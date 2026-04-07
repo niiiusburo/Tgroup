@@ -28,6 +28,7 @@ export interface OverviewAppointment {
   readonly note: string;
   readonly topStatus: AppointmentTopStatus;
   readonly checkInStatus: CheckInStatus | null; // null until arrived
+  readonly color: string | null; // color code 0-7 from database
 }
 
 // ─── Zone 3 filter tabs ──────────────────────────────────────────
@@ -97,6 +98,7 @@ function mapApiToOverview(apt: ApiAppointment): OverviewAppointment {
     note: apt.note || '',
     topStatus,
     checkInStatus: topStatus === 'arrived' ? (mapStateToCheckInStatus(apt.state) ?? 'waiting') : null,
+    color: apt.color,
   };
 }
 
@@ -154,14 +156,11 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
     all: arrivedAppointments.length,
     waiting: arrivedAppointments.filter((a) => a.checkInStatus === 'waiting').length,
     'in-treatment': arrivedAppointments.filter((a) => a.checkInStatus === 'in-treatment').length,
-    done: arrivedAppointments.filter((a) => a.checkInStatus === 'done' || a.topStatus === 'scheduled' && a.checkInStatus === null).length,
+    done: arrivedAppointments.filter((a) => a.checkInStatus === 'done').length,
   }), [arrivedAppointments]);
 
   const zone1Appointments = useMemo(() => {
     if (zone1Filter === 'all') return arrivedAppointments;
-    if (zone1Filter === 'done') {
-      return arrivedAppointments.filter((a) => a.checkInStatus === 'done' || (a.topStatus === 'scheduled' && a.checkInStatus === null));
-    }
     return arrivedAppointments.filter((a) => a.checkInStatus === zone1Filter);
   }, [arrivedAppointments, zone1Filter]);
 
