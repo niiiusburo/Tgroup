@@ -12,7 +12,7 @@ export { Payment } from './Payment';
 export { Employees } from './Employees/index';
 export { Locations } from './Locations';
 export { Website } from './Website';
-export { Settings } from './Settings';
+export { Settings } from './Settings/index';
 export { Relationships } from './Relationships';
 export { Commission } from './Commission';
 export { Reports } from './Reports';
