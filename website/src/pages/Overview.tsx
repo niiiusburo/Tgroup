@@ -1,50 +1,64 @@
 import { LayoutDashboard } from 'lucide-react';
+import { QuickActionsBar } from '@/components/shared/QuickActionsBar';
+import { NotificationsPanel } from '@/components/shared/NotificationsPanel';
+import { RevenueChartModule } from '@/components/modules/RevenueChartModule';
+import { FilterByLocation } from '@/components/shared/FilterByLocation';
+import { useOverviewData } from '@/hooks/useOverviewData';
 
 /**
  * Overview Dashboard Page
  * @crossref:route[/]
  * @crossref:used-in[App]
+ * @crossref:uses[QuickActionsBar, NotificationsPanel, RevenueChartModule, FilterByLocation]
  */
 export function Overview() {
+  const {
+    locations,
+    selectedLocationId,
+    setSelectedLocationId,
+    notifications,
+    markNotificationRead,
+    revenueData,
+  } = useOverviewData();
+
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-primary/10 rounded-lg">
-          <LayoutDashboard className="w-6 h-6 text-primary" />
+      {/* Page header with location filter */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <LayoutDashboard className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
+            <p className="text-sm text-gray-500">Dashboard and clinic insights</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
-          <p className="text-sm text-gray-500">Dashboard and clinic insights</p>
-        </div>
+
+        {/* @crossref:used-in[Overview, Calendar, Customers] */}
+        <FilterByLocation
+          locations={locations}
+          selectedId={selectedLocationId}
+          onChange={setSelectedLocationId}
+        />
       </div>
 
-      {/* Placeholder content */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-white rounded-xl p-6 shadow-card">
-            <div className="h-4 bg-gray-200 rounded w-1/2 mb-4" />
-            <div className="h-8 bg-gray-200 rounded w-1/3" />
-          </div>
-        ))}
-      </div>
+      {/* Quick Actions */}
+      <QuickActionsBar />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-card">
-          <div className="h-6 bg-gray-200 rounded w-1/3 mb-6" />
-          <div className="space-y-3">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-12 bg-gray-100 rounded" />
-            ))}
-          </div>
+      {/* Main content grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Revenue Chart - takes 2 columns */}
+        <div className="lg:col-span-2">
+          <RevenueChartModule data={revenueData} />
         </div>
-        <div className="bg-white rounded-xl p-6 shadow-card">
-          <div className="h-6 bg-gray-200 rounded w-1/3 mb-6" />
-          <div className="space-y-3">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-12 bg-gray-100 rounded" />
-            ))}
-          </div>
+
+        {/* Notifications Panel */}
+        <div className="lg:col-span-1">
+          <NotificationsPanel
+            notifications={notifications}
+            onMarkRead={markNotificationRead}
+          />
         </div>
       </div>
     </div>
