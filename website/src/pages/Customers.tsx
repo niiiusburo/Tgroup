@@ -1,18 +1,28 @@
 import { useState } from 'react';
 import { Users, Plus, Search, Phone, Mail, MapPin } from 'lucide-react';
 import { AddCustomerForm } from '@/components/forms/AddCustomerForm';
+import { CustomerProfile } from '@/components/customer';
 import { MOCK_CUSTOMERS } from '@/data/mockCustomers';
 import { MOCK_LOCATIONS } from '@/data/mockDashboard';
+import {
+  MOCK_CUSTOMER_PROFILE,
+  MOCK_CUSTOMER_PHOTOS,
+  MOCK_CUSTOMER_DEPOSIT,
+  MOCK_APPOINTMENT_HISTORY,
+  MOCK_SERVICE_HISTORY,
+} from '@/data/mockCustomerProfile';
 import type { CustomerFormData } from '@/data/mockCustomerForm';
 
 /**
- * Customers Page - Patient records with Add/Edit form
+ * Customers Page - Patient records with Add/Edit form and Profile view
  * @crossref:route[/customers]
  * @crossref:used-in[App]
+ * @crossref:uses[CustomerProfile, AddCustomerForm]
  */
 export function Customers() {
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
 
   const filteredCustomers = MOCK_CUSTOMERS.filter((c) => {
     if (!searchTerm) return true;
@@ -30,6 +40,25 @@ export function Customers() {
   const handleSubmit = (_data: CustomerFormData) => {
     setShowForm(false);
   };
+
+  // Show profile view when a customer is selected
+  if (selectedCustomerId) {
+    const selected = MOCK_CUSTOMERS.find((c) => c.id === selectedCustomerId);
+    const profileData = selected
+      ? { ...MOCK_CUSTOMER_PROFILE, id: selected.id, name: selected.name, phone: selected.phone, email: selected.email }
+      : MOCK_CUSTOMER_PROFILE;
+
+    return (
+      <CustomerProfile
+        profile={profileData}
+        photos={MOCK_CUSTOMER_PHOTOS}
+        deposit={MOCK_CUSTOMER_DEPOSIT}
+        appointments={MOCK_APPOINTMENT_HISTORY}
+        services={MOCK_SERVICE_HISTORY}
+        onBack={() => setSelectedCustomerId(null)}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -88,6 +117,7 @@ export function Customers() {
             filteredCustomers.map((customer) => (
               <div
                 key={customer.id}
+                onClick={() => setSelectedCustomerId(customer.id)}
                 className="p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
