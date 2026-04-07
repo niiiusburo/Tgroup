@@ -2,14 +2,18 @@ import { LayoutDashboard } from 'lucide-react';
 import { QuickActionsBar } from '@/components/shared/QuickActionsBar';
 import { NotificationsPanel } from '@/components/shared/NotificationsPanel';
 import { RevenueChartModule } from '@/components/modules/RevenueChartModule';
+import { StatCardModule } from '@/components/modules/StatCardModule';
+import { TodaySchedule } from '@/components/modules/TodaySchedule';
 import { FilterByLocation } from '@/components/shared/FilterByLocation';
 import { useOverviewData } from '@/hooks/useOverviewData';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useTodaySchedule } from '@/hooks/useTodaySchedule';
 
 /**
  * Overview Dashboard Page
  * @crossref:route[/]
- * @crossref:used-in[App]
- * @crossref:uses[QuickActionsBar, NotificationsPanel, RevenueChartModule, FilterByLocation]
+ * @crossref:used-in[AppRouter]
+ * @crossref:uses[QuickActionsBar, NotificationsPanel, RevenueChartModule, StatCardModule, TodaySchedule, FilterByLocation]
  */
 export function Overview() {
   const {
@@ -20,6 +24,9 @@ export function Overview() {
     markNotificationRead,
     revenueData,
   } = useOverviewData();
+
+  const { stats } = useDashboardStats();
+  const { appointments } = useTodaySchedule(selectedLocationId);
 
   return (
     <div className="space-y-6">
@@ -43,6 +50,10 @@ export function Overview() {
         />
       </div>
 
+      {/* Dashboard Stats Cards */}
+      {/* @crossref:used-in[Overview, Reports, LocationDashboard] */}
+      <StatCardModule stats={stats} />
+
       {/* Quick Actions */}
       <QuickActionsBar />
 
@@ -53,14 +64,18 @@ export function Overview() {
           <RevenueChartModule data={revenueData} />
         </div>
 
-        {/* Notifications Panel */}
+        {/* Today's Schedule */}
+        {/* @crossref:used-in[Overview, CalendarPage] */}
         <div className="lg:col-span-1">
-          <NotificationsPanel
-            notifications={notifications}
-            onMarkRead={markNotificationRead}
-          />
+          <TodaySchedule appointments={appointments} />
         </div>
       </div>
+
+      {/* Notifications Panel - full width */}
+      <NotificationsPanel
+        notifications={notifications}
+        onMarkRead={markNotificationRead}
+      />
     </div>
   );
 }
