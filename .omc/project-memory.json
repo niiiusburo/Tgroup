@@ -105,14 +105,14 @@
   "hotPaths": [
     {
       "path": "website/src/App.tsx",
-      "accessCount": 14,
-      "lastAccessed": 1775547274920,
+      "accessCount": 15,
+      "lastAccessed": 1775547510971,
       "type": "file"
     },
     {
       "path": "website/src/constants/index.ts",
-      "accessCount": 13,
-      "lastAccessed": 1775547281657,
+      "accessCount": 14,
+      "lastAccessed": 1775547502592,
       "type": "file"
     },
     {
@@ -146,6 +146,12 @@
       "type": "file"
     },
     {
+      "path": "website/src/data/mockDashboard.ts",
+      "accessCount": 8,
+      "lastAccessed": 1775547514434,
+      "type": "file"
+    },
+    {
       "path": "website/src/pages/Payment.tsx",
       "accessCount": 7,
       "lastAccessed": 1775546717326,
@@ -158,12 +164,6 @@
       "type": "file"
     },
     {
-      "path": "website/src/data/mockDashboard.ts",
-      "accessCount": 7,
-      "lastAccessed": 1775547281123,
-      "type": "file"
-    },
-    {
       "path": "website/src/pages/Customers.tsx",
       "accessCount": 6,
       "lastAccessed": 1775546699904,
@@ -173,6 +173,12 @@
       "path": "website/tailwind.config.js",
       "accessCount": 6,
       "lastAccessed": 1775546719937,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/modules/RevenueChartModule.tsx",
+      "accessCount": 6,
+      "lastAccessed": 1775547507642,
       "type": "file"
     },
     {
@@ -200,9 +206,9 @@
       "type": "file"
     },
     {
-      "path": "website/src/components/modules/RevenueChartModule.tsx",
+      "path": "website/src/components/shared/FilterByLocation.tsx",
       "accessCount": 5,
-      "lastAccessed": 1775547286873,
+      "lastAccessed": 1775547506746,
       "type": "file"
     },
     {
@@ -215,12 +221,6 @@
       "path": "website/src/hooks/useCalendarData.ts",
       "accessCount": 4,
       "lastAccessed": 1775546711779,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/shared/FilterByLocation.tsx",
-      "accessCount": 4,
-      "lastAccessed": 1775546714277,
       "type": "file"
     },
     {
@@ -239,6 +239,12 @@
       "path": "website/src/data/mockCalendar.ts",
       "accessCount": 4,
       "lastAccessed": 1775547281883,
+      "type": "file"
+    },
+    {
+      "path": "website/src/data/mockEmployees.ts",
+      "accessCount": 4,
+      "lastAccessed": 1775547514746,
       "type": "file"
     },
     {
@@ -263,12 +269,6 @@
       "path": "website/src/pages/Locations.tsx",
       "accessCount": 3,
       "lastAccessed": 1775545877350,
-      "type": "file"
-    },
-    {
-      "path": "website/src/data/mockEmployees.ts",
-      "accessCount": 3,
-      "lastAccessed": 1775545928331,
       "type": "file"
     },
     {
