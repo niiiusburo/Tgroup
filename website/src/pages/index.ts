@@ -9,7 +9,7 @@ export { Customers } from './Customers';
 export { Appointments } from './Appointments';
 export { Services } from './Services/index';
 export { Payment } from './Payment';
-export { Employees } from './Employees';
+export { Employees } from './Employees/index';
 export { Locations } from './Locations';
 export { Website } from './Website';
 export { Settings } from './Settings';

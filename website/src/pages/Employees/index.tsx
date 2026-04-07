@@ -1,14 +1,15 @@
 import { UserCog, Search, X } from 'lucide-react';
-import { useEmployeesData } from '@/hooks/useEmployeesData';
+import { useEmployees } from '@/hooks/useEmployees';
 import { TierSelector } from '@/components/employees/TierSelector';
 import { RoleMultiSelect } from '@/components/employees/RoleMultiSelect';
-import { EmployeeCard } from '@/components/employees/EmployeeCard';
+import { EmployeeTable } from '@/components/employees/EmployeeTable';
 import { EmployeeProfile } from '@/components/employees/EmployeeProfile';
 
 /**
- * Employees Page — staff management with roles, tiers, and schedules
+ * Employees Page — staff management with list view and detailed profiles
  * @crossref:route[/employees]
  * @crossref:used-in[App]
+ * @crossref:uses[EmployeeTable, EmployeeProfile, TierSelector]
  */
 export function Employees() {
   const {
@@ -26,7 +27,7 @@ export function Employees() {
     setStatusFilter,
     getLinkedEmployees,
     clearFilters,
-  } = useEmployeesData();
+  } = useEmployees();
 
   const hasFilters = searchQuery || tierFilter !== 'all' || roleFilter !== 'all' || statusFilter !== 'all';
 
@@ -112,33 +113,15 @@ export function Employees() {
         )}
       </div>
 
-      {/* Main content: grid + profile panel */}
+      {/* Main content: table + profile panel */}
       <div className={`grid gap-6 ${selectedEmployee ? 'lg:grid-cols-5' : ''}`}>
-        {/* Employee cards grid */}
+        {/* Employee table */}
         <div className={selectedEmployee ? 'lg:col-span-3' : ''}>
-          {employees.length === 0 ? (
-            <div className="bg-white rounded-xl shadow-card p-12 text-center">
-              <UserCog className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-              <p className="text-gray-500 font-medium">No employees match your filters</p>
-              <button
-                onClick={clearFilters}
-                className="mt-2 text-sm text-primary hover:text-primary-dark transition-colors"
-              >
-                Clear filters
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {employees.map((emp) => (
-                <EmployeeCard
-                  key={emp.id}
-                  employee={emp}
-                  isSelected={emp.id === selectedEmployeeId}
-                  onSelect={setSelectedEmployeeId}
-                />
-              ))}
-            </div>
-          )}
+          <EmployeeTable
+            employees={employees}
+            selectedEmployeeId={selectedEmployeeId}
+            onSelect={setSelectedEmployeeId}
+          />
         </div>
 
         {/* Profile panel */}
