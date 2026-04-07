@@ -105,20 +105,20 @@
   "hotPaths": [
     {
       "path": "website/src/App.tsx",
-      "accessCount": 18,
-      "lastAccessed": 1775548922694,
+      "accessCount": 19,
+      "lastAccessed": 1775549547204,
       "type": "file"
     },
     {
       "path": "website/src/constants/index.ts",
-      "accessCount": 18,
-      "lastAccessed": 1775548959536,
+      "accessCount": 19,
+      "lastAccessed": 1775549548319,
       "type": "file"
     },
     {
       "path": "website/src/pages/index.ts",
-      "accessCount": 13,
-      "lastAccessed": 1775548932683,
+      "accessCount": 14,
+      "lastAccessed": 1775549548155,
       "type": "file"
     },
     {
@@ -129,8 +129,8 @@
     },
     {
       "path": "website/src/pages/Overview.tsx",
-      "accessCount": 10,
-      "lastAccessed": 1775547336351,
+      "accessCount": 11,
+      "lastAccessed": 1775549559214,
       "type": "file"
     },
     {
@@ -146,21 +146,21 @@
       "type": "file"
     },
     {
+      "path": "website/src/pages/Customers.tsx",
+      "accessCount": 10,
+      "lastAccessed": 1775549742742,
+      "type": "file"
+    },
+    {
       "path": "website/src/pages/Employees.tsx",
       "accessCount": 8,
       "lastAccessed": 1775546757687,
       "type": "file"
     },
     {
-      "path": "website/src/pages/Customers.tsx",
-      "accessCount": 8,
-      "lastAccessed": 1775548074131,
-      "type": "file"
-    },
-    {
       "path": "website/src/pages/Payment.tsx",
-      "accessCount": 7,
-      "lastAccessed": 1775546717326,
+      "accessCount": 8,
+      "lastAccessed": 1775549558402,
       "type": "file"
     },
     {
@@ -231,8 +231,8 @@
     },
     {
       "path": "website/src/pages/Services.tsx",
-      "accessCount": 4,
-      "lastAccessed": 1775546706458,
+      "accessCount": 5,
+      "lastAccessed": 1775549565475,
       "type": "file"
     },
     {
@@ -264,6 +264,12 @@
       "accessCount": 4,
       "lastAccessed": 1775549124474,
       "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 4,
+      "lastAccessed": 1775549565868,
+      "type": "directory"
     },
     {
       "path": "website/src/index.css",
@@ -306,12 +312,6 @@
       "accessCount": 2,
       "lastAccessed": 1775543645429,
       "type": "file"
-    },
-    {
-      "path": "",
-      "accessCount": 2,
-      "lastAccessed": 1775544648289,
-      "type": "directory"
     },
     {
       "path": "website/src/components/employees/EmployeeCard.tsx",
