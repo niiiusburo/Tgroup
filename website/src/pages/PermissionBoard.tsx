@@ -571,9 +571,10 @@ function ArchitectureView({
 
 interface MatrixViewProps {
   groups: PermissionGroup[];
+  onToggle: (groupId: string, permission: string) => void;
 }
 
-function MatrixView({ groups }: MatrixViewProps) {
+function MatrixView({ groups, onToggle }: MatrixViewProps) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-auto">
       <table className="w-full border-collapse text-xs">
@@ -589,6 +590,7 @@ function MatrixView({ groups }: MatrixViewProps) {
                   style={{ background: `${g.color}18`, color: g.color }}
                 >
                   {g.name}
+                  {g.isSystem && <span className="ml-1 text-[9px] opacity-60">🔒</span>}
                 </span>
               </th>
             ))}
@@ -615,18 +617,20 @@ function MatrixView({ groups }: MatrixViewProps) {
                   </td>
                   {groups.map(g => {
                     const has = g.permissions.includes(permId);
+                    const isSystem = g.isSystem;
                     return (
                       <td key={g.id} className="text-center px-2 py-2">
-                        {has ? (
-                          <span
-                            className="inline-flex w-5 h-5 rounded items-center justify-center text-xs font-bold"
-                            style={{ background: `${g.color}18`, color: g.color }}
-                          >
-                            ✓
-                          </span>
-                        ) : (
-                          <span className="text-gray-200">—</span>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => !isSystem && onToggle(g.id, permId)}
+                          className={`inline-flex w-6 h-6 rounded items-center justify-center text-xs font-bold transition-all ${
+                            isSystem ? 'cursor-not-allowed opacity-80' : 'cursor-pointer hover:scale-110 hover:shadow-sm'
+                          }`}
+                          style={has ? { background: `${g.color}18`, color: g.color } : { background: '#f8fafc', color: '#e2e8f0' }}
+                          title={isSystem ? 'System group — cannot modify' : has ? `Remove ${permId} from ${g.name}` : `Grant ${permId} to ${g.name}`}
+                        >
+                          {has ? '✓' : '—'}
+                        </button>
                       </td>
                     );
                   })}
@@ -798,7 +802,7 @@ function LogicFlowView({ groups, employees, getEffective }: LogicFlowViewProps) 
 // ─── Main component ───────────────────────────────────────────────
 
 export function PermissionBoard() {
-  const { groups, employees, locations, loading, error, updateEmployee, getEffective, refetch } = usePermissionBoard();
+  const { groups, employees, locations, loading, error, updateEmployee, toggleGroupPermission, getEffective, refetch } = usePermissionBoard();
 
   const [view, setView] = useState<'architecture' | 'matrix' | 'flow'>('architecture');
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
@@ -887,7 +891,7 @@ export function PermissionBoard() {
           updateEmployee={updateEmployee}
         />
       )}
-      {view === 'matrix' && <MatrixView groups={groups} />}
+      {view === 'matrix' && <MatrixView groups={groups} onToggle={toggleGroupPermission} />}
       {view === 'flow' && <LogicFlowView groups={groups} employees={employees} getEffective={getEffective} />}
     </div>
   );

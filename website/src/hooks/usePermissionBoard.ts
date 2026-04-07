@@ -8,6 +8,7 @@ import {
   fetchPermissionGroups,
   fetchEmployeePermissions,
   updateEmployeePermission,
+  updatePermissionGroup,
   fetchCompanies,
   type PermissionGroup,
   type EmployeePermission,
@@ -60,5 +61,22 @@ export function usePermissionBoard() {
     return [...s];
   }, [groups]);
 
-  return { groups, employees, locations, loading, error, updateEmployee, getEffective, refetch: loadAll };
+  const toggleGroupPermission = useCallback(async (groupId: string, permission: string) => {
+    const group = groups.find(g => g.id === groupId);
+    if (!group || group.isSystem) return;
+    const has = group.permissions.includes(permission);
+    const newPerms = has
+      ? group.permissions.filter(p => p !== permission)
+      : [...group.permissions, permission];
+    const updated = await updatePermissionGroup(groupId, {
+      name: group.name,
+      color: group.color,
+      description: group.description || '',
+      permissions: newPerms,
+    });
+    setGroups(prev => prev.map(g => g.id === groupId ? updated : g));
+    return updated;
+  }, [groups]);
+
+  return { groups, employees, locations, loading, error, updateEmployee, toggleGroupPermission, getEffective, refetch: loadAll };
 }

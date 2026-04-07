@@ -6,22 +6,19 @@
  */
 
 import { useState } from 'react';
-import { Settings as SettingsIcon, Stethoscope, Users, SlidersHorizontal } from 'lucide-react';
+import { Settings as SettingsIcon, Stethoscope, SlidersHorizontal } from 'lucide-react';
 import { ServiceCatalogSettings } from '@/components/settings/ServiceCatalogSettings';
-import { CustomerSourcesConfig } from '@/components/settings/CustomerSourcesConfig';
 import { SystemPreferences } from '@/components/settings/SystemPreferences';
 
-type SettingsTab = 'catalog' | 'sources' | 'preferences';
+type SettingsTab = 'catalog' | 'preferences';
 
 const TABS: { id: SettingsTab; label: string; icon: React.ReactNode; description: string }[] = [
   { id: 'catalog', label: 'Service Catalog', icon: <Stethoscope className="w-4 h-4" />, description: 'Treatment types and pricing' },
-  { id: 'sources', label: 'Customer Sources', icon: <Users className="w-4 h-4" />, description: 'Manage referral sources' },
   { id: 'preferences', label: 'System Preferences', icon: <SlidersHorizontal className="w-4 h-4" />, description: 'General app settings' },
 ];
 
 const TAB_COMPONENTS: Record<SettingsTab, React.ComponentType> = {
   catalog: ServiceCatalogSettings,
-  sources: CustomerSourcesConfig,
   preferences: SystemPreferences,
 };
 
