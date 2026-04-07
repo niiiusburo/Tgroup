@@ -110,10 +110,9 @@
         "Add FilterByDoctor shared with @crossref:used-in[Calendar, Appointments, Employees]",
         "Add color coding system \u2014 constants @crossref:used-in[Calendar, Appointments, Overview] for appointment types"
       ],
-      "status": "open",
+      "status": "done",
       "priority": "high",
-      "failure_reason": "Implementation complete but verification/tests failed",
-      "failure_category": "test_only"
+      "progress": "Session: 2026-04-07 | PASSED | 56s\nBranch: feature/7-calendar-appointments-and-interactions | Session: 1BlMdXD8yEup0F1nZs3YU"
     },
     {
       "id": 8,
@@ -129,8 +128,8 @@
       ],
       "status": "open",
       "priority": "high",
-      "failure_reason": "Implementation complete but verification/tests failed",
-      "failure_category": "test_only"
+      "failure_reason": "Merge failed: Failed to merge feature/8-customer-list-and-search into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
+      "failure_category": "verification"
     },
     {
       "id": 9,
@@ -144,10 +143,9 @@
         "Build AppointmentHistory component with @crossref:used-in[CustomerProfile, Overview] \u2014 past appointments list",
         "Build ServiceHistory component with @crossref:used-in[CustomerProfile, Services] \u2014 treatment history"
       ],
-      "status": "open",
+      "status": "done",
       "priority": "high",
-      "failure_reason": "Implementation complete but verification/tests failed",
-      "failure_category": "test_only"
+      "progress": "Session: 2026-04-07 | PASSED | 52s\nBranch: feature/9-customer-profile-view | Session: 7mHWZ6XN566UaCoxmXh2T"
     },
     {
       "id": 10,
@@ -177,10 +175,9 @@
         "Build WaitTimer component with @crossref:used-in[CheckInFlow, Overview] \u2014 live wait time display",
         "Build ConvertToService button and create hooks/useAppointments.ts with @crossref:used-in[Appointments, Calendar, Overview]"
       ],
-      "status": "open",
+      "status": "done",
       "priority": "high",
-      "failure_reason": "Implementation complete but verification/tests failed",
-      "failure_category": "test_only"
+      "progress": "Session: 2026-04-07 | PASSED | 53s\nBranch: feature/11-appointments-management | Session: 96MvaJR1a8v03ZuegTfe1"
     },
     {
       "id": 12,
@@ -194,10 +191,9 @@
         "Build MultiVisitTracker with @crossref:used-in[Services, CustomerProfile] \u2014 tracks treatment progress across visits",
         "Create hooks/useServices.ts with @crossref:used-in[Services, Customers, Payment] and ServiceHistoryList component"
       ],
-      "status": "open",
+      "status": "done",
       "priority": "high",
-      "failure_reason": "Merge failed: Failed to merge feature/12-service-records into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
-      "failure_category": "verification"
+      "progress": "Session: 2026-04-07 | PASSED | 56s\nBranch: feature/12-service-records | Session: ByJk5hc9SinTW1XOpuPW5"
     },
     {
       "id": 13,
@@ -213,8 +209,8 @@
       ],
       "status": "open",
       "priority": "high",
-      "failure_reason": "Implementation complete but verification/tests failed",
-      "failure_category": "test_only"
+      "failure_reason": "Merge failed: Failed to merge feature/13-payment-and-deposit-wallet into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
+      "failure_category": "verification"
     },
     {
       "id": 14,
@@ -244,10 +240,9 @@
         "Build ReferralCodeDisplay with @crossref:used-in[EmployeeProfile, CustomerForm] \u2014 shows referral stats",
         "Create hooks/useEmployees.ts with @crossref:used-in[Employees, Appointments, Calendar, Customers]"
       ],
-      "status": "open",
+      "status": "done",
       "priority": "high",
-      "failure_reason": "Implementation complete but verification/tests failed",
-      "failure_category": "test_only"
+      "progress": "Session: 2026-04-07 | PASSED | 1m 6s\nBranch: feature/15-employees-list-and-profile | Session: m9uuSXWDmGcjWEkZZlyXe"
     },
     {
       "id": 16,
