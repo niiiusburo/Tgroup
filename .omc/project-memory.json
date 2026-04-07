@@ -104,64 +104,136 @@
   },
   "hotPaths": [
     {
-      "path": "",
-      "accessCount": 1,
-      "lastAccessed": 1775543089234,
-      "type": "directory"
-    },
-    {
       "path": "website/package.json",
-      "accessCount": 1,
-      "lastAccessed": 1775543093090,
+      "accessCount": 2,
+      "lastAccessed": 1775543638591,
       "type": "file"
     },
     {
       "path": "website/src/App.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775543093507,
+      "accessCount": 2,
+      "lastAccessed": 1775543643129,
       "type": "file"
     },
     {
       "path": "website/src/constants/index.ts",
-      "accessCount": 1,
-      "lastAccessed": 1775543093954,
+      "accessCount": 2,
+      "lastAccessed": 1775543643344,
       "type": "file"
     },
     {
       "path": "website/src/main.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775543094452,
+      "accessCount": 2,
+      "lastAccessed": 1775543643603,
       "type": "file"
     },
     {
-      "path": "website/src/components/Layout.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775543094899,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/index.ts",
-      "accessCount": 1,
-      "lastAccessed": 1775543095863,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Overview.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775543096458,
+      "path": "website/src/index.css",
+      "accessCount": 2,
+      "lastAccessed": 1775543644253,
       "type": "file"
     },
     {
       "path": "website/tailwind.config.js",
-      "accessCount": 1,
-      "lastAccessed": 1775543096934,
+      "accessCount": 2,
+      "lastAccessed": 1775543645114,
       "type": "file"
     },
     {
       "path": "website/vite.config.ts",
-      "accessCount": 1,
-      "lastAccessed": 1775543097356,
+      "accessCount": 2,
+      "lastAccessed": 1775543645429,
       "type": "file"
+    },
+    {
+      "path": "website/tsconfig.json",
+      "accessCount": 2,
+      "lastAccessed": 1775543645849,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/Layout.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1775543652054,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/index.ts",
+      "accessCount": 2,
+      "lastAccessed": 1775543652284,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/Overview.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1775543652738,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/Calendar.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1775543653222,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/Customers.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1775543653728,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/Appointments.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1775543654199,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/Services.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1775543661379,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/Payment.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1775543661679,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/Employees.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1775543662136,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/Locations.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1775543662935,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/Website.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1775543663088,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/Settings.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1775543663598,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/Relationships.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1775543663993,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 1,
+      "lastAccessed": 1775543089234,
+      "type": "directory"
     },
     {
       "path": "website/index.html",
@@ -170,81 +242,9 @@
       "type": "file"
     },
     {
-      "path": "website/src/index.css",
-      "accessCount": 1,
-      "lastAccessed": 1775543098765,
-      "type": "file"
-    },
-    {
-      "path": "website/tsconfig.json",
-      "accessCount": 1,
-      "lastAccessed": 1775543099234,
-      "type": "file"
-    },
-    {
       "path": "website/postcss.config.js",
       "accessCount": 1,
       "lastAccessed": 1775543099599,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Calendar.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775543105267,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Customers.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775543105747,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Appointments.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775543106208,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Services.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775543106661,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Payment.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775543107135,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Employees.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775543107566,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Locations.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775543108011,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Website.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775543108904,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Settings.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775543109456,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Relationships.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775543109654,
       "type": "file"
     }
   ],
