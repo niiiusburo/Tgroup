@@ -1,0 +1,18 @@
+{
+  "projectName": "Tgroup",
+  "tracks": [
+    { "name": "features", "categories": ["feature"], "color": "#8b5cf6", "isDefault": true },
+    { "name": "bugs", "categories": ["bugfix"], "color": "#ef4444" },
+    { "name": "refactor", "categories": ["refactor"], "color": "#3b82f6" }
+  ],
+  "agent": {
+    "preferred": "claude",
+    "fallbackAgents": [],
+    "claudeCommand": "pi",
+    "claudeArgs": "-p --mode json --model kimi-coding/kimi-k2-thinking --tools read,bash,edit,write {{PROMPT}}",
+    "maxTurnsImplementation": 40,
+    "maxTurnsVerification": 20,
+    "allowedTools": "Bash,Read,Write,Edit",
+    "allowedToolsVerification": "Bash,Read,Write"
+  }
+}

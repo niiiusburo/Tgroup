@@ -1,0 +1,293 @@
+{
+  "features": [
+    {
+      "id": 1,
+      "category": "infrastructure",
+      "name": "Project Setup with Cross-Reference Documentation System",
+      "description": "Initialize the TDental Dashboard with a comprehensive cross-reference documentation pattern. Every component, function, and type must include inline comments tracking where it's used across the codebase. Create a maintainable architecture with mock data.",
+      "steps": [
+        "Create /website folder with Vite + React + TypeScript + Tailwind",
+        "Set up project structure: src/components/, src/pages/, src/hooks/, src/types/, src/data/, src/lib/",
+        "Create CROSS_REF.md documenting the cross-reference comment pattern",
+        "Copy UI components from frontend-truth with added @crossref comments",
+        "Copy layout components (Sidebar, Header, DashboardLayout) with @crossref comments",
+        "Copy and adapt modules with @crossref documentation:",
+        "  - StatCardModule - used in: Overview, Reports, LocationDetail",
+        "  - RevenueChartModule - used in: Overview, Reports",
+        "  - NavigationTabsModule - used in: all pages",
+        "  - TotalVisitModule - used in: Overview, Customers",
+        "  - ProductTableModule - used in: Customers, Employees, Services",
+        "Set up React Router with route definitions and @crossref comments",
+        "Create types/index.ts with all interfaces and @crossref comments showing component relationships",
+        "Create mock data services with @crossref comments indicating which components consume the data",
+        "Create src/lib/crossref.ts - utility to validate cross-references at build time",
+        "Set up shared constants with @crossref documentation",
+        "Configure Tailwind theme with dental clinic colors",
+        "Create documentation template: // @crossref:used-in[ComponentA, ComponentB] // @crossref:uses[TypeA, HookB]"
+      ],
+      "status": "open",
+      "priority": "high"
+    },
+    {
+      "id": 2,
+      "category": "feature",
+      "name": "Overview Dashboard with Cross-References",
+      "description": "Build Overview dashboard with StatsCards, Today's Schedule, Quick Actions, Notifications, Revenue Chart. All components must have @crossref comments showing where else they're used.",
+      "steps": [
+        "Create src/pages/Overview/ with @crossref:used-in[AppRouter] header",
+        "Build DashboardStats component with @crossref:used-in[Overview, Reports, LocationDashboard]",
+        "Build TodaySchedule component with @crossref:used-in[Overview, CalendarPage] // @crossref:uses[AppointmentCard, TimeSlot]",
+        "Build QuickActionsBar component with @crossref:used-in[Overview, Sidebar] // @crossref:uses[CustomerModal, AppointmentModal]",
+        "Build NotificationsPanel component with @crossref:used-in[Overview, Header]",
+        "Integrate RevenueChartModule with @crossref:used-in[Overview, Reports]",
+        "Create hooks/useDashboardStats.ts with @crossref:used-in[Overview, Reports]",
+        "Create hooks/useTodaySchedule.ts with @crossref:used-in[Overview, Calendar]",
+        "Add filter by location - state managed in @crossref:used-in[Overview, Calendar, Customers, Appointments]",
+        "Wire up mock data from src/data/mock/ with @crossref comments"
+      ],
+      "status": "open",
+      "priority": "high"
+    },
+    {
+      "id": 3,
+      "category": "feature",
+      "name": "Calendar Page with Day/Week/Month Views",
+      "description": "Build Calendar with appointment scheduling. Components must track cross-references to Overview (TodaySchedule), Appointments (forms), and Customers (profiles).",
+      "steps": [
+        "Create src/pages/Calendar/ with @crossref:uses[TodaySchedule, AppointmentCard, useTodaySchedule]",
+        "Build DayView component with @crossref:used-in[Calendar] // @crossref:uses[TimeSlot, AppointmentCard, DragDropProvider]",
+        "Build WeekView component with @crossref:used-in[Calendar]",
+        "Build MonthView component with @crossref:used-in[Calendar]",
+        "Build TimeSlot component with @crossref:used-in[CalendarDayView, CalendarWeekView, OverviewTodaySchedule]",
+        "Build AppointmentCard component with @crossref:used-in[Calendar, Overview, Appointments] // @crossref:uses[CustomerAvatar, StatusBadge]",
+        "Build AppointmentDetailsModal with @crossref:used-in[Calendar, Appointments]",
+        "Implement drag-and-drop - hook @crossref:used-in[Calendar]",
+        "Add FilterByLocation - shared with @crossref:used-in[Overview, Calendar, Customers, Appointments, Employees]",
+        "Add FilterByDoctor - shared with @crossref:used-in[Calendar, Appointments, Employees]",
+        "Add color coding system - constants @crossref:used-in[Calendar, Appointments, Overview]"
+      ],
+      "status": "open",
+      "priority": "high"
+    },
+    {
+      "id": 4,
+      "category": "feature",
+      "name": "Customers List, Search, and Profile",
+      "description": "Build Customers management with searchable table and profile view. Cross-reference with Appointments (linked), Payment (balance), Services (history).",
+      "steps": [
+        "Create src/pages/Customers/ with @crossref:uses[SearchBar, DataTable, CustomerProfile]",
+        "Build SearchBar component with @crossref:used-in[Customers, Employees, Services, Website]",
+        "Build DataTable component with @crossref:used-in[Customers, Employees, Services, Locations, Reports]",
+        "Build CustomerProfile component with @crossref:used-in[Customers] // @crossref:uses[PhotoGallery, DepositCard, AppointmentHistory, ServiceHistory]",
+        "Build PhotoGallery component with @crossref:used-in[CustomerProfile] // @crossref:uses[ImageUpload]",
+        "Build DepositCard component with @crossref:used-in[CustomerProfile, Payment]",
+        "Build AppointmentHistory component with @crossref:used-in[CustomerProfile, Overview]",
+        "Build ServiceHistory component with @crossref:used-in[CustomerProfile, Services]",
+        "Create hooks/useCustomers.ts with @crossref:used-in[Customers, Appointments, Payment, Services]",
+        "Add filter components shared across pages"
+      ],
+      "status": "open",
+      "priority": "high"
+    },
+    {
+      "id": 5,
+      "category": "feature",
+      "name": "Customer Forms with Cross-References",
+      "description": "Build Add/Edit Customer forms. Track relationships to Location selector (shared) and ReferralCode input (used in Employees).",
+      "steps": [
+        "Create src/components/forms/AddCustomerForm/ with @crossref:used-in[Customers, QuickActionsBar]",
+        "Build form fields with @crossref comments on each input component",
+        "Build LocationSelector dropdown with @crossref:used-in[CustomerForm, EmployeeForm, AppointmentForm, ServiceForm]",
+        "Build ReferralCodeInput with @crossref:used-in[CustomerForm, EmployeeProfile]",
+        "Build CustomerSourceDropdown with @crossref:used-in[CustomerForm, Reports]",
+        "Create form validation hooks with @crossref:used-in[CustomerForm, EmployeeForm, AppointmentForm]",
+        "Add photo upload with @crossref:uses[ImageUpload] shared component"
+      ],
+      "status": "open",
+      "priority": "high"
+    },
+    {
+      "id": 6,
+      "category": "feature",
+      "name": "Appointments Management",
+      "description": "Build appointment creation, check-in flow, status workflow. Cross-reference with Calendar (shared components), Customers (linked), Services (conversion).",
+      "steps": [
+        "Create src/pages/Appointments/ with @crossref:uses[CalendarView, AppointmentForm, StatusBadge]",
+        "Build AppointmentForm with @crossref:used-in[Appointments, Calendar, Overview] // @crossref:uses[CustomerSelector, DoctorSelector, LocationSelector]",
+        "Build CustomerSelector with @crossref:used-in[AppointmentForm, ServiceForm, PaymentForm]",
+        "Build DoctorSelector with @crossref:used-in[AppointmentForm, ServiceForm, EmployeeProfile]",
+        "Build StatusBadge with @crossref:used-in[Appointments, Services, Calendar]",
+        "Build CheckInFlow with @crossref:used-in[Appointments] // @crossref:uses[WaitTimer]",
+        "Build WaitTimer component with @crossref:used-in[CheckInFlow, Overview]",
+        "Build ConvertToService button with @crossref:used-in[Appointments] // links to ServiceForm",
+        "Create hooks/useAppointments.ts with @crossref:used-in[Appointments, Calendar, Overview]"
+      ],
+      "status": "open",
+      "priority": "high"
+    },
+    {
+      "id": 7,
+      "category": "feature",
+      "name": "Service Records with Cross-References",
+      "description": "Build service/treatment records. Track links to Appointments, Customers, Payment, and multi-visit tracking.",
+      "steps": [
+        "Create src/pages/Services/ with @crossref:uses[ServiceForm, ServiceHistory, MultiVisitTracker]",
+        "Build ServiceForm with @crossref:used-in[Services, Appointments] // @crossref:uses[ServiceCatalogSelector, CustomerSelector, DoctorSelector]",
+        "Build ServiceCatalogSelector with @crossref:used-in[ServiceForm, Settings, Website]",
+        "Build ServiceHistoryList with @crossref:used-in[Services, CustomerProfile]",
+        "Build MultiVisitTracker with @crossref:used-in[Services, CustomerProfile]",
+        "Build StatusWorkflow with @crossref:used-in[Services, Appointments]",
+        "Create hooks/useServices.ts with @crossref:used-in[Services, Customers, Payment]"
+      ],
+      "status": "open",
+      "priority": "high"
+    },
+    {
+      "id": 8,
+      "category": "feature",
+      "name": "Payment and Deposit Wallet System",
+      "description": "Build payment system with deposits, partial payments, outstanding balance. Cross-reference with Customers (profile), Services (payment due).",
+      "steps": [
+        "Create src/pages/Payment/ with @crossref:uses[DepositWallet, PaymentForm, OutstandingBalance]",
+        "Build DepositWallet component with @crossref:used-in[Payment, CustomerProfile]",
+        "Build PaymentForm with @crossref:used-in[Payment, Services] // @crossref:uses[CustomerSelector, ServiceSelector, PaymentMethodSelector]",
+        "Build PaymentMethodSelector with @crossref:used-in[PaymentForm, DepositForm]",
+        "Build OutstandingBalanceCard with @crossref:used-in[Payment, CustomerProfile, Services]",
+        "Build PaymentHistoryTable with @crossref:used-in[Payment, CustomerProfile]",
+        "Create hooks/usePayment.ts with @crossref:used-in[Payment, Services, Customers]"
+      ],
+      "status": "open",
+      "priority": "high"
+    },
+    {
+      "id": 9,
+      "category": "feature",
+      "name": "Monthly Payment Plans",
+      "description": "Build installment plans for outstanding balances. Cross-reference with Payment (history), Customers (profile).",
+      "steps": [
+        "Create src/components/payment/MonthlyPlan/ with @crossref:used-in[Payment]",
+        "Build MonthlyPlanCreator with @crossref:used-in[Payment, OutstandingBalance]",
+        "Build PaymentSchedule with @crossref:used-in[Payment, CustomerProfile]",
+        "Build InstallmentTracker with @crossref:used-in[PaymentSchedule]",
+        "Create hooks/useMonthlyPlans.ts with @crossref:used-in[Payment, Customers]"
+      ],
+      "status": "open",
+      "priority": "high"
+    },
+    {
+      "id": 10,
+      "category": "feature",
+      "name": "Employees Management",
+      "description": "Build employee list, profiles, tier/role assignment. Cross-reference with Customers (referral code), Appointments (doctor selector), Locations.",
+      "steps": [
+        "Create src/pages/Employees/ with @crossref:uses[EmployeeTable, EmployeeProfile, TierSelector]",
+        "Build EmployeeTable with @crossref:used-in[Employees] // @crossref:uses[DataTable, StatusBadge]",
+        "Build EmployeeProfile with @crossref:used-in[Employees] // @crossref:uses[ScheduleCalendar, ReferralStats, LinkedEmployees]",
+        "Build TierSelector with @crossref:used-in[EmployeeForm, EmployeeProfile, Relationships]",
+        "Build RoleMultiSelect with @crossref:used-in[EmployeeForm, Settings]",
+        "Build ReferralCodeDisplay with @crossref:used-in[EmployeeProfile, CustomerForm]",
+        "Build ScheduleCalendar with @crossref:used-in[EmployeeProfile, Appointments, Calendar]",
+        "Create hooks/useEmployees.ts with @crossref:used-in[Employees, Appointments, Calendar, Customers]"
+      ],
+      "status": "open",
+      "priority": "high"
+    },
+    {
+      "id": 11,
+      "category": "feature",
+      "name": "Locations and Branches",
+      "description": "Build location management. Cross-reference with Customers (linking), Employees (assignment), Overview (filter).",
+      "steps": [
+        "Create src/pages/Locations/ with @crossref:uses[LocationCard, LocationDetail, LocationDashboard]",
+        "Build LocationCard with @crossref:used-in[Locations, OverviewFilter, CustomerForm]",
+        "Build LocationDetail with @crossref:used-in[Locations] // @crossref:uses[EmployeeList, CustomerStats, RevenueChart]",
+        "Build LocationDashboard with @crossref:used-in[LocationDetail, Overview]",
+        "Create hooks/useLocations.ts with @crossref:used-in[Locations, Customers, Employees, Appointments, Overview]"
+      ],
+      "status": "open",
+      "priority": "medium"
+    },
+    {
+      "id": 12,
+      "category": "feature",
+      "name": "Website CMS Management",
+      "description": "Build CMS for 14 public website pages. Cross-reference with Settings (service catalog), Locations (branch listings).",
+      "steps": [
+        "Create src/pages/Website/ with @crossref:uses[PageEditor, PageList, SEOManager]",
+        "Build PageList with @crossref:used-in[Website] // @crossref:uses[DataTable, StatusBadge]",
+        "Build PageEditor with @crossref:used-in[Website] // @crossref:uses[RichTextEditor, SectionManager]",
+        "Build ServiceCatalogManager with @crossref:used-in[Website, Settings]",
+        "Build BranchListingsEditor with @crossref:used-in[Website, Locations]",
+        "Build SEOManager with @crossref:used-in[Website]"
+      ],
+      "status": "open",
+      "priority": "high"
+    },
+    {
+      "id": 13,
+      "category": "feature",
+      "name": "Settings and Configuration",
+      "description": "Build settings for service catalog, roles, customer sources. Cross-reference with Website (service catalog), Employees (roles), Customers (sources).",
+      "steps": [
+        "Create src/pages/Settings/ with @crossref:uses[ServiceCatalogSettings, RoleConfig, CustomerSourcesConfig]",
+        "Build ServiceCatalogSettings with @crossref:used-in[Settings, Website] // @crossref:uses[ServiceForm, CategoryManager]",
+        "Build RoleConfig with @crossref:used-in[Settings, Employees, Relationships]",
+        "Build CustomerSourcesConfig with @crossref:used-in[Settings, Customers, Reports]",
+        "Build SystemPreferences with @crossref:used-in[Settings]"
+      ],
+      "status": "open",
+      "priority": "medium"
+    },
+    {
+      "id": 14,
+      "category": "feature",
+      "name": "Relationships and Permissions Matrix",
+      "description": "Build permission system and entity relationship management. Cross-reference with ALL pages (permissions).",
+      "steps": [
+        "Create src/pages/Relationships/ with @crossref:uses[PermissionMatrix, EntityRelationshipMap, LinkManager]",
+        "Build PermissionMatrix with @crossref:used-in[Relationships] // controls access to all pages",
+        "Build EntityRelationshipMap with @crossref:used-in[Relationships] // visual diagram",
+        "Build LinkManager with @crossref:used-in[Relationships] // manages Customer↔Employee, Employee↔Location, etc.",
+        "Create hooks/usePermissions.ts with @crossref:used-in[ALL_PAGES]"
+      ],
+      "status": "open",
+      "priority": "medium"
+    },
+    {
+      "id": 15,
+      "category": "feature",
+      "name": "Commission System - Placeholder",
+      "description": "PLACEHOLDER - Commission pages with cross-reference markers. Will be expanded when business logic is defined.",
+      "steps": [
+        "Create src/pages/Commission/ with PLACEHOLDER markers and @crossref:used-in[Employees, Reports]",
+        "Add placeholder components with cross-reference documentation for future implementation"
+      ],
+      "status": "open",
+      "priority": "low"
+    },
+    {
+      "id": 16,
+      "category": "feature",
+      "name": "Reports - Placeholder",
+      "description": "PLACEHOLDER - Reports pages with cross-reference markers. Will be expanded when report specifications are defined.",
+      "steps": [
+        "Create src/pages/Reports/ with PLACEHOLDER markers and @crossref:uses[RevenueChart, DataTable, StatCard]",
+        "Add placeholder components referencing existing chart/table components"
+      ],
+      "status": "open",
+      "priority": "low"
+    },
+    {
+      "id": 17,
+      "category": "feature",
+      "name": "SMS/Email Notifications - Placeholder",
+      "description": "PLACEHOLDER - Notification system placeholders. Cross-reference with Payment (triggers).",
+      "steps": [
+        "Add PLACEHOLDER markers in Payment page for SMS/Email notifications",
+        "Document @crossref:uses[Payment, Customers] for future implementation"
+      ],
+      "status": "open",
+      "priority": "low"
+    }
+  ]
+}
