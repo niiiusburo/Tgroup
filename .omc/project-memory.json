@@ -105,8 +105,44 @@
   "hotPaths": [
     {
       "path": "website/src/pages/Overview.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1775544654278,
+      "type": "file"
+    },
+    {
+      "path": "website/src/App.tsx",
       "accessCount": 4,
-      "lastAccessed": 1775544154177,
+      "lastAccessed": 1775544647734,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/index.ts",
+      "accessCount": 4,
+      "lastAccessed": 1775544654919,
+      "type": "file"
+    },
+    {
+      "path": "website/src/constants/index.ts",
+      "accessCount": 4,
+      "lastAccessed": 1775544655775,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/Layout.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1775544662613,
+      "type": "file"
+    },
+    {
+      "path": "website/tailwind.config.js",
+      "accessCount": 4,
+      "lastAccessed": 1775544671760,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/Calendar.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1775544784213,
       "type": "file"
     },
     {
@@ -116,39 +152,9 @@
       "type": "file"
     },
     {
-      "path": "website/src/App.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1775544062039,
-      "type": "file"
-    },
-    {
-      "path": "website/src/constants/index.ts",
-      "accessCount": 3,
-      "lastAccessed": 1775544062327,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/Layout.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1775544067803,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/index.ts",
-      "accessCount": 3,
-      "lastAccessed": 1775544068238,
-      "type": "file"
-    },
-    {
       "path": "website/tsconfig.json",
       "accessCount": 3,
       "lastAccessed": 1775544073345,
-      "type": "file"
-    },
-    {
-      "path": "website/tailwind.config.js",
-      "accessCount": 3,
-      "lastAccessed": 1775544073647,
       "type": "file"
     },
     {
@@ -167,12 +173,6 @@
       "path": "website/vite.config.ts",
       "accessCount": 2,
       "lastAccessed": 1775543645429,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Calendar.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1775543653222,
       "type": "file"
     },
     {
@@ -231,9 +231,21 @@
     },
     {
       "path": "",
-      "accessCount": 1,
-      "lastAccessed": 1775543089234,
+      "accessCount": 2,
+      "lastAccessed": 1775544648289,
       "type": "directory"
+    },
+    {
+      "path": "website/src/hooks/useOverviewData.ts",
+      "accessCount": 2,
+      "lastAccessed": 1775544661217,
+      "type": "file"
+    },
+    {
+      "path": "website/src/data/mockDashboard.ts",
+      "accessCount": 2,
+      "lastAccessed": 1775544671563,
+      "type": "file"
     },
     {
       "path": "website/index.html",
@@ -251,12 +263,6 @@
       "path": "website/src/vite-env.d.ts",
       "accessCount": 1,
       "lastAccessed": 1775544068943,
-      "type": "file"
-    },
-    {
-      "path": "website/src/data/mockDashboard.ts",
-      "accessCount": 1,
-      "lastAccessed": 1775544106315,
       "type": "file"
     },
     {
@@ -284,9 +290,39 @@
       "type": "file"
     },
     {
-      "path": "website/src/hooks/useOverviewData.ts",
+      "path": "website/src/data/mockCalendar.ts",
       "accessCount": 1,
-      "lastAccessed": 1775544141845,
+      "lastAccessed": 1775544702022,
+      "type": "file"
+    },
+    {
+      "path": "website/src/hooks/useCalendarData.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775544713423,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/calendar/TimeSlot.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775544736118,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/calendar/DayView.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775544741388,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/calendar/WeekView.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775544755369,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/calendar/MonthView.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775544765400,
       "type": "file"
     }
   ],
