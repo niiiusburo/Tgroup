@@ -16,6 +16,7 @@ import {
   Commission,
   Reports,
   Notifications,
+  PermissionBoard,
 } from '@/pages';
 import { ROUTES } from '@/constants';
 
@@ -87,6 +88,9 @@ function App() {
 
         {/* @crossref:route[path="/notifications", component=Notifications] */}
         <Route path={ROUTES.NOTIFICATIONS} element={<Notifications />} />
+
+        {/* @crossref:route[path="/permissions", component=PermissionBoard] */}
+        <Route path={ROUTES.PERMISSIONS} element={<PermissionBoard />} />
 
         {/* @crossref:catch-all-route[redirects to Overview] */}
         <Route path="*" element={<Navigate to="/" replace />} />

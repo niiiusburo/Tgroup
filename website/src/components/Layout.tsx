@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -15,6 +16,9 @@ import {
   Bell,
   Sparkles,
   LayoutGrid,
+  ChevronLeft,
+  ChevronRight,
+  Shield,
 } from 'lucide-react';
 import { NAVIGATION_ITEMS, type NavigationItem } from '@/constants';
 import { FilterByLocation } from '@/components/shared/FilterByLocation';
@@ -35,14 +39,16 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   BarChart3,
   BarChart2: BarChart3,
   FolderOpen,
+  Shield,
 };
 
 interface SidebarItemProps {
   item: NavigationItem;
+  expanded: boolean;
   onClick?: () => void;
 }
 
-function SidebarItem({ item, onClick }: SidebarItemProps) {
+function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
   const Icon = ICON_MAP[item.icon];
   const location = useLocation();
   const isActive = location.pathname === item.path ||
@@ -52,20 +58,36 @@ function SidebarItem({ item, onClick }: SidebarItemProps) {
     <NavLink
       to={item.path}
       onClick={onClick}
-      title={item.label}
+      title={!expanded ? item.label : undefined}
       className={`
-        relative w-12 h-12 flex items-center justify-center rounded-xl
-        transition-colors duration-150
+        relative h-11 flex items-center rounded-xl
+        transition-colors duration-150 gap-3
+        ${expanded ? 'px-3 w-full' : 'w-11 justify-center'}
         ${isActive
-          ? 'text-primary'
+          ? 'text-primary bg-white/10'
           : 'text-gray-400 hover:text-white hover:bg-white/5'
         }
       `}
     >
       {isActive && (
-        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-primary rounded-r-full" />
       )}
-      {Icon && <Icon className="w-5 h-5" />}
+      {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
+      {expanded && (
+        <span className="text-sm font-medium whitespace-nowrap overflow-hidden">
+          {item.label}
+        </span>
+      )}
+      {expanded && item.count && (
+        <span className="ml-auto text-xs bg-white/10 text-gray-300 px-1.5 py-0.5 rounded-full">
+          {item.count}
+        </span>
+      )}
+      {expanded && item.isPremium && (
+        <span className="ml-auto text-xs bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full">
+          Pro
+        </span>
+      )}
     </NavLink>
   );
 }
@@ -75,6 +97,7 @@ function SidebarItem({ item, onClick }: SidebarItemProps) {
  * Matches the original TDental design system
  */
 export function Layout() {
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const { selectedLocationId, setSelectedLocationId } = useLocationFilter();
   const location = useLocation();
 
@@ -88,31 +111,59 @@ export function Layout() {
   );
   const pageTitle = currentChild?.label ?? currentPage?.label ?? 'Dashboard';
 
+  const sidebarWidth = sidebarExpanded ? 'w-56' : 'w-[72px]';
+  const contentMargin = sidebarExpanded ? 'ml-56' : 'ml-[72px]';
+
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Fixed icon-only sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-[72px] bg-sidebar flex flex-col items-center py-4 z-50">
-        {/* Logo */}
-        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center mb-8 flex-shrink-0">
-          <span className="text-white font-bold text-sm">TD</span>
+      {/* Collapsible sidebar */}
+      <aside className={`fixed left-0 top-0 h-full ${sidebarWidth} bg-sidebar flex flex-col py-4 z-50 transition-all duration-300 ease-in-out`}>
+        {/* Logo + Toggle */}
+        <div className={`flex items-center mb-8 flex-shrink-0 ${sidebarExpanded ? 'px-4 justify-between' : 'justify-center'}`}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-sm">TD</span>
+            </div>
+            {sidebarExpanded && (
+              <span className="text-white font-semibold text-lg whitespace-nowrap">TDental</span>
+            )}
+          </div>
+          {sidebarExpanded && (
+            <button
+              onClick={() => setSidebarExpanded(false)}
+              className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 flex flex-col items-center gap-2 w-full px-3">
+        <nav className={`flex-1 flex flex-col gap-1 w-full ${sidebarExpanded ? 'px-3' : 'px-3 items-center'}`}>
           {NAVIGATION_ITEMS.map((item) => (
-            <SidebarItem key={item.path} item={item} />
+            <SidebarItem key={item.path} item={item} expanded={sidebarExpanded} />
           ))}
         </nav>
 
-        {/* Bottom indicators */}
-        <div className="flex flex-col items-center gap-3 mt-4">
-          <div className="w-3 h-3 rounded-full bg-purple-500" />
-          <div className="w-3 h-3 rounded-full bg-pink-500" />
+        {/* Bottom: expand button (collapsed) or indicators (expanded) */}
+        <div className={`flex flex-col items-center gap-3 mt-4 ${sidebarExpanded ? 'px-3' : ''}`}>
+          {!sidebarExpanded && (
+            <button
+              onClick={() => setSidebarExpanded(true)}
+              className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          )}
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-purple-500" />
+            <div className="w-3 h-3 rounded-full bg-pink-500" />
+          </div>
         </div>
       </aside>
 
       {/* Main content area */}
-      <div className="ml-[72px] min-h-screen flex flex-col">
+      <div className={`${contentMargin} min-h-screen flex flex-col transition-all duration-300 ease-in-out`}>
         {/* Header */}
         <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 sticky top-0 z-40">
           <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">

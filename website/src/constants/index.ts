@@ -102,26 +102,56 @@ export const ROUTES = {
   COMMISSION: '/commission',
   REPORTS: '/reports',
   NOTIFICATIONS: '/notifications',
+  PERMISSIONS: '/permissions',
 } as const;
 
 /**
- * Navigation items for sidebar/menu
+ * Navigation item type with optional children for hierarchical menus
  */
-export const NAVIGATION_ITEMS = [
-  { path: ROUTES.OVERVIEW, label: 'Overview', icon: 'LayoutDashboard' },
+export interface NavigationItem {
+  path: string;
+  label: string;
+  icon: string;
+  count?: string;
+  isPremium?: boolean;
+  children?: NavigationItem[];
+}
+
+/**
+ * Navigation items for sidebar/menu with hierarchical structure
+ * @design-ref:submenu-indentation - Children items are indented under parents
+ * @design-ref:count-badges - Shows completion counts like "0/5"
+ */
+export const NAVIGATION_ITEMS: NavigationItem[] = [
+  { path: ROUTES.OVERVIEW, label: 'Overview', icon: 'BarChart3' },
   { path: ROUTES.CALENDAR, label: 'Calendar', icon: 'Calendar' },
-  { path: ROUTES.CUSTOMERS, label: 'Customers', icon: 'Users' },
-  { path: ROUTES.APPOINTMENTS, label: 'Appointments', icon: 'CalendarCheck' },
-  { path: ROUTES.SERVICES, label: 'Services', icon: 'Stethoscope' },
-  { path: ROUTES.PAYMENT, label: 'Payment', icon: 'CreditCard' },
-  { path: ROUTES.EMPLOYEES, label: 'Employees', icon: 'UserCog' },
+  {
+    path: ROUTES.CUSTOMERS,
+    label: 'Customers',
+    icon: 'Users',
+    children: [
+      { path: ROUTES.APPOINTMENTS, label: 'Appointments', icon: 'CalendarCheck' },
+      { path: ROUTES.SERVICES, label: 'Record', icon: 'FolderOpen' },
+      { path: ROUTES.PAYMENT, label: 'Payment', icon: 'CreditCard' },
+    ],
+  },
+  {
+    path: ROUTES.EMPLOYEES,
+    label: 'Employees',
+    icon: 'UserCog',
+    children: [
+      { path: ROUTES.COMMISSION, label: 'Commission (P)', icon: 'Percent', isPremium: true },
+    ],
+  },
   { path: ROUTES.LOCATIONS, label: 'Locations', icon: 'MapPin' },
-  { path: ROUTES.WEBSITE, label: 'Website', icon: 'Globe' },
+  { 
+    path: ROUTES.WEBSITE, 
+    label: 'Service Catalog', 
+    icon: 'Stethoscope',
+    count: '228',
+  },
   { path: ROUTES.SETTINGS, label: 'Settings', icon: 'Settings' },
-  { path: ROUTES.RELATIONSHIPS, label: 'Relationships', icon: 'Network' },
-  { path: ROUTES.COMMISSION, label: 'Commission', icon: 'Percent' },
-  { path: ROUTES.REPORTS, label: 'Reports', icon: 'BarChart3' },
-  { path: ROUTES.NOTIFICATIONS, label: 'Notifications', icon: 'Bell' },
+  { path: ROUTES.PERMISSIONS, label: 'Permissions', icon: 'Shield' },
 ] as const;
 
 /**
