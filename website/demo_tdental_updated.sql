@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict HcFzRhQyCoB4NtKbcQYaOZKFH11bUJMDm1CxhkFnNcEzj8FoXSKT8VgVBXaFBIY
+\restrict gmciNvyL1xnbP0pWC56svdac2imMPGFhuuh1sgbgfHrF0AoFzKPdH3k0ns5o1r4
 
 -- Dumped from database version 16.11
 -- Dumped by pg_dump version 16.11
@@ -284,6 +284,7 @@ CREATE TABLE dbo.partners (
 CREATE VIEW dbo.employees AS
  SELECT id,
     name,
+    namenosign,
     ref,
     phone,
     email,
@@ -654,5 +655,5 @@ ALTER TABLE ONLY dbo.partners
 -- PostgreSQL database dump complete
 --
 
-\unrestrict HcFzRhQyCoB4NtKbcQYaOZKFH11bUJMDm1CxhkFnNcEzj8FoXSKT8VgVBXaFBIY
+\unrestrict gmciNvyL1xnbP0pWC56svdac2imMPGFhuuh1sgbgfHrF0AoFzKPdH3k0ns5o1r4
 
