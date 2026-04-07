@@ -3,24 +3,57 @@
  * @crossref:used-in[Settings, ServiceCatalogSettings, RoleConfig, CustomerSourcesConfig, SystemPreferences]
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
-  MOCK_CATALOG_SERVICES,
   MOCK_CUSTOMER_SOURCES,
   MOCK_SYSTEM_PREFERENCES,
-  type CatalogService,
   type CustomerSource,
   type SystemPreference,
 } from '@/data/mockSettings';
 import { ROLES, PERMISSIONS, type Role, type Permission } from '@/data/mockPermissions';
+import { fetchProducts } from '@/lib/api';
 
 // --- Service Catalog ---
 
+export interface ApiCatalogService {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  price: number;
+  duration: number;
+  visits: number;
+  isActive: boolean;
+}
+
 export function useServiceCatalog() {
-  const [services, setServices] = useState<CatalogService[]>([...MOCK_CATALOG_SERVICES]);
+  const [services, setServices] = useState<ApiCatalogService[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [showInactive, setShowInactive] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchProducts({ limit: 200 })
+      .then((res) => {
+        const mapped: ApiCatalogService[] = res.items.map((p) => ({
+          id: p.id,
+          name: p.name,
+          category: p.categname ?? 'Other',
+          description: p.defaultcode ?? '',
+          price: p.listprice ? parseFloat(p.listprice) : 0,
+          duration: 0,
+          visits: 1,
+          isActive: p.active,
+        }));
+        setServices(mapped);
+      })
+      .catch(() => {
+        // Keep empty state on error
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const filtered = useMemo(() => {
     return services.filter((s) => {
@@ -47,19 +80,20 @@ export function useServiceCatalog() {
     );
   }
 
-  function updateService(id: string, updates: Partial<Pick<CatalogService, 'name' | 'price' | 'duration' | 'visits' | 'description'>>) {
+  function updateService(id: string, updates: Partial<Pick<ApiCatalogService, 'name' | 'price' | 'duration' | 'visits' | 'description'>>) {
     setServices((prev) =>
       prev.map((s) => (s.id === id ? { ...s, ...updates } : s))
     );
   }
 
-  function addService(service: Omit<CatalogService, 'id'>) {
+  function addService(service: Omit<ApiCatalogService, 'id'>) {
     const newId = `cat-${Date.now()}`;
     setServices((prev) => [...prev, { ...service, id: newId }]);
   }
 
   return {
     services: filtered,
+    loading,
     stats,
     searchTerm,
     setSearchTerm,

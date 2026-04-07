@@ -260,6 +260,7 @@ export interface ApiProduct {
   uomname: string | null;
   companyid: string | null;
   companyname: string | null;
+  canorderlab: boolean;
   active: boolean;
   datecreated: string | null;
   lastupdated: string | null;
@@ -274,7 +275,7 @@ export function fetchProducts(params?: {
   return apiFetch<PaginatedResponse<ApiProduct>>('/Products', {
     params: {
       offset: params?.offset ?? 0,
-      limit: params?.limit ?? 50,
+      limit: params?.limit ?? 200,
       search: params?.search,
       categId: params?.categId,
     },

@@ -1,13 +1,37 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Stethoscope, Search, Filter, Package, DollarSign, Tag, ChevronDown, ChevronRight } from 'lucide-react';
-import { SERVICE_CATALOG_DATA, SERVICE_CATEGORIES } from '@/data/serviceCatalog';
-import type { ServiceItem } from '@/data/serviceCatalog';
+import { fetchProducts } from '@/lib/api';
+import type { ApiProduct } from '@/lib/api';
 
 /**
  * Service Catalog Page — Displays all dental services organized by category
  * @crossref:route[/services-catalog]
  * @replaces[Website]
  */
+
+interface ServiceItem {
+  id: string;
+  code: string;
+  name: string;
+  canOrderLab: boolean;
+  category: string;
+  unit: string;
+  price: number;
+  cost: number;
+}
+
+function mapProduct(p: ApiProduct): ServiceItem {
+  return {
+    id: p.id,
+    code: p.defaultcode ?? '',
+    name: p.name,
+    canOrderLab: p.canorderlab,
+    category: p.categname ?? 'Uncategorized',
+    unit: p.uomname ?? '',
+    price: p.listprice ? parseFloat(p.listprice) : 0,
+    cost: p.purchaseprice ? parseFloat(p.purchaseprice) : 0,
+  };
+}
 
 interface ServiceGroupProps {
   category: string;
@@ -85,7 +109,7 @@ function ServiceGroup({ category, services, isExpanded, onToggle, searchQuery }:
               <tbody className="divide-y divide-gray-100">
                 {filteredServices.map((service, index) => (
                   <tr
-                    key={`${service.code}-${index}`}
+                    key={`${service.id}-${index}`}
                     className="hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-6 py-3 whitespace-nowrap">
@@ -129,11 +153,34 @@ function ServiceGroup({ category, services, isExpanded, onToggle, searchQuery }:
 }
 
 export function ServiceCatalog() {
+  const [products, setProducts] = useState<ServiceItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    () => new Set([SERVICE_CATEGORIES[0]])
-  );
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  useEffect(() => {
+    setLoading(true);
+    fetchProducts({ limit: 200 })
+      .then((res) => {
+        const mapped = res.items.map(mapProduct);
+        setProducts(mapped);
+        // Auto-expand first category
+        const cats = [...new Set(mapped.map((p) => p.category))].sort();
+        if (cats.length > 0) {
+          setExpandedCategories(new Set([cats[0]]));
+        }
+      })
+      .catch(() => {
+        // Keep empty state on error
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const categories = useMemo(
+    () => [...new Set(products.map((p) => p.category))].sort(),
+    [products]
+  );
 
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => {
@@ -147,25 +194,22 @@ export function ServiceCatalog() {
     });
   };
 
-  const expandAll = () => {
-    setExpandedCategories(new Set(SERVICE_CATEGORIES));
-  };
-
-  const collapseAll = () => {
-    setExpandedCategories(new Set());
-  };
+  const expandAll = () => setExpandedCategories(new Set(categories));
+  const collapseAll = () => setExpandedCategories(new Set());
 
   const filteredCategories = useMemo(() => {
-    if (selectedCategory === 'all') return SERVICE_CATEGORIES;
-    return SERVICE_CATEGORIES.filter(c => c === selectedCategory);
-  }, [selectedCategory]);
+    if (selectedCategory === 'all') return categories;
+    return categories.filter(c => c === selectedCategory);
+  }, [categories, selectedCategory]);
 
   const stats = useMemo(() => {
-    const totalServices = SERVICE_CATALOG_DATA.length;
-    const categoriesCount = SERVICE_CATEGORIES.length;
+    const totalServices = products.length;
+    const categoriesCount = categories.length;
     const avgPrice =
-      SERVICE_CATALOG_DATA.reduce((sum, s) => sum + s.price, 0) / totalServices;
-    const labOrderableServices = SERVICE_CATALOG_DATA.filter(s => s.canOrderLab).length;
+      totalServices > 0
+        ? products.reduce((sum, s) => sum + s.price, 0) / totalServices
+        : 0;
+    const labOrderableServices = products.filter(s => s.canOrderLab).length;
 
     return {
       totalServices,
@@ -173,7 +217,7 @@ export function ServiceCatalog() {
       avgPrice: Math.round(avgPrice),
       labOrderableServices,
     };
-  }, []);
+  }, [products, categories]);
 
   return (
     <div className="space-y-6">
@@ -280,7 +324,7 @@ export function ServiceCatalog() {
               className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white min-w-[180px]"
             >
               <option value="all">All Categories</option>
-              {SERVICE_CATEGORIES.map((category) => (
+              {categories.map((category) => (
                 <option key={category} value={category}>
                   {category}
                 </option>
@@ -290,27 +334,37 @@ export function ServiceCatalog() {
         </div>
       </div>
 
-      {/* Service groups */}
-      <div className="space-y-4">
-        {filteredCategories.map((category) => (
-          <ServiceGroup
-            key={category}
-            category={category}
-            services={SERVICE_CATALOG_DATA.filter((s) => s.category === category)}
-            isExpanded={expandedCategories.has(category)}
-            onToggle={() => toggleCategory(category)}
-            searchQuery={searchQuery}
-          />
-        ))}
-      </div>
-
-      {filteredCategories.length === 0 && (
+      {/* Loading state */}
+      {loading && (
         <div className="bg-white rounded-xl shadow-card p-12 text-center">
-          <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-          <p className="text-gray-500 font-medium">No services found</p>
-          <p className="text-sm text-gray-400 mt-1">
-            Try changing your search query or filters
-          </p>
+          <Package className="w-12 h-12 mx-auto mb-3 text-gray-300 animate-pulse" />
+          <p className="text-gray-500 font-medium">Loading services...</p>
+        </div>
+      )}
+
+      {/* Service groups */}
+      {!loading && (
+        <div className="space-y-4">
+          {filteredCategories.map((category) => (
+            <ServiceGroup
+              key={category}
+              category={category}
+              services={products.filter((s) => s.category === category)}
+              isExpanded={expandedCategories.has(category)}
+              onToggle={() => toggleCategory(category)}
+              searchQuery={searchQuery}
+            />
+          ))}
+
+          {filteredCategories.length === 0 && (
+            <div className="bg-white rounded-xl shadow-card p-12 text-center">
+              <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+              <p className="text-gray-500 font-medium">No services found</p>
+              <p className="text-sm text-gray-400 mt-1">
+                Try changing your search query or filters
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

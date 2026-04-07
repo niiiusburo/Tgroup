@@ -4,23 +4,18 @@
  * @crossref:uses[useServiceCatalog]
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Search, ToggleLeft, ToggleRight, Pencil, Check, X } from 'lucide-react';
 import { useServiceCatalog } from '@/hooks/useSettings';
-import { APPOINTMENT_TYPE_LABELS, APPOINTMENT_TYPE_COLORS, type AppointmentType } from '@/constants';
 
 function formatVND(amount: number): string {
   return new Intl.NumberFormat('vi-VN').format(amount) + ' \u20ab';
 }
 
-const CATEGORY_OPTIONS: { label: string; value: string }[] = [
-  { label: 'All Categories', value: 'all' },
-  ...Object.entries(APPOINTMENT_TYPE_LABELS).map(([key, label]) => ({ label, value: key })),
-];
-
 export function ServiceCatalogSettings() {
   const {
     services,
+    loading,
     stats,
     searchTerm,
     setSearchTerm,
@@ -34,6 +29,12 @@ export function ServiceCatalogSettings() {
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPrice, setEditPrice] = useState('');
+
+  // Derive category options from fetched services (all, not filtered)
+  const categoryOptions = useMemo(() => {
+    const cats = [...new Set(services.map((s) => s.category))].sort();
+    return cats;
+  }, [services]);
 
   function startEdit(id: string, price: number) {
     setEditingId(id);
@@ -82,8 +83,9 @@ export function ServiceCatalogSettings() {
           onChange={(e) => setCategoryFilter(e.target.value)}
           className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
         >
-          {CATEGORY_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          <option value="all">All Categories</option>
+          {categoryOptions.map((cat) => (
+            <option key={cat} value={cat}>{cat}</option>
           ))}
         </select>
         <button
@@ -97,36 +99,39 @@ export function ServiceCatalogSettings() {
         </button>
       </div>
 
+      {/* Loading state */}
+      {loading && (
+        <div className="bg-white rounded-xl shadow-card p-12 text-center text-gray-400 text-sm">
+          Loading services...
+        </div>
+      )}
+
       {/* Service list */}
-      <div className="bg-white rounded-xl shadow-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/50">
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Service</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Category</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-600">Price</th>
-                <th className="text-center px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Duration</th>
-                <th className="text-center px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Visits</th>
-                <th className="text-center px-4 py-3 font-medium text-gray-600">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {services.map((service) => {
-                const catColors = APPOINTMENT_TYPE_COLORS[service.category as AppointmentType];
-                return (
+      {!loading && (
+        <div className="bg-white rounded-xl shadow-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50/50">
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">Service</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Category</th>
+                  <th className="text-right px-4 py-3 font-medium text-gray-600">Price</th>
+                  <th className="text-center px-4 py-3 font-medium text-gray-600">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {services.map((service) => (
                   <tr key={service.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                     <td className="px-4 py-3">
                       <div className="font-medium text-gray-900">{service.name}</div>
-                      <div className="text-xs text-gray-500 mt-0.5">{service.description}</div>
+                      {service.description && (
+                        <div className="text-xs text-gray-500 mt-0.5">{service.description}</div>
+                      )}
                     </td>
                     <td className="px-4 py-3 hidden sm:table-cell">
-                      {catColors && (
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${catColors.bg} ${catColors.text}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${catColors.dot}`} />
-                          {APPOINTMENT_TYPE_LABELS[service.category as AppointmentType]}
-                        </span>
-                      )}
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                        {service.category}
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-right">
                       {editingId === service.id ? (
@@ -156,8 +161,6 @@ export function ServiceCatalogSettings() {
                         </button>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-center text-gray-600 hidden md:table-cell">{service.duration}m</td>
-                    <td className="px-4 py-3 text-center text-gray-600 hidden md:table-cell">{service.visits}</td>
                     <td className="px-4 py-3 text-center">
                       <button
                         type="button"
@@ -173,19 +176,19 @@ export function ServiceCatalogSettings() {
                       </button>
                     </td>
                   </tr>
-                );
-              })}
-              {services.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-gray-400">
-                    No services found matching your filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                ))}
+                {services.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-12 text-center text-gray-400">
+                      No services found matching your filters.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

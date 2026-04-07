@@ -15,6 +15,7 @@ import { ServiceForm } from '@/components/services/ServiceForm';
 import { ServiceHistoryList } from '@/components/services/ServiceHistoryList';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { useServices, type ServiceFilter, type CategoryFilter, type CreateServiceInput } from '@/hooks/useServices';
+import type { ServiceRecord } from '@/data/mockServices';
 import { APPOINTMENT_TYPE_LABELS, type AppointmentType } from '@/constants';
 
 const STATUS_TABS: { label: string; value: ServiceFilter }[] = [
@@ -54,10 +55,32 @@ export function Services() {
   } = useServices(selectedLocationId);
 
   const [showForm, setShowForm] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<ServiceRecord | null>(null);
 
   function handleCreate(data: CreateServiceInput) {
     createServiceRecord(data);
     setShowForm(false);
+  }
+
+  function handleEdit(record: ServiceRecord) {
+    setEditingRecord(record);
+    setIsEditMode(true);
+    setShowForm(true);
+  }
+
+  function handleUpdate(_data: CreateServiceInput) {
+    // For now, update is local only - no API endpoint for this
+    // In a real app, you'd call an updateServiceRecord API
+    setShowForm(false);
+    setIsEditMode(false);
+    setEditingRecord(null);
+  }
+
+  function handleCloseForm() {
+    setShowForm(false);
+    setIsEditMode(false);
+    setEditingRecord(null);
   }
 
   return (
@@ -75,7 +98,11 @@ export function Services() {
         </div>
         <button
           type="button"
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setIsEditMode(false);
+            setEditingRecord(null);
+            setShowForm(true);
+          }}
           className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -140,11 +167,17 @@ export function Services() {
         records={records}
         onUpdateVisit={updateVisitStatus}
         onCancel={cancelServiceRecord}
+        onEdit={handleEdit}
       />
 
       {/* Form modal */}
       {showForm && (
-        <ServiceForm onSubmit={handleCreate} onClose={() => setShowForm(false)} />
+        <ServiceForm
+          isEdit={isEditMode}
+          initialData={editingRecord || undefined}
+          onSubmit={isEditMode ? handleUpdate : handleCreate}
+          onClose={handleCloseForm}
+        />
       )}
     </div>
   );

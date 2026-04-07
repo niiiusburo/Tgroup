@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict gmciNvyL1xnbP0pWC56svdac2imMPGFhuuh1sgbgfHrF0AoFzKPdH3k0ns5o1r4
+\restrict U73ECB3P8EJJLyhpJTIX6qtL6W4mYmSXUHLNMInNzYmrdQ2iOUiHtIq24SP6mGK
 
 -- Dumped from database version 16.11
 -- Dumped by pg_dump version 16.11
@@ -183,6 +183,31 @@ CREATE VIEW dbo.dotkhams AS
 
 
 --
+-- Name: employee_location_scope; Type: TABLE; Schema: dbo; Owner: -
+--
+
+CREATE TABLE dbo.employee_location_scope (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    employee_id uuid NOT NULL,
+    location_id uuid NOT NULL
+);
+
+
+--
+-- Name: employee_permissions; Type: TABLE; Schema: dbo; Owner: -
+--
+
+CREATE TABLE dbo.employee_permissions (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    employee_id uuid NOT NULL,
+    group_id uuid NOT NULL,
+    loc_scope text DEFAULT 'assigned'::text NOT NULL,
+    datecreated timestamp without time zone DEFAULT now(),
+    lastupdated timestamp without time zone DEFAULT now()
+);
+
+
+--
 -- Name: partners; Type: TABLE; Schema: dbo; Owner: -
 --
 
@@ -273,7 +298,9 @@ CREATE TABLE dbo.partners (
     potentiallevel text,
     marketingteamid uuid,
     saleteamid uuid,
-    isdeleted boolean NOT NULL
+    isdeleted boolean NOT NULL,
+    password_hash text,
+    last_login timestamp without time zone
 );
 
 
@@ -318,6 +345,17 @@ CREATE VIEW dbo.employees AS
 
 
 --
+-- Name: group_permissions; Type: TABLE; Schema: dbo; Owner: -
+--
+
+CREATE TABLE dbo.group_permissions (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    group_id uuid NOT NULL,
+    permission text NOT NULL
+);
+
+
+--
 -- Name: hrjobs; Type: VIEW; Schema: dbo; Owner: -
 --
 
@@ -335,6 +373,76 @@ CREATE VIEW dbo.partnersources AS
  SELECT NULL::uuid AS id,
     NULL::text AS name
   WHERE false;
+
+
+--
+-- Name: permission_groups; Type: TABLE; Schema: dbo; Owner: -
+--
+
+CREATE TABLE dbo.permission_groups (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    color text DEFAULT '#94A3B8'::text NOT NULL,
+    description text,
+    is_system boolean DEFAULT false NOT NULL,
+    datecreated timestamp without time zone DEFAULT now(),
+    lastupdated timestamp without time zone DEFAULT now()
+);
+
+
+--
+-- Name: permission_overrides; Type: TABLE; Schema: dbo; Owner: -
+--
+
+CREATE TABLE dbo.permission_overrides (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    employee_id uuid NOT NULL,
+    permission text NOT NULL,
+    override_type text NOT NULL,
+    datecreated timestamp without time zone DEFAULT now(),
+    CONSTRAINT permission_overrides_override_type_check CHECK ((override_type = ANY (ARRAY['grant'::text, 'revoke'::text])))
+);
+
+
+--
+-- Name: productcategories; Type: TABLE; Schema: dbo; Owner: -
+--
+
+CREATE TABLE dbo.productcategories (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    completename text,
+    parentid uuid,
+    active boolean DEFAULT true NOT NULL,
+    datecreated timestamp without time zone DEFAULT now(),
+    lastupdated timestamp without time zone DEFAULT now()
+);
+
+
+--
+-- Name: products; Type: TABLE; Schema: dbo; Owner: -
+--
+
+CREATE TABLE dbo.products (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    namenosign text,
+    defaultcode text,
+    type text DEFAULT 'service'::text,
+    type2 text DEFAULT 'service'::text,
+    listprice numeric DEFAULT 0,
+    saleprice numeric DEFAULT 0,
+    purchaseprice numeric DEFAULT 0,
+    laboprice numeric DEFAULT 0,
+    categid uuid,
+    uomid uuid,
+    uomname text DEFAULT 'Lần'::text,
+    companyid uuid,
+    active boolean DEFAULT true NOT NULL,
+    canorderlab boolean DEFAULT false NOT NULL,
+    datecreated timestamp without time zone DEFAULT now(),
+    lastupdated timestamp without time zone DEFAULT now()
+);
 
 
 --
@@ -493,6 +601,21 @@ b685f177-1d28-442d-853b-b40900b0e789	AP230469	2026-03-11 18:00:00	\N	\N	\N	60	CD
 b3a410ad-5051-4839-8518-b412004b9f6b	AP235011	2026-03-19 17:40:00	\N	\N	\N	10	KIỂM TRA RĂNG BỊ ĐAU - PL	\N	c928ee81-c3c1-4f56-9d0c-b3b20042e2db	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	\N	21360b9b-8e24-46e1-83a3-b1ef009a1911	done	\N	\N	f	7	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 0455be7a-bfd6-477f-9be2-b413008d3eb3	AP235538	2026-03-20 17:00:00	\N	\N	\N	10	smc- NGA 	\N	498c13ed-3f68-4c4f-b461-b28b003c173e	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	\N	\N	done	\N	\N	f	6	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
 c80f0337-5cc8-491a-8506-b412007c621d	AP235101	2026-03-23 18:00:00	\N	\N	\N	10	TĂNG LỰC - QUYÊN (thu tg trước) (knm)	\N	b2262736-c7f4-4072-a67f-b3d00095dcf1	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	\N	6ac1a478-0568-4ec6-a3d6-b05b009de13d	done	\N	\N	f	3	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+1491ca3e-3492-4aca-89a1-6c8103bfbe23	Lịch sáng 8h	2026-04-07 08:00:00	08:00	2026-04-07 08:00:00	\N	45	\N	\N	1e9d5389-810b-436c-8dbb-b0310021f217	765f6593-2b19-4d06-cc8c-08dc4d479451	\N	afde36ab-1eca-4281-b8e4-b1930033a9c6	confirmed	\N	\N	f	\N	\N	\N	2026-04-07 14:03:05.764834	2026-04-07 14:03:05.764834	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+0aba1eba-57bb-4aac-b6f2-ca9f0a8f3ca0	Lịch 9h	2026-04-07 09:00:00	09:00	2026-04-07 09:00:00	\N	60	\N	\N	e9fd09c2-e3be-4c59-88e0-b1030040130f	765f6593-2b19-4d06-cc8c-08dc4d479451	\N	afde36ab-1eca-4281-b8e4-b1930033a9c6	arrived	\N	\N	f	\N	\N	\N	2026-04-07 14:03:05.764834	2026-04-07 14:03:05.764834	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+3af20ccc-5f50-4840-8cac-b9d847a16b63	Lịch 10h nhổ	2026-04-07 10:00:00	10:00	2026-04-07 10:00:00	\N	90	Nhổ răng khôn	\N	a62414fe-b577-41a2-84d1-b14d008dc0c5	765f6593-2b19-4d06-cc8c-08dc4d479451	\N	b41477e0-8eed-4520-a41a-b145008c51b0	done	\N	\N	f	\N	\N	\N	2026-04-07 14:03:05.764834	2026-04-07 14:03:05.764834	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+c674827a-bb00-48a2-8b4d-5d4fb62ab1ee	Lịch 11h	2026-04-07 11:00:00	11:00	2026-04-07 11:00:00	\N	30	\N	\N	140d4c43-227b-4a1f-93e7-b17400aa26b1	765f6593-2b19-4d06-cc8c-08dc4d479451	\N	0b8e06d1-d517-4207-a8c0-b1f7002d7476	confirmed	\N	\N	f	\N	\N	\N	2026-04-07 14:03:05.764834	2026-04-07 14:03:05.764834	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+523490a3-ef11-404a-8ff3-f04c10e0b842	Lịch 8h30	2026-04-07 08:30:00	08:30	2026-04-07 08:30:00	\N	60	Tẩy trắng	\N	e2972973-56ed-4b6e-a411-b1760022319c	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	\N	21360b9b-8e24-46e1-83a3-b1ef009a1911	arrived	\N	\N	f	\N	\N	\N	2026-04-07 14:03:05.764834	2026-04-07 14:03:05.764834	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+e96ae487-5f3a-484d-a017-779673980133	Lịch 10h	2026-04-07 10:00:00	10:00	2026-04-07 10:00:00	\N	45	\N	\N	e9fd09c2-e3be-4c59-88e0-b1030040130f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	\N	dbefd061-dbb0-44d7-8eed-afe3007a8017	confirmed	\N	\N	f	\N	\N	\N	2026-04-07 14:03:05.764834	2026-04-07 14:03:05.764834	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+5a6da6ff-1dff-45f5-94be-adbe02967de7	Lịch 9h	2026-04-07 09:00:00	09:00	2026-04-07 09:00:00	\N	60	\N	\N	140d4c43-227b-4a1f-93e7-b17400aa26b1	f0f6361e-b99d-4ac7-4108-08dd8159c64a	\N	cab2a199-ae6f-4746-8d8f-b3690092e93c	confirmed	\N	\N	f	\N	\N	\N	2026-04-07 14:03:05.764834	2026-04-07 14:03:05.764834	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+a2d59849-a3cd-421e-ae2d-dd4eea87fa0c	Lịch 10h30 hủy	2026-04-07 10:30:00	10:30	2026-04-07 10:30:00	\N	45	Khách hủy	\N	a62414fe-b577-41a2-84d1-b14d008dc0c5	f0f6361e-b99d-4ac7-4108-08dd8159c64a	\N	494dd94b-0f5c-4037-a183-b2d5004495bc	cancelled	\N	\N	f	\N	\N	\N	2026-04-07 14:03:05.764834	2026-04-07 14:03:05.764834	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+d01f2caa-2301-4e18-98c9-93d5ac6729b6	Lịch 8h	2026-04-07 08:00:00	08:00	2026-04-07 08:00:00	\N	60	Niềng răng check	\N	1e9d5389-810b-436c-8dbb-b0310021f217	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	\N	c48e8550-f68f-4be5-89bb-b2110032b4e1	arrived	\N	\N	f	\N	\N	\N	2026-04-07 14:03:05.764834	2026-04-07 14:03:05.764834	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+92da01c6-d5b3-4276-b6f1-9e27e6097e61	Lịch 10h	2026-04-07 10:00:00	10:00	2026-04-07 10:00:00	\N	45	\N	\N	e9fd09c2-e3be-4c59-88e0-b1030040130f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	\N	c48e8550-f68f-4be5-89bb-b2110032b4e1	in-progress	\N	\N	f	\N	\N	\N	2026-04-07 14:03:05.764834	2026-04-07 14:03:05.764834	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+57c4b0e3-9c0e-4311-a7eb-88bcb0de1b06	Lịch 8h30	2026-04-07 08:30:00	08:30	2026-04-07 08:30:00	\N	60	\N	\N	a62414fe-b577-41a2-84d1-b14d008dc0c5	cad65000-6ff3-47c7-cc8d-08dc4d479451	\N	90e19070-f750-415b-ba52-b05f002e9438	arrived	\N	\N	f	\N	\N	\N	2026-04-07 14:03:05.764834	2026-04-07 14:03:05.764834	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+e3a441c6-7b7c-4fb6-8805-6e3a667457f7	Lịch 11h	2026-04-07 11:00:00	11:00	2026-04-07 11:00:00	\N	120	Bọc răng sứ	\N	e2972973-56ed-4b6e-a411-b1760022319c	cad65000-6ff3-47c7-cc8d-08dc4d479451	\N	90e19070-f750-415b-ba52-b05f002e9438	confirmed	\N	\N	f	\N	\N	\N	2026-04-07 14:03:05.764834	2026-04-07 14:03:05.764834	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N
+b4cee5e1-b41c-4b4e-a226-37f6e4a49725	Lịch 14h	2026-04-07 14:00:00	14:00	2026-04-07 14:00:00	\N	30	Trám răng	\N	1e9d5389-810b-436c-8dbb-b0310021f217	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	\N	21360b9b-8e24-46e1-83a3-b1ef009a1911	in Examination	\N	\N	f	\N	\N	\N	2026-04-07 14:03:05.764834	2026-04-07 14:45:34.159705	\N	\N	\N	\N	\N	\N	\N	\N	in Examination	\N	\N	\N	f	\N
+ec7fc6db-8e2b-4449-a639-b222b4f65ead	Lịch 13h	2026-04-07 13:00:00	13:00	2026-04-07 13:00:00	\N	60	\N	\N	e2972973-56ed-4b6e-a411-b1760022319c	f0f6361e-b99d-4ac7-4108-08dd8159c64a	\N	cab2a199-ae6f-4746-8d8f-b3690092e93c	done	\N	\N	f	\N	\N	\N	2026-04-07 14:03:05.764834	2026-04-07 14:45:36.728203	\N	\N	\N	\N	\N	\N	\N	\N	done	\N	\N	\N	f	\N
+52eb878e-9ac8-432e-8ecc-5ce96d45316a	Lịch 14h	2026-04-07 14:00:00	14:00	2026-04-07 14:00:00	\N	30	Lấy cao răng	\N	140d4c43-227b-4a1f-93e7-b17400aa26b1	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	\N	c48e8550-f68f-4be5-89bb-b2110032b4e1	arrived	\N	\N	f	\N	\N	\N	2026-04-07 14:03:05.764834	2026-04-07 14:45:49.61827	\N	\N	\N	\N	\N	\N	\N	\N	arrived	\N	\N	\N	f	\N
 \.
 
 
@@ -512,66 +635,424 @@ dde8b85e-e35a-41fa-4a6b-08de107d59ec	Nha khoa Tấm Dentist	499921f5-e290-42a3-8
 
 
 --
+-- Data for Name: employee_location_scope; Type: TABLE DATA; Schema: dbo; Owner: -
+--
+
+COPY dbo.employee_location_scope (id, employee_id, location_id) FROM stdin;
+d78dde6a-571f-449c-9c1f-0e18ced0c606	b41477e0-8eed-4520-a41a-b145008c51b0	765f6593-2b19-4d06-cc8c-08dc4d479451
+3ea29218-125a-4da0-8ccb-4425a004361e	0b8e06d1-d517-4207-a8c0-b1f7002d7476	765f6593-2b19-4d06-cc8c-08dc4d479451
+2af5cd48-a880-4a74-b989-766cb30070ff	9968161f-e735-448b-9adb-b14f0038c98e	765f6593-2b19-4d06-cc8c-08dc4d479451
+53b8b171-fc3d-4444-a13e-5451ffe67b17	cab2a199-ae6f-4746-8d8f-b3690092e93c	f0f6361e-b99d-4ac7-4108-08dd8159c64a
+94a5418a-bcf4-45a7-aa12-9d65f92507cf	494dd94b-0f5c-4037-a183-b2d5004495bc	f0f6361e-b99d-4ac7-4108-08dd8159c64a
+04968ae5-f07b-42b8-bac0-ecb9245da0fc	21360b9b-8e24-46e1-83a3-b1ef009a1911	c6b4b453-d260-46d4-4fd9-08db24f7ae8e
+68b22f02-d7ab-4135-8056-4e35d6bd0be8	dbefd061-dbb0-44d7-8eed-afe3007a8017	c6b4b453-d260-46d4-4fd9-08db24f7ae8e
+8d0d40ef-e1cf-474b-a7b1-fd6f27e03513	90e19070-f750-415b-ba52-b05f002e9438	c6b4b453-d260-46d4-4fd9-08db24f7ae8e
+115e6662-73a6-48e2-85e1-30bb98d0ea85	c48e8550-f68f-4be5-89bb-b2110032b4e1	6861c928-0e13-4664-c781-08dcdfa45074
+b6f8d542-8d0d-4794-adf4-99f77b9a89dc	7f9f1030-20ea-4c23-84e6-b16000c1e144	b178d5ee-d9ac-477e-088e-08db9a4c4cf4
+d41c8a25-7307-4419-b28d-30710dced8c9	43190b77-570b-4557-b470-b33e00663454	b178d5ee-d9ac-477e-088e-08db9a4c4cf4
+e2ec81a6-bab0-460a-949b-24d217286eac	6ac1a478-0568-4ec6-a3d6-b05b009de13d	b178d5ee-d9ac-477e-088e-08db9a4c4cf4
+640500e7-5b29-4637-9f1f-e61d05d94dc0	ed346f4b-c27b-428f-8e46-b05b009de13d	b178d5ee-d9ac-477e-088e-08db9a4c4cf4
+a865a92d-a926-4f77-816c-235e0a0da9c0	f03fce3f-d90e-4194-a28f-b1d400752590	cad65000-6ff3-47c7-cc8d-08dc4d479451
+05e8c81c-d765-4b2b-86ab-46d342610f3d	fd67fda4-42ea-4f85-b100-b14c0090e6e4	cad65000-6ff3-47c7-cc8d-08dc4d479451
+d89155f2-3ae8-417e-abe0-e6dc815fcb9f	3c2a3bda-879f-48b7-8ee4-b266004978ea	cad65000-6ff3-47c7-cc8d-08dc4d479451
+35637a57-79bd-4699-8212-f19113460818	a3a0e8dc-6b40-468f-803b-b1cf0063ad84	cad65000-6ff3-47c7-cc8d-08dc4d479451
+7e218683-7ba5-4c15-8d2f-cd4092f284a0	f1abd11e-6309-4b5b-add9-b14c0090f199	cad65000-6ff3-47c7-cc8d-08dc4d479451
+d8829606-b591-417a-aced-942cbb60a37e	afde36ab-1eca-4281-b8e4-b1930033a9c6	765f6593-2b19-4d06-cc8c-08dc4d479451
+a31527b2-d60a-44d0-9b86-5c236548d60e	28e2c9eb-d410-4881-9cf2-efb2494baad7	c6b4b453-d260-46d4-4fd9-08db24f7ae8e
+a21468b5-4e5e-4026-8f9d-c8ecf5ede509	28e2c9eb-d410-4881-9cf2-efb2494baad7	b178d5ee-d9ac-477e-088e-08db9a4c4cf4
+f8d8a35e-37f0-4840-9d17-654b405ca055	28e2c9eb-d410-4881-9cf2-efb2494baad7	765f6593-2b19-4d06-cc8c-08dc4d479451
+0d91a1f7-416e-4961-af04-3d482de73eff	28e2c9eb-d410-4881-9cf2-efb2494baad7	cad65000-6ff3-47c7-cc8d-08dc4d479451
+a5a5b1ab-bc10-4cd5-a653-2020fdaede48	28e2c9eb-d410-4881-9cf2-efb2494baad7	6861c928-0e13-4664-c781-08dcdfa45074
+3436b3d1-0ec1-426a-b47e-d8476a084934	28e2c9eb-d410-4881-9cf2-efb2494baad7	f0f6361e-b99d-4ac7-4108-08dd8159c64a
+7a4344f1-51d7-4736-88ea-358e0337943e	28e2c9eb-d410-4881-9cf2-efb2494baad7	dde8b85e-e35a-41fa-4a6b-08de107d59ec
+\.
+
+
+--
+-- Data for Name: employee_permissions; Type: TABLE DATA; Schema: dbo; Owner: -
+--
+
+COPY dbo.employee_permissions (id, employee_id, group_id, loc_scope, datecreated, lastupdated) FROM stdin;
+125b4c34-1993-4675-a1e6-848a1c8fc872	b41477e0-8eed-4520-a41a-b145008c51b0	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+14b0d63f-71ed-47eb-8e0e-ee5242d4eb85	0b8e06d1-d517-4207-a8c0-b1f7002d7476	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+5df6a781-8f85-41c0-a445-552f8ca21434	9968161f-e735-448b-9adb-b14f0038c98e	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+824d9ea4-9dbd-4547-900f-f662d465ec03	cab2a199-ae6f-4746-8d8f-b3690092e93c	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+d273a0d8-6209-4bc8-9f6b-338011b23fd0	494dd94b-0f5c-4037-a183-b2d5004495bc	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+d68217a8-753f-4e1f-a228-2870275ac034	21360b9b-8e24-46e1-83a3-b1ef009a1911	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+7f8e0b9d-192b-422c-9870-c72e09de8712	dbefd061-dbb0-44d7-8eed-afe3007a8017	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+3a978f21-1ca4-4a4a-bf50-13d3dba24386	90e19070-f750-415b-ba52-b05f002e9438	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+abc7de9a-20e7-4a5d-8ba6-128da56e9e24	c48e8550-f68f-4be5-89bb-b2110032b4e1	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+4b642654-01e8-4083-943e-5040efb722ac	7f9f1030-20ea-4c23-84e6-b16000c1e144	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+4c906db7-7ddc-48c3-8dbb-4ac974f80199	43190b77-570b-4557-b470-b33e00663454	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+ee59e245-f5a3-4e8e-9d85-48a166f9bb9e	6ac1a478-0568-4ec6-a3d6-b05b009de13d	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+1a014a24-4d36-4b28-99c1-40d74e8caff5	ed346f4b-c27b-428f-8e46-b05b009de13d	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+598f3111-0590-4d97-8e78-896e8e5c3be6	f03fce3f-d90e-4194-a28f-b1d400752590	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+a45ce062-6e39-49bc-8816-b3c590bd82cf	fd67fda4-42ea-4f85-b100-b14c0090e6e4	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+5098fe4e-b848-4092-b728-8f1f65b5420a	3c2a3bda-879f-48b7-8ee4-b266004978ea	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+441392a5-2b14-4ea7-b720-a84f9d41debd	a3a0e8dc-6b40-468f-803b-b1cf0063ad84	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+0685e8f9-973f-44dd-a2af-283b90cefe29	f1abd11e-6309-4b5b-add9-b14c0090f199	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 13:59:19.410765
+4838654a-25ba-4083-a329-e5defe3c05a1	afde36ab-1eca-4281-b8e4-b1930033a9c6	11111111-0000-0000-0000-000000000003	assigned	2026-04-07 13:59:19.410765	2026-04-07 14:00:40.45315
+25994c08-fae4-4eef-8cad-a53ecdad48cc	28e2c9eb-d410-4881-9cf2-efb2494baad7	11111111-0000-0000-0000-000000000001	all	2026-04-07 14:44:42.162171	2026-04-07 14:44:42.162171
+\.
+
+
+--
+-- Data for Name: group_permissions; Type: TABLE DATA; Schema: dbo; Owner: -
+--
+
+COPY dbo.group_permissions (id, group_id, permission) FROM stdin;
+feb42be5-7ad0-4d13-b551-451055431b0d	11111111-0000-0000-0000-000000000001	overview.view
+a070e6e6-0d5c-42bf-b6d6-ea30bd89f762	11111111-0000-0000-0000-000000000001	calendar.view
+e338501c-53b4-4db6-8348-b1bdaffe9547	11111111-0000-0000-0000-000000000001	calendar.edit
+0553d6a6-2c4e-4b44-bf8b-56a2a6c4ad73	11111111-0000-0000-0000-000000000001	customers.view
+4590ae3e-2675-4c41-8512-930fb1ad0d41	11111111-0000-0000-0000-000000000001	customers.add
+bfc90eb4-125e-4778-a1f4-75cc2e26faa6	11111111-0000-0000-0000-000000000001	customers.edit
+6ac434ab-cf61-41bc-81aa-82721c5c6d7f	11111111-0000-0000-0000-000000000001	customers.delete
+d091498b-0fca-4518-8fb1-9736dfebe9d8	11111111-0000-0000-0000-000000000001	appointments.view
+12a02f84-e9c9-48d0-994c-b41682a8bcf3	11111111-0000-0000-0000-000000000001	appointments.add
+210bbff0-3139-4591-ae5a-accdc1c17afc	11111111-0000-0000-0000-000000000001	appointments.edit
+8aa13877-c00f-42f2-a303-7a0a20c27679	11111111-0000-0000-0000-000000000001	services.view
+466e26ee-1052-43ce-8cff-4e82014125ee	11111111-0000-0000-0000-000000000001	services.add
+84e53331-7552-40b3-bc12-ef672b33cc03	11111111-0000-0000-0000-000000000001	services.edit
+942e591d-0f03-4e6a-9f36-255e6b0660ad	11111111-0000-0000-0000-000000000001	payment.view
+398344b2-68f1-4853-b97f-389158715284	11111111-0000-0000-0000-000000000001	payment.add
+56c0678d-6fce-4480-b727-6da59eafc5ef	11111111-0000-0000-0000-000000000001	payment.edit
+ee0dcd2f-44c3-4ca2-bd5d-6db9de624272	11111111-0000-0000-0000-000000000001	payment.refund
+7c016126-90bb-41af-89dc-43c02b27c093	11111111-0000-0000-0000-000000000001	employees.view
+3f6a7fa0-355c-4f14-8d37-888150396446	11111111-0000-0000-0000-000000000001	employees.add
+42ac111e-4c92-49b3-a98a-8836d751595f	11111111-0000-0000-0000-000000000001	employees.edit
+19607b98-8f92-480e-8d9f-85408c74d7b3	11111111-0000-0000-0000-000000000001	locations.view
+79dfd37c-0efa-4ecc-ae4c-e4eba9795df7	11111111-0000-0000-0000-000000000001	locations.add
+7c67e641-e133-4446-bb09-9a6d9ad84023	11111111-0000-0000-0000-000000000001	locations.edit
+f60b367f-3709-4a85-9d3e-14036a18a5db	11111111-0000-0000-0000-000000000001	reports.view
+c2bad0a4-c3f7-4bb2-8bac-50ce63f6d04e	11111111-0000-0000-0000-000000000001	reports.export
+31287524-8004-4a5b-8101-bd8d0eff5125	11111111-0000-0000-0000-000000000001	commission.view
+b9c6e5a8-d212-44a2-8d89-9931c1e6b82a	11111111-0000-0000-0000-000000000001	commission.edit
+7f176eb1-8ca6-4499-91d7-fda90d2f8668	11111111-0000-0000-0000-000000000001	settings.view
+9f193d9d-3460-466c-ac70-110b7c8f82a5	11111111-0000-0000-0000-000000000001	settings.edit
+356a5bf3-8ba1-4fb6-9b38-8e39915b1774	11111111-0000-0000-0000-000000000001	notifications.view
+0f83eead-a267-47c5-ab20-a683577ec6c9	11111111-0000-0000-0000-000000000001	notifications.edit
+2aeb399c-f5d9-4174-bf9c-14f86f764038	11111111-0000-0000-0000-000000000003	overview.view
+6164bd5a-e55e-41c2-bcdb-f033c76517dc	11111111-0000-0000-0000-000000000003	calendar.view
+2a5c31e1-0259-4206-bede-c1f1f052ed18	11111111-0000-0000-0000-000000000003	calendar.edit
+e1b5f724-d28f-453a-ac4b-9a3dd4d6626f	11111111-0000-0000-0000-000000000003	customers.view
+a26e66df-11ff-4ecd-9781-f392a4f2862c	11111111-0000-0000-0000-000000000003	appointments.view
+3aeced02-800f-4215-bb56-28574c7b1d7e	11111111-0000-0000-0000-000000000003	appointments.add
+05f68a67-cb86-4688-8276-3283fe35edfc	11111111-0000-0000-0000-000000000003	appointments.edit
+00d6b5d6-0f54-4ef9-9695-786ef9935711	11111111-0000-0000-0000-000000000003	services.view
+32f9d3d1-b4e3-4a65-ac77-a5c29118fc53	11111111-0000-0000-0000-000000000003	commission.view
+96e37db8-412b-4959-929f-3abfd4a60aa9	11111111-0000-0000-0000-000000000005	overview.view
+c2122723-b5d6-4fd3-9164-1b6999faed29	11111111-0000-0000-0000-000000000005	calendar.view
+557732ca-08b2-4f69-9c31-49228d104fe9	11111111-0000-0000-0000-000000000005	customers.view
+dd9cef64-ed37-4c1e-a676-e35bd5ef6608	11111111-0000-0000-0000-000000000005	appointments.view
+e16a184d-433c-4a65-94a9-fb5982db6306	11111111-0000-0000-0000-000000000005	services.view
+8bb41bd6-ebc6-4ad5-b6df-d390cc00500c	11111111-0000-0000-0000-000000000005	notifications.view
+e164fded-ef5f-4963-9123-24569fd27acd	11111111-0000-0000-0000-000000000002	appointments.add
+45d8b7a9-4c49-4a26-8ce5-892362b743ad	11111111-0000-0000-0000-000000000002	appointments.edit
+60487310-a36d-4043-8823-609f83b25390	11111111-0000-0000-0000-000000000002	appointments.view
+6629e461-761f-4f9d-9a83-6332c4739ec6	11111111-0000-0000-0000-000000000002	calendar.edit
+6c163884-0011-408f-bdd0-8854169f7251	11111111-0000-0000-0000-000000000002	calendar.view
+4206cff5-5bfb-4a21-b1db-231fb5da2b05	11111111-0000-0000-0000-000000000002	commission.edit
+04c36c7d-f7d5-4ea9-a423-7c79315fe935	11111111-0000-0000-0000-000000000002	commission.view
+8106b3c4-4c4e-475c-8c93-57c004791908	11111111-0000-0000-0000-000000000002	customers.add
+036b837d-b82b-4be2-9c1d-f6d2ecd93575	11111111-0000-0000-0000-000000000002	customers.edit
+1e56a01b-e4a9-465a-b573-ee9ecb7fcf14	11111111-0000-0000-0000-000000000002	customers.view
+29c50b96-b24a-4b0e-afb3-0fdf64db9c61	11111111-0000-0000-0000-000000000002	employees.add
+76a2118a-6ac9-4965-b995-e63589f5d1f9	11111111-0000-0000-0000-000000000002	employees.edit
+40ca4195-4207-472f-8e15-8b21e51353c8	11111111-0000-0000-0000-000000000002	employees.view
+0fa49d5d-db5e-49e9-91d7-9926892ef71d	11111111-0000-0000-0000-000000000002	locations.view
+02ef6979-45c6-4581-8863-b68c596bf952	11111111-0000-0000-0000-000000000002	notifications.edit
+7e65b568-b902-4fdf-93b1-ae1c893956f1	11111111-0000-0000-0000-000000000002	notifications.view
+ed6e1a1b-5537-4672-923d-06c4aad4294d	11111111-0000-0000-0000-000000000002	payment.add
+9aaacc01-dbde-460b-a3c7-ad147583839b	11111111-0000-0000-0000-000000000002	payment.edit
+2303e6e1-1e26-45c4-b0f0-48313d485f06	11111111-0000-0000-0000-000000000002	payment.view
+0972f7f6-8000-4aba-a72b-d86e5e6ff599	11111111-0000-0000-0000-000000000002	reports.export
+f8b86b41-fb88-44ab-babe-3b52e491f6be	11111111-0000-0000-0000-000000000002	reports.view
+5f5f7a19-cd74-49b3-a1f7-08163e422b07	11111111-0000-0000-0000-000000000002	services.add
+4984e615-75a0-4750-a7a8-ba8e4d057377	11111111-0000-0000-0000-000000000002	services.edit
+4f486ca0-ce46-4d0a-ab24-3c4ac00f7d49	11111111-0000-0000-0000-000000000002	services.view
+b3d11958-3bcc-4081-b4bc-46b878d2d0dd	11111111-0000-0000-0000-000000000002	settings.view
+5ddadcb8-d72f-43a3-9e10-b86d4d5d2fc4	11111111-0000-0000-0000-000000000002	overview.view
+3f80e382-7f45-4723-ade7-9015cb8ffd96	11111111-0000-0000-0000-000000000004	appointments.add
+7ef67fc6-e563-4bd0-bbff-b9c4dd3154ea	11111111-0000-0000-0000-000000000004	appointments.edit
+42d26e41-558f-4cd2-b26b-1fbebb86b958	11111111-0000-0000-0000-000000000004	appointments.view
+648475fe-b38d-44c8-b703-8efd38b679c6	11111111-0000-0000-0000-000000000004	calendar.edit
+4d3b9da0-224e-4067-b767-b25d71e0bea8	11111111-0000-0000-0000-000000000004	calendar.view
+40d72607-0982-49e0-87dd-731f2614721e	11111111-0000-0000-0000-000000000004	customers.add
+6e13ad35-ac9a-44ef-a3b8-151702693de3	11111111-0000-0000-0000-000000000004	customers.edit
+a80cf66d-2212-46c8-a4a5-368cd4008605	11111111-0000-0000-0000-000000000004	customers.view
+e5a315d3-3ec3-4b3a-8919-274d0067d583	11111111-0000-0000-0000-000000000004	payment.add
+7a34cbaf-3986-4af7-b413-fe0224c3d1bb	11111111-0000-0000-0000-000000000004	payment.edit
+26961e66-6a05-418a-9068-03192ec13f8b	11111111-0000-0000-0000-000000000004	payment.view
+661070e0-9f02-4cda-b498-547be7a27515	11111111-0000-0000-0000-000000000004	overview.view
+\.
+
+
+--
 -- Data for Name: partners; Type: TABLE DATA; Schema: dbo; Owner: -
 --
 
-COPY dbo.partners (id, displayname, name, namenosign, street, phone, email, supplier, customer, isagent, isinsurance, companyid, ref, comment, active, employee, gender, jobtitle, birthyear, birthmonth, birthday, medicalhistory, citycode, cityname, districtcode, districtname, wardcode, wardname, barcode, fax, sourceid, referraluserid, note, avatar, zaloid, date, titleid, agentid, weight, healthinsurancecardnumber, calendarlastnotifack, createdbyid, writebyid, datecreated, lastupdated, iscompany, ishead, hotline, website, countryid, stateid, type, userid, stageid, sequencenumber, sequenceprefix, birthdaycustomerstate, customerthankstate, emergencyphone, lasttreatmentcompletedate, treatmentstatus, taxcode, unitaddress, unitname, customername, invoicereceivingmethod, isbusinessinvoice, personaladdress, personalname, receiveremail, receiverzalonumber, personalidentitycard, personaltaxcode, citycodev2, citynamev2, identitynumber, usedaddressv2, wardcodev2, wardnamev2, age, contactstatusid, customerstatus, marketingstaffid, potentiallevel, marketingteamid, saleteamid, isdeleted) FROM stdin;
-1e9d5389-810b-436c-8dbb-b0310021f217	[T0963] PHẠM NGUYỄN MINH HIẾU 	PHẠM NGUYỄN MINH HIẾU 	PHAM NGUYEN MINH HIEU 	\N	0563757416	\N	f	t	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	T0963	\N	t	f	male	\N	1998	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	962b8c06-820b-430d-b392-afe30052abca	\N	\N	\N	2023-06-30 09:03:35.545583	b0eb3d9c-40f9-4840-aeae-87b63c24e64f	661769c7-fe5d-4de0-97b3-12d129198ccc	2023-06-30 09:03:35.545585	2023-07-10 16:18:27.264405	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	28	\N	\N	\N	\N	\N	\N	f
-e9fd09c2-e3be-4c59-88e0-b1030040130f	[T4944] Nguyễn Thị Thanh	Nguyễn Thị Thanh	Nguyen Thi Thanh	\N	0908177761	\N	f	t	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	T4944	\N	t	f	female	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	82fc6269-37a3-4702-8889-afe3007cf044	\N	\N	\N	\N	2024-01-26 00:00:00	\N	\N	\N	\N	2024-01-26 10:53:17.275413	8a553679-4de6-496c-8cf3-a25b09f124b4	2eb12148-bf3f-4694-8f3e-0a7db0815502	2024-01-26 10:53:17.275415	2024-10-01 17:53:52.536776	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	4944	T	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-a62414fe-b577-41a2-84d1-b14d008dc0c5	[T6771] NGUYỄN THỊ UYÊN	NGUYỄN THỊ UYÊN	NGUYEN THI UYEN	\N	0843656412	\N	f	t	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	T6771	Tư vấn niềng răng 	t	f	female	DungBtt	2002	5	24	\N	74	Tỉnh Bình Dương	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2024-04-09 00:00:00	096ad7ef-bbf1-4a2e-ae77-afe30052abca	\N	\N	\N	2024-04-09 15:36:06.413583	816d038b-856e-4227-9b19-9cac831fe139	aedc7e28-b6c1-44e0-a895-8524012c03e4	2024-04-09 15:36:06.413585	2024-04-10 20:36:30.672043	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	24	\N	\N	\N	\N	\N	\N	f
-140d4c43-227b-4a1f-93e7-b17400aa26b1	[T8126] Vũ Hữu Đạt	Vũ Hữu Đạt	Vu Huu Dat	\N	0388682636	\N	f	t	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	T8126	Tư vấn niềng răng 	t	f	male	nhunght	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2024-05-18 00:00:00	\N	\N	\N	\N	2024-05-18 17:19:30.082489	a5e29ed2-853c-4e2b-9fb6-0506732dbf1f	a5e29ed2-853c-4e2b-9fb6-0506732dbf1f	2024-05-18 17:19:30.082492	2024-05-18 17:19:30.082493	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-e2972973-56ed-4b6e-a411-b1760022319c	[T8160] Đặng Thị Hồng Thúy	Đặng Thị Hồng Thúy	Dang Thi Hong Thuy	\N	0977407980	\N	f	t	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	T8160	Sdt khác: 0376097208	t	f	female	\N	1964	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	82fc6269-37a3-4702-8889-afe3007cf044	\N	\N	\N	\N	2024-05-20 00:00:00	\N	\N	\N	\N	2024-05-20 09:04:29.747179	2eb12148-bf3f-4694-8f3e-0a7db0815502	2eb12148-bf3f-4694-8f3e-0a7db0815502	2024-05-20 09:04:29.747182	2024-05-25 09:32:22.812513	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	62	\N	\N	\N	\N	\N	\N	f
-80953c05-6320-4feb-b31e-b1ce00c73f79	[T11028] Nguyễn Thị Nguyệt	Nguyễn Thị Nguyệt	Nguyen Thi Nguyet	\N	0912866856	\N	f	t	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	T11028	\N	t	f	female	\N	1964	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	c7b3d31a-6325-4cf7-abae-afe3007cf6f8	\N	\N	\N	\N	2024-08-16 00:00:00	\N	\N	\N	\N	2024-08-16 19:05:26.372874	34faeb06-ee46-4277-bb29-544c49a99771	34faeb06-ee46-4277-bb29-544c49a99771	2024-08-16 19:05:26.372876	2024-08-19 12:20:53.239594	f	f	\N	\N	\N	\N	contact	\N	\N	11028	T	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	62	\N	\N	\N	\N	\N	\N	f
-7f38b288-2f0f-4caa-81ac-b217003b3c31	[T042342] NGUYỄN THỊ NHƯ NGỌC	NGUYỄN THỊ NHƯ NGỌC	NGUYEN THI NHU NGOC	\N	0387606489	\N	f	t	f	f	6861c928-0e13-4664-c781-08dcdfa45074	T042342	Tư vấn răng sứ 	t	f	female	DungBtt	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2024-10-28 00:00:00	e8db49c0-2290-47cb-9f09-afe30052abca	\N	\N	\N	2024-10-28 10:35:40.110442	816d038b-856e-4227-9b19-9cac831fe139	45119c4a-ee11-4b5d-9df6-8d0fd9d7a25d	2024-10-28 10:35:40.110447	2024-10-28 19:44:09.662922	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	42342	T	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-c977958d-09c6-4067-8f4d-b24c00353bcf	[T043901] Nguyễn Lan Phương (Lucy Phương Nguyễn)	Nguyễn Lan Phương (Lucy Phương Nguyễn)	Nguyen Lan Phuong (Lucy Phuong Nguyen)	\N	0973035522	\N	f	t	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	T043901	\N	t	f	female	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2024-12-20 00:00:00	\N	\N	\N	\N	2024-12-20 10:13:49.062602	34faeb06-ee46-4277-bb29-544c49a99771	34faeb06-ee46-4277-bb29-544c49a99771	2024-12-20 10:13:49.062606	2025-03-18 17:19:19.876534	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	43901	T	\N	1	\N	\N	sale	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-2da1bae8-d8e2-4a85-9da8-b25f0077382c	[T044356] LÊ HỒNG KHANH	LÊ HỒNG KHANH	LE HONG KHANH	\N	0902493006	\N	f	t	f	f	6861c928-0e13-4664-c781-08dcdfa45074	T044356	\N	t	f	male	\N	1997	12	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	82fc6269-37a3-4702-8889-afe3007cf044	\N	\N	\N	\N	2025-01-08 00:00:00	\N	\N	\N	\N	2025-01-08 14:14:03.880661	c727fe8c-bce6-4296-8836-647d6dd3fc6f	c727fe8c-bce6-4296-8836-647d6dd3fc6f	2025-01-08 14:14:03.880663	2025-01-13 15:53:35.117348	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	44356	T	\N	1	\N	\N	sale	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	29	\N	\N	\N	\N	\N	\N	f
-498c13ed-3f68-4c4f-b461-b28b003c173e	[T045826] Trần Ngọc Kim Tỷ	Trần Ngọc Kim Tỷ	Tran Ngoc Kim Ty	\N	0938256419	\N	f	t	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	T045826	\N	t	f	female	TrangTL	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-02-21 00:00:00	\N	\N	\N	\N	2025-02-21 10:38:47.033159	343de624-f1f6-467f-8bb7-3960d50f868a	de5ceb25-27e1-44cd-8529-19cacbbdec40	2025-02-21 10:38:47.033162	2025-12-27 19:19:36.599451	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	45826	T	\N	1	\N	\N	sale	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-0958759d-2985-4323-8807-b2e8007b4e9d	[T049475] Ngô Trí Nguyên 	Ngô Trí Nguyên 	Ngo Tri Nguyen 	\N	0933449696	\N	f	t	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	T049475	\N	t	f	male	\N	2018	12	22	\N	\N	\N	\N	\N	\N	\N	\N	\N	82fc6269-37a3-4702-8889-afe3007cf044	\N	\N	\N	\N	2025-05-25 00:00:00	962b8c06-820b-430d-b392-afe30052abca	\N	\N	\N	2025-05-25 14:28:56.840856	34faeb06-ee46-4277-bb29-544c49a99771	519b9e4b-9949-4422-bacc-6f17c1f4031e	2025-05-25 14:28:56.840859	2025-11-06 15:40:04.459328	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	49475	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	8	\N	\N	\N	\N	\N	\N	f
-e669a2b7-9733-4ef6-9feb-b2fe0098a9f5	[T050261] TRẦN NHẬT DUY - G	TRẦN NHẬT DUY - G	TRAN NHAT DUY - G	\N	0778998033	\N	f	t	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	T050261	YẾN YẾN GTH	t	f	male	\N	1991	\N	\N	\N	79	Thành phố Hồ Chí Minh	769	Thành phố Thủ Đức	\N	\N	\N	\N	c7b3d31a-6325-4cf7-abae-afe3007cf6f8	\N	\N	\N	\N	2025-06-16 00:00:00	962b8c06-820b-430d-b392-afe30052abca	\N	\N	\N	2025-06-16 16:15:49.934617	b4ce78f5-c73f-4f36-888a-914287165026	b4ce78f5-c73f-4f36-888a-914287165026	2025-06-16 16:15:49.934619	2025-06-17 16:23:10.65679	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	50261	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	35	\N	\N	\N	\N	\N	\N	f
-06364188-d7e1-421b-a409-b3030060b209	[T050466] NGUYỄN QUANG TOẢN (0979199660) - G1 	NGUYỄN QUANG TOẢN (0979199660) - G1 	NGUYEN QUANG TOAN (0979199660) - G1 	\N	0946128168	\N	f	t	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	T050466	KIÊN GIỚI THIỆU	t	f	male	CSKH : HUỲNH 	1990	9	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	c7b3d31a-6325-4cf7-abae-afe3007cf6f8	\N	\N	\N	\N	2025-06-21 00:00:00	\N	\N	\N	\N	2025-06-21 12:52:03.443613	b4ce78f5-c73f-4f36-888a-914287165026	b4ce78f5-c73f-4f36-888a-914287165026	2025-06-21 12:52:03.443616	2025-08-16 14:57:56.926853	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	50466	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	36	\N	\N	\N	\N	\N	\N	f
-fa3f3aa0-2bc9-4656-8029-b30a0064edf2	[T050774] HUỲNH THỊ HỒNG GẤM	HUỲNH THỊ HỒNG GẤM	HUYNH THI HONG GAM	BÌNH CHÁNH	0788851426	\N	f	t	f	f	6861c928-0e13-4664-c781-08dcdfa45074	T050774	Tư vấn răng sứ	t	f	female	AnhVL	2002	8	10	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-06-28 00:00:00	\N	\N	\N	\N	2025-06-28 13:07:28.377888	c0a08fa8-569c-4ac9-9f41-57089701b2f2	9f14688a-8e2d-40e7-850d-19f1abae8b63	2025-06-28 13:07:28.377889	2025-08-21 13:36:30.957494	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	c0a08fa8-569c-4ac9-9f41-57089701b2f2	\N	50774	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	24	\N	\N	\N	\N	\N	\N	f
-804e1102-7e0f-42b6-8158-b342003f49b5	[T053176] ĐẶNG NGỌC MINH THƯ	ĐẶNG NGỌC MINH THƯ	DANG NGOC MINH THU	\N	0909197570	\N	f	t	f	f	6861c928-0e13-4664-c781-08dcdfa45074	T053176	\N	t	f	female	\N	2013	1	1	\N	79	Thành phố Hồ Chí Minh	786	Huyện Nhà Bè	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-08-23 00:00:00	\N	\N	\N	\N	2025-08-23 10:50:25.456477	f879eaed-e8df-4b2f-91ae-e0409eabb639	9f14688a-8e2d-40e7-850d-19f1abae8b63	2025-08-23 10:50:25.456481	2025-08-23 12:00:17.791989	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	53176	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	13	\N	\N	\N	\N	\N	\N	f
-4da68ebf-0e77-4f33-a5f3-b34d00423c10	[T053491] Nguyễn Thu Huyền	Nguyễn Thu Huyền	Nguyen Thu Huyen	\N	0394990097	\N	f	t	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	T053491	\N	t	f	female	TrangNTH	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-09-03 00:00:00	\N	\N	\N	\N	2025-09-03 11:01:09.173853	628be5fe-ecec-4919-829e-871dfb5006ef	34faeb06-ee46-4277-bb29-544c49a99771	2025-09-03 11:01:09.173856	2025-09-03 16:35:04.951148	f	f	\N	\N	\N	\N	contact	\N	\N	53491	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-10f79eec-0965-4397-aeeb-b35400ab5326	[T053824] NGUYỄN THANH HIỂN	NGUYỄN THANH HIỂN	NGUYEN THANH HIEN	401/54 NGUYỄN VĂN KHỐI , GÒ VẤP	0399638858	\N	f	t	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	T053824	Tư vấn niềng răng 	t	f	male	DungBtt	2004	6	13	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-09-10 00:00:00	e8db49c0-2290-47cb-9f09-afe30052abca	\N	\N	\N	2025-09-10 17:23:46.471804	816d038b-856e-4227-9b19-9cac831fe139	07133b25-d559-419c-ae04-ddb4545df960	2025-09-10 17:23:46.471806	2026-02-11 13:48:20.442938	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	816d038b-856e-4227-9b19-9cac831fe139	\N	53824	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	22	\N	\N	\N	\N	\N	\N	f
-281f07e9-1916-4f3f-95d7-b3660060ccaa	[T054452] ỨC NỮ KIM XOAN	ỨC NỮ KIM XOAN	UC NU KIM XOAN	\N	0586490330	\N	f	t	f	f	f0f6361e-b99d-4ac7-4108-08dd8159c64a	T054452	\N	t	f	female	\N	2005	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	82fc6269-37a3-4702-8889-afe3007cf044	\N	\N	\N	\N	2025-09-28 00:00:00	\N	\N	\N	\N	2025-09-28 12:52:26.167444	47f96103-8fad-4d6e-ba79-9eb01eaa5451	d67346f6-837e-499d-8e8f-0eea533fcd4c	2025-09-28 12:52:26.167446	2025-09-29 11:33:00.645918	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	54452	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	21	\N	\N	\N	\N	\N	\N	f
-fd51b881-a221-4469-9c28-b37800215caa	[T055132] PHẠM THỊ KIỀU OANH	PHẠM THỊ KIỀU OANH	PHAM THI KIEU OANH	Đường Bình Hưng	0792538285	\N	f	t	f	f	f0f6361e-b99d-4ac7-4108-08dd8159c64a	T055132	\N	t	f	female	VanVC	2003	10	14	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-10-16 00:00:00	\N	\N	\N	\N	2025-10-16 09:01:28.034512	2b860551-c401-48a3-ac11-4286e01fca87	47f96103-8fad-4d6e-ba79-9eb01eaa5451	2025-10-16 09:01:28.034516	2025-11-24 13:44:26.40147	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	2b860551-c401-48a3-ac11-4286e01fca87	\N	55132	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	79	Thành phố Hồ Chí Minh	\N	t	27619	Xã Bình Hưng	23	\N	\N	\N	\N	\N	\N	f
-a7640271-7120-4917-904c-b388003ba146	[T055673] Nguyễn Hữu Thịnh	Nguyễn Hữu Thịnh	Nguyen Huu Thinh	\N	0846588595	\N	f	t	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	T055673	\N	t	f	male	TrangNTH	2006	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-11-01 00:00:00	\N	\N	\N	\N	2025-11-01 10:37:06.366873	628be5fe-ecec-4919-829e-871dfb5006ef	de5ceb25-27e1-44cd-8529-19cacbbdec40	2025-11-01 10:37:06.366876	2025-12-07 17:55:34.105577	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	628be5fe-ecec-4919-829e-871dfb5006ef	\N	55673	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	20	\N	\N	\N	\N	\N	\N	f
-a918ec28-0fdd-4671-8744-b38800685e88	[T055689] CAO HÀ TIÊN - G	CAO HÀ TIÊN - G	CAO HA TIEN - G	2/A BẠCH ĐẰNG, PHƯỜNG 2 TÂN BÌNH 	0765431477	\N	f	t	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	T055689	[T8692] ĐẶNG NGUYỄN KHÁNH AN\nGT	t	f	female	LYBAEE	2008	2	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	c7b3d31a-6325-4cf7-abae-afe3007cf6f8	\N	\N	\N	\N	2025-11-01 00:00:00	\N	\N	\N	\N	2025-11-01 13:19:59.811561	07133b25-d559-419c-ae04-ddb4545df960	07133b25-d559-419c-ae04-ddb4545df960	2025-11-01 13:19:59.811563	2026-02-07 17:09:06.592042	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	55689	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	18	\N	\N	\N	\N	\N	\N	f
-3dc647ea-698d-4038-94e6-b38a0022baa8	[T055760] NGUYỄN THỊ NGỌC TRANG (ACB)	NGUYỄN THỊ NGỌC TRANG (ACB)	NGUYEN THI NGOC TRANG (ACB)	\N	0364998608	\N	f	t	f	f	f0f6361e-b99d-4ac7-4108-08dd8159c64a	T055760	\N	t	f	female	\N	1991	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	82fc6269-37a3-4702-8889-afe3007cf044	\N	\N	\N	\N	2025-11-03 00:00:00	\N	\N	\N	\N	2025-11-03 09:06:26.693141	47f96103-8fad-4d6e-ba79-9eb01eaa5451	d67346f6-837e-499d-8e8f-0eea533fcd4c	2025-11-03 09:06:26.693144	2025-11-03 17:26:26.063122	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	55760	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	35	\N	\N	\N	\N	\N	\N	f
-a5a89433-420a-40dd-801c-b39000b34540	[T055990] NGÔ THỊ PHƯƠNG	NGÔ THỊ PHƯƠNG	NGO THI PHUONG	\N	0769587502	\N	f	t	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	T055990	\N	t	f	female	NganTK	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-11-09 00:00:00	\N	\N	\N	\N	2025-11-09 17:52:42.237355	f228b5c0-e26b-4825-bd80-08393b2a44e7	07133b25-d559-419c-ae04-ddb4545df960	2025-11-09 17:52:42.237357	2026-02-10 14:37:22.188893	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	f228b5c0-e26b-4825-bd80-08393b2a44e7	\N	55990	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-250c1ff6-8b5e-4bc6-9ac3-b3ad007ca9b0	[T056982] DƯƠNG NHẬT AN	DƯƠNG NHẬT AN	DUONG NHAT AN	\N	0936666321	\N	f	t	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	T056982	Tư vấn niềng răng	t	f	female	AnhVL	1987	\N	\N	\N	79	Thành phố Hồ Chí Minh	768	Quận Phú Nhuận	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-12-08 00:00:00	\N	\N	\N	\N	2025-12-08 14:33:53.011243	c0a08fa8-569c-4ac9-9f41-57089701b2f2	b4ce78f5-c73f-4f36-888a-914287165026	2025-12-08 14:33:53.011245	2025-12-31 15:45:31.469992	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	c0a08fa8-569c-4ac9-9f41-57089701b2f2	\N	56982	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	39	\N	\N	\N	\N	\N	\N	f
-c928ee81-c3c1-4f56-9d0c-b3b20042e2db	[T057129] QUÁCH ĐẶNG QUỲNH ANH	QUÁCH ĐẶNG QUỲNH ANH	QUACH DANG QUYNH ANH	\N	0784958752	\N	f	t	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	T057129	Tư vấn niềng răng 	t	f	female	DungBtt	2011	10	19	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-12-13 04:01:47.16	e8db49c0-2290-47cb-9f09-afe30052abca	\N	\N	\N	2025-12-13 11:03:31.504076	816d038b-856e-4227-9b19-9cac831fe139	b4ce78f5-c73f-4f36-888a-914287165026	2025-12-13 11:03:31.504078	2025-12-17 10:18:58.802266	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	816d038b-856e-4227-9b19-9cac831fe139	\N	57129	T	\N	\N	\N	\N	none	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	15	\N	\N	\N	\N	\N	\N	f
-79d56f7b-0572-424f-aa97-b3b30065fa75	[T057179] TRẦN PHƯƠNG ANH	TRẦN PHƯƠNG ANH	TRAN PHUONG ANH	\N	0786731755	\N	f	t	f	f	f0f6361e-b99d-4ac7-4108-08dd8159c64a	T057179	Tư vấn niềng răng	t	f	female	AnhVL	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-12-14 06:10:49.068	\N	\N	\N	\N	2025-12-14 13:11:17.509004	c0a08fa8-569c-4ac9-9f41-57089701b2f2	47f96103-8fad-4d6e-ba79-9eb01eaa5451	2025-12-14 13:11:17.509006	2025-12-15 14:57:30.136634	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	c0a08fa8-569c-4ac9-9f41-57089701b2f2	\N	57179	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-b2262736-c7f4-4072-a67f-b3d00095dcf1	[T058384] Phạm Ngọc Huy 	Phạm Ngọc Huy 	Pham Ngoc Huy 	\N	0349762840	\N	f	t	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	T058384	Tư vấn niềng răng 	t	f	male	DungBtt	2002	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2026-01-12 09:05:16.085	e8db49c0-2290-47cb-9f09-afe30052abca	\N	\N	\N	2026-01-12 16:05:38.081719	816d038b-856e-4227-9b19-9cac831fe139	de5ceb25-27e1-44cd-8529-19cacbbdec40	2026-01-12 16:05:38.081721	2026-02-11 14:05:32.585669	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	816d038b-856e-4227-9b19-9cac831fe139	\N	58384	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	24	\N	\N	\N	\N	\N	\N	f
-45fe0ac9-60cf-499a-81ed-b3d900a5e292	[T058892] NGUYỄN THỊ NHƯ Ý	NGUYỄN THỊ NHƯ Ý	NGUYEN THI NHU Y	579/70 QUANG TRUNG , P11 , GÒ VẤP	0353993861	\N	f	t	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	T058892	Tư  vấn niềng răng	t	f	female	AnhVL	2007	10	10	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2026-01-21 10:03:37.506	\N	\N	\N	\N	2026-01-21 17:03:58.138563	c0a08fa8-569c-4ac9-9f41-57089701b2f2	07133b25-d559-419c-ae04-ddb4545df960	2026-01-21 17:03:58.138565	2026-01-24 18:32:50.366252	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	c0a08fa8-569c-4ac9-9f41-57089701b2f2	\N	58892	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	19	\N	\N	\N	\N	\N	\N	f
-541bd083-7b08-4b7a-9517-b3db007928c7	[T058987] LƯU NGỌC THUÝ VY	LƯU NGỌC THUÝ VY	LUU NGOC THUY VY	QUẬN 8	0345935433	\N	f	t	f	f	f0f6361e-b99d-4ac7-4108-08dd8159c64a	T058987	Tư vấn niềng răng 	t	f	female	DungBtt	2007	8	11	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2026-01-23 07:20:45.391	e8db49c0-2290-47cb-9f09-afe30052abca	\N	\N	\N	2026-01-23 14:21:07.648803	816d038b-856e-4227-9b19-9cac831fe139	47f96103-8fad-4d6e-ba79-9eb01eaa5451	2026-01-23 14:21:07.648809	2026-01-27 17:24:22.301116	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	816d038b-856e-4227-9b19-9cac831fe139	\N	58987	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	19	\N	\N	\N	\N	\N	\N	f
-34f9945d-a2b3-4a7b-bbc5-b3e70045e958	[T059530] NGUYỄN NGÔ QUỲNH TRÂM 	NGUYỄN NGÔ QUỲNH TRÂM 	NGUYEN NGO QUYNH TRAM 	\N	0334112346	\N	f	t	f	f	6861c928-0e13-4664-c781-08dcdfa45074	T059530	TV NIỀNG 	t	f	female	NganTK	2006	10	25	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2026-02-04 04:14:38.942	\N	\N	\N	\N	2026-02-04 11:14:32.399209	f228b5c0-e26b-4825-bd80-08393b2a44e7	14901ece-9fd9-4f5a-8921-423ca8c120dc	2026-02-04 11:14:32.399211	2026-02-05 16:25:20.448757	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	f228b5c0-e26b-4825-bd80-08393b2a44e7	\N	59530	T	\N	\N	\N	\N	none	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	79	Thành phố Hồ Chí Minh	\N	t	\N	\N	20	\N	\N	\N	\N	\N	\N	f
-21734bc3-68ae-40f3-91a4-afc7006cf314	Tấm Dentist	Tấm Dentist	Tam Dentist	298 Nguyễn Thị Minh Khai	\N	trungkien150495@gmail.com	f	f	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	\N	\N	t	f	male	\N	\N	\N	\N	\N	79	Thành phố Hồ Chí Minh	770	Quận 3	27151	Phường 05	\N	\N	\N	\N	\N	\N	\N	2023-03-16 00:00:00	\N	\N	\N	\N	2023-03-16 13:36:40.384564	\N	\N	2023-03-16 13:36:40.384567	2023-03-16 13:36:40.384567	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-359155c1-89a4-4edc-95db-b05b009a2149	Tấm Dentist Thủ Đức	Tấm Dentist Thủ Đức	Tam Dentist Thu Duc	557 Kha Vạn Cân	0902501001	\N	f	f	f	f	\N	\N	\N	t	f	male	\N	\N	\N	\N	\N	79	Thành phố Hồ Chí Minh	769	Thành phố Thủ Đức	26821	Phường Linh Đông	\N	\N	\N	\N	\N	\N	\N	2023-08-11 00:00:00	\N	\N	\N	\N	2023-08-11 16:21:10.216362	b19424da-e016-41c8-b992-17181969c924	b19424da-e016-41c8-b992-17181969c924	2023-08-11 16:21:10.216364	2023-08-11 16:21:10.216365	f	f	0902501001	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-86d44007-e3a8-4f4d-a51d-b13f003eb759	Tấm Dentist Gò Vấp	Tấm Dentist Gò Vấp	Tam Dentist Go Vap	\N	0966 080 638	\N	f	f	f	f	\N	\N	\N	t	f	male	\N	\N	\N	\N	\N	79	Thành phố Hồ Chí Minh	764	Quận Gò Vấp	26893	Phường 04	\N	\N	\N	\N	\N	\N	\N	2024-03-26 00:00:00	\N	\N	\N	\N	2024-03-26 10:48:20.562296	b19424da-e016-41c8-b992-17181969c924	b19424da-e016-41c8-b992-17181969c924	2024-03-26 10:48:20.5623	2024-03-26 10:48:20.562301	t	f	\N	\N	\N	\N	contact	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-d73c7cd6-7be4-4356-b2b6-b13f003ed8a4	Tấm Dentist Đống Đa	Tấm Dentist Đống Đa	Tam Dentist Dong Da	\N	0966 080 638	\N	f	f	f	f	\N	\N	\N	t	f	male	\N	\N	\N	\N	\N	01	Thành phố Hà Nội	006	Quận Đống Đa	00196	Phường Hàng Bột	\N	\N	\N	\N	\N	\N	\N	2024-03-26 00:00:00	\N	\N	\N	\N	2024-03-26 10:48:48.974962	b19424da-e016-41c8-b992-17181969c924	b19424da-e016-41c8-b992-17181969c924	2024-03-26 10:48:48.974965	2024-03-26 10:48:48.974965	t	f	\N	\N	\N	\N	contact	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-cc59d7c8-3ec4-4a2c-90a3-b1f900a4cb11	Tấm Dentist Quận 7	Tấm Dentist Quận 7	Tam Dentist Quan 7	Nguyễn Thị Thập	0926563968	\N	f	f	f	f	\N	\N	\N	t	f	male	\N	\N	\N	\N	\N	79	Thành phố Hồ Chí Minh	778	Quận 7	27490	Phường Tân Phong	\N	\N	\N	\N	\N	\N	\N	2024-09-28 00:00:00	\N	\N	\N	\N	2024-09-28 16:59:59.627465	b19424da-e016-41c8-b992-17181969c924	b19424da-e016-41c8-b992-17181969c924	2024-09-28 16:59:59.627468	2024-09-28 16:59:59.627468	t	f	\N	https://tamdentist.vn/	\N	\N	contact	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-542d9beb-ab18-4670-980e-b2c70050e717	Tấm Dentist Quận 10	Tấm Dentist Quận 10	Tam Dentist Quan 10	376 Đường 3/2 Quận 10	0977041698	\N	f	f	f	f	\N	\N	\N	t	f	male	\N	\N	\N	\N	\N	79	Thành phố Hồ Chí Minh	771	Quận 10	27172	Phường 12	\N	\N	\N	\N	\N	\N	\N	2025-04-22 00:00:00	\N	\N	\N	\N	2025-04-22 11:54:33.463539	b19424da-e016-41c8-b992-17181969c924	b19424da-e016-41c8-b992-17181969c924	2025-04-22 11:54:33.463543	2025-04-22 11:54:33.463544	t	f	\N	\N	\N	\N	contact	\N	\N	\N	\N	\N	\N	\N	\N	none	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-499921f5-e290-42a3-8c2c-b37d008eaf2a	Nha khoa Tấm Dentist	Nha khoa Tấm Dentist	Nha khoa Tam Dentist	\N	\N	\N	f	f	f	f	\N	\N	\N	t	f	male	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-10-21 00:00:00	\N	\N	\N	\N	2025-10-21 15:39:29.846647	b19424da-e016-41c8-b992-17181969c924	b19424da-e016-41c8-b992-17181969c924	2025-10-21 15:39:29.846651	2025-10-21 15:39:29.846651	t	f	\N	\N	\N	\N	contact	\N	\N	\N	\N	\N	\N	\N	\N	none	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-afde36ab-1eca-4281-b8e4-b1930033a9c6	BS. Trang	BS. Trang	BS. Trang	\N	0901000001	trang@tamdentist.vn	f	f	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-b41477e0-8eed-4520-a41a-b145008c51b0	BS. Trâm	BS. Trâm	BS. Tram	\N	0901000002	tram@tamdentist.vn	f	f	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-0b8e06d1-d517-4207-a8c0-b1f7002d7476	BS. Ly	BS. Ly	BS. Ly	\N	0901000003	ly@tamdentist.vn	f	f	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	\N	\N	t	t	female	Bác sĩ Chỉnh nha	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-9968161f-e735-448b-9adb-b14f0038c98e	BS. Khánh	BS. Khánh	BS. Khanh	\N	0901000004	khanh@tamdentist.vn	f	f	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	\N	\N	t	t	male	Bác sĩ Chỉnh nha	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-cab2a199-ae6f-4746-8d8f-b3690092e93c	BS. Dương	BS. Dương	BS. Duong	\N	0901000005	duong@tamdentist.vn	f	f	f	f	f0f6361e-b99d-4ac7-4108-08dd8159c64a	\N	\N	t	t	male	Bác sĩ Chỉnh nha	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-494dd94b-0f5c-4037-a183-b2d5004495bc	BS. Uyên	BS. Uyên	BS. Uyen	\N	0901000006	uyen.q10@tamdentist.vn	f	f	f	f	f0f6361e-b99d-4ac7-4108-08dd8159c64a	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-21360b9b-8e24-46e1-83a3-b1ef009a1911	BS. Ý	BS. Ý	BS. Y	\N	0901000007	y@tamdentist.vn	f	f	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-dbefd061-dbb0-44d7-8eed-afe3007a8017	BS. Duy	BS. Duy	BS. Duy	\N	0901000008	duy@tamdentist.vn	f	f	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	\N	\N	t	t	male	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-90e19070-f750-415b-ba52-b05f002e9438	BS. Dũng	BS. Dũng	BS. Dung	\N	0901000009	dung@tamdentist.vn	f	f	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	\N	\N	t	t	male	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-c48e8550-f68f-4be5-89bb-b2110032b4e1	BS. Thu Thảo	BS. Thu Thảo	BS. Thu Thao	\N	0901000010	thuthao@tamdentist.vn	f	f	f	f	6861c928-0e13-4664-c781-08dcdfa45074	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-7f9f1030-20ea-4c23-84e6-b16000c1e144	BS. Thảo	BS. Thảo	BS. Thao	\N	0901000011	thao@tamdentist.vn	f	f	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-43190b77-570b-4557-b470-b33e00663454	BS. Nga	BS. Nga	BS. Nga	\N	0901000012	nga@tamdentist.vn	f	f	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-6ac1a478-0568-4ec6-a3d6-b05b009de13d	BS. Quyên	BS. Quyên	BS. Quyen	\N	0901000013	quyen@tamdentist.vn	f	f	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-ed346f4b-c27b-428f-8e46-b05b009de13d	BS. Quyên B	BS. Quyên B	BS. Quyen B	\N	0901000014	quyenb@tamdentist.vn	f	f	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	\N	\N	t	t	female	Bác sĩ Phẫu thuật	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-f03fce3f-d90e-4194-a28f-b1d400752590	BS. Hà	BS. Hà	BS. Ha	\N	0901000015	ha@tamdentist.vn	f	f	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-fd67fda4-42ea-4f85-b100-b14c0090e6e4	BS. Hải	BS. Hải	BS. Hai	\N	0901000016	hai@tamdentist.vn	f	f	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	\N	\N	t	t	male	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-3c2a3bda-879f-48b7-8ee4-b266004978ea	BS. Minh	BS. Minh	BS. Minh	\N	0901000017	minh@tamdentist.vn	f	f	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	\N	\N	t	t	male	Bác sĩ Phục hình	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-a3a0e8dc-6b40-468f-803b-b1cf0063ad84	BS. Phương	BS. Phương	BS. Phuong	\N	0901000018	phuong@tamdentist.vn	f	f	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
-f1abd11e-6309-4b5b-add9-b14c0090f199	BS. Linh	BS. Linh	BS. Linh	\N	0901000019	linh@tamdentist.vn	f	f	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f
+COPY dbo.partners (id, displayname, name, namenosign, street, phone, email, supplier, customer, isagent, isinsurance, companyid, ref, comment, active, employee, gender, jobtitle, birthyear, birthmonth, birthday, medicalhistory, citycode, cityname, districtcode, districtname, wardcode, wardname, barcode, fax, sourceid, referraluserid, note, avatar, zaloid, date, titleid, agentid, weight, healthinsurancecardnumber, calendarlastnotifack, createdbyid, writebyid, datecreated, lastupdated, iscompany, ishead, hotline, website, countryid, stateid, type, userid, stageid, sequencenumber, sequenceprefix, birthdaycustomerstate, customerthankstate, emergencyphone, lasttreatmentcompletedate, treatmentstatus, taxcode, unitaddress, unitname, customername, invoicereceivingmethod, isbusinessinvoice, personaladdress, personalname, receiveremail, receiverzalonumber, personalidentitycard, personaltaxcode, citycodev2, citynamev2, identitynumber, usedaddressv2, wardcodev2, wardnamev2, age, contactstatusid, customerstatus, marketingstaffid, potentiallevel, marketingteamid, saleteamid, isdeleted, password_hash, last_login) FROM stdin;
+1e9d5389-810b-436c-8dbb-b0310021f217	[T0963] PHẠM NGUYỄN MINH HIẾU 	PHẠM NGUYỄN MINH HIẾU 	PHAM NGUYEN MINH HIEU 	\N	0563757416	\N	f	t	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	T0963	\N	t	f	male	\N	1998	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	962b8c06-820b-430d-b392-afe30052abca	\N	\N	\N	2023-06-30 09:03:35.545583	b0eb3d9c-40f9-4840-aeae-87b63c24e64f	661769c7-fe5d-4de0-97b3-12d129198ccc	2023-06-30 09:03:35.545585	2023-07-10 16:18:27.264405	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	28	\N	\N	\N	\N	\N	\N	f	\N	\N
+e9fd09c2-e3be-4c59-88e0-b1030040130f	[T4944] Nguyễn Thị Thanh	Nguyễn Thị Thanh	Nguyen Thi Thanh	\N	0908177761	\N	f	t	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	T4944	\N	t	f	female	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	82fc6269-37a3-4702-8889-afe3007cf044	\N	\N	\N	\N	2024-01-26 00:00:00	\N	\N	\N	\N	2024-01-26 10:53:17.275413	8a553679-4de6-496c-8cf3-a25b09f124b4	2eb12148-bf3f-4694-8f3e-0a7db0815502	2024-01-26 10:53:17.275415	2024-10-01 17:53:52.536776	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	4944	T	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N
+a62414fe-b577-41a2-84d1-b14d008dc0c5	[T6771] NGUYỄN THỊ UYÊN	NGUYỄN THỊ UYÊN	NGUYEN THI UYEN	\N	0843656412	\N	f	t	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	T6771	Tư vấn niềng răng 	t	f	female	DungBtt	2002	5	24	\N	74	Tỉnh Bình Dương	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2024-04-09 00:00:00	096ad7ef-bbf1-4a2e-ae77-afe30052abca	\N	\N	\N	2024-04-09 15:36:06.413583	816d038b-856e-4227-9b19-9cac831fe139	aedc7e28-b6c1-44e0-a895-8524012c03e4	2024-04-09 15:36:06.413585	2024-04-10 20:36:30.672043	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	24	\N	\N	\N	\N	\N	\N	f	\N	\N
+140d4c43-227b-4a1f-93e7-b17400aa26b1	[T8126] Vũ Hữu Đạt	Vũ Hữu Đạt	Vu Huu Dat	\N	0388682636	\N	f	t	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	T8126	Tư vấn niềng răng 	t	f	male	nhunght	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2024-05-18 00:00:00	\N	\N	\N	\N	2024-05-18 17:19:30.082489	a5e29ed2-853c-4e2b-9fb6-0506732dbf1f	a5e29ed2-853c-4e2b-9fb6-0506732dbf1f	2024-05-18 17:19:30.082492	2024-05-18 17:19:30.082493	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N
+e2972973-56ed-4b6e-a411-b1760022319c	[T8160] Đặng Thị Hồng Thúy	Đặng Thị Hồng Thúy	Dang Thi Hong Thuy	\N	0977407980	\N	f	t	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	T8160	Sdt khác: 0376097208	t	f	female	\N	1964	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	82fc6269-37a3-4702-8889-afe3007cf044	\N	\N	\N	\N	2024-05-20 00:00:00	\N	\N	\N	\N	2024-05-20 09:04:29.747179	2eb12148-bf3f-4694-8f3e-0a7db0815502	2eb12148-bf3f-4694-8f3e-0a7db0815502	2024-05-20 09:04:29.747182	2024-05-25 09:32:22.812513	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	62	\N	\N	\N	\N	\N	\N	f	\N	\N
+80953c05-6320-4feb-b31e-b1ce00c73f79	[T11028] Nguyễn Thị Nguyệt	Nguyễn Thị Nguyệt	Nguyen Thi Nguyet	\N	0912866856	\N	f	t	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	T11028	\N	t	f	female	\N	1964	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	c7b3d31a-6325-4cf7-abae-afe3007cf6f8	\N	\N	\N	\N	2024-08-16 00:00:00	\N	\N	\N	\N	2024-08-16 19:05:26.372874	34faeb06-ee46-4277-bb29-544c49a99771	34faeb06-ee46-4277-bb29-544c49a99771	2024-08-16 19:05:26.372876	2024-08-19 12:20:53.239594	f	f	\N	\N	\N	\N	contact	\N	\N	11028	T	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	62	\N	\N	\N	\N	\N	\N	f	\N	\N
+7f38b288-2f0f-4caa-81ac-b217003b3c31	[T042342] NGUYỄN THỊ NHƯ NGỌC	NGUYỄN THỊ NHƯ NGỌC	NGUYEN THI NHU NGOC	\N	0387606489	\N	f	t	f	f	6861c928-0e13-4664-c781-08dcdfa45074	T042342	Tư vấn răng sứ 	t	f	female	DungBtt	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2024-10-28 00:00:00	e8db49c0-2290-47cb-9f09-afe30052abca	\N	\N	\N	2024-10-28 10:35:40.110442	816d038b-856e-4227-9b19-9cac831fe139	45119c4a-ee11-4b5d-9df6-8d0fd9d7a25d	2024-10-28 10:35:40.110447	2024-10-28 19:44:09.662922	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	42342	T	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N
+c977958d-09c6-4067-8f4d-b24c00353bcf	[T043901] Nguyễn Lan Phương (Lucy Phương Nguyễn)	Nguyễn Lan Phương (Lucy Phương Nguyễn)	Nguyen Lan Phuong (Lucy Phuong Nguyen)	\N	0973035522	\N	f	t	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	T043901	\N	t	f	female	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2024-12-20 00:00:00	\N	\N	\N	\N	2024-12-20 10:13:49.062602	34faeb06-ee46-4277-bb29-544c49a99771	34faeb06-ee46-4277-bb29-544c49a99771	2024-12-20 10:13:49.062606	2025-03-18 17:19:19.876534	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	43901	T	\N	1	\N	\N	sale	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N
+2da1bae8-d8e2-4a85-9da8-b25f0077382c	[T044356] LÊ HỒNG KHANH	LÊ HỒNG KHANH	LE HONG KHANH	\N	0902493006	\N	f	t	f	f	6861c928-0e13-4664-c781-08dcdfa45074	T044356	\N	t	f	male	\N	1997	12	5	\N	\N	\N	\N	\N	\N	\N	\N	\N	82fc6269-37a3-4702-8889-afe3007cf044	\N	\N	\N	\N	2025-01-08 00:00:00	\N	\N	\N	\N	2025-01-08 14:14:03.880661	c727fe8c-bce6-4296-8836-647d6dd3fc6f	c727fe8c-bce6-4296-8836-647d6dd3fc6f	2025-01-08 14:14:03.880663	2025-01-13 15:53:35.117348	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	44356	T	\N	1	\N	\N	sale	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	29	\N	\N	\N	\N	\N	\N	f	\N	\N
+498c13ed-3f68-4c4f-b461-b28b003c173e	[T045826] Trần Ngọc Kim Tỷ	Trần Ngọc Kim Tỷ	Tran Ngoc Kim Ty	\N	0938256419	\N	f	t	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	T045826	\N	t	f	female	TrangTL	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-02-21 00:00:00	\N	\N	\N	\N	2025-02-21 10:38:47.033159	343de624-f1f6-467f-8bb7-3960d50f868a	de5ceb25-27e1-44cd-8529-19cacbbdec40	2025-02-21 10:38:47.033162	2025-12-27 19:19:36.599451	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	45826	T	\N	1	\N	\N	sale	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N
+0958759d-2985-4323-8807-b2e8007b4e9d	[T049475] Ngô Trí Nguyên 	Ngô Trí Nguyên 	Ngo Tri Nguyen 	\N	0933449696	\N	f	t	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	T049475	\N	t	f	male	\N	2018	12	22	\N	\N	\N	\N	\N	\N	\N	\N	\N	82fc6269-37a3-4702-8889-afe3007cf044	\N	\N	\N	\N	2025-05-25 00:00:00	962b8c06-820b-430d-b392-afe30052abca	\N	\N	\N	2025-05-25 14:28:56.840856	34faeb06-ee46-4277-bb29-544c49a99771	519b9e4b-9949-4422-bacc-6f17c1f4031e	2025-05-25 14:28:56.840859	2025-11-06 15:40:04.459328	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	49475	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	8	\N	\N	\N	\N	\N	\N	f	\N	\N
+e669a2b7-9733-4ef6-9feb-b2fe0098a9f5	[T050261] TRẦN NHẬT DUY - G	TRẦN NHẬT DUY - G	TRAN NHAT DUY - G	\N	0778998033	\N	f	t	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	T050261	YẾN YẾN GTH	t	f	male	\N	1991	\N	\N	\N	79	Thành phố Hồ Chí Minh	769	Thành phố Thủ Đức	\N	\N	\N	\N	c7b3d31a-6325-4cf7-abae-afe3007cf6f8	\N	\N	\N	\N	2025-06-16 00:00:00	962b8c06-820b-430d-b392-afe30052abca	\N	\N	\N	2025-06-16 16:15:49.934617	b4ce78f5-c73f-4f36-888a-914287165026	b4ce78f5-c73f-4f36-888a-914287165026	2025-06-16 16:15:49.934619	2025-06-17 16:23:10.65679	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	50261	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	35	\N	\N	\N	\N	\N	\N	f	\N	\N
+06364188-d7e1-421b-a409-b3030060b209	[T050466] NGUYỄN QUANG TOẢN (0979199660) - G1 	NGUYỄN QUANG TOẢN (0979199660) - G1 	NGUYEN QUANG TOAN (0979199660) - G1 	\N	0946128168	\N	f	t	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	T050466	KIÊN GIỚI THIỆU	t	f	male	CSKH : HUỲNH 	1990	9	2	\N	\N	\N	\N	\N	\N	\N	\N	\N	c7b3d31a-6325-4cf7-abae-afe3007cf6f8	\N	\N	\N	\N	2025-06-21 00:00:00	\N	\N	\N	\N	2025-06-21 12:52:03.443613	b4ce78f5-c73f-4f36-888a-914287165026	b4ce78f5-c73f-4f36-888a-914287165026	2025-06-21 12:52:03.443616	2025-08-16 14:57:56.926853	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	50466	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	36	\N	\N	\N	\N	\N	\N	f	\N	\N
+fa3f3aa0-2bc9-4656-8029-b30a0064edf2	[T050774] HUỲNH THỊ HỒNG GẤM	HUỲNH THỊ HỒNG GẤM	HUYNH THI HONG GAM	BÌNH CHÁNH	0788851426	\N	f	t	f	f	6861c928-0e13-4664-c781-08dcdfa45074	T050774	Tư vấn răng sứ	t	f	female	AnhVL	2002	8	10	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-06-28 00:00:00	\N	\N	\N	\N	2025-06-28 13:07:28.377888	c0a08fa8-569c-4ac9-9f41-57089701b2f2	9f14688a-8e2d-40e7-850d-19f1abae8b63	2025-06-28 13:07:28.377889	2025-08-21 13:36:30.957494	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	c0a08fa8-569c-4ac9-9f41-57089701b2f2	\N	50774	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	24	\N	\N	\N	\N	\N	\N	f	\N	\N
+804e1102-7e0f-42b6-8158-b342003f49b5	[T053176] ĐẶNG NGỌC MINH THƯ	ĐẶNG NGỌC MINH THƯ	DANG NGOC MINH THU	\N	0909197570	\N	f	t	f	f	6861c928-0e13-4664-c781-08dcdfa45074	T053176	\N	t	f	female	\N	2013	1	1	\N	79	Thành phố Hồ Chí Minh	786	Huyện Nhà Bè	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-08-23 00:00:00	\N	\N	\N	\N	2025-08-23 10:50:25.456477	f879eaed-e8df-4b2f-91ae-e0409eabb639	9f14688a-8e2d-40e7-850d-19f1abae8b63	2025-08-23 10:50:25.456481	2025-08-23 12:00:17.791989	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	53176	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	13	\N	\N	\N	\N	\N	\N	f	\N	\N
+4da68ebf-0e77-4f33-a5f3-b34d00423c10	[T053491] Nguyễn Thu Huyền	Nguyễn Thu Huyền	Nguyen Thu Huyen	\N	0394990097	\N	f	t	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	T053491	\N	t	f	female	TrangNTH	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-09-03 00:00:00	\N	\N	\N	\N	2025-09-03 11:01:09.173853	628be5fe-ecec-4919-829e-871dfb5006ef	34faeb06-ee46-4277-bb29-544c49a99771	2025-09-03 11:01:09.173856	2025-09-03 16:35:04.951148	f	f	\N	\N	\N	\N	contact	\N	\N	53491	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N
+10f79eec-0965-4397-aeeb-b35400ab5326	[T053824] NGUYỄN THANH HIỂN	NGUYỄN THANH HIỂN	NGUYEN THANH HIEN	401/54 NGUYỄN VĂN KHỐI , GÒ VẤP	0399638858	\N	f	t	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	T053824	Tư vấn niềng răng 	t	f	male	DungBtt	2004	6	13	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-09-10 00:00:00	e8db49c0-2290-47cb-9f09-afe30052abca	\N	\N	\N	2025-09-10 17:23:46.471804	816d038b-856e-4227-9b19-9cac831fe139	07133b25-d559-419c-ae04-ddb4545df960	2025-09-10 17:23:46.471806	2026-02-11 13:48:20.442938	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	816d038b-856e-4227-9b19-9cac831fe139	\N	53824	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	22	\N	\N	\N	\N	\N	\N	f	\N	\N
+281f07e9-1916-4f3f-95d7-b3660060ccaa	[T054452] ỨC NỮ KIM XOAN	ỨC NỮ KIM XOAN	UC NU KIM XOAN	\N	0586490330	\N	f	t	f	f	f0f6361e-b99d-4ac7-4108-08dd8159c64a	T054452	\N	t	f	female	\N	2005	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	82fc6269-37a3-4702-8889-afe3007cf044	\N	\N	\N	\N	2025-09-28 00:00:00	\N	\N	\N	\N	2025-09-28 12:52:26.167444	47f96103-8fad-4d6e-ba79-9eb01eaa5451	d67346f6-837e-499d-8e8f-0eea533fcd4c	2025-09-28 12:52:26.167446	2025-09-29 11:33:00.645918	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	54452	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	21	\N	\N	\N	\N	\N	\N	f	\N	\N
+fd51b881-a221-4469-9c28-b37800215caa	[T055132] PHẠM THỊ KIỀU OANH	PHẠM THỊ KIỀU OANH	PHAM THI KIEU OANH	Đường Bình Hưng	0792538285	\N	f	t	f	f	f0f6361e-b99d-4ac7-4108-08dd8159c64a	T055132	\N	t	f	female	VanVC	2003	10	14	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-10-16 00:00:00	\N	\N	\N	\N	2025-10-16 09:01:28.034512	2b860551-c401-48a3-ac11-4286e01fca87	47f96103-8fad-4d6e-ba79-9eb01eaa5451	2025-10-16 09:01:28.034516	2025-11-24 13:44:26.40147	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	2b860551-c401-48a3-ac11-4286e01fca87	\N	55132	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	79	Thành phố Hồ Chí Minh	\N	t	27619	Xã Bình Hưng	23	\N	\N	\N	\N	\N	\N	f	\N	\N
+a7640271-7120-4917-904c-b388003ba146	[T055673] Nguyễn Hữu Thịnh	Nguyễn Hữu Thịnh	Nguyen Huu Thinh	\N	0846588595	\N	f	t	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	T055673	\N	t	f	male	TrangNTH	2006	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-11-01 00:00:00	\N	\N	\N	\N	2025-11-01 10:37:06.366873	628be5fe-ecec-4919-829e-871dfb5006ef	de5ceb25-27e1-44cd-8529-19cacbbdec40	2025-11-01 10:37:06.366876	2025-12-07 17:55:34.105577	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	628be5fe-ecec-4919-829e-871dfb5006ef	\N	55673	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	20	\N	\N	\N	\N	\N	\N	f	\N	\N
+a918ec28-0fdd-4671-8744-b38800685e88	[T055689] CAO HÀ TIÊN - G	CAO HÀ TIÊN - G	CAO HA TIEN - G	2/A BẠCH ĐẰNG, PHƯỜNG 2 TÂN BÌNH 	0765431477	\N	f	t	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	T055689	[T8692] ĐẶNG NGUYỄN KHÁNH AN\nGT	t	f	female	LYBAEE	2008	2	4	\N	\N	\N	\N	\N	\N	\N	\N	\N	c7b3d31a-6325-4cf7-abae-afe3007cf6f8	\N	\N	\N	\N	2025-11-01 00:00:00	\N	\N	\N	\N	2025-11-01 13:19:59.811561	07133b25-d559-419c-ae04-ddb4545df960	07133b25-d559-419c-ae04-ddb4545df960	2025-11-01 13:19:59.811563	2026-02-07 17:09:06.592042	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	55689	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	18	\N	\N	\N	\N	\N	\N	f	\N	\N
+3dc647ea-698d-4038-94e6-b38a0022baa8	[T055760] NGUYỄN THỊ NGỌC TRANG (ACB)	NGUYỄN THỊ NGỌC TRANG (ACB)	NGUYEN THI NGOC TRANG (ACB)	\N	0364998608	\N	f	t	f	f	f0f6361e-b99d-4ac7-4108-08dd8159c64a	T055760	\N	t	f	female	\N	1991	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	82fc6269-37a3-4702-8889-afe3007cf044	\N	\N	\N	\N	2025-11-03 00:00:00	\N	\N	\N	\N	2025-11-03 09:06:26.693141	47f96103-8fad-4d6e-ba79-9eb01eaa5451	d67346f6-837e-499d-8e8f-0eea533fcd4c	2025-11-03 09:06:26.693144	2025-11-03 17:26:26.063122	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	\N	\N	55760	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	35	\N	\N	\N	\N	\N	\N	f	\N	\N
+a5a89433-420a-40dd-801c-b39000b34540	[T055990] NGÔ THỊ PHƯƠNG	NGÔ THỊ PHƯƠNG	NGO THI PHUONG	\N	0769587502	\N	f	t	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	T055990	\N	t	f	female	NganTK	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-11-09 00:00:00	\N	\N	\N	\N	2025-11-09 17:52:42.237355	f228b5c0-e26b-4825-bd80-08393b2a44e7	07133b25-d559-419c-ae04-ddb4545df960	2025-11-09 17:52:42.237357	2026-02-10 14:37:22.188893	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	f228b5c0-e26b-4825-bd80-08393b2a44e7	\N	55990	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N
+250c1ff6-8b5e-4bc6-9ac3-b3ad007ca9b0	[T056982] DƯƠNG NHẬT AN	DƯƠNG NHẬT AN	DUONG NHAT AN	\N	0936666321	\N	f	t	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	T056982	Tư vấn niềng răng	t	f	female	AnhVL	1987	\N	\N	\N	79	Thành phố Hồ Chí Minh	768	Quận Phú Nhuận	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-12-08 00:00:00	\N	\N	\N	\N	2025-12-08 14:33:53.011243	c0a08fa8-569c-4ac9-9f41-57089701b2f2	b4ce78f5-c73f-4f36-888a-914287165026	2025-12-08 14:33:53.011245	2025-12-31 15:45:31.469992	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	c0a08fa8-569c-4ac9-9f41-57089701b2f2	\N	56982	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	39	\N	\N	\N	\N	\N	\N	f	\N	\N
+c928ee81-c3c1-4f56-9d0c-b3b20042e2db	[T057129] QUÁCH ĐẶNG QUỲNH ANH	QUÁCH ĐẶNG QUỲNH ANH	QUACH DANG QUYNH ANH	\N	0784958752	\N	f	t	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	T057129	Tư vấn niềng răng 	t	f	female	DungBtt	2011	10	19	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-12-13 04:01:47.16	e8db49c0-2290-47cb-9f09-afe30052abca	\N	\N	\N	2025-12-13 11:03:31.504076	816d038b-856e-4227-9b19-9cac831fe139	b4ce78f5-c73f-4f36-888a-914287165026	2025-12-13 11:03:31.504078	2025-12-17 10:18:58.802266	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	816d038b-856e-4227-9b19-9cac831fe139	\N	57129	T	\N	\N	\N	\N	none	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	15	\N	\N	\N	\N	\N	\N	f	\N	\N
+79d56f7b-0572-424f-aa97-b3b30065fa75	[T057179] TRẦN PHƯƠNG ANH	TRẦN PHƯƠNG ANH	TRAN PHUONG ANH	\N	0786731755	\N	f	t	f	f	f0f6361e-b99d-4ac7-4108-08dd8159c64a	T057179	Tư vấn niềng răng	t	f	female	AnhVL	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2025-12-14 06:10:49.068	\N	\N	\N	\N	2025-12-14 13:11:17.509004	c0a08fa8-569c-4ac9-9f41-57089701b2f2	47f96103-8fad-4d6e-ba79-9eb01eaa5451	2025-12-14 13:11:17.509006	2025-12-15 14:57:30.136634	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	c0a08fa8-569c-4ac9-9f41-57089701b2f2	\N	57179	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N
+b2262736-c7f4-4072-a67f-b3d00095dcf1	[T058384] Phạm Ngọc Huy 	Phạm Ngọc Huy 	Pham Ngoc Huy 	\N	0349762840	\N	f	t	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	T058384	Tư vấn niềng răng 	t	f	male	DungBtt	2002	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2026-01-12 09:05:16.085	e8db49c0-2290-47cb-9f09-afe30052abca	\N	\N	\N	2026-01-12 16:05:38.081719	816d038b-856e-4227-9b19-9cac831fe139	de5ceb25-27e1-44cd-8529-19cacbbdec40	2026-01-12 16:05:38.081721	2026-02-11 14:05:32.585669	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	816d038b-856e-4227-9b19-9cac831fe139	\N	58384	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	24	\N	\N	\N	\N	\N	\N	f	\N	\N
+45fe0ac9-60cf-499a-81ed-b3d900a5e292	[T058892] NGUYỄN THỊ NHƯ Ý	NGUYỄN THỊ NHƯ Ý	NGUYEN THI NHU Y	579/70 QUANG TRUNG , P11 , GÒ VẤP	0353993861	\N	f	t	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	T058892	Tư  vấn niềng răng	t	f	female	AnhVL	2007	10	10	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2026-01-21 10:03:37.506	\N	\N	\N	\N	2026-01-21 17:03:58.138563	c0a08fa8-569c-4ac9-9f41-57089701b2f2	07133b25-d559-419c-ae04-ddb4545df960	2026-01-21 17:03:58.138565	2026-01-24 18:32:50.366252	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	c0a08fa8-569c-4ac9-9f41-57089701b2f2	\N	58892	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	19	\N	\N	\N	\N	\N	\N	f	\N	\N
+541bd083-7b08-4b7a-9517-b3db007928c7	[T058987] LƯU NGỌC THUÝ VY	LƯU NGỌC THUÝ VY	LUU NGOC THUY VY	QUẬN 8	0345935433	\N	f	t	f	f	f0f6361e-b99d-4ac7-4108-08dd8159c64a	T058987	Tư vấn niềng răng 	t	f	female	DungBtt	2007	8	11	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2026-01-23 07:20:45.391	e8db49c0-2290-47cb-9f09-afe30052abca	\N	\N	\N	2026-01-23 14:21:07.648803	816d038b-856e-4227-9b19-9cac831fe139	47f96103-8fad-4d6e-ba79-9eb01eaa5451	2026-01-23 14:21:07.648809	2026-01-27 17:24:22.301116	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	816d038b-856e-4227-9b19-9cac831fe139	\N	58987	T	\N	\N	\N	\N	sale	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	19	\N	\N	\N	\N	\N	\N	f	\N	\N
+34f9945d-a2b3-4a7b-bbc5-b3e70045e958	[T059530] NGUYỄN NGÔ QUỲNH TRÂM 	NGUYỄN NGÔ QUỲNH TRÂM 	NGUYEN NGO QUYNH TRAM 	\N	0334112346	\N	f	t	f	f	6861c928-0e13-4664-c781-08dcdfa45074	T059530	TV NIỀNG 	t	f	female	NganTK	2006	10	25	\N	\N	\N	\N	\N	\N	\N	\N	\N	f3efa245-838e-4b5a-b8f6-afe3007ce234	\N	\N	\N	\N	2026-02-04 04:14:38.942	\N	\N	\N	\N	2026-02-04 11:14:32.399209	f228b5c0-e26b-4825-bd80-08393b2a44e7	14901ece-9fd9-4f5a-8921-423ca8c120dc	2026-02-04 11:14:32.399211	2026-02-05 16:25:20.448757	f	f	\N	\N	1ab9c25c-c6ca-4c05-9042-b0670114aee9	\N	contact	f228b5c0-e26b-4825-bd80-08393b2a44e7	\N	59530	T	\N	\N	\N	\N	none	\N	\N	\N	\N	none	f	\N	\N	\N	\N	\N	\N	79	Thành phố Hồ Chí Minh	\N	t	\N	\N	20	\N	\N	\N	\N	\N	\N	f	\N	\N
+21734bc3-68ae-40f3-91a4-afc7006cf314	Tấm Dentist	Tấm Dentist	Tam Dentist	298 Nguyễn Thị Minh Khai	\N	trungkien150495@gmail.com	f	f	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	\N	\N	t	f	male	\N	\N	\N	\N	\N	79	Thành phố Hồ Chí Minh	770	Quận 3	27151	Phường 05	\N	\N	\N	\N	\N	\N	\N	2023-03-16 00:00:00	\N	\N	\N	\N	2023-03-16 13:36:40.384564	\N	\N	2023-03-16 13:36:40.384567	2023-03-16 13:36:40.384567	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N
+359155c1-89a4-4edc-95db-b05b009a2149	Tấm Dentist Thủ Đức	Tấm Dentist Thủ Đức	Tam Dentist Thu Duc	557 Kha Vạn Cân	0902501001	\N	f	f	f	f	\N	\N	\N	t	f	male	\N	\N	\N	\N	\N	79	Thành phố Hồ Chí Minh	769	Thành phố Thủ Đức	26821	Phường Linh Đông	\N	\N	\N	\N	\N	\N	\N	2023-08-11 00:00:00	\N	\N	\N	\N	2023-08-11 16:21:10.216362	b19424da-e016-41c8-b992-17181969c924	b19424da-e016-41c8-b992-17181969c924	2023-08-11 16:21:10.216364	2023-08-11 16:21:10.216365	f	f	0902501001	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N
+86d44007-e3a8-4f4d-a51d-b13f003eb759	Tấm Dentist Gò Vấp	Tấm Dentist Gò Vấp	Tam Dentist Go Vap	\N	0966 080 638	\N	f	f	f	f	\N	\N	\N	t	f	male	\N	\N	\N	\N	\N	79	Thành phố Hồ Chí Minh	764	Quận Gò Vấp	26893	Phường 04	\N	\N	\N	\N	\N	\N	\N	2024-03-26 00:00:00	\N	\N	\N	\N	2024-03-26 10:48:20.562296	b19424da-e016-41c8-b992-17181969c924	b19424da-e016-41c8-b992-17181969c924	2024-03-26 10:48:20.5623	2024-03-26 10:48:20.562301	t	f	\N	\N	\N	\N	contact	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N
+d73c7cd6-7be4-4356-b2b6-b13f003ed8a4	Tấm Dentist Đống Đa	Tấm Dentist Đống Đa	Tam Dentist Dong Da	\N	0966 080 638	\N	f	f	f	f	\N	\N	\N	t	f	male	\N	\N	\N	\N	\N	01	Thành phố Hà Nội	006	Quận Đống Đa	00196	Phường Hàng Bột	\N	\N	\N	\N	\N	\N	\N	2024-03-26 00:00:00	\N	\N	\N	\N	2024-03-26 10:48:48.974962	b19424da-e016-41c8-b992-17181969c924	b19424da-e016-41c8-b992-17181969c924	2024-03-26 10:48:48.974965	2024-03-26 10:48:48.974965	t	f	\N	\N	\N	\N	contact	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N
+cc59d7c8-3ec4-4a2c-90a3-b1f900a4cb11	Tấm Dentist Quận 7	Tấm Dentist Quận 7	Tam Dentist Quan 7	Nguyễn Thị Thập	0926563968	\N	f	f	f	f	\N	\N	\N	t	f	male	\N	\N	\N	\N	\N	79	Thành phố Hồ Chí Minh	778	Quận 7	27490	Phường Tân Phong	\N	\N	\N	\N	\N	\N	\N	2024-09-28 00:00:00	\N	\N	\N	\N	2024-09-28 16:59:59.627465	b19424da-e016-41c8-b992-17181969c924	b19424da-e016-41c8-b992-17181969c924	2024-09-28 16:59:59.627468	2024-09-28 16:59:59.627468	t	f	\N	https://tamdentist.vn/	\N	\N	contact	\N	\N	\N	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N
+542d9beb-ab18-4670-980e-b2c70050e717	Tấm Dentist Quận 10	Tấm Dentist Quận 10	Tam Dentist Quan 10	376 Đường 3/2 Quận 10	0977041698	\N	f	f	f	f	\N	\N	\N	t	f	male	\N	\N	\N	\N	\N	79	Thành phố Hồ Chí Minh	771	Quận 10	27172	Phường 12	\N	\N	\N	\N	\N	\N	\N	2025-04-22 00:00:00	\N	\N	\N	\N	2025-04-22 11:54:33.463539	b19424da-e016-41c8-b992-17181969c924	b19424da-e016-41c8-b992-17181969c924	2025-04-22 11:54:33.463543	2025-04-22 11:54:33.463544	t	f	\N	\N	\N	\N	contact	\N	\N	\N	\N	\N	\N	\N	\N	none	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N
+499921f5-e290-42a3-8c2c-b37d008eaf2a	Nha khoa Tấm Dentist	Nha khoa Tấm Dentist	Nha khoa Tam Dentist	\N	\N	\N	f	f	f	f	\N	\N	\N	t	f	male	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2025-10-21 00:00:00	\N	\N	\N	\N	2025-10-21 15:39:29.846647	b19424da-e016-41c8-b992-17181969c924	b19424da-e016-41c8-b992-17181969c924	2025-10-21 15:39:29.846651	2025-10-21 15:39:29.846651	t	f	\N	\N	\N	\N	contact	\N	\N	\N	\N	\N	\N	\N	\N	none	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N
+b41477e0-8eed-4520-a41a-b145008c51b0	BS. Trâm	BS. Trâm	BS. Tram	\N	0901000002	tram@tamdentist.vn	f	f	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+0b8e06d1-d517-4207-a8c0-b1f7002d7476	BS. Ly	BS. Ly	BS. Ly	\N	0901000003	ly@tamdentist.vn	f	f	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	\N	\N	t	t	female	Bác sĩ Chỉnh nha	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+9968161f-e735-448b-9adb-b14f0038c98e	BS. Khánh	BS. Khánh	BS. Khanh	\N	0901000004	khanh@tamdentist.vn	f	f	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	\N	\N	t	t	male	Bác sĩ Chỉnh nha	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+cab2a199-ae6f-4746-8d8f-b3690092e93c	BS. Dương	BS. Dương	BS. Duong	\N	0901000005	duong@tamdentist.vn	f	f	f	f	f0f6361e-b99d-4ac7-4108-08dd8159c64a	\N	\N	t	t	male	Bác sĩ Chỉnh nha	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+494dd94b-0f5c-4037-a183-b2d5004495bc	BS. Uyên	BS. Uyên	BS. Uyen	\N	0901000006	uyen.q10@tamdentist.vn	f	f	f	f	f0f6361e-b99d-4ac7-4108-08dd8159c64a	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+21360b9b-8e24-46e1-83a3-b1ef009a1911	BS. Ý	BS. Ý	BS. Y	\N	0901000007	y@tamdentist.vn	f	f	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+dbefd061-dbb0-44d7-8eed-afe3007a8017	BS. Duy	BS. Duy	BS. Duy	\N	0901000008	duy@tamdentist.vn	f	f	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	\N	\N	t	t	male	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+90e19070-f750-415b-ba52-b05f002e9438	BS. Dũng	BS. Dũng	BS. Dung	\N	0901000009	dung@tamdentist.vn	f	f	f	f	c6b4b453-d260-46d4-4fd9-08db24f7ae8e	\N	\N	t	t	male	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+c48e8550-f68f-4be5-89bb-b2110032b4e1	BS. Thu Thảo	BS. Thu Thảo	BS. Thu Thao	\N	0901000010	thuthao@tamdentist.vn	f	f	f	f	6861c928-0e13-4664-c781-08dcdfa45074	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+7f9f1030-20ea-4c23-84e6-b16000c1e144	BS. Thảo	BS. Thảo	BS. Thao	\N	0901000011	thao@tamdentist.vn	f	f	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+43190b77-570b-4557-b470-b33e00663454	BS. Nga	BS. Nga	BS. Nga	\N	0901000012	nga@tamdentist.vn	f	f	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+6ac1a478-0568-4ec6-a3d6-b05b009de13d	BS. Quyên	BS. Quyên	BS. Quyen	\N	0901000013	quyen@tamdentist.vn	f	f	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+ed346f4b-c27b-428f-8e46-b05b009de13d	BS. Quyên B	BS. Quyên B	BS. Quyen B	\N	0901000014	quyenb@tamdentist.vn	f	f	f	f	b178d5ee-d9ac-477e-088e-08db9a4c4cf4	\N	\N	t	t	female	Bác sĩ Phẫu thuật	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+f03fce3f-d90e-4194-a28f-b1d400752590	BS. Hà	BS. Hà	BS. Ha	\N	0901000015	ha@tamdentist.vn	f	f	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+fd67fda4-42ea-4f85-b100-b14c0090e6e4	BS. Hải	BS. Hải	BS. Hai	\N	0901000016	hai@tamdentist.vn	f	f	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	\N	\N	t	t	male	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+3c2a3bda-879f-48b7-8ee4-b266004978ea	BS. Minh	BS. Minh	BS. Minh	\N	0901000017	minh@tamdentist.vn	f	f	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	\N	\N	t	t	male	Bác sĩ Phục hình	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+a3a0e8dc-6b40-468f-803b-b1cf0063ad84	BS. Phương	BS. Phương	BS. Phuong	\N	0901000018	phuong@tamdentist.vn	f	f	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+f1abd11e-6309-4b5b-add9-b14c0090f199	BS. Linh	BS. Linh	BS. Linh	\N	0901000019	linh@tamdentist.vn	f	f	f	f	cad65000-6ff3-47c7-cc8d-08dc4d479451	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	\N
+afde36ab-1eca-4281-b8e4-b1930033a9c6	BS. Trang	BS. Trang	BS. Trang	\N	0901000001	trang@tamdentist.vn	f	f	f	f	765f6593-2b19-4d06-cc8c-08dc4d479451	\N	\N	t	t	female	Bác sĩ Nha khoa	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 11:15:24.7804	2026-04-07 11:15:24.7804	f	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$x1YYk40zV8SDAlzk96.N5Op1IugF.pCSEjAaUDo08ZvR8TxS81qr.	2026-04-07 14:41:14.71967
+28e2c9eb-d410-4881-9cf2-efb2494baad7	Admin	Admin	Admin	\N	0900000000	admin@tamdentist.vn	f	f	f	f	\N	\N	\N	t	t	male	Quản trị viên hệ thống	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2026-04-07 14:44:30.628431	2026-04-07 14:44:30.628431	f	t	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	f	$2b$10$zfkoNf/.2HTe5enmkdjU4eOC0kFsGCgbvkxc6QZpiYo5HU9ZDeV32	2026-04-07 14:47:43.1251
+\.
+
+
+--
+-- Data for Name: permission_groups; Type: TABLE DATA; Schema: dbo; Owner: -
+--
+
+COPY dbo.permission_groups (id, name, color, description, is_system, datecreated, lastupdated) FROM stdin;
+11111111-0000-0000-0000-000000000001	Admin	#EF4444	Full system access	t	2026-04-07 13:58:48.179094	2026-04-07 13:58:48.179094
+11111111-0000-0000-0000-000000000003	Dentist	#0EA5E9	Dentist access	f	2026-04-07 13:58:48.179094	2026-04-07 13:58:48.179094
+11111111-0000-0000-0000-000000000005	Dental Assistant	#F59E0B	Updated assistant access	f	2026-04-07 13:58:48.179094	2026-04-07 14:00:47.257947
+11111111-0000-0000-0000-000000000002	Clinic Manager	#8B5CF6	Clinic management access	f	2026-04-07 13:58:48.179094	2026-04-07 15:02:42.890587
+11111111-0000-0000-0000-000000000004	Receptionist	#10B981	Front desk access	f	2026-04-07 13:58:48.179094	2026-04-07 15:02:50.73199
+\.
+
+
+--
+-- Data for Name: permission_overrides; Type: TABLE DATA; Schema: dbo; Owner: -
+--
+
+COPY dbo.permission_overrides (id, employee_id, permission, override_type, datecreated) FROM stdin;
+\.
+
+
+--
+-- Data for Name: productcategories; Type: TABLE DATA; Schema: dbo; Owner: -
+--
+
+COPY dbo.productcategories (id, name, completename, parentid, active, datecreated, lastupdated) FROM stdin;
+7ab70791-8567-4f11-9f67-cc93621b7fbe	Bọc sứ	Bọc sứ	\N	t	2026-04-07 15:04:24.397361	2026-04-07 15:04:24.397361
+40f1a1c0-f246-4767-b5d7-56920ee92a8a	Dán sứ	Dán sứ	\N	t	2026-04-07 15:04:24.397361	2026-04-07 15:04:24.397361
+f6668b73-7161-48f5-a1d0-76cf00f9367b	Điều trị tổng quát	Điều trị tổng quát	\N	t	2026-04-07 15:04:24.397361	2026-04-07 15:04:24.397361
+1d2c1143-54c3-4d17-9fca-41c631bb595c	Implant	Implant	\N	t	2026-04-07 15:04:24.397361	2026-04-07 15:04:24.397361
+40e7d669-4c91-43ce-934e-e26e443f3b0e	KHÍ CỤ TWINBLOCK	KHÍ CỤ TWINBLOCK	\N	t	2026-04-07 15:04:24.397361	2026-04-07 15:04:24.397361
+d09baedb-9fb9-4f4b-abb4-32ed3210054c	Máy tăm nước	Máy tăm nước	\N	t	2026-04-07 15:04:24.397361	2026-04-07 15:04:24.397361
+5e1d60ec-69a2-4e73-bcc9-d3b40cb6f8ca	Nhổ răng	Nhổ răng	\N	t	2026-04-07 15:04:24.397361	2026-04-07 15:04:24.397361
+d33a28a7-b432-4c71-b3a4-45e089d9f03c	Niềng răng	Niềng răng	\N	t	2026-04-07 15:04:24.397361	2026-04-07 15:04:24.397361
+5af92657-0743-4e55-855c-e18b059abb15	Phẫu thuật và điều trị	Phẫu thuật và điều trị	\N	t	2026-04-07 15:04:24.397361	2026-04-07 15:04:24.397361
+75a1b6aa-3363-42bd-ba17-7d9333e0ade8	Phục hình	Phục hình	\N	t	2026-04-07 15:04:24.397361	2026-04-07 15:04:24.397361
+25c5dbc1-ef0f-42da-ade2-13b0eb8dd508	BỘC LỘ	BỘC LỘ	\N	t	2026-04-07 15:04:24.397361	2026-04-07 15:04:24.397361
+\.
+
+
+--
+-- Data for Name: products; Type: TABLE DATA; Schema: dbo; Owner: -
+--
+
+COPY dbo.products (id, name, namenosign, defaultcode, type, type2, listprice, saleprice, purchaseprice, laboprice, categid, uomid, uomname, companyid, active, canorderlab, datecreated, lastupdated) FROM stdin;
+3ff661b5-98bf-4eea-8d67-cb9248fcd004	Cắm chốt	\N	SP0288	service	service	1	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+329e287f-0394-48b6-b766-63892115b48f	Chốt sợi	\N	DV0020	service	service	2000000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+58e5f26a-d9a9-44be-8b75-32f360c946e1	Chốt sợi thủy tinh	\N	SP0244	service	service	800000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	đồng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+361c04a8-ec53-4dd2-9cc8-f29497801f3f	Cùi giả kim loại	\N	SP0265	service	service	1000000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	đồng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+c25c8d99-3805-4d56-911a-c755f0007032	Cùi giả sứ	\N	SP0243	service	service	1500000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	đồng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+2edb1be4-bbed-4653-a702-32c0c7af8f4e	Đặt chốt	\N	SP0247	service	service	800000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	đồng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+9cc79779-c911-497b-af92-a73ad2f92c62	KHUNG NHỰA	\N	SP0248	service	service	5000000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+10d3e897-dbb7-431a-906e-8859fe9ec8e8	Mão tạm	\N	SP0246	service	service	300000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	đồng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+d102644f-bae9-4ac7-97ce-8f8c0e026365	RS 3M Lava Plus	\N	DV0011	service	service	8000000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+77d04792-9ead-407e-bf1f-d247f73fbb52	RS Ceramill	\N	DV0012	service	service	5500000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+5a307d27-5595-42f0-ba33-84090adfbffe	RS CERCON	\N	SP0245	service	service	6000000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	CÁI	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+fedf5b4f-ef2b-49c0-a5bf-8e5c2f0649b5	RS Cercon HT	\N	DV0013	service	service	6000000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+d451bfbb-cd82-47c4-9c7f-68e61aeceaef	RS Emax	\N	DV0014	service	service	5500000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+84467ce0-04c7-45b1-8fd6-8046046cc2fc	RS Ful Zirconia	\N	DV0015	service	service	3500000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+3c7cb95c-f2ac-47bd-9b98-b676edd38d24	RS HT Smile	\N	DV0016	service	service	6000000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+e8f42a48-913d-4a8a-960a-6427cab4e5fd	RS Katana	\N	DV0017	service	service	2500000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+62a2785a-d066-476c-aa77-8afeb6369823	RS Nacera Vita	\N	DV0018	service	service	6500000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+69b343fe-d5aa-4750-9946-5727e8667e9a	RS Titan	\N	SP0290	service	service	3000000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+b11cf8bc-11cf-43a5-8709-9208ed90b3b5	RS Venus 3D	\N	DV0019	service	service	3000000	0	0	0	7ab70791-8567-4f11-9f67-cc93621b7fbe	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+0b594a11-042a-45e6-854d-bc5090f8e09f	BỘC LỘ	\N	SP0296	service	service	1	0	0	0	25c5dbc1-ef0f-42da-ade2-13b0eb8dd508	\N	RĂNG	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+cf1e099a-d20b-4692-ad6a-25dcb22ff6dd	Dán sứ Veneer Caramay Ngọc Trai	\N	DV0021	service	service	9200000	0	0	0	40f1a1c0-f246-4767-b5d7-56920ee92a8a	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+b1ec2830-e64c-4dac-8c2e-a9dd74ff54d2	Dán sứ Veneer Emax Press	\N	DV0022	service	service	7200000	0	0	0	40f1a1c0-f246-4767-b5d7-56920ee92a8a	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+1bbe0a45-96c5-408d-8a69-62930b524228	Dán sứ Veneer Lava	\N	DV0023	service	service	14200000	0	0	0	40f1a1c0-f246-4767-b5d7-56920ee92a8a	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+1d49e342-591e-489d-a1c7-128d8fbbb7d7	Đính đá	\N	SP0253	service	service	500000	0	0	0	40f1a1c0-f246-4767-b5d7-56920ee92a8a	\N	đồng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+cb9922e3-ee45-40b0-8d19-6fd45ea84d47	GẮN LẠI RĂNG SỨ	\N	SP0216	service	service	500000	0	0	0	40f1a1c0-f246-4767-b5d7-56920ee92a8a	\N	CÁI	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+5eafc39e-a61b-443c-961d-e55a61dab0ec	Cắt cầu răng	\N	SP0237	service	service	1	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+c184b96e-bdd9-443e-87c8-8dc788ab28b2	CẮT CHỈ	\N	SP0201	service	service	200000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+d1b18d07-d858-4c2b-ae42-056eee18dbbf	CẮT LỢI TRÙM (THƯỜNG)	\N	SP0218	service	service	300000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+b8d7f344-1143-41d9-8298-33c2aaa1efc7	Cắt lợi+ Hạ xương ổ răng	\N	DV0051	service	service	1500000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+1eb1d181-0b43-4e4e-9152-0b429a112378	CẮT NƯỚU	\N	SP0303	service	service	1	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	RĂNG	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+023380a5-fb62-4342-9893-e1a393e53a26	chữa áp xe chân răng số 46	\N	SP0261	service	service	500000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+ed0ad2d9-bdbc-4231-b0e6-05513a84a613	Chụp phim	\N	SP0269	service	service	1	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	lần	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+b7c821bc-8b8a-41fb-a9eb-ec74301a939b	Đánh bóng làm sạch	\N	SP0252	service	service	100000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	đ	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+f6f5a273-2cd8-4638-8558-f726ab05860b	ĐIỀU TRỊ NHA CHU	\N	SP0306	service	service	1	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+0d926ee7-4c3d-40ee-a80d-8b73feef8825	Điều trị sâu ngà răng phục hồi bằng composite	\N	SP0286	service	service	300000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+09cef79f-29b5-44fe-b83a-9617f8932ef3	Điều trị tủy	\N	DV0047	service	service	2000000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+5314bb1a-4a67-4c2f-b728-55cd39c9c4ef	Điều trị tủy lại	\N	DV0048	service	service	3000000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+482519a4-cb2d-4574-995b-ef2531e76879	Điều trị viêm lợi	\N	SP0274	service	service	1	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	gói	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+0573920c-941e-4a7a-8000-92e5dd170a24	Điều trị viêm quanh răng	\N	DV0056	service	service	750000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+87e3f57c-6c27-491d-9238-72dcf222401c	GẮN HỘT	\N	SP0202	service	service	500000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Hột	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+00fd330a-3b43-422c-9a31-9e9452141546	Gắn lại răng sứ bị rớt	\N	SP0238	service	service	1	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+32bf760f-8395-4fd0-91b5-3699afe5013a	KHÍ CỤ NÂNG KHỚP	\N	SP0004	service	service	1500000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+a0313d88-ebd4-417d-9141-1adbc1a290d6	Làm sạch chuyên sâu Clean Teeth	\N	DV0058	service	service	380000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+ff7e958d-c966-473f-b1c1-b32241242975	Laser Cắt lợi trùm (răng khôn)	\N	DV0052	service	service	1500000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+c1efe8fb-529c-44f7-a6ab-108fe87b4088	Laser Cắt Phanh môi (điều trị răng hô)	\N	DV0053	service	service	1500000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+de9869d4-197f-40f2-9a72-e6edcac35afe	Lấy cao răng	\N	DV0057	service	service	300000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+b5242df8-3a57-4d9e-a05a-a75858593d26	MÀI CHỈNH	\N	SP0302	service	service	1	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	RĂNG	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+c56561d3-f136-47d7-a4c2-c3557a75dd9f	MÀI RĂNG	\N	SP0234	service	service	1	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	CÁI	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+7b51757d-a711-4132-b8e3-3a3850cf61a9	Máng chống nghiến	\N	SP0242	service	service	1500000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	đồng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+6ff88f34-fe56-4ab2-8557-cd9481529d25	Nạo Nha Chu	\N	SP0005	service	service	1000000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+76a3c2ca-eb69-4d08-a165-6bcc65791e26	NHỔ RĂNG SỮA BÔI TÊ	\N	SP0235	service	service	1	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	0	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+28688ea0-1685-41cf-8ee9-bc4b84e1d2b8	NÚT GỠ	\N	SP0011	service	service	3000000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+cd28de44-17c5-4039-93b8-d771a50d36ad	Phá composite răng khểnh	\N	SP0285	service	service	1	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+3cc3441a-3f05-4d97-9296-b2aff1b6517b	Phẫu thuật cưỡi hở lợi	\N	DV0050	service	service	1200000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+240b8fb9-e935-4ef6-8e97-250ea070a367	Phí quẹt thẻ	\N	SP0254	service	service	150000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	đồng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+3bb2b7c9-773f-4e17-91ac-3a4a9d72a839	Phí quẹt thẻ	\N	SP0255	service	service	150000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	đồng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+339b3ca8-fe3e-4537-9737-7985c738b310	Răng tạm	\N	SP0266	service	service	500000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+d8c0c709-31ba-4a1d-a8d5-34a52ecf49f3	Tẩy trắng răng tại nhà	\N	DV0055	service	service	800000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+ace5ec55-13cb-4fa1-a2dd-dc08e0be3eea	Tẩy trắng răng tại Phòng khám	\N	DV0054	service	service	1500000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+458bc9df-818c-4ef8-91fb-eeb552b35b23	THÁO SỨ	\N	SP0236	service	service	300000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	RĂNG	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+a0fc7f0c-cf58-40db-be78-5ac01efb34f2	Tiểu phẫu bộc lộ răng ngầm	\N	SP0298	service	service	1000000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+a03e258b-8532-4cf1-b6f4-e8f4ed8e8356	Trám cổ răng	\N	SP0287	service	service	1	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+d986b51c-f70d-4f79-a7c0-c301d5f46d53	Trám răng	\N	DV0049	service	service	1000000	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+07e030d9-2a2d-4163-b308-70ffd34dc3f5	Trám răng sữa	\N	SP0239	service	service	1	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+c42f7fe5-be25-401a-969c-e0754051fa65	Trám thẩm mỹ	\N	SP0279	service	service	1	0	0	0	f6668b73-7161-48f5-a1d0-76cf00f9367b	\N	cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+571dab82-eee4-456c-bdd9-eabfcae3f03c	Abutment	\N	DV0034	service	service	3000000	0	0	0	1d2c1143-54c3-4d17-9fca-41c631bb595c	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+2f9bf133-d7e1-4857-aad9-bc82708173fe	Full Implant Hàn Quốc	\N	DV0028	service	service	22000000	0	0	0	1d2c1143-54c3-4d17-9fca-41c631bb595c	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+e90e4e3b-0038-492b-a288-548a1928de50	Full Implant Mỹ	\N	DV0024	service	service	24000000	0	0	0	1d2c1143-54c3-4d17-9fca-41c631bb595c	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+444cef42-fe32-4dc6-92a1-d891d8f34e66	Full Implant Pháp	\N	DV0025	service	service	27000000	0	0	0	1d2c1143-54c3-4d17-9fca-41c631bb595c	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+ff396c6d-0151-442d-9b41-4a0bffefb4f7	Full Implant Thụy Điển	\N	DV0027	service	service	39000000	0	0	0	1d2c1143-54c3-4d17-9fca-41c631bb595c	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+bbe63d7e-06a4-45b2-8ca9-a1ce76e105ce	Full Implant Thụy Sĩ	\N	DV0026	service	service	36000000	0	0	0	1d2c1143-54c3-4d17-9fca-41c631bb595c	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+58c0c646-34a5-4a55-a54d-24d8781ea06a	KHUNG TITAN	\N	SP0240	service	service	35000000	0	0	0	1d2c1143-54c3-4d17-9fca-41c631bb595c	\N	CÁI	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+cafa7c91-c344-466b-b794-7993f9e90f1b	Mão sứ	\N	DV0035	service	service	8000000	0	0	0	1d2c1143-54c3-4d17-9fca-41c631bb595c	\N	Răng	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+b924e7c4-9204-4032-9d56-107db0df1404	Phẫu thuật ghép xương bột	\N	DV0036	service	service	8000000	0	0	0	1d2c1143-54c3-4d17-9fca-41c631bb595c	\N	Đơn vị	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+d7ec513e-6881-4fa3-91ef-f2de2c069ca0	Phẫu thuật lấy trụ Implant cũ	\N	DV0037	service	service	3000000	0	0	0	1d2c1143-54c3-4d17-9fca-41c631bb595c	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+839dd507-dfea-40dd-b9c9-4742f29a6203	Phẫu thuật nâng xoang hở	\N	DV0038	service	service	15000000	0	0	0	1d2c1143-54c3-4d17-9fca-41c631bb595c	\N	Đơn vị	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+f5307782-aacb-4787-954a-0cdcc6e4aff6	Phẫu thuật nâng xoang kín	\N	DV0039	service	service	6000000	0	0	0	1d2c1143-54c3-4d17-9fca-41c631bb595c	\N	Đơn vị	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+80846ae5-ea38-47dc-bbb7-623b80cf1b0c	KHÍ CỤ TWINBLOCK	\N	SP0297	service	service	1	0	0	0	40e7d669-4c91-43ce-934e-e26e443f3b0e	\N	KHÍ CỤ	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+8c746b4e-1fca-4a7c-888e-65e3eb990dea	MÁY TĂM NƯỚC PROCARE A3	\N	PROCARE A3	service	service	1200000	0	0	0	d09baedb-9fb9-4f4b-abb4-32ed3210054c	\N	cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+798f19ff-6f14-44af-8277-c142eaaeba59	Máy tăm nước Prosencor	\N	SP0270	service	service	1300000	0	0	0	d09baedb-9fb9-4f4b-abb4-32ed3210054c	\N	cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+ab88511c-fd8c-417a-adc7-1567f95079e6	Chấm thuốc	\N	SP0272	service	service	1	0	0	0	5e1d60ec-69a2-4e73-bcc9-d3b40cb6f8ca	\N	lần	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+6a1d1887-713f-47a6-8a14-3bda3aa3519a	Nhổ chân R26	\N	SP0267	service	service	700000	0	0	0	5e1d60ec-69a2-4e73-bcc9-d3b40cb6f8ca	\N	cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+dfeb45f2-1a62-40f9-8410-80a2fb00be7d	Nhổ chân răng số 6	\N	SP0257	service	service	500000	0	0	0	5e1d60ec-69a2-4e73-bcc9-d3b40cb6f8ca	\N	cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+13fd450d-4cca-4b86-b2d6-f45522509ccc	Nhổ chân răng Vĩnh viễn	\N	DV0042	service	service	1000000	0	0	0	5e1d60ec-69a2-4e73-bcc9-d3b40cb6f8ca	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+32c6e929-59b4-4e4c-ba4d-dc9da42ce8c3	nhổ răng dư	\N	SP0214	service	service	1	0	0	0	5e1d60ec-69a2-4e73-bcc9-d3b40cb6f8ca	\N	đồng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+758d922d-c353-4516-89be-ab74d3dc2170	Nhổ răng kẹ	\N	SP0284	service	service	1	0	0	0	5e1d60ec-69a2-4e73-bcc9-d3b40cb6f8ca	\N	cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+6c06e3a5-9b7f-45b6-8e0a-bcabb48e40f4	Nhổ răng khôn hàm dưới	\N	DV0045	service	service	4000000	0	0	0	5e1d60ec-69a2-4e73-bcc9-d3b40cb6f8ca	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+40b0cc31-4024-41b4-b236-aa028c9b9055	Nhổ răng khôn hàm trên	\N	DV0044	service	service	3500000	0	0	0	5e1d60ec-69a2-4e73-bcc9-d3b40cb6f8ca	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+5b472eca-5306-42ac-8bb2-7a280badea3d	Nhổ răng ngầm	\N	DV0046	service	service	7000000	0	0	0	5e1d60ec-69a2-4e73-bcc9-d3b40cb6f8ca	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+58d42702-0300-49b7-a8e5-5c34f0f2885b	Nhổ răng sữa	\N	SP0276	service	service	1	0	0	0	5e1d60ec-69a2-4e73-bcc9-d3b40cb6f8ca	\N	cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+008f1118-5113-4a0c-a9d1-3b137bab443f	Nhổ răng sữa chích tê	\N	SP0215	service	service	100000	0	0	0	5e1d60ec-69a2-4e73-bcc9-d3b40cb6f8ca	\N	1	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+7343ea92-8357-4e3c-a992-c8f6a5a68d93	Nhổ răng thừa, lạc chỗ	\N	DV0043	service	service	2200000	0	0	0	5e1d60ec-69a2-4e73-bcc9-d3b40cb6f8ca	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+0c5c11d0-0bb7-4faa-ac0f-39acf7ef3946	Nhổ răng Vĩnh viễn	\N	DV0041	service	service	2200000	0	0	0	5e1d60ec-69a2-4e73-bcc9-d3b40cb6f8ca	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+a749579c-1eaa-4f2b-8d49-2de0300dc159	Răng sữa	\N	DV0040	service	service	0	0	0	0	5e1d60ec-69a2-4e73-bcc9-d3b40cb6f8ca	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+5df23c54-6709-420e-b24b-55b2eb264621	Tiểu phẫu răng	\N	SP0262	service	service	1200000	0	0	0	5e1d60ec-69a2-4e73-bcc9-d3b40cb6f8ca	\N	đ	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+cfb7fe4e-bc5a-40dd-af5c-b506a4468b77	CHỈNH DÂY FIX	\N	SP0299	service	service	1	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	RĂNG	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+f65827ae-4a7d-4f6b-8edb-1a641456ba01	Band	\N	SP0305	service	service	300000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+4bb60912-c3af-4be2-8887-b63805152ce1	Bộ Mắc Cài Kim Loại Tiêu Chuẩn	\N	SP0292	service	service	1	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Bộ	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+46972887-cbc9-41a4-b94a-8fccceccd56e	Bộ mắc cài kim loại tự đóng	\N	SP0293	service	service	2500000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Bộ	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+7a091b70-b2a2-441c-8cd6-aa5ffc57d6e2	Bộ mắc cài sứ tiêu chuẩn	\N	SP0294	service	service	3500000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Bộ	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+7ab8369c-0f15-4d74-8af2-bbd1f9b2fe05	Bộ mắc cài sứ tự đóng	\N	SP0295	service	service	4500000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Bộ	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+8e5fe5b0-645f-435f-94bf-8167f0e72b20	Cắm 4 vít	\N	SP0258	service	service	2000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+67d5dd94-5e48-4409-a619-3186048bbfef	Cắt dây cung	\N	SP0282	service	service	1	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	lần	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+583d3d47-da61-40e8-9815-5b5f33374038	CẮT THẮNG MÔI	\N	SP0278	service	service	1000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	ĐỒNG	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+9a616bc5-5aab-4a96-9dee-19015920d76f	CHỈNH DÂY FIX 2	\N	SP0300	service	service	1	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	RĂNG	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+6aeab6c2-5dfd-4f36-afc0-3910636c35a2	Chun chỉnh nha	\N	SP0264	service	service	50000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	túi	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+18ab3b02-e2c2-461c-8f88-04e36bbab1cd	Cục cắn	\N	DV0010	service	service	50000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+c2093849-cd2c-4ec8-a750-fbadd3be3733	Gắn Lại Dây Cung	\N	SP0251	service	service	100000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	đ	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+e6daa982-22d1-4e03-b7b8-e3597fad452a	GẮN LẠI MẮC CÀI	\N	SP0249	service	service	100000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	VND	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+a4359b5d-a8c6-485d-bb0a-8e2c1bf9109b	Gói niềng tiền chỉnh nha	\N	SP0271	service	service	15000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+4a6c2c57-9384-4697-85df-3fe51a61b49c	Hàm cung khẩu cái	\N	SP0280	service	service	1	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Hàm	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+e3ed1924-9986-4143-ad79-25be5a4774c3	Hàm cung lưỡi	\N	SP0275	service	service	1	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	hàm	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+0829a82a-24e5-40cb-be78-bba3e842eacb	Hàm duy trì	\N	DV0009	service	service	4000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Ca	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+7b216146-dc95-41d0-9e9f-22d614da7abc	Hàm giữ khoảng	\N	SP0301	service	service	1	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	hàm	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+5a68e951-d755-45e6-becf-bcfeacc5955c	KHAY TRONG SUỐT	\N	SP0012	service	service	60000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	1	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+4785f4b9-9655-4fa0-93cd-139b396e4e3e	KHÍ CỤ ĐỊNH VỊ HÀM	\N	SP0006	service	service	2000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Hàm	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+7a50f31a-5656-4eb4-9f8f-373332f3c2f4	KHÍ CỤ NONG HÀM NHANH	\N	SP0007	service	service	4000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Hàm	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+d1ba9218-1074-4fa0-b615-c3c05625baa4	KHÍ CỤ NONG HÀM THƯỜNG	\N	SP0003	service	service	2500000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Hàm	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+99f3b8cb-0d64-4db1-b15d-5b62b2b01919	Khí Cụ Tật Lưỡi	\N	SP0256	service	service	5000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+65b53e8b-08c2-40c3-9c14-cba2312a1b4b	Mắc cài kim loại lẻ	\N	DV0006	service	service	100000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+db76feed-5b6a-414d-af0f-b750a0039c73	MẮC CÀI KIM LOẠI TIÊU CHUẨN	\N	SP0291	service	service	1	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	19000000	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+14391e59-7d3d-4ad1-9f72-88b4feee7c45	Mắc cài sứ lẻ	\N	DV0005	service	service	200000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+b1263775-f2f2-4289-86a4-4492cfff62dd	MẶT PHẲNG NGHIÊNG - CHỈNH NHA	\N	SP0008	service	service	2000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Hàm	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+929ccbef-39e4-4a3c-b8d0-b18dcdf3185b	MẶT PHẲNG NGHIÊNG - TRẺ EM	\N	SP0009	service	service	4000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Hàm	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+a2fde1ed-b730-413c-ad80-57f1e038698f	MCKL số 37	\N	SP0260	service	service	1	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+0d2f2066-9fce-40d0-9a7f-94608bd575e6	Mini vis	\N	DV0007	service	service	2000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+a6070451-c238-4ca9-8c2d-81931eeb75ca	Niềng Mắc Cài Cánh Cam	\N	SP0277	service	service	40000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+e9758b89-0d35-4aee-ad71-2577b3d54325	Niềng mắc cài kim loại mặt lưỡi	\N	SP0263	service	service	30000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	đ	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+b47c68a0-9c32-4672-8ec8-dc8fb8dd26a4	Niềng Mắc Cài Kim Loại Tiêu Chuẩn	\N	DV0001	service	service	28000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+8c77a54c-39e7-44bf-bef1-08326dba3ab0	Niềng Mắc Cài Kim Loại Tự Buộc 3M	\N	DV0002	service	service	32000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+b05fa014-b178-4ac3-84ac-c5814228422f	Niềng Mắc Cài Sứ Loại Tự Buộc 3M	\N	DV0004	service	service	45000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+0f63f272-a5fd-45f4-88ae-5bbf60f519f0	Niềng Mắc Cài Sứ Tiêu Chuẩn	\N	DV0003	service	service	39000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+86ea4abf-0c00-4370-b34c-3604fa3816a7	Niềng răng phân đoạn	\N	SP0268	service	service	30000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+bf767521-cebd-4531-86cc-5c50b167eb6b	Niềng răng trong suốt	\N	SP0217	service	service	80000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+4e538bc9-f375-407b-87e9-6da1ce994f42	Niềng trong suốt Invisalign	\N	DV0008	service	service	140000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Ca	\N	t	t	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+3e0dabf4-6cfe-49c8-8bf0-b23ce8a70722	Phí chênh lệch cấp độ	\N	SP0304	service	service	5000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Ca	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+2f5ffea1-395f-45ad-b24a-f0562ebc93a7	Phí trễ hẹn	\N	SP0250	service	service	112000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	đ	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+76ee81c9-d64b-4d5e-8038-e0e8c0a85cf9	Sáp chỉnh nha	\N	SP0002	service	service	20000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	hộp	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+3a6ea16d-ed96-4f04-a71b-478626ed03af	Tạo Khoảng Phục Hình	\N	SP0281	service	service	4000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	1	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+114c544a-dd91-45ee-b005-96a24a43dcc1	Tháo mắc cài	\N	SP0289	service	service	1	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	hàm	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+7e6135a8-dca8-4405-bf06-1fb2942be9c7	THÁO MẮC CÀI CŨ	\N	SP0010	service	service	1500000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Hàm	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+dffbf038-023b-42eb-905d-b8798be06217	THAY THUN	\N	SP0219	service	service	100000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Hàm	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+0d44f1ab-4ff0-4bf8-882a-cade36c46406	TINH CHỈNH RĂNG TIẾP TỤC	\N	SP0241	service	service	3000000	0	0	0	d33a28a7-b432-4c71-b3a4-45e089d9f03c	\N	Đ	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+45176fbd-c27a-4be3-a8b3-9f3add0235a9	cắt lợi	\N	SP0283	service	service	1	0	0	0	5af92657-0743-4e55-855c-e18b059abb15	\N	răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+49da4621-363f-47fe-8c5f-838b230665e0	Chích áp xe lợi	\N	DV0059	service	service	450000	0	0	0	5af92657-0743-4e55-855c-e18b059abb15	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+7d820b6e-1159-457d-a666-256f4255be0d	Điều trị áp xe quanh răng mạn	\N	DV0060	service	service	750000	0	0	0	5af92657-0743-4e55-855c-e18b059abb15	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+92062c0f-040c-4ad6-97fa-e57d715cc24f	Điều trị nhạy cảm ngà bằng máng với thuốc chống ê buốt	\N	DV0061	service	service	300000	0	0	0	5af92657-0743-4e55-855c-e18b059abb15	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+8110b6d9-2baf-4605-aeee-e3b077cdbc08	Phẫu thuật cắt cuống răng	\N	DV0062	service	service	5800000	0	0	0	5af92657-0743-4e55-855c-e18b059abb15	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+f4785009-90d8-49af-a8f6-980009688aa5	Phẫu thuật cắt nạo ổ xương	\N	DV0063	service	service	6000000	0	0	0	5af92657-0743-4e55-855c-e18b059abb15	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+4d9e1a55-ba42-4509-bcc7-a596b555d1e6	Phẫu thuật nạo quanh cuống răng	\N	DV0064	service	service	4300000	0	0	0	5af92657-0743-4e55-855c-e18b059abb15	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+5f42d6de-67d7-4e79-ba63-dcf53ef313f8	Phẫu thuật nhổ răng có tạo hình xương ổ răng	\N	DV0065	service	service	1800000	0	0	0	5af92657-0743-4e55-855c-e18b059abb15	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+e3e15adf-54c8-482c-bca3-4a0a4c7a4505	Phẫu thuật tạo hình xương ổ răng	\N	DV0066	service	service	2900000	0	0	0	5af92657-0743-4e55-855c-e18b059abb15	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+c2996ab0-2c64-4bbe-a2af-05bfde22bd98	Phục hồi thân răng có sử dụng pin ngà	\N	DV0067	service	service	600000	0	0	0	5af92657-0743-4e55-855c-e18b059abb15	\N	Răng	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+e4c46b87-6bd9-4b03-8a50-8d7cd50dccf9	Răng nhựa	\N	SP0273	service	service	1	0	0	0	75a1b6aa-3363-42bd-ba17-7d9333e0ade8	\N	cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
+aebff68e-5f30-4d0f-adb9-f68c74dd8f36	Răng tháo lắp	\N	SP0001	service	service	2000000	0	0	0	75a1b6aa-3363-42bd-ba17-7d9333e0ade8	\N	cái	\N	t	f	2026-04-07 15:04:24.398729	2026-04-07 15:04:24.398729
 \.
 
 
@@ -592,11 +1073,107 @@ ALTER TABLE ONLY dbo.companies
 
 
 --
+-- Name: employee_location_scope employee_location_scope_employee_id_location_id_key; Type: CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.employee_location_scope
+    ADD CONSTRAINT employee_location_scope_employee_id_location_id_key UNIQUE (employee_id, location_id);
+
+
+--
+-- Name: employee_location_scope employee_location_scope_pkey; Type: CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.employee_location_scope
+    ADD CONSTRAINT employee_location_scope_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: employee_permissions employee_permissions_employee_id_key; Type: CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.employee_permissions
+    ADD CONSTRAINT employee_permissions_employee_id_key UNIQUE (employee_id);
+
+
+--
+-- Name: employee_permissions employee_permissions_pkey; Type: CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.employee_permissions
+    ADD CONSTRAINT employee_permissions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: group_permissions group_permissions_group_id_permission_key; Type: CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.group_permissions
+    ADD CONSTRAINT group_permissions_group_id_permission_key UNIQUE (group_id, permission);
+
+
+--
+-- Name: group_permissions group_permissions_pkey; Type: CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.group_permissions
+    ADD CONSTRAINT group_permissions_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: partners partners_pkey; Type: CONSTRAINT; Schema: dbo; Owner: -
 --
 
 ALTER TABLE ONLY dbo.partners
     ADD CONSTRAINT partners_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: permission_groups permission_groups_name_key; Type: CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.permission_groups
+    ADD CONSTRAINT permission_groups_name_key UNIQUE (name);
+
+
+--
+-- Name: permission_groups permission_groups_pkey; Type: CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.permission_groups
+    ADD CONSTRAINT permission_groups_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: permission_overrides permission_overrides_employee_id_permission_key; Type: CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.permission_overrides
+    ADD CONSTRAINT permission_overrides_employee_id_permission_key UNIQUE (employee_id, permission);
+
+
+--
+-- Name: permission_overrides permission_overrides_pkey; Type: CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.permission_overrides
+    ADD CONSTRAINT permission_overrides_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: productcategories productcategories_pkey; Type: CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.productcategories
+    ADD CONSTRAINT productcategories_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: products products_pkey; Type: CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.products
+    ADD CONSTRAINT products_pkey PRIMARY KEY (id);
 
 
 --
@@ -628,6 +1205,38 @@ CREATE INDEX idx_partners_companyid ON dbo.partners USING btree (companyid);
 
 
 --
+-- Name: employee_location_scope employee_location_scope_employee_id_fkey; Type: FK CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.employee_location_scope
+    ADD CONSTRAINT employee_location_scope_employee_id_fkey FOREIGN KEY (employee_id) REFERENCES dbo.partners(id) ON DELETE CASCADE;
+
+
+--
+-- Name: employee_location_scope employee_location_scope_location_id_fkey; Type: FK CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.employee_location_scope
+    ADD CONSTRAINT employee_location_scope_location_id_fkey FOREIGN KEY (location_id) REFERENCES dbo.companies(id) ON DELETE CASCADE;
+
+
+--
+-- Name: employee_permissions employee_permissions_employee_id_fkey; Type: FK CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.employee_permissions
+    ADD CONSTRAINT employee_permissions_employee_id_fkey FOREIGN KEY (employee_id) REFERENCES dbo.partners(id) ON DELETE CASCADE;
+
+
+--
+-- Name: employee_permissions employee_permissions_group_id_fkey; Type: FK CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.employee_permissions
+    ADD CONSTRAINT employee_permissions_group_id_fkey FOREIGN KEY (group_id) REFERENCES dbo.permission_groups(id);
+
+
+--
 -- Name: appointments fk_appointments_company; Type: FK CONSTRAINT; Schema: dbo; Owner: -
 --
 
@@ -652,8 +1261,48 @@ ALTER TABLE ONLY dbo.partners
 
 
 --
+-- Name: group_permissions group_permissions_group_id_fkey; Type: FK CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.group_permissions
+    ADD CONSTRAINT group_permissions_group_id_fkey FOREIGN KEY (group_id) REFERENCES dbo.permission_groups(id) ON DELETE CASCADE;
+
+
+--
+-- Name: permission_overrides permission_overrides_employee_id_fkey; Type: FK CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.permission_overrides
+    ADD CONSTRAINT permission_overrides_employee_id_fkey FOREIGN KEY (employee_id) REFERENCES dbo.partners(id) ON DELETE CASCADE;
+
+
+--
+-- Name: productcategories productcategories_parentid_fkey; Type: FK CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.productcategories
+    ADD CONSTRAINT productcategories_parentid_fkey FOREIGN KEY (parentid) REFERENCES dbo.productcategories(id);
+
+
+--
+-- Name: products products_categid_fkey; Type: FK CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.products
+    ADD CONSTRAINT products_categid_fkey FOREIGN KEY (categid) REFERENCES dbo.productcategories(id);
+
+
+--
+-- Name: products products_companyid_fkey; Type: FK CONSTRAINT; Schema: dbo; Owner: -
+--
+
+ALTER TABLE ONLY dbo.products
+    ADD CONSTRAINT products_companyid_fkey FOREIGN KEY (companyid) REFERENCES dbo.companies(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-\unrestrict gmciNvyL1xnbP0pWC56svdac2imMPGFhuuh1sgbgfHrF0AoFzKPdH3k0ns5o1r4
+\unrestrict U73ECB3P8EJJLyhpJTIX6qtL6W4mYmSXUHLNMInNzYmrdQ2iOUiHtIq24SP6mGK
 
