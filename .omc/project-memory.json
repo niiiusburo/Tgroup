@@ -105,20 +105,20 @@
   "hotPaths": [
     {
       "path": "website/src/App.tsx",
-      "accessCount": 20,
-      "lastAccessed": 1775549854662,
+      "accessCount": 21,
+      "lastAccessed": 1775550203193,
       "type": "file"
     },
     {
       "path": "website/src/constants/index.ts",
-      "accessCount": 20,
-      "lastAccessed": 1775549855473,
+      "accessCount": 21,
+      "lastAccessed": 1775550209370,
       "type": "file"
     },
     {
       "path": "website/src/pages/index.ts",
-      "accessCount": 15,
-      "lastAccessed": 1775549855973,
+      "accessCount": 17,
+      "lastAccessed": 1775550443391,
       "type": "file"
     },
     {
@@ -212,6 +212,12 @@
       "type": "file"
     },
     {
+      "path": "website/src/pages/Services.tsx",
+      "accessCount": 6,
+      "lastAccessed": 1775550208005,
+      "type": "file"
+    },
+    {
       "path": "website/src/pages/Website.tsx",
       "accessCount": 5,
       "lastAccessed": 1775546156997,
@@ -227,12 +233,6 @@
       "path": "website/src/pages/Relationships.tsx",
       "accessCount": 5,
       "lastAccessed": 1775546889664,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Services.tsx",
-      "accessCount": 5,
-      "lastAccessed": 1775549565475,
       "type": "file"
     },
     {
