@@ -105,20 +105,20 @@
   "hotPaths": [
     {
       "path": "website/src/App.tsx",
-      "accessCount": 21,
-      "lastAccessed": 1775550203193,
+      "accessCount": 22,
+      "lastAccessed": 1775550981963,
       "type": "file"
     },
     {
       "path": "website/src/constants/index.ts",
-      "accessCount": 21,
-      "lastAccessed": 1775550209370,
+      "accessCount": 22,
+      "lastAccessed": 1775550982259,
       "type": "file"
     },
     {
       "path": "website/src/pages/index.ts",
-      "accessCount": 17,
-      "lastAccessed": 1775550443391,
+      "accessCount": 19,
+      "lastAccessed": 1775551110943,
       "type": "file"
     },
     {
@@ -153,8 +153,8 @@
     },
     {
       "path": "website/src/pages/Employees.tsx",
-      "accessCount": 8,
-      "lastAccessed": 1775546757687,
+      "accessCount": 9,
+      "lastAccessed": 1775550980572,
       "type": "file"
     },
     {
@@ -182,6 +182,12 @@
       "type": "file"
     },
     {
+      "path": "website/src/data/mockEmployees.ts",
+      "accessCount": 7,
+      "lastAccessed": 1775551010485,
+      "type": "file"
+    },
+    {
       "path": "website/tailwind.config.js",
       "accessCount": 6,
       "lastAccessed": 1775546719937,
@@ -203,12 +209,6 @@
       "path": "website/src/pages/Appointments.tsx",
       "accessCount": 6,
       "lastAccessed": 1775549864568,
-      "type": "file"
-    },
-    {
-      "path": "website/src/data/mockEmployees.ts",
-      "accessCount": 6,
-      "lastAccessed": 1775549872152,
       "type": "file"
     },
     {
@@ -234,6 +234,12 @@
       "accessCount": 5,
       "lastAccessed": 1775546889664,
       "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 5,
+      "lastAccessed": 1775550999527,
+      "type": "directory"
     },
     {
       "path": "website/tsconfig.json",
@@ -266,12 +272,6 @@
       "type": "file"
     },
     {
-      "path": "",
-      "accessCount": 4,
-      "lastAccessed": 1775549565868,
-      "type": "directory"
-    },
-    {
       "path": "website/src/index.css",
       "accessCount": 3,
       "lastAccessed": 1775545433574,
@@ -302,6 +302,24 @@
       "type": "file"
     },
     {
+      "path": "website/src/components/employees/EmployeeCard.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1775551004409,
+      "type": "file"
+    },
+    {
+      "path": "website/src/hooks/useEmployeesData.ts",
+      "accessCount": 3,
+      "lastAccessed": 1775551004733,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/employees/TierSelector.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1775551006407,
+      "type": "file"
+    },
+    {
       "path": "website/src/main.tsx",
       "accessCount": 2,
       "lastAccessed": 1775543643603,
@@ -314,27 +332,9 @@
       "type": "file"
     },
     {
-      "path": "website/src/components/employees/EmployeeCard.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1775545869221,
-      "type": "file"
-    },
-    {
-      "path": "website/src/hooks/useEmployeesData.ts",
-      "accessCount": 2,
-      "lastAccessed": 1775545869881,
-      "type": "file"
-    },
-    {
       "path": "website/src/components/payment/MonthlyPlan/PaymentSchedule.tsx",
       "accessCount": 2,
       "lastAccessed": 1775545873718,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/employees/TierSelector.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1775545880231,
       "type": "file"
     },
     {
