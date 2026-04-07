@@ -46,13 +46,10 @@ export function LocationProvider({ children }: LocationProviderProps) {
       setAllowedLocations(locs);
 
       if (locs.length === 1) {
-        // Auto-select the single assigned location
-        setSelectedLocationId(locs[0].id);
-      } else if (locs.length > 1) {
-        // Default to first assigned location
+        // Single location — auto-lock to it
         setSelectedLocationId(locs[0].id);
       } else {
-        // All-access — keep 'all'
+        // Multiple locations or all-access — default to 'all'
         setSelectedLocationId('all');
       }
     }
