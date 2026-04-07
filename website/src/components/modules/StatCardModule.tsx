@@ -3,7 +3,7 @@ import { TrendingUp, TrendingDown } from 'lucide-react';
 
 /**
  * StatCardModule - Reusable stat card for dashboard metrics
- * @crossref:used-in[Overview, Reports, LocationDashboard]
+ * @crossref:used-in[Overview, Reports, LocationDetail]
  */
 
 export interface StatCardData {
