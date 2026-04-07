@@ -7,9 +7,6 @@ import {
   Overview,
   Calendar,
   Customers,
-  Appointments,
-  Services,
-  Payment,
   Employees,
   Locations,
   ServiceCatalog,
@@ -31,9 +28,7 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
   '/': 'overview.view',
   '/calendar': 'calendar.view',
   '/customers': 'customers.view',
-  '/appointments': 'appointments.view',
-  '/services': 'services.view',
-  '/payment': 'payment.view',
+
   '/employees': 'employees.view',
   '/locations': 'locations.view',
   '/reports': 'reports.view',
@@ -115,9 +110,7 @@ function LoginRoute() {
  *   / -> Overview,
  *   /calendar -> Calendar,
  *   /customers -> Customers,
- *   /appointments -> Appointments,
- *   /services -> Services,
- *   /payment -> Payment,
+
  *   /employees -> Employees,
  *   /locations -> Locations,
  *   /website -> Website,
@@ -168,35 +161,6 @@ function App() {
               }
             />
 
-            {/* @crossref:route[path="/appointments", component=Appointments] */}
-            <Route
-              path={ROUTES.APPOINTMENTS}
-              element={
-                <ProtectedRoute path={ROUTES.APPOINTMENTS}>
-                  <Appointments />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* @crossref:route[path="/services", component=Services] */}
-            <Route
-              path={ROUTES.SERVICES}
-              element={
-                <ProtectedRoute path={ROUTES.SERVICES}>
-                  <Services />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* @crossref:route[path="/payment", component=Payment] */}
-            <Route
-              path={ROUTES.PAYMENT}
-              element={
-                <ProtectedRoute path={ROUTES.PAYMENT}>
-                  <Payment />
-                </ProtectedRoute>
-              }
-            />
 
             {/* @crossref:route[path="/employees", component=Employees] */}
             <Route

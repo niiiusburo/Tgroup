@@ -91,9 +91,6 @@ export const ROUTES = {
   OVERVIEW: '/',
   CALENDAR: '/calendar',
   CUSTOMERS: '/customers',
-  APPOINTMENTS: '/appointments',
-  SERVICES: '/services',
-  PAYMENT: '/payment',
   EMPLOYEES: '/employees',
   LOCATIONS: '/locations',
   WEBSITE: '/website',
@@ -125,16 +122,7 @@ export interface NavigationItem {
 export const NAVIGATION_ITEMS: NavigationItem[] = [
   { path: ROUTES.OVERVIEW, label: 'Overview', icon: 'BarChart3' },
   { path: ROUTES.CALENDAR, label: 'Calendar', icon: 'Calendar' },
-  {
-    path: ROUTES.CUSTOMERS,
-    label: 'Customers',
-    icon: 'Users',
-    children: [
-      { path: ROUTES.APPOINTMENTS, label: 'Appointments', icon: 'CalendarCheck' },
-      { path: ROUTES.SERVICES, label: 'Record', icon: 'FolderOpen' },
-      { path: ROUTES.PAYMENT, label: 'Payment', icon: 'CreditCard' },
-    ],
-  },
+  { path: ROUTES.CUSTOMERS, label: 'Customers', icon: 'Users' },
   {
     path: ROUTES.EMPLOYEES,
     label: 'Employees',

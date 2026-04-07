@@ -6,9 +6,6 @@
 export { Overview } from './Overview';
 export { Calendar } from './Calendar';
 export { Customers } from './Customers';
-export { Appointments } from './Appointments';
-export { Services } from './Services/index';
-export { Payment } from './Payment';
 export { Employees } from './Employees/index';
 export { Locations } from './Locations';
 export { ServiceCatalog } from './ServiceCatalog';
