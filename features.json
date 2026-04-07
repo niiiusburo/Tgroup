@@ -4,19 +4,19 @@
       "id": 1,
       "category": "setup",
       "name": "Project Scaffold and Core Setup",
-      "description": "Complete the Vite + React + TypeScript + Tailwind project setup. Create React Router, shared constants, remaining UI components, and the @crossref documentation template. The /website folder already exists with basic scaffold — extend it.",
+      "description": "Complete the Vite + React + TypeScript + Tailwind project setup. Create React Router, shared constants, remaining UI components, and the @crossref documentation template. The /website folder already exists with basic scaffold \u2014 extend it.",
       "steps": [
         "Verify /website folder has Vite + React + TS + Tailwind configured, fix any missing config",
-        "Set up React Router in src/App.tsx with route definitions for: Overview, Calendar, Customers, Appointments, Services, Payment, Employees, Locations, Website, Settings, Relationships — add @crossref comments",
+        "Set up React Router in src/App.tsx with route definitions for: Overview, Calendar, Customers, Appointments, Services, Payment, Employees, Locations, Website, Settings, Relationships \u2014 add @crossref comments",
         "Create src/constants/index.ts with status colors, dental clinic theme colors, and @crossref:used-in[ALL_COMPONENTS]",
         "Create placeholder page components for each route (just title + layout wrapper) so routing works end-to-end",
         "Verify the app builds and runs with 'npm run build' in the /website folder"
       ],
-      "status": "failed",
+      "status": "done",
       "priority": "high",
       "progress": "Session: 2026-04-07 | FAILED | 0s\nBranch: feature/1-project-scaffold-and-core-setup | Session: eVa0kVPTonWcM74GpfFPl\nReason: Process exited with code 1",
-      "failure_reason": "No commits found on branch feature/1-project-scaffold-and-core-setup. Stopping orchestrator to prevent wasted runs.",
-      "failure_category": "implementation"
+      "failure_reason": "Merge failed: Command failed: git push origin ai-develop\nfatal: 'origin' does not appear to be a git repository\nfatal: Could not read from remote repository.\n\nPlease make sure you have the correct access rights\nand the repository exists.\n",
+      "failure_category": "verification"
     },
     {
       "id": 2,
@@ -24,11 +24,11 @@
       "name": "Shared Business Components",
       "description": "Build the reusable shared components used across multiple pages. Each must have @crossref comments.",
       "steps": [
-        "Build SearchBar component in src/components/shared/ with @crossref:used-in[Customers, Employees, Services, Website] — debounced input with search icon",
-        "Build DataTable component in src/components/shared/ with @crossref:used-in[Customers, Employees, Services, Locations, Reports] — sorting, pagination",
-        "Build StatusBadge component in src/components/shared/ with @crossref:used-in[Appointments, Services, Calendar, EmployeeTable] — colored status indicator",
+        "Build SearchBar component in src/components/shared/ with @crossref:used-in[Customers, Employees, Services, Website] \u2014 debounced input with search icon",
+        "Build DataTable component in src/components/shared/ with @crossref:used-in[Customers, Employees, Services, Locations, Reports] \u2014 sorting, pagination",
+        "Build StatusBadge component in src/components/shared/ with @crossref:used-in[Appointments, Services, Calendar, EmployeeTable] \u2014 colored status indicator",
         "Build FilterByLocation dropdown in src/components/shared/ with @crossref:used-in[Overview, Calendar, Customers, Appointments, Employees]",
-        "Build StatCardModule in src/components/modules/ with @crossref:used-in[Overview, Reports, LocationDetail] — metric display card with icon and trend"
+        "Build StatCardModule in src/components/modules/ with @crossref:used-in[Overview, Reports, LocationDetail] \u2014 metric display card with icon and trend"
       ],
       "status": "open",
       "priority": "high",
@@ -40,11 +40,11 @@
       "name": "Shared Selectors and Form Components",
       "description": "Build selector components and form utilities shared across multiple forms. Each must have @crossref comments.",
       "steps": [
-        "Build CustomerSelector in src/components/shared/ with @crossref:used-in[AppointmentForm, ServiceForm, PaymentForm] — searchable customer dropdown",
-        "Build DoctorSelector in src/components/shared/ with @crossref:used-in[AppointmentForm, ServiceForm, CalendarFilter] — doctor/employee dropdown",
-        "Build LocationSelector in src/components/shared/ with @crossref:used-in[CustomerForm, EmployeeForm, AppointmentForm, ServiceForm] — branch selector",
+        "Build CustomerSelector in src/components/shared/ with @crossref:used-in[AppointmentForm, ServiceForm, PaymentForm] \u2014 searchable customer dropdown",
+        "Build DoctorSelector in src/components/shared/ with @crossref:used-in[AppointmentForm, ServiceForm, CalendarFilter] \u2014 doctor/employee dropdown",
+        "Build LocationSelector in src/components/shared/ with @crossref:used-in[CustomerForm, EmployeeForm, AppointmentForm, ServiceForm] \u2014 branch selector",
         "Create form validation hooks in src/hooks/useFormValidation.ts with @crossref:used-in[CustomerForm, EmployeeForm, AppointmentForm]",
-        "Build RevenueChartModule in src/components/modules/ with @crossref:used-in[Overview, Reports] — chart component using recharts or similar"
+        "Build RevenueChartModule in src/components/modules/ with @crossref:used-in[Overview, Reports] \u2014 chart component using recharts or similar"
       ],
       "status": "open",
       "priority": "high",
@@ -59,14 +59,14 @@
         "Create src/pages/Overview/index.tsx page component with @crossref:used-in[AppRouter]",
         "Build DashboardStats section using StatCardModule with @crossref:used-in[Overview, Reports, LocationDashboard]",
         "Build TodaySchedule component with @crossref:used-in[Overview, CalendarPage] showing appointment timeline",
-        "Create hooks/useDashboardStats.ts with @crossref:used-in[Overview, Reports] — fetches mock stats data",
-        "Create hooks/useTodaySchedule.ts with @crossref:used-in[Overview, Calendar] — fetches today's appointments"
+        "Create hooks/useDashboardStats.ts with @crossref:used-in[Overview, Reports] \u2014 fetches mock stats data",
+        "Create hooks/useTodaySchedule.ts with @crossref:used-in[Overview, Calendar] \u2014 fetches today's appointments"
       ],
       "status": "failed",
       "priority": "high",
-      "progress": "Session: 2026-04-07 | FAILED | 0s\nBranch: feature/4-overview-dashboard-stats-and-schedule | Session: Us2aWdgorMVfWKM5PqSxy\nReason: Process exited with code 1",
-      "failure_reason": "Merge failed: Failed to merge feature/4-overview-dashboard-stats-and-schedule into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
-      "failure_category": "verification"
+      "progress": "Session: 2026-04-07 | FAILED | 1m 8s\nBranch: feature/4-overview-dashboard-stats-and-schedule | Session: LUElJUek1VM-esyTiSQkU\nReason: {\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_018kLwzzRFbaZvCwetTW81MJ\",\"type\":\"tool_result\",\"content\":\"(Bash completed with no output)\",\"is_error\":false}]},\"parent_tool_use",
+      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_018kLwzzRFbaZvCwetTW81MJ\",\"type\":\"tool_result\",\"content\":\"(Bash completed with no output)\",\"is_error\":false}]},\"parent_tool_use",
+      "failure_category": "implementation"
     },
     {
       "id": 5,
@@ -74,10 +74,10 @@
       "name": "Overview Dashboard - Actions and Notifications",
       "description": "Add quick actions, notifications panel, and revenue chart to the Overview page.",
       "steps": [
-        "Build QuickActionsBar component with @crossref:used-in[Overview, Sidebar] — buttons for common actions",
-        "Build NotificationsPanel component with @crossref:used-in[Overview, Header] — recent alerts list",
+        "Build QuickActionsBar component with @crossref:used-in[Overview, Sidebar] \u2014 buttons for common actions",
+        "Build NotificationsPanel component with @crossref:used-in[Overview, Header] \u2014 recent alerts list",
         "Integrate RevenueChartModule into Overview page with @crossref:used-in[Overview, Reports]",
-        "Add FilterByLocation to Overview page — state managed with @crossref:used-in[Overview, Calendar, Customers]",
+        "Add FilterByLocation to Overview page \u2014 state managed with @crossref:used-in[Overview, Calendar, Customers]",
         "Wire up all Overview sections with mock data and verify page renders correctly"
       ],
       "status": "open",
@@ -105,11 +105,11 @@
       "name": "Calendar - Appointments and Interactions",
       "description": "Add appointment cards, detail modal, drag-and-drop, and filters to Calendar.",
       "steps": [
-        "Build AppointmentCard component with @crossref:used-in[Calendar, Overview, Appointments] — displays appointment summary",
-        "Build AppointmentDetailsModal with @crossref:used-in[Calendar, Appointments] — shows full appointment info",
+        "Build AppointmentCard component with @crossref:used-in[Calendar, Overview, Appointments] \u2014 displays appointment summary",
+        "Build AppointmentDetailsModal with @crossref:used-in[Calendar, Appointments] \u2014 shows full appointment info",
         "Add drag-and-drop rescheduling hook with @crossref:used-in[Calendar]",
         "Add FilterByDoctor shared with @crossref:used-in[Calendar, Appointments, Employees]",
-        "Add color coding system — constants @crossref:used-in[Calendar, Appointments, Overview] for appointment types"
+        "Add color coding system \u2014 constants @crossref:used-in[Calendar, Appointments, Overview] for appointment types"
       ],
       "status": "open",
       "priority": "high"
@@ -122,15 +122,15 @@
       "steps": [
         "Create src/pages/Customers/index.tsx with @crossref:uses[SearchBar, DataTable, CustomerProfile]",
         "Integrate SearchBar and DataTable for customer listing with sorting and pagination",
-        "Create hooks/useCustomers.ts with @crossref:used-in[Customers, Appointments, Payment, Services] — CRUD operations on mock data",
+        "Create hooks/useCustomers.ts with @crossref:used-in[Customers, Appointments, Payment, Services] \u2014 CRUD operations on mock data",
         "Add filter components (location, status, date range) shared across pages",
         "Wire up mock customer data and verify search/filter/sort works"
       ],
       "status": "failed",
       "priority": "high",
-      "progress": "Session: 2026-04-07 | FAILED | 0s\nBranch: feature/8-customer-list-and-search | Session: s2YjSnTx2M9q1m2tq6Wu0\nReason: Process exited with code 1",
-      "failure_reason": "Process exited with code 1",
-      "failure_category": "unknown"
+      "progress": "Session: 2026-04-07 | FAILED | 1m 2s\nBranch: feature/8-customer-list-and-search | Session: nBAXD7-Lvdvyx65wVlyed\nReason: {\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_012gk5PYPJJNXqxdrxEVGwbS\",\"type\":\"tool_result\",\"content\":\"(Bash completed with no output)\",\"is_error\":false}]},\"parent_tool_use",
+      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_012gk5PYPJJNXqxdrxEVGwbS\",\"type\":\"tool_result\",\"content\":\"(Bash completed with no output)\",\"is_error\":false}]},\"parent_tool_use",
+      "failure_category": "implementation"
     },
     {
       "id": 9,
@@ -138,11 +138,11 @@
       "name": "Customer Profile View",
       "description": "Build the detailed customer profile with photo gallery, deposits, and history sections.",
       "steps": [
-        "Build CustomerProfile component with @crossref:used-in[Customers] — main profile layout",
-        "Build PhotoGallery component with @crossref:used-in[CustomerProfile] — before/after dental photos",
-        "Build DepositCard component with @crossref:used-in[CustomerProfile, Payment] — shows wallet balance",
-        "Build AppointmentHistory component with @crossref:used-in[CustomerProfile, Overview] — past appointments list",
-        "Build ServiceHistory component with @crossref:used-in[CustomerProfile, Services] — treatment history"
+        "Build CustomerProfile component with @crossref:used-in[Customers] \u2014 main profile layout",
+        "Build PhotoGallery component with @crossref:used-in[CustomerProfile] \u2014 before/after dental photos",
+        "Build DepositCard component with @crossref:used-in[CustomerProfile, Payment] \u2014 shows wallet balance",
+        "Build AppointmentHistory component with @crossref:used-in[CustomerProfile, Overview] \u2014 past appointments list",
+        "Build ServiceHistory component with @crossref:used-in[CustomerProfile, Services] \u2014 treatment history"
       ],
       "status": "open",
       "priority": "high",
@@ -171,8 +171,8 @@
       "steps": [
         "Create src/pages/Appointments/index.tsx with @crossref:uses[AppointmentForm, StatusBadge]",
         "Build AppointmentForm with @crossref:used-in[Appointments, Calendar, Overview] using CustomerSelector, DoctorSelector, LocationSelector",
-        "Build CheckInFlow with @crossref:used-in[Appointments] — arrival, waiting, in-treatment, done",
-        "Build WaitTimer component with @crossref:used-in[CheckInFlow, Overview] — live wait time display",
+        "Build CheckInFlow with @crossref:used-in[Appointments] \u2014 arrival, waiting, in-treatment, done",
+        "Build WaitTimer component with @crossref:used-in[CheckInFlow, Overview] \u2014 live wait time display",
         "Build ConvertToService button and create hooks/useAppointments.ts with @crossref:used-in[Appointments, Calendar, Overview]"
       ],
       "status": "open",
@@ -187,14 +187,14 @@
         "Create src/pages/Services/index.tsx with @crossref:uses[ServiceForm, ServiceHistory, MultiVisitTracker]",
         "Build ServiceForm with @crossref:used-in[Services, Appointments] using ServiceCatalogSelector, CustomerSelector, DoctorSelector",
         "Build ServiceCatalogSelector with @crossref:used-in[ServiceForm, Settings, Website]",
-        "Build MultiVisitTracker with @crossref:used-in[Services, CustomerProfile] — tracks treatment progress across visits",
+        "Build MultiVisitTracker with @crossref:used-in[Services, CustomerProfile] \u2014 tracks treatment progress across visits",
         "Create hooks/useServices.ts with @crossref:used-in[Services, Customers, Payment] and ServiceHistoryList component"
       ],
       "status": "failed",
       "priority": "high",
-      "progress": "Session: 2026-04-07 | FAILED | 0s\nBranch: feature/12-service-records | Session: aoRKGnQYZqe1D5SVi_DNc\nReason: Process exited with code 1",
-      "failure_reason": "Process exited with code 1",
-      "failure_category": "unknown"
+      "progress": "Session: 2026-04-07 | FAILED | 1m 0s\nBranch: feature/12-service-records | Session: TbiXNB0j_DY3XoUUWwONb\nReason: {\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_016MpNrWXg2Hzu8jg4bfn2Dh\",\"type\":\"tool_result\",\"content\":\"(Bash completed with no output)\",\"is_error\":false}]},\"parent_tool_use",
+      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_016MpNrWXg2Hzu8jg4bfn2Dh\",\"type\":\"tool_result\",\"content\":\"(Bash completed with no output)\",\"is_error\":false}]},\"parent_tool_use",
+      "failure_category": "implementation"
     },
     {
       "id": 13,
@@ -203,7 +203,7 @@
       "description": "Build payment system with deposits, partial payments, and outstanding balance tracking.",
       "steps": [
         "Create src/pages/Payment/index.tsx with @crossref:uses[DepositWallet, PaymentForm, OutstandingBalance]",
-        "Build DepositWallet component with @crossref:used-in[Payment, CustomerProfile] — top-up and balance display",
+        "Build DepositWallet component with @crossref:used-in[Payment, CustomerProfile] \u2014 top-up and balance display",
         "Build PaymentForm with @crossref:used-in[Payment, Services] using CustomerSelector, PaymentMethodSelector",
         "Build OutstandingBalanceCard with @crossref:used-in[Payment, CustomerProfile, Services]",
         "Build PaymentHistoryTable and create hooks/usePayment.ts with @crossref:used-in[Payment, Services, Customers]"
@@ -219,9 +219,9 @@
       "description": "Build installment plans for outstanding balances.",
       "steps": [
         "Create src/components/payment/MonthlyPlan/ with @crossref:used-in[Payment]",
-        "Build MonthlyPlanCreator with @crossref:used-in[Payment, OutstandingBalance] — plan setup wizard",
-        "Build PaymentSchedule with @crossref:used-in[Payment, CustomerProfile] — timeline of installments",
-        "Build InstallmentTracker with @crossref:used-in[PaymentSchedule] — payment status per installment",
+        "Build MonthlyPlanCreator with @crossref:used-in[Payment, OutstandingBalance] \u2014 plan setup wizard",
+        "Build PaymentSchedule with @crossref:used-in[Payment, CustomerProfile] \u2014 timeline of installments",
+        "Build InstallmentTracker with @crossref:used-in[PaymentSchedule] \u2014 payment status per installment",
         "Create hooks/useMonthlyPlans.ts with @crossref:used-in[Payment, Customers]"
       ],
       "status": "open",
@@ -235,15 +235,15 @@
       "steps": [
         "Create src/pages/Employees/index.tsx with @crossref:uses[EmployeeTable, EmployeeProfile, TierSelector]",
         "Build EmployeeTable with @crossref:used-in[Employees] using DataTable and StatusBadge",
-        "Build EmployeeProfile with @crossref:used-in[Employees] — personal info, stats, linked data",
-        "Build ReferralCodeDisplay with @crossref:used-in[EmployeeProfile, CustomerForm] — shows referral stats",
+        "Build EmployeeProfile with @crossref:used-in[Employees] \u2014 personal info, stats, linked data",
+        "Build ReferralCodeDisplay with @crossref:used-in[EmployeeProfile, CustomerForm] \u2014 shows referral stats",
         "Create hooks/useEmployees.ts with @crossref:used-in[Employees, Appointments, Calendar, Customers]"
       ],
       "status": "failed",
       "priority": "high",
-      "progress": "Session: 2026-04-07 | FAILED | 0s\nBranch: feature/15-employees-list-and-profile | Session: S4Q-9fX2oKJWNLxrit70V\nReason: Process exited with code 1",
-      "failure_reason": "Process exited with code 1",
-      "failure_category": "unknown"
+      "progress": "Session: 2026-04-07 | FAILED | 1m 5s\nBranch: feature/15-employees-list-and-profile | Session: fAXqCrbq2j7KYRl35bhkU\nReason: {\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_01EwzGk4wZreSUeZR1mXzrBe\",\"type\":\"tool_result\",\"content\":\"  \\\"dependencies\\\": {\\n    \\\"react\\\": \\\"^18.2.0\\\",\\n    \\\"react-dom\\\"",
+      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_01EwzGk4wZreSUeZR1mXzrBe\",\"type\":\"tool_result\",\"content\":\"  \\\"dependencies\\\": {\\n    \\\"react\\\": \\\"^18.2.0\\\",\\n    \\\"react-dom\\\"",
+      "failure_category": "implementation"
     },
     {
       "id": 16,
@@ -253,7 +253,7 @@
       "steps": [
         "Build TierSelector with @crossref:used-in[EmployeeForm, EmployeeProfile, Relationships]",
         "Build RoleMultiSelect with @crossref:used-in[EmployeeForm, Settings]",
-        "Build ScheduleCalendar with @crossref:used-in[EmployeeProfile, Appointments, Calendar] — weekly availability",
+        "Build ScheduleCalendar with @crossref:used-in[EmployeeProfile, Appointments, Calendar] \u2014 weekly availability",
         "Build LinkedEmployees component showing team relationships",
         "Wire up employee mock data and verify profile + schedule renders"
       ],
@@ -270,7 +270,7 @@
         "Create src/pages/Locations/index.tsx with @crossref:uses[LocationCard, LocationDetail, LocationDashboard]",
         "Build LocationCard with @crossref:used-in[Locations, OverviewFilter, CustomerForm]",
         "Build LocationDetail with @crossref:used-in[Locations] showing employees, customer stats, revenue",
-        "Build LocationDashboard with @crossref:used-in[LocationDetail, Overview] — branch-level metrics",
+        "Build LocationDashboard with @crossref:used-in[LocationDetail, Overview] \u2014 branch-level metrics",
         "Create hooks/useLocations.ts with @crossref:used-in[Locations, Customers, Employees, Appointments, Overview]"
       ],
       "status": "open",
@@ -283,10 +283,10 @@
       "description": "Build CMS for managing public website pages with editor and SEO.",
       "steps": [
         "Create src/pages/Website/index.tsx with @crossref:uses[PageEditor, PageList, SEOManager]",
-        "Build PageList with @crossref:used-in[Website] using DataTable and StatusBadge — list of 14 pages",
-        "Build PageEditor with @crossref:used-in[Website] — rich text editing for page content",
-        "Build ServiceCatalogManager with @crossref:used-in[Website, Settings] — manage public service listings",
-        "Build SEOManager with @crossref:used-in[Website] — meta tags, descriptions per page"
+        "Build PageList with @crossref:used-in[Website] using DataTable and StatusBadge \u2014 list of 14 pages",
+        "Build PageEditor with @crossref:used-in[Website] \u2014 rich text editing for page content",
+        "Build ServiceCatalogManager with @crossref:used-in[Website, Settings] \u2014 manage public service listings",
+        "Build SEOManager with @crossref:used-in[Website] \u2014 meta tags, descriptions per page"
       ],
       "status": "open",
       "priority": "high"
@@ -298,10 +298,10 @@
       "description": "Build settings pages for service catalog, roles, and customer sources.",
       "steps": [
         "Create src/pages/Settings/index.tsx with @crossref:uses[ServiceCatalogSettings, RoleConfig, CustomerSourcesConfig]",
-        "Build ServiceCatalogSettings with @crossref:used-in[Settings, Website] — manage treatment types and pricing",
-        "Build RoleConfig with @crossref:used-in[Settings, Employees, Relationships] — define roles and permissions",
-        "Build CustomerSourcesConfig with @crossref:used-in[Settings, Customers, Reports] — manage referral sources",
-        "Build SystemPreferences with @crossref:used-in[Settings] — general app settings"
+        "Build ServiceCatalogSettings with @crossref:used-in[Settings, Website] \u2014 manage treatment types and pricing",
+        "Build RoleConfig with @crossref:used-in[Settings, Employees, Relationships] \u2014 define roles and permissions",
+        "Build CustomerSourcesConfig with @crossref:used-in[Settings, Customers, Reports] \u2014 manage referral sources",
+        "Build SystemPreferences with @crossref:used-in[Settings] \u2014 general app settings"
       ],
       "status": "open",
       "priority": "medium"
@@ -313,9 +313,9 @@
       "description": "Build permission matrix, entity relationships, and placeholder pages for Commission, Reports, and Notifications.",
       "steps": [
         "Create src/pages/Relationships/index.tsx with @crossref:uses[PermissionMatrix, EntityRelationshipMap]",
-        "Build PermissionMatrix with @crossref:used-in[Relationships] — role-based access control grid",
-        "Build EntityRelationshipMap with @crossref:used-in[Relationships] — visual diagram of entity connections",
-        "Create hooks/usePermissions.ts with @crossref:used-in[ALL_PAGES] — permission checking hook",
+        "Build PermissionMatrix with @crossref:used-in[Relationships] \u2014 role-based access control grid",
+        "Build EntityRelationshipMap with @crossref:used-in[Relationships] \u2014 visual diagram of entity connections",
+        "Create hooks/usePermissions.ts with @crossref:used-in[ALL_PAGES] \u2014 permission checking hook",
         "Create placeholder pages for Commission (@crossref:used-in[Employees, Reports]), Reports (@crossref:uses[RevenueChart, DataTable, StatCard]), and SMS/Email Notifications (@crossref:uses[Payment, Customers])"
       ],
       "status": "open",
