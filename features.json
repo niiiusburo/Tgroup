@@ -30,10 +30,9 @@
         "Build FilterByLocation dropdown in src/components/shared/ with @crossref:used-in[Overview, Calendar, Customers, Appointments, Employees]",
         "Build StatCardModule in src/components/modules/ with @crossref:used-in[Overview, Reports, LocationDetail] \u2014 metric display card with icon and trend"
       ],
-      "status": "open",
+      "status": "done",
       "priority": "high",
-      "failure_reason": "Merge failed: Failed to merge feature/2-shared-business-components into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
-      "failure_category": "verification"
+      "progress": "Session: 2026-04-07 | PASSED | 52s\nBranch: feature/2-shared-business-components | Session: J_-ht2hQA37GNq-ue7PkK"
     },
     {
       "id": 3,
@@ -101,7 +100,7 @@
     },
     {
       "id": 7,
-      "category": "dashboard",
+      "category": "sequential",
       "name": "Calendar - Appointments and Interactions",
       "description": "Add appointment cards, detail modal, drag-and-drop, and filters to Calendar.",
       "steps": [
@@ -113,12 +112,12 @@
       ],
       "status": "open",
       "priority": "high",
-      "failure_reason": "No commits found on branch feature/7-calendar-appointments-and-interactions. Stopping orchestrator to prevent wasted runs.",
-      "failure_category": "implementation"
+      "failure_reason": "Implementation complete but verification/tests failed",
+      "failure_category": "test_only"
     },
     {
       "id": 8,
-      "category": "customers",
+      "category": "sequential",
       "name": "Customer List and Search",
       "description": "Build the Customers page with searchable, sortable data table.",
       "steps": [
@@ -135,7 +134,7 @@
     },
     {
       "id": 9,
-      "category": "customers",
+      "category": "sequential",
       "name": "Customer Profile View",
       "description": "Build the detailed customer profile with photo gallery, deposits, and history sections.",
       "steps": [
@@ -168,7 +167,7 @@
     },
     {
       "id": 11,
-      "category": "customers",
+      "category": "sequential",
       "name": "Appointments Management",
       "description": "Build appointment creation, check-in flow, and status workflow.",
       "steps": [
@@ -185,7 +184,7 @@
     },
     {
       "id": 12,
-      "category": "services",
+      "category": "sequential",
       "name": "Service Records",
       "description": "Build service/treatment records with multi-visit tracking.",
       "steps": [
@@ -197,12 +196,12 @@
       ],
       "status": "open",
       "priority": "high",
-      "failure_reason": "Implementation complete but verification/tests failed",
-      "failure_category": "test_only"
+      "failure_reason": "Merge failed: Failed to merge feature/12-service-records into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
+      "failure_category": "verification"
     },
     {
       "id": 13,
-      "category": "services",
+      "category": "sequential",
       "name": "Payment and Deposit Wallet",
       "description": "Build payment system with deposits, partial payments, and outstanding balance tracking.",
       "steps": [
@@ -235,7 +234,7 @@
     },
     {
       "id": 15,
-      "category": "admin",
+      "category": "sequential",
       "name": "Employees List and Profile",
       "description": "Build employee management with list view and detailed profiles.",
       "steps": [
@@ -268,7 +267,7 @@
     },
     {
       "id": 17,
-      "category": "admin",
+      "category": "sequential",
       "name": "Locations and Branches",
       "description": "Build location management with cards, detail view, and mini-dashboard.",
       "steps": [
@@ -301,7 +300,7 @@
     },
     {
       "id": 19,
-      "category": "admin",
+      "category": "sequential",
       "name": "Settings and Configuration",
       "description": "Build settings pages for service catalog, roles, and customer sources.",
       "steps": [

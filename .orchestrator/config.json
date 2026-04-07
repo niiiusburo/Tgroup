@@ -2,39 +2,11 @@
   "projectName": "Tgroup",
   "tracks": [
     {
-      "name": "track-setup",
+      "name": "sequential",
       "categories": [
-        "setup"
+        "sequential"
       ],
-      "color": "#3b82f6"
-    },
-    {
-      "name": "track-dashboard",
-      "categories": [
-        "dashboard"
-      ],
-      "color": "#8b5cf6"
-    },
-    {
-      "name": "track-customers",
-      "categories": [
-        "customers"
-      ],
-      "color": "#10b981"
-    },
-    {
-      "name": "track-services",
-      "categories": [
-        "services"
-      ],
-      "color": "#f59e0b"
-    },
-    {
-      "name": "track-admin",
-      "categories": [
-        "admin"
-      ],
-      "color": "#ef4444",
+      "color": "#3b82f6",
       "isDefault": true
     }
   ],
