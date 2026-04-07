@@ -1,18 +1,52 @@
 {
   "projectName": "Tgroup",
   "tracks": [
-    { "name": "features", "categories": ["feature"], "color": "#8b5cf6", "isDefault": true },
-    { "name": "bugs", "categories": ["bugfix"], "color": "#ef4444" },
-    { "name": "refactor", "categories": ["refactor"], "color": "#3b82f6" }
+    {
+      "name": "track-setup",
+      "categories": [
+        "setup"
+      ],
+      "color": "#3b82f6"
+    },
+    {
+      "name": "track-dashboard",
+      "categories": [
+        "dashboard"
+      ],
+      "color": "#8b5cf6"
+    },
+    {
+      "name": "track-customers",
+      "categories": [
+        "customers"
+      ],
+      "color": "#10b981"
+    },
+    {
+      "name": "track-services",
+      "categories": [
+        "services"
+      ],
+      "color": "#f59e0b"
+    },
+    {
+      "name": "track-admin",
+      "categories": [
+        "admin"
+      ],
+      "color": "#ef4444",
+      "isDefault": true
+    }
   ],
   "agent": {
     "preferred": "claude",
     "fallbackAgents": [],
-    "claudeCommand": "pi",
-    "claudeArgs": "-p --mode json --model kimi-coding/kimi-k2-thinking --tools read,bash,edit,write {{PROMPT}}",
+    "claudeCommand": "claude",
+    "claudeArgs": "-p {{PROMPT}} --verbose --output-format stream-json --allowed-tools Bash,Read,Write,Edit --dangerously-skip-permissions",
     "maxTurnsImplementation": 40,
     "maxTurnsVerification": 20,
     "allowedTools": "Bash,Read,Write,Edit",
     "allowedToolsVerification": "Bash,Read,Write"
-  }
+  },
+  "tracksConfigured": true
 }
