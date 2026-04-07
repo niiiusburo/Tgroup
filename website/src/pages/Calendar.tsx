@@ -1,6 +1,6 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useCalendarData, type ViewMode } from '@/hooks/useCalendarData';
 import { useDragReschedule } from '@/hooks/useDragReschedule';
 import { DayView } from '@/components/calendar/DayView';
@@ -11,6 +11,8 @@ import { FilterByDoctor, type DoctorOption } from '@/components/shared/FilterByD
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import type { CalendarAppointment } from '@/data/mockCalendar';
+import { EditAppointmentModal } from '@/components/modules/EditAppointmentModal';
+import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
 
 /**
  * Calendar Page with Day/Week/Month view modes
@@ -41,7 +43,11 @@ export function Calendar() {
     setSelectedDoctorId,
     selectedAppointment,
     setSelectedAppointment,
+    refresh,
   } = useCalendarData(selectedLocationId);
+
+  const [editingAppointment, setEditingAppointment] = useState<CalendarAppointment | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Get real doctors from API for FilterByDoctor
   const { allEmployees } = useEmployees();
@@ -63,9 +69,41 @@ export function Calendar() {
     setSelectedAppointment(appointment);
   }, [setSelectedAppointment]);
 
+  const handleEditClick = useCallback((appointment: CalendarAppointment) => {
+    setEditingAppointment(appointment);
+    setIsEditModalOpen(true);
+  }, []);
+
+  const handleEditModalClose = useCallback(() => {
+    setIsEditModalOpen(false);
+    setEditingAppointment(null);
+  }, []);
+
+  const handleEditModalSaved = useCallback(() => {
+    refresh?.();
+    setIsEditModalOpen(false);
+    setEditingAppointment(null);
+  }, [refresh]);
+
   const handleCloseModal = useCallback(() => {
     setSelectedAppointment(null);
   }, [setSelectedAppointment]);
+
+  // Helper to map Calendar status to OverviewAppointment topStatus
+  function mapStatusToTopStatus(status: CalendarAppointment['status']): OverviewAppointment['topStatus'] {
+    switch (status) {
+      case 'cancelled':
+        return 'cancelled';
+      case 'confirmed':
+        return 'arrived';
+      case 'in-progress':
+        return 'arrived';
+      case 'completed':
+        return 'arrived';
+      default:
+        return 'scheduled';
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -142,6 +180,7 @@ export function Calendar() {
           currentDate={currentDate}
           getAppointmentsForDate={getAppointmentsForDate}
           onAppointmentClick={handleAppointmentClick}
+          onAppointmentEdit={handleEditClick}
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
@@ -153,6 +192,7 @@ export function Calendar() {
           weekDates={weekDates}
           getAppointmentsForDate={getAppointmentsForDate}
           onAppointmentClick={handleAppointmentClick}
+          onAppointmentEdit={handleEditClick}
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
@@ -165,6 +205,7 @@ export function Calendar() {
           monthDates={monthDates}
           getAppointmentsForDate={getAppointmentsForDate}
           onAppointmentClick={handleAppointmentClick}
+          onAppointmentEdit={handleEditClick}
         />
       )}
 
@@ -172,6 +213,27 @@ export function Calendar() {
       <AppointmentDetailsModal
         appointment={selectedAppointment}
         onClose={handleCloseModal}
+      />
+
+      {/* Edit Appointment Modal */}
+      <EditAppointmentModal
+        appointment={editingAppointment ? {
+          id: editingAppointment.id,
+          customerName: editingAppointment.customerName,
+          customerPhone: editingAppointment.customerPhone,
+          doctorName: editingAppointment.dentist,
+          doctorId: editingAppointment.dentistId,
+          time: editingAppointment.startTime,
+          locationId: editingAppointment.locationId,
+          locationName: editingAppointment.locationName,
+          note: editingAppointment.notes,
+          topStatus: mapStatusToTopStatus(editingAppointment.status),
+          checkInStatus: null,
+          color: editingAppointment.color,
+        } : null}
+        isOpen={isEditModalOpen}
+        onClose={handleEditModalClose}
+        onSaved={handleEditModalSaved}
       />
     </div>
   );
