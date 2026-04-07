@@ -29,10 +29,10 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: theme('colors.gray.200');
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-gray-900;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
