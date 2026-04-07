@@ -37,6 +37,11 @@ async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promis
     'Content-Type': 'application/json',
   };
 
+  const token = localStorage.getItem('tdental_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const res = await fetch(url, {
     method,
     headers,
@@ -379,4 +384,35 @@ export function createPermissionGroup(data: { name: string; color: string; descr
 
 export function updatePermissionGroup(groupId: string, data: { name: string; color: string; description: string; permissions: string[] }) {
   return apiFetch<PermissionGroup>(`/Permissions/groups/${groupId}`, { method: 'PUT', body: data });
+}
+
+// ─── Auth ─────────────────────────────────────────────────────────
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  companyId: string;
+  companyName: string;
+}
+
+export interface AuthPermissions {
+  groupId: string;
+  groupName: string;
+  effectivePermissions: string[];
+  locations: { id: string; name: string }[];
+}
+
+export interface LoginResponse {
+  token: string;
+  user: AuthUser;
+  permissions: AuthPermissions;
+}
+
+export function login(email: string, password: string) {
+  return apiFetch<LoginResponse>('/Auth/login', { method: 'POST', body: { email, password } });
+}
+
+export function fetchMe() {
+  return apiFetch<LoginResponse>('/Auth/me');
 }

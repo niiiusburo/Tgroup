@@ -8,6 +8,7 @@ import type { CustomerAppointment } from '@/data/mockCustomerProfile';
 
 interface AppointmentHistoryProps {
   readonly appointments: readonly CustomerAppointment[];
+  readonly limit?: number;
 }
 
 const STATUS_CONFIG = {
@@ -16,14 +17,15 @@ const STATUS_CONFIG = {
   'no-show': { icon: AlertTriangle, label: 'No Show', className: 'text-amber-600 bg-amber-50' },
 } as const;
 
-export function AppointmentHistory({ appointments }: AppointmentHistoryProps) {
+export function AppointmentHistory({ appointments, limit }: AppointmentHistoryProps) {
+  const displayAppointments = limit ? appointments.slice(0, limit) : appointments;
   return (
     <div className="bg-white rounded-xl shadow-card p-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <CalendarCheck className="w-5 h-5 text-primary" />
           <h3 className="font-semibold text-gray-900">Appointment History</h3>
-          <span className="text-xs text-gray-400">({appointments.length})</span>
+          <span className="text-xs text-gray-400">({appointments.length}{limit && appointments.length > limit ? `+` : ''})</span>
         </div>
       </div>
 
@@ -31,7 +33,7 @@ export function AppointmentHistory({ appointments }: AppointmentHistoryProps) {
         <div className="text-center py-8 text-gray-400 text-sm">No appointment history</div>
       ) : (
         <div className="space-y-3">
-          {appointments.map((apt) => {
+          {displayAppointments.map((apt) => {
             const statusConfig = STATUS_CONFIG[apt.status];
             const StatusIcon = statusConfig.icon;
             return (

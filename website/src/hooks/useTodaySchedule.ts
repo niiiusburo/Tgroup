@@ -29,7 +29,7 @@ export function useTodaySchedule(locationId?: string): TodayScheduleResult {
         const response = await fetchAppointments({
           limit: 100,
           dateFrom: todayStr,
-          dateTo: todayStr,
+          dateTo: `${todayStr}T23:59:59`,
           companyId: locationId && locationId !== 'all' ? locationId : undefined,
         });
 

@@ -8,6 +8,7 @@ import type { CustomerService } from '@/data/mockCustomerProfile';
 
 interface ServiceHistoryProps {
   readonly services: readonly CustomerService[];
+  readonly limit?: number;
 }
 
 function formatVND(amount: number): string {
@@ -20,7 +21,8 @@ const STATUS_CONFIG = {
   planned: { icon: CalendarPlus, label: 'Planned', className: 'text-gray-600 bg-gray-50', dot: 'bg-gray-400' },
 } as const;
 
-export function ServiceHistory({ services }: ServiceHistoryProps) {
+export function ServiceHistory({ services, limit }: ServiceHistoryProps) {
+  const displayServices = limit ? services.slice(0, limit) : services;
   const totalCost = services
     .filter((s) => s.status === 'completed')
     .reduce((sum, s) => sum + s.cost, 0);
@@ -31,7 +33,7 @@ export function ServiceHistory({ services }: ServiceHistoryProps) {
         <div className="flex items-center gap-2">
           <Stethoscope className="w-5 h-5 text-primary" />
           <h3 className="font-semibold text-gray-900">Treatment History</h3>
-          <span className="text-xs text-gray-400">({services.length} treatments)</span>
+          <span className="text-xs text-gray-400">({services.length}{limit && services.length > limit ? '+' : ''} treatments)</span>
         </div>
         <div className="text-right">
           <p className="text-xs text-gray-400">Total completed</p>
@@ -43,7 +45,7 @@ export function ServiceHistory({ services }: ServiceHistoryProps) {
         <div className="text-center py-8 text-gray-400 text-sm">No treatment history</div>
       ) : (
         <div className="space-y-3">
-          {services.map((svc) => {
+          {displayServices.map((svc) => {
             const statusConfig = STATUS_CONFIG[svc.status];
             const StatusIcon = statusConfig.icon;
             return (

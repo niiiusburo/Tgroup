@@ -1,0 +1,125 @@
+{
+  "updatedAt": "2026-04-07T11:22:12.493Z",
+  "missions": [
+    {
+      "id": "session:311c42ec-32e5-4d1e-abf0-d2de7697c0fe:none",
+      "source": "session",
+      "name": "none",
+      "objective": "Session mission",
+      "createdAt": "2026-04-07T11:16:58.137Z",
+      "updatedAt": "2026-04-07T11:22:12.493Z",
+      "status": "done",
+      "workerCount": 5,
+      "taskCounts": {
+        "total": 5,
+        "pending": 0,
+        "blocked": 0,
+        "inProgress": 0,
+        "completed": 5,
+        "failed": 0
+      },
+      "agents": [
+        {
+          "name": "executor:a407dd7",
+          "role": "executor",
+          "ownership": "a407dd764983e2f6d",
+          "status": "done",
+          "currentStep": null,
+          "latestUpdate": "completed",
+          "completedSummary": null,
+          "updatedAt": "2026-04-07T11:18:21.653Z"
+        },
+        {
+          "name": "executor:ac5031c",
+          "role": "executor",
+          "ownership": "ac5031c5b3021fc21",
+          "status": "done",
+          "currentStep": null,
+          "latestUpdate": "completed",
+          "completedSummary": null,
+          "updatedAt": "2026-04-07T11:18:27.662Z"
+        },
+        {
+          "name": "executor:ae17de4",
+          "role": "executor",
+          "ownership": "ae17de4ddb716a6cf",
+          "status": "done",
+          "currentStep": null,
+          "latestUpdate": "completed",
+          "completedSummary": null,
+          "updatedAt": "2026-04-07T11:20:44.158Z"
+        },
+        {
+          "name": "executor:a2e8633",
+          "role": "executor",
+          "ownership": "a2e863369a73403ee",
+          "status": "done",
+          "currentStep": null,
+          "latestUpdate": "completed",
+          "completedSummary": null,
+          "updatedAt": "2026-04-07T11:22:12.493Z"
+        },
+        {
+          "name": "executor:a1b6e5f",
+          "role": "executor",
+          "ownership": "a1b6e5fe90d5c7777",
+          "status": "done",
+          "currentStep": null,
+          "latestUpdate": "completed",
+          "completedSummary": null,
+          "updatedAt": "2026-04-07T11:20:10.273Z"
+        }
+      ],
+      "timeline": [
+        {
+          "id": "session-start:ae17de4ddb716a6cf:2026-04-07T11:18:58.695Z",
+          "at": "2026-04-07T11:18:58.695Z",
+          "kind": "update",
+          "agent": "executor:ae17de4",
+          "detail": "started executor:ae17de4",
+          "sourceKey": "session-start:ae17de4ddb716a6cf"
+        },
+        {
+          "id": "session-start:a2e863369a73403ee:2026-04-07T11:19:13.378Z",
+          "at": "2026-04-07T11:19:13.378Z",
+          "kind": "update",
+          "agent": "executor:a2e8633",
+          "detail": "started executor:a2e8633",
+          "sourceKey": "session-start:a2e863369a73403ee"
+        },
+        {
+          "id": "session-start:a1b6e5fe90d5c7777:2026-04-07T11:19:28.564Z",
+          "at": "2026-04-07T11:19:28.564Z",
+          "kind": "update",
+          "agent": "executor:a1b6e5f",
+          "detail": "started executor:a1b6e5f",
+          "sourceKey": "session-start:a1b6e5fe90d5c7777"
+        },
+        {
+          "id": "session-stop:a1b6e5fe90d5c7777:2026-04-07T11:20:10.273Z",
+          "at": "2026-04-07T11:20:10.273Z",
+          "kind": "completion",
+          "agent": "executor:a1b6e5f",
+          "detail": "completed",
+          "sourceKey": "session-stop:a1b6e5fe90d5c7777"
+        },
+        {
+          "id": "session-stop:ae17de4ddb716a6cf:2026-04-07T11:20:44.158Z",
+          "at": "2026-04-07T11:20:44.158Z",
+          "kind": "completion",
+          "agent": "executor:ae17de4",
+          "detail": "completed",
+          "sourceKey": "session-stop:ae17de4ddb716a6cf"
+        },
+        {
+          "id": "session-stop:a2e863369a73403ee:2026-04-07T11:22:12.493Z",
+          "at": "2026-04-07T11:22:12.493Z",
+          "kind": "completion",
+          "agent": "executor:a2e8633",
+          "detail": "completed",
+          "sourceKey": "session-stop:a2e863369a73403ee"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,218 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e6]: TD
+    - navigation [ref=e7]:
+      - link "Overview" [ref=e8] [cursor=pointer]:
+        - /url: /
+        - img [ref=e10]
+      - link "Calendar" [ref=e12] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e13]
+      - link "Customers" [ref=e15] [cursor=pointer]:
+        - /url: /customers
+        - img [ref=e16]
+      - link "Employees" [ref=e21] [cursor=pointer]:
+        - /url: /employees
+        - img [ref=e22]
+      - link "Locations" [ref=e34] [cursor=pointer]:
+        - /url: /locations
+        - img [ref=e35]
+      - link "Service Catalog" [ref=e38] [cursor=pointer]:
+        - /url: /website
+        - img [ref=e39]
+      - link "Settings" [ref=e43] [cursor=pointer]:
+        - /url: /settings
+        - img [ref=e44]
+  - generic [ref=e50]:
+    - banner [ref=e51]:
+      - heading "Overview" [level=1] [ref=e52]
+      - generic [ref=e53]:
+        - button "All Locations" [ref=e55] [cursor=pointer]:
+          - img [ref=e56]
+          - generic [ref=e59]: All Locations
+          - img [ref=e60]
+        - button [ref=e62] [cursor=pointer]:
+          - img [ref=e63]
+        - button [ref=e65] [cursor=pointer]:
+          - img [ref=e66]
+        - generic [ref=e70]:
+          - generic [ref=e72]: JD
+          - generic [ref=e74]: AS
+          - generic [ref=e76]: MK
+        - button "Customize Widget" [ref=e77] [cursor=pointer]:
+          - img [ref=e78]
+          - text: Customize Widget
+    - main [ref=e83]:
+      - generic [ref=e84]:
+        - generic [ref=e85]:
+          - generic [ref=e86]:
+            - generic [ref=e87]:
+              - generic [ref=e88]: Total Patients
+              - img [ref=e90]
+            - generic [ref=e95]: "0"
+            - generic [ref=e96]:
+              - img [ref=e97]
+              - generic [ref=e100]: +12.5%
+              - generic [ref=e101]: vs last month
+          - generic [ref=e102]:
+            - generic [ref=e103]:
+              - generic [ref=e104]: Appointments Today
+              - img [ref=e106]
+            - generic [ref=e109]: "0"
+            - generic [ref=e110]:
+              - img [ref=e111]
+              - generic [ref=e114]: +8%
+              - generic [ref=e115]: vs last month
+          - generic [ref=e116]:
+            - generic [ref=e117]:
+              - generic [ref=e118]: Revenue (MTD)
+              - img [ref=e120]
+            - generic [ref=e122]: ₫0
+            - generic [ref=e123]:
+              - img [ref=e124]
+              - generic [ref=e127]: +18.2%
+              - generic [ref=e128]: vs last month
+          - generic [ref=e129]:
+            - generic [ref=e130]:
+              - generic [ref=e131]: Avg. per Visit
+              - img [ref=e133]
+            - generic [ref=e136]: ₫0
+            - generic [ref=e137]:
+              - img [ref=e138]
+              - generic [ref=e141]: "-2.1%"
+              - generic [ref=e142]: vs last month
+        - generic [ref=e143]:
+          - heading "Quick Actions" [level=3] [ref=e144]
+          - generic [ref=e145]:
+            - button "New Appointment" [ref=e146] [cursor=pointer]:
+              - img [ref=e147]
+              - text: New Appointment
+            - button "Add Customer" [ref=e149] [cursor=pointer]:
+              - img [ref=e150]
+              - text: Add Customer
+            - button "Record Payment" [ref=e153] [cursor=pointer]:
+              - img [ref=e154]
+              - text: Record Payment
+            - button "New Service" [ref=e156] [cursor=pointer]:
+              - img [ref=e157]
+              - text: New Service
+            - button "View Reports" [ref=e161] [cursor=pointer]:
+              - img [ref=e162]
+              - text: View Reports
+        - generic [ref=e164]:
+          - generic [ref=e166]:
+            - generic [ref=e167]:
+              - generic [ref=e168]:
+                - heading "Revenue Overview" [level=3] [ref=e169]
+                - paragraph [ref=e170]: Monthly revenue vs target (millions VND)
+              - generic [ref=e171]:
+                - img [ref=e172]
+                - text: 2.5%
+            - generic [ref=e175]:
+              - generic [ref=e176]:
+                - generic [ref=e177]:
+                  - 'generic "Revenue: 120M" [ref=e178]'
+                  - 'generic "Target: 150M" [ref=e179]'
+                - generic [ref=e180]: Jan
+              - generic [ref=e181]:
+                - generic [ref=e182]:
+                  - 'generic "Revenue: 145M" [ref=e183]'
+                  - 'generic "Target: 150M" [ref=e184]'
+                - generic [ref=e185]: Feb
+              - generic [ref=e186]:
+                - generic [ref=e187]:
+                  - 'generic "Revenue: 162M" [ref=e188]'
+                  - 'generic "Target: 160M" [ref=e189]'
+                - generic [ref=e190]: Mar
+              - generic [ref=e191]:
+                - generic [ref=e192]:
+                  - 'generic "Revenue: 138M" [ref=e193]'
+                  - 'generic "Target: 160M" [ref=e194]'
+                - generic [ref=e195]: Apr
+              - generic [ref=e196]:
+                - generic [ref=e197]:
+                  - 'generic "Revenue: 175M" [ref=e198]'
+                  - 'generic "Target: 170M" [ref=e199]'
+                - generic [ref=e200]: May
+              - generic [ref=e201]:
+                - generic [ref=e202]:
+                  - 'generic "Revenue: 190M" [ref=e203]'
+                  - 'generic "Target: 170M" [ref=e204]'
+                - generic [ref=e205]: Jun
+              - generic [ref=e206]:
+                - generic [ref=e207]:
+                  - 'generic "Revenue: 168M" [ref=e208]'
+                  - 'generic "Target: 180M" [ref=e209]'
+                - generic [ref=e210]: Jul
+              - generic [ref=e211]:
+                - generic [ref=e212]:
+                  - 'generic "Revenue: 195M" [ref=e213]'
+                  - 'generic "Target: 180M" [ref=e214]'
+                - generic [ref=e215]: Aug
+              - generic [ref=e216]:
+                - generic [ref=e217]:
+                  - 'generic "Revenue: 210M" [ref=e218]'
+                  - 'generic "Target: 190M" [ref=e219]'
+                - generic [ref=e220]: Sep
+              - generic [ref=e221]:
+                - generic [ref=e222]:
+                  - 'generic "Revenue: 185M" [ref=e223]'
+                  - 'generic "Target: 190M" [ref=e224]'
+                - generic [ref=e225]: Oct
+              - generic [ref=e226]:
+                - generic [ref=e227]:
+                  - 'generic "Revenue: 220M" [ref=e228]'
+                  - 'generic "Target: 200M" [ref=e229]'
+                - generic [ref=e230]: Nov
+              - generic [ref=e231]:
+                - generic [ref=e232]:
+                  - 'generic "Revenue: 245M" [ref=e233]'
+                  - 'generic "Target: 200M" [ref=e234]'
+                - generic [ref=e235]: Dec
+            - generic [ref=e236]:
+              - generic [ref=e239]: Revenue
+              - generic [ref=e242]: Target
+              - generic [ref=e243]: "Total: 2153M VND"
+          - generic [ref=e245]:
+            - generic [ref=e246]:
+              - heading "Today's Schedule" [level=3] [ref=e247]
+              - generic [ref=e248]: 0 appointments
+            - generic [ref=e249]:
+              - img [ref=e250]
+              - paragraph [ref=e253]: No appointments scheduled for today
+        - generic [ref=e254]:
+          - generic [ref=e256]:
+            - img [ref=e257]
+            - heading "Notifications" [level=3] [ref=e260]
+            - generic [ref=e261]: "2"
+          - generic [ref=e262]:
+            - button "Upcoming Appointment Nguyen Van A has an appointment at 2:00 PM today 10 min ago" [ref=e263] [cursor=pointer]:
+              - img [ref=e265]
+              - generic [ref=e268]:
+                - paragraph [ref=e269]: Upcoming Appointment
+                - paragraph [ref=e270]: Nguyen Van A has an appointment at 2:00 PM today
+                - paragraph [ref=e271]: 10 min ago
+            - button "Payment Received Payment of 5,000,000 VND received from Tran Thi B 25 min ago" [ref=e273] [cursor=pointer]:
+              - img [ref=e275]
+              - generic [ref=e277]:
+                - paragraph [ref=e278]: Payment Received
+                - paragraph [ref=e279]: Payment of 5,000,000 VND received from Tran Thi B
+                - paragraph [ref=e280]: 25 min ago
+            - button "New Customer Le Van C registered as a new customer 1 hour ago" [ref=e282] [cursor=pointer]:
+              - img [ref=e284]
+              - generic [ref=e287]:
+                - paragraph [ref=e288]: New Customer
+                - paragraph [ref=e289]: Le Van C registered as a new customer
+                - paragraph [ref=e290]: 1 hour ago
+            - button "System Update Monthly reports are ready for review 2 hours ago" [ref=e291] [cursor=pointer]:
+              - img [ref=e293]
+              - generic [ref=e296]:
+                - paragraph [ref=e297]: System Update
+                - paragraph [ref=e298]: Monthly reports are ready for review
+                - paragraph [ref=e299]: 2 hours ago
+            - button "Appointment Cancelled Pham Thi D cancelled their 4:30 PM appointment 3 hours ago" [ref=e300] [cursor=pointer]:
+              - img [ref=e302]
+              - generic [ref=e305]:
+                - paragraph [ref=e306]: Appointment Cancelled
+                - paragraph [ref=e307]: Pham Thi D cancelled their 4:30 PM appointment
+                - paragraph [ref=e308]: 3 hours ago

@@ -23,13 +23,13 @@ interface CustomerProfileProps {
   readonly onBack: () => void;
 }
 
-type ProfileTab = 'overview' | 'photos' | 'appointments' | 'treatments';
+type ProfileTab = 'profile' | 'appointments' | 'records' | 'payment';
 
 const TABS: readonly { readonly value: ProfileTab; readonly label: string }[] = [
-  { value: 'overview', label: 'Overview' },
-  { value: 'photos', label: 'Photos' },
+  { value: 'profile', label: 'Profile' },
   { value: 'appointments', label: 'Appointments' },
-  { value: 'treatments', label: 'Treatments' },
+  { value: 'records', label: 'Records' },
+  { value: 'payment', label: 'Payment' },
 ];
 
 function formatVND(amount: number): string {
@@ -37,7 +37,7 @@ function formatVND(amount: number): string {
 }
 
 export function CustomerProfile({ profile, photos, deposit, appointments, services, onBack }: CustomerProfileProps) {
-  const [activeTab, setActiveTab] = useState<ProfileTab>('overview');
+  const [activeTab, setActiveTab] = useState<ProfileTab>('profile');
 
   return (
     <div className="space-y-6">
@@ -174,26 +174,112 @@ export function CustomerProfile({ profile, photos, deposit, appointments, servic
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <DepositCard deposit={deposit} />
-          <div className="space-y-6">
+      {activeTab === 'profile' && (
+        <div className="space-y-6">
+          {/* Personal Info Card */}
+          <div className="bg-white rounded-xl shadow-card p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-gray-400">Full Name</p>
+                <p className="text-sm font-medium text-gray-900">{profile.name}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Phone</p>
+                <p className="text-sm font-medium text-gray-900">{profile.phone}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Email</p>
+                <p className="text-sm font-medium text-gray-900">{profile.email}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Date of Birth</p>
+                <p className="text-sm font-medium text-gray-900">{profile.dateOfBirth}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Gender</p>
+                <p className="text-sm font-medium text-gray-900">{profile.gender === 'male' ? 'Male' : 'Female'}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Address</p>
+                <p className="text-sm font-medium text-gray-900">{profile.address}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Location</p>
+                <p className="text-sm font-medium text-gray-900">{profile.locationName}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Member Since</p>
+                <p className="text-sm font-medium text-gray-900">{profile.memberSince}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white rounded-xl shadow-card p-4 border-l-4 border-primary">
+              <p className="text-xs text-gray-400">Total Visits</p>
+              <p className="text-xl font-bold text-gray-900">{profile.totalVisits}</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-card p-4 border-l-4 border-green-500">
+              <p className="text-xs text-gray-400">Deposit Balance</p>
+              <p className="text-xl font-bold text-green-600">{formatVND(deposit.balance)}</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-card p-4 border-l-4 border-blue-500">
+              <p className="text-xs text-gray-400">Total Spent</p>
+              <p className="text-xl font-bold text-blue-600">{formatVND(profile.totalSpent)}</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-card p-4 border-l-4 border-gray-400">
+              <p className="text-xs text-gray-400">Last Visit</p>
+              <p className="text-xl font-bold text-gray-700">{profile.lastVisit}</p>
+            </div>
+          </div>
+
+          {/* Photo Gallery */}
+          <PhotoGallery photos={photos} />
+
+          {/* Recent Activity Summary */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <AppointmentHistory appointments={appointments.slice(0, 3)} />
             <ServiceHistory services={services.slice(0, 3)} />
           </div>
         </div>
       )}
 
-      {activeTab === 'photos' && (
-        <PhotoGallery photos={photos} />
-      )}
-
       {activeTab === 'appointments' && (
-        <AppointmentHistory appointments={appointments} />
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold text-gray-900">All Appointments</h3>
+            <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm">
+              + Add Appointment
+            </button>
+          </div>
+          <AppointmentHistory appointments={appointments} />
+        </div>
       )}
 
-      {activeTab === 'treatments' && (
-        <ServiceHistory services={services} />
+      {activeTab === 'records' && (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold text-gray-900">Treatment Records</h3>
+            <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm">
+              + Add Service
+            </button>
+          </div>
+          <ServiceHistory services={services} />
+        </div>
+      )}
+
+      {activeTab === 'payment' && (
+        <div className="space-y-6">
+          <h3 className="text-lg font-semibold text-gray-900">Payment & Deposits</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <DepositCard deposit={deposit} />
+            <div className="bg-white rounded-xl shadow-card p-6">
+              <p className="text-sm text-gray-500">Outstanding balances and payment history will be integrated here.</p>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

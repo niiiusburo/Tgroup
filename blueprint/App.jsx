@@ -6,9 +6,6 @@ import {
   OverviewLayout,
   CalendarLayout,
   CustomersLayout,
-  AppointmentsLayout,
-  ServicesLayout,
-  PaymentLayout,
   EmployeesLayout,
   CommissionLayout,
   LocationsLayout,
@@ -19,13 +16,11 @@ import {
 } from "./components/layouts/index.js";
 
 // Map page IDs to their layout components
+// Note: Appointments, Records, and Payment are now tabs inside CustomersLayout
 const PAGE_LAYOUTS = {
   overview: OverviewLayout,
   calendar: CalendarLayout,
   customers: CustomersLayout,
-  appointments: AppointmentsLayout,
-  services: ServicesLayout,
-  payment: PaymentLayout,
   employees: EmployeesLayout,
   commission: CommissionLayout,
   locations: LocationsLayout,

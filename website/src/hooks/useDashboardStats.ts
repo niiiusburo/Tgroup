@@ -45,7 +45,7 @@ export function useDashboardStats(selectedLocationId?: string): DashboardStatsRe
         const appointmentsResponse = await fetchAppointments({
           limit: 1,
           dateFrom: todayStr,
-          dateTo: todayStr,
+          dateTo: `${todayStr}T23:59:59`,
           companyId,
         });
         setAppointmentsToday(appointmentsResponse.totalItems);

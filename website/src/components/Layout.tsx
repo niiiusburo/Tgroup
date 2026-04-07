@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Calendar,
@@ -19,10 +19,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
+  LogOut,
 } from 'lucide-react';
 import { NAVIGATION_ITEMS, type NavigationItem } from '@/constants';
 import { FilterByLocation } from '@/components/shared/FilterByLocation';
 import { useLocationFilter } from '@/contexts/LocationContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { MOCK_LOCATIONS } from '@/data/mockDashboard';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -40,6 +42,23 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   BarChart2: BarChart3,
   FolderOpen,
   Shield,
+};
+
+/** Maps route path to the permission required to see it in the nav */
+const NAV_PERMISSION: Record<string, string> = {
+  '/': 'overview.view',
+  '/calendar': 'calendar.view',
+  '/customers': 'customers.view',
+  '/appointments': 'appointments.view',
+  '/services': 'services.view',
+  '/payment': 'payment.view',
+  '/employees': 'employees.view',
+  '/locations': 'locations.view',
+  '/reports': 'reports.view',
+  '/commission': 'commission.view',
+  '/settings': 'settings.view',
+  '/notifications': 'notifications.view',
+  '/permissions': 'employees.edit',
 };
 
 interface SidebarItemProps {
@@ -95,11 +114,14 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
 /**
  * Main application layout with icon-only dark sidebar navigation
  * Matches the original TDental design system
+ * @crossref:uses[AuthContext, LocationContext, FilterByLocation]
  */
 export function Layout() {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
-  const { selectedLocationId, setSelectedLocationId } = useLocationFilter();
+  const { selectedLocationId, setSelectedLocationId, allowedLocations, isSingleLocation } = useLocationFilter();
+  const { user, permissions, hasPermission, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const currentPage = NAVIGATION_ITEMS.find(
     (item) =>
@@ -113,6 +135,30 @@ export function Layout() {
 
   const sidebarWidth = sidebarExpanded ? 'w-56' : 'w-[72px]';
   const contentMargin = sidebarExpanded ? 'ml-56' : 'ml-[72px]';
+
+  /** Filter nav items (and their children) by permission */
+  function isNavItemVisible(item: NavigationItem): boolean {
+    // If no permissions data yet, show everything (fallback to unrestricted)
+    if (!permissions) return true;
+    const required = NAV_PERMISSION[item.path];
+    if (!required) return true;
+    return hasPermission(required);
+  }
+
+  const visibleNavItems = NAVIGATION_ITEMS.filter(isNavItemVisible).map((item) => ({
+    ...item,
+    children: item.children?.filter(isNavItemVisible),
+  }));
+
+  function handleLogout() {
+    logout();
+    navigate('/login', { replace: true });
+  }
+
+  // User initials for avatar
+  const initials = user?.name
+    ? user.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
+    : '?';
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -140,22 +186,53 @@ export function Layout() {
 
         {/* Navigation */}
         <nav className={`flex-1 flex flex-col gap-1 w-full ${sidebarExpanded ? 'px-3' : 'px-3 items-center'}`}>
-          {NAVIGATION_ITEMS.map((item) => (
+          {visibleNavItems.map((item) => (
             <SidebarItem key={item.path} item={item} expanded={sidebarExpanded} />
           ))}
         </nav>
 
-        {/* Bottom: expand button (collapsed) or indicators (expanded) */}
-        <div className={`flex flex-col items-center gap-3 mt-4 ${sidebarExpanded ? 'px-3' : ''}`}>
-          {!sidebarExpanded && (
-            <button
-              onClick={() => setSidebarExpanded(true)}
-              className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
+        {/* Bottom: user info + logout */}
+        <div className={`flex flex-col gap-3 mt-4 ${sidebarExpanded ? 'px-3' : 'items-center'}`}>
+          {sidebarExpanded ? (
+            <>
+              {/* User info row */}
+              <div className="flex items-center gap-3 px-1">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs text-primary font-semibold">{initials}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white truncate">{user?.name ?? 'User'}</p>
+                  <p className="text-xs text-gray-400 truncate">{permissions?.groupName ?? ''}</p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  title="Sign out"
+                  className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-400 hover:bg-white/10 transition-colors flex-shrink-0"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setSidebarExpanded(true)}
+                className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+              {/* Avatar with logout on click-hold — keep simple: avatar opens expand */}
+              <button
+                onClick={handleLogout}
+                title="Sign out"
+                className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center hover:bg-red-500/20 transition-colors"
+              >
+                <span className="text-xs text-primary font-semibold">{initials}</span>
+              </button>
+            </>
           )}
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-2 justify-center">
             <div className="w-3 h-3 rounded-full bg-purple-500" />
             <div className="w-3 h-3 rounded-full bg-pink-500" />
           </div>
@@ -171,12 +248,14 @@ export function Layout() {
           </h1>
 
           <div className="flex items-center gap-4">
-            {/* Location Filter */}
-            <FilterByLocation
-              locations={MOCK_LOCATIONS}
-              selectedId={selectedLocationId}
-              onChange={setSelectedLocationId}
-            />
+            {/* Location Filter — hidden when user is locked to a single location */}
+            {!isSingleLocation && (
+              <FilterByLocation
+                locations={allowedLocations.length > 0 ? allowedLocations : MOCK_LOCATIONS}
+                selectedId={selectedLocationId}
+                onChange={setSelectedLocationId}
+              />
+            )}
 
             {/* Sparkles */}
             <button className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors duration-150">

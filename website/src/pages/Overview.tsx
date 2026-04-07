@@ -1,56 +1,82 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
-import { QuickActionsBar } from '@/components/shared/QuickActionsBar';
-import { NotificationsPanel } from '@/components/shared/NotificationsPanel';
-import { RevenueChartModule } from '@/components/modules/RevenueChartModule';
-import { StatCardModule } from '@/components/modules/StatCardModule';
-import { TodaySchedule } from '@/components/modules/TodaySchedule';
-import { useOverviewData } from '@/hooks/useOverviewData';
-import { useDashboardStats } from '@/hooks/useDashboardStats';
-import { useTodaySchedule } from '@/hooks/useTodaySchedule';
+import { useCallback } from 'react';
+import { PatientCheckIn } from '@/components/modules/PatientCheckIn';
+import { TodayServicesTable } from '@/components/modules/TodayServicesTable';
+import { TodayAppointments } from '@/components/modules/TodayAppointments';
+import { useOverviewAppointments, type OverviewAppointment } from '@/hooks/useOverviewAppointments';
 import { useLocationFilter } from '@/contexts/LocationContext';
 
 /**
- * Overview Dashboard Page
+ * Overview Dashboard Page — Three-Zone Layout
  * @crossref:route[/]
  * @crossref:used-in[AppRouter]
+ *
+ * Zone 1 (top-left):    Patient Check-in / Reception — downline status cards
+ * Zone 2 (bottom-left): Today's Services / Activity — service table
+ * Zone 3 (right):       Today's Appointments — master appointment list
  */
 export function Overview() {
   const { selectedLocationId } = useLocationFilter();
-  const {
-    notifications,
-    markNotificationRead,
-    revenueData,
-  } = useOverviewData();
 
-  const { stats } = useDashboardStats(selectedLocationId);
-  const { appointments } = useTodaySchedule(selectedLocationId);
+  const {
+    isLoading,
+    // Zone 3
+    zone3Filter,
+    setZone3Filter,
+    zone3Appointments,
+    zone3Counts,
+    markArrived,
+    markCancelled,
+    // Zone 1
+    zone1Filter,
+    setZone1Filter,
+    zone1Appointments,
+    zone1Counts,
+    updateCheckInStatus,
+  } = useOverviewAppointments(selectedLocationId);
+
+  const handleEditAppointment = useCallback((appointment: OverviewAppointment) => {
+    // TODO: Open appointment edit modal
+    console.log('Edit appointment:', appointment.id);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Dashboard Stats Cards */}
-      <StatCardModule stats={stats} />
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5 h-[calc(100vh-100px)]">
+      {/* Left column: Zone 1 + Zone 2 stacked */}
+      <div className="flex flex-col gap-5 min-h-0 overflow-y-auto">
+        {/* Zone 1: Patient Check-in */}
+        <PatientCheckIn
+          appointments={zone1Appointments}
+          filter={zone1Filter}
+          onFilterChange={setZone1Filter}
+          counts={zone1Counts}
+          onUpdateStatus={updateCheckInStatus}
+        />
 
-      {/* Quick Actions */}
-      <QuickActionsBar />
-
-      {/* Main content grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Revenue Chart - takes 2 columns */}
-        <div className="lg:col-span-2">
-          <RevenueChartModule data={revenueData} />
-        </div>
-
-        {/* Today's Schedule */}
-        <div className="lg:col-span-1">
-          <TodaySchedule appointments={appointments} />
-        </div>
+        {/* Zone 2: Today's Services */}
+        <TodayServicesTable locationId={selectedLocationId} />
       </div>
 
-      {/* Notifications Panel - full width */}
-      <NotificationsPanel
-        notifications={notifications}
-        onMarkRead={markNotificationRead}
-      />
+      {/* Right column: Zone 3 — full height */}
+      <div className="min-h-0">
+        <TodayAppointments
+          appointments={zone3Appointments}
+          filter={zone3Filter}
+          onFilterChange={setZone3Filter}
+          counts={zone3Counts}
+          onMarkArrived={markArrived}
+          onMarkCancelled={markCancelled}
+          onEdit={handleEditAppointment}
+        />
+      </div>
     </div>
   );
 }

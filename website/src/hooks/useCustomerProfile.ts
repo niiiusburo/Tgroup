@@ -54,7 +54,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
       // Fetch partner details
       const partner = await fetchPartnerById(customerId);
 
-      // Build DOB string
+      // Build DOB string from available fields
       const dob = [partner.birthday, partner.birthmonth, partner.birthyear]
         .filter(Boolean)
         .join('/') || 'N/A';
@@ -67,8 +67,6 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
       // Build tags from DB flags
       const tags: string[] = [];
       if (partner.treatmentstatus) tags.push(partner.treatmentstatus);
-      const partnerAny = partner as unknown as Record<string, unknown>;
-      if (partnerAny['potentiallevel']) tags.push(`Potential: ${partnerAny['potentiallevel']}`);
 
       const memberSince = partner.datecreated?.slice(0, 10) ?? 'N/A';
       const lastVisit = partner.lastupdated?.slice(0, 10) ?? 'N/A';
@@ -85,7 +83,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         medicalHistory: partner.medicalhistory ?? '',
         tags,
         memberSince,
-        totalVisits: 0,   // Populated from appointments (below)
+        totalVisits: 0,   // Populated from appointments below
         lastVisit,
         totalSpent: 0,    // Requires sale orders aggregation
         companyId: partner.companyid ?? '',
@@ -102,13 +100,12 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         setAppointments(aptRes.items);
         profileData.totalVisits = aptRes.totalItems;
         if (aptRes.totalItems > 0) {
-          // Use most recent appointment date as lastVisit
           const sorted = [...aptRes.items].sort(
             (a, b) => b.date.localeCompare(a.date),
           );
           profileData.lastVisit = sorted[0].date.slice(0, 10);
+          profileData.companyName = sorted[0].companyname ?? '';
         }
-        profileData.companyName = aptRes.items.length > 0 ? aptRes.items[0].companyname ?? '' : '';
       } catch {
         // Appointments fetch failed — keep zeros
         profileData.totalVisits = 0;

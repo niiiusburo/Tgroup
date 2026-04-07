@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"npm run build 2>&1\",\"timeout\":120000,\"description\":\"Build the website project\"}",
-  "error": "Exit code 1\n\n> tdental-website@0.0.0 build\n> tsc && vite build\n\nvite v5.4.21 building for production...\ntransforming...\n✓ 5 modules transformed.\nx Build failed in 273ms\nerror during build:\n[vite:css] [postcss] /Users/thuanle/Documents/TamTMV/Tgroup/.worktrees/track-setup/website/src/index.css:1:1: The `border-border` class does not exist. If `border-border` is a custom class, make sure it is defined within a `@layer` directive.\nfile: /Users/thuanle/Documents/TamTMV/Tgroup/.worktrees/track-setup/...",
-  "timestamp": "2026-04-07T06:26:19.335Z",
+  "tool_input_preview": "{\"command\":\"PGPASSWORD=postgres pg_dump -h 127.0.0.1 -p 55433 -U postgres -d tdental_demo --schema=dbo --no-owner --no-privileges > /Users/thuanle/Documents/TamTMV/Tgroup/website/demo_tdental_updated....",
+  "error": "Exit code 1\n[rerun: b45]",
+  "timestamp": "2026-04-07T12:12:58.534Z",
   "retry_count": 1
 }

@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Calendar, X, Users, Stethoscope, Star, Clock } from 'lucide-react';
+import { Mail, Phone, MapPin, Calendar, X, Users, Stethoscope, Star, Clock, Shield, Globe } from 'lucide-react';
 import {
   TIER_LABELS,
   TIER_STYLES,
@@ -7,14 +7,16 @@ import {
   STATUS_BADGE_STYLES,
   type Employee,
 } from '@/data/mockEmployees';
+import { MOCK_PERMISSION_GROUPS, MOCK_ASSIGNMENTS } from '@/data/mockPermissionGroups';
+import { MOCK_LOCATION_BRANCHES } from '@/data/mockLocations';
 import { ScheduleCalendar } from './ScheduleCalendar';
 import { LinkedEmployees } from './LinkedEmployees';
 import { ReferralCodeDisplay } from './ReferralCodeDisplay';
 
 /**
- * Employee detail profile panel — personal info, stats, linked data
+ * Employee detail profile panel — personal info, stats, linked data, permission group + location access
  * @crossref:used-in[Employees]
- * @crossref:uses[ScheduleCalendar, LinkedEmployees, ReferralCodeDisplay]
+ * @crossref:uses[ScheduleCalendar, LinkedEmployees, ReferralCodeDisplay, mockPermissionGroups]
  */
 
 interface EmployeeStats {
@@ -147,6 +149,75 @@ export function EmployeeProfile({
             <span>Hired {new Date(employee.hireDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
           </div>
         </div>
+
+        {/* Permissions & Access */}
+        {(() => {
+          const assignment = MOCK_ASSIGNMENTS.find((a) => a.employeeId === employee.id);
+          const group = assignment ? MOCK_PERMISSION_GROUPS.find((g) => g.id === assignment.groupId) : null;
+          if (!assignment || !group) return null;
+
+          const isAllLocations = assignment.locationScope.type === 'all';
+          const locationNames = isAllLocations
+            ? ['All Locations']
+            : assignment.locationScope.type === 'specific'
+            ? assignment.locationScope.locationIds
+                .map((id) => MOCK_LOCATION_BRANCHES.find((l) => l.id === id)?.district)
+                .filter(Boolean)
+            : [];
+
+          return (
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                Permissions & Access
+              </h3>
+              <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-6 h-6 rounded flex items-center justify-center"
+                    style={{ backgroundColor: `${group.color}15` }}
+                  >
+                    <Shield className="w-3.5 h-3.5" style={{ color: group.color }} />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">{group.name}</span>
+                  <span className="text-xs text-gray-400">({group.permissions.length} permissions)</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-gray-600">
+                  {isAllLocations ? (
+                    <Globe className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                  ) : (
+                    <MapPin className="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" />
+                  )}
+                  <div className="flex flex-wrap gap-1">
+                    {locationNames.map((name) => (
+                      <span
+                        key={name}
+                        className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${
+                          isAllLocations
+                            ? 'bg-primary/10 text-primary'
+                            : 'bg-gray-200 text-gray-700'
+                        }`}
+                      >
+                        {name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                {(assignment.overrides.grant.length > 0 || assignment.overrides.revoke.length > 0) && (
+                  <div className="text-[11px] text-gray-500 pt-1 border-t border-gray-200">
+                    {assignment.overrides.grant.length > 0 && (
+                      <span className="text-green-600">+{assignment.overrides.grant.length} extra</span>
+                    )}
+                    {assignment.overrides.grant.length > 0 && assignment.overrides.revoke.length > 0 && ' · '}
+                    {assignment.overrides.revoke.length > 0 && (
+                      <span className="text-red-500">-{assignment.overrides.revoke.length} revoked</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Weekly Schedule */}
         <div>

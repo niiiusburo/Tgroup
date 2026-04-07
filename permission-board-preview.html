@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TDental — Permission Board Preview</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --primary: #F97316;
+    --primary-light: #FFF7ED;
+    --primary-dark: #EA580C;
+    --bg: #F8FAFC;
+    --card: #FFFFFF;
+    --border: #E2E8F0;
+    --border-light: #F1F5F9;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
+    --text-light: #64748B;
+    --red: #EF4444;
+    --purple: #8B5CF6;
+    --blue: #0EA5E9;
+    --green: #10B981;
+    --amber: #F59E0B;
+    --radius: 12px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.04);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+  /* Header */
+  .header { margin-bottom: 24px; }
+  .header h1 { font-size: 22px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 10px; }
+  .header h1 .icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary-light); display: flex; align-items: center; justify-content: center; }
+  .header h1 .icon svg { width: 18px; height: 18px; color: var(--primary); }
+  .header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: var(--card); border-radius: 10px; padding: 4px; border: 1px solid var(--border); display: inline-flex; }
+  .tab { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: transparent; color: var(--text-light); transition: all 0.2s; }
+  .tab:hover { background: var(--border-light); color: var(--text-secondary); }
+  .tab.active { background: var(--primary); color: #fff; box-shadow: 0 1px 3px rgba(249,115,22,0.3); }
+
+  /* Architecture View */
+  .arch-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; align-items: start; }
+  .col-header { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .col-header .num { width: 18px; height: 18px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--text-light); }
+
+  /* Group Cards */
+  .group-card { text-align: left; padding: 14px; border-radius: var(--radius); cursor: pointer; border: 2px solid var(--border); background: var(--card); box-shadow: var(--shadow-sm); transition: all 0.2s; margin-bottom: 8px; display: block; width: 100%; position: relative; overflow: hidden; }
+  .group-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 4px 0 0 4px; }
+  .group-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .group-card.selected { border-color: var(--sel-color); background: color-mix(in srgb, var(--sel-color) 4%, white); box-shadow: 0 4px 12px color-mix(in srgb, var(--sel-color) 15%, transparent); }
+  .group-card .top { display: flex; align-items: center; gap: 10px; }
+  .group-card .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .group-card .info h3 { font-weight: 600; font-size: 14px; color: var(--text-primary); display: flex; align-items: center; gap: 6px; }
+  .group-card .info h3 .sys-badge { font-size: 10px; background: var(--border-light); color: var(--text-muted); padding: 1px 6px; border-radius: 4px; font-weight: 500; }
+  .group-card .info .desc { font-size: 11px; color: var(--text-muted); }
+  .group-card .meta { display: flex; gap: 8px; margin-top: 10px; }
+  .group-card .perm-count { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .group-card .member-count { font-size: 11px; color: var(--text-light); }
+
+  /* Employee Cards */
+  .emp-card { text-align: left; padding: 12px; border-radius: 10px; cursor: pointer; border: 2px solid var(--border); background: var(--card); transition: all 0.2s; margin-bottom: 6px; display: block; width: 100%; }
+  .emp-card:hover { box-shadow: var(--shadow); }
+  .emp-card.selected { border-color: var(--primary); background: var(--primary-light); }
+  .emp-card.highlighted { border-color: var(--hl-color); background: color-mix(in srgb, var(--hl-color) 4%, white); }
+  .emp-card.dimmed { opacity: 0.35; }
+  .emp-card .top { display: flex; align-items: center; gap: 10px; }
+  .emp-card .avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .emp-card .name { font-weight: 600; font-size: 13px; color: var(--text-primary); }
+  .emp-card .role { font-size: 11px; color: var(--text-muted); }
+  .emp-card .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .emp-card .tag { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+  .emp-card .loc-tag { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 4px; background: var(--border-light); color: var(--text-light); }
+  .emp-card .eff-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #FEF3C7; color: #92400E; }
+
+  /* Location Grid */
+  .loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .loc-item { padding: 8px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); background: var(--bg); color: var(--text-secondary); transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+  .loc-item .loc-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .loc-item.renovation .loc-dot { background: var(--amber); }
+  .loc-item.highlighted { border: 2px solid var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+  .loc-item .hq-badge { font-size: 9px; background: var(--primary-light); color: var(--primary); padding: 1px 4px; border-radius: 3px; font-weight: 600; }
+
+  /* Detail Panel */
+  .detail-panel { background: var(--card); border-radius: var(--radius); border: 2px solid var(--border); padding: 16px; margin-top: 16px; }
+  .detail-panel h3 { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+  .detail-panel .detail-row { font-size: 12px; color: var(--text-secondary); line-height: 1.8; }
+  .detail-panel .detail-row strong { color: var(--text-primary); }
+  .detail-panel .grant { color: #16A34A; }
+  .detail-panel .revoke { color: #DC2626; }
+  .detail-panel .divider { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+
+  /* Matrix */
+  .matrix-wrap { background: var(--card); border-radius: var(--radius); border: 2px solid var(--border); overflow: auto; }
+  .matrix-wrap table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .matrix-wrap th { text-align: center; padding: 12px 8px; border-bottom: 2px solid var(--border); font-weight: 600; color: var(--text-secondary); }
+  .matrix-wrap th:first-child { text-align: left; padding-left: 16px; position: sticky; left: 0; background: var(--bg); z-index: 1; min-width: 180px; }
+  .matrix-wrap thead th { background: var(--bg); }
+  .matrix-wrap td { padding: 8px; text-align: center; }
+  .matrix-wrap td:first-child { text-align: left; padding-left: 16px; position: sticky; left: 0; background: var(--card); z-index: 1; }
+  .matrix-wrap tr:nth-child(even) td { background: var(--bg); }
+  .matrix-wrap tr:nth-child(even) td:first-child { background: var(--bg); }
+  .matrix-wrap .mod-border td { border-bottom: 2px solid var(--border); }
+  .matrix-wrap .mod-name { font-weight: 600; color: var(--text-primary); }
+  .matrix-wrap .action-name { color: var(--text-muted); margin-left: 16px; font-size: 11px; }
+  .matrix-wrap .check { display: inline-flex; width: 22px; height: 22px; border-radius: 6px; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .matrix-wrap .no-check { color: var(--border); font-size: 13px; }
+  .group-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+
+  /* Flow */
+  .flow-section { display: flex; flex-direction: column; gap: 24px; }
+  .flow-steps { display: flex; align-items: stretch; gap: 0; background: var(--card); border-radius: var(--radius); border: 2px solid var(--border); padding: 24px; }
+  .flow-step { flex: 1; padding: 16px; border-radius: var(--radius); position: relative; }
+  .flow-step .step-num { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .flow-step h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .flow-step p { font-size: 11px; color: var(--text-light); line-height: 1.5; }
+  .flow-arrow { display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--text-muted); padding: 0 8px; flex-shrink: 0; }
+
+  .formula-box { background: var(--text-primary); border-radius: var(--radius); padding: 20px; color: var(--border); }
+  .formula-box .label { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
+  .formula-box code { font-family: 'SF Mono', 'Cascadia Code', monospace; font-size: 13px; line-height: 2.2; display: block; }
+  .formula-box .var-blue { color: #93C5FD; }
+  .formula-box .var-green { color: #86EFAC; }
+  .formula-box .var-yellow { color: #FDE68A; }
+  .formula-box .var-red { color: #FCA5A5; }
+  .formula-box .var-purple { color: #C4B5FD; }
+  .formula-box .op { color: var(--text-muted); }
+
+  .examples-box { background: var(--card); border-radius: var(--radius); border: 2px solid var(--border); padding: 20px; }
+  .examples-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
+  .example-row { padding: 14px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); margin-bottom: 8px; }
+  .example-row .top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .example-row .mini-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 700; }
+  .example-row .ename { font-weight: 600; font-size: 13px; }
+  .example-row .flow-text { font-size: 12px; color: var(--text-secondary); line-height: 1.8; margin-left: 36px; }
+
+  .tip-box { background: #F0FDF4; border-radius: var(--radius); border: 2px solid #BBF7D0; padding: 20px; }
+  .tip-box h3 { font-size: 14px; font-weight: 700; color: #15803D; margin-bottom: 8px; }
+  .tip-box p { font-size: 13px; color: var(--text-secondary); line-height: 1.8; }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 1024px) {
+    .arch-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1>
+      <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span>
+      Permission Board
+    </h1>
+    <p>Manage role-based access control for employees across all clinic locations</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchView('architecture')">Architecture</button>
+    <button class="tab" onclick="switchView('matrix')">Permission Matrix</button>
+    <button class="tab" onclick="switchView('flow')">Logic Flow</button>
+  </div>
+
+  <!-- Architecture View -->
+  <div id="view-architecture" class="arch-grid">
+    <div>
+      <div class="col-header"><span class="num">1</span> Permission Groups (WHAT)</div>
+      <div id="groups-col"></div>
+    </div>
+    <div>
+      <div class="col-header"><span class="num">2</span> Employees (WHO)</div>
+      <div id="employees-col"></div>
+    </div>
+    <div>
+      <div class="col-header"><span class="num">3</span> Locations (WHERE)</div>
+      <div style="background:var(--card);border-radius:var(--radius);border:2px solid var(--border);padding:16px;margin-bottom:16px;">
+        <div class="loc-grid" id="locations-grid"></div>
+      </div>
+      <div id="detail-panel"></div>
+    </div>
+  </div>
+
+  <!-- Matrix View -->
+  <div id="view-matrix" class="hidden"></div>
+
+  <!-- Flow View -->
+  <div id="view-flow" class="hidden"></div>
+</div>
+
+<script>
+const GROUPS = [
+  { id:"g-admin", name:"Admin", color:"#EF4444", desc:"Full system access", isSystem:true,
+    permissions:["overview.view","calendar.view","calendar.edit","customers.view","customers.add","customers.edit","customers.delete","appointments.view","appointments.add","appointments.edit","services.view","services.add","services.edit","payment.view","payment.add","payment.edit","payment.refund","employees.view","employees.add","employees.edit","locations.view","locations.add","locations.edit","reports.view","reports.export","commission.view","commission.edit","settings.view","settings.edit","notifications.view","notifications.edit"] },
+  { id:"g-manager", name:"Clinic Manager", color:"#8B5CF6", desc:"Operations, staff, finances",
+    permissions:["overview.view","calendar.view","calendar.edit","customers.view","customers.add","customers.edit","appointments.view","appointments.add","appointments.edit","services.view","services.add","services.edit","payment.view","payment.add","payment.edit","employees.view","employees.add","employees.edit","locations.view","reports.view","reports.export","commission.view","commission.edit","notifications.view","notifications.edit"] },
+  { id:"g-dentist", name:"Dentist", color:"#0EA5E9", desc:"Clinical care provider",
+    permissions:["overview.view","calendar.view","calendar.edit","customers.view","appointments.view","appointments.add","appointments.edit","services.view","commission.view"] },
+  { id:"g-receptionist", name:"Receptionist", color:"#10B981", desc:"Front desk operations",
+    permissions:["overview.view","calendar.view","calendar.edit","customers.view","customers.add","customers.edit","appointments.view","appointments.add","appointments.edit","payment.view","payment.add","payment.edit"] },
+  { id:"g-assistant", name:"Dental Assistant", color:"#F59E0B", desc:"Clinical support role",
+    permissions:["overview.view","calendar.view","customers.view","appointments.view","services.view"] },
+];
+
+const LOCATIONS = [
+  { id:"hq",  name:"Nha khoa Tấm Dentist", short:"HQ", isHQ:true },
+  { id:"gv",  name:"Tấm Dentist Gò Vấp",  short:"Gò Vấp" },
+  { id:"q10", name:"Tấm Dentist Quận 10",  short:"Quận 10" },
+  { id:"q3",  name:"Tấm Dentist Quận 3",   short:"Quận 3" },
+  { id:"q7",  name:"Tấm Dentist Quận 7",   short:"Quận 7" },
+  { id:"td",  name:"Tấm Dentist Thủ Đức",  short:"Thủ Đức" },
+  { id:"dd",  name:"Tấm Dentist Đống Đa",  short:"Đống Đa" },
+];
+
+const EMPLOYEES = [
+  { id:"e1",  name:"BS. Trang",    avatar:"BT",  role:"Bác sĩ Nha khoa",  groupId:"g-dentist",      locScope:["gv"], overrides:{grant:["reports.view"],revoke:[]} },
+  { id:"e2",  name:"BS. Trâm",     avatar:"BT",  role:"Bác sĩ Nha khoa",  groupId:"g-dentist",      locScope:["gv"], overrides:{grant:[],revoke:[]} },
+  { id:"e3",  name:"BS. Ly",       avatar:"BL",  role:"Bác sĩ Chỉnh nha", groupId:"g-dentist",      locScope:["gv"], overrides:{grant:[],revoke:[]} },
+  { id:"e4",  name:"BS. Khánh",    avatar:"BK",  role:"Bác sĩ Chỉnh nha", groupId:"g-dentist",      locScope:["gv"], overrides:{grant:[],revoke:[]} },
+  { id:"e5",  name:"BS. Dương",    avatar:"BD",  role:"Bác sĩ Chỉnh nha", groupId:"g-dentist",      locScope:["q10"], overrides:{grant:["employees.view"],revoke:[]} },
+  { id:"e6",  name:"BS. Uyên",     avatar:"BU",  role:"Bác sĩ Nha khoa",  groupId:"g-dentist",      locScope:["q10"], overrides:{grant:[],revoke:[]} },
+  { id:"e7",  name:"BS. Ý",        avatar:"BY",  role:"Bác sĩ Nha khoa",  groupId:"g-dentist",      locScope:["q3"], overrides:{grant:[],revoke:[]} },
+  { id:"e8",  name:"BS. Duy",      avatar:"BD",  role:"Bác sĩ Nha khoa",  groupId:"g-dentist",      locScope:["q3"], overrides:{grant:[],revoke:[]} },
+  { id:"e9",  name:"BS. Dũng",     avatar:"BD",  role:"Bác sĩ Nha khoa",  groupId:"g-dentist",      locScope:["q3"], overrides:{grant:[],revoke:[]} },
+  { id:"e10", name:"BS. Thu Thảo", avatar:"TT",  role:"Bác sĩ Nha khoa",  groupId:"g-manager",      locScope:["q7"], overrides:{grant:[],revoke:[]} },
+  { id:"e11", name:"BS. Thảo",     avatar:"BT",  role:"Bác sĩ Nha khoa",  groupId:"g-dentist",      locScope:["td"], overrides:{grant:[],revoke:[]} },
+  { id:"e12", name:"BS. Nga",      avatar:"BN",  role:"Bác sĩ Nha khoa",  groupId:"g-dentist",      locScope:["td"], overrides:{grant:[],revoke:[]} },
+  { id:"e13", name:"BS. Quyên",    avatar:"BQ",  role:"Bác sĩ Nha khoa",  groupId:"g-dentist",      locScope:["td"], overrides:{grant:[],revoke:[]} },
+  { id:"e14", name:"BS. Quyên B",  avatar:"QB",  role:"Bác sĩ Phẫu thuật",groupId:"g-dentist",      locScope:["td"], overrides:{grant:[],revoke:[]} },
+  { id:"e15", name:"BS. Hà",       avatar:"BH",  role:"Bác sĩ Nha khoa",  groupId:"g-dentist",      locScope:["dd"], overrides:{grant:[],revoke:[]} },
+  { id:"e16", name:"BS. Hải",      avatar:"BH",  role:"Bác sĩ Nha khoa",  groupId:"g-dentist",      locScope:["dd"], overrides:{grant:[],revoke:[]} },
+  { id:"e17", name:"BS. Minh",     avatar:"BM",  role:"Bác sĩ Phục hình", groupId:"g-dentist",      locScope:["dd"], overrides:{grant:[],revoke:[]} },
+  { id:"e18", name:"BS. Phương",   avatar:"BP",  role:"Bác sĩ Nha khoa",  groupId:"g-dentist",      locScope:["dd"], overrides:{grant:[],revoke:[]} },
+  { id:"e19", name:"BS. Linh",     avatar:"BL",  role:"Bác sĩ Nha khoa",  groupId:"g-dentist",      locScope:["dd"], overrides:{grant:[],revoke:[]} },
+];
+
+const MODULES = [
+  { name:"Overview",      actions:["View"] },
+  { name:"Calendar",      actions:["View","Edit"] },
+  { name:"Customers",     actions:["View","Add","Edit","Delete"] },
+  { name:"Appointments",  actions:["View","Add","Edit"] },
+  { name:"Services",      actions:["View","Add","Edit"] },
+  { name:"Payment",       actions:["View","Add","Edit","Refund"] },
+  { name:"Employees",     actions:["View","Add","Edit"] },
+  { name:"Locations",     actions:["View","Add","Edit"] },
+  { name:"Reports",       actions:["View","Export"] },
+  { name:"Commission",    actions:["View","Edit"] },
+  { name:"Settings",      actions:["View","Edit"] },
+  { name:"Notifications", actions:["View","Edit"] },
+];
+
+let state = { selectedGroup: null, selectedEmployee: null };
+
+function getEffective(emp) {
+  const g = GROUPS.find(g => g.id === emp.groupId);
+  if (!g) return [];
+  const s = new Set(g.permissions);
+  emp.overrides.grant.forEach(p => s.add(p));
+  emp.overrides.revoke.forEach(p => s.delete(p));
+  return [...s];
+}
+
+function switchView(v) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  ['architecture','matrix','flow'].forEach(id => {
+    document.getElementById('view-'+id).classList.toggle('hidden', id !== v);
+  });
+  state.selectedGroup = null; state.selectedEmployee = null;
+  renderAll();
+}
+
+function selectGroup(id) {
+  state.selectedGroup = state.selectedGroup === id ? null : id;
+  state.selectedEmployee = null;
+  renderAll();
+}
+
+function selectEmployee(id) {
+  state.selectedEmployee = state.selectedEmployee === id ? null : id;
+  state.selectedGroup = null;
+  renderAll();
+}
+
+function renderGroups() {
+  const el = document.getElementById('groups-col');
+  el.innerHTML = GROUPS.map(g => {
+    const members = EMPLOYEES.filter(e => e.groupId === g.id);
+    const sel = state.selectedGroup === g.id;
+    return `<button class="group-card ${sel?'selected':''}" style="--sel-color:${g.color}" onclick="selectGroup('${g.id}')">
+      <span style="position:absolute;left:0;top:0;bottom:0;width:4px;background:${g.color};border-radius:4px 0 0 4px;"></span>
+      <div class="top">
+        <span class="dot" style="background:${g.color}"></span>
+        <div class="info">
+          <h3>${g.name} ${g.isSystem?'<span class="sys-badge">System</span>':''}</h3>
+          <div class="desc">${g.desc}</div>
+        </div>
+      </div>
+      <div class="meta">
+        <span class="perm-count" style="background:${g.color}15;color:${g.color}">${g.permissions.length} permissions</span>
+        <span class="member-count">${members.length} member${members.length!==1?'s':''}</span>
+      </div>
+    </button>`;
+  }).join('');
+}
+
+function renderEmployees() {
+  const el = document.getElementById('employees-col');
+  el.innerHTML = EMPLOYEES.map(emp => {
+    const g = GROUPS.find(g => g.id === emp.groupId);
+    const sel = state.selectedEmployee === emp.id;
+    const hl = state.selectedGroup && emp.groupId === state.selectedGroup;
+    const dim = state.selectedGroup && !hl;
+    const eff = getEffective(emp);
+    const locNames = emp.locScope.map(id => LOCATIONS.find(l=>l.id===id)?.short).filter(Boolean);
+    const cls = sel ? 'selected' : hl ? 'highlighted' : dim ? 'dimmed' : '';
+    return `<button class="emp-card ${cls}" style="--hl-color:${g?.color}" onclick="selectEmployee('${emp.id}')">
+      <div class="top">
+        <span class="avatar" style="background:${g?.color||'#94A3B8'}">${emp.avatar}</span>
+        <div>
+          <div class="name">${emp.name}</div>
+          <div class="role">${emp.role}</div>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag" style="background:${g?.color}15;color:${g?.color}">${g?.name}</span>
+        <span class="loc-tag">${locNames.join(', ')}</span>
+        ${eff.length !== (g?.permissions.length||0) ? `<span class="eff-tag">${eff.length} effective</span>` : ''}
+      </div>
+    </button>`;
+  }).join('');
+}
+
+function renderLocations() {
+  const el = document.getElementById('locations-grid');
+  el.innerHTML = LOCATIONS.map(loc => {
+    let hl = false;
+    if (state.selectedEmployee) {
+      const emp = EMPLOYEES.find(e => e.id === state.selectedEmployee);
+      hl = emp?.locScope.includes(loc.id);
+    } else if (state.selectedGroup) {
+      const members = EMPLOYEES.filter(e => e.groupId === state.selectedGroup);
+      hl = members.some(m => m.locScope.includes(loc.id));
+    }
+    return `<div class="loc-item ${hl?'highlighted':''} ${loc.isHQ?'':''}">
+      <span class="loc-dot"></span>
+      ${loc.short || loc.name}
+      ${loc.isHQ ? '<span class="hq-badge">HQ</span>' : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderDetail() {
+  const el = document.getElementById('detail-panel');
+  const emp = state.selectedEmployee ? EMPLOYEES.find(e => e.id === state.selectedEmployee) : null;
+  const grp = state.selectedGroup ? GROUPS.find(g => g.id === state.selectedGroup) : null;
+
+  if (emp) {
+    const g = GROUPS.find(g => g.id === emp.groupId);
+    const eff = getEffective(emp);
+    const locNames = emp.locScope.map(id => LOCATIONS.find(l=>l.id===id)?.name).filter(Boolean);
+    el.innerHTML = `<div class="detail-panel">
+      <h3 style="color:${g?.color}">${emp.name}</h3>
+      <div class="detail-row">
+        <div><strong>Group:</strong> <span style="color:${g?.color};font-weight:600">${g?.name}</span></div>
+        <div><strong>Base permissions:</strong> ${g?.permissions.length}</div>
+        ${emp.overrides.grant.length ? `<div class="grant"><strong>+ Extra:</strong> ${emp.overrides.grant.join(', ')}</div>` : ''}
+        ${emp.overrides.revoke.length ? `<div class="revoke"><strong>- Revoked:</strong> ${emp.overrides.revoke.join(', ')}</div>` : ''}
+        <div><strong>Effective total:</strong> ${eff.length} permissions</div>
+        <div class="divider"><strong>Location access:</strong> ${locNames.join(', ')}</div>
+      </div>
+    </div>`;
+  } else if (grp) {
+    const members = EMPLOYEES.filter(e => e.groupId === grp.id);
+    const modCount = new Set(grp.permissions.map(p => p.split('.')[0])).size;
+    el.innerHTML = `<div class="detail-panel">
+      <h3 style="color:${grp.color}">${grp.name}</h3>
+      <div class="detail-row">
+        <div>${grp.desc}</div>
+        <div><strong>${grp.permissions.length}</strong> permissions across ${modCount} modules</div>
+        <div><strong>${members.length}</strong> employees assigned</div>
+      </div>
+    </div>`;
+  } else {
+    el.innerHTML = '<div class="detail-panel" style="text-align:center;color:var(--text-muted);font-size:13px;padding:32px 16px;">Click a group or employee to see details</div>';
+  }
+}
+
+function renderMatrix() {
+  const el = document.getElementById('view-matrix');
+  let html = '<div class="matrix-wrap"><table><thead><tr><th>Module / Action</th>';
+  GROUPS.forEach(g => {
+    html += `<th><span class="group-badge" style="background:${g.color}15;color:${g.color}">${g.name}</span></th>`;
+  });
+  html += '</tr></thead><tbody>';
+  MODULES.forEach(mod => {
+    mod.actions.forEach((action, ai) => {
+      const permId = `${mod.name.toLowerCase()}.${action.toLowerCase()}`;
+      const isLast = ai === mod.actions.length - 1;
+      html += `<tr class="${isLast?'mod-border':''}"><td>${ai===0?`<span class="mod-name">${mod.name}</span> `:''}${ai>0?'<span class="action-name">':'<span class="action-name">'}${action}</span></td>`;
+      GROUPS.forEach(g => {
+        const has = g.permissions.includes(permId);
+        html += `<td>${has ? `<span class="check" style="background:${g.color}15;color:${g.color}">&#10003;</span>` : '<span class="no-check">&mdash;</span>'}</td>`;
+      });
+      html += '</tr>';
+    });
+  });
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+}
+
+function renderFlow() {
+  const el = document.getElementById('view-flow');
+  const examples = EMPLOYEES.filter(e => e.overrides.grant.length > 0).slice(0, 3);
+
+  el.innerHTML = `<div class="flow-section">
+    <div class="flow-steps">
+      <div class="flow-step" style="background:#EFF6FF;border:1px solid #BFDBFE;">
+        <div class="step-num" style="background:#3B82F6;">1</div>
+        <h4 style="color:#1E40AF;">Permission Group</h4>
+        <p>Employee is assigned to a group (e.g., "Dentist"). This sets the <strong>base permissions</strong>.</p>
+      </div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step" style="background:#F0FDF4;border:1px solid #BBF7D0;">
+        <div class="step-num" style="background:#16A34A;">2</div>
+        <h4 style="color:#15803D;">Location Scope</h4>
+        <p>Choose specific branches via checkboxes. This limits <strong>where</strong> permissions apply.</p>
+      </div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step" style="background:#FEFCE8;border:1px solid #FDE68A;">
+        <div class="step-num" style="background:#CA8A04;">3</div>
+        <h4 style="color:#A16207;">Individual Overrides</h4>
+        <p><strong>+Grant</strong> extra permissions or <strong>-Revoke</strong> specific ones for edge cases.</p>
+      </div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step" style="background:#FAF5FF;border:1px solid #D8B4FE;">
+        <div class="step-num" style="background:#7C3AED;">R</div>
+        <h4 style="color:#6D28D9;">Effective Access</h4>
+        <p>= Group permissions + Grants - Revokes, scoped to assigned locations.</p>
+      </div>
+    </div>
+
+    <div class="formula-box">
+      <div class="label">RESOLUTION FORMULA</div>
+      <code>
+        <span class="var-blue">effective_permissions</span> <span class="op">=</span> <span class="var-green">group.permissions</span> <span class="op">+</span> <span class="var-yellow">overrides.grant</span> <span class="op">-</span> <span class="var-red">overrides.revoke</span><br>
+        <span class="var-blue">accessible_locations</span> <span class="op">=</span> <span class="var-purple">employee.locScope</span><br>
+        <span class="var-blue">can_access(module, location)</span> <span class="op">=</span> <span class="var-green">effective.has(module)</span> <span class="op">&&</span> <span class="var-yellow">locations.has(location)</span>
+      </code>
+    </div>
+
+    <div class="examples-box">
+      <h3>Live Examples</h3>
+      ${examples.map(emp => {
+        const g = GROUPS.find(gr => gr.id === emp.groupId);
+        const eff = getEffective(emp);
+        const locNames = emp.locScope.map(id => LOCATIONS.find(l=>l.id===id)?.short).filter(Boolean);
+        return `<div class="example-row">
+          <div class="top">
+            <span class="mini-avatar" style="background:${g?.color}">${emp.avatar}</span>
+            <span class="ename">${emp.name}</span>
+          </div>
+          <div class="flow-text">
+            <span class="group-badge" style="background:${g?.color}15;color:${g?.color}">${g?.name}</span>
+            &rarr; <strong>${g?.permissions.length}</strong> base
+            ${emp.overrides.grant.length ? `<span style="color:#16A34A"> + ${emp.overrides.grant.length} granted</span>` : ''}
+            = <strong>${eff.length}</strong> effective
+            &middot; ${locNames.join(', ')}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="tip-box">
+      <h3>Adding New Employee Types</h3>
+      <p>
+        Want to add a "Consultant" or "Intern" type? Just:<br>
+        <strong>1.</strong> Create a new Permission Group with the right module access<br>
+        <strong>2.</strong> Assign employees to it + pick their locations<br>
+        <strong>3.</strong> Override individual permissions if needed<br>
+        No code changes needed — it's all configuration.
+      </p>
+    </div>
+  </div>`;
+}
+
+function renderAll() {
+  renderGroups();
+  renderEmployees();
+  renderLocations();
+  renderDetail();
+  renderMatrix();
+  renderFlow();
+}
+
+renderAll();
+</script>
+</body>
+</html>
