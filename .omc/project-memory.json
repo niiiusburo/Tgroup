@@ -104,21 +104,51 @@
   },
   "hotPaths": [
     {
+      "path": "website/src/pages/Overview.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1775544154177,
+      "type": "file"
+    },
+    {
       "path": "website/package.json",
-      "accessCount": 2,
-      "lastAccessed": 1775543638591,
+      "accessCount": 3,
+      "lastAccessed": 1775544056229,
       "type": "file"
     },
     {
       "path": "website/src/App.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1775543643129,
+      "accessCount": 3,
+      "lastAccessed": 1775544062039,
       "type": "file"
     },
     {
       "path": "website/src/constants/index.ts",
-      "accessCount": 2,
-      "lastAccessed": 1775543643344,
+      "accessCount": 3,
+      "lastAccessed": 1775544062327,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/Layout.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1775544067803,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/index.ts",
+      "accessCount": 3,
+      "lastAccessed": 1775544068238,
+      "type": "file"
+    },
+    {
+      "path": "website/tsconfig.json",
+      "accessCount": 3,
+      "lastAccessed": 1775544073345,
+      "type": "file"
+    },
+    {
+      "path": "website/tailwind.config.js",
+      "accessCount": 3,
+      "lastAccessed": 1775544073647,
       "type": "file"
     },
     {
@@ -134,39 +164,9 @@
       "type": "file"
     },
     {
-      "path": "website/tailwind.config.js",
-      "accessCount": 2,
-      "lastAccessed": 1775543645114,
-      "type": "file"
-    },
-    {
       "path": "website/vite.config.ts",
       "accessCount": 2,
       "lastAccessed": 1775543645429,
-      "type": "file"
-    },
-    {
-      "path": "website/tsconfig.json",
-      "accessCount": 2,
-      "lastAccessed": 1775543645849,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/Layout.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1775543652054,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/index.ts",
-      "accessCount": 2,
-      "lastAccessed": 1775543652284,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Overview.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1775543652738,
       "type": "file"
     },
     {
@@ -245,6 +245,48 @@
       "path": "website/postcss.config.js",
       "accessCount": 1,
       "lastAccessed": 1775543099599,
+      "type": "file"
+    },
+    {
+      "path": "website/src/vite-env.d.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775544068943,
+      "type": "file"
+    },
+    {
+      "path": "website/src/data/mockDashboard.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775544106315,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/shared/QuickActionsBar.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775544111172,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/shared/NotificationsPanel.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775544121092,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/modules/RevenueChartModule.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775544132192,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/shared/FilterByLocation.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775544138905,
+      "type": "file"
+    },
+    {
+      "path": "website/src/hooks/useOverviewData.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775544141845,
       "type": "file"
     }
   ],
