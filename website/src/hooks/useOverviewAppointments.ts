@@ -121,7 +121,10 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
         companyId: locationId && locationId !== 'all' ? locationId : undefined,
       });
 
-      setAppointments(response.items.map(mapApiToOverview));
+      const mapped = response.items.map(mapApiToOverview);
+      // Sort by time ascending (earliest first) — stable sort so status changes don't reorder
+      mapped.sort((a, b) => a.time.localeCompare(b.time));
+      setAppointments(mapped);
     } catch (error) {
       console.error('Failed to load overview appointments:', error);
       setAppointments([]);
