@@ -1,11 +1,9 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
-import { LayoutDashboard } from 'lucide-react';
 import { QuickActionsBar } from '@/components/shared/QuickActionsBar';
 import { NotificationsPanel } from '@/components/shared/NotificationsPanel';
 import { RevenueChartModule } from '@/components/modules/RevenueChartModule';
 import { StatCardModule } from '@/components/modules/StatCardModule';
 import { TodaySchedule } from '@/components/modules/TodaySchedule';
-import { FilterByLocation } from '@/components/shared/FilterByLocation';
 import { useOverviewData } from '@/hooks/useOverviewData';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useTodaySchedule } from '@/hooks/useTodaySchedule';
@@ -15,12 +13,10 @@ import { useLocationFilter } from '@/contexts/LocationContext';
  * Overview Dashboard Page
  * @crossref:route[/]
  * @crossref:used-in[AppRouter]
- * @crossref:uses[QuickActionsBar, NotificationsPanel, RevenueChartModule, StatCardModule, TodaySchedule, FilterByLocation, useLocationFilter]
  */
 export function Overview() {
-  const { selectedLocationId, setSelectedLocationId } = useLocationFilter();
+  const { selectedLocationId } = useLocationFilter();
   const {
-    locations,
     notifications,
     markNotificationRead,
     revenueData,
@@ -31,28 +27,7 @@ export function Overview() {
 
   return (
     <div className="space-y-6">
-      {/* Page header with location filter */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <LayoutDashboard className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
-            <p className="text-sm text-gray-500">Dashboard and clinic insights</p>
-          </div>
-        </div>
-
-        {/* @crossref:used-in[Overview, Calendar, Customers] */}
-        <FilterByLocation
-          locations={locations}
-          selectedId={selectedLocationId}
-          onChange={setSelectedLocationId}
-        />
-      </div>
-
       {/* Dashboard Stats Cards */}
-      {/* @crossref:used-in[Overview, Reports, LocationDashboard] */}
       <StatCardModule stats={stats} />
 
       {/* Quick Actions */}
@@ -66,7 +41,6 @@ export function Overview() {
         </div>
 
         {/* Today's Schedule */}
-        {/* @crossref:used-in[Overview, CalendarPage] */}
         <div className="lg:col-span-1">
           <TodaySchedule appointments={appointments} />
         </div>
