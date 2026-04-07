@@ -1,17 +1,17 @@
 /**
- * useServices - Service records CRUD, filtering, and multi-visit tracking
+ * useServices - Service records from API (Sale Orders), filtering, and multi-visit tracking
  * @crossref:used-in[Services, Customers, Payment]
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
-  MOCK_SERVICE_RECORDS,
   type ServiceRecord,
   type ServiceStatus,
   type ServiceVisit,
   type VisitStatus,
 } from '@/data/mockServices';
 import type { AppointmentType } from '@/constants';
+import { fetchSaleOrders, type ApiSaleOrder } from '@/lib/api';
 
 export type ServiceFilter = 'all' | ServiceStatus;
 export type CategoryFilter = 'all' | AppointmentType;
@@ -35,13 +35,108 @@ export interface CreateServiceInput {
   readonly toothNumbers: readonly string[];
 }
 
-export function useServices() {
-  const [records, setRecords] = useState<ServiceRecord[]>(
-    [...MOCK_SERVICE_RECORDS],
-  );
+/**
+ * Map ApiSaleOrder to ServiceRecord interface
+ */
+function mapSaleOrderToServiceRecord(order: ApiSaleOrder): ServiceRecord {
+  const statusMap: Record<string, ServiceStatus> = {
+    sale: 'active',
+    done: 'completed',
+    cancel: 'cancelled',
+  };
+
+  const status = (statusMap[order.state || ''] || 'planned') as ServiceStatus;
+  const completedVisits = status === 'completed' ? 1 : 0;
+
+  return {
+    id: order.id,
+    customerId: order.partnerid || '',
+    customerName: order.partnername || '',
+    customerPhone: '',
+    catalogItemId: '',
+    serviceName: order.name || '',
+    category: 'treatment' as AppointmentType,
+    doctorId: order.doctorid || '',
+    doctorName: order.doctorname || '',
+    locationId: order.companyid || '',
+    locationName: order.companyname || '',
+    status,
+    totalVisits: 1,
+    completedVisits,
+    totalCost: parseFloat(order.amounttotal || '0') || 0,
+    paidAmount: parseFloat(order.totalpaid || '0') || 0,
+    startDate: order.datecreated?.slice(0, 10) || '',
+    expectedEndDate: '',
+    notes: '',
+    toothNumbers: [],
+    visits: [],
+    createdAt: order.datecreated?.slice(0, 10) || '',
+  };
+}
+
+export function useServices(selectedLocationId?: string) {
+  const [records, setRecords] = useState<ServiceRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<ServiceFilter>('all');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /**
+   * Load service records from API (Sale Orders)
+   */
+  const fetchRecords = useCallback(async (search?: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetchSaleOrders({
+        offset: 0,
+        limit: 500,
+        search,
+        companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
+      });
+      setRecords(response.items.map(mapSaleOrderToServiceRecord));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load service records');
+      setRecords([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * Refetch with current search term
+   */
+  const refetch = useCallback(() => {
+    fetchRecords(searchTerm || undefined);
+  }, [fetchRecords, searchTerm]);
+
+  /**
+   * Load records on mount
+   */
+  useEffect(() => {
+    fetchRecords();
+  }, [fetchRecords]);
+
+  /**
+   * Debounced search
+   */
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      fetchRecords(searchTerm || undefined);
+    }, 300);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [searchTerm, fetchRecords]);
 
   const filtered = useMemo(() => {
     let result: readonly ServiceRecord[] = records;
@@ -52,19 +147,9 @@ export function useServices() {
     if (categoryFilter !== 'all') {
       result = result.filter((r) => r.category === categoryFilter);
     }
-    if (searchTerm) {
-      const lower = searchTerm.toLowerCase();
-      result = result.filter(
-        (r) =>
-          r.customerName.toLowerCase().includes(lower) ||
-          r.customerPhone.includes(lower) ||
-          r.serviceName.toLowerCase().includes(lower) ||
-          r.doctorName.toLowerCase().includes(lower),
-      );
-    }
 
     return [...result].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  }, [records, statusFilter, categoryFilter, searchTerm]);
+  }, [records, statusFilter, categoryFilter]);
 
   const stats = useMemo(() => ({
     total: records.length,
@@ -75,6 +160,9 @@ export function useServices() {
     outstanding: records.reduce((sum, r) => sum + (r.totalCost - r.paidAmount), 0),
   }), [records]);
 
+  /**
+   * Create a service record locally (no API endpoint for this)
+   */
   const createServiceRecord = useCallback((input: CreateServiceInput) => {
     const visits: ServiceVisit[] = Array.from({ length: input.totalVisits }, (_, i) => ({
       id: `v-new-${Date.now()}-${i + 1}`,
@@ -102,6 +190,9 @@ export function useServices() {
     return newRecord;
   }, []);
 
+  /**
+   * Update visit status in a service record (local-only)
+   */
   const updateVisitStatus = useCallback((recordId: string, visitId: string, status: VisitStatus) => {
     setRecords((prev) =>
       prev.map((record) => {
@@ -122,6 +213,9 @@ export function useServices() {
     );
   }, []);
 
+  /**
+   * Cancel a service record (local-only)
+   */
   const cancelServiceRecord = useCallback((recordId: string) => {
     setRecords((prev) =>
       prev.map((r) =>
@@ -130,6 +224,9 @@ export function useServices() {
     );
   }, []);
 
+  /**
+   * Get all records for a specific customer
+   */
   const getRecordsByCustomer = useCallback((customerId: string) =>
     records.filter((r) => r.customerId === customerId),
   [records]);
@@ -138,6 +235,8 @@ export function useServices() {
     records: filtered,
     allRecords: records,
     stats,
+    loading,
+    error,
     statusFilter,
     setStatusFilter,
     categoryFilter,
@@ -148,5 +247,6 @@ export function useServices() {
     updateVisitStatus,
     cancelServiceRecord,
     getRecordsByCustomer,
+    refetch,
   };
 }

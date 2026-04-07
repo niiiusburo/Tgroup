@@ -3,7 +3,7 @@
  * Payment Page - Deposit wallet, payment form, outstanding balances, and payment history
  * @crossref:route[/payment]
  * @crossref:used-in[App]
- * @crossref:uses[DepositWallet, PaymentForm, OutstandingBalance, PaymentHistory, MonthlyPlanCreator, PaymentSchedule, usePayment, useMonthlyPlans, FilterByLocation, useLocationFilter]
+ * @crossref:uses[DepositWallet, PaymentForm, OutstandingBalance, PaymentHistory, MonthlyPlanCreator, PaymentSchedule, usePayment, useMonthlyPlans, useLocationFilter]
  */
 
 import { useState } from 'react';
@@ -18,9 +18,7 @@ import { OutstandingBalance } from '@/components/payment/OutstandingBalance';
 import { PaymentHistory } from '@/components/payment/PaymentHistory';
 import { usePayment } from '@/hooks/usePayment';
 import { useMonthlyPlans } from '@/hooks/useMonthlyPlans';
-import { FilterByLocation } from '@/components/shared/FilterByLocation';
 import { useLocationFilter } from '@/contexts/LocationContext';
-import { MOCK_LOCATIONS } from '@/data/mockDashboard';
 import type { PlanStatus } from '@/data/mockMonthlyPlans';
 
 type ActiveTab = 'payments' | 'plans';
@@ -37,7 +35,7 @@ const PLAN_STATUS_FILTERS: readonly { readonly value: PlanStatus | 'all'; readon
 ];
 
 export function Payment() {
-  const { selectedLocationId, setSelectedLocationId } = useLocationFilter();
+  const { selectedLocationId } = useLocationFilter();
   const [activeTab, setActiveTab] = useState<ActiveTab>('payments');
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showCreator, setShowCreator] = useState(false);
@@ -54,7 +52,7 @@ export function Payment() {
     setSearchTerm,
     createPayment,
     topUpWallet,
-  } = usePayment();
+  } = usePayment(selectedLocationId);
 
   // Monthly plans hook
   const {
@@ -99,11 +97,6 @@ export function Payment() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <FilterByLocation
-            locations={MOCK_LOCATIONS}
-            selectedId={selectedLocationId}
-            onChange={setSelectedLocationId}
-          />
         <div className="flex gap-2">
           {activeTab === 'payments' && (
             <button

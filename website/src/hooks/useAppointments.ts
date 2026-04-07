@@ -1,15 +1,20 @@
 /**
- * useAppointments - Appointment CRUD and status management hook
+ * useAppointments - Appointment CRUD and status management hook with API integration
  * @crossref:used-in[Appointments, Calendar, Overview]
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
-  MOCK_MANAGED_APPOINTMENTS,
   CHECK_IN_FLOW_ORDER,
   type ManagedAppointment,
   type CheckInStatus,
 } from '@/data/mockAppointments';
+import {
+  fetchAppointments,
+  createAppointment as apiCreateAppointment,
+  updateAppointment as apiUpdateAppointment,
+  type ApiAppointment,
+} from '@/lib/api';
 import type { AppointmentStatus } from '@/data/mockCalendar';
 import type { AppointmentType } from '@/constants';
 
@@ -37,14 +42,142 @@ function nowTimeString(): string {
   return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 }
 
-export function useAppointments() {
-  const [appointments, setAppointments] = useState<ManagedAppointment[]>(
-    [...MOCK_MANAGED_APPOINTMENTS],
-  );
+function parseDate(dateString: string): string {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function parseTime(timeString: string | null, datetimeString: string | null): string {
+  if (timeString) return timeString;
+  if (datetimeString) {
+    const date = new Date(datetimeString);
+    if (!isNaN(date.getTime())) {
+      return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    }
+  }
+  return '09:00';
+}
+
+function calculateEndTime(startTime: string, durationMinutes: number | null): string {
+  const duration = durationMinutes || 30;
+  const [hours, minutes] = startTime.split(':').map(Number);
+  const totalMinutes = hours * 60 + minutes + duration;
+  const endHours = Math.floor(totalMinutes / 60);
+  const endMinutes = totalMinutes % 60;
+  return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+}
+
+function mapApiToManagedAppointment(api: ApiAppointment): ManagedAppointment {
+  const startTime = parseTime(api.time, api.datetimeappointment);
+  const endTime = calculateEndTime(startTime, api.timeexpected);
+  const date = parseDate(api.date);
+
+  const state = api.state?.toLowerCase() || '';
+  let status: AppointmentStatus = 'scheduled';
+  if (state === 'confirmed') status = 'confirmed';
+  else if (state === 'cancel') status = 'cancelled';
+  else if (state === 'done') status = 'completed';
+
+  let checkInStatus: CheckInStatus = 'not-arrived';
+  if (state === 'done') checkInStatus = 'done';
+  else if (state === 'confirmed') checkInStatus = 'not-arrived';
+
+  return {
+    id: api.id,
+    customerId: api.partnerid || '',
+    customerName: api.partnername || '',
+    customerPhone: api.partnerphone || '',
+    doctorId: api.doctorid || '',
+    doctorName: api.doctorname || '',
+    locationId: api.companyid || '',
+    locationName: api.companyname || '',
+    appointmentType: 'consultation' as const,
+    serviceName: api.name || api.note || '',
+    date,
+    startTime,
+    endTime,
+    status,
+    checkInStatus,
+    arrivalTime: null,
+    treatmentStartTime: null,
+    completionTime: null,
+    notes: api.note || '',
+    convertedToServiceId: null,
+  };
+}
+
+export function useAppointments(selectedLocationId?: string) {
+  const [appointments, setAppointments] = useState<ManagedAppointment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<AppointmentFilter>('all');
   const [checkInFilter, setCheckInFilter] = useState<CheckInFilter>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState<string>('');
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Initial load and refetch
+  const refetch = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetchAppointments({
+        offset: 0,
+        limit: 200,
+        companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
+      });
+      const managed = response.items.map(mapApiToManagedAppointment);
+      setAppointments(managed);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to fetch appointments';
+      setError(message);
+      console.error('Failed to fetch appointments:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Load appointments on mount
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  // Debounced search with API call
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+
+    if (!searchTerm) {
+      refetch();
+      return;
+    }
+
+    setLoading(true);
+    searchDebounceRef.current = setTimeout(async () => {
+      try {
+        const response = await fetchAppointments({
+          offset: 0,
+          limit: 200,
+          search: searchTerm,
+          companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
+        });
+        const managed = response.items.map(mapApiToManagedAppointment);
+        setAppointments(managed);
+        setError(null);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Search failed';
+        setError(message);
+        console.error('Search failed:', err);
+      } finally {
+        setLoading(false);
+      }
+    }, 300);
+
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, [searchTerm, refetch]);
 
   const filtered = useMemo(() => {
     let result = appointments;
@@ -58,37 +191,41 @@ export function useAppointments() {
     if (dateFilter) {
       result = result.filter((a) => a.date === dateFilter);
     }
-    if (searchTerm) {
-      const lower = searchTerm.toLowerCase();
-      result = result.filter(
-        (a) =>
-          a.customerName.toLowerCase().includes(lower) ||
-          a.customerPhone.includes(lower) ||
-          a.doctorName.toLowerCase().includes(lower) ||
-          a.serviceName.toLowerCase().includes(lower),
-      );
-    }
 
     return result.sort((a, b) => {
       const dateCompare = a.date.localeCompare(b.date);
       if (dateCompare !== 0) return dateCompare;
       return a.startTime.localeCompare(b.startTime);
     });
-  }, [appointments, statusFilter, checkInFilter, searchTerm, dateFilter]);
+  }, [appointments, statusFilter, checkInFilter, dateFilter]);
 
-  const createAppointment = useCallback((input: CreateAppointmentInput) => {
-    const newAppointment: ManagedAppointment = {
-      ...input,
-      id: `apt-${Date.now()}`,
-      status: 'scheduled',
-      checkInStatus: 'not-arrived',
-      arrivalTime: null,
-      treatmentStartTime: null,
-      completionTime: null,
-      convertedToServiceId: null,
-    };
-    setAppointments((prev) => [...prev, newAppointment]);
-    return newAppointment;
+  const createAppointment = useCallback(async (input: CreateAppointmentInput) => {
+    try {
+      const apiPayload: Partial<ApiAppointment> = {
+        partnerid: input.customerId,
+        partnername: input.customerName,
+        partnerphone: input.customerPhone,
+        doctorid: input.doctorId,
+        doctorname: input.doctorName,
+        companyid: input.locationId,
+        companyname: input.locationName,
+        name: input.serviceName,
+        date: input.date,
+        time: input.startTime,
+        note: input.notes,
+        state: 'scheduled',
+      };
+
+      const created = await apiCreateAppointment(apiPayload);
+      const managed = mapApiToManagedAppointment(created);
+      setAppointments((prev) => [...prev, managed]);
+      return managed;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to create appointment';
+      setError(message);
+      console.error('Failed to create appointment:', err);
+      throw err;
+    }
   }, []);
 
   const advanceCheckIn = useCallback((appointmentId: string) => {
@@ -111,22 +248,44 @@ export function useAppointments() {
     );
   }, []);
 
-  const updateStatus = useCallback((appointmentId: string, status: AppointmentStatus) => {
-    setAppointments((prev) =>
-      prev.map((apt) =>
-        apt.id === appointmentId ? { ...apt, status } : apt,
-      ),
-    );
-  }, []);
+  const updateStatus = useCallback(async (appointmentId: string, status: AppointmentStatus) => {
+    try {
+      const appointment = appointments.find((a) => a.id === appointmentId);
+      if (!appointment) return;
 
-  const cancelAppointment = useCallback((appointmentId: string) => {
-    setAppointments((prev) =>
-      prev.map((apt) =>
-        apt.id === appointmentId
-          ? { ...apt, status: 'cancelled' as const, checkInStatus: 'not-arrived' as const }
-          : apt,
-      ),
-    );
+      const apiStatus = status === 'completed' ? 'done' : status;
+      await apiUpdateAppointment(appointmentId, { state: apiStatus });
+
+      setAppointments((prev) =>
+        prev.map((apt) =>
+          apt.id === appointmentId ? { ...apt, status } : apt,
+        ),
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to update status';
+      setError(message);
+      console.error('Failed to update appointment status:', err);
+      throw err;
+    }
+  }, [appointments]);
+
+  const cancelAppointment = useCallback(async (appointmentId: string) => {
+    try {
+      await apiUpdateAppointment(appointmentId, { state: 'cancel' });
+
+      setAppointments((prev) =>
+        prev.map((apt) =>
+          apt.id === appointmentId
+            ? { ...apt, status: 'cancelled' as const, checkInStatus: 'not-arrived' as const }
+            : apt,
+        ),
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to cancel appointment';
+      setError(message);
+      console.error('Failed to cancel appointment:', err);
+      throw err;
+    }
   }, []);
 
   const convertToService = useCallback((appointmentId: string) => {
@@ -173,5 +332,8 @@ export function useAppointments() {
     updateStatus,
     cancelAppointment,
     convertToService,
+    loading,
+    error,
+    refetch,
   };
 }

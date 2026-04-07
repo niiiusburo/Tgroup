@@ -1,22 +1,20 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { UserCog, Search, X } from 'lucide-react';
 import { useEmployees } from '@/hooks/useEmployees';
+import { useLocationFilter } from '@/contexts/LocationContext';
 import { TierSelector } from '@/components/employees/TierSelector';
 import { RoleMultiSelect } from '@/components/employees/RoleMultiSelect';
 import { EmployeeTable } from '@/components/employees/EmployeeTable';
 import { EmployeeProfile } from '@/components/employees/EmployeeProfile';
-import { FilterByLocation } from '@/components/shared/FilterByLocation';
-import { useLocationFilter } from '@/contexts/LocationContext';
-import { MOCK_LOCATIONS } from '@/data/mockDashboard';
 
 /**
  * Employees Page — staff management with list view and detailed profiles
  * @crossref:route[/employees]
  * @crossref:used-in[App]
- * @crossref:uses[EmployeeTable, EmployeeProfile, TierSelector, FilterByLocation, useLocationFilter]
+ * @crossref:uses[EmployeeTable, EmployeeProfile, TierSelector, useLocationFilter]
  */
 export function Employees() {
-  const { selectedLocationId, setSelectedLocationId } = useLocationFilter();
+  const { selectedLocationId } = useLocationFilter();
   const {
     employees,
     selectedEmployee,
@@ -32,7 +30,7 @@ export function Employees() {
     setStatusFilter,
     getLinkedEmployees,
     clearFilters,
-  } = useEmployees();
+  } = useEmployees(selectedLocationId);
 
   const hasFilters = searchQuery || tierFilter !== 'all' || roleFilter !== 'all' || statusFilter !== 'all';
 
@@ -71,11 +69,6 @@ export function Employees() {
               className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </div>
-          <FilterByLocation
-            locations={MOCK_LOCATIONS}
-            selectedId={selectedLocationId}
-            onChange={setSelectedLocationId}
-          />
         </div>
 
         {/* Status filter */}

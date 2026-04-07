@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Users,
   CalendarCheck,
@@ -6,6 +6,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import type { StatCardData } from '@/components/modules/StatCardModule';
+import { fetchPartners, fetchAppointments, fetchSaleOrders } from '@/lib/api';
 
 /**
  * Hook for dashboard statistics data
@@ -17,13 +18,64 @@ interface DashboardStatsResult {
   readonly isLoading: boolean;
 }
 
-export function useDashboardStats(): DashboardStatsResult {
-  const stats = useMemo<readonly StatCardData[]>(
-    () => [
+export function useDashboardStats(selectedLocationId?: string): DashboardStatsResult {
+  const [isLoading, setIsLoading] = useState(true);
+  const [totalPatients, setTotalPatients] = useState(0);
+  const [appointmentsToday, setAppointmentsToday] = useState(0);
+  const [revenue, setRevenue] = useState(0);
+
+  const companyId =
+    selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined;
+
+  useEffect(() => {
+    async function loadStats() {
+      setIsLoading(true);
+      try {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+
+        // Fetch total patients
+        const partnersResponse = await fetchPartners({ limit: 1, companyId });
+        setTotalPatients(partnersResponse.totalItems);
+
+        // Fetch today's appointments
+        const appointmentsResponse = await fetchAppointments({
+          limit: 1,
+          dateFrom: todayStr,
+          dateTo: todayStr,
+          companyId,
+        });
+        setAppointmentsToday(appointmentsResponse.totalItems);
+
+        // Fetch sale orders and calculate revenue
+        const ordersResponse = await fetchSaleOrders({ limit: 200, companyId });
+        const totalRevenue = ordersResponse.items.reduce((sum, order) => {
+          const amount = parseFloat(order.amounttotal || '0');
+          return sum + (isNaN(amount) ? 0 : amount);
+        }, 0);
+        setRevenue(totalRevenue);
+      } catch (error) {
+        console.error('Failed to load dashboard stats:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadStats();
+  }, [companyId]);
+
+  const stats = useMemo<readonly StatCardData[]>(() => {
+    const avgPerVisit =
+      appointmentsToday > 0 ? Math.round(revenue / appointmentsToday) : 0;
+
+    return [
       {
         id: 'total-patients',
         label: 'Total Patients',
-        value: '1,284',
+        value: totalPatients.toLocaleString(),
         change: '+12.5%',
         changeType: 'positive',
         icon: Users,
@@ -32,7 +84,7 @@ export function useDashboardStats(): DashboardStatsResult {
       {
         id: 'appointments-today',
         label: 'Appointments Today',
-        value: '24',
+        value: appointmentsToday.toString(),
         change: '+8%',
         changeType: 'positive',
         icon: CalendarCheck,
@@ -41,7 +93,7 @@ export function useDashboardStats(): DashboardStatsResult {
       {
         id: 'revenue-mtd',
         label: 'Revenue (MTD)',
-        value: '₫245,600,000',
+        value: `₫${Math.round(revenue).toLocaleString()}`,
         change: '+18.2%',
         changeType: 'positive',
         icon: DollarSign,
@@ -50,15 +102,14 @@ export function useDashboardStats(): DashboardStatsResult {
       {
         id: 'avg-per-visit',
         label: 'Avg. per Visit',
-        value: '₫458,000',
+        value: `₫${avgPerVisit.toLocaleString()}`,
         change: '-2.1%',
         changeType: 'negative',
         icon: TrendingUp,
         color: '#F97316',
       },
-    ],
-    []
-  );
+    ];
+  }, [totalPatients, appointmentsToday, revenue]);
 
-  return { stats, isLoading: false } as const;
+  return { stats, isLoading } as const;
 }

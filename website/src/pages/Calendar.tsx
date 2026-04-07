@@ -1,23 +1,22 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useCalendarData, type ViewMode } from '@/hooks/useCalendarData';
 import { useDragReschedule } from '@/hooks/useDragReschedule';
 import { DayView } from '@/components/calendar/DayView';
 import { WeekView } from '@/components/calendar/WeekView';
 import { MonthView } from '@/components/calendar/MonthView';
 import { AppointmentDetailsModal } from '@/components/calendar/AppointmentDetailsModal';
-import { FilterByDoctor } from '@/components/shared/FilterByDoctor';
-import { FilterByLocation } from '@/components/shared/FilterByLocation';
+import { FilterByDoctor, type DoctorOption } from '@/components/shared/FilterByDoctor';
+import { useEmployees } from '@/hooks/useEmployees';
 import { useLocationFilter } from '@/contexts/LocationContext';
-import { MOCK_LOCATIONS } from '@/data/mockDashboard';
 import type { CalendarAppointment } from '@/data/mockCalendar';
 
 /**
  * Calendar Page with Day/Week/Month view modes
  * @crossref:route[/calendar]
  * @crossref:used-in[App]
- * @crossref:uses[DayView, WeekView, MonthView, AppointmentCard, AppointmentDetailsModal, FilterByDoctor, FilterByLocation, useLocationFilter, useDragReschedule]
+ * @crossref:uses[DayView, WeekView, MonthView, AppointmentCard, AppointmentDetailsModal, FilterByDoctor, useLocationFilter, useDragReschedule]
  */
 
 const VIEW_TABS: readonly { readonly mode: ViewMode; readonly label: string }[] = [
@@ -27,7 +26,7 @@ const VIEW_TABS: readonly { readonly mode: ViewMode; readonly label: string }[] 
 ];
 
 export function Calendar() {
-  const { selectedLocationId, setSelectedLocationId } = useLocationFilter();
+  const { selectedLocationId } = useLocationFilter();
   const {
     viewMode,
     setViewMode,
@@ -42,7 +41,16 @@ export function Calendar() {
     setSelectedDoctorId,
     selectedAppointment,
     setSelectedAppointment,
-  } = useCalendarData();
+  } = useCalendarData(selectedLocationId);
+
+  // Get real doctors from API for FilterByDoctor
+  const { allEmployees } = useEmployees();
+  const doctors = useMemo((): readonly DoctorOption[] =>
+    allEmployees
+      .filter((e) => e.status === 'active' && (e.roles.includes('dentist') || e.roles.includes('orthodontist')))
+      .map((e) => ({ id: e.id, name: e.name, roles: [...e.roles] })),
+    [allEmployees],
+  );
 
   const handleReschedule = useCallback((result: { appointmentId: string; newDate: string; newTime: string }) => {
     // In production, this would call an API. For now, log the reschedule.
@@ -101,16 +109,12 @@ export function Calendar() {
           <h2 className="text-base font-semibold text-gray-900 ml-1">{dateLabel}</h2>
         </div>
 
-        {/* Center: location + doctor filter */}
+        {/* Center: doctor filter */}
         <div className="flex items-center gap-2">
-          <FilterByLocation
-            locations={MOCK_LOCATIONS}
-            selectedId={selectedLocationId}
-            onChange={setSelectedLocationId}
-          />
           <FilterByDoctor
             selectedDoctorId={selectedDoctorId}
             onChange={setSelectedDoctorId}
+            doctors={doctors}
           />
         </div>
 

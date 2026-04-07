@@ -1,30 +1,39 @@
 import { Stethoscope, X } from 'lucide-react';
 import { useMemo } from 'react';
-import { MOCK_EMPLOYEES, ROLE_LABELS } from '@/data/mockEmployees';
 
 /**
  * FilterByDoctor - Quick doctor filter dropdown for lists and calendar
  * @crossref:used-in[Calendar, Appointments, Employees]
+ *
+ * Now accepts doctors as props instead of relying on mock employees.
+ * If doctors array is empty, falls back to "All Doctors" placeholder.
  */
+
+export interface DoctorOption {
+  readonly id: string;
+  readonly name: string;
+  readonly roles?: string[];
+}
 
 interface FilterByDoctorProps {
   readonly selectedDoctorId: string | null;
   readonly onChange: (doctorId: string | null) => void;
+  readonly doctors?: readonly DoctorOption[];
   readonly className?: string;
 }
 
-export function FilterByDoctor({ selectedDoctorId, onChange, className = '' }: FilterByDoctorProps) {
-  const doctors = useMemo(
+export function FilterByDoctor({ selectedDoctorId, onChange, doctors = [], className = '' }: FilterByDoctorProps) {
+  const availableDoctors = useMemo(
     () =>
-      MOCK_EMPLOYEES.filter(
-        (e) =>
-          e.status === 'active' &&
-          e.roles.some((r) => r === 'dentist' || r === 'orthodontist'),
+      doctors.filter(
+        (d) =>
+          d.roles === undefined ||
+          d.roles.some((r) => r === 'dentist' || r === 'orthodontist' || r === 'doctor'),
       ),
-    [],
+    [doctors],
   );
 
-  const selectedDoctor = doctors.find((d) => d.id === selectedDoctorId);
+  const selectedDoctor = availableDoctors.find((d) => d.id === selectedDoctorId);
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
@@ -35,9 +44,9 @@ export function FilterByDoctor({ selectedDoctorId, onChange, className = '' }: F
         className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
       >
         <option value="">All Doctors</option>
-        {doctors.map((doc) => (
+        {availableDoctors.map((doc) => (
           <option key={doc.id} value={doc.id}>
-            {doc.name} — {doc.roles.map((r) => ROLE_LABELS[r]).join(', ')}
+            {doc.name}{doc.roles ? ` — ${doc.roles.join(', ')}` : ''}
           </option>
         ))}
       </select>

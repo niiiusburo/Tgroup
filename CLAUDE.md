@@ -90,8 +90,8 @@ Tgroup/
 ## Dev Server
 
 ```bash
-cd website && npx vite --port 5173
-# Open http://localhost:5173
+cd website && npx vite --port 5174
+# Open http://localhost:5174
 ```
 
 ## Database

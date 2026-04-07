@@ -3,7 +3,7 @@
  * Services Management Page
  * @crossref:route[/services]
  * @crossref:used-in[App]
- * @crossref:uses[ServiceForm, ServiceHistoryList, MultiVisitTracker, FilterByLocation, useLocationFilter]
+ * @crossref:uses[ServiceForm, ServiceHistoryList, MultiVisitTracker, useLocationFilter]
  */
 
 import { useState } from 'react';
@@ -13,9 +13,7 @@ import {
 } from 'lucide-react';
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { ServiceHistoryList } from '@/components/services/ServiceHistoryList';
-import { FilterByLocation } from '@/components/shared/FilterByLocation';
 import { useLocationFilter } from '@/contexts/LocationContext';
-import { MOCK_LOCATIONS } from '@/data/mockDashboard';
 import { useServices, type ServiceFilter, type CategoryFilter, type CreateServiceInput } from '@/hooks/useServices';
 import { APPOINTMENT_TYPE_LABELS, type AppointmentType } from '@/constants';
 
@@ -40,7 +38,7 @@ function formatVND(amount: number): string {
 }
 
 export function Services() {
-  const { selectedLocationId, setSelectedLocationId } = useLocationFilter();
+  const { selectedLocationId } = useLocationFilter();
   const {
     records,
     stats,
@@ -53,7 +51,7 @@ export function Services() {
     createServiceRecord,
     updateVisitStatus,
     cancelServiceRecord,
-  } = useServices();
+  } = useServices(selectedLocationId);
 
   const [showForm, setShowForm] = useState(false);
 
@@ -105,11 +103,6 @@ export function Services() {
             className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
           />
         </div>
-        <FilterByLocation
-          locations={MOCK_LOCATIONS}
-          selectedId={selectedLocationId}
-          onChange={setSelectedLocationId}
-        />
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-gray-400" />
           <select

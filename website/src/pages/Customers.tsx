@@ -1,30 +1,31 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Users, Plus, Phone, Mail, MapPin } from 'lucide-react';
 import { AddCustomerForm } from '@/components/forms/AddCustomerForm';
 import { CustomerProfile } from '@/components/customer';
 import { SearchBar } from '@/components/shared/SearchBar';
 import { DataTable, type Column } from '@/components/shared/DataTable';
-import { FilterByLocation } from '@/components/shared/FilterByLocation';
 import { StatusBadge, type StatusVariant } from '@/components/shared/StatusBadge';
-import { useCustomers } from '@/hooks/useCustomers';
+import { useCustomers, type Customer } from '@/hooks/useCustomers';
 import { useLocationFilter } from '@/contexts/LocationContext';
-import { MOCK_LOCATIONS } from '@/data/mockDashboard';
+import { useCustomerProfile } from '@/hooks/useCustomerProfile';
+import { useLocations } from '@/hooks/useLocations';
 import {
-  MOCK_CUSTOMER_PROFILE,
   MOCK_CUSTOMER_PHOTOS,
   MOCK_CUSTOMER_DEPOSIT,
-  MOCK_APPOINTMENT_HISTORY,
   MOCK_SERVICE_HISTORY,
+  type CustomerProfileData,
+  type CustomerAppointment,
 } from '@/data/mockCustomerProfile';
-import type { Customer, CustomerStatus } from '@/data/mockCustomers';
+import type { ApiAppointment } from '@/lib/api';
+import type { CustomerStatus } from '@/data/mockCustomers';
 import type { CustomerFormData } from '@/data/mockCustomerForm';
 
 /**
  * Customers Page - Patient records with search, filters, table, and profile view
  * @crossref:route[/customers]
  * @crossref:used-in[App]
- * @crossref:uses[SearchBar, DataTable, FilterByLocation, StatusBadge, useCustomers, CustomerProfile, AddCustomerForm]
+ * @crossref:uses[SearchBar, DataTable, StatusBadge, useCustomers, CustomerProfile, AddCustomerForm]
  */
 
 const STATUS_FILTER_OPTIONS: readonly { readonly value: 'all' | CustomerStatus; readonly label: string }[] = [
@@ -40,8 +41,32 @@ const STATUS_TO_VARIANT: Record<CustomerStatus, StatusVariant> = {
   pending: 'pending',
 };
 
-function getLocationName(locationId: string): string {
-  return MOCK_LOCATIONS.find((l) => l.id === locationId)?.name ?? 'Unknown';
+/** Normalize API gender string to the 'male' | 'female' union */
+function normalizeGender(gender: string): 'male' | 'female' {
+  const g = gender.toLowerCase();
+  if (g === 'female' || g === 'nữ' || g === 'f') return 'female';
+  return 'male';
+}
+
+/** Map an ApiAppointment to the CustomerAppointment shape the component expects */
+function mapApiAppointment(apt: ApiAppointment): CustomerAppointment {
+  const time = apt.time ?? apt.datetimeappointment?.slice(11, 16) ?? '00:00';
+  const status =
+    apt.state === 'cancel' || apt.state === 'cancelled'
+      ? 'cancelled'
+      : apt.state === 'no_show'
+      ? 'no-show'
+      : 'completed';
+  return {
+    id: apt.id,
+    date: apt.date.slice(0, 10),
+    time,
+    doctor: apt.doctorname ?? 'N/A',
+    service: apt.name ?? apt.reason ?? 'N/A',
+    status,
+    location: apt.companyname ?? 'N/A',
+    notes: apt.note ?? '',
+  };
 }
 
 function formatDate(dateStr: string): string {
@@ -51,7 +76,8 @@ function formatDate(dateStr: string): string {
 }
 
 /** @crossref:uses[DataTable] */
-const CUSTOMER_COLUMNS: readonly Column<Customer>[] = [
+function buildCustomerColumns(locationNameMap: Map<string, string>): readonly Column<Customer>[] {
+  return [
   {
     key: 'name',
     header: 'Customer',
@@ -100,7 +126,7 @@ const CUSTOMER_COLUMNS: readonly Column<Customer>[] = [
     render: (row) => (
       <span className="flex items-center gap-1.5 text-gray-600">
         <MapPin className="w-3.5 h-3.5 text-gray-400" />
-        {getLocationName(row.locationId)}
+        {locationNameMap.get(row.locationId) ?? 'Unknown'}
       </span>
     ),
   },
@@ -122,12 +148,13 @@ const CUSTOMER_COLUMNS: readonly Column<Customer>[] = [
       <span className="text-gray-500">{formatDate(row.lastVisit)}</span>
     ),
   },
-];
+  ]; // end buildCustomerColumns
+}
 
 export function Customers() {
   const [showForm, setShowForm] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
-  const { selectedLocationId, setSelectedLocationId } = useLocationFilter();
+  const { selectedLocationId } = useLocationFilter();
 
   const {
     customers,
@@ -138,23 +165,84 @@ export function Customers() {
     setStatusFilter,
   } = useCustomers(selectedLocationId);
 
+  // Fetch all companies once for location name lookup
+  const { allLocations } = useLocations();
+  const locationNameMap = useMemo(
+    () => new Map(allLocations.map((l) => [l.id, l.name])),
+    [allLocations],
+  );
+  const customerColumns = useMemo(() => buildCustomerColumns(locationNameMap), [locationNameMap]);
+
+  // Fetch real profile data when a customer is selected
+  const { profile: hookProfile, appointments: hookAppointments, isLoading: profileLoading } =
+    useCustomerProfile(selectedCustomerId);
+
   const handleSubmit = (_data: CustomerFormData) => {
     setShowForm(false);
   };
 
   // Show profile view when a customer is selected
   if (selectedCustomerId) {
-    const selected = customers.find((c) => c.id === selectedCustomerId);
-    const profileData = selected
-      ? { ...MOCK_CUSTOMER_PROFILE, id: selected.id, name: selected.name, phone: selected.phone, email: selected.email }
-      : MOCK_CUSTOMER_PROFILE;
+    // Build CustomerProfileData from hook result, falling back to customer list data
+    const listCustomer = customers.find((c) => c.id === selectedCustomerId);
+
+    let profileData: CustomerProfileData;
+    if (hookProfile) {
+      profileData = {
+        id: hookProfile.id,
+        name: hookProfile.name,
+        phone: hookProfile.phone,
+        email: hookProfile.email,
+        dateOfBirth: hookProfile.dateOfBirth,
+        gender: normalizeGender(hookProfile.gender),
+        address: hookProfile.address,
+        locationId: hookProfile.companyId,
+        locationName: hookProfile.companyName || locationNameMap.get(hookProfile.companyId) || 'N/A',
+        memberSince: hookProfile.memberSince,
+        totalVisits: hookProfile.totalVisits,
+        totalSpent: hookProfile.totalSpent,
+        lastVisit: hookProfile.lastVisit,
+        notes: hookProfile.notes,
+        tags: hookProfile.tags,
+      };
+    } else {
+      // While loading or on error, build from list data
+      profileData = {
+        id: listCustomer?.id ?? selectedCustomerId,
+        name: listCustomer?.name ?? '',
+        phone: listCustomer?.phone ?? '',
+        email: listCustomer?.email ?? '',
+        dateOfBirth: 'N/A',
+        gender: 'male',
+        address: 'N/A',
+        locationId: listCustomer?.locationId ?? '',
+        locationName: locationNameMap.get(listCustomer?.locationId ?? '') ?? 'N/A',
+        memberSince: 'N/A',
+        totalVisits: 0,
+        totalSpent: 0,
+        lastVisit: listCustomer?.lastVisit ?? 'N/A',
+        notes: '',
+        tags: [],
+      };
+    }
+
+    // Map real appointments to component format
+    const appointments = hookAppointments.map(mapApiAppointment);
+
+    if (profileLoading) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <span className="text-gray-500">Loading profile...</span>
+        </div>
+      );
+    }
 
     return (
       <CustomerProfile
         profile={profileData}
         photos={MOCK_CUSTOMER_PHOTOS}
         deposit={MOCK_CUSTOMER_DEPOSIT}
-        appointments={MOCK_APPOINTMENT_HISTORY}
+        appointments={appointments}
         services={MOCK_SERVICE_HISTORY}
         onBack={() => setSelectedCustomerId(null)}
       />
@@ -206,11 +294,7 @@ export function Customers() {
             placeholder="Search by name, phone, or email..."
           />
         </div>
-        <FilterByLocation
-          locations={MOCK_LOCATIONS}
-          selectedId={selectedLocationId}
-          onChange={setSelectedLocationId}
-        />
+
         <div className="flex items-center gap-1">
           {STATUS_FILTER_OPTIONS.map((opt) => (
             <button
@@ -233,7 +317,7 @@ export function Customers() {
       {/* Customer Table */}
       {/* @crossref:uses[DataTable] */}
       <DataTable<Customer>
-        columns={CUSTOMER_COLUMNS}
+        columns={customerColumns}
         data={customers}
         keyExtractor={(row) => row.id}
         pageSize={10}

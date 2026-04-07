@@ -3,11 +3,9 @@
  * @crossref:used-in[Payment, Services, Customers]
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { fetchSaleOrders, type ApiSaleOrder } from '@/lib/api';
 import {
-  MOCK_PAYMENT_RECORDS,
-  MOCK_DEPOSIT_WALLETS,
-  MOCK_OUTSTANDING_BALANCES,
   type PaymentRecord,
   type PaymentMethod,
   type PaymentStatus,
@@ -35,12 +33,129 @@ export interface TopUpInput {
   readonly description: string;
 }
 
-export function usePayment() {
-  const [payments, setPayments] = useState<readonly PaymentRecord[]>([...MOCK_PAYMENT_RECORDS]);
-  const [wallets, setWallets] = useState<readonly DepositWalletData[]>([...MOCK_DEPOSIT_WALLETS]);
-  const [outstandingBalances] = useState<readonly OutstandingBalanceItem[]>([...MOCK_OUTSTANDING_BALANCES]);
+/**
+ * Map ApiSaleOrder to PaymentRecord
+ */
+function mapSaleOrderToPayment(saleOrder: ApiSaleOrder): PaymentRecord {
+  const residual = parseFloat(saleOrder.residual ?? '0');
+  const status: PaymentStatus = residual === 0 ? 'completed' : 'pending';
+
+  return {
+    id: saleOrder.id,
+    customerId: saleOrder.partnerid ?? '',
+    customerName: saleOrder.partnername ?? '',
+    customerPhone: '',
+    serviceId: saleOrder.id,
+    serviceName: saleOrder.name ?? '',
+    amount: parseFloat(saleOrder.amounttotal ?? '0') || 0,
+    method: 'bank_transfer' as const,
+    status,
+    date: saleOrder.datecreated?.slice(0, 10) ?? '',
+    locationName: saleOrder.companyname ?? '',
+    notes: saleOrder.state ?? '',
+    receiptNumber: saleOrder.name ?? '',
+  };
+}
+
+/**
+ * Derive OutstandingBalanceItem from sale orders where residual > 0
+ */
+function mapSaleOrderToOutstandingBalance(saleOrder: ApiSaleOrder): OutstandingBalanceItem | null {
+  const residual = parseFloat(saleOrder.residual ?? '0');
+  if (residual <= 0) return null;
+
+  return {
+    id: saleOrder.id,
+    customerId: saleOrder.partnerid ?? '',
+    customerName: saleOrder.partnername ?? '',
+    customerPhone: '',
+    serviceName: saleOrder.name ?? '',
+    totalCost: parseFloat(saleOrder.amounttotal ?? '0') || 0,
+    paidAmount: parseFloat(saleOrder.totalpaid ?? '0') || 0,
+    remainingBalance: residual,
+    dueDate: '',
+    locationName: saleOrder.companyname ?? '',
+  };
+}
+
+export function usePayment(selectedLocationId?: string) {
+  const [payments, setPayments] = useState<readonly PaymentRecord[]>([]);
+  const [outstandingBalances, setOutstandingBalances] = useState<readonly OutstandingBalanceItem[]>([]);
+  const [wallets] = useState<readonly DepositWalletData[]>([]);
   const [statusFilter, setStatusFilter] = useState<PaymentFilter>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Debounce timer ref
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /**
+   * Fetch sale orders from API
+   */
+  const fetchPayments = useCallback(async (search?: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const response = await fetchSaleOrders({
+        offset: 0,
+        limit: 100, // Accommodate all 76 records
+        search: search || undefined,
+        companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
+      });
+
+      const paymentRecords = response.items.map(mapSaleOrderToPayment);
+      const outstanding = response.items
+        .map(mapSaleOrderToOutstandingBalance)
+        .filter((item): item is OutstandingBalanceItem => item !== null);
+
+      setPayments(paymentRecords);
+      setOutstandingBalances(outstanding);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch payments');
+      console.error('Payment fetch error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  /**
+   * Refetch data
+   */
+  const refetch = useCallback(() => {
+    fetchPayments(searchTerm || undefined);
+  }, [fetchPayments, searchTerm]);
+
+  /**
+   * Initial fetch on mount
+   */
+  useEffect(() => {
+    fetchPayments();
+  }, []);
+
+  /**
+   * Debounced search
+   */
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      if (searchTerm) {
+        fetchPayments(searchTerm);
+      } else {
+        fetchPayments();
+      }
+    }, 300);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [searchTerm, fetchPayments]);
 
   const filteredPayments = useMemo(() => {
     let result: readonly PaymentRecord[] = payments;
@@ -48,35 +163,24 @@ export function usePayment() {
     if (statusFilter !== 'all') {
       result = result.filter((p) => p.status === statusFilter);
     }
-    if (searchTerm) {
-      const lower = searchTerm.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.customerName.toLowerCase().includes(lower) ||
-          p.customerPhone.includes(lower) ||
-          p.serviceName.toLowerCase().includes(lower) ||
-          p.receiptNumber.toLowerCase().includes(lower),
-      );
-    }
 
     return [...result].sort((a, b) => b.date.localeCompare(a.date));
-  }, [payments, statusFilter, searchTerm]);
+  }, [payments, statusFilter]);
 
   const stats = useMemo(() => {
     const completed = payments.filter((p) => p.status === 'completed');
     const totalRevenue = completed.reduce((sum, p) => sum + p.amount, 0);
     const totalOutstanding = outstandingBalances.reduce((sum, b) => sum + b.remainingBalance, 0);
-    const totalWalletBalance = wallets.reduce((sum, w) => sum + w.balance, 0);
 
     return {
       totalPayments: payments.length,
       completedPayments: completed.length,
       totalRevenue,
       totalOutstanding,
-      totalWalletBalance,
-      activeWallets: wallets.length,
+      totalWalletBalance: 0,
+      activeWallets: 0,
     };
-  }, [payments, outstandingBalances, wallets]);
+  }, [payments, outstandingBalances]);
 
   const createPayment = useCallback((input: CreatePaymentInput) => {
     const newPayment: PaymentRecord = {
@@ -92,27 +196,8 @@ export function usePayment() {
   }, []);
 
   const topUpWallet = useCallback((input: TopUpInput) => {
-    setWallets((prev) =>
-      prev.map((w) => {
-        if (w.customerId !== input.customerId) return w;
-        return {
-          ...w,
-          balance: w.balance + input.amount,
-          lastTopUp: new Date().toISOString().slice(0, 10),
-          transactions: [
-            {
-              id: `wt-${Date.now()}`,
-              date: new Date().toISOString().slice(0, 10),
-              amount: input.amount,
-              type: 'topup' as const,
-              description: input.description,
-              referenceId: null,
-            },
-            ...w.transactions,
-          ],
-        };
-      }),
-    );
+    // Client-side only: no wallet API
+    console.log('Top-up wallet (client-side):', input);
   }, []);
 
   const getWalletByCustomer = useCallback(
@@ -145,5 +230,8 @@ export function usePayment() {
     getWalletByCustomer,
     getOutstandingByCustomer,
     getPaymentsByCustomer,
+    isLoading,
+    error,
+    refetch,
   };
 }

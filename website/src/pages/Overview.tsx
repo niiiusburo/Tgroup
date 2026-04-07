@@ -22,7 +22,7 @@ export function Overview() {
     revenueData,
   } = useOverviewData();
 
-  const { stats } = useDashboardStats();
+  const { stats } = useDashboardStats(selectedLocationId);
   const { appointments } = useTodaySchedule(selectedLocationId);
 
   return (
