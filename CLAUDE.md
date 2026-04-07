@@ -45,14 +45,19 @@ Tgroup/
 
 ## Database
 
-**Active database:** Demo TDental PostgreSQL
-- **Host:** `127.0.0.1`
-- **Port:** `55433`
-- **Database:** `tdental_demo`
-- **User:** `postgres`
-- **Password:** `postgres`
-- **Docker container:** `tdental-demo`
-- **Source SQL:** `/Users/thuanle/Documents/TamTMV/TamDental/demo_tdental.sql`
+**Connection URL:** `postgresql://postgres:postgres@127.0.0.1:55433/tdental_demo`
+
+| Field | Value |
+|-------|-------|
+| **URL** | `postgresql://postgres:postgres@127.0.0.1:55433/tdental_demo` |
+| **Host** | `127.0.0.1` |
+| **Port** | `55433` |
+| **Database** | `tdental_demo` |
+| **User** | `postgres` |
+| **Password** | `postgres` |
+| **Docker container** | `tdental-demo` |
+| **Source SQL** | `/Users/thuanle/Documents/TamTMV/TamDental/demo_tdental.sql` |
+| **Connect via CLI** | `PGPASSWORD=postgres psql -h 127.0.0.1 -p 55433 -U postgres -d tdental_demo` |
 
 ### Demo Data
 
