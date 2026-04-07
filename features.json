@@ -47,10 +47,9 @@
         "Create form validation hooks in src/hooks/useFormValidation.ts with @crossref:used-in[CustomerForm, EmployeeForm, AppointmentForm]",
         "Build RevenueChartModule in src/components/modules/ with @crossref:used-in[Overview, Reports] \u2014 chart component using recharts or similar"
       ],
-      "status": "open",
+      "status": "done",
       "priority": "high",
-      "failure_reason": "Merge failed: Failed to merge feature/3-shared-selectors-and-form-components into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
-      "failure_category": "verification"
+      "progress": "Session: 2026-04-07 | PASSED | 44s\nBranch: feature/3-shared-selectors-and-form-components | Session: 9YMoa4Kwphjde74NUVeLQ"
     },
     {
       "id": 4,
@@ -64,10 +63,9 @@
         "Create hooks/useDashboardStats.ts with @crossref:used-in[Overview, Reports] \u2014 fetches mock stats data",
         "Create hooks/useTodaySchedule.ts with @crossref:used-in[Overview, Calendar] \u2014 fetches today's appointments"
       ],
-      "status": "open",
+      "status": "done",
       "priority": "high",
-      "failure_reason": "No commits found on branch feature/4-overview-dashboard-stats-and-schedule. Stopping orchestrator to prevent wasted runs.",
-      "failure_category": "implementation"
+      "progress": "Session: 2026-04-07 | PASSED | 1m 20s\nBranch: feature/4-overview-dashboard-stats-and-schedule | Session: K6Z1ff2HBzvWy3xc87dLV"
     },
     {
       "id": 5,
@@ -132,8 +130,8 @@
       ],
       "status": "open",
       "priority": "high",
-      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_01ESXzWCbxYiiDKvs9xNhupg\",\"type\":\"tool_result\",\"content\":\"[feature/8-customer-list-and-search 8b2aa24] Customer list and search",
-      "failure_category": "implementation"
+      "failure_reason": "Implementation complete but verification/tests failed",
+      "failure_category": "test_only"
     },
     {
       "id": 9,
@@ -149,8 +147,8 @@
       ],
       "status": "open",
       "priority": "high",
-      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_01Mx2qHyBxVAXgzob7Z3o3hR\",\"type\":\"tool_result\",\"content\":\"[feature/9-customer-profile-view 47a5500] Add customer profile view w",
-      "failure_category": "implementation"
+      "failure_reason": "Implementation complete but verification/tests failed",
+      "failure_category": "test_only"
     },
     {
       "id": 10,
@@ -164,10 +162,9 @@
         "Build CustomerSourceDropdown with @crossref:used-in[CustomerForm, Reports]",
         "Add form validation and photo upload using shared ImageUpload component"
       ],
-      "status": "open",
+      "status": "done",
       "priority": "high",
-      "failure_reason": "Merge failed: Failed to merge feature/10-customer-forms into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
-      "failure_category": "verification"
+      "progress": "Session: 2026-04-07 | PASSED | 52s\nBranch: feature/10-customer-forms | Session: 67JiyBzdJ-UnLKBWf6dTs"
     },
     {
       "id": 11,
@@ -183,8 +180,8 @@
       ],
       "status": "open",
       "priority": "high",
-      "failure_reason": "Merge failed: Failed to merge feature/11-appointments-management into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
-      "failure_category": "verification"
+      "failure_reason": "Implementation complete but verification/tests failed",
+      "failure_category": "test_only"
     },
     {
       "id": 12,
@@ -200,8 +197,8 @@
       ],
       "status": "open",
       "priority": "high",
-      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_01QFbPpQLLzGwyR1KHujSpkA\",\"type\":\"tool_result\",\"content\":\"/Users/thuanle/Documents/TamTMV/Tgroup/.worktrees/track-services/webs",
-      "failure_category": "implementation"
+      "failure_reason": "Implementation complete but verification/tests failed",
+      "failure_category": "test_only"
     },
     {
       "id": 13,
@@ -217,8 +214,8 @@
       ],
       "status": "open",
       "priority": "high",
-      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_016hc5Fk6EhAYnTx8ftS6Rvq\",\"type\":\"tool_result\",\"content\":\"4af3d06 chore: mark feature 1 as done\\n4c0a9f1 feat(#1): Project Scaf",
-      "failure_category": "implementation"
+      "failure_reason": "Implementation complete but verification/tests failed",
+      "failure_category": "test_only"
     },
     {
       "id": 14,
@@ -250,8 +247,8 @@
       ],
       "status": "open",
       "priority": "high",
-      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_0145Do5vY8EDMATQmVpMwBTu\",\"type\":\"tool_result\",\"content\":\"[feature/15-employees-list-and-profile 9537ceb] Employees list and pr",
-      "failure_category": "implementation"
+      "failure_reason": "Implementation complete but verification/tests failed",
+      "failure_category": "test_only"
     },
     {
       "id": 16,
@@ -283,8 +280,8 @@
       ],
       "status": "open",
       "priority": "medium",
-      "failure_reason": "No commits found on branch feature/17-locations-and-branches. Stopping orchestrator to prevent wasted runs.",
-      "failure_category": "implementation"
+      "failure_reason": "Merge failed: Failed to merge feature/17-locations-and-branches into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
+      "failure_category": "verification"
     },
     {
       "id": 18,
