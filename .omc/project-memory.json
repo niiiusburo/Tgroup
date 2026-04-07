@@ -105,14 +105,14 @@
   "hotPaths": [
     {
       "path": "website/src/App.tsx",
-      "accessCount": 15,
-      "lastAccessed": 1775547510971,
+      "accessCount": 16,
+      "lastAccessed": 1775547938242,
       "type": "file"
     },
     {
       "path": "website/src/constants/index.ts",
-      "accessCount": 14,
-      "lastAccessed": 1775547502592,
+      "accessCount": 15,
+      "lastAccessed": 1775547928143,
       "type": "file"
     },
     {
@@ -134,6 +134,12 @@
       "type": "file"
     },
     {
+      "path": "website/src/data/mockDashboard.ts",
+      "accessCount": 9,
+      "lastAccessed": 1775547943577,
+      "type": "file"
+    },
+    {
       "path": "website/src/pages/Employees.tsx",
       "accessCount": 8,
       "lastAccessed": 1775546757687,
@@ -146,9 +152,9 @@
       "type": "file"
     },
     {
-      "path": "website/src/data/mockDashboard.ts",
+      "path": "website/src/pages/Customers.tsx",
       "accessCount": 8,
-      "lastAccessed": 1775547514434,
+      "lastAccessed": 1775548074131,
       "type": "file"
     },
     {
@@ -161,12 +167,6 @@
       "path": "website/src/hooks/useOverviewData.ts",
       "accessCount": 7,
       "lastAccessed": 1775547280178,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Customers.tsx",
-      "accessCount": 6,
-      "lastAccessed": 1775546699904,
       "type": "file"
     },
     {
@@ -248,15 +248,15 @@
       "type": "file"
     },
     {
-      "path": "website/src/index.css",
-      "accessCount": 3,
-      "lastAccessed": 1775545433574,
+      "path": "website/src/components/shared/QuickActionsBar.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1775547933654,
       "type": "file"
     },
     {
-      "path": "website/src/components/shared/QuickActionsBar.tsx",
+      "path": "website/src/index.css",
       "accessCount": 3,
-      "lastAccessed": 1775545873949,
+      "lastAccessed": 1775545433574,
       "type": "file"
     },
     {
