@@ -1,3 +1,4 @@
+import { APPOINTMENT_TYPE_COLORS } from '@/constants';
 import { STATUS_DOT_COLORS, type CalendarAppointment } from '@/data/mockCalendar';
 
 /**
@@ -51,9 +52,10 @@ interface AppointmentBlockProps {
 
 function AppointmentBlock({ appointment }: AppointmentBlockProps) {
   const dotColor = STATUS_DOT_COLORS[appointment.status];
+  const typeColors = APPOINTMENT_TYPE_COLORS[appointment.appointmentType];
 
   return (
-    <div className="bg-primary-lighter border border-primary-light rounded-lg px-3 py-2 mb-1 cursor-pointer hover:shadow-card transition-shadow">
+    <div className={`${typeColors.bg} border ${typeColors.border} rounded-lg px-3 py-2 mb-1 cursor-pointer hover:shadow-card transition-shadow`}>
       <div className="flex items-center gap-2">
         <span className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
         <span className="text-sm font-medium text-gray-900 truncate">
@@ -72,11 +74,12 @@ function AppointmentBlock({ appointment }: AppointmentBlockProps) {
 
 function CompactAppointment({ appointment }: AppointmentBlockProps) {
   const dotColor = STATUS_DOT_COLORS[appointment.status];
+  const typeColors = APPOINTMENT_TYPE_COLORS[appointment.appointmentType];
 
   return (
-    <div className="flex items-center gap-1.5 py-0.5">
+    <div className={`flex items-center gap-1.5 py-0.5 px-1 rounded ${typeColors.bg}`}>
       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotColor}`} />
-      <span className="text-xs text-gray-700 truncate">{appointment.customerName}</span>
+      <span className={`text-xs truncate ${typeColors.text}`}>{appointment.customerName}</span>
     </div>
   );
 }

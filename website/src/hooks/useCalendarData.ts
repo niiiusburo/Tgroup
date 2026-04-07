@@ -10,6 +10,8 @@ export type ViewMode = 'day' | 'week' | 'month';
 export function useCalendarData() {
   const [viewMode, setViewMode] = useState<ViewMode>('week');
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
 
   const goToToday = useCallback(() => {
     setCurrentDate(new Date());
@@ -28,6 +30,11 @@ export function useCalendarData() {
       return d;
     });
   }, [viewMode]);
+
+  const filteredAppointments = useMemo(() => {
+    if (!selectedDoctorId) return MOCK_APPOINTMENTS;
+    return MOCK_APPOINTMENTS.filter((apt) => apt.dentistId === selectedDoctorId);
+  }, [selectedDoctorId]);
 
   const weekDates = useMemo(() => {
     const start = new Date(currentDate);
@@ -60,8 +67,8 @@ export function useCalendarData() {
 
   const getAppointmentsForDate = useCallback((date: Date): readonly CalendarAppointment[] => {
     const dateStr = formatDateStr(date);
-    return MOCK_APPOINTMENTS.filter((apt) => apt.date === dateStr);
-  }, []);
+    return filteredAppointments.filter((apt) => apt.date === dateStr);
+  }, [filteredAppointments]);
 
   const dateLabel = useMemo(() => {
     if (viewMode === 'day') {
@@ -91,6 +98,10 @@ export function useCalendarData() {
     monthDates,
     getAppointmentsForDate,
     dateLabel,
+    selectedDoctorId,
+    setSelectedDoctorId,
+    selectedAppointment,
+    setSelectedAppointment,
   } as const;
 }
 

@@ -1,19 +1,22 @@
+import { APPOINTMENT_TYPE_COLORS } from '@/constants';
 import { STATUS_DOT_COLORS, type CalendarAppointment } from '@/data/mockCalendar';
 
 /**
  * MonthView Component - monthly calendar grid
  * @crossref:used-in[Calendar]
+ * @crossref:uses[AppointmentCard]
  */
 
 interface MonthViewProps {
   readonly currentDate: Date;
   readonly monthDates: readonly Date[];
   readonly getAppointmentsForDate: (date: Date) => readonly CalendarAppointment[];
+  readonly onAppointmentClick?: (appointment: CalendarAppointment) => void;
 }
 
 const WEEKDAY_HEADERS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 
-export function MonthView({ currentDate, monthDates, getAppointmentsForDate }: MonthViewProps) {
+export function MonthView({ currentDate, monthDates, getAppointmentsForDate, onAppointmentClick }: MonthViewProps) {
   const currentMonth = currentDate.getMonth();
   const today = new Date();
   const todayStr = formatShort(today);
@@ -65,10 +68,14 @@ export function MonthView({ currentDate, monthDates, getAppointmentsForDate }: M
                 )}
               </div>
 
-              {/* Appointment dots */}
+              {/* Appointment dots with type colors */}
               <div className="space-y-0.5">
                 {appointments.slice(0, 3).map((apt) => (
-                  <MonthAppointmentDot key={apt.id} appointment={apt} />
+                  <MonthAppointmentDot
+                    key={apt.id}
+                    appointment={apt}
+                    onClick={onAppointmentClick}
+                  />
                 ))}
                 {appointments.length > 3 && (
                   <p className="text-[10px] text-gray-400 pl-1">
@@ -84,16 +91,26 @@ export function MonthView({ currentDate, monthDates, getAppointmentsForDate }: M
   );
 }
 
-function MonthAppointmentDot({ appointment }: { readonly appointment: CalendarAppointment }) {
-  const dotColor = STATUS_DOT_COLORS[appointment.status];
+interface MonthAppointmentDotProps {
+  readonly appointment: CalendarAppointment;
+  readonly onClick?: (appointment: CalendarAppointment) => void;
+}
+
+function MonthAppointmentDot({ appointment, onClick }: MonthAppointmentDotProps) {
+  const typeColors = APPOINTMENT_TYPE_COLORS[appointment.appointmentType];
+  const statusDot = STATUS_DOT_COLORS[appointment.status];
 
   return (
-    <div className="flex items-center gap-1 px-1 py-0.5 rounded hover:bg-gray-100 cursor-pointer">
-      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotColor}`} />
-      <span className="text-[11px] text-gray-700 truncate">
+    <button
+      type="button"
+      onClick={() => onClick?.(appointment)}
+      className={`w-full text-left flex items-center gap-1 px-1 py-0.5 rounded hover:shadow-sm cursor-pointer ${typeColors.bg}`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot}`} />
+      <span className={`text-[11px] truncate ${typeColors.text}`}>
         {appointment.startTime} {appointment.customerName}
       </span>
-    </div>
+    </button>
   );
 }
 

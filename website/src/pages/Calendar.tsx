@@ -1,14 +1,19 @@
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useCallback } from 'react';
 import { useCalendarData, type ViewMode } from '@/hooks/useCalendarData';
+import { useDragReschedule } from '@/hooks/useDragReschedule';
 import { DayView } from '@/components/calendar/DayView';
 import { WeekView } from '@/components/calendar/WeekView';
 import { MonthView } from '@/components/calendar/MonthView';
+import { AppointmentDetailsModal } from '@/components/calendar/AppointmentDetailsModal';
+import { FilterByDoctor } from '@/components/shared/FilterByDoctor';
+import type { CalendarAppointment } from '@/data/mockCalendar';
 
 /**
  * Calendar Page with Day/Week/Month view modes
  * @crossref:route[/calendar]
  * @crossref:used-in[App]
- * @crossref:uses[DayView, WeekView, MonthView]
+ * @crossref:uses[DayView, WeekView, MonthView, AppointmentCard, AppointmentDetailsModal, FilterByDoctor, useDragReschedule]
  */
 
 const VIEW_TABS: readonly { readonly mode: ViewMode; readonly label: string }[] = [
@@ -28,7 +33,26 @@ export function Calendar() {
     monthDates,
     getAppointmentsForDate,
     dateLabel,
+    selectedDoctorId,
+    setSelectedDoctorId,
+    selectedAppointment,
+    setSelectedAppointment,
   } = useCalendarData();
+
+  const handleReschedule = useCallback((result: { appointmentId: string; newDate: string; newTime: string }) => {
+    // In production, this would call an API. For now, log the reschedule.
+    void result;
+  }, []);
+
+  const { handleDragStart, handleDragOver, handleDrop, handleDragEnd } = useDragReschedule(handleReschedule);
+
+  const handleAppointmentClick = useCallback((appointment: CalendarAppointment) => {
+    setSelectedAppointment(appointment);
+  }, [setSelectedAppointment]);
+
+  const handleCloseModal = useCallback(() => {
+    setSelectedAppointment(null);
+  }, [setSelectedAppointment]);
 
   return (
     <div className="space-y-4">
@@ -43,7 +67,7 @@ export function Calendar() {
         </div>
       </div>
 
-      {/* Toolbar: navigation + view tabs */}
+      {/* Toolbar: navigation + filters + view tabs */}
       <div className="flex items-center justify-between flex-wrap gap-3 bg-white rounded-xl shadow-card px-4 py-3">
         {/* Left: date navigation */}
         <div className="flex items-center gap-2">
@@ -72,6 +96,12 @@ export function Calendar() {
           <h2 className="text-base font-semibold text-gray-900 ml-1">{dateLabel}</h2>
         </div>
 
+        {/* Center: doctor filter */}
+        <FilterByDoctor
+          selectedDoctorId={selectedDoctorId}
+          onChange={setSelectedDoctorId}
+        />
+
         {/* Right: view mode tabs */}
         <div className="flex items-center bg-gray-100 rounded-lg p-1">
           {VIEW_TABS.map((tab) => (
@@ -95,12 +125,22 @@ export function Calendar() {
         <DayView
           currentDate={currentDate}
           getAppointmentsForDate={getAppointmentsForDate}
+          onAppointmentClick={handleAppointmentClick}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onDragEnd={handleDragEnd}
         />
       )}
       {viewMode === 'week' && (
         <WeekView
           weekDates={weekDates}
           getAppointmentsForDate={getAppointmentsForDate}
+          onAppointmentClick={handleAppointmentClick}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onDragEnd={handleDragEnd}
         />
       )}
       {viewMode === 'month' && (
@@ -108,8 +148,15 @@ export function Calendar() {
           currentDate={currentDate}
           monthDates={monthDates}
           getAppointmentsForDate={getAppointmentsForDate}
+          onAppointmentClick={handleAppointmentClick}
         />
       )}
+
+      {/* Appointment detail modal */}
+      <AppointmentDetailsModal
+        appointment={selectedAppointment}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }

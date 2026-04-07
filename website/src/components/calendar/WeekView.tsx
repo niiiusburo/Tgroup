@@ -1,14 +1,20 @@
-import { STATUS_DOT_COLORS, type CalendarAppointment } from '@/data/mockCalendar';
+import { type CalendarAppointment } from '@/data/mockCalendar';
+import { AppointmentCard } from './AppointmentCard';
 
 /**
  * WeekView Component - 7-day grid with time slots
  * @crossref:used-in[Calendar]
- * @crossref:uses[TimeSlot]
+ * @crossref:uses[AppointmentCard]
  */
 
 interface WeekViewProps {
   readonly weekDates: readonly Date[];
   readonly getAppointmentsForDate: (date: Date) => readonly CalendarAppointment[];
+  readonly onAppointmentClick?: (appointment: CalendarAppointment) => void;
+  readonly onDragStart?: (e: React.DragEvent, appointment: CalendarAppointment) => void;
+  readonly onDragOver?: (e: React.DragEvent) => void;
+  readonly onDrop?: (e: React.DragEvent, targetDate: string, targetTime: string) => void;
+  readonly onDragEnd?: () => void;
 }
 
 const DISPLAY_HOURS = [
@@ -16,12 +22,20 @@ const DISPLAY_HOURS = [
   '13:00', '14:00', '15:00', '16:00', '17:00', '18:00',
 ] as const;
 
-export function WeekView({ weekDates, getAppointmentsForDate }: WeekViewProps) {
+export function WeekView({
+  weekDates,
+  getAppointmentsForDate,
+  onAppointmentClick,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+}: WeekViewProps) {
   const today = new Date();
   const todayStr = formatShort(today);
 
   return (
-    <div className="bg-white rounded-xl shadow-card overflow-hidden">
+    <div className="bg-white rounded-xl shadow-card overflow-hidden" onDragEnd={onDragEnd}>
       {/* Week header */}
       <div className="grid grid-cols-[64px_repeat(7,1fr)] border-b border-gray-200">
         <div className="p-2" />
@@ -67,6 +81,7 @@ export function WeekView({ weekDates, getAppointmentsForDate }: WeekViewProps) {
                 return aptHour === slotHour;
               });
               const isToday = formatShort(date) === todayStr;
+              const dateStr = formatShort(date);
 
               return (
                 <div
@@ -74,9 +89,18 @@ export function WeekView({ weekDates, getAppointmentsForDate }: WeekViewProps) {
                   className={`border-l border-gray-100 px-1 py-1 ${
                     isToday ? 'bg-primary-lighter/30' : 'hover:bg-gray-50'
                   }`}
+                  onDragOver={onDragOver}
+                  onDrop={(e) => onDrop?.(e, dateStr, hour)}
                 >
                   {hourAppointments.map((apt) => (
-                    <WeekAppointment key={apt.id} appointment={apt} />
+                    <AppointmentCard
+                      key={apt.id}
+                      appointment={apt}
+                      onClick={onAppointmentClick}
+                      compact
+                      draggable
+                      onDragStart={onDragStart}
+                    />
                   ))}
                 </div>
               );
@@ -84,24 +108,6 @@ export function WeekView({ weekDates, getAppointmentsForDate }: WeekViewProps) {
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-function WeekAppointment({ appointment }: { readonly appointment: CalendarAppointment }) {
-  const dotColor = STATUS_DOT_COLORS[appointment.status];
-
-  return (
-    <div className="bg-primary-lighter border border-primary-light rounded px-1.5 py-1 mb-0.5 cursor-pointer hover:shadow-card transition-shadow">
-      <div className="flex items-center gap-1">
-        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotColor}`} />
-        <span className="text-[11px] font-medium text-gray-800 truncate">
-          {appointment.customerName}
-        </span>
-      </div>
-      <p className="text-[10px] text-gray-500 truncate ml-2.5">
-        {appointment.startTime} {appointment.serviceName}
-      </p>
     </div>
   );
 }

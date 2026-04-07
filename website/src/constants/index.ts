@@ -125,6 +125,39 @@ export const NAVIGATION_ITEMS = [
 ] as const;
 
 /**
+ * Appointment type definitions with color coding
+ * @crossref:used-in[Calendar, Appointments, Overview]
+ */
+export type AppointmentType =
+  | 'cleaning'
+  | 'consultation'
+  | 'treatment'
+  | 'surgery'
+  | 'orthodontics'
+  | 'cosmetic'
+  | 'emergency';
+
+export const APPOINTMENT_TYPE_COLORS: Record<AppointmentType, { bg: string; border: string; text: string; dot: string }> = {
+  cleaning:     { bg: 'bg-teal-50',    border: 'border-teal-200',    text: 'text-teal-700',    dot: 'bg-teal-500' },
+  consultation: { bg: 'bg-blue-50',    border: 'border-blue-200',    text: 'text-blue-700',    dot: 'bg-blue-500' },
+  treatment:    { bg: 'bg-amber-50',   border: 'border-amber-200',   text: 'text-amber-700',   dot: 'bg-amber-500' },
+  surgery:      { bg: 'bg-red-50',     border: 'border-red-200',     text: 'text-red-700',     dot: 'bg-red-500' },
+  orthodontics: { bg: 'bg-purple-50',  border: 'border-purple-200',  text: 'text-purple-700',  dot: 'bg-purple-500' },
+  cosmetic:     { bg: 'bg-pink-50',    border: 'border-pink-200',    text: 'text-pink-700',    dot: 'bg-pink-500' },
+  emergency:    { bg: 'bg-orange-50',  border: 'border-orange-200',  text: 'text-orange-700',  dot: 'bg-orange-500' },
+} as const;
+
+export const APPOINTMENT_TYPE_LABELS: Record<AppointmentType, string> = {
+  cleaning: 'Cleaning',
+  consultation: 'Consultation',
+  treatment: 'Treatment',
+  surgery: 'Surgery',
+  orthodontics: 'Orthodontics',
+  cosmetic: 'Cosmetic',
+  emergency: 'Emergency',
+} as const;
+
+/**
  * Common time slots for appointments
  */
 export const TIME_SLOTS = [
