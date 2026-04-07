@@ -105,20 +105,20 @@
   "hotPaths": [
     {
       "path": "website/src/App.tsx",
-      "accessCount": 19,
-      "lastAccessed": 1775549547204,
+      "accessCount": 20,
+      "lastAccessed": 1775549854662,
       "type": "file"
     },
     {
       "path": "website/src/constants/index.ts",
-      "accessCount": 19,
-      "lastAccessed": 1775549548319,
+      "accessCount": 20,
+      "lastAccessed": 1775549855473,
       "type": "file"
     },
     {
       "path": "website/src/pages/index.ts",
-      "accessCount": 14,
-      "lastAccessed": 1775549548155,
+      "accessCount": 15,
+      "lastAccessed": 1775549855973,
       "type": "file"
     },
     {
@@ -135,8 +135,8 @@
     },
     {
       "path": "website/src/data/mockDashboard.ts",
-      "accessCount": 10,
-      "lastAccessed": 1775548394422,
+      "accessCount": 11,
+      "lastAccessed": 1775549873128,
       "type": "file"
     },
     {
@@ -176,6 +176,12 @@
       "type": "file"
     },
     {
+      "path": "website/src/data/mockCalendar.ts",
+      "accessCount": 7,
+      "lastAccessed": 1775549873597,
+      "type": "file"
+    },
+    {
       "path": "website/tailwind.config.js",
       "accessCount": 6,
       "lastAccessed": 1775546719937,
@@ -188,27 +194,27 @@
       "type": "file"
     },
     {
-      "path": "website/src/data/mockCalendar.ts",
-      "accessCount": 6,
-      "lastAccessed": 1775548992025,
-      "type": "file"
-    },
-    {
       "path": "website/src/hooks/useCalendarData.ts",
       "accessCount": 6,
       "lastAccessed": 1775549067806,
       "type": "file"
     },
     {
-      "path": "website/src/pages/Website.tsx",
-      "accessCount": 5,
-      "lastAccessed": 1775546156997,
+      "path": "website/src/pages/Appointments.tsx",
+      "accessCount": 6,
+      "lastAccessed": 1775549864568,
       "type": "file"
     },
     {
-      "path": "website/src/pages/Appointments.tsx",
+      "path": "website/src/data/mockEmployees.ts",
+      "accessCount": 6,
+      "lastAccessed": 1775549872152,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/Website.tsx",
       "accessCount": 5,
-      "lastAccessed": 1775546706740,
+      "lastAccessed": 1775546156997,
       "type": "file"
     },
     {
@@ -221,12 +227,6 @@
       "path": "website/src/pages/Relationships.tsx",
       "accessCount": 5,
       "lastAccessed": 1775546889664,
-      "type": "file"
-    },
-    {
-      "path": "website/src/data/mockEmployees.ts",
-      "accessCount": 5,
-      "lastAccessed": 1775548937543,
       "type": "file"
     },
     {
