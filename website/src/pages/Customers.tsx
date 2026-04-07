@@ -153,6 +153,7 @@ function buildCustomerColumns(locationNameMap: Map<string, string>): readonly Co
 
 export function Customers() {
   const [showForm, setShowForm] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const { selectedLocationId } = useLocationFilter();
 
@@ -163,6 +164,8 @@ export function Customers() {
     setSearchTerm,
     statusFilter,
     setStatusFilter,
+    createCustomer,
+    updateCustomer,
   } = useCustomers(selectedLocationId);
 
   // Fetch all companies once for location name lookup
@@ -177,8 +180,44 @@ export function Customers() {
   const { profile: hookProfile, appointments: hookAppointments, isLoading: profileLoading } =
     useCustomerProfile(selectedCustomerId);
 
-  const handleSubmit = (_data: CustomerFormData) => {
+  /** Convert CustomerFormData to API format and create/update */
+  const handleSubmit = async (data: CustomerFormData) => {
+    if (isEditMode && selectedCustomerId) {
+      await updateCustomer(selectedCustomerId, data);
+    } else {
+      await createCustomer(data);
+    }
     setShowForm(false);
+    setIsEditMode(false);
+  };
+
+  /** Handle Edit button click - open form with customer data */
+  const handleEdit = () => {
+    setIsEditMode(true);
+    setShowForm(true);
+  };
+
+  /** Get form initial data when editing */
+  const getEditFormData = (): Partial<CustomerFormData> | undefined => {
+    if (!isEditMode || !selectedCustomerId) return undefined;
+
+    const customer = customers.find((c) => c.id === selectedCustomerId);
+    if (!customer) return undefined;
+
+    return {
+      name: customer.name,
+      phone: customer.phone,
+      email: customer.email,
+      gender: (customer.gender === 'female' || customer.gender === 'Nữ' || customer.gender === 'f')
+        ? 'female'
+        : customer.gender
+        ? 'male'
+        : '',
+      companyid: customer.locationId,
+      street: customer.street || '',
+      note: customer.note || '',
+      comment: customer.comment || '',
+    };
   };
 
   // Show profile view when a customer is selected
@@ -238,14 +277,34 @@ export function Customers() {
     }
 
     return (
-      <CustomerProfile
-        profile={profileData}
-        photos={MOCK_CUSTOMER_PHOTOS}
-        deposit={MOCK_CUSTOMER_DEPOSIT}
-        appointments={appointments}
-        services={MOCK_SERVICE_HISTORY}
-        onBack={() => setSelectedCustomerId(null)}
-      />
+      <>
+        <CustomerProfile
+          profile={profileData}
+          photos={MOCK_CUSTOMER_PHOTOS}
+          deposit={MOCK_CUSTOMER_DEPOSIT}
+          appointments={appointments}
+          services={MOCK_SERVICE_HISTORY}
+          onBack={() => setSelectedCustomerId(null)}
+          onEdit={handleEdit}
+        />
+
+        {/* Edit Customer Form Modal */}
+        {showForm && isEditMode && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[900px] h-[85vh] flex flex-col overflow-hidden">
+              <AddCustomerForm
+                isEdit={true}
+                initialData={getEditFormData()}
+                onSubmit={handleSubmit}
+                onCancel={() => {
+                  setShowForm(false);
+                  setIsEditMode(false);
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </>
     );
   }
 
@@ -265,7 +324,10 @@ export function Customers() {
           </div>
         </div>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setIsEditMode(false);
+            setShowForm(true);
+          }}
           className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -276,7 +338,7 @@ export function Customers() {
       {/* Add Customer Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[900px] h-[85vh] flex flex-col overflow-hidden">
             <AddCustomerForm
               onSubmit={handleSubmit}
               onCancel={() => setShowForm(false)}

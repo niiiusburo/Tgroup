@@ -7,6 +7,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchPartners, createPartner, updatePartner, type ApiPartner } from '@/lib/api';
 import type { CustomerStatus } from '@/data/mockCustomers';
+import type { CustomerFormData } from '@/data/mockCustomerForm';
 
 export type { CustomerStatus } from '@/data/mockCustomers';
 
@@ -35,12 +36,6 @@ export interface Customer {
 export type CustomerStatusFilter = 'all' | CustomerStatus;
 export type CustomerLocationFilter = string; // companyId or 'all'
 
-interface CreateCustomerInput {
-  readonly name: string;
-  readonly phone: string;
-  readonly email: string;
-  readonly locationId: string;
-}
 
 function mapPartnerToCustomer(p: ApiPartner): Customer {
   return {
@@ -127,13 +122,23 @@ export function useCustomers(locationId: string = 'all') {
     pending: customers.filter((c) => c.status === 'pending').length,
   };
 
-  const createCustomerFn = useCallback(async (input: CreateCustomerInput): Promise<Customer> => {
+  const createCustomerFn = useCallback(async (input: CustomerFormData): Promise<Customer> => {
     try {
       const created = await createPartner({
         name: input.name,
         phone: input.phone,
-        email: input.email,
-        companyid: input.locationId,
+        email: input.email || undefined,
+        companyid: input.companyid || undefined,
+        gender: input.gender || undefined,
+        birthday: input.birthday ?? undefined,
+        birthmonth: input.birthmonth ?? undefined,
+        birthyear: input.birthyear ?? undefined,
+        street: input.street || undefined,
+        medicalhistory: input.medicalhistory || undefined,
+        note: input.note || undefined,
+        comment: input.comment || undefined,
+        sourceid: input.sourceid || undefined,
+        referraluserid: input.referraluserid || undefined,
         customer: true,
         status: true,
       });
@@ -142,10 +147,12 @@ export function useCustomers(locationId: string = 'all') {
       return mapped;
     } catch (err) {
       console.error('useCustomers: create error', err);
-      // Fallback to local-only creation
       const fallback: Customer = {
-        ...input,
         id: `cust-${Date.now()}`,
+        name: input.name,
+        phone: input.phone,
+        email: input.email,
+        locationId: input.companyid,
         status: 'active',
         lastVisit: new Date().toISOString().slice(0, 10),
       };
@@ -154,19 +161,43 @@ export function useCustomers(locationId: string = 'all') {
     }
   }, []);
 
-  const updateCustomerFn = useCallback(async (id: string, updates: Partial<Omit<Customer, 'id'>>) => {
+  const updateCustomerFn = useCallback(async (id: string, updates: CustomerFormData) => {
     try {
       await updatePartner(id, {
         name: updates.name,
         phone: updates.phone,
-        email: updates.email,
-        companyid: updates.locationId,
+        email: updates.email || undefined,
+        companyid: updates.companyid || undefined,
+        gender: updates.gender || undefined,
+        birthday: updates.birthday ?? undefined,
+        birthmonth: updates.birthmonth ?? undefined,
+        birthyear: updates.birthyear ?? undefined,
+        street: updates.street || undefined,
+        medicalhistory: updates.medicalhistory || undefined,
+        note: updates.note || undefined,
+        comment: updates.comment || undefined,
+        sourceid: updates.sourceid || undefined,
+        referraluserid: updates.referraluserid || undefined,
       });
     } catch (err) {
       console.error('useCustomers: update error', err);
     }
     setCustomers((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, ...updates } : c)),
+      prev.map((c) =>
+        c.id === id
+          ? {
+              ...c,
+              name: updates.name,
+              phone: updates.phone,
+              email: updates.email,
+              locationId: updates.companyid,
+              gender: updates.gender || null,
+              street: updates.street || null,
+              note: updates.note || null,
+              comment: updates.comment || null,
+            }
+          : c,
+      ),
     );
   }, []);
 
