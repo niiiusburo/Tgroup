@@ -1,11 +1,36 @@
-import { Users } from 'lucide-react';
+import { useState } from 'react';
+import { Users, Plus, Search, Phone, Mail, MapPin } from 'lucide-react';
+import { AddCustomerForm } from '@/components/forms/AddCustomerForm';
+import { MOCK_CUSTOMERS } from '@/data/mockCustomers';
+import { MOCK_LOCATIONS } from '@/data/mockDashboard';
+import type { CustomerFormData } from '@/data/mockCustomerForm';
 
 /**
- * Customers Page
+ * Customers Page - Patient records with Add/Edit form
  * @crossref:route[/customers]
  * @crossref:used-in[App]
  */
 export function Customers() {
+  const [showForm, setShowForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredCustomers = MOCK_CUSTOMERS.filter((c) => {
+    if (!searchTerm) return true;
+    const lower = searchTerm.toLowerCase();
+    return (
+      c.name.toLowerCase().includes(lower) ||
+      c.phone.includes(lower) ||
+      c.email.toLowerCase().includes(lower)
+    );
+  });
+
+  const getLocationName = (locationId: string) =>
+    MOCK_LOCATIONS.find((l) => l.id === locationId)?.name ?? 'Unknown';
+
+  const handleSubmit = (_data: CustomerFormData) => {
+    setShowForm(false);
+  };
+
   return (
     <div className="space-y-6">
       {/* Page header */}
@@ -19,27 +44,79 @@ export function Customers() {
             <p className="text-sm text-gray-500">Manage patient records and profiles</p>
           </div>
         </div>
-        <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+        <button
+          onClick={() => setShowForm(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+        >
+          <Plus className="w-4 h-4" />
           Add Customer
         </button>
       </div>
 
-      {/* Placeholder table */}
+      {/* Add Customer Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+            <AddCustomerForm
+              onSubmit={handleSubmit}
+              onCancel={() => setShowForm(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Customer List */}
       <div className="bg-white rounded-xl shadow-card overflow-hidden">
         <div className="p-4 border-b border-gray-200">
-          <div className="h-10 bg-gray-100 rounded-lg w-full max-w-md" />
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by name, phone, or email..."
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+            />
+          </div>
         </div>
         <div className="divide-y divide-gray-100">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="p-4 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-gray-200" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-1/4" />
-                <div className="h-3 bg-gray-100 rounded w-1/3" />
-              </div>
-              <div className="h-8 bg-gray-100 rounded w-24" />
+          {filteredCustomers.length === 0 ? (
+            <div className="p-8 text-center text-gray-400 text-sm">
+              No customers found
             </div>
-          ))}
+          ) : (
+            filteredCustomers.map((customer) => (
+              <div
+                key={customer.id}
+                className="p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm font-semibold text-primary">
+                    {customer.name.charAt(0)}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {customer.name}
+                  </p>
+                  <div className="flex items-center gap-3 mt-0.5">
+                    <span className="flex items-center gap-1 text-xs text-gray-500">
+                      <Phone className="w-3 h-3" />
+                      {customer.phone}
+                    </span>
+                    <span className="flex items-center gap-1 text-xs text-gray-500">
+                      <Mail className="w-3 h-3" />
+                      {customer.email}
+                    </span>
+                  </div>
+                </div>
+                <span className="flex items-center gap-1 text-xs text-gray-400 flex-shrink-0">
+                  <MapPin className="w-3 h-3" />
+                  {getLocationName(customer.locationId)}
+                </span>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
