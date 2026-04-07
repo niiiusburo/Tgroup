@@ -154,13 +154,14 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
 
   const zone1Counts = useMemo(() => ({
     all: arrivedAppointments.length,
-    waiting: arrivedAppointments.filter((a) => a.checkInStatus === 'waiting').length,
+    waiting: arrivedAppointments.filter((a) => a.checkInStatus === 'waiting' || a.checkInStatus === null).length,
     'in-treatment': arrivedAppointments.filter((a) => a.checkInStatus === 'in-treatment').length,
     done: arrivedAppointments.filter((a) => a.checkInStatus === 'done').length,
   }), [arrivedAppointments]);
 
   const zone1Appointments = useMemo(() => {
     if (zone1Filter === 'all') return arrivedAppointments;
+    if (zone1Filter === 'waiting') return arrivedAppointments.filter((a) => a.checkInStatus === 'waiting' || a.checkInStatus === null);
     return arrivedAppointments.filter((a) => a.checkInStatus === zone1Filter);
   }, [arrivedAppointments, zone1Filter]);
 
