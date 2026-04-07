@@ -11,6 +11,9 @@ import {
   Globe,
   Settings,
   Network,
+  Percent,
+  BarChart3,
+  Bell,
   Menu,
   X,
 } from 'lucide-react';
@@ -33,6 +36,9 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Globe,
   Settings,
   Network,
+  Percent,
+  BarChart3,
+  Bell,
 };
 
 /**

@@ -99,6 +99,9 @@ export const ROUTES = {
   WEBSITE: '/website',
   SETTINGS: '/settings',
   RELATIONSHIPS: '/relationships',
+  COMMISSION: '/commission',
+  REPORTS: '/reports',
+  NOTIFICATIONS: '/notifications',
 } as const;
 
 /**
@@ -116,6 +119,9 @@ export const NAVIGATION_ITEMS = [
   { path: ROUTES.WEBSITE, label: 'Website', icon: 'Globe' },
   { path: ROUTES.SETTINGS, label: 'Settings', icon: 'Settings' },
   { path: ROUTES.RELATIONSHIPS, label: 'Relationships', icon: 'Network' },
+  { path: ROUTES.COMMISSION, label: 'Commission', icon: 'Percent' },
+  { path: ROUTES.REPORTS, label: 'Reports', icon: 'BarChart3' },
+  { path: ROUTES.NOTIFICATIONS, label: 'Notifications', icon: 'Bell' },
 ] as const;
 
 /**

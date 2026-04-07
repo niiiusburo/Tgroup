@@ -14,3 +14,6 @@ export { Locations } from './Locations';
 export { Website } from './Website';
 export { Settings } from './Settings';
 export { Relationships } from './Relationships';
+export { Commission } from './Commission';
+export { Reports } from './Reports';
+export { Notifications } from './Notifications';

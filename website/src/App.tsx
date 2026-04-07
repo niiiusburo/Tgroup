@@ -12,6 +12,9 @@ import {
   Website,
   Settings,
   Relationships,
+  Commission,
+  Reports,
+  Notifications,
 } from '@/pages';
 import { ROUTES } from '@/constants';
 
@@ -30,7 +33,10 @@ import { ROUTES } from '@/constants';
  *   /locations -> Locations,
  *   /website -> Website,
  *   /settings -> Settings,
- *   /relationships -> Relationships
+ *   /relationships -> Relationships,
+ *   /commission -> Commission,
+ *   /reports -> Reports,
+ *   /notifications -> Notifications
  * ]
  */
 function App() {
@@ -70,7 +76,16 @@ function App() {
         
         {/* @crossref:route[path="/relationships", component=Relationships] */}
         <Route path={ROUTES.RELATIONSHIPS} element={<Relationships />} />
-        
+
+        {/* @crossref:route[path="/commission", component=Commission] */}
+        <Route path={ROUTES.COMMISSION} element={<Commission />} />
+
+        {/* @crossref:route[path="/reports", component=Reports] */}
+        <Route path={ROUTES.REPORTS} element={<Reports />} />
+
+        {/* @crossref:route[path="/notifications", component=Notifications] */}
+        <Route path={ROUTES.NOTIFICATIONS} element={<Notifications />} />
+
         {/* @crossref:catch-all-route[redirects to Overview] */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
