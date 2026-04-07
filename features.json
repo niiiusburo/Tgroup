@@ -32,7 +32,8 @@
       ],
       "status": "open",
       "priority": "high",
-      "progress": "Session: 2026-04-07 | FAILED | 0s\nBranch: feature/2-shared-business-components | Session: mfiA-56DbbelFtdYO2tmv\nReason: Process exited with code 1"
+      "failure_reason": "Merge failed: Failed to merge feature/2-shared-business-components into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
+      "failure_category": "verification"
     },
     {
       "id": 3,
@@ -48,7 +49,8 @@
       ],
       "status": "open",
       "priority": "high",
-      "progress": "Session: 2026-04-07 | FAILED | 0s\nBranch: feature/3-shared-selectors-and-form-components | Session: U5FWKNIvDE1l96X194AwW\nReason: Stopped by user"
+      "failure_reason": "Merge failed: Failed to merge feature/3-shared-selectors-and-form-components into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
+      "failure_category": "verification"
     },
     {
       "id": 4,
@@ -62,10 +64,9 @@
         "Create hooks/useDashboardStats.ts with @crossref:used-in[Overview, Reports] \u2014 fetches mock stats data",
         "Create hooks/useTodaySchedule.ts with @crossref:used-in[Overview, Calendar] \u2014 fetches today's appointments"
       ],
-      "status": "failed",
+      "status": "open",
       "priority": "high",
-      "progress": "Session: 2026-04-07 | FAILED | 1m 8s\nBranch: feature/4-overview-dashboard-stats-and-schedule | Session: LUElJUek1VM-esyTiSQkU\nReason: {\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_018kLwzzRFbaZvCwetTW81MJ\",\"type\":\"tool_result\",\"content\":\"(Bash completed with no output)\",\"is_error\":false}]},\"parent_tool_use",
-      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_018kLwzzRFbaZvCwetTW81MJ\",\"type\":\"tool_result\",\"content\":\"(Bash completed with no output)\",\"is_error\":false}]},\"parent_tool_use",
+      "failure_reason": "No commits found on branch feature/4-overview-dashboard-stats-and-schedule. Stopping orchestrator to prevent wasted runs.",
       "failure_category": "implementation"
     },
     {
@@ -80,9 +81,9 @@
         "Add FilterByLocation to Overview page \u2014 state managed with @crossref:used-in[Overview, Calendar, Customers]",
         "Wire up all Overview sections with mock data and verify page renders correctly"
       ],
-      "status": "open",
+      "status": "done",
       "priority": "high",
-      "progress": "Session: 2026-04-07 | FAILED | 0s\nBranch: feature/5-overview-dashboard-actions-and-notifications | Session: t7B1el49nPrQbMzUbWyng\nReason: Process exited with code 1"
+      "progress": "Session: 2026-04-07 | PASSED | 2m 5s\nBranch: feature/5-overview-dashboard-actions-and-notifications | Session: UOm3zLhdlOn8lmqTWLoxq"
     },
     {
       "id": 6,
@@ -96,8 +97,9 @@
         "Build MonthView component with @crossref:used-in[Calendar] showing monthly calendar grid",
         "Build TimeSlot component with @crossref:used-in[CalendarDayView, CalendarWeekView, OverviewTodaySchedule]"
       ],
-      "status": "open",
-      "priority": "high"
+      "status": "done",
+      "priority": "high",
+      "progress": "Session: 2026-04-07 | PASSED | 1m 9s\nBranch: feature/6-calendar-day-week-and-month-views | Session: 8yQfxE5LjiCdRAQ7I_ym8"
     },
     {
       "id": 7,
@@ -112,7 +114,9 @@
         "Add color coding system \u2014 constants @crossref:used-in[Calendar, Appointments, Overview] for appointment types"
       ],
       "status": "open",
-      "priority": "high"
+      "priority": "high",
+      "failure_reason": "No commits found on branch feature/7-calendar-appointments-and-interactions. Stopping orchestrator to prevent wasted runs.",
+      "failure_category": "implementation"
     },
     {
       "id": 8,
@@ -126,10 +130,9 @@
         "Add filter components (location, status, date range) shared across pages",
         "Wire up mock customer data and verify search/filter/sort works"
       ],
-      "status": "failed",
+      "status": "open",
       "priority": "high",
-      "progress": "Session: 2026-04-07 | FAILED | 1m 2s\nBranch: feature/8-customer-list-and-search | Session: nBAXD7-Lvdvyx65wVlyed\nReason: {\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_012gk5PYPJJNXqxdrxEVGwbS\",\"type\":\"tool_result\",\"content\":\"(Bash completed with no output)\",\"is_error\":false}]},\"parent_tool_use",
-      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_012gk5PYPJJNXqxdrxEVGwbS\",\"type\":\"tool_result\",\"content\":\"(Bash completed with no output)\",\"is_error\":false}]},\"parent_tool_use",
+      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_01ESXzWCbxYiiDKvs9xNhupg\",\"type\":\"tool_result\",\"content\":\"[feature/8-customer-list-and-search 8b2aa24] Customer list and search",
       "failure_category": "implementation"
     },
     {
@@ -146,7 +149,8 @@
       ],
       "status": "open",
       "priority": "high",
-      "progress": "Session: 2026-04-07 | FAILED | 11s\nBranch: feature/9-customer-profile-view | Session: peoWETnIlkn2Rjg4KDZJk\nReason: Process exited with code null"
+      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_01Mx2qHyBxVAXgzob7Z3o3hR\",\"type\":\"tool_result\",\"content\":\"[feature/9-customer-profile-view 47a5500] Add customer profile view w",
+      "failure_category": "implementation"
     },
     {
       "id": 10,
@@ -161,7 +165,9 @@
         "Add form validation and photo upload using shared ImageUpload component"
       ],
       "status": "open",
-      "priority": "high"
+      "priority": "high",
+      "failure_reason": "Merge failed: Failed to merge feature/10-customer-forms into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
+      "failure_category": "verification"
     },
     {
       "id": 11,
@@ -176,7 +182,9 @@
         "Build ConvertToService button and create hooks/useAppointments.ts with @crossref:used-in[Appointments, Calendar, Overview]"
       ],
       "status": "open",
-      "priority": "high"
+      "priority": "high",
+      "failure_reason": "Merge failed: Failed to merge feature/11-appointments-management into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
+      "failure_category": "verification"
     },
     {
       "id": 12,
@@ -190,10 +198,9 @@
         "Build MultiVisitTracker with @crossref:used-in[Services, CustomerProfile] \u2014 tracks treatment progress across visits",
         "Create hooks/useServices.ts with @crossref:used-in[Services, Customers, Payment] and ServiceHistoryList component"
       ],
-      "status": "failed",
+      "status": "open",
       "priority": "high",
-      "progress": "Session: 2026-04-07 | FAILED | 1m 0s\nBranch: feature/12-service-records | Session: TbiXNB0j_DY3XoUUWwONb\nReason: {\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_016MpNrWXg2Hzu8jg4bfn2Dh\",\"type\":\"tool_result\",\"content\":\"(Bash completed with no output)\",\"is_error\":false}]},\"parent_tool_use",
-      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_016MpNrWXg2Hzu8jg4bfn2Dh\",\"type\":\"tool_result\",\"content\":\"(Bash completed with no output)\",\"is_error\":false}]},\"parent_tool_use",
+      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_01QFbPpQLLzGwyR1KHujSpkA\",\"type\":\"tool_result\",\"content\":\"/Users/thuanle/Documents/TamTMV/Tgroup/.worktrees/track-services/webs",
       "failure_category": "implementation"
     },
     {
@@ -210,7 +217,8 @@
       ],
       "status": "open",
       "priority": "high",
-      "progress": "Session: 2026-04-07 | FAILED | 12s\nBranch: feature/13-payment-and-deposit-wallet | Session: 3ZhXEQqPdwAOWOKVgt1lb\nReason: {\"type\":\"turn_end\",\"message\":{\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"The user wants me to implement a feature called \\\"Payment and Deposit Wallet\\\" with specific acceptance crite"
+      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_016hc5Fk6EhAYnTx8ftS6Rvq\",\"type\":\"tool_result\",\"content\":\"4af3d06 chore: mark feature 1 as done\\n4c0a9f1 feat(#1): Project Scaf",
+      "failure_category": "implementation"
     },
     {
       "id": 14,
@@ -224,8 +232,9 @@
         "Build InstallmentTracker with @crossref:used-in[PaymentSchedule] \u2014 payment status per installment",
         "Create hooks/useMonthlyPlans.ts with @crossref:used-in[Payment, Customers]"
       ],
-      "status": "open",
-      "priority": "high"
+      "status": "done",
+      "priority": "high",
+      "progress": "Session: 2026-04-07 | PASSED | 52s\nBranch: feature/14-monthly-payment-plans | Session: GwH8taFVB11lW36wqYt8E"
     },
     {
       "id": 15,
@@ -239,10 +248,9 @@
         "Build ReferralCodeDisplay with @crossref:used-in[EmployeeProfile, CustomerForm] \u2014 shows referral stats",
         "Create hooks/useEmployees.ts with @crossref:used-in[Employees, Appointments, Calendar, Customers]"
       ],
-      "status": "failed",
+      "status": "open",
       "priority": "high",
-      "progress": "Session: 2026-04-07 | FAILED | 1m 5s\nBranch: feature/15-employees-list-and-profile | Session: fAXqCrbq2j7KYRl35bhkU\nReason: {\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_01EwzGk4wZreSUeZR1mXzrBe\",\"type\":\"tool_result\",\"content\":\"  \\\"dependencies\\\": {\\n    \\\"react\\\": \\\"^18.2.0\\\",\\n    \\\"react-dom\\\"",
-      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_01EwzGk4wZreSUeZR1mXzrBe\",\"type\":\"tool_result\",\"content\":\"  \\\"dependencies\\\": {\\n    \\\"react\\\": \\\"^18.2.0\\\",\\n    \\\"react-dom\\\"",
+      "failure_reason": "{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_0145Do5vY8EDMATQmVpMwBTu\",\"type\":\"tool_result\",\"content\":\"[feature/15-employees-list-and-profile 9537ceb] Employees list and pr",
       "failure_category": "implementation"
     },
     {
@@ -257,9 +265,9 @@
         "Build LinkedEmployees component showing team relationships",
         "Wire up employee mock data and verify profile + schedule renders"
       ],
-      "status": "open",
+      "status": "done",
       "priority": "medium",
-      "progress": "Session: 2026-04-07 | FAILED | 12s\nBranch: feature/16-employee-roles-and-schedule | Session: kiT8Cj_i0baUQX6XTYJzv\nReason: Process exited with code null"
+      "progress": "Session: 2026-04-07 | PASSED | 1m 52s\nBranch: feature/16-employee-roles-and-schedule | Session: rh1iojUH9JM6F-4qMgKLb"
     },
     {
       "id": 17,
@@ -274,7 +282,9 @@
         "Create hooks/useLocations.ts with @crossref:used-in[Locations, Customers, Employees, Appointments, Overview]"
       ],
       "status": "open",
-      "priority": "medium"
+      "priority": "medium",
+      "failure_reason": "No commits found on branch feature/17-locations-and-branches. Stopping orchestrator to prevent wasted runs.",
+      "failure_category": "implementation"
     },
     {
       "id": 18,
@@ -288,8 +298,9 @@
         "Build ServiceCatalogManager with @crossref:used-in[Website, Settings] \u2014 manage public service listings",
         "Build SEOManager with @crossref:used-in[Website] \u2014 meta tags, descriptions per page"
       ],
-      "status": "open",
-      "priority": "high"
+      "status": "done",
+      "priority": "high",
+      "progress": "Session: 2026-04-07 | PASSED | 1m 9s\nBranch: feature/18-website-cms-management | Session: 27apqB8HenyOvse9bsyFz"
     },
     {
       "id": 19,
@@ -304,7 +315,9 @@
         "Build SystemPreferences with @crossref:used-in[Settings] \u2014 general app settings"
       ],
       "status": "open",
-      "priority": "medium"
+      "priority": "medium",
+      "failure_reason": "Merge failed: Failed to merge feature/19-settings-and-configuration into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
+      "failure_category": "verification"
     },
     {
       "id": 20,
@@ -318,8 +331,9 @@
         "Create hooks/usePermissions.ts with @crossref:used-in[ALL_PAGES] \u2014 permission checking hook",
         "Create placeholder pages for Commission (@crossref:used-in[Employees, Reports]), Reports (@crossref:uses[RevenueChart, DataTable, StatCard]), and SMS/Email Notifications (@crossref:uses[Payment, Customers])"
       ],
-      "status": "open",
-      "priority": "medium"
+      "status": "done",
+      "priority": "medium",
+      "progress": "Session: 2026-04-07 | PASSED | 1m 48s\nBranch: feature/20-relationships-permissions-and-placeholders | Session: agza-OECC-nK5WAO00ry3"
     }
   ]
 }
