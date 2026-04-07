@@ -64,28 +64,53 @@ Tgroup/
 | Table | Count | Description |
 |-------|-------|-------------|
 | `dbo.companies` | 7 | Dental clinic branches (locations) |
-| `dbo.partners` | 37 | All partners (customers + others) |
+| `dbo.partners` | 56 | All partners (30 customers + 19 doctors + 7 branches) |
 | `dbo.partners` (customer=true) | 30 | Active dental patients |
+| `dbo.partners` (employee=true) | 19 | Dentists reverse-engineered from appointment data |
 | `dbo.appointments` | 120 | Patient appointments |
+| `dbo.employees` (view) | 19 | View mapping partners with employee=true |
+| 10 empty views | — | partnersources, agents, aspnetusers, dotkhams, saleorders, crmteams, customerreceipts, hrjobs, saleorderlines, accountpayments |
+
+### Doctors (19, from dbo.partners where employee=true)
+
+| Doctor | Location | Appointments |
+|--------|----------|-------------|
+| BS. Trang | Gò Vấp | 11 |
+| BS. Trâm | Gò Vấp | 3 |
+| BS. Ly | Gò Vấp | 2 |
+| BS. Khánh | Gò Vấp | 1 |
+| BS. Dương | Quận 10 | 9 |
+| BS. Uyên | Quận 10 | 7 |
+| BS. Ý | Quận 3 | 13 |
+| BS. Duy | Quận 3 | 4 |
+| BS. Dũng | Quận 3 | 1 |
+| BS. Thu Thảo | Quận 7 | 15 |
+| BS. Thảo | Thủ Đức | 7 |
+| BS. Nga | Thủ Đức | 6 |
+| BS. Quyên | Thủ Đức | 5 |
+| BS. Quyên B | Thủ Đức | 3 |
+| BS. Hà | Đống Đa | 5 |
+| BS. Hải | Đống Đa | 4 |
+| BS. Minh | Đống Đa | 2 |
+| BS. Phương | Đống Đa | 1 |
+| BS. Linh | Đống Đa | 1 |
 
 ### Locations (dbo.companies)
 
 | Branch |
 |--------|
-| Nha khoa Tam Dentist (HQ) |
-| Tam Dentist Go Vap |
-| Tam Dentist Quan 10 |
-| Tam Dentist Quan 3 |
-| Tam Dentist Quan 7 |
-| Tam Dentist Thu Duc |
-| Tam Dentist Dong Da |
+| Nha khoa Tấm Dentist (HQ) |
+| Tấm Dentist Gò Vấp |
+| Tấm Dentist Quận 10 |
+| Tấm Dentist Quận 3 |
+| Tấm Dentist Quận 7 |
+| Tấm Dentist Thủ Đức |
+| Tấm Dentist Đống Đa |
 
-### Full Production Database (available but not active)
+### SQL Dump
 
-- **Dump:** `/Users/thuanle/Documents/TamTMV/Tdental-portable-20260309/Golden/database/tdental-portable-20260309.dump` (932MB)
-- **Tables:** 398
-- **Schema reference:** `/Users/thuanle/Documents/TamTMV/Tdental-portable-20260309/Golden/database/table_map.md`
-- **Key counts:** 214,900 appointments, 113,622 account moves, 373 employees
+- **Demo dump:** `website/demo_tdental_updated.sql` (includes doctors + views)
+- **Original demo source:** `/Users/thuanle/Documents/TamTMV/TamDental/demo_tdental.sql`
 
 ## Dev Server
 
@@ -93,6 +118,25 @@ Tgroup/
 cd website && npx vite --port 5174
 # Open http://localhost:5174
 ```
+
+## Backend API
+
+```bash
+# Start API (connects to demo DB on port 55433)
+cd /Users/thuanle/Documents/TamTMV/TamDental/tdental-api && node src/server.js
+# Runs on http://localhost:3002
+```
+
+| Endpoint | Data | Notes |
+|----------|------|-------|
+| `/api/Partners` | 30 customers | search, companyId filter |
+| `/api/Partners/:id` | Single customer profile | All 87 partner fields |
+| `/api/Employees` | 19 doctors | companyId, isDoctor filters |
+| `/api/Appointments` | 120 appointments | dateFrom/dateTo, state, partner_id, companyId |
+| `/api/Companies` | 7 locations | All branches |
+| `/api/SaleOrders` | 0 (empty view) | No sale orders in demo |
+| `/api/Products` | error | productcategories table missing |
+| `/api/DashboardReports` | varies | Aggregation endpoint |
 
 ## Database
 
@@ -103,10 +147,10 @@ docker start tdental-demo
 # Connect
 PGPASSWORD=postgres psql -h 127.0.0.1 -p 55433 -U postgres -d tdental_demo
 
-# Restore demo from scratch
+# Restore demo from scratch (includes 19 doctors + 11 SQL views)
 docker run -d --name tdental-demo -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=tdental_demo -p 55433:5432 postgres:16-alpine
 sleep 5
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 55433 -U postgres -d tdental_demo < /Users/thuanle/Documents/TamTMV/TamDental/demo_tdental.sql
+docker exec -i tdental-demo psql -U postgres -d tdental_demo < website/demo_tdental_updated.sql
 ```
 
 ## GitHub
@@ -119,17 +163,31 @@ PGPASSWORD=postgres psql -h 127.0.0.1 -p 55433 -U postgres -d tdental_demo < /Us
 
 1. **Global LocationFilter** — `contexts/LocationContext.tsx` syncs "All Locations" dropdown across 7 pages (Overview, Customers, Calendar, Appointments, Employees, Services, Payment)
 2. **@crossref comments** — Every component has `@crossref:used-in[...]` and `@crossref:uses[...]` comments tracking where it's used across the codebase
-3. **Mock data → Real DB migration** — `data/mock*.ts` files will be replaced with API calls to the PostgreSQL database
-4. **20 features** split across 5 categories: setup, dashboard, customers, services, admin
+3. **tdental-api backend** — Express server at `/Users/thuanle/Documents/TamTMV/TamDental/tdental-api/` queries demo DB with `search_path=dbo`
+4. **SQL views for missing tables** — 11 views created so the API routes work against the 3-table demo DB
+5. **20 features** split across 5 categories: setup, dashboard, customers, services, admin
 
 ## Reference Sites
 
 - **Original TDental:** `https://tamdentist.tdental.vn` (admin / 123123@)
 - **Local replica:** `http://127.0.0.1:8899` (admin@tdental.vn / admin123) — requires Golden backend
 
-## Next Steps
+## What's Connected vs Mock
 
-- [ ] Connect frontend to real PostgreSQL demo database (replace mock data)
-- [ ] Map database schema columns to frontend component props
-- [ ] Build API layer between React frontend and PostgreSQL
-- [ ] Ensure all 7 locations from DB match the FilterByLocation dropdown
+### Connected to real DB
+- Customer list, search, create, profile view
+- Appointment list, search, create, calendar views
+- Employee/doctor list with location filter
+- Dashboard stats (patient count, appointment count)
+- Revenue chart (real appointment counts by month)
+- Location list and global location filter on all 7 pages
+- FilterByDoctor uses real doctors from API
+
+### Still using mock data (no DB tables)
+- Customer photos, deposits, service history
+- Payment wallets and installment plans
+- Service Catalog (Products table missing)
+- Settings (all 4 tabs)
+- Relationships / Permission matrix
+- Commission, Reports, Notifications (placeholder pages)
+- Notification panel on dashboard
