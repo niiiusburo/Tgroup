@@ -21,11 +21,6 @@ interface EmployeeTableProps {
   readonly onSelect: (id: string) => void;
 }
 
-const LOCATION_NAMES: Record<string, string> = {
-  'loc-1': 'District 1',
-  'loc-2': 'District 7',
-  'loc-3': 'Thu Duc',
-};
 
 const STATUS_MAP: Record<string, StatusVariant> = {
   active: 'active',
@@ -97,7 +92,7 @@ const columns: readonly Column<Employee>[] = [
     render: (emp) => (
       <span className="flex items-center gap-1 text-gray-600">
         <MapPin className="w-3.5 h-3.5 text-gray-400" />
-        {LOCATION_NAMES[emp.locationId] ?? emp.locationId}
+        {emp.locationName || emp.locationId}
       </span>
     ),
   },

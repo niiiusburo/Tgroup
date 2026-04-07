@@ -30,6 +30,7 @@ export interface Employee {
   readonly roles: readonly EmployeeRole[];
   readonly status: EmployeeStatus;
   readonly locationId: string;
+  readonly locationName: string;
   readonly phone: string;
   readonly email: string;
   readonly schedule: readonly ScheduleBlock[];
@@ -96,6 +97,7 @@ export const MOCK_EMPLOYEES: readonly Employee[] = [
     roles: ['dentist'],
     status: 'active',
     locationId: 'loc-1',
+    locationName: 'District 1',
     phone: '0901-234-567',
     email: 'duc.tran@tdental.vn',
     schedule: [
@@ -116,6 +118,7 @@ export const MOCK_EMPLOYEES: readonly Employee[] = [
     roles: ['orthodontist', 'dentist'],
     status: 'active',
     locationId: 'loc-2',
+    locationName: 'District 7',
     phone: '0912-345-678',
     email: 'hoa.le@tdental.vn',
     schedule: [
@@ -136,6 +139,7 @@ export const MOCK_EMPLOYEES: readonly Employee[] = [
     roles: ['hygienist'],
     status: 'active',
     locationId: 'loc-1',
+    locationName: 'District 1',
     phone: '0923-456-789',
     email: 'binh.nguyen@tdental.vn',
     schedule: [
@@ -156,6 +160,7 @@ export const MOCK_EMPLOYEES: readonly Employee[] = [
     roles: ['assistant'],
     status: 'active',
     locationId: 'loc-2',
+    locationName: 'District 7',
     phone: '0934-567-890',
     email: 'mai.pham@tdental.vn',
     schedule: [
@@ -177,6 +182,7 @@ export const MOCK_EMPLOYEES: readonly Employee[] = [
     roles: ['assistant', 'receptionist'],
     status: 'on-leave',
     locationId: 'loc-1',
+    locationName: 'District 1',
     phone: '0945-678-901',
     email: 'tuan.hoang@tdental.vn',
     schedule: [
@@ -197,6 +203,7 @@ export const MOCK_EMPLOYEES: readonly Employee[] = [
     roles: ['manager', 'receptionist'],
     status: 'active',
     locationId: 'loc-3',
+    locationName: 'Thu Duc',
     phone: '0956-789-012',
     email: 'lan.vo@tdental.vn',
     schedule: [
@@ -217,6 +224,7 @@ export const MOCK_EMPLOYEES: readonly Employee[] = [
     roles: ['lab-tech'],
     status: 'active',
     locationId: 'loc-1',
+    locationName: 'District 1',
     phone: '0967-890-123',
     email: 'hung.dao@tdental.vn',
     schedule: [
@@ -236,6 +244,7 @@ export const MOCK_EMPLOYEES: readonly Employee[] = [
     roles: ['dentist', 'manager'],
     status: 'active',
     locationId: 'loc-1',
+    locationName: 'District 1',
     phone: '0978-901-234',
     email: 'son.nguyen@tdental.vn',
     schedule: [

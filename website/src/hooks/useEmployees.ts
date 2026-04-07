@@ -70,6 +70,7 @@ function mapApiEmployeeToEmployee(apiEmployee: ApiEmployee): Employee {
     ),
     status: mapApiStatus(apiEmployee.active),
     locationId: apiEmployee.companyid || '',
+    locationName: apiEmployee.companyname || '',
     phone: apiEmployee.phone || '',
     email: apiEmployee.email || '',
     schedule: [],
