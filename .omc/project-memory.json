@@ -111,8 +111,8 @@
     },
     {
       "path": "website/src/App.tsx",
-      "accessCount": 4,
-      "lastAccessed": 1775544647734,
+      "accessCount": 5,
+      "lastAccessed": 1775544990192,
       "type": "file"
     },
     {
@@ -146,6 +146,12 @@
       "type": "file"
     },
     {
+      "path": "website/src/pages/Payment.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1775545171493,
+      "type": "file"
+    },
+    {
       "path": "website/package.json",
       "accessCount": 3,
       "lastAccessed": 1775544056229,
@@ -155,6 +161,24 @@
       "path": "website/tsconfig.json",
       "accessCount": 3,
       "lastAccessed": 1775544073345,
+      "type": "file"
+    },
+    {
+      "path": "website/src/pages/Customers.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1775544978639,
+      "type": "file"
+    },
+    {
+      "path": "website/src/hooks/useOverviewData.ts",
+      "accessCount": 3,
+      "lastAccessed": 1775544987092,
+      "type": "file"
+    },
+    {
+      "path": "website/src/data/mockDashboard.ts",
+      "accessCount": 3,
+      "lastAccessed": 1775544988304,
       "type": "file"
     },
     {
@@ -176,12 +200,6 @@
       "type": "file"
     },
     {
-      "path": "website/src/pages/Customers.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1775543653728,
-      "type": "file"
-    },
-    {
       "path": "website/src/pages/Appointments.tsx",
       "accessCount": 2,
       "lastAccessed": 1775543654199,
@@ -191,12 +209,6 @@
       "path": "website/src/pages/Services.tsx",
       "accessCount": 2,
       "lastAccessed": 1775543661379,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Payment.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1775543661679,
       "type": "file"
     },
     {
@@ -236,15 +248,9 @@
       "type": "directory"
     },
     {
-      "path": "website/src/hooks/useOverviewData.ts",
+      "path": "website/src/components/modules/RevenueChartModule.tsx",
       "accessCount": 2,
-      "lastAccessed": 1775544661217,
-      "type": "file"
-    },
-    {
-      "path": "website/src/data/mockDashboard.ts",
-      "accessCount": 2,
-      "lastAccessed": 1775544671563,
+      "lastAccessed": 1775544989105,
       "type": "file"
     },
     {
@@ -275,12 +281,6 @@
       "path": "website/src/components/shared/NotificationsPanel.tsx",
       "accessCount": 1,
       "lastAccessed": 1775544121092,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/modules/RevenueChartModule.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775544132192,
       "type": "file"
     },
     {
@@ -323,6 +323,42 @@
       "path": "website/src/components/calendar/MonthView.tsx",
       "accessCount": 1,
       "lastAccessed": 1775544765400,
+      "type": "file"
+    },
+    {
+      "path": "website/src/data/mockMonthlyPlans.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775545026943,
+      "type": "file"
+    },
+    {
+      "path": "website/src/hooks/useMonthlyPlans.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775545052130,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/payment/MonthlyPlan/MonthlyPlanCreator.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775545108238,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/payment/MonthlyPlan/PaymentSchedule.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775545125369,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/payment/MonthlyPlan/InstallmentTracker.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775545132033,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/payment/MonthlyPlan/index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775545132921,
       "type": "file"
     }
   ],
