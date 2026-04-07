@@ -96,9 +96,7 @@ export function useCustomers(locationId: string = 'all') {
         search: debouncedSearch || undefined,
         companyId: locationId !== 'all' ? locationId : undefined,
       });
-      let mapped = res.items
-        .filter((p) => p.customer)
-        .map(mapPartnerToCustomer);
+      let mapped = res.items.map(mapPartnerToCustomer);
 
       // Client-side status filter (API doesn't support it directly)
       if (statusFilter !== 'all') {
