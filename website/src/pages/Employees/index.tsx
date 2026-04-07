@@ -1,17 +1,22 @@
+// @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { UserCog, Search, X } from 'lucide-react';
 import { useEmployees } from '@/hooks/useEmployees';
 import { TierSelector } from '@/components/employees/TierSelector';
 import { RoleMultiSelect } from '@/components/employees/RoleMultiSelect';
 import { EmployeeTable } from '@/components/employees/EmployeeTable';
 import { EmployeeProfile } from '@/components/employees/EmployeeProfile';
+import { FilterByLocation } from '@/components/shared/FilterByLocation';
+import { useLocationFilter } from '@/contexts/LocationContext';
+import { MOCK_LOCATIONS } from '@/data/mockDashboard';
 
 /**
  * Employees Page — staff management with list view and detailed profiles
  * @crossref:route[/employees]
  * @crossref:used-in[App]
- * @crossref:uses[EmployeeTable, EmployeeProfile, TierSelector]
+ * @crossref:uses[EmployeeTable, EmployeeProfile, TierSelector, FilterByLocation, useLocationFilter]
  */
 export function Employees() {
+  const { selectedLocationId, setSelectedLocationId } = useLocationFilter();
   const {
     employees,
     selectedEmployee,
@@ -54,15 +59,22 @@ export function Employees() {
 
       {/* Search and filters */}
       <div className="bg-white rounded-xl shadow-card p-4 space-y-3">
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+        {/* Search + Location */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            />
+          </div>
+          <FilterByLocation
+            locations={MOCK_LOCATIONS}
+            selectedId={selectedLocationId}
+            onChange={setSelectedLocationId}
           />
         </div>
 

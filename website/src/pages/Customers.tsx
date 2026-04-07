@@ -1,3 +1,4 @@
+// @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { useState } from 'react';
 import { Users, Plus, Phone, Mail, MapPin } from 'lucide-react';
 import { AddCustomerForm } from '@/components/forms/AddCustomerForm';
@@ -7,6 +8,7 @@ import { DataTable, type Column } from '@/components/shared/DataTable';
 import { FilterByLocation } from '@/components/shared/FilterByLocation';
 import { StatusBadge, type StatusVariant } from '@/components/shared/StatusBadge';
 import { useCustomers } from '@/hooks/useCustomers';
+import { useLocationFilter } from '@/contexts/LocationContext';
 import { MOCK_LOCATIONS } from '@/data/mockDashboard';
 import {
   MOCK_CUSTOMER_PROFILE,
@@ -125,6 +127,7 @@ const CUSTOMER_COLUMNS: readonly Column<Customer>[] = [
 export function Customers() {
   const [showForm, setShowForm] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const { selectedLocationId, setSelectedLocationId } = useLocationFilter();
 
   const {
     customers,
@@ -133,9 +136,7 @@ export function Customers() {
     setSearchTerm,
     statusFilter,
     setStatusFilter,
-    locationFilter,
-    setLocationFilter,
-  } = useCustomers();
+  } = useCustomers(selectedLocationId);
 
   const handleSubmit = (_data: CustomerFormData) => {
     setShowForm(false);
@@ -207,8 +208,8 @@ export function Customers() {
         </div>
         <FilterByLocation
           locations={MOCK_LOCATIONS}
-          selectedId={locationFilter}
-          onChange={setLocationFilter}
+          selectedId={selectedLocationId}
+          onChange={setSelectedLocationId}
         />
         <div className="flex items-center gap-1">
           {STATUS_FILTER_OPTIONS.map((opt) => (

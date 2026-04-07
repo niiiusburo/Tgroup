@@ -1,3 +1,4 @@
+// @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { LayoutDashboard } from 'lucide-react';
 import { QuickActionsBar } from '@/components/shared/QuickActionsBar';
 import { NotificationsPanel } from '@/components/shared/NotificationsPanel';
@@ -8,18 +9,18 @@ import { FilterByLocation } from '@/components/shared/FilterByLocation';
 import { useOverviewData } from '@/hooks/useOverviewData';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useTodaySchedule } from '@/hooks/useTodaySchedule';
+import { useLocationFilter } from '@/contexts/LocationContext';
 
 /**
  * Overview Dashboard Page
  * @crossref:route[/]
  * @crossref:used-in[AppRouter]
- * @crossref:uses[QuickActionsBar, NotificationsPanel, RevenueChartModule, StatCardModule, TodaySchedule, FilterByLocation]
+ * @crossref:uses[QuickActionsBar, NotificationsPanel, RevenueChartModule, StatCardModule, TodaySchedule, FilterByLocation, useLocationFilter]
  */
 export function Overview() {
+  const { selectedLocationId, setSelectedLocationId } = useLocationFilter();
   const {
     locations,
-    selectedLocationId,
-    setSelectedLocationId,
     notifications,
     markNotificationRead,
     revenueData,

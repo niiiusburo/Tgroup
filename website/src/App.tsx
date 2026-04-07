@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
+import { LocationProvider } from '@/contexts/LocationContext';
 import {
   Overview,
   Calendar,
@@ -9,7 +10,7 @@ import {
   Payment,
   Employees,
   Locations,
-  Website,
+  ServiceCatalog,
   Settings,
   Relationships,
   Commission,
@@ -21,7 +22,7 @@ import { ROUTES } from '@/constants';
 /**
  * Main Application Component
  * @crossref:root-component
- * @crossref:uses[Layout, Routes, Route]
+ * @crossref:uses[Layout, Routes, Route, LocationProvider]
  * @crossref:routes[
  *   / -> Overview,
  *   /calendar -> Calendar,
@@ -41,6 +42,7 @@ import { ROUTES } from '@/constants';
  */
 function App() {
   return (
+    <LocationProvider>
     <Routes>
       {/* @crossref:route-wrapper[Layout] */}
       <Route path="/" element={<Layout />}>
@@ -68,8 +70,8 @@ function App() {
         {/* @crossref:route[path="/locations", component=Locations] */}
         <Route path={ROUTES.LOCATIONS} element={<Locations />} />
         
-        {/* @crossref:route[path="/website", component=Website] */}
-        <Route path={ROUTES.WEBSITE} element={<Website />} />
+        {/* @crossref:route[path="/website", component=ServiceCatalog] */}
+        <Route path={ROUTES.WEBSITE} element={<ServiceCatalog />} />
         
         {/* @crossref:route[path="/settings", component=Settings] */}
         <Route path={ROUTES.SETTINGS} element={<Settings />} />
@@ -90,6 +92,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
+    </LocationProvider>
   );
 }
 

@@ -1,8 +1,9 @@
+// @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 /**
  * Appointments Management Page
  * @crossref:route[/appointments]
  * @crossref:used-in[App]
- * @crossref:uses[AppointmentForm, StatusBadge, CheckInFlow, WaitTimer, ConvertToService]
+ * @crossref:uses[AppointmentForm, StatusBadge, CheckInFlow, WaitTimer, ConvertToService, FilterByLocation, useLocationFilter]
  */
 
 import { useState } from 'react';
@@ -16,6 +17,9 @@ import { CheckInFlow } from '@/components/appointments/CheckInFlow';
 import { WaitTimer } from '@/components/appointments/WaitTimer';
 import { ConvertToService } from '@/components/appointments/ConvertToService';
 import { useAppointments, type AppointmentFilter } from '@/hooks/useAppointments';
+import { FilterByLocation } from '@/components/shared/FilterByLocation';
+import { useLocationFilter } from '@/contexts/LocationContext';
+import { MOCK_LOCATIONS } from '@/data/mockDashboard';
 import {
   CHECK_IN_STATUS_LABELS,
   CHECK_IN_STATUS_STYLES,
@@ -41,6 +45,7 @@ const STATUS_TO_BADGE: Record<AppointmentStatus, StatusVariant> = {
 };
 
 export function Appointments() {
+  const { selectedLocationId, setSelectedLocationId } = useLocationFilter();
   const {
     appointments,
     stats,
@@ -111,6 +116,12 @@ export function Appointments() {
             className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
           />
         </div>
+        {/* Location filter */}
+        <FilterByLocation
+          locations={MOCK_LOCATIONS}
+          selectedId={selectedLocationId}
+          onChange={setSelectedLocationId}
+        />
         {/* Date filter */}
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-gray-400" />
