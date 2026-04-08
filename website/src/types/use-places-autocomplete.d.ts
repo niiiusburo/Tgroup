@@ -22,6 +22,11 @@ declare module 'use-places-autocomplete' {
   export default function usePlacesAutocomplete(config?: {
     requestOptions?: Record<string, unknown>;
     debounce?: number;
+    cache?: number | boolean;
+    cacheKey?: string;
+    defaultValue?: string;
+    initOnMount?: boolean;
+    [key: string]: unknown;
   }): UsePlacesAutocompleteResult;
 
   export function getGeocode(args: { address?: string; placeId?: string }): Promise<google.maps.GeocoderResult[]>;
