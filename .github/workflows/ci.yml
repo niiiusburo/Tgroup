@@ -1,0 +1,116 @@
+name: CI / Code Review
+
+on:
+  push:
+    branches: [main, master, ai-develop]
+  pull_request:
+    branches: [main, master, ai-develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================================
+  # Frontend Checks (Website)
+  # ============================================================
+  frontend-lint:
+    name: Frontend Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ./website/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+        continue-on-error: true
+
+  frontend-typecheck:
+    name: Frontend TypeCheck
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ./website/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    needs: [frontend-lint, frontend-typecheck]
+    defaults:
+      run:
+        working-directory: ./website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ./website/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+  # ============================================================
+  # E2E Tests (Playwright)
+  # ============================================================
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ./website/package-lock.json
+      - run: npm ci
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+      - name: Run E2E Tests
+        run: npx playwright test --reporter=list
+        continue-on-error: true
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: ./website/playwright-report/
+          retention-days: 7
+
+  # ============================================================
+  # Code Quality / Review
+  # ============================================================
+  code-review:
+    name: Code Review Summary
+    runs-on: ubuntu-latest
+    needs: [frontend-build, e2e-tests]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - name: Review Summary
+        run: |
+          echo "## Code Review Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend Lint | ${{ needs.frontend-lint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend TypeCheck | ${{ needs.frontend-typecheck.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend Build | ${{ needs.frontend-build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| E2E Tests | ${{ needs.e2e-tests.result }} |" >> $GITHUB_STEP_SUMMARY

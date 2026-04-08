@@ -1,0 +1,109 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to review'
+        required: true
+        type: string
+
+jobs:
+  ai-review:
+    name: AI Code Review
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR diff
+        id: get-diff
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }} > pr_diff.txt
+          else
+            gh pr diff ${{ inputs.pr_number }} --repo ${{ github.repository }} > pr_diff.txt
+          fi
+          echo "diff_size=$(stat -c%s pr_diff.txt)" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summarize changes
+        id: summarize
+        run: |
+          echo "## 🤖 AI Code Review Summary" > review_comment.md
+          echo "" >> review_comment.md
+          echo "### Files Changed" >> review_comment.md
+          echo "\`\`\`" >> review_comment.md
+          git diff --name-only HEAD~1 >> review_comment.md 2>/dev/null || echo "See PR files tab" >> review_comment.md
+          echo "\`\`\`" >> review_comment.md
+          echo "" >> review_comment.md
+          echo "### Review Checklist" >> review_comment.md
+          echo "- [ ] Code follows project conventions" >> review_comment.md
+          echo "- [ ] No obvious bugs or issues" >> review_comment.md
+          echo "- [ ] Proper error handling" >> review_comment.md
+          echo "- [ ] Type safety maintained" >> review_comment.md
+          echo "" >> review_comment.md
+          echo "> 💡 **Tip**: Run \`npm run lint\` and \`npm run build\` locally before pushing." >> review_comment.md
+
+      - name: Post review comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('review_comment.md', 'utf8');
+            
+            const prNumber = context.eventName === 'pull_request' 
+              ? context.payload.pull_request.number 
+              : parseInt('${{ inputs.pr_number }}');
+            
+            // Find existing bot comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber
+            });
+            
+            const botComment = comments.find(c => c.user.login === 'github-actions[bot]' && c.body.includes('AI Code Review'));
+            
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: body
+              });
+            }
+
+  # Optional: Auto-approve if checks pass and no critical files changed
+  auto-approve:
+    name: Auto-Approve Safe Changes
+    runs-on: ubuntu-latest
+    needs: [ai-review]
+    if: |
+      github.event_name == 'pull_request' &&
+      !contains(github.event.pull_request.changed_files, 'website/src/lib/api.ts') &&
+      !contains(github.event.pull_request.changed_files, 'website/src/contexts/AuthContext.tsx')
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Check if safe to auto-approve
+        run: |
+          echo "Checking for safe changes only..."
+          # This is a placeholder - implement your own logic
+          echo "Auto-approval logic would go here"

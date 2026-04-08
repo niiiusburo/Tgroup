@@ -1,0 +1,20 @@
+# Global owners (fallback)
+* @niiiusburo
+
+# Frontend code
+/website/src/ @niiiusburo
+/website/*.json @niiiusburo
+/website/*.ts @niiiusburo
+
+# GitHub configuration
+/.github/ @niiiusburo
+
+# Documentation
+*.md @niiiusburo
+/docs/ @niiiusburo
+
+# Database
+*.sql @niiiusburo
+
+# Blueprint / Architecture
+/blueprint/ @niiiusburo

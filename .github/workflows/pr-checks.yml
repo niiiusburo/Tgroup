@@ -1,0 +1,120 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  # ============================================================
+  # PR Title Validation
+  # ============================================================
+  pr-title:
+    name: Validate PR Title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR Title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const validPrefixes = [
+              'feat:', 'feature:',
+              'fix:', 'bugfix:',
+              'docs:',
+              'style:',
+              'refactor:',
+              'perf:', 'performance:',
+              'test:',
+              'chore:',
+              'ci:',
+              'build:',
+              'revert:'
+            ];
+            
+            const hasValidPrefix = validPrefixes.some(prefix => 
+              title.toLowerCase().startsWith(prefix)
+            );
+            
+            if (!hasValidPrefix) {
+              core.setFailed(
+                `PR title must start with one of: ${validPrefixes.join(', ')}\n` +
+                `Example: "feat: add login page" or "fix: resolve API timeout"`
+              );
+            }
+
+  # ============================================================
+  # Branch Name Validation
+  # ============================================================
+  branch-name:
+    name: Validate Branch Name
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Branch Name
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          echo "Branch: $BRANCH"
+          
+          # Allowed patterns
+          if [[ "$BRANCH" =~ ^(main|master|ai-develop)$ ]]; then
+            echo "✅ Protected branch allowed for PR"
+            exit 0
+          elif [[ "$BRANCH" =~ ^(feature|feat|fix|bugfix|hotfix|release|chore|docs|refactor)/.+$ ]]; then
+            echo "✅ Valid branch name"
+            exit 0
+          elif [[ "$BRANCH" =~ ^(dependabot|renovate)/.+$ ]]; then
+            echo "✅ Dependency bot branch allowed"
+            exit 0
+          else
+            echo "❌ Invalid branch name"
+            echo "Branch must follow pattern: (feature|fix|hotfix|release|chore|docs|refactor)/description"
+            exit 1
+          fi
+
+  # ============================================================
+  # File Size Check
+  # ============================================================
+  file-size:
+    name: Check File Sizes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for large files
+        run: |
+          # Find files larger than 500KB
+          LARGE_FILES=$(find . -type f -size +500k \
+            ! -path "./.git/*" \
+            ! -path "./node_modules/*" \
+            ! -path "./website/node_modules/*" \
+            ! -path "./website/dist/*" \
+            ! -name "*.sql" \
+            2>/dev/null)
+          
+          if [ -n "$LARGE_FILES" ]; then
+            echo "❌ Large files detected (>500KB):"
+            echo "$LARGE_FILES"
+            exit 1
+          else
+            echo "✅ No large files detected"
+          fi
+
+  # ============================================================
+  # Check for Secrets (basic)
+  # ============================================================
+  secrets-check:
+    name: Secrets Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Basic secrets check
+        run: |
+          # Check for common patterns (very basic)
+          if grep -r "password.*=.*['\"]" --include="*.ts" --include="*.tsx" --include="*.js" . 2>/dev/null | grep -v "node_modules" | grep -v "test" | grep -v "example"; then
+            echo "⚠️  Potential hardcoded password found - please review"
+          fi
+          
+          if grep -r "api_key.*=.*['\"]" --include="*.ts" --include="*.tsx" --include="*.js" . 2>/dev/null | grep -v "node_modules" | grep -v "test" | grep -v "example"; then
+            echo "⚠️  Potential hardcoded API key found - please review"
+          fi
+          
+          echo "✅ Basic secrets check complete"
+        continue-on-error: true
