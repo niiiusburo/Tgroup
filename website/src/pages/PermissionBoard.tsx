@@ -13,7 +13,7 @@ import type { PermissionGroup, EmployeePermission } from '@/lib/api';
 const MODULES = [
   { name: 'Overview', actions: ['View'] },
   { name: 'Calendar', actions: ['View', 'Edit'] },
-  { name: 'Customers', actions: ['View', 'Add', 'Edit', 'Delete'] },
+  { name: 'Customers', actions: ['View', 'View All', 'Add', 'Edit', 'Delete'] },
   { name: 'Appointments', actions: ['View', 'Add', 'Edit'] },
   { name: 'Services', actions: ['View', 'Add', 'Edit'] },
   { name: 'Payment', actions: ['View', 'Add', 'Edit', 'Refund'] },

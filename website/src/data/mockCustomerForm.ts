@@ -36,6 +36,7 @@ export interface CustomerFormData {
   sourceid: string;
   referraluserid: string;
   salestaffid: string;
+  cskhid: string;
 
   // Notes
   note: string;
@@ -78,6 +79,7 @@ export const EMPTY_CUSTOMER_FORM: CustomerFormData = {
   sourceid: '',
   referraluserid: '',
   salestaffid: '',
+  cskhid: '',
   note: '',
   comment: '',
   medicalhistory: '',

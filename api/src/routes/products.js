@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const { v4: uuidv4 } = require('uuid');
+const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -184,7 +185,7 @@ router.get('/:id', async (req, res) => {
  * POST /api/Products
  * Create a new product/service
  */
-router.post('/', async (req, res) => {
+router.post('/', requireAuth, async (req, res) => {
   try {
     const { name, defaultcode, type, listprice, categid, uomname, companyid, canorderlab } = req.body;
     if (!name || !name.trim()) {
@@ -220,7 +221,7 @@ router.post('/', async (req, res) => {
  * PUT /api/Products/:id
  * Update a product/service
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { name, defaultcode, listprice, categid, uomname, companyid, canorderlab, active } = req.body;
@@ -276,7 +277,7 @@ router.put('/:id', async (req, res) => {
 /**
  * DELETE /api/Products/:id
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     await query(`DELETE FROM dbo.products WHERE id = $1`, [id]);

@@ -228,25 +228,53 @@ export function useAppointments(selectedLocationId?: string) {
     }
   }, []);
 
-  const advanceCheckIn = useCallback((appointmentId: string) => {
-    setAppointments((prev) =>
-      prev.map((apt) => {
-        if (apt.id !== appointmentId) return apt;
-        const currentIdx = CHECK_IN_FLOW_ORDER.indexOf(apt.checkInStatus);
-        if (currentIdx >= CHECK_IN_FLOW_ORDER.length - 1) return apt;
-        const nextStatus = CHECK_IN_FLOW_ORDER[currentIdx + 1];
-        const now = nowTimeString();
+  const advanceCheckIn = useCallback(async (appointmentId: string) => {
+    const appointment = appointments.find((a) => a.id === appointmentId);
+    if (!appointment) return;
 
-        return {
-          ...apt,
-          checkInStatus: nextStatus,
-          ...(nextStatus === 'arrived' ? { arrivalTime: now } : {}),
-          ...(nextStatus === 'in-treatment' ? { treatmentStartTime: now, status: 'in-progress' as const } : {}),
-          ...(nextStatus === 'done' ? { completionTime: now, status: 'completed' as const } : {}),
-        };
-      }),
-    );
-  }, []);
+    const currentIdx = CHECK_IN_FLOW_ORDER.indexOf(appointment.checkInStatus);
+    if (currentIdx >= CHECK_IN_FLOW_ORDER.length - 1) return;
+
+    const nextStatus = CHECK_IN_FLOW_ORDER[currentIdx + 1];
+    const now = nowTimeString();
+
+    // Determine the API state based on next check-in status
+    let apiState: string;
+    switch (nextStatus) {
+      case 'arrived':
+        apiState = 'confirmed';
+        break;
+      case 'done':
+        apiState = 'done';
+        break;
+      default:
+        apiState = 'confirmed';
+    }
+
+    try {
+      // Persist to API first
+      await apiUpdateAppointment(appointmentId, { state: apiState });
+
+      // Then update local state
+      setAppointments((prev) =>
+        prev.map((apt) => {
+          if (apt.id !== appointmentId) return apt;
+          return {
+            ...apt,
+            checkInStatus: nextStatus,
+            ...(nextStatus === 'arrived' ? { arrivalTime: now } : {}),
+            ...(nextStatus === 'in-treatment' ? { treatmentStartTime: now, status: 'in-progress' as const } : {}),
+            ...(nextStatus === 'done' ? { completionTime: now, status: 'completed' as const } : {}),
+          };
+        }),
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to advance check-in status';
+      setError(message);
+      console.error('Failed to advance check-in status:', err);
+      throw err;
+    }
+  }, [appointments]);
 
   const updateStatus = useCallback(async (appointmentId: string, status: AppointmentStatus) => {
     try {

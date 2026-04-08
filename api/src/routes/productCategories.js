@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const { v4: uuidv4 } = require('uuid');
+const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -62,7 +63,7 @@ router.get('/', async (req, res) => {
  * POST /api/ProductCategories
  * Create a new category
  */
-router.post('/', async (req, res) => {
+router.post('/', requireAuth, async (req, res) => {
   try {
     const { name, parentid } = req.body;
     if (!name || !name.trim()) {
@@ -98,7 +99,7 @@ router.post('/', async (req, res) => {
  * PUT /api/ProductCategories/:id
  * Update a category
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { name, active } = req.body;
@@ -157,7 +158,7 @@ router.put('/:id', async (req, res) => {
 /**
  * DELETE /api/ProductCategories/:id
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
 

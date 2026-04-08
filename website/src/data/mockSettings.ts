@@ -76,7 +76,6 @@ export const MOCK_SYSTEM_PREFERENCES: SystemPreference[] = [
   { key: 'clinic_name', label: 'Clinic Name', description: 'Display name for the clinic', type: 'text', value: 'TDental Clinic', group: 'General' },
   { key: 'default_language', label: 'Default Language', description: 'Primary language for the application', type: 'select', value: 'vi', options: ['vi', 'en'], group: 'General' },
   { key: 'currency', label: 'Currency', description: 'Currency for pricing and payments', type: 'select', value: 'VND', options: ['VND', 'USD'], group: 'General' },
-  { key: 'timezone', label: 'Timezone', description: 'Clinic timezone setting', type: 'select', value: 'Asia/Ho_Chi_Minh', options: ['Asia/Ho_Chi_Minh', 'Asia/Bangkok', 'UTC'], group: 'General' },
   { key: 'appointment_duration', label: 'Default Appointment Duration (min)', description: 'Default time slot for new appointments', type: 'number', value: 30, group: 'Appointments' },
   { key: 'appointment_buffer', label: 'Buffer Between Appointments (min)', description: 'Gap between consecutive appointments', type: 'number', value: 10, group: 'Appointments' },
   { key: 'allow_online_booking', label: 'Allow Online Booking', description: 'Let customers book appointments online', type: 'toggle', value: true, group: 'Appointments' },

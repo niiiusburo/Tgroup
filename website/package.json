@@ -1,7 +1,7 @@
 {
   "name": "tdental-website",
   "private": true,
-  "version": "0.1.5",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +10,9 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite",
     "version": "node scripts/generate-version.js",
-    "version:check": "curl -s http://localhost:5174/version.json | jq ."
+    "version:check": "curl -s http://localhost:5174/version.json | jq .",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",

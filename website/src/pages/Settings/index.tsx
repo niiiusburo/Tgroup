@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { Settings as SettingsIcon, SlidersHorizontal, Shield } from 'lucide-react';
+import { Settings as SettingsIcon, SlidersHorizontal, Shield, Globe } from 'lucide-react';
 import { SystemPreferencesContent } from '@/components/settings/SystemPreferencesContent';
 import { IpAccessControl } from '@/components/settings/IpAccessControl';
 import { TimezoneSelector } from '@/components/settings/TimezoneSelector';
@@ -14,8 +14,8 @@ import { TimezoneSelector } from '@/components/settings/TimezoneSelector';
 type SettingsTab = 'system' | 'ip';
 
 const TABS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
-  { id: 'system', label: 'System Setting', icon: <SlidersHorizontal className="w-4 h-4" /> },
-  { id: 'ip', label: 'IP', icon: <Shield className="w-4 h-4" /> },
+  { id: 'system', label: 'System Settings', icon: <SlidersHorizontal className="w-5 h-5" /> },
+  { id: 'ip', label: 'IP Access Control', icon: <Shield className="w-5 h-5" /> },
 ];
 
 export function Settings() {
@@ -34,20 +34,30 @@ export function Settings() {
         </div>
       </div>
 
-      {/* Timezone Selector */}
-      <TimezoneSelector />
+      {/* Timezone Selector - Prominent at top */}
+      <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-xl border border-primary/20 overflow-hidden">
+        <div className="px-6 py-5">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-primary/20 rounded-lg">
+              <Globe className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-gray-900">Timezone Setting</h3>
+              <p className="text-sm text-gray-500">Configure your clinic's timezone for all date and time displays</p>
+            </div>
+          </div>
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4">
+            <TimezoneSelector compact />
+          </div>
+        </div>
+      </div>
 
-      {/* Main pill-style tab navigation */}
-      <div className="flex justify-center">
-        <div 
-          className="inline-flex bg-gray-100 rounded-full p-1" 
-          role="tablist"
-        >
-          {TABS.map((tab, index) => {
-            const isFirst = index === 0;
-            const isLast = index === TABS.length - 1;
-            
-            return (
+      {/* Main tab navigation - Styled with website color */}
+      <div className="bg-white rounded-xl shadow-card overflow-hidden">
+        {/* Tab header with primary color background */}
+        <div className="bg-gradient-to-r from-primary to-primary/90 px-6 py-1">
+          <div className="flex gap-1">
+            {TABS.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
@@ -56,26 +66,26 @@ export function Settings() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`
                   flex items-center gap-2 px-8 py-3 text-sm font-medium whitespace-nowrap transition-all
+                  rounded-t-lg border-b-2
                   ${activeTab === tab.id
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-white text-primary border-white shadow-sm'
+                    : 'bg-primary/20 text-white/90 border-transparent hover:bg-primary/30 hover:text-white'
                   }
                 `}
-                style={{
-                  borderRadius: isFirst ? '9999px 0 0 9999px' : isLast ? '0 9999px 9999px 0' : '0',
-                }}
               >
                 {tab.icon}
                 {tab.label}
               </button>
-            );
-          })}
+            ))}
+          </div>
+        </div>
+
+        {/* Tab content area */}
+        <div className="p-6">
+          {activeTab === 'system' && <SystemPreferencesContent />}
+          {activeTab === 'ip' && <IpAccessControl />}
         </div>
       </div>
-
-      {/* Tab content */}
-      {activeTab === 'system' && <SystemPreferencesContent />}
-      {activeTab === 'ip' && <IpAccessControl />}
     </div>
   );
 }

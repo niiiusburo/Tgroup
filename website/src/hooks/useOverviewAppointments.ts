@@ -62,16 +62,14 @@ interface UseOverviewAppointmentsResult {
 }
 
 function mapStateToTopStatus(state: string | null): AppointmentTopStatus {
-  switch (state?.toLowerCase()) {
-    case 'arrived':
-    case 'confirmed':
-      return 'arrived';
-    case 'cancelled':
-    case 'canceled':
-      return 'cancelled';
-    default:
-      return 'scheduled';
-  }
+  const s = state?.toLowerCase() ?? '';
+  if (s === 'arrived' || s === 'confirmed') return 'arrived';
+  // 'in examination' is a valid in-progress state — still counts as arrived
+  if (s === 'in examination' || s === 'in-progress') return 'arrived';
+  if (s === 'cancelled' || s === 'canceled') return 'cancelled';
+  // 'done' is completed — counts as arrived (still in the flow)
+  if (s === 'done' || s === 'completed') return 'arrived';
+  return 'scheduled';
 }
 
 // Map any DB state to the unified check-in status
@@ -87,6 +85,10 @@ function mapStateToCheckInStatus(state: string | null): CheckInStatus | null {
 
 function mapApiToOverview(apt: ApiAppointment): OverviewAppointment {
   const topStatus = mapStateToTopStatus(apt.state);
+  // Only cancelled appointments have no check-in status
+  const checkInStatus: CheckInStatus | null = topStatus === 'cancelled'
+    ? null
+    : (mapStateToCheckInStatus(apt.state) ?? 'waiting');
   return {
     id: apt.id,
     customerName: apt.partnername || apt.partnerdisplayname || '',
@@ -98,7 +100,7 @@ function mapApiToOverview(apt: ApiAppointment): OverviewAppointment {
     locationName: apt.companyname || '',
     note: apt.note || '',
     topStatus,
-    checkInStatus: topStatus === 'arrived' ? (mapStateToCheckInStatus(apt.state) ?? 'waiting') : null,
+    checkInStatus,
     color: apt.color,
   };
 }

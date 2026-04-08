@@ -26,7 +26,7 @@ import { DatePicker } from '@/components/ui/DatePicker';
 import { TimePicker } from '@/components/ui/TimePicker';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
-import { updateAppointment } from '@/lib/api';
+import { updateAppointment, fetchProducts, type ApiProduct } from '@/lib/api';
 import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
 // Color codes from database (0-7) - Light luxurious backgrounds matching card colors
 // These lighter shades ensure text readability while maintaining elegant aesthetics
@@ -95,15 +95,11 @@ const APPOINTMENT_COLORS: Record<string, {
   },
 };
 
-// Status options matching database states
+// Status options - simplified to 3 states as requested
 const STATUS_OPTIONS = [
-  { value: 'scheduled', label: 'Scheduled', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-  { value: 'confirmed', label: 'Confirmed', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-  { value: 'arrived', label: 'Arrived', color: 'bg-amber-100 text-amber-700 border-amber-200' },
-  { value: 'in Examination', label: 'In Examination', color: 'bg-purple-100 text-purple-700 border-purple-200' },
-  { value: 'in-progress', label: 'In Progress', color: 'bg-violet-100 text-violet-700 border-violet-200' },
-  { value: 'done', label: 'Done', color: 'bg-sky-100 text-sky-700 border-sky-200' },
-  { value: 'cancelled', label: 'Cancelled', color: 'bg-red-100 text-red-700 border-red-200' },
+  { value: 'scheduled', label: 'Đang hẹn', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  { value: 'arrived', label: 'Đã đến', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+  { value: 'cancelled', label: 'Hủy hẹn', color: 'bg-red-100 text-red-700 border-red-200' },
 ];
 
 interface EditAppointmentModalProps {
@@ -240,31 +236,74 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
   const [locationId, setLocationId] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [serviceName, setServiceName] = useState('');
+  const [serviceId, setServiceId] = useState('');
   const [status, setStatus] = useState('');
   const [colorCode, setColorCode] = useState('0');
   const [notes, setNotes] = useState('');
+  const [estimatedDuration, setEstimatedDuration] = useState<number>(30);
+  const [customerType, setCustomerType] = useState<'new' | 'returning'>('new');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Services catalog state
+  const [services, setServices] = useState<ApiProduct[]>([]);
+  const [servicesLoading, setServicesLoading] = useState(false);
+
+  // Load services catalog when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setServicesLoading(true);
+      fetchProducts({ limit: 200 })
+        .then(response => setServices(response.items))
+        .catch(() => setServices([]))
+        .finally(() => setServicesLoading(false));
+    }
+  }, [isOpen]);
 
   // Sync form with appointment data when opened
   useEffect(() => {
     if (appointment && isOpen) {
       setDoctorId(appointment.doctorId || '');
       setLocationId(appointment.locationId || '');
-      
+
       const today = new Date();
       setDate(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`);
       setTime(appointment.time || '09:00');
-      
-      // Extract service name from note if available
-      setServiceName(appointment.note?.split('\n')[0] || '');
+
+      // Extract service from note if available
+      const noteLines = appointment.note?.split('\n') || [];
+      const serviceLine = noteLines.find(l => l.startsWith('Service:'));
+      if (serviceLine) {
+        const serviceNameFromNote = serviceLine.replace('Service:', '').trim();
+        const matchedService = services.find(s => s.name === serviceNameFromNote);
+        setServiceId(matchedService?.id || '');
+      } else {
+        setServiceId('');
+      }
+
+      // Extract customer type from note
+      const typeLine = noteLines.find(l => l.startsWith('Type:'));
+      if (typeLine) {
+        setCustomerType(typeLine.includes('returning') ? 'returning' : 'new');
+      } else {
+        setCustomerType('new');
+      }
+
+      // Extract duration from note
+      const durationLine = noteLines.find(l => l.startsWith('Duration:'));
+      if (durationLine) {
+        const duration = parseInt(durationLine.replace('Duration:', '').trim(), 10);
+        setEstimatedDuration(isNaN(duration) ? 30 : duration);
+      } else {
+        setEstimatedDuration(30);
+      }
+
       setStatus(mapTopStatusToDbState(appointment.topStatus, appointment.checkInStatus));
       setColorCode(appointment.color || '0');
       setNotes(appointment.note || '');
       setError(null);
     }
-  }, [appointment, isOpen]);
+  }, [appointment, isOpen, services]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -313,10 +352,11 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
 
   const selectedDoctor = doctors.find(d => d.id === doctorId);
   const selectedLocation = locations.find(l => l.id === locationId);
+  const selectedService = services.find(s => s.id === serviceId);
   void STATUS_OPTIONS.find(s => s.value === status);
   void APPOINTMENT_COLORS[colorCode];
 
-  const isLoading = employeesLoading || locationsLoading;
+  const isLoading = employeesLoading || locationsLoading || servicesLoading;
 
   async function handleSave() {
     if (!appointment) return;
@@ -325,14 +365,24 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
     setError(null);
 
     try {
+      // Build note with service, duration, and customer type
+      const serviceName = selectedService?.name || '';
+      const noteParts = [
+        serviceName ? `Service: ${serviceName}` : '',
+        `Duration: ${estimatedDuration} min`,
+        `Type: ${customerType === 'returning' ? 'Khách tái khám' : 'Khách mới'}`,
+        notes,
+      ].filter(Boolean);
+      const fullNote = noteParts.join('\n');
+
       await updateAppointment(appointment.id, {
         doctorId: doctorId || undefined,
         companyid: locationId || undefined,
         date: date,
-        timeExpected: 30, // default 30 minutes
+        timeExpected: estimatedDuration,
         state: status,
         color: colorCode,
-        note: notes || undefined,
+        note: fullNote || undefined,
       });
       
       onSaved();
@@ -501,19 +551,92 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
             )}
           </div>
 
-          {/* Service Name */}
-          <div>
+          {/* Service - Searchable Dropdown from Catalog */}
+          <div className="searchable-selector">
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Stethoscope className="w-3.5 h-3.5" />
               Service
             </label>
-            <input
-              type="text"
-              value={serviceName}
-              onChange={(e) => setServiceName(e.target.value)}
-              placeholder="e.g., Teeth Cleaning, Root Canal..."
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
+            <SearchableSelector
+              options={services.filter(s => s.active !== false)}
+              selectedId={serviceId}
+              onChange={setServiceId}
+              placeholder="Chọn dịch vụ..."
+              icon={<Stethoscope className="w-4 h-4" />}
+              renderOption={(service) => (
+                <div>
+                  <p className="font-medium">{service.name}</p>
+                  {service.saleprice && (
+                    <p className="text-xs text-gray-400">{parseInt(service.saleprice).toLocaleString('vi-VN')}đ</p>
+                  )}
+                </div>
+              )}
             />
+            {selectedService && (
+              <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                Selected: <span className="font-medium text-gray-700">{selectedService.name}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Estimated Duration & Customer Type Row */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Estimated Duration */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <Clock className="w-3.5 h-3.5" />
+                Thời gian dự kiến
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  value={estimatedDuration}
+                  onChange={(e) => setEstimatedDuration(parseInt(e.target.value) || 30)}
+                  min={5}
+                  max={300}
+                  step={5}
+                  className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
+                />
+                <span className="text-sm text-gray-500">phút</span>
+              </div>
+            </div>
+
+            {/* Customer Type */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <User className="w-3.5 h-3.5" />
+                Loại khách
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCustomerType('new')}
+                  className={`
+                    px-3 py-2.5 rounded-xl text-xs font-medium border transition-all duration-200
+                    ${customerType === 'new'
+                      ? 'bg-orange-100 text-orange-700 border-orange-300 ring-2 ring-orange-500/20'
+                      : 'bg-white border-gray-200 text-gray-600 hover:border-orange-300'
+                    }
+                  `}
+                >
+                  Khách mới
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCustomerType('returning')}
+                  className={`
+                    px-3 py-2.5 rounded-xl text-xs font-medium border transition-all duration-200
+                    ${customerType === 'returning'
+                      ? 'bg-emerald-100 text-emerald-700 border-emerald-300 ring-2 ring-emerald-500/20'
+                      : 'bg-white border-gray-200 text-gray-600 hover:border-emerald-300'
+                    }
+                  `}
+                >
+                  Tái khám
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Status */}

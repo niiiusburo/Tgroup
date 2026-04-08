@@ -15,10 +15,13 @@ import { DatePicker } from '@/components/ui/DatePicker';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
-import { MOCK_SERVICE_CATALOG, type ServiceCatalogItem } from '@/data/mockServices';
+import { useProducts } from '@/hooks/useProducts';
+import { type ServiceCatalogItem } from '@/data/mockServices';
 import type { CreateServiceInput } from '@/hooks/useServices';
 import type { Customer } from '@/data/mockCustomers';
 import type { Employee } from '@/data/mockEmployees';
+import type { Product } from '@/hooks/useProducts';
+import type { AppointmentType } from '@/constants';
 
 interface Location {
   id: string;
@@ -43,6 +46,7 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
   const { customers: apiCustomers, loading: customersLoading } = useCustomers();
   const { employees: apiEmployees, isLoading: employeesLoading } = useEmployees();
   const { allLocations: apiLocations, isLoading: locationsLoading } = useLocations();
+  const { products, isLoading: productsLoading } = useProducts({ limit: 1000 }); // Load all 555+ services
 
   // Form state
   const [catalogItemId, setCatalogItemId] = useState<string | null>(initialData?.catalogItemId ?? null);
@@ -111,7 +115,24 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
     appointmentCount: 0,
   }));
 
-  const selectedCatalog: ServiceCatalogItem | undefined = MOCK_SERVICE_CATALOG.find(
+  // Map real products to ServiceCatalogItem format
+  const serviceCatalog: ServiceCatalogItem[] = products.map((p: Product) => ({
+    id: p.id,
+    name: p.name,
+    category: (p.categoryName?.toLowerCase().includes('ortho') ? 'orthodontics' :
+               p.categoryName?.toLowerCase().includes('cosmetic') ? 'cosmetic' :
+               p.categoryName?.toLowerCase().includes('surgery') ? 'surgery' :
+               p.categoryName?.toLowerCase().includes('clean') ? 'cleaning' :
+               p.categoryName?.toLowerCase().includes('consult') ? 'consultation' :
+               p.categoryName?.toLowerCase().includes('emergency') ? 'emergency' :
+               'treatment') as AppointmentType,
+    description: p.categoryName || 'Dental service',
+    defaultPrice: p.listPrice,
+    estimatedDuration: 30, // Default duration since API doesn't provide this
+    totalVisits: 1, // Default since API doesn't provide this
+  }));
+
+  const selectedCatalog: ServiceCatalogItem | undefined = serviceCatalog.find(
     (c) => c.id === catalogItemId,
   );
 
@@ -164,7 +185,7 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
     });
   }
 
-  const isLoading = customersLoading || employeesLoading || locationsLoading;
+  const isLoading = customersLoading || employeesLoading || locationsLoading || productsLoading;
 
   return (
     <div className="modal-container">
@@ -223,7 +244,7 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
               Service
             </label>
             <ServiceCatalogSelector
-              catalog={MOCK_SERVICE_CATALOG}
+              catalog={serviceCatalog}
               selectedId={catalogItemId}
               onChange={setCatalogItemId}
             />
@@ -359,7 +380,8 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
             Cancel
           </button>
           <button
-            type="submit"
+            type="button"
+            onClick={handleSubmit}
             disabled={isLoading}
             className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25"
           >

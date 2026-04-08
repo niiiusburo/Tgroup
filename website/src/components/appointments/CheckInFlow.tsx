@@ -16,7 +16,7 @@ import { WaitTimer } from './WaitTimer';
 
 interface CheckInFlowProps {
   readonly appointment: ManagedAppointment;
-  readonly onAdvance: (appointmentId: string) => void;
+  readonly onAdvance: (appointmentId: string) => void | Promise<void>;
 }
 
 const STEP_ICONS: Record<CheckInStatus, React.ReactNode> = {

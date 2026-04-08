@@ -7,9 +7,10 @@
  * Status is changed via dropdown on the status badge.
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Clock, User } from 'lucide-react';
 import type { OverviewAppointment, CheckInStatus, Zone1Filter } from '@/hooks/useOverviewAppointments';
+import { useAppointmentHover } from '@/contexts/AppointmentHoverContext';
 
 interface PatientCheckInProps {
   readonly appointments: readonly OverviewAppointment[];
@@ -118,11 +119,48 @@ interface PatientCardProps {
 
 function PatientCard({ appointment, onUpdateStatus }: PatientCardProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { hoveredId, setHoveredId, registerRef, scrollToAppointment } = useAppointmentHover();
+  const cardRef = useRef<HTMLDivElement>(null);
   const currentStatus = appointment.checkInStatus ?? 'waiting';
   const config = STATUS_CONFIG[currentStatus];
+  const isHighlighted = hoveredId === appointment.id;
+
+  // Register this card's ref for scrolling
+  useEffect(() => {
+    registerRef(appointment.id, cardRef.current);
+    return () => registerRef(appointment.id, null);
+  }, [appointment.id, registerRef]);
+
+  // Scroll into view when highlighted
+  useEffect(() => {
+    if (isHighlighted && cardRef.current && typeof cardRef.current.scrollIntoView === 'function') {
+      cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [isHighlighted]);
+
+  const handleMouseEnter = () => {
+    setHoveredId(appointment.id);
+    // Scroll to matching appointment in Today's Appointments
+    scrollToAppointment(appointment.id);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredId(null);
+  };
 
   return (
-    <div className="border border-gray-200 rounded-xl p-3.5 bg-gray-50/50 hover:shadow-sm transition-shadow relative">
+    <div
+      ref={cardRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className={`
+        border rounded-xl p-3.5 transition-all relative cursor-pointer
+        ${isHighlighted 
+          ? 'ring-2 ring-blue-500 ring-offset-2 bg-blue-50/50 border-blue-300' 
+          : 'border-gray-200 bg-gray-50/50 hover:shadow-sm'
+        }
+      `}
+    >
       {/* Status badge — clickable to open dropdown */}
       <button
         type="button"

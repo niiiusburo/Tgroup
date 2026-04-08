@@ -24,12 +24,9 @@ router.get('/', async (req, res) => {
 
     const allowedSortFields = {
       name: 'so.name',
-      dateorder: 'so.dateorder',
-      datedone: 'so.datedone',
+      dateorder: 'so.datecreated',
       amounttotal: 'so.amounttotal',
       state: 'so.state',
-      paymentstate: 'so.paymentstate',
-      invoicestatus: 'so.invoicestatus',
     };
 
     const orderByCol = allowedSortFields[sortField] || 'so.dateorder';
@@ -47,7 +44,7 @@ router.get('/', async (req, res) => {
 
     if (search) {
       conditions.push(
-        `(so.name ILIKE $${paramIdx} OR so.note ILIKE $${paramIdx})`
+        `(so.name ILIKE $${paramIdx} OR p.name ILIKE $${paramIdx})`
       );
       params.push(`%${search}%`);
       paramIdx++;
@@ -59,48 +56,22 @@ router.get('/', async (req, res) => {
       `SELECT
         so.id,
         so.name,
-        so.dateorder,
-        so.datedone,
         so.partnerid,
         p.name AS partnername,
         p.displayname AS partnerdisplayname,
-        so.amountuntaxed,
-        so.amounttax,
         so.amounttotal,
         so.residual,
         so.totalpaid,
-        so.note,
         so.state,
-        so.paymentstate,
-        so.invoicestatus,
         so.companyid,
         c.name AS companyname,
-        so.userid,
-        au.name AS username,
         so.doctorid,
         doc.name AS doctorname,
-        so.isquotation,
-        so.quoteid,
-        so.orderid,
-        so.type,
-        so.discountfixed,
-        so.discountpercent,
-        so.discounttype,
-        so.appointmentid,
         so.datecreated,
-        so.lastupdated,
-        so.createdbyid,
-        so.writebyid,
-        so.isfast,
-        so.leadid,
-        so.sequencenumber,
-        so.sequenceprefix,
-        (SELECT COUNT(*) FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false) AS linecount,
-        (SELECT COALESCE(SUM(sol.pricetotal), 0) FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false) AS totallineamount
+        so.isdeleted
       FROM saleorders so
       LEFT JOIN partners p ON p.id = so.partnerid
       LEFT JOIN companies c ON c.id = so.companyid
-      LEFT JOIN aspnetusers au ON au.id = so.userid
       LEFT JOIN partners doc ON doc.id = so.doctorid
       WHERE ${whereClause}
       ORDER BY ${orderByCol} ${orderDir} NULLS LAST
@@ -153,46 +124,22 @@ router.get('/:id', async (req, res) => {
       `SELECT
         so.id,
         so.name,
-        so.dateorder,
-        so.datedone,
         so.partnerid,
         p.name AS partnername,
         p.displayname AS partnerdisplayname,
-        so.amountuntaxed,
-        so.amounttax,
         so.amounttotal,
         so.residual,
         so.totalpaid,
-        so.note,
         so.state,
-        so.paymentstate,
-        so.invoicestatus,
         so.companyid,
         c.name AS companyname,
-        so.userid,
-        au.name AS username,
         so.doctorid,
         doc.name AS doctorname,
-        so.isquotation,
-        so.quoteid,
-        so.orderid,
-        so.type,
-        so.discountfixed,
-        so.discountpercent,
-        so.discounttype,
-        so.appointmentid,
         so.datecreated,
-        so.lastupdated,
-        so.createdbyid,
-        so.writebyid,
-        so.isfast,
-        so.leadid,
-        so.sequencenumber,
-        so.sequenceprefix
+        so.isdeleted
       FROM saleorders so
       LEFT JOIN partners p ON p.id = so.partnerid
       LEFT JOIN companies c ON c.id = so.companyid
-      LEFT JOIN aspnetusers au ON au.id = so.userid
       LEFT JOIN partners doc ON doc.id = so.doctorid
       WHERE so.id = $1 AND so.isdeleted = false`,
       [id]
@@ -205,35 +152,11 @@ router.get('/:id', async (req, res) => {
     const lines = await query(
       `SELECT
         sol.id,
-        sol.name,
-        sol.productid,
-        p.name AS productname,
-        p.defaultcode AS productcode,
-        sol.productuomid,
-        u.name AS uomname,
-        sol.productuomqty AS quantity,
-        sol.priceunit,
+        sol.orderid,
         sol.pricetotal,
-        sol.discount,
-        sol.discounttype,
-        sol.taxid,
-        at.name AS taxname,
-        sol.state,
-        sol.employeeid,
-        emp.name AS employeename,
-        sol.assistantid,
-        ast.name AS assistantname,
-        sol.note,
-        sol.datecreated,
-        sol.lastupdated
+        sol.isdeleted
       FROM saleorderlines sol
-      LEFT JOIN products p ON p.id = sol.productid
-      LEFT JOIN uoms u ON u.id = sol.productuomid
-      LEFT JOIN accounttaxes at ON at.id = sol.taxid
-      LEFT JOIN partners emp ON emp.id = sol.employeeid
-      LEFT JOIN partners ast ON ast.id = sol.assistantid
-      WHERE sol.orderid = $1 AND sol.isdeleted = false
-      ORDER BY sol.datecreated`,
+      WHERE sol.orderid = $1 AND sol.isdeleted = false`,
       [id]
     );
 

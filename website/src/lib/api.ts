@@ -88,6 +88,11 @@ export interface ApiPartner {
   customer: boolean;
   supplier: boolean;
   employee: boolean;
+  // CSKH (Customer Service) assignment
+  cskhid: string | null;
+  cskhname: string | null;
+  // Sales staff assignment
+  salestaffid: string | null;
   datecreated: string | null;
   lastupdated: string | null;
 }

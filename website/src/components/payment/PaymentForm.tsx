@@ -264,7 +264,8 @@ export function PaymentForm({
             Cancel
           </button>
           <button
-            type="submit"
+            type="button"
+            onClick={handleSubmit}
             className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all shadow-lg shadow-orange-500/25"
           >
             <Check className="w-4 h-4" />

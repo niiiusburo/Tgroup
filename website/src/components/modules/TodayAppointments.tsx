@@ -8,9 +8,10 @@
  * Two actions per card: Edit (pencil) and Check-in (person icon).
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Pencil, UserCheck, Phone, Clock, User } from 'lucide-react';
 import type { OverviewAppointment, Zone3Filter } from '@/hooks/useOverviewAppointments';
+import { useAppointmentHover } from '@/contexts/AppointmentHoverContext';
 import { EditAppointmentModal } from './EditAppointmentModal';
 
 interface TodayAppointmentsProps {
@@ -144,8 +145,25 @@ interface AppointmentCardProps {
 }
 
 function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkCancelled, onEdit }: AppointmentCardProps) {
+  const { hoveredId, setHoveredId, registerRef } = useAppointmentHover();
+  const cardRef = useRef<HTMLDivElement>(null);
   const isArrived = appointment.topStatus === 'arrived';
   const isCancelled = appointment.topStatus === 'cancelled';
+  const isHighlighted = hoveredId === appointment.id;
+
+  // Register this card's ref for scrolling
+  useEffect(() => {
+    registerRef(appointment.id, cardRef.current);
+    return () => registerRef(appointment.id, null);
+  }, [appointment.id, registerRef]);
+
+  const handleMouseEnter = () => {
+    setHoveredId(appointment.id);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredId(null);
+  };
 
   // Use appointment color if set, otherwise fall back to status-based colors with gradients
   const colorConfig = appointment.color && COLOR_CODE_TO_BG[appointment.color]
@@ -164,7 +182,18 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
     : 'bg-purple-500 text-white';
 
   return (
-    <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <div
+      ref={cardRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className={`
+        rounded-xl border overflow-hidden transition-all cursor-pointer
+        ${isHighlighted 
+          ? 'ring-2 ring-blue-500 ring-offset-2 border-blue-300 shadow-lg' 
+          : 'border-gray-200 shadow-sm hover:shadow-md'
+        }
+      `}
+    >
       {/* Top row: name + action buttons */}
       <div className="flex items-center justify-between px-3.5 pt-3 pb-1.5 bg-gradient-to-r from-white to-slate-50">
         <span className="text-sm font-bold text-slate-800 truncate flex-1 mr-2">

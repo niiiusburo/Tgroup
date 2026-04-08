@@ -4,7 +4,7 @@ const { query } = require('../db');
 const router = express.Router();
 
 // Valid states for appointments
-const VALID_STATES = ['draft', 'scheduled', 'confirmed', 'arrived', 'in Examination', 'done', 'cancelled'];
+const VALID_STATES = ['draft', 'scheduled', 'confirmed', 'arrived', 'in Examination', 'in-progress', 'done', 'cancelled'];
 
 // Error response helper
 function errorResponse(res, status, errorCode, message) {

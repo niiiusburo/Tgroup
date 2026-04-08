@@ -5,6 +5,7 @@ import { TodayServicesTable } from '@/components/modules/TodayServicesTable';
 import { TodayAppointments } from '@/components/modules/TodayAppointments';
 import { useOverviewAppointments } from '@/hooks/useOverviewAppointments';
 import { useLocationFilter } from '@/contexts/LocationContext';
+import { AppointmentHoverProvider } from '@/contexts/AppointmentHoverContext';
 
 /**
  * Overview Dashboard Page — Three-Zone Layout
@@ -50,34 +51,36 @@ export function Overview() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5 min-h-0 lg:h-[calc(100vh-100px)]">
-      {/* Left column: Zone 1 + Zone 2 stacked */}
-      <div className="flex flex-col gap-5 min-h-0 overflow-y-auto">
-        {/* Zone 1: Patient Check-in */}
-        <PatientCheckIn
-          appointments={zone1Appointments}
-          filter={zone1Filter}
-          onFilterChange={setZone1Filter}
-          counts={zone1Counts}
-          onUpdateStatus={updateCheckInStatus}
-        />
+    <AppointmentHoverProvider>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5 min-h-0 lg:h-[calc(100vh-100px)]">
+        {/* Left column: Zone 1 + Zone 2 stacked */}
+        <div className="flex flex-col gap-5 min-h-0 overflow-y-auto">
+          {/* Zone 1: Patient Check-in */}
+          <PatientCheckIn
+            appointments={zone1Appointments}
+            filter={zone1Filter}
+            onFilterChange={setZone1Filter}
+            counts={zone1Counts}
+            onUpdateStatus={updateCheckInStatus}
+          />
 
-        {/* Zone 2: Today's Services */}
-        <TodayServicesTable locationId={selectedLocationId} />
-      </div>
+          {/* Zone 2: Today's Services */}
+          <TodayServicesTable locationId={selectedLocationId} />
+        </div>
 
-      {/* Right column: Zone 3 — full height */}
-      <div className="min-h-0">
-        <TodayAppointments
-          appointments={zone3Appointments}
-          filter={zone3Filter}
-          onFilterChange={setZone3Filter}
-          counts={zone3Counts}
-          onMarkArrived={markArrived}
-          onMarkCancelled={markCancelled}
-          onEditSaved={handleEditAppointmentSaved}
-        />
+        {/* Right column: Zone 3 — full height */}
+        <div className="min-h-0">
+          <TodayAppointments
+            appointments={zone3Appointments}
+            filter={zone3Filter}
+            onFilterChange={setZone3Filter}
+            counts={zone3Counts}
+            onMarkArrived={markArrived}
+            onMarkCancelled={markCancelled}
+            onEditSaved={handleEditAppointmentSaved}
+          />
+        </div>
       </div>
-    </div>
+    </AppointmentHoverProvider>
   );
 }

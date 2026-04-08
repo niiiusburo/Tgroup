@@ -38,6 +38,7 @@ export const PERMISSIONS: readonly Permission[] = [
   { id: 'calendar.view', module: 'Calendar', action: 'View', description: 'View appointment calendar' },
   { id: 'calendar.edit', module: 'Calendar', action: 'Edit', description: 'Create and modify appointments' },
   { id: 'customers.view', module: 'Customers', action: 'View', description: 'View customer records' },
+  { id: 'customers.view.all', module: 'Customers', action: 'View All', description: 'View all customers without search restriction' },
   { id: 'customers.edit', module: 'Customers', action: 'Edit', description: 'Modify customer records' },
   { id: 'customers.delete', module: 'Customers', action: 'Delete', description: 'Delete customer records' },
   { id: 'appointments.view', module: 'Appointments', action: 'View', description: 'View appointments list' },

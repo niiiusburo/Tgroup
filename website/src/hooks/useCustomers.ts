@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchPartners, createPartner, updatePartner, type ApiPartner } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import type { CustomerStatus } from '@/data/mockCustomers';
 import type { CustomerFormData } from '@/data/mockCustomerForm';
 
@@ -31,6 +32,9 @@ export interface Customer {
   readonly sourcename?: string | null;
   readonly agentname?: string | null;
   readonly companyname?: string | null;
+  // CSKH (Customer Service) assignment
+  readonly cskhid?: string | null;
+  readonly cskhname?: string | null;
 }
 
 export type CustomerStatusFilter = 'all' | CustomerStatus;
@@ -57,16 +61,29 @@ function mapPartnerToCustomer(p: ApiPartner): Customer {
     sourcename: p.sourcename,
     agentname: p.agentname,
     companyname: p.companyname,
+    cskhid: p.cskhid,
+    cskhname: p.cskhname,
   };
 }
 
+// Permission constant for viewing all customers
+export const PERMISSION_VIEW_ALL_CUSTOMERS = 'customers.view.all';
+// Minimum search length when user lacks view.all permission
+export const MIN_SEARCH_LENGTH = 3;
+
 export function useCustomers(locationId: string = 'all') {
+  const { hasPermission } = useAuth();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<CustomerStatusFilter>('all');
+
+  // Check if user has permission to view all customers
+  const canViewAllCustomers = hasPermission(PERMISSION_VIEW_ALL_CUSTOMERS);
+  // Search is required if user doesn't have view.all permission
+  const searchRequired = !canViewAllCustomers;
 
   // Debounce search
   const searchTimeout = useRef<ReturnType<typeof setTimeout>>();
@@ -75,13 +92,27 @@ export function useCustomers(locationId: string = 'all') {
   useEffect(() => {
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
     searchTimeout.current = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
+      // Only update debounced search if:
+      // - User can view all customers (any search term is fine)
+      // - OR search term is empty (will show empty state for restricted users)
+      // - OR search term meets minimum length requirement
+      if (canViewAllCustomers || !searchTerm || searchTerm.length >= MIN_SEARCH_LENGTH) {
+        setDebouncedSearch(searchTerm);
+      }
     }, 300);
     return () => { if (searchTimeout.current) clearTimeout(searchTimeout.current); };
-  }, [searchTerm]);
+  }, [searchTerm, canViewAllCustomers]);
 
   // Fetch from API
   const loadCustomers = useCallback(async () => {
+    // If search is required and no valid search term provided, don't fetch
+    if (searchRequired && !debouncedSearch) {
+      setCustomers([]);
+      setTotalItems(0);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -109,7 +140,7 @@ export function useCustomers(locationId: string = 'all') {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, locationId, statusFilter]);
+  }, [debouncedSearch, locationId, statusFilter, searchRequired]);
 
   useEffect(() => {
     loadCustomers();
@@ -139,6 +170,8 @@ export function useCustomers(locationId: string = 'all') {
         comment: input.comment || undefined,
         sourceid: input.sourceid || undefined,
         referraluserid: input.referraluserid || undefined,
+        salestaffid: input.salestaffid || undefined,
+        cskhid: input.cskhid || undefined,
         customer: true,
         status: true,
       });
@@ -178,6 +211,8 @@ export function useCustomers(locationId: string = 'all') {
         comment: updates.comment || undefined,
         sourceid: updates.sourceid || undefined,
         referraluserid: updates.referraluserid || undefined,
+        salestaffid: updates.salestaffid || undefined,
+        cskhid: updates.cskhid !== undefined ? updates.cskhid : undefined,
       });
     } catch (err) {
       console.error('useCustomers: update error', err);
@@ -226,5 +261,9 @@ export function useCustomers(locationId: string = 'all') {
     deleteCustomer,
     getCustomerById,
     refetch: loadCustomers,
+    // Permission-related properties
+    searchRequired,
+    minSearchLength: MIN_SEARCH_LENGTH,
+    canViewAllCustomers,
   };
 }

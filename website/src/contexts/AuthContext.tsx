@@ -94,6 +94,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
+    // Also clear saved login credentials
+    localStorage.removeItem('tdental_remember');
     setState({ user: null, permissions: null, isAuthenticated: false, isLoading: false });
     dispatchAuthChange(null);
   }, []);
