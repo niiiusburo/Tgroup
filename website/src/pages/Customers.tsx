@@ -145,7 +145,7 @@ export function Customers() {
   );
   const customerColumns = useMemo(() => buildCustomerColumns(locationNameMap), [locationNameMap]);
 
-  const { profile: hookProfile, appointments: hookAppointments, isLoading: profileLoading } =
+  const { profile: hookProfile, appointments: hookAppointments, isLoading: profileLoading, refetch: refetchProfile } =
     useCustomerProfile(selectedCustomerId);
 
   // Hooks for profile actions
@@ -245,6 +245,8 @@ export function Customers() {
   const handleSubmit = async (data: CustomerFormData) => {
     if (isEditMode && selectedCustomerId) {
       await updateCustomer(selectedCustomerId, data);
+      // Refresh the profile so the updated fields (e.g. phone) are reflected immediately
+      refetchProfile();
     } else {
       await createCustomer(data);
     }
