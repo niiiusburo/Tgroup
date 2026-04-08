@@ -9,19 +9,121 @@
  * - Shows update notification when new version available
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useVersionCheck } from '@/hooks/useVersionCheck';
-import { 
-  RefreshCw, 
-  Check, 
-  AlertCircle, 
-  X, 
+import {
+  RefreshCw,
+  Check,
+  AlertCircle,
+  X,
   Info,
   GitCommit,
   Clock,
   Tag,
-  Download
+  Download,
+  FileText,
+  ChevronRight,
 } from 'lucide-react';
+
+// ─── Release Notes Types & Modal ─────────────────────────────────
+
+interface ChangelogSection {
+  title: string;
+  items: string[];
+}
+
+interface ChangelogEntry {
+  version: string;
+  date: string;
+  commit: string;
+  highlights: string;
+  sections: ChangelogSection[];
+}
+
+function ReleaseNotesModal({ isOpen, onClose }: { readonly isOpen: boolean; readonly onClose: () => void }) {
+  const [entries, setEntries] = useState<ChangelogEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedVersion, setExpandedVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setLoading(true);
+    fetch('/CHANGELOG.json')
+      .then((res) => res.json())
+      .then((data: ChangelogEntry[]) => {
+        setEntries(data);
+        if (data.length > 0) setExpandedVersion(data[0].version);
+      })
+      .catch(() => setEntries([]))
+      .finally(() => setLoading(false));
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b">
+          <div className="flex items-center gap-2">
+            <FileText className="w-5 h-5 text-primary" />
+            <h2 className="text-lg font-bold text-gray-900">Release Notes</h2>
+          </div>
+          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-lg">
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+          {loading ? (
+            <div className="py-8 text-center text-gray-400">Loading...</div>
+          ) : entries.length === 0 ? (
+            <div className="py-8 text-center text-gray-400">No release notes found</div>
+          ) : (
+            entries.map((entry) => {
+              const isExpanded = expandedVersion === entry.version;
+              return (
+                <div key={entry.version} className="border border-gray-200 rounded-xl overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setExpandedVersion(isExpanded ? null : entry.version)}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+                  >
+                    <div>
+                      <span className="font-mono font-bold text-gray-900">v{entry.version}</span>
+                      <span className="text-xs text-gray-500 ml-2">{entry.date}</span>
+                      <span className="text-xs text-gray-400 ml-2 font-mono">({entry.commit.slice(0, 7)})</span>
+                    </div>
+                    <ChevronRight className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                  </button>
+                  {isExpanded && (
+                    <div className="px-4 py-3 space-y-3">
+                      <p className="text-sm text-gray-600 font-medium">{entry.highlights}</p>
+                      {entry.sections.map((section) => (
+                        <div key={section.title}>
+                          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{section.title}</h4>
+                          <ul className="space-y-1">
+                            {section.items.map((item, i) => (
+                              <li key={i} className="text-sm text-gray-700 flex items-start gap-2">
+                                <span className="text-primary mt-1.5 shrink-0 w-1 h-1 rounded-full bg-primary" />
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface VersionDisplayProps {
   /** Position variant */
@@ -34,6 +136,11 @@ export function VersionDisplay({
   variant = 'footer',
   showDetails = true 
 }: VersionDisplayProps) {
+  // All state hooks must be called first, before any early returns
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showReleaseNotes, setShowReleaseNotes] = useState(false);
+  
   const {
     currentVersion,
     latestVersion,
@@ -48,12 +155,7 @@ export function VersionDisplay({
     enabled: true,
   });
 
-  const [showTooltip, setShowTooltip] = useState(false);
-
-  if (!currentVersion) {
-    return null;
-  }
-
+  // Format date helper
   const formatDate = (isoString: string) => {
     try {
       return new Date(isoString).toLocaleDateString('en-US', {
@@ -67,15 +169,18 @@ export function VersionDisplay({
     }
   };
 
-  // Handle update click - uses hook's applyUpdate which clears all caches properly
-  const [isUpdating, setIsUpdating] = useState(false);
-  
+  // Handle update click
   const handleUpdate = async () => {
     setIsUpdating(true);
     console.log('[Version] Applying update...');
     await applyUpdate();
     // Page will reload, so we never get here
   };
+
+  // Early return AFTER all hooks
+  if (!currentVersion) {
+    return null;
+  }
 
   // Floating variant shows as a card in bottom right
   if (variant === 'floating') {
@@ -193,7 +298,14 @@ export function VersionDisplay({
                     <span>Built: {formatDate(currentVersion.buildTime)}</span>
                   </div>
                   
-                  <div className="pt-1.5 mt-1.5 border-t border-gray-700">
+                  <div className="pt-1.5 mt-1.5 border-t border-gray-700 space-y-1.5">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setShowReleaseNotes(true); setShowTooltip(false); }}
+                      className="w-full flex items-center gap-1.5 text-orange-400 hover:text-orange-300 transition-colors"
+                    >
+                      <FileText className="w-3 h-3" />
+                      Release Notes
+                    </button>
                     <span className="text-gray-400 flex items-center gap-1">
                       <Info className="w-3 h-3" />
                       Click to check for updates
@@ -208,6 +320,9 @@ export function VersionDisplay({
             </div>
           )}
         </div>
+
+        {/* Release Notes Modal */}
+        <ReleaseNotesModal isOpen={showReleaseNotes} onClose={() => setShowReleaseNotes(false)} />
       </div>
     );
   }

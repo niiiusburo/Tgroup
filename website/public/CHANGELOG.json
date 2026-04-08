@@ -1,0 +1,65 @@
+[
+  {
+    "version": "0.2.0",
+    "date": "2026-04-08",
+    "commit": "585a5b4d",
+    "highlights": "Service Catalog, Calendar fixes, Customer Profile CRUD",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Service Catalog page with two-panel layout: service groups sidebar + paginated services table",
+          "ProductCategories API with full CRUD (11 groups, 155 services from database)",
+          "Products API with Create/Update/Delete endpoints",
+          "Calendar Day view redesigned as card grid layout with status badges",
+          "Customer Profile: Add deposit and make payment fully connected to database",
+          "Obsidian Brain integration for project context"
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Calendar timezone: UTC dates now correctly convert to Vietnam time (UTC+7)",
+          "All 3 calendar views (Overview, Week, Day) now consistently show 5 appointments",
+          "Appointment creation: added missing fields (time, isrepeatcustomer, isnotreatment)",
+          "Appointment API accepts both camelCase and lowercase field names",
+          "CustomerBalance now queries dbo.partners instead of missing public.customers",
+          "Added 'scheduled' to valid appointment states",
+          "Auth middleware: skip permission check for dev-mode non-UUID employeeId",
+          "Customer profile refreshes after editing phone/info"
+        ]
+      },
+      {
+        "title": "Removed",
+        "items": [
+          "Removed fake placeholder stats from Employee Profile (Patients Served, Avg Rating, etc.)",
+          "VersionDisplay hidden in production to prevent React #310 error"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "6 Playwright E2E tests for Customer Profile CRUD — all passing",
+          "TC1: Edit phone, TC2: Create appointment, TC3: Edit appointment",
+          "TC4: Add service record, TC5: Add deposit, TC6: Make payment"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.1.5",
+    "date": "2026-04-07",
+    "commit": "e04c461e",
+    "highlights": "Initial VPS deployment, Docker setup",
+    "sections": [
+      {
+        "title": "Features",
+        "items": [
+          "Docker Compose deployment with PostgreSQL, Express API, and nginx SPA",
+          "Google Places address autocomplete integration",
+          "Production environment configuration (.env.development / .env.production)"
+        ]
+      }
+    ]
+  }
+]

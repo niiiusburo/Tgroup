@@ -1,5 +1,18 @@
 # TGroup — TDental Dashboard
 
+## Release Notes (MANDATORY)
+
+Every time you bump the version or deploy a new build, you MUST update `website/public/CHANGELOG.json`:
+
+1. Add a new entry at the TOP of the JSON array with:
+   - `version`: the new semver version
+   - `date`: today's date (YYYY-MM-DD)
+   - `commit`: the git commit hash
+   - `highlights`: one-line summary
+   - `sections`: array of `{ title, items[] }` — use titles like "New Features", "Bug Fixes", "Removed", "Testing"
+2. Bump the version in `website/package.json`
+3. The VersionDisplay component (dev only) shows a "Release Notes" link in the tooltip that opens a modal reading from `/CHANGELOG.json`
+
 ## Obsidian Brain
 
 At session start, read project context from Obsidian vault:
