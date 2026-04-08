@@ -1,0 +1,12 @@
+node_modules
+.git
+.omc
+.agents
+.playwright-mcp
+screenshots
+blueprint
+frontend-truth
+*.backup
+*.dump
+**/__tests__
+**/e2e

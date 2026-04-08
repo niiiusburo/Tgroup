@@ -340,7 +340,7 @@ export function AddressAutocomplete({
       {showSuggestions && status === 'OK' && data.length > 0 && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="py-2 max-h-72 overflow-y-auto">
-            {data.map((suggestion, index) => (
+            {data.map((suggestion: { place_id: string; description: string; structured_formatting: { main_text: string; secondary_text: string } }, index: number) => (
               <button
                 key={suggestion.place_id}
                 type="button"
