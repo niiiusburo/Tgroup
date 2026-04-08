@@ -4,9 +4,47 @@
  * @crossref:uses[AuthContext.login]
  */
 
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+
+const STORAGE_KEY = 'tdental_remember';
+const REMEMBER_DAYS = 60;
+
+interface RememberedCredentials {
+  email: string;
+  password: string;
+  expiry: number;
+}
+
+function getRememberedCredentials(): RememberedCredentials | null {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return null;
+    
+    const data: RememberedCredentials = JSON.parse(stored);
+    if (Date.now() > data.expiry) {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function saveCredentials(email: string, password: string): void {
+  const data: RememberedCredentials = {
+    email,
+    password,
+    expiry: Date.now() + (REMEMBER_DAYS * 24 * 60 * 60 * 1000),
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function clearCredentials(): void {
+  localStorage.removeItem(STORAGE_KEY);
+}
 
 export function Login() {
   const { login } = useAuth();
@@ -14,8 +52,19 @@ export function Login() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Load remembered credentials on mount
+  useEffect(() => {
+    const remembered = getRememberedCredentials();
+    if (remembered) {
+      setEmail(remembered.email);
+      setPassword(remembered.password);
+      setRememberMe(true);
+    }
+  }, []);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -24,6 +73,14 @@ export function Login() {
 
     try {
       await login(email, password);
+      
+      // Handle remember me
+      if (rememberMe) {
+        saveCredentials(email, password);
+      } else {
+        clearCredentials();
+      }
+      
       navigate('/', { replace: true });
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -91,6 +148,22 @@ export function Login() {
                 placeholder="••••••••"
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
               />
+            </div>
+
+            {/* Remember me */}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <span className="text-sm text-gray-600">Remember me</span>
+              </label>
+              {rememberMe && (
+                <span className="text-xs text-gray-400">for {REMEMBER_DAYS} days</span>
+              )}
             </div>
 
             <button

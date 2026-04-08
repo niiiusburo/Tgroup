@@ -12,6 +12,7 @@ interface DayViewProps {
   readonly currentDate: Date;
   readonly getAppointmentsForDate: (date: Date) => readonly CalendarAppointment[];
   readonly onAppointmentClick?: (appointment: CalendarAppointment) => void;
+  readonly onAppointmentEdit?: (appointment: CalendarAppointment) => void;
   readonly onDragStart?: (e: React.DragEvent, appointment: CalendarAppointment) => void;
   readonly onDragOver?: (e: React.DragEvent) => void;
   readonly onDrop?: (e: React.DragEvent, targetDate: string, targetTime: string) => void;
@@ -22,6 +23,7 @@ export function DayView({
   currentDate,
   getAppointmentsForDate,
   onAppointmentClick,
+  onAppointmentEdit,
   onDragStart,
   onDragOver,
   onDrop,
@@ -74,6 +76,7 @@ export function DayView({
                     key={apt.id}
                     appointment={apt}
                     onClick={onAppointmentClick}
+                    onEdit={onAppointmentEdit}
                     draggable
                     onDragStart={onDragStart}
                   />

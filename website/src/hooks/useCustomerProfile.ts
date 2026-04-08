@@ -1,12 +1,11 @@
 /**
  * useCustomerProfile - Fetch a single customer's full profile from DB
- * Combines partner data with their appointment history for the profile view.
- * Photos, deposits, and service-history have no DB tables in demo — these remain mock.
+ * Now includes real deposit_balance and outstanding_balance
  * @crossref:used-in[Customers]
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { fetchPartnerById, fetchAppointments, type ApiAppointment } from '@/lib/api';
+import { fetchPartnerById, fetchAppointments, fetchCustomerBalance, type ApiAppointment } from '@/lib/api';
 
 export interface CustomerProfileData {
   id: string;
@@ -25,6 +24,8 @@ export interface CustomerProfileData {
   totalSpent: number;
   companyId: string;
   companyName: string;
+  depositBalance: number;
+  outstandingBalance: number;
 }
 
 export interface CustomerProfileResult {
@@ -83,11 +84,13 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         medicalHistory: partner.medicalhistory ?? '',
         tags,
         memberSince,
-        totalVisits: 0,   // Populated from appointments below
+        totalVisits: 0,
         lastVisit,
-        totalSpent: 0,    // Requires sale orders aggregation
+        totalSpent: 0,
         companyId: partner.companyid ?? '',
         companyName: '',
+        depositBalance: 0,
+        outstandingBalance: 0,
       };
 
       // Fetch appointment history for this customer
@@ -107,8 +110,16 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
           profileData.companyName = sorted[0].companyname ?? '';
         }
       } catch {
-        // Appointments fetch failed — keep zeros
         profileData.totalVisits = 0;
+      }
+
+      // Fetch deposit balance
+      try {
+        const balance = await fetchCustomerBalance(customerId);
+        profileData.depositBalance = balance.depositBalance;
+        profileData.outstandingBalance = balance.outstandingBalance;
+      } catch {
+        // Balance not available
       }
 
       setProfile(profileData);

@@ -2,6 +2,7 @@ import { ALL_ROLES, ROLE_LABELS, ROLE_STYLES, type EmployeeRole } from '@/data/m
 
 /**
  * Multi-select for employee roles with toggle chips
+ * Note: Database only has dentist, assistant, receptionist flags
  * @crossref:used-in[EmployeeForm, Settings]
  */
 

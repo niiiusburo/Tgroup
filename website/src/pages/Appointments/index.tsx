@@ -8,9 +8,11 @@
 
 import { useState } from 'react';
 import {
-  CalendarCheck, Plus, Search, Filter,
+  CalendarCheck, Plus, Search, Filter, Edit2,
   ChevronDown, ChevronUp, Clock, Users, Stethoscope, CheckCircle2,
+  Calendar,
 } from 'lucide-react';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { StatusBadge, type StatusVariant } from '@/components/shared/StatusBadge';
 import { AppointmentForm, type AppointmentFormData } from '@/components/appointments/AppointmentForm';
 import { CheckInFlow } from '@/components/appointments/CheckInFlow';
@@ -54,16 +56,52 @@ export function Appointments() {
     dateFilter,
     setDateFilter,
     createAppointment,
+    updateAppointment,
     advanceCheckIn,
     convertToService,
   } = useAppointments(selectedLocationId);
 
   const [showForm, setShowForm] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState<AppointmentFormData | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   function handleCreate(data: AppointmentFormData) {
     createAppointment(data);
     setShowForm(false);
+  }
+
+  function handleUpdate(data: AppointmentFormData) {
+    if (editingAppointmentId) {
+      updateAppointment(editingAppointmentId, data);
+    }
+    setShowForm(false);
+    setIsEditMode(false);
+    setEditingAppointmentId(null);
+    setEditingAppointment(null);
+  }
+
+  const [editingAppointmentId, setEditingAppointmentId] = useState<string | null>(null);
+
+  function handleEditClick(apt: typeof appointments[0]) {
+    setEditingAppointmentId(apt.id);
+    setEditingAppointment({
+      customerId: apt.customerId,
+      customerName: apt.customerName,
+      customerPhone: apt.customerPhone,
+      doctorId: apt.doctorId,
+      doctorName: apt.doctorName,
+      locationId: apt.locationId,
+      locationName: apt.locationName,
+      appointmentType: apt.appointmentType,
+      serviceName: apt.serviceName,
+      date: apt.date,
+      startTime: apt.startTime,
+      endTime: apt.endTime,
+      notes: apt.notes,
+    });
+    setIsEditMode(true);
+    setShowForm(true);
   }
 
   function toggleExpanded(id: string) {
@@ -85,7 +123,11 @@ export function Appointments() {
         </div>
         <button
           type="button"
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setIsEditMode(false);
+            setEditingAppointment(null);
+            setShowForm(true);
+          }}
           className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -118,12 +160,14 @@ export function Appointments() {
         {/* Date filter */}
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-gray-400" />
-          <input
-            type="date"
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-          />
+          <div className="w-44">
+            <DatePicker
+              value={dateFilter}
+              onChange={setDateFilter}
+              placeholder="Filter by date"
+              icon={<Calendar className="w-3.5 h-3.5" />}
+            />
+          </div>
           {dateFilter && (
             <button
               type="button"
@@ -214,7 +258,7 @@ export function Appointments() {
 
                   {/* Expanded detail */}
                   {isExpanded && (
-                    <div className="px-4 pb-4 pt-0 ml-20 space-y-4 border-t border-gray-50">
+                    <div className="px-4 pb-4 pt-0 ml-0 sm:ml-20 space-y-4 border-t border-gray-50">
                       {/* Appointment type badge */}
                       <div className="flex items-center gap-2 pt-3">
                         <span className={`px-2 py-0.5 rounded text-xs font-medium ${typeColors.bg} ${typeColors.text}`}>
@@ -232,6 +276,18 @@ export function Appointments() {
                       {apt.notes && (
                         <p className="text-sm text-gray-600">{apt.notes}</p>
                       )}
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => handleEditClick(apt)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                          Edit
+                        </button>
+                      </div>
 
                       {/* Check-in flow */}
                       <CheckInFlow
@@ -255,7 +311,17 @@ export function Appointments() {
 
       {/* Appointment form modal */}
       {showForm && (
-        <AppointmentForm onSubmit={handleCreate} onClose={() => setShowForm(false)} />
+        <AppointmentForm
+          isEdit={isEditMode}
+          initialData={editingAppointment || undefined}
+          onSubmit={isEditMode ? handleUpdate : handleCreate}
+          onClose={() => {
+            setShowForm(false);
+            setIsEditMode(false);
+            setEditingAppointmentId(null);
+            setEditingAppointment(null);
+          }}
+        />
       )}
     </div>
   );

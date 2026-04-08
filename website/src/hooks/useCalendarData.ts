@@ -35,47 +35,47 @@ export function useCalendarData(selectedLocationId?: string) {
   }, [viewMode]);
 
   // Fetch appointments when viewMode or currentDate changes
-  useEffect(() => {
-    async function loadAppointments() {
-      setIsLoading(true);
-      try {
-        const weekDatesLocal = getWeekDates(currentDate);
-        const monthDatesLocal = getMonthDates(currentDate);
+  const loadAppointments = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const weekDatesLocal = getWeekDates(currentDate);
+      const monthDatesLocal = getMonthDates(currentDate);
 
-        let dateFrom: string;
-        let dateTo: string;
+      let dateFrom: string;
+      let dateTo: string;
 
-        if (viewMode === 'day') {
-          dateFrom = formatDateStr(currentDate);
-          dateTo = formatDateStr(currentDate);
-        } else if (viewMode === 'week') {
-          dateFrom = formatDateStr(weekDatesLocal[0]);
-          dateTo = formatDateStr(weekDatesLocal[6]);
-        } else {
-          dateFrom = formatDateStr(monthDatesLocal[0]);
-          dateTo = formatDateStr(monthDatesLocal[monthDatesLocal.length - 1]);
-        }
-
-        const response = await fetchAppointments({
-          limit: 200,
-          dateFrom,
-          dateTo,
-          companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
-          doctorId: selectedDoctorId || undefined,
-        });
-
-        const mappedAppointments = response.items.map(mapApiAppointmentToCalendar);
-        setAppointments(mappedAppointments);
-      } catch (error) {
-        console.error('Failed to load calendar appointments:', error);
-        setAppointments([]);
-      } finally {
-        setIsLoading(false);
+      if (viewMode === 'day') {
+        dateFrom = formatDateStr(currentDate);
+        dateTo = formatDateStr(currentDate);
+      } else if (viewMode === 'week') {
+        dateFrom = formatDateStr(weekDatesLocal[0]);
+        dateTo = formatDateStr(weekDatesLocal[6]);
+      } else {
+        dateFrom = formatDateStr(monthDatesLocal[0]);
+        dateTo = formatDateStr(monthDatesLocal[monthDatesLocal.length - 1]);
       }
-    }
 
+      const response = await fetchAppointments({
+        limit: 200,
+        dateFrom,
+        dateTo,
+        companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
+        doctorId: selectedDoctorId || undefined,
+      });
+
+      const mappedAppointments = response.items.map(mapApiAppointmentToCalendar);
+      setAppointments(mappedAppointments);
+    } catch (error) {
+      console.error('Failed to load calendar appointments:', error);
+      setAppointments([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [viewMode, currentDate, selectedDoctorId, selectedLocationId]);
+
+  useEffect(() => {
     loadAppointments();
-  }, [viewMode, currentDate, selectedDoctorId]);
+  }, [loadAppointments]);
 
   const filteredAppointments = useMemo(() => {
     if (!selectedDoctorId) return appointments;
@@ -130,6 +130,7 @@ export function useCalendarData(selectedLocationId?: string) {
     selectedAppointment,
     setSelectedAppointment,
     isLoading,
+    refresh: loadAppointments,
   } as const;
 }
 
@@ -189,6 +190,7 @@ function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppointment {
     locationId: apt.companyid || '',
     locationName: apt.companyname || '',
     notes: apt.note || '',
+    color: apt.color,
   };
 }
 

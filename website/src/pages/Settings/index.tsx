@@ -1,31 +1,24 @@
 /**
- * Settings Page — tabbed settings for service catalog, roles, customer sources, and system preferences
+ * Settings Page — System settings with IP Access Control
  * @crossref:route[/settings]
  * @crossref:used-in[App]
- * @crossref:uses[ServiceCatalogSettings, RoleConfig, CustomerSourcesConfig, SystemPreferences]
+ * @crossref:uses[SystemPreferences, IpAccessControl]
  */
 
 import { useState } from 'react';
-import { Settings as SettingsIcon, Stethoscope, SlidersHorizontal } from 'lucide-react';
-import { ServiceCatalogSettings } from '@/components/settings/ServiceCatalogSettings';
-import { SystemPreferences } from '@/components/settings/SystemPreferences';
+import { Settings as SettingsIcon, SlidersHorizontal, Shield } from 'lucide-react';
+import { SystemPreferencesContent } from '@/components/settings/SystemPreferencesContent';
+import { IpAccessControl } from '@/components/settings/IpAccessControl';
 
-type SettingsTab = 'catalog' | 'preferences';
+type SettingsTab = 'system' | 'ip';
 
-const TABS: { id: SettingsTab; label: string; icon: React.ReactNode; description: string }[] = [
-  { id: 'catalog', label: 'Service Catalog', icon: <Stethoscope className="w-4 h-4" />, description: 'Treatment types and pricing' },
-  { id: 'preferences', label: 'System Preferences', icon: <SlidersHorizontal className="w-4 h-4" />, description: 'General app settings' },
+const TABS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
+  { id: 'system', label: 'System Setting', icon: <SlidersHorizontal className="w-4 h-4" /> },
+  { id: 'ip', label: 'IP', icon: <Shield className="w-4 h-4" /> },
 ];
 
-const TAB_COMPONENTS: Record<SettingsTab, React.ComponentType> = {
-  catalog: ServiceCatalogSettings,
-  preferences: SystemPreferences,
-};
-
 export function Settings() {
-  const [activeTab, setActiveTab] = useState<SettingsTab>('catalog');
-
-  const ActiveComponent = TAB_COMPONENTS[activeTab];
+  const [activeTab, setActiveTab] = useState<SettingsTab>('system');
 
   return (
     <div className="space-y-6">
@@ -36,36 +29,49 @@ export function Settings() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-          <p className="text-sm text-gray-500">Configure your clinic preferences and system settings</p>
+          <p className="text-sm text-gray-500">Configure your clinic system settings and IP access control</p>
         </div>
       </div>
 
-      {/* Tab navigation */}
-      <div className="bg-white rounded-xl shadow-card p-1.5 flex gap-1 overflow-x-auto">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all flex-1 justify-center ${
-              activeTab === tab.id
-                ? 'bg-primary text-white shadow-sm'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-            }`}
-          >
-            {tab.icon}
-            <span className="hidden sm:inline">{tab.label}</span>
-          </button>
-        ))}
+      {/* Main pill-style tab navigation */}
+      <div className="flex justify-center">
+        <div 
+          className="inline-flex bg-gray-100 rounded-full p-1" 
+          role="tablist"
+        >
+          {TABS.map((tab, index) => {
+            const isFirst = index === 0;
+            const isLast = index === TABS.length - 1;
+            
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  flex items-center gap-2 px-8 py-3 text-sm font-medium whitespace-nowrap transition-all
+                  ${activeTab === tab.id
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                  }
+                `}
+                style={{
+                  borderRadius: isFirst ? '9999px 0 0 9999px' : isLast ? '0 9999px 9999px 0' : '0',
+                }}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Tab description */}
-      <div className="text-sm text-gray-500">
-        {TABS.find((t) => t.id === activeTab)?.description}
-      </div>
-
-      {/* Active tab content */}
-      <ActiveComponent />
+      {/* Tab content */}
+      {activeTab === 'system' && <SystemPreferencesContent />}
+      {activeTab === 'ip' && <IpAccessControl />}
     </div>
   );
 }

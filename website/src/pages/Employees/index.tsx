@@ -1,4 +1,5 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
+import { useState } from 'react';
 import { UserCog, Search, X } from 'lucide-react';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocationFilter } from '@/contexts/LocationContext';
@@ -6,12 +7,13 @@ import { TierSelector } from '@/components/employees/TierSelector';
 import { RoleMultiSelect } from '@/components/employees/RoleMultiSelect';
 import { EmployeeTable } from '@/components/employees/EmployeeTable';
 import { EmployeeProfile } from '@/components/employees/EmployeeProfile';
+import { EmployeeForm } from '@/components/employees/EmployeeForm';
 
 /**
  * Employees Page — staff management with list view and detailed profiles
  * @crossref:route[/employees]
  * @crossref:used-in[App]
- * @crossref:uses[EmployeeTable, EmployeeProfile, TierSelector, useLocationFilter]
+ * @crossref:uses[EmployeeTable, EmployeeProfile, TierSelector, useLocationFilter, EmployeeForm]
  */
 export function Employees() {
   const { selectedLocationId } = useLocationFilter();
@@ -30,9 +32,35 @@ export function Employees() {
     setStatusFilter,
     getLinkedEmployees,
     clearFilters,
+    refetch,
   } = useEmployees(selectedLocationId);
 
+  // Form state
+  const [showForm, setShowForm] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<typeof selectedEmployee>(null);
+
   const hasFilters = searchQuery || tierFilter !== 'all' || roleFilter !== 'all' || statusFilter !== 'all';
+
+  const handleAddEmployee = () => {
+    setEditingEmployee(null);
+    setShowForm(true);
+  };
+
+  const handleEditEmployee = () => {
+    if (selectedEmployee) {
+      setEditingEmployee(selectedEmployee as any);
+      setShowForm(true);
+    }
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingEmployee(null);
+  };
+
+  const handleFormSave = () => {
+    refetch();
+  };
 
   return (
     <div className="space-y-6">
@@ -50,7 +78,10 @@ export function Employees() {
             </p>
           </div>
         </div>
-        <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+        <button
+          onClick={handleAddEmployee}
+          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+        >
           Add Employee
         </button>
       </div>
@@ -138,11 +169,21 @@ export function Employees() {
                 linkedEmployees={getLinkedEmployees(selectedEmployee)}
                 onClose={() => setSelectedEmployeeId(null)}
                 onSelectLinked={setSelectedEmployeeId}
+                onEdit={handleEditEmployee}
               />
             </div>
           </div>
         )}
       </div>
+
+      {/* Add/Edit form modal */}
+      {showForm && (
+        <EmployeeForm
+          employee={editingEmployee as any}
+          onClose={handleFormClose}
+          onSave={handleFormSave}
+        />
+      )}
     </div>
   );
 }

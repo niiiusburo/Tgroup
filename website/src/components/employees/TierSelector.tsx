@@ -2,6 +2,7 @@ import { ALL_TIERS, TIER_LABELS, TIER_STYLES, type EmployeeTier } from '@/data/m
 
 /**
  * Tier/level selector for employees
+ * Note: Database doesn't have tier data, but we keep this for future use
  * @crossref:used-in[EmployeeForm, EmployeeProfile, Relationships]
  */
 

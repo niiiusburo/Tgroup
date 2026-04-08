@@ -1,119 +1,156 @@
-import { APPOINTMENT_TYPE_COLORS } from '@/constants';
-import { STATUS_DOT_COLORS, type CalendarAppointment } from '@/data/mockCalendar';
-
 /**
- * MonthView Component - monthly calendar grid
+ * MonthView Component - monthly calendar grid with status counts
  * @crossref:used-in[Calendar]
- * @crossref:uses[AppointmentCard]
+ *
+ * Redesigned to match reference: day cells show appointment counts by status
  */
+
+import { CheckCircle, Calendar, XCircle, AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { type CalendarAppointment } from '@/data/mockCalendar';
 
 interface MonthViewProps {
   readonly currentDate: Date;
   readonly monthDates: readonly Date[];
   readonly getAppointmentsForDate: (date: Date) => readonly CalendarAppointment[];
-  readonly onAppointmentClick?: (appointment: CalendarAppointment) => void;
+  readonly onDayClick?: (date: Date) => void;
 }
 
-const WEEKDAY_HEADERS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+const WEEKDAY_HEADERS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
 
-export function MonthView({ currentDate, monthDates, getAppointmentsForDate, onAppointmentClick }: MonthViewProps) {
+function formatDateKey(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
+interface StatusCounts {
+  confirmed: number;
+  scheduled: number;
+  cancelled: number;
+  completed: number;
+  inProgress: number;
+}
+
+function countByStatus(appointments: readonly CalendarAppointment[]): StatusCounts {
+  return appointments.reduce(
+    (acc, apt) => {
+      switch (apt.status) {
+        case 'confirmed':
+          acc.confirmed += 1;
+          break;
+        case 'scheduled':
+          acc.scheduled += 1;
+          break;
+        case 'cancelled':
+          acc.cancelled += 1;
+          break;
+        case 'completed':
+          acc.completed += 1;
+          break;
+        case 'in-progress':
+          acc.inProgress += 1;
+          break;
+      }
+      return acc;
+    },
+    { confirmed: 0, scheduled: 0, cancelled: 0, completed: 0, inProgress: 0 } as StatusCounts,
+  );
+}
+
+export function MonthView({
+  currentDate,
+  monthDates,
+  getAppointmentsForDate,
+  onDayClick,
+}: MonthViewProps) {
   const currentMonth = currentDate.getMonth();
   const today = new Date();
-  const todayStr = formatShort(today);
+  const todayKey = formatDateKey(today);
 
   return (
-    <div className="bg-white rounded-xl shadow-card overflow-hidden">
+    <div className="bg-white rounded-xl border border-gray-200 shadow-card">
       {/* Weekday headers */}
-      <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
+      <div className="grid grid-cols-7 border-b border-gray-100">
         {WEEKDAY_HEADERS.map((day) => (
-          <div key={day} className="py-2.5 text-center">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              {day}
-            </span>
+          <div key={day} className="py-3 text-center">
+            <span className="text-sm font-semibold text-gray-700">{day}</span>
           </div>
         ))}
       </div>
 
       {/* Calendar grid */}
       <div className="grid grid-cols-7">
-        {monthDates.map((date, i) => {
+        {monthDates.map((date, index) => {
           const isCurrentMonth = date.getMonth() === currentMonth;
-          const isToday = formatShort(date) === todayStr;
+          const isToday = formatDateKey(date) === todayKey;
           const appointments = getAppointmentsForDate(date);
+          const counts = countByStatus(appointments);
+          const hasAppointments = appointments.length > 0;
 
           return (
             <div
-              key={i}
-              className={`min-h-[100px] border-b border-r border-gray-100 p-1.5 transition-colors ${
-                isCurrentMonth ? 'bg-white hover:bg-gray-50' : 'bg-gray-50/50'
-              }`}
+              key={index}
+              onClick={() => onDayClick?.(date)}
+              className={cn(
+                'min-h-[100px] p-2 border-b border-r border-gray-100',
+                'cursor-pointer transition-colors',
+                isCurrentMonth ? 'bg-white hover:bg-gray-50' : 'bg-gray-50/50',
+                isToday && 'bg-blue-50',
+                (index + 1) % 7 === 0 && 'border-r-0',
+              )}
             >
               {/* Date number */}
-              <div className="flex items-center justify-between mb-1">
-                <span
-                  className={`text-sm inline-flex items-center justify-center w-7 h-7 rounded-full ${
-                    isToday
-                      ? 'bg-primary text-white font-bold'
-                      : isCurrentMonth
-                      ? 'text-gray-900 font-medium'
-                      : 'text-gray-400'
-                  }`}
-                >
-                  {date.getDate()}
-                </span>
-                {appointments.length > 0 && (
-                  <span className="text-[10px] text-gray-400">
-                    {appointments.length}
-                  </span>
+              <div
+                className={cn(
+                  'text-sm font-medium mb-1 w-7 h-7 flex items-center justify-center rounded-full',
+                  isToday
+                    ? 'bg-blue-600 text-white'
+                    : isCurrentMonth
+                      ? 'text-gray-900'
+                      : 'text-gray-400',
                 )}
+              >
+                {date.getDate()}
               </div>
 
-              {/* Appointment dots with type colors */}
-              <div className="space-y-0.5">
-                {appointments.slice(0, 3).map((apt) => (
-                  <MonthAppointmentDot
-                    key={apt.id}
-                    appointment={apt}
-                    onClick={onAppointmentClick}
-                  />
-                ))}
-                {appointments.length > 3 && (
-                  <p className="text-[10px] text-gray-400 pl-1">
-                    +{appointments.length - 3} more
-                  </p>
-                )}
-              </div>
+              {/* Status counts */}
+              {hasAppointments && (
+                <div className="space-y-0.5">
+                  {counts.confirmed > 0 && (
+                    <div className="flex items-center gap-1 text-[10px] text-emerald-600">
+                      <CheckCircle className="w-3 h-3" />
+                      <span>Đã đến: ({counts.confirmed})</span>
+                    </div>
+                  )}
+                  {counts.scheduled > 0 && (
+                    <div className="flex items-center gap-1 text-[10px] text-blue-600">
+                      <Calendar className="w-3 h-3" />
+                      <span>Đang hẹn: ({counts.scheduled})</span>
+                    </div>
+                  )}
+                  {counts.cancelled > 0 && (
+                    <div className="flex items-center gap-1 text-[10px] text-red-600">
+                      <XCircle className="w-3 h-3" />
+                      <span>Hủy hẹn: ({counts.cancelled})</span>
+                    </div>
+                  )}
+                  {counts.completed > 0 && (
+                    <div className="flex items-center gap-1 text-[10px] text-gray-600">
+                      <CheckCircle className="w-3 h-3" />
+                      <span>Hoàn thành: ({counts.completed})</span>
+                    </div>
+                  )}
+                  {counts.inProgress > 0 && (
+                    <div className="flex items-center gap-1 text-[10px] text-purple-600">
+                      <AlertCircle className="w-3 h-3" />
+                      <span>Đang khám: ({counts.inProgress})</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
       </div>
     </div>
   );
-}
-
-interface MonthAppointmentDotProps {
-  readonly appointment: CalendarAppointment;
-  readonly onClick?: (appointment: CalendarAppointment) => void;
-}
-
-function MonthAppointmentDot({ appointment, onClick }: MonthAppointmentDotProps) {
-  const typeColors = APPOINTMENT_TYPE_COLORS[appointment.appointmentType];
-  const statusDot = STATUS_DOT_COLORS[appointment.status];
-
-  return (
-    <button
-      type="button"
-      onClick={() => onClick?.(appointment)}
-      className={`w-full text-left flex items-center gap-1 px-1 py-0.5 rounded hover:shadow-sm cursor-pointer ${typeColors.bg}`}
-    >
-      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot}`} />
-      <span className={`text-[11px] truncate ${typeColors.text}`}>
-        {appointment.startTime} {appointment.customerName}
-      </span>
-    </button>
-  );
-}
-
-function formatShort(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }

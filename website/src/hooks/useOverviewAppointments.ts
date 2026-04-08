@@ -64,6 +64,9 @@ function mapStateToTopStatus(state: string | null): AppointmentTopStatus {
   switch (state?.toLowerCase()) {
     case 'arrived':
     case 'confirmed':
+    case 'in examination':
+    case 'done':
+    case 'completed':
       return 'arrived';
     case 'cancelled':
     case 'canceled':
@@ -211,6 +214,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
       );
     } catch (error) {
       console.error('Failed to update check-in status:', error);
+      throw error; // Re-throw to let caller handle error display
     }
   }, []);
 

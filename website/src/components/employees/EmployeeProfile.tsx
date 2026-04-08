@@ -1,4 +1,5 @@
-import { Mail, Phone, MapPin, Calendar, X, Users, Stethoscope, Star, Clock, Shield, Globe } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Mail, Phone, MapPin, Calendar, X, Users, Stethoscope, Star, Clock, Pencil, Loader2 } from 'lucide-react';
 import {
   TIER_LABELS,
   TIER_STYLES,
@@ -7,16 +8,12 @@ import {
   STATUS_BADGE_STYLES,
   type Employee,
 } from '@/data/mockEmployees';
-import { MOCK_PERMISSION_GROUPS, MOCK_ASSIGNMENTS } from '@/data/mockPermissionGroups';
-import { MOCK_LOCATION_BRANCHES } from '@/data/mockLocations';
-import { ScheduleCalendar } from './ScheduleCalendar';
-import { LinkedEmployees } from './LinkedEmployees';
-import { ReferralCodeDisplay } from './ReferralCodeDisplay';
+import { fetchCompanies, type ApiCompany } from '@/lib/api';
 
 /**
- * Employee detail profile panel — personal info, stats, linked data, permission group + location access
+ * Employee detail profile panel — personal info, stats, linked data
  * @crossref:used-in[Employees]
- * @crossref:uses[ScheduleCalendar, LinkedEmployees, ReferralCodeDisplay, mockPermissionGroups]
+ * @crossref:uses[fetchCompanies]
  */
 
 interface EmployeeStats {
@@ -41,20 +38,37 @@ interface EmployeeProfileProps {
   readonly linkedEmployees: readonly Employee[];
   readonly onClose: () => void;
   readonly onSelectLinked: (id: string) => void;
+  readonly onEdit?: () => void;
 }
-
-const LOCATION_NAMES: Record<string, string> = {
-  'loc-1': 'District 1',
-  'loc-2': 'District 7',
-  'loc-3': 'Thu Duc',
-};
 
 export function EmployeeProfile({
   employee,
   linkedEmployees,
   onClose,
   onSelectLinked,
+  onEdit,
 }: EmployeeProfileProps) {
+  const [locations, setLocations] = useState<ApiCompany[]>([]);
+  const [loadingLocations, setLoadingLocations] = useState(true);
+
+  // Load locations for name lookup
+  useEffect(() => {
+    fetchCompanies()
+      .then((res) => {
+        setLocations(res.items);
+        setLoadingLocations(false);
+      })
+      .catch(() => {
+        setLoadingLocations(false);
+      });
+  }, []);
+
+  const getLocationName = (locationId: string): string => {
+    if (!locationId) return 'No Location';
+    const location = locations.find((l) => l.id === locationId);
+    return location?.name ?? locationId;
+  };
+
   const statusLabel = employee.status === 'on-leave' ? 'On Leave' : employee.status.charAt(0).toUpperCase() + employee.status.slice(1);
 
   return (
@@ -64,7 +78,7 @@ export function EmployeeProfile({
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-full bg-white shadow-sm flex items-center justify-center text-lg font-bold text-primary">
-              {employee.avatar}
+              {employee.avatar || employee.name.substring(0, 2).toUpperCase()}
             </div>
             <div>
               <h2 className="text-lg font-bold text-gray-900">{employee.name}</h2>
@@ -78,12 +92,23 @@ export function EmployeeProfile({
               </div>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-white/50 transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
+          <div className="flex items-center gap-1">
+            {onEdit && (
+              <button
+                onClick={onEdit}
+                className="p-1.5 rounded-lg hover:bg-white/50 transition-colors"
+                title="Edit employee"
+              >
+                <Pencil className="w-4 h-4 text-gray-500" />
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg hover:bg-white/50 transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -126,6 +151,9 @@ export function EmployeeProfile({
                 {ROLE_LABELS[role]}
               </span>
             ))}
+            {employee.roles.length === 0 && (
+              <span className="text-xs text-gray-400">No roles assigned</span>
+            )}
           </div>
         </div>
 
@@ -134,111 +162,61 @@ export function EmployeeProfile({
           <h3 className="text-sm font-medium text-gray-700 mb-2">Contact</h3>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Mail className="w-4 h-4 text-gray-400" />
-            <span>{employee.email}</span>
+            <span>{employee.email || 'No email'}</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Phone className="w-4 h-4 text-gray-400" />
-            <span>{employee.phone}</span>
+            <span>{employee.phone || 'No phone'}</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <MapPin className="w-4 h-4 text-gray-400" />
-            <span>{LOCATION_NAMES[employee.locationId] ?? employee.locationId}</span>
+            <span>
+              {loadingLocations ? (
+                <span className="flex items-center gap-1 text-gray-400">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Loading...
+                </span>
+              ) : (
+                getLocationName(employee.locationId)
+              )}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Calendar className="w-4 h-4 text-gray-400" />
-            <span>Hired {new Date(employee.hireDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+            <span>
+              {employee.hireDate
+                ? `Hired ${new Date(employee.hireDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+                : 'No hire date'}
+            </span>
           </div>
         </div>
 
-        {/* Permissions & Access */}
-        {(() => {
-          const assignment = MOCK_ASSIGNMENTS.find((a) => a.employeeId === employee.id);
-          const group = assignment ? MOCK_PERMISSION_GROUPS.find((g) => g.id === assignment.groupId) : null;
-          if (!assignment || !group) return null;
-
-          const isAllLocations = assignment.locationScope.type === 'all';
-          const locationNames = isAllLocations
-            ? ['All Locations']
-            : assignment.locationScope.type === 'specific'
-            ? assignment.locationScope.locationIds
-                .map((id) => MOCK_LOCATION_BRANCHES.find((l) => l.id === id)?.district)
-                .filter(Boolean)
-            : [];
-
-          return (
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                Permissions & Access
-              </h3>
-              <div className="bg-gray-50 rounded-lg p-3 space-y-2">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-6 h-6 rounded flex items-center justify-center"
-                    style={{ backgroundColor: `${group.color}15` }}
-                  >
-                    <Shield className="w-3.5 h-3.5" style={{ color: group.color }} />
+        {/* Team Members */}
+        {linkedEmployees.length > 0 && (
+          <div>
+            <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Team Members ({linkedEmployees.length})
+            </h3>
+            <div className="space-y-2">
+              {linkedEmployees.map((emp) => (
+                <button
+                  key={emp.id}
+                  onClick={() => onSelectLinked(emp.id)}
+                  className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+                    {emp.avatar || emp.name.substring(0, 2).toUpperCase()}
                   </div>
-                  <span className="text-sm font-medium text-gray-900">{group.name}</span>
-                  <span className="text-xs text-gray-400">({group.permissions.length} permissions)</span>
-                </div>
-                <div className="flex items-start gap-2 text-xs text-gray-600">
-                  {isAllLocations ? (
-                    <Globe className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-                  ) : (
-                    <MapPin className="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" />
-                  )}
-                  <div className="flex flex-wrap gap-1">
-                    {locationNames.map((name) => (
-                      <span
-                        key={name}
-                        className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${
-                          isAllLocations
-                            ? 'bg-primary/10 text-primary'
-                            : 'bg-gray-200 text-gray-700'
-                        }`}
-                      >
-                        {name}
-                      </span>
-                    ))}
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{emp.name}</p>
+                    <p className="text-xs text-gray-500">{emp.locationName || 'No location'}</p>
                   </div>
-                </div>
-                {(assignment.overrides.grant.length > 0 || assignment.overrides.revoke.length > 0) && (
-                  <div className="text-[11px] text-gray-500 pt-1 border-t border-gray-200">
-                    {assignment.overrides.grant.length > 0 && (
-                      <span className="text-green-600">+{assignment.overrides.grant.length} extra</span>
-                    )}
-                    {assignment.overrides.grant.length > 0 && assignment.overrides.revoke.length > 0 && ' · '}
-                    {assignment.overrides.revoke.length > 0 && (
-                      <span className="text-red-500">-{assignment.overrides.revoke.length} revoked</span>
-                    )}
-                  </div>
-                )}
-              </div>
+                </button>
+              ))}
             </div>
-          );
-        })()}
-
-        {/* Weekly Schedule */}
-        <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Weekly Schedule</h3>
-          <ScheduleCalendar schedule={employee.schedule} />
-        </div>
-
-        {/* Referral Code */}
-        <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Referral Code</h3>
-          <ReferralCodeDisplay employeeId={employee.id} employeeName={employee.name} />
-        </div>
-
-        {/* Linked Employees */}
-        <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            Team Members ({linkedEmployees.length})
-          </h3>
-          <LinkedEmployees employees={linkedEmployees} onSelect={onSelectLinked} />
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

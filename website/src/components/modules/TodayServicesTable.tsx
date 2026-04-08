@@ -10,7 +10,7 @@ interface TodayServicesTableProps {
   readonly locationId?: string;
 }
 
-export function TodayServicesTable({ locationId }: TodayServicesTableProps) {
+export function TodayServicesTable({ locationId: _locationId }: TodayServicesTableProps) {
   return (
     <div className="bg-white rounded-2xl border border-gray-200">
       <div className="px-5 pt-5 pb-3">

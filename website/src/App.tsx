@@ -19,6 +19,7 @@ import {
   Login,
 } from '@/pages';
 import { ROUTES } from '@/constants';
+import { AddressAutocompleteTest } from '@/components/shared/AddressAutocompleteTest';
 
 /**
  * Route → required permission mapping
@@ -126,8 +127,9 @@ function App() {
     <AuthProvider>
       <LocationProvider>
         <Routes>
-          {/* Public route */}
+          {/* Public routes */}
           <Route path="/login" element={<LoginRoute />} />
+          <Route path="/test/address" element={<AddressAutocompleteTest />} />
 
           {/* Protected routes wrapped in Layout */}
           <Route

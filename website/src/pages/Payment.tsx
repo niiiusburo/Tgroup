@@ -199,8 +199,9 @@ export function Payment() {
             {wallets.map((wallet) => (
               <DepositWallet
                 key={wallet.id}
-                wallet={wallet}
-                onTopUp={handleTopUp(wallet.customerId)}
+                depositBalance={wallet.balance}
+                outstandingBalance={0}
+                onAddDeposit={async (amount) => { await handleTopUp(wallet.customerId)(amount); }}
               />
             ))}
 

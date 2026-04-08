@@ -13,18 +13,24 @@ import { useLocationFilter } from '@/contexts/LocationContext';
 import type { CalendarAppointment } from '@/data/mockCalendar';
 import { EditAppointmentModal } from '@/components/modules/EditAppointmentModal';
 import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
+import { cn } from '@/lib/utils';
 
 /**
  * Calendar Page with Day/Week/Month view modes
  * @crossref:route[/calendar]
  * @crossref:used-in[App]
  * @crossref:uses[DayView, WeekView, MonthView, AppointmentCard, AppointmentDetailsModal, FilterByDoctor, useLocationFilter, useDragReschedule]
+ *
+ * Redesigned to match reference images with Vietnamese labels:
+ * - Ngày (Day), Tuần (Week), Tháng (Month)
+ * - Week view shows appointment cards with status badges
+ * - Month view shows status counts per day
  */
 
 const VIEW_TABS: readonly { readonly mode: ViewMode; readonly label: string }[] = [
-  { mode: 'day', label: 'Day' },
-  { mode: 'week', label: 'Week' },
-  { mode: 'month', label: 'Month' },
+  { mode: 'day', label: 'Ngày' },
+  { mode: 'week', label: 'Tuần' },
+  { mode: 'month', label: 'Tháng' },
 ];
 
 export function Calendar() {
@@ -89,6 +95,25 @@ export function Calendar() {
     setSelectedAppointment(null);
   }, [setSelectedAppointment]);
 
+  const handleDayClick = useCallback((_date: Date) => {
+    // Switch to day view when clicking a day in month view
+    setViewMode('day');
+  }, [setViewMode]);
+
+  const handleDateChange = useCallback((date: Date) => {
+    // This would update currentDate in useCalendarData
+    // For now, we use the navigate function
+    const current = new Date(currentDate);
+    const diff = date.getTime() - current.getTime();
+    const daysDiff = Math.round(diff / (1000 * 60 * 60 * 24));
+    
+    if (daysDiff > 0) {
+      for (let i = 0; i < daysDiff; i++) navigate('next');
+    } else if (daysDiff < 0) {
+      for (let i = 0; i < Math.abs(daysDiff); i++) navigate('prev');
+    }
+  }, [currentDate, navigate]);
+
   // Helper to map Calendar status to OverviewAppointment topStatus
   function mapStatusToTopStatus(status: CalendarAppointment['status']): OverviewAppointment['topStatus'] {
     switch (status) {
@@ -113,64 +138,67 @@ export function Calendar() {
           <CalendarIcon className="w-6 h-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Calendar</h1>
-          <p className="text-sm text-gray-500">Schedule and manage appointments</p>
+          <h1 className="text-2xl font-bold text-gray-900">Lịch hẹn</h1>
+          <p className="text-sm text-gray-500">Quản lý lịch hẹn khám bệnh</p>
         </div>
       </div>
 
-      {/* Toolbar: navigation + filters + view tabs */}
-      <div className="flex items-center justify-between flex-wrap gap-3 bg-white rounded-xl shadow-card px-4 py-3">
-        {/* Left: date navigation */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={goToToday}
-            className="px-3 py-1.5 text-sm font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary-lighter transition-colors"
-          >
-            Today
-          </button>
-          <div className="flex items-center">
-            <button
-              onClick={() => navigate('prev')}
-              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
-              aria-label="Previous"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => navigate('next')}
-              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
-              aria-label="Next"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-          <h2 className="text-base font-semibold text-gray-900 ml-1">{dateLabel}</h2>
-        </div>
-
-        {/* Center: doctor filter */}
-        <div className="flex items-center gap-2">
-          <FilterByDoctor
-            selectedDoctorId={selectedDoctorId}
-            onChange={setSelectedDoctorId}
-            doctors={doctors}
-          />
-        </div>
-
-        {/* Right: view mode tabs */}
+      {/* Toolbar: view tabs + navigation + filters */}
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 bg-white rounded-xl shadow-card px-4 py-3">
+        {/* Left: view mode tabs (Vietnamese) */}
         <div className="flex items-center bg-gray-100 rounded-lg p-1">
           {VIEW_TABS.map((tab) => (
             <button
               key={tab.mode}
               onClick={() => setViewMode(tab.mode)}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+              className={cn(
+                'px-4 py-1.5 text-sm font-medium rounded-md transition-colors',
                 viewMode === tab.mode
-                  ? 'bg-white text-primary shadow-sm'
+                  ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
-              }`}
+              )}
             >
               {tab.label}
             </button>
           ))}
+        </div>
+
+        {/* Center: date navigation */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate('prev')}
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+            aria-label="Previous"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <h2 className="text-base font-semibold text-gray-900 min-w-[150px] text-center">
+            {dateLabel}
+          </h2>
+          <button
+            onClick={() => navigate('next')}
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+            aria-label="Next"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+          <button
+            onClick={goToToday}
+            className="ml-2 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+          >
+            Hôm nay
+          </button>
+        </div>
+
+        {/* Right: doctor filter */}
+        <div className="flex items-center gap-2 w-full lg:w-auto">
+          <div className="flex-1 lg:flex-none">
+            <FilterByDoctor
+              selectedDoctorId={selectedDoctorId}
+              onChange={setSelectedDoctorId}
+              doctors={doctors}
+            />
+          </div>
         </div>
       </div>
 
@@ -193,10 +221,7 @@ export function Calendar() {
           getAppointmentsForDate={getAppointmentsForDate}
           onAppointmentClick={handleAppointmentClick}
           onAppointmentEdit={handleEditClick}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onDragEnd={handleDragEnd}
+          onDateChange={handleDateChange}
         />
       )}
       {viewMode === 'month' && (
@@ -204,8 +229,7 @@ export function Calendar() {
           currentDate={currentDate}
           monthDates={monthDates}
           getAppointmentsForDate={getAppointmentsForDate}
-          onAppointmentClick={handleAppointmentClick}
-          onAppointmentEdit={handleEditClick}
+          onDayClick={handleDayClick}
         />
       )}
 

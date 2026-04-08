@@ -262,7 +262,7 @@ function ArchitectureView({
   };
 
   return (
-    <div className="grid grid-cols-3 gap-5 items-start">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
       {/* Column 1: Permission Groups */}
       <div>
         <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">
@@ -318,14 +318,14 @@ function ArchitectureView({
       </div>
 
       {/* Column 3: Locations + Detail panel */}
-      <div>
+      <div className="lg:order-last">
         <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">
           Locations (WHERE)
         </div>
 
         {/* Location grid */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-4">
-          <div className="grid grid-cols-2 gap-1.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-1.5">
             {locations.map(loc => {
               let highlight = false;
               if (activeEmp) {
@@ -576,8 +576,8 @@ interface MatrixViewProps {
 
 function MatrixView({ groups, onToggle }: MatrixViewProps) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-auto">
-      <table className="w-full border-collapse text-xs">
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
+      <table className="w-full border-collapse text-xs min-w-[600px]">
         <thead>
           <tr className="bg-gray-50">
             <th className="text-left px-4 py-3 font-semibold text-gray-500 border-b-2 border-gray-200 sticky left-0 bg-gray-50 z-10 min-w-[160px]">

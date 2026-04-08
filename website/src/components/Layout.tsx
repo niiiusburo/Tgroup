@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -20,6 +20,8 @@ import {
   ChevronRight,
   Shield,
   LogOut,
+  Menu,
+  X,
 } from 'lucide-react';
 import { NAVIGATION_ITEMS, type NavigationItem } from '@/constants';
 import { FilterByLocation } from '@/components/shared/FilterByLocation';
@@ -133,8 +135,12 @@ export function Layout() {
   );
   const pageTitle = currentChild?.label ?? currentPage?.label ?? 'Dashboard';
 
-  const sidebarWidth = sidebarExpanded ? 'w-56' : 'w-[72px]';
-  const contentMargin = sidebarExpanded ? 'ml-56' : 'ml-[72px]';
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   /** Filter nav items (and their children) by permission */
   function isNavItemVisible(item: NavigationItem): boolean {
@@ -162,22 +168,45 @@ export function Layout() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Collapsible sidebar */}
-      <aside className={`fixed left-0 top-0 h-full ${sidebarWidth} bg-sidebar flex flex-col py-4 z-50 transition-all duration-300 ease-in-out`}>
+      {/* Mobile overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Collapsible sidebar - hidden on mobile, fixed on desktop */}
+      <aside
+        className={`
+          fixed left-0 top-0 h-full bg-sidebar flex flex-col py-4 z-50 transition-all duration-300 ease-in-out
+          ${mobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full w-0 md:translate-x-0'}
+          ${!mobileMenuOpen && sidebarExpanded ? 'md:w-56' : ''}
+          ${!mobileMenuOpen && !sidebarExpanded ? 'md:w-[72px]' : ''}
+        `}
+      >
         {/* Logo + Toggle */}
-        <div className={`flex items-center mb-8 flex-shrink-0 ${sidebarExpanded ? 'px-4 justify-between' : 'justify-center'}`}>
+        <div className={`flex items-center mb-8 flex-shrink-0 ${(mobileMenuOpen || sidebarExpanded) ? 'px-4 justify-between' : 'justify-center'}`}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold text-sm">TD</span>
             </div>
-            {sidebarExpanded && (
+            {(mobileMenuOpen || sidebarExpanded) && (
               <span className="text-white font-semibold text-lg whitespace-nowrap">TDental</span>
             )}
           </div>
+          {/* Mobile close button */}
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors md:hidden"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          {/* Desktop collapse button */}
           {sidebarExpanded && (
             <button
               onClick={() => setSidebarExpanded(false)}
-              className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+              className="hidden md:flex w-7 h-7 items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -192,8 +221,8 @@ export function Layout() {
         </nav>
 
         {/* Bottom: user info + logout */}
-        <div className={`flex flex-col gap-3 mt-4 ${sidebarExpanded ? 'px-3' : 'items-center'}`}>
-          {sidebarExpanded ? (
+        <div className={`flex flex-col gap-3 mt-4 ${(sidebarExpanded || mobileMenuOpen) ? 'px-3' : 'items-center'}`}>
+          {(sidebarExpanded || mobileMenuOpen) ? (
             <>
               {/* User info row */}
               <div className="flex items-center gap-3 px-1">
@@ -217,7 +246,7 @@ export function Layout() {
             <>
               <button
                 onClick={() => setSidebarExpanded(true)}
-                className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                className="hidden md:flex w-10 h-10 items-center justify-center rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -240,25 +269,42 @@ export function Layout() {
       </aside>
 
       {/* Main content area */}
-      <div className={`${contentMargin} min-h-screen flex flex-col transition-all duration-300 ease-in-out`}>
+      <div
+        className={`
+          min-h-screen flex flex-col transition-all duration-300 ease-in-out
+          ml-0
+          ${sidebarExpanded ? 'md:ml-56' : 'md:ml-[72px]'}
+        `}
+      >
         {/* Header */}
-        <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 sticky top-0 z-40">
-          <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">
-            {pageTitle}
-          </h1>
+        <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 md:px-6 sticky top-0 z-40">
+          {/* Mobile menu button + title */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="md:hidden w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <Menu className="w-5 h-5 text-gray-600" />
+            </button>
+            <h1 className="text-xl md:text-2xl font-semibold text-gray-900 tracking-tight">
+              {pageTitle}
+            </h1>
+          </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             {/* Location Filter — hidden when user is locked to a single location */}
             {!isSingleLocation && (
-              <FilterByLocation
-                locations={allowedLocations.length > 0 ? allowedLocations : MOCK_LOCATIONS}
-                selectedId={selectedLocationId}
-                onChange={setSelectedLocationId}
-              />
+              <div className="hidden sm:block">
+                <FilterByLocation
+                  locations={allowedLocations.length > 0 ? allowedLocations : MOCK_LOCATIONS}
+                  selectedId={selectedLocationId}
+                  onChange={setSelectedLocationId}
+                />
+              </div>
             )}
 
-            {/* Sparkles */}
-            <button className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors duration-150">
+            {/* Sparkles - hidden on mobile */}
+            <button className="hidden md:flex w-10 h-10 items-center justify-center rounded-lg hover:bg-gray-100 transition-colors duration-150">
               <Sparkles className="w-5 h-5 text-gray-500" />
             </button>
 
@@ -268,8 +314,8 @@ export function Layout() {
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full" />
             </button>
 
-            {/* Avatars */}
-            <div className="flex -space-x-2">
+            {/* Avatars - hidden on small mobile */}
+            <div className="hidden sm:flex -space-x-2">
               {[
                 { name: 'JD', color: 'bg-blue-500' },
                 { name: 'AS', color: 'bg-green-500' },
@@ -284,8 +330,8 @@ export function Layout() {
               ))}
             </div>
 
-            {/* Customize Widget */}
-            <button className="flex items-center gap-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors duration-150">
+            {/* Customize Widget - hidden on mobile */}
+            <button className="hidden lg:flex items-center gap-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors duration-150">
               <LayoutGrid className="w-4 h-4" />
               Customize Widget
             </button>
@@ -293,7 +339,7 @@ export function Layout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-4 md:p-6">
           <Outlet />
         </main>
       </div>

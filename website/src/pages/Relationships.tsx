@@ -29,6 +29,10 @@ export function Relationships() {
     entityNodes,
     entityRelations,
     selectedEntityRelations,
+    isDirty,
+    togglePermission,
+    savePermissions,
+    resetPermissions,
   } = useRelationshipsData();
 
   return (
@@ -110,6 +114,10 @@ export function Relationships() {
           permissionMatrix={permissionMatrix}
           selectedRoleId={selectedRoleId}
           onToggleRole={toggleRole}
+          onTogglePermission={togglePermission}
+          isDirty={isDirty}
+          onSave={savePermissions}
+          onReset={resetPermissions}
         />
       )}
 

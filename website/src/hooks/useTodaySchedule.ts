@@ -69,6 +69,7 @@ function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppointment {
     locationId: apt.companyid || '',
     locationName: apt.companyname || '',
     notes: apt.note || '',
+    color: apt.color,
   };
 }
 

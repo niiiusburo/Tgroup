@@ -300,6 +300,54 @@ export function useAppointments(selectedLocationId?: string) {
     return serviceId;
   }, []);
 
+  const updateAppointment = useCallback(async (appointmentId: string, input: CreateAppointmentInput) => {
+    try {
+      const apiPayload: Partial<ApiAppointment> = {
+        partnerid: input.customerId,
+        partnername: input.customerName,
+        partnerphone: input.customerPhone,
+        doctorid: input.doctorId,
+        doctorname: input.doctorName,
+        companyid: input.locationId,
+        companyname: input.locationName,
+        name: input.serviceName,
+        date: input.date,
+        time: input.startTime,
+        note: input.notes,
+      };
+
+      await apiUpdateAppointment(appointmentId, apiPayload);
+
+      // Update local state
+      setAppointments((prev) =>
+        prev.map((apt) =>
+          apt.id === appointmentId
+            ? {
+                ...apt,
+                customerId: input.customerId,
+                customerName: input.customerName,
+                customerPhone: input.customerPhone,
+                doctorId: input.doctorId,
+                doctorName: input.doctorName,
+                locationId: input.locationId,
+                locationName: input.locationName,
+                serviceName: input.serviceName,
+                date: input.date,
+                startTime: input.startTime,
+                endTime: input.endTime,
+                notes: input.notes,
+              }
+            : apt,
+        ),
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to update appointment';
+      setError(message);
+      console.error('Failed to update appointment:', err);
+      throw err;
+    }
+  }, []);
+
   const todayAppointments = useMemo(() => {
     const now = new Date();
     const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -328,6 +376,7 @@ export function useAppointments(selectedLocationId?: string) {
     dateFilter,
     setDateFilter,
     createAppointment,
+    updateAppointment,
     advanceCheckIn,
     updateStatus,
     cancelAppointment,

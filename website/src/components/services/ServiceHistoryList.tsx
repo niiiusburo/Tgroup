@@ -3,7 +3,7 @@
  * @crossref:used-in[Services, Customers, Payment]
  */
 
-import { Stethoscope, ChevronDown, ChevronUp } from 'lucide-react';
+import { Stethoscope, ChevronDown, ChevronUp, Edit2 } from 'lucide-react';
 import { useState } from 'react';
 import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_TYPE_LABELS } from '@/constants';
 import {
@@ -18,13 +18,14 @@ interface ServiceHistoryListProps {
   readonly records: readonly ServiceRecord[];
   readonly onUpdateVisit?: (recordId: string, visitId: string, status: VisitStatus) => void;
   readonly onCancel?: (recordId: string) => void;
+  readonly onEdit?: (record: ServiceRecord) => void;
 }
 
 function formatVND(amount: number): string {
   return new Intl.NumberFormat('vi-VN').format(amount) + ' \u20ab';
 }
 
-export function ServiceHistoryList({ records, onUpdateVisit, onCancel }: ServiceHistoryListProps) {
+export function ServiceHistoryList({ records, onUpdateVisit, onCancel, onEdit }: ServiceHistoryListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   function toggleExpanded(id: string) {
@@ -139,9 +140,19 @@ export function ServiceHistoryList({ records, onUpdateVisit, onCancel }: Service
                   onUpdateVisit={onUpdateVisit}
                 />
 
-                {/* Cancel action */}
-                {onCancel && record.status !== 'completed' && record.status !== 'cancelled' && (
-                  <div className="flex justify-end">
+                {/* Actions */}
+                <div className="flex items-center justify-end gap-2">
+                  {onEdit && (
+                    <button
+                      type="button"
+                      onClick={() => onEdit(record)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      Edit
+                    </button>
+                  )}
+                  {onCancel && record.status !== 'completed' && record.status !== 'cancelled' && (
                     <button
                       type="button"
                       onClick={() => onCancel(record.id)}
@@ -149,8 +160,8 @@ export function ServiceHistoryList({ records, onUpdateVisit, onCancel }: Service
                     >
                       Cancel Service
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             )}
           </div>

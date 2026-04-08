@@ -8,7 +8,7 @@
  */
 
 import { useState } from 'react';
-import { Clock, User, Stethoscope } from 'lucide-react';
+import { Clock, User } from 'lucide-react';
 import type { OverviewAppointment, CheckInStatus, Zone1Filter } from '@/hooks/useOverviewAppointments';
 
 interface PatientCheckInProps {

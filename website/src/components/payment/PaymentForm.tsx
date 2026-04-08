@@ -2,10 +2,11 @@
  * Payment Form Component - Create new payments
  * @crossref:used-in[Payment, Services]
  * @crossref:uses[usePayment, mockPayment]
+ * @crossref:matches[EditAppointmentModal styling]
  */
 
 import { useState } from 'react';
-import { X, CreditCard } from 'lucide-react';
+import { X, CreditCard, User, Phone, Stethoscope, DollarSign, MapPin, FileText, Check, Banknote, CreditCard as CardIcon, Wallet, QrCode } from 'lucide-react';
 import { PAYMENT_METHOD_LABELS, type PaymentMethod } from '@/data/mockPayment';
 
 function formatVND(amount: number): string {
@@ -71,67 +72,105 @@ export function PaymentForm({
 
   const QUICK_AMOUNTS = [500_000, 1_000_000, 2_000_000, 5_000_000, 10_000_000] as const;
 
+  const getMethodIcon = (methodValue: PaymentMethod) => {
+    switch (methodValue) {
+      case 'cash': return <Banknote className="w-4 h-4" />;
+      case 'card': return <CardIcon className="w-4 h-4" />;
+      case 'bank_transfer': return <Wallet className="w-4 h-4" />;
+      case 'wallet': return <Wallet className="w-4 h-4" />;
+      case 'momo': return <QrCode className="w-4 h-4" />;
+      default: return <DollarSign className="w-4 h-4" />;
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-bold text-gray-900">New Payment</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop with blur */}
+      <div
+        className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+        {/* Header with gradient */}
+        <div className="relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
+          <div className="relative flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <CreditCard className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">New Payment</h2>
+                <p className="text-sm text-orange-100 mt-0.5">Record a new transaction</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-400" />
-          </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        {/* Scrollable Form */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
           {/* Customer info */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Customer Name *</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <User className="w-3.5 h-3.5" />
+                Customer Name *
+              </label>
               <input
                 type="text"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
                 placeholder="Nguyen Van A"
                 required
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Phone</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <Phone className="w-3.5 h-3.5" />
+                Phone
+              </label>
               <input
                 type="text"
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
                 placeholder="0901-111-222"
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
               />
             </div>
           </div>
 
           {/* Service */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Service Name *</label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <Stethoscope className="w-3.5 h-3.5" />
+              Service Name *
+            </label>
             <input
               type="text"
               value={serviceName}
               onChange={(e) => setServiceName(e.target.value)}
               placeholder="Lam sach rang"
               required
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
             />
           </div>
 
           {/* Amount */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Amount (VND) *</label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <DollarSign className="w-3.5 h-3.5" />
+              Amount (VND) *
+            </label>
             <input
               type="number"
               value={amount}
@@ -139,18 +178,18 @@ export function PaymentForm({
               placeholder="1,500,000"
               required
               min={1}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
             />
             {Number(amount) > 0 && (
-              <p className="text-xs text-gray-400 mt-1">{formatVND(Number(amount))}</p>
+              <p className="mt-2 text-sm font-medium text-orange-600">{formatVND(Number(amount))}</p>
             )}
-            <div className="flex flex-wrap gap-2 mt-2">
+            <div className="flex flex-wrap gap-2 mt-3">
               {QUICK_AMOUNTS.map((qa) => (
                 <button
                   key={qa}
                   type="button"
                   onClick={() => setAmount(String(qa))}
-                  className="px-2.5 py-1 text-xs bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors"
+                  className="px-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600 transition-all"
                 >
                   {formatVND(qa)}
                 </button>
@@ -160,20 +199,25 @@ export function PaymentForm({
 
           {/* Payment method */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Payment Method</label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              Payment Method
+            </label>
             <div className="grid grid-cols-3 gap-2">
               {PAYMENT_METHODS.map((pm) => (
                 <button
                   key={pm.value}
                   type="button"
                   onClick={() => setMethod(pm.value)}
-                  className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
-                    method === pm.value
-                      ? 'bg-primary text-white border-primary'
-                      : 'text-gray-600 bg-white border-gray-200 hover:bg-gray-50'
-                  }`}
+                  className={`
+                    flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm rounded-xl border transition-all duration-200
+                    ${method === pm.value
+                      ? 'bg-orange-50 text-orange-700 border-orange-200 ring-2 ring-orange-500/20'
+                      : 'text-gray-600 bg-white border-gray-200 hover:border-orange-300'
+                    }
+                  `}
                 >
-                  {pm.label}
+                  {getMethodIcon(pm.value)}
+                  <span className="hidden sm:inline">{pm.label}</span>
                 </button>
               ))}
             </div>
@@ -181,45 +225,52 @@ export function PaymentForm({
 
           {/* Location */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Location</label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <MapPin className="w-3.5 h-3.5" />
+              Location
+            </label>
             <input
               type="text"
               value={locationName}
               onChange={(e) => setLocationName(e.target.value)}
               placeholder="Chi nhanh Quan 1"
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
             />
           </div>
 
           {/* Notes */}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Notes</label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <FileText className="w-3.5 h-3.5" />
+              Notes
+            </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Payment notes..."
               rows={2}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary resize-none"
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
             />
           </div>
-
-          {/* Submit */}
-          <div className="flex gap-3 pt-2">
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-dark transition-colors"
-            >
-              Record Payment
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2.5 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
         </form>
+
+        {/* Footer */}
+        <div className="px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all shadow-lg shadow-orange-500/25"
+          >
+            <Check className="w-4 h-4" />
+            Record Payment
+          </button>
+        </div>
       </div>
     </div>
   );

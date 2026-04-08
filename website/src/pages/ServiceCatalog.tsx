@@ -1,13 +1,13 @@
-import { useState, useMemo, useEffect } from 'react';
-import { Stethoscope, Search, Filter, Package, DollarSign, Tag, ChevronDown, ChevronRight } from 'lucide-react';
+/**
+ * Service Catalog Page — Displays all dental services organized by category with inline editing
+ * @crossref:route[/services-catalog]
+ * @crossref:uses[fetchProducts]
+ */
+
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { Stethoscope, Search, Filter, Package, DollarSign, Tag, ChevronDown, ChevronRight, Pencil, Check, X } from 'lucide-react';
 import { fetchProducts } from '@/lib/api';
 import type { ApiProduct } from '@/lib/api';
-
-/**
- * Service Catalog Page — Displays all dental services organized by category
- * @crossref:route[/services-catalog]
- * @replaces[Website]
- */
 
 interface ServiceItem {
   id: string;
@@ -33,15 +33,129 @@ function mapProduct(p: ApiProduct): ServiceItem {
   };
 }
 
+function formatVND(amount: number): string {
+  return new Intl.NumberFormat('vi-VN').format(amount) + ' \u20ab';
+}
+
+interface ServiceRowProps {
+  service: ServiceItem;
+  editingId: string | null;
+  editPrice: string;
+  onStartEdit: (id: string, price: number) => void;
+  onPriceChange: (price: string) => void;
+  onSaveEdit: (id: string) => void;
+  onCancelEdit: () => void;
+}
+
+function ServiceRow({
+  service,
+  editingId,
+  editPrice,
+  onStartEdit,
+  onPriceChange,
+  onSaveEdit,
+  onCancelEdit,
+}: ServiceRowProps) {
+  const isEditing = editingId === service.id;
+
+  return (
+    <tr className="hover:bg-gray-50 transition-colors">
+      <td className="px-6 py-3 whitespace-nowrap">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+          {service.code}
+        </span>
+      </td>
+      <td className="px-6 py-3">
+        <span className="text-sm font-medium text-gray-900">
+          {service.name}
+        </span>
+      </td>
+      <td className="px-6 py-3 whitespace-nowrap">
+        <span className="text-sm text-gray-600">{service.unit}</span>
+      </td>
+      <td className="px-6 py-3 whitespace-nowrap text-right">
+        {isEditing ? (
+          <div className="flex items-center justify-end gap-1">
+            <input
+              type="number"
+              value={editPrice}
+              onChange={(e) => onPriceChange(e.target.value)}
+              className="w-32 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary text-right"
+              autoFocus
+            />
+            <button
+              type="button"
+              onClick={() => onSaveEdit(service.id)}
+              title="Save"
+              className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors"
+            >
+              <Check className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={onCancelEdit}
+              title="Cancel"
+              className="p-1 text-gray-400 hover:bg-gray-100 rounded transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => onStartEdit(service.id, service.price)}
+            title="Edit price"
+            className="inline-flex items-center gap-1 text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors group"
+          >
+            <span className="text-sm font-semibold">
+              {formatVND(service.price)}
+            </span>
+            <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </button>
+        )}
+      </td>
+      <td className="px-6 py-3 whitespace-nowrap text-center">
+        {service.canOrderLab ? (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+            Yes
+          </span>
+        ) : (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+            No
+          </span>
+        )}
+      </td>
+    </tr>
+  );
+}
+
 interface ServiceGroupProps {
   category: string;
   services: ServiceItem[];
   isExpanded: boolean;
   onToggle: () => void;
   searchQuery: string;
+  editingId: string | null;
+  editPrice: string;
+  onStartEdit: (id: string, price: number) => void;
+  onPriceChange: (price: string) => void;
+  onSaveEdit: (id: string) => void;
+  onCancelEdit: () => void;
 }
 
-function ServiceGroup({ category, services, isExpanded, onToggle, searchQuery }: ServiceGroupProps) {
+function ServiceGroup({
+  category,
+  services,
+  isExpanded,
+  onToggle,
+  searchQuery,
+  editingId,
+  editPrice,
+  onStartEdit,
+  onPriceChange,
+  onSaveEdit,
+  onCancelEdit,
+}: ServiceGroupProps) {
   const filteredServices = useMemo(() => {
     if (!searchQuery) return services;
     const query = searchQuery.toLowerCase();
@@ -107,41 +221,17 @@ function ServiceGroup({ category, services, isExpanded, onToggle, searchQuery }:
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {filteredServices.map((service, index) => (
-                  <tr
-                    key={`${service.id}-${index}`}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-3 whitespace-nowrap">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                        {service.code}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3">
-                      <span className="text-sm font-medium text-gray-900">
-                        {service.name}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3 whitespace-nowrap">
-                      <span className="text-sm text-gray-600">{service.unit}</span>
-                    </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-right">
-                      <span className="text-sm font-semibold text-primary">
-                        {service.price.toLocaleString('en-US')} VND
-                      </span>
-                    </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-center">
-                      {service.canOrderLab ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                          Yes
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
-                          No
-                        </span>
-                      )}
-                    </td>
-                  </tr>
+                {filteredServices.map((service) => (
+                  <ServiceRow
+                    key={service.id}
+                    service={service}
+                    editingId={editingId}
+                    editPrice={editPrice}
+                    onStartEdit={onStartEdit}
+                    onPriceChange={onPriceChange}
+                    onSaveEdit={onSaveEdit}
+                    onCancelEdit={onCancelEdit}
+                  />
                 ))}
               </tbody>
             </table>
@@ -158,6 +248,11 @@ export function ServiceCatalog() {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  // Edit state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editPrice, setEditPrice] = useState('');
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -201,6 +296,53 @@ export function ServiceCatalog() {
     if (selectedCategory === 'all') return categories;
     return categories.filter(c => c === selectedCategory);
   }, [categories, selectedCategory]);
+
+  // Edit handlers
+  const startEdit = useCallback((id: string, price: number) => {
+    setEditingId(id);
+    setEditPrice(String(price));
+  }, []);
+
+  const priceChange = useCallback((price: string) => {
+    setEditPrice(price);
+  }, []);
+
+  const saveEdit = useCallback((id: string) => {
+    const parsed = parseInt(editPrice, 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      setProducts(prev =>
+        prev.map(p => (p.id === id ? { ...p, price: parsed } : p))
+      );
+      setIsDirty(true);
+    }
+    setEditingId(null);
+  }, [editPrice]);
+
+  const cancelEdit = useCallback(() => {
+    setEditingId(null);
+    setEditPrice('');
+  }, []);
+
+  const saveAllChanges = useCallback(() => {
+    // In a real app, this would save to backend
+    console.log('Saving all price changes:', products);
+    setIsDirty(false);
+  }, [products]);
+
+  const resetChanges = useCallback(() => {
+    // Reload from API to reset
+    setLoading(true);
+    fetchProducts({ limit: 200 })
+      .then((res) => {
+        const mapped = res.items.map(mapProduct);
+        setProducts(mapped);
+      })
+      .catch(() => {})
+      .finally(() => {
+        setLoading(false);
+        setIsDirty(false);
+      });
+  }, []);
 
   const stats = useMemo(() => {
     const totalServices = products.length;
@@ -334,6 +476,39 @@ export function ServiceCatalog() {
         </div>
       </div>
 
+      {/* Save/Reset actions bar */}
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-gray-500">
+          Click on a price to edit it
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={resetChanges}
+            disabled={!isDirty}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              isDirty
+                ? 'text-gray-600 hover:bg-gray-100'
+                : 'text-gray-300 cursor-not-allowed'
+            }`}
+          >
+            Reset
+          </button>
+          <button
+            type="button"
+            onClick={saveAllChanges}
+            disabled={!isDirty}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              isDirty
+                ? 'bg-green-600 text-white hover:bg-green-700'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            Save Changes
+          </button>
+        </div>
+      </div>
+
       {/* Loading state */}
       {loading && (
         <div className="bg-white rounded-xl shadow-card p-12 text-center">
@@ -353,6 +528,12 @@ export function ServiceCatalog() {
               isExpanded={expandedCategories.has(category)}
               onToggle={() => toggleCategory(category)}
               searchQuery={searchQuery}
+              editingId={editingId}
+              editPrice={editPrice}
+              onStartEdit={startEdit}
+              onPriceChange={priceChange}
+              onSaveEdit={saveEdit}
+              onCancelEdit={cancelEdit}
             />
           ))}
 

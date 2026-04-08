@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { PatientCheckIn } from '@/components/modules/PatientCheckIn';
 import { TodayServicesTable } from '@/components/modules/TodayServicesTable';
 import { TodayAppointments } from '@/components/modules/TodayAppointments';
-import { useOverviewAppointments, type OverviewAppointment } from '@/hooks/useOverviewAppointments';
+import { useOverviewAppointments } from '@/hooks/useOverviewAppointments';
 import { useLocationFilter } from '@/contexts/LocationContext';
 
 /**
@@ -20,6 +20,7 @@ export function Overview() {
 
   const {
     isLoading,
+    refresh,
     // Zone 3
     zone3Filter,
     setZone3Filter,
@@ -35,10 +36,10 @@ export function Overview() {
     updateCheckInStatus,
   } = useOverviewAppointments(selectedLocationId);
 
-  const handleEditAppointment = useCallback((appointment: OverviewAppointment) => {
-    // TODO: Open appointment edit modal
-    console.log('Edit appointment:', appointment.id);
-  }, []);
+  const handleEditAppointmentSaved = useCallback(() => {
+    // Refresh the appointments list after editing
+    refresh();
+  }, [refresh]);
 
   if (isLoading) {
     return (
@@ -49,7 +50,7 @@ export function Overview() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5 h-[calc(100vh-100px)]">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5 min-h-0 lg:h-[calc(100vh-100px)]">
       {/* Left column: Zone 1 + Zone 2 stacked */}
       <div className="flex flex-col gap-5 min-h-0 overflow-y-auto">
         {/* Zone 1: Patient Check-in */}
@@ -74,7 +75,7 @@ export function Overview() {
           counts={zone3Counts}
           onMarkArrived={markArrived}
           onMarkCancelled={markCancelled}
-          onEdit={handleEditAppointment}
+          onEditSaved={handleEditAppointmentSaved}
         />
       </div>
     </div>

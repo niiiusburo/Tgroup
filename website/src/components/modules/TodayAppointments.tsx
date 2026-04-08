@@ -9,8 +9,9 @@
  */
 
 import { useState } from 'react';
-import { Pencil, UserCheck, Phone, Clock, User, X } from 'lucide-react';
+import { Pencil, UserCheck, Phone, Clock, User } from 'lucide-react';
 import type { OverviewAppointment, Zone3Filter } from '@/hooks/useOverviewAppointments';
+import { EditAppointmentModal } from './EditAppointmentModal';
 
 interface TodayAppointmentsProps {
   readonly appointments: readonly OverviewAppointment[];
@@ -19,7 +20,7 @@ interface TodayAppointmentsProps {
   readonly counts: { all: number; arrived: number; cancelled: number };
   readonly onMarkArrived: (id: string) => void;
   readonly onMarkCancelled: (id: string) => void;
-  readonly onEdit: (appointment: OverviewAppointment) => void;
+  readonly onEditSaved?: () => void;
 }
 
 const FILTER_TABS: { key: Zone3Filter; label: string }[] = [
@@ -35,8 +36,27 @@ export function TodayAppointments({
   counts,
   onMarkArrived,
   onMarkCancelled,
-  onEdit,
+  onEditSaved,
 }: TodayAppointmentsProps) {
+  const [editingAppointment, setEditingAppointment] = useState<OverviewAppointment | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleEditClick = (appointment: OverviewAppointment) => {
+    setEditingAppointment(appointment);
+    setIsEditModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsEditModalOpen(false);
+    setEditingAppointment(null);
+  };
+
+  const handleModalSaved = () => {
+    // Call parent refresh function
+    onEditSaved?.();
+    handleModalClose();
+  };
+
   return (
     <div className="bg-white rounded-2xl border border-gray-200 h-full flex flex-col">
       {/* Header */}
@@ -82,13 +102,33 @@ export function TodayAppointments({
             appointment={apt}
             onMarkArrived={onMarkArrived}
             onMarkCancelled={onMarkCancelled}
-            onEdit={onEdit}
+            onEdit={handleEditClick}
           />
         ))}
+
+        {/* Edit Modal */}
+        <EditAppointmentModal
+          appointment={editingAppointment}
+          isOpen={isEditModalOpen}
+          onClose={handleModalClose}
+          onSaved={handleModalSaved}
+        />
       </div>
     </div>
   );
 }
+
+// Color code to background color mapping (matching EditAppointmentModal)
+const COLOR_CODE_TO_BG: Record<string, string> = {
+  '0': 'bg-blue-50',      // Blue
+  '1': 'bg-emerald-50',   // Green
+  '2': 'bg-amber-50',     // Orange
+  '3': 'bg-red-50',       // Red
+  '4': 'bg-violet-50',    // Purple
+  '5': 'bg-pink-50',      // Pink
+  '6': 'bg-cyan-50',      // Cyan
+  '7': 'bg-lime-50',      // Lime
+};
 
 // ─── Individual Appointment Card ────────────────────────────────
 
@@ -99,9 +139,18 @@ interface AppointmentCardProps {
   readonly onEdit: (appointment: OverviewAppointment) => void;
 }
 
-function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled, onEdit }: AppointmentCardProps) {
+function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkCancelled, onEdit }: AppointmentCardProps) {
   const isArrived = appointment.topStatus === 'arrived';
   const isCancelled = appointment.topStatus === 'cancelled';
+
+  // Use appointment color if set, otherwise fall back to status-based colors
+  const colorBg = appointment.color && COLOR_CODE_TO_BG[appointment.color]
+    ? COLOR_CODE_TO_BG[appointment.color]
+    : isArrived
+    ? 'bg-orange-50'
+    : isCancelled
+    ? 'bg-red-50'
+    : 'bg-gray-50';
 
   return (
     <div className="rounded-xl border border-gray-200 overflow-hidden">
@@ -145,7 +194,7 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled, onEdit }
       <div
         className={`
           mx-2.5 mb-2.5 rounded-lg px-3.5 py-2.5 flex items-center justify-between gap-2
-          ${isArrived ? 'bg-orange-50' : isCancelled ? 'bg-red-50' : 'bg-gray-50'}
+          ${colorBg}
         `}
       >
         <div className="flex-1 min-w-0">

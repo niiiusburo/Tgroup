@@ -122,6 +122,33 @@ export function updatePartner(id: string, data: Partial<ApiPartner>) {
 
 // ─── Employees ────────────────────────────────────────────────────
 
+// Employee-specific creation uses Partners API with employee=true
+export interface CreateEmployeeData {
+  name: string;
+  phone?: string;
+  email?: string;
+  companyid?: string;
+  isdoctor?: boolean;
+  isassistant?: boolean;
+  isreceptionist?: boolean;
+  active?: boolean;
+  wage?: number;
+  allowance?: number;
+  startworkdate?: string;
+}
+
+export function createEmployee(data: CreateEmployeeData) {
+  return apiFetch<ApiEmployee>('/Employees', { method: 'POST', body: data });
+}
+
+export function updateEmployee(id: string, data: Partial<CreateEmployeeData>) {
+  return apiFetch<ApiEmployee>(`/Employees/${id}`, { method: 'PUT', body: data });
+}
+
+export function deleteEmployee(id: string) {
+  return apiFetch<void>(`/Employees/${id}`, { method: 'DELETE' });
+}
+
 export interface ApiEmployee {
   id: string;
   name: string;
@@ -173,6 +200,7 @@ export interface ApiAppointment {
   time: string | null;
   datetimeappointment: string | null;
   timeexpected: number | null;
+  timeExpected: number | null; // camelCase for API requests
   note: string | null;
   state: string | null;
   reason: string | null;
@@ -181,9 +209,11 @@ export interface ApiAppointment {
   partnerdisplayname: string | null;
   partnerphone: string | null;
   doctorid: string | null;
+  doctorId: string | null; // camelCase for API requests
   doctorname: string | null;
   companyid: string | null;
   companyname: string | null;
+  color: string | null;
   datecreated: string | null;
   lastupdated: string | null;
 }
@@ -416,4 +446,104 @@ export function login(email: string, password: string) {
 
 export function fetchMe() {
   return apiFetch<LoginResponse>('/Auth/me');
+}
+
+// ─── Customer Balance ─────────────────────────────────────────────
+
+export interface ApiCustomerBalance {
+  id: string;
+  name: string;
+  depositBalance: number;
+  outstandingBalance: number;
+}
+
+export async function fetchCustomerBalance(customerId: string): Promise<ApiCustomerBalance> {
+  const res = await apiFetch<{ deposit_balance: number; outstanding_balance: number }>(`/CustomerBalance/${customerId}`);
+  return {
+    id: customerId,
+    name: '',
+    depositBalance: Number(res.deposit_balance) || 0,
+    outstandingBalance: Number(res.outstanding_balance) || 0,
+  };
+}
+
+// ─── Payments ────────────────────────────────────────────────────
+
+export interface ApiPayment {
+  id: string;
+  customerId: string;
+  serviceId?: string;
+  amount: number;
+  method: 'cash' | 'bank' | 'deposit';
+  depositUsed?: number;
+  cashAmount?: number;
+  bankAmount?: number;
+  receiptNumber?: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export async function fetchPayments(customerId?: string): Promise<{ items: ApiPayment[]; totalItems: number }> {
+  const url = customerId ? `/Payments?customerId=${customerId}` : '/Payments';
+  return apiFetch<{ items: ApiPayment[]; totalItems: number }>(url);
+}
+
+export async function createPayment(data: {
+  customerId: string;
+  serviceId?: string;
+  amount: number;
+  method: 'cash' | 'bank' | 'deposit';
+  notes?: string;
+}): Promise<ApiPayment> {
+  return apiFetch<ApiPayment>('/Payments', {
+    method: 'POST',
+    body: {
+      customer_id: data.customerId,
+      service_id: data.serviceId,
+      amount: data.amount,
+      method: data.method,
+      notes: data.notes,
+    },
+  });
+}
+
+// ─── Services (Sale Orders) ──────────────────────────────────────
+
+export interface ApiService {
+  id: string;
+  customerId: string;
+  doctorId?: string;
+  serviceType: string;
+  unitPrice: number;
+  totalAmount: number;
+  status: 'in_progress' | 'completed' | 'cancelled';
+  createdAt: string;
+}
+
+export async function fetchServices(customerId?: string): Promise<{ items: ApiService[]; totalItems: number }> {
+  const url = customerId ? `/Services?customerId=${customerId}` : '/Services';
+  return apiFetch<{ items: ApiService[]; totalItems: number }>(url);
+}
+
+export async function createService(data: {
+  customerId: string;
+  serviceType: string;
+  unitPrice: number;
+  quantity?: number;
+  discount?: number;
+  doctorId?: string;
+  notes?: string;
+}): Promise<ApiService> {
+  return apiFetch<ApiService>('/Services', {
+    method: 'POST',
+    body: {
+      customer_id: data.customerId,
+      service_type: data.serviceType,
+      unit_price: data.unitPrice,
+      quantity: data.quantity || 1,
+      discount: data.discount || 0,
+      doctor_id: data.doctorId,
+      notes: data.notes,
+    },
+  });
 }

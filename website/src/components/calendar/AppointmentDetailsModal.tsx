@@ -1,10 +1,11 @@
-import { X, Clock, User, MapPin, Phone, FileText, Tag } from 'lucide-react';
+import { X, Clock, User, MapPin, Phone, FileText, Tag, Calendar, Stethoscope } from 'lucide-react';
 import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_TYPE_LABELS } from '@/constants';
-import { STATUS_LABELS, STATUS_BADGE_STYLES, type CalendarAppointment } from '@/data/mockCalendar';
+import { STATUS_LABELS, type CalendarAppointment } from '@/data/mockCalendar';
 
 /**
  * AppointmentDetailsModal - Full appointment info overlay
  * @crossref:used-in[Calendar, Appointments]
+ * @crossref:uses[EditAppointmentModal styling reference]
  */
 
 interface AppointmentDetailsModalProps {
@@ -16,94 +17,120 @@ export function AppointmentDetailsModal({ appointment, onClose }: AppointmentDet
   if (!appointment) return null;
 
   const typeColors = APPOINTMENT_TYPE_COLORS[appointment.appointmentType];
-  const statusStyle = STATUS_BADGE_STYLES[appointment.status];
   const statusLabel = STATUS_LABELS[appointment.status];
   const typeLabel = APPOINTMENT_TYPE_LABELS[appointment.appointmentType];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <button
-        type="button"
-        className="absolute inset-0 bg-black/40"
+      {/* Backdrop with blur */}
+      <div
+        className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
         onClick={onClose}
-        aria-label="Close modal"
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
-        {/* Header with type color */}
-        <div className={`px-6 py-4 ${typeColors.bg} border-b ${typeColors.border}`}>
-          <div className="flex items-start justify-between">
+      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+        {/* Header with gradient */}
+        <div className="relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
+          <div className="relative flex items-start justify-between">
             <div>
-              <h2 className="text-lg font-bold text-gray-900">{appointment.customerName}</h2>
-              <p className={`text-sm font-medium mt-0.5 ${typeColors.text}`}>{appointment.serviceName}</p>
+              <h2 className="text-xl font-bold text-white">{appointment.customerName}</h2>
+              <p className="text-sm text-orange-100 mt-1 flex items-center gap-2">
+                <Stethoscope className="w-3.5 h-3.5" />
+                {appointment.serviceName}
+              </p>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-white/60 transition-colors"
-              aria-label="Close"
+              className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors"
             >
-              <X className="w-5 h-5 text-gray-500" />
+              <X className="w-5 h-5 text-white" />
             </button>
           </div>
 
           {/* Status + Type badges */}
-          <div className="flex items-center gap-2 mt-3">
-            <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyle}`}>
+          <div className="flex items-center gap-2 mt-4">
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/90 text-gray-800 shadow-sm">
               {statusLabel}
             </span>
-            <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${typeColors.border} ${typeColors.text} ${typeColors.bg}`}>
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/20 text-white border border-white/30">
               {typeLabel}
             </span>
           </div>
         </div>
 
-        {/* Body */}
-        <div className="px-6 py-4 space-y-4">
-          <DetailRow icon={<Clock className="w-4 h-4" />} label="Time">
-            {appointment.date} &middot; {appointment.startTime} - {appointment.endTime}
-          </DetailRow>
+        {/* Scrollable Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+          {/* Patient Card */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <User className="w-3.5 h-3.5" />
+              Patient
+            </label>
+            <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center text-white font-semibold text-sm shadow-md">
+                {appointment.customerName.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-gray-900 truncate">{appointment.customerName}</p>
+                <p className="text-xs text-gray-500 flex items-center gap-1">
+                  <Phone className="w-3 h-3" />
+                  {appointment.customerPhone}
+                </p>
+              </div>
+            </div>
+          </div>
 
-          <DetailRow icon={<User className="w-4 h-4" />} label="Doctor">
+          {/* Date & Time Row */}
+          <div className="grid grid-cols-2 gap-4">
+            <DetailRow icon={<Calendar className="w-3.5 h-3.5" />} label="Date">
+              {appointment.date}
+            </DetailRow>
+            <DetailRow icon={<Clock className="w-3.5 h-3.5" />} label="Time">
+              {appointment.startTime} - {appointment.endTime}
+            </DetailRow>
+          </div>
+
+          {/* Doctor */}
+          <DetailRow icon={<Stethoscope className="w-3.5 h-3.5" />} label="Doctor">
             {appointment.dentist}
           </DetailRow>
 
-          <DetailRow icon={<MapPin className="w-4 h-4" />} label="Location">
+          {/* Location */}
+          <DetailRow icon={<MapPin className="w-3.5 h-3.5" />} label="Location">
             {appointment.locationName}
           </DetailRow>
 
-          <DetailRow icon={<Phone className="w-4 h-4" />} label="Phone">
-            {appointment.customerPhone}
-          </DetailRow>
-
-          <DetailRow icon={<Tag className="w-4 h-4" />} label="Type">
-            <span className={`inline-flex items-center gap-1.5 ${typeColors.text}`}>
+          {/* Type */}
+          <DetailRow icon={<Tag className="w-3.5 h-3.5" />} label="Type">
+            <span className="inline-flex items-center gap-1.5">
               <span className={`w-2 h-2 rounded-full ${typeColors.dot}`} />
-              {typeLabel}
+              <span className={typeColors.text}>{typeLabel}</span>
             </span>
           </DetailRow>
 
+          {/* Notes */}
           {appointment.notes && (
-            <DetailRow icon={<FileText className="w-4 h-4" />} label="Notes">
-              {appointment.notes}
+            <DetailRow icon={<FileText className="w-3.5 h-3.5" />} label="Notes">
+              <span className="text-gray-700">{appointment.notes}</span>
             </DetailRow>
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 bg-gray-50 border-t border-gray-100 flex justify-end gap-2">
+        <div className="px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
           >
             Close
           </button>
           <button
             type="button"
-            className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark transition-colors"
+            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all shadow-lg shadow-orange-500/25"
           >
             Edit Appointment
           </button>
@@ -121,11 +148,13 @@ interface DetailRowProps {
 
 function DetailRow({ icon, label, children }: DetailRowProps) {
   return (
-    <div className="flex items-start gap-3">
-      <div className="text-gray-400 mt-0.5">{icon}</div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs text-gray-400 mb-0.5">{label}</p>
-        <p className="text-sm text-gray-800">{children}</p>
+    <div>
+      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+        {icon}
+        {label}
+      </label>
+      <div className="px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-800">
+        {children}
       </div>
     </div>
   );

@@ -1,0 +1,88 @@
+      <>
+        <CustomerProfile
+          profile={profileData}
+          photos={MOCK_CUSTOMER_PHOTOS}
+          deposit={MOCK_CUSTOMER_DEPOSIT}
+          appointments={appointments}
+          services={MOCK_SERVICE_HISTORY}
+          onBack={() => setSelectedCustomerId(null)}
+          onEdit={handleEdit}
+        />
+
+        {/* Edit Customer Form Modal */}
+        {showForm && isEditMode && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            onWheel={(e) => e.stopPropagation()}
+          >
+            {/* Backdrop with blur */}
+            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => {
+              setShowForm(false);
+              setIsEditMode(false);
+            }} />
+            <div 
+              className="relative bg-white rounded-3xl shadow-2xl w-full max-w-[1000px] h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+              onWheel={(e) => e.stopPropagation()}
+            >
+              <AddCustomerForm
+                isEdit={true}
+                initialData={getEditFormData()}
+                onSubmit={handleSubmit}
+                onCancel={() => {
+                  setShowForm(false);
+                  setIsEditMode(false);
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Page header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Users className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
+            <p className="text-sm text-gray-500">
+              {stats.total} patients &middot; {stats.active} active
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => {
+            setIsEditMode(false);
+            setShowForm(true);
+          }}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          Add Customer
+        </button>
+      </div>
+
+      {/* Add Customer Form Modal */}
+      {showForm && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onWheel={(e) => e.stopPropagation()}
+        >
+          {/* Backdrop with blur */}
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setShowForm(false)} />
+          <div 
+            className="relative bg-white rounded-3xl shadow-2xl w-full max-w-[1000px] h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+            onWheel={(e) => e.stopPropagation()}
+          >
+            <AddCustomerForm
+              onSubmit={handleSubmit}
+              onCancel={() => setShowForm(false)}
+            />
+          </div>
+        </div>
+      )}

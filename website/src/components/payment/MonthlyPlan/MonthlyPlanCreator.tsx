@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Calculator, CalendarDays, DollarSign, User, FileText, ChevronRight, Check } from 'lucide-react';
+import { DatePicker } from '@/components/ui/DatePicker';
 import type { PlanCreationInput } from '@/data/mockMonthlyPlans';
 
 /**
@@ -209,18 +210,12 @@ export function MonthlyPlanCreator({ onCreatePlan, onCancel }: MonthlyPlanCreato
                 ))}
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Start Date</label>
-              <div className="relative">
-                <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                />
-              </div>
-            </div>
+            <DatePicker
+              value={startDate}
+              onChange={setStartDate}
+              label="Start Date"
+              icon={<CalendarDays className="w-3.5 h-3.5" />}
+            />
             {parsedTotal > 0 && (
               <div className="bg-primary/5 rounded-lg p-3 text-sm">
                 <span className="text-gray-600">Monthly installment: </span>
