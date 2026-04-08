@@ -6,20 +6,21 @@ import { useDragReschedule } from '@/hooks/useDragReschedule';
 import { DayView } from '@/components/calendar/DayView';
 import { WeekView } from '@/components/calendar/WeekView';
 import { MonthView } from '@/components/calendar/MonthView';
-import { AppointmentDetailsModal } from '@/components/calendar/AppointmentDetailsModal';
+
 import { FilterByDoctor, type DoctorOption } from '@/components/shared/FilterByDoctor';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import type { CalendarAppointment } from '@/data/mockCalendar';
 import { EditAppointmentModal } from '@/components/modules/EditAppointmentModal';
 import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
+import { QuickAddAppointmentButton } from '@/components/shared/QuickAddAppointmentButton';
 import { cn } from '@/lib/utils';
 
 /**
  * Calendar Page with Day/Week/Month view modes
  * @crossref:route[/calendar]
  * @crossref:used-in[App]
- * @crossref:uses[DayView, WeekView, MonthView, AppointmentCard, AppointmentDetailsModal, FilterByDoctor, useLocationFilter, useDragReschedule]
+ * @crossref:uses[DayView, WeekView, MonthView, AppointmentCard, EditAppointmentModal, FilterByDoctor, useLocationFilter, useDragReschedule]
  *
  * Redesigned to match reference images with Vietnamese labels:
  * - Ngày (Day), Tuần (Week), Tháng (Month)
@@ -48,12 +49,11 @@ export function Calendar() {
     dateLabel,
     selectedDoctorId,
     setSelectedDoctorId,
-    selectedAppointment,
-    setSelectedAppointment,
     refresh,
   } = useCalendarData(selectedLocationId);
 
-  const [editingAppointment, setEditingAppointment] = useState<CalendarAppointment | null>(null);
+  // Edit modal state - uses OverviewAppointment to match EditAppointmentModal interface
+  const [editingAppointment, setEditingAppointment] = useState<OverviewAppointment | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Get real doctors from API for FilterByDoctor
@@ -79,14 +79,31 @@ export function Calendar() {
 
   const { handleDragStart, handleDragOver, handleDrop, handleDragEnd } = useDragReschedule(handleReschedule);
 
+  // Click on appointment card opens edit modal directly (same as TodayAppointments)
   const handleAppointmentClick = useCallback((appointment: CalendarAppointment) => {
-    setSelectedAppointment(appointment);
-  }, [setSelectedAppointment]);
-
-  const handleEditClick = useCallback((appointment: CalendarAppointment) => {
-    setEditingAppointment(appointment);
+    // Map CalendarAppointment to OverviewAppointment format for EditAppointmentModal
+    const overviewAppointment: OverviewAppointment = {
+      id: appointment.id,
+      customerName: appointment.customerName,
+      customerPhone: appointment.customerPhone,
+      doctorName: appointment.dentist,
+      doctorId: appointment.dentistId || '',
+      time: appointment.startTime,
+      locationId: appointment.locationId,
+      locationName: appointment.locationName,
+      note: appointment.notes || '',
+      topStatus: mapStatusToTopStatus(appointment.status),
+      checkInStatus: null,
+      color: appointment.color || '0',
+    };
+    setEditingAppointment(overviewAppointment);
     setIsEditModalOpen(true);
   }, []);
+
+  // Handle pencil icon edit - same action as card click in Calendar
+  const handleEditClick = useCallback((appointment: CalendarAppointment) => {
+    handleAppointmentClick(appointment);
+  }, [handleAppointmentClick]);
 
   const handleEditModalClose = useCallback(() => {
     setIsEditModalOpen(false);
@@ -98,10 +115,6 @@ export function Calendar() {
     setIsEditModalOpen(false);
     setEditingAppointment(null);
   }, [refresh]);
-
-  const handleCloseModal = useCallback(() => {
-    setSelectedAppointment(null);
-  }, [setSelectedAppointment]);
 
   const handleDayClick = useCallback((date: Date) => {
     setCurrentDate(date);
@@ -198,8 +211,12 @@ export function Calendar() {
           </button>
         </div>
 
-        {/* Right: doctor filter */}
-        <div className="flex items-center gap-2 w-full lg:w-auto">
+        {/* Right: Quick add + doctor filter */}
+        <div className="flex items-center gap-3 w-full lg:w-auto">
+          <QuickAddAppointmentButton 
+            onSuccess={refresh}
+            size="sm"
+          />
           <div className="flex-1 lg:flex-none">
             <FilterByDoctor
               selectedDoctorId={selectedDoctorId}
@@ -241,29 +258,9 @@ export function Calendar() {
         />
       )}
 
-      {/* Appointment detail modal */}
-      <AppointmentDetailsModal
-        appointment={selectedAppointment}
-        onClose={handleCloseModal}
-        onEdit={handleEditClick}
-      />
-
-      {/* Edit Appointment Modal */}
+      {/* Edit Appointment Modal - single module for both card click and pencil icon */}
       <EditAppointmentModal
-        appointment={editingAppointment ? {
-          id: editingAppointment.id,
-          customerName: editingAppointment.customerName,
-          customerPhone: editingAppointment.customerPhone,
-          doctorName: editingAppointment.dentist,
-          doctorId: editingAppointment.dentistId,
-          time: editingAppointment.startTime,
-          locationId: editingAppointment.locationId,
-          locationName: editingAppointment.locationName,
-          note: editingAppointment.notes,
-          topStatus: mapStatusToTopStatus(editingAppointment.status),
-          checkInStatus: null,
-          color: editingAppointment.color,
-        } : null}
+        appointment={editingAppointment}
         isOpen={isEditModalOpen}
         onClose={handleEditModalClose}
         onSaved={handleEditModalSaved}

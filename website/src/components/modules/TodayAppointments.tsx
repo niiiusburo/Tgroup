@@ -2,6 +2,15 @@
  * TodayAppointments - Zone 3: Today's appointment sidebar
  * @crossref:used-in[Overview]
  *
+ * ╔════════════════════════════════════════════════════════════════════════╗
+ * ║  APPOINTMENT MODULE FAMILY — @crossref:related[]                       ║
+ * ╠════════════════════════════════════════════════════════════════════════╣
+ * ║  @crossref:related[EditAppointmentModal] — opens edit modal            ║
+ * ║  @crossref:related[AppointmentForm] — CREATE variant                   ║
+ * ║  @crossref:color-source[constants/index.ts APPOINTMENT_CARD_COLORS]    ║
+ * ║    • Card colors come from constants — DO NOT duplicate locally        ║
+ * ╚════════════════════════════════════════════════════════════════════════╝
+ *
  * Shows all appointments for the day, filtered by location.
  * Filter tabs: All / Arrived / Canceled
  * All start as "Scheduled" in the morning.
@@ -12,6 +21,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Pencil, UserCheck, Phone, Clock, User } from 'lucide-react';
 import type { OverviewAppointment, Zone3Filter } from '@/hooks/useOverviewAppointments';
 import { useAppointmentHover } from '@/contexts/AppointmentHoverContext';
+import { APPOINTMENT_CARD_COLORS } from '@/constants';
 import { EditAppointmentModal } from './EditAppointmentModal';
 
 interface TodayAppointmentsProps {
@@ -25,9 +35,9 @@ interface TodayAppointmentsProps {
 }
 
 const FILTER_TABS: { key: Zone3Filter; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'arrived', label: 'Arrived' },
-  { key: 'cancelled', label: 'Canceled' },
+  { key: 'all', label: 'Tất cả' },
+  { key: 'arrived', label: 'Đã đến' },
+  { key: 'cancelled', label: 'Hủy hẹn' },
 ];
 
 export function TodayAppointments({
@@ -67,7 +77,7 @@ export function TodayAppointments({
         <div className="absolute bottom-0 right-8 w-16 h-16 bg-white/10 rounded-full translate-y-1/2" />
         
         <h2 className="text-base font-bold text-white uppercase tracking-wide mb-3">
-          Today's Appointments
+          Lịch hẹn hôm nay
         </h2>
 
         {/* Filter tabs */}
@@ -98,7 +108,7 @@ export function TodayAppointments({
       {/* Appointment list (scrollable) */}
       <div className="flex-1 overflow-y-auto px-5 pb-5 space-y-2.5">
         {appointments.length === 0 && (
-          <p className="text-center text-gray-400 text-sm py-8">No appointments</p>
+          <p className="text-center text-gray-400 text-sm py-8">Không có lịch hẹn</p>
         )}
 
         {appointments.map((apt) => (
@@ -123,17 +133,14 @@ export function TodayAppointments({
   );
 }
 
-// Color code to vibrant background gradient mapping
-const COLOR_CODE_TO_BG: Record<string, string> = {
-  '0': 'bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300',      // Blue
-  '1': 'bg-gradient-to-br from-emerald-100 to-emerald-200 border-emerald-300',   // Green
-  '2': 'bg-gradient-to-br from-amber-100 to-orange-200 border-orange-300',     // Orange
-  '3': 'bg-gradient-to-br from-red-100 to-rose-200 border-red-300',       // Red
-  '4': 'bg-gradient-to-br from-violet-100 to-purple-200 border-purple-300',    // Purple
-  '5': 'bg-gradient-to-br from-pink-100 to-fuchsia-200 border-pink-300',      // Pink
-  '6': 'bg-gradient-to-br from-cyan-100 to-teal-200 border-cyan-300',      // Cyan
-  '7': 'bg-gradient-to-br from-lime-100 to-green-200 border-lime-300',      // Lime
-};
+// Color mapping uses SINGLE SOURCE OF TRUTH from constants
+function getColorConfig(color: string | null | undefined): string {
+  if (color && APPOINTMENT_CARD_COLORS[color]) {
+    const c = APPOINTMENT_CARD_COLORS[color];
+    return `${c.bgHighlight} ${c.border}`;
+  }
+  return 'bg-gradient-to-br from-gray-100 to-slate-200 border-gray-300';
+}
 
 // ─── Individual Appointment Card ────────────────────────────────
 
@@ -166,13 +173,7 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
   };
 
   // Use appointment color if set, otherwise fall back to status-based colors with gradients
-  const colorConfig = appointment.color && COLOR_CODE_TO_BG[appointment.color]
-    ? COLOR_CODE_TO_BG[appointment.color]
-    : isArrived
-    ? 'bg-gradient-to-br from-orange-100 to-amber-200 border-orange-300'
-    : isCancelled
-    ? 'bg-gradient-to-br from-red-100 to-rose-200 border-red-300'
-    : 'bg-gradient-to-br from-gray-100 to-slate-200 border-gray-300';
+  const colorConfig = getColorConfig(appointment.color);
 
   // Get status badge color
   const statusBadgeColor = isArrived
@@ -254,7 +255,7 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
           </div>
         </div>
 
-        {/* Status badge */}
+        {/* Status badge - 3 states only */}
         {isArrived && (
           <span className={`${statusBadgeColor} px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-sm`}>
             Đã đến
@@ -264,14 +265,14 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
         {/* Cancelled badge */}
         {isCancelled && (
           <span className={`${statusBadgeColor} px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-sm`}>
-            Đã hủy
+            Hủy hẹn
           </span>
         )}
 
         {/* Scheduled badge */}
         {!isArrived && !isCancelled && (
           <span className={`${statusBadgeColor} px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-sm`}>
-            Chờ khám
+            Đang hẹn
           </span>
         )}
       </div>

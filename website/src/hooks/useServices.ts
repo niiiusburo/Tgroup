@@ -17,6 +17,7 @@ export type ServiceFilter = 'all' | ServiceStatus;
 export type CategoryFilter = 'all' | AppointmentType;
 
 export interface CreateServiceInput {
+  readonly id?: string;
   readonly customerId: string;
   readonly customerName: string;
   readonly customerPhone: string;

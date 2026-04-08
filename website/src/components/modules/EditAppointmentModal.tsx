@@ -3,6 +3,24 @@
  * @crossref:used-in[TodayAppointments, Overview, Calendar]
  * @crossref:uses[SearchableSelector, useCustomers, useEmployees, useLocations]
  *
+ * ╔════════════════════════════════════════════════════════════════════════╗
+ * ║  APPOINTMENT MODULE FAMILY — @crossref:related[]                       ║
+ * ╠════════════════════════════════════════════════════════════════════════╣
+ * ║  This component is the EDIT variant of the appointment module.         ║
+ * ║  When editing this file, you MUST also check:                          ║
+ * ║                                                                        ║
+ * ║  @crossref:related[AppointmentForm]  — CREATE variant                  ║
+ * ║    • Color picker, STATUS_OPTIONS, selectors must be consistent         ║
+ * ║                                                                        ║
+ * ║  @crossref:related[AppointmentDetailsModal] — VIEW variant             ║
+ * ║    • Status labels must match                                           ║
+ * ║                                                                        ║
+ * ║  @crossref:color-source[constants/index.ts APPOINTMENT_CARD_COLORS]    ║
+ * ║    • Single source of truth for all color codes 0-7                    ║
+ * ║    • DO NOT create local APPOINTMENT_COLORS maps                       ║
+ * ║    • If you need previewGradient, ADD it to the constants export        ║
+ * ╚════════════════════════════════════════════════════════════════════════╝
+ *
  * Luxurious design with searchable dropdowns.
  * Customer is READ-ONLY (appointment belongs to a specific patient).
  */
@@ -27,80 +45,11 @@ import { TimePicker } from '@/components/ui/TimePicker';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
 import { updateAppointment, fetchProducts, type ApiProduct } from '@/lib/api';
+import { APPOINTMENT_CARD_COLORS, APPOINTMENT_STATUS_OPTIONS } from '@/constants';
 import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
-// Color codes from database (0-7) - Light luxurious backgrounds matching card colors
-// These lighter shades ensure text readability while maintaining elegant aesthetics
-const APPOINTMENT_COLORS: Record<string, { 
-  bg: string; 
-  border: string; 
-  label: string; 
-  textColor: string;
-  previewGradient: string;
-}> = {
-  '0': { 
-    bg: 'bg-blue-100', 
-    border: 'border-blue-300',
-    label: 'Ocean Blue', 
-    textColor: 'text-blue-800',
-    previewGradient: 'from-blue-200 to-blue-300'
-  },
-  '1': { 
-    bg: 'bg-emerald-100', 
-    border: 'border-emerald-300',
-    label: 'Emerald', 
-    textColor: 'text-emerald-800',
-    previewGradient: 'from-emerald-200 to-emerald-300'
-  },
-  '2': { 
-    bg: 'bg-amber-100', 
-    border: 'border-amber-300',
-    label: 'Amber', 
-    textColor: 'text-amber-800',
-    previewGradient: 'from-amber-200 to-amber-300'
-  },
-  '3': { 
-    bg: 'bg-red-100', 
-    border: 'border-red-300',
-    label: 'Ruby', 
-    textColor: 'text-red-800',
-    previewGradient: 'from-red-200 to-red-300'
-  },
-  '4': { 
-    bg: 'bg-violet-100', 
-    border: 'border-violet-300',
-    label: 'Amethyst', 
-    textColor: 'text-violet-800',
-    previewGradient: 'from-violet-200 to-violet-300'
-  },
-  '5': { 
-    bg: 'bg-pink-100', 
-    border: 'border-pink-300',
-    label: 'Rose', 
-    textColor: 'text-pink-800',
-    previewGradient: 'from-pink-200 to-pink-300'
-  },
-  '6': { 
-    bg: 'bg-cyan-100', 
-    border: 'border-cyan-300',
-    label: 'Cyan', 
-    textColor: 'text-cyan-800',
-    previewGradient: 'from-cyan-200 to-cyan-300'
-  },
-  '7': { 
-    bg: 'bg-lime-100', 
-    border: 'border-lime-300',
-    label: 'Lime', 
-    textColor: 'text-lime-800',
-    previewGradient: 'from-lime-200 to-lime-300'
-  },
-};
 
-// Status options - simplified to 3 states as requested
-const STATUS_OPTIONS = [
-  { value: 'scheduled', label: 'Đang hẹn', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-  { value: 'arrived', label: 'Đã đến', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-  { value: 'cancelled', label: 'Hủy hẹn', color: 'bg-red-100 text-red-700 border-red-200' },
-];
+// Status options imported from constants — single source of truth
+const STATUS_OPTIONS = APPOINTMENT_STATUS_OPTIONS;
 
 interface EditAppointmentModalProps {
   readonly appointment: OverviewAppointment | null;
@@ -189,7 +138,7 @@ function SearchableSelector<T extends { id: string; name: string }>({
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Type to search..."
+                placeholder="Nhập để tìm kiếm..."
                 className="w-full pl-9 pr-4 py-2 bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:bg-white transition-all"
                 autoFocus
               />
@@ -197,7 +146,7 @@ function SearchableSelector<T extends { id: string; name: string }>({
           </div>
           <div className="max-h-56 overflow-y-auto py-1">
             {filteredOptions.length === 0 ? (
-              <div className="px-4 py-3 text-sm text-gray-400 text-center">No matches found</div>
+              <div className="px-4 py-3 text-sm text-gray-400 text-center">Không tìm thấy</div>
             ) : (
               filteredOptions.map((option) => (
                 <button
@@ -354,7 +303,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
   const selectedLocation = locations.find(l => l.id === locationId);
   const selectedService = services.find(s => s.id === serviceId);
   void STATUS_OPTIONS.find(s => s.value === status);
-  void APPOINTMENT_COLORS[colorCode];
+  void APPOINTMENT_CARD_COLORS[colorCode];
 
   const isLoading = employeesLoading || locationsLoading || servicesLoading;
 
@@ -417,7 +366,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
           <div className="relative flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-bold text-white">Edit Appointment</h2>
+              <h2 className="text-xl font-bold text-white">Sửa lịch hẹn</h2>
               <p className="text-sm text-orange-100 mt-1 flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5" />
                 {appointment.time} · {appointment.locationName}
@@ -454,7 +403,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
           <div className="searchable-selector">
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
-              Patient
+              Bệnh nhân
             </label>
             <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center text-white font-semibold text-sm shadow-md">
@@ -468,7 +417,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
                 </p>
               </div>
               <span className="text-xs text-gray-400 bg-white px-2 py-1 rounded-full border border-gray-200">
-                Linked Patient
+                Bệnh nhân đã liên kết
               </span>
             </div>
           </div>
@@ -478,13 +427,13 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
             <DatePicker
               value={date}
               onChange={setDate}
-              label="Date"
+              label="Ngày hẹn"
               icon={<Calendar className="w-3.5 h-3.5" />}
             />
             <TimePicker
               value={time}
               onChange={setTime}
-              label="Time"
+              label="Giờ"
               icon={<Clock className="w-3.5 h-3.5" />}
               interval={15}
             />
@@ -494,13 +443,13 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
           <div className="searchable-selector">
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Stethoscope className="w-3.5 h-3.5" />
-              Doctor
+              Bác sĩ
             </label>
             <SearchableSelector
               options={doctors}
               selectedId={doctorId}
               onChange={setDoctorId}
-              placeholder="Select doctor..."
+              placeholder="Chọn bác sĩ..."
               icon={<Stethoscope className="w-4 h-4" />}
               renderOption={(doctor) => (
                 <div className="flex items-center gap-3">
@@ -517,7 +466,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
             {selectedDoctor && (
               <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                Selected: <span className="font-medium text-gray-700">{selectedDoctor.name}</span>
+                Đã chọn: <span className="font-medium text-gray-700">{selectedDoctor.name}</span>
               </div>
             )}
           </div>
@@ -526,13 +475,13 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
           <div className="searchable-selector">
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <MapPin className="w-3.5 h-3.5" />
-              Location
+              Chi nhánh
             </label>
             <SearchableSelector
               options={locations}
               selectedId={locationId}
               onChange={setLocationId}
-              placeholder="Select location..."
+              placeholder="Chọn chi nhánh..."
               icon={<MapPin className="w-4 h-4" />}
               renderOption={(location) => (
                 <div>
@@ -546,7 +495,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
             {selectedLocation && (
               <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                Selected: <span className="font-medium text-gray-700">{selectedLocation.name}</span>
+                Đã chọn: <span className="font-medium text-gray-700">{selectedLocation.name}</span>
               </div>
             )}
           </div>
@@ -555,7 +504,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
           <div className="searchable-selector">
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Stethoscope className="w-3.5 h-3.5" />
-              Service
+              Dịch vụ
             </label>
             <SearchableSelector
               options={services.filter(s => s.active !== false)}
@@ -575,7 +524,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
             {selectedService && (
               <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                Selected: <span className="font-medium text-gray-700">{selectedService.name}</span>
+                Đã chọn: <span className="font-medium text-gray-700">{selectedService.name}</span>
               </div>
             )}
           </div>
@@ -642,7 +591,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
           {/* Status */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              Status
+              Trạng thái
             </label>
             <div className="grid grid-cols-3 gap-2">
               {STATUS_OPTIONS.map((s) => (
@@ -664,49 +613,41 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
             </div>
           </div>
 
-          {/* Color Selection - Luxurious Grid with Light Card-Matching Colors */}
+          {/* Color Selection - Compact row of color dots */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Palette className="w-3.5 h-3.5" />
-              Card Color
+              Màu thẻ
             </label>
-            <div className="grid grid-cols-4 gap-3">
-              {Object.entries(APPOINTMENT_COLORS).map(([code, color]) => (
+            <div className="flex items-center gap-2 flex-wrap">
+              {Object.entries(APPOINTMENT_CARD_COLORS).map(([code, color]) => (
                 <button
                   key={code}
                   type="button"
                   onClick={() => setColorCode(code)}
                   className={`
-                    group relative p-3 rounded-xl transition-all duration-200 border-2
+                    group relative rounded-full transition-all duration-200 border-2
                     ${colorCode === code 
-                      ? `${color.bg} ${color.border} shadow-lg scale-105` 
-                      : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-md'
+                      ? `border-gray-800 shadow-md scale-110` 
+                      : 'border-transparent hover:border-gray-300 hover:scale-105'
                   }
                   `}
                   title={color.label}
                 >
-                  {/* Color Preview Block - Light elegant shade matching card */}
+                  {/* Color dot */}
                   <div className={`
-                    w-full aspect-square rounded-lg bg-gradient-to-br ${color.previewGradient}
-                    flex items-center justify-center shadow-inner border border-white/50
+                    w-8 h-8 rounded-full bg-gradient-to-br ${color.previewGradient}
+                    flex items-center justify-center
                   `}>
                     {colorCode === code && (
-                      <div className={`
-                        w-6 h-6 rounded-full bg-white shadow-md flex items-center justify-center
-                      `}
-                      >
-                        <Check className={`w-4 h-4 ${color.textColor}`} />
-                      </div>
+                      <Check className="w-4 h-4 text-white drop-shadow-sm" />
                     )}
                   </div>
-                  <p className={`mt-2 text-[10px] font-semibold text-center truncate ${color.textColor}`}>
-                    {color.label}
-                  </p>
                 </button>
               ))}
             </div>
-            <p className="mt-2 text-xs text-gray-400 text-center">
-              Selected color will appear on the appointment card outside
+            <p className="mt-1.5 text-[11px] text-gray-400">
+              {APPOINTMENT_CARD_COLORS[colorCode]?.label ?? 'Default'}
             </p>
           </div>
 
@@ -714,13 +655,13 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
-              Notes
+              Ghi chú
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              placeholder="Additional notes about this appointment..."
+              placeholder="Ghi chú thêm..."
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
             />
           </div>
@@ -734,7 +675,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
             disabled={isSaving}
             className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50"
           >
-            Cancel
+            Hủy bỏ
           </button>
           <button
             type="button"
@@ -745,12 +686,12 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
             {isSaving ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Saving...
+                Đang lưu...
               </>
             ) : (
               <>
                 <Check className="w-4 h-4" />
-                Save Changes
+                Lưu thay đổi
               </>
             )}
           </button>

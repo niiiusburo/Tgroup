@@ -71,7 +71,7 @@ describe('AppointmentForm Edit Mode', () => {
       );
 
       // Assert: Customer should be shown as read-only text, not a selector
-      const customerLabel = screen.getByText('Customer');
+      const customerLabel = screen.getByText('Khách hàng');
       expect(customerLabel).toBeInTheDocument();
       
       // Should show the customer name as text, not as a dropdown/selector

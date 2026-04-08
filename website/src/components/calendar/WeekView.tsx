@@ -9,6 +9,7 @@
 import { CalendarDays, Phone, User, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type CalendarAppointment } from '@/data/mockCalendar';
+import { APPOINTMENT_CARD_COLORS } from '@/constants';
 
 interface WeekViewProps {
   readonly weekDates: readonly Date[];
@@ -64,24 +65,13 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string; b
   },
 };
 
-// Color mapping for card backgrounds (from reference)
-const COLOR_MAP: Record<string, string> = {
-  '0': 'bg-rose-100 border-l-rose-400',
-  '1': 'bg-orange-100 border-l-orange-400',
-  '2': 'bg-amber-100 border-l-amber-400',
-  '3': 'bg-emerald-100 border-l-emerald-400',
-  '4': 'bg-cyan-100 border-l-cyan-400',
-  '5': 'bg-blue-100 border-l-blue-400',
-  '6': 'bg-violet-100 border-l-violet-400',
-  '7': 'bg-fuchsia-100 border-l-fuchsia-400',
-};
-
-const WEEKDAY_NAMES = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
-
+// Color mapping uses the SINGLE SOURCE OF TRUTH from constants
+// See APPOINTMENT_CARD_COLORS for the canonical mapping
 function getCardStyles(appointment: CalendarAppointment): string {
   // Use color from appointment if available
-  if (appointment.color && COLOR_MAP[appointment.color]) {
-    return COLOR_MAP[appointment.color];
+  if (appointment.color && APPOINTMENT_CARD_COLORS[appointment.color]) {
+    const c = APPOINTMENT_CARD_COLORS[appointment.color];
+    return `${c.bg} ${c.dot}`;
   }
   // Fallback to status-based color
   const statusConfig = STATUS_CONFIG[appointment.status] || STATUS_CONFIG.scheduled;
@@ -91,6 +81,8 @@ function getCardStyles(appointment: CalendarAppointment): string {
 function formatDateKey(date: Date): string {
   return date.toISOString().split('T')[0];
 }
+
+const WEEKDAY_NAMES = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
 
 function formatDateDisplay(date: Date): string {
   return date.toLocaleDateString('vi-VN', {
@@ -115,7 +107,7 @@ function AppointmentCard({
     <div
       onClick={() => onClick?.(appointment)}
       className={cn(
-        'rounded-lg p-2.5 border-l-4 shadow-sm cursor-pointer',
+        'relative group rounded-lg p-2.5 border-l-4 shadow-sm cursor-pointer',
         'hover:shadow-md transition-shadow text-xs mb-2',
         cardStyles
       )}

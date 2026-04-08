@@ -1,0 +1,294 @@
+- generic [ref=e7]:
+  - complementary [ref=e8]:
+    - generic [ref=e12]: TD
+    - navigation [ref=e13]:
+      - link "Overview" [ref=e14] [cursor=pointer]:
+        - /url: /
+        - img [ref=e16]
+      - link "Calendar" [ref=e18] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e19]
+      - link "Customers" [ref=e21] [cursor=pointer]:
+        - /url: /customers
+        - img [ref=e22]
+      - link "Employees" [ref=e27] [cursor=pointer]:
+        - /url: /employees
+        - img [ref=e28]
+      - link "Locations" [ref=e40] [cursor=pointer]:
+        - /url: /locations
+        - img [ref=e41]
+      - link "Service Catalog" [ref=e44] [cursor=pointer]:
+        - /url: /website
+        - img [ref=e45]
+      - link "Settings" [ref=e49] [cursor=pointer]:
+        - /url: /settings
+        - img [ref=e50]
+      - link "Permissions" [ref=e53] [cursor=pointer]:
+        - /url: /permissions
+        - img [ref=e54]
+    - generic [ref=e56]:
+      - button [ref=e57] [cursor=pointer]:
+        - img [ref=e58]
+      - button "AU" [ref=e60] [cursor=pointer]:
+        - generic [ref=e61]: AU
+  - generic [ref=e65]:
+    - banner [ref=e66]:
+      - heading "Overview" [level=1] [ref=e68]
+      - generic [ref=e69]:
+        - button "All Locations" [ref=e72] [cursor=pointer]:
+          - img [ref=e73]
+          - generic [ref=e76]: All Locations
+          - img [ref=e77]
+        - button [ref=e79] [cursor=pointer]:
+          - img [ref=e80]
+        - button [ref=e82] [cursor=pointer]:
+          - img [ref=e83]
+        - generic [ref=e87]:
+          - generic [ref=e89]: JD
+          - generic [ref=e91]: AS
+          - generic [ref=e93]: MK
+        - button "Customize Widget" [ref=e94] [cursor=pointer]:
+          - img [ref=e95]
+          - text: Customize Widget
+    - main [ref=e100]:
+      - generic [ref=e101]:
+        - generic [ref=e102]:
+          - generic [ref=e103]:
+            - generic [ref=e104]:
+              - heading "Patient Check-in / Reception" [level=2] [ref=e105]
+              - generic [ref=e106]:
+                - button "Tất cả · 5" [ref=e107] [cursor=pointer]
+                - button "Chờ khám · 5" [ref=e108] [cursor=pointer]
+                - button "Đang khám · 0" [ref=e109] [cursor=pointer]
+                - button "Hoàn thành · 0" [ref=e110] [cursor=pointer]
+            - generic [ref=e112]:
+              - generic [ref=e113]:
+                - button "Chờ khám ▾" [ref=e114] [cursor=pointer]:
+                  - text: Chờ khám
+                  - generic [ref=e115]: ▾
+                - generic [ref=e116]:
+                  - generic [ref=e117]: PHẠM NGUYỄN MINH HIẾU
+                  - generic [ref=e118]:
+                    - img [ref=e119]
+                    - generic [ref=e122]: BS. Thu Thảo
+                    - generic [ref=e123]: ·
+                    - img [ref=e124]
+                    - generic [ref=e127]: 15:00
+                  - generic [ref=e128]: Tái khám định kỳ
+              - generic [ref=e129]:
+                - button "Chờ khám ▾" [ref=e130] [cursor=pointer]:
+                  - text: Chờ khám
+                  - generic [ref=e131]: ▾
+                - generic [ref=e132]:
+                  - generic [ref=e133]: Nguyễn Thị Thanh
+                  - generic [ref=e134]:
+                    - img [ref=e135]
+                    - generic [ref=e138]: BS. Dương
+                    - generic [ref=e139]: ·
+                    - img [ref=e140]
+                    - generic [ref=e143]: 15:30
+                  - generic [ref=e144]: Niềng răng
+              - generic [ref=e145]:
+                - button "Chờ khám ▾" [ref=e146] [cursor=pointer]:
+                  - text: Chờ khám
+                  - generic [ref=e147]: ▾
+                - generic [ref=e148]:
+                  - generic [ref=e149]: Vũ Hữu Đạt
+                  - generic [ref=e150]:
+                    - img [ref=e151]
+                    - generic [ref=e154]: BS. Trâm
+                    - generic [ref=e155]: ·
+                    - img [ref=e156]
+                    - generic [ref=e159]: 16:00
+                  - generic [ref=e160]: Cấy ghép implant
+              - generic [ref=e161]:
+                - button "Chờ khám ▾" [ref=e162] [cursor=pointer]:
+                  - text: Chờ khám
+                  - generic [ref=e163]: ▾
+                - generic [ref=e164]:
+                  - generic [ref=e165]: Đặng Thị Hồng Thúy
+                  - generic [ref=e166]:
+                    - img [ref=e167]
+                    - generic [ref=e170]: BS. Ý
+                    - generic [ref=e171]: ·
+                    - img [ref=e172]
+                    - generic [ref=e175]: 16:30
+                  - generic [ref=e176]: Tẩy trắng răng
+              - generic [ref=e177]:
+                - button "Chờ khám ▾" [ref=e178] [cursor=pointer]:
+                  - text: Chờ khám
+                  - generic [ref=e179]: ▾
+                - generic [ref=e180]:
+                  - generic [ref=e181]: Nguyễn Thị Nguyệt
+                  - generic [ref=e182]:
+                    - img [ref=e183]
+                    - generic [ref=e186]: BS. Thảo
+                    - generic [ref=e187]: ·
+                    - img [ref=e188]
+                    - generic [ref=e191]: 17:00
+                  - generic [ref=e192]: Updated note from curl test
+          - generic [ref=e193]:
+            - heading "Today's Services / Activity" [level=2] [ref=e195]
+            - table [ref=e197]:
+              - rowgroup [ref=e198]:
+                - row "Service Patient Qty Doctor Amount Status" [ref=e199]:
+                  - columnheader "Service" [ref=e200]
+                  - columnheader "Patient" [ref=e201]
+                  - columnheader "Qty" [ref=e202]
+                  - columnheader "Doctor" [ref=e203]
+                  - columnheader "Amount" [ref=e204]
+                  - columnheader "Status" [ref=e205]
+              - rowgroup [ref=e206]:
+                - row "Services will populate as patients are treated throughout the day." [ref=e207]:
+                  - cell "Services will populate as patients are treated throughout the day." [ref=e208]
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - heading "Today's Appointments" [level=2] [ref=e214]
+            - generic [ref=e215]:
+              - button "All · 5" [ref=e216] [cursor=pointer]
+              - button "Arrived · 4" [ref=e217] [cursor=pointer]
+              - button "Canceled · 0" [ref=e218] [cursor=pointer]
+          - generic [ref=e219]:
+            - generic [ref=e220]:
+              - generic [ref=e221]:
+                - generic [ref=e222]: PHẠM NGUYỄN MINH HIẾU
+                - generic [ref=e223]:
+                  - button "Edit appointment" [ref=e224] [cursor=pointer]:
+                    - img [ref=e225]
+                  - button "Mark as arrived" [ref=e228] [cursor=pointer]:
+                    - img [ref=e229]
+              - generic [ref=e233]:
+                - generic [ref=e234]:
+                  - generic [ref=e235]:
+                    - img [ref=e236]
+                    - generic [ref=e239]: BS. Thu Thảo
+                  - generic [ref=e240]:
+                    - generic [ref=e241]:
+                      - img [ref=e242]
+                      - text: 15:00
+                    - generic [ref=e245]:
+                      - img [ref=e246]
+                      - text: "0563757416"
+                - generic [ref=e248]: Chờ khám
+            - generic [ref=e249]:
+              - generic [ref=e250]:
+                - generic [ref=e251]: Nguyễn Thị Thanh
+                - generic [ref=e252]:
+                  - button "Edit appointment" [ref=e253] [cursor=pointer]:
+                    - img [ref=e254]
+                  - button "Arrived" [ref=e257] [cursor=pointer]:
+                    - img [ref=e258]
+              - generic [ref=e262]:
+                - generic [ref=e263]:
+                  - generic [ref=e264]:
+                    - img [ref=e265]
+                    - generic [ref=e268]: BS. Dương
+                  - generic [ref=e269]:
+                    - generic [ref=e270]:
+                      - img [ref=e271]
+                      - text: 15:30
+                    - generic [ref=e274]:
+                      - img [ref=e275]
+                      - text: "0908177761"
+                - generic [ref=e277]: Đã đến
+            - generic [ref=e278]:
+              - generic [ref=e279]:
+                - generic [ref=e280]: Vũ Hữu Đạt
+                - generic [ref=e281]:
+                  - button "Edit appointment" [ref=e282] [cursor=pointer]:
+                    - img [ref=e283]
+                  - button "Arrived" [ref=e286] [cursor=pointer]:
+                    - img [ref=e287]
+              - generic [ref=e291]:
+                - generic [ref=e292]:
+                  - generic [ref=e293]:
+                    - img [ref=e294]
+                    - generic [ref=e297]: BS. Trâm
+                  - generic [ref=e298]:
+                    - generic [ref=e299]:
+                      - img [ref=e300]
+                      - text: 16:00
+                    - generic [ref=e303]:
+                      - img [ref=e304]
+                      - text: "0388682636"
+                - generic [ref=e306]: Đã đến
+            - generic [ref=e307]:
+              - generic [ref=e308]:
+                - generic [ref=e309]: Đặng Thị Hồng Thúy
+                - generic [ref=e310]:
+                  - button "Edit appointment" [ref=e311] [cursor=pointer]:
+                    - img [ref=e312]
+                  - button "Arrived" [ref=e315] [cursor=pointer]:
+                    - img [ref=e316]
+              - generic [ref=e320]:
+                - generic [ref=e321]:
+                  - generic [ref=e322]:
+                    - img [ref=e323]
+                    - generic [ref=e326]: BS. Ý
+                  - generic [ref=e327]:
+                    - generic [ref=e328]:
+                      - img [ref=e329]
+                      - text: 16:30
+                    - generic [ref=e332]:
+                      - img [ref=e333]
+                      - text: "0977407980"
+                - generic [ref=e335]: Đã đến
+            - generic [ref=e336]:
+              - generic [ref=e337]:
+                - generic [ref=e338]: Nguyễn Thị Nguyệt
+                - generic [ref=e339]:
+                  - button "Edit appointment" [ref=e340] [cursor=pointer]:
+                    - img [ref=e341]
+                  - button "Arrived" [ref=e344] [cursor=pointer]:
+                    - img [ref=e345]
+              - generic [ref=e349]:
+                - generic [ref=e350]:
+                  - generic [ref=e351]:
+                    - img [ref=e352]
+                    - generic [ref=e355]: BS. Thảo
+                  - generic [ref=e356]:
+                    - generic [ref=e357]:
+                      - img [ref=e358]
+                      - text: 17:00
+                    - generic [ref=e361]:
+                      - img [ref=e362]
+                      - text: "0912866856"
+                - generic [ref=e364]: Đã đến
+    - generic [ref=e366]:
+      - generic [ref=e368]:
+        - img [ref=e370]
+        - generic [ref=e373]:
+          - heading "Update Available" [level=4] [ref=e374]
+          - paragraph [ref=e375]: New version 0.2.0 is ready. Click to refresh.
+          - generic [ref=e376]:
+            - button "Update Now" [ref=e377] [cursor=pointer]:
+              - img [ref=e378]
+              - text: Update Now
+            - button "Later" [ref=e383] [cursor=pointer]
+        - button [ref=e384] [cursor=pointer]:
+          - img [ref=e385]
+      - generic [ref=e388]:
+        - button "v0.2.0 (585a5b4)" [ref=e389] [cursor=pointer]:
+          - img [ref=e426]
+          - generic [ref=e393]: v0.2.0
+          - generic [ref=e394]: (585a5b4)
+        - generic [ref=e397]:
+          - generic [ref=e398]:
+            - img [ref=e399]
+            - generic [ref=e402]: "Version: 0.2.0"
+          - generic [ref=e403]:
+            - img [ref=e404]
+            - generic [ref=e406]: "Commit: 585a5b4"
+          - generic [ref=e407]:
+            - img [ref=e408]
+            - generic [ref=e410]: "Branch: ai-develop"
+          - generic [ref=e411]:
+            - img [ref=e412]
+            - generic [ref=e415]: "Built: Apr 8, 03:55 PM"
+          - generic [ref=e416]:
+            - button "Release Notes" [ref=e417] [cursor=pointer]:
+              - img [ref=e418]
+              - text: Release Notes
+            - generic [ref=e421]:
+              - img [ref=e422]
+              - text: Click to check for updates

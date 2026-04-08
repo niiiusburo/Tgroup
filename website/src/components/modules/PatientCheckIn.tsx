@@ -5,6 +5,10 @@
  * Only shows patients who have been marked "Arrived" in Zone 3.
  * Downline status: Chờ khám (waiting) → Đang khám (in-treatment) → Hoàn thành (done)
  * Status is changed via dropdown on the status badge.
+ *
+ * ⚠️ LAYOUT LOCK: Do NOT add width/height constraints or truncate classes to PatientCard.
+ *    The card content (customer name, doctor info, notes) MUST display fully without truncation.
+ *    Any changes to card dimensions require explicit user approval.
  */
 
 import { useState, useEffect, useRef } from 'react';
@@ -27,24 +31,27 @@ const FILTER_TABS: { key: Zone1Filter; label: string }[] = [
   { key: 'done', label: 'Hoàn thành' },
 ];
 
-const STATUS_CONFIG: Record<CheckInStatus, { label: string; bg: string; text: string; border: string }> = {
+const STATUS_CONFIG: Record<CheckInStatus, { label: string; bg: string; text: string; border: string; dot: string }> = {
   waiting: {
     label: 'Chờ khám',
     bg: 'bg-amber-50',
     text: 'text-amber-700',
-    border: 'border-amber-200',
+    border: 'border-amber-200/80',
+    dot: 'bg-amber-400',
   },
   'in-treatment': {
     label: 'Đang khám',
-    bg: 'bg-blue-50',
-    text: 'text-blue-700',
-    border: 'border-blue-200',
+    bg: 'bg-sky-50',
+    text: 'text-sky-700',
+    border: 'border-sky-200/80',
+    dot: 'bg-sky-400',
   },
   done: {
     label: 'Hoàn thành',
     bg: 'bg-emerald-50',
     text: 'text-emerald-700',
-    border: 'border-emerald-200',
+    border: 'border-emerald-200/80',
+    dot: 'bg-emerald-400',
   },
 };
 
@@ -56,15 +63,15 @@ export function PatientCheckIn({
   onUpdateStatus,
 }: PatientCheckInProps) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200">
+    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm">
       {/* Header */}
-      <div className="px-5 pt-5 pb-3">
-        <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">
-          Patient Check-in / Reception
+      <div className="px-6 pt-5 pb-4">
+        <h2 className="text-base font-semibold text-slate-800 mb-4">
+          Đón tiếp / Tiếp nhận bệnh nhân
         </h2>
 
         {/* Filter tabs */}
-        <div className="flex gap-1.5 flex-wrap">
+        <div className="flex gap-2 flex-wrap">
           {FILTER_TABS.map((tab) => {
             const count = counts[tab.key];
             const isActive = filter === tab.key;
@@ -74,10 +81,10 @@ export function PatientCheckIn({
                 type="button"
                 onClick={() => onFilterChange(tab.key)}
                 className={`
-                  px-3 py-1.5 rounded-full text-xs font-semibold transition-colors
+                  px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200
                   ${isActive
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'
+                    ? 'bg-slate-800 text-white shadow-sm'
+                    : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700'
                   }
                 `}
               >
@@ -89,11 +96,15 @@ export function PatientCheckIn({
       </div>
 
       {/* Patient card grid */}
-      <div className="px-5 pb-5">
+      <div className="px-6 pb-6">
         {appointments.length === 0 ? (
-          <p className="text-center text-gray-400 text-sm py-8">
-            No arrived patients yet. Mark patients as arrived in Today's Appointments.
-          </p>
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-3">
+              <User className="w-5 h-5 text-slate-400" />
+            </div>
+            <p className="text-sm text-slate-500">Chưa có bệnh nhân đến</p>
+            <p className="text-xs text-slate-400 mt-1">Đánh dấu "Đã đến" trong lịch hẹn hôm nay</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {appointments.map((apt) => (
@@ -212,9 +223,9 @@ function PatientCard({ appointment, onUpdateStatus }: PatientCardProps) {
         </div>
       )}
 
-      {/* Patient info */}
+      {/* Patient info — NO truncate: display full name per layout lock */}
       <div className="mt-2.5">
-        <div className="text-sm font-semibold text-gray-800 truncate">{appointment.customerName}</div>
+        <div className="text-sm font-semibold text-gray-800 break-words">{appointment.customerName}</div>
         <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
           <User className="w-3 h-3" />
           <span>{appointment.doctorName}</span>
@@ -223,7 +234,7 @@ function PatientCard({ appointment, onUpdateStatus }: PatientCardProps) {
           <span>{appointment.time}</span>
         </div>
         {appointment.note && (
-          <div className="text-xs text-gray-400 mt-1 truncate">{appointment.note}</div>
+          <div className="text-xs text-gray-400 mt-1 break-words">{appointment.note}</div>
         )}
       </div>
     </div>

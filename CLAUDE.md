@@ -200,6 +200,65 @@ docker exec -i tdental-demo psql -U postgres -d tdental_demo < website/demo_tden
 - **Branch:** `ai-develop`
 - **Push:** `git push origin ai-develop`
 
+## TODO: Apply Modular Card Scrolling to All Related Forms
+
+### Status: PARTIAL (CustomerForm done)
+
+All modular form components MUST follow the **independent card scrolling pattern** as implemented in `AddCustomerForm`.
+
+### The Pattern
+
+```
+┌─────────────────────────────────────┐
+│ Modal Container (flex, overflow-hidden, max-height)
+│ ├── Header (flex-shrink-0)          │ ← Does NOT scroll
+│ ├── Main Content (flex flex-1 overflow-hidden)
+│ │   ├── Left Sidebar (flex flex-col gap-4 overflow-hidden)
+│ │   │   ├── Card 1 (max-height: 300px, flex flex-col)
+│ │   │   │   ├── Header (flex-shrink-0)  │ ← Does NOT scroll
+│ │   │   │   └── Content (overflow-y-auto)│ ← Scrolls INDEPENDENTLY
+│ │   │   ├── Card 2 (max-height: 320px, flex flex-col)
+│ │   │   └── Card 3 (max-height: 180px, flex flex-col)
+│ │   └── Right Panel (flex-1 flex flex-col overflow-hidden)
+│ │       ├── Tabs (flex-shrink-0)     │ ← Does NOT scroll
+│ │       └── Tab Content (overflow-y-auto) ← Scrolls INDEPENDENTLY
+│ └── Footer (flex-shrink-0)          │ ← Does NOT scroll
+└─────────────────────────────────────┘
+```
+
+### Key CSS Properties
+
+| Element | Required CSS | Purpose |
+|---------|-------------|---------|
+| Card Container | `flex flex-col` + `max-height` | Fixed height container |
+| Card Header | `flex-shrink-0` | Header stays visible |
+| Card Content | `overflow-y-auto flex-1 min-h-0` | Content scrolls independently |
+| Content Wrapper | `overflow-hidden` | Prevents entire panel scroll |
+
+### Modules That Need This Pattern
+
+| Module | File | Status |
+|--------|------|--------|
+| ✅ CustomerForm (Add/Edit) | `components/forms/AddCustomerForm/AddCustomerForm.tsx` | DONE |
+| ⬜ AppointmentForm | `components/appointments/AppointmentForm.tsx` | TODO |
+| ⬜ ServiceForm | `components/services/ServiceForm.tsx` | TODO |
+| ⬜ PaymentForm | `components/payment/PaymentForm.tsx` | TODO |
+| ⬜ EmployeeForm | `components/employees/EmployeeForm.tsx` | TODO |
+
+### Reference Implementation
+
+See: `~/Downloads/CardScrollRedesign/app/src/App.tsx`
+
+### When Adding New Modular Forms
+
+1. Use the `CardSection` component with `maxHeight` prop
+2. Ensure headers have `flex-shrink-0`
+3. Ensure content has `overflow-y-auto flex-1 min-h-0`
+4. Add the `### CUSTOMER FORM MODULE` documentation block (copy from AddCustomerForm.tsx)
+5. Test: Verify each card scrolls independently without affecting others
+
+---
+
 ## Key Architecture Decisions
 
 1. **Global LocationFilter** — `contexts/LocationContext.tsx` syncs "All Locations" dropdown across 7 pages (Overview, Customers, Calendar, Appointments, Employees, Services, Payment)
@@ -208,6 +267,51 @@ docker exec -i tdental-demo psql -U postgres -d tdental_demo < website/demo_tden
 4. **SQL views for missing tables** — 11 views created so the API routes work against the 3-table demo DB
 5. **Auto-Update Version System** — App detects new deployments and prompts users to refresh (see `docs/VERSION_SYSTEM.md`)
 6. **20 features** split across 5 categories: setup, dashboard, customers, services, admin
+
+## Layout Locking — Protect Approved UI Decisions
+
+### The Problem
+When the user approves a UI design, future AI agents often "fix" or "improve" it, breaking what was already approved.
+
+### The Solution
+Add `⚠️ LAYOUT LOCK` comments in component files to mark approved designs. Any agent MUST NOT change locked elements without explicit user approval.
+
+### Lock Format
+
+```typescript
+/**
+ * ComponentName - Description
+ * ...
+ * ⚠️ LAYOUT LOCK: Do NOT change [specific element] without user approval.
+ *    [Why it was locked, e.g., "User approved this exact size on 2024-04-08"]
+ */
+```
+
+### Examples
+
+#### PatientCard (PatientCheckIn.tsx)
+```typescript
+/**
+ * ⚠️ LAYOUT LOCK: Do NOT add width/height constraints or truncate classes to PatientCard.
+ *    Card content (customer name, doctor info, notes) MUST display fully without truncation.
+ *    Any changes to card dimensions require explicit user approval.
+ */
+```
+
+#### CardGrid (Example)
+```typescript
+/**
+ * ⚠️ LAYOUT LOCK: Grid uses 4 columns at fixed widths.
+ *    Changing grid-template-columns will break the approved card layout.
+ *    User approved: "4 columns, each card min-width 180px" on 2024-04-08
+ */
+```
+
+### Rules for Agents
+1. **Read layout locks** — Check for `⚠️ LAYOUT LOCK` in component comments before making changes
+2. **Do NOT auto-fix** — Never add `truncate`, `w-*`, `h-*`, `max-w-*`, or `min-w-*` to locked elements
+3. **Ask first** — If you think a locked element needs fixing, describe the issue and ask for approval
+4. **Respect final approval** — If user says "looks good" or "don't change this", add a layout lock immediately
 
 ## Version System
 
@@ -301,3 +405,42 @@ Password: Tamyeu@234@234
 - Relationships / Permission matrix
 - Commission, Reports, Notifications (placeholder pages)
 - Notification panel on dashboard
+
+<!-- code-review-graph MCP tools -->
+## MCP Tools: code-review-graph
+
+**IMPORTANT: This project has a knowledge graph. ALWAYS use the
+code-review-graph MCP tools BEFORE using Grep/Glob/Read to explore
+the codebase.** The graph is faster, cheaper (fewer tokens), and gives
+you structural context (callers, dependents, test coverage) that file
+scanning cannot.
+
+### When to use graph tools FIRST
+
+- **Exploring code**: `semantic_search_nodes` or `query_graph` instead of Grep
+- **Understanding impact**: `get_impact_radius` instead of manually tracing imports
+- **Code review**: `detect_changes` + `get_review_context` instead of reading entire files
+- **Finding relationships**: `query_graph` with callers_of/callees_of/imports_of/tests_for
+- **Architecture questions**: `get_architecture_overview` + `list_communities`
+
+Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
+
+### Key Tools
+
+| Tool | Use when |
+|------|----------|
+| `detect_changes` | Reviewing code changes — gives risk-scored analysis |
+| `get_review_context` | Need source snippets for review — token-efficient |
+| `get_impact_radius` | Understanding blast radius of a change |
+| `get_affected_flows` | Finding which execution paths are impacted |
+| `query_graph` | Tracing callers, callees, imports, tests, dependencies |
+| `semantic_search_nodes` | Finding functions/classes by name or keyword |
+| `get_architecture_overview` | Understanding high-level codebase structure |
+| `refactor_tool` | Planning renames, finding dead code |
+
+### Workflow
+
+1. The graph auto-updates on file changes (via hooks).
+2. Use `detect_changes` for code review.
+3. Use `get_affected_flows` to understand impact.
+4. Use `query_graph` pattern="tests_for" to check coverage.

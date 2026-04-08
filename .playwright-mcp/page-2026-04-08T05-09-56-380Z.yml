@@ -1,0 +1,470 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e8]: TD
+    - navigation [ref=e9]:
+      - link "Overview" [ref=e10] [cursor=pointer]:
+        - /url: /
+        - img [ref=e11]
+      - link "Calendar" [ref=e13] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e14]
+      - link "Customers" [ref=e16] [cursor=pointer]:
+        - /url: /customers
+        - img [ref=e18]
+      - link "Employees" [ref=e23] [cursor=pointer]:
+        - /url: /employees
+        - img [ref=e24]
+      - link "Locations" [ref=e36] [cursor=pointer]:
+        - /url: /locations
+        - img [ref=e37]
+      - link "Service Catalog" [ref=e40] [cursor=pointer]:
+        - /url: /website
+        - img [ref=e41]
+      - link "Settings" [ref=e45] [cursor=pointer]:
+        - /url: /settings
+        - img [ref=e46]
+      - link "Permissions" [ref=e49] [cursor=pointer]:
+        - /url: /permissions
+        - img [ref=e50]
+    - generic [ref=e52]:
+      - button [ref=e53] [cursor=pointer]:
+        - img [ref=e54]
+      - button "AU" [ref=e56] [cursor=pointer]:
+        - generic [ref=e57]: AU
+  - generic [ref=e61]:
+    - banner [ref=e62]:
+      - heading "Customers" [level=1] [ref=e64]
+      - generic [ref=e65]:
+        - button "All Locations" [ref=e68] [cursor=pointer]:
+          - img [ref=e69]
+          - generic [ref=e72]: All Locations
+          - img [ref=e73]
+        - button [ref=e75] [cursor=pointer]:
+          - img [ref=e76]
+        - button [ref=e78] [cursor=pointer]:
+          - img [ref=e79]
+        - generic [ref=e83]:
+          - generic [ref=e85]: JD
+          - generic [ref=e87]: AS
+          - generic [ref=e89]: MK
+        - button "Customize Widget" [ref=e90] [cursor=pointer]:
+          - img [ref=e91]
+          - text: Customize Widget
+    - main [ref=e96]:
+      - generic [ref=e423]:
+        - generic [ref=e424]:
+          - button [ref=e425] [cursor=pointer]:
+            - img [ref=e426]
+          - generic [ref=e428]:
+            - heading "Customer Profile" [level=1] [ref=e429]
+            - paragraph [ref=e430]: View and manage patient details
+          - button "Edit" [ref=e431] [cursor=pointer]:
+            - img [ref=e432]
+            - text: Edit
+        - generic [ref=e435]:
+          - generic [ref=e438]: P
+          - generic [ref=e439]:
+            - generic [ref=e440]:
+              - heading "Phạm Ngọc Huy" [level=2] [ref=e441]
+              - generic [ref=e442]:
+                - img [ref=e443]
+                - text: Male
+            - generic [ref=e446]:
+              - generic [ref=e447]:
+                - img [ref=e448]
+                - text: "0349762840"
+              - generic [ref=e450]:
+                - img [ref=e451]
+                - text: No email
+              - generic [ref=e454]:
+                - img [ref=e455]
+                - text: N/A
+              - generic [ref=e458]:
+                - img [ref=e459]
+                - text: "DOB: 2002"
+            - generic [ref=e462]:
+              - img [ref=e463]
+              - text: sale
+          - generic [ref=e466]:
+            - generic [ref=e467]:
+              - paragraph [ref=e468]: Member since
+              - paragraph [ref=e469]: 2026-01-12
+            - generic [ref=e470]:
+              - paragraph [ref=e471]: Total visits
+              - paragraph [ref=e472]: "144"
+            - generic [ref=e473]:
+              - paragraph [ref=e474]: Deposit Balance
+              - paragraph [ref=e475]: 1.000.000 đ
+            - generic [ref=e476]:
+              - paragraph [ref=e477]: Outstanding
+              - paragraph [ref=e478]: 0 đ
+        - generic [ref=e480]:
+          - button "Profile" [ref=e481] [cursor=pointer]
+          - button "Appointments 99+" [ref=e482] [cursor=pointer]:
+            - text: Appointments
+            - generic [ref=e483]: 99+
+          - button "Records 0" [ref=e484] [cursor=pointer]:
+            - text: Records
+            - generic [ref=e485]: "0"
+          - button "Payment" [ref=e486] [cursor=pointer]
+        - generic [ref=e514]:
+          - generic [ref=e515]:
+            - heading "Appointments (144)" [level=3] [ref=e516]
+            - button "Add Appointment" [ref=e517] [cursor=pointer]:
+              - img [ref=e518]
+              - text: Add Appointment
+          - generic [ref=e521]:
+            - generic [ref=e522] [cursor=pointer]:
+              - generic [ref=e524]:
+                - generic [ref=e525]:
+                  - generic [ref=e526]: AP235542
+                  - generic [ref=e527]: Confirmed
+                - generic [ref=e528]:
+                  - generic [ref=e529]:
+                    - img [ref=e530]
+                    - text: 12:30
+                  - generic [ref=e533]: Admin
+                  - generic [ref=e534]: 11 Apr 2026
+                - paragraph [ref=e535]: updated via lowercase
+              - button "Edit appointment" [ref=e536]:
+                - img [ref=e537]
+            - generic [ref=e539] [cursor=pointer]:
+              - generic [ref=e541]:
+                - generic [ref=e542]:
+                  - generic [ref=e543]: AP235541
+                  - generic [ref=e544]: Confirmed
+                - generic [ref=e545]:
+                  - generic [ref=e546]:
+                    - img [ref=e547]
+                    - text: 09:00
+                  - generic [ref=e550]: Admin
+                  - generic [ref=e551]: 10 Apr 2026
+                - paragraph [ref=e552]: verified
+              - button "Edit appointment" [ref=e553]:
+                - img [ref=e554]
+            - generic [ref=e556] [cursor=pointer]:
+              - generic [ref=e558]:
+                - generic [ref=e559]:
+                  - generic [ref=e560]: AP235540
+                  - generic [ref=e561]: Confirmed
+                - generic [ref=e562]:
+                  - generic [ref=e563]:
+                    - img [ref=e564]
+                    - text: 14:00
+                  - generic [ref=e567]: Admin
+                  - generic [ref=e568]: 09 Apr 2026
+                - paragraph [ref=e569]: updated note
+              - button "Edit appointment" [ref=e570]:
+                - img [ref=e571]
+            - generic [ref=e573] [cursor=pointer]:
+              - generic [ref=e575]:
+                - generic [ref=e576]:
+                  - generic [ref=e577]: AP235539
+                  - generic [ref=e578]: Confirmed
+                - generic [ref=e579]:
+                  - generic [ref=e580]:
+                    - img [ref=e581]
+                    - text: 10:00
+                  - generic [ref=e584]: Admin
+                  - generic [ref=e585]: 08 Apr 2026
+                - paragraph [ref=e586]: E2E test
+              - button "Edit appointment" [ref=e587]:
+                - img [ref=e588]
+            - generic [ref=e590] [cursor=pointer]:
+              - generic [ref=e592]:
+                - generic [ref=e593]:
+                  - generic [ref=e594]: Nguyễn Thị Nguyệt
+                  - generic [ref=e595]: Confirmed
+                - generic [ref=e596]:
+                  - generic [ref=e597]:
+                    - img [ref=e598]
+                    - text: 17:00
+                  - generic [ref=e601]: BS. Thảo
+                  - generic [ref=e602]: 08 Apr 2026
+                - paragraph [ref=e603]: Updated note from curl test
+              - button "Edit appointment" [ref=e604]:
+                - img [ref=e605]
+            - generic [ref=e607] [cursor=pointer]:
+              - generic [ref=e609]:
+                - generic [ref=e610]:
+                  - generic [ref=e611]: Đặng Thị Hồng Thúy
+                  - generic [ref=e612]: Confirmed
+                - generic [ref=e613]:
+                  - generic [ref=e614]:
+                    - img [ref=e615]
+                    - text: 16:30
+                  - generic [ref=e618]: BS. Ý
+                  - generic [ref=e619]: 08 Apr 2026
+                - paragraph [ref=e620]: Tẩy trắng răng
+              - button "Edit appointment" [ref=e621]:
+                - img [ref=e622]
+            - generic [ref=e624] [cursor=pointer]:
+              - generic [ref=e626]:
+                - generic [ref=e627]:
+                  - generic [ref=e628]: Vũ Hữu Đạt
+                  - generic [ref=e629]: Confirmed
+                - generic [ref=e630]:
+                  - generic [ref=e631]:
+                    - img [ref=e632]
+                    - text: 16:00
+                  - generic [ref=e635]: BS. Trâm
+                  - generic [ref=e636]: 08 Apr 2026
+                - paragraph [ref=e637]: Cấy ghép implant
+              - button "Edit appointment" [ref=e638]:
+                - img [ref=e639]
+            - generic [ref=e641] [cursor=pointer]:
+              - generic [ref=e643]:
+                - generic [ref=e644]:
+                  - generic [ref=e645]: PHẠM NGUYỄN MINH HIẾU
+                  - generic [ref=e646]: Scheduled
+                - generic [ref=e647]:
+                  - generic [ref=e648]:
+                    - img [ref=e649]
+                    - text: 15:00
+                  - generic [ref=e652]: BS. Thu Thảo
+                  - generic [ref=e653]: 07 Apr 2026
+                - paragraph [ref=e654]: Tái khám định kỳ
+              - button "Edit appointment" [ref=e655]:
+                - img [ref=e656]
+            - generic [ref=e658] [cursor=pointer]:
+              - generic [ref=e660]:
+                - generic [ref=e661]:
+                  - generic [ref=e662]: Nguyễn Thị Thanh
+                  - generic [ref=e663]: Scheduled
+                - generic [ref=e664]:
+                  - generic [ref=e665]:
+                    - img [ref=e666]
+                    - text: 15:30
+                  - generic [ref=e669]: BS. Dương
+                  - generic [ref=e670]: 07 Apr 2026
+                - paragraph [ref=e671]: Niềng răng
+              - button "Edit appointment" [ref=e672]:
+                - img [ref=e673]
+            - generic [ref=e675] [cursor=pointer]:
+              - generic [ref=e677]:
+                - generic [ref=e678]:
+                  - generic [ref=e679]: Lịch 14h
+                  - generic [ref=e680]: Scheduled
+                - generic [ref=e681]:
+                  - generic [ref=e682]:
+                    - img [ref=e683]
+                    - text: 14:00
+                  - generic [ref=e686]: BS. Thu Thảo
+                  - generic [ref=e687]: 07 Apr 2026
+                - paragraph [ref=e688]: Lấy cao răng
+              - button "Edit appointment" [ref=e689]:
+                - img [ref=e690]
+            - generic [ref=e694]:
+              - generic [ref=e695]:
+                - generic [ref=e696]: Lịch 13h
+                - generic [ref=e697]: Completed
+              - generic [ref=e698]:
+                - generic [ref=e699]:
+                  - img [ref=e700]
+                  - text: 13:00
+                - generic [ref=e703]: BS. Dương
+                - generic [ref=e704]: 07 Apr 2026
+            - generic [ref=e705] [cursor=pointer]:
+              - generic [ref=e707]:
+                - generic [ref=e708]:
+                  - generic [ref=e709]: Lịch 11h
+                  - generic [ref=e710]: Confirmed
+                - generic [ref=e711]:
+                  - generic [ref=e712]:
+                    - img [ref=e713]
+                    - text: 11:00
+                  - generic [ref=e716]: BS. Dũng
+                  - generic [ref=e717]: 07 Apr 2026
+                - paragraph [ref=e718]: Bọc răng sứ
+              - button "Edit appointment" [ref=e719]:
+                - img [ref=e720]
+            - generic [ref=e722] [cursor=pointer]:
+              - generic [ref=e724]:
+                - generic [ref=e725]:
+                  - generic [ref=e726]: Lịch 11h
+                  - generic [ref=e727]: Confirmed
+                - generic [ref=e728]:
+                  - generic [ref=e729]:
+                    - img [ref=e730]
+                    - text: 11:00
+                  - generic [ref=e733]: BS. Ly
+                  - generic [ref=e734]: 07 Apr 2026
+                - paragraph [ref=e735]: Updated via API test
+              - button "Edit appointment" [ref=e736]:
+                - img [ref=e737]
+            - generic [ref=e741]:
+              - generic [ref=e742]:
+                - generic [ref=e743]: Lịch 10h nhổ
+                - generic [ref=e744]: Completed
+              - generic [ref=e745]:
+                - generic [ref=e746]:
+                  - img [ref=e747]
+                  - text: 10:00
+                - generic [ref=e750]: BS. Trâm
+                - generic [ref=e751]: 07 Apr 2026
+              - paragraph [ref=e752]: Nhổ răng khôn
+            - generic [ref=e753] [cursor=pointer]:
+              - generic [ref=e755]:
+                - generic [ref=e756]:
+                  - generic [ref=e757]: Lịch 10h
+                  - generic [ref=e758]: Confirmed
+                - generic [ref=e759]:
+                  - generic [ref=e760]:
+                    - img [ref=e761]
+                    - text: 10:00
+                  - generic [ref=e764]: BS. Duy
+                  - generic [ref=e765]: 07 Apr 2026
+              - button "Edit appointment" [ref=e766]:
+                - img [ref=e767]
+            - generic [ref=e769] [cursor=pointer]:
+              - generic [ref=e771]:
+                - generic [ref=e772]:
+                  - generic [ref=e773]: Lịch 10h
+                  - generic [ref=e774]: Scheduled
+                - generic [ref=e775]:
+                  - generic [ref=e776]:
+                    - img [ref=e777]
+                    - text: 10:00
+                  - generic [ref=e780]: BS. Thu Thảo
+                  - generic [ref=e781]: 07 Apr 2026
+              - button "Edit appointment" [ref=e782]:
+                - img [ref=e783]
+            - generic [ref=e785] [cursor=pointer]:
+              - generic [ref=e787]:
+                - generic [ref=e788]:
+                  - generic [ref=e789]: Lịch 9h
+                  - generic [ref=e790]: Scheduled
+                - generic [ref=e791]:
+                  - generic [ref=e792]:
+                    - img [ref=e793]
+                    - text: 09:00
+                  - generic [ref=e796]: BS. Trang
+                  - generic [ref=e797]: 07 Apr 2026
+              - button "Edit appointment" [ref=e798]:
+                - img [ref=e799]
+            - generic [ref=e801] [cursor=pointer]:
+              - generic [ref=e803]:
+                - generic [ref=e804]:
+                  - generic [ref=e805]: Lịch 9h
+                  - generic [ref=e806]: Confirmed
+                - generic [ref=e807]:
+                  - generic [ref=e808]:
+                    - img [ref=e809]
+                    - text: 09:00
+                  - generic [ref=e812]: BS. Dương
+                  - generic [ref=e813]: 07 Apr 2026
+              - button "Edit appointment" [ref=e814]:
+                - img [ref=e815]
+            - generic [ref=e817] [cursor=pointer]:
+              - generic [ref=e819]:
+                - generic [ref=e820]:
+                  - generic [ref=e821]: Lịch 8h30
+                  - generic [ref=e822]: Scheduled
+                - generic [ref=e823]:
+                  - generic [ref=e824]:
+                    - img [ref=e825]
+                    - text: 08:30
+                  - generic [ref=e828]: BS. Dũng
+                  - generic [ref=e829]: 07 Apr 2026
+              - button "Edit appointment" [ref=e830]:
+                - img [ref=e831]
+            - generic [ref=e835]:
+              - generic [ref=e836]:
+                - generic [ref=e837]: Lịch sáng 8h
+                - generic [ref=e838]: Completed
+              - generic [ref=e839]:
+                - generic [ref=e840]:
+                  - img [ref=e841]
+                  - text: 08:00
+                - generic [ref=e844]: BS. Trang
+                - generic [ref=e845]: 06 Apr 2026
+        - generic [ref=e847]:
+          - generic [ref=e850]:
+            - generic [ref=e851]:
+              - img [ref=e853]
+              - generic [ref=e855]:
+                - heading "New Appointment" [level=2] [ref=e856]
+                - paragraph [ref=e857]: Schedule a new appointment
+            - button [ref=e858] [cursor=pointer]:
+              - img [ref=e859]
+          - generic [ref=e862]:
+            - generic [ref=e863]:
+              - generic [ref=e864]: Customer
+              - button "Phạm Ngọc Huy" [ref=e866] [cursor=pointer]:
+                - img [ref=e867]
+                - generic [ref=e870]: Phạm Ngọc Huy
+                - img [ref=e871]
+            - generic [ref=e873]:
+              - generic [ref=e874]: Doctor
+              - button "Select doctor..." [ref=e876] [cursor=pointer]:
+                - img [ref=e877]
+                - generic [ref=e881]: Select doctor...
+                - img [ref=e882]
+            - generic [ref=e884]:
+              - generic [ref=e885]: Location
+              - button "Tấm Dentist Thủ Đức" [ref=e887] [cursor=pointer]:
+                - img [ref=e888]
+                - generic [ref=e891]: Tấm Dentist Thủ Đức
+                - img [ref=e892]
+            - generic [ref=e894]:
+              - generic [ref=e895]:
+                - generic [ref=e896]: Type
+                - combobox [ref=e897]:
+                  - option "Cleaning"
+                  - option "Consultation" [selected]
+                  - option "Treatment"
+                  - option "Surgery"
+                  - option "Orthodontics"
+                  - option "Cosmetic"
+                  - option "Emergency"
+              - generic [ref=e898]:
+                - generic [ref=e899]: Service Name
+                - textbox "e.g. Teeth Cleaning" [ref=e900]
+            - generic [ref=e901]:
+              - generic [ref=e902]:
+                - img [ref=e903]
+                - text: Date
+              - button "Chọn ngày" [ref=e905] [cursor=pointer]:
+                - img [ref=e907]
+                - generic [ref=e909]: Chọn ngày
+                - img [ref=e910]
+            - generic [ref=e912]:
+              - generic [ref=e913]:
+                - generic [ref=e914]:
+                  - img [ref=e915]
+                  - text: Start Time
+                - button "Chọn giờ" [ref=e918] [cursor=pointer]:
+                  - img [ref=e920]
+                  - generic [ref=e923]: Chọn giờ
+                  - img [ref=e924]
+              - generic [ref=e926]:
+                - generic [ref=e927]:
+                  - img [ref=e928]
+                  - text: End Time
+                - button "Chọn giờ" [ref=e931] [cursor=pointer]:
+                  - img [ref=e933]
+                  - generic [ref=e936]: Chọn giờ
+                  - img [ref=e937]
+            - generic [ref=e939]:
+              - generic [ref=e940]: Notes
+              - textbox "Additional notes..." [ref=e941]
+          - generic [ref=e942]:
+            - button "Cancel" [ref=e943] [cursor=pointer]
+            - button "Create Appointment" [ref=e944] [cursor=pointer]
+    - generic [ref=e394]:
+      - generic [ref=e396]:
+        - img [ref=e398]
+        - generic [ref=e401]:
+          - heading "Update Available" [level=4] [ref=e402]
+          - paragraph [ref=e403]: New version 0.1.6 is ready. Click to refresh.
+          - generic [ref=e404]:
+            - button "Update Now" [ref=e405] [cursor=pointer]:
+              - img [ref=e406]
+              - text: Update Now
+            - button "Later" [ref=e411] [cursor=pointer]
+        - button [ref=e412] [cursor=pointer]:
+          - img [ref=e413]
+      - button "v0.1.7 (b5346dd)" [ref=e417] [cursor=pointer]:
+        - img [ref=e418]
+        - generic [ref=e421]: v0.1.7
+        - generic [ref=e422]: (b5346dd)

@@ -191,3 +191,143 @@ export const TIME_SLOTS = [
 export const WEEK_DAYS = [
   'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
 ] as const;
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════
+ * APPOINTMENT CARD COLORS — SINGLE SOURCE OF TRUTH
+ * ═══════════════════════════════════════════════════════════════════════
+ *
+ * Color codes 0-7 come from the database (appointments.color field).
+ * ALL components displaying appointment colors MUST use this constant.
+ * DO NOT create local color maps — import from here instead.
+ *
+ * This ensures the EditAppointmentModal color picker, TodayAppointments
+ * cards, WeekView, DayView, and AppointmentCard all show the SAME color
+ * for the same code.
+ * ═══════════════════════════════════════════════════════════════════════
+ */
+export interface AppointmentCardColor {
+  /** Tailwind bg class for card background */
+  bg: string;
+  /** Tailwind bg class for highlighted/gradient card */
+  bgHighlight: string;
+  /** Tailwind border class */
+  border: string;
+  /** Tailwind text class */
+  text: string;
+  /** Tailwind dot/accent class */
+  dot: string;
+  /** Human-readable label (Vietnamese) */
+  label: string;
+  /** Tailwind gradient classes for color picker preview dots */
+  previewGradient: string;
+}
+
+export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
+  '0': {
+    bg: 'bg-blue-50',
+    bgHighlight: 'bg-gradient-to-br from-blue-100 to-blue-200',
+    border: 'border-blue-200',
+    text: 'text-blue-700',
+    dot: 'border-l-blue-400',
+    label: 'Xanh dương',
+    previewGradient: 'from-blue-200 to-blue-300',
+  },
+  '1': {
+    bg: 'bg-emerald-50',
+    bgHighlight: 'bg-gradient-to-br from-emerald-100 to-emerald-200',
+    border: 'border-emerald-200',
+    text: 'text-emerald-700',
+    dot: 'border-l-emerald-400',
+    label: 'Xanh lá',
+    previewGradient: 'from-emerald-200 to-emerald-300',
+  },
+  '2': {
+    bg: 'bg-amber-50',
+    bgHighlight: 'bg-gradient-to-br from-amber-100 to-amber-200',
+    border: 'border-amber-200',
+    text: 'text-amber-700',
+    dot: 'border-l-amber-400',
+    label: 'Cam',
+    previewGradient: 'from-amber-200 to-amber-300',
+  },
+  '3': {
+    bg: 'bg-red-50',
+    bgHighlight: 'bg-gradient-to-br from-red-100 to-red-200',
+    border: 'border-red-200',
+    text: 'text-red-700',
+    dot: 'border-l-red-400',
+    label: 'Đỏ',
+    previewGradient: 'from-red-200 to-red-300',
+  },
+  '4': {
+    bg: 'bg-violet-50',
+    bgHighlight: 'bg-gradient-to-br from-violet-100 to-violet-200',
+    border: 'border-violet-200',
+    text: 'text-violet-700',
+    dot: 'border-l-violet-400',
+    label: 'Tím',
+    previewGradient: 'from-violet-200 to-violet-300',
+  },
+  '5': {
+    bg: 'bg-pink-50',
+    bgHighlight: 'bg-gradient-to-br from-pink-100 to-pink-200',
+    border: 'border-pink-200',
+    text: 'text-pink-700',
+    dot: 'border-l-pink-400',
+    label: 'Hồng',
+    previewGradient: 'from-pink-200 to-pink-300',
+  },
+  '6': {
+    bg: 'bg-cyan-50',
+    bgHighlight: 'bg-gradient-to-br from-cyan-100 to-cyan-200',
+    border: 'border-cyan-200',
+    text: 'text-cyan-700',
+    dot: 'border-l-cyan-400',
+    label: 'Cyan',
+    previewGradient: 'from-cyan-200 to-cyan-300',
+  },
+  '7': {
+    bg: 'bg-lime-50',
+    bgHighlight: 'bg-gradient-to-br from-lime-100 to-lime-200',
+    border: 'border-lime-200',
+    text: 'text-lime-700',
+    dot: 'border-l-lime-400',
+    label: 'Lime',
+    previewGradient: 'from-lime-200 to-lime-300',
+  },
+} as const;
+
+/** Default color when no color code is set */
+export const DEFAULT_APPOINTMENT_COLOR = APPOINTMENT_CARD_COLORS['0'];
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════
+ * APPOINTMENT STATUS OPTIONS — SINGLE SOURCE OF TRUTH
+ * ═══════════════════════════════════════════════════════════════════════
+ *
+ * 3 states only: scheduled, arrived, cancelled.
+ * Used by AppointmentForm, EditAppointmentModal, AppointmentDetailsModal.
+ * DO NOT create local STATUS_OPTIONS arrays — import from here.
+ * ═══════════════════════════════════════════════════════════════════════
+ */
+export const APPOINTMENT_STATUS_OPTIONS = [
+  { value: 'scheduled', label: 'Đang hẹn', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  { value: 'arrived', label: 'Đã đến', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+  { value: 'cancelled', label: 'Hủy hẹn', color: 'bg-red-100 text-red-700 border-red-200' },
+] as const;
+
+/**
+ * Vietnamese status labels for ALL appointment states (including extended ones).
+ * Used by AppointmentDetailsModal for display.
+ */
+export const APPOINTMENT_STATUS_LABELS_VI: Record<string, string> = {
+  scheduled: 'Đang hẹn',
+  arrived: 'Đã đến',
+  confirmed: 'Đã xác nhận',
+  'in-progress': 'Đang khám',
+  completed: 'Hoàn tất',
+  cancelled: 'Hủy hẹn',
+};
+
+export type AppointmentStatus = typeof APPOINTMENT_STATUS_OPTIONS[number]['value'];

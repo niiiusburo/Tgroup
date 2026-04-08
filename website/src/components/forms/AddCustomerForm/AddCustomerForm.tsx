@@ -16,10 +16,64 @@ import type { CustomerSource } from '@/data/mockSettings';
 import { AddressAutocomplete } from '@/components/shared/AddressAutocomplete';
 
 /**
+ * ╔═══════════════════════════════════════════════════════════════════════════════╗
+ * ║                         CUSTOMER FORM MODULE                                  ║
+ * ╠═══════════════════════════════════════════════════════════════════════════════╣
+ * ║  This component handles BOTH Add and Edit modes via the `isEdit` prop.       ║
+ * ║                                                                              ║
+ * ║  MODULAR STRUCTURE (Left Panel):                                             ║
+ * ║  ┌─────────────────────────────────────┐                                    ║
+ * ║  │ Header (flex-shrink-0)               │ ← Does NOT scroll                   ║
+ * ║  ├─────────────────────────────────────┤                                    ║
+ * ║  │ Content (overflow-y-auto)            │ ← Scrolls INDEPENDENTLY              ║
+ * ║  │  ┌─────────────────────────────┐     │                                    ║
+ * ║  │  │ Card 1: Personal Info       │     │  max-height: 300px                  ║
+ * ║  │  │ (Avatar, Name, Gender,      │     │                                    ║
+ * ║  │  │  Phone + Emergency)         │     │                                    ║
+ * ║  │  └─────────────────────────────┘     │                                    ║
+ * ║  │  ┌─────────────────────────────┐     │                                    ║
+ * ║  │  │ Card 2: Assignment         │     │  max-height: 320px                  ║
+ * ║  │  │ (Branch, Sales, CSKH,       │     │                                    ║
+ * ║  │  │  Source, Referral)          │     │                                    ║
+ * ║  │  └─────────────────────────────┘     │                                    ║
+ * ║  │  ┌─────────────────────────────┐     │                                    ║
+ * ║  │  │ Card 3: Notes               │     │  max-height: 180px                  ║
+ * ║  │  └─────────────────────────────┘     │                                    ║
+ * ║  └─────────────────────────────────────┘                                    ║
+ * ║                                                                              ║
+ * ║  RIGHT PANEL (Tabs):                                                        ║
+ * ║  ┌─────────────────────────────────────┐                                    ║
+ * ║  │ Tab Headers (flex-shrink-0)         │ ← Does NOT scroll                   ║
+ * ║  ├─────────────────────────────────────┤                                    ║
+ * ║  │ Tab Content (overflow-y-auto)       │ ← Scrolls independently            ║
+ * ║  │  - Basic Info (2-col grid)          │                                    ║
+ * ║  │  - Medical History                  │                                    ║
+ * ║  │  - E-Invoice                        │                                    ║
+ * ║  └─────────────────────────────────────┘                                    ║
+ * ║                                                                              ║
+ * ║  ⚠️  IMPORTANT: If you modify the left panel structure, ensure:             ║
+ * ║      1. CardSection component props are consistent                           ║
+ * ║      2. maxHeight values are appropriate for content                        ║
+ * ║      3. flex-shrink-0 on headers / overflow-y-auto on content                 ║
+ * ║      4. The CardSection component is the single source of truth             ║
+ * ║                                                                              ║
+ * ║  Reference: ~/Downloads/CardScrollRedesign/app/src/App.tsx                   ║
+ * ║  @crossref:used-in[Customers]                                                ║
+ * ╚═══════════════════════════════════════════════════════════════════════════════╝
+ */
+
+/**
  * AddCustomerForm - TDental "Thêm khách hàng" modular card-based form
  * Redesigned to match Overview page card design with functional + buttons
  * Supports both create and edit modes.
  * @crossref:used-in[Customers]
+ *
+ * ⚠️ LAYOUT LOCK: Do NOT change the modal width (900px) or the left panel width (320px).
+ *    - Modal max-width: 900px (set via inline style in Customers.tsx)
+ *    - Left panel width: 320px (w-80 class)
+ *    - Right panel: flex-1 (takes remaining space)
+ *    - Form height: 85vh with max 800px
+ *    Any changes to these dimensions require explicit user approval.
  */
 
 interface AddCustomerFormProps {
@@ -84,30 +138,46 @@ function FieldLabel({ children, required }: { children: React.ReactNode; require
   );
 }
 
-// Card Section Component - matches Overview modular design
+/**
+ * CardSection - Reusable card component with INDEPENDENT scrolling
+ * 
+ * IMPORTANT: This component enforces a fixed height container where:
+ * - The header stays visible (flex-shrink-0)
+ * - Only the content area scrolls (overflow-y-auto)
+ * 
+ * Usage: Always use maxHeight prop to enable independent scrolling.
+ * Without maxHeight, the card will expand to fit content.
+ * 
+ * @see CustomerFormModule note above for the complete modular structure
+ */
 function CardSection({ 
   title, 
   icon: Icon, 
   children, 
   action,
-  className = ''
+  className = '',
+  maxHeight = 'none'
 }: { 
   title: string; 
   icon?: React.ElementType; 
   children: React.ReactNode;
   action?: React.ReactNode;
   className?: string;
+  maxHeight?: string;
 }) {
   return (
-    <div className={`bg-white rounded-2xl border border-gray-200 overflow-hidden ${className}`}>
-      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+    <div 
+      className={`bg-white rounded-2xl border border-gray-200 flex flex-col ${className}`}
+      style={{ maxHeight, height: maxHeight !== 'none' ? maxHeight : 'auto' }}
+    >
+      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
           {Icon && <Icon className="w-4 h-4 text-gray-500" />}
           <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
         </div>
         {action}
       </div>
-      <div className="p-4">
+      <div className="p-4 overflow-y-auto flex-1 min-h-0 custom-scrollbar">
         {children}
       </div>
     </div>
@@ -365,8 +435,12 @@ export function AddCustomerForm({
   const selectedSource = allSources.find(s => s.id === formData.sourceid);
 
   return (
-    <div className="flex flex-col h-full bg-gray-50/50" onWheel={(e) => e.stopPropagation()}>
-      {/* Mini Dialogs */}
+    <div 
+      className="flex flex-col bg-gray-50/50" 
+      style={{ height: '85vh', maxHeight: '800px' }}
+      onWheel={(e) => e.stopPropagation()}
+    >
+      {/* Mini Dialogs (use their own modal-container) */}
       <MiniAddDialog
         isOpen={showSourceDialog}
         onClose={() => setShowSourceDialog(false)}
@@ -408,9 +482,10 @@ export function AddCustomerForm({
 
       <form onSubmit={handleSubmit} className="flex flex-1 overflow-hidden">
         {/* ── Left Panel ─────────────────────────────────────── */}
-        <div className="w-80 flex-shrink-0 border-r border-gray-200 flex flex-col gap-5 px-5 py-5 overflow-y-auto overscroll-contain bg-gray-50/30">
-          {/* Profile Card */}
-          <CardSection title="Thông tin cá nhân" icon={Users}>
+        {/* Fixed width, flex column, each card has independent scroll */}
+        <div className="w-80 flex-shrink-0 border-r border-gray-200 flex flex-col gap-4 px-5 py-5 overflow-hidden bg-gray-50/30">
+          {/* Profile Card - Fixed height with independent scroll */}
+          <CardSection title="Thông tin cá nhân" icon={Users} maxHeight="300px">
             {/* Avatar */}
             <div className="flex justify-center mb-4">
               <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:from-gray-200 hover:to-gray-300 transition-all group">
@@ -495,13 +570,14 @@ export function AddCustomerForm({
             </div>
           </CardSection>
 
-          {/* Assignment Card */}
+          {/* Assignment Card - Fixed height with independent scroll */}
           <CardSection 
             title="Phân công" 
             icon={Briefcase}
             action={
               <span className="text-xs text-gray-400">{employees.length} nhân viên</span>
             }
+            maxHeight="320px"
           >
             {/* Branch */}
             <div className="mb-3">
@@ -629,8 +705,8 @@ export function AddCustomerForm({
             </div>
           </CardSection>
 
-          {/* Notes Card */}
-          <CardSection title="Ghi chú" icon={Stethoscope}>
+          {/* Notes Card - Fixed height with independent scroll */}
+          <CardSection title="Ghi chú" icon={Stethoscope} maxHeight="180px">
             <textarea
               value={formData.note}
               onChange={(e) => set('note', e.target.value)}

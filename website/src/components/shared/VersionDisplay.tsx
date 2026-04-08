@@ -230,7 +230,7 @@ export function VersionDisplay({
     pollInterval: 5 * 60 * 1000, // 5 minutes
     enabled: true,
   });
-
+  
   // Fetch current version highlights on mount
   useEffect(() => {
     if (!currentVersion) return;
@@ -289,7 +289,7 @@ export function VersionDisplay({
   // Handle update click
   const handleUpdate = async () => {
     setIsUpdating(true);
-    console.log('[Version] Applying update...');
+    console.log('[VersionDisplay] User clicked Update - reloading page...');
     await applyUpdate();
     // Page will reload, so we never get here
   };

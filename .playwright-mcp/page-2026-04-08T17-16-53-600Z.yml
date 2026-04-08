@@ -1,0 +1,528 @@
+- generic [ref=e7]:
+  - complementary [ref=e8]:
+    - generic [ref=e12]: TD
+    - navigation [ref=e13]:
+      - link "Overview" [ref=e14] [cursor=pointer]:
+        - /url: /
+        - img [ref=e15]
+      - link "Calendar" [ref=e17] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e19]
+      - link "Customers" [ref=e21] [cursor=pointer]:
+        - /url: /customers
+        - img [ref=e22]
+      - link "Employees" [ref=e27] [cursor=pointer]:
+        - /url: /employees
+        - img [ref=e28]
+      - link "Locations" [ref=e40] [cursor=pointer]:
+        - /url: /locations
+        - img [ref=e41]
+      - link "Service Catalog" [ref=e44] [cursor=pointer]:
+        - /url: /website
+        - img [ref=e45]
+      - link "Settings" [ref=e49] [cursor=pointer]:
+        - /url: /settings
+        - img [ref=e50]
+      - link "Permissions" [ref=e53] [cursor=pointer]:
+        - /url: /permissions
+        - img [ref=e54]
+    - generic [ref=e56]:
+      - button [ref=e57] [cursor=pointer]:
+        - img [ref=e58]
+      - button "A" [ref=e60] [cursor=pointer]:
+        - generic [ref=e61]: A
+  - generic [ref=e65]:
+    - banner [ref=e66]:
+      - heading "Calendar" [level=1] [ref=e68]
+      - generic [ref=e69]:
+        - button "All Locations" [ref=e72] [cursor=pointer]:
+          - img [ref=e73]
+          - generic [ref=e76]: All Locations
+          - img [ref=e77]
+        - button [ref=e79] [cursor=pointer]:
+          - img [ref=e80]
+        - button [ref=e82] [cursor=pointer]:
+          - img [ref=e83]
+        - generic [ref=e87]:
+          - generic [ref=e89]: JD
+          - generic [ref=e91]: AS
+          - generic [ref=e93]: MK
+        - button "Customize Widget" [ref=e94] [cursor=pointer]:
+          - img [ref=e95]
+          - text: Customize Widget
+    - main [ref=e100]:
+      - generic [ref=e101]:
+        - generic [ref=e102]:
+          - img [ref=e104]
+          - generic [ref=e106]:
+            - heading "Lịch hẹn" [level=1] [ref=e107]
+            - paragraph [ref=e108]: Quản lý lịch hẹn khám bệnh
+        - generic [ref=e109]:
+          - generic [ref=e110]:
+            - button "Ngày" [ref=e111] [cursor=pointer]
+            - button "Tuần" [ref=e112] [cursor=pointer]
+            - button "Tháng" [ref=e113] [cursor=pointer]
+          - generic [ref=e114]:
+            - button "Previous" [ref=e115] [cursor=pointer]:
+              - img [ref=e116]
+            - heading "6 thg 4 - 12 thg 4, 2026" [level=2] [ref=e118]
+            - button "Next" [ref=e119] [cursor=pointer]:
+              - img [ref=e120]
+            - button "Hôm nay" [ref=e122] [cursor=pointer]
+          - generic [ref=e123]:
+            - button "Hẹn mới" [ref=e124] [cursor=pointer]:
+              - img [ref=e125]
+              - generic [ref=e127]: Hẹn mới
+            - generic [ref=e129]:
+              - img [ref=e130]
+              - combobox [ref=e134]:
+                - option "All Doctors" [selected]
+                - option "Admin — dentist"
+                - option "Admin — dentist"
+                - option "BS. Duy — dentist"
+                - option "BS. Dũng — dentist"
+                - option "BS. Dương — dentist"
+                - option "BS. Hà — dentist"
+                - option "BS. Hải — dentist"
+                - option "BS. Khánh — dentist"
+                - option "BS. Linh — dentist"
+                - option "BS. Ly — dentist"
+                - option "BS. Minh — dentist"
+                - option "BS. Nga — dentist"
+                - option "BS. Phương — dentist"
+                - option "BS. Quyên — dentist"
+                - option "BS. Quyên B — dentist"
+                - option "BS. Thu Thảo — dentist"
+                - option "BS. Thảo — dentist"
+                - option "BS. Trang — dentist"
+                - option "BS. Trâm — dentist"
+                - option "BS. Uyên — dentist"
+                - option "BS. Ý — dentist"
+        - generic [ref=e136]:
+          - generic [ref=e137]:
+            - generic [ref=e138]:
+              - generic [ref=e139]: 06-04
+              - generic [ref=e140]: Thứ Hai
+            - generic [ref=e142]:
+              - img [ref=e143]
+              - generic [ref=e145]: Không có lịch hẹn
+          - generic [ref=e146]:
+            - generic [ref=e147]:
+              - generic [ref=e148]: 07-04
+              - generic [ref=e149]: Thứ Ba
+            - generic [ref=e150]:
+              - generic [ref=e151] [cursor=pointer]:
+                - generic [ref=e152]: Hoàn thành
+                - heading "PHẠM NGUYỄN MINH HIẾU" [level=5] [ref=e153]
+                - generic [ref=e154]:
+                  - generic [ref=e155]:
+                    - img [ref=e156]
+                    - generic [ref=e158]: "0563757416"
+                  - generic [ref=e159]:
+                    - img [ref=e160]
+                    - generic [ref=e163]: BS. Trang
+                  - generic [ref=e164]:
+                    - img [ref=e165]
+                    - generic [ref=e168]: 08:00 - 08:45
+                - paragraph [ref=e169]: Lịch sáng 8h
+                - button "✎" [ref=e170]
+              - generic [ref=e171] [cursor=pointer]:
+                - generic [ref=e172]: Đang khám
+                - heading "PHẠM NGUYỄN MINH HIẾU" [level=5] [ref=e173]
+                - generic [ref=e174]:
+                  - generic [ref=e175]:
+                    - img [ref=e176]
+                    - generic [ref=e178]: "0563757416"
+                  - generic [ref=e179]:
+                    - img [ref=e180]
+                    - generic [ref=e183]: BS. Thu Thảo
+                  - generic [ref=e184]:
+                    - img [ref=e185]
+                    - generic [ref=e188]: 08:00 - 08:30
+                - paragraph [ref=e189]: Lịch 8h
+                - button "✎" [ref=e190]
+              - generic [ref=e191] [cursor=pointer]:
+                - generic [ref=e192]: Đang hẹn
+                - heading "NGUYỄN THỊ UYÊN" [level=5] [ref=e193]
+                - generic [ref=e194]:
+                  - generic [ref=e195]:
+                    - img [ref=e196]
+                    - generic [ref=e198]: "0843656412"
+                  - generic [ref=e199]:
+                    - img [ref=e200]
+                    - generic [ref=e203]: BS. Dũng
+                  - generic [ref=e204]:
+                    - img [ref=e205]
+                    - generic [ref=e208]: 08:30 - 09:30
+                - paragraph [ref=e209]: Lịch 8h30
+                - button "✎" [ref=e210]
+              - generic [ref=e211] [cursor=pointer]:
+                - generic [ref=e212]: Đang hẹn
+                - heading "Đặng Thị Hồng Thúy" [level=5] [ref=e213]
+                - generic [ref=e214]:
+                  - generic [ref=e215]:
+                    - img [ref=e216]
+                    - generic [ref=e218]: "0977407980"
+                  - generic [ref=e219]:
+                    - img [ref=e220]
+                    - generic [ref=e223]: BS. Ý
+                  - generic [ref=e224]:
+                    - img [ref=e225]
+                    - generic [ref=e228]: 08:30 - 09:30
+                - paragraph [ref=e229]: Lịch 8h30
+                - button "✎" [ref=e230]
+              - generic [ref=e231] [cursor=pointer]:
+                - generic [ref=e232]: Đang hẹn
+                - heading "Vũ Hữu Đạt" [level=5] [ref=e233]
+                - generic [ref=e234]:
+                  - generic [ref=e235]:
+                    - img [ref=e236]
+                    - generic [ref=e238]: "0388682636"
+                  - generic [ref=e239]:
+                    - img [ref=e240]
+                    - generic [ref=e243]: BS. Dương
+                  - generic [ref=e244]:
+                    - img [ref=e245]
+                    - generic [ref=e248]: 09:00 - 10:00
+                - paragraph [ref=e249]: Lịch 9h
+                - button "✎" [ref=e250]
+              - generic [ref=e251] [cursor=pointer]:
+                - generic [ref=e252]: Đang hẹn
+                - heading "Nguyễn Thị Thanh" [level=5] [ref=e253]
+                - generic [ref=e254]:
+                  - generic [ref=e255]:
+                    - img [ref=e256]
+                    - generic [ref=e258]: "0908177761"
+                  - generic [ref=e259]:
+                    - img [ref=e260]
+                    - generic [ref=e263]: BS. Trang
+                  - generic [ref=e264]:
+                    - img [ref=e265]
+                    - generic [ref=e268]: 09:00 - 10:00
+                - paragraph [ref=e269]: Lịch 9h
+                - button "✎" [ref=e270]
+              - generic [ref=e271] [cursor=pointer]:
+                - generic [ref=e272]: Đang hẹn
+                - heading "Nguyễn Thị Thanh" [level=5] [ref=e273]
+                - generic [ref=e274]:
+                  - generic [ref=e275]:
+                    - img [ref=e276]
+                    - generic [ref=e278]: "0908177761"
+                  - generic [ref=e279]:
+                    - img [ref=e280]
+                    - generic [ref=e283]: BS. Duy
+                  - generic [ref=e284]:
+                    - img [ref=e285]
+                    - generic [ref=e288]: 10:00 - 10:45
+                - paragraph [ref=e289]: Lịch 10h
+                - button "✎" [ref=e290]
+              - generic [ref=e291] [cursor=pointer]:
+                - generic [ref=e292]: Hoàn thành
+                - heading "NGUYỄN THỊ UYÊN" [level=5] [ref=e293]
+                - generic [ref=e294]:
+                  - generic [ref=e295]:
+                    - img [ref=e296]
+                    - generic [ref=e298]: "0843656412"
+                  - generic [ref=e299]:
+                    - img [ref=e300]
+                    - generic [ref=e303]: BS. Trâm
+                  - generic [ref=e304]:
+                    - img [ref=e305]
+                    - generic [ref=e308]: 10:00 - 11:30
+                - paragraph [ref=e309]: Lịch 10h nhổ
+                - button "✎" [ref=e310]
+              - generic [ref=e311] [cursor=pointer]:
+                - generic [ref=e312]: Đang khám
+                - heading "Nguyễn Thị Thanh" [level=5] [ref=e313]
+                - generic [ref=e314]:
+                  - generic [ref=e315]:
+                    - img [ref=e316]
+                    - generic [ref=e318]: "0908177761"
+                  - generic [ref=e319]:
+                    - img [ref=e320]
+                    - generic [ref=e323]: BS. Thu Thảo
+                  - generic [ref=e324]:
+                    - img [ref=e325]
+                    - generic [ref=e328]: 10:00 - 10:45
+                - paragraph [ref=e329]: Lịch 10h
+                - button "✎" [ref=e330]
+              - generic [ref=e331] [cursor=pointer]:
+                - generic [ref=e332]: Hủy hẹn
+                - heading "NGUYỄN THỊ UYÊN" [level=5] [ref=e333]
+                - generic [ref=e334]:
+                  - generic [ref=e335]:
+                    - img [ref=e336]
+                    - generic [ref=e338]: "0843656412"
+                  - generic [ref=e339]:
+                    - img [ref=e340]
+                    - generic [ref=e343]: BS. Uyên
+                  - generic [ref=e344]:
+                    - img [ref=e345]
+                    - generic [ref=e348]: 10:30 - 11:15
+                - paragraph [ref=e349]: Lịch 10h30 hủy
+                - button "✎" [ref=e350]
+              - generic [ref=e351] [cursor=pointer]:
+                - generic [ref=e352]: Đang hẹn
+                - heading "Đặng Thị Hồng Thúy" [level=5] [ref=e353]
+                - generic [ref=e354]:
+                  - generic [ref=e355]:
+                    - img [ref=e356]
+                    - generic [ref=e358]: "0977407980"
+                  - generic [ref=e359]:
+                    - img [ref=e360]
+                    - generic [ref=e363]: BS. Dũng
+                  - generic [ref=e364]:
+                    - img [ref=e365]
+                    - generic [ref=e368]: 11:00 - 13:00
+                - paragraph [ref=e369]: Lịch 11h
+                - button "✎" [ref=e370]
+              - generic [ref=e371] [cursor=pointer]:
+                - generic [ref=e372]: Đang hẹn
+                - heading "Vũ Hữu Đạt" [level=5] [ref=e373]
+                - generic [ref=e374]:
+                  - generic [ref=e375]:
+                    - img [ref=e376]
+                    - generic [ref=e378]: "0388682636"
+                  - generic [ref=e379]:
+                    - img [ref=e380]
+                    - generic [ref=e383]: BS. Ly
+                  - generic [ref=e384]:
+                    - img [ref=e385]
+                    - generic [ref=e388]: 11:00 - 11:30
+                - paragraph [ref=e389]: Lịch 11h
+                - button "✎" [ref=e390]
+              - generic [ref=e391] [cursor=pointer]:
+                - generic [ref=e392]: Hoàn thành
+                - heading "Đặng Thị Hồng Thúy" [level=5] [ref=e393]
+                - generic [ref=e394]:
+                  - generic [ref=e395]:
+                    - img [ref=e396]
+                    - generic [ref=e398]: "0977407980"
+                  - generic [ref=e399]:
+                    - img [ref=e400]
+                    - generic [ref=e403]: BS. Dương
+                  - generic [ref=e404]:
+                    - img [ref=e405]
+                    - generic [ref=e408]: 13:00 - 14:00
+                - paragraph [ref=e409]: Lịch 13h
+                - button "✎" [ref=e410]
+              - generic [ref=e411] [cursor=pointer]:
+                - generic [ref=e412]: Đang khám
+                - heading "Vũ Hữu Đạt" [level=5] [ref=e413]
+                - generic [ref=e414]:
+                  - generic [ref=e415]:
+                    - img [ref=e416]
+                    - generic [ref=e418]: "0388682636"
+                  - generic [ref=e419]:
+                    - img [ref=e420]
+                    - generic [ref=e423]: BS. Thu Thảo
+                  - generic [ref=e424]:
+                    - img [ref=e425]
+                    - generic [ref=e428]: 14:00 - 14:30
+                - paragraph [ref=e429]: Lịch 14h
+                - button "✎" [ref=e430]
+              - generic [ref=e431] [cursor=pointer]:
+                - generic [ref=e432]: Đang hẹn
+                - heading "PHẠM NGUYỄN MINH HIẾU" [level=5] [ref=e433]
+                - generic [ref=e434]:
+                  - generic [ref=e435]:
+                    - img [ref=e436]
+                    - generic [ref=e438]: "0563757416"
+                  - generic [ref=e439]:
+                    - img [ref=e440]
+                    - generic [ref=e443]: BS. Ý
+                  - generic [ref=e444]:
+                    - img [ref=e445]
+                    - generic [ref=e448]: 14:00 - 14:30
+                - paragraph [ref=e449]: Lịch 14h
+                - button "✎" [ref=e450]
+          - generic [ref=e451]:
+            - generic [ref=e452]:
+              - generic [ref=e453]: 08-04
+              - generic [ref=e454]: Thứ Tư
+            - generic [ref=e455]:
+              - generic [ref=e456] [cursor=pointer]:
+                - generic [ref=e457]: Đang hẹn
+                - heading "Phạm Ngọc Huy" [level=5] [ref=e458]
+                - generic [ref=e459]:
+                  - generic [ref=e460]:
+                    - img [ref=e461]
+                    - generic [ref=e463]: "0349762840"
+                  - generic [ref=e464]:
+                    - img [ref=e465]
+                    - generic [ref=e468]: BS. Dũng
+                  - generic [ref=e469]:
+                    - img [ref=e470]
+                    - generic [ref=e473]: 07:00 - 07:30
+                - paragraph [ref=e474]: AP235544
+                - button "✎" [ref=e475]
+              - generic [ref=e476] [cursor=pointer]:
+                - generic [ref=e477]: Hoàn thành
+                - heading "PHẠM NGUYỄN MINH HIẾU" [level=5] [ref=e478]
+                - generic [ref=e479]:
+                  - generic [ref=e480]:
+                    - img [ref=e481]
+                    - generic [ref=e483]: "0563757416"
+                  - generic [ref=e484]:
+                    - img [ref=e485]
+                    - generic [ref=e488]: BS. Thu Thảo
+                  - generic [ref=e489]:
+                    - img [ref=e490]
+                    - generic [ref=e493]: 15:00 - 15:30
+                - paragraph [ref=e494]: PHẠM NGUYỄN MINH HIẾU
+                - button "✎" [ref=e495]
+              - generic [ref=e496] [cursor=pointer]:
+                - generic [ref=e497]: Hoàn thành
+                - heading "Nguyễn Thị Thanh" [level=5] [ref=e498]
+                - generic [ref=e499]:
+                  - generic [ref=e500]:
+                    - img [ref=e501]
+                    - generic [ref=e503]: "0908177761"
+                  - generic [ref=e504]:
+                    - img [ref=e505]
+                    - generic [ref=e508]: BS. Dương
+                  - generic [ref=e509]:
+                    - img [ref=e510]
+                    - generic [ref=e513]: 15:30 - 16:00
+                - paragraph [ref=e514]: Nguyễn Thị Thanh
+                - button "✎" [ref=e515]
+              - generic [ref=e516] [cursor=pointer]:
+                - generic [ref=e517]: Đang hẹn
+                - heading "Vũ Hữu Đạt" [level=5] [ref=e518]
+                - generic [ref=e519]:
+                  - generic [ref=e520]:
+                    - img [ref=e521]
+                    - generic [ref=e523]: "0388682636"
+                  - generic [ref=e524]:
+                    - img [ref=e525]
+                    - generic [ref=e528]: BS. Trâm
+                  - generic [ref=e529]:
+                    - img [ref=e530]
+                    - generic [ref=e533]: 16:00 - 17:30
+                - paragraph [ref=e534]: Vũ Hữu Đạt
+                - button "✎" [ref=e535]
+              - generic [ref=e536] [cursor=pointer]:
+                - generic [ref=e537]: Đang hẹn
+                - heading "Đặng Thị Hồng Thúy" [level=5] [ref=e538]
+                - generic [ref=e539]:
+                  - generic [ref=e540]:
+                    - img [ref=e541]
+                    - generic [ref=e543]: "0977407980"
+                  - generic [ref=e544]:
+                    - img [ref=e545]
+                    - generic [ref=e548]: BS. Ý
+                  - generic [ref=e549]:
+                    - img [ref=e550]
+                    - generic [ref=e553]: 16:30 - 17:00
+                - paragraph [ref=e554]: Đặng Thị Hồng Thúy
+                - button "✎" [ref=e555]
+              - generic [ref=e556] [cursor=pointer]:
+                - generic [ref=e557]: Hoàn thành
+                - heading "Nguyễn Thị Nguyệt" [level=5] [ref=e558]
+                - generic [ref=e559]:
+                  - generic [ref=e560]:
+                    - img [ref=e561]
+                    - generic [ref=e563]: "0912866856"
+                  - generic [ref=e564]:
+                    - img [ref=e565]
+                    - generic [ref=e568]: BS. Thảo
+                  - generic [ref=e569]:
+                    - img [ref=e570]
+                    - generic [ref=e573]: 17:00 - 17:45
+                - paragraph [ref=e574]: Nguyễn Thị Nguyệt
+                - button "✎" [ref=e575]
+          - generic [ref=e576]:
+            - generic [ref=e577]:
+              - generic [ref=e578]: 09-04
+              - generic [ref=e579]: Thứ Năm
+            - generic [ref=e581] [cursor=pointer]:
+              - generic [ref=e582]: Đang hẹn
+              - heading "NGUYỄN NGÔ QUỲNH TRÂM" [level=5] [ref=e583]
+              - generic [ref=e584]:
+                - generic [ref=e585]:
+                  - img [ref=e586]
+                  - generic [ref=e588]: "0999111222"
+                - generic [ref=e589]:
+                  - img [ref=e590]
+                  - generic [ref=e593]: Admin
+                - generic [ref=e594]:
+                  - img [ref=e595]
+                  - generic [ref=e598]: 10:00 - 10:30
+              - paragraph [ref=e599]: AP235539
+              - button "✎" [ref=e600]
+          - generic [ref=e601]:
+            - generic [ref=e602]:
+              - generic [ref=e603]: 10-04
+              - generic [ref=e604]: Thứ Sáu
+            - generic [ref=e606] [cursor=pointer]:
+              - generic [ref=e607]: Đang hẹn
+              - heading "NGUYỄN NGÔ QUỲNH TRÂM" [level=5] [ref=e608]
+              - generic [ref=e609]:
+                - generic [ref=e610]:
+                  - img [ref=e611]
+                  - generic [ref=e613]: "0999111222"
+                - generic [ref=e614]:
+                  - img [ref=e615]
+                  - generic [ref=e618]: Admin
+                - generic [ref=e619]:
+                  - img [ref=e620]
+                  - generic [ref=e623]: 14:00 - 14:30
+              - paragraph [ref=e624]: AP235540
+              - button "✎" [ref=e625]
+          - generic [ref=e626]:
+            - generic [ref=e627]:
+              - generic [ref=e628]: 11-04
+              - generic [ref=e629]: Thứ Bảy
+            - generic [ref=e631] [cursor=pointer]:
+              - generic [ref=e632]: Đang hẹn
+              - heading "NGUYỄN NGÔ QUỲNH TRÂM" [level=5] [ref=e633]
+              - generic [ref=e634]:
+                - generic [ref=e635]:
+                  - img [ref=e636]
+                  - generic [ref=e638]: "0999111222"
+                - generic [ref=e639]:
+                  - img [ref=e640]
+                  - generic [ref=e643]: Admin
+                - generic [ref=e644]:
+                  - img [ref=e645]
+                  - generic [ref=e648]: 09:00 - 09:30
+              - paragraph [ref=e649]: AP235541
+              - button "✎" [ref=e650]
+          - generic [ref=e651]:
+            - generic [ref=e652]:
+              - generic [ref=e653]: 12-04
+              - generic [ref=e654]: Chủ Nhật
+            - generic [ref=e656] [cursor=pointer]:
+              - generic [ref=e657]: Đang hẹn
+              - heading "NGUYỄN NGÔ QUỲNH TRÂM" [level=5] [ref=e658]
+              - generic [ref=e659]:
+                - generic [ref=e660]:
+                  - img [ref=e661]
+                  - generic [ref=e663]: "0999111222"
+                - generic [ref=e664]:
+                  - img [ref=e665]
+                  - generic [ref=e668]: Admin
+                - generic [ref=e669]:
+                  - img [ref=e670]
+                  - generic [ref=e673]: 12:30 - 13:00
+              - paragraph [ref=e674]: AP235542
+              - button "✎" [ref=e675]
+    - generic [ref=e677]:
+      - generic [ref=e679]:
+        - img [ref=e681]
+        - generic [ref=e684]:
+          - heading "Update Available" [level=4] [ref=e685]
+          - paragraph [ref=e686]: New version 0.4.2 is ready.
+          - generic [ref=e687]:
+            - button "Update Now" [ref=e688] [cursor=pointer]:
+              - img [ref=e689]
+              - text: Update Now
+            - button "Notes" [ref=e694] [cursor=pointer]:
+              - img [ref=e695]
+              - text: Notes
+            - button "Later" [ref=e698] [cursor=pointer]
+        - button [ref=e699] [cursor=pointer]:
+          - img [ref=e700]
+      - button "v0.0.0" [ref=e705] [cursor=pointer]:
+        - img [ref=e706]
+        - generic [ref=e709]: v0.0.0

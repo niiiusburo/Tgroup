@@ -1,5 +1,5 @@
 import { Clock, User, Pencil } from 'lucide-react';
-import { APPOINTMENT_TYPE_COLORS } from '@/constants';
+import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_CARD_COLORS } from '@/constants';
 import { STATUS_DOT_COLORS, type CalendarAppointment } from '@/data/mockCalendar';
 
 const TYPE_LABELS_VI: Record<string, string> = {
@@ -29,17 +29,7 @@ interface AppointmentCardProps {
   readonly onDragStart?: (e: React.DragEvent, appointment: CalendarAppointment) => void;
 }
 
-// Color code to tailwind classes mapping (matching TodayAppointments and EditAppointmentModal)
-const COLOR_CODE_TO_STYLES: Record<string, { bg: string; border: string; text: string }> = {
-  '0': { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700' },      // Blue
-  '1': { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700' },   // Green
-  '2': { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700' },    // Orange
-  '3': { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700' },       // Red
-  '4': { bg: 'bg-violet-50', border: 'border-violet-200', text: 'text-violet-700' },   // Purple
-  '5': { bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-700' },      // Pink
-  '6': { bg: 'bg-cyan-50', border: 'border-cyan-200', text: 'text-cyan-700' },      // Cyan
-  '7': { bg: 'bg-lime-50', border: 'border-lime-200', text: 'text-lime-700' },      // Lime
-};
+// Color mapping uses SINGLE SOURCE OF TRUTH from constants
 
 export function AppointmentCard({
   appointment,
@@ -53,8 +43,8 @@ export function AppointmentCard({
   const statusDot = STATUS_DOT_COLORS[appointment.status];
   
   // Use appointment color if set, otherwise fall back to type-based colors
-  const colorStyles = appointment.color && COLOR_CODE_TO_STYLES[appointment.color]
-    ? COLOR_CODE_TO_STYLES[appointment.color]
+  const colorStyles = appointment.color && APPOINTMENT_CARD_COLORS[appointment.color]
+    ? APPOINTMENT_CARD_COLORS[appointment.color]
     : typeColors;
 
   function handleDragStart(e: React.DragEvent) {

@@ -358,8 +358,8 @@ export function Customers() {
           loadingDeposits={false}
         />
         {showForm && isEditMode && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overscroll-contain">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[900px] h-[85vh] flex flex-col overflow-hidden overscroll-contain">
+          <div className="modal-container">
+            <div className="modal-content max-w-[900px] animate-in zoom-in-95 duration-200 overflow-hidden">
               <AddCustomerForm
                 isEdit={true}
                 canEdit={canEditCustomers}
@@ -397,9 +397,9 @@ export function Customers() {
         )}
       </div>
 
-      {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[900px] h-[85vh] flex flex-col overflow-hidden">
+      {showForm && !isEditMode && (
+        <div className="modal-container">
+          <div className="modal-content max-w-[900px] animate-in zoom-in-95 duration-200 overflow-hidden">
             <AddCustomerForm onSubmit={handleSubmit} onCancel={() => setShowForm(false)} />
           </div>
         </div>

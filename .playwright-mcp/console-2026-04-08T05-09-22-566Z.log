@@ -1,0 +1,29 @@
+[      73ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:21550
+[      82ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[      82ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[     103ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.1.7, gitCommit: b5346dd5} @ http://localhost:5174/src/hooks/useVersionCheck.ts:6
+[     104ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.1.7, gitCommit: b5346dd5} @ http://localhost:5174/src/hooks/useVersionCheck.ts:6
+[     112ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.1.7, gitCommit: b5346dd5} @ http://localhost:5174/src/hooks/useVersionCheck.ts:6
+[     112ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.1.7, gitCommit: b5346dd5} @ http://localhost:5174/src/hooks/useVersionCheck.ts:6
+[     127ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=500:0
+[     127ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=100:0
+[     130ms] [ERROR] Payment fetch error: Error: API GET /SaleOrders failed (500): {"offset":0,"limit":20,"totalItems":0,"items":[],"aggregates":null,"error":"column so.userid does not exist"}
+    at apiFetch (http://localhost:5174/src/lib/api.ts:29:11)
+    at async http://localhost:5174/src/hooks/usePayment.ts:51:24 @ http://localhost:5174/src/hooks/usePayment.ts:63
+[     138ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=500:0
+[     147ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=100:0
+[     150ms] [ERROR] Payment fetch error: Error: API GET /SaleOrders failed (500): {"offset":0,"limit":20,"totalItems":0,"items":[],"aggregates":null,"error":"column so.userid does not exist"}
+    at apiFetch (http://localhost:5174/src/lib/api.ts:29:11)
+    at async http://localhost:5174/src/hooks/usePayment.ts:51:24 @ http://localhost:5174/src/hooks/usePayment.ts:63
+[     408ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=100:0
+[     408ms] [ERROR] Payment fetch error: Error: API GET /SaleOrders failed (500): {"offset":0,"limit":20,"totalItems":0,"items":[],"aggregates":null,"error":"column so.userid does not exist"}
+    at apiFetch (http://localhost:5174/src/lib/api.ts:29:11)
+    at async http://localhost:5174/src/hooks/usePayment.ts:51:24 @ http://localhost:5174/src/hooks/usePayment.ts:63
+[     409ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=500:0
+[  145131ms] [LOG] [AddressAutocomplete] API Key check: Found Value: AIzaSyDVk_... @ http://localhost:5174/src/components/shared/AddressAutocomplete.tsx:63
+[  145132ms] [LOG] [AddressAutocomplete] Status:  Data count: 0 Ready: false Script loaded: false @ http://localhost:5174/src/components/shared/AddressAutocomplete.tsx:106
+[  145132ms] [LOG] [AddressAutocomplete] API Key check: Found Value: AIzaSyDVk_... @ http://localhost:5174/src/components/shared/AddressAutocomplete.tsx:63
+[  145132ms] [LOG] [AddressAutocomplete] Status:  Data count: 0 Ready: false Script loaded: false @ http://localhost:5174/src/components/shared/AddressAutocomplete.tsx:106
+[  145140ms] [ERROR] 💡 use-places-autocomplete: Google Maps Places API library must be loaded. See: https://github.com/wellyshen/use-places-autocomplete#load-the-library @ http://localhost:5174/node_modules/.vite/deps/use-places-autocomplete.js?v=c31536a8:64
+[  145140ms] [LOG] [AddressAutocomplete] Status:  Data count: 0 Ready: false Script loaded: true @ http://localhost:5174/src/components/shared/AddressAutocomplete.tsx:106
+[  145559ms] [WARNING] Google Maps JavaScript API has been loaded directly without loading=async. This can result in suboptimal performance. For best-practice loading patterns please see https://goo.gle/js-api-loading @ https://maps.googleapis.com/maps/api/js?key=AIzaSyDVk_KxoeAtvTa1-LvewB2OwrdnmZn-64c&libraries=places&language=vi&region=VN:1438

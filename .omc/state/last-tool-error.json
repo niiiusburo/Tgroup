@@ -1,7 +1,7 @@
 {
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cd /Users/thuanle/Documents/TamTMV/Tgroup/website && npx tsc --noEmit 2>&1\",\"timeout\":60000,\"description\":\"TypeScript type check\"}",
-  "error": "Exit code 2\nsrc/components/customer/CustomerProfile.tsx(40,58): error TS2345: Argument of type '\"overview\"' is not assignable to parameter of type 'ProfileTab | (() => ProfileTab)'.\nsrc/components/customer/CustomerProfile.tsx(177,8): error TS2367: This comparison appears to be unintentional because the types 'ProfileTab' and '\"overview\"' have no overlap.\nsrc/components/customer/CustomerProfile.tsx(187,8): error TS2367: This comparison appears to be unintentional because the types 'ProfileTab' an...",
-  "timestamp": "2026-04-07T14:40:37.180Z",
+  "tool_name": "Read",
+  "tool_input_preview": "{\"file_path\":\"/Users/thuanle/.claude/projects/-Users-thuanle-Documents-TamTMV-Tgroup/1882c2f8-f3e5-4586-968f-38eecde95695/tool-results/b94x0evq4.txt\"}",
+  "error": "File content (31658 tokens) exceeds maximum allowed tokens (10000). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.",
+  "timestamp": "2026-04-08T17:06:43.488Z",
   "retry_count": 1
 }

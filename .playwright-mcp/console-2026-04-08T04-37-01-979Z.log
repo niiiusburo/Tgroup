@@ -1,0 +1,412 @@
+[      50ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:21550
+[      59ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[      59ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[   32412ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=500:0
+[   32421ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=100:0
+[   32421ms] [ERROR] Payment fetch error: Error: API GET /SaleOrders failed (500): {"offset":0,"limit":20,"totalItems":0,"items":[],"aggregates":null,"error":"column so.userid does not exist"}
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775622194437:29:11)
+    at async http://localhost:5174/src/hooks/usePayment.ts?t=1775622194437:51:24 @ http://localhost:5174/src/hooks/usePayment.ts?t=1775622194437:63
+[   32424ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=500:0
+[   32425ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=100:0
+[   32425ms] [ERROR] Payment fetch error: Error: API GET /SaleOrders failed (500): {"offset":0,"limit":20,"totalItems":0,"items":[],"aggregates":null,"error":"column so.userid does not exist"}
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775622194437:29:11)
+    at async http://localhost:5174/src/hooks/usePayment.ts?t=1775622194437:51:24 @ http://localhost:5174/src/hooks/usePayment.ts?t=1775622194437:63
+[   32710ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=100:0
+[   32711ms] [ERROR] Payment fetch error: Error: API GET /SaleOrders failed (500): {"offset":0,"limit":20,"totalItems":0,"items":[],"aggregates":null,"error":"column so.userid does not exist"}
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775622194437:29:11)
+    at async http://localhost:5174/src/hooks/usePayment.ts?t=1775622194437:51:24 @ http://localhost:5174/src/hooks/usePayment.ts?t=1775622194437:63
+[   32713ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=500:0
+[  167663ms] [LOG] [Version] Applying update... @ http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775622986441:65
+[  167752ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:21550
+[  167764ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  167765ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  170333ms] [LOG] [Version] Applying update... @ http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775622986441:65
+[  170387ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:21550
+[  170396ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  170396ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  203286ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3002/api/Appointments/2e1c3428-6eba-4d04-b07d-48d4968517f2:0
+[  205191ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3002/api/Appointments/2e1c3428-6eba-4d04-b07d-48d4968517f2:0
+[  205391ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3002/api/Appointments/2e1c3428-6eba-4d04-b07d-48d4968517f2:0
+[  205599ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:3002/api/Appointments/2e1c3428-6eba-4d04-b07d-48d4968517f2:0
+[  277605ms] [LOG] [Version] Applying update... @ http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623238923:65
+[  277672ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:21550
+[  277684ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  277684ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  290492ms] [LOG] [Version] Applying update... @ http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623238923:65
+[  290541ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:21550
+[  290550ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  290550ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  290976ms] [LOG] [Version] Applying update... @ http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623238923:65
+[  291027ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:21550
+[  291037ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  291037ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  426724ms] [ERROR] Warning: React has detected a change in the order of Hooks called by %s. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://reactjs.org/link/rules-of-hooks
+
+   Previous render            Next render
+   ------------------------------------------------------
+%s   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+%s VersionDisplay 1. useState                   useState
+2. useState                   useState
+3. useState                   useState
+4. useState                   useState
+5. useState                   useState
+6. useRef                     useRef
+7. useRef                     useRef
+8. useEffect                  useEffect
+9. useCallback                useCallback
+10. useCallback               useCallback
+11. useCallback               useCallback
+12. useEffect                 useEffect
+13. useState                  useState
+14. undefined                 useState
+ 
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:32:3)
+    at div
+    at div
+    at div
+    at Layout (http://localhost:5174/src/components/Layout.tsx?t=1775623238923:142:49)
+    at ProtectedRoute (http://localhost:5174/src/App.tsx?t=1775623250060:104:27)
+    at RenderedRoute (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4131:5)
+    at Routes (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4601:5)
+    at LocationProvider (http://localhost:5174/src/contexts/LocationContext.tsx:20:36)
+    at TimezoneProvider (http://localhost:5174/src/contexts/TimezoneContext.tsx:35:36)
+    at AuthProvider (http://localhost:5174/src/contexts/AuthContext.tsx?t=1775622194437:31:32)
+    at App
+    at Router (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4544:15)
+    at BrowserRouter (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:5290:5) @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:520
+[  426748ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11678:21)
+    at updateReducer (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11727:22)
+    at updateState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12021:18)
+    at Object.useState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12753:24)
+    at useState (http://localhost:5174/node_modules/.vite/deps/chunk-DRWLMN53.js?v=c31536a8:1066:29)
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:66:39)
+    at renderWithHooks (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11548:26)
+    at updateFunctionComponent (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14582:28)
+    at beginWork (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:15924:22)
+    at HTMLUnknownElement.callCallback2 (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:3674:22)
+[  426751ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11678:21)
+    at updateReducer (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11727:22)
+    at updateState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12021:18)
+    at Object.useState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12753:24)
+    at useState (http://localhost:5174/node_modules/.vite/deps/chunk-DRWLMN53.js?v=c31536a8:1066:29)
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:66:39)
+    at renderWithHooks (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11548:26)
+    at updateFunctionComponent (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14582:28)
+    at beginWork (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:15924:22)
+    at HTMLUnknownElement.callCallback2 (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:3674:22)
+[  426732ms] [ERROR] The above error occurred in the <VersionDisplay> component:
+
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:32:3)
+    at div
+    at div
+    at div
+    at Layout (http://localhost:5174/src/components/Layout.tsx?t=1775623238923:142:49)
+    at ProtectedRoute (http://localhost:5174/src/App.tsx?t=1775623250060:104:27)
+    at RenderedRoute (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4131:5)
+    at Routes (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4601:5)
+    at LocationProvider (http://localhost:5174/src/contexts/LocationContext.tsx:20:36)
+    at TimezoneProvider (http://localhost:5174/src/contexts/TimezoneContext.tsx:35:36)
+    at AuthProvider (http://localhost:5174/src/contexts/AuthContext.tsx?t=1775622194437:31:32)
+    at App
+    at Router (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4544:15)
+    at BrowserRouter (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:5290:5)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries. @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14031
+[  426751ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11678:21)
+    at updateReducer (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11727:22)
+    at updateState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12021:18)
+    at Object.useState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12753:24)
+    at useState (http://localhost:5174/node_modules/.vite/deps/chunk-DRWLMN53.js?v=c31536a8:1066:29)
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:66:39)
+    at renderWithHooks (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11548:26)
+    at updateFunctionComponent (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14582:28)
+    at beginWork (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:15924:22)
+    at beginWork$1 (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19753:22)
+[  450072ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11678:21)
+    at updateReducer (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11727:22)
+    at updateState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12021:18)
+    at Object.useState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12753:24)
+    at useState (http://localhost:5174/node_modules/.vite/deps/chunk-DRWLMN53.js?v=c31536a8:1066:29)
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:66:39)
+    at renderWithHooks (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11548:26)
+    at updateFunctionComponent (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14582:28)
+    at beginWork (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:15924:22)
+    at HTMLUnknownElement.callCallback2 (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:3674:22)
+[  450073ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11678:21)
+    at updateReducer (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11727:22)
+    at updateState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12021:18)
+    at Object.useState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12753:24)
+    at useState (http://localhost:5174/node_modules/.vite/deps/chunk-DRWLMN53.js?v=c31536a8:1066:29)
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:66:39)
+    at renderWithHooks (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11548:26)
+    at updateFunctionComponent (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14582:28)
+    at beginWork (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:15924:22)
+    at HTMLUnknownElement.callCallback2 (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:3674:22)
+[  450071ms] [ERROR] The above error occurred in the <VersionDisplay> component:
+
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:32:3)
+    at div
+    at div
+    at div
+    at Layout (http://localhost:5174/src/components/Layout.tsx?t=1775623238923:142:49)
+    at ProtectedRoute (http://localhost:5174/src/App.tsx?t=1775623250060:104:27)
+    at RenderedRoute (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4131:5)
+    at Routes (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4601:5)
+    at LocationProvider (http://localhost:5174/src/contexts/LocationContext.tsx:20:36)
+    at TimezoneProvider (http://localhost:5174/src/contexts/TimezoneContext.tsx:35:36)
+    at AuthProvider (http://localhost:5174/src/contexts/AuthContext.tsx?t=1775622194437:31:32)
+    at App
+    at Router (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4544:15)
+    at BrowserRouter (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:5290:5)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries. @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14031
+[  450073ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11678:21)
+    at updateReducer (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11727:22)
+    at updateState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12021:18)
+    at Object.useState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12753:24)
+    at useState (http://localhost:5174/node_modules/.vite/deps/chunk-DRWLMN53.js?v=c31536a8:1066:29)
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:66:39)
+    at renderWithHooks (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11548:26)
+    at updateFunctionComponent (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14582:28)
+    at beginWork (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:15924:22)
+    at beginWork$1 (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19753:22)
+[  457268ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11678:21)
+    at updateReducer (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11727:22)
+    at updateState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12021:18)
+    at Object.useState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12753:24)
+    at useState (http://localhost:5174/node_modules/.vite/deps/chunk-DRWLMN53.js?v=c31536a8:1066:29)
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:66:39)
+    at renderWithHooks (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11548:26)
+    at updateFunctionComponent (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14582:28)
+    at beginWork (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:15924:22)
+    at HTMLUnknownElement.callCallback2 (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:3674:22)
+[  457268ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11678:21)
+    at updateReducer (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11727:22)
+    at updateState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12021:18)
+    at Object.useState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12753:24)
+    at useState (http://localhost:5174/node_modules/.vite/deps/chunk-DRWLMN53.js?v=c31536a8:1066:29)
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:66:39)
+    at renderWithHooks (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11548:26)
+    at updateFunctionComponent (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14582:28)
+    at beginWork (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:15924:22)
+    at HTMLUnknownElement.callCallback2 (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:3674:22)
+[  457267ms] [ERROR] The above error occurred in the <VersionDisplay> component:
+
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:32:3)
+    at div
+    at div
+    at div
+    at Layout (http://localhost:5174/src/components/Layout.tsx?t=1775623238923:142:49)
+    at ProtectedRoute (http://localhost:5174/src/App.tsx?t=1775623250060:104:27)
+    at RenderedRoute (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4131:5)
+    at Routes (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4601:5)
+    at LocationProvider (http://localhost:5174/src/contexts/LocationContext.tsx:20:36)
+    at TimezoneProvider (http://localhost:5174/src/contexts/TimezoneContext.tsx:35:36)
+    at AuthProvider (http://localhost:5174/src/contexts/AuthContext.tsx?t=1775622194437:31:32)
+    at App
+    at Router (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4544:15)
+    at BrowserRouter (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:5290:5)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries. @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14031
+[  457269ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11678:21)
+    at updateReducer (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11727:22)
+    at updateState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12021:18)
+    at Object.useState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12753:24)
+    at useState (http://localhost:5174/node_modules/.vite/deps/chunk-DRWLMN53.js?v=c31536a8:1066:29)
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:66:39)
+    at renderWithHooks (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11548:26)
+    at updateFunctionComponent (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14582:28)
+    at beginWork (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:15924:22)
+    at beginWork$1 (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19753:22)
+[  479293ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11678:21)
+    at updateReducer (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11727:22)
+    at updateState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12021:18)
+    at Object.useState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12753:24)
+    at useState (http://localhost:5174/node_modules/.vite/deps/chunk-DRWLMN53.js?v=c31536a8:1066:29)
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:66:39)
+    at renderWithHooks (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11548:26)
+    at updateFunctionComponent (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14582:28)
+    at beginWork (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:15924:22)
+    at HTMLUnknownElement.callCallback2 (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:3674:22)
+[  479293ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11678:21)
+    at updateReducer (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11727:22)
+    at updateState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12021:18)
+    at Object.useState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12753:24)
+    at useState (http://localhost:5174/node_modules/.vite/deps/chunk-DRWLMN53.js?v=c31536a8:1066:29)
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:66:39)
+    at renderWithHooks (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11548:26)
+    at updateFunctionComponent (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14582:28)
+    at beginWork (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:15924:22)
+    at HTMLUnknownElement.callCallback2 (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:3674:22)
+[  479291ms] [ERROR] The above error occurred in the <VersionDisplay> component:
+
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:32:3)
+    at div
+    at div
+    at div
+    at Layout (http://localhost:5174/src/components/Layout.tsx?t=1775623238923:142:49)
+    at ProtectedRoute (http://localhost:5174/src/App.tsx?t=1775623250060:104:27)
+    at RenderedRoute (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4131:5)
+    at Routes (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4601:5)
+    at LocationProvider (http://localhost:5174/src/contexts/LocationContext.tsx:20:36)
+    at TimezoneProvider (http://localhost:5174/src/contexts/TimezoneContext.tsx:35:36)
+    at AuthProvider (http://localhost:5174/src/contexts/AuthContext.tsx?t=1775622194437:31:32)
+    at App
+    at Router (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4544:15)
+    at BrowserRouter (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:5290:5)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries. @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14031
+[  479294ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11678:21)
+    at updateReducer (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11727:22)
+    at updateState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12021:18)
+    at Object.useState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12753:24)
+    at useState (http://localhost:5174/node_modules/.vite/deps/chunk-DRWLMN53.js?v=c31536a8:1066:29)
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:66:39)
+    at renderWithHooks (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11548:26)
+    at updateFunctionComponent (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14582:28)
+    at beginWork (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:15924:22)
+    at beginWork$1 (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19753:22)
+[  516856ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11678:21)
+    at updateReducer (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11727:22)
+    at updateState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12021:18)
+    at Object.useState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12753:24)
+    at useState (http://localhost:5174/node_modules/.vite/deps/chunk-DRWLMN53.js?v=c31536a8:1066:29)
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:66:39)
+    at renderWithHooks (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11548:26)
+    at updateFunctionComponent (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14582:28)
+    at beginWork (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:15924:22)
+    at HTMLUnknownElement.callCallback2 (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:3674:22)
+[  516857ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11678:21)
+    at updateReducer (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11727:22)
+    at updateState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12021:18)
+    at Object.useState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12753:24)
+    at useState (http://localhost:5174/node_modules/.vite/deps/chunk-DRWLMN53.js?v=c31536a8:1066:29)
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:66:39)
+    at renderWithHooks (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11548:26)
+    at updateFunctionComponent (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14582:28)
+    at beginWork (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:15924:22)
+    at HTMLUnknownElement.callCallback2 (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:3674:22)
+[  516855ms] [ERROR] The above error occurred in the <VersionDisplay> component:
+
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:32:3)
+    at div
+    at div
+    at div
+    at Layout (http://localhost:5174/src/components/Layout.tsx?t=1775623448623:142:49)
+    at ProtectedRoute (http://localhost:5174/src/App.tsx?t=1775623538743:104:27)
+    at RenderedRoute (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4131:5)
+    at Routes (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4601:5)
+    at LocationProvider (http://localhost:5174/src/contexts/LocationContext.tsx:20:36)
+    at TimezoneProvider (http://localhost:5174/src/contexts/TimezoneContext.tsx?t=1775623538743:35:36)
+    at AuthProvider (http://localhost:5174/src/contexts/AuthContext.tsx?t=1775622194437:31:32)
+    at App
+    at Router (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4544:15)
+    at BrowserRouter (http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:5290:5)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries. @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14031
+[  516857ms] Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11678:21)
+    at updateReducer (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11727:22)
+    at updateState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12021:18)
+    at Object.useState (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:12753:24)
+    at useState (http://localhost:5174/node_modules/.vite/deps/chunk-DRWLMN53.js?v=c31536a8:1066:29)
+    at VersionDisplay (http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623448623:66:39)
+    at renderWithHooks (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:11548:26)
+    at updateFunctionComponent (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:14582:28)
+    at beginWork (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:15924:22)
+    at beginWork$1 (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19753:22)
+[  865493ms] [LOG] [Version] Applying update... @ http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623874416:65
+[  865493ms] [LOG] [VersionCheck] Applying update... @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:105
+[  865493ms] [LOG] [VersionCheck] Clearing all caches... @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:32
+[  865499ms] [LOG] [VersionCheck] Preserving localStorage (auth session kept) @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:59
+[  865499ms] [LOG] [VersionCheck] Reloading to: http://localhost:5174/?_v=1775623887477 @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:110
+[  865662ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:21550
+[  865671ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  865671ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  866218ms] [LOG] [Version] Applying update... @ http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623874416:65
+[  866218ms] [LOG] [VersionCheck] Applying update... @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:105
+[  866218ms] [LOG] [VersionCheck] Clearing all caches... @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:32
+[  866219ms] [LOG] [VersionCheck] Preserving localStorage (auth session kept) @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:59
+[  866219ms] [LOG] [VersionCheck] Reloading to: http://localhost:5174/?_v=1775623888198 @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:110
+[  866367ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:21550
+[  866375ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  866375ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  891219ms] [LOG] [Version] Applying update... @ http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623874416:65
+[  891220ms] [LOG] [VersionCheck] Applying update... @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:105
+[  891220ms] [LOG] [VersionCheck] Clearing all caches... @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:32
+[  891227ms] [LOG] [VersionCheck] Preserving localStorage (auth session kept) @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:59
+[  891227ms] [LOG] [VersionCheck] Reloading to: http://localhost:5174/?_v=1775623913205 @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:110
+[  891389ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:21550
+[  891400ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  891400ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  891918ms] [LOG] [Version] Applying update... @ http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623874416:65
+[  891918ms] [LOG] [VersionCheck] Applying update... @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:105
+[  891918ms] [LOG] [VersionCheck] Clearing all caches... @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:32
+[  891920ms] [LOG] [VersionCheck] Preserving localStorage (auth session kept) @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:59
+[  891920ms] [LOG] [VersionCheck] Reloading to: http://localhost:5174/?_v=1775623913898 @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:110
+[  892060ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:21550
+[  892069ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[  892069ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[ 1018547ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=500:0
+[ 1018555ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=100:0
+[ 1018555ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=500:0
+[ 1018555ms] [ERROR] Payment fetch error: Error: API GET /SaleOrders failed (500): {"offset":0,"limit":20,"totalItems":0,"items":[],"aggregates":null,"error":"column so.userid does not exist"}
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775622194437:29:11)
+    at async http://localhost:5174/src/hooks/usePayment.ts?t=1775622194437:51:24 @ http://localhost:5174/src/hooks/usePayment.ts?t=1775622194437:63
+[ 1018559ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=100:0
+[ 1018560ms] [ERROR] Payment fetch error: Error: API GET /SaleOrders failed (500): {"offset":0,"limit":20,"totalItems":0,"items":[],"aggregates":null,"error":"column so.userid does not exist"}
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775622194437:29:11)
+    at async http://localhost:5174/src/hooks/usePayment.ts?t=1775622194437:51:24 @ http://localhost:5174/src/hooks/usePayment.ts?t=1775622194437:63
+[ 1018848ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=500:0
+[ 1018850ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/SaleOrders?offset=0&limit=100:0
+[ 1018851ms] [ERROR] Payment fetch error: Error: API GET /SaleOrders failed (500): {"offset":0,"limit":20,"totalItems":0,"items":[],"aggregates":null,"error":"column so.userid does not exist"}
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775622194437:29:11)
+    at async http://localhost:5174/src/hooks/usePayment.ts?t=1775622194437:51:24 @ http://localhost:5174/src/hooks/usePayment.ts?t=1775622194437:63
+[ 1019668ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3002/api/CustomerBalance/b2262736-c7f4-4072-a67f-b3d00095dcf1:0
+[ 1032234ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/Payments:0
+[ 1032234ms] [ERROR] Failed to add deposit: Error: API POST /Payments failed (500): {"error":"Failed to create payment"}
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775622194437:29:11)
+    at async http://localhost:5174/src/hooks/useDeposits.ts?t=1775622194437:51:7
+    at async http://localhost:5174/src/pages/Customers.tsx?t=1775622529769:254:5
+    at async handleAddDeposit (http://localhost:5174/src/components/payment/DepositWallet.tsx:39:7) @ http://localhost:5174/src/components/payment/DepositWallet.tsx:43
+[ 1032929ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3002/api/Payments:0
+[ 1032929ms] [ERROR] Failed to add deposit: Error: API POST /Payments failed (500): {"error":"Failed to create payment"}
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775622194437:29:11)
+    at async http://localhost:5174/src/hooks/useDeposits.ts?t=1775622194437:51:7
+    at async http://localhost:5174/src/pages/Customers.tsx?t=1775622529769:254:5
+    at async handleAddDeposit (http://localhost:5174/src/components/payment/DepositWallet.tsx:39:7) @ http://localhost:5174/src/components/payment/DepositWallet.tsx:43
+[ 1181209ms] [LOG] [Version] Applying update... @ http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623874416:65
+[ 1181209ms] [LOG] [VersionCheck] Applying update... @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:105
+[ 1181209ms] [LOG] [VersionCheck] Clearing all caches... @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:32
+[ 1181213ms] [LOG] [VersionCheck] Preserving localStorage (auth session kept) @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:59
+[ 1181213ms] [LOG] [VersionCheck] Reloading to: http://localhost:5174/settings?_v=1775624203191 @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:110
+[ 1181389ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:21550
+[ 1181400ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[ 1181400ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[ 1181850ms] [LOG] [Version] Applying update... @ http://localhost:5174/src/components/shared/VersionDisplay.tsx?t=1775623874416:65
+[ 1181850ms] [LOG] [VersionCheck] Applying update... @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:105
+[ 1181850ms] [LOG] [VersionCheck] Clearing all caches... @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:32
+[ 1181852ms] [LOG] [VersionCheck] Preserving localStorage (auth session kept) @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:59
+[ 1181852ms] [LOG] [VersionCheck] Reloading to: http://localhost:5174/settings?_v=1775624203831 @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775623416167:110
+[ 1181999ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:21550
+[ 1182008ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[ 1182008ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435

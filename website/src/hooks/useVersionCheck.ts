@@ -1,14 +1,14 @@
 /**
  * Version Check Hook
- * 
+ *
  * Polls for app updates and notifies when a new version is available.
  * This solves the browser cache problem by detecting when a new build is deployed.
- * 
+ *
  * @crossref:used-in[App, Layout, VersionDisplay]
- * 
+ *
  * Usage:
  *   const { currentVersion, latestVersion, isUpdateAvailable, checkForUpdates, applyUpdate } = useVersionCheck();
- * 
+ *
  * How it works:
  * 1. On mount, fetches /version.json to get current deployed version
  * 2. Polls every 5 minutes (configurable) for changes
@@ -68,6 +68,7 @@ declare global {
 const DISMISSED_VERSION_KEY = 'tdental:dismissedVersion';
 // const LAST_UPDATE_CHECK_KEY = 'tdental:lastUpdateCheck';
 const JUST_UPDATED_KEY = 'tdental:justUpdated';
+const TARGET_VERSION_KEY = 'tdental:targetVersion'; // Version we're trying to update to
 
 /**
  * Check if we just completed an update (based on URL param or localStorage)
@@ -83,7 +84,7 @@ function checkJustUpdated(): boolean {
     localStorage.setItem(JUST_UPDATED_KEY, Date.now().toString());
     return true;
   }
-  
+
   // Check localStorage for recent update (within last 30 seconds)
   const justUpdated = localStorage.getItem(JUST_UPDATED_KEY);
   if (justUpdated) {
@@ -94,7 +95,7 @@ function checkJustUpdated(): boolean {
     // Clear stale marker
     localStorage.removeItem(JUST_UPDATED_KEY);
   }
-  
+
   return false;
 }
 
@@ -138,9 +139,7 @@ function getBuildTimeVersion(): VersionInfo {
   const buildTime = window.__APP_BUILD_TIME__ ?? new Date().toISOString();
   const gitCommit = window.__APP_GIT_COMMIT__ ?? 'unknown';
   const gitBranch = window.__APP_GIT_BRANCH__ ?? 'unknown';
-  
-  console.log('[VersionCheck] Build-time version loaded:', { version, gitCommit });
-  
+
   return {
     version,
     buildTime,
@@ -161,11 +160,11 @@ async function fetchVersion(): Promise<VersionInfo> {
       'Pragma': 'no-cache',
     },
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to fetch version: ${response.status} ${response.statusText}`);
   }
-  
+
   return response.json();
 }
 
@@ -193,7 +192,7 @@ function isNewerVersion(current: VersionInfo, latest: VersionInfo): boolean {
   // Parse version numbers for comparison
   const currentV = parseVersion(current.version);
   const latestV = parseVersion(latest.version);
-  
+
   // Compare version numbers first (semantic versioning)
   if (latestV.major > currentV.major) return true;
   if (latestV.major < currentV.major) return false;
@@ -201,7 +200,7 @@ function isNewerVersion(current: VersionInfo, latest: VersionInfo): boolean {
   if (latestV.minor < currentV.minor) return false;
   if (latestV.patch > currentV.patch) return true;
   if (latestV.patch < currentV.patch) return false;
-  
+
   // Same version number - no update needed
   // (dev server restarts change git commit but not version)
   return false;
@@ -211,41 +210,28 @@ function isNewerVersion(current: VersionInfo, latest: VersionInfo): boolean {
  * Clear all browser caches comprehensively
  */
 async function clearAllCaches(): Promise<void> {
-  console.log('[VersionCheck] Clearing all caches...');
-  
   // 1. Unregister service workers
   if ('serviceWorker' in navigator) {
     try {
       const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(
-        registrations.map(async (reg) => {
-          console.log('[VersionCheck] Unregistering service worker:', reg.scope);
-          await reg.unregister();
-        })
-      );
-    } catch (err) {
-      console.warn('[VersionCheck] Failed to unregister service workers:', err);
+      await Promise.all(registrations.map((reg) => reg.unregister()));
+    } catch {
+      // Ignore service worker errors
     }
   }
-  
+
   // 2. Clear Cache API
   if ('caches' in window) {
     try {
       const names = await caches.keys();
-      await Promise.all(
-        names.map(async (name) => {
-          console.log('[VersionCheck] Deleting cache:', name);
-          await caches.delete(name);
-        })
-      );
-    } catch (err) {
-      console.warn('[VersionCheck] Failed to clear caches:', err);
+      await Promise.all(names.map((name) => caches.delete(name)));
+    } catch {
+      // Ignore cache API errors
     }
   }
-  
+
   // 3. Clear localStorage items that might cache version info (but NOT auth)
   // We intentionally do NOT clear localStorage here to preserve login session
-  console.log('[VersionCheck] Preserving localStorage (auth session kept)');
 }
 
 export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersionCheckReturn {
@@ -260,58 +246,111 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  
+
   // Track if we've shown the update notification
   const hasNotifiedRef = useRef(false);
-  
+
   // Store dismissed version to prevent re-showing (persisted in localStorage)
   const dismissedVersionRef = useRef<string | null>(getDismissedVersion());
-  
+
   // Track if we just completed an update (grace period to avoid immediate re-check)
   const justUpdatedRef = useRef<boolean>(checkJustUpdated());
 
-  // Initialize with build-time version
+  // Periodically refresh justUpdatedRef from localStorage (to handle reload cases)
+  // Without this, justUpdatedRef.current stays true forever after reload
   useEffect(() => {
-    setCurrentVersion(getBuildTimeVersion());
+    const intervalId = setInterval(() => {
+      const isStillRecent = checkJustUpdated();
+      if (!isStillRecent && justUpdatedRef.current) {
+        justUpdatedRef.current = false;
+      }
+    }, 2000); // Check every 2 seconds
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  // Initialize with build-time version
+  // BUT: if we just reloaded after an update and the build version doesn't match
+  // what's on the server, use the server version to avoid an infinite update loop.
+  useEffect(() => {
+    const buildVersion = getBuildTimeVersion();
+
+    // Check if we just completed an update
+    const justUpdated = checkJustUpdated();
+    const targetVersion = localStorage.getItem(TARGET_VERSION_KEY);
+
+    if (justUpdated && targetVersion && targetVersion !== buildVersion.version) {
+      setCurrentVersion({
+        version: targetVersion,
+        buildTime: buildVersion.buildTime,
+        gitCommit: buildVersion.gitCommit,
+        gitBranch: buildVersion.gitBranch,
+      });
+      // Clean up
+      localStorage.removeItem(TARGET_VERSION_KEY);
+    } else {
+      setCurrentVersion(buildVersion);
+    }
   }, []);
 
   /**
    * Check for updates by fetching version.json
+   *
+   * IMPORTANT: After a reload (applyUpdate), this MUST run to verify the update
+   * actually took effect. The justUpdatedRef grace period is only for the initial
+   * polling to avoid showing "update available" immediately after reloading.
    */
-  const checkForUpdates = useCallback(async () => {
+  const checkForUpdates = useCallback(async (forceCheck = false) => {
     if (!enabled) return;
-    
+
     // Skip check if we just updated (give it 30 seconds grace period)
-    if (justUpdatedRef.current) {
-      console.log('[VersionCheck] Skipping check - just updated');
+    // EXCEPT if forceCheck is true (used to verify update after reload)
+    if (justUpdatedRef.current && !forceCheck) {
+      // Still fetch version to verify we got the update (but don't show notification)
+      try {
+        const serverVersion = await fetchVersion();
+        const current = currentVersion || getBuildTimeVersion();
+        // If versions match, we successfully updated!
+        if (!isNewerVersion(current, serverVersion)) {
+          setIsUpdateAvailable(false);
+          clearDismissedVersion();
+          hasNotifiedRef.current = false;
+        } else {
+          // Versions still don't match after reload — the JS bundle wasn't actually updated.
+          // Accept the server version as truth (we intentionally reloaded) to avoid
+          // an infinite update loop. This happens in dev mode when version.json
+          // was updated but the dev server wasn't restarted.
+          setCurrentVersion(serverVersion);
+          setLatestVersion(serverVersion);
+          setIsUpdateAvailable(false);
+          clearDismissedVersion();
+          hasNotifiedRef.current = false;
+        }
+      } catch {
+        // Ignore grace period check failures
+      }
+
       return;
     }
-    
+
     setIsChecking(true);
     setError(null);
-    
+
     try {
       const serverVersion = await fetchVersion();
       setLatestVersion(serverVersion);
-      
+
       const current = currentVersion || getBuildTimeVersion();
       const hasUpdate = isNewerVersion(current, serverVersion);
-      
+
       // Check if this version was already dismissed (from ref or localStorage)
       const versionKey = `${serverVersion.version}|${serverVersion.gitCommit}`;
-      const wasDismissed = dismissedVersionRef.current === versionKey || 
+      const wasDismissed = dismissedVersionRef.current === versionKey ||
                           getDismissedVersion() === versionKey;
-      
-      console.log('[VersionCheck] Check result:', {
-        current: current.version,
-        server: serverVersion.version,
-        hasUpdate,
-        wasDismissed,
-      });
-      
+
       if (hasUpdate && !wasDismissed) {
         setIsUpdateAvailable(true);
-        
+
         if (onUpdateAvailable && !hasNotifiedRef.current) {
           onUpdateAvailable(current, serverVersion);
           hasNotifiedRef.current = true;
@@ -326,41 +365,49 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
       }
     } catch (err) {
       setError(err instanceof Error ? err : new Error(String(err)));
-      console.error('[VersionCheck] Failed to check for updates:', err);
     } finally {
       setIsChecking(false);
     }
   }, [enabled, currentVersion, onUpdateAvailable]);
 
+  // Ref to hold the latest checkForUpdates without re-triggering polling effect
+  const checkRef = useRef(checkForUpdates);
+  useEffect(() => { checkRef.current = checkForUpdates; }, [checkForUpdates]);
+
   /**
    * Apply the update by clearing all caches and reloading
    * Preserves login session by NOT clearing localStorage
+   *
+   * IMPORTANT: This requires a NEW DEPLOYMENT first!
+   * If the server hasn't been deployed with new code, this will just reload
+   * the same version. The update detection works by comparing version.json.
    */
   const applyUpdate = useCallback(async () => {
-    console.log('[VersionCheck] Applying update...');
-    
     // Clear all caches comprehensively
     await clearAllCaches();
-    
+
     // Mark that we're about to update (cleared on successful load of new version)
     localStorage.setItem(JUST_UPDATED_KEY, Date.now().toString());
-    
+
+    // Store the target version we're trying to update to
+    if (latestVersion) {
+      localStorage.setItem(TARGET_VERSION_KEY, latestVersion.version);
+    }
+
     // Clear dismissed version so we don't carry it over
     clearDismissedVersion();
-    
+
     // Force reload with cache-busting timestamp
     // Use replace() to remove current URL from history, then set new URL
     const timestamp = Date.now();
     const baseUrl = window.location.href.split('?')[0];
     const newUrl = `${baseUrl}?_v=${timestamp}`;
-    
-    console.log('[VersionCheck] Reloading to:', newUrl);
-    
+
     // Small delay to let cache clearing complete
     setTimeout(() => {
       window.location.replace(newUrl);
     }, 100);
-  }, []);
+  }, [latestVersion]);
 
   /**
    * Dismiss the update notification (persists in localStorage)
@@ -368,40 +415,47 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
   const dismissUpdate = useCallback(() => {
     setIsUpdateAvailable(false);
     hasNotifiedRef.current = false;
-    
+
     // Remember this version was dismissed (in both ref and localStorage)
     if (latestVersion) {
       const versionKey = `${latestVersion.version}|${latestVersion.gitCommit}`;
       dismissedVersionRef.current = versionKey;
       setDismissedVersion(versionKey);
-      console.log('[VersionCheck] Update dismissed:', versionKey);
     }
   }, [latestVersion]);
 
-  // Set up polling
+  // Set up polling — uses checkRef to avoid timer thrashing when checkForUpdates changes
   useEffect(() => {
     if (!enabled) return;
 
-    // Initial check
-    checkForUpdates();
+    // Initial check (will skip due to grace period, but verifies version)
+    checkRef.current();
 
-    // Set up interval
-    const intervalId = setInterval(checkForUpdates, pollInterval);
+    // Schedule a FORCE check 31 seconds after load (after grace period ends)
+    // This ensures we verify the update actually took effect
+    const forceCheckTimeout = setTimeout(() => {
+      justUpdatedRef.current = false; // Explicitly clear the ref
+      checkRef.current(true); // Force check to verify version
+    }, 31000);
+
+    // Set up regular polling interval
+    const intervalId = setInterval(() => checkRef.current(), pollInterval);
 
     // Also check when user comes back to the page
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        checkForUpdates();
+        checkRef.current();
       }
     };
-    
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
+      clearTimeout(forceCheckTimeout);
       clearInterval(intervalId);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [enabled, pollInterval, checkForUpdates]);
+  }, [enabled, pollInterval]); // checkForUpdates removed — uses checkRef instead
 
   return {
     currentVersion,

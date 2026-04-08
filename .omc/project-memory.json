@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1775543072129,
-  "projectRoot": "/Users/thuanle/Documents/TamTMV/Tgroup/.worktrees/track-setup",
+  "lastScanned": 1775647310428,
+  "projectRoot": "/Users/thuanle/Documents/TamTMV/Tgroup",
   "techStack": {
     "languages": [],
     "frameworks": [],
@@ -24,48 +24,103 @@
   "structure": {
     "isMonorepo": false,
     "workspaces": [],
-    "mainDirectories": [],
-    "gitBranches": null
+    "mainDirectories": [
+      "docs"
+    ],
+    "gitBranches": {
+      "defaultBranch": "ai-develop",
+      "branchingStrategy": null
+    }
   },
   "customNotes": [],
   "directoryMap": {
+    "api": {
+      "path": "api",
+      "purpose": "API routes",
+      "fileCount": 2,
+      "lastAccessed": 1775647310405,
+      "keyFiles": [
+        "package-lock.json",
+        "package.json"
+      ]
+    },
     "blueprint": {
       "path": "blueprint",
       "purpose": null,
-      "fileCount": 2,
-      "lastAccessed": 1775543072057,
+      "fileCount": 4,
+      "lastAccessed": 1775647310406,
       "keyFiles": [
         "App.jsx",
+        "BUTTON_MAP.md",
+        "CustomerDetailPreview.jsx",
         "index.js"
       ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 0,
+      "lastAccessed": 1775647310406,
+      "keyFiles": []
     },
     "frontend-truth": {
       "path": "frontend-truth",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1775543072057,
+      "lastAccessed": 1775647310407,
       "keyFiles": [
         "tech-spec.md"
+      ]
+    },
+    "screenshots": {
+      "path": "screenshots",
+      "purpose": null,
+      "fileCount": 11,
+      "lastAccessed": 1775647310408,
+      "keyFiles": [
+        "01-overview.png",
+        "02-calendar.png",
+        "03-customers.png",
+        "04-appointments.png",
+        "05-services.png"
       ]
     },
     "website": {
       "path": "website",
       "purpose": null,
-      "fileCount": 7,
-      "lastAccessed": 1775543072058,
+      "fileCount": 18,
+      "lastAccessed": 1775647310408,
       "keyFiles": [
+        "demo_tdental_updated.sql",
         "index.html",
+        "package-lock.json",
         "package.json",
-        "postcss.config.js",
-        "tailwind.config.js",
-        "tsconfig.json"
+        "playwright.config.ts"
+      ]
+    },
+    "api/node_modules": {
+      "path": "api/node_modules",
+      "purpose": "Dependencies",
+      "fileCount": 1,
+      "lastAccessed": 1775647310411,
+      "keyFiles": []
+    },
+    "api/src": {
+      "path": "api/src",
+      "purpose": "Source code",
+      "fileCount": 4,
+      "lastAccessed": 1775647310411,
+      "keyFiles": [
+        "db.js",
+        "server.js",
+        "session-defaults.js"
       ]
     },
     "blueprint/components": {
       "path": "blueprint/components",
       "purpose": "UI components",
       "fileCount": 1,
-      "lastAccessed": 1775543072059,
+      "lastAccessed": 1775647310411,
       "keyFiles": [
         "index.js"
       ]
@@ -74,7 +129,7 @@
       "path": "blueprint/data",
       "purpose": "Data files",
       "fileCount": 1,
-      "lastAccessed": 1775543072059,
+      "lastAccessed": 1775647310412,
       "keyFiles": [
         "pages.js"
       ]
@@ -83,326 +138,34 @@
       "path": "frontend-truth/app",
       "purpose": "Application code",
       "fileCount": 13,
-      "lastAccessed": 1775543072060,
+      "lastAccessed": 1775647310412,
       "keyFiles": [
         "README.md",
         "components.json",
         "eslint.config.js"
       ]
     },
-    "website/src": {
-      "path": "website/src",
-      "purpose": "Source code",
-      "fileCount": 4,
-      "lastAccessed": 1775543072060,
+    "website/dist": {
+      "path": "website/dist",
+      "purpose": "Distribution/build output",
+      "fileCount": 3,
+      "lastAccessed": 1775647310412,
       "keyFiles": [
-        "App.tsx",
-        "index.css",
-        "main.tsx"
+        "CHANGELOG.json",
+        "index.html",
+        "version.json"
+      ]
+    },
+    "website/docs": {
+      "path": "website/docs",
+      "purpose": "Documentation",
+      "fileCount": 1,
+      "lastAccessed": 1775647310413,
+      "keyFiles": [
+        "VERSION_SYSTEM.md"
       ]
     }
   },
-  "hotPaths": [
-    {
-      "path": "website/src/App.tsx",
-      "accessCount": 34,
-      "lastAccessed": 1775572740115,
-      "type": "file"
-    },
-    {
-      "path": "website/src/constants/index.ts",
-      "accessCount": 31,
-      "lastAccessed": 1775572654449,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/index.ts",
-      "accessCount": 28,
-      "lastAccessed": 1775572715980,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/Layout.tsx",
-      "accessCount": 26,
-      "lastAccessed": 1775572830015,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Payment.tsx",
-      "accessCount": 22,
-      "lastAccessed": 1775554814028,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Customers.tsx",
-      "accessCount": 20,
-      "lastAccessed": 1775554634619,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Overview.tsx",
-      "accessCount": 18,
-      "lastAccessed": 1775557566370,
-      "type": "file"
-    },
-    {
-      "path": "website/src/data/mockDashboard.ts",
-      "accessCount": 16,
-      "lastAccessed": 1775554596604,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Calendar.tsx",
-      "accessCount": 16,
-      "lastAccessed": 1775554685760,
-      "type": "file"
-    },
-    {
-      "path": "website/src/data/mockEmployees.ts",
-      "accessCount": 14,
-      "lastAccessed": 1775564782480,
-      "type": "file"
-    },
-    {
-      "path": "website/src/hooks/useOverviewData.ts",
-      "accessCount": 12,
-      "lastAccessed": 1775554613301,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/shared/FilterByLocation.tsx",
-      "accessCount": 12,
-      "lastAccessed": 1775572816683,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Employees.tsx",
-      "accessCount": 9,
-      "lastAccessed": 1775550980572,
-      "type": "file"
-    },
-    {
-      "path": "",
-      "accessCount": 8,
-      "lastAccessed": 1775551608668,
-      "type": "directory"
-    },
-    {
-      "path": "website/src/pages/Locations.tsx",
-      "accessCount": 8,
-      "lastAccessed": 1775554555285,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/modules/RevenueChartModule.tsx",
-      "accessCount": 8,
-      "lastAccessed": 1775557502865,
-      "type": "file"
-    },
-    {
-      "path": "website/tailwind.config.js",
-      "accessCount": 8,
-      "lastAccessed": 1775557529558,
-      "type": "file"
-    },
-    {
-      "path": "website/src/data/mockCalendar.ts",
-      "accessCount": 7,
-      "lastAccessed": 1775549873597,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Relationships.tsx",
-      "accessCount": 7,
-      "lastAccessed": 1775554556606,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Website.tsx",
-      "accessCount": 7,
-      "lastAccessed": 1775554557941,
-      "type": "file"
-    },
-    {
-      "path": "website/src/hooks/useCalendarData.ts",
-      "accessCount": 6,
-      "lastAccessed": 1775549067806,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Appointments.tsx",
-      "accessCount": 6,
-      "lastAccessed": 1775549864568,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Services.tsx",
-      "accessCount": 6,
-      "lastAccessed": 1775550208005,
-      "type": "file"
-    },
-    {
-      "path": "website/package.json",
-      "accessCount": 5,
-      "lastAccessed": 1775546716692,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Settings.tsx",
-      "accessCount": 5,
-      "lastAccessed": 1775551600906,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/shared/QuickActionsBar.tsx",
-      "accessCount": 5,
-      "lastAccessed": 1775554576019,
-      "type": "file"
-    },
-    {
-      "path": "website/src/index.css",
-      "accessCount": 5,
-      "lastAccessed": 1775557516155,
-      "type": "file"
-    },
-    {
-      "path": "website/tsconfig.json",
-      "accessCount": 4,
-      "lastAccessed": 1775546719736,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/calendar/DayView.tsx",
-      "accessCount": 4,
-      "lastAccessed": 1775549098978,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/calendar/MonthView.tsx",
-      "accessCount": 4,
-      "lastAccessed": 1775549124474,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/shared/NotificationsPanel.tsx",
-      "accessCount": 4,
-      "lastAccessed": 1775554576887,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/calendar/WeekView.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1775549111489,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/calendar/TimeSlot.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1775549141932,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/employees/EmployeeCard.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1775551004409,
-      "type": "file"
-    },
-    {
-      "path": "website/src/hooks/useEmployeesData.ts",
-      "accessCount": 3,
-      "lastAccessed": 1775551004733,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/employees/TierSelector.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1775551006407,
-      "type": "file"
-    },
-    {
-      "path": "website/src/main.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1775554537566,
-      "type": "file"
-    },
-    {
-      "path": "website/vite.config.ts",
-      "accessCount": 2,
-      "lastAccessed": 1775543645429,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/payment/MonthlyPlan/PaymentSchedule.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1775545873718,
-      "type": "file"
-    },
-    {
-      "path": "website/src/hooks/useMonthlyPlans.ts",
-      "accessCount": 2,
-      "lastAccessed": 1775545887603,
-      "type": "file"
-    },
-    {
-      "path": "website/src/data/mockMonthlyPlans.ts",
-      "accessCount": 2,
-      "lastAccessed": 1775552103333,
-      "type": "file"
-    },
-    {
-      "path": "website/index.html",
-      "accessCount": 1,
-      "lastAccessed": 1775543097812,
-      "type": "file"
-    },
-    {
-      "path": "website/postcss.config.js",
-      "accessCount": 1,
-      "lastAccessed": 1775543099599,
-      "type": "file"
-    },
-    {
-      "path": "website/src/vite-env.d.ts",
-      "accessCount": 1,
-      "lastAccessed": 1775544068943,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/payment/MonthlyPlan/MonthlyPlanCreator.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775545108238,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/payment/MonthlyPlan/InstallmentTracker.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775545132033,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/payment/MonthlyPlan/index.ts",
-      "accessCount": 1,
-      "lastAccessed": 1775545132921,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/employees/RoleMultiSelect.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775545530335,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/employees/ScheduleCalendar.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775545540796,
-      "type": "file"
-    },
-    {
-      "path": "website/src/components/employees/LinkedEmployees.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775545546534,
-      "type": "file"
-    }
-  ],
+  "hotPaths": [],
   "userDirectives": []
 }

@@ -74,6 +74,26 @@
   background: #9CA3AF;
 }
 
+/* Card section scrollbar - thin and subtle */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #E5E7EB;
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #D1D5DB;
+}
+
+/* Firefox scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #E5E7EB transparent;
+}
+
 /* ============================================
    RESPONSIVE MODAL STYLES
    Fixes scrolling on iPhone, iPad, and Desktop
@@ -98,8 +118,9 @@ body.modal-open {
   /* Mobile-first: use more screen space */
   max-height: calc(100vh - 2rem); /* 2rem margin */
   max-height: calc(100vh - env(safe-area-inset-bottom) - 2rem);
-  /* Default for larger screens */
-  @apply max-w-lg md:max-h-[85vh] max-h-[90vh];
+  /* Default for larger screens - max-width is set by the using component */
+  @apply md:max-h-[85vh] max-h-[90vh];
+  /* NOTE: Do NOT add max-w classes here. Modal width is controlled by inline max-w on the element. */
 }
 
 /* Modal content for small screens (iPhone SE, small phones) */

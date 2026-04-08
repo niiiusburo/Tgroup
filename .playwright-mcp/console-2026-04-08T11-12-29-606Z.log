@@ -1,0 +1,132 @@
+[    1150ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.0.0, gitCommit: unknown} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[    1318ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.0.0, gitCommit: unknown} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[    1318ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[    1484ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[  301489ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[  608541ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[  901508ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 1201498ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 1501602ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 1801279ms] [ERROR] Failed to load resource: net::ERR_INTERNET_DISCONNECTED @ http://76.13.16.68:5174/version.json?t=1775648550783:0
+[ 1801324ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 2103243ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 2401394ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 2701376ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 3001371ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 3301425ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 3601365ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 3901369ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 4208214ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 4501375ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 4801555ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 5101418ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 5401419ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 5701399ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 6001416ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 6301397ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 6602490ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 6902503ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 7202448ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 7502537ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 7802657ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 8102553ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 8402637ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 8702469ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 9002611ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 9302432ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 9602661ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[ 9902680ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[10275919ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775656950512:0
+[10275922ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[10575900ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775657250501:0
+[10575900ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[10875893ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775657550495:0
+[10875893ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[11175885ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775657850487:0
+[11175886ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[11475880ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775658150480:0
+[11475880ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[11775873ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775658450474:0
+[11775874ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[12076007ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775658750608:0
+[12076007ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[12376004ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775659050604:0
+[12376004ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[12676003ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775659350602:0
+[12676003ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[12976112ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775659650711:0
+[12976112ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[13276112ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775659950711:0
+[13276112ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[13576111ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775660250711:0
+[13576112ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[13876146ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775660550744:0
+[13876147ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[14176114ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775660850712:0
+[14176114ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[14476108ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775661150707:0
+[14476108ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[14776096ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775661450708:0
+[14776096ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[15076095ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775661750696:0
+[15076096ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[15376095ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_TIMED_OUT @ http://76.13.16.68:5174/version.json?t=1775662050695:0
+[15376096ms] [ERROR] [VersionCheck] Failed to check for updates: TypeError: Failed to fetch
+    at my (http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:6617)
+    at http://76.13.16.68:5174/assets/index-BOHRVYnX.js:462:8282 @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[15601497ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[15901259ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[16201270ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[16501279ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[16801269ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[17101264ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[17401274ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[17701280ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[18001273ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[18301262ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[18601532ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[18901281ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[19201266ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[19501402ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[19801721ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[20101734ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[20401874ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[20701748ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[21001758ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461
+[21301819ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.4.2, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-BOHRVYnX.js:461

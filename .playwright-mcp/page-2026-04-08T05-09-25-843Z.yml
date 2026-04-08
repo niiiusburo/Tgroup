@@ -1,0 +1,296 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e8]: TD
+    - navigation [ref=e9]:
+      - link "Overview" [ref=e10] [cursor=pointer]:
+        - /url: /
+        - img [ref=e11]
+      - link "Calendar" [ref=e13] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e14]
+      - link "Customers" [ref=e16] [cursor=pointer]:
+        - /url: /customers
+        - img [ref=e18]
+      - link "Employees" [ref=e23] [cursor=pointer]:
+        - /url: /employees
+        - img [ref=e24]
+      - link "Locations" [ref=e36] [cursor=pointer]:
+        - /url: /locations
+        - img [ref=e37]
+      - link "Service Catalog" [ref=e40] [cursor=pointer]:
+        - /url: /website
+        - img [ref=e41]
+      - link "Settings" [ref=e45] [cursor=pointer]:
+        - /url: /settings
+        - img [ref=e46]
+      - link "Permissions" [ref=e49] [cursor=pointer]:
+        - /url: /permissions
+        - img [ref=e50]
+    - generic [ref=e52]:
+      - button [ref=e53] [cursor=pointer]:
+        - img [ref=e54]
+      - button "AU" [ref=e56] [cursor=pointer]:
+        - generic [ref=e57]: AU
+  - generic [ref=e61]:
+    - banner [ref=e62]:
+      - heading "Customers" [level=1] [ref=e64]
+      - generic [ref=e65]:
+        - button "All Locations" [ref=e68] [cursor=pointer]:
+          - img [ref=e69]
+          - generic [ref=e72]: All Locations
+          - img [ref=e73]
+        - button [ref=e75] [cursor=pointer]:
+          - img [ref=e76]
+        - button [ref=e78] [cursor=pointer]:
+          - img [ref=e79]
+        - generic [ref=e83]:
+          - generic [ref=e85]: JD
+          - generic [ref=e87]: AS
+          - generic [ref=e89]: MK
+        - button "Customize Widget" [ref=e90] [cursor=pointer]:
+          - img [ref=e91]
+          - text: Customize Widget
+    - main [ref=e96]:
+      - generic [ref=e97]:
+        - generic [ref=e98]:
+          - generic [ref=e99]:
+            - img [ref=e101]
+            - generic [ref=e106]:
+              - heading "Customers" [level=1] [ref=e107]
+              - paragraph [ref=e108]: 30 patients · 30 active
+          - button "Add Customer" [ref=e109] [cursor=pointer]:
+            - img [ref=e110]
+            - text: Add Customer
+        - generic [ref=e111]:
+          - generic [ref=e113]:
+            - img [ref=e114]
+            - textbox "Search by name, phone, or email..." [ref=e117]
+          - generic [ref=e118]:
+            - button "All Status" [ref=e119] [cursor=pointer]
+            - button "Active" [ref=e120] [cursor=pointer]
+            - button "Inactive" [ref=e121] [cursor=pointer]
+            - button "Pending" [ref=e122] [cursor=pointer]
+        - generic [ref=e123]:
+          - table [ref=e125]:
+            - rowgroup [ref=e126]:
+              - row "Customer Phone Email Location Status Last Visit" [ref=e127]:
+                - columnheader "Customer" [ref=e128] [cursor=pointer]:
+                  - generic [ref=e129]: Customer
+                - columnheader "Phone" [ref=e130]:
+                  - generic [ref=e131]: Phone
+                - columnheader "Email" [ref=e132]:
+                  - generic [ref=e133]: Email
+                - columnheader "Location" [ref=e134] [cursor=pointer]:
+                  - generic [ref=e135]: Location
+                - columnheader "Status" [ref=e136] [cursor=pointer]:
+                  - generic [ref=e137]: Status
+                - columnheader "Last Visit" [ref=e138] [cursor=pointer]:
+                  - generic [ref=e139]: Last Visit
+            - rowgroup [ref=e140]:
+              - row "N NGUYỄN NGÔ QUỲNH TRÂM 0999111222 Tấm Dentist Quận 7 Active 07 Apr 2026" [ref=e141] [cursor=pointer]:
+                - cell "N NGUYỄN NGÔ QUỲNH TRÂM" [ref=e142]:
+                  - generic [ref=e143]:
+                    - generic [ref=e145]: "N"
+                    - generic [ref=e146]: NGUYỄN NGÔ QUỲNH TRÂM
+                - cell "0999111222" [ref=e147]:
+                  - generic [ref=e148]:
+                    - img [ref=e149]
+                    - text: "0999111222"
+                - cell [ref=e151]:
+                  - img [ref=e153]
+                - cell "Tấm Dentist Quận 7" [ref=e156]:
+                  - generic [ref=e157]:
+                    - img [ref=e158]
+                    - text: Tấm Dentist Quận 7
+                - cell "Active" [ref=e161]:
+                  - generic [ref=e162]: Active
+                - cell "07 Apr 2026" [ref=e164]
+              - row "P Phạm Ngọc Huy 0349762840 Tấm Dentist Thủ Đức Active 11 Feb 2026" [ref=e165] [cursor=pointer]:
+                - cell "P Phạm Ngọc Huy" [ref=e166]:
+                  - generic [ref=e167]:
+                    - generic [ref=e169]: P
+                    - generic [ref=e170]: Phạm Ngọc Huy
+                - cell "0349762840" [ref=e171]:
+                  - generic [ref=e172]:
+                    - img [ref=e173]
+                    - text: "0349762840"
+                - cell [ref=e175]:
+                  - img [ref=e177]
+                - cell "Tấm Dentist Thủ Đức" [ref=e180]:
+                  - generic [ref=e181]:
+                    - img [ref=e182]
+                    - text: Tấm Dentist Thủ Đức
+                - cell "Active" [ref=e185]:
+                  - generic [ref=e186]: Active
+                - cell "11 Feb 2026" [ref=e188]
+              - row "N NGUYỄN THANH HIỂN 0399638858 Tấm Dentist Gò Vấp Active 11 Feb 2026" [ref=e189] [cursor=pointer]:
+                - cell "N NGUYỄN THANH HIỂN" [ref=e190]:
+                  - generic [ref=e191]:
+                    - generic [ref=e193]: "N"
+                    - generic [ref=e194]: NGUYỄN THANH HIỂN
+                - cell "0399638858" [ref=e195]:
+                  - generic [ref=e196]:
+                    - img [ref=e197]
+                    - text: "0399638858"
+                - cell [ref=e199]:
+                  - img [ref=e201]
+                - cell "Tấm Dentist Gò Vấp" [ref=e204]:
+                  - generic [ref=e205]:
+                    - img [ref=e206]
+                    - text: Tấm Dentist Gò Vấp
+                - cell "Active" [ref=e209]:
+                  - generic [ref=e210]: Active
+                - cell "11 Feb 2026" [ref=e212]
+              - row "N NGÔ THỊ PHƯƠNG 0769587502 Tấm Dentist Gò Vấp Active 10 Feb 2026" [ref=e213] [cursor=pointer]:
+                - cell "N NGÔ THỊ PHƯƠNG" [ref=e214]:
+                  - generic [ref=e215]:
+                    - generic [ref=e217]: "N"
+                    - generic [ref=e218]: NGÔ THỊ PHƯƠNG
+                - cell "0769587502" [ref=e219]:
+                  - generic [ref=e220]:
+                    - img [ref=e221]
+                    - text: "0769587502"
+                - cell [ref=e223]:
+                  - img [ref=e225]
+                - cell "Tấm Dentist Gò Vấp" [ref=e228]:
+                  - generic [ref=e229]:
+                    - img [ref=e230]
+                    - text: Tấm Dentist Gò Vấp
+                - cell "Active" [ref=e233]:
+                  - generic [ref=e234]: Active
+                - cell "10 Feb 2026" [ref=e236]
+              - row "C CAO HÀ TIÊN - G 0765431477 Tấm Dentist Gò Vấp Active 07 Feb 2026" [ref=e237] [cursor=pointer]:
+                - cell "C CAO HÀ TIÊN - G" [ref=e238]:
+                  - generic [ref=e239]:
+                    - generic [ref=e241]: C
+                    - generic [ref=e242]: CAO HÀ TIÊN - G
+                - cell "0765431477" [ref=e243]:
+                  - generic [ref=e244]:
+                    - img [ref=e245]
+                    - text: "0765431477"
+                - cell [ref=e247]:
+                  - img [ref=e249]
+                - cell "Tấm Dentist Gò Vấp" [ref=e252]:
+                  - generic [ref=e253]:
+                    - img [ref=e254]
+                    - text: Tấm Dentist Gò Vấp
+                - cell "Active" [ref=e257]:
+                  - generic [ref=e258]: Active
+                - cell "07 Feb 2026" [ref=e260]
+              - row "L LƯU NGỌC THUÝ VY 0345935433 Tấm Dentist Quận 10 Active 27 Jan 2026" [ref=e261] [cursor=pointer]:
+                - cell "L LƯU NGỌC THUÝ VY" [ref=e262]:
+                  - generic [ref=e263]:
+                    - generic [ref=e265]: L
+                    - generic [ref=e266]: LƯU NGỌC THUÝ VY
+                - cell "0345935433" [ref=e267]:
+                  - generic [ref=e268]:
+                    - img [ref=e269]
+                    - text: "0345935433"
+                - cell [ref=e271]:
+                  - img [ref=e273]
+                - cell "Tấm Dentist Quận 10" [ref=e276]:
+                  - generic [ref=e277]:
+                    - img [ref=e278]
+                    - text: Tấm Dentist Quận 10
+                - cell "Active" [ref=e281]:
+                  - generic [ref=e282]: Active
+                - cell "27 Jan 2026" [ref=e284]
+              - row "N NGUYỄN THỊ NHƯ Ý 0353993861 Tấm Dentist Gò Vấp Active 24 Jan 2026" [ref=e285] [cursor=pointer]:
+                - cell "N NGUYỄN THỊ NHƯ Ý" [ref=e286]:
+                  - generic [ref=e287]:
+                    - generic [ref=e289]: "N"
+                    - generic [ref=e290]: NGUYỄN THỊ NHƯ Ý
+                - cell "0353993861" [ref=e291]:
+                  - generic [ref=e292]:
+                    - img [ref=e293]
+                    - text: "0353993861"
+                - cell [ref=e295]:
+                  - img [ref=e297]
+                - cell "Tấm Dentist Gò Vấp" [ref=e300]:
+                  - generic [ref=e301]:
+                    - img [ref=e302]
+                    - text: Tấm Dentist Gò Vấp
+                - cell "Active" [ref=e305]:
+                  - generic [ref=e306]: Active
+                - cell "24 Jan 2026" [ref=e308]
+              - row "D DƯƠNG NHẬT AN 0936666321 Tấm Dentist Quận 3 Active 31 Dec 2025" [ref=e309] [cursor=pointer]:
+                - cell "D DƯƠNG NHẬT AN" [ref=e310]:
+                  - generic [ref=e311]:
+                    - generic [ref=e313]: D
+                    - generic [ref=e314]: DƯƠNG NHẬT AN
+                - cell "0936666321" [ref=e315]:
+                  - generic [ref=e316]:
+                    - img [ref=e317]
+                    - text: "0936666321"
+                - cell [ref=e319]:
+                  - img [ref=e321]
+                - cell "Tấm Dentist Quận 3" [ref=e324]:
+                  - generic [ref=e325]:
+                    - img [ref=e326]
+                    - text: Tấm Dentist Quận 3
+                - cell "Active" [ref=e329]:
+                  - generic [ref=e330]: Active
+                - cell "31 Dec 2025" [ref=e332]
+              - row "T Trần Ngọc Kim Tỷ 0938256419 Tấm Dentist Thủ Đức Active 27 Dec 2025" [ref=e333] [cursor=pointer]:
+                - cell "T Trần Ngọc Kim Tỷ" [ref=e334]:
+                  - generic [ref=e335]:
+                    - generic [ref=e337]: T
+                    - generic [ref=e338]: Trần Ngọc Kim Tỷ
+                - cell "0938256419" [ref=e339]:
+                  - generic [ref=e340]:
+                    - img [ref=e341]
+                    - text: "0938256419"
+                - cell [ref=e343]:
+                  - img [ref=e345]
+                - cell "Tấm Dentist Thủ Đức" [ref=e348]:
+                  - generic [ref=e349]:
+                    - img [ref=e350]
+                    - text: Tấm Dentist Thủ Đức
+                - cell "Active" [ref=e353]:
+                  - generic [ref=e354]: Active
+                - cell "27 Dec 2025" [ref=e356]
+              - row "Q QUÁCH ĐẶNG QUỲNH ANH 0784958752 Tấm Dentist Quận 3 Active 17 Dec 2025" [ref=e357] [cursor=pointer]:
+                - cell "Q QUÁCH ĐẶNG QUỲNH ANH" [ref=e358]:
+                  - generic [ref=e359]:
+                    - generic [ref=e361]: Q
+                    - generic [ref=e362]: QUÁCH ĐẶNG QUỲNH ANH
+                - cell "0784958752" [ref=e363]:
+                  - generic [ref=e364]:
+                    - img [ref=e365]
+                    - text: "0784958752"
+                - cell [ref=e367]:
+                  - img [ref=e369]
+                - cell "Tấm Dentist Quận 3" [ref=e372]:
+                  - generic [ref=e373]:
+                    - img [ref=e374]
+                    - text: Tấm Dentist Quận 3
+                - cell "Active" [ref=e377]:
+                  - generic [ref=e378]: Active
+                - cell "17 Dec 2025" [ref=e380]
+          - generic [ref=e381]:
+            - generic [ref=e382]: Showing 1–10 of 30
+            - generic [ref=e383]:
+              - button [disabled] [ref=e384]:
+                - img [ref=e385]
+              - button "1" [ref=e387] [cursor=pointer]
+              - button "2" [ref=e388] [cursor=pointer]
+              - button "3" [ref=e389] [cursor=pointer]
+              - button [ref=e390] [cursor=pointer]:
+                - img [ref=e391]
+    - generic [ref=e394]:
+      - generic [ref=e396]:
+        - img [ref=e398]
+        - generic [ref=e401]:
+          - heading "Update Available" [level=4] [ref=e402]
+          - paragraph [ref=e403]: New version 0.1.6 is ready. Click to refresh.
+          - generic [ref=e404]:
+            - button "Update Now" [ref=e405] [cursor=pointer]:
+              - img [ref=e406]
+              - text: Update Now
+            - button "Later" [ref=e411] [cursor=pointer]
+        - button [ref=e412] [cursor=pointer]:
+          - img [ref=e413]
+      - button "v0.1.7 (b5346dd)" [ref=e417] [cursor=pointer]:
+        - img [ref=e418]
+        - generic [ref=e421]: v0.1.7
+        - generic [ref=e422]: (b5346dd)

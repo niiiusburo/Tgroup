@@ -1,0 +1,6 @@
+{"t":0,"agent":"a8ca7cb","agent_type":"claude-code-guide","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"a8ca7cb","agent_type":"claude-code-guide","event":"agent_stop","success":true,"duration_ms":14644}
+{"t":0,"agent":"ad758fc","agent_type":"Explore","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"ad758fc","agent_type":"Explore","event":"agent_stop","success":true,"duration_ms":35799}
+{"t":0,"agent":"system","event":"keyword_detected","keyword":"code-review"}
+{"t":0,"agent":"aa528a1","agent_type":"code-reviewer","event":"agent_start","parent_mode":"none"}

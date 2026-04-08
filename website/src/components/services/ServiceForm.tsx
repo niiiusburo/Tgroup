@@ -1,11 +1,25 @@
 /**
  * ServiceForm - Create/edit service record modal form with real API data
  * @crossref:used-in[Services, Appointments]
- * @crossref:uses[ServiceCatalogSelector, CustomerSelector, DoctorSelector, DatePicker]
- * @crossref:matches[EditAppointmentModal styling]
+ * @crossref:uses[ServiceCatalogSelector, CustomerSelector, DoctorSelector, LocationSelector, DatePicker]
+ * @crossref:matches[AppointmentForm DESIGN STANDARD]
+ *
+ * ╔════════════════════════════════════════════════════════════════════════╗
+ * ║  FORM FAMILY — @crossref:related[]                                     ║
+ * ╠════════════════════════════════════════════════════════════════════════╣
+ * ║  @crossref:related[AppointmentForm] — SISTER FORM                      ║
+ * ║    • Header/footer/label/input styling MUST match                      ║
+ * ║    • Shared selectors (CustomerSelector, DoctorSelector, etc.)         ║
+ * ║                                                                        ║
+ * ║  @crossref:related[PaymentForm] — SISTER FORM                          ║
+ * ║    • Same design standard, same shared components                      ║
+ * ║                                                                        ║
+ * ║  @crossref:related[EmployeeForm] — SISTER FORM                         ║
+ * ║    • Same design standard                                              ║
+ * ╚════════════════════════════════════════════════════════════════════════╝
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X, ClipboardPlus, Edit2, User, Stethoscope, MapPin, CalendarDays, Clock, FileText, DollarSign, Hash, Check } from 'lucide-react';
 import { ServiceCatalogSelector } from '@/components/shared/ServiceCatalogSelector';
 import { CustomerSelector } from '@/components/shared/CustomerSelector';
@@ -42,11 +56,10 @@ interface ServiceFormProps {
 }
 
 export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: ServiceFormProps) {
-  // Fetch real data from API
   const { customers: apiCustomers, loading: customersLoading } = useCustomers();
   const { employees: apiEmployees, isLoading: employeesLoading } = useEmployees();
   const { allLocations: apiLocations, isLoading: locationsLoading } = useLocations();
-  const { products, isLoading: productsLoading } = useProducts({ limit: 1000 }); // Load all 555+ services
+  const { products, isLoading: productsLoading } = useProducts({ limit: 1000 });
 
   // Form state
   const [catalogItemId, setCatalogItemId] = useState<string | null>(initialData?.catalogItemId ?? null);
@@ -62,7 +75,6 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Sync with initialData when editing
   useEffect(() => {
     if (initialData) {
       setCatalogItemId(initialData.catalogItemId ?? null);
@@ -75,113 +87,81 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
       setToothInput(initialData.toothNumbers?.join(', ') ?? '');
       setTotalCostOverride(initialData.totalCost ? String(initialData.totalCost) : '');
     }
-  }, [initialData]);
+  }, [initialData?.id]);
 
-  // Convert API data to selector format
   const customers: Customer[] = apiCustomers.map(c => ({
-    id: c.id,
-    name: c.name,
-    phone: c.phone,
-    email: c.email,
-    locationId: c.locationId,
-    status: c.status,
-    lastVisit: c.lastVisit,
+    id: c.id, name: c.name, phone: c.phone, email: c.email,
+    locationId: c.locationId, status: c.status, lastVisit: c.lastVisit,
   }));
 
   const employees: Employee[] = apiEmployees.map(e => ({
-    id: e.id,
-    name: e.name,
+    id: e.id, name: e.name,
     avatar: e.avatar || e.name.charAt(0).toUpperCase(),
     tier: (e.tier as Employee['tier']) || 'mid',
     roles: (e.roles as Employee['roles']) || ['dentist'],
     status: (e.status as Employee['status']) || 'active',
-    locationId: e.locationId || '',
-    locationName: e.locationName || '',
-    phone: e.phone || '',
-    email: e.email || '',
-    schedule: e.schedule || [],
-    linkedEmployeeIds: e.linkedEmployeeIds || [],
-    hireDate: e.hireDate || '',
+    locationId: e.locationId || '', locationName: e.locationName || '',
+    phone: e.phone || '', email: e.email || '', schedule: e.schedule || [],
+    linkedEmployeeIds: e.linkedEmployeeIds || [], hireDate: e.hireDate || '',
   }));
 
   const locations: Location[] = apiLocations.map(l => ({
-    id: l.id,
-    name: l.name,
-    address: l.address || '',
-    phone: l.phone || '',
+    id: l.id, name: l.name, address: l.address || '', phone: l.phone || '',
     status: (l.status as Location['status']) || 'active',
-    doctorCount: 0,
-    patientCount: 0,
-    appointmentCount: 0,
+    doctorCount: 0, patientCount: 0, appointmentCount: 0,
   }));
 
-  // Map real products to ServiceCatalogItem format
-  const serviceCatalog: ServiceCatalogItem[] = products.map((p: Product) => ({
-    id: p.id,
-    name: p.name,
-    category: (p.categoryName?.toLowerCase().includes('ortho') ? 'orthodontics' :
-               p.categoryName?.toLowerCase().includes('cosmetic') ? 'cosmetic' :
-               p.categoryName?.toLowerCase().includes('surgery') ? 'surgery' :
-               p.categoryName?.toLowerCase().includes('clean') ? 'cleaning' :
-               p.categoryName?.toLowerCase().includes('consult') ? 'consultation' :
-               p.categoryName?.toLowerCase().includes('emergency') ? 'emergency' :
-               'treatment') as AppointmentType,
-    description: p.categoryName || 'Dental service',
-    defaultPrice: p.listPrice,
-    estimatedDuration: 30, // Default duration since API doesn't provide this
-    totalVisits: 1, // Default since API doesn't provide this
-  }));
-
-  const selectedCatalog: ServiceCatalogItem | undefined = serviceCatalog.find(
-    (c) => c.id === catalogItemId,
+  const serviceCatalog: ServiceCatalogItem[] = useMemo(() =>
+    products.map((p: Product) => ({
+      id: p.id, name: p.name,
+      category: (p.categoryName?.toLowerCase().includes('ortho') ? 'orthodontics' :
+                 p.categoryName?.toLowerCase().includes('cosmetic') ? 'cosmetic' :
+                 p.categoryName?.toLowerCase().includes('surgery') ? 'surgery' :
+                 p.categoryName?.toLowerCase().includes('clean') ? 'cleaning' :
+                 p.categoryName?.toLowerCase().includes('consult') ? 'consultation' :
+                 p.categoryName?.toLowerCase().includes('emergency') ? 'emergency' :
+                 'treatment') as AppointmentType,
+      description: p.categoryName || 'Dental service',
+      defaultPrice: p.listPrice,
+      estimatedDuration: 30,
+      totalVisits: 1,
+    })),
+    [products]
   );
+
+  const selectedCatalog = serviceCatalog.find(c => c.id === catalogItemId);
 
   function validate(): boolean {
     const newErrors: Record<string, string> = {};
-    if (!catalogItemId) newErrors.service = 'Service is required';
-    if (!customerId) newErrors.customer = 'Customer is required';
-    if (!doctorId) newErrors.doctor = 'Doctor is required';
-    if (!locationId) newErrors.location = 'Location is required';
-    if (!startDate) newErrors.startDate = 'Start date is required';
+    if (!catalogItemId) newErrors.service = 'Vui lòng chọn dịch vụ';
+    if (!customerId) newErrors.customer = 'Vui lòng chọn khách hàng';
+    if (!doctorId) newErrors.doctor = 'Vui lòng chọn bác sĩ';
+    if (!locationId) newErrors.location = 'Vui lòng chọn chi nhánh';
+    if (!startDate) newErrors.startDate = 'Vui lòng chọn ngày bắt đầu';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(e?: React.FormEvent) {
+    e?.preventDefault();
     if (!validate()) return;
 
-    const customer = customers.find((c) => c.id === customerId);
-    const doctor = employees.find((emp) => emp.id === doctorId);
-    const location = locations.find((l) => l.id === locationId);
-
+    const customer = customers.find(c => c.id === customerId);
+    const doctor = employees.find(emp => emp.id === doctorId);
+    const location = locations.find(l => l.id === locationId);
     if (!customer || !doctor || !location || !selectedCatalog) return;
 
-    const cost = totalCostOverride
-      ? Number(totalCostOverride)
-      : selectedCatalog.defaultPrice;
-
-    const toothNumbers = toothInput
-      ? toothInput.split(',').map((t) => t.trim()).filter(Boolean)
-      : [];
+    const cost = totalCostOverride ? Number(totalCostOverride) : selectedCatalog.defaultPrice;
+    const toothNumbers = toothInput ? toothInput.split(',').map(t => t.trim()).filter(Boolean) : [];
 
     onSubmit({
-      customerId: customer.id,
-      customerName: customer.name,
-      customerPhone: customer.phone,
-      catalogItemId: selectedCatalog.id,
-      serviceName: selectedCatalog.name,
-      category: selectedCatalog.category,
-      doctorId: doctor.id,
-      doctorName: doctor.name,
-      locationId: location.id,
-      locationName: location.name,
-      totalVisits: selectedCatalog.totalVisits,
-      totalCost: cost,
-      startDate,
-      expectedEndDate: expectedEndDate || startDate,
-      notes: notes.trim(),
-      toothNumbers,
+      customerId: customer.id, customerName: customer.name, customerPhone: customer.phone,
+      catalogItemId: selectedCatalog.id, serviceName: selectedCatalog.name,
+      category: selectedCatalog.category, doctorId: doctor.id, doctorName: doctor.name,
+      locationId: location.id, locationName: location.name,
+      totalVisits: selectedCatalog.totalVisits, totalCost: cost,
+      startDate, expectedEndDate: expectedEndDate || startDate,
+      notes: notes.trim(), toothNumbers,
     });
   }
 
@@ -189,204 +169,146 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
 
   return (
     <div className="modal-container">
-      {/* Backdrop with blur */}
-      <div
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
-      />
-
-      {/* Modal */}
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
       <div className="modal-content animate-in zoom-in-95 duration-200">
-        {/* Header with gradient */}
+        {/* Header */}
         <div className="modal-header relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
           <div className="relative flex items-start justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white/20 rounded-xl">
-                {isEdit ? (
-                  <Edit2 className="w-5 h-5 text-white" />
-                ) : (
-                  <ClipboardPlus className="w-5 h-5 text-white" />
-                )}
+                {isEdit ? <Edit2 className="w-5 h-5 text-white" /> : <ClipboardPlus className="w-5 h-5 text-white" />}
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">
-                  {isEdit ? 'Edit Service Record' : 'New Service Record'}
-                </h2>
+                <h2 className="text-xl font-bold text-white">{isEdit ? 'Sửa dịch vụ' : 'Tạo dịch vụ'}</h2>
                 <p className="text-sm text-orange-100 mt-0.5">
-                  {isEdit ? 'Update treatment details' : 'Create a new service treatment'}
+                  {isEdit ? 'Cập nhật thông tin điều trị' : 'Tạo hồ sơ dịch vụ điều trị mới'}
                 </p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors"
-            >
+            <button type="button" onClick={onClose} className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors">
               <X className="w-5 h-5 text-white" />
             </button>
           </div>
         </div>
 
-        {/* Scrollable Form */}
+        {/* Form Body */}
         <form onSubmit={handleSubmit} className="modal-body px-6 py-6 space-y-5">
           {isLoading && (
             <div className="flex items-center justify-center py-8 text-gray-400">
               <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2" />
-              Loading...
+              Đang tải...
             </div>
           )}
 
-          {/* Service Catalog */}
+          {/* Dịch vụ */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Stethoscope className="w-3.5 h-3.5" />
-              Service
+              Dịch vụ
             </label>
-            <ServiceCatalogSelector
-              catalog={serviceCatalog}
-              selectedId={catalogItemId}
-              onChange={setCatalogItemId}
-            />
+            <ServiceCatalogSelector catalog={serviceCatalog} selectedId={catalogItemId} onChange={setCatalogItemId} placeholder="Chọn dịch vụ..." />
             {errors.service && <p className="mt-2 text-xs text-red-500">{errors.service}</p>}
             {selectedCatalog && (
               <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span>{selectedCatalog.totalVisits} visit{selectedCatalog.totalVisits > 1 ? 's' : ''} · ~{selectedCatalog.estimatedDuration}min each</span>
+                <span>{selectedCatalog.totalVisits} lần khám · ~{selectedCatalog.estimatedDuration} phút/lần</span>
               </div>
             )}
           </div>
 
-          {/* Customer */}
+          {/* Khách hàng */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
-              Customer
+              Khách hàng
             </label>
-            <CustomerSelector
-              customers={customers}
-              selectedId={customerId}
-              onChange={setCustomerId}
-            />
+            <CustomerSelector customers={customers} selectedId={customerId} onChange={setCustomerId} />
             {errors.customer && <p className="mt-2 text-xs text-red-500">{errors.customer}</p>}
           </div>
 
-          {/* Doctor */}
+          {/* Bác sĩ */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Stethoscope className="w-3.5 h-3.5" />
-              Doctor
+              Bác sĩ
             </label>
-            <DoctorSelector
-              employees={employees}
-              selectedId={doctorId}
-              onChange={setDoctorId}
-              filterRoles={['dentist', 'orthodontist']}
-            />
+            <DoctorSelector employees={employees} selectedId={doctorId} onChange={setDoctorId} filterRoles={['dentist', 'orthodontist']} />
             {errors.doctor && <p className="mt-2 text-xs text-red-500">{errors.doctor}</p>}
           </div>
 
-          {/* Location */}
+          {/* Chi nhánh */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <MapPin className="w-3.5 h-3.5" />
-              Location
+              Chi nhánh
             </label>
-            <LocationSelector
-              locations={locations}
-              selectedId={locationId}
-              onChange={setLocationId}
-              excludeAll
-            />
+            <LocationSelector locations={locations} selectedId={locationId} onChange={setLocationId} excludeAll />
             {errors.location && <p className="mt-2 text-xs text-red-500">{errors.location}</p>}
           </div>
 
-          {/* Dates - Custom DatePickers */}
+          {/* Ngày bắt đầu + Ngày kết thúc */}
           <div className="grid grid-cols-2 gap-4">
-            <DatePicker
-              value={startDate}
-              onChange={setStartDate}
-              label="Start Date"
-              icon={<CalendarDays className="w-3.5 h-3.5" />}
-              error={errors.startDate}
-            />
-            <DatePicker
-              value={expectedEndDate}
-              onChange={setExpectedEndDate}
-              label="Expected End"
-              icon={<Clock className="w-3.5 h-3.5" />}
-              minDate={startDate}
-            />
+            <DatePicker value={startDate} onChange={setStartDate} label="Ngày bắt đầu" icon={<CalendarDays className="w-3.5 h-3.5" />} error={errors.startDate} />
+            <DatePicker value={expectedEndDate} onChange={setExpectedEndDate} label="Ngày kết thúc" icon={<Clock className="w-3.5 h-3.5" />} minDate={startDate} />
           </div>
 
-          {/* Cost and Tooth */}
+          {/* Chi phí + Số răng */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                 <DollarSign className="w-3.5 h-3.5" />
-                Total Cost
+                Tổng chi phí
               </label>
               <input
-                type="number"
-                value={totalCostOverride}
+                type="number" value={totalCostOverride}
                 onChange={(e) => setTotalCostOverride(e.target.value)}
                 placeholder={selectedCatalog ? String(selectedCatalog.defaultPrice) : '0'}
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
               />
               {selectedCatalog && (
                 <p className="mt-1 text-xs text-gray-400">
-                  Default: {new Intl.NumberFormat('vi-VN').format(selectedCatalog.defaultPrice)} VND
+                  Mặc định: {new Intl.NumberFormat('vi-VN').format(selectedCatalog.defaultPrice)} VND
                 </p>
               )}
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                 <Hash className="w-3.5 h-3.5" />
-                Tooth Numbers
+                Số răng
               </label>
               <input
-                type="text"
-                value={toothInput}
+                type="text" value={toothInput}
                 onChange={(e) => setToothInput(e.target.value)}
-                placeholder="e.g. #11, #21"
+                placeholder="vd: #11, #21"
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
               />
             </div>
           </div>
 
-          {/* Notes */}
+          {/* Ghi chú */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
-              Notes
+              Ghi chú
             </label>
             <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              placeholder="Treatment notes..."
+              value={notes} onChange={(e) => setNotes(e.target.value)}
+              rows={3} placeholder="Ghi chú điều trị..."
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
             />
           </div>
         </form>
 
         {/* Footer */}
-        <div className="px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
-          >
-            Cancel
+        <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
+          <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
+            Hủy bỏ
           </button>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isLoading}
-            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25"
-          >
+          <button type="button" onClick={() => handleSubmit()} disabled={isLoading}
+            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25">
             <Check className="w-4 h-4" />
-            {isEdit ? 'Update Service Record' : 'Create Service Record'}
+            {isEdit ? 'Cập nhật' : 'Tạo dịch vụ'}
           </button>
         </div>
       </div>

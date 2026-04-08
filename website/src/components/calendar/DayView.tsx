@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { User, Phone, Clock, MessageSquare, Pencil, UserPlus } from 'lucide-react';
 import { type CalendarAppointment } from '@/data/mockCalendar';
+import { APPOINTMENT_CARD_COLORS } from '@/constants';
 
 /**
  * DayView Component - card grid layout for a single day's appointments
@@ -28,31 +29,21 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }>
   cancelled:    { label: 'Hủy hẹn',     bg: 'bg-red-500',    text: 'text-white' },
 };
 
-// Card background colors based on appointment color code
-const CARD_BG: Record<string, string> = {
-  '0': 'bg-blue-50 border-blue-200',
-  '1': 'bg-emerald-50 border-emerald-200',
-  '2': 'bg-amber-50 border-amber-200',
-  '3': 'bg-red-50 border-red-200',
-  '4': 'bg-violet-50 border-violet-200',
-  '5': 'bg-pink-50 border-pink-200',
-  '6': 'bg-cyan-50 border-cyan-200',
-  '7': 'bg-lime-50 border-lime-200',
-};
+// Color mapping uses SINGLE SOURCE OF TRUTH from constants
+function getCardBg(color: string | null | undefined): string {
+  if (color && APPOINTMENT_CARD_COLORS[color]) {
+    const c = APPOINTMENT_CARD_COLORS[color];
+    return `${c.bg} ${c.border}`;
+  }
+  return `${APPOINTMENT_CARD_COLORS['0'].bg} ${APPOINTMENT_CARD_COLORS['0'].border}`;
+}
 
-const CARD_NAME_COLOR: Record<string, string> = {
-  '0': 'text-blue-600',
-  '1': 'text-emerald-600',
-  '2': 'text-amber-700',
-  '3': 'text-red-600',
-  '4': 'text-violet-600',
-  '5': 'text-pink-600',
-  '6': 'text-cyan-600',
-  '7': 'text-lime-700',
-};
-
-const DEFAULT_CARD_BG = 'bg-blue-50 border-blue-200';
-const DEFAULT_NAME_COLOR = 'text-blue-600';
+function getCardNameColor(color: string | null | undefined): string {
+  if (color && APPOINTMENT_CARD_COLORS[color]) {
+    return APPOINTMENT_CARD_COLORS[color].text;
+  }
+  return APPOINTMENT_CARD_COLORS['0'].text;
+}
 
 // ── Time group helpers ───────────────────────────────────────────
 
@@ -90,8 +81,8 @@ interface DayCardProps {
 
 function DayCard({ appointment, onClick, onEdit }: DayCardProps) {
   const status = STATUS_CONFIG[appointment.status] ?? STATUS_CONFIG.scheduled;
-  const cardBg = appointment.color ? (CARD_BG[appointment.color] ?? DEFAULT_CARD_BG) : DEFAULT_CARD_BG;
-  const nameColor = appointment.color ? (CARD_NAME_COLOR[appointment.color] ?? DEFAULT_NAME_COLOR) : DEFAULT_NAME_COLOR;
+  const cardBg = getCardBg(appointment.color);
+  const nameColor = getCardNameColor(appointment.color);
 
   return (
     <div className={`rounded-lg border ${cardBg} overflow-hidden`}>
@@ -210,8 +201,8 @@ export function DayView({
               <span className="text-xs font-medium text-gray-400">{group.time}</span>
             </div>
 
-            {/* Cards grid — 4 columns */}
-            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {/* Cards grid — 4 columns always */}
+            <div className="flex-1 grid grid-cols-4 gap-3">
               {group.appointments.map((apt) => (
                 <DayCard
                   key={apt.id}

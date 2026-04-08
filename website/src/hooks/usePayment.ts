@@ -22,7 +22,7 @@ export interface CreatePaymentInput {
   readonly serviceId: string;
   readonly serviceName: string;
   readonly amount: number;
-  readonly method: PaymentMethod;
+  readonly method: PaymentMethod | 'deposit' | 'mixed';
   readonly locationName: string;
   readonly notes: string;
 }

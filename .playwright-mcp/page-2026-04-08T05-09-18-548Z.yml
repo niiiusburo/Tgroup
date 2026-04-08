@@ -1,0 +1,70 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e8]: TD
+    - navigation [ref=e9]:
+      - link "Overview" [ref=e10] [cursor=pointer]:
+        - /url: /
+        - img [ref=e12]
+      - link "Calendar" [ref=e14] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e15]
+      - link "Customers" [ref=e17] [cursor=pointer]:
+        - /url: /customers
+        - img [ref=e18]
+      - link "Employees" [ref=e23] [cursor=pointer]:
+        - /url: /employees
+        - img [ref=e24]
+      - link "Locations" [ref=e36] [cursor=pointer]:
+        - /url: /locations
+        - img [ref=e37]
+      - link "Service Catalog" [ref=e40] [cursor=pointer]:
+        - /url: /website
+        - img [ref=e41]
+      - link "Settings" [ref=e45] [cursor=pointer]:
+        - /url: /settings
+        - img [ref=e46]
+      - link "Permissions" [ref=e49] [cursor=pointer]:
+        - /url: /permissions
+        - img [ref=e50]
+    - generic [ref=e52]:
+      - button [ref=e53] [cursor=pointer]:
+        - img [ref=e54]
+      - button "AU" [ref=e56] [cursor=pointer]:
+        - generic [ref=e57]: AU
+  - generic [ref=e61]:
+    - banner [ref=e62]:
+      - heading "Overview" [level=1] [ref=e64]
+      - generic [ref=e65]:
+        - button "All Locations" [ref=e68] [cursor=pointer]:
+          - img [ref=e69]
+          - generic [ref=e72]: All Locations
+          - img [ref=e73]
+        - button [ref=e75] [cursor=pointer]:
+          - img [ref=e76]
+        - button [ref=e78] [cursor=pointer]:
+          - img [ref=e79]
+        - generic [ref=e83]:
+          - generic [ref=e85]: JD
+          - generic [ref=e87]: AS
+          - generic [ref=e89]: MK
+        - button "Customize Widget" [ref=e90] [cursor=pointer]:
+          - img [ref=e91]
+          - text: Customize Widget
+    - main [ref=e96]
+    - generic [ref=e100]:
+      - generic [ref=e102]:
+        - img [ref=e104]
+        - generic [ref=e107]:
+          - heading "Update Available" [level=4] [ref=e108]
+          - paragraph [ref=e109]: New version 0.1.6 is ready. Click to refresh.
+          - generic [ref=e110]:
+            - button "Update Now" [ref=e111] [cursor=pointer]:
+              - img [ref=e112]
+              - text: Update Now
+            - button "Later" [ref=e117] [cursor=pointer]
+        - button [ref=e118] [cursor=pointer]:
+          - img [ref=e119]
+      - button "v0.1.7 (b5346dd)" [ref=e123] [cursor=pointer]:
+        - img [ref=e124]
+        - generic [ref=e127]: v0.1.7
+        - generic [ref=e128]: (b5346dd)

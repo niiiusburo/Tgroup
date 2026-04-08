@@ -1,0 +1,23 @@
+[   11879ms] [LOG] [VersionDisplay] Render: {isUpdateAvailable: false, currentVersion: undefined, latestVersion: undefined, dismissedHighlights: } @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   11882ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.0.0, gitCommit: unknown} @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   11882ms] [LOG] [VersionCheck]   window.__APP_VERSION__: undefined @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   11919ms] [LOG] [VersionDisplay] Render: {isUpdateAvailable: false, currentVersion: 0.0.0, latestVersion: undefined, dismissedHighlights: } @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   11921ms] [LOG] [VersionDisplay] Render: {isUpdateAvailable: false, currentVersion: 0.0.0, latestVersion: undefined, dismissedHighlights: } @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   11982ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.0.0, gitCommit: unknown} @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   11982ms] [LOG] [VersionCheck]   window.__APP_VERSION__: undefined @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   11983ms] [LOG] [VersionCheck] === VERSION COMPARISON === @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   11983ms] [LOG] [VersionCheck]   currentVersion state: null @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   11983ms] [LOG] [VersionCheck]   current (used for compare): 0.0.0 @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   11983ms] [LOG] [VersionCheck]   serverVersion: 0.4.2 @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   11983ms] [LOG] [VersionCheck]   isNewerVersion result: true @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   11983ms] [LOG] [VersionCheck] ========================== @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   11983ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.4.2, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   11984ms] [LOG] [VersionDisplay] Render: {isUpdateAvailable: true, currentVersion: 0.0.0, latestVersion: 0.4.2, dismissedHighlights: } @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   12082ms] [LOG] [VersionCheck] === VERSION COMPARISON === @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   12082ms] [LOG] [VersionCheck]   currentVersion state: {version: 0.0.0, buildTime: 2026-04-08T17:09:38.330Z, gitCommit: unknown, gitBranch: unknown} @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   12082ms] [LOG] [VersionCheck]   current (used for compare): 0.0.0 @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   12082ms] [LOG] [VersionCheck]   serverVersion: 0.4.2 @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   12082ms] [LOG] [VersionCheck]   isNewerVersion result: true @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   12082ms] [LOG] [VersionCheck] ========================== @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   12082ms] [LOG] [VersionCheck] Check result: {current: 0.0.0, server: 0.4.2, hasUpdate: true, wasDismissed: false} @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461
+[   12083ms] [LOG] [VersionDisplay] Render: {isUpdateAvailable: true, currentVersion: 0.0.0, latestVersion: 0.4.2, dismissedHighlights: } @ http://76.13.16.68:5174/assets/index-CtlQntSa.js:461

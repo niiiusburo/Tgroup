@@ -1,20 +1,28 @@
 import { X, Clock, User, MapPin, Phone, FileText, Tag, Calendar, Stethoscope, Pencil } from 'lucide-react';
-import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_TYPE_LABELS } from '@/constants';
+import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_TYPE_LABELS, APPOINTMENT_STATUS_LABELS_VI } from '@/constants';
 import { STATUS_LABELS, type CalendarAppointment } from '@/data/mockCalendar';
 
 /**
  * AppointmentDetailsModal - Full appointment info overlay
  * @crossref:used-in[Calendar, Appointments]
  * @crossref:uses[EditAppointmentModal styling reference]
+ *
+ * ╔════════════════════════════════════════════════════════════════════════╗
+ * ║  APPOINTMENT MODULE FAMILY — @crossref:related[]                       ║
+ * ╠════════════════════════════════════════════════════════════════════════╣
+ * ║  This component is the VIEW variant of the appointment module.         ║
+ * ║  When editing this file, you MUST also check:                          ║
+ * ║                                                                        ║
+ * ║  @crossref:related[AppointmentForm]  — CREATE variant                  ║
+ * ║    • Status labels here MUST match STATUS_OPTIONS in AppointmentForm    ║
+ * ║                                                                        ║
+ * ║  @crossref:related[EditAppointmentModal] — EDIT variant                ║
+ * ║    • Status labels here MUST match STATUS_OPTIONS in EditModal          ║
+ * ║                                                                        ║
+ * ║  @crossref:color-source[constants/index.ts APPOINTMENT_CARD_COLORS]    ║
+ * ║    • Status labels should come from constants, not local STATUS_LABELS ║
+ * ╚════════════════════════════════════════════════════════════════════════╝
  */
-
-const STATUS_LABELS_VI: Record<string, string> = {
-  scheduled: 'Đã đặt lịch',
-  confirmed: 'Đã xác nhận',
-  'in-progress': 'Đang khám',
-  completed: 'Hoàn tất',
-  cancelled: 'Đã huỷ',
-};
 
 interface AppointmentDetailsModalProps {
   readonly appointment: CalendarAppointment | null;
@@ -26,7 +34,7 @@ export function AppointmentDetailsModal({ appointment, onClose, onEdit }: Appoin
   if (!appointment) return null;
 
   const typeColors = APPOINTMENT_TYPE_COLORS[appointment.appointmentType];
-  const statusLabel = STATUS_LABELS_VI[appointment.status] ?? STATUS_LABELS[appointment.status];
+  const statusLabel = APPOINTMENT_STATUS_LABELS_VI[appointment.status] ?? STATUS_LABELS[appointment.status];
   const typeLabel = APPOINTMENT_TYPE_LABELS[appointment.appointmentType];
 
   return (

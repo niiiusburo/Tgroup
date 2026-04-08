@@ -6,11 +6,13 @@ import { TodayAppointments } from '@/components/modules/TodayAppointments';
 import { useOverviewAppointments } from '@/hooks/useOverviewAppointments';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { AppointmentHoverProvider } from '@/contexts/AppointmentHoverContext';
+import { QuickAddAppointmentButton } from '@/components/shared/QuickAddAppointmentButton';
 
 /**
  * Overview Dashboard Page — Three-Zone Layout
  * @crossref:route[/]
  * @crossref:used-in[AppRouter]
+ * @crossref:uses[QuickAddAppointmentButton]
  *
  * Zone 1 (top-left):    Patient Check-in / Reception — downline status cards
  * Zone 2 (bottom-left): Today's Services / Activity — service table
@@ -52,9 +54,17 @@ export function Overview() {
 
   return (
     <AppointmentHoverProvider>
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5 min-h-0 lg:h-[calc(100vh-100px)]">
+      {/* Quick Add Appointment Button — Top Right */}
+      <div className="flex justify-end mb-6">
+        <QuickAddAppointmentButton
+          onSuccess={refresh}
+          size="sm"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 min-h-0 lg:h-[calc(100vh-100px)]">
         {/* Left column: Zone 1 + Zone 2 stacked */}
-        <div className="flex flex-col gap-5 min-h-0 overflow-y-auto">
+        <div className="flex flex-col gap-6 min-h-0 overflow-y-auto">
           {/* Zone 1: Patient Check-in */}
           <PatientCheckIn
             appointments={zone1Appointments}

@@ -1,22 +1,65 @@
 /**
  * AppointmentForm - Create/edit appointment form with real API data
  * @crossref:used-in[Appointments, Calendar, Overview]
- * @crossref:uses[CustomerSelector, DoctorSelector, LocationSelector, DatePicker, TimePicker]
+ * @crossref:uses[CustomerSelector, DoctorSelector, LocationSelector, ServiceCatalogSelector, DatePicker, TimePicker]
+ *
+ * ╔════════════════════════════════════════════════════════════════════════╗
+ * ║  APPOINTMENT MODULE FAMILY — @crossref:related[]                       ║
+ * ╠════════════════════════════════════════════════════════════════════════╣
+ * ║  This component is the CREATE variant of the appointment module.       ║
+ * ║  When editing this file, you MUST also check:                          ║
+ * ║                                                                        ║
+ * ║  @crossref:related[EditAppointmentModal]  — EDIT variant               ║
+ * ║    • Color picker, STATUS_OPTIONS, selectors must be consistent         ║
+ * ║    • Uses APPOINTMENT_CARD_COLORS from constants (DO NOT duplicate)     ║
+ * ║                                                                        ║
+ * ║  @crossref:related[AppointmentDetailsModal] — VIEW variant             ║
+ * ║    • Status labels must match STATUS_OPTIONS                           ║
+ * ║                                                                        ║
+ * ║  @crossref:related[TodayAppointments] — LIST variant                   ║
+ * ║    • Card colors come from APPOINTMENT_CARD_COLORS in constants         ║
+ * ║                                                                        ║
+ * ║  @crossref:color-source[constants/index.ts APPOINTMENT_CARD_COLORS]    ║
+ * ║    • Single source of truth for all color codes 0-7                    ║
+ * ║    • DO NOT create local APPOINTMENT_COLORS maps                       ║
+ * ║                                                                        ║
+ * ║  @crossref:related[ServiceForm, PaymentForm] — SISTER FORMS            ║
+ * ║    • Header/footer/label/input styling must match DESIGN STANDARD       ║
+ * ╚════════════════════════════════════════════════════════════════════════╝
+ *
+ * ═══ DESIGN STANDARD ═══
+ * This form is the GOLD STANDARD for all TDental modal forms.
+ * Every other form must match this exact pattern:
+ *   - modal-container + modal-content wrapper
+ *   - Orange gradient header with icon, Vietnamese title, subtitle, X button
+ *   - modal-body for scrollable content
+ *   - Labels: text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 with icon
+ *   - Inputs: px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-orange-500/20
+ *   - Grid layouts for paired fields
+ *   - Gradient footer with "Hủy bỏ" + primary action button
+ *   - Vietnamese labels throughout
+ * ═══════════════════════
  */
 
-import { useState, useEffect } from 'react';
-import { X, CalendarPlus, Edit2, Calendar, Clock, User } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { X, CalendarPlus, Edit2, Calendar, Clock, User, Stethoscope, MapPin, FileText, Palette, Check } from 'lucide-react';
 import { CustomerSelector } from '@/components/shared/CustomerSelector';
 import { DoctorSelector } from '@/components/shared/DoctorSelector';
 import { LocationSelector } from '@/components/shared/LocationSelector';
+import { ServiceCatalogSelector } from '@/components/shared/ServiceCatalogSelector';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { TimePicker } from '@/components/ui/TimePicker';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
-import { APPOINTMENT_TYPE_LABELS, type AppointmentType } from '@/constants';
+import { useProducts } from '@/hooks/useProducts';
+import type { ServiceCatalogItem } from '@/data/mockServices';
+import { APPOINTMENT_CARD_COLORS, APPOINTMENT_STATUS_OPTIONS } from '@/constants';
+import type { AppointmentType } from '@/constants';
 import type { Customer } from '@/data/mockCustomers';
 import type { Employee } from '@/data/mockEmployees';
+import type { Product } from '@/hooks/useProducts';
+
 interface Location {
   id: string;
   name: string;
@@ -28,7 +71,11 @@ interface Location {
   appointmentCount: number;
 }
 
+// Status options imported from constants — single source of truth
+const STATUS_OPTIONS = APPOINTMENT_STATUS_OPTIONS;
+
 export interface AppointmentFormData {
+  readonly id?: string;
   readonly customerId: string;
   readonly customerName: string;
   readonly customerPhone: string;
@@ -42,6 +89,11 @@ export interface AppointmentFormData {
   readonly startTime: string;
   readonly endTime: string;
   readonly notes: string;
+  readonly estimatedDuration?: number;
+  readonly customerType?: 'new' | 'returning';
+  readonly serviceId?: string;
+  readonly status?: string;
+  readonly color?: string;
 }
 
 interface AppointmentFormProps {
@@ -51,24 +103,27 @@ interface AppointmentFormProps {
   readonly isEdit?: boolean;
 }
 
-const APPOINTMENT_TYPES = Object.keys(APPOINTMENT_TYPE_LABELS) as AppointmentType[];
-
 export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false }: AppointmentFormProps) {
   // Fetch real data from API
   const { customers: apiCustomers, loading: customersLoading } = useCustomers();
   const { employees: apiEmployees, isLoading: employeesLoading } = useEmployees();
   const { allLocations: apiLocations, isLoading: locationsLoading } = useLocations();
+  const { products, isLoading: productsLoading } = useProducts({ limit: 1000 });
 
   // Form state
   const [customerId, setCustomerId] = useState<string | null>(initialData?.customerId ?? null);
   const [doctorId, setDoctorId] = useState<string | null>(initialData?.doctorId ?? null);
   const [locationId, setLocationId] = useState<string | null>(initialData?.locationId ?? null);
-  const [appointmentType, setAppointmentType] = useState<AppointmentType>('consultation');
+  const [serviceId, setServiceId] = useState<string | null>(initialData?.serviceId ?? null);
   const [serviceName, setServiceName] = useState(initialData?.serviceName ?? '');
+  const [customerType, setCustomerType] = useState<'new' | 'returning'>(initialData?.customerType ?? 'new');
+  const [estimatedDuration, setEstimatedDuration] = useState<number>(initialData?.estimatedDuration ?? 30);
   const [date, setDate] = useState(initialData?.date ?? '');
   const [startTime, setStartTime] = useState(initialData?.startTime ?? '');
   const [endTime, setEndTime] = useState(initialData?.endTime ?? '');
   const [notes, setNotes] = useState(initialData?.notes ?? '');
+  const [status, setStatus] = useState(initialData?.status ?? 'scheduled');
+  const [colorCode, setColorCode] = useState(initialData?.color ?? '0');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Sync with initialData when editing
@@ -77,13 +132,18 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
       setCustomerId(initialData.customerId ?? null);
       setDoctorId(initialData.doctorId ?? null);
       setLocationId(initialData.locationId ?? null);
+      setServiceId(initialData.serviceId ?? null);
       setServiceName(initialData.serviceName ?? '');
+      setCustomerType(initialData.customerType ?? 'new');
+      setEstimatedDuration(initialData.estimatedDuration ?? 30);
       setDate(initialData.date ?? '');
       setStartTime(initialData.startTime ?? '');
       setEndTime(initialData.endTime ?? '');
       setNotes(initialData.notes ?? '');
+      setStatus(initialData.status ?? 'scheduled');
+      setColorCode(initialData.color ?? '0');
     }
-  }, [initialData]);
+  }, [initialData?.id]);
 
   // Convert API data to selector format
   const customers: Customer[] = apiCustomers.map(c => ({
@@ -123,24 +183,45 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
     appointmentCount: 0,
   }));
 
+  // Map real products to ServiceCatalogItem format
+  const serviceCatalog: ServiceCatalogItem[] = useMemo(() =>
+    products.map((p: Product) => ({
+      id: p.id,
+      name: p.name,
+      category: (p.categoryName?.toLowerCase().includes('ortho') ? 'orthodontics' :
+                 p.categoryName?.toLowerCase().includes('cosmetic') ? 'cosmetic' :
+                 p.categoryName?.toLowerCase().includes('surgery') ? 'surgery' :
+                 p.categoryName?.toLowerCase().includes('clean') ? 'cleaning' :
+                 p.categoryName?.toLowerCase().includes('consult') ? 'consultation' :
+                 p.categoryName?.toLowerCase().includes('emergency') ? 'emergency' :
+                 'treatment') as AppointmentType,
+      description: p.categoryName || 'Dental service',
+      defaultPrice: p.listPrice,
+      estimatedDuration: 30,
+      totalVisits: 1,
+    })),
+    [products]
+  );
+
+  const selectedService = serviceCatalog.find(s => s.id === serviceId);
+
   function validate(): boolean {
     const newErrors: Record<string, string> = {};
-    if (!customerId) newErrors.customer = 'Customer is required';
-    if (!doctorId) newErrors.doctor = 'Doctor is required';
-    if (!locationId) newErrors.location = 'Location is required';
-    if (!date) newErrors.date = 'Date is required';
-    if (!startTime) newErrors.startTime = 'Start time is required';
-    if (!endTime) newErrors.endTime = 'End time is required';
-    if (!serviceName.trim()) newErrors.serviceName = 'Service name is required';
+    if (!customerId) newErrors.customer = 'Vui lòng chọn khách hàng';
+    if (!doctorId) newErrors.doctor = 'Vui lòng chọn bác sĩ';
+    if (!locationId) newErrors.location = 'Vui lòng chọn chi nhánh';
+    if (!date) newErrors.date = 'Vui lòng chọn ngày';
+    if (!startTime) newErrors.startTime = 'Vui lòng chọn giờ bắt đầu';
+    if (!endTime) newErrors.endTime = 'Vui lòng chọn giờ kết thúc';
     if (startTime && endTime && startTime >= endTime) {
-      newErrors.endTime = 'End time must be after start time';
+      newErrors.endTime = 'Giờ kết thúc phải sau giờ bắt đầu';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(e?: React.FormEvent) {
+    e?.preventDefault();
     if (!validate()) return;
 
     const customer = customers.find((c) => c.id === customerId);
@@ -157,163 +238,166 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
       doctorName: doctor.name,
       locationId: location.id,
       locationName: location.name,
-      appointmentType,
-      serviceName: serviceName.trim(),
+      appointmentType: selectedService?.category ?? 'consultation',
+      serviceName: selectedService?.name || serviceName.trim(),
       date,
       startTime,
       endTime,
       notes: notes.trim(),
+      estimatedDuration,
+      customerType,
+      serviceId: serviceId || undefined,
+      status,
+      color: colorCode,
     });
   }
 
-  const isLoading = customersLoading || employeesLoading || locationsLoading;
+  const isLoading = customersLoading || employeesLoading || locationsLoading || productsLoading;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="modal-container">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Modal */}
+      <div className="modal-content animate-in zoom-in-95 duration-200">
         {/* Header with gradient */}
-        <div className="relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400 shrink-0">
+        <div className="modal-header relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white/20 rounded-xl">
-                {isEdit ? (
-                  <Edit2 className="w-5 h-5 text-white" />
-                ) : (
-                  <CalendarPlus className="w-5 h-5 text-white" />
-                )}
+                {isEdit ? <Edit2 className="w-5 h-5 text-white" /> : <CalendarPlus className="w-5 h-5 text-white" />}
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">
-                  {isEdit ? 'Edit Appointment' : 'New Appointment'}
+                  {isEdit ? 'Sửa lịch hẹn' : 'Tạo lịch hẹn'}
                 </h2>
                 <p className="text-sm text-orange-100 mt-0.5">
-                  {isEdit ? 'Update appointment details' : 'Schedule a new appointment'}
+                  {isEdit ? 'Cập nhật thông tin lịch hẹn' : 'Đặt lịch hẹn mới cho bệnh nhân'}
                 </p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors"
-            >
+            <button type="button" onClick={onClose} className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors">
               <X className="w-5 h-5 text-white" />
             </button>
           </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+        {/* Scrollable Form Body */}
+        <form onSubmit={handleSubmit} className="modal-body px-6 py-6 space-y-5">
           {isLoading && (
             <div className="flex items-center justify-center py-8 text-gray-400">
               <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2" />
-              Loading data...
+              Đang tải dữ liệu...
             </div>
           )}
 
-          {/* Customer */}
+          {/* Khách hàng */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              Customer
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <User className="w-3.5 h-3.5" />
+              Khách hàng
             </label>
             {isEdit ? (
-              // Read-only display for edit mode (appointment already linked to customer)
-              <div className="flex items-center gap-2 w-full px-3 py-2 rounded-lg border bg-gray-50 border-gray-200 text-gray-700">
+              <div className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border bg-gray-50 border-gray-200 text-gray-700">
                 <User className="w-4 h-4 text-gray-400 shrink-0" />
-                <span className="flex-1 truncate font-medium">
-                  {initialData?.customerName || 'Unknown Customer'}
-                </span>
-                <span className="text-xs text-gray-400">
-                  {initialData?.customerPhone}
-                </span>
+                <span className="flex-1 truncate font-medium">{initialData?.customerName || 'Không xác định'}</span>
+                <span className="text-xs text-gray-400">{initialData?.customerPhone}</span>
               </div>
             ) : (
-              // Selector for new appointments
-              <CustomerSelector
-                customers={customers}
-                selectedId={customerId}
-                onChange={setCustomerId}
-              />
+              <CustomerSelector customers={customers} selectedId={customerId} onChange={setCustomerId} />
             )}
             {errors.customer && <p className="text-xs text-red-500 mt-1">{errors.customer}</p>}
           </div>
 
-          {/* Doctor */}
+          {/* Bác sĩ */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              Doctor
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <Stethoscope className="w-3.5 h-3.5" />
+              Bác sĩ
             </label>
-            <DoctorSelector
-              employees={employees}
-              selectedId={doctorId}
-              onChange={setDoctorId}
-              filterRoles={['dentist', 'orthodontist']}
-            />
+            <DoctorSelector employees={employees} selectedId={doctorId} onChange={setDoctorId} filterRoles={['dentist', 'orthodontist']} />
             {errors.doctor && <p className="text-xs text-red-500 mt-1">{errors.doctor}</p>}
           </div>
 
-          {/* Location */}
+          {/* Chi nhánh */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              Location
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <MapPin className="w-3.5 h-3.5" />
+              Chi nhánh
             </label>
-            <LocationSelector
-              locations={locations}
-              selectedId={locationId}
-              onChange={setLocationId}
-              excludeAll
-            />
+            <LocationSelector locations={locations} selectedId={locationId} onChange={setLocationId} excludeAll />
             {errors.location && <p className="text-xs text-red-500 mt-1">{errors.location}</p>}
           </div>
 
-          {/* Type and Service */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Dịch vụ + Loại khách */}
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                Type
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <Stethoscope className="w-3.5 h-3.5" />
+                Dịch vụ
               </label>
-              <select
-                value={appointmentType}
-                onChange={(e) => setAppointmentType(e.target.value as AppointmentType)}
-                className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 bg-white"
-              >
-                {APPOINTMENT_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {APPOINTMENT_TYPE_LABELS[type]}
-                  </option>
-                ))}
-              </select>
+              <ServiceCatalogSelector
+                catalog={serviceCatalog}
+                selectedId={serviceId}
+                onChange={setServiceId}
+                placeholder="Chọn dịch vụ..."
+              />
+              {selectedService && (
+                <p className="mt-1.5 text-xs text-gray-500 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  {selectedService.totalVisits} lần khám · ~{selectedService.estimatedDuration} phút
+                </p>
+              )}
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                Service Name
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <User className="w-3.5 h-3.5" />
+                Loại khách
               </label>
-              <input
-                type="text"
-                value={serviceName}
-                onChange={(e) => setServiceName(e.target.value)}
-                placeholder="e.g. Teeth Cleaning"
-                className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400"
-              />
-              {errors.serviceName && <p className="text-xs text-red-500 mt-1">{errors.serviceName}</p>}
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCustomerType('new')}
+                  className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-all duration-200 ${
+                    customerType === 'new'
+                      ? 'bg-orange-100 text-orange-700 border-orange-300 ring-2 ring-orange-500/20'
+                      : 'bg-white border-gray-200 text-gray-600 hover:border-orange-300'
+                  }`}
+                >
+                  Khách mới
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCustomerType('returning')}
+                  className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-all duration-200 ${
+                    customerType === 'returning'
+                      ? 'bg-emerald-100 text-emerald-700 border-emerald-300 ring-2 ring-emerald-500/20'
+                      : 'bg-white border-gray-200 text-gray-600 hover:border-emerald-300'
+                  }`}
+                >
+                  Tái khám
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Date - Custom DatePicker */}
+          {/* Ngày hẹn */}
           <DatePicker
             value={date}
             onChange={setDate}
-            label="Date"
+            label="Ngày hẹn"
             icon={<Calendar className="w-3.5 h-3.5" />}
             error={errors.date}
           />
 
-          {/* Time - Custom TimePickers */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Giờ bắt đầu + Giờ kết thúc */}
+          <div className="grid grid-cols-2 gap-4">
             <TimePicker
               value={startTime}
               onChange={setStartTime}
-              label="Start Time"
+              label="Giờ bắt đầu"
               icon={<Clock className="w-3.5 h-3.5" />}
               error={errors.startTime}
               interval={15}
@@ -321,7 +405,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
             <TimePicker
               value={endTime}
               onChange={setEndTime}
-              label="End Time"
+              label="Giờ kết thúc"
               icon={<Clock className="w-3.5 h-3.5" />}
               minTime={startTime}
               error={errors.endTime}
@@ -329,37 +413,120 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
             />
           </div>
 
-          {/* Notes */}
+          {/* Thời gian dự kiến */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              Notes
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <Clock className="w-3.5 h-3.5" />
+              Thời gian dự kiến
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                value={estimatedDuration}
+                onChange={(e) => setEstimatedDuration(parseInt(e.target.value) || 30)}
+                min={5}
+                max={300}
+                step={5}
+                className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
+              />
+              <span className="text-sm text-gray-500">phút</span>
+            </div>
+          </div>
+
+          {/* Trạng thái (edit mode only) */}
+          {isEdit && (
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Trạng thái
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {STATUS_OPTIONS.map((s) => (
+                  <button
+                    key={s.value}
+                    type="button"
+                    onClick={() => setStatus(s.value)}
+                    className={`px-3 py-2 rounded-xl text-xs font-medium border transition-all duration-200 ${
+                      status === s.value
+                        ? `${s.color} ring-2 ring-offset-1 ring-orange-500/30 shadow-sm`
+                        : 'bg-white border-gray-200 text-gray-600 hover:border-orange-300'
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Màu thẻ — Color picker matching EditAppointmentModal */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <Palette className="w-3.5 h-3.5" />
+              Màu thẻ
+            </label>
+            <div className="flex items-center gap-2 flex-wrap">
+              {Object.entries(APPOINTMENT_CARD_COLORS).map(([code, color]) => (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => setColorCode(code)}
+                  className={`
+                    group relative rounded-full transition-all duration-200 border-2
+                    ${colorCode === code
+                      ? 'border-gray-800 shadow-md scale-110'
+                      : 'border-transparent hover:border-gray-300 hover:scale-105'
+                    }
+                  `}
+                  title={color.label}
+                >
+                  <div className={`
+                    w-8 h-8 rounded-full bg-gradient-to-br ${color.previewGradient}
+                    flex items-center justify-center
+                  `}>
+                    {colorCode === code && (
+                      <Check className="w-4 h-4 text-white drop-shadow-sm" />
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+            <p className="mt-1.5 text-[11px] text-gray-400">
+              {APPOINTMENT_CARD_COLORS[colorCode]?.label ?? 'Default'}
+            </p>
+          </div>
+
+          {/* Ghi chú */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <FileText className="w-3.5 h-3.5" />
+              Ghi chú
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              placeholder="Additional notes..."
-              className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 resize-none"
+              placeholder="Ghi chú thêm..."
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
             />
           </div>
         </form>
 
         {/* Footer */}
-        <div className="px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3 shrink-0">
+        <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
             className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
           >
-            Cancel
+            Hủy bỏ
           </button>
           <button
-            type="submit"
-            onClick={handleSubmit}
+            type="button"
+            onClick={() => handleSubmit()}
             disabled={isLoading}
             className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25"
           >
-            {isEdit ? 'Update Appointment' : 'Create Appointment'}
+            {isEdit ? 'Cập nhật' : 'Tạo lịch hẹn'}
           </button>
         </div>
       </div>

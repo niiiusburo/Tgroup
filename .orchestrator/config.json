@@ -11,10 +11,10 @@
     }
   ],
   "agent": {
-    "preferred": "claude",
+    "preferred": "pi",
     "fallbackAgents": [],
-    "claudeCommand": "claude",
-    "claudeArgs": "-p {{PROMPT}} --verbose --output-format stream-json --allowed-tools Bash,Read,Write,Edit --dangerously-skip-permissions",
+    "piCommand": "pi",
+    "piArgs": "agent run --model z-ai/glm-5.1 --prompt '{{PROMPT}}'",
     "maxTurnsImplementation": 40,
     "maxTurnsVerification": 20,
     "allowedTools": "Bash,Read,Write,Edit",

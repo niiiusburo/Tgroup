@@ -3,7 +3,7 @@
  * @crossref:used-in[Payment, usePayment, DepositWallet, PaymentForm, OutstandingBalance, PaymentHistory]
  */
 
-export type PaymentMethod = 'cash' | 'bank_transfer' | 'card' | 'wallet' | 'momo';
+export type PaymentMethod = 'cash' | 'bank_transfer' | 'card' | 'wallet' | 'momo' | 'deposit' | 'mixed';
 export type PaymentStatus = 'completed' | 'pending' | 'failed' | 'refunded';
 export type WalletTransactionType = 'topup' | 'payment' | 'refund';
 
@@ -60,6 +60,8 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   card: 'Card',
   wallet: 'Wallet',
   momo: 'MoMo',
+  deposit: 'Deposit',
+  mixed: 'Mixed',
 };
 
 export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {

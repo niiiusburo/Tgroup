@@ -1,0 +1,23 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications alt+T"
+    - generic [ref=e57]:
+      - banner [ref=e58]:
+        - navigation "Global" [ref=e59]:
+          - link "Dokploy" [ref=e60] [cursor=pointer]:
+            - /url: /
+            - img [ref=e61]
+            - generic [ref=e65]: Dokploy
+      - main [ref=e66]:
+        - generic [ref=e67]:
+          - heading "400" [level=1] [ref=e68]
+          - paragraph [ref=e69]: Oops, something went wrong.
+          - link "Go to homepage" [ref=e71] [cursor=pointer]:
+            - /url: /dashboard/projects
+            - img [ref=e72]
+            - text: Go to homepage
+      - contentinfo [ref=e74]:
+        - paragraph [ref=e76]:
+          - link "Submit Log in issue on Github" [ref=e77] [cursor=pointer]:
+            - /url: https://github.com/Dokploy/dokploy/issues
+  - alert [ref=e78]

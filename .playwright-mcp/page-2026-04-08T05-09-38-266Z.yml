@@ -1,0 +1,153 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e8]: TD
+    - navigation [ref=e9]:
+      - link "Overview" [ref=e10] [cursor=pointer]:
+        - /url: /
+        - img [ref=e11]
+      - link "Calendar" [ref=e13] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e14]
+      - link "Customers" [ref=e16] [cursor=pointer]:
+        - /url: /customers
+        - img [ref=e18]
+      - link "Employees" [ref=e23] [cursor=pointer]:
+        - /url: /employees
+        - img [ref=e24]
+      - link "Locations" [ref=e36] [cursor=pointer]:
+        - /url: /locations
+        - img [ref=e37]
+      - link "Service Catalog" [ref=e40] [cursor=pointer]:
+        - /url: /website
+        - img [ref=e41]
+      - link "Settings" [ref=e45] [cursor=pointer]:
+        - /url: /settings
+        - img [ref=e46]
+      - link "Permissions" [ref=e49] [cursor=pointer]:
+        - /url: /permissions
+        - img [ref=e50]
+    - generic [ref=e52]:
+      - button [ref=e53] [cursor=pointer]:
+        - img [ref=e54]
+      - button "AU" [ref=e56] [cursor=pointer]:
+        - generic [ref=e57]: AU
+  - generic [ref=e61]:
+    - banner [ref=e62]:
+      - heading "Customers" [level=1] [ref=e64]
+      - generic [ref=e65]:
+        - button "All Locations" [ref=e68] [cursor=pointer]:
+          - img [ref=e69]
+          - generic [ref=e72]: All Locations
+          - img [ref=e73]
+        - button [ref=e75] [cursor=pointer]:
+          - img [ref=e76]
+        - button [ref=e78] [cursor=pointer]:
+          - img [ref=e79]
+        - generic [ref=e83]:
+          - generic [ref=e85]: JD
+          - generic [ref=e87]: AS
+          - generic [ref=e89]: MK
+        - button "Customize Widget" [ref=e90] [cursor=pointer]:
+          - img [ref=e91]
+          - text: Customize Widget
+    - main [ref=e96]:
+      - generic [ref=e423]:
+        - generic [ref=e424]:
+          - button [ref=e425] [cursor=pointer]:
+            - img [ref=e426]
+          - generic [ref=e428]:
+            - heading "Customer Profile" [level=1] [ref=e429]
+            - paragraph [ref=e430]: View and manage patient details
+          - button "Edit" [ref=e431] [cursor=pointer]:
+            - img [ref=e432]
+            - text: Edit
+        - generic [ref=e435]:
+          - generic [ref=e438]: P
+          - generic [ref=e439]:
+            - generic [ref=e440]:
+              - heading "Phạm Ngọc Huy" [level=2] [ref=e441]
+              - generic [ref=e442]:
+                - img [ref=e443]
+                - text: Male
+            - generic [ref=e446]:
+              - generic [ref=e447]:
+                - img [ref=e448]
+                - text: "0349762840"
+              - generic [ref=e450]:
+                - img [ref=e451]
+                - text: No email
+              - generic [ref=e454]:
+                - img [ref=e455]
+                - text: N/A
+              - generic [ref=e458]:
+                - img [ref=e459]
+                - text: "DOB: 2002"
+            - generic [ref=e462]:
+              - img [ref=e463]
+              - text: sale
+          - generic [ref=e466]:
+            - generic [ref=e467]:
+              - paragraph [ref=e468]: Member since
+              - paragraph [ref=e469]: 2026-01-12
+            - generic [ref=e470]:
+              - paragraph [ref=e471]: Total visits
+              - paragraph [ref=e472]: "144"
+            - generic [ref=e473]:
+              - paragraph [ref=e474]: Deposit Balance
+              - paragraph [ref=e475]: 1.000.000 đ
+            - generic [ref=e476]:
+              - paragraph [ref=e477]: Outstanding
+              - paragraph [ref=e478]: 0 đ
+        - generic [ref=e480]:
+          - button "Profile" [ref=e481] [cursor=pointer]
+          - button "Appointments 99+" [ref=e482] [cursor=pointer]:
+            - text: Appointments
+            - generic [ref=e483]: 99+
+          - button "Records 0" [ref=e484] [cursor=pointer]:
+            - text: Records
+            - generic [ref=e485]: "0"
+          - button "Payment" [ref=e486] [cursor=pointer]
+        - generic [ref=e487]:
+          - heading "Personal Information" [level=3] [ref=e488]
+          - generic [ref=e489]:
+            - generic [ref=e490]:
+              - paragraph [ref=e491]: Full Name
+              - paragraph [ref=e492]: Phạm Ngọc Huy
+            - generic [ref=e493]:
+              - paragraph [ref=e494]: Phone
+              - paragraph [ref=e495]: "0349762840"
+            - generic [ref=e496]:
+              - paragraph [ref=e497]: Email
+              - paragraph [ref=e498]: N/A
+            - generic [ref=e499]:
+              - paragraph [ref=e500]: Date of Birth
+              - paragraph [ref=e501]: "2002"
+            - generic [ref=e502]:
+              - paragraph [ref=e503]: Gender
+              - paragraph [ref=e504]: Male
+            - generic [ref=e505]:
+              - paragraph [ref=e506]: Address
+              - paragraph [ref=e507]: N/A
+            - generic [ref=e508]:
+              - paragraph [ref=e509]: Location
+              - paragraph [ref=e510]: Tấm Dentist Quận 3
+            - generic [ref=e511]:
+              - paragraph [ref=e512]: Member Since
+              - paragraph [ref=e513]: 2026-01-12
+    - generic [ref=e394]:
+      - generic [ref=e396]:
+        - img [ref=e398]
+        - generic [ref=e401]:
+          - heading "Update Available" [level=4] [ref=e402]
+          - paragraph [ref=e403]: New version 0.1.6 is ready. Click to refresh.
+          - generic [ref=e404]:
+            - button "Update Now" [ref=e405] [cursor=pointer]:
+              - img [ref=e406]
+              - text: Update Now
+            - button "Later" [ref=e411] [cursor=pointer]
+        - button [ref=e412] [cursor=pointer]:
+          - img [ref=e413]
+      - button "v0.1.7 (b5346dd)" [ref=e417] [cursor=pointer]:
+        - img [ref=e418]
+        - generic [ref=e421]: v0.1.7
+        - generic [ref=e422]: (b5346dd)

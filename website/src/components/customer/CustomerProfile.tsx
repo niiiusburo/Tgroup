@@ -483,7 +483,9 @@ export function CustomerProfile({
       {showPaymentModal && onMakePayment && (
         <PaymentForm
           defaultCustomerName={profile.name}
-          defaultAmount={profile.outstandingBalance > 0 ? profile.outstandingBalance : 0}
+          defaultCustomerId={profile.id}
+          depositBalance={profile.depositBalance}
+          outstandingBalance={profile.outstandingBalance}
           onSubmit={async (data) => {
             try {
               if (onMakePayment) {

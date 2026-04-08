@@ -28,12 +28,12 @@ import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_TYPE_LABELS } from '@/constants';
 import type { AppointmentStatus } from '@/data/mockCalendar';
 
 const STATUS_TABS: { label: string; value: AppointmentFilter }[] = [
-  { label: 'All', value: 'all' },
-  { label: 'Scheduled', value: 'scheduled' },
-  { label: 'Confirmed', value: 'confirmed' },
-  { label: 'In Progress', value: 'in-progress' },
-  { label: 'Completed', value: 'completed' },
-  { label: 'Cancelled', value: 'cancelled' },
+  { label: 'Tất cả', value: 'all' },
+  { label: 'Đang hẹn', value: 'scheduled' },
+  { label: 'Đã xác nhận', value: 'confirmed' },
+  { label: 'Đang khám', value: 'in-progress' },
+  { label: 'Hoàn thành', value: 'completed' },
+  { label: 'Hủy hẹn', value: 'cancelled' },
 ];
 
 const STATUS_TO_BADGE: Record<AppointmentStatus, StatusVariant> = {
@@ -117,8 +117,8 @@ export function Appointments() {
             <CalendarCheck className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Appointments</h1>
-            <p className="text-sm text-gray-500">Manage appointments, check-ins, and status workflow</p>
+            <h1 className="text-2xl font-bold text-gray-900">Lịch hẹn</h1>
+            <p className="text-sm text-gray-500">Quản lý lịch hẹn, tiếp nhận và trạng thái</p>
           </div>
         </div>
         <button
@@ -137,10 +137,10 @@ export function Appointments() {
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard icon={<Users className="w-5 h-5 text-blue-600" />} label="Today Total" value={stats.total} bg="bg-blue-50" />
-        <StatCard icon={<Clock className="w-5 h-5 text-amber-600" />} label="Waiting" value={stats.waiting} bg="bg-amber-50" />
-        <StatCard icon={<Stethoscope className="w-5 h-5 text-purple-600" />} label="In Treatment" value={stats.inTreatment} bg="bg-purple-50" />
-        <StatCard icon={<CheckCircle2 className="w-5 h-5 text-green-600" />} label="Completed" value={stats.completed} bg="bg-green-50" />
+        <StatCard icon={<Users className="w-5 h-5 text-blue-600" />} label="Tổng hôm nay" value={stats.total} bg="bg-blue-50" />
+        <StatCard icon={<Clock className="w-5 h-5 text-amber-600" />} label="Đang chờ" value={stats.waiting} bg="bg-amber-50" />
+        <StatCard icon={<Stethoscope className="w-5 h-5 text-purple-600" />} label="Đang khám" value={stats.inTreatment} bg="bg-purple-50" />
+        <StatCard icon={<CheckCircle2 className="w-5 h-5 text-green-600" />} label="Hoàn thành" value={stats.completed} bg="bg-green-50" />
       </div>
 
       {/* Filters */}
@@ -152,7 +152,7 @@ export function Appointments() {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by name, phone, doctor, service..."
+            placeholder="Tìm theo tên, SĐT, bác sĩ, dịch vụ..."
             className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
           />
         </div>
@@ -203,7 +203,7 @@ export function Appointments() {
         {appointments.length === 0 ? (
           <div className="p-8 text-center text-gray-400">
             <CalendarCheck className="w-10 h-10 mx-auto mb-2 text-gray-300" />
-            <p className="text-sm">No appointments found</p>
+            <p className="text-sm">Không tìm thấy lịch hẹn</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-100">

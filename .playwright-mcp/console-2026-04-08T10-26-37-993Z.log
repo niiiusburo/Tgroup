@@ -1,0 +1,380 @@
+[     144ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:21550
+[     177ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[     177ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=c31536a8:4435
+[     305ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.2.0, gitCommit: 1105cc62} @ http://localhost:5174/src/hooks/useVersionCheck.ts:46
+[     306ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.2.0, gitCommit: 1105cc62} @ http://localhost:5174/src/hooks/useVersionCheck.ts:46
+[     313ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.2.0, gitCommit: 1105cc62} @ http://localhost:5174/src/hooks/useVersionCheck.ts:46
+[     313ms] [LOG] [VersionCheck] Check result: {current: 0.2.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts:156
+[     313ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.2.0, gitCommit: 1105cc62} @ http://localhost:5174/src/hooks/useVersionCheck.ts:46
+[     314ms] [LOG] [VersionCheck] Check result: {current: 0.2.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts:156
+[     314ms] [LOG] [VersionCheck] Check result: {current: 0.2.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts:156
+[  300312ms] [LOG] [VersionCheck] Check result: {current: 0.2.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts:156
+[  600324ms] [LOG] [VersionCheck] Check result: {current: 0.2.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts:156
+[  900316ms] [LOG] [VersionCheck] Check result: {current: 0.2.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts:156
+[ 1176833ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://localhost:3002/api/Companies?offset=0&limit=50:0
+[ 1176834ms] [ERROR] Error loading locations: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchCompanies (http://localhost:5174/src/lib/api.ts?t=1775641157593:95:10)
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:38:30
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:52:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at commitPassiveMountOnFiber (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18156:19)
+    at commitPassiveMountEffects_complete (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18129:17)
+    at commitPassiveMountEffects_begin (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18119:15)
+    at commitPassiveMountEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18109:11)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19490:11) @ http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:45
+[ 1176835ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://localhost:3002/api/Employees?offset=0&limit=500:0
+[ 1176835ms] [ERROR] Error fetching employees: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchEmployees (http://localhost:5174/src/lib/api.ts?t=1775641157593:62:10)
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:63:30
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:96:7 @ http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:82
+[ 1176835ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://localhost:3002/api/Employees?offset=0&limit=500:0
+[ 1176835ms] [ERROR] Error fetching employees: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchEmployees (http://localhost:5174/src/lib/api.ts?t=1775641157593:62:10)
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:63:30
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:96:7 @ http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:82
+[ 1176835ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://localhost:3002/api/Employees?offset=0&limit=500:0
+[ 1176835ms] [ERROR] Error fetching employees: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchEmployees (http://localhost:5174/src/lib/api.ts?t=1775641157593:62:10)
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:63:30
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:89:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at commitPassiveMountOnFiber (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18156:19)
+    at commitPassiveMountEffects_complete (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18129:17)
+    at commitPassiveMountEffects_begin (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18119:15)
+    at commitPassiveMountEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18109:11)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19490:11) @ http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:82
+[ 1176835ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Employees?offset=0&limit=500:0
+[ 1176835ms] [ERROR] Error fetching employees: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchEmployees (http://localhost:5174/src/lib/api.ts?t=1775641157593:62:10)
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:63:30
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:89:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at commitPassiveMountOnFiber (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18156:19)
+    at commitPassiveMountEffects_complete (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18129:17)
+    at commitPassiveMountEffects_begin (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18119:15)
+    at commitPassiveMountEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18109:11)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19490:11) @ http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:82
+[ 1176835ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Companies?offset=0&limit=50:0
+[ 1176835ms] [ERROR] Error loading locations: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchCompanies (http://localhost:5174/src/lib/api.ts?t=1775641157593:95:10)
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:38:30
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:52:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at commitPassiveMountOnFiber (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18156:19)
+    at commitPassiveMountEffects_complete (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18129:17)
+    at commitPassiveMountEffects_begin (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18119:15)
+    at commitPassiveMountEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18109:11)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19490:11) @ http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:45
+[ 1176835ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Employees?offset=0&limit=500:0
+[ 1176835ms] [ERROR] Error fetching employees: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchEmployees (http://localhost:5174/src/lib/api.ts?t=1775641157593:62:10)
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:63:30
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:89:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at invokePassiveEffectMountInDEV (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18324:19)
+    at invokeEffectsInDev (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19701:19)
+    at commitDoubleInvokeEffectsInDEV (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19686:15)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19503:13)
+    at flushPassiveEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19447:22) @ http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:82
+[ 1176836ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Companies?offset=0&limit=50:0
+[ 1176836ms] [ERROR] Error loading locations: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchCompanies (http://localhost:5174/src/lib/api.ts?t=1775641157593:95:10)
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:38:30
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:52:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at invokePassiveEffectMountInDEV (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18324:19)
+    at invokeEffectsInDev (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19701:19)
+    at commitDoubleInvokeEffectsInDEV (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19686:15)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19503:13)
+    at flushPassiveEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19447:22) @ http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:45
+[ 1176836ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Employees?offset=0&limit=500:0
+[ 1176836ms] [ERROR] Error fetching employees: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchEmployees (http://localhost:5174/src/lib/api.ts?t=1775641157593:62:10)
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:63:30
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:96:7 @ http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:82
+[ 1176836ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Employees?offset=0&limit=500:0
+[ 1176836ms] [ERROR] Error fetching employees: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchEmployees (http://localhost:5174/src/lib/api.ts?t=1775641157593:62:10)
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:63:30
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:89:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at commitPassiveMountOnFiber (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18156:19)
+    at commitPassiveMountEffects_complete (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18129:17)
+    at commitPassiveMountEffects_begin (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18119:15)
+    at commitPassiveMountEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18109:11)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19490:11) @ http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:82
+[ 1176836ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Companies?offset=0&limit=50:0
+[ 1176837ms] [ERROR] Error loading locations: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchCompanies (http://localhost:5174/src/lib/api.ts?t=1775641157593:95:10)
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:38:30
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:52:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at commitPassiveMountOnFiber (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18156:19)
+    at commitPassiveMountEffects_complete (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18129:17)
+    at commitPassiveMountEffects_begin (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18119:15)
+    at commitPassiveMountEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18109:11)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19490:11) @ http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:45
+[ 1176837ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Employees?offset=0&limit=500:0
+[ 1176837ms] [ERROR] Error fetching employees: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchEmployees (http://localhost:5174/src/lib/api.ts?t=1775641157593:62:10)
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:63:30
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:89:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at invokePassiveEffectMountInDEV (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18324:19)
+    at invokeEffectsInDev (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19701:19)
+    at commitDoubleInvokeEffectsInDEV (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19686:15)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19503:13)
+    at flushPassiveEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19447:22) @ http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:82
+[ 1176837ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Companies?offset=0&limit=50:0
+[ 1176837ms] [ERROR] Error loading locations: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchCompanies (http://localhost:5174/src/lib/api.ts?t=1775641157593:95:10)
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:38:30
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:52:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at invokePassiveEffectMountInDEV (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18324:19)
+    at invokeEffectsInDev (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19701:19)
+    at commitDoubleInvokeEffectsInDEV (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19686:15)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19503:13)
+    at flushPassiveEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19447:22) @ http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:45
+[ 1176837ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Employees?offset=0&limit=500:0
+[ 1176837ms] [ERROR] Error fetching employees: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchEmployees (http://localhost:5174/src/lib/api.ts?t=1775641157593:62:10)
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:63:30
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:96:7 @ http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:82
+[ 1176837ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Employees?offset=0&limit=500:0
+[ 1176837ms] [ERROR] Error fetching employees: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchEmployees (http://localhost:5174/src/lib/api.ts?t=1775641157593:62:10)
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:63:30
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:89:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at commitPassiveMountOnFiber (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18156:19)
+    at commitPassiveMountEffects_complete (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18129:17)
+    at commitPassiveMountEffects_begin (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18119:15)
+    at commitPassiveMountEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18109:11)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19490:11) @ http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:82
+[ 1176837ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Companies?offset=0&limit=50:0
+[ 1176837ms] [ERROR] Error loading locations: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchCompanies (http://localhost:5174/src/lib/api.ts?t=1775641157593:95:10)
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:38:30
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:52:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at commitPassiveMountOnFiber (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18156:19)
+    at commitPassiveMountEffects_complete (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18129:17)
+    at commitPassiveMountEffects_begin (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18119:15)
+    at commitPassiveMountEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18109:11)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19490:11) @ http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:45
+[ 1176837ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Employees?offset=0&limit=500:0
+[ 1176837ms] [ERROR] Error fetching employees: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchEmployees (http://localhost:5174/src/lib/api.ts?t=1775641157593:62:10)
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:63:30
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:96:7 @ http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:82
+[ 1176837ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Employees?offset=0&limit=500:0
+[ 1176837ms] [ERROR] Error fetching employees: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchEmployees (http://localhost:5174/src/lib/api.ts?t=1775641157593:62:10)
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:63:30
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:89:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at commitPassiveMountOnFiber (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18156:19)
+    at commitPassiveMountEffects_complete (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18129:17)
+    at commitPassiveMountEffects_begin (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18119:15)
+    at commitPassiveMountEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18109:11)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19490:11) @ http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:82
+[ 1176837ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Companies?offset=0&limit=50:0
+[ 1176837ms] [ERROR] Error loading locations: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchCompanies (http://localhost:5174/src/lib/api.ts?t=1775641157593:95:10)
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:38:30
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:52:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at commitPassiveMountOnFiber (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18156:19)
+    at commitPassiveMountEffects_complete (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18129:17)
+    at commitPassiveMountEffects_begin (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18119:15)
+    at commitPassiveMountEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18109:11)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19490:11) @ http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:45
+[ 1176837ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Employees?offset=0&limit=500:0
+[ 1176837ms] [ERROR] Error fetching employees: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchEmployees (http://localhost:5174/src/lib/api.ts?t=1775641157593:62:10)
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:63:30
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:96:7 @ http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:82
+[ 1176837ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Employees?offset=0&limit=500:0
+[ 1176837ms] [ERROR] Error fetching employees: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchEmployees (http://localhost:5174/src/lib/api.ts?t=1775641157593:62:10)
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:63:30
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:89:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at commitPassiveMountOnFiber (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18156:19)
+    at commitPassiveMountEffects_complete (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18129:17)
+    at commitPassiveMountEffects_begin (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18119:15)
+    at commitPassiveMountEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18109:11)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19490:11) @ http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:82
+[ 1176837ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Companies?offset=0&limit=50:0
+[ 1176837ms] [ERROR] Error loading locations: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchCompanies (http://localhost:5174/src/lib/api.ts?t=1775641157593:95:10)
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:38:30
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:52:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at commitPassiveMountOnFiber (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18156:19)
+    at commitPassiveMountEffects_complete (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18129:17)
+    at commitPassiveMountEffects_begin (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18119:15)
+    at commitPassiveMountEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18109:11)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19490:11) @ http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:45
+[ 1176837ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Companies?offset=0&limit=50:0
+[ 1176837ms] [ERROR] Error loading locations: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchCompanies (http://localhost:5174/src/lib/api.ts?t=1775641157593:95:10)
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:38:30
+    at http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:52:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at commitPassiveMountOnFiber (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18156:19)
+    at commitPassiveMountEffects_complete (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18129:17)
+    at commitPassiveMountEffects_begin (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18119:15)
+    at commitPassiveMountEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18109:11)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19490:11) @ http://localhost:5174/src/hooks/useLocations.ts?t=1775641157593:45
+[ 1176837ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Employees?offset=0&limit=500:0
+[ 1176837ms] [ERROR] Error fetching employees: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchEmployees (http://localhost:5174/src/lib/api.ts?t=1775641157593:62:10)
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:63:30
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:89:5
+    at commitHookEffectListMount (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:16915:34)
+    at commitPassiveMountOnFiber (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18156:19)
+    at commitPassiveMountEffects_complete (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18129:17)
+    at commitPassiveMountEffects_begin (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18119:15)
+    at commitPassiveMountEffects (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:18109:11)
+    at flushPassiveEffectsImpl (http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=c31536a8:19490:11) @ http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:82
+[ 1176838ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3002/api/Employees?offset=0&limit=500:0
+[ 1176838ms] [ERROR] Error fetching employees: TypeError: Failed to fetch
+    at apiFetch (http://localhost:5174/src/lib/api.ts?t=1775641157593:22:21)
+    at fetchEmployees (http://localhost:5174/src/lib/api.ts?t=1775641157593:62:10)
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:63:30
+    at http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:96:7 @ http://localhost:5174/src/hooks/useEmployees.ts?t=1775641157593:82
+[ 1200298ms] [LOG] [VersionCheck] Check result: {current: 0.2.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts:156
+[ 1402453ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:5174/@vite/client:559
+[ 1402456ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1403458ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1405506ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=07fc36c9:21550
+[ 1405556ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=352a33a1:4435
+[ 1405556ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=352a33a1:4435
+[ 1405689ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.3.0, gitCommit: 4afae5df} @ http://localhost:5174/src/hooks/useVersionCheck.ts:46
+[ 1405690ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.3.0, gitCommit: 4afae5df} @ http://localhost:5174/src/hooks/useVersionCheck.ts:46
+[ 1405697ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.3.0, gitCommit: 4afae5df} @ http://localhost:5174/src/hooks/useVersionCheck.ts:46
+[ 1405697ms] [LOG] [VersionCheck] Check result: {current: 0.3.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts:156
+[ 1405697ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.3.0, gitCommit: 4afae5df} @ http://localhost:5174/src/hooks/useVersionCheck.ts:46
+[ 1405697ms] [LOG] [VersionCheck] Check result: {current: 0.3.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts:156
+[ 1405697ms] [LOG] [VersionCheck] Check result: {current: 0.3.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts:156
+[ 1550689ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:5174/@vite/client:559
+[ 1550695ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1551697ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1552698ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1553701ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1554703ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1555706ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1556707ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1557709ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1558711ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1559714ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1560716ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1561718ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1562720ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1563723ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1564725ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1565726ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1566728ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1567731ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1568734ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1569736ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1570738ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1571740ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1572743ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1573746ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1574749ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1575752ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1576754ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1577757ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1578759ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1579761ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1580765ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1581768ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1582770ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1583773ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1584776ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1585779ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1586781ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1587784ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1588787ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1589790ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1590792ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1591794ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1592796ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1593798ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1594800ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1595802ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1596805ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1597810ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1598815ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1599820ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1600823ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1601825ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1602829ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1603831ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1604840ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1605845ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1606848ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1607850ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1608852ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1609855ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1610859ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1611865ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1612868ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1613870ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1614872ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1615875ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1616877ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1617880ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1618882ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1619886ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1620892ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1621895ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1622897ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1623901ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1624905ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1625908ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1626911ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1627915ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1628928ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5174/:0
+[ 1630871ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/chunk-PJEEZAML.js?v=d99bf0ae:21550
+[ 1630892ms] [WARNING] ⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=d99bf0ae:4435
+[ 1630892ms] [WARNING] ⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath. @ http://localhost:5174/node_modules/.vite/deps/react-router-dom.js?v=d99bf0ae:4435
+[ 1631082ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.3.0, gitCommit: 4afae5df} @ http://localhost:5174/src/hooks/useVersionCheck.ts:46
+[ 1631089ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.3.0, gitCommit: 4afae5df} @ http://localhost:5174/src/hooks/useVersionCheck.ts:46
+[ 1631107ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.3.0, gitCommit: 4afae5df} @ http://localhost:5174/src/hooks/useVersionCheck.ts:46
+[ 1631109ms] [LOG] [VersionCheck] Check result: {current: 0.3.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts:156
+[ 1631117ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.3.0, gitCommit: 4afae5df} @ http://localhost:5174/src/hooks/useVersionCheck.ts:46
+[ 1631124ms] [LOG] [VersionCheck] Check result: {current: 0.3.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts:156
+[ 1631124ms] [LOG] [VersionCheck] Check result: {current: 0.3.0, server: 0.3.0, hasUpdate: true, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts:156
+[ 1663753ms] [LOG] [VersionCheck] Build-time version loaded: {version: 0.3.0, gitCommit: 4afae5df} @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775645661662:46
+[ 1663759ms] [LOG] [VersionCheck] Check result: {current: 0.3.0, server: 0.3.0, hasUpdate: false, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775645661662:153
+[ 1663759ms] [LOG] [VersionCheck] Check result: {current: 0.3.0, server: 0.3.0, hasUpdate: false, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775645661662:153
+[ 1963765ms] [LOG] [VersionCheck] Check result: {current: 0.3.0, server: 0.3.0, hasUpdate: false, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775645661662:153
+[ 2263770ms] [LOG] [VersionCheck] Check result: {current: 0.3.0, server: 0.3.0, hasUpdate: false, wasDismissed: false} @ http://localhost:5174/src/hooks/useVersionCheck.ts?t=1775645661662:153

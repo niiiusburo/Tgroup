@@ -1,0 +1,558 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e8]: TD
+    - navigation [ref=e9]:
+      - link "Overview" [ref=e10] [cursor=pointer]:
+        - /url: /
+        - img [ref=e11]
+      - link "Calendar" [ref=e13] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e14]
+      - link "Customers" [ref=e16] [cursor=pointer]:
+        - /url: /customers
+        - img [ref=e17]
+      - link "Employees" [ref=e22] [cursor=pointer]:
+        - /url: /employees
+        - img [ref=e23]
+      - link "Locations" [ref=e35] [cursor=pointer]:
+        - /url: /locations
+        - img [ref=e36]
+      - link "Service Catalog" [ref=e39] [cursor=pointer]:
+        - /url: /website
+        - img [ref=e41]
+      - link "Settings" [ref=e45] [cursor=pointer]:
+        - /url: /settings
+        - img [ref=e46]
+      - link "Permissions" [ref=e49] [cursor=pointer]:
+        - /url: /permissions
+        - img [ref=e50]
+    - generic [ref=e52]:
+      - button [ref=e53] [cursor=pointer]:
+        - img [ref=e54]
+      - button "AU" [ref=e56] [cursor=pointer]:
+        - generic [ref=e57]: AU
+      - generic [ref=e62]:
+        - generic [ref=e63]:
+          - generic [ref=e64]:
+            - generic [ref=e65]: Update Available
+            - button [ref=e66] [cursor=pointer]:
+              - img [ref=e67]
+          - button "Update Now" [ref=e70] [cursor=pointer]:
+            - img [ref=e71]
+            - text: Update Now
+        - button "v0.0.0 (e04c461)" [ref=e76] [cursor=pointer]:
+          - img [ref=e77]
+          - generic [ref=e82]: v0.0.0
+          - generic [ref=e83]: (e04c461)
+  - generic [ref=e84]:
+    - banner [ref=e85]:
+      - heading "Service Catalog" [level=1] [ref=e87]
+      - generic [ref=e88]:
+        - button "All Locations" [ref=e91] [cursor=pointer]:
+          - img [ref=e92]
+          - generic [ref=e95]: All Locations
+          - img [ref=e96]
+        - button [ref=e98] [cursor=pointer]:
+          - img [ref=e99]
+        - button [ref=e101] [cursor=pointer]:
+          - img [ref=e102]
+        - generic [ref=e106]:
+          - generic [ref=e108]: JD
+          - generic [ref=e110]: AS
+          - generic [ref=e112]: MK
+        - button "Customize Widget" [ref=e113] [cursor=pointer]:
+          - img [ref=e114]
+          - text: Customize Widget
+    - main [ref=e119]:
+      - generic [ref=e120]:
+        - generic [ref=e121]:
+          - heading "Thông tin sản phẩm" [level=1] [ref=e122]
+          - generic [ref=e123]:
+            - button "Dịch vụ" [ref=e124] [cursor=pointer]
+            - button "Vật tư" [ref=e125] [cursor=pointer]
+            - button "Thuốc" [ref=e126] [cursor=pointer]
+        - generic [ref=e127]:
+          - generic [ref=e128]:
+            - generic [ref=e129]:
+              - heading "Nhóm dịch vụ" [level=2] [ref=e130]
+              - button "Thêm nhóm" [ref=e131] [cursor=pointer]:
+                - img [ref=e132]
+            - generic [ref=e134]:
+              - img [ref=e135]
+              - textbox "Tìm kiếm nhóm dịch vụ" [ref=e138]
+            - generic [ref=e139]: Tên nhóm dịch vụ
+            - generic [ref=e140]:
+              - button "Tất cả (155)" [ref=e141] [cursor=pointer]
+              - button "Bọc sứ 19" [ref=e142] [cursor=pointer]:
+                - generic [ref=e143]: Bọc sứ
+                - generic [ref=e144]: "19"
+              - button "BỘC LỘ 1" [ref=e145] [cursor=pointer]:
+                - generic [ref=e146]: BỘC LỘ
+                - generic [ref=e147]: "1"
+              - button "Dán sứ 5" [ref=e148] [cursor=pointer]:
+                - generic [ref=e149]: Dán sứ
+                - generic [ref=e150]: "5"
+              - button "Implant 12" [ref=e151] [cursor=pointer]:
+                - generic [ref=e152]: Implant
+                - generic [ref=e153]: "12"
+              - button "KHÍ CỤ TWINBLOCK 1" [ref=e154] [cursor=pointer]:
+                - generic [ref=e155]: KHÍ CỤ TWINBLOCK
+                - generic [ref=e156]: "1"
+              - button "Máy tăm nước 2" [ref=e157] [cursor=pointer]:
+                - generic [ref=e158]: Máy tăm nước
+                - generic [ref=e159]: "2"
+              - button "Nhổ răng 15" [ref=e160] [cursor=pointer]:
+                - generic [ref=e161]: Nhổ răng
+                - generic [ref=e162]: "15"
+              - button "Niềng răng 48" [ref=e163] [cursor=pointer]:
+                - generic [ref=e164]: Niềng răng
+                - generic [ref=e165]: "48"
+              - button "Phẫu thuật và điều trị 10" [ref=e166] [cursor=pointer]:
+                - generic [ref=e167]: Phẫu thuật và điều trị
+                - generic [ref=e168]: "10"
+              - button "Phục hình 2" [ref=e169] [cursor=pointer]:
+                - generic [ref=e170]: Phục hình
+                - generic [ref=e171]: "2"
+              - button "Điều trị tổng quát 40" [ref=e172] [cursor=pointer]:
+                - generic [ref=e173]: Điều trị tổng quát
+                - generic [ref=e174]: "40"
+          - generic [ref=e175]:
+            - generic [ref=e176]:
+              - generic [ref=e177]:
+                - button "Thêm mới" [ref=e178] [cursor=pointer]:
+                  - img [ref=e179]
+                  - text: Thêm mới
+                - combobox [ref=e180]:
+                  - option "Đang sử dụng" [selected]
+                  - option "Ngừng sử dụng"
+                  - option "Tất cả"
+              - generic [ref=e181]:
+                - img [ref=e182]
+                - textbox "Tìm kiếm theo mã hoặc tên" [ref=e185]
+            - generic [ref=e186]:
+              - table [ref=e187]:
+                - rowgroup [ref=e188]:
+                  - row "Tên dịch vụ Nhóm dịch vụ Chi nhánh Giá Thao tác" [ref=e189]:
+                    - columnheader [ref=e190]:
+                      - checkbox [disabled] [ref=e191]
+                    - columnheader "Tên dịch vụ" [ref=e192]
+                    - columnheader "Nhóm dịch vụ" [ref=e193]
+                    - columnheader "Chi nhánh" [ref=e194]
+                    - columnheader "Giá" [ref=e195]
+                    - columnheader "Thao tác" [ref=e196]
+                - rowgroup [ref=e197]:
+                  - 'row "Abutment Đơn vị tính: Răng DV0034 Implant Tất cả 3.000.000 ₫" [ref=e198]':
+                    - cell [ref=e199]:
+                      - checkbox [ref=e200]
+                    - 'cell "Abutment Đơn vị tính: Răng DV0034" [ref=e201]':
+                      - generic [ref=e202]:
+                        - generic [ref=e203]: Abutment
+                        - generic [ref=e204]:
+                          - text: "Đơn vị tính: Răng"
+                          - generic [ref=e205]: DV0034
+                    - cell "Implant" [ref=e206]
+                    - cell "Tất cả" [ref=e207]
+                    - cell "3.000.000 ₫" [ref=e208]
+                    - cell [ref=e209]:
+                      - generic [ref=e210]:
+                        - button "Sửa" [ref=e211] [cursor=pointer]:
+                          - img [ref=e212]
+                        - button "Xóa" [ref=e215] [cursor=pointer]:
+                          - img [ref=e216]
+                        - button "Ẩn" [ref=e219] [cursor=pointer]:
+                          - img [ref=e220]
+                  - 'row "Band Đơn vị tính: Cái SP0305 Niềng răng Tất cả 300.000 ₫" [ref=e225]':
+                    - cell [ref=e226]:
+                      - checkbox [ref=e227]
+                    - 'cell "Band Đơn vị tính: Cái SP0305" [ref=e228]':
+                      - generic [ref=e229]:
+                        - generic [ref=e230]: Band
+                        - generic [ref=e231]:
+                          - text: "Đơn vị tính: Cái"
+                          - generic [ref=e232]: SP0305
+                    - cell "Niềng răng" [ref=e233]
+                    - cell "Tất cả" [ref=e234]
+                    - cell "300.000 ₫" [ref=e235]
+                    - cell [ref=e236]:
+                      - generic [ref=e237]:
+                        - button "Sửa" [ref=e238] [cursor=pointer]:
+                          - img [ref=e239]
+                        - button "Xóa" [ref=e242] [cursor=pointer]:
+                          - img [ref=e243]
+                        - button "Ẩn" [ref=e246] [cursor=pointer]:
+                          - img [ref=e247]
+                  - 'row "BỘC LỘ Đơn vị tính: RĂNG SP0296 BỘC LỘ Tất cả -" [ref=e252]':
+                    - cell [ref=e253]:
+                      - checkbox [ref=e254]
+                    - 'cell "BỘC LỘ Đơn vị tính: RĂNG SP0296" [ref=e255]':
+                      - generic [ref=e256]:
+                        - generic [ref=e257]: BỘC LỘ
+                        - generic [ref=e258]:
+                          - text: "Đơn vị tính: RĂNG"
+                          - generic [ref=e259]: SP0296
+                    - cell "BỘC LỘ" [ref=e260]
+                    - cell "Tất cả" [ref=e261]
+                    - cell "-" [ref=e262]
+                    - cell [ref=e263]:
+                      - generic [ref=e264]:
+                        - button "Sửa" [ref=e265] [cursor=pointer]:
+                          - img [ref=e266]
+                        - button "Xóa" [ref=e269] [cursor=pointer]:
+                          - img [ref=e270]
+                        - button "Ẩn" [ref=e273] [cursor=pointer]:
+                          - img [ref=e274]
+                  - 'row "Bộ Mắc Cài Kim Loại Tiêu Chuẩn Đơn vị tính: Bộ SP0292 Niềng răng Tất cả -" [ref=e279]':
+                    - cell [ref=e280]:
+                      - checkbox [ref=e281]
+                    - 'cell "Bộ Mắc Cài Kim Loại Tiêu Chuẩn Đơn vị tính: Bộ SP0292" [ref=e282]':
+                      - generic [ref=e283]:
+                        - generic [ref=e284]: Bộ Mắc Cài Kim Loại Tiêu Chuẩn
+                        - generic [ref=e285]:
+                          - text: "Đơn vị tính: Bộ"
+                          - generic [ref=e286]: SP0292
+                    - cell "Niềng răng" [ref=e287]
+                    - cell "Tất cả" [ref=e288]
+                    - cell "-" [ref=e289]
+                    - cell [ref=e290]:
+                      - generic [ref=e291]:
+                        - button "Sửa" [ref=e292] [cursor=pointer]:
+                          - img [ref=e293]
+                        - button "Xóa" [ref=e296] [cursor=pointer]:
+                          - img [ref=e297]
+                        - button "Ẩn" [ref=e300] [cursor=pointer]:
+                          - img [ref=e301]
+                  - 'row "Bộ mắc cài kim loại tự đóng Đơn vị tính: Bộ SP0293 Niềng răng Tất cả 2.500.000 ₫" [ref=e306]':
+                    - cell [ref=e307]:
+                      - checkbox [ref=e308]
+                    - 'cell "Bộ mắc cài kim loại tự đóng Đơn vị tính: Bộ SP0293" [ref=e309]':
+                      - generic [ref=e310]:
+                        - generic [ref=e311]: Bộ mắc cài kim loại tự đóng
+                        - generic [ref=e312]:
+                          - text: "Đơn vị tính: Bộ"
+                          - generic [ref=e313]: SP0293
+                    - cell "Niềng răng" [ref=e314]
+                    - cell "Tất cả" [ref=e315]
+                    - cell "2.500.000 ₫" [ref=e316]
+                    - cell [ref=e317]:
+                      - generic [ref=e318]:
+                        - button "Sửa" [ref=e319] [cursor=pointer]:
+                          - img [ref=e320]
+                        - button "Xóa" [ref=e323] [cursor=pointer]:
+                          - img [ref=e324]
+                        - button "Ẩn" [ref=e327] [cursor=pointer]:
+                          - img [ref=e328]
+                  - 'row "Bộ mắc cài sứ tiêu chuẩn Đơn vị tính: Bộ SP0294 Niềng răng Tất cả 3.500.000 ₫" [ref=e333]':
+                    - cell [ref=e334]:
+                      - checkbox [ref=e335]
+                    - 'cell "Bộ mắc cài sứ tiêu chuẩn Đơn vị tính: Bộ SP0294" [ref=e336]':
+                      - generic [ref=e337]:
+                        - generic [ref=e338]: Bộ mắc cài sứ tiêu chuẩn
+                        - generic [ref=e339]:
+                          - text: "Đơn vị tính: Bộ"
+                          - generic [ref=e340]: SP0294
+                    - cell "Niềng răng" [ref=e341]
+                    - cell "Tất cả" [ref=e342]
+                    - cell "3.500.000 ₫" [ref=e343]
+                    - cell [ref=e344]:
+                      - generic [ref=e345]:
+                        - button "Sửa" [ref=e346] [cursor=pointer]:
+                          - img [ref=e347]
+                        - button "Xóa" [ref=e350] [cursor=pointer]:
+                          - img [ref=e351]
+                        - button "Ẩn" [ref=e354] [cursor=pointer]:
+                          - img [ref=e355]
+                  - 'row "Bộ mắc cài sứ tự đóng Đơn vị tính: Bộ SP0295 Niềng răng Tất cả 4.500.000 ₫" [ref=e360]':
+                    - cell [ref=e361]:
+                      - checkbox [ref=e362]
+                    - 'cell "Bộ mắc cài sứ tự đóng Đơn vị tính: Bộ SP0295" [ref=e363]':
+                      - generic [ref=e364]:
+                        - generic [ref=e365]: Bộ mắc cài sứ tự đóng
+                        - generic [ref=e366]:
+                          - text: "Đơn vị tính: Bộ"
+                          - generic [ref=e367]: SP0295
+                    - cell "Niềng răng" [ref=e368]
+                    - cell "Tất cả" [ref=e369]
+                    - cell "4.500.000 ₫" [ref=e370]
+                    - cell [ref=e371]:
+                      - generic [ref=e372]:
+                        - button "Sửa" [ref=e373] [cursor=pointer]:
+                          - img [ref=e374]
+                        - button "Xóa" [ref=e377] [cursor=pointer]:
+                          - img [ref=e378]
+                        - button "Ẩn" [ref=e381] [cursor=pointer]:
+                          - img [ref=e382]
+                  - 'row "CHỈNH DÂY FIX Đơn vị tính: RĂNG SP0299 Niềng răng Tất cả -" [ref=e387]':
+                    - cell [ref=e388]:
+                      - checkbox [ref=e389]
+                    - 'cell "CHỈNH DÂY FIX Đơn vị tính: RĂNG SP0299" [ref=e390]':
+                      - generic [ref=e391]:
+                        - generic [ref=e392]: CHỈNH DÂY FIX
+                        - generic [ref=e393]:
+                          - text: "Đơn vị tính: RĂNG"
+                          - generic [ref=e394]: SP0299
+                    - cell "Niềng răng" [ref=e395]
+                    - cell "Tất cả" [ref=e396]
+                    - cell "-" [ref=e397]
+                    - cell [ref=e398]:
+                      - generic [ref=e399]:
+                        - button "Sửa" [ref=e400] [cursor=pointer]:
+                          - img [ref=e401]
+                        - button "Xóa" [ref=e404] [cursor=pointer]:
+                          - img [ref=e405]
+                        - button "Ẩn" [ref=e408] [cursor=pointer]:
+                          - img [ref=e409]
+                  - 'row "CHỈNH DÂY FIX 2 Đơn vị tính: RĂNG SP0300 Niềng răng Tất cả -" [ref=e414]':
+                    - cell [ref=e415]:
+                      - checkbox [ref=e416]
+                    - 'cell "CHỈNH DÂY FIX 2 Đơn vị tính: RĂNG SP0300" [ref=e417]':
+                      - generic [ref=e418]:
+                        - generic [ref=e419]: CHỈNH DÂY FIX 2
+                        - generic [ref=e420]:
+                          - text: "Đơn vị tính: RĂNG"
+                          - generic [ref=e421]: SP0300
+                    - cell "Niềng răng" [ref=e422]
+                    - cell "Tất cả" [ref=e423]
+                    - cell "-" [ref=e424]
+                    - cell [ref=e425]:
+                      - generic [ref=e426]:
+                        - button "Sửa" [ref=e427] [cursor=pointer]:
+                          - img [ref=e428]
+                        - button "Xóa" [ref=e431] [cursor=pointer]:
+                          - img [ref=e432]
+                        - button "Ẩn" [ref=e435] [cursor=pointer]:
+                          - img [ref=e436]
+                  - 'row "Chun chỉnh nha Đơn vị tính: túi SP0264 Niềng răng Tất cả 50.000 ₫" [ref=e441]':
+                    - cell [ref=e442]:
+                      - checkbox [ref=e443]
+                    - 'cell "Chun chỉnh nha Đơn vị tính: túi SP0264" [ref=e444]':
+                      - generic [ref=e445]:
+                        - generic [ref=e446]: Chun chỉnh nha
+                        - generic [ref=e447]:
+                          - text: "Đơn vị tính: túi"
+                          - generic [ref=e448]: SP0264
+                    - cell "Niềng răng" [ref=e449]
+                    - cell "Tất cả" [ref=e450]
+                    - cell "50.000 ₫" [ref=e451]
+                    - cell [ref=e452]:
+                      - generic [ref=e453]:
+                        - button "Sửa" [ref=e454] [cursor=pointer]:
+                          - img [ref=e455]
+                        - button "Xóa" [ref=e458] [cursor=pointer]:
+                          - img [ref=e459]
+                        - button "Ẩn" [ref=e462] [cursor=pointer]:
+                          - img [ref=e463]
+                  - 'row "Chích áp xe lợi Đơn vị tính: Răng DV0059 Phẫu thuật và điều trị Tất cả 450.000 ₫" [ref=e468]':
+                    - cell [ref=e469]:
+                      - checkbox [ref=e470]
+                    - 'cell "Chích áp xe lợi Đơn vị tính: Răng DV0059" [ref=e471]':
+                      - generic [ref=e472]:
+                        - generic [ref=e473]: Chích áp xe lợi
+                        - generic [ref=e474]:
+                          - text: "Đơn vị tính: Răng"
+                          - generic [ref=e475]: DV0059
+                    - cell "Phẫu thuật và điều trị" [ref=e476]
+                    - cell "Tất cả" [ref=e477]
+                    - cell "450.000 ₫" [ref=e478]
+                    - cell [ref=e479]:
+                      - generic [ref=e480]:
+                        - button "Sửa" [ref=e481] [cursor=pointer]:
+                          - img [ref=e482]
+                        - button "Xóa" [ref=e485] [cursor=pointer]:
+                          - img [ref=e486]
+                        - button "Ẩn" [ref=e489] [cursor=pointer]:
+                          - img [ref=e490]
+                  - 'row "Chấm thuốc Đơn vị tính: lần SP0272 Nhổ răng Tất cả -" [ref=e495]':
+                    - cell [ref=e496]:
+                      - checkbox [ref=e497]
+                    - 'cell "Chấm thuốc Đơn vị tính: lần SP0272" [ref=e498]':
+                      - generic [ref=e499]:
+                        - generic [ref=e500]: Chấm thuốc
+                        - generic [ref=e501]:
+                          - text: "Đơn vị tính: lần"
+                          - generic [ref=e502]: SP0272
+                    - cell "Nhổ răng" [ref=e503]
+                    - cell "Tất cả" [ref=e504]
+                    - cell "-" [ref=e505]
+                    - cell [ref=e506]:
+                      - generic [ref=e507]:
+                        - button "Sửa" [ref=e508] [cursor=pointer]:
+                          - img [ref=e509]
+                        - button "Xóa" [ref=e512] [cursor=pointer]:
+                          - img [ref=e513]
+                        - button "Ẩn" [ref=e516] [cursor=pointer]:
+                          - img [ref=e517]
+                  - 'row "Chốt sợi Đơn vị tính: Răng DV0020 Bọc sứ Tất cả 2.000.000 ₫" [ref=e522]':
+                    - cell [ref=e523]:
+                      - checkbox [ref=e524]
+                    - 'cell "Chốt sợi Đơn vị tính: Răng DV0020" [ref=e525]':
+                      - generic [ref=e526]:
+                        - generic [ref=e527]: Chốt sợi
+                        - generic [ref=e528]:
+                          - text: "Đơn vị tính: Răng"
+                          - generic [ref=e529]: DV0020
+                    - cell "Bọc sứ" [ref=e530]
+                    - cell "Tất cả" [ref=e531]
+                    - cell "2.000.000 ₫" [ref=e532]
+                    - cell [ref=e533]:
+                      - generic [ref=e534]:
+                        - button "Sửa" [ref=e535] [cursor=pointer]:
+                          - img [ref=e536]
+                        - button "Xóa" [ref=e539] [cursor=pointer]:
+                          - img [ref=e540]
+                        - button "Ẩn" [ref=e543] [cursor=pointer]:
+                          - img [ref=e544]
+                  - 'row "Chốt sợi thủy tinh Đơn vị tính: đồng SP0244 Bọc sứ Tất cả 800.000 ₫" [ref=e549]':
+                    - cell [ref=e550]:
+                      - checkbox [ref=e551]
+                    - 'cell "Chốt sợi thủy tinh Đơn vị tính: đồng SP0244" [ref=e552]':
+                      - generic [ref=e553]:
+                        - generic [ref=e554]: Chốt sợi thủy tinh
+                        - generic [ref=e555]:
+                          - text: "Đơn vị tính: đồng"
+                          - generic [ref=e556]: SP0244
+                    - cell "Bọc sứ" [ref=e557]
+                    - cell "Tất cả" [ref=e558]
+                    - cell "800.000 ₫" [ref=e559]
+                    - cell [ref=e560]:
+                      - generic [ref=e561]:
+                        - button "Sửa" [ref=e562] [cursor=pointer]:
+                          - img [ref=e563]
+                        - button "Xóa" [ref=e566] [cursor=pointer]:
+                          - img [ref=e567]
+                        - button "Ẩn" [ref=e570] [cursor=pointer]:
+                          - img [ref=e571]
+                  - 'row "Chụp phim Đơn vị tính: lần SP0269 Điều trị tổng quát Tất cả -" [ref=e576]':
+                    - cell [ref=e577]:
+                      - checkbox [ref=e578]
+                    - 'cell "Chụp phim Đơn vị tính: lần SP0269" [ref=e579]':
+                      - generic [ref=e580]:
+                        - generic [ref=e581]: Chụp phim
+                        - generic [ref=e582]:
+                          - text: "Đơn vị tính: lần"
+                          - generic [ref=e583]: SP0269
+                    - cell "Điều trị tổng quát" [ref=e584]
+                    - cell "Tất cả" [ref=e585]
+                    - cell "-" [ref=e586]
+                    - cell [ref=e587]:
+                      - generic [ref=e588]:
+                        - button "Sửa" [ref=e589] [cursor=pointer]:
+                          - img [ref=e590]
+                        - button "Xóa" [ref=e593] [cursor=pointer]:
+                          - img [ref=e594]
+                        - button "Ẩn" [ref=e597] [cursor=pointer]:
+                          - img [ref=e598]
+                  - 'row "Cùi giả kim loại Đơn vị tính: đồng SP0265 Bọc sứ Tất cả 1.000.000 ₫" [ref=e603]':
+                    - cell [ref=e604]:
+                      - checkbox [ref=e605]
+                    - 'cell "Cùi giả kim loại Đơn vị tính: đồng SP0265" [ref=e606]':
+                      - generic [ref=e607]:
+                        - generic [ref=e608]: Cùi giả kim loại
+                        - generic [ref=e609]:
+                          - text: "Đơn vị tính: đồng"
+                          - generic [ref=e610]: SP0265
+                    - cell "Bọc sứ" [ref=e611]
+                    - cell "Tất cả" [ref=e612]
+                    - cell "1.000.000 ₫" [ref=e613]
+                    - cell [ref=e614]:
+                      - generic [ref=e615]:
+                        - button "Sửa" [ref=e616] [cursor=pointer]:
+                          - img [ref=e617]
+                        - button "Xóa" [ref=e620] [cursor=pointer]:
+                          - img [ref=e621]
+                        - button "Ẩn" [ref=e624] [cursor=pointer]:
+                          - img [ref=e625]
+                  - 'row "Cùi giả sứ Đơn vị tính: đồng SP0243 Bọc sứ Tất cả 1.500.000 ₫" [ref=e630]':
+                    - cell [ref=e631]:
+                      - checkbox [ref=e632]
+                    - 'cell "Cùi giả sứ Đơn vị tính: đồng SP0243" [ref=e633]':
+                      - generic [ref=e634]:
+                        - generic [ref=e635]: Cùi giả sứ
+                        - generic [ref=e636]:
+                          - text: "Đơn vị tính: đồng"
+                          - generic [ref=e637]: SP0243
+                    - cell "Bọc sứ" [ref=e638]
+                    - cell "Tất cả" [ref=e639]
+                    - cell "1.500.000 ₫" [ref=e640]
+                    - cell [ref=e641]:
+                      - generic [ref=e642]:
+                        - button "Sửa" [ref=e643] [cursor=pointer]:
+                          - img [ref=e644]
+                        - button "Xóa" [ref=e647] [cursor=pointer]:
+                          - img [ref=e648]
+                        - button "Ẩn" [ref=e651] [cursor=pointer]:
+                          - img [ref=e652]
+                  - 'row "CẮT CHỈ Đơn vị tính: Cái SP0201 Điều trị tổng quát Tất cả 200.000 ₫" [ref=e657]':
+                    - cell [ref=e658]:
+                      - checkbox [ref=e659]
+                    - 'cell "CẮT CHỈ Đơn vị tính: Cái SP0201" [ref=e660]':
+                      - generic [ref=e661]:
+                        - generic [ref=e662]: CẮT CHỈ
+                        - generic [ref=e663]:
+                          - text: "Đơn vị tính: Cái"
+                          - generic [ref=e664]: SP0201
+                    - cell "Điều trị tổng quát" [ref=e665]
+                    - cell "Tất cả" [ref=e666]
+                    - cell "200.000 ₫" [ref=e667]
+                    - cell [ref=e668]:
+                      - generic [ref=e669]:
+                        - button "Sửa" [ref=e670] [cursor=pointer]:
+                          - img [ref=e671]
+                        - button "Xóa" [ref=e674] [cursor=pointer]:
+                          - img [ref=e675]
+                        - button "Ẩn" [ref=e678] [cursor=pointer]:
+                          - img [ref=e679]
+                  - 'row "CẮT LỢI TRÙM (THƯỜNG) Đơn vị tính: cái SP0218 Điều trị tổng quát Tất cả 300.000 ₫" [ref=e684]':
+                    - cell [ref=e685]:
+                      - checkbox [ref=e686]
+                    - 'cell "CẮT LỢI TRÙM (THƯỜNG) Đơn vị tính: cái SP0218" [ref=e687]':
+                      - generic [ref=e688]:
+                        - generic [ref=e689]: CẮT LỢI TRÙM (THƯỜNG)
+                        - generic [ref=e690]:
+                          - text: "Đơn vị tính: cái"
+                          - generic [ref=e691]: SP0218
+                    - cell "Điều trị tổng quát" [ref=e692]
+                    - cell "Tất cả" [ref=e693]
+                    - cell "300.000 ₫" [ref=e694]
+                    - cell [ref=e695]:
+                      - generic [ref=e696]:
+                        - button "Sửa" [ref=e697] [cursor=pointer]:
+                          - img [ref=e698]
+                        - button "Xóa" [ref=e701] [cursor=pointer]:
+                          - img [ref=e702]
+                        - button "Ẩn" [ref=e705] [cursor=pointer]:
+                          - img [ref=e706]
+                  - 'row "CẮT NƯỚU Đơn vị tính: RĂNG SP0303 Điều trị tổng quát Tất cả -" [ref=e711]':
+                    - cell [ref=e712]:
+                      - checkbox [ref=e713]
+                    - 'cell "CẮT NƯỚU Đơn vị tính: RĂNG SP0303" [ref=e714]':
+                      - generic [ref=e715]:
+                        - generic [ref=e716]: CẮT NƯỚU
+                        - generic [ref=e717]:
+                          - text: "Đơn vị tính: RĂNG"
+                          - generic [ref=e718]: SP0303
+                    - cell "Điều trị tổng quát" [ref=e719]
+                    - cell "Tất cả" [ref=e720]
+                    - cell "-" [ref=e721]
+                    - cell [ref=e722]:
+                      - generic [ref=e723]:
+                        - button "Sửa" [ref=e724] [cursor=pointer]:
+                          - img [ref=e725]
+                        - button "Xóa" [ref=e728] [cursor=pointer]:
+                          - img [ref=e729]
+                        - button "Ẩn" [ref=e732] [cursor=pointer]:
+                          - img [ref=e733]
+              - generic [ref=e738]:
+                - generic [ref=e739]:
+                  - button [disabled] [ref=e740]:
+                    - img [ref=e741]
+                  - button "1" [ref=e743] [cursor=pointer]
+                  - button "2" [ref=e744] [cursor=pointer]
+                  - generic [ref=e745]: ...
+                  - button "8" [ref=e746] [cursor=pointer]
+                  - button [ref=e747] [cursor=pointer]:
+                    - img [ref=e748]
+                - generic [ref=e750]:
+                  - combobox [disabled] [ref=e751]:
+                    - option "20" [selected]
+                  - generic [ref=e752]: hàng trên trang
+                  - generic [ref=e753]: 1-20 của 155 dòng
