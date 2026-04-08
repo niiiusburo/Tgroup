@@ -1,5 +1,11 @@
 # TGroup — TDental Dashboard
 
+## Obsidian Brain
+
+At session start, read project context from Obsidian vault:
+- `~/obsidian-vault/thuan-brain/01-projects/tgroup/TGroup-Overview.md` — Architecture, pages, tech stack
+- `~/obsidian-vault/thuan-brain/01-projects/tgroup/TGroup-Deployment.md` — VPS deploy workflow, Docker setup
+
 ## Project Map
 
 ```
@@ -184,7 +190,7 @@ docker exec -i tdental-demo psql -U postgres -d tdental_demo < website/demo_tden
 
 ## Version System
 
-**Current Version:** `0.1.5` - Fixed update system with proper cache clearing and Playwright tests
+**Current Version:** `0.1.6` - Fixed React hooks error in VersionDisplay, version update working correctly
 
 Auto-update notification system solves browser cache issues:
 
