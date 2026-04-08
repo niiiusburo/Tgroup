@@ -359,12 +359,10 @@ export function Layout() {
           <Outlet />
         </main>
 
-        {/* Version Display - Dev only */}
-        {import.meta.env.DEV && (
-          <div className="fixed bottom-4 right-4 z-40">
-            <VersionDisplay variant="floating" />
-          </div>
-        )}
+        {/* Version Display */}
+        <div className="fixed bottom-4 right-4 z-40">
+          <VersionDisplay variant="floating" />
+        </div>
       </div>
 
       {/* Permission Debugger Modal */}
