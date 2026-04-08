@@ -1,0 +1,398 @@
+const express = require('express');
+const { query } = require('../db');
+
+const router = express.Router();
+
+/**
+ * GET /api/Permissions/groups
+ * Returns all permission groups with their permissions array
+ */
+router.get('/groups', async (req, res) => {
+  try {
+    const rows = await query(`
+      SELECT
+        pg.id,
+        pg.name,
+        pg.color,
+        pg.description,
+        pg.is_system AS "isSystem",
+        pg.datecreated,
+        pg.lastupdated,
+        COALESCE(
+          ARRAY_AGG(gp.permission ORDER BY gp.permission) FILTER (WHERE gp.permission IS NOT NULL),
+          '{}'::TEXT[]
+        ) AS permissions
+      FROM permission_groups pg
+      LEFT JOIN group_permissions gp ON gp.group_id = pg.id
+      GROUP BY pg.id, pg.name, pg.color, pg.description, pg.is_system, pg.datecreated, pg.lastupdated
+      ORDER BY pg.datecreated ASC
+    `);
+    return res.json(rows);
+  } catch (err) {
+    console.error('Error fetching permission groups:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/Permissions/groups
+ * Body: { name, color, description, permissions: [] }
+ * Creates a new permission group
+ */
+router.post('/groups', async (req, res) => {
+  try {
+    const { name, color = '#94A3B8', description = null, permissions = [] } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: 'name is required' });
+    }
+
+    const groupRows = await query(
+      `INSERT INTO permission_groups (name, color, description)
+       VALUES ($1, $2, $3)
+       RETURNING id, name, color, description, is_system AS "isSystem", datecreated, lastupdated`,
+      [name, color, description]
+    );
+    const group = groupRows[0];
+
+    if (permissions.length > 0) {
+      const placeholders = permissions.map((_, i) => `($1, $${i + 2})`).join(', ');
+      await query(
+        `INSERT INTO group_permissions (group_id, permission) VALUES ${placeholders} ON CONFLICT DO NOTHING`,
+        [group.id, ...permissions]
+      );
+    }
+
+    const result = await query(
+      `SELECT
+        pg.id, pg.name, pg.color, pg.description, pg.is_system AS "isSystem", pg.datecreated, pg.lastupdated,
+        COALESCE(ARRAY_AGG(gp.permission ORDER BY gp.permission) FILTER (WHERE gp.permission IS NOT NULL), '{}'::TEXT[]) AS permissions
+       FROM permission_groups pg
+       LEFT JOIN group_permissions gp ON gp.group_id = pg.id
+       WHERE pg.id = $1
+       GROUP BY pg.id, pg.name, pg.color, pg.description, pg.is_system, pg.datecreated, pg.lastupdated`,
+      [group.id]
+    );
+
+    return res.status(201).json(result[0]);
+  } catch (err) {
+    console.error('Error creating permission group:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * PUT /api/Permissions/groups/:groupId
+ * Body: { name, color, description, permissions: [] }
+ * Updates a permission group
+ */
+router.put('/groups/:groupId', async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { name, color, description, permissions = [] } = req.body;
+
+    const updateFields = [];
+    const params = [];
+    let paramIdx = 1;
+
+    if (name !== undefined) { updateFields.push(`name = $${paramIdx++}`); params.push(name); }
+    if (color !== undefined) { updateFields.push(`color = $${paramIdx++}`); params.push(color); }
+    if (description !== undefined) { updateFields.push(`description = $${paramIdx++}`); params.push(description); }
+    updateFields.push(`lastupdated = NOW()`);
+
+    if (updateFields.length > 1) {
+      params.push(groupId);
+      await query(
+        `UPDATE permission_groups SET ${updateFields.join(', ')} WHERE id = $${paramIdx}`,
+        params
+      );
+    }
+
+    // Replace permissions
+    await query(`DELETE FROM group_permissions WHERE group_id = $1`, [groupId]);
+    if (permissions.length > 0) {
+      const placeholders = permissions.map((_, i) => `($1, $${i + 2})`).join(', ');
+      await query(
+        `INSERT INTO group_permissions (group_id, permission) VALUES ${placeholders} ON CONFLICT DO NOTHING`,
+        [groupId, ...permissions]
+      );
+    }
+
+    const result = await query(
+      `SELECT
+        pg.id, pg.name, pg.color, pg.description, pg.is_system AS "isSystem", pg.datecreated, pg.lastupdated,
+        COALESCE(ARRAY_AGG(gp.permission ORDER BY gp.permission) FILTER (WHERE gp.permission IS NOT NULL), '{}'::TEXT[]) AS permissions
+       FROM permission_groups pg
+       LEFT JOIN group_permissions gp ON gp.group_id = pg.id
+       WHERE pg.id = $1
+       GROUP BY pg.id, pg.name, pg.color, pg.description, pg.is_system, pg.datecreated, pg.lastupdated`,
+      [groupId]
+    );
+
+    if (!result || result.length === 0) {
+      return res.status(404).json({ error: 'Permission group not found' });
+    }
+
+    return res.json(result[0]);
+  } catch (err) {
+    console.error('Error updating permission group:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/Permissions/employees
+ * Returns all employee permission assignments
+ */
+router.get('/employees', async (req, res) => {
+  try {
+    const rows = await query(`
+      SELECT
+        ep.employee_id AS "employeeId",
+        p.name AS "employeeName",
+        ep.group_id AS "groupId",
+        pg.name AS "groupName",
+        pg.color AS "groupColor",
+        ep.loc_scope AS "locScope"
+      FROM employee_permissions ep
+      JOIN partners p ON p.id = ep.employee_id
+      JOIN permission_groups pg ON pg.id = ep.group_id
+      ORDER BY p.name ASC
+    `);
+
+    const employeeIds = rows.map(r => r.employeeId);
+
+    let locationMap = {};
+    let overridesMap = {};
+
+    if (employeeIds.length > 0) {
+      const locRows = await query(`
+        SELECT
+          els.employee_id,
+          c.id AS location_id,
+          c.name AS location_name
+        FROM employee_location_scope els
+        JOIN companies c ON c.id = els.location_id
+        WHERE els.employee_id = ANY($1::uuid[])
+      `, [employeeIds]);
+
+      for (const loc of locRows) {
+        if (!locationMap[loc.employee_id]) locationMap[loc.employee_id] = [];
+        locationMap[loc.employee_id].push({ id: loc.location_id, name: loc.location_name });
+      }
+
+      const overrideRows = await query(`
+        SELECT employee_id, permission, override_type
+        FROM permission_overrides
+        WHERE employee_id = ANY($1::uuid[])
+      `, [employeeIds]);
+
+      for (const ov of overrideRows) {
+        if (!overridesMap[ov.employee_id]) overridesMap[ov.employee_id] = { grant: [], revoke: [] };
+        overridesMap[ov.employee_id][ov.override_type].push(ov.permission);
+      }
+    }
+
+    const result = rows.map(r => ({
+      employeeId: r.employeeId,
+      employeeName: r.employeeName,
+      groupId: r.groupId,
+      groupName: r.groupName,
+      groupColor: r.groupColor,
+      locScope: r.locScope,
+      locations: locationMap[r.employeeId] || [],
+      overrides: overridesMap[r.employeeId] || { grant: [], revoke: [] },
+    }));
+
+    return res.json(result);
+  } catch (err) {
+    console.error('Error fetching employee permissions:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * PUT /api/Permissions/employees/:employeeId
+ * Body: { groupId, locScope, locationIds: [], overrides: { grant: [], revoke: [] } }
+ * Updates employee permission assignment
+ */
+router.put('/employees/:employeeId', async (req, res) => {
+  try {
+    const { employeeId } = req.params;
+    const { groupId, locScope = 'assigned', locationIds = [], overrides = { grant: [], revoke: [] } } = req.body;
+
+    if (!groupId) {
+      return res.status(400).json({ error: 'groupId is required' });
+    }
+
+    // Upsert employee_permissions
+    await query(
+      `INSERT INTO employee_permissions (employee_id, group_id, loc_scope, lastupdated)
+       VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (employee_id) DO UPDATE
+         SET group_id = EXCLUDED.group_id,
+             loc_scope = EXCLUDED.loc_scope,
+             lastupdated = NOW()`,
+      [employeeId, groupId, locScope]
+    );
+
+    // Replace location scopes
+    await query(`DELETE FROM employee_location_scope WHERE employee_id = $1`, [employeeId]);
+    if (locationIds.length > 0) {
+      const placeholders = locationIds.map((_, i) => `($1, $${i + 2})`).join(', ');
+      await query(
+        `INSERT INTO employee_location_scope (employee_id, location_id) VALUES ${placeholders} ON CONFLICT DO NOTHING`,
+        [employeeId, ...locationIds]
+      );
+    }
+
+    // Replace permission overrides
+    await query(`DELETE FROM permission_overrides WHERE employee_id = $1`, [employeeId]);
+    const allOverrides = [
+      ...(overrides.grant || []).map(p => ({ permission: p, type: 'grant' })),
+      ...(overrides.revoke || []).map(p => ({ permission: p, type: 'revoke' })),
+    ];
+    if (allOverrides.length > 0) {
+      const placeholders = allOverrides.map((_, i) => `($1, $${i * 2 + 2}, $${i * 2 + 3})`).join(', ');
+      const params = [employeeId];
+      for (const ov of allOverrides) {
+        params.push(ov.permission, ov.type);
+      }
+      await query(
+        `INSERT INTO permission_overrides (employee_id, permission, override_type) VALUES ${placeholders} ON CONFLICT DO NOTHING`,
+        params
+      );
+    }
+
+    // Return updated employee data
+    const epRows = await query(
+      `SELECT
+        ep.employee_id AS "employeeId",
+        p.name AS "employeeName",
+        ep.group_id AS "groupId",
+        pg.name AS "groupName",
+        pg.color AS "groupColor",
+        ep.loc_scope AS "locScope"
+       FROM employee_permissions ep
+       JOIN partners p ON p.id = ep.employee_id
+       JOIN permission_groups pg ON pg.id = ep.group_id
+       WHERE ep.employee_id = $1`,
+      [employeeId]
+    );
+
+    if (!epRows || epRows.length === 0) {
+      return res.status(404).json({ error: 'Employee permission not found' });
+    }
+
+    const locRows = await query(
+      `SELECT c.id AS location_id, c.name AS location_name
+       FROM employee_location_scope els
+       JOIN companies c ON c.id = els.location_id
+       WHERE els.employee_id = $1`,
+      [employeeId]
+    );
+
+    const overrideRows = await query(
+      `SELECT permission, override_type FROM permission_overrides WHERE employee_id = $1`,
+      [employeeId]
+    );
+
+    const emp = epRows[0];
+    const resultOverrides = { grant: [], revoke: [] };
+    for (const ov of overrideRows) {
+      resultOverrides[ov.override_type].push(ov.permission);
+    }
+
+    return res.json({
+      employeeId: emp.employeeId,
+      employeeName: emp.employeeName,
+      groupId: emp.groupId,
+      groupName: emp.groupName,
+      groupColor: emp.groupColor,
+      locScope: emp.locScope,
+      locations: locRows.map(l => ({ id: l.location_id, name: l.location_name })),
+      overrides: resultOverrides,
+    });
+  } catch (err) {
+    console.error('Error updating employee permissions:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/Permissions/resolve/:employeeId
+ * Returns effective permissions for an employee (base group + overrides applied)
+ */
+router.get('/resolve/:employeeId', async (req, res) => {
+  try {
+    const { employeeId } = req.params;
+
+    const epRows = await query(
+      `SELECT
+        ep.employee_id,
+        p.name AS employee_name,
+        ep.group_id,
+        pg.name AS group_name,
+        pg.color AS group_color
+       FROM employee_permissions ep
+       JOIN partners p ON p.id = ep.employee_id
+       JOIN permission_groups pg ON pg.id = ep.group_id
+       WHERE ep.employee_id = $1`,
+      [employeeId]
+    );
+
+    if (!epRows || epRows.length === 0) {
+      return res.status(404).json({ error: 'Employee permission assignment not found' });
+    }
+
+    const ep = epRows[0];
+
+    const [basePermRows, overrideRows, locRows] = await Promise.all([
+      query(
+        `SELECT permission FROM group_permissions WHERE group_id = $1 ORDER BY permission`,
+        [ep.group_id]
+      ),
+      query(
+        `SELECT permission, override_type FROM permission_overrides WHERE employee_id = $1`,
+        [employeeId]
+      ),
+      query(
+        `SELECT c.id, c.name
+         FROM employee_location_scope els
+         JOIN companies c ON c.id = els.location_id
+         WHERE els.employee_id = $1`,
+        [employeeId]
+      ),
+    ]);
+
+    const basePermissions = basePermRows.map(r => r.permission);
+    const granted = overrideRows.filter(r => r.override_type === 'grant').map(r => r.permission);
+    const revoked = overrideRows.filter(r => r.override_type === 'revoke').map(r => r.permission);
+
+    const effectiveSet = new Set([...basePermissions, ...granted]);
+    for (const p of revoked) effectiveSet.delete(p);
+    const effectivePermissions = [...effectiveSet].sort();
+
+    return res.json({
+      employeeId: ep.employee_id,
+      employeeName: ep.employee_name,
+      group: {
+        id: ep.group_id,
+        name: ep.group_name,
+        color: ep.group_color,
+        basePermissions,
+      },
+      overrides: {
+        grant: granted,
+        revoke: revoked,
+      },
+      effectivePermissions,
+      locations: locRows.map(l => ({ id: l.id, name: l.name })),
+    });
+  } catch (err) {
+    console.error('Error resolving permissions:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+module.exports = router;
