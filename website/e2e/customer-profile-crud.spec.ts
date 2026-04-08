@@ -20,8 +20,8 @@ const ORIGINAL_PHONE = '0349762840';
 
 async function login(page: Page) {
   await page.goto('http://localhost:5174/login');
-  await page.getByRole('textbox', { name: 'Email' }).fill('admin@tdental.vn');
-  await page.getByRole('textbox', { name: 'Password' }).fill('admin123');
+  await page.getByRole('textbox', { name: 'Email' }).fill('tg@clinic.vn');
+  await page.getByRole('textbox', { name: 'Password' }).fill('123456');
   await page.getByRole('button', { name: 'Sign In' }).click();
   // Wait for redirect to dashboard — avoids strict mode h1 violations
   await page.waitForURL('**/');

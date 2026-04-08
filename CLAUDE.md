@@ -13,6 +13,14 @@ Every time you bump the version or deploy a new build, you MUST update `website/
 2. Bump the version in `website/package.json`
 3. The VersionDisplay component (dev only) shows a "Release Notes" link in the tooltip that opens a modal reading from `/CHANGELOG.json`
 
+## Admin Login Credentials
+
+**For Playwright E2E tests and browser testing, always use:**
+- Email: `tg@clinic.vn`
+- Password: `123456`
+
+Do NOT use `admin@tdental.vn` or any other email. This is the only admin account.
+
 ## Obsidian Brain
 
 At session start, read project context from Obsidian vault:
