@@ -1,6 +1,6 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
-import { useState, useMemo, useCallback } from 'react';
-import { Users, Plus, Phone, Mail, MapPin } from 'lucide-react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { Users, Plus, Phone, Mail, MapPin, Search } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { AddCustomerForm } from '@/components/forms/AddCustomerForm';
 import { CustomerProfile } from '@/components/customer';
@@ -121,6 +121,16 @@ export function Customers() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const { selectedLocationId } = useLocationFilter();
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (showForm) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+    return () => document.body.classList.remove('modal-open');
+  }, [showForm]);
   const { hasPermission } = useAuth();
   
   // Check permissions
@@ -136,6 +146,8 @@ export function Customers() {
     setStatusFilter,
     createCustomer,
     updateCustomer,
+    searchRequired,
+    minSearchLength,
   } = useCustomers(selectedLocationId);
 
   const { allLocations } = useLocations();
@@ -346,8 +358,8 @@ export function Customers() {
           loadingDeposits={false}
         />
         {showForm && isEditMode && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[900px] h-[85vh] flex flex-col overflow-hidden">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overscroll-contain">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[900px] h-[85vh] flex flex-col overflow-hidden overscroll-contain">
               <AddCustomerForm
                 isEdit={true}
                 canEdit={canEditCustomers}
@@ -412,14 +424,30 @@ export function Customers() {
         </div>
       </div>
 
-      <DataTable<Customer>
-        columns={customerColumns}
-        data={customers}
-        keyExtractor={(row) => row.id}
-        pageSize={10}
-        onRowClick={(row) => setSelectedCustomerId(row.id)}
-        emptyMessage="No customers found"
-      />
+      {/* Search Required Message */}
+      {searchRequired && !searchTerm && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
+          <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <Search className="w-6 h-6 text-amber-600" />
+          </div>
+          <h3 className="text-sm font-medium text-amber-900 mb-1">Tìm kiếm để xem khách hàng</h3>
+          <p className="text-xs text-amber-700">
+            Nhập ít nhất {minSearchLength} ký tự để tìm kiếm khách hàng
+          </p>
+        </div>
+      )}
+
+      {/* Customer Table - only show when not in search required mode or has results */}
+      {(!searchRequired || searchTerm.length >= minSearchLength) && (
+        <DataTable<Customer>
+          columns={customerColumns}
+          data={customers}
+          keyExtractor={(row) => row.id}
+          pageSize={10}
+          onRowClick={(row) => setSelectedCustomerId(row.id)}
+          emptyMessage="No customers found"
+        />
+      )}
     </div>
   );
 }

@@ -79,9 +79,15 @@
    Fixes scrolling on iPhone, iPad, and Desktop
    ============================================ */
 
+/* Lock body scroll when any modal overlay is open */
+body.modal-open {
+  overflow: hidden !important;
+}
+
 /* Modal container with proper mobile height handling */
 .modal-container {
   @apply fixed inset-0 z-50 flex items-center justify-center;
+  overscroll-behavior: contain;
 }
 
 /* Modal content with responsive max-height */

@@ -408,7 +408,7 @@ export function AddCustomerForm({
 
       <form onSubmit={handleSubmit} className="flex flex-1 overflow-hidden">
         {/* ── Left Panel ─────────────────────────────────────── */}
-        <div className="w-80 flex-shrink-0 border-r border-gray-200 flex flex-col gap-5 px-5 py-5 overflow-y-auto bg-gray-50/30">
+        <div className="w-80 flex-shrink-0 border-r border-gray-200 flex flex-col gap-5 px-5 py-5 overflow-y-auto overscroll-contain bg-gray-50/30">
           {/* Profile Card */}
           <CardSection title="Thông tin cá nhân" icon={Users}>
             {/* Avatar */}
@@ -526,8 +526,8 @@ export function AddCustomerForm({
             <div className="mb-3">
               <div className="flex items-center justify-between mb-1.5">
                 <FieldLabel>Nhân viên sale</FieldLabel>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setShowSalesDialog(true)}
                   className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
                   title="Thêm nhân viên sale mới"
@@ -541,6 +541,31 @@ export function AddCustomerForm({
                 className={selectClass()}
               >
                 <option value="">-- Chọn nhân viên --</option>
+                {employees.map((emp) => (
+                  <option key={emp.id} value={emp.id}>{emp.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* CSKH (Customer Service) - NEW */}
+            <div className="mb-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <FieldLabel>CSKH (Chăm sóc khách hàng)</FieldLabel>
+                <button
+                  type="button"
+                  onClick={() => alert('Tính năng thêm CSKH mới sẽ được phát triển sau')}
+                  className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
+                  title="Thêm CSKH mới"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <select
+                value={formData.cskhid}
+                onChange={(e) => set('cskhid', e.target.value)}
+                className={selectClass()}
+              >
+                <option value="">-- Chọn CSKH --</option>
                 {employees.map((emp) => (
                   <option key={emp.id} value={emp.id}>{emp.name}</option>
                 ))}
@@ -637,7 +662,7 @@ export function AddCustomerForm({
           </div>
 
           {/* Tab content */}
-          <div className="flex-1 overflow-y-auto px-8 py-6">
+          <div className="flex-1 overflow-y-auto overscroll-contain px-8 py-6">
             {/* ── Tab: Basic Info ── */}
             {activeTab === 'basic' && (
               <div className="max-w-4xl">
