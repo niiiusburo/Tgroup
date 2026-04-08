@@ -2,32 +2,43 @@ const express = require('express');
 const router = express.Router();
 const { query } = require('../db');
 
-console.log('[customerBalance_debug] loaded, query:', typeof query);
-
+/**
+ * GET /api/CustomerBalance/:id
+ * Returns deposit and outstanding balance for a customer (dbo.partners)
+ * Calculates from payments table if records exist, otherwise returns 0
+ */
 router.get('/:id', async (req, res) => {
   try {
-    console.log('[customerBalance_debug] GET /:id called with id:', req.params.id);
-    console.log('[customerBalance_debug] query function:', typeof query);
-    
-    const result = await query('SELECT * FROM public.customers WHERE id = $1 LIMIT 1', [req.params.id]);
-    console.log('[customerBalance_debug] result:', typeof result, Array.isArray(result) ? 'is array' : 'not array', result?.length);
-    
-    if (!result || result.length === 0) {
-      console.log('[customerBalance_debug] Customer not found');
+    const { id } = req.params;
+
+    // Verify customer exists in dbo.partners
+    const partner = await query('SELECT id, name FROM dbo.partners WHERE id = $1', [id]);
+    if (!partner || partner.length === 0) {
       return res.status(404).json({ error: 'Customer not found' });
     }
-    
-    const row = result[0];
-    console.log('[customerBalance_debug] row:', row);
-    
+
+    // Calculate deposit balance from payments
+    // Deposits (cash/bank method) add to balance, 'deposit' method withdraws
+    const depositResult = await query(`
+      SELECT
+        COALESCE(SUM(CASE WHEN method IN ('cash', 'bank') THEN amount ELSE 0 END), 0) AS total_deposits,
+        COALESCE(SUM(CASE WHEN method = 'deposit' THEN amount ELSE 0 END), 0) AS total_withdrawals
+      FROM public.payments
+      WHERE customer_id = $1
+    `, [id]);
+
+    const totalDeposits = parseFloat(depositResult[0]?.total_deposits || 0);
+    const totalWithdrawals = parseFloat(depositResult[0]?.total_withdrawals || 0);
+    const depositBalance = totalDeposits - totalWithdrawals;
+
     res.json({
-      id: row.id,
-      name: row.name,
-      deposit_balance: parseFloat(row.deposit_balance || 0),
-      outstanding_balance: parseFloat(row.outstanding_balance || 0),
+      id: partner[0].id,
+      name: partner[0].name,
+      deposit_balance: Math.max(0, depositBalance),
+      outstanding_balance: 0, // No outstanding balance tracking yet
     });
   } catch (error) {
-    console.error('[customerBalance_debug] Error:', error.message);
+    console.error('Error fetching customer balance:', error.message);
     res.status(500).json({ error: 'Failed to fetch customer balance' });
   }
 });

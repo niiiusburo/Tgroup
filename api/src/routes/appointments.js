@@ -113,8 +113,11 @@ router.get('/', async (req, res) => {
     }
 
     if (dateTo) {
+      // If dateTo is just a date (YYYY-MM-DD), convert to end of day (YYYY-MM-DD 23:59:59)
+      // to include all appointments on that day
+      const dateToValue = dateTo.length <= 10 ? `${dateTo} 23:59:59` : dateTo;
       conditions.push(`a.date <= $${paramIdx}`);
-      params.push(dateTo);
+      params.push(dateToValue);
       paramIdx++;
     }
 
@@ -320,16 +323,17 @@ router.get('/:id', async (req, res) => {
  */
 router.post('/', async (req, res) => {
   try {
-    const {
-      date,
-      partnerId,
-      doctorId,
-      companyId,
-      note = '',
-      timeExpected = 30,
-      color = '1',
-      state = 'confirmed',
-    } = req.body;
+    // Accept both camelCase and lowercase field names (frontend sends lowercase)
+    const b = req.body;
+    const date = b.date;
+    const time = b.time;
+    const partnerId = b.partnerId || b.partnerid;
+    const doctorId = b.doctorId || b.doctorid;
+    const companyId = b.companyId || b.companyid;
+    const note = b.note || '';
+    const timeExpected = b.timeExpected || b.timeexpected || 30;
+    const color = b.color || '1';
+    const state = b.state || 'confirmed';
 
     // Validate required fields
     const missingFields = [];
@@ -393,12 +397,12 @@ router.post('/', async (req, res) => {
     // Create appointment
     const result = await query(
       `INSERT INTO appointments (
-        id, name, date, partnerid, doctorid, companyid, note, timeexpected,
-        color, state, aptstate, datecreated, lastupdated
+        id, name, date, time, partnerid, doctorid, companyid, note, timeexpected,
+        color, state, aptstate, isrepeatcustomer, isnotreatment, datecreated, lastupdated
       ) VALUES (
-        gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW()
+        gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, false, false, NOW(), NOW()
       ) RETURNING *`,
-      [name, date, partnerId, doctorId || null, companyId, note, timeExpectedNum, color, state, state]
+      [name, date, time || null, partnerId, doctorId || null, companyId, note, timeExpectedNum, color, state, state]
     );
 
     const newAppointment = result[0];
@@ -447,14 +451,15 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const {
-      date,
-      doctorId,
-      note,
-      state,
-      timeExpected,
-      color,
-    } = req.body;
+    // Accept both camelCase and lowercase field names
+    const b = req.body;
+    const date = b.date;
+    const doctorId = b.doctorId || b.doctorid;
+    const note = b.note;
+    const state = b.state;
+    const timeExpected = b.timeExpected || b.timeexpected;
+    const color = b.color;
+    const time = b.time;
 
     // Validate ID
     if (!isValidUUID(id)) {
@@ -528,6 +533,11 @@ router.put('/:id', async (req, res) => {
     if (color !== undefined) {
       updates.push(`color = $${paramIdx}`);
       params.push(color);
+      paramIdx++;
+    }
+    if (time !== undefined) {
+      updates.push(`time = $${paramIdx}`);
+      params.push(time);
       paramIdx++;
     }
 
