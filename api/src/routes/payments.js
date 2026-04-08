@@ -69,15 +69,8 @@ router.post('/', async (req, res) => {
       RETURNING *
     `, [customer_id, service_id, amount, method, notes]);
     
-    if (method === 'cash' || method === 'bank') {
-      await query(`
-        UPDATE public.customers SET deposit_balance = deposit_balance + $1 WHERE id = $2
-      `, [amount, customer_id]);
-    } else if (method === 'deposit') {
-      await query(`
-        UPDATE public.customers SET deposit_balance = GREATEST(0, deposit_balance - $1) WHERE id = $2
-      `, [amount, customer_id]);
-    }
+    // Balance is calculated dynamically from payments in CustomerBalance route
+    // No need to update a separate balance column
     
     const row = result[0];
     res.status(201).json({
