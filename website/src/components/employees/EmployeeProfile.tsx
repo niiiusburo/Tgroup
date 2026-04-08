@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Calendar, X, Users, Stethoscope, Star, Clock, Pencil, Loader2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Calendar, X, Users, Pencil, Loader2 } from 'lucide-react';
 import {
   TIER_LABELS,
   TIER_STYLES,
@@ -16,22 +16,6 @@ import { fetchCompanies, type ApiCompany } from '@/lib/api';
  * @crossref:uses[fetchCompanies]
  */
 
-interface EmployeeStats {
-  readonly patientsServed: number;
-  readonly avgRating: number;
-  readonly hoursThisMonth: number;
-  readonly completedServices: number;
-}
-
-function generateEmployeeStats(employeeId: string): EmployeeStats {
-  const seed = parseInt(employeeId.replace(/\D/g, ''), 10) || 1;
-  return {
-    patientsServed: seed * 47 + 120,
-    avgRating: Math.min(5, 3.5 + (seed % 15) / 10),
-    hoursThisMonth: 80 + (seed * 13) % 80,
-    completedServices: seed * 23 + 50,
-  };
-}
 
 interface EmployeeProfileProps {
   readonly employee: Employee;
@@ -113,35 +97,6 @@ export function EmployeeProfile({
       </div>
 
       <div className="p-5 space-y-5">
-        {/* Performance Stats */}
-        {(() => {
-          const stats = generateEmployeeStats(employee.id);
-          return (
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-blue-50 rounded-lg p-3 text-center">
-                <Stethoscope className="w-4 h-4 text-blue-500 mx-auto mb-1" />
-                <p className="text-lg font-bold text-blue-700">{stats.patientsServed}</p>
-                <p className="text-[10px] text-blue-500">Patients Served</p>
-              </div>
-              <div className="bg-amber-50 rounded-lg p-3 text-center">
-                <Star className="w-4 h-4 text-amber-500 mx-auto mb-1" />
-                <p className="text-lg font-bold text-amber-700">{stats.avgRating.toFixed(1)}</p>
-                <p className="text-[10px] text-amber-500">Avg Rating</p>
-              </div>
-              <div className="bg-green-50 rounded-lg p-3 text-center">
-                <Clock className="w-4 h-4 text-green-500 mx-auto mb-1" />
-                <p className="text-lg font-bold text-green-700">{stats.hoursThisMonth}h</p>
-                <p className="text-[10px] text-green-500">Hours This Month</p>
-              </div>
-              <div className="bg-purple-50 rounded-lg p-3 text-center">
-                <Stethoscope className="w-4 h-4 text-purple-500 mx-auto mb-1" />
-                <p className="text-lg font-bold text-purple-700">{stats.completedServices}</p>
-                <p className="text-[10px] text-purple-500">Services Done</p>
-              </div>
-            </div>
-          );
-        })()}
-
         {/* Roles */}
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2">Roles</h3>

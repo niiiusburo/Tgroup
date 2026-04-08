@@ -71,7 +71,9 @@ export function AddressAutocomplete({
   // Load Google Places Script
   useEffect(() => {
     const apiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
+    console.log('[AddressAutocomplete] API Key check:', apiKey ? 'Found' : 'Not found', 'Value:', apiKey?.substring(0, 10) + '...');
     if (!apiKey) {
+      console.error('[AddressAutocomplete] VITE_GOOGLE_PLACES_API_KEY not set in environment');
       setScriptError('Google Places API key not configured');
       return;
     }

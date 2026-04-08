@@ -28,6 +28,7 @@ interface AddCustomerFormProps {
   readonly onSubmit: (data: CustomerFormData) => void;
   readonly onCancel: () => void;
   readonly isEdit?: boolean;
+  readonly canEdit?: boolean; // If true, allows editing all fields even in edit mode
 }
 
 type TabId = 'basic' | 'medical' | 'einvoice';
@@ -142,13 +143,13 @@ function MiniAddDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center">
+    <div className="modal-container">
       {/* Backdrop with blur */}
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
       
       <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header with gradient */}
-        <div className="relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
+        <div className="modal-header relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
           <div className="relative flex items-center justify-between">
             <h3 className="text-lg font-bold text-white">{title}</h3>
@@ -177,7 +178,7 @@ function MiniAddDialog({
           />
         </div>
         
-        <div className="px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
+        <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
@@ -205,7 +206,10 @@ export function AddCustomerForm({
   onSubmit,
   onCancel,
   isEdit = false,
+  canEdit = false,
 }: AddCustomerFormProps) {
+  // Fields should be editable if not in edit mode OR if user has edit permission
+  const isFieldEditable = !isEdit || canEdit;
   const [formData, setFormData] = useState<CustomerFormData>({
     ...EMPTY_CUSTOMER_FORM,
     ...(initialData ?? {}),
@@ -440,8 +444,8 @@ export function AddCustomerForm({
                 value={formData.name}
                 onChange={(e) => set('name', nameUppercase ? e.target.value.toUpperCase() : e.target.value)}
                 placeholder="Nhập họ và tên"
-                disabled={isEdit}
-                className={inputClass(!!getError('name'), isEdit)}
+                disabled={!isFieldEditable}
+                className={inputClass(!!getError('name'), !isFieldEditable)}
                 style={nameUppercase ? { textTransform: 'uppercase' } : {}}
               />
               {getError('name') && <p className="mt-1 text-xs text-red-500">{getError('name')}</p>}
@@ -452,14 +456,14 @@ export function AddCustomerForm({
               <FieldLabel>Giới tính</FieldLabel>
               <div className="flex gap-4">
                 {(['male', 'female', 'other'] as const).map((g) => (
-                  <label key={g} className={`flex items-center gap-2 text-sm cursor-pointer ${isEdit ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  <label key={g} className={`flex items-center gap-2 text-sm ${!isFieldEditable ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
                     <input
                       type="radio"
                       name="gender"
                       value={g}
                       checked={formData.gender === g}
-                      onChange={() => !isEdit && set('gender', g)}
-                      disabled={isEdit}
+                      onChange={() => isFieldEditable && set('gender', g)}
+                      disabled={!isFieldEditable}
                       className="accent-orange-500 w-4 h-4"
                     />
                     <span className="text-gray-700">{g === 'male' ? 'Nam' : g === 'female' ? 'Nữ' : 'Khác'}</span>
@@ -645,8 +649,8 @@ export function AddCustomerForm({
                       <select
                         value={formData.birthday ?? ''}
                         onChange={(e) => set('birthday', e.target.value ? Number(e.target.value) : null)}
-                        disabled={isEdit}
-                        className={`flex-1 ${selectClass(isEdit)}`}
+                        disabled={!isFieldEditable}
+                        className={`flex-1 ${selectClass(!isFieldEditable)}`}
                       >
                         <option value="">Ngày</option>
                         {DAYS.map((d) => <option key={d} value={d}>{d}</option>)}
@@ -654,8 +658,8 @@ export function AddCustomerForm({
                       <select
                         value={formData.birthmonth ?? ''}
                         onChange={(e) => set('birthmonth', e.target.value ? Number(e.target.value) : null)}
-                        disabled={isEdit}
-                        className={`flex-1 ${selectClass(isEdit)}`}
+                        disabled={!isFieldEditable}
+                        className={`flex-1 ${selectClass(!isFieldEditable)}`}
                       >
                         <option value="">Tháng</option>
                         {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
@@ -663,8 +667,8 @@ export function AddCustomerForm({
                       <select
                         value={formData.birthyear ?? ''}
                         onChange={(e) => set('birthyear', e.target.value ? Number(e.target.value) : null)}
-                        disabled={isEdit}
-                        className={`flex-1 ${selectClass(isEdit)}`}
+                        disabled={!isFieldEditable}
+                        className={`flex-1 ${selectClass(!isFieldEditable)}`}
                       >
                         <option value="">Năm</option>
                         {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}

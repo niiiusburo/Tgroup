@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { PermissionDebugger } from '@/components/debug/PermissionDebugger';
+import { VersionDisplay } from '@/components/shared/VersionDisplay';
 import {
   LayoutDashboard,
   Calendar,
@@ -120,10 +122,24 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
  */
 export function Layout() {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
+  const [debugOpen, setDebugOpen] = useState(false);
   const { selectedLocationId, setSelectedLocationId, allowedLocations, isSingleLocation } = useLocationFilter();
   const { user, permissions, hasPermission, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Keyboard shortcut for permission debugger (Ctrl+Shift+P)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+        e.preventDefault();
+        setDebugOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const currentPage = NAVIGATION_ITEMS.find(
     (item) =>
@@ -342,7 +358,15 @@ export function Layout() {
         <main className="flex-1 p-4 md:p-6">
           <Outlet />
         </main>
+
+        {/* Version Display - Fixed to bottom right of main content */}
+        <div className="fixed bottom-4 right-4 z-40">
+          <VersionDisplay variant="floating" />
+        </div>
       </div>
+
+      {/* Permission Debugger Modal */}
+      <PermissionDebugger isOpen={debugOpen} onClose={() => setDebugOpen(false)} />
     </div>
   );
 }

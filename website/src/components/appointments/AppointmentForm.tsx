@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { X, CalendarPlus, Edit2, Calendar, Clock } from 'lucide-react';
+import { X, CalendarPlus, Edit2, Calendar, Clock, User } from 'lucide-react';
 import { CustomerSelector } from '@/components/shared/CustomerSelector';
 import { DoctorSelector } from '@/components/shared/DoctorSelector';
 import { LocationSelector } from '@/components/shared/LocationSelector';
@@ -216,11 +216,25 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
               Customer
             </label>
-            <CustomerSelector
-              customers={customers}
-              selectedId={customerId}
-              onChange={setCustomerId}
-            />
+            {isEdit ? (
+              // Read-only display for edit mode (appointment already linked to customer)
+              <div className="flex items-center gap-2 w-full px-3 py-2 rounded-lg border bg-gray-50 border-gray-200 text-gray-700">
+                <User className="w-4 h-4 text-gray-400 shrink-0" />
+                <span className="flex-1 truncate font-medium">
+                  {initialData?.customerName || 'Unknown Customer'}
+                </span>
+                <span className="text-xs text-gray-400">
+                  {initialData?.customerPhone}
+                </span>
+              </div>
+            ) : (
+              // Selector for new appointments
+              <CustomerSelector
+                customers={customers}
+                selectedId={customerId}
+                onChange={setCustomerId}
+              />
+            )}
             {errors.customer && <p className="text-xs text-red-500 mt-1">{errors.customer}</p>}
           </div>
 

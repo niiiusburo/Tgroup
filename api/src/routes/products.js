@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
+const { v4: uuidv4 } = require('uuid');
 
 const router = express.Router();
 
@@ -176,6 +177,113 @@ router.get('/:id', async (req, res) => {
     return res.status(500).json({
       error: err instanceof Error ? err.message : 'Unknown error',
     });
+  }
+});
+
+/**
+ * POST /api/Products
+ * Create a new product/service
+ */
+router.post('/', async (req, res) => {
+  try {
+    const { name, defaultcode, type, listprice, categid, uomname, companyid, canorderlab } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Name is required' });
+    }
+
+    const id = uuidv4();
+    const now = new Date().toISOString();
+
+    await query(
+      `INSERT INTO dbo.products (id, name, namenosign, defaultcode, type, type2, listprice, categid, uomname, companyid, canorderlab, active, datecreated, lastupdated)
+       VALUES ($1, $2, $3, $4, $5, $5, $6, $7, $8, $9, $10, true, $11, $11)`,
+      [id, name.trim(), name.trim(), defaultcode || null, type || 'service', listprice || 0, categid || null, uomname || 'Lần', companyid || null, canorderlab || false, now]
+    );
+
+    const rows = await query(
+      `SELECT p.*, pc.name AS categname, pc.completename AS categcompletename, c.name AS companyname
+       FROM dbo.products p
+       LEFT JOIN dbo.productcategories pc ON pc.id = p.categid
+       LEFT JOIN dbo.companies c ON c.id = p.companyid
+       WHERE p.id = $1`,
+      [id]
+    );
+
+    return res.status(201).json(rows[0]);
+  } catch (err) {
+    console.error('Error creating product:', err);
+    return res.status(500).json({ error: err instanceof Error ? err.message : 'Unknown error' });
+  }
+});
+
+/**
+ * PUT /api/Products/:id
+ * Update a product/service
+ */
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, defaultcode, listprice, categid, uomname, companyid, canorderlab, active } = req.body;
+
+    const updates = [];
+    const params = [];
+    let idx = 1;
+
+    if (name !== undefined) { updates.push(`name = $${idx}`, `namenosign = $${idx}`); params.push(name.trim()); idx++; }
+    if (defaultcode !== undefined) { updates.push(`defaultcode = $${idx}`); params.push(defaultcode); idx++; }
+    if (listprice !== undefined) { updates.push(`listprice = $${idx}`); params.push(listprice); idx++; }
+    if (categid !== undefined) { updates.push(`categid = $${idx}`); params.push(categid); idx++; }
+    if (uomname !== undefined) { updates.push(`uomname = $${idx}`); params.push(uomname); idx++; }
+    if (companyid !== undefined) { updates.push(`companyid = $${idx}`); params.push(companyid); idx++; }
+    if (canorderlab !== undefined) { updates.push(`canorderlab = $${idx}`); params.push(canorderlab); idx++; }
+    if (active !== undefined) { updates.push(`active = $${idx}`); params.push(active); idx++; }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    updates.push(`lastupdated = $${idx}`);
+    params.push(new Date().toISOString());
+    idx++;
+
+    params.push(id);
+
+    await query(
+      `UPDATE dbo.products SET ${updates.join(', ')} WHERE id = $${idx}`,
+      params
+    );
+
+    const rows = await query(
+      `SELECT p.*, pc.name AS categname, pc.completename AS categcompletename, c.name AS companyname
+       FROM dbo.products p
+       LEFT JOIN dbo.productcategories pc ON pc.id = p.categid
+       LEFT JOIN dbo.companies c ON c.id = p.companyid
+       WHERE p.id = $1`,
+      [id]
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    return res.json(rows[0]);
+  } catch (err) {
+    console.error('Error updating product:', err);
+    return res.status(500).json({ error: err instanceof Error ? err.message : 'Unknown error' });
+  }
+});
+
+/**
+ * DELETE /api/Products/:id
+ */
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await query(`DELETE FROM dbo.products WHERE id = $1`, [id]);
+    return res.status(204).end();
+  } catch (err) {
+    console.error('Error deleting product:', err);
+    return res.status(500).json({ error: err instanceof Error ? err.message : 'Unknown error' });
   }
 });
 

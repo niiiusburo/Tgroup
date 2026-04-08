@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchAppointments, updateAppointment, type ApiAppointment } from '@/lib/api';
+import { useTimezone } from '@/contexts/TimezoneContext';
 
 /**
  * Hook for the Overview three-zone appointment flow
@@ -64,9 +65,6 @@ function mapStateToTopStatus(state: string | null): AppointmentTopStatus {
   switch (state?.toLowerCase()) {
     case 'arrived':
     case 'confirmed':
-    case 'in examination':
-    case 'done':
-    case 'completed':
       return 'arrived';
     case 'cancelled':
     case 'canceled':
@@ -106,6 +104,7 @@ function mapApiToOverview(apt: ApiAppointment): OverviewAppointment {
 }
 
 export function useOverviewAppointments(locationId?: string): UseOverviewAppointmentsResult {
+  const { getToday, getEndOfDay, timezone } = useTimezone();
   const [appointments, setAppointments] = useState<OverviewAppointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [zone3Filter, setZone3Filter] = useState<Zone3Filter>('all');
@@ -114,13 +113,14 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
   const loadAppointments = useCallback(async () => {
     setIsLoading(true);
     try {
-      const today = new Date();
-      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      // Use global timezone from TimezoneContext
+      const todayStr = getToday();
+      const endOfDay = getEndOfDay(todayStr);
 
       const response = await fetchAppointments({
         limit: 200,
         dateFrom: todayStr,
-        dateTo: `${todayStr}T23:59:59`,
+        dateTo: endOfDay,
         companyId: locationId && locationId !== 'all' ? locationId : undefined,
       });
 
@@ -134,11 +134,11 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
     } finally {
       setIsLoading(false);
     }
-  }, [locationId]);
+  }, [locationId, timezone, getToday, getEndOfDay]);
 
   useEffect(() => {
     loadAppointments();
-  }, [loadAppointments]);
+  }, [loadAppointments, timezone]);
 
   // ─── Zone 3: filtered appointments ─────────────────────────────
   const zone3Counts = useMemo(() => ({
@@ -214,7 +214,6 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
       );
     } catch (error) {
       console.error('Failed to update check-in status:', error);
-      throw error; // Re-throw to let caller handle error display
     }
   }, []);
 

@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 import { fetchAppointments, type ApiAppointment } from '@/lib/api';
+import { useTimezone } from '@/contexts/TimezoneContext';
 
 export type ViewMode = 'day' | 'week' | 'month';
 
@@ -9,19 +10,25 @@ export type ViewMode = 'day' | 'week' | 'month';
  * @crossref:used-in[Calendar]
  */
 export function useCalendarData(selectedLocationId?: string) {
+  const { formatDate } = useTimezone();
   const [viewMode, setViewMode] = useState<ViewMode>('week');
-  const [currentDate, setCurrentDate] = useState(new Date());
+  // Store current date as string in YYYY-MM-DD format for timezone consistency
+  const [currentDateStr, setCurrentDateStr] = useState(() => formatDate(new Date(), 'yyyy-MM-dd'));
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
   const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [appointments, setAppointments] = useState<readonly CalendarAppointment[]>([]);
 
+  // Current date as Date object (for display purposes)
+  const currentDate = useMemo(() => new Date(currentDateStr), [currentDateStr]);
+
   const goToToday = useCallback(() => {
-    setCurrentDate(new Date());
-  }, []);
+    setCurrentDateStr(formatDate(new Date(), 'yyyy-MM-dd'));
+  }, [formatDate]);
 
   const navigate = useCallback((direction: 'prev' | 'next') => {
-    setCurrentDate((prev) => {
+    setCurrentDateStr((prevStr) => {
+      const prev = new Date(prevStr);
       const d = new Date(prev);
       if (viewMode === 'day') {
         d.setDate(d.getDate() + (direction === 'next' ? 1 : -1));
@@ -30,29 +37,30 @@ export function useCalendarData(selectedLocationId?: string) {
       } else {
         d.setMonth(d.getMonth() + (direction === 'next' ? 1 : -1));
       }
-      return d;
+      return formatDate(d, 'yyyy-MM-dd');
     });
-  }, [viewMode]);
+  }, [viewMode, formatDate]);
 
-  // Fetch appointments when viewMode or currentDate changes
+  // Fetch appointments when viewMode, currentDate, or timezone changes
   const loadAppointments = useCallback(async () => {
     setIsLoading(true);
     try {
-      const weekDatesLocal = getWeekDates(currentDate);
-      const monthDatesLocal = getMonthDates(currentDate);
+      const current = new Date(currentDateStr);
+      const weekDatesLocal = getWeekDates(current);
+      const monthDatesLocal = getMonthDates(current);
 
       let dateFrom: string;
       let dateTo: string;
 
       if (viewMode === 'day') {
-        dateFrom = formatDateStr(currentDate);
-        dateTo = formatDateStr(currentDate);
+        dateFrom = currentDateStr;
+        dateTo = currentDateStr;
       } else if (viewMode === 'week') {
-        dateFrom = formatDateStr(weekDatesLocal[0]);
-        dateTo = formatDateStr(weekDatesLocal[6]);
+        dateFrom = formatDate(weekDatesLocal[0], 'yyyy-MM-dd');
+        dateTo = formatDate(weekDatesLocal[6], 'yyyy-MM-dd');
       } else {
-        dateFrom = formatDateStr(monthDatesLocal[0]);
-        dateTo = formatDateStr(monthDatesLocal[monthDatesLocal.length - 1]);
+        dateFrom = formatDate(monthDatesLocal[0], 'yyyy-MM-dd');
+        dateTo = formatDate(monthDatesLocal[monthDatesLocal.length - 1], 'yyyy-MM-dd');
       }
 
       const response = await fetchAppointments({
@@ -71,7 +79,7 @@ export function useCalendarData(selectedLocationId?: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [viewMode, currentDate, selectedDoctorId, selectedLocationId]);
+  }, [viewMode, currentDateStr, selectedDoctorId, selectedLocationId, formatDate]);
 
   useEffect(() => {
     loadAppointments();
@@ -93,13 +101,13 @@ export function useCalendarData(selectedLocationId?: string) {
   );
 
   const getAppointmentsForDate = useCallback((date: Date): readonly CalendarAppointment[] => {
-    const dateStr = formatDateStr(date);
+    const dateStr = formatDate(date, 'yyyy-MM-dd');
     return filteredAppointments.filter((apt) => apt.date === dateStr);
-  }, [filteredAppointments]);
+  }, [filteredAppointments, formatDate]);
 
   const dateLabel = useMemo(() => {
     if (viewMode === 'day') {
-      return currentDate.toLocaleDateString('en-US', {
+      return currentDate.toLocaleDateString('vi-VN', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
@@ -110,15 +118,16 @@ export function useCalendarData(selectedLocationId?: string) {
       const start = weekDates[0];
       const end = weekDates[6];
       const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-      return `${start.toLocaleDateString('en-US', opts)} - ${end.toLocaleDateString('en-US', { ...opts, year: 'numeric' })}`;
+      return `${start.toLocaleDateString('vi-VN', opts)} - ${end.toLocaleDateString('vi-VN', { ...opts, year: 'numeric' })}`;
     }
-    return currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    return currentDate.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' });
   }, [viewMode, currentDate, weekDates]);
 
   return {
     viewMode,
     setViewMode,
     currentDate,
+    setCurrentDate: (date: Date) => setCurrentDateStr(formatDate(date, 'yyyy-MM-dd')),
     goToToday,
     navigate,
     weekDates,
@@ -132,13 +141,6 @@ export function useCalendarData(selectedLocationId?: string) {
     isLoading,
     refresh: loadAppointments,
   } as const;
-}
-
-function formatDateStr(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
 }
 
 function getWeekDates(currentDate: Date): Date[] {
@@ -171,7 +173,9 @@ function getMonthDates(currentDate: Date): Date[] {
 }
 
 function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppointment {
-  const dateStr = apt.date;
+  // Convert UTC date to Vietnam local date (UTC+7)
+  // apt.date may be UTC like "2026-04-07T17:00:00.000Z" which is actually 2026-04-08 in VN
+  const dateStr = apt.date ? utcToLocalDateStr(apt.date) : '';
   const startTime = apt.time || '09:00';
   const endTime = calculateEndTime(startTime, apt.timeexpected);
 
@@ -180,7 +184,7 @@ function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppointment {
     customerName: apt.partnername || '',
     customerPhone: apt.partnerphone || '',
     serviceName: apt.name || apt.note || '',
-    appointmentType: 'consultation',
+    appointmentType: deriveAppointmentType(apt.reason || apt.note || ''),
     dentist: apt.doctorname || '',
     dentistId: apt.doctorid || '',
     date: dateStr,
@@ -190,8 +194,21 @@ function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppointment {
     locationId: apt.companyid || '',
     locationName: apt.companyname || '',
     notes: apt.note || '',
-    color: apt.color,
+    color: mapHexToColorCode(apt.color),
   };
+}
+
+/**
+ * Convert a UTC ISO date string to a local YYYY-MM-DD string in Vietnam timezone.
+ * E.g. "2026-04-07T17:00:00.000Z" → "2026-04-08" (UTC+7)
+ */
+function utcToLocalDateStr(isoDate: string): string {
+  // If it's already just a date (no 'T'), return as-is
+  if (!isoDate.includes('T')) return isoDate;
+  const d = new Date(isoDate);
+  // Format in Vietnam timezone
+  const parts = d.toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }); // en-CA gives YYYY-MM-DD
+  return parts;
 }
 
 function calculateEndTime(startTime: string, durationMinutes: number | null): string {
@@ -204,11 +221,42 @@ function calculateEndTime(startTime: string, durationMinutes: number | null): st
 
 function mapStateToStatus(state: string | null): CalendarAppointment['status'] {
   const stateMap: Record<string, CalendarAppointment['status']> = {
+    draft: 'scheduled',
     scheduled: 'scheduled',
     confirmed: 'confirmed',
+    arrived: 'confirmed',
+    'in examination': 'in-progress',
     'in-progress': 'in-progress',
+    done: 'completed',
     completed: 'completed',
     cancelled: 'cancelled',
   };
-  return stateMap[state?.toLowerCase() || ''] || 'scheduled';
+  return stateMap[state?.toLowerCase().trim() || ''] || 'scheduled';
+}
+
+function mapHexToColorCode(color: string | null | undefined): string | null {
+  if (color === null || color === undefined) return null;
+  if (/^[0-7]$/.test(color)) return color;
+  const hexMap: Record<string, string> = {
+    '#ef4444': '3',
+    '#3b82f6': '0',
+    '#10b981': '1',
+    '#f59e0b': '2',
+    '#8b5cf6': '4',
+    '#ec4899': '5',
+    '#06b6d4': '6',
+    '#84cc16': '7',
+  };
+  return hexMap[color.toLowerCase()] ?? null;
+}
+
+function deriveAppointmentType(text: string): CalendarAppointment['appointmentType'] {
+  const lower = text.toLowerCase();
+  if (/lấy cao|vệ sinh/.test(lower)) return 'cleaning';
+  if (/niềng|chỉnh nha/.test(lower)) return 'orthodontics';
+  if (/nhổ|phẫu/.test(lower)) return 'surgery';
+  if (/tẩy trắng|thẩm mỹ/.test(lower)) return 'cosmetic';
+  if (/cấp cứu|đau/.test(lower)) return 'emergency';
+  if (/khám|tư vấn/.test(lower)) return 'consultation';
+  return 'treatment';
 }

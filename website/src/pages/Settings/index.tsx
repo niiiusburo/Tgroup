@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { Settings as SettingsIcon, SlidersHorizontal, Shield } from 'lucide-react';
 import { SystemPreferencesContent } from '@/components/settings/SystemPreferencesContent';
 import { IpAccessControl } from '@/components/settings/IpAccessControl';
+import { TimezoneSelector } from '@/components/settings/TimezoneSelector';
 
 type SettingsTab = 'system' | 'ip';
 
@@ -29,9 +30,12 @@ export function Settings() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-          <p className="text-sm text-gray-500">Configure your clinic system settings and IP access control</p>
+          <p className="text-sm text-gray-500">Configure your clinic system settings, timezone, and IP access control</p>
         </div>
       </div>
+
+      {/* Timezone Selector */}
+      <TimezoneSelector />
 
       {/* Main pill-style tab navigation */}
       <div className="flex justify-center">

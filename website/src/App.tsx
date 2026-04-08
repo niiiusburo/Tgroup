@@ -3,6 +3,7 @@ import { Layout } from '@/components/Layout';
 import { LocationProvider } from '@/contexts/LocationContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { TimezoneProvider } from '@/contexts/TimezoneContext';
 import {
   Overview,
   Calendar,
@@ -125,7 +126,8 @@ function LoginRoute() {
 function App() {
   return (
     <AuthProvider>
-      <LocationProvider>
+      <TimezoneProvider>
+        <LocationProvider>
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginRoute />} />
@@ -245,6 +247,7 @@ function App() {
           </Route>
         </Routes>
       </LocationProvider>
+      </TimezoneProvider>
     </AuthProvider>
   );
 }

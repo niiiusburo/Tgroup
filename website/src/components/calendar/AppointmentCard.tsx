@@ -2,6 +2,16 @@ import { Clock, User, Pencil } from 'lucide-react';
 import { APPOINTMENT_TYPE_COLORS } from '@/constants';
 import { STATUS_DOT_COLORS, type CalendarAppointment } from '@/data/mockCalendar';
 
+const TYPE_LABELS_VI: Record<string, string> = {
+  cleaning: 'Vệ sinh',
+  consultation: 'Tư vấn',
+  treatment: 'Điều trị',
+  surgery: 'Phẫu thuật',
+  orthodontics: 'Chỉnh nha',
+  cosmetic: 'Thẩm mỹ',
+  emergency: 'Cấp cứu',
+};
+
 /**
  * AppointmentCard - Compact appointment summary card
  * @crossref:used-in[Calendar, Overview, Appointments]
@@ -101,7 +111,7 @@ export function AppointmentCard({
           </button>
         )}
         <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${colorStyles.bg} ${colorStyles.text} border ${colorStyles.border}`}>
-          {appointment.appointmentType}
+          {TYPE_LABELS_VI[appointment.appointmentType] ?? appointment.appointmentType}
         </span>
       </div>
       <button

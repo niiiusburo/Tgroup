@@ -39,6 +39,7 @@ export function Calendar() {
     viewMode,
     setViewMode,
     currentDate,
+    setCurrentDate,
     goToToday,
     navigate,
     weekDates,
@@ -64,10 +65,17 @@ export function Calendar() {
     [allEmployees],
   );
 
-  const handleReschedule = useCallback((result: { appointmentId: string; newDate: string; newTime: string }) => {
-    // In production, this would call an API. For now, log the reschedule.
-    void result;
-  }, []);
+  const handleReschedule = useCallback(async (result: { appointmentId: string; newDate: string; newTime: string }) => {
+    try {
+      const { updateAppointment } = await import('@/lib/api');
+      await updateAppointment(result.appointmentId, {
+        date: `${result.newDate}T${result.newTime}:00`,
+      });
+      refresh?.();
+    } catch (error) {
+      console.error('Failed to reschedule appointment:', error);
+    }
+  }, [refresh]);
 
   const { handleDragStart, handleDragOver, handleDrop, handleDragEnd } = useDragReschedule(handleReschedule);
 
@@ -95,10 +103,10 @@ export function Calendar() {
     setSelectedAppointment(null);
   }, [setSelectedAppointment]);
 
-  const handleDayClick = useCallback((_date: Date) => {
-    // Switch to day view when clicking a day in month view
+  const handleDayClick = useCallback((date: Date) => {
+    setCurrentDate(date);
     setViewMode('day');
-  }, [setViewMode]);
+  }, [setCurrentDate, setViewMode]);
 
   const handleDateChange = useCallback((date: Date) => {
     // This would update currentDate in useCalendarData
@@ -237,6 +245,7 @@ export function Calendar() {
       <AppointmentDetailsModal
         appointment={selectedAppointment}
         onClose={handleCloseModal}
+        onEdit={handleEditClick}
       />
 
       {/* Edit Appointment Modal */}

@@ -22,6 +22,7 @@ const commissionsRoutes = require('./routes/commissions');
 const hrPayslipsRoutes = require('./routes/hrPayslips');
 const employeesRoutes = require('./routes/employees');
 const productsRoutes = require('./routes/products');
+const productCategoriesRoutes = require('./routes/productCategories');
 const saleOrderLinesRoutes = require('./routes/saleOrderLines');
 const dashboardReportsRoutes = require('./routes/dashboardReports');
 const permissionsRoutes = require('./routes/permissions');
@@ -63,6 +64,7 @@ app.use('/api/Commissions', commissionsRoutes);
 app.use('/api/HrPayslips', hrPayslipsRoutes);
 app.use('/api/Employees', employeesRoutes);
 app.use('/api/Products', productsRoutes);
+app.use('/api/ProductCategories', productCategoriesRoutes);
 app.use('/api/SaleOrderLines', saleOrderLinesRoutes);
 app.use('/api/DashboardReports', dashboardReportsRoutes);
 app.use('/api/Permissions', permissionsRoutes);
@@ -80,6 +82,21 @@ app.get('/api/web/Image2', (req, res) => {
 app.use((req, res) => {
   console.log(`[404] ${req.method} ${req.path}`);
   res.status(404).json({ message: `Route not found: ${req.method} ${req.path}` });
+});
+
+// Global error-handling middleware — catches thrown errors in routes
+app.use((err, _req, res, _next) => {
+  console.error('Unhandled route error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+// Prevent process crashes from unhandled rejections/exceptions
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
 });
 
 // Export for testing

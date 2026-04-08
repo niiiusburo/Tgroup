@@ -100,7 +100,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const hasPermission = useCallback(
     (permission: string) => {
-      return state.permissions?.effectivePermissions.includes(permission) ?? false;
+      const perms = state.permissions?.effectivePermissions ?? [];
+      // Wildcard * grants all permissions
+      if (perms.includes('*')) return true;
+      return perms.includes(permission);
     },
     [state.permissions]
   );

@@ -112,11 +112,25 @@ Tgroup/
 - **Demo dump:** `website/demo_tdental_updated.sql` (includes doctors + views)
 - **Original demo source:** `/Users/thuanle/Documents/TamTMV/TamDental/demo_tdental.sql`
 
+## Environment Config
+
+Vite loads env files by priority: `.env.{mode}.local` > `.env.{mode}` > `.env.local` > `.env`
+
+| File | Purpose | Committed? |
+|------|---------|-----------|
+| `website/.env` | Shared keys (Google API key) | Yes |
+| `website/.env.development` | Local dev: `VITE_API_URL=http://localhost:3002/api` | Yes |
+| `website/.env.production` | VPS build: `VITE_API_URL=/api` (nginx proxies) | Yes |
+| `website/.env.local` | Personal overrides (gitignored) | No |
+
+**Rule:** Never hardcode IPs in committed env files. VPS IP is set via `docker-compose.yml` build arg `VITE_API_URL`.
+
 ## Dev Server
 
 ```bash
 cd website && npx vite --port 5174
 # Open http://localhost:5174
+# Uses .env.development → API at localhost:3002
 ```
 
 ## Backend API
@@ -165,12 +179,81 @@ docker exec -i tdental-demo psql -U postgres -d tdental_demo < website/demo_tden
 2. **@crossref comments** — Every component has `@crossref:used-in[...]` and `@crossref:uses[...]` comments tracking where it's used across the codebase
 3. **tdental-api backend** — Express server at `/Users/thuanle/Documents/TamTMV/TamDental/tdental-api/` queries demo DB with `search_path=dbo`
 4. **SQL views for missing tables** — 11 views created so the API routes work against the 3-table demo DB
-5. **20 features** split across 5 categories: setup, dashboard, customers, services, admin
+5. **Auto-Update Version System** — App detects new deployments and prompts users to refresh (see `docs/VERSION_SYSTEM.md`)
+6. **20 features** split across 5 categories: setup, dashboard, customers, services, admin
+
+## Version System
+
+**Current Version:** `0.1.5` - Fixed update system with proper cache clearing and Playwright tests
+
+Auto-update notification system solves browser cache issues:
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `VersionDisplay` | `components/shared/VersionDisplay.tsx` | Shows version in sidebar + update notifications |
+| `useVersionCheck` | `hooks/useVersionCheck.ts` | Polls for updates every 5 minutes |
+| `version.json` | `public/version.json` | Build metadata (version, git commit, build time) |
+| `generate-version.js` | `scripts/generate-version.js` | Creates version.json at build time |
+
+**CRITICAL: Update Version on Every Change**
+
+To ensure the auto-update system works and users get the latest code, you MUST update the version number in `website/package.json` every time you make changes:
+
+```bash
+# Before building, update the version
+# Open website/package.json and change:
+# "version": "0.0.0" → "version": "0.0.1" (or higher)
+
+# Semantic versioning guide:
+# - Patch (0.0.1 → 0.0.2): Bug fixes, small tweaks
+# - Minor (0.0.2 → 0.1.0): New features, components
+# - Major (0.1.0 → 1.0.0): Breaking changes, architecture shifts
+```
+
+**Build Process:**
+```bash
+cd website
+
+# 1. Update version in package.json
+# 2. Build (automatically generates version.json with git info)
+npm run build
+
+# 3. Deploy dist/ folder
+```
+
+**How Users Get Updates:**
+1. User has version `v0.0.1 (abc1234)` running
+2. You deploy version `v0.0.2 (def5678)`
+3. App detects version change within 5 minutes
+4. Sidebar shows: "Update Available" + "Update Now" button
+5. User clicks button → page reloads with new code
+6. No more "hard refresh" or "clear cache" needed!
+
+**Features:**
+- Version shows as `v0.0.0 (abc1234)` in sidebar footer
+- Green checkmark = up to date
+- Orange notification = update available
+- Hover for detailed build info (timestamp, git branch)
+- Click version to manually check for updates
+
+## VPS Access (TEMPORARY - REMOVE AFTER FIX)
+
+**SSH Credentials for 76.13.16.68:**
+```
+ssh root@76.13.16.68
+Password: Tamyeu@234@234
+```
+
+**Backend Location:** `/root/tdental-api/`
+**Start Command:** `cd /root/tdental-api && pm2 start src/server.js --name tdental-api`
+
+---
 
 ## Reference Sites
 
 - **Original TDental:** `https://tamdentist.tdental.vn` (admin / 123123@)
 - **Local replica:** `http://127.0.0.1:8899` (admin@tdental.vn / admin123) — requires Golden backend
+- **VPS Deployed:** `http://76.13.16.68:5174` (admin@tdental.vn / admin123)
 
 ## What's Connected vs Mock
 

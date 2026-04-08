@@ -58,10 +58,14 @@ export function TodayAppointments({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 h-full flex flex-col">
-      {/* Header */}
-      <div className="px-5 pt-5 pb-3">
-        <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">
+    <div className="bg-white rounded-2xl border border-gray-200 h-full flex flex-col overflow-hidden">
+      {/* Gradient Header */}
+      <div className="relative bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 px-5 pt-5 pb-4">
+        {/* Decorative circles */}
+        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4" />
+        <div className="absolute bottom-0 right-8 w-16 h-16 bg-white/10 rounded-full translate-y-1/2" />
+        
+        <h2 className="text-base font-bold text-white uppercase tracking-wide mb-3">
           Today's Appointments
         </h2>
 
@@ -76,10 +80,10 @@ export function TodayAppointments({
                 type="button"
                 onClick={() => onFilterChange(tab.key)}
                 className={`
-                  px-3 py-1.5 rounded-full text-xs font-semibold transition-colors
+                  px-3 py-1.5 rounded-full text-xs font-semibold transition-all
                   ${isActive
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'
+                    ? 'bg-white text-purple-700 shadow-lg'
+                    : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'
                   }
                 `}
               >
@@ -118,16 +122,16 @@ export function TodayAppointments({
   );
 }
 
-// Color code to background color mapping (matching EditAppointmentModal)
+// Color code to vibrant background gradient mapping
 const COLOR_CODE_TO_BG: Record<string, string> = {
-  '0': 'bg-blue-50',      // Blue
-  '1': 'bg-emerald-50',   // Green
-  '2': 'bg-amber-50',     // Orange
-  '3': 'bg-red-50',       // Red
-  '4': 'bg-violet-50',    // Purple
-  '5': 'bg-pink-50',      // Pink
-  '6': 'bg-cyan-50',      // Cyan
-  '7': 'bg-lime-50',      // Lime
+  '0': 'bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300',      // Blue
+  '1': 'bg-gradient-to-br from-emerald-100 to-emerald-200 border-emerald-300',   // Green
+  '2': 'bg-gradient-to-br from-amber-100 to-orange-200 border-orange-300',     // Orange
+  '3': 'bg-gradient-to-br from-red-100 to-rose-200 border-red-300',       // Red
+  '4': 'bg-gradient-to-br from-violet-100 to-purple-200 border-purple-300',    // Purple
+  '5': 'bg-gradient-to-br from-pink-100 to-fuchsia-200 border-pink-300',      // Pink
+  '6': 'bg-gradient-to-br from-cyan-100 to-teal-200 border-cyan-300',      // Cyan
+  '7': 'bg-gradient-to-br from-lime-100 to-green-200 border-lime-300',      // Lime
 };
 
 // ─── Individual Appointment Card ────────────────────────────────
@@ -143,20 +147,27 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
   const isArrived = appointment.topStatus === 'arrived';
   const isCancelled = appointment.topStatus === 'cancelled';
 
-  // Use appointment color if set, otherwise fall back to status-based colors
-  const colorBg = appointment.color && COLOR_CODE_TO_BG[appointment.color]
+  // Use appointment color if set, otherwise fall back to status-based colors with gradients
+  const colorConfig = appointment.color && COLOR_CODE_TO_BG[appointment.color]
     ? COLOR_CODE_TO_BG[appointment.color]
     : isArrived
-    ? 'bg-orange-50'
+    ? 'bg-gradient-to-br from-orange-100 to-amber-200 border-orange-300'
     : isCancelled
-    ? 'bg-red-50'
-    : 'bg-gray-50';
+    ? 'bg-gradient-to-br from-red-100 to-rose-200 border-red-300'
+    : 'bg-gradient-to-br from-gray-100 to-slate-200 border-gray-300';
+
+  // Get status badge color
+  const statusBadgeColor = isArrived
+    ? 'bg-emerald-500 text-white'
+    : isCancelled
+    ? 'bg-red-500 text-white'
+    : 'bg-purple-500 text-white';
 
   return (
-    <div className="rounded-xl border border-gray-200 overflow-hidden">
+    <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       {/* Top row: name + action buttons */}
-      <div className="flex items-center justify-between px-3.5 pt-3 pb-1.5">
-        <span className="text-sm font-semibold text-blue-600 truncate flex-1 mr-2">
+      <div className="flex items-center justify-between px-3.5 pt-3 pb-1.5 bg-gradient-to-r from-white to-slate-50">
+        <span className="text-sm font-bold text-slate-800 truncate flex-1 mr-2">
           {appointment.customerName || 'No Name'}
         </span>
         <div className="flex items-center gap-1.5 shrink-0">
@@ -164,7 +175,7 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
           <button
             type="button"
             onClick={() => onEdit(appointment)}
-            className="w-7 h-7 rounded-lg border border-gray-200 bg-white flex items-center justify-center text-gray-400 hover:text-blue-600 hover:border-blue-300 transition-colors"
+            className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-purple-600 hover:border-purple-300 hover:bg-purple-50 transition-all"
             title="Edit appointment"
           >
             <Pencil className="w-3.5 h-3.5" />
@@ -176,7 +187,7 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
               type="button"
               onClick={() => !isArrived && onMarkArrived(appointment.id)}
               className={`
-                w-7 h-7 rounded-lg border flex items-center justify-center transition-colors
+                w-7 h-7 rounded-lg border flex items-center justify-center transition-all
                 ${isArrived
                   ? 'bg-emerald-500 text-white border-emerald-500'
                   : 'border-gray-200 bg-white text-gray-400 hover:text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50'
@@ -190,41 +201,48 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
         </div>
       </div>
 
-      {/* Detail row */}
+      {/* Detail row with gradient */}
       <div
         className={`
-          mx-2.5 mb-2.5 rounded-lg px-3.5 py-2.5 flex items-center justify-between gap-2
-          ${colorBg}
+          mx-2.5 mb-2.5 rounded-lg px-3.5 py-2.5 flex items-center justify-between gap-2 border
+          ${colorConfig}
         `}
       >
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 mb-1">
-            <User className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-1">
+            <User className="w-3.5 h-3.5 text-purple-500 shrink-0" />
             <span className="truncate">{appointment.doctorName}</span>
           </div>
-          <div className="flex items-center gap-3 text-xs text-gray-500">
+          <div className="flex items-center gap-3 text-xs text-gray-600">
             <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
+              <Clock className="w-3 h-3 text-blue-500" />
               {appointment.time}
             </span>
-            <span className="flex items-center gap-1 text-emerald-600 font-semibold">
+            <span className="flex items-center gap-1 text-blue-600 font-semibold">
               <Phone className="w-3 h-3" />
               {appointment.customerPhone}
             </span>
           </div>
         </div>
 
-        {/* Arrived badge */}
+        {/* Status badge */}
         {isArrived && (
-          <span className="bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
+          <span className={`${statusBadgeColor} px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-sm`}>
             Đã đến
           </span>
         )}
 
         {/* Cancelled badge */}
         {isCancelled && (
-          <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap">
+          <span className={`${statusBadgeColor} px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-sm`}>
             Đã hủy
+          </span>
+        )}
+
+        {/* Scheduled badge */}
+        {!isArrived && !isCancelled && (
+          <span className={`${statusBadgeColor} px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-sm`}>
+            Chờ khám
           </span>
         )}
       </div>

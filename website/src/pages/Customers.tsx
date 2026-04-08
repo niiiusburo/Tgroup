@@ -1,6 +1,7 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Users, Plus, Phone, Mail, MapPin } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { AddCustomerForm } from '@/components/forms/AddCustomerForm';
 import { CustomerProfile } from '@/components/customer';
 import { SearchBar } from '@/components/shared/SearchBar';
@@ -10,6 +11,12 @@ import { useCustomers, type Customer } from '@/hooks/useCustomers';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { useCustomerProfile } from '@/hooks/useCustomerProfile';
 import { useLocations } from '@/hooks/useLocations';
+import { useAppointments } from '@/hooks/useAppointments';
+import { useServices } from '@/hooks/useServices';
+import { usePayment } from '@/hooks/usePayment';
+import { useDeposits } from '@/hooks/useDeposits';
+import type { AppointmentFormData } from '@/components/appointments/AppointmentForm';
+import type { PaymentFormData } from '@/components/payment/PaymentForm';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 import type { CustomerStatus } from '@/data/mockCustomers';
 import type { CustomerFormData } from '@/data/mockCustomerForm';
@@ -114,6 +121,11 @@ export function Customers() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const { selectedLocationId } = useLocationFilter();
+  const { hasPermission } = useAuth();
+  
+  // Check permissions
+  const canEditCustomers = hasPermission('customers.edit');
+  const canAddCustomers = hasPermission('customers.add');
 
   const {
     customers,
@@ -135,6 +147,100 @@ export function Customers() {
 
   const { profile: hookProfile, appointments: hookAppointments, isLoading: profileLoading } =
     useCustomerProfile(selectedCustomerId);
+
+  // Hooks for profile actions
+  const { createAppointment, updateAppointment } = useAppointments(selectedLocationId);
+  const { createServiceRecord } = useServices(selectedLocationId);
+  const { createPayment } = usePayment(selectedLocationId);
+  const { addDeposit } = useDeposits();
+
+  // Callbacks for CustomerProfile
+  const handleCreateAppointment = useCallback(async (data: AppointmentFormData) => {
+    await createAppointment({
+      customerId: data.customerId,
+      customerName: data.customerName,
+      customerPhone: data.customerPhone,
+      doctorId: data.doctorId,
+      doctorName: data.doctorName,
+      locationId: data.locationId,
+      locationName: data.locationName,
+      appointmentType: 'consultation',
+      serviceName: data.serviceName,
+      date: data.date,
+      startTime: data.startTime,
+      endTime: data.endTime,
+      notes: data.notes,
+    });
+  }, [createAppointment]);
+
+  const handleUpdateAppointment = useCallback(async (id: string, data: AppointmentFormData) => {
+    await updateAppointment(id, {
+      customerId: data.customerId,
+      customerName: data.customerName,
+      customerPhone: data.customerPhone,
+      doctorId: data.doctorId,
+      doctorName: data.doctorName,
+      locationId: data.locationId,
+      locationName: data.locationName,
+      appointmentType: 'consultation',
+      serviceName: data.serviceName,
+      date: data.date,
+      startTime: data.startTime,
+      endTime: data.endTime,
+      notes: data.notes,
+    });
+  }, [updateAppointment]);
+
+  const handleCreateService = useCallback(async (data: {
+    catalogItemId: string;
+    serviceName: string;
+    doctorId: string;
+    locationId: string;
+    startDate: string;
+    notes: string;
+  }) => {
+    await createServiceRecord({
+      customerId: selectedCustomerId ?? '',
+      customerName: hookProfile?.name ?? '',
+      customerPhone: hookProfile?.phone ?? '',
+      catalogItemId: data.catalogItemId,
+      serviceName: data.serviceName,
+      category: 'treatment',
+      doctorId: data.doctorId,
+      doctorName: '',
+      locationId: data.locationId,
+      locationName: '',
+      totalVisits: 1,
+      totalCost: 0,
+      startDate: data.startDate,
+      expectedEndDate: data.startDate,
+      notes: data.notes,
+      toothNumbers: [],
+    });
+  }, [createServiceRecord, selectedCustomerId, hookProfile]);
+
+  const handleMakePayment = useCallback(async (data: PaymentFormData) => {
+    await createPayment({
+      customerId: data.customerId,
+      customerName: data.customerName,
+      customerPhone: data.customerPhone,
+      serviceId: data.serviceId,
+      serviceName: data.serviceName,
+      amount: data.amount,
+      method: data.method,
+      locationName: data.locationName,
+      notes: data.notes,
+    });
+  }, [createPayment]);
+
+  const handleAddDeposit = useCallback(async (
+    customerId: string,
+    amount: number,
+    method: 'cash' | 'bank',
+    note?: string
+  ) => {
+    await addDeposit(customerId, amount, method, note);
+  }, [addDeposit]);
 
   const handleSubmit = async (data: CustomerFormData) => {
     if (isEditMode && selectedCustomerId) {
@@ -229,13 +335,20 @@ export function Customers() {
           profile={profileData}
           appointments={hookAppointments}
           onBack={() => setSelectedCustomerId(null)}
-          onEdit={handleEdit}
+          onEdit={canEditCustomers ? handleEdit : undefined}
+          onAddDeposit={handleAddDeposit}
+          onCreateAppointment={handleCreateAppointment}
+          onUpdateAppointment={handleUpdateAppointment}
+          onCreateService={handleCreateService}
+          onMakePayment={handleMakePayment}
+          loadingDeposits={false}
         />
         {showForm && isEditMode && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[900px] h-[85vh] flex flex-col overflow-hidden">
               <AddCustomerForm
                 isEdit={true}
+                canEdit={canEditCustomers}
                 initialData={getEditFormData()}
                 onSubmit={handleSubmit}
                 onCancel={() => { setShowForm(false); setIsEditMode(false); }}
@@ -259,13 +372,15 @@ export function Customers() {
             <p className="text-sm text-gray-500">{stats.total} patients · {stats.active} active</p>
           </div>
         </div>
-        <button
-          onClick={() => { setIsEditMode(false); setShowForm(true); }}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Customer
-        </button>
+        {canAddCustomers && (
+          <button
+            onClick={() => { setIsEditMode(false); setShowForm(true); }}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Customer
+          </button>
+        )}
       </div>
 
       {showForm && (

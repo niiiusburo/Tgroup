@@ -6,7 +6,7 @@
  * Cards show: status badge, customer name, phone, doctor, time, service
  */
 
-import { ChevronLeft, ChevronRight, CalendarDays, Phone, User, Clock } from 'lucide-react';
+import { CalendarDays, Phone, User, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 
@@ -186,66 +186,12 @@ export function WeekView({
   getAppointmentsForDate,
   onAppointmentClick,
   onAppointmentEdit,
-  onDateChange,
 }: WeekViewProps) {
   const today = new Date();
   const todayKey = formatDateKey(today);
 
-  // Get week range for header
-  const weekStart = weekDates[0];
-  const weekEnd = weekDates[6];
-
-  const handlePrevious = () => {
-    if (weekStart && onDateChange) {
-      const prevWeek = new Date(weekStart);
-      prevWeek.setDate(prevWeek.getDate() - 7);
-      onDateChange(prevWeek);
-    }
-  };
-
-  const handleNext = () => {
-    if (weekStart && onDateChange) {
-      const nextWeek = new Date(weekStart);
-      nextWeek.setDate(nextWeek.getDate() + 7);
-      onDateChange(nextWeek);
-    }
-  };
-
-  const handleToday = () => {
-    onDateChange?.(new Date());
-  };
-
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-card">
-      {/* Header with navigation */}
-      <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handlePrevious}
-            className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <h2 className="text-lg font-semibold text-gray-900">
-            {weekStart && weekEnd && (
-              `${formatDateDisplay(weekStart)} - ${formatDateDisplay(weekEnd)}`
-            )}
-          </h2>
-          <button
-            onClick={handleNext}
-            className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ChevronRight className="w-5 h-5 text-gray-600" />
-          </button>
-        </div>
-        <button
-          onClick={handleToday}
-          className="px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-        >
-          Hôm nay
-        </button>
-      </div>
-
       {/* Week grid */}
       <div className="flex overflow-x-auto">
         {weekDates.map((date, index) => {

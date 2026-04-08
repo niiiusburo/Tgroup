@@ -38,60 +38,60 @@ const APPOINTMENT_COLORS: Record<string, {
   previewGradient: string;
 }> = {
   '0': { 
-    bg: 'bg-blue-50', 
-    border: 'border-blue-200',
+    bg: 'bg-blue-100', 
+    border: 'border-blue-300',
     label: 'Ocean Blue', 
-    textColor: 'text-blue-700',
-    previewGradient: 'from-blue-100 to-blue-200'
+    textColor: 'text-blue-800',
+    previewGradient: 'from-blue-200 to-blue-300'
   },
   '1': { 
-    bg: 'bg-emerald-50', 
-    border: 'border-emerald-200',
+    bg: 'bg-emerald-100', 
+    border: 'border-emerald-300',
     label: 'Emerald', 
-    textColor: 'text-emerald-700',
-    previewGradient: 'from-emerald-100 to-emerald-200'
+    textColor: 'text-emerald-800',
+    previewGradient: 'from-emerald-200 to-emerald-300'
   },
   '2': { 
-    bg: 'bg-amber-50', 
-    border: 'border-amber-200',
+    bg: 'bg-amber-100', 
+    border: 'border-amber-300',
     label: 'Amber', 
-    textColor: 'text-amber-700',
-    previewGradient: 'from-amber-100 to-amber-200'
+    textColor: 'text-amber-800',
+    previewGradient: 'from-amber-200 to-amber-300'
   },
   '3': { 
-    bg: 'bg-red-50', 
-    border: 'border-red-200',
+    bg: 'bg-red-100', 
+    border: 'border-red-300',
     label: 'Ruby', 
-    textColor: 'text-red-700',
-    previewGradient: 'from-red-100 to-red-200'
+    textColor: 'text-red-800',
+    previewGradient: 'from-red-200 to-red-300'
   },
   '4': { 
-    bg: 'bg-violet-50', 
-    border: 'border-violet-200',
+    bg: 'bg-violet-100', 
+    border: 'border-violet-300',
     label: 'Amethyst', 
-    textColor: 'text-violet-700',
-    previewGradient: 'from-violet-100 to-violet-200'
+    textColor: 'text-violet-800',
+    previewGradient: 'from-violet-200 to-violet-300'
   },
   '5': { 
-    bg: 'bg-pink-50', 
-    border: 'border-pink-200',
+    bg: 'bg-pink-100', 
+    border: 'border-pink-300',
     label: 'Rose', 
-    textColor: 'text-pink-700',
-    previewGradient: 'from-pink-100 to-pink-200'
+    textColor: 'text-pink-800',
+    previewGradient: 'from-pink-200 to-pink-300'
   },
   '6': { 
-    bg: 'bg-cyan-50', 
-    border: 'border-cyan-200',
+    bg: 'bg-cyan-100', 
+    border: 'border-cyan-300',
     label: 'Cyan', 
-    textColor: 'text-cyan-700',
-    previewGradient: 'from-cyan-100 to-cyan-200'
+    textColor: 'text-cyan-800',
+    previewGradient: 'from-cyan-200 to-cyan-300'
   },
   '7': { 
-    bg: 'bg-lime-50', 
-    border: 'border-lime-200',
+    bg: 'bg-lime-100', 
+    border: 'border-lime-300',
     label: 'Lime', 
-    textColor: 'text-lime-700',
-    previewGradient: 'from-lime-100 to-lime-200'
+    textColor: 'text-lime-800',
+    previewGradient: 'from-lime-200 to-lime-300'
   },
 };
 
@@ -353,7 +353,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
   if (!isOpen || !appointment) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="modal-container">
       {/* Backdrop with blur */}
       <div
         className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
@@ -361,9 +361,9 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+      <div className="modal-content animate-in zoom-in-95 duration-200">
         {/* Header with gradient */}
-        <div className="relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
+        <div className="modal-header relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
           <div className="relative flex items-start justify-between">
             <div>
@@ -385,7 +385,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
         </div>
 
         {/* Scrollable Body */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+        <div className="modal-body px-6 py-6 space-y-5">
           {isLoading && (
             <div className="flex items-center justify-center py-8 text-gray-400">
               <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2" />
@@ -604,7 +604,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
+        <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
           <button
             type="button"
             onClick={handleClose}

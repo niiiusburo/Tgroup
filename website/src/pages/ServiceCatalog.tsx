@@ -1,553 +1,705 @@
 /**
- * Service Catalog Page — Displays all dental services organized by category with inline editing
- * @crossref:route[/services-catalog]
- * @crossref:uses[fetchProducts]
+ * Service Catalog Page — "Thông tin sản phẩm" with service groups sidebar + services table
+ * @crossref:route[/website]
+ * @crossref:uses[fetchProducts, fetchProductCategories, fetchCompanies]
  */
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
-import { Stethoscope, Search, Filter, Package, DollarSign, Tag, ChevronDown, ChevronRight, Pencil, Check, X } from 'lucide-react';
-import { fetchProducts } from '@/lib/api';
-import type { ApiProduct } from '@/lib/api';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+  Search, Plus, Pencil, Trash2, EyeOff, Eye, ChevronLeft, ChevronRight,
+  X, Loader2,
+} from 'lucide-react';
+import {
+  fetchProducts, fetchProductCategories, fetchCompanies,
+  createProduct, updateProduct, deleteProduct,
+  createProductCategory,
+} from '@/lib/api';
+import type { ApiProduct, ApiProductCategory, ApiCompany } from '@/lib/api';
 
-interface ServiceItem {
-  id: string;
-  code: string;
+// ─── Types ───────────────────────────────────────────────────────
+
+interface ServiceFormData {
   name: string;
-  canOrderLab: boolean;
-  category: string;
-  unit: string;
-  price: number;
-  cost: number;
+  defaultcode: string;
+  listprice: number;
+  categid: string;
+  uomname: string;
+  companyid: string;
 }
 
-function mapProduct(p: ApiProduct): ServiceItem {
-  return {
-    id: p.id,
-    code: p.defaultcode ?? '',
-    name: p.name,
-    canOrderLab: p.canorderlab,
-    category: p.categname ?? 'Uncategorized',
-    unit: p.uomname ?? '',
-    price: p.listprice ? parseFloat(p.listprice) : 0,
-    cost: p.purchaseprice ? parseFloat(p.purchaseprice) : 0,
-  };
-}
+// ─── Helpers ─────────────────────────────────────────────────────
 
 function formatVND(amount: number): string {
+  if (amount <= 1) return '-';
   return new Intl.NumberFormat('vi-VN').format(amount) + ' \u20ab';
 }
 
-interface ServiceRowProps {
-  service: ServiceItem;
-  editingId: string | null;
-  editPrice: string;
-  onStartEdit: (id: string, price: number) => void;
-  onPriceChange: (price: string) => void;
-  onSaveEdit: (id: string) => void;
-  onCancelEdit: () => void;
+// ─── Service Form Modal ──────────────────────────────────────────
+
+interface ServiceFormModalProps {
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onSubmit: (data: ServiceFormData) => Promise<void>;
+  readonly categories: ApiProductCategory[];
+  readonly companies: ApiCompany[];
+  readonly initialData?: ApiProduct | null;
+  readonly title: string;
 }
 
-function ServiceRow({
-  service,
-  editingId,
-  editPrice,
-  onStartEdit,
-  onPriceChange,
-  onSaveEdit,
-  onCancelEdit,
-}: ServiceRowProps) {
-  const isEditing = editingId === service.id;
+function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, initialData, title }: ServiceFormModalProps) {
+  const [form, setForm] = useState<ServiceFormData>({
+    name: '',
+    defaultcode: '',
+    listprice: 0,
+    categid: '',
+    uomname: 'Lần',
+    companyid: '',
+  });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (initialData) {
+      setForm({
+        name: initialData.name,
+        defaultcode: initialData.defaultcode ?? '',
+        listprice: initialData.listprice ? parseFloat(initialData.listprice) : 0,
+        categid: initialData.categid ?? '',
+        uomname: initialData.uomname ?? 'Lần',
+        companyid: initialData.companyid ?? '',
+      });
+    } else {
+      setForm({ name: '', defaultcode: '', listprice: 0, categid: '', uomname: 'Lần', companyid: '' });
+    }
+  }, [initialData, isOpen]);
+
+  if (!isOpen) return null;
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.name.trim()) return;
+    setSaving(true);
+    try {
+      await onSubmit(form);
+      onClose();
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
-    <tr className="hover:bg-gray-50 transition-colors">
-      <td className="px-6 py-3 whitespace-nowrap">
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-          {service.code}
-        </span>
-      </td>
-      <td className="px-6 py-3">
-        <span className="text-sm font-medium text-gray-900">
-          {service.name}
-        </span>
-      </td>
-      <td className="px-6 py-3 whitespace-nowrap">
-        <span className="text-sm text-gray-600">{service.unit}</span>
-      </td>
-      <td className="px-6 py-3 whitespace-nowrap text-right">
-        {isEditing ? (
-          <div className="flex items-center justify-end gap-1">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4">
+        <div className="flex items-center justify-between px-6 py-4 border-b">
+          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+          <button type="button" onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg">
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tên dịch vụ *</label>
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              required
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Mã dịch vụ</label>
+              <input
+                type="text"
+                value={form.defaultcode}
+                onChange={(e) => setForm({ ...form, defaultcode: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Đơn vị tính</label>
+              <input
+                type="text"
+                value={form.uomname}
+                onChange={(e) => setForm({ ...form, uomname: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Giá niêm yết</label>
             <input
               type="number"
-              value={editPrice}
-              onChange={(e) => onPriceChange(e.target.value)}
-              className="w-32 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary text-right"
-              autoFocus
+              value={form.listprice}
+              onChange={(e) => setForm({ ...form, listprice: parseFloat(e.target.value) || 0 })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
             />
-            <button
-              type="button"
-              onClick={() => onSaveEdit(service.id)}
-              title="Save"
-              className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors"
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nhóm dịch vụ</label>
+            <select
+              value={form.categid}
+              onChange={(e) => setForm({ ...form, categid: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
             >
-              <Check className="w-4 h-4" />
+              <option value="">-- Chọn nhóm --</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Chi nhánh</label>
+            <select
+              value={form.companyid}
+              onChange={(e) => setForm({ ...form, companyid: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            >
+              <option value="">Tất cả chi nhánh</option>
+              {companies.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+              Hủy
             </button>
             <button
-              type="button"
-              onClick={onCancelEdit}
-              title="Cancel"
-              className="p-1 text-gray-400 hover:bg-gray-100 rounded transition-colors"
+              type="submit"
+              disabled={saving || !form.name.trim()}
+              className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
             >
-              <X className="w-4 h-4" />
+              {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+              {initialData ? 'Cập nhật' : 'Thêm mới'}
             </button>
           </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => onStartEdit(service.id, service.price)}
-            title="Edit price"
-            className="inline-flex items-center gap-1 text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors group"
-          >
-            <span className="text-sm font-semibold">
-              {formatVND(service.price)}
-            </span>
-            <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
-        )}
-      </td>
-      <td className="px-6 py-3 whitespace-nowrap text-center">
-        {service.canOrderLab ? (
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-            Yes
-          </span>
-        ) : (
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
-            No
-          </span>
-        )}
-      </td>
-    </tr>
-  );
-}
-
-interface ServiceGroupProps {
-  category: string;
-  services: ServiceItem[];
-  isExpanded: boolean;
-  onToggle: () => void;
-  searchQuery: string;
-  editingId: string | null;
-  editPrice: string;
-  onStartEdit: (id: string, price: number) => void;
-  onPriceChange: (price: string) => void;
-  onSaveEdit: (id: string) => void;
-  onCancelEdit: () => void;
-}
-
-function ServiceGroup({
-  category,
-  services,
-  isExpanded,
-  onToggle,
-  searchQuery,
-  editingId,
-  editPrice,
-  onStartEdit,
-  onPriceChange,
-  onSaveEdit,
-  onCancelEdit,
-}: ServiceGroupProps) {
-  const filteredServices = useMemo(() => {
-    if (!searchQuery) return services;
-    const query = searchQuery.toLowerCase();
-    return services.filter(
-      s =>
-        s.name.toLowerCase().includes(query) ||
-        s.code.toLowerCase().includes(query)
-    );
-  }, [services, searchQuery]);
-
-  if (filteredServices.length === 0) return null;
-
-  const totalServices = services.length;
-  const showingCount = filteredServices.length;
-
-  return (
-    <div className="bg-white rounded-xl shadow-card overflow-hidden">
-      <button
-        onClick={onToggle}
-        className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-primary/5 to-transparent hover:from-primary/10 transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Package className="w-5 h-5 text-primary" />
-          </div>
-          <div className="text-left">
-            <h3 className="font-semibold text-gray-900">{category}</h3>
-            <p className="text-sm text-gray-500">
-              {showingCount < totalServices
-                ? `Showing ${showingCount} of ${totalServices} services`
-                : `${totalServices} services`}
-            </p>
-          </div>
-        </div>
-        {isExpanded ? (
-          <ChevronDown className="w-5 h-5 text-gray-400" />
-        ) : (
-          <ChevronRight className="w-5 h-5 text-gray-400" />
-        )}
-      </button>
-
-      {isExpanded && (
-        <div className="border-t border-gray-100">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Service Code
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Service Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Unit
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Lab Order
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredServices.map((service) => (
-                  <ServiceRow
-                    key={service.id}
-                    service={service}
-                    editingId={editingId}
-                    editPrice={editPrice}
-                    onStartEdit={onStartEdit}
-                    onPriceChange={onPriceChange}
-                    onSaveEdit={onSaveEdit}
-                    onCancelEdit={onCancelEdit}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+        </form>
+      </div>
     </div>
   );
 }
 
-export function ServiceCatalog() {
-  const [products, setProducts] = useState<ServiceItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+// ─── Category Add Modal ──────────────────────────────────────────
 
-  // Edit state
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editPrice, setEditPrice] = useState('');
-  const [isDirty, setIsDirty] = useState(false);
+interface CategoryAddModalProps {
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onSubmit: (name: string) => Promise<void>;
+}
 
-  useEffect(() => {
-    setLoading(true);
-    fetchProducts({ limit: 200 })
-      .then((res) => {
-        const mapped = res.items.map(mapProduct);
-        setProducts(mapped);
-        // Auto-expand first category
-        const cats = [...new Set(mapped.map((p) => p.category))].sort();
-        if (cats.length > 0) {
-          setExpandedCategories(new Set([cats[0]]));
-        }
-      })
-      .catch(() => {
-        // Keep empty state on error
-      })
-      .finally(() => setLoading(false));
-  }, []);
+function CategoryAddModal({ isOpen, onClose, onSubmit }: CategoryAddModalProps) {
+  const [name, setName] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const categories = useMemo(
-    () => [...new Set(products.map((p) => p.category))].sort(),
-    [products]
-  );
+  useEffect(() => { if (isOpen) setName(''); }, [isOpen]);
 
-  const toggleCategory = (category: string) => {
-    setExpandedCategories(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(category)) {
-        newSet.delete(category);
-      } else {
-        newSet.add(category);
-      }
-      return newSet;
-    });
-  };
+  if (!isOpen) return null;
 
-  const expandAll = () => setExpandedCategories(new Set(categories));
-  const collapseAll = () => setExpandedCategories(new Set());
-
-  const filteredCategories = useMemo(() => {
-    if (selectedCategory === 'all') return categories;
-    return categories.filter(c => c === selectedCategory);
-  }, [categories, selectedCategory]);
-
-  // Edit handlers
-  const startEdit = useCallback((id: string, price: number) => {
-    setEditingId(id);
-    setEditPrice(String(price));
-  }, []);
-
-  const priceChange = useCallback((price: string) => {
-    setEditPrice(price);
-  }, []);
-
-  const saveEdit = useCallback((id: string) => {
-    const parsed = parseInt(editPrice, 10);
-    if (!isNaN(parsed) && parsed > 0) {
-      setProducts(prev =>
-        prev.map(p => (p.id === id ? { ...p, price: parsed } : p))
-      );
-      setIsDirty(true);
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setSaving(true);
+    try {
+      await onSubmit(name.trim());
+      onClose();
+    } finally {
+      setSaving(false);
     }
-    setEditingId(null);
-  }, [editPrice]);
-
-  const cancelEdit = useCallback(() => {
-    setEditingId(null);
-    setEditPrice('');
-  }, []);
-
-  const saveAllChanges = useCallback(() => {
-    // In a real app, this would save to backend
-    console.log('Saving all price changes:', products);
-    setIsDirty(false);
-  }, [products]);
-
-  const resetChanges = useCallback(() => {
-    // Reload from API to reset
-    setLoading(true);
-    fetchProducts({ limit: 200 })
-      .then((res) => {
-        const mapped = res.items.map(mapProduct);
-        setProducts(mapped);
-      })
-      .catch(() => {})
-      .finally(() => {
-        setLoading(false);
-        setIsDirty(false);
-      });
-  }, []);
-
-  const stats = useMemo(() => {
-    const totalServices = products.length;
-    const categoriesCount = categories.length;
-    const avgPrice =
-      totalServices > 0
-        ? products.reduce((sum, s) => sum + s.price, 0) / totalServices
-        : 0;
-    const labOrderableServices = products.filter(s => s.canOrderLab).length;
-
-    return {
-      totalServices,
-      categoriesCount,
-      avgPrice: Math.round(avgPrice),
-      labOrderableServices,
-    };
-  }, [products, categories]);
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Stethoscope className="w-6 h-6 text-primary" />
-          </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm mx-4">
+        <div className="flex items-center justify-between px-6 py-4 border-b">
+          <h3 className="text-lg font-semibold text-gray-900">Thêm nhóm dịch vụ</h3>
+          <button type="button" onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg">
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Service Catalog</h1>
-            <p className="text-sm text-gray-500">
-              Manage dental services and pricing
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={expandAll}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Expand All
-          </button>
-          <button
-            onClick={collapseAll}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Collapse All
-          </button>
-          <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm font-medium">
-            + Add Service
-          </button>
-        </div>
-      </div>
-
-      {/* Stats cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl shadow-card p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-50 rounded-lg">
-              <Package className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Total Services</p>
-              <p className="text-xl font-bold text-gray-900">{stats.totalServices}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-card p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-50 rounded-lg">
-              <Tag className="w-5 h-5 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Categories</p>
-              <p className="text-xl font-bold text-gray-900">{stats.categoriesCount}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-card p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-50 rounded-lg">
-              <DollarSign className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Average Price</p>
-              <p className="text-xl font-bold text-gray-900">
-                {stats.avgPrice.toLocaleString('en-US')} VND
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-card p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-amber-50 rounded-lg">
-              <Stethoscope className="w-5 h-5 text-amber-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Lab Orderable</p>
-              <p className="text-xl font-bold text-gray-900">{stats.labOrderableServices}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Search and filter */}
-      <div className="bg-white rounded-xl shadow-card p-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tên nhóm dịch vụ *</label>
             <input
               type="text"
-              placeholder="Search services by name or code..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              autoFocus
+              required
             />
           </div>
-          <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-gray-400" />
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white min-w-[180px]"
+          <div className="flex justify-end gap-3">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+              Hủy
+            </button>
+            <button
+              type="submit"
+              disabled={saving || !name.trim()}
+              className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
             >
-              <option value="all">All Categories</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
+              {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+              Thêm
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Page ───────────────────────────────────────────────────
+
+export function ServiceCatalog() {
+  // Data state
+  const [categories, setCategories] = useState<ApiProductCategory[]>([]);
+  const [products, setProducts] = useState<ApiProduct[]>([]);
+  const [companies, setCompanies] = useState<ApiCompany[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  // Filter state
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [categorySearch, setCategorySearch] = useState('');
+  const [productSearch, setProductSearch] = useState('');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('active');
+
+  // Pagination
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+
+  // Modals
+  const [showAddCategory, setShowAddCategory] = useState(false);
+  const [showServiceForm, setShowServiceForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<ApiProduct | null>(null);
+
+  // ── Load categories + companies (once) ──
+  useEffect(() => {
+    fetchProductCategories().then((res) => setCategories(res.items)).catch(() => {});
+    fetchCompanies().then((res) => setCompanies(res.items)).catch(() => {});
+  }, []);
+
+  // ── Load products (on filter/page change) ──
+  const loadProducts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetchProducts({
+        offset: (page - 1) * pageSize,
+        limit: pageSize,
+        search: productSearch || undefined,
+        categId: selectedCategoryId || undefined,
+      });
+      setProducts(res.items);
+      setTotalProducts(res.totalItems);
+    } catch {
+      setProducts([]);
+      setTotalProducts(0);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, pageSize, productSearch, selectedCategoryId]);
+
+  useEffect(() => { loadProducts(); }, [loadProducts]);
+
+  // Reset page when filters change
+  useEffect(() => { setPage(1); }, [productSearch, selectedCategoryId, activeFilter]);
+
+  // ── Filtered categories for sidebar ──
+  const filteredCategories = useMemo(() => {
+    if (!categorySearch) return categories;
+    const q = categorySearch.toLowerCase();
+    return categories.filter((c) => c.name.toLowerCase().includes(q));
+  }, [categories, categorySearch]);
+
+  // ── Filtered products by active status (client-side since API defaults active=true) ──
+  const displayProducts = useMemo(() => {
+    if (activeFilter === 'all') return products;
+    if (activeFilter === 'active') return products.filter((p) => p.active);
+    return products.filter((p) => !p.active);
+  }, [products, activeFilter]);
+
+  // ── Pagination ──
+  const totalPages = Math.max(1, Math.ceil(totalProducts / pageSize));
+
+  function pageNumbers(): (number | '...')[] {
+    const pages: (number | '...')[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (page > 3) pages.push('...');
+      for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
+      if (page < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
+  }
+
+  // ── Handlers ──
+  async function handleAddCategory(name: string) {
+    const created = await createProductCategory({ name });
+    setCategories((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
+  }
+
+  async function handleCreateService(data: ServiceFormData) {
+    await createProduct({
+      name: data.name,
+      defaultcode: data.defaultcode || undefined,
+      listprice: data.listprice,
+      categid: data.categid || undefined,
+      uomname: data.uomname || undefined,
+      companyid: data.companyid || undefined,
+    });
+    await loadProducts();
+    // Refresh categories to update counts
+    fetchProductCategories().then((res) => setCategories(res.items)).catch(() => {});
+  }
+
+  async function handleUpdateService(data: ServiceFormData) {
+    if (!editingProduct) return;
+    await updateProduct(editingProduct.id, {
+      name: data.name,
+      defaultcode: data.defaultcode || undefined,
+      listprice: data.listprice,
+      categid: data.categid || undefined,
+      uomname: data.uomname || undefined,
+      companyid: data.companyid || undefined,
+    });
+    setEditingProduct(null);
+    await loadProducts();
+  }
+
+  async function handleToggleActive(product: ApiProduct) {
+    await updateProduct(product.id, { active: !product.active });
+    await loadProducts();
+    fetchProductCategories().then((res) => setCategories(res.items)).catch(() => {});
+  }
+
+  async function handleDelete(product: ApiProduct) {
+    if (!window.confirm(`Xóa dịch vụ "${product.name}"?`)) return;
+    await deleteProduct(product.id);
+    await loadProducts();
+    fetchProductCategories().then((res) => setCategories(res.items)).catch(() => {});
+  }
+
+  // ── Selected category name ──
+  const selectedCategoryName = selectedCategoryId
+    ? categories.find((c) => c.id === selectedCategoryId)?.name ?? null
+    : null;
+
+  return (
+    <div className="space-y-4">
+      {/* Page header */}
+      <div>
+        <h1 className="text-xl font-bold text-gray-900">Thông tin sản phẩm</h1>
+        {/* Tabs */}
+        <div className="flex gap-1 mt-3">
+          <button type="button" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg">
+            Dịch vụ
+          </button>
+          <button type="button" className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+            Vật tư
+          </button>
+          <button type="button" className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+            Thuốc
+          </button>
+        </div>
+      </div>
+
+      {/* Main two-panel layout */}
+      <div className="flex gap-4">
+        {/* ── Left Sidebar: Service Groups ── */}
+        <div className="w-80 shrink-0 bg-white rounded-xl shadow-card">
+          <div className="flex items-center justify-between px-4 py-3 border-b">
+            <h2 className="text-sm font-semibold text-gray-900">Nhóm dịch vụ</h2>
+            <button
+              type="button"
+              onClick={() => setShowAddCategory(true)}
+              className="p-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              title="Thêm nhóm"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Category search */}
+          <div className="px-4 py-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                value={categorySearch}
+                onChange={(e) => setCategorySearch(e.target.value)}
+                placeholder="Tìm kiếm nhóm dịch vụ"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+
+          {/* Category header */}
+          <div className="px-4 py-2 border-b">
+            <span className="text-xs font-medium text-gray-500 uppercase">Tên nhóm dịch vụ</span>
+          </div>
+
+          {/* Category list */}
+          <div className="max-h-[calc(100vh-320px)] overflow-y-auto">
+            {/* "All" option */}
+            <button
+              type="button"
+              onClick={() => setSelectedCategoryId(null)}
+              className={`w-full px-4 py-2.5 text-left text-sm border-b border-gray-50 transition-colors ${
+                selectedCategoryId === null
+                  ? 'bg-blue-50 text-blue-700 font-medium'
+                  : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Tất cả ({totalProducts})
+            </button>
+
+            {filteredCategories.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setSelectedCategoryId(cat.id)}
+                className={`w-full px-4 py-2.5 text-left text-sm border-b border-gray-50 transition-colors flex items-center justify-between ${
+                  selectedCategoryId === cat.id
+                    ? 'bg-blue-50 text-blue-700 font-medium'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <span className="truncate">{cat.name}</span>
+                <span className="text-xs text-gray-400 ml-2">{cat.product_count}</span>
+              </button>
+            ))}
           </div>
         </div>
-      </div>
 
-      {/* Save/Reset actions bar */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-500">
-          Click on a price to edit it
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={resetChanges}
-            disabled={!isDirty}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              isDirty
-                ? 'text-gray-600 hover:bg-gray-100'
-                : 'text-gray-300 cursor-not-allowed'
-            }`}
-          >
-            Reset
-          </button>
-          <button
-            type="button"
-            onClick={saveAllChanges}
-            disabled={!isDirty}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              isDirty
-                ? 'bg-green-600 text-white hover:bg-green-700'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            Save Changes
-          </button>
-        </div>
-      </div>
+        {/* ── Right Panel: Services Table ── */}
+        <div className="flex-1 min-w-0">
+          {/* Toolbar */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => { setEditingProduct(null); setShowServiceForm(true); }}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              >
+                <Plus className="w-4 h-4" />
+                Thêm mới
+              </button>
+              <select
+                value={activeFilter}
+                onChange={(e) => setActiveFilter(e.target.value as 'all' | 'active' | 'inactive')}
+                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="active">Đang sử dụng</option>
+                <option value="inactive">Ngừng sử dụng</option>
+                <option value="all">Tất cả</option>
+              </select>
+            </div>
+            <div className="relative w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                value={productSearch}
+                onChange={(e) => setProductSearch(e.target.value)}
+                placeholder="Tìm kiếm theo mã hoặc tên"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+          </div>
 
-      {/* Loading state */}
-      {loading && (
-        <div className="bg-white rounded-xl shadow-card p-12 text-center">
-          <Package className="w-12 h-12 mx-auto mb-3 text-gray-300 animate-pulse" />
-          <p className="text-gray-500 font-medium">Loading services...</p>
-        </div>
-      )}
-
-      {/* Service groups */}
-      {!loading && (
-        <div className="space-y-4">
-          {filteredCategories.map((category) => (
-            <ServiceGroup
-              key={category}
-              category={category}
-              services={products.filter((s) => s.category === category)}
-              isExpanded={expandedCategories.has(category)}
-              onToggle={() => toggleCategory(category)}
-              searchQuery={searchQuery}
-              editingId={editingId}
-              editPrice={editPrice}
-              onStartEdit={startEdit}
-              onPriceChange={priceChange}
-              onSaveEdit={saveEdit}
-              onCancelEdit={cancelEdit}
-            />
-          ))}
-
-          {filteredCategories.length === 0 && (
-            <div className="bg-white rounded-xl shadow-card p-12 text-center">
-              <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-              <p className="text-gray-500 font-medium">No services found</p>
-              <p className="text-sm text-gray-400 mt-1">
-                Try changing your search query or filters
-              </p>
+          {/* Selected category indicator */}
+          {selectedCategoryName && (
+            <div className="mb-3 flex items-center gap-2">
+              <span className="text-sm text-gray-500">Nhóm:</span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 text-sm font-medium bg-blue-50 text-blue-700 rounded-lg">
+                {selectedCategoryName}
+                <button type="button" onClick={() => setSelectedCategoryId(null)} className="ml-1 hover:text-blue-900">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </span>
             </div>
           )}
+
+          {/* Table */}
+          <div className="bg-white rounded-xl shadow-card overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-12">
+                    <input type="checkbox" className="rounded border-gray-300" disabled />
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Tên dịch vụ
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Nhóm dịch vụ
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Chi nhánh
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                    Giá
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                    Thao tác
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="py-16 text-center">
+                      <Loader2 className="w-8 h-8 mx-auto mb-2 text-gray-300 animate-spin" />
+                      <p className="text-sm text-gray-500">Đang tải...</p>
+                    </td>
+                  </tr>
+                ) : displayProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-16 text-center">
+                      <p className="text-sm text-gray-500">Không tìm thấy dịch vụ nào</p>
+                    </td>
+                  </tr>
+                ) : (
+                  displayProducts.map((product) => (
+                    <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3">
+                        <input type="checkbox" className="rounded border-gray-300" />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                          <div className="text-xs text-gray-500">
+                            Đơn vị tính: {product.uomname ?? 'Lần'}
+                            {product.defaultcode && (
+                              <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
+                                {product.defaultcode}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        {product.categname ?? '-'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        {product.companyname ?? 'Tất cả'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
+                        {formatVND(product.listprice ? parseFloat(product.listprice) : 0)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => { setEditingProduct(product); setShowServiceForm(true); }}
+                            className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                            title="Sửa"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(product)}
+                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Xóa"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleActive(product)}
+                            className={`p-1.5 rounded-lg transition-colors ${
+                              product.active
+                                ? 'text-gray-400 hover:bg-gray-100'
+                                : 'text-green-600 hover:bg-green-50'
+                            }`}
+                            title={product.active ? 'Ẩn' : 'Hiện'}
+                          >
+                            {product.active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+
+            {/* Pagination */}
+            {totalProducts > 0 && (
+              <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    className="p-1.5 rounded-lg hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  {pageNumbers().map((p, i) =>
+                    p === '...' ? (
+                      <span key={`ellipsis-${i}`} className="px-2 text-sm text-gray-400">...</span>
+                    ) : (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setPage(p)}
+                        className={`w-8 h-8 text-sm rounded-lg transition-colors ${
+                          page === p
+                            ? 'bg-blue-600 text-white font-medium'
+                            : 'text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    )
+                  )}
+                  <button
+                    type="button"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    className="p-1.5 rounded-lg hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-gray-500">
+                  <select
+                    value={pageSize}
+                    disabled
+                    className="px-2 py-1 border border-gray-200 rounded text-sm bg-white"
+                  >
+                    <option value={20}>20</option>
+                  </select>
+                  <span>hàng trên trang</span>
+                  <span className="font-medium text-gray-700">
+                    {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, totalProducts)} của {totalProducts} dòng
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
+
+      {/* Modals */}
+      <CategoryAddModal
+        isOpen={showAddCategory}
+        onClose={() => setShowAddCategory(false)}
+        onSubmit={handleAddCategory}
+      />
+      <ServiceFormModal
+        isOpen={showServiceForm}
+        onClose={() => { setShowServiceForm(false); setEditingProduct(null); }}
+        onSubmit={editingProduct ? handleUpdateService : handleCreateService}
+        categories={categories}
+        companies={companies}
+        initialData={editingProduct}
+        title={editingProduct ? 'Sửa dịch vụ' : 'Thêm dịch vụ mới'}
+      />
     </div>
   );
 }
