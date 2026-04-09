@@ -12,7 +12,13 @@
     "version": "node scripts/generate-version.js",
     "version:check": "curl -s http://localhost:5174/version.json | jq .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "../scripts/dev-e2e.sh test",
+    "test:e2e:ui": "npx playwright test --ui",
+    "test:e2e:headed": "npx playwright test --headed",
+    "dev:e2e": "../scripts/dev-e2e.sh start",
+    "dev:e2e:stop": "../scripts/dev-e2e.sh stop",
+    "dev:e2e:status": "../scripts/dev-e2e.sh status"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",

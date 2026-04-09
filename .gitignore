@@ -28,3 +28,7 @@ Thumbs.db
 
 # OMC state
 .omc/
+.dev-api.pid
+.dev-api.log
+.dev-vite.pid
+.dev-vite.log
