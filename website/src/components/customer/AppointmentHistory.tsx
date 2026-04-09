@@ -1,5 +1,5 @@
 import { CalendarCheck, Clock, MapPin, User, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
-import type { CustomerAppointment } from '@/data/mockCustomerProfile';
+import type { CustomerAppointment } from '@/types/customer';
 
 /**
  * Appointment History - Past appointments list

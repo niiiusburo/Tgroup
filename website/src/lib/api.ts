@@ -18,7 +18,12 @@ interface FetchOptions {
   params?: Record<string, string | number | boolean | undefined>;
 }
 
-async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
+// Convert camelCase to snake_case for backend API compatibility
+function toSnakeCase(str: string): string {
+  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+}
+
+export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
   const { method = 'GET', body, params } = options;
 
   let url = `${API_URL}${endpoint}`;
@@ -26,7 +31,8 @@ async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promis
     const searchParams = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {
       if (value !== undefined && value !== '') {
-        searchParams.set(key, String(value));
+        // Convert camelCase to snake_case for backend compatibility
+        searchParams.set(toSnakeCase(key), String(value));
       }
     }
     const qs = searchParams.toString();
@@ -403,6 +409,8 @@ export function fetchSaleOrders(params?: {
   search?: string;
   partnerId?: string;
   companyId?: string;
+  dateFrom?: string;
+  dateTo?: string;
 }) {
   return apiFetch<PaginatedResponse<ApiSaleOrder>>('/SaleOrders', {
     params: {
@@ -411,6 +419,8 @@ export function fetchSaleOrders(params?: {
       search: params?.search,
       partnerId: params?.partnerId,
       companyId: params?.companyId,
+      dateFrom: params?.dateFrom,
+      dateTo: params?.dateTo,
     },
   });
 }
@@ -628,4 +638,309 @@ export async function createService(data: {
       notes: data.notes,
     },
   });
+}
+
+// ─── Monthly Plans ────────────────────────────────────────────────
+
+export interface ApiMonthlyPlan {
+  id: string;
+  customer_id: string;
+  customer_name: string;
+  company_id: string;
+  treatment_description: string;
+  total_amount: string;
+  down_payment: string;
+  installment_amount: string;
+  number_of_installments: number;
+  start_date: string;
+  status: 'active' | 'completed' | 'defaulted' | 'draft';
+  notes: string;
+  installments: ApiInstallment[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ApiInstallment {
+  id: string;
+  plan_id: string;
+  installment_number: number;
+  due_date: string;
+  amount: string;
+  status: 'paid' | 'upcoming' | 'overdue' | 'pending';
+  paid_date: string | null;
+  paid_amount: string | null;
+}
+
+export interface MonthlyPlanSummary {
+  totalPlans: number;
+  activePlans: number;
+  completedPlans: number;
+  totalOutstanding: number;
+  overdueCount: number;
+}
+
+export interface MonthlyPlansResponse {
+  items: ApiMonthlyPlan[];
+  aggregates: MonthlyPlanSummary;
+}
+
+export function fetchMonthlyPlans(params?: {
+  companyId?: string;
+  status?: string;
+  customerId?: string;
+  search?: string;
+}) {
+  return apiFetch<MonthlyPlansResponse>('/MonthlyPlans', {
+    params: {
+      company_id: params?.companyId,
+      status: params?.status,
+      customer_id: params?.customerId,
+      search: params?.search,
+    },
+  });
+}
+
+export function fetchMonthlyPlanById(id: string) {
+  return apiFetch<ApiMonthlyPlan>(`/MonthlyPlans/${id}`);
+}
+
+export function createMonthlyPlan(data: {
+  customer_id: string;
+  company_id?: string;
+  treatment_description: string;
+  total_amount: number;
+  down_payment?: number;
+  number_of_installments: number;
+  start_date: string;
+  notes?: string;
+}) {
+  return apiFetch<ApiMonthlyPlan>('/MonthlyPlans', { method: 'POST', body: data });
+}
+
+export function updateMonthlyPlan(id: string, data: Partial<{
+  treatment_description: string;
+  total_amount: number;
+  down_payment: number;
+  status: string;
+  notes: string;
+}>) {
+  return apiFetch<ApiMonthlyPlan>(`/MonthlyPlans/${id}`, { method: 'PUT', body: data });
+}
+
+export function deleteMonthlyPlan(id: string) {
+  return apiFetch<void>(`/MonthlyPlans/${id}`, { method: 'DELETE' });
+}
+
+export function markInstallmentPaid(planId: string, installmentId: string, data?: {
+  paid_amount?: number;
+  paid_date?: string;
+}) {
+  return apiFetch<ApiInstallment>(`/MonthlyPlans/${planId}/installments/${installmentId}/pay`, {
+    method: 'PUT',
+    body: data,
+  });
+}
+
+// ─── Customer Sources ─────────────────────────────────────────────
+
+export interface ApiCustomerSource {
+  id: string;
+  name: string;
+  type: 'online' | 'offline' | 'referral';
+  description: string;
+  is_active: boolean;
+  customer_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CustomerSourcesResponse {
+  items: ApiCustomerSource[];
+  aggregates: {
+    total: number;
+    active: number;
+    totalCustomers: number;
+    topSource: string;
+  };
+}
+
+export function fetchCustomerSources(params?: {
+  type?: string;
+  is_active?: boolean;
+}) {
+  return apiFetch<CustomerSourcesResponse>('/CustomerSources', {
+    params: {
+      type: params?.type,
+      is_active: params?.is_active,
+    },
+  });
+}
+
+export function createCustomerSource(data: {
+  name: string;
+  type?: string;
+  description?: string;
+  is_active?: boolean;
+}) {
+  return apiFetch<ApiCustomerSource>('/CustomerSources', { method: 'POST', body: data });
+}
+
+export function updateCustomerSource(id: string, data: Partial<{
+  name: string;
+  type: string;
+  description: string;
+  is_active: boolean;
+}>) {
+  return apiFetch<ApiCustomerSource>(`/CustomerSources/${id}`, { method: 'PUT', body: data });
+}
+
+export function deleteCustomerSource(id: string) {
+  return apiFetch<void>(`/CustomerSources/${id}`, { method: 'DELETE' });
+}
+
+// ─── System Preferences ───────────────────────────────────────────
+
+export interface ApiSystemPreference {
+  id: string;
+  key: string;
+  value: string;
+  type: string;
+  category: string;
+  description: string;
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SystemPreferencesResponse {
+  items: ApiSystemPreference[];
+  groups: Record<string, ApiSystemPreference[]>;
+  aggregates: {
+    total: number;
+    categories: number;
+  };
+}
+
+export function fetchSystemPreferences(params?: {
+  category?: string;
+  key?: string;
+  is_public?: boolean;
+}) {
+  return apiFetch<SystemPreferencesResponse>('/SystemPreferences', {
+    params: {
+      category: params?.category,
+      key: params?.key,
+      is_public: params?.is_public,
+    },
+  });
+}
+
+export function fetchSystemPreference(key: string) {
+  return apiFetch<ApiSystemPreference>(`/SystemPreferences/${key}`);
+}
+
+export function upsertSystemPreference(data: {
+  key: string;
+  value: string;
+  type?: string;
+  category?: string;
+  description?: string;
+  is_public?: boolean;
+}) {
+  return apiFetch<ApiSystemPreference>('/SystemPreferences', { method: 'POST', body: data });
+}
+
+export function updateSystemPreference(key: string, data: Partial<{
+  value: string;
+  type: string;
+  category: string;
+  description: string;
+  is_public: boolean;
+}>) {
+  return apiFetch<ApiSystemPreference>(`/SystemPreferences/${key}`, { method: 'PUT', body: data });
+}
+
+export function deleteSystemPreference(key: string) {
+  return apiFetch<void>(`/SystemPreferences/${key}`, { method: 'DELETE' });
+}
+
+// ─── Website Pages ────────────────────────────────────────────────
+
+export interface ApiWebsitePage {
+  id: string;
+  company_id: string;
+  title: string;
+  slug: string;
+  status: 'published' | 'draft' | 'scheduled' | 'archived';
+  content: string;
+  template: string;
+  author: string;
+  seo: {
+    title: string;
+    description: string;
+    keywords: readonly string[];
+    ogImage: string;
+    canonicalUrl: string;
+  };
+  views: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WebsitePagesResponse {
+  items: ApiWebsitePage[];
+  aggregates: {
+    total: number;
+    published: number;
+    draft: number;
+    scheduled: number;
+  };
+}
+
+export function fetchWebsitePages(params?: {
+  companyId?: string;
+  status?: string;
+  search?: string;
+}) {
+  return apiFetch<WebsitePagesResponse>('/WebsitePages', {
+    params: {
+      company_id: params?.companyId,
+      status: params?.status,
+      search: params?.search,
+    },
+  });
+}
+
+export function fetchWebsitePage(id: string) {
+  return apiFetch<ApiWebsitePage>(`/WebsitePages/${id}`);
+}
+
+export function createWebsitePage(data: {
+  company_id?: string;
+  title: string;
+  slug: string;
+  status?: string;
+  content?: string;
+  template?: string;
+  author?: string;
+  seo?: ApiWebsitePage['seo'];
+}) {
+  return apiFetch<ApiWebsitePage>('/WebsitePages', { method: 'POST', body: data });
+}
+
+export function updateWebsitePage(id: string, data: Partial<{
+  title: string;
+  slug: string;
+  status: string;
+  content: string;
+  template: string;
+  author: string;
+  seo: ApiWebsitePage['seo'];
+  views: number;
+}>) {
+  return apiFetch<ApiWebsitePage>(`/WebsitePages/${id}`, { method: 'PUT', body: data });
+}
+
+export function deleteWebsitePage(id: string) {
+  return apiFetch<void>(`/WebsitePages/${id}`, { method: 'DELETE' });
 }

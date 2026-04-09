@@ -1,5 +1,5 @@
 import { Wallet, ArrowUpCircle, ArrowDownCircle, TrendingUp } from 'lucide-react';
-import type { CustomerDeposit } from '@/data/mockCustomerProfile';
+import type { CustomerDeposit } from '@/types/customer';
 
 /**
  * Deposit Card - Shows wallet balance and transaction history

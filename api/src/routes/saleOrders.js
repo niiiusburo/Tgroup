@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
       offset = '0',
       limit = '20',
       search = '',
-      sortField = 'dateorder',
+      sortField = 'datecreated',
       sortOrder = 'desc',
     } = req.query;
 
@@ -24,12 +24,12 @@ router.get('/', async (req, res) => {
 
     const allowedSortFields = {
       name: 'so.name',
-      dateorder: 'so.datecreated',
+      datecreated: 'so.datecreated',
       amounttotal: 'so.amounttotal',
       state: 'so.state',
     };
 
-    const orderByCol = allowedSortFields[sortField] || 'so.dateorder';
+    const orderByCol = allowedSortFields[sortField] || 'so.datecreated';
     const orderDir = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 
     const conditions = ['so.isdeleted = false'];
@@ -166,6 +166,113 @@ router.get('/:id', async (req, res) => {
     });
   } catch (err) {
     console.error('Error fetching sale order:', err);
+    return res.status(500).json({
+      error: err instanceof Error ? err.message : 'Unknown error',
+    });
+  }
+});
+
+/**
+ * POST /api/SaleOrders
+ * Creates a new sale order (service record)
+ * Body: { partnerid, companyid, productid, productname, doctorid, doctorname, amounttotal, datestart, dateend, notes }
+ */
+router.post('/', async (req, res) => {
+  try {
+    const {
+      partnerid,
+      companyid,
+      productid,
+      productname,
+      doctorid,
+      doctorname,
+      amounttotal,
+      datestart,
+      dateend,
+      notes,
+    } = req.body;
+
+    if (!partnerid) {
+      return res.status(400).json({ error: 'partnerid is required' });
+    }
+
+    // Generate a new UUID for the sale order
+    const { v4: uuidv4 } = require('uuid');
+    const id = uuidv4();
+
+    // Generate sale order name (SO + timestamp)
+    const name = productname || `Service ${new Date().toISOString().slice(0, 10)}`;
+
+    // Insert the sale order (only using columns that exist in the schema)
+    const result = await query(
+      `INSERT INTO saleorders (
+        id, name, partnerid, companyid, doctorid,
+        amounttotal, residual, totalpaid, state,
+        isdeleted, datecreated
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+      RETURNING *`,
+      [
+        id,
+        name,
+        partnerid,
+        companyid || null,
+        doctorid || null,
+        amounttotal || 0,
+        amounttotal || 0, // residual = total for new orders
+        0, // totalpaid = 0 for new orders
+        'draft', // state = draft (not confirmed yet)
+        false, // isdeleted
+      ]
+    );
+
+    // If productid is provided, add a sale order line
+    if (productid) {
+      const lineId = uuidv4();
+      await query(
+        `INSERT INTO saleorderlines (
+          id, orderid, productid, productname,
+          pricetotal, isdeleted
+        ) VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          lineId,
+          id,
+          productid,
+          productname || null,
+          amounttotal || 0,
+          false,
+        ]
+      );
+    }
+
+    // Fetch the created sale order with joins
+    const rows = await query(
+      `SELECT
+        so.id,
+        so.name,
+        so.partnerid,
+        p.name AS partnername,
+        p.displayname AS partnerdisplayname,
+        so.amounttotal,
+        so.residual,
+        so.totalpaid,
+        so.state,
+        so.companyid,
+        c.name AS companyname,
+        so.doctorid,
+        doc.name AS doctorname,
+        so.datecreated,
+        so.isdeleted
+      FROM saleorders so
+      LEFT JOIN partners p ON p.id = so.partnerid
+      LEFT JOIN companies c ON c.id = so.companyid
+      LEFT JOIN partners doc ON doc.id = so.doctorid
+      WHERE so.id = $1`,
+      [id]
+    );
+
+    return res.status(201).json(rows[0]);
+  } catch (err) {
+    console.error('Error creating sale order:', err);
     return res.status(500).json({
       error: err instanceof Error ? err.message : 'Unknown error',
     });

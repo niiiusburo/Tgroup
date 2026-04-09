@@ -23,7 +23,7 @@ router.get('/:id', async (req, res) => {
       SELECT
         COALESCE(SUM(CASE WHEN method IN ('cash', 'bank') THEN amount ELSE 0 END), 0) AS total_deposits,
         COALESCE(SUM(CASE WHEN method = 'deposit' THEN amount ELSE 0 END), 0) AS total_withdrawals
-      FROM public.payments
+      FROM payments
       WHERE customer_id = $1
     `, [id]);
 

@@ -1,20 +1,23 @@
 import { useState } from 'react';
 import {
   ArrowLeft, Phone, Mail, MapPin, Calendar, Tag,
-  User, AlertCircle, Edit2, Plus, Clock, CalendarPlus, Stethoscope,
+  User, AlertCircle, Edit2, Plus, Clock, CalendarPlus,
 } from 'lucide-react';
 import { DepositWallet } from '@/components/payment/DepositWallet';
 import { DepositHistory } from '@/components/payment/DepositHistory';
 import { AppointmentForm, type AppointmentFormData } from '@/components/appointments/AppointmentForm';
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { PaymentForm, type PaymentFormData } from '@/components/payment/PaymentForm';
+import { ServiceHistory } from '@/components/customer/ServiceHistory';
 import type { DepositTransaction } from '@/hooks/useDeposits';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
+import type { CustomerService } from '@/types/customer';
 import type { ApiAppointment } from '@/lib/api';
 
 interface CustomerProfileProps {
   readonly profile: CustomerProfileData;
   readonly appointments: readonly ApiAppointment[];
+  readonly services?: readonly CustomerService[];
   readonly depositTransactions?: DepositTransaction[];
   readonly onBack: () => void;
   readonly onEdit?: () => void;
@@ -25,9 +28,13 @@ interface CustomerProfileProps {
     catalogItemId: string;
     serviceName: string;
     doctorId: string;
+    doctorName: string;
     locationId: string;
+    locationName: string;
     startDate: string;
     notes: string;
+    totalCost: number;
+    toothNumbers: readonly string[];
   }) => Promise<void>;
   readonly onMakePayment?: (data: PaymentFormData) => Promise<void>;
   readonly loadingDeposits?: boolean;
@@ -44,8 +51,8 @@ interface TabConfig {
 const TABS: readonly TabConfig[] = [
   { value: 'profile', label: 'Profile' },
   { value: 'appointments', label: 'Appointments', getCount: (p) => p.appointments.length },
-  { value: 'records', label: 'Records', getCount: () => 0 },
-  { value: 'payment', label: 'Payment' },
+  { value: 'records', label: 'Records', getCount: (p) => p.services?.length ?? 0 },
+  { value: 'payment', label: 'Payment', getCount: (p) => p.depositTransactions?.length ?? 0 },
 ];
 
 function TabBadge({ count, isActive }: { count: number; isActive: boolean }) {
@@ -95,11 +102,12 @@ function formatDate(dateStr: string | null | undefined): string {
   }
 }
 
-export function CustomerProfile({ 
-  profile, 
-  appointments, 
+export function CustomerProfile({
+  profile,
+  appointments,
+  services = [],
   depositTransactions = [],
-  onBack, 
+  onBack,
   onEdit,
   onAddDeposit,
   onCreateAppointment,
@@ -233,6 +241,7 @@ export function CustomerProfile({
             const count = tab.getCount?.({
               profile,
               appointments,
+              services,
               depositTransactions,
               onBack,
               onEdit,
@@ -371,17 +380,7 @@ export function CustomerProfile({
               </button>
             )}
           </div>
-          <div className="bg-white rounded-xl shadow-card p-6">
-            <div className="text-center py-8">
-              <Stethoscope className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-400 mb-3">
-                Treatment records will be displayed here.
-              </p>
-              <p className="text-xs text-gray-400">
-                Records are linked to appointments and services.
-              </p>
-            </div>
-          </div>
+          <ServiceHistory services={services} />
         </div>
       )}
 
@@ -465,9 +464,13 @@ export function CustomerProfile({
                   catalogItemId: data.catalogItemId,
                   serviceName: data.serviceName,
                   doctorId: data.doctorId,
+                  doctorName: data.doctorName,
                   locationId: data.locationId,
+                  locationName: data.locationName,
                   startDate: data.startDate,
                   notes: data.notes,
+                  totalCost: data.totalCost,
+                  toothNumbers: data.toothNumbers,
                 });
               }
               setShowServiceModal(false);

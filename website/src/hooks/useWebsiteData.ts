@@ -1,12 +1,62 @@
 /**
  * Website CMS state management hook
+ * Uses real backend API for page management
  * @crossref:used-in[Website]
  */
-import { useState, useMemo, useCallback } from 'react';
-import { MOCK_PAGES, MOCK_SERVICES } from '@/data/mockWebsite';
-import type { PageStatus } from '@/data/mockWebsite';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import type { WebsitePage, PageStatus } from '@/types/website';
+import { 
+  fetchWebsitePages, 
+  createWebsitePage as apiCreatePage, 
+  updateWebsitePage as apiUpdatePage, 
+  deleteWebsitePage as apiDeletePage,
+  type ApiWebsitePage 
+} from '@/lib/api';
+
+export type { WebsitePage, PageStatus };
 
 export type WebsiteTab = 'pages' | 'editor' | 'services' | 'seo';
+
+// Service listing type (local only for now)
+export interface ServiceListing {
+  readonly id: string;
+  readonly name: string;
+  readonly slug: string;
+  readonly category: string;
+  readonly description: string;
+  readonly price: string;
+  readonly duration: string;
+  readonly featured: boolean;
+  readonly visible: boolean;
+  readonly sortOrder: number;
+  readonly image: string;
+}
+
+// Default pages (fallback when API fails)
+const DEFAULT_PAGES: readonly WebsitePage[] = [];
+const DEFAULT_SERVICES: readonly ServiceListing[] = [];
+
+// Map API response to type
+function mapApiPage(api: ApiWebsitePage): WebsitePage {
+  return {
+    id: api.id,
+    title: api.title,
+    slug: api.slug,
+    status: api.status,
+    content: api.content || '',
+    lastModified: api.updated_at,
+    author: api.author || '',
+    template: api.template || 'default',
+    seo: api.seo || {
+      title: '',
+      description: '',
+      keywords: [],
+      ogImage: '',
+      canonicalUrl: '',
+    },
+    views: api.views || 0,
+  };
+}
 
 export function useWebsiteData() {
   const [activeTab, setActiveTab] = useState<WebsiteTab>('pages');
@@ -17,9 +67,37 @@ export function useWebsiteData() {
   const [serviceSearch, setServiceSearch] = useState('');
   const [serviceCategoryFilter, setServiceCategoryFilter] = useState<string>('all');
 
+  // Pages stored in state
+  const [pages, setPages] = useState<readonly WebsitePage[]>(DEFAULT_PAGES);
+  const [services] = useState<readonly ServiceListing[]>(DEFAULT_SERVICES);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch pages from API
+  const loadPages = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetchWebsitePages({
+        status: statusFilter !== 'all' ? statusFilter : undefined,
+        search: searchQuery || undefined,
+      });
+      setPages(response.items.map(mapApiPage));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load pages');
+      // Keep existing pages on error
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter, searchQuery]);
+
+  useEffect(() => {
+    loadPages();
+  }, [loadPages]);
+
   const filteredPages = useMemo(() => {
     const query = searchQuery.toLowerCase();
-    return MOCK_PAGES.filter((page) => {
+    return pages.filter((page) => {
       const matchesSearch = !query
         || page.title.toLowerCase().includes(query)
         || page.slug.toLowerCase().includes(query)
@@ -27,35 +105,35 @@ export function useWebsiteData() {
       const matchesStatus = statusFilter === 'all' || page.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [searchQuery, statusFilter]);
+  }, [pages, searchQuery, statusFilter]);
 
   const selectedPage = useMemo(
-    () => MOCK_PAGES.find((p) => p.id === selectedPageId) ?? null,
-    [selectedPageId],
+    () => pages.find((p) => p.id === selectedPageId) ?? null,
+    [pages, selectedPageId],
   );
 
   const editingPage = useMemo(
-    () => MOCK_PAGES.find((p) => p.id === editingPageId) ?? null,
-    [editingPageId],
+    () => pages.find((p) => p.id === editingPageId) ?? null,
+    [pages, editingPageId],
   );
 
   const filteredServices = useMemo(() => {
     const query = serviceSearch.toLowerCase();
-    return MOCK_SERVICES.filter((svc) => {
+    return services.filter((svc) => {
       const matchesSearch = !query
         || svc.name.toLowerCase().includes(query)
         || svc.category.toLowerCase().includes(query);
       const matchesCategory = serviceCategoryFilter === 'all' || svc.category === serviceCategoryFilter;
       return matchesSearch && matchesCategory;
     });
-  }, [serviceSearch, serviceCategoryFilter]);
+  }, [services, serviceSearch, serviceCategoryFilter]);
 
   const pageStats = useMemo(() => ({
-    total: MOCK_PAGES.length,
-    published: MOCK_PAGES.filter((p) => p.status === 'published').length,
-    draft: MOCK_PAGES.filter((p) => p.status === 'draft').length,
-    scheduled: MOCK_PAGES.filter((p) => p.status === 'scheduled').length,
-  }), []);
+    total: pages.length,
+    published: pages.filter((p) => p.status === 'published').length,
+    draft: pages.filter((p) => p.status === 'draft').length,
+    scheduled: pages.filter((p) => p.status === 'scheduled').length,
+  }), [pages]);
 
   const openEditor = useCallback((pageId: string) => {
     setEditingPageId(pageId);
@@ -77,6 +155,62 @@ export function useWebsiteData() {
     setServiceCategoryFilter('all');
   }, []);
 
+  // Page mutations (with API)
+  const addPage = useCallback(async (page: Omit<WebsitePage, 'id'>) => {
+    try {
+      const apiPage = await apiCreatePage({
+        title: page.title,
+        slug: page.slug,
+        status: page.status,
+        content: page.content,
+        template: page.template,
+        author: page.author,
+        seo: page.seo,
+      });
+      const newPage = mapApiPage(apiPage);
+      setPages((prev) => [...prev, newPage]);
+      return newPage;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create page');
+      throw err;
+    }
+  }, []);
+
+  const updatePage = useCallback(async (pageId: string, updates: Partial<WebsitePage>) => {
+    try {
+      const apiPage = await apiUpdatePage(pageId, {
+        title: updates.title,
+        slug: updates.slug,
+        status: updates.status,
+        content: updates.content,
+        template: updates.template,
+        author: updates.author,
+        seo: updates.seo,
+        views: updates.views,
+      });
+      const updated = mapApiPage(apiPage);
+      setPages((prev) =>
+        prev.map((p) => (p.id === pageId ? updated : p))
+      );
+      return updated;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update page');
+      throw err;
+    }
+  }, []);
+
+  const deletePage = useCallback(async (pageId: string) => {
+    try {
+      await apiDeletePage(pageId);
+      setPages((prev) => prev.filter((p) => p.id !== pageId));
+      if (selectedPageId === pageId) setSelectedPageId(null);
+      if (editingPageId === pageId) setEditingPageId(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete page');
+      throw err;
+    }
+  }, [selectedPageId, editingPageId]);
+
   return {
     activeTab,
     setActiveTab,
@@ -97,9 +231,16 @@ export function useWebsiteData() {
     editingPage,
     filteredServices,
     pageStats,
+    loading,
+    error,
     openEditor,
     openSEO,
     clearFilters,
     clearServiceFilters,
+    // Page mutations
+    addPage,
+    updatePage,
+    deletePage,
+    refresh: loadPages,
   } as const;
 }

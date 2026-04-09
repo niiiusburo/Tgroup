@@ -5,23 +5,21 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import {
-  MOCK_NOTIFICATIONS,
-  type Notification,
-  type LocationOption,
-  type RevenueDataPoint,
-} from '@/data/mockDashboard';
-import { fetchCompanies, fetchAppointments } from '@/lib/api';
+import type { Notification, LocationOption, RevenueDataPoint } from '@/types/common';
+import { fetchCompanies, fetchSaleOrders } from '@/lib/api';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
 
+const MONTHLY_TARGET = 200_000_000; // 200M VND monthly target
+
 export function useOverviewData() {
-  const [notifications, setNotifications] = useState<readonly Notification[]>(MOCK_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<readonly Notification[]>([]);
   const [locations, setLocations] = useState<readonly LocationOption[]>([
     { id: 'all', name: 'All Locations' },
   ]);
   const [revenueData, setRevenueData] = useState<readonly RevenueDataPoint[]>([]);
+  const [isLoadingRevenue, setIsLoadingRevenue] = useState(true);
 
   // Fetch real locations from API
   useEffect(() => {
@@ -38,24 +36,49 @@ export function useOverviewData() {
       });
   }, []);
 
-  // Derive revenue chart data from real appointment counts by month (current year)
+  // Fetch REAL revenue data from Sale Orders API (single call for full year)
   useEffect(() => {
     async function loadRevenueData() {
       try {
+        setIsLoadingRevenue(true);
         const year = new Date().getFullYear();
-        const counts = await Promise.all(
-          MONTH_LABELS.map(async (month, idx) => {
-            const mm = String(idx + 1).padStart(2, '0');
-            const lastDay = new Date(year, idx + 1, 0).getDate();
-            const dateFrom = `${year}-${mm}-01`;
-            const dateTo = `${year}-${mm}-${String(lastDay).padStart(2, '0')}`;
-            const res = await fetchAppointments({ limit: 1, dateFrom, dateTo });
-            return { month, revenue: res.totalItems, target: 0 };
-          })
-        );
-        setRevenueData(counts);
+        const dateFrom = `${year}-01-01`;
+        const dateTo = `${year}-12-31`;
+
+        // Single API call to fetch all sale orders for the year
+        const res = await fetchSaleOrders({
+          dateFrom,
+          dateTo,
+          limit: 1000, // Get up to 1000 orders
+        });
+
+        // Initialize monthly revenue array
+        const revenueByMonth = new Array(12).fill(0);
+
+        // Aggregate revenue by month
+        for (const order of res.items) {
+          if (order.datecreated && order.amounttotal) {
+            const date = new Date(order.datecreated);
+            const month = date.getMonth(); // 0-11
+            const amount = parseFloat(order.amounttotal) || 0;
+            revenueByMonth[month] += amount;
+          }
+        }
+
+        // Convert to RevenueDataPoint format
+        const revenuePoints: RevenueDataPoint[] = MONTH_LABELS.map((month, idx) => ({
+          month,
+          revenue: Math.round(revenueByMonth[idx]), // Round to whole VND
+          target: MONTHLY_TARGET,
+        }));
+
+        setRevenueData(revenuePoints);
       } catch (err) {
         console.error('useOverviewData: failed to fetch revenue data', err);
+        // Fall back to empty array on error
+        setRevenueData([]);
+      } finally {
+        setIsLoadingRevenue(false);
       }
     }
 
@@ -73,5 +96,6 @@ export function useOverviewData() {
     notifications,
     markNotificationRead,
     revenueData,
+    isLoadingRevenue,
   } as const;
 }

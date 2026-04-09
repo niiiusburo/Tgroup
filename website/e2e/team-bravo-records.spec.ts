@@ -18,11 +18,8 @@ const CUSTOMER_PHONE = '0846588595';
 const TIMESTAMP = Date.now();
 
 async function login(page: Page) {
-  await page.goto('http://localhost:5174/login');
-  await page.getByRole('textbox', { name: 'Email' }).fill('tg@clinic.vn');
-  await page.getByRole('textbox', { name: 'Password' }).fill('123456');
-  await page.getByRole('button', { name: 'Sign In' }).click();
-  await page.waitForURL('**/');
+  // Tests use storageState from auth-setup; auto-login is already handled
+  await page.goto('http://localhost:5174/');
   await page.getByRole('link', { name: 'Customers' }).waitFor({ timeout: 15000 });
 }
 
@@ -53,25 +50,19 @@ test.describe('TEAM BRAVO: Service Records', () => {
     await page.waitForTimeout(1000);
     await page.getByRole('button', { name: 'Add Service' }).click();
     await expect(page.getByRole('heading', { name: 'Tạo dịch vụ' })).toBeVisible({ timeout: 8000 });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(3000);
 
-    // Select service from catalog via DOM (avoids overlay intercept)
-    await page.evaluate(() => new Promise<void>(resolve => {
-      const btns = [...document.querySelectorAll('button')];
-      const svcBtn = btns.find(b => b.textContent?.includes('Chọn dịch vụ'));
-      if (svcBtn) svcBtn.click();
-      setTimeout(() => {
-        const dropdown = document.querySelector('.max-h-56.overflow-y-auto');
-        if (dropdown) {
-          const item = dropdown.querySelector('button');
-          if (item && !item.textContent?.includes('No services')) {
-            (item as HTMLButtonElement).click();
-          }
-        }
-        resolve();
-      }, 500);
-    }));
-    await page.waitForTimeout(500);
+    // Select service from catalog
+    const svcBtn = page.locator('button').filter({ hasText: 'Chọn dịch vụ...' }).first();
+    if (await svcBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await svcBtn.click();
+      await page.waitForTimeout(500);
+      const firstItem = page.locator('.max-h-56.overflow-y-auto button').first();
+      if (await firstItem.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await firstItem.click();
+        await page.waitForTimeout(300);
+      }
+    }
 
     // Doctor
     const doctorBtn = page.getByRole('button', { name: 'Select doctor...' });
@@ -172,27 +163,21 @@ test.describe('TEAM BRAVO: Service Records', () => {
     await page.waitForTimeout(1000);
     await page.getByRole('button', { name: 'Add Service' }).click();
     await expect(page.getByRole('heading', { name: 'Tạo dịch vụ' })).toBeVisible({ timeout: 8000 });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(3000);
 
-    // Catalog via DOM
-    await page.evaluate(() => new Promise<void>(resolve => {
-      const btns = [...document.querySelectorAll('button')];
-      const svcBtn = btns.find(b => b.textContent?.includes('Chọn dịch vụ'));
-      if (svcBtn) svcBtn.click();
-      setTimeout(() => {
-        const dropdown = document.querySelector('.max-h-56.overflow-y-auto');
-        if (dropdown) {
-          const items = dropdown.querySelectorAll('button');
-          // Pick second item if available, else first
-          const target = items.length > 1 ? items[1] : items[0];
-          if (target && !target.textContent?.includes('No services')) {
-            (target as HTMLButtonElement).click();
-          }
-        }
-        resolve();
-      }, 500);
-    }));
-    await page.waitForTimeout(500);
+    // Select service from catalog
+    const svcBtn = page.locator('button').filter({ hasText: 'Chọn dịch vụ...' }).first();
+    if (await svcBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await svcBtn.click();
+      await page.waitForTimeout(500);
+      const items = page.locator('.max-h-56.overflow-y-auto button');
+      const count = await items.count();
+      const target = count > 1 ? items.nth(1) : items.first();
+      if (await target.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await target.click();
+        await page.waitForTimeout(300);
+      }
+    }
 
     // Doctor — pick different one if available
     const doctorBtn = page.getByRole('button', { name: 'Select doctor...' });

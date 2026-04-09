@@ -2,7 +2,7 @@
  * ServiceForm - Create/edit service record modal form with real API data
  * @crossref:used-in[Services, Appointments]
  * @crossref:uses[ServiceCatalogSelector, CustomerSelector, DoctorSelector, LocationSelector, DatePicker]
- * @crossref:matches[AppointmentForm DESIGN STANDARD]
+ * @crossref:matches[AddCustomerForm DESIGN STANDARD]
  *
  * ╔════════════════════════════════════════════════════════════════════════╗
  * ║  FORM FAMILY — @crossref:related[]                                     ║
@@ -32,8 +32,8 @@ import { useLocations } from '@/hooks/useLocations';
 import { useProducts } from '@/hooks/useProducts';
 import { type ServiceCatalogItem } from '@/data/mockServices';
 import type { CreateServiceInput } from '@/hooks/useServices';
-import type { Customer } from '@/data/mockCustomers';
-import type { Employee } from '@/data/mockEmployees';
+import type { Customer } from '@/types/customer';
+import type { Employee } from '@/types/employee';
 import type { Product } from '@/hooks/useProducts';
 import type { AppointmentType } from '@/constants';
 
@@ -64,6 +64,8 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
   // Form state
   const [catalogItemId, setCatalogItemId] = useState<string | null>(initialData?.catalogItemId ?? null);
   const [customerId, setCustomerId] = useState<string | null>(initialData?.customerId ?? null);
+  const [customerName, setCustomerName] = useState(initialData?.customerName ?? '');
+  const [customerPhone, setCustomerPhone] = useState(initialData?.customerPhone ?? '');
   const [doctorId, setDoctorId] = useState<string | null>(initialData?.doctorId ?? null);
   const [locationId, setLocationId] = useState<string | null>(initialData?.locationId ?? null);
   const [startDate, setStartDate] = useState(initialData?.startDate ?? '');
@@ -79,6 +81,8 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
     if (initialData) {
       setCatalogItemId(initialData.catalogItemId ?? null);
       setCustomerId(initialData.customerId ?? null);
+      setCustomerName(initialData.customerName ?? '');
+      setCustomerPhone(initialData.customerPhone ?? '');
       setDoctorId(initialData.doctorId ?? null);
       setLocationId(initialData.locationId ?? null);
       setStartDate(initialData.startDate ?? '');
@@ -142,11 +146,39 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
     return Object.keys(newErrors).length === 0;
   }
 
+  // Clear field-specific errors when values change
+  const handleCatalogChange = (id: string | null) => {
+    setCatalogItemId(id);
+    if (id) setErrors(prev => { const next = { ...prev }; delete next.service; return next; });
+  };
+  const handleCustomerChange = (id: string | null) => {
+    setCustomerId(id);
+    const customer = customers.find(c => c.id === id);
+    if (customer) {
+      setCustomerName(customer.name);
+      setCustomerPhone(customer.phone);
+    }
+    if (id) setErrors(prev => { const next = { ...prev }; delete next.customer; return next; });
+  };
+  const handleDoctorChange = (id: string | null) => {
+    setDoctorId(id);
+    if (id) setErrors(prev => { const next = { ...prev }; delete next.doctor; return next; });
+  };
+  const handleLocationChange = (id: string | null) => {
+    setLocationId(id);
+    if (id) setErrors(prev => { const next = { ...prev }; delete next.location; return next; });
+  };
+  const handleStartDateChange = (date: string) => {
+    setStartDate(date);
+    if (date) setErrors(prev => { const next = { ...prev }; delete next.startDate; return next; });
+  };
+
   function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
     if (!validate()) return;
 
-    const customer = customers.find(c => c.id === customerId);
+    const customer = customers.find(c => c.id === customerId) ||
+      (customerId ? { id: customerId, name: customerName, phone: customerPhone } : undefined);
     const doctor = employees.find(emp => emp.id === doctorId);
     const location = locations.find(l => l.id === locationId);
     if (!customer || !doctor || !location || !selectedCatalog) return;
@@ -207,7 +239,7 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
               <Stethoscope className="w-3.5 h-3.5" />
               Dịch vụ
             </label>
-            <ServiceCatalogSelector catalog={serviceCatalog} selectedId={catalogItemId} onChange={setCatalogItemId} placeholder="Chọn dịch vụ..." />
+            <ServiceCatalogSelector catalog={serviceCatalog} selectedId={catalogItemId} onChange={handleCatalogChange} placeholder="Chọn dịch vụ..." />
             {errors.service && <p className="mt-2 text-xs text-red-500">{errors.service}</p>}
             {selectedCatalog && (
               <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
@@ -223,7 +255,7 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
               <User className="w-3.5 h-3.5" />
               Khách hàng
             </label>
-            <CustomerSelector customers={customers} selectedId={customerId} onChange={setCustomerId} />
+            <CustomerSelector customers={customers} selectedId={customerId} onChange={handleCustomerChange} />
             {errors.customer && <p className="mt-2 text-xs text-red-500">{errors.customer}</p>}
           </div>
 
@@ -233,7 +265,7 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
               <Stethoscope className="w-3.5 h-3.5" />
               Bác sĩ
             </label>
-            <DoctorSelector employees={employees} selectedId={doctorId} onChange={setDoctorId} filterRoles={['doctor']} />
+            <DoctorSelector employees={employees} selectedId={doctorId} onChange={handleDoctorChange} filterRoles={['doctor']} />
             {errors.doctor && <p className="mt-2 text-xs text-red-500">{errors.doctor}</p>}
           </div>
 
@@ -243,13 +275,13 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
               <MapPin className="w-3.5 h-3.5" />
               Chi nhánh
             </label>
-            <LocationSelector locations={locations} selectedId={locationId} onChange={setLocationId} excludeAll />
+            <LocationSelector locations={locations} selectedId={locationId} onChange={handleLocationChange} excludeAll />
             {errors.location && <p className="mt-2 text-xs text-red-500">{errors.location}</p>}
           </div>
 
           {/* Ngày bắt đầu + Ngày kết thúc */}
           <div className="grid grid-cols-2 gap-4">
-            <DatePicker value={startDate} onChange={setStartDate} label="Ngày bắt đầu" icon={<CalendarDays className="w-3.5 h-3.5" />} error={errors.startDate} />
+            <DatePicker value={startDate} onChange={handleStartDateChange} label="Ngày bắt đầu" icon={<CalendarDays className="w-3.5 h-3.5" />} error={errors.startDate} />
             <DatePicker value={expectedEndDate} onChange={setExpectedEndDate} label="Ngày kết thúc" icon={<Clock className="w-3.5 h-3.5" />} minDate={startDate} />
           </div>
 
@@ -298,19 +330,19 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
             />
           </div>
-        </form>
 
-        {/* Footer */}
-        <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
-          <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
-            Hủy bỏ
-          </button>
-          <button type="button" onClick={() => handleSubmit()} disabled={isLoading}
-            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25">
-            <Check className="w-4 h-4" />
-            {isEdit ? 'Cập nhật' : 'Tạo dịch vụ'}
-          </button>
-        </div>
+          {/* Footer */}
+          <div className="modal-footer px-0 pt-4 flex justify-end gap-3 -mx-6 -mb-6 px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100">
+            <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
+              Hủy bỏ
+            </button>
+            <button type="submit" disabled={isLoading}
+              className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25">
+              <Check className="w-4 h-4" />
+              {isEdit ? 'Cập nhật' : 'Tạo dịch vụ'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

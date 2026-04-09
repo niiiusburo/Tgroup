@@ -1,20 +1,90 @@
-import { useState, useCallback, useMemo } from 'react';
-import {
-  MOCK_MONTHLY_PLANS,
-  type MonthlyPlan,
-  type PlanCreationInput,
-  type PlanStatus,
-} from '@/data/mockMonthlyPlans';
-
 /**
  * Hook for Monthly Payment Plans state management
+ * Uses real backend API for data persistence
  * @crossref:used-in[Payment, Customers]
  */
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import type { MonthlyPlan, PlanCreationInput, PlanStatus, Installment, InstallmentStatus } from '@/types/monthlyPlans';
+import {
+  fetchMonthlyPlans,
+  createMonthlyPlan as apiCreatePlan,
+  markInstallmentPaid as apiMarkPaid,
+  type ApiMonthlyPlan,
+  type ApiInstallment,
+} from '@/lib/api';
+
+// Export types for consumers
+export type { MonthlyPlan, PlanCreationInput, PlanStatus, Installment, InstallmentStatus };
+
+// Map API response to type
+function mapApiPlan(api: ApiMonthlyPlan): MonthlyPlan {
+  return {
+    id: api.id,
+    customerId: api.customer_id,
+    customerName: api.customer_name || '',
+    treatmentDescription: api.treatment_description || '',
+    totalAmount: parseFloat(api.total_amount),
+    downPayment: parseFloat(api.down_payment),
+    numberOfInstallments: api.number_of_installments,
+    installmentAmount: parseFloat(api.installment_amount),
+    startDate: api.start_date,
+    status: api.status,
+    createdAt: api.created_at,
+    notes: api.notes || '',
+    installments: api.installments?.map(mapApiInstallment) || [],
+  };
+}
+
+function mapApiInstallment(api: ApiInstallment): Installment {
+  return {
+    id: api.id,
+    planId: api.plan_id,
+    installmentNumber: api.installment_number,
+    dueDate: api.due_date,
+    amount: parseFloat(api.amount),
+    status: api.status,
+    paidDate: api.paid_date,
+    paidAmount: api.paid_amount ? parseFloat(api.paid_amount) : null,
+  };
+}
+
 export function useMonthlyPlans() {
-  const [plans, setPlans] = useState<readonly MonthlyPlan[]>(MOCK_MONTHLY_PLANS);
+  const [plans, setPlans] = useState<readonly MonthlyPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [summary, setSummary] = useState({
+    totalPlans: 0,
+    activePlans: 0,
+    completedPlans: 0,
+    totalOutstanding: 0,
+    overdueCount: 0,
+  });
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<PlanStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Fetch plans from API
+  const loadPlans = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetchMonthlyPlans({
+        status: statusFilter !== 'all' ? statusFilter : undefined,
+        search: searchQuery || undefined,
+      });
+      setPlans(response.items.map(mapApiPlan));
+      setSummary(response.aggregates);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load plans');
+      // Keep existing plans on error
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter, searchQuery]);
+
+  useEffect(() => {
+    loadPlans();
+  }, [loadPlans]);
 
   const filteredPlans = useMemo(() => {
     return plans.filter((plan) => {
@@ -34,94 +104,43 @@ export function useMonthlyPlans() {
     [plans, selectedPlanId],
   );
 
-  const summary = useMemo(() => {
-    const active = plans.filter((p) => p.status === 'active');
-    const totalOutstanding = active.reduce((sum, p) => {
-      const paidInstallments = p.installments.filter((i) => i.status === 'paid').length;
-      const remaining = p.totalAmount - p.downPayment - paidInstallments * p.installmentAmount;
-      return sum + Math.max(0, remaining);
-    }, 0);
-    const overdueCount = plans.reduce(
-      (count, p) => count + p.installments.filter((i) => i.status === 'overdue').length,
-      0,
-    );
+  const createPlan = useCallback(async (input: PlanCreationInput) => {
+    try {
+      const apiPlan = await apiCreatePlan({
+        customer_id: input.customerId,
+        treatment_description: input.treatmentDescription,
+        total_amount: input.totalAmount,
+        down_payment: input.downPayment,
+        number_of_installments: input.numberOfInstallments,
+        start_date: input.startDate,
+      });
+      const newPlan = mapApiPlan(apiPlan);
+      setPlans((prev) => [newPlan, ...prev]);
+      // Refresh summary
+      loadPlans();
+      return newPlan;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create plan');
+      throw err;
+    }
+  }, [loadPlans]);
 
-    return {
-      totalPlans: plans.length,
-      activePlans: active.length,
-      completedPlans: plans.filter((p) => p.status === 'completed').length,
-      totalOutstanding,
-      overdueCount,
-    };
-  }, [plans]);
-
-  const createPlan = useCallback((input: PlanCreationInput) => {
-    const installmentAmount = Math.round(
-      (input.totalAmount - input.downPayment) / input.numberOfInstallments,
-    );
-    const start = new Date(input.startDate);
-    const newPlan: MonthlyPlan = {
-      id: `plan-${Date.now()}`,
-      ...input,
-      installmentAmount,
-      status: 'active',
-      createdAt: new Date().toISOString().split('T')[0],
-      installments: Array.from({ length: input.numberOfInstallments }, (_, i) => {
-        const dueDate = new Date(start);
-        dueDate.setMonth(dueDate.getMonth() + i + 1);
-        return {
-          id: `plan-${Date.now()}-inst-${i + 1}`,
-          planId: `plan-${Date.now()}`,
-          installmentNumber: i + 1,
-          dueDate: dueDate.toISOString().split('T')[0],
-          amount: installmentAmount,
-          status: i === 0 ? 'upcoming' as const : 'pending' as const,
-          paidDate: null,
-          paidAmount: null,
-        };
-      }),
-    };
-
-    setPlans((prev) => [newPlan, ...prev]);
-    return newPlan;
-  }, []);
-
-  const markInstallmentPaid = useCallback((planId: string, installmentId: string) => {
-    setPlans((prev) =>
-      prev.map((plan) => {
-        if (plan.id !== planId) return plan;
-
-        const updatedInstallments = plan.installments.map((inst, idx, arr) => {
-          if (inst.id !== installmentId) {
-            if (inst.status === 'upcoming' || inst.status === 'pending') {
-              const prevInst = arr[idx - 1];
-              if (prevInst?.id === installmentId) {
-                return { ...inst, status: 'upcoming' as const };
-              }
-            }
-            return inst;
-          }
-          return {
-            ...inst,
-            status: 'paid' as const,
-            paidDate: new Date().toISOString().split('T')[0],
-            paidAmount: inst.amount,
-          };
-        });
-
-        const allPaid = updatedInstallments.every((i) => i.status === 'paid');
-        return {
-          ...plan,
-          installments: updatedInstallments,
-          status: allPaid ? 'completed' as const : plan.status,
-        };
-      }),
-    );
-  }, []);
+  const markInstallmentPaid = useCallback(async (planId: string, installmentId: string) => {
+    try {
+      await apiMarkPaid(planId, installmentId);
+      // Refresh the plan to get updated installment statuses
+      await loadPlans();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to mark installment as paid');
+      throw err;
+    }
+  }, [loadPlans]);
 
   return {
     plans: filteredPlans,
     allPlans: plans,
+    loading,
+    error,
     selectedPlan,
     selectedPlanId,
     setSelectedPlanId,
@@ -132,5 +151,6 @@ export function useMonthlyPlans() {
     summary,
     createPlan,
     markInstallmentPaid,
+    refresh: loadPlans,
   } as const;
 }

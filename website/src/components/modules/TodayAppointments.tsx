@@ -32,6 +32,7 @@ interface TodayAppointmentsProps {
   readonly onMarkArrived: (id: string) => void;
   readonly onMarkCancelled: (id: string) => void;
   readonly onEditSaved?: () => void;
+  readonly onEditClick?: (appointment: OverviewAppointment) => void;
 }
 
 const FILTER_TABS: { key: Zone3Filter; label: string }[] = [
@@ -48,11 +49,16 @@ export function TodayAppointments({
   onMarkArrived,
   onMarkCancelled,
   onEditSaved,
+  onEditClick,
 }: TodayAppointmentsProps) {
   const [editingAppointment, setEditingAppointment] = useState<OverviewAppointment | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleEditClick = (appointment: OverviewAppointment) => {
+    if (onEditClick) {
+      onEditClick(appointment);
+      return;
+    }
     setEditingAppointment(appointment);
     setIsEditModalOpen(true);
   };

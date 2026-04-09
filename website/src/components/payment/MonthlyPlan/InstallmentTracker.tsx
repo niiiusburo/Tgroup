@@ -1,5 +1,5 @@
 import { CheckCircle2 } from 'lucide-react';
-import type { Installment, InstallmentStatus } from '@/data/mockMonthlyPlans';
+import type { Installment, InstallmentStatus } from '@/types/monthlyPlans';
 
 /**
  * InstallmentTracker - Payment status display per installment

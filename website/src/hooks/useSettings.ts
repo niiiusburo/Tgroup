@@ -1,19 +1,21 @@
 /**
  * Settings state management hook
+ * Uses real backend API for customer sources and system preferences
  * @crossref:used-in[Settings, ServiceCatalogSettings, RoleConfig, CustomerSourcesConfig, SystemPreferences]
  */
 
-import { useState, useMemo, useEffect } from 'react';
-import {
-  MOCK_CUSTOMER_SOURCES,
-  MOCK_SYSTEM_PREFERENCES,
-  type CustomerSource,
-  type SystemPreference,
-} from '@/data/mockSettings';
-import { ROLES, PERMISSIONS, type Role, type Permission } from '@/data/mockPermissions';
-import { fetchProducts } from '@/lib/api';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import type { CustomerSource, SystemPreference, CatalogService } from '@/types/settings';
+import { PERMISSIONS, ROLES } from '@/data/mockPermissionGroups';
+import type { Permission } from '@/data/mockPermissionGroups';
+import type { Role } from '@/types/permissions';
+import { fetchProducts, fetchCustomerSources, createCustomerSource, updateCustomerSource, deleteCustomerSource, fetchSystemPreferences, upsertSystemPreference, updateSystemPreference, deleteSystemPreference, type ApiCustomerSource, type ApiSystemPreference } from '@/lib/api';
 
-// --- Service Catalog ---
+// Export types
+export type { CustomerSource, SystemPreference, CatalogService };
+export type { Role, Permission };
+
+// ─── Service Catalog ──────────────────────────────────────────────
 
 export interface ApiCatalogService {
   id: string;
@@ -107,7 +109,7 @@ export function useServiceCatalog() {
   };
 }
 
-// --- Role Config ---
+// ─── Role Config ─────────────────────────────────────────────────
 
 export function useRoleConfig() {
   const [roles, setRoles] = useState<Role[]>([...ROLES] as Role[]);
@@ -161,11 +163,59 @@ export function useRoleConfig() {
   };
 }
 
-// --- Customer Sources ---
+// ─── Customer Sources ────────────────────────────────────────────
+
+// Default customer sources (fallback when API fails)
+const DEFAULT_CUSTOMER_SOURCES: readonly CustomerSource[] = [
+  { id: 'src-1', name: 'Sale Online', type: 'online', description: 'Online sales', isActive: true, customerCount: 0 },
+  { id: 'src-2', name: 'Khách vãng lai', type: 'offline', description: 'Walk-in customer', isActive: true, customerCount: 0 },
+  { id: 'src-3', name: 'Hotline', type: 'online', description: 'Phone hotline', isActive: true, customerCount: 0 },
+  { id: 'src-4', name: 'Khách cũ', type: 'referral', description: 'Returning customer', isActive: true, customerCount: 0 },
+  { id: 'src-5', name: 'Khách hàng giới thiệu', type: 'referral', description: 'Customer referral', isActive: true, customerCount: 0 },
+  { id: 'src-6', name: 'Nội bộ giới thiệu', type: 'referral', description: 'Internal referral', isActive: true, customerCount: 0 },
+  { id: 'src-7', name: 'MKT1', type: 'online', description: 'Marketing channel 1', isActive: true, customerCount: 0 },
+  { id: 'src-8', name: 'ĐNCB', type: 'offline', description: 'Direct customer', isActive: true, customerCount: 0 },
+];
+
+function mapApiSource(api: ApiCustomerSource): CustomerSource {
+  return {
+    id: api.id,
+    name: api.name,
+    type: api.type,
+    description: api.description || '',
+    isActive: api.is_active,
+    customerCount: api.customer_count,
+  };
+}
 
 export function useCustomerSources() {
-  const [sources, setSources] = useState<CustomerSource[]>([...MOCK_CUSTOMER_SOURCES]);
+  const [sources, setSources] = useState<CustomerSource[]>([...DEFAULT_CUSTOMER_SOURCES]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>('all');
+
+  // Fetch from API
+  const loadSources = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetchCustomerSources({
+        type: typeFilter !== 'all' ? typeFilter : undefined,
+      });
+      if (response.items.length > 0) {
+        setSources(response.items.map(mapApiSource));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load sources');
+      // Keep defaults on error
+    } finally {
+      setLoading(false);
+    }
+  }, [typeFilter]);
+
+  useEffect(() => {
+    loadSources();
+  }, [loadSources]);
 
   const filtered = useMemo(() => {
     if (typeFilter === 'all') return sources;
@@ -179,52 +229,162 @@ export function useCustomerSources() {
     topSource: [...sources].sort((a, b) => b.customerCount - a.customerCount)[0]?.name ?? '-',
   }), [sources]);
 
-  function toggleSourceActive(id: string) {
-    setSources((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, isActive: !s.isActive } : s))
-    );
+  async function toggleSourceActive(id: string) {
+    const source = sources.find(s => s.id === id);
+    if (!source) return;
+    try {
+      await updateCustomerSource(id, { is_active: !source.isActive });
+      setSources((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, isActive: !s.isActive } : s))
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update source');
+    }
   }
 
-  function addSource(source: Omit<CustomerSource, 'id' | 'customerCount'>) {
-    const newId = `src-${Date.now()}`;
-    setSources((prev) => [...prev, { ...source, id: newId, customerCount: 0 }]);
+  async function addSource(source: Omit<CustomerSource, 'id' | 'customerCount'>) {
+    try {
+      const apiSource = await createCustomerSource({
+        name: source.name,
+        type: source.type,
+        description: source.description,
+        is_active: source.isActive,
+      });
+      setSources((prev) => [...prev, mapApiSource(apiSource)]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add source');
+      throw err;
+    }
   }
 
-  function removeSource(id: string) {
-    setSources((prev) => prev.filter((s) => s.id !== id));
+  async function removeSource(id: string) {
+    try {
+      await deleteCustomerSource(id);
+      setSources((prev) => prev.filter((s) => s.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete source');
+      throw err;
+    }
   }
 
   return {
     sources: filtered,
     allSources: sources,
+    loading,
+    error,
     stats,
     typeFilter,
     setTypeFilter,
     toggleSourceActive,
     addSource,
     removeSource,
+    refresh: loadSources,
   };
 }
 
-// --- System Preferences ---
+// ─── System Preferences ───────────────────────────────────────────
+
+// Default preferences (fallback when API fails)
+const DEFAULT_PREFERENCES: readonly SystemPreference[] = [
+  { id: 'pref-1', key: 'clinic_name', value: 'TDental Clinic', type: 'string', category: 'General', description: 'Clinic name', isPublic: true },
+  { id: 'pref-2', key: 'timezone', value: 'Asia/Ho_Chi_Minh', type: 'string', category: 'General', description: 'Timezone', isPublic: true },
+  { id: 'pref-3', key: 'currency', value: 'VND', type: 'string', category: 'General', description: 'Currency', isPublic: true },
+];
+
+function mapApiPref(api: ApiSystemPreference): SystemPreference {
+  return {
+    id: api.id,
+    key: api.key,
+    value: api.value,
+    type: api.type as SystemPreference['type'],
+    category: api.category,
+    description: api.description || '',
+    isPublic: api.is_public,
+  };
+}
 
 export function useSystemPreferences() {
-  const [preferences, setPreferences] = useState<SystemPreference[]>([...MOCK_SYSTEM_PREFERENCES]);
+  const [preferences, setPreferences] = useState<SystemPreference[]>([...DEFAULT_PREFERENCES]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch from API
+  const loadPreferences = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetchSystemPreferences();
+      if (response.items.length > 0) {
+        setPreferences(response.items.map(mapApiPref));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load preferences');
+      // Keep defaults on error
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPreferences();
+  }, [loadPreferences]);
 
   const groups = useMemo(() => {
     const grouped: Record<string, SystemPreference[]> = {};
     for (const p of preferences) {
-      if (!grouped[p.group]) grouped[p.group] = [];
-      grouped[p.group].push(p);
+      if (!grouped[p.category]) grouped[p.category] = [];
+      grouped[p.category].push(p);
     }
     return grouped;
   }, [preferences]);
 
-  function updatePreference(key: string, value: string | number | boolean) {
-    setPreferences((prev) =>
-      prev.map((p) => (p.key === key ? { ...p, value } : p))
-    );
+  async function updatePreference(key: string, value: string | number | boolean) {
+    try {
+      await updateSystemPreference(key, { value: String(value) });
+      setPreferences((prev) =>
+        prev.map((p) => (p.key === key ? { ...p, value: String(value) } : p))
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update preference');
+      throw err;
+    }
   }
 
-  return { preferences, groups, updatePreference };
+  async function addPreference(pref: Omit<SystemPreference, 'id'>) {
+    try {
+      const apiPref = await upsertSystemPreference({
+        key: pref.key,
+        value: pref.value,
+        type: pref.type,
+        category: pref.category,
+        description: pref.description,
+        is_public: pref.isPublic,
+      });
+      setPreferences((prev) => [...prev, mapApiPref(apiPref)]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add preference');
+      throw err;
+    }
+  }
+
+  async function removePreference(key: string) {
+    try {
+      await deleteSystemPreference(key);
+      setPreferences((prev) => prev.filter((p) => p.key !== key));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete preference');
+      throw err;
+    }
+  }
+
+  return { 
+    preferences, 
+    groups, 
+    loading,
+    error,
+    updatePreference, 
+    addPreference,
+    removePreference,
+    refresh: loadPreferences,
+  };
 }

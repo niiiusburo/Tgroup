@@ -1,5 +1,5 @@
 import { TrendingUp, TrendingDown } from 'lucide-react';
-import type { RevenueDataPoint } from '@/data/mockDashboard';
+import type { RevenueDataPoint } from '@/types/common';
 
 /**
  * RevenueChartModule - Revenue chart visualization using pure CSS bars

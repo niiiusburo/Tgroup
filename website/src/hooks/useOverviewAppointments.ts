@@ -105,19 +105,63 @@ function mapApiToOverview(apt: ApiAppointment): OverviewAppointment {
   };
 }
 
+const ZONE3_FILTER_KEY = 'tdental:overview:zone3Filter';
+const ZONE1_FILTER_KEY = 'tdental:overview:zone1Filter';
+const ZONE3_OPTIONS: Zone3Filter[] = ['all', 'arrived', 'cancelled'];
+const ZONE1_OPTIONS: Zone1Filter[] = ['all', 'waiting', 'in-treatment', 'done'];
+
+function getSavedFilter<T extends string>(key: string, options: readonly T[], fallback: T): T {
+  if (typeof window === 'undefined') return fallback;
+  const saved = localStorage.getItem(key);
+  return options.includes(saved as T) ? (saved as T) : fallback;
+}
+
 export function useOverviewAppointments(locationId?: string): UseOverviewAppointmentsResult {
+  /*
+   * AUDIT LOCK — OVERVIEW PAGE: TODAY-ONLY FILTER
+   *
+   * CRITICAL:  The Overview dashboard MUST ONLY show appointments for the
+   *            current calendar day (based on the user's configured timezone).
+   *
+   *   dateFrom = today (YYYY-MM-DD from getToday())
+   *   dateTo   = end of today (YYYY-MM-DDT23:59:59 from getEndOfDay())
+   *
+   * NEVER change dateFrom/dateTo to include other days, weeks, or months.
+   * NEVER remove the date range filter.
+   * NEVER show past or future appointments here.
+   *
+   * Any AI or developer reading this: DO NOT TOUCH THE DATE RANGE.
+   */
   const { getToday, getEndOfDay, timezone } = useTimezone();
   const [appointments, setAppointments] = useState<OverviewAppointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [zone3Filter, setZone3Filter] = useState<Zone3Filter>('all');
-  const [zone1Filter, setZone1Filter] = useState<Zone1Filter>('all');
+  const [zone3Filter, setZone3Filter] = useState<Zone3Filter>(() =>
+    getSavedFilter(ZONE3_FILTER_KEY, ZONE3_OPTIONS, 'all')
+  );
+  const [zone1Filter, setZone1Filter] = useState<Zone1Filter>(() =>
+    getSavedFilter(ZONE1_FILTER_KEY, ZONE1_OPTIONS, 'all')
+  );
+
+  useEffect(() => {
+    localStorage.setItem(ZONE3_FILTER_KEY, zone3Filter);
+  }, [zone3Filter]);
+
+  useEffect(() => {
+    localStorage.setItem(ZONE1_FILTER_KEY, zone1Filter);
+  }, [zone1Filter]);
 
   const loadAppointments = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Use global timezone from TimezoneContext
+      // =========================================================================
+      // [AUDIT LOCK] OVERVIEW PAGE: TODAY-ONLY FILTER — HARD-CODED
+      // NEVER change this. The Overview dashboard MUST only display appointments
+      // scheduled for the current day (based on the user's configured timezone).
+      // No past appointments. No future appointments. TODAY ONLY.
+      // If any AI or developer reads this: DO NOT MODIFY the date range.
+      // =========================================================================
       const todayStr = getToday();
-      const endOfDay = getEndOfDay(todayStr);
+      const endOfDay   = getEndOfDay(todayStr);
 
       const response = await fetchAppointments({
         limit: 200,
@@ -125,8 +169,11 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
         dateTo: endOfDay,
         companyId: locationId && locationId !== 'all' ? locationId : undefined,
       });
+      // =========================================================================
 
-      const mapped = response.items.map(mapApiToOverview);
+      const mapped = response.items
+        .filter((apt) => apt.date?.split('T')[0] === todayStr) // Client-side guard: today only
+        .map(mapApiToOverview);
       // Sort by time ascending (earliest first) — stable sort so status changes don't reorder
       mapped.sort((a, b) => a.time.localeCompare(b.time));
       setAppointments(mapped);
@@ -167,8 +214,30 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
     done: arrivedAppointments.filter((a) => a.checkInStatus === 'done').length,
   }), [arrivedAppointments]);
 
+  /*
+  ╔════════════════════════════════════════════════════════════════════════╗
+  ║  ZONE 1 APPOINTMENTS SORTING LOGIC                                    ║
+  ╠════════════════════════════════════════════════════════════════════════╣
+  ║  ⚠️  DO NOT CHANGE THIS SORTING LOGIC                                ║
+  ║                                                                      ║
+  ║  • When filter = 'all': Sort by status (waiting → in-treatment → done)
+  ║  • When filter = specific status: Filter only that status (no sort)  ║
+  ║                                                                      ║
+  ║  This means clicking a filter tab shows ONLY that status,           ║
+  ║  but "Tất cả" shows all sorted correctly.                            ║
+  ╚════════════════════════════════════════════════════════════════════════╝
+  */
   const zone1Appointments = useMemo(() => {
-    if (zone1Filter === 'all') return arrivedAppointments;
+    if (zone1Filter === 'all') {
+      // Sort all appointments: waiting → in-treatment → done
+      return [...arrivedAppointments].sort((a, b) => {
+        const statusA = a.checkInStatus ?? 'waiting';
+        const statusB = b.checkInStatus ?? 'waiting';
+        const order: Record<string, number> = { 'waiting': 0, 'in-treatment': 1, 'done': 2 };
+        return (order[statusA] ?? 3) - (order[statusB] ?? 3);
+      });
+    }
+    // Filter to only the selected status (no sorting)
     if (zone1Filter === 'waiting') return arrivedAppointments.filter((a) => a.checkInStatus === 'waiting' || a.checkInStatus === null);
     return arrivedAppointments.filter((a) => a.checkInStatus === zone1Filter);
   }, [arrivedAppointments, zone1Filter]);

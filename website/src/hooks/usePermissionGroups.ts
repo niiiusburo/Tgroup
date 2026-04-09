@@ -1,36 +1,104 @@
 /**
  * Hook for managing Permission Groups, assignments, and location scoping
- *
- * Provides:
- *   - CRUD for permission groups (create, edit permissions, delete non-system)
- *   - Assign employees to groups with location scope (all / specific checkboxes)
- *   - Individual permission overrides per employee
- *   - Computed effective permissions for any employee
+ * NOW CONNECTED TO REAL API
  *
  * @crossref:used-in[PermissionGroupConfig, EmployeeProfile, Settings]
- * @crossref:uses[mockPermissionGroups, mockLocations]
+ * @crossref:uses[api]
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
-  PERMISSIONS,
-  MOCK_PERMISSION_GROUPS,
-  MOCK_ASSIGNMENTS,
-  type Permission,
+  fetchPermissionGroups,
+  fetchEmployeePermissions,
+  fetchCompanies,
+  updateEmployeePermission,
   type PermissionGroup,
-  type EmployeePermissionAssignment,
-  type LocationScope,
-} from '@/data/mockPermissionGroups';
-import { MOCK_LOCATION_BRANCHES, type LocationBranch } from '@/data/mockLocations';
+  type EmployeePermission,
+} from '@/lib/api';
+import { PERMISSIONS } from '@/data/mockPermissionGroups';
+import type { Permission } from '@/data/mockPermissionGroups';
+
+// Export types
+export type { Permission, PermissionGroup };
+export type { EmployeePermission };
+
+export type LocationScope = 'all' | 'assigned' | 'specific';
+
+// Location branch type
+export interface LocationBranch {
+  readonly id: string;
+  readonly name: string;
+}
+
+// Employee permission assignment with locations
+export interface EmployeePermissionAssignment {
+  readonly employeeId: string;
+  readonly employeeName: string;
+  readonly groupId: string;
+  readonly groupName: string;
+  readonly groupColor?: string;
+  readonly locations: readonly { id: string; name: string }[];
+  readonly locScope: string;
+  readonly overrides: { grant: readonly string[]; revoke: readonly string[] };
+}
 
 export function usePermissionGroups() {
-  const [groups, setGroups] = useState<PermissionGroup[]>([...MOCK_PERMISSION_GROUPS]);
-  const [assignments, setAssignments] = useState<EmployeePermissionAssignment[]>([...MOCK_ASSIGNMENTS]);
+  const [groups, setGroups] = useState<PermissionGroup[]>([]);
+  const [assignments, setAssignments] = useState<EmployeePermissionAssignment[]>([]);
+  const [locations, setLocations] = useState<readonly LocationBranch[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const locations: readonly LocationBranch[] = MOCK_LOCATION_BRANCHES;
   const permissions: readonly Permission[] = PERMISSIONS;
+
+  // Fetch data from API on mount
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const [fetchedGroups, fetchedAssignments, fetchedCompanies] = await Promise.all([
+          fetchPermissionGroups(),
+          fetchEmployeePermissions(),
+          fetchCompanies({ limit: 100 }),
+        ]);
+
+        // Map API response to our types
+        const mappedGroups: PermissionGroup[] = fetchedGroups.map((g) => ({
+          id: g.id,
+          name: g.name,
+          color: g.color,
+          description: g.description ?? '',
+          permissions: g.permissions,
+          isSystem: g.isSystem,
+        }));
+
+        const mappedAssignments: EmployeePermissionAssignment[] = fetchedAssignments.map((a) => ({
+          employeeId: a.employeeId,
+          employeeName: a.employeeName,
+          groupId: a.groupId,
+          groupName: a.groupName,
+          groupColor: a.groupColor,
+          locations: a.locations,
+          locScope: a.locScope,
+          overrides: a.overrides,
+        }));
+
+        setGroups(mappedGroups);
+        setAssignments(mappedAssignments);
+        setLocations(fetchedCompanies.items.map((c) => ({ id: c.id, name: c.name })));
+      } catch (err) {
+        console.error('usePermissionGroups: failed to load data', err);
+        setError(err instanceof Error ? err.message : 'Failed to load permission groups');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
 
   // ─── Derived state ────────────────────────────────────────
 
@@ -96,8 +164,8 @@ export function usePermissionGroups() {
     (employeeId: string, locationId: string): boolean => {
       const assignment = assignments.find((a) => a.employeeId === employeeId);
       if (!assignment) return false;
-      if (assignment.locationScope.type === 'all') return true;
-      return assignment.locationScope.locationIds.includes(locationId);
+      if (assignment.locScope === 'all') return true;
+      return assignment.locations.some((loc) => loc.id === locationId);
     },
     [assignments],
   );
@@ -112,29 +180,30 @@ export function usePermissionGroups() {
         return {
           ...g,
           permissions: has
-            ? g.permissions.filter((p) => p !== permissionId)
+            ? g.permissions.filter((p: string) => p !== permissionId)
             : [...g.permissions, permissionId],
         };
       }),
     );
   }, []);
 
-  const addGroup = useCallback((name: string, color: string, description: string) => {
+  const addGroup = useCallback(async (name: string, color: string, description: string) => {
     const newGroup: PermissionGroup = {
       id: `group-${Date.now()}`,
       name,
       color,
       description,
-      permissions: ['overview.view'],  // minimum default
+      permissions: ['overview.view'],
       isSystem: false,
     };
+
+    // TODO: Call API to create group
     setGroups((prev) => [...prev, newGroup]);
     return newGroup;
   }, []);
 
   const removeGroup = useCallback((groupId: string) => {
     setGroups((prev) => prev.filter((g) => g.id !== groupId || g.isSystem));
-    // Also remove assignments for this group
     setAssignments((prev) => prev.filter((a) => a.groupId !== groupId));
   }, []);
 
@@ -147,58 +216,95 @@ export function usePermissionGroups() {
   // ─── Assignment mutations ─────────────────────────────────
 
   const assignEmployee = useCallback(
-    (employeeId: string, groupId: string, locationScope: LocationScope) => {
-      setAssignments((prev) => {
-        const existing = prev.findIndex((a) => a.employeeId === employeeId);
-        const newAssignment: EmployeePermissionAssignment = {
-          employeeId,
+    async (employeeId: string, groupId: string, locationScope: LocationScope) => {
+      const newAssignment: EmployeePermissionAssignment = {
+        employeeId,
+        groupId,
+        employeeName: '', // Will be filled from API
+        groupName: groups.find((g) => g.id === groupId)?.name ?? '',
+        locations: [],
+        locScope: locationScope,
+        overrides: { grant: [], revoke: [] },
+      };
+
+      try {
+        await updateEmployeePermission(employeeId, {
           groupId,
-          locationScope,
-          overrides: existing >= 0 ? prev[existing].overrides : { grant: [], revoke: [] },
-        };
-        if (existing >= 0) {
-          const updated = [...prev];
-          updated[existing] = newAssignment;
-          return updated;
-        }
-        return [...prev, newAssignment];
-      });
+          locScope: locationScope,
+          locationIds: [],
+          overrides: { grant: [], revoke: [] },
+        });
+
+        setAssignments((prev) => {
+          const existing = prev.findIndex((a) => a.employeeId === employeeId);
+          if (existing >= 0) {
+            const updated = [...prev];
+            updated[existing] = newAssignment;
+            return updated;
+          }
+          return [...prev, newAssignment];
+        });
+      } catch (err) {
+        console.error('usePermissionGroups: failed to assign employee', err);
+        throw err;
+      }
     },
-    [],
+    [groups],
   );
 
-  const updateLocationScope = useCallback(
-    (employeeId: string, locationScope: LocationScope) => {
-      setAssignments((prev) =>
-        prev.map((a) => (a.employeeId === employeeId ? { ...a, locationScope } : a)),
-      );
-    },
-    [],
-  );
+  const removeAssignment = useCallback((employeeId: string) => {
+    setAssignments((prev) => prev.filter((a) => a.employeeId !== employeeId));
+  }, []);
+
+  // ─── Location scope mutations ─────────────────────────────────
 
   const toggleLocationForEmployee = useCallback(
     (employeeId: string, locationId: string) => {
       setAssignments((prev) =>
         prev.map((a) => {
           if (a.employeeId !== employeeId) return a;
-          if (a.locationScope.type === 'all') {
-            // Switching from "all" to specific: include all except the toggled one
-            const allIds = MOCK_LOCATION_BRANCHES.map((l) => l.id).filter((id) => id !== locationId);
-            return { ...a, locationScope: { type: 'specific', locationIds: allIds } };
+
+          const currentScope = a.locScope;
+          const currentLocations = a.locations;
+          const isCurrentlyAll = currentScope === 'all';
+          const locationIds = currentLocations.map((l) => l.id);
+          const hasLocation = locationIds.includes(locationId);
+
+          if (isCurrentlyAll) {
+            // Switching from "all" to specific: exclude the toggled location
+            const newLocations = locations
+              .filter((loc) => loc.id !== locationId)
+              .map((loc) => ({ id: loc.id, name: loc.name }));
+            return {
+              ...a,
+              locScope: 'specific' as LocationScope,
+              locations: newLocations,
+            };
           }
-          const has = a.locationScope.locationIds.includes(locationId);
-          const newIds = has
-            ? a.locationScope.locationIds.filter((id) => id !== locationId)
-            : [...a.locationScope.locationIds, locationId];
-          // If all locations are selected, switch to "all"
-          if (newIds.length === MOCK_LOCATION_BRANCHES.length) {
-            return { ...a, locationScope: { type: 'all' } };
+
+          // Toggle individual location
+          const newLocations = hasLocation
+            ? currentLocations.filter((l) => l.id !== locationId)
+            : [...currentLocations, locations.find((l) => l.id === locationId)!];
+
+          // If all locations selected, switch to 'all'
+          if (newLocations.length === locations.length) {
+            return {
+              ...a,
+              locScope: 'all' as LocationScope,
+              locations: locations.map((l) => ({ id: l.id, name: l.name })),
+            };
           }
-          return { ...a, locationScope: { type: 'specific', locationIds: newIds } };
+
+          return {
+            ...a,
+            locScope: 'specific' as LocationScope,
+            locations: newLocations,
+          };
         }),
       );
     },
-    [],
+    [locations],
   );
 
   const setAllLocations = useCallback(
@@ -208,21 +314,16 @@ export function usePermissionGroups() {
           if (a.employeeId !== employeeId) return a;
           return {
             ...a,
-            locationScope: allLocations
-              ? { type: 'all' }
-              : { type: 'specific', locationIds: [] },
+            locScope: allLocations ? 'all' as LocationScope : 'specific' as LocationScope,
+            locations: allLocations ? locations.map((l) => ({ id: l.id, name: l.name })) : [],
           };
         }),
       );
     },
-    [],
+    [locations],
   );
 
-  const removeAssignment = useCallback((employeeId: string) => {
-    setAssignments((prev) => prev.filter((a) => a.employeeId !== employeeId));
-  }, []);
-
-  // ─── Override mutations ───────────────────────────────────
+  // ─── Override mutations ─────────────────────────────────
 
   const toggleOverrideGrant = useCallback(
     (employeeId: string, permissionId: string) => {
@@ -235,10 +336,9 @@ export function usePermissionGroups() {
             overrides: {
               ...a.overrides,
               grant: hasGrant
-                ? a.overrides.grant.filter((p) => p !== permissionId)
+                ? a.overrides.grant.filter((p: string) => p !== permissionId)
                 : [...a.overrides.grant, permissionId],
-              // Remove from revoke if granting
-              revoke: a.overrides.revoke.filter((p) => p !== permissionId),
+              revoke: a.overrides.revoke.filter((p: string) => p !== permissionId),
             },
           };
         }),
@@ -258,10 +358,9 @@ export function usePermissionGroups() {
             overrides: {
               ...a.overrides,
               revoke: hasRevoke
-                ? a.overrides.revoke.filter((p) => p !== permissionId)
+                ? a.overrides.revoke.filter((p: string) => p !== permissionId)
                 : [...a.overrides.revoke, permissionId],
-              // Remove from grant if revoking
-              grant: a.overrides.grant.filter((p) => p !== permissionId),
+              grant: a.overrides.grant.filter((p: string) => p !== permissionId),
             },
           };
         }),
@@ -283,6 +382,8 @@ export function usePermissionGroups() {
     setSelectedGroupId,
     selectedEmployeeId,
     setSelectedEmployeeId,
+    isLoading,
+    error,
 
     // Queries
     getAssignment,
@@ -298,10 +399,9 @@ export function usePermissionGroups() {
 
     // Assignment mutations
     assignEmployee,
-    updateLocationScope,
+    removeAssignment,
     toggleLocationForEmployee,
     setAllLocations,
-    removeAssignment,
 
     // Override mutations
     toggleOverrideGrant,

@@ -1,0 +1,146 @@
+/**
+ * Status-related constants (labels, styles, colors)
+ * Extracted from mock files for centralized style management
+ */
+
+export const STATUS_LABELS: Record<string, string> = {
+  active: 'Active',
+  inactive: 'Inactive',
+  pending: 'Pending',
+  scheduled: 'Scheduled',
+  confirmed: 'Confirmed',
+  'in-progress': 'In Progress',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+  renovation: 'Renovation',
+  closed: 'Closed',
+  'planned': 'Planned',
+  'missed': 'Missed',
+  'paid': 'Paid',
+  'upcoming': 'Upcoming',
+  'overdue': 'Overdue',
+  'defaulted': 'Defaulted',
+  'draft': 'Draft',
+  'not-arrived': 'Not Arrived',
+  arrived: 'Arrived',
+  waiting: 'Waiting',
+  done: 'Done',
+  published: 'Published',
+  archived: 'Archived',
+  failed: 'Failed',
+  refunded: 'Refunded',
+};
+
+export const STATUS_STYLES: Record<string, string> = {
+  active: 'bg-green-100 text-green-700',
+  inactive: 'bg-gray-100 text-gray-500',
+  pending: 'bg-yellow-100 text-yellow-700',
+  scheduled: 'bg-blue-100 text-blue-700',
+  confirmed: 'bg-indigo-100 text-indigo-700',
+  'in-progress': 'bg-orange-100 text-orange-700',
+  completed: 'bg-green-100 text-green-700',
+  cancelled: 'bg-red-100 text-red-700',
+  renovation: 'bg-yellow-100 text-yellow-700',
+  closed: 'bg-gray-100 text-gray-500',
+  planned: 'bg-blue-100 text-blue-700',
+  missed: 'bg-red-100 text-red-700',
+  paid: 'bg-green-100 text-green-700',
+  upcoming: 'bg-blue-100 text-blue-700',
+  overdue: 'bg-red-100 text-red-700',
+  defaulted: 'bg-red-100 text-red-700',
+  draft: 'bg-gray-100 text-gray-500',
+  'not-arrived': 'bg-gray-100 text-gray-500',
+  arrived: 'bg-blue-100 text-blue-700',
+  waiting: 'bg-yellow-100 text-yellow-700',
+  'in-treatment': 'bg-orange-100 text-orange-700',
+  done: 'bg-green-100 text-green-700',
+  published: 'bg-green-100 text-green-700',
+  archived: 'bg-gray-100 text-gray-500',
+  failed: 'bg-red-100 text-red-700',
+  refunded: 'bg-gray-100 text-gray-500',
+};
+
+export const STATUS_BADGE_STYLES: Record<string, string> = {
+  active: 'bg-green-100 text-green-700 border-green-200',
+  inactive: 'bg-gray-100 text-gray-500 border-gray-200',
+  pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  scheduled: 'bg-blue-100 text-blue-700 border-blue-200',
+  confirmed: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  'in-progress': 'bg-orange-100 text-orange-700 border-orange-200',
+  completed: 'bg-green-100 text-green-700 border-green-200',
+  cancelled: 'bg-red-100 text-red-700 border-red-200',
+  renovation: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  closed: 'bg-gray-100 text-gray-500 border-gray-200',
+  planned: 'bg-blue-100 text-blue-700 border-blue-200',
+  missed: 'bg-red-100 text-red-700 border-red-200',
+  paid: 'bg-green-100 text-green-700 border-green-200',
+  upcoming: 'bg-blue-100 text-blue-700 border-blue-200',
+  overdue: 'bg-red-100 text-red-700 border-red-200',
+  defaulted: 'bg-red-100 text-red-700 border-red-200',
+  draft: 'bg-gray-100 text-gray-500 border-gray-200',
+  'not-arrived': 'bg-gray-100 text-gray-500 border-gray-200',
+  arrived: 'bg-blue-100 text-blue-700 border-blue-200',
+  waiting: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  'in-treatment': 'bg-orange-100 text-orange-700 border-orange-200',
+  done: 'bg-green-100 text-green-700 border-green-200',
+  failed: 'bg-red-100 text-red-700 border-red-200',
+  refunded: 'bg-gray-100 text-gray-500 border-gray-200',
+};
+
+export const STATUS_DOT_COLORS: Record<string, string> = {
+  scheduled: 'bg-blue-500',
+  confirmed: 'bg-indigo-500',
+  'in-progress': 'bg-orange-500',
+  completed: 'bg-green-500',
+  cancelled: 'bg-red-500',
+  active: 'bg-green-500',
+  inactive: 'bg-gray-400',
+  pending: 'bg-yellow-500',
+  renovation: 'bg-yellow-500',
+  closed: 'bg-gray-400',
+  'not-arrived': 'bg-gray-400',
+  arrived: 'bg-blue-500',
+  waiting: 'bg-yellow-500',
+  'in-treatment': 'bg-orange-500',
+  done: 'bg-green-500',
+};
+
+export const TIER_LABELS: Record<string, string> = {
+  junior: 'Junior',
+  mid: 'Mid-Level',
+  senior: 'Senior',
+  lead: 'Lead',
+  director: 'Director',
+};
+
+export const TIER_STYLES: Record<string, string> = {
+  junior: 'bg-gray-100 text-gray-600',
+  mid: 'bg-blue-100 text-blue-600',
+  senior: 'bg-purple-100 text-purple-600',
+  lead: 'bg-orange-100 text-orange-600',
+  director: 'bg-red-100 text-red-600',
+};
+
+export const ROLE_LABELS: Record<string, string> = {
+  'general-manager': 'Quản lý tổng',
+  'branch-manager': 'Quản lý cơ sở',
+  doctor: 'Bác sĩ',
+  'doctor-assistant': 'Trợ lý Bác sĩ',
+  assistant: 'Phụ tá',
+  receptionist: 'Lễ tân',
+  'sale-online': 'Sale online',
+  'customer-service': 'CSKH',
+  marketing: 'Marketing',
+};
+
+export const ROLE_STYLES: Record<string, string> = {
+  'general-manager': 'bg-red-100 text-red-700',
+  'branch-manager': 'bg-orange-100 text-orange-700',
+  doctor: 'bg-blue-100 text-blue-700',
+  'doctor-assistant': 'bg-cyan-100 text-cyan-700',
+  assistant: 'bg-teal-100 text-teal-700',
+  receptionist: 'bg-green-100 text-green-700',
+  'sale-online': 'bg-purple-100 text-purple-700',
+  'customer-service': 'bg-pink-100 text-pink-700',
+  marketing: 'bg-indigo-100 text-indigo-700',
+};

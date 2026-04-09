@@ -5,7 +5,7 @@ import {
   TrendingUp,
   Activity,
 } from 'lucide-react';
-import type { LocationMetrics } from '@/data/mockLocations';
+import type { LocationMetrics } from '@/types/location';
 
 /**
  * Mini dashboard showing branch-level metrics

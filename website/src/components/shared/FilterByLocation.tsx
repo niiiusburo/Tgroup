@@ -1,6 +1,6 @@
 import { MapPin, ChevronDown } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
-import type { LocationOption } from '@/data/mockDashboard';
+import type { LocationOption } from '@/types/common';
 
 /**
  * FilterByLocation - Location filter dropdown

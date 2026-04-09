@@ -21,11 +21,8 @@ const CUSTOMER_NAME = 'ĐẶNG NGỌC MINH THƯ';
 const TIMESTAMP = Date.now();
 
 async function login(page: Page) {
-  await page.goto('http://localhost:5174/login');
-  await page.getByRole('textbox', { name: 'Email' }).fill('tg@clinic.vn');
-  await page.getByRole('textbox', { name: 'Password' }).fill('123456');
-  await page.getByRole('button', { name: 'Sign In' }).click();
-  await page.waitForURL('**/');
+  // Tests use storageState from auth-setup; auto-login is already handled
+  await page.goto('http://localhost:5174/');
   await page.getByRole('link', { name: 'Customers' }).waitFor({ timeout: 15000 });
 }
 
@@ -113,50 +110,38 @@ test.describe('TEAM CHARLIE: Payments & Deposits', () => {
 
     await page.getByRole('button', { name: 'Make Payment' }).click();
     await expect(page.getByRole('heading', { name: 'Ghi nhận thanh toán' })).toBeVisible({ timeout: 8000 });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(3000);
 
-    // Customer is pre-selected via CustomerSelector (defaultCustomerId)
-    // Select service from catalog via DOM
-    await page.evaluate(() => new Promise<void>(resolve => {
-      const btns = [...document.querySelectorAll('button')];
-      const svcBtn = btns.find(b => b.textContent?.includes('Chọn dịch vụ'));
-      if (svcBtn) svcBtn.click();
-      setTimeout(() => {
-        const dropdown = document.querySelector('.max-h-56.overflow-y-auto');
-        if (dropdown) {
-          const item = dropdown.querySelector('button');
-          if (item && !item.textContent?.includes('No services')) {
-            (item as HTMLButtonElement).click();
-          }
-        }
-        resolve();
-      }, 500);
-    }));
-    await page.waitForTimeout(500);
-
-    // Amount — find the input near "Thành tiền" or price label
-    const amountInput = page.locator('input[placeholder="0"]').first();
-    if (await amountInput.isVisible({ timeout: 500 }).catch(() => false)) {
-      await amountInput.fill('300000');
+    // Select service from catalog
+    const svcBtn4 = page.locator('button').filter({ hasText: 'Chọn dịch vụ...' }).first();
+    if (await svcBtn4.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await svcBtn4.click();
+      await page.waitForTimeout(500);
+      const firstItem = page.locator('.max-h-56.overflow-y-auto button').first();
+      if (await firstItem.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await firstItem.click();
+        await page.waitForTimeout(300);
+      }
     }
 
-    // Payment method — Cash
-    const cashBtn = page.locator('button').filter({ hasText: /Tiền mặt|Cash/i }).first();
-    if (await cashBtn.isVisible({ timeout: 500 }).catch(() => false)) {
-      await cashBtn.click();
+    // Amount — cash input in multi-source form
+    const cashSection = page.locator('div').filter({ hasText: 'Tiền mặt (Cash)' }).first();
+    const cashInput = cashSection.locator('input[type="number"]').first();
+    if (await cashInput.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await cashInput.fill('300000');
     }
 
     // Notes
-    const notesArea = page.getByPlaceholder('Ghi chú thanh toán...');
-    if (await notesArea.isVisible({ timeout: 500 }).catch(() => false)) {
-      await notesArea.fill(`Charlie payment 1 - ${TIMESTAMP}`);
+    const notesArea4 = page.getByPlaceholder('Ghi chú thanh toán...');
+    if (await notesArea4.isVisible({ timeout: 500 }).catch(() => false)) {
+      await notesArea4.fill(`Charlie payment 1 - ${TIMESTAMP}`);
     }
 
     await page.screenshot({ path: 'e2e/screenshots/tc4-form.png' });
 
-    // Submit — button says "Ghi nhận 300.000 ₫" or similar
-    const submitBtn = page.getByRole('button', { name: /Ghi nhận/i }).last();
-    await submitBtn.click();
+    // Submit
+    const submitBtn4 = page.getByRole('button', { name: /Ghi nhận/i }).last();
+    await submitBtn4.click();
     await page.waitForTimeout(2000);
 
     await expect(page.getByRole('heading', { name: 'Ghi nhận thanh toán' })).not.toBeVisible({ timeout: 8000 });
@@ -169,49 +154,39 @@ test.describe('TEAM CHARLIE: Payments & Deposits', () => {
 
     await page.getByRole('button', { name: 'Make Payment' }).click();
     await expect(page.getByRole('heading', { name: 'Ghi nhận thanh toán' })).toBeVisible({ timeout: 8000 });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(3000);
 
-    // Service via DOM
-    await page.evaluate(() => new Promise<void>(resolve => {
-      const btns = [...document.querySelectorAll('button')];
-      const svcBtn = btns.find(b => b.textContent?.includes('Chọn dịch vụ'));
-      if (svcBtn) svcBtn.click();
-      setTimeout(() => {
-        const dropdown = document.querySelector('.max-h-56.overflow-y-auto');
-        if (dropdown) {
-          const items = dropdown.querySelectorAll('button');
-          const target = items.length > 1 ? items[1] : items[0];
-          if (target && !target.textContent?.includes('No services')) {
-            (target as HTMLButtonElement).click();
-          }
-        }
-        resolve();
-      }, 500);
-    }));
-    await page.waitForTimeout(500);
-
-    // Amount
-    const amountInput = page.locator('input[placeholder="0"]').first();
-    if (await amountInput.isVisible({ timeout: 500 }).catch(() => false)) {
-      await amountInput.fill('500000');
+    // Select service from catalog
+    const svcBtn5 = page.locator('button').filter({ hasText: 'Chọn dịch vụ...' }).first();
+    if (await svcBtn5.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await svcBtn5.click();
+      await page.waitForTimeout(500);
+      const items = page.locator('.max-h-56.overflow-y-auto button');
+      const count = await items.count();
+      const target = count > 1 ? items.nth(1) : items.first();
+      if (await target.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await target.click();
+        await page.waitForTimeout(300);
+      }
     }
 
-    // Bank transfer method
-    const bankBtn = page.locator('button').filter({ hasText: /Chuyển khoản|Bank Transfer|Transfer/i }).first();
-    if (await bankBtn.isVisible({ timeout: 500 }).catch(() => false)) {
-      await bankBtn.click();
+    // Amount — bank input in multi-source form
+    const bankSection = page.locator('div').filter({ hasText: 'Chuyển khoản (Bank)' }).first();
+    const bankInput = bankSection.locator('input[type="number"]').first();
+    if (await bankInput.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await bankInput.fill('500000');
     }
 
     // Notes
-    const notesArea = page.getByPlaceholder('Ghi chú thanh toán...');
-    if (await notesArea.isVisible({ timeout: 500 }).catch(() => false)) {
-      await notesArea.fill(`Charlie payment 2 - ${TIMESTAMP}`);
+    const notesArea5 = page.getByPlaceholder('Ghi chú thanh toán...');
+    if (await notesArea5.isVisible({ timeout: 500 }).catch(() => false)) {
+      await notesArea5.fill(`Charlie payment 2 - ${TIMESTAMP}`);
     }
 
     await page.screenshot({ path: 'e2e/screenshots/tc5-form.png' });
 
-    const submitBtn = page.getByRole('button', { name: /Ghi nhận/i }).last();
-    await submitBtn.click();
+    const submitBtn5 = page.getByRole('button', { name: /Ghi nhận/i }).last();
+    await submitBtn5.click();
     await page.waitForTimeout(2000);
 
     await expect(page.getByRole('heading', { name: 'Ghi nhận thanh toán' })).not.toBeVisible({ timeout: 8000 });

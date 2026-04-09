@@ -1,5 +1,5 @@
 import { Calendar, CheckCircle2, Clock, AlertTriangle, Circle } from 'lucide-react';
-import type { MonthlyPlan, InstallmentStatus } from '@/data/mockMonthlyPlans';
+import type { MonthlyPlan, InstallmentStatus } from '@/types/monthlyPlans';
 import { InstallmentTracker } from './InstallmentTracker';
 
 /**

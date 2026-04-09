@@ -30,6 +30,7 @@ export interface Customer {
   readonly comment?: string | null;
   readonly note?: string | null;
   readonly sourcename?: string | null;
+  readonly sourceid?: string | null;
   readonly agentname?: string | null;
   readonly companyname?: string | null;
   // CSKH (Customer Service) assignment
@@ -59,6 +60,7 @@ function mapPartnerToCustomer(p: ApiPartner): Customer {
     comment: p.comment,
     note: p.note,
     sourcename: p.sourcename,
+    sourceid: p.sourceid,
     agentname: p.agentname,
     companyname: p.companyname,
     cskhid: p.cskhid,
@@ -177,6 +179,8 @@ export function useCustomers(locationId: string = 'all') {
       });
       const mapped = mapPartnerToCustomer(created);
       setCustomers((prev) => [...prev, mapped]);
+      // Update totalItems to reflect the new customer
+      setTotalItems((prev) => prev + 1);
       return mapped;
     } catch (err) {
       console.error('useCustomers: create error', err);
@@ -190,6 +194,7 @@ export function useCustomers(locationId: string = 'all') {
         lastVisit: new Date().toISOString().slice(0, 10),
       };
       setCustomers((prev) => [...prev, fallback]);
+      setTotalItems((prev) => prev + 1);
       return fallback;
     }
   }, []);

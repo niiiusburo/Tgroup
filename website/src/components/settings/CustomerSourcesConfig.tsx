@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import { Users, Plus, ToggleLeft, ToggleRight, Trash2, Globe, MapPin, UserPlus, X } from 'lucide-react';
 import { useCustomerSources } from '@/hooks/useSettings';
-import type { CustomerSource } from '@/data/mockSettings';
+import type { CustomerSource } from '@/types/settings';
 
 const TYPE_ICONS: Record<CustomerSource['type'], React.ReactNode> = {
   online: <Globe className="w-4 h-4" />,

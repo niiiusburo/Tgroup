@@ -1,7 +1,32 @@
+import {
+  X,
+  Camera,
+  Plus,
+  Users,
+  UserPlus,
+  Globe,
+  MapPin,
+  Briefcase,
+  Building2,
+  Stethoscope,
+  CalendarPlus,
+  Edit2,
+  User,
+  Phone,
+  Mail,
+  Calendar,
+  Clock,
+  FileText,
+  Info,
+  Scale,
+  ShieldCheck,
+  CreditCard,
+  Link,
+} from 'lucide-react';
 import { useState, useCallback, useEffect } from 'react';
-import { X, Camera, Plus, Users, UserPlus, Globe, MapPin, Briefcase, Building2, Stethoscope } from 'lucide-react';
 import { fetchCompanies, fetchEmployees } from '@/lib/api';
 import type { ApiCompany, ApiEmployee } from '@/lib/api';
+import { ComboboxInput } from '@/components/shared/ComboboxInput';
 import {
   EMPTY_CUSTOMER_FORM,
   validateCustomerForm,
@@ -16,64 +41,29 @@ import type { CustomerSource } from '@/data/mockSettings';
 import { AddressAutocomplete } from '@/components/shared/AddressAutocomplete';
 
 /**
- * ╔═══════════════════════════════════════════════════════════════════════════════╗
- * ║                         CUSTOMER FORM MODULE                                  ║
- * ╠═══════════════════════════════════════════════════════════════════════════════╣
- * ║  This component handles BOTH Add and Edit modes via the `isEdit` prop.       ║
- * ║                                                                              ║
- * ║  MODULAR STRUCTURE (Left Panel):                                             ║
- * ║  ┌─────────────────────────────────────┐                                    ║
- * ║  │ Header (flex-shrink-0)               │ ← Does NOT scroll                   ║
- * ║  ├─────────────────────────────────────┤                                    ║
- * ║  │ Content (overflow-y-auto)            │ ← Scrolls INDEPENDENTLY              ║
- * ║  │  ┌─────────────────────────────┐     │                                    ║
- * ║  │  │ Card 1: Personal Info       │     │  max-height: 300px                  ║
- * ║  │  │ (Avatar, Name, Gender,      │     │                                    ║
- * ║  │  │  Phone + Emergency)         │     │                                    ║
- * ║  │  └─────────────────────────────┘     │                                    ║
- * ║  │  ┌─────────────────────────────┐     │                                    ║
- * ║  │  │ Card 2: Assignment         │     │  max-height: 320px                  ║
- * ║  │  │ (Branch, Sales, CSKH,       │     │                                    ║
- * ║  │  │  Source, Referral)          │     │                                    ║
- * ║  │  └─────────────────────────────┘     │                                    ║
- * ║  │  ┌─────────────────────────────┐     │                                    ║
- * ║  │  │ Card 3: Notes               │     │  max-height: 180px                  ║
- * ║  │  └─────────────────────────────┘     │                                    ║
- * ║  └─────────────────────────────────────┘                                    ║
- * ║                                                                              ║
- * ║  RIGHT PANEL (Tabs):                                                        ║
- * ║  ┌─────────────────────────────────────┐                                    ║
- * ║  │ Tab Headers (flex-shrink-0)         │ ← Does NOT scroll                   ║
- * ║  ├─────────────────────────────────────┤                                    ║
- * ║  │ Tab Content (overflow-y-auto)       │ ← Scrolls independently            ║
- * ║  │  - Basic Info (2-col grid)          │                                    ║
- * ║  │  - Medical History                  │                                    ║
- * ║  │  - E-Invoice                        │                                    ║
- * ║  └─────────────────────────────────────┘                                    ║
- * ║                                                                              ║
- * ║  ⚠️  IMPORTANT: If you modify the left panel structure, ensure:             ║
- * ║      1. CardSection component props are consistent                           ║
- * ║      2. maxHeight values are appropriate for content                        ║
- * ║      3. flex-shrink-0 on headers / overflow-y-auto on content                 ║
- * ║      4. The CardSection component is the single source of truth             ║
- * ║                                                                              ║
- * ║  Reference: ~/Downloads/CardScrollRedesign/app/src/App.tsx                   ║
- * ║  @crossref:used-in[Customers]                                                ║
- * ╚═══════════════════════════════════════════════════════════════════════════════╝
+ * ╔══════════════════════════════════════════════════════════════════════════════════════╗
+ * ║                    ⛔  D O   N O T   T O U C H   T H I S   M O D U L E  ⛔          ║
+ * ╠══════════════════════════════════════════════════════════════════════════════════════╣
+ * ║  This AddCustomerForm is the canonical GOLD STANDARD for all TDental modal forms.  ║
+ * ║  ANY new form or modal MUST copy this exact visual standard:                        ║
+ * ║                                                                                     ║
+ * ║  • Header        : orange gradient + icon + title + subtitle                        ║
+ * ║  • Labels        : uppercase, semibold, gray-500, tracking-wider, small icon        ║
+ * ║  • Inputs        : px-4 py-3, rounded-xl, border-gray-200, focus:ring-orange-500/20 ║
+ * ║  • Selects       : same as inputs + custom chevron, appearance-none                 ║
+ * ║  • Cards         : rounded-2xl, border-gray-200, overflow-hidden                    ║
+ * ║  • Footer        : border-t border-gray-200, gradient bg, rounded-xl buttons        ║
+ * ║                                                                                     ║
+ * ║  This component is the single source of truth for TDental form styling.             ║
+ * ║  Every new modal/form MUST visually match this exact standard.                      ║
+ * ║  BEFORE modifying this file, you MUST run Playwright visual regression.             ║
+ * ╚══════════════════════════════════════════════════════════════════════════════════════╝
  */
 
 /**
  * AddCustomerForm - TDental "Thêm khách hàng" modular card-based form
- * Redesigned to match Overview page card design with functional + buttons
  * Supports both create and edit modes.
  * @crossref:used-in[Customers]
- *
- * ⚠️ LAYOUT LOCK: Do NOT change the modal width (900px) or the left panel width (320px).
- *    - Modal max-width: 900px (set via inline style in Customers.tsx)
- *    - Left panel width: 320px (w-80 class)
- *    - Right panel: flex-1 (takes remaining space)
- *    - Form height: 85vh with max 800px
- *    Any changes to these dimensions require explicit user approval.
  */
 
 interface AddCustomerFormProps {
@@ -82,7 +72,7 @@ interface AddCustomerFormProps {
   readonly onSubmit: (data: CustomerFormData) => void;
   readonly onCancel: () => void;
   readonly isEdit?: boolean;
-  readonly canEdit?: boolean; // If true, allows editing all fields even in edit mode
+  readonly canEdit?: boolean;
 }
 
 type TabId = 'basic' | 'medical' | 'einvoice';
@@ -111,68 +101,74 @@ const TYPE_COLORS: Record<CustomerSource['type'], string> = {
   referral: 'bg-green-50 text-green-700 border-green-200',
 };
 
+/** Appointment-style input class — DO NOT ALTER without updating DESIGN STANDARD */
 function inputClass(hasError: boolean, disabled = false) {
   return [
-    'w-full px-3 py-2 rounded-lg border text-sm transition-all focus:outline-none focus:ring-2',
-    hasError
-      ? 'border-red-300 focus:ring-red-100 focus:border-red-400'
-      : 'border-gray-200 focus:ring-orange-100 focus:border-orange-400',
-    disabled ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-white hover:border-gray-300',
-  ].join(' ');
-}
-
-function selectClass(disabled = false) {
-  return [
-    'w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white',
-    'focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all',
+    'w-full px-4 py-3 bg-white border rounded-xl text-sm transition-all',
+    'focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400',
+    hasError ? 'border-red-300' : 'border-gray-200',
     disabled ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'hover:border-gray-300',
   ].join(' ');
 }
 
-function FieldLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
+/** Appointment-style select class — DO NOT ALTER without updating DESIGN STANDARD */
+function selectClass(disabled = false) {
+  return [
+    'w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm',
+    'focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400',
+    'transition-all appearance-none',
+    disabled ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'hover:border-gray-300',
+  ].join(' ');
+}
+
+/** Appointment-style label with icon */
+function FieldLabel({
+  children,
+  icon: Icon,
+  required,
+}: {
+  children: React.ReactNode;
+  icon?: React.ElementType;
+  required?: boolean;
+}) {
   return (
-    <label className="block text-xs font-medium text-gray-600 mb-1.5">
+    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+      {Icon && <Icon className="w-3.5 h-3.5" />}
       {children}
-      {required && <span className="text-red-500 ml-0.5">*</span>}
+      {required && <span className="text-red-500">*</span>}
     </label>
   );
 }
 
 /**
  * CardSection - Reusable card component with INDEPENDENT scrolling
- * 
  * IMPORTANT: This component enforces a fixed height container where:
  * - The header stays visible (flex-shrink-0)
  * - Only the content area scrolls (overflow-y-auto)
- * 
- * Usage: Always use maxHeight prop to enable independent scrolling.
- * Without maxHeight, the card will expand to fit content.
- * 
- * @see CustomerFormModule note above for the complete modular structure
  */
-function CardSection({ 
-  title, 
-  icon: Icon, 
-  children, 
+function CardSection({
+  title,
+  icon: Icon,
+  children,
   action,
   className = '',
-  maxHeight = 'none'
-}: { 
-  title: string; 
-  icon?: React.ElementType; 
+  maxHeight = 'none',
+}: {
+  title: string;
+  icon?: React.ElementType;
   children: React.ReactNode;
   action?: React.ReactNode;
   className?: string;
   maxHeight?: string;
 }) {
   return (
-    <div 
-      className={`bg-white rounded-2xl border border-gray-200 flex flex-col ${className}`}
-      style={{ maxHeight, height: maxHeight !== 'none' ? maxHeight : 'auto' }}
+    <div
+      className={`bg-white rounded-2xl border border-gray-200 flex flex-col overflow-hidden ${className}`}
+      style={{ maxHeight: maxHeight !== 'none' ? maxHeight : undefined }}
     >
       <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
-          {Icon && <Icon className="w-4 h-4 text-gray-500" />}
+          {Icon && <Icon className="w-4 h-4 text-orange-500" />}
           <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
         </div>
         {action}
@@ -184,21 +180,19 @@ function CardSection({
   );
 }
 
-// Mini Dialog for adding sources/referrers - Matching EditAppointmentModal luxury style
+// Mini Dialog for adding sources/referrers
 function MiniAddDialog({
   isOpen,
   onClose,
   title,
   onSubmit,
   placeholder,
-
 }: {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   onSubmit: (value: string) => void;
   placeholder: string;
-
 }) {
   const [value, setValue] = useState('');
 
@@ -214,11 +208,8 @@ function MiniAddDialog({
 
   return (
     <div className="modal-container">
-      {/* Backdrop with blur */}
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      
       <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden animate-in zoom-in-95 duration-200">
-        {/* Header with gradient */}
         <div className="modal-header relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
           <div className="relative flex items-center justify-between">
@@ -232,7 +223,6 @@ function MiniAddDialog({
             </button>
           </div>
         </div>
-        
         <div className="px-6 py-6">
           <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
             {placeholder}
@@ -247,7 +237,6 @@ function MiniAddDialog({
             onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
           />
         </div>
-        
         <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
           <button
             type="button"
@@ -278,7 +267,6 @@ export function AddCustomerForm({
   isEdit = false,
   canEdit = false,
 }: AddCustomerFormProps) {
-  // Fields should be editable if not in edit mode OR if user has edit permission
   const isFieldEditable = !isEdit || canEdit;
   const [formData, setFormData] = useState<CustomerFormData>({
     ...EMPTY_CUSTOMER_FORM,
@@ -289,16 +277,13 @@ export function AddCustomerForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [nameUppercase, setNameUppercase] = useState(false);
 
-  // Dialog states
   const [showSourceDialog, setShowSourceDialog] = useState(false);
   const [showReferrerDialog, setShowReferrerDialog] = useState(false);
   const [showSalesDialog, setShowSalesDialog] = useState(false);
 
-  // Dropdown data
   const [companies, setCompanies] = useState<ApiCompany[]>([]);
   const [employees, setEmployees] = useState<ApiEmployee[]>([]);
-  
-  // Customer sources from settings hook
+
   const { allSources, addSource } = useCustomerSources();
 
   useEffect(() => {
@@ -306,7 +291,6 @@ export function AddCustomerForm({
     fetchEmployees({ limit: 100 }).then((r) => setEmployees(r.items)).catch(() => {});
   }, []);
 
-  // Sync when initialData changes (edit mode)
   useEffect(() => {
     setFormData({ ...EMPTY_CUSTOMER_FORM, ...(initialData ?? {}) });
   }, [initialData]);
@@ -324,7 +308,6 @@ export function AddCustomerForm({
     [],
   );
 
-  // Handle adding new source
   const handleAddSource = (name: string) => {
     addSource({
       name,
@@ -332,18 +315,12 @@ export function AddCustomerForm({
       description: 'Custom source',
       isActive: true,
     });
-    // Auto-select the new source (in a real app, we'd get the ID back)
-    // For now, we'll just close the dialog
   };
 
-  // Handle adding new referrer (employee)
   const handleAddReferrer = (name: string) => {
-    // In a real app, this would call an API to create a new employee
-    // For now, we just show a placeholder notification
     alert(`Đã thêm ngưới giới thiệu: ${name} (Cần tích hợp API tạo nhân viên)`);
   };
 
-  // Handle adding new sales staff
   const handleAddSalesStaff = (name: string) => {
     alert(`Đã thêm nhân viên sale: ${name} (Cần tích hợp API tạo nhân viên)`);
   };
@@ -354,7 +331,6 @@ export function AddCustomerForm({
       const validationErrors = validateCustomerForm(formData);
       if (validationErrors.length > 0) {
         setErrors(validationErrors);
-        // Switch to the tab containing the first error
         const firstErrorField = validationErrors[0].field;
         if (firstErrorField === 'medicalhistory') setActiveTab('medical');
         else if (['isbusinessinvoice', 'unitname', 'taxcode'].includes(firstErrorField)) setActiveTab('einvoice');
@@ -371,54 +347,38 @@ export function AddCustomerForm({
     [formData, onSubmit],
   );
 
-  // Helper function to find best match between Google Places result and Vietnamese address data
   const findBestMatch = (input: string, options: readonly string[]): string | null => {
     if (!input || options.length === 0) return null;
-    
     const normalizedInput = input.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    
-    // Try exact match first
-    const exactMatch = options.find(opt => 
-      opt.toLowerCase() === input.toLowerCase()
-    );
+    const exactMatch = options.find((opt) => opt.toLowerCase() === input.toLowerCase());
     if (exactMatch) return exactMatch;
-    
-    // Try normalized match (remove diacritics)
-    const normalizedMatch = options.find(opt => {
+    const normalizedMatch = options.find((opt) => {
       const normalizedOpt = opt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       return normalizedOpt === normalizedInput;
     });
     if (normalizedMatch) return normalizedMatch;
-    
-    // Try partial match
-    const partialMatch = options.find(opt => {
+    const partialMatch = options.find((opt) => {
       const normalizedOpt = opt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       return normalizedOpt.includes(normalizedInput) || normalizedInput.includes(normalizedOpt);
     });
     if (partialMatch) return partialMatch;
-    
-    // Try word-by-word matching
     const inputWords = normalizedInput.split(/\s+/);
     let bestMatch: string | null = null;
     let bestScore = 0;
-    
     for (const option of options) {
       const normalizedOpt = option.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       const optWords = normalizedOpt.split(/\s+/);
-      
       let score = 0;
       for (const word of inputWords) {
-        if (word.length > 2 && optWords.some(optWord => optWord.includes(word))) {
+        if (word.length > 2 && optWords.some((optWord) => optWord.includes(word))) {
           score += 1;
         }
       }
-      
       if (score > bestScore) {
         bestScore = score;
         bestMatch = option;
       }
     }
-    
     return bestScore > 0 ? bestMatch : null;
   };
 
@@ -431,16 +391,10 @@ export function AddCustomerForm({
     year: 'numeric',
   });
 
-  // Get selected source details
-  const selectedSource = allSources.find(s => s.id === formData.sourceid);
+  const selectedSource = allSources.find((s) => s.id === formData.sourceid);
 
   return (
-    <div 
-      className="flex flex-col bg-gray-50/50 overflow-y-auto" 
-      style={{ height: '85vh', maxHeight: '800px' }}
-      onWheel={(e) => e.stopPropagation()}
-    >
-      {/* Mini Dialogs (use their own modal-container) */}
+    <div className="flex flex-col bg-gray-50/50 overflow-hidden flex-1" onWheel={(e) => e.stopPropagation()}>
       <MiniAddDialog
         isOpen={showSourceDialog}
         onClose={() => setShowSourceDialog(false)}
@@ -463,13 +417,29 @@ export function AddCustomerForm({
         onSubmit={handleAddSalesStaff}
       />
 
-      {/* Header - Luxurious Style */}
+      {/* ═══════════════════════════════════════════════════════════════════════════════
+          HEADER — Appointment module style (icon + title + subtitle)
+         ═══════════════════════════════════════════════════════════════════════════════ */}
       <div className="relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400 flex-shrink-0">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
         <div className="relative flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white">
-            {isEdit ? 'Chỉnh sửa khách hàng' : 'Thêm khách hàng'}
-          </h2>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-white/20 rounded-xl">
+              {isEdit ? (
+                <Edit2 className="w-5 h-5 text-white" />
+              ) : (
+                <CalendarPlus className="w-5 h-5 text-white" />
+              )}
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white">
+                {isEdit ? 'Chỉnh sửa khách hàng' : 'Thêm khách hàng'}
+              </h2>
+              <p className="text-sm text-orange-100 mt-0.5">
+                {isEdit ? 'Cập nhật thông tin hồ sơ bệnh nhân' : 'Tạo hồ sơ bệnh nhân mới'}
+              </p>
+            </div>
+          </div>
           <button
             type="button"
             onClick={onCancel}
@@ -480,13 +450,11 @@ export function AddCustomerForm({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-1 min-h-0">
-        {/* ── Left Panel ─────────────────────────────────────── */}
-        {/* Fixed width, flex column, each card has independent scroll */}
+      <form onSubmit={handleSubmit} className="flex flex-1 min-h-0 overflow-hidden">
+        {/* ══ LEFT PANEL ════════════════════════════════════════════════════════════ */}
         <div className="w-80 flex-shrink-0 border-r border-gray-200 flex flex-col gap-4 px-5 py-5 overflow-hidden bg-gray-50/30">
-          {/* Profile Card - Fixed height with independent scroll */}
-          <CardSection title="Thông tin cá nhân" icon={Users} maxHeight="300px">
-            {/* Avatar */}
+          {/* Card 1: Personal Info */}
+          <CardSection title="Thông tin cá nhân" icon={User} maxHeight="280px">
             <div className="flex justify-center mb-4">
               <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:from-gray-200 hover:to-gray-300 transition-all group">
                 {formData.photoUrl ? (
@@ -498,226 +466,245 @@ export function AddCustomerForm({
               </div>
             </div>
 
-            {/* Name */}
-            <div className="mb-3">
-              <div className="flex items-center justify-between mb-1.5">
-                <FieldLabel required>Họ và tên</FieldLabel>
-                <button
-                  type="button"
-                  onClick={() => setNameUppercase((v) => !v)}
-                  className={`text-[10px] px-2 py-1 rounded-md border font-medium transition-colors ${
-                    nameUppercase
-                      ? 'bg-orange-500 text-white border-orange-500'
-                      : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  IN HOA
-                </button>
-              </div>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => set('name', nameUppercase ? e.target.value.toUpperCase() : e.target.value)}
-                placeholder="Nhập họ và tên"
-                disabled={!isFieldEditable}
-                className={inputClass(!!getError('name'), !isFieldEditable)}
-                style={nameUppercase ? { textTransform: 'uppercase' } : {}}
-              />
-              {getError('name') && <p className="mt-1 text-xs text-red-500">{getError('name')}</p>}
-            </div>
-
-            {/* Gender */}
-            <div className="mb-3">
-              <FieldLabel>Giới tính</FieldLabel>
-              <div className="flex gap-4">
-                {(['male', 'female', 'other'] as const).map((g) => (
-                  <label key={g} className={`flex items-center gap-2 text-sm ${!isFieldEditable ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
-                    <input
-                      type="radio"
-                      name="gender"
-                      value={g}
-                      checked={formData.gender === g}
-                      onChange={() => isFieldEditable && set('gender', g)}
-                      disabled={!isFieldEditable}
-                      className="accent-orange-500 w-4 h-4"
-                    />
-                    <span className="text-gray-700">{g === 'male' ? 'Nam' : g === 'female' ? 'Nữ' : 'Khác'}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Phone */}
-            <div className="mb-3">
-              <FieldLabel required>Số điện thoại</FieldLabel>
-              <div className="flex gap-2">
+            <div className="space-y-4">
+              {/* Name */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <FieldLabel icon={User} required>
+                    Họ và tên
+                  </FieldLabel>
+                  <button
+                    type="button"
+                    onClick={() => setNameUppercase((v) => !v)}
+                    className={`text-[10px] px-2 py-1 rounded-md border font-medium transition-colors ${
+                      nameUppercase
+                        ? 'bg-orange-500 text-white border-orange-500'
+                        : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    IN HOA
+                  </button>
+                </div>
                 <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => set('phone', e.target.value)}
-                  placeholder="0901 111 222"
-                  className={inputClass(!!getError('phone')) + ' flex-1'}
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => set('name', nameUppercase ? e.target.value.toUpperCase() : e.target.value)}
+                  placeholder="Nhập họ và tên"
+                  disabled={!isFieldEditable}
+                  className={inputClass(!!getError('name'), !isFieldEditable)}
+                  style={nameUppercase ? { textTransform: 'uppercase' } : {}}
                 />
-                <button
-                  type="button"
-                  title="Số khẩn cấp"
-                  className="px-3 py-2 border border-gray-200 rounded-lg text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50 transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
+                {getError('name') && <p className="mt-1 text-xs text-red-500">{getError('name')}</p>}
               </div>
-              {getError('phone') && <p className="mt-1 text-xs text-red-500">{getError('phone')}</p>}
+
+              {/* Gender */}
+              <div>
+                <FieldLabel icon={Users}>Giới tính</FieldLabel>
+                <div className="flex gap-4">
+                  {(['male', 'female', 'other'] as const).map((g) => (
+                    <label
+                      key={g}
+                      className={`flex items-center gap-2 text-sm ${
+                        !isFieldEditable ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="gender"
+                        value={g}
+                        checked={formData.gender === g}
+                        onChange={() => isFieldEditable && set('gender', g)}
+                        disabled={!isFieldEditable}
+                        className="accent-orange-500 w-4 h-4"
+                      />
+                      <span className="text-gray-700">{g === 'male' ? 'Nam' : g === 'female' ? 'Nữ' : 'Khác'}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Phone */}
+              <div>
+                <FieldLabel icon={Phone} required>
+                  Số điện thoại
+                </FieldLabel>
+                <div className="flex gap-2">
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => set('phone', e.target.value)}
+                    placeholder="0901 111 222"
+                    className={`${inputClass(!!getError('phone'))} flex-1`}
+                  />
+                  <button
+                    type="button"
+                    title="Số khẩn cấp"
+                    className="px-3 py-2 border border-gray-200 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+                {getError('phone') && <p className="mt-1 text-xs text-red-500">{getError('phone')}</p>}
+              </div>
             </div>
           </CardSection>
 
-          {/* Assignment Card - Fixed height with independent scroll */}
-          <CardSection 
-            title="Phân công" 
+          {/* Card 2: Assignment */}
+          <CardSection
+            title="Phân công"
             icon={Briefcase}
-            action={
-              <span className="text-xs text-gray-400">{employees.length} nhân viên</span>
-            }
-            maxHeight="320px"
+            action={<span className="text-xs text-gray-400">{employees.length} nhân viên</span>}
+            className="flex-1 min-h-0"
           >
-            {/* Branch */}
-            <div className="mb-3">
-              <FieldLabel required>Chi nhánh</FieldLabel>
-              <div className="relative">
-                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <select
-                  value={formData.companyid}
-                  onChange={(e) => set('companyid', e.target.value)}
-                  className={selectClass() + ' pl-9'}
-                >
-                  <option value="">-- Chọn chi nhánh --</option>
-                  {companies.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
+            <div className="space-y-4">
+              {/* Branch */}
+              <div>
+                <FieldLabel icon={MapPin} required>
+                  Chi nhánh
+                </FieldLabel>
+                <div className="relative">
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <select
+                    value={formData.companyid}
+                    onChange={(e) => set('companyid', e.target.value)}
+                    className={`${selectClass()} pl-9`}
+                  >
+                    <option value="">-- Chọn chi nhánh --</option>
+                    {companies.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {getError('companyid') && <p className="mt-1 text-xs text-red-500">{getError('companyid')}</p>}
+              </div>
+
+              {/* Sales staff */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <FieldLabel icon={Users}>Nhân viên sale</FieldLabel>
+                  <button
+                    type="button"
+                    onClick={() => setShowSalesDialog(true)}
+                    className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
+                    title="Thêm nhân viên sale mới"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <select value={formData.salestaffid} onChange={(e) => set('salestaffid', e.target.value)} className={selectClass()}>
+                  <option value="">-- Chọn nhân viên --</option>
+                  {employees.map((emp) => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.name}
+                    </option>
                   ))}
                 </select>
               </div>
-              {getError('companyid') && <p className="mt-1 text-xs text-red-500">{getError('companyid')}</p>}
-            </div>
 
-            {/* Sales staff */}
-            <div className="mb-3">
-              <div className="flex items-center justify-between mb-1.5">
-                <FieldLabel>Nhân viên sale</FieldLabel>
-                <button
-                  type="button"
-                  onClick={() => setShowSalesDialog(true)}
-                  className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
-                  title="Thêm nhân viên sale mới"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              <select
-                value={formData.salestaffid}
-                onChange={(e) => set('salestaffid', e.target.value)}
-                className={selectClass()}
-              >
-                <option value="">-- Chọn nhân viên --</option>
-                {employees.map((emp) => (
-                  <option key={emp.id} value={emp.id}>{emp.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* CSKH (Customer Service) - NEW */}
-            <div className="mb-3">
-              <div className="flex items-center justify-between mb-1.5">
-                <FieldLabel>CSKH (Chăm sóc khách hàng)</FieldLabel>
-                <button
-                  type="button"
-                  onClick={() => alert('Tính năng thêm CSKH mới sẽ được phát triển sau')}
-                  className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
-                  title="Thêm CSKH mới"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              <select
-                value={formData.cskhid}
-                onChange={(e) => set('cskhid', e.target.value)}
-                className={selectClass()}
-              >
-                <option value="">-- Chọn CSKH --</option>
-                {employees.map((emp) => (
-                  <option key={emp.id} value={emp.id}>{emp.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Source */}
-            <div className="mb-3">
-              <div className="flex items-center justify-between mb-1.5">
-                <FieldLabel>Nguồn</FieldLabel>
-                <button 
-                  type="button" 
-                  onClick={() => setShowSourceDialog(true)}
-                  className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
-                  title="Thêm nguồn mới"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              <select
-                value={formData.sourceid}
-                onChange={(e) => set('sourceid', e.target.value)}
-                className={selectClass()}
-              >
-                <option value="">-- Chọn nguồn --</option>
-                {allSources.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
-              {selectedSource && (
-                <div className={`mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs border ${TYPE_COLORS[selectedSource.type]}`}>
-                  {TYPE_ICONS[selectedSource.type]}
-                  <span>{selectedSource.type === 'online' ? 'Online' : selectedSource.type === 'offline' ? 'Offline' : 'Giới thiệu'}</span>
+              {/* CSKH */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <FieldLabel icon={Phone}>CSKH</FieldLabel>
+                  <button
+                    type="button"
+                    onClick={() => alert('Tính năng thêm CSKH mới sẽ được phát triển sau')}
+                    className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
+                    title="Thêm CSKH mới"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-              )}
-            </div>
-
-            {/* Referral */}
-            <div className="mb-1">
-              <div className="flex items-center justify-between mb-1.5">
-                <FieldLabel>Ngưới giới thiệu</FieldLabel>
-                <button 
-                  type="button" 
-                  onClick={() => setShowReferrerDialog(true)}
-                  className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
-                  title="Thêm ngưới giới thiệu mới"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
+                <select value={formData.cskhid} onChange={(e) => set('cskhid', e.target.value)} className={selectClass()}>
+                  <option value="">-- Chọn CSKH --</option>
+                  {employees.map((emp) => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.name}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <select
-                value={formData.referraluserid}
-                onChange={(e) => set('referraluserid', e.target.value)}
-                className={selectClass()}
-              >
-                <option value="">-- Chọn ngưới giới thiệu --</option>
-                {employees.map((emp) => (
-                  <option key={emp.id} value={emp.id}>{emp.name}</option>
-                ))}
-              </select>
+
+              {/* Source */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <FieldLabel icon={Link}>Nguồn</FieldLabel>
+                  <button
+                    type="button"
+                    onClick={() => setShowSourceDialog(true)}
+                    className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
+                    title="Thêm nguồn mới"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <select value={formData.sourceid} onChange={(e) => set('sourceid', e.target.value)} className={selectClass()}>
+                  <option value="">-- Chọn nguồn --</option>
+                  {allSources.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+                {selectedSource && (
+                  <div
+                    className={`mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs border ${TYPE_COLORS[selectedSource.type]}`}
+                  >
+                    {TYPE_ICONS[selectedSource.type]}
+                    <span>
+                      {selectedSource.type === 'online'
+                        ? 'Online'
+                        : selectedSource.type === 'offline'
+                        ? 'Offline'
+                        : 'Giới thiệu'}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Referral */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <FieldLabel icon={Users}>Ngưới giới thiệu</FieldLabel>
+                  <button
+                    type="button"
+                    onClick={() => setShowReferrerDialog(true)}
+                    className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
+                    title="Thêm ngưới giới thiệu mới"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <select
+                  value={formData.referraluserid}
+                  onChange={(e) => set('referraluserid', e.target.value)}
+                  className={selectClass()}
+                >
+                  <option value="">-- Chọn ngưới giới thiệu --</option>
+                  {employees.map((emp) => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </CardSection>
 
-          {/* Notes Card - Fixed height with independent scroll */}
-          <CardSection title="Ghi chú" icon={Stethoscope} maxHeight="180px">
+          {/* Card 3: Notes */}
+          <CardSection title="Ghi chú" icon={FileText} maxHeight="180px">
             <textarea
               value={formData.note}
               onChange={(e) => set('note', e.target.value)}
               placeholder="Ghi chú về khách hàng..."
-              rows={4}
-              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 resize-none transition-all hover:border-gray-300"
+              rows={3}
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 resize-none transition-all hover:border-gray-300"
             />
           </CardSection>
         </div>
 
-        {/* ── Right Panel ────────────────────────────────────── */}
+        {/* ══ RIGHT PANEL ═══════════════════════════════════════════════════════════ */}
         <div className="flex-1 flex flex-col overflow-hidden bg-white">
           {/* Tabs */}
           <div className="flex border-b border-gray-200 flex-shrink-0 px-6 bg-gray-50/30">
@@ -738,14 +725,18 @@ export function AddCustomerForm({
           </div>
 
           {/* Tab content */}
-          <div className="flex-1 overflow-y-auto overscroll-contain px-8 py-6">
-            {/* ── Tab: Basic Info ── */}
+          <div className="flex-1 overflow-y-auto overscroll-contain px-8 py-6 custom-scrollbar">
             {activeTab === 'basic' && (
               <div className="max-w-4xl">
+                <h3 className="text-sm font-semibold text-gray-800 pb-2 border-b border-gray-100 flex items-center gap-2 mb-5">
+                  <Info className="w-4 h-4 text-orange-500" />
+                  Thông tin chi tiết
+                </h3>
+
                 <div className="grid grid-cols-2 gap-x-6 gap-y-5">
                   {/* DOB */}
                   <div>
-                    <FieldLabel>Ngày sinh</FieldLabel>
+                    <FieldLabel icon={Calendar}>Ngày sinh</FieldLabel>
                     <div className="flex gap-2">
                       <select
                         value={formData.birthday ?? ''}
@@ -754,7 +745,11 @@ export function AddCustomerForm({
                         className={`flex-1 ${selectClass(!isFieldEditable)}`}
                       >
                         <option value="">Ngày</option>
-                        {DAYS.map((d) => <option key={d} value={d}>{d}</option>)}
+                        {DAYS.map((d) => (
+                          <option key={d} value={d}>
+                            {d}
+                          </option>
+                        ))}
                       </select>
                       <select
                         value={formData.birthmonth ?? ''}
@@ -763,7 +758,11 @@ export function AddCustomerForm({
                         className={`flex-1 ${selectClass(!isFieldEditable)}`}
                       >
                         <option value="">Tháng</option>
-                        {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
+                        {MONTHS.map((m) => (
+                          <option key={m} value={m}>
+                            {m}
+                          </option>
+                        ))}
                       </select>
                       <select
                         value={formData.birthyear ?? ''}
@@ -772,58 +771,62 @@ export function AddCustomerForm({
                         className={`flex-1 ${selectClass(!isFieldEditable)}`}
                       >
                         <option value="">Năm</option>
-                        {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+                        {YEARS.map((y) => (
+                          <option key={y} value={y}>
+                            {y}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
 
                   {/* Created date */}
                   <div>
-                    <FieldLabel>Ngày tạo</FieldLabel>
+                    <FieldLabel icon={Clock}>Ngày tạo</FieldLabel>
                     <input
                       type="text"
                       value={today}
                       readOnly
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-gray-50 text-gray-500 cursor-default"
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500 cursor-default"
                     />
                   </div>
 
                   {/* Title */}
                   <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <FieldLabel>Danh xưng</FieldLabel>
-                      <button 
-                        type="button" 
+                    <div className="flex items-center justify-between mb-2">
+                      <FieldLabel icon={User}>Danh xưng</FieldLabel>
+                      <button
+                        type="button"
                         onClick={() => alert('Tính năng thêm danh xưng tuỳ chỉnh sẽ được phát triển sau')}
                         className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                    <select
-                      value={formData.title}
-                      onChange={(e) => set('title', e.target.value)}
-                      className={selectClass()}
-                    >
+                    <select value={formData.title} onChange={(e) => set('title', e.target.value)} className={selectClass()}>
                       <option value="">-- Chọn danh xưng --</option>
-                      {TITLE_OPTIONS.map((t) => <option key={t} value={t}>{t}</option>)}
+                      {TITLE_OPTIONS.map((t) => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                   {/* Customer code */}
                   <div>
-                    <FieldLabel>Mã khách hàng</FieldLabel>
+                    <FieldLabel icon={Building2}>Mã khách hàng</FieldLabel>
                     <input
                       type="text"
                       value={customerRef ?? '(Tự động)'}
                       readOnly
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-gray-50 text-gray-500 cursor-default"
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500 cursor-default"
                     />
                   </div>
 
                   {/* Email */}
                   <div>
-                    <FieldLabel>Email</FieldLabel>
+                    <FieldLabel icon={Mail}>Email</FieldLabel>
                     <input
                       type="email"
                       value={formData.email}
@@ -836,17 +839,13 @@ export function AddCustomerForm({
 
                   {/* Country */}
                   <div>
-                    <FieldLabel>Quốc gia</FieldLabel>
-                    <input
-                      type="text"
-                      defaultValue="Viet Nam"
-                      className={inputClass(false)}
-                    />
+                    <FieldLabel icon={Globe}>Quốc gia</FieldLabel>
+                    <input type="text" defaultValue="Viet Nam" className={inputClass(false)} />
                   </div>
 
                   {/* Weight */}
                   <div>
-                    <FieldLabel>Cân nặng (Kg)</FieldLabel>
+                    <FieldLabel icon={Scale}>Cân nặng (Kg)</FieldLabel>
                     <input
                       type="number"
                       value={formData.weight ?? ''}
@@ -857,35 +856,40 @@ export function AddCustomerForm({
                     />
                   </div>
 
-                  {/* Street - Google Places Autocomplete */}
+                  {/* Street */}
                   <div>
-                    <FieldLabel>Số nhà / Địa chỉ</FieldLabel>
+                    <FieldLabel icon={MapPin}>Số nhà / Địa chỉ</FieldLabel>
                     <AddressAutocomplete
                       value={formData.street}
                       onChange={(address, details) => {
-                        set('street', address);
-                        // Auto-fill city, district, ward if details available
+                        // Batch all address updates into a single setFormData call
+                        const updates: Partial<CustomerFormData> = {
+                          street: address,
+                        };
+                        
                         if (details) {
-                          // Try to match city
-                          const matchedCity = findBestMatch(details.city, VIET_CITIES);
+                          const matchedCity = details.city ? findBestMatch(details.city, VIET_CITIES) : null;
                           if (matchedCity) {
-                            set('cityname', matchedCity);
-                            // Get districts for this city
+                            updates.cityname = matchedCity;
+                            
                             const districts = VIET_DISTRICTS[matchedCity] || [];
-                            // Try to match district
-                            const matchedDistrict = findBestMatch(details.district, districts);
+                            const matchedDistrict = details.district ? findBestMatch(details.district, districts) : null;
                             if (matchedDistrict) {
-                              set('districtname', matchedDistrict);
-                              // Get wards for this district
+                              updates.districtname = matchedDistrict;
+                              
                               const wards = VIET_WARDS[matchedDistrict] || [];
-                              // Try to match ward
-                              const matchedWard = findBestMatch(details.ward, wards);
+                              const matchedWard = details.ward ? findBestMatch(details.ward, wards) : null;
                               if (matchedWard) {
-                                set('wardname', matchedWard);
+                                updates.wardname = matchedWard;
                               }
                             }
                           }
                         }
+                        
+                        // Update all fields at once
+                        setFormData((prev) => ({ ...prev, ...updates }));
+                        // Clear any address-related errors
+                        setErrors((prev) => prev.filter((e) => !['street', 'cityname', 'districtname', 'wardname'].includes(e.field)));
                       }}
                       placeholder="Nhập địa chỉ (ví dụ: 123 Nguyễn Huệ...)"
                     />
@@ -897,7 +901,7 @@ export function AddCustomerForm({
 
                   {/* Occupation */}
                   <div>
-                    <FieldLabel>Nghề nghiệp</FieldLabel>
+                    <FieldLabel icon={Briefcase}>Nghề nghiệp</FieldLabel>
                     <input
                       type="text"
                       value={formData.jobtitle}
@@ -909,7 +913,7 @@ export function AddCustomerForm({
 
                   {/* Province/City */}
                   <div>
-                    <FieldLabel>Tỉnh/Thành</FieldLabel>
+                    <FieldLabel icon={MapPin}>Tỉnh/Thành</FieldLabel>
                     <select
                       value={formData.cityname}
                       onChange={(e) => {
@@ -920,13 +924,17 @@ export function AddCustomerForm({
                       className={selectClass()}
                     >
                       <option value="">-- Chọn Tỉnh/Thành --</option>
-                      {VIET_CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                      {VIET_CITIES.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                   {/* Health insurance */}
                   <div>
-                    <FieldLabel>Số thẻ bảo hiểm y tế</FieldLabel>
+                    <FieldLabel icon={ShieldCheck}>Số thẻ bảo hiểm y tế</FieldLabel>
                     <input
                       type="text"
                       value={formData.healthinsurancecardnumber}
@@ -938,23 +946,30 @@ export function AddCustomerForm({
 
                   {/* District */}
                   <div>
-                    <FieldLabel>Quận/Huyện</FieldLabel>
-                    <select
+                    <FieldLabel icon={MapPin}>Quận/Huyện</FieldLabel>
+                    <ComboboxInput
                       value={formData.districtname}
-                      onChange={(e) => {
-                        set('districtname', e.target.value);
-                        set('wardname', '');
+                      onChange={(value) => {
+                        set('districtname', value);
+                        // Clear ward if district changes
+                        if (value !== formData.districtname) {
+                          set('wardname', '');
+                        }
                       }}
-                      className={selectClass()}
-                    >
-                      <option value="">-- Chọn Quận/Huyện --</option>
-                      {districtsForCity.map((d) => <option key={d} value={d}>{d}</option>)}
-                    </select>
+                      options={districtsForCity}
+                      placeholder="-- Chọn hoặc nhập Quận/Huyện --"
+                      disabled={!formData.cityname}
+                    />
+                    {formData.cityname && !formData.districtname && (
+                      <p className="mt-1 text-xs text-orange-600">
+                        Nhập hoặc chọn Quận/Huyện từ danh sách
+                      </p>
+                    )}
                   </div>
 
                   {/* ID / Passport */}
                   <div>
-                    <FieldLabel>Căn cước / Hộ chiếu</FieldLabel>
+                    <FieldLabel icon={CreditCard}>Căn cước / Hộ chiếu</FieldLabel>
                     <input
                       type="text"
                       value={formData.identitynumber}
@@ -966,57 +981,64 @@ export function AddCustomerForm({
 
                   {/* Ward */}
                   <div>
-                    <FieldLabel>Phường/Xã</FieldLabel>
-                    <select
+                    <FieldLabel icon={MapPin}>Phường/Xã</FieldLabel>
+                    <ComboboxInput
                       value={formData.wardname}
-                      onChange={(e) => set('wardname', e.target.value)}
-                      className={selectClass()}
-                    >
-                      <option value="">-- Chọn Phường/Xã --</option>
-                      {wardsForDistrict.map((w) => <option key={w} value={w}>{w}</option>)}
-                    </select>
+                      onChange={(value) => set('wardname', value)}
+                      options={wardsForDistrict}
+                      placeholder="-- Chọn hoặc nhập Phường/Xã --"
+                      disabled={!formData.districtname}
+                    />
+                    {formData.districtname && !formData.wardname && wardsForDistrict.length > 0 && (
+                      <p className="mt-1 text-xs text-orange-600">
+                        Nhập hoặc chọn Phường/Xã từ danh sách
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* ── Tab: Medical History ── */}
             {activeTab === 'medical' && (
               <div className="max-w-3xl">
                 <div className="bg-orange-50 border border-orange-100 rounded-xl p-4 mb-4">
                   <h4 className="text-sm font-medium text-orange-800 mb-1">Lưu ý y tế</h4>
-                  <p className="text-xs text-orange-600">Thông tin tiểu sử bệnh giúp bác sĩ đánh giá tốt hơn tình trạng sức khỏe của bệnh nhân.</p>
+                  <p className="text-xs text-orange-600">
+                    Thông tin tiểu sử bệnh giúp bác sĩ đánh giá tốt hơn tình trạng sức khỏe của bệnh nhân.
+                  </p>
                 </div>
-                <FieldLabel>Tiểu sử bệnh</FieldLabel>
+                <FieldLabel icon={Stethoscope}>Tiểu sử bệnh</FieldLabel>
                 <textarea
                   value={formData.medicalhistory}
                   onChange={(e) => set('medicalhistory', e.target.value)}
                   placeholder="Nhập tiểu sử bệnh, dị ứng, thuốc đang dùng..."
                   rows={8}
-                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-orange-400 resize-none transition-all hover:border-gray-300"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 resize-none transition-all hover:border-gray-300"
                 />
                 <div className="mt-4 grid grid-cols-3 gap-3">
-                  {['Tiểu đường', 'Tim mạch', 'Dị ứng thuốc', 'Huyết áp cao', 'Hen suyễn', 'Đang mang thai'].map((cond) => (
-                    <label key={cond} className="flex items-center gap-2.5 text-sm text-gray-700 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                      <input
-                        type="checkbox"
-                        className="accent-orange-500 w-4 h-4 rounded"
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            set('medicalhistory', formData.medicalhistory
-                              ? `${formData.medicalhistory}\n${cond}`
-                              : cond);
-                          }
-                        }}
-                      />
-                      <span>{cond}</span>
-                    </label>
-                  ))}
+                  {['Tiểu đường', 'Tim mạch', 'Dị ứng thuốc', 'Huyết áp cao', 'Hen suyễn', 'Đang mang thai'].map(
+                    (cond) => (
+                      <label
+                        key={cond}
+                        className="flex items-center gap-2.5 text-sm text-gray-700 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          className="accent-orange-500 w-4 h-4 rounded"
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              set('medicalhistory', formData.medicalhistory ? `${formData.medicalhistory}\n${cond}` : cond);
+                            }
+                          }}
+                        />
+                        <span>{cond}</span>
+                      </label>
+                    ),
+                  )}
                 </div>
               </div>
             )}
 
-            {/* ── Tab: E-Invoice ── */}
             {activeTab === 'einvoice' && (
               <div className="max-w-4xl">
                 <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-xl mb-5">
@@ -1036,72 +1058,72 @@ export function AddCustomerForm({
                   <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
                     <div className="col-span-2">
                       <FieldLabel>Tên công ty</FieldLabel>
-                      <input 
-                        type="text" 
-                        value={formData.unitname} 
+                      <input
+                        type="text"
+                        value={formData.unitname}
                         onChange={(e) => set('unitname', e.target.value)}
-                        placeholder="Công ty TNHH..." 
-                        className={inputClass(false)} 
+                        placeholder="Công ty TNHH..."
+                        className={inputClass(false)}
                       />
                     </div>
                     <div className="col-span-2">
                       <FieldLabel>Địa chỉ công ty</FieldLabel>
-                      <input 
-                        type="text" 
-                        value={formData.unitaddress} 
+                      <input
+                        type="text"
+                        value={formData.unitaddress}
                         onChange={(e) => set('unitaddress', e.target.value)}
-                        placeholder="123 Đường..." 
-                        className={inputClass(false)} 
+                        placeholder="123 Đường..."
+                        className={inputClass(false)}
                       />
                     </div>
                     <div>
                       <FieldLabel>Mã số thuế</FieldLabel>
-                      <input 
-                        type="text" 
-                        value={formData.taxcode} 
+                      <input
+                        type="text"
+                        value={formData.taxcode}
                         onChange={(e) => set('taxcode', e.target.value)}
-                        placeholder="0123456789" 
-                        className={inputClass(false)} 
+                        placeholder="0123456789"
+                        className={inputClass(false)}
                       />
                     </div>
                     <div>
                       <FieldLabel>Họ tên ngưới nhận</FieldLabel>
-                      <input 
-                        type="text" 
-                        value={formData.personalname} 
+                      <input
+                        type="text"
+                        value={formData.personalname}
                         onChange={(e) => set('personalname', e.target.value)}
-                        placeholder="Nguyễn Văn A" 
-                        className={inputClass(false)} 
+                        placeholder="Nguyễn Văn A"
+                        className={inputClass(false)}
                       />
                     </div>
                     <div>
                       <FieldLabel>CCCD ngưới nhận</FieldLabel>
-                      <input 
-                        type="text" 
-                        value={formData.personalidentitycard} 
+                      <input
+                        type="text"
+                        value={formData.personalidentitycard}
                         onChange={(e) => set('personalidentitycard', e.target.value)}
-                        placeholder="0xxxxxxxxx" 
-                        className={inputClass(false)} 
+                        placeholder="0xxxxxxxxx"
+                        className={inputClass(false)}
                       />
                     </div>
                     <div>
                       <FieldLabel>MST cá nhân</FieldLabel>
-                      <input 
-                        type="text" 
-                        value={formData.personaltaxcode} 
+                      <input
+                        type="text"
+                        value={formData.personaltaxcode}
                         onChange={(e) => set('personaltaxcode', e.target.value)}
-                        placeholder="0xxxxxxxxx" 
-                        className={inputClass(false)} 
+                        placeholder="0xxxxxxxxx"
+                        className={inputClass(false)}
                       />
                     </div>
                     <div className="col-span-2">
                       <FieldLabel>Địa chỉ ngưới nhận</FieldLabel>
-                      <input 
-                        type="text" 
-                        value={formData.personaladdress} 
+                      <input
+                        type="text"
+                        value={formData.personaladdress}
                         onChange={(e) => set('personaladdress', e.target.value)}
-                        placeholder="123 Đường..." 
-                        className={inputClass(false)} 
+                        placeholder="123 Đường..."
+                        className={inputClass(false)}
                       />
                     </div>
                   </div>
@@ -1119,12 +1141,12 @@ export function AddCustomerForm({
             )}
           </div>
 
-          {/* ── Footer ─────────────────────────────────────── */}
-          <div className="flex items-center justify-end gap-3 px-6 py-5 border-t border-gray-100 flex-shrink-0 bg-gradient-to-b from-gray-50 to-white">
+          {/* Footer */}
+          <div className="px-6 py-5 border-t border-gray-200 flex-shrink-0 bg-gradient-to-b from-gray-50 to-white flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onCancel}
-              className="px-6 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
+              className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
             >
               Đóng
             </button>

@@ -5,7 +5,7 @@
  */
 
 import { AlertTriangle, Clock } from 'lucide-react';
-import type { OutstandingBalanceItem } from '@/data/mockPayment';
+import type { OutstandingBalanceItem } from '@/types/payment';
 
 function formatVND(amount: number): string {
   return new Intl.NumberFormat('vi-VN').format(amount) + ' \u20ab';
@@ -34,7 +34,7 @@ export function OutstandingBalance({ balances, onPayNow }: OutstandingBalancePro
     );
   }
 
-  const totalOutstanding = balances.reduce((sum, b) => sum + b.remainingBalance, 0);
+  const totalOutstanding = balances.reduce((sum, b) => sum + (b.remainingBalance ?? (b.totalCost - b.paidAmount)), 0);
 
   return (
     <div className="space-y-3">
@@ -96,7 +96,7 @@ export function OutstandingBalance({ balances, onPayNow }: OutstandingBalancePro
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-xs text-gray-400">Remaining: </span>
-                <span className="text-sm font-bold text-gray-900">{formatVND(balance.remainingBalance)}</span>
+                <span className="text-sm font-bold text-gray-900">{formatVND(balance.remainingBalance ?? (balance.totalCost - balance.paidAmount))}</span>
               </div>
               {onPayNow && (
                 <button

@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.4.7",
+    "date": "Apr 9, 2026",
+    "commit": "pending",
+    "highlights": "🖥️ Widen AddCustomerForm modal to 1100px for better desktop layout",
+    "sections": [
+      {
+        "title": "✨ UX Improvement",
+        "items": [
+          "AddCustomerForm modal expanded from 900px to 1100px",
+          "Better use of screen real estate on desktop"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.4.4",
     "date": "Apr 8, 2026",
     "commit": "pending",

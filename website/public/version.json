@@ -1,7 +1,7 @@
 {
-  "version": "0.4.4",
-  "buildTime": "2026-04-09T05:19:53.067Z",
-  "gitCommit": "cc03b6e8",
-  "gitBranch": "fix/clinic-7-issues",
+  "version": "0.4.7",
+  "buildTime": "2026-04-09T14:37:25.128Z",
+  "gitCommit": "b3b7186d",
+  "gitBranch": "ai-develop",
   "environment": "development"
 }

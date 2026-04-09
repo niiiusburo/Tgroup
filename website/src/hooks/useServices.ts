@@ -7,7 +7,6 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   type ServiceRecord,
   type ServiceStatus,
-  type ServiceVisit,
   type VisitStatus,
 } from '@/data/mockServices';
 import type { AppointmentType } from '@/constants';
@@ -108,7 +107,7 @@ export function useServices(selectedLocationId?: string) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedLocationId]);
 
   /**
    * Refetch with current search term
@@ -153,7 +152,7 @@ export function useServices(selectedLocationId?: string) {
       result = result.filter((r) => r.category === categoryFilter);
     }
 
-    return [...result].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return [...result].sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
   }, [records, statusFilter, categoryFilter]);
 
   const stats = useMemo(() => ({
@@ -166,7 +165,7 @@ export function useServices(selectedLocationId?: string) {
   }), [records]);
 
   /**
-   * Create a service record via API, with local fallback
+   * Create a service record via API
    */
   const createServiceRecord = useCallback(async (input: CreateServiceInput) => {
     const apiPayload = {
@@ -183,39 +182,10 @@ export function useServices(selectedLocationId?: string) {
       notes: input.notes,
     };
 
-    try {
-      const created = await createSaleOrder(apiPayload);
-      const newRecord = mapSaleOrderToServiceRecord(created);
-      setRecords((prev) => [newRecord, ...prev]);
-      return newRecord;
-    } catch (err) {
-      console.error('Failed to create service record via API, falling back to local:', err);
-      // Fallback: add locally with a generated ID
-      const visits: ServiceVisit[] = Array.from({ length: input.totalVisits }, (_, i) => ({
-        id: `v-new-${Date.now()}-${i + 1}`,
-        serviceRecordId: `svc-${Date.now()}`,
-        visitNumber: i + 1,
-        date: '',
-        doctorId: input.doctorId,
-        doctorName: input.doctorName,
-        status: 'scheduled' as VisitStatus,
-        notes: `Visit ${i + 1}`,
-        toothNumbers: input.toothNumbers,
-      }));
-
-      const newRecord: ServiceRecord = {
-        ...input,
-        id: `svc-${Date.now()}`,
-        status: 'planned',
-        completedVisits: 0,
-        paidAmount: 0,
-        visits,
-        createdAt: new Date().toISOString().slice(0, 10),
-      };
-
-      setRecords((prev) => [...prev, newRecord]);
-      return newRecord;
-    }
+    const created = await createSaleOrder(apiPayload);
+    const newRecord = mapSaleOrderToServiceRecord(created);
+    setRecords((prev) => [newRecord, ...prev]);
+    return newRecord;
   }, []);
 
   /**
@@ -225,7 +195,7 @@ export function useServices(selectedLocationId?: string) {
     setRecords((prev) =>
       prev.map((record) => {
         if (record.id !== recordId) return record;
-        const updatedVisits = record.visits.map((v) =>
+        const updatedVisits = (record.visits ?? []).map((v) =>
           v.id === visitId ? { ...v, status } : v,
         );
         const completedVisits = updatedVisits.filter((v) => v.status === 'completed').length;

@@ -18,6 +18,7 @@ import { useDeposits } from '@/hooks/useDeposits';
 import type { AppointmentFormData } from '@/components/appointments/AppointmentForm';
 import type { PaymentFormData } from '@/components/payment/PaymentForm';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
+import type { CustomerService } from '@/types/customer';
 import type { CustomerStatus } from '@/data/mockCustomers';
 import type { CustomerFormData } from '@/data/mockCustomerForm';
 
@@ -162,9 +163,9 @@ export function Customers() {
 
   // Hooks for profile actions
   const { createAppointment, updateAppointment } = useAppointments(selectedLocationId);
-  const { createServiceRecord } = useServices(selectedLocationId);
+  const { createServiceRecord, getRecordsByCustomer } = useServices(selectedLocationId);
   const { createPayment } = usePayment(selectedLocationId);
-  const { addDeposit } = useDeposits();
+  const { addDeposit, deposits, loading: depositsLoading, loadDeposits } = useDeposits();
 
   // Callbacks for CustomerProfile
   const handleCreateAppointment = useCallback(async (data: AppointmentFormData) => {
@@ -207,9 +208,13 @@ export function Customers() {
     catalogItemId: string;
     serviceName: string;
     doctorId: string;
+    doctorName: string;
     locationId: string;
+    locationName: string;
     startDate: string;
     notes: string;
+    totalCost: number;
+    toothNumbers: readonly string[];
   }) => {
     await createServiceRecord({
       customerId: selectedCustomerId ?? '',
@@ -219,15 +224,15 @@ export function Customers() {
       serviceName: data.serviceName,
       category: 'treatment',
       doctorId: data.doctorId,
-      doctorName: '',
+      doctorName: data.doctorName,
       locationId: data.locationId,
-      locationName: '',
+      locationName: data.locationName,
       totalVisits: 1,
-      totalCost: 0,
+      totalCost: data.totalCost,
       startDate: data.startDate,
       expectedEndDate: data.startDate,
       notes: data.notes,
-      toothNumbers: [],
+      toothNumbers: data.toothNumbers,
     });
   }, [createServiceRecord, selectedCustomerId, hookProfile]);
 
@@ -252,7 +257,15 @@ export function Customers() {
     note?: string
   ) => {
     await addDeposit(customerId, amount, method, note);
-  }, [addDeposit]);
+    refetchProfile();
+  }, [addDeposit, refetchProfile]);
+
+  // Load deposits when a customer is selected
+  useEffect(() => {
+    if (selectedCustomerId) {
+      loadDeposits(selectedCustomerId);
+    }
+  }, [selectedCustomerId, loadDeposits]);
 
   const handleSubmit = async (data: CustomerFormData) => {
     if (isEditMode && selectedCustomerId) {
@@ -288,6 +301,11 @@ export function Customers() {
       street: customer.street || '',
       note: customer.note || '',
       comment: customer.comment || '',
+      // Include source, referral, and assignment fields
+      sourceid: customer.sourceid || '',
+      referraluserid: '',
+      salestaffid: '',
+      cskhid: customer.cskhid || '',
     };
   };
 
@@ -339,6 +357,24 @@ export function Customers() {
       };
     }
 
+    const customerServices: CustomerService[] = selectedCustomerId
+      ? getRecordsByCustomer(selectedCustomerId).map((r) => ({
+          id: r.id,
+          date: r.startDate || r.createdAt || '-',
+          service: r.serviceName,
+          doctor: r.doctorName || 'N/A',
+          cost: r.totalCost,
+          status:
+            r.status === 'completed'
+              ? 'completed'
+              : r.status === 'active'
+              ? 'in-progress'
+              : 'planned',
+          tooth: r.toothNumbers?.join(', ') || '-',
+          notes: r.notes || '',
+        }))
+      : [];
+
     if (profileLoading) {
       return <div className="flex items-center justify-center h-64"><span className="text-gray-500">Loading profile...</span></div>;
     }
@@ -348,6 +384,8 @@ export function Customers() {
         <CustomerProfile
           profile={profileData}
           appointments={hookAppointments}
+          services={customerServices}
+          depositTransactions={deposits}
           onBack={() => setSelectedCustomerId(null)}
           onEdit={canEditCustomers ? handleEdit : undefined}
           onAddDeposit={handleAddDeposit}
@@ -355,11 +393,11 @@ export function Customers() {
           onUpdateAppointment={handleUpdateAppointment}
           onCreateService={handleCreateService}
           onMakePayment={handleMakePayment}
-          loadingDeposits={false}
+          loadingDeposits={depositsLoading}
         />
         {showForm && isEditMode && (
           <div className="modal-container">
-            <div className="modal-content max-w-[900px] animate-in zoom-in-95 duration-200 overflow-hidden">
+            <div className="modal-content max-w-[1100px] animate-in zoom-in-95 duration-200 flex flex-col">
               <AddCustomerForm
                 isEdit={true}
                 canEdit={canEditCustomers}
@@ -399,7 +437,7 @@ export function Customers() {
 
       {showForm && !isEditMode && (
         <div className="modal-container">
-          <div className="modal-content max-w-[900px] animate-in zoom-in-95 duration-200 overflow-hidden">
+          <div className="modal-content max-w-[1100px] animate-in zoom-in-95 duration-200 flex flex-col">
             <AddCustomerForm onSubmit={handleSubmit} onCancel={() => setShowForm(false)} />
           </div>
         </div>

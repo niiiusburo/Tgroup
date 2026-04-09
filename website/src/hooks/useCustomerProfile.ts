@@ -94,21 +94,16 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
       };
 
       // Fetch appointment history for this customer
+      // Backend API expects partner_id (snake_case), frontend camelCase is auto-converted in apiFetch
       try {
         const aptRes = await fetchAppointments({
           offset: 0,
-          limit: 200,
-          partnerId: customerId,
+          limit: 500,
+          partnerId: customerId, // auto-converted to partner_id by apiFetch
         });
         setAppointments(aptRes.items);
-        // Client-side safety: ensure only this customer's appointments
-        // (in case API doesn't filter by partnerId)
-        const filtered = aptRes.items.filter(
-          (a: any) => a.partnerid === customerId || a.partnerId === customerId
-        );
-        setAppointments(filtered.length > 0 ? filtered : aptRes.items);
-        profileData.totalVisits = filtered.length > 0 ? filtered.length : aptRes.totalItems;
-        if (aptRes.totalItems > 0) {
+        profileData.totalVisits = aptRes.totalItems;
+        if (aptRes.items.length > 0) {
           const sorted = [...aptRes.items].sort(
             (a, b) => b.date.localeCompare(a.date),
           );

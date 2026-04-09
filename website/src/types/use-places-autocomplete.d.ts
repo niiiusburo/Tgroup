@@ -1,3 +1,5 @@
+/// <reference types="google.maps" />
+
 declare module 'use-places-autocomplete' {
   interface Suggestion {
     place_id: string;
@@ -17,6 +19,7 @@ declare module 'use-places-autocomplete' {
     };
     setValue: (value: string, shouldFetchData?: boolean) => void;
     clearSuggestions: () => void;
+    init: () => void;
   }
 
   export default function usePlacesAutocomplete(config?: {
@@ -26,6 +29,7 @@ declare module 'use-places-autocomplete' {
     cacheKey?: string;
     defaultValue?: string;
     initOnMount?: boolean;
+    googleMaps?: typeof google;
     [key: string]: unknown;
   }): UsePlacesAutocompleteResult;
 

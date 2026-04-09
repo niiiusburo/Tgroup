@@ -189,10 +189,10 @@ body.modal-open {
   }
 }
 
-/* Desktop - don't exceed 700px height */
+/* Desktop - allow taller modals for complex forms (AddCustomerForm, AppointmentForm, etc.) */
 @media (min-width: 1024px) {
   .modal-content {
-    max-height: min(700px, 85vh);
+    max-height: min(800px, 90vh);
   }
 }
 

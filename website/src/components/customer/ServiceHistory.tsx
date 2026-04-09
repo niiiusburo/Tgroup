@@ -1,5 +1,5 @@
 import { Stethoscope, CheckCircle2, Clock, CalendarPlus } from 'lucide-react';
-import type { CustomerService } from '@/data/mockCustomerProfile';
+import type { CustomerService } from '@/types/customer';
 
 /**
  * Service History - Treatment history list

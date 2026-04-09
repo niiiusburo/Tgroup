@@ -9,10 +9,9 @@ router.get('/', async (req, res) => {
     
     let sql = `
       SELECT 
-        p.id, p.customer_id, p.service_id, p.processed_by,
-        p.amount, p.method, p.deposit_used, p.cash_amount, p.bank_amount,
-        p.receipt_number, p.notes, p.created_at
-      FROM public.payments p
+        p.id, p.customer_id, p.service_id,
+        p.amount, p.method, p.notes, p.created_at
+      FROM payments p
       WHERE 1=1
     `;
     const params = [];
@@ -27,7 +26,7 @@ router.get('/', async (req, res) => {
     
     const result = await query(sql, params);
     
-    let countSql = 'SELECT COUNT(*) FROM public.payments';
+    let countSql = 'SELECT COUNT(*) FROM payments';
     if (customerId) {
       countSql += ' WHERE customer_id = $1';
     }
@@ -64,10 +63,10 @@ router.post('/', async (req, res) => {
     }
     
     const result = await query(`
-      INSERT INTO public.payments (customer_id, service_id, amount, method, notes)
+      INSERT INTO payments (customer_id, service_id, amount, method, notes)
       VALUES ($1, $2, $3, $4, $5)
       RETURNING *
-    `, [customer_id, service_id, amount, method, notes]);
+    `, [customer_id, service_id || null, amount, method, notes || null]);
     
     // Balance is calculated dynamically from payments in CustomerBalance route
     // No need to update a separate balance column

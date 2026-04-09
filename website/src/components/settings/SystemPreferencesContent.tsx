@@ -43,9 +43,11 @@ export function SystemPreferencesContent() {
                       onChange={(e) => updatePreference(pref.key, e.target.value)}
                       className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-white"
                     >
-                      {pref.options.map((opt) => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
+                      {pref.options.map((opt, idx) => {
+                        const optValue = typeof opt === 'string' ? opt : opt.value;
+                        const optLabel = typeof opt === 'string' ? opt : opt.label;
+                        return <option key={idx} value={optValue}>{optLabel}</option>;
+                      })}
                     </select>
                   )}
                   {pref.type === 'text' && (

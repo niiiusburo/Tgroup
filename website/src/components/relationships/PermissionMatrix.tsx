@@ -6,7 +6,7 @@
 
 import { Shield, Check, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
-import type { Role, Permission } from '@/data/mockPermissions';
+import type { Role, Permission } from '@/types/permissions';
 
 interface PermissionMatrixProps {
   readonly roles: readonly Role[];

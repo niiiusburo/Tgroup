@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Calculator, CalendarDays, DollarSign, User, FileText, ChevronRight, Check } from 'lucide-react';
 import { DatePicker } from '@/components/ui/DatePicker';
-import type { PlanCreationInput } from '@/data/mockMonthlyPlans';
+import type { PlanCreationInput } from '@/types/monthlyPlans';
 
 /**
  * MonthlyPlanCreator - Plan setup wizard for installment plans

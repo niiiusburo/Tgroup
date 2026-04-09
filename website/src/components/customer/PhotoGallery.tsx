@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Camera, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import type { CustomerPhoto } from '@/data/mockCustomerProfile';
+import type { CustomerPhoto } from '@/types/customer';
 
 /**
  * Photo Gallery - Before/after dental photos

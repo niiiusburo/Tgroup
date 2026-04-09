@@ -16,7 +16,7 @@ import {
   Users, Globe, Trash2,
 } from 'lucide-react';
 import { usePermissionGroups } from '@/hooks/usePermissionGroups';
-import { MOCK_EMPLOYEES } from '@/data/mockEmployees';
+import { useEmployees } from '@/hooks/useEmployees';
 
 // ─── Group Color Picker ─────────────────────────────────
 
@@ -43,6 +43,7 @@ export function PermissionGroupConfig() {
     setAllLocations,
     removeAssignment,
   } = usePermissionGroups();
+  const { employees } = useEmployees();
 
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
@@ -51,13 +52,13 @@ export function PermissionGroupConfig() {
   const [showAddEmployee, setShowAddEmployee] = useState(false);
 
   // Employees not yet assigned to any group
-  const unassignedEmployees = MOCK_EMPLOYEES.filter(
+  const unassignedEmployees = employees.filter(
     (emp) => !assignments.find((a) => a.employeeId === emp.id),
   );
 
-  function handleAddGroup() {
+  async function handleAddGroup() {
     if (!newGroupName.trim()) return;
-    const g = addGroup(newGroupName.trim(), newGroupColor, newGroupDesc.trim());
+    const g = await addGroup(newGroupName.trim(), newGroupColor, newGroupDesc.trim());
     setNewGroupName('');
     setNewGroupDesc('');
     setShowAddGroup(false);
@@ -66,7 +67,7 @@ export function PermissionGroupConfig() {
 
   function handleAddEmployeeToGroup(employeeId: string) {
     if (!selectedGroupId) return;
-    assignEmployee(employeeId, selectedGroupId, { type: 'all' });
+    assignEmployee(employeeId, selectedGroupId, 'all');
     setShowAddEmployee(false);
   }
 
@@ -341,9 +342,9 @@ export function PermissionGroupConfig() {
               </div>
             ) : (
               groupAssignments.map((assignment) => {
-                const employee = MOCK_EMPLOYEES.find((e) => e.id === assignment.employeeId);
+                const employee = employees.find((e) => e.id === assignment.employeeId);
                 if (!employee) return null;
-                const isAllLocations = assignment.locationScope.type === 'all';
+                const isAllLocations = assignment.locScope === 'all';
 
                 return (
                   <div key={assignment.employeeId} className="px-5 py-4">
@@ -359,7 +360,7 @@ export function PermissionGroupConfig() {
                         <div>
                           <div className="text-sm font-medium text-gray-900">{employee.name}</div>
                           <div className="text-xs text-gray-500">
-                            {employee.roles.join(', ')} · {employee.locationName}
+                            {employee.roles.join(', ') || 'Staff'} · {employee.locationName}
                           </div>
                         </div>
                       </div>
@@ -396,11 +397,8 @@ export function PermissionGroupConfig() {
                       {/* Individual location checkboxes */}
                       {!isAllLocations && (
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 ml-6">
-                          {locations.filter((l) => l.status !== 'closed').map((loc) => {
-                            const checked =
-                              assignment.locationScope.type === 'all' ||
-                              (assignment.locationScope.type === 'specific' &&
-                                assignment.locationScope.locationIds.includes(loc.id));
+                          {locations.map((loc) => {
+                            const checked = assignment.locations.some((l) => l.id === loc.id);
 
                             return (
                               <label
@@ -421,11 +419,8 @@ export function PermissionGroupConfig() {
                                   <span className={`text-xs font-medium block truncate ${
                                     checked ? 'text-gray-900' : 'text-gray-600'
                                   }`}>
-                                    {loc.district}
+                                    {loc.name}
                                   </span>
-                                  {loc.status === 'renovation' && (
-                                    <span className="text-[10px] text-yellow-600">Renovation</span>
-                                  )}
                                 </div>
                               </label>
                             );
@@ -436,9 +431,9 @@ export function PermissionGroupConfig() {
                       {/* Summary */}
                       <div className="text-[11px] text-gray-400 ml-6">
                         {isAllLocations
-                          ? `Access to all ${locations.filter((l) => l.status !== 'closed').length} active locations`
-                          : assignment.locationScope.type === 'specific'
-                          ? `${assignment.locationScope.locationIds.length} location${assignment.locationScope.locationIds.length !== 1 ? 's' : ''} selected`
+                          ? `Access to all ${locations.length} locations`
+                          : assignment.locScope === 'specific'
+                          ? `${assignment.locations.length} location${assignment.locations.length !== 1 ? 's' : ''} selected`
                           : 'No locations selected'}
                       </div>
                     </div>

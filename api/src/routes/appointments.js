@@ -44,10 +44,16 @@ router.get('/', async (req, res) => {
       search = '',
       sortField = 'date',
       sortOrder = 'desc',
-      dateFrom = '',
+      date_from = '',  // Frontend sends snake_case via toSnakeCase()
+      date_to = '',    // Frontend sends snake_case via toSnakeCase()
+      dateFrom = '',   // Legacy camelCase fallback
       dateTo = '',
       state = '',
     } = req.query;
+
+    // Accept either date_from (snake_case from frontend) or dateFrom (camelCase)
+    const effectiveDateFrom = date_from || dateFrom;
+    const effectiveDateTo = date_to || dateTo;
 
     // Validate offset and limit
     const offsetNum = parseInt(offset, 10);
@@ -61,12 +67,15 @@ router.get('/', async (req, res) => {
       return errorResponse(res, 400, 'INVALID_LIMIT', 'limit must be between 1 and 500');
     }
 
-    // Validate date range
-    if (dateFrom && !isValidISODate(dateFrom)) {
+    // Validate date range (accept both snake_case and camelCase)
+    const df = effectiveDateFrom;
+    const dt = effectiveDateTo;
+
+    if (df && !isValidISODate(df)) {
       return errorResponse(res, 400, 'INVALID_DATE_FROM', 'dateFrom must be a valid ISO date (YYYY-MM-DD)');
     }
 
-    if (dateTo && !isValidISODate(dateTo)) {
+    if (dt && !isValidISODate(dt)) {
       return errorResponse(res, 400, 'INVALID_DATE_TO', 'dateTo must be a valid ISO date (YYYY-MM-DD)');
     }
 
@@ -106,16 +115,16 @@ router.get('/', async (req, res) => {
       paramIdx++;
     }
 
-    if (dateFrom) {
+    if (df) {
       conditions.push(`a.date >= $${paramIdx}`);
-      params.push(dateFrom);
+      params.push(df);
       paramIdx++;
     }
 
-    if (dateTo) {
-      // If dateTo is just a date (YYYY-MM-DD), convert to end of day (YYYY-MM-DD 23:59:59)
+    if (dt) {
+      // If date_to is just a date (YYYY-MM-DD), convert to end of day (YYYY-MM-DD 23:59:59)
       // to include all appointments on that day
-      const dateToValue = dateTo.length <= 10 ? `${dateTo} 23:59:59` : dateTo;
+      const dateToValue = dt.length <= 10 ? `${dt} 23:59:59` : dt;
       conditions.push(`a.date <= $${paramIdx}`);
       params.push(dateToValue);
       paramIdx++;

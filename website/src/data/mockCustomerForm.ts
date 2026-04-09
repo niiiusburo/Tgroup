@@ -1,62 +1,22 @@
 /**
- * Customer Form data types and helpers
+ * Customer Form types re-exported from /types/
  * @crossref:used-in[AddCustomerForm, Customers]
  */
 
-export interface CustomerFormData {
-  // Core
-  name: string;
-  phone: string;
-  email: string;
-  gender: 'male' | 'female' | 'other' | '';
-  emergencyphone: string;
+import type { CustomerFormData, FormValidationError } from '@/types/customer';
+import type { CustomerSource } from '@/types/settings';
 
-  // Location
-  companyid: string;
+export type { CustomerFormData, FormValidationError, CustomerSource };
 
-  // DOB
-  birthday: number | null;
-  birthmonth: number | null;
-  birthyear: number | null;
-
-  // Personal
-  weight: number | null;
-  jobtitle: string;
-  street: string;
-  cityname: string;
-  districtname: string;
-  wardname: string;
-  identitynumber: string;
-  healthinsurancecardnumber: string;
-
-  // Title / Salutation
-  title: string;
-
-  // Source / referral
-  sourceid: string;
-  referraluserid: string;
-  salestaffid: string;
-  cskhid: string;
-
-  // Notes
-  note: string;
-  comment: string;
-  medicalhistory: string;
-
-  // E-Invoice
-  isbusinessinvoice: boolean;
-  unitname: string;
-  unitaddress: string;
-  taxcode: string;
-  personalname: string;
-  personalidentitycard: string;
-  personaltaxcode: string;
-  personaladdress: string;
-
-  // Avatar
-  photoUrl: string;
+// Referral codes interface
+export interface ReferralCode {
+  readonly code: string;
+  readonly employeeName: string;
+  readonly employeeId: string;
+  readonly isActive: boolean;
 }
 
+// Empty form
 export const EMPTY_CUSTOMER_FORM: CustomerFormData = {
   name: '',
   phone: '',
@@ -87,89 +47,89 @@ export const EMPTY_CUSTOMER_FORM: CustomerFormData = {
   unitname: '',
   unitaddress: '',
   taxcode: '',
+  photoUrl: '',
   personalname: '',
   personalidentitycard: '',
   personaltaxcode: '',
   personaladdress: '',
-  photoUrl: '',
 };
 
-export interface FormValidationError {
-  readonly field: keyof CustomerFormData;
-  readonly message: string;
-}
-
-export function validateCustomerForm(data: CustomerFormData): readonly FormValidationError[] {
-  const errors: FormValidationError[] = [];
-
-  if (!data.name.trim()) {
-    errors.push({ field: 'name', message: 'Vui lòng nhập tên khách hàng' });
-  }
-  if (!data.phone.trim()) {
-    errors.push({ field: 'phone', message: 'Vui lòng nhập số điện thoại' });
-  }
-  if (!data.companyid) {
-    errors.push({ field: 'companyid', message: 'Vui lòng chọn chi nhánh' });
-  }
-  if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-    errors.push({ field: 'email', message: 'Email không hợp lệ' });
-  }
-
-  return errors;
-}
-
-// Known Vietnamese cities / districts / wards for address cascading
+// Vietnamese cities
 export const VIET_CITIES = [
+  'Hồ Chí Minh',
   'Thành phố Hồ Chí Minh',
+  'Hà Nội',
   'Thành phố Hà Nội',
+  'Đà Nẵng',
+  'Hải Phòng',
+  'Cần Thơ',
+  'Khánh Hòa',
+  'Bình Dương',
   'Tỉnh Bình Dương',
+  'Đồng Nai',
+  'Bà Rịa - Vũng Tàu',
+  'Lâm Đồng',
 ] as const;
 
-export const VIET_DISTRICTS: Record<string, readonly string[]> = {
-  'Thành phố Hồ Chí Minh': [
-    'Quận 1', 'Quận 3', 'Quận 7', 'Quận 10', 'Quận Gò Vấp',
-    'Quận Bình Thạnh', 'Thành phố Thủ Đức',
-  ],
-  'Thành phố Hà Nội': [
-    'Quận Ba Đình', 'Quận Hoàn Kiếm', 'Quận Đống Đa', 'Quận Cầu Giấy',
-  ],
-  'Tỉnh Bình Dương': [
-    'Thành phố Thủ Dầu Một', 'Thành phố Dĩ An', 'Thành phố Thuận An',
-  ],
-};
-
-export const VIET_WARDS: Record<string, readonly string[]> = {
-  'Quận 1': ['Phường Bến Nghé', 'Phường Bến Thành', 'Phường Cầu Kho'],
-  'Quận 3': ['Phường 1', 'Phường 2', 'Phường 3'],
-  'Quận 7': ['Phường Tân Phú', 'Phường Tân Quy', 'Phường Bình Thuận'],
-  'Quận 10': ['Phường 1', 'Phường 4', 'Phường 6'],
-  'Quận Gò Vấp': ['Phường 1', 'Phường 3', 'Phường 5'],
-};
-
-export const TITLE_OPTIONS = ['Ông', 'Bà', 'Anh', 'Chị', 'Em', 'Bé'] as const;
-
-// Legacy types kept for ReferralCodeInput component compatibility
-export interface ReferralCode {
-  readonly code: string;
-  readonly employeeName: string;
-  readonly employeeId: string;
-  readonly isActive: boolean;
-}
-
-export const MOCK_REFERRAL_CODES: readonly ReferralCode[] = [
-  { code: 'DR-MINH-2024', employeeName: 'Dr. Tran Minh', employeeId: 'emp-1', isActive: true },
-  { code: 'DR-LINH-2024', employeeName: 'Dr. Nguyen Linh', employeeId: 'emp-2', isActive: true },
-  { code: 'REC-HOA-001', employeeName: 'Le Thi Hoa', employeeId: 'emp-3', isActive: true },
-  { code: 'DR-KHOA-2024', employeeName: 'Dr. Pham Khoa', employeeId: 'emp-4', isActive: true },
+// Complete districts for all Vietnamese cities
+// Hồ Chí Minh districts
+export const HO_CHI_MINH_DISTRICTS = [
+  'Quận 1', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận 6', 'Quận 7', 'Quận 8', 'Quận 10', 'Quận 11', 'Quận 12',
+  'Quận Bình Tân', 'Quận Bình Thạnh', 'Quận Gò Vấp', 'Quận Phú Nhuận', 'Quận Tân Bình', 'Quận Tân Phú',
+  'Thành phố Thủ Đức', 'Quận Thủ Đức'
 ];
+
+// Hà Nội districts
+export const HA_NOI_DISTRICTS = [
+  'Quận Ba Đình', 'Quận Hoàn Kiếm', 'Quận Đống Đa', 'Quận Hai Bà Trưng', 'Quận Thanh Xuân',
+  'Quận Cầu Giấy', 'Quận Gia Lâm', 'Quận Đông Anh', 'Quận Long Biên', 'Quận Nam Từ Liêm',
+  'Quận Bắc Từ Liêm', 'Quận Tây Hồ', 'Huyện Thanh Trì', 'Huyện Hoài Đức', 'Huyện Thường Tín'
+];
+
+// Đà Nẵng districts
+export const DA_NANG_DISTRICTS = [
+  'Quận Hải Châu', 'Quận Thanh Khê', 'Quận Sơn Trà', 'Quận Ngũ Hành Sơn', 'Quận Liên Chiểu',
+  'Huyện Hòa Vang', 'Huyện Hoà Sa Điền'
+];
+
+export const VIET_DISTRICTS: Record<string, readonly string[]> = {
+  'Hồ Chí Minh': HO_CHI_MINH_DISTRICTS,
+  'Thành phố Hồ Chí Minh': HO_CHI_MINH_DISTRICTS,
+  'Hà Nội': HA_NOI_DISTRICTS,
+  'Thành phố Hà Nội': HA_NOI_DISTRICTS,
+  'Đà Nẵng': DA_NANG_DISTRICTS,
+  'Hải Phòng': ['Quận Hồng Bàng', 'Quận Lê Chân', 'Quận Ngô Quyền', 'Quận Kiến An', 'Quận Đồ Sơn', 'Quận Dương Kinh', 'Huyện An Dương', 'Huyện Tiên Lãng'],
+  'Cần Thơ': ['Quận Ninh Kiều', 'Quận Bình Thủy', 'Quận Cái Răng', 'Quận Thốt Nốt', 'Huyện Vĩnh Thạnh', 'Huyện Cờ Đỏ', 'Huyện Phong Điền'],
+  'Khánh Hòa': ['Thành phố Nha Trang', 'Thành phố Cam Ranh', 'Huyện Diên Khánh', 'Huyện Ninh Hòa', 'Huyện Khánh Vĩnh'],
+  'Bình Dương': ['Thành phố Thủ Dầu Một', 'Thành phố Dĩ An', 'Thành phố Thuận An', 'Huyện Bắc Tân Uyên', 'Huyện Phú Giáo', 'Huyện Dầu Tiếng'],
+  'Tỉnh Bình Dương': ['Thành phố Thủ Dầu Một', 'Thành phố Dĩ An', 'Thành phố Thuận An', 'Huyện Bắc Tân Uyên', 'Huyện Phú Giáo', 'Huyện Dầu Tiếng'],
+  'Đồng Nai': ['Thành phố Biên Hòa', 'Thành phố Long Khánh', 'Huyện Trảng Bom', 'Huyện Thống Nhất', 'Huyện Cẩm Mỹ', 'Huyện Long Thành'],
+  'Bà Rịa - Vũng Tàu': ['Thành phố Vũng Tàu', 'Thành phố Bà Rịa', 'Huyện Châu Đức', 'Huyện Xuyên Mộc', 'Huyện Côn Đảo'],
+  'Lâm Đồng': ['Thành phố Đà Lạt', 'Thành phố Bảo Lộc', 'Huyện Đức Trọng', 'Huyện Di Linh', 'Huyện Bảo Lâm'],
+};
+
+// Sample wards for a few districts (for demo - in production this would be comprehensive)
+export const VIET_WARDS: Record<string, readonly string[]> = {
+  // Quận 1 wards
+  'Quận 1': ['Phường Bến Nghé', 'Phường Bến Thành', 'Phường Cầu Kho', 'Phường Cầu Ông Lãnh', 'Phường Đa Kao', 'Phường Tân Định'],
+  // Quận 3 wards
+  'Quận 3': ['Phường Võ Thị Sáu', 'Phường 1', 'Phường 2', 'Phường 3', 'Phường 4', 'Phường 5'],
+  // Quận 7 wards
+  'Quận 7': ['Phường Tân Thuận Đông', 'Phường Tân Thuận Tây', 'Phường Bình Thuận', 'Phường Phú Mỹ', 'Phường Phú Thuận'],
+};
+
+export const TITLE_OPTIONS = ['Ông', 'Bà', 'Anh', 'Chị'] as const;
+
+export const MOCK_REFERRAL_CODES: readonly ReferralCode[] = [];
 
 export const CUSTOMER_SOURCES = [
   { id: 'sale-online', label: 'Sale Online' },
   { id: 'walk-in', label: 'Khách vãng lai' },
-  { id: 'hotline', label: 'Hotline' },
-  { id: 'returning', label: 'Khách cũ' },
-  { id: 'customer-referral', label: 'Khách hàng giới thiệu' },
-  { id: 'internal-referral', label: 'Nội bộ giới thiệu' },
-  { id: 'mkt1', label: 'MKT1' },
-  { id: 'dncb', label: 'ĐNCB' },
 ] as const;
+
+export function validateCustomerForm(data: CustomerFormData): FormValidationError[] {
+  const errors: FormValidationError[] = [];
+  if (!data.name.trim()) errors.push({ field: 'name', message: 'Vui lòng nhập tên' });
+  if (!data.phone.trim()) errors.push({ field: 'phone', message: 'Vui lòng nhập sđt' });
+  return errors;
+}

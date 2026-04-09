@@ -42,7 +42,7 @@ services:
       context: .
       dockerfile: Dockerfile.web
       args:
-        VITE_API_URL: http://76.13.16.68:3002/api
+        VITE_API_URL: /api
     container_name: tgroup-web
     restart: unless-stopped
     depends_on:

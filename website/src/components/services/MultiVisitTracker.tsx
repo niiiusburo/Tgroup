@@ -48,7 +48,7 @@ export function MultiVisitTracker({ record, onUpdateVisit, compact = false }: Mu
       <div className="space-y-1.5">
         <ProgressBar completed={record.completedVisits} total={record.totalVisits} />
         <div className="flex gap-1">
-          {record.visits.map((visit) => {
+          {(record.visits ?? []).map((visit) => {
             const Icon = VISIT_ICONS[visit.status];
             return (
               <div
@@ -70,11 +70,11 @@ export function MultiVisitTracker({ record, onUpdateVisit, compact = false }: Mu
       <ProgressBar completed={record.completedVisits} total={record.totalVisits} />
 
       <div className="space-y-2">
-        {record.visits.map((visit, idx) => (
+        {(record.visits ?? []).map((visit, idx) => (
           <VisitRow
             key={visit.id}
             visit={visit}
-            isLast={idx === record.visits.length - 1}
+            isLast={idx === (record.visits?.length ?? 0) - 1}
             onAdvance={
               onUpdateVisit && visit.status === 'scheduled'
                 ? () => onUpdateVisit(record.id, visit.id, 'completed')

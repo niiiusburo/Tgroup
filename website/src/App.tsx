@@ -33,10 +33,12 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
 
   '/employees': 'employees.view',
   '/locations': 'locations.view',
+  '/website': 'services.view',
   '/reports': 'reports.view',
   '/commission': 'commission.view',
   '/settings': 'settings.view',
   '/notifications': 'notifications.view',
+  '/relationships': 'settings.view',
   '/permissions': 'employees.edit',
 };
 
@@ -131,7 +133,9 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginRoute />} />
-          <Route path="/test/address" element={<AddressAutocompleteTest />} />
+          {import.meta.env.DEV && (
+            <Route path="/test/address" element={<AddressAutocompleteTest />} />
+          )}
 
           {/* Protected routes wrapped in Layout */}
           <Route
@@ -187,7 +191,14 @@ function App() {
             />
 
             {/* @crossref:route[path="/website", component=ServiceCatalog] */}
-            <Route path={ROUTES.WEBSITE} element={<ServiceCatalog />} />
+            <Route
+              path={ROUTES.WEBSITE}
+              element={
+                <ProtectedRoute path={ROUTES.WEBSITE}>
+                  <ServiceCatalog />
+                </ProtectedRoute>
+              }
+            />
 
             {/* @crossref:route[path="/settings", component=Settings] */}
             <Route
@@ -200,7 +211,14 @@ function App() {
             />
 
             {/* @crossref:route[path="/relationships", component=Relationships] */}
-            <Route path={ROUTES.RELATIONSHIPS} element={<Relationships />} />
+            <Route
+              path={ROUTES.RELATIONSHIPS}
+              element={
+                <ProtectedRoute path={ROUTES.RELATIONSHIPS}>
+                  <Relationships />
+                </ProtectedRoute>
+              }
+            />
 
             {/* @crossref:route[path="/commission", component=Commission] */}
             <Route

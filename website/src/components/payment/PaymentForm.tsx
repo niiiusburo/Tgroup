@@ -3,7 +3,7 @@
  * Blueprint spec: cu-18 "Pay Against a Service — any combo, any amount. Partial payment OK."
  * @crossref:used-in[Payment, Services, CustomerProfile]
  * @crossref:uses[CustomerSelector, ServiceCatalogSelector, useCustomers, useProducts, useDeposits]
- * @crossref:matches[AppointmentForm DESIGN STANDARD]
+ * @crossref:matches[AddCustomerForm DESIGN STANDARD]
  *
  * ╔════════════════════════════════════════════════════════════════════════╗
  * ║  FORM FAMILY — @crossref:related[]                                     ║
@@ -32,7 +32,7 @@ import { useLocations } from '@/hooks/useLocations';
 import { useProducts } from '@/hooks/useProducts';
 import { useDeposits } from '@/hooks/useDeposits';
 import { LocationSelector } from '@/components/shared/LocationSelector';
-import type { ServiceCatalogItem } from '@/data/mockServices';
+import type { ServiceCatalogItem } from '@/types/service';
 import type { Customer } from '@/hooks/useCustomers';
 import type { Product } from '@/hooks/useProducts';
 import type { AppointmentType } from '@/constants';

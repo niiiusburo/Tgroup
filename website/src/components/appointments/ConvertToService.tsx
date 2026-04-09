@@ -4,7 +4,7 @@
  */
 
 import { ArrowRightCircle, CheckCircle2 } from 'lucide-react';
-import type { ManagedAppointment } from '@/data/mockAppointments';
+import type { ManagedAppointment } from '@/types/appointment';
 
 interface ConvertToServiceProps {
   readonly appointment: ManagedAppointment;

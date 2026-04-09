@@ -1,5 +1,5 @@
 import { WEEK_DAYS, TIME_SLOTS } from '@/constants';
-import type { ScheduleBlock } from '@/data/mockEmployees';
+import type { ScheduleBlock } from '@/types/employee';
 
 /**
  * Weekly schedule calendar showing employee availability

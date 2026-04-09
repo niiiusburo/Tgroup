@@ -5,7 +5,7 @@ import {
   UserPlus,
   Settings,
 } from 'lucide-react';
-import type { Notification } from '@/data/mockDashboard';
+import type { Notification } from '@/types/common';
 
 /**
  * NotificationsPanel - Recent alerts list

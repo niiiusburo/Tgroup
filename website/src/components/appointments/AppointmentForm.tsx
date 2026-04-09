@@ -28,8 +28,8 @@
  * ╚════════════════════════════════════════════════════════════════════════╝
  *
  * ═══ DESIGN STANDARD ═══
- * This form is the GOLD STANDARD for all TDental modal forms.
- * Every other form must match this exact pattern:
+ * AddCustomerForm.tsx is the canonical GOLD STANDARD for all TDental modal forms.
+ * This appointment form must stay visually identical to that standard:
  *   - modal-container + modal-content wrapper
  *   - Orange gradient header with icon, Vietnamese title, subtitle, X button
  *   - modal-body for scrollable content
@@ -53,11 +53,11 @@ import { useCustomers } from '@/hooks/useCustomers';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
 import { useProducts } from '@/hooks/useProducts';
-import type { ServiceCatalogItem } from '@/data/mockServices';
+import type { ServiceCatalogItem } from '@/types/service';
 import { APPOINTMENT_CARD_COLORS, APPOINTMENT_STATUS_OPTIONS } from '@/constants';
 import type { AppointmentType } from '@/constants';
-import type { Customer } from '@/data/mockCustomers';
-import type { Employee } from '@/data/mockEmployees';
+import type { Customer } from '@/types/customer';
+import type { Employee } from '@/types/employee';
 import type { Product } from '@/hooks/useProducts';
 
 interface Location {

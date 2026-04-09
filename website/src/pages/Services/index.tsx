@@ -14,16 +14,15 @@ import {
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { ServiceHistoryList } from '@/components/services/ServiceHistoryList';
 import { useLocationFilter } from '@/contexts/LocationContext';
-import { useServices, type ServiceFilter, type CategoryFilter, type CreateServiceInput } from '@/hooks/useServices';
-import type { ServiceRecord } from '@/data/mockServices';
+import { useServices, type CategoryFilter, type CreateServiceInput } from '@/hooks/useServices';
+import type { ServiceRecord, ServiceStatus } from '@/data/mockServices';
 import { APPOINTMENT_TYPE_LABELS, type AppointmentType } from '@/constants';
 
-const STATUS_TABS: { label: string; value: ServiceFilter }[] = [
-  { label: 'All', value: 'all' },
-  { label: 'Active', value: 'active' },
-  { label: 'Planned', value: 'planned' },
-  { label: 'Completed', value: 'completed' },
-  { label: 'Cancelled', value: 'cancelled' },
+const STATUS_TABS: { label: string; value: 'waiting' | 'in_progress' | 'complete' | 'all' }[] = [
+  { label: 'Chờ xử lý', value: 'waiting' },
+  { label: 'Đang thực hiện', value: 'in_progress' },
+  { label: 'Hoàn thành', value: 'complete' },
+  { label: 'Tất cả', value: 'all' },
 ];
 
 const CATEGORY_OPTIONS: { label: string; value: CategoryFilter }[] = [
@@ -41,10 +40,8 @@ function formatVND(amount: number): string {
 export function Services() {
   const { selectedLocationId } = useLocationFilter();
   const {
-    records,
+    allRecords,
     stats,
-    statusFilter,
-    setStatusFilter,
     categoryFilter,
     setCategoryFilter,
     searchTerm,
@@ -57,6 +54,46 @@ export function Services() {
   const [showForm, setShowForm] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingRecord, setEditingRecord] = useState<ServiceRecord | null>(null);
+  const [statusTab, setStatusTab] = useState<'waiting' | 'in_progress' | 'complete' | 'all'>('all');
+
+  // Sort records based on selected tab - selected status first, then others
+  const sortedRecords = (() => {
+    // Apply category filter first
+    let filtered = categoryFilter === 'all' 
+      ? allRecords 
+      : allRecords.filter(r => r.category === categoryFilter);
+    
+    // Apply search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(r => 
+        r.customerName.toLowerCase().includes(term) ||
+        r.serviceName.toLowerCase().includes(term) ||
+        r.doctorName.toLowerCase().includes(term)
+      );
+    }
+
+    if (statusTab === 'all') {
+      return filtered;
+    }
+
+    // Map tab to status
+    const statusMap: Record<string, ServiceStatus> = {
+      'waiting': 'planned',
+      'in_progress': 'active',
+      'complete': 'completed',
+    };
+    const targetStatus = statusMap[statusTab];
+    
+    // Sort: target status first, then others
+    return [...filtered].sort((a, b) => {
+      if (a.status === targetStatus && b.status !== targetStatus) return -1;
+      if (a.status !== targetStatus && b.status === targetStatus) return 1;
+      // Secondary sort: planned -> active -> completed
+      const order = { 'planned': 0, 'active': 1, 'completed': 2, 'cancelled': 3 };
+      return (order[a.status] ?? 4) - (order[b.status] ?? 4);
+    });
+  })();
 
   async function handleCreate(data: CreateServiceInput) {
     await createServiceRecord(data);
@@ -150,9 +187,9 @@ export function Services() {
           <button
             key={tab.value}
             type="button"
-            onClick={() => setStatusFilter(tab.value)}
+            onClick={() => setStatusTab(tab.value)}
             className={`px-4 py-2 text-sm font-medium rounded-lg border whitespace-nowrap transition-colors ${
-              statusFilter === tab.value
+              statusTab === tab.value
                 ? 'bg-primary text-white border-primary'
                 : 'text-gray-600 bg-white border-gray-200 hover:bg-gray-50'
             }`}
@@ -164,7 +201,7 @@ export function Services() {
 
       {/* Service records list */}
       <ServiceHistoryList
-        records={records}
+        records={sortedRecords}
         onUpdateVisit={updateVisitStatus}
         onCancel={cancelServiceRecord}
         onEdit={handleEdit}

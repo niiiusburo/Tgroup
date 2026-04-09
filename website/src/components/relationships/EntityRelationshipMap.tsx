@@ -9,7 +9,7 @@ import {
   CreditCard, MapPin, Percent, BarChart3, Bell,
   ArrowRight,
 } from 'lucide-react';
-import type { EntityNode, EntityRelation } from '@/data/mockPermissions';
+import type { EntityNode, EntityRelation } from '@/constants/entityGraph';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
   Users,

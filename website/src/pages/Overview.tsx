@@ -1,9 +1,11 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { PatientCheckIn } from '@/components/modules/PatientCheckIn';
 import { TodayServicesTable } from '@/components/modules/TodayServicesTable';
 import { TodayAppointments } from '@/components/modules/TodayAppointments';
+import { EditAppointmentModal } from '@/components/modules/EditAppointmentModal';
 import { useOverviewAppointments } from '@/hooks/useOverviewAppointments';
+import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { AppointmentHoverProvider } from '@/contexts/AppointmentHoverContext';
 import { QuickAddAppointmentButton } from '@/components/shared/QuickAddAppointmentButton';
@@ -39,10 +41,24 @@ export function Overview() {
     updateCheckInStatus,
   } = useOverviewAppointments(selectedLocationId);
 
+  const [editingAppointment, setEditingAppointment] = useState<OverviewAppointment | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleEditClick = useCallback((appointment: OverviewAppointment) => {
+    setEditingAppointment(appointment);
+    setIsEditModalOpen(true);
+  }, []);
+
+  const handleModalClose = useCallback(() => {
+    setIsEditModalOpen(false);
+    setEditingAppointment(null);
+  }, []);
+
   const handleEditAppointmentSaved = useCallback(() => {
     // Refresh the appointments list after editing
     refresh();
-  }, [refresh]);
+    handleModalClose();
+  }, [refresh, handleModalClose]);
 
   if (isLoading) {
     return (
@@ -72,6 +88,7 @@ export function Overview() {
             onFilterChange={setZone1Filter}
             counts={zone1Counts}
             onUpdateStatus={updateCheckInStatus}
+            onEditClick={handleEditClick}
           />
 
           {/* Zone 2: Today's Services */}
@@ -88,9 +105,18 @@ export function Overview() {
             onMarkArrived={markArrived}
             onMarkCancelled={markCancelled}
             onEditSaved={handleEditAppointmentSaved}
+            onEditClick={handleEditClick}
           />
         </div>
       </div>
+
+      {/* Shared Edit Modal for both Zone 1 and Zone 3 */}
+      <EditAppointmentModal
+        appointment={editingAppointment}
+        isOpen={isEditModalOpen}
+        onClose={handleModalClose}
+        onSaved={handleEditAppointmentSaved}
+      />
     </AppointmentHoverProvider>
   );
 }

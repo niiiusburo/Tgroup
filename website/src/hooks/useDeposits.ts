@@ -26,10 +26,13 @@ export function useDeposits() {
     setLoading(true);
     setError(null);
     try {
-      const [paymentsRes, balanceData] = await Promise.all([
-        fetchPayments(customerId),
-        fetchCustomerBalance(customerId),
-      ]);
+      const paymentsRes = await fetchPayments(customerId);
+      let balanceData: DepositBalance = { depositBalance: 0, outstandingBalance: 0 };
+      try {
+        balanceData = await fetchCustomerBalance(customerId);
+      } catch {
+        // If balance fetch fails, calculate from payments as fallback
+      }
 
       const transactions: DepositTransaction[] = paymentsRes.items.map((p) => {
         const isDeposit = p.method === 'cash' || p.method === 'bank';

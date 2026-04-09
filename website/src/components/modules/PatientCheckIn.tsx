@@ -22,6 +22,7 @@ interface PatientCheckInProps {
   readonly onFilterChange: (filter: Zone1Filter) => void;
   readonly counts: { all: number; waiting: number; 'in-treatment': number; done: number };
   readonly onUpdateStatus: (id: string, status: CheckInStatus) => void;
+  readonly onEditClick?: (appointment: OverviewAppointment) => void;
 }
 
 const FILTER_TABS: { key: Zone1Filter; label: string }[] = [
@@ -61,6 +62,7 @@ export function PatientCheckIn({
   onFilterChange,
   counts,
   onUpdateStatus,
+  onEditClick,
 }: PatientCheckInProps) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm">
@@ -112,6 +114,7 @@ export function PatientCheckIn({
                 key={apt.id}
                 appointment={apt}
                 onUpdateStatus={onUpdateStatus}
+                onEditClick={onEditClick}
               />
             ))}
           </div>
@@ -126,9 +129,10 @@ export function PatientCheckIn({
 interface PatientCardProps {
   readonly appointment: OverviewAppointment;
   readonly onUpdateStatus: (id: string, status: CheckInStatus) => void;
+  readonly onEditClick?: (appointment: OverviewAppointment) => void;
 }
 
-function PatientCard({ appointment, onUpdateStatus }: PatientCardProps) {
+function PatientCard({ appointment, onUpdateStatus, onEditClick }: PatientCardProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { hoveredId, setHoveredId, registerRef, scrollToAppointment } = useAppointmentHover();
   const cardRef = useRef<HTMLDivElement>(null);
@@ -164,6 +168,7 @@ function PatientCard({ appointment, onUpdateStatus }: PatientCardProps) {
       ref={cardRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onClick={() => onEditClick?.(appointment)}
       className={`
         border rounded-xl p-3.5 transition-all relative cursor-pointer
         ${isHighlighted 
@@ -175,7 +180,10 @@ function PatientCard({ appointment, onUpdateStatus }: PatientCardProps) {
       {/* Status badge — clickable to open dropdown */}
       <button
         type="button"
-        onClick={() => setDropdownOpen(!dropdownOpen)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setDropdownOpen(!dropdownOpen);
+        }}
         className={`
           inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border cursor-pointer
           ${config.bg} ${config.text} ${config.border}
@@ -186,7 +194,7 @@ function PatientCard({ appointment, onUpdateStatus }: PatientCardProps) {
 
       {/* Status change dropdown */}
       {dropdownOpen && (
-        <div className="absolute top-2 left-2 right-2 bg-white border border-gray-200 rounded-xl p-3.5 shadow-lg z-10">
+        <div className="absolute top-2 left-2 right-2 bg-white border border-gray-200 rounded-xl p-3.5 shadow-lg z-10" onClick={(e) => e.stopPropagation()}>
           <div className="text-xs font-bold text-gray-700 mb-2.5">Chuyển trạng thái</div>
           {(['waiting', 'in-treatment', 'done'] as CheckInStatus[]).map((status) => {
             const isSelected = currentStatus === status;

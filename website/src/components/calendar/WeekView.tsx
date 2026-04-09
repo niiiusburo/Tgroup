@@ -199,20 +199,20 @@ export function WeekView({
               key={dateKey}
               className={cn(
                 'flex-1 min-w-[180px] border-r border-gray-100 last:border-r-0',
-                isToday && 'bg-blue-50/30'
+                isToday && 'bg-orange-50/30 ring-2 ring-inset ring-orange-400'
               )}
             >
               {/* Day header */}
               <div
                 className={cn(
                   'text-center py-3 border-b border-gray-100',
-                  isToday && 'bg-blue-100'
+                  isToday && 'bg-orange-100'
                 )}
               >
                 <div
                   className={cn(
                     'text-sm font-semibold',
-                    isToday ? 'text-blue-700' : 'text-gray-900'
+                    isToday ? 'text-orange-700' : 'text-gray-900'
                   )}
                 >
                   {formatDateDisplay(date)}
@@ -220,7 +220,7 @@ export function WeekView({
                 <div
                   className={cn(
                     'text-xs mt-0.5',
-                    isToday ? 'text-blue-600' : 'text-gray-500'
+                    isToday ? 'text-orange-600' : 'text-gray-500'
                   )}
                 >
                   {WEEKDAY_NAMES[index]}

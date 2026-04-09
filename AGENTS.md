@@ -1,3 +1,15 @@
+## Version Policy
+
+**ALWAYS bump the version in `website/package.json` after making code changes.**
+
+Version format: `major.minor.patch` (e.g., 0.4.5)
+- **Patch** (0.4.x): Bug fixes, small improvements
+- **Minor** (0.x.0): New features, significant changes
+- **Major** (x.0.0): Breaking changes
+
+After updating code, increment the appropriate version number in `website/package.json`.
+The build timestamp and git info are auto-generated from this version.
+
 ## Obsidian Brain
 
 At session start, read project context from local Obsidian notes:

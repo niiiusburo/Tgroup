@@ -104,9 +104,9 @@ export function ServiceHistoryList({ records, onUpdateVisit, onCancel, onEdit }:
                   <span className="text-xs text-gray-400">
                     {record.startDate} - {record.expectedEndDate}
                   </span>
-                  {record.toothNumbers.length > 0 && (
+                  {(record.toothNumbers?.length ?? 0) > 0 && (
                     <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
-                      Tooth: {record.toothNumbers.join(', ')}
+                      Tooth: {record.toothNumbers?.join(', ')}
                     </span>
                   )}
                 </div>

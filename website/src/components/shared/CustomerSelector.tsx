@@ -1,6 +1,6 @@
 import { Search, User, ChevronDown } from 'lucide-react';
 import { useState, useRef, useEffect, useMemo } from 'react';
-import type { Customer } from '@/data/mockCustomers';
+import type { Customer } from '@/types/customer';
 
 /**
  * CustomerSelector - Searchable customer dropdown
