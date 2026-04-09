@@ -26,7 +26,7 @@ export function StatCardModule({ stats }: StatCardModuleProps) {
       {stats.map((stat) => (
         <div
           key={stat.id}
-          className="bg-white rounded-xl p-5 shadow-card hover:shadow-md transition-shadow"
+          className="bg-white rounded-xl p-5 shadow-card card-hover"
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">

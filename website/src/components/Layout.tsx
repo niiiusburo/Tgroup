@@ -16,8 +16,6 @@ import {
   BarChart3,
   FolderOpen,
   Bell,
-  Sparkles,
-  LayoutGrid,
   ChevronLeft,
   ChevronRight,
   Shield,
@@ -29,7 +27,7 @@ import { NAVIGATION_ITEMS, type NavigationItem } from '@/constants';
 import { FilterByLocation } from '@/components/shared/FilterByLocation';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { MOCK_LOCATIONS } from '@/data/mockDashboard';
+
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard,
@@ -84,11 +82,11 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
       title={!expanded ? item.label : undefined}
       className={`
         relative h-11 flex items-center rounded-xl
-        transition-colors duration-150 gap-3
+        nav-smooth gap-3
         ${expanded ? 'px-3 w-full' : 'w-11 justify-center'}
         ${isActive
           ? 'text-primary bg-white/10'
-          : 'text-gray-400 hover:text-white hover:bg-white/5'
+          : 'text-gray-400 hover:text-white hover:bg-white/8'
         }
       `}
     >
@@ -312,44 +310,17 @@ export function Layout() {
             {!isSingleLocation && (
               <div className="hidden sm:block">
                 <FilterByLocation
-                  locations={allowedLocations.length > 0 ? allowedLocations : MOCK_LOCATIONS}
+                  locations={allowedLocations.length > 0 ? allowedLocations : []}
                   selectedId={selectedLocationId}
                   onChange={setSelectedLocationId}
                 />
               </div>
             )}
 
-            {/* Sparkles - hidden on mobile */}
-            <button className="hidden md:flex w-10 h-10 items-center justify-center rounded-lg hover:bg-gray-100 transition-colors duration-150">
-              <Sparkles className="w-5 h-5 text-gray-500" />
-            </button>
-
             {/* Bell */}
             <button className="relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors duration-150">
               <Bell className="w-5 h-5 text-gray-500" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full" />
-            </button>
-
-            {/* Avatars - hidden on small mobile */}
-            <div className="hidden sm:flex -space-x-2">
-              {[
-                { name: 'JD', color: 'bg-blue-500' },
-                { name: 'AS', color: 'bg-green-500' },
-                { name: 'MK', color: 'bg-purple-500' },
-              ].map((avatar) => (
-                <div
-                  key={avatar.name}
-                  className={`w-8 h-8 rounded-full border-2 border-white ${avatar.color} flex items-center justify-center`}
-                >
-                  <span className="text-xs text-white font-medium">{avatar.name}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Customize Widget - hidden on mobile */}
-            <button className="hidden lg:flex items-center gap-2 text-sm font-medium text-gray-700 border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors duration-150">
-              <LayoutGrid className="w-4 h-4" />
-              Customize Widget
             </button>
           </div>
         </header>

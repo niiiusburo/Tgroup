@@ -337,7 +337,7 @@ interface StatCardProps {
 
 function StatCard({ icon, label, value, bg }: StatCardProps) {
   return (
-    <div className={`${bg} rounded-xl p-4 flex items-center gap-3`}>
+    <div className={`${bg} rounded-xl p-4 flex items-center gap-3 card-hover-subtle`}>
       <div className="p-2 bg-white/60 rounded-lg">{icon}</div>
       <div>
         <div className="text-2xl font-bold text-gray-900">{value}</div>

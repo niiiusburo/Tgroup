@@ -55,6 +55,57 @@
   }
 }
 
+/* ============================================
+   SUBTLE ANIMATIONS — Global Utilities
+   GPU-accelerated, 100-250ms, prefers-reduced-motion safe
+   ============================================ */
+
+/* Card hover lift — used on StatCards, LocationCards, etc. */
+.card-hover {
+  transition: transform 200ms cubic-bezier(.23, 1, .32, 1),
+              box-shadow 200ms cubic-bezier(.23, 1, .32, 1);
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Colored card hover — for cards with bg-color (no shadow lift) */
+.card-hover-subtle {
+  transition: transform 200ms cubic-bezier(.23, 1, .32, 1),
+              filter 200ms ease;
+}
+.card-hover-subtle:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.97);
+}
+
+/* Button press feedback */
+.btn-press {
+  transition: transform 100ms ease-out,
+              box-shadow 100ms ease-out;
+}
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* Sidebar nav item transition */
+.nav-smooth {
+  transition: background-color 200ms ease,
+              color 150ms ease;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .card-hover:hover,
+  .card-hover-subtle:hover {
+    transform: none;
+  }
+  .btn-press:active {
+    transform: none;
+  }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

@@ -32,7 +32,7 @@ export function EmployeeCard({ employee, isSelected, onSelect }: EmployeeCardPro
   return (
     <button
       onClick={() => onSelect(employee.id)}
-      className={`w-full text-left bg-white rounded-xl p-5 shadow-card transition-all hover:shadow-card-hover ${
+      className={`w-full text-left bg-white rounded-xl p-5 shadow-card card-hover ${
         isSelected ? 'ring-2 ring-primary' : ''
       }`}
     >

@@ -74,7 +74,7 @@ export function AppointmentCard({
     <div
       draggable={draggable}
       onDragStart={handleDragStart}
-      className={`w-full text-left rounded-lg border px-3 py-2 mb-1 cursor-pointer hover:shadow-md transition-shadow ${colorStyles.bg} ${colorStyles.border}`}
+      className={`w-full text-left rounded-lg border px-3 py-2 mb-1 cursor-pointer card-hover ${colorStyles.bg} ${colorStyles.border}`}
     >
       <div className="flex items-center gap-2">
         <button

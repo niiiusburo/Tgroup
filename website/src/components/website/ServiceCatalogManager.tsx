@@ -123,7 +123,7 @@ export function ServiceCatalogManager({
           services.map((svc) => (
             <div
               key={svc.id}
-              className="bg-white rounded-xl shadow-card overflow-hidden transition-all hover:shadow-card-hover"
+              className="bg-white rounded-xl shadow-card overflow-hidden card-hover"
             >
               <div
                 className="flex items-center gap-3 p-4 cursor-pointer"

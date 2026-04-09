@@ -194,7 +194,7 @@ interface StatCardProps {
 
 function StatCard({ icon, label, value, bg, isText = false }: StatCardProps) {
   return (
-    <div className={`${bg} rounded-xl p-4 flex items-center gap-3`}>
+    <div className={`${bg} rounded-xl p-4 flex items-center gap-3 card-hover-subtle`}>
       <div className="p-2 bg-white/60 rounded-lg">{icon}</div>
       <div>
         <div className={`font-bold text-gray-900 ${isText ? 'text-sm' : 'text-2xl'}`}>{value}</div>

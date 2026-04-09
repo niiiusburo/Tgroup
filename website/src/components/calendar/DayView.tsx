@@ -88,7 +88,7 @@ function DayCard({ appointment, onClick, onEdit }: DayCardProps) {
     <button
       type="button"
       onClick={() => onClick?.(appointment)}
-      className="group w-full text-left rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer"
+      className="group w-full text-left rounded-xl border border-gray-200 bg-white shadow-sm card-hover overflow-hidden cursor-pointer"
     >
       {/* Colored left accent + content */}
       <div className={`flex border-l-[3px] ${colors.dot}`}>

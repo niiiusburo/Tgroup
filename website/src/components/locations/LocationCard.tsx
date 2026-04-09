@@ -24,7 +24,7 @@ export function LocationCard({ location, onSelect }: LocationCardProps) {
   return (
     <div
       onClick={() => onSelect(location.id)}
-      className="bg-white rounded-xl shadow-card overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
+      className="bg-white rounded-xl shadow-card overflow-hidden card-hover cursor-pointer group"
     >
       {/* Header bar with status color */}
       <div
