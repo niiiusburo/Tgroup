@@ -28,7 +28,7 @@ export function FilterByDoctor({ selectedDoctorId, onChange, doctors = [], class
       doctors.filter(
         (d) =>
           d.roles === undefined ||
-          d.roles.some((r) => r === 'dentist' || r === 'orthodontist' || r === 'doctor'),
+          d.roles.some((r) => r === 'doctor'),
       ),
     [doctors],
   );
@@ -41,7 +41,8 @@ export function FilterByDoctor({ selectedDoctorId, onChange, doctors = [], class
       <select
         value={selectedDoctorId ?? ''}
         onChange={(e) => onChange(e.target.value || null)}
-        className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
+        className="text-sm border border-gray-300 rounded-lg pl-9 pr-3 py-1.5 bg-white text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
+        style={{ paddingLeft: '2.25rem' }}
       >
         <option value="">All Doctors</option>
         {availableDoctors.map((doc) => (

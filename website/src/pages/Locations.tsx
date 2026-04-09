@@ -3,7 +3,7 @@ import { MapPin, Plus, Search, Building2, Phone, Mail, Clock, Check, FileText } 
 import { LocationCard } from '@/components/locations/LocationCard';
 import { LocationDetail } from '@/components/locations/LocationDetail';
 import { useLocations } from '@/hooks/useLocations';
-import { STATUS_LABELS, type LocationStatus } from '@/data/mockLocations';
+import { STATUS_LABELS, type LocationStatus, type LocationBranch } from '@/data/mockLocations';
 
 /**
  * Locations Page - Manage clinic branches with grid, detail view, and dashboard
@@ -23,6 +23,7 @@ export function Locations() {
     getMetricsByLocationId,
     totalStats,
     clearFilters,
+    updateLocation,
   } = useLocations();
 
   const [showAddForm, setShowAddForm] = useState(false);
@@ -35,6 +36,9 @@ export function Locations() {
         location={selectedLocation}
         metrics={metrics}
         onBack={() => setSelectedLocationId(null)}
+        onUpdate={(updated: LocationBranch) => {
+          updateLocation(updated);
+        }}
       />
     );
   }

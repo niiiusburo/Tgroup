@@ -1,3 +1,12 @@
+## Obsidian Brain
+
+At session start, read project context from local Obsidian notes:
+- `./notes/📋 TGroup Project Overview.md` — Architecture, pages, tech stack
+- `./notes/🏗️ Architecture.md` — Detailed component architecture
+- `./notes/📊 Features Status.md` — All features tracker
+- `./notes/🚀 Deployment Guide.md` — VPS deploy workflow, Docker setup
+- `./notes/💾 Database Schema.md` — Database tables and relationships
+
 <!-- code-review-graph MCP tools -->
 ## MCP Tools: code-review-graph
 

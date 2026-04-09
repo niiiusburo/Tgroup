@@ -6,13 +6,15 @@
 export type EmployeeTier = 'junior' | 'mid' | 'senior' | 'lead' | 'director';
 
 export type EmployeeRole =
-  | 'dentist'
-  | 'orthodontist'
-  | 'hygienist'
+  | 'general-manager'
+  | 'branch-manager'
+  | 'doctor'
+  | 'doctor-assistant'
   | 'assistant'
   | 'receptionist'
-  | 'manager'
-  | 'lab-tech';
+  | 'sale-online'
+  | 'customer-service'
+  | 'marketing';
 
 export type EmployeeStatus = 'active' | 'on-leave' | 'inactive';
 
@@ -54,24 +56,49 @@ export const TIER_STYLES: Record<EmployeeTier, string> = {
   director: 'bg-rose-100 text-rose-700',
 };
 
+// Map role to DB boolean flags
+export const ROLE_TO_DB_FLAGS: Record<EmployeeRole, { isdoctor: boolean; isassistant: boolean; isreceptionist: boolean }> = {
+  'general-manager': { isdoctor: false, isassistant: false, isreceptionist: false },
+  'branch-manager': { isdoctor: false, isassistant: false, isreceptionist: false },
+  'doctor': { isdoctor: true, isassistant: false, isreceptionist: false },
+  'doctor-assistant': { isdoctor: false, isassistant: true, isreceptionist: false },
+  'assistant': { isdoctor: false, isassistant: true, isreceptionist: false },
+  'receptionist': { isdoctor: false, isassistant: false, isreceptionist: true },
+  'sale-online': { isdoctor: false, isassistant: false, isreceptionist: true },
+  'customer-service': { isdoctor: false, isassistant: false, isreceptionist: true },
+  'marketing': { isdoctor: false, isassistant: false, isreceptionist: false },
+};
+
+// Map DB flags back to primary role
+export function inferRoleFromFlags(isdoctor: boolean, isassistant: boolean, isreceptionist: boolean): EmployeeRole {
+  if (isdoctor) return 'doctor';
+  if (isassistant) return 'assistant';
+  if (isreceptionist) return 'receptionist';
+  return 'general-manager';
+}
+
 export const ROLE_LABELS: Record<EmployeeRole, string> = {
-  dentist: 'Dentist',
-  orthodontist: 'Orthodontist',
-  hygienist: 'Hygienist',
-  assistant: 'Assistant',
-  receptionist: 'Receptionist',
-  manager: 'Manager',
-  'lab-tech': 'Lab Technician',
+  'general-manager': 'Quản lý tổng',
+  'branch-manager': 'Quản lý cơ sở',
+  'doctor': 'Bác sĩ',
+  'doctor-assistant': 'Trợ lý Bác sĩ',
+  'assistant': 'Phụ tá',
+  'receptionist': 'Lễ tân',
+  'sale-online': 'Sale online',
+  'customer-service': 'CSKH',
+  'marketing': 'Marketing',
 };
 
 export const ROLE_STYLES: Record<EmployeeRole, string> = {
-  dentist: 'bg-sky-100 text-sky-700',
-  orthodontist: 'bg-indigo-100 text-indigo-700',
-  hygienist: 'bg-teal-100 text-teal-700',
-  assistant: 'bg-green-100 text-green-700',
-  receptionist: 'bg-orange-100 text-orange-700',
-  manager: 'bg-pink-100 text-pink-700',
-  'lab-tech': 'bg-violet-100 text-violet-700',
+  'general-manager': 'bg-purple-100 text-purple-700',
+  'branch-manager': 'bg-indigo-100 text-indigo-700',
+  'doctor': 'bg-sky-100 text-sky-700',
+  'doctor-assistant': 'bg-teal-100 text-teal-700',
+  'assistant': 'bg-green-100 text-green-700',
+  'receptionist': 'bg-orange-100 text-orange-700',
+  'sale-online': 'bg-blue-100 text-blue-700',
+  'customer-service': 'bg-pink-100 text-pink-700',
+  'marketing': 'bg-amber-100 text-amber-700',
 };
 
 export const STATUS_BADGE_STYLES: Record<EmployeeStatus, string> = {
@@ -85,7 +112,8 @@ export const ALL_TIERS: readonly EmployeeTier[] = [
 ] as const;
 
 export const ALL_ROLES: readonly EmployeeRole[] = [
-  'dentist', 'orthodontist', 'hygienist', 'assistant', 'receptionist', 'manager', 'lab-tech',
+  'general-manager', 'branch-manager', 'doctor', 'doctor-assistant',
+  'assistant', 'receptionist', 'sale-online', 'customer-service', 'marketing',
 ] as const;
 
 export const MOCK_EMPLOYEES: readonly Employee[] = [
@@ -94,7 +122,7 @@ export const MOCK_EMPLOYEES: readonly Employee[] = [
     name: 'Dr. Tran Minh Duc',
     avatar: 'TD',
     tier: 'senior',
-    roles: ['dentist'],
+    roles: ['doctor'],
     status: 'active',
     locationId: 'loc-1',
     locationName: 'District 1',
@@ -115,7 +143,7 @@ export const MOCK_EMPLOYEES: readonly Employee[] = [
     name: 'Dr. Le Thi Hoa',
     avatar: 'LH',
     tier: 'lead',
-    roles: ['orthodontist', 'dentist'],
+    roles: ['doctor'],
     status: 'active',
     locationId: 'loc-2',
     locationName: 'District 7',
@@ -136,7 +164,7 @@ export const MOCK_EMPLOYEES: readonly Employee[] = [
     name: 'Nguyen Van Binh',
     avatar: 'NB',
     tier: 'mid',
-    roles: ['hygienist'],
+    roles: ['assistant'],
     status: 'active',
     locationId: 'loc-1',
     locationName: 'District 1',
@@ -200,7 +228,7 @@ export const MOCK_EMPLOYEES: readonly Employee[] = [
     name: 'Vo Thi Lan',
     avatar: 'VL',
     tier: 'senior',
-    roles: ['manager', 'receptionist'],
+    roles: ['branch-manager', 'receptionist'],
     status: 'active',
     locationId: 'loc-3',
     locationName: 'Thu Duc',
@@ -221,7 +249,7 @@ export const MOCK_EMPLOYEES: readonly Employee[] = [
     name: 'Dao Quoc Hung',
     avatar: 'DH',
     tier: 'junior',
-    roles: ['lab-tech'],
+    roles: ['marketing'],
     status: 'active',
     locationId: 'loc-1',
     locationName: 'District 1',
@@ -241,7 +269,7 @@ export const MOCK_EMPLOYEES: readonly Employee[] = [
     name: 'Dr. Nguyen Thanh Son',
     avatar: 'NS',
     tier: 'director',
-    roles: ['dentist', 'manager'],
+    roles: ['doctor', 'general-manager'],
     status: 'active',
     locationId: 'loc-1',
     locationName: 'District 1',

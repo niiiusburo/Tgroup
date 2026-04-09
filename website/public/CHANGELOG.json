@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.4.4",
+    "date": "Apr 8, 2026",
+    "commit": "pending",
+    "highlights": "📐 Appointment modal reduced to 2/3 width — better desktop layout",
+    "sections": [
+      {
+        "title": "✨ UX Improvement",
+        "items": [
+          "EditAppointmentModal, AppointmentForm, AppointmentDetailsModal all set to max-w-[900px]",
+          "Modal now takes 2/3 width on desktop instead of stretching full-width",
+          "Appointment module family consistently sized across all variants"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.4.3",
     "date": "Apr 8, 2026",
     "commit": "pending",

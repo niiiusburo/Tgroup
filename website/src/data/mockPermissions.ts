@@ -84,7 +84,7 @@ export const ROLES: readonly Role[] = [
       'services.view', 'services.edit',
       'payment.view', 'payment.edit',
       'employees.view', 'employees.edit',
-      'locations.view',
+      'locations.view', 'locations.edit',
       'reports.view', 'reports.export',
       'commission.view', 'commission.edit',
       'notifications.view', 'notifications.edit',

@@ -1,0 +1,49 @@
+# Obsidian Tags Index
+
+## Project Tags
+
+#project/tgroup
+#project/dashboard
+#project/dental-clinic
+
+## Component Tags
+
+#component/shared
+#component/modules
+#component/calendar
+#component/payment
+#component/forms
+
+## Tech Tags
+
+#tech/react
+#tech/typescript
+#tech/tailwind
+#tech/postgresql
+#tech/docker
+
+## Status Tags
+
+#status/completed
+#status/in-progress
+#status/planned
+#status/bug
+#status/feature
+
+## Priority Tags
+
+#priority/high
+#priority/medium
+#priority/low
+
+## Page Tags
+
+#page/overview
+#page/calendar
+#page/customers
+#page/appointments
+#page/payment
+#page/employees
+#page/locations
+#page/website
+#page/settings

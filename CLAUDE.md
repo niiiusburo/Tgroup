@@ -23,9 +23,13 @@ Do NOT use `admin@tdental.vn` or any other email. This is the only admin account
 
 ## Obsidian Brain
 
-At session start, read project context from Obsidian vault:
-- `~/obsidian-vault/thuan-brain/01-projects/tgroup/TGroup-Overview.md` — Architecture, pages, tech stack
-- `~/obsidian-vault/thuan-brain/01-projects/tgroup/TGroup-Deployment.md` — VPS deploy workflow, Docker setup
+At session start, read project context from local Obsidian vault:
+- `./notes/📋\ TGroup\ Project\ Overview.md` — Architecture, pages, tech stack
+- `./notes/🏗️\ Architecture.md` — Detailed component architecture
+- `./notes/📊\ Features\ Status.md` — All features tracker
+- `./notes/🚀\ Deployment\ Guide.md` — VPS deploy workflow, Docker setup
+- `./notes/💾\ Database\ Schema.md` — Database tables and relationships
+- `./notes/🗓️\ YYYY-MM-DD.md` — Daily session notes
 
 ## Project Map
 

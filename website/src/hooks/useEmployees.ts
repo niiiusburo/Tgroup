@@ -39,14 +39,14 @@ function deriveRoles(
 ): readonly EmployeeRole[] {
   const roles: EmployeeRole[] = [];
 
-  if (isdoctor) roles.push('dentist');
+  if (isdoctor) roles.push('doctor');
   if (isassistant) roles.push('assistant');
   if (isreceptionist) roles.push('receptionist');
 
   if (hrjobname) {
     const lower = hrjobname.toLowerCase();
-    if ((lower.includes('quản lý') || lower.includes('manager')) && !roles.includes('manager')) {
-      roles.push('manager');
+    if ((lower.includes('quản lý') || lower.includes('manager')) && !roles.includes('general-manager')) {
+      roles.push('general-manager');
     }
   }
 

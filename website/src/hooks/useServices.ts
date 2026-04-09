@@ -11,7 +11,11 @@ import {
   type VisitStatus,
 } from '@/data/mockServices';
 import type { AppointmentType } from '@/constants';
-import { fetchSaleOrders, type ApiSaleOrder } from '@/lib/api';
+import {
+  fetchSaleOrders,
+  createSaleOrder,
+  type ApiSaleOrder,
+} from '@/lib/api';
 
 export type ServiceFilter = 'all' | ServiceStatus;
 export type CategoryFilter = 'all' | AppointmentType;
@@ -162,33 +166,56 @@ export function useServices(selectedLocationId?: string) {
   }), [records]);
 
   /**
-   * Create a service record locally (no API endpoint for this)
+   * Create a service record via API, with local fallback
    */
-  const createServiceRecord = useCallback((input: CreateServiceInput) => {
-    const visits: ServiceVisit[] = Array.from({ length: input.totalVisits }, (_, i) => ({
-      id: `v-new-${Date.now()}-${i + 1}`,
-      serviceRecordId: `svc-${Date.now()}`,
-      visitNumber: i + 1,
-      date: '',
-      doctorId: input.doctorId,
-      doctorName: input.doctorName,
-      status: 'scheduled' as VisitStatus,
-      notes: `Visit ${i + 1}`,
-      toothNumbers: input.toothNumbers,
-    }));
-
-    const newRecord: ServiceRecord = {
-      ...input,
-      id: `svc-${Date.now()}`,
-      status: 'planned',
-      completedVisits: 0,
-      paidAmount: 0,
-      visits,
-      createdAt: new Date().toISOString().slice(0, 10),
+  const createServiceRecord = useCallback(async (input: CreateServiceInput) => {
+    const apiPayload = {
+      partnerid: input.customerId,
+      partnername: input.customerName,
+      companyid: input.locationId,
+      productid: input.catalogItemId,
+      productname: input.serviceName,
+      doctorid: input.doctorId,
+      doctorname: input.doctorName,
+      amounttotal: input.totalCost,
+      datestart: input.startDate,
+      dateend: input.expectedEndDate,
+      notes: input.notes,
     };
 
-    setRecords((prev) => [...prev, newRecord]);
-    return newRecord;
+    try {
+      const created = await createSaleOrder(apiPayload);
+      const newRecord = mapSaleOrderToServiceRecord(created);
+      setRecords((prev) => [newRecord, ...prev]);
+      return newRecord;
+    } catch (err) {
+      console.error('Failed to create service record via API, falling back to local:', err);
+      // Fallback: add locally with a generated ID
+      const visits: ServiceVisit[] = Array.from({ length: input.totalVisits }, (_, i) => ({
+        id: `v-new-${Date.now()}-${i + 1}`,
+        serviceRecordId: `svc-${Date.now()}`,
+        visitNumber: i + 1,
+        date: '',
+        doctorId: input.doctorId,
+        doctorName: input.doctorName,
+        status: 'scheduled' as VisitStatus,
+        notes: `Visit ${i + 1}`,
+        toothNumbers: input.toothNumbers,
+      }));
+
+      const newRecord: ServiceRecord = {
+        ...input,
+        id: `svc-${Date.now()}`,
+        status: 'planned',
+        completedVisits: 0,
+        paidAmount: 0,
+        visits,
+        createdAt: new Date().toISOString().slice(0, 10),
+      };
+
+      setRecords((prev) => [...prev, newRecord]);
+      return newRecord;
+    }
   }, []);
 
   /**

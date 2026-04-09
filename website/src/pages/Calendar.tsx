@@ -60,7 +60,7 @@ export function Calendar() {
   const { allEmployees } = useEmployees();
   const doctors = useMemo((): readonly DoctorOption[] =>
     allEmployees
-      .filter((e) => e.status === 'active' && (e.roles.includes('dentist') || e.roles.includes('orthodontist')))
+      .filter((e) => e.status === 'active' && (e.roles.includes('doctor')))
       .map((e) => ({ id: e.id, name: e.name, roles: [...e.roles] })),
     [allEmployees],
   );

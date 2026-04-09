@@ -164,12 +164,12 @@ export const MOCK_REFERRAL_CODES: readonly ReferralCode[] = [
 ];
 
 export const CUSTOMER_SOURCES = [
-  { id: 'facebook', label: 'Facebook' },
-  { id: 'google', label: 'Google' },
-  { id: 'zalo', label: 'Zalo' },
-  { id: 'referral', label: 'Người quen giới thiệu' },
+  { id: 'sale-online', label: 'Sale Online' },
   { id: 'walk-in', label: 'Khách vãng lai' },
-  { id: 'website', label: 'Website' },
-  { id: 'instagram', label: 'Instagram' },
-  { id: 'other', label: 'Khác' },
+  { id: 'hotline', label: 'Hotline' },
+  { id: 'returning', label: 'Khách cũ' },
+  { id: 'customer-referral', label: 'Khách hàng giới thiệu' },
+  { id: 'internal-referral', label: 'Nội bộ giới thiệu' },
+  { id: 'mkt1', label: 'MKT1' },
+  { id: 'dncb', label: 'ĐNCB' },
 ] as const;

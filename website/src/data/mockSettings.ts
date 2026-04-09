@@ -47,17 +47,14 @@ export interface CustomerSource {
 }
 
 export const MOCK_CUSTOMER_SOURCES: CustomerSource[] = [
-  { id: 'src-1', name: 'Walk-in', type: 'offline', description: 'Customers who visit without appointment', isActive: true, customerCount: 124 },
-  { id: 'src-2', name: 'Google Search', type: 'online', description: 'Found via Google search results', isActive: true, customerCount: 89 },
-  { id: 'src-3', name: 'Facebook Ads', type: 'online', description: 'Came through Facebook advertising', isActive: true, customerCount: 67 },
-  { id: 'src-4', name: 'Patient Referral', type: 'referral', description: 'Referred by an existing patient', isActive: true, customerCount: 156 },
-  { id: 'src-5', name: 'Doctor Referral', type: 'referral', description: 'Referred by another healthcare provider', isActive: true, customerCount: 42 },
-  { id: 'src-6', name: 'Employee Referral', type: 'referral', description: 'Referred by a clinic employee', isActive: true, customerCount: 38 },
-  { id: 'src-7', name: 'Website Booking', type: 'online', description: 'Booked through clinic website', isActive: true, customerCount: 95 },
-  { id: 'src-8', name: 'Zalo', type: 'online', description: 'Contacted via Zalo messaging', isActive: true, customerCount: 73 },
-  { id: 'src-9', name: 'Instagram', type: 'online', description: 'Discovered through Instagram', isActive: true, customerCount: 31 },
-  { id: 'src-10', name: 'Insurance Partner', type: 'offline', description: 'Through dental insurance partnerships', isActive: false, customerCount: 18 },
-  { id: 'src-11', name: 'Event / Health Fair', type: 'offline', description: 'Met at community health events', isActive: false, customerCount: 12 },
+  { id: 'src-1', name: 'Sale Online', type: 'online', description: 'Khách đến từ kênh sale online', isActive: true, customerCount: 0 },
+  { id: 'src-2', name: 'Khách vãng lai', type: 'offline', description: 'Khách đến trực tiếp không hẹn trước', isActive: true, customerCount: 0 },
+  { id: 'src-3', name: 'Hotline', type: 'online', description: 'Khách gọi qua tổng đài', isActive: true, customerCount: 0 },
+  { id: 'src-4', name: 'Khách cũ', type: 'offline', description: 'Khách hàng quay lại', isActive: true, customerCount: 0 },
+  { id: 'src-5', name: 'Khách hàng giới thiệu', type: 'referral', description: 'Khách hàng hiện tại giới thiệu', isActive: true, customerCount: 0 },
+  { id: 'src-6', name: 'Nội bộ giới thiệu', type: 'referral', description: 'Nhân viên nội bộ giới thiệu', isActive: true, customerCount: 0 },
+  { id: 'src-7', name: 'MKT1', type: 'online', description: 'Kênh marketing 1', isActive: true, customerCount: 0 },
+  { id: 'src-8', name: 'ĐNCB', type: 'offline', description: 'Đối nội cơ bản', isActive: true, customerCount: 0 },
 ];
 
 // --- System Preferences ---

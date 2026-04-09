@@ -20,11 +20,11 @@
  */
 
 import { useState, useEffect } from 'react';
-import { X, Loader2, UserPlus, User, Phone, Mail, MapPin, CalendarDays, CheckCircle2, Shield, Check } from 'lucide-react';
+import { X, Loader2, UserPlus, User, Phone, Mail, MapPin, CalendarDays, CheckCircle2, Shield, Check, Eye, EyeOff } from 'lucide-react';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { LocationSelector } from '@/components/shared/LocationSelector';
-import { createEmployee, updateEmployee, type CreateEmployeeData } from '@/lib/api';
-import { fetchCompanies } from '@/lib/api';
+import { createEmployee, updateEmployee, fetchCompanies, type CreateEmployeeData } from '@/lib/api';
+import { ALL_ROLES, ROLE_LABELS, ROLE_TO_DB_FLAGS, inferRoleFromFlags, type EmployeeRole } from '@/data/mockEmployees';
 
 interface EmployeeFormProps {
   readonly employee?: {
@@ -55,13 +55,17 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
   const [phone, setPhone] = useState(employee?.phone ?? '');
   const [email, setEmail] = useState(employee?.email ?? '');
   const [companyid, setCompanyid] = useState(employee?.companyid ?? '');
-  const [isdoctor, setIsdoctor] = useState(employee?.isdoctor ?? false);
-  const [isassistant, setIsassistant] = useState(employee?.isassistant ?? false);
-  const [isreceptionist, setIsreceptionist] = useState(employee?.isreceptionist ?? false);
+  // Determine initial role from DB flags
+  const initialRole = employee
+    ? inferRoleFromFlags(employee.isdoctor, employee.isassistant, employee.isreceptionist)
+    : 'doctor';
+  const [selectedRole, setSelectedRole] = useState<EmployeeRole>(initialRole);
   const [active, setActive] = useState(employee?.active ?? true);
   const [startworkdate, setStartworkdate] = useState(
     employee?.startworkdate ? employee.startworkdate.split('T')[0] : ''
   );
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     fetchCompanies().then((res) => setLocations(res.items.map(l => ({
@@ -78,17 +82,22 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
       setError('Vui lòng nhập tên nhân viên');
       return;
     }
-    if (!isdoctor && !isassistant && !isreceptionist) {
-      setError('Vui lòng chọn ít nhất một vai trò');
+    if (!isEdit && !password.trim()) {
+      setError('Vui lòng nhập mật khẩu');
       return;
     }
 
+    const dbFlags = ROLE_TO_DB_FLAGS[selectedRole];
     const data: CreateEmployeeData = {
       name: name.trim(),
       phone: phone.trim() || undefined,
       email: email.trim() || undefined,
+      password: password.trim() || undefined,
       companyid: companyid || undefined,
-      isdoctor, isassistant, isreceptionist, active,
+      isdoctor: dbFlags.isdoctor,
+      isassistant: dbFlags.isassistant,
+      isreceptionist: dbFlags.isreceptionist,
+      active,
       startworkdate: startworkdate || undefined,
     };
 
@@ -108,7 +117,7 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
     }
   };
 
-  const isValid = name.trim() && (isdoctor || isassistant || isreceptionist);
+  const isValid = name.trim();
 
   return (
     <div className="modal-container">
@@ -184,6 +193,38 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
             </div>
           </div>
 
+          {/* Mật khẩu */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <Shield className="w-3.5 h-3.5" />
+              {isEdit ? 'Đặt lại mật khẩu' : 'Mật khẩu'} {!isEdit && <span className="text-red-500">*</span>}
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={isEdit ? 'Để trống nếu không đổi mật khẩu' : 'Nhập mật khẩu'}
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm pr-16"
+                {...(!isEdit ? { required: true } : {})}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-gray-600 font-medium"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+            {isEdit && (
+              <p className="mt-1 text-xs text-gray-400">Để trống nếu không muốn thay đổi mật khẩu</p>
+            )}
+          </div>
+
           {/* Chi nhánh */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
@@ -198,23 +239,21 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
             />
           </div>
 
-          {/* Vai trò */}
+          {/* Vị trí / Vai trò */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Shield className="w-3.5 h-3.5" />
-              Vai trò <span className="text-red-500">*</span>
+              Vị trí / Vai trò <span className="text-red-500">*</span>
             </label>
-            <div className="grid grid-cols-3 gap-2">
-              <RoleButton selected={isdoctor} onClick={() => setIsdoctor(!isdoctor)} label="Bác sĩ" color="orange" />
-              <RoleButton selected={isassistant} onClick={() => setIsassistant(!isassistant)} label="Trợ lý" color="green" />
-              <RoleButton selected={isreceptionist} onClick={() => setIsreceptionist(!isreceptionist)} label="Lễ tân" color="blue" />
-            </div>
-            {!isdoctor && !isassistant && !isreceptionist && (
-              <p className="mt-2 text-xs text-amber-600 flex items-center gap-1">
-                <div className="w-1 h-1 rounded-full bg-amber-500" />
-                Vui lòng chọn ít nhất một vai trò
-              </p>
-            )}
+            <select
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value as EmployeeRole)}
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
+            >
+              {ALL_ROLES.map((role) => (
+                <option key={role} value={role}>{ROLE_LABELS[role]}</option>
+              ))}
+            </select>
           </div>
 
           {/* Ngày bắt đầu + Trạng thái */}
@@ -255,35 +294,4 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
   );
 }
 
-// ─── Role Button Sub-component ──────────────────────────────────
 
-interface RoleButtonProps {
-  selected: boolean;
-  onClick: () => void;
-  label: string;
-  color: 'orange' | 'green' | 'blue';
-}
-
-function RoleButton({ selected, onClick, label, color }: RoleButtonProps) {
-  const colors = {
-    orange: {
-      active: 'bg-orange-50 text-orange-700 border-orange-200 ring-2 ring-orange-500/20',
-      inactive: 'bg-white border-gray-200 text-gray-600 hover:border-orange-300',
-    },
-    green: {
-      active: 'bg-green-50 text-green-700 border-green-200 ring-2 ring-green-500/20',
-      inactive: 'bg-white border-gray-200 text-gray-600 hover:border-green-300',
-    },
-    blue: {
-      active: 'bg-blue-50 text-blue-700 border-blue-200 ring-2 ring-blue-500/20',
-      inactive: 'bg-white border-gray-200 text-gray-600 hover:border-blue-300',
-    },
-  };
-
-  return (
-    <button type="button" onClick={onClick}
-      className={`px-3 py-2.5 rounded-xl text-sm font-medium border transition-all duration-200 ${selected ? colors[color].active : colors[color].inactive}`}>
-      {label}
-    </button>
-  );
-}

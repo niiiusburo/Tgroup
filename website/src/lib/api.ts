@@ -132,6 +132,7 @@ export interface CreateEmployeeData {
   name: string;
   phone?: string;
   email?: string;
+  password?: string;
   companyid?: string;
   isdoctor?: boolean;
   isassistant?: boolean;
@@ -412,6 +413,22 @@ export function fetchSaleOrders(params?: {
       companyId: params?.companyId,
     },
   });
+}
+
+export function createSaleOrder(data: {
+  partnerid?: string;
+  partnername?: string;
+  companyid?: string;
+  productid?: string;
+  productname?: string;
+  doctorid?: string;
+  doctorname?: string;
+  amounttotal?: number;
+  datestart?: string;
+  dateend?: string;
+  notes?: string;
+}) {
+  return apiFetch<ApiSaleOrder>('/SaleOrders', { method: 'POST', body: data });
 }
 
 // ─── Dashboard Reports ────────────────────────────────────────────

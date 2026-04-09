@@ -436,7 +436,7 @@ export function AddCustomerForm({
 
   return (
     <div 
-      className="flex flex-col bg-gray-50/50" 
+      className="flex flex-col bg-gray-50/50 overflow-y-auto" 
       style={{ height: '85vh', maxHeight: '800px' }}
       onWheel={(e) => e.stopPropagation()}
     >
@@ -480,7 +480,7 @@ export function AddCustomerForm({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-1 overflow-hidden">
+      <form onSubmit={handleSubmit} className="flex flex-1 min-h-0">
         {/* ── Left Panel ─────────────────────────────────────── */}
         {/* Fixed width, flex column, each card has independent scroll */}
         <div className="w-80 flex-shrink-0 border-r border-gray-200 flex flex-col gap-4 px-5 py-5 overflow-hidden bg-gray-50/30">

@@ -98,7 +98,7 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
     id: e.id, name: e.name,
     avatar: e.avatar || e.name.charAt(0).toUpperCase(),
     tier: (e.tier as Employee['tier']) || 'mid',
-    roles: (e.roles as Employee['roles']) || ['dentist'],
+    roles: (e.roles as Employee['roles']) || ['doctor'],
     status: (e.status as Employee['status']) || 'active',
     locationId: e.locationId || '', locationName: e.locationName || '',
     phone: e.phone || '', email: e.email || '', schedule: e.schedule || [],
@@ -233,7 +233,7 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
               <Stethoscope className="w-3.5 h-3.5" />
               Bác sĩ
             </label>
-            <DoctorSelector employees={employees} selectedId={doctorId} onChange={setDoctorId} filterRoles={['dentist', 'orthodontist']} />
+            <DoctorSelector employees={employees} selectedId={doctorId} onChange={setDoctorId} filterRoles={['doctor']} />
             {errors.doctor && <p className="mt-2 text-xs text-red-500">{errors.doctor}</p>}
           </div>
 

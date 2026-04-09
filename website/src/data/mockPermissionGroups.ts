@@ -107,7 +107,7 @@ export const MOCK_PERMISSION_GROUPS: PermissionGroup[] = [
       'services.view', 'services.edit',
       'payment.view', 'payment.edit',
       'employees.view', 'employees.edit',
-      'locations.view',
+      'locations.view', 'locations.edit',
       'reports.view', 'reports.export',
       'commission.view', 'commission.edit',
       'notifications.view', 'notifications.edit',

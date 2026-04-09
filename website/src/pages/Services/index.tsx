@@ -58,8 +58,8 @@ export function Services() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingRecord, setEditingRecord] = useState<ServiceRecord | null>(null);
 
-  function handleCreate(data: CreateServiceInput) {
-    createServiceRecord(data);
+  async function handleCreate(data: CreateServiceInput) {
+    await createServiceRecord(data);
     setShowForm(false);
   }
 

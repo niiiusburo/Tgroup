@@ -147,6 +147,17 @@ export function useLocations() {
   }, [allLocations]);
 
   /**
+   * Update a location in the state
+   */
+  const updateLocation = useCallback((updatedLocation: LocationBranch) => {
+    setAllLocations((prev) =>
+      prev.map((loc) =>
+        loc.id === updatedLocation.id ? updatedLocation : loc
+      )
+    );
+  }, []);
+
+  /**
    * Clear all filters
    */
   const clearFilters = useCallback(() => {
@@ -169,6 +180,7 @@ export function useLocations() {
     getActiveLocations,
     totalStats,
     clearFilters,
+    updateLocation,
     refetch: loadLocations,
     isLoading,
     error,

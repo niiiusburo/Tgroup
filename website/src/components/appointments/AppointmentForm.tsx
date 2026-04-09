@@ -161,7 +161,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
     name: e.name,
     avatar: e.avatar || e.name.charAt(0).toUpperCase(),
     tier: (e.tier as Employee['tier']) || 'mid',
-    roles: (e.roles as Employee['roles']) || ['dentist'],
+    roles: (e.roles as Employee['roles']) || ['doctor'],
     status: (e.status as Employee['status']) || 'active',
     locationId: e.locationId || '',
     locationName: e.locationName || '',
@@ -212,8 +212,8 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
     if (!locationId) newErrors.location = 'Vui lòng chọn chi nhánh';
     if (!date) newErrors.date = 'Vui lòng chọn ngày';
     if (!startTime) newErrors.startTime = 'Vui lòng chọn giờ bắt đầu';
-    if (!endTime) newErrors.endTime = 'Vui lòng chọn giờ kết thúc';
-    if (startTime && endTime && startTime >= endTime) {
+    // endTime is optional — only validate if provided
+    if (endTime && startTime && endTime <= startTime) {
       newErrors.endTime = 'Giờ kết thúc phải sau giờ bắt đầu';
     }
     setErrors(newErrors);
@@ -230,6 +230,16 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
 
     if (!customer || !doctor || !location) return;
 
+    // Auto-calculate endTime from startTime + estimatedDuration if not provided
+    let computedEndTime = endTime;
+    if (!computedEndTime && startTime && estimatedDuration) {
+      const [hours, minutes] = startTime.split(':').map(Number);
+      const totalMinutes = hours * 60 + minutes + estimatedDuration;
+      const endHours = Math.floor(totalMinutes / 60) % 24;
+      const endMins = totalMinutes % 60;
+      computedEndTime = `${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
+    }
+
     onSubmit({
       customerId: customer.id,
       customerName: customer.name,
@@ -242,7 +252,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
       serviceName: selectedService?.name || serviceName.trim(),
       date,
       startTime,
-      endTime,
+      endTime: computedEndTime,
       notes: notes.trim(),
       estimatedDuration,
       customerType,
@@ -260,7 +270,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="modal-content animate-in zoom-in-95 duration-200">
+      <div className="modal-content animate-in zoom-in-95 duration-200 max-w-[900px]">
         {/* Header with gradient */}
         <div className="modal-header relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
@@ -285,7 +295,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
         </div>
 
         {/* Scrollable Form Body */}
-        <form onSubmit={handleSubmit} className="modal-body px-6 py-6 space-y-5">
+        <form onSubmit={handleSubmit} className="modal-body px-6 py-6">
           {isLoading && (
             <div className="flex items-center justify-center py-8 text-gray-400">
               <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2" />
@@ -293,221 +303,253 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
             </div>
           )}
 
-          {/* Khách hàng */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-              <User className="w-3.5 h-3.5" />
-              Khách hàng
-            </label>
-            {isEdit ? (
-              <div className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border bg-gray-50 border-gray-200 text-gray-700">
-                <User className="w-4 h-4 text-gray-400 shrink-0" />
-                <span className="flex-1 truncate font-medium">{initialData?.customerName || 'Không xác định'}</span>
-                <span className="text-xs text-gray-400">{initialData?.customerPhone}</span>
+          <div className="grid grid-cols-2 gap-6">
+            {/* ── LEFT: Thông tin cơ bản ── */}
+            <div className="space-y-5">
+              <h3 className="text-sm font-semibold text-gray-800 pb-2 border-b border-gray-100 flex items-center gap-2">
+                <User className="w-4 h-4 text-orange-500" />
+                Thông tin cơ bản
+              </h3>
+
+              {/* Khách hàng */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  <User className="w-3.5 h-3.5" />
+                  Khách hàng
+                </label>
+                {isEdit ? (
+                  <div className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border bg-gray-50 border-gray-200 text-gray-700">
+                    <User className="w-4 h-4 text-gray-400 shrink-0" />
+                    <span className="flex-1 truncate font-medium">{initialData?.customerName || 'Không xác định'}</span>
+                    <span className="text-xs text-gray-400">{initialData?.customerPhone}</span>
+                  </div>
+                ) : (
+                  <CustomerSelector customers={customers} selectedId={customerId} onChange={setCustomerId} />
+                )}
+                {errors.customer && <p className="text-xs text-red-500 mt-1">{errors.customer}</p>}
               </div>
-            ) : (
-              <CustomerSelector customers={customers} selectedId={customerId} onChange={setCustomerId} />
-            )}
-            {errors.customer && <p className="text-xs text-red-500 mt-1">{errors.customer}</p>}
-          </div>
 
-          {/* Bác sĩ */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-              <Stethoscope className="w-3.5 h-3.5" />
-              Bác sĩ
-            </label>
-            <DoctorSelector employees={employees} selectedId={doctorId} onChange={setDoctorId} filterRoles={['dentist', 'orthodontist']} />
-            {errors.doctor && <p className="text-xs text-red-500 mt-1">{errors.doctor}</p>}
-          </div>
+              {/* Bác sĩ */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  <Stethoscope className="w-3.5 h-3.5" />
+                  Bác sĩ
+                </label>
+                <DoctorSelector employees={employees} selectedId={doctorId} onChange={setDoctorId} filterRoles={['doctor']} />
+                {errors.doctor && <p className="text-xs text-red-500 mt-1">{errors.doctor}</p>}
+              </div>
 
-          {/* Chi nhánh */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-              <MapPin className="w-3.5 h-3.5" />
-              Chi nhánh
-            </label>
-            <LocationSelector locations={locations} selectedId={locationId} onChange={setLocationId} excludeAll />
-            {errors.location && <p className="text-xs text-red-500 mt-1">{errors.location}</p>}
-          </div>
+              {/* Chi nhánh */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  <MapPin className="w-3.5 h-3.5" />
+                  Chi nhánh
+                </label>
+                <LocationSelector locations={locations} selectedId={locationId} onChange={setLocationId} excludeAll />
+                {errors.location && <p className="text-xs text-red-500 mt-1">{errors.location}</p>}
+              </div>
 
-          {/* Dịch vụ + Loại khách */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-                <Stethoscope className="w-3.5 h-3.5" />
-                Dịch vụ
-              </label>
-              <ServiceCatalogSelector
-                catalog={serviceCatalog}
-                selectedId={serviceId}
-                onChange={setServiceId}
-                placeholder="Chọn dịch vụ..."
+              {/* Ngày hẹn */}
+              <DatePicker
+                value={date}
+                onChange={setDate}
+                label="Ngày hẹn"
+                icon={<Calendar className="w-3.5 h-3.5" />}
+                error={errors.date}
               />
-              {selectedService && (
-                <p className="mt-1.5 text-xs text-gray-500 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  {selectedService.totalVisits} lần khám · ~{selectedService.estimatedDuration} phút
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-                <User className="w-3.5 h-3.5" />
-                Loại khách
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setCustomerType('new')}
-                  className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-all duration-200 ${
-                    customerType === 'new'
-                      ? 'bg-orange-100 text-orange-700 border-orange-300 ring-2 ring-orange-500/20'
-                      : 'bg-white border-gray-200 text-gray-600 hover:border-orange-300'
-                  }`}
-                >
-                  Khách mới
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCustomerType('returning')}
-                  className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-all duration-200 ${
-                    customerType === 'returning'
-                      ? 'bg-emerald-100 text-emerald-700 border-emerald-300 ring-2 ring-emerald-500/20'
-                      : 'bg-white border-gray-200 text-gray-600 hover:border-emerald-300'
-                  }`}
-                >
-                  Tái khám
-                </button>
+
+              {/* Giờ bắt đầu + Thời gian dự kiến */}
+              <div className="grid grid-cols-2 gap-3">
+                <TimePicker
+                  value={startTime}
+                  onChange={setStartTime}
+                  label="Giờ bắt đầu"
+                  icon={<Clock className="w-3.5 h-3.5" />}
+                  error={errors.startTime}
+                  interval={15}
+                />
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <Clock className="w-3.5 h-3.5" />
+                    Thời gian dự kiến
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      value={estimatedDuration}
+                      onChange={(e) => setEstimatedDuration(parseInt(e.target.value) || 30)}
+                      min={5} max={300} step={5}
+                      className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
+                    />
+                    <span className="text-sm text-gray-500">phút</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Ngày hẹn */}
-          <DatePicker
-            value={date}
-            onChange={setDate}
-            label="Ngày hẹn"
-            icon={<Calendar className="w-3.5 h-3.5" />}
-            error={errors.date}
-          />
+            {/* ── RIGHT: Thông tin nâng cao ── */}
+            <div className="space-y-5">
+              <h3 className="text-sm font-semibold text-gray-800 pb-2 border-b border-gray-100 flex items-center gap-2">
+                <Stethoscope className="w-4 h-4 text-orange-500" />
+                Thông tin nâng cao
+              </h3>
 
-          {/* Giờ bắt đầu + Giờ kết thúc */}
-          <div className="grid grid-cols-2 gap-4">
-            <TimePicker
-              value={startTime}
-              onChange={setStartTime}
-              label="Giờ bắt đầu"
-              icon={<Clock className="w-3.5 h-3.5" />}
-              error={errors.startTime}
-              interval={15}
-            />
-            <TimePicker
-              value={endTime}
-              onChange={setEndTime}
-              label="Giờ kết thúc"
-              icon={<Clock className="w-3.5 h-3.5" />}
-              minTime={startTime}
-              error={errors.endTime}
-              interval={15}
-            />
-          </div>
+              {/* Dịch vụ */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  <Stethoscope className="w-3.5 h-3.5" />
+                  Dịch vụ
+                </label>
+                <ServiceCatalogSelector
+                  catalog={serviceCatalog}
+                  selectedId={serviceId}
+                  onChange={setServiceId}
+                  placeholder="Chọn dịch vụ..."
+                />
+                {selectedService && (
+                  <p className="mt-1.5 text-xs text-gray-500 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    {selectedService.totalVisits} lần khám · ~{selectedService.estimatedDuration} phút
+                  </p>
+                )}
+              </div>
 
-          {/* Thời gian dự kiến */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-              <Clock className="w-3.5 h-3.5" />
-              Thời gian dự kiến
-            </label>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                value={estimatedDuration}
-                onChange={(e) => setEstimatedDuration(parseInt(e.target.value) || 30)}
-                min={5}
-                max={300}
-                step={5}
-                className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
-              />
-              <span className="text-sm text-gray-500">phút</span>
-            </div>
-          </div>
+              {/* Ghi chú */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  <FileText className="w-3.5 h-3.5" />
+                  Ghi chú
+                </label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={3}
+                  placeholder="Ghi chú thêm..."
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
+                />
+              </div>
 
-          {/* Trạng thái (edit mode only) */}
-          {isEdit && (
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                Trạng thái
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {STATUS_OPTIONS.map((s) => (
+              {/* Loại khách */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  <User className="w-3.5 h-3.5" />
+                  Loại khách
+                </label>
+                <div className="grid grid-cols-2 gap-2">
                   <button
-                    key={s.value}
                     type="button"
-                    onClick={() => setStatus(s.value)}
-                    className={`px-3 py-2 rounded-xl text-xs font-medium border transition-all duration-200 ${
-                      status === s.value
-                        ? `${s.color} ring-2 ring-offset-1 ring-orange-500/30 shadow-sm`
+                    onClick={() => setCustomerType('new')}
+                    className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-all duration-200 ${
+                      customerType === 'new'
+                        ? 'bg-orange-100 text-orange-700 border-orange-300 ring-2 ring-orange-500/20'
                         : 'bg-white border-gray-200 text-gray-600 hover:border-orange-300'
                     }`}
                   >
-                    {s.label}
+                    Khách mới
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() => setCustomerType('returning')}
+                    className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-all duration-200 ${
+                      customerType === 'returning'
+                        ? 'bg-emerald-100 text-emerald-700 border-emerald-300 ring-2 ring-emerald-500/20'
+                        : 'bg-white border-gray-200 text-gray-600 hover:border-emerald-300'
+                    }`}
+                  >
+                    Tái khám
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
 
-          {/* Màu thẻ — Color picker matching EditAppointmentModal */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-              <Palette className="w-3.5 h-3.5" />
-              Màu thẻ
-            </label>
-            <div className="flex items-center gap-2 flex-wrap">
-              {Object.entries(APPOINTMENT_CARD_COLORS).map(([code, color]) => (
-                <button
-                  key={code}
-                  type="button"
-                  onClick={() => setColorCode(code)}
-                  className={`
-                    group relative rounded-full transition-all duration-200 border-2
-                    ${colorCode === code
-                      ? 'border-gray-800 shadow-md scale-110'
-                      : 'border-transparent hover:border-gray-300 hover:scale-105'
-                    }
-                  `}
-                  title={color.label}
-                >
-                  <div className={`
-                    w-8 h-8 rounded-full bg-gradient-to-br ${color.previewGradient}
-                    flex items-center justify-center
-                  `}>
-                    {colorCode === code && (
-                      <Check className="w-4 h-4 text-white drop-shadow-sm" />
-                    )}
+              {/* Màu thẻ */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  <Palette className="w-3.5 h-3.5" />
+                  Màu thẻ
+                </label>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {Object.entries(APPOINTMENT_CARD_COLORS).map(([code, color]) => (
+                    <button
+                      key={code}
+                      type="button"
+                      onClick={() => setColorCode(code)}
+                      className={`
+                        group relative rounded-full transition-all duration-200 border-2
+                        ${colorCode === code
+                          ? 'border-gray-800 shadow-md scale-110'
+                          : 'border-transparent hover:border-gray-300 hover:scale-105'
+                        }
+                      `}
+                      title={color.label}
+                    >
+                      <div className={`
+                        w-8 h-8 rounded-full bg-gradient-to-br ${color.previewGradient}
+                        flex items-center justify-center
+                      `}>
+                        {colorCode === code && (
+                          <Check className="w-4 h-4 text-white drop-shadow-sm" />
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-1.5 text-[11px] text-gray-400">
+                  {APPOINTMENT_CARD_COLORS[colorCode]?.label ?? 'Default'}
+                </p>
+              </div>
+
+              {/* Trạng thái (edit mode only) */}
+              {isEdit && (
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                    Trạng thái
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {STATUS_OPTIONS.map((s) => (
+                      <button
+                        key={s.value}
+                        type="button"
+                        onClick={() => setStatus(s.value)}
+                        className={`px-3 py-2 rounded-xl text-xs font-medium border transition-all duration-200 ${
+                          status === s.value
+                            ? `${s.color} ring-2 ring-offset-1 ring-orange-500/30 shadow-sm`
+                            : 'bg-white border-gray-200 text-gray-600 hover:border-orange-300'
+                        }`}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
                   </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ── Nhắc lịch hẹn ── */}
+          <div className="mt-6 pt-5 border-t border-gray-100">
+            <h3 className="text-sm font-semibold text-gray-800 pb-2 mb-3 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-orange-500" />
+              Nhắc lịch hẹn
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { label: '15 phút trước', value: '15min' },
+                { label: '30 phút trước', value: '30min' },
+                { label: '1 giờ trước', value: '1h' },
+                { label: '1 ngày trước', value: '1d' },
+                { label: 'SMS', value: 'sms' },
+                { label: 'Zalo', value: 'zalo' },
+              ].map((reminder) => (
+                <button
+                  key={reminder.value}
+                  type="button"
+                  className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg text-gray-600 hover:border-orange-300 hover:bg-orange-50 transition-colors"
+                >
+                  {reminder.label}
                 </button>
               ))}
             </div>
-            <p className="mt-1.5 text-[11px] text-gray-400">
-              {APPOINTMENT_CARD_COLORS[colorCode]?.label ?? 'Default'}
-            </p>
-          </div>
-
-          {/* Ghi chú */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-              <FileText className="w-3.5 h-3.5" />
-              Ghi chú
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              placeholder="Ghi chú thêm..."
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
-            />
+            <p className="mt-2 text-xs text-gray-400">Tính năng nhắc lịch sẽ được kích hoạt sau</p>
           </div>
         </form>
 
