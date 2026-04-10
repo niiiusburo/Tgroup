@@ -280,9 +280,10 @@ export function Customers() {
     customerId: string,
     amount: number,
     method: 'cash' | 'bank' | 'vietqr',
+    date?: string,
     note?: string
   ) => {
-    await addDeposit(customerId, amount, method, note);
+    await addDeposit(customerId, amount, method, date, note);
     refetchProfile();
   }, [addDeposit, refetchProfile]);
 

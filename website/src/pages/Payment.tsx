@@ -201,7 +201,7 @@ export function Payment() {
                 key={wallet.id}
                 depositBalance={wallet.balance}
                 outstandingBalance={0}
-                onAddDeposit={async (amount) => { await handleTopUp(wallet.customerId)(amount); }}
+                onAddDeposit={async (amount, _method, _date, _note) => { await handleTopUp(wallet.customerId)(amount); }}
               />
             ))}
 

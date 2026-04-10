@@ -23,7 +23,7 @@ interface CustomerProfileProps {
   readonly onTabChange?: (tab: ProfileTab) => void;
   readonly onBack: () => void;
   readonly onEdit?: () => void;
-  readonly onAddDeposit?: (customerId: string, amount: number, method: 'cash' | 'bank' | 'vietqr', note?: string) => Promise<void>;
+  readonly onAddDeposit?: (customerId: string, amount: number, method: 'cash' | 'bank' | 'vietqr', date?: string, note?: string) => Promise<void>;
   readonly onCreateAppointment?: (data: AppointmentFormData) => Promise<void>;
   readonly onUpdateAppointment?: (id: string, data: AppointmentFormData) => Promise<void>;
   readonly onCreateService?: (data: {
@@ -413,7 +413,7 @@ export function CustomerProfile({
           <DepositWallet
             depositBalance={profile.depositBalance}
             outstandingBalance={profile.outstandingBalance}
-            onAddDeposit={onAddDeposit ? (amount, method, note) => onAddDeposit(profile.id, amount, method, note) : undefined}
+            onAddDeposit={onAddDeposit ? (amount, method, date, note) => onAddDeposit(profile.id, amount, method, date, note) : undefined}
             loading={loadingDeposits}
           />
           <DepositHistory transactions={depositTransactions} loading={loadingDeposits} />
