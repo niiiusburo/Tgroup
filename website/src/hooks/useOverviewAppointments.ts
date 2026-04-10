@@ -30,6 +30,8 @@ export interface OverviewAppointment {
   readonly topStatus: AppointmentTopStatus;
   readonly checkInStatus: CheckInStatus | null; // null until arrived
   readonly color: string | null; // color code 0-7 from database
+  readonly arrivalTime: string | null;
+  readonly treatmentStartTime: string | null;
 }
 
 // ─── Zone 3 filter tabs ──────────────────────────────────────────
@@ -102,6 +104,8 @@ function mapApiToOverview(apt: ApiAppointment): OverviewAppointment {
     topStatus,
     checkInStatus,
     color: apt.color,
+    arrivalTime: apt.time || '09:00',
+    treatmentStartTime: checkInStatus === 'waiting' ? null : (apt.time || '09:00'),
   };
 }
 
@@ -248,7 +252,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
       await updateAppointment(id, { state: 'arrived' });
       setAppointments((prev) =>
         prev.map((a) =>
-          a.id === id ? { ...a, topStatus: 'arrived' as const, checkInStatus: 'waiting' as const } : a,
+          a.id === id ? { ...a, topStatus: 'arrived' as const, checkInStatus: 'waiting' as const, arrivalTime: a.time, treatmentStartTime: null } : a,
         ),
       );
     } catch (error) {
@@ -280,7 +284,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
       await updateAppointment(id, { state: stateMap[status] });
       setAppointments((prev) =>
         prev.map((a) =>
-          a.id === id ? { ...a, checkInStatus: status } : a,
+          a.id === id ? { ...a, checkInStatus: status, treatmentStartTime: status === 'waiting' ? null : (a.treatmentStartTime || a.time) } : a,
         ),
       );
       onSuccess?.();

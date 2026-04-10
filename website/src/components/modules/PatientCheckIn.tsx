@@ -13,6 +13,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Clock, User } from 'lucide-react';
+import { WaitTimer } from '@/components/appointments/WaitTimer';
 import type { OverviewAppointment, CheckInStatus, Zone1Filter } from '@/hooks/useOverviewAppointments';
 import { useAppointmentHover } from '@/contexts/AppointmentHoverContext';
 
@@ -200,6 +201,12 @@ function PatientCard({ appointment, onUpdateStatus, onEditClick, onDone }: Patie
       >
         {config.label} <span className="text-[10px] opacity-60">▾</span>
       </button>
+
+      {currentStatus === 'waiting' && appointment.arrivalTime && (
+        <div className="mt-2">
+          <WaitTimer arrivalTime={appointment.arrivalTime} treatmentStartTime={appointment.treatmentStartTime} compact />
+        </div>
+      )}
 
       {/* Status change dropdown */}
       {dropdownOpen && (
