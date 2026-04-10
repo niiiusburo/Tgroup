@@ -6,15 +6,17 @@
  */
 
 import { useState } from 'react';
-import { Settings as SettingsIcon, SlidersHorizontal, Shield, Globe } from 'lucide-react';
+import { Settings as SettingsIcon, SlidersHorizontal, Shield, Globe, Building2 } from 'lucide-react';
 import { SystemPreferencesContent } from '@/components/settings/SystemPreferencesContent';
 import { IpAccessControl } from '@/components/settings/IpAccessControl';
 import { TimezoneSelector } from '@/components/settings/TimezoneSelector';
+import { BankSettingsForm } from '@/components/settings/BankSettingsForm';
 
-type SettingsTab = 'system' | 'ip';
+type SettingsTab = 'system' | 'bank' | 'ip';
 
 const TABS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
   { id: 'system', label: 'System Settings', icon: <SlidersHorizontal className="w-5 h-5" /> },
+  { id: 'bank', label: 'Bank Account', icon: <Building2 className="w-5 h-5" /> },
   { id: 'ip', label: 'IP Access Control', icon: <Shield className="w-5 h-5" /> },
 ];
 
@@ -83,6 +85,7 @@ export function Settings() {
         {/* Tab content area */}
         <div className="p-6">
           {activeTab === 'system' && <SystemPreferencesContent />}
+          {activeTab === 'bank' && <BankSettingsForm />}
           {activeTab === 'ip' && <IpAccessControl />}
         </div>
       </div>
