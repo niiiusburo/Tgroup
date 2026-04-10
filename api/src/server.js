@@ -35,6 +35,7 @@ const customerSourcesRoutes = require('./routes/customerSources');
 const systemPreferencesRoutes = require('./routes/systemPreferences');
 const websitePagesRoutes = require('./routes/websitePages');
 const placesRoutes = require('./routes/places');
+const bankSettingsRoutes = require('./routes/bankSettings');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -82,6 +83,7 @@ app.use('/api/CustomerSources', customerSourcesRoutes);
 app.use('/api/Places', placesRoutes);
 app.use('/api/SystemPreferences', systemPreferencesRoutes);
 app.use('/api/WebsitePages', websitePagesRoutes);
+app.use('/api/settings', bankSettingsRoutes);
 
 // Stub image endpoint used by partner avatars
 app.get('/api/web/Image2', (req, res) => {
@@ -115,6 +117,6 @@ module.exports = app;
 // Only start server if not in test environment
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
-    console.log(`TDental API running on http://localhost:${PORT}`);
+    console.log(`TG Clinic API running on http://localhost:${PORT}`);
   });
 }
