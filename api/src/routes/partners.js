@@ -344,6 +344,14 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Name and phone are required' });
     }
 
+    const duplicate = await query(
+      'SELECT id FROM partners WHERE phone = $1 AND isdeleted = false LIMIT 1',
+      [phone]
+    );
+    if (duplicate && duplicate.length > 0) {
+      return res.status(409).json({ error: 'Phone number already exists' });
+    }
+
     // Generate a new UUID
     const { v4: uuidv4 } = require('uuid');
     const id = uuidv4();
