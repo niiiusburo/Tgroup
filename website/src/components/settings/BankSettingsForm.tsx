@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react';
 import { useBankSettings, BankSettings } from '@/hooks/useBankSettings';
 import { Building2, Save, Loader2, CheckCircle2 } from 'lucide-react';
+import { BankSelector } from '@/components/shared/BankSelector';
 
 export function BankSettingsForm() {
   const { settings, loading, updateSettings } = useBankSettings();
@@ -69,14 +70,10 @@ export function BankSettingsForm() {
           <label htmlFor="bankBin" className="block text-sm font-medium text-gray-700">
             Mã ngân hàng (BIN)
           </label>
-          <input
-            id="bankBin"
-            type="text"
+          <BankSelector
             value={formData.bankBin}
-            onChange={(e) => handleChange('bankBin', e.target.value)}
-            placeholder="970436"
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-            required
+            onChange={(bin) => handleChange('bankBin', bin)}
+            placeholder="Chọn ngân hàng..."
           />
           <p className="text-xs text-gray-400">Ví dụ: 970436 (Vietcombank)</p>
         </div>
