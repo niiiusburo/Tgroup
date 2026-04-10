@@ -1,16 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-test.use({ storageState: undefined });
-
 test('TC-VQ1: Generate VietQR from customer payments tab', async ({ page }) => {
-  // Navigate to login
-  await page.goto('http://localhost:5174/login');
-
-  // Wait for login form and fill credentials
-  await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 10000 });
-  await page.fill('input[type="email"]', 'tg@clinic.vn');
-  await page.fill('input[type="password"]', '123456');
-  await page.click('button[type="submit"]');
+  // Start from base URL (already authenticated via storageState)
+  await page.goto('http://localhost:5174');
 
   // Wait for dashboard to load
   await expect(page.locator('h1', { hasText: 'Overview' })).toBeVisible({ timeout: 15000 });
