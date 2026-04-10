@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Wallet, Plus, Loader2 } from 'lucide-react';
+import { Wallet, Plus, Loader2, QrCode } from 'lucide-react';
+import { VietQrModal } from './VietQrModal';
 
 interface DepositWalletProps {
   depositBalance: number;
   outstandingBalance: number;
-  onAddDeposit?: (amount: number, method: 'cash' | 'bank', note?: string) => Promise<void>;
+  onAddDeposit?: (amount: number, method: 'cash' | 'bank' | 'vietqr', note?: string) => Promise<void>;
   loading?: boolean;
 }
 
@@ -20,9 +21,10 @@ export function DepositWallet({
 }: DepositWalletProps) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [addAmount, setAddAmount] = useState('');
-  const [addMethod, setAddMethod] = useState<'cash' | 'bank'>('cash');
+  const [addMethod, setAddMethod] = useState<'cash' | 'bank' | 'vietqr'>('cash');
   const [addNote, setAddNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showVietQr, setShowVietQr] = useState(false);
 
   const handleAddDeposit = async () => {
     if (!onAddDeposit || !addAmount) return;
@@ -99,7 +101,7 @@ export function DepositWallet({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Payment Method
                 </label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <button
                     type="button"
                     onClick={() => setAddMethod('cash')}
@@ -122,6 +124,17 @@ export function DepositWallet({
                   >
                     Bank Transfer
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setAddMethod('vietqr')}
+                    className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                      addMethod === 'vietqr'
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    VietQR
+                  </button>
                 </div>
               </div>
 
@@ -138,6 +151,17 @@ export function DepositWallet({
                 />
               </div>
             </div>
+
+            {addMethod === 'vietqr' && (
+              <button
+                type="button"
+                onClick={() => setShowVietQr(true)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <QrCode className="w-4 h-4" />
+                Tạo QR
+              </button>
+            )}
 
             <div className="flex justify-end gap-3 mt-6">
               <button
@@ -159,6 +183,7 @@ export function DepositWallet({
           </div>
         </div>
       )}
+      <VietQrModal open={showVietQr} onClose={() => setShowVietQr(false)} />
     </div>
   );
 }

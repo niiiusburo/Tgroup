@@ -23,9 +23,10 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   X, CreditCard, User, Stethoscope, MapPin, FileText, Check, DollarSign,
-  Banknote, Wallet, Building2, AlertCircle, Info,
+  Banknote, Wallet, Building2, AlertCircle, Info, QrCode,
 } from 'lucide-react';
 import { CustomerSelector } from '@/components/shared/CustomerSelector';
+import { VietQrModal } from './VietQrModal';
 import { ServiceCatalogSelector } from '@/components/shared/ServiceCatalogSelector';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useLocations } from '@/hooks/useLocations';
@@ -82,6 +83,7 @@ export function PaymentForm({
   onClose,
   defaultCustomerName = '',
   defaultServiceName = '',
+  defaultAmount,
   defaultCustomerId,
   depositBalance: externalDepositBalance,
   outstandingBalance: externalOutstandingBalance,
@@ -102,6 +104,7 @@ export function PaymentForm({
   const [depositAmount, setDepositAmount] = useState(0);
   const [cashAmount, setCashAmount] = useState(0);
   const [bankAmount, setBankAmount] = useState(0);
+  const [showVietQr, setShowVietQr] = useState(false);
 
   // ─── Derived data ─────────────────────────────────────────────
   const customers: Customer[] = apiCustomers.map(c => ({
@@ -357,13 +360,23 @@ export function PaymentForm({
               <div className={`rounded-xl border-2 p-4 transition-all ${
                 bankAmount > 0 ? 'border-blue-300 bg-blue-50/50' : 'border-gray-200 bg-white'
               }`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                    bankAmount > 0 ? 'bg-blue-100' : 'bg-gray-100'
-                  }`}>
-                    <Building2 className={`w-4 h-4 ${bankAmount > 0 ? 'text-blue-600' : 'text-gray-400'}`} />
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                      bankAmount > 0 ? 'bg-blue-100' : 'bg-gray-100'
+                    }`}>
+                      <Building2 className={`w-4 h-4 ${bankAmount > 0 ? 'text-blue-600' : 'text-gray-400'}`} />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">Chuyển khoản (Bank)</span>
                   </div>
-                  <span className="text-sm font-medium text-gray-700">Chuyển khoản (Bank)</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowVietQr(true)}
+                    className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors"
+                  >
+                    <QrCode className="w-3.5 h-3.5" />
+                    Tạo QR
+                  </button>
                 </div>
                 <input
                   type="number"
@@ -462,6 +475,14 @@ export function PaymentForm({
             />
           </div>
         </form>
+
+        <VietQrModal
+          open={showVietQr}
+          onClose={() => setShowVietQr(false)}
+          defaultAmount={bankAmount > 0 ? bankAmount : defaultAmount}
+          customerName={selectedCustomer?.name || defaultCustomerName}
+          customerPhone={selectedCustomer?.phone || ''}
+        />
 
         {/* ─── Footer ─── */}
         <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
