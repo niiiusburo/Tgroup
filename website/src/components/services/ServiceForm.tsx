@@ -71,6 +71,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   const [customerPhone, setCustomerPhone] = useState(initialData?.customerPhone ?? '');
   const [doctorId, setDoctorId] = useState<string | null>(initialData?.doctorId ?? null);
   const [assistantId, setAssistantId] = useState<string | null>(initialData?.assistantId ?? null);
+  const [dentalAideId, setDentalAideId] = useState<string | null>(initialData?.dentalAideId ?? null);
   const [locationId, setLocationId] = useState<string | null>(initialData?.locationId ?? null);
   const [startDate, setStartDate] = useState(initialData?.startDate ?? '');
   const [expectedEndDate, setExpectedEndDate] = useState(initialData?.expectedEndDate ?? '');
@@ -91,6 +92,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       setCustomerPhone(initialData.customerPhone ?? '');
       setDoctorId(initialData.doctorId ?? null);
       setAssistantId(initialData.assistantId ?? null);
+      setDentalAideId(initialData.dentalAideId ?? null);
       setLocationId(initialData.locationId ?? null);
       setStartDate(initialData.startDate ?? '');
       setExpectedEndDate(initialData.expectedEndDate ?? '');
@@ -186,6 +188,9 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   const handleAssistantChange = (id: string | null) => {
     setAssistantId(id);
   };
+  const handleDentalAideChange = (id: string | null) => {
+    setDentalAideId(id);
+  };
   const handleLocationChange = (id: string | null) => {
     setLocationId(id);
     if (id) setErrors(prev => { const next = { ...prev }; delete next.location; return next; });
@@ -203,6 +208,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       (customerId ? { id: customerId, name: customerName, phone: customerPhone } : undefined);
     const doctor = employees.find(emp => emp.id === doctorId);
     const assistant = employees.find(emp => emp.id === assistantId);
+    const dentalAide = employees.find(emp => emp.id === dentalAideId);
     const location = locations.find(l => l.id === locationId);
     if (!customer || !doctor || !location || !selectedCatalog) return;
 
@@ -215,6 +221,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       catalogItemId: selectedCatalog.id, serviceName: selectedCatalog.name,
       category: selectedCatalog.category, doctorId: doctor.id, doctorName: doctor.name,
       assistantId: assistant?.id ?? null, assistantName: assistant?.name ?? '',
+      dentalAideId: dentalAide?.id ?? null, dentalAideName: dentalAide?.name ?? '',
       locationId: location.id, locationName: location.name,
       totalVisits: selectedCatalog.totalVisits, totalCost: cost,
       startDate, expectedEndDate: expectedEndDate || startDate,
@@ -309,6 +316,15 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
               Trợ thủ
             </label>
             <DoctorSelector employees={employees} selectedId={assistantId} onChange={handleAssistantChange} filterRoles={['doctor-assistant', 'assistant']} placeholder="Chọn trợ thủ..." />
+          </div>
+
+          {/* Nha sĩ phụ */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <User className="w-3.5 h-3.5" />
+              Nha sĩ phụ
+            </label>
+            <DoctorSelector employees={employees} selectedId={dentalAideId} onChange={handleDentalAideChange} filterRoles={['assistant', 'doctor-assistant']} placeholder="Chọn nha sĩ phụ..." />
           </div>
 
           {/* Chi nhánh */}
