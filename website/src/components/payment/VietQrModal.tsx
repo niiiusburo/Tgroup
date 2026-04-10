@@ -5,9 +5,10 @@
  */
 
 import { useState, useEffect } from 'react';
-import { X, QrCode } from 'lucide-react';
+import { X, QrCode, CheckCircle } from 'lucide-react';
 import { buildVietQrUrl, generatePaymentDescription } from '../../lib/vietqr';
 import { useBankSettings } from '../../hooks/useBankSettings';
+import { uploadPaymentProof } from '../../lib/api';
 
 interface VietQrModalProps {
   open: boolean;
@@ -15,6 +16,7 @@ interface VietQrModalProps {
   customerName?: string;
   customerPhone?: string;
   defaultAmount?: number;
+  paymentId?: string;
 }
 
 export function VietQrModal({
@@ -23,11 +25,16 @@ export function VietQrModal({
   customerName = '',
   customerPhone = '',
   defaultAmount,
+  paymentId,
 }: VietQrModalProps) {
   const { settings, loading } = useBankSettings();
   const [amount, setAmount] = useState<string>(defaultAmount ? String(defaultAmount) : '');
   const [description, setDescription] = useState<string>('');
   const [generated, setGenerated] = useState<boolean>(false);
+  const [proofImage, setProofImage] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<boolean>(false);
+  const [uploadSuccess, setUploadSuccess] = useState<boolean>(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -36,6 +43,9 @@ export function VietQrModal({
         customerName ? generatePaymentDescription(customerName, customerPhone) : ''
       );
       setGenerated(false);
+      setProofImage(null);
+      setUploadSuccess(false);
+      setUploadError(null);
     }
   }, [open, customerName, customerPhone, defaultAmount]);
 
@@ -51,6 +61,34 @@ export function VietQrModal({
           name: settings.bankAccountName,
         })
       : null;
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadSuccess(false);
+    setUploadError(null);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const result = ev.target?.result as string;
+      setProofImage(result || null);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleConfirmPayment = async () => {
+    if (!proofImage || !paymentId) return;
+    setUploading(true);
+    setUploadSuccess(false);
+    setUploadError(null);
+    try {
+      await uploadPaymentProof(paymentId, proofImage, description || undefined);
+      setUploadSuccess(true);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -130,28 +168,64 @@ export function VietQrModal({
             </button>
           </div>
 
-          {/* Right panel - QR display */}
-          <div className="flex items-center justify-center bg-gray-50 rounded-xl border border-gray-100 p-4 min-h-[200px]">
-            {loading ? (
-              <div className="flex items-center gap-2 text-gray-400">
-                <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
-                Đang tải...
-              </div>
-            ) : !settings ? (
-              <div className="text-center text-gray-500">
-                <p className="text-sm">Vui lòng cấu hình tài khoản ngân hàng trong Cài đặt</p>
-              </div>
-            ) : qrUrl ? (
-              <div className="text-center">
-                <img src={qrUrl} alt="VietQR" className="mx-auto rounded-lg" />
-                <p className="mt-2 text-xs text-gray-400">
-                  {settings.bankAccountName} - {settings.bankNumber}
-                </p>
-              </div>
-            ) : (
-              <div className="text-center text-gray-400">
-                <QrCode className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Nhập số tiền và nhấn "Tạo QR"</p>
+          {/* Right panel - QR display + proof upload */}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-center bg-gray-50 rounded-xl border border-gray-100 p-4 min-h-[200px]">
+              {loading ? (
+                <div className="flex items-center gap-2 text-gray-400">
+                  <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                  Đang tải...
+                </div>
+              ) : !settings ? (
+                <div className="text-center text-gray-500">
+                  <p className="text-sm">Vui lòng cấu hình tài khoản ngân hàng trong Cài đặt</p>
+                </div>
+              ) : qrUrl ? (
+                <div className="text-center">
+                  <img src={qrUrl} alt="VietQR" className="mx-auto rounded-lg" />
+                  <p className="mt-2 text-xs text-gray-400">
+                    {settings.bankAccountName} - {settings.bankNumber}
+                  </p>
+                </div>
+              ) : (
+                <div className="text-center text-gray-400">
+                  <QrCode className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Nhập số tiền và nhấn "Tạo QR"</p>
+                </div>
+              )}
+            </div>
+
+            {qrUrl && (
+              <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Ảnh xác nhận chuyển khoản
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100"
+                />
+                {proofImage && (
+                  <img src={proofImage} alt="Payment proof preview" className="w-full max-h-40 object-contain rounded-lg border border-gray-100" />
+                )}
+                <button
+                  type="button"
+                  onClick={handleConfirmPayment}
+                  disabled={!proofImage || uploading || !paymentId}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-green-600 rounded-xl hover:bg-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {uploading ? 'Đang lưu...' : 'Xác nhận đã thanh toán'}
+                </button>
+                {uploadSuccess && (
+                  <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg text-sm">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Đã lưu xác nhận thanh toán thành công</span>
+                  </div>
+                )}
+                {uploadError && (
+                  <div className="text-red-600 bg-red-50 px-3 py-2 rounded-lg text-sm">{uploadError}</div>
+                )}
               </div>
             )}
           </div>

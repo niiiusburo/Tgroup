@@ -1,5 +1,97 @@
 [
   {
+    "version": "0.4.10",
+    "date": "2026-04-10",
+    "commit": "61ad558e",
+    "highlights": "VietQR payment generation and clinic bank account configuration",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "VietQR code generation in PaymentForm and DepositWallet",
+          "Clinic bank account configuration via Settings API",
+          "Payment proof upload after QR transfer"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "TDD unit tests for VietQR builder and bank settings hook",
+          "Playwright E2E test TC-VQ1 for QR payment flow"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.4.9",
+    "date": "Apr 10, 2026",
+    "commit": "pending",
+    "highlights": "Save button fix, quick-add customer in appointments, form layout improvements",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Fixed save button (Lưu) — async handling now properly awaits API call with spinner and error feedback",
+          "Fixed deposit modal resetting active tab after close"
+        ]
+      },
+      {
+        "title": "New Features",
+        "items": [
+          "Quick-add customer button in appointment form — create new patients inline without leaving the form",
+          "CustomerSelector now shows 'Tạo khách hàng mới' button at bottom of dropdown"
+        ]
+      },
+      {
+        "title": "UI Improvements",
+        "items": [
+          "Moved Ghi chú (Notes) from left panel to right panel in customer form for better balance",
+          "Phân công (Assignment) section now has more vertical space for its 5 dropdown fields"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added 14-test customer persistence sweep covering all customer modules",
+          "Added customer create save test with TDD verification"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.4.8",
+    "date": "Apr 10, 2026",
+    "commit": "pending",
+    "highlights": "🚀 Major customer module overhaul — auto codes, walk-ins, calendar search, service form refactor",
+    "sections": [
+      {
+        "title": "✨ New Features",
+        "items": [
+          "Auto-generated customer codes now visible in AddCustomerForm and Customers table",
+          "Floating '+' quick-add button on Customers page",
+          "Walk-in patient modal on Overview — instant customer + appointment creation",
+          "Calendar page now has text search and status filter tabs",
+          "ServiceForm supports assistant selector, quantity, and unit fields"
+        ]
+      },
+      {
+        "title": "🐛 Bug Fixes",
+        "items": [
+          "Fixed schedule logic bug — scheduled appointments no longer appear in Patient Check-in",
+          "Verified save buttons work across payment, appointment, and service forms",
+          "E2E tests updated to match Vietnamese UI headings and auth state"
+        ]
+      },
+      {
+        "title": "🏗️ Backend",
+        "items": [
+          "Extended SaleOrders API with assistantid, quantity, and unit fields",
+          "Customer code auto-generation already active — now surfaced in UI"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.4.7",
     "date": "Apr 9, 2026",
     "commit": "pending",
@@ -129,7 +221,7 @@
         "items": [
           "AppointmentForm now has service dropdown from catalog (no more free text)",
           "AppointmentForm now has 'Loại khách' toggle (Khách mới / Tái khám)",
-          "AppointmentForm now has 'Thời gian dự kiến' field (estimated duration)",
+          "AppointmentForm now has 'Thờigian dự kiến' field (estimated duration)",
           "PaymentForm now uses real CustomerSelector + ServiceCatalogSelector",
           "PaymentForm now uses LocationSelector instead of free text",
           "All forms use label icons (User, Stethoscope, MapPin, etc.)"
@@ -157,7 +249,7 @@
         "title": "✨ New Features",
         "items": [
           "Service dropdown linked to product catalog (no more free text)",
-          "Thời gian dự kiến field for estimated appointment duration",
+          "Thờigian dự kiến field for estimated appointment duration",
           "Loại khách field: Khách mới / Tái khám"
         ]
       },

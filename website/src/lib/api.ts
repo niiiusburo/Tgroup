@@ -1,5 +1,5 @@
 /**
- * API Client - connects frontend to tdental-api backend
+ * API Client - connects frontend to tgclinic-api backend
  * @crossref:used-in[useCustomers, useEmployees, useAppointments, useServices, usePayment, useLocations]
  */
 
@@ -43,7 +43,7 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
     'Content-Type': 'application/json',
   };
 
-  const token = localStorage.getItem('tdental_token');
+  const token = localStorage.getItem('tgclinic_token');
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
@@ -433,6 +433,9 @@ export function createSaleOrder(data: {
   productname?: string;
   doctorid?: string;
   doctorname?: string;
+  assistantid?: string | null;
+  quantity?: number;
+  unit?: string;
   amounttotal?: number;
   datestart?: string;
   dateend?: string;
@@ -533,11 +536,11 @@ export interface LoginResponse {
 }
 
 export function login(email: string, password: string) {
-  return apiFetch<LoginResponse>('/Auth/login', { method: 'POST', body: { email, password } });
+  return apiFetch<LoginResponse>('/auth/login', { method: 'POST', body: { email, password } });
 }
 
 export function fetchMe() {
-  return apiFetch<LoginResponse>('/Auth/me');
+  return apiFetch<LoginResponse>('/auth/me');
 }
 
 // ─── Customer Balance ─────────────────────────────────────────────
@@ -943,4 +946,15 @@ export function updateWebsitePage(id: string, data: Partial<{
 
 export function deleteWebsitePage(id: string) {
   return apiFetch<void>(`/WebsitePages/${id}`, { method: 'DELETE' });
+}
+
+export async function uploadPaymentProof(
+  paymentId: string,
+  proofImageBase64: string,
+  qrDescription?: string
+): Promise<{ success: boolean; proofId?: number }> {
+  return apiFetch<{ success: boolean; proofId?: number }>(`/Payments/${paymentId}/proof`, {
+    method: 'POST',
+    body: { proofImageBase64, qrDescription },
+  });
 }
