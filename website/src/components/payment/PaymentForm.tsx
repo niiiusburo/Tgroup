@@ -23,7 +23,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   X, CreditCard, User, Stethoscope, MapPin, FileText, Check, DollarSign,
-  Banknote, Wallet, Building2, AlertCircle, Info, QrCode,
+  Banknote, Wallet, Building2, AlertCircle, Info, QrCode, CalendarDays,
 } from 'lucide-react';
 import { CustomerSelector } from '@/components/shared/CustomerSelector';
 import { VietQrModal } from './VietQrModal';
@@ -106,6 +106,7 @@ export function PaymentForm({
   const [cashAmount, setCashAmount] = useState(0);
   const [bankAmount, setBankAmount] = useState(0);
   const [showVietQr, setShowVietQr] = useState(false);
+  const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().slice(0, 10));
 
   // ─── Derived data ─────────────────────────────────────────────
   const customers: Customer[] = apiCustomers.map(c => ({
@@ -186,6 +187,7 @@ export function PaymentForm({
 
     setIsSaving(true);
     try {
+      const finalNotes = [paymentDate ? `Date: ${paymentDate}` : null, notes.trim()].filter(Boolean).join(' | ');
       await onSubmit({
         customerId: selectedCustomer.id,
       customerName: selectedCustomer.name,
@@ -195,7 +197,7 @@ export function PaymentForm({
       amount: totalPayment,
       method,
       locationName: selectedLocation?.name || '',
-      notes: notes.trim(),
+      notes: finalNotes,
       sources: {
         depositAmount,
         cashAmount,
@@ -467,6 +469,20 @@ export function PaymentForm({
             <LocationSelector
               locations={apiLocations.map(l => ({ id: l.id, name: l.name, address: l.address || '', phone: l.phone || '', status: 'active' as const, doctorCount: 0, patientCount: 0, appointmentCount: 0 }))}
               selectedId={locationId} onChange={setLocationId} excludeAll
+            />
+          </div>
+
+          {/* ─── Ngày thanh toán ─── */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <CalendarDays className="w-3.5 h-3.5" />
+              Ngày thanh toán
+            </label>
+            <input
+              type="date"
+              value={paymentDate}
+              onChange={(e) => setPaymentDate(e.target.value)}
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
             />
           </div>
 
