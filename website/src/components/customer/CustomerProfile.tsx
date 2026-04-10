@@ -287,6 +287,7 @@ export function CustomerProfile({
         <div className="bg-white rounded-xl shadow-card p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><p className="text-xs text-gray-400">Customer Code</p><p className="text-sm font-medium text-gray-900">{profile.code || 'N/A'}</p></div>
             <div><p className="text-xs text-gray-400">Full Name</p><p className="text-sm font-medium text-gray-900">{profile.name}</p></div>
             <div><p className="text-xs text-gray-400">Phone</p><p className="text-sm font-medium text-gray-900">{profile.phone || 'N/A'}</p></div>
             <div><p className="text-xs text-gray-400">Email</p><p className="text-sm font-medium text-gray-900">{profile.email || 'N/A'}</p></div>
