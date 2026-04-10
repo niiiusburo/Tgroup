@@ -5,7 +5,7 @@ import { VietQrModal } from './VietQrModal';
 interface DepositWalletProps {
   depositBalance: number;
   outstandingBalance: number;
-  onAddDeposit?: (amount: number, method: 'cash' | 'bank' | 'vietqr', note?: string) => Promise<void>;
+  onAddDeposit?: (amount: number, method: 'cash' | 'bank' | 'vietqr', date: string, note?: string) => Promise<void>;
   loading?: boolean;
 }
 
@@ -22,6 +22,7 @@ export function DepositWallet({
   const [showAddModal, setShowAddModal] = useState(false);
   const [addAmount, setAddAmount] = useState('');
   const [addMethod, setAddMethod] = useState<'cash' | 'bank' | 'vietqr'>('cash');
+  const [addDate, setAddDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [addNote, setAddNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showVietQr, setShowVietQr] = useState(false);
@@ -31,7 +32,7 @@ export function DepositWallet({
     
     setSubmitting(true);
     try {
-      await onAddDeposit(parseFloat(addAmount), addMethod, addNote || undefined);
+      await onAddDeposit(parseFloat(addAmount), addMethod, addDate, addNote || undefined);
       setShowAddModal(false);
       setAddAmount('');
       setAddNote('');
@@ -84,6 +85,16 @@ export function DepositWallet({
             <h4 className="text-lg font-semibold text-gray-900 mb-4">Add Deposit</h4>
             
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Ngày giao dịch</label>
+                <input
+                  type="date"
+                  value={addDate}
+                  onChange={(e) => setAddDate(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                />
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Amount (VND)

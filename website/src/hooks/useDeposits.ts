@@ -73,12 +73,14 @@ export function useDeposits() {
     customerId: string,
     amount: number,
     method: 'cash' | 'bank' | 'vietqr',
+    date?: string,
     note?: string
   ) => {
     setLoading(true);
     setError(null);
     try {
-      await createPayment({ customerId, amount, method: method === 'vietqr' ? 'bank' : method, notes: note });
+      const composedNote = [date ? `Date: ${date}` : null, note].filter(Boolean).join(' | ');
+      await createPayment({ customerId, amount, method: method === 'vietqr' ? 'bank' : method, notes: composedNote });
       await loadDeposits(customerId);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add deposit');

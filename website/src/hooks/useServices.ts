@@ -31,6 +31,8 @@ export interface CreateServiceInput {
   readonly doctorName: string;
   readonly assistantId?: string | null;
   readonly assistantName?: string;
+  readonly dentalAideId?: string | null;
+  readonly dentalAideName?: string;
   readonly locationId: string;
   readonly locationName: string;
   readonly totalVisits: number;
@@ -181,6 +183,7 @@ export function useServices(selectedLocationId?: string) {
       doctorid: input.doctorId,
       doctorname: input.doctorName,
       assistantid: input.assistantId ?? null,
+      dentalaideid: input.dentalAideId ?? null,
       quantity: input.quantity ?? 1,
       unit: input.unit ?? 'răng',
       amounttotal: input.totalCost,
