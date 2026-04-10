@@ -24,6 +24,7 @@ export interface CustomerProfileData {
   totalSpent: number;
   companyId: string;
   companyName: string;
+  code: string;
   depositBalance: number;
   outstandingBalance: number;
 }
@@ -89,6 +90,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         totalSpent: 0,
         companyId: partner.companyid ?? '',
         companyName: '',
+        code: partner.code ?? '',
         depositBalance: 0,
         outstandingBalance: 0,
       };

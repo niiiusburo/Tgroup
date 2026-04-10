@@ -367,6 +367,7 @@ export function Customers() {
         totalSpent: hookProfile.totalSpent,
         companyId: hookProfile.companyId,
         companyName: hookProfile.companyName || locationNameMap.get(hookProfile.companyId) || 'N/A',
+        code: getCustomerCode() ?? '',
         depositBalance: hookProfile.depositBalance,
         outstandingBalance: hookProfile.outstandingBalance,
       };
@@ -388,6 +389,7 @@ export function Customers() {
         lastVisit: listCustomer?.lastVisit ?? 'N/A',
         companyId: listCustomer?.locationId ?? '',
         companyName: locationNameMap.get(listCustomer?.locationId ?? '') ?? 'N/A',
+        code: listCustomer?.code ?? '',
         depositBalance: 0,
         outstandingBalance: 0,
       };
