@@ -1,4 +1,4 @@
-# VPS Timezone Setup for TDental
+# VPS Timezone Setup for TG Clinic
 
 ## Problem
 The Overview page was not displaying appointments because the VPS was using UTC timezone while the application expects Vietnam timezone (Asia/Ho_Chi_Minh, UTC+7).
@@ -40,7 +40,7 @@ date
 timedatectl
 
 # Restart the backend API to pick up the new timezone
-pm2 restart tdental-api  # or however you manage the process
+pm2 restart tgclinic-api  # or however you manage the process
 ```
 
 ### 3. Docker Configuration (if using Docker)
@@ -75,7 +75,7 @@ TZ=Asia/Ho_Chi_Minh node src/server.js
 Or in your process manager (PM2):
 
 ```bash
-pm2 start src/server.js --name tdental-api --env TZ=Asia/Ho_Chi_Minh
+pm2 start src/server.js --name tgclinic-api --env TZ=Asia/Ho_Chi_Minh
 ```
 
 ## Verification

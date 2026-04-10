@@ -2,8 +2,12 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 import { fetchAppointments, type ApiAppointment } from '@/lib/api';
 import { useTimezone } from '@/contexts/TimezoneContext';
+import { normalizeText } from '@/lib/utils';
+import type { AppointmentStatus } from '@/types/appointment';
 
 export type ViewMode = 'day' | 'week' | 'month';
+
+export type CalendarStatusFilter = AppointmentStatus | 'all';
 
 /**
  * Hook for Calendar page state and data
@@ -15,6 +19,8 @@ export function useCalendarData(selectedLocationId?: string) {
   // Store current date as string in YYYY-MM-DD format for timezone consistency
   const [currentDateStr, setCurrentDateStr] = useState(() => formatDate(new Date(), 'yyyy-MM-dd'));
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<CalendarStatusFilter>('all');
   const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [appointments, setAppointments] = useState<readonly CalendarAppointment[]>([]);
@@ -86,9 +92,18 @@ export function useCalendarData(selectedLocationId?: string) {
   }, [loadAppointments]);
 
   const filteredAppointments = useMemo(() => {
-    if (!selectedDoctorId) return appointments;
-    return appointments.filter((apt) => apt.dentistId === selectedDoctorId);
-  }, [appointments, selectedDoctorId]);
+    return appointments.filter((apt) => {
+      const matchesDoctor = selectedDoctorId ? apt.dentistId === selectedDoctorId : true;
+      const matchesStatus = statusFilter !== 'all' ? apt.status === statusFilter : true;
+      const term = normalizeText(searchTerm.trim());
+      const matchesSearch = term
+        ? normalizeText(apt.customerName).includes(term) ||
+          normalizeText(apt.customerPhone).includes(term) ||
+          normalizeText(apt.dentist).includes(term)
+        : true;
+      return matchesDoctor && matchesStatus && matchesSearch;
+    });
+  }, [appointments, selectedDoctorId, statusFilter, searchTerm]);
 
   const weekDates = useMemo(
     () => getWeekDates(currentDate),
@@ -136,6 +151,10 @@ export function useCalendarData(selectedLocationId?: string) {
     dateLabel,
     selectedDoctorId,
     setSelectedDoctorId,
+    searchTerm,
+    setSearchTerm,
+    statusFilter,
+    setStatusFilter,
     selectedAppointment,
     setSelectedAppointment,
     isLoading,

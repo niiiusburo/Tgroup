@@ -1,4 +1,4 @@
-# TGroup — TDental Dashboard
+# TGroup — TG Clinic Dashboard
 
 ## Project Overview
 
@@ -39,7 +39,7 @@ Tgroup/
 │
 ├── api/                        # Backend API (Express + PostgreSQL)
 ├── blueprint/                  # Architecture docs & reference
-├── frontend-truth/             # Original TDental (ground truth)
+├── frontend-truth/             # Original TG Clinic (ground truth)
 ├── docs/                       # Generated documentation
 └── features.json               # Feature tracker (20 features)
 ```

@@ -34,7 +34,7 @@ describe('TimezoneContext', () => {
   });
 
   it('should load timezone from localStorage if available', () => {
-    localStorageMock.setItem('tdental_timezone', 'America/New_York');
+    localStorageMock.setItem('tgclinic_timezone', 'America/New_York');
 
     const wrapper = ({ children }: { children: React.ReactNode }) =>
       React.createElement(TimezoneProvider, null, children);
@@ -55,7 +55,7 @@ describe('TimezoneContext', () => {
     });
 
     expect(result.current.timezone).toBe('UTC');
-    expect(localStorageMock.getItem('tdental_timezone')).toBe('UTC');
+    expect(localStorageMock.getItem('tgclinic_timezone')).toBe('UTC');
   });
 
   it('should provide getToday function returning YYYY-MM-DD format', () => {

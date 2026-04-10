@@ -18,6 +18,7 @@ import {
   Notifications,
   PermissionBoard,
   Login,
+  Payment,
 } from '@/pages';
 import { ROUTES } from '@/constants';
 import { AddressAutocompleteTest } from '@/components/shared/AddressAutocompleteTest';
@@ -169,6 +170,16 @@ function App() {
               }
             />
 
+            {/* @crossref:route[path="/customers/:id", component=Customers] */}
+            <Route
+              path={`${ROUTES.CUSTOMERS}/:id`}
+              element={
+                <ProtectedRoute path={ROUTES.CUSTOMERS}>
+                  <Customers />
+                </ProtectedRoute>
+              }
+            />
+
 
             {/* @crossref:route[path="/employees", component=Employees] */}
             <Route
@@ -256,6 +267,16 @@ function App() {
               element={
                 <ProtectedRoute path={ROUTES.PERMISSIONS}>
                   <PermissionBoard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* @crossref:route[path="/payment", component=Payment] */}
+            <Route
+              path={ROUTES.PAYMENT}
+              element={
+                <ProtectedRoute path={ROUTES.PAYMENT}>
+                  <Payment />
                 </ProtectedRoute>
               }
             />

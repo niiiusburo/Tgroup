@@ -1,5 +1,5 @@
 /**
- * Login Page - TDental authentication screen
+ * Login Page - TG Clinic authentication screen
  * @crossref:used-in[App]
  * @crossref:uses[AuthContext.login]
  */
@@ -8,7 +8,7 @@ import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
-const STORAGE_KEY = 'tdental_remember';
+const STORAGE_KEY = 'tgclinic_remember';
 const STORAGE_DAYS = 60; // Save for 60 days
 
 interface RememberedCredentials {
@@ -123,7 +123,7 @@ export function Login() {
             </div>
             <div className="text-center">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                TDental
+                TG Clinic
               </h1>
               <p className="text-sm text-gray-500 mt-1">Sign in to your account</p>
             </div>
@@ -159,7 +159,7 @@ export function Login() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@tdental.vn"
+                placeholder="you@tgclinic.vn"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors"
               />
             </div>
@@ -206,7 +206,7 @@ export function Login() {
         </div>
 
         <p className="text-center text-xs text-white/60 mt-6">
-          TDental Management System &copy; {new Date().getFullYear()}
+          TG Clinic Management System &copy; {new Date().getFullYear()}
         </p>
       </div>
     </div>

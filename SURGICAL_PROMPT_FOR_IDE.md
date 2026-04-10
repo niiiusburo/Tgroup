@@ -1,4 +1,4 @@
-# SURGICAL PROMPT — TDental Website Restructure
+# SURGICAL PROMPT — TG Clinic Website Restructure
 
 > **Give this entire file to Claude IDE.** It contains every detail needed to restructure the main website codebase to match the blueprint spec.
 
@@ -26,7 +26,7 @@
 
 ## CONTEXT: What This System Is
 
-TDental is a dental clinic management system. The tech stack is:
+TG Clinic is a dental clinic management system. The tech stack is:
 - Vite 5.1 + React 18.2 + TypeScript 5.3 + Tailwind 3.4
 - React Router DOM 6.22 + Framer Motion
 - PostgreSQL backend API at `localhost:3002` (API client in `src/lib/api.ts`)

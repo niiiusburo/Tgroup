@@ -54,8 +54,8 @@ export function LocationProvider({ children }: LocationProviderProps) {
       }
     }
 
-    window.addEventListener('tdental:auth-change', handleAuthChange);
-    return () => window.removeEventListener('tdental:auth-change', handleAuthChange);
+    window.addEventListener('tgclinic:auth-change', handleAuthChange);
+    return () => window.removeEventListener('tgclinic:auth-change', handleAuthChange);
   }, []);
 
   const isSingleLocation = allowedLocations.length === 1;

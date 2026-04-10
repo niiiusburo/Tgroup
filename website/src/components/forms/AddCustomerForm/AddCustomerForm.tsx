@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useState, useCallback, useEffect } from 'react';
 import { fetchCompanies, fetchEmployees } from '@/lib/api';
+import { normalizeText } from '@/lib/utils';
 import type { ApiCompany, ApiEmployee } from '@/lib/api';
 import { ComboboxInput } from '@/components/shared/ComboboxInput';
 import {
@@ -44,7 +45,7 @@ import { AddressAutocomplete } from '@/components/shared/AddressAutocomplete';
  * ╔══════════════════════════════════════════════════════════════════════════════════════╗
  * ║                    ⛔  D O   N O T   T O U C H   T H I S   M O D U L E  ⛔          ║
  * ╠══════════════════════════════════════════════════════════════════════════════════════╣
- * ║  This AddCustomerForm is the canonical GOLD STANDARD for all TDental modal forms.  ║
+ * ║  This AddCustomerForm is the canonical GOLD STANDARD for all TG Clinic modal forms. ║
  * ║  ANY new form or modal MUST copy this exact visual standard:                        ║
  * ║                                                                                     ║
  * ║  • Header        : orange gradient + icon + title + subtitle                        ║
@@ -54,14 +55,14 @@ import { AddressAutocomplete } from '@/components/shared/AddressAutocomplete';
  * ║  • Cards         : rounded-2xl, border-gray-200, overflow-hidden                    ║
  * ║  • Footer        : border-t border-gray-200, gradient bg, rounded-xl buttons        ║
  * ║                                                                                     ║
- * ║  This component is the single source of truth for TDental form styling.             ║
+ * ║  This component is the single source of truth for TG Clinic form styling.            ║
  * ║  Every new modal/form MUST visually match this exact standard.                      ║
  * ║  BEFORE modifying this file, you MUST run Playwright visual regression.             ║
  * ╚══════════════════════════════════════════════════════════════════════════════════════╝
  */
 
 /**
- * AddCustomerForm - TDental "Thêm khách hàng" modular card-based form
+ * AddCustomerForm - TG Clinic "Thêm khách hàng" modular card-based form
  * Supports both create and edit modes.
  * @crossref:used-in[Customers]
  */
@@ -69,7 +70,7 @@ import { AddressAutocomplete } from '@/components/shared/AddressAutocomplete';
 interface AddCustomerFormProps {
   readonly initialData?: Partial<CustomerFormData>;
   readonly customerRef?: string | null;
-  readonly onSubmit: (data: CustomerFormData) => void;
+  readonly onSubmit: (data: CustomerFormData) => void | Promise<void>;
   readonly onCancel: () => void;
   readonly isEdit?: boolean;
   readonly canEdit?: boolean;
@@ -276,6 +277,7 @@ export function AddCustomerForm({
   const [activeTab, setActiveTab] = useState<TabId>('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [nameUppercase, setNameUppercase] = useState(false);
+  const [displayRef, setDisplayRef] = useState<string | null>(customerRef ?? null);
 
   const [showSourceDialog, setShowSourceDialog] = useState(false);
   const [showReferrerDialog, setShowReferrerDialog] = useState(false);
@@ -294,6 +296,10 @@ export function AddCustomerForm({
   useEffect(() => {
     setFormData({ ...EMPTY_CUSTOMER_FORM, ...(initialData ?? {}) });
   }, [initialData]);
+
+  useEffect(() => {
+    setDisplayRef(customerRef ?? null);
+  }, [customerRef]);
 
   const getError = useCallback(
     (field: keyof CustomerFormData) => errors.find((e) => e.field === field)?.message,
@@ -326,7 +332,7 @@ export function AddCustomerForm({
   };
 
   const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
       const validationErrors = validateCustomerForm(formData);
       if (validationErrors.length > 0) {
@@ -339,7 +345,10 @@ export function AddCustomerForm({
       }
       setIsSubmitting(true);
       try {
-        onSubmit(formData);
+        await onSubmit(formData);
+      } catch (err) {
+        console.error('Save customer error:', err);
+        setErrors([{ field: 'name', message: 'Lỗi lưu dữ liệu. Vui lòng thử lại.' }]);
       } finally {
         setIsSubmitting(false);
       }
@@ -349,16 +358,16 @@ export function AddCustomerForm({
 
   const findBestMatch = (input: string, options: readonly string[]): string | null => {
     if (!input || options.length === 0) return null;
-    const normalizedInput = input.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const normalizedInput = normalizeText(input);
     const exactMatch = options.find((opt) => opt.toLowerCase() === input.toLowerCase());
     if (exactMatch) return exactMatch;
     const normalizedMatch = options.find((opt) => {
-      const normalizedOpt = opt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const normalizedOpt = normalizeText(opt);
       return normalizedOpt === normalizedInput;
     });
     if (normalizedMatch) return normalizedMatch;
     const partialMatch = options.find((opt) => {
-      const normalizedOpt = opt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const normalizedOpt = normalizeText(opt);
       return normalizedOpt.includes(normalizedInput) || normalizedInput.includes(normalizedOpt);
     });
     if (partialMatch) return partialMatch;
@@ -366,7 +375,7 @@ export function AddCustomerForm({
     let bestMatch: string | null = null;
     let bestScore = 0;
     for (const option of options) {
-      const normalizedOpt = option.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const normalizedOpt = normalizeText(option);
       const optWords = normalizedOpt.split(/\s+/);
       let score = 0;
       for (const word of inputWords) {
@@ -692,16 +701,6 @@ export function AddCustomerForm({
             </div>
           </CardSection>
 
-          {/* Card 3: Notes */}
-          <CardSection title="Ghi chú" icon={FileText} maxHeight="180px">
-            <textarea
-              value={formData.note}
-              onChange={(e) => set('note', e.target.value)}
-              placeholder="Ghi chú về khách hàng..."
-              rows={3}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 resize-none transition-all hover:border-gray-300"
-            />
-          </CardSection>
         </div>
 
         {/* ══ RIGHT PANEL ═══════════════════════════════════════════════════════════ */}
@@ -818,7 +817,7 @@ export function AddCustomerForm({
                     <FieldLabel icon={Building2}>Mã khách hàng</FieldLabel>
                     <input
                       type="text"
-                      value={customerRef ?? '(Tự động)'}
+                      value={displayRef ?? '(Tự động)'}
                       readOnly
                       className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500 cursor-default"
                     />
@@ -1139,6 +1138,17 @@ export function AddCustomerForm({
                 )}
               </div>
             )}
+
+            {/* Notes — moved from left panel for better balance */}
+            <CardSection title="Ghi chú" icon={FileText} maxHeight="180px">
+              <textarea
+                value={formData.note}
+                onChange={(e) => set('note', e.target.value)}
+                placeholder="Ghi chú về khách hàng..."
+                rows={3}
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 resize-none transition-all hover:border-gray-300"
+              />
+            </CardSection>
           </div>
 
           {/* Footer */}

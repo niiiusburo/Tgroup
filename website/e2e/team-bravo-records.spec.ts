@@ -78,7 +78,7 @@ test.describe('TEAM BRAVO: Service Records', () => {
     if (await locationBtn.isVisible({ timeout: 500 }).catch(() => false)) {
       await locationBtn.click();
       await page.waitForTimeout(300);
-      await page.locator('button').filter({ hasText: /Tấm Dentist/ }).first().click();
+      await page.locator('button').filter({ hasText: /TG Clinic/ }).first().click();
       await page.waitForTimeout(200);
     }
 
@@ -196,7 +196,7 @@ test.describe('TEAM BRAVO: Service Records', () => {
     if (await locationBtn.isVisible({ timeout: 500 }).catch(() => false)) {
       await locationBtn.click();
       await page.waitForTimeout(300);
-      await page.locator('button').filter({ hasText: /Tấm Dentist/ }).first().click();
+      await page.locator('button').filter({ hasText: /TG Clinic/ }).first().click();
       await page.waitForTimeout(200);
     }
 

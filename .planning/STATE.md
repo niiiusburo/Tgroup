@@ -1,50 +1,46 @@
 ---
 gsd_state_version: 1.0
-milestone: kol-integration
-milestone_name: KOL Integration Portal
+milestone: v1.1
+milestone_name: v1.1-bugfixes-and-features
 status: in_progress
-last_updated: "2026-04-10T17:50:00.000Z"
+last_updated: "2026-04-10T18:10:00.000Z"
 last_activity: 2026-04-10
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 1
+  completed_plans: 1
   percent: 25
 ---
 
-# Project State — KOL Integration Portal
+# Project State — TG Clinic v1.1 Bugfixes & Features
 
-**Status:** In Progress  
+**Status:** Ready to Execute Phase 2
 **Last Activity:** 2026-04-10
 
 ## Phase Tracker
 
 | Phase | Status | Plans | Verified |
 |-------|--------|-------|----------|
-| 1: Foundation & VietQR | Completed | 4 / 4 | Yes |
-| 2: KOL Management | Not started | — | — |
-| 3: Commission Engine | Not started | — | — |
-| 4: Reporting & Payouts | Not started | — | — |
+| 1: Bug Fixes Wave 1 | Completed | 1 | Yes |
+| 2: Quick Features & Validations | Not started | — | — |
+| 3: Architecture Shifts | Not started | — | — |
+| 4: Polish & Walk-in Redesign | Not started | — | — |
 
-## Completed Plans
+## Reports
 
-- `01-01` — VietQR URL builder + `useBankSettings` hook (TDD)
-- `01-02` — Bank settings backend migration + admin form
-- `01-03` — VietQR modal integration into PaymentForm / DepositWallet
-- `01-04` — Payment proof upload backend + E2E test (TC-VQ1)
+- `v1-1-audit-report.md` — Codebase audit (4 exist, 1 partial, 10 missing)
+- `v1-1-contradictions-report.md` — Top 5 architectural conflicts and resolutions
+- `v1-1-playwright-report.md` — Playwright verification (save-button bugs confirmed by test failures)
 
-## Key Decisions Log
+## Phase 1 Plan
 
-1. **VietQR provider:** `img.vietqr.io` (static QR image) — chosen over dynamic APIs to avoid rate limits and keep flow simple.
-2. **face-api.js reuse:** Plan to reuse existing face-api setup from `frontend-truth` for patient-photo capture (deferred to Phase 2).
-3. **Payment proofs:** Stored as base64 `TEXT` in `payment_proofs.proof_image` for demo simplicity; migrate to object storage before production.
+**Plan:** `.planning/phases/01-bug-fixes-wave-1/01-PLAN.md`
 
-## Artifacts
-
-- `api/migrations/002_payment_proofs.sql`
-- `api/src/routes/payments.js`
-- `website/src/components/payment/VietQrModal.tsx`
-- `website/e2e/vietqr-payment.spec.ts`
-- `website/src/lib/vietqr.ts`
-- `website/src/hooks/useBankSettings.ts`
+Tasks:
+1. Async save in ServiceForm
+2. Async save in PaymentForm
+3. Async save in AppointmentForm
+4. Scroll-to-completed in PatientCheckIn
+5. Calendar branch filter fix
+6. Playwright E2E spec with screenshots

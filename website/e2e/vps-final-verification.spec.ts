@@ -47,6 +47,6 @@ test.describe('VPS Final Verification - Appointments', () => {
     const title = await page.title();
     console.log(`\nPage title: ${title}`);
     
-    expect(title).toContain('TDental');
+    expect(title).toContain('TG Clinic');
   });
 });

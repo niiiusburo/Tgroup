@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, X } from 'lucide-react';
+import { normalizeText } from '@/lib/utils';
 
 interface ComboboxInputProps {
   value: string;
@@ -30,7 +31,7 @@ export function ComboboxInput({
 
   // Filter options based on input
   const filteredOptions = options.filter((option) =>
-    option.toLowerCase().includes(inputValue.toLowerCase())
+    normalizeText(option).includes(normalizeText(inputValue))
   );
 
   // Close dropdown on outside click
@@ -118,8 +119,8 @@ export function ComboboxInput({
               onClick={() => handleSelect(option)}
               className={`
                 w-full px-4 py-2.5 text-left text-sm transition-colors
-                ${option.toLowerCase() === inputValue.toLowerCase() 
-                  ? 'bg-orange-50 text-orange-700 font-medium' 
+                ${normalizeText(option) === normalizeText(inputValue)
+                  ? 'bg-orange-50 text-orange-700 font-medium'
                   : 'hover:bg-gray-50 text-gray-700'}
               `}
             >

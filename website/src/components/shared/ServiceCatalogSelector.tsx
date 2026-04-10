@@ -5,6 +5,7 @@
 
 import { Search, ChevronDown, Stethoscope } from 'lucide-react';
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { normalizeText } from '@/lib/utils';
 import type { ServiceCatalogItem } from '@/data/mockServices';
 import { APPOINTMENT_TYPE_LABELS, type AppointmentType } from '@/constants';
 
@@ -42,12 +43,12 @@ export function ServiceCatalogSelector({
       : [...catalog];
 
     if (searchTerm) {
-      const lower = searchTerm.toLowerCase();
+      const norm = normalizeText(searchTerm);
       items = items.filter(
         (c) =>
-          c.name.toLowerCase().includes(lower) ||
-          c.description.toLowerCase().includes(lower) ||
-          APPOINTMENT_TYPE_LABELS[c.category].toLowerCase().includes(lower),
+          normalizeText(c.name).includes(norm) ||
+          normalizeText(c.description).includes(norm) ||
+          normalizeText(APPOINTMENT_TYPE_LABELS[c.category]).includes(norm),
       );
     }
     return items;

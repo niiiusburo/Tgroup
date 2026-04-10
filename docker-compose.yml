@@ -31,7 +31,7 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/tdental_demo
-      JWT_SECRET: tdental-production-secret-key-2026
+      JWT_SECRET: tgclinic-production-secret-key-2026
       PORT: "3002"
       NODE_ENV: production
     ports:

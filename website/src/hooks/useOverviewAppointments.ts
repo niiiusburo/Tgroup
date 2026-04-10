@@ -55,7 +55,7 @@ interface UseOverviewAppointmentsResult {
   readonly setZone1Filter: (filter: Zone1Filter) => void;
   readonly zone1Appointments: readonly OverviewAppointment[];
   readonly zone1Counts: { all: number; waiting: number; 'in-treatment': number; done: number };
-  readonly updateCheckInStatus: (id: string, status: CheckInStatus) => Promise<void>;
+  readonly updateCheckInStatus: (id: string, status: CheckInStatus, onSuccess?: () => void) => Promise<void>;
 
   // Refresh
   readonly refresh: () => void;
@@ -105,8 +105,8 @@ function mapApiToOverview(apt: ApiAppointment): OverviewAppointment {
   };
 }
 
-const ZONE3_FILTER_KEY = 'tdental:overview:zone3Filter';
-const ZONE1_FILTER_KEY = 'tdental:overview:zone1Filter';
+const ZONE3_FILTER_KEY = 'tgclinic:overview:zone3Filter';
+const ZONE1_FILTER_KEY = 'tgclinic:overview:zone1Filter';
 const ZONE3_OPTIONS: Zone3Filter[] = ['all', 'arrived', 'cancelled'];
 const ZONE1_OPTIONS: Zone1Filter[] = ['all', 'waiting', 'in-treatment', 'done'];
 
@@ -203,7 +203,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
 
   // ─── Zone 1: only arrived patients with downline status ────────
   const arrivedAppointments = useMemo(
-    () => appointments.filter((a) => a.topStatus !== 'cancelled'),
+    () => appointments.filter((a) => a.topStatus === 'arrived'),
     [appointments],
   );
 
@@ -269,7 +269,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
     }
   }, []);
 
-  const updateCheckInStatus = useCallback(async (id: string, status: CheckInStatus) => {
+  const updateCheckInStatus = useCallback(async (id: string, status: CheckInStatus, onSuccess?: () => void) => {
     try {
       // Map downline status to API-valid states
       const stateMap: Record<CheckInStatus, string> = {
@@ -283,6 +283,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
           a.id === id ? { ...a, checkInStatus: status } : a,
         ),
       );
+      onSuccess?.();
     } catch (error) {
       console.error('Failed to update check-in status:', error);
     }

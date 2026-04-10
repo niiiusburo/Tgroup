@@ -5,6 +5,7 @@
  */
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
+import { normalizeText } from '@/lib/utils';
 import type { CustomerSource, SystemPreference, CatalogService } from '@/types/settings';
 import { PERMISSIONS, ROLES } from '@/data/mockPermissionGroups';
 import type { Permission } from '@/data/mockPermissionGroups';
@@ -62,8 +63,8 @@ export function useServiceCatalog() {
       if (!showInactive && !s.isActive) return false;
       if (categoryFilter !== 'all' && s.category !== categoryFilter) return false;
       if (searchTerm) {
-        const q = searchTerm.toLowerCase();
-        return s.name.toLowerCase().includes(q) || s.description.toLowerCase().includes(q);
+        const q = normalizeText(searchTerm);
+        return normalizeText(s.name).includes(q) || normalizeText(s.description).includes(q);
       }
       return true;
     });
@@ -286,7 +287,7 @@ export function useCustomerSources() {
 
 // Default preferences (fallback when API fails)
 const DEFAULT_PREFERENCES: readonly SystemPreference[] = [
-  { id: 'pref-1', key: 'clinic_name', value: 'TDental Clinic', type: 'string', category: 'General', description: 'Clinic name', isPublic: true },
+  { id: 'pref-1', key: 'clinic_name', value: 'TG Clinic', type: 'string', category: 'General', description: 'Clinic name', isPublic: true },
   { id: 'pref-2', key: 'timezone', value: 'Asia/Ho_Chi_Minh', type: 'string', category: 'General', description: 'Timezone', isPublic: true },
   { id: 'pref-3', key: 'currency', value: 'VND', type: 'string', category: 'General', description: 'Currency', isPublic: true },
 ];

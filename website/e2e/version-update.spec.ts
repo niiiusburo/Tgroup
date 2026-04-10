@@ -50,7 +50,7 @@ async function setupVersionMock(page: Page, versionData: typeof OLD_VERSION) {
  */
 async function login(page: Page) {
   await page.goto('http://localhost:5174/login');
-  await page.fill('input#email', 'admin@tdental.vn');
+  await page.fill('input#email', 'tg@clinic.vn');
   await page.fill('input#password', 'admin123');
   await page.click('button[type="submit"]');
   await expect(page.locator('h1', { hasText: 'Overview' })).toBeVisible({ timeout: 15000 });
@@ -111,7 +111,7 @@ test.describe('Version Update System', () => {
     await expect(page.locator('text=Overview')).toBeVisible();
     
     // Store the auth token before update
-    const tokenBefore = await page.evaluate(() => localStorage.getItem('tdental_token'));
+    const tokenBefore = await page.evaluate(() => localStorage.getItem('tgclinic_token'));
     expect(tokenBefore).toBeTruthy();
     
     // Trigger update
@@ -129,7 +129,7 @@ test.describe('Version Update System', () => {
     await page.waitForLoadState('networkidle');
     
     // Verify still logged in (token preserved)
-    const tokenAfter = await page.evaluate(() => localStorage.getItem('tdental_token'));
+    const tokenAfter = await page.evaluate(() => localStorage.getItem('tgclinic_token'));
     expect(tokenAfter).toBe(tokenBefore);
     
     // Should still see Overview (logged in state)

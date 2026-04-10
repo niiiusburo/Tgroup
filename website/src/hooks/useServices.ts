@@ -29,6 +29,8 @@ export interface CreateServiceInput {
   readonly category: AppointmentType;
   readonly doctorId: string;
   readonly doctorName: string;
+  readonly assistantId?: string | null;
+  readonly assistantName?: string;
   readonly locationId: string;
   readonly locationName: string;
   readonly totalVisits: number;
@@ -36,6 +38,8 @@ export interface CreateServiceInput {
   readonly startDate: string;
   readonly expectedEndDate: string;
   readonly notes: string;
+  readonly quantity?: number;
+  readonly unit?: string;
   readonly toothNumbers: readonly string[];
 }
 
@@ -176,6 +180,9 @@ export function useServices(selectedLocationId?: string) {
       productname: input.serviceName,
       doctorid: input.doctorId,
       doctorname: input.doctorName,
+      assistantid: input.assistantId ?? null,
+      quantity: input.quantity ?? 1,
+      unit: input.unit ?? 'răng',
       amounttotal: input.totalCost,
       datestart: input.startDate,
       dateend: input.expectedEndDate,

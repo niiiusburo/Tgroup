@@ -14,7 +14,7 @@ import { test, expect, Page } from '@playwright/test';
 // Test credentials - must match database entries
 const USERS = {
   admin: {
-    email: 'admin@tdental.vn',
+    email: 'tg@clinic.vn',
     password: 'admin123',
     role: 'Admin',
     shouldEditCustomer: true,
@@ -43,7 +43,7 @@ const USERS = {
  */
 async function login(page: Page, email: string, password: string) {
   await page.goto('http://localhost:5174/login');
-  await expect(page.locator('h1')).toContainText('TDental');
+  await expect(page.locator('h1')).toContainText('TG Clinic');
   
   await page.fill('input#email', email);
   await page.fill('input#password', password);

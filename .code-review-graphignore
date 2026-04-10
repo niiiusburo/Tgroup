@@ -1,0 +1,40 @@
+# Ignore patterns for code-review-graph
+# Uses fnmatch, so use * (not **) and include full path patterns
+
+# Dependencies — match at any depth
+node_modules/*
+*/node_modules/*
+*/node_modules
+**/node_modules/**
+
+# Build outputs
+dist/*
+*/dist/*
+build/*
+*/build/*
+.next/*
+*/.next/*
+
+# Duplicate api folder (not the running backend)
+api/*
+
+# Reference folders
+frontend-truth/*
+blueprint/*
+
+# Hidden/state
+.omc/*
+.obsidian/*
+.planning/*
+.claude/*
+.code-review-graph/*
+
+# E2E artifacts
+*/e2e/screenshots/*
+*/test-results/*
+*/playwright-report/*
+
+# Generated
+*.min.js
+*.bundle.js
+*.map

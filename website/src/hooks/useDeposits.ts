@@ -72,13 +72,13 @@ export function useDeposits() {
   const addDeposit = useCallback(async (
     customerId: string,
     amount: number,
-    method: 'cash' | 'bank',
+    method: 'cash' | 'bank' | 'vietqr',
     note?: string
   ) => {
     setLoading(true);
     setError(null);
     try {
-      await createPayment({ customerId, amount, method, notes: note });
+      await createPayment({ customerId, amount, method: method === 'vietqr' ? 'bank' : method, notes: note });
       await loadDeposits(customerId);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add deposit');

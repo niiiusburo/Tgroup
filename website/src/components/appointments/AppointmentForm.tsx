@@ -28,7 +28,7 @@
  * ╚════════════════════════════════════════════════════════════════════════╝
  *
  * ═══ DESIGN STANDARD ═══
- * AddCustomerForm.tsx is the canonical GOLD STANDARD for all TDental modal forms.
+ * AddCustomerForm.tsx is the canonical GOLD STANDARD for all TG Clinic modal forms.
  * This appointment form must stay visually identical to that standard:
  *   - modal-container + modal-content wrapper
  *   - Orange gradient header with icon, Vietnamese title, subtitle, X button
@@ -50,6 +50,7 @@ import { ServiceCatalogSelector } from '@/components/shared/ServiceCatalogSelect
 import { DatePicker } from '@/components/ui/DatePicker';
 import { TimePicker } from '@/components/ui/TimePicker';
 import { useCustomers } from '@/hooks/useCustomers';
+import { AddCustomerForm } from '@/components/forms/AddCustomerForm/AddCustomerForm';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
 import { useProducts } from '@/hooks/useProducts';
@@ -105,7 +106,7 @@ interface AppointmentFormProps {
 
 export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false }: AppointmentFormProps) {
   // Fetch real data from API
-  const { customers: apiCustomers, loading: customersLoading } = useCustomers();
+  const { customers: apiCustomers, loading: customersLoading, createCustomer } = useCustomers();
   const { employees: apiEmployees, isLoading: employeesLoading } = useEmployees();
   const { allLocations: apiLocations, isLoading: locationsLoading } = useLocations();
   const { products, isLoading: productsLoading } = useProducts({ limit: 1000 });
@@ -117,6 +118,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
   const [serviceId, setServiceId] = useState<string | null>(initialData?.serviceId ?? null);
   const [serviceName, setServiceName] = useState(initialData?.serviceName ?? '');
   const [customerType, setCustomerType] = useState<'new' | 'returning'>(initialData?.customerType ?? 'new');
+  const [showCreateCustomer, setShowCreateCustomer] = useState(false);
   const [estimatedDuration, setEstimatedDuration] = useState<number>(initialData?.estimatedDuration ?? 30);
   const [date, setDate] = useState(initialData?.date ?? '');
   const [startTime, setStartTime] = useState(initialData?.startTime ?? '');
@@ -125,6 +127,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
   const [status, setStatus] = useState(initialData?.status ?? 'scheduled');
   const [colorCode, setColorCode] = useState(initialData?.color ?? '0');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSaving, setIsSaving] = useState(false);
 
   // Sync with initialData when editing
   useEffect(() => {
@@ -220,7 +223,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
     return Object.keys(newErrors).length === 0;
   }
 
-  function handleSubmit(e?: React.FormEvent) {
+  async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
     if (!validate()) return;
 
@@ -240,8 +243,10 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
       computedEndTime = `${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
     }
 
-    onSubmit({
-      customerId: customer.id,
+    setIsSaving(true);
+    try {
+      await onSubmit({
+        customerId: customer.id,
       customerName: customer.name,
       customerPhone: customer.phone,
       doctorId: doctor.id,
@@ -260,9 +265,15 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
       status,
       color: colorCode,
     });
+    } catch (error) {
+      console.error('Appointment save failed:', error);
+    } finally {
+      setIsSaving(false);
+    }
   }
 
-  const isLoading = customersLoading || employeesLoading || locationsLoading || productsLoading;
+  const isLoading = customersLoading || employeesLoading || locationsLoading;
+  const isProductsLoading = productsLoading;
 
   return (
     <div className="modal-container">
@@ -324,7 +335,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                     <span className="text-xs text-gray-400">{initialData?.customerPhone}</span>
                   </div>
                 ) : (
-                  <CustomerSelector customers={customers} selectedId={customerId} onChange={setCustomerId} />
+                  <CustomerSelector customers={customers} selectedId={customerId} onChange={setCustomerId} onCreateNew={() => setShowCreateCustomer(true)} />
                 )}
                 {errors.customer && <p className="text-xs text-red-500 mt-1">{errors.customer}</p>}
               </div>
@@ -400,12 +411,19 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                   <Stethoscope className="w-3.5 h-3.5" />
                   Dịch vụ
                 </label>
-                <ServiceCatalogSelector
-                  catalog={serviceCatalog}
-                  selectedId={serviceId}
-                  onChange={setServiceId}
-                  placeholder="Chọn dịch vụ..."
-                />
+                {isProductsLoading ? (
+                  <div className="flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-500">
+                    <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                    Đang tải danh mục dịch vụ...
+                  </div>
+                ) : (
+                  <ServiceCatalogSelector
+                    catalog={serviceCatalog}
+                    selectedId={serviceId}
+                    onChange={setServiceId}
+                    placeholder="Chọn dịch vụ..."
+                  />
+                )}
                 {selectedService && (
                   <p className="mt-1.5 text-xs text-gray-500 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -565,13 +583,29 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
           <button
             type="button"
             onClick={() => handleSubmit()}
-            disabled={isLoading}
+            disabled={isLoading || isSaving}
             className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25"
           >
             {isEdit ? 'Cập nhật' : 'Tạo lịch hẹn'}
           </button>
         </div>
       </div>
+
+      {/* Quick-add customer modal */}
+      {showCreateCustomer && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-4xl max-h-[90vh] flex flex-col bg-white rounded-2xl shadow-xl overflow-hidden">
+            <AddCustomerForm
+              onSubmit={async (data) => {
+                const created = await createCustomer(data);
+                setCustomerId(created.id);
+                setShowCreateCustomer(false);
+              }}
+              onCancel={() => setShowCreateCustomer(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

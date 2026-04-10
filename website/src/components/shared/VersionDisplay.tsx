@@ -210,7 +210,7 @@ export function VersionDisplay({
   const [dismissedHighlights, setDismissedHighlights] = useState<string>(() => {
     // Persist dismissal across page loads
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('tdental_dismissed_highlights') || '';
+      return localStorage.getItem('tgclinic_dismissed_highlights') || '';
     }
     return '';
   });
@@ -236,9 +236,9 @@ export function VersionDisplay({
     if (!currentVersion) return;
 
     // Reset dismissal if version changed
-    const storedDismissed = localStorage.getItem('tdental_dismissed_highlights');
+    const storedDismissed = localStorage.getItem('tgclinic_dismissed_highlights');
     if (storedDismissed && storedDismissed !== currentVersion.version) {
-      localStorage.removeItem('tdental_dismissed_highlights');
+      localStorage.removeItem('tgclinic_dismissed_highlights');
       setDismissedHighlights('');
     }
 
@@ -302,7 +302,7 @@ export function VersionDisplay({
   const handleDismissHighlights = () => {
     // Dismiss until next version update
     if (currentVersion) {
-      localStorage.setItem('tdental_dismissed_highlights', currentVersion.version);
+      localStorage.setItem('tgclinic_dismissed_highlights', currentVersion.version);
       setDismissedHighlights(currentVersion.version);
     }
   };

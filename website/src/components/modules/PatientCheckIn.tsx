@@ -11,7 +11,7 @@
  *    Any changes to card dimensions require explicit user approval.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Clock, User } from 'lucide-react';
 import type { OverviewAppointment, CheckInStatus, Zone1Filter } from '@/hooks/useOverviewAppointments';
 import { useAppointmentHover } from '@/contexts/AppointmentHoverContext';
@@ -21,7 +21,7 @@ interface PatientCheckInProps {
   readonly filter: Zone1Filter;
   readonly onFilterChange: (filter: Zone1Filter) => void;
   readonly counts: { all: number; waiting: number; 'in-treatment': number; done: number };
-  readonly onUpdateStatus: (id: string, status: CheckInStatus) => void;
+  readonly onUpdateStatus: (id: string, status: CheckInStatus, onSuccess?: () => void) => void;
   readonly onEditClick?: (appointment: OverviewAppointment) => void;
 }
 
@@ -64,6 +64,11 @@ export function PatientCheckIn({
   onUpdateStatus,
   onEditClick,
 }: PatientCheckInProps) {
+  const doneSectionRef = useRef<HTMLDivElement>(null);
+  const scrollToDone = useCallback(() => {
+    doneSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm">
       {/* Header */}
@@ -108,15 +113,18 @@ export function PatientCheckIn({
             <p className="text-xs text-slate-400 mt-1">Đánh dấu "Đã đến" trong lịch hẹn hôm nay</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {appointments.map((apt) => (
-              <PatientCard
-                key={apt.id}
-                appointment={apt}
-                onUpdateStatus={onUpdateStatus}
-                onEditClick={onEditClick}
-              />
-            ))}
+          <div ref={doneSectionRef}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {appointments.map((apt) => (
+                <PatientCard
+                  key={apt.id}
+                  appointment={apt}
+                  onUpdateStatus={onUpdateStatus}
+                  onEditClick={onEditClick}
+                  onDone={scrollToDone}
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -128,11 +136,12 @@ export function PatientCheckIn({
 
 interface PatientCardProps {
   readonly appointment: OverviewAppointment;
-  readonly onUpdateStatus: (id: string, status: CheckInStatus) => void;
+  readonly onUpdateStatus: (id: string, status: CheckInStatus, onSuccess?: () => void) => void;
   readonly onEditClick?: (appointment: OverviewAppointment) => void;
+  readonly onDone?: () => void;
 }
 
-function PatientCard({ appointment, onUpdateStatus, onEditClick }: PatientCardProps) {
+function PatientCard({ appointment, onUpdateStatus, onEditClick, onDone }: PatientCardProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { hoveredId, setHoveredId, registerRef, scrollToAppointment } = useAppointmentHover();
   const cardRef = useRef<HTMLDivElement>(null);
@@ -171,8 +180,8 @@ function PatientCard({ appointment, onUpdateStatus, onEditClick }: PatientCardPr
       onClick={() => onEditClick?.(appointment)}
       className={`
         border rounded-xl p-3.5 transition-all relative cursor-pointer
-        ${isHighlighted 
-          ? 'ring-2 ring-blue-500 ring-offset-2 bg-blue-50/50 border-blue-300' 
+        ${isHighlighted
+          ? 'ring-2 ring-blue-500 ring-offset-2 bg-blue-50/50 border-blue-300'
           : 'border-gray-200 bg-gray-50/50 hover:shadow-sm'
         }
       `}
@@ -203,7 +212,7 @@ function PatientCard({ appointment, onUpdateStatus, onEditClick }: PatientCardPr
                 key={status}
                 className="flex items-center gap-2.5 py-2 text-sm text-gray-600 cursor-pointer hover:text-blue-600"
                 onClick={() => {
-                  onUpdateStatus(appointment.id, status);
+                  onUpdateStatus(appointment.id, status, status === 'done' ? onDone : undefined);
                   setDropdownOpen(false);
                 }}
               >

@@ -1,4 +1,4 @@
-# TDental Auto-Update Version System
+# TG Clinic Auto-Update Version System
 
 ## Overview
 

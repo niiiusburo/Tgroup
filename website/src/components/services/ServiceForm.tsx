@@ -49,49 +49,68 @@ interface Location {
 }
 
 interface ServiceFormProps {
+  readonly customerId?: string | null;
   readonly onSubmit: (data: CreateServiceInput) => void;
   readonly onClose: () => void;
   readonly initialData?: Partial<CreateServiceInput>;
   readonly isEdit?: boolean;
 }
 
-export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: ServiceFormProps) {
+export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose, initialData, isEdit = false }: ServiceFormProps) {
   const { customers: apiCustomers, loading: customersLoading } = useCustomers();
   const { employees: apiEmployees, isLoading: employeesLoading } = useEmployees();
   const { allLocations: apiLocations, isLoading: locationsLoading } = useLocations();
   const { products, isLoading: productsLoading } = useProducts({ limit: 1000 });
 
+  const isProfileContext = Boolean(readonlyCustomerId);
+
   // Form state
   const [catalogItemId, setCatalogItemId] = useState<string | null>(initialData?.catalogItemId ?? null);
-  const [customerId, setCustomerId] = useState<string | null>(initialData?.customerId ?? null);
+  const [customerId, setCustomerId] = useState<string | null>(initialData?.customerId ?? readonlyCustomerId ?? null);
   const [customerName, setCustomerName] = useState(initialData?.customerName ?? '');
   const [customerPhone, setCustomerPhone] = useState(initialData?.customerPhone ?? '');
   const [doctorId, setDoctorId] = useState<string | null>(initialData?.doctorId ?? null);
+  const [assistantId, setAssistantId] = useState<string | null>(initialData?.assistantId ?? null);
   const [locationId, setLocationId] = useState<string | null>(initialData?.locationId ?? null);
   const [startDate, setStartDate] = useState(initialData?.startDate ?? '');
   const [expectedEndDate, setExpectedEndDate] = useState(initialData?.expectedEndDate ?? '');
   const [notes, setNotes] = useState(initialData?.notes ?? '');
-  const [toothInput, setToothInput] = useState(initialData?.toothNumbers?.join(', ') ?? '');
+  const [quantity, setQuantity] = useState(initialData?.quantity ? String(initialData.quantity) : '1');
+  const [unit, setUnit] = useState(initialData?.unit ?? 'răng');
   const [totalCostOverride, setTotalCostOverride] = useState(
     initialData?.totalCost ? String(initialData.totalCost) : ''
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (initialData) {
       setCatalogItemId(initialData.catalogItemId ?? null);
-      setCustomerId(initialData.customerId ?? null);
+      setCustomerId(initialData.customerId ?? readonlyCustomerId ?? null);
       setCustomerName(initialData.customerName ?? '');
       setCustomerPhone(initialData.customerPhone ?? '');
       setDoctorId(initialData.doctorId ?? null);
+      setAssistantId(initialData.assistantId ?? null);
       setLocationId(initialData.locationId ?? null);
       setStartDate(initialData.startDate ?? '');
       setExpectedEndDate(initialData.expectedEndDate ?? '');
       setNotes(initialData.notes ?? '');
-      setToothInput(initialData.toothNumbers?.join(', ') ?? '');
+      setQuantity(initialData.quantity ? String(initialData.quantity) : '1');
+      setUnit(initialData.unit ?? 'răng');
       setTotalCostOverride(initialData.totalCost ? String(initialData.totalCost) : '');
     }
-  }, [initialData?.id]);
+  }, [initialData?.id, readonlyCustomerId]);
+
+  useEffect(() => {
+    if (isProfileContext && readonlyCustomerId && apiCustomers.length > 0) {
+      const customer = apiCustomers.find(c => c.id === readonlyCustomerId);
+      if (customer) {
+        setCustomerId(customer.id);
+        setCustomerName(customer.name);
+        setCustomerPhone(customer.phone);
+      }
+    }
+  }, [readonlyCustomerId, apiCustomers, isProfileContext]);
 
   const customers: Customer[] = apiCustomers.map(c => ({
     id: c.id, name: c.name, phone: c.phone, email: c.email,
@@ -164,6 +183,9 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
     setDoctorId(id);
     if (id) setErrors(prev => { const next = { ...prev }; delete next.doctor; return next; });
   };
+  const handleAssistantChange = (id: string | null) => {
+    setAssistantId(id);
+  };
   const handleLocationChange = (id: string | null) => {
     setLocationId(id);
     if (id) setErrors(prev => { const next = { ...prev }; delete next.location; return next; });
@@ -173,28 +195,37 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
     if (date) setErrors(prev => { const next = { ...prev }; delete next.startDate; return next; });
   };
 
-  function handleSubmit(e?: React.FormEvent) {
+  async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
     if (!validate()) return;
 
     const customer = customers.find(c => c.id === customerId) ||
       (customerId ? { id: customerId, name: customerName, phone: customerPhone } : undefined);
     const doctor = employees.find(emp => emp.id === doctorId);
+    const assistant = employees.find(emp => emp.id === assistantId);
     const location = locations.find(l => l.id === locationId);
     if (!customer || !doctor || !location || !selectedCatalog) return;
 
     const cost = totalCostOverride ? Number(totalCostOverride) : selectedCatalog.defaultPrice;
-    const toothNumbers = toothInput ? toothInput.split(',').map(t => t.trim()).filter(Boolean) : [];
 
-    onSubmit({
+    setIsSaving(true);
+    try {
+      await onSubmit({
       customerId: customer.id, customerName: customer.name, customerPhone: customer.phone,
       catalogItemId: selectedCatalog.id, serviceName: selectedCatalog.name,
       category: selectedCatalog.category, doctorId: doctor.id, doctorName: doctor.name,
+      assistantId: assistant?.id ?? null, assistantName: assistant?.name ?? '',
       locationId: location.id, locationName: location.name,
       totalVisits: selectedCatalog.totalVisits, totalCost: cost,
       startDate, expectedEndDate: expectedEndDate || startDate,
-      notes: notes.trim(), toothNumbers,
+      notes: notes.trim(), quantity: Number(quantity) || 1, unit: unit.trim(),
+      toothNumbers: [],
     });
+    } catch (error) {
+      setErrors(prev => ({ ...prev, submit: error instanceof Error ? error.message : 'Lưu thất bại' }));
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   const isLoading = customersLoading || employeesLoading || locationsLoading || productsLoading;
@@ -250,14 +281,16 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
           </div>
 
           {/* Khách hàng */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-              <User className="w-3.5 h-3.5" />
-              Khách hàng
-            </label>
-            <CustomerSelector customers={customers} selectedId={customerId} onChange={handleCustomerChange} />
-            {errors.customer && <p className="mt-2 text-xs text-red-500">{errors.customer}</p>}
-          </div>
+          {!isProfileContext && (
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <User className="w-3.5 h-3.5" />
+                Khách hàng
+              </label>
+              <CustomerSelector customers={customers} selectedId={customerId} onChange={handleCustomerChange} />
+              {errors.customer && <p className="mt-2 text-xs text-red-500">{errors.customer}</p>}
+            </div>
+          )}
 
           {/* Bác sĩ */}
           <div>
@@ -267,6 +300,15 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
             </label>
             <DoctorSelector employees={employees} selectedId={doctorId} onChange={handleDoctorChange} filterRoles={['doctor']} />
             {errors.doctor && <p className="mt-2 text-xs text-red-500">{errors.doctor}</p>}
+          </div>
+
+          {/* Trợ thủ */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <User className="w-3.5 h-3.5" />
+              Trợ thủ
+            </label>
+            <DoctorSelector employees={employees} selectedId={assistantId} onChange={handleAssistantChange} filterRoles={['doctor-assistant', 'assistant']} placeholder="Chọn trợ thủ..." />
           </div>
 
           {/* Chi nhánh */}
@@ -285,8 +327,8 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
             <DatePicker value={expectedEndDate} onChange={setExpectedEndDate} label="Ngày kết thúc" icon={<Clock className="w-3.5 h-3.5" />} minDate={startDate} />
           </div>
 
-          {/* Chi phí + Số răng */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Chi phí + Số lượng + Đơn vị */}
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                 <DollarSign className="w-3.5 h-3.5" />
@@ -307,12 +349,25 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                 <Hash className="w-3.5 h-3.5" />
-                Số răng
+                Số lượng
               </label>
               <input
-                type="text" value={toothInput}
-                onChange={(e) => setToothInput(e.target.value)}
-                placeholder="vd: #11, #21"
+                type="number" value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                placeholder="1"
+                min={1}
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <FileText className="w-3.5 h-3.5" />
+                Đơn vị
+              </label>
+              <input
+                type="text" value={unit}
+                onChange={(e) => setUnit(e.target.value)}
+                placeholder="răng"
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
               />
             </div>
@@ -336,7 +391,7 @@ export function ServiceForm({ onSubmit, onClose, initialData, isEdit = false }: 
             <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
               Hủy bỏ
             </button>
-            <button type="submit" disabled={isLoading}
+            <button type="submit" disabled={isLoading || isSaving}
               className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25">
               <Check className="w-4 h-4" />
               {isEdit ? 'Cập nhật' : 'Tạo dịch vụ'}

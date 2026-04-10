@@ -17,11 +17,20 @@ const CUSTOMER_PHONE = '0786731755';
 const TIMESTAMP = Date.now();
 
 async function login(page: Page) {
-  await page.goto('http://localhost:5174/login');
-  await page.getByRole('textbox', { name: 'Email' }).fill('tg@clinic.vn');
-  await page.getByRole('textbox', { name: 'Password' }).fill('123456');
-  await page.getByRole('button', { name: 'Sign In' }).click();
-  await page.waitForURL('**/');
+  // Auth state is pre-loaded from .auth/admin.json (storageState in playwright.config)
+  // Just navigate to app — token in localStorage auto-authenticates
+  await page.goto('http://localhost:5174/');
+
+  // If login form appears (token expired), re-authenticate
+  const emailInput = page.locator('#email');
+  const isLoginPage = await emailInput.isVisible({ timeout: 3000 }).catch(() => false);
+  if (isLoginPage) {
+    await emailInput.fill('tg@clinic.vn');
+    await page.locator('#password').fill('123456');
+    await page.locator('button[type="submit"]').click();
+    await expect(emailInput).toBeHidden({ timeout: 15000 });
+  }
+
   await page.getByRole('link', { name: 'Customers' }).waitFor({ timeout: 15000 });
 }
 
@@ -58,7 +67,7 @@ async function selectLocation(page: Page) {
   if (await locBtn.isVisible({ timeout: 500 }).catch(() => false)) {
     await locBtn.click();
     await page.waitForTimeout(500);
-    await page.locator('button').filter({ hasText: /Tấm Dentist/ }).first().click();
+    await page.locator('button').filter({ hasText: /TG Clinic/ }).first().click();
     await page.waitForTimeout(300);
   }
 }

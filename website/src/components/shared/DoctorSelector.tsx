@@ -1,5 +1,6 @@
 import { Stethoscope, ChevronDown, Search } from 'lucide-react';
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { normalizeText } from '@/lib/utils';
 import type { Employee } from '@/data/mockEmployees';
 import { ROLE_LABELS } from '@/data/mockEmployees';
 
@@ -41,11 +42,11 @@ export function DoctorSelector({
 
   const filteredEmployees = useMemo(() => {
     if (!searchTerm) return availableEmployees;
-    const lower = searchTerm.toLowerCase();
+    const norm = normalizeText(searchTerm);
     return availableEmployees.filter(
       (e) =>
-        e.name.toLowerCase().includes(lower) ||
-        e.roles.some((r) => ROLE_LABELS[r].toLowerCase().includes(lower)),
+        normalizeText(e.name).includes(norm) ||
+        e.roles.some((r) => normalizeText(ROLE_LABELS[r]).includes(norm)),
     );
   }, [availableEmployees, searchTerm]);
 

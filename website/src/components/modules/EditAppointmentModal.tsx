@@ -44,6 +44,7 @@ import { DatePicker } from '@/components/ui/DatePicker';
 import { TimePicker } from '@/components/ui/TimePicker';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
+import { normalizeText } from '@/lib/utils';
 import { updateAppointment, fetchProducts, type ApiProduct } from '@/lib/api';
 import { APPOINTMENT_CARD_COLORS, APPOINTMENT_STATUS_OPTIONS } from '@/constants';
 import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
@@ -98,8 +99,8 @@ function SearchableSelector<T extends { id: string; name: string }>({
 
   const filteredOptions = useMemo(() => {
     if (!searchTerm) return options;
-    const lower = searchTerm.toLowerCase();
-    return options.filter(o => o.name.toLowerCase().includes(lower));
+    const norm = normalizeText(searchTerm);
+    return options.filter(o => normalizeText(o.name).includes(norm));
   }, [options, searchTerm]);
 
   const handleSelect = (id: string) => {

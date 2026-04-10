@@ -1,5 +1,6 @@
-import { Search, User, ChevronDown } from 'lucide-react';
+import { Search, User, ChevronDown, Plus } from 'lucide-react';
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { normalizeText } from '@/lib/utils';
 import type { Customer } from '@/types/customer';
 
 /**
@@ -13,6 +14,7 @@ interface CustomerSelectorProps {
   readonly onChange: (customerId: string) => void;
   readonly placeholder?: string;
   readonly disabled?: boolean;
+  readonly onCreateNew?: () => void;
 }
 
 export function CustomerSelector({
@@ -21,6 +23,7 @@ export function CustomerSelector({
   onChange,
   placeholder = 'Select customer...',
   disabled = false,
+  onCreateNew,
 }: CustomerSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,12 +34,12 @@ export function CustomerSelector({
 
   const filteredCustomers = useMemo(() => {
     if (!searchTerm) return customers;
-    const lower = searchTerm.toLowerCase();
+    const norm = normalizeText(searchTerm);
     return customers.filter(
       (c) =>
-        c.name.toLowerCase().includes(lower) ||
-        c.phone.includes(lower) ||
-        c.email.toLowerCase().includes(lower),
+        normalizeText(c.name).includes(norm) ||
+        normalizeText(c.phone).includes(norm) ||
+        normalizeText(c.email).includes(norm),
     );
   }, [customers, searchTerm]);
 
@@ -98,7 +101,7 @@ export function CustomerSelector({
           </div>
           <div className="max-h-48 overflow-y-auto py-1">
             {filteredCustomers.length === 0 ? (
-              <div className="px-4 py-3 text-sm text-gray-400 text-center">No customers found</div>
+              <div className="px-4 py-3 text-sm text-gray-400 text-center">Không tìm thấy khách hàng</div>
             ) : (
               filteredCustomers.map((customer) => (
                 <button
@@ -123,6 +126,22 @@ export function CustomerSelector({
               ))
             )}
           </div>
+          {onCreateNew && (
+            <div className="border-t border-gray-100 p-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  setSearchTerm('');
+                  onCreateNew();
+                }}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Tạo khách hàng mới
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -6,10 +6,10 @@ test.describe('Login and Settings Flow', () => {
     await page.goto('http://localhost:5174/login');
     
     // Verify login page
-    await expect(page.locator('h1')).toContainText('TDental');
+    await expect(page.locator('h1')).toContainText('TG Clinic');
     
     // Fill credentials
-    await page.fill('input#email', 'admin@tdental.vn');
+    await page.fill('input#email', 'tg@clinic.vn');
     await page.fill('input#password', 'admin123');
     
     // Click login
@@ -44,7 +44,7 @@ test.describe('Login and Settings Flow', () => {
   test('should add IP entry and validate input', async ({ page }) => {
     // Login
     await page.goto('http://localhost:5174/login');
-    await page.fill('input#email', 'admin@tdental.vn');
+    await page.fill('input#email', 'tg@clinic.vn');
     await page.fill('input#password', 'admin123');
     await page.click('button[type="submit"]');
     await expect(page.locator('h1', { hasText: 'Overview' })).toBeVisible({ timeout: 15000 });

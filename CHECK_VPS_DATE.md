@@ -55,9 +55,9 @@ timedatectl
 sudo timedatectl set-timezone Asia/Ho_Chi_Minh
 
 # Restart your backend API
-pm2 restart tdental-api
+pm2 restart tgclinic-api
 # or
-sudo systemctl restart tdental-api
+sudo systemctl restart tgclinic-api
 
 # Verify
 date

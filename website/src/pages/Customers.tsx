@@ -1,6 +1,7 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Users, Plus, Phone, Mail, MapPin, Search } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { AddCustomerForm } from '@/components/forms/AddCustomerForm';
 import { CustomerProfile } from '@/components/customer';
@@ -18,6 +19,7 @@ import { useDeposits } from '@/hooks/useDeposits';
 import type { AppointmentFormData } from '@/components/appointments/AppointmentForm';
 import type { PaymentFormData } from '@/components/payment/PaymentForm';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
+import type { ProfileTab } from '@/components/customer/CustomerProfile';
 import type { CustomerService } from '@/types/customer';
 import type { CustomerStatus } from '@/data/mockCustomers';
 import type { CustomerFormData } from '@/data/mockCustomerForm';
@@ -51,10 +53,21 @@ function formatDate(dateStr: string): string {
 function buildCustomerColumns(locationNameMap: Map<string, string>): readonly Column<Customer>[] {
   return [
     {
+      key: 'code',
+      header: 'Code',
+      sortable: true,
+      width: '10%',
+      render: (row) => (
+        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 text-xs font-medium text-gray-700">
+          {row.code || '-'}
+        </span>
+      ),
+    },
+    {
       key: 'name',
       header: 'Customer',
       sortable: true,
-      width: '22%',
+      width: '20%',
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -118,9 +131,12 @@ function buildCustomerColumns(locationNameMap: Map<string, string>): readonly Co
 }
 
 export function Customers() {
+  const { id } = useParams<{ id?: string }>();
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(id ?? null);
+  const [profileTab, setProfileTab] = useState<ProfileTab>('profile');
   const { selectedLocationId } = useLocationFilter();
 
   // Lock body scroll when modal is open
@@ -132,6 +148,16 @@ export function Customers() {
     }
     return () => document.body.classList.remove('modal-open');
   }, [showForm]);
+  // Sync selected customer with URL param for deep-linking
+  useEffect(() => {
+    setSelectedCustomerId(id ?? null);
+  }, [id]);
+
+  // Reset profile tab when switching customers or returning to list
+  useEffect(() => {
+    setProfileTab('profile');
+  }, [selectedCustomerId]);
+
   const { hasPermission } = useAuth();
   
   // Check permissions
@@ -253,7 +279,7 @@ export function Customers() {
   const handleAddDeposit = useCallback(async (
     customerId: string,
     amount: number,
-    method: 'cash' | 'bank',
+    method: 'cash' | 'bank' | 'vietqr',
     note?: string
   ) => {
     await addDeposit(customerId, amount, method, note);
@@ -267,16 +293,20 @@ export function Customers() {
     }
   }, [selectedCustomerId, loadDeposits]);
 
+  const [createdCustomerCode, setCreatedCustomerCode] = useState<string | null>(null);
+
   const handleSubmit = async (data: CustomerFormData) => {
     if (isEditMode && selectedCustomerId) {
       await updateCustomer(selectedCustomerId, data);
-      // Refresh the profile so the updated fields (e.g. phone) are reflected immediately
       refetchProfile();
+      setShowForm(false);
+      setIsEditMode(false);
     } else {
-      await createCustomer(data);
+      const created = await createCustomer(data);
+      setCreatedCustomerCode(created.code ?? null);
+      setShowForm(false);
+      setIsEditMode(false);
     }
-    setShowForm(false);
-    setIsEditMode(false);
   };
 
   const handleEdit = () => {
@@ -307,6 +337,12 @@ export function Customers() {
       salestaffid: '',
       cskhid: customer.cskhid || '',
     };
+  };
+
+  const getCustomerCode = (): string | null | undefined => {
+    if (!selectedCustomerId) return undefined;
+    const customer = customers.find((c) => c.id === selectedCustomerId);
+    return customer?.code;
   };
 
   if (selectedCustomerId) {
@@ -386,7 +422,9 @@ export function Customers() {
           appointments={hookAppointments}
           services={customerServices}
           depositTransactions={deposits}
-          onBack={() => setSelectedCustomerId(null)}
+          activeTab={profileTab}
+          onTabChange={setProfileTab}
+          onBack={() => navigate('/customers')}
           onEdit={canEditCustomers ? handleEdit : undefined}
           onAddDeposit={handleAddDeposit}
           onCreateAppointment={handleCreateAppointment}
@@ -402,6 +440,7 @@ export function Customers() {
                 isEdit={true}
                 canEdit={canEditCustomers}
                 initialData={getEditFormData()}
+                customerRef={getCustomerCode()}
                 onSubmit={handleSubmit}
                 onCancel={() => { setShowForm(false); setIsEditMode(false); }}
               />
@@ -438,9 +477,25 @@ export function Customers() {
       {showForm && !isEditMode && (
         <div className="modal-container">
           <div className="modal-content max-w-[1100px] animate-in zoom-in-95 duration-200 flex flex-col">
-            <AddCustomerForm onSubmit={handleSubmit} onCancel={() => setShowForm(false)} />
+            <AddCustomerForm
+              customerRef={createdCustomerCode}
+              onSubmit={handleSubmit}
+              onCancel={() => { setShowForm(false); setCreatedCustomerCode(null); }}
+            />
           </div>
         </div>
+      )}
+
+      {/* Floating Action Button — Quick Add Customer */}
+      {canAddCustomers && (
+        <button
+          onClick={() => { setIsEditMode(false); setShowForm(true); }}
+          className="fixed bottom-6 right-6 z-40 inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-lg shadow-orange-500/30 hover:from-orange-600 hover:to-orange-500 hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-200 hover:scale-105"
+          aria-label="Add Customer"
+          title="Thêm khách hàng"
+        >
+          <Plus className="w-6 h-6" />
+        </button>
       )}
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
@@ -482,7 +537,7 @@ export function Customers() {
           data={customers}
           keyExtractor={(row) => row.id}
           pageSize={10}
-          onRowClick={(row) => setSelectedCustomerId(row.id)}
+          onRowClick={(row) => navigate(`/customers/${row.id}`)}
           emptyMessage="No customers found"
         />
       )}

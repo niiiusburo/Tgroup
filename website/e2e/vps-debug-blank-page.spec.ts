@@ -65,7 +65,7 @@ test.describe('VPS Debug - Blank Page Investigation', () => {
     await page.waitForTimeout(2000);
     
     // Fill login form
-    await page.fill('input[type="email"]', 'admin@tdental.vn');
+    await page.fill('input[type="email"]', 'tg@clinic.vn');
     await page.fill('input[type="password"]', 'admin123');
     
     // Click login

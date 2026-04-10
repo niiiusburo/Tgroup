@@ -99,6 +99,7 @@ export function PaymentForm({
   const [locationId, setLocationId] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSaving, setIsSaving] = useState(false);
 
   // Multi-source amounts
   const [depositAmount, setDepositAmount] = useState(0);
@@ -170,7 +171,7 @@ export function PaymentForm({
   }
 
   // ─── Submit ───────────────────────────────────────────────────
-  function handleSubmit(e?: React.FormEvent) {
+  async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
     if (!validate()) return;
     if (!selectedCustomer || totalPayment <= 0) return;
@@ -183,8 +184,10 @@ export function PaymentForm({
     else if (bankAmount > 0) method = 'bank_transfer';
     else method = 'cash';
 
-    onSubmit({
-      customerId: selectedCustomer.id,
+    setIsSaving(true);
+    try {
+      await onSubmit({
+        customerId: selectedCustomer.id,
       customerName: selectedCustomer.name,
       customerPhone: selectedCustomer.phone,
       serviceId: serviceId || `svc-${Date.now()}`,
@@ -199,6 +202,11 @@ export function PaymentForm({
         bankAmount,
       },
     });
+    } catch (error) {
+      console.error('Payment save failed:', error);
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   const isLoading = customersLoading || locationsLoading || productsLoading;
@@ -490,7 +498,7 @@ export function PaymentForm({
             Hủy bỏ
           </button>
           <button type="button" onClick={() => handleSubmit()}
-            disabled={totalPayment <= 0}
+            disabled={isLoading || isSaving || totalPayment <= 0}
             className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all shadow-lg shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed">
             <Check className="w-4 h-4" />
             Ghi nhận {totalPayment > 0 ? formatVND(totalPayment) : ''}

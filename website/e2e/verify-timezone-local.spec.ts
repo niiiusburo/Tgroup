@@ -10,7 +10,7 @@ test.describe('Local Timezone Verification', () => {
     await page.goto('http://localhost:5174/login');
     
     // Login (dev mode accepts any credentials)
-    await page.fill('input#email', 'admin@tdental.vn');
+    await page.fill('input#email', 'tg@clinic.vn');
     await page.fill('input#password', 'admin123');
     await page.click('button[type="submit"]');
     
@@ -39,7 +39,7 @@ test.describe('Local Timezone Verification', () => {
   test('Calendar and Overview show same date', async ({ page }) => {
     // Login
     await page.goto('http://localhost:5174/login');
-    await page.fill('input#email', 'admin@tdental.vn');
+    await page.fill('input#email', 'tg@clinic.vn');
     await page.fill('input#password', 'admin123');
     await page.click('button[type="submit"]');
     await page.waitForSelector('h1:has-text("Overview")', { timeout: 15000 });

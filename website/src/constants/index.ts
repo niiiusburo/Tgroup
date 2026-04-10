@@ -1,5 +1,5 @@
 /**
- * TDental Shared Constants
+ * TG Clinic Shared Constants
  * @crossref:used-in[ALL_COMPONENTS]
  * @crossref:used-in[ROUTES, PAGES, UI_COMPONENTS]
  */
@@ -100,6 +100,7 @@ export const ROUTES = {
   REPORTS: '/reports',
   NOTIFICATIONS: '/notifications',
   PERMISSIONS: '/permissions',
+  PAYMENT: '/payment',
 } as const;
 
 /**
@@ -140,6 +141,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
   },
   { path: ROUTES.SETTINGS, label: 'Settings', icon: 'Settings' },
   { path: ROUTES.PERMISSIONS, label: 'Permissions', icon: 'Shield' },
+  { path: ROUTES.PAYMENT, label: 'Payment Plans', icon: 'CreditCard' },
 ] as const;
 
 /**

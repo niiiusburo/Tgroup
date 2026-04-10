@@ -1,6 +1,6 @@
 /**
  * useCustomers - Customer CRUD, search, and filter hook
- * NOW CONNECTED TO REAL API (tdental-api → PostgreSQL)
+ * NOW CONNECTED TO REAL API (tgclinic-api → PostgreSQL)
  * @crossref:used-in[Customers, Appointments, Payment, Services]
  */
 

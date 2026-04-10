@@ -1,4 +1,4 @@
-# TGroup — TDental Dashboard
+# TGroup — TG Clinic Dashboard
 
 ## Release Notes (MANDATORY)
 
@@ -19,7 +19,7 @@ Every time you bump the version or deploy a new build, you MUST update `website/
 - Email: `tg@clinic.vn`
 - Password: `123456`
 
-Do NOT use `admin@tdental.vn` or any other email. This is the only admin account.
+Do NOT use old admin emails or any other email. This is the only admin account.
 
 ## Obsidian Brain
 
@@ -59,12 +59,12 @@ Tgroup/
 │
 ├── blueprint/                  # Architecture & design docs
 │   ├── BUTTON_MAP.md           # All buttons, filters, interactive elements mapped across pages
-│   ├── App.jsx                 # Reference app from original TDental
+│   ├── App.jsx                 # Reference app from original TG Clinic
 │   ├── components/             # Reference component specs
 │   ├── constants/              # Reference constants
 │   └── data/                   # Reference data structures
 │
-├── frontend-truth/             # Original TDental frontend (ground truth for parity)
+├── frontend-truth/             # Original TG Clinic frontend (ground truth for parity)
 │   ├── app/                    # Built app with all original components
 │   └── tech-spec.md            # Technical specification
 │
@@ -267,7 +267,7 @@ See: `~/Downloads/CardScrollRedesign/app/src/App.tsx`
 
 1. **Global LocationFilter** — `contexts/LocationContext.tsx` syncs "All Locations" dropdown across 7 pages (Overview, Customers, Calendar, Appointments, Employees, Services, Payment)
 2. **@crossref comments** — Every component has `@crossref:used-in[...]` and `@crossref:uses[...]` comments tracking where it's used across the codebase
-3. **tdental-api backend** — Express server at `/Users/thuanle/Documents/TamTMV/TamDental/tdental-api/` queries demo DB with `search_path=dbo`
+3. **tgclinic-api backend** — Express server at `/Users/thuanle/Documents/TamTMV/TamDental/tdental-api/` queries demo DB with `search_path=dbo`
 4. **SQL views for missing tables** — 11 views created so the API routes work against the 3-table demo DB
 5. **Auto-Update Version System** — App detects new deployments and prompts users to refresh (see `docs/VERSION_SYSTEM.md`)
 6. **20 features** split across 5 categories: setup, dashboard, customers, services, admin
@@ -386,9 +386,9 @@ Password: Tamyeu@234@234
 
 ## Reference Sites
 
-- **Original TDental:** `https://tamdentist.tdental.vn` (admin / 123123@)
-- **Local replica:** `http://127.0.0.1:8899` (admin@tdental.vn / admin123) — requires Golden backend
-- **VPS Deployed:** `http://76.13.16.68:5174` (admin@tdental.vn / admin123)
+- **Original TG Clinic (legacy):** `https://tamdentist.tdental.vn` (admin / 123123@)
+- **Local replica:** `http://127.0.0.1:8899` (admin@tgclinic.vn / admin123) — requires Golden backend
+- **VPS Deployed:** `http://76.13.16.68:5174` (admin@tgclinic.vn / admin123)
 
 ## What's Connected vs Mock
 

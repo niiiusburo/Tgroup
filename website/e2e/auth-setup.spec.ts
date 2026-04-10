@@ -24,7 +24,7 @@ test('authenticate as admin', async ({ page }) => {
   await page.waitForLoadState('networkidle');
 
   // Verify token was saved in localStorage
-  const token = await page.evaluate(() => localStorage.getItem('tdental_token'));
+  const token = await page.evaluate(() => localStorage.getItem('tgclinic_token'));
   expect(token).toBeTruthy();
   console.log('✅ Login successful — token saved');
 

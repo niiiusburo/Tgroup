@@ -19,9 +19,11 @@ interface CustomerProfileProps {
   readonly appointments: readonly ApiAppointment[];
   readonly services?: readonly CustomerService[];
   readonly depositTransactions?: DepositTransaction[];
+  readonly activeTab?: ProfileTab;
+  readonly onTabChange?: (tab: ProfileTab) => void;
   readonly onBack: () => void;
   readonly onEdit?: () => void;
-  readonly onAddDeposit?: (customerId: string, amount: number, method: 'cash' | 'bank', note?: string) => Promise<void>;
+  readonly onAddDeposit?: (customerId: string, amount: number, method: 'cash' | 'bank' | 'vietqr', note?: string) => Promise<void>;
   readonly onCreateAppointment?: (data: AppointmentFormData) => Promise<void>;
   readonly onUpdateAppointment?: (id: string, data: AppointmentFormData) => Promise<void>;
   readonly onCreateService?: (data: {
@@ -40,7 +42,7 @@ interface CustomerProfileProps {
   readonly loadingDeposits?: boolean;
 }
 
-type ProfileTab = 'profile' | 'appointments' | 'records' | 'payment';
+export type ProfileTab = 'profile' | 'appointments' | 'records' | 'payment';
 
 interface TabConfig {
   readonly value: ProfileTab;
@@ -107,6 +109,8 @@ export function CustomerProfile({
   appointments,
   services = [],
   depositTransactions = [],
+  activeTab: controlledActiveTab,
+  onTabChange,
   onBack,
   onEdit,
   onAddDeposit,
@@ -116,7 +120,14 @@ export function CustomerProfile({
   onMakePayment,
   loadingDeposits = false,
 }: CustomerProfileProps) {
-  const [activeTab, setActiveTab] = useState<ProfileTab>('profile');
+  const [internalActiveTab, setInternalActiveTab] = useState<ProfileTab>('profile');
+  const activeTab = controlledActiveTab ?? internalActiveTab;
+  const setActiveTab = (tab: ProfileTab) => {
+    if (controlledActiveTab === undefined) {
+      setInternalActiveTab(tab);
+    }
+    onTabChange?.(tab);
+  };
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -452,6 +463,7 @@ export function CustomerProfile({
       {/* Service Modal */}
       {showServiceModal && onCreateService && (
         <ServiceForm
+          customerId={profile.id}
           initialData={{
             customerId: profile.id,
             customerName: profile.name,

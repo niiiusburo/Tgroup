@@ -1,5 +1,42 @@
 [
   {
+    "version": "0.4.12",
+    "date": "2026-04-10",
+    "commit": "1119c7ef",
+    "highlights": "Phase 1 bug fixes — async save buttons, scroll-to-completed, branch filtering",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Fixed async save buttons in ServiceForm, PaymentForm, and AppointmentForm",
+          "Fixed PatientCheckIn scroll-to-completed on status change to \"Hoàn thành\"",
+          "Verified Calendar branch filtering via global LocationContext"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Playwright E2E spec bug-fixes-wave-1 with screenshot verification for all 3 fixes"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.4.11",
+    "date": "2026-04-09",
+    "commit": "pending",
+    "highlights": "Permissions matrix fix + tooltip descriptions",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Fix permission tooltip E2E tests",
+          "Fix toggle test group targeting"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.4.10",
     "date": "2026-04-10",
     "commit": "61ad558e",

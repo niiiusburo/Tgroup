@@ -19,7 +19,7 @@ import {
   type AuthPermissions,
 } from '@/lib/api';
 
-const TOKEN_KEY = 'tdental_token';
+const TOKEN_KEY = 'tgclinic_token';
 
 interface AuthState {
   user: AuthUser | null;
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   function dispatchAuthChange(locations: { id: string; name: string }[] | null) {
     window.dispatchEvent(
-      new CustomEvent('tdental:auth-change', { detail: locations ? { locations } : null })
+      new CustomEvent('tgclinic:auth-change', { detail: locations ? { locations } : null })
     );
   }
 
@@ -95,7 +95,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
     // Also clear saved login credentials
-    localStorage.removeItem('tdental_remember');
+    localStorage.removeItem('tgclinic_remember');
     setState({ user: null, permissions: null, isAuthenticated: false, isLoading: false });
     dispatchAuthChange(null);
   }, []);

@@ -1,59 +1,64 @@
-# Roadmap — TG Clinic KOL Integration
+# Roadmap — TG Clinic v1.1 Bugfixes & Features
 
-## Phase 1: Foundation & VietQR
-**Goal:** Enable Vietnamese QR payment generation and clinic bank account configuration.
+## Phase 1: Bug Fixes Wave 1
+**Goal:** Fix broken save buttons, branch filtering, and appointment scroll behavior.
 
-**Requirements:** PAY-01, PAY-02, PAY-03, PAY-04, DATA-02, DATA-04
-
-**Success Criteria:**
-1. User can open VietQR modal from PaymentForm and see a generated QR image
-2. Bank settings can be saved and retrieved via API
-3. Payment proof upload flow works end-to-end
-4. All TDD tests pass (unit + integration + E2E TC-VQ1)
-
-**UI hint:** yes
-
----
-
-## Phase 2: Facial Recognition Frontend
-**Goal:** Build face enrollment and scanning UI components.
-
-**Requirements:** FACE-01, FACE-02
+**Requirements:** #1 Save buttons broken, #2 Branch filtering broken, #3 Appointment completion no-scroll
 
 **Success Criteria:**
-1. FaceEnrollmentModal opens from AddCustomerForm and captures face
-2. FaceScannerModal opens from CustomerProfile and shows match result
-3. Face-api models lazy-load only when modals open
-4. All frontend integration tests pass
-
-**UI hint:** yes
-
----
-
-## Phase 3: Facial Recognition Backend
-**Goal:** Implement biometric data storage and matching APIs.
-
-**Requirements:** FACE-04, DATA-01, DATA-03
-
-**Success Criteria:**
-1. DB migrations for `partner_biometrics` and `partner_biometric_images` succeed
-2. POST /api/customers/:id/biometric/enroll stores descriptor and image
-3. POST /api/customers/biometric/match returns matched customer with confidence
-4. E2E tests TC-FR1 and TC-FR2 pass
+1. `ServiceForm` and `PaymentForm` `handleSubmit` are async and await API completion
+2. Calendar/TodaySchedule respects location filter when branch is selected
+3. Appointment completion scrolls smoothly to the completed section
+4. All relevant E2E tests pass with Playwright screenshots
 
 **UI hint:** no
 
 ---
 
-## Phase 4: Polish & Settings
-**Goal:** Add bank config UI, face-enrolled badges, and finalize.
+## Phase 2: Quick Features & Validations
+**Goal:** Add missing fields and validations that don't require schema redesign.
 
-**Requirements:** FACE-03
+**Requirements:** #4 Customer code visibility, #5 Duplicate phone check, #7 Assistant Doctor role, #8 3 quick search boxes, #9 Countdown timer integration, #10 Quick-add customer, #13 Deposit date field, #14 Payment date field
 
 **Success Criteria:**
-1. Settings page has bank account configuration with bank selector
-2. Customers list shows ScanFace badge for enrolled customers
-3. Vietnamese i18n strings added for all new UI
-4. Full E2E suite passes, CHANGELOG.json updated, version bumped
+1. Customer code visible in `CustomerProfile` read-only view
+2. `Partners` POST rejects duplicate phone with 409 Conflict
+3. `ServiceForm` has third staff selector (Doctor, Assistant, Dental Aide)
+4. Appointments page has 3 quick search boxes (patient, doctor, service)
+5. `WaitTimer` shows in Overview `PatientCheckIn`
+6. Deposit and Payment forms include date picker defaulting to today
+7. Playwright tests cover each new field
+
+**UI hint:** yes
+
+---
+
+## Phase 3: Architecture Shifts
+**Goal:** Implement multi-branch staff, admin delete, and voucher-linked payments.
+
+**Requirements:** #6 Admin delete customers, #12 Multi-branch assignment, #15 Payment linked to examination vouchers
+
+**Success Criteria:**
+1. `employee_location_scope` junction table is active with API CRUD
+2. `EmployeeForm` supports checkbox-style multi-branch assignment
+3. Admin can soft-delete customers with FK-safe confirmation
+4. `PaymentForm` lists open examination vouchers with residual amounts
+5. Multiple payments can be recorded against a single voucher
+6. Full E2E suite passes, CHANGELOG.json updated, version bumped
+
+**UI hint:** yes
+
+---
+
+## Phase 4: Polish & Walk-in Redesign
+**Goal:** Walk-in form redesign plus final verification.
+
+**Requirements:** #11 Walk-in patient form redesign
+
+**Success Criteria:**
+1. `WalkInForm` layout follows the independent card scrolling pattern
+2. Quick-add customer flow is verified end-to-end
+3. Full regression Playwright suite passes
+4. CHANGELOG.json updated, version bumped
 
 **UI hint:** yes

@@ -37,6 +37,7 @@ vi.mock('@/hooks/useLocations', () => ({
   }),
 }));
 
+
 describe('AppointmentForm Edit Mode', () => {
   const mockSubmit = vi.fn();
   const mockClose = vi.fn();
@@ -110,6 +111,76 @@ describe('AppointmentForm Edit Mode', () => {
       // Assert: Customer change button/selector should not exist
       const changeCustomerButton = screen.queryByRole('button', { name: /change|select.*customer/i });
       expect(changeCustomerButton).not.toBeInTheDocument();
+    });
+  });
+
+  describe('RED: Validation error messages should appear for required fields', () => {
+    it('should show doctor validation error when submitting without doctor', () => {
+      render(
+        <AppointmentForm
+          onSubmit={mockSubmit}
+          onClose={mockClose}
+          initialData={{
+            customerId: 'cust-1',
+            customerName: 'John Doe',
+            customerPhone: '0901234567',
+            locationId: 'loc-1',
+          }}
+        />
+      );
+
+      // Act: click save without selecting doctor, date, or time
+      const saveButton = screen.getByRole('button', { name: /tạo lịch hẹn/i });
+      fireEvent.click(saveButton);
+
+      // Assert: doctor error should be visible
+      expect(screen.getByText('Vui lòng chọn bác sĩ')).toBeInTheDocument();
+      expect(mockSubmit).not.toHaveBeenCalled();
+    });
+
+    it('should show date validation error when submitting without date', () => {
+      render(
+        <AppointmentForm
+          onSubmit={mockSubmit}
+          onClose={mockClose}
+          initialData={{
+            customerId: 'cust-1',
+            customerName: 'John Doe',
+            customerPhone: '0901234567',
+            locationId: 'loc-1',
+            doctorId: 'emp-1',
+          }}
+        />
+      );
+
+      const saveButton = screen.getByRole('button', { name: /tạo lịch hẹn/i });
+      fireEvent.click(saveButton);
+
+      expect(screen.getByText('Vui lòng chọn ngày')).toBeInTheDocument();
+      expect(mockSubmit).not.toHaveBeenCalled();
+    });
+
+    it('should show startTime validation error when submitting without time', () => {
+      render(
+        <AppointmentForm
+          onSubmit={mockSubmit}
+          onClose={mockClose}
+          initialData={{
+            customerId: 'cust-1',
+            customerName: 'John Doe',
+            customerPhone: '0901234567',
+            locationId: 'loc-1',
+            doctorId: 'emp-1',
+            date: '2024-03-15',
+          }}
+        />
+      );
+
+      const saveButton = screen.getByRole('button', { name: /tạo lịch hẹn/i });
+      fireEvent.click(saveButton);
+
+      expect(screen.getByText('Vui lòng chọn giờ bắt đầu')).toBeInTheDocument();
+      expect(mockSubmit).not.toHaveBeenCalled();
     });
   });
 

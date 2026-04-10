@@ -20,7 +20,7 @@ test.describe('TDD: Version Display System', () => {
     await page.waitForTimeout(2000);
     
     // Act: Login
-    await page.fill('input#email', 'admin@tdental.vn');
+    await page.fill('input#email', 'tg@clinic.vn');
     await page.fill('input#password', 'admin123');
     await page.click('button[type="submit"]');
     await page.waitForLoadState('networkidle');
@@ -54,7 +54,7 @@ test.describe('TDD: Version Display System', () => {
     
     // Login
     await page.goto('http://localhost:5174/login');
-    await page.fill('input#email', 'admin@tdental.vn');
+    await page.fill('input#email', 'tg@clinic.vn');
     await page.fill('input#password', 'admin123');
     await page.click('button[type="submit"]');
     await page.waitForLoadState('networkidle');

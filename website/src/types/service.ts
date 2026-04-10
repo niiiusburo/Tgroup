@@ -41,6 +41,10 @@ export interface ServiceRecord {
   readonly category: AppointmentType;
   readonly doctorId: string;
   readonly doctorName: string;
+  readonly assistantId?: string | null;
+  readonly assistantName?: string;
+  readonly quantity?: number;
+  readonly unit?: string;
   readonly locationId: string;
   readonly locationName: string;
   readonly status: ServiceStatus;

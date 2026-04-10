@@ -48,7 +48,7 @@ test.describe('VPS Overview Page - Appointments Display', () => {
     await page.waitForSelector('text=Sign In', { timeout: 10000 });
     
     // Fill credentials
-    await page.fill('input[type="email"]', 'admin@tdental.vn');
+    await page.fill('input[type="email"]', 'tg@clinic.vn');
     await page.fill('input[type="password"]', 'admin123');
     
     // Click Sign In

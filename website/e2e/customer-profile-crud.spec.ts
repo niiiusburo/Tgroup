@@ -19,13 +19,20 @@ const ORIGINAL_PHONE = '0349762840';
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
 async function login(page: Page) {
-  await page.goto('http://localhost:5174/login');
-  await page.getByRole('textbox', { name: 'Email' }).fill('tg@clinic.vn');
-  await page.getByRole('textbox', { name: 'Password' }).fill('123456');
-  await page.getByRole('button', { name: 'Sign In' }).click();
-  // Wait for redirect to dashboard — avoids strict mode h1 violations
-  await page.waitForURL('**/');
-  // Also wait for the sidebar nav link to confirm app is ready
+  // Auth state is pre-loaded from .auth/admin.json (storageState in playwright.config)
+  // Just navigate to app — token in localStorage auto-authenticates
+  await page.goto('http://localhost:5174/');
+
+  // If login form appears (token expired), re-authenticate
+  const emailInput = page.locator('#email');
+  const isLoginPage = await emailInput.isVisible({ timeout: 3000 }).catch(() => false);
+  if (isLoginPage) {
+    await emailInput.fill('tg@clinic.vn');
+    await page.locator('#password').fill('123456');
+    await page.locator('button[type="submit"]').click();
+    await expect(emailInput).toBeHidden({ timeout: 15000 });
+  }
+
   await page.getByRole('link', { name: 'Customers' }).waitFor({ timeout: 10000 });
 }
 
@@ -88,7 +95,7 @@ test.describe('Customer Profile CRUD', () => {
     await expect(page.getByRole('button', { name: 'Add Appointment' })).toBeVisible({ timeout: 8000 });
     await page.getByRole('button', { name: 'Add Appointment' }).click();
 
-    await expect(page.getByRole('heading', { name: 'New Appointment' })).toBeVisible({ timeout: 8000 });
+    await expect(page.getByRole('heading', { name: 'Tạo lịch hẹn' })).toBeVisible({ timeout: 8000 });
     await page.waitForTimeout(1500); // Wait for API data to load
 
     // ── Select Doctor — use evaluate for reliable React state update ──
@@ -110,7 +117,7 @@ test.describe('Customer Profile CRUD', () => {
         const btn = [...document.querySelectorAll('button')].find(b => b.textContent?.trim() === 'Select location...');
         if (btn) { btn.click(); }
         setTimeout(() => {
-          const opt = [...document.querySelectorAll('button')].find(b => /Tấm Dentist/.test(b.textContent ?? ''));
+          const opt = [...document.querySelectorAll('button')].find(b => /TG Clinic/.test(b.textContent ?? ''));
           if (opt) { opt.click(); }
           resolve();
         }, 500);
@@ -119,7 +126,10 @@ test.describe('Customer Profile CRUD', () => {
     }
 
     // ── Service name ──
-    await page.getByPlaceholder('e.g. Teeth Cleaning').fill('Kiểm tra tổng quát');
+    await page.getByRole('button', { name: 'Chọn dịch vụ...' }).click();
+    await page.waitForTimeout(500);
+    await page.locator('button').filter({ hasText: /^Răng/ }).first().click();
+    await page.waitForTimeout(300);
 
     // ── Date ──
     await page.evaluate(() => new Promise<void>(resolve => {
@@ -133,20 +143,20 @@ test.describe('Customer Profile CRUD', () => {
     }));
     await page.waitForTimeout(300);
 
-    // ── Start & End time — click trigger via Playwright locator, then pick time ──
-    // Start Time: find the container with "Start Time" label
-    const startPicker = page.locator('div.relative').filter({ has: page.locator('label:has-text("Start Time")') });
-    await startPicker.locator('button').first().click();
-    await page.waitForTimeout(600);
-    // The dropdown is inside the same container
-    await startPicker.locator('.overflow-y-auto button', { hasText: '08:00' }).click();
-    await page.waitForTimeout(400);
-
-    // End Time
-    const endPicker = page.locator('div.relative').filter({ has: page.locator('label:has-text("End Time")') });
-    await endPicker.locator('button').first().click();
-    await page.waitForTimeout(600);
-    await endPicker.locator('.overflow-y-auto button', { hasText: '09:00' }).click();
+    // ── Start time ──
+    await page.evaluate(() => new Promise<void>(resolve => {
+      const labels = [...document.querySelectorAll('label')];
+      const startLabel = labels.find(l => /Giờ bắt đầu/.test(l.textContent ?? ''));
+      const container = startLabel?.closest('div')?.parentElement;
+      const trigger = container?.querySelector('button');
+      if (trigger) { trigger.click(); }
+      setTimeout(() => {
+        const dd = [...document.querySelectorAll('.overflow-y-auto')].pop();
+        const slot = dd?.querySelector('button');
+        if (slot) { (slot as HTMLButtonElement).click(); }
+        resolve();
+      }, 500);
+    }));
     await page.waitForTimeout(400);
 
     // Take screenshot to debug form state
@@ -156,7 +166,7 @@ test.describe('Customer Profile CRUD', () => {
     const consoleErrors: string[] = [];
     page.on('console', msg => { if (msg.type() === 'error') consoleErrors.push(msg.text()); });
 
-    await page.getByRole('button', { name: 'Create Appointment' }).click();
+    await page.getByRole('button', { name: 'Tạo lịch hẹn' }).click();
     await page.waitForTimeout(3000);
 
     // Log console errors for debugging
@@ -164,7 +174,7 @@ test.describe('Customer Profile CRUD', () => {
       console.log('Console errors during submit:', consoleErrors.join('\n'));
     }
 
-    await expect(page.getByRole('heading', { name: 'New Appointment' })).not.toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: 'Tạo lịch hẹn' })).not.toBeVisible({ timeout: 10000 });
   });
 
   // ─── TC3: Edit appointment notes ─────────────────────────────────────────
@@ -186,20 +196,23 @@ test.describe('Customer Profile CRUD', () => {
       return;
     }
 
-    await expect(page.getByRole('heading', { name: 'Edit Appointment' })).toBeVisible({ timeout: 8000 });
+    await expect(page.getByRole('heading', { name: 'Sửa lịch hẹn' })).toBeVisible({ timeout: 8000 });
 
-    // serviceName may be empty — fill it to pass validation
-    const serviceInput = page.getByPlaceholder('e.g. Teeth Cleaning');
-    const currentService = await serviceInput.inputValue();
-    if (!currentService) await serviceInput.fill('Kiểm tra');
+    // serviceName may be empty — fill it to pass validation using catalog selector
+    const serviceBtn = page.getByRole('button', { name: 'Chọn dịch vụ...' });
+    if (await serviceBtn.isVisible({ timeout: 500 }).catch(() => false)) {
+      await serviceBtn.click();
+      await page.waitForTimeout(500);
+      await page.locator('button').filter({ hasText: /^Răng/ }).first().click();
+      await page.waitForTimeout(300);
+    }
 
-    // End time may be empty — fill using label-based approach
+    // Giờ bắt đầu may be empty
     await page.evaluate(() => new Promise<void>(resolve => {
       const labels = [...document.querySelectorAll('label')];
-      const endLabel = labels.find(l => /end time/i.test(l.textContent ?? ''));
-      const container = endLabel?.closest('div');
+      const startLabel = labels.find(l => /Giờ bắt đầu/.test(l.textContent ?? ''));
+      const container = startLabel?.closest('div')?.parentElement;
       const trigger = container?.querySelector('button');
-      // Only click if the trigger shows "Chọn giờ" (not already set)
       if (trigger && /Chọn giờ/.test(trigger.textContent ?? '')) {
         trigger.click();
         setTimeout(() => {
@@ -216,12 +229,12 @@ test.describe('Customer Profile CRUD', () => {
     }));
     await page.waitForTimeout(400);
 
-    const notesArea = page.getByPlaceholder('Additional notes...');
+    const notesArea = page.getByPlaceholder('Ghi chú thêm...');
     await notesArea.clear();
     const newNote = 'QA automated test note ' + Date.now();
     await notesArea.fill(newNote);
 
-    await page.getByRole('button', { name: 'Update Appointment' }).click();
+    await page.getByRole('button', { name: 'Cập nhật' }).click();
     await page.waitForTimeout(3000);
 
     // Modal should close — verify by checking profile is visible again
@@ -264,7 +277,7 @@ test.describe('Customer Profile CRUD', () => {
     if (await locationBtn.isVisible({ timeout: 500 }).catch(() => false)) {
       await locationBtn.click();
       await page.waitForTimeout(300);
-      await page.locator('button').filter({ hasText: /Tấm Dentist/ }).first().click();
+      await page.locator('button').filter({ hasText: /TG Clinic/ }).first().click();
       await page.waitForTimeout(200);
     }
 
@@ -313,6 +326,29 @@ test.describe('Customer Profile CRUD', () => {
     await expect(page.getByText('Deposit Wallet')).toBeVisible({ timeout: 5000 });
   });
 
+  // ─── TC5b: Deposit modal submit keeps Payment tab active ─────────────────
+  test('TC5b: Submitting deposit keeps Payment tab active', async ({ page }) => {
+    await openCustomerProfile(page, CUSTOMER_NAME);
+
+    await page.getByRole('button', { name: 'Payment' }).click();
+    await expect(page.getByText('Deposit Wallet')).toBeVisible({ timeout: 8000 });
+
+    // Open the deposit modal, fill, and submit so onAddDeposit -> refetchProfile runs
+    await page.getByRole('button', { name: 'Add Deposit' }).first().click();
+    await expect(page.getByRole('heading', { name: 'Add Deposit' })).toBeVisible({ timeout: 5000 });
+
+    await page.getByPlaceholder('Enter amount').fill('1000');
+    await page.getByPlaceholder('Add a note').fill('QA tab persistence test');
+
+    await page.getByRole('button', { name: 'Add Deposit' }).last().click();
+    await expect(page.getByRole('heading', { name: 'Add Deposit' })).not.toBeVisible({ timeout: 8000 });
+
+    // Bug: tab was resetting to Profile after modal close because refetchProfile
+    // unmounts CustomerProfile while loading, and activeTab defaulted to 'profile'.
+    await expect(page.getByRole('heading', { name: 'Payment & Deposits' })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('Deposit Wallet')).toBeVisible({ timeout: 5000 });
+  });
+
   // ─── TC6: Make payment ────────────────────────────────────────────────────
   test('TC6: Make payment from customer profile', async ({ page }) => {
     await openCustomerProfile(page, CUSTOMER_NAME);
@@ -321,34 +357,31 @@ test.describe('Customer Profile CRUD', () => {
     await expect(page.getByRole('heading', { name: 'Payment & Deposits' })).toBeVisible({ timeout: 8000 });
 
     await page.getByRole('button', { name: 'Make Payment' }).click();
-    await expect(page.getByRole('heading', { name: 'New Payment' })).toBeVisible({ timeout: 8000 });
+    await expect(page.getByRole('heading', { name: 'Ghi nhận thanh toán' })).toBeVisible({ timeout: 8000 });
+    await page.waitForTimeout(1000);
 
-    // Customer name is pre-filled from profile; verify or fill
-    const customerInput = page.getByPlaceholder('Nguyen Van A');
-    const prefilled = await customerInput.inputValue();
-    if (!prefilled) await customerInput.fill(CUSTOMER_NAME);
-
-    // Service name (required)
-    await page.getByPlaceholder('Lam sach rang').fill('Kiểm tra định kỳ');
+    // Service selector (required)
+    await page.getByRole('button', { name: 'Chọn dịch vụ...' }).click();
+    await page.waitForTimeout(500);
+    await page.locator('button').filter({ hasText: /^Răng/ }).first().click();
+    await page.waitForTimeout(300);
 
     // Amount (required, > 0) — scope to the modal overlay to avoid matching other number inputs
     const modal = page.locator('div.modal-content, .fixed.inset-0 .bg-white').last();
-    await modal.locator('input[type="number"]').fill('300000');
-
-    // Payment method — Cash is default; click for explicitness
-    await page.locator('button').filter({ hasText: /^Cash$/ }).first().click();
+    // Use Cash amount field (Tiền mặt)
+    await modal.locator('input[type="number"]').first().fill('300000');
 
     // Notes
-    await page.getByPlaceholder('Payment notes...').fill('QA test payment');
+    await page.getByPlaceholder('Ghi chú thanh toán...').fill('QA test payment');
 
     await page.screenshot({ path: 'e2e/screenshots/tc6-payment-form.png' });
 
-    // Submit (type="submit" inside the form)
-    await page.getByRole('button', { name: 'Record Payment' }).click();
+    // Submit button
+    await page.getByRole('button', { name: /^Ghi nhận/ }).click();
     await page.waitForTimeout(2000);
 
     // Modal should close — createPayment is client-side only (mock), so it resolves immediately
-    await expect(page.getByRole('heading', { name: 'New Payment' })).not.toBeVisible({ timeout: 8000 });
+    await expect(page.getByRole('heading', { name: 'Ghi nhận thanh toán' })).not.toBeVisible({ timeout: 8000 });
     await expect(page.getByRole('heading', { name: 'Payment & Deposits' })).toBeVisible({ timeout: 5000 });
   });
 });

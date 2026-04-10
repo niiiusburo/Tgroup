@@ -115,7 +115,7 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
 
 /**
  * Main application layout with icon-only dark sidebar navigation
- * Matches the original TDental design system
+ * Matches the original TG Clinic design system
  * @crossref:uses[AuthContext, LocationContext, FilterByLocation]
  */
 export function Layout() {
@@ -206,7 +206,7 @@ export function Layout() {
               <span className="text-white font-bold text-sm">TD</span>
             </div>
             {(mobileMenuOpen || sidebarExpanded) && (
-              <span className="text-white font-semibold text-lg whitespace-nowrap">TDental</span>
+              <span className="text-white font-semibold text-lg whitespace-nowrap">TG Clinic</span>
             )}
           </div>
           {/* Mobile close button */}

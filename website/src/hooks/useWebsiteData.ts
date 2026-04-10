@@ -5,12 +5,13 @@
  */
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import type { WebsitePage, PageStatus } from '@/types/website';
-import { 
-  fetchWebsitePages, 
-  createWebsitePage as apiCreatePage, 
-  updateWebsitePage as apiUpdatePage, 
+import { normalizeText } from '@/lib/utils';
+import {
+  fetchWebsitePages,
+  createWebsitePage as apiCreatePage,
+  updateWebsitePage as apiUpdatePage,
   deleteWebsitePage as apiDeletePage,
-  type ApiWebsitePage 
+  type ApiWebsitePage
 } from '@/lib/api';
 
 export type { WebsitePage, PageStatus };
@@ -96,12 +97,12 @@ export function useWebsiteData() {
   }, [loadPages]);
 
   const filteredPages = useMemo(() => {
-    const query = searchQuery.toLowerCase();
+    const query = normalizeText(searchQuery);
     return pages.filter((page) => {
       const matchesSearch = !query
-        || page.title.toLowerCase().includes(query)
-        || page.slug.toLowerCase().includes(query)
-        || page.author.toLowerCase().includes(query);
+        || normalizeText(page.title).includes(query)
+        || normalizeText(page.slug).includes(query)
+        || normalizeText(page.author).includes(query);
       const matchesStatus = statusFilter === 'all' || page.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
@@ -118,11 +119,11 @@ export function useWebsiteData() {
   );
 
   const filteredServices = useMemo(() => {
-    const query = serviceSearch.toLowerCase();
+    const query = normalizeText(serviceSearch);
     return services.filter((svc) => {
       const matchesSearch = !query
-        || svc.name.toLowerCase().includes(query)
-        || svc.category.toLowerCase().includes(query);
+        || normalizeText(svc.name).includes(query)
+        || normalizeText(svc.category).includes(query);
       const matchesCategory = serviceCategoryFilter === 'all' || svc.category === serviceCategoryFilter;
       return matchesSearch && matchesCategory;
     });

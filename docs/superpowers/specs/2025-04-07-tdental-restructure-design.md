@@ -1,4 +1,4 @@
-# TDental Website Restructure — Design Document
+# TG Clinic Website Restructure — Design Document
 
 **Date:** 2025-04-07  
 **Approach:** Option A (Incremental) + TDD Flow  
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Restructure the TDental dashboard from standalone pages to a customer-centric tabbed interface, implement the "Slip" concept (doctor + 3 assistants per service/appointment), and establish proper business logic flows for the payment/deposit banking system.
+Restructure the TG Clinic dashboard from standalone pages to a customer-centric tabbed interface, implement the "Slip" concept (doctor + 3 assistants per service/appointment), and establish proper business logic flows for the payment/deposit banking system.
 
 ---
 

@@ -218,7 +218,7 @@ export function SEOManager({ selectedPage, onSelectPage, onBack }: SEOManagerPro
                 value={canonicalUrl}
                 onChange={(e) => setCanonicalUrl(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                placeholder="https://tdental.vn/page"
+                placeholder="https://tgclinic.vn/page"
               />
             </div>
           </div>
@@ -230,10 +230,10 @@ export function SEOManager({ selectedPage, onSelectPage, onBack }: SEOManagerPro
             <h3 className="text-sm font-semibold text-gray-900 mb-3">Google Search Preview</h3>
             <div className="border border-gray-200 rounded-lg p-4 space-y-1">
               <p className="text-sm text-blue-700 font-medium truncate">
-                {seoTitle || 'Page Title — TDental'}
+                {seoTitle || 'Page Title — TG Clinic'}
               </p>
               <p className="text-xs text-green-700 truncate">
-                {canonicalUrl || 'https://tdental.vn/page'}
+                {canonicalUrl || 'https://tgclinic.vn/page'}
               </p>
               <p className="text-xs text-gray-600 line-clamp-2">
                 {seoDescription || 'Add a meta description to improve search visibility.'}

@@ -4,6 +4,7 @@
  * @crossref:used-in[Payment, Customers]
  */
 import { useState, useCallback, useMemo, useEffect } from 'react';
+import { normalizeText } from '@/lib/utils';
 import type { MonthlyPlan, PlanCreationInput, PlanStatus, Installment, InstallmentStatus } from '@/types/monthlyPlans';
 import {
   fetchMonthlyPlans,
@@ -86,15 +87,16 @@ export function useMonthlyPlans() {
     loadPlans();
   }, [loadPlans]);
 
+
   const filteredPlans = useMemo(() => {
     return plans.filter((plan) => {
       const matchesStatus = statusFilter === 'all' || plan.status === statusFilter;
-      const query = searchQuery.toLowerCase();
+      const query = normalizeText(searchQuery);
       const matchesSearch =
         query === '' ||
-        plan.customerName.toLowerCase().includes(query) ||
-        plan.treatmentDescription.toLowerCase().includes(query) ||
-        plan.id.toLowerCase().includes(query);
+        normalizeText(plan.customerName).includes(query) ||
+        normalizeText(plan.treatmentDescription).includes(query) ||
+        normalizeText(plan.id).includes(query);
       return matchesStatus && matchesSearch;
     });
   }, [plans, statusFilter, searchQuery]);

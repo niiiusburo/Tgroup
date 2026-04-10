@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { fetchCompanies, type ApiCompany } from '@/lib/api';
+import { normalizeText } from '@/lib/utils';
 import {
   type LocationBranch,
   type LocationMetrics,
@@ -85,11 +86,11 @@ export function useLocations() {
   const locations = useMemo(() => {
     return allLocations.filter((loc) => {
       if (searchQuery) {
-        const q = searchQuery.toLowerCase();
+        const q = normalizeText(searchQuery);
         if (
-          !loc.name.toLowerCase().includes(q) &&
-          !loc.district.toLowerCase().includes(q) &&
-          !loc.address.toLowerCase().includes(q)
+          !normalizeText(loc.name).includes(q) &&
+          !normalizeText(loc.district).includes(q) &&
+          !normalizeText(loc.address).includes(q)
         ) {
           return false;
         }

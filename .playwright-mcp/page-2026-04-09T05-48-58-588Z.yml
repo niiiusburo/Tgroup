@@ -1,0 +1,115 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e8]: TD
+        - generic [ref=e156]: TDental
+      - button [ref=e157] [cursor=pointer]:
+        - img [ref=e158]
+    - navigation [ref=e9]:
+      - link "Overview" [active] [ref=e10] [cursor=pointer]:
+        - /url: /
+        - img [ref=e12]
+        - generic [ref=e160]: Overview
+      - link "Calendar" [ref=e14] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e15]
+        - generic [ref=e161]: Calendar
+      - link "Customers" [ref=e17] [cursor=pointer]:
+        - /url: /customers
+        - img [ref=e18]
+        - generic [ref=e162]: Customers
+      - link "Employees" [ref=e23] [cursor=pointer]:
+        - /url: /employees
+        - img [ref=e24]
+        - generic [ref=e163]: Employees
+      - link "Locations" [ref=e36] [cursor=pointer]:
+        - /url: /locations
+        - img [ref=e37]
+        - generic [ref=e164]: Locations
+      - link "Service Catalog 228" [ref=e165] [cursor=pointer]:
+        - /url: /website
+        - img [ref=e41]
+        - generic [ref=e167]: Service Catalog
+        - generic [ref=e168]: "228"
+      - link "Settings" [ref=e45] [cursor=pointer]:
+        - /url: /settings
+        - img [ref=e46]
+        - generic [ref=e169]: Settings
+      - link "Permissions" [ref=e49] [cursor=pointer]:
+        - /url: /permissions
+        - img [ref=e50]
+        - generic [ref=e170]: Permissions
+    - generic [ref=e171]:
+      - generic [ref=e173]: A
+      - generic [ref=e174]:
+        - paragraph [ref=e175]: Admin
+        - paragraph [ref=e176]: Admin
+      - button "Sign out" [ref=e177] [cursor=pointer]:
+        - img [ref=e178]
+  - generic [ref=e61]:
+    - banner [ref=e62]:
+      - heading "Overview" [level=1] [ref=e188]
+      - generic [ref=e65]:
+        - button "All Locations" [ref=e68] [cursor=pointer]:
+          - img [ref=e69]
+          - generic [ref=e72]: All Locations
+          - img [ref=e73]
+        - button [ref=e75] [cursor=pointer]:
+          - img [ref=e76]
+    - main [ref=e80]:
+      - button "Hẹn mới" [ref=e190] [cursor=pointer]:
+        - img [ref=e191]
+        - generic [ref=e193]: Hẹn mới
+      - generic [ref=e194]:
+        - generic [ref=e195]:
+          - generic [ref=e196]:
+            - generic [ref=e197]:
+              - heading "Đón tiếp / Tiếp nhận bệnh nhân" [level=2] [ref=e198]
+              - generic [ref=e199]:
+                - button "Tất cả · 0" [ref=e200] [cursor=pointer]
+                - button "Chờ khám · 0" [ref=e201] [cursor=pointer]
+                - button "Đang khám · 0" [ref=e202] [cursor=pointer]
+                - button "Hoàn thành · 0" [ref=e203] [cursor=pointer]
+            - generic [ref=e205]:
+              - img [ref=e207]
+              - paragraph [ref=e210]: Chưa có bệnh nhân đến
+              - paragraph [ref=e211]: Đánh dấu "Đã đến" trong lịch hẹn hôm nay
+          - generic [ref=e212]:
+            - heading "Today's Services / Activity" [level=2] [ref=e214]
+            - table [ref=e216]:
+              - rowgroup [ref=e217]:
+                - row "Service Patient Qty Doctor Amount Status" [ref=e218]:
+                  - columnheader "Service" [ref=e219]
+                  - columnheader "Patient" [ref=e220]
+                  - columnheader "Qty" [ref=e221]
+                  - columnheader "Doctor" [ref=e222]
+                  - columnheader "Amount" [ref=e223]
+                  - columnheader "Status" [ref=e224]
+              - rowgroup [ref=e225]:
+                - row "Services will populate as patients are treated throughout the day." [ref=e226]:
+                  - cell "Services will populate as patients are treated throughout the day." [ref=e227]
+        - generic [ref=e229]:
+          - generic [ref=e230]:
+            - heading "Lịch hẹn hôm nay" [level=2] [ref=e233]
+            - generic [ref=e234]:
+              - button "Tất cả · 0" [ref=e235] [cursor=pointer]
+              - button "Đã đến · 0" [ref=e236] [cursor=pointer]
+              - button "Hủy hẹn · 0" [ref=e237] [cursor=pointer]
+          - paragraph [ref=e239]: Không có lịch hẹn
+    - generic [ref=e134]:
+      - generic [ref=e135]:
+        - button "New in this version 📐 Appointment modal reduced to 2/3 width — better desktop layout View all changes" [ref=e136] [cursor=pointer]:
+          - img [ref=e137]
+          - generic [ref=e139]:
+            - generic [ref=e141]: New in this version
+            - paragraph [ref=e142]: 📐 Appointment modal reduced to 2/3 width — better desktop layout
+            - generic [ref=e143]:
+              - text: View all changes
+              - img [ref=e144]
+        - button "Dismiss" [ref=e146] [cursor=pointer]:
+          - img [ref=e147]
+      - button "v0.4.4 (6f5fa0c)" [ref=e151] [cursor=pointer]:
+        - img [ref=e152]
+        - generic [ref=e154]: v0.4.4
+        - generic [ref=e155]: (6f5fa0c)

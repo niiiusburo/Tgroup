@@ -1,8 +1,8 @@
-# TDental Website Restructure — Implementation Plan
+# TG Clinic Website Restructure — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Restructure TDental dashboard with customer-centric tabs, 3-tier employee organization, Slip concept (doctor + 3 assistants), and proper business logic flows.
+**Goal:** Restructure TG Clinic dashboard with customer-centric tabs, 3-tier employee organization, Slip concept (doctor + 3 assistants), and proper business logic flows.
 
 **Architecture:** Phase-by-phase incremental restructure: (1) Customer tabs consolidation, (2) Employee tier tabs, (3) Slip data model with assistants, (4) Business logic validation, (5) Route cleanup, (6) Audit documentation. TypeScript compilation as primary test mechanism.
 
@@ -684,8 +684,8 @@ export interface CustomerService {
 Update `MOCK_APPOINTMENT_HISTORY` entries to include assistant names:
 ```typescript
 export const MOCK_APPOINTMENT_HISTORY: readonly CustomerAppointment[] = [
-  { id: 'apt-1', date: '2026-03-28', time: '09:00', doctor: 'Dr. Tran Minh', assistantName1: 'Khanh Do', assistantName2: 'Linh Pham', service: 'Cleaning & Checkup', status: 'completed', location: 'TDental District 1', notes: 'Regular cleaning, no issues found' },
-  { id: 'apt-2', date: '2026-03-15', time: '10:30', doctor: 'Dr. Le Hoang', assistantName1: 'Mai Tran', service: 'Orthodontic Adjustment', status: 'completed', location: 'TDental District 1', notes: 'Wire tightened, next visit in 4 weeks' },
+  { id: 'apt-1', date: '2026-03-28', time: '09:00', doctor: 'Dr. Tran Minh', assistantName1: 'Khanh Do', assistantName2: 'Linh Pham', service: 'Cleaning & Checkup', status: 'completed', location: 'TG Clinic District 1', notes: 'Regular cleaning, no issues found' },
+  { id: 'apt-2', date: '2026-03-15', time: '10:30', doctor: 'Dr. Le Hoang', assistantName1: 'Mai Tran', service: 'Orthodontic Adjustment', status: 'completed', location: 'TG Clinic District 1', notes: 'Wire tightened, next visit in 4 weeks' },
   // ... add assistant names to other entries or leave undefined
 ];
 ```
@@ -1360,7 +1360,7 @@ git commit -m "refactor: final route and navigation cleanup"
 - [ ] **Step 1: Create audit file with all sections**
 
 ```markdown
-# TDental Implementation Audit — Gaps & Missing Pieces
+# TG Clinic Implementation Audit — Gaps & Missing Pieces
 
 **Date:** 2025-04-07
 **Audited by:** Implementation Agent

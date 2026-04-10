@@ -11,7 +11,7 @@ const router = express.Router();
  * Dashboard widget: Service statistics
  *
  * PARITY NOTES:
- * - Field names use camelCase to match live TDental API
+ * - Field names use camelCase to match live TG Clinic API
  * - Fields not in DB schema return null (steps, tax, stateDisplay, etc.)
  * - See docs/parity-mvp.md for full parity matrix
  */

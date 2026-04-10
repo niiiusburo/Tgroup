@@ -1,33 +1,51 @@
 {
   "agents": [
     {
-      "agent_id": "a8ca7cb872b58a160",
-      "agent_type": "claude-code-guide",
-      "started_at": "2026-04-08T15:34:08.827Z",
+      "agent_id": "aaec7976e5ec55527",
+      "agent_type": "bravo-playwright-verify",
+      "started_at": "2026-04-10T11:12:51.547Z",
       "parent_mode": "none",
       "status": "completed",
-      "completed_at": "2026-04-08T15:34:23.471Z",
-      "duration_ms": 14644
+      "completed_at": "2026-04-10T11:13:29.987Z",
+      "duration_ms": 38440
     },
     {
-      "agent_id": "ad758fc9dc48fc106",
-      "agent_type": "Explore",
-      "started_at": "2026-04-08T16:57:37.426Z",
+      "agent_id": "a95c874111501de0c",
+      "agent_type": "bravo-playwright-verify",
+      "started_at": "2026-04-10T11:13:30.157Z",
       "parent_mode": "none",
       "status": "completed",
-      "completed_at": "2026-04-08T16:58:13.225Z",
-      "duration_ms": 35799
+      "completed_at": "2026-04-10T11:13:37.913Z",
+      "duration_ms": 7756
     },
     {
-      "agent_id": "aa528a1d573e39d4a",
-      "agent_type": "code-reviewer",
-      "started_at": "2026-04-08T17:06:35.160Z",
+      "agent_id": "aca4a5f093672477b",
+      "agent_type": "bravo-playwright-verify",
+      "started_at": "2026-04-10T11:13:38.077Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-04-10T11:13:47.321Z",
+      "duration_ms": 9244
+    },
+    {
+      "agent_id": "a03ade673b324d350",
+      "agent_type": "bravo-playwright-verify",
+      "started_at": "2026-04-10T11:13:47.483Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-04-10T11:14:03.128Z",
+      "duration_ms": 15645
+    },
+    {
+      "agent_id": "adf0c5784f31852e3",
+      "agent_type": "oh-my-claudecode:executor",
+      "started_at": "2026-04-10T11:15:44.929Z",
       "parent_mode": "none",
       "status": "running"
     }
   ],
-  "total_spawned": 3,
-  "total_completed": 2,
+  "total_spawned": 5,
+  "total_completed": 4,
   "total_failed": 0,
-  "last_updated": "2026-04-08T17:06:35.263Z"
+  "last_updated": "2026-04-10T11:15:45.031Z"
 }

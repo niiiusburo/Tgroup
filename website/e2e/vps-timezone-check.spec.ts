@@ -76,7 +76,7 @@ test.describe('VPS Timezone Diagnostics', () => {
     await page.screenshot({ path: 'e2e/screenshots/vps-login-page.png', fullPage: true });
     
     // Login
-    await page.fill('input#email', 'admin@tdental.vn');
+    await page.fill('input#email', 'tg@clinic.vn');
     await page.fill('input#password', 'admin123');
     await page.click('button[type="submit"]');
     

@@ -11,7 +11,7 @@ test.describe('VPS All Pages Verification', () => {
 
   // Auth credentials
   const LOGIN_CREDENTIALS = {
-    email: 'admin@tdental.vn',
+    email: 'tg@clinic.vn',
     password: 'admin123'
   };
 
@@ -220,7 +220,7 @@ test.describe('VPS All Pages Verification', () => {
       bodyText.includes('Locations') ||
       bodyText.includes('Chi nhánh') ||
       bodyText.includes('Cơ sở') ||
-      bodyText.includes('Tấm Dentist');
+      bodyText.includes('TG Clinic');
     
     expect(hasLocationContent || result.status === 'PASS').toBe(true);
   });

@@ -1,6 +1,6 @@
-# TDental Dashboard -- Button & Component Relationship Map
+# TG Clinic Dashboard -- Button & Component Relationship Map
 
-> Auto-generated from source analysis. Maps every button, dropdown, filter, and interactive element across the TDental Dashboard.
+> Auto-generated from source analysis. Maps every button, dropdown, filter, and interactive element across the TG Clinic Dashboard.
 
 ---
 

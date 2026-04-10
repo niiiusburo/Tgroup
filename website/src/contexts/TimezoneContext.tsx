@@ -20,7 +20,7 @@ import {
   type TimezoneOption,
 } from '@/lib/dateUtils';
 
-const STORAGE_KEY = 'tdental_timezone';
+const STORAGE_KEY = 'tgclinic_timezone';
 const DEFAULT_TIMEZONE = 'Asia/Ho_Chi_Minh';
 
 interface TimezoneContextValue {

@@ -65,10 +65,10 @@ declare global {
 }
 
 // localStorage keys
-const DISMISSED_VERSION_KEY = 'tdental:dismissedVersion';
-// const LAST_UPDATE_CHECK_KEY = 'tdental:lastUpdateCheck';
-const JUST_UPDATED_KEY = 'tdental:justUpdated';
-const TARGET_VERSION_KEY = 'tdental:targetVersion'; // Version we're trying to update to
+const DISMISSED_VERSION_KEY = 'tgclinic:dismissedVersion';
+// const LAST_UPDATE_CHECK_KEY = 'tgclinic:lastUpdateCheck';
+const JUST_UPDATED_KEY = 'tgclinic:justUpdated';
+const TARGET_VERSION_KEY = 'tgclinic:targetVersion'; // Version we're trying to update to
 
 /**
  * Check if we just completed an update (based on URL param or localStorage)
@@ -127,18 +127,21 @@ function setDismissedVersion(versionKey: string): void {
 function clearDismissedVersion(): void {
   try {
     localStorage.removeItem(DISMISSED_VERSION_KEY);
-    localStorage.removeItem(JUST_UPDATED_KEY);
+    // NOTE: do NOT remove JUST_UPDATED_KEY here — it has its own
+    // 30-second expiry in checkJustUpdated() and is needed for the
+    // post-reload grace period.
   } catch {
     // Ignore
   }
 }
 
-function getBuildTimeVersion(): VersionInfo {
-  // Try to get from Vite's define (window first, then fallback)
-  const version = window.__APP_VERSION__ ?? '0.0.0';
-  const buildTime = window.__APP_BUILD_TIME__ ?? new Date().toISOString();
-  const gitCommit = window.__APP_GIT_COMMIT__ ?? 'unknown';
-  const gitBranch = window.__APP_GIT_BRANCH__ ?? 'unknown';
+export function getBuildTimeVersion(): VersionInfo {
+  // Use globalThis because Vite's define plugin replaces globalThis.__APP_VERSION__
+  // at build time, but does NOT replace window.__APP_VERSION__.
+  const version = (globalThis as Record<string, unknown>).__APP_VERSION__ as string | undefined ?? '0.0.0';
+  const buildTime = (globalThis as Record<string, unknown>).__APP_BUILD_TIME__ as string | undefined ?? new Date().toISOString();
+  const gitCommit = (globalThis as Record<string, unknown>).__APP_GIT_COMMIT__ as string | undefined ?? 'unknown';
+  const gitBranch = (globalThis as Record<string, unknown>).__APP_GIT_BRANCH__ as string | undefined ?? 'unknown';
 
   return {
     version,

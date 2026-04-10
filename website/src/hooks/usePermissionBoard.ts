@@ -63,7 +63,7 @@ export function usePermissionBoard() {
 
   const toggleGroupPermission = useCallback(async (groupId: string, permission: string) => {
     const group = groups.find(g => g.id === groupId);
-    if (!group || group.isSystem) return;
+    if (!group) return;
     const has = group.permissions.includes(permission);
     const newPerms = has
       ? group.permissions.filter(p => p !== permission)

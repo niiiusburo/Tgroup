@@ -1,7 +1,7 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { useState, useCallback, useMemo } from 'react';
-import { useCalendarData, type ViewMode } from '@/hooks/useCalendarData';
+import { useCalendarData, type ViewMode, type CalendarStatusFilter } from '@/hooks/useCalendarData';
 import { useDragReschedule } from '@/hooks/useDragReschedule';
 import { DayView } from '@/components/calendar/DayView';
 import { WeekView } from '@/components/calendar/WeekView';
@@ -34,6 +34,15 @@ const VIEW_TABS: readonly { readonly mode: ViewMode; readonly label: string }[] 
   { mode: 'month', label: 'Tháng' },
 ];
 
+const STATUS_TABS: readonly { readonly value: CalendarStatusFilter; readonly label: string }[] = [
+  { value: 'all', label: 'Tất cả' },
+  { value: 'scheduled', label: 'Đang hẹn' },
+  { value: 'confirmed', label: 'Đã xác nhận' },
+  { value: 'in-progress', label: 'Đang khám' },
+  { value: 'completed', label: 'Hoàn thành' },
+  { value: 'cancelled', label: 'Hủy hẹn' },
+];
+
 export function Calendar() {
   const { selectedLocationId } = useLocationFilter();
   const {
@@ -49,6 +58,10 @@ export function Calendar() {
     dateLabel,
     selectedDoctorId,
     setSelectedDoctorId,
+    searchTerm,
+    setSearchTerm,
+    statusFilter,
+    setStatusFilter,
     refresh,
   } = useCalendarData(selectedLocationId);
 
@@ -211,9 +224,19 @@ export function Calendar() {
           </button>
         </div>
 
-        {/* Right: Quick add + doctor filter */}
+        {/* Right: Quick add + search + doctor filter */}
         <div className="flex items-center gap-3 w-full lg:w-auto">
-          <QuickAddAppointmentButton 
+          <div className="relative flex-1 lg:w-56">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Tìm theo tên, SĐT, bác sĩ..."
+              className="w-full pl-9 pr-4 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+            />
+          </div>
+          <QuickAddAppointmentButton
             onSuccess={refresh}
             size="sm"
           />
@@ -225,6 +248,24 @@ export function Calendar() {
             />
           </div>
         </div>
+      </div>
+
+      {/* Status filter tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {STATUS_TABS.map((tab) => (
+          <button
+            key={tab.value}
+            type="button"
+            onClick={() => setStatusFilter(tab.value)}
+            className={`px-4 py-2 text-sm font-medium rounded-lg border whitespace-nowrap transition-colors ${
+              statusFilter === tab.value
+                ? 'bg-primary text-white border-primary'
+                : 'text-gray-600 bg-white border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Calendar view */}

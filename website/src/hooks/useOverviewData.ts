@@ -1,6 +1,6 @@
 /**
  * Hook for Overview page data management
- * NOW CONNECTED TO REAL API (tdental-api → PostgreSQL)
+ * NOW CONNECTED TO REAL API (tgclinic-api → PostgreSQL)
  * @crossref:used-in[Overview]
  */
 

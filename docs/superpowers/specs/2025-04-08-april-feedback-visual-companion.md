@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-Based on the Vietnamese feedback document "Feedback ngày 8/4", this visual companion maps out 7 critical issues that need to be addressed in the TDental system.
+Based on the Vietnamese feedback document "Feedback ngày 8/4", this visual companion maps out 7 critical issues that need to be addressed in the TG Clinic system.
 
 ---
 
@@ -372,7 +372,7 @@ Based on the Vietnamese feedback document "Feedback ngày 8/4", this visual comp
 ### Current State (Sidebar)
 ```
 +-------------+
-| TDental     |
+| TG Clinic     |
 +-------------+
 | Tổng quan   |
 | Khách hàng  |
@@ -393,7 +393,7 @@ Based on the Vietnamese feedback document "Feedback ngày 8/4", this visual comp
 ### Expected State
 ```
 +-------------+
-| TDental     |
+| TG Clinic     |
 +-------------+
 | Tổng quan   |
 | Khách hàng  |
