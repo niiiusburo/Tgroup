@@ -345,7 +345,7 @@ router.post('/', async (req, res) => {
     }
 
     const duplicate = await query(
-      'SELECT id FROM partners WHERE phone = $1 AND isdeleted = false LIMIT 1',
+      'SELECT id FROM partners WHERE phone = $1 LIMIT 1',
       [phone]
     );
     if (duplicate && duplicate.length > 0) {

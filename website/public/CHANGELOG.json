@@ -1,5 +1,30 @@
 [
   {
+    "version": "0.4.13",
+    "date": "2026-04-10",
+    "commit": "d8d2ab08",
+    "highlights": "Phase 2 quick features and validations",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Customer code visibility in read-only Customer Profile",
+          "Duplicate phone check blocks creation with 409 Conflict",
+          "Dental aide selector in ServiceForm",
+          "Three independent search boxes on Calendar page (patient, doctor, service)",
+          "Wait timer on waiting PatientCheckIn cards",
+          "Deposit and payment date pickers defaulting to today"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added Phase 2 E2E coverage in phase2-quick-features.spec.ts"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.4.12",
     "date": "2026-04-10",
     "commit": "1119c7ef",
