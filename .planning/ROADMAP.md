@@ -31,6 +31,13 @@
 
 **UI hint:** yes
 
+**Plans:** 3 plans in 2 waves
+
+Plans:
+- [ ] 02-01-PLAN.md — Backend duplicate-phone validation + customer code visibility
+- [ ] 02-02-PLAN.md — ServiceForm Dental Aide selector + Deposit & Payment date pickers
+- [ ] 02-03-PLAN.md — Calendar 3 search boxes, WaitTimer integration, E2E tests, version bump
+
 ---
 
 ## Phase 3: Architecture Shifts
