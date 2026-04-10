@@ -19,7 +19,9 @@ export function useCalendarData(selectedLocationId?: string) {
   // Store current date as string in YYYY-MM-DD format for timezone consistency
   const [currentDateStr, setCurrentDateStr] = useState(() => formatDate(new Date(), 'yyyy-MM-dd'));
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [patientSearch, setPatientSearch] = useState('');
+  const [doctorSearch, setDoctorSearch] = useState('');
+  const [serviceSearch, setServiceSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<CalendarStatusFilter>('all');
   const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -93,17 +95,24 @@ export function useCalendarData(selectedLocationId?: string) {
 
   const filteredAppointments = useMemo(() => {
     return appointments.filter((apt) => {
-      const matchesDoctor = selectedDoctorId ? apt.dentistId === selectedDoctorId : true;
+      const matchesDoctorFilter = selectedDoctorId ? apt.dentistId === selectedDoctorId : true;
       const matchesStatus = statusFilter !== 'all' ? apt.status === statusFilter : true;
-      const term = normalizeText(searchTerm.trim());
-      const matchesSearch = term
-        ? normalizeText(apt.customerName).includes(term) ||
-          normalizeText(apt.customerPhone).includes(term) ||
-          normalizeText(apt.dentist).includes(term)
+      const patientSearchTerm = normalizeText(patientSearch.trim());
+      const doctorSearchTerm = normalizeText(doctorSearch.trim());
+      const serviceSearchTerm = normalizeText(serviceSearch.trim());
+      const matchesPatient = patientSearchTerm
+        ? normalizeText(apt.customerName).includes(patientSearchTerm) ||
+          normalizeText(apt.customerPhone).includes(patientSearchTerm)
         : true;
-      return matchesDoctor && matchesStatus && matchesSearch;
+      const matchesDoctor = doctorSearchTerm
+        ? normalizeText(apt.dentist).includes(doctorSearchTerm)
+        : true;
+      const matchesService = serviceSearchTerm
+        ? normalizeText(apt.serviceName || '').includes(serviceSearchTerm)
+        : true;
+      return matchesDoctorFilter && matchesStatus && matchesPatient && matchesDoctor && matchesService;
     });
-  }, [appointments, selectedDoctorId, statusFilter, searchTerm]);
+  }, [appointments, selectedDoctorId, statusFilter, patientSearch, doctorSearch, serviceSearch]);
 
   const weekDates = useMemo(
     () => getWeekDates(currentDate),
@@ -151,8 +160,12 @@ export function useCalendarData(selectedLocationId?: string) {
     dateLabel,
     selectedDoctorId,
     setSelectedDoctorId,
-    searchTerm,
-    setSearchTerm,
+    patientSearch,
+    setPatientSearch,
+    doctorSearch,
+    setDoctorSearch,
+    serviceSearch,
+    setServiceSearch,
     statusFilter,
     setStatusFilter,
     selectedAppointment,

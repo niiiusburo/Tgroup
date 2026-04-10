@@ -58,8 +58,12 @@ export function Calendar() {
     dateLabel,
     selectedDoctorId,
     setSelectedDoctorId,
-    searchTerm,
-    setSearchTerm,
+    patientSearch,
+    setPatientSearch,
+    doctorSearch,
+    setDoctorSearch,
+    serviceSearch,
+    setServiceSearch,
     statusFilter,
     setStatusFilter,
     refresh,
@@ -225,15 +229,35 @@ export function Calendar() {
         </div>
 
         {/* Right: Quick add + search + doctor filter */}
-        <div className="flex items-center gap-3 w-full lg:w-auto">
-          <div className="relative flex-1 lg:w-56">
+        <div className="flex items-center gap-2 w-full lg:w-auto">
+          <div className="relative w-full lg:w-40">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Tìm theo tên, SĐT, bác sĩ..."
-              className="w-full pl-9 pr-4 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+              value={patientSearch}
+              onChange={(e) => setPatientSearch(e.target.value)}
+              placeholder="Bệnh nhân..."
+              className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+            />
+          </div>
+          <div className="relative w-full lg:w-40">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              value={doctorSearch}
+              onChange={(e) => setDoctorSearch(e.target.value)}
+              placeholder="Bác sĩ..."
+              className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+            />
+          </div>
+          <div className="relative w-full lg:w-40">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              value={serviceSearch}
+              onChange={(e) => setServiceSearch(e.target.value)}
+              placeholder="Dịch vụ..."
+              className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
             />
           </div>
           <QuickAddAppointmentButton
