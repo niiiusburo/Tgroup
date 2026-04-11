@@ -20,6 +20,12 @@
 - **DATA-03**: API endpoints exist for biometric enroll, match, and phone-check
 - **DATA-04**: API endpoints exist for bank settings CRUD
 
+## v1.1 / Architecture Shifts
+
+- **REQ-06**: Two-tier customer delete with permission gating and FK-safe confirmation dialogs
+- **REQ-12**: Multi-branch employee assignment via junction table and dual-selector UI
+- **REQ-15**: Payment allocation expanded to dotkhams (examination vouchers) via tabbed UI
+
 ## v2 / Deferred
 
 - Quick check-in widget on Overview dashboard with face scanner
@@ -31,6 +37,7 @@
 - KOL referral tracking or commission logic
 - Mobile native app integration
 - Real-time payment webhook from banks
+- REQ-13, REQ-14: originally scoped but dropped/consolidated into other v1.1 items
 
 ## Traceability
 
@@ -48,3 +55,6 @@
 | DATA-02 | 1 |
 | DATA-03 | 3 |
 | DATA-04 | 1 |
+| REQ-06 | 3 |
+| REQ-12 | 3 |
+| REQ-15 | 3 |
