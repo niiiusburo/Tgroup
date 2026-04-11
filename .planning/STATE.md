@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
-current_plan: 3 / 4
-status: executing
-stopped_at: Completed 03-02-PLAN.md
-last_updated: "2026-04-11T04:29:12.373Z"
+current_plan: 4 / 4
+status: completed
+stopped_at: Completed 03-04-PLAN.md
+last_updated: "2026-04-11T04:41:03.363Z"
 last_activity: 2026-04-11
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 12
-  completed_plans: 10
-  percent: 83
+  completed_plans: 11
+  percent: 92
 ---
 
 # Project State — TG Clinic v1.1 Bugfixes & Features
@@ -25,8 +25,8 @@ progress:
 | Phase | Status | Plans | Verified |
 |-------|--------|-------|----------|
 | 1: Bug Fixes Wave 1 | Completed | 1 | Yes |
-| 2: Quick Features & Validations | Not started | — | — |
-| 3: Architecture Shifts | Not started | — | — |
+| 2: Quick Features & Validations | Completed | — | — |
+| 3: Architecture Shifts | Completed | — | — |
 | 4: Polish & Walk-in Redesign | Not started | — | — |
 
 ## Reports
@@ -39,15 +39,15 @@ progress:
 
 **Phase 03: Architecture Shifts**
 
-- **Current Plan:** 3 / 4
-- **Plan Status:** In Progress
+- **Current Plan:** 4 / 4
+- **Plan Status:** Completed
 
 | Plan | Status |
 |------|--------|
 | 03-01 | Completed |
-| 03-02 | Not started |
+| 03-02 | Completed |
 | 03-03 | Completed |
-| 03-04 | Not started |
+| 03-04 | Completed |
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ progress:
 | 03-architecture-shifts | 03-01 | 18min | 2 | 2 |
 | Phase 03-architecture-shifts P03 | 23min | 3 tasks | 7 files |
 | Phase 03-architecture-shifts P03-02 | 35min | 3 tasks | 7 files |
+| Phase 03-architecture-shifts P03-04 | 571 | 4 tasks | 7 files |
 
 ## Decisions
 
@@ -67,8 +68,10 @@ progress:
 - [Phase 03-architecture-shifts]: 409 Conflict from hard delete maps to user-facing message 'Không thể xóa: còn dữ liệu liên quan.'
 - [Phase 03-architecture-shifts]: Use useColumns hook to close over locationNameMap since DataTable Column render only receives row
 - [Phase 03-architecture-shifts]: Filter out primary companyid from scope chips to avoid duplicate selection
+- [Phase 03-architecture-shifts]: Dotkhams is a VIEW in the demo schema; FK constraint to dotkhams(id) cannot be added, so column was added without REFERENCES
+- [Phase 03-architecture-shifts]: Allocation state was refactored to target-agnostic keys to support both invoices and dotkhams
 
 ## Session
 
-- **Last session:** 2026-04-11T04:29:12.370Z
-- **Stopped at:** Completed 03-02-PLAN.md
+- **Last session:** 2026-04-11T04:41:03.361Z
+- **Stopped at:** Completed 03-04-PLAN.md
