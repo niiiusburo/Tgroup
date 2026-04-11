@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { query } = require('../db');
 
-// GET /api/Payments - List payments
+// GET /api/Payments - List payments with allocations
 router.get('/', async (req, res) => {
   try {
     const { customerId, limit = 100, offset = 0 } = req.query;
@@ -10,7 +10,9 @@ router.get('/', async (req, res) => {
     let sql = `
       SELECT
         p.id, p.customer_id, p.service_id,
-        p.amount, p.method, p.notes, p.created_at
+        p.amount, p.method, p.notes, p.created_at,
+        p.payment_date, p.reference_code, p.status,
+        p.deposit_used, p.cash_amount, p.bank_amount
       FROM payments p
       WHERE 1=1
     `;
@@ -26,11 +28,28 @@ router.get('/', async (req, res) => {
 
     const result = await query(sql, params);
 
-    let countSql = 'SELECT COUNT(*) FROM payments';
+    let countSql = 'SELECT COUNT(*) FROM payments p WHERE 1=1';
+    const countParams = [];
     if (customerId) {
-      countSql += ' WHERE customer_id = $1';
+      countSql += ' AND p.customer_id = $1';
+      countParams.push(customerId);
     }
-    const countResult = await query(countSql, customerId ? [customerId] : []);
+    const countResult = await query(countSql, countParams);
+
+    // Fetch allocations for returned payments
+    const paymentIds = result.map(r => r.id);
+    let allocations = [];
+    if (paymentIds.length > 0) {
+      const allocResult = await query(
+        `SELECT pa.id, pa.payment_id, pa.invoice_id, pa.allocated_amount,
+                so.name as invoice_name, so.amounttotal as invoice_total, so.residual as invoice_residual
+         FROM payment_allocations pa
+         JOIN saleorders so ON so.id = pa.invoice_id
+         WHERE pa.payment_id = ANY($1)`,
+        [paymentIds]
+      );
+      allocations = allocResult;
+    }
 
     res.json({
       items: result.map(row => ({
@@ -43,7 +62,20 @@ router.get('/', async (req, res) => {
         cashAmount: parseFloat(row.cash_amount || 0),
         bankAmount: parseFloat(row.bank_amount || 0),
         notes: row.notes,
+        paymentDate: row.payment_date,
+        referenceCode: row.reference_code,
+        status: row.status,
         createdAt: row.created_at,
+        allocations: allocations
+          .filter(a => a.payment_id === row.id)
+          .map(a => ({
+            id: a.id,
+            invoiceId: a.invoice_id,
+            invoiceName: a.invoice_name,
+            invoiceTotal: parseFloat(a.invoice_total || 0),
+            invoiceResidual: parseFloat(a.invoice_residual || 0),
+            allocatedAmount: parseFloat(a.allocated_amount),
+          })),
       })),
       totalItems: parseInt(countResult[0]?.count || 0),
     });
@@ -53,22 +85,109 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /api/Payments - Create a new payment
+// GET /api/Payments/:id - Single payment with allocations
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const rows = await query(
+      `SELECT id, customer_id, service_id, amount, method, notes, created_at,
+              payment_date, reference_code, status, deposit_used, cash_amount, bank_amount
+       FROM payments WHERE id = $1`,
+      [id]
+    );
+    if (rows.length === 0) return res.status(404).json({ error: 'Payment not found' });
+
+    const row = rows[0];
+    const allocations = await query(
+      `SELECT pa.id, pa.payment_id, pa.invoice_id, pa.allocated_amount,
+              so.name as invoice_name, so.amounttotal as invoice_total, so.residual as invoice_residual
+       FROM payment_allocations pa
+       JOIN saleorders so ON so.id = pa.invoice_id
+       WHERE pa.payment_id = $1`,
+      [id]
+    );
+
+    res.json({
+      id: row.id,
+      customerId: row.customer_id,
+      serviceId: row.service_id,
+      amount: parseFloat(row.amount),
+      method: row.method,
+      depositUsed: parseFloat(row.deposit_used || 0),
+      cashAmount: parseFloat(row.cash_amount || 0),
+      bankAmount: parseFloat(row.bank_amount || 0),
+      notes: row.notes,
+      paymentDate: row.payment_date,
+      referenceCode: row.reference_code,
+      status: row.status,
+      createdAt: row.created_at,
+      allocations: allocations.map(a => ({
+        id: a.id,
+        invoiceId: a.invoice_id,
+        invoiceName: a.invoice_name,
+        invoiceTotal: parseFloat(a.invoice_total || 0),
+        invoiceResidual: parseFloat(a.invoice_residual || 0),
+        allocatedAmount: parseFloat(a.allocated_amount),
+      })),
+    });
+  } catch (error) {
+    console.error('Error fetching payment:', error);
+    res.status(500).json({ error: 'Failed to fetch payment' });
+  }
+});
+
+// POST /api/Payments - Create a new payment with optional allocations
 router.post('/', async (req, res) => {
   try {
-    const { customer_id, service_id, amount, method, notes } = req.body;
+    const {
+      customer_id, service_id, amount, method, notes,
+      payment_date, reference_code, status,
+      deposit_used, cash_amount, bank_amount,
+      allocations
+    } = req.body;
 
-    if (!customer_id || !amount || !method) {
+    if (!customer_id || amount === undefined || amount === null || !method) {
       return res.status(400).json({ error: 'customer_id, amount, and method are required' });
     }
 
+    // Create payment
     const result = await query(`
-      INSERT INTO payments (customer_id, service_id, amount, method, notes)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO payments (
+        customer_id, service_id, amount, method, notes,
+        payment_date, reference_code, status,
+        deposit_used, cash_amount, bank_amount
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *
-    `, [customer_id, service_id || null, amount, method, notes || null]);
+    `, [
+      customer_id, service_id || null, amount, method, notes || null,
+      payment_date || null, reference_code || null, status || 'posted',
+      deposit_used || 0, cash_amount || 0, bank_amount || 0
+    ]);
 
     const row = result[0];
+
+    // Create allocations if provided
+    let createdAllocations = [];
+    if (Array.isArray(allocations) && allocations.length > 0) {
+      const allocValues = [];
+      const allocParams = [];
+      let idx = 1;
+      for (const a of allocations) {
+        if (!a.invoice_id || a.allocated_amount == null) continue;
+        allocValues.push(`($${idx}, $${idx + 1}, $${idx + 2})`);
+        allocParams.push(row.id, a.invoice_id, a.allocated_amount);
+        idx += 3;
+      }
+      if (allocValues.length > 0) {
+        const allocSql = `
+          INSERT INTO payment_allocations (payment_id, invoice_id, allocated_amount)
+          VALUES ${allocValues.join(', ')}
+          RETURNING *
+        `;
+        createdAllocations = await query(allocSql, allocParams);
+      }
+    }
+
     res.status(201).json({
       id: row.id,
       customerId: row.customer_id,
@@ -76,11 +195,54 @@ router.post('/', async (req, res) => {
       amount: parseFloat(row.amount),
       method: row.method,
       notes: row.notes,
+      paymentDate: row.payment_date,
+      referenceCode: row.reference_code,
+      status: row.status,
+      depositUsed: parseFloat(row.deposit_used || 0),
+      cashAmount: parseFloat(row.cash_amount || 0),
+      bankAmount: parseFloat(row.bank_amount || 0),
       createdAt: row.created_at,
+      allocations: createdAllocations.map(a => ({
+        id: a.id,
+        invoiceId: a.invoice_id,
+        allocatedAmount: parseFloat(a.allocated_amount),
+      })),
     });
   } catch (error) {
     console.error('Error creating payment:', error);
     res.status(500).json({ error: 'Failed to create payment' });
+  }
+});
+
+// POST /api/Payments/:id/void - Void payment and reverse allocations
+router.post('/:id/void', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body || {};
+
+    await query('BEGIN');
+    try {
+      // Reverse allocations by deleting them
+      await query('DELETE FROM payment_allocations WHERE payment_id = $1', [id]);
+
+      // Mark payment as voided
+      const result = await query(
+        `UPDATE payments SET status = 'voided', notes = COALESCE(notes, '') || ' | VOIDED: ' || $2 WHERE id = $1 RETURNING *`,
+        [id, reason || '']
+      );
+      if (result.length === 0) {
+        await query('ROLLBACK');
+        return res.status(404).json({ error: 'Payment not found' });
+      }
+      await query('COMMIT');
+      res.json({ success: true, payment: result[0] });
+    } catch (err) {
+      await query('ROLLBACK');
+      throw err;
+    }
+  } catch (error) {
+    console.error('Error voiding payment:', error);
+    res.status(500).json({ error: 'Failed to void payment' });
   }
 });
 
@@ -96,7 +258,7 @@ router.post('/:id/proof', async (req, res) => {
 
     const result = await query(
       'INSERT INTO payment_proofs (payment_id, proof_image, qr_description) VALUES ($1, $2, $3) RETURNING *',
-      [parseInt(id, 10), proofImageBase64, qrDescription || null]
+      [id, proofImageBase64, qrDescription || null]
     );
 
     const row = result[0];

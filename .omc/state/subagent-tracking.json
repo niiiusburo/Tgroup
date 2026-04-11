@@ -1,51 +1,40 @@
 {
   "agents": [
     {
-      "agent_id": "aaec7976e5ec55527",
-      "agent_type": "bravo-playwright-verify",
-      "started_at": "2026-04-10T11:12:51.547Z",
+      "agent_id": "a99f62e6f85c840a3",
+      "agent_type": "general-purpose",
+      "started_at": "2026-04-10T11:53:35.735Z",
       "parent_mode": "none",
       "status": "completed",
-      "completed_at": "2026-04-10T11:13:29.987Z",
-      "duration_ms": 38440
+      "completed_at": "2026-04-10T11:55:36.192Z",
+      "duration_ms": 120457
     },
     {
-      "agent_id": "a95c874111501de0c",
-      "agent_type": "bravo-playwright-verify",
-      "started_at": "2026-04-10T11:13:30.157Z",
+      "agent_id": "aed5e3a0e00b50773",
+      "agent_type": "gsd-verifier",
+      "started_at": "2026-04-10T12:21:38.462Z",
+      "parent_mode": "none",
+      "status": "running"
+    },
+    {
+      "agent_id": "ae0a9a8595c38b146",
+      "agent_type": "gsd-verifier",
+      "started_at": "2026-04-11T02:06:55.044Z",
       "parent_mode": "none",
       "status": "completed",
-      "completed_at": "2026-04-10T11:13:37.913Z",
-      "duration_ms": 7756
+      "completed_at": "2026-04-11T02:09:12.463Z",
+      "duration_ms": 137419
     },
     {
-      "agent_id": "aca4a5f093672477b",
-      "agent_type": "bravo-playwright-verify",
-      "started_at": "2026-04-10T11:13:38.077Z",
-      "parent_mode": "none",
-      "status": "completed",
-      "completed_at": "2026-04-10T11:13:47.321Z",
-      "duration_ms": 9244
-    },
-    {
-      "agent_id": "a03ade673b324d350",
-      "agent_type": "bravo-playwright-verify",
-      "started_at": "2026-04-10T11:13:47.483Z",
-      "parent_mode": "none",
-      "status": "completed",
-      "completed_at": "2026-04-10T11:14:03.128Z",
-      "duration_ms": 15645
-    },
-    {
-      "agent_id": "adf0c5784f31852e3",
-      "agent_type": "oh-my-claudecode:executor",
-      "started_at": "2026-04-10T11:15:44.929Z",
+      "agent_id": "abca931dd907b7c6e",
+      "agent_type": "general-purpose",
+      "started_at": "2026-04-11T02:09:48.613Z",
       "parent_mode": "none",
       "status": "running"
     }
   ],
-  "total_spawned": 5,
-  "total_completed": 4,
+  "total_spawned": 4,
+  "total_completed": 2,
   "total_failed": 0,
-  "last_updated": "2026-04-10T11:15:45.031Z"
+  "last_updated": "2026-04-11T02:09:48.715Z"
 }

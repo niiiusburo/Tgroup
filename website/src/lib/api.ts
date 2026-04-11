@@ -564,18 +564,31 @@ export async function fetchCustomerBalance(customerId: string): Promise<ApiCusto
 
 // ─── Payments ────────────────────────────────────────────────────
 
+export interface ApiPaymentAllocation {
+  id: string;
+  invoiceId: string;
+  invoiceName?: string;
+  invoiceTotal?: number;
+  invoiceResidual?: number;
+  allocatedAmount: number;
+}
+
 export interface ApiPayment {
   id: string;
   customerId: string;
   serviceId?: string;
   amount: number;
-  method: 'cash' | 'bank' | 'deposit';
+  method: 'cash' | 'bank_transfer' | 'deposit' | 'mixed';
   depositUsed?: number;
   cashAmount?: number;
   bankAmount?: number;
   receiptNumber?: string;
   notes?: string;
+  paymentDate?: string;
+  referenceCode?: string;
+  status?: 'posted' | 'voided';
   createdAt: string;
+  allocations?: ApiPaymentAllocation[];
 }
 
 export async function fetchPayments(customerId?: string): Promise<{ items: ApiPayment[]; totalItems: number }> {
@@ -587,8 +600,15 @@ export async function createPayment(data: {
   customerId: string;
   serviceId?: string;
   amount: number;
-  method: 'cash' | 'bank' | 'deposit';
+  method: 'cash' | 'bank_transfer' | 'deposit' | 'mixed';
   notes?: string;
+  paymentDate?: string;
+  referenceCode?: string;
+  status?: 'posted' | 'voided';
+  depositUsed?: number;
+  cashAmount?: number;
+  bankAmount?: number;
+  allocations?: { invoice_id: string; allocated_amount: number }[];
 }): Promise<ApiPayment> {
   return apiFetch<ApiPayment>('/Payments', {
     method: 'POST',
@@ -598,7 +618,21 @@ export async function createPayment(data: {
       amount: data.amount,
       method: data.method,
       notes: data.notes,
+      payment_date: data.paymentDate,
+      reference_code: data.referenceCode,
+      status: data.status ?? 'posted',
+      deposit_used: data.depositUsed ?? 0,
+      cash_amount: data.cashAmount ?? 0,
+      bank_amount: data.bankAmount ?? 0,
+      allocations: data.allocations,
     },
+  });
+}
+
+export async function voidPayment(id: string, reason?: string): Promise<{ success: boolean }> {
+  return apiFetch<{ success: boolean }>(`/Payments/${id}/void`, {
+    method: 'POST',
+    body: { reason },
   });
 }
 
@@ -645,6 +679,16 @@ export async function createService(data: {
 
 // ─── Monthly Plans ────────────────────────────────────────────────
 
+export interface ApiMonthlyPlanItem {
+  id: string;
+  planId: string;
+  invoiceId: string;
+  invoiceName?: string;
+  invoiceTotal?: number;
+  invoiceResidual?: number;
+  priority: number;
+}
+
 export interface ApiMonthlyPlan {
   id: string;
   customer_id: string;
@@ -659,6 +703,7 @@ export interface ApiMonthlyPlan {
   status: 'active' | 'completed' | 'defaulted' | 'draft';
   notes: string;
   installments: ApiInstallment[];
+  items?: ApiMonthlyPlanItem[];
   created_at: string;
   updated_at: string;
 }
@@ -716,6 +761,7 @@ export function createMonthlyPlan(data: {
   number_of_installments: number;
   start_date: string;
   notes?: string;
+  invoice_ids?: string[];
 }) {
   return apiFetch<ApiMonthlyPlan>('/MonthlyPlans', { method: 'POST', body: data });
 }
@@ -726,6 +772,7 @@ export function updateMonthlyPlan(id: string, data: Partial<{
   down_payment: number;
   status: string;
   notes: string;
+  invoice_ids?: string[];
 }>) {
   return apiFetch<ApiMonthlyPlan>(`/MonthlyPlans/${id}`, { method: 'PUT', body: data });
 }

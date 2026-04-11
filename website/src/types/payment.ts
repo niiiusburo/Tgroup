@@ -30,8 +30,8 @@ export interface PaymentRecord {
   readonly customerId: string;
   readonly customerName: string;
   readonly customerPhone: string;
-  readonly serviceId: string;
-  readonly serviceName: string;
+  readonly serviceId?: string;
+  readonly serviceName?: string;
   readonly amount: number;
   readonly method: PaymentMethod;
   readonly status: PaymentStatus;

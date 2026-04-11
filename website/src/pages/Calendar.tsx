@@ -112,6 +112,8 @@ export function Calendar() {
       topStatus: mapStatusToTopStatus(appointment.status),
       checkInStatus: null,
       color: appointment.color || '0',
+      arrivalTime: null,
+      treatmentStartTime: null,
     };
     setEditingAppointment(overviewAppointment);
     setIsEditModalOpen(true);

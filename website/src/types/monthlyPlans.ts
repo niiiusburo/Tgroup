@@ -17,6 +17,16 @@ export interface Installment {
   readonly paidAmount: number | null;
 }
 
+export interface PlanItem {
+  readonly id: string;
+  readonly planId: string;
+  readonly invoiceId: string;
+  readonly invoiceName?: string;
+  readonly invoiceTotal?: number;
+  readonly invoiceResidual?: number;
+  readonly priority: number;
+}
+
 export interface MonthlyPlan {
   readonly id: string;
   readonly customerId: string;
@@ -29,6 +39,7 @@ export interface MonthlyPlan {
   readonly startDate: string;
   readonly status: PlanStatus;
   readonly installments: readonly Installment[];
+  readonly items?: readonly PlanItem[];
   readonly createdAt: string;
   readonly notes?: string;
 }

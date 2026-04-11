@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   ArrowLeft, Phone, Mail, MapPin, Calendar, Tag,
-  User, AlertCircle, Edit2, Plus, Clock, CalendarPlus,
+  User, AlertCircle, Edit2, Plus, Clock, CalendarPlus, Receipt,
 } from 'lucide-react';
 import { DepositWallet } from '@/components/payment/DepositWallet';
 import { DepositHistory } from '@/components/payment/DepositHistory';
@@ -13,17 +13,19 @@ import type { DepositTransaction } from '@/hooks/useDeposits';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 import type { CustomerService } from '@/types/customer';
 import type { ApiAppointment } from '@/lib/api';
+import type { PaymentWithAllocations } from '@/hooks/useCustomerPayments';
 
 interface CustomerProfileProps {
   readonly profile: CustomerProfileData;
   readonly appointments: readonly ApiAppointment[];
   readonly services?: readonly CustomerService[];
   readonly depositTransactions?: DepositTransaction[];
+  readonly payments?: PaymentWithAllocations[];
   readonly activeTab?: ProfileTab;
   readonly onTabChange?: (tab: ProfileTab) => void;
   readonly onBack: () => void;
   readonly onEdit?: () => void;
-  readonly onAddDeposit?: (customerId: string, amount: number, method: 'cash' | 'bank' | 'vietqr', date?: string, note?: string) => Promise<void>;
+  readonly onAddDeposit?: (customerId: string, amount: number, method: 'cash' | 'bank_transfer' | 'vietqr', date?: string, note?: string) => Promise<void>;
   readonly onCreateAppointment?: (data: AppointmentFormData) => Promise<void>;
   readonly onUpdateAppointment?: (id: string, data: AppointmentFormData) => Promise<void>;
   readonly onCreateService?: (data: {
@@ -40,6 +42,7 @@ interface CustomerProfileProps {
   }) => Promise<void>;
   readonly onMakePayment?: (data: PaymentFormData) => Promise<void>;
   readonly loadingDeposits?: boolean;
+  readonly loadingPayments?: boolean;
 }
 
 export type ProfileTab = 'profile' | 'appointments' | 'records' | 'payment';
@@ -54,7 +57,7 @@ const TABS: readonly TabConfig[] = [
   { value: 'profile', label: 'Profile' },
   { value: 'appointments', label: 'Appointments', getCount: (p) => p.appointments.length },
   { value: 'records', label: 'Records', getCount: (p) => p.services?.length ?? 0 },
-  { value: 'payment', label: 'Payment', getCount: (p) => p.depositTransactions?.length ?? 0 },
+  { value: 'payment', label: 'Payment', getCount: (p) => (p.payments?.length ?? 0) + (p.depositTransactions?.length ?? 0) },
 ];
 
 function TabBadge({ count, isActive }: { count: number; isActive: boolean }) {
@@ -109,6 +112,7 @@ export function CustomerProfile({
   appointments,
   services = [],
   depositTransactions = [],
+  payments = [],
   activeTab: controlledActiveTab,
   onTabChange,
   onBack,
@@ -119,6 +123,7 @@ export function CustomerProfile({
   onCreateService,
   onMakePayment,
   loadingDeposits = false,
+  loadingPayments = false,
 }: CustomerProfileProps) {
   const [internalActiveTab, setInternalActiveTab] = useState<ProfileTab>('profile');
   const activeTab = controlledActiveTab ?? internalActiveTab;
@@ -132,6 +137,7 @@ export function CustomerProfile({
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<ApiAppointment | null>(null);
+  const [expandedPaymentId, setExpandedPaymentId] = useState<string | null>(null);
 
   const getStatusConfig = (state: string | null | undefined) => {
     const s = (state || '').toLowerCase();
@@ -254,6 +260,7 @@ export function CustomerProfile({
               appointments,
               services,
               depositTransactions,
+              payments,
               onBack,
               onEdit,
               onAddDeposit,
@@ -262,6 +269,7 @@ export function CustomerProfile({
               onCreateService,
               onMakePayment,
               loadingDeposits,
+              loadingPayments,
             }) ?? 0;
             const showBadge = tab.getCount !== undefined;
             const isActive = activeTab === tab.value;
@@ -410,6 +418,92 @@ export function CustomerProfile({
               </button>
             )}
           </div>
+
+          {/* Payments with Allocations */}
+          <div className="bg-white rounded-xl shadow-card overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+              <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <Receipt className="w-4 h-4 text-gray-500" />
+                Payment History
+                {payments.length > 0 && <span className="text-xs font-normal text-gray-500 ml-1">({payments.length})</span>}
+              </h4>
+            </div>
+            {loadingPayments ? (
+              <div className="p-6 text-center text-sm text-gray-500">Loading payments...</div>
+            ) : payments.length === 0 ? (
+              <div className="p-6 text-center text-sm text-gray-400">No payment records found</div>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {payments.map((p) => {
+                  const isExpanded = expandedPaymentId === p.id;
+                  const methodColor =
+                    p.method === 'cash' ? 'text-amber-600 bg-amber-50' :
+                    p.method === 'bank_transfer' ? 'text-blue-600 bg-blue-50' :
+                    p.method === 'deposit' ? 'text-emerald-600 bg-emerald-50' :
+                    'text-gray-600 bg-gray-50';
+                  return (
+                    <div key={p.id} className="hover:bg-gray-50/60 transition-colors">
+                      <button
+                        type="button"
+                        onClick={() => setExpandedPaymentId(isExpanded ? null : p.id)}
+                        className="w-full px-4 py-3 flex items-center justify-between text-left"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`text-xs px-2 py-0.5 rounded-full font-medium ${methodColor}`}>
+                            {p.method === 'bank_transfer' ? 'Bank' : p.method === 'deposit' ? 'Deposit' : 'Cash'}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{formatVND(p.amount)}</p>
+                            <p className="text-xs text-gray-400">{p.paymentDate || p.createdAt?.slice(0, 10)}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {p.referenceCode && (
+                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{p.referenceCode}</span>
+                          )}
+                          {p.status === 'voided' && (
+                            <span className="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full font-medium">Voided</span>
+                          )}
+                          <span className={`text-xs text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>▼</span>
+                        </div>
+                      </button>
+                      {isExpanded && (
+                        <div className="px-4 pb-4">
+                          {p.notes && (
+                            <p className="text-xs text-gray-500 mb-2">Note: {p.notes}</p>
+                          )}
+                          {(p.allocations && p.allocations.length > 0) ? (
+                            <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                              <p className="text-xs font-medium text-gray-600">Allocated to invoices:</p>
+                              {p.allocations.map((a) => (
+                                <div key={a.id} className="flex items-center justify-between text-sm">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs px-1.5 py-0.5 rounded bg-white border border-gray-200 text-gray-600">{a.invoiceName || a.invoiceId?.slice(0, 8)}</span>
+                                    <span className="text-xs text-gray-400">Total {formatVND(a.invoiceTotal || 0)}</span>
+                                  </div>
+                                  <span className="font-medium text-gray-900">{formatVND(a.allocatedAmount)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-xs text-gray-400 italic">No invoice allocations recorded.</p>
+                          )}
+                          {(p.depositUsed || p.cashAmount || p.bankAmount) ? (
+                            <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                              {(p.depositUsed || 0) > 0 && <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Deposit {formatVND(p.depositUsed || 0)}</span>}
+                              {(p.cashAmount || 0) > 0 && <span className="text-amber-600 bg-amber-50 px-2 py-0.5 rounded">Cash {formatVND(p.cashAmount || 0)}</span>}
+                              {(p.bankAmount || 0) > 0 && <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded">Bank {formatVND(p.bankAmount || 0)}</span>}
+                            </div>
+                          ) : null}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           <DepositWallet
             depositBalance={profile.depositBalance}
             outstandingBalance={profile.outstandingBalance}

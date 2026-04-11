@@ -1,48 +1,26 @@
 /**
- * PaymentForm - Multi-source payment: deposit + cash + bank in any combo, any amount.
- * Blueprint spec: cu-18 "Pay Against a Service — any combo, any amount. Partial payment OK."
- * @crossref:used-in[Payment, Services, CustomerProfile]
- * @crossref:uses[CustomerSelector, ServiceCatalogSelector, useCustomers, useProducts, useDeposits]
- * @crossref:matches[AddCustomerForm DESIGN STANDARD]
- *
- * ╔════════════════════════════════════════════════════════════════════════╗
- * ║  FORM FAMILY — @crossref:related[]                                     ║
- * ╠════════════════════════════════════════════════════════════════════════╣
- * ║  @crossref:related[AppointmentForm] — SISTER FORM                      ║
- * ║    • Header/footer/label/input styling MUST match                      ║
- * ║    • Shared selectors (CustomerSelector, LocationSelector, etc.)       ║
- * ║                                                                        ║
- * ║  @crossref:related[ServiceForm] — SISTER FORM                          ║
- * ║    • Same design standard, same shared components                      ║
- * ║                                                                        ║
- * ║  @crossref:related[EmployeeForm] — SISTER FORM                         ║
- * ║    • Same design standard                                              ║
- * ╚════════════════════════════════════════════════════════════════════════╝
+ * PaymentForm - Multi-source payment with invoice allocation ledger.
+ * Supports applying one payment across multiple invoices.
  */
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
-  X, CreditCard, User, Stethoscope, MapPin, FileText, Check, DollarSign,
+  X, CreditCard, User, MapPin, FileText, Check, DollarSign,
   Banknote, Wallet, Building2, AlertCircle, Info, QrCode, CalendarDays,
+  Receipt, ListChecks,
 } from 'lucide-react';
 import { CustomerSelector } from '@/components/shared/CustomerSelector';
 import { VietQrModal } from './VietQrModal';
-import { ServiceCatalogSelector } from '@/components/shared/ServiceCatalogSelector';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useLocations } from '@/hooks/useLocations';
-import { useProducts } from '@/hooks/useProducts';
 import { useDeposits } from '@/hooks/useDeposits';
+import { fetchSaleOrders } from '@/lib/api';
 import { LocationSelector } from '@/components/shared/LocationSelector';
-import type { ServiceCatalogItem } from '@/types/service';
 import type { Customer } from '@/hooks/useCustomers';
-import type { Product } from '@/hooks/useProducts';
-import type { AppointmentType } from '@/constants';
 
 function formatVND(amount: number): string {
   return new Intl.NumberFormat('vi-VN').format(amount) + ' \u20ab';
 }
-
-// ─── Multi-source payment data ─────────────────────────────────
 
 export interface PaymentSourceBreakdown {
   readonly depositAmount: number;
@@ -50,31 +28,41 @@ export interface PaymentSourceBreakdown {
   readonly bankAmount: number;
 }
 
+export interface PaymentAllocationInput {
+  readonly invoiceId: string;
+  readonly allocatedAmount: number;
+}
+
 export interface PaymentFormData {
   readonly customerId: string;
   readonly customerName: string;
   readonly customerPhone: string;
-  readonly serviceId: string;
-  readonly serviceName: string;
   readonly amount: number;
   readonly method: 'deposit' | 'cash' | 'bank_transfer' | 'mixed';
   readonly locationName: string;
   readonly notes: string;
-  /** Breakdown of payment across sources (for multi-source) */
+  readonly paymentDate: string;
+  readonly referenceCode?: string;
   readonly sources?: PaymentSourceBreakdown;
+  readonly allocations?: PaymentAllocationInput[];
+}
+
+interface InvoiceOption {
+  id: string;
+  name: string;
+  amountTotal: number;
+  residual: number;
+  totalPaid: number;
+  dateCreated: string;
 }
 
 interface PaymentFormProps {
   readonly onSubmit: (data: PaymentFormData) => void;
   readonly onClose: () => void;
   readonly defaultCustomerName?: string;
-  readonly defaultServiceName?: string;
   readonly defaultAmount?: number;
-  /** Pre-selected customer ID — skips customer selector */
   readonly defaultCustomerId?: string;
-  /** Available deposit balance for pre-selected customer */
   readonly depositBalance?: number;
-  /** Outstanding balance for pre-selected customer */
   readonly outstandingBalance?: number;
 }
 
@@ -82,7 +70,6 @@ export function PaymentForm({
   onSubmit,
   onClose,
   defaultCustomerName = '',
-  defaultServiceName = '',
   defaultAmount,
   defaultCustomerId,
   depositBalance: externalDepositBalance,
@@ -90,12 +77,10 @@ export function PaymentForm({
 }: PaymentFormProps) {
   const { customers: apiCustomers, loading: customersLoading } = useCustomers();
   const { allLocations: apiLocations, isLoading: locationsLoading } = useLocations();
-  const { products, isLoading: productsLoading } = useProducts({ limit: 1000 });
   const { loadDeposits, balance: depositBalanceData } = useDeposits();
 
   // ─── Form state ───────────────────────────────────────────────
   const [customerId, setCustomerId] = useState<string | null>(defaultCustomerId ?? null);
-  const [serviceId, setServiceId] = useState<string | null>(null);
   const [locationId, setLocationId] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -107,6 +92,14 @@ export function PaymentForm({
   const [bankAmount, setBankAmount] = useState(0);
   const [showVietQr, setShowVietQr] = useState(false);
   const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [referenceCode, setReferenceCode] = useState('');
+
+  // Invoices & allocations
+  const [invoices, setInvoices] = useState<InvoiceOption[]>([]);
+  const [invoicesLoading, setInvoicesLoading] = useState(false);
+  const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<Set<string>>(new Set());
+  const [allocationMap, setAllocationMap] = useState<Record<string, number>>({});
+  const [allocateMode, setAllocateMode] = useState<'auto' | 'manual'>('manual');
 
   // ─── Derived data ─────────────────────────────────────────────
   const customers: Customer[] = apiCustomers.map(c => ({
@@ -114,40 +107,74 @@ export function PaymentForm({
     locationId: c.locationId, status: c.status, lastVisit: c.lastVisit,
   }));
 
-  const serviceCatalog: ServiceCatalogItem[] = useMemo(() =>
-    products.map((p: Product) => ({
-      id: p.id, name: p.name,
-      category: 'treatment' as AppointmentType,
-      description: p.categoryName || 'Dental service',
-      defaultPrice: p.listPrice,
-      estimatedDuration: 30,
-      totalVisits: 1,
-    })),
-    [products]
-  );
-
   const selectedCustomer = customers.find(c => c.id === customerId);
-  const selectedService = serviceCatalog.find(s => s.id === serviceId);
   const selectedLocation = apiLocations.find(l => l.id === locationId);
 
   const totalPayment = depositAmount + cashAmount + bankAmount;
 
-  // Deposit balance: use external if provided, otherwise from deposits hook
   const availableDeposit = externalDepositBalance ?? depositBalanceData.depositBalance;
   const outstandingBalance = externalOutstandingBalance ?? depositBalanceData.outstandingBalance;
 
-  // Load deposit balance when customer changes (only if no external balance provided)
+  // Load deposit balance when customer changes
   useEffect(() => {
     if (customerId && externalDepositBalance === undefined) {
       loadDeposits(customerId);
     }
   }, [customerId, externalDepositBalance, loadDeposits]);
 
+  // Fetch customer invoices when customer changes
+  useEffect(() => {
+    if (!customerId) {
+      setInvoices([]);
+      return;
+    }
+    let cancelled = false;
+    async function loadInvoices() {
+      setInvoicesLoading(true);
+      try {
+        const res = await fetchSaleOrders({ partnerId: customerId || undefined, limit: 100 });
+        if (cancelled) return;
+        const mapped = res.items.map((so) => ({
+          id: so.id,
+          name: so.name || 'Unknown',
+          amountTotal: parseFloat(so.amounttotal ?? '0'),
+          residual: parseFloat(so.residual ?? '0'),
+          totalPaid: parseFloat(so.totalpaid ?? '0'),
+          dateCreated: so.datecreated ?? '',
+        }));
+        setInvoices(mapped);
+      } catch (e) {
+        console.error('Failed to load invoices', e);
+      } finally {
+        if (!cancelled) setInvoicesLoading(false);
+      }
+    }
+    loadInvoices();
+    return () => { cancelled = true; };
+  }, [customerId]);
+
+  // Auto-allocate when mode or total payment changes
+  useEffect(() => {
+    if (allocateMode === 'auto' && selectedInvoiceIds.size > 0 && totalPayment > 0) {
+      const selected = invoices
+        .filter((inv) => selectedInvoiceIds.has(inv.id))
+        .sort((a, b) => new Date(a.dateCreated).getTime() - new Date(b.dateCreated).getTime());
+      let remaining = totalPayment;
+      const next: Record<string, number> = {};
+      for (const inv of selected) {
+        if (remaining <= 0) break;
+        const alloc = Math.min(remaining, inv.residual > 0 ? inv.residual : inv.amountTotal);
+        next[inv.id] = alloc;
+        remaining -= alloc;
+      }
+      setAllocationMap(next);
+    }
+  }, [allocateMode, selectedInvoiceIds, totalPayment, invoices]);
+
   // ─── Quick amount helpers ─────────────────────────────────────
   const QUICK_AMOUNTS = [500_000, 1_000_000, 2_000_000, 5_000_000, 10_000_000] as const;
 
   const applyQuickAmount = useCallback((amount: number) => {
-    // Fill cash first, then bank
     setCashAmount(amount);
     setDepositAmount(0);
     setBankAmount(0);
@@ -158,6 +185,36 @@ export function PaymentForm({
     setDepositAmount(maxUsable);
   }, [availableDeposit, outstandingBalance]);
 
+  // ─── Allocation helpers ───────────────────────────────────────
+  const toggleInvoice = useCallback((id: string) => {
+    setSelectedInvoiceIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+        setAllocationMap((m) => {
+          const mm = { ...m };
+          delete mm[id];
+          return mm;
+        });
+      } else {
+        next.add(id);
+        const inv = invoices.find((i) => i.id === id);
+        if (inv) {
+          setAllocationMap((m) => ({ ...m, [id]: inv.residual > 0 ? inv.residual : 0 }));
+        }
+      }
+      return next;
+    });
+  }, [invoices]);
+
+  const setAllocation = useCallback((id: string, value: number) => {
+    setAllocationMap((m) => ({ ...m, [id]: Math.max(0, value) }));
+  }, []);
+
+  const allocatedTotal = useMemo(() => {
+    return Object.values(allocationMap).reduce((sum, v) => sum + (v || 0), 0);
+  }, [allocationMap]);
+
   // ─── Validation ───────────────────────────────────────────────
   function validate(): boolean {
     const newErrors: Record<string, string> = {};
@@ -167,6 +224,9 @@ export function PaymentForm({
     if (depositAmount < 0) newErrors.deposit = 'Số tiền không hợp lệ';
     if (cashAmount < 0) newErrors.cash = 'Số tiền không hợp lệ';
     if (bankAmount < 0) newErrors.bank = 'Số tiền không hợp lệ';
+    if (selectedInvoiceIds.size > 0 && Math.abs(allocatedTotal - totalPayment) > 0.01) {
+      newErrors.allocations = `Tổng phân bổ (${formatVND(allocatedTotal)}) phải bằng tổng thanh toán (${formatVND(totalPayment)})`;
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -177,7 +237,6 @@ export function PaymentForm({
     if (!validate()) return;
     if (!selectedCustomer || totalPayment <= 0) return;
 
-    // Determine primary method for backwards compat
     let method: PaymentFormData['method'] = 'cash';
     const sources = [depositAmount > 0, cashAmount > 0, bankAmount > 0].filter(Boolean);
     if (sources.length > 1) method = 'mixed';
@@ -185,25 +244,33 @@ export function PaymentForm({
     else if (bankAmount > 0) method = 'bank_transfer';
     else method = 'cash';
 
+    const allocations: PaymentAllocationInput[] = [];
+    if (selectedInvoiceIds.size > 0) {
+      for (const id of selectedInvoiceIds) {
+        const amt = allocationMap[id] || 0;
+        if (amt > 0) allocations.push({ invoiceId: id, allocatedAmount: amt });
+      }
+    }
+
     setIsSaving(true);
     try {
-      const finalNotes = [paymentDate ? `Date: ${paymentDate}` : null, notes.trim()].filter(Boolean).join(' | ');
       await onSubmit({
         customerId: selectedCustomer.id,
-      customerName: selectedCustomer.name,
-      customerPhone: selectedCustomer.phone,
-      serviceId: serviceId || `svc-${Date.now()}`,
-      serviceName: selectedService?.name || defaultServiceName || '',
-      amount: totalPayment,
-      method,
-      locationName: selectedLocation?.name || '',
-      notes: finalNotes,
-      sources: {
-        depositAmount,
-        cashAmount,
-        bankAmount,
-      },
-    });
+        customerName: selectedCustomer.name,
+        customerPhone: selectedCustomer.phone,
+        amount: totalPayment,
+        method,
+        locationName: selectedLocation?.name || '',
+        notes: notes.trim(),
+        paymentDate,
+        referenceCode: referenceCode.trim() || undefined,
+        sources: {
+          depositAmount,
+          cashAmount,
+          bankAmount,
+        },
+        allocations: allocations.length > 0 ? allocations : undefined,
+      });
     } catch (error) {
       console.error('Payment save failed:', error);
     } finally {
@@ -211,15 +278,13 @@ export function PaymentForm({
     }
   }
 
-  const isLoading = customersLoading || locationsLoading || productsLoading;
-
-  // ─── Determine if this is a customer-scoped form ──────────────
+  const isLoading = customersLoading || locationsLoading || invoicesLoading;
   const isCustomerScoped = !!defaultCustomerId;
 
   return (
     <div className="modal-container">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="modal-content animate-in zoom-in-95 duration-200">
+      <div className="modal-content animate-in zoom-in-95 duration-200 max-w-2xl">
         {/* ─── Header ─── */}
         <div className="modal-header relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
@@ -276,24 +341,8 @@ export function PaymentForm({
             </div>
           )}
 
-          {/* ─── Dịch vụ ─── */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-              <Stethoscope className="w-3.5 h-3.5" />
-              Dịch vụ
-            </label>
-            <ServiceCatalogSelector catalog={serviceCatalog} selectedId={serviceId} onChange={setServiceId} placeholder="Chọn dịch vụ..." />
-            {selectedService && (
-              <p className="text-xs text-gray-400 mt-1">
-                Giá tham khảo: <span className="font-medium text-gray-600">{formatVND(selectedService.defaultPrice)}</span>
-              </p>
-            )}
-          </div>
-
           {/* ═══════════════════════════════════════════════════════
               MULTI-SOURCE PAYMENT SECTION
-              Blueprint: "Use Deposit ($) + Cash ($) + Bank Transfer ($)
-              — any combo, any amount. Partial payment OK."
           ═══════════════════════════════════════════════════════ */}
           <div>
             <div className="flex items-center gap-2 mb-3">
@@ -438,12 +487,6 @@ export function PaymentForm({
                   {errors.amount}
                 </div>
               )}
-              {outstandingBalance > 0 && totalPayment > 0 && totalPayment < outstandingBalance && (
-                <div className="flex items-center gap-1 mt-2 text-xs text-amber-600">
-                  <Info className="w-3 h-3" />
-                  Thanh toán một phần — còn lại: {formatVND(outstandingBalance - totalPayment)}
-                </div>
-              )}
             </div>
 
             {/* ─── Quick amounts (applied to cash) ─── */}
@@ -459,6 +502,115 @@ export function PaymentForm({
               </div>
             </div>
           </div>
+
+          {/* ═══════════════════════════════════════════════════════
+              INVOICE ALLOCATION SECTION
+          ═══════════════════════════════════════════════════════ */}
+          {customerId && invoices.length > 0 && (
+            <div className="border-t border-gray-200 pt-5">
+              <div className="flex items-center gap-2 mb-3">
+                <ListChecks className="w-4 h-4 text-gray-500" />
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Phân bổ thanh toán
+                </label>
+                <span className="text-xs text-gray-400">(tùy chọn)</span>
+              </div>
+
+              <div className="flex items-center gap-2 mb-3">
+                <button
+                  type="button"
+                  onClick={() => setAllocateMode('manual')}
+                  className={`px-3 py-1 text-xs rounded-lg transition-colors ${
+                    allocateMode === 'manual' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  Tự chọn
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAllocateMode('auto')}
+                  className={`px-3 py-1 text-xs rounded-lg transition-colors ${
+                    allocateMode === 'auto' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  Tự động (cũ trước)
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {invoices.map((inv) => {
+                  const isSelected = selectedInvoiceIds.has(inv.id);
+                  const allocated = allocationMap[inv.id] || 0;
+                  return (
+                    <div
+                      key={inv.id}
+                      className={`rounded-lg border p-3 transition-all ${
+                        isSelected ? 'border-orange-300 bg-orange-50/40' : 'border-gray-200 bg-white'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleInvoice(inv.id)}
+                          className="mt-1 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Receipt className="w-3.5 h-3.5 text-gray-400" />
+                              <span className="text-sm font-medium text-gray-900">{inv.name}</span>
+                            </div>
+                            <span className="text-xs text-gray-500">
+                              {new Date(inv.dateCreated).toLocaleDateString('vi-VN')}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
+                            <span>Tổng: {formatVND(inv.amountTotal)}</span>
+                            <span>Đã trả: {formatVND(inv.totalPaid)}</span>
+                            <span className={inv.residual > 0 ? 'text-red-600 font-medium' : 'text-emerald-600'}>
+                              Còn nợ: {formatVND(inv.residual)}
+                            </span>
+                          </div>
+                          {isSelected && (
+                            <div className="mt-2 flex items-center gap-2">
+                              <span className="text-xs text-gray-500">Phân bổ:</span>
+                              <input
+                                type="number"
+                                value={allocated || ''}
+                                onChange={(e) => setAllocation(inv.id, Number(e.target.value))}
+                                disabled={allocateMode === 'auto'}
+                                className="w-32 px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 disabled:bg-gray-100"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {selectedInvoiceIds.size > 0 && (
+                <div className="mt-3 flex items-center justify-between text-sm">
+                  <span className="text-gray-500">Đã phân bổ: <span className="font-medium text-gray-900">{formatVND(allocatedTotal)}</span></span>
+                  <span className={`font-medium ${
+                    Math.abs(allocatedTotal - totalPayment) <= 0.01 ? 'text-emerald-600' : 'text-amber-600'
+                  }`}>
+                    {Math.abs(allocatedTotal - totalPayment) <= 0.01
+                      ? 'Khớp với tổng thanh toán'
+                      : `Chênh lệch: ${formatVND(Math.abs(allocatedTotal - totalPayment))}`}
+                  </span>
+                </div>
+              )}
+              {errors.allocations && (
+                <div className="flex items-center gap-1 mt-2 text-xs text-red-500">
+                  <AlertCircle className="w-3 h-3" />
+                  {errors.allocations}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ─── Chi nhánh ─── */}
           <div>
@@ -482,6 +634,21 @@ export function PaymentForm({
               type="date"
               value={paymentDate}
               onChange={(e) => setPaymentDate(e.target.value)}
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
+            />
+          </div>
+
+          {/* ─── Mã tham chiếu ─── */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <FileText className="w-3.5 h-3.5" />
+              Mã tham chiếu / Ghi chú nhanh
+            </label>
+            <input
+              type="text"
+              value={referenceCode}
+              onChange={(e) => setReferenceCode(e.target.value)}
+              placeholder="VD: TGL3, CK MB..."
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
             />
           </div>

@@ -14,8 +14,8 @@ import { useCustomerProfile } from '@/hooks/useCustomerProfile';
 import { useLocations } from '@/hooks/useLocations';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useServices } from '@/hooks/useServices';
-import { usePayment } from '@/hooks/usePayment';
 import { useDeposits } from '@/hooks/useDeposits';
+import { useCustomerPayments } from '@/hooks/useCustomerPayments';
 import type { AppointmentFormData } from '@/components/appointments/AppointmentForm';
 import type { PaymentFormData } from '@/components/payment/PaymentForm';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
@@ -190,8 +190,8 @@ export function Customers() {
   // Hooks for profile actions
   const { createAppointment, updateAppointment } = useAppointments(selectedLocationId);
   const { createServiceRecord, getRecordsByCustomer } = useServices(selectedLocationId);
-  const { createPayment } = usePayment(selectedLocationId);
   const { addDeposit, deposits, loading: depositsLoading, loadDeposits } = useDeposits();
+  const { payments: customerPayments, isLoading: paymentsLoading, addPayment, refetch: refetchPayments } = useCustomerPayments(selectedCustomerId);
 
   // Callbacks for CustomerProfile
   const handleCreateAppointment = useCallback(async (data: AppointmentFormData) => {
@@ -263,23 +263,30 @@ export function Customers() {
   }, [createServiceRecord, selectedCustomerId, hookProfile]);
 
   const handleMakePayment = useCallback(async (data: PaymentFormData) => {
-    await createPayment({
+    await addPayment({
       customerId: data.customerId,
-      customerName: data.customerName,
-      customerPhone: data.customerPhone,
-      serviceId: data.serviceId,
-      serviceName: data.serviceName,
       amount: data.amount,
       method: data.method,
-      locationName: data.locationName,
       notes: data.notes,
+      paymentDate: data.paymentDate,
+      referenceCode: data.referenceCode,
+      depositUsed: data.sources?.depositAmount,
+      cashAmount: data.sources?.cashAmount,
+      bankAmount: data.sources?.bankAmount,
+      allocations: data.allocations?.map((a) => ({
+        invoice_id: a.invoiceId,
+        allocated_amount: a.allocatedAmount,
+      })),
     });
-  }, [createPayment]);
+    refetchProfile();
+    refetchPayments();
+    loadDeposits(data.customerId);
+  }, [addPayment, refetchProfile, refetchPayments, loadDeposits]);
 
   const handleAddDeposit = useCallback(async (
     customerId: string,
     amount: number,
-    method: 'cash' | 'bank' | 'vietqr',
+    method: 'cash' | 'bank_transfer' | 'vietqr',
     date?: string,
     note?: string
   ) => {
@@ -425,6 +432,7 @@ export function Customers() {
           appointments={hookAppointments}
           services={customerServices}
           depositTransactions={deposits}
+          payments={customerPayments}
           activeTab={profileTab}
           onTabChange={setProfileTab}
           onBack={() => navigate('/customers')}
@@ -435,6 +443,7 @@ export function Customers() {
           onCreateService={handleCreateService}
           onMakePayment={handleMakePayment}
           loadingDeposits={depositsLoading}
+          loadingPayments={paymentsLoading}
         />
         {showForm && isEditMode && (
           <div className="modal-container">

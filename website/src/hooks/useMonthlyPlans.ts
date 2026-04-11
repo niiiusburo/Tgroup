@@ -33,6 +33,15 @@ function mapApiPlan(api: ApiMonthlyPlan): MonthlyPlan {
     createdAt: api.created_at,
     notes: api.notes || '',
     installments: api.installments?.map(mapApiInstallment) || [],
+    items: api.items?.map((i) => ({
+      id: i.id,
+      planId: i.planId,
+      invoiceId: i.invoiceId,
+      invoiceName: i.invoiceName,
+      invoiceTotal: i.invoiceTotal,
+      invoiceResidual: i.invoiceResidual,
+      priority: i.priority,
+    })) || [],
   };
 }
 

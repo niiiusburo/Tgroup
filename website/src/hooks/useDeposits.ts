@@ -35,7 +35,7 @@ export function useDeposits() {
       }
 
       const transactions: DepositTransaction[] = paymentsRes.items.map((p) => {
-        const isDeposit = p.method === 'cash' || p.method === 'bank';
+        const isDeposit = p.method === 'cash' || p.method === 'bank_transfer';
         const amount = Number(p.amount) || 0;
         return {
           id: p.id,
@@ -72,7 +72,7 @@ export function useDeposits() {
   const addDeposit = useCallback(async (
     customerId: string,
     amount: number,
-    method: 'cash' | 'bank' | 'vietqr',
+    method: 'cash' | 'bank_transfer' | 'vietqr',
     date?: string,
     note?: string
   ) => {
@@ -80,7 +80,7 @@ export function useDeposits() {
     setError(null);
     try {
       const composedNote = [date ? `Date: ${date}` : null, note].filter(Boolean).join(' | ');
-      await createPayment({ customerId, amount, method: method === 'vietqr' ? 'bank' : method, notes: composedNote });
+      await createPayment({ customerId, amount, method: method === 'vietqr' ? 'bank_transfer' : method, notes: composedNote });
       await loadDeposits(customerId);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add deposit');

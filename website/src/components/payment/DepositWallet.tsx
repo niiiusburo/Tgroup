@@ -5,7 +5,7 @@ import { VietQrModal } from './VietQrModal';
 interface DepositWalletProps {
   depositBalance: number;
   outstandingBalance: number;
-  onAddDeposit?: (amount: number, method: 'cash' | 'bank' | 'vietqr', date: string, note?: string) => Promise<void>;
+  onAddDeposit?: (amount: number, method: 'cash' | 'bank_transfer' | 'vietqr', date: string, note?: string) => Promise<void>;
   loading?: boolean;
 }
 
@@ -21,7 +21,7 @@ export function DepositWallet({
 }: DepositWalletProps) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [addAmount, setAddAmount] = useState('');
-  const [addMethod, setAddMethod] = useState<'cash' | 'bank' | 'vietqr'>('cash');
+  const [addMethod, setAddMethod] = useState<'cash' | 'bank_transfer' | 'vietqr'>('cash');
   const [addDate, setAddDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [addNote, setAddNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -126,9 +126,9 @@ export function DepositWallet({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setAddMethod('bank')}
+                    onClick={() => setAddMethod('bank_transfer')}
                     className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                      addMethod === 'bank'
+                      addMethod === 'bank_transfer'
                         ? 'bg-primary text-white border-primary'
                         : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'
                     }`}

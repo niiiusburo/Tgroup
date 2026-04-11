@@ -175,32 +175,38 @@
   "hotPaths": [
     {
       "path": "website/src",
-      "accessCount": 35,
-      "lastAccessed": 1775818535554,
+      "accessCount": 47,
+      "lastAccessed": 1775823861497,
       "type": "directory"
     },
     {
-      "path": "website/src/pages/Customers.tsx",
-      "accessCount": 19,
-      "lastAccessed": 1775816719183,
+      "path": "website/src/components/payment/PaymentForm.tsx",
+      "accessCount": 23,
+      "lastAccessed": 1775823791444,
       "type": "file"
     },
     {
-      "path": "website/src/components/payment/PaymentForm.tsx",
-      "accessCount": 19,
-      "lastAccessed": 1775818762931,
+      "path": "website/src/pages/Customers.tsx",
+      "accessCount": 20,
+      "lastAccessed": 1775820188603,
       "type": "file"
     },
     {
       "path": "website/src/components/appointments/AppointmentForm.tsx",
-      "accessCount": 19,
-      "lastAccessed": 1775818803011,
+      "accessCount": 20,
+      "lastAccessed": 1775820188724,
+      "type": "file"
+    },
+    {
+      "path": "website/src/components/services/ServiceForm.tsx",
+      "accessCount": 20,
+      "lastAccessed": 1775823781363,
       "type": "file"
     },
     {
       "path": "website/src/components/customer/CustomerProfile.tsx",
-      "accessCount": 16,
-      "lastAccessed": 1775819014795,
+      "accessCount": 18,
+      "lastAccessed": 1775823781313,
       "type": "file"
     },
     {
@@ -210,15 +216,15 @@
       "type": "directory"
     },
     {
-      "path": "website/src/components/services/ServiceForm.tsx",
+      "path": "website/package.json",
       "accessCount": 16,
-      "lastAccessed": 1775819075906,
+      "lastAccessed": 1775823757520,
       "type": "file"
     },
     {
-      "path": "website/package.json",
-      "accessCount": 13,
-      "lastAccessed": 1775819718454,
+      "path": "website/src/lib/api.ts",
+      "accessCount": 14,
+      "lastAccessed": 1775820242707,
       "type": "file"
     },
     {
@@ -228,21 +234,21 @@
       "type": "directory"
     },
     {
-      "path": "website/src/lib/api.ts",
-      "accessCount": 12,
-      "lastAccessed": 1775816884017,
-      "type": "file"
-    },
-    {
       "path": "website/src/__tests__/customer-deep-link.test.tsx",
       "accessCount": 10,
       "lastAccessed": 1775795101693,
       "type": "file"
     },
     {
+      "path": "website/src/components/payment/DepositWallet.tsx",
+      "accessCount": 10,
+      "lastAccessed": 1775823791392,
+      "type": "file"
+    },
+    {
       "path": "website/e2e/customer-profile-crud.spec.ts",
-      "accessCount": 8,
-      "lastAccessed": 1775795085623,
+      "accessCount": 9,
+      "lastAccessed": 1775820223418,
       "type": "file"
     },
     {
@@ -270,15 +276,15 @@
       "type": "file"
     },
     {
-      "path": "website/src/components/payment/DepositWallet.tsx",
+      "path": "website/src/constants/index.ts",
       "accessCount": 6,
-      "lastAccessed": 1775816771915,
+      "lastAccessed": 1775821862106,
       "type": "file"
     },
     {
-      "path": "website/src/constants/index.ts",
-      "accessCount": 5,
-      "lastAccessed": 1775795849456,
+      "path": "website/src/hooks/useCustomerProfile.ts",
+      "accessCount": 6,
+      "lastAccessed": 1775823781418,
       "type": "file"
     },
     {
@@ -312,27 +318,21 @@
       "type": "file"
     },
     {
+      "path": "website/src/App.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1775821873837,
+      "type": "file"
+    },
+    {
       "path": "website/src/__tests__",
       "accessCount": 3,
       "lastAccessed": 1775795116541,
       "type": "directory"
     },
     {
-      "path": "website/src/App.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1775795808059,
-      "type": "file"
-    },
-    {
       "path": "website/src/hooks/usePayment.ts",
       "accessCount": 3,
       "lastAccessed": 1775816791056,
-      "type": "file"
-    },
-    {
-      "path": "website/src/hooks/useCustomerProfile.ts",
-      "accessCount": 3,
-      "lastAccessed": 1775816796703,
       "type": "file"
     },
     {
@@ -360,6 +360,12 @@
       "type": "file"
     },
     {
+      "path": "website/src/pages/Payment.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1775820391253,
+      "type": "file"
+    },
+    {
       "path": "website/src/__tests__/ServiceCatalog.test.tsx",
       "accessCount": 2,
       "lastAccessed": 1775789969346,
@@ -369,12 +375,6 @@
       "path": "website/src/components/shared/CustomerSelector.tsx",
       "accessCount": 2,
       "lastAccessed": 1775791724747,
-      "type": "file"
-    },
-    {
-      "path": "website/src/pages/Payment.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1775795859803,
       "type": "file"
     },
     {

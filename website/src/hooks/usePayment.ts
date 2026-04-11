@@ -19,10 +19,10 @@ export interface CreatePaymentInput {
   readonly customerId: string;
   readonly customerName: string;
   readonly customerPhone: string;
-  readonly serviceId: string;
-  readonly serviceName: string;
+  readonly serviceId?: string;
+  readonly serviceName?: string;
   readonly amount: number;
-  readonly method: PaymentMethod | 'deposit' | 'mixed';
+  readonly method: PaymentMethod | 'bank_transfer' | 'deposit' | 'mixed';
   readonly locationName: string;
   readonly notes: string;
 }
