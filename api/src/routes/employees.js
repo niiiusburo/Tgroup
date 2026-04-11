@@ -1,5 +1,5 @@
 const express = require('express');
-const { query } = require('../db');
+const { query, pool } = require('../db');
 
 const router = express.Router();
 
@@ -100,6 +100,20 @@ router.get('/', async (req, res) => {
     );
     const totalItems = parseInt(countResult[0]?.count || '0', 10);
 
+    // Attach location scopes
+    if (items.length > 0) {
+      const employeeIds = items.map((i) => i.id);
+      const scopeRows = await query(
+        'SELECT employee_id, company_id FROM employee_location_scope WHERE employee_id = ANY($1)',
+        [employeeIds]
+      );
+      for (const item of items) {
+        item.locationScopeIds = scopeRows
+          .filter((r) => r.employee_id === item.id)
+          .map((r) => r.company_id);
+      }
+    }
+
     return res.json({
       offset: offsetNum,
       limit: limitNum,
@@ -168,6 +182,12 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Employee not found' });
     }
 
+    const scopes = await query(
+      'SELECT company_id FROM employee_location_scope WHERE employee_id = $1',
+      [id]
+    );
+    rows[0].locationScopeIds = scopes.map((s) => s.company_id);
+
     return res.json(rows[0]);
   } catch (err) {
     console.error('Error fetching employee:', err);
@@ -183,6 +203,7 @@ router.get('/:id', async (req, res) => {
  * Body: { name, phone?, email?, companyid?, active? }
  */
 router.post('/', async (req, res) => {
+  const client = await pool.connect();
   try {
     const {
       name,
@@ -190,6 +211,7 @@ router.post('/', async (req, res) => {
       email = null,
       companyid = null,
       active = true,
+      locationScopeIds = [],
     } = req.body;
 
     if (!name || !name.trim()) {
@@ -199,8 +221,10 @@ router.post('/', async (req, res) => {
     const id = require('crypto').randomUUID();
     const now = new Date().toISOString();
 
+    await client.query('BEGIN');
+
     // Insert into partners table with employee=true
-    const result = await query(
+    const result = await client.query(
       `INSERT INTO partners (
         id, name, phone, email, companyid,
         employee, customer, supplier, isagent, isinsurance,
@@ -229,12 +253,31 @@ router.post('/', async (req, res) => {
       ]
     );
 
-    return res.status(201).json(result[0]);
+    // Insert scope records (skip primary companyid to avoid duplicate)
+    const scopes = Array.isArray(locationScopeIds) ? locationScopeIds : [];
+    const primaryId = companyid || null;
+    for (const scopeId of scopes) {
+      if (scopeId && scopeId !== primaryId) {
+        await client.query(
+          'INSERT INTO employee_location_scope (employee_id, company_id) VALUES ($1, $2)',
+          [id, scopeId]
+        );
+      }
+    }
+
+    await client.query('COMMIT');
+
+    const employee = result.rows[0];
+    employee.locationScopeIds = scopes.filter((sid) => sid && sid !== primaryId);
+    return res.status(201).json(employee);
   } catch (err) {
+    await client.query('ROLLBACK');
     console.error('Error creating employee:', err);
     return res.status(500).json({
       error: err instanceof Error ? err.message : 'Unknown error',
     });
+  } finally {
+    client.release();
   }
 });
 
@@ -243,6 +286,7 @@ router.post('/', async (req, res) => {
  * Updates an existing employee (updates partners table)
  */
 router.put('/:id', async (req, res) => {
+  const client = await pool.connect();
   try {
     const { id } = req.params;
     const {
@@ -251,6 +295,7 @@ router.put('/:id', async (req, res) => {
       email,
       companyid,
       active,
+      locationScopeIds,
     } = req.body;
 
     // Build dynamic update query for partners table
@@ -268,38 +313,83 @@ router.put('/:id', async (req, res) => {
 
     for (const [key, value] of Object.entries(fields)) {
       if (value !== undefined) {
-        updates.push(`${key} = $${paramIdx}`);
+        updates.push(`${key} = ${paramIdx}`);
         values.push(value);
         paramIdx++;
       }
     }
 
-    if (updates.length === 0) {
+    if (updates.length === 0 && locationScopeIds === undefined) {
       return res.status(400).json({ error: 'No fields to update' });
     }
 
-    // Add lastupdated
-    updates.push(`lastupdated = $${paramIdx}`);
-    values.push(new Date().toISOString());
-    paramIdx++;
+    await client.query('BEGIN');
 
-    values.push(id);
+    let result;
+    if (updates.length > 0) {
+      // Add lastupdated
+      updates.push(`lastupdated = ${paramIdx}`);
+      values.push(new Date().toISOString());
+      paramIdx++;
 
-    const result = await query(
-      `UPDATE partners SET ${updates.join(', ')} WHERE id = $${paramIdx} AND employee = true RETURNING *`,
-      values
-    );
+      values.push(id);
 
-    if (!result || result.length === 0) {
-      return res.status(404).json({ error: 'Employee not found' });
+      result = await client.query(
+        `UPDATE partners SET ${updates.join(', ')} WHERE id = ${paramIdx} AND employee = true RETURNING *`,
+        values
+      );
+
+      if (!result || result.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Employee not found' });
+      }
+    } else {
+      result = await client.query(
+        'SELECT * FROM partners WHERE id = $1 AND employee = true',
+        [id]
+      );
+      if (!result || result.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Employee not found' });
+      }
     }
 
-    return res.json(result[0]);
+    // Update location scopes if provided
+    if (locationScopeIds !== undefined) {
+      await client.query(
+        'DELETE FROM employee_location_scope WHERE employee_id = $1',
+        [id]
+      );
+      const scopes = Array.isArray(locationScopeIds) ? locationScopeIds : [];
+      const primaryId = companyid !== undefined ? companyid : result.rows[0].companyid;
+      for (const scopeId of scopes) {
+        if (scopeId && scopeId !== primaryId) {
+          await client.query(
+            'INSERT INTO employee_location_scope (employee_id, company_id) VALUES ($1, $2)',
+            [id, scopeId]
+          );
+        }
+      }
+    }
+
+    await client.query('COMMIT');
+
+    const updatedEmployee = result.rows[0];
+    const finalScopes = await query(
+      'SELECT company_id FROM employee_location_scope WHERE employee_id = $1',
+      [id]
+    );
+    updatedEmployee.locationScopeIds = finalScopes.map((s) => s.company_id);
+
+    return res.json(updatedEmployee);
   } catch (err) {
+    await client.query('ROLLBACK');
     console.error('Error updating employee:', err);
     return res.status(500).json({
       error: err instanceof Error ? err.message : 'Unknown error',
     });
+  } finally {
+    client.release();
   }
 });
 
