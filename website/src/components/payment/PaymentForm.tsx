@@ -14,7 +14,7 @@ import { VietQrModal } from './VietQrModal';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useLocations } from '@/hooks/useLocations';
 import { useDeposits } from '@/hooks/useDeposits';
-import { fetchSaleOrders } from '@/lib/api';
+import { fetchSaleOrders, fetchDotKhams } from '@/lib/api';
 import { LocationSelector } from '@/components/shared/LocationSelector';
 import type { Customer } from '@/hooks/useCustomers';
 
@@ -29,9 +29,12 @@ export interface PaymentSourceBreakdown {
 }
 
 export interface PaymentAllocationInput {
-  readonly invoiceId: string;
+  readonly invoiceId?: string;
+  readonly dotkhamId?: string;
   readonly allocatedAmount: number;
 }
+
+type AllocationTab = 'invoices' | 'dotkhams';
 
 export interface PaymentFormData {
   readonly customerId: string;
@@ -50,10 +53,10 @@ export interface PaymentFormData {
 interface InvoiceOption {
   id: string;
   name: string;
-  amountTotal: number;
+  totalAmount: number;
   residual: number;
   totalPaid: number;
-  dateCreated: string;
+  date: string;
 }
 
 interface PaymentFormProps {
@@ -97,8 +100,12 @@ export function PaymentForm({
   // Invoices & allocations
   const [invoices, setInvoices] = useState<InvoiceOption[]>([]);
   const [invoicesLoading, setInvoicesLoading] = useState(false);
-  const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<Set<string>>(new Set());
-  const [allocationMap, setAllocationMap] = useState<Record<string, number>>({});
+  const [dotkhams, setDotkhams] = useState<{ id: string; name: string; totalAmount: number; residual: number; date: string }[]>([]);
+  const [dotkhamsLoading, setDotkhamsLoading] = useState(false);
+  const [allocationTab, setAllocationTab] = useState<AllocationTab>('invoices');
+  const [selectedTargetIds, setSelectedTargetIds] = useState<Set<string>>(new Set());
+  const [targetAllocationMap, setTargetAllocationMap] = useState<Record<string, number>>({});
+  const [allocationTypes, setAllocationTypes] = useState<Record<string, AllocationTab>>({});
   const [allocateMode, setAllocateMode] = useState<'auto' | 'manual'>('manual');
 
   // ─── Derived data ─────────────────────────────────────────────
@@ -137,10 +144,10 @@ export function PaymentForm({
         const mapped = res.items.map((so) => ({
           id: so.id,
           name: so.name || 'Unknown',
-          amountTotal: parseFloat(so.amounttotal ?? '0'),
+          totalAmount: parseFloat(so.amounttotal ?? '0'),
           residual: parseFloat(so.residual ?? '0'),
           totalPaid: parseFloat(so.totalpaid ?? '0'),
-          dateCreated: so.datecreated ?? '',
+          date: so.datecreated ?? '',
         }));
         setInvoices(mapped);
       } catch (e) {
@@ -153,23 +160,53 @@ export function PaymentForm({
     return () => { cancelled = true; };
   }, [customerId]);
 
+  // Fetch customer dotkhams when customer changes
+  useEffect(() => {
+    if (!customerId) {
+      setDotkhams([]);
+      return;
+    }
+    let cancelled = false;
+    async function loadDotKhams() {
+      setDotkhamsLoading(true);
+      try {
+        const res = await fetchDotKhams({ partnerId: customerId || undefined, limit: 100 });
+        if (cancelled) return;
+        setDotkhams(res.items.map((dk) => ({
+          id: dk.id,
+          name: dk.name || 'Unknown',
+          totalAmount: parseFloat(dk.totalamount ?? '0'),
+          residual: parseFloat(dk.amountresidual ?? '0'),
+          date: dk.date ?? '',
+        })));
+      } catch (e) {
+        console.error('Failed to load dotkhams', e);
+      } finally {
+        if (!cancelled) setDotkhamsLoading(false);
+      }
+    }
+    loadDotKhams();
+    return () => { cancelled = true; };
+  }, [customerId]);
+
   // Auto-allocate when mode or total payment changes
   useEffect(() => {
-    if (allocateMode === 'auto' && selectedInvoiceIds.size > 0 && totalPayment > 0) {
-      const selected = invoices
-        .filter((inv) => selectedInvoiceIds.has(inv.id))
-        .sort((a, b) => new Date(a.dateCreated).getTime() - new Date(b.dateCreated).getTime());
+    if (allocateMode === 'auto' && selectedTargetIds.size > 0 && totalPayment > 0) {
+      const activeTargets = allocationTab === 'invoices' ? invoices : dotkhams;
+      const selected = activeTargets
+        .filter((t) => selectedTargetIds.has(t.id))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
       let remaining = totalPayment;
       const next: Record<string, number> = {};
-      for (const inv of selected) {
+      for (const t of selected) {
         if (remaining <= 0) break;
-        const alloc = Math.min(remaining, inv.residual > 0 ? inv.residual : inv.amountTotal);
-        next[inv.id] = alloc;
+        const alloc = Math.min(remaining, t.residual > 0 ? t.residual : t.totalAmount);
+        next[t.id] = alloc;
         remaining -= alloc;
       }
-      setAllocationMap(next);
+      setTargetAllocationMap(next);
     }
-  }, [allocateMode, selectedInvoiceIds, totalPayment, invoices]);
+  }, [allocateMode, selectedTargetIds, totalPayment, invoices, dotkhams, allocationTab]);
 
   // ─── Quick amount helpers ─────────────────────────────────────
   const QUICK_AMOUNTS = [500_000, 1_000_000, 2_000_000, 5_000_000, 10_000_000] as const;
@@ -186,34 +223,44 @@ export function PaymentForm({
   }, [availableDeposit, outstandingBalance]);
 
   // ─── Allocation helpers ───────────────────────────────────────
-  const toggleInvoice = useCallback((id: string) => {
-    setSelectedInvoiceIds((prev) => {
+  const currentTabTargets = useMemo(() => {
+    return allocationTab === 'invoices' ? invoices : dotkhams;
+  }, [allocationTab, invoices, dotkhams]);
+
+  const toggleTarget = useCallback((id: string) => {
+    setSelectedTargetIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
-        setAllocationMap((m) => {
+        setTargetAllocationMap((m) => {
+          const mm = { ...m };
+          delete mm[id];
+          return mm;
+        });
+        setAllocationTypes((m) => {
           const mm = { ...m };
           delete mm[id];
           return mm;
         });
       } else {
         next.add(id);
-        const inv = invoices.find((i) => i.id === id);
-        if (inv) {
-          setAllocationMap((m) => ({ ...m, [id]: inv.residual > 0 ? inv.residual : 0 }));
+        setAllocationTypes((m) => ({ ...m, [id]: allocationTab }));
+        const t = currentTabTargets.find((i) => i.id === id);
+        if (t) {
+          setTargetAllocationMap((m) => ({ ...m, [id]: t.residual > 0 ? t.residual : 0 }));
         }
       }
       return next;
     });
-  }, [invoices]);
+  }, [currentTabTargets, allocationTab]);
 
   const setAllocation = useCallback((id: string, value: number) => {
-    setAllocationMap((m) => ({ ...m, [id]: Math.max(0, value) }));
+    setTargetAllocationMap((m) => ({ ...m, [id]: Math.max(0, value) }));
   }, []);
 
   const allocatedTotal = useMemo(() => {
-    return Object.values(allocationMap).reduce((sum, v) => sum + (v || 0), 0);
-  }, [allocationMap]);
+    return Object.values(targetAllocationMap).reduce((sum, v) => sum + (v || 0), 0);
+  }, [targetAllocationMap]);
 
   // ─── Validation ───────────────────────────────────────────────
   function validate(): boolean {
@@ -224,7 +271,7 @@ export function PaymentForm({
     if (depositAmount < 0) newErrors.deposit = 'Số tiền không hợp lệ';
     if (cashAmount < 0) newErrors.cash = 'Số tiền không hợp lệ';
     if (bankAmount < 0) newErrors.bank = 'Số tiền không hợp lệ';
-    if (selectedInvoiceIds.size > 0 && Math.abs(allocatedTotal - totalPayment) > 0.01) {
+    if (selectedTargetIds.size > 0 && Math.abs(allocatedTotal - totalPayment) > 0.01) {
       newErrors.allocations = `Tổng phân bổ (${formatVND(allocatedTotal)}) phải bằng tổng thanh toán (${formatVND(totalPayment)})`;
     }
     setErrors(newErrors);
@@ -245,10 +292,14 @@ export function PaymentForm({
     else method = 'cash';
 
     const allocations: PaymentAllocationInput[] = [];
-    if (selectedInvoiceIds.size > 0) {
-      for (const id of selectedInvoiceIds) {
-        const amt = allocationMap[id] || 0;
-        if (amt > 0) allocations.push({ invoiceId: id, allocatedAmount: amt });
+    if (selectedTargetIds.size > 0) {
+      for (const id of selectedTargetIds) {
+        const amt = targetAllocationMap[id] || 0;
+        if (amt > 0) {
+          const type = allocationTypes[id];
+          if (type === 'invoices') allocations.push({ invoiceId: id, allocatedAmount: amt });
+          else allocations.push({ dotkhamId: id, allocatedAmount: amt });
+        }
       }
     }
 
@@ -278,7 +329,7 @@ export function PaymentForm({
     }
   }
 
-  const isLoading = customersLoading || locationsLoading || invoicesLoading;
+  const isLoading = customersLoading || locationsLoading || invoicesLoading || dotkhamsLoading;
   const isCustomerScoped = !!defaultCustomerId;
 
   return (
@@ -504,9 +555,9 @@ export function PaymentForm({
           </div>
 
           {/* ═══════════════════════════════════════════════════════
-              INVOICE ALLOCATION SECTION
+              ALLOCATION SECTION
           ═══════════════════════════════════════════════════════ */}
-          {customerId && invoices.length > 0 && (
+          {customerId && (invoices.length > 0 || dotkhams.length > 0) && (
             <div className="border-t border-gray-200 pt-5">
               <div className="flex items-center gap-2 mb-3">
                 <ListChecks className="w-4 h-4 text-gray-500" />
@@ -514,6 +565,27 @@ export function PaymentForm({
                   Phân bổ thanh toán
                 </label>
                 <span className="text-xs text-gray-400">(tùy chọn)</span>
+              </div>
+
+              <div className="flex items-center gap-2 mb-3">
+                <button
+                  type="button"
+                  onClick={() => setAllocationTab('invoices')}
+                  className={`px-3 py-1 text-xs rounded-lg transition-colors ${
+                    allocationTab === 'invoices' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  Hóa đơn
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAllocationTab('dotkhams')}
+                  className={`px-3 py-1 text-xs rounded-lg transition-colors ${
+                    allocationTab === 'dotkhams' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  Đợt khám
+                </button>
               </div>
 
               <div className="flex items-center gap-2 mb-3">
@@ -537,13 +609,22 @@ export function PaymentForm({
                 </button>
               </div>
 
+              {(allocationTab === 'invoices' ? invoicesLoading : dotkhamsLoading) && (
+                <div className="flex items-center justify-center py-4 text-gray-400 text-sm">
+                  <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2" />
+                  Đang tải...
+                </div>
+              )}
+
               <div className="space-y-2">
-                {invoices.map((inv) => {
-                  const isSelected = selectedInvoiceIds.has(inv.id);
-                  const allocated = allocationMap[inv.id] || 0;
+                {(allocationTab === 'invoices' ? invoices : dotkhams).map((t) => {
+                  const isSelected = selectedTargetIds.has(t.id);
+                  const allocated = targetAllocationMap[t.id] || 0;
+                  const isInvoice = allocationTab === 'invoices';
+                  const totalPaid = isInvoice ? (t as InvoiceOption).totalPaid : 0;
                   return (
                     <div
-                      key={inv.id}
+                      key={t.id}
                       className={`rounded-lg border p-3 transition-all ${
                         isSelected ? 'border-orange-300 bg-orange-50/40' : 'border-gray-200 bg-white'
                       }`}
@@ -552,24 +633,24 @@ export function PaymentForm({
                         <input
                           type="checkbox"
                           checked={isSelected}
-                          onChange={() => toggleInvoice(inv.id)}
+                          onChange={() => toggleTarget(t.id)}
                           className="mt-1 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <Receipt className="w-3.5 h-3.5 text-gray-400" />
-                              <span className="text-sm font-medium text-gray-900">{inv.name}</span>
+                              <span className="text-sm font-medium text-gray-900">{t.name}</span>
                             </div>
                             <span className="text-xs text-gray-500">
-                              {new Date(inv.dateCreated).toLocaleDateString('vi-VN')}
+                              {t.date ? new Date(t.date).toLocaleDateString('vi-VN') : ''}
                             </span>
                           </div>
                           <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
-                            <span>Tổng: {formatVND(inv.amountTotal)}</span>
-                            <span>Đã trả: {formatVND(inv.totalPaid)}</span>
-                            <span className={inv.residual > 0 ? 'text-red-600 font-medium' : 'text-emerald-600'}>
-                              Còn nợ: {formatVND(inv.residual)}
+                            <span>Tổng: {formatVND(t.totalAmount)}</span>
+                            {isInvoice && <span>Đã trả: {formatVND(totalPaid)}</span>}
+                            <span className={t.residual > 0 ? 'text-red-600 font-medium' : 'text-emerald-600'}>
+                              Còn nợ: {formatVND(t.residual)}
                             </span>
                           </div>
                           {isSelected && (
@@ -578,7 +659,7 @@ export function PaymentForm({
                               <input
                                 type="number"
                                 value={allocated || ''}
-                                onChange={(e) => setAllocation(inv.id, Number(e.target.value))}
+                                onChange={(e) => setAllocation(t.id, Number(e.target.value))}
                                 disabled={allocateMode === 'auto'}
                                 className="w-32 px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 disabled:bg-gray-100"
                               />
@@ -591,7 +672,7 @@ export function PaymentForm({
                 })}
               </div>
 
-              {selectedInvoiceIds.size > 0 && (
+              {selectedTargetIds.size > 0 && (
                 <div className="mt-3 flex items-center justify-between text-sm">
                   <span className="text-gray-500">Đã phân bổ: <span className="font-medium text-gray-900">{formatVND(allocatedTotal)}</span></span>
                   <span className={`font-medium ${
