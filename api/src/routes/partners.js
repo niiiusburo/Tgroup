@@ -481,4 +481,86 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+/**
+ * PATCH /api/Partners/:id/soft-delete
+ * Soft-deletes a partner by setting isdeleted = true
+ */
+router.patch('/:id/soft-delete', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await query(
+      `UPDATE partners SET
+        isdeleted = true,
+        lastupdated = NOW()
+      WHERE id = $1 AND customer = true AND isdeleted = false
+      RETURNING *`,
+      [id]
+    );
+
+    if (!result || result.length === 0) {
+      return res.status(404).json({ error: 'Partner not found' });
+    }
+
+    return res.json(result[0]);
+  } catch (err) {
+    console.error('Error soft-deleting partner:', err);
+    return res.status(500).json({
+      error: err instanceof Error ? err.message : 'Unknown error',
+    });
+  }
+});
+
+/**
+ * DELETE /api/Partners/:id/hard-delete
+ * Hard-deletes a partner after FK-safe checks
+ */
+router.delete('/:id/hard-delete', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const existing = await query(
+      'SELECT id FROM partners WHERE id = $1 AND customer = true',
+      [id]
+    );
+
+    if (!existing || existing.length === 0) {
+      return res.status(404).json({ error: 'Partner not found' });
+    }
+
+    const [aptResult, soResult, dkResult] = await Promise.all([
+      query('SELECT COUNT(*) AS count FROM appointments WHERE partnerid = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM saleorders WHERE partnerid = $1 AND isdeleted = false', [id]),
+      query('SELECT COUNT(*) AS count FROM dotkhams WHERE partnerid = $1 AND isdeleted = false', [id]),
+    ]);
+
+    const appointments = parseInt(aptResult[0]?.count || '0', 10);
+    const saleorders = parseInt(soResult[0]?.count || '0', 10);
+    const dotkhams = parseInt(dkResult[0]?.count || '0', 10);
+
+    if (appointments > 0 || saleorders > 0 || dotkhams > 0) {
+      return res.status(409).json({
+        error: 'Partner has linked records',
+        linked: { appointments, saleorders, dotkhams },
+      });
+    }
+
+    const deleteResult = await query(
+      'DELETE FROM partners WHERE id = $1 AND customer = true RETURNING id',
+      [id]
+    );
+
+    if (!deleteResult || deleteResult.length === 0) {
+      return res.status(404).json({ error: 'Partner not found' });
+    }
+
+    return res.json({ success: true, id: deleteResult[0].id });
+  } catch (err) {
+    console.error('Error hard-deleting partner:', err);
+    return res.status(500).json({
+      error: err instanceof Error ? err.message : 'Unknown error',
+    });
+  }
+});
+
 module.exports = router;
