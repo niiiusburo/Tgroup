@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   ArrowLeft, Phone, Mail, MapPin, Calendar, Tag,
   User, AlertCircle, Edit2, Plus, Clock, CalendarPlus, Receipt,
+  Trash2, ChevronDown,
 } from 'lucide-react';
 import { DepositWallet } from '@/components/payment/DepositWallet';
 import { DepositHistory } from '@/components/payment/DepositHistory';
@@ -41,6 +42,10 @@ interface CustomerProfileProps {
     toothNumbers: readonly string[];
   }) => Promise<void>;
   readonly onMakePayment?: (data: PaymentFormData) => Promise<void>;
+  readonly onSoftDelete?: () => void;
+  readonly onHardDelete?: () => void;
+  readonly canSoftDelete?: boolean;
+  readonly canHardDelete?: boolean;
   readonly loadingDeposits?: boolean;
   readonly loadingPayments?: boolean;
 }
@@ -122,6 +127,10 @@ export function CustomerProfile({
   onUpdateAppointment,
   onCreateService,
   onMakePayment,
+  onSoftDelete,
+  onHardDelete,
+  canSoftDelete,
+  canHardDelete,
   loadingDeposits = false,
   loadingPayments = false,
 }: CustomerProfileProps) {
@@ -138,6 +147,7 @@ export function CustomerProfile({
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<ApiAppointment | null>(null);
   const [expandedPaymentId, setExpandedPaymentId] = useState<string | null>(null);
+  const [showDeleteMenu, setShowDeleteMenu] = useState(false);
 
   const getStatusConfig = (state: string | null | undefined) => {
     const s = (state || '').toLowerCase();
@@ -169,6 +179,43 @@ export function CustomerProfile({
             <Edit2 className="w-4 h-4" />
             Edit
           </button>
+        )}
+        {(canSoftDelete || canHardDelete) && (
+          <div className="relative flex items-center">
+            <button
+              onClick={() => { if (canSoftDelete) { onSoftDelete?.(); } else { onHardDelete?.(); } }}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-l-lg hover:bg-red-700 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              Xóa
+            </button>
+            <button
+              onClick={() => setShowDeleteMenu((v) => !v)}
+              className="px-2 py-2 bg-red-600 text-white rounded-r-lg border-l border-red-500 hover:bg-red-700 transition-colors"
+            >
+              <ChevronDown className="w-4 h-4" />
+            </button>
+            {showDeleteMenu && (
+              <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+                {canSoftDelete && (
+                  <button
+                    onClick={() => { setShowDeleteMenu(false); onSoftDelete?.(); }}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    Xóa mềm
+                  </button>
+                )}
+                {canHardDelete && (
+                  <button
+                    onClick={() => { setShowDeleteMenu(false); onHardDelete?.(); }}
+                    className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    Xóa vĩnh viễn
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         )}
       </div>
 

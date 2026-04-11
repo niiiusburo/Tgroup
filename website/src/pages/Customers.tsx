@@ -1,6 +1,7 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Users, Plus, Phone, Mail, MapPin, Search } from 'lucide-react';
+import { Users, Plus, Phone, Mail, MapPin, Search, Trash2 } from 'lucide-react';
+import { softDeletePartner, hardDeletePartner } from '@/lib/api';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { AddCustomerForm } from '@/components/forms/AddCustomerForm';
@@ -50,7 +51,7 @@ function formatDate(dateStr: string): string {
   return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-function buildCustomerColumns(locationNameMap: Map<string, string>): readonly Column<Customer>[] {
+function buildCustomerColumns(locationNameMap: Map<string, string>, canSoftDelete: boolean, onSoftDelete: (id: string, name: string) => void): readonly Column<Customer>[] {
   return [
     {
       key: 'code',
@@ -127,6 +128,24 @@ function buildCustomerColumns(locationNameMap: Map<string, string>): readonly Co
       width: '14%',
       render: (row) => <span className="text-gray-500">{formatDate(row.lastVisit)}</span>,
     },
+    {
+      key: 'actions',
+      header: '',
+      sortable: false,
+      width: '48px',
+      render: (row) => (
+        canSoftDelete ? (
+          <button
+            onClick={(e) => { e.stopPropagation(); onSoftDelete(row.id, row.name); }}
+            className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+            aria-label="Delete"
+            title="Xóa"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        ) : null
+      ),
+    },
   ];
 }
 
@@ -137,6 +156,9 @@ export function Customers() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(id ?? null);
   const [profileTab, setProfileTab] = useState<ProfileTab>('profile');
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; customerId: string | null; customerName: string; mode: 'soft' | 'hard' } | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const { selectedLocationId } = useLocationFilter();
 
   // Lock body scroll when modal is open
@@ -163,6 +185,8 @@ export function Customers() {
   // Check permissions
   const canEditCustomers = hasPermission('customers.edit');
   const canAddCustomers = hasPermission('customers.add');
+  const canSoftDelete = hasPermission('customer:delete');
+  const canHardDelete = hasPermission('customer:hard_delete');
 
   const {
     customers,
@@ -173,8 +197,10 @@ export function Customers() {
     setStatusFilter,
     createCustomer,
     updateCustomer,
+    deleteCustomer,
     searchRequired,
     minSearchLength,
+    refetch,
   } = useCustomers(selectedLocationId);
 
   const { allLocations } = useLocations();
@@ -182,9 +208,11 @@ export function Customers() {
     () => new Map(allLocations.map((l) => [l.id, l.name])),
     [allLocations],
   );
-  const customerColumns = useMemo(() => buildCustomerColumns(locationNameMap), [locationNameMap]);
+  const customerColumns = useMemo(() => buildCustomerColumns(locationNameMap, canSoftDelete, (id, name) => {
+    setDeleteDialog({ open: true, customerId: id, customerName: name, mode: 'soft' });
+  }), [locationNameMap, canSoftDelete]);
 
-  const { profile: hookProfile, appointments: hookAppointments, isLoading: profileLoading, refetch: refetchProfile } =
+  const { profile: hookProfile, appointments: hookAppointments, linkedCounts, isLoading: profileLoading, refetch: refetchProfile } =
     useCustomerProfile(selectedCustomerId);
 
   // Hooks for profile actions
@@ -353,6 +381,36 @@ export function Customers() {
     return customer?.code;
   };
 
+  function getErrorMessage(error: unknown): string {
+    if (error instanceof Error) return error.message;
+    if (typeof error === 'string') return error;
+    return 'Unexpected error';
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog?.customerId) return;
+    setDeleteLoading(true);
+    setDeleteError(null);
+    try {
+      if (deleteDialog.mode === 'hard') {
+        await hardDeletePartner(deleteDialog.customerId);
+      } else {
+        await softDeletePartner(deleteDialog.customerId);
+      }
+      setDeleteDialog(null);
+      navigate('/customers');
+      refetchProfile();
+    } catch (err: unknown) {
+      if (typeof err === 'object' && err !== null && 'status' in err && (err as { status: number }).status === 409) {
+        setDeleteError('Khách hàng này đang có lịch hẹn, điều trị hoặc thanh toán liên quan. Vui lòng xóa các dữ liệu liên quan trước.');
+      } else {
+        setDeleteError(getErrorMessage(err));
+      }
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   if (selectedCustomerId) {
     const listCustomer = customers.find((c) => c.id === selectedCustomerId);
 
@@ -442,6 +500,18 @@ export function Customers() {
           onUpdateAppointment={handleUpdateAppointment}
           onCreateService={handleCreateService}
           onMakePayment={handleMakePayment}
+          canSoftDelete={canSoftDelete}
+          canHardDelete={canHardDelete}
+          onSoftDelete={() => {
+            if (selectedCustomerId && hookProfile) {
+              setDeleteDialog({ open: true, customerId: selectedCustomerId, customerName: hookProfile.name, mode: 'soft' });
+            }
+          }}
+          onHardDelete={() => {
+            if (selectedCustomerId && hookProfile) {
+              setDeleteDialog({ open: true, customerId: selectedCustomerId, customerName: hookProfile.name, mode: 'hard' });
+            }
+          }}
           loadingDeposits={depositsLoading}
           loadingPayments={paymentsLoading}
         />
@@ -552,6 +622,53 @@ export function Customers() {
           onRowClick={(row) => navigate(`/customers/${row.id}`)}
           emptyMessage="No customers found"
         />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {deleteDialog?.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {deleteDialog.mode === 'hard' ? 'Xóa vĩnh viễn' : 'Xóa khách hàng'}
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Bạn có chắc muốn <strong>{deleteDialog.mode === 'hard' ? 'xóa vĩnh viễn' : 'xóa'}</strong> khách hàng <strong>{deleteDialog.customerName}</strong>?
+              {deleteDialog.mode === 'soft' && ' Khách hàng sẽ bị ẩn khỏi danh sách nhưng dữ liệu vẫn được giữ lại.'}
+              {deleteDialog.mode === 'hard' && ' Hành động này không thể hoàn tác.'}
+            </p>
+            {linkedCounts && (linkedCounts.appointments > 0 || linkedCounts.services > 0 || linkedCounts.payments > 0) && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-800">
+                <p className="font-medium mb-1">Dữ liệu liên quan:</p>
+                <ul className="list-disc list-inside space-y-0.5">
+                  {linkedCounts.appointments > 0 && <li>{linkedCounts.appointments} lịch hẹn</li>}
+                  {linkedCounts.services > 0 && <li>{linkedCounts.services} điều trị</li>}
+                  {linkedCounts.payments > 0 && <li>{linkedCounts.payments} thanh toán</li>}
+                </ul>
+              </div>
+            )}
+            {deleteError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 text-sm text-red-700">
+                {deleteError}
+              </div>
+            )}
+            <div className="flex items-center justify-end gap-3">
+              <button
+                onClick={() => setDeleteDialog(null)}
+                disabled={deleteLoading}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={deleteLoading}
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {deleteLoading ? 'Đang xử lý...' : (deleteDialog.mode === 'hard' ? 'Xóa vĩnh viễn' : 'Xóa')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

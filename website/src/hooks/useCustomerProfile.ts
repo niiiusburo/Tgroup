@@ -35,6 +35,11 @@ export interface CustomerProfileResult {
   isLoading: boolean;
   error: string | null;
   refetch: () => void;
+  linkedCounts: {
+    appointments: number;
+    saleorders: number;
+    dotkhams: number;
+  };
 }
 
 export function useCustomerProfile(customerId: string | null): CustomerProfileResult {
@@ -42,6 +47,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
   const [appointments, setAppointments] = useState<ApiAppointment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [linkedCounts, setLinkedCounts] = useState({ appointments: 0, saleorders: 0, dotkhams: 0 });
 
   const fetchProfile = useCallback(async () => {
     if (!customerId) {
@@ -125,6 +131,13 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         // Balance not available
       }
 
+      // Extract linked record counts from partner API response
+      setLinkedCounts({
+        appointments: Number((partner as unknown as Record<string, number>).appointmentcount) || 0,
+        saleorders: Number((partner as unknown as Record<string, number>).ordercount) || 0,
+        dotkhams: Number((partner as unknown as Record<string, number>).dotkhamcount) || 0,
+      });
+
       setProfile(profileData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load customer profile');
@@ -138,5 +151,5 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
     fetchProfile();
   }, [fetchProfile]);
 
-  return { profile, appointments, isLoading, error, refetch: fetchProfile } as const;
+  return { profile, appointments, isLoading, error, refetch: fetchProfile, linkedCounts };
 }
