@@ -71,6 +71,7 @@ function mapApiEmployeeToEmployee(apiEmployee: ApiEmployee): Employee {
     status: mapApiStatus(apiEmployee.active),
     locationId: apiEmployee.companyid || '',
     locationName: apiEmployee.companyname || '',
+    locationScopeIds: apiEmployee.locationScopeIds ?? [],
     phone: apiEmployee.phone || '',
     email: apiEmployee.email || '',
     schedule: [],
@@ -92,6 +93,7 @@ interface EmployeeWithApiFields extends Employee {
   readonly hrjobname?: string | null;
   readonly wage?: string | null;
   readonly allowance?: string | null;
+  readonly locationScopeIds?: readonly string[];
 }
 
 /**
@@ -134,6 +136,7 @@ export function useEmployees(selectedLocationId?: string) {
           hrjobname: apiEmp.hrjobname,
           wage: apiEmp.wage,
           allowance: apiEmp.allowance,
+          locationScopeIds: apiEmp.locationScopeIds ?? [],
         };
       });
 
