@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.4.16",
+    "date": "2026-04-11",
+    "commit": "614401b0",
+    "highlights": "Fixed location filter dropdown z-index and added location filter to sidebar menu",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Fixed location filter dropdown being hidden under sidebar popouts",
+          "Added location filter to expanded sidebar and mobile menu"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.4.15",
     "date": "2026-04-11",
     "commit": "pending",

@@ -172,7 +172,7 @@ router.get('/employees', async (req, res) => {
           c.id AS location_id,
           c.name AS location_name
         FROM employee_location_scope els
-        JOIN companies c ON c.id = els.location_id
+        JOIN companies c ON c.id = els.company_id
         WHERE els.employee_id = ANY($1::uuid[])
       `, [employeeIds]);
 
@@ -241,7 +241,7 @@ router.put('/employees/:employeeId', async (req, res) => {
     if (locationIds.length > 0) {
       const placeholders = locationIds.map((_, i) => `($1, $${i + 2})`).join(', ');
       await query(
-        `INSERT INTO employee_location_scope (employee_id, location_id) VALUES ${placeholders} ON CONFLICT DO NOTHING`,
+        `INSERT INTO employee_location_scope (employee_id, company_id) VALUES ${placeholders} ON CONFLICT DO NOTHING`,
         [employeeId, ...locationIds]
       );
     }
@@ -287,7 +287,7 @@ router.put('/employees/:employeeId', async (req, res) => {
     const locRows = await query(
       `SELECT c.id AS location_id, c.name AS location_name
        FROM employee_location_scope els
-       JOIN companies c ON c.id = els.location_id
+       JOIN companies c ON c.id = els.company_id
        WHERE els.employee_id = $1`,
       [employeeId]
     );
@@ -359,7 +359,7 @@ router.get('/resolve/:employeeId', async (req, res) => {
       query(
         `SELECT c.id, c.name
          FROM employee_location_scope els
-         JOIN companies c ON c.id = els.location_id
+         JOIN companies c ON c.id = els.company_id
          WHERE els.employee_id = $1`,
         [employeeId]
       ),

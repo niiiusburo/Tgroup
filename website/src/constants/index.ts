@@ -125,23 +125,36 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
   { path: ROUTES.CALENDAR, label: 'Calendar', icon: 'Calendar' },
   { path: ROUTES.CUSTOMERS, label: 'Customers', icon: 'Users' },
   {
-    path: ROUTES.EMPLOYEES,
-    label: 'Employees',
-    icon: 'UserCog',
+    path: '/clinic',
+    label: 'Clinic',
+    icon: 'Stethoscope',
     children: [
-      { path: ROUTES.COMMISSION, label: 'Commission (P)', icon: 'Percent', isPremium: true },
+      { path: ROUTES.WEBSITE, label: 'Service Catalog', icon: 'Stethoscope', count: '228' },
+      { path: ROUTES.PAYMENT, label: 'Payment Plans', icon: 'CreditCard' },
     ],
   },
-  { path: ROUTES.LOCATIONS, label: 'Locations', icon: 'MapPin' },
-  { 
-    path: ROUTES.WEBSITE, 
-    label: 'Service Catalog', 
-    icon: 'Stethoscope',
-    count: '228',
+  {
+    path: '/team',
+    label: 'Team',
+    icon: 'UserCog',
+    children: [
+      { path: ROUTES.EMPLOYEES, label: 'Employees', icon: 'UserCog' },
+      { path: ROUTES.COMMISSION, label: 'Commission', icon: 'Percent', isPremium: true },
+      { path: ROUTES.LOCATIONS, label: 'Locations', icon: 'MapPin' },
+    ],
   },
-  { path: ROUTES.SETTINGS, label: 'Settings', icon: 'Settings' },
-  { path: ROUTES.PERMISSIONS, label: 'Permissions', icon: 'Shield' },
-  { path: ROUTES.PAYMENT, label: 'Payment Plans', icon: 'CreditCard' },
+  {
+    path: '/admin',
+    label: 'Admin',
+    icon: 'Settings',
+    children: [
+      { path: ROUTES.SETTINGS, label: 'Settings', icon: 'Settings' },
+      { path: ROUTES.PERMISSIONS, label: 'Permissions', icon: 'Shield' },
+      { path: ROUTES.REPORTS, label: 'Reports', icon: 'BarChart3' },
+      { path: ROUTES.RELATIONSHIPS, label: 'Relationships', icon: 'Users' },
+      { path: ROUTES.NOTIFICATIONS, label: 'Notifications', icon: 'Bell' },
+    ],
+  },
 ] as const;
 
 /**

@@ -197,10 +197,8 @@ export function Customers() {
     setStatusFilter,
     createCustomer,
     updateCustomer,
-    deleteCustomer,
     searchRequired,
     minSearchLength,
-    refetch,
   } = useCustomers(selectedLocationId);
 
   const { allLocations } = useLocations();
@@ -568,18 +566,6 @@ export function Customers() {
         </div>
       )}
 
-      {/* Floating Action Button — Quick Add Customer */}
-      {canAddCustomers && (
-        <button
-          onClick={() => { setIsEditMode(false); setShowForm(true); }}
-          className="fixed bottom-6 right-6 z-40 inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-lg shadow-orange-500/30 hover:from-orange-600 hover:to-orange-500 hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-200 hover:scale-105"
-          aria-label="Add Customer"
-          title="Thêm khách hàng"
-        >
-          <Plus className="w-6 h-6" />
-        </button>
-      )}
-
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div className="w-full sm:max-w-xs">
           <SearchBar value={searchTerm} onChange={setSearchTerm} placeholder="Search by name, phone, or email..." />
@@ -636,13 +622,13 @@ export function Customers() {
               {deleteDialog.mode === 'soft' && ' Khách hàng sẽ bị ẩn khỏi danh sách nhưng dữ liệu vẫn được giữ lại.'}
               {deleteDialog.mode === 'hard' && ' Hành động này không thể hoàn tác.'}
             </p>
-            {linkedCounts && (linkedCounts.appointments > 0 || linkedCounts.services > 0 || linkedCounts.payments > 0) && (
+            {linkedCounts && (linkedCounts.appointments > 0 || linkedCounts.saleorders > 0 || linkedCounts.dotkhams > 0) && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-800">
                 <p className="font-medium mb-1">Dữ liệu liên quan:</p>
                 <ul className="list-disc list-inside space-y-0.5">
                   {linkedCounts.appointments > 0 && <li>{linkedCounts.appointments} lịch hẹn</li>}
-                  {linkedCounts.services > 0 && <li>{linkedCounts.services} điều trị</li>}
-                  {linkedCounts.payments > 0 && <li>{linkedCounts.payments} thanh toán</li>}
+                  {linkedCounts.saleorders > 0 && <li>{linkedCounts.saleorders} hóa đơn</li>}
+                  {linkedCounts.dotkhams > 0 && <li>{linkedCounts.dotkhams} đợt khám</li>}
                 </ul>
               </div>
             )}

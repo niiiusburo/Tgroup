@@ -44,6 +44,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   BarChart2: BarChart3,
   FolderOpen,
   Shield,
+  Bell,
 };
 
 /** Maps route path to the permission required to see it in the nav */
@@ -61,6 +62,9 @@ const NAV_PERMISSION: Record<string, string> = {
   '/settings': 'settings.view',
   '/notifications': 'notifications.view',
   '/permissions': 'employees.edit',
+  '/clinic': '',
+  '/team': '',
+  '/admin': '',
 };
 
 interface SidebarItemProps {
@@ -72,44 +76,131 @@ interface SidebarItemProps {
 function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
   const Icon = ICON_MAP[item.icon];
   const location = useLocation();
-  const isActive = location.pathname === item.path ||
+  const [open, setOpen] = useState(false);
+
+  const isActive =
+    location.pathname === item.path ||
     (item.children?.some((c) => c.path === location.pathname) ?? false);
 
+  const hasChildren = (item.children?.length ?? 0) > 0;
+
+  if (!hasChildren) {
+    return (
+      <NavLink
+        to={item.path}
+        onClick={onClick}
+        title={!expanded ? item.label : undefined}
+        className={`
+          relative h-11 flex items-center rounded-xl
+          nav-smooth gap-3
+          ${expanded ? 'px-3 w-full' : 'w-11 justify-center'}
+          ${isActive
+            ? 'text-primary bg-white/10'
+            : 'text-gray-400 hover:text-white hover:bg-white/8'
+          }
+        `}
+      >
+        {isActive && (
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-primary rounded-r-full" />
+        )}
+        {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
+        {expanded && (
+          <span className="text-sm font-medium whitespace-nowrap overflow-hidden">
+            {item.label}
+          </span>
+        )}
+        {expanded && item.count && (
+          <span className="ml-auto text-xs bg-white/10 text-gray-300 px-1.5 py-0.5 rounded-full">
+            {item.count}
+          </span>
+        )}
+        {expanded && item.isPremium && (
+          <span className="ml-auto text-xs bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full">
+            Pro
+          </span>
+        )}
+      </NavLink>
+    );
+  }
+
   return (
-    <NavLink
-      to={item.path}
-      onClick={onClick}
-      title={!expanded ? item.label : undefined}
-      className={`
-        relative h-11 flex items-center rounded-xl
-        nav-smooth gap-3
-        ${expanded ? 'px-3 w-full' : 'w-11 justify-center'}
-        ${isActive
-          ? 'text-primary bg-white/10'
-          : 'text-gray-400 hover:text-white hover:bg-white/8'
-        }
-      `}
+    <div
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
     >
-      {isActive && (
-        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-primary rounded-r-full" />
-      )}
-      {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
-      {expanded && (
-        <span className="text-sm font-medium whitespace-nowrap overflow-hidden">
-          {item.label}
-        </span>
-      )}
-      {expanded && item.count && (
-        <span className="ml-auto text-xs bg-white/10 text-gray-300 px-1.5 py-0.5 rounded-full">
-          {item.count}
-        </span>
-      )}
-      {expanded && item.isPremium && (
-        <span className="ml-auto text-xs bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full">
-          Pro
-        </span>
-      )}
-    </NavLink>
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        title={!expanded ? item.label : undefined}
+        className={`
+          relative h-11 flex items-center rounded-xl
+          nav-smooth gap-3
+          ${expanded ? 'px-3 w-full' : 'w-11 justify-center'}
+          ${isActive
+            ? 'text-primary bg-white/10'
+            : 'text-gray-400 hover:text-white hover:bg-white/8'
+          }
+        `}
+      >
+        {isActive && (
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-primary rounded-r-full" />
+        )}
+        {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
+        {expanded && (
+          <>
+            <span className="text-sm font-medium whitespace-nowrap overflow-hidden flex-1 text-left">
+              {item.label}
+            </span>
+            <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+          </>
+        )}
+      </button>
+
+      <div
+        className={`
+          absolute z-50 transition-all duration-200 ease-out
+          ${expanded ? 'left-full top-0 ml-2' : 'left-full top-0 ml-2'}
+          ${open ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 pointer-events-none'}
+        `}
+      >
+        <div className="bg-sidebar border border-white/10 rounded-xl shadow-lg p-2 min-w-[180px]">
+          <div className="px-3 py-2 text-[10px] uppercase tracking-wider text-gray-500 font-semibold">
+            {item.label}
+          </div>
+          <div className="flex flex-col gap-1">
+            {item.children!.map((child) => {
+              const ChildIcon = ICON_MAP[child.icon];
+              const childActive = location.pathname === child.path;
+              return (
+                <NavLink
+                  key={child.path}
+                  to={child.path}
+                  onClick={onClick}
+                  className={`
+                    flex items-center gap-2 rounded-lg px-3 py-2 text-sm
+                    ${childActive ? 'text-primary bg-white/10' : 'text-gray-400 hover:text-white hover:bg-white/8'}
+                  `}
+                >
+                  {ChildIcon && <ChildIcon className="w-4 h-4 flex-shrink-0" />}
+                  <span className="flex-1 whitespace-nowrap">{child.label}</span>
+                  {child.count && (
+                    <span className="text-xs bg-white/10 text-gray-300 px-1.5 py-0.5 rounded-full">
+                      {child.count}
+                    </span>
+                  )}
+                  {child.isPremium && (
+                    <span className="text-xs bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full">
+                      Pro
+                    </span>
+                  )}
+                </NavLink>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -150,7 +241,7 @@ export function Layout() {
   const pageTitle = currentChild?.label ?? currentPage?.label ?? 'Dashboard';
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+
   // Close mobile menu when route changes
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -184,8 +275,8 @@ export function Layout() {
     <div className="min-h-screen bg-gray-100">
       {/* Mobile overlay */}
       {mobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+        <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
@@ -193,7 +284,7 @@ export function Layout() {
       {/* Collapsible sidebar - hidden on mobile, fixed on desktop */}
       <aside
         className={`
-          fixed left-0 top-0 h-full bg-sidebar flex flex-col py-4 z-50 transition-all duration-300 ease-in-out
+          fixed left-0 top-0 h-full bg-sidebar flex flex-col py-4 z-40 transition-all duration-300 ease-in-out
           ${mobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full w-0 md:translate-x-0'}
           ${!mobileMenuOpen && sidebarExpanded ? 'md:w-56' : ''}
           ${!mobileMenuOpen && !sidebarExpanded ? 'md:w-[72px]' : ''}
@@ -227,6 +318,17 @@ export function Layout() {
           )}
         </div>
 
+        {/* Location Filter in sidebar */}
+        {(mobileMenuOpen || sidebarExpanded) && !isSingleLocation && (
+          <div className="px-4 mb-4">
+            <FilterByLocation
+              locations={allowedLocations.length > 0 ? allowedLocations : []}
+              selectedId={selectedLocationId}
+              onChange={setSelectedLocationId}
+            />
+          </div>
+        )}
+
         {/* Navigation */}
         <nav className={`flex-1 flex flex-col gap-1 w-full ${sidebarExpanded ? 'px-3' : 'px-3 items-center'}`}>
           {visibleNavItems.map((item) => (
@@ -235,8 +337,8 @@ export function Layout() {
         </nav>
 
         {/* Bottom: user info + logout */}
-        <div className={`flex flex-col gap-3 mt-4 ${(sidebarExpanded || mobileMenuOpen) ? 'px-3' : 'items-center'}`}>
-          {(sidebarExpanded || mobileMenuOpen) ? (
+        <div className={`flex flex-col gap-3 mt-4 ${(mobileMenuOpen || sidebarExpanded) ? 'px-3' : 'items-center'}`}>
+          {(mobileMenuOpen || sidebarExpanded) ? (
             <>
               {/* User info row */}
               <div className="flex items-center gap-3 px-1">
@@ -291,7 +393,7 @@ export function Layout() {
         `}
       >
         {/* Header */}
-        <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 md:px-6 sticky top-0 z-40">
+        <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 md:px-6 sticky top-0 z-50">
           {/* Mobile menu button + title */}
           <div className="flex items-center gap-3">
             <button

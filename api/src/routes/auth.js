@@ -39,7 +39,7 @@ async function resolvePermissions(employeeId) {
     query(
       `SELECT c.id, c.name
        FROM employee_location_scope els
-       JOIN companies c ON c.id = els.location_id
+       JOIN companies c ON c.id = els.company_id
        WHERE els.employee_id = $1`,
       [employeeId]
     ),

@@ -1,7 +1,7 @@
 {
-  "version": "0.4.13",
-  "buildTime": "2026-04-10T15:54:01.388Z",
-  "gitCommit": "ed959c14",
+  "version": "0.4.15",
+  "buildTime": "2026-04-11T04:59:26.940Z",
+  "gitCommit": "614401b0",
   "gitBranch": "ai-develop",
   "environment": "development"
 }
