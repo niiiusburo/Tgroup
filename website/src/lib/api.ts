@@ -131,6 +131,14 @@ export function updatePartner(id: string, data: Partial<ApiPartner>) {
   return apiFetch<ApiPartner>(`/Partners/${id}`, { method: 'PUT', body: data });
 }
 
+export function softDeletePartner(id: string) {
+  return apiFetch<ApiPartner>(`/Partners/${id}/soft-delete`, { method: 'PATCH' });
+}
+
+export function hardDeletePartner(id: string) {
+  return apiFetch<{ success: boolean; id: string }>(`/Partners/${id}/hard-delete`, { method: 'DELETE' });
+}
+
 // ─── Employees ────────────────────────────────────────────────────
 
 // Employee-specific creation uses Partners API with employee=true
