@@ -572,14 +572,44 @@ export async function fetchCustomerBalance(customerId: string): Promise<ApiCusto
   };
 }
 
+// ─── DotKhams ─────────────────────────────────────────────────────
+
+export interface ApiDotKham {
+  id: string;
+  name: string | null;
+  date: string | null;
+  totalamount: string | null;
+  amountresidual: string | null;
+  partnerid: string | null;
+  partnername: string | null;
+  companyid: string | null;
+  companyname: string | null;
+  state: string | null;
+  paymentstate: string | null;
+}
+
+export function fetchDotKhams(params?: { partnerId?: string; limit?: number; offset?: number }) {
+  return apiFetch<PaginatedResponse<ApiDotKham>>("/DotKhams", {
+    params: {
+      partner_id: params?.partnerId,
+      limit: params?.limit ?? 100,
+      offset: params?.offset ?? 0,
+    },
+  });
+}
+
 // ─── Payments ────────────────────────────────────────────────────
 
 export interface ApiPaymentAllocation {
   id: string;
-  invoiceId: string;
+  invoiceId?: string;
+  dotkhamId?: string;
   invoiceName?: string;
+  dotkhamName?: string;
   invoiceTotal?: number;
+  dotkhamTotal?: number;
   invoiceResidual?: number;
+  dotkhamResidual?: number;
   allocatedAmount: number;
 }
 
@@ -618,7 +648,7 @@ export async function createPayment(data: {
   depositUsed?: number;
   cashAmount?: number;
   bankAmount?: number;
-  allocations?: { invoice_id: string; allocated_amount: number }[];
+  allocations?: { invoice_id?: string; dotkham_id?: string; allocated_amount: number }[];
 }): Promise<ApiPayment> {
   return apiFetch<ApiPayment>('/Payments', {
     method: 'POST',
