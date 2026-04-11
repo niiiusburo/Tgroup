@@ -33,6 +33,7 @@ export interface Employee {
   readonly status: EmployeeStatus;
   readonly locationId: string;
   readonly locationName: string;
+  readonly locationScopeIds?: readonly string[];
   readonly phone: string;
   readonly email: string;
   readonly schedule: readonly ScheduleBlock[];

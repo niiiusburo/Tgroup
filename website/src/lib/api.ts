@@ -155,6 +155,7 @@ export interface CreateEmployeeData {
   wage?: number;
   allowance?: number;
   startworkdate?: string;
+  locationScopeIds?: string[];
 }
 
 export function createEmployee(data: CreateEmployeeData) {
@@ -182,6 +183,7 @@ export interface ApiEmployee {
   active: boolean;
   companyid: string | null;
   companyname: string | null;
+  locationScopeIds?: string[];
   hrjobid: string | null;
   hrjobname: string | null;
   wage: string | null;
