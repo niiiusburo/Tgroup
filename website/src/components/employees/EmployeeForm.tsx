@@ -20,7 +20,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { X, Loader2, UserPlus, User, Phone, Mail, MapPin, CalendarDays, CheckCircle2, Shield, Check, Eye, EyeOff } from 'lucide-react';
+import { X, Loader2, UserPlus, User, Phone, Mail, MapPin, CalendarDays, CheckCircle2, Shield, Check, Eye, EyeOff, Building2 } from 'lucide-react';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { LocationSelector } from '@/components/shared/LocationSelector';
 import { createEmployee, updateEmployee, fetchCompanies, type CreateEmployeeData } from '@/lib/api';
@@ -33,6 +33,7 @@ interface EmployeeFormProps {
     phone?: string;
     email?: string;
     companyid?: string;
+    locationScopeIds?: readonly string[];
     isdoctor: boolean;
     isassistant: boolean;
     isreceptionist: boolean;
@@ -66,6 +67,7 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
   );
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [locationScopeIds, setLocationScopeIds] = useState<string[]>(employee?.locationScopeIds ? [...employee.locationScopeIds] : []);
 
   useEffect(() => {
     fetchCompanies().then((res) => setLocations(res.items.map(l => ({
@@ -94,6 +96,7 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
       email: email.trim() || undefined,
       password: password.trim() || undefined,
       companyid: companyid || undefined,
+      locationScopeIds,
       isdoctor: dbFlags.isdoctor,
       isassistant: dbFlags.isassistant,
       isreceptionist: dbFlags.isreceptionist,
@@ -237,6 +240,43 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
               onChange={setCompanyid}
               excludeAll
             />
+          </div>
+
+          {/* Chi nhánh phụ */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <Building2 className="w-3.5 h-3.5" />
+              Chi nhánh phụ
+            </label>
+            {locations.length === 0 ? (
+              <p className="text-sm text-gray-400">Chưa có chi nhánh nào</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {locations
+                  .filter((loc) => loc.id !== companyid)
+                  .map((loc) => {
+                    const selected = locationScopeIds.includes(loc.id);
+                    return (
+                      <button
+                        key={loc.id}
+                        type="button"
+                        onClick={() => {
+                          setLocationScopeIds((prev) =>
+                            selected ? prev.filter((id) => id !== loc.id) : [...prev, loc.id]
+                          );
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+                          selected
+                            ? 'bg-orange-100 text-orange-700 border-orange-200'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-transparent'
+                        }`}
+                      >
+                        {loc.name}
+                      </button>
+                    );
+                  })}
+              </div>
+            )}
           </div>
 
           {/* Vị trí / Vai trò */}
