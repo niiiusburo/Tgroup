@@ -4,15 +4,15 @@ milestone: v1.1
 milestone_name: milestone
 current_plan: 3 / 4
 status: executing
-stopped_at: Completed 03-03-PLAN.md
-last_updated: "2026-04-11T04:21:13.683Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-04-11T04:29:12.373Z"
 last_activity: 2026-04-11
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 12
-  completed_plans: 9
-  percent: 75
+  completed_plans: 10
+  percent: 83
 ---
 
 # Project State — TG Clinic v1.1 Bugfixes & Features
@@ -55,6 +55,7 @@ progress:
 |-------|------|----------|-------|-------|
 | 03-architecture-shifts | 03-01 | 18min | 2 | 2 |
 | Phase 03-architecture-shifts P03 | 23min | 3 tasks | 7 files |
+| Phase 03-architecture-shifts P03-02 | 35min | 3 tasks | 7 files |
 
 ## Decisions
 
@@ -64,8 +65,10 @@ progress:
 - [Phase 03-architecture-shifts]: Soft delete is exposed in both list view (trash icon) and profile view (dropdown) for users with customer:delete
 - [Phase 03-architecture-shifts]: Linked record counts shown in hard-delete dialog come from hookProfile (appointmentcount, ordercount, dotkhamcount)
 - [Phase 03-architecture-shifts]: 409 Conflict from hard delete maps to user-facing message 'Không thể xóa: còn dữ liệu liên quan.'
+- [Phase 03-architecture-shifts]: Use useColumns hook to close over locationNameMap since DataTable Column render only receives row
+- [Phase 03-architecture-shifts]: Filter out primary companyid from scope chips to avoid duplicate selection
 
 ## Session
 
-- **Last session:** 2026-04-11T04:21:13.681Z
-- **Stopped at:** Completed 03-03-PLAN.md
+- **Last session:** 2026-04-11T04:29:12.370Z
+- **Stopped at:** Completed 03-02-PLAN.md
