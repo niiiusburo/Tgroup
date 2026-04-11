@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.4.15",
+    "date": "2026-04-11",
+    "commit": "pending",
+    "highlights": "Phase 3 architecture shifts \u2014 multi-branch employees, admin customer delete, dotkham payment allocation",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Employee multi-branch assignment via employee_location_scope junction table",
+          "EmployeeForm dual-selector for primary and additional branches",
+          "Admin two-tier customer delete with soft delete and hard delete permissions",
+          "PaymentForm tabbed allocation supporting dotkhams (examination vouchers) and invoices"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Playwright E2E coverage for Phase 3 architecture shifts"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.4.14",
     "date": "2026-04-11",
     "commit": "pending",
