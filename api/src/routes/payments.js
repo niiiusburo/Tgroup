@@ -1,9 +1,37 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { query } = require('../db');
+const { query } = require("../db");
+
+function mapAllocations(allocResult) {
+  return allocResult.map(a => {
+    const base = {
+      id: a.id,
+      paymentId: a.payment_id,
+      allocatedAmount: parseFloat(a.allocated_amount),
+    };
+    if (a.invoice_id) {
+      return {
+        ...base,
+        type: "invoice",
+        targetId: a.invoice_id,
+        targetName: a.invoice_name,
+        targetTotal: parseFloat(a.invoice_total || 0),
+        targetResidual: parseFloat(a.invoice_residual || 0),
+      };
+    }
+    return {
+      ...base,
+      type: "dotkham",
+      targetId: a.dotkham_id,
+      targetName: a.dotkham_name,
+      targetTotal: parseFloat(a.dotkham_total || 0),
+      targetResidual: parseFloat(a.dotkham_residual || 0),
+    };
+  });
+}
 
 // GET /api/Payments - List payments with allocations
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const { customerId, limit = 100, offset = 0 } = req.query;
 
@@ -28,10 +56,10 @@ router.get('/', async (req, res) => {
 
     const result = await query(sql, params);
 
-    let countSql = 'SELECT COUNT(*) FROM payments p WHERE 1=1';
+    let countSql = "SELECT COUNT(*) FROM payments p WHERE 1=1";
     const countParams = [];
     if (customerId) {
-      countSql += ' AND p.customer_id = $1';
+      countSql += " AND p.customer_id = $1";
       countParams.push(customerId);
     }
     const countResult = await query(countSql, countParams);
@@ -41,14 +69,22 @@ router.get('/', async (req, res) => {
     let allocations = [];
     if (paymentIds.length > 0) {
       const allocResult = await query(
-        `SELECT pa.id, pa.payment_id, pa.invoice_id, pa.allocated_amount,
-                so.name as invoice_name, so.amounttotal as invoice_total, so.residual as invoice_residual
+        `SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
+                so.name as invoice_name, so.amounttotal as invoice_total, so.residual as invoice_residual,
+                NULL as dotkham_name, NULL as dotkham_total, NULL as dotkham_residual
          FROM payment_allocations pa
-         JOIN saleorders so ON so.id = pa.invoice_id
-         WHERE pa.payment_id = ANY($1)`,
+         LEFT JOIN saleorders so ON so.id = pa.invoice_id
+         WHERE pa.payment_id = ANY($1) AND pa.invoice_id IS NOT NULL
+         UNION ALL
+         SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
+                NULL, NULL, NULL,
+                dk.name as dotkham_name, dk.totalamount as dotkham_total, dk.amountresidual as dotkham_residual
+         FROM payment_allocations pa
+         LEFT JOIN dotkhams dk ON dk.id = pa.dotkham_id
+         WHERE pa.payment_id = ANY($1) AND pa.dotkham_id IS NOT NULL`,
         [paymentIds]
       );
-      allocations = allocResult;
+      allocations = mapAllocations(allocResult);
     }
 
     res.json({
@@ -67,26 +103,19 @@ router.get('/', async (req, res) => {
         status: row.status,
         createdAt: row.created_at,
         allocations: allocations
-          .filter(a => a.payment_id === row.id)
-          .map(a => ({
-            id: a.id,
-            invoiceId: a.invoice_id,
-            invoiceName: a.invoice_name,
-            invoiceTotal: parseFloat(a.invoice_total || 0),
-            invoiceResidual: parseFloat(a.invoice_residual || 0),
-            allocatedAmount: parseFloat(a.allocated_amount),
-          })),
+          .filter(a => a.paymentId === row.id)
+          .map(a => ({ ...a })),
       })),
       totalItems: parseInt(countResult[0]?.count || 0),
     });
   } catch (error) {
-    console.error('Error fetching payments:', error);
-    res.status(500).json({ error: 'Failed to fetch payments' });
+    console.error("Error fetching payments:", error);
+    res.status(500).json({ error: "Failed to fetch payments" });
   }
 });
 
 // GET /api/Payments/:id - Single payment with allocations
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const rows = await query(
@@ -95,17 +124,26 @@ router.get('/:id', async (req, res) => {
        FROM payments WHERE id = $1`,
       [id]
     );
-    if (rows.length === 0) return res.status(404).json({ error: 'Payment not found' });
+    if (rows.length === 0) return res.status(404).json({ error: "Payment not found" });
 
     const row = rows[0];
-    const allocations = await query(
-      `SELECT pa.id, pa.payment_id, pa.invoice_id, pa.allocated_amount,
-              so.name as invoice_name, so.amounttotal as invoice_total, so.residual as invoice_residual
+    const allocResult = await query(
+      `SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
+              so.name as invoice_name, so.amounttotal as invoice_total, so.residual as invoice_residual,
+              NULL as dotkham_name, NULL as dotkham_total, NULL as dotkham_residual
        FROM payment_allocations pa
-       JOIN saleorders so ON so.id = pa.invoice_id
-       WHERE pa.payment_id = $1`,
+       LEFT JOIN saleorders so ON so.id = pa.invoice_id
+       WHERE pa.payment_id = $1 AND pa.invoice_id IS NOT NULL
+       UNION ALL
+       SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
+              NULL, NULL, NULL,
+              dk.name as dotkham_name, dk.totalamount as dotkham_total, dk.amountresidual as dotkham_residual
+       FROM payment_allocations pa
+       LEFT JOIN dotkhams dk ON dk.id = pa.dotkham_id
+       WHERE pa.payment_id = $1 AND pa.dotkham_id IS NOT NULL`,
       [id]
     );
+    const allocations = mapAllocations(allocResult);
 
     res.json({
       id: row.id,
@@ -121,23 +159,16 @@ router.get('/:id', async (req, res) => {
       referenceCode: row.reference_code,
       status: row.status,
       createdAt: row.created_at,
-      allocations: allocations.map(a => ({
-        id: a.id,
-        invoiceId: a.invoice_id,
-        invoiceName: a.invoice_name,
-        invoiceTotal: parseFloat(a.invoice_total || 0),
-        invoiceResidual: parseFloat(a.invoice_residual || 0),
-        allocatedAmount: parseFloat(a.allocated_amount),
-      })),
+      allocations,
     });
   } catch (error) {
-    console.error('Error fetching payment:', error);
-    res.status(500).json({ error: 'Failed to fetch payment' });
+    console.error("Error fetching payment:", error);
+    res.status(500).json({ error: "Failed to fetch payment" });
   }
 });
 
 // POST /api/Payments - Create a new payment with optional allocations
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const {
       customer_id, service_id, amount, method, notes,
@@ -147,7 +178,7 @@ router.post('/', async (req, res) => {
     } = req.body;
 
     if (!customer_id || amount === undefined || amount === null || !method) {
-      return res.status(400).json({ error: 'customer_id, amount, and method are required' });
+      return res.status(400).json({ error: "customer_id, amount, and method are required" });
     }
 
     // Create payment
@@ -160,7 +191,7 @@ router.post('/', async (req, res) => {
       RETURNING *
     `, [
       customer_id, service_id || null, amount, method, notes || null,
-      payment_date || null, reference_code || null, status || 'posted',
+      payment_date || null, reference_code || null, status || "posted",
       deposit_used || 0, cash_amount || 0, bank_amount || 0
     ]);
 
@@ -173,15 +204,20 @@ router.post('/', async (req, res) => {
       const allocParams = [];
       let idx = 1;
       for (const a of allocations) {
-        if (!a.invoice_id || a.allocated_amount == null) continue;
-        allocValues.push(`($${idx}, $${idx + 1}, $${idx + 2})`);
-        allocParams.push(row.id, a.invoice_id, a.allocated_amount);
+        if ((!a.invoice_id && !a.dotkham_id) || a.allocated_amount == null) continue;
+        if (a.invoice_id) {
+          allocValues.push(`($${idx}, $${idx + 1}, $${idx + 2}, NULL)`);
+          allocParams.push(row.id, a.invoice_id, a.allocated_amount);
+        } else {
+          allocValues.push(`($${idx}, $${idx + 1}, NULL, $${idx + 2})`);
+          allocParams.push(row.id, a.dotkham_id, a.allocated_amount);
+        }
         idx += 3;
       }
       if (allocValues.length > 0) {
         const allocSql = `
-          INSERT INTO payment_allocations (payment_id, invoice_id, allocated_amount)
-          VALUES ${allocValues.join(', ')}
+          INSERT INTO payment_allocations (payment_id, invoice_id, dotkham_id, allocated_amount)
+          VALUES ${allocValues.join(", ")}
           RETURNING *
         `;
         createdAllocations = await query(allocSql, allocParams);
@@ -202,70 +238,78 @@ router.post('/', async (req, res) => {
       cashAmount: parseFloat(row.cash_amount || 0),
       bankAmount: parseFloat(row.bank_amount || 0),
       createdAt: row.created_at,
-      allocations: createdAllocations.map(a => ({
+      allocations: mapAllocations(createdAllocations.map(a => ({
         id: a.id,
-        invoiceId: a.invoice_id,
-        allocatedAmount: parseFloat(a.allocated_amount),
-      })),
+        invoice_id: a.invoice_id,
+        dotkham_id: a.dotkham_id,
+        allocated_amount: a.allocated_amount,
+        // no joined names here; mapAllocations handles gracefully with defaults
+        invoice_name: null,
+        invoice_total: null,
+        invoice_residual: null,
+        dotkham_name: null,
+        dotkham_total: null,
+        dotkham_residual: null,
+      }))),
     });
   } catch (error) {
-    console.error('Error creating payment:', error);
-    res.status(500).json({ error: 'Failed to create payment' });
+    console.error("Error creating payment:", error);
+    res.status(500).json({ error: "Failed to create payment" });
   }
 });
 
 // POST /api/Payments/:id/void - Void payment and reverse allocations
-router.post('/:id/void', async (req, res) => {
+router.post("/:id/void", async (req, res) => {
   try {
     const { id } = req.params;
     const { reason } = req.body || {};
 
-    await query('BEGIN');
+    await query("BEGIN");
     try {
       // Reverse allocations by deleting them
-      await query('DELETE FROM payment_allocations WHERE payment_id = $1', [id]);
+      await query("DELETE FROM payment_allocations WHERE payment_id = $1", [id]);
 
       // Mark payment as voided
       const result = await query(
-        `UPDATE payments SET status = 'voided', notes = COALESCE(notes, '') || ' | VOIDED: ' || $2 WHERE id = $1 RETURNING *`,
-        [id, reason || '']
+        `UPDATE payments SET status = "voided", notes = COALESCE(notes, "") || " | VOIDED: " || $2 WHERE id = $1 RETURNING *`,
+        [id, reason || ""]
       );
       if (result.length === 0) {
-        await query('ROLLBACK');
-        return res.status(404).json({ error: 'Payment not found' });
+        await query("ROLLBACK");
+        return res.status(404).json({ error: "Payment not found" });
       }
-      await query('COMMIT');
+      await query("COMMIT");
       res.json({ success: true, payment: result[0] });
     } catch (err) {
-      await query('ROLLBACK');
+      await query("ROLLBACK");
       throw err;
     }
   } catch (error) {
-    console.error('Error voiding payment:', error);
-    res.status(500).json({ error: 'Failed to void payment' });
+    console.error("Error voiding payment:", error);
+    res.status(500).json({ error: "Failed to void payment" });
   }
 });
 
 // POST /api/Payments/:id/proof - Upload payment proof image
-router.post('/:id/proof', async (req, res) => {
+router.post("/:id/proof", async (req, res) => {
   try {
     const { id } = req.params;
     const { proofImageBase64, qrDescription } = req.body;
 
-    if (!proofImageBase64 || typeof proofImageBase64 !== 'string' || !proofImageBase64.startsWith('data:image/')) {
-      return res.status(400).json({ error: 'proofImageBase64 must be a non-empty string starting with data:image/' });
+    if (!proofImageBase64 || typeof proofImageBase64 !== "string" || !proofImageBase64.startsWith("data:image/")) {
+      return res.status(400).json({ error: "proofImageBase64 must be a non-empty string starting with data:image/" });
     }
 
     const result = await query(
-      'INSERT INTO payment_proofs (payment_id, proof_image, qr_description) VALUES ($1, $2, $3) RETURNING *',
+      "INSERT INTO payment_proofs (payment_id, proof_image, qr_description) VALUES ($1, $2, $3) RETURNING *",
       [id, proofImageBase64, qrDescription || null]
     );
 
     const row = result[0];
     res.json({ success: true, proofId: row.id });
   } catch (error) {
-    console.error('Error saving payment proof:', error);
-    res.status(500).json({ error: 'Failed to save payment proof' });
+    console.error("Error saving payment proof:", error);
+    res.status(500).json({ error: "Failed to save payment proof" });
   }
 });
 
