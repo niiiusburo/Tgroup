@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Calendar, X, Users, Pencil, Loader2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Calendar, X, Users, Pencil, Loader2, Building2 } from 'lucide-react';
 import {
   TIER_LABELS,
   TIER_STYLES,
@@ -133,6 +133,24 @@ export function EmployeeProfile({
                 </span>
               ) : (
                 getLocationName(employee.locationId)
+              )}
+            </span>
+          </div>
+          <div className="flex items-start gap-2 text-sm text-gray-600">
+            <Building2 className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
+            <span>
+              {loadingLocations ? (
+                <span className="flex items-center gap-1 text-gray-400">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Loading...
+                </span>
+              ) : (
+                (employee.locationScopeIds || []).length > 0
+                  ? (employee.locationScopeIds || [])
+                      .filter((id) => id !== employee.locationId)
+                      .map((id) => getLocationName(id))
+                      .join(', ')
+                  : 'Không có chi nhánh phụ'
               )}
             </span>
           </div>

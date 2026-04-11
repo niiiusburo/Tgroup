@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { UserCog, Search, X } from 'lucide-react';
 import { useEmployees } from '@/hooks/useEmployees';
+import { useLocations } from '@/hooks/useLocations';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { TierSelector } from '@/components/employees/TierSelector';
 import { RoleMultiSelect } from '@/components/employees/RoleMultiSelect';
@@ -40,6 +41,9 @@ export function Employees() {
   const [editingEmployee, setEditingEmployee] = useState<typeof selectedEmployee>(null);
 
   const hasFilters = searchQuery || tierFilter !== 'all' || roleFilter !== 'all' || statusFilter !== 'all';
+
+  const { locations: allLocations } = useLocations();
+  const locationNameMap = new Map(allLocations.map((l) => [l.id, l.name]));
 
   const handleAddEmployee = () => {
     setEditingEmployee(null);
@@ -157,6 +161,7 @@ export function Employees() {
             employees={employees}
             selectedEmployeeId={selectedEmployeeId}
             onSelect={setSelectedEmployeeId}
+            locationNameMap={locationNameMap}
           />
         </div>
 
