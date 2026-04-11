@@ -21,6 +21,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Pencil, UserCheck, Phone, Clock, User } from 'lucide-react';
 import type { OverviewAppointment, Zone3Filter } from '@/hooks/useOverviewAppointments';
 import { useAppointmentHover } from '@/contexts/AppointmentHoverContext';
+import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
 import { EditAppointmentModal } from './EditAppointmentModal';
 
@@ -204,7 +205,7 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
       {/* Top row: name + action buttons */}
       <div className="flex items-center justify-between px-3.5 pt-3 pb-1.5 bg-gradient-to-r from-white to-slate-50">
         <span className="text-sm font-bold text-slate-800 truncate flex-1 mr-2">
-          {appointment.customerName || 'No Name'}
+          <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName || 'No Name'}</CustomerNameLink>
         </span>
         <div className="flex items-center gap-1.5 shrink-0">
           {/* Edit button */}

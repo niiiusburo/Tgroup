@@ -218,6 +218,7 @@ export function useCustomers(locationId: string = 'all') {
         referraluserid: updates.referraluserid || undefined,
         salestaffid: updates.salestaffid || undefined,
         cskhid: updates.cskhid !== undefined ? updates.cskhid : undefined,
+        ref: updates.ref || undefined,
       });
     } catch (err) {
       console.error('useCustomers: update error', err);

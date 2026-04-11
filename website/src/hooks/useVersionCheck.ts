@@ -69,6 +69,7 @@ const DISMISSED_VERSION_KEY = 'tgclinic:dismissedVersion';
 // const LAST_UPDATE_CHECK_KEY = 'tgclinic:lastUpdateCheck';
 const JUST_UPDATED_KEY = 'tgclinic:justUpdated';
 const TARGET_VERSION_KEY = 'tgclinic:targetVersion'; // Version we're trying to update to
+const ACCEPTED_VERSION_KEY = 'tgclinic:acceptedVersion'; // Persist accepted server version across remounts
 
 /**
  * Check if we just completed an update (based on URL param or localStorage)
@@ -281,17 +282,37 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
     // Check if we just completed an update
     const justUpdated = checkJustUpdated();
     const targetVersion = localStorage.getItem(TARGET_VERSION_KEY);
+    let acceptedVersion: VersionInfo | null = null;
+    try {
+      const raw = sessionStorage.getItem(ACCEPTED_VERSION_KEY);
+      if (raw) acceptedVersion = JSON.parse(raw) as VersionInfo;
+    } catch {
+      acceptedVersion = null;
+    }
 
-    if (justUpdated && targetVersion && targetVersion !== buildVersion.version) {
-      setCurrentVersion({
+    if (targetVersion && targetVersion !== buildVersion.version && (justUpdated || acceptedVersion?.version === targetVersion)) {
+      const override = acceptedVersion || {
         version: targetVersion,
         buildTime: buildVersion.buildTime,
         gitCommit: buildVersion.gitCommit,
         gitBranch: buildVersion.gitBranch,
-      });
-      // Clean up
+      };
+      setCurrentVersion(override);
+      if (!acceptedVersion) {
+        sessionStorage.setItem(ACCEPTED_VERSION_KEY, JSON.stringify(override));
+      }
+    } else if (targetVersion && targetVersion === buildVersion.version) {
+      // Update actually took effect — clear markers
       localStorage.removeItem(TARGET_VERSION_KEY);
+      sessionStorage.removeItem(ACCEPTED_VERSION_KEY);
+      setCurrentVersion(buildVersion);
+    } else if (acceptedVersion && isNewerVersion(buildVersion, acceptedVersion)) {
+      // We previously accepted a newer server version during this tab session
+      setCurrentVersion(acceptedVersion);
     } else {
+      // No pending update in progress; clear stale markers
+      localStorage.removeItem(TARGET_VERSION_KEY);
+      sessionStorage.removeItem(ACCEPTED_VERSION_KEY);
       setCurrentVersion(buildVersion);
     }
   }, []);
@@ -328,6 +349,7 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
           setIsUpdateAvailable(false);
           clearDismissedVersion();
           hasNotifiedRef.current = false;
+          sessionStorage.setItem(ACCEPTED_VERSION_KEY, JSON.stringify(serverVersion));
         }
       } catch {
         // Ignore grace period check failures

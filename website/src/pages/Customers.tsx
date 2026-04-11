@@ -17,6 +17,7 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { useServices } from '@/hooks/useServices';
 import { useDeposits } from '@/hooks/useDeposits';
 import { useCustomerPayments } from '@/hooks/useCustomerPayments';
+import { useExternalCheckups } from '@/hooks/useExternalCheckups';
 import type { AppointmentFormData } from '@/components/appointments/AppointmentForm';
 import type { PaymentFormData } from '@/components/payment/PaymentForm';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
@@ -370,6 +371,7 @@ export function Customers() {
       referraluserid: '',
       salestaffid: '',
       cskhid: customer.cskhid || '',
+      ref: customer.code || '',
     };
   };
 
@@ -378,6 +380,9 @@ export function Customers() {
     const customer = customers.find((c) => c.id === selectedCustomerId);
     return customer?.code;
   };
+
+  const customerCode = getCustomerCode();
+  const { data: checkupData, isLoading: checkupsLoading, error: checkupsError, refetch: refetchCheckups } = useExternalCheckups(customerCode);
 
   function getErrorMessage(error: unknown): string {
     if (error instanceof Error) return error.message;
@@ -512,6 +517,10 @@ export function Customers() {
           }}
           loadingDeposits={depositsLoading}
           loadingPayments={paymentsLoading}
+          checkupData={checkupData}
+          checkupsLoading={checkupsLoading}
+          checkupsError={checkupsError}
+          onRefetchCheckups={refetchCheckups}
         />
         {showForm && isEditMode && (
           <div className="modal-container">
@@ -613,7 +622,7 @@ export function Customers() {
       {/* Delete Confirmation Dialog */}
       {deleteDialog?.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 mx-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 mx-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               {deleteDialog.mode === 'hard' ? 'Xóa vĩnh viễn' : 'Xóa khách hàng'}
             </h3>

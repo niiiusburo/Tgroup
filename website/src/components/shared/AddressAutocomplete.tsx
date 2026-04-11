@@ -73,6 +73,7 @@ export function AddressAutocomplete({
   disabled = false,
 }: AddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -308,12 +309,12 @@ export function AddressAutocomplete({
   // Close suggestions on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      // Don't close if clicking on the input or suggestion buttons
+      // Don't close if clicking on the input or dropdown
       const target = e.target as HTMLElement;
       const isInputClick = inputRef.current?.contains(target);
-      const isSuggestionClick = target.closest('[class*="shadow"]'); // Check if clicking a suggestion button
-      
-      if (!isInputClick && !isSuggestionClick) {
+      const isDropdownClick = dropdownRef.current?.contains(target);
+
+      if (!isInputClick && !isDropdownClick) {
         setShowSuggestions(false);
       }
     };
@@ -394,7 +395,7 @@ export function AddressAutocomplete({
 
       {/* Suggestions dropdown */}
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+        <div ref={dropdownRef} className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="py-2 max-h-72 overflow-y-auto">
             {suggestions.map((suggestion, index) => (
               <button
@@ -427,7 +428,7 @@ export function AddressAutocomplete({
 
       {/* No results message */}
       {showSuggestions && !isLoading && inputValue.length >= 3 && suggestions.length === 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 z-[100]">
+        <div ref={dropdownRef} className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 z-[100]">
           <div className="flex items-center gap-3 text-gray-500">
             <Search className="w-5 h-5" />
             <p className="text-sm">Không tìm thấy địa chỉ phù hợp</p>

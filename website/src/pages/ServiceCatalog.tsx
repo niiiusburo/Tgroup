@@ -15,6 +15,7 @@ import {
   createProductCategory,
 } from '@/lib/api';
 import type { ApiProduct, ApiProductCategory, ApiCompany } from '@/lib/api';
+import { useLocationFilter } from '@/contexts/LocationContext';
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -268,6 +269,8 @@ export function ServiceCatalog() {
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
+  const { selectedLocationId } = useLocationFilter();
+
   // Modals
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [showServiceForm, setShowServiceForm] = useState(false);
@@ -288,6 +291,7 @@ export function ServiceCatalog() {
         limit: pageSize,
         search: productSearch || undefined,
         categId: selectedCategoryId || undefined,
+        companyId: selectedLocationId !== 'all' ? selectedLocationId : undefined,
       });
       setProducts(res.items);
       setTotalProducts(res.totalItems);
@@ -297,12 +301,12 @@ export function ServiceCatalog() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, productSearch, selectedCategoryId]);
+  }, [page, pageSize, productSearch, selectedCategoryId, selectedLocationId]);
 
   useEffect(() => { loadProducts(); }, [loadProducts]);
 
   // Reset page when filters change
-  useEffect(() => { setPage(1); }, [productSearch, selectedCategoryId, activeFilter]);
+  useEffect(() => { setPage(1); }, [productSearch, selectedCategoryId, activeFilter, selectedLocationId]);
 
   // ── Filtered categories for sidebar ──
   const filteredCategories = useMemo(() => {

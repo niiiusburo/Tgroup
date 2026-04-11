@@ -36,6 +36,7 @@ const systemPreferencesRoutes = require('./routes/systemPreferences');
 const websitePagesRoutes = require('./routes/websitePages');
 const placesRoutes = require('./routes/places');
 const bankSettingsRoutes = require('./routes/bankSettings');
+const externalCheckupsRoutes = require('./routes/externalCheckups');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -84,6 +85,7 @@ app.use('/api/Places', placesRoutes);
 app.use('/api/SystemPreferences', systemPreferencesRoutes);
 app.use('/api/WebsitePages', websitePagesRoutes);
 app.use('/api/settings', bankSettingsRoutes);
+app.use('/api/ExternalCheckups', externalCheckupsRoutes);
 
 // Stub image endpoint used by partner avatars
 app.get('/api/web/Image2', (req, res) => {

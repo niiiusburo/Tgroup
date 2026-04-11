@@ -1,5 +1,6 @@
 import { APPOINTMENT_TYPE_COLORS } from '@/constants';
 import { STATUS_DOT_COLORS, type CalendarAppointment } from '@/data/mockCalendar';
+import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 
 /**
  * TimeSlot Component - displays a time slot with optional appointments
@@ -59,7 +60,7 @@ function AppointmentBlock({ appointment }: AppointmentBlockProps) {
       <div className="flex items-center gap-2">
         <span className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
         <span className="text-sm font-medium text-gray-900 truncate">
-          {appointment.customerName}
+          <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink>
         </span>
       </div>
       <div className="ml-4 mt-0.5">
@@ -79,7 +80,7 @@ function CompactAppointment({ appointment }: AppointmentBlockProps) {
   return (
     <div className={`flex items-center gap-1.5 py-0.5 px-1 rounded ${typeColors.bg}`}>
       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotColor}`} />
-      <span className={`text-xs truncate ${typeColors.text}`}>{appointment.customerName}</span>
+      <span className={`text-xs truncate ${typeColors.text}`}><CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink></span>
     </div>
   );
 }

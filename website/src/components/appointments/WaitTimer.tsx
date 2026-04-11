@@ -50,7 +50,7 @@ export function WaitTimer({ arrivalTime, treatmentStartTime, compact = false }: 
   }
 
   const waitMinutes = Math.floor(waitSeconds / 60);
-  const isLongWait = waitMinutes > 30;
+  const timerColor = waitMinutes < 10 ? 'green' : waitMinutes < 20 ? 'orange' : 'red';
   const isFinished = treatmentStartTime !== null;
 
   if (compact) {
@@ -59,9 +59,11 @@ export function WaitTimer({ arrivalTime, treatmentStartTime, compact = false }: 
         className={`inline-flex items-center gap-1 text-xs font-medium ${
           isFinished
             ? 'text-gray-500'
-            : isLongWait
-              ? 'text-red-600'
-              : 'text-amber-600'
+            : timerColor === 'green'
+              ? 'text-emerald-600'
+              : timerColor === 'orange'
+                ? 'text-amber-600'
+                : 'text-red-600'
         }`}
       >
         <Clock className="w-3 h-3" />
@@ -76,9 +78,11 @@ export function WaitTimer({ arrivalTime, treatmentStartTime, compact = false }: 
       className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium ${
         isFinished
           ? 'bg-gray-50 text-gray-600'
-          : isLongWait
-            ? 'bg-red-50 text-red-700'
-            : 'bg-amber-50 text-amber-700'
+          : timerColor === 'green'
+            ? 'bg-emerald-50 text-emerald-700'
+            : timerColor === 'orange'
+              ? 'bg-amber-50 text-amber-700'
+              : 'bg-red-50 text-red-700'
       }`}
     >
       <Clock className="w-4 h-4" />

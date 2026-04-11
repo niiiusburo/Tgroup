@@ -137,7 +137,7 @@ export function useAppointments(selectedLocationId?: string) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedLocationId]);
 
   // Load appointments on mount
   useEffect(() => {

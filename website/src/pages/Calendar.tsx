@@ -1,7 +1,8 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Search } from 'lucide-react';
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useCalendarData, type ViewMode, type CalendarStatusFilter } from '@/hooks/useCalendarData';
+import { normalizeText } from '@/lib/utils';
 import { useDragReschedule } from '@/hooks/useDragReschedule';
 import { DayView } from '@/components/calendar/DayView';
 import { WeekView } from '@/components/calendar/WeekView';
@@ -58,12 +59,8 @@ export function Calendar() {
     dateLabel,
     selectedDoctorId,
     setSelectedDoctorId,
-    patientSearch,
-    setPatientSearch,
-    doctorSearch,
-    setDoctorSearch,
-    serviceSearch,
-    setServiceSearch,
+    search,
+    setSearch,
     statusFilter,
     setStatusFilter,
     refresh,
@@ -101,6 +98,7 @@ export function Calendar() {
     // Map CalendarAppointment to OverviewAppointment format for EditAppointmentModal
     const overviewAppointment: OverviewAppointment = {
       id: appointment.id,
+      customerId: appointment.customerId,
       customerName: appointment.customerName,
       customerPhone: appointment.customerPhone,
       doctorName: appointment.dentist,
@@ -140,19 +138,6 @@ export function Calendar() {
     setViewMode('day');
   }, [setCurrentDate, setViewMode]);
 
-  const handleDateChange = useCallback((date: Date) => {
-    // This would update currentDate in useCalendarData
-    // For now, we use the navigate function
-    const current = new Date(currentDate);
-    const diff = date.getTime() - current.getTime();
-    const daysDiff = Math.round(diff / (1000 * 60 * 60 * 24));
-    
-    if (daysDiff > 0) {
-      for (let i = 0; i < daysDiff; i++) navigate('next');
-    } else if (daysDiff < 0) {
-      for (let i = 0; i < Math.abs(daysDiff); i++) navigate('prev');
-    }
-  }, [currentDate, navigate]);
 
   // Helper to map Calendar status to OverviewAppointment topStatus
   function mapStatusToTopStatus(status: CalendarAppointment['status']): OverviewAppointment['topStatus'] {
@@ -169,6 +154,62 @@ export function Calendar() {
         return 'scheduled';
     }
   }
+
+  // Unified search combobox state
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const visibleAppointments = useMemo(() => {
+    if (viewMode === 'day') return getAppointmentsForDate(currentDate);
+    if (viewMode === 'week') return weekDates.flatMap((d) => getAppointmentsForDate(d));
+    return monthDates.flatMap((d) => getAppointmentsForDate(d));
+  }, [viewMode, currentDate, weekDates, monthDates, getAppointmentsForDate]);
+
+  const customerSuggestions = useMemo(() => {
+    const map = new Map<string, { id: string; name: string; phone: string; code: string }>();
+    visibleAppointments.forEach((apt) => {
+      if (!map.has(apt.customerId)) {
+        map.set(apt.customerId, {
+          id: apt.customerId,
+          name: apt.customerName,
+          phone: apt.customerPhone,
+          code: apt.customerCode,
+        });
+      }
+    });
+    return Array.from(map.values());
+  }, [visibleAppointments]);
+
+  const filteredSuggestions = useMemo(() => {
+    if (search.trim().length < 2) return [];
+    const term = normalizeText(search.trim());
+    return customerSuggestions.filter(
+      (c) =>
+        normalizeText(c.name).includes(term) ||
+        normalizeText(c.phone).includes(term) ||
+        normalizeText(c.code).includes(term),
+    );
+  }, [customerSuggestions, search]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSearchInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+    setIsDropdownOpen(true);
+  }, [setSearch]);
+
+  const handleSelectCustomer = useCallback((name: string) => {
+    setSearch(name);
+    setIsDropdownOpen(false);
+  }, [setSearch]);
 
   return (
     <div className="space-y-4">
@@ -230,37 +271,37 @@ export function Calendar() {
           </button>
         </div>
 
-        {/* Right: Quick add + search + doctor filter */}
+        {/* Right: Quick add + unified search combobox + doctor filter */}
         <div className="flex items-center gap-2 w-full lg:w-auto">
-          <div className="relative w-full lg:w-40">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <div ref={dropdownRef} className="relative w-full lg:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
             <input
               type="text"
-              value={patientSearch}
-              onChange={(e) => setPatientSearch(e.target.value)}
-              placeholder="Bệnh nhân..."
+              value={search}
+              onChange={handleSearchInputChange}
+              onFocus={() => setIsDropdownOpen(true)}
+              placeholder="Tìm theo tên, SĐT, mã KH, bác sĩ, dịch vụ..."
               className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
             />
-          </div>
-          <div className="relative w-full lg:w-40">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              value={doctorSearch}
-              onChange={(e) => setDoctorSearch(e.target.value)}
-              placeholder="Bác sĩ..."
-              className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-            />
-          </div>
-          <div className="relative w-full lg:w-40">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              value={serviceSearch}
-              onChange={(e) => setServiceSearch(e.target.value)}
-              placeholder="Dịch vụ..."
-              className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-            />
+            {isDropdownOpen && search.trim().length >= 2 && (
+              <div className="absolute top-full left-0 mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-60 overflow-y-auto">
+                {filteredSuggestions.length === 0 ? (
+                  <div className="px-4 py-3 text-sm text-gray-400 text-center">Không tìm thấy kết quả</div>
+                ) : (
+                  filteredSuggestions.map((customer) => (
+                    <button
+                      key={customer.id}
+                      type="button"
+                      onClick={() => handleSelectCustomer(customer.name)}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="font-medium text-gray-900">{customer.name}</div>
+                      <div className="text-xs text-gray-500">{customer.phone} · {customer.code}</div>
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
           </div>
           <QuickAddAppointmentButton
             onSuccess={refresh}
@@ -313,7 +354,7 @@ export function Calendar() {
           getAppointmentsForDate={getAppointmentsForDate}
           onAppointmentClick={handleAppointmentClick}
           onAppointmentEdit={handleEditClick}
-          onDateChange={handleDateChange}
+          onDateChange={setCurrentDate}
         />
       )}
       {viewMode === 'month' && (

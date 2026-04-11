@@ -67,7 +67,7 @@ export function Payment() {
     summary,
     createPlan,
     markInstallmentPaid,
-  } = useMonthlyPlans();
+  } = useMonthlyPlans(selectedLocationId);
 
   const handleCreatePayment = (data: PaymentFormData) => {
     createPayment(data);

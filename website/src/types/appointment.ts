@@ -10,8 +10,10 @@ export type CheckInStatus = 'not-arrived' | 'arrived' | 'waiting' | 'in-treatmen
 
 export interface CalendarAppointment {
   readonly id: string;
+  readonly customerId: string;
   readonly customerName: string;
   readonly customerPhone: string;
+  readonly customerCode: string;
   readonly serviceName: string;
   readonly appointmentType: AppointmentType;
   readonly dentist: string;

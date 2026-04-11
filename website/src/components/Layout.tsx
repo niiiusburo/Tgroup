@@ -27,6 +27,7 @@ import { NAVIGATION_ITEMS, type NavigationItem } from '@/constants';
 import { FilterByLocation } from '@/components/shared/FilterByLocation';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocations } from '@/hooks/useLocations';
 
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -228,6 +229,8 @@ export function Layout() {
   const [debugOpen, setDebugOpen] = useState(false);
   const { selectedLocationId, setSelectedLocationId, allowedLocations, isSingleLocation } = useLocationFilter();
   const { user, permissions, hasPermission, logout } = useAuth();
+  const { allLocations: allApiLocations } = useLocations();
+  const locationsForFilter = allowedLocations.length > 0 ? allowedLocations : allApiLocations;
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -415,7 +418,7 @@ export function Layout() {
             {!isSingleLocation && (
               <div className="hidden sm:block">
                 <FilterByLocation
-                  locations={allowedLocations.length > 0 ? allowedLocations : []}
+                  locations={locationsForFilter}
                   selectedId={selectedLocationId}
                   onChange={setSelectedLocationId}
                 />
@@ -431,7 +434,7 @@ export function Layout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 md:p-6">
+        <main className="flex-1 p-4 md:p-6 relative z-0">
           <Outlet />
         </main>
 

@@ -238,9 +238,9 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   const isLoading = customersLoading || employeesLoading || locationsLoading || productsLoading;
 
   return (
-    <div className="modal-container">
+    <div className="modal-container z-[100]">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="modal-content animate-in zoom-in-95 duration-200">
+      <div className="modal-content animate-in zoom-in-95 duration-200 max-w-3xl">
         {/* Header */}
         <div className="modal-header relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
@@ -401,19 +401,19 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
             />
           </div>
+        </form>
 
-          {/* Footer */}
-          <div className="modal-footer px-0 pt-4 flex justify-end gap-3 -mx-6 -mb-6 px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100">
+        {/* Footer */}
+        <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
             <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
               Hủy bỏ
             </button>
-            <button type="submit" disabled={isLoading || isSaving}
+            <button type="button" onClick={() => handleSubmit()} disabled={isLoading || isSaving}
               className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25">
               <Check className="w-4 h-4" />
               {isEdit ? 'Cập nhật' : 'Tạo dịch vụ'}
             </button>
           </div>
-        </form>
       </div>
     </div>
   );

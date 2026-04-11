@@ -132,7 +132,7 @@ router.get('/', async (req, res) => {
 
     if (search) {
       conditions.push(
-        `(a.name ILIKE $${paramIdx} OR a.note ILIKE $${paramIdx} OR a.reason ILIKE $${paramIdx} OR p.name ILIKE $${paramIdx} OR p.namenosign ILIKE $${paramIdx})`
+        `(a.name ILIKE $${paramIdx} OR a.note ILIKE $${paramIdx} OR a.reason ILIKE $${paramIdx} OR p.name ILIKE $${paramIdx} OR p.namenosign ILIKE $${paramIdx} OR p.ref ILIKE $${paramIdx})`
       );
       params.push(`%${search}%`);
       paramIdx++;
@@ -157,6 +157,7 @@ router.get('/', async (req, res) => {
         p.name AS partnername,
         p.displayname AS partnerdisplayname,
         p.phone AS partnerphone,
+        p.ref AS partnercode,
         a.companyid,
         c.name AS companyname,
         a.userid,
@@ -269,6 +270,7 @@ router.get('/:id', async (req, res) => {
         p.displayname AS partnerdisplayname,
         p.phone AS partnerphone,
         p.email AS partneremail,
+        p.ref AS partnercode,
         a.companyid,
         c.name AS companyname,
         a.userid,
@@ -427,6 +429,7 @@ router.post('/', async (req, res) => {
         a.partnerid,
         p.name AS partnername,
         p.displayname AS partnerdisplayname,
+        p.ref AS partnercode,
         a.companyid,
         c.name AS companyname,
         a.doctorid,
@@ -575,6 +578,7 @@ router.put('/:id', async (req, res) => {
         a.partnerid,
         p.name AS partnername,
         p.displayname AS partnerdisplayname,
+        p.ref AS partnercode,
         a.companyid,
         c.name AS companyname,
         a.doctorid,

@@ -1,6 +1,7 @@
 import { Clock, User, Pencil } from 'lucide-react';
 import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_CARD_COLORS } from '@/constants';
 import { STATUS_DOT_COLORS, type CalendarAppointment } from '@/data/mockCalendar';
+import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 
 const TYPE_LABELS_VI: Record<string, string> = {
   cleaning: 'Vệ sinh',
@@ -64,7 +65,7 @@ export function AppointmentCard({
       >
         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot}`} />
         <span className={`text-[11px] font-medium truncate ${colorStyles.text}`}>
-          {appointment.startTime} {appointment.customerName}
+          {appointment.startTime} <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink>
         </span>
       </button>
     );
@@ -84,7 +85,7 @@ export function AppointmentCard({
         >
           <span className={`w-2 h-2 rounded-full shrink-0 ${statusDot}`} />
           <span className="text-sm font-medium text-gray-900 truncate">
-            {appointment.customerName}
+            <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink>
           </span>
         </button>
         {onEdit && (

@@ -14,6 +14,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Clock, User } from 'lucide-react';
 import { WaitTimer } from '@/components/appointments/WaitTimer';
+import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import type { OverviewAppointment, CheckInStatus, Zone1Filter } from '@/hooks/useOverviewAppointments';
 import { useAppointmentHover } from '@/contexts/AppointmentHoverContext';
 
@@ -249,7 +250,7 @@ function PatientCard({ appointment, onUpdateStatus, onEditClick, onDone }: Patie
 
       {/* Patient info — NO truncate: display full name per layout lock */}
       <div className="mt-2.5">
-        <div className="text-sm font-semibold text-gray-800 break-words">{appointment.customerName}</div>
+        <div className="text-sm font-semibold text-gray-800 break-words"><CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink></div>
         <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
           <User className="w-3 h-3" />
           <span>{appointment.doctorName}</span>

@@ -67,18 +67,14 @@ export function QuickAddAppointmentButton({ onSuccess, size = 'md' }: QuickAddAp
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="modal-container">
           {/* Backdrop */}
           <div 
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
           />
           
-          {/* Modal */}
-          <div 
-            className="relative bg-white rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
-            style={{ width: '90vw', maxWidth: '900px', maxHeight: '90vh' }}
-          >
+          <div className="modal-content animate-in zoom-in-95 duration-200 max-w-[900px]">
             <AppointmentForm
               onSubmit={handleSubmit}
               onClose={() => setIsOpen(false)}

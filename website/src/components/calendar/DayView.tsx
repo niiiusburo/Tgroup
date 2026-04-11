@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { User, Phone, Clock, MessageSquare, Pencil } from 'lucide-react';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
+import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 
 /**
  * DayView Component - responsive card grid layout for a single day's appointments
@@ -85,8 +86,7 @@ function DayCard({ appointment, onClick, onEdit }: DayCardProps) {
   const colors = getCardColor(appointment.color);
 
   return (
-    <button
-      type="button"
+    <div
       onClick={() => onClick?.(appointment)}
       className="group w-full text-left rounded-xl border border-gray-200 bg-white shadow-sm card-hover overflow-hidden cursor-pointer"
     >
@@ -106,22 +106,20 @@ function DayCard({ appointment, onClick, onEdit }: DayCardProps) {
               </span>
             </div>
             {onEdit && (
-              <span
-                role="button"
-                tabIndex={0}
+              <button
+                type="button"
                 onClick={(e) => { e.stopPropagation(); onEdit(appointment); }}
-                onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onEdit(appointment); } }}
-                className="p-1 rounded opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-600 hover:bg-gray-100 transition-all cursor-pointer"
+                className="p-1 rounded opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-600 hover:bg-gray-100 transition-all"
                 title="Sửa"
               >
                 <Pencil className="w-3.5 h-3.5" />
-              </span>
+              </button>
             )}
           </div>
 
           {/* Row 2: Patient name */}
           <div className="text-sm font-bold text-gray-900 leading-tight truncate">
-            {appointment.customerName}
+            <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink>
           </div>
 
           {/* Row 3: Doctor */}
@@ -153,7 +151,7 @@ function DayCard({ appointment, onClick, onEdit }: DayCardProps) {
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 

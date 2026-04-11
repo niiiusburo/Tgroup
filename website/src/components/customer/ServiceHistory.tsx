@@ -9,6 +9,7 @@ import type { CustomerService } from '@/types/customer';
 interface ServiceHistoryProps {
   readonly services: readonly CustomerService[];
   readonly limit?: number;
+  readonly onSelect?: (service: CustomerService) => void;
 }
 
 function formatVND(amount: number): string {
@@ -21,7 +22,7 @@ const STATUS_CONFIG = {
   planned: { icon: CalendarPlus, label: 'Planned', className: 'text-gray-600 bg-gray-50', dot: 'bg-gray-400' },
 } as const;
 
-export function ServiceHistory({ services, limit }: ServiceHistoryProps) {
+export function ServiceHistory({ services, limit, onSelect }: ServiceHistoryProps) {
   const displayServices = limit ? services.slice(0, limit) : services;
   const totalCost = services
     .filter((s) => s.status === 'completed')
@@ -51,7 +52,8 @@ export function ServiceHistory({ services, limit }: ServiceHistoryProps) {
             return (
               <div
                 key={svc.id}
-                className="border border-gray-100 rounded-lg p-4 hover:border-gray-200 transition-colors"
+                className={`border border-gray-100 rounded-lg p-4 transition-colors ${onSelect ? 'cursor-pointer hover:border-primary/40 hover:bg-primary/5' : 'hover:border-gray-200'}`}
+                onClick={() => onSelect?.(svc)}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">

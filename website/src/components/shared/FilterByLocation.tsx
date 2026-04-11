@@ -49,7 +49,7 @@ export function FilterByLocation({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-[9999]">
+        <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
           {locations.map((location) => (
             <button
               key={location.id}

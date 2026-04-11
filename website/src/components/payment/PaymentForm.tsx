@@ -67,6 +67,10 @@ interface PaymentFormProps {
   readonly defaultCustomerId?: string;
   readonly depositBalance?: number;
   readonly outstandingBalance?: number;
+  readonly defaultNotes?: string;
+  readonly defaultPaymentDate?: string;
+  readonly defaultReferenceCode?: string;
+  readonly isEdit?: boolean;
 }
 
 export function PaymentForm({
@@ -77,6 +81,10 @@ export function PaymentForm({
   defaultCustomerId,
   depositBalance: externalDepositBalance,
   outstandingBalance: externalOutstandingBalance,
+  defaultNotes = '',
+  defaultPaymentDate,
+  defaultReferenceCode = '',
+  isEdit = false,
 }: PaymentFormProps) {
   const { customers: apiCustomers, loading: customersLoading } = useCustomers();
   const { allLocations: apiLocations, isLoading: locationsLoading } = useLocations();
@@ -85,7 +93,7 @@ export function PaymentForm({
   // ─── Form state ───────────────────────────────────────────────
   const [customerId, setCustomerId] = useState<string | null>(defaultCustomerId ?? null);
   const [locationId, setLocationId] = useState<string | null>(null);
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState(defaultNotes);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -94,8 +102,8 @@ export function PaymentForm({
   const [cashAmount, setCashAmount] = useState(0);
   const [bankAmount, setBankAmount] = useState(0);
   const [showVietQr, setShowVietQr] = useState(false);
-  const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [referenceCode, setReferenceCode] = useState('');
+  const [paymentDate, setPaymentDate] = useState(() => defaultPaymentDate ?? new Date().toISOString().slice(0, 10));
+  const [referenceCode, setReferenceCode] = useState(defaultReferenceCode);
 
   // Invoices & allocations
   const [invoices, setInvoices] = useState<InvoiceOption[]>([]);
@@ -345,7 +353,7 @@ export function PaymentForm({
                 <CreditCard className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Ghi nhận thanh toán</h2>
+                <h2 className="text-xl font-bold text-white">{isEdit ? 'Chỉnh sửa thanh toán' : 'Ghi nhận thanh toán'}</h2>
                 <p className="text-sm text-orange-100 mt-0.5">
                   {isCustomerScoped ? `Thanh toán cho ${defaultCustomerName || selectedCustomer?.name || ''}` : 'Tạo giao dịch thanh toán mới'}
                 </p>
@@ -358,7 +366,7 @@ export function PaymentForm({
         </div>
 
         {/* ─── Form Body ─── */}
-        <form onSubmit={handleSubmit} className="modal-body px-6 py-6 space-y-5 max-h-[70vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="modal-body px-6 py-6 space-y-5">
           {isLoading && (
             <div className="flex items-center justify-center py-8 text-gray-400">
               <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2" />

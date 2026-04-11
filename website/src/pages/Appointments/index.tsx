@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { StatusBadge, type StatusVariant } from '@/components/shared/StatusBadge';
+import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import { AppointmentForm, type AppointmentFormData } from '@/components/appointments/AppointmentForm';
 import { CheckInFlow } from '@/components/appointments/CheckInFlow';
 import { WaitTimer } from '@/components/appointments/WaitTimer';
@@ -65,6 +66,9 @@ export function Appointments() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<AppointmentFormData | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  function toggleExpanded(id: string) {
+    setExpandedId((prev) => (prev === id ? null : id));
+  }
 
   function handleCreate(data: AppointmentFormData) {
     createAppointment(data);
@@ -102,10 +106,6 @@ export function Appointments() {
     });
     setIsEditMode(true);
     setShowForm(true);
-  }
-
-  function toggleExpanded(id: string) {
-    setExpandedId((prev) => (prev === id ? null : id));
   }
 
   return (
@@ -214,27 +214,23 @@ export function Appointments() {
               return (
                 <div key={apt.id} className="transition-colors hover:bg-gray-50/50">
                   {/* Row */}
-                  <button
-                    type="button"
-                    onClick={() => toggleExpanded(apt.id)}
-                    className="w-full text-left p-4 flex items-center gap-4"
-                  >
+                  <div className="w-full text-left p-4 flex items-center gap-4">
                     {/* Date/Time block */}
-                    <div className="w-16 text-center shrink-0">
+                    <button type="button" onClick={() => toggleExpanded(apt.id)} className="w-16 text-center shrink-0">
                       <div className="text-xs text-gray-500">{apt.date.slice(5)}</div>
                       <div className="text-sm font-semibold text-gray-900">{apt.startTime}</div>
-                    </div>
+                    </button>
 
                     {/* Type dot + info */}
-                    <div className="flex-1 min-w-0">
+                    <button type="button" onClick={() => toggleExpanded(apt.id)} className="flex-1 min-w-0 text-left">
                       <div className="flex items-center gap-2">
                         <span className={`w-2 h-2 rounded-full shrink-0 ${typeColors.dot}`} />
-                        <span className="font-medium text-gray-900 truncate">{apt.customerName}</span>
+                        <span className="font-medium text-gray-900 truncate"><CustomerNameLink customerId={apt.customerId}>{apt.customerName}</CustomerNameLink></span>
                       </div>
                       <div className="text-xs text-gray-500 mt-0.5 truncate">
                         {apt.serviceName} &middot; {apt.doctorName} &middot; {apt.locationName}
                       </div>
-                    </div>
+                    </button>
 
                     {/* Check-in status */}
                     <span className={`hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${CHECK_IN_STATUS_STYLES[apt.checkInStatus]}`}>
@@ -250,11 +246,13 @@ export function Appointments() {
                     <StatusBadge status={STATUS_TO_BADGE[apt.status]} label={apt.status.replace('-', ' ')} />
 
                     {/* Expand chevron */}
-                    {isExpanded
-                      ? <ChevronUp className="w-4 h-4 text-gray-400 shrink-0" />
-                      : <ChevronDown className="w-4 h-4 text-gray-400 shrink-0" />
-                    }
-                  </button>
+                    <button type="button" onClick={() => toggleExpanded(apt.id)} className="shrink-0 p-1 rounded hover:bg-gray-100 transition-colors" aria-label={isExpanded ? 'Thu gọn chi tiết' : 'Mở rộng chi tiết'}>
+                      {isExpanded
+                        ? <ChevronUp className="w-4 h-4 text-gray-400" />
+                        : <ChevronDown className="w-4 h-4 text-gray-400" />
+                      }
+                    </button>
+                  </div>
 
                   {/* Expanded detail */}
                   {isExpanded && (

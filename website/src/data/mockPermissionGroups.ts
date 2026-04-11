@@ -45,6 +45,7 @@ export const PERMISSIONS: readonly Permission[] = [
   { id: 'services.edit', module: 'Services', action: 'Edit', description: 'Edit services' },
   { id: 'payment.view', module: 'Payment', action: 'View', description: 'View payments' },
   { id: 'payment.edit', module: 'Payment', action: 'Edit', description: 'Edit payments' },
+  { id: 'external_checkups.view', module: 'Health Checkups', action: 'View', description: 'View external health checkup images' },
 ];
 
 export const ROLES: readonly Role[] = [

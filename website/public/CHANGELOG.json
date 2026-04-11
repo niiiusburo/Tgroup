@@ -1,5 +1,101 @@
 [
   {
+    "version": "0.4.23",
+    "date": "2026-04-11",
+    "commit": "",
+    "highlights": "Payment history rows now editable — click expand then Edit button",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Click to edit payment records from customer profile — opens pre-populated PaymentForm",
+          "PaymentForm now supports edit mode with pre-filled notes, date, and reference code"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.4.22",
+    "date": "2026-04-11",
+    "commit": "",
+    "highlights": "Treatment records now clickable to edit service details",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Click treatment records in customer profile to open edit form",
+          "Hover effects on treatment record rows to indicate clickability"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.4.21",
+    "date": "2026-04-11",
+    "commit": "",
+    "highlights": "Customer code (Mã khách hàng) field now editable in Edit Customer form",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Make 'Mã khách hàng' field editable in Edit Customer form — saves to API on update"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.4.20",
+    "date": "2026-04-11",
+    "commit": "",
+    "highlights": "Location filter now works on all pages including ServiceCatalog and Payment monthly plans",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Fix ServiceCatalog page not filtering products by selected location",
+          "Fix useMonthlyPlans hook not passing location filter to API"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.4.19",
+    "date": "2026-04-11",
+    "commit": "",
+    "highlights": "Fix FilterByLocation dropdown showing empty for admin users",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Fix FilterByLocation dropdown rendering empty for admin (all-access) users — now shows all 7 branches"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.4.18",
+    "date": "2026-04-11",
+    "commit": "",
+    "highlights": "Fix z-index stacking, employee all-locations button, wait timer color thresholds, sidebar submenu hover",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Fix FilterByLocation dropdown rendering behind page content (z-index stacking)",
+          "Fix sidebar submenu disappearing when moving mouse to submenu panel",
+          "Remove duplicate FilterByLocation from sidebar"
+        ]
+      },
+      {
+        "title": "New Features",
+        "items": [
+          "Add 'Tất cả chi nhánh' button to employee form for selecting all locations",
+          "Wait timer color thresholds: green (<10min), orange (10-20min), red (>20min)"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.4.17",
     "date": "2026-04-11",
     "commit": "4d803878",

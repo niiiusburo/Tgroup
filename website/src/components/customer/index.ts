@@ -7,3 +7,4 @@ export { PhotoGallery } from './PhotoGallery';
 export { DepositCard } from './DepositCard';
 export { AppointmentHistory } from './AppointmentHistory';
 export { ServiceHistory } from './ServiceHistory';
+export { HealthCheckupGallery } from './HealthCheckupGallery';

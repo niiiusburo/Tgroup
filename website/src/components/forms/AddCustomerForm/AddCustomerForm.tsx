@@ -299,7 +299,10 @@ export function AddCustomerForm({
 
   useEffect(() => {
     setDisplayRef(customerRef ?? null);
-  }, [customerRef]);
+    if (customerRef && isEdit) {
+      setFormData(prev => ({ ...prev, ref: customerRef }));
+    }
+  }, [customerRef, isEdit]);
 
   const getError = useCallback(
     (field: keyof CustomerFormData) => errors.find((e) => e.field === field)?.message,
@@ -817,9 +820,15 @@ export function AddCustomerForm({
                     <FieldLabel icon={Building2}>Mã khách hàng</FieldLabel>
                     <input
                       type="text"
-                      value={displayRef ?? '(Tự động)'}
-                      readOnly
-                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500 cursor-default"
+                      value={isEdit ? (formData.ref || displayRef || '') : (displayRef ?? '(Tự động)')}
+                      onChange={isEdit ? (e) => set('ref', e.target.value) : undefined}
+                      readOnly={!isEdit}
+                      placeholder="(Tự động)"
+                      className={`w-full px-4 py-3 border border-gray-200 rounded-xl text-sm ${
+                        isEdit
+                          ? 'bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all'
+                          : 'bg-gray-50 text-gray-500 cursor-default'
+                      }`}
                     />
                   </div>
 

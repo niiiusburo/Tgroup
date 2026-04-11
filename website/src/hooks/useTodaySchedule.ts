@@ -56,8 +56,10 @@ function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppointment {
 
   return {
     id: apt.id,
+    customerId: apt.partnerid || '',
     customerName: apt.partnername || '',
     customerPhone: apt.partnerphone || '',
+    customerCode: apt.partnercode || '',
     serviceName: apt.name || apt.note || '',
     appointmentType: 'consultation',
     dentist: apt.doctorname || '',

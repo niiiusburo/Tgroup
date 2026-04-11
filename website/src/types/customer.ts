@@ -18,6 +18,7 @@ export interface Customer {
 // Customer Form Types
 export interface CustomerFormData {
   // Core
+  ref: string;  // Customer code / mã khách hàng
   name: string;
   phone: string;
   email: string;

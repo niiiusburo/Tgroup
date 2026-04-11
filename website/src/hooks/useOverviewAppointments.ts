@@ -19,6 +19,7 @@ export type CheckInStatus = 'waiting' | 'in-treatment' | 'done';
 
 export interface OverviewAppointment {
   readonly id: string;
+  readonly customerId: string;
   readonly customerName: string;
   readonly customerPhone: string;
   readonly doctorName: string;
@@ -97,6 +98,7 @@ function mapApiToOverview(apt: ApiAppointment): OverviewAppointment {
     ?? (apt.time || '09:00');
   return {
     id: apt.id,
+    customerId: apt.partnerid || '',
     customerName: apt.partnername || apt.partnerdisplayname || '',
     customerPhone: apt.partnerphone || '',
     doctorName: apt.doctorname || '---',

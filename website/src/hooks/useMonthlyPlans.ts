@@ -58,7 +58,7 @@ function mapApiInstallment(api: ApiInstallment): Installment {
   };
 }
 
-export function useMonthlyPlans() {
+export function useMonthlyPlans(locationId?: string) {
   const [plans, setPlans] = useState<readonly MonthlyPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,6 +79,7 @@ export function useMonthlyPlans() {
     setError(null);
     try {
       const response = await fetchMonthlyPlans({
+        companyId: locationId && locationId !== 'all' ? locationId : undefined,
         status: statusFilter !== 'all' ? statusFilter : undefined,
         search: searchQuery || undefined,
       });
@@ -90,7 +91,7 @@ export function useMonthlyPlans() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, searchQuery]);
+  }, [locationId, statusFilter, searchQuery]);
 
   useEffect(() => {
     loadPlans();

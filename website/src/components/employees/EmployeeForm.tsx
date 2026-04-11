@@ -123,9 +123,9 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
   const isValid = name.trim();
 
   return (
-    <div className="modal-container">
+    <div className="modal-container z-[100]">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="modal-content animate-in zoom-in-95 duration-200">
+      <div className="modal-content animate-in zoom-in-95 duration-200 max-w-3xl">
         {/* Header */}
         <div className="modal-header relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
@@ -334,7 +334,6 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
               </button>
             </div>
           </div>
-        </form>
 
         {/* Footer */}
         <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
@@ -348,6 +347,7 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
             {isEdit ? 'Cập nhật' : 'Thêm nhân viên'}
           </button>
         </div>
+        </form>
       </div>
     </div>
   );

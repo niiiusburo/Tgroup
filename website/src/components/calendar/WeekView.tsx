@@ -10,6 +10,7 @@ import { CalendarDays, Phone, User, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
+import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 
 interface WeekViewProps {
   readonly weekDates: readonly Date[];
@@ -125,7 +126,7 @@ function AppointmentCard({
 
       {/* Customer name */}
       <h5 className="font-semibold text-gray-900 truncate text-xs mb-1.5">
-        {appointment.customerName}
+        <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink>
       </h5>
 
       {/* Details grid */}

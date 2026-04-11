@@ -13,8 +13,9 @@ import { ServiceHistory } from '@/components/customer/ServiceHistory';
 import type { DepositTransaction } from '@/hooks/useDeposits';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 import type { CustomerService } from '@/types/customer';
-import type { ApiAppointment } from '@/lib/api';
+import type { ApiAppointment, ExternalCheckupsResponse } from '@/lib/api';
 import type { PaymentWithAllocations } from '@/hooks/useCustomerPayments';
+import { HealthCheckupGallery } from './HealthCheckupGallery';
 
 interface CustomerProfileProps {
   readonly profile: CustomerProfileData;
@@ -48,6 +49,10 @@ interface CustomerProfileProps {
   readonly canHardDelete?: boolean;
   readonly loadingDeposits?: boolean;
   readonly loadingPayments?: boolean;
+  readonly checkupData?: ExternalCheckupsResponse | null;
+  readonly checkupsLoading?: boolean;
+  readonly checkupsError?: string | null;
+  readonly onRefetchCheckups?: () => void;
 }
 
 export type ProfileTab = 'profile' | 'appointments' | 'records' | 'payment';
@@ -133,6 +138,10 @@ export function CustomerProfile({
   canHardDelete,
   loadingDeposits = false,
   loadingPayments = false,
+  checkupData,
+  checkupsLoading,
+  checkupsError,
+  onRefetchCheckups,
 }: CustomerProfileProps) {
   const [internalActiveTab, setInternalActiveTab] = useState<ProfileTab>('profile');
   const activeTab = controlledActiveTab ?? internalActiveTab;
@@ -146,7 +155,9 @@ export function CustomerProfile({
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<ApiAppointment | null>(null);
+  const [editingService, setEditingService] = useState<CustomerService | null>(null);
   const [expandedPaymentId, setExpandedPaymentId] = useState<string | null>(null);
+  const [editingPayment, setEditingPayment] = useState<PaymentWithAllocations | null>(null);
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
 
   const getStatusConfig = (state: string | null | undefined) => {
@@ -339,19 +350,28 @@ export function CustomerProfile({
 
       {/* Tab Content */}
       {activeTab === 'profile' && (
-        <div className="bg-white rounded-xl shadow-card p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><p className="text-xs text-gray-400">Customer Code</p><p className="text-sm font-medium text-gray-900">{profile.code || 'N/A'}</p></div>
-            <div><p className="text-xs text-gray-400">Full Name</p><p className="text-sm font-medium text-gray-900">{profile.name}</p></div>
-            <div><p className="text-xs text-gray-400">Phone</p><p className="text-sm font-medium text-gray-900">{profile.phone || 'N/A'}</p></div>
-            <div><p className="text-xs text-gray-400">Email</p><p className="text-sm font-medium text-gray-900">{profile.email || 'N/A'}</p></div>
-            <div><p className="text-xs text-gray-400">Date of Birth</p><p className="text-sm font-medium text-gray-900">{profile.dateOfBirth}</p></div>
-            <div><p className="text-xs text-gray-400">Gender</p><p className="text-sm font-medium text-gray-900">{profile.gender === 'male' ? 'Male' : 'Female'}</p></div>
-            <div><p className="text-xs text-gray-400">Address</p><p className="text-sm font-medium text-gray-900">{profile.address || 'N/A'}</p></div>
-            <div><p className="text-xs text-gray-400">Location</p><p className="text-sm font-medium text-gray-900">{profile.companyName || 'N/A'}</p></div>
-            <div><p className="text-xs text-gray-400">Member Since</p><p className="text-sm font-medium text-gray-900">{profile.memberSince}</p></div>
+        <div className="space-y-6">
+          <div className="bg-white rounded-xl shadow-card p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><p className="text-xs text-gray-400">Customer Code</p><p className="text-sm font-medium text-gray-900">{profile.code || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-400">Full Name</p><p className="text-sm font-medium text-gray-900">{profile.name}</p></div>
+              <div><p className="text-xs text-gray-400">Phone</p><p className="text-sm font-medium text-gray-900">{profile.phone || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-400">Email</p><p className="text-sm font-medium text-gray-900">{profile.email || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-400">Date of Birth</p><p className="text-sm font-medium text-gray-900">{profile.dateOfBirth}</p></div>
+              <div><p className="text-xs text-gray-400">Gender</p><p className="text-sm font-medium text-gray-900">{profile.gender === 'male' ? 'Male' : 'Female'}</p></div>
+              <div><p className="text-xs text-gray-400">Address</p><p className="text-sm font-medium text-gray-900">{profile.address || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-400">Location</p><p className="text-sm font-medium text-gray-900">{profile.companyName || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-400">Member Since</p><p className="text-sm font-medium text-gray-900">{profile.memberSince}</p></div>
+            </div>
           </div>
+          <HealthCheckupGallery
+            data={checkupData ?? null}
+            isLoading={checkupsLoading}
+            error={checkupsError}
+            customerCode={profile.code}
+            onUploaded={onRefetchCheckups}
+          />
         </div>
       )}
 
@@ -396,8 +416,9 @@ export function CustomerProfile({
                     : null) || '--:--';
                   const isEditable = canEditAppointment(apt.state ?? undefined) && !!onUpdateAppointment;
                   return (
-                    <div 
-                      key={apt.id} 
+                    <div
+                      key={apt.id}
+                      onClick={() => { if (isEditable) { setEditingAppointment(apt); setShowAppointmentModal(true); } }}
                       className={`group flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-primary/30 hover:bg-primary/5 transition-all ${isEditable ? 'cursor-pointer pr-2' : ''}`}
                     >
                       <div className={`w-2 h-2 rounded-full ${statusConfig.dot}`} />
@@ -415,15 +436,6 @@ export function CustomerProfile({
                           <p className="text-xs text-gray-400 mt-1 truncate">{apt.note}</p>
                         )}
                       </div>
-                      {isEditable && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setEditingAppointment(apt); setShowAppointmentModal(true); }}
-                          className="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
-                          title="Edit appointment"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                      )}
                     </div>
                   );
                 })}
@@ -447,7 +459,7 @@ export function CustomerProfile({
               </button>
             )}
           </div>
-          <ServiceHistory services={services} />
+          <ServiceHistory services={services} onSelect={setEditingService} />
         </div>
       )}
 
@@ -542,6 +554,18 @@ export function CustomerProfile({
                               {(p.bankAmount || 0) > 0 && <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded">Bank {formatVND(p.bankAmount || 0)}</span>}
                             </div>
                           ) : null}
+                          {onMakePayment && (
+                            <div className="mt-3 flex justify-end">
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); setEditingPayment(p); setExpandedPaymentId(null); }}
+                                className="flex items-center gap-1 text-xs px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                              >
+                                <Edit2 className="w-3 h-3" />
+                                Sửa
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -636,6 +660,49 @@ export function CustomerProfile({
         />
       )}
 
+      {/* Edit Service Modal */}
+      {editingService && (
+        <ServiceForm
+          customerId={profile.id}
+          isEdit={true}
+          initialData={{
+            id: editingService.id,
+            customerId: profile.id,
+            customerName: profile.name,
+            locationId: profile.companyId,
+            serviceName: editingService.service,
+            startDate: editingService.date,
+            notes: editingService.notes || '',
+            totalCost: editingService.cost,
+            toothNumbers: editingService.tooth
+              ? editingService.tooth.split(',').map((t) => t.trim()).filter(Boolean)
+              : [],
+          }}
+          onSubmit={async (data) => {
+            try {
+              if (onCreateService) {
+                await onCreateService({
+                  catalogItemId: data.catalogItemId,
+                  serviceName: data.serviceName,
+                  doctorId: data.doctorId,
+                  doctorName: data.doctorName,
+                  locationId: data.locationId,
+                  locationName: data.locationName,
+                  startDate: data.startDate,
+                  notes: data.notes,
+                  totalCost: data.totalCost,
+                  toothNumbers: data.toothNumbers,
+                });
+              }
+              setEditingService(null);
+            } catch (error) {
+              console.error('Failed to update service:', error);
+            }
+          }}
+          onClose={() => setEditingService(null)}
+        />
+      )}
+
       {/* Payment Modal */}
       {showPaymentModal && onMakePayment && (
         <PaymentForm
@@ -654,6 +721,30 @@ export function CustomerProfile({
             }
           }}
           onClose={() => setShowPaymentModal(false)}
+        />
+      )}
+
+      {/* Edit Payment Modal */}
+      {editingPayment && onMakePayment && (
+        <PaymentForm
+          isEdit={true}
+          defaultCustomerId={profile.id}
+          defaultCustomerName={profile.name}
+          defaultAmount={editingPayment.amount}
+          defaultNotes={editingPayment.notes || ''}
+          defaultPaymentDate={editingPayment.paymentDate || editingPayment.createdAt?.slice(0, 10)}
+          defaultReferenceCode={editingPayment.referenceCode || ''}
+          depositBalance={profile.depositBalance}
+          outstandingBalance={profile.outstandingBalance}
+          onSubmit={async (data) => {
+            try {
+              await onMakePayment(data);
+              setEditingPayment(null);
+            } catch (error) {
+              console.error('Failed to update payment:', error);
+            }
+          }}
+          onClose={() => setEditingPayment(null)}
         />
       )}
     </div>

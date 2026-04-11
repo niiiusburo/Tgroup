@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Wallet, Plus, Loader2, QrCode } from 'lucide-react';
+import { Wallet, Plus, Loader2, QrCode, DollarSign } from 'lucide-react';
 import { VietQrModal } from './VietQrModal';
 
 interface DepositWalletProps {
@@ -80,8 +80,9 @@ export function DepositWallet({
 
       {/* Add Deposit Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+        <div className="modal-container">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
+          <div className="modal-content w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <h4 className="text-lg font-semibold text-gray-900 mb-4">Add Deposit</h4>
             
             <div className="space-y-4">
@@ -96,16 +97,48 @@ export function DepositWallet({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Amount (VND)
-                </label>
-                <input
-                  type="number"
-                  value={addAmount}
-                  onChange={(e) => setAddAmount(e.target.value)}
-                  placeholder="Enter amount"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                />
+                <div className="flex items-center justify-between px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl">
+                  <div className="flex items-center gap-2 text-gray-500">
+                    <DollarSign className="w-5 h-5" />
+                    <span className="text-sm font-medium text-gray-600">Tổng thanh toán</span>
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <input
+                      type="number"
+                      value={addAmount}
+                      onChange={(e) => setAddAmount(e.target.value)}
+                      placeholder="0"
+                      className="w-36 text-right text-2xl font-bold text-orange-600 bg-transparent border-b border-orange-300 focus:outline-none focus:border-orange-500 placeholder:text-orange-300"
+                    />
+                    <span className="text-sm font-semibold text-orange-600">₫</span>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 mt-3">
+                  <span className="text-xs text-gray-400">Nhanh:</span>
+                  {(outstandingBalance > 0
+                    ? [outstandingBalance, 500000, 1000000, 2000000, 5000000, 10000000]
+                    : [500000, 1000000, 2000000, 5000000, 10000000]
+                  )
+                    .filter((v, i, arr) => arr.indexOf(v) === i)
+                    .map((amt) => {
+                      const isInstallment = amt === outstandingBalance;
+                      return (
+                        <button
+                          key={amt}
+                          type="button"
+                          onClick={() => setAddAmount(String(amt))}
+                          className={`px-3 py-1 text-xs font-medium border rounded-full transition-colors ${
+                            isInstallment
+                              ? 'text-orange-700 bg-orange-50 border-orange-200 hover:bg-orange-100'
+                              : 'text-gray-600 bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                          }`}
+                          title={isInstallment ? 'Số tiền nợ hiện tại' : undefined}
+                        >
+                          {isInstallment ? 'Thanh toán nợ ' : ''}{formatVND(amt)} ₫
+                        </button>
+                      );
+                    })}
+                </div>
               </div>
 
               <div>
@@ -194,7 +227,7 @@ export function DepositWallet({
           </div>
         </div>
       )}
-      <VietQrModal open={showVietQr} onClose={() => setShowVietQr(false)} />
+      <VietQrModal open={showVietQr} onClose={() => setShowVietQr(false)} defaultAmount={addAmount ? Number(addAmount) : undefined} />
     </div>
   );
 }

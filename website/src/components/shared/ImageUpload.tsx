@@ -92,7 +92,7 @@ export function ImageUpload({
               <button
                 type="button"
                 onClick={() => onChange('')}
-                className="absolute top-0 right-0 p-0.5 bg-red-500 text-white rounded-full opacity-0 hover:opacity-100 transition-opacity"
+                className="absolute top-0 right-0 p-0.5 bg-red-500 text-white rounded-full opacity-70 sm:opacity-0 sm:hover:opacity-100 transition-opacity"
               >
                 <X className="w-3 h-3" />
               </button>

@@ -18,6 +18,7 @@ export interface ReferralCode {
 
 // Empty form
 export const EMPTY_CUSTOMER_FORM: CustomerFormData = {
+  ref: '',
   name: '',
   phone: '',
   email: '',

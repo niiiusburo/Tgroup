@@ -1,6 +1,7 @@
 import { Clock, User, MapPin } from 'lucide-react';
 import type { CalendarAppointment } from '@/data/mockCalendar';
 import { STATUS_BADGE_STYLES } from '@/data/mockCalendar';
+import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 
 /**
  * TodaySchedule - Appointment timeline for today
@@ -69,7 +70,7 @@ export function TodaySchedule({
                 <div className="flex items-center gap-3 mt-1.5">
                   <span className="flex items-center gap-1 text-xs text-gray-500">
                     <User className="w-3 h-3" />
-                    {apt.customerName}
+                    <CustomerNameLink customerId={apt.customerId}>{apt.customerName}</CustomerNameLink>
                   </span>
                   <span className="flex items-center gap-1 text-xs text-gray-500">
                     <MapPin className="w-3 h-3" />

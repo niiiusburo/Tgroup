@@ -120,7 +120,7 @@ export function DataTable<T>({
                   `}
                 >
                   {columns.map((col) => (
-                    <td key={col.key} className="px-4 py-3 text-sm text-gray-700">
+                    <td key={col.key} className="px-4 py-3 text-sm text-gray-700" style={col.width ? { width: col.width } : undefined}>
                       {col.render
                         ? col.render(row)
                         : String((row as Record<string, unknown>)[col.key] ?? '')}
