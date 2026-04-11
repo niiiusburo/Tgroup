@@ -25,9 +25,12 @@ Enable faster patient check-in via face recognition and frictionless payments vi
 
 ### Validated
 
-- ✓ TG Clinic dashboard deployed and operational (v0.4.9)
+- ✓ TG Clinic dashboard deployed and operational (v0.4.15)
 - ✓ Customer CRUD, appointments, payments connected to real DB
 - ✓ KOL project has proven face recognition (@vladmandic/face-api) and VietQR implementation
+- ✓ Multi-branch employee assignment (REQ-12) — Validated in Phase 3
+- ✓ Two-tier customer delete with permission gating (REQ-06) — Validated in Phase 3
+- ✓ Dotkham payment allocations via tabbed UI (REQ-15) — Validated in Phase 3
 
 ### Active
 
@@ -48,9 +51,14 @@ Enable faster patient check-in via face recognition and frictionless payments vi
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Start with VietQR (Phase 1) | Lower complexity, no ML models, faster win | — Pending |
-| Use @vladmandic/face-api (same as KOL) | Proven working in KOL, client-side only | — Pending |
-| Reuse KOL components where possible | Reduces risk, maintains consistency | — Pending |
+| Start with VietQR (Phase 1) | Lower complexity, no ML models, faster win | Completed |
+| Use @vladmandic/face-api (same as KOL) | Proven working in KOL, client-side only | Deferred to Phase 4 |
+| Reuse KOL components where possible | Reduces risk, maintains consistency | Completed |
+
+## Current State
+
+- Phase 3 (Architecture Shifts) complete — v0.4.15 shipped with multi-branch employees, two-tier customer delete, and dotkham payment allocations.
+- Phase 4 (Polish & Walk-in Redesign) is next.
 
 ---
-*Last updated: 2026-04-10*
+*Last updated: 2026-04-11*
