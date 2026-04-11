@@ -12,15 +12,18 @@ interface WaitTimerProps {
   readonly compact?: boolean;
 }
 
-function parseTimeToMinutes(time: string): number {
-  const [hours, minutes] = time.split(':').map(Number);
-  return hours * 60 + minutes;
+function parseTimeToSeconds(time: string): number {
+  const parts = time.split(':').map(Number);
+  const hours = parts[0] || 0;
+  const minutes = parts[1] || 0;
+  const seconds = parts[2] || 0;
+  return hours * 3600 + minutes * 60 + seconds;
 }
 
-function formatDuration(totalMinutes: number): string {
-  if (totalMinutes < 1) return '< 1m';
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
+function formatDuration(totalSeconds: number): string {
+  if (totalSeconds < 60) return `${totalSeconds}s`;
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
   if (hours === 0) return `${minutes}m`;
   return `${hours}h ${minutes}m`;
 }
@@ -30,22 +33,23 @@ export function WaitTimer({ arrivalTime, treatmentStartTime, compact = false }: 
 
   useEffect(() => {
     if (treatmentStartTime || !arrivalTime) return;
-    const interval = setInterval(() => setNow(new Date()), 15_000);
+    const interval = setInterval(() => setNow(new Date()), 1_000);
     return () => clearInterval(interval);
   }, [arrivalTime, treatmentStartTime]);
 
   if (!arrivalTime) return null;
 
-  const arrivalMinutes = parseTimeToMinutes(arrivalTime);
-  let waitMinutes: number;
+  const arrivalSeconds = parseTimeToSeconds(arrivalTime);
+  let waitSeconds: number;
 
   if (treatmentStartTime) {
-    waitMinutes = parseTimeToMinutes(treatmentStartTime) - arrivalMinutes;
+    waitSeconds = parseTimeToSeconds(treatmentStartTime) - arrivalSeconds;
   } else {
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
-    waitMinutes = Math.max(0, currentMinutes - arrivalMinutes);
+    const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+    waitSeconds = Math.max(0, currentSeconds - arrivalSeconds);
   }
 
+  const waitMinutes = Math.floor(waitSeconds / 60);
   const isLongWait = waitMinutes > 30;
   const isFinished = treatmentStartTime !== null;
 
@@ -61,7 +65,7 @@ export function WaitTimer({ arrivalTime, treatmentStartTime, compact = false }: 
         }`}
       >
         <Clock className="w-3 h-3" />
-        {formatDuration(waitMinutes)}
+        {formatDuration(waitSeconds)}
         {!isFinished && <span className="animate-pulse">*</span>}
       </span>
     );
@@ -78,7 +82,7 @@ export function WaitTimer({ arrivalTime, treatmentStartTime, compact = false }: 
       }`}
     >
       <Clock className="w-4 h-4" />
-      <span>Wait: {formatDuration(waitMinutes)}</span>
+      <span>Wait: {formatDuration(waitSeconds)}</span>
       {!isFinished && (
         <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
       )}

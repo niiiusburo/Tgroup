@@ -250,11 +250,29 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
             </label>
             {locations.length === 0 ? (
               <p className="text-sm text-gray-400">Chưa có chi nhánh nào</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {locations
-                  .filter((loc) => loc.id !== companyid)
-                  .map((loc) => {
+            ) : (() => {
+              const otherLocs = locations.filter((loc) => loc.id !== companyid);
+              const allSelected = otherLocs.length > 0 && otherLocs.every((loc) => locationScopeIds.includes(loc.id));
+              return (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (allSelected) {
+                        setLocationScopeIds([]);
+                      } else {
+                        setLocationScopeIds(otherLocs.map((loc) => loc.id));
+                      }
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+                      allSelected
+                        ? 'bg-orange-500 text-white border-orange-500'
+                        : 'bg-white text-orange-600 hover:bg-orange-50 border-orange-300'
+                    }`}
+                  >
+                    Tất cả chi nhánh
+                  </button>
+                  {otherLocs.map((loc) => {
                     const selected = locationScopeIds.includes(loc.id);
                     return (
                       <button
@@ -275,8 +293,9 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
                       </button>
                     );
                   })}
-              </div>
-            )}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Vị trí / Vai trò */}

@@ -31,6 +31,7 @@ function mapAllocations(allocResult) {
 }
 
 // GET /api/Payments - List payments with allocations
+// Falls back to accountpayments for historical records not yet migrated to payments table
 router.get("/", async (req, res) => {
   try {
     const { customerId, limit = 100, offset = 0 } = req.query;
@@ -54,7 +55,42 @@ router.get("/", async (req, res) => {
     sql += ` ORDER BY p.created_at DESC LIMIT $` + (params.length + 1) + ` OFFSET $` + (params.length + 2);
     params.push(parseInt(limit), parseInt(offset));
 
-    const result = await query(sql, params);
+    let result = await query(sql, params);
+    let usedLegacyFallback = false;
+
+    // Fallback: if no payments found for a customer, query historical accountpayments
+    if (customerId && result.length === 0) {
+      try {
+        const legacyRows = await query(
+          `SELECT
+             ap.id,
+             ap.partnerid AS customer_id,
+             NULL::uuid AS service_id,
+             ap.amount,
+             'cash' AS method,
+             COALESCE(ap.communication, ap.name) AS notes,
+             COALESCE(ap.paymentdate, ap.datecreated) AS created_at,
+             ap.paymentdate AS payment_date,
+             ap.name AS reference_code,
+             CASE WHEN ap.state = 'posted' THEN 'posted' ELSE 'voided' END AS status,
+             0 AS deposit_used,
+             0 AS cash_amount,
+             0 AS bank_amount
+           FROM accountpayments ap
+           WHERE ap.partnerid = $1 AND ap.state = 'posted'
+           ORDER BY ap.paymentdate DESC
+           LIMIT $2 OFFSET $3`,
+          [customerId, parseInt(limit), parseInt(offset)]
+        );
+        if (legacyRows.length > 0) {
+          result = legacyRows;
+          usedLegacyFallback = true;
+        }
+      } catch (legacyErr) {
+        // accountpayments table may not exist in some environments; ignore
+        console.warn("Legacy accountpayments fallback failed:", legacyErr.message);
+      }
+    }
 
     let countSql = "SELECT COUNT(*) FROM payments p WHERE 1=1";
     const countParams = [];
@@ -62,29 +98,50 @@ router.get("/", async (req, res) => {
       countSql += " AND p.customer_id = $1";
       countParams.push(customerId);
     }
-    const countResult = await query(countSql, countParams);
+    let countResult = await query(countSql, countParams);
+    let totalItems = parseInt(countResult[0]?.count || 0);
 
-    // Fetch allocations for returned payments
+    // If we fell back to accountpayments, use that count
+    if (customerId && totalItems === 0) {
+      try {
+        const legacyCount = await query(
+          `SELECT COUNT(*) FROM accountpayments ap WHERE ap.partnerid = $1 AND ap.state = 'posted'`,
+          [customerId]
+        );
+        totalItems = parseInt(legacyCount[0]?.count || 0);
+      } catch {
+        // ignore
+      }
+    }
+
+    // Fetch allocations for returned payments (skip for legacy fallback IDs since they
+    // originate from accountpayments and won't exist in payment_allocations)
     const paymentIds = result.map(r => r.id);
     let allocations = [];
-    if (paymentIds.length > 0) {
-      const allocResult = await query(
-        `SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
-                so.name as invoice_name, so.amounttotal as invoice_total, so.residual as invoice_residual,
-                NULL as dotkham_name, NULL as dotkham_total, NULL as dotkham_residual
-         FROM payment_allocations pa
-         LEFT JOIN saleorders so ON so.id = pa.invoice_id
-         WHERE pa.payment_id = ANY($1) AND pa.invoice_id IS NOT NULL
-         UNION ALL
-         SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
-                NULL, NULL, NULL,
-                dk.name as dotkham_name, dk.totalamount as dotkham_total, dk.amountresidual as dotkham_residual
-         FROM payment_allocations pa
-         LEFT JOIN dotkhams dk ON dk.id = pa.dotkham_id
-         WHERE pa.payment_id = ANY($1) AND pa.dotkham_id IS NOT NULL`,
-        [paymentIds]
-      );
-      allocations = mapAllocations(allocResult);
+    if (paymentIds.length > 0 && !usedLegacyFallback) {
+      try {
+        const allocResult = await query(
+          `SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
+                  so.name as invoice_name, so.amounttotal as invoice_total, so.residual as invoice_residual,
+                  NULL as dotkham_name, NULL as dotkham_total, NULL as dotkham_residual
+           FROM payment_allocations pa
+           LEFT JOIN saleorders so ON so.id = pa.invoice_id
+           WHERE pa.payment_id = ANY($1) AND pa.invoice_id IS NOT NULL
+           UNION ALL
+           SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
+                  NULL, NULL, NULL,
+                  dk.name as dotkham_name, dk.totalamount as dotkham_total, dk.amountresidual as dotkham_residual
+           FROM payment_allocations pa
+           LEFT JOIN dotkhams dk ON dk.id = pa.dotkham_id
+           WHERE pa.payment_id = ANY($1) AND pa.dotkham_id IS NOT NULL`,
+          [paymentIds]
+        );
+        allocations = mapAllocations(allocResult);
+      } catch (allocErr) {
+        // Schema may be missing joined columns (e.g. dk.totalamount); degrade gracefully
+        console.warn("Payment allocations query failed, returning empty allocations:", allocErr.message);
+        allocations = [];
+      }
     }
 
     res.json({
@@ -106,7 +163,7 @@ router.get("/", async (req, res) => {
           .filter(a => a.paymentId === row.id)
           .map(a => ({ ...a })),
       })),
-      totalItems: parseInt(countResult[0]?.count || 0),
+      totalItems,
     });
   } catch (error) {
     console.error("Error fetching payments:", error);
@@ -127,23 +184,29 @@ router.get("/:id", async (req, res) => {
     if (rows.length === 0) return res.status(404).json({ error: "Payment not found" });
 
     const row = rows[0];
-    const allocResult = await query(
-      `SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
-              so.name as invoice_name, so.amounttotal as invoice_total, so.residual as invoice_residual,
-              NULL as dotkham_name, NULL as dotkham_total, NULL as dotkham_residual
-       FROM payment_allocations pa
-       LEFT JOIN saleorders so ON so.id = pa.invoice_id
-       WHERE pa.payment_id = $1 AND pa.invoice_id IS NOT NULL
-       UNION ALL
-       SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
-              NULL, NULL, NULL,
-              dk.name as dotkham_name, dk.totalamount as dotkham_total, dk.amountresidual as dotkham_residual
-       FROM payment_allocations pa
-       LEFT JOIN dotkhams dk ON dk.id = pa.dotkham_id
-       WHERE pa.payment_id = $1 AND pa.dotkham_id IS NOT NULL`,
-      [id]
-    );
-    const allocations = mapAllocations(allocResult);
+    let allocations = [];
+    try {
+      const allocResult = await query(
+        `SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
+                so.name as invoice_name, so.amounttotal as invoice_total, so.residual as invoice_residual,
+                NULL as dotkham_name, NULL as dotkham_total, NULL as dotkham_residual
+         FROM payment_allocations pa
+         LEFT JOIN saleorders so ON so.id = pa.invoice_id
+         WHERE pa.payment_id = $1 AND pa.invoice_id IS NOT NULL
+         UNION ALL
+         SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
+                NULL, NULL, NULL,
+                dk.name as dotkham_name, dk.totalamount as dotkham_total, dk.amountresidual as dotkham_residual
+         FROM payment_allocations pa
+         LEFT JOIN dotkhams dk ON dk.id = pa.dotkham_id
+         WHERE pa.payment_id = $1 AND pa.dotkham_id IS NOT NULL`,
+        [id]
+      );
+      allocations = mapAllocations(allocResult);
+    } catch (allocErr) {
+      console.warn("Payment allocations query failed, returning empty allocations:", allocErr.message);
+      allocations = [];
+    }
 
     res.json({
       id: row.id,

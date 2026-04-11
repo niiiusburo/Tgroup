@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { PermissionDebugger } from '@/components/debug/PermissionDebugger';
 import { VersionDisplay } from '@/components/shared/VersionDisplay';
@@ -317,17 +317,6 @@ export function Layout() {
             </button>
           )}
         </div>
-
-        {/* Location Filter in sidebar */}
-        {(mobileMenuOpen || sidebarExpanded) && !isSingleLocation && (
-          <div className="px-4 mb-4">
-            <FilterByLocation
-              locations={allowedLocations.length > 0 ? allowedLocations : []}
-              selectedId={selectedLocationId}
-              onChange={setSelectedLocationId}
-            />
-          </div>
-        )}
 
         {/* Navigation */}
         <nav className={`flex-1 flex flex-col gap-1 w-full ${sidebarExpanded ? 'px-3' : 'px-3 items-center'}`}>

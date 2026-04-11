@@ -91,6 +91,10 @@ function mapApiToOverview(apt: ApiAppointment): OverviewAppointment {
   const checkInStatus: CheckInStatus | null = topStatus === 'cancelled'
     ? null
     : (mapStateToCheckInStatus(apt.state) ?? 'waiting');
+  // Use stored arrival time if available, otherwise fall back to lastupdated time, then scheduled time
+  const fallbackArrivalTime = getStoredArrivalTime(apt.id)
+    ?? extractTimeFromTimestamp(apt.lastupdated)
+    ?? (apt.time || '09:00');
   return {
     id: apt.id,
     customerName: apt.partnername || apt.partnerdisplayname || '',
@@ -104,15 +108,49 @@ function mapApiToOverview(apt: ApiAppointment): OverviewAppointment {
     topStatus,
     checkInStatus,
     color: apt.color,
-    arrivalTime: apt.time || '09:00',
+    arrivalTime: fallbackArrivalTime,
     treatmentStartTime: checkInStatus === 'waiting' ? null : (apt.time || '09:00'),
   };
 }
 
 const ZONE3_FILTER_KEY = 'tgclinic:overview:zone3Filter';
 const ZONE1_FILTER_KEY = 'tgclinic:overview:zone1Filter';
+const ARRIVAL_TIMES_KEY = 'tgclinic:arrivalTimes';
 const ZONE3_OPTIONS: Zone3Filter[] = ['all', 'arrived', 'cancelled'];
 const ZONE1_OPTIONS: Zone1Filter[] = ['all', 'waiting', 'in-treatment', 'done'];
+
+function extractTimeFromTimestamp(ts: string | null): string | null {
+  if (!ts) return null;
+  const date = new Date(ts);
+  if (Number.isNaN(date.getTime())) return null;
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${hours}:${minutes}:${seconds}`;
+}
+
+function getStoredArrivalTime(id: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(ARRIVAL_TIMES_KEY);
+    const map = raw ? (JSON.parse(raw) as Record<string, string>) : {};
+    return map[id] || null;
+  } catch {
+    return null;
+  }
+}
+
+function setStoredArrivalTime(id: string, time: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = localStorage.getItem(ARRIVAL_TIMES_KEY);
+    const map = raw ? (JSON.parse(raw) as Record<string, string>) : {};
+    map[id] = time;
+    localStorage.setItem(ARRIVAL_TIMES_KEY, JSON.stringify(map));
+  } catch {
+    // ignore
+  }
+}
 
 function getSavedFilter<T extends string>(key: string, options: readonly T[], fallback: T): T {
   if (typeof window === 'undefined') return fallback;
@@ -250,9 +288,12 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
   const markArrived = useCallback(async (id: string) => {
     try {
       await updateAppointment(id, { state: 'arrived' });
+      const now = new Date();
+      const arrivalTime = now.toLocaleTimeString('en-GB', { hour12: false });
+      setStoredArrivalTime(id, arrivalTime);
       setAppointments((prev) =>
         prev.map((a) =>
-          a.id === id ? { ...a, topStatus: 'arrived' as const, checkInStatus: 'waiting' as const, arrivalTime: a.time, treatmentStartTime: null } : a,
+          a.id === id ? { ...a, topStatus: 'arrived' as const, checkInStatus: 'waiting' as const, arrivalTime, treatmentStartTime: null } : a,
         ),
       );
     } catch (error) {
