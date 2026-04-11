@@ -2,15 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
+current_plan: 3 / 4
 status: executing
-last_updated: "2026-04-11T04:03:34.975Z"
+stopped_at: Completed 03-03-PLAN.md
+last_updated: "2026-04-11T04:21:13.683Z"
 last_activity: 2026-04-11
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 12
-  completed_plans: 8
-  percent: 67
+  completed_plans: 9
+  percent: 75
 ---
 
 # Project State — TG Clinic v1.1 Bugfixes & Features
@@ -36,14 +38,15 @@ progress:
 ## Phase Tracker (Detailed)
 
 **Phase 03: Architecture Shifts**
-- **Current Plan:** 2 / 4
+
+- **Current Plan:** 3 / 4
 - **Plan Status:** In Progress
 
 | Plan | Status |
 |------|--------|
 | 03-01 | Completed |
 | 03-02 | Not started |
-| 03-03 | Not started |
+| 03-03 | Completed |
 | 03-04 | Not started |
 
 ## Performance Metrics
@@ -51,13 +54,18 @@ progress:
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 03-architecture-shifts | 03-01 | 18min | 2 | 2 |
+| Phase 03-architecture-shifts P03 | 23min | 3 tasks | 7 files |
 
 ## Decisions
 
 - Use pool.connect() with explicit BEGIN/COMMIT/ROLLBACK for transactional scope updates
 - Exclude primary companyid from junction inserts to maintain a single source of truth
+- [Phase 03-architecture-shifts]: Hard delete is gated behind customer:hard_delete permission and runs FK-safe counts on appointments, saleorders, dotkhams
+- [Phase 03-architecture-shifts]: Soft delete is exposed in both list view (trash icon) and profile view (dropdown) for users with customer:delete
+- [Phase 03-architecture-shifts]: Linked record counts shown in hard-delete dialog come from hookProfile (appointmentcount, ordercount, dotkhamcount)
+- [Phase 03-architecture-shifts]: 409 Conflict from hard delete maps to user-facing message 'Không thể xóa: còn dữ liệu liên quan.'
 
 ## Session
 
-- **Last session:** 2026-04-11T11:03:00Z
-- **Stopped at:** Completed 03-01-PLAN.md
+- **Last session:** 2026-04-11T04:21:13.681Z
+- **Stopped at:** Completed 03-03-PLAN.md
