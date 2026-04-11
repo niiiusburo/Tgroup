@@ -55,6 +55,14 @@ Plans:
 
 **UI hint:** yes
 
+**Plans:** 4 plans in 3 waves
+
+Plans:
+- [ ] 03-01-PLAN.md — DB migration for employee_location_scope + backend employee scope API
+- [ ] 03-02-PLAN.md — Frontend employee multi-branch UI (EmployeeForm + EmployeeTable + EmployeeProfile)
+- [ ] 03-03-PLAN.md — Backend customer delete endpoints (soft + hard) + frontend delete UI
+- [ ] 03-04-PLAN.md — Payment allocation expansion to dotkhams + frontend PaymentForm tabs + E2E tests + version bump
+
 ---
 
 ## Phase 4: Polish & Walk-in Redesign
