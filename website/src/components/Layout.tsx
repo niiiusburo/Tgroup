@@ -77,6 +77,18 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
   const Icon = ICON_MAP[item.icon];
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function scheduleHide() {
+    hideTimeoutRef.current = setTimeout(() => setOpen(false), 150);
+  }
+
+  function cancelHide() {
+    if (hideTimeoutRef.current !== null) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+  }
 
   const isActive =
     location.pathname === item.path ||
@@ -126,8 +138,8 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
   return (
     <div
       className="relative"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onMouseEnter={() => { cancelHide(); setOpen(true); }}
+      onMouseLeave={scheduleHide}
     >
       <button
         type="button"
@@ -163,6 +175,8 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
           ${expanded ? 'left-full top-0 ml-2' : 'left-full top-0 ml-2'}
           ${open ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 pointer-events-none'}
         `}
+        onMouseEnter={cancelHide}
+        onMouseLeave={scheduleHide}
       >
         <div className="bg-sidebar border border-white/10 rounded-xl shadow-lg p-2 min-w-[180px]">
           <div className="px-3 py-2 text-[10px] uppercase tracking-wider text-gray-500 font-semibold">
