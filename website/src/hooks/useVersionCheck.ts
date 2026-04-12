@@ -139,7 +139,9 @@ function clearDismissedVersion(): void {
 export function getBuildTimeVersion(): VersionInfo {
   // Use globalThis because Vite's define plugin replaces globalThis.__APP_VERSION__
   // at build time, but does NOT replace window.__APP_VERSION__.
-  const version = (globalThis as Record<string, unknown>).__APP_VERSION__ as string | undefined ?? '0.0.0';
+  // In dev mode, define may not work, so we fallback to '0.0.0-dev'
+  // (version checking is disabled in dev anyway).
+  const version = (globalThis as Record<string, unknown>).__APP_VERSION__ as string | undefined ?? '0.0.0-dev';
   const buildTime = (globalThis as Record<string, unknown>).__APP_BUILD_TIME__ as string | undefined ?? new Date().toISOString();
   const gitCommit = (globalThis as Record<string, unknown>).__APP_GIT_COMMIT__ as string | undefined ?? 'unknown';
   const gitBranch = (globalThis as Record<string, unknown>).__APP_GIT_BRANCH__ as string | undefined ?? 'unknown';

@@ -228,7 +228,7 @@ export function VersionDisplay({
     dismissUpdate,
   } = useVersionCheck({
     pollInterval: 5 * 60 * 1000, // 5 minutes
-    enabled: true,
+    enabled: !import.meta.env.DEV, // Disable auto-checking in dev to prevent spurious reloads
   });
   
   // Fetch current version highlights on mount
