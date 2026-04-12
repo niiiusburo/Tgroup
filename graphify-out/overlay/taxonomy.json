@@ -1,0 +1,400 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-04-11",
+  "description": "Business taxonomy for TGroup dental clinic management overlay",
+  "domains": [
+    {
+      "id": "auth",
+      "label": "Authentication & Permissions",
+      "description": "User login, JWT token lifecycle, permission groups, role-based access control, and location scope enforcement."
+    },
+    {
+      "id": "customers",
+      "label": "Customer Management",
+      "description": "Patient records, profiles, search, create/edit/soft-delete, referral tracking, and customer source attribution."
+    },
+    {
+      "id": "appointments",
+      "label": "Appointment Scheduling",
+      "description": "Creating, editing, rescheduling, and cancelling appointments with doctor and location assignment."
+    },
+    {
+      "id": "checkin",
+      "label": "Check-in & Wait Flow",
+      "description": "Reception workflow from patient arrival through waiting, in-treatment, and completion status transitions."
+    },
+    {
+      "id": "services",
+      "label": "Service Records & Treatment",
+      "description": "Dental treatment records, multi-visit tracking, service catalog, and appointment-to-service conversion."
+    },
+    {
+      "id": "payments",
+      "label": "Payments & Billing",
+      "description": "Payment collection (cash, bank transfer, VietQR, wallet), outstanding balance tracking, receipts, and payment history."
+    },
+    {
+      "id": "deposits",
+      "label": "Deposit Wallet",
+      "description": "Pre-paid deposit top-ups, wallet balances per customer, and wallet deduction against service payments."
+    },
+    {
+      "id": "monthly_plans",
+      "label": "Monthly Payment Plans",
+      "description": "Installment plan creation, schedule management, and per-installment payment status tracking for outstanding balances."
+    },
+    {
+      "id": "employees",
+      "label": "Employee Management",
+      "description": "Staff profiles, roles, tiers, schedule availability, referral codes, and linked team relationships."
+    },
+    {
+      "id": "locations",
+      "label": "Locations & Branches",
+      "description": "Clinic branch management, per-branch metrics, global location filter synced across all pages."
+    },
+    {
+      "id": "catalog",
+      "label": "Service Catalog & Products",
+      "description": "Dental service definitions, pricing, visit counts, and product inventory available per location."
+    },
+    {
+      "id": "admin",
+      "label": "Administration & Settings",
+      "description": "System preferences, bank account config, IP access control, role definitions, customer sources, and CMS website pages."
+    }
+  ],
+  "entities": [
+    {
+      "id": "customer",
+      "label": "Customer",
+      "sourceOfTruth": "dbo.partners where customer=true",
+      "primaryKey": "id",
+      "relatedTypes": ["Customer", "CustomerFormData", "CustomerDeposit", "CustomerAppointment", "CustomerService"],
+      "relatedTables": ["partners"]
+    },
+    {
+      "id": "appointment",
+      "label": "Appointment",
+      "sourceOfTruth": "dbo.appointments",
+      "primaryKey": "id",
+      "relatedTypes": ["CalendarAppointment", "ManagedAppointment", "AppointmentStatus", "CheckInStatus"],
+      "relatedTables": ["appointments"]
+    },
+    {
+      "id": "employee",
+      "label": "Employee",
+      "sourceOfTruth": "dbo.partners where employee=true (via dbo.employees view)",
+      "primaryKey": "id",
+      "relatedTypes": ["Employee", "EmployeeFormData", "EmployeeRole", "EmployeeTier", "ScheduleBlock"],
+      "relatedTables": ["partners", "employees"]
+    },
+    {
+      "id": "location",
+      "label": "Location / Branch",
+      "sourceOfTruth": "dbo.companies",
+      "primaryKey": "id",
+      "relatedTypes": ["LocationBranch", "LocationMetrics", "LocationRevenuePoint", "LocationStatus"],
+      "relatedTables": ["companies"]
+    },
+    {
+      "id": "service_record",
+      "label": "Service Record",
+      "sourceOfTruth": "dbo.saleorders or dbo.dotkhams",
+      "primaryKey": "id",
+      "relatedTypes": ["ServiceRecord", "ServiceVisit", "ServiceStatus", "VisitStatus"],
+      "relatedTables": ["saleorders", "dotkhams"]
+    },
+    {
+      "id": "service_catalog_item",
+      "label": "Service Catalog Item",
+      "sourceOfTruth": "dbo.products (currently empty in demo)",
+      "primaryKey": "id",
+      "relatedTypes": ["ServiceCatalogItem"],
+      "relatedTables": ["products"]
+    },
+    {
+      "id": "payment",
+      "label": "Payment",
+      "sourceOfTruth": "dbo.customerreceipts / accountpayments",
+      "primaryKey": "id",
+      "relatedTypes": ["PaymentRecord", "PaymentMethod", "PaymentStatus", "OutstandingBalanceItem"],
+      "relatedTables": ["customerreceipts", "accountpayments"]
+    },
+    {
+      "id": "deposit_wallet",
+      "label": "Deposit Wallet",
+      "sourceOfTruth": "dbo.accountpayments where type=topup",
+      "primaryKey": "customerId",
+      "relatedTypes": ["DepositWalletData", "WalletTransaction", "DepositTransaction"],
+      "relatedTables": ["accountpayments"]
+    },
+    {
+      "id": "monthly_plan",
+      "label": "Monthly Payment Plan",
+      "sourceOfTruth": "dbo.monthlyplans (custom table)",
+      "primaryKey": "id",
+      "relatedTypes": ["MonthlyPlan", "Installment", "PlanItem", "PlanStatus", "InstallmentStatus"],
+      "relatedTables": ["monthlyplans"]
+    },
+    {
+      "id": "permission",
+      "label": "Permission",
+      "sourceOfTruth": "dbo.permissions (custom table)",
+      "primaryKey": "id",
+      "relatedTypes": ["Permission", "Role", "PermissionGroup"],
+      "relatedTables": ["permissions"]
+    },
+    {
+      "id": "auth_user",
+      "label": "Auth User",
+      "sourceOfTruth": "dbo.aspnetusers (currently empty in demo)",
+      "primaryKey": "id",
+      "relatedTypes": ["AuthUser", "AuthPermissions"],
+      "relatedTables": ["aspnetusers"]
+    },
+    {
+      "id": "commission",
+      "label": "Commission",
+      "sourceOfTruth": "dbo.commissions (derived from payments + employees)",
+      "primaryKey": "id",
+      "relatedTypes": [],
+      "relatedTables": ["commissions"]
+    },
+    {
+      "id": "website_page",
+      "label": "CMS Website Page",
+      "sourceOfTruth": "dbo.website_pages (custom table)",
+      "primaryKey": "id",
+      "relatedTypes": [],
+      "relatedTables": ["website_pages"]
+    },
+    {
+      "id": "system_settings",
+      "label": "System Settings",
+      "sourceOfTruth": "dbo.system_preferences / bank_settings",
+      "primaryKey": "key",
+      "relatedTypes": ["SystemPreferences", "BankAccount"],
+      "relatedTables": ["system_preferences", "bank_settings"]
+    }
+  ],
+  "journeys": [
+    {
+      "id": "login",
+      "label": "User Login",
+      "description": "Staff member authenticates and gains scoped access to the clinic management system.",
+      "steps": [
+        "User opens Login.tsx and submits email + password",
+        "Frontend POSTs credentials to POST /api/Auth/login",
+        "auth.js validates credentials against dbo.aspnetusers, signs JWT with JWT_SECRET",
+        "JWT token stored in localStorage via AuthContext",
+        "AuthContext hydrates user profile, roles, and effectivePermissions",
+        "App.tsx router redirects to Overview dashboard based on role"
+      ],
+      "criticality": "critical"
+    },
+    {
+      "id": "logout",
+      "label": "User Logout",
+      "description": "Staff member ends their session and JWT is cleared from the browser.",
+      "steps": [
+        "User clicks logout in sidebar footer",
+        "AuthContext.logout() removes JWT from localStorage",
+        "LocationContext and AppointmentHoverContext state is reset",
+        "Router redirects to /login page"
+      ],
+      "criticality": "high"
+    },
+    {
+      "id": "customer-create",
+      "label": "Create Customer",
+      "description": "Receptionist registers a new patient with full profile, referral source, and location assignment.",
+      "steps": [
+        "User opens AddCustomerForm modal from Customers page or QuickActionsBar",
+        "Form collects name, phone, email, DOB, gender, address, medical history, referral source",
+        "useFormValidation validates required fields and phone format",
+        "Frontend POSTs to POST /api/Partners with customer=true flag",
+        "partners.js inserts into dbo.partners, returns new record",
+        "useCustomers refreshes customer list; modal closes with success toast"
+      ],
+      "criticality": "critical"
+    },
+    {
+      "id": "customer-edit",
+      "label": "Edit Customer",
+      "description": "Staff updates an existing patient's profile information.",
+      "steps": [
+        "User opens customer row in Customers page, clicks Edit",
+        "AddCustomerForm pre-fills with current CustomerFormData",
+        "User modifies fields and submits",
+        "Frontend PUTs to PUT /api/Partners/:id",
+        "partners.js updates dbo.partners record",
+        "CustomerProfile and customer list refresh with updated data"
+      ],
+      "criticality": "high"
+    },
+    {
+      "id": "customer-checkin",
+      "label": "Patient Check-in at Reception",
+      "description": "Receptionist marks a patient as arrived and tracks their wait time through to treatment.",
+      "steps": [
+        "Receptionist views TodayAppointments on Overview dashboard",
+        "Clicks check-in action on patient row in PatientCheckIn component",
+        "CheckInFlow transitions status: not-arrived -> arrived -> waiting -> in-treatment -> done",
+        "WaitTimer starts live countdown from arrival time",
+        "PUT /api/Appointments/:id updates checkInStatus and arrivalTime",
+        "Overview dashboard updates zone counts in real time"
+      ],
+      "criticality": "critical"
+    },
+    {
+      "id": "appointment-create",
+      "label": "Create Appointment",
+      "description": "Staff books a new appointment by selecting customer, doctor, location, date/time, and service.",
+      "steps": [
+        "User opens AppointmentForm from Calendar, Appointments page, or QuickAddAppointmentButton",
+        "Selects customer via CustomerSelector, doctor via DoctorSelector, location via LocationSelector",
+        "Chooses date, start/end time from TIME_SLOTS, and service name",
+        "Frontend POSTs to POST /api/Appointments",
+        "appointments.js inserts into dbo.appointments",
+        "Calendar and Appointments list refresh; new card appears in correct time slot"
+      ],
+      "criticality": "critical"
+    },
+    {
+      "id": "appointment-reschedule",
+      "label": "Reschedule Appointment",
+      "description": "Staff moves an appointment to a new date/time via drag-and-drop on the calendar or edit form.",
+      "steps": [
+        "User drags AppointmentCard to new time slot in DayView or WeekView",
+        "useDragReschedule.handleDrop() calculates new date and time",
+        "Frontend PUTs to PUT /api/Appointments/:id with updated date/startTime/endTime",
+        "appointments.js updates dbo.appointments record",
+        "Calendar re-renders with appointment in new slot"
+      ],
+      "criticality": "high"
+    },
+    {
+      "id": "service-record",
+      "label": "Record Treatment Service",
+      "description": "Doctor or staff creates a service record for a patient's dental treatment.",
+      "steps": [
+        "User opens ServiceForm from Services page or via ConvertToService from an appointment",
+        "Selects customer, doctor, service catalog item, tooth numbers, and visit count",
+        "Frontend POSTs to POST /api/SaleOrders or /api/Services",
+        "Backend inserts into dbo.saleorders or dbo.dotkhams",
+        "ServiceHistoryList and CustomerProfile refresh",
+        "MultiVisitTracker shows progress against total planned visits"
+      ],
+      "criticality": "critical"
+    },
+    {
+      "id": "payment-create",
+      "label": "Record Payment",
+      "description": "Staff records a patient payment against an outstanding service balance.",
+      "steps": [
+        "User opens PaymentForm on Payment page, selects customer",
+        "Chooses payment method (cash/bank/VietQR/wallet), enters amount",
+        "VietQrModal shown if method is VietQR — displays QR code",
+        "Frontend POSTs to POST /api/Payments or /api/AccountPayments",
+        "payments.js inserts payment record and updates outstanding balance",
+        "PaymentHistory and OutstandingBalance components refresh"
+      ],
+      "criticality": "critical"
+    },
+    {
+      "id": "payment-void",
+      "label": "Void Payment",
+      "description": "Manager reverses an incorrect payment record and restores the outstanding balance.",
+      "steps": [
+        "Manager selects payment in PaymentHistory table, clicks Void",
+        "Confirmation dialog shown with payment details",
+        "Frontend PUTs to PUT /api/Payments/:id/void",
+        "payments.js runs DB transaction: sets status='voided', reverses balance adjustment",
+        "OutstandingBalance and PaymentHistory refresh to reflect reversal"
+      ],
+      "criticality": "high"
+    },
+    {
+      "id": "deposit-topup",
+      "label": "Deposit Wallet Top-up",
+      "description": "Receptionist adds funds to a customer's pre-paid deposit wallet.",
+      "steps": [
+        "User opens DepositWallet component for a customer on Payment page",
+        "Enters top-up amount and payment method",
+        "Frontend POSTs to POST /api/AccountPayments with type=topup",
+        "accountPayments.js inserts transaction and updates wallet balance",
+        "DepositWalletData refreshes showing new balance and transaction history"
+      ],
+      "criticality": "high"
+    },
+    {
+      "id": "monthly-plan-create",
+      "label": "Create Monthly Payment Plan",
+      "description": "Staff sets up an installment plan for a patient with a large outstanding balance.",
+      "steps": [
+        "User opens MonthlyPlanCreator from Payment page, selects customer with outstanding balance",
+        "Enters total amount, down payment, number of installments, and start date",
+        "Frontend POSTs to POST /api/MonthlyPlans",
+        "monthlyPlans.js inserts plan and generates installment schedule records",
+        "PaymentSchedule component renders installment timeline",
+        "InstallmentTracker shows paid vs upcoming vs overdue per installment"
+      ],
+      "criticality": "high"
+    },
+    {
+      "id": "employee-create",
+      "label": "Create Employee",
+      "description": "HR or manager registers a new staff member with roles, tier, and location assignment.",
+      "steps": [
+        "User opens EmployeeForm from Employees page",
+        "Fills in name, phone, email, roles (RoleMultiSelect), tier (TierSelector), and location",
+        "inferRoleFromFlags() maps roles to dbo.partners boolean flags",
+        "Frontend POSTs to POST /api/Employees",
+        "employees.js inserts into dbo.partners with employee=true and role flags",
+        "EmployeeTable refreshes; new staff appears in list"
+      ],
+      "criticality": "high"
+    },
+    {
+      "id": "location-filter",
+      "label": "Global Location Filter",
+      "description": "Staff scopes the entire dashboard to a single branch by selecting from the location dropdown.",
+      "steps": [
+        "User selects a branch from FilterByLocation dropdown in the header",
+        "LocationContext.setSelectedLocationId() updates global state",
+        "All 10+ pages re-fetch data with companyId query parameter",
+        "API routes filter dbo.* tables by company_id WHERE clause",
+        "All lists, calendars, and metrics reflect only the selected branch"
+      ],
+      "criticality": "high"
+    },
+    {
+      "id": "permission-edit",
+      "label": "Edit Role Permissions",
+      "description": "Admin modifies which actions a role group can perform across the system.",
+      "steps": [
+        "Admin navigates to Permissions page (PermissionBoard.tsx)",
+        "PermissionMatrix renders role-vs-module grid via usePermissionBoard hook",
+        "Admin toggles permission checkboxes for a role",
+        "Frontend PUTs to PUT /api/Permissions/employees/:id",
+        "permissions.js updates records in dbo.permissions",
+        "AuthContext re-evaluates effectivePermissions on next login"
+      ],
+      "criticality": "high"
+    },
+    {
+      "id": "walkin-create",
+      "label": "Walk-in Patient Registration",
+      "description": "Receptionist quickly registers a walk-in patient and creates an appointment in one step.",
+      "steps": [
+        "Receptionist clicks Walk-in button on Overview dashboard",
+        "WalkInForm collects minimal patient info (name, phone) and service",
+        "Form simultaneously creates customer (POST /api/Partners) and appointment (POST /api/Appointments)",
+        "New patient appears in TodayAppointments with 'arrived' check-in status",
+        "WaitTimer starts immediately for the walk-in patient"
+      ],
+      "criticality": "critical"
+    }
+  ]
+}

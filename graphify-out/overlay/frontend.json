@@ -1,0 +1,1825 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-04-12",
+  "scope": "frontend",
+  "files": {
+    "website/src/App.tsx": {
+      "domain": "infra",
+      "tier": "page",
+      "intent": "Root router with lazy-loaded pages, ProtectedRoute gating via ROUTE_PERMISSIONS, wrapped in AuthProvider + LocationProvider + TimezoneProvider",
+      "entities": ["user", "permission"],
+      "journeys": ["login", "logout", "every-navigation"],
+      "keyExports": ["App"],
+      "notes": "Uses React.lazy + Suspense; ROUTE_PERMISSIONS maps routes to required permission strings"
+    },
+    "website/src/main.tsx": {
+      "domain": "infra",
+      "tier": "page",
+      "intent": "Application entry point that mounts the React tree inside BrowserRouter",
+      "entities": [],
+      "journeys": [],
+      "keyExports": [],
+      "notes": "StrictMode enabled; single ReactDOM.createRoot call"
+    },
+    "website/src/vite-env.d.ts": {
+      "domain": "infra",
+      "tier": "type",
+      "intent": "Vite client environment type declarations for import.meta.env",
+      "entities": [],
+      "journeys": [],
+      "keyExports": [],
+      "notes": "Generated reference file; no custom types"
+    },
+    "website/src/test/setup.ts": {
+      "domain": "infra",
+      "tier": "lib",
+      "intent": "Vitest global test setup that mocks matchMedia and IntersectionObserver",
+      "entities": [],
+      "journeys": [],
+      "keyExports": [],
+      "notes": "Imported by vitest.config.ts setupFiles"
+    },
+    "website/src/pages/index.ts": {
+      "domain": "infra",
+      "tier": "page",
+      "intent": "Barrel export for all page components consumed by App.tsx",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["Overview", "Calendar", "Customers", "Employees", "Locations", "ServiceCatalog", "Settings", "Relationships", "Commission", "Reports", "Notifications", "PermissionBoard", "Login", "Payment"],
+      "notes": "Re-exports from individual page modules"
+    },
+    "website/src/pages/Login.tsx": {
+      "domain": "auth",
+      "tier": "page",
+      "intent": "Login form with email persistence via localStorage and auto-abort on unmount",
+      "entities": ["user"],
+      "journeys": ["login"],
+      "keyExports": ["Login"],
+      "notes": "Saves last-used email in localStorage; uses AuthContext.login"
+    },
+    "website/src/pages/Overview.tsx": {
+      "domain": "infra",
+      "tier": "page",
+      "intent": "Dashboard home with three zones: patient check-in, today's services table, and today's appointment list",
+      "entities": ["appointment", "customer"],
+      "journeys": ["dashboard-view", "appointment-checkin", "customer-checkin"],
+      "keyExports": ["Overview"],
+      "notes": "Three-zone layout; wraps children in AppointmentHoverProvider; synced to global location filter"
+    },
+    "website/src/pages/Customers.tsx": {
+      "domain": "customers",
+      "tier": "page",
+      "intent": "Patient records page with search, location-filtered DataTable, and side-panel CustomerProfile with full CRUD",
+      "entities": ["customer", "appointment", "payment", "service", "deposit"],
+      "journeys": ["customer-create", "customer-edit", "customer-delete", "appointment-create", "payment-create", "deposit-topup"],
+      "keyExports": ["Customers"],
+      "notes": "Soft-delete and hard-delete; opens profile via URL param :id; URL navigation for deep-links"
+    },
+    "website/src/pages/Calendar.tsx": {
+      "domain": "appointments",
+      "tier": "page",
+      "intent": "Appointment calendar with Day/Week/Month views, doctor filter, drag-reschedule, and edit modal",
+      "entities": ["appointment", "employee"],
+      "journeys": ["appointment-create", "appointment-reschedule", "location-filter"],
+      "keyExports": ["Calendar"],
+      "notes": "ViewMode: day|week|month; drag-drop via useDragReschedule; synced to global location filter"
+    },
+    "website/src/pages/Appointments/index.tsx": {
+      "domain": "appointments",
+      "tier": "page",
+      "intent": "Appointment management list with search, date range filter, check-in flow, wait timer, and service conversion",
+      "entities": ["appointment", "customer", "employee"],
+      "journeys": ["appointment-create", "appointment-checkin", "appointment-reschedule"],
+      "keyExports": ["Appointments"],
+      "notes": "Expandable rows for CheckInFlow and WaitTimer; synced to global location filter"
+    },
+    "website/src/pages/Payment.tsx": {
+      "domain": "payments",
+      "tier": "page",
+      "intent": "Payment page with deposit wallet, single-record payment form, outstanding balances, and payment history",
+      "entities": ["payment", "customer", "deposit"],
+      "journeys": ["payment-create", "payment-void", "deposit-topup"],
+      "keyExports": ["Payment"],
+      "notes": "Synced to global location filter; wraps DepositWallet, PaymentForm, OutstandingBalance, PaymentHistory"
+    },
+    "website/src/pages/Employees/index.tsx": {
+      "domain": "employees",
+      "tier": "page",
+      "intent": "Staff management page with table/card view, tier/role filters, and detailed employee profile panel",
+      "entities": ["employee", "location"],
+      "journeys": ["employee-create", "employee-edit", "location-filter"],
+      "keyExports": ["Employees"],
+      "notes": "Synced to global location filter; EmployeeForm modal for create/edit"
+    },
+    "website/src/pages/Locations.tsx": {
+      "domain": "locations",
+      "tier": "page",
+      "intent": "Clinic branch management with grid of LocationCards, detail panel, and dashboard metrics",
+      "entities": ["location"],
+      "journeys": ["location-filter"],
+      "keyExports": ["Locations"],
+      "notes": "Status filter: active|renovation|closed; edit inline via LocationDetail"
+    },
+    "website/src/pages/Services/index.tsx": {
+      "domain": "services",
+      "tier": "page",
+      "intent": "Service records management with status tabs, service form, and multi-visit tracker",
+      "entities": ["service", "customer", "appointment"],
+      "journeys": ["service-record", "location-filter"],
+      "keyExports": ["Services"],
+      "notes": "Status tabs: active|completed|cancelled|all; synced to global location filter"
+    },
+    "website/src/pages/Settings/index.tsx": {
+      "domain": "settings",
+      "tier": "page",
+      "intent": "System settings page with tabs for system preferences, bank account, and IP access control",
+      "entities": ["bankAccount", "ipRule"],
+      "journeys": [],
+      "keyExports": ["Settings"],
+      "notes": "Tabs: system|bank|ip; delegates to SystemPreferencesContent, BankSettingsForm, IpAccessControl"
+    },
+    "website/src/pages/Website.tsx": {
+      "domain": "cms",
+      "tier": "page",
+      "intent": "Public website CMS with tabs for pages list, content editor, service catalog, and SEO manager",
+      "entities": ["page"],
+      "journeys": [],
+      "keyExports": ["Website"],
+      "notes": "Tabs: pages|editor|services|seo; delegates to PageList, PageEditor, ServiceCatalogManager, SEOManager"
+    },
+    "website/src/pages/Commission.tsx": {
+      "domain": "reports",
+      "tier": "page",
+      "intent": "Placeholder page for employee commission tracking and rule configuration",
+      "entities": ["commission", "employee"],
+      "journeys": [],
+      "keyExports": ["Commission"],
+      "notes": "Stub UI only; no data connected"
+    },
+    "website/src/pages/Reports.tsx": {
+      "domain": "reports",
+      "tier": "page",
+      "intent": "Placeholder page for analytics and business intelligence reporting",
+      "entities": [],
+      "journeys": ["dashboard-view"],
+      "keyExports": ["Reports"],
+      "notes": "Stub UI only; no data connected"
+    },
+    "website/src/pages/Notifications.tsx": {
+      "domain": "infra",
+      "tier": "page",
+      "intent": "Placeholder page for SMS and email notification template management",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["Notifications"],
+      "notes": "Stub UI only; shows channel cards (SMS, Email, Push)"
+    },
+    "website/src/pages/Relationships.tsx": {
+      "domain": "settings",
+      "tier": "page",
+      "intent": "Permission matrix and entity relationship visualization page with two tabs",
+      "entities": ["permission", "user"],
+      "journeys": ["permission-edit"],
+      "keyExports": ["Relationships"],
+      "notes": "Tabs: permissions|entities; delegates to PermissionMatrix and EntityRelationshipMap"
+    },
+    "website/src/pages/PermissionBoard.tsx": {
+      "domain": "settings",
+      "tier": "page",
+      "intent": "Permission board showing per-employee permission group assignments across modules and actions",
+      "entities": ["permission", "employee"],
+      "journeys": ["permission-edit"],
+      "keyExports": ["PermissionBoard"],
+      "notes": "Uses usePermissionBoard; MODULES array drives the permission matrix"
+    },
+    "website/src/pages/ServiceCatalog.tsx": {
+      "domain": "services",
+      "tier": "page",
+      "intent": "Product/service catalog management page with sidebar category groups and services table with CRUD",
+      "entities": ["product", "service", "location"],
+      "journeys": ["service-record"],
+      "keyExports": ["ServiceCatalog"],
+      "notes": "Fetches from real API (products, productcategories, companies); paginated table"
+    },
+    "website/src/components/Layout.tsx": {
+      "domain": "infra",
+      "tier": "component",
+      "intent": "App shell with collapsible sidebar nav, nested submenu hover, and Outlet for page content",
+      "entities": ["user"],
+      "journeys": ["every-navigation", "logout"],
+      "keyExports": ["Layout"],
+      "notes": "Sidebar uses useRef for nested hover submenu; includes VersionDisplay and PermissionDebugger"
+    },
+    "website/src/components/appointments/AppointmentForm.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Create appointment modal form with customer, doctor, location, service, date/time, and color picker",
+      "entities": ["appointment", "customer", "employee", "location", "service"],
+      "journeys": ["appointment-create"],
+      "keyExports": ["AppointmentForm", "AppointmentFormData"],
+      "notes": "Part of APPOINTMENT MODULE FAMILY (CREATE variant); must stay consistent with EditAppointmentModal"
+    },
+    "website/src/components/appointments/AppointmentForm.test.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Unit tests for AppointmentForm covering render, field interaction, and form submission",
+      "entities": ["appointment", "customer", "employee"],
+      "journeys": ["appointment-create"],
+      "keyExports": [],
+      "notes": "Vitest + React Testing Library; mocks useCustomers, useEmployees, useLocations, api"
+    },
+    "website/src/components/appointments/CheckInFlow.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Step-by-step check-in status workflow: arrival to waiting to in-treatment to done",
+      "entities": ["appointment", "customer"],
+      "journeys": ["appointment-checkin"],
+      "keyExports": ["CheckInFlow"],
+      "notes": "Renders WaitTimer inline; calls onAdvance to progress status"
+    },
+    "website/src/components/appointments/ConvertToService.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Action button to convert a completed appointment into a service record",
+      "entities": ["appointment", "service"],
+      "journeys": ["service-record"],
+      "keyExports": ["ConvertToService"],
+      "notes": "Only renders when checkInStatus === done; shows converted badge once done"
+    },
+    "website/src/components/appointments/WaitTimer.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Live second-by-second wait time display calculated from arrivalTime or treatmentStartTime",
+      "entities": ["appointment"],
+      "journeys": ["appointment-checkin"],
+      "keyExports": ["WaitTimer"],
+      "notes": "Updates every second via setInterval; supports compact mode for inline display"
+    },
+    "website/src/components/calendar/AppointmentCard.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Compact appointment summary card with status dot, color-coded left border, and edit button",
+      "entities": ["appointment", "customer"],
+      "journeys": ["appointment-reschedule"],
+      "keyExports": ["AppointmentCard"],
+      "notes": "Color codes 0-7 from APPOINTMENT_CARD_COLORS constants; used in Week and Day views"
+    },
+    "website/src/components/calendar/AppointmentDetailsModal.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Full appointment detail overlay (VIEW variant) showing all appointment fields read-only",
+      "entities": ["appointment", "customer", "employee"],
+      "journeys": [],
+      "keyExports": ["AppointmentDetailsModal"],
+      "notes": "Part of APPOINTMENT MODULE FAMILY (VIEW variant); status labels must match AppointmentForm"
+    },
+    "website/src/components/calendar/DayView.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Single-day appointment grid grouped by half-hour slots with responsive auto-fill columns",
+      "entities": ["appointment"],
+      "journeys": ["appointment-reschedule"],
+      "keyExports": ["DayView"],
+      "notes": "LAYOUT LOCK: auto-fill grid; each card has color-coded left border from APPOINTMENT_CARD_COLORS"
+    },
+    "website/src/components/calendar/MonthView.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Monthly calendar grid displaying per-day appointment counts grouped by status",
+      "entities": ["appointment"],
+      "journeys": [],
+      "keyExports": ["MonthView"],
+      "notes": "Vietnamese weekday headers T2-CN; day cells show status count badges"
+    },
+    "website/src/components/calendar/TimeSlot.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Time slot row displaying appointments at a given time with optional compact mode",
+      "entities": ["appointment"],
+      "journeys": [],
+      "keyExports": ["TimeSlot"],
+      "notes": "Used in DayView and legacy TodaySchedule; compact mode for sidebar use"
+    },
+    "website/src/components/calendar/WeekView.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Seven-column week view with stacked appointment cards per day and click-to-edit support",
+      "entities": ["appointment", "customer"],
+      "journeys": ["appointment-reschedule"],
+      "keyExports": ["WeekView"],
+      "notes": "Cards show status badge, name, phone, doctor, time, service; color from APPOINTMENT_CARD_COLORS"
+    },
+    "website/src/components/customer/AppointmentHistory.tsx": {
+      "domain": "customers",
+      "tier": "component",
+      "intent": "Past appointments list shown inside a customer profile with status icons",
+      "entities": ["appointment", "customer"],
+      "journeys": [],
+      "keyExports": ["AppointmentHistory"],
+      "notes": "Supports limit prop to truncate to N most recent appointments"
+    },
+    "website/src/components/customer/CustomerProfile.tsx": {
+      "domain": "customers",
+      "tier": "component",
+      "intent": "Full customer profile side panel with personal info and tabs for appointments, services, payments, deposits, checkups, and photos",
+      "entities": ["customer", "appointment", "service", "payment", "deposit", "checkup"],
+      "journeys": ["customer-edit", "appointment-create", "service-record", "payment-create", "deposit-topup"],
+      "keyExports": ["CustomerProfile"],
+      "notes": "Multi-tab panel; uses real API data; includes HealthCheckupGallery and DepositWallet"
+    },
+    "website/src/components/customer/CustomerProfile.test.tsx": {
+      "domain": "customers",
+      "tier": "component",
+      "intent": "Unit tests for CustomerProfile covering render and tab navigation",
+      "entities": ["customer"],
+      "journeys": [],
+      "keyExports": [],
+      "notes": "Vitest + React Testing Library"
+    },
+    "website/src/components/customer/DepositCard.tsx": {
+      "domain": "payments",
+      "tier": "component",
+      "intent": "Wallet balance card showing total top-ups, payments, and recent transaction history",
+      "entities": ["deposit", "customer"],
+      "journeys": ["deposit-topup"],
+      "keyExports": ["DepositCard"],
+      "notes": "Displays formatted VND amounts; read-only summary view"
+    },
+    "website/src/components/customer/HealthCheckupGallery.tsx": {
+      "domain": "customers",
+      "tier": "component",
+      "intent": "Gallery of external health-checkup images from hosoonline.com with lightbox and upload support",
+      "entities": ["checkup", "customer"],
+      "journeys": [],
+      "keyExports": ["HealthCheckupGallery"],
+      "notes": "Uses createExternalCheckup API; shows loading and error states"
+    },
+    "website/src/components/customer/index.ts": {
+      "domain": "customers",
+      "tier": "component",
+      "intent": "Barrel export for all customer profile sub-components",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["CustomerProfile", "PhotoGallery", "DepositCard", "AppointmentHistory", "ServiceHistory", "HealthCheckupGallery"],
+      "notes": "Import hub for Customers page"
+    },
+    "website/src/components/customer/PhotoGallery.tsx": {
+      "domain": "customers",
+      "tier": "component",
+      "intent": "Before/after dental photo gallery with lightbox navigation",
+      "entities": ["customer"],
+      "journeys": [],
+      "keyExports": ["PhotoGallery"],
+      "notes": "Placeholder cards when no photos available; before=amber theme, after=emerald theme"
+    },
+    "website/src/components/customer/ServiceHistory.tsx": {
+      "domain": "services",
+      "tier": "component",
+      "intent": "Treatment history list with inline status dropdown to update service record status",
+      "entities": ["service", "customer"],
+      "journeys": ["service-record"],
+      "keyExports": ["ServiceHistory"],
+      "notes": "Uses StatusDropdown for inline status change; supports limit prop"
+    },
+    "website/src/components/debug/PermissionDebugger.tsx": {
+      "domain": "infra",
+      "tier": "component",
+      "intent": "Development overlay panel to inspect current user permissions for all modules",
+      "entities": ["user", "permission"],
+      "journeys": [],
+      "keyExports": ["PermissionDebugger"],
+      "notes": "Dev-only tool; reads from useAuth; shows check/cross per KEY_PERMISSIONS"
+    },
+    "website/src/components/employees/EmployeeCard.tsx": {
+      "domain": "employees",
+      "tier": "component",
+      "intent": "Employee grid card showing avatar, tier badge, role chips, location, and schedule status",
+      "entities": ["employee"],
+      "journeys": [],
+      "keyExports": ["EmployeeCard"],
+      "notes": "Uses TIER_LABELS, ROLE_LABELS, STATUS_BADGE_STYLES from mockEmployees constants"
+    },
+    "website/src/components/employees/EmployeeForm.tsx": {
+      "domain": "employees",
+      "tier": "component",
+      "intent": "Modal form for creating and editing employee records with real API integration",
+      "entities": ["employee", "location"],
+      "journeys": ["employee-create", "employee-edit"],
+      "keyExports": ["EmployeeForm"],
+      "notes": "Part of FORM FAMILY matching AddCustomerForm design standard; uses createEmployee/updateEmployee API"
+    },
+    "website/src/components/employees/EmployeeProfile.tsx": {
+      "domain": "employees",
+      "tier": "component",
+      "intent": "Employee detail panel showing personal info, stats, location, and linked team members",
+      "entities": ["employee", "location"],
+      "journeys": ["employee-edit"],
+      "keyExports": ["EmployeeProfile"],
+      "notes": "Fetches company list for location display; uses fetchCompanies API"
+    },
+    "website/src/components/employees/EmployeeTable.tsx": {
+      "domain": "employees",
+      "tier": "component",
+      "intent": "Sortable paginated table of employees with tier, role, and status columns",
+      "entities": ["employee"],
+      "journeys": [],
+      "keyExports": ["EmployeeTable"],
+      "notes": "Wraps shared DataTable; uses StatusBadge for active/inactive display"
+    },
+    "website/src/components/employees/LinkedEmployees.tsx": {
+      "domain": "employees",
+      "tier": "component",
+      "intent": "Shows team relationships panel listing colleagues linked to an employee",
+      "entities": ["employee"],
+      "journeys": [],
+      "keyExports": ["LinkedEmployees"],
+      "notes": "Displays tier and role badges for each linked employee"
+    },
+    "website/src/components/employees/ReferralCodeDisplay.tsx": {
+      "domain": "employees",
+      "tier": "component",
+      "intent": "Shows employee referral code with copy button and referral stats",
+      "entities": ["employee"],
+      "journeys": [],
+      "keyExports": ["ReferralCodeDisplay"],
+      "notes": "Copy-to-clipboard with visual feedback; stats are stub until API connected"
+    },
+    "website/src/components/employees/RoleMultiSelect.tsx": {
+      "domain": "employees",
+      "tier": "component",
+      "intent": "Toggle chip selector for employee role filter with optional All tab and counts display",
+      "entities": ["employee"],
+      "journeys": [],
+      "keyExports": ["RoleMultiSelect"],
+      "notes": "Can show role counts via counts prop; single-select (not multi)"
+    },
+    "website/src/components/employees/ScheduleCalendar.tsx": {
+      "domain": "employees",
+      "tier": "component",
+      "intent": "Weekly availability grid showing employee schedule blocks across days and time slots",
+      "entities": ["employee"],
+      "journeys": [],
+      "keyExports": ["ScheduleCalendar"],
+      "notes": "Uses WEEK_DAYS and TIME_SLOTS from constants; read-only display"
+    },
+    "website/src/components/employees/TierSelector.tsx": {
+      "domain": "employees",
+      "tier": "component",
+      "intent": "Toggle chip selector for employee tier filter with optional All tab and counts display",
+      "entities": ["employee"],
+      "journeys": [],
+      "keyExports": ["TierSelector"],
+      "notes": "Tier data not in DB; kept for future use; can show tier counts via counts prop"
+    },
+    "website/src/components/forms/AddCustomerForm/AddCustomerForm.tsx": {
+      "domain": "customers",
+      "tier": "component",
+      "intent": "Full customer creation/edit modal with independent card-scrolling layout, photo upload, referral code, and appointment booking",
+      "entities": ["customer", "appointment", "location"],
+      "journeys": ["customer-create", "customer-edit", "appointment-create"],
+      "keyExports": ["AddCustomerForm"],
+      "notes": "Reference implementation for independent card-scrolling pattern; CardSection with maxHeight"
+    },
+    "website/src/components/forms/AddCustomerForm/index.ts": {
+      "domain": "customers",
+      "tier": "component",
+      "intent": "Barrel export for AddCustomerForm component",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["AddCustomerForm"],
+      "notes": "Single re-export"
+    },
+    "website/src/components/forms/WalkInForm.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Minimal walk-in patient modal that creates a customer plus appointment (arrived) plus optional sale order in one flow",
+      "entities": ["customer", "appointment", "service"],
+      "journeys": ["customer-checkin", "customer-create", "appointment-create"],
+      "keyExports": ["WalkInForm", "WalkInFormProps"],
+      "notes": "Calls createPartner + createAppointment + createSaleOrder; uses useUniqueCheck for dedup"
+    },
+    "website/src/components/forms/WalkInForm.test.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Unit tests for WalkInForm covering API call orchestration and form submission",
+      "entities": ["customer", "appointment"],
+      "journeys": ["customer-checkin"],
+      "keyExports": [],
+      "notes": "Vitest; mocks api module entirely"
+    },
+    "website/src/components/locations/LocationCard.tsx": {
+      "domain": "locations",
+      "tier": "component",
+      "intent": "Branch summary card showing name, address, status badge, staff count, and phone",
+      "entities": ["location"],
+      "journeys": [],
+      "keyExports": ["LocationCard"],
+      "notes": "Uses STATUS_LABELS and STATUS_STYLES from mockLocations constants"
+    },
+    "website/src/components/locations/LocationDashboard.tsx": {
+      "domain": "locations",
+      "tier": "component",
+      "intent": "Mini metrics dashboard for a branch showing appointments, patients, rating, and revenue",
+      "entities": ["location"],
+      "journeys": ["dashboard-view"],
+      "keyExports": ["LocationDashboard"],
+      "notes": "Reads from LocationMetrics type; used inside LocationDetail"
+    },
+    "website/src/components/locations/LocationDetail.tsx": {
+      "domain": "locations",
+      "tier": "component",
+      "intent": "Full branch detail panel with editable info, staff list, and embedded LocationDashboard",
+      "entities": ["location", "employee"],
+      "journeys": [],
+      "keyExports": ["LocationDetail"],
+      "notes": "Inline edit mode for address, phone, email, hours; delegates metrics to LocationDashboard"
+    },
+    "website/src/components/modules/EditAppointmentModal.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Edit appointment modal (EDIT variant) with customer/doctor/location/time/color fields and status change",
+      "entities": ["appointment", "customer", "employee", "location"],
+      "journeys": ["appointment-reschedule"],
+      "keyExports": ["EditAppointmentModal"],
+      "notes": "Part of APPOINTMENT MODULE FAMILY (EDIT variant); must stay in sync with AppointmentForm"
+    },
+    "website/src/components/modules/PatientCheckIn.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Zone 1 treatment tracker showing arrived patients with downline status progression and wait timers",
+      "entities": ["appointment", "customer"],
+      "journeys": ["appointment-checkin", "customer-checkin"],
+      "keyExports": ["PatientCheckIn"],
+      "notes": "LAYOUT LOCK: PatientCard must not truncate content; bidirectional hover via AppointmentHoverContext"
+    },
+    "website/src/components/modules/PatientCheckIn.test.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Unit tests for PatientCheckIn component",
+      "entities": ["appointment"],
+      "journeys": ["appointment-checkin"],
+      "keyExports": [],
+      "notes": "Vitest + React Testing Library"
+    },
+    "website/src/components/modules/RevenueChartModule.tsx": {
+      "domain": "reports",
+      "tier": "component",
+      "intent": "Revenue vs target bar chart rendered with pure CSS height-percentage bars",
+      "entities": [],
+      "journeys": ["dashboard-view"],
+      "keyExports": ["RevenueChartModule"],
+      "notes": "No chart library; uses inline style height percentage; shows trend arrows"
+    },
+    "website/src/components/modules/StatCardModule.tsx": {
+      "domain": "infra",
+      "tier": "component",
+      "intent": "Reusable dashboard KPI card showing label, value, trend change, and icon",
+      "entities": [],
+      "journeys": ["dashboard-view"],
+      "keyExports": ["StatCardModule", "StatCardData"],
+      "notes": "changeType drives positive/negative/neutral trend icon and color"
+    },
+    "website/src/components/modules/TodayAppointments.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Zone 3 today's appointment sidebar with filter tabs and per-card edit plus check-in actions",
+      "entities": ["appointment", "customer"],
+      "journeys": ["appointment-checkin", "appointment-reschedule"],
+      "keyExports": ["TodayAppointments"],
+      "notes": "Part of APPOINTMENT MODULE FAMILY; bidirectional hover via AppointmentHoverContext"
+    },
+    "website/src/components/modules/TodaySchedule.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Appointment timeline for today as a vertical list with time slots and status badges",
+      "entities": ["appointment"],
+      "journeys": ["dashboard-view"],
+      "keyExports": ["TodaySchedule"],
+      "notes": "Legacy component; uses STATUS_BADGE_STYLES from mockCalendar"
+    },
+    "website/src/components/modules/TodayServicesTable.tsx": {
+      "domain": "services",
+      "tier": "component",
+      "intent": "Zone 2 placeholder table for services performed today with search input",
+      "entities": ["service"],
+      "journeys": ["service-record"],
+      "keyExports": ["TodayServicesTable"],
+      "notes": "Stub placeholder; data not yet connected to API"
+    },
+    "website/src/components/payment/DepositHistory.tsx": {
+      "domain": "payments",
+      "tier": "component",
+      "intent": "Transaction history list for a customer deposit wallet showing date, amount, type, and method",
+      "entities": ["deposit", "payment"],
+      "journeys": ["deposit-topup"],
+      "keyExports": ["DepositHistory"],
+      "notes": "Color-codes top-up (green) vs payment (red) rows; uses DepositTransaction type"
+    },
+    "website/src/components/payment/DepositWallet.tsx": {
+      "domain": "payments",
+      "tier": "component",
+      "intent": "Wallet card showing deposit balance, outstanding balance, top-up form, and VietQR modal",
+      "entities": ["deposit", "customer"],
+      "journeys": ["deposit-topup"],
+      "keyExports": ["DepositWallet"],
+      "notes": "Triggers VietQrModal for bank transfer; calls onAddDeposit callback on submit"
+    },
+    "website/src/components/payment/MonthlyPlan/index.ts": {
+      "domain": "payments",
+      "tier": "component",
+      "intent": "Barrel export for monthly payment plan sub-components",
+      "entities": ["plan"],
+      "journeys": ["monthly-plan-create"],
+      "keyExports": ["MonthlyPlanCreator", "PaymentSchedule", "InstallmentTracker"],
+      "notes": "Groups the three plan components for Payment page import"
+    },
+    "website/src/components/payment/MonthlyPlan/InstallmentTracker.tsx": {
+      "domain": "payments",
+      "tier": "component",
+      "intent": "Per-installment status display chip with icon and color from a status config map",
+      "entities": ["plan"],
+      "journeys": [],
+      "keyExports": ["InstallmentTracker"],
+      "notes": "Presentational only; used inside PaymentSchedule rows"
+    },
+    "website/src/components/payment/MonthlyPlan/MonthlyPlanCreator.tsx": {
+      "domain": "payments",
+      "tier": "component",
+      "intent": "Four-step wizard for creating installment plans: customer, treatment, payment, review",
+      "entities": ["plan", "customer"],
+      "journeys": ["monthly-plan-create"],
+      "keyExports": ["MonthlyPlanCreator"],
+      "notes": "Uses DatePicker; auto-calculates monthly installment amount; preview in review step"
+    },
+    "website/src/components/payment/MonthlyPlan/PaymentSchedule.tsx": {
+      "domain": "payments",
+      "tier": "component",
+      "intent": "Timeline of installments for a monthly plan with mark-paid action per installment",
+      "entities": ["plan"],
+      "journeys": ["monthly-plan-create"],
+      "keyExports": ["PaymentSchedule"],
+      "notes": "Uses InstallmentTracker per row; calls onMarkPaid callback"
+    },
+    "website/src/components/payment/OutstandingBalance.tsx": {
+      "domain": "payments",
+      "tier": "component",
+      "intent": "Cards listing unpaid sale orders and dotkhams with pay-now action",
+      "entities": ["payment", "customer"],
+      "journeys": ["payment-create"],
+      "keyExports": ["OutstandingBalance"],
+      "notes": "Shows empty green state when no outstanding balance"
+    },
+    "website/src/components/payment/PaymentForm.tsx": {
+      "domain": "payments",
+      "tier": "component",
+      "intent": "Single-record payment form supporting cash, bank transfer, deposit, and VietQR methods",
+      "entities": ["payment", "customer", "location"],
+      "journeys": ["payment-create"],
+      "keyExports": ["PaymentForm", "PaymentFormData"],
+      "notes": "Fetches sale orders and dotkhams to populate record selector; integrates VietQrModal"
+    },
+    "website/src/components/payment/PaymentHistory.tsx": {
+      "domain": "payments",
+      "tier": "component",
+      "intent": "Table listing all payment transactions with method, status, amount, and linked record",
+      "entities": ["payment"],
+      "journeys": ["payment-void"],
+      "keyExports": ["PaymentHistory"],
+      "notes": "Uses PAYMENT_METHOD_LABELS and PAYMENT_STATUS_LABELS from mockPayment"
+    },
+    "website/src/components/payment/VietQrModal.tsx": {
+      "domain": "payments",
+      "tier": "component",
+      "intent": "Split-panel QR code generation modal using VietQR API for bank transfer payments",
+      "entities": ["payment", "bankAccount"],
+      "journeys": ["payment-create", "deposit-topup"],
+      "keyExports": ["VietQrModal"],
+      "notes": "Reads bank settings from useBankSettings; calls uploadPaymentProof on confirmation"
+    },
+    "website/src/components/payment/VietQrModal.test.tsx": {
+      "domain": "payments",
+      "tier": "component",
+      "intent": "Unit tests for VietQrModal covering render and QR URL generation",
+      "entities": ["payment"],
+      "journeys": [],
+      "keyExports": [],
+      "notes": "Vitest; mocks useBankSettings hook"
+    },
+    "website/src/components/relationships/EntityRelationshipMap.tsx": {
+      "domain": "settings",
+      "tier": "component",
+      "intent": "Visual diagram of entity connections using arrow-linked nodes from static graph constants",
+      "entities": ["permission"],
+      "journeys": [],
+      "keyExports": ["EntityRelationshipMap"],
+      "notes": "Static visualization from ENTITY_NODES and ENTITY_RELATIONS constants"
+    },
+    "website/src/components/relationships/PermissionMatrix.tsx": {
+      "domain": "settings",
+      "tier": "component",
+      "intent": "Role-based access control grid showing which roles have which permissions per module",
+      "entities": ["permission", "user"],
+      "journeys": ["permission-edit"],
+      "keyExports": ["PermissionMatrix"],
+      "notes": "Collapsible module rows; check/X icons per cell; read-only display"
+    },
+    "website/src/components/services/MultiVisitTracker.tsx": {
+      "domain": "services",
+      "tier": "component",
+      "intent": "Progress tracker for multi-visit treatment plans showing each visit status in sequence",
+      "entities": ["service"],
+      "journeys": ["service-record"],
+      "keyExports": ["MultiVisitTracker"],
+      "notes": "Compact mode for embedded use; calls onUpdateVisit to change visit status"
+    },
+    "website/src/components/services/ServiceForm.tsx": {
+      "domain": "services",
+      "tier": "component",
+      "intent": "Create/edit service record modal with catalog selector, customer/doctor/location, date, and visit count",
+      "entities": ["service", "customer", "employee", "location", "product"],
+      "journeys": ["service-record"],
+      "keyExports": ["ServiceForm"],
+      "notes": "Part of FORM FAMILY matching AddCustomerForm design standard; uses real API data"
+    },
+    "website/src/components/services/ServiceHistoryList.tsx": {
+      "domain": "services",
+      "tier": "component",
+      "intent": "Service record list with expandable rows showing MultiVisitTracker and inline status dropdown",
+      "entities": ["service", "customer"],
+      "journeys": ["service-record"],
+      "keyExports": ["ServiceHistoryList"],
+      "notes": "Uses StatusDropdown for inline status change; expandable for multi-visit detail"
+    },
+    "website/src/components/settings/BankSettingsForm.tsx": {
+      "domain": "settings",
+      "tier": "component",
+      "intent": "Clinic bank account configuration form for VietQR integration (BIN, account number, name)",
+      "entities": ["bankAccount"],
+      "journeys": [],
+      "keyExports": ["BankSettingsForm"],
+      "notes": "Uses useBankSettings hook and BankSelector dropdown; saves via updateSettings"
+    },
+    "website/src/components/settings/CustomerSourcesConfig.tsx": {
+      "domain": "settings",
+      "tier": "component",
+      "intent": "Manage referral source list with add, toggle, and delete per source type",
+      "entities": ["customer"],
+      "journeys": [],
+      "keyExports": ["CustomerSourcesConfig"],
+      "notes": "Uses useCustomerSources from useSettings hook; type icons mapped by source type"
+    },
+    "website/src/components/settings/IpAccessControl.tsx": {
+      "domain": "settings",
+      "tier": "component",
+      "intent": "IP whitelist/blacklist management panel with add, remove, and mode toggle",
+      "entities": ["ipRule"],
+      "journeys": [],
+      "keyExports": ["IpAccessControl"],
+      "notes": "Uses useIpAccessControl hook; validates IP format inline"
+    },
+    "website/src/components/settings/PermissionGroupConfig.tsx": {
+      "domain": "settings",
+      "tier": "component",
+      "intent": "Permission group configuration with module permission matrix and employee assignment panel",
+      "entities": ["permission", "employee", "location"],
+      "journeys": ["permission-edit"],
+      "keyExports": ["PermissionGroupConfig"],
+      "notes": "Three-section layout: group cards, permission matrix, employee assignments with location scope"
+    },
+    "website/src/components/settings/RoleConfig.tsx": {
+      "domain": "settings",
+      "tier": "component",
+      "intent": "Role definition panel showing per-role permission matrix with collapsible module groups",
+      "entities": ["permission"],
+      "journeys": ["permission-edit"],
+      "keyExports": ["RoleConfig"],
+      "notes": "Uses useRoleConfig from useSettings; read-only grid of check marks per role"
+    },
+    "website/src/components/settings/ServiceCatalogSettings.tsx": {
+      "domain": "settings",
+      "tier": "component",
+      "intent": "Service catalog settings panel with search, inline price editing, and enable/disable toggle",
+      "entities": ["service", "product"],
+      "journeys": [],
+      "keyExports": ["ServiceCatalogSettings"],
+      "notes": "Uses useServiceCatalog from useSettings; inline edit mode per row"
+    },
+    "website/src/components/settings/SystemPreferences.tsx": {
+      "domain": "settings",
+      "tier": "component",
+      "intent": "System preferences wrapper with sub-tabs for general settings and IP access control",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["SystemPreferences"],
+      "notes": "Wraps SystemPreferencesContent and IpAccessControl in sub-tab navigation"
+    },
+    "website/src/components/settings/SystemPreferencesContent.tsx": {
+      "domain": "settings",
+      "tier": "component",
+      "intent": "General system preference toggles grouped by category without sub-tab navigation",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["SystemPreferencesContent"],
+      "notes": "Reads from useSystemPreferences; renders toggle switches per preference entry"
+    },
+    "website/src/components/settings/TimezoneSelector.tsx": {
+      "domain": "settings",
+      "tier": "component",
+      "intent": "Timezone selector dropdown that updates the global TimezoneContext",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["TimezoneSelector"],
+      "notes": "Compact mode for sidebar; reads/writes via useTimezone context"
+    },
+    "website/src/components/shared/AddressAutocomplete.tsx": {
+      "domain": "shared",
+      "tier": "component",
+      "intent": "Google Places API powered address autocomplete that fills Vietnamese address fields on selection",
+      "entities": [],
+      "journeys": ["customer-create"],
+      "keyExports": ["AddressAutocomplete", "AddressDetails"],
+      "notes": "Uses REST API directly to bypass AutocompleteService; parses structured address components"
+    },
+    "website/src/components/shared/AddressAutocompleteTest.tsx": {
+      "domain": "shared",
+      "tier": "component",
+      "intent": "Test harness page to verify Google Places API integration is working correctly",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["AddressAutocompleteTest"],
+      "notes": "Dev/testing utility; shows address details and event logs in the UI"
+    },
+    "website/src/components/shared/BankSelector.tsx": {
+      "domain": "shared",
+      "tier": "component",
+      "intent": "Searchable Vietnamese bank dropdown with BIN, code, and short name display",
+      "entities": ["bankAccount"],
+      "journeys": [],
+      "keyExports": ["BankSelector", "Bank"],
+      "notes": "Accent-insensitive search via normalizeText; fetches bank list from external API"
+    },
+    "website/src/components/shared/ComboboxInput.tsx": {
+      "domain": "shared",
+      "tier": "component",
+      "intent": "Free-text input with dropdown suggestions filtered from a provided options array",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["ComboboxInput"],
+      "notes": "Hybrid input: user can type anything or select from suggestions"
+    },
+    "website/src/components/shared/CustomerNameLink.tsx": {
+      "domain": "customers",
+      "tier": "component",
+      "intent": "Clickable customer name that navigates to /customers/:id, falls back to span if no ID",
+      "entities": ["customer"],
+      "journeys": ["every-navigation"],
+      "keyExports": ["CustomerNameLink"],
+      "notes": "Stops click propagation; used in appointment cards and table rows"
+    },
+    "website/src/components/shared/CustomerSelector.tsx": {
+      "domain": "customers",
+      "tier": "component",
+      "intent": "Searchable customer dropdown with avatar initials and add-new option",
+      "entities": ["customer"],
+      "journeys": ["customer-create"],
+      "keyExports": ["CustomerSelector"],
+      "notes": "Accent-insensitive search; used in AppointmentForm, ServiceForm, PaymentForm"
+    },
+    "website/src/components/shared/CustomerSourceDropdown.tsx": {
+      "domain": "customers",
+      "tier": "component",
+      "intent": "Dropdown to select how a customer found the clinic (referral source)",
+      "entities": ["customer"],
+      "journeys": ["customer-create"],
+      "keyExports": ["CustomerSourceDropdown"],
+      "notes": "Reads source list from CUSTOMER_SOURCES in mockCustomerForm"
+    },
+    "website/src/components/shared/DataTable.tsx": {
+      "domain": "shared",
+      "tier": "component",
+      "intent": "Sortable, paginated data table with configurable columns and custom cell renderers",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["DataTable", "Column"],
+      "notes": "Generic component used across Customers, Employees, Services, Locations; client-side sort"
+    },
+    "website/src/components/shared/DoctorSelector.tsx": {
+      "domain": "employees",
+      "tier": "component",
+      "intent": "Searchable doctor/employee dropdown with filterRoles prop to limit shown roles",
+      "entities": ["employee"],
+      "journeys": [],
+      "keyExports": ["DoctorSelector"],
+      "notes": "Used in AppointmentForm, ServiceForm, CalendarFilter; accent-insensitive search"
+    },
+    "website/src/components/shared/DoctorSelector.test.tsx": {
+      "domain": "employees",
+      "tier": "component",
+      "intent": "Unit tests for DoctorSelector role filtering behavior",
+      "entities": ["employee"],
+      "journeys": [],
+      "keyExports": [],
+      "notes": "Vitest + React Testing Library; verifies filterRoles prop limits displayed options"
+    },
+    "website/src/components/shared/FilterByDoctor.tsx": {
+      "domain": "employees",
+      "tier": "component",
+      "intent": "Doctor filter dropdown accepting DoctorOption array as props for list and calendar filtering",
+      "entities": ["employee"],
+      "journeys": ["location-filter"],
+      "keyExports": ["FilterByDoctor", "DoctorOption"],
+      "notes": "Props-driven not hook-driven; falls back to All Doctors when list empty"
+    },
+    "website/src/components/shared/FilterByLocation.tsx": {
+      "domain": "locations",
+      "tier": "component",
+      "intent": "Location filter dropdown synced globally via LocationContext across all pages",
+      "entities": ["location"],
+      "journeys": ["location-filter"],
+      "keyExports": ["FilterByLocation"],
+      "notes": "Used on Overview, Calendar, Customers, Appointments, Employees; All Locations option"
+    },
+    "website/src/components/shared/ImageUpload.tsx": {
+      "domain": "shared",
+      "tier": "component",
+      "intent": "Photo upload component with preview and file input for customer and employee profiles",
+      "entities": [],
+      "journeys": ["customer-create", "employee-create"],
+      "keyExports": ["ImageUpload"],
+      "notes": "Supports sm/md/lg sizes; accepts base64 URL string as value"
+    },
+    "website/src/components/shared/index.ts": {
+      "domain": "shared",
+      "tier": "component",
+      "intent": "Barrel export for shared components (currently only AddressAutocomplete)",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["AddressAutocomplete", "AddressDetails"],
+      "notes": "Minimal barrel; most shared components imported directly"
+    },
+    "website/src/components/shared/LocationSelector.tsx": {
+      "domain": "locations",
+      "tier": "component",
+      "intent": "Branch location selector dropdown for forms, distinct from the global FilterByLocation",
+      "entities": ["location"],
+      "journeys": [],
+      "keyExports": ["LocationSelector"],
+      "notes": "Used in CustomerForm, EmployeeForm, AppointmentForm, ServiceForm"
+    },
+    "website/src/components/shared/NotificationsPanel.tsx": {
+      "domain": "infra",
+      "tier": "component",
+      "intent": "Recent system alerts panel showing appointment, payment, and customer notifications",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["NotificationsPanel"],
+      "notes": "Uses Notification type from common types; currently shows mock data"
+    },
+    "website/src/components/shared/QuickActionsBar.tsx": {
+      "domain": "infra",
+      "tier": "component",
+      "intent": "Quick action buttons bar for common clinic actions (add appointment, customer, payment, service)",
+      "entities": [],
+      "journeys": ["appointment-create", "customer-create", "payment-create"],
+      "keyExports": ["QuickActionsBar"],
+      "notes": "Reads QUICK_ACTIONS from mockDashboard; presentational bar"
+    },
+    "website/src/components/shared/QuickAddAppointmentButton.tsx": {
+      "domain": "appointments",
+      "tier": "component",
+      "intent": "Floating action button that opens AppointmentForm modal for quick appointment creation",
+      "entities": ["appointment"],
+      "journeys": ["appointment-create"],
+      "keyExports": ["QuickAddAppointmentButton"],
+      "notes": "Used in Overview and Calendar headers; reads selected location from LocationContext"
+    },
+    "website/src/components/shared/ReferralCodeInput.tsx": {
+      "domain": "customers",
+      "tier": "component",
+      "intent": "Referral code input with validation against employee codes and visual success/error feedback",
+      "entities": ["customer"],
+      "journeys": ["customer-create"],
+      "keyExports": ["ReferralCodeInput"],
+      "notes": "Validates against MOCK_REFERRAL_CODES; shows matched employee name on success"
+    },
+    "website/src/components/shared/SearchBar.tsx": {
+      "domain": "shared",
+      "tier": "component",
+      "intent": "Debounced search input with magnifier icon and clear button",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["SearchBar"],
+      "notes": "debounceMs prop default 300ms; used across Customers, Employees, Services, Website"
+    },
+    "website/src/components/shared/ServiceCatalogSelector.tsx": {
+      "domain": "services",
+      "tier": "component",
+      "intent": "Searchable service catalog dropdown showing service name, type, and price",
+      "entities": ["service", "product"],
+      "journeys": ["service-record"],
+      "keyExports": ["ServiceCatalogSelector"],
+      "notes": "Accent-insensitive search; used in ServiceForm and Settings"
+    },
+    "website/src/components/shared/StatusBadge.tsx": {
+      "domain": "shared",
+      "tier": "component",
+      "intent": "Colored pill badge for entity status with preset variants (active, pending, cancelled, etc.)",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["StatusBadge", "StatusVariant"],
+      "notes": "Variant-driven Tailwind classes; exported StatusVariant type used across tables"
+    },
+    "website/src/components/shared/StatusDropdown.tsx": {
+      "domain": "shared",
+      "tier": "component",
+      "intent": "Clickable status badge that opens a dropdown to change status inline",
+      "entities": [],
+      "journeys": ["service-record"],
+      "keyExports": ["StatusDropdown", "StatusOption"],
+      "notes": "Closes on outside click; used in ServiceHistoryList and ServiceHistory"
+    },
+    "website/src/components/shared/VersionDisplay.tsx": {
+      "domain": "infra",
+      "tier": "component",
+      "intent": "Sidebar footer widget showing app version, update availability notification, and release notes link",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["VersionDisplay"],
+      "notes": "Uses useVersionCheck hook; polls every 5 min; hover tooltip shows build time and git branch"
+    },
+    "website/src/components/ui/DatePicker.tsx": {
+      "domain": "shared",
+      "tier": "component",
+      "intent": "Custom date picker popover with month navigation, orange accent design, and YYYY-MM-DD value format",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["DatePicker"],
+      "notes": "No external date library; pure React; used in AppointmentForm, EditAppointmentModal, ServiceForm"
+    },
+    "website/src/components/ui/TimePicker.tsx": {
+      "domain": "shared",
+      "tier": "component",
+      "intent": "Custom time picker dropdown with HH:MM format and 30-minute slot options",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["TimePicker"],
+      "notes": "Matches DatePicker aesthetic; orange accents; used in AppointmentForm and EditAppointmentModal"
+    },
+    "website/src/components/website/PageEditor.tsx": {
+      "domain": "cms",
+      "tier": "component",
+      "intent": "Rich text editor panel for website page content with formatting toolbar",
+      "entities": ["page"],
+      "journeys": [],
+      "keyExports": ["PageEditor"],
+      "notes": "Toolbar-driven formatting; saves via onSave callback"
+    },
+    "website/src/components/website/PageList.tsx": {
+      "domain": "cms",
+      "tier": "component",
+      "intent": "DataTable listing website pages with status badges, search, and status filter",
+      "entities": ["page"],
+      "journeys": [],
+      "keyExports": ["PageList"],
+      "notes": "Uses DataTable and StatusBadge; edit/preview actions per row"
+    },
+    "website/src/components/website/SEOManager.tsx": {
+      "domain": "cms",
+      "tier": "component",
+      "intent": "Per-page SEO metadata editor (title, description, keywords, OG image) with page selector",
+      "entities": ["page"],
+      "journeys": [],
+      "keyExports": ["SEOManager"],
+      "notes": "Reads from MOCK_PAGES; shows character count and validation warnings"
+    },
+    "website/src/components/website/ServiceCatalogManager.tsx": {
+      "domain": "cms",
+      "tier": "component",
+      "intent": "Public service listing manager with search, category filter, visibility toggle, and drag-reorder handle",
+      "entities": ["service", "page"],
+      "journeys": [],
+      "keyExports": ["ServiceCatalogManager"],
+      "notes": "Reads SERVICE_CATEGORIES from mockWebsite; drag handle UI (reorder not yet wired)"
+    },
+    "website/src/hooks/useAppointments.ts": {
+      "domain": "appointments",
+      "tier": "hook",
+      "intent": "Appointment CRUD and check-in status management with real API integration and optimistic updates",
+      "entities": ["appointment", "customer", "employee"],
+      "journeys": ["appointment-create", "appointment-reschedule", "appointment-checkin"],
+      "keyExports": ["useAppointments", "AppointmentFilter"],
+      "notes": "Fetches from /api/Appointments; manages check-in transitions locally; debounced refresh"
+    },
+    "website/src/hooks/useBankSettings.ts": {
+      "domain": "settings",
+      "tier": "hook",
+      "intent": "Loads and persists clinic bank account settings (BIN, account number, name) via API",
+      "entities": ["bankAccount"],
+      "journeys": [],
+      "keyExports": ["useBankSettings", "BankSettings"],
+      "notes": "GET/PUT /api/BankSettings; used by VietQrModal and BankSettingsForm"
+    },
+    "website/src/hooks/useBankSettings.test.ts": {
+      "domain": "settings",
+      "tier": "hook",
+      "intent": "Unit tests for useBankSettings hook covering load, update, and error states",
+      "entities": ["bankAccount"],
+      "journeys": [],
+      "keyExports": [],
+      "notes": "Vitest; mocks fetch API"
+    },
+    "website/src/hooks/useCalendarData.ts": {
+      "domain": "appointments",
+      "tier": "hook",
+      "intent": "Calendar page state: view mode, date navigation, appointment fetching, and timezone-aware filtering",
+      "entities": ["appointment"],
+      "journeys": ["appointment-reschedule", "location-filter"],
+      "keyExports": ["useCalendarData", "ViewMode", "CalendarStatusFilter"],
+      "notes": "Maps API appointments to CalendarAppointment via calendarUtils; uses TimezoneContext"
+    },
+    "website/src/hooks/useClientIp.ts": {
+      "domain": "infra",
+      "tier": "hook",
+      "intent": "Detects client IP address for IP access control enforcement",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["useClientIp"],
+      "notes": "Fetches from external IP detection service; used by AuthContext and IpAccessControl"
+    },
+    "website/src/hooks/useCustomerPayments.ts": {
+      "domain": "payments",
+      "tier": "hook",
+      "intent": "Fetches and manages payment records for a specific customer with create and void operations",
+      "entities": ["payment", "customer"],
+      "journeys": ["payment-create", "payment-void"],
+      "keyExports": ["useCustomerPayments", "UseCustomerPaymentsResult"],
+      "notes": "Scoped to a single customerId; used inside CustomerProfile"
+    },
+    "website/src/hooks/useCustomerProfile.ts": {
+      "domain": "customers",
+      "tier": "hook",
+      "intent": "Fetches a single customer full profile including balance, appointments, and partner fields from API",
+      "entities": ["customer", "appointment", "deposit"],
+      "journeys": ["customer-edit"],
+      "keyExports": ["useCustomerProfile", "CustomerProfileData"],
+      "notes": "Calls fetchPartnerById + fetchAppointments + fetchCustomerBalance; 87-field partner record"
+    },
+    "website/src/hooks/useCustomers.ts": {
+      "domain": "customers",
+      "tier": "hook",
+      "intent": "Customer CRUD, search, and location-filter hook connected to real PostgreSQL API",
+      "entities": ["customer"],
+      "journeys": ["customer-create", "customer-edit", "customer-delete"],
+      "keyExports": ["useCustomers", "Customer", "CustomerStatus"],
+      "notes": "Fetches from /api/Partners where customer=true; debounced search; aborts stale requests"
+    },
+    "website/src/hooks/useDashboardStats.ts": {
+      "domain": "reports",
+      "tier": "hook",
+      "intent": "Computes dashboard KPI stat cards from real API data (partners, appointments, saleorders)",
+      "entities": ["customer", "appointment", "payment"],
+      "journeys": ["dashboard-view"],
+      "keyExports": ["useDashboardStats"],
+      "notes": "Returns StatCardData array for StatCardModule; fetches from three API endpoints"
+    },
+    "website/src/hooks/useDeposits.ts": {
+      "domain": "payments",
+      "tier": "hook",
+      "intent": "Manages deposit wallet transactions including top-up and balance fetch for a customer",
+      "entities": ["deposit", "customer"],
+      "journeys": ["deposit-topup"],
+      "keyExports": ["useDeposits", "DepositTransaction", "DepositBalance"],
+      "notes": "Wraps fetchPayments + createPayment + fetchCustomerBalance from API"
+    },
+    "website/src/hooks/useDragReschedule.ts": {
+      "domain": "appointments",
+      "tier": "hook",
+      "intent": "Drag-and-drop rescheduling state management for moving appointments between calendar slots",
+      "entities": ["appointment"],
+      "journeys": ["appointment-reschedule"],
+      "keyExports": ["useDragReschedule"],
+      "notes": "Tracks drag state locally; actual API persist is stubbed; used in Calendar page"
+    },
+    "website/src/hooks/useEmployees.ts": {
+      "domain": "employees",
+      "tier": "hook",
+      "intent": "Fetches and filters employee list from real API with location, role, tier, and search filters",
+      "entities": ["employee", "location"],
+      "journeys": ["employee-create", "employee-edit", "location-filter"],
+      "keyExports": ["useEmployees"],
+      "notes": "Maps ApiEmployee to Employee; infers roles from doctor/dentist/receptionist DB flags"
+    },
+    "website/src/hooks/useExternalCheckups.ts": {
+      "domain": "customers",
+      "tier": "hook",
+      "intent": "Fetches external health checkup images for a customer from hosoonline.com via API",
+      "entities": ["checkup", "customer"],
+      "journeys": [],
+      "keyExports": ["useExternalCheckups", "UseExternalCheckupsResult"],
+      "notes": "Keyed by customerCode; skips fetch if code is null; used by HealthCheckupGallery"
+    },
+    "website/src/hooks/useFormValidation.ts": {
+      "domain": "shared",
+      "tier": "hook",
+      "intent": "Generic form validation hook with per-field rules, error state, and touched tracking",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["useFormValidation"],
+      "notes": "Rule-based validation; returns errors map and validate/clearErrors functions"
+    },
+    "website/src/hooks/useIpAccessControl.ts": {
+      "domain": "settings",
+      "tier": "hook",
+      "intent": "IP access control state management for whitelist/blacklist entries, mode toggle, and IP validation",
+      "entities": ["ipRule"],
+      "journeys": [],
+      "keyExports": ["useIpAccessControl"],
+      "notes": "Computes stats and check results; uses ipValidation utilities for CIDR and range parsing"
+    },
+    "website/src/hooks/useLocations.ts": {
+      "domain": "locations",
+      "tier": "hook",
+      "intent": "Fetches clinic branches from real API and maps ApiCompany to LocationBranch with search and status filters",
+      "entities": ["location"],
+      "journeys": ["location-filter"],
+      "keyExports": ["useLocations"],
+      "notes": "Computes totalStats and per-location metrics; used across Customers, Employees, Appointments, Overview"
+    },
+    "website/src/hooks/useMonthlyPlans.ts": {
+      "domain": "payments",
+      "tier": "hook",
+      "intent": "Monthly installment plan CRUD with real API persistence and status-based filtering",
+      "entities": ["plan", "customer"],
+      "journeys": ["monthly-plan-create"],
+      "keyExports": ["useMonthlyPlans"],
+      "notes": "Calls fetchMonthlyPlans, createMonthlyPlan, markInstallmentPaid; maps ApiMonthlyPlan to MonthlyPlan"
+    },
+    "website/src/hooks/useOverviewAppointments.ts": {
+      "domain": "appointments",
+      "tier": "hook",
+      "intent": "Three-zone appointment flow for Overview: top-level status (Zone 3) and check-in status (Zone 1)",
+      "entities": ["appointment", "customer"],
+      "journeys": ["appointment-checkin", "customer-checkin", "dashboard-view"],
+      "keyExports": ["useOverviewAppointments", "OverviewAppointment", "CheckInStatus", "Zone1Filter"],
+      "notes": "Fetches today appointments; timezone-aware filtering via TimezoneContext"
+    },
+    "website/src/hooks/useOverviewAppointments.test.tsx": {
+      "domain": "appointments",
+      "tier": "hook",
+      "intent": "Unit tests for useOverviewAppointments covering status transitions and filtering",
+      "entities": ["appointment"],
+      "journeys": [],
+      "keyExports": [],
+      "notes": "Vitest; mocks api and TimezoneContext"
+    },
+    "website/src/hooks/useOverviewData.ts": {
+      "domain": "infra",
+      "tier": "hook",
+      "intent": "Overview page data: locations list, revenue chart data from real API",
+      "entities": ["location"],
+      "journeys": ["dashboard-view"],
+      "keyExports": ["useOverviewData"],
+      "notes": "Fetches companies + saleorders; generates monthly revenue vs 200M VND target chart data"
+    },
+    "website/src/hooks/usePayment.ts": {
+      "domain": "payments",
+      "tier": "hook",
+      "intent": "Payment operations, wallet management, and outstanding balance aggregation from real API",
+      "entities": ["payment", "customer", "deposit"],
+      "journeys": ["payment-create", "payment-void", "deposit-topup"],
+      "keyExports": ["usePayment"],
+      "notes": "Fetches payments, saleorders, dotkhams, customer balance; computes stats; voids payments"
+    },
+    "website/src/hooks/usePermissionBoard.ts": {
+      "domain": "settings",
+      "tier": "hook",
+      "intent": "Permission board state: loads permission groups, employee assignments, and company list from API",
+      "entities": ["permission", "employee", "location"],
+      "journeys": ["permission-edit"],
+      "keyExports": ["usePermissionBoard"],
+      "notes": "Calls fetchPermissionGroups + fetchEmployeePermissions + fetchCompanies"
+    },
+    "website/src/hooks/usePermissionGroups.ts": {
+      "domain": "settings",
+      "tier": "hook",
+      "intent": "Permission group CRUD with employee assignment management and location scoping from real API",
+      "entities": ["permission", "employee", "location"],
+      "journeys": ["permission-edit"],
+      "keyExports": ["usePermissionGroups"],
+      "notes": "Fetches groups + employee permissions + companies; updates via updateEmployeePermission API"
+    },
+    "website/src/hooks/usePermissions.ts": {
+      "domain": "auth",
+      "tier": "hook",
+      "intent": "Permission checking hook backed by real API that resolves which actions the current user can perform",
+      "entities": ["user", "permission"],
+      "journeys": ["every-navigation"],
+      "keyExports": ["usePermissions", "Permission"],
+      "notes": "Uses AuthContext user ID to fetch permission groups; hasPermission(module, action) pattern"
+    },
+    "website/src/hooks/useProducts.ts": {
+      "domain": "services",
+      "tier": "hook",
+      "intent": "Fetches product catalog from API for use in ServiceForm and ServiceCatalog page",
+      "entities": ["product"],
+      "journeys": ["service-record"],
+      "keyExports": ["useProducts", "Product"],
+      "notes": "Maps ApiProduct to Product; used where service catalog selection is needed"
+    },
+    "website/src/hooks/useRelationshipsData.ts": {
+      "domain": "settings",
+      "tier": "hook",
+      "intent": "State management for Relationships page: active tab, role selection, and permission data from real API",
+      "entities": ["permission"],
+      "journeys": ["permission-edit"],
+      "keyExports": ["useRelationshipsData", "RelationshipsTab"],
+      "notes": "Fetches permission groups; uses ENTITY_NODES/ENTITY_RELATIONS from entityGraph constants"
+    },
+    "website/src/hooks/useServices.ts": {
+      "domain": "services",
+      "tier": "hook",
+      "intent": "Service record CRUD from API (Sale Orders), status filtering, and multi-visit tracking",
+      "entities": ["service", "customer", "appointment"],
+      "journeys": ["service-record"],
+      "keyExports": ["useServices", "CategoryFilter", "CreateServiceInput", "ServiceStatus"],
+      "notes": "Maps saleorders to ServiceRecord; creates saleorder+saleorderline; tracks visit counts"
+    },
+    "website/src/hooks/useSettings.ts": {
+      "domain": "settings",
+      "tier": "hook",
+      "intent": "Settings state management with real API for customer sources, system preferences, service catalog, and roles",
+      "entities": ["service", "permission"],
+      "journeys": [],
+      "keyExports": ["useCustomerSources", "useSystemPreferences", "useServiceCatalog", "useRoleConfig"],
+      "notes": "Exports multiple named hooks for each settings subsystem; backed by real API endpoints"
+    },
+    "website/src/hooks/useTodaySchedule.ts": {
+      "domain": "appointments",
+      "tier": "hook",
+      "intent": "Fetches today appointments mapped to CalendarAppointment format for schedule display",
+      "entities": ["appointment"],
+      "journeys": ["dashboard-view"],
+      "keyExports": ["useTodaySchedule"],
+      "notes": "Uses mapApiAppointmentToCalendar utility; filters to current date only"
+    },
+    "website/src/hooks/useUniqueCheck.ts": {
+      "domain": "customers",
+      "tier": "hook",
+      "intent": "Debounced uniqueness check for phone/email fields to prevent duplicate customer records",
+      "entities": ["customer"],
+      "journeys": ["customer-create"],
+      "keyExports": ["useUniqueCheck"],
+      "notes": "Debounces 500ms; cancels inflight checks; used in WalkInForm and AddCustomerForm"
+    },
+    "website/src/hooks/useVersionCheck.ts": {
+      "domain": "infra",
+      "tier": "hook",
+      "intent": "Polls /version.json every 5 minutes to detect new deployments and trigger update notification",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["useVersionCheck"],
+      "notes": "Compares version string; applyUpdate() reloads the page; used by VersionDisplay component"
+    },
+    "website/src/hooks/useWebsiteData.ts": {
+      "domain": "cms",
+      "tier": "hook",
+      "intent": "Website CMS state management with real API for pages CRUD, search, and status filtering",
+      "entities": ["page"],
+      "journeys": [],
+      "keyExports": ["useWebsiteData", "WebsiteTab"],
+      "notes": "Fetches/creates/updates/deletes website pages via API; maps ApiWebsitePage to WebsitePage"
+    },
+    "website/src/contexts/AppointmentHoverContext.tsx": {
+      "domain": "appointments",
+      "tier": "context",
+      "intent": "Bidirectional hover linking between PatientCheckIn (Zone 1) and TodayAppointments (Zone 3)",
+      "entities": ["appointment"],
+      "journeys": ["appointment-checkin"],
+      "keyExports": ["AppointmentHoverProvider", "useAppointmentHover"],
+      "notes": "Uses ref-based callbacks to avoid re-render cascade; wraps Overview children"
+    },
+    "website/src/contexts/AuthContext.tsx": {
+      "domain": "auth",
+      "tier": "context",
+      "intent": "Global auth state providing current user, login/logout, and permission checking for all pages",
+      "entities": ["user", "permission"],
+      "journeys": ["login", "logout", "every-navigation"],
+      "keyExports": ["AuthProvider", "useAuth"],
+      "notes": "Calls /api/auth/login and /api/auth/me; stores session; hasPermission derived from user roles"
+    },
+    "website/src/contexts/LocationContext.tsx": {
+      "domain": "locations",
+      "tier": "context",
+      "intent": "Global location filter state synced across all pages with auto-lock for restricted users",
+      "entities": ["location"],
+      "journeys": ["location-filter", "every-navigation"],
+      "keyExports": ["LocationProvider", "useLocationFilter"],
+      "notes": "Provides selectedLocationId and isSingleLocation; auto-locks if user has restricted location scope"
+    },
+    "website/src/contexts/TimezoneContext.tsx": {
+      "domain": "infra",
+      "tier": "context",
+      "intent": "Global timezone state used by calendar and appointment hooks for date-aware filtering",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["TimezoneProvider", "useTimezone"],
+      "notes": "Persists selected timezone; Vietnam (Asia/Ho_Chi_Minh) is the default; exposes availableTimezones"
+    },
+    "website/src/lib/api.ts": {
+      "domain": "infra",
+      "tier": "lib",
+      "intent": "Centralized API client for the tgclinic-api backend with typed fetch functions for all entities",
+      "entities": ["customer", "appointment", "employee", "location", "service", "payment", "permission"],
+      "journeys": [],
+      "keyExports": ["fetchPartners", "fetchAppointments", "fetchEmployees", "fetchCompanies", "createAppointment", "updateAppointment", "PaginatedResponse"],
+      "notes": "Reads VITE_API_URL; all functions throw typed errors; backend uses search_path=dbo"
+    },
+    "website/src/lib/calendarUtils.ts": {
+      "domain": "appointments",
+      "tier": "lib",
+      "intent": "Utilities to map API appointment objects to CalendarAppointment type used by calendar views",
+      "entities": ["appointment"],
+      "journeys": [],
+      "keyExports": ["mapApiAppointmentToCalendar", "calculateEndTime"],
+      "notes": "calculateEndTime adds durationMinutes to startTime; default 30-min duration if null"
+    },
+    "website/src/lib/dateUtils.ts": {
+      "domain": "infra",
+      "tier": "lib",
+      "intent": "Date utilities with timezone support including available timezone list and formatting helpers",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["TimezoneOption"],
+      "notes": "Vietnam timezone listed first as default; used by TimezoneContext"
+    },
+    "website/src/lib/formatting.ts": {
+      "domain": "shared",
+      "tier": "lib",
+      "intent": "Formatting utilities including Vietnamese Dong (VND) currency formatter",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["formatVND"],
+      "notes": "Uses Intl.NumberFormat vi-VN with appended dong symbol; used across all monetary displays"
+    },
+    "website/src/lib/ipAccessMiddleware.ts": {
+      "domain": "settings",
+      "tier": "lib",
+      "intent": "Pure function to check if an IP is allowed given IP access settings (whitelist/blacklist/allow_all)",
+      "entities": ["ipRule"],
+      "journeys": [],
+      "keyExports": ["checkIpAccess"],
+      "notes": "Framework-agnostic; usable on both client and server; depends on ipValidation utilities"
+    },
+    "website/src/lib/ipValidation.ts": {
+      "domain": "settings",
+      "tier": "lib",
+      "intent": "IPv4 validation and range checking utilities for IP access control (CIDR, private ranges)",
+      "entities": ["ipRule"],
+      "journeys": [],
+      "keyExports": ["validateIp", "IpValidationResult"],
+      "notes": "Regex-based IPv4 validation; private range detection; CIDR mask support"
+    },
+    "website/src/lib/utils.ts": {
+      "domain": "shared",
+      "tier": "lib",
+      "intent": "Core utilities: Tailwind class merging (cn) and accent-insensitive Vietnamese text normalizer",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["cn", "normalizeText"],
+      "notes": "normalizeText decomposes Unicode NFD and strips diacritics for search; cn wraps clsx+twMerge"
+    },
+    "website/src/lib/utils.test.ts": {
+      "domain": "shared",
+      "tier": "lib",
+      "intent": "Unit tests for utils library covering cn and normalizeText functions",
+      "entities": [],
+      "journeys": [],
+      "keyExports": [],
+      "notes": "Vitest"
+    },
+    "website/src/lib/vietqr.ts": {
+      "domain": "payments",
+      "tier": "lib",
+      "intent": "VietQR URL builder and payment description generator for bank transfer QR codes",
+      "entities": ["payment", "bankAccount"],
+      "journeys": ["payment-create", "deposit-topup"],
+      "keyExports": ["buildVietQrUrl", "generatePaymentDescription", "VietQrUrlParams"],
+      "notes": "Builds img.vietqr.io URL with BIN, account, amount, and encoded description"
+    },
+    "website/src/lib/vietqr.test.ts": {
+      "domain": "payments",
+      "tier": "lib",
+      "intent": "Unit tests for vietqr URL builder and payment description functions",
+      "entities": [],
+      "journeys": [],
+      "keyExports": [],
+      "notes": "Vitest"
+    },
+    "website/src/types/appointment.ts": {
+      "domain": "appointments",
+      "tier": "type",
+      "intent": "Appointment and check-in status type definitions shared across calendar, form, and check-in components",
+      "entities": ["appointment"],
+      "journeys": [],
+      "keyExports": ["AppointmentStatus", "CheckInStatus", "CalendarAppointment", "ManagedAppointment", "CHECK_IN_STATUS_LABELS", "CHECK_IN_FLOW_ORDER"],
+      "notes": "Source of truth for appointment status enums; re-exported via data/mockAppointments.ts"
+    },
+    "website/src/types/common.ts": {
+      "domain": "shared",
+      "tier": "type",
+      "intent": "Shared type definitions for Notification, RevenueDataPoint, LocationOption, and QUICK_ACTIONS",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["Notification", "RevenueDataPoint", "LocationOption", "QUICK_ACTIONS"],
+      "notes": "Cross-domain shared types used by Overview, hooks, and shared components"
+    },
+    "website/src/types/customer.ts": {
+      "domain": "customers",
+      "tier": "type",
+      "intent": "Customer entity type definitions including Customer, CustomerPhoto, CustomerDeposit, and form types",
+      "entities": ["customer", "deposit"],
+      "journeys": [],
+      "keyExports": ["Customer", "CustomerStatus", "CustomerFormData", "CustomerPhoto", "CustomerDeposit", "CustomerService", "CustomerAppointment"],
+      "notes": "Source of truth for all customer-related types; re-exported via data mock files"
+    },
+    "website/src/types/employee.ts": {
+      "domain": "employees",
+      "tier": "type",
+      "intent": "Employee entity type definitions including roles, tiers, schedule blocks, and DB flag mappings",
+      "entities": ["employee"],
+      "journeys": [],
+      "keyExports": ["Employee", "EmployeeTier", "EmployeeRole", "EmployeeStatus", "ScheduleBlock", "TIER_LABELS", "ROLE_LABELS", "ALL_ROLES", "ALL_TIERS", "inferRoleFromFlags"],
+      "notes": "inferRoleFromFlags maps doctor/dentist/receptionist boolean flags from DB to EmployeeRole"
+    },
+    "website/src/types/ipAccessControl.ts": {
+      "domain": "settings",
+      "tier": "type",
+      "intent": "IP access control type definitions for entries, settings, modes, and validation results",
+      "entities": ["ipRule"],
+      "journeys": [],
+      "keyExports": ["IpEntry", "IpAccessMode", "IpAccessSettings", "IpValidationResult", "IpAccessCheckResult"],
+      "notes": "Used by useIpAccessControl hook, IpAccessControl component, and ipAccessMiddleware"
+    },
+    "website/src/types/location.ts": {
+      "domain": "locations",
+      "tier": "type",
+      "intent": "Location/branch type definitions including LocationBranch, LocationMetrics, and status types",
+      "entities": ["location"],
+      "journeys": [],
+      "keyExports": ["LocationBranch", "LocationStatus", "LocationMetrics"],
+      "notes": "Source of truth for location types; re-exported via data/mockLocations.ts"
+    },
+    "website/src/types/monthlyPlans.ts": {
+      "domain": "payments",
+      "tier": "type",
+      "intent": "Monthly payment plan type definitions for plans, installments, and their status enums",
+      "entities": ["plan"],
+      "journeys": [],
+      "keyExports": ["MonthlyPlan", "Installment", "InstallmentStatus", "PlanStatus", "PlanCreationInput"],
+      "notes": "Source of truth for installment plan types; re-exported via data/mockMonthlyPlans.ts"
+    },
+    "website/src/types/payment.ts": {
+      "domain": "payments",
+      "tier": "type",
+      "intent": "Payment entity type definitions including methods, statuses, wallet transactions, and outstanding balances",
+      "entities": ["payment", "deposit"],
+      "journeys": [],
+      "keyExports": ["PaymentMethod", "PaymentStatus", "PaymentRecord", "WalletTransaction", "OutstandingBalanceItem", "RecordType"],
+      "notes": "Source of truth for all payment types; re-exported via data/mockPayment.ts"
+    },
+    "website/src/types/permissions.ts": {
+      "domain": "settings",
+      "tier": "type",
+      "intent": "Permission and Role type definitions for the RBAC system",
+      "entities": ["permission", "user"],
+      "journeys": [],
+      "keyExports": ["Permission", "Role"],
+      "notes": "Used by usePermissions, useRelationshipsData, PermissionMatrix, and EntityRelationshipMap"
+    },
+    "website/src/types/service.ts": {
+      "domain": "services",
+      "tier": "type",
+      "intent": "Service record type definitions including catalog items, visit tracking, and status enums",
+      "entities": ["service", "product"],
+      "journeys": [],
+      "keyExports": ["ServiceCatalogItem", "ServiceRecord", "ServiceVisit", "ServiceStatus", "VisitStatus"],
+      "notes": "Source of truth for service types; re-exported via data/mockServices.ts"
+    },
+    "website/src/types/settings.ts": {
+      "domain": "settings",
+      "tier": "type",
+      "intent": "Settings type definitions for system preferences, customer sources, and catalog services",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["SystemPreference", "CustomerSource", "CatalogService", "PreferenceType"],
+      "notes": "Source of truth for settings types; re-exported via data/mockSettings.ts"
+    },
+    "website/src/types/use-places-autocomplete.d.ts": {
+      "domain": "shared",
+      "tier": "type",
+      "intent": "Type declarations for the use-places-autocomplete library bridging Google Maps API types",
+      "entities": [],
+      "journeys": [],
+      "keyExports": [],
+      "notes": "Ambient module declaration; extends google.maps types for place suggestions"
+    },
+    "website/src/types/version.d.ts": {
+      "domain": "infra",
+      "tier": "type",
+      "intent": "Global declarations for Vite build-time injected version constants",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["__APP_VERSION__", "__APP_BUILD_TIME__", "__APP_GIT_COMMIT__", "__APP_GIT_BRANCH__"],
+      "notes": "Declares globals injected by vite.config.ts define block"
+    },
+    "website/src/types/website.ts": {
+      "domain": "cms",
+      "tier": "type",
+      "intent": "Website CMS type definitions for pages, SEO metadata, and service listings",
+      "entities": ["page"],
+      "journeys": [],
+      "keyExports": ["WebsitePage", "PageStatus", "SEOMeta", "ServiceListing"],
+      "notes": "Source of truth for CMS types; re-exported via data/mockWebsite.ts"
+    },
+    "website/src/constants/entityGraph.ts": {
+      "domain": "settings",
+      "tier": "constant",
+      "intent": "Static entity relationship graph data (nodes and relations) for the architecture visualization",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["ENTITY_NODES", "ENTITY_RELATIONS", "EntityNode", "EntityRelation"],
+      "notes": "Node types: core|support|external; relation types: one-to-many|many-to-many|one-to-one"
+    },
+    "website/src/constants/index.ts": {
+      "domain": "infra",
+      "tier": "constant",
+      "intent": "Shared application constants including status colors, appointment types, routes, and calendar config",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["STATUS_COLORS", "APPOINTMENT_TYPE_COLORS", "APPOINTMENT_TYPE_LABELS", "APPOINTMENT_CARD_COLORS", "ROUTES", "WEEK_DAYS", "TIME_SLOTS", "APPOINTMENT_STATUS_LABELS_VI"],
+      "notes": "Used across ALL_COMPONENTS; APPOINTMENT_CARD_COLORS is canonical color source for calendar cards"
+    },
+    "website/src/constants/statusStyles.ts": {
+      "domain": "shared",
+      "tier": "constant",
+      "intent": "Centralized status label and Tailwind style maps for all entity states across the app",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["STATUS_LABELS", "STATUS_STYLES", "STATUS_BADGE_STYLES", "STATUS_DOT_COLORS", "TIER_LABELS", "TIER_STYLES", "ROLE_LABELS", "ROLE_STYLES"],
+      "notes": "Extracted from mock files for centralized style management; imported by type files and data files"
+    },
+    "website/src/data/mockAppointments.ts": {
+      "domain": "appointments",
+      "tier": "data",
+      "intent": "Re-exports appointment types and check-in constants from /types/appointment.ts",
+      "entities": ["appointment"],
+      "journeys": [],
+      "keyExports": ["ManagedAppointment", "CheckInStatus", "CHECK_IN_STATUS_LABELS", "CHECK_IN_FLOW_ORDER"],
+      "notes": "Thin re-export layer; historical filename kept for import compatibility"
+    },
+    "website/src/data/mockCalendar.ts": {
+      "domain": "appointments",
+      "tier": "data",
+      "intent": "Re-exports calendar appointment types and status style constants",
+      "entities": ["appointment"],
+      "journeys": [],
+      "keyExports": ["CalendarAppointment", "STATUS_BADGE_STYLES", "STATUS_DOT_COLORS", "STATUS_LABELS"],
+      "notes": "Thin re-export layer; imports from types/appointment and constants/statusStyles"
+    },
+    "website/src/data/mockCustomerForm.ts": {
+      "domain": "customers",
+      "tier": "data",
+      "intent": "Re-exports customer form types and provides MOCK_REFERRAL_CODES and CUSTOMER_SOURCES static data",
+      "entities": ["customer"],
+      "journeys": ["customer-create"],
+      "keyExports": ["CustomerFormData", "FormValidationError", "CustomerSource", "ReferralCode", "MOCK_REFERRAL_CODES", "CUSTOMER_SOURCES"],
+      "notes": "CUSTOMER_SOURCES and MOCK_REFERRAL_CODES are static data still in this file"
+    },
+    "website/src/data/mockCustomerProfile.ts": {
+      "domain": "customers",
+      "tier": "data",
+      "intent": "Re-exports customer profile sub-types (photos, deposits, transactions, appointments, services)",
+      "entities": ["customer", "deposit"],
+      "journeys": [],
+      "keyExports": ["CustomerPhoto", "CustomerDeposit", "DepositTransaction", "CustomerAppointment", "CustomerService"],
+      "notes": "Thin re-export layer from /types/customer.ts"
+    },
+    "website/src/data/mockCustomers.ts": {
+      "domain": "customers",
+      "tier": "data",
+      "intent": "Re-exports Customer and CustomerStatus types from /types/customer.ts",
+      "entities": ["customer"],
+      "journeys": [],
+      "keyExports": ["Customer", "CustomerStatus"],
+      "notes": "Thin re-export layer; historical filename kept for import compatibility"
+    },
+    "website/src/data/mockDashboard.ts": {
+      "domain": "infra",
+      "tier": "data",
+      "intent": "Re-exports dashboard types and provides QUICK_ACTIONS constant and empty MOCK_NOTIFICATIONS array",
+      "entities": [],
+      "journeys": ["dashboard-view"],
+      "keyExports": ["Notification", "RevenueDataPoint", "LocationOption", "QUICK_ACTIONS", "MOCK_NOTIFICATIONS"],
+      "notes": "QUICK_ACTIONS sourced from /types/common.ts; MOCK_NOTIFICATIONS is empty (real data from API)"
+    },
+    "website/src/data/mockEmployees.ts": {
+      "domain": "employees",
+      "tier": "data",
+      "intent": "Re-exports employee types, tier/role style constants, and DB flag mapping utilities",
+      "entities": ["employee"],
+      "journeys": [],
+      "keyExports": ["Employee", "EmployeeTier", "EmployeeRole", "TIER_LABELS", "ROLE_LABELS", "ALL_TIERS", "ALL_ROLES", "inferRoleFromFlags"],
+      "notes": "Thin re-export layer; DB flag helpers passed through from /types/employee.ts"
+    },
+    "website/src/data/mockIpAccessControl.ts": {
+      "domain": "settings",
+      "tier": "data",
+      "intent": "Re-exports IP access control types and provides empty MOCK_IP_ENTRIES stub",
+      "entities": ["ipRule"],
+      "journeys": [],
+      "keyExports": ["IpEntry", "IpAccessSettings", "IpAccessStats", "MOCK_IP_ENTRIES"],
+      "notes": "Thin re-export layer; MOCK_IP_ENTRIES is empty (real data from API)"
+    },
+    "website/src/data/mockLocations.ts": {
+      "domain": "locations",
+      "tier": "data",
+      "intent": "Re-exports location types and status style constants plus empty MOCK_LOCATIONS stub",
+      "entities": ["location"],
+      "journeys": [],
+      "keyExports": ["LocationBranch", "LocationStatus", "STATUS_LABELS", "STATUS_STYLES", "MOCK_LOCATIONS"],
+      "notes": "Thin re-export layer; real location data comes from /api/Companies"
+    },
+    "website/src/data/mockMonthlyPlans.ts": {
+      "domain": "payments",
+      "tier": "data",
+      "intent": "Re-exports monthly plan types and provides empty MOCK_MONTHLY_PLANS stub",
+      "entities": ["plan"],
+      "journeys": [],
+      "keyExports": ["MonthlyPlan", "Installment", "InstallmentStatus", "PlanStatus", "MOCK_MONTHLY_PLANS"],
+      "notes": "Thin re-export layer; real plan data comes from API"
+    },
+    "website/src/data/mockPayment.ts": {
+      "domain": "payments",
+      "tier": "data",
+      "intent": "Re-exports payment types and provides PAYMENT_STATUS_LABELS and PAYMENT_METHOD_LABELS display maps",
+      "entities": ["payment"],
+      "journeys": [],
+      "keyExports": ["PaymentRecord", "PaymentMethod", "PaymentStatus", "PAYMENT_STATUS_LABELS", "PAYMENT_METHOD_LABELS", "PAYMENT_STATUS_STYLES"],
+      "notes": "Label and style maps are static config; actual payment data comes from real API"
+    },
+    "website/src/data/mockPermissionGroups.ts": {
+      "domain": "settings",
+      "tier": "data",
+      "intent": "Re-exports permission types and entity graph constants; provides PERMISSIONS and ROLES seed arrays",
+      "entities": ["permission"],
+      "journeys": [],
+      "keyExports": ["Permission", "Role", "PERMISSIONS", "ROLES", "ENTITY_NODES", "ENTITY_RELATIONS"],
+      "notes": "PERMISSIONS and ROLES are static seed data used when API returns empty"
+    },
+    "website/src/data/mockPermissions.ts": {
+      "domain": "settings",
+      "tier": "data",
+      "intent": "Re-exports permission/role types and entity graph constants for relationship visualization",
+      "entities": ["permission"],
+      "journeys": [],
+      "keyExports": ["Permission", "Role", "ENTITY_NODES", "ENTITY_RELATIONS"],
+      "notes": "Thin re-export layer; subset of mockPermissionGroups exports"
+    },
+    "website/src/data/mockServices.ts": {
+      "domain": "services",
+      "tier": "data",
+      "intent": "Re-exports service types and provides Vietnamese SERVICE_STATUS_LABELS and VISIT_STATUS_LABELS display maps",
+      "entities": ["service"],
+      "journeys": [],
+      "keyExports": ["ServiceRecord", "ServiceStatus", "VisitStatus", "SERVICE_STATUS_LABELS", "VISIT_STATUS_LABELS", "VISIT_STATUS_STYLES"],
+      "notes": "Labels are Vietnamese; real service data from API"
+    },
+    "website/src/data/mockSettings.ts": {
+      "domain": "settings",
+      "tier": "data",
+      "intent": "Re-exports settings types and provides DEFAULT_CUSTOMER_SOURCES seed data",
+      "entities": [],
+      "journeys": [],
+      "keyExports": ["CatalogService", "CustomerSource", "SystemPreference", "DEFAULT_CUSTOMER_SOURCES"],
+      "notes": "DEFAULT_CUSTOMER_SOURCES used as fallback when API returns empty list"
+    },
+    "website/src/data/mockWebsite.ts": {
+      "domain": "cms",
+      "tier": "data",
+      "intent": "Re-exports CMS types and provides PAGE_STATUS_LABELS, PAGE_TEMPLATES, SERVICE_CATEGORIES, MOCK_PAGES",
+      "entities": ["page"],
+      "journeys": [],
+      "keyExports": ["WebsitePage", "PageStatus", "PAGE_STATUS_LABELS", "PAGE_STATUS_STYLES", "PAGE_TEMPLATES", "SERVICE_CATEGORIES", "MOCK_PAGES"],
+      "notes": "MOCK_PAGES used by SEOManager as static seed; other data from real API"
+    },
+    "website/src/data/serviceCatalog.ts": {
+      "domain": "services",
+      "tier": "data",
+      "intent": "Complete list of dental service items organized by category sourced from clinic product spreadsheet",
+      "entities": ["service", "product"],
+      "journeys": [],
+      "keyExports": ["ServiceItem", "SERVICE_CATALOG"],
+      "notes": "Static data from Website spreadsheet; fields: code, name, canOrderLab, category, unit"
+    }
+  }
+}
