@@ -1,7 +1,7 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Users, Plus, Phone, Mail, MapPin, Search, Trash2 } from 'lucide-react';
-import { softDeletePartner, hardDeletePartner } from '@/lib/api';
+import { softDeletePartner, hardDeletePartner, registerFace } from '@/lib/api';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { AddCustomerForm } from '@/components/forms/AddCustomerForm';
@@ -216,8 +216,19 @@ export function Customers() {
 
   // Hooks for profile actions
   const { createAppointment, updateAppointment } = useAppointments(selectedLocationId);
-  const { createServiceRecord, getRecordsByCustomer } = useServices(selectedLocationId);
-  const { addDeposit, deposits, loading: depositsLoading, loadDeposits } = useDeposits();
+  const { createServiceRecord, updateServiceRecord, getRecordsByCustomer, updateServiceStatus } = useServices(selectedLocationId);
+  const {
+    depositList,
+    usageHistory,
+    balance: depositBalanceData,
+    loading: depositsLoading,
+    loadDeposits,
+    addDeposit,
+    addRefund,
+    voidDeposit,
+    removeDeposit,
+    editDeposit,
+  } = useDeposits();
   const { payments: customerPayments, isLoading: paymentsLoading, addPayment, refetch: refetchPayments } = useCustomerPayments(selectedCustomerId);
 
   // Callbacks for CustomerProfile
@@ -262,6 +273,10 @@ export function Customers() {
     serviceName: string;
     doctorId: string;
     doctorName: string;
+    assistantId?: string | null;
+    assistantName?: string;
+    dentalAideId?: string | null;
+    dentalAideName?: string;
     locationId: string;
     locationName: string;
     startDate: string;
@@ -278,6 +293,10 @@ export function Customers() {
       category: 'treatment',
       doctorId: data.doctorId,
       doctorName: data.doctorName,
+      assistantId: data.assistantId ?? null,
+      assistantName: data.assistantName ?? '',
+      dentalAideId: data.dentalAideId ?? null,
+      dentalAideName: data.dentalAideName ?? '',
       locationId: data.locationId,
       locationName: data.locationName,
       totalVisits: 1,
@@ -288,6 +307,48 @@ export function Customers() {
       toothNumbers: data.toothNumbers,
     });
   }, [createServiceRecord, selectedCustomerId, hookProfile]);
+
+  const handleUpdateService = useCallback(async (data: {
+    id: string;
+    catalogItemId: string;
+    serviceName: string;
+    doctorId: string;
+    doctorName: string;
+    assistantId?: string | null;
+    assistantName?: string;
+    dentalAideId?: string | null;
+    dentalAideName?: string;
+    locationId: string;
+    locationName: string;
+    startDate: string;
+    notes: string;
+    totalCost: number;
+    toothNumbers: readonly string[];
+  }) => {
+    await updateServiceRecord({
+      id: data.id,
+      customerId: selectedCustomerId ?? '',
+      customerName: hookProfile?.name ?? '',
+      customerPhone: hookProfile?.phone ?? '',
+      catalogItemId: data.catalogItemId,
+      serviceName: data.serviceName,
+      category: 'treatment',
+      doctorId: data.doctorId,
+      doctorName: data.doctorName,
+      assistantId: data.assistantId ?? null,
+      assistantName: data.assistantName ?? '',
+      dentalAideId: data.dentalAideId ?? null,
+      dentalAideName: data.dentalAideName ?? '',
+      locationId: data.locationId,
+      locationName: data.locationName,
+      totalVisits: 1,
+      totalCost: data.totalCost,
+      startDate: data.startDate,
+      expectedEndDate: data.startDate,
+      notes: data.notes,
+      toothNumbers: data.toothNumbers,
+    });
+  }, [updateServiceRecord, selectedCustomerId, hookProfile]);
 
   const handleMakePayment = useCallback(async (data: PaymentFormData) => {
     await addPayment({
@@ -320,7 +381,39 @@ export function Customers() {
   ) => {
     await addDeposit(customerId, amount, method, date, note);
     refetchProfile();
-  }, [addDeposit, refetchProfile]);
+    if (selectedCustomerId) loadDeposits(selectedCustomerId);
+  }, [addDeposit, refetchProfile, selectedCustomerId, loadDeposits]);
+
+  const handleAddRefund = useCallback(async (
+    customerId: string,
+    amount: number,
+    method: 'cash' | 'bank_transfer',
+    date?: string,
+    note?: string
+  ) => {
+    await addRefund(customerId, amount, method, date, note);
+    refetchProfile();
+    if (selectedCustomerId) loadDeposits(selectedCustomerId);
+  }, [addRefund, refetchProfile, selectedCustomerId, loadDeposits]);
+
+  const handleVoidDeposit = useCallback(async (id: string) => {
+    await voidDeposit(id);
+    if (selectedCustomerId) loadDeposits(selectedCustomerId);
+  }, [voidDeposit, selectedCustomerId, loadDeposits]);
+
+  const handleDeleteDeposit = useCallback(async (id: string) => {
+    await removeDeposit(id);
+    if (selectedCustomerId) loadDeposits(selectedCustomerId);
+  }, [removeDeposit, selectedCustomerId, loadDeposits]);
+
+  const handleEditDeposit = useCallback(async (id: string, data: Partial<{ amount: number; method: 'cash' | 'bank_transfer'; notes: string; paymentDate: string }>) => {
+    await editDeposit(id, data);
+    if (selectedCustomerId) loadDeposits(selectedCustomerId);
+  }, [editDeposit, selectedCustomerId, loadDeposits]);
+
+  const handleRefreshDeposits = useCallback(() => {
+    if (selectedCustomerId) loadDeposits(selectedCustomerId);
+  }, [selectedCustomerId, loadDeposits]);
 
   // Load deposits when a customer is selected
   useEffect(() => {
@@ -330,6 +423,13 @@ export function Customers() {
   }, [selectedCustomerId, loadDeposits]);
 
   const [createdCustomerCode, setCreatedCustomerCode] = useState<string | null>(null);
+  const [pendingFaceImage, setPendingFaceImage] = useState<Blob | null>(null);
+
+  useEffect(() => {
+    if (!showForm) {
+      setPendingFaceImage(null);
+    }
+  }, [showForm]);
 
   const handleSubmit = async (data: CustomerFormData) => {
     if (isEditMode && selectedCustomerId) {
@@ -339,6 +439,14 @@ export function Customers() {
       setIsEditMode(false);
     } else {
       const created = await createCustomer(data);
+      if (pendingFaceImage) {
+        try {
+          await registerFace(created.id, pendingFaceImage);
+        } catch (err) {
+          console.error('Post-save face registration failed:', err);
+        }
+        setPendingFaceImage(null);
+      }
       setCreatedCustomerCode(created.code ?? null);
       setShowForm(false);
       setIsEditMode(false);
@@ -534,15 +642,24 @@ export function Customers() {
           date: r.startDate || r.createdAt || '-',
           service: r.serviceName,
           doctor: r.doctorName || 'N/A',
+          doctorId: r.doctorId,
+          assistantId: r.assistantId,
+          assistantName: r.assistantName,
+          dentalAideId: r.dentalAideId,
+          dentalAideName: r.dentalAideName,
+          catalogItemId: r.catalogItemId,
           cost: r.totalCost,
           status:
             r.status === 'completed'
               ? 'completed'
               : r.status === 'cancelled'
               ? 'cancelled'
-              : 'in-progress',
+              : 'active',
           tooth: r.toothNumbers?.join(', ') || '-',
           notes: r.notes || '',
+          orderName: r.orderName,
+          paidAmount: r.paidAmount,
+          residual: r.residual ?? Math.max(0, (r.totalCost ?? 0) - (r.paidAmount ?? 0)),
         }))
       : [];
 
@@ -556,16 +673,24 @@ export function Customers() {
           profile={profileData}
           appointments={hookAppointments}
           services={customerServices}
-          depositTransactions={deposits}
+          depositList={depositList}
+          usageHistory={usageHistory}
+          depositBalance={depositBalanceData}
           payments={customerPayments}
           activeTab={profileTab}
           onTabChange={setProfileTab}
           onBack={() => navigate('/customers')}
           onEdit={canEditCustomers ? handleEdit : undefined}
           onAddDeposit={handleAddDeposit}
+          onAddRefund={handleAddRefund}
+          onVoidDeposit={handleVoidDeposit}
+          onDeleteDeposit={handleDeleteDeposit}
+          onEditDeposit={handleEditDeposit}
+          onRefreshDeposits={handleRefreshDeposits}
           onCreateAppointment={handleCreateAppointment}
           onUpdateAppointment={handleUpdateAppointment}
           onCreateService={handleCreateService}
+          onUpdateService={handleUpdateService}
           onMakePayment={handleMakePayment}
           canSoftDelete={canSoftDelete}
           canHardDelete={canHardDelete}
@@ -585,6 +710,9 @@ export function Customers() {
           checkupsLoading={checkupsLoading}
           checkupsError={checkupsError}
           onRefetchCheckups={refetchCheckups}
+          onUpdateServiceStatus={async (serviceId, newStatus) => {
+            await updateServiceStatus(serviceId, newStatus as 'active' | 'completed' | 'cancelled');
+          }}
         />
         {showForm && isEditMode && (
           <div className="modal-container">
@@ -594,8 +722,10 @@ export function Customers() {
                 canEdit={canEditCustomers}
                 initialData={getEditFormData()}
                 customerRef={getCustomerCode()}
+                customerId={selectedCustomerId ?? undefined}
                 onSubmit={handleSubmit}
                 onCancel={() => { setShowForm(false); setIsEditMode(false); }}
+                onPendingFaceImage={setPendingFaceImage}
               />
             </div>
           </div>
@@ -632,8 +762,10 @@ export function Customers() {
           <div className="modal-content max-w-[1100px] animate-in zoom-in-95 duration-200 flex flex-col">
             <AddCustomerForm
               customerRef={createdCustomerCode}
+              customerId={selectedCustomerId ?? undefined}
               onSubmit={handleSubmit}
               onCancel={() => { setShowForm(false); setCreatedCustomerCode(null); }}
+              onPendingFaceImage={setPendingFaceImage}
             />
           </div>
         </div>
