@@ -35,6 +35,8 @@ services:
       PORT: "3002"
       NODE_ENV: production
       GOOGLE_PLACES_API_KEY: ${GOOGLE_PLACES_API_KEY}
+      HOSOONLINE_BASE_URL: ${HOSOONLINE_BASE_URL:-https://hosoonline.com}
+      HOSOONLINE_API_KEY: ${HOSOONLINE_API_KEY}
     ports:
       - "127.0.0.1:3002:3002"
 
