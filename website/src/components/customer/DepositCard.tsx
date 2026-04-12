@@ -1,5 +1,6 @@
 import { Wallet, ArrowUpCircle, ArrowDownCircle, TrendingUp } from 'lucide-react';
 import type { CustomerDeposit } from '@/types/customer';
+import { formatVND } from '@/lib/formatting';
 
 /**
  * Deposit Card - Shows wallet balance and transaction history
@@ -8,10 +9,6 @@ import type { CustomerDeposit } from '@/types/customer';
 
 interface DepositCardProps {
   readonly deposit: CustomerDeposit;
-}
-
-function formatVND(amount: number): string {
-  return new Intl.NumberFormat('vi-VN').format(Math.abs(amount)) + ' \u20ab';
 }
 
 export function DepositCard({ deposit }: DepositCardProps) {
@@ -83,7 +80,7 @@ export function DepositCard({ deposit }: DepositCardProps) {
               <span className={`text-sm font-medium ${
                 tx.type === 'topup' ? 'text-emerald-600' : 'text-red-600'
               }`}>
-                {tx.type === 'topup' ? '+' : '-'}{formatVND(tx.amount)}
+                {tx.type === 'topup' ? '+' : '-'}{formatVND(Math.abs(tx.amount))}
               </span>
             </div>
           ))}

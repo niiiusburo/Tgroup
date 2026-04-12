@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { query } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 
 // GET /api/Services - List services (optionally filtered by customerId)
-router.get('/', async (req, res) => {
+router.get('/', requirePermission('services.view'), async (req, res) => {
   try {
     const { customerId, limit = 100, offset = 0 } = req.query;
     
@@ -67,7 +68,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/Services - Create a new service
-router.post('/', async (req, res) => {
+router.post('/', requirePermission('services.edit'), async (req, res) => {
   try {
     const { customer_id, service_type, unit_price, quantity, discount, doctor_id, notes, status } = req.body;
     
@@ -93,7 +94,7 @@ router.post('/', async (req, res) => {
       total
     ]);
     
-    const row = result.rows[0];
+    const row = result[0];
     res.status(201).json({
       id: row.id,
       customerId: row.customer_id,

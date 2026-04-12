@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { query, pool } = require("../db");
+const { requirePermission } = require("../middleware/auth");
 
 function mapAllocations(allocResult) {
   return allocResult.map(a => {
@@ -231,7 +232,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST /api/Payments - Create a new payment with optional allocations
-router.post("/", async (req, res) => {
+router.post("/", requirePermission('payment.edit'), async (req, res) => {
   try {
     const {
       customer_id, service_id, amount, method, notes,
@@ -322,7 +323,7 @@ router.post("/", async (req, res) => {
 });
 
 // POST /api/Payments/:id/void - Void payment and reverse allocations
-router.post("/:id/void", async (req, res) => {
+router.post("/:id/void", requirePermission('payment.edit'), async (req, res) => {
   const { id } = req.params;
   const { reason } = req.body || {};
   const client = await pool.connect();
@@ -353,7 +354,7 @@ router.post("/:id/void", async (req, res) => {
 });
 
 // POST /api/Payments/:id/proof - Upload payment proof image
-router.post("/:id/proof", async (req, res) => {
+router.post("/:id/proof", requirePermission('payment.edit'), async (req, res) => {
   try {
     const { id } = req.params;
     const { proofImageBase64, qrDescription } = req.body;

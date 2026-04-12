@@ -8,7 +8,7 @@ const router = express.Router();
  * GET /api/settings/bank
  * Returns the configured bank account or 404 if none
  */
-router.get('/bank', async (_req, res) => {
+router.get('/bank', requirePermission('settings.view'), async (_req, res) => {
   try {
     const result = await query(
       'SELECT bank_bin, bank_number, bank_account_name FROM company_bank_settings ORDER BY id LIMIT 1'

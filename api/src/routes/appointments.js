@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -357,7 +358,7 @@ router.get('/:id', async (req, res) => {
  * Body: { date, partnerId, doctorId, companyId, note, timeExpected, color, state }
  * Returns: created appointment
  */
-router.post('/', async (req, res) => {
+router.post('/', requirePermission('appointments.add'), async (req, res) => {
   try {
     // Accept both camelCase and lowercase field names (frontend sends lowercase)
     const b = req.body;
@@ -485,7 +486,7 @@ router.post('/', async (req, res) => {
  * Body: { date, doctorId, note, state, timeExpected, color }
  * Returns: updated appointment
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', requirePermission('appointments.edit'), async (req, res) => {
   try {
     const { id } = req.params;
     // Accept both camelCase and lowercase field names

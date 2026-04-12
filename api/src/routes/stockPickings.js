@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -262,7 +263,7 @@ router.get('/:id', async (req, res) => {
  * POST /api/StockPickings
  * Creates a new stock picking (Import/Export/Internal transfer)
  */
-router.post('/', async (req, res) => {
+router.post('/', requirePermission('settings.edit'), async (req, res) => {
   try {
     const {
       pickingtypeid,
@@ -322,7 +323,7 @@ router.post('/', async (req, res) => {
  * PUT /api/StockPickings/:id
  * Updates a stock picking
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', requirePermission('settings.edit'), async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -373,7 +374,7 @@ router.put('/:id', async (req, res) => {
  * DELETE /api/StockPickings/:id
  * Soft delete (cancel) a stock picking
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requirePermission('settings.edit'), async (req, res) => {
   try {
     const { id } = req.params;
 

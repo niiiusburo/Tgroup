@@ -17,6 +17,7 @@ import type { ApiAppointment, ExternalCheckupsResponse } from '@/lib/api';
 import type { PaymentWithAllocations } from '@/hooks/useCustomerPayments';
 import { HealthCheckupGallery } from './HealthCheckupGallery';
 import { useAuth } from '@/contexts/AuthContext';
+import { formatVND } from '@/lib/formatting';
 
 interface CustomerProfileProps {
   readonly profile: CustomerProfileData;
@@ -93,10 +94,6 @@ function TabBadge({ count, isActive }: { count: number; isActive: boolean }) {
       {count > 99 ? '99+' : count}
     </span>
   );
-}
-
-function formatVND(amount: number): string {
-  return new Intl.NumberFormat('vi-VN').format(amount) + ' đ';
 }
 
 function formatDate(dateStr: string | null | undefined): string {

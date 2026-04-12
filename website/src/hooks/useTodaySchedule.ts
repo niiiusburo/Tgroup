@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { type CalendarAppointment } from '@/data/mockCalendar';
-import { fetchAppointments, type ApiAppointment } from '@/lib/api';
+import { fetchAppointments } from '@/lib/api';
+import { mapApiAppointmentToCalendar } from '@/lib/calendarUtils';
 
 /**
  * Hook for today's appointment schedule
@@ -47,49 +48,4 @@ export function useTodaySchedule(locationId?: string): TodayScheduleResult {
   }, [locationId]);
 
   return { appointments, isLoading } as const;
-}
-
-function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppointment {
-  const dateStr = apt.date;
-  const startTime = apt.time || '09:00';
-  const endTime = calculateEndTime(startTime, apt.timeexpected);
-
-  return {
-    id: apt.id,
-    customerId: apt.partnerid || '',
-    customerName: apt.partnername || '',
-    customerPhone: apt.partnerphone || '',
-    customerCode: apt.partnercode || '',
-    serviceName: apt.name || apt.note || '',
-    appointmentType: 'consultation',
-    dentist: apt.doctorname || '',
-    dentistId: apt.doctorid || '',
-    date: dateStr,
-    startTime,
-    endTime,
-    status: mapStateToStatus(apt.state),
-    locationId: apt.companyid || '',
-    locationName: apt.companyname || '',
-    notes: apt.note || '',
-    color: apt.color,
-  };
-}
-
-function calculateEndTime(startTime: string, durationMinutes: number | null): string {
-  const [hours, minutes] = startTime.split(':').map(Number);
-  const totalMinutes = hours * 60 + minutes + (durationMinutes || 30);
-  const endHours = Math.floor(totalMinutes / 60);
-  const endMinutes = totalMinutes % 60;
-  return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
-}
-
-function mapStateToStatus(state: string | null): CalendarAppointment['status'] {
-  const stateMap: Record<string, CalendarAppointment['status']> = {
-    scheduled: 'scheduled',
-    confirmed: 'confirmed',
-    'in-progress': 'in-progress',
-    completed: 'completed',
-    cancelled: 'cancelled',
-  };
-  return stateMap[state?.toLowerCase() || ''] || 'scheduled';
 }

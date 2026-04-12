@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Calculator, CalendarDays, DollarSign, User, FileText, ChevronRight, Check } from 'lucide-react';
 import { DatePicker } from '@/components/ui/DatePicker';
 import type { PlanCreationInput } from '@/types/monthlyPlans';
+import { formatVND } from '@/lib/formatting';
 
 /**
  * MonthlyPlanCreator - Plan setup wizard for installment plans
@@ -25,10 +26,6 @@ const STEP_LABELS: Record<WizardStep, string> = {
 };
 
 const INSTALLMENT_OPTIONS = [3, 4, 6, 9, 12] as const;
-
-function formatVND(amount: number): string {
-  return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
-}
 
 export function MonthlyPlanCreator({ onCreatePlan, onCancel }: MonthlyPlanCreatorProps) {
   const [currentStep, setCurrentStep] = useState<WizardStep>('customer');

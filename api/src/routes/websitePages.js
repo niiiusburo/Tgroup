@@ -9,7 +9,7 @@ const { requirePermission } = require('../middleware/auth');
 const router = express.Router();
 
 // GET /api/WebsitePages - List all pages
-router.get('/', async (req, res) => {
+router.get('/', requirePermission('website.view'), async (req, res) => {
   try {
     const { company_id, status, search } = req.query;
 
@@ -59,7 +59,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/WebsitePages/:id
-router.get('/:id', async (req, res) => {
+router.get('/:id', requirePermission('website.view'), async (req, res) => {
   try {
     const pages = await query(
       'SELECT * FROM dbo.websitepages WHERE id = $1',
@@ -129,23 +129,46 @@ router.put('/:id', requirePermission('website.edit'), async (req, res) => {
       }
     }
 
-    let sql = `
-      UPDATE dbo.websitepages SET
-        title = COALESCE($1, title),
-        slug = COALESCE($2, slug),
-        status = COALESCE($3, status),
-        content = COALESCE($4, content),
-        template = COALESCE($5, template),
-        author = COALESCE($6, author),
-        views = COALESCE($7, views),
-        updated_at = CURRENT_TIMESTAMP
-      WHERE id = $8 RETURNING *
-    `;
+    const updates = [];
+    const values = [];
+    let paramIdx = 1;
+
+    const fields = { title, slug, status, content, template, author, views };
+    for (const [key, value] of Object.entries(fields)) {
+      if (value !== undefined) {
+        updates.push(`${key} = $${paramIdx}`);
+        values.push(value);
+        paramIdx++;
+      }
+    }
+
+    let result = [];
+    if (updates.length > 0) {
+      updates.push(`updated_at = CURRENT_TIMESTAMP`);
+      values.push(req.params.id);
+      result = await query(
+        `UPDATE dbo.websitepages SET ${updates.join(', ')} WHERE id = $${paramIdx} RETURNING *`,
+        values
+      );
+      if (result.length === 0) {
+        return res.status(404).json({ error: 'Page not found' });
+      }
+    }
 
     // Handle seo separately due to JSON type
-    const result = await query(sql, [
-      title, slug, status, content, template, author, views, req.params.id
-    ]);
+    if (seo !== undefined) {
+      await query(
+        'UPDATE dbo.websitepages SET seo = $1 WHERE id = $2',
+        [JSON.stringify(seo), req.params.id]
+      );
+    }
+
+    if (updates.length === 0 && seo === undefined) {
+      const existing = await query('SELECT * FROM dbo.websitepages WHERE id = $1', [req.params.id]);
+      if (existing.length === 0) {
+        return res.status(404).json({ error: 'Page not found' });
+      }
+    }
 
     if (result.length === 0) {
       return res.status(404).json({ error: 'Page not found' });

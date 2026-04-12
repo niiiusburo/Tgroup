@@ -1,16 +1,13 @@
 import { useState } from 'react';
 import { Wallet, Plus, Loader2, QrCode, DollarSign } from 'lucide-react';
 import { VietQrModal } from './VietQrModal';
+import { formatVND } from '@/lib/formatting';
 
 interface DepositWalletProps {
   depositBalance: number;
   outstandingBalance: number;
   onAddDeposit?: (amount: number, method: 'cash' | 'bank_transfer' | 'vietqr', date: string, note?: string) => Promise<void>;
   loading?: boolean;
-}
-
-function formatVND(amount: number): string {
-  return new Intl.NumberFormat('vi-VN').format(amount);
 }
 
 export function DepositWallet({ 
@@ -67,13 +64,13 @@ export function DepositWallet({
         <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
           <p className="text-xs text-emerald-600 mb-1">Available Balance</p>
           <p className="text-xl font-bold text-emerald-700">
-            {formatVND(depositBalance)} đ
+            {formatVND(depositBalance)}
           </p>
         </div>
         <div className="bg-red-50 rounded-lg p-4 border border-red-100">
           <p className="text-xs text-red-600 mb-1">Outstanding</p>
           <p className="text-xl font-bold text-red-700">
-            {formatVND(outstandingBalance)} đ
+            {formatVND(outstandingBalance)}
           </p>
         </div>
       </div>
@@ -134,7 +131,7 @@ export function DepositWallet({
                           }`}
                           title={isInstallment ? 'Số tiền nợ hiện tại' : undefined}
                         >
-                          {isInstallment ? 'Thanh toán nợ ' : ''}{formatVND(amt)} ₫
+                          {isInstallment ? 'Thanh toán nợ ' : ''}{formatVND(amt)}
                         </button>
                       );
                     })}

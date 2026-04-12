@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -143,7 +144,7 @@ router.get('/', async (req, res) => {
  * GET /api/Partners/:id
  * Returns: full partner/customer profile with all fields
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', requirePermission('customers.view'), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -255,7 +256,7 @@ router.get('/:id', async (req, res) => {
  * GET /api/Partners/:id/GetKPIs
  * Returns: {totalTreatmentAmount, expectedRevenue, actualRevenue, debt, advancePayment, pointBalance}
  */
-router.get('/:id/GetKPIs', async (req, res) => {
+router.get('/:id/GetKPIs', requirePermission('customers.view'), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -320,7 +321,7 @@ router.get('/:id/GetKPIs', async (req, res) => {
  * Creates a new customer/partner
  * Body: partner fields
  */
-router.post('/', async (req, res) => {
+router.post('/', requirePermission('customers.add'), async (req, res) => {
   try {
     const {
       name,
@@ -406,7 +407,7 @@ router.post('/', async (req, res) => {
  * Updates an existing customer/partner
  * Body: partner fields to update
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', requirePermission('customers.edit'), async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -428,52 +429,37 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Partner not found' });
     }
 
+    const updates = [];
+    const values = [];
+    let paramIdx = 1;
+
+    const fields = {
+      name, phone, email, companyid, gender, birthday, birthmonth, birthyear,
+      street, medicalhistory, note, comment, sourceid, referraluserid,
+      cityname, districtname, wardname, weight, identitynumber,
+      healthinsurancecardnumber, emergencyphone, jobtitle, taxcode,
+      unitname, unitaddress, isbusinessinvoice, personalname,
+      personalidentitycard, personaltaxcode, personaladdress, ref, cskhid, salestaffid,
+    };
+
+    for (const [key, value] of Object.entries(fields)) {
+      if (value !== undefined) {
+        updates.push(`${key} = $${paramIdx}`);
+        values.push(value);
+        paramIdx++;
+      }
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    updates.push(`lastupdated = NOW()`);
+    values.push(id);
+
     const result = await query(
-      `UPDATE partners SET
-        name = COALESCE($1, name),
-        phone = COALESCE($2, phone),
-        email = COALESCE($3, email),
-        companyid = COALESCE($4, companyid),
-        gender = COALESCE($5, gender),
-        birthday = COALESCE($6, birthday),
-        birthmonth = COALESCE($7, birthmonth),
-        birthyear = COALESCE($8, birthyear),
-        street = COALESCE($9, street),
-        medicalhistory = COALESCE($10, medicalhistory),
-        note = COALESCE($11, note),
-        comment = COALESCE($12, comment),
-        sourceid = COALESCE($13, sourceid),
-        referraluserid = COALESCE($14, referraluserid),
-        cityname = COALESCE($15, cityname),
-        districtname = COALESCE($16, districtname),
-        wardname = COALESCE($17, wardname),
-        weight = COALESCE($18, weight),
-        identitynumber = COALESCE($19, identitynumber),
-        healthinsurancecardnumber = COALESCE($20, healthinsurancecardnumber),
-        emergencyphone = COALESCE($21, emergencyphone),
-        jobtitle = COALESCE($22, jobtitle),
-        taxcode = COALESCE($23, taxcode),
-        unitname = COALESCE($24, unitname),
-        unitaddress = COALESCE($25, unitaddress),
-        isbusinessinvoice = COALESCE($26, isbusinessinvoice),
-        personalname = COALESCE($27, personalname),
-        personalidentitycard = COALESCE($28, personalidentitycard),
-        personaltaxcode = COALESCE($29, personaltaxcode),
-        personaladdress = COALESCE($30, personaladdress),
-        ref = COALESCE($31, ref),
-        cskhid = COALESCE($32, cskhid),
-        salestaffid = COALESCE($33, salestaffid),
-        lastupdated = NOW()
-      WHERE id = $34
-      RETURNING *`,
-      [
-        name, phone, email, companyid, gender, birthday, birthmonth, birthyear,
-        street, medicalhistory, note, comment, sourceid, referraluserid,
-        cityname, districtname, wardname, weight, identitynumber,
-        healthinsurancecardnumber, emergencyphone, jobtitle, taxcode,
-        unitname, unitaddress, isbusinessinvoice, personalname,
-        personalidentitycard, personaltaxcode, personaladdress, ref, cskhid, salestaffid, id,
-      ]
+      `UPDATE partners SET ${updates.join(', ')} WHERE id = $${paramIdx} RETURNING *`,
+      values
     );
 
     return res.json(result[0]);
@@ -489,7 +475,7 @@ router.put('/:id', async (req, res) => {
  * PATCH /api/Partners/:id/soft-delete
  * Soft-deletes a partner by setting isdeleted = true
  */
-router.patch('/:id/soft-delete', async (req, res) => {
+router.patch('/:id/soft-delete', requirePermission('customers.delete'), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -519,7 +505,7 @@ router.patch('/:id/soft-delete', async (req, res) => {
  * DELETE /api/Partners/:id/hard-delete
  * Hard-deletes a partner after FK-safe checks
  */
-router.delete('/:id/hard-delete', async (req, res) => {
+router.delete('/:id/hard-delete', requirePermission('customers.hard_delete'), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -532,20 +518,50 @@ router.delete('/:id/hard-delete', async (req, res) => {
       return res.status(404).json({ error: 'Partner not found' });
     }
 
-    const [aptResult, soResult, dkResult] = await Promise.all([
+    const [
+      aptResult, soResult, dkResult,
+      payResult, acpResult, crResult,
+      crmResult, spResult, mpResult,
+      epResult, elsResult
+    ] = await Promise.all([
       query('SELECT COUNT(*) AS count FROM appointments WHERE partnerid = $1', [id]),
       query('SELECT COUNT(*) AS count FROM saleorders WHERE partnerid = $1 AND isdeleted = false', [id]),
       query('SELECT COUNT(*) AS count FROM dotkhams WHERE partnerid = $1 AND isdeleted = false', [id]),
+      query('SELECT COUNT(*) AS count FROM payments WHERE customer_id = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM accountpayments WHERE partnerid = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM customerreceipts WHERE partnerid = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM crmtasks WHERE partnerid = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM stockpickings WHERE partnerid = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM monthlyplans WHERE customer_id = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM employee_permissions WHERE employee_id = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM employee_location_scope WHERE employee_id = $1', [id]),
     ]);
 
     const appointments = parseInt(aptResult[0]?.count || '0', 10);
     const saleorders = parseInt(soResult[0]?.count || '0', 10);
     const dotkhams = parseInt(dkResult[0]?.count || '0', 10);
+    const payments = parseInt(payResult[0]?.count || '0', 10);
+    const accountpayments = parseInt(acpResult[0]?.count || '0', 10);
+    const customerreceipts = parseInt(crResult[0]?.count || '0', 10);
+    const crmtasks = parseInt(crmResult[0]?.count || '0', 10);
+    const stockpickings = parseInt(spResult[0]?.count || '0', 10);
+    const monthlyplans = parseInt(mpResult[0]?.count || '0', 10);
+    const employeePermissions = parseInt(epResult[0]?.count || '0', 10);
+    const employeeLocationScopes = parseInt(elsResult[0]?.count || '0', 10);
 
-    if (appointments > 0 || saleorders > 0 || dotkhams > 0) {
+    if (
+      appointments > 0 || saleorders > 0 || dotkhams > 0 ||
+      payments > 0 || accountpayments > 0 || customerreceipts > 0 ||
+      crmtasks > 0 || stockpickings > 0 || monthlyplans > 0 ||
+      employeePermissions > 0 || employeeLocationScopes > 0
+    ) {
       return res.status(409).json({
         error: 'Partner has linked records',
-        linked: { appointments, saleorders, dotkhams },
+        linked: {
+          appointments, saleorders, dotkhams, payments, accountpayments,
+          customerreceipts, crmtasks, stockpickings, monthlyplans,
+          employeePermissions, employeeLocationScopes,
+        },
       });
     }
 

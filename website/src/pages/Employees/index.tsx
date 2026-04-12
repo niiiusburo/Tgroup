@@ -52,7 +52,23 @@ export function Employees() {
 
   const handleEditEmployee = () => {
     if (selectedEmployee) {
-      setEditingEmployee(selectedEmployee as any);
+      // Map domain Employee type to EmployeeForm's expected shape
+      const formData = {
+        id: selectedEmployee.id,
+        name: selectedEmployee.name,
+        phone: selectedEmployee.phone || undefined,
+        email: selectedEmployee.email || undefined,
+        companyid: selectedEmployee.locationId || undefined,
+        locationScopeIds: selectedEmployee.locationScopeIds ?? [],
+        isdoctor: selectedEmployee.roles.includes('doctor'),
+        isassistant: selectedEmployee.roles.includes('assistant') || selectedEmployee.roles.includes('doctor-assistant'),
+        isreceptionist: selectedEmployee.roles.includes('receptionist'),
+        active: selectedEmployee.status === 'active',
+        wage: (selectedEmployee as any).wage ?? null,
+        allowance: (selectedEmployee as any).allowance ?? null,
+        startworkdate: selectedEmployee.hireDate || null,
+      };
+      setEditingEmployee(formData as any);
       setShowForm(true);
     }
   };

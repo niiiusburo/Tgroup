@@ -127,7 +127,7 @@ router.get('/:customerCode', requireAuth, requirePermission('external_checkups.v
  * Create a new checkup + upload images to hosoonline.com.
  * Expects multipart/form-data.
  */
-router.post('/:customerCode/health-checkups', requireAuth, requirePermission('external_checkups.view'), upload.array('files'), async (req, res) => {
+router.post('/:customerCode/health-checkups', requireAuth, requirePermission('external_checkups.create'), upload.array('files'), async (req, res) => {
   try {
     const { customerCode } = req.params;
 

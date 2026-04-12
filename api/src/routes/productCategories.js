@@ -1,7 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const { v4: uuidv4 } = require('uuid');
-const { requireAuth } = require('../middleware/auth');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -63,7 +63,7 @@ router.get('/', async (req, res) => {
  * POST /api/ProductCategories
  * Create a new category
  */
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requirePermission('services.edit'), async (req, res) => {
   try {
     const { name, parentid } = req.body;
     if (!name || !name.trim()) {
@@ -99,7 +99,7 @@ router.post('/', requireAuth, async (req, res) => {
  * PUT /api/ProductCategories/:id
  * Update a category
  */
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requirePermission('services.edit'), async (req, res) => {
   try {
     const { id } = req.params;
     const { name, active } = req.body;
@@ -158,17 +158,22 @@ router.put('/:id', requireAuth, async (req, res) => {
 /**
  * DELETE /api/ProductCategories/:id
  */
-router.delete('/:id', requireAuth, async (req, res) => {
+router.delete('/:id', requirePermission('services.edit'), async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Check if category has products
-    const countResult = await query(
-      `SELECT COUNT(*) AS count FROM dbo.products WHERE categid = $1`,
-      [id]
-    );
-    if (parseInt(countResult[0]?.count || '0', 10) > 0) {
+    // Check if category has products or child categories
+    const [prodResult, childResult] = await Promise.all([
+      query(`SELECT COUNT(*) AS count FROM dbo.products WHERE categid = $1`, [id]),
+      query(`SELECT COUNT(*) AS count FROM dbo.productcategories WHERE parentid = $1`, [id]),
+    ]);
+
+    if (parseInt(prodResult[0]?.count || '0', 10) > 0) {
       return res.status(400).json({ error: 'Cannot delete category with existing products. Remove or reassign products first.' });
+    }
+
+    if (parseInt(childResult[0]?.count || '0', 10) > 0) {
+      return res.status(400).json({ error: 'Cannot delete category with child categories. Remove or reassign child categories first.' });
     }
 
     await query(`DELETE FROM dbo.productcategories WHERE id = $1`, [id]);

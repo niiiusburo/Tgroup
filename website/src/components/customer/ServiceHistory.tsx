@@ -1,5 +1,6 @@
 import { Stethoscope, CheckCircle2, Clock, CalendarPlus } from 'lucide-react';
 import type { CustomerService } from '@/types/customer';
+import { formatVND } from '@/lib/formatting';
 
 /**
  * Service History - Treatment history list
@@ -10,10 +11,6 @@ interface ServiceHistoryProps {
   readonly services: readonly CustomerService[];
   readonly limit?: number;
   readonly onSelect?: (service: CustomerService) => void;
-}
-
-function formatVND(amount: number): string {
-  return new Intl.NumberFormat('vi-VN').format(amount) + ' \u20ab';
 }
 
 const STATUS_CONFIG = {

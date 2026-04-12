@@ -20,12 +20,9 @@ import { usePayment } from '@/hooks/usePayment';
 import { useMonthlyPlans } from '@/hooks/useMonthlyPlans';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import type { PlanStatus } from '@/data/mockMonthlyPlans';
+import { formatVND } from '@/lib/formatting';
 
 type ActiveTab = 'payments' | 'plans';
-
-function formatVND(amount: number): string {
-  return new Intl.NumberFormat('vi-VN').format(amount) + ' \u20ab';
-}
 
 const PLAN_STATUS_FILTERS: readonly { readonly value: PlanStatus | 'all'; readonly label: string }[] = [
   { value: 'all', label: 'All Plans' },

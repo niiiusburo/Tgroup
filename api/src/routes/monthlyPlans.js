@@ -9,7 +9,7 @@ const { requirePermission } = require('../middleware/auth');
 const router = express.Router();
 
 // GET /api/MonthlyPlans - List all plans with installments and linked invoices
-router.get('/', async (req, res) => {
+router.get('/', requirePermission('payment.view'), async (req, res) => {
   try {
     const { company_id, status, customer_id, search } = req.query;
     
@@ -121,7 +121,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/MonthlyPlans/:id - Get single plan with installments and linked invoices
-router.get('/:id', async (req, res) => {
+router.get('/:id', requirePermission('payment.view'), async (req, res) => {
   try {
     const plans = await query(
       `SELECT mp.*, p.name as customer_name 
@@ -258,17 +258,46 @@ router.put('/:id', requirePermission('payment.edit'), async (req, res) => {
   try {
     const { treatment_description, total_amount, down_payment, status, notes, invoice_ids } = req.body;
 
-    const result = await query(
-      `UPDATE dbo.monthlyplans 
-       SET treatment_description = COALESCE($1, treatment_description),
-           total_amount = COALESCE($2, total_amount),
-           down_payment = COALESCE($3, down_payment),
-           status = COALESCE($4, status),
-           notes = COALESCE($5, notes),
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $6 RETURNING *`,
-      [treatment_description, total_amount, down_payment, status, notes, req.params.id]
-    );
+    const updates = [];
+    const values = [];
+    let paramIdx = 1;
+
+    const fields = {
+      treatment_description, total_amount, down_payment, status, notes,
+    };
+
+    for (const [key, value] of Object.entries(fields)) {
+      if (value !== undefined) {
+        updates.push(`${key} = $${paramIdx}`);
+        values.push(value);
+        paramIdx++;
+      }
+    }
+
+    if (updates.length === 0 && !Array.isArray(invoice_ids)) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    let result = [];
+    if (updates.length > 0) {
+      updates.push(`updated_at = CURRENT_TIMESTAMP`);
+      values.push(req.params.id);
+
+      result = await query(
+        `UPDATE dbo.monthlyplans SET ${updates.join(', ')} WHERE id = $${paramIdx} RETURNING *`,
+        values
+      );
+
+      if (result.length === 0) {
+        return res.status(404).json({ error: 'Plan not found' });
+      }
+    } else {
+      const planResult = await query('SELECT * FROM dbo.monthlyplans WHERE id = $1', [req.params.id]);
+      if (planResult.length === 0) {
+        return res.status(404).json({ error: 'Plan not found' });
+      }
+      result = planResult;
+    }
 
     if (result.length === 0) {
       return res.status(404).json({ error: 'Plan not found' });
@@ -315,6 +344,14 @@ router.put('/:id', requirePermission('payment.edit'), async (req, res) => {
 // DELETE /api/MonthlyPlans/:id - Delete plan
 router.delete('/:id', requirePermission('payment.edit'), async (req, res) => {
   try {
+    const paidResult = await query(
+      `SELECT COUNT(*) AS count FROM dbo.planinstallments WHERE plan_id = $1 AND status = 'paid'`,
+      [req.params.id]
+    );
+    if (parseInt(paidResult[0]?.count || '0', 10) > 0) {
+      return res.status(409).json({ error: 'Cannot delete plan with paid installments' });
+    }
+
     await query('DELETE FROM dbo.monthlyplans WHERE id = $1', [req.params.id]);
     res.json({ success: true });
   } catch (err) {

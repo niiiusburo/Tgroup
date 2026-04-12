@@ -4,6 +4,7 @@
  */
 const express = require('express');
 const { query } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -91,7 +92,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/CustomerSources - Create new source
-router.post('/', async (req, res) => {
+router.post('/', requirePermission('settings.edit'), async (req, res) => {
   try {
     const { name, type, description, is_active } = req.body;
 
@@ -116,19 +117,33 @@ router.post('/', async (req, res) => {
 });
 
 // PUT /api/CustomerSources/:id
-router.put('/:id', async (req, res) => {
+router.put('/:id', requirePermission('settings.edit'), async (req, res) => {
   try {
     const { name, type, description, is_active } = req.body;
 
+    const updates = [];
+    const values = [];
+    let paramIdx = 1;
+
+    const fields = { name, type, description, is_active };
+    for (const [key, value] of Object.entries(fields)) {
+      if (value !== undefined) {
+        updates.push(`${key} = $${paramIdx}`);
+        values.push(value);
+        paramIdx++;
+      }
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    updates.push(`updated_at = CURRENT_TIMESTAMP`);
+    values.push(req.params.id);
+
     const result = await query(
-      `UPDATE dbo.customersources 
-       SET name = COALESCE($1, name),
-           type = COALESCE($2, type),
-           description = COALESCE($3, description),
-           is_active = COALESCE($4, is_active),
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $5 RETURNING *`,
-      [name, type, description, is_active, req.params.id]
+      `UPDATE dbo.customersources SET ${updates.join(', ')} WHERE id = $${paramIdx} RETURNING *`,
+      values
     );
 
     if (result.length === 0) {
@@ -143,7 +158,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE /api/CustomerSources/:id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requirePermission('settings.edit'), async (req, res) => {
   try {
     // Check if any customers use this source
     const customers = await query(

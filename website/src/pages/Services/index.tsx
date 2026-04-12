@@ -17,6 +17,7 @@ import { useLocationFilter } from '@/contexts/LocationContext';
 import { useServices, type CategoryFilter, type CreateServiceInput } from '@/hooks/useServices';
 import type { ServiceRecord, ServiceStatus } from '@/data/mockServices';
 import { APPOINTMENT_TYPE_LABELS, type AppointmentType } from '@/constants';
+import { formatVND } from '@/lib/formatting';
 
 const STATUS_TABS: { label: string; value: 'waiting' | 'in_progress' | 'complete' | 'all' }[] = [
   { label: 'Chờ xử lý', value: 'waiting' },
@@ -32,10 +33,6 @@ const CATEGORY_OPTIONS: { label: string; value: CategoryFilter }[] = [
     value: key as AppointmentType,
   })),
 ];
-
-function formatVND(amount: number): string {
-  return new Intl.NumberFormat('vi-VN').format(amount) + ' \u20ab';
-}
 
 export function Services() {
   const { selectedLocationId } = useLocationFilter();

@@ -15,6 +15,7 @@ import {
   updateAppointment as apiUpdateAppointment,
   type ApiAppointment,
 } from '@/lib/api';
+import { calculateEndTime } from '@/lib/calendarUtils';
 import type { AppointmentStatus } from '@/data/mockCalendar';
 import type { AppointmentType } from '@/constants';
 
@@ -60,15 +61,6 @@ function parseTime(timeString: string | null, datetimeString: string | null): st
     }
   }
   return '09:00';
-}
-
-function calculateEndTime(startTime: string, durationMinutes: number | null): string {
-  const duration = durationMinutes || 30;
-  const [hours, minutes] = startTime.split(':').map(Number);
-  const totalMinutes = hours * 60 + minutes + duration;
-  const endHours = Math.floor(totalMinutes / 60);
-  const endMinutes = totalMinutes % 60;
-  return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
 }
 
 function mapApiToManagedAppointment(api: ApiAppointment): ManagedAppointment {

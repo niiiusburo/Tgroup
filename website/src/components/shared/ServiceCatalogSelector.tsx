@@ -8,6 +8,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { normalizeText } from '@/lib/utils';
 import type { ServiceCatalogItem } from '@/data/mockServices';
 import { APPOINTMENT_TYPE_LABELS, type AppointmentType } from '@/constants';
+import { formatVND } from '@/lib/formatting';
 
 interface ServiceCatalogSelectorProps {
   readonly catalog: readonly ServiceCatalogItem[];
@@ -16,10 +17,6 @@ interface ServiceCatalogSelectorProps {
   readonly placeholder?: string;
   readonly disabled?: boolean;
   readonly filterCategory?: AppointmentType;
-}
-
-function formatVND(amount: number): string {
-  return new Intl.NumberFormat('vi-VN').format(amount) + ' \u20ab';
 }
 
 export function ServiceCatalogSelector({

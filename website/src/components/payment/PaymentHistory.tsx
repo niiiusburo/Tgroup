@@ -11,10 +11,7 @@ import {
   PAYMENT_STATUS_STYLES,
   type PaymentRecord,
 } from '@/data/mockPayment';
-
-function formatVND(amount: number): string {
-  return new Intl.NumberFormat('vi-VN').format(amount) + ' \u20ab';
-}
+import { formatVND } from '@/lib/formatting';
 
 interface PaymentHistoryProps {
   readonly payments: readonly PaymentRecord[];

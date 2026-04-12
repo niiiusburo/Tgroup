@@ -17,10 +17,7 @@ import { useDeposits } from '@/hooks/useDeposits';
 import { fetchSaleOrders, fetchDotKhams } from '@/lib/api';
 import { LocationSelector } from '@/components/shared/LocationSelector';
 import type { Customer } from '@/hooks/useCustomers';
-
-function formatVND(amount: number): string {
-  return new Intl.NumberFormat('vi-VN').format(amount) + ' \u20ab';
-}
+import { formatVND } from '@/lib/formatting';
 
 export interface PaymentSourceBreakdown {
   readonly depositAmount: number;

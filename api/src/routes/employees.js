@@ -432,14 +432,14 @@ router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
 
 /**
  * DELETE /api/Employees/:id
- * Deletes an employee (deletes from partners table where employee=true)
+ * Soft-deletes an employee by setting active = false
  */
 router.delete('/:id', requirePermission('employees.edit'), async (req, res) => {
   try {
     const { id } = req.params;
 
     const result = await query(
-      'DELETE FROM partners WHERE id = $1 AND employee = true RETURNING id',
+      'UPDATE partners SET active = false, lastupdated = NOW() WHERE id = $1 AND employee = true RETURNING id',
       [id]
     );
 

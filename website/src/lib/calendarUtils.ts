@@ -1,0 +1,107 @@
+/**
+ * Calendar and appointment mapping utilities
+ */
+
+import { type CalendarAppointment } from '@/data/mockCalendar';
+import { type ApiAppointment } from '@/lib/api';
+
+/**
+ * Calculate end time given a start time and duration in minutes
+ */
+export function calculateEndTime(startTime: string, durationMinutes: number | null): string {
+  const [hours, minutes] = startTime.split(':').map(Number);
+  const totalMinutes = hours * 60 + minutes + (durationMinutes || 30);
+  const endHours = Math.floor(totalMinutes / 60);
+  const endMinutes = totalMinutes % 60;
+  return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+}
+
+/**
+ * Convert a UTC ISO date string to a Vietnam local date string (YYYY-MM-DD)
+ */
+export function utcToLocalDateStr(isoDate: string): string {
+  if (!isoDate.includes('T')) return isoDate;
+  const d = new Date(isoDate);
+  // en-CA gives YYYY-MM-DD
+  return d.toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
+}
+
+/**
+ * Map appointment state string to CalendarAppointment status
+ */
+export function mapStateToStatus(state: string | null): CalendarAppointment['status'] {
+  const stateMap: Record<string, CalendarAppointment['status']> = {
+    draft: 'scheduled',
+    scheduled: 'scheduled',
+    confirmed: 'confirmed',
+    arrived: 'confirmed',
+    'in examination': 'in-progress',
+    'in-progress': 'in-progress',
+    done: 'completed',
+    completed: 'completed',
+    cancelled: 'cancelled',
+  };
+  return stateMap[state?.toLowerCase().trim() || ''] || 'scheduled';
+}
+
+/**
+ * Map hex color or tailwind color class to a usable color code
+ */
+export function mapHexToColorCode(color: string | null | undefined): string | null {
+  if (color === null || color === undefined) return null;
+  if (/^[0-7]$/.test(color)) return color;
+  const hexMap: Record<string, string> = {
+    '#ef4444': '3',
+    '#3b82f6': '0',
+    '#10b981': '1',
+    '#f59e0b': '2',
+    '#8b5cf6': '4',
+    '#ec4899': '5',
+    '#06b6d4': '6',
+    '#84cc16': '7',
+  };
+  return hexMap[color.toLowerCase()] ?? null;
+}
+
+/**
+ * Derive appointment type from reason/note text
+ */
+export function deriveAppointmentType(text: string): CalendarAppointment['appointmentType'] {
+  const lower = text.toLowerCase();
+  if (/lấy cao|vệ sinh/.test(lower)) return 'cleaning';
+  if (/niềng|chỉnh nha/.test(lower)) return 'orthodontics';
+  if (/nhổ|phẫu/.test(lower)) return 'surgery';
+  if (/tẩy trắng|thẩm mỹ/.test(lower)) return 'cosmetic';
+  if (/cấp cứu|đau/.test(lower)) return 'emergency';
+  if (/khám|tư vấn/.test(lower)) return 'consultation';
+  return 'treatment';
+}
+
+/**
+ * Map a backend API appointment to a CalendarAppointment
+ */
+export function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppointment {
+  const dateStr = apt.date ? utcToLocalDateStr(apt.date) : '';
+  const startTime = apt.time || '09:00';
+  const endTime = calculateEndTime(startTime, apt.timeexpected);
+
+  return {
+    id: apt.id,
+    customerId: apt.partnerid || '',
+    customerName: apt.partnername || '',
+    customerPhone: apt.partnerphone || '',
+    customerCode: apt.partnercode || '',
+    serviceName: apt.name || apt.note || '',
+    appointmentType: deriveAppointmentType(apt.reason || apt.note || ''),
+    dentist: apt.doctorname || '',
+    dentistId: apt.doctorid || '',
+    date: dateStr,
+    startTime,
+    endTime,
+    status: mapStateToStatus(apt.state),
+    locationId: apt.companyid || '',
+    locationName: apt.companyname || '',
+    notes: apt.note || '',
+    color: mapHexToColorCode(apt.color),
+  };
+}

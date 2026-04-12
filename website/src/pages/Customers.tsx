@@ -186,8 +186,8 @@ export function Customers() {
   // Check permissions
   const canEditCustomers = hasPermission('customers.edit');
   const canAddCustomers = hasPermission('customers.add');
-  const canSoftDelete = hasPermission('customer:delete');
-  const canHardDelete = hasPermission('customer:hard_delete');
+  const canSoftDelete = hasPermission('customers.delete');
+  const canHardDelete = hasPermission('customers.hard_delete');
 
   const {
     customers,

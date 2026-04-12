@@ -1,5 +1,6 @@
 import { Calendar, CheckCircle2, Clock, AlertTriangle, Circle, Receipt } from 'lucide-react';
 import type { MonthlyPlan, InstallmentStatus } from '@/types/monthlyPlans';
+import { formatVND } from '@/lib/formatting';
 import { InstallmentTracker } from './InstallmentTracker';
 
 /**
@@ -10,10 +11,6 @@ import { InstallmentTracker } from './InstallmentTracker';
 interface PaymentScheduleProps {
   readonly plan: MonthlyPlan;
   readonly onMarkPaid?: (planId: string, installmentId: string) => void;
-}
-
-function formatVND(amount: number): string {
-  return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
 }
 
 const STATUS_CONFIG: Record<InstallmentStatus, {

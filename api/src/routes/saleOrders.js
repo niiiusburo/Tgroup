@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -180,7 +181,7 @@ router.get('/:id', async (req, res) => {
  * Creates a new sale order (service record)
  * Body: { partnerid, companyid, productid, productname, doctorid, doctorname, amounttotal, datestart, dateend, notes }
  */
-router.post('/', async (req, res) => {
+router.post('/', requirePermission('customers.edit'), async (req, res) => {
   try {
     const {
       partnerid,

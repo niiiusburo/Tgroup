@@ -16,6 +16,7 @@ import {
 } from '@/lib/api';
 import type { ApiProduct, ApiProductCategory, ApiCompany } from '@/lib/api';
 import { useLocationFilter } from '@/contexts/LocationContext';
+import { formatVND } from '@/lib/formatting';
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -26,13 +27,6 @@ interface ServiceFormData {
   categid: string;
   uomname: string;
   companyid: string;
-}
-
-// ─── Helpers ─────────────────────────────────────────────────────
-
-function formatVND(amount: number): string {
-  if (amount <= 1) return '-';
-  return new Intl.NumberFormat('vi-VN').format(amount) + ' \u20ab';
 }
 
 // ─── Service Form Modal ──────────────────────────────────────────
@@ -591,7 +585,7 @@ export function ServiceCatalog() {
                         {product.companyname ?? 'Tất cả'}
                       </td>
                       <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
-                        {formatVND(product.listprice ? parseFloat(product.listprice) : 0)}
+                        {product.listprice && parseFloat(product.listprice) > 1 ? formatVND(parseFloat(product.listprice)) : '-'}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-center gap-1">

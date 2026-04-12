@@ -1,7 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const { v4: uuidv4 } = require('uuid');
-const { requireAuth } = require('../middleware/auth');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -185,7 +185,7 @@ router.get('/:id', async (req, res) => {
  * POST /api/Products
  * Create a new product/service
  */
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requirePermission('services.edit'), async (req, res) => {
   try {
     const { name, defaultcode, type, listprice, categid, uomname, companyid, canorderlab } = req.body;
     if (!name || !name.trim()) {
@@ -221,7 +221,7 @@ router.post('/', requireAuth, async (req, res) => {
  * PUT /api/Products/:id
  * Update a product/service
  */
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requirePermission('services.edit'), async (req, res) => {
   try {
     const { id } = req.params;
     const { name, defaultcode, listprice, categid, uomname, companyid, canorderlab, active } = req.body;
@@ -277,9 +277,25 @@ router.put('/:id', requireAuth, async (req, res) => {
 /**
  * DELETE /api/Products/:id
  */
-router.delete('/:id', requireAuth, async (req, res) => {
+router.delete('/:id', requirePermission('services.edit'), async (req, res) => {
   try {
     const { id } = req.params;
+
+    const [solResult, dksResult] = await Promise.all([
+      query('SELECT COUNT(*) AS count FROM dbo.saleorderlines WHERE productid = $1 AND isdeleted = false', [id]),
+      query('SELECT COUNT(*) AS count FROM dbo.dotkhamsteps WHERE productid = $1', [id]),
+    ]);
+
+    const saleOrderLines = parseInt(solResult[0]?.count || '0', 10);
+    const dotkhamSteps = parseInt(dksResult[0]?.count || '0', 10);
+
+    if (saleOrderLines > 0 || dotkhamSteps > 0) {
+      return res.status(409).json({
+        error: 'Product has linked records',
+        linked: { saleOrderLines, dotkhamSteps },
+      });
+    }
+
     await query(`DELETE FROM dbo.products WHERE id = $1`, [id]);
     return res.status(204).end();
   } catch (err) {

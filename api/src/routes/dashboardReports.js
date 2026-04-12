@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -54,7 +55,7 @@ async function foreignKeyExists(table, id) {
  *
  * Dashboard KPI widget
  */
-router.post('/GetSumary', async (req, res) => {
+router.post('/GetSumary', requirePermission('reports.view'), async (req, res) => {
   try {
     const { dateFrom = '', dateTo = '', companyId = '' } = req.body;
 

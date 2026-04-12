@@ -7,10 +7,7 @@
 import { useState, useMemo } from 'react';
 import { Search, ToggleLeft, ToggleRight, Pencil, Check, X } from 'lucide-react';
 import { useServiceCatalog } from '@/hooks/useSettings';
-
-function formatVND(amount: number): string {
-  return new Intl.NumberFormat('vi-VN').format(amount) + ' \u20ab';
-}
+import { formatVND } from '@/lib/formatting';
 
 export function ServiceCatalogSettings() {
   const {

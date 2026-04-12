@@ -23,6 +23,10 @@ const MODULES = [
   { name: 'Commission', actions: ['View', 'Edit'] },
   { name: 'Settings', actions: ['View', 'Edit'] },
   { name: 'Notifications', actions: ['View', 'Edit'] },
+  { name: 'Permissions', actions: ['View', 'Edit'] },
+  { name: 'Relationships', actions: ['View'] },
+  { name: 'Website', actions: ['View', 'Edit'] },
+  { name: 'Health Checkups', actions: ['View', 'Create'] },
 ] as const;
 
 const PERMISSION_DESCRIPTIONS: Record<string, string> = {
@@ -58,6 +62,12 @@ const PERMISSION_DESCRIPTIONS: Record<string, string> = {
   'notifications.edit': 'Quản lý thông báo',
   'commission.view': 'Xem hoa hồng',
   'commission.edit': 'Chỉnh sửa hoa hồng',
+  'permissions.view': 'Xem quyền hệ thống',
+  'permissions.edit': 'Chỉnh sửa quyền hệ thống',
+  'relationships.view': 'Xem mối quan hệ dữ liệu',
+  'website.view': 'Xem trang website',
+  'website.edit': 'Chỉnh sửa trang website',
+  'external_checkups.create': 'Tải lên ảnh khám ngoài',
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────

@@ -1,8 +1,9 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { type CalendarAppointment } from '@/data/mockCalendar';
-import { fetchAppointments, type ApiAppointment } from '@/lib/api';
+import { fetchAppointments } from '@/lib/api';
 import { useTimezone } from '@/contexts/TimezoneContext';
 import { normalizeText } from '@/lib/utils';
+import { mapApiAppointmentToCalendar } from '@/lib/calendarUtils';
 import type { AppointmentStatus } from '@/types/appointment';
 
 export type ViewMode = 'day' | 'week' | 'month';
@@ -193,93 +194,3 @@ function getMonthDates(currentDate: Date): Date[] {
   });
 }
 
-function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppointment {
-  // Convert UTC date to Vietnam local date (UTC+7)
-  // apt.date may be UTC like "2026-04-07T17:00:00.000Z" which is actually 2026-04-08 in VN
-  const dateStr = apt.date ? utcToLocalDateStr(apt.date) : '';
-  const startTime = apt.time || '09:00';
-  const endTime = calculateEndTime(startTime, apt.timeexpected);
-
-  return {
-    id: apt.id,
-    customerId: apt.partnerid || '',
-    customerName: apt.partnername || '',
-    customerPhone: apt.partnerphone || '',
-    customerCode: apt.partnercode || '',
-    serviceName: apt.name || apt.note || '',
-    appointmentType: deriveAppointmentType(apt.reason || apt.note || ''),
-    dentist: apt.doctorname || '',
-    dentistId: apt.doctorid || '',
-    date: dateStr,
-    startTime,
-    endTime,
-    status: mapStateToStatus(apt.state),
-    locationId: apt.companyid || '',
-    locationName: apt.companyname || '',
-    notes: apt.note || '',
-    color: mapHexToColorCode(apt.color),
-  };
-}
-
-/**
- * Convert a UTC ISO date string to a local YYYY-MM-DD string in Vietnam timezone.
- * E.g. "2026-04-07T17:00:00.000Z" → "2026-04-08" (UTC+7)
- */
-function utcToLocalDateStr(isoDate: string): string {
-  // If it's already just a date (no 'T'), return as-is
-  if (!isoDate.includes('T')) return isoDate;
-  const d = new Date(isoDate);
-  // Format in Vietnam timezone
-  const parts = d.toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }); // en-CA gives YYYY-MM-DD
-  return parts;
-}
-
-function calculateEndTime(startTime: string, durationMinutes: number | null): string {
-  const [hours, minutes] = startTime.split(':').map(Number);
-  const totalMinutes = hours * 60 + minutes + (durationMinutes || 30);
-  const endHours = Math.floor(totalMinutes / 60);
-  const endMinutes = totalMinutes % 60;
-  return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
-}
-
-function mapStateToStatus(state: string | null): CalendarAppointment['status'] {
-  const stateMap: Record<string, CalendarAppointment['status']> = {
-    draft: 'scheduled',
-    scheduled: 'scheduled',
-    confirmed: 'confirmed',
-    arrived: 'confirmed',
-    'in examination': 'in-progress',
-    'in-progress': 'in-progress',
-    done: 'completed',
-    completed: 'completed',
-    cancelled: 'cancelled',
-  };
-  return stateMap[state?.toLowerCase().trim() || ''] || 'scheduled';
-}
-
-function mapHexToColorCode(color: string | null | undefined): string | null {
-  if (color === null || color === undefined) return null;
-  if (/^[0-7]$/.test(color)) return color;
-  const hexMap: Record<string, string> = {
-    '#ef4444': '3',
-    '#3b82f6': '0',
-    '#10b981': '1',
-    '#f59e0b': '2',
-    '#8b5cf6': '4',
-    '#ec4899': '5',
-    '#06b6d4': '6',
-    '#84cc16': '7',
-  };
-  return hexMap[color.toLowerCase()] ?? null;
-}
-
-function deriveAppointmentType(text: string): CalendarAppointment['appointmentType'] {
-  const lower = text.toLowerCase();
-  if (/lấy cao|vệ sinh/.test(lower)) return 'cleaning';
-  if (/niềng|chỉnh nha/.test(lower)) return 'orthodontics';
-  if (/nhổ|phẫu/.test(lower)) return 'surgery';
-  if (/tẩy trắng|thẩm mỹ/.test(lower)) return 'cosmetic';
-  if (/cấp cứu|đau/.test(lower)) return 'emergency';
-  if (/khám|tư vấn/.test(lower)) return 'consultation';
-  return 'treatment';
-}

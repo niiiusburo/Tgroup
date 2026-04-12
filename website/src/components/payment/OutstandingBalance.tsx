@@ -6,10 +6,7 @@
 
 import { AlertTriangle, Clock } from 'lucide-react';
 import type { OutstandingBalanceItem } from '@/types/payment';
-
-function formatVND(amount: number): string {
-  return new Intl.NumberFormat('vi-VN').format(amount) + ' \u20ab';
-}
+import { formatVND } from '@/lib/formatting';
 
 function getDaysUntilDue(dueDate: string): number {
   const now = new Date();

@@ -8,7 +8,7 @@ const router = express.Router();
  * GET /api/Permissions/groups
  * Returns all permission groups with their permissions array
  */
-router.get('/groups', async (req, res) => {
+router.get('/groups', requirePermission('permissions.view'), async (req, res) => {
   try {
     const rows = await query(`
       SELECT
@@ -145,7 +145,7 @@ router.put('/groups/:groupId', requirePermission('permissions.edit'), async (req
  * GET /api/Permissions/employees
  * Returns all employee permission assignments
  */
-router.get('/employees', async (req, res) => {
+router.get('/employees', requirePermission('permissions.view'), async (req, res) => {
   try {
     const rows = await query(`
       SELECT
@@ -324,7 +324,7 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
  * GET /api/Permissions/resolve/:employeeId
  * Returns effective permissions for an employee (base group + overrides applied)
  */
-router.get('/resolve/:employeeId', async (req, res) => {
+router.get('/resolve/:employeeId', requirePermission('permissions.view'), async (req, res) => {
   try {
     const { employeeId } = req.params;
 

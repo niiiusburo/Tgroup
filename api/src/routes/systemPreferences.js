@@ -9,7 +9,7 @@ const { requirePermission } = require('../middleware/auth');
 const router = express.Router();
 
 // GET /api/SystemPreferences - List all preferences
-router.get('/', async (req, res) => {
+router.get('/', requirePermission('settings.view'), async (req, res) => {
   try {
     const { category, key, is_public } = req.query;
 
@@ -62,7 +62,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/SystemPreferences/:key - Get single preference by key
-router.get('/:key', async (req, res) => {
+router.get('/:key', requirePermission('settings.view'), async (req, res) => {
   try {
     const prefs = await query(
       'SELECT * FROM dbo.systempreferences WHERE key = $1',
@@ -116,16 +116,29 @@ router.put('/:key', requirePermission('settings.edit'), async (req, res) => {
   try {
     const { value, type, category, description, is_public } = req.body;
 
+    const updates = [];
+    const values = [];
+    let paramIdx = 1;
+
+    const fields = { value, type, category, description, is_public };
+    for (const [key, fieldValue] of Object.entries(fields)) {
+      if (fieldValue !== undefined) {
+        updates.push(`${key} = $${paramIdx}`);
+        values.push(fieldValue);
+        paramIdx++;
+      }
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    updates.push(`updated_at = CURRENT_TIMESTAMP`);
+    values.push(req.params.key);
+
     const result = await query(
-      `UPDATE dbo.systempreferences 
-       SET value = COALESCE($1, value),
-           type = COALESCE($2, type),
-           category = COALESCE($3, category),
-           description = COALESCE($4, description),
-           is_public = COALESCE($5, is_public),
-           updated_at = CURRENT_TIMESTAMP
-       WHERE key = $6 RETURNING *`,
-      [value, type, category, description, is_public, req.params.key]
+      `UPDATE dbo.systempreferences SET ${updates.join(', ')} WHERE key = $${paramIdx} RETURNING *`,
+      values
     );
 
     if (result.length === 0) {

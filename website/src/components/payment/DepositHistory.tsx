@@ -1,13 +1,10 @@
 import { Clock, ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import type { DepositTransaction } from '@/hooks/useDeposits';
+import { formatVND } from '@/lib/formatting';
 
 interface DepositHistoryProps {
   transactions: DepositTransaction[];
   loading?: boolean;
-}
-
-function formatVND(amount: number): string {
-  return new Intl.NumberFormat('vi-VN').format(amount);
 }
 
 function formatDate(dateStr: string): string {
@@ -72,7 +69,7 @@ export function DepositHistory({ transactions, loading }: DepositHistoryProps) {
                     <span className={`text-sm font-medium ${
                       isDeposit ? 'text-emerald-700' : 'text-red-700'
                     }`}>
-                      {isDeposit ? '+' : ''}{formatVND(tx.amount)} đ
+                      {isDeposit ? '+' : ''}{formatVND(tx.amount)}
                     </span>
                     <span className={`text-xs px-1.5 py-0.5 rounded ${
                       isDeposit ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'
@@ -89,7 +86,7 @@ export function DepositHistory({ transactions, loading }: DepositHistoryProps) {
                   <p className="text-xs text-gray-400">{formatDate(tx.date)}</p>
                   {tx.balanceAfter !== undefined && (
                     <p className="text-xs text-gray-500">
-                      Bal: {formatVND(tx.balanceAfter)} đ
+                      Bal: {formatVND(tx.balanceAfter)}
                     </p>
                   )}
                 </div>

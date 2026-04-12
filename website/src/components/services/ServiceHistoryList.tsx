@@ -13,16 +13,13 @@ import {
   type VisitStatus,
 } from '@/data/mockServices';
 import { MultiVisitTracker } from './MultiVisitTracker';
+import { formatVND } from '@/lib/formatting';
 
 interface ServiceHistoryListProps {
   readonly records: readonly ServiceRecord[];
   readonly onUpdateVisit?: (recordId: string, visitId: string, status: VisitStatus) => void;
   readonly onCancel?: (recordId: string) => void;
   readonly onEdit?: (record: ServiceRecord) => void;
-}
-
-function formatVND(amount: number): string {
-  return new Intl.NumberFormat('vi-VN').format(amount) + ' \u20ab';
 }
 
 export function ServiceHistoryList({ records, onUpdateVisit, onCancel, onEdit }: ServiceHistoryListProps) {

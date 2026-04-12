@@ -50,8 +50,14 @@ export function useDashboardStats(selectedLocationId?: string): DashboardStatsRe
         });
         setAppointmentsToday(appointmentsResponse.totalItems);
 
-        // Fetch sale orders and calculate revenue
-        const ordersResponse = await fetchSaleOrders({ limit: 200, companyId });
+        // Fetch sale orders and calculate revenue (MTD)
+        const firstDayOfMonth = `${yyyy}-${mm}-01`;
+        const ordersResponse = await fetchSaleOrders({
+          limit: 200,
+          companyId,
+          dateFrom: firstDayOfMonth,
+          dateTo: todayStr,
+        });
         const totalRevenue = ordersResponse.items.reduce((sum, order) => {
           const amount = parseFloat(order.amounttotal || '0');
           return sum + (isNaN(amount) ? 0 : amount);

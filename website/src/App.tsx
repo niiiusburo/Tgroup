@@ -32,16 +32,16 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
   '/': 'overview.view',
   '/calendar': 'calendar.view',
   '/customers': 'customers.view',
-
   '/employees': 'employees.view',
   '/locations': 'locations.view',
-  '/website': 'services.view',
+  '/website': 'website.view',
   '/reports': 'reports.view',
   '/commission': 'commission.view',
   '/settings': 'settings.view',
   '/notifications': 'notifications.view',
-  '/relationships': 'settings.view',
-  '/permissions': 'employees.edit',
+  '/relationships': 'relationships.view',
+  '/permissions': 'permissions.view',
+  '/payment': 'payment.view',
 };
 
 /**
