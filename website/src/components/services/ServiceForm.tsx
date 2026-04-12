@@ -21,6 +21,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { X, ClipboardPlus, Edit2, User, Stethoscope, MapPin, CalendarDays, Clock, FileText, DollarSign, Hash, Check } from 'lucide-react';
+import { CurrencyInput } from '@/components/shared/CurrencyInput';
 import { ServiceCatalogSelector } from '@/components/shared/ServiceCatalogSelector';
 import { CustomerSelector } from '@/components/shared/CustomerSelector';
 import { DoctorSelector } from '@/components/shared/DoctorSelector';
@@ -150,6 +151,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       defaultPrice: p.listPrice,
       estimatedDuration: 30,
       totalVisits: 1,
+      unit: p.uomName || undefined,
     })),
     [products]
   );
@@ -170,7 +172,11 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   // Clear field-specific errors when values change
   const handleCatalogChange = (id: string | null) => {
     setCatalogItemId(id);
-    if (id) setErrors(prev => { const next = { ...prev }; delete next.service; return next; });
+    if (id) {
+      setErrors(prev => { const next = { ...prev }; delete next.service; return next; });
+      const catalogItem = serviceCatalog.find(c => c.id === id);
+      if (catalogItem?.unit) setUnit(catalogItem.unit);
+    }
   };
   const handleCustomerChange = (id: string | null) => {
     setCustomerId(id);
@@ -350,9 +356,9 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
                 <DollarSign className="w-3.5 h-3.5" />
                 Tổng chi phí
               </label>
-              <input
-                type="number" value={totalCostOverride}
-                onChange={(e) => setTotalCostOverride(e.target.value)}
+              <CurrencyInput
+                value={totalCostOverride ? Number(totalCostOverride) : null}
+                onChange={(v) => setTotalCostOverride(v === null ? '' : String(v))}
                 placeholder={selectedCatalog ? String(selectedCatalog.defaultPrice) : '0'}
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
               />

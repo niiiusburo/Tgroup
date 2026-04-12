@@ -8,6 +8,7 @@ import { useState, useMemo } from 'react';
 import { Search, ToggleLeft, ToggleRight, Pencil, Check, X } from 'lucide-react';
 import { useServiceCatalog } from '@/hooks/useSettings';
 import { formatVND } from '@/lib/formatting';
+import { CurrencyInput } from '@/components/shared/CurrencyInput';
 
 export function ServiceCatalogSettings() {
   const {
@@ -133,11 +134,10 @@ export function ServiceCatalogSettings() {
                     <td className="px-4 py-3 text-right">
                       {editingId === service.id ? (
                         <div className="flex items-center justify-end gap-1">
-                          <input
-                            type="number"
-                            value={editPrice}
-                            onChange={(e) => setEditPrice(e.target.value)}
-                            className="w-28 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary text-right"
+                          <CurrencyInput
+                            value={editPrice ? Number(editPrice) : null}
+                            onChange={(v) => setEditPrice(v === null ? '' : String(v))}
+                            className="w-32 px-2 py-1 text-sm border border-gray-300 rounded"
                             autoFocus
                           />
                           <button type="button" onClick={() => saveEdit(service.id)} className="p-1 text-green-600 hover:bg-green-50 rounded">

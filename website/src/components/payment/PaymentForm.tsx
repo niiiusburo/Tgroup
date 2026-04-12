@@ -11,13 +11,15 @@ import {
 } from 'lucide-react';
 import { CustomerSelector } from '@/components/shared/CustomerSelector';
 import { VietQrModal } from './VietQrModal';
+import { ServicePaymentCard, type ServicePaymentContext } from './ServicePaymentCard';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useLocations } from '@/hooks/useLocations';
 import { useDeposits } from '@/hooks/useDeposits';
 import { fetchSaleOrders, fetchDotKhams } from '@/lib/api';
 import { LocationSelector } from '@/components/shared/LocationSelector';
 import type { Customer } from '@/hooks/useCustomers';
-import { formatVND } from '@/lib/formatting';
+import { formatVND, formatVNDInput } from '@/lib/formatting';
+import { CurrencyInput } from '@/components/shared/CurrencyInput';
 
 export interface PaymentSourceBreakdown {
   readonly depositAmount: number;
@@ -72,6 +74,7 @@ interface PaymentFormProps {
   readonly defaultBankAmount?: number;
   readonly defaultAllocations?: PaymentAllocationInput[];
   readonly isEdit?: boolean;
+  readonly serviceContext?: ServicePaymentContext;
 }
 
 export function PaymentForm({
@@ -90,6 +93,7 @@ export function PaymentForm({
   defaultBankAmount = 0,
   defaultAllocations,
   isEdit = false,
+  serviceContext,
 }: PaymentFormProps) {
   const { customers: apiCustomers, loading: customersLoading } = useCustomers();
   const { allLocations: apiLocations, isLoading: locationsLoading } = useLocations();
@@ -241,6 +245,30 @@ export function PaymentForm({
     }
   }, [allocateMode, selectedTargetIds, totalPayment, invoices, dotkhams, allocationTab]);
 
+  // Auto-select allocation when serviceContext is provided and invoices are loaded
+  useEffect(() => {
+    if (!serviceContext) return;
+    const targetId = serviceContext.recordId;
+    const targetList = serviceContext.recordType === 'saleorder' ? invoices : dotkhams;
+    const target = targetList.find((t) => t.id === targetId);
+    if (!target) return;
+    // Only auto-select once (when invoices first load)
+    if (!selectedTargetIds.has(targetId)) {
+      setSelectedTargetIds(new Set([targetId]));
+      setTargetAllocationMap({ [targetId]: serviceContext.residual > 0 ? serviceContext.residual : target.residual });
+      setAllocationTypes({ [targetId]: serviceContext.recordType === 'saleorder' ? 'invoices' : 'dotkhams' });
+    }
+  }, [serviceContext, invoices, dotkhams, selectedTargetIds]);
+
+  // Auto-fill payment amount from serviceContext when first loaded
+  useEffect(() => {
+    if (!serviceContext || serviceContext.residual <= 0) return;
+    // Only auto-fill if all sources are still at initial values
+    if (depositAmount === 0 && cashAmount === 0 && bankAmount === 0) {
+      setCashAmount(serviceContext.residual);
+    }
+  }, [serviceContext]);
+
   // ─── Quick amount helpers ─────────────────────────────────────
   const QUICK_AMOUNTS = [500_000, 1_000_000, 2_000_000, 5_000_000, 10_000_000] as const;
 
@@ -380,7 +408,11 @@ export function PaymentForm({
               <div>
                 <h2 className="text-xl font-bold text-white">{isEdit ? 'Chỉnh sửa thanh toán' : 'Ghi nhận thanh toán'}</h2>
                 <p className="text-sm text-orange-100 mt-0.5">
-                  {isCustomerScoped ? `Thanh toán cho ${defaultCustomerName || selectedCustomer?.name || ''}` : 'Tạo giao dịch thanh toán mới'}
+                  {serviceContext
+                    ? `${serviceContext.recordName} — ${defaultCustomerName || selectedCustomer?.name || ''}`
+                    : isCustomerScoped
+                      ? `Thanh toán cho ${defaultCustomerName || selectedCustomer?.name || ''}`
+                      : 'Tạo giao dịch thanh toán mới'}
                 </p>
               </div>
             </div>
@@ -425,6 +457,11 @@ export function PaymentForm({
             </div>
           )}
 
+          {/* ─── Service Payment Context ─── */}
+          {serviceContext && (
+            <ServicePaymentCard ctx={serviceContext} />
+          )}
+
           {/* ═══════════════════════════════════════════════════════
               MULTI-SOURCE PAYMENT SECTION
           ═══════════════════════════════════════════════════════ */}
@@ -465,14 +502,10 @@ export function PaymentForm({
                     Dùng tất cả
                   </button>
                 </div>
-                <input
-                  type="number"
-                  value={depositAmount || ''}
-                  onChange={(e) => setDepositAmount(Math.max(0, Number(e.target.value)))}
+                <CurrencyInput
+                  value={depositAmount || null}
+                  onChange={(v) => setDepositAmount(Math.max(0, Math.min(availableDeposit, v ?? 0)))}
                   placeholder="0"
-                  min={0}
-                  max={availableDeposit}
-                  className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 transition-all text-sm"
                 />
                 {errors.deposit && <p className="text-xs text-red-500 mt-1">{errors.deposit}</p>}
               </div>
@@ -489,13 +522,10 @@ export function PaymentForm({
                   </div>
                   <span className="text-sm font-medium text-gray-700">Tiền mặt (Cash)</span>
                 </div>
-                <input
-                  type="number"
-                  value={cashAmount || ''}
-                  onChange={(e) => setCashAmount(Math.max(0, Number(e.target.value)))}
+                <CurrencyInput
+                  value={cashAmount || null}
+                  onChange={(v) => setCashAmount(Math.max(0, v ?? 0))}
                   placeholder="0"
-                  min={0}
-                  className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400 transition-all text-sm"
                 />
               </div>
 
@@ -521,13 +551,10 @@ export function PaymentForm({
                     Tạo QR
                   </button>
                 </div>
-                <input
-                  type="number"
-                  value={bankAmount || ''}
-                  onChange={(e) => setBankAmount(Math.max(0, Number(e.target.value)))}
+                <CurrencyInput
+                  value={bankAmount || null}
+                  onChange={(v) => setBankAmount(Math.max(0, v ?? 0))}
                   placeholder="0"
-                  min={0}
-                  className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all text-sm"
                 />
               </div>
             </div>
@@ -580,7 +607,7 @@ export function PaymentForm({
                 {QUICK_AMOUNTS.map((qa) => (
                   <button key={qa} type="button" onClick={() => applyQuickAmount(qa)}
                     className="px-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600 transition-all">
-                    {formatVND(qa)}
+                    {formatVNDInput(qa)}
                   </button>
                 ))}
               </div>
@@ -795,7 +822,7 @@ export function PaymentForm({
             Hủy bỏ
           </button>
           <button type="button" onClick={() => handleSubmit()}
-            disabled={isLoading || isSaving || totalPayment <= 0}
+            disabled={isLoading || isSaving || totalPayment <= 0 || (serviceContext !== undefined && serviceContext.residual <= 0)}
             className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all shadow-lg shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed">
             <Check className="w-4 h-4" />
             Ghi nhận {totalPayment > 0 ? formatVND(totalPayment) : ''}

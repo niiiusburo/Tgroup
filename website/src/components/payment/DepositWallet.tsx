@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Wallet, Plus, Loader2, QrCode, DollarSign } from 'lucide-react';
 import { VietQrModal } from './VietQrModal';
-import { formatVND } from '@/lib/formatting';
+import { formatVND, formatVNDInput } from '@/lib/formatting';
+import { CurrencyInput } from '@/components/shared/CurrencyInput';
 
 interface DepositWalletProps {
   depositBalance: number;
@@ -100,14 +101,12 @@ export function DepositWallet({
                     <span className="text-sm font-medium text-gray-600">Tổng thanh toán</span>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <input
-                      type="number"
-                      value={addAmount}
-                      onChange={(e) => setAddAmount(e.target.value)}
+                    <CurrencyInput
+                      value={addAmount ? Number(addAmount) : null}
+                      onChange={(v) => setAddAmount(v === null ? '' : String(v))}
                       placeholder="0"
-                      className="w-36 text-right text-2xl font-bold text-orange-600 bg-transparent border-b border-orange-300 focus:outline-none focus:border-orange-500 placeholder:text-orange-300"
+                      className="w-36"
                     />
-                    <span className="text-sm font-semibold text-orange-600">₫</span>
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 mt-3">
@@ -131,7 +130,7 @@ export function DepositWallet({
                           }`}
                           title={isInstallment ? 'Số tiền nợ hiện tại' : undefined}
                         >
-                          {isInstallment ? 'Thanh toán nợ ' : ''}{formatVND(amt)}
+                          {isInstallment ? 'Thanh toán nợ ' : ''}{formatVNDInput(amt)}
                         </button>
                       );
                     })}

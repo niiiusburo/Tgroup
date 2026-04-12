@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
-import { Calculator, CalendarDays, DollarSign, User, FileText, ChevronRight, Check } from 'lucide-react';
+import { Calculator, CalendarDays, User, FileText, ChevronRight, Check } from 'lucide-react';
 import { DatePicker } from '@/components/ui/DatePicker';
 import type { PlanCreationInput } from '@/types/monthlyPlans';
 import { formatVND } from '@/lib/formatting';
+import { CurrencyInput } from '@/components/shared/CurrencyInput';
 
 /**
  * MonthlyPlanCreator - Plan setup wizard for installment plans
@@ -150,17 +151,11 @@ export function MonthlyPlanCreator({ onCreatePlan, onCancel }: MonthlyPlanCreato
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">Total Amount (VND)</label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="number"
-                  value={totalAmount}
-                  onChange={(e) => setTotalAmount(e.target.value)}
-                  placeholder="0"
-                  min={0}
-                  className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                />
-              </div>
+              <CurrencyInput
+                value={totalAmount ? Number(totalAmount) : null}
+                onChange={(v) => setTotalAmount(v === null ? '' : String(v))}
+                placeholder="0"
+              />
             </div>
           </div>
         )}

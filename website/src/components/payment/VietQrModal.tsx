@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react';
 import { X, QrCode, CheckCircle } from 'lucide-react';
 import { buildVietQrUrl, generatePaymentDescription } from '../../lib/vietqr';
+import { CurrencyInput } from '@/components/shared/CurrencyInput';
 import { useBankSettings } from '../../hooks/useBankSettings';
 import { uploadPaymentProof } from '../../lib/api';
 
@@ -129,16 +130,13 @@ export function VietQrModal({
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                 Số tiền (VND)
               </label>
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => {
-                  setAmount(e.target.value);
+              <CurrencyInput
+                value={amount ? Number(amount) : null}
+                onChange={(v) => {
+                  setAmount(v === null ? '' : String(v));
                   setGenerated(false);
                 }}
                 placeholder="Nhập số tiền"
-                min={0}
-                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
               />
             </div>
 

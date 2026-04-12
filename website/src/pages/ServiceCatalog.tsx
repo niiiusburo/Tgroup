@@ -17,6 +17,7 @@ import {
 import type { ApiProduct, ApiProductCategory, ApiCompany } from '@/lib/api';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { formatVND } from '@/lib/formatting';
+import { CurrencyInput } from '@/components/shared/CurrencyInput';
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -123,10 +124,9 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Giá niêm yết</label>
-            <input
-              type="number"
+            <CurrencyInput
               value={form.listprice}
-              onChange={(e) => setForm({ ...form, listprice: parseFloat(e.target.value) || 0 })}
+              onChange={(v) => setForm({ ...form, listprice: v ?? 0 })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
             />
           </div>
