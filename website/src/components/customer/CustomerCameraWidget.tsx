@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { ScanFace, CreditCard, Camera, X, Check, Loader2, UserCheck, ScanLine } from 'lucide-react';
+import { ScanFace, CreditCard, X, Check, Loader2, UserCheck, ScanLine } from 'lucide-react';
 import type { CustomerFormData } from '@/types/customer';
 
 type WidgetMode = 'idle' | 'face-id' | 'quick-add';
@@ -116,47 +116,43 @@ export function CustomerCameraWidget({
 
   return (
     <div className="flex flex-col items-center">
-      {/* Camera Preview / Avatar Area */}
-      <div className="relative w-28 h-28 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
-        {isActive ? (
-          <>
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            {/* Overlay frame */}
-            {mode === 'quick-add' && !isProcessing && !isSuccess && (
-              <div className="absolute inset-0 p-3">
-                <div className="w-full h-full border-2 border-white/80 rounded-lg relative">
-                  <span className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-orange-500 rounded-tl-md" />
-                  <span className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-orange-500 rounded-tr-md" />
-                  <span className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-orange-500 rounded-bl-md" />
-                  <span className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-orange-500 rounded-br-md" />
-                </div>
+      {/* Camera Preview — only shown when active */}
+      {isActive && (
+        <div className="relative w-28 h-28 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          {/* Overlay frame */}
+          {mode === 'quick-add' && !isProcessing && !isSuccess && (
+            <div className="absolute inset-0 p-3">
+              <div className="w-full h-full border-2 border-white/80 rounded-lg relative">
+                <span className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-orange-500 rounded-tl-md" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-orange-500 rounded-tr-md" />
+                <span className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-orange-500 rounded-bl-md" />
+                <span className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-orange-500 rounded-br-md" />
               </div>
-            )}
-            {mode === 'face-id' && !isProcessing && !isSuccess && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-20 h-24 border-2 border-white/80 rounded-[50%]" />
-              </div>
-            )}
-            {(isProcessing || isSuccess) && (
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                {isProcessing ? (
-                  <Loader2 className="w-8 h-8 text-white animate-spin" />
-                ) : (
-                  <Check className="w-8 h-8 text-emerald-400" />
-                )}
-              </div>
-            )}
-          </>
-        ) : (
-          <Camera className="w-8 h-8 text-gray-400" />
-        )}
-      </div>
+            </div>
+          )}
+          {mode === 'face-id' && !isProcessing && !isSuccess && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-20 h-24 border-2 border-white/80 rounded-[50%]" />
+            </div>
+          )}
+          {(isProcessing || isSuccess) && (
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+              {isProcessing ? (
+                <Loader2 className="w-8 h-8 text-white animate-spin" />
+              ) : (
+                <Check className="w-8 h-8 text-emerald-400" />
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Controls */}
       <div className="mt-3 w-full">
@@ -165,25 +161,25 @@ export function CustomerCameraWidget({
         )}
 
         {!isActive ? (
-          // Idle state: two compact buttons
-          <div className="flex items-center justify-center gap-2">
+          // Idle state: two large module buttons
+          <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
               onClick={() => startCamera('face-id')}
               disabled={disabled}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50"
+              className="flex flex-col items-center justify-center gap-2 px-3 py-5 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-2xl hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm transition-all disabled:opacity-50"
             >
-              <ScanFace className="w-3.5 h-3.5 text-orange-500" />
-              Face ID
+              <ScanFace className="w-7 h-7 text-orange-500" />
+              <span>Face ID</span>
             </button>
             <button
               type="button"
               onClick={() => startCamera('quick-add')}
               disabled={disabled}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-lg hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50"
+              className="flex flex-col items-center justify-center gap-2 px-3 py-5 text-sm font-semibold text-white bg-gradient-to-br from-orange-500 to-orange-400 rounded-2xl hover:from-orange-600 hover:to-orange-500 hover:shadow-sm transition-all disabled:opacity-50"
             >
-              <CreditCard className="w-3.5 h-3.5" />
-              Quick Add
+              <CreditCard className="w-7 h-7" />
+              <span>Quick Add</span>
             </button>
           </div>
         ) : (
