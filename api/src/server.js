@@ -2,6 +2,14 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const { requireAuth } = require('./middleware/auth');
+
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET not set');
+  process.exit(1);
+}
 
 const accountRoutes = require('./routes/account');
 const sessionRoutes = require('./routes/session');
@@ -41,14 +49,27 @@ const externalCheckupsRoutes = require('./routes/externalCheckups');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({ origin: true, credentials: true }));
+const ALLOWED_ORIGINS = ['http://localhost:5174', 'http://localhost:5173', 'http://76.13.16.68:5174'];
+app.use(helmet());
+app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
+
+const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
+app.use('/api/Auth/login', loginLimiter);
+app.use('/api/Account/Login', loginLimiter);
 
 // Request logger
 app.use((req, _res, next) => {
   console.log(`[${req.method}] ${req.path}`);
   next();
+});
+
+const PUBLIC_PATHS = new Set(['/api/Auth/login', '/api/Account/Login']);
+app.use('/api', (req, res, next) => {
+  const fullPath = req.originalUrl.split('?')[0];
+  if (PUBLIC_PATHS.has(fullPath)) return next();
+  return requireAuth(req, res, next);
 });
 
 // Routes

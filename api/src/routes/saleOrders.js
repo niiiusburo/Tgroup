@@ -17,6 +17,9 @@ router.get('/', async (req, res) => {
       search = '',
       sortField = 'datecreated',
       sortOrder = 'desc',
+      date_from = '',
+      date_to = '',
+      company_id = '',
     } = req.query;
 
     const offsetNum = parseInt(offset, 10);
@@ -80,7 +83,7 @@ router.get('/', async (req, res) => {
     );
 
     const countResult = await query(
-      `SELECT COUNT(*) AS count FROM saleorders so WHERE ${whereClause}`,
+      `SELECT COUNT(*) AS count FROM saleorders so LEFT JOIN partners p ON p.id = so.partnerid WHERE ${whereClause}`,
       params
     );
     const totalItems = parseInt(countResult[0]?.count || '0', 10);

@@ -8,14 +8,8 @@ const router = express.Router();
 router.post('/Login', async (req, res) => {
   const { userName, password } = req.body;
 
-  // Hardcoded admin acceptance for local dev
   if (!userName || !password) {
     return res.status(400).json({ succeeded: false, message: 'userName and password are required' });
-  }
-
-  const isAdmin = userName === 'admin' && password === 'admin123';
-  if (!isAdmin) {
-    return res.status(401).json({ succeeded: false, message: 'Invalid credentials' });
   }
 
   let userRow = null;
@@ -26,14 +20,18 @@ router.post('/Login', async (req, res) => {
     );
     userRow = rows[0] || null;
   } catch (err) {
-    // DB not available — use fallback values
+    // DB not available
     userRow = null;
   }
 
-  const userId = userRow ? userRow.id : 'local-admin-id';
-  const userEmail = userRow ? userRow.email : 'admin@tamdentist.local';
-  const partnerId = userRow ? userRow.partnerid : null;
-  const companyId = userRow ? userRow.companyid : null;
+  if (!userRow) {
+    return res.status(401).json({ succeeded: false, message: 'Invalid credentials' });
+  }
+
+  const userId = userRow.id;
+  const userEmail = userRow.email;
+  const partnerId = userRow.partnerid;
+  const companyId = userRow.companyid;
   const sessionId = crypto.randomUUID();
 
   // Match EXACT live site JWT claim names
@@ -69,8 +67,8 @@ router.post('/Login', async (req, res) => {
     configs: null,
     user: {
       id: userId,
-      name: 'Admin',
-      userName: 'admin',
+      name: userRow.name || userName,
+      userName,
       partnerId,
       phone: null,
       email: userEmail,

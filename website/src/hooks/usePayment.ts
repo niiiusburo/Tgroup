@@ -118,7 +118,7 @@ export function usePayment(selectedLocationId?: string) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [selectedLocationId]);
 
   /**
    * Refetch data
@@ -132,7 +132,7 @@ export function usePayment(selectedLocationId?: string) {
    */
   useEffect(() => {
     fetchPayments();
-  }, []);
+  }, [fetchPayments]);
 
   /**
    * Debounced search

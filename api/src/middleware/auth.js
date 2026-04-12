@@ -36,10 +36,9 @@ function requirePermission(permission) {
     try {
       const { employeeId } = req.user;
 
-      // In dev mode with non-UUID employeeId, grant all permissions
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       if (!uuidRegex.test(employeeId)) {
-        return next();
+        return res.status(403).json({ error: 'Forbidden' });
       }
 
       const epRows = await query(

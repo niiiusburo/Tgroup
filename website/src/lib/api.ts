@@ -18,8 +18,12 @@ interface FetchOptions {
   params?: Record<string, string | number | boolean | undefined>;
 }
 
+// Keys that must be passed through unchanged (backend expects camelCase for these)
+const SNAKE_CASE_ALLOWLIST = new Set(['isDoctor', 'isAssistant', 'isReceptionist']);
+
 // Convert camelCase to snake_case for backend API compatibility
 function toSnakeCase(str: string): string {
+  if (SNAKE_CASE_ALLOWLIST.has(str)) return str;
   return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 }
 
@@ -474,14 +478,6 @@ export function createSaleOrder(data: {
   notes?: string;
 }) {
   return apiFetch<ApiSaleOrder>('/SaleOrders', { method: 'POST', body: data });
-}
-
-// ─── Dashboard Reports ────────────────────────────────────────────
-
-export function fetchDashboardReports(params?: { companyId?: string }) {
-  return apiFetch<Record<string, unknown>>('/DashboardReports', {
-    params: { companyId: params?.companyId },
-  });
 }
 
 // ─── Permissions ──────────────────────────────────────────────────
@@ -1123,8 +1119,13 @@ export async function createExternalCheckup(
     }
   });
 
+  const token = localStorage.getItem('tgclinic_token');
+  const authHeaders: Record<string, string> = {};
+  if (token) authHeaders['Authorization'] = `Bearer ${token}`;
+
   const res = await fetch(`${API_URL}/ExternalCheckups/${encodeURIComponent(customerCode)}/health-checkups`, {
     method: 'POST',
+    headers: authHeaders,
     body: form,
     credentials: 'include',
   });

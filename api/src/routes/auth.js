@@ -126,7 +126,7 @@ router.post('/login', async (req, res) => {
     });
   } catch (err) {
     console.error('Login error:', err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -166,7 +166,7 @@ router.get('/me', requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('/me error:', err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 

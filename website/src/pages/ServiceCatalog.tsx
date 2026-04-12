@@ -671,14 +671,6 @@ export function ServiceCatalog() {
                   </button>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-gray-500">
-                  <select
-                    value={pageSize}
-                    disabled
-                    className="px-2 py-1 border border-gray-200 rounded text-sm bg-white"
-                  >
-                    <option value={20}>20</option>
-                  </select>
-                  <span>hàng trên trang</span>
                   <span className="font-medium text-gray-700">
                     {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, totalProducts)} của {totalProducts} dòng
                   </span>

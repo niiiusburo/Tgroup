@@ -127,6 +127,103 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * GET /api/SaleOrderLinePartnerCommissions
+ * Returns: Commission records for partners/employees
+ */
+router.get('/SaleOrderLinePartnerCommissions', async (req, res) => {
+  try {
+    const {
+      offset = '0',
+      limit = '20',
+      partnerId = '',
+      dateFrom = '',
+      dateTo = '',
+    } = req.query;
+    const offsetNum = parseInt(offset, 10);
+    const limitNum = Math.min(parseInt(limit, 10), 500);
+
+    const conditions = ['1=1'];
+    const params = [];
+    let paramIdx = 1;
+
+    if (partnerId) {
+      conditions.push(`solpc.partnerid = $${paramIdx}`);
+      params.push(partnerId);
+      paramIdx++;
+    }
+
+    if (dateFrom) {
+      conditions.push(`solpc.datecreated >= $${paramIdx}`);
+      params.push(dateFrom);
+      paramIdx++;
+    }
+    if (dateTo) {
+      conditions.push(`solpc.datecreated <= $${paramIdx}`);
+      params.push(dateTo);
+      paramIdx++;
+    }
+
+    const whereClause = conditions.join(' AND ');
+
+    const items = await query(
+      `SELECT
+        solpc.id,
+        solpc.partnerid,
+        p.displayname AS partnername,
+        p.ref AS partnercode,
+        solpc.saleorderlineid,
+        sol.name AS orderlinename,
+        solpc.amount,
+        solpc.percentage,
+        solpc.commissiontype,
+        solpc.datecreated
+      FROM saleorderlinepartnercommissions solpc
+      LEFT JOIN partners p ON p.id = solpc.partnerid
+      LEFT JOIN saleorderlines sol ON sol.id = solpc.saleorderlineid
+      WHERE ${whereClause}
+      ORDER BY solpc.datecreated DESC
+      LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
+      [...params, limitNum, offsetNum]
+    );
+
+    const countResult = await query(
+      `SELECT COUNT(*) AS count FROM saleorderlinepartnercommissions solpc WHERE ${whereClause}`,
+      params
+    );
+    const totalItems = parseInt(countResult[0]?.count || '0', 10);
+
+    // Calculate totals
+    const totalResult = await query(
+      `SELECT COALESCE(SUM(amount), 0) AS totalcommission
+       FROM saleorderlinepartnercommissions solpc
+       WHERE ${whereClause}`,
+      params
+    );
+
+    return res.json({
+      offset: offsetNum,
+      limit: limitNum,
+      totalItems,
+      items,
+      aggregates: {
+        totalCommission: parseFloat(totalResult[0]?.totalcommission || 0),
+      },
+    });
+  } catch (err) {
+    console.error('Error fetching partner commissions:', err);
+    return res.status(500).json({
+      offset: 0,
+      limit: 20,
+      totalItems: 0,
+      items: [],
+      aggregates: null,
+      error: err instanceof Error ? err.message : 'Unknown error',
+    });
+  }
+});
+
+
+/**
  * GET /api/Commissions/:id
  * Returns: Single commission scheme with details
  */
@@ -239,103 +336,6 @@ router.get('/:id/Histories', async (req, res) => {
       limit: 20,
       totalItems: 0,
       items: [],
-      error: err instanceof Error ? err.message : 'Unknown error',
-    });
-  }
-});
-
-/**
- * GET /api/SaleOrderLinePartnerCommissions
- * Returns: Commission records for partners/employees
- */
-router.get('/SaleOrderLinePartnerCommissions', async (req, res) => {
-  try {
-    const {
-      offset = '0',
-      limit = '20',
-      partnerId = '',
-      dateFrom = '',
-      dateTo = '',
-    } = req.query;
-
-    const offsetNum = parseInt(offset, 10);
-    const limitNum = Math.min(parseInt(limit, 10), 500);
-
-    const conditions = ['1=1'];
-    const params = [];
-    let paramIdx = 1;
-
-    if (partnerId) {
-      conditions.push(`solpc.partnerid = $${paramIdx}`);
-      params.push(partnerId);
-      paramIdx++;
-    }
-
-    if (dateFrom) {
-      conditions.push(`solpc.datecreated >= $${paramIdx}`);
-      params.push(dateFrom);
-      paramIdx++;
-    }
-    if (dateTo) {
-      conditions.push(`solpc.datecreated <= $${paramIdx}`);
-      params.push(dateTo);
-      paramIdx++;
-    }
-
-    const whereClause = conditions.join(' AND ');
-
-    const items = await query(
-      `SELECT
-        solpc.id,
-        solpc.partnerid,
-        p.displayname AS partnername,
-        p.ref AS partnercode,
-        solpc.saleorderlineid,
-        sol.name AS orderlinename,
-        solpc.amount,
-        solpc.percentage,
-        solpc.commissiontype,
-        solpc.datecreated
-      FROM saleorderlinepartnercommissions solpc
-      LEFT JOIN partners p ON p.id = solpc.partnerid
-      LEFT JOIN saleorderlines sol ON sol.id = solpc.saleorderlineid
-      WHERE ${whereClause}
-      ORDER BY solpc.datecreated DESC
-      LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
-      [...params, limitNum, offsetNum]
-    );
-
-    const countResult = await query(
-      `SELECT COUNT(*) AS count FROM saleorderlinepartnercommissions solpc WHERE ${whereClause}`,
-      params
-    );
-    const totalItems = parseInt(countResult[0]?.count || '0', 10);
-
-    // Calculate totals
-    const totalResult = await query(
-      `SELECT COALESCE(SUM(amount), 0) AS totalcommission
-       FROM saleorderlinepartnercommissions solpc
-       WHERE ${whereClause}`,
-      params
-    );
-
-    return res.json({
-      offset: offsetNum,
-      limit: limitNum,
-      totalItems,
-      items,
-      aggregates: {
-        totalCommission: parseFloat(totalResult[0]?.totalcommission || 0),
-      },
-    });
-  } catch (err) {
-    console.error('Error fetching partner commissions:', err);
-    return res.status(500).json({
-      offset: 0,
-      limit: 20,
-      totalItems: 0,
-      items: [],
-      aggregates: null,
       error: err instanceof Error ? err.message : 'Unknown error',
     });
   }

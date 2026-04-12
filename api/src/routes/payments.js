@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { query } = require("../db");
+const { query, pool } = require("../db");
 
 function mapAllocations(allocResult) {
   return allocResult.map(a => {
@@ -323,33 +323,32 @@ router.post("/", async (req, res) => {
 
 // POST /api/Payments/:id/void - Void payment and reverse allocations
 router.post("/:id/void", async (req, res) => {
+  const { id } = req.params;
+  const { reason } = req.body || {};
+  const client = await pool.connect();
   try {
-    const { id } = req.params;
-    const { reason } = req.body || {};
+    await client.query("BEGIN");
 
-    await query("BEGIN");
-    try {
-      // Reverse allocations by deleting them
-      await query("DELETE FROM payment_allocations WHERE payment_id = $1", [id]);
+    // Reverse allocations by deleting them
+    await client.query("DELETE FROM payment_allocations WHERE payment_id = $1", [id]);
 
-      // Mark payment as voided
-      const result = await query(
-        `UPDATE payments SET status = 'voided', notes = COALESCE(notes, '') || ' | VOIDED: ' || $2 WHERE id = $1 RETURNING *`,
-        [id, reason || ""]
-      );
-      if (result.length === 0) {
-        await query("ROLLBACK");
-        return res.status(404).json({ error: "Payment not found" });
-      }
-      await query("COMMIT");
-      res.json({ success: true, payment: result[0] });
-    } catch (err) {
-      await query("ROLLBACK");
-      throw err;
+    // Mark payment as voided
+    const result = await client.query(
+      `UPDATE payments SET status = 'voided', notes = COALESCE(notes, '') || ' | VOIDED: ' || $2 WHERE id = $1 RETURNING *`,
+      [id, reason || ""]
+    );
+    if (result.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Payment not found" });
     }
-  } catch (error) {
-    console.error("Error voiding payment:", error);
+    await client.query("COMMIT");
+    res.json({ success: true, payment: result.rows[0] });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("Void error:", err);
     res.status(500).json({ error: "Failed to void payment" });
+  } finally {
+    client.release();
   }
 });
 

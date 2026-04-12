@@ -50,6 +50,7 @@ router.get('/', async (req, res) => {
       dateTo = '',
       state = '',
       company_id = '',
+      doctor_id = '',
     } = req.query;
 
     // Accept either date_from (snake_case from frontend) or dateFrom (camelCase)
@@ -122,6 +123,15 @@ router.get('/', async (req, res) => {
       }
       conditions.push(`a.companyid = $${paramIdx}`);
       params.push(company_id);
+      paramIdx++;
+    }
+
+    if (doctor_id) {
+      if (!isValidUUID(doctor_id)) {
+        return errorResponse(res, 400, 'INVALID_DOCTOR_ID', 'doctor_id must be a valid UUID');
+      }
+      conditions.push(`a.employeeid = $${paramIdx}`);
+      params.push(doctor_id);
       paramIdx++;
     }
 

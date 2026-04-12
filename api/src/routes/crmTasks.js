@@ -181,6 +181,61 @@ router.get('/GetPagedV2', async (req, res) => {
 });
 
 /**
+ * GET /api/CrmTaskCategories
+ * Returns: Task categories for dropdown
+ */
+router.get('/Categories', async (req, res) => {
+  try {
+    const items = await query(
+      `SELECT id, name, code, active, datecreated
+       FROM crmtaskcategories
+       WHERE active = true
+       ORDER BY name`
+    );
+
+    return res.json({
+      totalItems: items.length,
+      items,
+    });
+  } catch (err) {
+    console.error('Error fetching task categories:', err);
+    return res.status(500).json({
+      totalItems: 0,
+      items: [],
+      error: err instanceof Error ? err.message : 'Unknown error',
+    });
+  }
+});
+
+/**
+ * GET /api/CrmTaskTypes
+ * Returns: Task types for dropdown
+ */
+router.get('/Types', async (req, res) => {
+  try {
+    const items = await query(
+      `SELECT id, name, active, datecreated
+       FROM crmtasktypes
+       WHERE active = true
+       ORDER BY name`
+    );
+
+    return res.json({
+      totalItems: items.length,
+      items,
+    });
+  } catch (err) {
+    console.error('Error fetching task types:', err);
+    return res.status(500).json({
+      totalItems: 0,
+      items: [],
+      error: err instanceof Error ? err.message : 'Unknown error',
+    });
+  }
+});
+
+
+/**
  * GET /api/CrmTasks/:id
  * Returns: Single task with full details
  */
@@ -249,60 +304,6 @@ router.get('/:id', async (req, res) => {
   } catch (err) {
     console.error('Error fetching task:', err);
     return res.status(500).json({
-      error: err instanceof Error ? err.message : 'Unknown error',
-    });
-  }
-});
-
-/**
- * GET /api/CrmTaskCategories
- * Returns: Task categories for dropdown
- */
-router.get('/Categories', async (req, res) => {
-  try {
-    const items = await query(
-      `SELECT id, name, code, active, datecreated
-       FROM crmtaskcategories
-       WHERE active = true
-       ORDER BY name`
-    );
-
-    return res.json({
-      totalItems: items.length,
-      items,
-    });
-  } catch (err) {
-    console.error('Error fetching task categories:', err);
-    return res.status(500).json({
-      totalItems: 0,
-      items: [],
-      error: err instanceof Error ? err.message : 'Unknown error',
-    });
-  }
-});
-
-/**
- * GET /api/CrmTaskTypes
- * Returns: Task types for dropdown
- */
-router.get('/Types', async (req, res) => {
-  try {
-    const items = await query(
-      `SELECT id, name, active, datecreated
-       FROM crmtasktypes
-       WHERE active = true
-       ORDER BY name`
-    );
-
-    return res.json({
-      totalItems: items.length,
-      items,
-    });
-  } catch (err) {
-    console.error('Error fetching task types:', err);
-    return res.status(500).json({
-      totalItems: 0,
-      items: [],
       error: err instanceof Error ? err.message : 'Unknown error',
     });
   }

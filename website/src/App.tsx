@@ -1,27 +1,28 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { LocationProvider } from '@/contexts/LocationContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { TimezoneProvider } from '@/contexts/TimezoneContext';
-import {
-  Overview,
-  Calendar,
-  Customers,
-  Employees,
-  Locations,
-  ServiceCatalog,
-  Settings,
-  Relationships,
-  Commission,
-  Reports,
-  Notifications,
-  PermissionBoard,
-  Login,
-  Payment,
-} from '@/pages';
+import { Login } from '@/pages';
 import { ROUTES } from '@/constants';
 import { AddressAutocompleteTest } from '@/components/shared/AddressAutocompleteTest';
+
+// Lazy-loaded pages (code-split for smaller initial bundle)
+const Overview = lazy(() => import('@/pages/Overview').then(m => ({ default: m.Overview })));
+const Calendar = lazy(() => import('@/pages/Calendar').then(m => ({ default: m.Calendar })));
+const Customers = lazy(() => import('@/pages/Customers').then(m => ({ default: m.Customers })));
+const Employees = lazy(() => import('@/pages/Employees').then(m => ({ default: m.Employees })));
+const Locations = lazy(() => import('@/pages/Locations').then(m => ({ default: m.Locations })));
+const ServiceCatalog = lazy(() => import('@/pages/ServiceCatalog'));
+const Settings = lazy(() => import('@/pages/Settings').then(m => ({ default: m.Settings })));
+const Relationships = lazy(() => import('@/pages/Relationships').then(m => ({ default: m.Relationships })));
+const Commission = lazy(() => import('@/pages/Commission').then(m => ({ default: m.Commission })));
+const Reports = lazy(() => import('@/pages/Reports').then(m => ({ default: m.Reports })));
+const Notifications = lazy(() => import('@/pages/Notifications').then(m => ({ default: m.Notifications })));
+const PermissionBoard = lazy(() => import('@/pages/PermissionBoard').then(m => ({ default: m.PermissionBoard })));
+const Payment = lazy(() => import('@/pages/Payment').then(m => ({ default: m.Payment })));
 
 /**
  * Route → required permission mapping
@@ -131,6 +132,7 @@ function App() {
     <AuthProvider>
       <TimezoneProvider>
         <LocationProvider>
+        <Suspense fallback={<div className="flex items-center justify-center h-screen text-gray-500">Loading...</div>}>
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginRoute />} />
@@ -285,6 +287,7 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
+        </Suspense>
       </LocationProvider>
       </TimezoneProvider>
     </AuthProvider>

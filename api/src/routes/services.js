@@ -27,7 +27,7 @@ router.get('/', async (req, res) => {
     params.push(parseInt(limit), parseInt(offset));
     
     const result = await query(sql, params);
-    
+
     let countSql = 'SELECT COUNT(*) FROM public.services WHERE 1=1';
     const countParams = [];
     if (customerId) {
@@ -35,9 +35,9 @@ router.get('/', async (req, res) => {
       countSql += ` AND customer_id = $1`;
     }
     const countResult = await query(countSql, countParams);
-    
+
     res.json({
-      items: result.rows.map(row => ({
+      items: result.map(row => ({
         id: row.id,
         customerId: row.customer_id,
         doctorId: row.doctor_id,
@@ -58,7 +58,7 @@ router.get('/', async (req, res) => {
         createdAt: row.created_at,
         updatedAt: row.updated_at,
       })),
-      totalItems: parseInt(countResult.rows[0].count),
+      totalItems: parseInt(countResult[0].count),
     });
   } catch (error) {
     console.error('Error fetching services:', error);

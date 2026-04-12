@@ -4,79 +4,52 @@
  * @crossref:uses[AuthContext.login]
  */
 
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
-const STORAGE_KEY = 'tgclinic_remember';
-const STORAGE_DAYS = 60; // Save for 60 days
+const EMAIL_STORAGE_KEY = 'tgclinic_saved_email';
 
-interface RememberedCredentials {
-  email: string;
-  password: string;
-  expiry: number;
-}
-
-function getRememberedCredentials(): RememberedCredentials | null {
+function getSavedEmail(): string {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return null;
-    
-    const data: RememberedCredentials = JSON.parse(stored);
-    if (Date.now() > data.expiry) {
-      localStorage.removeItem(STORAGE_KEY);
-      return null;
-    }
-    return data;
+    return localStorage.getItem(EMAIL_STORAGE_KEY) || '';
   } catch {
-    return null;
+    return '';
   }
 }
 
-function saveCredentials(email: string, password: string): void {
-  const data: RememberedCredentials = {
-    email,
-    password,
-    expiry: Date.now() + (STORAGE_DAYS * 24 * 60 * 60 * 1000),
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+function saveEmail(email: string): void {
+  try {
+    localStorage.setItem(EMAIL_STORAGE_KEY, email);
+  } catch {
+    // Ignore storage errors
+  }
 }
 
-function clearCredentials(): void {
-  localStorage.removeItem(STORAGE_KEY);
+function clearSavedEmail(): void {
+  try {
+    localStorage.removeItem(EMAIL_STORAGE_KEY);
+  } catch {
+    // Ignore storage errors
+  }
 }
 
 export function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const mountedRef = useRef(true);
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => getSavedEmail());
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [hasSavedCredentials, setHasSavedCredentials] = useState(false);
   const [error, setError] = useState('');
 
-  // Load remembered credentials on mount (auto-login)
   useEffect(() => {
-    const remembered = getRememberedCredentials();
-    if (remembered) {
-      setEmail(remembered.email);
-      setPassword(remembered.password);
-      setHasSavedCredentials(true);
-      
-      // Auto-login with saved credentials
-      setIsLoading(true);
-      login(remembered.email, remembered.password)
-        .then(() => navigate('/', { replace: true }))
-        .catch(() => {
-          // Saved credentials failed, clear them
-          clearCredentials();
-          setHasSavedCredentials(false);
-          setIsLoading(false);
-        });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -85,23 +58,25 @@ export function Login() {
 
     try {
       await login(email, password);
-      
-      // Automatically save credentials on successful login
-      saveCredentials(email, password);
-      setHasSavedCredentials(true);
-      
+
+      if (!mountedRef.current) return;
+
+      // Only save email (not password) for prefill convenience
+      saveEmail(email);
+
       navigate('/', { replace: true });
     } catch (err: unknown) {
+      if (!mountedRef.current) return;
       if (err instanceof Error) {
         setError(err.message.includes('401') ? 'Invalid email or password.' : err.message);
       } else {
         setError('Login failed. Please try again.');
       }
-      // Clear saved credentials if login failed
-      clearCredentials();
-      setHasSavedCredentials(false);
+      clearSavedEmail();
     } finally {
-      setIsLoading(false);
+      if (mountedRef.current) {
+        setIsLoading(false);
+      }
     }
   }
 
@@ -112,7 +87,7 @@ export function Login() {
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
       </div>
-      
+
       <div className="w-full max-w-md relative">
         {/* Card */}
         <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8">
@@ -128,16 +103,6 @@ export function Login() {
               <p className="text-sm text-gray-500 mt-1">Sign in to your account</p>
             </div>
           </div>
-
-          {/* Saved credentials notice */}
-          {hasSavedCredentials && !isLoading && (
-            <div className="mb-4 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700 flex items-center gap-2">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              Signed in with saved credentials
-            </div>
-          )}
 
           {/* Error message */}
           {error && (
@@ -178,14 +143,6 @@ export function Login() {
                 placeholder="••••••••"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400 transition-colors"
               />
-            </div>
-
-            {/* Auto-save notice */}
-            <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
-              <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              Credentials saved automatically for {STORAGE_DAYS} days
             </div>
 
             <button

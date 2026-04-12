@@ -210,28 +210,19 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
     }
   }, [isOpen]);
 
-  // Sync form with appointment data when opened
+  // Effect 1: Sync core form fields from appointment (not serviceId — that needs services loaded)
   useEffect(() => {
     if (appointment && isOpen) {
       setDoctorId(appointment.doctorId || '');
       setLocationId(appointment.locationId || '');
 
+      // This modal handles today's appointments — always use today's date
       const today = new Date();
       setDate(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`);
       setTime(appointment.time || '09:00');
 
-      // Extract service from note if available
-      const noteLines = appointment.note?.split('\n') || [];
-      const serviceLine = noteLines.find(l => l.startsWith('Service:'));
-      if (serviceLine) {
-        const serviceNameFromNote = serviceLine.replace('Service:', '').trim();
-        const matchedService = services.find(s => s.name === serviceNameFromNote);
-        setServiceId(matchedService?.id || '');
-      } else {
-        setServiceId('');
-      }
-
       // Extract customer type from note
+      const noteLines = appointment.note?.split('\n') || [];
       const typeLine = noteLines.find(l => l.startsWith('Type:'));
       if (typeLine) {
         setCustomerType(typeLine.includes('returning') ? 'returning' : 'new');
@@ -253,7 +244,22 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
       setNotes(appointment.note || '');
       setError(null);
     }
-  }, [appointment, isOpen, services]);
+  }, [appointment, isOpen]);
+
+  // Effect 2: Match serviceId once services catalog is loaded
+  useEffect(() => {
+    if (appointment && isOpen && services.length > 0) {
+      const noteLines = appointment.note?.split('\n') || [];
+      const serviceLine = noteLines.find(l => l.startsWith('Service:'));
+      if (serviceLine) {
+        const serviceNameFromNote = serviceLine.replace('Service:', '').trim();
+        const matchedService = services.find(s => s.name === serviceNameFromNote);
+        setServiceId(matchedService?.id || '');
+      } else {
+        setServiceId('');
+      }
+    }
+  }, [services, appointment?.note, isOpen]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -303,8 +309,6 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
   const selectedDoctor = doctors.find(d => d.id === doctorId);
   const selectedLocation = locations.find(l => l.id === locationId);
   const selectedService = services.find(s => s.id === serviceId);
-  void STATUS_OPTIONS.find(s => s.value === status);
-  void APPOINTMENT_CARD_COLORS[colorCode];
 
   const isLoading = employeesLoading || locationsLoading || servicesLoading;
 

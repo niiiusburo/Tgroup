@@ -184,88 +184,6 @@ router.get('/', async (req, res) => {
 });
 
 /**
- * GET /api/HrPayslips/:id
- * Returns: Single payslip with full details
- */
-router.get('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const rows = await query(
-      `SELECT
-        hp.id,
-        hp.name,
-        hp.number,
-        hp.employeeid,
-        e.name AS employeename,
-        e.ref AS employeecode,
-        e.phone AS employeephone,
-        e.email AS employeeemail,
-        hp.datefrom,
-        hp.dateto,
-        hp.state,
-        hp.companyid,
-        c.name AS companyname,
-        hp.paysliprunid,
-        hpr.name AS paysliprunname,
-        hp.structid,
-        hps.name AS structurename,
-        hp.structuretypeid,
-        hp.daysalary,
-        hp.workedday,
-        hp.totalbasicsalary,
-        hp.overtimehour,
-        hp.overtimehoursalary,
-        hp.overtimeday,
-        hp.overtimedaysalary,
-        hp.allowance,
-        hp.otherallowance,
-        hp.rewardsalary,
-        hp.holidayallowance,
-        hp.totalsalary,
-        hp.commissionsalary,
-        hp.tax,
-        hp.socialinsurance,
-        hp.advancepayment,
-        hp.amercementmoney,
-        hp.netsalary,
-        hp.actualleavepermonth,
-        hp.leavepermonthunpaid,
-        hp.totalamount,
-        hp.salarypaymentid,
-        sp.name AS salarypaymentname,
-        hp.createdbyid,
-        au.name AS createdbyname,
-        hp.writebyid,
-        wu.name AS updatedbyname,
-        hp.datecreated,
-        hp.lastupdated
-      FROM hrpayslips hp
-      LEFT JOIN employees e ON e.id = hp.employeeid
-      LEFT JOIN companies c ON c.id = hp.companyid
-      LEFT JOIN hrpayslipruns hpr ON hpr.id = hp.paysliprunid
-      LEFT JOIN hrpayrollstructures hps ON hps.id = hp.structid
-      LEFT JOIN salarypayments sp ON sp.id = hp.salarypaymentid
-      LEFT JOIN aspnetusers au ON au.id = hp.createdbyid
-      LEFT JOIN aspnetusers wu ON wu.id = hp.writebyid
-      WHERE hp.id = $1`,
-      [id]
-    );
-
-    if (!rows || rows.length === 0) {
-      return res.status(404).json({ error: 'Payslip not found' });
-    }
-
-    return res.json(rows[0]);
-  } catch (err) {
-    console.error('Error fetching payslip:', err);
-    return res.status(500).json({
-      error: err instanceof Error ? err.message : 'Unknown error',
-    });
-  }
-});
-
-/**
  * GET /api/HrPayslipRuns
  * Returns: Payslip run periods for dropdown
  */
@@ -345,6 +263,88 @@ router.get('/Structures', async (req, res) => {
     return res.status(500).json({
       totalItems: 0,
       items: [],
+      error: err instanceof Error ? err.message : 'Unknown error',
+    });
+  }
+});
+
+/**
+ * GET /api/HrPayslips/:id
+ * Returns: Single payslip with full details
+ */
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const rows = await query(
+      `SELECT
+        hp.id,
+        hp.name,
+        hp.number,
+        hp.employeeid,
+        e.name AS employeename,
+        e.ref AS employeecode,
+        e.phone AS employeephone,
+        e.email AS employeeemail,
+        hp.datefrom,
+        hp.dateto,
+        hp.state,
+        hp.companyid,
+        c.name AS companyname,
+        hp.paysliprunid,
+        hpr.name AS paysliprunname,
+        hp.structid,
+        hps.name AS structurename,
+        hp.structuretypeid,
+        hp.daysalary,
+        hp.workedday,
+        hp.totalbasicsalary,
+        hp.overtimehour,
+        hp.overtimehoursalary,
+        hp.overtimeday,
+        hp.overtimedaysalary,
+        hp.allowance,
+        hp.otherallowance,
+        hp.rewardsalary,
+        hp.holidayallowance,
+        hp.totalsalary,
+        hp.commissionsalary,
+        hp.tax,
+        hp.socialinsurance,
+        hp.advancepayment,
+        hp.amercementmoney,
+        hp.netsalary,
+        hp.actualleavepermonth,
+        hp.leavepermonthunpaid,
+        hp.totalamount,
+        hp.salarypaymentid,
+        sp.name AS salarypaymentname,
+        hp.createdbyid,
+        au.name AS createdbyname,
+        hp.writebyid,
+        wu.name AS updatedbyname,
+        hp.datecreated,
+        hp.lastupdated
+      FROM hrpayslips hp
+      LEFT JOIN employees e ON e.id = hp.employeeid
+      LEFT JOIN companies c ON c.id = hp.companyid
+      LEFT JOIN hrpayslipruns hpr ON hpr.id = hp.paysliprunid
+      LEFT JOIN hrpayrollstructures hps ON hps.id = hp.structid
+      LEFT JOIN salarypayments sp ON sp.id = hp.salarypaymentid
+      LEFT JOIN aspnetusers au ON au.id = hp.createdbyid
+      LEFT JOIN aspnetusers wu ON wu.id = hp.writebyid
+      WHERE hp.id = $1`,
+      [id]
+    );
+
+    if (!rows || rows.length === 0) {
+      return res.status(404).json({ error: 'Payslip not found' });
+    }
+
+    return res.json(rows[0]);
+  } catch (err) {
+    console.error('Error fetching payslip:', err);
+    return res.status(500).json({
       error: err instanceof Error ? err.message : 'Unknown error',
     });
   }
