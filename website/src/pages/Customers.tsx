@@ -538,9 +538,9 @@ export function Customers() {
           status:
             r.status === 'completed'
               ? 'completed'
-              : r.status === 'active'
-              ? 'in-progress'
-              : 'planned',
+              : r.status === 'cancelled'
+              ? 'cancelled'
+              : 'in-progress',
           tooth: r.toothNumbers?.join(', ') || '-',
           notes: r.notes || '',
         }))

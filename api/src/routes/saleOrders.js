@@ -71,12 +71,25 @@ router.get('/', async (req, res) => {
         c.name AS companyname,
         so.doctorid,
         doc.name AS doctorname,
+        so.assistantid,
+        asst.name AS assistantname,
+        so.dentalaideid,
+        da.name AS dentalaidename,
+        so.quantity,
+        so.unit,
+        so.datestart,
+        so.dateend,
+        so.notes,
+        (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
+        (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
         so.datecreated,
         so.isdeleted
       FROM saleorders so
       LEFT JOIN partners p ON p.id = so.partnerid
       LEFT JOIN companies c ON c.id = so.companyid
       LEFT JOIN partners doc ON doc.id = so.doctorid
+      LEFT JOIN partners asst ON asst.id = so.assistantid
+      LEFT JOIN partners da ON da.id = so.dentalaideid
       WHERE ${whereClause}
       ORDER BY ${orderByCol} ${orderDir} NULLS LAST
       LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
@@ -139,12 +152,25 @@ router.get('/:id', async (req, res) => {
         c.name AS companyname,
         so.doctorid,
         doc.name AS doctorname,
+        so.assistantid,
+        asst.name AS assistantname,
+        so.dentalaideid,
+        da.name AS dentalaidename,
+        so.quantity,
+        so.unit,
+        so.datestart,
+        so.dateend,
+        so.notes,
+        (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
+        (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
         so.datecreated,
         so.isdeleted
       FROM saleorders so
       LEFT JOIN partners p ON p.id = so.partnerid
       LEFT JOIN companies c ON c.id = so.companyid
       LEFT JOIN partners doc ON doc.id = so.doctorid
+      LEFT JOIN partners asst ON asst.id = so.assistantid
+      LEFT JOIN partners da ON da.id = so.dentalaideid
       WHERE so.id = $1 AND so.isdeleted = false`,
       [id]
     );
@@ -191,6 +217,7 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
       doctorid,
       doctorname,
       assistantid,
+      dentalaideid,
       quantity,
       unit,
       amounttotal,
@@ -213,10 +240,11 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
     // Insert the sale order (only using columns that exist in the schema)
     const result = await query(
       `INSERT INTO saleorders (
-        id, name, partnerid, companyid, doctorid, assistantid,
+        id, name, partnerid, companyid, doctorid, assistantid, dentalaideid,
         quantity, unit, amounttotal, residual, totalpaid, state,
+        datestart, dateend, notes,
         isdeleted, datecreated
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,NOW())
       RETURNING *`,
       [
         id,
@@ -225,12 +253,16 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
         companyid || null,
         doctorid || null,
         assistantid || null,
+        dentalaideid || null,
         quantity || null,
         unit || null,
         amounttotal || 0,
         amounttotal || 0, // residual = total for new orders
         0, // totalpaid = 0 for new orders
-        'draft', // state = draft (not confirmed yet)
+        'sale', // state = sale (Đang điều trị) by default
+        datestart || null,
+        dateend || null,
+        notes || null,
         false, // isdeleted
       ]
     );
@@ -270,12 +302,25 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
         c.name AS companyname,
         so.doctorid,
         doc.name AS doctorname,
+        so.assistantid,
+        asst.name AS assistantname,
+        so.dentalaideid,
+        da.name AS dentalaidename,
+        so.quantity,
+        so.unit,
+        so.datestart,
+        so.dateend,
+        so.notes,
+        (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
+        (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
         so.datecreated,
         so.isdeleted
       FROM saleorders so
       LEFT JOIN partners p ON p.id = so.partnerid
       LEFT JOIN companies c ON c.id = so.companyid
       LEFT JOIN partners doc ON doc.id = so.doctorid
+      LEFT JOIN partners asst ON asst.id = so.assistantid
+      LEFT JOIN partners da ON da.id = so.dentalaideid
       WHERE so.id = $1`,
       [id]
     );

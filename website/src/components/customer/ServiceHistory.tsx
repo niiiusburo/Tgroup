@@ -1,4 +1,4 @@
-import { Stethoscope, CheckCircle2, Clock, CalendarPlus } from 'lucide-react';
+import { Stethoscope, CheckCircle2, Clock, XCircle } from 'lucide-react';
 import type { CustomerService } from '@/types/customer';
 import { formatVND } from '@/lib/formatting';
 
@@ -14,9 +14,9 @@ interface ServiceHistoryProps {
 }
 
 const STATUS_CONFIG = {
-  completed: { icon: CheckCircle2, label: 'Completed', className: 'text-emerald-600 bg-emerald-50', dot: 'bg-emerald-500' },
-  'in-progress': { icon: Clock, label: 'In Progress', className: 'text-blue-600 bg-blue-50', dot: 'bg-blue-500' },
-  planned: { icon: CalendarPlus, label: 'Planned', className: 'text-gray-600 bg-gray-50', dot: 'bg-gray-400' },
+  completed: { icon: CheckCircle2, label: 'Hoàn thành', className: 'text-emerald-600 bg-emerald-50', dot: 'bg-emerald-500' },
+  'in-progress': { icon: Clock, label: 'Đang điều trị', className: 'text-blue-600 bg-blue-50', dot: 'bg-blue-500' },
+  cancelled: { icon: XCircle, label: 'Đã hủy', className: 'text-red-600 bg-red-50', dot: 'bg-red-500' },
 } as const;
 
 export function ServiceHistory({ services, limit, onSelect }: ServiceHistoryProps) {

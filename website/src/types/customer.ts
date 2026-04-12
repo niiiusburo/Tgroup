@@ -119,7 +119,7 @@ export interface CustomerService {
   readonly service: string;
   readonly doctor: string;
   readonly cost: number;
-  readonly status: 'completed' | 'in-progress' | 'planned';
+  readonly status: 'completed' | 'in-progress' | 'cancelled';
   readonly tooth: string;
   readonly notes: string;
 }

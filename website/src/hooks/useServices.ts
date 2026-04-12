@@ -53,9 +53,10 @@ function mapSaleOrderToServiceRecord(order: ApiSaleOrder): ServiceRecord {
     sale: 'active',
     done: 'completed',
     cancel: 'cancelled',
+    draft: 'active',
   };
 
-  const status = (statusMap[order.state || ''] || 'planned') as ServiceStatus;
+  const status = statusMap[order.state || ''] || 'active' as ServiceStatus;
   const completedVisits = status === 'completed' ? 1 : 0;
 
   return {
@@ -63,11 +64,17 @@ function mapSaleOrderToServiceRecord(order: ApiSaleOrder): ServiceRecord {
     customerId: order.partnerid || '',
     customerName: order.partnername || '',
     customerPhone: '',
-    catalogItemId: '',
-    serviceName: order.name || '',
+    catalogItemId: order.productid || '',
+    serviceName: order.productname || order.name || '',
     category: 'treatment' as AppointmentType,
     doctorId: order.doctorid || '',
     doctorName: order.doctorname || '',
+    assistantId: order.assistantid ?? null,
+    assistantName: order.assistantname || '',
+    dentalAideId: order.dentalaideid ?? null,
+    dentalAideName: order.dentalaidename || '',
+    quantity: order.quantity ? parseFloat(order.quantity) : 1,
+    unit: order.unit || 'răng',
     locationId: order.companyid || '',
     locationName: order.companyname || '',
     status,
@@ -75,9 +82,9 @@ function mapSaleOrderToServiceRecord(order: ApiSaleOrder): ServiceRecord {
     completedVisits,
     totalCost: parseFloat(order.amounttotal || '0') || 0,
     paidAmount: parseFloat(order.totalpaid || '0') || 0,
-    startDate: order.datecreated?.slice(0, 10) || '',
-    expectedEndDate: '',
-    notes: '',
+    startDate: order.datestart?.slice(0, 10) || order.datecreated?.slice(0, 10) || '',
+    expectedEndDate: order.dateend?.slice(0, 10) || '',
+    notes: order.notes || '',
     toothNumbers: [],
     visits: [],
     createdAt: order.datecreated?.slice(0, 10) || '',
@@ -165,7 +172,7 @@ export function useServices(selectedLocationId?: string) {
     total: records.length,
     active: records.filter((r) => r.status === 'active').length,
     completed: records.filter((r) => r.status === 'completed').length,
-    planned: records.filter((r) => r.status === 'planned').length,
+    cancelled: records.filter((r) => r.status === 'cancelled').length,
     totalRevenue: records.reduce((sum, r) => sum + r.paidAmount, 0),
     outstanding: records.reduce((sum, r) => sum + (r.totalCost - r.paidAmount), 0),
   }), [records]);

@@ -9,7 +9,7 @@
 import { useState } from 'react';
 import {
   Stethoscope, Plus, Search, Filter,
-  Activity, CheckCircle2, Clock, DollarSign,
+  Activity, CheckCircle2, XCircle, DollarSign,
 } from 'lucide-react';
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { ServiceHistoryList } from '@/components/services/ServiceHistoryList';
@@ -19,10 +19,10 @@ import type { ServiceRecord, ServiceStatus } from '@/data/mockServices';
 import { APPOINTMENT_TYPE_LABELS, type AppointmentType } from '@/constants';
 import { formatVND } from '@/lib/formatting';
 
-const STATUS_TABS: { label: string; value: 'waiting' | 'in_progress' | 'complete' | 'all' }[] = [
-  { label: 'Chờ xử lý', value: 'waiting' },
-  { label: 'Đang thực hiện', value: 'in_progress' },
-  { label: 'Hoàn thành', value: 'complete' },
+const STATUS_TABS: { label: string; value: 'active' | 'completed' | 'cancelled' | 'all' }[] = [
+  { label: 'Đang điều trị', value: 'active' },
+  { label: 'Hoàn thành', value: 'completed' },
+  { label: 'Đã hủy', value: 'cancelled' },
   { label: 'Tất cả', value: 'all' },
 ];
 
@@ -51,7 +51,7 @@ export function Services() {
   const [showForm, setShowForm] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingRecord, setEditingRecord] = useState<ServiceRecord | null>(null);
-  const [statusTab, setStatusTab] = useState<'waiting' | 'in_progress' | 'complete' | 'all'>('all');
+  const [statusTab, setStatusTab] = useState<'active' | 'completed' | 'cancelled' | 'all'>('all');
 
   // Sort records based on selected tab - selected status first, then others
   const sortedRecords = (() => {
@@ -76,9 +76,9 @@ export function Services() {
 
     // Map tab to status
     const statusMap: Record<string, ServiceStatus> = {
-      'waiting': 'planned',
-      'in_progress': 'active',
-      'complete': 'completed',
+      'active': 'active',
+      'completed': 'completed',
+      'cancelled': 'cancelled',
     };
     const targetStatus = statusMap[statusTab];
     
@@ -86,9 +86,8 @@ export function Services() {
     return [...filtered].sort((a, b) => {
       if (a.status === targetStatus && b.status !== targetStatus) return -1;
       if (a.status !== targetStatus && b.status === targetStatus) return 1;
-      // Secondary sort: planned -> active -> completed
-      const order = { 'planned': 0, 'active': 1, 'completed': 2, 'cancelled': 3 };
-      return (order[a.status] ?? 4) - (order[b.status] ?? 4);
+      const order = { 'active': 0, 'completed': 1, 'cancelled': 2 };
+      return (order[a.status] ?? 3) - (order[b.status] ?? 3);
     });
   })();
 
@@ -146,9 +145,9 @@ export function Services() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard icon={<Activity className="w-5 h-5 text-blue-600" />} label="Active" value={stats.active} bg="bg-blue-50" />
-        <StatCard icon={<Clock className="w-5 h-5 text-gray-600" />} label="Planned" value={stats.planned} bg="bg-gray-50" />
-        <StatCard icon={<CheckCircle2 className="w-5 h-5 text-green-600" />} label="Completed" value={stats.completed} bg="bg-green-50" />
+        <StatCard icon={<Activity className="w-5 h-5 text-blue-600" />} label="Đang điều trị" value={stats.active} bg="bg-blue-50" />
+        <StatCard icon={<CheckCircle2 className="w-5 h-5 text-green-600" />} label="Hoàn thành" value={stats.completed} bg="bg-green-50" />
+        <StatCard icon={<XCircle className="w-5 h-5 text-red-600" />} label="Đã hủy" value={stats.cancelled} bg="bg-red-50" />
         <StatCard icon={<DollarSign className="w-5 h-5 text-amber-600" />} label="Outstanding" value={formatVND(stats.outstanding)} bg="bg-amber-50" isText />
       </div>
 

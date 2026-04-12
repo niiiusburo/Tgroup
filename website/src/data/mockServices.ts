@@ -8,17 +8,15 @@ import type { ServiceCatalogItem, ServiceRecord, ServiceVisit, ServiceStatus, Vi
 export type { ServiceCatalogItem, ServiceRecord, ServiceVisit, ServiceStatus, VisitStatus };
 
 export const SERVICE_STATUS_LABELS: Record<ServiceStatus, string> = {
-  active: 'Active',
-  completed: 'Completed',
-  cancelled: 'Cancelled',
-  planned: 'Planned',
+  active: 'Đang điều trị',
+  completed: 'Hoàn thành',
+  cancelled: 'Đã hủy',
 };
 
 export const SERVICE_STATUS_STYLES: Record<ServiceStatus, string> = {
   active: 'bg-blue-100 text-blue-700',
   completed: 'bg-green-100 text-green-700',
   cancelled: 'bg-red-100 text-red-700',
-  planned: 'bg-yellow-100 text-yellow-700',
 };
 
 export const VISIT_STATUS_LABELS: Record<VisitStatus, string> = {

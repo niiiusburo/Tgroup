@@ -5,7 +5,7 @@
 
 import type { AppointmentType } from '@/constants';
 
-export type ServiceStatus = 'active' | 'completed' | 'cancelled' | 'planned';
+export type ServiceStatus = 'active' | 'completed' | 'cancelled';
 export type VisitStatus = 'completed' | 'scheduled' | 'missed' | 'cancelled';
 
 export interface ServiceCatalogItem {
@@ -43,6 +43,8 @@ export interface ServiceRecord {
   readonly doctorName: string;
   readonly assistantId?: string | null;
   readonly assistantName?: string;
+  readonly dentalAideId?: string | null;
+  readonly dentalAideName?: string;
   readonly quantity?: number;
   readonly unit?: string;
   readonly locationId: string;
