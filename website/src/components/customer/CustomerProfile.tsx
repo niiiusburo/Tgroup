@@ -160,6 +160,9 @@ export function CustomerProfile({
   const { hasPermission } = useAuth();
   const canViewHealthCheckups = hasPermission('external_checkups.view');
 
+  const totalServiceCost = services.reduce((sum, s) => sum + (s.cost || 0), 0);
+  const amountPaid = totalServiceCost - profile.outstandingBalance;
+
   const getStatusConfig = (state: string | null | undefined) => {
     const s = (state || '').toLowerCase();
     if (s === 'done') return { label: 'Completed', className: 'text-emerald-600 bg-emerald-50', dot: 'bg-emerald-500' };
@@ -480,6 +483,22 @@ export function CustomerProfile({
             )}
           </div>
 
+          {/* Bill summary — 3 columns */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
+              <p className="text-xs text-gray-500 mb-1">Tổng chi phí</p>
+              <p className="text-lg font-bold text-gray-900">{formatVND(totalServiceCost)}</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
+              <p className="text-xs text-gray-500 mb-1">Đã thanh toán</p>
+              <p className="text-lg font-bold text-emerald-600">{formatVND(amountPaid)}</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
+              <p className="text-xs text-gray-500 mb-1">Còn nợ</p>
+              <p className="text-lg font-bold text-red-600">{formatVND(profile.outstandingBalance)}</p>
+            </div>
+          </div>
+
           {/* Payments with Allocations */}
           <div className="bg-white rounded-xl shadow-card overflow-hidden">
             <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
@@ -545,6 +564,10 @@ export function CustomerProfile({
                                   <span className="font-medium text-gray-900">{formatVND(a.allocatedAmount)}</span>
                                 </div>
                               ))}
+                              <div className="flex items-center justify-between text-sm border-t border-gray-200 pt-2 mt-1">
+                                <span className="text-xs font-semibold text-gray-600">Tổng phân bổ</span>
+                                <span className="font-bold text-gray-900">{formatVND(p.allocations.reduce((sum, a) => sum + (a.allocatedAmount || 0), 0))}</span>
+                              </div>
                             </div>
                           ) : (
                             <p className="text-xs text-gray-400 italic">No invoice allocations recorded.</p>
@@ -733,6 +756,14 @@ export function CustomerProfile({
           defaultCustomerId={profile.id}
           defaultCustomerName={profile.name}
           defaultAmount={editingPayment.amount}
+          defaultDepositAmount={editingPayment.depositUsed}
+          defaultCashAmount={editingPayment.cashAmount}
+          defaultBankAmount={editingPayment.bankAmount}
+          defaultAllocations={editingPayment.allocations?.map((a) => ({
+            invoiceId: a.invoiceId,
+            dotkhamId: a.dotkhamId,
+            allocatedAmount: a.allocatedAmount,
+          }))}
           defaultNotes={editingPayment.notes || ''}
           defaultPaymentDate={editingPayment.paymentDate || editingPayment.createdAt?.slice(0, 10)}
           defaultReferenceCode={editingPayment.referenceCode || ''}

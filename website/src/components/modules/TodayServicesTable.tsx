@@ -6,17 +6,36 @@
  * Data will come from service orders linked to today's appointments.
  */
 
+import { Search } from 'lucide-react';
+import { useState } from 'react';
+
 interface TodayServicesTableProps {
   readonly locationId?: string;
 }
 
 export function TodayServicesTable({ locationId: _locationId }: TodayServicesTableProps) {
+  const [searchTerm, setSearchTerm] = useState('');
+
   return (
     <div className="bg-white rounded-2xl border border-gray-200">
       <div className="px-5 pt-5 pb-3">
-        <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wide mb-3">
-          Today's Services / Activity
-        </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+          <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wide">
+            Today's Services / Activity
+          </h2>
+
+          {/* Quick search */}
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Tìm nhanh dịch vụ..."
+              className="w-full sm:w-56 pl-8 pr-3 py-1.5 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all"
+            />
+          </div>
+        </div>
       </div>
 
       <div className="px-5 pb-5">

@@ -34,6 +34,8 @@ export function Overview() {
     setZone3Filter,
     zone3Appointments,
     zone3Counts,
+    zone3Search,
+    setZone3Search,
     markArrived,
     markCancelled,
     // Zone 1
@@ -41,6 +43,8 @@ export function Overview() {
     setZone1Filter,
     zone1Appointments,
     zone1Counts,
+    zone1Search,
+    setZone1Search,
     updateCheckInStatus,
   } = useOverviewAppointments(selectedLocationId);
 
@@ -98,6 +102,8 @@ export function Overview() {
             appointments={zone1Appointments}
             filter={zone1Filter}
             onFilterChange={setZone1Filter}
+            searchTerm={zone1Search}
+            onSearchChange={setZone1Search}
             counts={zone1Counts}
             onUpdateStatus={updateCheckInStatus}
             onEditClick={handleEditClick}
@@ -113,6 +119,8 @@ export function Overview() {
             appointments={zone3Appointments}
             filter={zone3Filter}
             onFilterChange={setZone3Filter}
+            searchTerm={zone3Search}
+            onSearchChange={setZone3Search}
             counts={zone3Counts}
             onMarkArrived={markArrived}
             onMarkCancelled={markCancelled}

@@ -12,7 +12,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Clock, User } from 'lucide-react';
+import { Clock, User, Search } from 'lucide-react';
 import { WaitTimer } from '@/components/appointments/WaitTimer';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import type { OverviewAppointment, CheckInStatus, Zone1Filter } from '@/hooks/useOverviewAppointments';
@@ -22,6 +22,8 @@ interface PatientCheckInProps {
   readonly appointments: readonly OverviewAppointment[];
   readonly filter: Zone1Filter;
   readonly onFilterChange: (filter: Zone1Filter) => void;
+  readonly searchTerm?: string;
+  readonly onSearchChange?: (term: string) => void;
   readonly counts: { all: number; waiting: number; 'in-treatment': number; done: number };
   readonly onUpdateStatus: (id: string, status: CheckInStatus, onSuccess?: () => void) => void;
   readonly onEditClick?: (appointment: OverviewAppointment) => void;
@@ -62,6 +64,8 @@ export function PatientCheckIn({
   appointments,
   filter,
   onFilterChange,
+  searchTerm = '',
+  onSearchChange,
   counts,
   onUpdateStatus,
   onEditClick,
@@ -79,28 +83,42 @@ export function PatientCheckIn({
           Đón tiếp / Tiếp nhận bệnh nhân
         </h2>
 
-        {/* Filter tabs */}
-        <div className="flex gap-2 flex-wrap">
-          {FILTER_TABS.map((tab) => {
-            const count = counts[tab.key];
-            const isActive = filter === tab.key;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => onFilterChange(tab.key)}
-                className={`
-                  px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200
-                  ${isActive
-                    ? 'bg-slate-800 text-white shadow-sm'
-                    : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700'
-                  }
-                `}
-              >
-                {tab.label} · {count}
-              </button>
-            );
-          })}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+          {/* Filter tabs */}
+          <div className="flex gap-2 flex-wrap">
+            {FILTER_TABS.map((tab) => {
+              const count = counts[tab.key];
+              const isActive = filter === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => onFilterChange(tab.key)}
+                  className={`
+                    px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-200
+                    ${isActive
+                      ? 'bg-slate-800 text-white shadow-sm'
+                      : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700'
+                    }
+                  `}
+                >
+                  {tab.label} · {count}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Quick search */}
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => onSearchChange?.(e.target.value)}
+              placeholder="Tìm nhanh bệnh nhân..."
+              className="w-full sm:w-56 pl-8 pr-3 py-1.5 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all"
+            />
+          </div>
         </div>
       </div>
 
@@ -157,12 +175,18 @@ function PatientCard({ appointment, onUpdateStatus, onEditClick, onDone }: Patie
     return () => registerRef(appointment.id, null);
   }, [appointment.id, registerRef]);
 
-  // Scroll into view when highlighted
+  // Scroll into view when highlighted or changed to done
   useEffect(() => {
     if (isHighlighted && cardRef.current && typeof cardRef.current.scrollIntoView === 'function') {
       cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [isHighlighted]);
+
+  useEffect(() => {
+    if (currentStatus === 'done' && cardRef.current && typeof cardRef.current.scrollIntoView === 'function') {
+      cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [currentStatus]);
 
   const handleMouseEnter = () => {
     setHoveredId(appointment.id);

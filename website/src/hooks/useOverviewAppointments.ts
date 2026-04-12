@@ -50,6 +50,8 @@ interface UseOverviewAppointmentsResult {
   readonly setZone3Filter: (filter: Zone3Filter) => void;
   readonly zone3Appointments: readonly OverviewAppointment[];
   readonly zone3Counts: { all: number; arrived: number; cancelled: number };
+  readonly zone3Search: string;
+  readonly setZone3Search: (term: string) => void;
   readonly markArrived: (id: string) => Promise<void>;
   readonly markCancelled: (id: string) => Promise<void>;
 
@@ -58,6 +60,8 @@ interface UseOverviewAppointmentsResult {
   readonly setZone1Filter: (filter: Zone1Filter) => void;
   readonly zone1Appointments: readonly OverviewAppointment[];
   readonly zone1Counts: { all: number; waiting: number; 'in-treatment': number; done: number };
+  readonly zone1Search: string;
+  readonly setZone1Search: (term: string) => void;
   readonly updateCheckInStatus: (id: string, status: CheckInStatus, onSuccess?: () => void) => Promise<void>;
 
   // Refresh
@@ -233,6 +237,21 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
     loadAppointments();
   }, [loadAppointments, timezone]);
 
+  // ─── Search states ─────────────────────────────────────────────
+  const [zone1Search, setZone1Search] = useState('');
+  const [zone3Search, setZone3Search] = useState('');
+
+  function matchesSearch(apt: OverviewAppointment, term: string) {
+    if (!term.trim()) return true;
+    const q = term.toLowerCase();
+    return (
+      apt.customerName.toLowerCase().includes(q) ||
+      apt.customerPhone.toLowerCase().includes(q) ||
+      apt.doctorName.toLowerCase().includes(q) ||
+      apt.note.toLowerCase().includes(q)
+    );
+  }
+
   // ─── Zone 3: filtered appointments ─────────────────────────────
   const zone3Counts = useMemo(() => ({
     all: appointments.length,
@@ -241,9 +260,11 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
   }), [appointments]);
 
   const zone3Appointments = useMemo(() => {
-    if (zone3Filter === 'all') return appointments;
-    return appointments.filter((a) => a.topStatus === zone3Filter);
-  }, [appointments, zone3Filter]);
+    const byTab = zone3Filter === 'all'
+      ? appointments
+      : appointments.filter((a) => a.topStatus === zone3Filter);
+    return byTab.filter((a) => matchesSearch(a, zone3Search));
+  }, [appointments, zone3Filter, zone3Search]);
 
   // ─── Zone 1: only arrived patients with downline status ────────
   const arrivedAppointments = useMemo(
@@ -272,19 +293,22 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
   ╚════════════════════════════════════════════════════════════════════════╝
   */
   const zone1Appointments = useMemo(() => {
-    if (zone1Filter === 'all') {
+    let filtered = arrivedAppointments;
+    if (zone1Filter !== 'all') {
+      filtered = zone1Filter === 'waiting'
+        ? arrivedAppointments.filter((a) => a.checkInStatus === 'waiting' || a.checkInStatus === null)
+        : arrivedAppointments.filter((a) => a.checkInStatus === zone1Filter);
+    } else {
       // Sort all appointments: waiting → in-treatment → done
-      return [...arrivedAppointments].sort((a, b) => {
+      filtered = [...arrivedAppointments].sort((a, b) => {
         const statusA = a.checkInStatus ?? 'waiting';
         const statusB = b.checkInStatus ?? 'waiting';
         const order: Record<string, number> = { 'waiting': 0, 'in-treatment': 1, 'done': 2 };
         return (order[statusA] ?? 3) - (order[statusB] ?? 3);
       });
     }
-    // Filter to only the selected status (no sorting)
-    if (zone1Filter === 'waiting') return arrivedAppointments.filter((a) => a.checkInStatus === 'waiting' || a.checkInStatus === null);
-    return arrivedAppointments.filter((a) => a.checkInStatus === zone1Filter);
-  }, [arrivedAppointments, zone1Filter]);
+    return filtered.filter((a) => matchesSearch(a, zone1Search));
+  }, [arrivedAppointments, zone1Filter, zone1Search]);
 
   // ─── Actions ───────────────────────────────────────────────────
   const markArrived = useCallback(async (id: string) => {
@@ -343,12 +367,16 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
     setZone3Filter,
     zone3Appointments,
     zone3Counts,
+    zone3Search,
+    setZone3Search,
     markArrived,
     markCancelled,
     zone1Filter,
     setZone1Filter,
     zone1Appointments,
     zone1Counts,
+    zone1Search,
+    setZone1Search,
     updateCheckInStatus,
     refresh: loadAppointments,
   };

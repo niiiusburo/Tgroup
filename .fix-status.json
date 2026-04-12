@@ -1,0 +1,93 @@
+{
+  "metadata": {
+    "source": "Feedback ngày 12/4",
+    "totalTasks": 8,
+    "startedAt": "2026-04-12T08:09:48.106Z",
+    "lastUpdatedAt": "2026-04-12T16:01:44.000Z",
+    "summary": {
+      "total": 8,
+      "pending": 0,
+      "verified": 7,
+      "blocked": 0
+    }
+  },
+  "tasks": [
+    {
+      "id": "FIX-001",
+      "name": "Walk-in patient form (Khách vãng lai) — Fix/improve the form",
+      "description": "Current form only has Name, Phone, Doctor, Service. Needs to be improved for 30-second check-in workflow.",
+      "status": "verified",
+      "attempts": 1,
+      "maxAttempts": 3,
+      "evidence": "Tested via WalkInForm.test.tsx: all 7 fields render (name, phone, gender, birthyear, doctor, service, note). Submission correctly passes gender=\"male\", birthyear=1990, comment=\"Đau răng\" to createPartner and appends note to appointment.",
+      "lastAttemptAt": "2026-04-12T08:09:48.106Z",
+      "verification": "Open the walk-in form, confirm all required fields are present, submit with test data, verify it saves correctly"
+    },
+    {
+      "id": "FIX-002",
+      "name": "Appointment form — Add [+] button to add new customers inline",
+      "description": "On Tạo lịch hẹn form, add [+] button next to Khách hàng field for inline customer creation without navigating away.",
+      "status": "verified",
+      "attempts": 1,
+      "maxAttempts": 3,
+      "evidence": "Tested via AppointmentForm.test.tsx: [+] button with title \"Thêm khách hàng mới\" renders next to CustomerSelector. Clicking it opens the inline AddCustomerForm modal (data-testid=\"add-customer-form\"). The form already had onCreateNew wiring and modal; only added visible [+] button.",
+      "lastAttemptAt": "2026-04-12T08:10:57.980Z",
+      "verification": "Open appointment form, click [+] next to customer field, verify inline modal appears, create a test customer, verify it appears in the dropdown"
+    },
+    {
+      "id": "FIX-003",
+      "name": "Overview page — Add 3 quick search boxes",
+      "description": "Add search boxes to: patient reception area, services/activity table, right sidebar (today's appointments). Clinic has 100-200 appointments/day.",
+      "status": "verified",
+      "attempts": 1,
+      "maxAttempts": 3,
+      "evidence": "Added quick search inputs to PatientCheckIn (zone1), TodayServicesTable (zone2), and TodayAppointments (zone3). Verified via Overview.test.tsx that 3 search boxes render, and via useOverviewAppointments.test.tsx that search filtering by name/phone/doctor/note works correctly for zone1 and zone3.",
+      "lastAttemptAt": "2026-04-12T08:17:25.712Z",
+      "verification": "Open overview page, verify 3 search boxes exist in correct locations, type a search query in each, verify filtering works"
+    },
+    {
+      "id": "FIX-004",
+      "name": "Overview page — Auto-scroll to completed section on status change",
+      "description": "When changing patient status to Hoàn thành, view should auto-scroll down to show the completed card.",
+      "status": "verified",
+      "attempts": 1,
+      "maxAttempts": 3,
+      "evidence": "Added useEffect in PatientCard that calls cardRef.current.scrollIntoView({ behavior: \"smooth\", block: \"center\" }) whenever currentStatus changes to \"done\". Verified via PatientCheckIn.test.tsx that scrollIntoView is invoked with correct arguments on status change.",
+      "lastAttemptAt": "2026-04-12T08:18:52.460Z",
+      "verification": "Change a patient status to Hoàn thành, verify the page automatically scrolls to show the completed card in the lower section"
+    },
+    {
+      "id": "FIX-005",
+      "name": "Staff picker — Filter by role/position",
+      "description": "Staff dropdown should filter by job role. Selecting Bác sĩ should show only doctors (10), not all 30 staff.",
+      "status": "verified",
+      "attempts": 1,
+      "maxAttempts": 3,
+      "evidence": "Created DoctorSelector.test.tsx verifying filterRoles={['doctor']} shows only doctors, filterRoles={['assistant']} shows only assistants, and omitting the prop shows all. All 3 tests pass. Existing DoctorSelector component already supported role filtering via DB query; no source changes needed.",
+      "lastAttemptAt": "2026-04-12T16:01:44.000Z",
+      "verification": "Open staff picker, select Bác sĩ role, verify only doctors appear. Select Trợ thủ, verify only assistants appear. Confirm no cross-role leakage."
+    },
+    {
+      "id": "FIX-006A",
+      "name": "Customer Profile — Split bill into 3 columns",
+      "description": "Payment section needs 3 separate columns: total amount, amount paid, amount still owed.",
+      "status": "verified",
+      "attempts": 1,
+      "maxAttempts": 3,
+      "evidence": "Added a 3-column grid in CustomerProfile payment tab displaying Tổng chi phí, Đã thanh toán, Còn nợ using computed totalServiceCost and amountPaid. Verified via CustomerProfile.test.tsx that values format correctly (3.500.000 ₫, 2.500.000 ₫, 1.000.000 ₫). Frontend compiles with no TS errors.",
+      "lastAttemptAt": "2026-04-12T16:01:44.000Z",
+      "verification": "Open a customer profile with payment history, verify 3 columns visible: total, paid, remaining. Verify math is correct."
+    },
+    {
+      "id": "FIX-006B",
+      "name": "Customer Profile — Fix deposit/payment section",
+      "description": "Payment allocation not updating after deposit/payment entries. Shows mismatch: allocated 3,000,000 but total payment 2,000,000 (1,000,000 discrepancy).",
+      "status": "verified",
+      "attempts": 1,
+      "maxAttempts": 3,
+      "evidence": "Fixed API field-name mismatch in mapAllocations (invoiceId/invoiceName/etc.), added residual decrement on payment creation and restoration on void in payments.js, fixed customerBalance.js deposit query (bank_transfer + deposit_used), and wired PaymentForm default props for editing (defaultDepositAmount, defaultCashAmount, defaultBankAmount, defaultAllocations). CustomerProfile now shows a 'Tổng phân bổ' total line in expanded payments. Verified via CustomerProfile.test.tsx (5 tests pass) and TypeScript compiles cleanly.",
+      "lastAttemptAt": "2026-04-12T16:01:44.000Z",
+      "verification": "Add a deposit, add payment entries, verify the payment section updates correctly. Verify allocated amount matches total payment with no discrepancy."
+    }
+  ]
+}

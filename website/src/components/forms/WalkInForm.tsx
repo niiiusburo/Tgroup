@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, User, Phone, Stethoscope, UserCheck, CalendarPlus } from 'lucide-react';
+import { X, User, Phone, Stethoscope, UserCheck, CalendarPlus, FileText, Users, Calendar } from 'lucide-react';
 import { fetchEmployees, fetchProducts, createPartner, createAppointment, createSaleOrder } from '@/lib/api';
 import type { ApiEmployee, ApiProduct } from '@/lib/api';
 
@@ -19,10 +19,13 @@ export interface WalkInFormProps {
 interface FormState {
   name: string;
   phone: string;
+  gender: 'male' | 'female' | 'other' | '';
+  birthyear: string;
   doctorId: string;
   doctorName: string;
   serviceId: string;
   serviceName: string;
+  note: string;
 }
 
 function inputClass(hasError: boolean) {
@@ -52,14 +55,20 @@ function FieldLabel({ children, icon: Icon, required }: { children: React.ReactN
   );
 }
 
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS = Array.from({ length: 100 }, (_, i) => CURRENT_YEAR - i);
+
 export function WalkInForm({ locationId, locationName, onSuccess, onCancel }: WalkInFormProps) {
   const [form, setForm] = useState<FormState>({
     name: '',
     phone: '',
+    gender: '',
+    birthyear: '',
     doctorId: '',
     doctorName: '',
     serviceId: '',
     serviceName: '',
+    note: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -97,6 +106,9 @@ export function WalkInForm({ locationId, locationName, onSuccess, onCancel }: Wa
       const customer = await createPartner({
         name: form.name.trim(),
         phone: form.phone.trim(),
+        gender: form.gender || null,
+        birthyear: form.birthyear ? Number(form.birthyear) : null,
+        comment: form.note.trim() || null,
         companyid: locationId || undefined,
         customer: true,
         status: true,
@@ -119,7 +131,7 @@ export function WalkInForm({ locationId, locationName, onSuccess, onCancel }: Wa
         time: nowStr,
         name: form.serviceName || 'Khám tổng quát',
         state: 'confirmed',
-        note: 'Khách vãng lai',
+        note: form.note.trim() ? `Khách vãng lai — ${form.note.trim()}` : 'Khách vãng lai',
       });
 
       // 3. Optionally create sale order if service selected
@@ -197,6 +209,48 @@ export function WalkInForm({ locationId, locationName, onSuccess, onCancel }: Wa
             {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
           </div>
 
+          {/* Gender */}
+          <div>
+            <FieldLabel icon={Users}>Giới tính</FieldLabel>
+            <div className="flex gap-4">
+              {([
+                { value: 'male', label: 'Nam' },
+                { value: 'female', label: 'Nữ' },
+                { value: 'other', label: 'Khác' },
+              ] as const).map((g) => (
+                <label key={g.value} className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="radio"
+                    name="gender"
+                    value={g.value}
+                    checked={form.gender === g.value}
+                    onChange={() => setField('gender', g.value)}
+                    className="accent-orange-500 w-4 h-4"
+                  />
+                  <span className="text-gray-700">{g.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Year of birth */}
+          <div>
+            <FieldLabel icon={Calendar}>Năm sinh</FieldLabel>
+            <div className="relative">
+              <select
+                value={form.birthyear}
+                onChange={(e) => setField('birthyear', e.target.value)}
+                className={`${selectClass()} pl-3`}
+                data-testid="walkin-birthyear"
+              >
+                <option value="">-- Chọn năm sinh --</option>
+                {YEARS.map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           {/* Doctor */}
           <div>
             <FieldLabel icon={Stethoscope}>Bác sĩ</FieldLabel>
@@ -237,6 +291,18 @@ export function WalkInForm({ locationId, locationName, onSuccess, onCancel }: Wa
                 ))}
               </select>
             </div>
+          </div>
+
+          {/* Note / Symptoms */}
+          <div>
+            <FieldLabel icon={FileText}>Ghi chú / Triệu chứng</FieldLabel>
+            <textarea
+              value={form.note}
+              onChange={(e) => setField('note', e.target.value)}
+              placeholder="Nhập ghi chú hoặc triệu chứng nhanh..."
+              rows={3}
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 resize-none transition-all hover:border-gray-300"
+            />
           </div>
         </div>
 

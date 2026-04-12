@@ -5,28 +5,25 @@ const { requirePermission } = require("../middleware/auth");
 
 function mapAllocations(allocResult) {
   return allocResult.map(a => {
-    const base = {
-      id: a.id,
-      paymentId: a.payment_id,
-      allocatedAmount: parseFloat(a.allocated_amount),
-    };
     if (a.invoice_id) {
       return {
-        ...base,
-        type: "invoice",
-        targetId: a.invoice_id,
-        targetName: a.invoice_name,
-        targetTotal: parseFloat(a.invoice_total || 0),
-        targetResidual: parseFloat(a.invoice_residual || 0),
+        id: a.id,
+        paymentId: a.payment_id,
+        invoiceId: a.invoice_id,
+        invoiceName: a.invoice_name,
+        invoiceTotal: parseFloat(a.invoice_total || 0),
+        invoiceResidual: parseFloat(a.invoice_residual || 0),
+        allocatedAmount: parseFloat(a.allocated_amount),
       };
     }
     return {
-      ...base,
-      type: "dotkham",
-      targetId: a.dotkham_id,
-      targetName: a.dotkham_name,
-      targetTotal: parseFloat(a.dotkham_total || 0),
-      targetResidual: parseFloat(a.dotkham_residual || 0),
+      id: a.id,
+      paymentId: a.payment_id,
+      dotkhamId: a.dotkham_id,
+      dotkhamName: a.dotkham_name,
+      dotkhamTotal: parseFloat(a.dotkham_total || 0),
+      dotkhamResidual: parseFloat(a.dotkham_residual || 0),
+      allocatedAmount: parseFloat(a.allocated_amount),
     };
   });
 }
@@ -285,6 +282,21 @@ router.post("/", requirePermission('payment.edit'), async (req, res) => {
           RETURNING *
         `;
         createdAllocations = await query(allocSql, allocParams);
+
+        // Update residuals on invoices / dotkhams
+        for (const a of createdAllocations) {
+          if (a.invoice_id) {
+            await query(
+              "UPDATE saleorders SET residual = GREATEST(0, residual - $1) WHERE id = $2",
+              [a.allocated_amount, a.invoice_id]
+            );
+          } else if (a.dotkham_id) {
+            await query(
+              "UPDATE dotkhams SET amountresidual = GREATEST(0, amountresidual - $1) WHERE id = $2",
+              [a.allocated_amount, a.dotkham_id]
+            );
+          }
+        }
       }
     }
 
@@ -330,8 +342,29 @@ router.post("/:id/void", requirePermission('payment.edit'), async (req, res) => 
   try {
     await client.query("BEGIN");
 
+    // Fetch allocations before deleting so we can restore residuals
+    const allocationsToReverse = await client.query(
+      "SELECT invoice_id, dotkham_id, allocated_amount FROM payment_allocations WHERE payment_id = $1",
+      [id]
+    );
+
     // Reverse allocations by deleting them
     await client.query("DELETE FROM payment_allocations WHERE payment_id = $1", [id]);
+
+    // Restore residuals on invoices / dotkhams
+    for (const a of allocationsToReverse.rows) {
+      if (a.invoice_id) {
+        await client.query(
+          "UPDATE saleorders SET residual = residual + $1 WHERE id = $2",
+          [a.allocated_amount, a.invoice_id]
+        );
+      } else if (a.dotkham_id) {
+        await client.query(
+          "UPDATE dotkhams SET amountresidual = amountresidual + $1 WHERE id = $2",
+          [a.allocated_amount, a.dotkham_id]
+        );
+      }
+    }
 
     // Mark payment as voided
     const result = await client.query(

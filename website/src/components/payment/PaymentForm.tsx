@@ -67,6 +67,10 @@ interface PaymentFormProps {
   readonly defaultNotes?: string;
   readonly defaultPaymentDate?: string;
   readonly defaultReferenceCode?: string;
+  readonly defaultDepositAmount?: number;
+  readonly defaultCashAmount?: number;
+  readonly defaultBankAmount?: number;
+  readonly defaultAllocations?: PaymentAllocationInput[];
   readonly isEdit?: boolean;
 }
 
@@ -81,6 +85,10 @@ export function PaymentForm({
   defaultNotes = '',
   defaultPaymentDate,
   defaultReferenceCode = '',
+  defaultDepositAmount = 0,
+  defaultCashAmount = 0,
+  defaultBankAmount = 0,
+  defaultAllocations,
   isEdit = false,
 }: PaymentFormProps) {
   const { customers: apiCustomers, loading: customersLoading } = useCustomers();
@@ -95,9 +103,9 @@ export function PaymentForm({
   const [isSaving, setIsSaving] = useState(false);
 
   // Multi-source amounts
-  const [depositAmount, setDepositAmount] = useState(0);
-  const [cashAmount, setCashAmount] = useState(0);
-  const [bankAmount, setBankAmount] = useState(0);
+  const [depositAmount, setDepositAmount] = useState(defaultDepositAmount);
+  const [cashAmount, setCashAmount] = useState(defaultCashAmount);
+  const [bankAmount, setBankAmount] = useState(defaultBankAmount);
   const [showVietQr, setShowVietQr] = useState(false);
   const [paymentDate, setPaymentDate] = useState(() => defaultPaymentDate ?? new Date().toISOString().slice(0, 10));
   const [referenceCode, setReferenceCode] = useState(defaultReferenceCode);
@@ -112,6 +120,26 @@ export function PaymentForm({
   const [targetAllocationMap, setTargetAllocationMap] = useState<Record<string, number>>({});
   const [allocationTypes, setAllocationTypes] = useState<Record<string, AllocationTab>>({});
   const [allocateMode, setAllocateMode] = useState<'auto' | 'manual'>('manual');
+
+  // Initialize existing allocations when editing
+  useEffect(() => {
+    if (isEdit && defaultAllocations && defaultAllocations.length > 0) {
+      const ids = new Set<string>();
+      const map: Record<string, number> = {};
+      const types: Record<string, AllocationTab> = {};
+      for (const a of defaultAllocations) {
+        const id = a.invoiceId || a.dotkhamId;
+        if (id) {
+          ids.add(id);
+          map[id] = a.allocatedAmount;
+          types[id] = a.invoiceId ? 'invoices' : 'dotkhams';
+        }
+      }
+      setSelectedTargetIds(ids);
+      setTargetAllocationMap(map);
+      setAllocationTypes(types);
+    }
+  }, [isEdit, defaultAllocations]);
 
   // ─── Derived data ─────────────────────────────────────────────
   const customers: Customer[] = apiCustomers.map(c => ({

@@ -18,7 +18,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { Pencil, UserCheck, Phone, Clock, User } from 'lucide-react';
+import { Pencil, UserCheck, Phone, Clock, User, Search } from 'lucide-react';
 import type { OverviewAppointment, Zone3Filter } from '@/hooks/useOverviewAppointments';
 import { useAppointmentHover } from '@/contexts/AppointmentHoverContext';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
@@ -29,6 +29,8 @@ interface TodayAppointmentsProps {
   readonly appointments: readonly OverviewAppointment[];
   readonly filter: Zone3Filter;
   readonly onFilterChange: (filter: Zone3Filter) => void;
+  readonly searchTerm?: string;
+  readonly onSearchChange?: (term: string) => void;
   readonly counts: { all: number; arrived: number; cancelled: number };
   readonly onMarkArrived: (id: string) => void;
   readonly onMarkCancelled: (id: string) => void;
@@ -46,6 +48,8 @@ export function TodayAppointments({
   appointments,
   filter,
   onFilterChange,
+  searchTerm = '',
+  onSearchChange,
   counts,
   onMarkArrived,
   onMarkCancelled,
@@ -87,28 +91,42 @@ export function TodayAppointments({
           Lịch hẹn hôm nay
         </h2>
 
-        {/* Filter tabs */}
-        <div className="flex gap-1.5">
-          {FILTER_TABS.map((tab) => {
-            const count = counts[tab.key];
-            const isActive = filter === tab.key;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => onFilterChange(tab.key)}
-                className={`
-                  px-3 py-1.5 rounded-full text-xs font-semibold transition-all
-                  ${isActive
-                    ? 'bg-white text-purple-700 shadow-lg'
-                    : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'
-                  }
-                `}
-              >
-                {tab.label} · {count}
-              </button>
-            );
-          })}
+        <div className="flex flex-col gap-3">
+          {/* Filter tabs */}
+          <div className="flex gap-1.5 flex-wrap">
+            {FILTER_TABS.map((tab) => {
+              const count = counts[tab.key];
+              const isActive = filter === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => onFilterChange(tab.key)}
+                  className={`
+                    px-3 py-1.5 rounded-full text-xs font-semibold transition-all
+                    ${isActive
+                      ? 'bg-white text-purple-700 shadow-lg'
+                      : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'
+                    }
+                  `}
+                >
+                  {tab.label} · {count}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Quick search */}
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => onSearchChange?.(e.target.value)}
+              placeholder="Tìm nhanh lịch hẹn..."
+              className="w-full pl-8 pr-3 py-1.5 text-sm rounded-lg bg-white/20 border border-white/30 text-white placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-white/30 transition-all"
+            />
+          </div>
         </div>
       </div>
 

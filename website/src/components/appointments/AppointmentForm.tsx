@@ -42,7 +42,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { X, CalendarPlus, Edit2, Calendar, Clock, User, Stethoscope, MapPin, FileText, Palette, Check } from 'lucide-react';
+import { X, CalendarPlus, Edit2, Calendar, Clock, User, Stethoscope, MapPin, FileText, Palette, Check, Plus } from 'lucide-react';
 import { CustomerSelector } from '@/components/shared/CustomerSelector';
 import { DoctorSelector } from '@/components/shared/DoctorSelector';
 import { LocationSelector } from '@/components/shared/LocationSelector';
@@ -335,7 +335,19 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                     <span className="text-xs text-gray-400">{initialData?.customerPhone}</span>
                   </div>
                 ) : (
-                  <CustomerSelector customers={customers} selectedId={customerId} onChange={setCustomerId} onCreateNew={() => setShowCreateCustomer(true)} />
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <CustomerSelector customers={customers} selectedId={customerId} onChange={setCustomerId} onCreateNew={() => setShowCreateCustomer(true)} />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateCustomer(true)}
+                      title="Thêm khách hàng mới"
+                      className="flex-shrink-0 p-2.5 text-orange-600 bg-orange-50 border border-orange-200 rounded-xl hover:bg-orange-100 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
                 )}
                 {errors.customer && <p className="text-xs text-red-500 mt-1">{errors.customer}</p>}
               </div>
