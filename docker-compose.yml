@@ -37,8 +37,54 @@ services:
       GOOGLE_PLACES_API_KEY: ${GOOGLE_PLACES_API_KEY}
       HOSOONLINE_BASE_URL: ${HOSOONLINE_BASE_URL:-https://hosoonline.com}
       HOSOONLINE_API_KEY: ${HOSOONLINE_API_KEY}
+      COMPREFACE_URL: ${COMPREFACE_URL:-http://compreface-api}
+      COMPREFACE_API_KEY: ${COMPREFACE_API_KEY}
     ports:
       - "127.0.0.1:3002:3002"
+
+  compreface-postgres-db:
+    image: postgres:11.5-alpine
+    container_name: compreface-postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: frs
+    volumes:
+      - compreface-db-data:/var/lib/postgresql/data
+
+  compreface-api:
+    image: exadel/compreface:1.2.0
+    container_name: compreface-api
+    restart: unless-stopped
+    depends_on:
+      - compreface-postgres-db
+    ports:
+      - "127.0.0.1:8000:80"
+    environment:
+      POSTGRES_URL: jdbc:postgresql://compreface-postgres-db:5432/frs
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      ADMIN_JAVA_OPTS: -Xmx1g
+      API_JAVA_OPTS: -Xmx4g
+      SAVE_IMAGES_TO_DB: "true"
+      MAX_FILE_SIZE: 5MB
+      MAX_REQUEST_SIZE: 10MB
+      CONNECTION_TIMEOUT: 10000
+      READ_TIMEOUT: 60000
+      COMPREFACE_API_JAVA_OPTS: -Xmx4g
+    volumes:
+      - compreface-api-data:/app/model-data
+
+  compreface-core:
+    image: exadel/compreface-core:1.2.0
+    container_name: compreface-core
+    restart: unless-stopped
+    environment:
+      ML_PORT: "3000"
+      IMG_LENGTH_LIMIT: "640"
+    depends_on:
+      - compreface-api
 
   web:
     build:
@@ -55,3 +101,5 @@ services:
 
 volumes:
   tgroup-pgdata:
+  compreface-db-data:
+  compreface-api-data:
