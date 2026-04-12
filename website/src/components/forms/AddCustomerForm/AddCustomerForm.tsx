@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   CreditCard,
   Link,
+  ScanFace,
 } from 'lucide-react';
 import { useState, useCallback, useEffect } from 'react';
 import { fetchCompanies, fetchEmployees } from '@/lib/api';
@@ -40,6 +41,8 @@ import { useCustomerSources } from '@/hooks/useSettings';
 import type { CustomerSource } from '@/data/mockSettings';
 import { AddressAutocomplete } from '@/components/shared/AddressAutocomplete';
 import { CustomerCameraWidget } from '@/components/customer/CustomerCameraWidget';
+import { FaceCaptureModal } from '@/components/shared/FaceCaptureModal';
+import { useFaceRecognition } from '@/hooks/useFaceRecognition';
 
 /**
  * ╔══════════════════════════════════════════════════════════════════════════════════════╗
@@ -70,8 +73,10 @@ import { CustomerCameraWidget } from '@/components/customer/CustomerCameraWidget
 interface AddCustomerFormProps {
   readonly initialData?: Partial<CustomerFormData>;
   readonly customerRef?: string | null;
+  readonly customerId?: string;
   readonly onSubmit: (data: CustomerFormData) => void | Promise<void>;
   readonly onCancel: () => void;
+  readonly onPendingFaceImage?: (image: Blob | null) => void;
   readonly isEdit?: boolean;
   readonly canEdit?: boolean;
 }
@@ -263,8 +268,10 @@ function MiniAddDialog({
 export function AddCustomerForm({
   initialData,
   customerRef,
+  customerId,
   onSubmit,
   onCancel,
+  onPendingFaceImage,
   isEdit = false,
   canEdit = false,
 }: AddCustomerFormProps) {
@@ -285,6 +292,14 @@ export function AddCustomerForm({
 
   const [companies, setCompanies] = useState<ApiCompany[]>([]);
   const [employees, setEmployees] = useState<ApiEmployee[]>([]);
+
+  const [pendingFaceImage, setPendingFaceImage] = useState<Blob | null>(null);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const { registerState, register, reset: resetFace } = useFaceRecognition();
+
+  useEffect(() => {
+    onPendingFaceImage?.(pendingFaceImage);
+  }, [pendingFaceImage, onPendingFaceImage]);
 
   const { allSources, addSource } = useCustomerSources();
 
@@ -476,17 +491,54 @@ export function AddCustomerForm({
                     prev.filter((e) => !Object.keys(fields).includes(e.field)),
                   );
                 }}
-                onFaceIdResult={(customer) => {
+                onFaceIdResult={(customer, imageBlob) => {
                   if (customer) {
                     setFormData((prev) => ({ ...prev, ...customer }));
                     setErrors((prev) =>
                       prev.filter((e) => !Object.keys(customer).includes(e.field)),
                     );
+                    setPendingFaceImage(null);
                   } else {
-                    alert('Không tìm thấy khách hàng. Vui lòng nhập thủ công hoặc dùng Quick Add.');
+                    setPendingFaceImage(imageBlob ?? null);
                   }
                 }}
               />
+            </div>
+
+            {/* Register Face button */}
+            {isEdit && customerId && (
+              <div className="mt-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetFace();
+                    setShowRegisterModal(true);
+                  }}
+                  disabled={!isFieldEditable || registerState.status === 'processing'}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-semibold text-orange-600 bg-orange-50 border border-orange-200 rounded-xl hover:bg-orange-100 transition-all disabled:opacity-50"
+                >
+                  <ScanFace className="w-4 h-4" />
+                  {registerState.status === 'processing' ? 'Đang đăng ký...' : 'Đăng ký khuôn mặt'}
+                </button>
+                {registerState.status === 'success' && (
+                  <p className="mt-1.5 text-[10px] text-emerald-600 text-center">Đăng ký thành công!</p>
+                )}
+                {registerState.status === 'error' && (
+                  <p className="mt-1.5 text-[10px] text-red-500 text-center">
+                    {(registerState as { message: string }).message}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* No-match hint in add mode */}
+            {!isEdit && pendingFaceImage && (
+              <div className="mt-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
+                <p className="text-[10px] text-amber-700 text-center">
+                  Ảnh khuôn mặt đã lưu. Điền thông tin và lưu để đăng ký.
+                </p>
+              </div>
+            )}
             </div>
 
             <div className="space-y-4">
@@ -1190,6 +1242,18 @@ export function AddCustomerForm({
           </div>
         </div>
       </form>
+
+      <FaceCaptureModal
+        isOpen={showRegisterModal}
+        title="Đăng ký khuôn mặt"
+        onCapture={async (imageBlob) => {
+          setShowRegisterModal(false);
+          if (customerId) {
+            await register(customerId, imageBlob);
+          }
+        }}
+        onCancel={() => setShowRegisterModal(false)}
+      />
     </div>
   );
 }
