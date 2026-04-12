@@ -181,7 +181,18 @@ router.post('/', requirePermission('payment.edit'), async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const installment_amount = Math.round((total_amount - (down_payment || 0)) / number_of_installments);
+    // Invariants: downPayment-less-than-total + installmentSum.equals-remaining (CRITICAL)
+    const _ta = parseFloat(total_amount || 0);
+    const _dp = parseFloat(down_payment || 0);
+    const _n = parseInt(number_of_installments || 0, 10);
+    if (_dp < 0) return res.status(400).json({ error: 'down_payment must be >= 0' });
+    if (_dp >= _ta) return res.status(400).json({ error: 'down_payment must be less than total_amount' });
+    if (_n < 1) return res.status(400).json({ error: 'number_of_installments must be >= 1' });
+    const installment_amount = Math.round((_ta - _dp) / _n);
+    const installment_sum = installment_amount * _n;
+    if (Math.abs(installment_sum - (_ta - _dp)) > 0.5 * _n) {
+      return res.status(400).json({ error: 'installment sum does not equal total_amount - down_payment' });
+    }
 
     const result = await query(
       `INSERT INTO dbo.monthlyplans 
@@ -257,6 +268,16 @@ router.post('/', requirePermission('payment.edit'), async (req, res) => {
 router.put('/:id', requirePermission('payment.edit'), async (req, res) => {
   try {
     const { treatment_description, total_amount, down_payment, status, notes, invoice_ids } = req.body;
+
+    // Invariant: downPayment-less-than-total (CRITICAL) on PUT
+    if (total_amount !== undefined || down_payment !== undefined) {
+      const cur = await query('SELECT total_amount, down_payment FROM dbo.monthlyplans WHERE id = $1', [req.params.id]);
+      if (cur.length === 0) return res.status(404).json({ error: 'Plan not found' });
+      const newT = parseFloat(total_amount !== undefined ? total_amount : cur[0].total_amount);
+      const newD = parseFloat(down_payment !== undefined ? down_payment : cur[0].down_payment);
+      if (newD < 0) return res.status(400).json({ error: 'down_payment must be >= 0' });
+      if (newD >= newT) return res.status(400).json({ error: 'down_payment must be less than total_amount' });
+    }
 
     const updates = [];
     const values = [];
