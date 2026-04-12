@@ -76,18 +76,26 @@ router.post('/', requirePermission('services.edit'), async (req, res) => {
       return res.status(400).json({ error: 'customer_id and service_type are required' });
     }
     
-    const total = (unit_price || 0) * (quantity || 1) - (discount || 0);
+    // Invariant: service.totalCost.non-negative (HIGH)
+    const _up = parseFloat(unit_price || 0);
+    const _qty = parseFloat(quantity == null ? 1 : quantity);
+    const _disc = parseFloat(discount || 0);
+    if (_up < 0) return res.status(400).json({ error: 'unit_price must be >= 0' });
+    if (_qty < 0) return res.status(400).json({ error: 'quantity must be >= 0' });
+    if (_disc < 0) return res.status(400).json({ error: 'discount must be >= 0' });
+    const total = _up * _qty - _disc;
+    if (total < 0) return res.status(400).json({ error: 'total_amount must be >= 0 (discount exceeds unit_price * quantity)' });
     
     const result = await query(`
       INSERT INTO public.services (customer_id, service_type, unit_price, quantity, discount, doctor_id, notes, status, total_amount)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `, [
-      customer_id, 
-      service_type, 
-      unit_price || 0, 
-      quantity || 1, 
-      discount || 0,
+      customer_id,
+      service_type,
+      _up,
+      _qty,
+      _disc,
       doctor_id,
       notes,
       status || 'in_progress',

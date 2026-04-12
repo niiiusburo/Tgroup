@@ -230,6 +230,14 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
       return res.status(400).json({ error: 'partnerid is required' });
     }
 
+    // Invariant: service.totalCost.non-negative (HIGH)
+    if (parseFloat(amounttotal || 0) < 0) {
+      return res.status(400).json({ error: 'amounttotal must be >= 0' });
+    }
+    if (quantity != null && !isNaN(parseFloat(quantity)) && parseFloat(quantity) < 0) {
+      return res.status(400).json({ error: 'quantity must be >= 0' });
+    }
+
     // Generate a new UUID for the sale order
     const { v4: uuidv4 } = require('uuid');
     const id = uuidv4();
@@ -328,6 +336,102 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
     return res.status(201).json(rows[0]);
   } catch (err) {
     console.error('Error creating sale order:', err);
+    return res.status(500).json({
+      error: err instanceof Error ? err.message : 'Unknown error',
+    });
+  }
+});
+
+/**
+ * PATCH /api/SaleOrders/:id/state
+ * Update the state of a sale order (treatment status)
+ * Body: { state: 'sale' | 'done' | 'cancel' | 'draft' }
+ */
+router.patch('/:id/state', requirePermission('customers.edit'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { state } = req.body;
+    const changedBy = req.user?.employeeId || req.user?.id || null;
+    console.log('[PATCH /SaleOrders/:id/state] id=', id, 'state=', state, 'changedBy=', changedBy);
+
+    const validStates = ['sale', 'done', 'cancel', 'draft'];
+    if (!state || !validStates.includes(state)) {
+      console.log('[PATCH /SaleOrders/:id/state] invalid state:', state);
+      return res.status(400).json({ error: `Invalid state. Must be one of: ${validStates.join(', ')}` });
+    }
+
+    // Capture old state for audit logging
+    const oldRows = await query(
+      `SELECT state FROM saleorders WHERE id = $1 AND isdeleted = false`,
+      [id]
+    );
+    console.log('[PATCH /SaleOrders/:id/state] oldRows=', oldRows);
+    if (!oldRows || oldRows.length === 0) {
+      return res.status(404).json({ error: 'Sale order not found' });
+    }
+    const oldState = oldRows[0].state;
+
+    const updateResult = await query(
+      `UPDATE saleorders SET state = $1 WHERE id = $2 AND isdeleted = false RETURNING id, state`,
+      [state, id]
+    );
+    console.log('[PATCH /SaleOrders/:id/state] updateResult=', updateResult);
+
+    // Audit log (best-effort: don't fail the request if logging fails)
+    try {
+      const { v4: uuidv4 } = require('uuid');
+      await query(
+        `INSERT INTO saleorder_state_logs (id, saleorder_id, old_state, new_state, changed_by, changed_at)
+         VALUES ($1, $2, $3, $4, $5, NOW())`,
+        [uuidv4(), id, oldState, state, changedBy]
+      );
+    } catch (logErr) {
+      console.error('Failed to write saleorder_state_logs:', logErr);
+    }
+
+    // Fetch the full updated record with joins
+    const rows = await query(
+      `SELECT
+        so.id,
+        so.name,
+        so.partnerid,
+        p.name AS partnername,
+        p.displayname AS partnerdisplayname,
+        so.amounttotal,
+        so.residual,
+        so.totalpaid,
+        so.state,
+        so.companyid,
+        c.name AS companyname,
+        so.doctorid,
+        doc.name AS doctorname,
+        so.assistantid,
+        asst.name AS assistantname,
+        so.dentalaideid,
+        da.name AS dentalaidename,
+        so.quantity,
+        so.unit,
+        so.datestart,
+        so.dateend,
+        so.notes,
+        (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
+        (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
+        so.datecreated,
+        so.isdeleted
+      FROM saleorders so
+      LEFT JOIN partners p ON p.id = so.partnerid
+      LEFT JOIN companies c ON c.id = so.companyid
+      LEFT JOIN partners doc ON doc.id = so.doctorid
+      LEFT JOIN partners asst ON asst.id = so.assistantid
+      LEFT JOIN partners da ON da.id = so.dentalaideid
+      WHERE so.id = $1`,
+      [id]
+    );
+    console.log('[PATCH /SaleOrders/:id/state] final rows count=', rows ? rows.length : 0);
+
+    return res.json(rows[0]);
+  } catch (err) {
+    console.error('[PATCH /SaleOrders/:id/state] Unhandled error:', err);
     return res.status(500).json({
       error: err instanceof Error ? err.message : 'Unknown error',
     });

@@ -28,6 +28,52 @@ function mapAllocations(allocResult) {
   });
 }
 
+async function generateReceiptNumber(prefix = "TUKH") {
+  const year = new Date().getFullYear();
+  const result = await query(
+    `INSERT INTO receipt_sequences (prefix, year, last_number)
+     VALUES ($1, $2, 1)
+     ON CONFLICT (prefix, year)
+     DO UPDATE SET last_number = receipt_sequences.last_number + 1
+     RETURNING last_number`,
+    [prefix, year]
+  );
+  const num = result[0].last_number;
+  return `${prefix}/${year}/${String(num).padStart(5, "0")}`;
+}
+
+async function checkInvoiceResidual(id, amt) {
+  const r = await query("SELECT residual FROM saleorders WHERE id = $1", [id]);
+  if (r.length === 0) return `Invoice ${id} not found`;
+  const residual = parseFloat(r[0].residual || 0);
+  if (amt > residual + 0.01) return 'Payment amount exceeds outstanding balance';
+  return null;
+}
+
+async function checkDotkhamResidual(id, amt) {
+  const r = await query("SELECT amountresidual FROM dotkhams WHERE id = $1", [id]);
+  if (r.length === 0) return `Dotkham ${id} not found`;
+  const residual = parseFloat(r[0].amountresidual || 0);
+  if (amt > residual + 0.01) return 'Payment amount exceeds outstanding balance';
+  return null;
+}
+
+async function checkOneAllocationResidual(a) {
+  if ((!a.invoice_id && !a.dotkham_id) || a.allocated_amount == null) return null;
+  const amt = parseFloat(a.allocated_amount);
+  if (a.invoice_id) return checkInvoiceResidual(a.invoice_id, amt);
+  return checkDotkhamResidual(a.dotkham_id, amt);
+}
+
+async function validateAllocationResidual(allocations) {
+  if (!Array.isArray(allocations)) return null;
+  for (const a of allocations) {
+    const e = await checkOneAllocationResidual(a);
+    if (e) return e;
+  }
+  return null;
+}
+
 // GET /api/Payments - List payments with allocations
 // Falls back to accountpayments for historical records not yet migrated to payments table
 router.get("/", async (req, res) => {
@@ -39,7 +85,8 @@ router.get("/", async (req, res) => {
         p.id, p.customer_id, p.service_id,
         p.amount, p.method, p.notes, p.created_at,
         p.payment_date, p.reference_code, p.status,
-        p.deposit_used, p.cash_amount, p.bank_amount
+        p.deposit_used, p.cash_amount, p.bank_amount,
+        p.receipt_number, p.deposit_type
       FROM payments p
       WHERE 1=1
     `;
@@ -73,7 +120,9 @@ router.get("/", async (req, res) => {
              CASE WHEN ap.state = 'posted' THEN 'posted' ELSE 'voided' END AS status,
              0 AS deposit_used,
              0 AS cash_amount,
-             0 AS bank_amount
+             0 AS bank_amount,
+             NULL AS receipt_number,
+             NULL AS deposit_type
            FROM accountpayments ap
            WHERE ap.partnerid = $1 AND ap.state = 'posted'
            ORDER BY ap.paymentdate DESC
@@ -85,7 +134,6 @@ router.get("/", async (req, res) => {
           usedLegacyFallback = true;
         }
       } catch (legacyErr) {
-        // accountpayments table may not exist in some environments; ignore
         console.warn("Legacy accountpayments fallback failed:", legacyErr.message);
       }
     }
@@ -99,7 +147,6 @@ router.get("/", async (req, res) => {
     let countResult = await query(countSql, countParams);
     let totalItems = parseInt(countResult[0]?.count || 0);
 
-    // If we fell back to accountpayments, use that count
     if (customerId && totalItems === 0) {
       try {
         const legacyCount = await query(
@@ -112,8 +159,6 @@ router.get("/", async (req, res) => {
       }
     }
 
-    // Fetch allocations for returned payments (skip for legacy fallback IDs since they
-    // originate from accountpayments and won't exist in payment_allocations)
     const paymentIds = result.map(r => r.id);
     let allocations = [];
     if (paymentIds.length > 0 && !usedLegacyFallback) {
@@ -136,7 +181,6 @@ router.get("/", async (req, res) => {
         );
         allocations = mapAllocations(allocResult);
       } catch (allocErr) {
-        // Schema may be missing joined columns (e.g. dk.totalamount); degrade gracefully
         console.warn("Payment allocations query failed, returning empty allocations:", allocErr.message);
         allocations = [];
       }
@@ -156,6 +200,8 @@ router.get("/", async (req, res) => {
         paymentDate: row.payment_date,
         referenceCode: row.reference_code,
         status: row.status,
+        receiptNumber: row.receipt_number,
+        depositType: row.deposit_type,
         createdAt: row.created_at,
         allocations: allocations
           .filter(a => a.paymentId === row.id)
@@ -169,13 +215,186 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET /api/Payments/deposits - List deposit top-ups and refunds
+router.get("/deposits", async (req, res) => {
+  try {
+    const {
+      customerId,
+      dateFrom,
+      dateTo,
+      receiptNumber,
+      type = "all",
+      limit = 100,
+      offset = 0,
+    } = req.query;
+
+    let sql = `
+      SELECT
+        p.id, p.customer_id, p.service_id,
+        p.amount, p.method, p.notes, p.created_at,
+        p.payment_date, p.reference_code, p.status,
+        p.deposit_used, p.cash_amount, p.bank_amount,
+        p.receipt_number, p.deposit_type
+      FROM payments p
+      WHERE (
+        p.deposit_type IN ('deposit', 'refund')
+        OR (
+          p.deposit_type IS NULL
+          AND p.method IN ('cash', 'bank_transfer')
+          AND p.service_id IS NULL
+          AND (p.deposit_used IS NULL OR p.deposit_used = 0)
+        )
+      )
+    `;
+    const params = [];
+
+    if (customerId) {
+      params.push(customerId);
+      sql += ` AND p.customer_id = $` + params.length;
+    }
+
+    if (type === "deposit") {
+      sql += ` AND (
+        p.deposit_type = 'deposit'
+        OR (
+          p.deposit_type IS NULL
+          AND p.method IN ('cash', 'bank_transfer')
+          AND p.service_id IS NULL
+          AND (p.deposit_used IS NULL OR p.deposit_used = 0)
+          AND p.amount > 0
+        )
+      )`;
+    } else if (type === "refund") {
+      sql += ` AND (p.deposit_type = 'refund' OR p.amount < 0)`;
+    }
+
+    if (dateFrom) {
+      params.push(dateFrom);
+      sql += ` AND p.payment_date >= $` + params.length;
+    }
+    if (dateTo) {
+      params.push(dateTo);
+      sql += ` AND p.payment_date <= $` + params.length;
+    }
+    if (receiptNumber) {
+      params.push(`%${receiptNumber}%`);
+      sql += ` AND p.receipt_number ILIKE $` + params.length;
+    }
+
+    const countSql = `SELECT COUNT(*) FROM payments p ${sql.slice(sql.indexOf("FROM payments p") + "FROM payments p".length)}`;
+    const countResult = await query(countSql, [...params]);
+    const totalItems = parseInt(countResult[0]?.count || 0);
+
+    sql += ` ORDER BY p.created_at DESC LIMIT $` + (params.length + 1) + ` OFFSET $` + (params.length + 2);
+    params.push(parseInt(limit), parseInt(offset));
+
+    const result = await query(sql, params);
+
+    res.json({
+      items: result.map(row => ({
+        id: row.id,
+        customerId: row.customer_id,
+        serviceId: row.service_id,
+        amount: parseFloat(row.amount),
+        method: row.method,
+        depositUsed: parseFloat(row.deposit_used || 0),
+        cashAmount: parseFloat(row.cash_amount || 0),
+        bankAmount: parseFloat(row.bank_amount || 0),
+        notes: row.notes,
+        paymentDate: row.payment_date,
+        referenceCode: row.reference_code,
+        status: row.status,
+        receiptNumber: row.receipt_number,
+        depositType: row.deposit_type,
+        createdAt: row.created_at,
+        allocations: [],
+      })),
+      totalItems,
+    });
+  } catch (error) {
+    console.error("Error fetching deposits:", error);
+    res.status(500).json({ error: "Failed to fetch deposits" });
+  }
+});
+
+// GET /api/Payments/deposit-usage - List deposit usage (withdrawals)
+router.get("/deposit-usage", async (req, res) => {
+  try {
+    const { customerId, dateFrom, dateTo, limit = 100, offset = 0 } = req.query;
+
+    let sql = `
+      SELECT
+        p.id, p.customer_id, p.service_id,
+        p.amount, p.method, p.notes, p.created_at,
+        p.payment_date, p.reference_code, p.status,
+        p.deposit_used, p.cash_amount, p.bank_amount,
+        p.receipt_number, p.deposit_type
+      FROM payments p
+      WHERE (
+        p.deposit_type = 'usage'
+        OR p.method = 'deposit'
+        OR (p.deposit_used IS NOT NULL AND p.deposit_used > 0)
+      )
+    `;
+    const params = [];
+
+    if (customerId) {
+      params.push(customerId);
+      sql += ` AND p.customer_id = $` + params.length;
+    }
+    if (dateFrom) {
+      params.push(dateFrom);
+      sql += ` AND p.payment_date >= $` + params.length;
+    }
+    if (dateTo) {
+      params.push(dateTo);
+      sql += ` AND p.payment_date <= $` + params.length;
+    }
+
+    const countSql = `SELECT COUNT(*) FROM payments p ${sql.slice(sql.indexOf("FROM payments p") + "FROM payments p".length)}`;
+    const countResult = await query(countSql, [...params]);
+    const totalItems = parseInt(countResult[0]?.count || 0);
+
+    sql += ` ORDER BY p.created_at DESC LIMIT $` + (params.length + 1) + ` OFFSET $` + (params.length + 2);
+    params.push(parseInt(limit), parseInt(offset));
+
+    const result = await query(sql, params);
+
+    res.json({
+      items: result.map(row => ({
+        id: row.id,
+        customerId: row.customer_id,
+        serviceId: row.service_id,
+        amount: parseFloat(row.amount),
+        method: row.method,
+        depositUsed: parseFloat(row.deposit_used || 0),
+        cashAmount: parseFloat(row.cash_amount || 0),
+        bankAmount: parseFloat(row.bank_amount || 0),
+        notes: row.notes,
+        paymentDate: row.payment_date,
+        referenceCode: row.reference_code,
+        status: row.status,
+        receiptNumber: row.receipt_number,
+        depositType: row.deposit_type,
+        createdAt: row.created_at,
+        allocations: [],
+      })),
+      totalItems,
+    });
+  } catch (error) {
+    console.error("Error fetching deposit usage:", error);
+    res.status(500).json({ error: "Failed to fetch deposit usage" });
+  }
+});
+
 // GET /api/Payments/:id - Single payment with allocations
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const rows = await query(
       `SELECT id, customer_id, service_id, amount, method, notes, created_at,
-              payment_date, reference_code, status, deposit_used, cash_amount, bank_amount
+              payment_date, reference_code, status, deposit_used, cash_amount, bank_amount,
+              receipt_number, deposit_type
        FROM payments WHERE id = $1`,
       [id]
     );
@@ -219,6 +438,8 @@ router.get("/:id", async (req, res) => {
       paymentDate: row.payment_date,
       referenceCode: row.reference_code,
       status: row.status,
+      receiptNumber: row.receipt_number,
+      depositType: row.deposit_type,
       createdAt: row.created_at,
       allocations,
     });
@@ -231,34 +452,59 @@ router.get("/:id", async (req, res) => {
 // POST /api/Payments - Create a new payment with optional allocations
 router.post("/", requirePermission('payment.edit'), async (req, res) => {
   try {
-    const {
+    let {
       customer_id, service_id, amount, method, notes,
       payment_date, reference_code, status,
       deposit_used, cash_amount, bank_amount,
+      deposit_type, receipt_number,
       allocations
     } = req.body;
 
-    if (!customer_id || amount === undefined || amount === null || !method) {
-      return res.status(400).json({ error: "customer_id, amount, and method are required" });
+    if (!customer_id || amount === undefined || amount === null || !method || parseFloat(amount) <= 0) {
+      return res.status(400).json({ error: "customer_id, positive amount, and method are required" });
     }
 
-    // Create payment
-    const result = await query(`
-      INSERT INTO payments (
+    // Auto-detect deposit top-up if not explicitly typed
+    const looksLikeDeposit =
+      !deposit_type &&
+      method !== "deposit" &&
+      method !== "mixed" &&
+      !service_id &&
+      !(deposit_used > 0) &&
+      parseFloat(amount) > 0;
+
+    if (looksLikeDeposit) {
+      deposit_type = "deposit";
+    }
+
+    if (deposit_type === "deposit" && !receipt_number) {
+      receipt_number = await generateReceiptNumber();
+    }
+
+    // Invariant: payment.amount.not-exceeding-residual (CRITICAL)
+    const residualErr = await validateAllocationResidual(allocations);
+    if (residualErr) {
+      return res.status(400).json({ error: residualErr });
+    }
+
+    const result = await query(
+      `INSERT INTO payments (
         customer_id, service_id, amount, method, notes,
         payment_date, reference_code, status,
-        deposit_used, cash_amount, bank_amount
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-      RETURNING *
-    `, [
-      customer_id, service_id || null, amount, method, notes || null,
-      payment_date || null, reference_code || null, status || "posted",
-      deposit_used || 0, cash_amount || 0, bank_amount || 0
-    ]);
+        deposit_used, cash_amount, bank_amount,
+        deposit_type, receipt_number
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      RETURNING *`,
+      [
+        customer_id, service_id || null, amount, method, notes || null,
+        payment_date || null, reference_code || null, status || "posted",
+        deposit_used || 0, cash_amount || 0, bank_amount || 0,
+        deposit_type || null, receipt_number || null,
+      ]
+    );
 
     const row = result[0];
 
-    // Create allocations if provided
     let createdAllocations = [];
     if (Array.isArray(allocations) && allocations.length > 0) {
       const allocValues = [];
@@ -283,7 +529,6 @@ router.post("/", requirePermission('payment.edit'), async (req, res) => {
         `;
         createdAllocations = await query(allocSql, allocParams);
 
-        // Update residuals on invoices / dotkhams
         for (const a of createdAllocations) {
           if (a.invoice_id) {
             await query(
@@ -313,13 +558,14 @@ router.post("/", requirePermission('payment.edit'), async (req, res) => {
       depositUsed: parseFloat(row.deposit_used || 0),
       cashAmount: parseFloat(row.cash_amount || 0),
       bankAmount: parseFloat(row.bank_amount || 0),
+      receiptNumber: row.receipt_number,
+      depositType: row.deposit_type,
       createdAt: row.created_at,
       allocations: mapAllocations(createdAllocations.map(a => ({
         id: a.id,
         invoice_id: a.invoice_id,
         dotkham_id: a.dotkham_id,
         allocated_amount: a.allocated_amount,
-        // no joined names here; mapAllocations handles gracefully with defaults
         invoice_name: null,
         invoice_total: null,
         invoice_residual: null,
@@ -334,24 +580,122 @@ router.post("/", requirePermission('payment.edit'), async (req, res) => {
   }
 });
 
-// POST /api/Payments/:id/void - Void payment and reverse allocations
-router.post("/:id/void", requirePermission('payment.edit'), async (req, res) => {
+// POST /api/Payments/refund - Create a refund (negative deposit payment)
+router.post("/refund", requirePermission('payment.edit'), async (req, res) => {
+  try {
+    const { customer_id, amount, method, notes, payment_date } = req.body;
+
+    if (!customer_id || !amount || amount <= 0 || !method) {
+      return res.status(400).json({ error: "customer_id, positive amount, and method are required" });
+    }
+
+    const receipt_number = await generateReceiptNumber();
+
+    const result = await query(
+      `INSERT INTO payments (
+        customer_id, amount, method, notes,
+        payment_date, status, deposit_type, receipt_number,
+        deposit_used, cash_amount, bank_amount
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      RETURNING *`,
+      [
+        customer_id, -Math.abs(amount), method, notes || null,
+        payment_date || null, "posted", "refund", receipt_number,
+        0, 0, 0,
+      ]
+    );
+
+    const row = result[0];
+    res.status(201).json({
+      id: row.id,
+      customerId: row.customer_id,
+      amount: parseFloat(row.amount),
+      method: row.method,
+      notes: row.notes,
+      paymentDate: row.payment_date,
+      status: row.status,
+      receiptNumber: row.receipt_number,
+      depositType: row.deposit_type,
+      createdAt: row.created_at,
+    });
+  } catch (error) {
+    console.error("Error creating refund:", error);
+    res.status(500).json({ error: "Failed to create refund" });
+  }
+});
+
+// PATCH /api/Payments/:id - Update payment
+router.patch("/:id", requirePermission('payment.edit'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    const allowedFields = [
+      "amount",
+      "method",
+      "notes",
+      "payment_date",
+      "reference_code",
+      "status",
+      "deposit_type",
+      "receipt_number",
+    ];
+
+    const fields = [];
+    const values = [];
+    for (const key of allowedFields) {
+      if (updates[key] !== undefined) {
+        fields.push(`${key} = $${fields.length + 1}`);
+        values.push(updates[key]);
+      }
+    }
+
+    if (fields.length === 0) {
+      return res.status(400).json({ error: "No valid fields to update" });
+    }
+
+    values.push(id);
+    const sql = `UPDATE payments SET ${fields.join(", ")} WHERE id = $${values.length} RETURNING *`;
+    const result = await query(sql, values);
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: "Payment not found" });
+    }
+
+    const row = result[0];
+    res.json({
+      id: row.id,
+      customerId: row.customer_id,
+      serviceId: row.service_id,
+      amount: parseFloat(row.amount),
+      method: row.method,
+      notes: row.notes,
+      paymentDate: row.payment_date,
+      referenceCode: row.reference_code,
+      status: row.status,
+      receiptNumber: row.receipt_number,
+      depositType: row.deposit_type,
+      createdAt: row.created_at,
+    });
+  } catch (error) {
+    console.error("Error updating payment:", error);
+    res.status(500).json({ error: "Failed to update payment" });
+  }
+});
+
+// DELETE /api/Payments/:id - Delete payment and reverse allocations
+router.delete("/:id", requirePermission('payment.edit'), async (req, res) => {
   const { id } = req.params;
-  const { reason } = req.body || {};
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
-    // Fetch allocations before deleting so we can restore residuals
     const allocationsToReverse = await client.query(
       "SELECT invoice_id, dotkham_id, allocated_amount FROM payment_allocations WHERE payment_id = $1",
       [id]
     );
 
-    // Reverse allocations by deleting them
     await client.query("DELETE FROM payment_allocations WHERE payment_id = $1", [id]);
 
-    // Restore residuals on invoices / dotkhams
     for (const a of allocationsToReverse.rows) {
       if (a.invoice_id) {
         await client.query(
@@ -366,7 +710,52 @@ router.post("/:id/void", requirePermission('payment.edit'), async (req, res) => 
       }
     }
 
-    // Mark payment as voided
+    const result = await client.query("DELETE FROM payments WHERE id = $1 RETURNING id", [id]);
+    if (result.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Payment not found" });
+    }
+
+    await client.query("COMMIT");
+    res.json({ success: true, id: result.rows[0].id });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("Delete error:", err);
+    res.status(500).json({ error: "Failed to delete payment" });
+  } finally {
+    client.release();
+  }
+});
+
+// POST /api/Payments/:id/void - Void payment and reverse allocations
+router.post("/:id/void", requirePermission('payment.edit'), async (req, res) => {
+  const { id } = req.params;
+  const { reason } = req.body || {};
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const allocationsToReverse = await client.query(
+      "SELECT invoice_id, dotkham_id, allocated_amount FROM payment_allocations WHERE payment_id = $1",
+      [id]
+    );
+
+    await client.query("DELETE FROM payment_allocations WHERE payment_id = $1", [id]);
+
+    for (const a of allocationsToReverse.rows) {
+      if (a.invoice_id) {
+        await client.query(
+          "UPDATE saleorders SET residual = residual + $1 WHERE id = $2",
+          [a.allocated_amount, a.invoice_id]
+        );
+      } else if (a.dotkham_id) {
+        await client.query(
+          "UPDATE dotkhams SET amountresidual = amountresidual + $1 WHERE id = $2",
+          [a.allocated_amount, a.dotkham_id]
+        );
+      }
+    }
+
     const result = await client.query(
       `UPDATE payments SET status = 'voided', notes = COALESCE(notes, '') || ' | VOIDED: ' || $2 WHERE id = $1 AND status = 'posted' RETURNING *`,
       [id, reason || ""]
@@ -396,8 +785,6 @@ router.post("/:id/proof", requirePermission('payment.edit'), async (req, res) =>
       return res.status(400).json({ error: "proofImageBase64 must be a non-empty string starting with data:image/" });
     }
 
-    // TODO: payment_proofs.payment_id must be UUID to match payments.id (uuid type).
-    // Run migration 011_fix_payment_proofs_type.sql before this endpoint will work.
     const result = await query(
       "INSERT INTO payment_proofs (payment_id, proof_image, qr_description) VALUES ($1, $2, $3) RETURNING *",
       [id, proofImageBase64, qrDescription || null]
