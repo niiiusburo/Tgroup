@@ -36,8 +36,13 @@ function isValidDate(str) {
          checkDate.getDate() === day;
 }
 
-// Check if foreign key exists
+// Allowlist of tables that foreignKeyExists may query.
+const FK_TABLES = new Set(['companies']);
+
 async function foreignKeyExists(table, id) {
+  if (!FK_TABLES.has(table)) {
+    throw new Error(`foreignKeyExists: "${table}" not allowlisted`);
+  }
   const result = await query(`SELECT 1 FROM ${table} WHERE id = $1 LIMIT 1`, [id]);
   return result.length > 0;
 }

@@ -24,8 +24,13 @@ function isValidISODate(str) {
   return !isNaN(date.getTime()) && str.match(/^\d{4}-\d{2}-\d{2}/);
 }
 
-// Check if foreign key exists
+// Allowlist of tables that foreignKeyExists may query.
+const FK_TABLES = new Set(['partners', 'companies', 'employees']);
+
 async function foreignKeyExists(table, id) {
+  if (!FK_TABLES.has(table)) {
+    throw new Error(`foreignKeyExists: "${table}" not allowlisted`);
+  }
   const result = await query(`SELECT 1 FROM ${table} WHERE id = $1 LIMIT 1`, [id]);
   return result.length > 0;
 }

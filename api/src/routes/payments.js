@@ -334,7 +334,7 @@ router.post("/:id/void", async (req, res) => {
 
     // Mark payment as voided
     const result = await client.query(
-      `UPDATE payments SET status = 'voided', notes = COALESCE(notes, '') || ' | VOIDED: ' || $2 WHERE id = $1 RETURNING *`,
+      `UPDATE payments SET status = 'voided', notes = COALESCE(notes, '') || ' | VOIDED: ' || $2 WHERE id = $1 AND status = 'posted' RETURNING *`,
       [id, reason || ""]
     );
     if (result.rows.length === 0) {

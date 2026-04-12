@@ -236,15 +236,15 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
 
     await client.query('BEGIN');
 
-    // Note: isdoctor, isassistant, isreceptionist, startworkdate do NOT exist in dbo.partners — accepted from frontend but not written to DB.
     // Insert into partners table with employee=true
     const result = await client.query(
       `INSERT INTO partners (
         id, name, phone, email, companyid,
         employee, customer, supplier, isagent, isinsurance,
-        active, iscompany, ishead, isdeleted, isbusinessinvoice,
+        active, isdoctor, isassistant, isreceptionist, startworkdate,
+        iscompany, ishead, isdeleted, isbusinessinvoice,
         password_hash, datecreated, lastupdated
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
       RETURNING *`,
       [
         id,
@@ -258,6 +258,10 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
         false,  // isagent = false
         false,  // isinsurance = false
         active,
+        !!isdoctor,
+        !!isassistant,
+        !!isreceptionist,
+        startworkdate || null,
         false,  // iscompany = false
         false,  // ishead = false
         false,  // isdeleted = false
@@ -323,13 +327,16 @@ router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
     const values = [];
     let paramIdx = 1;
 
-    // Note: isdoctor, isassistant, isreceptionist, startworkdate do NOT exist in dbo.partners — accepted from frontend but not written to DB.
     const fields = {
       name,
       phone,
       email,
       companyid,
       active,
+      isdoctor,
+      isassistant,
+      isreceptionist,
+      startworkdate,
     };
 
     for (const [key, value] of Object.entries(fields)) {
