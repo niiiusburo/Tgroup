@@ -49,11 +49,17 @@ const externalCheckupsRoutes = require('./routes/externalCheckups');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const ALLOWED_ORIGINS = ['http://localhost:5174', 'http://localhost:5173', 'http://76.13.16.68:5174'];
+const ALLOWED_ORIGINS = [
+  'http://localhost:5174',
+  'http://localhost:5173',
+  'http://76.13.16.68:5174',
+  'https://tbot.vn',
+  'https://www.tbot.vn',
+];
 app.use(helmet());
 app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
 app.use(cookieParser());
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
 app.use('/api/Auth/login', loginLimiter);
@@ -85,7 +91,7 @@ app.use('/api/DotKhams', dotKhamsRoutes);
 app.use('/api/AccountPayments', accountPaymentsRoutes);
 app.use('/api/CashBooks', cashbooksRoutes);
 app.use('/api/Receipts', receiptsRoutes);
-app.use('/api/accountjournals', journalsRoutes);
+app.use('/api/AccountJournals', journalsRoutes);
 app.use('/api/StockPickings', stockPickingsRoutes);
 app.use('/api/CrmTasks', crmTasksRoutes);
 app.use('/api/Commissions', commissionsRoutes);

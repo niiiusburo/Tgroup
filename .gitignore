@@ -6,6 +6,7 @@ dist/
 *.tsbuildinfo
 
 # Environment variables (sensitive)
+.env
 .env.local
 .env.*.local
 
