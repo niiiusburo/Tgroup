@@ -211,6 +211,11 @@ router.post('/', async (req, res) => {
       email = null,
       companyid = null,
       active = true,
+      isdoctor = false,
+      isassistant = false,
+      isreceptionist = false,
+      startworkdate = null,
+      password = null,
       locationScopeIds = [],
     } = req.body;
 
@@ -221,16 +226,24 @@ router.post('/', async (req, res) => {
     const id = require('crypto').randomUUID();
     const now = new Date().toISOString();
 
+    // Hash password if provided
+    let passwordHash = null;
+    if (password) {
+      const bcrypt = require('bcryptjs');
+      passwordHash = await bcrypt.hash(password, 10);
+    }
+
     await client.query('BEGIN');
 
+    // Note: isdoctor, isassistant, isreceptionist, startworkdate do NOT exist in dbo.partners — accepted from frontend but not written to DB.
     // Insert into partners table with employee=true
     const result = await client.query(
       `INSERT INTO partners (
         id, name, phone, email, companyid,
         employee, customer, supplier, isagent, isinsurance,
         active, iscompany, ishead, isdeleted, isbusinessinvoice,
-        datecreated, lastupdated
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+        password_hash, datecreated, lastupdated
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
       RETURNING *`,
       [
         id,
@@ -248,6 +261,7 @@ router.post('/', async (req, res) => {
         false,  // ishead = false
         false,  // isdeleted = false
         false,  // isbusinessinvoice = false
+        passwordHash,
         now,    // datecreated
         now,    // lastupdated
       ]
@@ -295,6 +309,11 @@ router.put('/:id', async (req, res) => {
       email,
       companyid,
       active,
+      isdoctor,
+      isassistant,
+      isreceptionist,
+      startworkdate,
+      password,
       locationScopeIds,
     } = req.body;
 
@@ -303,6 +322,7 @@ router.put('/:id', async (req, res) => {
     const values = [];
     let paramIdx = 1;
 
+    // Note: isdoctor, isassistant, isreceptionist, startworkdate do NOT exist in dbo.partners — accepted from frontend but not written to DB.
     const fields = {
       name,
       phone,
@@ -313,10 +333,19 @@ router.put('/:id', async (req, res) => {
 
     for (const [key, value] of Object.entries(fields)) {
       if (value !== undefined) {
-        updates.push(`${key} = ${paramIdx}`);
+        updates.push(`${key} = $${paramIdx}`);
         values.push(value);
         paramIdx++;
       }
+    }
+
+    // Hash password if provided
+    if (password) {
+      const bcrypt = require('bcryptjs');
+      const passwordHash = await bcrypt.hash(password, 10);
+      updates.push(`password_hash = $${paramIdx}`);
+      values.push(passwordHash);
+      paramIdx++;
     }
 
     if (updates.length === 0 && locationScopeIds === undefined) {
@@ -328,14 +357,14 @@ router.put('/:id', async (req, res) => {
     let result;
     if (updates.length > 0) {
       // Add lastupdated
-      updates.push(`lastupdated = ${paramIdx}`);
+      updates.push(`lastupdated = $${paramIdx}`);
       values.push(new Date().toISOString());
       paramIdx++;
 
       values.push(id);
 
       result = await client.query(
-        `UPDATE partners SET ${updates.join(', ')} WHERE id = ${paramIdx} AND employee = true RETURNING *`,
+        `UPDATE partners SET ${updates.join(', ')} WHERE id = $${paramIdx} AND employee = true RETURNING *`,
         values
       );
 

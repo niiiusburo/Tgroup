@@ -408,20 +408,11 @@ router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const {
-      name,
-      phone,
-      email,
-      companyid,
-      gender,
-      birthday,
-      birthmonth,
-      birthyear,
-      street,
-      medicalhistory,
-      note,
-      comment,
-      sourceid,
-      referraluserid,
+      name, phone, email, companyid, gender, birthday, birthmonth, birthyear,
+      street, cityname, districtname, wardname, medicalhistory, note, comment,
+      sourceid, referraluserid, weight, identitynumber, healthinsurancecardnumber,
+      emergencyphone, jobtitle, taxcode, unitname, unitaddress, isbusinessinvoice,
+      personalname, personalidentitycard, personaltaxcode, personaladdress, ref,
     } = req.body;
 
     // Check if partner exists
@@ -450,25 +441,33 @@ router.put('/:id', async (req, res) => {
         comment = COALESCE($12, comment),
         sourceid = COALESCE($13, sourceid),
         referraluserid = COALESCE($14, referraluserid),
+        cityname = COALESCE($15, cityname),
+        districtname = COALESCE($16, districtname),
+        wardname = COALESCE($17, wardname),
+        weight = COALESCE($18, weight),
+        identitynumber = COALESCE($19, identitynumber),
+        healthinsurancecardnumber = COALESCE($20, healthinsurancecardnumber),
+        emergencyphone = COALESCE($21, emergencyphone),
+        jobtitle = COALESCE($22, jobtitle),
+        taxcode = COALESCE($23, taxcode),
+        unitname = COALESCE($24, unitname),
+        unitaddress = COALESCE($25, unitaddress),
+        isbusinessinvoice = COALESCE($26, isbusinessinvoice),
+        personalname = COALESCE($27, personalname),
+        personalidentitycard = COALESCE($28, personalidentitycard),
+        personaltaxcode = COALESCE($29, personaltaxcode),
+        personaladdress = COALESCE($30, personaladdress),
+        ref = COALESCE($31, ref),
         lastupdated = NOW()
-      WHERE id = $15
+      WHERE id = $32
       RETURNING *`,
       [
-        name,
-        phone,
-        email,
-        companyid,
-        gender,
-        birthday,
-        birthmonth,
-        birthyear,
-        street,
-        medicalhistory,
-        note,
-        comment,
-        sourceid,
-        referraluserid,
-        id,
+        name, phone, email, companyid, gender, birthday, birthmonth, birthyear,
+        street, medicalhistory, note, comment, sourceid, referraluserid,
+        cityname, districtname, wardname, weight, identitynumber,
+        healthinsurancecardnumber, emergencyphone, jobtitle, taxcode,
+        unitname, unitaddress, isbusinessinvoice, personalname,
+        personalidentitycard, personaltaxcode, personaladdress, ref, id,
       ]
     );
 

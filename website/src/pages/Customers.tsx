@@ -211,7 +211,7 @@ export function Customers() {
     setDeleteDialog({ open: true, customerId: id, customerName: name, mode: 'soft' });
   }), [locationNameMap, canSoftDelete]);
 
-  const { profile: hookProfile, appointments: hookAppointments, linkedCounts, isLoading: profileLoading, refetch: refetchProfile } =
+  const { profile: hookProfile, rawPartner, appointments: hookAppointments, linkedCounts, isLoading: profileLoading, refetch: refetchProfile } =
     useCustomerProfile(selectedCustomerId);
 
   // Hooks for profile actions
@@ -302,6 +302,7 @@ export function Customers() {
       bankAmount: data.sources?.bankAmount,
       allocations: data.allocations?.map((a) => ({
         invoice_id: a.invoiceId,
+        dotkham_id: a.dotkhamId,
         allocated_amount: a.allocatedAmount,
       })),
     });
@@ -351,6 +352,70 @@ export function Customers() {
 
   const getEditFormData = (): Partial<CustomerFormData> | undefined => {
     if (!isEditMode || !selectedCustomerId) return undefined;
+    // Prefer raw partner data (has all fields) over the summarised profile
+    if (rawPartner) {
+      const g = rawPartner.gender ?? '';
+      return {
+        name: rawPartner.name,
+        phone: rawPartner.phone ?? '',
+        email: rawPartner.email ?? '',
+        gender: g === 'female' || g === 'Nữ' || g === 'f' ? 'female' : g ? 'male' : '',
+        companyid: rawPartner.companyid ?? '',
+        street: rawPartner.street ?? '',
+        // API aliases cityname→city, districtname→district, wardname→ward
+        cityname: rawPartner.city ?? '',
+        districtname: rawPartner.district ?? '',
+        wardname: rawPartner.ward ?? '',
+        note: rawPartner.note ?? '',
+        comment: rawPartner.comment ?? '',
+        medicalhistory: rawPartner.medicalhistory ?? '',
+        birthday: rawPartner.birthday ?? null,
+        birthmonth: rawPartner.birthmonth ?? null,
+        birthyear: rawPartner.birthyear ?? null,
+        sourceid: rawPartner.sourceid ?? '',
+        referraluserid: rawPartner.referraluserid ?? '',
+        salestaffid: rawPartner.salestaffid ?? '',
+        cskhid: rawPartner.cskhid ?? '',
+        weight: rawPartner.weight ?? null,
+        identitynumber: rawPartner.identitynumber ?? '',
+        healthinsurancecardnumber: rawPartner.healthinsurancecardnumber ?? '',
+        emergencyphone: rawPartner.emergencyphone ?? '',
+        jobtitle: rawPartner.jobtitle ?? '',
+        taxcode: rawPartner.taxcode ?? '',
+        unitname: rawPartner.unitname ?? '',
+        unitaddress: rawPartner.unitaddress ?? '',
+        isbusinessinvoice: rawPartner.isbusinessinvoice ?? false,
+        personalname: rawPartner.personalname ?? '',
+        personalidentitycard: rawPartner.personalidentitycard ?? '',
+        personaltaxcode: rawPartner.personaltaxcode ?? '',
+        personaladdress: rawPartner.personaladdress ?? '',
+        ref: rawPartner.code ?? '',
+      };
+    }
+    // Fallback to summarised profile
+    if (hookProfile) {
+      return {
+        name: hookProfile.name,
+        phone: hookProfile.phone,
+        email: hookProfile.email,
+        gender: hookProfile.gender === 'female' || hookProfile.gender === 'Nữ' || hookProfile.gender === 'f'
+          ? 'female'
+          : hookProfile.gender && hookProfile.gender !== 'N/A'
+          ? 'male'
+          : '',
+        companyid: hookProfile.companyId,
+        street: hookProfile.address !== 'N/A' ? hookProfile.address.split(', ')[0] || '' : '',
+        note: hookProfile.notes || '',
+        comment: '',
+        medicalhistory: hookProfile.medicalHistory || '',
+        sourceid: '',
+        referraluserid: '',
+        salestaffid: '',
+        cskhid: '',
+        ref: hookProfile.code || '',
+      };
+    }
+    // Fallback to paginated customers list
     const customer = customers.find((c) => c.id === selectedCustomerId);
     if (!customer) return undefined;
     return {
@@ -366,7 +431,6 @@ export function Customers() {
       street: customer.street || '',
       note: customer.note || '',
       comment: customer.comment || '',
-      // Include source, referral, and assignment fields
       sourceid: customer.sourceid || '',
       referraluserid: '',
       salestaffid: '',

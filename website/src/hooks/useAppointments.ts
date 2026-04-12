@@ -35,6 +35,8 @@ interface CreateAppointmentInput {
   readonly startTime: string;
   readonly endTime: string;
   readonly notes: string;
+  readonly estimatedDuration?: number;
+  readonly color?: string;
 }
 
 function nowTimeString(): string {
@@ -77,7 +79,7 @@ function mapApiToManagedAppointment(api: ApiAppointment): ManagedAppointment {
   const state = api.state?.toLowerCase() || '';
   let status: AppointmentStatus = 'scheduled';
   if (state === 'confirmed') status = 'confirmed';
-  else if (state === 'cancel') status = 'cancelled';
+  else if (state === 'cancel' || state === 'cancelled') status = 'cancelled';
   else if (state === 'done') status = 'completed';
 
   let checkInStatus: CheckInStatus = 'not-arrived';
@@ -213,6 +215,8 @@ export function useAppointments(selectedLocationId?: string) {
         date: input.date,
         time: input.startTime,
         note: input.notes,
+        timeexpected: input.estimatedDuration || 30,
+        color: input.color || '1',
         state: 'scheduled',
       };
 
@@ -299,7 +303,7 @@ export function useAppointments(selectedLocationId?: string) {
 
   const cancelAppointment = useCallback(async (appointmentId: string) => {
     try {
-      await apiUpdateAppointment(appointmentId, { state: 'cancel' });
+      await apiUpdateAppointment(appointmentId, { state: 'cancelled' });
 
       setAppointments((prev) =>
         prev.map((apt) =>

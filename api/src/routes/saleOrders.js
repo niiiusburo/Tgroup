@@ -186,6 +186,9 @@ router.post('/', async (req, res) => {
       productname,
       doctorid,
       doctorname,
+      assistantid,
+      quantity,
+      unit,
       amounttotal,
       datestart,
       dateend,
@@ -206,10 +209,10 @@ router.post('/', async (req, res) => {
     // Insert the sale order (only using columns that exist in the schema)
     const result = await query(
       `INSERT INTO saleorders (
-        id, name, partnerid, companyid, doctorid,
-        amounttotal, residual, totalpaid, state,
+        id, name, partnerid, companyid, doctorid, assistantid,
+        quantity, unit, amounttotal, residual, totalpaid, state,
         isdeleted, datecreated
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
       RETURNING *`,
       [
         id,
@@ -217,6 +220,9 @@ router.post('/', async (req, res) => {
         partnerid,
         companyid || null,
         doctorid || null,
+        assistantid || null,
+        quantity || null,
+        unit || null,
         amounttotal || 0,
         amounttotal || 0, // residual = total for new orders
         0, // totalpaid = 0 for new orders

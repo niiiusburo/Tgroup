@@ -76,6 +76,10 @@ export interface ApiPartner {
   city: string | null;
   district: string | null;
   ward: string | null;
+  // Raw DB column names used in write operations (read queries alias these to city/district/ward)
+  cityname?: string | null;
+  districtname?: string | null;
+  wardname?: string | null;
   gender: string | null;
   birthyear: number | null;
   birthmonth: number | null;
@@ -102,6 +106,20 @@ export interface ApiPartner {
   salestaffid: string | null;
   datecreated: string | null;
   lastupdated: string | null;
+  // Extended fields (returned by single-partner fetch)
+  taxcode: string | null;
+  identitynumber: string | null;
+  healthinsurancecardnumber: string | null;
+  emergencyphone: string | null;
+  weight: number | null;
+  jobtitle: string | null;
+  isbusinessinvoice: boolean | null;
+  unitname: string | null;
+  unitaddress: string | null;
+  personalname: string | null;
+  personalidentitycard: string | null;
+  personaltaxcode: string | null;
+  personaladdress: string | null;
 }
 
 export function fetchPartners(params?: {

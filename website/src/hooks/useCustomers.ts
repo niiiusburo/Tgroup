@@ -200,29 +200,40 @@ export function useCustomers(locationId: string = 'all') {
   }, []);
 
   const updateCustomerFn = useCallback(async (id: string, updates: CustomerFormData) => {
-    try {
-      await updatePartner(id, {
-        name: updates.name,
-        phone: updates.phone,
-        email: updates.email || undefined,
-        companyid: updates.companyid || undefined,
-        gender: updates.gender || undefined,
-        birthday: updates.birthday ?? undefined,
-        birthmonth: updates.birthmonth ?? undefined,
-        birthyear: updates.birthyear ?? undefined,
-        street: updates.street || undefined,
-        medicalhistory: updates.medicalhistory || undefined,
-        note: updates.note || undefined,
-        comment: updates.comment || undefined,
-        sourceid: updates.sourceid || undefined,
-        referraluserid: updates.referraluserid || undefined,
-        salestaffid: updates.salestaffid || undefined,
-        cskhid: updates.cskhid !== undefined ? updates.cskhid : undefined,
-        ref: updates.ref || undefined,
-      });
-    } catch (err) {
-      console.error('useCustomers: update error', err);
-    }
+    await updatePartner(id, {
+      name: updates.name,
+      phone: updates.phone,
+      email: updates.email || undefined,
+      companyid: updates.companyid || undefined,
+      gender: updates.gender || undefined,
+      birthday: updates.birthday ?? undefined,
+      birthmonth: updates.birthmonth ?? undefined,
+      birthyear: updates.birthyear ?? undefined,
+      street: updates.street || undefined,
+      cityname: updates.cityname || undefined,
+      districtname: updates.districtname || undefined,
+      wardname: updates.wardname || undefined,
+      medicalhistory: updates.medicalhistory || undefined,
+      note: updates.note || undefined,
+      comment: updates.comment || undefined,
+      sourceid: updates.sourceid || undefined,
+      referraluserid: updates.referraluserid || undefined,
+      weight: updates.weight ?? undefined,
+      identitynumber: updates.identitynumber || undefined,
+      healthinsurancecardnumber: updates.healthinsurancecardnumber || undefined,
+      emergencyphone: updates.emergencyphone || undefined,
+      jobtitle: updates.jobtitle || undefined,
+      taxcode: updates.taxcode || undefined,
+      unitname: updates.unitname || undefined,
+      unitaddress: updates.unitaddress || undefined,
+      personalname: updates.personalname || undefined,
+      personalidentitycard: updates.personalidentitycard || undefined,
+      personaltaxcode: updates.personaltaxcode || undefined,
+      personaladdress: updates.personaladdress || undefined,
+      ref: updates.ref || undefined,
+      isbusinessinvoice: updates.isbusinessinvoice ?? undefined,
+    });
+    // Only update local state after successful API call
     setCustomers((prev) =>
       prev.map((c) =>
         c.id === id

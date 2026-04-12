@@ -269,10 +269,10 @@ router.post("/", async (req, res) => {
       for (const a of allocations) {
         if ((!a.invoice_id && !a.dotkham_id) || a.allocated_amount == null) continue;
         if (a.invoice_id) {
-          allocValues.push(`($${idx}, $${idx + 1}, $${idx + 2}, NULL)`);
+          allocValues.push(`($${idx}, $${idx + 1}, NULL, $${idx + 2})`);
           allocParams.push(row.id, a.invoice_id, a.allocated_amount);
         } else {
-          allocValues.push(`($${idx}, $${idx + 1}, NULL, $${idx + 2})`);
+          allocValues.push(`($${idx}, NULL, $${idx + 1}, $${idx + 2})`);
           allocParams.push(row.id, a.dotkham_id, a.allocated_amount);
         }
         idx += 3;
@@ -334,7 +334,7 @@ router.post("/:id/void", async (req, res) => {
 
       // Mark payment as voided
       const result = await query(
-        `UPDATE payments SET status = "voided", notes = COALESCE(notes, "") || " | VOIDED: " || $2 WHERE id = $1 RETURNING *`,
+        `UPDATE payments SET status = 'voided', notes = COALESCE(notes, '') || ' | VOIDED: ' || $2 WHERE id = $1 RETURNING *`,
         [id, reason || ""]
       );
       if (result.length === 0) {
@@ -363,6 +363,8 @@ router.post("/:id/proof", async (req, res) => {
       return res.status(400).json({ error: "proofImageBase64 must be a non-empty string starting with data:image/" });
     }
 
+    // TODO: payment_proofs.payment_id must be UUID to match payments.id (uuid type).
+    // Run migration 011_fix_payment_proofs_type.sql before this endpoint will work.
     const result = await query(
       "INSERT INTO payment_proofs (payment_id, proof_image, qr_description) VALUES ($1, $2, $3) RETURNING *",
       [id, proofImageBase64, qrDescription || null]

@@ -49,6 +49,7 @@ router.get('/', async (req, res) => {
       dateFrom = '',   // Legacy camelCase fallback
       dateTo = '',
       state = '',
+      company_id = '',
     } = req.query;
 
     // Accept either date_from (snake_case from frontend) or dateFrom (camelCase)
@@ -112,6 +113,15 @@ router.get('/', async (req, res) => {
     if (state) {
       conditions.push(`a.state = $${paramIdx}`);
       params.push(state);
+      paramIdx++;
+    }
+
+    if (company_id) {
+      if (!isValidUUID(company_id)) {
+        return errorResponse(res, 400, 'INVALID_COMPANY_ID', 'company_id must be a valid UUID');
+      }
+      conditions.push(`a.companyid = $${paramIdx}`);
+      params.push(company_id);
       paramIdx++;
     }
 

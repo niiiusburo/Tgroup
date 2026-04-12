@@ -16,6 +16,7 @@ import type { CustomerService } from '@/types/customer';
 import type { ApiAppointment, ExternalCheckupsResponse } from '@/lib/api';
 import type { PaymentWithAllocations } from '@/hooks/useCustomerPayments';
 import { HealthCheckupGallery } from './HealthCheckupGallery';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CustomerProfileProps {
   readonly profile: CustomerProfileData;
@@ -159,6 +160,8 @@ export function CustomerProfile({
   const [expandedPaymentId, setExpandedPaymentId] = useState<string | null>(null);
   const [editingPayment, setEditingPayment] = useState<PaymentWithAllocations | null>(null);
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
+  const { hasPermission } = useAuth();
+  const canViewHealthCheckups = hasPermission('external_checkups.view');
 
   const getStatusConfig = (state: string | null | undefined) => {
     const s = (state || '').toLowerCase();
@@ -365,13 +368,15 @@ export function CustomerProfile({
               <div><p className="text-xs text-gray-400">Member Since</p><p className="text-sm font-medium text-gray-900">{profile.memberSince}</p></div>
             </div>
           </div>
-          <HealthCheckupGallery
-            data={checkupData ?? null}
-            isLoading={checkupsLoading}
-            error={checkupsError}
-            customerCode={profile.code}
-            onUploaded={onRefetchCheckups}
-          />
+          {canViewHealthCheckups && (
+            <HealthCheckupGallery
+              data={checkupData ?? null}
+              isLoading={checkupsLoading}
+              error={checkupsError}
+              customerCode={profile.code}
+              onUploaded={onRefetchCheckups}
+            />
+          )}
         </div>
       )}
 

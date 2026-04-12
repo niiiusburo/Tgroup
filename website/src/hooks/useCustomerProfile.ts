@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { fetchPartnerById, fetchAppointments, fetchCustomerBalance, type ApiAppointment } from '@/lib/api';
+import { fetchPartnerById, fetchAppointments, fetchCustomerBalance, type ApiAppointment, type ApiPartner } from '@/lib/api';
 
 export interface CustomerProfileData {
   id: string;
@@ -31,6 +31,7 @@ export interface CustomerProfileData {
 
 export interface CustomerProfileResult {
   profile: CustomerProfileData | null;
+  rawPartner: ApiPartner | null;
   appointments: readonly ApiAppointment[];
   isLoading: boolean;
   error: string | null;
@@ -44,6 +45,7 @@ export interface CustomerProfileResult {
 
 export function useCustomerProfile(customerId: string | null): CustomerProfileResult {
   const [profile, setProfile] = useState<CustomerProfileData | null>(null);
+  const [rawPartner, setRawPartner] = useState<ApiPartner | null>(null);
   const [appointments, setAppointments] = useState<ApiAppointment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +54,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
   const fetchProfile = useCallback(async () => {
     if (!customerId) {
       setProfile(null);
+      setRawPartner(null);
       return;
     }
 
@@ -138,6 +141,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         dotkhams: Number((partner as unknown as Record<string, number>).dotkhamcount) || 0,
       });
 
+      setRawPartner(partner);
       setProfile(profileData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load customer profile');
@@ -151,5 +155,5 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
     fetchProfile();
   }, [fetchProfile]);
 
-  return { profile, appointments, isLoading, error, refetch: fetchProfile, linkedCounts };
+  return { profile, rawPartner, appointments, isLoading, error, refetch: fetchProfile, linkedCounts };
 }
