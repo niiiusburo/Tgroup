@@ -43,9 +43,11 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
     if (qs) url += `?${qs}`;
   }
 
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  const isFormData = body instanceof FormData;
+  const headers: Record<string, string> = {};
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   const token = localStorage.getItem('tgclinic_token');
   if (token) {
@@ -55,7 +57,7 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
   const res = await fetch(url, {
     method,
     headers,
-    body: body ? JSON.stringify(body) : undefined,
+    body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
   });
 
   if (!res.ok) {
@@ -160,6 +162,33 @@ export function softDeletePartner(id: string) {
 
 export function hardDeletePartner(id: string) {
   return apiFetch<{ success: boolean; id: string }>(`/Partners/${id}/hard-delete`, { method: 'DELETE' });
+}
+
+export interface FaceMatchResult {
+  match: {
+    partnerId: string;
+    name: string;
+    confidence: number;
+  } | null;
+}
+
+export function recognizeFace(image: Blob) {
+  const formData = new FormData();
+  formData.append('image', image, 'face.jpg');
+  return apiFetch<FaceMatchResult>('/face/recognize', {
+    method: 'POST',
+    body: formData as unknown as Record<string, unknown>,
+  });
+}
+
+export function registerFace(partnerId: string, image: Blob) {
+  const formData = new FormData();
+  formData.append('partnerId', partnerId);
+  formData.append('image', image, 'face.jpg');
+  return apiFetch<{ success: boolean; faceSubjectId: string }>('/face/register', {
+    method: 'POST',
+    body: formData as unknown as Record<string, unknown>,
+  });
 }
 
 // ─── Employees ────────────────────────────────────────────────────
@@ -429,14 +458,27 @@ export interface ApiSaleOrder {
   state: string | null;
   partnerid: string | null;
   partnername: string | null;
+  partnerdisplayname: string | null;
   companyid: string | null;
   companyname: string | null;
   doctorid: string | null;
   doctorname: string | null;
+  assistantid: string | null;
+  assistantname: string | null;
+  dentalaideid: string | null;
+  dentalaidename: string | null;
+  productid: string | null;
+  productname: string | null;
+  quantity: string | null;
+  unit: string | null;
   amounttotal: string | null;
   residual: string | null;
   totalpaid: string | null;
+  datestart: string | null;
+  dateend: string | null;
+  notes: string | null;
   lastupdated: string | null;
+  isdeleted?: boolean;
 }
 
 export function fetchSaleOrders(params?: {
@@ -478,6 +520,32 @@ export function createSaleOrder(data: {
   notes?: string;
 }) {
   return apiFetch<ApiSaleOrder>('/SaleOrders', { method: 'POST', body: data });
+}
+
+export function updateSaleOrder(id: string, data: {
+  partnerid?: string | null;
+  partnername?: string | null;
+  companyid?: string | null;
+  productid?: string | null;
+  productname?: string | null;
+  doctorid?: string | null;
+  doctorname?: string | null;
+  assistantid?: string | null;
+  assistantname?: string | null;
+  dentalaideid?: string | null;
+  dentalaidename?: string | null;
+  quantity?: number | null;
+  unit?: string | null;
+  amounttotal?: number;
+  datestart?: string | null;
+  dateend?: string | null;
+  notes?: string | null;
+}) {
+  return apiFetch<ApiSaleOrder>(`/SaleOrders/${id}`, { method: 'PATCH', body: data });
+}
+
+export function updateSaleOrderState(id: string, state: string) {
+  return apiFetch<ApiSaleOrder>(`/SaleOrders/${id}/state`, { method: 'PATCH', body: { state } });
 }
 
 // ─── Permissions ──────────────────────────────────────────────────
@@ -578,15 +646,21 @@ export interface ApiCustomerBalance {
   name: string;
   depositBalance: number;
   outstandingBalance: number;
+  totalDeposited: number;
+  totalUsed: number;
+  totalRefunded: number;
 }
 
 export async function fetchCustomerBalance(customerId: string): Promise<ApiCustomerBalance> {
-  const res = await apiFetch<{ deposit_balance: number; outstanding_balance: number }>(`/CustomerBalance/${customerId}`);
+  const res = await apiFetch<{ deposit_balance: number; outstanding_balance: number; total_deposited?: number; total_used?: number; total_refunded?: number }>(`/CustomerBalance/${customerId}`);
   return {
     id: customerId,
     name: '',
     depositBalance: Number(res.deposit_balance) || 0,
     outstandingBalance: Number(res.outstanding_balance) || 0,
+    totalDeposited: Number(res.total_deposited) || 0,
+    totalUsed: Number(res.total_used) || 0,
+    totalRefunded: Number(res.total_refunded) || 0,
   };
 }
 
@@ -641,6 +715,7 @@ export interface ApiPayment {
   cashAmount?: number;
   bankAmount?: number;
   receiptNumber?: string;
+  depositType?: 'deposit' | 'refund' | 'usage' | null;
   notes?: string;
   paymentDate?: string;
   referenceCode?: string;
@@ -649,9 +724,16 @@ export interface ApiPayment {
   allocations?: ApiPaymentAllocation[];
 }
 
-export async function fetchPayments(customerId?: string): Promise<{ items: ApiPayment[]; totalItems: number }> {
-  const url = customerId ? `/Payments?customerId=${customerId}` : '/Payments';
-  return apiFetch<{ items: ApiPayment[]; totalItems: number }>(url);
+export async function fetchPayments(
+  customerId?: string,
+  type?: 'payments' | 'deposits' | 'all'
+): Promise<{ items: ApiPayment[]; totalItems: number }> {
+  const searchParams = new URLSearchParams();
+  if (customerId) searchParams.set('customerId', customerId);
+  if (type && type !== 'all') searchParams.set('type', type);
+  searchParams.set('limit', '100');
+  searchParams.set('offset', '0');
+  return apiFetch<{ items: ApiPayment[]; totalItems: number }>(`/Payments?${searchParams.toString()}`);
 }
 
 export async function createPayment(data: {
@@ -666,6 +748,7 @@ export async function createPayment(data: {
   depositUsed?: number;
   cashAmount?: number;
   bankAmount?: number;
+  depositType?: 'deposit' | 'refund' | 'usage';
   allocations?: { invoice_id?: string; dotkham_id?: string; allocated_amount: number }[];
 }): Promise<ApiPayment> {
   return apiFetch<ApiPayment>('/Payments', {
@@ -682,6 +765,7 @@ export async function createPayment(data: {
       deposit_used: data.depositUsed ?? 0,
       cash_amount: data.cashAmount ?? 0,
       bank_amount: data.bankAmount ?? 0,
+      deposit_type: data.depositType,
       allocations: data.allocations,
     },
   });
@@ -692,6 +776,89 @@ export async function voidPayment(id: string, reason?: string): Promise<{ succes
     method: 'POST',
     body: { reason },
   });
+}
+
+export async function fetchDeposits(params: {
+  customerId: string;
+  dateFrom?: string;
+  dateTo?: string;
+  receiptNumber?: string;
+  type?: 'deposit' | 'refund' | 'all';
+  limit?: number;
+  offset?: number;
+}): Promise<{ items: ApiPayment[]; totalItems: number }> {
+  const searchParams = new URLSearchParams();
+  searchParams.set('customerId', params.customerId);
+  if (params.dateFrom) searchParams.set('dateFrom', params.dateFrom);
+  if (params.dateTo) searchParams.set('dateTo', params.dateTo);
+  if (params.receiptNumber) searchParams.set('receiptNumber', params.receiptNumber);
+  if (params.type) searchParams.set('type', params.type);
+  searchParams.set('limit', String(params.limit ?? 100));
+  searchParams.set('offset', String(params.offset ?? 0));
+  return apiFetch<{ items: ApiPayment[]; totalItems: number }>(`/Payments/deposits?${searchParams.toString()}`);
+}
+
+export async function fetchDepositUsage(params: {
+  customerId: string;
+  dateFrom?: string;
+  dateTo?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{ items: ApiPayment[]; totalItems: number }> {
+  const searchParams = new URLSearchParams();
+  searchParams.set('customerId', params.customerId);
+  if (params.dateFrom) searchParams.set('dateFrom', params.dateFrom);
+  if (params.dateTo) searchParams.set('dateTo', params.dateTo);
+  searchParams.set('limit', String(params.limit ?? 100));
+  searchParams.set('offset', String(params.offset ?? 0));
+  return apiFetch<{ items: ApiPayment[]; totalItems: number }>(`/Payments/deposit-usage?${searchParams.toString()}`);
+}
+
+export async function createRefund(data: {
+  customerId: string;
+  amount: number;
+  method: 'cash' | 'bank_transfer';
+  notes?: string;
+  paymentDate?: string;
+}): Promise<ApiPayment> {
+  return apiFetch<ApiPayment>('/Payments/refund', {
+    method: 'POST',
+    body: {
+      customer_id: data.customerId,
+      amount: data.amount,
+      method: data.method,
+      notes: data.notes,
+      payment_date: data.paymentDate,
+    },
+  });
+}
+
+export async function updatePayment(
+  id: string,
+  data: Partial<{
+    amount: number;
+    method: 'cash' | 'bank_transfer' | 'deposit' | 'mixed';
+    notes: string;
+    paymentDate: string;
+    referenceCode: string;
+    status: 'posted' | 'voided';
+  }>
+): Promise<ApiPayment> {
+  return apiFetch<ApiPayment>(`/Payments/${id}`, {
+    method: 'PATCH',
+    body: {
+      amount: data.amount,
+      method: data.method,
+      notes: data.notes,
+      payment_date: data.paymentDate,
+      reference_code: data.referenceCode,
+      status: data.status,
+    },
+  });
+}
+
+export async function deletePayment(id: string): Promise<{ success: boolean }> {
+  return apiFetch<{ success: boolean }>(`/Payments/${id}`, { method: 'DELETE' });
 }
 
 // ─── Services (Sale Orders) ──────────────────────────────────────
