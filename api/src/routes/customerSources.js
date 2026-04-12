@@ -58,7 +58,7 @@ router.get('/', async (req, res) => {
     });
   } catch (err) {
     console.error('CustomerSources GET error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -86,7 +86,7 @@ router.get('/:id', async (req, res) => {
     });
   } catch (err) {
     console.error('CustomerSources GET/:id error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -111,7 +111,7 @@ router.post('/', async (req, res) => {
     });
   } catch (err) {
     console.error('CustomerSources POST error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -138,7 +138,7 @@ router.put('/:id', async (req, res) => {
     res.json(result[0]);
   } catch (err) {
     console.error('CustomerSources PUT error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -162,7 +162,7 @@ router.delete('/:id', async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error('CustomerSources DELETE error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

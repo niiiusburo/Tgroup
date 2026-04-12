@@ -4,6 +4,7 @@
  */
 const express = require('express');
 const { query } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -53,7 +54,7 @@ router.get('/', async (req, res) => {
     });
   } catch (err) {
     console.error('WebsitePages GET error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -72,12 +73,12 @@ router.get('/:id', async (req, res) => {
     res.json(pages[0]);
   } catch (err) {
     console.error('WebsitePages GET/:id error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // POST /api/WebsitePages - Create page
-router.post('/', async (req, res) => {
+router.post('/', requirePermission('website.edit'), async (req, res) => {
   try {
     const {
       company_id, title, slug, status, content, template, author, seo
@@ -108,12 +109,12 @@ router.post('/', async (req, res) => {
     res.status(201).json(result[0]);
   } catch (err) {
     console.error('WebsitePages POST error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // PUT /api/WebsitePages/:id - Update page
-router.put('/:id', async (req, res) => {
+router.put('/:id', requirePermission('website.edit'), async (req, res) => {
   try {
     const { title, slug, status, content, template, author, seo, views } = req.body;
 
@@ -167,18 +168,18 @@ router.put('/:id', async (req, res) => {
     res.json(updated[0]);
   } catch (err) {
     console.error('WebsitePages PUT error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // DELETE /api/WebsitePages/:id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requirePermission('website.edit'), async (req, res) => {
   try {
     await query('DELETE FROM dbo.websitepages WHERE id = $1', [req.params.id]);
     res.json({ success: true });
   } catch (err) {
     console.error('WebsitePages DELETE error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

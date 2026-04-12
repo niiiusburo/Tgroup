@@ -4,6 +4,7 @@
  */
 const express = require('express');
 const { query } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -56,7 +57,7 @@ router.get('/', async (req, res) => {
     });
   } catch (err) {
     console.error('SystemPreferences GET error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -75,12 +76,12 @@ router.get('/:key', async (req, res) => {
     res.json(prefs[0]);
   } catch (err) {
     console.error('SystemPreferences GET/:key error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // POST /api/SystemPreferences - Create or update preference (upsert)
-router.post('/', async (req, res) => {
+router.post('/', requirePermission('settings.edit'), async (req, res) => {
   try {
     const { key, value, type, category, description, is_public } = req.body;
 
@@ -106,12 +107,12 @@ router.post('/', async (req, res) => {
     res.status(201).json(result[0]);
   } catch (err) {
     console.error('SystemPreferences POST error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // PUT /api/SystemPreferences/:key - Update preference
-router.put('/:key', async (req, res) => {
+router.put('/:key', requirePermission('settings.edit'), async (req, res) => {
   try {
     const { value, type, category, description, is_public } = req.body;
 
@@ -134,23 +135,23 @@ router.put('/:key', async (req, res) => {
     res.json(result[0]);
   } catch (err) {
     console.error('SystemPreferences PUT error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // DELETE /api/SystemPreferences/:key
-router.delete('/:key', async (req, res) => {
+router.delete('/:key', requirePermission('settings.edit'), async (req, res) => {
   try {
     await query('DELETE FROM dbo.systempreferences WHERE key = $1', [req.params.key]);
     res.json({ success: true });
   } catch (err) {
     console.error('SystemPreferences DELETE error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // POST /api/SystemPreferences/bulk - Create multiple preferences
-router.post('/bulk', async (req, res) => {
+router.post('/bulk', requirePermission('settings.edit'), async (req, res) => {
   try {
     const { preferences } = req.body;
 
@@ -175,7 +176,7 @@ router.post('/bulk', async (req, res) => {
     res.status(201).json({ items: results });
   } catch (err) {
     console.error('SystemPreferences bulk POST error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

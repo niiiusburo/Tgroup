@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -35,7 +36,7 @@ router.get('/bank', async (_req, res) => {
  * PUT /api/settings/bank
  * Creates or updates the bank account configuration
  */
-router.put('/bank', async (req, res) => {
+router.put('/bank', requirePermission('payment.edit'), async (req, res) => {
   try {
     const { bankBin, bankNumber, bankAccountName } = req.body;
 

@@ -1,5 +1,6 @@
 const express = require('express');
 const { query, pool } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -202,7 +203,7 @@ router.get('/:id', async (req, res) => {
  * Creates a new employee (inserts into partners table with employee=true)
  * Body: { name, phone?, email?, companyid?, active? }
  */
-router.post('/', async (req, res) => {
+router.post('/', requirePermission('employees.edit'), async (req, res) => {
   const client = await pool.connect();
   try {
     const {
@@ -299,7 +300,7 @@ router.post('/', async (req, res) => {
  * PUT /api/Employees/:id
  * Updates an existing employee (updates partners table)
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
   const client = await pool.connect();
   try {
     const { id } = req.params;
@@ -426,7 +427,7 @@ router.put('/:id', async (req, res) => {
  * DELETE /api/Employees/:id
  * Deletes an employee (deletes from partners table where employee=true)
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requirePermission('employees.edit'), async (req, res) => {
   try {
     const { id } = req.params;
 

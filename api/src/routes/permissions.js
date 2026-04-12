@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -30,7 +31,7 @@ router.get('/groups', async (req, res) => {
     return res.json(rows);
   } catch (err) {
     console.error('Error fetching permission groups:', err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -39,7 +40,7 @@ router.get('/groups', async (req, res) => {
  * Body: { name, color, description, permissions: [] }
  * Creates a new permission group
  */
-router.post('/groups', async (req, res) => {
+router.post('/groups', requirePermission('permissions.edit'), async (req, res) => {
   try {
     const { name, color = '#94A3B8', description = null, permissions = [] } = req.body;
 
@@ -77,7 +78,7 @@ router.post('/groups', async (req, res) => {
     return res.status(201).json(result[0]);
   } catch (err) {
     console.error('Error creating permission group:', err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -86,7 +87,7 @@ router.post('/groups', async (req, res) => {
  * Body: { name, color, description, permissions: [] }
  * Updates a permission group
  */
-router.put('/groups/:groupId', async (req, res) => {
+router.put('/groups/:groupId', requirePermission('permissions.edit'), async (req, res) => {
   try {
     const { groupId } = req.params;
     const { name, color, description, permissions = [] } = req.body;
@@ -136,7 +137,7 @@ router.put('/groups/:groupId', async (req, res) => {
     return res.json(result[0]);
   } catch (err) {
     console.error('Error updating permission group:', err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -207,7 +208,7 @@ router.get('/employees', async (req, res) => {
     return res.json(result);
   } catch (err) {
     console.error('Error fetching employee permissions:', err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -216,7 +217,7 @@ router.get('/employees', async (req, res) => {
  * Body: { groupId, locScope, locationIds: [], overrides: { grant: [], revoke: [] } }
  * Updates employee permission assignment
  */
-router.put('/employees/:employeeId', async (req, res) => {
+router.put('/employees/:employeeId', requirePermission('permissions.edit'), async (req, res) => {
   try {
     const { employeeId } = req.params;
     const { groupId, locScope = 'assigned', locationIds = [], overrides = { grant: [], revoke: [] } } = req.body;
@@ -315,7 +316,7 @@ router.put('/employees/:employeeId', async (req, res) => {
     });
   } catch (err) {
     console.error('Error updating employee permissions:', err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -391,7 +392,7 @@ router.get('/resolve/:employeeId', async (req, res) => {
     });
   } catch (err) {
     console.error('Error resolving permissions:', err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 

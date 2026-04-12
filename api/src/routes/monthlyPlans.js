@@ -4,6 +4,7 @@
  */
 const express = require('express');
 const { query } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -115,7 +116,7 @@ router.get('/', async (req, res) => {
     });
   } catch (err) {
     console.error('MonthlyPlans GET error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -163,12 +164,12 @@ router.get('/:id', async (req, res) => {
     });
   } catch (err) {
     console.error('MonthlyPlans GET/:id error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // POST /api/MonthlyPlans - Create new plan with installments and optional linked invoices
-router.post('/', async (req, res) => {
+router.post('/', requirePermission('payment.edit'), async (req, res) => {
   try {
     const {
       customer_id, company_id, treatment_description,
@@ -248,12 +249,12 @@ router.post('/', async (req, res) => {
     });
   } catch (err) {
     console.error('MonthlyPlans POST error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // PUT /api/MonthlyPlans/:id - Update plan
-router.put('/:id', async (req, res) => {
+router.put('/:id', requirePermission('payment.edit'), async (req, res) => {
   try {
     const { treatment_description, total_amount, down_payment, status, notes, invoice_ids } = req.body;
 
@@ -307,23 +308,23 @@ router.put('/:id', async (req, res) => {
     });
   } catch (err) {
     console.error('MonthlyPlans PUT error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // DELETE /api/MonthlyPlans/:id - Delete plan
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requirePermission('payment.edit'), async (req, res) => {
   try {
     await query('DELETE FROM dbo.monthlyplans WHERE id = $1', [req.params.id]);
     res.json({ success: true });
   } catch (err) {
     console.error('MonthlyPlans DELETE error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // PUT /api/MonthlyPlans/:id/installments/:installmentId/pay - Mark installment paid
-router.put('/:id/installments/:installmentId/pay', async (req, res) => {
+router.put('/:id/installments/:installmentId/pay', requirePermission('payment.edit'), async (req, res) => {
   try {
     const { paid_amount, paid_date } = req.body;
 
@@ -370,7 +371,7 @@ router.put('/:id/installments/:installmentId/pay', async (req, res) => {
     res.json(instResult[0]);
   } catch (err) {
     console.error('Mark installment paid error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
