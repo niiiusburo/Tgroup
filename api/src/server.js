@@ -128,7 +128,9 @@ app.use((req, res) => {
 // Global error-handling middleware — catches thrown errors in routes
 app.use((err, _req, res, _next) => {
   console.error('Unhandled route error:', err);
-  res.status(500).json({ error: 'Internal server error' });
+  const status = err.status || err.statusCode || 500;
+  const message = status < 500 ? (err.message || 'Bad request') : 'Internal server error';
+  res.status(status).json({ error: message });
 });
 
 // Prevent process crashes from unhandled rejections/exceptions
