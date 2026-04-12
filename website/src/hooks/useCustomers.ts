@@ -183,19 +183,8 @@ export function useCustomers(locationId: string = 'all') {
       setTotalItems((prev) => prev + 1);
       return mapped;
     } catch (err) {
-      console.error('useCustomers: create error', err);
-      const fallback: Customer = {
-        id: `cust-${Date.now()}`,
-        name: input.name,
-        phone: input.phone,
-        email: input.email,
-        locationId: input.companyid,
-        status: 'active',
-        lastVisit: new Date().toISOString().slice(0, 10),
-      };
-      setCustomers((prev) => [...prev, fallback]);
-      setTotalItems((prev) => prev + 1);
-      return fallback;
+      console.error('Failed to create customer:', err);
+      throw err;
     }
   }, []);
 
@@ -232,6 +221,8 @@ export function useCustomers(locationId: string = 'all') {
       personaladdress: updates.personaladdress || undefined,
       ref: updates.ref || undefined,
       isbusinessinvoice: updates.isbusinessinvoice ?? undefined,
+      cskhid: updates.cskhid || undefined,
+      salestaffid: updates.salestaffid || undefined,
     });
     // Only update local state after successful API call
     setCustomers((prev) =>

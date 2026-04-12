@@ -223,6 +223,8 @@ router.get('/:id', async (req, res) => {
         p.isagent,
         p.isinsurance,
         p.employee,
+        p.cskhid,
+        p.salestaffid,
         (SELECT COUNT(*) FROM appointments apt WHERE apt.partnerid = p.id) AS appointmentcount,
         (SELECT COUNT(*) FROM saleorders so WHERE so.partnerid = p.id AND so.isdeleted = false) AS ordercount,
         (SELECT COUNT(*) FROM dotkhams dk WHERE dk.partnerid = p.id AND dk.isdeleted = false) AS dotkhamcount
@@ -413,6 +415,7 @@ router.put('/:id', async (req, res) => {
       sourceid, referraluserid, weight, identitynumber, healthinsurancecardnumber,
       emergencyphone, jobtitle, taxcode, unitname, unitaddress, isbusinessinvoice,
       personalname, personalidentitycard, personaltaxcode, personaladdress, ref,
+      cskhid, salestaffid,
     } = req.body;
 
     // Check if partner exists
@@ -458,8 +461,10 @@ router.put('/:id', async (req, res) => {
         personaltaxcode = COALESCE($29, personaltaxcode),
         personaladdress = COALESCE($30, personaladdress),
         ref = COALESCE($31, ref),
+        cskhid = COALESCE($32, cskhid),
+        salestaffid = COALESCE($33, salestaffid),
         lastupdated = NOW()
-      WHERE id = $32
+      WHERE id = $34
       RETURNING *`,
       [
         name, phone, email, companyid, gender, birthday, birthmonth, birthyear,
@@ -467,7 +472,7 @@ router.put('/:id', async (req, res) => {
         cityname, districtname, wardname, weight, identitynumber,
         healthinsurancecardnumber, emergencyphone, jobtitle, taxcode,
         unitname, unitaddress, isbusinessinvoice, personalname,
-        personalidentitycard, personaltaxcode, personaladdress, ref, id,
+        personalidentitycard, personaltaxcode, personaladdress, ref, cskhid, salestaffid, id,
       ]
     );
 
