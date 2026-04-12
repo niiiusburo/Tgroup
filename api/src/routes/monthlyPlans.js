@@ -3,7 +3,7 @@
  * Handles monthly payment plan CRUD and installment management
  */
 const express = require('express');
-const { query } = require('../db');
+const { query, pool } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
@@ -362,19 +362,50 @@ router.put('/:id', requirePermission('payment.edit'), async (req, res) => {
   }
 });
 
-// DELETE /api/MonthlyPlans/:id - Delete plan
+async function planHasPaidInstallments(client, id) {
+  const r = await client.query(
+    `SELECT COUNT(*)::int AS count FROM dbo.planinstallments WHERE plan_id = $1 AND status = 'paid'`,
+    [id]
+  );
+  return (r.rows[0]?.count || 0) > 0;
+}
+
+async function doDeletePlanTxn(client, req, res) {
+  await client.query('BEGIN');
+  // Invariant: monthlyPlan.noDelete-if-paid-installments (CRITICAL)
+  if (await planHasPaidInstallments(client, req.params.id)) {
+    await client.query('ROLLBACK');
+    return res.status(409).json({
+      error: 'Cannot delete plan with paid installments',
+      invariant: 'monthlyPlan.noDelete-if-paid-installments'
+    });
+  }
+  const del = await client.query('DELETE FROM dbo.monthlyplans WHERE id = $1 RETURNING id', [req.params.id]);
+  if (del.rowCount === 0) {
+    await client.query('ROLLBACK');
+    return res.status(404).json({ error: 'Plan not found' });
+  }
+  await client.query('COMMIT');
+  return res.json({ success: true });
+}
+
+async function doDeletePlan(req, res) {
+  const client = await pool.connect();
+  try {
+    return await doDeletePlanTxn(client, req, res);
+  } catch (e) {
+    try { await client.query('ROLLBACK'); } catch (_) { /* ignore */ }
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
+// DELETE /api/MonthlyPlans/:id - Delete plan (transactional)
 router.delete('/:id', requirePermission('payment.edit'), async (req, res) => {
   try {
-    const paidResult = await query(
-      `SELECT COUNT(*) AS count FROM dbo.planinstallments WHERE plan_id = $1 AND status = 'paid'`,
-      [req.params.id]
-    );
-    if (parseInt(paidResult[0]?.count || '0', 10) > 0) {
-      return res.status(409).json({ error: 'Cannot delete plan with paid installments' });
-    }
-
-    await query('DELETE FROM dbo.monthlyplans WHERE id = $1', [req.params.id]);
-    res.json({ success: true });
+    // DELETE_BODY — transactional per invariant monthlyPlan.noDelete-if-paid-installments
+    return await doDeletePlan(req, res);
   } catch (err) {
     console.error('MonthlyPlans DELETE error:', err);
     res.status(500).json({ error: 'Internal server error' });
