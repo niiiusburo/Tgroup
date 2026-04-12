@@ -1,0 +1,808 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-04-11",
+  "scope": "api-validations",
+  "source": "api/src/routes/*.js",
+  "validations": [
+    {
+      "id": "auth.post.login.email-password",
+      "file": "api/src/routes/auth.js",
+      "line": 72,
+      "route": "POST /api/auth/login",
+      "entity": "user",
+      "kind": "required-field",
+      "rule": "email and password are both required",
+      "evidence": "if (!email || !password) return res.status(400).json({ error: 'email and password are required' })"
+    },
+    {
+      "id": "account.post.login.username-password",
+      "file": "api/src/routes/account.js",
+      "line": 12,
+      "route": "POST /api/Account/login",
+      "entity": "user",
+      "kind": "required-field",
+      "rule": "userName and password are both required",
+      "evidence": "return res.status(400).json({ succeeded: false, message: 'userName and password are required' })"
+    },
+    {
+      "id": "partners.post.name-phone",
+      "file": "api/src/routes/partners.js",
+      "line": 399,
+      "route": "POST /api/Partners",
+      "entity": "customer",
+      "kind": "required-field",
+      "rule": "name and phone are both required",
+      "evidence": "if (!name || !phone) return res.status(400).json({ error: 'Name and phone are required' })"
+    },
+    {
+      "id": "partners.post.phone-uniqueness",
+      "file": "api/src/routes/partners.js",
+      "line": 403,
+      "route": "POST /api/Partners",
+      "entity": "customer",
+      "kind": "uniqueness",
+      "rule": "phone must be unique among active customers",
+      "evidence": "SELECT id FROM partners WHERE customer = true AND isdeleted = false AND phone = $1 LIMIT 1 => 409 if found"
+    },
+    {
+      "id": "partners.post.email-uniqueness",
+      "file": "api/src/routes/partners.js",
+      "line": 411,
+      "route": "POST /api/Partners",
+      "entity": "customer",
+      "kind": "uniqueness",
+      "rule": "email must be unique among active customers when provided",
+      "evidence": "SELECT id FROM partners WHERE customer = true AND isdeleted = false AND email = $1 LIMIT 1 => 409 if found"
+    },
+    {
+      "id": "partners.put.no-fields",
+      "file": "api/src/routes/partners.js",
+      "line": 544,
+      "route": "PUT /api/Partners/:id",
+      "entity": "customer",
+      "kind": "required-field",
+      "rule": "at least one field must be provided for update",
+      "evidence": "if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' })"
+    },
+    {
+      "id": "partners.put.phone-uniqueness",
+      "file": "api/src/routes/partners.js",
+      "line": 504,
+      "route": "PUT /api/Partners/:id",
+      "entity": "customer",
+      "kind": "uniqueness",
+      "rule": "phone must be unique among active customers excluding current record",
+      "evidence": "SELECT id FROM partners WHERE customer = true AND isdeleted = false AND phone = $1 AND id != $2 LIMIT 1 => 409"
+    },
+    {
+      "id": "partners.put.email-uniqueness",
+      "file": "api/src/routes/partners.js",
+      "line": 513,
+      "route": "PUT /api/Partners/:id",
+      "entity": "customer",
+      "kind": "uniqueness",
+      "rule": "email must be unique among active customers excluding current record",
+      "evidence": "SELECT id FROM partners WHERE customer = true AND isdeleted = false AND email = $1 AND id != $2 LIMIT 1 => 409"
+    },
+    {
+      "id": "appointments.get.datefrom-format",
+      "file": "api/src/routes/appointments.js",
+      "line": 82,
+      "route": "GET /api/Appointments",
+      "entity": "appointment",
+      "kind": "format",
+      "rule": "dateFrom must be a valid ISO date (YYYY-MM-DD)",
+      "evidence": "if (df && !isValidISODate(df)) return errorResponse(res, 400, 'INVALID_DATE_FROM', ...)"
+    },
+    {
+      "id": "appointments.get.dateto-format",
+      "file": "api/src/routes/appointments.js",
+      "line": 86,
+      "route": "GET /api/Appointments",
+      "entity": "appointment",
+      "kind": "format",
+      "rule": "dateTo must be a valid ISO date (YYYY-MM-DD)",
+      "evidence": "if (dt && !isValidISODate(dt)) return errorResponse(res, 400, 'INVALID_DATE_TO', ...)"
+    },
+    {
+      "id": "appointments.get.state-enum",
+      "file": "api/src/routes/appointments.js",
+      "line": 91,
+      "route": "GET /api/Appointments",
+      "entity": "appointment",
+      "kind": "enum",
+      "rule": "state filter must be one of VALID_STATES",
+      "evidence": "if (state && !VALID_STATES.includes(state)) return errorResponse(res, 400, 'INVALID_STATE', ...)"
+    },
+    {
+      "id": "appointments.get.partner_id-uuid",
+      "file": "api/src/routes/appointments.js",
+      "line": 112,
+      "route": "GET /api/Appointments",
+      "entity": "appointment",
+      "kind": "format",
+      "rule": "partner_id filter must be a valid UUID",
+      "evidence": "if (!isValidUUID(partner_id)) return errorResponse(res, 400, 'INVALID_PARTNER_ID', ...)"
+    },
+    {
+      "id": "appointments.post.required-fields",
+      "file": "api/src/routes/appointments.js",
+      "line": 381,
+      "route": "POST /api/Appointments",
+      "entity": "appointment",
+      "kind": "required-field",
+      "rule": "date, partnerId, and companyId are all required",
+      "evidence": "missingFields check => errorResponse(res, 400, 'MISSING_REQUIRED_FIELDS', ...)"
+    },
+    {
+      "id": "appointments.post.date-format",
+      "file": "api/src/routes/appointments.js",
+      "line": 386,
+      "route": "POST /api/Appointments",
+      "entity": "appointment",
+      "kind": "format",
+      "rule": "date must be a valid ISO date (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss)",
+      "evidence": "if (!isValidISODate(date)) return errorResponse(res, 400, 'INVALID_DATE', ...)"
+    },
+    {
+      "id": "appointments.post.partnerid-uuid",
+      "file": "api/src/routes/appointments.js",
+      "line": 391,
+      "route": "POST /api/Appointments",
+      "entity": "appointment",
+      "kind": "format",
+      "rule": "partnerId must be a valid UUID",
+      "evidence": "if (!isValidUUID(partnerId)) return errorResponse(res, 400, 'INVALID_PARTNER_ID', ...)"
+    },
+    {
+      "id": "appointments.post.companyid-uuid",
+      "file": "api/src/routes/appointments.js",
+      "line": 395,
+      "route": "POST /api/Appointments",
+      "entity": "appointment",
+      "kind": "format",
+      "rule": "companyId must be a valid UUID",
+      "evidence": "if (!isValidUUID(companyId)) return errorResponse(res, 400, 'INVALID_COMPANY_ID', ...)"
+    },
+    {
+      "id": "appointments.post.doctorid-uuid",
+      "file": "api/src/routes/appointments.js",
+      "line": 399,
+      "route": "POST /api/Appointments",
+      "entity": "appointment",
+      "kind": "format",
+      "rule": "doctorId must be a valid UUID when provided",
+      "evidence": "if (doctorId && !isValidUUID(doctorId)) return errorResponse(res, 400, 'INVALID_DOCTOR_ID', ...)"
+    },
+    {
+      "id": "appointments.post.state-enum",
+      "file": "api/src/routes/appointments.js",
+      "line": 404,
+      "route": "POST /api/Appointments",
+      "entity": "appointment",
+      "kind": "enum",
+      "rule": "state must be one of VALID_STATES",
+      "evidence": "if (!VALID_STATES.includes(state)) return errorResponse(res, 400, 'INVALID_STATE', ...)"
+    },
+    {
+      "id": "appointments.post.timeexpected-range",
+      "file": "api/src/routes/appointments.js",
+      "line": 410,
+      "route": "POST /api/Appointments",
+      "entity": "appointment",
+      "kind": "numeric-range",
+      "rule": "timeExpected must be an integer between 1 and 480 minutes",
+      "evidence": "if (isNaN(timeExpectedNum) || timeExpectedNum < 1 || timeExpectedNum > 480) return errorResponse(...)"
+    },
+    {
+      "id": "appointments.post.fk-partner",
+      "file": "api/src/routes/appointments.js",
+      "line": 415,
+      "route": "POST /api/Appointments",
+      "entity": "appointment",
+      "kind": "referential",
+      "rule": "partnerId must exist in partners table",
+      "evidence": "if (!(await foreignKeyExists('partners', partnerId))) return errorResponse(res, 404, 'PARTNER_NOT_FOUND', ...)"
+    },
+    {
+      "id": "appointments.post.fk-company",
+      "file": "api/src/routes/appointments.js",
+      "line": 419,
+      "route": "POST /api/Appointments",
+      "entity": "appointment",
+      "kind": "referential",
+      "rule": "companyId must exist in companies table",
+      "evidence": "if (!(await foreignKeyExists('companies', companyId))) return errorResponse(res, 404, 'COMPANY_NOT_FOUND', ...)"
+    },
+    {
+      "id": "appointments.post.fk-doctor",
+      "file": "api/src/routes/appointments.js",
+      "line": 423,
+      "route": "POST /api/Appointments",
+      "entity": "appointment",
+      "kind": "referential",
+      "rule": "doctorId must exist in employees table when provided",
+      "evidence": "if (doctorId && !(await foreignKeyExists('employees', doctorId))) return errorResponse(res, 404, 'DOCTOR_NOT_FOUND', ...)"
+    },
+    {
+      "id": "appointments.put.id-uuid",
+      "file": "api/src/routes/appointments.js",
+      "line": 503,
+      "route": "PUT /api/Appointments/:id",
+      "entity": "appointment",
+      "kind": "format",
+      "rule": "id path param must be a valid UUID",
+      "evidence": "if (!isValidUUID(id)) return errorResponse(res, 400, 'INVALID_ID', ...)"
+    },
+    {
+      "id": "appointments.put.date-format",
+      "file": "api/src/routes/appointments.js",
+      "line": 508,
+      "route": "PUT /api/Appointments/:id",
+      "entity": "appointment",
+      "kind": "format",
+      "rule": "date must be a valid ISO date when provided",
+      "evidence": "if (date !== undefined && !isValidISODate(date)) return errorResponse(res, 400, 'INVALID_DATE', ...)"
+    },
+    {
+      "id": "appointments.put.doctorid-uuid",
+      "file": "api/src/routes/appointments.js",
+      "line": 513,
+      "route": "PUT /api/Appointments/:id",
+      "entity": "appointment",
+      "kind": "format",
+      "rule": "doctorId must be a valid UUID when provided",
+      "evidence": "if (!isValidUUID(doctorId)) return errorResponse(res, 400, 'INVALID_DOCTOR_ID', ...)"
+    },
+    {
+      "id": "appointments.put.state-enum",
+      "file": "api/src/routes/appointments.js",
+      "line": 518,
+      "route": "PUT /api/Appointments/:id",
+      "entity": "appointment",
+      "kind": "enum",
+      "rule": "state must be one of VALID_STATES when provided",
+      "evidence": "if (state !== undefined && !VALID_STATES.includes(state)) return errorResponse(res, 400, 'INVALID_STATE', ...)"
+    },
+    {
+      "id": "appointments.put.timeexpected-range",
+      "file": "api/src/routes/appointments.js",
+      "line": 524,
+      "route": "PUT /api/Appointments/:id",
+      "entity": "appointment",
+      "kind": "numeric-range",
+      "rule": "timeExpected must be between 1 and 480 minutes when provided",
+      "evidence": "if (isNaN(timeExpectedNum) || timeExpectedNum < 1 || timeExpectedNum > 480) return errorResponse(...)"
+    },
+    {
+      "id": "appointments.put.fk-doctor",
+      "file": "api/src/routes/appointments.js",
+      "line": 536,
+      "route": "PUT /api/Appointments/:id",
+      "entity": "appointment",
+      "kind": "referential",
+      "rule": "doctorId must exist in employees table when provided",
+      "evidence": "if (doctorId !== undefined && !(await foreignKeyExists('employees', doctorId))) return errorResponse(res, 404, ...)"
+    },
+    {
+      "id": "payments.post.required-fields",
+      "file": "api/src/routes/payments.js",
+      "line": 333,
+      "route": "POST /api/Payments",
+      "entity": "payment",
+      "kind": "required-field",
+      "rule": "customer_id, amount, and method are all required",
+      "evidence": "if (!customer_id || amount === undefined || amount === null || !method) return res.status(400)..."
+    },
+    {
+      "id": "payments.post.record-type-enum",
+      "file": "api/src/routes/payments.js",
+      "line": 337,
+      "route": "POST /api/Payments",
+      "entity": "payment",
+      "kind": "cross-field",
+      "rule": "record_type must be 'saleorder' or 'dotkham' when record_id is provided",
+      "evidence": "if (record_id && !['saleorder', 'dotkham'].includes(record_type)) return res.status(400)..."
+    },
+    {
+      "id": "payments.post.refund.required-fields",
+      "file": "api/src/routes/payments.js",
+      "line": 411,
+      "route": "POST /api/Payments/refund",
+      "entity": "payment",
+      "kind": "required-field",
+      "rule": "customer_id, positive amount, and method are all required",
+      "evidence": "if (!customer_id || !amount || amount <= 0 || !method) return res.status(400)..."
+    },
+    {
+      "id": "payments.post.refund.amount-positive",
+      "file": "api/src/routes/payments.js",
+      "line": 411,
+      "route": "POST /api/Payments/refund",
+      "entity": "payment",
+      "kind": "numeric-range",
+      "rule": "refund amount must be positive (> 0)",
+      "evidence": "amount <= 0 triggers 400 'customer_id, positive amount, and method are required'"
+    },
+    {
+      "id": "payments.post.refund.method-enum",
+      "file": "api/src/routes/payments.js",
+      "line": 415,
+      "route": "POST /api/Payments/refund",
+      "entity": "payment",
+      "kind": "enum",
+      "rule": "refund method must be 'cash' or 'bank_transfer'",
+      "evidence": "if (!['cash', 'bank_transfer'].includes(method)) return res.status(400)..."
+    },
+    {
+      "id": "payments.patch.deposit-only",
+      "file": "api/src/routes/payments.js",
+      "line": 467,
+      "route": "PATCH /api/Payments/:id",
+      "entity": "payment",
+      "kind": "state-transition",
+      "rule": "only deposit transactions can be edited",
+      "evidence": "if (!isDepositRecord(row)) return res.status(403).json({ error: 'Only deposit transactions can be edited' })"
+    },
+    {
+      "id": "payments.delete.deposit-only",
+      "file": "api/src/routes/payments.js",
+      "line": 573,
+      "route": "DELETE /api/Payments/:id",
+      "entity": "payment",
+      "kind": "state-transition",
+      "rule": "only deposit transactions can be deleted",
+      "evidence": "if (!isDepositRecord(row)) return res.status(403).json({ error: 'Only deposit transactions can be deleted' })"
+    },
+    {
+      "id": "payments.void.status-posted",
+      "file": "api/src/routes/payments.js",
+      "line": 539,
+      "route": "POST /api/Payments/:id/void",
+      "entity": "payment",
+      "kind": "state-transition",
+      "rule": "payment status must be 'posted' to void; already-voided payments silently return 404",
+      "evidence": "UPDATE payments ... WHERE id = $1 AND status = 'posted' RETURNING *; rows=0 => 404 'already voided'"
+    },
+    {
+      "id": "payments.proof.format",
+      "file": "api/src/routes/payments.js",
+      "line": 592,
+      "route": "POST /api/Payments/:id/proof",
+      "entity": "payment",
+      "kind": "format",
+      "rule": "proofImageBase64 must be a non-empty string starting with 'data:image/'",
+      "evidence": "if (!proofImageBase64 || typeof proofImageBase64 !== 'string' || !proofImageBase64.startsWith('data:image/')) return res.status(400)..."
+    },
+    {
+      "id": "saleorders.post.partnerid-required",
+      "file": "api/src/routes/saleOrders.js",
+      "line": 249,
+      "route": "POST /api/SaleOrders",
+      "entity": "saleorder",
+      "kind": "required-field",
+      "rule": "partnerid is required",
+      "evidence": "if (!partnerid) return res.status(400).json({ error: 'partnerid is required' })"
+    },
+    {
+      "id": "saleorders.patch.state.state-enum",
+      "file": "api/src/routes/saleOrders.js",
+      "line": 368,
+      "route": "PATCH /api/SaleOrders/:id/state",
+      "entity": "saleorder",
+      "kind": "enum",
+      "rule": "state must be one of: sale, done, cancel, draft",
+      "evidence": "if (!state || !validStates.includes(state)) return res.status(400).json({ error: 'Invalid state...' })"
+    },
+    {
+      "id": "monthlyplans.post.required-fields",
+      "file": "api/src/routes/monthlyPlans.js",
+      "line": 152,
+      "route": "POST /api/MonthlyPlans",
+      "entity": "monthlyplan",
+      "kind": "required-field",
+      "rule": "customer_id, total_amount, number_of_installments, and start_date are all required",
+      "evidence": "if (!customer_id || !total_amount || !number_of_installments || !start_date) return res.status(400)..."
+    },
+    {
+      "id": "monthlyplans.post.record-type-enum",
+      "file": "api/src/routes/monthlyPlans.js",
+      "line": 156,
+      "route": "POST /api/MonthlyPlans",
+      "entity": "monthlyplan",
+      "kind": "cross-field",
+      "rule": "record_type must be 'saleorder' or 'dotkham' when record_id is provided",
+      "evidence": "if (record_id && !['saleorder', 'dotkham'].includes(record_type)) return res.status(400)..."
+    },
+    {
+      "id": "monthlyplans.put.no-fields",
+      "file": "api/src/routes/monthlyPlans.js",
+      "line": 225,
+      "route": "PUT /api/MonthlyPlans/:id",
+      "entity": "monthlyplan",
+      "kind": "required-field",
+      "rule": "at least one field must be provided for update",
+      "evidence": "if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' })"
+    },
+    {
+      "id": "employees.post.name-required",
+      "file": "api/src/routes/employees.js",
+      "line": 278,
+      "route": "POST /api/Employees",
+      "entity": "employee",
+      "kind": "required-field",
+      "rule": "name is required and must be non-empty",
+      "evidence": "if (!name || !name.trim()) return res.status(400).json({ error: 'Name is required' })"
+    },
+    {
+      "id": "employees.post.phone-uniqueness",
+      "file": "api/src/routes/employees.js",
+      "line": 284,
+      "route": "POST /api/Employees",
+      "entity": "employee",
+      "kind": "uniqueness",
+      "rule": "phone must be unique among active employees",
+      "evidence": "SELECT id FROM partners WHERE employee = true AND isdeleted = false AND phone = $1 LIMIT 1 => 409 if found"
+    },
+    {
+      "id": "employees.post.email-uniqueness",
+      "file": "api/src/routes/employees.js",
+      "line": 294,
+      "route": "POST /api/Employees",
+      "entity": "employee",
+      "kind": "uniqueness",
+      "rule": "email must be unique among active employees",
+      "evidence": "SELECT id FROM partners WHERE employee = true AND isdeleted = false AND email = $1 LIMIT 1 => 409 if found"
+    },
+    {
+      "id": "employees.put.no-fields",
+      "file": "api/src/routes/employees.js",
+      "line": 438,
+      "route": "PUT /api/Employees/:id",
+      "entity": "employee",
+      "kind": "required-field",
+      "rule": "at least one field or locationScopeIds must be provided for update",
+      "evidence": "if (updates.length === 0 && locationScopeIds === undefined) return res.status(400).json({ error: 'No fields to update' })"
+    },
+    {
+      "id": "employees.put.phone-uniqueness",
+      "file": "api/src/routes/employees.js",
+      "line": 444,
+      "route": "PUT /api/Employees/:id",
+      "entity": "employee",
+      "kind": "uniqueness",
+      "rule": "phone must be unique among active employees excluding current record",
+      "evidence": "SELECT id FROM partners WHERE employee = true AND isdeleted = false AND phone = $1 AND id != $2 LIMIT 1 => 409"
+    },
+    {
+      "id": "employees.put.email-uniqueness",
+      "file": "api/src/routes/employees.js",
+      "line": 454,
+      "route": "PUT /api/Employees/:id",
+      "entity": "employee",
+      "kind": "uniqueness",
+      "rule": "email must be unique among active employees excluding current record",
+      "evidence": "SELECT id FROM partners WHERE employee = true AND isdeleted = false AND email = $1 AND id != $2 LIMIT 1 => 409"
+    },
+    {
+      "id": "products.post.name-required",
+      "file": "api/src/routes/products.js",
+      "line": 191,
+      "route": "POST /api/Products",
+      "entity": "product",
+      "kind": "required-field",
+      "rule": "name is required and must be non-empty",
+      "evidence": "if (!name || !name.trim()) return res.status(400).json({ error: 'Name is required' })"
+    },
+    {
+      "id": "products.put.no-fields",
+      "file": "api/src/routes/products.js",
+      "line": 242,
+      "route": "PUT /api/Products/:id",
+      "entity": "product",
+      "kind": "required-field",
+      "rule": "at least one field must be provided for update",
+      "evidence": "if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' })"
+    },
+    {
+      "id": "productcategories.post.name-required",
+      "file": "api/src/routes/productCategories.js",
+      "line": 69,
+      "route": "POST /api/ProductCategories",
+      "entity": "productcategory",
+      "kind": "required-field",
+      "rule": "name is required and must be non-empty",
+      "evidence": "if (!name || !name.trim()) return res.status(400).json({ error: 'Name is required' })"
+    },
+    {
+      "id": "productcategories.put.no-fields",
+      "file": "api/src/routes/productCategories.js",
+      "line": 122,
+      "route": "PUT /api/ProductCategories/:id",
+      "entity": "productcategory",
+      "kind": "required-field",
+      "rule": "at least one field must be provided for update",
+      "evidence": "if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' })"
+    },
+    {
+      "id": "productcategories.delete.has-products",
+      "file": "api/src/routes/productCategories.js",
+      "line": 171,
+      "route": "DELETE /api/ProductCategories/:id",
+      "entity": "productcategory",
+      "kind": "referential",
+      "rule": "cannot delete category that has existing products",
+      "evidence": "SELECT COUNT(*) FROM dbo.products WHERE categid = $1 => 400 if count > 0"
+    },
+    {
+      "id": "productcategories.delete.has-children",
+      "file": "api/src/routes/productCategories.js",
+      "line": 175,
+      "route": "DELETE /api/ProductCategories/:id",
+      "entity": "productcategory",
+      "kind": "referential",
+      "rule": "cannot delete category that has child categories",
+      "evidence": "SELECT COUNT(*) FROM dbo.productcategories WHERE parentid = $1 => 400 if count > 0"
+    },
+    {
+      "id": "services.post.required-fields",
+      "file": "api/src/routes/services.js",
+      "line": 75,
+      "route": "POST /api/Services",
+      "entity": "service",
+      "kind": "required-field",
+      "rule": "customer_id and service_type are both required",
+      "evidence": "if (!customer_id || !service_type) return res.status(400).json({ error: 'customer_id and service_type are required' })"
+    },
+    {
+      "id": "permissions.post.groups.name-required",
+      "file": "api/src/routes/permissions.js",
+      "line": 47,
+      "route": "POST /api/Permissions/groups",
+      "entity": "permissiongroup",
+      "kind": "required-field",
+      "rule": "name is required",
+      "evidence": "if (!name) return res.status(400).json({ error: 'name is required' })"
+    },
+    {
+      "id": "permissions.put.employees.groupid-required",
+      "file": "api/src/routes/permissions.js",
+      "line": 225,
+      "route": "PUT /api/Permissions/employees/:employeeId",
+      "entity": "permissiongroup",
+      "kind": "required-field",
+      "rule": "groupId is required when assigning employee permissions",
+      "evidence": "if (!groupId) return res.status(400).json({ error: 'groupId is required' })"
+    },
+    {
+      "id": "customersources.post.name-required",
+      "file": "api/src/routes/customerSources.js",
+      "line": 99,
+      "route": "POST /api/CustomerSources",
+      "entity": "customersource",
+      "kind": "required-field",
+      "rule": "name is required",
+      "evidence": "if (!name) return res.status(400).json({ error: 'Name is required' })"
+    },
+    {
+      "id": "customersources.put.no-fields",
+      "file": "api/src/routes/customerSources.js",
+      "line": 137,
+      "route": "PUT /api/CustomerSources/:id",
+      "entity": "customersource",
+      "kind": "required-field",
+      "rule": "at least one field must be provided for update",
+      "evidence": "if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' })"
+    },
+    {
+      "id": "customersources.delete.has-customers",
+      "file": "api/src/routes/customerSources.js",
+      "line": 169,
+      "route": "DELETE /api/CustomerSources/:id",
+      "entity": "customersource",
+      "kind": "referential",
+      "rule": "cannot delete source that has existing customers assigned to it",
+      "evidence": "SELECT COUNT(*) FROM dbo.partners WHERE sourceid = $1 => 400 if count > 0"
+    },
+    {
+      "id": "systempreferences.post.key-required",
+      "file": "api/src/routes/systemPreferences.js",
+      "line": 88,
+      "route": "POST /api/SystemPreferences",
+      "entity": "systempreference",
+      "kind": "required-field",
+      "rule": "key is required",
+      "evidence": "if (!key) return res.status(400).json({ error: 'Key is required' })"
+    },
+    {
+      "id": "systempreferences.put.no-fields",
+      "file": "api/src/routes/systemPreferences.js",
+      "line": 132,
+      "route": "PUT /api/SystemPreferences/:key",
+      "entity": "systempreference",
+      "kind": "required-field",
+      "rule": "at least one field must be provided for update",
+      "evidence": "if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' })"
+    },
+    {
+      "id": "systempreferences.bulk.array-required",
+      "file": "api/src/routes/systemPreferences.js",
+      "line": 171,
+      "route": "POST /api/SystemPreferences/bulk",
+      "entity": "systempreference",
+      "kind": "required-field",
+      "rule": "preferences must be an array",
+      "evidence": "if (!Array.isArray(preferences)) return res.status(400).json({ error: 'preferences array is required' })"
+    },
+    {
+      "id": "websitepages.post.required-fields",
+      "file": "api/src/routes/websitePages.js",
+      "line": 87,
+      "route": "POST /api/WebsitePages",
+      "entity": "websitepage",
+      "kind": "required-field",
+      "rule": "title and slug are both required",
+      "evidence": "if (!title || !slug) return res.status(400).json({ error: 'Title and slug are required' })"
+    },
+    {
+      "id": "websitepages.post.slug-uniqueness",
+      "file": "api/src/routes/websitePages.js",
+      "line": 92,
+      "route": "POST /api/WebsitePages",
+      "entity": "websitepage",
+      "kind": "uniqueness",
+      "rule": "slug must be unique across all website pages",
+      "evidence": "SELECT id FROM dbo.websitepages WHERE slug = $1 => 400 if found"
+    },
+    {
+      "id": "websitepages.put.slug-uniqueness",
+      "file": "api/src/routes/websitePages.js",
+      "line": 128,
+      "route": "PUT /api/WebsitePages/:id",
+      "entity": "websitepage",
+      "kind": "uniqueness",
+      "rule": "updated slug must be unique excluding current record",
+      "evidence": "SELECT id FROM dbo.websitepages WHERE slug = $1 AND id != $2 => 400 if found"
+    },
+    {
+      "id": "banksettings.put.required-fields",
+      "file": "api/src/routes/bankSettings.js",
+      "line": 43,
+      "route": "PUT /api/BankSettings",
+      "entity": "banksetting",
+      "kind": "required-field",
+      "rule": "bankBin, bankNumber, and bankAccountName are all required non-empty strings",
+      "evidence": "typeof bankBin !== 'string' || bankBin.trim() === '' || ... => res.status(400)..."
+    },
+    {
+      "id": "stockpickings.post.pickingtypeid-required",
+      "file": "api/src/routes/stockPickings.js",
+      "line": 282,
+      "route": "POST /api/StockPickings",
+      "entity": "stockpicking",
+      "kind": "required-field",
+      "rule": "pickingtypeid is required",
+      "evidence": "if (!pickingtypeid) return res.status(400).json({ error: 'pickingtypeid is required' })"
+    },
+    {
+      "id": "stockpickings.post.companyid-required",
+      "file": "api/src/routes/stockPickings.js",
+      "line": 285,
+      "route": "POST /api/StockPickings",
+      "entity": "stockpicking",
+      "kind": "required-field",
+      "rule": "companyid is required",
+      "evidence": "if (!companyid) return res.status(400).json({ error: 'companyid is required' })"
+    },
+    {
+      "id": "stockpickings.post.locationid-required",
+      "file": "api/src/routes/stockPickings.js",
+      "line": 288,
+      "route": "POST /api/StockPickings",
+      "entity": "stockpicking",
+      "kind": "required-field",
+      "rule": "locationid is required",
+      "evidence": "if (!locationid) return res.status(400).json({ error: 'locationid is required' })"
+    },
+    {
+      "id": "stockpickings.post.locationdestid-required",
+      "file": "api/src/routes/stockPickings.js",
+      "line": 291,
+      "route": "POST /api/StockPickings",
+      "entity": "stockpicking",
+      "kind": "required-field",
+      "rule": "locationdestid is required",
+      "evidence": "if (!locationdestid) return res.status(400).json({ error: 'locationdestid is required' })"
+    },
+    {
+      "id": "stockpickings.put.no-valid-fields",
+      "file": "api/src/routes/stockPickings.js",
+      "line": 348,
+      "route": "PUT /api/StockPickings/:id",
+      "entity": "stockpicking",
+      "kind": "required-field",
+      "rule": "at least one allowlisted field must be provided for update",
+      "evidence": "if (sets.length === 0) return res.status(400).json({ error: 'No valid fields to update' })"
+    },
+    {
+      "id": "externalcheckups.post.required-fields",
+      "file": "api/src/routes/externalCheckups.js",
+      "line": 142,
+      "route": "POST /api/ExternalCheckups/:customerCode/health-checkups",
+      "entity": "externalcheckup",
+      "kind": "required-field",
+      "rule": "title, doctor, and date are all required",
+      "evidence": "if (!body.title || !body.doctor || !body.date) return res.status(400).json({ error: 'title, doctor, and date are required' })"
+    },
+    {
+      "id": "dashboardreports.post.companyid-uuid",
+      "file": "api/src/routes/dashboardReports.js",
+      "line": 64,
+      "route": "POST /api/DashboardReports/GetSumary",
+      "entity": "report",
+      "kind": "format",
+      "rule": "companyId must be a valid UUID when provided",
+      "evidence": "if (!isValidUUID(companyId)) return errorResponse(res, 400, 'INVALID_COMPANY_ID', ...)"
+    },
+    {
+      "id": "dashboardreports.post.fk-company",
+      "file": "api/src/routes/dashboardReports.js",
+      "line": 67,
+      "route": "POST /api/DashboardReports/GetSumary",
+      "entity": "report",
+      "kind": "referential",
+      "rule": "companyId must exist in companies table when provided",
+      "evidence": "if (!(await foreignKeyExists('companies', companyId))) return errorResponse(res, 404, 'COMPANY_NOT_FOUND', ...)"
+    },
+    {
+      "id": "dashboardreports.post.datefrom-format",
+      "file": "api/src/routes/dashboardReports.js",
+      "line": 73,
+      "route": "POST /api/DashboardReports/GetSumary",
+      "entity": "report",
+      "kind": "format",
+      "rule": "dateFrom must be in YYYY-MM-DD format when provided",
+      "evidence": "if (dateFrom && !isValidDate(dateFrom)) return errorResponse(res, 400, 'INVALID_DATE_FROM', ...)"
+    },
+    {
+      "id": "dashboardreports.post.dateto-format",
+      "file": "api/src/routes/dashboardReports.js",
+      "line": 77,
+      "route": "POST /api/DashboardReports/GetSumary",
+      "entity": "report",
+      "kind": "format",
+      "rule": "dateTo must be in YYYY-MM-DD format when provided",
+      "evidence": "if (dateTo && !isValidDate(dateTo)) return errorResponse(res, 400, 'INVALID_DATE_TO', ...)"
+    },
+    {
+      "id": "dashboardreports.post.date-range",
+      "file": "api/src/routes/dashboardReports.js",
+      "line": 82,
+      "route": "POST /api/DashboardReports/GetSumary",
+      "entity": "report",
+      "kind": "cross-field",
+      "rule": "dateFrom must not be after dateTo",
+      "evidence": "if (fromDate > toDate) return errorResponse(res, 400, ...)"
+    },
+    {
+      "id": "places.get.autocomplete.input-required",
+      "file": "api/src/routes/places.js",
+      "line": 13,
+      "route": "GET /api/Places/autocomplete",
+      "entity": "place",
+      "kind": "required-field",
+      "rule": "input query param is required",
+      "evidence": "if (!input) return res.status(400).json({ error: 'Input is required' })"
+    },
+    {
+      "id": "places.get.details.place_id-required",
+      "file": "api/src/routes/places.js",
+      "line": 45,
+      "route": "GET /api/Places/details",
+      "entity": "place",
+      "kind": "required-field",
+      "rule": "place_id query param is required",
+      "evidence": "if (!place_id) return res.status(400).json({ error: 'Place ID is required' })"
+    }
+  ]
+}

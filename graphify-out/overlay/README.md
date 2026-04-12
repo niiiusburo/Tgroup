@@ -184,3 +184,133 @@ node graphify-out/overlay/query.js flow login
 - **Journey coverage is partial.** Only journeys explicitly listed in a file's
   `journeys` array are tracked. Indirect participation (e.g. a utility called
   by a journey participant) is not captured.
+
+---
+
+## Invariants & Gaps
+
+### Concepts
+
+| Term | Definition |
+|------|-----------|
+| **Business invariant** | A rule that MUST always hold for the system to be correct, e.g. `payment.amount > 0`. Invariants are entity-scoped, typed by kind (enum, numeric-range, referential, …), and rated by severity. |
+| **DB constraint** | A structural enforcement mechanism in PostgreSQL — NOT NULL, UNIQUE, CHECK, or FOREIGN KEY. Captured in `overlay/constraints-db.json` (118 entries). |
+| **API validation** | An Express-layer guard that returns 4xx before a bad write reaches the DB. Captured in `overlay/validations-api.json` (80 entries). |
+| **UI validation** | A React-layer check that rejects bad input before the HTTP request is sent. Captured in `overlay/validations-ui.json` (47 entries). |
+
+### Three-Layer Enforcement Model
+
+```
+User input
+    │
+    ▼
+┌─────────────────────────────┐
+│  UI layer (React forms)     │  ← First gate; easily bypassed by direct API call
+│  validations-ui.json        │
+└──────────────┬──────────────┘
+               │ HTTP request
+               ▼
+┌─────────────────────────────┐
+│  API layer (Express routes) │  ← Second gate; enforces rules for all callers
+│  validations-api.json       │
+└──────────────┬──────────────┘
+               │ SQL write
+               ▼
+┌─────────────────────────────┐
+│  DB layer (PostgreSQL)      │  ← Final gate; cannot be bypassed
+│  constraints-db.json        │
+└─────────────────────────────┘
+```
+
+**Rationale for three layers:**
+- UI-only rules are dangerous — any API client bypasses them
+- DB-only rules enforce correctness but produce cryptic errors with no context
+- DB + API is the recommended minimum: DB as backstop, API for clear error messages
+- Fully enforced (all three) is ideal for critical business rules
+
+### Gap Classification
+
+| Status | Meaning | Risk |
+|--------|---------|------|
+| `fully-enforced` | DB + API + UI all check | Lowest |
+| `db-and-api` | DB + API enforce | Low |
+| `db-and-ui` | DB + UI but API missing check | Medium |
+| `api-and-ui` | API + UI but no DB backstop | Medium |
+| `api-only` | Only API enforces | Medium-High |
+| `db-only` | Only DB enforces (poor error UX) | Medium |
+| `ui-only` | Only UI enforces — API bypassable | **High** |
+| `unenforced` | No layer enforces | **Critical** |
+
+### Summary (as of 2026-04-12)
+
+| Metric | Count |
+|--------|-------|
+| Total invariants | 43 |
+| Fully enforced | 6 |
+| Partially enforced | 19 |
+| Unenforced | 18 |
+| Critical gaps | 4 |
+
+### Sample `gaps` command output
+
+```
+$ node graphify-out/overlay/query.js gaps
+
+ENFORCEMENT GAPS (21 rules — unenforced or ui-only)
+
+[UI-ONLY]    payment.amount.not-exceeding-residual
+         severity: critical  entity: payment  kind: numeric-range
+         rule: payment.amount must not exceed selectedRecord.residual (outstanding balance) by more than 1%
+         fix: Add API validation comparing payment amount vs outstanding residual before INSERT.
+
+[UNENFORCED] monthlyPlan.installmentSum.equals-remaining
+         severity: critical  entity: monthlyPlan  kind: cross-field
+         rule: sum of all Installment.amount values must equal (monthlyPlan.totalAmount - monthlyPlan.downPayment)
+         fix: Add API validation: sum(installmentAmount * count) == (totalAmount - downPayment) before INSERT.
+
+[UNENFORCED] service.totalCost.non-negative
+         severity: critical  entity: service  kind: numeric-range
+         rule: service.totalCost must be >= 0
+         fix: Add DB CHECK (total_cost >= 0) on saleorders table. Add API validation.
+...
+```
+
+### Invariant commands
+
+```bash
+# List all 43 invariants with status
+node graphify-out/overlay/query.js invariants
+
+# Full details for one invariant
+node graphify-out/overlay/query.js invariant payment.amount.positive
+
+# All rules for a specific entity
+node graphify-out/overlay/query.js entity-rules payment
+node graphify-out/overlay/query.js entity-rules appointment
+node graphify-out/overlay/query.js entity-rules service
+
+# List gaps sorted by severity (critical first)
+node graphify-out/overlay/query.js gaps
+
+# Which rules does the DB/API/UI enforce?
+node graphify-out/overlay/query.js enforcement db
+node graphify-out/overlay/query.js enforcement api
+node graphify-out/overlay/query.js enforcement ui
+```
+
+### How to regenerate
+
+Re-run the invariant matcher whenever source files change:
+
+```bash
+# Re-build from the four overlay input files
+node /tmp/build_invariants.js
+# Or keep the script at a permanent path:
+# node graphify-out/build-invariants.js
+```
+
+Input files consumed:
+- `graphify-out/overlay/invariants-catalog.json` — 43 canonical rules
+- `graphify-out/overlay/constraints-db.json` — 118 DB constraints
+- `graphify-out/overlay/validations-api.json` — 80 API validations
+- `graphify-out/overlay/validations-ui.json` — 47 UI validations

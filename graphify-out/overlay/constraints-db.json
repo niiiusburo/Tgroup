@@ -1,0 +1,1117 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-04-11",
+  "scope": "db-constraints",
+  "source": "api/migrations/*.sql + website/demo_tdental_updated.sql",
+  "constraints": [
+    {
+      "id": "company_bank_settings.bank_bin.not_null",
+      "table": "company_bank_settings",
+      "column": "bank_bin",
+      "kind": "not-null",
+      "rule": "bank_bin VARCHAR(20) NOT NULL",
+      "file": "api/migrations/001_company_bank_settings.sql",
+      "line": 3
+    },
+    {
+      "id": "company_bank_settings.bank_number.not_null",
+      "table": "company_bank_settings",
+      "column": "bank_number",
+      "kind": "not-null",
+      "rule": "bank_number VARCHAR(50) NOT NULL",
+      "file": "api/migrations/001_company_bank_settings.sql",
+      "line": 4
+    },
+    {
+      "id": "company_bank_settings.bank_account_name.not_null",
+      "table": "company_bank_settings",
+      "column": "bank_account_name",
+      "kind": "not-null",
+      "rule": "bank_account_name VARCHAR(200) NOT NULL",
+      "file": "api/migrations/001_company_bank_settings.sql",
+      "line": 5
+    },
+    {
+      "id": "payment_proofs.proof_image.not_null",
+      "table": "payment_proofs",
+      "column": "proof_image",
+      "kind": "not-null",
+      "rule": "proof_image TEXT NOT NULL",
+      "file": "api/migrations/002_payment_proofs.sql",
+      "line": 4
+    },
+    {
+      "id": "payment_allocations.payment_id.not_null",
+      "table": "payment_allocations",
+      "column": "payment_id",
+      "kind": "not-null",
+      "rule": "payment_id UUID NOT NULL",
+      "file": "api/migrations/003_payment_allocations.sql",
+      "line": 4
+    },
+    {
+      "id": "payment_allocations.fk.payment_id",
+      "table": "payment_allocations",
+      "column": "payment_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES payments(id) ON DELETE CASCADE",
+      "references": "payments.id",
+      "file": "api/migrations/003_payment_allocations.sql",
+      "line": 4
+    },
+    {
+      "id": "payment_allocations.invoice_id.not_null",
+      "table": "payment_allocations",
+      "column": "invoice_id",
+      "kind": "not-null",
+      "rule": "invoice_id UUID NOT NULL",
+      "file": "api/migrations/003_payment_allocations.sql",
+      "line": 5
+    },
+    {
+      "id": "payment_allocations.fk.invoice_id",
+      "table": "payment_allocations",
+      "column": "invoice_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES saleorders(id) ON DELETE RESTRICT",
+      "references": "saleorders.id",
+      "file": "api/migrations/003_payment_allocations.sql",
+      "line": 5
+    },
+    {
+      "id": "payment_allocations.allocated_amount.not_null",
+      "table": "payment_allocations",
+      "column": "allocated_amount",
+      "kind": "not-null",
+      "rule": "allocated_amount NUMERIC(15,2) NOT NULL",
+      "file": "api/migrations/003_payment_allocations.sql",
+      "line": 6
+    },
+    {
+      "id": "payment_allocations.allocated_amount.default",
+      "table": "payment_allocations",
+      "column": "allocated_amount",
+      "kind": "default",
+      "rule": "DEFAULT 0",
+      "defaultValue": "0",
+      "file": "api/migrations/003_payment_allocations.sql",
+      "line": 6
+    },
+    {
+      "id": "payment_allocations.allocated_amount.check",
+      "table": "payment_allocations",
+      "column": "allocated_amount",
+      "kind": "check",
+      "rule": "CHECK (allocated_amount >= 0)",
+      "file": "api/migrations/003_payment_allocations.sql",
+      "line": 6
+    },
+    {
+      "id": "payment_allocations.chk_payment_allocation_target.check",
+      "table": "payment_allocations",
+      "column": null,
+      "kind": "check",
+      "rule": "CHECK ((invoice_id IS NOT NULL AND dotkham_id IS NULL) OR (invoice_id IS NULL AND dotkham_id IS NOT NULL) OR (invoice_id IS NULL AND dotkham_id IS NULL))",
+      "file": "api/migrations/006_dotkham_payment_allocations.sql",
+      "line": 19
+    },
+    {
+      "id": "monthlyplan_items.plan_id.not_null",
+      "table": "monthlyplan_items",
+      "column": "plan_id",
+      "kind": "not-null",
+      "rule": "plan_id UUID NOT NULL",
+      "file": "api/migrations/004_payment_plan_items.sql",
+      "line": 4
+    },
+    {
+      "id": "monthlyplan_items.fk.plan_id",
+      "table": "monthlyplan_items",
+      "column": "plan_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES monthlyplans(id) ON DELETE CASCADE",
+      "references": "monthlyplans.id",
+      "file": "api/migrations/004_payment_plan_items.sql",
+      "line": 4
+    },
+    {
+      "id": "monthlyplan_items.invoice_id.not_null",
+      "table": "monthlyplan_items",
+      "column": "invoice_id",
+      "kind": "not-null",
+      "rule": "invoice_id UUID NOT NULL",
+      "file": "api/migrations/004_payment_plan_items.sql",
+      "line": 5
+    },
+    {
+      "id": "monthlyplan_items.fk.invoice_id",
+      "table": "monthlyplan_items",
+      "column": "invoice_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES saleorders(id) ON DELETE CASCADE",
+      "references": "saleorders.id",
+      "file": "api/migrations/004_payment_plan_items.sql",
+      "line": 5
+    },
+    {
+      "id": "monthlyplan_items.priority.not_null",
+      "table": "monthlyplan_items",
+      "column": "priority",
+      "kind": "not-null",
+      "rule": "priority INTEGER NOT NULL",
+      "file": "api/migrations/004_payment_plan_items.sql",
+      "line": 6
+    },
+    {
+      "id": "monthlyplan_items.priority.default",
+      "table": "monthlyplan_items",
+      "column": "priority",
+      "kind": "default",
+      "rule": "DEFAULT 0",
+      "defaultValue": "0",
+      "file": "api/migrations/004_payment_plan_items.sql",
+      "line": 6
+    },
+    {
+      "id": "monthlyplan_items.unique.plan_id_invoice_id",
+      "table": "monthlyplan_items",
+      "column": "plan_id, invoice_id",
+      "kind": "unique",
+      "rule": "UNIQUE(plan_id, invoice_id)",
+      "file": "api/migrations/004_payment_plan_items.sql",
+      "line": 8
+    },
+    {
+      "id": "employee_location_scope.employee_id.not_null",
+      "table": "employee_location_scope",
+      "column": "employee_id",
+      "kind": "not-null",
+      "rule": "employee_id UUID NOT NULL",
+      "file": "api/migrations/005_employee_location_scope.sql",
+      "line": 4
+    },
+    {
+      "id": "employee_location_scope.fk.employee_id",
+      "table": "employee_location_scope",
+      "column": "employee_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.partners(id) ON DELETE CASCADE",
+      "references": "dbo.partners.id",
+      "file": "api/migrations/005_employee_location_scope.sql",
+      "line": 4
+    },
+    {
+      "id": "employee_location_scope.company_id.not_null",
+      "table": "employee_location_scope",
+      "column": "company_id",
+      "kind": "not-null",
+      "rule": "company_id UUID NOT NULL",
+      "file": "api/migrations/005_employee_location_scope.sql",
+      "line": 5
+    },
+    {
+      "id": "employee_location_scope.fk.company_id",
+      "table": "employee_location_scope",
+      "column": "company_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.companies(id) ON DELETE CASCADE",
+      "references": "dbo.companies.id",
+      "file": "api/migrations/005_employee_location_scope.sql",
+      "line": 5
+    },
+    {
+      "id": "employee_location_scope.unique.employee_id_company_id",
+      "table": "employee_location_scope",
+      "column": "employee_id, company_id",
+      "kind": "unique",
+      "rule": "UNIQUE (employee_id, company_id)",
+      "file": "api/migrations/005_employee_location_scope.sql",
+      "line": 8
+    },
+    {
+      "id": "partners.isdoctor.not_null",
+      "table": "partners",
+      "column": "isdoctor",
+      "kind": "not-null",
+      "rule": "isdoctor BOOLEAN NOT NULL",
+      "file": "api/migrations/013_add_employee_role_fields.sql",
+      "line": 6
+    },
+    {
+      "id": "partners.isdoctor.default",
+      "table": "partners",
+      "column": "isdoctor",
+      "kind": "default",
+      "rule": "DEFAULT false",
+      "defaultValue": "false",
+      "file": "api/migrations/013_add_employee_role_fields.sql",
+      "line": 6
+    },
+    {
+      "id": "partners.isassistant.not_null",
+      "table": "partners",
+      "column": "isassistant",
+      "kind": "not-null",
+      "rule": "isassistant BOOLEAN NOT NULL",
+      "file": "api/migrations/013_add_employee_role_fields.sql",
+      "line": 7
+    },
+    {
+      "id": "partners.isassistant.default",
+      "table": "partners",
+      "column": "isassistant",
+      "kind": "default",
+      "rule": "DEFAULT false",
+      "defaultValue": "false",
+      "file": "api/migrations/013_add_employee_role_fields.sql",
+      "line": 7
+    },
+    {
+      "id": "partners.isreceptionist.not_null",
+      "table": "partners",
+      "column": "isreceptionist",
+      "kind": "not-null",
+      "rule": "isreceptionist BOOLEAN NOT NULL",
+      "file": "api/migrations/013_add_employee_role_fields.sql",
+      "line": 8
+    },
+    {
+      "id": "partners.isreceptionist.default",
+      "table": "partners",
+      "column": "isreceptionist",
+      "kind": "default",
+      "rule": "DEFAULT false",
+      "defaultValue": "false",
+      "file": "api/migrations/013_add_employee_role_fields.sql",
+      "line": 8
+    },
+    {
+      "id": "receipt_sequences.prefix.not_null",
+      "table": "receipt_sequences",
+      "column": "prefix",
+      "kind": "not-null",
+      "rule": "prefix VARCHAR(10) NOT NULL",
+      "file": "api/migrations/015_deposit_receipts.sql",
+      "line": 7
+    },
+    {
+      "id": "receipt_sequences.prefix.default",
+      "table": "receipt_sequences",
+      "column": "prefix",
+      "kind": "default",
+      "rule": "DEFAULT 'TUKH'",
+      "defaultValue": "TUKH",
+      "file": "api/migrations/015_deposit_receipts.sql",
+      "line": 7
+    },
+    {
+      "id": "receipt_sequences.year.not_null",
+      "table": "receipt_sequences",
+      "column": "year",
+      "kind": "not-null",
+      "rule": "year INTEGER NOT NULL",
+      "file": "api/migrations/015_deposit_receipts.sql",
+      "line": 8
+    },
+    {
+      "id": "receipt_sequences.last_number.not_null",
+      "table": "receipt_sequences",
+      "column": "last_number",
+      "kind": "not-null",
+      "rule": "last_number INTEGER NOT NULL",
+      "file": "api/migrations/015_deposit_receipts.sql",
+      "line": 9
+    },
+    {
+      "id": "receipt_sequences.last_number.default",
+      "table": "receipt_sequences",
+      "column": "last_number",
+      "kind": "default",
+      "rule": "DEFAULT 0",
+      "defaultValue": "0",
+      "file": "api/migrations/015_deposit_receipts.sql",
+      "line": 9
+    },
+    {
+      "id": "receipt_sequences.unique.prefix_year",
+      "table": "receipt_sequences",
+      "column": "prefix, year",
+      "kind": "unique",
+      "rule": "UNIQUE(prefix, year)",
+      "file": "api/migrations/015_deposit_receipts.sql",
+      "line": 10
+    },
+    {
+      "id": "payments.chk_deposit_type.check",
+      "table": "payments",
+      "column": "deposit_type",
+      "kind": "check",
+      "rule": "CHECK (deposit_type IS NULL OR deposit_type IN ('deposit', 'refund', 'usage'))",
+      "file": "api/migrations/015_deposit_receipts.sql",
+      "line": 27
+    },
+    {
+      "id": "dbo.monthlyplans.fk.customer_id",
+      "table": "dbo.monthlyplans",
+      "column": "customer_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.partners(id)",
+      "references": "dbo.partners.id",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 14
+    },
+    {
+      "id": "dbo.monthlyplans.fk.company_id",
+      "table": "dbo.monthlyplans",
+      "column": "company_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.companies(id)",
+      "references": "dbo.companies.id",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 15
+    },
+    {
+      "id": "dbo.monthlyplans.isdeleted.default",
+      "table": "dbo.monthlyplans",
+      "column": "isdeleted",
+      "kind": "default",
+      "rule": "DEFAULT false",
+      "defaultValue": "false",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 22
+    },
+    {
+      "id": "dbo.monthlyplan_items.fk.plan_id",
+      "table": "dbo.monthlyplan_items",
+      "column": "plan_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.monthlyplans(id)",
+      "references": "dbo.monthlyplans.id",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 28
+    },
+    {
+      "id": "dbo.monthlyplan_items.isdeleted.default",
+      "table": "dbo.monthlyplan_items",
+      "column": "isdeleted",
+      "kind": "default",
+      "rule": "DEFAULT false",
+      "defaultValue": "false",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 33
+    },
+    {
+      "id": "dbo.planinstallments.fk.plan_id",
+      "table": "dbo.planinstallments",
+      "column": "plan_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.monthlyplans(id)",
+      "references": "dbo.monthlyplans.id",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 39
+    },
+    {
+      "id": "dbo.planinstallments.isdeleted.default",
+      "table": "dbo.planinstallments",
+      "column": "isdeleted",
+      "kind": "default",
+      "rule": "DEFAULT false",
+      "defaultValue": "false",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 44
+    },
+    {
+      "id": "dbo.payments.fk.customer_id",
+      "table": "dbo.payments",
+      "column": "customer_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.partners(id)",
+      "references": "dbo.partners.id",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 50
+    },
+    {
+      "id": "dbo.payments.deposit_used.default",
+      "table": "dbo.payments",
+      "column": "deposit_used",
+      "kind": "default",
+      "rule": "DEFAULT 0",
+      "defaultValue": "0",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 59
+    },
+    {
+      "id": "dbo.payments.cash_amount.default",
+      "table": "dbo.payments",
+      "column": "cash_amount",
+      "kind": "default",
+      "rule": "DEFAULT 0",
+      "defaultValue": "0",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 60
+    },
+    {
+      "id": "dbo.payments.bank_amount.default",
+      "table": "dbo.payments",
+      "column": "bank_amount",
+      "kind": "default",
+      "rule": "DEFAULT 0",
+      "defaultValue": "0",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 61
+    },
+    {
+      "id": "dbo.payment_allocations.fk.payment_id",
+      "table": "dbo.payment_allocations",
+      "column": "payment_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.payments(id)",
+      "references": "dbo.payments.id",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 66
+    },
+    {
+      "id": "dbo.websitepages.fk.company_id",
+      "table": "dbo.websitepages",
+      "column": "company_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.companies(id)",
+      "references": "dbo.companies.id",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 80
+    },
+    {
+      "id": "dbo.websitepages.ispublished.default",
+      "table": "dbo.websitepages",
+      "column": "ispublished",
+      "kind": "default",
+      "rule": "DEFAULT false",
+      "defaultValue": "false",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 81
+    },
+    {
+      "id": "dbo.saleorders.isdeleted.default",
+      "table": "dbo.saleorders",
+      "column": "isdeleted",
+      "kind": "default",
+      "rule": "DEFAULT false",
+      "defaultValue": "false",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 139
+    },
+    {
+      "id": "dbo.saleorderlines.isdeleted.default",
+      "table": "dbo.saleorderlines",
+      "column": "isdeleted",
+      "kind": "default",
+      "rule": "DEFAULT false",
+      "defaultValue": "false",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 208
+    },
+    {
+      "id": "dbo.dotkhams.isdeleted.default",
+      "table": "dbo.dotkhams",
+      "column": "isdeleted",
+      "kind": "default",
+      "rule": "DEFAULT false",
+      "defaultValue": "false",
+      "file": "api/migrations/008_data_migration_from_tdental_v3.sql",
+      "line": 239
+    },
+    {
+      "id": "dbo.appointments.name.not_null",
+      "table": "dbo.appointments",
+      "column": "name",
+      "kind": "not-null",
+      "rule": "name text NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 61
+    },
+    {
+      "id": "dbo.appointments.date.not_null",
+      "table": "dbo.appointments",
+      "column": "date",
+      "kind": "not-null",
+      "rule": "date timestamp without time zone NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 62
+    },
+    {
+      "id": "dbo.appointments.timeexpected.not_null",
+      "table": "dbo.appointments",
+      "column": "timeexpected",
+      "kind": "not-null",
+      "rule": "timeexpected integer NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 66
+    },
+    {
+      "id": "dbo.appointments.partnerid.not_null",
+      "table": "dbo.appointments",
+      "column": "partnerid",
+      "kind": "not-null",
+      "rule": "partnerid uuid NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 69
+    },
+    {
+      "id": "dbo.appointments.companyid.not_null",
+      "table": "dbo.appointments",
+      "column": "companyid",
+      "kind": "not-null",
+      "rule": "companyid uuid NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 70
+    },
+    {
+      "id": "dbo.appointments.isrepeatcustomer.not_null",
+      "table": "dbo.appointments",
+      "column": "isrepeatcustomer",
+      "kind": "not-null",
+      "rule": "isrepeatcustomer boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 76
+    },
+    {
+      "id": "dbo.appointments.isnotreatment.not_null",
+      "table": "dbo.appointments",
+      "column": "isnotreatment",
+      "kind": "not-null",
+      "rule": "isnotreatment boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 94
+    },
+    {
+      "id": "dbo.appointments.fk.partnerid",
+      "table": "dbo.appointments",
+      "column": "partnerid",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.partners(id) ON DELETE CASCADE",
+      "references": "dbo.partners.id",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1253
+    },
+    {
+      "id": "dbo.appointments.fk.companyid",
+      "table": "dbo.appointments",
+      "column": "companyid",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.companies(id) ON DELETE CASCADE",
+      "references": "dbo.companies.id",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1245
+    },
+    {
+      "id": "dbo.companies.name.not_null",
+      "table": "dbo.companies",
+      "column": "name",
+      "kind": "not-null",
+      "rule": "name text NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 115
+    },
+    {
+      "id": "dbo.companies.partnerid.not_null",
+      "table": "dbo.companies",
+      "column": "partnerid",
+      "kind": "not-null",
+      "rule": "partnerid uuid NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 116
+    },
+    {
+      "id": "dbo.companies.active.not_null",
+      "table": "dbo.companies",
+      "column": "active",
+      "kind": "not-null",
+      "rule": "active boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 123
+    },
+    {
+      "id": "dbo.companies.notallowexportinventorynegative.not_null",
+      "table": "dbo.companies",
+      "column": "notallowexportinventorynegative",
+      "kind": "not-null",
+      "rule": "notallowexportinventorynegative boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 126
+    },
+    {
+      "id": "dbo.companies.isuppercasepartnername.not_null",
+      "table": "dbo.companies",
+      "column": "isuppercasepartnername",
+      "kind": "not-null",
+      "rule": "isuppercasepartnername boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 132
+    },
+    {
+      "id": "dbo.companies.ishead.not_null",
+      "table": "dbo.companies",
+      "column": "ishead",
+      "kind": "not-null",
+      "rule": "ishead boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 133
+    },
+    {
+      "id": "dbo.companies.paymentsmsvalidation.not_null",
+      "table": "dbo.companies",
+      "column": "paymentsmsvalidation",
+      "kind": "not-null",
+      "rule": "paymentsmsvalidation boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 134
+    },
+    {
+      "id": "dbo.companies.isconnectconfigmedicalprescription.not_null",
+      "table": "dbo.companies",
+      "column": "isconnectconfigmedicalprescription",
+      "kind": "not-null",
+      "rule": "isconnectconfigmedicalprescription boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 137
+    },
+    {
+      "id": "dbo.partners.fk.companyid",
+      "table": "dbo.partners",
+      "column": "companyid",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.companies(id) ON DELETE SET NULL",
+      "references": "dbo.companies.id",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1261
+    },
+    {
+      "id": "dbo.partners.name.not_null",
+      "table": "dbo.partners",
+      "column": "name",
+      "kind": "not-null",
+      "rule": "name text NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 217
+    },
+    {
+      "id": "dbo.partners.supplier.not_null",
+      "table": "dbo.partners",
+      "column": "supplier",
+      "kind": "not-null",
+      "rule": "supplier boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 222
+    },
+    {
+      "id": "dbo.partners.customer.not_null",
+      "table": "dbo.partners",
+      "column": "customer",
+      "kind": "not-null",
+      "rule": "customer boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 223
+    },
+    {
+      "id": "dbo.partners.isagent.not_null",
+      "table": "dbo.partners",
+      "column": "isagent",
+      "kind": "not-null",
+      "rule": "isagent boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 224
+    },
+    {
+      "id": "dbo.partners.isinsurance.not_null",
+      "table": "dbo.partners",
+      "column": "isinsurance",
+      "kind": "not-null",
+      "rule": "isinsurance boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 225
+    },
+    {
+      "id": "dbo.partners.active.not_null",
+      "table": "dbo.partners",
+      "column": "active",
+      "kind": "not-null",
+      "rule": "active boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 229
+    },
+    {
+      "id": "dbo.partners.employee.not_null",
+      "table": "dbo.partners",
+      "column": "employee",
+      "kind": "not-null",
+      "rule": "employee boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 230
+    },
+    {
+      "id": "dbo.partners.iscompany.not_null",
+      "table": "dbo.partners",
+      "column": "iscompany",
+      "kind": "not-null",
+      "rule": "iscompany boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 260
+    },
+    {
+      "id": "dbo.partners.ishead.not_null",
+      "table": "dbo.partners",
+      "column": "ishead",
+      "kind": "not-null",
+      "rule": "ishead boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 261
+    },
+    {
+      "id": "dbo.partners.isbusinessinvoice.not_null",
+      "table": "dbo.partners",
+      "column": "isbusinessinvoice",
+      "kind": "not-null",
+      "rule": "isbusinessinvoice boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 281
+    },
+    {
+      "id": "dbo.partners.isdeleted.not_null",
+      "table": "dbo.partners",
+      "column": "isdeleted",
+      "kind": "not-null",
+      "rule": "isdeleted boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 301
+    },
+    {
+      "id": "dbo.employee_location_scope.employee_id.not_null",
+      "table": "dbo.employee_location_scope",
+      "column": "employee_id",
+      "kind": "not-null",
+      "rule": "employee_id uuid NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 191
+    },
+    {
+      "id": "dbo.employee_location_scope.location_id.not_null",
+      "table": "dbo.employee_location_scope",
+      "column": "location_id",
+      "kind": "not-null",
+      "rule": "location_id uuid NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 192
+    },
+    {
+      "id": "dbo.employee_location_scope.unique.employee_id_location_id",
+      "table": "dbo.employee_location_scope",
+      "column": "employee_id, location_id",
+      "kind": "unique",
+      "rule": "UNIQUE (employee_id, location_id)",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1081
+    },
+    {
+      "id": "dbo.employee_location_scope.fk.employee_id",
+      "table": "dbo.employee_location_scope",
+      "column": "employee_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.partners(id) ON DELETE CASCADE",
+      "references": "dbo.partners.id",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1213
+    },
+    {
+      "id": "dbo.employee_location_scope.fk.location_id",
+      "table": "dbo.employee_location_scope",
+      "column": "location_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.companies(id) ON DELETE CASCADE",
+      "references": "dbo.companies.id",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1221
+    },
+    {
+      "id": "dbo.employee_permissions.employee_id.not_null",
+      "table": "dbo.employee_permissions",
+      "column": "employee_id",
+      "kind": "not-null",
+      "rule": "employee_id uuid NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 202
+    },
+    {
+      "id": "dbo.employee_permissions.group_id.not_null",
+      "table": "dbo.employee_permissions",
+      "column": "group_id",
+      "kind": "not-null",
+      "rule": "group_id uuid NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 203
+    },
+    {
+      "id": "dbo.employee_permissions.loc_scope.not_null",
+      "table": "dbo.employee_permissions",
+      "column": "loc_scope",
+      "kind": "not-null",
+      "rule": "loc_scope text NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 204
+    },
+    {
+      "id": "dbo.employee_permissions.loc_scope.default",
+      "table": "dbo.employee_permissions",
+      "column": "loc_scope",
+      "kind": "default",
+      "rule": "DEFAULT 'assigned'",
+      "defaultValue": "assigned",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 204
+    },
+    {
+      "id": "dbo.employee_permissions.unique.employee_id",
+      "table": "dbo.employee_permissions",
+      "column": "employee_id",
+      "kind": "unique",
+      "rule": "UNIQUE (employee_id)",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1097
+    },
+    {
+      "id": "dbo.employee_permissions.fk.employee_id",
+      "table": "dbo.employee_permissions",
+      "column": "employee_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.partners(id) ON DELETE CASCADE",
+      "references": "dbo.partners.id",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1229
+    },
+    {
+      "id": "dbo.employee_permissions.fk.group_id",
+      "table": "dbo.employee_permissions",
+      "column": "group_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.permission_groups(id)",
+      "references": "dbo.permission_groups.id",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1237
+    },
+    {
+      "id": "dbo.group_permissions.group_id.not_null",
+      "table": "dbo.group_permissions",
+      "column": "group_id",
+      "kind": "not-null",
+      "rule": "group_id uuid NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 353
+    },
+    {
+      "id": "dbo.group_permissions.permission.not_null",
+      "table": "dbo.group_permissions",
+      "column": "permission",
+      "kind": "not-null",
+      "rule": "permission text NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 354
+    },
+    {
+      "id": "dbo.group_permissions.unique.group_id_permission",
+      "table": "dbo.group_permissions",
+      "column": "group_id, permission",
+      "kind": "unique",
+      "rule": "UNIQUE (group_id, permission)",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1113
+    },
+    {
+      "id": "dbo.group_permissions.fk.group_id",
+      "table": "dbo.group_permissions",
+      "column": "group_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.permission_groups(id) ON DELETE CASCADE",
+      "references": "dbo.permission_groups.id",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1269
+    },
+    {
+      "id": "dbo.permission_groups.name.not_null",
+      "table": "dbo.permission_groups",
+      "column": "name",
+      "kind": "not-null",
+      "rule": "name text NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 384
+    },
+    {
+      "id": "dbo.permission_groups.color.not_null",
+      "table": "dbo.permission_groups",
+      "column": "color",
+      "kind": "not-null",
+      "rule": "color text NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 385
+    },
+    {
+      "id": "dbo.permission_groups.color.default",
+      "table": "dbo.permission_groups",
+      "column": "color",
+      "kind": "default",
+      "rule": "DEFAULT '#94A3B8'",
+      "defaultValue": "#94A3B8",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 385
+    },
+    {
+      "id": "dbo.permission_groups.is_system.not_null",
+      "table": "dbo.permission_groups",
+      "column": "is_system",
+      "kind": "not-null",
+      "rule": "is_system boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 387
+    },
+    {
+      "id": "dbo.permission_groups.is_system.default",
+      "table": "dbo.permission_groups",
+      "column": "is_system",
+      "kind": "default",
+      "rule": "DEFAULT false",
+      "defaultValue": "false",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 387
+    },
+    {
+      "id": "dbo.permission_groups.unique.name",
+      "table": "dbo.permission_groups",
+      "column": "name",
+      "kind": "unique",
+      "rule": "UNIQUE (name)",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1137
+    },
+    {
+      "id": "dbo.permission_overrides.employee_id.not_null",
+      "table": "dbo.permission_overrides",
+      "column": "employee_id",
+      "kind": "not-null",
+      "rule": "employee_id uuid NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 399
+    },
+    {
+      "id": "dbo.permission_overrides.permission.not_null",
+      "table": "dbo.permission_overrides",
+      "column": "permission",
+      "kind": "not-null",
+      "rule": "permission text NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 400
+    },
+    {
+      "id": "dbo.permission_overrides.override_type.not_null",
+      "table": "dbo.permission_overrides",
+      "column": "override_type",
+      "kind": "not-null",
+      "rule": "override_type text NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 401
+    },
+    {
+      "id": "dbo.permission_overrides.override_type.check",
+      "table": "dbo.permission_overrides",
+      "column": "override_type",
+      "kind": "check",
+      "rule": "CHECK (override_type = ANY (ARRAY['grant', 'revoke']))",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 403
+    },
+    {
+      "id": "dbo.permission_overrides.unique.employee_id_permission",
+      "table": "dbo.permission_overrides",
+      "column": "employee_id, permission",
+      "kind": "unique",
+      "rule": "UNIQUE (employee_id, permission)",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1153
+    },
+    {
+      "id": "dbo.permission_overrides.fk.employee_id",
+      "table": "dbo.permission_overrides",
+      "column": "employee_id",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.partners(id) ON DELETE CASCADE",
+      "references": "dbo.partners.id",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1277
+    },
+    {
+      "id": "dbo.productcategories.fk.parentid",
+      "table": "dbo.productcategories",
+      "column": "parentid",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.productcategories(id)",
+      "references": "dbo.productcategories.id",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1285
+    },
+    {
+      "id": "dbo.products.active.not_null",
+      "table": "dbo.products",
+      "column": "active",
+      "kind": "not-null",
+      "rule": "active boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 441
+    },
+    {
+      "id": "dbo.products.active.default",
+      "table": "dbo.products",
+      "column": "active",
+      "kind": "default",
+      "rule": "DEFAULT true",
+      "defaultValue": "true",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 441
+    },
+    {
+      "id": "dbo.products.canorderlab.not_null",
+      "table": "dbo.products",
+      "column": "canorderlab",
+      "kind": "not-null",
+      "rule": "canorderlab boolean NOT NULL",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 442
+    },
+    {
+      "id": "dbo.products.canorderlab.default",
+      "table": "dbo.products",
+      "column": "canorderlab",
+      "kind": "default",
+      "rule": "DEFAULT false",
+      "defaultValue": "false",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 442
+    },
+    {
+      "id": "dbo.products.fk.categid",
+      "table": "dbo.products",
+      "column": "categid",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.productcategories(id)",
+      "references": "dbo.productcategories.id",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1293
+    },
+    {
+      "id": "dbo.products.fk.companyid",
+      "table": "dbo.products",
+      "column": "companyid",
+      "kind": "foreign-key",
+      "rule": "REFERENCES dbo.companies(id)",
+      "references": "dbo.companies.id",
+      "file": "website/demo_tdental_updated.sql",
+      "line": 1301
+    }
+  ]
+}

@@ -1,6 +1,5 @@
 import {
   X,
-  Camera,
   Plus,
   Users,
   UserPlus,
@@ -40,6 +39,7 @@ import type { CustomerFormData, FormValidationError } from '@/data/mockCustomerF
 import { useCustomerSources } from '@/hooks/useSettings';
 import type { CustomerSource } from '@/data/mockSettings';
 import { AddressAutocomplete } from '@/components/shared/AddressAutocomplete';
+import { CustomerCameraWidget } from '@/components/customer/CustomerCameraWidget';
 
 /**
  * ╔══════════════════════════════════════════════════════════════════════════════════════╗
@@ -468,14 +468,25 @@ export function AddCustomerForm({
           {/* Card 1: Personal Info */}
           <CardSection title="Thông tin cá nhân" icon={User} maxHeight="280px">
             <div className="flex justify-center mb-4">
-              <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:from-gray-200 hover:to-gray-300 transition-all group">
-                {formData.photoUrl ? (
-                  <img src={formData.photoUrl} alt="avatar" className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <Camera className="w-8 h-8 text-gray-400 group-hover:text-gray-500" />
-                )}
-                <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/5 transition-colors" />
-              </div>
+              <CustomerCameraWidget
+                disabled={!isFieldEditable}
+                onQuickAddResult={(fields) => {
+                  setFormData((prev) => ({ ...prev, ...fields }));
+                  setErrors((prev) =>
+                    prev.filter((e) => !Object.keys(fields).includes(e.field)),
+                  );
+                }}
+                onFaceIdResult={(customer) => {
+                  if (customer) {
+                    setFormData((prev) => ({ ...prev, ...customer }));
+                    setErrors((prev) =>
+                      prev.filter((e) => !Object.keys(customer).includes(e.field)),
+                    );
+                  } else {
+                    alert('Không tìm thấy khách hàng. Vui lòng nhập thủ công hoặc dùng Quick Add.');
+                  }
+                }}
+              />
             </div>
 
             <div className="space-y-4">

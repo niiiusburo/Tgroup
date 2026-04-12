@@ -1,0 +1,394 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-04-12",
+  "description": "Canonical business invariants for TGroup. Each rule describes what MUST hold. Enforcement is tracked separately.",
+  "invariants": [
+    {
+      "id": "customer.name.required",
+      "entity": "customer",
+      "rule": "customer.name must be non-empty after trimming whitespace",
+      "rationale": "Name is the primary human identifier; blank names break all list/search displays and appointment records",
+      "kind": "required-field",
+      "severity": "critical",
+      "source": "validateCustomerForm() in website/src/data/mockCustomerForm.ts:133 — explicit name.trim() check"
+    },
+    {
+      "id": "customer.phone.required",
+      "entity": "customer",
+      "rule": "customer.phone must be non-empty after trimming whitespace",
+      "rationale": "Phone is the primary contact channel for appointment reminders and the de-facto uniqueness check before creating a new record",
+      "kind": "required-field",
+      "severity": "critical",
+      "source": "validateCustomerForm() in website/src/data/mockCustomerForm.ts:134 — explicit phone.trim() check"
+    },
+    {
+      "id": "customer.phone.unique",
+      "entity": "customer",
+      "rule": "customer.phone must be unique across all non-deleted partner records",
+      "rationale": "Duplicate phones cause misidentification of patients in appointment and payment workflows",
+      "kind": "uniqueness",
+      "severity": "critical",
+      "source": "checkPartnerExists(phone, email, excludeId) in website/src/lib/api.ts:165 — called from AddCustomerForm before submit"
+    },
+    {
+      "id": "customer.status.enum",
+      "entity": "customer",
+      "rule": "customer.status must be one of: 'active' | 'inactive' | 'pending'",
+      "rationale": "UI badges and filter logic depend on this fixed vocabulary; unknown values break rendering",
+      "kind": "enum",
+      "severity": "high",
+      "source": "CustomerStatus type in website/src/types/customer.ts:6"
+    },
+    {
+      "id": "customer.companyId.referential",
+      "entity": "customer",
+      "rule": "customer.companyid must reference an existing dbo.companies record",
+      "rationale": "Customers without a valid branch are invisible to location-scoped queries and never appear in any dashboard",
+      "kind": "referential",
+      "severity": "high",
+      "source": "CustomerFormData.companyid field in website/src/types/customer.ts:29; location filter in taxonomy.json journey location-filter"
+    },
+    {
+      "id": "customer.soft-delete-only",
+      "entity": "customer",
+      "rule": "customers referenced by appointments or payments must never be hard-deleted; only soft-deleted via isdeleted flag",
+      "rationale": "Hard deleting a customer with linked appointments or payments orphans those records and corrupts historical reporting",
+      "kind": "invariant-over-time",
+      "severity": "critical",
+      "source": "AUDIT_REPORT.md CRIT-2: hard-delete endpoint exists with no auth guard; dbo.partners is sourceOfTruth for both customers and employees (taxonomy.json)"
+    },
+    {
+      "id": "customer.gender.enum",
+      "entity": "customer",
+      "rule": "customer.gender must be one of: 'male' | 'female' | 'other' | '' (empty = not specified)",
+      "rationale": "Gender is used for salutation display and analytics segmentation; unexpected values break rendering",
+      "kind": "enum",
+      "severity": "medium",
+      "source": "CustomerFormData.gender type in website/src/types/customer.ts:25"
+    },
+    {
+      "id": "appointment.status.enum",
+      "entity": "appointment",
+      "rule": "appointment.status must be one of: 'scheduled' | 'arrived' | 'cancelled' (UI-selectable) or 'confirmed' | 'in-progress' | 'completed' (extended display states)",
+      "rationale": "All calendar rendering, filter, and reporting logic branches on this value; an unknown status causes silent display failures",
+      "kind": "enum",
+      "severity": "critical",
+      "source": "APPOINTMENT_STATUS_OPTIONS in website/src/constants/index.ts:329-333; APPOINTMENT_STATUS_COLORS keys; AppointmentStatus type in appointment.ts:8"
+    },
+    {
+      "id": "appointment.checkInStatus.enum",
+      "entity": "appointment",
+      "rule": "appointment.checkInStatus must be one of: 'not-arrived' | 'arrived' | 'waiting' | 'in-treatment' | 'done'",
+      "rationale": "Reception flow and WaitTimer depend on this enum for transitions; undefined values break check-in UI state machine",
+      "kind": "enum",
+      "severity": "high",
+      "source": "CheckInStatus type in website/src/types/appointment.ts:9; CHECK_IN_FLOW_ORDER constant"
+    },
+    {
+      "id": "appointment.checkInStatus.transitions",
+      "entity": "appointment",
+      "rule": "checkInStatus transitions must follow the order: not-arrived -> arrived -> waiting -> in-treatment -> done; reversal is not allowed",
+      "rationale": "WaitTimer calculates elapsed time from arrivalTime; out-of-order transitions produce negative durations and corrupt wait statistics",
+      "kind": "state-transition",
+      "severity": "high",
+      "source": "CHECK_IN_FLOW_ORDER readonly array in website/src/types/appointment.ts:55-61; customer-checkin journey in taxonomy.json"
+    },
+    {
+      "id": "appointment.datetime.valid",
+      "entity": "appointment",
+      "rule": "appointment.date combined with startTime must form a valid ISO datetime; endTime must be strictly after startTime",
+      "rationale": "Calendar grid layout and drag-reschedule both compute pixel positions from time deltas; invalid or inverted times produce invisible or overlapping cards",
+      "kind": "cross-field",
+      "severity": "critical",
+      "source": "CalendarAppointment.date/startTime/endTime fields in appointment.ts:22-24; useDragReschedule.handleDrop in taxonomy.json journey appointment-reschedule"
+    },
+    {
+      "id": "appointment.customer.referential",
+      "entity": "appointment",
+      "rule": "appointment.customerId must reference an existing dbo.partners record with customer=true",
+      "rationale": "Orphaned appointments cannot display patient info and break profile history views",
+      "kind": "referential",
+      "severity": "high",
+      "source": "CalendarAppointment.customerId in appointment.ts:13; appointment-create journey step 3 (CustomerSelector)"
+    },
+    {
+      "id": "appointment.doctor.referential",
+      "entity": "appointment",
+      "rule": "appointment.dentistId (doctorId) must reference a dbo.partners record with employee=true and isdoctor=true",
+      "rationale": "Doctor filter and schedule views only show doctors; assigning a non-doctor breaks those displays",
+      "kind": "referential",
+      "severity": "high",
+      "source": "CalendarAppointment.dentistId in appointment.ts:19; ROLE_TO_DB_FLAGS['doctor'] in employee.ts:80"
+    },
+    {
+      "id": "appointment.location.referential",
+      "entity": "appointment",
+      "rule": "appointment.locationId must reference an existing dbo.companies record",
+      "rationale": "Global location filter queries appointments by companyId; unmatched locationId hides the appointment from all scoped views",
+      "kind": "referential",
+      "severity": "high",
+      "source": "CalendarAppointment.locationId in appointment.ts:26; location-filter journey in taxonomy.json"
+    },
+    {
+      "id": "appointment.arrivalTime.conditional",
+      "entity": "appointment",
+      "rule": "appointment.arrivalTime must be non-null when checkInStatus is 'arrived', 'waiting', 'in-treatment', or 'done'",
+      "rationale": "WaitTimer computes elapsed time from arrivalTime; null arrival time while in a post-arrival state causes NaN display",
+      "kind": "cross-field",
+      "severity": "high",
+      "source": "ManagedAppointment.arrivalTime: string | null in appointment.ts:48; customer-checkin journey step 5"
+    },
+    {
+      "id": "payment.amount.positive",
+      "entity": "payment",
+      "rule": "payment.amount must be > 0",
+      "rationale": "Zero or negative payments corrupt outstanding balance totals and allow fraudulent reversals disguised as charges",
+      "kind": "numeric-range",
+      "severity": "critical",
+      "source": "PaymentFormData.amount: number in website/src/components/payment/PaymentForm.tsx:36; financial domain norm; useDeposits.ts:67 checks amount > 0"
+    },
+    {
+      "id": "payment.amount.not-exceeding-residual",
+      "entity": "payment",
+      "rule": "payment.amount must not exceed selectedRecord.residual (outstanding balance) by more than 1%",
+      "rationale": "Overpayment would make remainingBalance negative, corrupting the debt ledger",
+      "kind": "numeric-range",
+      "severity": "critical",
+      "source": "PaymentForm.tsx:220 — explicit guard: totalPayment > selectedRecord.residual * 1.01 triggers validation error"
+    },
+    {
+      "id": "payment.method.enum",
+      "entity": "payment",
+      "rule": "payment.method must be one of: 'cash' | 'bank_transfer' | 'deposit' | 'mixed'",
+      "rationale": "Reporting and QR-code display branch on method; unknown values crash VietQrModal and payment summaries",
+      "kind": "enum",
+      "severity": "high",
+      "source": "PaymentMethod type in website/src/types/payment.ts:7; PaymentFormData.method in PaymentForm.tsx:37"
+    },
+    {
+      "id": "payment.status.enum",
+      "entity": "payment",
+      "rule": "payment.status must be one of: 'completed' | 'pending' | 'partial' | 'refunded'",
+      "rationale": "PaymentHistory table and status badges depend on this fixed set",
+      "kind": "enum",
+      "severity": "high",
+      "source": "PaymentStatus type in website/src/types/payment.ts:10; PAYMENT_STATUS_COLORS keys in constants/index.ts:41"
+    },
+    {
+      "id": "payment.void.state-transition",
+      "entity": "payment",
+      "rule": "void operation is allowed only when payment.status == 'completed' (posted); voiding an already-voided or pending payment is forbidden",
+      "rationale": "Double-voiding restores a balance twice, inflating outstanding debt; voiding pending payments that were never posted makes no sense",
+      "kind": "state-transition",
+      "severity": "critical",
+      "source": "AUDIT_REPORT.md CRIT-4/CRIT-5: void endpoint uses SET status='voided'; payment-void journey in taxonomy.json step 4"
+    },
+    {
+      "id": "payment.mixed.sources-sum",
+      "entity": "payment",
+      "rule": "when method == 'mixed', sum(sources.depositAmount + sources.cashAmount + sources.bankAmount) must equal payment.amount",
+      "rationale": "Mismatched breakdown causes unreconciled ledger entries where total paid differs from component breakdown",
+      "kind": "cross-field",
+      "severity": "high",
+      "source": "PaymentRecord.sources breakdown in payment.ts:49-53; PaymentSourceBreakdown interface in PaymentForm.tsx:23-27"
+    },
+    {
+      "id": "payment.customer.referential",
+      "entity": "payment",
+      "rule": "payment.customerId must reference an existing dbo.partners record with customer=true",
+      "rationale": "Payment history and outstanding balance views are scoped by customerId; orphaned payments are invisible to staff",
+      "kind": "referential",
+      "severity": "high",
+      "source": "PaymentRecord.customerId in payment.ts:35; payment-create journey step 2 (CustomerSelector)"
+    },
+    {
+      "id": "payment.record.referential",
+      "entity": "payment",
+      "rule": "payment.recordId must reference an existing dbo.saleorders or dbo.dotkhams record (per recordType)",
+      "rationale": "Payment must be applied to a real service record; unmatched recordId leaves the service balance unreduced",
+      "kind": "referential",
+      "severity": "critical",
+      "source": "PaymentRecord.recordId + recordType in payment.ts:38-39; PaymentForm only shows records with residual > 0 (PaymentForm.tsx:141,151)"
+    },
+    {
+      "id": "employee.status.enum",
+      "entity": "employee",
+      "rule": "employee.status must be one of: 'active' | 'on-leave' | 'inactive'",
+      "rationale": "Doctor selectors and schedule views filter by status; unknown values cause employees to appear where they should not",
+      "kind": "enum",
+      "severity": "high",
+      "source": "EmployeeStatus type in website/src/types/employee.ts:19"
+    },
+    {
+      "id": "employee.tier.enum",
+      "entity": "employee",
+      "rule": "employee.tier must be one of: 'junior' | 'mid' | 'senior' | 'lead' | 'director'",
+      "rationale": "Tier drives commission calculations and TierSelector rendering; out-of-range values break display",
+      "kind": "enum",
+      "severity": "medium",
+      "source": "EmployeeTier type + ALL_TIERS constant in website/src/types/employee.ts:6,89"
+    },
+    {
+      "id": "employee.role.enum",
+      "entity": "employee",
+      "rule": "each value in employee.roles[] must be one of the 9 defined EmployeeRole values",
+      "rationale": "ROLE_TO_DB_FLAGS maps roles to boolean DB columns; an unknown role silently maps to all-false flags, mis-classifying the employee",
+      "kind": "enum",
+      "severity": "high",
+      "source": "EmployeeRole type + ALL_ROLES constant + ROLE_TO_DB_FLAGS in employee.ts:8-100"
+    },
+    {
+      "id": "employee.email.unique-per-company",
+      "entity": "employee",
+      "rule": "employee.email must be unique within the same companyId (locationId)",
+      "rationale": "Email is the login credential; duplicate emails in the same branch create ambiguous authentication",
+      "kind": "uniqueness",
+      "severity": "critical",
+      "source": "employee-create journey step 6 (inserts into dbo.partners with employee=true); auth login flow uses email as identifier (taxonomy.json login journey)"
+    },
+    {
+      "id": "employee.location.referential",
+      "entity": "employee",
+      "rule": "employee.locationId must reference an existing dbo.companies record; locationScopeIds (if set) must all reference existing dbo.companies records",
+      "rationale": "Location-scoped permission checks use locationScopeIds; dangling references silently grant or deny access incorrectly",
+      "kind": "referential",
+      "severity": "high",
+      "source": "Employee.locationId + locationScopeIds in employee.ts:34-36; location-filter journey in taxonomy.json"
+    },
+    {
+      "id": "employee.doctor-flag.consistent",
+      "entity": "employee",
+      "rule": "when employee.roles includes 'doctor', the DB flags isdoctor=true, isassistant=false, isreceptionist=false must be set (exactly one primary role flag active at a time)",
+      "rationale": "inferRoleFromFlags() reads these mutually exclusive flags to reconstruct role; conflicting flags yield wrong role inference",
+      "kind": "cross-field",
+      "severity": "high",
+      "source": "ROLE_TO_DB_FLAGS in employee.ts:68-87; inferRoleFromFlags() function in employee.ts:45-66"
+    },
+    {
+      "id": "monthlyPlan.amount.downPayment-less-than-total",
+      "entity": "monthlyPlan",
+      "rule": "monthlyPlan.downPayment must be >= 0 and < monthlyPlan.totalAmount",
+      "rationale": "A down payment >= totalAmount means nothing is owed in installments; plan creation would generate zero or negative installment amounts",
+      "kind": "cross-field",
+      "severity": "critical",
+      "source": "MonthlyPlan.totalAmount + downPayment in monthlyPlans.ts:38-39; monthly-plan-create journey step 3"
+    },
+    {
+      "id": "monthlyPlan.installmentCount.positive",
+      "entity": "monthlyPlan",
+      "rule": "monthlyPlan.numberOfInstallments must be >= 1",
+      "rationale": "Zero installments means no repayment schedule is generated; the plan would have a balance with no mechanism to clear it",
+      "kind": "numeric-range",
+      "severity": "critical",
+      "source": "MonthlyPlan.numberOfInstallments: number in monthlyPlans.ts:40; PlanCreationInput.numberOfInstallments in monthlyPlans.ts:57"
+    },
+    {
+      "id": "monthlyPlan.installmentSum.equals-remaining",
+      "entity": "monthlyPlan",
+      "rule": "sum of all Installment.amount values must equal (monthlyPlan.totalAmount - monthlyPlan.downPayment)",
+      "rationale": "A mismatch leaves an unaccounted gap or surplus in the repayment schedule, creating a permanently unclearable balance",
+      "kind": "cross-field",
+      "severity": "critical",
+      "source": "MonthlyPlan.installmentAmount * numberOfInstallments pattern in useMonthlyPlans.ts:28-31; monthly-plan-create journey step 4"
+    },
+    {
+      "id": "monthlyPlan.status.enum",
+      "entity": "monthlyPlan",
+      "rule": "monthlyPlan.status must be one of: 'active' | 'completed' | 'defaulted' | 'draft'",
+      "rationale": "InstallmentTracker and plan list filters branch on this status; unknown values cause rendering gaps",
+      "kind": "enum",
+      "severity": "high",
+      "source": "PlanStatus type in website/src/types/monthlyPlans.ts:7"
+    },
+    {
+      "id": "monthlyPlan.status.transitions",
+      "entity": "monthlyPlan",
+      "rule": "plan status transitions: draft -> active -> completed; active -> defaulted; completed and defaulted are terminal states",
+      "rationale": "Reactivating a completed plan would re-open a settled debt; transitioning from defaulted to completed without actual payment corrupts the ledger",
+      "kind": "state-transition",
+      "severity": "high",
+      "source": "PlanStatus values in monthlyPlans.ts:7; monthly-plan-create journey; financial domain norms"
+    },
+    {
+      "id": "monthlyPlan.noDelete-if-paid-installments",
+      "entity": "monthlyPlan",
+      "rule": "a monthlyPlan must not be deleted if any of its Installment records have status == 'paid'",
+      "rationale": "Deleting a plan with paid installments removes evidence of received payments, creating unreconcilable financial records",
+      "kind": "invariant-over-time",
+      "severity": "critical",
+      "source": "Installment.status: InstallmentStatus in monthlyPlans.ts:15; financial audit norms; monthly-plan-create journey step 6"
+    },
+    {
+      "id": "monthlyPlan.customer.referential",
+      "entity": "monthlyPlan",
+      "rule": "monthlyPlan.customerId must reference an existing dbo.partners record with customer=true",
+      "rationale": "Plans without a valid customer cannot be displayed on the patient payment page",
+      "kind": "referential",
+      "severity": "high",
+      "source": "MonthlyPlan.customerId in monthlyPlans.ts:32; PlanCreationInput.customerId in monthlyPlans.ts:50"
+    },
+    {
+      "id": "monthlyPlan.installment.status.enum",
+      "entity": "monthlyPlan",
+      "rule": "Installment.status must be one of: 'paid' | 'upcoming' | 'overdue' | 'pending'",
+      "rationale": "InstallmentTracker UI classifies installments by color and action buttons based on this value",
+      "kind": "enum",
+      "severity": "medium",
+      "source": "InstallmentStatus type in website/src/types/monthlyPlans.ts:6"
+    },
+    {
+      "id": "service.totalCost.non-negative",
+      "entity": "service",
+      "rule": "service.totalCost must be >= 0",
+      "rationale": "Negative service costs would create negative outstanding balances, allowing money to be fabricated through payment allocation",
+      "kind": "numeric-range",
+      "severity": "critical",
+      "source": "ServiceRecord.totalCost: number in service.ts:57; ServiceCatalogItem.defaultPrice: number in service.ts:16 — no negative price semantics defined"
+    },
+    {
+      "id": "service.paidAmount.not-exceeding-totalCost",
+      "entity": "service",
+      "rule": "service.paidAmount must be <= service.totalCost",
+      "rationale": "Overpayment on a service record makes remainingBalance negative, showing credit that was never deposited",
+      "kind": "cross-field",
+      "severity": "critical",
+      "source": "ServiceRecord.totalCost + paidAmount in service.ts:57-58; OutstandingBalance.tsx:77 computes paid = totalCost - remainingBalance"
+    },
+    {
+      "id": "service.status.enum",
+      "entity": "service",
+      "rule": "service.status must be one of: 'active' | 'completed' | 'cancelled'",
+      "rationale": "ServiceHistoryList and MultiVisitTracker filter and badge on this enum; unknown values cause rendering errors",
+      "kind": "enum",
+      "severity": "high",
+      "source": "ServiceStatus type in website/src/types/service.ts:8"
+    },
+    {
+      "id": "service.totalVisits.positive",
+      "entity": "service",
+      "rule": "service.totalVisits must be >= 1",
+      "rationale": "MultiVisitTracker computes progress as completedVisits / totalVisits; zero totalVisits causes division-by-zero",
+      "kind": "numeric-range",
+      "severity": "high",
+      "source": "ServiceRecord.totalVisits: number in service.ts:53; ServiceCatalogItem.totalVisits: number in service.ts:19"
+    },
+    {
+      "id": "service.completedVisits.not-exceeding-total",
+      "entity": "service",
+      "rule": "service.completedVisits must be >= 0 and <= service.totalVisits",
+      "rationale": "completedVisits > totalVisits produces a progress bar > 100%, an impossible state that signals data corruption",
+      "kind": "cross-field",
+      "severity": "high",
+      "source": "ServiceRecord.totalVisits + completedVisits in service.ts:53-54; MultiVisitTracker progress computation"
+    },
+    {
+      "id": "service.customer.referential",
+      "entity": "service",
+      "rule": "service.customerId must reference an existing dbo.partners record with customer=true",
+      "rationale": "Service records without a valid patient cannot be displayed in CustomerProfile or linked to payments",
+      "kind": "referential",
+      "severity": "high",
+      "source": "ServiceRecord.customerId in service.ts:38; service-record journey step 3 (fetches from POST /api/SaleOrders)"
+    }
+  ]
+}

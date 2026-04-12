@@ -224,6 +224,151 @@ function cmdSearch(overlay, keyword) {
 }
 
 
+
+// ─── ANSI color helpers ───────────────────────────────────────────────────────
+const TTY = process.stdout.isTTY;
+const C = {
+  red:    s => TTY ? `\x1b[31m${s}\x1b[0m` : s,
+  yellow: s => TTY ? `\x1b[33m${s}\x1b[0m` : s,
+  green:  s => TTY ? `\x1b[32m${s}\x1b[0m` : s,
+  bold:   s => TTY ? `\x1b[1m${s}\x1b[0m`  : s,
+  cyan:   s => TTY ? `\x1b[36m${s}\x1b[0m` : s,
+};
+
+function colorStatus(status) {
+  if (status === 'fully-enforced' || status === 'db-and-api') return C.green(status);
+  if (status === 'unenforced') return C.red(status);
+  return C.yellow(status);
+}
+
+function colorSeverity(severity) {
+  if (severity === 'critical') return C.red(severity);
+  if (severity === 'high')     return C.yellow(severity);
+  return severity;
+}
+
+// ─── Invariants data loader ───────────────────────────────────────────────────
+const INVARIANTS_PATH = path.join(__dirname, '..', 'business-invariants.json');
+
+function loadInvariants() {
+  if (!fs.existsSync(INVARIANTS_PATH)) {
+    console.error('ERROR: business-invariants.json not found at', INVARIANTS_PATH);
+    process.exit(1);
+  }
+  return JSON.parse(fs.readFileSync(INVARIANTS_PATH, 'utf8'));
+}
+
+// ─── Invariant commands ───────────────────────────────────────────────────────
+
+function cmdInvariants() {
+  const data = loadInvariants();
+  const s = data.summary;
+  console.log(C.bold('BUSINESS INVARIANTS — ENFORCEMENT SUMMARY'));
+  console.log('-'.repeat(60));
+  console.log('Total invariants:    ' + s.totalInvariants);
+  console.log('Fully enforced:      ' + C.green(s.fullyEnforced));
+  console.log('Partially enforced:  ' + C.yellow(s.partiallyEnforced));
+  console.log('Unenforced:          ' + C.red(s.unenforced));
+  console.log('Critical gaps:       ' + C.red(s.critical_gaps));
+  console.log('');
+  printTable(
+    ['ID', 'ENTITY', 'SEVERITY', 'STATUS'],
+    data.invariants.map(i => [i.id, i.entity, colorSeverity(i.severity), colorStatus(i.status)])
+  );
+}
+
+function cmdInvariant(id) {
+  if (!id) { console.error('Usage: query.js invariant <id>'); process.exit(1); }
+  const data = loadInvariants();
+  const inv = data.invariants.find(i => i.id === id);
+  if (!inv) {
+    console.error('Invariant not found:', id);
+    console.error('Use "invariants" command to list all IDs');
+    process.exit(1);
+  }
+  console.log(C.bold('INVARIANT: ' + inv.id));
+  console.log('Entity:     ' + inv.entity);
+  console.log('Kind:       ' + inv.kind);
+  console.log('Severity:   ' + colorSeverity(inv.severity));
+  console.log('Status:     ' + colorStatus(inv.status));
+  console.log('Rule:       ' + inv.rule);
+  console.log('Rationale:  ' + inv.rationale);
+  console.log('');
+  console.log('ENFORCEMENT:');
+  ['db', 'api', 'ui'].forEach(layer => {
+    const e = inv.enforcement[layer];
+    const label = layer.toUpperCase().padEnd(4);
+    if (e.status === 'enforced') {
+      console.log('  ' + C.green(label + ' enforced'));
+      e.references.forEach(r => console.log('    ' + r.id + '  ' + r.file + ':' + r.line));
+    } else {
+      console.log('  ' + C.red(label + ' missing'));
+    }
+  });
+  console.log('');
+  console.log('RECOMMENDATION:');
+  console.log('  ' + inv.recommendation);
+}
+
+function cmdEntityRules(entity) {
+  if (!entity) { console.error('Usage: query.js entity-rules <entity>'); process.exit(1); }
+  const data = loadInvariants();
+  const matches = data.invariants.filter(i => i.entity === entity);
+  if (matches.length === 0) {
+    console.log('No invariants for entity:', entity);
+    console.log('Available entities:', [...new Set(data.invariants.map(i => i.entity))].join(', '));
+    return;
+  }
+  console.log(C.bold('INVARIANTS FOR ENTITY: ' + entity + '  (' + matches.length + ' rules)'));
+  console.log('');
+  printTable(
+    ['ID', 'KIND', 'SEVERITY', 'STATUS'],
+    matches.map(i => [i.id, i.kind, colorSeverity(i.severity), colorStatus(i.status)])
+  );
+}
+
+function cmdGaps() {
+  const data = loadInvariants();
+  const gaps = data.invariants
+    .filter(i => i.status === 'unenforced' || i.status === 'ui-only')
+    .sort((a, b) => {
+      const sevOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+      return (sevOrder[a.severity] ?? 9) - (sevOrder[b.severity] ?? 9);
+    });
+  if (gaps.length === 0) { console.log(C.green('No enforcement gaps found.')); return; }
+  console.log(C.bold('ENFORCEMENT GAPS (' + gaps.length + ' rules — unenforced or ui-only)'));
+  console.log('');
+  gaps.forEach(i => {
+    const tag = i.status === 'unenforced' ? '[UNENFORCED]' : '[UI-ONLY]   ';
+    console.log(tag + ' ' + i.id);
+    console.log('         severity: ' + i.severity + '  entity: ' + i.entity + '  kind: ' + i.kind);
+    console.log('         rule: ' + i.rule.slice(0, 90));
+    console.log('         fix: ' + i.recommendation.slice(0, 100));
+    console.log('');
+  });
+}
+
+function cmdEnforcement(layer) {
+  if (!layer || !['db','api','ui'].includes(layer)) {
+    console.error('Usage: query.js enforcement <db|api|ui>');
+    process.exit(1);
+  }
+  const data = loadInvariants();
+  const enforced = data.invariants.filter(i => i.enforcement[layer].status === 'enforced');
+  const missing  = data.invariants.filter(i => i.enforcement[layer].status === 'missing');
+  console.log(C.bold('ENFORCEMENT LAYER: ' + layer.toUpperCase()));
+  console.log('Enforced (' + enforced.length + '):');
+  enforced.forEach(i => {
+    const refs = i.enforcement[layer].references.map(r => r.id).join(', ');
+    console.log('  + ' + i.id + '  [' + refs + ']');
+  });
+  console.log('');
+  console.log('Missing (' + missing.length + '):');
+  missing.forEach(i => {
+    console.log('  - ' + i.id + '  (' + i.severity + ')');
+  });
+}
+
 const FLOWS_PATH = path.join(__dirname, 'flows.json');
 
 function loadFlows() {
@@ -277,6 +422,13 @@ function printHelp() {
   console.log('  stats                Coverage summary: annotated/total, per-domain, per-tier');
   console.log('  search <keyword>     Search intents + notes + labels for a keyword');
   console.log('');
+  console.log('Invariant commands:');
+  console.log('  invariants           List all 43 invariants with enforcement status');
+  console.log('  invariant <id>       Show full details for one invariant');
+  console.log('  entity-rules <e>     List invariants for a specific entity');
+  console.log('  gaps                 List unenforced or ui-only rules (critical first)');
+  console.log('  enforcement <layer>  List rules enforced at db / api / ui');
+  console.log('');
   console.log('Examples:');
   console.log('  node graphify-out/overlay/query.js domains');
   console.log('  node graphify-out/overlay/query.js domain payments');
@@ -302,6 +454,11 @@ switch (cmd) {
   case 'unannotated': cmdUnannotated(overlay); break;
   case 'stats':       cmdStats(overlay); break;
   case 'search':      cmdSearch(overlay, args[0]); break;
+  case 'invariants':  cmdInvariants(); break;
+  case 'invariant':   cmdInvariant(args[0]); break;
+  case 'entity-rules':cmdEntityRules(args[0]); break;
+  case 'gaps':        cmdGaps(); break;
+  case 'enforcement': cmdEnforcement(args[0]); break;
   default:
     console.error('Unknown command:', cmd);
     printHelp();
