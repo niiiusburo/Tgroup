@@ -94,6 +94,83 @@ the source annotations change.
 
 ---
 
+---
+
+## Code-Level Flow Sequences (`flows.json`)
+
+`flows.json` adds function/line-level execution traces for the top 5 critical
+journeys. Unlike the file-level overlay, each flow records an ordered sequence
+of exact code locations — the actual call path a request follows from UI trigger
+to database write and back.
+
+### Structure
+
+```json
+{
+  "version": "1.0",
+  "generatedAt": "YYYY-MM-DD",
+  "flows": {
+    "<journey-id>": {
+      "journey": "login",
+      "label": "User Login",
+      "entryPoint": "website/src/pages/Login.tsx:54",
+      "steps": [
+        { "order": 1, "file": "...", "line": 54, "label": "...", "kind": "ui-event" }
+      ],
+      "filesInvolved": ["..."],
+      "crossesBoundary": true,
+      "criticality": "critical"
+    }
+  }
+}
+```
+
+### Step `kind` values
+
+| Kind | Description |
+|------|-------------|
+| `ui-event` | User interaction (click, form submit) |
+| `hook-call` | Call into a React hook |
+| `hook-init` | Hook instantiation in a page component |
+| `hook-method` | Method returned by a hook |
+| `hook-effect` | useEffect re-run triggered by dependency change |
+| `context-method` | Function provided by a React context |
+| `context-consumer` | Component consuming context state |
+| `api-call` | HTTP request via `apiFetch` / `api.ts` helper |
+| `route-handler` | Express route handler on the backend |
+| `middleware` | Express middleware (auth, permission check) |
+| `business-logic` | Core logic within a route (validation, DB query) |
+| `db-write` | SQL INSERT / UPDATE / DELETE |
+| `db-read` | SQL SELECT (re-fetch after write) |
+| `state-update` | React `setState` call updating local component state |
+| `side-effect` | Secondary effect after main operation (refetch, localStorage) |
+| `event-dispatch` | `window.dispatchEvent` custom event |
+| `event-listener` | `window.addEventListener` handler |
+| `routing` | React Router navigation / redirect |
+| `fan-out` | One state change propagates to multiple independent consumers |
+
+### Covered journeys
+
+| ID | Label | Steps |
+|----|-------|-------|
+| `login` | User Login | 12 |
+| `customer-checkin` | Patient Check-in at Reception | 9 |
+| `appointment-create` | Create Appointment | 10 |
+| `payment-create` | Record Payment | 11 |
+| `location-filter` | Global Location Filter | 8 |
+
+### Querying flows
+
+```bash
+# Pretty-print code-level steps with file:line for a journey
+node graphify-out/overlay/query.js flow-detail login
+node graphify-out/overlay/query.js flow-detail payment-create
+node graphify-out/overlay/query.js flow-detail location-filter
+
+# Original flow command (file-level participants from business-overlay.json) still works
+node graphify-out/overlay/query.js flow login
+```
+
 ## Known Limitations
 
 - **File-level granularity only.** The overlay annotates files, not individual

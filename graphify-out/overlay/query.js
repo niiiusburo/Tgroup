@@ -223,6 +223,45 @@ function cmdSearch(overlay, keyword) {
   );
 }
 
+
+const FLOWS_PATH = path.join(__dirname, 'flows.json');
+
+function loadFlows() {
+  if (!fs.existsSync(FLOWS_PATH)) {
+    console.error('ERROR: flows.json not found at', FLOWS_PATH);
+    process.exit(1);
+  }
+  return JSON.parse(fs.readFileSync(FLOWS_PATH, 'utf8'));
+}
+
+function cmdFlowDetail(journeyId) {
+  if (!journeyId) { console.error('Usage: query.js flow-detail <journey-id>'); process.exit(1); }
+  const flows = loadFlows();
+  const flow = flows.flows[journeyId];
+  if (!flow) {
+    console.log('Flow not found in flows.json:', journeyId);
+    console.log('Available journeys:', Object.keys(flows.flows).join(', '));
+    return;
+  }
+  console.log('='.repeat(60));
+  console.log('FLOW: ' + flow.label);
+  console.log('='.repeat(60));
+  console.log('Journey:     ' + flow.journey);
+  console.log('Criticality: ' + flow.criticality);
+  console.log('Entry point: ' + flow.entryPoint);
+  console.log('Boundary:    ' + (flow.crossesBoundary ? 'frontend + backend' : 'single-layer'));
+  console.log('');
+  console.log('STEPS (' + flow.steps.length + '):');
+  (flow.steps || []).forEach((s) => {
+    const num = String(s.order).padStart(2, '0');
+    const loc = s.file + ':' + s.line;
+    console.log('  ' + num + '. [' + s.kind + '] ' + loc + ' \u2014 ' + s.label);
+  });
+  console.log('');
+  console.log('FILES INVOLVED (' + (flow.filesInvolved || []).length + '):');
+  (flow.filesInvolved || []).forEach((f) => console.log('  ' + f));
+}
+
 function printHelp() {
   console.log('Usage: node graphify-out/overlay/query.js <command> [args]');
   console.log('');
@@ -232,7 +271,8 @@ function printHelp() {
   console.log('  journey <id>         List nodes in a journey (with steps)');
   console.log('  entity <id>          List nodes touching an entity');
   console.log('  file <path>          Show annotation for a specific file');
-  console.log('  flow <journey-id>    Pretty-print journey steps + participating files');
+  console.log('  flow <journey-id>         Pretty-print journey steps + participating files (from overlay)');
+  console.log('  flow-detail <journey-id>  Pretty-print ordered code-level flow steps with file:line (from flows.json)');
   console.log('  unannotated          List files with no annotation');
   console.log('  stats                Coverage summary: annotated/total, per-domain, per-tier');
   console.log('  search <keyword>     Search intents + notes + labels for a keyword');
@@ -242,6 +282,8 @@ function printHelp() {
   console.log('  node graphify-out/overlay/query.js domain payments');
   console.log('  node graphify-out/overlay/query.js journey payment-create');
   console.log('  node graphify-out/overlay/query.js flow login');
+  console.log('  node graphify-out/overlay/query.js flow-detail login');
+  console.log('  node graphify-out/overlay/query.js flow-detail payment-create');
   console.log('  node graphify-out/overlay/query.js search void');
   console.log('  node graphify-out/overlay/query.js stats');
 }
@@ -256,6 +298,7 @@ switch (cmd) {
   case 'entity':      cmdEntity(overlay, args[0]); break;
   case 'file':        cmdFile(overlay, args[0]); break;
   case 'flow':        cmdFlow(overlay, args[0]); break;
+  case 'flow-detail': cmdFlowDetail(args[0]); break;
   case 'unannotated': cmdUnannotated(overlay); break;
   case 'stats':       cmdStats(overlay); break;
   case 'search':      cmdSearch(overlay, args[0]); break;
