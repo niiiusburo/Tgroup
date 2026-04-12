@@ -30,16 +30,25 @@ Customers and employees (doctors/staff).
 | Column | Type | Description |
 |--------|------|-------------|
 | id | uuid | Primary key |
-| name | varchar(255) | Full name |
-| email | varchar(255) | Email address |
-| phone | varchar(50) | Phone number |
-| address | text | Home address |
-| date_of_birth | date | Date of birth |
+| name | text | Full name |
+| email | text | Email address |
+| phone | text | Phone number |
+| street | text | Home address |
+| jobtitle | text | Job title (e.g. "Bác sĩ Nha khoa") |
 | customer | boolean | Is customer |
 | employee | boolean | Is employee |
-| company_id | uuid | FK → companies |
-| created_at | timestamp | Creation date |
-| updated_at | timestamp | Last update |
+| active | boolean | Active status |
+| isdoctor | boolean | Is doctor |
+| isassistant | boolean | Is assistant |
+| isreceptionist | boolean | Is receptionist |
+| companyid | uuid | FK → companies |
+| hrjobid | uuid | FK → hrjobs (for HR job classification) |
+| startworkdate | timestamp | Start work date |
+| wage | numeric | Base wage |
+| allowance | numeric | Allowance |
+| password_hash | text | Auth password hash |
+| datecreated | timestamp | Creation date |
+| lastupdated | timestamp | Last update |
 
 **Count:** 56 total (30 customers + 19 doctors + 7 branch accounts)
 
@@ -108,14 +117,27 @@ Payment receipts.
 ## Views
 
 ### dbo.employees
-View combining partners with `employee=true`.
+View combining partners with `employee=true`. Passes through real columns from partners.
 
-```sql
-CREATE VIEW dbo.employees AS
-SELECT * FROM dbo.partners WHERE employee = true;
-```
+| Column | Source | Description |
+|--------|--------|-------------|
+| id | partners.id | Primary key |
+| name | partners.name | Full name |
+| isdoctor | partners.isdoctor | Is doctor (real column) |
+| isassistant | partners.isassistant | Is assistant (real column) |
+| isreceptionist | partners.isreceptionist | Is receptionist (real column) |
+| active | partners.active | Active status |
+| jobtitle | partners.jobtitle | Job title |
+| companyid | partners.companyid | FK → companies |
+| hrjobid | partners.hrjobid | FK → hrjobs |
+| wage | partners.wage | Base wage |
+| allowance | partners.allowance | Allowance |
+| startworkdate | partners.startworkdate | Start work date |
+| address | partners.street | Home address |
+| birthday | derived | From birthyear/birthmonth/birthday |
+| hourlywage..enrollnumber | NULL | HR fields (not yet used) |
 
-**Count:** 19 doctors
+**Count:** 28 employees (19 doctors + test assistants + admin)
 
 ## Empty Tables (Not Yet Used)
 

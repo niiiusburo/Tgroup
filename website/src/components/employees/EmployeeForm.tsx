@@ -26,6 +26,18 @@ import { LocationSelector } from '@/components/shared/LocationSelector';
 import { createEmployee, updateEmployee, fetchCompanies, type CreateEmployeeData } from '@/lib/api';
 import { ALL_ROLES, ROLE_LABELS, ROLE_TO_DB_FLAGS, inferRoleFromFlags, type EmployeeRole } from '@/data/mockEmployees';
 
+const ROLE_TO_JOBTITLE: Record<EmployeeRole, string> = {
+  'doctor': 'Bác sĩ',
+  'doctor-assistant': 'Trợ lý bác sĩ',
+  'assistant': 'Phụ tá',
+  'receptionist': 'Lễ tân',
+  'general-manager': 'Quản lý tổng',
+  'branch-manager': 'Quản lý cơ sở',
+  'sale-online': 'Sale online',
+  'customer-service': 'CSKH',
+  'marketing': 'Marketing',
+};
+
 interface EmployeeFormProps {
   readonly employee?: {
     id: string;
@@ -38,6 +50,7 @@ interface EmployeeFormProps {
     isassistant: boolean;
     isreceptionist: boolean;
     active: boolean;
+    jobtitle?: string | null;
     wage?: string | null;
     allowance?: string | null;
     startworkdate?: string | null;
@@ -56,9 +69,9 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
   const [phone, setPhone] = useState(employee?.phone ?? '');
   const [email, setEmail] = useState(employee?.email ?? '');
   const [companyid, setCompanyid] = useState(employee?.companyid ?? '');
-  // Determine initial role from DB flags
+  // Determine initial role from DB flags + jobtitle
   const initialRole = employee
-    ? inferRoleFromFlags(employee.isdoctor, employee.isassistant, employee.isreceptionist)
+    ? inferRoleFromFlags(employee.isdoctor, employee.isassistant, employee.isreceptionist, employee.jobtitle)
     : 'doctor';
   const [selectedRole, setSelectedRole] = useState<EmployeeRole>(initialRole);
   const [active, setActive] = useState(employee?.active ?? true);
@@ -100,6 +113,7 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
       isdoctor: dbFlags.isdoctor,
       isassistant: dbFlags.isassistant,
       isreceptionist: dbFlags.isreceptionist,
+      jobtitle: ROLE_TO_JOBTITLE[selectedRole],
       active,
       startworkdate: startworkdate || undefined,
     };

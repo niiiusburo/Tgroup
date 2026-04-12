@@ -35,22 +35,29 @@ function deriveRoles(
   isdoctor: boolean,
   isassistant: boolean,
   isreceptionist: boolean,
-  hrjobname: string | null
+  jobtitle: string | null
 ): readonly EmployeeRole[] {
-  const roles: EmployeeRole[] = [];
-
-  if (isdoctor) roles.push('doctor');
-  if (isassistant) roles.push('assistant');
-  if (isreceptionist) roles.push('receptionist');
-
-  if (hrjobname) {
-    const lower = hrjobname.toLowerCase();
-    if ((lower.includes('quản lý') || lower.includes('manager')) && !roles.includes('general-manager')) {
-      roles.push('general-manager');
+  // Single-role: return exactly one role based on DB flags + jobtitle
+  if (isdoctor) return ['doctor'];
+  if (isreceptionist) return ['receptionist'];
+  if (isassistant) {
+    if (jobtitle && jobtitle.toLowerCase().includes('trợ lý')) {
+      return ['doctor-assistant'];
     }
+    return ['assistant'];
   }
 
-  return roles.length > 0 ? roles : ['assistant'];
+  // No role flags set — classify by jobtitle
+  if (jobtitle) {
+    const lower = jobtitle.toLowerCase();
+    if (lower.includes('quản lý') || lower.includes('manager')) return ['general-manager'];
+    if (lower.includes('marketing')) return ['marketing'];
+    if (lower.includes('sale')) return ['sale-online'];
+    if (lower.includes('cskh') || lower.includes('customer service') || lower.includes('hỗ trợ')) return ['customer-service'];
+    if (lower.includes('quản trị') || lower.includes('admin')) return ['general-manager'];
+  }
+
+  return ['assistant'];
 }
 
 /**
@@ -66,7 +73,7 @@ function mapApiEmployeeToEmployee(apiEmployee: ApiEmployee): Employee {
       apiEmployee.isdoctor,
       apiEmployee.isassistant,
       apiEmployee.isreceptionist,
-      apiEmployee.hrjobname
+      apiEmployee.jobtitle
     ),
     status: mapApiStatus(apiEmployee.active),
     locationId: apiEmployee.companyid || '',
@@ -91,6 +98,7 @@ interface EmployeeWithApiFields extends Employee {
   readonly ref?: string | null;
   readonly companyname?: string | null;
   readonly hrjobname?: string | null;
+  readonly jobtitle?: string | null;
   readonly wage?: string | null;
   readonly allowance?: string | null;
   readonly locationScopeIds?: readonly string[];
@@ -134,6 +142,7 @@ export function useEmployees(selectedLocationId?: string) {
           ref: apiEmp.ref,
           companyname: apiEmp.companyname,
           hrjobname: apiEmp.hrjobname,
+          jobtitle: apiEmp.jobtitle,
           wage: apiEmp.wage,
           allowance: apiEmp.allowance,
           locationScopeIds: apiEmp.locationScopeIds ?? [],
@@ -174,6 +183,52 @@ export function useEmployees(selectedLocationId?: string) {
       }
     };
   }, [searchQuery, fetchAndSetEmployees]);
+
+  /**
+   * Filter counts derived from allEmployees (reflects search + location context)
+   */
+  const filterCounts = useMemo(() => {
+    const statusCounts: Record<EmployeeStatus | 'all', number> = {
+      all: allEmployees.length,
+      active: 0,
+      'on-leave': 0,
+      inactive: 0,
+    };
+    const tierCounts: Record<EmployeeTier | 'all', number> = {
+      all: allEmployees.length,
+      junior: 0,
+      mid: 0,
+      senior: 0,
+      lead: 0,
+      director: 0,
+    };
+    const roleCounts: Record<EmployeeRole | 'all', number> = {
+      all: allEmployees.length,
+      'general-manager': 0,
+      'branch-manager': 0,
+      doctor: 0,
+      'doctor-assistant': 0,
+      assistant: 0,
+      receptionist: 0,
+      'sale-online': 0,
+      'customer-service': 0,
+      marketing: 0,
+    };
+
+    for (const emp of allEmployees) {
+      if (emp.status === 'active') statusCounts.active++;
+      else if (emp.status === 'on-leave') statusCounts['on-leave']++;
+      else if (emp.status === 'inactive') statusCounts.inactive++;
+
+      tierCounts[emp.tier]++;
+
+      for (const role of emp.roles) {
+        roleCounts[role]++;
+      }
+    }
+
+    return { statusCounts, tierCounts, roleCounts };
+  }, [allEmployees]);
 
   /**
    * Filter employees based on client-side filters
@@ -255,6 +310,7 @@ export function useEmployees(selectedLocationId?: string) {
     refetch,
     isLoading,
     error,
+    filterCounts,
   } as const;
 }
 

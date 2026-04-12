@@ -46,10 +46,22 @@ export function inferRoleFromFlags(
   isDoctor: boolean,
   isAssistant: boolean,
   isReceptionist: boolean,
+  jobtitle?: string | null,
 ): EmployeeRole {
   if (isDoctor) return 'doctor';
   if (isReceptionist) return 'receptionist';
-  if (isAssistant) return 'assistant';
+  if (isAssistant) {
+    if (jobtitle && jobtitle.toLowerCase().includes('trợ lý')) return 'doctor-assistant';
+    return 'assistant';
+  }
+  // No role flags — classify by jobtitle
+  if (jobtitle) {
+    const lower = jobtitle.toLowerCase();
+    if (lower.includes('quản lý') || lower.includes('manager') || lower.includes('quản trị') || lower.includes('admin')) return 'general-manager';
+    if (lower.includes('marketing')) return 'marketing';
+    if (lower.includes('sale')) return 'sale-online';
+    if (lower.includes('cskh') || lower.includes('customer service') || lower.includes('hỗ trợ')) return 'customer-service';
+  }
   return 'customer-service';
 }
 

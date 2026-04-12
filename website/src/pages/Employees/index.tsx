@@ -34,6 +34,7 @@ export function Employees() {
     getLinkedEmployees,
     clearFilters,
     refetch,
+    filterCounts,
   } = useEmployees(selectedLocationId);
 
   // Form state
@@ -64,6 +65,7 @@ export function Employees() {
         isassistant: selectedEmployee.roles.includes('assistant') || selectedEmployee.roles.includes('doctor-assistant'),
         isreceptionist: selectedEmployee.roles.includes('receptionist'),
         active: selectedEmployee.status === 'active',
+        jobtitle: (selectedEmployee as any).hrjobname || (selectedEmployee as any).jobtitle || null,
         wage: (selectedEmployee as any).wage ?? null,
         allowance: (selectedEmployee as any).allowance ?? null,
         startworkdate: selectedEmployee.hireDate || null,
@@ -126,35 +128,48 @@ export function Employees() {
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-gray-500 w-14 shrink-0">Status:</span>
           <div className="flex flex-wrap gap-1.5">
-            {(['all', 'active', 'on-leave', 'inactive'] as const).map((status) => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                  statusFilter === status
-                    ? status === 'all' ? 'bg-gray-900 text-white'
-                    : status === 'active' ? 'bg-green-100 text-green-700'
-                    : status === 'on-leave' ? 'bg-yellow-100 text-yellow-700'
-                    : 'bg-gray-200 text-gray-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {status === 'all' ? 'All' : status === 'on-leave' ? 'On Leave' : status.charAt(0).toUpperCase() + status.slice(1)}
-              </button>
-            ))}
+            {(['all', 'active', 'on-leave', 'inactive'] as const).map((status) => {
+              const isSelected = statusFilter === status;
+              const label = status === 'all' ? 'All' : status === 'on-leave' ? 'On Leave' : status.charAt(0).toUpperCase() + status.slice(1);
+              return (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                    isSelected
+                      ? status === 'all' ? 'bg-gray-900 text-white'
+                      : status === 'active' ? 'bg-green-100 text-green-700'
+                      : status === 'on-leave' ? 'bg-yellow-100 text-yellow-700'
+                      : 'bg-gray-200 text-gray-600'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  <span>{label}</span>
+                  <span
+                    className={`ml-1.5 inline-flex min-w-[1.125rem] items-center justify-center rounded-full px-1 py-0 text-[10px] leading-4 ${
+                      isSelected
+                        ? status === 'all' ? 'bg-white/20 text-white' : 'bg-black/10'
+                        : 'bg-gray-200 text-gray-600'
+                    }`}
+                  >
+                    {filterCounts.statusCounts[status]}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Tier filter */}
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-gray-500 w-14 shrink-0">Tier:</span>
-          <TierSelector value={tierFilter} onChange={setTierFilter} />
+          <TierSelector value={tierFilter} onChange={setTierFilter} counts={filterCounts.tierCounts} />
         </div>
 
         {/* Role filter */}
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-gray-500 w-14 shrink-0">Role:</span>
-          <RoleMultiSelect value={roleFilter} onChange={setRoleFilter} />
+          <RoleMultiSelect value={roleFilter} onChange={setRoleFilter} counts={filterCounts.roleCounts} />
         </div>
 
         {/* Clear filters */}
