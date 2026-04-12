@@ -501,6 +501,16 @@
       "line": 139
     },
     {
+      "id": "dbo.monthlyplans.chk_downpayment_lt_total.check",
+      "table": "dbo.monthlyplans",
+      "column": "down_payment",
+      "kind": "check",
+      "rule": "CHECK (down_payment < total_amount)",
+      "constraintName": "chk_downpayment_lt_total",
+      "file": "api/migrations/017_monthlyplan_constraints.sql",
+      "line": 8
+    },
+    {
       "id": "dbo.saleorderlines.isdeleted.default",
       "table": "dbo.saleorderlines",
       "column": "isdeleted",

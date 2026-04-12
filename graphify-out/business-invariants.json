@@ -1,13 +1,32 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "generatedAt": "2026-04-12",
+  "description": "Business invariant enforcement model for TGroup. Reflects API-layer enforcement added by commits f58da4a9, 5670ae0e, 3ad65c1a and DB CHECK from migration 017.",
   "summary": {
     "totalInvariants": 43,
-    "fullyEnforced": 6,
-    "partiallyEnforced": 19,
-    "unenforced": 18,
-    "critical_gaps": 4
+    "fullyEnforced": 7,
+    "partiallyEnforced": 21,
+    "unenforced": 15,
+    "critical_gaps": 1,
+    "statusBreakdown": {
+      "fully-enforced": 7,
+      "db-and-api": 2,
+      "db-and-ui": 1,
+      "api-and-ui": 6,
+      "db-only": 4,
+      "api-only": 7,
+      "ui-only": 1,
+      "unenforced": 15
+    }
   },
+  "critical_gaps": [
+    {
+      "id": "service.paidAmount.not-exceeding-totalCost",
+      "severity": "critical",
+      "status": "unenforced",
+      "recommendation": "Add API validation: paidAmount <= totalCost before updating service record."
+    }
+  ],
   "invariants": [
     {
       "id": "customer.name.required",
@@ -562,9 +581,14 @@
           "status": "enforced",
           "references": [
             {
+              "id": "payments.post.amount-positive",
+              "file": "api/src/routes/payments.js",
+              "line": 491
+            },
+            {
               "id": "payments.post.refund.amount-positive",
               "file": "api/src/routes/payments.js",
-              "line": 411
+              "line": 618
             }
           ]
         },
@@ -580,7 +604,7 @@
         }
       },
       "status": "api-and-ui",
-      "recommendation": "Add DB CHECK (amount > 0) on payments table. Add API validation: reject amount <= 0 on POST."
+      "recommendation": "API enforces amount > 0 on both POST /Payments and POST /Payments/refund. Add DB CHECK (amount > 0) on payments table for defense-in-depth."
     },
     {
       "id": "payment.amount.not-exceeding-residual",
@@ -595,8 +619,14 @@
           "references": []
         },
         "api": {
-          "status": "missing",
-          "references": []
+          "status": "enforced",
+          "references": [
+            {
+              "id": "payments.post.allocation-residual",
+              "file": "api/src/routes/payments.js",
+              "line": 515
+            }
+          ]
         },
         "ui": {
           "status": "enforced",
@@ -609,8 +639,8 @@
           ]
         }
       },
-      "status": "ui-only",
-      "recommendation": "Add API validation comparing payment amount vs outstanding residual before INSERT."
+      "status": "api-and-ui",
+      "recommendation": "API validateAllocationResidual() checks each allocation vs outstanding balance with 0.01 tolerance. No DB-level check possible (dynamic residual). Solid API enforcement."
     },
     {
       "id": "payment.method.enum",
@@ -1032,12 +1062,39 @@
       "rationale": "A down payment >= totalAmount means nothing is owed in installments; plan creation would generate zero or negative installment amounts",
       "enforcement": {
         "db": {
-          "status": "missing",
-          "references": []
+          "status": "enforced",
+          "references": [
+            {
+              "id": "dbo.monthlyplans.chk_downpayment_lt_total.check",
+              "file": "api/migrations/017_monthlyplan_constraints.sql",
+              "line": 8
+            }
+          ]
         },
         "api": {
-          "status": "missing",
-          "references": []
+          "status": "enforced",
+          "references": [
+            {
+              "id": "monthlyplans.post.down-payment-less-than-total",
+              "file": "api/src/routes/monthlyPlans.js",
+              "line": 189
+            },
+            {
+              "id": "monthlyplans.put.down-payment-less-than-total",
+              "file": "api/src/routes/monthlyPlans.js",
+              "line": 279
+            },
+            {
+              "id": "monthlyplans.post.down-payment-non-negative",
+              "file": "api/src/routes/monthlyPlans.js",
+              "line": 188
+            },
+            {
+              "id": "monthlyplans.put.down-payment-non-negative",
+              "file": "api/src/routes/monthlyPlans.js",
+              "line": 278
+            }
+          ]
         },
         "ui": {
           "status": "enforced",
@@ -1055,8 +1112,8 @@
           ]
         }
       },
-      "status": "ui-only",
-      "recommendation": "Add API validation: downPayment < totalAmount. Add DB CHECK (down_payment < total_amount)."
+      "status": "fully-enforced",
+      "recommendation": "Fully enforced: DB CHECK chk_downpayment_lt_total (migration 017) + API guard on POST and PUT. All 3 layers covered."
     },
     {
       "id": "monthlyPlan.installmentCount.positive",
@@ -1101,16 +1158,22 @@
           "references": []
         },
         "api": {
-          "status": "missing",
-          "references": []
+          "status": "enforced",
+          "references": [
+            {
+              "id": "monthlyplans.post.installment-sum-tolerance",
+              "file": "api/src/routes/monthlyPlans.js",
+              "line": 193
+            }
+          ]
         },
         "ui": {
           "status": "missing",
           "references": []
         }
       },
-      "status": "unenforced",
-      "recommendation": "Add API validation: sum(installmentAmount * count) == (totalAmount - downPayment) before INSERT."
+      "status": "api-only",
+      "recommendation": "API enforces installment_sum tolerance check on POST. No DB check possible (computed). Add PUT guard for updates."
     },
     {
       "id": "monthlyPlan.status.enum",
@@ -1173,16 +1236,22 @@
           "references": []
         },
         "api": {
-          "status": "missing",
-          "references": []
+          "status": "enforced",
+          "references": [
+            {
+              "id": "monthlyplans.delete.paid-installments-guard",
+              "file": "api/src/routes/monthlyPlans.js",
+              "line": 376
+            }
+          ]
         },
         "ui": {
           "status": "missing",
           "references": []
         }
       },
-      "status": "unenforced",
-      "recommendation": "Add API pre-delete check: SELECT count from planinstallments WHERE plan_id=$1 AND status='paid'; reject if > 0."
+      "status": "api-only",
+      "recommendation": "API pre-delete check in monthlyPlans.js queries planinstallments WHERE status=paid; returns 409 with invariant reference. Solid."
     },
     {
       "id": "monthlyPlan.customer.referential",
@@ -1257,16 +1326,42 @@
           "references": []
         },
         "api": {
-          "status": "missing",
-          "references": []
+          "status": "enforced",
+          "references": [
+            {
+              "id": "saleorders.post.amounttotal-non-negative",
+              "file": "api/src/routes/saleOrders.js",
+              "line": 234
+            },
+            {
+              "id": "saleorders.patch.amounttotal-non-negative",
+              "file": "api/src/routes/saleOrders.js",
+              "line": 464
+            },
+            {
+              "id": "services.post.total-non-negative",
+              "file": "api/src/routes/services.js",
+              "line": 87
+            },
+            {
+              "id": "services.post.unit-price-non-negative",
+              "file": "api/src/routes/services.js",
+              "line": 83
+            },
+            {
+              "id": "services.post.quantity-non-negative",
+              "file": "api/src/routes/services.js",
+              "line": 84
+            }
+          ]
         },
         "ui": {
           "status": "missing",
           "references": []
         }
       },
-      "status": "unenforced",
-      "recommendation": "Add DB CHECK (total_cost >= 0) on saleorders table. Add API validation."
+      "status": "api-only",
+      "recommendation": "API enforces non-negative amounttotal on saleOrders POST/PATCH and validates total = unit_price*qty-discount >= 0 in services route. Add DB CHECK (amounttotal >= 0) on saleorders for defense-in-depth."
     },
     {
       "id": "service.paidAmount.not-exceeding-totalCost",

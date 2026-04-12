@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generatedAt": "2026-04-11",
+  "generatedAt": "2026-04-12",
   "scope": "api-validations",
   "source": "api/src/routes/*.js",
   "validations": [
@@ -287,27 +287,37 @@
     {
       "id": "payments.post.required-fields",
       "file": "api/src/routes/payments.js",
-      "line": 333,
+      "line": 491,
       "route": "POST /api/Payments",
       "entity": "payment",
       "kind": "required-field",
       "rule": "customer_id, amount, and method are all required",
-      "evidence": "if (!customer_id || amount === undefined || amount === null || !method) return res.status(400)..."
+      "evidence": "if (!customer_id || amount === undefined || amount === null || !method || parseFloat(amount) <= 0) return res.status(400)..."
     },
     {
-      "id": "payments.post.record-type-enum",
+      "id": "payments.post.amount-positive",
       "file": "api/src/routes/payments.js",
-      "line": 337,
+      "line": 491,
       "route": "POST /api/Payments",
       "entity": "payment",
-      "kind": "cross-field",
-      "rule": "record_type must be 'saleorder' or 'dotkham' when record_id is provided",
-      "evidence": "if (record_id && !['saleorder', 'dotkham'].includes(record_type)) return res.status(400)..."
+      "kind": "numeric-range",
+      "rule": "payment amount must be positive (> 0)",
+      "evidence": "parseFloat(amount) <= 0 => res.status(400).json({ error: 'customer_id, positive amount, and method are required' })"
+    },
+    {
+      "id": "payments.post.allocation-residual",
+      "file": "api/src/routes/payments.js",
+      "line": 515,
+      "route": "POST /api/Payments",
+      "entity": "payment",
+      "kind": "numeric-range",
+      "rule": "each allocation's allocated_amount must not exceed the outstanding residual of its invoice or dotkham",
+      "evidence": "validateAllocationResidual(allocations) => checkInvoiceResidual / checkDotkhamResidual: if (amt > residual + 0.01) return 'Payment amount exceeds outstanding balance' => 400"
     },
     {
       "id": "payments.post.refund.required-fields",
       "file": "api/src/routes/payments.js",
-      "line": 411,
+      "line": 618,
       "route": "POST /api/Payments/refund",
       "entity": "payment",
       "kind": "required-field",
@@ -317,7 +327,7 @@
     {
       "id": "payments.post.refund.amount-positive",
       "file": "api/src/routes/payments.js",
-      "line": 411,
+      "line": 618,
       "route": "POST /api/Payments/refund",
       "entity": "payment",
       "kind": "numeric-range",
@@ -325,49 +335,29 @@
       "evidence": "amount <= 0 triggers 400 'customer_id, positive amount, and method are required'"
     },
     {
-      "id": "payments.post.refund.method-enum",
+      "id": "payments.patch.no-valid-fields",
       "file": "api/src/routes/payments.js",
-      "line": 415,
-      "route": "POST /api/Payments/refund",
-      "entity": "payment",
-      "kind": "enum",
-      "rule": "refund method must be 'cash' or 'bank_transfer'",
-      "evidence": "if (!['cash', 'bank_transfer'].includes(method)) return res.status(400)..."
-    },
-    {
-      "id": "payments.patch.deposit-only",
-      "file": "api/src/routes/payments.js",
-      "line": 467,
+      "line": 682,
       "route": "PATCH /api/Payments/:id",
       "entity": "payment",
-      "kind": "state-transition",
-      "rule": "only deposit transactions can be edited",
-      "evidence": "if (!isDepositRecord(row)) return res.status(403).json({ error: 'Only deposit transactions can be edited' })"
-    },
-    {
-      "id": "payments.delete.deposit-only",
-      "file": "api/src/routes/payments.js",
-      "line": 573,
-      "route": "DELETE /api/Payments/:id",
-      "entity": "payment",
-      "kind": "state-transition",
-      "rule": "only deposit transactions can be deleted",
-      "evidence": "if (!isDepositRecord(row)) return res.status(403).json({ error: 'Only deposit transactions can be deleted' })"
+      "kind": "required-field",
+      "rule": "at least one allowlisted field must be provided for update",
+      "evidence": "if (fields.length === 0) return res.status(400).json({ error: 'No valid fields to update' })"
     },
     {
       "id": "payments.void.status-posted",
       "file": "api/src/routes/payments.js",
-      "line": 539,
+      "line": 790,
       "route": "POST /api/Payments/:id/void",
       "entity": "payment",
       "kind": "state-transition",
-      "rule": "payment status must be 'posted' to void; already-voided payments silently return 404",
-      "evidence": "UPDATE payments ... WHERE id = $1 AND status = 'posted' RETURNING *; rows=0 => 404 'already voided'"
+      "rule": "payment status must be 'posted' to void; payments with other statuses return 404",
+      "evidence": "UPDATE payments SET status = 'voided' ... WHERE id = $1 AND status = 'posted' RETURNING *; rows=0 => 404 'Payment not found'"
     },
     {
       "id": "payments.proof.format",
       "file": "api/src/routes/payments.js",
-      "line": 592,
+      "line": 814,
       "route": "POST /api/Payments/:id/proof",
       "entity": "payment",
       "kind": "format",
@@ -377,7 +367,7 @@
     {
       "id": "saleorders.post.partnerid-required",
       "file": "api/src/routes/saleOrders.js",
-      "line": 249,
+      "line": 229,
       "route": "POST /api/SaleOrders",
       "entity": "saleorder",
       "kind": "required-field",
@@ -385,9 +375,29 @@
       "evidence": "if (!partnerid) return res.status(400).json({ error: 'partnerid is required' })"
     },
     {
+      "id": "saleorders.post.amounttotal-non-negative",
+      "file": "api/src/routes/saleOrders.js",
+      "line": 234,
+      "route": "POST /api/SaleOrders",
+      "entity": "saleorder",
+      "kind": "numeric-range",
+      "rule": "amounttotal must be >= 0",
+      "evidence": "if (parseFloat(amounttotal || 0) < 0) return res.status(400).json({ error: 'amounttotal must be >= 0' })"
+    },
+    {
+      "id": "saleorders.post.quantity-non-negative",
+      "file": "api/src/routes/saleOrders.js",
+      "line": 237,
+      "route": "POST /api/SaleOrders",
+      "entity": "saleorder",
+      "kind": "numeric-range",
+      "rule": "quantity must be >= 0 when provided",
+      "evidence": "if (quantity != null && !isNaN(parseFloat(quantity)) && parseFloat(quantity) < 0) return res.status(400).json({ error: 'quantity must be >= 0' })"
+    },
+    {
       "id": "saleorders.patch.state.state-enum",
       "file": "api/src/routes/saleOrders.js",
-      "line": 368,
+      "line": 357,
       "route": "PATCH /api/SaleOrders/:id/state",
       "entity": "saleorder",
       "kind": "enum",
@@ -395,34 +405,174 @@
       "evidence": "if (!state || !validStates.includes(state)) return res.status(400).json({ error: 'Invalid state...' })"
     },
     {
+      "id": "saleorders.patch.amounttotal-non-negative",
+      "file": "api/src/routes/saleOrders.js",
+      "line": 464,
+      "route": "PATCH /api/SaleOrders/:id",
+      "entity": "saleorder",
+      "kind": "numeric-range",
+      "rule": "amounttotal must be >= 0 when provided",
+      "evidence": "if (amounttotal != null && parseFloat(amounttotal) < 0) return res.status(400).json({ error: 'amounttotal must be >= 0' })"
+    },
+    {
+      "id": "saleorders.patch.quantity-non-negative",
+      "file": "api/src/routes/saleOrders.js",
+      "line": 467,
+      "route": "PATCH /api/SaleOrders/:id",
+      "entity": "saleorder",
+      "kind": "numeric-range",
+      "rule": "quantity must be >= 0 when provided",
+      "evidence": "if (quantity != null && !isNaN(parseFloat(quantity)) && parseFloat(quantity) < 0) return res.status(400).json({ error: 'quantity must be >= 0' })"
+    },
+    {
+      "id": "saleorders.patch.no-fields",
+      "file": "api/src/routes/saleOrders.js",
+      "line": 498,
+      "route": "PATCH /api/SaleOrders/:id",
+      "entity": "saleorder",
+      "kind": "required-field",
+      "rule": "at least one field must be provided for update",
+      "evidence": "if (sets.length === 0) return res.status(400).json({ error: 'No fields to update' })"
+    },
+    {
+      "id": "services.post.required-fields",
+      "file": "api/src/routes/services.js",
+      "line": 75,
+      "route": "POST /api/Services",
+      "entity": "service",
+      "kind": "required-field",
+      "rule": "customer_id and service_type are both required",
+      "evidence": "if (!customer_id || !service_type) return res.status(400).json({ error: 'customer_id and service_type are required' })"
+    },
+    {
+      "id": "services.post.unit-price-non-negative",
+      "file": "api/src/routes/services.js",
+      "line": 83,
+      "route": "POST /api/Services",
+      "entity": "service",
+      "kind": "numeric-range",
+      "rule": "unit_price must be >= 0",
+      "evidence": "if (_up < 0) return res.status(400).json({ error: 'unit_price must be >= 0' })"
+    },
+    {
+      "id": "services.post.quantity-non-negative",
+      "file": "api/src/routes/services.js",
+      "line": 84,
+      "route": "POST /api/Services",
+      "entity": "service",
+      "kind": "numeric-range",
+      "rule": "quantity must be >= 0",
+      "evidence": "if (_qty < 0) return res.status(400).json({ error: 'quantity must be >= 0' })"
+    },
+    {
+      "id": "services.post.discount-non-negative",
+      "file": "api/src/routes/services.js",
+      "line": 85,
+      "route": "POST /api/Services",
+      "entity": "service",
+      "kind": "numeric-range",
+      "rule": "discount must be >= 0",
+      "evidence": "if (_disc < 0) return res.status(400).json({ error: 'discount must be >= 0' })"
+    },
+    {
+      "id": "services.post.total-non-negative",
+      "file": "api/src/routes/services.js",
+      "line": 87,
+      "route": "POST /api/Services",
+      "entity": "service",
+      "kind": "cross-field",
+      "rule": "computed total (unit_price * quantity - discount) must be >= 0; discount must not exceed unit_price * quantity",
+      "evidence": "const total = _up * _qty - _disc; if (total < 0) return res.status(400).json({ error: 'total_amount must be >= 0 (discount exceeds unit_price * quantity)' })"
+    },
+    {
       "id": "monthlyplans.post.required-fields",
       "file": "api/src/routes/monthlyPlans.js",
-      "line": 152,
+      "line": 180,
       "route": "POST /api/MonthlyPlans",
       "entity": "monthlyplan",
       "kind": "required-field",
       "rule": "customer_id, total_amount, number_of_installments, and start_date are all required",
-      "evidence": "if (!customer_id || !total_amount || !number_of_installments || !start_date) return res.status(400)..."
+      "evidence": "if (!customer_id || !total_amount || !number_of_installments || !start_date) return res.status(400).json({ error: 'Missing required fields' })"
     },
     {
-      "id": "monthlyplans.post.record-type-enum",
+      "id": "monthlyplans.post.down-payment-non-negative",
       "file": "api/src/routes/monthlyPlans.js",
-      "line": 156,
+      "line": 188,
+      "route": "POST /api/MonthlyPlans",
+      "entity": "monthlyplan",
+      "kind": "numeric-range",
+      "rule": "down_payment must be >= 0",
+      "evidence": "if (_dp < 0) return res.status(400).json({ error: 'down_payment must be >= 0' })"
+    },
+    {
+      "id": "monthlyplans.post.down-payment-less-than-total",
+      "file": "api/src/routes/monthlyPlans.js",
+      "line": 189,
       "route": "POST /api/MonthlyPlans",
       "entity": "monthlyplan",
       "kind": "cross-field",
-      "rule": "record_type must be 'saleorder' or 'dotkham' when record_id is provided",
-      "evidence": "if (record_id && !['saleorder', 'dotkham'].includes(record_type)) return res.status(400)..."
+      "rule": "down_payment must be strictly less than total_amount",
+      "evidence": "if (_dp >= _ta) return res.status(400).json({ error: 'down_payment must be less than total_amount' })"
+    },
+    {
+      "id": "monthlyplans.post.installments-min-one",
+      "file": "api/src/routes/monthlyPlans.js",
+      "line": 190,
+      "route": "POST /api/MonthlyPlans",
+      "entity": "monthlyplan",
+      "kind": "numeric-range",
+      "rule": "number_of_installments must be >= 1",
+      "evidence": "if (_n < 1) return res.status(400).json({ error: 'number_of_installments must be >= 1' })"
+    },
+    {
+      "id": "monthlyplans.post.installment-sum-tolerance",
+      "file": "api/src/routes/monthlyPlans.js",
+      "line": 193,
+      "route": "POST /api/MonthlyPlans",
+      "entity": "monthlyplan",
+      "kind": "cross-field",
+      "rule": "installment_amount * number_of_installments must equal (total_amount - down_payment) within rounding tolerance of 0.5 * n",
+      "evidence": "const installment_sum = installment_amount * _n; if (Math.abs(installment_sum - (_ta - _dp)) > 0.5 * _n) return res.status(400).json({ error: 'installment sum does not equal total_amount - down_payment' })"
     },
     {
       "id": "monthlyplans.put.no-fields",
       "file": "api/src/routes/monthlyPlans.js",
-      "line": 225,
+      "line": 298,
       "route": "PUT /api/MonthlyPlans/:id",
       "entity": "monthlyplan",
       "kind": "required-field",
-      "rule": "at least one field must be provided for update",
-      "evidence": "if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' })"
+      "rule": "at least one field or invoice_ids must be provided for update",
+      "evidence": "if (updates.length === 0 && !Array.isArray(invoice_ids)) return res.status(400).json({ error: 'No fields to update' })"
+    },
+    {
+      "id": "monthlyplans.put.down-payment-non-negative",
+      "file": "api/src/routes/monthlyPlans.js",
+      "line": 278,
+      "route": "PUT /api/MonthlyPlans/:id",
+      "entity": "monthlyplan",
+      "kind": "numeric-range",
+      "rule": "down_payment must be >= 0 when provided",
+      "evidence": "if (newD < 0) return res.status(400).json({ error: 'down_payment must be >= 0' })"
+    },
+    {
+      "id": "monthlyplans.put.down-payment-less-than-total",
+      "file": "api/src/routes/monthlyPlans.js",
+      "line": 279,
+      "route": "PUT /api/MonthlyPlans/:id",
+      "entity": "monthlyplan",
+      "kind": "cross-field",
+      "rule": "down_payment must be strictly less than total_amount when either is updated (merged with current values)",
+      "evidence": "if (newD >= newT) return res.status(400).json({ error: 'down_payment must be less than total_amount' })"
+    },
+    {
+      "id": "monthlyplans.delete.paid-installments-guard",
+      "file": "api/src/routes/monthlyPlans.js",
+      "line": 376,
+      "route": "DELETE /api/MonthlyPlans/:id",
+      "entity": "monthlyplan",
+      "kind": "state-transition",
+      "rule": "cannot delete a plan that has any paid installments",
+      "evidence": "planHasPaidInstallments(client, id): SELECT COUNT(*)::int FROM dbo.planinstallments WHERE plan_id=$1 AND status='paid'; count>0 => res.status(409).json({ error: 'Cannot delete plan with paid installments', invariant: 'monthlyPlan.noDelete-if-paid-installments' })"
     },
     {
       "id": "employees.post.name-required",
@@ -543,16 +693,6 @@
       "kind": "referential",
       "rule": "cannot delete category that has child categories",
       "evidence": "SELECT COUNT(*) FROM dbo.productcategories WHERE parentid = $1 => 400 if count > 0"
-    },
-    {
-      "id": "services.post.required-fields",
-      "file": "api/src/routes/services.js",
-      "line": 75,
-      "route": "POST /api/Services",
-      "entity": "service",
-      "kind": "required-field",
-      "rule": "customer_id and service_type are both required",
-      "evidence": "if (!customer_id || !service_type) return res.status(400).json({ error: 'customer_id and service_type are required' })"
     },
     {
       "id": "permissions.post.groups.name-required",
