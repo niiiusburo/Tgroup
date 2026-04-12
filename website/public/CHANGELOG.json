@@ -1,5 +1,29 @@
 [
   {
+    "version": "0.4.24",
+    "date": "2026-04-12",
+    "commit": "8be4060",
+    "highlights": "Security hardening: enforce permissions on all API endpoints and improve data integrity",
+    "sections": [
+      {
+        "title": "Security & Permissions",
+        "items": [
+          "Guard all write endpoints with requirePermission middleware",
+          "Stop leaking internal error messages to API responses",
+          "Harden Docker Compose and server configuration (env vars, local port, body limit, CORS)"
+        ]
+      },
+      {
+        "title": "Data Integrity",
+        "items": [
+          "Persist employee role fields correctly across updates",
+          "Enforce payment void idempotency to prevent duplicate reversals",
+          "Allowlist foreign-key tables for safer data operations"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.4.23",
     "date": "2026-04-11",
     "commit": "",
