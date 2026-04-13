@@ -73,7 +73,7 @@ function mapApiEmployeeToEmployee(apiEmployee: ApiEmployee): Employee {
       apiEmployee.isdoctor,
       apiEmployee.isassistant,
       apiEmployee.isreceptionist,
-      apiEmployee.jobtitle
+      apiEmployee.jobtitle ?? null
     ),
     status: mapApiStatus(apiEmployee.active),
     locationId: apiEmployee.companyid || '',

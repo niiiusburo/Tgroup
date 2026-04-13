@@ -203,6 +203,7 @@ export interface CreateEmployeeData {
   isdoctor?: boolean;
   isassistant?: boolean;
   isreceptionist?: boolean;
+  jobtitle?: string;
   active?: boolean;
   wage?: number;
   allowance?: number;
@@ -238,6 +239,7 @@ export interface ApiEmployee {
   locationScopeIds?: string[];
   hrjobid: string | null;
   hrjobname: string | null;
+  jobtitle?: string | null;
   wage: string | null;
   allowance: string | null;
   startworkdate: string | null;

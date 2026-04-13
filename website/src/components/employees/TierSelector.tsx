@@ -10,6 +10,7 @@ interface TierSelectorProps {
   readonly value: EmployeeTier | 'all';
   readonly onChange: (tier: EmployeeTier | 'all') => void;
   readonly showAll?: boolean;
+  readonly counts?: Record<EmployeeTier | 'all', number>;
 }
 
 export function TierSelector({ value, onChange, showAll = true }: TierSelectorProps) {

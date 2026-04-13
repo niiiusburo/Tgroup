@@ -10,6 +10,7 @@ interface RoleMultiSelectProps {
   readonly value: EmployeeRole | 'all';
   readonly onChange: (role: EmployeeRole | 'all') => void;
   readonly showAll?: boolean;
+  readonly counts?: Record<EmployeeRole | 'all', number>;
 }
 
 export function RoleMultiSelect({ value, onChange, showAll = true }: RoleMultiSelectProps) {
