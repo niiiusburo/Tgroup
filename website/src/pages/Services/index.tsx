@@ -44,6 +44,7 @@ export function Services() {
     searchTerm,
     setSearchTerm,
     createServiceRecord,
+    updateServiceRecord,
     updateVisitStatus,
     cancelServiceRecord,
   } = useServices(selectedLocationId);
@@ -102,9 +103,8 @@ export function Services() {
     setShowForm(true);
   }
 
-  function handleUpdate(_data: CreateServiceInput) {
-    // For now, update is local only - no API endpoint for this
-    // In a real app, you'd call an updateServiceRecord API
+  async function handleUpdate(data: CreateServiceInput) {
+    await updateServiceRecord(data);
     setShowForm(false);
     setIsEditMode(false);
     setEditingRecord(null);

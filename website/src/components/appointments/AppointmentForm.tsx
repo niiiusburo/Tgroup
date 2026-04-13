@@ -202,6 +202,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
       defaultPrice: p.listPrice,
       estimatedDuration: 30,
       totalVisits: 1,
+      unit: p.uomName || undefined,
     })),
     [products]
   );

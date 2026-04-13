@@ -38,7 +38,7 @@ export function useCustomerPayments(customerId: string | null): UseCustomerPayme
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetchPayments(customerId);
+      const res = await fetchPayments(customerId, 'payments');
       setPayments(res.items as PaymentWithAllocations[]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load payments');

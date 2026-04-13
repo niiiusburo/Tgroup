@@ -118,8 +118,21 @@ export interface CustomerService {
   readonly date: string;
   readonly service: string;
   readonly doctor: string;
+  readonly doctorId?: string;
+  readonly assistantId?: string | null;
+  readonly assistantName?: string;
+  readonly dentalAideId?: string | null;
+  readonly dentalAideName?: string;
+  readonly catalogItemId?: string;
   readonly cost: number;
-  readonly status: 'completed' | 'in-progress' | 'cancelled';
+  readonly quantity?: number;
+  readonly unit?: string;
+  readonly status: 'completed' | 'active' | 'cancelled';
   readonly tooth: string;
   readonly notes: string;
+  readonly orderName?: string;
+  readonly paidAmount?: number;
+  readonly residual?: number;
+  /** Branch/clinic name where the service was performed. */
+  readonly locationName?: string;
 }

@@ -16,6 +16,7 @@ export interface ServiceCatalogItem {
   readonly defaultPrice: number;
   readonly estimatedDuration: number;
   readonly totalVisits: number;
+  readonly unit?: string;
 }
 
 export interface ServiceVisit {
@@ -54,6 +55,7 @@ export interface ServiceRecord {
   readonly completedVisits: number;
   readonly totalCost: number;
   readonly paidAmount: number;
+  readonly residual: number;
   readonly startDate: string;
   readonly createdAt?: string;
   // Fields for UI
@@ -61,4 +63,5 @@ export interface ServiceRecord {
   readonly expectedEndDate?: string;
   readonly toothNumbers?: readonly string[];
   readonly notes?: string;
+  readonly orderName?: string;
 }

@@ -61,7 +61,8 @@ describe('CustomerProfile payment tab', () => {
             appointments={[]}
             services={mockServices}
             payments={mockPayments}
-            depositTransactions={[]}
+            depositList={[]}
+            usageHistory={[]}
             activeTab="payment"
             onBack={vi.fn()}
           />
@@ -85,7 +86,8 @@ describe('CustomerProfile payment tab', () => {
             appointments={[]}
             services={mockServices}
             payments={mockPayments}
-            depositTransactions={[]}
+            depositList={[]}
+            usageHistory={[]}
             activeTab="payment"
             onBack={vi.fn()}
           />

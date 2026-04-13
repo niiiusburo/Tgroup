@@ -43,6 +43,7 @@ const PAGE_SIZE = 20;
 
 export function CustomerDeposits({
   depositList,
+  usageHistory,
   balance,
   loading,
   onAddDeposit,
@@ -53,6 +54,7 @@ export function CustomerDeposits({
   onRefresh,
 }: CustomerDepositsProps) {
   const [page, setPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<'deposits' | 'usage'>('deposits');
 
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showRefundModal, setShowRefundModal] = useState(false);
@@ -339,15 +341,34 @@ export function CustomerDeposits({
       {/* Action bar + table */}
       <div className="bg-white rounded-xl shadow-card overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 border-b border-gray-100">
-          <div className="flex items-center gap-1">
-            <h4 className="text-sm font-semibold text-gray-700">Danh sách tạm ứng</h4>
-            {depositList.length > 0 && (
-              <span className="text-xs font-normal text-gray-500">({depositList.length})</span>
-            )}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setActiveTab('deposits')}
+              className={`text-sm font-semibold transition-colors ${
+                activeTab === 'deposits' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              Danh sách tạm ứng
+              {depositList.length > 0 && (
+                <span className="text-xs font-normal text-gray-500 ml-1">({depositList.length})</span>
+              )}
+            </button>
+            <span className="text-gray-300">|</span>
+            <button
+              onClick={() => setActiveTab('usage')}
+              className={`text-sm font-semibold transition-colors ${
+                activeTab === 'usage' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              Lịch sử sử dụng
+              {usageHistory.length > 0 && (
+                <span className="text-xs font-normal text-gray-500 ml-1">({usageHistory.length})</span>
+              )}
+            </button>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {(onAddDeposit || onAddRefund) && (
+            {activeTab === 'deposits' && (onAddDeposit || onAddRefund) && (
               <>
                 <button
                   onClick={openDepositModal}
@@ -373,103 +394,155 @@ export function CustomerDeposits({
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 text-left">
-                <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Số phiếu tạm ứng</th>
-                <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày tạm ứng</th>
-                <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Phương thức</th>
-                <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Loại tạm ứng</th>
-                <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Số tiền</th>
-                <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {loading ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
-                    <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Đang tải...
-                    </div>
-                  </td>
+          {activeTab === 'deposits' ? (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50 text-left">
+                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Số phiếu tạm ứng</th>
+                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày tạm ứng</th>
+                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Phương thức</th>
+                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Loại tạm ứng</th>
+                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Số tiền</th>
+                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Thao tác</th>
                 </tr>
-              ) : paged.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
-                    Không có dữ liệu
-                  </td>
-                </tr>
-              ) : (
-                paged.map((tx) => (
-                  <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-mono text-gray-700">{tx.receiptNumber || '-'}</td>
-                    <td className="px-4 py-3 text-gray-600">{formatDate(tx.date)}</td>
-                    <td className="px-4 py-3 text-gray-600">{tx.method}</td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        tx.type === 'refund'
-                          ? 'bg-amber-100 text-amber-700'
-                          : 'bg-blue-100 text-blue-700'
-                      }`}>
-                        {tx.type === 'refund' ? 'Hoàn tạm ứng' : 'Đóng tạm ứng'}
-                      </span>
-                    </td>
-                    <td className={`px-4 py-3 text-right font-medium ${
-                      tx.type === 'refund' ? 'text-amber-600' : 'text-blue-600'
-                    }`}>
-                      {tx.type === 'refund' ? '-' : '+'}{formatVND(tx.amount)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        tx.status === 'posted' || tx.status === 'confirmed'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : 'bg-red-100 text-red-700'
-                      }`}>
-                        {tx.status === 'posted' || tx.status === 'confirmed' ? 'Đã xác nhận' : 'Đã hủy'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {onEditDeposit && (
-                          <button
-                            onClick={() => openEditModal(tx)}
-                            className="p-1.5 rounded-md text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                            title="Sửa"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                        )}
-                        {onVoidDeposit && tx.status !== 'voided' && (
-                          <button
-                            onClick={() => handleVoid(tx.id)}
-                            className="p-1.5 rounded-md text-gray-500 hover:text-amber-600 hover:bg-amber-50 transition-colors"
-                            title="Hủy"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
-                        {onDeleteDeposit && (
-                          <button
-                            onClick={() => handleDelete(tx.id)}
-                            className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-                            title="Xóa"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {loading ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Đang tải...
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : paged.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
+                      Không có dữ liệu
+                    </td>
+                  </tr>
+                ) : (
+                  paged.map((tx) => (
+                    <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 font-mono text-gray-700">{tx.receiptNumber || '-'}</td>
+                      <td className="px-4 py-3 text-gray-600">{formatDate(tx.date)}</td>
+                      <td className="px-4 py-3 text-gray-600">{tx.method}</td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          tx.type === 'refund'
+                            ? 'bg-amber-100 text-amber-700'
+                            : 'bg-blue-100 text-blue-700'
+                        }`}>
+                          {tx.type === 'refund' ? 'Hoàn tạm ứng' : 'Đóng tạm ứng'}
+                        </span>
+                      </td>
+                      <td className={`px-4 py-3 text-right font-medium ${
+                        tx.type === 'refund' ? 'text-amber-600' : 'text-blue-600'
+                      }`}>
+                        {tx.type === 'refund' ? '-' : '+'}{formatVND(tx.amount)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          tx.status === 'posted' || tx.status === 'confirmed'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-red-100 text-red-700'
+                        }`}>
+                          {tx.status === 'posted' || tx.status === 'confirmed' ? 'Đã xác nhận' : 'Đã hủy'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {onEditDeposit && (
+                            <button
+                              onClick={() => openEditModal(tx)}
+                              className="p-1.5 rounded-md text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                              title="Sửa"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                          )}
+                          {onVoidDeposit && tx.status !== 'voided' && (
+                            <button
+                              onClick={() => handleVoid(tx.id)}
+                              className="p-1.5 rounded-md text-gray-500 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+                              title="Hủy"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                          {onDeleteDeposit && (
+                            <button
+                              onClick={() => handleDelete(tx.id)}
+                              className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                              title="Xóa"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50 text-left">
+                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày giao dịch</th>
+                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Phương thức</th>
+                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Ghi chú</th>
+                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Số tiền</th>
+                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {loading ? (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Đang tải...
+                      </div>
+                    </td>
+                  </tr>
+                ) : usageHistory.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                      Không có dữ liệu sử dụng tạm ứng
+                    </td>
+                  </tr>
+                ) : (
+                  usageHistory.map((tx) => (
+                    <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-gray-600">{formatDate(tx.date)}</td>
+                      <td className="px-4 py-3 text-gray-600">{tx.method}</td>
+                      <td className="px-4 py-3 text-gray-600">{tx.note || '-'}</td>
+                      <td className="px-4 py-3 text-right font-medium text-rose-600">
+                        -{formatVND(tx.amount)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          tx.status === 'posted' || tx.status === 'confirmed'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-red-100 text-red-700'
+                        }`}>
+                          {tx.status === 'posted' || tx.status === 'confirmed' ? 'Đã xác nhận' : 'Đã hủy'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* Pagination */}
-        {depositList.length > 0 && (
+        {activeTab === 'deposits' && depositList.length > 0 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
             <div className="flex items-center gap-2">
               <select

@@ -11,6 +11,8 @@ import {
   type PaymentStatus,
   type DepositWalletData,
   type OutstandingBalanceItem,
+  type RecordPaymentTracker,
+  type RecordType,
 } from '@/data/mockPayment';
 
 export type PaymentFilter = 'all' | PaymentStatus;
@@ -19,10 +21,11 @@ export interface CreatePaymentInput {
   readonly customerId: string;
   readonly customerName: string;
   readonly customerPhone: string;
-  readonly serviceId?: string;
-  readonly serviceName?: string;
+  readonly recordId?: string;
+  readonly recordType?: RecordType;
+  readonly recordName?: string;
   readonly amount: number;
-  readonly method: PaymentMethod | 'bank_transfer' | 'deposit' | 'mixed';
+  readonly method: PaymentMethod;
   readonly locationName: string;
   readonly notes: string;
 }
@@ -45,8 +48,9 @@ function mapSaleOrderToPayment(saleOrder: ApiSaleOrder): PaymentRecord {
     customerId: saleOrder.partnerid ?? '',
     customerName: saleOrder.partnername ?? '',
     customerPhone: '',
-    serviceId: saleOrder.id,
-    serviceName: saleOrder.name ?? '',
+    recordId: saleOrder.id,
+    recordType: 'saleorder',
+    recordName: saleOrder.name ?? '',
     amount: parseFloat(saleOrder.amounttotal ?? '0') || 0,
     method: 'bank_transfer' as const,
     status,
@@ -54,6 +58,7 @@ function mapSaleOrderToPayment(saleOrder: ApiSaleOrder): PaymentRecord {
     locationName: saleOrder.companyname ?? '',
     notes: saleOrder.state ?? '',
     receiptNumber: saleOrder.name ?? '',
+    isFullPayment: residual === 0,
   };
 }
 
@@ -69,7 +74,8 @@ function mapSaleOrderToOutstandingBalance(saleOrder: ApiSaleOrder): OutstandingB
     customerId: saleOrder.partnerid ?? '',
     customerName: saleOrder.partnername ?? '',
     customerPhone: '',
-    serviceName: saleOrder.name ?? '',
+    recordType: 'saleorder',
+    recordName: saleOrder.name ?? '',
     totalCost: parseFloat(saleOrder.amounttotal ?? '0') || 0,
     paidAmount: parseFloat(saleOrder.totalpaid ?? '0') || 0,
     remainingBalance: residual,
@@ -186,9 +192,13 @@ export function usePayment(selectedLocationId?: string) {
     const newPayment: PaymentRecord = {
       ...input,
       id: `pay-${Date.now()}`,
+      recordId: input.recordId ?? '',
+      recordType: input.recordType ?? 'saleorder',
+      recordName: input.recordName ?? '',
       status: 'completed',
       date: new Date().toISOString().slice(0, 10),
       receiptNumber: `RCP-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
+      isFullPayment: true,
     };
 
     setPayments((prev) => [newPayment, ...prev]);
@@ -215,11 +225,30 @@ export function usePayment(selectedLocationId?: string) {
     [payments],
   );
 
+  const getRecordPaymentTrackers = useCallback((): RecordPaymentTracker[] => {
+    const recordMap = new Map<string, RecordPaymentTracker>();
+    for (const ob of outstandingBalances) {
+      recordMap.set(ob.id, {
+        recordId: ob.id,
+        recordType: ob.recordType ?? 'saleorder',
+        recordName: ob.recordName,
+        customerId: ob.customerId,
+        customerName: ob.customerName,
+        totalCost: ob.totalCost,
+        paidAmount: ob.paidAmount,
+        remainingBalance: ob.remainingBalance,
+        payments: payments.filter((p) => p.customerId === ob.customerId),
+      });
+    }
+    return [...recordMap.values()];
+  }, [outstandingBalances, payments]);
+
   return {
     payments: filteredPayments,
     allPayments: payments,
     wallets,
     outstandingBalances,
+    recordPaymentTrackers: getRecordPaymentTrackers(),
     stats,
     statusFilter,
     setStatusFilter,
@@ -230,6 +259,7 @@ export function usePayment(selectedLocationId?: string) {
     getWalletByCustomer,
     getOutstandingByCustomer,
     getPaymentsByCustomer,
+    getRecordPaymentTrackers,
     isLoading,
     error,
     refetch,

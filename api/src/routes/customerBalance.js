@@ -18,26 +18,30 @@ router.get('/:id', async (req, res) => {
     }
 
     // Calculate deposit balance from payments
-    // Deposits (cash/bank_transfer) add to balance; 'deposit' method and deposit_used withdraw
     const depositResult = await query(`
       SELECT
-        COALESCE(SUM(CASE WHEN method IN ('cash', 'bank_transfer') THEN amount ELSE 0 END), 0) AS total_deposits,
-        COALESCE(SUM(CASE WHEN method = 'deposit' THEN amount ELSE 0 END), 0) AS total_withdrawals,
-        COALESCE(SUM(deposit_used), 0) AS total_deposit_used
+        COALESCE(SUM(CASE WHEN deposit_type = 'deposit' OR (
+          deposit_type IS NULL AND method IN ('cash', 'bank_transfer')
+          AND service_id IS NULL AND (deposit_used IS NULL OR deposit_used = 0) AND amount > 0
+        ) THEN amount ELSE 0 END), 0) AS total_deposited,
+        COALESCE(SUM(CASE WHEN deposit_type = 'usage' OR method = 'deposit' OR (deposit_used > 0) THEN
+          COALESCE(deposit_used, 0) + CASE WHEN method = 'deposit' THEN amount ELSE 0 END
+        ELSE 0 END), 0) AS total_used,
+        COALESCE(SUM(CASE WHEN deposit_type = 'refund' OR amount < 0 THEN ABS(amount) ELSE 0 END), 0) AS total_refunded
       FROM payments
-      WHERE customer_id = $1
+      WHERE customer_id = $1 AND status != 'voided'
     `, [id]);
 
-    const totalDeposits = parseFloat(depositResult[0]?.total_deposits || 0);
-    const totalWithdrawals = parseFloat(depositResult[0]?.total_withdrawals || 0);
-    const totalDepositUsed = parseFloat(depositResult[0]?.total_deposit_used || 0);
-    const depositBalance = totalDeposits - totalWithdrawals - totalDepositUsed;
+    const totalDeposited = parseFloat(depositResult[0]?.total_deposited || 0);
+    const totalUsed = parseFloat(depositResult[0]?.total_used || 0);
+    const totalRefunded = parseFloat(depositResult[0]?.total_refunded || 0);
+    const depositBalance = Math.max(0, totalDeposited - totalUsed - totalRefunded);
 
     // Calculate outstanding balance from uninvoiced saleorders and dotkhams
     let outstandingBalance = 0;
     try {
       const residualResult = await query(`
-        SELECT COALESCE(SUM(residual), 0) AS total FROM saleorders WHERE partner_id = $1 AND state != 'cancelled'
+        SELECT COALESCE(SUM(residual), 0) AS total FROM saleorders WHERE partnerid = $1 AND state != 'cancelled'
         UNION ALL
         SELECT COALESCE(SUM(amountresidual), 0) FROM dotkhams WHERE partnerid = $1 AND state != 'cancelled'
       `, [id]);
@@ -49,8 +53,11 @@ router.get('/:id', async (req, res) => {
     res.json({
       id: partner[0].id,
       name: partner[0].name,
-      deposit_balance: Math.max(0, depositBalance),
+      deposit_balance: depositBalance,
       outstanding_balance: Math.max(0, outstandingBalance),
+      total_deposited: totalDeposited,
+      total_used: totalUsed,
+      total_refunded: totalRefunded,
     });
   } catch (error) {
     console.error('Error fetching customer balance:', error.message);

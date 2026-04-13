@@ -78,7 +78,7 @@ async function validateAllocationResidual(allocations) {
 // Falls back to accountpayments for historical records not yet migrated to payments table
 router.get("/", async (req, res) => {
   try {
-    const { customerId, limit = 100, offset = 0 } = req.query;
+    const { customerId, limit = 100, offset = 0, type } = req.query;
 
     let sql = `
       SELECT
@@ -97,6 +97,33 @@ router.get("/", async (req, res) => {
       sql += ` AND p.customer_id = $` + params.length;
     }
 
+    if (type === 'payments') {
+      sql += ` AND NOT (
+        p.deposit_type IN ('deposit', 'refund', 'usage')
+        OR p.amount < 0
+        OR p.method = 'deposit'
+        OR p.deposit_used > 0
+        OR (
+          p.deposit_type IS NULL
+          AND p.method IN ('cash', 'bank_transfer')
+          AND p.service_id IS NULL
+          AND (p.deposit_used IS NULL OR p.deposit_used = 0)
+          AND p.amount > 0
+        )
+      )`;
+    } else if (type === 'deposits') {
+      sql += ` AND (
+        p.deposit_type IN ('deposit', 'refund')
+        OR (
+          p.deposit_type IS NULL
+          AND p.method IN ('cash', 'bank_transfer')
+          AND p.service_id IS NULL
+          AND (p.deposit_used IS NULL OR p.deposit_used = 0)
+          AND p.amount > 0
+        )
+      )`;
+    }
+
     sql += ` ORDER BY p.created_at DESC LIMIT $` + (params.length + 1) + ` OFFSET $` + (params.length + 2);
     params.push(parseInt(limit), parseInt(offset));
 
@@ -104,7 +131,8 @@ router.get("/", async (req, res) => {
     let usedLegacyFallback = false;
 
     // Fallback: if no payments found for a customer, query historical accountpayments
-    if (customerId && result.length === 0) {
+    // Skip legacy fallback when type filter is applied since we cannot reliably classify legacy records
+    if (customerId && result.length === 0 && !type) {
       try {
         const legacyRows = await query(
           `SELECT
@@ -465,8 +493,10 @@ router.post("/", requirePermission('payment.edit'), async (req, res) => {
     }
 
     // Auto-detect deposit top-up if not explicitly typed
+    const hasAllocations = Array.isArray(allocations) && allocations.some(a => parseFloat(a.allocated_amount || 0) > 0);
     const looksLikeDeposit =
       !deposit_type &&
+      !hasAllocations &&
       method !== "deposit" &&
       method !== "mixed" &&
       !service_id &&

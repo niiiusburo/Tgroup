@@ -61,7 +61,7 @@ export function OutstandingBalance({ balances, onPayNow }: OutstandingBalancePro
             <div className="flex items-start justify-between mb-2">
               <div>
                 <p className="text-sm font-medium text-gray-900">{balance.customerName}</p>
-                <p className="text-xs text-gray-500">{balance.serviceName}</p>
+                <p className="text-xs text-gray-500">{balance.recordName}</p>
               </div>
               <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
                 isOverdue

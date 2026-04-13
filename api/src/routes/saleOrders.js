@@ -438,4 +438,168 @@ router.patch('/:id/state', requirePermission('customers.edit'), async (req, res)
   }
 });
 
+/**
+ * PATCH /api/SaleOrders/:id
+ * Update sale order details (doctor, assistant, dental aide, cost, dates, notes, etc.)
+ */
+router.patch('/:id', requirePermission('customers.edit'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      partnerid,
+      companyid,
+      productid,
+      productname,
+      doctorid,
+      assistantid,
+      dentalaideid,
+      quantity,
+      unit,
+      amounttotal,
+      datestart,
+      dateend,
+      notes,
+    } = req.body;
+
+    if (amounttotal != null && parseFloat(amounttotal) < 0) {
+      return res.status(400).json({ error: 'amounttotal must be >= 0' });
+    }
+    if (quantity != null && !isNaN(parseFloat(quantity)) && parseFloat(quantity) < 0) {
+      return res.status(400).json({ error: 'quantity must be >= 0' });
+    }
+
+    // Build dynamic SET clause
+    const sets = [];
+    const values = [];
+    let paramIdx = 1;
+
+    const fields = [
+      { key: 'partnerid', val: partnerid },
+      { key: 'companyid', val: companyid },
+      { key: 'doctorid', val: doctorid },
+      { key: 'assistantid', val: assistantid },
+      { key: 'dentalaideid', val: dentalaideid },
+      { key: 'quantity', val: quantity },
+      { key: 'unit', val: unit },
+      { key: 'amounttotal', val: amounttotal },
+      { key: 'datestart', val: datestart },
+      { key: 'dateend', val: dateend },
+      { key: 'notes', val: notes },
+    ];
+
+    for (const f of fields) {
+      if (f.val !== undefined) {
+        sets.push(`${f.key} = $${paramIdx}`);
+        values.push(f.val === '' ? null : f.val);
+        paramIdx++;
+      }
+    }
+
+    if (sets.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    values.push(id);
+    const orderUpdate = await query(
+      `UPDATE saleorders SET ${sets.join(', ')} WHERE id = $${paramIdx} AND isdeleted = false RETURNING *`,
+      values
+    );
+
+    if (!orderUpdate || orderUpdate.length === 0) {
+      return res.status(404).json({ error: 'Sale order not found' });
+    }
+
+    // Update sale order line product if provided
+    if (productid !== undefined || productname !== undefined) {
+      const existingLine = await query(
+        `SELECT id, productid FROM saleorderlines WHERE orderid = $1 AND isdeleted = false LIMIT 1`,
+        [id]
+      );
+
+      if (existingLine && existingLine.length > 0) {
+        const lineSets = [];
+        const lineValues = [];
+        let lineIdx = 1;
+
+        if (productid !== undefined) {
+          lineSets.push(`productid = $${lineIdx}`);
+          lineValues.push(productid || null);
+          lineIdx++;
+        }
+        if (productname !== undefined) {
+          lineSets.push(`productname = $${lineIdx}`);
+          lineValues.push(productname || null);
+          lineIdx++;
+        }
+        if (amounttotal !== undefined) {
+          lineSets.push(`pricetotal = $${lineIdx}`);
+          lineValues.push(amounttotal || 0);
+          lineIdx++;
+        }
+
+        lineValues.push(existingLine[0].id);
+        await query(
+          `UPDATE saleorderlines SET ${lineSets.join(', ')} WHERE id = $${lineIdx}`,
+          lineValues
+        );
+      } else if (productid) {
+        const { v4: uuidv4 } = require('uuid');
+        const lineId = uuidv4();
+        await query(
+          `INSERT INTO saleorderlines (
+            id, orderid, productid, productname, pricetotal, isdeleted
+          ) VALUES ($1, $2, $3, $4, $5, $6)`,
+          [lineId, id, productid, productname || null, amounttotal || 0, false]
+        );
+      }
+    }
+
+    // Fetch updated record with joins
+    const rows = await query(
+      `SELECT
+        so.id,
+        so.name,
+        so.partnerid,
+        p.name AS partnername,
+        p.displayname AS partnerdisplayname,
+        so.amounttotal,
+        so.residual,
+        so.totalpaid,
+        so.state,
+        so.companyid,
+        c.name AS companyname,
+        so.doctorid,
+        doc.name AS doctorname,
+        so.assistantid,
+        asst.name AS assistantname,
+        so.dentalaideid,
+        da.name AS dentalaidename,
+        so.quantity,
+        so.unit,
+        so.datestart,
+        so.dateend,
+        so.notes,
+        (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
+        (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
+        so.datecreated,
+        so.isdeleted
+      FROM saleorders so
+      LEFT JOIN partners p ON p.id = so.partnerid
+      LEFT JOIN companies c ON c.id = so.companyid
+      LEFT JOIN partners doc ON doc.id = so.doctorid
+      LEFT JOIN partners asst ON asst.id = so.assistantid
+      LEFT JOIN partners da ON da.id = so.dentalaideid
+      WHERE so.id = $1`,
+      [id]
+    );
+
+    return res.json(rows[0]);
+  } catch (err) {
+    console.error('Error updating sale order:', err);
+    return res.status(500).json({
+      error: err instanceof Error ? err.message : 'Unknown error',
+    });
+  }
+});
+
 module.exports = router;

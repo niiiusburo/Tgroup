@@ -13,6 +13,8 @@ import type { AppointmentType } from '@/constants';
 import {
   fetchSaleOrders,
   createSaleOrder,
+  updateSaleOrder,
+  updateSaleOrderState,
   type ApiSaleOrder,
 } from '@/lib/api';
 
@@ -82,12 +84,14 @@ function mapSaleOrderToServiceRecord(order: ApiSaleOrder): ServiceRecord {
     completedVisits,
     totalCost: parseFloat(order.amounttotal || '0') || 0,
     paidAmount: parseFloat(order.totalpaid || '0') || 0,
+    residual: parseFloat(order.residual || '0') || 0,
     startDate: order.datestart?.slice(0, 10) || order.datecreated?.slice(0, 10) || '',
     expectedEndDate: order.dateend?.slice(0, 10) || '',
     notes: order.notes || '',
     toothNumbers: [],
     visits: [],
     createdAt: order.datecreated?.slice(0, 10) || '',
+    orderName: order.name || undefined,
   };
 }
 
@@ -206,6 +210,35 @@ export function useServices(selectedLocationId?: string) {
   }, []);
 
   /**
+   * Update a service record via API
+   */
+  const updateServiceRecord = useCallback(async (input: CreateServiceInput) => {
+    if (!input.id) throw new Error('Missing service record id');
+    const apiPayload = {
+      partnerid: input.customerId,
+      partnername: input.customerName,
+      companyid: input.locationId,
+      productid: input.catalogItemId,
+      productname: input.serviceName,
+      doctorid: input.doctorId,
+      doctorname: input.doctorName,
+      assistantid: input.assistantId ?? null,
+      dentalaideid: input.dentalAideId ?? null,
+      quantity: input.quantity ?? 1,
+      unit: input.unit ?? 'răng',
+      amounttotal: input.totalCost,
+      datestart: input.startDate,
+      dateend: input.expectedEndDate,
+      notes: input.notes,
+    };
+
+    const updated = await updateSaleOrder(input.id, apiPayload);
+    const mapped = mapSaleOrderToServiceRecord(updated);
+    setRecords((prev) => prev.map((r) => (r.id === input.id ? mapped : r)));
+    return mapped;
+  }, []);
+
+  /**
    * Update visit status in a service record (local-only)
    */
   const updateVisitStatus = useCallback((recordId: string, visitId: string, status: VisitStatus) => {
@@ -240,6 +273,34 @@ export function useServices(selectedLocationId?: string) {
   }, []);
 
   /**
+   * Map frontend ServiceStatus to backend state value
+   */
+  function statusToState(status: ServiceStatus): string {
+    switch (status) {
+      case 'active': return 'sale';
+      case 'completed': return 'done';
+      case 'cancelled': return 'cancel';
+      default:
+        // Exhaustiveness check for compile-time safety
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        throw new Error(`Unsupported service status: ${status}`);
+    }
+  }
+
+  /**
+   * Update a service record's status via API
+   */
+  const updateServiceStatus = useCallback(async (recordId: string, newStatus: ServiceStatus) => {
+    const newState = statusToState(newStatus);
+    const updated = await updateSaleOrderState(recordId, newState);
+    const mapped = mapSaleOrderToServiceRecord(updated);
+    setRecords((prev) =>
+      prev.map((r) => r.id === recordId ? mapped : r),
+    );
+    return mapped;
+  }, []);
+
+  /**
    * Get all records for a specific customer
    */
   const getRecordsByCustomer = useCallback((customerId: string) =>
@@ -259,8 +320,10 @@ export function useServices(selectedLocationId?: string) {
     searchTerm,
     setSearchTerm,
     createServiceRecord,
+    updateServiceRecord,
     updateVisitStatus,
     cancelServiceRecord,
+    updateServiceStatus,
     getRecordsByCustomer,
     refetch,
   };

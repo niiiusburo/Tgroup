@@ -3,7 +3,7 @@
  * Payment Page - Deposit wallet, payment form, outstanding balances, and payment history
  * @crossref:route[/payment]
  * @crossref:used-in[App]
- * @crossref:uses[DepositWallet, PaymentForm, OutstandingBalance, PaymentHistory, MonthlyPlanCreator, PaymentSchedule, usePayment, useMonthlyPlans, useLocationFilter]
+ * @crossref:uses[DepositWallet, OutstandingBalance, PaymentHistory, MonthlyPlanCreator, PaymentSchedule, usePayment, useMonthlyPlans, useLocationFilter]
  */
 
 import { useState } from 'react';
@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { MonthlyPlanCreator, PaymentSchedule } from '@/components/payment/MonthlyPlan';
 import { DepositWallet } from '@/components/payment/DepositWallet';
-import { PaymentForm, type PaymentFormData } from '@/components/payment/PaymentForm';
 import { OutstandingBalance } from '@/components/payment/OutstandingBalance';
 import { PaymentHistory } from '@/components/payment/PaymentHistory';
 import { usePayment } from '@/hooks/usePayment';
@@ -34,7 +33,6 @@ const PLAN_STATUS_FILTERS: readonly { readonly value: PlanStatus | 'all'; readon
 export function Payment() {
   const { selectedLocationId } = useLocationFilter();
   const [activeTab, setActiveTab] = useState<ActiveTab>('payments');
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showCreator, setShowCreator] = useState(false);
 
   // Payment hook
@@ -47,7 +45,6 @@ export function Payment() {
     setStatusFilter: setPaymentStatusFilter,
     searchTerm,
     setSearchTerm,
-    createPayment,
     topUpWallet,
   } = usePayment(selectedLocationId);
 
@@ -65,11 +62,6 @@ export function Payment() {
     createPlan,
     markInstallmentPaid,
   } = useMonthlyPlans(selectedLocationId);
-
-  const handleCreatePayment = (data: PaymentFormData) => {
-    createPayment(data);
-    setShowPaymentForm(false);
-  };
 
   const handleCreatePlan = (input: Parameters<typeof createPlan>[0]) => {
     createPlan(input);
@@ -95,16 +87,7 @@ export function Payment() {
         </div>
         <div className="flex items-center gap-3">
         <div className="flex gap-2">
-          {activeTab === 'payments' && (
-            <button
-              type="button"
-              onClick={() => setShowPaymentForm(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              New Payment
-            </button>
-          )}
+
           {activeTab === 'plans' && !showCreator && (
             <button
               type="button"
@@ -207,9 +190,6 @@ export function Payment() {
               <h3 className="text-sm font-semibold text-gray-700 mb-3">Outstanding Balances</h3>
               <OutstandingBalance
                 balances={outstandingBalances}
-                onPayNow={() => {
-                  setShowPaymentForm(true);
-                }}
               />
             </div>
           </div>
@@ -353,13 +333,7 @@ export function Payment() {
         </>
       )}
 
-      {/* Payment Form Modal */}
-      {showPaymentForm && (
-        <PaymentForm
-          onSubmit={handleCreatePayment}
-          onClose={() => setShowPaymentForm(false)}
-        />
-      )}
+
     </div>
   );
 }

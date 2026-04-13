@@ -17,4 +17,45 @@ export const DEFAULT_CUSTOMER_SOURCES: readonly CustomerSource[] = [
 
 export const MOCK_CATALOG_SERVICES: CatalogService[] = [];
 export const MOCK_CUSTOMER_SOURCES: CustomerSource[] = [];
-export const MOCK_SYSTEM_PREFERENCES: SystemPreference[] = [];
+
+// ------------------------------------------------------------------
+// Payment system preferences
+// ------------------------------------------------------------------
+
+/** System preferences that configure record-based payment behaviour. */
+export const MOCK_PAYMENT_SYSTEM_PREFERENCES: readonly SystemPreference[] = [
+  {
+    id: 'pref-payment-methods',
+    key: 'payment.record.methods',
+    value: JSON.stringify(['cash', 'bank_transfer', 'deposit', 'mixed']),
+    type: 'json',
+    category: 'payment',
+    description: 'Enabled payment methods for record-based payments',
+    isPublic: true,
+    label: 'Record Payment Methods',
+  },
+  {
+    id: 'pref-payment-record-based',
+    key: 'payment.record.enabled',
+    value: 'true',
+    type: 'toggle',
+    category: 'payment',
+    description: 'Enable record-based payment tracking per service record',
+    isPublic: true,
+    label: 'Record-Based Payments',
+  },
+  {
+    id: 'pref-payment-allow-installment',
+    key: 'payment.record.allowByDate',
+    value: 'true',
+    type: 'toggle',
+    category: 'payment',
+    description: 'Allow by-date (installment) payments on a single record',
+    isPublic: true,
+    label: 'Allow By-Date Payments',
+  },
+];
+
+export const MOCK_SYSTEM_PREFERENCES: SystemPreference[] = [
+  ...MOCK_PAYMENT_SYSTEM_PREFERENCES,
+];

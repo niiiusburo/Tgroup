@@ -2,15 +2,15 @@ import { useState } from 'react';
 import {
   ArrowLeft, Phone, Mail, MapPin, Calendar, Tag,
   User, AlertCircle, Edit2, Plus, Clock, CalendarPlus, Receipt,
-  Trash2, ChevronDown,
+  Trash2, ChevronDown, Coins, CircleDollarSign, Wallet, HandCoins,
 } from 'lucide-react';
-import { DepositWallet } from '@/components/payment/DepositWallet';
-import { DepositHistory } from '@/components/payment/DepositHistory';
+import { CustomerDeposits } from '@/components/payment/CustomerDeposits';
 import { AppointmentForm, type AppointmentFormData } from '@/components/appointments/AppointmentForm';
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { PaymentForm, type PaymentFormData } from '@/components/payment/PaymentForm';
+import { type ServicePaymentContext } from '@/components/payment/ServicePaymentCard';
 import { ServiceHistory } from '@/components/customer/ServiceHistory';
-import type { DepositTransaction } from '@/hooks/useDeposits';
+import type { DepositTransaction, DepositBalance } from '@/hooks/useDeposits';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 import type { CustomerService } from '@/types/customer';
 import type { ApiAppointment, ExternalCheckupsResponse } from '@/lib/api';
@@ -23,13 +23,20 @@ interface CustomerProfileProps {
   readonly profile: CustomerProfileData;
   readonly appointments: readonly ApiAppointment[];
   readonly services?: readonly CustomerService[];
-  readonly depositTransactions?: DepositTransaction[];
+  readonly depositList?: DepositTransaction[];
+  readonly usageHistory?: DepositTransaction[];
+  readonly depositBalance?: DepositBalance;
   readonly payments?: PaymentWithAllocations[];
   readonly activeTab?: ProfileTab;
   readonly onTabChange?: (tab: ProfileTab) => void;
   readonly onBack: () => void;
   readonly onEdit?: () => void;
   readonly onAddDeposit?: (customerId: string, amount: number, method: 'cash' | 'bank_transfer' | 'vietqr', date?: string, note?: string) => Promise<void>;
+  readonly onAddRefund?: (customerId: string, amount: number, method: 'cash' | 'bank_transfer', date?: string, note?: string) => Promise<void>;
+  readonly onVoidDeposit?: (id: string) => Promise<void>;
+  readonly onDeleteDeposit?: (id: string) => Promise<void>;
+  readonly onEditDeposit?: (id: string, data: Partial<{ amount: number; method: 'cash' | 'bank_transfer'; notes: string; paymentDate: string }>) => Promise<void>;
+  readonly onRefreshDeposits?: () => void;
   readonly onCreateAppointment?: (data: AppointmentFormData) => Promise<void>;
   readonly onUpdateAppointment?: (id: string, data: AppointmentFormData) => Promise<void>;
   readonly onCreateService?: (data: {
@@ -37,6 +44,27 @@ interface CustomerProfileProps {
     serviceName: string;
     doctorId: string;
     doctorName: string;
+    assistantId?: string | null;
+    assistantName?: string;
+    dentalAideId?: string | null;
+    dentalAideName?: string;
+    locationId: string;
+    locationName: string;
+    startDate: string;
+    notes: string;
+    totalCost: number;
+    toothNumbers: readonly string[];
+  }) => Promise<void>;
+  readonly onUpdateService?: (data: {
+    id: string;
+    catalogItemId: string;
+    serviceName: string;
+    doctorId: string;
+    doctorName: string;
+    assistantId?: string | null;
+    assistantName?: string;
+    dentalAideId?: string | null;
+    dentalAideName?: string;
     locationId: string;
     locationName: string;
     startDate: string;
@@ -55,6 +83,7 @@ interface CustomerProfileProps {
   readonly checkupsLoading?: boolean;
   readonly checkupsError?: string | null;
   readonly onRefetchCheckups?: () => void;
+  readonly onUpdateServiceStatus?: (serviceId: string, newStatus: string) => Promise<void>;
 }
 
 export type ProfileTab = 'profile' | 'appointments' | 'records' | 'payment';
@@ -69,7 +98,7 @@ const TABS: readonly TabConfig[] = [
   { value: 'profile', label: 'Profile' },
   { value: 'appointments', label: 'Appointments', getCount: (p) => p.appointments.length },
   { value: 'records', label: 'Records', getCount: (p) => p.services?.length ?? 0 },
-  { value: 'payment', label: 'Payment', getCount: (p) => (p.payments?.length ?? 0) + (p.depositTransactions?.length ?? 0) },
+  { value: 'payment', label: 'Payment', getCount: (p) => (p.payments?.length ?? 0) + (p.depositList?.length ?? 0) },
 ];
 
 function TabBadge({ count, isActive }: { count: number; isActive: boolean }) {
@@ -119,16 +148,24 @@ export function CustomerProfile({
   profile,
   appointments,
   services = [],
-  depositTransactions = [],
+  depositList = [],
+  usageHistory = [],
+  depositBalance,
   payments = [],
   activeTab: controlledActiveTab,
   onTabChange,
   onBack,
   onEdit,
   onAddDeposit,
+  onAddRefund,
+  onVoidDeposit,
+  onDeleteDeposit,
+  onEditDeposit,
+  onRefreshDeposits,
   onCreateAppointment,
   onUpdateAppointment,
   onCreateService,
+  onUpdateService,
   onMakePayment,
   onSoftDelete,
   onHardDelete,
@@ -140,6 +177,7 @@ export function CustomerProfile({
   checkupsLoading,
   checkupsError,
   onRefetchCheckups,
+  onUpdateServiceStatus,
 }: CustomerProfileProps) {
   const [internalActiveTab, setInternalActiveTab] = useState<ProfileTab>('profile');
   const activeTab = controlledActiveTab ?? internalActiveTab;
@@ -152,15 +190,19 @@ export function CustomerProfile({
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [payTargetService, setPayTargetService] = useState<CustomerService | null>(null);
   const [editingAppointment, setEditingAppointment] = useState<ApiAppointment | null>(null);
   const [editingService, setEditingService] = useState<CustomerService | null>(null);
   const [expandedPaymentId, setExpandedPaymentId] = useState<string | null>(null);
-  const [editingPayment, setEditingPayment] = useState<PaymentWithAllocations | null>(null);
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
   const { hasPermission } = useAuth();
   const canViewHealthCheckups = hasPermission('external_checkups.view');
 
   const totalServiceCost = services.reduce((sum, s) => sum + (s.cost || 0), 0);
+  const expectedRevenue = services
+    .filter((s) => s.status !== 'cancelled')
+    .reduce((sum, s) => sum + (s.cost || 0), 0);
+  const totalRevenue = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
   const amountPaid = totalServiceCost - profile.outstandingBalance;
 
   const getStatusConfig = (state: string | null | undefined) => {
@@ -320,11 +362,18 @@ export function CustomerProfile({
               profile,
               appointments,
               services,
-              depositTransactions,
+              depositList,
+              usageHistory,
+              depositBalance,
               payments,
               onBack,
               onEdit,
               onAddDeposit,
+              onAddRefund,
+              onVoidDeposit,
+              onDeleteDeposit,
+              onEditDeposit,
+              onRefreshDeposits,
               onCreateAppointment,
               onUpdateAppointment,
               onCreateService,
@@ -464,7 +513,70 @@ export function CustomerProfile({
               </button>
             )}
           </div>
-          <ServiceHistory services={services} onSelect={setEditingService} />
+
+          {/* Financial Overview Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-sky-50 flex items-center justify-center flex-shrink-0">
+                  <Coins className="w-5 h-5 text-sky-500" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-gray-500 truncate">Tổng tiền điều trị</p>
+                  <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(totalServiceCost)}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0">
+                  <CircleDollarSign className="w-5 h-5 text-amber-500" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-gray-500 truncate">Dự kiến thu</p>
+                  <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(expectedRevenue)}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center flex-shrink-0">
+                  <Wallet className="w-5 h-5 text-purple-500" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-gray-500 truncate">Doanh thu</p>
+                  <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(totalRevenue)}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center flex-shrink-0">
+                  <Receipt className="w-5 h-5 text-rose-500" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-gray-500 truncate">Công nợ</p>
+                  <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(profile.outstandingBalance)}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center flex-shrink-0">
+                  <HandCoins className="w-5 h-5 text-orange-500" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-gray-500 truncate">Tạm ứng</p>
+                  <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(profile.depositBalance)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ServiceHistory services={services} onSelect={setEditingService} onUpdateStatus={onUpdateServiceStatus} onPayForService={onMakePayment ? (svc) => {
+            setPayTargetService(svc);
+            setShowPaymentModal(true);
+          } : undefined} />
         </div>
       )}
 
@@ -472,15 +584,7 @@ export function CustomerProfile({
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold text-gray-900">Payment & Deposits</h3>
-            {onMakePayment && (
-              <button
-                onClick={() => setShowPaymentModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm"
-              >
-                <Plus className="w-4 h-4" />
-                Make Payment
-              </button>
-            )}
+  
           </div>
 
           {/* Bill summary — 3 columns */}
@@ -579,18 +683,7 @@ export function CustomerProfile({
                               {(p.bankAmount || 0) > 0 && <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded">Bank {formatVND(p.bankAmount || 0)}</span>}
                             </div>
                           ) : null}
-                          {onMakePayment && (
-                            <div className="mt-3 flex justify-end">
-                              <button
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); setEditingPayment(p); setExpandedPaymentId(null); }}
-                                className="flex items-center gap-1 text-xs px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-                              >
-                                <Edit2 className="w-3 h-3" />
-                                Sửa
-                              </button>
-                            </div>
-                          )}
+
                         </div>
                       )}
                     </div>
@@ -600,13 +693,24 @@ export function CustomerProfile({
             )}
           </div>
 
-          <DepositWallet
-            depositBalance={profile.depositBalance}
-            outstandingBalance={profile.outstandingBalance}
-            onAddDeposit={onAddDeposit ? (amount, method, date, note) => onAddDeposit(profile.id, amount, method, date, note) : undefined}
+          <CustomerDeposits
+            depositList={depositList}
+            usageHistory={usageHistory}
+            balance={depositBalance ?? {
+              depositBalance: profile.depositBalance,
+              outstandingBalance: profile.outstandingBalance,
+              totalDeposited: 0,
+              totalUsed: 0,
+              totalRefunded: 0,
+            }}
             loading={loadingDeposits}
+            onAddDeposit={onAddDeposit ? (amount, method, date, note) => onAddDeposit(profile.id, amount, method, date, note) : undefined}
+            onAddRefund={onAddRefund ? (amount, method, date, note) => onAddRefund(profile.id, amount, method, date, note) : undefined}
+            onVoidDeposit={onVoidDeposit}
+            onDeleteDeposit={onDeleteDeposit}
+            onEditDeposit={onEditDeposit}
+            onRefresh={onRefreshDeposits}
           />
-          <DepositHistory transactions={depositTransactions} loading={loadingDeposits} />
         </div>
       )}
 
@@ -668,6 +772,10 @@ export function CustomerProfile({
                   serviceName: data.serviceName,
                   doctorId: data.doctorId,
                   doctorName: data.doctorName,
+                  assistantId: data.assistantId,
+                  assistantName: data.assistantName,
+                  dentalAideId: data.dentalAideId,
+                  dentalAideName: data.dentalAideName,
                   locationId: data.locationId,
                   locationName: data.locationName,
                   startDate: data.startDate,
@@ -694,8 +802,12 @@ export function CustomerProfile({
             id: editingService.id,
             customerId: profile.id,
             customerName: profile.name,
-            locationId: profile.companyId,
+            catalogItemId: editingService.catalogItemId,
             serviceName: editingService.service,
+            doctorId: editingService.doctorId,
+            assistantId: editingService.assistantId,
+            dentalAideId: editingService.dentalAideId,
+            locationId: profile.companyId,
             startDate: editingService.date,
             notes: editingService.notes || '',
             totalCost: editingService.cost,
@@ -705,12 +817,17 @@ export function CustomerProfile({
           }}
           onSubmit={async (data) => {
             try {
-              if (onCreateService) {
-                await onCreateService({
+              if (onUpdateService && data.id) {
+                await onUpdateService({
+                  id: data.id,
                   catalogItemId: data.catalogItemId,
                   serviceName: data.serviceName,
                   doctorId: data.doctorId,
                   doctorName: data.doctorName,
+                  assistantId: data.assistantId,
+                  assistantName: data.assistantName,
+                  dentalAideId: data.dentalAideId,
+                  dentalAideName: data.dentalAideName,
                   locationId: data.locationId,
                   locationName: data.locationName,
                   startDate: data.startDate,
@@ -729,57 +846,41 @@ export function CustomerProfile({
       )}
 
       {/* Payment Modal */}
-      {showPaymentModal && onMakePayment && (
-        <PaymentForm
-          defaultCustomerName={profile.name}
-          defaultCustomerId={profile.id}
-          depositBalance={profile.depositBalance}
-          outstandingBalance={profile.outstandingBalance}
-          onSubmit={async (data) => {
-            try {
-              if (onMakePayment) {
-                await onMakePayment(data);
+      {showPaymentModal && onMakePayment && payTargetService && (() => {
+        const svcCtx: ServicePaymentContext = {
+          recordId: payTargetService.id,
+          recordName: payTargetService.service,
+          recordType: 'saleorder',
+          totalCost: payTargetService.cost,
+          paidAmount: payTargetService.paidAmount ?? 0,
+          residual: payTargetService.residual ?? payTargetService.cost,
+          locationName: payTargetService.locationName ?? profile.companyName ?? '',
+        };
+        return (
+          <PaymentForm
+            defaultCustomerName={profile.name}
+            defaultCustomerId={profile.id}
+            depositBalance={profile.depositBalance}
+            outstandingBalance={profile.outstandingBalance}
+            serviceContext={svcCtx}
+            onSubmit={async (data) => {
+              try {
+                if (onMakePayment) {
+                  await onMakePayment(data);
+                }
+                setShowPaymentModal(false);
+                setPayTargetService(null);
+              } catch (error) {
+                console.error('Failed to make payment:', error);
               }
+            }}
+            onClose={() => {
               setShowPaymentModal(false);
-            } catch (error) {
-              console.error('Failed to make payment:', error);
-            }
-          }}
-          onClose={() => setShowPaymentModal(false)}
-        />
-      )}
-
-      {/* Edit Payment Modal */}
-      {editingPayment && onMakePayment && (
-        <PaymentForm
-          isEdit={true}
-          defaultCustomerId={profile.id}
-          defaultCustomerName={profile.name}
-          defaultAmount={editingPayment.amount}
-          defaultDepositAmount={editingPayment.depositUsed}
-          defaultCashAmount={editingPayment.cashAmount}
-          defaultBankAmount={editingPayment.bankAmount}
-          defaultAllocations={editingPayment.allocations?.map((a) => ({
-            invoiceId: a.invoiceId,
-            dotkhamId: a.dotkhamId,
-            allocatedAmount: a.allocatedAmount,
-          }))}
-          defaultNotes={editingPayment.notes || ''}
-          defaultPaymentDate={editingPayment.paymentDate || editingPayment.createdAt?.slice(0, 10)}
-          defaultReferenceCode={editingPayment.referenceCode || ''}
-          depositBalance={profile.depositBalance}
-          outstandingBalance={profile.outstandingBalance}
-          onSubmit={async (data) => {
-            try {
-              await onMakePayment(data);
-              setEditingPayment(null);
-            } catch (error) {
-              console.error('Failed to update payment:', error);
-            }
-          }}
-          onClose={() => setEditingPayment(null)}
-        />
-      )}
+              setPayTargetService(null);
+            }}
+          />
+        );
+      })()}
     </div>
   );
 }

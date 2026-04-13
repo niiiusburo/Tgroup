@@ -136,6 +136,12 @@ export function ServiceCatalogSelector({
                     <span>{item.totalVisits} visit{item.totalVisits > 1 ? 's' : ''}</span>
                     <span>&middot;</span>
                     <span>{item.estimatedDuration}min</span>
+                    {item.unit && (
+                      <>
+                        <span>&middot;</span>
+                        <span>{item.unit}</span>
+                      </>
+                    )}
                   </div>
                 </button>
               ))

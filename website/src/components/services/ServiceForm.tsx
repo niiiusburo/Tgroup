@@ -223,6 +223,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
     setIsSaving(true);
     try {
       await onSubmit({
+      ...(initialData?.id ? { id: initialData.id } : {}),
       customerId: customer.id, customerName: customer.name, customerPhone: customer.phone,
       catalogItemId: selectedCatalog.id, serviceName: selectedCatalog.name,
       category: selectedCatalog.category, doctorId: doctor.id, doctorName: doctor.name,

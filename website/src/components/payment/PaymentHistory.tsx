@@ -58,7 +58,7 @@ export function PaymentHistory({ payments }: PaymentHistoryProps) {
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <p className="text-gray-700">{payment.serviceName}</p>
+                  <p className="text-gray-700">{payment.recordName}</p>
                   <p className="text-xs text-gray-400">{payment.locationName}</p>
                 </td>
                 <td className="px-4 py-3 font-medium text-gray-900">
