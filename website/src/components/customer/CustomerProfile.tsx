@@ -98,7 +98,7 @@ const TABS: readonly TabConfig[] = [
   { value: 'profile', label: 'Profile' },
   { value: 'appointments', label: 'Appointments', getCount: (p) => p.appointments.length },
   { value: 'records', label: 'Records', getCount: (p) => p.services?.length ?? 0 },
-  { value: 'payment', label: 'Payment', getCount: (p) => (p.payments?.length ?? 0) + (p.depositList?.length ?? 0) },
+  { value: 'payment', label: 'Payment', getCount: (p) => p.payments?.length ?? 0 },
 ];
 
 function TabBadge({ count, isActive }: { count: number; isActive: boolean }) {

@@ -98,17 +98,22 @@ router.get("/", async (req, res) => {
     }
 
     if (type === 'payments') {
-      sql += ` AND NOT (
-        p.deposit_type IN ('deposit', 'refund', 'usage')
-        OR p.amount < 0
-        OR p.method = 'deposit'
-        OR p.deposit_used > 0
-        OR (
-          p.deposit_type IS NULL
-          AND p.method IN ('cash', 'bank_transfer')
-          AND p.service_id IS NULL
-          AND (p.deposit_used IS NULL OR p.deposit_used = 0)
-          AND p.amount > 0
+      // Payments that are allocated to invoices/dotkhams are always "payments"
+      // even if they look like deposits on the surface
+      sql += ` AND (
+        EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = p.id)
+        OR NOT (
+          p.deposit_type IN ('deposit', 'refund', 'usage')
+          OR p.amount < 0
+          OR p.method = 'deposit'
+          OR p.deposit_used > 0
+          OR (
+            p.deposit_type IS NULL
+            AND p.method IN ('cash', 'bank_transfer')
+            AND p.service_id IS NULL
+            AND (p.deposit_used IS NULL OR p.deposit_used = 0)
+            AND p.amount > 0
+          )
         )
       )`;
     } else if (type === 'deposits') {
@@ -166,16 +171,48 @@ router.get("/", async (req, res) => {
       }
     }
 
-    let countSql = "SELECT COUNT(*) FROM payments p WHERE 1=1";
+    // Build count query with the SAME filters as the data query (including type)
+    const countConditions = ['1=1'];
     const countParams = [];
     if (customerId) {
-      countSql += " AND p.customer_id = $1";
       countParams.push(customerId);
+      countConditions.push(`p.customer_id = $${countParams.length}`);
     }
-    let countResult = await query(countSql, countParams);
+    if (type === 'payments') {
+      countConditions.push(`(
+        EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = p.id)
+        OR NOT (
+          p.deposit_type IN ('deposit', 'refund', 'usage')
+          OR p.amount < 0
+          OR p.method = 'deposit'
+          OR p.deposit_used > 0
+          OR (
+            p.deposit_type IS NULL
+            AND p.method IN ('cash', 'bank_transfer')
+            AND p.service_id IS NULL
+            AND (p.deposit_used IS NULL OR p.deposit_used = 0)
+            AND p.amount > 0
+          )
+        )
+      )`);
+    } else if (type === 'deposits') {
+      countConditions.push(`(
+        p.deposit_type IN ('deposit', 'refund')
+        OR (
+          p.deposit_type IS NULL
+          AND p.method IN ('cash', 'bank_transfer')
+          AND p.service_id IS NULL
+          AND (p.deposit_used IS NULL OR p.deposit_used = 0)
+          AND p.amount > 0
+        )
+      )`);
+    }
+    const countWhere = countConditions.join(' AND ');
+    let countResult = await query(`SELECT COUNT(*) FROM payments p WHERE ${countWhere}`, countParams);
     let totalItems = parseInt(countResult[0]?.count || 0);
 
-    if (customerId && totalItems === 0) {
+    // Legacy fallback only when no type filter and no payments found
+    if (customerId && totalItems === 0 && !type) {
       try {
         const legacyCount = await query(
           `SELECT COUNT(*) FROM accountpayments ap WHERE ap.partnerid = $1 AND ap.state = 'posted'`,
