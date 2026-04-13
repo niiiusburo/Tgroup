@@ -17,7 +17,7 @@ interface DashboardData {
 
 export function ReportsDashboard() {
   const filters = useOutletContext<{ dateFrom: string; dateTo: string; companyId: string }>();
-  const { data, loading } = useReportData<DashboardData>('/Reports/dashboard', filters);
+  const { data, loading, error, refetch } = useReportData<DashboardData>('/Reports/dashboard', filters);
 
   if (loading) return <div className="text-center py-12 text-gray-400">Loading dashboard…</div>;
   if (error) return <ReportError error={error} onRetry={refetch} />;
