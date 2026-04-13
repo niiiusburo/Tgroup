@@ -216,9 +216,8 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
       setDoctorId(appointment.doctorId || '');
       setLocationId(appointment.locationId || '');
 
-      // This modal handles today's appointments — always use today's date
-      const today = new Date();
-      setDate(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`);
+      // Use the appointment's stored date and time from the database
+      setDate(appointment.date || '');
       setTime(appointment.time || '09:00');
 
       // Extract customer type from note

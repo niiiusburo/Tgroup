@@ -40,6 +40,10 @@ vi.mock('@/components/forms/AddCustomerForm/AddCustomerForm', () => ({
   ),
 }));
 
+vi.mock('@/contexts/LocationContext', () => ({
+  useLocationFilter: () => ({ selectedLocationId: 'all' }),
+}));
+
 describe('AppointmentForm [+] inline customer', () => {
   it('shows a [+] button next to the Khách hàng field', () => {
     render(<AppointmentForm onSubmit={() => {}} onClose={() => {}} />);
@@ -57,6 +61,65 @@ describe('AppointmentForm [+] inline customer', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('add-customer-form')).toBeInTheDocument();
+    });
+  });
+});
+
+describe('AppointmentForm defaults', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-04-13T10:30:00'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('populates today\'s date and current time when creating a new appointment', () => {
+    render(<AppointmentForm onSubmit={() => {}} onClose={() => {}} />);
+
+    // Date should be formatted as DD/MM/YYYY: 13/04/2026
+    expect(screen.getByText('13/04/2026')).toBeInTheDocument();
+    // Time should be exact current time: 10:30
+    expect(screen.getByText('10:30')).toBeInTheDocument();
+  });
+
+  it('does not overwrite date/time when editing an existing appointment', () => {
+    render(
+      <AppointmentForm
+        onSubmit={() => {}}
+        onClose={() => {}}
+        isEdit
+        initialData={{
+          date: '2025-12-25',
+          startTime: '14:00',
+          customerId: 'c1',
+          customerName: 'Nguyễn Văn A',
+          customerPhone: '0901111222',
+        }}
+      />,
+    );
+
+    expect(screen.getByText('25/12/2025')).toBeInTheDocument();
+    expect(screen.getByText('14:00')).toBeInTheDocument();
+  });
+});
+
+describe('AppointmentForm location auto-populate', () => {
+  it('auto-populates location from selected customer\'s profile', async () => {
+    render(<AppointmentForm onSubmit={() => {}} onClose={() => {}} />);
+
+    // Open customer selector
+    const customerBtn = screen.getByText('Select customer...');
+    fireEvent.click(customerBtn);
+
+    // Select the mocked customer
+    const customerOption = screen.getByText('Nguyễn Văn A');
+    fireEvent.click(customerOption);
+
+    // Location should auto-update to the customer's registered location
+    await waitFor(() => {
+      expect(screen.getByText('Chi nhánh 1')).toBeInTheDocument();
     });
   });
 });

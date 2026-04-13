@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { CalendarPlus } from 'lucide-react';
 import { AppointmentForm } from '@/components/appointments/AppointmentForm';
 import type { AppointmentFormData } from '@/components/appointments/AppointmentForm';
-import { useLocationFilter } from '@/contexts/LocationContext';
+
 
 /**
  * Quick Add Appointment Button — Small floating action button for quick access
@@ -19,7 +19,6 @@ interface QuickAddAppointmentButtonProps {
 
 export function QuickAddAppointmentButton({ onSuccess, size = 'md' }: QuickAddAppointmentButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { selectedLocationId } = useLocationFilter();
 
   const handleSubmit = async (data: AppointmentFormData) => {
     try {
@@ -78,7 +77,6 @@ export function QuickAddAppointmentButton({ onSuccess, size = 'md' }: QuickAddAp
             <AppointmentForm
               onSubmit={handleSubmit}
               onClose={() => setIsOpen(false)}
-              initialData={selectedLocationId ? { locationId: selectedLocationId } : undefined}
             />
           </div>
         </div>

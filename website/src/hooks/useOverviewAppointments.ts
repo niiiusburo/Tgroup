@@ -24,6 +24,7 @@ export interface OverviewAppointment {
   readonly customerPhone: string;
   readonly doctorName: string;
   readonly doctorId: string;
+  readonly date: string;
   readonly time: string;
   readonly locationId: string;
   readonly locationName: string;
@@ -107,6 +108,7 @@ function mapApiToOverview(apt: ApiAppointment): OverviewAppointment {
     customerPhone: apt.partnerphone || '',
     doctorName: apt.doctorname || '---',
     doctorId: apt.doctorid || '',
+    date: apt.date?.split('T')[0] || '',
     time: apt.time || '09:00',
     locationId: apt.companyid || '',
     locationName: apt.companyname || '',

@@ -103,6 +103,7 @@ export function Calendar() {
       customerPhone: appointment.customerPhone,
       doctorName: appointment.dentist,
       doctorId: appointment.dentistId || '',
+      date: appointment.date,
       time: appointment.startTime,
       locationId: appointment.locationId,
       locationName: appointment.locationName,

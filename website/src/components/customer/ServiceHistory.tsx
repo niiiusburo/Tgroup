@@ -69,21 +69,28 @@ export function ServiceHistory({ services, limit, onSelect, onUpdateStatus, onPa
                       {onPayForService && svc.status !== 'cancelled' && (() => {
                         const owed = svc.residual ?? Math.max(0, svc.cost - (svc.paidAmount ?? 0));
                         const hasBalance = owed > 0;
+                        const paid = Math.max(0, svc.cost - owed);
+                        const pct = svc.cost > 0 ? Math.min(1, Math.max(0, paid / svc.cost)) : 0;
                         return (
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); onPayForService(svc); }}
-                            className={`flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium rounded-lg transition-colors ${
+                            className={`relative overflow-hidden flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium rounded-lg transition-colors ${
                               hasBalance
                                 ? 'text-orange-600 bg-orange-50 border border-orange-200 hover:bg-orange-100 hover:border-orange-300'
                                 : 'text-gray-400 bg-gray-50 border border-gray-200 hover:bg-gray-100'
                             }`}
                             title={hasBalance ? `Còn nợ ${formatVND(owed)}` : 'Đã thanh toán đủ'}
                           >
-                            {hasBalance
-                              ? <CreditCard className="w-3 h-3" />
-                              : <CheckCircle className="w-3 h-3" />}
-                            {hasBalance ? `Pay ${formatVND(owed)}` : 'Paid'}
+                            {hasBalance && pct > 0 && (
+                              <span aria-hidden className="absolute inset-y-0 left-0 bg-green-500 transition-[width] duration-500 ease-out" style={{ width: `${pct * 100}%` }} />
+                            )}
+                            <span className="relative flex items-center gap-1">
+                              {hasBalance
+                                ? <CreditCard className="w-3 h-3" />
+                                : <CheckCircle className="w-3 h-3" />}
+                              {hasBalance ? `Pay ${formatVND(owed)}` : 'Paid'}
+                            </span>
                           </button>
                         );
                       })()}

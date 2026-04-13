@@ -1,5 +1,22 @@
 [
   {
+    "version": "0.8.2",
+    "date": "2026-04-13",
+    "commit": "<fill-in-after-commit>",
+    "highlights": "Appointment form smart defaults + Pay-button progress fill",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "AppointmentForm auto-fills date/time to now when creating a new appointment",
+          "AppointmentForm auto-picks the location from the selected customer's registered branch",
+          "AppointmentForm respects the globally-selected location filter as fallback",
+          "Pay button on Treatment History rows shows a green progress fill reflecting how much of the service is already paid"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.8.1",
     "date": "2026-04-13",
     "commit": "7f4b8c67",

@@ -41,7 +41,7 @@
  * ═══════════════════════
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { X, CalendarPlus, Edit2, Calendar, Clock, User, Stethoscope, MapPin, FileText, Palette, Check, Plus } from 'lucide-react';
 import { CustomerSelector } from '@/components/shared/CustomerSelector';
 import { DoctorSelector } from '@/components/shared/DoctorSelector';
@@ -54,6 +54,7 @@ import { AddCustomerForm } from '@/components/forms/AddCustomerForm/AddCustomerF
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
 import { useProducts } from '@/hooks/useProducts';
+import { useLocationFilter } from '@/contexts/LocationContext';
 import type { ServiceCatalogItem } from '@/types/service';
 import { APPOINTMENT_CARD_COLORS, APPOINTMENT_STATUS_OPTIONS } from '@/constants';
 import type { AppointmentType } from '@/constants';
@@ -104,24 +105,38 @@ interface AppointmentFormProps {
   readonly isEdit?: boolean;
 }
 
+function getTodayStr() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
+function getCurrentTimeStr() {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+}
+
 export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false }: AppointmentFormProps) {
+  const { selectedLocationId } = useLocationFilter();
+
   // Fetch real data from API
   const { customers: apiCustomers, loading: customersLoading, createCustomer } = useCustomers();
   const { employees: apiEmployees, isLoading: employeesLoading } = useEmployees();
   const { allLocations: apiLocations, isLoading: locationsLoading } = useLocations();
   const { products, isLoading: productsLoading } = useProducts({ limit: 1000 });
 
+  const fallbackLocationId = selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : null;
+
   // Form state
   const [customerId, setCustomerId] = useState<string | null>(initialData?.customerId ?? null);
   const [doctorId, setDoctorId] = useState<string | null>(initialData?.doctorId ?? null);
-  const [locationId, setLocationId] = useState<string | null>(initialData?.locationId ?? null);
+  const [locationId, setLocationId] = useState<string | null>(initialData?.locationId ?? (isEdit ? null : fallbackLocationId));
   const [serviceId, setServiceId] = useState<string | null>(initialData?.serviceId ?? null);
   const [serviceName, setServiceName] = useState(initialData?.serviceName ?? '');
   const [customerType, setCustomerType] = useState<'new' | 'returning'>(initialData?.customerType ?? 'new');
   const [showCreateCustomer, setShowCreateCustomer] = useState(false);
   const [estimatedDuration, setEstimatedDuration] = useState<number>(initialData?.estimatedDuration ?? 30);
-  const [date, setDate] = useState(initialData?.date ?? '');
-  const [startTime, setStartTime] = useState(initialData?.startTime ?? '');
+  const [date, setDate] = useState(() => initialData?.date ?? (isEdit ? '' : getTodayStr()));
+  const [startTime, setStartTime] = useState(() => initialData?.startTime ?? (isEdit ? '' : getCurrentTimeStr()));
   const [endTime, setEndTime] = useState(initialData?.endTime ?? '');
   const [notes, setNotes] = useState(initialData?.notes ?? '');
   const [status, setStatus] = useState(initialData?.status ?? 'scheduled');
@@ -147,6 +162,18 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
       setColorCode(initialData.color ?? '0');
     }
   }, [initialData?.id]);
+
+  // When customer selection changes, auto-populate their registered location
+  const prevCustomerIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (customerId && customerId !== prevCustomerIdRef.current) {
+      const customer = apiCustomers.find((c) => c.id === customerId);
+      if (customer?.locationId) {
+        setLocationId(customer.locationId);
+      }
+    }
+    prevCustomerIdRef.current = customerId;
+  }, [customerId, apiCustomers]);
 
   // Convert API data to selector format
   const customers: Customer[] = apiCustomers.map(c => ({
