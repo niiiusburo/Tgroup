@@ -1,5 +1,51 @@
 [
   {
+    "version": "0.9.4",
+    "date": "2026-04-13",
+    "commit": "pending",
+    "highlights": "Customer add/edit: live duplicate-field validation for phone & email",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Live uniqueness check on the phone and email fields while typing (debounced 400ms) — errors appear inline under the specific field",
+          "New backend endpoint GET /api/Partners/check-unique for field-level live validation",
+          "Save button now disabled while a duplicate is detected or a check is in flight"
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Duplicate phone errors no longer appear under the Name field — they now appear under Phone with a specific Vietnamese message",
+          "PUT /api/Partners/:id now enforces duplicate phone/email checks (excluding self) — previously had none",
+          "POST /api/Partners now also checks duplicate email (case-insensitive); previously only phone was checked",
+          "API 4xx/409 responses now return a structured { error: { code, field, message } } shape; frontend throws a typed ApiError so callers can route messages to the correct field"
+        ]
+      },
+      {
+        "title": "Infra",
+        "items": [
+          "New hook useUniqueFieldCheck — debounced, cached, abort-safe live uniqueness check; reusable for future forms",
+          "New migration 021_partner_unique_constraints.sql adds UNIQUE on partners.phone and a case-insensitive UNIQUE on LOWER(email) — NOT YET APPLIED; resolve existing duplicates first (see migration comments)"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.9.3",
+    "date": "2026-04-13",
+    "commit": "pending",
+    "highlights": "Customer Profile: new Care Team strip",
+    "sections": [
+      {
+        "title": "New",
+        "items": [
+          "Care Team shows up to 3 doctors with real roles; Lead = most visits"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.8.4",
     "date": "2026-04-13",
     "commit": "59ae390e",

@@ -24,9 +24,10 @@ import {
   ScanFace,
 } from 'lucide-react';
 import { useState, useCallback, useEffect } from 'react';
-import { fetchCompanies, fetchEmployees } from '@/lib/api';
+import { fetchCompanies, fetchEmployees, ApiError } from '@/lib/api';
 import { normalizeText } from '@/lib/utils';
 import type { ApiCompany, ApiEmployee } from '@/lib/api';
+import { useUniqueFieldCheck } from '@/hooks/useUniqueFieldCheck';
 import { ComboboxInput } from '@/components/shared/ComboboxInput';
 import {
   EMPTY_CUSTOMER_FORM,
@@ -332,6 +333,54 @@ export function AddCustomerForm({
     [],
   );
 
+  // Live uniqueness checks for phone and email
+  const phoneCheck = useUniqueFieldCheck({
+    field: 'phone',
+    value: formData.phone ?? '',
+    excludeId: isEdit ? customerId : undefined,
+    initialValue: isEdit ? (initialData?.phone ?? undefined) : undefined,
+  });
+  const emailCheck = useUniqueFieldCheck({
+    field: 'email',
+    value: formData.email ?? '',
+    excludeId: isEdit ? customerId : undefined,
+    initialValue: isEdit ? (initialData?.email ?? undefined) : undefined,
+  });
+
+  const setError = useCallback(
+    (field: keyof CustomerFormData, message: string) => {
+      setErrors((prev) => {
+        const filtered = prev.filter((e) => e.field !== field);
+        return [...filtered, { field, message }];
+      });
+    },
+    [],
+  );
+
+  const clearError = useCallback(
+    (field: keyof CustomerFormData) => {
+      setErrors((prev) => prev.filter((e) => e.field !== field));
+    },
+    [],
+  );
+
+  // Reflect duplicate status into field errors; clear on unique verdict
+  useEffect(() => {
+    if (phoneCheck.status === 'duplicate' && phoneCheck.message) {
+      setError('phone', phoneCheck.message);
+    } else if (phoneCheck.status === 'unique') {
+      clearError('phone');
+    }
+  }, [phoneCheck.status, phoneCheck.message, setError, clearError]);
+
+  useEffect(() => {
+    if (emailCheck.status === 'duplicate' && emailCheck.message) {
+      setError('email', emailCheck.message);
+    } else if (emailCheck.status === 'unique') {
+      clearError('email');
+    }
+  }, [emailCheck.status, emailCheck.message, setError, clearError]);
+
   const handleAddSource = (name: string) => {
     addSource({
       name,
@@ -366,19 +415,17 @@ export function AddCustomerForm({
         await onSubmit(formData);
       } catch (err) {
         console.error('Save customer error:', err);
-        let message = 'Lỗi lưu dữ liệu. Vui lòng thử lại.';
-        if (err instanceof Error) {
-          // Try to extract a JSON error message from the API response text
-          const match = err.message.match(/\{[^}]*"error"\s*:\s*"([^"]+)"/);
-          if (match) {
-            message = match[1];
-          } else if (err.message.includes('Phone number already exists')) {
-            message = 'Số điện thoại đã tồn tại';
-          } else if (err.message.includes('Name and phone are required')) {
-            message = 'Vui lòng nhập đầy đủ tên và số điện thoại';
+        if (err instanceof ApiError) {
+          if ((err.code === 'DUPLICATE_FIELD') && (err.field === 'phone' || err.field === 'email')) {
+            setErrors([{ field: err.field, message: err.message }]);
+          } else if (err.code === 'VALIDATION') {
+            setErrors([{ field: 'name', message: err.message }]);
+          } else {
+            setErrors([{ field: 'name', message: 'Lỗi lưu dữ liệu. Vui lòng thử lại.' }]);
           }
+        } else {
+          setErrors([{ field: 'name', message: 'Lỗi lưu dữ liệu. Vui lòng thử lại.' }]);
         }
-        setErrors([{ field: 'name', message }]);
       } finally {
         setIsSubmitting(false);
       }
@@ -631,6 +678,9 @@ export function AddCustomerForm({
                   </button>
                 </div>
                 {getError('phone') && <p className="mt-1 text-xs text-red-500">{getError('phone')}</p>}
+                {phoneCheck.status === 'error' && !getError('phone') && (
+                  <p className="mt-1 text-xs text-gray-400">{phoneCheck.message}</p>
+                )}
               </div>
             </div>
           </CardSection>
@@ -917,6 +967,9 @@ export function AddCustomerForm({
                       className={inputClass(!!getError('email'))}
                     />
                     {getError('email') && <p className="mt-1 text-xs text-red-500">{getError('email')}</p>}
+                    {emailCheck.status === 'error' && !getError('email') && (
+                      <p className="mt-1 text-xs text-gray-400">{emailCheck.message}</p>
+                    )}
                   </div>
 
                   {/* Country */}
@@ -1245,7 +1298,13 @@ export function AddCustomerForm({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={
+                isSubmitting ||
+                phoneCheck.status === 'checking' ||
+                phoneCheck.status === 'duplicate' ||
+                emailCheck.status === 'checking' ||
+                emailCheck.status === 'duplicate'
+              }
               className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/25"
             >
               {isSubmitting ? 'Đang lưu...' : isEdit ? 'Cập nhật' : 'Lưu'}

@@ -140,6 +140,66 @@ router.get('/', async (req, res) => {
   }
 });
 
+// declared before /:id to prevent Express matching 'check-unique' as an id param.
+router.get('/check-unique', async (req, res) => {
+  try {
+    const { field, value, excludeId } = req.query;
+
+    if (!field || !['phone', 'email'].includes(field)) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION',
+          message: "Tham số 'field' phải là 'phone' hoặc 'email'",
+        },
+      });
+    }
+    const trimmed = typeof value === 'string' ? value.trim() : '';
+
+    if (!trimmed) {
+      return res.json({ unique: true });
+    }
+
+    let rows;
+    if (field === 'phone') {
+      if (excludeId) {
+        rows = await query(
+          'SELECT id FROM partners WHERE phone = $1 AND id <> $2 LIMIT 1',
+          [trimmed, excludeId]
+        );
+      } else {
+        rows = await query(
+          'SELECT id FROM partners WHERE phone = $1 LIMIT 1',
+          [trimmed]
+        );
+      }
+    } else {
+      // email — case-insensitive comparison
+      if (excludeId) {
+        rows = await query(
+          'SELECT id FROM partners WHERE LOWER(email) = LOWER($1) AND id <> $2 LIMIT 1',
+          [trimmed, excludeId]
+        );
+      } else {
+        rows = await query(
+          'SELECT id FROM partners WHERE LOWER(email) = LOWER($1) LIMIT 1',
+          [trimmed]
+        );
+      }
+    }
+
+    if (rows && rows.length > 0) {
+      return res.json({ unique: false, conflictField: field });
+    }
+
+    return res.json({ unique: true });
+  } catch (err) {
+    console.error('Error checking field uniqueness:', err);
+    return res.status(500).json({
+      error: err instanceof Error ? err.message : 'Unknown error',
+    });
+  }
+});
+
 /**
  * GET /api/Partners/:id
  * Returns: full partner/customer profile with all fields
@@ -362,15 +422,42 @@ router.post('/', requirePermission('customers.add'), async (req, res) => {
 
     // Validate required fields
     if (!name || !phone) {
-      return res.status(400).json({ error: 'Name and phone are required' });
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION',
+          message: 'Vui lòng nhập đầy đủ tên và số điện thoại',
+        },
+      });
     }
 
-    const duplicate = await query(
+    const phoneDup = await query(
       'SELECT id FROM partners WHERE phone = $1 LIMIT 1',
       [phone]
     );
-    if (duplicate && duplicate.length > 0) {
-      return res.status(409).json({ error: 'Phone number already exists' });
+    if (phoneDup && phoneDup.length > 0) {
+      return res.status(409).json({
+        error: {
+          code: 'DUPLICATE_FIELD',
+          field: 'phone',
+          message: 'Số điện thoại này đã được sử dụng',
+        },
+      });
+    }
+    const trimmedEmail = typeof email === 'string' ? email.trim() : '';
+    if (trimmedEmail) {
+      const emailDup = await query(
+        'SELECT id FROM partners WHERE LOWER(email) = LOWER($1) LIMIT 1',
+        [trimmedEmail]
+      );
+      if (emailDup && emailDup.length > 0) {
+        return res.status(409).json({
+          error: {
+            code: 'DUPLICATE_FIELD',
+            field: 'email',
+            message: 'Email này đã được sử dụng',
+          },
+        });
+      }
     }
 
     // Generate a new UUID
@@ -466,6 +553,40 @@ router.put('/:id', requirePermission('customers.edit'), async (req, res) => {
 
     if (!existing || existing.length === 0) {
       return res.status(404).json({ error: 'Partner not found' });
+    }
+
+    // Check phone uniqueness excluding this partner
+    if (phone !== undefined) {
+      const phoneDup = await query(
+        'SELECT id FROM partners WHERE phone = $1 AND id <> $2 LIMIT 1',
+        [phone, id]
+      );
+      if (phoneDup && phoneDup.length > 0) {
+        return res.status(409).json({
+          error: {
+            code: 'DUPLICATE_FIELD',
+            field: 'phone',
+            message: 'Số điện thoại này đã được sử dụng',
+          },
+        });
+      }
+    }
+    // Check email uniqueness (case-insensitive) excluding this partner
+    const trimmedEmailPut = typeof email === 'string' ? email.trim() : '';
+    if (trimmedEmailPut) {
+      const emailDup = await query(
+        'SELECT id FROM partners WHERE LOWER(email) = LOWER($1) AND id <> $2 LIMIT 1',
+        [trimmedEmailPut, id]
+      );
+      if (emailDup && emailDup.length > 0) {
+        return res.status(409).json({
+          error: {
+            code: 'DUPLICATE_FIELD',
+            field: 'email',
+            message: 'Email này đã được sử dụng',
+          },
+        });
+      }
     }
 
     const updates = [];

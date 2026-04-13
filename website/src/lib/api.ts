@@ -3,7 +3,29 @@
  * @crossref:used-in[useCustomers, useEmployees, useAppointments, useServices, usePayment, useLocations]
  */
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+
+export class ApiError extends Error {
+  status: number;
+  code?: string;
+  field?: string;
+  body?: unknown;
+
+  constructor(init: { status: number; code?: string; field?: string; message: string; body?: unknown }) {
+    super(init.message);
+    this.name = 'ApiError';
+    this.status = init.status;
+    this.code = init.code;
+    this.field = init.field;
+    this.body = init.body;
+  }
+}
+
+export function getUploadUrl(relativePath: string): string {
+  if (relativePath.startsWith('http')) return relativePath;
+  const base = API_URL.replace(/\/?api$/, '');
+  return `${base}${relativePath}`;
+}
 
 export interface PaginatedResponse<T> {
   offset: number;
@@ -61,8 +83,51 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => 'Unknown error');
-    throw new Error(`API ${method} ${endpoint} failed (${res.status}): ${text}`);
+    let parsed: unknown;
+    try {
+      parsed = await res.clone().json();
+    } catch {
+      // JSON parse failed — fall back to legacy string throw
+      const text = await res.text().catch(() => 'Unknown error');
+      throw new Error(`API ${method} ${endpoint} failed (${res.status}): ${text}`);
+    }
+
+    // Structured error: { error: { code, field?, message } }
+    if (
+      parsed !== null &&
+      typeof parsed === 'object' &&
+      'error' in parsed &&
+      (parsed as Record<string, unknown>).error !== null &&
+      typeof (parsed as Record<string, unknown>).error === 'object' &&
+      'code' in ((parsed as Record<string, unknown>).error as Record<string, unknown>) &&
+      'message' in ((parsed as Record<string, unknown>).error as Record<string, unknown>)
+    ) {
+      const e = (parsed as Record<string, unknown>).error as { code: string; field?: string; message: string };
+      throw new ApiError({ status: res.status, code: e.code, field: e.field, message: e.message, body: parsed });
+    }
+
+    // Legacy string error: { error: "some string" }
+    if (
+      parsed !== null &&
+      typeof parsed === 'object' &&
+      'error' in parsed &&
+      typeof (parsed as Record<string, unknown>).error === 'string'
+    ) {
+      throw new ApiError({
+        status: res.status,
+        code: 'UNKNOWN',
+        message: (parsed as Record<string, unknown>).error as string,
+        body: parsed,
+      });
+    }
+
+    // Unknown JSON shape — treat as UNKNOWN
+    throw new ApiError({
+      status: res.status,
+      code: 'UNKNOWN',
+      message: `API ${method} ${endpoint} failed (${res.status})`,
+      body: parsed,
+    });
   }
 
   return res.json();
@@ -481,6 +546,10 @@ export interface ApiSaleOrder {
   notes: string | null;
   lastupdated: string | null;
   isdeleted?: boolean;
+  /** Sale order reference code (e.g. SO-2024-001). */
+  code?: string | null;
+  ref?: string | null;
+  origin?: string | null;
 }
 
 export function fetchSaleOrders(params?: {
@@ -699,6 +768,7 @@ export interface ApiPaymentAllocation {
   invoiceId?: string;
   dotkhamId?: string;
   invoiceName?: string;
+  invoiceCode?: string;
   dotkhamName?: string;
   invoiceTotal?: number;
   dotkhamTotal?: number;
@@ -1328,14 +1398,34 @@ export async function createFeedback(data: {
   content: string;
   pagePath?: string;
   screenSize?: string;
+  files?: File[];
 }): Promise<FeedbackThread> {
-  return apiFetch('/Feedback', { method: 'POST', body: data });
+  const { files, ...rest } = data;
+  if (files && files.length > 0) {
+    const form = new FormData();
+    form.append('content', rest.content);
+    if (rest.pagePath) form.append('pagePath', rest.pagePath);
+    if (rest.screenSize) form.append('screenSize', rest.screenSize);
+    files.forEach((file) => form.append('files', file));
+    return apiFetch('/Feedback', { method: 'POST', body: form as unknown as Record<string, unknown> });
+  }
+  return apiFetch('/Feedback', { method: 'POST', body: rest });
 }
 
 export async function replyToMyFeedbackThread(
   threadId: string,
-  content: string
+  content: string,
+  files?: File[]
 ): Promise<FeedbackMessage> {
+  if (files && files.length > 0) {
+    const form = new FormData();
+    form.append('content', content);
+    files.forEach((file) => form.append('files', file));
+    return apiFetch(`/Feedback/my/${encodeURIComponent(threadId)}/reply`, {
+      method: 'POST',
+      body: form as unknown as Record<string, unknown>,
+    });
+  }
   return apiFetch(`/Feedback/my/${encodeURIComponent(threadId)}/reply`, {
     method: 'POST',
     body: { content },
@@ -1352,8 +1442,18 @@ export async function fetchAdminFeedbackThread(threadId: string): Promise<Feedba
 
 export async function replyToFeedbackThread(
   threadId: string,
-  content: string
+  content: string,
+  files?: File[]
 ): Promise<FeedbackMessage> {
+  if (files && files.length > 0) {
+    const form = new FormData();
+    form.append('content', content);
+    files.forEach((file) => form.append('files', file));
+    return apiFetch(`/Feedback/all/${encodeURIComponent(threadId)}/reply`, {
+      method: 'POST',
+      body: form as unknown as Record<string, unknown>,
+    });
+  }
   return apiFetch(`/Feedback/all/${encodeURIComponent(threadId)}/reply`, {
     method: 'POST',
     body: { content },
