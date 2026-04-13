@@ -2,7 +2,7 @@
   {
     "version": "0.8.1",
     "date": "2026-04-13",
-    "commit": "<fill-in-after-commit>",
+    "commit": "7f4b8c67",
     "highlights": "Show saleorder code badge on service rows and payment modal to distinguish duplicate service names",
     "sections": [
       {
