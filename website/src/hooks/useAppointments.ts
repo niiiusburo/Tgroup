@@ -18,6 +18,7 @@ import {
 import { calculateEndTime } from '@/lib/calendarUtils';
 import type { AppointmentStatus } from '@/data/mockCalendar';
 import type { AppointmentType } from '@/constants';
+import { useTimezone } from '@/contexts/TimezoneContext';
 
 export type AppointmentFilter = 'all' | AppointmentStatus;
 export type CheckInFilter = 'all' | CheckInStatus;
@@ -45,12 +46,6 @@ function nowTimeString(): string {
   return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 }
 
-function parseDate(dateString: string): string {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return '';
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
 
 function parseTime(timeString: string | null, datetimeString: string | null): string {
   if (timeString) return timeString;
@@ -63,10 +58,13 @@ function parseTime(timeString: string | null, datetimeString: string | null): st
   return '09:00';
 }
 
-function mapApiToManagedAppointment(api: ApiAppointment): ManagedAppointment {
+function mapApiToManagedAppointment(
+  api: ApiAppointment,
+  formatDate: (date: Date | string, format?: string) => string,
+): ManagedAppointment {
   const startTime = parseTime(api.time, api.datetimeappointment);
   const endTime = calculateEndTime(startTime, api.timeexpected);
-  const date = parseDate(api.date);
+  const date = api.date ? formatDate(api.date, 'yyyy-MM-dd') : '';
 
   const state = api.state?.toLowerCase() || '';
   let status: AppointmentStatus = 'scheduled';
@@ -103,6 +101,7 @@ function mapApiToManagedAppointment(api: ApiAppointment): ManagedAppointment {
 }
 
 export function useAppointments(selectedLocationId?: string) {
+  const { formatDate } = useTimezone();
   const [appointments, setAppointments] = useState<ManagedAppointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -122,7 +121,7 @@ export function useAppointments(selectedLocationId?: string) {
         limit: 200,
         companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
       });
-      const managed = response.items.map(mapApiToManagedAppointment);
+      const managed = response.items.map((item) => mapApiToManagedAppointment(item, formatDate));
       setAppointments(managed);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to fetch appointments';
@@ -131,7 +130,7 @@ export function useAppointments(selectedLocationId?: string) {
     } finally {
       setLoading(false);
     }
-  }, [selectedLocationId]);
+  }, [selectedLocationId, formatDate]);
 
   // Load appointments on mount
   useEffect(() => {
@@ -156,7 +155,7 @@ export function useAppointments(selectedLocationId?: string) {
           search: searchTerm,
           companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
         });
-        const managed = response.items.map(mapApiToManagedAppointment);
+        const managed = response.items.map((item) => mapApiToManagedAppointment(item, formatDate));
         setAppointments(managed);
         setError(null);
       } catch (err) {
@@ -213,7 +212,7 @@ export function useAppointments(selectedLocationId?: string) {
       };
 
       const created = await apiCreateAppointment(apiPayload);
-      const managed = mapApiToManagedAppointment(created);
+      const managed = mapApiToManagedAppointment(created, formatDate);
       setAppointments((prev) => [...prev, managed]);
       return managed;
     } catch (err) {

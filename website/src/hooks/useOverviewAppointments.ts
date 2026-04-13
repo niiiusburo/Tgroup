@@ -91,7 +91,10 @@ function mapStateToCheckInStatus(state: string | null): CheckInStatus | null {
 
 
 
-function mapApiToOverview(apt: ApiAppointment): OverviewAppointment {
+function mapApiToOverview(
+  apt: ApiAppointment,
+  formatDate: (date: Date | string, format?: string) => string,
+): OverviewAppointment {
   const topStatus = mapStateToTopStatus(apt.state);
   // Only cancelled appointments have no check-in status
   const checkInStatus: CheckInStatus | null = topStatus === 'cancelled'
@@ -108,7 +111,7 @@ function mapApiToOverview(apt: ApiAppointment): OverviewAppointment {
     customerPhone: apt.partnerphone || '',
     doctorName: apt.doctorname || '---',
     doctorId: apt.doctorid || '',
-    date: apt.date?.split('T')[0] || '',
+    date: apt.date ? formatDate(apt.date, 'yyyy-MM-dd') : '',
     time: apt.time || '09:00',
     locationId: apt.companyid || '',
     locationName: apt.companyname || '',
@@ -182,7 +185,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
    *
    * Any AI or developer reading this: DO NOT TOUCH THE DATE RANGE.
    */
-  const { getToday, getEndOfDay, timezone } = useTimezone();
+  const { getToday, getEndOfDay, timezone, formatDate } = useTimezone();
   const [appointments, setAppointments] = useState<OverviewAppointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [zone3Filter, setZone3Filter] = useState<Zone3Filter>(() =>
@@ -222,8 +225,11 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
       // =========================================================================
 
       const mapped = response.items
-        .filter((apt) => apt.date?.split('T')[0] === todayStr) // Client-side guard: today only
-        .map(mapApiToOverview);
+        .filter((apt) => {
+          const aptDateStr = apt.date ? formatDate(apt.date, 'yyyy-MM-dd') : '';
+          return aptDateStr === todayStr; // Client-side guard: today only
+        })
+        .map((apt) => mapApiToOverview(apt, formatDate));
       // Sort by time ascending (earliest first) — stable sort so status changes don't reorder
       mapped.sort((a, b) => a.time.localeCompare(b.time));
       setAppointments(mapped);
@@ -233,11 +239,22 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
     } finally {
       setIsLoading(false);
     }
-  }, [locationId, timezone, getToday, getEndOfDay]);
+  }, [locationId, timezone, getToday, getEndOfDay, formatDate]);
 
   useEffect(() => {
     loadAppointments();
   }, [loadAppointments, timezone]);
+
+  // Refresh appointments when the tab becomes visible again
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadAppointments();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [loadAppointments]);
 
   // ─── Search states ─────────────────────────────────────────────
   const [zone1Search, setZone1Search] = useState('');
