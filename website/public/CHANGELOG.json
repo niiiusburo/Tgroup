@@ -1,8 +1,37 @@
 [
   {
+    "version": "0.10.1",
+    "date": "2026-04-13",
+    "commit": "pending",
+    "severity": "critical",
+    "forceUpdate": true,
+    "highlights": "Fixed force update mechanism - updates now detected by commit hash, snooze instead of dismiss, critical updates auto-reload",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Updates detected by both semantic version AND git commit hash",
+          "24-hour snooze instead of permanent dismissal for regular updates",
+          "Critical update severity with auto-reload countdown",
+          "Cross-tab sync via BroadcastChannel",
+          "Preserves current route after update reload"
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Fixed updates not detected when only commit changed but version stayed same",
+          "Fixed permanent dismissal preventing future update notifications",
+          "Fixed grace period accepting server version without actual bundle update"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.9.4",
     "date": "2026-04-13",
     "commit": "pending",
+    "severity": "regular",
     "highlights": "Customer add/edit: live duplicate-field validation for phone & email",
     "sections": [
       {

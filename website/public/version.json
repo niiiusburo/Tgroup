@@ -1,7 +1,7 @@
 {
-  "version": "0.8.5",
-  "buildTime": "2026-04-13T04:17:09.225Z",
-  "gitCommit": "b8025eee",
-  "gitBranch": "ai-develop",
-  "environment": "production"
+  "version": "0.10.2",
+  "buildTime": "2026-04-13T09:44:49.885Z",
+  "gitCommit": "45c8199b",
+  "gitBranch": "fix-force-update",
+  "environment": "development"
 }
