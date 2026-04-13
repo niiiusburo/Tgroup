@@ -2,7 +2,7 @@
   {
     "version": "0.8.4",
     "date": "2026-04-13",
-    "commit": "<fill-in-after-commit>",
+    "commit": "59ae390e",
     "highlights": "AddCustomerForm + POST /partners gain full Vietnamese address, identity, insurance and business-invoice fields",
     "sections": [
       {
