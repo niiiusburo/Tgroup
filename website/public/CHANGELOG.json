@@ -2,7 +2,7 @@
   {
     "version": "0.7.0",
     "date": "2026-04-13",
-    "commit": "<fill-in-after-commit>",
+    "commit": "1f7cb68c",
     "highlights": "Pay-per-service refactor: locked service context, read-only location, capped multi-source inputs",
     "sections": [
       {
