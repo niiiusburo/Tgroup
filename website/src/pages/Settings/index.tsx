@@ -6,21 +6,27 @@
  */
 
 import { useState } from 'react';
-import { Settings as SettingsIcon, SlidersHorizontal, Shield, Globe, Building2 } from 'lucide-react';
+import { Settings as SettingsIcon, SlidersHorizontal, Shield, Globe, Building2, MessageSquare } from 'lucide-react';
 import { SystemPreferencesContent } from '@/components/settings/SystemPreferencesContent';
 import { IpAccessControl } from '@/components/settings/IpAccessControl';
 import { TimezoneSelector } from '@/components/settings/TimezoneSelector';
 import { BankSettingsForm } from '@/components/settings/BankSettingsForm';
+import { FeedbackAdminContent } from '@/components/settings/FeedbackAdminContent';
+import { useAuth } from '@/contexts/AuthContext';
 
-type SettingsTab = 'system' | 'bank' | 'ip';
+type SettingsTab = 'system' | 'bank' | 'ip' | 'feedback';
 
-const TABS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
+const ALL_TABS: { id: SettingsTab; label: string; icon: React.ReactNode; admin?: boolean }[] = [
   { id: 'system', label: 'System Settings', icon: <SlidersHorizontal className="w-5 h-5" /> },
   { id: 'bank', label: 'Bank Account', icon: <Building2 className="w-5 h-5" /> },
   { id: 'ip', label: 'IP Access Control', icon: <Shield className="w-5 h-5" /> },
+  { id: 'feedback', label: 'Feedback', icon: <MessageSquare className="w-5 h-5" />, admin: true },
 ];
 
 export function Settings() {
+  const { hasPermission } = useAuth();
+  const isAdmin = hasPermission('permissions.view') && hasPermission('permissions.edit');
+  const TABS = ALL_TABS.filter((t) => !t.admin || isAdmin);
   const [activeTab, setActiveTab] = useState<SettingsTab>('system');
 
   return (
@@ -87,6 +93,7 @@ export function Settings() {
           {activeTab === 'system' && <SystemPreferencesContent />}
           {activeTab === 'bank' && <BankSettingsForm />}
           {activeTab === 'ip' && <IpAccessControl />}
+          {activeTab === 'feedback' && <FeedbackAdminContent />}
         </div>
       </div>
     </div>

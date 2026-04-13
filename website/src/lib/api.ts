@@ -1305,3 +1305,67 @@ export async function createExternalCheckup(
   }
   return res.json();
 }
+
+// ─── Feedback ─────────────────────────────────────────────────────
+
+import type {
+  FeedbackStatus,
+  FeedbackThread,
+  AdminFeedbackThread,
+  FeedbackMessage,
+  FeedbackThreadDetail,
+} from '@/types/feedback';
+
+export async function fetchMyFeedback(): Promise<{ items: FeedbackThread[] }> {
+  return apiFetch('/Feedback/my');
+}
+
+export async function fetchMyFeedbackThread(threadId: string): Promise<FeedbackThreadDetail> {
+  return apiFetch(`/Feedback/my/${encodeURIComponent(threadId)}`);
+}
+
+export async function createFeedback(data: {
+  content: string;
+  pagePath?: string;
+  screenSize?: string;
+}): Promise<FeedbackThread> {
+  return apiFetch('/Feedback', { method: 'POST', body: data });
+}
+
+export async function replyToMyFeedbackThread(
+  threadId: string,
+  content: string
+): Promise<FeedbackMessage> {
+  return apiFetch(`/Feedback/my/${encodeURIComponent(threadId)}/reply`, {
+    method: 'POST',
+    body: { content },
+  });
+}
+
+export async function fetchAllFeedback(): Promise<{ items: AdminFeedbackThread[] }> {
+  return apiFetch('/Feedback/all');
+}
+
+export async function fetchAdminFeedbackThread(threadId: string): Promise<FeedbackThreadDetail> {
+  return apiFetch(`/Feedback/all/${encodeURIComponent(threadId)}`);
+}
+
+export async function replyToFeedbackThread(
+  threadId: string,
+  content: string
+): Promise<FeedbackMessage> {
+  return apiFetch(`/Feedback/all/${encodeURIComponent(threadId)}/reply`, {
+    method: 'POST',
+    body: { content },
+  });
+}
+
+export async function updateFeedbackStatus(
+  threadId: string,
+  status: FeedbackStatus
+): Promise<FeedbackThread> {
+  return apiFetch(`/Feedback/all/${encodeURIComponent(threadId)}/status`, {
+    method: 'PATCH',
+    body: { status },
+  });
+}

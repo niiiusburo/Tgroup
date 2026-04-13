@@ -28,6 +28,7 @@ import { FilterByLocation } from '@/components/shared/FilterByLocation';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocations } from '@/hooks/useLocations';
+import { FeedbackWidget } from '@/components/shared/FeedbackWidget';
 
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -424,6 +425,9 @@ export function Layout() {
                 />
               </div>
             )}
+
+            {/* Feedback */}
+            <FeedbackWidget />
 
             {/* Bell */}
             <button className="relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors duration-150">
