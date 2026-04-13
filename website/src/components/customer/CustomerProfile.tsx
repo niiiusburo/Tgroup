@@ -2,22 +2,24 @@ import { useState } from 'react';
 import {
   ArrowLeft, Phone, Mail, MapPin, Calendar, Tag,
   User, AlertCircle, Edit2, Plus, Clock, CalendarPlus, Receipt,
-  Trash2, ChevronDown, Coins, CircleDollarSign, Wallet, HandCoins,
+  Trash2, ChevronDown, Coins, Wallet, HandCoins,
 } from 'lucide-react';
 import { CustomerDeposits } from '@/components/payment/CustomerDeposits';
 import { AppointmentForm, type AppointmentFormData } from '@/components/appointments/AppointmentForm';
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { PaymentForm, type PaymentFormData } from '@/components/payment/PaymentForm';
+import { EditPaymentModal } from '@/components/payment/EditPaymentModal';
 import { type ServicePaymentContext } from '@/components/payment/ServicePaymentCard';
 import { ServiceHistory } from '@/components/customer/ServiceHistory';
+import { CustomerAssignments } from '@/components/customer/CustomerAssignments';
 import type { DepositTransaction, DepositBalance } from '@/hooks/useDeposits';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 import type { CustomerService } from '@/types/customer';
-import type { ApiAppointment, ExternalCheckupsResponse } from '@/lib/api';
+import type { ApiAppointment, ApiPayment, ExternalCheckupsResponse } from '@/lib/api';
 import type { PaymentWithAllocations } from '@/hooks/useCustomerPayments';
 import { HealthCheckupGallery } from './HealthCheckupGallery';
 import { useAuth } from '@/contexts/AuthContext';
-import { formatVND } from '@/lib/formatting';
+import { formatVND, parseDisplayDate } from '@/lib/formatting';
 
 interface CustomerProfileProps {
   readonly profile: CustomerProfileData;
@@ -193,15 +195,13 @@ export function CustomerProfile({
   const [payTargetService, setPayTargetService] = useState<CustomerService | null>(null);
   const [editingAppointment, setEditingAppointment] = useState<ApiAppointment | null>(null);
   const [editingService, setEditingService] = useState<CustomerService | null>(null);
+  const [editingPayment, setEditingPayment] = useState<ApiPayment | null>(null);
   const [expandedPaymentId, setExpandedPaymentId] = useState<string | null>(null);
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
   const { hasPermission } = useAuth();
   const canViewHealthCheckups = hasPermission('external_checkups.view');
 
   const totalServiceCost = services.reduce((sum, s) => sum + (s.cost || 0), 0);
-  const expectedRevenue = services
-    .filter((s) => s.status !== 'cancelled')
-    .reduce((sum, s) => sum + (s.cost || 0), 0);
   const totalRevenue = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
   const amountPaid = totalServiceCost - profile.outstandingBalance;
 
@@ -285,12 +285,22 @@ export function CustomerProfile({
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-1">
-              <h2 className="text-xl font-bold text-gray-900">{profile.name}</h2>
-              <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">
-                <User className="w-3 h-3" />
-                {profile.gender === 'male' ? 'Male' : 'Female'}
-              </span>
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-3">
+                <h2 className="text-xl font-bold text-gray-900">{profile.name}</h2>
+                <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
+                  profile.gender === 'female' ? 'bg-pink-50 text-pink-600' : 'bg-blue-50 text-blue-600'
+                }`}>
+                  <User className="w-3 h-3" />
+                  {profile.gender === 'male' ? 'Male' : 'Female'}
+                </span>
+              </div>
+              {profile.code && (
+                <span className="self-start inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                  <Tag className="w-3 h-3 text-slate-400" />
+                  {profile.code}
+                </span>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
@@ -354,6 +364,16 @@ export function CustomerProfile({
         )}
       </div>
 
+      <CustomerAssignments
+        companyName={profile.companyName}
+        salestaffId={profile.salestaffid}
+        cskhId={profile.cskhid}
+        cskhName={profile.cskhname}
+        sourceId={profile.sourceid}
+        sourceName={profile.sourcename}
+        referralUserId={profile.referraluserid}
+      />
+
       {/* Tabs */}
       <div className="border-b border-gray-200">
         <div className="flex gap-1">
@@ -406,7 +426,6 @@ export function CustomerProfile({
           <div className="bg-white rounded-xl shadow-card p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><p className="text-xs text-gray-400">Customer Code</p><p className="text-sm font-medium text-gray-900">{profile.code || 'N/A'}</p></div>
               <div><p className="text-xs text-gray-400">Full Name</p><p className="text-sm font-medium text-gray-900">{profile.name}</p></div>
               <div><p className="text-xs text-gray-400">Phone</p><p className="text-sm font-medium text-gray-900">{profile.phone || 'N/A'}</p></div>
               <div><p className="text-xs text-gray-400">Email</p><p className="text-sm font-medium text-gray-900">{profile.email || 'N/A'}</p></div>
@@ -515,7 +534,7 @@ export function CustomerProfile({
           </div>
 
           {/* Financial Overview Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-sky-50 flex items-center justify-center flex-shrink-0">
@@ -524,17 +543,6 @@ export function CustomerProfile({
                 <div className="min-w-0">
                   <p className="text-xs text-gray-500 truncate">Tổng tiền điều trị</p>
                   <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(totalServiceCost)}</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center flex-shrink-0">
-                  <CircleDollarSign className="w-5 h-5 text-amber-500" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs text-gray-500 truncate">Dự kiến thu</p>
-                  <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(expectedRevenue)}</p>
                 </div>
               </div>
             </div>
@@ -555,7 +563,7 @@ export function CustomerProfile({
                   <Receipt className="w-5 h-5 text-rose-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-gray-500 truncate">Công nợ</p>
+                  <p className="text-xs text-gray-500 truncate">Dự kiến thu</p>
                   <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(profile.outstandingBalance)}</p>
                 </div>
               </div>
@@ -573,10 +581,10 @@ export function CustomerProfile({
             </div>
           </div>
 
-          <ServiceHistory services={services} onSelect={setEditingService} onUpdateStatus={onUpdateServiceStatus} onPayForService={onMakePayment ? (svc) => {
+          <ServiceHistory services={services} payments={payments} onEditService={setEditingService} onUpdateStatus={onUpdateServiceStatus} onPayForService={onMakePayment ? (svc) => {
             setPayTargetService(svc);
             setShowPaymentModal(true);
-          } : undefined} />
+          } : undefined} onEditPayment={(p) => setEditingPayment(p)} />
         </div>
       )}
 
@@ -619,71 +627,74 @@ export function CustomerProfile({
             ) : (
               <div className="divide-y divide-gray-100">
                 {payments.map((p) => {
+                  const isVoided = p.status === 'voided';
+                  const isNegative = p.amount < 0;
+                  const dateInfo = parseDisplayDate(p.paymentDate || p.createdAt);
+                  const dd = dateInfo?.day ?? '—';
+                  const mmm = dateInfo?.month ?? '';
+                  const yyyy = dateInfo?.year ?? '';
+                  const methodChipClass =
+                    p.method === 'cash' ? 'text-green-700 bg-green-100 border border-green-200' :
+                    p.method === 'bank_transfer' ? 'text-blue-700 bg-blue-100 border border-blue-200' :
+                    p.method === 'deposit' ? 'text-purple-700 bg-purple-100 border border-purple-200' :
+                    'text-gray-700 bg-gray-100 border border-gray-200';
+                  const methodLabel = p.method === 'bank_transfer' ? 'Bank' : p.method === 'deposit' ? 'Deposit' : p.method === 'mixed' ? 'Mixed' : 'Cash';
                   const isExpanded = expandedPaymentId === p.id;
-                  const methodColor =
-                    p.method === 'cash' ? 'text-amber-600 bg-amber-50' :
-                    p.method === 'bank_transfer' ? 'text-blue-600 bg-blue-50' :
-                    p.method === 'deposit' ? 'text-emerald-600 bg-emerald-50' :
-                    'text-gray-600 bg-gray-50';
                   return (
-                    <div key={p.id} className="hover:bg-gray-50/60 transition-colors">
+                    <div
+                      key={p.id}
+                      className={`transition-all duration-200 group ${isNegative ? 'bg-red-50/20' : ''}`}
+                    >
                       <button
                         type="button"
-                        onClick={() => setExpandedPaymentId(isExpanded ? null : p.id)}
-                        className="w-full px-4 py-3 flex items-center justify-between text-left"
+                        onClick={() => {
+                          if (!isVoided) {
+                            setEditingPayment(p);
+                          } else {
+                            setExpandedPaymentId(isExpanded ? null : p.id);
+                          }
+                        }}
+                        className={`w-full px-4 py-3 flex items-center gap-3 text-left transition-all duration-200 ${
+                          !isVoided
+                            ? 'cursor-pointer hover:bg-gray-50 hover:ring-2 hover:ring-primary/20 hover:ring-inset hover:shadow-sm hover:-translate-y-px'
+                            : 'cursor-default opacity-60'
+                        }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className={`text-xs px-2 py-0.5 rounded-full font-medium ${methodColor}`}>
-                            {p.method === 'bank_transfer' ? 'Bank' : p.method === 'deposit' ? 'Deposit' : 'Cash'}
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">{formatVND(p.amount)}</p>
-                            <p className="text-xs text-gray-400">{p.paymentDate || p.createdAt?.slice(0, 10)}</p>
-                          </div>
+                        {/* Date tear-off block */}
+                        <div className={`flex-shrink-0 flex flex-col items-center justify-center w-11 h-12 rounded-lg border text-center ${isNegative ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-200'}`}>
+                          <span className={`text-sm font-bold leading-none ${isNegative ? 'text-red-600' : 'text-orange-600'}`}>{dd}</span>
+                          {mmm && <span className="text-[9px] text-gray-500 leading-tight mt-0.5">{mmm}</span>}
+                          {yyyy && <span className="text-[8px] text-gray-400 leading-tight">{yyyy}</span>}
                         </div>
-                        <div className="flex items-center gap-3">
-                          {p.referenceCode && (
-                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{p.referenceCode}</span>
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${methodChipClass}`}>{methodLabel}</span>
+                            {p.receiptNumber && <span className="text-[10px] text-gray-400 font-mono">{p.receiptNumber}</span>}
+                            {p.referenceCode && !p.receiptNumber && <span className="text-[10px] text-gray-400">{p.referenceCode}</span>}
+                          </div>
+                          <p className={`text-sm font-semibold ${isNegative ? 'text-red-600' : 'text-gray-900'} ${isVoided ? 'line-through' : ''}`}>
+                            {formatVND(p.amount)}
+                          </p>
+                          {p.notes && (
+                            <p className="text-[10px] text-gray-400 truncate max-w-[220px]" title={p.notes}>{p.notes}</p>
                           )}
-                          {p.status === 'voided' && (
-                            <span className="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full font-medium">Voided</span>
+                        </div>
+                        {/* Status + edit hint */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {isVoided ? (
+                            <span className="text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">Voided</span>
+                          ) : (
+                            <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Posted</span>
                           )}
-                          <span className={`text-xs text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}>▼</span>
+                          {!isVoided && (
+                            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[10px] text-primary font-medium">Edit</span>
+                          )}
                         </div>
                       </button>
-                      {isExpanded && (
-                        <div className="px-4 pb-4">
-                          {p.notes && (
-                            <p className="text-xs text-gray-500 mb-2">Note: {p.notes}</p>
-                          )}
-                          {(p.allocations && p.allocations.length > 0) ? (
-                            <div className="bg-gray-50 rounded-lg p-3 space-y-2">
-                              <p className="text-xs font-medium text-gray-600">Allocated to invoices:</p>
-                              {p.allocations.map((a) => (
-                                <div key={a.id} className="flex items-center justify-between text-sm">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs px-1.5 py-0.5 rounded bg-white border border-gray-200 text-gray-600">{a.invoiceName || a.invoiceId?.slice(0, 8)}</span>
-                                    <span className="text-xs text-gray-400">Total {formatVND(a.invoiceTotal || 0)}</span>
-                                  </div>
-                                  <span className="font-medium text-gray-900">{formatVND(a.allocatedAmount)}</span>
-                                </div>
-                              ))}
-                              <div className="flex items-center justify-between text-sm border-t border-gray-200 pt-2 mt-1">
-                                <span className="text-xs font-semibold text-gray-600">Tổng phân bổ</span>
-                                <span className="font-bold text-gray-900">{formatVND(p.allocations.reduce((sum, a) => sum + (a.allocatedAmount || 0), 0))}</span>
-                              </div>
-                            </div>
-                          ) : (
-                            <p className="text-xs text-gray-400 italic">No invoice allocations recorded.</p>
-                          )}
-                          {(p.depositUsed || p.cashAmount || p.bankAmount) ? (
-                            <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                              {(p.depositUsed || 0) > 0 && <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Deposit {formatVND(p.depositUsed || 0)}</span>}
-                              {(p.cashAmount || 0) > 0 && <span className="text-amber-600 bg-amber-50 px-2 py-0.5 rounded">Cash {formatVND(p.cashAmount || 0)}</span>}
-                              {(p.bankAmount || 0) > 0 && <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded">Bank {formatVND(p.bankAmount || 0)}</span>}
-                            </div>
-                          ) : null}
-
+                      {isVoided && isExpanded && (
+                        <div className="px-4 pb-3">
+                          {p.notes && <p className="text-xs text-gray-500">Note: {p.notes}</p>}
                         </div>
                       )}
                     </div>
@@ -845,11 +856,21 @@ export function CustomerProfile({
         />
       )}
 
+      {/* Edit Payment Modal */}
+      {editingPayment && (
+        <EditPaymentModal
+          payment={editingPayment}
+          isOpen={!!editingPayment}
+          onClose={() => setEditingPayment(null)}
+          onSaved={() => setEditingPayment(null)}
+        />
+      )}
+
       {/* Payment Modal */}
       {showPaymentModal && onMakePayment && payTargetService && (() => {
         const svcCtx: ServicePaymentContext = {
           recordId: payTargetService.id,
-          recordName: payTargetService.service,
+          recordName: payTargetService.orderCode || payTargetService.orderName || payTargetService.service,
           recordType: 'saleorder',
           totalCost: payTargetService.cost,
           paidAmount: payTargetService.paidAmount ?? 0,

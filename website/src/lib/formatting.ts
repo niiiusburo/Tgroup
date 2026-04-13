@@ -58,3 +58,21 @@ export function parseVND(text: string | null | undefined): number | null {
 
   return Number(segments.join(''));
 }
+
+export function parseDisplayDate(dateStr: string | null | undefined): { day: string; month: string; year: string } | null {
+  if (!dateStr || dateStr === 'NaN' || dateStr === 'Invalid Date') return null;
+  try {
+    const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
+    const [year, month, day] = datePart.split('-').map(Number);
+    if (!year || !month || !day || Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day)) return null;
+    const date = new Date(year, month - 1, day);
+    if (Number.isNaN(date.getTime())) return null;
+    return {
+      day: String(day).padStart(2, '0'),
+      month: date.toLocaleDateString('vi-VN', { month: 'short' }),
+      year: String(year),
+    };
+  } catch {
+    return null;
+  }
+}

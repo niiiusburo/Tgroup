@@ -131,6 +131,7 @@ export interface CustomerService {
   readonly tooth: string;
   readonly notes: string;
   readonly orderName?: string;
+  readonly orderCode?: string;
   readonly paidAmount?: number;
   readonly residual?: number;
   /** Branch/clinic name where the service was performed. */

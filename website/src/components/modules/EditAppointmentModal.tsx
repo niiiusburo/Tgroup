@@ -176,6 +176,15 @@ function SearchableSelector<T extends { id: string; name: string }>({
   );
 }
 
+// Extract free-text portion of a note by removing structured metadata lines
+function extractFreeTextNote(note: string): string {
+  if (!note) return '';
+  const lines = note.split('\n');
+  const structuredPrefixes = ['Service:', 'Duration:', 'Type:'];
+  const freeLines = lines.filter(line => !structuredPrefixes.some(prefix => line.startsWith(prefix)));
+  return freeLines.join('\n').trim();
+}
+
 export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: EditAppointmentModalProps) {
   // Fetch real data from API
   const { employees: apiEmployees, isLoading: employeesLoading } = useEmployees();
@@ -240,7 +249,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
 
       setStatus(mapTopStatusToDbState(appointment.topStatus, appointment.checkInStatus));
       setColorCode(appointment.color || '0');
-      setNotes(appointment.note || '');
+      setNotes(extractFreeTextNote(appointment.note || ''));
       setError(null);
     }
   }, [appointment, isOpen]);
@@ -288,16 +297,44 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
     return 'scheduled';
   }
 
-  // Convert API data to selector format
-  const doctors: Employee[] = apiEmployees
-    .filter(e => e.status === 'active' && (e.roles?.includes('doctor')))
-    .map(e => ({
-      id: e.id,
-      name: e.name,
-      avatar: e.avatar || e.name.charAt(0).toUpperCase(),
-      roles: e.roles || ['doctor'],
-      locationName: e.locationName || '',
-    }));
+  // Convert API data to selector format.
+  // Always include the appointment's currently-assigned doctor, even if they
+  // would normally be filtered out (inactive, or not flagged as a doctor role) —
+  // otherwise the dropdown shows the placeholder instead of the DB value.
+  const doctors: Employee[] = useMemo(() => {
+    const list: Employee[] = apiEmployees
+      .filter(e => e.status === 'active' && e.roles?.includes('doctor'))
+      .map(e => ({
+        id: e.id,
+        name: e.name,
+        avatar: e.avatar || e.name.charAt(0).toUpperCase(),
+        roles: e.roles || ['doctor'],
+        locationName: e.locationName || '',
+      }));
+
+    const assignedId = appointment?.doctorId;
+    if (assignedId && !list.some(d => d.id === assignedId)) {
+      const assignedEmp = apiEmployees.find(e => e.id === assignedId);
+      if (assignedEmp) {
+        list.unshift({
+          id: assignedEmp.id,
+          name: assignedEmp.name,
+          avatar: assignedEmp.avatar || assignedEmp.name.charAt(0).toUpperCase(),
+          roles: assignedEmp.roles?.length ? assignedEmp.roles : ['doctor'],
+          locationName: assignedEmp.locationName || '',
+        });
+      } else if (appointment?.doctorName) {
+        list.unshift({
+          id: assignedId,
+          name: appointment.doctorName,
+          avatar: appointment.doctorName.charAt(0).toUpperCase(),
+          roles: ['doctor'],
+          locationName: appointment.locationName || '',
+        });
+      }
+    }
+    return list;
+  }, [apiEmployees, appointment?.doctorId, appointment?.doctorName, appointment?.locationName]);
 
   const locations: Location[] = apiLocations.map(l => ({
     id: l.id,

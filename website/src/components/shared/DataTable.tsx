@@ -21,6 +21,11 @@ interface DataTableProps<T> {
   readonly pageSize?: number;
   readonly onRowClick?: (row: T) => void;
   readonly emptyMessage?: string;
+  readonly selection?: {
+    readonly selectedIds: Set<string>;
+    readonly onSelect: (id: string, selected: boolean) => void;
+    readonly onSelectAll: (selected: boolean) => void;
+  };
 }
 
 type SortDirection = 'asc' | 'desc';
@@ -37,6 +42,7 @@ export function DataTable<T>({
   pageSize = 10,
   onRowClick,
   emptyMessage = 'No data found',
+  selection,
 }: DataTableProps<T>) {
   const [sort, setSort] = useState<SortState | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -61,6 +67,9 @@ export function DataTable<T>({
     return sortedData.slice(start, start + pageSize);
   }, [sortedData, safePage, pageSize]);
 
+  const allPageIdsSelected = pageData.length > 0 && pageData.every((row) => selection?.selectedIds.has(keyExtractor(row)));
+  const somePageIdsSelected = pageData.some((row) => selection?.selectedIds.has(keyExtractor(row))) && !allPageIdsSelected;
+
   function handleSort(key: string) {
     setSort((prev) => {
       if (prev?.key === key) {
@@ -79,6 +88,19 @@ export function DataTable<T>({
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100">
+              {selection && (
+                <th className="px-4 py-3 text-left w-12">
+                  <input
+                    type="checkbox"
+                    checked={allPageIdsSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = somePageIdsSelected;
+                    }}
+                    onChange={(e) => selection.onSelectAll(e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                </th>
+              )}
               {columns.map((col) => (
                 <th
                   key={col.key}
@@ -104,30 +126,48 @@ export function DataTable<T>({
           <tbody>
             {pageData.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-8 text-center text-sm text-gray-400">
+                <td colSpan={columns.length + (selection ? 1 : 0)} className="px-4 py-8 text-center text-sm text-gray-400">
                   {emptyMessage}
                 </td>
               </tr>
             ) : (
-              pageData.map((row) => (
-                <tr
-                  key={keyExtractor(row)}
-                  onClick={onRowClick ? () => onRowClick(row) : undefined}
-                  className={`
-                    border-b border-gray-50 last:border-b-0
-                    ${onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''}
-                    transition-colors duration-100
-                  `}
-                >
-                  {columns.map((col) => (
-                    <td key={col.key} className="px-4 py-3 text-sm text-gray-700" style={col.width ? { width: col.width } : undefined}>
-                      {col.render
-                        ? col.render(row)
-                        : String((row as Record<string, unknown>)[col.key] ?? '')}
-                    </td>
-                  ))}
-                </tr>
-              ))
+              pageData.map((row) => {
+                const rowId = keyExtractor(row);
+                const isSelected = selection?.selectedIds.has(rowId) ?? false;
+                return (
+                  <tr
+                    key={rowId}
+                    onClick={onRowClick ? () => onRowClick(row) : undefined}
+                    className={`
+                      border-b border-gray-50 last:border-b-0
+                      ${onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''}
+                      ${isSelected ? 'bg-primary/[0.03]' : ''}
+                      transition-colors duration-100
+                    `}
+                  >
+                    {selection && (
+                      <td
+                        className="px-4 py-3 text-sm text-gray-700"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => selection.onSelect(rowId, e.target.checked)}
+                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                      </td>
+                    )}
+                    {columns.map((col) => (
+                      <td key={col.key} className="px-4 py-3 text-sm text-gray-700" style={col.width ? { width: col.width } : undefined}>
+                        {col.render
+                          ? col.render(row)
+                          : String((row as Record<string, unknown>)[col.key] ?? '')}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

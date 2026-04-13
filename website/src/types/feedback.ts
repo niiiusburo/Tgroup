@@ -4,6 +4,16 @@
 
 export type FeedbackStatus = 'pending' | 'in_progress' | 'resolved' | 'ignored';
 
+export interface FeedbackAttachment {
+  id: string;
+  messageId: string;
+  originalName: string;
+  mimeType: string;
+  sizeBytes: number;
+  url: string;
+  createdAt: string;
+}
+
 export interface FeedbackThread {
   id: string;
   pageUrl: string | null;
@@ -26,6 +36,7 @@ export interface FeedbackMessage {
   authorName: string | null;
   content: string;
   createdAt: string;
+  attachments?: FeedbackAttachment[];
 }
 
 export interface FeedbackThreadDetail {

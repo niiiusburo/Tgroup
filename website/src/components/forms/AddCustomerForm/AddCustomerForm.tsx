@@ -762,6 +762,33 @@ export function AddCustomerForm({
                 </select>
               </div>
 
+              {/* Referral */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <FieldLabel icon={Users}>Ngưới giới thiệu</FieldLabel>
+                  <button
+                    type="button"
+                    onClick={() => setShowReferrerDialog(true)}
+                    className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
+                    title="Thêm ngưới giới thiệu mới"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <select
+                  value={formData.referraluserid}
+                  onChange={(e) => set('referraluserid', e.target.value)}
+                  className={selectClass()}
+                >
+                  <option value="">-- Chọn ngưới giới thiệu --</option>
+                  {employees.map((emp) => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {/* Source */}
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -799,32 +826,6 @@ export function AddCustomerForm({
                 )}
               </div>
 
-              {/* Referral */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <FieldLabel icon={Users}>Ngưới giới thiệu</FieldLabel>
-                  <button
-                    type="button"
-                    onClick={() => setShowReferrerDialog(true)}
-                    className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
-                    title="Thêm ngưới giới thiệu mới"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-                <select
-                  value={formData.referraluserid}
-                  onChange={(e) => set('referraluserid', e.target.value)}
-                  className={selectClass()}
-                >
-                  <option value="">-- Chọn ngưới giới thiệu --</option>
-                  {employees.map((emp) => (
-                    <option key={emp.id} value={emp.id}>
-                      {emp.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
           </CardSection>
 

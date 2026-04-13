@@ -12,7 +12,7 @@ export { ServiceCatalog } from './ServiceCatalog';
 export { Settings } from './Settings/index';
 export { Relationships } from './Relationships';
 export { Commission } from './Commission';
-export { Reports } from './Reports';
+// Reports uses default export — imported directly in App.tsx via lazy()
 export { Notifications } from './Notifications';
 export { PermissionBoard } from './PermissionBoard';
 export { Login } from './Login';

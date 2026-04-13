@@ -19,7 +19,15 @@ const ServiceCatalog = lazy(() => import('@/pages/ServiceCatalog'));
 const Settings = lazy(() => import('@/pages/Settings').then(m => ({ default: m.Settings })));
 const Relationships = lazy(() => import('@/pages/Relationships').then(m => ({ default: m.Relationships })));
 const Commission = lazy(() => import('@/pages/Commission').then(m => ({ default: m.Commission })));
-const Reports = lazy(() => import('@/pages/Reports').then(m => ({ default: m.Reports })));
+const ReportsShell = lazy(() => import('@/pages/Reports'));
+const ReportsDashboard = lazy(() => import('@/pages/Reports').then(m => ({ default: m.Dashboard })));
+const ReportsRevenue = lazy(() => import('@/pages/Reports').then(m => ({ default: m.Revenue })));
+const ReportsAppointments = lazy(() => import('@/pages/Reports').then(m => ({ default: m.Appointments })));
+const ReportsDoctors = lazy(() => import('@/pages/Reports').then(m => ({ default: m.Doctors })));
+const ReportsCustomers = lazy(() => import('@/pages/Reports').then(m => ({ default: m.Customers })));
+const ReportsLocations = lazy(() => import('@/pages/Reports').then(m => ({ default: m.Locations })));
+const ReportsServices = lazy(() => import('@/pages/Reports').then(m => ({ default: m.Services })));
+const ReportsEmployees = lazy(() => import('@/pages/Reports').then(m => ({ default: m.Employees })));
 const Notifications = lazy(() => import('@/pages/Notifications').then(m => ({ default: m.Notifications })));
 const PermissionBoard = lazy(() => import('@/pages/PermissionBoard').then(m => ({ default: m.PermissionBoard })));
 const Payment = lazy(() => import('@/pages/Payment').then(m => ({ default: m.Payment })));
@@ -37,6 +45,14 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
   '/locations': 'locations.view',
   '/website': 'website.view',
   '/reports': 'reports.view',
+  '/reports/dashboard': 'reports.view',
+  '/reports/revenue': 'reports.view',
+  '/reports/appointments': 'reports.view',
+  '/reports/doctors': 'reports.view',
+  '/reports/customers': 'reports.view',
+  '/reports/locations': 'reports.view',
+  '/reports/services': 'reports.view',
+  '/reports/employees': 'reports.view',
   '/commission': 'commission.view',
   '/settings': 'settings.view',
   '/notifications': 'notifications.view',
@@ -245,15 +261,26 @@ function App() {
               }
             />
 
-            {/* @crossref:route[path="/reports", component=Reports] */}
+            {/* Reports section with nested sub-pages */}
             <Route
               path={ROUTES.REPORTS}
               element={
                 <ProtectedRoute path={ROUTES.REPORTS}>
-                  <Reports />
+                  <ReportsShell />
                 </ProtectedRoute>
               }
-            />
+            >
+              <Route index element={<Navigate to={ROUTES.REPORTS_DASHBOARD} replace />} />
+              <Route path="dashboard" element={<ProtectedRoute path="/reports/dashboard"><ReportsDashboard /></ProtectedRoute>} />
+              <Route path="revenue" element={<ProtectedRoute path="/reports/revenue"><ReportsRevenue /></ProtectedRoute>} />
+              <Route path="appointments" element={<ProtectedRoute path="/reports/appointments"><ReportsAppointments /></ProtectedRoute>} />
+              <Route path="doctors" element={<ProtectedRoute path="/reports/doctors"><ReportsDoctors /></ProtectedRoute>} />
+              <Route path="customers" element={<ProtectedRoute path="/reports/customers"><ReportsCustomers /></ProtectedRoute>} />
+              <Route path="locations" element={<ProtectedRoute path="/reports/locations"><ReportsLocations /></ProtectedRoute>} />
+              <Route path="services" element={<ProtectedRoute path="/reports/services"><ReportsServices /></ProtectedRoute>} />
+              <Route path="employees" element={<ProtectedRoute path="/reports/employees"><ReportsEmployees /></ProtectedRoute>} />
+              <Route path="*" element={<Navigate to={ROUTES.REPORTS_DASHBOARD} replace />} />
+            </Route>
 
             {/* @crossref:route[path="/notifications", component=Notifications] */}
             <Route

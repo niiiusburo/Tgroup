@@ -130,6 +130,9 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
     });
   }
 
+  if (res.status === 204) {
+    return undefined as T;
+  }
   return res.json();
 }
 
@@ -747,6 +750,13 @@ export interface ApiDotKham {
   partnername: string | null;
   companyid: string | null;
   companyname: string | null;
+  doctorid: string | null;
+  doctorname: string | null;
+  assistantid: string | null;
+  assistantname: string | null;
+  assistantsecondaryid: string | null;
+  assistantsecondaryname: string | null;
+  note: string | null;
   state: string | null;
   paymentstate: string | null;
 }
@@ -1467,5 +1477,11 @@ export async function updateFeedbackStatus(
   return apiFetch(`/Feedback/all/${encodeURIComponent(threadId)}/status`, {
     method: 'PATCH',
     body: { status },
+  });
+}
+
+export async function deleteFeedbackThread(threadId: string): Promise<void> {
+  return apiFetch(`/Feedback/all/${encodeURIComponent(threadId)}`, {
+    method: 'DELETE',
   });
 }

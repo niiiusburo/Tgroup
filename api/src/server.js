@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -47,6 +48,7 @@ const bankSettingsRoutes = require('./routes/bankSettings');
 const externalCheckupsRoutes = require('./routes/externalCheckups');
 const faceRecognitionRoutes = require('./routes/faceRecognition');
 const feedbackRoutes = require('./routes/feedback');
+const reportsRoutes = require('./routes/reports');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -54,6 +56,7 @@ const PORT = process.env.PORT || 3000;
 const ALLOWED_ORIGINS = [
   'http://localhost:5174',
   'http://localhost:5173',
+  'http://localhost:5175',
   'http://76.13.16.68:5174',
   'https://tbot.vn',
   'https://www.tbot.vn',
@@ -117,6 +120,10 @@ app.use('/api/settings', bankSettingsRoutes);
 app.use('/api/ExternalCheckups', externalCheckupsRoutes);
 app.use('/api/face', faceRecognitionRoutes);
 app.use('/api/Feedback', feedbackRoutes);
+app.use('/api/Reports', reportsRoutes);
+
+// Serve uploaded feedback attachments
+app.use('/uploads/feedback', express.static(path.join(__dirname, '..', 'uploads', 'feedback')));
 
 // Stub image endpoint used by partner avatars
 app.get('/api/web/Image2', (req, res) => {

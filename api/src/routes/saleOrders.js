@@ -60,6 +60,7 @@ router.get('/', async (req, res) => {
       `SELECT
         so.id,
         so.name,
+        so.code,
         so.partnerid,
         p.name AS partnername,
         p.displayname AS partnerdisplayname,
@@ -141,6 +142,7 @@ router.get('/:id', async (req, res) => {
       `SELECT
         so.id,
         so.name,
+        so.code,
         so.partnerid,
         p.name AS partnername,
         p.displayname AS partnerdisplayname,
@@ -242,21 +244,28 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
     const { v4: uuidv4 } = require('uuid');
     const id = uuidv4();
 
-    // Generate sale order name (SO + timestamp)
+    // Generate sale order name (service description)
     const name = productname || `Service ${new Date().toISOString().slice(0, 10)}`;
+
+    // Generate a unique sale order code, e.g. SO-2024-0001
+    const year = new Date().getFullYear();
+    const seqResult = await query(`SELECT nextval('dbo.saleorder_code_seq') AS seq`);
+    const seqNum = parseInt(seqResult[0]?.seq || '1', 10);
+    const code = `SO-${year}-${String(seqNum).padStart(4, '0')}`;
 
     // Insert the sale order (only using columns that exist in the schema)
     const result = await query(
       `INSERT INTO saleorders (
-        id, name, partnerid, companyid, doctorid, assistantid, dentalaideid,
+        id, name, code, partnerid, companyid, doctorid, assistantid, dentalaideid,
         quantity, unit, amounttotal, residual, totalpaid, state,
         datestart, dateend, notes,
         isdeleted, datecreated
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,NOW())
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,NOW())
       RETURNING *`,
       [
         id,
         name,
+        code,
         partnerid,
         companyid || null,
         doctorid || null,
@@ -299,6 +308,7 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
       `SELECT
         so.id,
         so.name,
+        so.code,
         so.partnerid,
         p.name AS partnername,
         p.displayname AS partnerdisplayname,
@@ -394,6 +404,7 @@ router.patch('/:id/state', requirePermission('customers.edit'), async (req, res)
       `SELECT
         so.id,
         so.name,
+        so.code,
         so.partnerid,
         p.name AS partnername,
         p.displayname AS partnerdisplayname,
@@ -559,6 +570,7 @@ router.patch('/:id', requirePermission('customers.edit'), async (req, res) => {
       `SELECT
         so.id,
         so.name,
+        so.code,
         so.partnerid,
         p.name AS partnername,
         p.displayname AS partnerdisplayname,

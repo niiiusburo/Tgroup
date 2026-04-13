@@ -48,6 +48,20 @@ export interface CreateServiceInput {
 }
 
 /**
+ * Extract sale order reference code (e.g. SO-2024-001) from API response.
+ * Prioritizes the dedicated code field, then falls back to ref / origin / name.
+ */
+function extractOrderCode(order: ApiSaleOrder): string | undefined {
+  const candidates = [order.code, order.ref, order.origin, order.name];
+  for (const c of candidates) {
+    if (c && /^S[-\s]?O/i.test(c)) {
+      return c;
+    }
+  }
+  return undefined;
+}
+
+/**
  * Map ApiSaleOrder to ServiceRecord interface
  */
 function mapSaleOrderToServiceRecord(order: ApiSaleOrder): ServiceRecord {
@@ -92,10 +106,11 @@ function mapSaleOrderToServiceRecord(order: ApiSaleOrder): ServiceRecord {
     visits: [],
     createdAt: order.datecreated?.slice(0, 10) || '',
     orderName: order.name || undefined,
+    orderCode: extractOrderCode(order),
   };
 }
 
-export function useServices(selectedLocationId?: string) {
+export function useServices(selectedLocationId?: string, partnerId?: string) {
   const [records, setRecords] = useState<ServiceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,6 +131,7 @@ export function useServices(selectedLocationId?: string) {
         limit: 500,
         search,
         companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
+        partnerId: partnerId || undefined,
       });
       setRecords(response.items.map(mapSaleOrderToServiceRecord));
     } catch (err) {
@@ -124,7 +140,7 @@ export function useServices(selectedLocationId?: string) {
     } finally {
       setLoading(false);
     }
-  }, [selectedLocationId]);
+  }, [selectedLocationId, partnerId]);
 
   /**
    * Refetch with current search term
@@ -157,7 +173,7 @@ export function useServices(selectedLocationId?: string) {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [searchTerm, fetchRecords]);
+  }, [searchTerm, fetchRecords, partnerId]);
 
   const filtered = useMemo(() => {
     let result: readonly ServiceRecord[] = records;

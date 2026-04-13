@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { MessageSquare, Eye, Loader2, Send, X } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { MessageSquare, Eye, Loader2, Send, X, Paperclip, Trash2 } from 'lucide-react';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusDropdown, type StatusOption } from '@/components/shared/StatusDropdown';
 import {
@@ -7,6 +7,8 @@ import {
   fetchAdminFeedbackThread,
   replyToFeedbackThread,
   updateFeedbackStatus,
+  deleteFeedbackThread,
+  getUploadUrl,
 } from '@/lib/api';
 import type { AdminFeedbackThread, FeedbackMessage, FeedbackStatus } from '@/types/feedback';
 
@@ -16,6 +18,10 @@ const STATUS_OPTIONS: StatusOption[] = [
   { value: 'resolved', label: 'Resolved', style: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' },
   { value: 'ignored', label: 'Ignored', style: 'bg-gray-50 text-gray-600 ring-gray-500/20' },
 ];
+
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_FILES = 5;
 
 function formatTime(iso: string) {
   const d = new Date(iso);
@@ -28,6 +34,12 @@ function formatTime(iso: string) {
   });
 }
 
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 function getInitials(name: string | null) {
   if (!name) return '?';
   return name
@@ -38,14 +50,65 @@ function getInitials(name: string | null) {
     .toUpperCase();
 }
 
+function useObjectUrls(files: File[]) {
+  const [urls, setUrls] = useState<string[]>([]);
+  useEffect(() => {
+    const next = files.map((f) => URL.createObjectURL(f));
+    setUrls(next);
+    return () => {
+      next.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [files]);
+  return urls;
+}
+
+function AttachmentThumbnails({ attachments }: { attachments?: { url: string; originalName: string; sizeBytes: number }[] }) {
+  if (!attachments || attachments.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-2 mt-2">
+      {attachments.map((att) => {
+        const src = getUploadUrl(att.url);
+        return (
+          <a
+            key={att.url}
+            href={src}
+            target="_blank"
+            rel="noreferrer"
+            className="group relative block w-24 h-24 rounded-lg border border-gray-200 overflow-hidden bg-gray-50"
+            title={att.originalName}
+          >
+            <img
+              src={src}
+              alt={att.originalName}
+              className="w-full h-full object-cover"
+              loading="lazy"
+              onError={(e) => {
+                console.error('Failed to load attachment image:', src);
+                (e.currentTarget as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          </a>
+        );
+      })}
+    </div>
+  );
+}
+
 export function FeedbackAdminContent() {
   const [threads, setThreads] = useState<AdminFeedbackThread[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
   const [modalThreadId, setModalThreadId] = useState<string | null>(null);
   const [detail, setDetail] = useState<{ thread: AdminFeedbackThread; messages: FeedbackMessage[] } | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [replyInput, setReplyInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const filePreviews = useObjectUrls(files);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadThreads = useCallback(async () => {
     setLoading(true);
@@ -58,6 +121,46 @@ export function FeedbackAdminContent() {
       setLoading(false);
     }
   }, []);
+
+  function handleSelect(id: string, selected: boolean) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (selected) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
+  function handleSelectAll(selected: boolean, pageIds: string[]) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      pageIds.forEach((id) => {
+        if (selected) next.add(id);
+        else next.delete(id);
+      });
+      return next;
+    });
+  }
+
+  async function handleDeleteSelected() {
+    if (selectedIds.size === 0) return;
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${selectedIds.size} feedback item${selectedIds.size > 1 ? 's' : ''}? This action cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      await Promise.all(Array.from(selectedIds).map((id) => deleteFeedbackThread(id)));
+      setSelectedIds(new Set());
+      await loadThreads();
+    } catch (err) {
+      console.error('Failed to delete feedback:', err);
+      alert('Failed to delete some feedback items. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   useEffect(() => {
     loadThreads();
@@ -102,18 +205,45 @@ export function FeedbackAdminContent() {
     }
   }
 
+  function validateAndSetFiles(selected: FileList | null) {
+    setFileError(null);
+    setSendError(null);
+    if (!selected || selected.length === 0) return;
+    const newFiles = Array.from(selected);
+    const total = files.length + newFiles.length;
+    if (total > MAX_FILES) {
+      setFileError(`You can only attach up to ${MAX_FILES} images.`);
+      return;
+    }
+    const invalid = newFiles.find((f) => !ALLOWED_TYPES.includes(f.type));
+    if (invalid) {
+      setFileError('Only JPG, PNG, GIF, and WEBP images are allowed.');
+      return;
+    }
+    const oversized = newFiles.find((f) => f.size > MAX_FILE_SIZE);
+    if (oversized) {
+      setFileError('Each image must be smaller than 5 MB.');
+      return;
+    }
+    setFiles((prev) => [...prev, ...newFiles]);
+  }
+
   async function handleSendReply() {
     const content = replyInput.trim();
-    if (!content || !modalThreadId || !detail || sending) return;
+    if ((!content && files.length === 0) || !modalThreadId || !detail || sending) return;
 
     setSending(true);
+    setSendError(null);
     try {
-      const msg = await replyToFeedbackThread(modalThreadId, content);
+      const msg = await replyToFeedbackThread(modalThreadId, content, files.length > 0 ? files : undefined);
       setDetail((prev) => (prev ? { ...prev, messages: [...prev.messages, msg] } : prev));
       setReplyInput('');
+      setFiles([]);
       await loadThreads();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to send reply:', err);
+      const message = err instanceof Error ? err.message : 'Failed to send. Please try again.';
+      setSendError(message);
     } finally {
       setSending(false);
     }
@@ -201,7 +331,24 @@ export function FeedbackAdminContent() {
           <h3 className="text-lg font-semibold text-gray-900">Employee Feedback</h3>
           <p className="text-sm text-gray-500">Review and respond to feedback submitted by employees.</p>
         </div>
-        {loading && <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />}
+        <div className="flex items-center gap-3">
+          {selectedIds.size > 0 && (
+            <button
+              type="button"
+              disabled={deleting}
+              onClick={handleDeleteSelected}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {deleting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Trash2 className="w-4 h-4" />
+              )}
+              Delete {selectedIds.size}
+            </button>
+          )}
+          {loading && <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />}
+        </div>
       </div>
 
       <DataTable
@@ -210,6 +357,14 @@ export function FeedbackAdminContent() {
         keyExtractor={(row) => row.id}
         pageSize={10}
         emptyMessage="No feedback submissions yet."
+        selection={{
+          selectedIds,
+          onSelect: handleSelect,
+          onSelectAll: (selected) => {
+            const visibleIds = threads.map((t) => t.id);
+            handleSelectAll(selected, visibleIds);
+          },
+        }}
       />
 
       {/* Detail Modal */}
@@ -266,6 +421,7 @@ export function FeedbackAdminContent() {
                         }`}
                       >
                         <p className="whitespace-pre-wrap">{msg.content}</p>
+                        <AttachmentThumbnails attachments={msg.attachments} />
                         <p className={`text-[10px] mt-1 ${isAdmin ? 'text-white/70' : 'text-gray-500'}`}>
                           {msg.authorName || 'Unknown'} • {formatTime(msg.createdAt)}
                         </p>
@@ -277,8 +433,39 @@ export function FeedbackAdminContent() {
             </div>
 
             {/* Reply input */}
-            <div className="border-t border-gray-100 p-4 bg-white">
+            <div className="border-t border-gray-100 p-4 bg-white space-y-2">
+              {files.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {filePreviews.map((url, idx) => (
+                    <div
+                      key={url}
+                      className="relative w-16 h-16 rounded-lg border border-gray-200 overflow-hidden bg-gray-50"
+                      title={`${files[idx].name} • ${formatFileSize(files[idx].size)}`}
+                    >
+                      <img src={url} alt={files[idx].name} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setFiles((prev) => prev.filter((_, i) => i !== idx))}
+                        className="absolute top-0.5 right-0.5 p-0.5 rounded-full bg-black/50 text-white hover:bg-black/70"
+                        aria-label="Remove file"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {sendError && <p className="text-xs text-red-600">{sendError}</p>}
+              {fileError && <p className="text-xs text-red-600">{fileError}</p>}
               <div className="flex items-end gap-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept={ALLOWED_TYPES.join(',')}
+                  multiple
+                  onChange={(e) => validateAndSetFiles(e.target.files)}
+                />
                 <textarea
                   value={replyInput}
                   onChange={(e) => setReplyInput(e.target.value)}
@@ -289,7 +476,16 @@ export function FeedbackAdminContent() {
                 />
                 <button
                   type="button"
-                  disabled={!replyInput.trim() || sending}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                  aria-label="Attach image"
+                  title="Attach image"
+                >
+                  <Paperclip className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  disabled={(!replyInput.trim() && files.length === 0) || sending}
                   onClick={handleSendReply}
                   className="w-9 h-9 flex items-center justify-center rounded-lg bg-primary text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
                 >

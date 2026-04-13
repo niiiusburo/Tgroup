@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { PatientCheckIn } from './PatientCheckIn';
+import { PatientCheckIn, parseAppointmentNote } from './PatientCheckIn';
 import { AppointmentHoverProvider } from '@/contexts/AppointmentHoverContext';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -77,5 +77,70 @@ describe('PatientCheckIn auto-scroll on done', () => {
         expect.objectContaining({ behavior: 'smooth', block: 'center' })
       );
     });
+  });
+});
+
+describe('PatientCheckIn note parsing', () => {
+  it('extracts duration, type, and free text from structured note', () => {
+    const note = 'Service: Facial\nDuration: 30 min\nType: Khách tái khám\nwdawdadW';
+    const parsed = parseAppointmentNote(note);
+    expect(parsed.duration).toBe('30 min');
+    expect(parsed.type).toBe('Khách tái khám');
+    expect(parsed.freeText).toBe('wdawdadW');
+  });
+
+  it('returns all free text when there is no structured metadata', () => {
+    const note = 'Just some free text';
+    const parsed = parseAppointmentNote(note);
+    expect(parsed.duration).toBe('');
+    expect(parsed.type).toBe('');
+    expect(parsed.freeText).toBe('Just some free text');
+  });
+
+  it('renders duration and type as pills and free text in a notes box', () => {
+    const appointments = [
+      {
+        id: 'apt-1',
+        customerId: 'c1',
+        customerName: 'Nguyễn Văn A',
+        customerPhone: '0901111222',
+        doctorName: 'Bác sĩ X',
+        doctorId: 'd1',
+        time: '09:00',
+        locationId: 'l1',
+        locationName: 'CN1',
+        note: 'Duration: 45 min\nType: Khách mới\nUống thuốc trước khi đến',
+        topStatus: 'arrived' as const,
+        checkInStatus: 'waiting' as const,
+        color: null,
+        arrivalTime: '09:00',
+        treatmentStartTime: null,
+      },
+    ];
+
+    render(
+      <MemoryRouter>
+        <AppointmentHoverProvider>
+          <PatientCheckIn
+            appointments={appointments}
+            filter="all"
+            onFilterChange={() => {}}
+            counts={{ all: 1, waiting: 1, 'in-treatment': 0, done: 0 }}
+            onUpdateStatus={vi.fn()}
+          />
+        </AppointmentHoverProvider>
+      </MemoryRouter>
+    );
+
+    // Pills should be visible
+    expect(screen.getByText('45 min')).toBeInTheDocument();
+    expect(screen.getByText('Khách mới')).toBeInTheDocument();
+
+    // Raw metadata lines should NOT appear in the document
+    expect(screen.queryByText(/Duration: 45 min/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Type: Khách mới/)).not.toBeInTheDocument();
+
+    // Free text should appear inside the notes box
+    expect(screen.getByText('Uống thuốc trước khi đến')).toBeInTheDocument();
   });
 });

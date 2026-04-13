@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.10.3",
+    "date": "2026-04-13",
+    "commit": "pending",
+    "highlights": "Payment history redesign: prominent date blocks, clickable cards, edit modal, colored method badges",
+    "sections": [
+      {
+        "title": "Improvements",
+        "items": [
+          "Payment cards now lead with calendar tear-off date block (DD + MMM YYYY) for easy scanning",
+          "Each payment card is clickable to open an edit modal (EditPaymentModal)",
+          "Hover state: orange outline ring + lift animation + shadow",
+          "Method badges redesigned as colored chips: green=Cash, blue=Bank, purple=Deposit",
+          "Status badge (Posted/Voided) right-aligned, secondary to amount",
+          "Red tint for negative/refund payments",
+          "Edit modal covers: amount, method, payment date, reference code, notes",
+          "Both Payment History tab and Treatment History inline payments redesigned consistently"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.10.1",
     "date": "2026-04-13",
     "commit": "pending",

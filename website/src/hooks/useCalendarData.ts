@@ -19,7 +19,7 @@ export function useCalendarData(selectedLocationId?: string) {
   const [viewMode, setViewMode] = useState<ViewMode>('week');
   // Store current date as string in YYYY-MM-DD format for timezone consistency
   const [currentDateStr, setCurrentDateStr] = useState(() => formatDate(new Date(), 'yyyy-MM-dd'));
-  const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
+  const [selectedDoctorName, setSelectedDoctorName] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<CalendarStatusFilter>('all');
   const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
@@ -75,7 +75,6 @@ export function useCalendarData(selectedLocationId?: string) {
         dateFrom,
         dateTo,
         companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
-        doctorId: selectedDoctorId || undefined,
       });
 
       const mappedAppointments = response.items.map(mapApiAppointmentToCalendar);
@@ -86,7 +85,7 @@ export function useCalendarData(selectedLocationId?: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [viewMode, currentDateStr, selectedDoctorId, selectedLocationId, formatDate]);
+  }, [viewMode, currentDateStr, selectedLocationId, formatDate]);
 
   useEffect(() => {
     loadAppointments();
@@ -94,7 +93,9 @@ export function useCalendarData(selectedLocationId?: string) {
 
   const filteredAppointments = useMemo(() => {
     return appointments.filter((apt) => {
-      const matchesDoctorFilter = selectedDoctorId ? apt.dentistId === selectedDoctorId : true;
+      const matchesDoctorFilter = selectedDoctorName
+        ? normalizeText(apt.dentist).includes(normalizeText(selectedDoctorName))
+        : true;
       const matchesStatus = statusFilter !== 'all' ? apt.status === statusFilter : true;
       const searchTerm = normalizeText(search.trim());
       const matchesSearch = searchTerm
@@ -106,7 +107,7 @@ export function useCalendarData(selectedLocationId?: string) {
         : true;
       return matchesDoctorFilter && matchesStatus && matchesSearch;
     });
-  }, [appointments, selectedDoctorId, statusFilter, search]);
+  }, [appointments, selectedDoctorName, statusFilter, search]);
 
   const weekDates = useMemo(
     () => getWeekDates(currentDate),
@@ -152,8 +153,8 @@ export function useCalendarData(selectedLocationId?: string) {
     monthDates,
     getAppointmentsForDate,
     dateLabel,
-    selectedDoctorId,
-    setSelectedDoctorId,
+    selectedDoctorName,
+    setSelectedDoctorName,
     search,
     setSearch,
     statusFilter,

@@ -1,7 +1,7 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Users, Plus, Phone, Mail, MapPin, Search, Trash2 } from 'lucide-react';
-import { softDeletePartner, hardDeletePartner, registerFace } from '@/lib/api';
+import { softDeletePartner, hardDeletePartner, registerFace, fetchDotKhams } from '@/lib/api';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { AddCustomerForm } from '@/components/forms/AddCustomerForm';
@@ -10,7 +10,7 @@ import { SearchBar } from '@/components/shared/SearchBar';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge, type StatusVariant } from '@/components/shared/StatusBadge';
 import { useCustomers, type Customer } from '@/hooks/useCustomers';
-import { useLocationFilter } from '@/contexts/LocationContext';
+
 import { useCustomerProfile } from '@/hooks/useCustomerProfile';
 import { useLocations } from '@/hooks/useLocations';
 import { useAppointments } from '@/hooks/useAppointments';
@@ -25,6 +25,7 @@ import type { ProfileTab } from '@/components/customer/CustomerProfile';
 import type { CustomerService } from '@/types/customer';
 import type { CustomerStatus } from '@/data/mockCustomers';
 import type { CustomerFormData } from '@/data/mockCustomerForm';
+import type { ApiDotKham } from '@/lib/api';
 
 /**
  * Customers Page - Patient records with search, filters, table, and profile view
@@ -160,7 +161,6 @@ export function Customers() {
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; customerId: string | null; customerName: string; mode: 'soft' | 'hard' } | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const { selectedLocationId } = useLocationFilter();
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -200,7 +200,9 @@ export function Customers() {
     updateCustomer,
     searchRequired,
     minSearchLength,
-  } = useCustomers(selectedLocationId);
+  // Load customers across all locations so staff can search by name/phone
+  // regardless of the global clinic filter.
+  } = useCustomers(undefined);
 
   const { allLocations } = useLocations();
   const locationNameMap = useMemo(
@@ -214,9 +216,12 @@ export function Customers() {
   const { profile: hookProfile, rawPartner, appointments: hookAppointments, linkedCounts, isLoading: profileLoading, refetch: refetchProfile } =
     useCustomerProfile(selectedCustomerId);
 
-  // Hooks for profile actions
-  const { createAppointment, updateAppointment } = useAppointments(selectedLocationId);
-  const { createServiceRecord, updateServiceRecord, getRecordsByCustomer, updateServiceStatus } = useServices(selectedLocationId);
+  // Hooks for profile actions (fetch across all locations — a customer's history
+  // should never be hidden by the global clinic filter).
+  const { createAppointment, updateAppointment } = useAppointments(undefined);
+  // Fetch service records without location filter so the customer profile shows
+  // treatment history across all locations (not just the currently selected one).
+  const { createServiceRecord, updateServiceRecord, getRecordsByCustomer, updateServiceStatus } = useServices(undefined, selectedCustomerId ?? undefined);
   const {
     depositList,
     usageHistory,
@@ -422,8 +427,23 @@ export function Customers() {
     }
   }, [selectedCustomerId, loadDeposits]);
 
+  // Load dotkhams (examination rounds) when a customer is selected
+  useEffect(() => {
+    if (!selectedCustomerId) {
+      setDotKhams([]);
+      return;
+    }
+    fetchDotKhams({ partnerId: selectedCustomerId, limit: 500 })
+      .then((res) => setDotKhams(res.items))
+      .catch((err) => {
+        console.error('Failed to load dotkhams:', err);
+        setDotKhams([]);
+      });
+  }, [selectedCustomerId]);
+
   const [createdCustomerCode, setCreatedCustomerCode] = useState<string | null>(null);
   const [pendingFaceImage, setPendingFaceImage] = useState<Blob | null>(null);
+  const [dotKhams, setDotKhams] = useState<ApiDotKham[]>([]);
 
   useEffect(() => {
     if (!showForm) {
@@ -611,6 +631,12 @@ export function Customers() {
         code: getCustomerCode() ?? '',
         depositBalance: hookProfile.depositBalance,
         outstandingBalance: hookProfile.outstandingBalance,
+        salestaffid: hookProfile.salestaffid,
+        cskhid: hookProfile.cskhid,
+        cskhname: hookProfile.cskhname,
+        sourceid: hookProfile.sourceid,
+        sourcename: hookProfile.sourcename,
+        referraluserid: hookProfile.referraluserid,
       };
     } else {
       profileData = {
@@ -633,10 +659,16 @@ export function Customers() {
         code: listCustomer?.code ?? '',
         depositBalance: 0,
         outstandingBalance: 0,
+        salestaffid: null,
+        cskhid: null,
+        cskhname: null,
+        sourceid: null,
+        sourcename: null,
+        referraluserid: null,
       };
     }
 
-    const customerServices: CustomerService[] = selectedCustomerId
+    const saleServices: CustomerService[] = selectedCustomerId
       ? getRecordsByCustomer(selectedCustomerId).map((r) => ({
           id: r.id,
           date: r.startDate || r.createdAt || '-',
@@ -658,10 +690,46 @@ export function Customers() {
           tooth: r.toothNumbers?.join(', ') || '-',
           notes: r.notes || '',
           orderName: r.orderName,
+          orderCode: r.orderCode,
           paidAmount: r.paidAmount,
           residual: r.residual ?? Math.max(0, (r.totalCost ?? 0) - (r.paidAmount ?? 0)),
         }))
       : [];
+
+    const dotkhamServices: CustomerService[] = dotKhams.map((dk) => {
+      const cost = parseFloat(dk.totalamount || '0') || 0;
+      const residual = parseFloat(dk.amountresidual || '0') || 0;
+      const status =
+        dk.state === 'done' || dk.state === 'completed'
+          ? 'completed'
+          : dk.state === 'cancel' || dk.state === 'cancelled'
+          ? 'cancelled'
+          : 'active';
+      return {
+        id: dk.id,
+        date: dk.date ? dk.date.slice(0, 10) : '-',
+        service: dk.name || 'Đợt khám',
+        doctor: dk.doctorname || 'N/A',
+        doctorId: dk.doctorid || '',
+        assistantId: dk.assistantid,
+        assistantName: dk.assistantname || undefined,
+        dentalAideId: dk.assistantsecondaryid,
+        dentalAideName: dk.assistantsecondaryname || undefined,
+        catalogItemId: '',
+        cost,
+        status,
+        tooth: '-',
+        notes: dk.note || '',
+        orderName: dk.name || undefined,
+        paidAmount: Math.max(0, cost - residual),
+        residual,
+        locationName: dk.companyname || undefined,
+      };
+    });
+
+    const customerServices: CustomerService[] = [...saleServices, ...dotkhamServices].sort(
+      (a, b) => b.date.localeCompare(a.date)
+    );
 
     if (profileLoading) {
       return <div className="flex items-center justify-center h-64"><span className="text-gray-500">Loading profile...</span></div>;

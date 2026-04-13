@@ -1,12 +1,53 @@
 'use strict';
 
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
+const { v4: uuidv4 } = require('uuid');
+const multer = require('multer');
+const sharp = require('sharp');
 const { query, pool } = require('../db');
 const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
 const VALID_STATUSES = new Set(['pending', 'in_progress', 'resolved', 'ignored']);
+
+const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'feedback');
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
+const ALLOWED_MIME_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+]);
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, UPLOAD_DIR);
+  },
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname) || '';
+    cb(null, `${uuidv4()}${ext}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_MIME_TYPES.has(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error(`Invalid file type: ${file.mimetype}`));
+    }
+  },
+});
 
 /**
  * Admin check helper.
@@ -59,17 +100,110 @@ function requireAdmin(req, res, next) {
     });
 }
 
+async function compressImage(file) {
+  if (file.mimetype === 'image/gif') return; // preserve animated GIFs
+  try {
+    const newFilename = `${uuidv4()}.jpg`;
+    const newPath = path.join(UPLOAD_DIR, newFilename);
+
+    await sharp(file.path)
+      .resize(1920, 1920, { fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 80, progressive: true })
+      .toFile(newPath);
+
+    fs.unlinkSync(file.path);
+    file.filename = newFilename;
+    file.path = newPath;
+    file.mimetype = 'image/jpeg';
+    file.size = fs.statSync(newPath).size;
+  } catch (err) {
+    console.error('Image compression failed, keeping original:', err);
+  }
+}
+
+async function insertAttachments(client, messageId, files) {
+  if (!files || files.length === 0) return;
+  for (const file of files) {
+    await compressImage(file);
+    const url = `/uploads/feedback/${file.filename}`;
+    await client.query(
+      `INSERT INTO feedback_attachments (message_id, original_name, stored_name, mime_type, size_bytes, url, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+      [messageId, file.originalname, file.filename, file.mimetype, file.size, url]
+    );
+  }
+}
+
+async function enrichMessageWithAttachments(client, message) {
+  const rows = await client.query(
+    `SELECT id, message_id, original_name, mime_type, size_bytes, url, created_at
+     FROM feedback_attachments
+     WHERE message_id = $1
+     ORDER BY created_at ASC`,
+    [message.id]
+  );
+  return {
+    ...message,
+    attachments: rows.rows.map((row) => ({
+      id: row.id,
+      messageId: row.message_id,
+      originalName: row.original_name,
+      mimeType: row.mime_type,
+      sizeBytes: row.size_bytes,
+      url: row.url,
+      createdAt: row.created_at,
+    })),
+  };
+}
+
+async function fetchAttachmentsForMessages(messageIds) {
+  if (!messageIds || messageIds.length === 0) return {};
+  const rows = await query(
+    `SELECT id, message_id, original_name, mime_type, size_bytes, url, created_at
+     FROM feedback_attachments
+     WHERE message_id = ANY($1)
+     ORDER BY created_at ASC`,
+    [messageIds]
+  );
+  const map = {};
+  for (const row of rows) {
+    const msgId = row.message_id;
+    if (!map[msgId]) map[msgId] = [];
+    map[msgId].push({
+      id: row.id,
+      messageId: row.message_id,
+      originalName: row.original_name,
+      mimeType: row.mime_type,
+      sizeBytes: row.size_bytes,
+      url: row.url,
+      createdAt: row.created_at,
+    });
+  }
+  return map;
+}
+
+async function enrichMessagesWithAttachments(messages) {
+  const messageIds = messages.map(m => m.id);
+  const attachmentMap = await fetchAttachmentsForMessages(messageIds);
+  return messages.map((m) => ({
+    ...m,
+    attachments: attachmentMap[m.id] || [],
+  }));
+}
+
 /**
  * POST /api/Feedback
  * Create a new feedback thread with the first message.
- * Body: { content }
+ * Body: multipart/form-data { content, pagePath?, screenSize?, files? }
+ *   or JSON { content, pagePath?, screenSize? }
  */
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, upload.array('files', 5), async (req, res) => {
   const client = await pool.connect();
   try {
     const { content } = req.body;
-    if (!content || !content.trim()) {
-      return res.status(400).json({ error: 'Content is required' });
+    const hasFiles = req.files && req.files.length > 0;
+    if ((!content || !content.trim()) && !hasFiles) {
+      return res.status(400).json({ error: 'Content or file is required' });
     }
 
     const employeeId = req.user.employeeId;
@@ -90,11 +224,14 @@ router.post('/', requireAuth, async (req, res) => {
 
     const thread = threadResult.rows[0];
 
-    await client.query(
+    const msgResult = await client.query(
       `INSERT INTO feedback_messages (thread_id, author_id, content, created_at)
-       VALUES ($1, $2, $3, $4)`,
+       VALUES ($1, $2, $3, $4)
+       RETURNING id`,
       [thread.id, employeeId, content.trim(), now]
     );
+
+    await insertAttachments(client, msgResult.rows[0].id, req.files);
 
     await client.query('COMMIT');
 
@@ -102,6 +239,12 @@ router.post('/', requireAuth, async (req, res) => {
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Error creating feedback:', err);
+    // Clean up uploaded files on error
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        try { fs.unlinkSync(file.path); } catch (_) {}
+      }
+    }
     return res.status(500).json({ error: 'Internal server error' });
   } finally {
     client.release();
@@ -181,7 +324,9 @@ router.get('/my/:threadId', requireAuth, async (req, res) => {
       [threadId]
     );
 
-    return res.json({ thread: threadRows[0], messages });
+    const messagesWithAttachments = await enrichMessagesWithAttachments(messages);
+
+    return res.json({ thread: threadRows[0], messages: messagesWithAttachments });
   } catch (err) {
     console.error('Error fetching feedback thread:', err);
     return res.status(500).json({ error: 'Internal server error' });
@@ -192,15 +337,16 @@ router.get('/my/:threadId', requireAuth, async (req, res) => {
  * POST /api/Feedback/my/:threadId/reply
  * Employee reply inside their own thread.
  */
-router.post('/my/:threadId/reply', requireAuth, async (req, res) => {
+router.post('/my/:threadId/reply', requireAuth, upload.array('files', 5), async (req, res) => {
   const client = await pool.connect();
   try {
     const employeeId = req.user.employeeId;
     const { threadId } = req.params;
     const { content } = req.body;
+    const hasFiles = req.files && req.files.length > 0;
 
-    if (!content || !content.trim()) {
-      return res.status(400).json({ error: 'Content is required' });
+    if ((!content || !content.trim()) && !hasFiles) {
+      return res.status(400).json({ error: 'Content or file is required' });
     }
 
     const threadRows = await client.query(
@@ -226,11 +372,20 @@ router.post('/my/:threadId/reply', requireAuth, async (req, res) => {
       [threadId, employeeId, content.trim(), now]
     );
 
+    await insertAttachments(client, msgResult.rows[0].id, req.files);
+
+    const enrichedMsg = await enrichMessageWithAttachments(client, msgResult.rows[0]);
+
     await client.query('COMMIT');
-    return res.status(201).json(msgResult.rows[0]);
+    return res.status(201).json(enrichedMsg);
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Error replying to feedback:', err);
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        try { fs.unlinkSync(file.path); } catch (_) {}
+      }
+    }
     return res.status(500).json({ error: 'Internal server error' });
   } finally {
     client.release();
@@ -311,7 +466,9 @@ router.get('/all/:threadId', requireAuth, requireAdmin, async (req, res) => {
       [threadId]
     );
 
-    return res.json({ thread: threadRows[0], messages });
+    const messagesWithAttachments = await enrichMessagesWithAttachments(messages);
+
+    return res.json({ thread: threadRows[0], messages: messagesWithAttachments });
   } catch (err) {
     console.error('Error fetching admin feedback thread:', err);
     return res.status(500).json({ error: 'Internal server error' });
@@ -322,15 +479,16 @@ router.get('/all/:threadId', requireAuth, requireAdmin, async (req, res) => {
  * POST /api/Feedback/all/:threadId/reply
  * Admin-only: append a message to the thread.
  */
-router.post('/all/:threadId/reply', requireAuth, requireAdmin, async (req, res) => {
+router.post('/all/:threadId/reply', requireAuth, requireAdmin, upload.array('files', 5), async (req, res) => {
   const client = await pool.connect();
   try {
     const adminId = req.user.employeeId;
     const { threadId } = req.params;
     const { content } = req.body;
+    const hasFiles = req.files && req.files.length > 0;
 
-    if (!content || !content.trim()) {
-      return res.status(400).json({ error: 'Content is required' });
+    if ((!content || !content.trim()) && !hasFiles) {
+      return res.status(400).json({ error: 'Content or file is required' });
     }
 
     const threadRows = await client.query(
@@ -356,11 +514,20 @@ router.post('/all/:threadId/reply', requireAuth, requireAdmin, async (req, res) 
       [threadId, adminId, content.trim(), now]
     );
 
+    await insertAttachments(client, msgResult.rows[0].id, req.files);
+
+    const enrichedMsg = await enrichMessageWithAttachments(client, msgResult.rows[0]);
+
     await client.query('COMMIT');
-    return res.status(201).json(msgResult.rows[0]);
+    return res.status(201).json(enrichedMsg);
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Error admin-replying to feedback:', err);
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        try { fs.unlinkSync(file.path); } catch (_) {}
+      }
+    }
     return res.status(500).json({ error: 'Internal server error' });
   } finally {
     client.release();
@@ -393,6 +560,83 @@ router.patch('/all/:threadId/status', requireAuth, requireAdmin, async (req, res
   } catch (err) {
     console.error('Error updating feedback status:', err);
     return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * DELETE /api/Feedback/all/:threadId
+ * Admin-only: permanently delete a thread and all associated data.
+ */
+router.delete('/all/:threadId', requireAuth, requireAdmin, async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { threadId } = req.params;
+
+    // Verify thread exists
+    const threadResult = await client.query(
+      'SELECT id FROM feedback_threads WHERE id = $1',
+      [threadId]
+    );
+
+    if (!threadResult.rows || threadResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Thread not found' });
+    }
+
+    await client.query('BEGIN');
+
+    // Get all messages to find attachments
+    const messageResult = await client.query(
+      'SELECT id FROM feedback_messages WHERE thread_id = $1',
+      [threadId]
+    );
+    const messageIds = messageResult.rows.map(r => r.id);
+
+    // Get all attachments for file deletion
+    if (messageIds.length > 0) {
+      const attachmentResult = await client.query(
+        'SELECT stored_name FROM feedback_attachments WHERE message_id = ANY($1)',
+        [messageIds]
+      );
+
+      // Delete physical files (log errors but don't block transaction)
+      for (const row of attachmentResult.rows) {
+        try {
+          const filePath = path.join(UPLOAD_DIR, row.stored_name);
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+        } catch (fileErr) {
+          console.error('Failed to delete attachment file:', row.stored_name, fileErr);
+        }
+      }
+
+      // Delete attachment records
+      await client.query(
+        'DELETE FROM feedback_attachments WHERE message_id = ANY($1)',
+        [messageIds]
+      );
+    }
+
+    // Delete messages
+    await client.query(
+      'DELETE FROM feedback_messages WHERE thread_id = $1',
+      [threadId]
+    );
+
+    // Delete thread
+    await client.query(
+      'DELETE FROM feedback_threads WHERE id = $1',
+      [threadId]
+    );
+
+    await client.query('COMMIT');
+    return res.status(204).send();
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Error deleting feedback thread:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
   }
 });
 

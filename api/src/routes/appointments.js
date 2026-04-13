@@ -79,6 +79,7 @@ router.get('/', async (req, res) => {
     const df = effectiveDateFrom;
     const dt = effectiveDateTo;
 
+
     if (df && !isValidISODate(df)) {
       return errorResponse(res, 400, 'INVALID_DATE_FROM', 'dateFrom must be a valid ISO date (YYYY-MM-DD)');
     }
@@ -136,7 +137,7 @@ router.get('/', async (req, res) => {
       if (!isValidUUID(doctor_id)) {
         return errorResponse(res, 400, 'INVALID_DOCTOR_ID', 'doctor_id must be a valid UUID');
       }
-      conditions.push(`a.employeeid = $${paramIdx}`);
+      conditions.push(`a.doctorid = $${paramIdx}`);
       params.push(doctor_id);
       paramIdx++;
     }
@@ -165,6 +166,7 @@ router.get('/', async (req, res) => {
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
 
     const items = await query(
       `SELECT
@@ -249,6 +251,7 @@ router.get('/', async (req, res) => {
     stateCounts.forEach((row) => {
       aggregates.byState[row.state || 'unknown'] = parseInt(row.count, 10);
     });
+
 
     return res.json({
       offset: offsetNum,

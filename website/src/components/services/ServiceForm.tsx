@@ -316,22 +316,22 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
             {errors.doctor && <p className="mt-2 text-xs text-red-500">{errors.doctor}</p>}
           </div>
 
-          {/* Trợ thủ */}
+          {/* Phụ tá */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
-              Trợ thủ
+              Phụ tá
             </label>
-            <DoctorSelector employees={employees} selectedId={assistantId} onChange={handleAssistantChange} filterRoles={['doctor-assistant', 'assistant']} placeholder="Chọn trợ thủ..." />
+            <DoctorSelector employees={employees} selectedId={assistantId} onChange={handleAssistantChange} filterRoles={['assistant']} placeholder="Chọn phụ tá..." />
           </div>
 
-          {/* Nha sĩ phụ */}
+          {/* Trợ lý Bác sĩ */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
-              Nha sĩ phụ
+              Trợ lý Bác sĩ
             </label>
-            <DoctorSelector employees={employees} selectedId={dentalAideId} onChange={handleDentalAideChange} filterRoles={['assistant', 'doctor-assistant']} placeholder="Chọn nha sĩ phụ..." />
+            <DoctorSelector employees={employees} selectedId={dentalAideId} onChange={handleDentalAideChange} filterRoles={['doctor-assistant']} placeholder="Chọn trợ lý bác sĩ..." />
           </div>
 
           {/* Chi nhánh */}

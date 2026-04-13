@@ -64,4 +64,5 @@ export interface ServiceRecord {
   readonly toothNumbers?: readonly string[];
   readonly notes?: string;
   readonly orderName?: string;
+  readonly orderCode?: string;
 }

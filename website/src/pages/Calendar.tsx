@@ -57,8 +57,8 @@ export function Calendar() {
     monthDates,
     getAppointmentsForDate,
     dateLabel,
-    selectedDoctorId,
-    setSelectedDoctorId,
+    selectedDoctorName,
+    setSelectedDoctorName,
     search,
     setSearch,
     statusFilter,
@@ -310,8 +310,8 @@ export function Calendar() {
           />
           <div className="flex-1 lg:flex-none">
             <FilterByDoctor
-              selectedDoctorId={selectedDoctorId}
-              onChange={setSelectedDoctorId}
+              selectedDoctorName={selectedDoctorName}
+              onChange={setSelectedDoctorName}
               doctors={doctors}
             />
           </div>

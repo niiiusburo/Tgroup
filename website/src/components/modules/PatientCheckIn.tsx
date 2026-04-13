@@ -12,7 +12,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Clock, User, Search } from 'lucide-react';
+import { Clock, User, Search, FileText } from 'lucide-react';
 import { WaitTimer } from '@/components/appointments/WaitTimer';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import type { OverviewAppointment, CheckInStatus, Zone1Filter } from '@/hooks/useOverviewAppointments';
@@ -154,6 +154,26 @@ export function PatientCheckIn({
 
 // ─── Individual Patient Card ────────────────────────────────────
 
+export function parseAppointmentNote(note: string) {
+  if (!note) return { duration: '', type: '', freeText: '' };
+  const lines = note.split('\n');
+  let duration = '';
+  let type = '';
+  const freeLines: string[] = [];
+  for (const line of lines) {
+    if (line.startsWith('Duration:')) {
+      duration = line.replace('Duration:', '').trim();
+    } else if (line.startsWith('Type:')) {
+      type = line.replace('Type:', '').trim();
+    } else if (line.startsWith('Service:')) {
+      // intentionally ignore service line; displayed elsewhere if needed
+    } else {
+      freeLines.push(line);
+    }
+  }
+  return { duration, type, freeText: freeLines.join('\n').trim() };
+}
+
 interface PatientCardProps {
   readonly appointment: OverviewAppointment;
   readonly onUpdateStatus: (id: string, status: CheckInStatus, onSuccess?: () => void) => void;
@@ -198,6 +218,8 @@ function PatientCard({ appointment, onUpdateStatus, onEditClick, onDone }: Patie
     setHoveredId(null);
   };
 
+  const parsed = parseAppointmentNote(appointment.note || '');
+
   return (
     <div
       ref={cardRef}
@@ -205,7 +227,7 @@ function PatientCard({ appointment, onUpdateStatus, onEditClick, onDone }: Patie
       onMouseLeave={handleMouseLeave}
       onClick={() => onEditClick?.(appointment)}
       className={`
-        border rounded-xl p-3.5 transition-all relative cursor-pointer
+        border rounded-xl p-3.5 transition-all relative cursor-pointer h-full flex flex-col
         ${isHighlighted
           ? 'ring-2 ring-blue-500 ring-offset-2 bg-blue-50/50 border-blue-300'
           : 'border-gray-200 bg-gray-50/50 hover:shadow-sm'
@@ -273,17 +295,42 @@ function PatientCard({ appointment, onUpdateStatus, onEditClick, onDone }: Patie
       )}
 
       {/* Patient info — NO truncate: display full name per layout lock */}
-      <div className="mt-2.5">
-        <div className="text-sm font-semibold text-gray-800 break-words"><CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink></div>
-        <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+      <div className="mt-2.5 flex-1 flex flex-col gap-2">
+        <div className="text-sm font-semibold text-gray-800 break-words">
+          <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink>
+        </div>
+        <div className="flex items-center gap-1 text-xs text-gray-500">
           <User className="w-3 h-3" />
           <span>{appointment.doctorName}</span>
           <span className="mx-1">·</span>
           <Clock className="w-3 h-3" />
           <span>{appointment.time}</span>
         </div>
-        {appointment.note && (
-          <div className="text-xs text-gray-400 mt-1 break-words">{appointment.note}</div>
+
+        {/* Duration + Type pills */}
+        {(parsed.duration || parsed.type) && (
+          <div className="flex flex-wrap gap-2">
+            {parsed.duration && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white border border-gray-200 text-[11px] text-gray-600">
+                <Clock className="w-3 h-3 text-gray-400" />
+                {parsed.duration}
+              </span>
+            )}
+            {parsed.type && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white border border-gray-200 text-[11px] text-gray-600">
+                <User className="w-3 h-3 text-gray-400" />
+                {parsed.type}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Free-text notes */}
+        {parsed.freeText && (
+          <div className="rounded-r-lg rounded-l-md bg-amber-50/40 border border-gray-100 border-l-4 border-l-amber-200 p-2 text-xs text-gray-600 break-words whitespace-pre-wrap flex items-start gap-1.5">
+            <FileText className="w-3 h-3 text-amber-400 shrink-0 mt-0.5" />
+            <span>{parsed.freeText}</span>
+          </div>
         )}
       </div>
     </div>

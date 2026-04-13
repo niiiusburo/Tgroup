@@ -11,6 +11,7 @@ function mapAllocations(allocResult) {
         paymentId: a.payment_id,
         invoiceId: a.invoice_id,
         invoiceName: a.invoice_name,
+        invoiceCode: a.invoice_code,
         invoiceTotal: parseFloat(a.invoice_total || 0),
         invoiceResidual: parseFloat(a.invoice_residual || 0),
         allocatedAmount: parseFloat(a.allocated_amount),
@@ -78,7 +79,7 @@ async function validateAllocationResidual(allocations) {
 // Falls back to accountpayments for historical records not yet migrated to payments table
 router.get("/", async (req, res) => {
   try {
-    const { customerId, limit = 100, offset = 0, type } = req.query;
+    const { customerId, serviceId, limit = 100, offset = 0, type } = req.query;
 
     let sql = `
       SELECT
@@ -95,6 +96,11 @@ router.get("/", async (req, res) => {
     if (customerId) {
       params.push(customerId);
       sql += ` AND p.customer_id = $` + params.length;
+    }
+
+    if (serviceId) {
+      params.push(serviceId);
+      sql += ` AND p.service_id = $` + params.length;
     }
 
     if (type === 'payments') {
@@ -125,6 +131,7 @@ router.get("/", async (req, res) => {
           AND p.service_id IS NULL
           AND (p.deposit_used IS NULL OR p.deposit_used = 0)
           AND p.amount > 0
+          AND NOT EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = p.id)
         )
       )`;
     }
@@ -178,6 +185,10 @@ router.get("/", async (req, res) => {
       countParams.push(customerId);
       countConditions.push(`p.customer_id = $${countParams.length}`);
     }
+    if (serviceId) {
+      countParams.push(serviceId);
+      countConditions.push(`p.service_id = $${countParams.length}`);
+    }
     if (type === 'payments') {
       countConditions.push(`(
         EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = p.id)
@@ -204,6 +215,7 @@ router.get("/", async (req, res) => {
           AND p.service_id IS NULL
           AND (p.deposit_used IS NULL OR p.deposit_used = 0)
           AND p.amount > 0
+          AND NOT EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = p.id)
         )
       )`);
     }
@@ -230,14 +242,14 @@ router.get("/", async (req, res) => {
       try {
         const allocResult = await query(
           `SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
-                  so.name as invoice_name, so.amounttotal as invoice_total, so.residual as invoice_residual,
+                  so.name as invoice_name, so.code as invoice_code, so.amounttotal as invoice_total, so.residual as invoice_residual,
                   NULL as dotkham_name, NULL as dotkham_total, NULL as dotkham_residual
            FROM payment_allocations pa
            LEFT JOIN saleorders so ON so.id = pa.invoice_id
            WHERE pa.payment_id = ANY($1) AND pa.invoice_id IS NOT NULL
            UNION ALL
            SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
-                  NULL, NULL, NULL,
+                  NULL, NULL, NULL, NULL,
                   dk.name as dotkham_name, dk.totalamount as dotkham_total, dk.amountresidual as dotkham_residual
            FROM payment_allocations pa
            LEFT JOIN dotkhams dk ON dk.id = pa.dotkham_id
@@ -308,6 +320,7 @@ router.get("/deposits", async (req, res) => {
           AND p.method IN ('cash', 'bank_transfer')
           AND p.service_id IS NULL
           AND (p.deposit_used IS NULL OR p.deposit_used = 0)
+          AND NOT EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = p.id)
         )
       )
     `;
@@ -327,6 +340,7 @@ router.get("/deposits", async (req, res) => {
           AND p.service_id IS NULL
           AND (p.deposit_used IS NULL OR p.deposit_used = 0)
           AND p.amount > 0
+          AND NOT EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = p.id)
         )
       )`;
     } else if (type === "refund") {
@@ -470,14 +484,14 @@ router.get("/:id", async (req, res) => {
     try {
       const allocResult = await query(
         `SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
-                so.name as invoice_name, so.amounttotal as invoice_total, so.residual as invoice_residual,
+                so.name as invoice_name, so.code as invoice_code, so.amounttotal as invoice_total, so.residual as invoice_residual,
                 NULL as dotkham_name, NULL as dotkham_total, NULL as dotkham_residual
          FROM payment_allocations pa
          LEFT JOIN saleorders so ON so.id = pa.invoice_id
          WHERE pa.payment_id = $1 AND pa.invoice_id IS NOT NULL
          UNION ALL
          SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
-                NULL, NULL, NULL,
+                NULL, NULL, NULL, NULL,
                 dk.name as dotkham_name, dk.totalamount as dotkham_total, dk.amountresidual as dotkham_residual
          FROM payment_allocations pa
          LEFT JOIN dotkhams dk ON dk.id = pa.dotkham_id
