@@ -31,8 +31,12 @@ const STATUS_CONFIG = {
 export function ServiceHistory({ services, limit, onSelect, onUpdateStatus, onPayForService }: ServiceHistoryProps) {
   const displayServices = limit ? services.slice(0, limit) : services;
   const totalCost = services
-    .filter((s) => s.status === 'completed')
+    .filter((s) => s.status !== 'cancelled')
     .reduce((sum, s) => sum + s.cost, 0);
+  const totalPaid = services
+    .filter((s) => s.status !== 'cancelled')
+    .reduce((sum, s) => sum + (s.cost - (s.residual ?? Math.max(0, s.cost - (s.paidAmount ?? 0)))), 0);
+  const zeroCostCount = services.filter((s) => s.cost === 0 && s.status !== 'cancelled').length;
 
   return (
     <div className="bg-white rounded-xl shadow-card p-6">
@@ -42,9 +46,16 @@ export function ServiceHistory({ services, limit, onSelect, onUpdateStatus, onPa
           <h3 className="font-semibold text-gray-900">Treatment History</h3>
           <span className="text-xs text-gray-400">({services.length}{limit && services.length > limit ? '+' : ''} treatments)</span>
         </div>
-        <div className="text-right">
-          <p className="text-xs text-gray-400">Total completed</p>
-          <p className="text-sm font-bold text-gray-900">{formatVND(totalCost)}</p>
+        <div className="flex items-center gap-4 text-right">
+          {zeroCostCount > 0 && (
+            <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1 rounded-lg">
+              ⚠ {zeroCostCount} chưa có giá
+            </span>
+          )}
+          <div>
+            <p className="text-xs text-gray-400">Tổng chi phí / Đã thu</p>
+            <p className="text-sm font-bold text-gray-900">{formatVND(totalPaid)} <span className="text-gray-400 font-normal">/ {formatVND(totalCost)}</span></p>
+          </div>
         </div>
       </div>
 
@@ -124,8 +135,10 @@ export function ServiceHistory({ services, limit, onSelect, onUpdateStatus, onPa
                       onChange={(newStatus) => onUpdateStatus?.(svc.id, newStatus)}
                       disabled={!onUpdateStatus}
                     />
-                    {svc.cost > 0 && (
+                    {svc.cost > 0 ? (
                       <p className="text-sm font-medium text-gray-900 mt-1">{formatVND(svc.cost)}</p>
+                    ) : (
+                      <p className="text-sm font-medium text-amber-600 mt-1 bg-amber-50 px-1.5 py-0.5 rounded">Chưa có giá</p>
                     )}
                   </div>
                 </div>

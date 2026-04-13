@@ -4,12 +4,16 @@ import * as api from '@/lib/api';
 
 const getToday = vi.fn().mockReturnValue('2024-01-01');
 const getEndOfDay = vi.fn().mockReturnValue('2024-01-01T23:59:59');
+function mockFormatDate(date: string) {
+  return date.split('T')[0];
+}
 
 vi.mock('@/contexts/TimezoneContext', () => ({
   useTimezone: () => ({
     getToday,
     getEndOfDay,
     timezone: 'Asia/Ho_Chi_Minh',
+    formatDate: mockFormatDate,
   }),
 }));
 

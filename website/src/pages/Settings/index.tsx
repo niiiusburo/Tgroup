@@ -25,7 +25,7 @@ const ALL_TABS: { id: SettingsTab; label: string; icon: React.ReactNode; admin?:
 
 export function Settings() {
   const { hasPermission } = useAuth();
-  const isAdmin = hasPermission('permissions.view') && hasPermission('permissions.edit');
+  const isAdmin = hasPermission('permissions.view');
   const TABS = ALL_TABS.filter((t) => !t.admin || isAdmin);
   const [activeTab, setActiveTab] = useState<SettingsTab>('system');
 

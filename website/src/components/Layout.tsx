@@ -22,6 +22,7 @@ import {
   LogOut,
   Menu,
   X,
+  MessageSquare,
 } from 'lucide-react';
 import { NAVIGATION_ITEMS, type NavigationItem } from '@/constants';
 import { FilterByLocation } from '@/components/shared/FilterByLocation';
@@ -47,6 +48,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   FolderOpen,
   Shield,
   Bell,
+  MessageSquare,
 };
 
 /** Maps route path to the permission required to see it in the nav */
@@ -64,6 +66,7 @@ const NAV_PERMISSION: Record<string, string> = {
   '/settings': 'settings.view',
   '/notifications': 'notifications.view',
   '/permissions': 'permissions.view',
+  '/feedback': 'permissions.view',
   '/clinic': '',
   '/team': '',
   '/admin': '',

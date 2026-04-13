@@ -101,6 +101,7 @@ export const ROUTES = {
   NOTIFICATIONS: '/notifications',
   PERMISSIONS: '/permissions',
   PAYMENT: '/payment',
+  FEEDBACK: '/feedback',
 } as const;
 
 /**
@@ -149,6 +150,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     icon: 'Settings',
     children: [
       { path: ROUTES.SETTINGS, label: 'Settings', icon: 'Settings' },
+      { path: ROUTES.FEEDBACK, label: 'Feedback', icon: 'MessageSquare' },
       { path: ROUTES.PERMISSIONS, label: 'Permissions', icon: 'Shield' },
       { path: ROUTES.REPORTS, label: 'Reports', icon: 'BarChart3' },
       { path: ROUTES.RELATIONSHIPS, label: 'Relationships', icon: 'Users' },

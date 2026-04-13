@@ -23,6 +23,7 @@ const Reports = lazy(() => import('@/pages/Reports').then(m => ({ default: m.Rep
 const Notifications = lazy(() => import('@/pages/Notifications').then(m => ({ default: m.Notifications })));
 const PermissionBoard = lazy(() => import('@/pages/PermissionBoard').then(m => ({ default: m.PermissionBoard })));
 const Payment = lazy(() => import('@/pages/Payment').then(m => ({ default: m.Payment })));
+const Feedback = lazy(() => import('@/pages/Feedback').then(m => ({ default: m.Feedback })));
 
 /**
  * Route → required permission mapping
@@ -42,6 +43,7 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
   '/relationships': 'relationships.view',
   '/permissions': 'permissions.view',
   '/payment': 'payment.view',
+  '/feedback': 'permissions.view',
 };
 
 /**
@@ -279,6 +281,16 @@ function App() {
               element={
                 <ProtectedRoute path={ROUTES.PAYMENT}>
                   <Payment />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* @crossref:route[path="/feedback", component=Feedback] */}
+            <Route
+              path={ROUTES.FEEDBACK}
+              element={
+                <ProtectedRoute path={ROUTES.FEEDBACK}>
+                  <Feedback />
                 </ProtectedRoute>
               }
             />

@@ -10,7 +10,7 @@ const VALID_STATUSES = new Set(['pending', 'in_progress', 'resolved', 'ignored']
 
 /**
  * Admin check helper.
- * Admin = belongs to 'System Administrator' group OR has both permissions.view + permissions.edit
+ * Admin = belongs to 'System Administrator' group OR has permissions.view
  */
 async function isAdmin(employeeId) {
   const epRows = await query(
@@ -44,7 +44,7 @@ async function isAdmin(employeeId) {
   const effectiveSet = new Set([...basePerms, ...granted]);
   for (const p of revoked) effectiveSet.delete(p);
 
-  return effectiveSet.has('permissions.view') && effectiveSet.has('permissions.edit');
+  return effectiveSet.has('permissions.view');
 }
 
 function requireAdmin(req, res, next) {
