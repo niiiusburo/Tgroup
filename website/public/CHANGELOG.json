@@ -1,5 +1,37 @@
 [
   {
+    "version": "0.7.0",
+    "date": "2026-04-13",
+    "commit": "<fill-in-after-commit>",
+    "highlights": "Pay-per-service refactor: locked service context, read-only location, capped multi-source inputs",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "PaymentForm now opens with a locked service context from the invoking row",
+          "Location is rendered as a read-only badge inside the service card",
+          "Multi-source payment (wallet + cash + bank) is capped at the service residual — overpay is impossible",
+          "Submit button label always reflects the true capped total"
+        ]
+      },
+      {
+        "title": "Removed",
+        "items": [
+          "Service picker (invoice/consultation tabs, manual/auto allocation)",
+          "Location picker inside payment modal",
+          "Generic \"Record Payment\" CTA on the Payment page and Customer profile"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "New pure allocatePaymentSources() function with 9 unit tests covering cap, clamp priority, and float tolerance",
+          "Rewrote PaymentForm component tests (13 cases) for the locked-context contract"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.4.24",
     "date": "2026-04-12",
     "commit": "8be4060",
