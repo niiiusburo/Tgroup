@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.8.1",
+    "date": "2026-04-13",
+    "commit": "<fill-in-after-commit>",
+    "highlights": "Show saleorder code badge on service rows and payment modal to distinguish duplicate service names",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Treatment History rows display the saleorder code (SO-...) as a monospace badge",
+          "Service payment card inside the payment modal also shows the saleorder code, between the type badge and location badge"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.7.0",
     "date": "2026-04-13",
     "commit": "1f7cb68c",

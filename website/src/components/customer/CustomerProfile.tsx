@@ -855,6 +855,7 @@ export function CustomerProfile({
           paidAmount: payTargetService.paidAmount ?? 0,
           residual: payTargetService.residual ?? payTargetService.cost,
           locationName: payTargetService.locationName ?? profile.companyName ?? '',
+          orderName: payTargetService.orderName,
         };
         return (
           <PaymentForm

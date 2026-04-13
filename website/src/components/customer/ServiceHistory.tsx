@@ -62,9 +62,10 @@ export function ServiceHistory({ services, limit, onSelect, onUpdateStatus, onPa
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <div className={`w-2 h-2 rounded-full ${statusConfig.dot}`} />
                       <p className="font-medium text-gray-900">{svc.service}</p>
+                      {svc.orderName && <span className="text-xs font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{svc.orderName}</span>}
                       {onPayForService && svc.status !== 'cancelled' && (() => {
                         const owed = svc.residual ?? Math.max(0, svc.cost - (svc.paidAmount ?? 0));
                         const hasBalance = owed > 0;

@@ -14,6 +14,7 @@ export interface ServicePaymentContext {
   readonly paidAmount: number;
   readonly residual: number;
   readonly locationName: string;
+  readonly orderName?: string;
 }
 
 interface ServicePaymentCardProps {
@@ -40,6 +41,11 @@ export function ServicePaymentCard({ ctx }: ServicePaymentCardProps) {
               }`}>
                 {ctx.recordType === 'saleorder' ? 'Hóa đơn' : 'Đợt khám'}
               </span>
+              {ctx.orderName && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded font-mono bg-gray-100 text-gray-600">
+                  {ctx.orderName}
+                </span>
+              )}
               {ctx.locationName && (
                 <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium bg-gray-100 text-gray-600">
                   <MapPin className="w-2.5 h-2.5" />
