@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.8.4",
+    "date": "2026-04-13",
+    "commit": "<fill-in-after-commit>",
+    "highlights": "AddCustomerForm + POST /partners gain full Vietnamese address, identity, insurance and business-invoice fields",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Customer form accepts city/district/ward, weight, ID number, health insurance card, emergency phone, job title",
+          "Tax code, business-invoice fields (unit name, unit address, personal name, personal ID card, personal tax code, personal address), and salestaff/CSKH assignments",
+          "POST /partners persists all new fields; the useCustomers hook passes them through"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.8.2",
     "date": "2026-04-13",
     "commit": "8b244739",

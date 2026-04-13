@@ -366,7 +366,19 @@ export function AddCustomerForm({
         await onSubmit(formData);
       } catch (err) {
         console.error('Save customer error:', err);
-        setErrors([{ field: 'name', message: 'Lỗi lưu dữ liệu. Vui lòng thử lại.' }]);
+        let message = 'Lỗi lưu dữ liệu. Vui lòng thử lại.';
+        if (err instanceof Error) {
+          // Try to extract a JSON error message from the API response text
+          const match = err.message.match(/\{[^}]*"error"\s*:\s*"([^"]+)"/);
+          if (match) {
+            message = match[1];
+          } else if (err.message.includes('Phone number already exists')) {
+            message = 'Số điện thoại đã tồn tại';
+          } else if (err.message.includes('Name and phone are required')) {
+            message = 'Vui lòng nhập đầy đủ tên và số điện thoại';
+          }
+        }
+        setErrors([{ field: 'name', message }]);
       } finally {
         setIsSubmitting(false);
       }

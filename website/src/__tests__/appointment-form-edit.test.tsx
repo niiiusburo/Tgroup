@@ -37,6 +37,10 @@ vi.mock('@/hooks/useLocations', () => ({
   }),
 }));
 
+vi.mock('@/contexts/LocationContext', () => ({
+  useLocationFilter: () => ({ selectedLocationId: 'all' }),
+}));
+
 
 describe('AppointmentForm Edit Mode', () => {
   const mockSubmit = vi.fn();
