@@ -4,7 +4,7 @@
   "addService": "Thêm dịch vụ",
   "editService": "Sửa dịch vụ",
   "serviceCatalog": "Danh mục dịch vụ",
-  "searchPlaceholder": "Tìm dịch vụ...",
+  "searchPlaceholder": "Tìm kiếm dịch vụ...",
   "columns": {
     "name": "Tên dịch vụ",
     "category": "Danh mục",
@@ -25,12 +25,14 @@
     "color": "Màu sắc"
   },
   "categories": {
-    "general": "Nha khoa tổng quát",
-    "cosmetic": "Nha khoa thẩm mỹ",
+    "all": "Tất cả danh mục",
+    "general": "Tổng quát",
+    "cosmetic": "Thẩm mỹ",
     "orthodontics": "Chỉnh nha",
-    "oralSurgery": "Phẫu thuật răng hàm mặt",
-    "pediatric": "Nha khoa trẻ em",
-    "preventive": "Chăm sóc phòng ngừa"
+    "surgery": "Phẫu thuật",
+    "cleaning": "Cạo vôi",
+    "consultation": "Tư vấn",
+    "emergency": "Cấp cứu"
   },
   "multiVisit": {
     "title": "Theo dõi nhiều lần khám",
@@ -43,5 +45,34 @@
   "history": {
     "title": "Lịch sử dịch vụ",
     "noHistory": "Chưa có lịch sử dịch vụ"
-  }
+  },
+  "completed": "Hoàn thành",
+  "active": "Đang điều trị",
+  "cancelled": "Đã hủy",
+  "noPrice": "Chưa có giá",
+  "pay": "Thanh toán",
+  "paid": "Đã thanh toán",
+  "outstanding": "Còn nợ",
+  "paymentHistory": "Lịch sử thanh toán",
+  "noPayments": "Chưa có thanh toán",
+  "totalPaid": "Tổng đã thanh toán",
+  "voided": "Đã hủy",
+  "posted": "Đã ghi",
+  "toPay": "còn nợ",
+  "paidInFull": "Đã thanh toán đủ",
+  "tooth": "Răng",
+  "treatment": "điều trị",
+  "transactions": "giao dịch",
+  "editTreatment": "Sửa điều trị",
+  "all": "Tất cả",
+  "treatments": "điều trị",
+  "noServiceHistory": "Chưa có lịch sử dịch vụ",
+  "visits": "lần khám",
+  "minutesPerVisit": "phút/lần",
+  "default": "Mặc định",
+  "selectService": "Chọn dịch vụ",
+  "selectDoctor": "Chọn bác sĩ",
+  "selectAssistant": "Chọn phụ tá",
+  "selectLocation": "Chọn chi nhánh",
+  "enterNotes": "Nhập ghi chú"
 }

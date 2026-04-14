@@ -1,7 +1,7 @@
 {
   "title": "Chi nhánh",
   "list": "Danh sách chi nhánh",
-  "addLocation": "Thêm chi nhánh",
+  "addLocation": "Thêm chi nhánh mới",
   "editLocation": "Sửa chi nhánh",
   "locationDetails": "Chi tiết chi nhánh",
   "searchPlaceholder": "Tìm chi nhánh...",
@@ -32,5 +32,12 @@
     "monthlyRevenue": "Doanh thu tháng",
     "activeCustomers": "Khách hàng hoạt động",
     "staffCount": "Số nhân viên"
-  }
+  },
+  "subtitle": "Quản lý cơ sở và chi nhánh",
+  "totalBranches": "Tổng chi nhánh",
+  "totalStaff": "Tổng nhân viên",
+  "totalCustomers": "Tổng khách hàng",
+  "monthlyRevenue": "Doanh thu tháng",
+  "noLocations": "Không có chi nhánh",
+  "createNew": "Tạo chi nhánh mới"
 }

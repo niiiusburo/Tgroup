@@ -87,7 +87,7 @@ export function AppointmentDetailsModal({
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
-              {t('calendar.appointmentDetails.patient')}
+              {t('appointmentDetails.patient')}
             </label>
             <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center text-white font-semibold text-sm shadow-md">
@@ -105,26 +105,26 @@ export function AppointmentDetailsModal({
 
           {/* Date & Time Row */}
           <div className="grid grid-cols-2 gap-4">
-            <DetailRow icon={<Calendar className="w-3.5 h-3.5" />} label={t('calendar.appointmentDetails.date')}>
+            <DetailRow icon={<Calendar className="w-3.5 h-3.5" />} label={t('appointmentDetails.date')}>
               {appointment.date}
             </DetailRow>
-            <DetailRow icon={<Clock className="w-3.5 h-3.5" />} label={t('calendar.appointmentDetails.time')}>
+            <DetailRow icon={<Clock className="w-3.5 h-3.5" />} label={t('appointmentDetails.time')}>
               {appointment.startTime} - {appointment.endTime}
             </DetailRow>
           </div>
 
           {/* Doctor */}
-          <DetailRow icon={<Stethoscope className="w-3.5 h-3.5" />} label={t('calendar.appointmentDetails.doctor')}>
+          <DetailRow icon={<Stethoscope className="w-3.5 h-3.5" />} label={t('appointmentDetails.doctor')}>
             {appointment.dentist}
           </DetailRow>
 
           {/* Location */}
-          <DetailRow icon={<MapPin className="w-3.5 h-3.5" />} label={t('calendar.appointmentDetails.location')}>
+          <DetailRow icon={<MapPin className="w-3.5 h-3.5" />} label={t('appointmentDetails.location')}>
             {appointment.locationName}
           </DetailRow>
 
           {/* Type */}
-          <DetailRow icon={<Tag className="w-3.5 h-3.5" />} label={t('calendar.appointmentDetails.serviceType')}>
+          <DetailRow icon={<Tag className="w-3.5 h-3.5" />} label={t('appointmentDetails.serviceType')}>
             <span className="inline-flex items-center gap-1.5">
               <span className={`w-2 h-2 rounded-full ${typeColors.dot}`} />
               <span className={typeColors.text}>{typeLabel}</span>
@@ -133,7 +133,7 @@ export function AppointmentDetailsModal({
 
           {/* Notes */}
           {appointment.notes && (
-            <DetailRow icon={<FileText className="w-3.5 h-3.5" />} label={t('calendar.appointmentDetails.notes')}>
+            <DetailRow icon={<FileText className="w-3.5 h-3.5" />} label={t('appointmentDetails.notes')}>
               <span className="text-gray-700">{appointment.notes}</span>
             </DetailRow>
           )}
@@ -158,7 +158,7 @@ export function AppointmentDetailsModal({
               className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all shadow-lg shadow-orange-500/25"
             >
               <Pencil className="w-4 h-4" />
-              {t('calendar.appointmentDetails.edit')}
+              {t('appointmentDetails.edit')}
             </button>
           )}
         </div>

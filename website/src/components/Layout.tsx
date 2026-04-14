@@ -392,7 +392,7 @@ export function Layout() {
           )}
 
           <div className="flex items-center gap-2 justify-center">
-            <LanguageToggle />
+            <LanguageToggle compact={!sidebarExpanded} />
           </div>
         </div>
       </aside>

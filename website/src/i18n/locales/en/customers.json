@@ -21,19 +21,7 @@
     "address": "Address",
     "notes": "Notes"
   },
-  "profile": {
-    "personalInfo": "Personal Information",
-    "contactInfo": "Contact Information",
-    "medicalHistory": "Medical History",
-    "appointmentHistory": "Appointment History",
-    "serviceHistory": "Service History",
-    "paymentHistory": "Payment History",
-    "assignments": "Assignments",
-    "photos": "Photos",
-    "healthCheckup": "Health Checkup",
-    "noAppointments": "No appointments yet",
-    "noServices": "No services yet"
-  },
+  "profile": "Profile",
   "form": {
     "fullName": "Full Name",
     "phone": "Phone Number",
@@ -59,5 +47,10 @@
     "zalo": "Zalo",
     "tiktok": "TikTok",
     "other": "Other"
-  }
+  },
+  "subtitle": "Patient management",
+  "noResults": "No results found",
+  "appointments": "Appointments",
+  "records": "Records",
+  "payment": "Payment"
 }

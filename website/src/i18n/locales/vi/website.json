@@ -36,5 +36,7 @@
     "addService": "Thêm vào danh mục",
     "editService": "Sửa",
     "categories": "Danh mục"
-  }
+  },
+  "subtitle": "Quản lý nội dung, danh mục dịch vụ và SEO",
+  "noPageSelected": "Chưa chọn trang để chỉnh sửa"
 }

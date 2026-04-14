@@ -1,4 +1,5 @@
 import { useOutletContext } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Calendar, CheckCircle, XCircle, Repeat } from 'lucide-react';
 import { useReportData, formatNum } from '@/hooks/useReportData';
 import { KPICard } from '@/components/reports/KPICard';
@@ -24,13 +25,14 @@ interface ApptTrend {
 }
 
 export function ReportsAppointments() {
+  const { t } = useTranslation('reports');
   const filters = useOutletContext<{ dateFrom: string; dateTo: string; companyId: string }>();
   const { data: summary, loading: l1, error: e1, refetch: r1 } = useReportData<ApptSummary>('/Reports/appointments/summary', filters);
   const { data: trendData, loading: l2, error: e2, refetch: r2 } = useReportData<ApptTrend>('/Reports/appointments/trend', filters);
 
-  if (l1 || l2) return <div className="text-center py-12 text-gray-400">Loading appointments…</div>;
+  if (l1 || l2) return <div className="text-center py-12 text-gray-400">{t('loading')}</div>;
   if (e1 || e2) return <ReportError error={e1 || e2 || ''} onRetry={() => { r1(); r2(); }} />;
-  if (!summary) return <div className="text-center py-12 text-gray-400">No data available</div>;
+  if (!summary) return <div className="text-center py-12 text-gray-400">{t('noData')}</div>;
 
   const statusSegments = summary.states.map(s => ({
     label: s.state || 'unknown',
@@ -51,44 +53,44 @@ export function ReportsAppointments() {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard label="Total Appointments" value={summary.total} format="number" icon={<Calendar className="w-4 h-4" />} color="blue" delay={0} />
-        <KPICard label="Completed" value={summary.done} format="number" icon={<CheckCircle className="w-4 h-4" />} color="emerald" delay={1} />
-        <KPICard label="Cancelled" value={summary.cancelled} format="number" icon={<XCircle className="w-4 h-4" />} color="rose" delay={2} />
-        <KPICard label="Repeat Patients" value={summary.repeatCustomers} format="number" icon={<Repeat className="w-4 h-4" />} color="violet" delay={3} />
+        <KPICard label={t('metrics.totalAppointments')} value={summary.total} format="number" icon={<Calendar className="w-4 h-4" />} color="blue" delay={0} />
+        <KPICard label={t('metrics.completedAppointments')} value={summary.done} format="number" icon={<CheckCircle className="w-4 h-4" />} color="emerald" delay={1} />
+        <KPICard label={t('metrics.cancelledAppointments')} value={summary.cancelled} format="number" icon={<XCircle className="w-4 h-4" />} color="rose" delay={2} />
+        <KPICard label={t('kpi.repeatPatients')} value={summary.repeatCustomers} format="number" icon={<Repeat className="w-4 h-4" />} color="violet" delay={3} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Status breakdown */}
-        <SectionCard title="Status Breakdown">
+        <SectionCard title={t('charts.statusBreakdown')}>
           <DonutChart segments={statusSegments} />
         </SectionCard>
 
         {/* Rate rings */}
-        <SectionCard title="Key Rates">
+        <SectionCard title={t('charts.keyRates')}>
           <div className="flex items-center justify-around py-4">
-            <ProgressRing value={parseFloat(summary.completionRate)} label="Completion" color="#10B981" />
-            <ProgressRing value={parseFloat(summary.cancellationRate)} label="Cancellation" color="#EF4444" />
-            <ProgressRing value={parseFloat(summary.conversionRate)} label="Conversion" color="#3B82F6" />
+            <ProgressRing value={parseFloat(summary.completionRate)} label={t('metrics.completion')} color="#10B981" />
+            <ProgressRing value={parseFloat(summary.cancellationRate)} label={t('metrics.cancellation')} color="#EF4444" />
+            <ProgressRing value={parseFloat(summary.conversionRate)} label={t('metrics.conversion')} color="#3B82F6" />
           </div>
         </SectionCard>
 
         {/* New vs Repeat */}
-        <SectionCard title="Patient Type">
+        <SectionCard title={t('charts.patientType')}>
           <DonutChart segments={[
-            { label: 'New Patients', value: summary.newCustomers, color: '#8B5CF6' },
-            { label: 'Repeat Patients', value: summary.repeatCustomers, color: '#0EA5E9' },
+            { label: t('kpi.newPatients'), value: summary.newCustomers, color: '#8B5CF6' },
+            { label: t('kpi.repeatPatients'), value: summary.repeatCustomers, color: '#0EA5E9' },
           ]} />
         </SectionCard>
       </div>
 
       {/* Weekly trend */}
-      <SectionCard title="Weekly Appointment Volume">
+      <SectionCard title={t('charts.weeklyAppointmentVolume')}>
         <BarChart data={weeklyTrend} formatValue={formatNum} color="bg-blue-500" height={220} />
       </SectionCard>
 
       {/* Peak hours */}
       <SectionCard
-        title="Peak Hours"
+        title={t('charts.peakHours')}
         action={<ExportCSVButton data={(trendData?.peakHours || []).map(h => ({ Hour: `${h.hour}:00`, Appointments: h.count }))} filename="peak-hours" />}
       >
         <HorizontalBarList items={peakHours} formatValue={formatNum} color="bg-cyan-500" maxItems={12} />

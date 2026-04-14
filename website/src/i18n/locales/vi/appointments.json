@@ -3,32 +3,34 @@
   "list": "Danh sách lịch hẹn",
   "addAppointment": "Thêm lịch hẹn",
   "editAppointment": "Sửa lịch hẹn",
-  "searchPlaceholder": "Tìm lịch hẹn...",
+  "searchPlaceholder": "Tìm kiếm lịch hẹn...",
   "status": {
     "scheduled": "Đang hẹn",
-    "arrived": "Đã đến",
     "confirmed": "Đã xác nhận",
     "inProgress": "Đang khám",
-    "completed": "Hoàn tất",
+    "completed": "Hoàn thành",
     "cancelled": "Hủy hẹn",
-    "noShow": "Không đến"
+    "noShow": "Quá hẹn",
+    "arrived": "Đã đến",
+    "pending": "Chờ xác nhận"
   },
   "form": {
-    "patient": "Bệnh nhân",
+    "customer": "Khách hàng",
     "doctor": "Bác sĩ",
-    "date": "Ngày",
-    "startTime": "Giờ bắt đầu",
-    "endTime": "Giờ kết thúc",
-    "type": "Loại lịch hẹn",
-    "status": "Trạng thái",
     "location": "Chi nhánh",
+    "date": "Ngày",
+    "time": "Giờ",
+    "duration": "Thời lượng",
+    "service": "Dịch vụ",
     "notes": "Ghi chú",
+    "status": "Trạng thái",
     "color": "Màu sắc",
-    "selectPatient": "Chọn bệnh nhân",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "selectCustomer": "Chọn khách hàng",
     "selectDoctor": "Chọn bác sĩ",
     "selectLocation": "Chọn chi nhánh",
-    "selectType": "Chọn loại",
-    "selectStatus": "Chọn trạng thái"
+    "enterNotes": "Nhập ghi chú"
   },
   "checkIn": {
     "title": "Check In",
@@ -42,5 +44,30 @@
   "convertToService": {
     "title": "Chuyển thành dịch vụ",
     "selectService": "Chọn dịch vụ"
+  },
+  "all": "Tất cả",
+  "scheduled": "Đang hẹn",
+  "confirmed": "Đã xác nhận",
+  "inProgress": "Đang khám",
+  "completed": "Hoàn thành",
+  "cancelled": "Hủy hẹn",
+  "appointments": "lịch hẹn",
+  "labels": {
+    "appointments": "lịch hẹn",
+    "all": "Tất cả",
+    "add": "Thêm",
+    "edit": "Sửa",
+    "delete": "Xóa",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "today": "Hôm nay",
+    "thisWeek": "Tuần này",
+    "thisMonth": "Tháng này"
+  },
+  "messages": {
+    "noAppointments": "Không có lịch hẹn",
+    "scheduleFirst": "Đặt lịch hẹn đầu tiên",
+    "confirmDelete": "Bạn có chắc muốn xóa lịch hẹn này?",
+    "confirmCancel": "Bạn có chắc muốn hủy lịch hẹn này?"
   }
 }

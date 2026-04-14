@@ -7,7 +7,13 @@
   "roleConfig": "Role Configuration",
   "serviceCatalog": "Service Catalog Settings",
   "customerSources": "Customer Sources",
-  "feedbackAdmin": "Feedback Management",
+  "feedbackAdmin": {
+    "title": "Feedback Management",
+    "review": "Review",
+    "status": "Status",
+    "submittedAt": "Submitted At",
+    "noFeedback": "No feedback submissions"
+  },
   "timezone": "Timezone",
   "general": "General",
   "systemPreferencesContent": {
@@ -67,15 +73,9 @@
     "sourceName": "Source Name",
     "description": "Description"
   },
-  "feedbackAdmin": {
-    "title": "Feedback Management",
-    "review": "Review",
-    "status": "Status",
-    "submittedAt": "Submitted At",
-    "noFeedback": "No feedback submissions"
-  },
   "timezoneSelector": {
     "label": "Select Timezone",
     "searchPlaceholder": "Search timezone..."
-  }
+  },
+  "subtitle": "System configuration"
 }

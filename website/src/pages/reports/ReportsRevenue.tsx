@@ -1,4 +1,5 @@
 import { useOutletContext } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { DollarSign } from 'lucide-react';
 import { useReportData, formatVND } from '@/hooks/useReportData';
 import { KPICard } from '@/components/reports/KPICard';
@@ -14,6 +15,7 @@ type RevByDoc = { id: string; name: string; orderCount: number; invoiced: number
 type RevByCat = { id: string; category: string; lineCount: number; revenue: number }[]
 
 export function ReportsRevenue() {
+  const { t } = useTranslation('reports');
   const filters = useOutletContext<{ dateFrom: string; dateTo: string; companyId: string }>();
   const { data: summary, loading: l1, error: e1, refetch: r1 } = useReportData<RevSummary>('/Reports/revenue/summary', filters);
   const { data: trend, loading: l2, error: e2, refetch: r2 } = useReportData<RevTrend>('/Reports/revenue/trend', filters);
@@ -21,10 +23,10 @@ export function ReportsRevenue() {
   const { data: byDoc, loading: l4, error: e4, refetch: r4 } = useReportData<RevByDoc>('/Reports/revenue/by-doctor', filters);
   const { data: byCat, loading: l5, error: e5, refetch: r5 } = useReportData<RevByCat>('/Reports/revenue/by-category', filters);
 
-  if (l1 || l2 || l3 || l4 || l5) return <div className="text-center py-12 text-gray-400">Loading revenue…</div>;
+  if (l1 || l2 || l3 || l4 || l5) return <div className="text-center py-12 text-gray-400">{t('loading')}</div>;
   const firstError = e1 || e2 || e3 || e4 || e5;
   if (firstError) return <ReportError error={firstError} onRetry={() => { r1(); r2(); r3(); r4(); r5(); }} />;
-  if (!summary) return <div className="text-center py-12 text-gray-400">No data available</div>;
+  if (!summary) return <div className="text-center py-12 text-gray-400">{t('noData')}</div>;
 
   const totalInvoiced = summary.orders.reduce((s, o) => s + o.total, 0);
   const totalPaid = summary.orders.reduce((s, o) => s + o.paid, 0);
@@ -48,27 +50,27 @@ export function ReportsRevenue() {
     <div className="space-y-5">
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard label="Total Invoiced" value={totalInvoiced} format="currency" icon={<DollarSign className="w-4 h-4" />} color="blue" delay={0} />
-        <KPICard label="Total Collected" value={totalPaid} format="currency" icon={<DollarSign className="w-4 h-4" />} color="emerald" delay={1} />
-        <KPICard label="Outstanding" value={totalOutstanding} format="currency" icon={<DollarSign className="w-4 h-4" />} color="amber" delay={2} />
-        <KPICard label="Collection Rate" value={totalInvoiced > 0 ? (totalPaid / totalInvoiced * 100) : 0} format="percent" icon={<DollarSign className="w-4 h-4" />} color="violet" delay={3} />
+        <KPICard label={t('metrics.totalInvoiced')} value={totalInvoiced} format="currency" icon={<DollarSign className="w-4 h-4" />} color="blue" delay={0} />
+        <KPICard label={t('metrics.totalCollected')} value={totalPaid} format="currency" icon={<DollarSign className="w-4 h-4" />} color="emerald" delay={1} />
+        <KPICard label={t('metrics.outstanding')} value={totalOutstanding} format="currency" icon={<DollarSign className="w-4 h-4" />} color="amber" delay={2} />
+        <KPICard label={t('metrics.collectionRate')} value={totalInvoiced > 0 ? (totalPaid / totalInvoiced * 100) : 0} format="percent" icon={<DollarSign className="w-4 h-4" />} color="violet" delay={3} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Revenue trend */}
-        <SectionCard title="Revenue Trend">
+        <SectionCard title={t('charts.revenueTrend')}>
           <BarChart data={trendMonths} formatValue={formatVND} color="bg-blue-500" height={220} />
         </SectionCard>
 
         {/* Payment method breakdown */}
-        <SectionCard title="By Payment Method">
+        <SectionCard title={t('charts.byPaymentMethod')}>
           <DonutChart segments={methodSegments} />
         </SectionCard>
       </div>
 
       {/* Revenue by Doctor */}
       <SectionCard
-        title="Revenue by Doctor"
+        title={t('charts.revenueByDoctor')}
         action={byDoc ? <ExportCSVButton data={byDoc.map(d => ({ Doctor: d.name, Orders: d.orderCount, Invoiced: d.invoiced, Collected: d.paid }))} filename="revenue-by-doctor" /> : undefined}
       >
         <HorizontalBarList
@@ -80,7 +82,7 @@ export function ReportsRevenue() {
 
       {/* Revenue by Location */}
       <SectionCard
-        title="Revenue by Location"
+        title={t('charts.revenueByBranch')}
         action={byLoc ? <ExportCSVButton data={byLoc.filter(l => l.invoiced > 0).map(l => ({ Location: l.name, Orders: l.orderCount, Invoiced: l.invoiced, Collected: l.paid, Outstanding: l.outstanding }))} filename="revenue-by-location" /> : undefined}
       >
         <HorizontalBarList
@@ -92,7 +94,7 @@ export function ReportsRevenue() {
 
       {/* Revenue by Category */}
       <SectionCard
-        title="Revenue by Service Category"
+        title={t('charts.revenueByCategory')}
         action={byCat ? <ExportCSVButton data={byCat.filter(c => c.revenue > 0).map(c => ({ Category: c.category, Orders: c.lineCount, Revenue: c.revenue }))} filename="revenue-by-category" /> : undefined}
       >
         <HorizontalBarList

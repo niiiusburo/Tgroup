@@ -25,12 +25,14 @@
     "color": "Color"
   },
   "categories": {
-    "general": "General Dentistry",
-    "cosmetic": "Cosmetic Dentistry",
+    "all": "All Categories",
+    "general": "General",
+    "cosmetic": "Cosmetic",
     "orthodontics": "Orthodontics",
-    "oralSurgery": "Oral Surgery",
-    "pediatric": "Pediatric Dentistry",
-    "preventive": "Preventive Care"
+    "surgery": "Surgery",
+    "cleaning": "Cleaning",
+    "consultation": "Consultation",
+    "emergency": "Emergency"
   },
   "multiVisit": {
     "title": "Multi-Visit Tracker",
@@ -43,5 +45,34 @@
   "history": {
     "title": "Service History",
     "noHistory": "No service history"
-  }
+  },
+  "completed": "Completed",
+  "active": "Active",
+  "cancelled": "Cancelled",
+  "noPrice": "No price set",
+  "pay": "Pay",
+  "paid": "Paid",
+  "outstanding": "Outstanding",
+  "paymentHistory": "Payment History",
+  "noPayments": "No payments recorded",
+  "totalPaid": "Total paid",
+  "voided": "Voided",
+  "posted": "Posted",
+  "toPay": "to pay",
+  "paidInFull": "Paid in full",
+  "tooth": "Tooth",
+  "treatment": "treatment",
+  "transactions": "transactions",
+  "editTreatment": "Edit treatment",
+  "all": "All",
+  "treatments": "treatments",
+  "noServiceHistory": "No service history",
+  "visits": "visits",
+  "minutesPerVisit": "min/visit",
+  "default": "Default",
+  "selectService": "Select service",
+  "selectDoctor": "Select doctor",
+  "selectAssistant": "Select assistant",
+  "selectLocation": "Select location",
+  "enterNotes": "Enter notes"
 }

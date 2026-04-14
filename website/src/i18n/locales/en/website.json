@@ -36,5 +36,7 @@
     "addService": "Add to Catalog",
     "editService": "Edit",
     "categories": "Categories"
-  }
+  },
+  "subtitle": "Content management, services catalog, and SEO",
+  "noPageSelected": "No page selected for editing"
 }

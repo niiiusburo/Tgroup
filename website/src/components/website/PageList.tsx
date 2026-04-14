@@ -4,6 +4,7 @@
  * @crossref:uses[DataTable, StatusBadge]
  */
 import { FileText, Eye, Pencil, Search as SearchIcon, Globe, ArrowUpDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { WebsitePage, PageStatus } from '@/data/mockWebsite';
 import { PAGE_STATUS_LABELS, PAGE_STATUS_STYLES } from '@/data/mockWebsite';
 
@@ -53,6 +54,7 @@ export function PageList({
   onClearFilters,
   stats,
 }: PageListProps) {
+  const { t } = useTranslation('website');
   const hasFilters = searchQuery || statusFilter !== 'all';
 
   return (
@@ -80,7 +82,7 @@ export function PageList({
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search pages by title, slug, or author..."
+            placeholder={t('searchPlaceholder', { ns: 'website' })}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"

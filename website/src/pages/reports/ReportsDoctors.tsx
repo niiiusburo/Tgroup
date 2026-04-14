@@ -1,4 +1,5 @@
 import { useOutletContext } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Stethoscope, Award, DollarSign, Activity } from 'lucide-react';
 import { useReportData, formatVND, formatNum } from '@/hooks/useReportData';
 import { KPICard } from '@/components/reports/KPICard';
@@ -9,12 +10,13 @@ import { ReportError } from '@/components/reports/ReportError';
 type DocPerf = { id: string; name: string; totalAppointments: number; done: number; cancelled: number; revenue: number }[]
 
 export function ReportsDoctors() {
+  const { t } = useTranslation('reports');
   const filters = useOutletContext<{ dateFrom: string; dateTo: string; companyId: string }>();
   const { data: doctors, loading, error, refetch } = useReportData<DocPerf>('/Reports/doctors/performance', filters);
 
-  if (loading) return <div className="text-center py-12 text-gray-400">Loading doctors…</div>;
+  if (loading) return <div className="text-center py-12 text-gray-400">{t('loading')}</div>;
   if (error) return <ReportError error={error} onRetry={refetch} />;
-  if (!doctors) return <div className="text-center py-12 text-gray-400">No data available</div>;
+  if (!doctors) return <div className="text-center py-12 text-gray-400">{t('noData')}</div>;
 
   const totalAppts = doctors.reduce((s, d) => s + d.totalAppointments, 0);
   const totalDone = doctors.reduce((s, d) => s + d.done, 0);
@@ -25,19 +27,19 @@ export function ReportsDoctors() {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard label="Total Doctors" value={doctors.length} format="number" icon={<Stethoscope className="w-4 h-4" />} color="blue" delay={0} />
-        <KPICard label="Total Appointments" value={totalAppts} format="number" icon={<Activity className="w-4 h-4" />} color="emerald" delay={1} />
-        <KPICard label="Total Completed" value={totalDone} format="number" icon={<Award className="w-4 h-4" />} color="violet" delay={2} />
-        <KPICard label="Total Revenue" value={totalRev} format="currency" icon={<DollarSign className="w-4 h-4" />} color="orange" delay={3} />
+        <KPICard label={t('metrics.totalDoctors')} value={doctors.length} format="number" icon={<Stethoscope className="w-4 h-4" />} color="blue" delay={0} />
+        <KPICard label={t('metrics.totalAppointments')} value={totalAppts} format="number" icon={<Activity className="w-4 h-4" />} color="emerald" delay={1} />
+        <KPICard label={t('metrics.totalCompleted')} value={totalDone} format="number" icon={<Award className="w-4 h-4" />} color="violet" delay={2} />
+        <KPICard label={t('metrics.totalRevenue')} value={totalRev} format="currency" icon={<DollarSign className="w-4 h-4" />} color="orange" delay={3} />
       </div>
 
       {/* By Appointments */}
       <SectionCard
-        title="Appointments per Doctor"
+        title={t('charts.appointmentsPerDoctor')}
         action={<ExportCSVButton data={doctors.map(d => ({ Doctor: d.name, Total: d.totalAppointments, Done: d.done, Cancelled: d.cancelled, Revenue: d.revenue }))} filename="doctors-appointments" />}
       >
         <HorizontalBarList
-          items={doctors.filter(d => d.totalAppointments > 0).map(d => ({ label: d.name, value: d.totalAppointments, extra: `${d.done} done` }))}
+          items={doctors.filter(d => d.totalAppointments > 0).map(d => ({ label: d.name, value: d.totalAppointments, extra: `${d.done} ${t('table.done')}` }))}
           formatValue={formatNum}
           color="bg-blue-500"
         />
@@ -45,7 +47,7 @@ export function ReportsDoctors() {
 
       {/* By Revenue */}
       <SectionCard
-        title="Revenue per Doctor"
+        title={t('charts.revenuePerDoctor')}
         action={<ExportCSVButton data={doctors.filter(d => d.revenue > 0).map(d => ({ Doctor: d.name, Revenue: d.revenue }))} filename="doctors-revenue" />}
       >
         <HorizontalBarList
@@ -56,17 +58,17 @@ export function ReportsDoctors() {
       </SectionCard>
 
       {/* Detail table */}
-      <SectionCard title="Doctor Performance Detail">
+      <SectionCard title={t('charts.doctorPerformanceDetail')}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left py-3 px-3 text-gray-500 font-medium">Doctor</th>
-                <th className="text-right py-3 px-3 text-gray-500 font-medium">Appointments</th>
-                <th className="text-right py-3 px-3 text-gray-500 font-medium">Completed</th>
-                <th className="text-right py-3 px-3 text-gray-500 font-medium">Cancelled</th>
-                <th className="text-right py-3 px-3 text-gray-500 font-medium">Completion %</th>
-                <th className="text-right py-3 px-3 text-gray-500 font-medium">Revenue</th>
+                <th className="text-left py-3 px-3 text-gray-500 font-medium">{t('table.doctor')}</th>
+                <th className="text-right py-3 px-3 text-gray-500 font-medium">{t('table.appointments')}</th>
+                <th className="text-right py-3 px-3 text-gray-500 font-medium">{t('table.completed')}</th>
+                <th className="text-right py-3 px-3 text-gray-500 font-medium">{t('table.cancelled')}</th>
+                <th className="text-right py-3 px-3 text-gray-500 font-medium">{t('table.completionPct')}</th>
+                <th className="text-right py-3 px-3 text-gray-500 font-medium">{t('table.revenue')}</th>
               </tr>
             </thead>
             <tbody>

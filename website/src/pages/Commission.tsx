@@ -19,7 +19,7 @@ export function Commission() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{t('commission', { ns: 'nav' })}</h1>
-            <p className="text-sm text-gray-500">Track and manage employee commissions</p>
+            <p className="text-sm text-gray-500">{t('commission:subtitle')}</p>
           </div>
         </div>
         <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm">
@@ -52,12 +52,12 @@ export function Commission() {
       {/* Placeholder table */}
       <div className="bg-white rounded-xl shadow-card overflow-hidden">
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <h3 className="font-medium text-gray-900">Commission Records</h3>
+          <h3 className="font-medium text-gray-900">{t('commission:records')}</h3>
           <span className="text-xs text-gray-400">Coming soon</span>
         </div>
         <div className="p-12 text-center">
           <Percent className="w-12 h-12 mx-auto mb-3 text-gray-200" />
-          <p className="text-gray-500 font-medium">Commission tracking coming soon</p>
+          <p className="text-gray-500 font-medium">{t('commission:comingSoon')}</p>
           <p className="text-sm text-gray-400 mt-1">
             Automated commission calculation based on service revenue and employee roles
           </p>

@@ -57,7 +57,7 @@ export function Locations() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-            <p className="text-sm text-gray-500">Manage clinic locations and branches</p>
+            <p className="text-sm text-gray-500">{t('locations:subtitle')}</p>
           </div>
         </div>
         <button
@@ -75,7 +75,7 @@ export function Locations() {
         <div className="bg-white rounded-xl shadow-card p-4">
           <div className="flex items-center gap-2 mb-1">
             <Building2 className="w-4 h-4 text-gray-400" />
-            <span className="text-xs font-medium text-gray-500">Total Branches</span>
+            <span className="text-xs font-medium text-gray-500">{t('locations:totalBranches')}</span>
           </div>
           <p className="text-2xl font-bold text-gray-900">{totalStats.totalBranches}</p>
           <p className="text-xs text-green-600 mt-0.5">{totalStats.activeBranches} active</p>
@@ -86,14 +86,14 @@ export function Locations() {
           <p className="text-xs text-gray-400 mt-0.5">Across all branches</p>
         </div>
         <div className="bg-white rounded-xl shadow-card p-4">
-          <p className="text-xs font-medium text-gray-500 mb-1">Total Customers</p>
+          <p className="text-xs font-medium text-gray-500 mb-1">{t('locations:totalCustomers')}</p>
           <p className="text-2xl font-bold text-gray-900">
             {totalStats.totalCustomers.toLocaleString()}
           </p>
           <p className="text-xs text-gray-400 mt-0.5">Registered patients</p>
         </div>
         <div className="bg-white rounded-xl shadow-card p-4">
-          <p className="text-xs font-medium text-gray-500 mb-1">Monthly Revenue</p>
+          <p className="text-xs font-medium text-gray-500 mb-1">{t('locations:monthlyRevenue')}</p>
           <p className="text-2xl font-bold text-gray-900">{totalStats.totalRevenue}M</p>
           <p className="text-xs text-gray-400 mt-0.5">
             Target: {totalStats.totalTarget}M VND
@@ -109,7 +109,7 @@ export function Locations() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by name, district, or address..."
+            placeholder={t('searchPlaceholder')}
             className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary shadow-card"
           />
         </div>
@@ -143,7 +143,7 @@ export function Locations() {
       {locations.length === 0 ? (
         <div className="bg-white rounded-xl shadow-card p-12 text-center">
           <MapPin className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">No locations found</p>
+          <p className="text-sm text-gray-400">{t('locations:noLocations')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -170,8 +170,8 @@ export function Locations() {
                     <MapPin className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">Add New Location</h2>
-                    <p className="text-sm text-blue-100 mt-0.5">Create a new clinic branch</p>
+                    <h2 className="text-xl font-bold text-white">{t('locations:addLocation')}</h2>
+                    <p className="text-sm text-blue-100 mt-0.5">{t('locations:createNew')}</p>
                   </div>
                 </div>
                 <button type="button" onClick={() => setShowAddForm(false)} className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors">

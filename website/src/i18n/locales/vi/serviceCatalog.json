@@ -1,0 +1,14 @@
+{
+  "title": "Dịch vụ",
+  "subtitle": "Quản lý danh mục và giá dịch vụ",
+  "serviceName": "Tên dịch vụ",
+  "serviceCode": "Mã dịch vụ",
+  "unit": "Đơn vị tính",
+  "listPrice": "Giá niêm yết",
+  "category": "Danh mục",
+  "branch": "Chi nhánh",
+  "allBranches": "Tất cả chi nhánh",
+  "addCategory": "Thêm nhóm dịch vụ",
+  "categoryName": "Tên nhóm dịch vụ",
+  "categories": "Nhóm dịch vụ"
+}

@@ -1,0 +1,14 @@
+{
+  "title": "Service Catalog",
+  "subtitle": "Manage service catalog and pricing",
+  "serviceName": "Service Name",
+  "serviceCode": "Service Code",
+  "unit": "Unit",
+  "listPrice": "List Price",
+  "category": "Category",
+  "branch": "Branch",
+  "allBranches": "All branches",
+  "addCategory": "Add Service Category",
+  "categoryName": "Category Name",
+  "categories": "Categories"
+}

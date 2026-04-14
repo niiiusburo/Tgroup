@@ -224,7 +224,7 @@ export function Calendar() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-          <p className="text-sm text-gray-500">Quản lý lịch hẹn khám bệnh</p>
+          <p className="text-sm text-gray-500">{t('subtitle')}</p>
         </div>
       </div>
 
@@ -284,7 +284,7 @@ export function Calendar() {
               value={search}
               onChange={handleSearchInputChange}
               onFocus={() => setIsDropdownOpen(true)}
-              placeholder="Tìm theo tên, SĐT, mã KH, bác sĩ, dịch vụ..."
+              placeholder={t('searchPlaceholder', { ns: 'customers' })}
               className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
             />
             {isDropdownOpen && search.trim().length >= 2 && (

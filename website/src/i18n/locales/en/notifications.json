@@ -1,0 +1,8 @@
+{
+  "title": "Notifications",
+  "subtitle": "SMS and email notification management",
+  "emailNotifications": "Email Notifications",
+  "smsNotifications": "SMS Notifications",
+  "notificationTemplates": "Notification Templates",
+  "comingSoon": "Full notification management coming soon"
+}

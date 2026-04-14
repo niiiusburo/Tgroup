@@ -5,12 +5,14 @@
  */
 
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, ToggleLeft, ToggleRight, Pencil, Check, X } from 'lucide-react';
 import { useServiceCatalog } from '@/hooks/useSettings';
 import { formatVND } from '@/lib/formatting';
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
 
 export function ServiceCatalogSettings() {
+  const { t } = useTranslation('settings');
   const {
     services,
     loading,
@@ -72,7 +74,7 @@ export function ServiceCatalogSettings() {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search services..."
+            placeholder={t('catalog.searchPlaceholder', { ns: 'website' })}
             className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
           />
         </div>

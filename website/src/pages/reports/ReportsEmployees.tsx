@@ -1,4 +1,5 @@
 import { useOutletContext } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { UserCog, Stethoscope, Users, Building2 } from 'lucide-react';
 import { useReportData, formatNum } from '@/hooks/useReportData';
 import { KPICard } from '@/components/reports/KPICard';
@@ -14,39 +15,40 @@ interface EmpData {
 }
 
 export function ReportsEmployees() {
+  const { t } = useTranslation('reports');
   const filters = useOutletContext<{ dateFrom: string; dateTo: string; companyId: string }>();
   const { data, loading, error, refetch } = useReportData<EmpData>('/Reports/employees/overview', filters);
 
-  if (loading) return <div className="text-center py-12 text-gray-400">Loading employees…</div>;
+  if (loading) return <div className="text-center py-12 text-gray-400">{t('loading')}</div>;
   if (error) return <ReportError error={error} onRetry={refetch} />;
-  if (!data) return <div className="text-center py-12 text-gray-400">No data available</div>;
+  if (!data) return <div className="text-center py-12 text-gray-400">{t('noData')}</div>;
 
   const roleSegs = [
-    { label: 'Doctors', value: data.roles.doctors, color: '#3B82F6' },
-    { label: 'Assistants', value: data.roles.assistants, color: '#10B981' },
-    { label: 'Receptionists', value: data.roles.receptionists, color: '#F59E0B' },
-    { label: 'Other', value: data.roles.total - data.roles.doctors - data.roles.assistants - data.roles.receptionists, color: '#6B7280' },
+    { label: t('metrics.doctors'), value: data.roles.doctors, color: '#3B82F6' },
+    { label: t('metrics.assistants'), value: data.roles.assistants, color: '#10B981' },
+    { label: t('nav.receptionists', 'Receptionists'), value: data.roles.receptionists, color: '#F59E0B' },
+    { label: t('kpi.other'), value: data.roles.total - data.roles.doctors - data.roles.assistants - data.roles.receptionists, color: '#6B7280' },
   ].filter(s => s.value > 0);
 
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard label="Total Employees" value={data.roles.total} format="number" icon={<UserCog className="w-4 h-4" />} color="blue" delay={0} />
-        <KPICard label="Doctors" value={data.roles.doctors} format="number" icon={<Stethoscope className="w-4 h-4" />} color="emerald" delay={1} />
-        <KPICard label="Assistants" value={data.roles.assistants} format="number" icon={<Users className="w-4 h-4" />} color="violet" delay={2} />
-        <KPICard label="Locations" value={data.byLocation.filter(l => l.count > 0).length} format="number" icon={<Building2 className="w-4 h-4" />} color="orange" delay={3} />
+        <KPICard label={t('metrics.totalEmployees')} value={data.roles.total} format="number" icon={<UserCog className="w-4 h-4" />} color="blue" delay={0} />
+        <KPICard label={t('metrics.doctors')} value={data.roles.doctors} format="number" icon={<Stethoscope className="w-4 h-4" />} color="emerald" delay={1} />
+        <KPICard label={t('metrics.assistants')} value={data.roles.assistants} format="number" icon={<Users className="w-4 h-4" />} color="violet" delay={2} />
+        <KPICard label={t('charts.revenueByLocation')} value={data.byLocation.filter(l => l.count > 0).length} format="number" icon={<Building2 className="w-4 h-4" />} color="orange" delay={3} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Role distribution */}
-        <SectionCard title="Role Distribution">
+        <SectionCard title={t('charts.roleDistribution')}>
           <DonutChart segments={roleSegs} />
         </SectionCard>
 
         {/* Staff by location */}
-        <SectionCard title="Staff by Location">
+        <SectionCard title={t('charts.staffByLocation')}>
           <HorizontalBarList
-            items={data.byLocation.filter(l => l.count > 0).map(l => ({ label: l.location || 'Unassigned', value: l.count }))}
+            items={data.byLocation.filter(l => l.count > 0).map(l => ({ label: l.location || t('kpi.unassigned'), value: l.count }))}
             formatValue={formatNum}
             color="bg-blue-500"
           />
@@ -55,19 +57,19 @@ export function ReportsEmployees() {
 
       {/* Employee table */}
       <SectionCard
-        title="Employee Directory"
+        title={t('charts.employeeDirectory')}
         action={<ExportCSVButton data={data.employees.map(e => ({ Name: e.name, Role: e.isdoctor ? 'Doctor' : e.isassistant ? 'Assistant' : e.isreceptionist ? 'Receptionist' : 'Other', Title: e.jobtitle || '', Location: e.location || '', StartDate: e.startworkdate || '', Active: e.active ? 'Yes' : 'No' }))} filename="employees" />}
       >
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left py-3 px-3 text-gray-500 font-medium">Name</th>
-                <th className="text-left py-3 px-3 text-gray-500 font-medium">Role</th>
-                <th className="text-left py-3 px-3 text-gray-500 font-medium">Title</th>
-                <th className="text-left py-3 px-3 text-gray-500 font-medium">Location</th>
-                <th className="text-left py-3 px-3 text-gray-500 font-medium">Start Date</th>
-                <th className="text-center py-3 px-3 text-gray-500 font-medium">Status</th>
+                <th className="text-left py-3 px-3 text-gray-500 font-medium">{t('table.name')}</th>
+                <th className="text-left py-3 px-3 text-gray-500 font-medium">{t('table.role')}</th>
+                <th className="text-left py-3 px-3 text-gray-500 font-medium">{t('table.title')}</th>
+                <th className="text-left py-3 px-3 text-gray-500 font-medium">{t('table.location')}</th>
+                <th className="text-left py-3 px-3 text-gray-500 font-medium">{t('table.startDate')}</th>
+                <th className="text-center py-3 px-3 text-gray-500 font-medium">{t('table.status')}</th>
               </tr>
             </thead>
             <tbody>

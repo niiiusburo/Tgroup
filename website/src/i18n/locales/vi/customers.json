@@ -4,7 +4,7 @@
   "addCustomer": "Thêm khách hàng",
   "editCustomer": "Sửa khách hàng",
   "customerDetails": "Chi tiết khách hàng",
-  "searchPlaceholder": "Tìm khách hàng...",
+  "searchPlaceholder": "Tìm kiếm khách hàng...",
   "columns": {
     "name": "Tên",
     "phone": "Số điện thoại",
@@ -21,19 +21,7 @@
     "address": "Địa chỉ",
     "notes": "Ghi chú"
   },
-  "profile": {
-    "personalInfo": "Thông tin cá nhân",
-    "contactInfo": "Thông tin liên hệ",
-    "medicalHistory": "Lịch sử y tế",
-    "appointmentHistory": "Lịch sử lịch hẹn",
-    "serviceHistory": "Lịch sử dịch vụ",
-    "paymentHistory": "Lịch sử thanh toán",
-    "assignments": "Phân công",
-    "photos": "Hình ảnh",
-    "healthCheckup": "Khám sức khỏe",
-    "noAppointments": "Chưa có lịch hẹn",
-    "noServices": "Chưa có dịch vụ"
-  },
+  "profile": "Hồ sơ",
   "form": {
     "fullName": "Họ và tên",
     "phone": "Số điện thoại",
@@ -59,5 +47,10 @@
     "zalo": "Zalo",
     "tiktok": "TikTok",
     "other": "Khác"
-  }
+  },
+  "subtitle": "Quản lý bệnh nhân",
+  "noResults": "Không tìm thấy kết quả",
+  "appointments": "Lịch hẹn",
+  "records": "Hồ sơ",
+  "payment": "Thanh toán"
 }

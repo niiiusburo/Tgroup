@@ -229,8 +229,8 @@ export function CustomerProfile({
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">{t('customers.profile.customerProfile')}</h1>
-          <p className="text-sm text-gray-500">{t('customers.profile.viewAndManage')}</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('profile.customerProfile')}</h1>
+          <p className="text-sm text-gray-500">{t('profile.viewAndManage')}</p>
         </div>
         {onEdit && (
           <button onClick={onEdit} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
@@ -453,7 +453,7 @@ export function CustomerProfile({
       {activeTab === 'appointments' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">{t('customers.profile.appointmentHistory')} ({appointments.length})</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('profile.appointmentHistory')} ({appointments.length})</h3>
             <button
               onClick={() => { setEditingAppointment(null); setShowAppointmentModal(true); }}
               disabled={!onCreateAppointment}
@@ -523,7 +523,7 @@ export function CustomerProfile({
       {activeTab === 'records' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">{t('customers.profile.serviceHistory')}</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('profile.serviceHistory')}</h3>
             {onCreateService && (
               <button
                 onClick={() => setShowServiceModal(true)}
@@ -565,7 +565,7 @@ export function CustomerProfile({
                   <Receipt className="w-5 h-5 text-rose-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-gray-500 truncate">{t('customers.profile.expectedRevenue')}</p>
+                  <p className="text-xs text-gray-500 truncate">{t('profile.expectedRevenue')}</p>
                   <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(profile.outstandingBalance)}</p>
                 </div>
               </div>
@@ -576,7 +576,7 @@ export function CustomerProfile({
                   <HandCoins className="w-5 h-5 text-orange-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-gray-500 truncate">{t('customers.profile.deposit')}</p>
+                  <p className="text-xs text-gray-500 truncate">{t('profile.deposit')}</p>
                   <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(profile.depositBalance)}</p>
                 </div>
               </div>
@@ -600,7 +600,7 @@ export function CustomerProfile({
           {/* Bill summary — 3 columns */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
-              <p className="text-xs text-gray-500 mb-1">{t('customers.profile.totalCost')}</p>
+              <p className="text-xs text-gray-500 mb-1">{t('profile.totalCost')}</p>
               <p className="text-lg font-bold text-gray-900">{formatVND(totalServiceCost)}</p>
             </div>
             <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">

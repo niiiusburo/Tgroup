@@ -9,35 +9,39 @@
   "recentActivity": "Hoạt động gần đây",
   "noAppointments": "Không có lịch hẹn hôm nay",
   "zone1": {
-    "title": "Đón tiếp / Tiếp nhận bệnh nhân",
-    "filterAll": "Tất cả",
-    "filterWaiting": "Chờ khám",
-    "filterCheckedIn": "Đã check-in",
-    "filterInProgress": "Đang khám",
-    "filterCompleted": "Hoàn thành",
-    "searchPlaceholder": "Tìm nhanh bệnh nhân...",
-    "noPatients": "Chưa có bệnh nhân đến",
-    "noPatientsHint": "Đánh dấu \"Đã đến\" trong lịch hẹn hôm nay",
-    "changeStatus": "Chuyển trạng thái",
-    "close": "Đóng"
+    "title": "Lịch trình ngày",
+    "searchPlaceholder": "Tìm kiếm dịch vụ...",
+    "noServices": "Không có dịch vụ hôm nay",
+    "servicesCount": "{count} dịch vụ"
   },
   "zone2": {
-    "title": "Dịch vụ hôm nay",
-    "noServices": "Không có dịch vụ hôm nay",
-    "todayServices": "DỊCH VỤ HÔM NAY"
+    "title": "Hàng đợi check-in",
+    "searchPlaceholder": "Tìm kiếm bệnh nhân...",
+    "noPatients": "Không có bệnh nhân đang chờ",
+    "waiting": "Đang chờ",
+    "patientsCount": "{count} bệnh nhân"
   },
   "zone3": {
     "title": "Lịch hẹn hôm nay",
     "filterAll": "Tất cả",
-    "filterScheduled": "Đang hẹn",
     "filterArrived": "Đã đến",
     "filterCancelled": "Đã hủy",
-    "searchPlaceholder": "Tìm lịch hẹn..."
+    "noPatients": "Không có lịch hẹn hôm nay",
+    "noPatientsYet": "Chưa có bệnh nhân"
   },
   "addAppointment": "Thêm lịch hẹn",
   "editAppointment": "Sửa lịch hẹn",
   "markArrived": "Đánh dấu đã đến",
   "markCancelled": "Hủy hẹn",
   "quickAdd": "Hẹn mới",
-  "quickAddFull": "Thêm lịch hẹn"
+  "quickAddFull": "Thêm lịch hẹn",
+  "today": "Hôm nay",
+  "stats": {
+    "totalAppointments": "Tổng lịch hẹn",
+    "arrived": "Đã đến",
+    "completed": "Hoàn thành",
+    "cancelled": "Đã hủy",
+    "pending": "Đang chờ"
+  },
+  "subtitle": "Tổng quan bảng điều khiển"
 }

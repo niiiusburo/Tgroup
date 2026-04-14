@@ -62,7 +62,7 @@ export function Website() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-            <p className="text-sm text-gray-500">Content management, services catalog, and SEO</p>
+            <p className="text-sm text-gray-500">{t('website:subtitle')}</p>
           </div>
         </div>
         <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm font-medium">
@@ -113,7 +113,7 @@ export function Website() {
       {activeTab === 'editor' && !editingPage && (
         <div className="bg-white rounded-xl shadow-card p-12 text-center">
           <Palette className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-          <p className="text-gray-500 font-medium">No page selected for editing</p>
+          <p className="text-gray-500 font-medium">{t('website:noPageSelected')}</p>
           <button
             onClick={() => setActiveTab('pages')}
             className="mt-2 text-sm text-primary hover:text-primary-dark transition-colors"

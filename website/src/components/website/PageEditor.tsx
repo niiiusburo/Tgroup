@@ -3,6 +3,7 @@
  * @crossref:used-in[Website]
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft, Save, Eye, Bold, Italic, Underline, List, ListOrdered,
   Heading1, Heading2, Link, Image, AlignLeft, AlignCenter, AlignRight, Code,
@@ -52,6 +53,7 @@ function stripHtml(html: string): string {
 }
 
 export function PageEditor({ page, onBack }: PageEditorProps) {
+  const { t } = useTranslation('website');
   const [content, setContent] = useState(stripHtml(page.content));
   const [title, setTitle] = useState(page.title);
   const [slug, setSlug] = useState(page.slug);
@@ -167,7 +169,7 @@ export function PageEditor({ page, onBack }: PageEditorProps) {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="w-full p-6 min-h-[400px] text-sm text-gray-900 resize-y focus:outline-none leading-relaxed"
-            placeholder="Start writing your page content..."
+            placeholder={t('editor.content', { ns: 'website' })}
           />
         )}
       </div>

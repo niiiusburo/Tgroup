@@ -89,24 +89,24 @@ export function ServiceHistory({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Stethoscope className="w-5 h-5 text-primary" />
-          <h3 className="font-semibold text-gray-900">{t('services.history.title')}</h3>
-          <span className="text-xs text-gray-400">({services.length}{limit && services.length > limit ? '+' : ''} {t('services.treatment')})</span>
+          <h3 className="font-semibold text-gray-900">{t('history.title')}</h3>
+          <span className="text-xs text-gray-400">({services.length}{limit && services.length > limit ? '+' : ''} {t('treatment')})</span>
         </div>
         <div className="flex items-center gap-4 text-right">
           {zeroCostCount > 0 && (
             <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1 rounded-lg">
-              ⚠ {zeroCostCount} {t('services.noPrice')}
+              ⚠ {zeroCostCount} {t('noPrice')}
             </span>
           )}
           <div>
-            <p className="text-xs text-gray-400">{t('services.totalCost')} / {t('services.collected')}</p>
+            <p className="text-xs text-gray-400">{t('totalCost')} / {t('collected')}</p>
             <p className="text-sm font-bold text-gray-900">{formatVND(totalPaid)} <span className="text-gray-400 font-normal">/ {formatVND(totalCost)}</span></p>
           </div>
         </div>
       </div>
 
       {services.length === 0 ? (
-        <div className="text-center py-8 text-gray-400 text-sm">{t('services.history.noHistory')}</div>
+        <div className="text-center py-8 text-gray-400 text-sm">{t('history.noHistory')}</div>
       ) : (
         <div className="space-y-3">
           {displayServices.map((svc) => {
@@ -147,7 +147,7 @@ export function ServiceHistory({
                                 ? 'text-orange-600 bg-orange-50 border border-orange-200 hover:bg-orange-100 hover:border-orange-300'
                                 : 'text-gray-400 bg-gray-50 border border-gray-200 hover:bg-gray-100'
                             }`}
-                            title={hasBalance ? `${t('services.outstanding')} ${formatVND(owed)}` : t('services.paidInFull')}
+                            title={hasBalance ? `${t('outstanding')} ${formatVND(owed)}` : t('paidInFull')}
                           >
                             {hasBalance && pct > 0 && (
                               <span aria-hidden className="absolute inset-y-0 left-0 bg-green-500 transition-[width] duration-500 ease-out" style={{ width: `${pct * 100}%` }} />
@@ -156,7 +156,7 @@ export function ServiceHistory({
                               {hasBalance
                                 ? <CreditCard className="w-3 h-3" />
                                 : <CheckCircle className="w-3 h-3" />}
-                              {hasBalance ? `${t('services.pay')} ${formatVND(owed)}` : t('services.paid')}
+                              {hasBalance ? `${t('pay')} ${formatVND(owed)}` : t('paid')}
                             </span>
                           </button>
                         );
@@ -177,7 +177,7 @@ export function ServiceHistory({
                         </span>
                       )}
                       <span className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
-                        {t('services.tooth')}: {svc.tooth}
+                        {t('tooth')}: {svc.tooth}
                       </span>
                     </div>
                     {svc.notes && (
@@ -191,7 +191,7 @@ export function ServiceHistory({
                           type="button"
                           onClick={(e) => { e.stopPropagation(); onEditService(svc); }}
                           className="absolute right-full top-1/2 -translate-y-1/2 mr-1 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900"
-                          title={t('services.editTreatment')}
+                          title={t('editTreatment')}
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
@@ -218,13 +218,13 @@ export function ServiceHistory({
                   <div className="mt-4 pt-4 border-t border-dashed border-primary/30">
                     <div className="flex items-center gap-2 mb-3">
                       <Wallet className="w-4 h-4 text-gray-400" />
-                      <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{t('services.paymentHistory')}</h4>
-                      <span className="text-[10px] text-gray-400">({relatedPayments.length} {t('services.transactions')})</span>
+                      <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{t('paymentHistory')}</h4>
+                      <span className="text-[10px] text-gray-400">({relatedPayments.length} {t('transactions')})</span>
                     </div>
 
                     {relatedPayments.length === 0 ? (
                       <div className="bg-white rounded-lg border border-gray-100 px-4 py-3 text-sm text-gray-400">
-                        {t('services.noPayments')}.
+                        {t('noPayments')}.
                       </div>
                     ) : (
                       <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">

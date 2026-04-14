@@ -6,29 +6,31 @@
   "searchPlaceholder": "Search appointments...",
   "status": {
     "scheduled": "Scheduled",
-    "arrived": "Arrived",
     "confirmed": "Confirmed",
     "inProgress": "In Progress",
     "completed": "Completed",
     "cancelled": "Cancelled",
-    "noShow": "No Show"
+    "noShow": "No Show",
+    "arrived": "Arrived",
+    "pending": "Pending"
   },
   "form": {
-    "patient": "Patient",
+    "customer": "Customer",
     "doctor": "Doctor",
-    "date": "Date",
-    "startTime": "Start Time",
-    "endTime": "End Time",
-    "type": "Appointment Type",
-    "status": "Status",
     "location": "Location",
+    "date": "Date",
+    "time": "Time",
+    "duration": "Duration",
+    "service": "Service",
     "notes": "Notes",
+    "status": "Status",
     "color": "Color",
-    "selectPatient": "Select patient",
+    "save": "Save",
+    "cancel": "Cancel",
+    "selectCustomer": "Select customer",
     "selectDoctor": "Select doctor",
     "selectLocation": "Select location",
-    "selectType": "Select type",
-    "selectStatus": "Select status"
+    "enterNotes": "Enter notes"
   },
   "checkIn": {
     "title": "Check In",
@@ -42,5 +44,30 @@
   "convertToService": {
     "title": "Convert to Service",
     "selectService": "Select Service"
+  },
+  "all": "All",
+  "scheduled": "Scheduled",
+  "confirmed": "Confirmed",
+  "inProgress": "In Progress",
+  "completed": "Completed",
+  "cancelled": "Cancelled",
+  "appointments": "Appointments",
+  "labels": {
+    "appointments": "appointments",
+    "all": "All",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "filter": "Filter",
+    "today": "Today",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month"
+  },
+  "messages": {
+    "noAppointments": "No appointments found",
+    "scheduleFirst": "Schedule your first appointment",
+    "confirmDelete": "Are you sure you want to delete this appointment?",
+    "confirmCancel": "Are you sure you want to cancel this appointment?"
   }
 }

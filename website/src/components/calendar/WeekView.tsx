@@ -235,7 +235,7 @@ export function WeekView({
                 {sortedAppointments.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-24 text-gray-300">
                     <CalendarDays className="w-6 h-6 mb-1" />
-                    <span className="text-xs">{`${t('calendar.noAppointments')}`}</span>
+                    <span className="text-xs">{`${t('noAppointments')}`}</span>
                   </div>
                 ) : (
                   sortedAppointments.map((apt) => (

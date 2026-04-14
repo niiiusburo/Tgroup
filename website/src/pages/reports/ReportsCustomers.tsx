@@ -1,4 +1,5 @@
 import { useOutletContext } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Users, UserPlus, UserCheck, MapPin } from 'lucide-react';
 import { useReportData, formatVND, formatNum } from '@/hooks/useReportData';
 import { KPICard } from '@/components/reports/KPICard';
@@ -18,12 +19,13 @@ interface CustSummary {
 }
 
 export function ReportsCustomers() {
+  const { t } = useTranslation('reports');
   const filters = useOutletContext<{ dateFrom: string; dateTo: string; companyId: string }>();
   const { data, loading, error, refetch } = useReportData<CustSummary>('/Reports/customers/summary', filters);
 
-  if (loading) return <div className="text-center py-12 text-gray-400">Loading customers…</div>;
+  if (loading) return <div className="text-center py-12 text-gray-400">{t('loading')}</div>;
   if (error) return <ReportError error={error} onRetry={refetch} />;
-  if (!data) return <div className="text-center py-12 text-gray-400">No data available</div>;
+  if (!data) return <div className="text-center py-12 text-gray-400">{t('noData')}</div>;
 
   const growthPct = data.total > 0 ? (data.newInPeriod / data.total * 100).toFixed(1) : '0';
 
@@ -42,26 +44,26 @@ export function ReportsCustomers() {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard label="Total Customers" value={data.total} format="number" icon={<Users className="w-4 h-4" />} color="blue" delay={0} />
-        <KPICard label="New This Period" value={data.newInPeriod} format="number" icon={<UserPlus className="w-4 h-4" />} color="emerald" delay={1} />
-        <KPICard label="Growth Rate" value={parseFloat(growthPct)} format="percent" icon={<UserCheck className="w-4 h-4" />} color="violet" delay={2} />
-        <KPICard label="With Outstanding" value={data.outstanding.length} format="number" icon={<MapPin className="w-4 h-4" />} color="amber" delay={3} />
+        <KPICard label={t('metrics.totalAppointments')} value={data.total} format="number" icon={<Users className="w-4 h-4" />} color="blue" delay={0} />
+        <KPICard label={t('metrics.newThisPeriod')} value={data.newInPeriod} format="number" icon={<UserPlus className="w-4 h-4" />} color="emerald" delay={1} />
+        <KPICard label={t('metrics.growthRate')} value={parseFloat(growthPct)} format="percent" icon={<UserCheck className="w-4 h-4" />} color="violet" delay={2} />
+        <KPICard label={t('metrics.withOutstanding')} value={data.outstanding.length} format="number" icon={<MapPin className="w-4 h-4" />} color="amber" delay={3} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* By source */}
-        <SectionCard title="Customer Sources">
+        <SectionCard title={t('charts.customerSources')}>
           <DonutChart segments={sourceSegs.length > 0 ? sourceSegs : [{ label: 'No data', value: 1, color: '#E5E7EB' }]} />
         </SectionCard>
 
         {/* By gender */}
-        <SectionCard title="Gender Distribution">
+        <SectionCard title={t('charts.genderDistribution')}>
           <DonutChart segments={genderSegs.length > 0 ? genderSegs : [{ label: 'No data', value: 1, color: '#E5E7EB' }]} />
         </SectionCard>
       </div>
 
       {/* Growth trend */}
-      <SectionCard title="Customer Growth">
+      <SectionCard title={t('charts.customerGrowth')}>
         <HorizontalBarList
           items={data.growth.map(g => {
             const d = new Date(g.month);
@@ -74,7 +76,7 @@ export function ReportsCustomers() {
 
       {/* Top spenders */}
       <SectionCard
-        title="Top Customers by Spend"
+        title={t('charts.topCustomersBySpend')}
         action={<ExportCSVButton data={data.topSpenders.filter(s => s.totalPaid > 0).map(s => ({ Customer: s.name, Spent: s.totalPaid, Orders: s.orderCount }))} filename="top-customers" />}
       >
         <HorizontalBarList
@@ -88,7 +90,7 @@ export function ReportsCustomers() {
       {/* Outstanding */}
       {data.outstanding.length > 0 && (
         <SectionCard
-          title="Outstanding Balances"
+          title={t('charts.outstandingBalances')}
           action={<ExportCSVButton data={data.outstanding.map(o => ({ Customer: o.name, Outstanding: o.outstanding }))} filename="outstanding-balances" />}
         >
           <HorizontalBarList
@@ -102,7 +104,7 @@ export function ReportsCustomers() {
 
       {/* Cities */}
       {data.cities.length > 0 && (
-        <SectionCard title="Customers by City">
+        <SectionCard title={t('charts.customersByCity')}>
           <HorizontalBarList
             items={data.cities.map(c => ({ label: c.city, value: c.count }))}
             formatValue={formatNum}

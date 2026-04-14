@@ -20,7 +20,7 @@ export function Notifications() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{t('notifications', { ns: 'nav' })}</h1>
-            <p className="text-sm text-gray-500">SMS and email notification management</p>
+            <p className="text-sm text-gray-500">{t('notifications:subtitle')}</p>
           </div>
         </div>
         <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm">
@@ -62,7 +62,7 @@ export function Notifications() {
       {/* Notification templates placeholder */}
       <div className="bg-white rounded-xl shadow-card overflow-hidden">
         <div className="p-4 border-b border-gray-200">
-          <h3 className="font-medium text-gray-900">Notification Templates</h3>
+          <h3 className="font-medium text-gray-900">{t('notifications:notificationTemplates')}</h3>
         </div>
         <div className="divide-y divide-gray-50">
           {[
@@ -91,7 +91,7 @@ export function Notifications() {
       {/* Coming soon section */}
       <div className="bg-white rounded-xl shadow-card p-12 text-center">
         <Bell className="w-12 h-12 mx-auto mb-3 text-gray-200" />
-        <p className="text-gray-500 font-medium">Full notification management coming soon</p>
+        <p className="text-gray-500 font-medium">{t('notifications:comingSoon')}</p>
         <p className="text-sm text-gray-400 mt-1">
           Automated workflows for appointment reminders, payment alerts, and customer engagement
         </p>

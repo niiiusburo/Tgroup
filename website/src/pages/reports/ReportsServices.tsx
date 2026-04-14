@@ -1,4 +1,5 @@
 import { useOutletContext } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { FolderOpen, Package, DollarSign, Tag } from 'lucide-react';
 import { useReportData, formatVND, formatNum } from '@/hooks/useReportData';
 import { KPICard } from '@/components/reports/KPICard';
@@ -13,12 +14,13 @@ interface SvcData {
 }
 
 export function ReportsServices() {
+  const { t } = useTranslation('reports');
   const filters = useOutletContext<{ dateFrom: string; dateTo: string; companyId: string }>();
   const { data, loading, error, refetch } = useReportData<SvcData>('/Reports/services/breakdown', filters);
 
-  if (loading) return <div className="text-center py-12 text-gray-400">Loading services…</div>;
+  if (loading) return <div className="text-center py-12 text-gray-400">{t('loading')}</div>;
   if (error) return <ReportError error={error} onRetry={refetch} />;
-  if (!data) return <div className="text-center py-12 text-gray-400">No data available</div>;
+  if (!data) return <div className="text-center py-12 text-gray-400">{t('noData')}</div>;
 
   const totalProducts = data.categories.reduce((s, c) => s + c.productCount, 0);
   const totalRev = data.revenueByCategory.reduce((s, c) => s + c.revenue, 0);
@@ -26,15 +28,15 @@ export function ReportsServices() {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard label="Categories" value={data.categories.length} format="number" icon={<Tag className="w-4 h-4" />} color="blue" delay={0} />
-        <KPICard label="Active Products" value={totalProducts} format="number" icon={<Package className="w-4 h-4" />} color="emerald" delay={1} />
-        <KPICard label="Service Revenue" value={totalRev} format="currency" icon={<DollarSign className="w-4 h-4" />} color="violet" delay={2} />
-        <KPICard label="Avg Price" value={data.categories.length > 0 ? data.categories.reduce((s, c) => s + c.avgPrice, 0) / data.categories.length : 0} format="currency" icon={<FolderOpen className="w-4 h-4" />} color="orange" delay={3} />
+        <KPICard label={t('metrics.categories')} value={data.categories.length} format="number" icon={<Tag className="w-4 h-4" />} color="blue" delay={0} />
+        <KPICard label={t('metrics.activeProducts')} value={totalProducts} format="number" icon={<Package className="w-4 h-4" />} color="emerald" delay={1} />
+        <KPICard label={t('metrics.serviceRevenue')} value={totalRev} format="currency" icon={<DollarSign className="w-4 h-4" />} color="violet" delay={2} />
+        <KPICard label={t('metrics.avgPrice')} value={data.categories.length > 0 ? data.categories.reduce((s, c) => s + c.avgPrice, 0) / data.categories.length : 0} format="currency" icon={<FolderOpen className="w-4 h-4" />} color="orange" delay={3} />
       </div>
 
       {/* Revenue by category */}
       <SectionCard
-        title="Revenue by Service Category"
+        title={t('charts.revenueByCategory')}
         action={<ExportCSVButton data={data.revenueByCategory.map(c => ({ Category: c.category, Orders: c.orderCount, Revenue: c.revenue }))} filename="service-categories" />}
       >
         <HorizontalBarList
@@ -46,7 +48,7 @@ export function ReportsServices() {
 
       {/* Product catalog overview */}
       <SectionCard
-        title="Product Catalog by Category"
+        title={t('charts.productCatalogByCategory')}
         action={<ExportCSVButton data={data.categories.map(c => ({ Category: c.category, Products: c.productCount, AvgPrice: c.avgPrice }))} filename="product-catalog" />}
       >
         <HorizontalBarList
@@ -58,15 +60,15 @@ export function ReportsServices() {
 
       {/* Popular products */}
       {data.popularProducts.length > 0 && (
-        <SectionCard title="Popular Products">
+        <SectionCard title={t('charts.popularProducts')}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="text-left py-3 px-3 text-gray-500 font-medium">Product</th>
-                  <th className="text-left py-3 px-3 text-gray-500 font-medium">Category</th>
-                  <th className="text-right py-3 px-3 text-gray-500 font-medium">Price</th>
-                  <th className="text-right py-3 px-3 text-gray-500 font-medium">Orders</th>
+                  <th className="text-left py-3 px-3 text-gray-500 font-medium">{t('table.product')}</th>
+                  <th className="text-left py-3 px-3 text-gray-500 font-medium">{t('table.category')}</th>
+                  <th className="text-right py-3 px-3 text-gray-500 font-medium">{t('table.price')}</th>
+                  <th className="text-right py-3 px-3 text-gray-500 font-medium">{t('table.orders')}</th>
                 </tr>
               </thead>
               <tbody>

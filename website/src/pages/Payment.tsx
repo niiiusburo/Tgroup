@@ -84,7 +84,7 @@ export function Payment() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-            <p className="text-sm text-gray-500">Manage payments, wallets, and installment plans</p>
+            <p className="text-sm text-gray-500">{t('payment:subtitle')}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -109,7 +109,7 @@ export function Payment() {
         <div className="bg-white rounded-xl p-4 shadow-card">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
             <Receipt className="w-4 h-4" />
-            <span className="text-xs font-medium">Total Revenue</span>
+            <span className="text-xs font-medium">{t('payment:totalRevenue')}</span>
           </div>
           <p className="text-2xl font-bold text-gray-900">{formatVND(stats.totalRevenue)}</p>
           <p className="text-xs text-gray-400 mt-0.5">{stats.completedPayments} payments</p>
@@ -117,7 +117,7 @@ export function Payment() {
         <div className="bg-white rounded-xl p-4 shadow-card">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
             <Wallet className="w-4 h-4" />
-            <span className="text-xs font-medium">Wallet Balance</span>
+            <span className="text-xs font-medium">{t('payment:walletBalance')}</span>
           </div>
           <p className="text-2xl font-bold text-gray-900">{formatVND(stats.totalWalletBalance)}</p>
           <p className="text-xs text-gray-400 mt-0.5">{stats.activeWallets} active wallets</p>
@@ -125,7 +125,7 @@ export function Payment() {
         <div className="bg-white rounded-xl p-4 shadow-card">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
             <AlertCircle className="w-4 h-4" />
-            <span className="text-xs font-medium">Outstanding</span>
+            <span className="text-xs font-medium">{t('payment:outstanding')}</span>
           </div>
           <p className="text-2xl font-bold text-red-500">{formatVND(stats.totalOutstanding)}</p>
           <p className="text-xs text-gray-400 mt-0.5">{outstandingBalances.length} items</p>
@@ -133,7 +133,7 @@ export function Payment() {
         <div className="bg-white rounded-xl p-4 shadow-card">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
             <CalendarRange className="w-4 h-4" />
-            <span className="text-xs font-medium">Active Plans</span>
+            <span className="text-xs font-medium">{t('payment:activePlans')}</span>
           </div>
           <p className="text-2xl font-bold text-gray-900">{summary.activePlans}</p>
           <p className="text-xs text-gray-400 mt-0.5">{summary.overdueCount} overdue</p>
@@ -189,7 +189,7 @@ export function Payment() {
 
             {/* Outstanding balances */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">Outstanding Balances</h3>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">{t('payment:outstandingBalances')}</h3>
               <OutstandingBalance
                 balances={outstandingBalances}
               />
@@ -206,7 +206,7 @@ export function Payment() {
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search payments..."
+                  placeholder={t('searchPlaceholder')}
                   className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                 />
               </div>
@@ -252,7 +252,7 @@ export function Payment() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search plans..."
+                placeholder={t('searchPlaceholder')}
                 className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
               />
             </div>
@@ -281,7 +281,7 @@ export function Payment() {
               {plans.length === 0 ? (
                 <div className="bg-white rounded-xl shadow-card p-8 text-center">
                   <CalendarRange className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500">No plans found</p>
+                  <p className="text-sm text-gray-500">{t('payment:noPlans')}</p>
                 </div>
               ) : (
                 plans.map((plan) => {
@@ -326,8 +326,8 @@ export function Payment() {
               ) : (
                 <div className="bg-white rounded-xl shadow-card p-12 text-center">
                   <CreditCard className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-                  <p className="text-gray-500">Select a plan to view details</p>
-                  <p className="text-xs text-gray-400 mt-1">Click on any plan from the list</p>
+                  <p className="text-gray-500">{t('payment:selectPlan')}</p>
+                  <p className="text-xs text-gray-400 mt-1">{t('payment:clickPlan')}</p>
                 </div>
               )}
             </div>

@@ -1,4 +1,5 @@
 import { useOutletContext } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { MapPin, Calendar, DollarSign, Users } from 'lucide-react';
 import { useReportData, formatVND, formatNum } from '@/hooks/useReportData';
 import { KPICard } from '@/components/reports/KPICard';
@@ -12,12 +13,13 @@ interface LocData {
 }
 
 export function ReportsLocations() {
+  const { t } = useTranslation('reports');
   const filters = useOutletContext<{ dateFrom: string; dateTo: string; companyId: string }>();
   const { data, loading, error, refetch } = useReportData<LocData>('/Reports/locations/comparison', filters);
 
-  if (loading) return <div className="text-center py-12 text-gray-400">Loading locations…</div>;
+  if (loading) return <div className="text-center py-12 text-gray-400">{t('loading')}</div>;
   if (error) return <ReportError error={error} onRetry={refetch} />;
-  if (!data) return <div className="text-center py-12 text-gray-400">No data available</div>;
+  if (!data) return <div className="text-center py-12 text-gray-400">{t('noData')}</div>;
 
   const totalAppts = data.locations.reduce((s, l) => s + l.appointmentCount, 0);
   const totalRev = data.locations.reduce((s, l) => s + l.revenue, 0);
@@ -26,28 +28,28 @@ export function ReportsLocations() {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard label="Total Branches" value={data.locations.length} format="number" icon={<MapPin className="w-4 h-4" />} color="blue" delay={0} />
-        <KPICard label="Total Appointments" value={totalAppts} format="number" icon={<Calendar className="w-4 h-4" />} color="emerald" delay={1} />
-        <KPICard label="Total Revenue" value={totalRev} format="currency" icon={<DollarSign className="w-4 h-4" />} color="violet" delay={2} />
-        <KPICard label="Total Staff" value={totalEmps} format="number" icon={<Users className="w-4 h-4" />} color="orange" delay={3} />
+        <KPICard label={t('metrics.totalBranches')} value={data.locations.length} format="number" icon={<MapPin className="w-4 h-4" />} color="blue" delay={0} />
+        <KPICard label={t('metrics.totalAppointments')} value={totalAppts} format="number" icon={<Calendar className="w-4 h-4" />} color="emerald" delay={1} />
+        <KPICard label={t('metrics.totalRevenue')} value={totalRev} format="currency" icon={<DollarSign className="w-4 h-4" />} color="violet" delay={2} />
+        <KPICard label={t('metrics.totalStaff')} value={totalEmps} format="number" icon={<Users className="w-4 h-4" />} color="orange" delay={3} />
       </div>
 
       {/* Comparison table */}
       <SectionCard
-        title="Branch Comparison"
+        title={t('charts.branchComparison')}
         action={<ExportCSVButton data={data.locations.map(l => ({ Branch: l.name, Appointments: l.appointmentCount, Completed: l.doneCount, Revenue: l.revenue, Orders: l.orderCount, Staff: l.employeeCount }))} filename="location-comparison" />}
       >
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left py-3 px-3 text-gray-500 font-medium">Branch</th>
-                <th className="text-right py-3 px-3 text-gray-500 font-medium">Appointments</th>
-                <th className="text-right py-3 px-3 text-gray-500 font-medium">Completed</th>
-                <th className="text-right py-3 px-3 text-gray-500 font-medium">Revenue</th>
-                <th className="text-right py-3 px-3 text-gray-500 font-medium">Orders</th>
-                <th className="text-right py-3 px-3 text-gray-500 font-medium">Staff</th>
-                <th className="text-right py-3 px-3 text-gray-500 font-medium">Rev/Appt</th>
+                <th className="text-left py-3 px-3 text-gray-500 font-medium">{t('table.branch')}</th>
+                <th className="text-right py-3 px-3 text-gray-500 font-medium">{t('table.appointments')}</th>
+                <th className="text-right py-3 px-3 text-gray-500 font-medium">{t('table.completed')}</th>
+                <th className="text-right py-3 px-3 text-gray-500 font-medium">{t('table.revenue')}</th>
+                <th className="text-right py-3 px-3 text-gray-500 font-medium">{t('table.orders')}</th>
+                <th className="text-right py-3 px-3 text-gray-500 font-medium">{t('table.staff')}</th>
+                <th className="text-right py-3 px-3 text-gray-500 font-medium">{t('table.revPerAppt')}</th>
               </tr>
             </thead>
             <tbody>
@@ -76,7 +78,7 @@ export function ReportsLocations() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <SectionCard title="Appointments by Branch">
+        <SectionCard title={t('charts.appointmentsByBranch')}>
           <HorizontalBarList
             items={data.locations.filter(l => l.appointmentCount > 0).map(l => ({ label: l.name, value: l.appointmentCount }))}
             formatValue={formatNum}
@@ -84,7 +86,7 @@ export function ReportsLocations() {
           />
         </SectionCard>
 
-        <SectionCard title="Revenue by Branch">
+        <SectionCard title={t('charts.revenueByBranch')}>
           <HorizontalBarList
             items={data.locations.filter(l => l.revenue > 0).map(l => ({ label: l.name, value: l.revenue }))}
             formatValue={formatVND}

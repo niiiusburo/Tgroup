@@ -430,7 +430,7 @@ export function ServiceCatalog() {
                 type="text"
                 value={categorySearch}
                 onChange={(e) => setCategorySearch(e.target.value)}
-                placeholder="Tìm kiếm nhóm dịch vụ"
+                placeholder={t('catalog.searchPlaceholder', { ns: 'website' })}
                 className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -503,7 +503,7 @@ export function ServiceCatalog() {
                 type="text"
                 value={productSearch}
                 onChange={(e) => setProductSearch(e.target.value)}
-                placeholder="Tìm kiếm theo mã hoặc tên"
+                placeholder={t('catalog.searchPlaceholder', { ns: 'website' })}
                 className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>

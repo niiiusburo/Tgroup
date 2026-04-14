@@ -9,35 +9,39 @@
   "recentActivity": "Recent Activity",
   "noAppointments": "No appointments for today",
   "zone1": {
-    "title": "Patient Check-in",
-    "filterAll": "All",
-    "filterWaiting": "Waiting",
-    "filterCheckedIn": "Checked In",
-    "filterInProgress": "In Progress",
-    "filterCompleted": "Completed",
-    "searchPlaceholder": "Search patients...",
-    "noPatients": "No patients have arrived",
-    "noPatientsHint": "Mark \"Arrived\" in today's appointments",
-    "changeStatus": "Change status",
-    "close": "Close"
+    "title": "Daily Schedule",
+    "searchPlaceholder": "Search services...",
+    "noServices": "No services today",
+    "servicesCount": "{count} services"
   },
   "zone2": {
-    "title": "Today's Services",
-    "noServices": "No services today",
-    "todayServices": "TODAY'S SERVICES / ACTIVITY"
+    "title": "Check-in Queue",
+    "searchPlaceholder": "Search patients...",
+    "noPatients": "No patients waiting",
+    "waiting": "Waiting",
+    "patientsCount": "{count} patients"
   },
   "zone3": {
     "title": "Today's Appointments",
     "filterAll": "All",
-    "filterScheduled": "Scheduled",
     "filterArrived": "Arrived",
     "filterCancelled": "Cancelled",
-    "searchPlaceholder": "Search appointments..."
+    "noPatients": "No appointments today",
+    "noPatientsYet": "No patients yet"
   },
   "addAppointment": "Add Appointment",
   "editAppointment": "Edit Appointment",
   "markArrived": "Mark Arrived",
   "markCancelled": "Cancel",
   "quickAdd": "New",
-  "quickAddFull": "Add Appointment"
+  "quickAddFull": "Add Appointment",
+  "today": "Today",
+  "stats": {
+    "totalAppointments": "Total Appointments",
+    "arrived": "Arrived",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "pending": "Pending"
+  },
+  "subtitle": "Dashboard overview"
 }

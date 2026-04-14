@@ -734,7 +734,7 @@ export function Customers() {
     );
 
     if (profileLoading) {
-      return <div className="flex items-center justify-center h-64"><span className="text-gray-500">Loading profile...</span></div>;
+      return <div className="flex items-center justify-center h-64"><span className="text-gray-500">{t('customers.loadingProfile') || 'Loading...'}</span></div>;
     }
 
     return (
@@ -843,7 +843,7 @@ export function Customers() {
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div className="w-full sm:max-w-xs">
-          <SearchBar value={searchTerm} onChange={setSearchTerm} placeholder="Search by name, phone, or email..." />
+          <SearchBar value={searchTerm} onChange={setSearchTerm} placeholder={t('searchPlaceholder')} />
         </div>
         <div className="flex items-center gap-1">
           {STATUS_FILTER_OPTIONS.map((opt) => (
@@ -866,7 +866,7 @@ export function Customers() {
           <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
             <Search className="w-6 h-6 text-amber-600" />
           </div>
-          <h3 className="text-sm font-medium text-amber-900 mb-1">Tìm kiếm để xem khách hàng</h3>
+          <h3 className="text-sm font-medium text-amber-900 mb-1">{t('customers.searchToView')}</h3>
           <p className="text-xs text-amber-700">
             Nhập ít nhất {minSearchLength} ký tự để tìm kiếm khách hàng
           </p>
@@ -881,7 +881,7 @@ export function Customers() {
           keyExtractor={(row) => row.id}
           pageSize={10}
           onRowClick={(row) => navigate(`/customers/${row.id}`)}
-          emptyMessage="No customers found"
+          emptyMessage={t('table.noData', { ns: 'common' })}
         />
       )}
 
@@ -899,7 +899,7 @@ export function Customers() {
             </p>
             {linkedCounts && (linkedCounts.appointments > 0 || linkedCounts.saleorders > 0 || linkedCounts.dotkhams > 0) && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-800">
-                <p className="font-medium mb-1">Dữ liệu liên quan:</p>
+                <p className="font-medium mb-1">{t('customers.relatedData')}</p>
                 <ul className="list-disc list-inside space-y-0.5">
                   {linkedCounts.appointments > 0 && <li>{linkedCounts.appointments} lịch hẹn</li>}
                   {linkedCounts.saleorders > 0 && <li>{linkedCounts.saleorders} hóa đơn</li>}

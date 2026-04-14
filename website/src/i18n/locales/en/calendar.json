@@ -28,7 +28,9 @@
     "notes": "Notes",
     "color": "Color",
     "edit": "Edit",
-    "delete": "Delete"
+    "close": "Close",
+    "serviceType": "Service Type",
+    "tooth": "Tooth"
   },
   "weekDays": {
     "mon": "Mon",
@@ -37,6 +39,46 @@
     "thu": "Thu",
     "fri": "Fri",
     "sat": "Sat",
-    "sun": "Sun"
-  }
+    "sun": "Sun",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday"
+  },
+  "status": {
+    "scheduled": "Scheduled",
+    "confirmed": "Confirmed",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "noShow": "No Show",
+    "arrived": "Arrived",
+    "pending": "Pending"
+  },
+  "labels": {
+    "appointments": "appointments",
+    "edit": "Edit",
+    "today": "Today"
+  },
+  "empty": "No appointments scheduled",
+  "card": {
+    "tooth": "Tooth",
+    "doctor": "Doctor",
+    "phone": "Phone",
+    "service": "Service",
+    "time": "Time",
+    "edit": "Edit"
+  },
+  "subtitle": "Appointment scheduling and management",
+  "searchPlaceholder": "Search appointments...",
+  "filter": "Filter",
+  "all": "All",
+  "scheduled": "Scheduled",
+  "confirmed": "Confirmed",
+  "inProgress": "In Progress",
+  "completed": "Completed",
+  "cancelled": "Cancelled"
 }

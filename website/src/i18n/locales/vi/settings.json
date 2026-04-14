@@ -7,7 +7,13 @@
   "roleConfig": "Cấu hình chức vụ",
   "serviceCatalog": "Cài đặt danh mục dịch vụ",
   "customerSources": "Nguồn khách hàng",
-  "feedbackAdmin": "Quản lý phản hồi",
+  "feedbackAdmin": {
+    "title": "Quản lý phản hồi",
+    "review": "Xem xét",
+    "status": "Trạng thái",
+    "submittedAt": "Thời gian gửi",
+    "noFeedback": "Không có phản hồi"
+  },
   "timezone": "Múi giờ",
   "general": "Chung",
   "systemPreferencesContent": {
@@ -67,15 +73,9 @@
     "sourceName": "Tên nguồn",
     "description": "Mô tả"
   },
-  "feedbackAdmin": {
-    "title": "Quản lý phản hồi",
-    "review": "Xem xét",
-    "status": "Trạng thái",
-    "submittedAt": "Thời gian gửi",
-    "noFeedback": "Không có phản hồi"
-  },
   "timezoneSelector": {
     "label": "Chọn múi giờ",
     "searchPlaceholder": "Tìm múi giờ..."
-  }
+  },
+  "subtitle": "Cấu hình hệ thống"
 }

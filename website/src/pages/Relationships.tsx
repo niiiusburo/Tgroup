@@ -57,7 +57,7 @@ export function Relationships() {
       {/* Stats row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl p-5 shadow-card">
-          <div className="text-xs font-medium text-gray-500 mb-1">Roles</div>
+          <div className="text-xs font-medium text-gray-500 mb-1">{t('relationships:roles')}</div>
           <div className="text-2xl font-bold text-gray-900">{roles.length}</div>
           <div className="flex gap-1.5 mt-2">
             {roles.map((r) => (
@@ -71,7 +71,7 @@ export function Relationships() {
           </div>
         </div>
         <div className="bg-white rounded-xl p-5 shadow-card">
-          <div className="text-xs font-medium text-gray-500 mb-1">Entities</div>
+          <div className="text-xs font-medium text-gray-500 mb-1">{t('relationships:entities')}</div>
           <div className="text-2xl font-bold text-gray-900">{entityNodes.length}</div>
           <div className="text-xs text-gray-400 mt-2">
             {entityNodes.filter((n) => n.type === 'core').length} core ·{' '}
@@ -80,7 +80,7 @@ export function Relationships() {
           </div>
         </div>
         <div className="bg-white rounded-xl p-5 shadow-card">
-          <div className="text-xs font-medium text-gray-500 mb-1">Connections</div>
+          <div className="text-xs font-medium text-gray-500 mb-1">{t('relationships:connections')}</div>
           <div className="text-2xl font-bold text-gray-900">{entityRelations.length}</div>
           <div className="text-xs text-gray-400 mt-2">
             Linking entities across modules

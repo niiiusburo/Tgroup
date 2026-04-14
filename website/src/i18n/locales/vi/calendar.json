@@ -1,5 +1,5 @@
 {
-  "title": "Lịch",
+  "title": "Lịch hẹn",
   "dayView": "Ngày",
   "weekView": "Tuần",
   "monthView": "Tháng",
@@ -19,16 +19,18 @@
     "title": "Chi tiết lịch hẹn",
     "patient": "Bệnh nhân",
     "doctor": "Bác sĩ",
-    "date": "Ngày",
-    "time": "Giờ",
+    "date": "Ngày khám",
+    "time": "Giờ khám",
     "duration": "Thời lượng",
     "status": "Trạng thái",
     "type": "Loại",
     "location": "Chi nhánh",
     "notes": "Ghi chú",
     "color": "Màu sắc",
-    "edit": "Sửa",
-    "delete": "Xóa"
+    "edit": "Chỉnh sửa",
+    "close": "Đóng",
+    "serviceType": "Loại dịch vụ",
+    "tooth": "Răng"
   },
   "weekDays": {
     "mon": "T2",
@@ -37,6 +39,46 @@
     "thu": "T5",
     "fri": "T6",
     "sat": "T7",
-    "sun": "CN"
-  }
+    "sun": "CN",
+    "monday": "Thứ Hai",
+    "tuesday": "Thứ Ba",
+    "wednesday": "Thứ Tư",
+    "thursday": "Thứ Năm",
+    "friday": "Thứ Sáu",
+    "saturday": "Thứ Bảy",
+    "sunday": "Chủ Nhật"
+  },
+  "status": {
+    "scheduled": "Đang hẹn",
+    "confirmed": "Đã xác nhận",
+    "inProgress": "Đang khám",
+    "completed": "Hoàn thành",
+    "cancelled": "Hủy hẹn",
+    "noShow": "Quá hẹn",
+    "arrived": "Đã đến",
+    "pending": "Chờ xác nhận"
+  },
+  "labels": {
+    "appointments": "lịch hẹn",
+    "edit": "Sửa",
+    "today": "Hôm nay"
+  },
+  "empty": "Không có lịch hẹn",
+  "card": {
+    "tooth": "Răng",
+    "doctor": "Bác sĩ",
+    "phone": "Điện thoại",
+    "service": "Dịch vụ",
+    "time": "Giờ",
+    "edit": "Sửa"
+  },
+  "subtitle": "Quản lý lịch hẹn khám bệnh",
+  "searchPlaceholder": "Tìm kiếm lịch hẹn...",
+  "filter": "Lọc",
+  "all": "Tất cả",
+  "scheduled": "Đang hẹn",
+  "confirmed": "Đã xác nhận",
+  "inProgress": "Đang khám",
+  "completed": "Hoàn thành",
+  "cancelled": "Hủy hẹn"
 }

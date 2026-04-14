@@ -95,7 +95,7 @@ export function EditPaymentModal({
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
           <div className="relative flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-bold text-white">{t('payment.editPayment')}</h2>
+              <h2 className="text-xl font-bold text-white">{t('editPayment')}</h2>
               <p className="text-sm text-orange-100 mt-1 flex items-center gap-2">
                 <CreditCard className="w-3.5 h-3.5" />
                 {payment.referenceCode ? `Ref: ${payment.referenceCode}` : payment.receiptNumber ? `Receipt: ${payment.receiptNumber}` : `ID: ${payment.id.slice(0, 8)}…`}
@@ -133,7 +133,7 @@ export function EditPaymentModal({
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <DollarSign className="w-3.5 h-3.5" />
-              {t('payment.paymentAmount')}
+              {t('paymentAmount')}
             </label>
             <div className="relative">
               <input
@@ -159,7 +159,7 @@ export function EditPaymentModal({
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <CreditCard className="w-3.5 h-3.5" />
-              {t('payment.paymentMethod')}
+              {t('paymentMethod')}
             </label>
             <div className="grid grid-cols-2 gap-2">
               {METHOD_OPTIONS.map((opt) => (
@@ -183,7 +183,7 @@ export function EditPaymentModal({
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Calendar className="w-3.5 h-3.5" />
-              {t('payment.paymentDate')}
+              {t('paymentDate')}
             </label>
             <input
               type="date"
@@ -196,7 +196,7 @@ export function EditPaymentModal({
           {/* Reference Code */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              {t('payment.referenceOptional')}
+              {t('referenceOptional')}
             </label>
             <input
               type="text"
@@ -211,13 +211,13 @@ export function EditPaymentModal({
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
-              {t('payment.noteOptional')}
+              {t('noteOptional')}
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              placeholder="{t('payment.noteOptional')} thêm..."
+              placeholder="{t('noteOptional')} thêm..."
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
             />
           </div>
@@ -231,7 +231,7 @@ export function EditPaymentModal({
             disabled={isSaving}
             className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50"
           >
-            {t('payment.cancel')}
+            {t('cancel')}
           </button>
           <button
             type="button"
@@ -242,12 +242,12 @@ export function EditPaymentModal({
             {isSaving ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                {t('payment.saving')}
+                {t('saving')}
               </>
             ) : (
               <>
                 <Check className="w-4 h-4" />
-                {t('payment.saveChanges')}
+                {t('saveChanges')}
               </>
             )}
           </button>
