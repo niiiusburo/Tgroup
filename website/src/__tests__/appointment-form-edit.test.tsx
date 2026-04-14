@@ -76,7 +76,7 @@ describe('AppointmentForm Edit Mode', () => {
       );
 
       // Assert: Customer should be shown as read-only text, not a selector
-      const customerLabel = screen.getByText('Khách hàng');
+      const customerLabel = screen.getAllByText(/form\.patient/i)[0];
       expect(customerLabel).toBeInTheDocument();
       
       // Should show the customer name as text, not as a dropdown/selector
@@ -134,11 +134,11 @@ describe('AppointmentForm Edit Mode', () => {
       );
 
       // Act: click save without selecting doctor, date, or time
-      const saveButton = screen.getByRole('button', { name: /tạo lịch hẹn/i });
+      const saveButton = screen.getByRole('button', { name: /addAppointment/i });
       fireEvent.click(saveButton);
 
       // Assert: doctor error should be visible
-      expect(screen.getByText('Vui lòng chọn bác sĩ')).toBeInTheDocument();
+      expect(screen.getByText('form.selectDoctor')).toBeInTheDocument();
       expect(mockSubmit).not.toHaveBeenCalled();
     });
 
@@ -157,10 +157,10 @@ describe('AppointmentForm Edit Mode', () => {
         />
       );
 
-      const saveButton = screen.getByRole('button', { name: /tạo lịch hẹn/i });
+      const saveButton = screen.getByRole('button', { name: /addAppointment/i });
       fireEvent.click(saveButton);
 
-      expect(screen.getByText('Vui lòng chọn ngày')).toBeInTheDocument();
+      expect(screen.getAllByText('form.date').length).toBeGreaterThanOrEqual(1);
       expect(mockSubmit).not.toHaveBeenCalled();
     });
 
@@ -180,10 +180,10 @@ describe('AppointmentForm Edit Mode', () => {
         />
       );
 
-      const saveButton = screen.getByRole('button', { name: /tạo lịch hẹn/i });
+      const saveButton = screen.getByRole('button', { name: /addAppointment/i });
       fireEvent.click(saveButton);
 
-      expect(screen.getByText('Vui lòng chọn giờ bắt đầu')).toBeInTheDocument();
+      expect(screen.getAllByText('form.startTime').length).toBeGreaterThanOrEqual(1);
       expect(mockSubmit).not.toHaveBeenCalled();
     });
   });

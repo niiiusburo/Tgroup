@@ -356,7 +356,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                   <User className="w-3.5 h-3.5" />
-                  Khách hàng
+                  {t('form.patient')}
                 </label>
                 {isEdit ? (
                   <div className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border bg-gray-50 border-gray-200 text-gray-700">
@@ -386,7 +386,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                   <Stethoscope className="w-3.5 h-3.5" />
-                  Bác sĩ
+                  {t('form.doctor')}
                 </label>
                 <DoctorSelector employees={employees} selectedId={doctorId} onChange={setDoctorId} filterRoles={['doctor']} />
                 {errors.doctor && <p className="text-xs text-red-500 mt-1">{errors.doctor}</p>}
@@ -396,7 +396,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                   <MapPin className="w-3.5 h-3.5" />
-                  Chi nhánh
+                  {t('form.location')}
                 </label>
                 <LocationSelector locations={locations} selectedId={locationId} onChange={setLocationId} excludeAll />
                 {errors.location && <p className="text-xs text-red-500 mt-1">{errors.location}</p>}
@@ -424,7 +424,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                     <Clock className="w-3.5 h-3.5" />
-                    Thời gian dự kiến
+                    {t('form.endTime')}
                   </label>
                   <div className="flex items-center gap-2">
                     <input
@@ -478,13 +478,13 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                   <FileText className="w-3.5 h-3.5" />
-                  Ghi chú
+                  {t('form.notes')}
                 </label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
-                  placeholder="Ghi chú thêm..."
+                  placeholder={t('form.notes')}
                   className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
                 />
               </div>
@@ -493,7 +493,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                   <User className="w-3.5 h-3.5" />
-                  Loại khách
+                  {t('form.selectStatus')}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -562,7 +562,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
               {isEdit && (
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                    Trạng thái
+                    {t('form.status')}
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     {STATUS_OPTIONS.map((s) => (
