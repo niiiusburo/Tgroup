@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScanFace, CreditCard, X, Check, Loader2 } from 'lucide-react';
 import type { CustomerFormData } from '@/types/customer';
 import { FaceCaptureModal } from '@/components/shared/FaceCaptureModal';
@@ -32,6 +33,7 @@ export function CustomerCameraWidget({
   onFaceIdResult,
   disabled = false,
 }: CustomerCameraWidgetProps) {
+  const { t } = useTranslation('customers');
   const [mode, setMode] = useState<WidgetMode>('idle');
   const [captureState, setCaptureState] = useState<CaptureState>('preview');
   const [showCaptureModal, setShowCaptureModal] = useState(false);
@@ -177,7 +179,7 @@ export function CustomerCameraWidget({
 
       <FaceCaptureModal
         isOpen={showCaptureModal}
-        title="Nhận diện khuôn mặt"
+        title={t('profile.customerProfile', { ns: 'customers' })}
         onCapture={handleCapture}
         onCancel={() => {
           setShowCaptureModal(false);

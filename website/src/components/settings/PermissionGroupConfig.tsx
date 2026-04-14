@@ -11,6 +11,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Shield, ChevronRight, Check, X, Plus, MapPin,
   Users, Globe, Trash2,
@@ -25,6 +26,7 @@ const GROUP_COLORS = ['#EF4444', '#F59E0B', '#10B981', '#0EA5E9', '#8B5CF6', '#E
 // ─── Main Component ─────────────────────────────────────
 
 export function PermissionGroupConfig() {
+  const { t } = useTranslation('settings');
   const {
     groups,
     locations,
@@ -142,7 +144,7 @@ export function PermissionGroupConfig() {
             <div className="p-4 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 space-y-3">
               <input
                 type="text"
-                placeholder="Group name..."
+                placeholder={t('permissionGroup.groupName', { ns: 'settings' })}
                 value={newGroupName}
                 onChange={(e) => setNewGroupName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
@@ -150,7 +152,7 @@ export function PermissionGroupConfig() {
               />
               <input
                 type="text"
-                placeholder="Description..."
+                placeholder={t('permissionGroup.description', { ns: 'settings' })}
                 value={newGroupDesc}
                 onChange={(e) => setNewGroupDesc(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"

@@ -7,6 +7,7 @@
  */
 
 import { Building2, UserRound, Headphones, Link2, Users } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useCustomerSources } from '@/hooks/useSettings';
 import type { Employee } from '@/data/mockEmployees';
@@ -60,6 +61,7 @@ export function CustomerAssignments({
   sourceName,
   referralUserId,
 }: CustomerAssignmentsProps) {
+  const { t } = useTranslation('customers');
   const { allEmployees } = useEmployees();
   const { allSources: sources } = useCustomerSources();
 
@@ -85,17 +87,17 @@ export function CustomerAssignments({
       <div className="flex-1 grid grid-cols-2 lg:grid-cols-5 gap-3">
         <AssignmentField
           icon={Building2}
-          label="CHI NHÁNH"
+          label={t('columns.location', { ns: 'customers' })}
           value={companyName}
         />
         <AssignmentField
           icon={UserRound}
-          label="NHÂN VIÊN SALE"
+          label={t('form.assignTo', { ns: 'customers' })}
           value={resolveName(salestaffId, employeeList)}
         />
         <AssignmentField
           icon={Headphones}
-          label="CSKH"
+          label={t('profile.assignments', { ns: 'customers' })}
           value={cskhName || resolveName(cskhId, employeeList)}
         />
         <AssignmentField

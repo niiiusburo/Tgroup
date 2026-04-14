@@ -5,6 +5,7 @@ import {
   TrendingUp,
   Activity,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { LocationMetrics } from '@/types/location';
 
 /**
@@ -38,6 +39,7 @@ function MetricCard({ label, value, icon, color, subtitle }: MetricCardProps) {
 }
 
 export function LocationDashboard({ metrics }: LocationDashboardProps) {
+  const { t } = useTranslation('locations');
   return (
     <div className="space-y-4">
       <h3 className="text-sm font-semibold text-gray-700">Branch Metrics</h3>
@@ -45,18 +47,18 @@ export function LocationDashboard({ metrics }: LocationDashboardProps) {
       {/* Metric cards grid */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <MetricCard
-          label="Today's Appointments"
+          label={t('detail.todayAppointments', { ns: 'locations' })}
           value={metrics.appointmentsToday}
           icon={<CalendarCheck className="w-4 h-4 text-blue-600" />}
           color="bg-blue-50"
           subtitle={`${metrics.appointmentsThisWeek} this week`}
         />
         <MetricCard
-          label="New Customers"
+          label={t('columns.name', { ns: 'customers' })}
           value={metrics.newCustomersThisMonth}
           icon={<Users className="w-4 h-4 text-green-600" />}
           color="bg-green-50"
-          subtitle="This month"
+          subtitle={t('time.thisMonth', { ns: 'common' })}
         />
         <MetricCard
           label="Avg Rating"

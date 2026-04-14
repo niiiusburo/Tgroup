@@ -5,6 +5,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Users, Plus, ToggleLeft, ToggleRight, Trash2, Globe, MapPin, UserPlus, X } from 'lucide-react';
 import { useCustomerSources } from '@/hooks/useSettings';
 import type { CustomerSource } from '@/types/settings';
@@ -29,6 +30,7 @@ const TYPE_FILTERS: { label: string; value: string }[] = [
 ];
 
 export function CustomerSourcesConfig() {
+  const { t } = useTranslation('settings');
   const {
     sources,
     stats,
@@ -116,7 +118,7 @@ export function CustomerSourcesConfig() {
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="Source name"
+              placeholder={t('customerSourcesConfig.sourceName', { ns: 'settings' })}
               className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
             />
             <select
@@ -132,7 +134,7 @@ export function CustomerSourcesConfig() {
               type="text"
               value={newDesc}
               onChange={(e) => setNewDesc(e.target.value)}
-              placeholder="Description"
+              placeholder={t('customerSourcesConfig.description', { ns: 'settings' })}
               className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>

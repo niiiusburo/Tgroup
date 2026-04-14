@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Calendar, Image as ImageIcon, X, ChevronLeft, ChevronRight, ExternalLink, Plus, Loader2 } from 'lucide-react';
 import type { ExternalCheckupsResponse } from '@/lib/api';
 import { createExternalCheckup } from '@/lib/api';
@@ -279,6 +280,7 @@ interface UploadFormProps {
 }
 
 function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, saving }: UploadFormProps) {
+  const { t } = useTranslation('customers');
   const [title, setTitle] = useState('');
   const [doctor, setDoctor] = useState('');
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
@@ -320,7 +322,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder="VD: Tl, Niềng răng..."
+            placeholder={t('form.fullName', { ns: 'customers' })}
           />
         </div>
         <div>
@@ -331,7 +333,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
             value={doctor}
             onChange={(e) => setDoctor(e.target.value)}
             className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder="VD: Bs08"
+            placeholder={t('form.fullName', { ns: 'customers' })}
           />
         </div>
         <div>
@@ -362,7 +364,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
-          placeholder="Ghi chú về buổi khám"
+          placeholder={t('form.notes', { ns: 'appointments' })}
         />
       </div>
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MessageSquare, Eye, Loader2, Send, X, Paperclip, Trash2 } from 'lucide-react';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusDropdown, type StatusOption } from '@/components/shared/StatusDropdown';
@@ -95,6 +96,7 @@ function AttachmentThumbnails({ attachments }: { attachments?: { url: string; or
 }
 
 export function FeedbackAdminContent() {
+  const { t } = useTranslation('settings');
   const [threads, setThreads] = useState<AdminFeedbackThread[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -356,7 +358,7 @@ export function FeedbackAdminContent() {
         data={threads}
         keyExtractor={(row) => row.id}
         pageSize={10}
-        emptyMessage="No feedback submissions yet."
+        emptyMessage={t('feedbackAdmin.noFeedback', { ns: 'settings' })}
         selection={{
           selectedIds,
           onSelect: handleSelect,
@@ -470,7 +472,7 @@ export function FeedbackAdminContent() {
                   value={replyInput}
                   onChange={(e) => setReplyInput(e.target.value)}
                   onKeyDown={handleReplyKeyDown}
-                  placeholder="Type a reply…"
+                  placeholder={t('enterNotePlaceholder', { ns: 'payment' })}
                   rows={2}
                   className="flex-1 resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                 />
