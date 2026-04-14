@@ -54,6 +54,24 @@ router.get('/', async (req, res) => {
       paramIdx++;
     }
 
+    if (date_from) {
+      conditions.push(`so.datecreated >= $${paramIdx}`);
+      params.push(date_from);
+      paramIdx++;
+    }
+
+    if (date_to) {
+      conditions.push(`so.datecreated <= $${paramIdx}`);
+      params.push(date_to);
+      paramIdx++;
+    }
+
+    if (company_id) {
+      conditions.push(`so.companyid = $${paramIdx}`);
+      params.push(company_id);
+      paramIdx++;
+    }
+
     const whereClause = conditions.join(' AND ');
 
     const items = await query(

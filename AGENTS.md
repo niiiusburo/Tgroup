@@ -53,6 +53,62 @@ At session start, read project context from local Obsidian notes:
 - `./notes/🚀 Deployment Guide.md` — VPS deploy workflow, Docker setup
 - `./notes/💾 Database Schema.md` — Database tables and relationships
 
+## Global Behavioral Rules (MANDATORY — from ~/.claude/CLAUDE.md)
+
+### 1. Workflow — Parallel Teams (NON-NEGOTIABLE)
+Every non-trivial task MUST follow this exact workflow:
+1. **Plan first** — Break into 2-5 independent subtasks
+2. **Spawn parallel agents** — Launch all simultaneously
+3. **Synthesize** — Collect outputs, resolve conflicts, integrate
+4. **Verify** — Run tests / checks before reporting done
+
+**Orchestrator Rule:** The main session is ORCHESTRATOR ONLY for non-trivial tasks. Never do implementation work directly. Spawn agents for reading, editing, exploring, and testing. Main session plans, delegates, and verifies only.
+
+**Exception:** Single file, <10 lines → may skip teams.
+
+### 2. Goal Discipline
+Stay focused on the original request. Do NOT pivot to tangential work without explicit user approval. Mention side issues briefly at the end — do not act on them.
+
+### 3. Evidence Before Claims
+- Prefer evidence over assumptions
+- Verify outcomes before declaring success
+- Consult official docs before implementing SDKs/frameworks/APIs
+- **Database:** Verify schema first — never assume (run `\d tablename` if unsure)
+- **Ports:** Verify with `lsof` before assuming
+
+### 4. Tool Discipline
+- Read multiple files in parallel when possible
+- Use background execution for long builds/tests
+
+### 5. Review Separation
+- Keep authoring and review as separate passes
+- Never self-approve in the same active context
+- Run verification AFTER code changes
+
+### 6. Safety
+Never perform aggressive cleanup or deletion of directories, services, or files without explicit user confirmation. List what will be deleted and wait for approval.
+
+### 7. Verification (MANDATORY)
+After making code changes, you MUST verify:
+- TypeScript compiles without errors
+- The affected feature loads correctly (browser test or curl)
+- No console errors in the browser
+- Version is bumped in `website/package.json`
+
+### 8. Coding Standards
+- **Immutability:** Always create new objects, never mutate existing ones
+- **File organization:** Many small files > few large ones. 200-400 lines typical, 800 max
+- **Error handling:** Handle errors explicitly at every level. Never silently swallow errors
+- **Functions small** (<50 lines), **files focused** (<800 lines)
+- No deep nesting (>4 levels)
+
+### 9. Security Checks (Before ANY commit)
+- No hardcoded secrets (API keys, passwords, tokens)
+- All user inputs validated
+- SQL injection prevention (parameterized queries)
+- XSS prevention (sanitized HTML)
+- Error messages don't leak sensitive data
+
 <!-- code-review-graph MCP tools -->
 ## MCP Tools: code-review-graph
 

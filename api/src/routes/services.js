@@ -1,9 +1,51 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════
+ * /api/Services  —  LEGACY / DEAD ROUTE
+ * ═══════════════════════════════════════════════════════════════════
+ *
+ * STATUS: This route is NOT used by the frontend. It is dead code.
+ *
+ * WHAT IT QUERIES:  public.services  (a table that does NOT exist
+ *   in the current database schema — the DB_SCHEMA_AUDIT_REPORT flags
+ *   this as ISSUE 16 / CRITICAL). The code assumes columns like
+ *   customer_id, doctor_id, service_type, unit_price, etc., but the
+ *   actual "services" table (if it existed) has columns: name,
+ *   description, price, duration, category, status.
+ *   Calling any endpoint here will result in a SQL error.
+ *
+ * WHAT THE FRONTEND ACTUALLY USES INSTEAD:
+ *
+ *   1. SERVICE CATALOG (managing available dental procedures + prices):
+ *      → Frontend: ServiceCatalog.tsx
+ *      → API calls: fetchProducts / createProduct / updateProduct
+ *      → Backend route: /api/Products (routes/products.js)
+ *      → DB table: public.products
+ *
+ *   2. SERVICE RECORDS / SALE ORDERS (treatments assigned to patients):
+ *      → Frontend: useServices.ts hook → mapSaleOrderToServiceRecord()
+ *      → API calls: fetchSaleOrders / createSaleOrder / updateSaleOrder
+ *      → Backend route: /api/SaleOrders (routes/saleOrders.js)
+ *      → DB table: public.sale_orders (Odoo-backed)
+ *
+ *   3. The frontend lib/api.ts still exports fetchServices() and
+ *      createService() wrappers for this route, but NOTHING imports
+ *      or calls them — they are dead code too.
+ *
+ * RECOMMENDATION: Either delete this file (and the dead api.ts
+ *   wrappers) or repurpose it. If a local public.services table is
+ *   ever created (e.g., to decouple from Odoo sale_orders), this
+ *   route would be the place to wire it up.
+ * ═══════════════════════════════════════════════════════════════════
+ */
+
 const express = require('express');
 const router = express.Router();
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 
 // GET /api/Services - List services (optionally filtered by customerId)
+// NOTE: Queries public.services which does NOT match current DB schema.
+// See block comment above. The frontend uses /api/SaleOrders instead.
 router.get('/', requirePermission('services.view'), async (req, res) => {
   try {
     const { customerId, limit = 100, offset = 0 } = req.query;
@@ -67,7 +109,9 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
   }
 });
 
-// POST /api/Services - Create a new service
+// POST /api/Services - Create a new service record
+// NOTE: Also dead code — frontend uses POST /api/SaleOrders instead.
+// The INSERT targets public.services which does not exist in current schema.
 router.post('/', requirePermission('services.edit'), async (req, res) => {
   try {
     const { customer_id, service_type, unit_price, quantity, discount, doctor_id, notes, status } = req.body;
