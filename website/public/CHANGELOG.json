@@ -1,5 +1,22 @@
 [
   {
+    "version": "0.12.1",
+    "date": "2026-04-14",
+    "commit": "pending",
+    "highlights": "Fix: Tạm ứng (advance/deposit) no longer double-counts regular invoice payments",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Fixed customer Tạm ứng balance incorrectly increasing when a regular payment invoice was created",
+          "Root cause: /api/CustomerBalance SQL counted NULL-deposit_type cash/bank payments without excluding those with allocations",
+          "Fix: added NOT EXISTS payment_allocations guard to total_deposited clause in api/src/routes/customerBalance.js",
+          "Verified: affected customer total_deposited dropped from 25,370,000đ (inflated) to 0đ (correct)"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.10.3",
     "date": "2026-04-13",
     "commit": "pending",

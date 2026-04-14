@@ -17,12 +17,15 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Customer not found' });
     }
 
-    // Calculate deposit balance from payments
+    // Calculate deposit balance from payments.
+    // Bug fix (2026-04-14): exclude payments that have allocations so regular
+    // invoice payments are not double-counted as deposits (Tạm ứng).
     const depositResult = await query(`
       SELECT
         COALESCE(SUM(CASE WHEN deposit_type = 'deposit' OR (
           deposit_type IS NULL AND method IN ('cash', 'bank_transfer')
           AND service_id IS NULL AND (deposit_used IS NULL OR deposit_used = 0) AND amount > 0
+          AND NOT EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = payments.id)
         ) THEN amount ELSE 0 END), 0) AS total_deposited,
         COALESCE(SUM(CASE WHEN deposit_type = 'usage' OR method = 'deposit' OR (deposit_used > 0) THEN
           COALESCE(deposit_used, 0) + CASE WHEN method = 'deposit' THEN amount ELSE 0 END
