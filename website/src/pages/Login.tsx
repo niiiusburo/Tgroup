@@ -7,6 +7,7 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const EMAIL_STORAGE_KEY = 'tgclinic_saved_email';
 
@@ -35,6 +36,7 @@ function clearSavedEmail(): void {
 }
 
 export function Login() {
+  const { t } = useTranslation('auth');
   const { login } = useAuth();
   const navigate = useNavigate();
   const mountedRef = useRef(true);
@@ -68,9 +70,9 @@ export function Login() {
     } catch (err: unknown) {
       if (!mountedRef.current) return;
       if (err instanceof Error) {
-        setError(err.message.includes('401') ? 'Invalid email or password.' : err.message);
+        setError(err.message.includes('401') ? t('errors.invalidCredentials') : err.message);
       } else {
-        setError('Login failed. Please try again.');
+        setError(t('errors.invalidCredentials'));
       }
       clearSavedEmail();
     } finally {
@@ -98,9 +100,9 @@ export function Login() {
             </div>
             <div className="text-center">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                TG Clinic
+                {t('title')}
               </h1>
-              <p className="text-sm text-gray-500 mt-1">Sign in to your account</p>
+              <p className="text-sm text-gray-500 mt-1">{t('signIn')}</p>
             </div>
           </div>
 
@@ -115,7 +117,7 @@ export function Login() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                Email
+                {t('email')}
               </label>
               <input
                 id="email"
@@ -131,7 +133,7 @@ export function Login() {
 
             <div className="flex flex-col gap-1.5">
               <label htmlFor="password" className="text-sm font-medium text-gray-700">
-                Password
+                {t('password')}
               </label>
               <input
                 id="password"
@@ -153,10 +155,10 @@ export function Login() {
               {isLoading ? (
                 <>
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Signing in…
+                  {t('signIn')}…
                 </>
               ) : (
-                'Sign In'
+                t('signIn')
               )}
             </button>
           </form>

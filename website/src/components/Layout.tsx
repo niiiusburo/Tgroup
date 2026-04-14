@@ -81,6 +81,7 @@ interface SidebarItemProps {
 }
 
 function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
+  const { t } = useTranslation('nav');
   const Icon = ICON_MAP[item.icon];
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -108,7 +109,7 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
       <NavLink
         to={item.path}
         onClick={onClick}
-        title={!expanded ? item.label : undefined}
+        title={!expanded ? t(item.label) : undefined}
         className={`
           relative h-11 flex items-center rounded-xl
           nav-smooth gap-3
@@ -151,7 +152,7 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        title={!expanded ? item.label : undefined}
+        title={!expanded ? t(item.label) : undefined}
         className={`
           relative h-11 flex items-center rounded-xl
           nav-smooth gap-3
@@ -321,7 +322,7 @@ export function Layout() {
               <span className="text-white font-bold text-sm">TD</span>
             </div>
             {(mobileMenuOpen || sidebarExpanded) && (
-              <span className="text-white font-semibold text-lg whitespace-nowrap">TG Clinic</span>
+              <span className="text-white font-semibold text-lg whitespace-nowrap">{t('app.name', { ns: 'common' })}</span>
             )}
           </div>
           {/* Mobile close button */}
@@ -359,12 +360,12 @@ export function Layout() {
                   <span className="text-xs text-primary font-semibold">{initials}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{user?.name ?? 'User'}</p>
+                  <p className="text-sm font-medium text-white truncate">{user?.name ?? ''}</p>
                   <p className="text-xs text-gray-400 truncate">{permissions?.groupName ?? ''}</p>
                 </div>
                 <button
                   onClick={handleLogout}
-                  title="Sign out"
+                  title={t('logout')}
                   className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-400 hover:bg-white/10 transition-colors flex-shrink-0"
                 >
                   <LogOut className="w-4 h-4" />
@@ -382,7 +383,7 @@ export function Layout() {
               {/* Avatar with logout on click-hold — keep simple: avatar opens expand */}
               <button
                 onClick={handleLogout}
-                title="Sign out"
+                title={t('logout')}
                 className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center hover:bg-red-500/20 transition-colors"
               >
                 <span className="text-xs text-primary font-semibold">{initials}</span>

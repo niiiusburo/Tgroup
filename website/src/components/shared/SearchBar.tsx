@@ -1,5 +1,6 @@
 import { Search, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * SearchBar - Debounced search input with icon
@@ -16,9 +17,10 @@ interface SearchBarProps {
 export function SearchBar({
   value,
   onChange,
-  placeholder = 'Search...',
+  placeholder = '',
   debounceMs = 300,
 }: SearchBarProps) {
+  const { t } = useTranslation();
   const [localValue, setLocalValue] = useState(value);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
 
@@ -52,7 +54,7 @@ export function SearchBar({
         type="text"
         value={localValue}
         onChange={(e) => handleChange(e.target.value)}
-        placeholder={placeholder}
+        placeholder={placeholder || t('actions.search')}
         className="
           w-full pl-9 pr-9 py-2 rounded-lg border border-gray-200
           bg-white text-sm text-gray-700 placeholder-gray-400
