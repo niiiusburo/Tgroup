@@ -32,6 +32,7 @@ export interface OverviewAppointment {
   readonly topStatus: AppointmentTopStatus;
   readonly checkInStatus: CheckInStatus | null; // null until arrived
   readonly color: string | null; // color code 0-7 from database
+  readonly productId: string | null; // FK to products(id) — the booked service
   readonly arrivalTime: string | null;
   readonly treatmentStartTime: string | null;
 }
@@ -119,6 +120,7 @@ function mapApiToOverview(
     topStatus,
     checkInStatus,
     color: apt.color,
+    productId: apt.productid || null,
     arrivalTime: fallbackArrivalTime,
     treatmentStartTime: checkInStatus === 'waiting' ? null : (apt.time || '09:00'),
   };

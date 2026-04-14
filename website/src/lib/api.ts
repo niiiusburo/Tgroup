@@ -359,6 +359,8 @@ export interface ApiAppointment {
   companyid: string | null;
   companyname: string | null;
   color: string | null;
+  productid: string | null;
+  productname: string | null;
   datecreated: string | null;
   lastupdated: string | null;
 }
@@ -943,7 +945,12 @@ export async function deletePayment(id: string): Promise<{ success: boolean }> {
   return apiFetch<{ success: boolean }>(`/Payments/${id}`, { method: 'DELETE' });
 }
 
-// ─── Services (Sale Orders) ──────────────────────────────────────
+// ─── Services (DEAD CODE — routes/services.js is unused) ──────────
+// The frontend does NOT import fetchServices or createService.
+// Service records use fetchSaleOrders/createSaleOrder above.
+// Service catalog uses fetchProducts/createProduct above.
+// These wrappers call /api/Services which queries a non-existent
+// public.services table. Safe to delete.
 
 export interface ApiService {
   id: string;

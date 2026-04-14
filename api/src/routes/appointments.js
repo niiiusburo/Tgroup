@@ -214,7 +214,9 @@ router.get('/', async (req, res) => {
         a.datecreated,
         a.lastupdated,
         a.createdbyid,
-        a.writebyid
+        a.writebyid,
+        a.productid,
+        prod.name AS productname
       FROM appointments a
       LEFT JOIN partners p ON p.id = a.partnerid
       LEFT JOIN companies c ON c.id = a.companyid
@@ -224,6 +226,7 @@ router.get('/', async (req, res) => {
       LEFT JOIN saleorders so ON so.id = a.saleorderid
       LEFT JOIN crmteams t ON t.id = a.teamid
       LEFT JOIN customerreceipts cr ON cr.id = a.customerreceiptid
+      LEFT JOIN products prod ON prod.id = a.productid
       ${whereClause}
       ORDER BY ${orderByCol} ${orderDir} NULLS LAST
       LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
@@ -328,7 +331,9 @@ router.get('/:id', async (req, res) => {
         a.datecreated,
         a.lastupdated,
         a.createdbyid,
-        a.writebyid
+        a.writebyid,
+        a.productid,
+        prod.name AS productname
       FROM appointments a
       LEFT JOIN partners p ON p.id = a.partnerid
       LEFT JOIN companies c ON c.id = a.companyid
@@ -338,6 +343,7 @@ router.get('/:id', async (req, res) => {
       LEFT JOIN saleorders so ON so.id = a.saleorderid
       LEFT JOIN crmteams t ON t.id = a.teamid
       LEFT JOIN customerreceipts cr ON cr.id = a.customerreceiptid
+      LEFT JOIN products prod ON prod.id = a.productid
       WHERE a.id = $1`,
       [id]
     );
@@ -374,6 +380,7 @@ router.post('/', requirePermission('appointments.add'), async (req, res) => {
     const timeExpected = b.timeExpected || b.timeexpected || 30;
     const color = b.color || '1';
     const state = b.state || 'confirmed';
+    const productId = b.productId || b.productid || null;
 
     // Validate required fields
     const missingFields = [];
@@ -438,11 +445,12 @@ router.post('/', requirePermission('appointments.add'), async (req, res) => {
     const result = await query(
       `INSERT INTO appointments (
         id, name, date, time, partnerid, doctorid, companyid, note, timeexpected,
-        color, state, aptstate, isrepeatcustomer, isnotreatment, datecreated, lastupdated
+        color, state, aptstate, isrepeatcustomer, isnotreatment, productid,
+        datecreated, lastupdated
       ) VALUES (
-        gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, false, false, NOW(), NOW()
+        gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, false, false, $12, NOW(), NOW()
       ) RETURNING *`,
-      [name, date, time || null, partnerId, doctorId || null, companyId, note, timeExpectedNum, color, state, state]
+      [name, date, time || null, partnerId, doctorId || null, companyId, note, timeExpectedNum, color, state, state, productId]
     );
 
     const newAppointment = result[0];
@@ -464,12 +472,15 @@ router.post('/', requirePermission('appointments.add'), async (req, res) => {
         a.doctorid,
         doc.name AS doctorname,
         a.note,
+        a.productid,
+        prod.name AS productname,
         a.datecreated,
         a.lastupdated
       FROM appointments a
       LEFT JOIN partners p ON p.id = a.partnerid
       LEFT JOIN companies c ON c.id = a.companyid
       LEFT JOIN employees doc ON doc.id = a.doctorid
+      LEFT JOIN products prod ON prod.id = a.productid
       WHERE a.id = $1`,
       [newAppointment.id]
     );
@@ -501,6 +512,7 @@ router.put('/:id', requirePermission('appointments.edit'), async (req, res) => {
     const timeExpected = b.timeExpected || b.timeexpected;
     const color = b.color;
     const time = b.time;
+    const productId = b.productId || b.productid;
 
     // Validate ID
     if (!isValidUUID(id)) {
@@ -581,6 +593,11 @@ router.put('/:id', requirePermission('appointments.edit'), async (req, res) => {
       params.push(time);
       paramIdx++;
     }
+    if (productId !== undefined) {
+      updates.push(`productid = $${paramIdx}`);
+      params.push(productId || null);
+      paramIdx++;
+    }
 
     // Always update lastupdated
     updates.push(`lastupdated = NOW()`);
@@ -613,12 +630,15 @@ router.put('/:id', requirePermission('appointments.edit'), async (req, res) => {
         a.doctorid,
         doc.name AS doctorname,
         a.note,
+        a.productid,
+        prod.name AS productname,
         a.datecreated,
         a.lastupdated
       FROM appointments a
       LEFT JOIN partners p ON p.id = a.partnerid
       LEFT JOIN companies c ON c.id = a.companyid
       LEFT JOIN employees doc ON doc.id = a.doctorid
+      LEFT JOIN products prod ON prod.id = a.productid
       WHERE a.id = $1`,
       [id]
     );
