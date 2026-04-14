@@ -126,7 +126,7 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
         {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
         {expanded && (
           <span className="text-sm font-medium whitespace-nowrap overflow-hidden">
-            {item.label}
+            {t(item.label)}
           </span>
         )}
         {expanded && item.count && (
@@ -170,7 +170,7 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
         {expanded && (
           <>
             <span className="text-sm font-medium whitespace-nowrap overflow-hidden flex-1 text-left">
-              {item.label}
+              {t(item.label)}
             </span>
             <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
           </>
@@ -188,7 +188,7 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
       >
         <div className="bg-sidebar border border-white/10 rounded-xl shadow-lg p-2 min-w-[180px]">
           <div className="px-3 py-2 text-[10px] uppercase tracking-wider text-gray-500 font-semibold">
-            {item.label}
+            {t(item.label)}
           </div>
           <div className="flex flex-col gap-1">
             {item.children!.map((child) => {
@@ -205,7 +205,7 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
                   `}
                 >
                   {ChildIcon && <ChildIcon className="w-4 h-4 flex-shrink-0" />}
-                  <span className="flex-1 whitespace-nowrap">{child.label}</span>
+                  <span className="flex-1 whitespace-nowrap">{t(child.label)}</span>
                   {child.count && (
                     <span className="text-xs bg-white/10 text-gray-300 px-1.5 py-0.5 rounded-full">
                       {child.count}
