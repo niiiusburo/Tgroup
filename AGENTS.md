@@ -1,3 +1,33 @@
+## VPS Deployment (MANDATORY)
+
+**ALWAYS use `scripts/deploy-vps.sh` to deploy to VPS. Never deploy manually.**
+
+```bash
+./scripts/deploy-vps.sh              # Full deploy: code + DB (tdental_demo) + rebuild
+./scripts/deploy-vps.sh --code-only  # Code + rebuild only, skip DB
+./scripts/deploy-vps.sh --db-only    # DB sync only, skip code
+```
+
+### How it works
+1. **rsync** `api/` + `website/` to VPS (whitelist — only what VPS needs, no local junk)
+2. **scp** infra files (`docker-compose.yml`, `Dockerfile.api`, `Dockerfile.web`, `nginx.docker.conf`)
+3. **pg_dump** local `tdental_demo` → restore on VPS `tdental_demo` (same DB name)
+4. **docker compose build + up -d** on VPS
+5. **Verify** API, web, and DB are responding
+
+### When to update the deploy script
+If you change **any** of these, you MUST update `scripts/deploy-vps.sh` and notify the user:
+- `docker-compose.yml` — services, ports, volumes, env vars
+- `Dockerfile.api` or `Dockerfile.web` — build steps, base images
+- `nginx.docker.conf` — reverse proxy rules
+- VPS `.env` values — secrets, API keys, DB credentials
+- VPS SSH host (`dokploy`) or project dir (`/opt/tgroup`)
+- Local Docker container name (`tgroup-db`) or database name (`tdental_demo`)
+- Added new top-level directories that VPS needs (currently only `api/` and `website/`)
+
+### What NEVER goes to VPS
+`notes/`, `tools/`, `backups/`, `scripts/`, `docs/`, `.claude/`, `.omc/`, `.agents/`, `.planning/`, screenshots, test artifacts — these are local-only.
+
 ## Version Policy
 
 **ALWAYS bump the version in `website/package.json` after making code changes.**
