@@ -10,6 +10,40 @@ Version format: `major.minor.patch` (e.g., 0.4.5)
 After updating code, increment the appropriate version number in `website/package.json`.
 The build timestamp and git info are auto-generated from this version.
 
+## i18n Rules (MANDATORY)
+
+**ALL user-facing text MUST use react-i18next `t()` function.**
+
+- ✅ `t('common.save')` — correct
+- ✅ `t('appointments.status.scheduled')` — correct
+- ✅ `t('title')` (within a namespaced component) — correct
+- ❌ `"Save"` — FORBIDDEN in JSX/TSX
+- ❌ `"Scheduled"` — FORBIDDEN in JSX/TSX
+- ❌ `"Đang hẹn"` — FORBIDDEN in JSX/TSX
+
+### Exceptions (may remain hardcoded)
+- Database/API data values (customer names, service names, notes, addresses)
+- CSS class names, HTML attributes, technical identifiers
+- Console.log / debug messages (not user-facing)
+- Placeholder strings like `'you@tgclinic.vn'` that are example values
+
+### Translation File Locations
+- English: `website/src/i18n/locales/en/*.json`
+- Vietnamese: `website/src/i18n/locales/vi/*.json`
+- 14 namespaces: common, nav, overview, calendar, customers, appointments, services, payment, employees, locations, reports, settings, auth, website
+
+### How to Add a New UI String
+1. Add the key to BOTH the `en` and `vi` JSON files in the appropriate namespace
+2. Use `t('keyName')` in the component
+3. Use `{ t } = useTranslation('namespace')` at the top of the component
+
+### Constants Migration
+- `NAVIGATION_ITEMS[].label` → i18n keys (e.g., `'overview'`, `'calendar'`)
+- `APPOINTMENT_STATUS_OPTIONS[].label` → i18n keys (e.g., `'appointments.status.scheduled'`)
+- `APPOINTMENT_TYPE_LABELS` → i18n keys (e.g., `'calendar.appointmentTypes.cleaning'`)
+- `APPOINTMENT_CARD_COLORS[].label` → i18n keys (e.g., `'common.colors.blue'`)
+- Use `APPOINTMENT_STATUS_I18N_KEYS` instead of deprecated `APPOINTMENT_STATUS_LABELS_VI`
+
 ## Obsidian Brain
 
 At session start, read project context from local Obsidian notes:
