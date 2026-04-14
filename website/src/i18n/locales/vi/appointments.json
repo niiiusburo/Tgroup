@@ -1,0 +1,46 @@
+{
+  "title": "Lịch hẹn",
+  "list": "Danh sách lịch hẹn",
+  "addAppointment": "Thêm lịch hẹn",
+  "editAppointment": "Sửa lịch hẹn",
+  "searchPlaceholder": "Tìm lịch hẹn...",
+  "status": {
+    "scheduled": "Đang hẹn",
+    "arrived": "Đã đến",
+    "confirmed": "Đã xác nhận",
+    "inProgress": "Đang khám",
+    "completed": "Hoàn tất",
+    "cancelled": "Hủy hẹn",
+    "noShow": "Không đến"
+  },
+  "form": {
+    "patient": "Bệnh nhân",
+    "doctor": "Bác sĩ",
+    "date": "Ngày",
+    "startTime": "Giờ bắt đầu",
+    "endTime": "Giờ kết thúc",
+    "type": "Loại lịch hẹn",
+    "status": "Trạng thái",
+    "location": "Chi nhánh",
+    "notes": "Ghi chú",
+    "color": "Màu sắc",
+    "selectPatient": "Chọn bệnh nhân",
+    "selectDoctor": "Chọn bác sĩ",
+    "selectLocation": "Chọn chi nhánh",
+    "selectType": "Chọn loại",
+    "selectStatus": "Chọn trạng thái"
+  },
+  "checkIn": {
+    "title": "Check In",
+    "waiting": "Đang chờ",
+    "checkedIn": "Đã check-in",
+    "inProgress": "Đang khám",
+    "completed": "Hoàn tất",
+    "waitTime": "Thời gian chờ",
+    "duration": "Thời lượng"
+  },
+  "convertToService": {
+    "title": "Chuyển thành dịch vụ",
+    "selectService": "Chọn dịch vụ"
+  }
+}

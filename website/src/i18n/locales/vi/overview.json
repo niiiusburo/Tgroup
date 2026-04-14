@@ -1,0 +1,36 @@
+{
+  "title": "Tổng quan",
+  "todaysRevenue": "Doanh thu hôm nay",
+  "totalAppointments": "Tổng lịch hẹn",
+  "newCustomers": "Khách hàng mới",
+  "pendingPayments": "Thanh toán chờ xử lý",
+  "todaySchedule": "Lịch hôm nay",
+  "quickActions": "Thao tác nhanh",
+  "recentActivity": "Hoạt động gần đây",
+  "noAppointments": "Không có lịch hẹn hôm nay",
+  "zone1": {
+    "title": "Check-in bệnh nhân",
+    "filterAll": "Tất cả",
+    "filterWaiting": "Đang chờ",
+    "filterCheckedIn": "Đã check-in",
+    "filterInProgress": "Đang khám",
+    "filterCompleted": "Hoàn tất",
+    "searchPlaceholder": "Tìm bệnh nhân..."
+  },
+  "zone2": {
+    "title": "Dịch vụ hôm nay",
+    "noServices": "Không có dịch vụ hôm nay"
+  },
+  "zone3": {
+    "title": "Lịch hẹn hôm nay",
+    "filterAll": "Tất cả",
+    "filterScheduled": "Đang hẹn",
+    "filterArrived": "Đã đến",
+    "filterCancelled": "Đã hủy",
+    "searchPlaceholder": "Tìm lịch hẹn..."
+  },
+  "addAppointment": "Thêm lịch hẹn",
+  "editAppointment": "Sửa lịch hẹn",
+  "markArrived": "Đánh dấu đã đến",
+  "markCancelled": "Hủy hẹn"
+}

@@ -1,0 +1,36 @@
+{
+  "title": "Chi nhánh",
+  "list": "Danh sách chi nhánh",
+  "addLocation": "Thêm chi nhánh",
+  "editLocation": "Sửa chi nhánh",
+  "locationDetails": "Chi tiết chi nhánh",
+  "searchPlaceholder": "Tìm chi nhánh...",
+  "columns": {
+    "name": "Tên",
+    "address": "Địa chỉ",
+    "phone": "Số điện thoại",
+    "status": "Trạng thái",
+    "manager": "Quản lý",
+    "employees": "Nhân viên",
+    "customers": "Khách hàng",
+    "revenue": "Doanh thu"
+  },
+  "form": {
+    "name": "Tên chi nhánh",
+    "address": "Địa chỉ",
+    "phone": "Số điện thoại",
+    "email": "Email",
+    "status": "Trạng thái",
+    "manager": "Quản lý",
+    "openingHours": "Giờ mở cửa",
+    "closingHours": "Giờ đóng cửa",
+    "description": "Mô tả"
+  },
+  "detail": {
+    "stats": "Thống kê",
+    "todayAppointments": "Lịch hẹn hôm nay",
+    "monthlyRevenue": "Doanh thu tháng",
+    "activeCustomers": "Khách hàng hoạt động",
+    "staffCount": "Số nhân viên"
+  }
+}

@@ -130,53 +130,53 @@ export interface NavigationItem {
  * @design-ref:count-badges - Shows completion counts like "0/5"
  */
 export const NAVIGATION_ITEMS: NavigationItem[] = [
-  { path: ROUTES.OVERVIEW, label: 'Overview', icon: 'BarChart3' },
-  { path: ROUTES.CALENDAR, label: 'Calendar', icon: 'Calendar' },
-  { path: ROUTES.CUSTOMERS, label: 'Customers', icon: 'Users' },
+  { path: ROUTES.OVERVIEW, label: 'overview', icon: 'BarChart3' },
+  { path: ROUTES.CALENDAR, label: 'calendar', icon: 'Calendar' },
+  { path: ROUTES.CUSTOMERS, label: 'customers', icon: 'Users' },
   {
     path: '/clinic',
-    label: 'Clinic',
+    label: 'clinic',
     icon: 'Stethoscope',
     children: [
-      { path: ROUTES.WEBSITE, label: 'Service Catalog', icon: 'Stethoscope', count: '228' },
-      { path: ROUTES.PAYMENT, label: 'Payment Plans', icon: 'CreditCard' },
+      { path: ROUTES.WEBSITE, label: 'serviceCatalog', icon: 'Stethoscope', count: '228' },
+      { path: ROUTES.PAYMENT, label: 'paymentPlans', icon: 'CreditCard' },
     ],
   },
   {
     path: '/team',
-    label: 'Team',
+    label: 'team',
     icon: 'UserCog',
     children: [
-      { path: ROUTES.EMPLOYEES, label: 'Employees', icon: 'UserCog' },
-      { path: ROUTES.COMMISSION, label: 'Commission', icon: 'Percent', isPremium: true },
-      { path: ROUTES.LOCATIONS, label: 'Locations', icon: 'MapPin' },
+      { path: ROUTES.EMPLOYEES, label: 'employees', icon: 'UserCog' },
+      { path: ROUTES.COMMISSION, label: 'commission', icon: 'Percent', isPremium: true },
+      { path: ROUTES.LOCATIONS, label: 'locations', icon: 'MapPin' },
     ],
   },
   {
     path: '/reports',
-    label: 'Reports',
+    label: 'reports',
     icon: 'BarChart3',
     children: [
-      { path: ROUTES.REPORTS_DASHBOARD, label: 'Dashboard', icon: 'LayoutDashboard' },
-      { path: ROUTES.REPORTS_REVENUE, label: 'Revenue', icon: 'CreditCard' },
-      { path: ROUTES.REPORTS_APPOINTMENTS, label: 'Appointments', icon: 'Calendar' },
-      { path: ROUTES.REPORTS_DOCTORS, label: 'Doctors', icon: 'Stethoscope' },
-      { path: ROUTES.REPORTS_CUSTOMERS, label: 'Customers', icon: 'Users' },
-      { path: ROUTES.REPORTS_LOCATIONS, label: 'Locations', icon: 'MapPin' },
-      { path: ROUTES.REPORTS_SERVICES, label: 'Services', icon: 'FolderOpen' },
-      { path: ROUTES.REPORTS_EMPLOYEES, label: 'Employees', icon: 'UserCog' },
+      { path: ROUTES.REPORTS_DASHBOARD, label: 'dashboard', icon: 'LayoutDashboard' },
+      { path: ROUTES.REPORTS_REVENUE, label: 'revenue', icon: 'CreditCard' },
+      { path: ROUTES.REPORTS_APPOINTMENTS, label: 'appointments', icon: 'Calendar' },
+      { path: ROUTES.REPORTS_DOCTORS, label: 'doctors', icon: 'Stethoscope' },
+      { path: ROUTES.REPORTS_CUSTOMERS, label: 'customers', icon: 'Users' },
+      { path: ROUTES.REPORTS_LOCATIONS, label: 'locations', icon: 'MapPin' },
+      { path: ROUTES.REPORTS_SERVICES, label: 'services', icon: 'FolderOpen' },
+      { path: ROUTES.REPORTS_EMPLOYEES, label: 'employees', icon: 'UserCog' },
     ],
   },
   {
     path: '/admin',
-    label: 'Admin',
+    label: 'admin',
     icon: 'Settings',
     children: [
-      { path: ROUTES.SETTINGS, label: 'Settings', icon: 'Settings' },
-      { path: ROUTES.FEEDBACK, label: 'Feedback', icon: 'MessageSquare' },
-      { path: ROUTES.PERMISSIONS, label: 'Permissions', icon: 'Shield' },
-      { path: ROUTES.RELATIONSHIPS, label: 'Relationships', icon: 'Users' },
-      { path: ROUTES.NOTIFICATIONS, label: 'Notifications', icon: 'Bell' },
+      { path: ROUTES.SETTINGS, label: 'settings', icon: 'Settings' },
+      { path: ROUTES.FEEDBACK, label: 'feedback', icon: 'MessageSquare' },
+      { path: ROUTES.PERMISSIONS, label: 'permissions', icon: 'Shield' },
+      { path: ROUTES.RELATIONSHIPS, label: 'relationships', icon: 'Users' },
+      { path: ROUTES.NOTIFICATIONS, label: 'notifications', icon: 'Bell' },
     ],
   },
 ] as const;
@@ -205,13 +205,13 @@ export const APPOINTMENT_TYPE_COLORS: Record<AppointmentType, { bg: string; bord
 } as const;
 
 export const APPOINTMENT_TYPE_LABELS: Record<AppointmentType, string> = {
-  cleaning: 'Cleaning',
-  consultation: 'Consultation',
-  treatment: 'Treatment',
-  surgery: 'Surgery',
-  orthodontics: 'Orthodontics',
-  cosmetic: 'Cosmetic',
-  emergency: 'Emergency',
+  cleaning: 'calendar.appointmentTypes.cleaning',
+  consultation: 'calendar.appointmentTypes.consultation',
+  treatment: 'calendar.appointmentTypes.treatment',
+  surgery: 'calendar.appointmentTypes.surgery',
+  orthodontics: 'calendar.appointmentTypes.orthodontics',
+  cosmetic: 'calendar.appointmentTypes.cosmetic',
+  emergency: 'calendar.appointmentTypes.emergency',
 } as const;
 
 /**
@@ -228,7 +228,7 @@ export const TIME_SLOTS = [
  * Week days for scheduling
  */
 export const WEEK_DAYS = [
-  'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
+  'common.days.monday', 'common.days.tuesday', 'common.days.wednesday', 'common.days.thursday', 'common.days.friday', 'common.days.saturday', 'common.days.sunday',
 ] as const;
 
 /**
@@ -269,7 +269,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
     border: 'border-blue-200',
     text: 'text-blue-700',
     dot: 'border-l-blue-400',
-    label: 'Xanh dương',
+    label: 'common.colors.blue',
     previewGradient: 'from-blue-200 to-blue-300',
   },
   '1': {
@@ -278,7 +278,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
     border: 'border-emerald-200',
     text: 'text-emerald-700',
     dot: 'border-l-emerald-400',
-    label: 'Xanh lá',
+    label: 'common.colors.green',
     previewGradient: 'from-emerald-200 to-emerald-300',
   },
   '2': {
@@ -287,7 +287,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
     border: 'border-amber-200',
     text: 'text-amber-700',
     dot: 'border-l-amber-400',
-    label: 'Cam',
+    label: 'common.colors.orange',
     previewGradient: 'from-amber-200 to-amber-300',
   },
   '3': {
@@ -296,7 +296,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
     border: 'border-red-200',
     text: 'text-red-700',
     dot: 'border-l-red-400',
-    label: 'Đỏ',
+    label: 'common.colors.red',
     previewGradient: 'from-red-200 to-red-300',
   },
   '4': {
@@ -305,7 +305,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
     border: 'border-violet-200',
     text: 'text-violet-700',
     dot: 'border-l-violet-400',
-    label: 'Tím',
+    label: 'common.colors.purple',
     previewGradient: 'from-violet-200 to-violet-300',
   },
   '5': {
@@ -314,7 +314,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
     border: 'border-pink-200',
     text: 'text-pink-700',
     dot: 'border-l-pink-400',
-    label: 'Hồng',
+    label: 'common.colors.pink',
     previewGradient: 'from-pink-200 to-pink-300',
   },
   '6': {
@@ -323,7 +323,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
     border: 'border-cyan-200',
     text: 'text-cyan-700',
     dot: 'border-l-cyan-400',
-    label: 'Cyan',
+    label: 'common.colors.cyan',
     previewGradient: 'from-cyan-200 to-cyan-300',
   },
   '7': {
@@ -332,7 +332,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
     border: 'border-lime-200',
     text: 'text-lime-700',
     dot: 'border-l-lime-400',
-    label: 'Lime',
+    label: 'common.colors.lime',
     previewGradient: 'from-lime-200 to-lime-300',
   },
 } as const;
@@ -351,15 +351,26 @@ export const DEFAULT_APPOINTMENT_COLOR = APPOINTMENT_CARD_COLORS['0'];
  * ═══════════════════════════════════════════════════════════════════════
  */
 export const APPOINTMENT_STATUS_OPTIONS = [
-  { value: 'scheduled', label: 'Đang hẹn', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-  { value: 'arrived', label: 'Đã đến', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-  { value: 'cancelled', label: 'Hủy hẹn', color: 'bg-red-100 text-red-700 border-red-200' },
+  { value: 'scheduled', label: 'appointments.status.scheduled', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  { value: 'arrived', label: 'appointments.status.arrived', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+  { value: 'cancelled', label: 'appointments.status.cancelled', color: 'bg-red-100 text-red-700 border-red-200' },
 ] as const;
 
 /**
- * Vietnamese status labels for ALL appointment states (including extended ones).
+ * i18n status keys for ALL appointment states (including extended ones).
  * Used by AppointmentDetailsModal for display.
+ * Use with: t(`appointments.status.${APPOINTMENT_STATUS_LABELS[key]}`)
  */
+export const APPOINTMENT_STATUS_I18N_KEYS: Record<string, string> = {
+  scheduled: 'appointments.status.scheduled',
+  arrived: 'appointments.status.arrived',
+  confirmed: 'appointments.status.confirmed',
+  'in-progress': 'appointments.status.inProgress',
+  completed: 'appointments.status.completed',
+  cancelled: 'appointments.status.cancelled',
+};
+
+/** @deprecated Use APPOINTMENT_STATUS_I18N_KEYS with t() instead */
 export const APPOINTMENT_STATUS_LABELS_VI: Record<string, string> = {
   scheduled: 'Đang hẹn',
   arrived: 'Đã đến',

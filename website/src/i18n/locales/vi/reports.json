@@ -1,0 +1,62 @@
+{
+  "title": "Báo cáo",
+  "dashboard": "Bảng điều khiển báo cáo",
+  "revenue": "Báo cáo doanh thu",
+  "appointments": "Báo cáo lịch hẹn",
+  "doctors": "Báo cáo bác sĩ",
+  "customers": "Báo cáo khách hàng",
+  "locations": "Báo cáo chi nhánh",
+  "services": "Báo cáo dịch vụ",
+  "employees": "Báo cáo nhân viên",
+  "filters": {
+    "dateRange": "Khoảng thời gian",
+    "location": "Chi nhánh",
+    "doctor": "Bác sĩ",
+    "service": "Dịch vụ",
+    "status": "Trạng thái",
+    "period": "Giai đoạn",
+    "custom": "Tùy chỉnh",
+    "from": "Từ",
+    "to": "Đến",
+    "apply": "Áp dụng bộ lọc",
+    "clear": "Xóa bộ lọc"
+  },
+  "metrics": {
+    "totalRevenue": "Tổng doanh thu",
+    "avgRevenue": "Doanh thu trung bình",
+    "totalAppointments": "Tổng lịch hẹn",
+    "completedAppointments": "Hoàn tất",
+    "cancelledAppointments": "Đã hủy",
+    "noShowRate": "Tỷ lệ không đến",
+    "newCustomers": "Khách hàng mới",
+    "returningCustomers": "Khách hàng quay lại",
+    "avgServiceValue": "Giá trị dịch vụ TB",
+    "topService": "Dịch vụ hàng đầu",
+    "topDoctor": "Bác sĩ hàng đầu",
+    "totalServices": "Tổng dịch vụ"
+  },
+  "charts": {
+    "revenueTrend": "Xu hướng doanh thu",
+    "appointmentTrend": "Xu hướng lịch hẹn",
+    "serviceDistribution": "Phân bố dịch vụ",
+    "revenueByLocation": "Doanh thu theo chi nhánh",
+    "revenueByDoctor": "Doanh thu theo bác sĩ",
+    "customerGrowth": "Tăng trưởng khách hàng"
+  },
+  "table": {
+    "date": "Ngày",
+    "service": "Dịch vụ",
+    "doctor": "Bác sĩ",
+    "customer": "Khách hàng",
+    "amount": "Số tiền",
+    "status": "Trạng thái",
+    "location": "Chi nhánh",
+    "count": "Số lượng"
+  },
+  "error": {
+    "title": "Lỗi tải báo cáo",
+    "message": "Không thể tải dữ liệu báo cáo. Vui lòng thử lại.",
+    "retry": "Thử lại"
+  },
+  "noData": "Không có dữ liệu cho giai đoạn đã chọn"
+}

@@ -1,0 +1,71 @@
+{
+  "title": "Employees",
+  "list": "Employee List",
+  "addEmployee": "Add Employee",
+  "editEmployee": "Edit Employee",
+  "employeeProfile": "Employee Profile",
+  "searchPlaceholder": "Search employees...",
+  "columns": {
+    "name": "Name",
+    "role": "Role",
+    "tier": "Tier",
+    "location": "Location",
+    "phone": "Phone",
+    "email": "Email",
+    "status": "Status",
+    "schedule": "Schedule",
+    "joinDate": "Join Date"
+  },
+  "form": {
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "role": "Role",
+    "tier": "Tier",
+    "location": "Location",
+    "status": "Status",
+    "startDate": "Start Date",
+    "schedule": "Work Schedule",
+    "notes": "Notes",
+    "selectRole": "Select role",
+    "selectTier": "Select tier",
+    "selectLocation": "Select location"
+  },
+  "tiers": {
+    "junior": "Junior",
+    "mid": "Mid-Level",
+    "senior": "Senior",
+    "lead": "Lead",
+    "director": "Director"
+  },
+  "roles": {
+    "dentist": "Dentist",
+    "assistant": "Assistant",
+    "receptionist": "Receptionist",
+    "manager": "Manager",
+    "admin": "Admin",
+    "nurse": "Nurse",
+    "hygienist": "Hygienist"
+  },
+  "schedule": {
+    "title": "Work Schedule",
+    "workDays": "Work Days",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "breakStart": "Break Start",
+    "breakEnd": "Break End"
+  },
+  "profile": {
+    "personalInfo": "Personal Information",
+    "workInfo": "Work Information",
+    "linkedEmployees": "Linked Employees",
+    "referralCode": "Referral Code"
+  },
+  "referral": {
+    "title": "Referral Code",
+    "code": "Code",
+    "copy": "Copy Code",
+    "copied": "Copied!",
+    "uses": "Total Uses"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "title": "Website",
+  "pageList": "Pages",
+  "pageEditor": "Page Editor",
+  "seoManager": "SEO Manager",
+  "addPage": "Add Page",
+  "editPage": "Edit Page",
+  "columns": {
+    "title": "Title",
+    "slug": "Slug",
+    "status": "Status",
+    "lastModified": "Last Modified",
+    "author": "Author"
+  },
+  "editor": {
+    "title": "Page Title",
+    "content": "Content",
+    "slug": "URL Slug",
+    "metaTitle": "Meta Title",
+    "metaDescription": "Meta Description",
+    "featuredImage": "Featured Image",
+    "publish": "Publish",
+    "draft": "Save as Draft",
+    "preview": "Preview"
+  },
+  "seo": {
+    "title": "SEO Settings",
+    "metaTitle": "Meta Title",
+    "metaDescription": "Meta Description",
+    "keywords": "Keywords",
+    "ogImage": "OG Image"
+  },
+  "catalog": {
+    "title": "Service Catalog",
+    "searchPlaceholder": "Search catalog...",
+    "addService": "Add to Catalog",
+    "editService": "Edit",
+    "categories": "Categories"
+  }
+}

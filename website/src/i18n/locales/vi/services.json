@@ -1,0 +1,47 @@
+{
+  "title": "Dịch vụ",
+  "list": "Danh sách dịch vụ",
+  "addService": "Thêm dịch vụ",
+  "editService": "Sửa dịch vụ",
+  "serviceCatalog": "Danh mục dịch vụ",
+  "searchPlaceholder": "Tìm dịch vụ...",
+  "columns": {
+    "name": "Tên dịch vụ",
+    "category": "Danh mục",
+    "price": "Giá",
+    "duration": "Thời lượng",
+    "status": "Trạng thái",
+    "location": "Chi nhánh",
+    "description": "Mô tả"
+  },
+  "form": {
+    "name": "Tên dịch vụ",
+    "category": "Danh mục",
+    "price": "Giá",
+    "duration": "Thời lượng (phút)",
+    "description": "Mô tả",
+    "status": "Trạng thái",
+    "location": "Chi nhánh",
+    "color": "Màu sắc"
+  },
+  "categories": {
+    "general": "Nha khoa tổng quát",
+    "cosmetic": "Nha khoa thẩm mỹ",
+    "orthodontics": "Chỉnh nha",
+    "oralSurgery": "Phẫu thuật răng hàm mặt",
+    "pediatric": "Nha khoa trẻ em",
+    "preventive": "Chăm sóc phòng ngừa"
+  },
+  "multiVisit": {
+    "title": "Theo dõi nhiều lần khám",
+    "visit": "Lần khám",
+    "visits": "Lần khám",
+    "completed": "Hoàn tất",
+    "remaining": "Còn lại",
+    "progress": "Tiến độ"
+  },
+  "history": {
+    "title": "Lịch sử dịch vụ",
+    "noHistory": "Chưa có lịch sử dịch vụ"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "title": "Locations",
+  "list": "Location List",
+  "addLocation": "Add Location",
+  "editLocation": "Edit Location",
+  "locationDetails": "Location Details",
+  "searchPlaceholder": "Search locations...",
+  "columns": {
+    "name": "Name",
+    "address": "Address",
+    "phone": "Phone",
+    "status": "Status",
+    "manager": "Manager",
+    "employees": "Employees",
+    "customers": "Customers",
+    "revenue": "Revenue"
+  },
+  "form": {
+    "name": "Location Name",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "status": "Status",
+    "manager": "Manager",
+    "openingHours": "Opening Hours",
+    "closingHours": "Closing Hours",
+    "description": "Description"
+  },
+  "detail": {
+    "stats": "Statistics",
+    "todayAppointments": "Today's Appointments",
+    "monthlyRevenue": "Monthly Revenue",
+    "activeCustomers": "Active Customers",
+    "staffCount": "Staff Count"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "title": "Appointments",
+  "list": "Appointment List",
+  "addAppointment": "Add Appointment",
+  "editAppointment": "Edit Appointment",
+  "searchPlaceholder": "Search appointments...",
+  "status": {
+    "scheduled": "Scheduled",
+    "arrived": "Arrived",
+    "confirmed": "Confirmed",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "noShow": "No Show"
+  },
+  "form": {
+    "patient": "Patient",
+    "doctor": "Doctor",
+    "date": "Date",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "type": "Appointment Type",
+    "status": "Status",
+    "location": "Location",
+    "notes": "Notes",
+    "color": "Color",
+    "selectPatient": "Select patient",
+    "selectDoctor": "Select doctor",
+    "selectLocation": "Select location",
+    "selectType": "Select type",
+    "selectStatus": "Select status"
+  },
+  "checkIn": {
+    "title": "Check In",
+    "waiting": "Waiting",
+    "checkedIn": "Checked In",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "waitTime": "Wait Time",
+    "duration": "Duration"
+  },
+  "convertToService": {
+    "title": "Convert to Service",
+    "selectService": "Select Service"
+  }
+}

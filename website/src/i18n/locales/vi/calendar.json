@@ -1,0 +1,42 @@
+{
+  "title": "Lịch",
+  "dayView": "Ngày",
+  "weekView": "Tuần",
+  "monthView": "Tháng",
+  "today": "Hôm nay",
+  "noAppointments": "Không có lịch hẹn",
+  "allDay": "Cả ngày",
+  "appointmentTypes": {
+    "cleaning": "Cạo vôi răng",
+    "consultation": "Tư vấn",
+    "treatment": "Điều trị",
+    "surgery": "Phẫu thuật",
+    "orthodontics": "Chỉnh nha",
+    "cosmetic": "Thẩm mỹ",
+    "emergency": "Cấp cứu"
+  },
+  "appointmentDetails": {
+    "title": "Chi tiết lịch hẹn",
+    "patient": "Bệnh nhân",
+    "doctor": "Bác sĩ",
+    "date": "Ngày",
+    "time": "Giờ",
+    "duration": "Thời lượng",
+    "status": "Trạng thái",
+    "type": "Loại",
+    "location": "Chi nhánh",
+    "notes": "Ghi chú",
+    "color": "Màu sắc",
+    "edit": "Sửa",
+    "delete": "Xóa"
+  },
+  "weekDays": {
+    "mon": "T2",
+    "tue": "T3",
+    "wed": "T4",
+    "thu": "T5",
+    "fri": "T6",
+    "sat": "T7",
+    "sun": "CN"
+  }
+}

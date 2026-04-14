@@ -1,0 +1,81 @@
+{
+  "title": "Settings",
+  "systemPreferences": "System Preferences",
+  "bankSettings": "Bank Settings",
+  "ipAccessControl": "IP Access Control",
+  "permissionGroups": "Permission Groups",
+  "roleConfig": "Role Configuration",
+  "serviceCatalog": "Service Catalog Settings",
+  "customerSources": "Customer Sources",
+  "feedbackAdmin": "Feedback Management",
+  "timezone": "Timezone",
+  "general": "General",
+  "systemPreferencesContent": {
+    "title": "System Preferences",
+    "language": "Default Language",
+    "timezone": "Default Timezone",
+    "currency": "Currency",
+    "dateFormat": "Date Format",
+    "theme": "Theme"
+  },
+  "bankSettingsContent": {
+    "title": "Bank Account Settings",
+    "bankName": "Bank Name",
+    "accountNumber": "Account Number",
+    "accountName": "Account Name",
+    "branch": "Branch",
+    "selectBank": "Select Bank",
+    "addAccount": "Add Account",
+    "editAccount": "Edit Account"
+  },
+  "ipAccess": {
+    "title": "IP Access Control",
+    "addIp": "Add IP Address",
+    "ipAddress": "IP Address",
+    "description": "Description",
+    "isActive": "Active",
+    "actions": "Actions",
+    "noEntries": "No IP entries"
+  },
+  "permissionGroup": {
+    "title": "Permission Groups",
+    "addGroup": "Add Group",
+    "editGroup": "Edit Group",
+    "groupName": "Group Name",
+    "description": "Description",
+    "permissions": "Permissions",
+    "members": "Members"
+  },
+  "roleConfigContent": {
+    "title": "Role Configuration",
+    "addRole": "Add Role",
+    "editRole": "Edit Role",
+    "roleName": "Role Name",
+    "permissions": "Permissions",
+    "description": "Description"
+  },
+  "serviceCatalogSettings": {
+    "title": "Service Catalog Settings",
+    "addCategory": "Add Category",
+    "editCategory": "Edit Category",
+    "categoryName": "Category Name",
+    "services": "Services"
+  },
+  "customerSourcesConfig": {
+    "title": "Customer Sources",
+    "addSource": "Add Source",
+    "sourceName": "Source Name",
+    "description": "Description"
+  },
+  "feedbackAdmin": {
+    "title": "Feedback Management",
+    "review": "Review",
+    "status": "Status",
+    "submittedAt": "Submitted At",
+    "noFeedback": "No feedback submissions"
+  },
+  "timezoneSelector": {
+    "label": "Select Timezone",
+    "searchPlaceholder": "Search timezone..."
+  }
+}

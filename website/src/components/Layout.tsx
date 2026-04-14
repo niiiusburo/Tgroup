@@ -30,6 +30,8 @@ import { useLocationFilter } from '@/contexts/LocationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocations } from '@/hooks/useLocations';
 import { FeedbackWidget } from '@/components/shared/FeedbackWidget';
+import { LanguageToggle } from '@/components/shared/LanguageToggle';
+import { useTranslation } from 'react-i18next';
 
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -229,6 +231,7 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
  * @crossref:uses[AuthContext, LocationContext, FilterByLocation]
  */
 export function Layout() {
+  const { t } = useTranslation('nav');
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [debugOpen, setDebugOpen] = useState(false);
   const { selectedLocationId, setSelectedLocationId, allowedLocations, isSingleLocation } = useLocationFilter();
@@ -259,7 +262,7 @@ export function Layout() {
   const currentChild = NAVIGATION_ITEMS.flatMap((item) => item.children ?? []).find(
     (c) => c.path === location.pathname
   );
-  const pageTitle = currentChild?.label ?? currentPage?.label ?? 'Dashboard';
+  const pageTitle = t(currentChild?.label ?? currentPage?.label ?? 'Dashboard');
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -388,8 +391,7 @@ export function Layout() {
           )}
 
           <div className="flex items-center gap-2 justify-center">
-            <div className="w-3 h-3 rounded-full bg-purple-500" />
-            <div className="w-3 h-3 rounded-full bg-pink-500" />
+            <LanguageToggle />
           </div>
         </div>
       </aside>

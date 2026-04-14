@@ -1,0 +1,62 @@
+{
+  "title": "Reports",
+  "dashboard": "Reports Dashboard",
+  "revenue": "Revenue Report",
+  "appointments": "Appointment Report",
+  "doctors": "Doctor Report",
+  "customers": "Customer Report",
+  "locations": "Location Report",
+  "services": "Service Report",
+  "employees": "Employee Report",
+  "filters": {
+    "dateRange": "Date Range",
+    "location": "Location",
+    "doctor": "Doctor",
+    "service": "Service",
+    "status": "Status",
+    "period": "Period",
+    "custom": "Custom",
+    "from": "From",
+    "to": "To",
+    "apply": "Apply Filters",
+    "clear": "Clear Filters"
+  },
+  "metrics": {
+    "totalRevenue": "Total Revenue",
+    "avgRevenue": "Average Revenue",
+    "totalAppointments": "Total Appointments",
+    "completedAppointments": "Completed",
+    "cancelledAppointments": "Cancelled",
+    "noShowRate": "No-Show Rate",
+    "newCustomers": "New Customers",
+    "returningCustomers": "Returning Customers",
+    "avgServiceValue": "Avg. Service Value",
+    "topService": "Top Service",
+    "topDoctor": "Top Doctor",
+    "totalServices": "Total Services"
+  },
+  "charts": {
+    "revenueTrend": "Revenue Trend",
+    "appointmentTrend": "Appointment Trend",
+    "serviceDistribution": "Service Distribution",
+    "revenueByLocation": "Revenue by Location",
+    "revenueByDoctor": "Revenue by Doctor",
+    "customerGrowth": "Customer Growth"
+  },
+  "table": {
+    "date": "Date",
+    "service": "Service",
+    "doctor": "Doctor",
+    "customer": "Customer",
+    "amount": "Amount",
+    "status": "Status",
+    "location": "Location",
+    "count": "Count"
+  },
+  "error": {
+    "title": "Error Loading Report",
+    "message": "Could not load report data. Please try again.",
+    "retry": "Retry"
+  },
+  "noData": "No data available for the selected period"
+}

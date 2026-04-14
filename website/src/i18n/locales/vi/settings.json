@@ -1,0 +1,81 @@
+{
+  "title": "Cài đặt",
+  "systemPreferences": "Tùy chọn hệ thống",
+  "bankSettings": "Cài đặt ngân hàng",
+  "ipAccessControl": "Kiểm soát truy cập IP",
+  "permissionGroups": "Nhóm quyền",
+  "roleConfig": "Cấu hình chức vụ",
+  "serviceCatalog": "Cài đặt danh mục dịch vụ",
+  "customerSources": "Nguồn khách hàng",
+  "feedbackAdmin": "Quản lý phản hồi",
+  "timezone": "Múi giờ",
+  "general": "Chung",
+  "systemPreferencesContent": {
+    "title": "Tùy chọn hệ thống",
+    "language": "Ngôn ngữ mặc định",
+    "timezone": "Múi giờ mặc định",
+    "currency": "Tiền tệ",
+    "dateFormat": "Định dạng ngày",
+    "theme": "Giao diện"
+  },
+  "bankSettingsContent": {
+    "title": "Cài đặt tài khoản ngân hàng",
+    "bankName": "Tên ngân hàng",
+    "accountNumber": "Số tài khoản",
+    "accountName": "Tên tài khoản",
+    "branch": "Chi nhánh",
+    "selectBank": "Chọn ngân hàng",
+    "addAccount": "Thêm tài khoản",
+    "editAccount": "Sửa tài khoản"
+  },
+  "ipAccess": {
+    "title": "Kiểm soát truy cập IP",
+    "addIp": "Thêm địa chỉ IP",
+    "ipAddress": "Địa chỉ IP",
+    "description": "Mô tả",
+    "isActive": "Hoạt động",
+    "actions": "Thao tác",
+    "noEntries": "Không có mục IP"
+  },
+  "permissionGroup": {
+    "title": "Nhóm quyền",
+    "addGroup": "Thêm nhóm",
+    "editGroup": "Sửa nhóm",
+    "groupName": "Tên nhóm",
+    "description": "Mô tả",
+    "permissions": "Quyền",
+    "members": "Thành viên"
+  },
+  "roleConfigContent": {
+    "title": "Cấu hình chức vụ",
+    "addRole": "Thêm chức vụ",
+    "editRole": "Sửa chức vụ",
+    "roleName": "Tên chức vụ",
+    "permissions": "Quyền",
+    "description": "Mô tả"
+  },
+  "serviceCatalogSettings": {
+    "title": "Cài đặt danh mục dịch vụ",
+    "addCategory": "Thêm danh mục",
+    "editCategory": "Sửa danh mục",
+    "categoryName": "Tên danh mục",
+    "services": "Dịch vụ"
+  },
+  "customerSourcesConfig": {
+    "title": "Nguồn khách hàng",
+    "addSource": "Thêm nguồn",
+    "sourceName": "Tên nguồn",
+    "description": "Mô tả"
+  },
+  "feedbackAdmin": {
+    "title": "Quản lý phản hồi",
+    "review": "Xem xét",
+    "status": "Trạng thái",
+    "submittedAt": "Thời gian gửi",
+    "noFeedback": "Không có phản hồi"
+  },
+  "timezoneSelector": {
+    "label": "Chọn múi giờ",
+    "searchPlaceholder": "Tìm múi giờ..."
+  }
+}

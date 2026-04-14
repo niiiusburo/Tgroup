@@ -1,0 +1,63 @@
+{
+  "title": "Customers",
+  "list": "Customer List",
+  "addCustomer": "Add Customer",
+  "editCustomer": "Edit Customer",
+  "customerDetails": "Customer Details",
+  "searchPlaceholder": "Search customers...",
+  "columns": {
+    "name": "Name",
+    "phone": "Phone",
+    "email": "Email",
+    "status": "Status",
+    "location": "Location",
+    "source": "Source",
+    "lastVisit": "Last Visit",
+    "totalSpent": "Total Spent",
+    "balance": "Balance",
+    "createdDate": "Created Date",
+    "gender": "Gender",
+    "dob": "Date of Birth",
+    "address": "Address",
+    "notes": "Notes"
+  },
+  "profile": {
+    "personalInfo": "Personal Information",
+    "contactInfo": "Contact Information",
+    "medicalHistory": "Medical History",
+    "appointmentHistory": "Appointment History",
+    "serviceHistory": "Service History",
+    "paymentHistory": "Payment History",
+    "assignments": "Assignments",
+    "photos": "Photos",
+    "healthCheckup": "Health Checkup",
+    "noAppointments": "No appointments yet",
+    "noServices": "No services yet"
+  },
+  "form": {
+    "fullName": "Full Name",
+    "phone": "Phone Number",
+    "email": "Email",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "other": "Other",
+    "dateOfBirth": "Date of Birth",
+    "address": "Address",
+    "location": "Location",
+    "source": "Customer Source",
+    "referralCode": "Referral Code",
+    "notes": "Notes",
+    "assignTo": "Assign To"
+  },
+  "sources": {
+    "walkIn": "Walk-in",
+    "referral": "Referral",
+    "facebook": "Facebook",
+    "google": "Google",
+    "website": "Website",
+    "zalo": "Zalo",
+    "tiktok": "TikTok",
+    "other": "Other"
+  }
+}

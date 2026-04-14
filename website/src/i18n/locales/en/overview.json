@@ -1,0 +1,36 @@
+{
+  "title": "Overview",
+  "todaysRevenue": "Today's Revenue",
+  "totalAppointments": "Total Appointments",
+  "newCustomers": "New Customers",
+  "pendingPayments": "Pending Payments",
+  "todaySchedule": "Today's Schedule",
+  "quickActions": "Quick Actions",
+  "recentActivity": "Recent Activity",
+  "noAppointments": "No appointments for today",
+  "zone1": {
+    "title": "Patient Check-in",
+    "filterAll": "All",
+    "filterWaiting": "Waiting",
+    "filterCheckedIn": "Checked In",
+    "filterInProgress": "In Progress",
+    "filterCompleted": "Completed",
+    "searchPlaceholder": "Search patients..."
+  },
+  "zone2": {
+    "title": "Today's Services",
+    "noServices": "No services today"
+  },
+  "zone3": {
+    "title": "Today's Appointments",
+    "filterAll": "All",
+    "filterScheduled": "Scheduled",
+    "filterArrived": "Arrived",
+    "filterCancelled": "Cancelled",
+    "searchPlaceholder": "Search appointments..."
+  },
+  "addAppointment": "Add Appointment",
+  "editAppointment": "Edit Appointment",
+  "markArrived": "Mark Arrived",
+  "markCancelled": "Cancel"
+}

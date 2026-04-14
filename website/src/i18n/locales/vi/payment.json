@@ -1,0 +1,88 @@
+{
+  "title": "Thanh toán",
+  "overview": "Tổng quan thanh toán",
+  "deposits": "Tiền gửi",
+  "depositWallet": "Ví tiền gửi",
+  "paymentPlans": "Kế hoạch thanh toán",
+  "paymentHistory": "Lịch sử thanh toán",
+  "addPayment": "Thêm thanh toán",
+  "editPayment": "Sửa thanh toán",
+  "searchPlaceholder": "Tìm thanh toán...",
+  "columns": {
+    "customer": "Khách hàng",
+    "amount": "Số tiền",
+    "method": "Phương thức",
+    "status": "Trạng thái",
+    "date": "Ngày",
+    "reference": "Mã tham chiếu",
+    "notes": "Ghi chú"
+  },
+  "form": {
+    "customer": "Khách hàng",
+    "amount": "Số tiền",
+    "method": "Phương thức thanh toán",
+    "date": "Ngày thanh toán",
+    "reference": "Số tham chiếu",
+    "notes": "Ghi chú",
+    "selectCustomer": "Chọn khách hàng",
+    "selectMethod": "Chọn phương thức"
+  },
+  "methods": {
+    "cash": "Tiền mặt",
+    "transfer": "Chuyển khoản",
+    "card": "Thẻ tín dụng/ghi nợ",
+    "vietqr": "VietQR",
+    "wallet": "Số dư ví",
+    "installment": "Trả góp"
+  },
+  "status": {
+    "paid": "Đã thanh toán",
+    "pending": "Chờ xử lý",
+    "overdue": "Quá hạn",
+    "refunded": "Đã hoàn tiền",
+    "partial": "Thanh toán một phần"
+  },
+  "deposits": {
+    "title": "Tiền gửi khách hàng",
+    "balance": "Số dư",
+    "addDeposit": "Thêm tiền gửi",
+    "history": "Lịch sử tiền gửi",
+    "noDeposits": "Không có tiền gửi"
+  },
+  "monthlyPlan": {
+    "title": "Kế hoạch thanh toán hàng tháng",
+    "create": "Tạo kế hoạch",
+    "installments": "Đợt thanh toán",
+    "totalAmount": "Tổng số tiền",
+    "paidAmount": "Đã thanh toán",
+    "remainingAmount": "Còn lại",
+    "monthlyPayment": "Thanh toán hàng tháng",
+    "startDate": "Ngày bắt đầu",
+    "endDate": "Ngày kết thúc",
+    "status": "Trạng thái",
+    "installmentNumber": "Đợt #",
+    "dueDate": "Hạn thanh toán",
+    "paidDate": "Ngày thanh toán",
+    "amount": "Số tiền",
+    "schedule": "Lịch thanh toán",
+    "tracker": "Theo dõi đợt thanh toán"
+  },
+  "outstanding": {
+    "title": "Công nợ",
+    "totalOutstanding": "Tổng công nợ",
+    "overdue": "Quá hạn",
+    "dueSoon": "Sắp đến hạn"
+  },
+  "vietqr": {
+    "title": "Thanh toán VietQR",
+    "scanToPay": "Quét mã QR để thanh toán",
+    "accountInfo": "Thông tin tài khoản",
+    "bank": "Ngân hàng",
+    "accountNumber": "Số tài khoản",
+    "accountName": "Tên tài khoản",
+    "amount": "Số tiền",
+    "content": "Nội dung chuyển khoản",
+    "copyContent": "Sao chép nội dung",
+    "copied": "Đã sao chép!"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "title": "Services",
+  "list": "Service List",
+  "addService": "Add Service",
+  "editService": "Edit Service",
+  "serviceCatalog": "Service Catalog",
+  "searchPlaceholder": "Search services...",
+  "columns": {
+    "name": "Service Name",
+    "category": "Category",
+    "price": "Price",
+    "duration": "Duration",
+    "status": "Status",
+    "location": "Location",
+    "description": "Description"
+  },
+  "form": {
+    "name": "Service Name",
+    "category": "Category",
+    "price": "Price",
+    "duration": "Duration (minutes)",
+    "description": "Description",
+    "status": "Status",
+    "location": "Location",
+    "color": "Color"
+  },
+  "categories": {
+    "general": "General Dentistry",
+    "cosmetic": "Cosmetic Dentistry",
+    "orthodontics": "Orthodontics",
+    "oralSurgery": "Oral Surgery",
+    "pediatric": "Pediatric Dentistry",
+    "preventive": "Preventive Care"
+  },
+  "multiVisit": {
+    "title": "Multi-Visit Tracker",
+    "visit": "Visit",
+    "visits": "Visits",
+    "completed": "Completed",
+    "remaining": "Remaining",
+    "progress": "Progress"
+  },
+  "history": {
+    "title": "Service History",
+    "noHistory": "No service history"
+  }
+}

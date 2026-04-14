@@ -1,0 +1,63 @@
+{
+  "title": "Khách hàng",
+  "list": "Danh sách khách hàng",
+  "addCustomer": "Thêm khách hàng",
+  "editCustomer": "Sửa khách hàng",
+  "customerDetails": "Chi tiết khách hàng",
+  "searchPlaceholder": "Tìm khách hàng...",
+  "columns": {
+    "name": "Tên",
+    "phone": "Số điện thoại",
+    "email": "Email",
+    "status": "Trạng thái",
+    "location": "Chi nhánh",
+    "source": "Nguồn",
+    "lastVisit": "Lần đến gần nhất",
+    "totalSpent": "Tổng chi tiêu",
+    "balance": "Số dư",
+    "createdDate": "Ngày tạo",
+    "gender": "Giới tính",
+    "dob": "Ngày sinh",
+    "address": "Địa chỉ",
+    "notes": "Ghi chú"
+  },
+  "profile": {
+    "personalInfo": "Thông tin cá nhân",
+    "contactInfo": "Thông tin liên hệ",
+    "medicalHistory": "Lịch sử y tế",
+    "appointmentHistory": "Lịch sử lịch hẹn",
+    "serviceHistory": "Lịch sử dịch vụ",
+    "paymentHistory": "Lịch sử thanh toán",
+    "assignments": "Phân công",
+    "photos": "Hình ảnh",
+    "healthCheckup": "Khám sức khỏe",
+    "noAppointments": "Chưa có lịch hẹn",
+    "noServices": "Chưa có dịch vụ"
+  },
+  "form": {
+    "fullName": "Họ và tên",
+    "phone": "Số điện thoại",
+    "email": "Email",
+    "gender": "Giới tính",
+    "male": "Nam",
+    "female": "Nữ",
+    "other": "Khác",
+    "dateOfBirth": "Ngày sinh",
+    "address": "Địa chỉ",
+    "location": "Chi nhánh",
+    "source": "Nguồn khách hàng",
+    "referralCode": "Mã giới thiệu",
+    "notes": "Ghi chú",
+    "assignTo": "Phân công cho"
+  },
+  "sources": {
+    "walkIn": "Khách vãng lai",
+    "referral": "Giới thiệu",
+    "facebook": "Facebook",
+    "google": "Google",
+    "website": "Website",
+    "zalo": "Zalo",
+    "tiktok": "TikTok",
+    "other": "Khác"
+  }
+}

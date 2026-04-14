@@ -1,0 +1,88 @@
+{
+  "title": "Payment",
+  "overview": "Payment Overview",
+  "deposits": "Deposits",
+  "depositWallet": "Deposit Wallet",
+  "paymentPlans": "Payment Plans",
+  "paymentHistory": "Payment History",
+  "addPayment": "Add Payment",
+  "editPayment": "Edit Payment",
+  "searchPlaceholder": "Search payments...",
+  "columns": {
+    "customer": "Customer",
+    "amount": "Amount",
+    "method": "Method",
+    "status": "Status",
+    "date": "Date",
+    "reference": "Reference",
+    "notes": "Notes"
+  },
+  "form": {
+    "customer": "Customer",
+    "amount": "Amount",
+    "method": "Payment Method",
+    "date": "Payment Date",
+    "reference": "Reference Number",
+    "notes": "Notes",
+    "selectCustomer": "Select customer",
+    "selectMethod": "Select method"
+  },
+  "methods": {
+    "cash": "Cash",
+    "transfer": "Bank Transfer",
+    "card": "Credit/Debit Card",
+    "vietqr": "VietQR",
+    "wallet": "Wallet Balance",
+    "installment": "Installment"
+  },
+  "status": {
+    "paid": "Paid",
+    "pending": "Pending",
+    "overdue": "Overdue",
+    "refunded": "Refunded",
+    "partial": "Partial"
+  },
+  "deposits": {
+    "title": "Customer Deposits",
+    "balance": "Balance",
+    "addDeposit": "Add Deposit",
+    "history": "Deposit History",
+    "noDeposits": "No deposits"
+  },
+  "monthlyPlan": {
+    "title": "Monthly Payment Plan",
+    "create": "Create Plan",
+    "installments": "Installments",
+    "totalAmount": "Total Amount",
+    "paidAmount": "Paid Amount",
+    "remainingAmount": "Remaining Amount",
+    "monthlyPayment": "Monthly Payment",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "status": "Status",
+    "installmentNumber": "Installment #",
+    "dueDate": "Due Date",
+    "paidDate": "Paid Date",
+    "amount": "Amount",
+    "schedule": "Payment Schedule",
+    "tracker": "Installment Tracker"
+  },
+  "outstanding": {
+    "title": "Outstanding Balance",
+    "totalOutstanding": "Total Outstanding",
+    "overdue": "Overdue",
+    "dueSoon": "Due Soon"
+  },
+  "vietqr": {
+    "title": "VietQR Payment",
+    "scanToPay": "Scan QR code to pay",
+    "accountInfo": "Account Information",
+    "bank": "Bank",
+    "accountNumber": "Account Number",
+    "accountName": "Account Name",
+    "amount": "Amount",
+    "content": "Transfer Content",
+    "copyContent": "Copy Transfer Content",
+    "copied": "Copied!"
+  }
+}

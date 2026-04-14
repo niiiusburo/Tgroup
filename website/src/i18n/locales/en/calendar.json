@@ -1,0 +1,42 @@
+{
+  "title": "Calendar",
+  "dayView": "Day",
+  "weekView": "Week",
+  "monthView": "Month",
+  "today": "Today",
+  "noAppointments": "No appointments",
+  "allDay": "All Day",
+  "appointmentTypes": {
+    "cleaning": "Cleaning",
+    "consultation": "Consultation",
+    "treatment": "Treatment",
+    "surgery": "Surgery",
+    "orthodontics": "Orthodontics",
+    "cosmetic": "Cosmetic",
+    "emergency": "Emergency"
+  },
+  "appointmentDetails": {
+    "title": "Appointment Details",
+    "patient": "Patient",
+    "doctor": "Doctor",
+    "date": "Date",
+    "time": "Time",
+    "duration": "Duration",
+    "status": "Status",
+    "type": "Type",
+    "location": "Location",
+    "notes": "Notes",
+    "color": "Color",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "weekDays": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  }
+}

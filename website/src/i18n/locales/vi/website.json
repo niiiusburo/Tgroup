@@ -1,0 +1,40 @@
+{
+  "title": "Website",
+  "pageList": "Trang",
+  "pageEditor": "Trình soạn trang",
+  "seoManager": "Quản lý SEO",
+  "addPage": "Thêm trang",
+  "editPage": "Sửa trang",
+  "columns": {
+    "title": "Tiêu đề",
+    "slug": "Đường dẫn",
+    "status": "Trạng thái",
+    "lastModified": "Cập nhật lần cuối",
+    "author": "Tác giả"
+  },
+  "editor": {
+    "title": "Tiêu đề trang",
+    "content": "Nội dung",
+    "slug": "Đường dẫn URL",
+    "metaTitle": "Meta Title",
+    "metaDescription": "Meta Description",
+    "featuredImage": "Hình ảnh đại diện",
+    "publish": "Xuất bản",
+    "draft": "Lưu nháp",
+    "preview": "Xem trước"
+  },
+  "seo": {
+    "title": "Cài đặt SEO",
+    "metaTitle": "Meta Title",
+    "metaDescription": "Meta Description",
+    "keywords": "Từ khóa",
+    "ogImage": "OG Image"
+  },
+  "catalog": {
+    "title": "Danh mục dịch vụ",
+    "searchPlaceholder": "Tìm dịch vụ...",
+    "addService": "Thêm vào danh mục",
+    "editService": "Sửa",
+    "categories": "Danh mục"
+  }
+}

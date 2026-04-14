@@ -1,0 +1,71 @@
+{
+  "title": "Nhân viên",
+  "list": "Danh sách nhân viên",
+  "addEmployee": "Thêm nhân viên",
+  "editEmployee": "Sửa nhân viên",
+  "employeeProfile": "Hồ sơ nhân viên",
+  "searchPlaceholder": "Tìm nhân viên...",
+  "columns": {
+    "name": "Tên",
+    "role": "Chức vụ",
+    "tier": "Cấp bậc",
+    "location": "Chi nhánh",
+    "phone": "Số điện thoại",
+    "email": "Email",
+    "status": "Trạng thái",
+    "schedule": "Lịch làm việc",
+    "joinDate": "Ngày vào"
+  },
+  "form": {
+    "fullName": "Họ và tên",
+    "email": "Email",
+    "phone": "Số điện thoại",
+    "role": "Chức vụ",
+    "tier": "Cấp bậc",
+    "location": "Chi nhánh",
+    "status": "Trạng thái",
+    "startDate": "Ngày bắt đầu",
+    "schedule": "Lịch làm việc",
+    "notes": "Ghi chú",
+    "selectRole": "Chọn chức vụ",
+    "selectTier": "Chọn cấp bậc",
+    "selectLocation": "Chọn chi nhánh"
+  },
+  "tiers": {
+    "junior": "Junior",
+    "mid": "Trung cấp",
+    "senior": "Cao cấp",
+    "lead": "Trưởng nhóm",
+    "director": "Giám đốc"
+  },
+  "roles": {
+    "dentist": "Bác sĩ",
+    "assistant": "Phụ tá",
+    "receptionist": "Lễ tân",
+    "manager": "Quản lý",
+    "admin": "Quản trị",
+    "nurse": "Y tá",
+    "hygienist": "Chuyên viên vệ sinh răng"
+  },
+  "schedule": {
+    "title": "Lịch làm việc",
+    "workDays": "Ngày làm việc",
+    "startTime": "Giờ bắt đầu",
+    "endTime": "Giờ kết thúc",
+    "breakStart": "Giờ nghỉ bắt đầu",
+    "breakEnd": "Giờ nghỉ kết thúc"
+  },
+  "profile": {
+    "personalInfo": "Thông tin cá nhân",
+    "workInfo": "Thông tin công việc",
+    "linkedEmployees": "Nhân viên liên kết",
+    "referralCode": "Mã giới thiệu"
+  },
+  "referral": {
+    "title": "Mã giới thiệu",
+    "code": "Mã",
+    "copy": "Sao chép mã",
+    "copied": "Đã sao chép!",
+    "uses": "Tổng lượt sử dụng"
+  }
+}
