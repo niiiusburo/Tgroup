@@ -542,7 +542,7 @@ export function AddCustomerForm({
         {/* ══ LEFT PANEL ════════════════════════════════════════════════════════════ */}
         <div className="w-80 flex-shrink-0 border-r border-gray-200 flex flex-col gap-4 px-5 py-5 overflow-hidden bg-gray-50/30">
           {/* Card 1: Personal Info */}
-          <CardSection title={t('profile.personalInfo', { ns: 'customers' })} icon={User} maxHeight="280px">
+          <CardSection title={t('profileSection.personalInfo', { ns: 'customers' })} icon={User} maxHeight="280px">
             <div className="flex justify-center mb-4">
               <CustomerCameraWidget
                 disabled={!isFieldEditable}
@@ -689,7 +689,7 @@ export function AddCustomerForm({
 
           {/* Card 2: Assignment */}
           <CardSection
-            title={t('profile.assignments', { ns: 'customers' })}
+            title={t('profileSection.assignments', { ns: 'customers' })}
             icon={Briefcase}
             action={<span className="text-xs text-gray-400">{employees.length} nhân viên</span>}
             className="flex-1 min-h-0"

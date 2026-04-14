@@ -182,7 +182,7 @@ export function DayView({
             })}
           </h3>
           <span className="text-xs text-gray-500">
-            {`${appointments.length} ${t('labels.appointments')}`}
+            {`${appointments.length} ${t('labelsAppointments', { ns: 'calendar' })}`}
           </span>
         </div>
       </div>
@@ -191,7 +191,7 @@ export function DayView({
       <div className="p-4 space-y-6 max-h-[calc(100vh-280px)] overflow-y-auto">
         {timeGroups.length === 0 && (
           <div className="py-16 text-center">
-            <p className="text-sm text-gray-400">{`${t('noAppointments')}`}</p>
+            <p className="text-sm text-gray-400">{`${t('noAppointments', { ns: 'calendar' })}`}</p>
           </div>
         )}
 
@@ -204,7 +204,7 @@ export function DayView({
               </span>
               <div className="flex-1 h-px bg-gray-200" />
               <span className="text-[10px] text-gray-300 font-medium">
-                {`${group.appointments.length} ${t('labels.appointments')}`}
+                {`${group.appointments.length} ${t('labelsAppointments', { ns: 'calendar' })}`}
               </span>
             </div>
 

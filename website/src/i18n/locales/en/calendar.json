@@ -80,5 +80,8 @@
   "confirmed": "Confirmed",
   "inProgress": "In Progress",
   "completed": "Completed",
-  "cancelled": "Cancelled"
+  "cancelled": "Cancelled",
+  "labelsAppointments": "Appointments",
+  "appointmentTypeTreatment": "Treatment",
+  "appointmentTypeConsultation": "Consultation"
 }

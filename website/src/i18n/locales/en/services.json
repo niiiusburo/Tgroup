@@ -74,5 +74,7 @@
   "selectDoctor": "Select doctor",
   "selectAssistant": "Select assistant",
   "selectLocation": "Select location",
-  "enterNotes": "Enter notes"
+  "enterNotes": "Enter notes",
+  "totalCost": "Total cost",
+  "collected": "Collected"
 }

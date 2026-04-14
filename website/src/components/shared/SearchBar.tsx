@@ -54,7 +54,7 @@ export function SearchBar({
         type="text"
         value={localValue}
         onChange={(e) => handleChange(e.target.value)}
-        placeholder={placeholder || t('actions.search')}
+        placeholder={placeholder || t('search')}
         className="
           w-full pl-9 pr-9 py-2 rounded-lg border border-gray-200
           bg-white text-sm text-gray-700 placeholder-gray-400

@@ -26,7 +26,7 @@ export function ReportsEmployees() {
   const roleSegs = [
     { label: t('metrics.doctors'), value: data.roles.doctors, color: '#3B82F6' },
     { label: t('metrics.assistants'), value: data.roles.assistants, color: '#10B981' },
-    { label: t('nav.receptionists', 'Receptionists'), value: data.roles.receptionists, color: '#F59E0B' },
+    { label: t('receptionists', { ns: 'nav', defaultValue: 'Receptionists' }), value: data.roles.receptionists, color: '#F59E0B' },
     { label: t('kpi.other'), value: data.roles.total - data.roles.doctors - data.roles.assistants - data.roles.receptionists, color: '#6B7280' },
   ].filter(s => s.value > 0);
 

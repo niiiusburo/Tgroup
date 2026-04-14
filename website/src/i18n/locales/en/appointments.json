@@ -8,9 +8,11 @@
     "scheduled": "Scheduled",
     "confirmed": "Confirmed",
     "inProgress": "In Progress",
+    "in-progress": "In Progress",
     "completed": "Completed",
     "cancelled": "Cancelled",
     "noShow": "No Show",
+    "no-show": "No Show",
     "arrived": "Arrived",
     "pending": "Pending"
   },
@@ -30,7 +32,12 @@
     "selectCustomer": "Select customer",
     "selectDoctor": "Select doctor",
     "selectLocation": "Select location",
-    "enterNotes": "Enter notes"
+    "enterNotes": "Enter notes",
+    "selectPatient": "Select patient",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "patient": "Patient",
+    "selectStatus": "Select status"
   },
   "checkIn": {
     "title": "Check In",

@@ -80,5 +80,8 @@
   "confirmed": "Đã xác nhận",
   "inProgress": "Đang khám",
   "completed": "Hoàn thành",
-  "cancelled": "Hủy hẹn"
+  "cancelled": "Hủy hẹn",
+  "labelsAppointments": "Lịch hẹn",
+  "appointmentTypeTreatment": "Điều trị",
+  "appointmentTypeConsultation": "Tư vấn"
 }

@@ -179,7 +179,7 @@ export function CustomerCameraWidget({
 
       <FaceCaptureModal
         isOpen={showCaptureModal}
-        title={t('profile.customerProfile', { ns: 'customers' })}
+        title={t('customerProfile', { ns: 'customers' })}
         onCapture={handleCapture}
         onCancel={() => {
           setShowCaptureModal(false);

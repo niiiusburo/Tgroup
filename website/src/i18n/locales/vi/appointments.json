@@ -8,9 +8,11 @@
     "scheduled": "Đang hẹn",
     "confirmed": "Đã xác nhận",
     "inProgress": "Đang khám",
+    "in-progress": "Đang khám",
     "completed": "Hoàn thành",
     "cancelled": "Hủy hẹn",
     "noShow": "Quá hẹn",
+    "no-show": "Quá hẹn",
     "arrived": "Đã đến",
     "pending": "Chờ xác nhận"
   },
@@ -30,7 +32,12 @@
     "selectCustomer": "Chọn khách hàng",
     "selectDoctor": "Chọn bác sĩ",
     "selectLocation": "Chọn chi nhánh",
-    "enterNotes": "Nhập ghi chú"
+    "enterNotes": "Nhập ghi chú",
+    "selectPatient": "Chọn bệnh nhân",
+    "startTime": "Giờ bắt đầu",
+    "endTime": "Giờ kết thúc",
+    "patient": "Bệnh nhân",
+    "selectStatus": "Chọn trạng thái"
   },
   "checkIn": {
     "title": "Check In",

@@ -453,7 +453,7 @@ export function CustomerProfile({
       {activeTab === 'appointments' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">{t('profile.appointmentHistory')} ({appointments.length})</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('profileSection.appointmentHistory', { ns: 'customers' })} ({appointments.length})</h3>
             <button
               onClick={() => { setEditingAppointment(null); setShowAppointmentModal(true); }}
               disabled={!onCreateAppointment}
@@ -500,7 +500,7 @@ export function CustomerProfile({
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium text-gray-900">{apt.name || 'Appointment'}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded ${statusConfig.className}`}>{t(`customers.profile.${statusConfig.label}`)}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded ${statusConfig.className}`}>{t(`status.${statusConfig.label}`, { ns: 'appointments' })}</span>
                         </div>
                         <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
                           <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{time}</span>
@@ -523,7 +523,7 @@ export function CustomerProfile({
       {activeTab === 'records' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">{t('profile.serviceHistory')}</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('profileSection.serviceHistory', { ns: 'customers' })}</h3>
             {onCreateService && (
               <button
                 onClick={() => setShowServiceModal(true)}
@@ -565,7 +565,7 @@ export function CustomerProfile({
                   <Receipt className="w-5 h-5 text-rose-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-gray-500 truncate">{t('profile.expectedRevenue')}</p>
+                  <p className="text-xs text-gray-500 truncate">{t('profileSection.expectedRevenue', { ns: 'customers' })}</p>
                   <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(profile.outstandingBalance)}</p>
                 </div>
               </div>
@@ -576,7 +576,7 @@ export function CustomerProfile({
                   <HandCoins className="w-5 h-5 text-orange-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-gray-500 truncate">{t('profile.deposit')}</p>
+                  <p className="text-xs text-gray-500 truncate">{t('profileSection.deposit', { ns: 'customers' })}</p>
                   <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(profile.depositBalance)}</p>
                 </div>
               </div>
@@ -600,7 +600,7 @@ export function CustomerProfile({
           {/* Bill summary — 3 columns */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
-              <p className="text-xs text-gray-500 mb-1">{t('profile.totalCost')}</p>
+              <p className="text-xs text-gray-500 mb-1">{t('profileSection.totalCost', { ns: 'customers' })}</p>
               <p className="text-lg font-bold text-gray-900">{formatVND(totalServiceCost)}</p>
             </div>
             <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">

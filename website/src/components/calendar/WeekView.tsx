@@ -22,45 +22,45 @@ interface WeekViewProps {
 }
 
 // Status configuration matching reference image
-const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string; border: string }> = {
+const STATUS_CONFIG: Record<string, { labelKey: string; bg: string; text: string; border: string }> = {
   arrived: {
-    label: 'Đã đến',
+    labelKey: 'arrived',
     bg: 'bg-emerald-50',
     text: 'text-emerald-700',
     border: 'border-emerald-200',
   },
   confirmed: {
-    label: 'Đang hẹn',
+    labelKey: 'confirmed',
     bg: 'bg-blue-50',
     text: 'text-blue-700',
     border: 'border-blue-200',
   },
   scheduled: {
-    label: 'Đang hẹn',
+    labelKey: 'scheduled',
     bg: 'bg-blue-50',
     text: 'text-blue-700',
     border: 'border-blue-200',
   },
   cancelled: {
-    label: 'Hủy hẹn',
+    labelKey: 'cancelled',
     bg: 'bg-red-50',
     text: 'text-red-700',
     border: 'border-red-200',
   },
   'no-show': {
-    label: 'Quá hẹn',
+    labelKey: 'no-show',
     bg: 'bg-amber-50',
     text: 'text-amber-700',
     border: 'border-amber-200',
   },
   completed: {
-    label: 'Hoàn thành',
+    labelKey: 'completed',
     bg: 'bg-gray-50',
     text: 'text-gray-700',
     border: 'border-gray-200',
   },
   'in-progress': {
-    label: 'Đang khám',
+    labelKey: 'in-progress',
     bg: 'bg-purple-50',
     text: 'text-purple-700',
     border: 'border-purple-200',
@@ -103,6 +103,7 @@ function AppointmentCard({
   readonly onEdit?: (apt: CalendarAppointment) => void;
 }) {
   const statusConfig = STATUS_CONFIG[appointment.status] || STATUS_CONFIG.scheduled;
+  const { t } = useTranslation('appointments');
   const cardStyles = getCardStyles(appointment);
 
   return (
@@ -122,7 +123,7 @@ function AppointmentCard({
           statusConfig.text
         )}
       >
-        {statusConfig.label}
+        {t(`status.${statusConfig.labelKey}`)}
       </span>
 
       {/* Customer name */}
@@ -235,7 +236,7 @@ export function WeekView({
                 {sortedAppointments.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-24 text-gray-300">
                     <CalendarDays className="w-6 h-6 mb-1" />
-                    <span className="text-xs">{`${t('noAppointments')}`}</span>
+                    <span className="text-xs">{`${t('noAppointments', { ns: 'calendar' })}`}</span>
                   </div>
                 ) : (
                   sortedAppointments.map((apt) => (

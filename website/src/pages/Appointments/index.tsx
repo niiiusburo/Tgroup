@@ -287,7 +287,7 @@ export function Appointments() {
                           className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/5 rounded-lg transition-colors"
                         >
                           <Edit2 className="w-4 h-4" />
-                          {t('form.edit', { ns: 'common' })}
+                          {t('edit', { ns: 'common' })}
                         </button>
                       </div>
 

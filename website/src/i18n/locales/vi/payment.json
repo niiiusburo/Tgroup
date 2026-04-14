@@ -168,5 +168,6 @@
   "outstandingBalances": "Danh sách công nợ",
   "noPlans": "Không có kế hoạch",
   "selectPlan": "Chọn kế hoạch để xem chi tiết",
-  "clickPlan": "Nhấp vào kế hoạch bất kỳ từ danh sách"
+  "clickPlan": "Nhấp vào kế hoạch bất kỳ từ danh sách",
+  "enterAmount": "Nhập số tiền"
 }

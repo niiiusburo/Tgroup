@@ -146,7 +146,7 @@ export function AppointmentDetailsModal({
             onClick={onClose}
             className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
           >
-            {t('common.close')}
+            {t('close', { ns: 'common' })}
           </button>
           {onEdit && (
             <button

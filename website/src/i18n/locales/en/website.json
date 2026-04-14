@@ -38,5 +38,6 @@
     "categories": "Categories"
   },
   "subtitle": "Content management, services catalog, and SEO",
-  "noPageSelected": "No page selected for editing"
+  "noPageSelected": "No page selected for editing",
+  "searchPlaceholder": "Search pages..."
 }

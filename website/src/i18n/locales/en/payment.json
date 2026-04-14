@@ -168,5 +168,6 @@
   "outstandingBalances": "Outstanding Balances",
   "noPlans": "No plans found",
   "selectPlan": "Select a plan to view details",
-  "clickPlan": "Click on any plan from the list"
+  "clickPlan": "Click on any plan from the list",
+  "enterAmount": "Enter amount"
 }

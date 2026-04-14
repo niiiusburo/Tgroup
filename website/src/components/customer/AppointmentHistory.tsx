@@ -1,4 +1,5 @@
 import { CalendarCheck, Clock, MapPin, User, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { CustomerAppointment } from '@/types/customer';
 
 /**
@@ -12,25 +13,27 @@ interface AppointmentHistoryProps {
 }
 
 const STATUS_CONFIG = {
-  completed: { icon: CheckCircle2, label: 'Completed', className: 'text-emerald-600 bg-emerald-50' },
-  cancelled: { icon: XCircle, label: 'Cancelled', className: 'text-red-600 bg-red-50' },
-  'no-show': { icon: AlertTriangle, label: 'No Show', className: 'text-amber-600 bg-amber-50' },
+  completed: { icon: CheckCircle2, labelKey: 'completed', className: 'text-emerald-600 bg-emerald-50' },
+  cancelled: { icon: XCircle, labelKey: 'cancelled', className: 'text-red-600 bg-red-50' },
+  'no-show': { icon: AlertTriangle, labelKey: 'no-show', className: 'text-amber-600 bg-amber-50' },
 } as const;
 
 export function AppointmentHistory({ appointments, limit }: AppointmentHistoryProps) {
   const displayAppointments = limit ? appointments.slice(0, limit) : appointments;
+  const { t } = useTranslation('customers');
+  const { t: tApt } = useTranslation('appointments');
   return (
     <div className="bg-white rounded-xl shadow-card p-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <CalendarCheck className="w-5 h-5 text-primary" />
-          <h3 className="font-semibold text-gray-900">Appointment History</h3>
+          <h3 className="font-semibold text-gray-900">{t('appointmentHistory')}</h3>
           <span className="text-xs text-gray-400">({appointments.length}{limit && appointments.length > limit ? `+` : ''})</span>
         </div>
       </div>
 
       {appointments.length === 0 ? (
-        <div className="text-center py-8 text-gray-400 text-sm">No appointment history</div>
+        <div className="text-center py-8 text-gray-400 text-sm">{t('noAppointmentHistory')}</div>
       ) : (
         <div className="space-y-3">
           {displayAppointments.map((apt) => {
@@ -61,7 +64,7 @@ export function AppointmentHistory({ appointments, limit }: AppointmentHistoryPr
                   </div>
                   <span className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${statusConfig.className}`}>
                     <StatusIcon className="w-3 h-3" />
-                    {statusConfig.label}
+                    {tApt(`status.${statusConfig.labelKey}`)}
                   </span>
                 </div>
                 {apt.notes && (

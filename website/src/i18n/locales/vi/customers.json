@@ -22,6 +22,15 @@
     "notes": "Ghi chú"
   },
   "profile": "Hồ sơ",
+  "profileSection": {
+    "appointmentHistory": "Lịch sử lịch hẹn",
+    "serviceHistory": "Lịch sử dịch vụ",
+    "expectedRevenue": "Doanh thu dự kiến",
+    "deposit": "Tạm ứng",
+    "totalCost": "Tổng chi phí",
+    "personalInfo": "Thông tin cá nhân",
+    "assignments": "CSKH"
+  },
   "customerProfile": "Hồ sơ khách hàng",
   "viewAndManage": "Xem và quản lý thông tin khách hàng",
   "assignments": "CSKH",
@@ -55,5 +64,10 @@
   "noResults": "Không tìm thấy kết quả",
   "appointments": "Lịch hẹn",
   "records": "Hồ sơ",
-  "payment": "Thanh toán"
+  "payment": "Thanh toán",
+  "loadingProfile": "Đang tải hồ sơ...",
+  "searchToView": "Tìm khách hàng để xem hồ sơ",
+  "relatedData": "Dữ liệu liên quan",
+  "appointmentHistory": "Lịch sử lịch hẹn",
+  "noAppointmentHistory": "Không có lịch sử lịch hẹn"
 }

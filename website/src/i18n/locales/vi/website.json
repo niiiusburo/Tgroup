@@ -38,5 +38,6 @@
     "categories": "Danh mục"
   },
   "subtitle": "Quản lý nội dung, danh mục dịch vụ và SEO",
-  "noPageSelected": "Chưa chọn trang để chỉnh sửa"
+  "noPageSelected": "Chưa chọn trang để chỉnh sửa",
+  "searchPlaceholder": "Tìm trang..."
 }

@@ -74,5 +74,7 @@
   "selectDoctor": "Chọn bác sĩ",
   "selectAssistant": "Chọn phụ tá",
   "selectLocation": "Chọn chi nhánh",
-  "enterNotes": "Nhập ghi chú"
+  "enterNotes": "Nhập ghi chú",
+  "totalCost": "Tổng chi phí",
+  "collected": "Đã thu"
 }

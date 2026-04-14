@@ -138,13 +138,13 @@ export function MonthView({
                   {counts.completed > 0 && (
                     <div className="flex items-center gap-1 text-[10px] text-gray-600">
                       <CheckCircle className="w-3 h-3" />
-                      <span>{t('appointmentTypes.treatment')}: ({counts.completed})</span>
+                      <span>{t('appointmentTypes.treatment', { ns: 'calendar' })}: ({counts.completed})</span>
                     </div>
                   )}
                   {counts.inProgress > 0 && (
                     <div className="flex items-center gap-1 text-[10px] text-purple-600">
                       <AlertCircle className="w-3 h-3" />
-                      <span>{t('appointmentTypes.consultation')}: ({counts.inProgress})</span>
+                      <span>{t('appointmentTypes.consultation', { ns: 'calendar' })}: ({counts.inProgress})</span>
                     </div>
                   )}
                 </div>

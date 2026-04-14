@@ -22,6 +22,15 @@
     "notes": "Notes"
   },
   "profile": "Profile",
+  "profileSection": {
+    "appointmentHistory": "Appointment History",
+    "serviceHistory": "Service History",
+    "expectedRevenue": "Expected Revenue",
+    "deposit": "Deposit",
+    "totalCost": "Total Cost",
+    "personalInfo": "Personal Info",
+    "assignments": "CSKH"
+  },
   "customerProfile": "Customer Profile",
   "viewAndManage": "View and manage customer information",
   "assignments": "CSKH",
@@ -55,5 +64,10 @@
   "noResults": "No results found",
   "appointments": "Appointments",
   "records": "Records",
-  "payment": "Payment"
+  "payment": "Payment",
+  "loadingProfile": "Loading profile...",
+  "searchToView": "Search for a customer to view their profile",
+  "relatedData": "Related Data",
+  "appointmentHistory": "Appointment History",
+  "noAppointmentHistory": "No appointment history"
 }
