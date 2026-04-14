@@ -6,8 +6,10 @@
  */
 
 import { Bell, Mail, MessageSquare, Send } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function Notifications() {
+  const { t } = useTranslation('common');
   return (
     <div className="space-y-6">
       {/* Page header */}
@@ -17,7 +19,7 @@ export function Notifications() {
             <Bell className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('notifications', { ns: 'nav' })}</h1>
             <p className="text-sm text-gray-500">SMS and email notification management</p>
           </div>
         </div>

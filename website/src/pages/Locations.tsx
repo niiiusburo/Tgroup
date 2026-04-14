@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MapPin, Plus, Search, Building2, Phone, Mail, Clock, Check, FileText } from 'lucide-react';
 import { LocationCard } from '@/components/locations/LocationCard';
 import { LocationDetail } from '@/components/locations/LocationDetail';
@@ -12,6 +13,7 @@ import { STATUS_LABELS, type LocationStatus, type LocationBranch } from '@/data/
  * @crossref:uses[LocationCard, LocationDetail, LocationDashboard, useLocations]
  */
 export function Locations() {
+  const { t } = useTranslation('locations');
   const {
     locations,
     selectedLocation,
@@ -54,7 +56,7 @@ export function Locations() {
             <MapPin className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Locations</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
             <p className="text-sm text-gray-500">Manage clinic locations and branches</p>
           </div>
         </div>

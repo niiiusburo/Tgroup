@@ -1,5 +1,6 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useCalendarData, type ViewMode, type CalendarStatusFilter } from '@/hooks/useCalendarData';
 import { normalizeText } from '@/lib/utils';
@@ -45,6 +46,7 @@ const STATUS_TABS: readonly { readonly value: CalendarStatusFilter; readonly lab
 ];
 
 export function Calendar() {
+  const { t } = useTranslation('calendar');
   const { selectedLocationId } = useLocationFilter();
   const {
     viewMode,
@@ -220,7 +222,7 @@ export function Calendar() {
           <CalendarIcon className="w-6 h-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Lịch hẹn</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
           <p className="text-sm text-gray-500">Quản lý lịch hẹn khám bệnh</p>
         </div>
       </div>

@@ -1,5 +1,6 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Users, Plus, Phone, Mail, MapPin, Search, Trash2 } from 'lucide-react';
 import { softDeletePartner, hardDeletePartner, registerFace, fetchDotKhams } from '@/lib/api';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -152,6 +153,7 @@ function buildCustomerColumns(locationNameMap: Map<string, string>, canSoftDelet
 }
 
 export function Customers() {
+  const { t } = useTranslation('customers');
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
@@ -810,7 +812,7 @@ export function Customers() {
             <Users className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
             <p className="text-sm text-gray-500">{stats.total} patients · {stats.active} active</p>
           </div>
         </div>

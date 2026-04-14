@@ -61,6 +61,7 @@ import type { AppointmentType } from '@/constants';
 import type { Customer } from '@/types/customer';
 import type { Employee } from '@/types/employee';
 import type { Product } from '@/hooks/useProducts';
+import { useTranslation } from 'react-i18next';
 
 interface Location {
   id: string;
@@ -116,6 +117,7 @@ function getCurrentTimeStr() {
 }
 
 export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false }: AppointmentFormProps) {
+  const { t } = useTranslation('appointments');
   const { selectedLocationId } = useLocationFilter();
 
   // Fetch real data from API
@@ -238,14 +240,14 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
 
   function validate(): boolean {
     const newErrors: Record<string, string> = {};
-    if (!customerId) newErrors.customer = 'Vui lòng chọn khách hàng';
-    if (!doctorId) newErrors.doctor = 'Vui lòng chọn bác sĩ';
-    if (!locationId) newErrors.location = 'Vui lòng chọn chi nhánh';
-    if (!date) newErrors.date = 'Vui lòng chọn ngày';
-    if (!startTime) newErrors.startTime = 'Vui lòng chọn giờ bắt đầu';
+    if (!customerId) newErrors.customer = t('form.selectPatient');
+    if (!doctorId) newErrors.doctor = t('form.selectDoctor');
+    if (!locationId) newErrors.location = t('form.selectLocation');
+    if (!date) newErrors.date = t('form.date');
+    if (!startTime) newErrors.startTime = t('form.startTime');
     // endTime is optional — only validate if provided
     if (endTime && startTime && endTime <= startTime) {
-      newErrors.endTime = 'Giờ kết thúc phải sau giờ bắt đầu';
+      newErrors.endTime = t('form.endTime');
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -320,10 +322,10 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">
-                  {isEdit ? 'Sửa lịch hẹn' : 'Tạo lịch hẹn'}
+                  {isEdit ? t('editAppointment') : t('addAppointment')}
                 </h2>
                 <p className="text-sm text-orange-100 mt-0.5">
-                  {isEdit ? 'Cập nhật thông tin lịch hẹn' : 'Đặt lịch hẹn mới cho bệnh nhân'}
+                  {isEdit ? t('editAppointment') : t('addAppointment')}
                 </p>
               </div>
             </div>
@@ -359,7 +361,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                 {isEdit ? (
                   <div className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border bg-gray-50 border-gray-200 text-gray-700">
                     <User className="w-4 h-4 text-gray-400 shrink-0" />
-                    <span className="flex-1 truncate font-medium">{initialData?.customerName || 'Không xác định'}</span>
+                    <span className="flex-1 truncate font-medium">{initialData?.customerName || t('form.selectPatient')}</span>
                     <span className="text-xs text-gray-400">{initialData?.customerPhone}</span>
                   </div>
                 ) : (
@@ -404,7 +406,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
               <DatePicker
                 value={date}
                 onChange={setDate}
-                label="Ngày hẹn"
+                label={t('form.date')}
                 icon={<Calendar className="w-3.5 h-3.5" />}
                 error={errors.date}
               />
@@ -414,7 +416,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                 <TimePicker
                   value={startTime}
                   onChange={setStartTime}
-                  label="Giờ bắt đầu"
+                  label={t('form.startTime')}
                   icon={<Clock className="w-3.5 h-3.5" />}
                   error={errors.startTime}
                   interval={15}
@@ -626,7 +628,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
             disabled={isLoading || isSaving}
             className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25"
           >
-            {isEdit ? 'Cập nhật' : 'Tạo lịch hẹn'}
+            {isEdit ? 'Cập nhật' : t('addAppointment')}
           </button>
         </div>
       </div>

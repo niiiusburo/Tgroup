@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Search, Plus, Pencil, Trash2, EyeOff, Eye, ChevronLeft, ChevronRight,
   X, Loader2,
@@ -246,6 +247,7 @@ function CategoryAddModal({ isOpen, onClose, onSubmit }: CategoryAddModalProps) 
 // ─── Main Page ───────────────────────────────────────────────────
 
 export function ServiceCatalog() {
+  const { t } = useTranslation('services');
   // Data state
   const [categories, setCategories] = useState<ApiProductCategory[]>([]);
   const [products, setProducts] = useState<ApiProduct[]>([]);
@@ -389,7 +391,7 @@ export function ServiceCatalog() {
     <div className="space-y-4">
       {/* Page header */}
       <div>
-        <h1 className="text-xl font-bold text-gray-900">Thông tin sản phẩm</h1>
+        <h1 className="text-xl font-bold text-gray-900">{t('serviceCatalog')}</h1>
         {/* Tabs */}
         <div className="flex gap-1 mt-3">
           <button type="button" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg">

@@ -6,6 +6,7 @@
  */
 
 import { Network, Shield, GitBranch } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useRelationshipsData } from '@/hooks/useRelationshipsData';
 import { PermissionMatrix } from '@/components/relationships/PermissionMatrix';
 import { EntityRelationshipMap } from '@/components/relationships/EntityRelationshipMap';
@@ -17,6 +18,7 @@ const TABS: readonly { readonly id: RelationshipsTab; readonly label: string; re
 ];
 
 export function Relationships() {
+  const { t } = useTranslation('common');
   const {
     activeTab,
     setActiveTab,
@@ -44,7 +46,7 @@ export function Relationships() {
             <Network className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Relationships & Permissions</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('relationships', { ns: 'nav' })}</h1>
             <p className="text-sm text-gray-500">
               Role-based access control and entity connections
             </p>

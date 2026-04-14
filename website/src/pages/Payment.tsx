@@ -7,6 +7,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   CreditCard, Plus, Search, Wallet, Receipt,
   CalendarRange, AlertCircle,
@@ -31,6 +32,7 @@ const PLAN_STATUS_FILTERS: readonly { readonly value: PlanStatus | 'all'; readon
 ];
 
 export function Payment() {
+  const { t } = useTranslation('payment');
   const { selectedLocationId } = useLocationFilter();
   const [activeTab, setActiveTab] = useState<ActiveTab>('payments');
   const [showCreator, setShowCreator] = useState(false);
@@ -81,7 +83,7 @@ export function Payment() {
             <CreditCard className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Payments</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
             <p className="text-sm text-gray-500">Manage payments, wallets, and installment plans</p>
           </div>
         </div>

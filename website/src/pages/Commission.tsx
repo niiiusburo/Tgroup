@@ -5,8 +5,10 @@
  */
 
 import { Percent, Users, BarChart3 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function Commission() {
+  const { t } = useTranslation('common');
   return (
     <div className="space-y-6">
       {/* Page header */}
@@ -16,7 +18,7 @@ export function Commission() {
             <Percent className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Commission</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('commission', { ns: 'nav' })}</h1>
             <p className="text-sm text-gray-500">Track and manage employee commissions</p>
           </div>
         </div>

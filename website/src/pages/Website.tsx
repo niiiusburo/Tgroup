@@ -1,4 +1,5 @@
 import { Globe, FileText, Palette, Search, LayoutList } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useWebsiteData } from '@/hooks/useWebsiteData';
 import type { WebsiteTab } from '@/hooks/useWebsiteData';
 import { PageList } from '@/components/website/PageList';
@@ -27,6 +28,7 @@ const TABS: readonly TabConfig[] = [
 ];
 
 export function Website() {
+  const { t } = useTranslation('website');
   const {
     activeTab,
     setActiveTab,
@@ -59,7 +61,7 @@ export function Website() {
             <Globe className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Website</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
             <p className="text-sm text-gray-500">Content management, services catalog, and SEO</p>
           </div>
         </div>
