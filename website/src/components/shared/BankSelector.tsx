@@ -4,6 +4,7 @@
  */
 
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, ChevronDown, X, Check, Loader2, Landmark } from 'lucide-react';
 import { normalizeText } from '@/lib/utils';
 
@@ -33,6 +34,7 @@ export function BankSelector({
   disabled = false,
   className = '',
 }: BankSelectorProps) {
+  const { t } = useTranslation('settings');
   const [banks, setBanks] = useState<readonly Bank[]>([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -200,7 +202,7 @@ export function BankSelector({
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Tìm theo tên, mã, BIN..."
+                placeholder={t('bankSettingsContent.selectBank', { ns: 'settings' })}
                 className="w-full pl-8 pr-3 py-1.5 text-sm rounded-md border border-gray-200 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
                 autoFocus
               />

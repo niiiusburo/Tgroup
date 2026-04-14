@@ -698,7 +698,7 @@ async function main() {
         method: 'bank',
         notes: deposit.note || null,
         payment_date: deposit.date ? deposit.date.toISOString().slice(0, 10) : null,
-        reference_code: deposit.name || null,
+        reference_code: null,
         status: 'posted',
         deposit_used: 0,
         cash_amount: 0,

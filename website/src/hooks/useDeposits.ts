@@ -35,6 +35,7 @@ export interface DepositBalance {
 function formatMethod(method: string): string {
   const map: Record<string, string> = {
     cash: 'Tiền mặt',
+    bank: 'Ngân hàng',
     bank_transfer: 'Chuyển khoản',
     deposit: 'Ví cọc',
     mixed: 'Kết hợp',

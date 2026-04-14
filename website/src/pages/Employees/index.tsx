@@ -8,6 +8,7 @@ import { TierSelector } from '@/components/employees/TierSelector';
 import { RoleMultiSelect } from '@/components/employees/RoleMultiSelect';
 import { EmployeeTable } from '@/components/employees/EmployeeTable';
 import { EmployeeProfile } from '@/components/employees/EmployeeProfile';
+import { useTranslation } from 'react-i18next';
 import { EmployeeForm } from '@/components/employees/EmployeeForm';
 
 /**
@@ -17,6 +18,7 @@ import { EmployeeForm } from '@/components/employees/EmployeeForm';
  * @crossref:uses[EmployeeTable, EmployeeProfile, TierSelector, useLocationFilter, EmployeeForm]
  */
 export function Employees() {
+  const { t } = useTranslation('employees');
   const { selectedLocationId } = useLocationFilter();
   const {
     employees,
@@ -93,7 +95,7 @@ export function Employees() {
             <UserCog className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Employees</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
             <p className="text-sm text-gray-500">
               {employees.length} staff member{employees.length !== 1 ? 's' : ''}
               {hasFilters ? ' (filtered)' : ''}
@@ -104,7 +106,7 @@ export function Employees() {
           onClick={handleAddEmployee}
           className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
         >
-          Add Employee
+          {t('addEmployee')}
         </button>
       </div>
 
@@ -116,7 +118,7 @@ export function Employees() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Search by name or email..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"

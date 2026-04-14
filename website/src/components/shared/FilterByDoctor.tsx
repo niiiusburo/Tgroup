@@ -1,5 +1,6 @@
 import { Stethoscope, X, ChevronDown, Search, Check } from 'lucide-react';
 import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn, normalizeText } from '@/lib/utils';
 
 /**
@@ -24,6 +25,7 @@ interface FilterByDoctorProps {
 }
 
 export function FilterByDoctor({ selectedDoctorName, onChange, doctors = [], className = '' }: FilterByDoctorProps) {
+  const { t } = useTranslation('appointments');
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -176,7 +178,7 @@ export function FilterByDoctor({ selectedDoctorName, onChange, doctors = [], cla
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Tìm bác sĩ..."
+                placeholder={t('searchPlaceholder', { ns: 'appointments' })}
                 className="w-full pl-7 pr-2 py-1.5 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
               />
             </div>
