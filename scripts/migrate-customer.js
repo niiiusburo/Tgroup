@@ -230,6 +230,14 @@ async function main() {
       [customer.id]
     );
 
+    // Deposits / advances (separate table in real DB)
+    const { rows: realDeposits } = await real.query(
+      `SELECT * FROM dbo.partneradvances
+       WHERE partnerid = $1 AND state = 'confirmed'
+       ORDER BY date`,
+      [customer.id]
+    );
+
     // Accountpayments (for reference_code / receipt numbers)
     const { rows: realAccountPayments } = await real.query(
       `SELECT name, communication, paymentdate, amount
@@ -240,8 +248,11 @@ async function main() {
     const apMap = new Map();
     for (const ap of realAccountPayments) {
       const key = (ap.communication || '').trim();
-      if (key && !apMap.has(key)) {
+      if (!key) continue;
+      if (!apMap.has(key)) {
         apMap.set(key, ap.name);
+      } else {
+        apMap.set(key, `${apMap.get(key)}, ${ap.name}`);
       }
     }
 
@@ -337,6 +348,9 @@ async function main() {
     const doctorIds = [...new Set([
       ...realAppts.map((a) => a.doctorid).filter(Boolean),
       ...realOrders.map((o) => o.doctorid).filter(Boolean),
+      ...realLines.map((l) => l.employeeid).filter(Boolean),
+      ...realLines.map((l) => l.assistantid).filter(Boolean),
+      ...realLines.map((l) => l.counselorid).filter(Boolean),
     ])];
     const doctorMap = {}; // realDoctorId → demoPartnerId
 
@@ -374,9 +388,9 @@ async function main() {
         namenosign: emp.name,
         employee: true,
         customer: false,
-        isdoctor: true,
-        isassistant: false,
-        isreceptionist: false,
+        isdoctor: !!emp.isdoctor,
+        isassistant: !!emp.isassistant,
+        isreceptionist: !!emp.isreceptionist,
         active: true,
         companyid: emp.companyid,
         phone: emp.phone || null,
@@ -527,13 +541,19 @@ async function main() {
         continue;
       }
 
+      // Resolve employee assignments from saleorderlines (old DB stores them per-line)
+      const firstLine = orderLines[0] || {};
+      const lineDoctorId = firstLine.employeeid;
+      const lineAssistantId = firstLine.assistantid;
+      const lineCounselorId = firstLine.counselorid;
+
       // Map columns: real → demo
       const mappedOrder = {
         id: order.id,
         name: order.name,
         partnerid: order.partnerid,
         companyid: order.companyid,
-        doctorid: doctorMap[order.doctorid] || null,
+        doctorid: doctorMap[lineDoctorId] || doctorMap[order.doctorid] || null,
         amounttotal: order.amounttotal,
         residual: order.residual,
         totalpaid: order.totalpaid,
@@ -542,10 +562,11 @@ async function main() {
         datecreated: order.datecreated,
         lastupdated: order.lastupdated,
         notes: order.note || null,
-        assistantid: null,
+        code: order.code || null,
+        assistantid: doctorMap[lineAssistantId] || doctorMap[lineCounselorId] || null,
         quantity: 1,
         unit: 'răng',
-        dentalaideid: null,
+        dentalaideid: (doctorMap[lineAssistantId] && doctorMap[lineCounselorId]) ? doctorMap[lineCounselorId] : null,
         datestart: order.dateorder || order.datecreated,
         dateend: null,
       };
@@ -616,9 +637,14 @@ async function main() {
       const mappedPayment = {
         id: payment.id,
         customer_id: payment.partnerid,
-        service_id: null,
+        service_id: payment.orderid || null,
         amount: paymentAmount,
-        method: 'cash',
+        method: (() => {
+          const note = (payment.note || '').toLowerCase();
+          if (note.includes('ck')) return 'bank_transfer';
+          if (note.includes('tm')) return 'cash';
+          return 'cash';
+        })(),
         notes: payment.note || null,
         payment_date: payment.date ? payment.date.toISOString().slice(0, 10) : null,
         reference_code: apMap.get((payment.note || '').trim()) || null,
@@ -654,6 +680,45 @@ async function main() {
         await demo.query(allocIns.sql, allocIns.params);
       }
       log.ok(`Payment ${parseFloat(payment.amount).toLocaleString('vi-VN')}₫ → order ${payment.orderid?.slice(0, 8)}...`);
+    }
+
+    // ── 9b. Insert deposits (partneradvances) ──────────────────────────
+    for (const deposit of realDeposits) {
+      if (parseFloat(deposit.amount) === 0) {
+        log.skip(`Deposit ${deposit.id.slice(0, 8)}... — amount=0`);
+        continue;
+      }
+
+      const depositAmount = parseFloat(deposit.amount);
+      const mappedDeposit = {
+        id: deposit.id,
+        customer_id: deposit.partnerid,
+        service_id: null,
+        amount: depositAmount,
+        method: 'bank',
+        notes: deposit.note || null,
+        payment_date: deposit.date ? deposit.date.toISOString().slice(0, 10) : null,
+        reference_code: deposit.name || null,
+        status: 'posted',
+        deposit_used: 0,
+        cash_amount: 0,
+        bank_amount: depositAmount,
+        receipt_number: deposit.name || null,
+        deposit_type: 'deposit',
+      };
+
+      const exists = await demo.query(`SELECT id FROM dbo.payments WHERE id = $1`, [deposit.id]);
+      if (exists.rows.length > 0) {
+        log.skip(`Deposit ${deposit.id.slice(0, 8)}... already exists`);
+        continue;
+      }
+
+      if (!opts.dryRun) {
+        const ins = buildInsert('payments', mappedDeposit, demoPaymentsCols);
+        await demo.query(ins.sql, ins.params);
+        // No payment_allocations for pure deposits
+      }
+      log.ok(`Deposit ${depositAmount.toLocaleString('vi-VN')}₫ → ${deposit.name} (bank)`);
     }
 
     // ── 10. Update saleorder totalpaid/residual ────────────────────────
