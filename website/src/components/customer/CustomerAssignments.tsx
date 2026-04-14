@@ -97,7 +97,7 @@ export function CustomerAssignments({
         />
         <AssignmentField
           icon={Headphones}
-          label={t('profile.assignments', { ns: 'customers' })}
+          label={t('assignments', { ns: 'customers' })}
           value={cskhName || resolveName(cskhId, employeeList)}
         />
         <AssignmentField

@@ -22,6 +22,9 @@
     "notes": "Notes"
   },
   "profile": "Profile",
+  "customerProfile": "Customer Profile",
+  "viewAndManage": "View and manage customer information",
+  "assignments": "CSKH",
   "form": {
     "fullName": "Full Name",
     "phone": "Phone Number",

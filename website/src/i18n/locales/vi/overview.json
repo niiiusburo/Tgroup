@@ -12,7 +12,14 @@
     "title": "Lịch trình ngày",
     "searchPlaceholder": "Tìm kiếm dịch vụ...",
     "noServices": "Không có dịch vụ hôm nay",
-    "servicesCount": "{count} dịch vụ"
+    "servicesCount": "{count} dịch vụ",
+    "filterAll": "Tất cả",
+    "filterWaiting": "Đang chờ",
+    "filterInProgress": "Đang khám",
+    "filterCompleted": "Hoàn thành",
+    "noPatients": "Không có bệnh nhân",
+    "noPatientsHint": "Bệnh nhân chờ check-in sẽ hiển thị ở đây",
+    "changeStatus": "Đổi trạng thái"
   },
   "zone2": {
     "title": "Hàng đợi check-in",

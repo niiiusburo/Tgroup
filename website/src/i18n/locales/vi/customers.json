@@ -22,6 +22,9 @@
     "notes": "Ghi chú"
   },
   "profile": "Hồ sơ",
+  "customerProfile": "Hồ sơ khách hàng",
+  "viewAndManage": "Xem và quản lý thông tin khách hàng",
+  "assignments": "CSKH",
   "form": {
     "fullName": "Họ và tên",
     "phone": "Số điện thoại",

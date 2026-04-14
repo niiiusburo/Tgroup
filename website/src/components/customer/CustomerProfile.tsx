@@ -229,8 +229,8 @@ export function CustomerProfile({
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">{t('profile.customerProfile')}</h1>
-          <p className="text-sm text-gray-500">{t('profile.viewAndManage')}</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('customerProfile', { ns: 'customers' })}</h1>
+          <p className="text-sm text-gray-500">{t('viewAndManage', { ns: 'customers' })}</p>
         </div>
         {onEdit && (
           <button onClick={onEdit} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
@@ -414,7 +414,7 @@ export function CustomerProfile({
                   isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
-                {t(`customers.profile.${tab.label}`)}
+                {t(tab.label, { ns: 'customers' })}
                 {showBadge && <TabBadge count={count} isActive={isActive} />}
               </button>
             );

@@ -10,9 +10,16 @@
   "noAppointments": "No appointments for today",
   "zone1": {
     "title": "Daily Schedule",
-    "searchPlaceholder": "Search services...",
+    "searchPlaceholder": "Search by name or phone...",
     "noServices": "No services today",
-    "servicesCount": "{count} services"
+    "servicesCount": "{count} services",
+    "filterAll": "All",
+    "filterWaiting": "Waiting",
+    "filterInProgress": "In Progress",
+    "filterCompleted": "Completed",
+    "noPatients": "No patients",
+    "noPatientsHint": "Patients waiting for check-in will appear here",
+    "changeStatus": "Change status"
   },
   "zone2": {
     "title": "Check-in Queue",
