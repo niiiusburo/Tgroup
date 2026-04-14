@@ -33,3 +33,31 @@ Thumbs.db
 .dev-api.log
 .dev-vite.pid
 .dev-vite.log
+
+# Test artifacts
+website/test-results/
+test-results/
+website/e2e/screenshots/
+
+# Playwright MCP session snapshots
+.playwright-mcp/
+
+# Code graph build output
+graphify-out/
+
+# Generated build artifacts
+website/dist/
+website/public/version.json
+
+# Vite pre-bundle cache
+website/node_modules/.vite/
+
+# Project memory & agent artifacts
+.omc/project-memory.json
+.omc/state/
+website/.omc/
+skills-lock.json
+.claude/scheduled_tasks.lock
+.claude/skills/
+.claude/worktrees/
+.agents/
