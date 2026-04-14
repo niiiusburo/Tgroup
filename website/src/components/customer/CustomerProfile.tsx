@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft, Phone, Mail, MapPin, Calendar, Tag,
   User, AlertCircle, Edit2, Plus, Clock, CalendarPlus, Receipt,
@@ -97,10 +98,10 @@ interface TabConfig {
 }
 
 const TABS: readonly TabConfig[] = [
-  { value: 'profile', label: 'Profile' },
-  { value: 'appointments', label: 'Appointments', getCount: (p) => p.appointments.length },
-  { value: 'records', label: 'Records', getCount: (p) => p.services?.length ?? 0 },
-  { value: 'payment', label: 'Payment', getCount: (p) => p.payments?.length ?? 0 },
+  { value: 'profile', label: 'profile' },
+  { value: 'appointments', label: 'appointments', getCount: (p) => p.appointments.length },
+  { value: 'records', label: 'records', getCount: (p) => p.services?.length ?? 0 },
+  { value: 'payment', label: 'payment', getCount: (p) => p.payments?.length ?? 0 },
 ];
 
 function TabBadge({ count, isActive }: { count: number; isActive: boolean }) {
@@ -181,6 +182,7 @@ export function CustomerProfile({
   onRefetchCheckups,
   onUpdateServiceStatus,
 }: CustomerProfileProps) {
+  const { t } = useTranslation();
   const [internalActiveTab, setInternalActiveTab] = useState<ProfileTab>('profile');
   const activeTab = controlledActiveTab ?? internalActiveTab;
   const setActiveTab = (tab: ProfileTab) => {
@@ -207,11 +209,11 @@ export function CustomerProfile({
 
   const getStatusConfig = (state: string | null | undefined) => {
     const s = (state || '').toLowerCase();
-    if (s === 'done') return { label: 'Completed', className: 'text-emerald-600 bg-emerald-50', dot: 'bg-emerald-500' };
-    if (s === 'cancelled' || s === 'cancel') return { label: 'Cancelled', className: 'text-red-600 bg-red-50', dot: 'bg-red-500' };
-    if (s === 'no_show') return { label: 'No Show', className: 'text-amber-600 bg-amber-50', dot: 'bg-amber-500' };
-    if (s === 'confirmed') return { label: 'Confirmed', className: 'text-blue-600 bg-blue-50', dot: 'bg-blue-500' };
-    return { label: 'Scheduled', className: 'text-gray-600 bg-gray-50', dot: 'bg-gray-400' };
+    if (s === 'done') return { label: 'completed', className: 'text-emerald-600 bg-emerald-50', dot: 'bg-emerald-500' };
+    if (s === 'cancelled' || s === 'cancel') return { label: 'cancelled', className: 'text-red-600 bg-red-50', dot: 'bg-red-500' };
+    if (s === 'no_show') return { label: 'noShow', className: 'text-amber-600 bg-amber-50', dot: 'bg-amber-500' };
+    if (s === 'confirmed') return { label: 'confirmed', className: 'text-blue-600 bg-blue-50', dot: 'bg-blue-500' };
+    return { label: 'scheduled', className: 'text-gray-600 bg-gray-50', dot: 'bg-gray-400' };
   };
 
   const canEditAppointment = (state: string | null | undefined) => {
@@ -227,8 +229,8 @@ export function CustomerProfile({
           <ArrowLeft className="w-5 h-5 text-gray-600" />
         </button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">Customer Profile</h1>
-          <p className="text-sm text-gray-500">View and manage patient details</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('customers.profile.customerProfile')}</h1>
+          <p className="text-sm text-gray-500">{t('customers.profile.viewAndManage')}</p>
         </div>
         {onEdit && (
           <button onClick={onEdit} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
@@ -412,7 +414,7 @@ export function CustomerProfile({
                   isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
-                {tab.label}
+                {t(`customers.profile.${tab.label}`)}
                 {showBadge && <TabBadge count={count} isActive={isActive} />}
               </button>
             );
@@ -451,7 +453,7 @@ export function CustomerProfile({
       {activeTab === 'appointments' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">Appointments ({appointments.length})</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('customers.profile.appointmentHistory')} ({appointments.length})</h3>
             <button
               onClick={() => { setEditingAppointment(null); setShowAppointmentModal(true); }}
               disabled={!onCreateAppointment}
@@ -498,7 +500,7 @@ export function CustomerProfile({
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium text-gray-900">{apt.name || 'Appointment'}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded ${statusConfig.className}`}>{statusConfig.label}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded ${statusConfig.className}`}>{t(`customers.profile.${statusConfig.label}`)}</span>
                         </div>
                         <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
                           <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{time}</span>
@@ -521,7 +523,7 @@ export function CustomerProfile({
       {activeTab === 'records' && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">Treatment Records</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('customers.profile.serviceHistory')}</h3>
             {onCreateService && (
               <button
                 onClick={() => setShowServiceModal(true)}
@@ -563,7 +565,7 @@ export function CustomerProfile({
                   <Receipt className="w-5 h-5 text-rose-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-gray-500 truncate">Dự kiến thu</p>
+                  <p className="text-xs text-gray-500 truncate">{t('customers.profile.expectedRevenue')}</p>
                   <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(profile.outstandingBalance)}</p>
                 </div>
               </div>
@@ -574,7 +576,7 @@ export function CustomerProfile({
                   <HandCoins className="w-5 h-5 text-orange-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-gray-500 truncate">Tạm ứng</p>
+                  <p className="text-xs text-gray-500 truncate">{t('customers.profile.deposit')}</p>
                   <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(profile.depositBalance)}</p>
                 </div>
               </div>
@@ -598,7 +600,7 @@ export function CustomerProfile({
           {/* Bill summary — 3 columns */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
-              <p className="text-xs text-gray-500 mb-1">Tổng chi phí</p>
+              <p className="text-xs text-gray-500 mb-1">{t('customers.profile.totalCost')}</p>
               <p className="text-lg font-bold text-gray-900">{formatVND(totalServiceCost)}</p>
             </div>
             <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">

@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, QrCode, CheckCircle } from 'lucide-react';
 import { buildVietQrUrl, generatePaymentDescription } from '../../lib/vietqr';
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
@@ -28,6 +29,7 @@ export function VietQrModal({
   defaultAmount,
   paymentId,
 }: VietQrModalProps) {
+  const { t } = useTranslation('payment');
   const { settings, loading } = useBankSettings();
   const [amount, setAmount] = useState<string>(defaultAmount ? String(defaultAmount) : '');
   const [description, setDescription] = useState<string>('');
@@ -136,7 +138,7 @@ export function VietQrModal({
                   setAmount(v === null ? '' : String(v));
                   setGenerated(false);
                 }}
-                placeholder="Nhập số tiền"
+                placeholder={t('enterAmount', { ns: 'payment' })}
               />
             </div>
 
@@ -151,7 +153,7 @@ export function VietQrModal({
                   setDescription(e.target.value);
                   setGenerated(false);
                 }}
-                placeholder="Nhập nội dung"
+                placeholder={t('enterNote', { ns: 'payment' })}
                 className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
               />
             </div>

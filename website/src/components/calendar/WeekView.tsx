@@ -7,6 +7,7 @@
  */
 
 import { CalendarDays, Phone, User, Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
@@ -180,6 +181,7 @@ export function WeekView({
   onAppointmentClick,
   onAppointmentEdit,
 }: WeekViewProps) {
+  const { t } = useTranslation();
   const today = new Date();
   const todayKey = formatDateKey(today);
 
@@ -233,7 +235,7 @@ export function WeekView({
                 {sortedAppointments.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-24 text-gray-300">
                     <CalendarDays className="w-6 h-6 mb-1" />
-                    <span className="text-xs">Không có lịch hẹn</span>
+                    <span className="text-xs">{`${t('calendar.noAppointments')}`}</span>
                   </div>
                 ) : (
                   sortedAppointments.map((apt) => (

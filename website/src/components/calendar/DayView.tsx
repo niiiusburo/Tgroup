@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { User, Phone, Clock, MessageSquare, Pencil } from 'lucide-react';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
@@ -163,6 +164,7 @@ export function DayView({
   onAppointmentClick,
   onAppointmentEdit,
 }: DayViewProps) {
+  const { t } = useTranslation();
   const appointments = getAppointmentsForDate(currentDate);
 
   const timeGroups = useMemo(() => groupByHalfHour(appointments), [appointments]);
@@ -180,7 +182,7 @@ export function DayView({
             })}
           </h3>
           <span className="text-xs text-gray-500">
-            {appointments.length} lịch hẹn
+            {`${appointments.length} ${t('calendar.labels.appointments')}`}
           </span>
         </div>
       </div>
@@ -189,7 +191,7 @@ export function DayView({
       <div className="p-4 space-y-6 max-h-[calc(100vh-280px)] overflow-y-auto">
         {timeGroups.length === 0 && (
           <div className="py-16 text-center">
-            <p className="text-sm text-gray-400">Không có lịch hẹn</p>
+            <p className="text-sm text-gray-400">{`${t('calendar.noAppointments')}`}</p>
           </div>
         )}
 
@@ -202,7 +204,7 @@ export function DayView({
               </span>
               <div className="flex-1 h-px bg-gray-200" />
               <span className="text-[10px] text-gray-300 font-medium">
-                {group.appointments.length} lịch hẹn
+                {`${group.appointments.length} ${t('calendar.labels.appointments')}`}
               </span>
             </div>
 

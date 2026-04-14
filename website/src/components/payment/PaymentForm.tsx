@@ -9,6 +9,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Banknote, Building2, CalendarDays, Check, CheckCircle2, CreditCard,
   DollarSign, FileText, Info, QrCode, Wallet, X,
@@ -81,6 +82,7 @@ export function PaymentForm({
   defaultBankAmount = 0,
   isEdit = false,
 }: PaymentFormProps) {
+  const { t } = useTranslation('payment');
   const { loadDeposits, balance: depositBalanceData } = useDeposits();
 
   const cap = Math.max(0, serviceContext.residual);
@@ -423,7 +425,7 @@ export function PaymentForm({
               type="text"
               value={referenceCode}
               onChange={(e) => setReferenceCode(e.target.value)}
-              placeholder="VD: TGL3, CK MB..."
+              placeholder={t('referenceOptional')}
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
             />
           </div>
@@ -436,7 +438,7 @@ export function PaymentForm({
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ghi chú thanh toán..."
+              placeholder={t('enterNotePlaceholder')}
               rows={2}
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
             />

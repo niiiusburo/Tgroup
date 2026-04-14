@@ -5,11 +5,13 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useBankSettings, BankSettings } from '@/hooks/useBankSettings';
 import { Building2, Save, Loader2, CheckCircle2 } from 'lucide-react';
 import { BankSelector } from '@/components/shared/BankSelector';
 
 export function BankSettingsForm() {
+  const { t } = useTranslation('settings');
   const { settings, loading, updateSettings } = useBankSettings();
   const [formData, setFormData] = useState<BankSettings>({
     bankBin: '',
@@ -73,7 +75,7 @@ export function BankSettingsForm() {
           <BankSelector
             value={formData.bankBin}
             onChange={(bin) => handleChange('bankBin', bin)}
-            placeholder="Chọn ngân hàng..."
+            placeholder={t('bankSettingsContent.selectBank', { ns: 'settings' })}
           />
           <p className="text-xs text-gray-400">Ví dụ: 970436 (Vietcombank)</p>
         </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Wallet,
   Coins,
@@ -53,6 +54,7 @@ export function CustomerDeposits({
   onEditDeposit,
   onRefresh,
 }: CustomerDepositsProps) {
+  const { t } = useTranslation('payment');
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState<'deposits' | 'usage'>('deposits');
 
@@ -254,7 +256,7 @@ export function CustomerDeposits({
                 type="text"
                 value={formNote}
                 onChange={(e) => setFormNote(e.target.value)}
-                placeholder="Nhập ghi chú"
+                placeholder={t('enterNote', { ns: 'payment' })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
               />
             </div>

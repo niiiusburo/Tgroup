@@ -20,6 +20,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, ClipboardPlus, Edit2, User, Stethoscope, MapPin, CalendarDays, Clock, FileText, DollarSign, Hash, Check } from 'lucide-react';
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
 import { ServiceCatalogSelector } from '@/components/shared/ServiceCatalogSelector';
@@ -58,6 +59,7 @@ interface ServiceFormProps {
 }
 
 export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose, initialData, isEdit = false }: ServiceFormProps) {
+  const { t } = useTranslation('services');
   const { customers: apiCustomers, loading: customersLoading } = useCustomers();
   const { employees: apiEmployees, isLoading: employeesLoading } = useEmployees();
   const { allLocations: apiLocations, isLoading: locationsLoading } = useLocations();
@@ -284,7 +286,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
               <Stethoscope className="w-3.5 h-3.5" />
               Dịch vụ
             </label>
-            <ServiceCatalogSelector catalog={serviceCatalog} selectedId={catalogItemId} onChange={handleCatalogChange} placeholder="Chọn dịch vụ..." />
+            <ServiceCatalogSelector catalog={serviceCatalog} selectedId={catalogItemId} onChange={handleCatalogChange} placeholder={t('convertToService.selectService', { ns: 'appointments' })} />
             {errors.service && <p className="mt-2 text-xs text-red-500">{errors.service}</p>}
             {selectedCatalog && (
               <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
@@ -322,7 +324,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
               <User className="w-3.5 h-3.5" />
               Phụ tá
             </label>
-            <DoctorSelector employees={employees} selectedId={assistantId} onChange={handleAssistantChange} filterRoles={['assistant']} placeholder="Chọn phụ tá..." />
+            <DoctorSelector employees={employees} selectedId={assistantId} onChange={handleAssistantChange} filterRoles={['assistant']} placeholder={t('form.selectDoctor', { ns: 'appointments' })} />
           </div>
 
           {/* Trợ lý Bác sĩ */}
@@ -331,7 +333,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
               <User className="w-3.5 h-3.5" />
               Trợ lý Bác sĩ
             </label>
-            <DoctorSelector employees={employees} selectedId={dentalAideId} onChange={handleDentalAideChange} filterRoles={['doctor-assistant']} placeholder="Chọn trợ lý bác sĩ..." />
+            <DoctorSelector employees={employees} selectedId={dentalAideId} onChange={handleDentalAideChange} filterRoles={['doctor-assistant']} placeholder={t('form.selectDoctor', { ns: 'appointments' })} />
           </div>
 
           {/* Chi nhánh */}
@@ -404,7 +406,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
             </label>
             <textarea
               value={notes} onChange={(e) => setNotes(e.target.value)}
-              rows={3} placeholder="Ghi chú điều trị..."
+              rows={3} placeholder={t('form.notes', { ns: 'appointments' })}
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
             />
           </div>

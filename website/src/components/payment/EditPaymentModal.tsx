@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Check, CreditCard, FileText, Calendar, DollarSign } from 'lucide-react';
 import { updatePayment, type ApiPayment } from '@/lib/api';
 import { formatVND } from '@/lib/formatting';
@@ -23,7 +24,9 @@ const METHOD_OPTIONS = [
   { value: 'mixed' as const, label: 'Mixed', active: 'bg-purple-100 text-purple-700 border-purple-300 ring-purple-500/20' },
 ] as const;
 
-export function EditPaymentModal({ payment, isOpen, onClose, onSaved }: EditPaymentModalProps) {
+export function EditPaymentModal({
+  payment, isOpen, onClose, onSaved }: EditPaymentModalProps) {
+  const { t } = useTranslation('payment');
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState<'cash' | 'bank_transfer' | 'deposit' | 'mixed'>('cash');
   const [paymentDate, setPaymentDate] = useState('');
@@ -92,7 +95,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSaved }: EditPaym
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
           <div className="relative flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-bold text-white">Ch&#7881;nh s&#7917;a thanh to&#225;n</h2>
+              <h2 className="text-xl font-bold text-white">{t('payment.editPayment')}</h2>
               <p className="text-sm text-orange-100 mt-1 flex items-center gap-2">
                 <CreditCard className="w-3.5 h-3.5" />
                 {payment.referenceCode ? `Ref: ${payment.referenceCode}` : payment.receiptNumber ? `Receipt: ${payment.receiptNumber}` : `ID: ${payment.id.slice(0, 8)}…`}
@@ -130,7 +133,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSaved }: EditPaym
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <DollarSign className="w-3.5 h-3.5" />
-              S&#7889; ti&#7873;n (VND)
+              {t('payment.paymentAmount')}
             </label>
             <div className="relative">
               <input
@@ -156,7 +159,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSaved }: EditPaym
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <CreditCard className="w-3.5 h-3.5" />
-              Ph&#432;&#417;ng th&#7913;c
+              {t('payment.paymentMethod')}
             </label>
             <div className="grid grid-cols-2 gap-2">
               {METHOD_OPTIONS.map((opt) => (
@@ -180,7 +183,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSaved }: EditPaym
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Calendar className="w-3.5 h-3.5" />
-              Ng&#224;y thanh to&#225;n
+              {t('payment.paymentDate')}
             </label>
             <input
               type="date"
@@ -193,7 +196,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSaved }: EditPaym
           {/* Reference Code */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              M&#227; tham chi&#7871;u (tu&#7ef3; ch&#7885;n)
+              {t('payment.referenceOptional')}
             </label>
             <input
               type="text"
@@ -208,13 +211,13 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSaved }: EditPaym
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
-              Ghi ch&#250;
+              {t('payment.noteOptional')}
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              placeholder="Ghi ch&#250; th&#234;m..."
+              placeholder="{t('payment.noteOptional')} thêm..."
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
             />
           </div>
@@ -228,7 +231,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSaved }: EditPaym
             disabled={isSaving}
             className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50"
           >
-            H&#7911;y b&#7887;
+            {t('payment.cancel')}
           </button>
           <button
             type="button"
@@ -239,12 +242,12 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSaved }: EditPaym
             {isSaving ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                &#272;ang l&#432;u...
+                {t('payment.saving')}
               </>
             ) : (
               <>
                 <Check className="w-4 h-4" />
-                L&#432;u thay &#273;&#7893;i
+                {t('payment.saveChanges')}
               </>
             )}
           </button>

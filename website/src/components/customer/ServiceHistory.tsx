@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Stethoscope, CheckCircle2, Clock, XCircle, CreditCard, CheckCircle, Edit2, Wallet } from 'lucide-react';
 import type { CustomerService } from '@/types/customer';
 import type { PaymentWithAllocations } from '@/hooks/useCustomerPayments';
@@ -21,15 +22,15 @@ interface ServiceHistoryProps {
 }
 
 const STATUS_OPTIONS: readonly StatusOption[] = [
-  { value: 'completed', label: 'Hoàn thành', style: 'text-emerald-600 bg-emerald-50' },
-  { value: 'active', label: 'Đang điều trị', style: 'text-blue-600 bg-blue-50' },
-  { value: 'cancelled', label: 'Đã hủy', style: 'text-red-600 bg-red-50' },
+  { value: 'completed', label: 'completed', style: 'text-emerald-600 bg-emerald-50' },
+  { value: 'active', label: 'active', style: 'text-blue-600 bg-blue-50' },
+  { value: 'cancelled', label: 'cancelled', style: 'text-red-600 bg-red-50' },
 ];
 
 const STATUS_CONFIG = {
-  completed: { icon: CheckCircle2, label: 'Hoàn thành', className: 'text-emerald-600 bg-emerald-50', dot: 'bg-emerald-500' },
-  active: { icon: Clock, label: 'Đang điều trị', className: 'text-blue-600 bg-blue-50', dot: 'bg-blue-500' },
-  cancelled: { icon: XCircle, label: 'Đã hủy', className: 'text-red-600 bg-red-50', dot: 'bg-red-500' },
+  completed: { icon: CheckCircle2, label: 'completed', className: 'text-emerald-600 bg-emerald-50', dot: 'bg-emerald-500' },
+  active: { icon: Clock, label: 'active', className: 'text-blue-600 bg-blue-50', dot: 'bg-blue-500' },
+  cancelled: { icon: XCircle, label: 'cancelled', className: 'text-red-600 bg-red-50', dot: 'bg-red-500' },
 } as const;
 
 function getMethodLabel(method?: string) {
@@ -68,6 +69,7 @@ export function ServiceHistory({
   onPayForService,
   onEditPayment,
 }: ServiceHistoryProps) {
+  const { t } = useTranslation('services');
   const [expandedServiceId, setExpandedServiceId] = useState<string | null>(null);
   const displayServices = limit ? services.slice(0, limit) : services;
   const totalCost = services
@@ -87,24 +89,24 @@ export function ServiceHistory({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Stethoscope className="w-5 h-5 text-primary" />
-          <h3 className="font-semibold text-gray-900">Treatment History</h3>
-          <span className="text-xs text-gray-400">({services.length}{limit && services.length > limit ? '+' : ''} treatments)</span>
+          <h3 className="font-semibold text-gray-900">{t('services.history.title')}</h3>
+          <span className="text-xs text-gray-400">({services.length}{limit && services.length > limit ? '+' : ''} {t('services.treatment')})</span>
         </div>
         <div className="flex items-center gap-4 text-right">
           {zeroCostCount > 0 && (
             <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1 rounded-lg">
-              ⚠ {zeroCostCount} chưa có giá
+              ⚠ {zeroCostCount} {t('services.noPrice')}
             </span>
           )}
           <div>
-            <p className="text-xs text-gray-400">Tổng chi phí / Đã thu</p>
+            <p className="text-xs text-gray-400">{t('services.totalCost')} / {t('services.collected')}</p>
             <p className="text-sm font-bold text-gray-900">{formatVND(totalPaid)} <span className="text-gray-400 font-normal">/ {formatVND(totalCost)}</span></p>
           </div>
         </div>
       </div>
 
       {services.length === 0 ? (
-        <div className="text-center py-8 text-gray-400 text-sm">No treatment history</div>
+        <div className="text-center py-8 text-gray-400 text-sm">{t('services.history.noHistory')}</div>
       ) : (
         <div className="space-y-3">
           {displayServices.map((svc) => {
@@ -145,7 +147,7 @@ export function ServiceHistory({
                                 ? 'text-orange-600 bg-orange-50 border border-orange-200 hover:bg-orange-100 hover:border-orange-300'
                                 : 'text-gray-400 bg-gray-50 border border-gray-200 hover:bg-gray-100'
                             }`}
-                            title={hasBalance ? `Còn nợ ${formatVND(owed)}` : 'Đã thanh toán đủ'}
+                            title={hasBalance ? `${t('services.outstanding')} ${formatVND(owed)}` : t('services.paidInFull')}
                           >
                             {hasBalance && pct > 0 && (
                               <span aria-hidden className="absolute inset-y-0 left-0 bg-green-500 transition-[width] duration-500 ease-out" style={{ width: `${pct * 100}%` }} />
@@ -154,7 +156,7 @@ export function ServiceHistory({
                               {hasBalance
                                 ? <CreditCard className="w-3 h-3" />
                                 : <CheckCircle className="w-3 h-3" />}
-                              {hasBalance ? `Pay ${formatVND(owed)}` : 'Paid'}
+                              {hasBalance ? `${t('services.pay')} ${formatVND(owed)}` : t('services.paid')}
                             </span>
                           </button>
                         );
@@ -175,7 +177,7 @@ export function ServiceHistory({
                         </span>
                       )}
                       <span className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
-                        Tooth: {svc.tooth}
+                        {t('services.tooth')}: {svc.tooth}
                       </span>
                     </div>
                     {svc.notes && (
@@ -189,7 +191,7 @@ export function ServiceHistory({
                           type="button"
                           onClick={(e) => { e.stopPropagation(); onEditService(svc); }}
                           className="absolute right-full top-1/2 -translate-y-1/2 mr-1 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900"
-                          title="Edit treatment"
+                          title={t('services.editTreatment')}
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
@@ -200,6 +202,7 @@ export function ServiceHistory({
                           options={STATUS_OPTIONS}
                           onChange={(newStatus) => onUpdateStatus?.(svc.id, newStatus)}
                           disabled={!onUpdateStatus}
+                          namespace="services"
                         />
                       </div>
                     </div>
@@ -215,13 +218,13 @@ export function ServiceHistory({
                   <div className="mt-4 pt-4 border-t border-dashed border-primary/30">
                     <div className="flex items-center gap-2 mb-3">
                       <Wallet className="w-4 h-4 text-gray-400" />
-                      <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Payment History</h4>
-                      <span className="text-[10px] text-gray-400">({relatedPayments.length} transactions)</span>
+                      <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{t('services.paymentHistory')}</h4>
+                      <span className="text-[10px] text-gray-400">({relatedPayments.length} {t('services.transactions')})</span>
                     </div>
 
                     {relatedPayments.length === 0 ? (
                       <div className="bg-white rounded-lg border border-gray-100 px-4 py-3 text-sm text-gray-400">
-                        No payments recorded for this treatment.
+                        {t('services.noPayments')}.
                       </div>
                     ) : (
                       <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">

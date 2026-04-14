@@ -20,6 +20,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Loader2, UserPlus, User, Phone, Mail, MapPin, CalendarDays, CheckCircle2, Shield, Check, Eye, EyeOff, Building2 } from 'lucide-react';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { LocationSelector } from '@/components/shared/LocationSelector';
@@ -60,6 +61,7 @@ interface EmployeeFormProps {
 }
 
 export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
+  const { t } = useTranslation('employees');
   const isEdit = !!employee;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -178,7 +180,7 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
             </label>
             <input
               type="text" value={name} onChange={(e) => setName(e.target.value)}
-              placeholder="Nhập họ và tên"
+              placeholder={t('enterName')}
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
               required
             />
@@ -193,7 +195,7 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
               </label>
               <input
                 type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
-                placeholder="Nhập số điện thoại"
+                placeholder={t('enterPhone')}
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
               />
             </div>
@@ -204,7 +206,7 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
               </label>
               <input
                 type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                placeholder="Nhập email"
+                placeholder={t('enterEmail')}
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
               />
             </div>

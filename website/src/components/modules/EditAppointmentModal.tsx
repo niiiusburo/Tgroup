@@ -26,6 +26,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   X, 
   Clock, 
@@ -139,7 +140,7 @@ function SearchableSelector<T extends { id: string; name: string }>({
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Nhập để tìm kiếm..."
+                placeholder="Search..."
                 className="w-full pl-9 pr-4 py-2 bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:bg-white transition-all"
                 autoFocus
               />
@@ -185,7 +186,9 @@ function extractFreeTextNote(note: string): string {
   return freeLines.join('\n').trim();
 }
 
-export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: EditAppointmentModalProps) {
+export function EditAppointmentModal({
+  appointment, isOpen, onClose, onSaved }: EditAppointmentModalProps) {
+  const { t } = useTranslation('appointments');
   // Fetch real data from API
   const { employees: apiEmployees, isLoading: employeesLoading } = useEmployees();
   const { allLocations: apiLocations, isLoading: locationsLoading } = useLocations();
@@ -468,13 +471,13 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
             <DatePicker
               value={date}
               onChange={setDate}
-              label="Ngày hẹn"
+              label={t('form.date')}
               icon={<Calendar className="w-3.5 h-3.5" />}
             />
             <TimePicker
               value={time}
               onChange={setTime}
-              label="Giờ"
+              label={t('form.startTime')}
               icon={<Clock className="w-3.5 h-3.5" />}
               interval={15}
             />
@@ -490,7 +493,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
               options={doctors}
               selectedId={doctorId}
               onChange={setDoctorId}
-              placeholder="Chọn bác sĩ..."
+              placeholder={t('form.selectDoctor')}
               icon={<Stethoscope className="w-4 h-4" />}
               renderOption={(doctor) => (
                 <div className="flex items-center gap-3">
@@ -522,7 +525,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
               options={locations}
               selectedId={locationId}
               onChange={setLocationId}
-              placeholder="Chọn chi nhánh..."
+              placeholder={t('form.selectLocation')}
               icon={<MapPin className="w-4 h-4" />}
               renderOption={(location) => (
                 <div>
@@ -551,7 +554,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
               options={services.filter(s => s.active !== false)}
               selectedId={serviceId}
               onChange={setServiceId}
-              placeholder="Chọn dịch vụ..."
+              placeholder={t('convertToService.selectService')}
               icon={<Stethoscope className="w-4 h-4" />}
               renderOption={(service) => (
                 <div>
@@ -702,7 +705,7 @@ export function EditAppointmentModal({ appointment, isOpen, onClose, onSaved }: 
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              placeholder="Ghi chú thêm..."
+              placeholder={t('form.notes')}
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
             />
           </div>

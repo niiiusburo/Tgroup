@@ -18,6 +18,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pencil, UserCheck, Phone, Clock, User, Search } from 'lucide-react';
 import type { OverviewAppointment, Zone3Filter } from '@/hooks/useOverviewAppointments';
 import { useAppointmentHover } from '@/contexts/AppointmentHoverContext';
@@ -38,12 +39,6 @@ interface TodayAppointmentsProps {
   readonly onEditClick?: (appointment: OverviewAppointment) => void;
 }
 
-const FILTER_TABS: { key: Zone3Filter; label: string }[] = [
-  { key: 'all', label: 'Tất cả' },
-  { key: 'arrived', label: 'Đã đến' },
-  { key: 'cancelled', label: 'Hủy hẹn' },
-];
-
 export function TodayAppointments({
   appointments,
   filter,
@@ -56,6 +51,12 @@ export function TodayAppointments({
   onEditSaved,
   onEditClick,
 }: TodayAppointmentsProps) {
+  const { t } = useTranslation();
+  const FILTER_TABS: { key: Zone3Filter; label: string }[] = [
+    { key: 'all', label: t('overview:zone3.filterAll') },
+    { key: 'arrived', label: t('overview:zone3.filterArrived') },
+    { key: 'cancelled', label: t('overview:zone3.filterCancelled') },
+  ];
   const [editingAppointment, setEditingAppointment] = useState<OverviewAppointment | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -177,6 +178,7 @@ interface AppointmentCardProps {
 }
 
 function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkCancelled, onEdit }: AppointmentCardProps) {
+  const { t } = useTranslation('overview');
   const { hoveredId, setHoveredId, registerRef } = useAppointmentHover();
   const cardRef = useRef<HTMLDivElement>(null);
   const isArrived = appointment.topStatus === 'arrived';
@@ -223,7 +225,7 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
       {/* Top row: name + action buttons */}
       <div className="flex items-center justify-between px-3.5 pt-3 pb-1.5 bg-gradient-to-r from-white to-slate-50">
         <span className="text-sm font-bold text-slate-800 truncate flex-1 mr-2">
-          <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName || 'No Name'}</CustomerNameLink>
+          <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName || t('overview:zone3.noPatients')}</CustomerNameLink>
         </span>
         <div className="flex items-center gap-1.5 shrink-0">
           {/* Edit button */}

@@ -6,6 +6,7 @@
  */
 
 import { CheckCircle, Calendar, XCircle, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 
@@ -62,6 +63,7 @@ export function MonthView({
   getAppointmentsForDate,
   onDayClick,
 }: MonthViewProps) {
+  const { t } = useTranslation();
   const currentMonth = currentDate.getMonth();
   const today = new Date();
   const todayKey = formatDateKey(today);
@@ -136,13 +138,13 @@ export function MonthView({
                   {counts.completed > 0 && (
                     <div className="flex items-center gap-1 text-[10px] text-gray-600">
                       <CheckCircle className="w-3 h-3" />
-                      <span>Hoàn thành: ({counts.completed})</span>
+                      <span>{t('calendar.appointmentTypes.treatment')}: ({counts.completed})</span>
                     </div>
                   )}
                   {counts.inProgress > 0 && (
                     <div className="flex items-center gap-1 text-[10px] text-purple-600">
                       <AlertCircle className="w-3 h-3" />
-                      <span>Đang khám: ({counts.inProgress})</span>
+                      <span>{t('calendar.appointmentTypes.consultation')}: ({counts.inProgress})</span>
                     </div>
                   )}
                 </div>

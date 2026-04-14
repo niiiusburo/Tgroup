@@ -24,6 +24,7 @@ import {
   ScanFace,
 } from 'lucide-react';
 import { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { fetchCompanies, fetchEmployees, ApiError } from '@/lib/api';
 import { normalizeText } from '@/lib/utils';
 import type { ApiCompany, ApiEmployee } from '@/lib/api';
@@ -276,6 +277,7 @@ export function AddCustomerForm({
   isEdit = false,
   canEdit = false,
 }: AddCustomerFormProps) {
+  const { t } = useTranslation('customers');
   const isFieldEditable = !isEdit || canEdit;
   const [formData, setFormData] = useState<CustomerFormData>({
     ...EMPTY_CUSTOMER_FORM,
@@ -484,8 +486,8 @@ export function AddCustomerForm({
       <MiniAddDialog
         isOpen={showSourceDialog}
         onClose={() => setShowSourceDialog(false)}
-        title="Thêm nguồn khách hàng mới"
-        placeholder="Nhập tên nguồn (vd: TikTok, Youtube...)"
+        title={t('sources.other', { ns: 'customers' })}
+        placeholder={t('form.fullName', { ns: 'customers' })}
         onSubmit={handleAddSource}
       />
       <MiniAddDialog
@@ -540,7 +542,7 @@ export function AddCustomerForm({
         {/* ══ LEFT PANEL ════════════════════════════════════════════════════════════ */}
         <div className="w-80 flex-shrink-0 border-r border-gray-200 flex flex-col gap-4 px-5 py-5 overflow-hidden bg-gray-50/30">
           {/* Card 1: Personal Info */}
-          <CardSection title="Thông tin cá nhân" icon={User} maxHeight="280px">
+          <CardSection title={t('profile.personalInfo', { ns: 'customers' })} icon={User} maxHeight="280px">
             <div className="flex justify-center mb-4">
               <CustomerCameraWidget
                 disabled={!isFieldEditable}
@@ -622,7 +624,7 @@ export function AddCustomerForm({
                   type="text"
                   value={formData.name}
                   onChange={(e) => set('name', nameUppercase ? e.target.value.toUpperCase() : e.target.value)}
-                  placeholder="Nhập họ và tên"
+                  placeholder={t('form.fullName', { ns: 'customers' })}
                   disabled={!isFieldEditable}
                   className={inputClass(!!getError('name'), !isFieldEditable)}
                   style={nameUppercase ? { textTransform: 'uppercase' } : {}}
@@ -687,7 +689,7 @@ export function AddCustomerForm({
 
           {/* Card 2: Assignment */}
           <CardSection
-            title="Phân công"
+            title={t('profile.assignments', { ns: 'customers' })}
             icon={Briefcase}
             action={<span className="text-xs text-gray-400">{employees.length} nhân viên</span>}
             className="flex-1 min-h-0"
