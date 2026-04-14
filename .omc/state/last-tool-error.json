@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"ls -1 /Users/thuanle/Documents/TamTMV/Tgroup/.planning/phases/02-quick-features-validations/*-VERIFICATION.md 2>/dev/null\",\"description\":\"Check for previous verification files in phase 02\"...",
-  "error": "Exit code 1\n(eval):1: no matches found: /Users/thuanle/Documents/TamTMV/Tgroup/.planning/phases/02-quick-features-validations/*-VERIFICATION.md",
-  "timestamp": "2026-04-10T12:21:48.141Z",
-  "retry_count": 1
-}

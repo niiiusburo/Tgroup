@@ -1,7 +1,0 @@
-{
-  "tool_name": "Read",
-  "tool_input_preview": "{\"file_path\":\"/Users/thuanle/Documents/TamTMV/Tgroup/website/test-results/permissions-tooltips-Permi-060fe-customers-view-all-checkbox-chromium/test-failed-1.png\"}",
-  "error": "File does not exist. Note: your current working directory is /Users/thuanle/Documents/TamTMV/Tgroup/website.",
-  "timestamp": "2026-04-10T11:08:50.044Z",
-  "retry_count": 1
-}
