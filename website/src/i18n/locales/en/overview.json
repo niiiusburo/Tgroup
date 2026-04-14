@@ -15,11 +15,16 @@
     "filterCheckedIn": "Checked In",
     "filterInProgress": "In Progress",
     "filterCompleted": "Completed",
-    "searchPlaceholder": "Search patients..."
+    "searchPlaceholder": "Search patients...",
+    "noPatients": "No patients have arrived",
+    "noPatientsHint": "Mark \"Arrived\" in today's appointments",
+    "changeStatus": "Change status",
+    "close": "Close"
   },
   "zone2": {
     "title": "Today's Services",
-    "noServices": "No services today"
+    "noServices": "No services today",
+    "todayServices": "TODAY'S SERVICES / ACTIVITY"
   },
   "zone3": {
     "title": "Today's Appointments",
@@ -32,5 +37,7 @@
   "addAppointment": "Add Appointment",
   "editAppointment": "Edit Appointment",
   "markArrived": "Mark Arrived",
-  "markCancelled": "Cancel"
+  "markCancelled": "Cancel",
+  "quickAdd": "New",
+  "quickAddFull": "Add Appointment"
 }

@@ -13,6 +13,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Clock, User, Search, FileText } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { WaitTimer } from '@/components/appointments/WaitTimer';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import type { OverviewAppointment, CheckInStatus, Zone1Filter } from '@/hooks/useOverviewAppointments';
@@ -29,30 +30,30 @@ interface PatientCheckInProps {
   readonly onEditClick?: (appointment: OverviewAppointment) => void;
 }
 
-const FILTER_TABS: { key: Zone1Filter; label: string }[] = [
-  { key: 'all', label: 'Tất cả' },
-  { key: 'waiting', label: 'Chờ khám' },
-  { key: 'in-treatment', label: 'Đang khám' },
-  { key: 'done', label: 'Hoàn thành' },
+const FILTER_TABS: { key: Zone1Filter; labelKey: string }[] = [
+  { key: 'all', labelKey: 'overview:zone1.filterAll' },
+  { key: 'waiting', labelKey: 'overview:zone1.filterWaiting' },
+  { key: 'in-treatment', labelKey: 'overview:zone1.filterInProgress' },
+  { key: 'done', labelKey: 'overview:zone1.filterCompleted' },
 ];
 
-const STATUS_CONFIG: Record<CheckInStatus, { label: string; bg: string; text: string; border: string; dot: string }> = {
+const STATUS_CONFIG: Record<CheckInStatus, { labelKey: string; bg: string; text: string; border: string; dot: string }> = {
   waiting: {
-    label: 'Chờ khám',
+    labelKey: 'overview:zone1.filterWaiting',
     bg: 'bg-amber-50',
     text: 'text-amber-700',
     border: 'border-amber-200/80',
     dot: 'bg-amber-400',
   },
   'in-treatment': {
-    label: 'Đang khám',
+    labelKey: 'overview:zone1.filterInProgress',
     bg: 'bg-sky-50',
     text: 'text-sky-700',
     border: 'border-sky-200/80',
     dot: 'bg-sky-400',
   },
   done: {
-    label: 'Hoàn thành',
+    labelKey: 'overview:zone1.filterCompleted',
     bg: 'bg-emerald-50',
     text: 'text-emerald-700',
     border: 'border-emerald-200/80',
@@ -70,6 +71,7 @@ export function PatientCheckIn({
   onUpdateStatus,
   onEditClick,
 }: PatientCheckInProps) {
+  const { t } = useTranslation();
   const doneSectionRef = useRef<HTMLDivElement>(null);
   const scrollToDone = useCallback(() => {
     doneSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -80,7 +82,7 @@ export function PatientCheckIn({
       {/* Header */}
       <div className="px-6 pt-5 pb-4">
         <h2 className="text-base font-semibold text-slate-800 mb-4">
-          Đón tiếp / Tiếp nhận bệnh nhân
+          {t('overview:zone1.title')}
         </h2>
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
@@ -102,7 +104,7 @@ export function PatientCheckIn({
                     }
                   `}
                 >
-                  {tab.label} · {count}
+                  {t(tab.labelKey)} · {count}
                 </button>
               );
             })}
@@ -115,7 +117,7 @@ export function PatientCheckIn({
               type="text"
               value={searchTerm}
               onChange={(e) => onSearchChange?.(e.target.value)}
-              placeholder="Tìm nhanh bệnh nhân..."
+              placeholder="{t('overview:zone1.searchPlaceholder')}"
               className="w-full sm:w-56 pl-8 pr-3 py-1.5 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all"
             />
           </div>
@@ -129,8 +131,8 @@ export function PatientCheckIn({
             <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-3">
               <User className="w-5 h-5 text-slate-400" />
             </div>
-            <p className="text-sm text-slate-500">Chưa có bệnh nhân đến</p>
-            <p className="text-xs text-slate-400 mt-1">Đánh dấu "Đã đến" trong lịch hẹn hôm nay</p>
+            <p className="text-sm text-slate-500">{t('overview:zone1.noPatients')}</p>
+            <p className="text-xs text-slate-400 mt-1">{t('overview:zone1.noPatientsHint')}</p>
           </div>
         ) : (
           <div ref={doneSectionRef}>
@@ -182,6 +184,7 @@ interface PatientCardProps {
 }
 
 function PatientCard({ appointment, onUpdateStatus, onEditClick, onDone }: PatientCardProps) {
+  const { t } = useTranslation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { hoveredId, setHoveredId, registerRef, scrollToAppointment } = useAppointmentHover();
   const cardRef = useRef<HTMLDivElement>(null);
@@ -246,7 +249,7 @@ function PatientCard({ appointment, onUpdateStatus, onEditClick, onDone }: Patie
           ${config.bg} ${config.text} ${config.border}
         `}
       >
-        {config.label} <span className="text-[10px] opacity-60">▾</span>
+        {t(config.labelKey)} <span className="text-[10px] opacity-60">▾</span>
       </button>
 
       {currentStatus === 'waiting' && appointment.arrivalTime && (
@@ -258,7 +261,7 @@ function PatientCard({ appointment, onUpdateStatus, onEditClick, onDone }: Patie
       {/* Status change dropdown */}
       {dropdownOpen && (
         <div className="absolute top-2 left-2 right-2 bg-white border border-gray-200 rounded-xl p-3.5 shadow-lg z-10" onClick={(e) => e.stopPropagation()}>
-          <div className="text-xs font-bold text-gray-700 mb-2.5">Chuyển trạng thái</div>
+          <div className="text-xs font-bold text-gray-700 mb-2.5">{t('overview:zone1.changeStatus')}</div>
           {(['waiting', 'in-treatment', 'done'] as CheckInStatus[]).map((status) => {
             const isSelected = currentStatus === status;
             return (
@@ -278,7 +281,7 @@ function PatientCard({ appointment, onUpdateStatus, onEditClick, onDone }: Patie
                 >
                   {isSelected && <span className="w-2 h-2 rounded-full bg-blue-600" />}
                 </span>
-                {STATUS_CONFIG[status].label}
+                {t(STATUS_CONFIG[status].labelKey)}
               </label>
             );
           })}

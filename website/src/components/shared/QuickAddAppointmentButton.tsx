@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CalendarPlus } from 'lucide-react';
 import { AppointmentForm } from '@/components/appointments/AppointmentForm';
 import type { AppointmentFormData } from '@/components/appointments/AppointmentForm';
@@ -18,6 +19,7 @@ interface QuickAddAppointmentButtonProps {
 }
 
 export function QuickAddAppointmentButton({ onSuccess, size = 'md' }: QuickAddAppointmentButtonProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSubmit = async (data: AppointmentFormData) => {
@@ -62,7 +64,7 @@ export function QuickAddAppointmentButton({ onSuccess, size = 'md' }: QuickAddAp
         `}
       >
         <CalendarPlus className={size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
-        <span>{size === 'sm' ? 'Hẹn mới' : 'Thêm lịch hẹn'}</span>
+        <span>{size === 'sm' ? t('overview:quickAdd') : t('overview:quickAddFull')}</span>
       </button>
 
       {isOpen && (

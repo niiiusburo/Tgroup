@@ -9,17 +9,22 @@
   "recentActivity": "Hoạt động gần đây",
   "noAppointments": "Không có lịch hẹn hôm nay",
   "zone1": {
-    "title": "Check-in bệnh nhân",
+    "title": "Đón tiếp / Tiếp nhận bệnh nhân",
     "filterAll": "Tất cả",
-    "filterWaiting": "Đang chờ",
+    "filterWaiting": "Chờ khám",
     "filterCheckedIn": "Đã check-in",
     "filterInProgress": "Đang khám",
-    "filterCompleted": "Hoàn tất",
-    "searchPlaceholder": "Tìm bệnh nhân..."
+    "filterCompleted": "Hoàn thành",
+    "searchPlaceholder": "Tìm nhanh bệnh nhân...",
+    "noPatients": "Chưa có bệnh nhân đến",
+    "noPatientsHint": "Đánh dấu \"Đã đến\" trong lịch hẹn hôm nay",
+    "changeStatus": "Chuyển trạng thái",
+    "close": "Đóng"
   },
   "zone2": {
     "title": "Dịch vụ hôm nay",
-    "noServices": "Không có dịch vụ hôm nay"
+    "noServices": "Không có dịch vụ hôm nay",
+    "todayServices": "DỊCH VỤ HÔM NAY"
   },
   "zone3": {
     "title": "Lịch hẹn hôm nay",
@@ -32,5 +37,7 @@
   "addAppointment": "Thêm lịch hẹn",
   "editAppointment": "Sửa lịch hẹn",
   "markArrived": "Đánh dấu đã đến",
-  "markCancelled": "Hủy hẹn"
+  "markCancelled": "Hủy hẹn",
+  "quickAdd": "Hẹn mới",
+  "quickAddFull": "Thêm lịch hẹn"
 }

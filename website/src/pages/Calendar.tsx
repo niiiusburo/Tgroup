@@ -115,6 +115,7 @@ export function Calendar() {
       color: appointment.color || '0',
       arrivalTime: null,
       treatmentStartTime: null,
+      productId: '',
     };
     setEditingAppointment(overviewAppointment);
     setIsEditModalOpen(true);
