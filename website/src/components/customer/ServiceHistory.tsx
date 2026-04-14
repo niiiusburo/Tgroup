@@ -258,7 +258,13 @@ export function ServiceHistory({
                                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${methodChipClass}`}>
                                       {getMethodLabel(p.method)}
                                     </span>
-                                    {p.receiptNumber && (
+                                    {p.referenceCode && (
+                                      <span className="text-[10px] text-gray-700 font-medium">{p.referenceCode}</span>
+                                    )}
+                                    {!p.referenceCode && p.receiptNumber && (
+                                      <span className="text-[10px] text-gray-400 font-mono">{p.receiptNumber}</span>
+                                    )}
+                                    {p.referenceCode && p.receiptNumber && (
                                       <span className="text-[10px] text-gray-400 font-mono">{p.receiptNumber}</span>
                                     )}
                                   </div>

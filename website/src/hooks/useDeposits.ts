@@ -19,6 +19,7 @@ export interface DepositTransaction {
   method: string;
   note: string;
   receiptNumber?: string;
+  referenceCode?: string;
   balanceAfter?: number;
   status?: string;
 }
@@ -54,6 +55,7 @@ function mapToDepositTransaction(p: ApiPayment): DepositTransaction {
     method: formatMethod(p.method),
     note: p.notes || (isRefund ? 'Hoàn tạm ứng' : 'Đóng tạm ứng'),
     receiptNumber: p.receiptNumber,
+    referenceCode: p.referenceCode,
     status: p.status,
   };
 }
@@ -69,6 +71,7 @@ function mapToUsageTransaction(p: ApiPayment): DepositTransaction {
     method: formatMethod('deposit'),
     note: p.notes || 'Thanh toán từ ví cọc',
     receiptNumber: p.receiptNumber,
+    referenceCode: p.referenceCode,
     status: p.status,
   };
 }

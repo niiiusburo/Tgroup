@@ -426,7 +426,13 @@ export function CustomerDeposits({
                 ) : (
                   paged.map((tx) => (
                     <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 font-mono text-gray-700">{tx.receiptNumber || '-'}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-col">
+                          {tx.referenceCode && <span className="text-sm font-medium text-gray-700">{tx.referenceCode}</span>}
+                          {!tx.referenceCode && <span className="text-sm font-mono text-gray-700">{tx.receiptNumber || '-'}</span>}
+                          {tx.referenceCode && tx.receiptNumber && <span className="text-[10px] font-mono text-gray-400">{tx.receiptNumber}</span>}
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-gray-600">{formatDate(tx.date)}</td>
                       <td className="px-4 py-3 text-gray-600">{tx.method}</td>
                       <td className="px-4 py-3">

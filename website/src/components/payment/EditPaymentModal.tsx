@@ -95,7 +95,7 @@ export function EditPaymentModal({ payment, isOpen, onClose, onSaved }: EditPaym
               <h2 className="text-xl font-bold text-white">Ch&#7881;nh s&#7917;a thanh to&#225;n</h2>
               <p className="text-sm text-orange-100 mt-1 flex items-center gap-2">
                 <CreditCard className="w-3.5 h-3.5" />
-                {payment.receiptNumber ? `Receipt: ${payment.receiptNumber}` : `ID: ${payment.id.slice(0, 8)}…`}
+                {payment.referenceCode ? `Ref: ${payment.referenceCode}` : payment.receiptNumber ? `Receipt: ${payment.receiptNumber}` : `ID: ${payment.id.slice(0, 8)}…`}
                 {isVoided && (
                   <span className="bg-red-500/80 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">VOIDED</span>
                 )}

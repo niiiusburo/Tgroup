@@ -48,7 +48,11 @@ export function PaymentHistory({ payments }: PaymentHistoryProps) {
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
                     <FileText className="w-4 h-4 text-gray-400" />
-                    <span className="text-xs font-mono text-gray-600">{payment.receiptNumber}</span>
+                    <div className="flex flex-col">
+                      {payment.referenceCode && <span className="text-xs font-medium text-gray-700">{payment.referenceCode}</span>}
+                      {!payment.referenceCode && payment.receiptNumber && <span className="text-xs font-mono text-gray-600">{payment.receiptNumber}</span>}
+                      {payment.referenceCode && payment.receiptNumber && <span className="text-[10px] font-mono text-gray-400">{payment.receiptNumber}</span>}
+                    </div>
                   </div>
                 </td>
                 <td className="px-4 py-3">

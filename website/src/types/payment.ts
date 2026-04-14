@@ -45,6 +45,7 @@ export interface PaymentRecord {
   readonly locationName: string;
   readonly notes: string;
   readonly receiptNumber: string;
+  readonly referenceCode?: string;
   /** Source breakdown for mixed payments. */
   readonly sources?: {
     readonly depositAmount: number;

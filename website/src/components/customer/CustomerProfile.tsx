@@ -670,8 +670,9 @@ export function CustomerProfile({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
                             <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${methodChipClass}`}>{methodLabel}</span>
-                            {p.receiptNumber && <span className="text-[10px] text-gray-400 font-mono">{p.receiptNumber}</span>}
-                            {p.referenceCode && !p.receiptNumber && <span className="text-[10px] text-gray-400">{p.referenceCode}</span>}
+                            {p.referenceCode && <span className="text-[10px] text-gray-700 font-medium">{p.referenceCode}</span>}
+                            {!p.referenceCode && p.receiptNumber && <span className="text-[10px] text-gray-400 font-mono">{p.receiptNumber}</span>}
+                            {p.referenceCode && p.receiptNumber && <span className="text-[10px] text-gray-400 font-mono">{p.receiptNumber}</span>}
                           </div>
                           <p className={`text-sm font-semibold ${isNegative ? 'text-red-600' : 'text-gray-900'} ${isVoided ? 'line-through' : ''}`}>
                             {formatVND(p.amount)}

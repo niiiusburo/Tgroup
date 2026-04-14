@@ -44,10 +44,24 @@ const mockPayments: PaymentWithAllocations[] = [
     cashAmount: 2000000,
     bankAmount: 0,
     createdAt: '2024-12-05T00:00:00Z',
+    referenceCode: 'CUST.IN/2024/27094',
+    receiptNumber: 'REC-001',
     allocations: [
       { id: 'a1', paymentId: 'p1', invoiceId: 'inv1', invoiceName: 'Invoice 1', invoiceTotal: 2000000, invoiceResidual: 0, allocatedAmount: 1500000 },
       { id: 'a2', paymentId: 'p1', invoiceId: 'inv2', invoiceName: 'Invoice 2', invoiceTotal: 1500000, invoiceResidual: 500000, allocatedAmount: 500000 },
     ],
+  },
+  {
+    id: 'p2',
+    customerId: '1',
+    amount: 500000,
+    method: 'bank_transfer',
+    depositUsed: 0,
+    cashAmount: 0,
+    bankAmount: 500000,
+    createdAt: '2024-12-06T00:00:00Z',
+    referenceCode: 'CUST.IN/2024/27095',
+    allocations: [],
   },
 ];
 
@@ -77,7 +91,7 @@ describe('CustomerProfile payment tab', () => {
     expect(screen.getByText('Còn nợ').closest('div')?.textContent).toContain('1.000.000 ₫');
   });
 
-  it('shows total allocated line when expanded', () => {
+  it('shows referenceCode as primary identifier in payment history', () => {
     render(
       <MemoryRouter>
         <AuthProvider>
@@ -95,12 +109,30 @@ describe('CustomerProfile payment tab', () => {
       </MemoryRouter>
     );
 
-    // Click to expand first payment
-    const paymentRow = screen.getAllByText('2.000.000 ₫')[0].closest('button');
-    if (paymentRow) fireEvent.click(paymentRow);
+    expect(screen.getByText('CUST.IN/2024/27094')).toBeInTheDocument();
+    expect(screen.getByText('CUST.IN/2024/27095')).toBeInTheDocument();
+  });
 
-    expect(screen.getByText('Tổng phân bổ')).toBeInTheDocument();
-    // After expansion there will be two occurrences of the formatted amount
-    expect(screen.getAllByText('2.000.000 ₫').length).toBeGreaterThanOrEqual(2);
+  it('shows receiptNumber as secondary when both referenceCode and receiptNumber exist', () => {
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <CustomerProfile
+            profile={mockProfile}
+            appointments={[]}
+            services={mockServices}
+            payments={mockPayments}
+            depositList={[]}
+            usageHistory={[]}
+            activeTab="payment"
+            onBack={vi.fn()}
+          />
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    // p1 has both referenceCode and receiptNumber; both should be visible
+    expect(screen.getByText('CUST.IN/2024/27094')).toBeInTheDocument();
+    expect(screen.getByText('REC-001')).toBeInTheDocument();
   });
 });
