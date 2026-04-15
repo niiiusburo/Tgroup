@@ -540,7 +540,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                           : 'border-transparent hover:border-gray-300 hover:scale-105'
                         }
                       `}
-                      title={color.label}
+                      title={t(color.label)}
                     >
                       <div className={`
                         w-8 h-8 rounded-full bg-gradient-to-br ${color.previewGradient}
@@ -554,7 +554,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                   ))}
                 </div>
                 <p className="mt-1.5 text-[11px] text-gray-400">
-                  {APPOINTMENT_CARD_COLORS[colorCode]?.label ?? 'Default'}
+                  {t(APPOINTMENT_CARD_COLORS[colorCode]?.label ?? 'default')}
                 </p>
               </div>
 
@@ -576,7 +576,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                             : 'bg-white border-gray-200 text-gray-600 hover:border-orange-300'
                         }`}
                       >
-                        {s.label}
+                        {t(s.label)}
                       </button>
                     ))}
                   </div>
