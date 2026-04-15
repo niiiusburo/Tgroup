@@ -106,13 +106,13 @@ router.get('/', async (req, res) => {
     if (items.length > 0) {
       const employeeIds = items.map((i) => i.id);
       const scopeRows = await query(
-        'SELECT employee_id, company_id FROM employee_location_scope WHERE employee_id = ANY($1)',
+        'SELECT employee_id, location_id FROM employee_location_scope WHERE employee_id = ANY($1)',
         [employeeIds]
       );
       for (const item of items) {
         item.locationScopeIds = scopeRows
           .filter((r) => r.employee_id === item.id)
-          .map((r) => r.company_id);
+          .map((r) => r.location_id);
       }
     }
 
@@ -185,10 +185,10 @@ router.get('/:id', async (req, res) => {
     }
 
     const scopes = await query(
-      'SELECT company_id FROM employee_location_scope WHERE employee_id = $1',
+      'SELECT location_id FROM employee_location_scope WHERE employee_id = $1',
       [id]
     );
-    rows[0].locationScopeIds = scopes.map((s) => s.company_id);
+    rows[0].locationScopeIds = scopes.map((s) => s.location_id);
 
     return res.json(rows[0]);
   } catch (err) {

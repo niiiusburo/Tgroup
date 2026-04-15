@@ -2,11 +2,23 @@
 
 ## Connection
 
+### ⚠️ Local Development (Mac / Homebrew)
 ```
-postgresql://postgres:***@127.0.0.1:55433/tdental_demo
+postgresql://postgres:postgres@127.0.0.1:5433/tdental_demo
 ```
+- **Port:** `5433` — Homebrew PostgreSQL@15
+- **Start:** `pg_ctl -D /opt/homebrew/var/postgresql@15 start`
+- **Data dir:** `/opt/homebrew/var/postgresql@15`
 
-**Last verified:** 2026-04-14 (from live database via `\d tablename`)
+### Docker / VPS
+```
+postgresql://postgres:postgres@127.0.0.1:55433/tdental_demo
+```
+- **Port:** `55433` — Docker-mapped port (only when `docker compose up db` is running)
+
+**CRITICAL for local dev:** The API `.env` must use **port 5433**. Port 55433 will throw `ECONNREFUSED` if Docker is not running.
+
+**Last verified:** 2026-04-15 (from live database via `\d tablename`)
 
 ---
 
@@ -272,15 +284,16 @@ View. Returns only `id` and `dateexamination`.
 
 **Key takeaway:** Most tables use no underscores for FKs and `state`/`datecreated`/`lastupdated`. The `payments` table is the exception (uses underscores, `status`, `created_at`).
 
-## Demo Data Summary
+## Demo Data Summary (After Seeding)
 
-| Entity | Count |
-|--------|-------|
-| Companies (Locations) | 7 |
-| Partners (Total) | 56+ |
-| Customers | 30+ |
-| Employees (Doctors) | 28 |
-| Appointments | 120+ |
-| Products (Service Catalog) | 20+ |
-| Sale Orders | Active |
-| Payments | Active |
+| Entity | Count | Notes |
+|--------|-------|-------|
+| Companies (Locations) | 7 | 7 clinic branches |
+| Partners (Total) | 340 | 40 customers + 300 employees |
+| Customers | 40 | Active dental patients |
+| Employees | 300 | Includes ~110 doctors |
+| Appointments | ~160 | Total across all dates |
+| Appointments (today) | 24 | Seeded for the current calendar day |
+| Products (Service Catalog) | 20+ | Real service catalog |
+| Sale Orders | Active | Treatment orders linked to patients |
+| Payments | Active | Payment records with allocations |
