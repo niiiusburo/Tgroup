@@ -31,3 +31,10 @@ export function fetchMe() {
   return apiFetch<LoginResponse>('/auth/me');
 }
 
+export function changePassword(oldPassword: string, newPassword: string) {
+  return apiFetch<{ success: boolean; message: string }>('/Auth/change-password', {
+    method: 'POST',
+    body: { oldPassword, newPassword },
+  });
+}
+

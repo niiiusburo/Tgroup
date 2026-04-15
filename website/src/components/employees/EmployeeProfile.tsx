@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Calendar, X, Users, Pencil, Loader2, Building2 } from 'lucide-react';
 import {
-  TIER_LABELS,
-  TIER_STYLES,
   ROLE_LABELS,
   ROLE_STYLES,
   STATUS_BADGE_STYLES,
@@ -67,8 +65,8 @@ export function EmployeeProfile({
             <div>
               <h2 className="text-lg font-bold text-gray-900">{employee.name}</h2>
               <div className="flex items-center gap-2 mt-1">
-                <span className={`text-xs font-medium px-2 py-0.5 rounded ${TIER_STYLES[employee.tier]}`}>
-                  {TIER_LABELS[employee.tier]}
+                <span className="text-xs font-medium px-2 py-0.5 rounded bg-purple-100 text-purple-700">
+                  {employee.tierName || 'No Tier'}
                 </span>
                 <span className={`text-xs px-1.5 py-0.5 rounded ${STATUS_BADGE_STYLES[employee.status]}`}>
                   {statusLabel}

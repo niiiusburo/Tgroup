@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
  */
 test('authenticate as admin', async ({ page }) => {
   // Navigate to app — will show login form
-  await page.goto('http://localhost:5175');
+  await page.goto('http://localhost:5174');
 
   // Wait for the login form to render (SPA takes a moment)
   const emailInput = page.locator('#email');

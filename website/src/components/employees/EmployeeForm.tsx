@@ -24,7 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { X, Loader2, UserPlus, User, Phone, Mail, MapPin, CalendarDays, CheckCircle2, Shield, Check, Eye, EyeOff, Building2 } from 'lucide-react';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { LocationSelector } from '@/components/shared/LocationSelector';
-import { createEmployee, updateEmployee, fetchCompanies, type CreateEmployeeData } from '@/lib/api';
+import { createEmployee, updateEmployee, fetchCompanies, fetchPermissionGroups, type CreateEmployeeData, type PermissionGroup } from '@/lib/api';
 import { ALL_ROLES, ROLE_LABELS, ROLE_TO_DB_FLAGS, inferRoleFromFlags, type EmployeeRole } from '@/data/mockEmployees';
 
 const ROLE_TO_JOBTITLE: Record<EmployeeRole, string> = {
@@ -55,6 +55,7 @@ interface EmployeeFormProps {
     wage?: string | null;
     allowance?: string | null;
     startworkdate?: string | null;
+    tierId?: string | null;
   };
   readonly onClose: () => void;
   readonly onSave: () => void;
@@ -83,12 +84,15 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [locationScopeIds, setLocationScopeIds] = useState<string[]>(employee?.locationScopeIds ? [...employee.locationScopeIds] : []);
+  const [tiers, setTiers] = useState<PermissionGroup[]>([]);
+  const [selectedTierId, setSelectedTierId] = useState<string>(employee?.tierId ?? '');
 
   useEffect(() => {
     fetchCompanies().then((res) => setLocations(res.items.map(l => ({
       id: l.id, name: l.name, address: '', phone: l.phone || '',
       status: (l.active ? 'active' : 'inactive') as 'active' | 'inactive', doctorCount: 0, patientCount: 0, appointmentCount: 0,
     })))).catch((err) => console.error('Failed to fetch locations:', err));
+    fetchPermissionGroups().then((groups) => setTiers(groups)).catch((err) => console.error('Failed to fetch tiers:', err));
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -118,6 +122,7 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
       jobtitle: ROLE_TO_JOBTITLE[selectedRole],
       active,
       startworkdate: startworkdate || undefined,
+      tierId: selectedTierId || undefined,
     };
 
     setLoading(true);
@@ -312,6 +317,25 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
                 </div>
               );
             })()}
+          </div>
+
+          {/* Cấp bậc quyền (Tier) */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <Shield className="w-3.5 h-3.5" />
+              Cấp bậc quyền (Tier)
+            </label>
+            <select
+              value={selectedTierId}
+              onChange={(e) => setSelectedTierId(e.target.value)}
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
+            >
+              <option value="">-- Chọn tier --</option>
+              {tiers.map((tier) => (
+                <option key={tier.id} value={tier.id}>{tier.name}</option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-gray-400">Tier quyết định quyền truy cập của nhân viên trong hệ thống</p>
           </div>
 
           {/* Vị trí / Vai trò */}

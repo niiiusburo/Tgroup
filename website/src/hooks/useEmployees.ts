@@ -2,7 +2,6 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { fetchEmployees, type ApiEmployee } from '@/lib/api';
 import {
   type Employee,
-  type EmployeeTier,
   type EmployeeRole,
   type EmployeeStatus,
 } from '@/data/mockEmployees';
@@ -14,19 +13,7 @@ function mapApiStatus(active: boolean): EmployeeStatus {
   return active ? 'active' : 'inactive';
 }
 
-/**
- * Derive tier from hrjobname
- */
-function deriveTier(hrjobname: string | null): EmployeeTier {
-  if (!hrjobname) return 'mid';
-  const lower = hrjobname.toLowerCase();
 
-  if (lower.includes('trưởng') || lower.includes('director')) return 'director';
-  if (lower.includes('phó') || lower.includes('lead')) return 'lead';
-  if (lower.includes('senior') || lower.includes('chính')) return 'senior';
-
-  return 'mid';
-}
 
 /**
  * Derive roles from API employee flags and hrjobname
@@ -68,7 +55,8 @@ function mapApiEmployeeToEmployee(apiEmployee: ApiEmployee): Employee {
     id: apiEmployee.id,
     name: apiEmployee.name,
     avatar: apiEmployee.avatar || '',
-    tier: deriveTier(apiEmployee.hrjobname),
+    tierId: apiEmployee.tierId || '',
+    tierName: apiEmployee.tierName || 'No Tier',
     roles: deriveRoles(
       apiEmployee.isdoctor,
       apiEmployee.isassistant,
@@ -111,7 +99,7 @@ interface EmployeeWithApiFields extends Employee {
 export function useEmployees(selectedLocationId?: string) {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [tierFilter, setTierFilter] = useState<EmployeeTier | 'all'>('all');
+  const [tierFilter, setTierFilter] = useState<string>('all');
   const [roleFilter, setRoleFilter] = useState<EmployeeRole | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<EmployeeStatus | 'all'>('all');
 
@@ -195,13 +183,8 @@ export function useEmployees(selectedLocationId?: string) {
       'on-leave': 0,
       inactive: 0,
     };
-    const tierCounts: Record<EmployeeTier | 'all', number> = {
+    const tierCounts: Record<string, number> = {
       all: allEmployees.length,
-      junior: 0,
-      mid: 0,
-      senior: 0,
-      lead: 0,
-      director: 0,
     };
     const roleCounts: Record<EmployeeRole | 'all', number> = {
       all: allEmployees.length,
@@ -221,7 +204,9 @@ export function useEmployees(selectedLocationId?: string) {
       else if (emp.status === 'on-leave') statusCounts['on-leave']++;
       else if (emp.status === 'inactive') statusCounts.inactive++;
 
-      tierCounts[emp.tier]++;
+      if (emp.tierId) {
+        tierCounts[emp.tierId] = (tierCounts[emp.tierId] || 0) + 1;
+      }
 
       for (const role of emp.roles) {
         roleCounts[role]++;
@@ -236,7 +221,7 @@ export function useEmployees(selectedLocationId?: string) {
    */
   const employees = useMemo(() => {
     return allEmployees.filter((emp) => {
-      if (tierFilter !== 'all' && emp.tier !== tierFilter) return false;
+      if (tierFilter !== 'all' && emp.tierId !== tierFilter) return false;
       if (roleFilter !== 'all' && !emp.roles.includes(roleFilter)) return false;
       if (statusFilter !== 'all' && emp.status !== statusFilter) return false;
       return true;
@@ -315,4 +300,4 @@ export function useEmployees(selectedLocationId?: string) {
   } as const;
 }
 
-export type { Employee, EmployeeTier, EmployeeRole, EmployeeStatus };
+export type { Employee, EmployeeRole, EmployeeStatus };

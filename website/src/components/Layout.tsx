@@ -23,6 +23,7 @@ import {
   Menu,
   X,
   MessageSquare,
+  Lock,
 } from 'lucide-react';
 import { NAVIGATION_ITEMS, type NavigationItem } from '@/constants';
 import { FilterByLocation } from '@/components/shared/FilterByLocation';
@@ -31,6 +32,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLocations } from '@/hooks/useLocations';
 import { FeedbackWidget } from '@/components/shared/FeedbackWidget';
 import { LanguageToggle } from '@/components/shared/LanguageToggle';
+import { ChangePasswordModal } from '@/components/shared/ChangePasswordModal';
 import { useTranslation } from 'react-i18next';
 
 
@@ -235,6 +237,7 @@ export function Layout() {
   const { t } = useTranslation('nav');
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [debugOpen, setDebugOpen] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const { selectedLocationId, setSelectedLocationId, allowedLocations, isSingleLocation } = useLocationFilter();
   const { user, permissions, hasPermission, logout } = useAuth();
   const { allLocations: allApiLocations } = useLocations();
@@ -365,6 +368,13 @@ export function Layout() {
                   <p className="text-xs text-gray-400 truncate">{permissions?.groupName ?? ''}</p>
                 </div>
                 <button
+                  onClick={() => setChangePasswordOpen(true)}
+                  title="Đổi mật khẩu"
+                  className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
+                >
+                  <Lock className="w-4 h-4" />
+                </button>
+                <button
                   onClick={handleLogout}
                   title={t('logout')}
                   className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-400 hover:bg-white/10 transition-colors flex-shrink-0"
@@ -458,6 +468,9 @@ export function Layout() {
 
       {/* Permission Debugger Modal */}
       <PermissionDebugger isOpen={debugOpen} onClose={() => setDebugOpen(false)} />
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal open={changePasswordOpen} onClose={() => setChangePasswordOpen(false)} />
     </div>
   );
 }

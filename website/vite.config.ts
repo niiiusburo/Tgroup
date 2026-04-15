@@ -47,7 +47,7 @@ console.log('✅ Vite config loading with version:', versionInfo.version)
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
-    port: 5175,
+    port: 5174,
     strictPort: true,
     host: true,
   },

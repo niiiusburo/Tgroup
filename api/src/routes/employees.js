@@ -85,11 +85,14 @@ router.get('/', async (req, res) => {
         e.wage,
         e.allowance,
         e.startworkdate,
+        e.tier_id AS "tierId",
+        pg.name AS "tierName",
         e.datecreated,
         e.lastupdated
       FROM employees e
       LEFT JOIN companies c ON c.id = e.companyid
       LEFT JOIN hrjobs j ON j.id = e.hrjobid
+      LEFT JOIN permission_groups pg ON pg.id = e.tier_id
       WHERE ${whereClause}
       ORDER BY e.name ASC
       LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
@@ -172,10 +175,13 @@ router.get('/:id', async (req, res) => {
         e.enrollnumber,
         e.medicalprescriptioncode,
         e.datecreated,
-        e.lastupdated
+        e.lastupdated,
+        e.tier_id AS "tierId",
+        pg.name AS "tierName"
       FROM employees e
       LEFT JOIN companies c ON c.id = e.companyid
       LEFT JOIN hrjobs j ON j.id = e.hrjobid
+      LEFT JOIN permission_groups pg ON pg.id = e.tier_id
       WHERE e.id = $1`,
       [id]
     );
@@ -324,6 +330,7 @@ router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
       password,
       jobtitle,
       locationScopeIds,
+      tierId,
     } = req.body;
 
     // Build dynamic update query for partners table
@@ -343,6 +350,12 @@ router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
       startworkdate,
       jobtitle,
     };
+
+    if (tierId !== undefined) {
+      updates.push(`tier_id = $${paramIdx}`);
+      values.push(tierId || null);
+      paramIdx++;
+    }
 
     for (const [key, value] of Object.entries(fields)) {
       if (value !== undefined) {
@@ -394,6 +407,19 @@ router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
         await client.query('ROLLBACK');
         return res.status(404).json({ error: 'Employee not found' });
       }
+    }
+
+    // Mirror tier assignment to employee_permissions for backward compatibility
+    if (tierId !== undefined && tierId) {
+      await client.query(
+        `INSERT INTO employee_permissions (employee_id, group_id, loc_scope, lastupdated)
+         VALUES ($1, $2, 'all', NOW())
+         ON CONFLICT (employee_id) DO UPDATE
+           SET group_id = EXCLUDED.group_id,
+               loc_scope = EXCLUDED.loc_scope,
+               lastupdated = NOW()`,
+        [id, tierId]
+      );
     }
 
     // Update location scopes if provided

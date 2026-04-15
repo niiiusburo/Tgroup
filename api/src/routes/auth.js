@@ -13,19 +13,19 @@ const router = express.Router();
  * Returns { groupId, groupName, effectivePermissions, locations }
  */
 async function resolvePermissions(employeeId) {
-  const tierRows = await query(
-    `SELECT p.tier_id, pg.name AS group_name
-     FROM partners p
-     JOIN permission_groups pg ON pg.id = p.tier_id
-     WHERE p.id = $1`,
+  const epRows = await query(
+    `SELECT ep.group_id, pg.name AS group_name
+     FROM employee_permissions ep
+     JOIN permission_groups pg ON pg.id = ep.group_id
+     WHERE ep.employee_id = $1`,
     [employeeId]
   );
 
-  if (!tierRows || tierRows.length === 0) {
+  if (!epRows || epRows.length === 0) {
     return { groupId: null, groupName: null, effectivePermissions: [], locations: [] };
   }
 
-  const { tier_id: groupId, group_name: groupName } = tierRows[0];
+  const { group_id: groupId, group_name: groupName } = epRows[0];
 
   const [basePermRows, overrideRows, locRows] = await Promise.all([
     query(
@@ -166,6 +166,51 @@ router.get('/me', requireAuth, async (req, res) => {
     });
   } catch (err) {
     console.error('/me error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * POST /api/Auth/change-password
+ * Body: { oldPassword, newPassword }
+ * Allows an authenticated employee to change their own password.
+ */
+router.post('/change-password', requireAuth, async (req, res) => {
+  try {
+    const { employeeId } = req.user;
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ error: 'oldPassword and newPassword are required' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: 'newPassword must be at least 6 characters' });
+    }
+
+    const rows = await query(
+      `SELECT password_hash FROM partners WHERE id = $1 AND employee = true AND isdeleted = false`,
+      [employeeId]
+    );
+
+    if (!rows || rows.length === 0 || !rows[0].password_hash) {
+      return res.status(401).json({ error: 'User not found or no password set' });
+    }
+
+    const passwordMatch = await bcrypt.compare(oldPassword, rows[0].password_hash);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: 'Incorrect current password' });
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+    await query(
+      `UPDATE partners SET password_hash = $1 WHERE id = $2`,
+      [newHash, employeeId]
+    );
+
+    return res.json({ success: true, message: 'Password changed successfully' });
+  } catch (err) {
+    console.error('Change password error:', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });

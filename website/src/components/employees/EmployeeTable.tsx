@@ -2,8 +2,6 @@ import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge, type StatusVariant } from '@/components/shared/StatusBadge';
 import { MapPin } from 'lucide-react';
 import {
-  TIER_LABELS,
-  TIER_STYLES,
   ROLE_LABELS,
   ROLE_STYLES,
   type Employee,
@@ -68,8 +66,8 @@ function useColumns(locationNameMap?: Map<string, string>): readonly Column<Empl
       sortable: true,
       width: '110px',
       render: (emp) => (
-        <span className={`text-xs font-medium px-2 py-0.5 rounded ${TIER_STYLES[emp.tier]}`}>
-          {TIER_LABELS[emp.tier]}
+        <span className="text-xs font-medium px-2 py-0.5 rounded bg-purple-100 text-purple-700">
+          {emp.tierName || 'No Tier'}
         </span>
       ),
     },

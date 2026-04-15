@@ -6,6 +6,8 @@ import { useLocations } from '@/hooks/useLocations';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { TierSelector } from '@/components/employees/TierSelector';
 import { RoleMultiSelect } from '@/components/employees/RoleMultiSelect';
+import { useState as useStateReact, useEffect as useEffectReact } from 'react';
+import { fetchPermissionGroups, type PermissionGroup } from '@/lib/api';
 import { EmployeeTable } from '@/components/employees/EmployeeTable';
 import { EmployeeProfile } from '@/components/employees/EmployeeProfile';
 import { useTranslation } from 'react-i18next';
@@ -53,6 +55,12 @@ export function Employees() {
     setShowForm(true);
   };
 
+  const [tiers, setTiers] = useStateReact<PermissionGroup[]>([]);
+
+  useEffectReact(() => {
+    fetchPermissionGroups().then(setTiers).catch(() => {});
+  }, []);
+
   const handleEditEmployee = () => {
     if (selectedEmployee) {
       // Map domain Employee type to EmployeeForm's expected shape
@@ -71,6 +79,7 @@ export function Employees() {
         wage: (selectedEmployee as any).wage ?? null,
         allowance: (selectedEmployee as any).allowance ?? null,
         startworkdate: selectedEmployee.hireDate || null,
+        tierId: selectedEmployee.tierId || null,
       };
       setEditingEmployee(formData as any);
       setShowForm(true);
@@ -165,7 +174,7 @@ export function Employees() {
         {/* Tier filter */}
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-gray-500 w-14 shrink-0">Tier:</span>
-          <TierSelector value={tierFilter} onChange={setTierFilter} counts={filterCounts.tierCounts} />
+          <TierSelector value={tierFilter} onChange={setTierFilter} tiers={tiers} counts={filterCounts.tierCounts} />
         </div>
 
         {/* Role filter */}

@@ -1,5 +1,5 @@
 import { Users } from 'lucide-react';
-import { TIER_STYLES, TIER_LABELS, ROLE_LABELS, type Employee } from '@/data/mockEmployees';
+import { ROLE_LABELS, type Employee } from '@/data/mockEmployees';
 
 /**
  * Shows team relationships for an employee
@@ -38,8 +38,8 @@ export function LinkedEmployees({ employees, onSelect }: LinkedEmployeesProps) {
               {emp.roles.map((r) => ROLE_LABELS[r]).join(', ')}
             </p>
           </div>
-          <span className={`px-2 py-0.5 rounded text-xs font-medium shrink-0 ${TIER_STYLES[emp.tier]}`}>
-            {TIER_LABELS[emp.tier]}
+          <span className="px-2 py-0.5 rounded text-xs font-medium shrink-0 bg-purple-100 text-purple-700">
+            {emp.tierName || 'No Tier'}
           </span>
         </button>
       ))}

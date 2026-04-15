@@ -149,15 +149,16 @@ router.get('/employees', requirePermission('permissions.view'), async (req, res)
   try {
     const rows = await query(`
       SELECT
-        ep.employee_id AS "employeeId",
+        p.id AS "employeeId",
         p.name AS "employeeName",
-        ep.group_id AS "groupId",
+        p.tier_id AS "groupId",
         pg.name AS "groupName",
         pg.color AS "groupColor",
-        ep.loc_scope AS "locScope"
-      FROM employee_permissions ep
-      JOIN partners p ON p.id = ep.employee_id
-      JOIN permission_groups pg ON pg.id = ep.group_id
+        COALESCE(ep.loc_scope, 'all') AS "locScope"
+      FROM partners p
+      JOIN permission_groups pg ON pg.id = p.tier_id
+      LEFT JOIN employee_permissions ep ON ep.employee_id = p.id
+      WHERE p.employee = true AND p.isdeleted = false
       ORDER BY p.name ASC
     `);
 
@@ -226,7 +227,13 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
       return res.status(400).json({ error: 'groupId is required' });
     }
 
-    // Upsert employee_permissions
+    // Update tier on partners record
+    await query(
+      `UPDATE partners SET tier_id = $1, lastupdated = NOW() WHERE id = $2`,
+      [groupId, employeeId]
+    );
+
+    // Upsert employee_permissions for backward compatibility
     await query(
       `INSERT INTO employee_permissions (employee_id, group_id, loc_scope, lastupdated)
        VALUES ($1, $2, $3, NOW())
@@ -328,25 +335,24 @@ router.get('/resolve/:employeeId', requirePermission('permissions.view'), async 
   try {
     const { employeeId } = req.params;
 
-    const epRows = await query(
+    const tierRows = await query(
       `SELECT
-        ep.employee_id,
+        p.id AS employee_id,
         p.name AS employee_name,
-        ep.group_id,
+        p.tier_id AS group_id,
         pg.name AS group_name,
         pg.color AS group_color
-       FROM employee_permissions ep
-       JOIN partners p ON p.id = ep.employee_id
-       JOIN permission_groups pg ON pg.id = ep.group_id
-       WHERE ep.employee_id = $1`,
+       FROM partners p
+       JOIN permission_groups pg ON pg.id = p.tier_id
+       WHERE p.id = $1`,
       [employeeId]
     );
 
-    if (!epRows || epRows.length === 0) {
+    if (!tierRows || tierRows.length === 0 || !tierRows[0].group_id) {
       return res.status(404).json({ error: 'Employee permission assignment not found' });
     }
 
-    const ep = epRows[0];
+    const ep = tierRows[0];
 
     const [basePermRows, overrideRows, locRows] = await Promise.all([
       query(

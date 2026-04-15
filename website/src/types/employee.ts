@@ -28,7 +28,8 @@ export interface Employee {
   readonly id: string;
   readonly name: string;
   readonly avatar: string;
-  readonly tier: EmployeeTier;
+  readonly tierId: string;
+  readonly tierName: string;
   readonly roles: readonly EmployeeRole[];
   readonly status: EmployeeStatus;
   readonly locationId: string;
