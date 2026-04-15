@@ -1,3 +1,20 @@
+## Module Size Rule
+
+**No single source file should exceed ~500 lines or ~10,000 characters.**
+
+If a file approaches this limit, it MUST be split into smaller, focused modules before new features are added.
+
+### Enforcement
+- Before editing any file, check its line count (`wc -l`) or character count.
+- If a file is >500 lines or >10,000 chars, **refuse to add more code to it** and instead:
+  1. Extract sub-components, hooks, or utilities into separate files.
+  2. Use barrel exports (`index.ts`) to keep import paths clean.
+  3. Update cross-reference comments (`@crossref:uses[...]`) in the parent file.
+
+### Good exceptions
+- Auto-generated files (e.g., `api.ts` with many endpoint definitions) may exceed this limit if splitting them harms maintainability.
+- Translation JSON files and static data files are exempt.
+
 ## Version Policy
 
 **ALWAYS bump the version in `website/package.json` after making code changes.**
