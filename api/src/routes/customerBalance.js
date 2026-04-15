@@ -27,9 +27,12 @@ router.get('/:id', async (req, res) => {
           AND service_id IS NULL AND (deposit_used IS NULL OR deposit_used = 0) AND amount > 0
           AND NOT EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = payments.id)
         ) THEN amount ELSE 0 END), 0) AS total_deposited,
-        COALESCE(SUM(CASE WHEN deposit_type = 'usage' OR method = 'deposit' OR (deposit_used > 0) THEN
-          COALESCE(deposit_used, 0) + CASE WHEN method = 'deposit' THEN amount ELSE 0 END
-        ELSE 0 END), 0) AS total_used,
+        COALESCE(SUM(
+          CASE
+            WHEN method = 'deposit' THEN amount
+            ELSE COALESCE(deposit_used, 0)
+          END
+        ), 0) AS total_used,
         COALESCE(SUM(CASE WHEN deposit_type = 'refund' OR amount < 0 THEN ABS(amount) ELSE 0 END), 0) AS total_refunded
       FROM payments
       WHERE customer_id = $1 AND status != 'voided'
