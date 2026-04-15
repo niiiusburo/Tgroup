@@ -106,19 +106,19 @@ export const STATUS_DOT_COLORS: Record<string, string> = {
 };
 
 export const TIER_LABELS: Record<string, string> = {
-  junior: 'Junior',
-  mid: 'Mid-Level',
-  senior: 'Senior',
-  lead: 'Lead',
-  director: 'Director',
+  'super-admin': 'Super Admin',
+  admin: 'Admin',
+  editor: 'Editor',
+  receptionist: 'Receptionist',
+  assistant: 'Assistant',
 };
 
 export const TIER_STYLES: Record<string, string> = {
-  junior: 'bg-gray-100 text-gray-600',
-  mid: 'bg-blue-100 text-blue-600',
-  senior: 'bg-purple-100 text-purple-600',
-  lead: 'bg-orange-100 text-orange-600',
-  director: 'bg-red-100 text-red-600',
+  'super-admin': 'bg-red-100 text-red-600',
+  admin: 'bg-purple-100 text-purple-600',
+  editor: 'bg-blue-100 text-blue-600',
+  receptionist: 'bg-green-100 text-green-600',
+  assistant: 'bg-amber-100 text-amber-600',
 };
 
 export const ROLE_LABELS: Record<string, string> = {

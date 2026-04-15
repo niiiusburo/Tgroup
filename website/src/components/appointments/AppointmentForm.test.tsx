@@ -13,7 +13,7 @@ vi.mock('@/hooks/useCustomers', () => ({
 
 vi.mock('@/hooks/useEmployees', () => ({
   useEmployees: () => ({
-    employees: [{ id: 'e1', name: 'Bác sĩ A', phone: '', email: '', avatar: '', tier: 'mid', roles: ['doctor'], status: 'active', locationId: 'l1', locationName: 'CN1', schedule: [], linkedEmployeeIds: [], hireDate: '' }],
+    employees: [{ id: 'e1', name: 'Bác sĩ A', phone: '', email: '', avatar: '', tierId: 'editor-id', tierName: 'Editor', roles: ['doctor'], status: 'active', locationId: 'l1', locationName: 'CN1', schedule: [], linkedEmployeeIds: [], hireDate: '' }],
     isLoading: false,
   }),
 }));

@@ -3,7 +3,7 @@
  * @crossref:used-in[Employees, EmployeeProfile, ScheduleCalendar, LinkedEmployees]
  */
 
-export type EmployeeTier = 'junior' | 'mid' | 'senior' | 'lead' | 'director';
+export type EmployeeTier = 'super-admin' | 'admin' | 'editor' | 'receptionist' | 'assistant';
 
 export type EmployeeRole =
   | 'general-manager'
@@ -87,7 +87,7 @@ export const ROLE_TO_DB_FLAGS: Record<EmployeeRole, {
   'marketing': { isDoctor: false, isAssistant: false, isReceptionist: false, isdoctor: false, isassistant: false, isreceptionist: false },
 };
 
-export const ALL_TIERS: readonly EmployeeTier[] = ['junior', 'mid', 'senior', 'lead', 'director'];
+export const ALL_TIERS: readonly EmployeeTier[] = ['super-admin', 'admin', 'editor', 'receptionist', 'assistant'];
 export const ALL_ROLES: readonly EmployeeRole[] = [
   'general-manager',
   'branch-manager',

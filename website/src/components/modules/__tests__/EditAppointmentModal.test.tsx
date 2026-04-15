@@ -8,7 +8,7 @@ const mockOnSaved = vi.fn();
 vi.mock('@/hooks/useEmployees', () => ({
   useEmployees: () => ({
     employees: [
-      { id: 'doc-1', name: 'Dr. A', phone: '', email: '', avatar: '', tier: 'mid', roles: ['doctor'], status: 'active', locationId: 'loc-1', locationName: 'Clinic 1', schedule: [], linkedEmployeeIds: [], hireDate: '' },
+      { id: 'doc-1', name: 'Dr. A', phone: '', email: '', avatar: '', tierId: 'editor-id', tierName: 'Editor', roles: ['doctor'], status: 'active', locationId: 'loc-1', locationName: 'Clinic 1', schedule: [], linkedEmployeeIds: [], hireDate: '' },
     ],
     isLoading: false,
   }),
