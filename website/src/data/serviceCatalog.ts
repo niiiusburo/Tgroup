@@ -4,6 +4,8 @@
  * @description Complete list of dental services organized by category
  */
 
+import { normalizeText } from '@/lib/utils';
+
 export interface ServiceItem {
   code: string;
   name: string;
@@ -242,12 +244,12 @@ export function getCategoryStats(): { category: string; count: number; avgPrice:
  * Search services by name or code
  */
 export function searchServices(query: string): ServiceItem[] {
-  const normalizedQuery = query.toLowerCase().trim();
+  const normalizedQuery = normalizeText(query.trim());
   if (!normalizedQuery) return SERVICE_CATALOG_DATA;
-  
+
   return SERVICE_CATALOG_DATA.filter(
     service =>
-      service.name.toLowerCase().includes(normalizedQuery) ||
-      service.code.toLowerCase().includes(normalizedQuery)
+      normalizeText(service.name).includes(normalizedQuery) ||
+      normalizeText(service.code).includes(normalizedQuery)
   );
 }

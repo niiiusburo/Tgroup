@@ -18,6 +18,7 @@ import { useServices, type CategoryFilter, type CreateServiceInput } from '@/hoo
 import type { ServiceRecord, ServiceStatus } from '@/data/mockServices';
 import { APPOINTMENT_TYPE_LABELS, type AppointmentType } from '@/constants';
 import { formatVND } from '@/lib/formatting';
+import { normalizeText } from '@/lib/utils';
 
 const STATUS_TABS: { label: string; value: 'active' | 'completed' | 'cancelled' | 'all' }[] = [
   { label: 'Đang điều trị', value: 'active' },
@@ -63,11 +64,11 @@ export function Services() {
     
     // Apply search filter
     if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(r => 
-        r.customerName.toLowerCase().includes(term) ||
-        r.serviceName.toLowerCase().includes(term) ||
-        r.doctorName.toLowerCase().includes(term)
+      const term = normalizeText(searchTerm);
+      filtered = filtered.filter(r =>
+        normalizeText(r.customerName).includes(term) ||
+        normalizeText(r.serviceName).includes(term) ||
+        normalizeText(r.doctorName).includes(term)
       );
     }
 
