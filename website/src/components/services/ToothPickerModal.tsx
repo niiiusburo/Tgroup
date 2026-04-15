@@ -57,7 +57,7 @@ export function ToothPickerModal({ isOpen, initialValues = [], onClose, onSave }
   const currentTeeth = useMemo(() => (dentition === 'permanent' ? PERMANENT_TEETH : PRIMARY_TEETH), [dentition]);
 
   const renderQuadrant = (nums: number[], reverse = false) => (
-    <div className={`flex gap-1 justify-center ${reverse ? 'flex-col-reverse' : 'flex-col'} items-center`}>
+    <div className="flex gap-1 justify-center items-center">
       {nums.map((n) => {
         const isSelected = selected.has(n);
         return (
@@ -66,9 +66,10 @@ export function ToothPickerModal({ isOpen, initialValues = [], onClose, onSave }
             type="button"
             onClick={() => toggleTooth(n)}
             className={[
-              'w-11 flex flex-col items-center cursor-pointer select-none border p-0.5 transition-colors',
+              'w-11 flex items-center cursor-pointer select-none border p-0.5 transition-colors',
               'hover:border-gray-300',
               isSelected ? 'border-[#1a6de3] bg-blue-50' : 'border-white',
+              reverse ? 'flex-col-reverse' : 'flex-col',
             ].join(' ')}
           >
             <div className="w-9 h-[52px] flex items-center justify-center pointer-events-none">
