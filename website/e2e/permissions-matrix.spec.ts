@@ -15,7 +15,7 @@ import { test, expect, Page } from '@playwright/test';
 const USERS = {
   admin: {
     email: 'tg@clinic.vn',
-    password: 'admin123',
+    password: '123456',
     role: 'Admin',
     shouldEditCustomer: true,
     permissions: ['*'], // Super admin wildcard
@@ -43,14 +43,16 @@ const USERS = {
  */
 async function login(page: Page, email: string, password: string) {
   await page.goto('http://localhost:5174/login');
-  await expect(page.locator('h1')).toContainText('TG Clinic');
+  // Wait for login form to render (use language-independent selector)
+  const emailInput = page.locator('input#email');
+  await expect(emailInput).toBeVisible({ timeout: 10000 });
   
-  await page.fill('input#email', email);
+  await emailInput.fill(email);
   await page.fill('input#password', password);
   await page.click('button[type="submit"]');
   
-  // Wait for dashboard
-  await expect(page.locator('h1', { hasText: 'Overview' })).toBeVisible({ timeout: 15000 });
+  // Wait for auth to complete — login form disappears
+  await expect(emailInput).toBeHidden({ timeout: 15000 });
 }
 
 /**

@@ -46,7 +46,6 @@ describe('ServiceHistory payment history', () => {
       <ServiceHistory
         services={mockServices}
         payments={mockPayments}
-        onEditPayment={vi.fn()}
       />
     );
 
@@ -62,7 +61,6 @@ describe('ServiceHistory payment history', () => {
       <ServiceHistory
         services={mockServices}
         payments={mockPayments}
-        onEditPayment={vi.fn()}
       />
     );
 

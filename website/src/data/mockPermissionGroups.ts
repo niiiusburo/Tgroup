@@ -51,7 +51,6 @@ export const PERMISSIONS: readonly Permission[] = [
   { id: 'services.edit', module: 'Services', action: 'Edit', description: 'Edit services' },
   { id: 'payment.view', module: 'Payment', action: 'View', description: 'View payments' },
   { id: 'payment.add', module: 'Payment', action: 'Add', description: 'Add payments' },
-  { id: 'payment.edit', module: 'Payment', action: 'Edit', description: 'Edit payments' },
   { id: 'payment.refund', module: 'Payment', action: 'Refund', description: 'Refund payments' },
   { id: 'employees.view', module: 'Employees', action: 'View', description: 'View employees' },
   { id: 'employees.add', module: 'Employees', action: 'Add', description: 'Add employees' },

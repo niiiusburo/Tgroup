@@ -1,33 +1,3 @@
-## VPS Deployment (MANDATORY)
-
-**ALWAYS use `scripts/deploy-vps.sh` to deploy to VPS. Never deploy manually.**
-
-```bash
-./scripts/deploy-vps.sh              # Full deploy: code + DB (tdental_demo) + rebuild
-./scripts/deploy-vps.sh --code-only  # Code + rebuild only, skip DB
-./scripts/deploy-vps.sh --db-only    # DB sync only, skip code
-```
-
-### How it works
-1. **rsync** `api/` + `website/` to VPS (whitelist — only what VPS needs, no local junk)
-2. **scp** infra files (`docker-compose.yml`, `Dockerfile.api`, `Dockerfile.web`, `nginx.docker.conf`)
-3. **pg_dump** local `tdental_demo` → restore on VPS `tdental_demo` (same DB name)
-4. **docker compose build + up -d** on VPS
-5. **Verify** API, web, and DB are responding
-
-### When to update the deploy script
-If you change **any** of these, you MUST update `scripts/deploy-vps.sh` and notify the user:
-- `docker-compose.yml` — services, ports, volumes, env vars
-- `Dockerfile.api` or `Dockerfile.web` — build steps, base images
-- `nginx.docker.conf` — reverse proxy rules
-- VPS `.env` values — secrets, API keys, DB credentials
-- VPS SSH host (`dokploy`) or project dir (`/opt/tgroup`)
-- Local Docker container name (`tgroup-db`) or database name (`tdental_demo`)
-- Added new top-level directories that VPS needs (currently only `api/` and `website/`)
-
-### What NEVER goes to VPS
-`notes/`, `tools/`, `backups/`, `scripts/`, `docs/`, `.claude/`, `.omc/`, `.agents/`, `.planning/`, screenshots, test artifacts — these are local-only.
-
 ## Version Policy
 
 **ALWAYS bump the version in `website/package.json` after making code changes.**
@@ -40,40 +10,6 @@ Version format: `major.minor.patch` (e.g., 0.4.5)
 After updating code, increment the appropriate version number in `website/package.json`.
 The build timestamp and git info are auto-generated from this version.
 
-## i18n Rules (MANDATORY)
-
-**ALL user-facing text MUST use react-i18next `t()` function.**
-
-- ✅ `t('common.save')` — correct
-- ✅ `t('appointments.status.scheduled')` — correct
-- ✅ `t('title')` (within a namespaced component) — correct
-- ❌ `"Save"` — FORBIDDEN in JSX/TSX
-- ❌ `"Scheduled"` — FORBIDDEN in JSX/TSX
-- ❌ `"Đang hẹn"` — FORBIDDEN in JSX/TSX
-
-### Exceptions (may remain hardcoded)
-- Database/API data values (customer names, service names, notes, addresses)
-- CSS class names, HTML attributes, technical identifiers
-- Console.log / debug messages (not user-facing)
-- Placeholder strings like `'you@tgclinic.vn'` that are example values
-
-### Translation File Locations
-- English: `website/src/i18n/locales/en/*.json`
-- Vietnamese: `website/src/i18n/locales/vi/*.json`
-- 14 namespaces: common, nav, overview, calendar, customers, appointments, services, payment, employees, locations, reports, settings, auth, website
-
-### How to Add a New UI String
-1. Add the key to BOTH the `en` and `vi` JSON files in the appropriate namespace
-2. Use `t('keyName')` in the component
-3. Use `{ t } = useTranslation('namespace')` at the top of the component
-
-### Constants Migration
-- `NAVIGATION_ITEMS[].label` → i18n keys (e.g., `'overview'`, `'calendar'`)
-- `APPOINTMENT_STATUS_OPTIONS[].label` → i18n keys (e.g., `'appointments.status.scheduled'`)
-- `APPOINTMENT_TYPE_LABELS` → i18n keys (e.g., `'calendar.appointmentTypes.cleaning'`)
-- `APPOINTMENT_CARD_COLORS[].label` → i18n keys (e.g., `'common.colors.blue'`)
-- Use `APPOINTMENT_STATUS_I18N_KEYS` instead of deprecated `APPOINTMENT_STATUS_LABELS_VI`
-
 ## Obsidian Brain
 
 At session start, read project context from local Obsidian notes:
@@ -82,62 +18,6 @@ At session start, read project context from local Obsidian notes:
 - `./notes/📊 Features Status.md` — All features tracker
 - `./notes/🚀 Deployment Guide.md` — VPS deploy workflow, Docker setup
 - `./notes/💾 Database Schema.md` — Database tables and relationships
-
-## Global Behavioral Rules (MANDATORY — from ~/.claude/CLAUDE.md)
-
-### 1. Workflow — Parallel Teams (NON-NEGOTIABLE)
-Every non-trivial task MUST follow this exact workflow:
-1. **Plan first** — Break into 2-5 independent subtasks
-2. **Spawn parallel agents** — Launch all simultaneously
-3. **Synthesize** — Collect outputs, resolve conflicts, integrate
-4. **Verify** — Run tests / checks before reporting done
-
-**Orchestrator Rule:** The main session is ORCHESTRATOR ONLY for non-trivial tasks. Never do implementation work directly. Spawn agents for reading, editing, exploring, and testing. Main session plans, delegates, and verifies only.
-
-**Exception:** Single file, <10 lines → may skip teams.
-
-### 2. Goal Discipline
-Stay focused on the original request. Do NOT pivot to tangential work without explicit user approval. Mention side issues briefly at the end — do not act on them.
-
-### 3. Evidence Before Claims
-- Prefer evidence over assumptions
-- Verify outcomes before declaring success
-- Consult official docs before implementing SDKs/frameworks/APIs
-- **Database:** Verify schema first — never assume (run `\d tablename` if unsure)
-- **Ports:** Verify with `lsof` before assuming
-
-### 4. Tool Discipline
-- Read multiple files in parallel when possible
-- Use background execution for long builds/tests
-
-### 5. Review Separation
-- Keep authoring and review as separate passes
-- Never self-approve in the same active context
-- Run verification AFTER code changes
-
-### 6. Safety
-Never perform aggressive cleanup or deletion of directories, services, or files without explicit user confirmation. List what will be deleted and wait for approval.
-
-### 7. Verification (MANDATORY)
-After making code changes, you MUST verify:
-- TypeScript compiles without errors
-- The affected feature loads correctly (browser test or curl)
-- No console errors in the browser
-- Version is bumped in `website/package.json`
-
-### 8. Coding Standards
-- **Immutability:** Always create new objects, never mutate existing ones
-- **File organization:** Many small files > few large ones. 200-400 lines typical, 800 max
-- **Error handling:** Handle errors explicitly at every level. Never silently swallow errors
-- **Functions small** (<50 lines), **files focused** (<800 lines)
-- No deep nesting (>4 levels)
-
-### 9. Security Checks (Before ANY commit)
-- No hardcoded secrets (API keys, passwords, tokens)
-- All user inputs validated
-- SQL injection prevention (parameterized queries)
-- XSS prevention (sanitized HTML)
-- Error messages don't leak sensitive data
 
 <!-- code-review-graph MCP tools -->
 ## MCP Tools: code-review-graph

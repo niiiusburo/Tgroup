@@ -13,19 +13,19 @@ const router = express.Router();
  * Returns { groupId, groupName, effectivePermissions, locations }
  */
 async function resolvePermissions(employeeId) {
-  const epRows = await query(
-    `SELECT ep.group_id, pg.name AS group_name
-     FROM employee_permissions ep
-     JOIN permission_groups pg ON pg.id = ep.group_id
-     WHERE ep.employee_id = $1`,
+  const tierRows = await query(
+    `SELECT p.tier_id, pg.name AS group_name
+     FROM partners p
+     JOIN permission_groups pg ON pg.id = p.tier_id
+     WHERE p.id = $1`,
     [employeeId]
   );
 
-  if (!epRows || epRows.length === 0) {
+  if (!tierRows || tierRows.length === 0) {
     return { groupId: null, groupName: null, effectivePermissions: [], locations: [] };
   }
 
-  const { group_id: groupId, group_name: groupName } = epRows[0];
+  const { tier_id: groupId, group_name: groupName } = tierRows[0];
 
   const [basePermRows, overrideRows, locRows] = await Promise.all([
     query(
@@ -39,7 +39,7 @@ async function resolvePermissions(employeeId) {
     query(
       `SELECT c.id, c.name
        FROM employee_location_scope els
-       JOIN companies c ON c.id = els.location_id
+       JOIN companies c ON c.id = els.company_id
        WHERE els.employee_id = $1`,
       [employeeId]
     ),
@@ -77,7 +77,7 @@ router.post('/login', async (req, res) => {
       `SELECT p.id, p.name, p.email, p.password_hash, p.companyid AS "companyId", c.name AS "companyName"
        FROM partners p
        LEFT JOIN companies c ON c.id = p.companyid
-       WHERE p.email = $1 AND p.employee = true AND p.isdeleted = false`,
+       WHERE p.email = $1 AND p.employee = true AND p.isdeleted = false AND p.active = true`,
       [email]
     );
 

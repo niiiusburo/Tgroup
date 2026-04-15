@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Stethoscope, CheckCircle2, Clock, XCircle, CreditCard, CheckCircle, Edit2, Wallet } from 'lucide-react';
+import { Stethoscope, CheckCircle2, Clock, XCircle, CreditCard, CheckCircle, Edit2, Wallet, Trash2 } from 'lucide-react';
 import type { CustomerService } from '@/types/customer';
 import type { PaymentWithAllocations } from '@/hooks/useCustomerPayments';
 import { formatVND, parseDisplayDate } from '@/lib/formatting';
 import { StatusDropdown, type StatusOption } from '@/components/shared/StatusDropdown';
+import { PaymentSourceBadges } from '@/components/payment/PaymentSourceBadges';
 
 /**
  * Service History - Treatment history list
@@ -18,7 +19,7 @@ interface ServiceHistoryProps {
   readonly onEditService?: (service: CustomerService) => void;
   readonly onUpdateStatus?: (serviceId: string, newStatus: string) => Promise<void>;
   readonly onPayForService?: (service: CustomerService) => void;
-  readonly onEditPayment?: (payment: PaymentWithAllocations) => void;
+  readonly onDeletePayment?: (id: string) => void | Promise<void>;
 }
 
 const STATUS_OPTIONS: readonly StatusOption[] = [
@@ -32,21 +33,6 @@ const STATUS_CONFIG = {
   active: { icon: Clock, label: 'active', className: 'text-blue-600 bg-blue-50', dot: 'bg-blue-500' },
   cancelled: { icon: XCircle, label: 'cancelled', className: 'text-red-600 bg-red-50', dot: 'bg-red-500' },
 } as const;
-
-function getMethodLabel(method?: string) {
-  switch (method) {
-    case 'cash':
-      return 'Cash';
-    case 'bank_transfer':
-      return 'Bank';
-    case 'deposit':
-      return 'Deposit';
-    case 'mixed':
-      return 'Mixed';
-    default:
-      return method || 'Other';
-  }
-}
 
 function getPaymentsForService(
   serviceId: string,
@@ -67,7 +53,7 @@ export function ServiceHistory({
   onEditService,
   onUpdateStatus,
   onPayForService,
-  onEditPayment,
+  onDeletePayment,
 }: ServiceHistoryProps) {
   const { t } = useTranslation('services');
   const [expandedServiceId, setExpandedServiceId] = useState<string | null>(null);
@@ -235,17 +221,11 @@ export function ServiceHistory({
                           const dd = dateInfo?.day ?? '—';
                           const mmm = dateInfo?.month ?? '';
                           const yyyy = dateInfo?.year ?? '';
-                          const methodChipClass =
-                            p.method === 'cash' ? 'text-green-700 bg-green-100 border border-green-200' :
-                            p.method === 'bank_transfer' ? 'text-blue-700 bg-blue-100 border border-blue-200' :
-                            p.method === 'deposit' ? 'text-purple-700 bg-purple-100 border border-purple-200' :
-                            'text-gray-700 bg-gray-100 border border-gray-200';
                           return (
                             <div
                               key={p.id}
-                              onClick={() => !isVoided && onEditPayment?.(p)}
                               className={`px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-gray-50 last:border-b-0 transition-all duration-200 group ${
-                                isVoided ? 'opacity-60' : 'cursor-pointer hover:border-primary/40 hover:ring-2 hover:ring-primary/20 hover:ring-inset hover:shadow-sm hover:-translate-y-px'
+                                isVoided ? 'opacity-60' : ''
                               } ${isNegative ? 'bg-red-50/30' : ''}`}
                             >
                         <div className="flex items-center gap-3 min-w-0">
@@ -258,9 +238,12 @@ export function ServiceHistory({
                           {/* Method badge + amount */}
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
-                              <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${methodChipClass}`}>
-                                {getMethodLabel(p.method)}
-                              </span>
+                              <PaymentSourceBadges
+                                method={p.method}
+                                cashAmount={p.cashAmount}
+                                bankAmount={p.bankAmount}
+                                depositUsed={p.depositUsed}
+                              />
                               {p.referenceCode && (
                                 <span className="text-[10px] text-gray-700 font-medium">{p.referenceCode}</span>
                               )}
@@ -285,8 +268,15 @@ export function ServiceHistory({
                           ) : (
                             <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Posted</span>
                           )}
-                          {!isVoided && onEditPayment && (
-                            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[10px] text-primary font-medium">Edit</span>
+                          {!isVoided && onDeletePayment && (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); onDeletePayment(p.id); }}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 rounded-full text-red-500 hover:bg-red-50 hover:text-red-600"
+                              title="Delete payment"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           )}
                         </div>
                             </div>

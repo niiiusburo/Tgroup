@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { fetchPayments, createPayment, voidPayment, type ApiPayment, type ApiPaymentAllocation } from '@/lib/api';
+import { fetchPayments, createPayment, voidPayment, deletePayment, type ApiPayment, type ApiPaymentAllocation } from '@/lib/api';
 
 export interface PaymentWithAllocations extends ApiPayment {
   allocations: ApiPaymentAllocation[];
@@ -23,6 +23,7 @@ export interface UseCustomerPaymentsResult {
     allocations?: { invoice_id?: string; dotkham_id?: string; allocated_amount: number }[];
   }) => Promise<ApiPayment>;
   voidPaymentById: (id: string, reason?: string) => Promise<void>;
+  deletePaymentById: (id: string) => Promise<void>;
 }
 
 export function useCustomerPayments(customerId: string | null): UseCustomerPaymentsResult {
@@ -75,6 +76,11 @@ export function useCustomerPayments(customerId: string | null): UseCustomerPayme
     );
   }, []);
 
+  const deletePaymentById = useCallback(async (id: string) => {
+    await deletePayment(id);
+    setPayments((prev) => prev.filter((p) => p.id !== id));
+  }, []);
+
   return {
     payments,
     isLoading,
@@ -82,5 +88,6 @@ export function useCustomerPayments(customerId: string | null): UseCustomerPayme
     refetch: load,
     addPayment,
     voidPaymentById,
+    deletePaymentById,
   };
 }

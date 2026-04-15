@@ -20,6 +20,6 @@ test('Permissions page loads for admin', async ({ page }) => {
   const hasAdmin = body?.toLowerCase().includes('admin');
   
   expect(denied).toBeFalsy();
-  expect(header).toBe('Permissions');
+  expect(header).toMatch(/Permissions|Quyền hạn/);
   console.log(`Has permission: ${hasPermission}, Has group: ${hasGroup}, Has admin: ${hasAdmin}`);
 });

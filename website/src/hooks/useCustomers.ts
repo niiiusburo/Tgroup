@@ -83,7 +83,8 @@ export function useCustomers(locationId: string = 'all') {
   const [statusFilter, setStatusFilter] = useState<CustomerStatusFilter>('all');
 
   // Check if user has permission to view all customers
-  const canViewAllCustomers = hasPermission(PERMISSION_VIEW_ALL_CUSTOMERS);
+  // Support both legacy 'customers.view.all' and current 'customers.view_all'
+  const canViewAllCustomers = hasPermission(PERMISSION_VIEW_ALL_CUSTOMERS) || hasPermission('customers.view_all');
   // Search is required if user doesn't have view.all permission
   const searchRequired = !canViewAllCustomers;
 

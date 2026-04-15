@@ -1,0 +1,5 @@
+id,orderid,productid,productname,pricetotal,isdeleted,datecreated
+aafe5ac7-acda-4ad3-ba11-b1a60091a0d9,9104d6b7-6ff4-4796-8406-b1a60091a0d9,4bc4ade1-3487-4a80-8b33-afe30053b79e,Niềng Mắc Cài Kim Loại Tiêu Chuẩn,10000000.00,f,2024-07-07 15:50:12.988
+a9991590-5e36-4558-9c23-b1a900bb29cc,e799b8a8-c456-4c05-941d-b1a900bb29cc,468fa1df-5ebb-4aa6-82cf-b05b00a64ed3,Trám răng,600000.00,f,2024-07-10 18:21:26.436
+513b635d-518b-4078-a482-b1a900bb9ef5,ea27679d-28f6-444d-bfcf-b1a900bb9ef5,4bc4ade1-3487-4a80-8b33-afe30053b79e,Niềng Mắc Cài Kim Loại Tiêu Chuẩn,14000000.00,f,2024-07-10 18:23:06.414
+d4d0068d-add7-4d12-af4e-b1be00c99fd5,da2c4485-64cd-43c3-a356-b1be00c99fd5,468fa1df-5ebb-4aa6-82cf-b05b00a64ed3,Trám răng,200000.00,f,2024-07-31 19:14:05.506

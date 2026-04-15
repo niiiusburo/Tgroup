@@ -223,7 +223,7 @@ export function Customers() {
   const { createAppointment, updateAppointment } = useAppointments(undefined);
   // Fetch service records without location filter so the customer profile shows
   // treatment history across all locations (not just the currently selected one).
-  const { createServiceRecord, updateServiceRecord, getRecordsByCustomer, updateServiceStatus } = useServices(undefined, selectedCustomerId ?? undefined);
+  const { createServiceRecord, updateServiceRecord, getRecordsByCustomer, updateServiceStatus, refetch: refetchServices } = useServices(undefined, selectedCustomerId ?? undefined);
   const {
     depositList,
     usageHistory,
@@ -236,7 +236,7 @@ export function Customers() {
     removeDeposit,
     editDeposit,
   } = useDeposits();
-  const { payments: customerPayments, isLoading: paymentsLoading, addPayment, refetch: refetchPayments } = useCustomerPayments(selectedCustomerId);
+  const { payments: customerPayments, isLoading: paymentsLoading, addPayment, refetch: refetchPayments, deletePaymentById } = useCustomerPayments(selectedCustomerId);
 
   // Callbacks for CustomerProfile
   const handleCreateAppointment = useCallback(async (data: AppointmentFormData) => {
@@ -377,7 +377,8 @@ export function Customers() {
     refetchProfile();
     refetchPayments();
     loadDeposits(data.customerId);
-  }, [addPayment, refetchProfile, refetchPayments, loadDeposits]);
+    refetchServices();
+  }, [addPayment, refetchProfile, refetchPayments, loadDeposits, refetchServices]);
 
   const handleAddDeposit = useCallback(async (
     customerId: string,
@@ -762,6 +763,7 @@ export function Customers() {
           onCreateService={handleCreateService}
           onUpdateService={handleUpdateService}
           onMakePayment={handleMakePayment}
+          onDeletePayment={async (id) => { await deletePaymentById(id); refetchPayments(); refetchProfile(); }}
           canSoftDelete={canSoftDelete}
           canHardDelete={canHardDelete}
           onSoftDelete={() => {

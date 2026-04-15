@@ -41,16 +41,16 @@ function requirePermission(permission) {
         return res.status(403).json({ error: 'Forbidden' });
       }
 
-      const epRows = await query(
-        `SELECT ep.group_id FROM employee_permissions ep WHERE ep.employee_id = $1`,
+      const tierRows = await query(
+        `SELECT tier_id FROM partners WHERE id = $1`,
         [employeeId]
       );
 
-      if (!epRows || epRows.length === 0) {
+      if (!tierRows || tierRows.length === 0 || !tierRows[0].tier_id) {
         return res.status(403).json({ error: 'No permission assignment found' });
       }
 
-      const groupId = epRows[0].group_id;
+      const groupId = tierRows[0].tier_id;
 
       const [basePermRows, overrideRows] = await Promise.all([
         query(
@@ -70,7 +70,7 @@ function requirePermission(permission) {
       const effectiveSet = new Set([...basePerms, ...granted]);
       for (const p of revoked) effectiveSet.delete(p);
 
-      if (!effectiveSet.has(permission)) {
+      if (!effectiveSet.has('*') && !effectiveSet.has(permission)) {
         return res.status(403).json({ error: `Permission denied: ${permission}` });
       }
 

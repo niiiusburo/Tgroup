@@ -29,7 +29,6 @@ import { CustomerSelector } from '@/components/shared/CustomerSelector';
 import { DoctorSelector } from '@/components/shared/DoctorSelector';
 import { LocationSelector } from '@/components/shared/LocationSelector';
 import { DatePicker } from '@/components/ui/DatePicker';
-import { ToothPickerModal } from './ToothPickerModal';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
@@ -87,9 +86,6 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   const [totalCostOverride, setTotalCostOverride] = useState(
     initialData?.totalCost ? String(initialData.totalCost) : ''
   );
-  const [toothNumbers, setToothNumbers] = useState<string[]>(initialData?.toothNumbers ? [...initialData.toothNumbers] : []);
-  const [toothComment, setToothComment] = useState(initialData?.toothComment ?? '');
-  const [isToothModalOpen, setIsToothModalOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -109,8 +105,6 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       setQuantity(initialData.quantity ? String(initialData.quantity) : '1');
       setUnit(initialData.unit ?? 'răng');
       setTotalCostOverride(initialData.totalCost ? String(initialData.totalCost) : '');
-      setToothNumbers(initialData.toothNumbers ? [...initialData.toothNumbers] : []);
-      setToothComment(initialData.toothComment ?? '');
     }
   }, [initialData?.id, readonlyCustomerId]);
 
@@ -243,8 +237,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       totalVisits: selectedCatalog.totalVisits, totalCost: cost,
       startDate, expectedEndDate: expectedEndDate || startDate,
       notes: notes.trim(), quantity: Number(quantity) || 1, unit: unit.trim(),
-      toothNumbers,
-      toothComment: toothComment.trim(),
+      toothNumbers: [],
     });
     } catch (error) {
       setErrors(prev => ({ ...prev, submit: error instanceof Error ? error.message : t('formErrors.saveFailed', 'Lưu thất bại') }));
@@ -419,51 +412,6 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
             />
           </div>
-
-          {/* Răng */}
-          <div className="border border-gray-200 rounded-xl p-4 bg-gray-50/50 space-y-3">
-            <label className="block text-sm font-semibold text-gray-700">
-              {t('form.teeth', 'Răng')}
-            </label>
-
-            {/* Tooth numbers display / picker trigger */}
-            <button
-              type="button"
-              onClick={() => setIsToothModalOpen(true)}
-              className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-orange-300 transition-colors"
-            >
-              {toothNumbers.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {toothNumbers.map((n) => (
-                    <span
-                      key={n}
-                      className="inline-flex items-center px-2 py-1 rounded bg-blue-100 text-blue-700 text-sm font-medium"
-                    >
-                      {n}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <span className="text-sm text-gray-400">
-                  {t('form.selectTeeth', 'Chọn răng…')}
-                </span>
-              )}
-            </button>
-
-            {/* Tooth comment */}
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">
-                {t('form.toothComment', 'Ghi chú răng')}
-              </label>
-              <textarea
-                value={toothComment}
-                onChange={(e) => setToothComment(e.target.value)}
-                rows={2}
-                placeholder={t('form.toothCommentPlaceholder', 'Nhập ghi chú về răng')}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
-              />
-            </div>
-          </div>
         </form>
 
         {/* Footer */}
@@ -478,16 +426,6 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
             </button>
           </div>
       </div>
-
-      <ToothPickerModal
-        isOpen={isToothModalOpen}
-        initialValues={toothNumbers}
-        onClose={() => setIsToothModalOpen(false)}
-        onSave={(values) => {
-          setToothNumbers(values);
-          setIsToothModalOpen(false);
-        }}
-      />
     </div>
   );
 }

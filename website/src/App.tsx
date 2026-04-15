@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { LocationProvider } from '@/contexts/LocationContext';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -66,6 +66,14 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
  * Access Denied page — shown when authenticated but lacking permission
  */
 function AccessDenied() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    logout();
+    navigate('/login', { replace: true });
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
       <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center">
@@ -75,6 +83,12 @@ function AccessDenied() {
       <p className="text-sm text-gray-500 text-center max-w-xs">
         You do not have permission to view this page. Contact your administrator.
       </p>
+      <button
+        onClick={handleLogout}
+        className="mt-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+      >
+        Log Out
+      </button>
     </div>
   );
 }

@@ -8,7 +8,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   fetchPermissionGroups,
-  updateEmployeePermission,
+  updatePermissionGroup,
 } from '@/lib/api';
 import { ENTITY_NODES, ENTITY_RELATIONS } from '@/constants/entityGraph';
 
@@ -186,19 +186,23 @@ export function useRelationshipsData() {
         }
       }
 
-      // Call API to update the role
-      await updateEmployeePermission(selectedRoleId, {
-        groupId: selectedRoleId,
-        locScope: 'assigned',
-        locationIds: [],
-        overrides: { grant: [], revoke: [] },
+      // Call API to update the permission group with the new permission set
+      await updatePermissionGroup(selectedRoleId, {
+        name: role.name,
+        color: role.color,
+        description: role.description,
+        permissions: newPermissions,
       });
 
-      // Note: The backend handles permission updates via the role's permission list
-      // We need to update the role's permissions in the backend
-      // For now, we'll refetch the groups after a "save"
-      
-      setState((prev) => ({ ...prev, isSaving: false, saveSuccess: true }));
+      // Update local roles state to reflect saved changes
+      setState((prev) => ({
+        ...prev,
+        roles: prev.roles.map((r) =>
+          r.id === selectedRoleId ? { ...r, permissions: newPermissions } : r
+        ),
+        isSaving: false,
+        saveSuccess: true,
+      }));
       setIsDirty(false);
       // Reset edited permissions after save
       setEditedPermissions({});

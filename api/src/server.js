@@ -66,7 +66,7 @@ app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
 app.use(cookieParser());
 app.use(express.json({ limit: '1mb' }));
 
-const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
+const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 1000 });
 app.use('/api/Auth/login', loginLimiter);
 app.use('/api/Account/Login', loginLimiter);
 

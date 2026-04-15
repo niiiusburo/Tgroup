@@ -101,8 +101,6 @@ router.get('/', async (req, res) => {
         so.notes,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
-        (SELECT sol.tooth_numbers FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_numbers,
-        (SELECT sol.tooth_comment FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_comment,
         so.datecreated,
         so.isdeleted
       FROM saleorders so
@@ -185,8 +183,6 @@ router.get('/:id', async (req, res) => {
         so.notes,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
-        (SELECT sol.tooth_numbers FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_numbers,
-        (SELECT sol.tooth_comment FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_comment,
         so.datecreated,
         so.isdeleted
       FROM saleorders so
@@ -248,8 +244,6 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
       datestart,
       dateend,
       notes,
-      tooth_numbers,
-      tooth_comment,
     } = req.body;
 
     if (!partnerid) {
@@ -314,16 +308,14 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
       await query(
         `INSERT INTO saleorderlines (
           id, orderid, productid, productname,
-          pricetotal, tooth_numbers, tooth_comment, isdeleted
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+          pricetotal, isdeleted
+        ) VALUES ($1, $2, $3, $4, $5, $6)`,
         [
           lineId,
           id,
           productid,
           productname || null,
           amounttotal || 0,
-          tooth_numbers || null,
-          tooth_comment || null,
           false,
         ]
       );
@@ -357,8 +349,6 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
         so.notes,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
-        (SELECT sol.tooth_numbers FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_numbers,
-        (SELECT sol.tooth_comment FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_comment,
         so.datecreated,
         so.isdeleted
       FROM saleorders so
@@ -455,8 +445,6 @@ router.patch('/:id/state', requirePermission('customers.edit'), async (req, res)
         so.notes,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
-        (SELECT sol.tooth_numbers FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_numbers,
-        (SELECT sol.tooth_comment FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_comment,
         so.datecreated,
         so.isdeleted
       FROM saleorders so
@@ -500,8 +488,6 @@ router.patch('/:id', requirePermission('customers.edit'), async (req, res) => {
       datestart,
       dateend,
       notes,
-      tooth_numbers,
-      tooth_comment,
     } = req.body;
 
     if (amounttotal != null && parseFloat(amounttotal) < 0) {
@@ -552,8 +538,8 @@ router.patch('/:id', requirePermission('customers.edit'), async (req, res) => {
       return res.status(404).json({ error: 'Sale order not found' });
     }
 
-    // Update sale order line fields if provided
-    if (productid !== undefined || productname !== undefined || tooth_numbers !== undefined || tooth_comment !== undefined) {
+    // Update sale order line product if provided
+    if (productid !== undefined || productname !== undefined) {
       const existingLine = await query(
         `SELECT id, productid FROM saleorderlines WHERE orderid = $1 AND isdeleted = false LIMIT 1`,
         [id]
@@ -579,32 +565,20 @@ router.patch('/:id', requirePermission('customers.edit'), async (req, res) => {
           lineValues.push(amounttotal || 0);
           lineIdx++;
         }
-        if (tooth_numbers !== undefined) {
-          lineSets.push(`tooth_numbers = $${lineIdx}`);
-          lineValues.push(tooth_numbers || null);
-          lineIdx++;
-        }
-        if (tooth_comment !== undefined) {
-          lineSets.push(`tooth_comment = $${lineIdx}`);
-          lineValues.push(tooth_comment || null);
-          lineIdx++;
-        }
 
-        if (lineSets.length > 0) {
-          lineValues.push(existingLine[0].id);
-          await query(
-            `UPDATE saleorderlines SET ${lineSets.join(', ')} WHERE id = $${lineIdx}`,
-            lineValues
-          );
-        }
+        lineValues.push(existingLine[0].id);
+        await query(
+          `UPDATE saleorderlines SET ${lineSets.join(', ')} WHERE id = $${lineIdx}`,
+          lineValues
+        );
       } else if (productid) {
         const { v4: uuidv4 } = require('uuid');
         const lineId = uuidv4();
         await query(
           `INSERT INTO saleorderlines (
-            id, orderid, productid, productname, pricetotal, tooth_numbers, tooth_comment, isdeleted
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-          [lineId, id, productid, productname || null, amounttotal || 0, tooth_numbers || null, tooth_comment || null, false]
+            id, orderid, productid, productname, pricetotal, isdeleted
+          ) VALUES ($1, $2, $3, $4, $5, $6)`,
+          [lineId, id, productid, productname || null, amounttotal || 0, false]
         );
       }
     }
@@ -637,8 +611,6 @@ router.patch('/:id', requirePermission('customers.edit'), async (req, res) => {
         so.notes,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
-        (SELECT sol.tooth_numbers FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_numbers,
-        (SELECT sol.tooth_comment FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_comment,
         so.datecreated,
         so.isdeleted
       FROM saleorders so

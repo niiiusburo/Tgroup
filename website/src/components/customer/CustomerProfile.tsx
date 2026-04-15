@@ -9,14 +9,14 @@ import { CustomerDeposits } from '@/components/payment/CustomerDeposits';
 import { AppointmentForm, type AppointmentFormData } from '@/components/appointments/AppointmentForm';
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { PaymentForm, type PaymentFormData } from '@/components/payment/PaymentForm';
-import { EditPaymentModal } from '@/components/payment/EditPaymentModal';
+import { PaymentSourceBadges } from '@/components/payment/PaymentSourceBadges';
 import { type ServicePaymentContext } from '@/components/payment/ServicePaymentCard';
 import { ServiceHistory } from '@/components/customer/ServiceHistory';
 import { CustomerAssignments } from '@/components/customer/CustomerAssignments';
 import type { DepositTransaction, DepositBalance } from '@/hooks/useDeposits';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 import type { CustomerService } from '@/types/customer';
-import type { ApiAppointment, ApiPayment, ExternalCheckupsResponse } from '@/lib/api';
+import type { ApiAppointment, ExternalCheckupsResponse } from '@/lib/api';
 import type { PaymentWithAllocations } from '@/hooks/useCustomerPayments';
 import { HealthCheckupGallery } from './HealthCheckupGallery';
 import { useAuth } from '@/contexts/AuthContext';
@@ -76,6 +76,7 @@ interface CustomerProfileProps {
     toothNumbers: readonly string[];
   }) => Promise<void>;
   readonly onMakePayment?: (data: PaymentFormData) => Promise<void>;
+  readonly onDeletePayment?: (id: string) => Promise<void>;
   readonly onSoftDelete?: () => void;
   readonly onHardDelete?: () => void;
   readonly canSoftDelete?: boolean;
@@ -181,6 +182,7 @@ export function CustomerProfile({
   checkupsError,
   onRefetchCheckups,
   onUpdateServiceStatus,
+  onDeletePayment,
 }: CustomerProfileProps) {
   const { t } = useTranslation();
   const [internalActiveTab, setInternalActiveTab] = useState<ProfileTab>('profile');
@@ -197,9 +199,10 @@ export function CustomerProfile({
   const [payTargetService, setPayTargetService] = useState<CustomerService | null>(null);
   const [editingAppointment, setEditingAppointment] = useState<ApiAppointment | null>(null);
   const [editingService, setEditingService] = useState<CustomerService | null>(null);
-  const [editingPayment, setEditingPayment] = useState<ApiPayment | null>(null);
   const [expandedPaymentId, setExpandedPaymentId] = useState<string | null>(null);
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
+  const [paymentToDelete, setPaymentToDelete] = useState<string | null>(null);
+  const [isDeletingPayment, setIsDeletingPayment] = useState(false);
   const { hasPermission } = useAuth();
   const canViewHealthCheckups = hasPermission('external_checkups.view');
 
@@ -590,7 +593,7 @@ export function CustomerProfile({
           <ServiceHistory services={services} payments={payments} onEditService={setEditingService} onUpdateStatus={onUpdateServiceStatus} onPayForService={onMakePayment ? (svc) => {
             setPayTargetService(svc);
             setShowPaymentModal(true);
-          } : undefined} onEditPayment={(p) => setEditingPayment(p)} />
+          } : undefined} onDeletePayment={onDeletePayment ? (id) => setPaymentToDelete(id) : undefined} />
         </div>
       )}
 
@@ -639,12 +642,7 @@ export function CustomerProfile({
                   const dd = dateInfo?.day ?? '—';
                   const mmm = dateInfo?.month ?? '';
                   const yyyy = dateInfo?.year ?? '';
-                  const methodChipClass =
-                    p.method === 'cash' ? 'text-green-700 bg-green-100 border border-green-200' :
-                    p.method === 'bank_transfer' ? 'text-blue-700 bg-blue-100 border border-blue-200' :
-                    p.method === 'deposit' ? 'text-purple-700 bg-purple-100 border border-purple-200' :
-                    'text-gray-700 bg-gray-100 border border-gray-200';
-                  const methodLabel = p.method === 'bank_transfer' ? 'Bank' : p.method === 'deposit' ? 'Deposit' : p.method === 'mixed' ? 'Mixed' : 'Cash';
+
                   const isExpanded = expandedPaymentId === p.id;
                   return (
                     <div
@@ -654,16 +652,14 @@ export function CustomerProfile({
                       <button
                         type="button"
                         onClick={() => {
-                          if (!isVoided) {
-                            setEditingPayment(p);
-                          } else {
+                          if (isVoided) {
                             setExpandedPaymentId(isExpanded ? null : p.id);
                           }
                         }}
                         className={`w-full px-4 py-3 flex items-center gap-3 text-left transition-all duration-200 ${
-                          !isVoided
-                            ? 'cursor-pointer hover:bg-gray-50 hover:ring-2 hover:ring-primary/20 hover:ring-inset hover:shadow-sm hover:-translate-y-px'
-                            : 'cursor-default opacity-60'
+                          isVoided
+                            ? 'cursor-default opacity-60'
+                            : 'hover:bg-gray-50 hover:ring-2 hover:ring-primary/20 hover:ring-inset hover:shadow-sm hover:-translate-y-px'
                         }`}
                       >
                         {/* Date tear-off block */}
@@ -675,7 +671,7 @@ export function CustomerProfile({
                         {/* Content */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${methodChipClass}`}>{methodLabel}</span>
+                            <PaymentSourceBadges method={p.method} cashAmount={p.cashAmount} bankAmount={p.bankAmount} depositUsed={p.depositUsed} />
                             {p.referenceCode && <span className="text-[10px] text-gray-700 font-medium">{p.referenceCode}</span>}
                             {!p.referenceCode && p.receiptNumber && <span className="text-[10px] text-gray-400 font-mono">{p.receiptNumber}</span>}
                             {p.referenceCode && p.receiptNumber && <span className="text-[10px] text-gray-400 font-mono">{p.receiptNumber}</span>}
@@ -687,15 +683,22 @@ export function CustomerProfile({
                             <p className="text-[10px] text-gray-400 truncate max-w-[140px] sm:max-w-[200px]" title={p.notes}>{p.notes}</p>
                           )}
                         </div>
-                        {/* Status + edit hint */}
+                        {/* Status + delete */}
                         <div className="flex items-center gap-2 flex-shrink-0">
                           {isVoided ? (
                             <span className="text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">Voided</span>
                           ) : (
                             <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Posted</span>
                           )}
-                          {!isVoided && (
-                            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[10px] text-primary font-medium">Edit</span>
+                          {!isVoided && onDeletePayment && (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); setPaymentToDelete(p.id); }}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 rounded-full text-red-500 hover:bg-red-50 hover:text-red-600"
+                              title="Delete payment"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           )}
                         </div>
                       </button>
@@ -863,14 +866,45 @@ export function CustomerProfile({
         />
       )}
 
-      {/* Edit Payment Modal */}
-      {editingPayment && (
-        <EditPaymentModal
-          payment={editingPayment}
-          isOpen={!!editingPayment}
-          onClose={() => setEditingPayment(null)}
-          onSaved={() => setEditingPayment(null)}
-        />
+      {/* Delete Payment Confirmation */}
+      {paymentToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Xóa thanh toán?</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Bạn có chắc muốn xóa bản ghi thanh toán này? Hành động này không thể hoàn tác.
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setPaymentToDelete(null)}
+                disabled={isDeletingPayment}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!onDeletePayment || !paymentToDelete) return;
+                  setIsDeletingPayment(true);
+                  try {
+                    await onDeletePayment(paymentToDelete);
+                  } catch (err) {
+                    console.error('Failed to delete payment:', err);
+                  } finally {
+                    setIsDeletingPayment(false);
+                    setPaymentToDelete(null);
+                  }
+                }}
+                disabled={isDeletingPayment}
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {isDeletingPayment ? 'Đang xóa...' : 'Xóa'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Payment Modal */}
@@ -880,7 +914,7 @@ export function CustomerProfile({
           recordName: payTargetService.orderCode || payTargetService.orderName || payTargetService.service,
           recordType: 'saleorder',
           totalCost: payTargetService.cost,
-          paidAmount: payTargetService.paidAmount ?? 0,
+          paidAmount: payTargetService.paidAmount ?? Math.max(0, payTargetService.cost - (payTargetService.residual ?? payTargetService.cost)),
           residual: payTargetService.residual ?? payTargetService.cost,
           locationName: payTargetService.locationName ?? profile.companyName ?? '',
           orderName: payTargetService.orderName,

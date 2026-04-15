@@ -12,11 +12,19 @@ test.describe('Permission Board', () => {
     const viewAllCell = page.locator('td:has-text("View All")');
     await expect(viewAllCell).toBeVisible();
     const viewAllRow = viewAllCell.locator('..');
-    const toggleBtn = viewAllRow.locator('button').nth(1);
+    // Admin is the first group column, so use nth(0)
+    const toggleBtn = viewAllRow.locator('button').nth(0);
     await expect(toggleBtn).toBeVisible();
     const initialText = await toggleBtn.textContent();
+    // Wait for the API response after clicking
+    const responsePromise = page.waitForResponse(
+      (resp) =>
+        resp.url().includes('/Permissions/groups/') &&
+        resp.request().method() === 'PUT',
+      { timeout: 5000 }
+    );
     await toggleBtn.click();
-    await page.waitForTimeout(500);
+    await responsePromise;
     const afterText = await toggleBtn.textContent();
     expect(afterText).not.toBe(initialText);
   });

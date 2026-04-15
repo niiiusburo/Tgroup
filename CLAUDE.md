@@ -76,59 +76,31 @@ Tgroup/
 
 ## Database
 
-**⚠️ LOCAL DEVELOPMENT USES PORT 5433 (HOMEBREW POSTGRES), NOT 55433.**
+**Connection URL:** `postgresql://postgres:postgres@127.0.0.1:55433/tdental_demo`
 
-| Environment | URL | Port | How to start |
-|-------------|-----|------|--------------|
-| **Local dev (Mac)** | `postgresql://postgres:postgres@127.0.0.1:5433/tdental_demo` | **5433** | `pg_ctl -D /opt/homebrew/var/postgresql@15 start` |
-| Docker / VPS | `postgresql://postgres:postgres@127.0.0.1:55433/tdental_demo` | 55433 | `docker compose up db` |
-
-**CRITICAL:** The `api/.env` file must use **port 5433** for local development. Port 55433 is the Docker-mapped port and will fail with `ECONNREFUSED` if Docker is not running.
-
-| Field | Local Dev Value |
-|-------|-----------------|
-| **URL** | `postgresql://postgres:postgres@127.0.0.1:5433/tdental_demo` |
+| Field | Value |
+|-------|-------|
+| **URL** | `postgresql://postgres:postgres@127.0.0.1:55433/tdental_demo` |
 | **Host** | `127.0.0.1` |
-| **Port** | **5433** |
+| **Port** | `55433` |
 | **Database** | `tdental_demo` |
 | **User** | `postgres` |
 | **Password** | `postgres` |
-| **Data dir** | `/opt/homebrew/var/postgresql@15` |
-| **Connect via CLI** | `PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -d tdental_demo` |
-| **Source SQL** | `website/demo_tdental_updated.sql` |
+| **Docker container** | `tdental-demo` |
+| **Source SQL** | `/Users/thuanle/Documents/TamTMV/TamDental/demo_tdental.sql` |
+| **Connect via CLI** | `PGPASSWORD=postgres psql -h 127.0.0.1 -p 55433 -U postgres -d tdental_demo` |
 
-### Local DB Setup (One-time or after wipe)
-
-```bash
-# 1. Start Homebrew PostgreSQL
-pg_ctl -D /opt/homebrew/var/postgresql@15 start
-
-# 2. Create database
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -c "CREATE DATABASE tdental_demo;"
-
-# 3. Load schema + seed data
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -d tdental_demo -f website/demo_tdental_updated.sql
-
-# 4. Apply required migrations (the dump is older than these)
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -d tdental_demo -f api/migrations/013_add_employee_role_fields.sql
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -d tdental_demo -f api/migrations/022_add_appointment_productid.sql
-# ...apply any other newer migrations
-
-# 5. Seed demo data (employees, customers, today's appointments)
-node scripts/seed-demo-data.js
-```
-
-### Demo Data (After Seeding)
+### Demo Data
 
 | Table | Count | Description |
 |-------|-------|-------------|
 | `dbo.companies` | 7 | Dental clinic branches (locations) |
-| `dbo.partners` | 340 | All partners (40 customers + 300 employees/doctors) |
-| `dbo.partners` (customer=true) | 40 | Active dental patients |
-| `dbo.partners` (employee=true) | 300 | Employees including ~110 doctors |
-| `dbo.appointments` | ~160 | Patient appointments |
-| `dbo.appointments` (today) | 24 | Appointments seeded for the current calendar day |
-| `dbo.employees` (view) | 300 | View mapping partners with employee=true |
+| `dbo.partners` | 56 | All partners (30 customers + 19 doctors + 7 branches) |
+| `dbo.partners` (customer=true) | 30 | Active dental patients |
+| `dbo.partners` (employee=true) | 19 | Dentists reverse-engineered from appointment data |
+| `dbo.appointments` | 120 | Patient appointments |
+| `dbo.employees` (view) | 19 | View mapping partners with employee=true |
+| 10 empty views | — | partnersources, agents, aspnetusers, dotkhams, saleorders, crmteams, customerreceipts, hrjobs, saleorderlines, accountpayments |
 
 ### Doctors (19, from dbo.partners where employee=true)
 
@@ -187,46 +159,43 @@ Vite loads env files by priority: `.env.{mode}.local` > `.env.{mode}` > `.env.lo
 ## Dev Server
 
 ```bash
-cd website && npm run dev
-# Open http://localhost:5175 (or http://localhost:5174 if explicitly set)
+cd website && npx vite --port 5174
+# Open http://localhost:5174
 # Uses .env.development → API at localhost:3002
 ```
 
 ## Backend API
 
 ```bash
-# Start API (connects to local dev DB on port 5433)
-cd api && npm start
+# Start API (connects to demo DB on port 55433)
+cd /Users/thuanle/Documents/TamTMV/TamDental/tdental-api && node src/server.js
 # Runs on http://localhost:3002
-# Ensure api/.env has: DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5433/tdental_demo
 ```
 
 | Endpoint | Data | Notes |
 |----------|------|-------|
-| `/api/Partners` | 40 customers | search, companyId filter |
-| `/api/Partners/:id` | Single customer profile | All partner fields |
-| `/api/Employees` | 300 employees | companyId, isDoctor filters |
-| `/api/Appointments` | ~160 appointments | dateFrom/dateTo, state, partner_id, companyId |
+| `/api/Partners` | 30 customers | search, companyId filter |
+| `/api/Partners/:id` | Single customer profile | All 87 partner fields |
+| `/api/Employees` | 19 doctors | companyId, isDoctor filters |
+| `/api/Appointments` | 120 appointments | dateFrom/dateTo, state, partner_id, companyId |
 | `/api/Companies` | 7 locations | All branches |
-| `/api/SaleOrders` | Active | Real sale orders after seeding |
-| `/api/Products` | Active | Service catalog |
+| `/api/SaleOrders` | 0 (empty view) | No sale orders in demo |
+| `/api/Products` | error | productcategories table missing |
 | `/api/DashboardReports` | varies | Aggregation endpoint |
 
 ## Database
 
-**Local development uses Homebrew PostgreSQL on port 5433. Docker port 55433 is for VPS only.**
-
 ```bash
-# Start local PostgreSQL (Homebrew)
-pg_ctl -D /opt/homebrew/var/postgresql@15 start
+# Start demo DB
+docker start tdental-demo
 
 # Connect
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -d tdental_demo
+PGPASSWORD=postgres psql -h 127.0.0.1 -p 55433 -U postgres -d tdental_demo
 
-# Restore demo from scratch
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -c "CREATE DATABASE tdental_demo;"
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -d tdental_demo -f website/demo_tdental_updated.sql
-# Then apply migrations and seed data (see "Local DB Setup" above)
+# Restore demo from scratch (includes 19 doctors + 11 SQL views)
+docker run -d --name tdental-demo -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=tdental_demo -p 55433:5432 postgres:16-alpine
+sleep 5
+docker exec -i tdental-demo psql -U postgres -d tdental_demo < website/demo_tdental_updated.sql
 ```
 
 ## GitHub
