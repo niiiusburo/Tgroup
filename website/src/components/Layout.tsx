@@ -313,6 +313,7 @@ export function Layout() {
           ${mobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full w-0 md:translate-x-0'}
           ${!mobileMenuOpen && sidebarExpanded ? 'md:w-56' : ''}
           ${!mobileMenuOpen && !sidebarExpanded ? 'md:w-[72px]' : ''}
+          ${mobileMenuOpen ? 'overflow-x-hidden' : ''}
         `}
       >
         {/* Logo + Toggle */}
@@ -401,6 +402,7 @@ export function Layout() {
       <div
         className={`
           min-h-screen flex flex-col transition-all duration-300 ease-in-out
+          w-full max-w-full md:w-auto
           ml-0
           ${sidebarExpanded ? 'md:ml-56' : 'md:ml-[72px]'}
         `}
@@ -444,7 +446,7 @@ export function Layout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 md:p-6 relative z-0">
+        <main className="flex-1 p-4 md:p-6 relative z-0 overflow-x-hidden">
           <Outlet />
         </main>
 

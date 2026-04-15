@@ -69,5 +69,129 @@
   "searchToView": "Tìm khách hàng để xem hồ sơ",
   "relatedData": "Dữ liệu liên quan",
   "appointmentHistory": "Lịch sử lịch hẹn",
-  "noAppointmentHistory": "Không có lịch sử lịch hẹn"
+  "noAppointmentHistory": "Không có lịch sử lịch hẹn",
+  "tabs": {
+    "basic": "Thông tin cơ bản",
+    "medical": "Tiểu sử bệnh",
+    "einvoice": "Hóa đơn điện tử"
+  },
+  "subtitle": {
+    "edit": "Cập nhật thông tin hồ sơ bệnh nhân",
+    "create": "Tạo hồ sơ bệnh nhân mới"
+  },
+  "section": {
+    "detailInfo": "Thông tin chi tiết"
+  },
+  "select": {
+    "branch": "Chọn chi nhánh",
+    "employee": "Chọn nhân viên",
+    "cskh": "Chọn CSKH",
+    "referrer": "Chọn ngưới giới thiệu",
+    "source": "Chọn nguồn",
+    "title": "Chọn danh xưng",
+    "city": "Chọn Tỉnh/Thành",
+    "districtPlaceholder": "-- Chọn hoặc nhập Quận/Huyện --",
+    "wardPlaceholder": "-- Chọn hoặc nhập Phường/Xã --"
+  },
+  "form": {
+    "fullName": "Họ và tên",
+    "phone": "Số điện thoại",
+    "email": "Email",
+    "gender": "Giới tính",
+    "male": "Nam",
+    "female": "Nữ",
+    "other": "Khác",
+    "dateOfBirth": "Ngày sinh",
+    "address": "Địa chỉ",
+    "location": "Chi nhánh",
+    "source": "Nguồn khách hàng",
+    "referralCode": "Mã giới thiệu",
+    "notes": "Ghi chú",
+    "assignTo": "Phân công cho",
+    "salesStaff": "Nhân viên sale",
+    "cskh": "CSKH",
+    "referrer": "Ngưới giới thiệu",
+    "titleLabel": "Danh xưng",
+    "customerCode": "Mã khách hàng",
+    "country": "Quốc gia",
+    "weight": "Cân nặng (Kg)",
+    "street": "Số nhà / Địa chỉ",
+    "jobTitle": "Nghề nghiệp",
+    "city": "Tỉnh/Thành",
+    "healthInsurance": "Số thẻ bảo hiểm y tế",
+    "district": "Quận/Huyện",
+    "identity": "Căn cước / Hộ chiếu",
+    "ward": "Phường/Xã",
+    "medicalHistory": "Tiểu sử bệnh"
+  },
+  "date": {
+    "day": "Ngày",
+    "month": "Tháng",
+    "year": "Năm"
+  },
+  "face": {
+    "register": "Đăng ký khuôn mặt",
+    "registering": "Đang đăng ký...",
+    "registerSuccess": "Đăng ký thành công!",
+    "registerTitle": "Đăng ký khuôn mặt",
+    "savedHint": "Ảnh khuôn mặt đã lưu. Điền thông tin và lưu để đăng ký."
+  },
+  "dialog": {
+    "addReferrer": "Thêm ngưới giới thiệu mới",
+    "referrerPlaceholder": "Nhập tên ngưới giới thiệu",
+    "addSalesStaff": "Thêm nhân viên sale mới",
+    "salesStaffPlaceholder": "Nhập tên nhân viên sale",
+    "addCskh": "Thêm CSKH mới",
+    "addSource": "Thêm nguồn mới"
+  },
+  "messages": {
+    "addedReferrer": "Đã thêm ngưới giới thiệu: {{name}} (Cần tích hợp API tạo nhân viên)",
+    "addedSalesStaff": "Đã thêm nhân viên sale: {{name}} (Cần tích hợp API tạo nhân viên)",
+    "cskhComingSoon": "Tính năng thêm CSKH mới sẽ được phát triển sau",
+    "titleComingSoon": "Tính năng thêm danh xưng tuỳ chỉnh sẽ được phát triển sau"
+  },
+  "errors": {
+    "saveFailed": "Lỗi lưu dữ liệu. Vui lòng thử lại."
+  },
+  "medicalNotice": {
+    "title": "Lưu ý y tế",
+    "description": "Thông tin tiểu sử bệnh giúp bác sĩ đánh giá tốt hơn tình trạng sức khỏe của bệnh nhân."
+  },
+  "conditions": {
+    "diabetes": "Tiểu đường",
+    "cardiovascular": "Tim mạch",
+    "drugAllergy": "Dị ứng thuốc",
+    "hypertension": "Huyết áp cao",
+    "asthma": "Hen suyễn",
+    "pregnant": "Đang mang thai"
+  },
+  "einvoice": {
+    "businessInvoice": "Xuất hóa đơn doanh nghiệp",
+    "companyName": "Tên công ty",
+    "companyAddress": "Địa chỉ công ty",
+    "taxCode": "Mã số thuế",
+    "recipientName": "Họ tên ngưới nhận",
+    "recipientId": "CCCD ngưới nhận",
+    "personalTaxCode": "MST cá nhân",
+    "recipientAddress": "Địa chỉ ngưới nhận",
+    "companyPlaceholder": "Công ty TNHH...",
+    "addressPlaceholder": "123 Đường...",
+    "namePlaceholder": "Nguyễn Văn A",
+    "toggleHint": "Bật tùy chọn trên để nhập thông tin hóa đơn doanh nghiệp."
+  },
+  "uppercase": "IN HOA",
+  "employeeCount": "nhân viên",
+  "createdDate": "Ngày tạo",
+  "auto": "(Tự động)",
+  "addressPlaceholder": "Nhập địa chỉ (ví dụ: 123 Nguyễn Huệ...)",
+  "addressHint": "Gõ địa chỉ để tự động điền Tỉnh/Thành, Quận/Huyện, Phường/Xã",
+  "jobPlaceholder": "Nhân viên văn phòng",
+  "medicalHistoryPlaceholder": "Nhập tiểu sử bệnh, dị ứng, thuốc đang dùng...",
+  "notesPlaceholder": "Ghi chú về khách hàng...",
+  "close": "Đóng",
+  "saving": "Đang lưu...",
+  "save": "Lưu",
+  "update": "Cập nhật",
+  "cancel": "Hủy",
+  "add": "Thêm"
 }

@@ -84,7 +84,7 @@ export function CustomerAssignments({
       </div>
 
       {/* Right grid of 5 fields */}
-      <div className="flex-1 grid grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         <AssignmentField
           icon={Building2}
           label={t('columns.location', { ns: 'customers' })}

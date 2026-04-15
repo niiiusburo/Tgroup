@@ -86,7 +86,7 @@ describe('CustomerProfile payment tab', () => {
 
     // Total service cost = 3,500,000
     // Amount paid = 3,500,000 - 1,000,000 = 2,500,000 (but payments only sum to 2M; however calculation uses totalCost - outstanding)
-    expect(screen.getByText('Tổng chi phí').closest('div')?.textContent).toContain('3.500.000 ₫');
+    expect(screen.getByText('profileSection.totalCost').closest('div')?.textContent).toContain('3.500.000 ₫');
     expect(screen.getByText('Đã thanh toán').closest('div')?.textContent).toContain('2.500.000 ₫');
     expect(screen.getByText('Còn nợ').closest('div')?.textContent).toContain('1.000.000 ₫');
   });

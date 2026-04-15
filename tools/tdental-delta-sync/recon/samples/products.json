@@ -1,0 +1,82 @@
+{
+  "offset": 0,
+  "limit": 3,
+  "totalItems": 443,
+  "items": [
+    {
+      "id": "a5be3270-bb5f-40d5-a1ab-b30c00538728",
+      "name": " CHỈNH DÂY FIX",
+      "uomId": "a8b0ef0d-054e-4c2e-8e29-b30c0053872e",
+      "uomName": "RĂNG",
+      "categId": "cb4cb417-9778-4416-8d5a-afe30053b73c",
+      "categName": "Niềng răng",
+      "taxId": null,
+      "amountTax": null,
+      "listPrice": 1.0,
+      "saleOK": true,
+      "active": true,
+      "uompoId": "a8b0ef0d-054e-4c2e-8e29-b30c0053872e",
+      "uompoName": "RĂNG",
+      "type": "service",
+      "purchaseOK": false,
+      "description": null,
+      "defaultCode": "SP0299",
+      "nameGet": null,
+      "companyId": "6861c928-0e13-4664-c781-08dcdfa45074",
+      "qtyAvailable": 0.0,
+      "nameNoSign": " CHỈNH DÂY FIX| CHINH DAY FIX|CDF",
+      "keToaOK": false,
+      "isLabo": false,
+      "type2": "service",
+      "purchasePrice": null,
+      "laboPrice": null,
+      "minInventory": null,
+      "origin": null,
+      "expiry": null,
+      "appliedCompanies": [
+        {
+          "id": "6861c928-0e13-4664-c781-08dcdfa45074",
+          "name": "Tấm Dentist Quận 7"
+        }
+      ]
+    },
+    {
+      "id": "e9e9d65b-2a33-4cb7-aef9-afe30053b7aa",
+      "name": "Abutment",
+      "uomId": "ff952419-cf7f-411f-b937-afe30053b7aa",
+      "uomName": "Răng",
+      "categId": "ff573cc6-fce3-4b2d-b639-afe30053b759",
+      "categName": "Implant",
+      "taxId": null,
+      "amountTax": null,
+      "listPrice": 3000000.0,
+      "saleOK": true,
+      "active": true,
+      "uompoId": "ff952419-cf7f-411f-b937-afe30053b7aa",
+      "uompoName": "Răng",
+      "type": "service",
+      "purchaseOK": false,
+      "description": null,
+      "defaultCode": "DV0034",
+      "nameGet": null,
+      "companyId": "c6b4b453-d260-46d4-4fd9-08db24f7ae8e",
+      "qtyAvailable": 0.0,
+      "nameNoSign": "Abutment|Abutment|A",
+      "keToaOK": false,
+      "isLabo": true,
+      "type2": "service",
+      "purchasePrice": null,
+      "laboPrice": 0.0,
+      "minInventory": null,
+      "origin": null,
+      "expiry": null,
+      "appliedCompanies": [
+        {
+          "id": "c6b4b453-d260-46d4-4fd9-08db24f7ae8e",
+          "name": "Tấm Dentist Quận 3"
+        }
+      ]
+    }
+  ],
+  "aggregates": null
+}

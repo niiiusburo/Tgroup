@@ -67,7 +67,7 @@ describe('EditAppointmentModal notes behavior', () => {
       />
     );
 
-    const textarea = await screen.findByPlaceholderText('Ghi chú thêm...') as HTMLTextAreaElement;
+    const textarea = await screen.findByPlaceholderText('form.notes') as HTMLTextAreaElement;
 
     // The textarea should only contain the free-text part
     expect(textarea.value).toBe('wdawdadW');
@@ -87,7 +87,7 @@ describe('EditAppointmentModal notes behavior', () => {
       />
     );
 
-    const textarea = await screen.findByPlaceholderText('Ghi chú thêm...') as HTMLTextAreaElement;
+    const textarea = await screen.findByPlaceholderText('form.notes') as HTMLTextAreaElement;
     expect(textarea.value).toBe('Just some free text');
   });
 
@@ -104,7 +104,7 @@ describe('EditAppointmentModal notes behavior', () => {
     );
 
     // Wait for form to load and service catalog to resolve
-    await screen.findByPlaceholderText('Ghi chú thêm...');
+    await screen.findByPlaceholderText('form.notes');
     await waitFor(() => expect(screen.getByText('Lưu thay đổi')).not.toBeDisabled());
 
     fireEvent.click(screen.getByText('Lưu thay đổi'));

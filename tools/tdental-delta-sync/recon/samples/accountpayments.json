@@ -1,0 +1,58 @@
+{
+  "offset": 0,
+  "limit": 3,
+  "totalItems": 61688,
+  "items": [
+    {
+      "id": "533de2e7-c57b-4ab7-988a-b42b00cefe1c",
+      "partnerName": "TRẦN QUỐC KHÁNH-QL",
+      "paymentDate": "2026-04-13T00:00:00",
+      "partnerType": "customer",
+      "paymentType": "inbound",
+      "journalName": "Ngân hàng",
+      "journal": {
+        "id": "731f4676-3f9d-4777-b47c-b13f003eb7e5",
+        "name": "Ngân hàng",
+        "type": "bank",
+        "accountNumber": null,
+        "displayType": "Ngân hàng",
+        "bankAccount": null,
+        "code": "CSH2"
+      },
+      "journalType": "bank",
+      "state": "posted",
+      "name": "CUST.IN/2026/107301",
+      "amount": 800000.0,
+      "communication": "15-MB-CVR-800K",
+      "displayPaymentType": "Phiếu thu",
+      "amountSigned": 800000.0,
+      "displayState": "Đã xác nhận"
+    },
+    {
+      "id": "50bd580e-c66c-49fb-95d5-b42b00ceba6f",
+      "partnerName": "TRẦN QUỐC KHÁNH-QL",
+      "paymentDate": "2026-04-13T00:00:00",
+      "partnerType": "customer",
+      "paymentType": "inbound",
+      "journalName": "Ngân hàng",
+      "journal": {
+        "id": "731f4676-3f9d-4777-b47c-b13f003eb7e5",
+        "name": "Ngân hàng",
+        "type": "bank",
+        "accountNumber": null,
+        "displayType": "Ngân hàng",
+        "bankAccount": null,
+        "code": "CSH2"
+      },
+      "journalType": "bank",
+      "state": "posted",
+      "name": "CUST.IN/2026/107300",
+      "amount": 700000.0,
+      "communication": "15-MB-TRÁM-700K",
+      "displayPaymentType": "Phiếu thu",
+      "amountSigned": 700000.0,
+      "displayState": "Đã xác nhận"
+    }
+  ],
+  "aggregates": null
+}

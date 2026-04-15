@@ -879,7 +879,7 @@ export function Customers() {
           columns={customerColumns}
           data={customers}
           keyExtractor={(row) => row.id}
-          pageSize={10}
+          pageSize={20}
           onRowClick={(row) => navigate(`/customers/${row.id}`)}
           emptyMessage={t('table.noData', { ns: 'common' })}
         />

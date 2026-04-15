@@ -124,7 +124,7 @@ export const TITLE_OPTIONS = ['Ông', 'Bà', 'Anh', 'Chị'] as const;
 export const MOCK_REFERRAL_CODES: readonly ReferralCode[] = [];
 
 export const CUSTOMER_SOURCES = [
-  { id: 'sale-online', label: 'Sale Online' },
+  { id: 'sales-staff', label: 'Nhân viên sale' },
   { id: 'walk-in', label: 'Khách vãng lai' },
 ] as const;
 

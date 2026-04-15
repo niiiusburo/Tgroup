@@ -19,15 +19,15 @@ vi.mock('@/lib/api', () => ({
 import { apiFetch } from '@/lib/api';
 const mockFetch = vi.mocked(apiFetch);
 
-vi.mock('framer-motion', () => {
-  const React = require('react');
+vi.mock('framer-motion', async () => {
+  const React = await import('react');
   return {
     motion: {
       div: React.forwardRef(({ children, ...props }: any, ref: any) => React.createElement('div', { ...props, ref }, children)),
       circle: React.forwardRef(({ children, ...props }: any, ref: any) => React.createElement('circle', { ...props, ref }, children)),
       span: React.forwardRef(({ children, ...props }: any, ref: any) => React.createElement('span', { ...props, ref }, children)),
     },
-    useSpring: (v: number) => ({ set: () => {} }),
+    useSpring: (_v: number) => ({ set: () => {} }),
     useTransform: (_: any, fn: any) => fn(0),
   };
 });
@@ -128,13 +128,13 @@ describe('Report subpages — error handling', () => {
   });
 
   const subpages = [
-    { name: 'Revenue', Component: ReportsRevenue, label: 'Total Invoiced', responses: getRevenueResponses, loadingText: 'Loading revenue' },
-    { name: 'Appointments', Component: ReportsAppointments, label: 'Total Appointments', responses: getApptResponses, loadingText: 'Loading appointments' },
-    { name: 'Doctors', Component: ReportsDoctors, label: 'Total Doctors', responses: () => [getDoctorsResponse()], loadingText: 'Loading doctors' },
-    { name: 'Customers', Component: ReportsCustomers, label: 'Total Customers', responses: () => [getCustomersResponse()], loadingText: 'Loading customers' },
-    { name: 'Locations', Component: ReportsLocations, label: 'Total Branches', responses: () => [getLocationsResponse()], loadingText: 'Loading locations' },
-    { name: 'Services', Component: ReportsServices, label: 'Categories', responses: () => [getServicesResponse()], loadingText: 'Loading services' },
-    { name: 'Employees', Component: ReportsEmployees, label: 'Total Employees', responses: () => [getEmployeesResponse()], loadingText: 'Loading employees' },
+    { name: 'Revenue', Component: ReportsRevenue, label: 'metrics.totalInvoiced', responses: getRevenueResponses, loadingText: 'loading' },
+    { name: 'Appointments', Component: ReportsAppointments, label: 'metrics.totalAppointments', responses: getApptResponses, loadingText: 'loading' },
+    { name: 'Doctors', Component: ReportsDoctors, label: 'metrics.totalDoctors', responses: () => [getDoctorsResponse()], loadingText: 'loading' },
+    { name: 'Customers', Component: ReportsCustomers, label: 'metrics.totalAppointments', responses: () => [getCustomersResponse()], loadingText: 'loading' },
+    { name: 'Locations', Component: ReportsLocations, label: 'metrics.totalBranches', responses: () => [getLocationsResponse()], loadingText: 'loading' },
+    { name: 'Services', Component: ReportsServices, label: 'metrics.categories', responses: () => [getServicesResponse()], loadingText: 'loading' },
+    { name: 'Employees', Component: ReportsEmployees, label: 'metrics.totalEmployees', responses: () => [getEmployeesResponse()], loadingText: 'loading' },
   ];
 
   for (const { name, Component, label, responses, loadingText } of subpages) {

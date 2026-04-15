@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+.env.local
+state.json
+sync-report-*.md
+sync-errors-*.jsonl
+backups/
+*.log
+.DS_Store

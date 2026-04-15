@@ -86,13 +86,13 @@ export function ServiceHistory({
 
   return (
     <div className="bg-white rounded-xl shadow-card p-6">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
         <div className="flex items-center gap-2">
           <Stethoscope className="w-5 h-5 text-primary" />
           <h3 className="font-semibold text-gray-900">{t('history.title')}</h3>
           <span className="text-xs text-gray-400">({services.length}{limit && services.length > limit ? '+' : ''} {t('treatment')})</span>
         </div>
-        <div className="flex items-center gap-4 text-right">
+        <div className="flex items-center gap-3 sm:gap-4 text-left sm:text-right">
           {zeroCostCount > 0 && (
             <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1 rounded-lg">
               ⚠ {zeroCostCount} {t('noPrice')}
@@ -127,9 +127,9 @@ export function ServiceHistory({
                 }`}
                 onClick={() => handleCardClick(svc)}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
                       {(svc.orderCode || svc.orderName) && <span className="text-xs font-mono font-medium text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">{svc.orderCode || svc.orderName}</span>}
                       <div className={`w-2 h-2 rounded-full ${statusConfig.dot}`} />
                       <p className="font-medium text-gray-900">{svc.service}</p>
@@ -162,7 +162,7 @@ export function ServiceHistory({
                         );
                       })()}
                     </div>
-                    <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500 ml-4">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-xs text-gray-500">
                       <span>{svc.date}</span>
                       <span>{svc.doctor}</span>
                       {svc.assistantName && (
@@ -181,16 +181,16 @@ export function ServiceHistory({
                       </span>
                     </div>
                     {svc.notes && (
-                      <p className="text-xs text-gray-400 mt-2 ml-4">{svc.notes}</p>
+                      <p className="text-xs text-gray-400 mt-2">{svc.notes}</p>
                     )}
                   </div>
-                  <div className="text-right flex-shrink-0 ml-4 flex items-start gap-2">
+                  <div className="flex sm:flex-col items-center sm:items-end gap-2 sm:gap-1 flex-shrink-0">
                     <div className="relative inline-block group">
                       {onEditService && (
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); onEditService(svc); }}
-                          className="absolute right-full top-1/2 -translate-y-1/2 mr-1 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900"
+                          className="sm:absolute sm:right-full sm:top-1/2 sm:-translate-y-1/2 sm:mr-1 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 flex items-center justify-center w-8 h-8 sm:w-7 sm:h-7 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900"
                           title={t('editTreatment')}
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -207,9 +207,9 @@ export function ServiceHistory({
                       </div>
                     </div>
                     {svc.cost > 0 ? (
-                      <p className="text-sm font-medium text-gray-900 mt-1">{formatVND(svc.cost)}</p>
+                      <p className="text-sm font-medium text-gray-900">{formatVND(svc.cost)}</p>
                     ) : (
-                      <p className="text-sm font-medium text-amber-600 mt-1 bg-amber-50 px-1.5 py-0.5 rounded">Chưa có giá</p>
+                      <p className="text-sm font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">Chưa có giá</p>
                     )}
                   </div>
                 </div>
@@ -244,51 +244,51 @@ export function ServiceHistory({
                             <div
                               key={p.id}
                               onClick={() => !isVoided && onEditPayment?.(p)}
-                              className={`px-4 py-3 flex items-center justify-between border-b border-gray-50 last:border-b-0 transition-all duration-200 group ${
+                              className={`px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-gray-50 last:border-b-0 transition-all duration-200 group ${
                                 isVoided ? 'opacity-60' : 'cursor-pointer hover:border-primary/40 hover:ring-2 hover:ring-primary/20 hover:ring-inset hover:shadow-sm hover:-translate-y-px'
                               } ${isNegative ? 'bg-red-50/30' : ''}`}
                             >
-                              <div className="flex items-center gap-3">
-                                {/* Date tear-off block */}
-                                <div className={`flex-shrink-0 flex flex-col items-center justify-center w-11 h-12 rounded-lg border text-center ${isNegative ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-200'}`}>
-                                  <span className={`text-sm font-bold leading-none ${isNegative ? 'text-red-600' : 'text-orange-600'}`}>{dd}</span>
-                                  {mmm && <span className="text-[9px] text-gray-500 leading-tight mt-0.5">{mmm}</span>}
-                                  {yyyy && <span className="text-[8px] text-gray-400 leading-tight">{yyyy}</span>}
-                                </div>
-                                {/* Method badge + amount */}
-                                <div>
-                                  <div className="flex items-center gap-1.5 mb-0.5">
-                                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${methodChipClass}`}>
-                                      {getMethodLabel(p.method)}
-                                    </span>
-                                    {p.referenceCode && (
-                                      <span className="text-[10px] text-gray-700 font-medium">{p.referenceCode}</span>
-                                    )}
-                                    {!p.referenceCode && p.receiptNumber && (
-                                      <span className="text-[10px] text-gray-400 font-mono">{p.receiptNumber}</span>
-                                    )}
-                                    {p.referenceCode && p.receiptNumber && (
-                                      <span className="text-[10px] text-gray-400 font-mono">{p.receiptNumber}</span>
-                                    )}
-                                  </div>
-                                  <p className={`text-sm font-semibold ${isNegative ? 'text-red-600' : 'text-gray-900'} ${isVoided ? 'line-through' : ''}`}>
-                                    {formatVND(p.amount)}
-                                  </p>
-                                  {p.notes && (
-                                    <p className="text-[10px] text-gray-400 truncate max-w-[160px]" title={p.notes}>{p.notes}</p>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                {isVoided ? (
-                                  <span className="text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">Voided</span>
-                                ) : (
-                                  <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Posted</span>
-                                )}
-                                {!isVoided && onEditPayment && (
-                                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[10px] text-primary font-medium">Edit</span>
-                                )}
-                              </div>
+                        <div className="flex items-center gap-3 min-w-0">
+                          {/* Date tear-off block */}
+                          <div className={`flex-shrink-0 flex flex-col items-center justify-center w-11 h-12 rounded-lg border text-center ${isNegative ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-200'}`}>
+                            <span className={`text-sm font-bold leading-none ${isNegative ? 'text-red-600' : 'text-orange-600'}`}>{dd}</span>
+                            {mmm && <span className="text-[9px] text-gray-500 leading-tight mt-0.5">{mmm}</span>}
+                            {yyyy && <span className="text-[8px] text-gray-400 leading-tight">{yyyy}</span>}
+                          </div>
+                          {/* Method badge + amount */}
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${methodChipClass}`}>
+                                {getMethodLabel(p.method)}
+                              </span>
+                              {p.referenceCode && (
+                                <span className="text-[10px] text-gray-700 font-medium">{p.referenceCode}</span>
+                              )}
+                              {!p.referenceCode && p.receiptNumber && (
+                                <span className="text-[10px] text-gray-400 font-mono">{p.receiptNumber}</span>
+                              )}
+                              {p.referenceCode && p.receiptNumber && (
+                                <span className="text-[10px] text-gray-400 font-mono">{p.receiptNumber}</span>
+                              )}
+                            </div>
+                            <p className={`text-sm font-semibold ${isNegative ? 'text-red-600' : 'text-gray-900'} ${isVoided ? 'line-through' : ''}`}>
+                              {formatVND(p.amount)}
+                            </p>
+                            {p.notes && (
+                              <p className="text-[10px] text-gray-400 truncate max-w-[160px] sm:max-w-[200px]" title={p.notes}>{p.notes}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {isVoided ? (
+                            <span className="text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">Voided</span>
+                          ) : (
+                            <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Posted</span>
+                          )}
+                          {!isVoided && onEditPayment && (
+                            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[10px] text-primary font-medium">Edit</span>
+                          )}
+                        </div>
                             </div>
                           );
                         })}

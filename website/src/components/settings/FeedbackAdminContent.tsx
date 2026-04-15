@@ -357,7 +357,7 @@ export function FeedbackAdminContent() {
         columns={columns}
         data={threads}
         keyExtractor={(row) => row.id}
-        pageSize={10}
+        pageSize={20}
         emptyMessage={t('feedbackAdmin.noFeedback', { ns: 'settings' })}
         selection={{
           selectedIds,

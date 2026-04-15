@@ -128,7 +128,7 @@ export const ROLE_LABELS: Record<string, string> = {
   'doctor-assistant': 'Trợ lý Bác sĩ',
   assistant: 'Phụ tá',
   receptionist: 'Lễ tân',
-  'sale-online': 'Sale online',
+  'sales-staff': 'Nhân viên sale',
   'customer-service': 'CSKH',
   marketing: 'Marketing',
 };
@@ -140,7 +140,7 @@ export const ROLE_STYLES: Record<string, string> = {
   'doctor-assistant': 'bg-cyan-100 text-cyan-700',
   assistant: 'bg-teal-100 text-teal-700',
   receptionist: 'bg-green-100 text-green-700',
-  'sale-online': 'bg-purple-100 text-purple-700',
+  'sales-staff': 'bg-purple-100 text-purple-700',
   'customer-service': 'bg-pink-100 text-pink-700',
   marketing: 'bg-indigo-100 text-indigo-700',
 };

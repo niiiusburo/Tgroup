@@ -1,0 +1,22 @@
+{
+  "offset": 0,
+  "limit": 3,
+  "totalItems": 3,
+  "items": [
+    {
+      "id": "bc794e7c-75cb-4e62-a1c5-b2e800760a4d",
+      "name": "BỘC LỘ",
+      "completeName": "BỘC LỘ",
+      "parentId": null,
+      "parent": null
+    },
+    {
+      "id": "e8162d98-ef16-430d-8650-afe30053b744",
+      "name": "Bọc sứ",
+      "completeName": "Bọc sứ",
+      "parentId": null,
+      "parent": null
+    }
+  ],
+  "aggregates": null
+}

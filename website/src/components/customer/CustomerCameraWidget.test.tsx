@@ -41,7 +41,7 @@ describe('CustomerCameraWidget', () => {
   it('opens capture modal when Face ID is clicked', async () => {
     render(<CustomerCameraWidget onQuickAddResult={vi.fn()} onFaceIdResult={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: /Face ID/i }));
-    expect(await screen.findByText('Nhận diện khuôn mặt')).toBeInTheDocument();
+    expect(await screen.findByText('customerProfile')).toBeInTheDocument();
   });
 
   it('calls onQuickAddResult after quick add capture', async () => {
@@ -57,7 +57,7 @@ describe('CustomerCameraWidget', () => {
   it('returns to idle when cancel is clicked after Face ID', async () => {
     render(<CustomerCameraWidget onQuickAddResult={vi.fn()} onFaceIdResult={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: /Face ID/i }));
-    expect(await screen.findByText('Nhận diện khuôn mặt')).toBeInTheDocument();
+    expect(await screen.findByText('customerProfile')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Hủy/i }));
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /Face ID/i })).toBeInTheDocument();

@@ -10,15 +10,15 @@ import { apiFetch } from '@/lib/api';
 const mockFetch = vi.mocked(apiFetch);
 
 // Mock framer-motion — useSpring/useTransform must return renderable values
-vi.mock('framer-motion', () => {
-  const React = require('react');
+vi.mock('framer-motion', async () => {
+  const React = await import('react');
   return {
     motion: {
       div: React.forwardRef(({ children, ...props }: any, ref: any) => React.createElement('div', { ...props, ref }, children)),
       circle: React.forwardRef(({ children, ...props }: any, ref: any) => React.createElement('circle', { ...props, ref }, children)),
       span: React.forwardRef(({ children, ...props }: any, ref: any) => React.createElement('span', { ...props, ref }, children)),
     },
-    useSpring: (v: number) => ({ set: () => {} }),
+    useSpring: (_v: number) => ({ set: () => {} }),
     useTransform: (_: any, fn: any) => fn(0),
   };
 });
@@ -45,7 +45,7 @@ describe('ReportsDashboard', () => {
   it('shows loading state while fetching', () => {
     mockFetch.mockReturnValue(new Promise(() => {}));
     render(<ReportsDashboard />);
-    expect(screen.getByText(/Loading dashboard/i)).toBeInTheDocument();
+    expect(screen.getByText('loading')).toBeInTheDocument();
   });
 
   it('renders KPI card labels when data loads', async () => {
@@ -53,11 +53,11 @@ describe('ReportsDashboard', () => {
 
     render(<ReportsDashboard />);
 
-    await screen.findByText('Revenue Collected');
-    expect(screen.getByText('Appointments')).toBeInTheDocument();
-    expect(screen.getByText('New Customers')).toBeInTheDocument();
+    await screen.findByText('metrics.revenueCollected');
+    expect(screen.getByText('metrics.totalAppointments')).toBeInTheDocument();
+    expect(screen.getByText('metrics.newCustomers')).toBeInTheDocument();
     // 'Outstanding' appears in KPI card and quick stats
-    const outstandingElements = screen.getAllByText('Outstanding');
+    const outstandingElements = screen.getAllByText('metrics.outstanding');
     expect(outstandingElements.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -86,7 +86,7 @@ describe('ReportsDashboard', () => {
 
     render(<ReportsDashboard />);
 
-    await screen.findByText('12-Month Revenue Trend');
-    expect(screen.getByText('Appointment Rates')).toBeInTheDocument();
+    await screen.findByText('charts.revenueTrend12Month');
+    expect(screen.getByText('charts.appointmentRates')).toBeInTheDocument();
   });
 });

@@ -1,0 +1,32 @@
+{
+  "name": "tdental-delta-sync",
+  "version": "0.1.0",
+  "private": true,
+  "description": "One-shot CLI that catches up local tdental_real from https://tamdentist.tdental.vn",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node --enable-source-maps dist/cli.js",
+    "dev": "tsx src/cli.ts",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/fieldMapper.test.ts",
+    "test:int": "vitest run tests/pgUpserter.test.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "pg": "^8.11.5",
+    "playwright": "^1.45.0",
+    "undici": "^6.19.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "@types/pg": "^8.11.6",
+    "tsx": "^4.15.5",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  },
+  "engines": {
+    "node": ">=18.17"
+  }
+}

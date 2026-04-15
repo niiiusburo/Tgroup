@@ -3,9 +3,14 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { PatientCheckIn } from '../PatientCheckIn';
 import { AppointmentHoverProvider } from '@/contexts/AppointmentHoverContext';
 import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
+
+function renderWithRouter(ui: React.ReactElement) {
+  return render(<MemoryRouter>{ui}</MemoryRouter>);
+}
 
 const mockAppointments: OverviewAppointment[] = [
   {
@@ -55,7 +60,7 @@ describe('PatientCheckIn Hover Linking', () => {
   });
 
   it('should render appointment cards', () => {
-    render(
+    renderWithRouter(
       <AppointmentHoverProvider>
         <PatientCheckIn {...defaultProps} />
       </AppointmentHoverProvider>
@@ -66,7 +71,7 @@ describe('PatientCheckIn Hover Linking', () => {
   });
 
   it('should apply highlight class when card is hovered', () => {
-    render(
+    renderWithRouter(
       <AppointmentHoverProvider>
         <PatientCheckIn {...defaultProps} />
       </AppointmentHoverProvider>
@@ -87,7 +92,7 @@ describe('PatientCheckIn Hover Linking', () => {
   });
 
   it('should remove highlight when mouse leaves', () => {
-    render(
+    renderWithRouter(
       <AppointmentHoverProvider>
         <PatientCheckIn {...defaultProps} />
       </AppointmentHoverProvider>
@@ -106,7 +111,7 @@ describe('PatientCheckIn Hover Linking', () => {
   it('should highlight when another component sets the hoveredId', () => {
     // This tests that when TodayAppointments sets the hoveredId,
     // PatientCheckIn will also highlight the matching card
-    const { container } = render(
+    const { container } = renderWithRouter(
       <AppointmentHoverProvider>
         <PatientCheckIn {...defaultProps} />
       </AppointmentHoverProvider>
@@ -120,7 +125,7 @@ describe('PatientCheckIn Hover Linking', () => {
     const scrollIntoViewMock = vi.fn();
     Element.prototype.scrollIntoView = scrollIntoViewMock;
 
-    render(
+    renderWithRouter(
       <AppointmentHoverProvider>
         <PatientCheckIn {...defaultProps} />
       </AppointmentHoverProvider>

@@ -351,9 +351,9 @@ export const DEFAULT_APPOINTMENT_COLOR = APPOINTMENT_CARD_COLORS['0'];
  * ═══════════════════════════════════════════════════════════════════════
  */
 export const APPOINTMENT_STATUS_OPTIONS = [
-  { value: 'scheduled', label: 'appointments.status.scheduled', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-  { value: 'arrived', label: 'appointments.status.arrived', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-  { value: 'cancelled', label: 'appointments.status.cancelled', color: 'bg-red-100 text-red-700 border-red-200' },
+  { value: 'scheduled', label: 'status.scheduled', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  { value: 'arrived', label: 'status.arrived', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+  { value: 'cancelled', label: 'status.cancelled', color: 'bg-red-100 text-red-700 border-red-200' },
 ] as const;
 
 /**
@@ -362,12 +362,12 @@ export const APPOINTMENT_STATUS_OPTIONS = [
  * Use with: t(`appointments.status.${APPOINTMENT_STATUS_LABELS[key]}`)
  */
 export const APPOINTMENT_STATUS_I18N_KEYS: Record<string, string> = {
-  scheduled: 'appointments.status.scheduled',
-  arrived: 'appointments.status.arrived',
+  scheduled: 'status.scheduled',
+  arrived: 'status.arrived',
   confirmed: 'appointments.status.confirmed',
   'in-progress': 'appointments.status.inProgress',
   completed: 'appointments.status.completed',
-  cancelled: 'appointments.status.cancelled',
+  cancelled: 'status.cancelled',
 };
 
 /** @deprecated Use APPOINTMENT_STATUS_I18N_KEYS with t() instead */

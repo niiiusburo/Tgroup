@@ -1,0 +1,804 @@
+{
+  "_meta": {
+    "base_url": "https://tamdentist.tdental.vn",
+    "auth": {
+      "scheme": "bearer",
+      "header": "Authorization",
+      "format": "Bearer <jwt>"
+    },
+    "common_response_envelope": {
+      "shape": "{ offset, limit, totalItems, items: [...], aggregates }",
+      "exceptions": [
+        "/api/DotKhamSteps returns a bare JSON array (no envelope, no pagination)"
+      ]
+    },
+    "common_pagination": {
+      "style": "offset",
+      "param_limit": "limit",
+      "param_offset": "offset",
+      "limit_zero_means": "return all rows (SPA uses this for dropdowns; works on most endpoints)",
+      "default_safe_page_size": 100
+    },
+    "delta_filter_strategy_notes": [
+      "Generic 'writeDate', 'updatedAfter', 'lastUpdated' params are silently IGNORED server-side (verified: returns full count).",
+      "Each table has its own server-side business-date filter. Use those when present.",
+      "Skinny list rows do NOT expose writeDate. Most DO expose a 'date' or 'dateCreated' or table-specific date field.",
+      "For tables without server-side filter (Products, Employees, Companies, ApplicationUsers), full-pull and client-side filter if needed (all <500 rows)."
+    ],
+    "id_field_default": "id (GUID string)"
+  },
+  "partners": {
+    "list_url": "https://tamdentist.tdental.vn/api/Partners/GetPagedPartnersCustomer",
+    "method": "GET",
+    "pagination": {
+      "style": "offset",
+      "param_limit": "limit",
+      "param_offset": "offset",
+      "default_size": 100
+    },
+    "delta_filter": {
+      "supported": true,
+      "param": "dateFrom",
+      "format": "YYYY-MM-DD",
+      "verified_with": "dateFrom=2026-04-10 -> 304 rows vs 34683 baseline"
+    },
+    "auth": {
+      "scheme": "bearer",
+      "header": "Authorization"
+    },
+    "id_field": "id",
+    "required_query_params": [
+      "isActive=true",
+      "searchType=All"
+    ],
+    "useful_query_params": [
+      "companyId",
+      "categoryIds",
+      "sourceId",
+      "dateFrom",
+      "dateTo"
+    ],
+    "sample_row_fields": [
+      "id",
+      "ref",
+      "avatar",
+      "displayName",
+      "name",
+      "phone",
+      "email",
+      "street",
+      "cityName",
+      "districtName",
+      "wardName",
+      "birthYear",
+      "birthMonth",
+      "birthDay",
+      "orderState",
+      "orderResidual",
+      "totalDebit",
+      "amountTreatmentTotal",
+      "amountRevenueTotal",
+      "jobTitle",
+      "cardType",
+      "sourceId",
+      "sourceName",
+      "companyName",
+      "date"
+    ],
+    "fat_detail_url": "https://tamdentist.tdental.vn/api/Partners/{id}",
+    "fat_detail_fields_count": 96,
+    "fat_detail_field_sample": [
+      "id",
+      "name",
+      "displayName",
+      "phone",
+      "emergencyPhone",
+      "userId",
+      "userSaleName",
+      "dateCreated",
+      "ref",
+      "gender",
+      "dateOfBirth",
+      "addressV2",
+      "identityNumber",
+      "isBusinessInvoice",
+      "taxCode",
+      "active",
+      "jobTitle",
+      "employee",
+      "supplier",
+      "customer",
+      "categories",
+      "histories",
+      "companyId",
+      "companyName",
+      "zaloId",
+      "weight",
+      "healthInsuranceCardNumber",
+      "age",
+      "consultantId",
+      "point",
+      "memberLevel",
+      "marketingTeam",
+      "saleTeam"
+    ],
+    "notes": "Two endpoints exist. /api/Partners is a slim list (35343 items); /api/Partners/GetPagedPartnersCustomer is what the SPA actually uses (34683 items, customer subset, supports dateFrom/dateTo). For sync, use GetPagedPartnersCustomer + per-id detail call (/api/Partners/{id}) to get all 96 fields."
+  },
+  "saleorders": {
+    "list_url": "https://tamdentist.tdental.vn/api/SaleOrders",
+    "method": "GET",
+    "pagination": {
+      "style": "offset",
+      "param_limit": "limit",
+      "param_offset": "offset",
+      "default_size": 100
+    },
+    "delta_filter": {
+      "supported": true,
+      "param": "dateOrderFrom",
+      "format": "YYYY-MM-DD",
+      "companion_param": "dateOrderTo",
+      "verified_with": "dateOrderFrom=2026-04-10 -> 315 rows vs 60631 baseline"
+    },
+    "auth": {
+      "scheme": "bearer",
+      "header": "Authorization"
+    },
+    "id_field": "id",
+    "fat_detail_url": "https://tamdentist.tdental.vn/api/SaleOrders/{id}",
+    "useful_query_params": [
+      "companyId",
+      "state (sale,done,draft,cancel)",
+      "dateOrderFrom",
+      "dateOrderTo",
+      "partnerId"
+    ],
+    "sample_row_fields": [
+      "id",
+      "dateOrder",
+      "partnerName",
+      "partnerDisplayName",
+      "saleManName",
+      "partner (nested fat partner)",
+      "partnerId",
+      "amountTotal",
+      "state",
+      "name",
+      "residual",
+      "totalPaid",
+      "productNames",
+      "stateDisplay",
+      "amountDiscountTotal",
+      "doctorName",
+      "companyName"
+    ],
+    "notes": "60631 saleorders. Inline 'partner' subobject matches partners list row (usable as partner side-cache). 'dateOrder' is business date (no writeDate on list rows). /api/Quotations/GetPagedV2 is a DIFFERENT endpoint (only 75 rows = open-quote subset); use /api/SaleOrders for the full table."
+  },
+  "saleorderlines": {
+    "list_url": "https://tamdentist.tdental.vn/api/SaleOrderLines",
+    "method": "GET",
+    "pagination": {
+      "style": "offset",
+      "param_limit": "limit",
+      "param_offset": "offset",
+      "default_size": 100
+    },
+    "delta_filter": {
+      "supported": true,
+      "param": "dateFrom",
+      "format": "YYYY-MM-DD",
+      "companion_param": "dateTo",
+      "verified_with": "dateFrom=2026-04-10 -> 322 rows vs 62580 baseline (dateOrderFrom is an alias returning identical 322)"
+    },
+    "auth": {
+      "scheme": "bearer",
+      "header": "Authorization"
+    },
+    "id_field": "id",
+    "useful_query_params": [
+      "companyId",
+      "state (sale,done,cancel)",
+      "partnerId",
+      "dateFrom",
+      "dateTo",
+      "modePaged=single (fat row per saleorder, used by customer-detail)",
+      "aggregate=[{field:'PriceSubTotal',aggregate:'sum'}]",
+      "excludeRewardGlobalDiscount=true"
+    ],
+    "sample_row_fields": [
+      "id",
+      "date",
+      "name",
+      "state",
+      "orderPartnerId",
+      "orderPartnerName",
+      "orderPartnerDisplayName",
+      "orderPartnerPhone",
+      "orderPartnerAddress",
+      "orderId",
+      "orderName",
+      "productId",
+      "productName",
+      "diagnostic",
+      "employeeId",
+      "employee",
+      "employeeName",
+      "assistantId",
+      "assistant",
+      "counselorId",
+      "counselor",
+      "productCode",
+      "productUOMQty",
+      "priceUnit",
+      "priceSubTotal",
+      "priceTotal",
+      "toothType",
+      "toothRange",
+      "discountType",
+      "discount",
+      "discountFixedAmount",
+      "toothTypeFilter",
+      "amountInvoiced",
+      "amountEInvoiced",
+      "productUOMName",
+      "productUOMId",
+      "steps (inline array of step rows)",
+      "totalRecognizedRevenue",
+      "totalRemainingRevenue",
+      "amountResidual"
+    ],
+    "notes": "62580 lines. Each row includes inline 'steps' array — the dotkhamsteps for that line. Sync can derive dotkhamsteps rows from here, avoiding the broken /api/DotKhamSteps endpoint."
+  },
+  "dotkhams": {
+    "list_url": "https://tamdentist.tdental.vn/api/dotkhams",
+    "method": "GET",
+    "pagination": {
+      "style": "offset",
+      "param_limit": "limit",
+      "param_offset": "offset",
+      "default_size": 100
+    },
+    "delta_filter": {
+      "supported": true,
+      "param": "dateFrom",
+      "format": "YYYY-MM-DD",
+      "companion_param": "dateTo",
+      "verified_with": "dateFrom=2026-04-10 -> 503 rows vs 89932 baseline"
+    },
+    "auth": {
+      "scheme": "bearer",
+      "header": "Authorization"
+    },
+    "id_field": "id",
+    "useful_query_params": [
+      "partnerId",
+      "doctorId",
+      "companyId",
+      "dateFrom",
+      "dateTo",
+      "state"
+    ],
+    "sample_row_fields": [
+      "id",
+      "name",
+      "partnerId",
+      "partnerRef",
+      "partnerName",
+      "partner",
+      "doctorId",
+      "doctorName",
+      "doctor",
+      "note",
+      "reason",
+      "assistantId",
+      "assistantName",
+      "assistant",
+      "assistantSecondaryId",
+      "assistantSecondaryName",
+      "assistantSecondary",
+      "date",
+      "saleOrderId",
+      "saleOrderName",
+      "invoiceState",
+      "services",
+      "state",
+      "doctorUserId",
+      "doctorAvatar",
+      "lineIds",
+      "totalInvoicesResidual",
+      "totalPaid",
+      "paymentState",
+      "isOldFlow",
+      "totalAmount"
+    ],
+    "notes": "PATH IS LOWERCASE 'dotkhams'. 89932 rows. 'date' is visit date. lineIds link to dotkhamsteps."
+  },
+  "dotkhamsteps": {
+    "list_url": "https://tamdentist.tdental.vn/api/DotKhamSteps",
+    "method": "GET",
+    "pagination": {
+      "style": "NONE",
+      "notes": "Bare JSON array, no envelope. limit/partnerId/dotkhamId params SILENTLY IGNORED — always returns full table (~15.5 MB)."
+    },
+    "delta_filter": {
+      "supported": false,
+      "fallback": "client-side filter on row['dateCreated']"
+    },
+    "auth": {
+      "scheme": "bearer",
+      "header": "Authorization"
+    },
+    "id_field": "id",
+    "sample_row_fields": [
+      "id",
+      "name",
+      "isDone",
+      "order",
+      "numberOfTimes",
+      "saleLineId",
+      "dateCreated"
+    ],
+    "notes": "PROBLEM ENDPOINT. Do NOT call /api/DotKhamSteps directly. Derive dotkhamstep rows from the inline 'steps' array on each /api/SaleOrderLines row (already fetched for saleorderlines delta)."
+  },
+  "dotkhamstepv2s": {
+    "list_url": "https://tamdentist.tdental.vn/api/DotKhamStepV2s",
+    "method": "GET",
+    "status": "empty",
+    "raw_response": "[]",
+    "notes": "Feature flag service-step-v2=true, but endpoint returns empty array. Skip initially."
+  },
+  "appointments": {
+    "list_url": "https://tamdentist.tdental.vn/api/Appointments",
+    "method": "GET",
+    "pagination": {
+      "style": "offset",
+      "param_limit": "limit",
+      "param_offset": "offset",
+      "default_size": 100,
+      "limit_zero_returns_all": true
+    },
+    "delta_filter": {
+      "supported": true,
+      "param": "dateTimeFrom",
+      "format": "YYYY-MM-DD",
+      "companion_param": "dateTimeTo (REQUIRED)",
+      "verified_with": "dateTimeFrom=2026-04-10&dateTimeTo=2026-04-13 -> 2050 rows vs 238838 baseline"
+    },
+    "auth": {
+      "scheme": "bearer",
+      "header": "Authorization"
+    },
+    "id_field": "id",
+    "useful_query_params": [
+      "companyId",
+      "doctorId",
+      "partnerId",
+      "state",
+      "dateTimeFrom",
+      "dateTimeTo",
+      "includeServices=false"
+    ],
+    "sample_row_fields": [
+      "id",
+      "name",
+      "date",
+      "timeExpected",
+      "userName",
+      "doctorId",
+      "doctorName",
+      "aptState",
+      "state",
+      "stateDisplay",
+      "reason",
+      "partnerId",
+      "partnerName",
+      "partnerPhone",
+      "partnerGender",
+      "partnerAvatar",
+      "partnerRef",
+      "partnerDisplayName",
+      "partner (inline fat partner)",
+      "note",
+      "isRepeatCustomer",
+      "companyId",
+      "companyName",
+      "isLate",
+      "color",
+      "services",
+      "serviceIds",
+      "leadId"
+    ],
+    "notes": "238838 appointments — largest table. Filter is on appointment 'date' (scheduled visit date), NOT row creation. Sync strategy: pull dateTimeFrom=since AND a wide forward window; for backfill of edits to past appointments run a separate full-company sweep with paging."
+  },
+  "accountpayments": {
+    "list_url": "https://tamdentist.tdental.vn/api/AccountPayments",
+    "method": "GET",
+    "pagination": {
+      "style": "offset",
+      "param_limit": "limit",
+      "param_offset": "offset",
+      "default_size": 100
+    },
+    "delta_filter": {
+      "supported": true,
+      "param": "paymentDateFrom",
+      "format": "YYYY-MM-DD",
+      "companion_param": "paymentDateTo",
+      "verified_with": "paymentDateFrom=2026-04-10 -> 560 rows vs 61688 baseline"
+    },
+    "auth": {
+      "scheme": "bearer",
+      "header": "Authorization"
+    },
+    "id_field": "id",
+    "fat_detail_url": "https://tamdentist.tdental.vn/api/AccountPayments/{id}",
+    "useful_query_params": [
+      "companyId",
+      "partnerType (customer|supplier)",
+      "paymentType (inbound|outbound)",
+      "state",
+      "journalId",
+      "partnerId",
+      "paymentDateFrom",
+      "paymentDateTo"
+    ],
+    "sample_row_fields": [
+      "id",
+      "partnerName",
+      "paymentDate",
+      "partnerType",
+      "paymentType",
+      "journalName",
+      "journal (nested {id,name,type,accountNumber,displayType,bankAccount,code})",
+      "journalType",
+      "state",
+      "name",
+      "amount",
+      "communication",
+      "displayPaymentType",
+      "amountSigned",
+      "displayState"
+    ],
+    "notes": "61688 payments. Use paymentDateFrom (NOT dateFrom — silently ignored)."
+  },
+  "accountinvoices": {
+    "list_url": "https://tamdentist.tdental.vn/api/AccountInvoices",
+    "method": "GET",
+    "status": "empty",
+    "raw_response": "{\"offset\":0,\"limit\":1,\"totalItems\":0,\"items\":[],\"aggregates\":null}",
+    "notes": "Endpoint live but totalItems=0 across all filter attempts (no params, type=out_invoice, state=open, with companyId). This tenant does not use the AccountInvoices entity. Skip during sync. Revenue data is computed via /api/AccountInvoiceReports/SumRevenueReport and SaleOrderLines.amountInvoiced instead."
+  },
+  "accountinvoicelines": {
+    "list_url": "https://tamdentist.tdental.vn/api/AccountInvoiceLines",
+    "method": "GET",
+    "status": "empty",
+    "raw_response": "{\"offset\":0,\"limit\":3,\"totalItems\":0,\"items\":[],\"aggregates\":null}",
+    "notes": "Mirror of accountinvoices — endpoint live, table empty. Skip."
+  },
+  "customerreceipts": {
+    "list_url": "https://tamdentist.tdental.vn/api/CustomerReceipts",
+    "method": "GET",
+    "pagination": {
+      "style": "offset",
+      "param_limit": "limit",
+      "param_offset": "offset",
+      "default_size": 100
+    },
+    "delta_filter": {
+      "supported": true,
+      "param": "dateWaitingFrom",
+      "format": "YYYY-MM-DD",
+      "companion_param": "dateWaitingTo (REQUIRED)",
+      "verified_with": "endpoint throws 500 'Nullable object must have a value' if dateFrom/dateWaitingFrom is supplied without its 'To' counterpart. SPA pattern: dateFrom=YYYY-MM-DD&dateTo=YYYY-MM-DD&companyId=..."
+    },
+    "auth": {
+      "scheme": "bearer",
+      "header": "Authorization"
+    },
+    "id_field": "id",
+    "useful_query_params": [
+      "companyId",
+      "dateFrom",
+      "dateTo",
+      "state (waiting|examination|done)",
+      "partnerId",
+      "doctorId"
+    ],
+    "sample_row_fields": [
+      "id",
+      "dateWaiting",
+      "dateExamination",
+      "dateDone",
+      "doctorId",
+      "doctorName",
+      "partnerId",
+      "partnerName",
+      "partnerPhone",
+      "isRepeatCustomer",
+      "isNoTreatment",
+      "reason",
+      "state",
+      "partnerDisplayName",
+      "note"
+    ],
+    "notes": "182429 receipts (visit check-ins). ALWAYS pair dateFrom with dateTo."
+  },
+  "companies": {
+    "list_url": "https://tamdentist.tdental.vn/api/Companies",
+    "method": "GET",
+    "pagination": {
+      "style": "offset",
+      "param_limit": "limit",
+      "param_offset": "offset",
+      "default_size": 100
+    },
+    "delta_filter": {
+      "supported": false,
+      "fallback": "full pull (7 rows)"
+    },
+    "auth": {
+      "scheme": "bearer",
+      "header": "Authorization"
+    },
+    "id_field": "id",
+    "useful_query_params": [
+      "active=true"
+    ],
+    "sample_row_fields": [
+      "id",
+      "name",
+      "logo",
+      "active",
+      "isHead",
+      "periodLockDate",
+      "medicalFacilityCode",
+      "hotline",
+      "phone",
+      "address",
+      "addressV2",
+      "usedAddressV2",
+      "taxCode",
+      "taxUnitName",
+      "taxUnitAddress",
+      "taxBankName",
+      "taxBankAccount",
+      "taxPhone",
+      "householdBusinesses"
+    ],
+    "notes": "Only 7 rows. Full pull: GET /api/Companies?limit=0&offset=0."
+  },
+  "products": {
+    "list_url": "https://tamdentist.tdental.vn/api/Products",
+    "method": "GET",
+    "pagination": {
+      "style": "offset",
+      "param_limit": "limit",
+      "param_offset": "offset",
+      "default_size": 100
+    },
+    "delta_filter": {
+      "supported": false,
+      "fallback": "full pull (443 rows)"
+    },
+    "auth": {
+      "scheme": "bearer",
+      "header": "Authorization"
+    },
+    "id_field": "id",
+    "useful_query_params": [
+      "type (service|consu|product)",
+      "active",
+      "categId"
+    ],
+    "sample_row_fields": [
+      "id",
+      "name",
+      "uomId",
+      "uomName",
+      "categId",
+      "categName",
+      "taxId",
+      "amountTax",
+      "listPrice",
+      "saleOK",
+      "active",
+      "uompoId",
+      "uompoName",
+      "type",
+      "purchaseOK",
+      "description",
+      "defaultCode",
+      "nameGet",
+      "companyId",
+      "qtyAvailable",
+      "nameNoSign",
+      "keToaOK",
+      "isLabo",
+      "type2",
+      "purchasePrice",
+      "laboPrice",
+      "minInventory",
+      "origin",
+      "expiry",
+      "appliedCompanies"
+    ],
+    "notes": "443 products. dateFrom ignored; full pull is fine."
+  },
+  "productcategories": {
+    "list_url": "https://tamdentist.tdental.vn/api/productcategories",
+    "method": "GET",
+    "pagination": {
+      "style": "offset",
+      "param_limit": "limit",
+      "param_offset": "offset",
+      "default_size": 100
+    },
+    "delta_filter": {
+      "supported": false,
+      "fallback": "full pull (3 rows)"
+    },
+    "auth": {
+      "scheme": "bearer",
+      "header": "Authorization"
+    },
+    "id_field": "id",
+    "useful_query_params": [
+      "type"
+    ],
+    "sample_row_fields": [
+      "id",
+      "name",
+      "completeName",
+      "parentId",
+      "parent"
+    ],
+    "notes": "Path is lowercase. 3 top-level rows."
+  },
+  "employees": {
+    "list_url": "https://tamdentist.tdental.vn/api/Employees",
+    "method": "GET",
+    "pagination": {
+      "style": "offset",
+      "param_limit": "limit",
+      "param_offset": "offset",
+      "default_size": 100,
+      "limit_zero_returns_all": true
+    },
+    "delta_filter": {
+      "supported": false,
+      "fallback": "full pull (382 rows)"
+    },
+    "auth": {
+      "scheme": "bearer",
+      "header": "Authorization"
+    },
+    "id_field": "id",
+    "fat_detail_url": "https://tamdentist.tdental.vn/api/Employees/{id}",
+    "useful_query_params": [
+      "companyId",
+      "active=true",
+      "isDoctor=true",
+      "isAssistant=true"
+    ],
+    "sample_row_fields": [
+      "id",
+      "name",
+      "isDoctor",
+      "isAssistant",
+      "ref",
+      "phone",
+      "email",
+      "categoryId",
+      "category",
+      "wage",
+      "structureTypeId",
+      "leavePerMonth",
+      "regularHour",
+      "overtimeRate",
+      "restDayRate",
+      "allowance",
+      "active",
+      "userName",
+      "companyId",
+      "company (nested company)"
+    ],
+    "notes": "382 employees. dateFrom ignored; full pull."
+  },
+  "aspnetusers": {
+    "list_url": "https://tamdentist.tdental.vn/api/ApplicationUsers",
+    "method": "GET",
+    "pagination": {
+      "style": "offset",
+      "param_limit": "limit",
+      "param_offset": "offset",
+      "default_size": 100
+    },
+    "delta_filter": {
+      "supported": false,
+      "fallback": "full pull (73 rows)"
+    },
+    "auth": {
+      "scheme": "bearer",
+      "header": "Authorization"
+    },
+    "id_field": "id",
+    "useful_query_params": [
+      "companyId",
+      "includeEmp=true",
+      "active"
+    ],
+    "sample_row_fields": [
+      "id",
+      "name",
+      "userName",
+      "partnerId",
+      "active",
+      "phoneNumber",
+      "jobId",
+      "jobName",
+      "ref",
+      "avatar",
+      "employees",
+      "teamMembers"
+    ],
+    "notes": "73 ASP.NET Identity users. Full pull; includeEmp=true enriches with employee linkage."
+  },
+  "partneradvances": {
+    "list_url": "https://tamdentist.tdental.vn/api/PartnerAdvances",
+    "method": "GET",
+    "pagination": {
+      "style": "offset",
+      "param_limit": "limit",
+      "param_offset": "offset",
+      "default_size": 100
+    },
+    "delta_filter": {
+      "supported": true,
+      "param": "dateFrom",
+      "format": "YYYY-MM-DD",
+      "companion_param": "dateTo",
+      "verified_with": "dateFrom=2026-04-10 -> 80 rows vs 14651 baseline"
+    },
+    "auth": {
+      "scheme": "bearer",
+      "header": "Authorization"
+    },
+    "id_field": "id",
+    "fat_detail_url": "https://tamdentist.tdental.vn/api/PartnerAdvances/{id}",
+    "useful_query_params": [
+      "partnerId",
+      "companyId",
+      "dateFrom",
+      "dateTo",
+      "state",
+      "type"
+    ],
+    "sample_row_fields": [
+      "id",
+      "name",
+      "date",
+      "journalName",
+      "type",
+      "amount",
+      "state",
+      "amountResidual"
+    ],
+    "notes": "14651 deposit/advance rows. Not in original target list but business-money — recommend including for PRD user stories 16, 20, 28. Maps to dbo.partneradvances if present."
+  },
+  "_unfound": {
+    "tables_with_empty_source": [
+      "accountinvoices (endpoint live, table empty in tenant)",
+      "accountinvoicelines (endpoint live, table empty in tenant)",
+      "dotkhamstepv2s (endpoint live, table empty)"
+    ],
+    "tables_skipped_per_PRD_scope": [
+      "accountmoves",
+      "accountmovelines",
+      "accountjournals",
+      "accountfullreconciles",
+      "accountpartialreconciles",
+      "accountregisterpayments",
+      "accountregisterpaymentinvoicerel"
+    ]
+  }
+}

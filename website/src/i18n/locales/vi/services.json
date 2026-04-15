@@ -76,5 +76,53 @@
   "selectLocation": "Chọn chi nhánh",
   "enterNotes": "Nhập ghi chú",
   "totalCost": "Tổng chi phí",
-  "collected": "Đã thu"
+  "collected": "Đã thu",
+  "form": {
+    "name": "Tên dịch vụ",
+    "category": "Danh mục",
+    "price": "Giá",
+    "duration": "Thờ lượng (phút)",
+    "description": "Mô tả",
+    "status": "Trạng thái",
+    "location": "Chi nhánh",
+    "color": "Màu sắc",
+    "customer": "Khách hàng",
+    "doctor": "Bác sĩ",
+    "assistant": "Phụ tá",
+    "dentalAide": "Trợ lý Bác sĩ",
+    "startDate": "Ngày bắt đầu",
+    "endDate": "Ngày kết thúc",
+    "quantity": "Số lượng",
+    "unit": "Đơn vị",
+    "unitPlaceholder": "răng"
+  },
+  "formErrors": {
+    "selectService": "Vui lòng chọn dịch vụ",
+    "selectCustomer": "Vui lòng chọn khách hàng",
+    "selectDoctor": "Vui lòng chọn bác sĩ",
+    "selectLocation": "Vui lòng chọn chi nhánh",
+    "selectStartDate": "Vui lòng chọn ngày bắt đầu",
+    "saveFailed": "Lưu thất bại"
+  },
+  "subtitleEdit": "Cập nhật thông tin điều trị",
+  "subtitleCreate": "Tạo hồ sơ dịch vụ điều trị mới",
+  "default": "Mặc định",
+  "serviceGroups": "Nhóm dịch vụ",
+  "groupName": "Tên nhóm dịch vụ",
+  "addCategory": "Thêm nhóm dịch vụ",
+  "categoryName": "Tên nhóm",
+  "groupLabel": "Nhóm",
+  "allLocations": "Tất cả chi nhánh",
+  "uomLabel": "Đơn vị tính",
+  "confirmDeleteService": "Xóa dịch vụ \"{{name}}\"?",
+  "tabs": {
+    "services": "Dịch vụ",
+    "supplies": "Vật tư",
+    "medicine": "Thuốc"
+  },
+  "filters": {
+    "active": "Đang sử dụng",
+    "inactive": "Ngừng sử dụng"
+  },
+  "noServicesFound": "Không tìm thấy dịch vụ nào"
 }

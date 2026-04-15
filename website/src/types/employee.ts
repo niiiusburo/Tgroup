@@ -12,7 +12,7 @@ export type EmployeeRole =
   | 'doctor-assistant'
   | 'assistant'
   | 'receptionist'
-  | 'sale-online'
+  | 'sales-staff'
   | 'customer-service'
   | 'marketing';
 
@@ -59,7 +59,7 @@ export function inferRoleFromFlags(
     const lower = jobtitle.toLowerCase();
     if (lower.includes('quản lý') || lower.includes('manager') || lower.includes('quản trị') || lower.includes('admin')) return 'general-manager';
     if (lower.includes('marketing')) return 'marketing';
-    if (lower.includes('sale')) return 'sale-online';
+    if (lower.includes('sale')) return 'sales-staff';
     if (lower.includes('cskh') || lower.includes('customer service') || lower.includes('hỗ trợ')) return 'customer-service';
   }
   return 'customer-service';
@@ -81,7 +81,7 @@ export const ROLE_TO_DB_FLAGS: Record<EmployeeRole, {
   'doctor-assistant': { isDoctor: false, isAssistant: true, isReceptionist: false, isdoctor: false, isassistant: true, isreceptionist: false },
   'assistant': { isDoctor: false, isAssistant: true, isReceptionist: false, isdoctor: false, isassistant: true, isreceptionist: false },
   'receptionist': { isDoctor: false, isAssistant: false, isReceptionist: true, isdoctor: false, isassistant: false, isreceptionist: true },
-  'sale-online': { isDoctor: false, isAssistant: false, isReceptionist: false, isdoctor: false, isassistant: false, isreceptionist: false },
+  'sales-staff': { isDoctor: false, isAssistant: false, isReceptionist: false, isdoctor: false, isassistant: false, isreceptionist: false },
   'customer-service': { isDoctor: false, isAssistant: false, isReceptionist: false, isdoctor: false, isassistant: false, isreceptionist: false },
   'marketing': { isDoctor: false, isAssistant: false, isReceptionist: false, isdoctor: false, isassistant: false, isreceptionist: false },
 };
@@ -94,7 +94,7 @@ export const ALL_ROLES: readonly EmployeeRole[] = [
   'doctor-assistant',
   'assistant',
   'receptionist',
-  'sale-online',
+  'sales-staff',
   'customer-service',
   'marketing',
 ];

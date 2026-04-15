@@ -138,6 +138,66 @@ function buildInsert(table, row, allowedCols) {
 }
 
 // ---------------------------------------------------------------------------
+// Helper: insert a single accountpayment as a demo payment
+// ---------------------------------------------------------------------------
+async function insertAccountPayment(ap, matchedOrder, customerId, realLines, demoPaymentsCols, demoAllocsCols, demo, opts, log) {
+  const apAmount = parseFloat(ap.amount);
+  const comm = (ap.communication || '').trim();
+  const orderLines = realLines.filter((l) => l.orderid === matchedOrder.id);
+  const serviceName = orderLines[0]?.name || '';
+  const noteParts = [serviceName, comm].filter(Boolean);
+  const composedNote = noteParts.join(' | ');
+
+  const method = (() => {
+    const c = comm.toLowerCase();
+    if (c.includes('ck')) return 'bank_transfer';
+    if (c.includes('tm')) return 'cash';
+    return 'cash';
+  })();
+
+  const paymentId = require('crypto').randomUUID();
+  const mappedPayment = {
+    id: paymentId,
+    customer_id: customerId,
+    service_id: matchedOrder.id,
+    amount: apAmount,
+    method,
+    notes: composedNote || null,
+    payment_date: ap.paymentdate ? ap.paymentdate.toISOString().slice(0, 10) : null,
+    reference_code: ap.name || null,
+    status: 'posted',
+    deposit_used: 0,
+    cash_amount: method === 'cash' ? apAmount : 0,
+    bank_amount: method === 'bank_transfer' ? apAmount : 0,
+    receipt_number: null,
+    deposit_type: null,
+  };
+
+  const exists = await demo.query(`SELECT id FROM dbo.payments WHERE id = $1`, [paymentId]);
+  if (exists.rows.length > 0) {
+    log.skip(`Fallback payment ${paymentId.slice(0, 8)}... already exists`);
+    return;
+  }
+
+  if (!opts.dryRun) {
+    const ins = buildInsert('payments', mappedPayment, demoPaymentsCols);
+    await demo.query(ins.sql, ins.params);
+
+    const allocationId = require('crypto').randomUUID();
+    const alloc = {
+      id: allocationId,
+      payment_id: paymentId,
+      invoice_id: matchedOrder.id,
+      dotkham_id: null,
+      allocated_amount: apAmount,
+    };
+    const allocIns = buildInsert('payment_allocations', alloc, demoAllocsCols);
+    await demo.query(allocIns.sql, allocIns.params);
+  }
+  log.ok(`Fallback payment ${apAmount.toLocaleString('vi-VN')}₫ → order ${matchedOrder.name} (${serviceName})`);
+}
+
+// ---------------------------------------------------------------------------
 // Main migration
 // ---------------------------------------------------------------------------
 async function main() {
@@ -682,6 +742,248 @@ async function main() {
       log.ok(`Payment ${parseFloat(payment.amount).toLocaleString('vi-VN')}₫ → order ${payment.orderid?.slice(0, 8)}...`);
     }
 
+    // ── 9a. Fallback: create payments from accountpayments when saleorderpayments are missing
+    if (realPayments.length === 0 && realAccountPayments.length > 0) {
+      const usedOrderIds = new Set();
+      const unmatchedAps = [];
+
+      // Phase 1: individual exact match (SO name or amount)
+      for (const ap of realAccountPayments) {
+        const apAmount = parseFloat(ap.amount);
+        if (apAmount === 0) continue;
+
+        let matchedOrder = null;
+        const comm = (ap.communication || '').trim();
+
+        // 1) Try to match by SO name in communication
+        const soMatch = comm.match(/SO\d+/i);
+        if (soMatch) {
+          const soName = soMatch[0].toUpperCase();
+          const nameMatches = realOrders.filter((o) => o.name?.toUpperCase() === soName && !usedOrderIds.has(o.id));
+          if (nameMatches.length === 1) {
+            matchedOrder = nameMatches[0];
+            log.info(`Accountpayment ${ap.name} matched by name ${soName}`);
+          } else if (nameMatches.length > 1) {
+            log.warn(`Accountpayment ${ap.name} matched ${nameMatches.length} orders by name ${soName}, using first`);
+            matchedOrder = nameMatches[0];
+          }
+        }
+
+        // 2) Fall back to exact amount match against unused orders
+        if (!matchedOrder) {
+          const matchingOrders = realOrders.filter((o) => parseFloat(o.amounttotal) === apAmount && !usedOrderIds.has(o.id));
+          if (matchingOrders.length === 1) {
+            matchedOrder = matchingOrders[0];
+          }
+        }
+
+        if (matchedOrder && migratedOrderIds.includes(matchedOrder.id)) {
+          usedOrderIds.add(matchedOrder.id);
+          await insertAccountPayment(ap, matchedOrder, customer.id, realLines, demoPaymentsCols, demoAllocsCols, demo, opts, log);
+          continue;
+        }
+
+        unmatchedAps.push(ap);
+      }
+
+      // Phase 2: group unmatched by communication and try sum match
+      if (unmatchedAps.length > 0) {
+        const groups = new Map();
+        for (const ap of unmatchedAps) {
+          const key = (ap.communication || '').trim();
+          if (!groups.has(key)) groups.set(key, []);
+          groups.get(key).push(ap);
+        }
+
+        const depositAmounts = new Set(realDeposits.map((d) => parseFloat(d.amount)));
+
+        for (const [comm, aps] of groups) {
+          const groupTotal = aps.reduce((sum, ap) => sum + parseFloat(ap.amount), 0);
+
+          const matchingOrders = realOrders.filter((o) => parseFloat(o.amounttotal) === groupTotal && !usedOrderIds.has(o.id));
+          if (matchingOrders.length === 0) {
+            for (const ap of aps) {
+              log.warn(`Accountpayment ${ap.name} (${parseFloat(ap.amount).toLocaleString('vi-VN')}₫) — no matching sale order found`);
+            }
+            continue;
+          }
+          if (matchingOrders.length > 1) {
+            for (const ap of aps) {
+              log.warn(`Accountpayment ${ap.name} — group sum ${groupTotal.toLocaleString('vi-VN')}₫ matches ${matchingOrders.length} orders, skipping ambiguous match`);
+            }
+            continue;
+          }
+
+          const matchedOrder = matchingOrders[0];
+          if (!migratedOrderIds.includes(matchedOrder.id)) {
+            for (const ap of aps) {
+              log.warn(`Accountpayment ${ap.name} — matched order ${matchedOrder.name} was not migrated`);
+            }
+            continue;
+          }
+
+          usedOrderIds.add(matchedOrder.id);
+          log.info(`Grouped accountpayments matched by sum ${groupTotal.toLocaleString('vi-VN')}₫ → ${matchedOrder.name}`);
+
+          for (const ap of aps) {
+            const apAmount = parseFloat(ap.amount);
+            const orderLines = realLines.filter((l) => l.orderid === matchedOrder.id);
+            const serviceName = orderLines[0]?.name || '';
+
+            // Detect deposit usage: if this accountpayment amount matches a deposit amount
+            const isDepositUsage = depositAmounts.has(apAmount);
+            const method = (() => {
+              if (isDepositUsage) return 'deposit';
+              const c = comm.toLowerCase();
+              if (c.includes('ck')) return 'bank_transfer';
+              if (c.includes('tm')) return 'cash';
+              return 'cash';
+            })();
+
+            const paymentId = require('crypto').randomUUID();
+            const noteParts = [serviceName, comm].filter(Boolean);
+            const composedNote = noteParts.join(' | ');
+
+            const mappedPayment = {
+              id: paymentId,
+              customer_id: customer.id,
+              service_id: matchedOrder.id,
+              amount: apAmount,
+              method,
+              notes: composedNote || null,
+              payment_date: ap.paymentdate ? ap.paymentdate.toISOString().slice(0, 10) : null,
+              reference_code: ap.name || null,
+              status: 'posted',
+              deposit_used: isDepositUsage ? apAmount : 0,
+              cash_amount: method === 'cash' ? apAmount : 0,
+              bank_amount: method === 'bank_transfer' ? apAmount : 0,
+              receipt_number: null,
+              deposit_type: isDepositUsage ? 'usage' : null,
+            };
+
+            const exists = await demo.query(`SELECT id FROM dbo.payments WHERE id = $1`, [paymentId]);
+            if (exists.rows.length > 0) {
+              log.skip(`Fallback payment ${paymentId.slice(0, 8)}... already exists`);
+              continue;
+            }
+
+            if (!opts.dryRun) {
+              const ins = buildInsert('payments', mappedPayment, demoPaymentsCols);
+              await demo.query(ins.sql, ins.params);
+
+              const allocationId = require('crypto').randomUUID();
+              const alloc = {
+                id: allocationId,
+                payment_id: paymentId,
+                invoice_id: matchedOrder.id,
+                dotkham_id: null,
+                allocated_amount: apAmount,
+              };
+              const allocIns = buildInsert('payment_allocations', alloc, demoAllocsCols);
+              await demo.query(allocIns.sql, allocIns.params);
+            }
+            log.ok(`Grouped fallback payment ${apAmount.toLocaleString('vi-VN')}₫ (${method}) → order ${matchedOrder.name} (${serviceName})`);
+          }
+        }
+
+        // Phase 3: match remaining groups by real DB totalpaid (deposit + partial payments)
+        const remainingGroups = [];
+        for (const [comm, aps] of groups) {
+          const groupTotal = aps.reduce((sum, ap) => sum + parseFloat(ap.amount), 0);
+          const alreadyMatched = aps.some((ap) => !unmatchedAps.includes(ap));
+          if (alreadyMatched) continue;
+          remainingGroups.push({ comm, aps, groupTotal });
+        }
+
+        for (const { comm, aps, groupTotal } of remainingGroups) {
+          const matchingOrders = realOrders.filter(
+            (o) => parseFloat(o.totalpaid) === groupTotal && !usedOrderIds.has(o.id)
+          );
+          if (matchingOrders.length === 0) {
+            for (const ap of aps) {
+              log.warn(`Accountpayment ${ap.name} (${parseFloat(ap.amount).toLocaleString('vi-VN')}₫) — no matching sale order found`);
+            }
+            continue;
+          }
+          if (matchingOrders.length > 1) {
+            for (const ap of aps) {
+              log.warn(`Accountpayment ${ap.name} — group sum ${groupTotal.toLocaleString('vi-VN')}₫ matches ${matchingOrders.length} orders by totalpaid, skipping ambiguous match`);
+            }
+            continue;
+          }
+
+          const matchedOrder = matchingOrders[0];
+          if (!migratedOrderIds.includes(matchedOrder.id)) {
+            for (const ap of aps) {
+              log.warn(`Accountpayment ${ap.name} — matched order ${matchedOrder.name} was not migrated`);
+            }
+            continue;
+          }
+
+          usedOrderIds.add(matchedOrder.id);
+          log.info(`Grouped accountpayments matched by totalpaid ${groupTotal.toLocaleString('vi-VN')}₫ → ${matchedOrder.name}`);
+
+          for (const ap of aps) {
+            const apAmount = parseFloat(ap.amount);
+            const orderLines = realLines.filter((l) => l.orderid === matchedOrder.id);
+            const serviceName = orderLines[0]?.name || '';
+            const isDepositUsage = depositAmounts.has(apAmount);
+            const method = (() => {
+              if (isDepositUsage) return 'deposit';
+              const c = comm.toLowerCase();
+              if (c.includes('ck')) return 'bank_transfer';
+              if (c.includes('tm')) return 'cash';
+              return 'cash';
+            })();
+
+            const paymentId = require('crypto').randomUUID();
+            const noteParts = [serviceName, comm].filter(Boolean);
+            const composedNote = noteParts.join(' | ');
+
+            const mappedPayment = {
+              id: paymentId,
+              customer_id: customer.id,
+              service_id: matchedOrder.id,
+              amount: apAmount,
+              method,
+              notes: composedNote || null,
+              payment_date: ap.paymentdate ? ap.paymentdate.toISOString().slice(0, 10) : null,
+              reference_code: ap.name || null,
+              status: 'posted',
+              deposit_used: isDepositUsage ? apAmount : 0,
+              cash_amount: method === 'cash' ? apAmount : 0,
+              bank_amount: method === 'bank_transfer' ? apAmount : 0,
+              receipt_number: null,
+              deposit_type: isDepositUsage ? 'usage' : null,
+            };
+
+            const exists = await demo.query(`SELECT id FROM dbo.payments WHERE id = $1`, [paymentId]);
+            if (exists.rows.length > 0) {
+              log.skip(`Fallback payment ${paymentId.slice(0, 8)}... already exists`);
+              continue;
+            }
+
+            if (!opts.dryRun) {
+              const ins = buildInsert('payments', mappedPayment, demoPaymentsCols);
+              await demo.query(ins.sql, ins.params);
+
+              const allocationId = require('crypto').randomUUID();
+              const alloc = {
+                id: allocationId,
+                payment_id: paymentId,
+                invoice_id: matchedOrder.id,
+                dotkham_id: null,
+                allocated_amount: apAmount,
+              };
+              const allocIns = buildInsert('payment_allocations', alloc, demoAllocsCols);
+              await demo.query(allocIns.sql, allocIns.params);
+            }
+            log.ok(`Totalpaid fallback payment ${apAmount.toLocaleString('vi-VN')}₫ (${method}) → order ${matchedOrder.name} (${serviceName})`);
+          }
+        }
+      }
+    }
+
     // ── 9b. Insert deposits (partneradvances) ──────────────────────────
     for (const deposit of realDeposits) {
       if (parseFloat(deposit.amount) === 0) {
@@ -689,7 +991,9 @@ async function main() {
         continue;
       }
 
-      const depositAmount = parseFloat(deposit.amount);
+      const isRefund = deposit.type === 'refund';
+      const rawAmount = parseFloat(deposit.amount);
+      const depositAmount = isRefund ? -Math.abs(rawAmount) : rawAmount;
       const mappedDeposit = {
         id: deposit.id,
         customer_id: deposit.partnerid,
@@ -702,14 +1006,14 @@ async function main() {
         status: 'posted',
         deposit_used: 0,
         cash_amount: 0,
-        bank_amount: depositAmount,
+        bank_amount: isRefund ? -Math.abs(rawAmount) : rawAmount,
         receipt_number: deposit.name || null,
-        deposit_type: 'deposit',
+        deposit_type: isRefund ? 'refund' : 'deposit',
       };
 
       const exists = await demo.query(`SELECT id FROM dbo.payments WHERE id = $1`, [deposit.id]);
       if (exists.rows.length > 0) {
-        log.skip(`Deposit ${deposit.id.slice(0, 8)}... already exists`);
+        log.skip(`${isRefund ? 'Refund' : 'Deposit'} ${deposit.id.slice(0, 8)}... already exists`);
         continue;
       }
 
@@ -718,7 +1022,7 @@ async function main() {
         await demo.query(ins.sql, ins.params);
         // No payment_allocations for pure deposits
       }
-      log.ok(`Deposit ${depositAmount.toLocaleString('vi-VN')}₫ → ${deposit.name} (bank)`);
+      log.ok(`${isRefund ? 'Refund' : 'Deposit'} ${Math.abs(depositAmount).toLocaleString('vi-VN')}₫ → ${deposit.name} (bank)`);
     }
 
     // ── 10. Update saleorder totalpaid/residual ────────────────────────

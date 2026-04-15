@@ -34,7 +34,7 @@ const ROLE_TO_JOBTITLE: Record<EmployeeRole, string> = {
   'receptionist': 'Lễ tân',
   'general-manager': 'Quản lý tổng',
   'branch-manager': 'Quản lý cơ sở',
-  'sale-online': 'Sale online',
+  'sales-staff': 'Nhân viên sale',
   'customer-service': 'CSKH',
   'marketing': 'Marketing',
 };

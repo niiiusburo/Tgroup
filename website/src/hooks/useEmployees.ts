@@ -52,7 +52,7 @@ function deriveRoles(
     const lower = jobtitle.toLowerCase();
     if (lower.includes('quản lý') || lower.includes('manager')) return ['general-manager'];
     if (lower.includes('marketing')) return ['marketing'];
-    if (lower.includes('sale')) return ['sale-online'];
+    if (lower.includes('sale')) return ['sales-staff'];
     if (lower.includes('cskh') || lower.includes('customer service') || lower.includes('hỗ trợ')) return ['customer-service'];
     if (lower.includes('quản trị') || lower.includes('admin')) return ['general-manager'];
   }
@@ -133,6 +133,7 @@ export function useEmployees(selectedLocationId?: string) {
         limit: 500,
         search,
         companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
+        active: 'all',
       });
 
       const employeesWithApiFields: EmployeeWithApiFields[] = response.items.map((apiEmp) => {
@@ -210,7 +211,7 @@ export function useEmployees(selectedLocationId?: string) {
       'doctor-assistant': 0,
       assistant: 0,
       receptionist: 0,
-      'sale-online': 0,
+      'sales-staff': 0,
       'customer-service': 0,
       marketing: 0,
     };

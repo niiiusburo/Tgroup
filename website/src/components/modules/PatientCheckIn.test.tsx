@@ -52,8 +52,8 @@ describe('PatientCheckIn auto-scroll on done', () => {
     scrollIntoViewMock.mockClear();
 
     // Open the status dropdown on the card
-    fireEvent.click(screen.getByText('Chờ khám'));
-    fireEvent.click(screen.getByText('Hoàn thành'));
+    fireEvent.click(screen.getByText('overview:zone1.filterWaiting'));
+    fireEvent.click(screen.getByText('overview:zone1.filterCompleted'));
 
     // Simulate the parent re-rendering with the updated appointment status
     rerender(

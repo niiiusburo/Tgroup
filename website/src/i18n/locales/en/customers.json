@@ -69,5 +69,129 @@
   "searchToView": "Search for a customer to view their profile",
   "relatedData": "Related Data",
   "appointmentHistory": "Appointment History",
-  "noAppointmentHistory": "No appointment history"
+  "noAppointmentHistory": "No appointment history",
+  "tabs": {
+    "basic": "Basic Info",
+    "medical": "Medical History",
+    "einvoice": "E-Invoice"
+  },
+  "subtitle": {
+    "edit": "Update patient profile information",
+    "create": "Create new patient profile"
+  },
+  "section": {
+    "detailInfo": "Detailed Information"
+  },
+  "select": {
+    "branch": "Select branch",
+    "employee": "Select employee",
+    "cskh": "Select CSKH",
+    "referrer": "Select referrer",
+    "source": "Select source",
+    "title": "Select title",
+    "city": "Select Province/City",
+    "districtPlaceholder": "-- Select or enter District --",
+    "wardPlaceholder": "-- Select or enter Ward --"
+  },
+  "form": {
+    "fullName": "Full Name",
+    "phone": "Phone Number",
+    "email": "Email",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "other": "Other",
+    "dateOfBirth": "Date of Birth",
+    "address": "Address",
+    "location": "Location",
+    "source": "Customer Source",
+    "referralCode": "Referral Code",
+    "notes": "Notes",
+    "assignTo": "Assign To",
+    "salesStaff": "Sales Staff",
+    "cskh": "CSKH",
+    "referrer": "Referrer",
+    "titleLabel": "Title",
+    "customerCode": "Customer Code",
+    "country": "Country",
+    "weight": "Weight (Kg)",
+    "street": "Street / Address",
+    "jobTitle": "Occupation",
+    "city": "Province/City",
+    "healthInsurance": "Health Insurance Card Number",
+    "district": "District",
+    "identity": "ID / Passport",
+    "ward": "Ward",
+    "medicalHistory": "Medical History"
+  },
+  "date": {
+    "day": "Day",
+    "month": "Month",
+    "year": "Year"
+  },
+  "face": {
+    "register": "Register Face",
+    "registering": "Registering...",
+    "registerSuccess": "Registration successful!",
+    "registerTitle": "Register Face",
+    "savedHint": "Face photo saved. Fill in information and save to register."
+  },
+  "dialog": {
+    "addReferrer": "Add new referrer",
+    "referrerPlaceholder": "Enter referrer name",
+    "addSalesStaff": "Add new sales staff",
+    "salesStaffPlaceholder": "Enter sales staff name",
+    "addCskh": "Add new CSKH",
+    "addSource": "Add new source"
+  },
+  "messages": {
+    "addedReferrer": "Added referrer: {{name}} (Need employee creation API integration)",
+    "addedSalesStaff": "Added sales staff: {{name}} (Need employee creation API integration)",
+    "cskhComingSoon": "Add new CSKH feature will be developed later",
+    "titleComingSoon": "Custom title feature will be developed later"
+  },
+  "errors": {
+    "saveFailed": "Error saving data. Please try again."
+  },
+  "medicalNotice": {
+    "title": "Medical Notice",
+    "description": "Medical history information helps doctors better assess the patient's health condition."
+  },
+  "conditions": {
+    "diabetes": "Diabetes",
+    "cardiovascular": "Cardiovascular",
+    "drugAllergy": "Drug Allergy",
+    "hypertension": "Hypertension",
+    "asthma": "Asthma",
+    "pregnant": "Pregnant"
+  },
+  "einvoice": {
+    "businessInvoice": "Business Invoice",
+    "companyName": "Company Name",
+    "companyAddress": "Company Address",
+    "taxCode": "Tax Code",
+    "recipientName": "Recipient Name",
+    "recipientId": "Recipient ID",
+    "personalTaxCode": "Personal Tax Code",
+    "recipientAddress": "Recipient Address",
+    "companyPlaceholder": "Company Ltd...",
+    "addressPlaceholder": "123 Street...",
+    "namePlaceholder": "John Doe",
+    "toggleHint": "Enable the option above to enter business invoice information."
+  },
+  "uppercase": "UPPERCASE",
+  "employeeCount": "employees",
+  "createdDate": "Created Date",
+  "auto": "(Auto)",
+  "addressPlaceholder": "Enter address (e.g. 123 Nguyen Hue...)",
+  "addressHint": "Type address to auto-fill Province/City, District, Ward",
+  "jobPlaceholder": "Office worker",
+  "medicalHistoryPlaceholder": "Enter medical history, allergies, current medications...",
+  "notesPlaceholder": "Notes about customer...",
+  "close": "Close",
+  "saving": "Saving...",
+  "save": "Save",
+  "update": "Update",
+  "cancel": "Cancel",
+  "add": "Add"
 }

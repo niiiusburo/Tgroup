@@ -152,7 +152,7 @@ describe('Customer profile deep linking', () => {
     renderWithRouter(['/customers']);
 
     await waitFor(() => {
-      expect(screen.getByText('Customers')).toBeInTheDocument();
+      expect(screen.getByText('title')).toBeInTheDocument();
     });
 
     expect(screen.getByText('Alice Nguyen')).toBeInTheDocument();
@@ -163,7 +163,7 @@ describe('Customer profile deep linking', () => {
     renderWithRouter(['/customers/cust-123']);
 
     await waitFor(() => {
-      expect(screen.getByText('Customer Profile')).toBeInTheDocument();
+      expect(screen.getByText('customerProfile')).toBeInTheDocument();
     });
 
     expect(screen.getByRole('heading', { name: 'Alice Nguyen' })).toBeInTheDocument();
@@ -175,14 +175,16 @@ describe('Customer profile deep linking', () => {
     renderWithRouter(['/customers/cust-123']);
 
     await waitFor(() => {
-      expect(screen.getByText('Customer Profile')).toBeInTheDocument();
+      expect(screen.getByText('customerProfile')).toBeInTheDocument();
     });
 
-    const backButton = screen.getByRole('button', { name: '' });
+    const backButton = screen.getAllByRole('button', { name: '' }).find(
+      (el) => el.querySelector('svg')
+    )!;
     fireEvent.click(backButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Customers')).toBeInTheDocument();
+      expect(screen.getByText('title')).toBeInTheDocument();
     });
 
     expect(screen.getByText('Alice Nguyen')).toBeInTheDocument();

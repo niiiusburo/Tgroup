@@ -76,5 +76,53 @@
   "selectLocation": "Select location",
   "enterNotes": "Enter notes",
   "totalCost": "Total cost",
-  "collected": "Collected"
+  "collected": "Collected",
+  "form": {
+    "name": "Service Name",
+    "category": "Category",
+    "price": "Price",
+    "duration": "Duration (minutes)",
+    "description": "Description",
+    "status": "Status",
+    "location": "Location",
+    "color": "Color",
+    "customer": "Customer",
+    "doctor": "Doctor",
+    "assistant": "Assistant",
+    "dentalAide": "Dental Aide",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "unitPlaceholder": "tooth"
+  },
+  "formErrors": {
+    "selectService": "Please select a service",
+    "selectCustomer": "Please select a customer",
+    "selectDoctor": "Please select a doctor",
+    "selectLocation": "Please select a location",
+    "selectStartDate": "Please select a start date",
+    "saveFailed": "Failed to save"
+  },
+  "subtitleEdit": "Update treatment information",
+  "subtitleCreate": "Create new treatment service record",
+  "default": "Default",
+  "serviceGroups": "Service Groups",
+  "groupName": "Service Group Name",
+  "addCategory": "Add Service Category",
+  "categoryName": "Category Name",
+  "groupLabel": "Group",
+  "allLocations": "All Locations",
+  "uomLabel": "Unit",
+  "confirmDeleteService": "Delete service \"{{name}}\"?",
+  "tabs": {
+    "services": "Services",
+    "supplies": "Supplies",
+    "medicine": "Medicine"
+  },
+  "filters": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "noServicesFound": "No services found"
 }

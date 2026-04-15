@@ -23,11 +23,11 @@ import {
   Link,
   ScanFace,
 } from 'lucide-react';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { fetchCompanies, fetchEmployees, ApiError } from '@/lib/api';
+import { fetchCompanies, fetchEmployees, fetchPartners, fetchPartnerById, ApiError } from '@/lib/api';
 import { normalizeText } from '@/lib/utils';
-import type { ApiCompany, ApiEmployee } from '@/lib/api';
+import type { ApiCompany, ApiEmployee, ApiPartner } from '@/lib/api';
 import { useUniqueFieldCheck } from '@/hooks/useUniqueFieldCheck';
 import { ComboboxInput } from '@/components/shared/ComboboxInput';
 import {
@@ -85,10 +85,10 @@ interface AddCustomerFormProps {
 
 type TabId = 'basic' | 'medical' | 'einvoice';
 
-const TABS: { id: TabId; label: string }[] = [
-  { id: 'basic', label: 'Thông tin cơ bản' },
-  { id: 'medical', label: 'Tiểu sử bệnh' },
-  { id: 'einvoice', label: 'Hóa đơn điện tử' },
+const TABS: { id: TabId; labelKey: string }[] = [
+  { id: 'basic', labelKey: 'tabs.basic' },
+  { id: 'medical', labelKey: 'tabs.medical' },
+  { id: 'einvoice', labelKey: 'tabs.einvoice' },
 ];
 
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -202,6 +202,7 @@ function MiniAddDialog({
   onSubmit: (value: string) => void;
   placeholder: string;
 }) {
+  const { t } = useTranslation('customers');
   const [value, setValue] = useState('');
 
   if (!isOpen) return null;
@@ -251,7 +252,7 @@ function MiniAddDialog({
             onClick={onClose}
             className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
           >
-            Hủy
+            {t('cancel', 'Hủy')}
           </button>
           <button
             type="button"
@@ -259,7 +260,7 @@ function MiniAddDialog({
             disabled={!value.trim()}
             className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/25"
           >
-            Thêm
+            {t('add', 'Thêm')}
           </button>
         </div>
       </div>
@@ -290,8 +291,6 @@ export function AddCustomerForm({
   const [displayRef, setDisplayRef] = useState<string | null>(customerRef ?? null);
 
   const [showSourceDialog, setShowSourceDialog] = useState(false);
-  const [showReferrerDialog, setShowReferrerDialog] = useState(false);
-  const [showSalesDialog, setShowSalesDialog] = useState(false);
 
   const [companies, setCompanies] = useState<ApiCompany[]>([]);
   const [employees, setEmployees] = useState<ApiEmployee[]>([]);
@@ -321,6 +320,210 @@ export function AddCustomerForm({
       setFormData(prev => ({ ...prev, ref: customerRef }));
     }
   }, [customerRef, isEdit]);
+
+  // ─── Async customer search for referrer ────────────────────────────────
+  const [referrerQuery, setReferrerQuery] = useState('');
+  const [referrerResults, setReferrerResults] = useState<ApiPartner[]>([]);
+  const [referrerLoading, setReferrerLoading] = useState(false);
+  const [referrerOpen, setReferrerOpen] = useState(false);
+  const [selectedReferrer, setSelectedReferrer] = useState<ApiPartner | null>(null);
+  const referrerTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const referrerContainerRef = useRef<HTMLDivElement>(null);
+
+  // Load selected referrer name when editing
+  useEffect(() => {
+    if (formData.referraluserid && !selectedReferrer) {
+      fetchPartnerById(formData.referraluserid)
+        .then((partner) => setSelectedReferrer(partner))
+        .catch(() => {});
+    }
+  }, [formData.referraluserid, selectedReferrer]);
+
+  useEffect(() => {
+    if (selectedReferrer) {
+      setReferrerQuery(selectedReferrer.name);
+    }
+  }, [selectedReferrer]);
+
+  useEffect(() => {
+    if (!formData.referraluserid) {
+      setSelectedReferrer(null);
+      setReferrerQuery('');
+    }
+  }, [formData.referraluserid]);
+
+  // Debounced search
+  useEffect(() => {
+    if (referrerTimeoutRef.current) clearTimeout(referrerTimeoutRef.current);
+    const trimmed = referrerQuery.trim();
+    if (!trimmed || (selectedReferrer && referrerQuery === selectedReferrer.name)) {
+      setReferrerResults([]);
+      setReferrerLoading(false);
+      return;
+    }
+    setReferrerLoading(true);
+    referrerTimeoutRef.current = setTimeout(() => {
+      fetchPartners({ search: trimmed, limit: 20 })
+        .then((res) => setReferrerResults(res.items))
+        .catch(() => setReferrerResults([]))
+        .finally(() => setReferrerLoading(false));
+    }, 300);
+    return () => { if (referrerTimeoutRef.current) clearTimeout(referrerTimeoutRef.current); };
+  }, [referrerQuery, selectedReferrer]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (referrerContainerRef.current && !referrerContainerRef.current.contains(e.target as Node)) {
+        setReferrerOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleReferrerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setReferrerQuery(value);
+    if (selectedReferrer && value !== selectedReferrer.name) {
+      setSelectedReferrer(null);
+      set('referraluserid', '');
+    }
+    setReferrerOpen(true);
+  };
+
+  const handleSelectReferrer = (partner: ApiPartner) => {
+    setSelectedReferrer(partner);
+    setReferrerQuery(partner.name);
+    set('referraluserid', partner.id);
+    setReferrerOpen(false);
+  };
+
+  const handleClearReferrer = () => {
+    setReferrerQuery('');
+    setSelectedReferrer(null);
+    set('referraluserid', '');
+    setReferrerResults([]);
+  };
+  // ────────────────────────────────────────────────────────────────────────
+
+  // ─── Async employee search for sales staff ─────────────────────────────
+  const [salesQuery, setSalesQuery] = useState('');
+  const [salesResults, setSalesResults] = useState<ApiEmployee[]>([]);
+  const [salesLoading, setSalesLoading] = useState(false);
+  const [salesOpen, setSalesOpen] = useState(false);
+  const salesTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const salesContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (formData.salestaffid) {
+      const emp = employees.find((e) => e.id === formData.salestaffid);
+      if (emp) setSalesQuery(emp.name);
+    } else {
+      setSalesQuery('');
+    }
+  }, [formData.salestaffid, employees]);
+
+  useEffect(() => {
+    if (salesTimeoutRef.current) clearTimeout(salesTimeoutRef.current);
+    const trimmed = salesQuery.trim();
+    if (!trimmed) { setSalesResults([]); setSalesLoading(false); return; }
+    setSalesLoading(true);
+    salesTimeoutRef.current = setTimeout(() => {
+      fetchEmployees({ search: trimmed, limit: 100 })
+        .then((res) => {
+          const filtered = res.items.filter((e) => {
+            const jt = (e.jobtitle ?? '').toLowerCase();
+            return jt.includes('sale');
+          });
+          setSalesResults(filtered);
+        })
+        .catch(() => setSalesResults([]))
+        .finally(() => setSalesLoading(false));
+    }, 300);
+    return () => { if (salesTimeoutRef.current) clearTimeout(salesTimeoutRef.current); };
+  }, [salesQuery]);
+
+  const handleSalesInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSalesQuery(e.target.value);
+    set('salestaffid', '');
+    setSalesOpen(true);
+  };
+  const handleSelectSales = (emp: ApiEmployee) => {
+    setSalesQuery(emp.name);
+    set('salestaffid', emp.id);
+    setSalesOpen(false);
+  };
+  const handleClearSales = () => {
+    setSalesQuery('');
+    set('salestaffid', '');
+    setSalesResults([]);
+  };
+  // ────────────────────────────────────────────────────────────────────────
+
+  // ─── Async employee search for CSKH ────────────────────────────────────
+  const [cskhQuery, setCskhQuery] = useState('');
+  const [cskhResults, setCskhResults] = useState<ApiEmployee[]>([]);
+  const [cskhLoading, setCskhLoading] = useState(false);
+  const [cskhOpen, setCskhOpen] = useState(false);
+  const cskhTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const cskhContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (formData.cskhid) {
+      const emp = employees.find((e) => e.id === formData.cskhid);
+      if (emp) setCskhQuery(emp.name);
+    } else {
+      setCskhQuery('');
+    }
+  }, [formData.cskhid, employees]);
+
+  useEffect(() => {
+    if (cskhTimeoutRef.current) clearTimeout(cskhTimeoutRef.current);
+    const trimmed = cskhQuery.trim();
+    if (!trimmed) { setCskhResults([]); setCskhLoading(false); return; }
+    setCskhLoading(true);
+    cskhTimeoutRef.current = setTimeout(() => {
+      fetchEmployees({ search: trimmed, limit: 100 })
+        .then((res) => {
+          const filtered = res.items.filter((e) => {
+            const jt = (e.jobtitle ?? '').toLowerCase();
+            return jt.includes('cskh') || jt.includes('customer service') || jt.includes('hỗ trợ');
+          });
+          setCskhResults(filtered);
+        })
+        .catch(() => setCskhResults([]))
+        .finally(() => setCskhLoading(false));
+    }, 300);
+    return () => { if (cskhTimeoutRef.current) clearTimeout(cskhTimeoutRef.current); };
+  }, [cskhQuery]);
+
+  const handleCskhInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCskhQuery(e.target.value);
+    set('cskhid', '');
+    setCskhOpen(true);
+  };
+  const handleSelectCskh = (emp: ApiEmployee) => {
+    setCskhQuery(emp.name);
+    set('cskhid', emp.id);
+    setCskhOpen(false);
+  };
+  const handleClearCskh = () => {
+    setCskhQuery('');
+    set('cskhid', '');
+    setCskhResults([]);
+  };
+  // ────────────────────────────────────────────────────────────────────────
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (salesContainerRef.current && !salesContainerRef.current.contains(e.target as Node)) setSalesOpen(false);
+      if (cskhContainerRef.current && !cskhContainerRef.current.contains(e.target as Node)) setCskhOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const getError = useCallback(
     (field: keyof CustomerFormData) => errors.find((e) => e.field === field)?.message,
@@ -392,14 +595,6 @@ export function AddCustomerForm({
     });
   };
 
-  const handleAddReferrer = (name: string) => {
-    alert(`Đã thêm ngưới giới thiệu: ${name} (Cần tích hợp API tạo nhân viên)`);
-  };
-
-  const handleAddSalesStaff = (name: string) => {
-    alert(`Đã thêm nhân viên sale: ${name} (Cần tích hợp API tạo nhân viên)`);
-  };
-
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -423,16 +618,16 @@ export function AddCustomerForm({
           } else if (err.code === 'VALIDATION') {
             setErrors([{ field: 'name', message: err.message }]);
           } else {
-            setErrors([{ field: 'name', message: 'Lỗi lưu dữ liệu. Vui lòng thử lại.' }]);
+            setErrors([{ field: 'name', message: t('errors.saveFailed', 'Lỗi lưu dữ liệu. Vui lòng thử lại.') }]);
           }
         } else {
-          setErrors([{ field: 'name', message: 'Lỗi lưu dữ liệu. Vui lòng thử lại.' }]);
+          setErrors([{ field: 'name', message: t('errors.saveFailed', 'Lỗi lưu dữ liệu. Vui lòng thử lại.') }]);
         }
       } finally {
         setIsSubmitting(false);
       }
     },
-    [formData, onSubmit],
+    [formData, onSubmit, t],
   );
 
   const findBestMatch = (input: string, options: readonly string[]): string | null => {
@@ -490,20 +685,6 @@ export function AddCustomerForm({
         placeholder={t('form.fullName', { ns: 'customers' })}
         onSubmit={handleAddSource}
       />
-      <MiniAddDialog
-        isOpen={showReferrerDialog}
-        onClose={() => setShowReferrerDialog(false)}
-        title="Thêm ngưới giới thiệu mới"
-        placeholder="Nhập tên ngưới giới thiệu"
-        onSubmit={handleAddReferrer}
-      />
-      <MiniAddDialog
-        isOpen={showSalesDialog}
-        onClose={() => setShowSalesDialog(false)}
-        title="Thêm nhân viên sale mới"
-        placeholder="Nhập tên nhân viên sale"
-        onSubmit={handleAddSalesStaff}
-      />
 
       {/* ═══════════════════════════════════════════════════════════════════════════════
           HEADER — Appointment module style (icon + title + subtitle)
@@ -521,10 +702,10 @@ export function AddCustomerForm({
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">
-                {isEdit ? 'Chỉnh sửa khách hàng' : 'Thêm khách hàng'}
+                {isEdit ? t('editCustomer') : t('addCustomer')}
               </h2>
               <p className="text-sm text-orange-100 mt-0.5">
-                {isEdit ? 'Cập nhật thông tin hồ sơ bệnh nhân' : 'Tạo hồ sơ bệnh nhân mới'}
+                {isEdit ? t('subtitle.edit', 'Cập nhật thông tin hồ sơ bệnh nhân') : t('subtitle.create', 'Tạo hồ sơ bệnh nhân mới')}
               </p>
             </div>
           </div>
@@ -569,44 +750,44 @@ export function AddCustomerForm({
             {/* Register Face button */}
             {isEdit && customerId && (
               <div className="mt-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    resetFace();
-                    setShowRegisterModal(true);
-                  }}
-                  disabled={!isFieldEditable || registerState.status === 'processing'}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-semibold text-orange-600 bg-orange-50 border border-orange-200 rounded-xl hover:bg-orange-100 transition-all disabled:opacity-50"
-                >
-                  <ScanFace className="w-4 h-4" />
-                  {registerState.status === 'processing' ? 'Đang đăng ký...' : 'Đăng ký khuôn mặt'}
-                </button>
-                {registerState.status === 'success' && (
-                  <p className="mt-1.5 text-[10px] text-emerald-600 text-center">Đăng ký thành công!</p>
-                )}
-                {registerState.status === 'error' && (
-                  <p className="mt-1.5 text-[10px] text-red-500 text-center">
-                    {(registerState as { message: string }).message}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* No-match hint in add mode */}
-            {!isEdit && pendingFaceImage && (
-              <div className="mt-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
-                <p className="text-[10px] text-amber-700 text-center">
-                  Ảnh khuôn mặt đã lưu. Điền thông tin và lưu để đăng ký.
+              <button
+                type="button"
+                onClick={() => {
+                  resetFace();
+                  setShowRegisterModal(true);
+                }}
+                disabled={!isFieldEditable || registerState.status === 'processing'}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-semibold text-orange-600 bg-orange-50 border border-orange-200 rounded-xl hover:bg-orange-100 transition-all disabled:opacity-50"
+              >
+                <ScanFace className="w-4 h-4" />
+                {registerState.status === 'processing' ? t('face.registering', 'Đang đăng ký...') : t('face.register', 'Đăng ký khuôn mặt')}
+              </button>
+              {registerState.status === 'success' && (
+                <p className="mt-1.5 text-[10px] text-emerald-600 text-center">{t('face.registerSuccess', 'Đăng ký thành công!')}</p>
+              )}
+              {registerState.status === 'error' && (
+                <p className="mt-1.5 text-[10px] text-red-500 text-center">
+                  {(registerState as { message: string }).message}
                 </p>
-              </div>
-            )}
+              )}
+            </div>
+          )}
+
+          {/* No-match hint in add mode */}
+          {!isEdit && pendingFaceImage && (
+            <div className="mt-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
+              <p className="text-[10px] text-amber-700 text-center">
+                {t('face.savedHint', 'Ảnh khuôn mặt đã lưu. Điền thông tin và lưu để đăng ký.')}
+              </p>
+            </div>
+          )}
 
             <div className="space-y-4">
               {/* Name */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <FieldLabel icon={User} required>
-                    Họ và tên
+                    {t('form.fullName')}
                   </FieldLabel>
                   <button
                     type="button"
@@ -617,7 +798,7 @@ export function AddCustomerForm({
                         : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    IN HOA
+                    {t('uppercase', 'IN HOA')}
                   </button>
                 </div>
                 <input
@@ -634,7 +815,7 @@ export function AddCustomerForm({
 
               {/* Gender */}
               <div>
-                <FieldLabel icon={Users}>Giới tính</FieldLabel>
+                <FieldLabel icon={Users}>{t('form.gender')}</FieldLabel>
                 <div className="flex gap-4">
                   {(['male', 'female', 'other'] as const).map((g) => (
                     <label
@@ -652,7 +833,7 @@ export function AddCustomerForm({
                         disabled={!isFieldEditable}
                         className="accent-orange-500 w-4 h-4"
                       />
-                      <span className="text-gray-700">{g === 'male' ? 'Nam' : g === 'female' ? 'Nữ' : 'Khác'}</span>
+                      <span className="text-gray-700">{t(`form.${g}`)}</span>
                     </label>
                   ))}
                 </div>
@@ -661,7 +842,7 @@ export function AddCustomerForm({
               {/* Phone */}
               <div>
                 <FieldLabel icon={Phone} required>
-                  Số điện thoại
+                  {t('form.phone')}
                 </FieldLabel>
                 <div className="flex gap-2">
                   <input
@@ -691,14 +872,14 @@ export function AddCustomerForm({
           <CardSection
             title={t('profileSection.assignments', { ns: 'customers' })}
             icon={Briefcase}
-            action={<span className="text-xs text-gray-400">{employees.length} nhân viên</span>}
+            action={<span className="text-xs text-gray-400">{employees.length} {t('employeeCount', 'nhân viên')}</span>}
             className="flex-1 min-h-0"
           >
             <div className="space-y-4">
               {/* Branch */}
               <div>
                 <FieldLabel icon={MapPin} required>
-                  Chi nhánh
+                  {t('form.location')}
                 </FieldLabel>
                 <div className="relative">
                   <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -707,7 +888,7 @@ export function AddCustomerForm({
                     onChange={(e) => set('companyid', e.target.value)}
                     className={`${selectClass()} pl-9`}
                   >
-                    <option value="">-- Chọn chi nhánh --</option>
+                    <option value="">-- {t('select.branch', 'Chọn chi nhánh')} --</option>
                     {companies.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}
@@ -721,91 +902,162 @@ export function AddCustomerForm({
               {/* Sales staff */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <FieldLabel icon={Users}>Nhân viên sale</FieldLabel>
-                  <button
-                    type="button"
-                    onClick={() => setShowSalesDialog(true)}
-                    className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
-                    title="Thêm nhân viên sale mới"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
+                  <FieldLabel icon={Users}>{t('form.salesStaff', 'Nhân viên sale')}</FieldLabel>
                 </div>
-                <select value={formData.salestaffid} onChange={(e) => set('salestaffid', e.target.value)} className={selectClass()}>
-                  <option value="">-- Chọn nhân viên --</option>
-                  {employees.map((emp) => (
-                    <option key={emp.id} value={emp.id}>
-                      {emp.name}
-                    </option>
-                  ))}
-                </select>
+                <div ref={salesContainerRef} className="relative">
+                  <input
+                    type="text"
+                    value={salesQuery}
+                    onChange={handleSalesInputChange}
+                    onFocus={() => setSalesOpen(true)}
+                    placeholder={t('salesPlaceholder', 'Nhập tên nhân viên sale...')}
+                    className={inputClass(false)}
+                  />
+                  {salesQuery && (
+                    <button
+                      type="button"
+                      onClick={handleClearSales}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+                      tabIndex={-1}
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  {salesOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-[100] max-h-60 overflow-y-auto">
+                      {salesLoading ? (
+                        <div className="px-4 py-3 text-sm text-gray-500 text-center">{t('loading', 'Đang tìm...')}</div>
+                      ) : salesResults.length > 0 ? (
+                        salesResults.map((emp) => (
+                          <button
+                            key={emp.id}
+                            type="button"
+                            onClick={() => handleSelectSales(emp)}
+                            className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 text-gray-700 flex flex-col gap-0.5"
+                          >
+                            <span className="font-medium">{emp.name}</span>
+                            {emp.phone && <span className="text-xs text-gray-400">{emp.phone}</span>}
+                          </button>
+                        ))
+                      ) : salesQuery.trim().length > 0 ? (
+                        <div className="px-4 py-3 text-sm text-gray-500 text-center">{t('noResults', 'Không tìm thấy kết quả')}</div>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* CSKH */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <FieldLabel icon={Phone}>CSKH</FieldLabel>
-                  <button
-                    type="button"
-                    onClick={() => alert('Tính năng thêm CSKH mới sẽ được phát triển sau')}
-                    className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
-                    title="Thêm CSKH mới"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
+                  <FieldLabel icon={Phone}>{t('form.cskh', 'CSKH')}</FieldLabel>
                 </div>
-                <select value={formData.cskhid} onChange={(e) => set('cskhid', e.target.value)} className={selectClass()}>
-                  <option value="">-- Chọn CSKH --</option>
-                  {employees.map((emp) => (
-                    <option key={emp.id} value={emp.id}>
-                      {emp.name}
-                    </option>
-                  ))}
-                </select>
+                <div ref={cskhContainerRef} className="relative">
+                  <input
+                    type="text"
+                    value={cskhQuery}
+                    onChange={handleCskhInputChange}
+                    onFocus={() => setCskhOpen(true)}
+                    placeholder={t('cskhPlaceholder', 'Nhập tên CSKH...')}
+                    className={inputClass(false)}
+                  />
+                  {cskhQuery && (
+                    <button
+                      type="button"
+                      onClick={handleClearCskh}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+                      tabIndex={-1}
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  {cskhOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-[100] max-h-60 overflow-y-auto">
+                      {cskhLoading ? (
+                        <div className="px-4 py-3 text-sm text-gray-500 text-center">{t('loading', 'Đang tìm...')}</div>
+                      ) : cskhResults.length > 0 ? (
+                        cskhResults.map((emp) => (
+                          <button
+                            key={emp.id}
+                            type="button"
+                            onClick={() => handleSelectCskh(emp)}
+                            className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 text-gray-700 flex flex-col gap-0.5"
+                          >
+                            <span className="font-medium">{emp.name}</span>
+                            {emp.phone && <span className="text-xs text-gray-400">{emp.phone}</span>}
+                          </button>
+                        ))
+                      ) : cskhQuery.trim().length > 0 ? (
+                        <div className="px-4 py-3 text-sm text-gray-500 text-center">{t('noResults', 'Không tìm thấy kết quả')}</div>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Referral */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <FieldLabel icon={Users}>Ngưới giới thiệu</FieldLabel>
-                  <button
-                    type="button"
-                    onClick={() => setShowReferrerDialog(true)}
-                    className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
-                    title="Thêm ngưới giới thiệu mới"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
+                  <FieldLabel icon={Users}>{t('form.referrer', 'Ngưới giới thiệu')}</FieldLabel>
                 </div>
-                <select
-                  value={formData.referraluserid}
-                  onChange={(e) => set('referraluserid', e.target.value)}
-                  className={selectClass()}
-                >
-                  <option value="">-- Chọn ngưới giới thiệu --</option>
-                  {employees.map((emp) => (
-                    <option key={emp.id} value={emp.id}>
-                      {emp.name}
-                    </option>
-                  ))}
-                </select>
+                <div ref={referrerContainerRef} className="relative">
+                  <input
+                    type="text"
+                    value={referrerQuery}
+                    onChange={handleReferrerInputChange}
+                    onFocus={() => setReferrerOpen(true)}
+                    placeholder={t('referrerPlaceholder', 'Nhập tên hoặc số điện thoại...')}
+                    className={inputClass(false)}
+                  />
+                  {referrerQuery && (
+                    <button
+                      type="button"
+                      onClick={handleClearReferrer}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+                      tabIndex={-1}
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  {referrerOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-[100] max-h-60 overflow-y-auto">
+                      {referrerLoading ? (
+                        <div className="px-4 py-3 text-sm text-gray-500 text-center">{t('loading', 'Đang tìm...')}</div>
+                      ) : referrerResults.length > 0 ? (
+                        referrerResults.map((partner) => (
+                          <button
+                            key={partner.id}
+                            type="button"
+                            onClick={() => handleSelectReferrer(partner)}
+                            className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-50 text-gray-700 flex flex-col gap-0.5"
+                          >
+                            <span className="font-medium">{partner.name}</span>
+                            {partner.phone && <span className="text-xs text-gray-400">{partner.phone}</span>}
+                          </button>
+                        ))
+                      ) : referrerQuery.trim().length > 0 ? (
+                        <div className="px-4 py-3 text-sm text-gray-500 text-center">{t('noResults', 'Không tìm thấy kết quả')}</div>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Source */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <FieldLabel icon={Link}>Nguồn</FieldLabel>
+                  <FieldLabel icon={Link}>{t('form.source')}</FieldLabel>
                   <button
                     type="button"
                     onClick={() => setShowSourceDialog(true)}
                     className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
-                    title="Thêm nguồn mới"
+                    title={t('dialog.addSource', 'Thêm nguồn mới')}
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
                 </div>
                 <select value={formData.sourceid} onChange={(e) => set('sourceid', e.target.value)} className={selectClass()}>
-                  <option value="">-- Chọn nguồn --</option>
+                  <option value="">-- {t('select.source', 'Chọn nguồn')} --</option>
                   {allSources.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
@@ -822,7 +1074,7 @@ export function AddCustomerForm({
                         ? 'Online'
                         : selectedSource.type === 'offline'
                         ? 'Offline'
-                        : 'Giới thiệu'}
+                        : t('sources.referral')}
                     </span>
                   </div>
                 )}
@@ -848,7 +1100,7 @@ export function AddCustomerForm({
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                {tab.label}
+                {t(tab.labelKey)}
               </button>
             ))}
           </div>
@@ -859,13 +1111,13 @@ export function AddCustomerForm({
               <div className="max-w-4xl">
                 <h3 className="text-sm font-semibold text-gray-800 pb-2 border-b border-gray-100 flex items-center gap-2 mb-5">
                   <Info className="w-4 h-4 text-orange-500" />
-                  Thông tin chi tiết
+                  {t('section.detailInfo', 'Thông tin chi tiết')}
                 </h3>
 
                 <div className="grid grid-cols-2 gap-x-6 gap-y-5">
                   {/* DOB */}
                   <div>
-                    <FieldLabel icon={Calendar}>Ngày sinh</FieldLabel>
+                    <FieldLabel icon={Calendar}>{t('form.dateOfBirth')}</FieldLabel>
                     <div className="flex gap-2">
                       <select
                         value={formData.birthday ?? ''}
@@ -873,7 +1125,7 @@ export function AddCustomerForm({
                         disabled={!isFieldEditable}
                         className={`flex-1 ${selectClass(!isFieldEditable)}`}
                       >
-                        <option value="">Ngày</option>
+                        <option value="">{t('date.day', 'Ngày')}</option>
                         {DAYS.map((d) => (
                           <option key={d} value={d}>
                             {d}
@@ -886,7 +1138,7 @@ export function AddCustomerForm({
                         disabled={!isFieldEditable}
                         className={`flex-1 ${selectClass(!isFieldEditable)}`}
                       >
-                        <option value="">Tháng</option>
+                        <option value="">{t('date.month', 'Tháng')}</option>
                         {MONTHS.map((m) => (
                           <option key={m} value={m}>
                             {m}
@@ -899,7 +1151,7 @@ export function AddCustomerForm({
                         disabled={!isFieldEditable}
                         className={`flex-1 ${selectClass(!isFieldEditable)}`}
                       >
-                        <option value="">Năm</option>
+                        <option value="">{t('date.year', 'Năm')}</option>
                         {YEARS.map((y) => (
                           <option key={y} value={y}>
                             {y}
@@ -911,7 +1163,7 @@ export function AddCustomerForm({
 
                   {/* Created date */}
                   <div>
-                    <FieldLabel icon={Clock}>Ngày tạo</FieldLabel>
+                    <FieldLabel icon={Clock}>{t('createdDate', 'Ngày tạo')}</FieldLabel>
                     <input
                       type="text"
                       value={today}
@@ -923,17 +1175,17 @@ export function AddCustomerForm({
                   {/* Title */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <FieldLabel icon={User}>Danh xưng</FieldLabel>
+                      <FieldLabel icon={User}>{t('form.titleLabel', 'Danh xưng')}</FieldLabel>
                       <button
                         type="button"
-                        onClick={() => alert('Tính năng thêm danh xưng tuỳ chỉnh sẽ được phát triển sau')}
+                        onClick={() => alert(t('messages.titleComingSoon', 'Tính năng thêm danh xưng tuỳ chỉnh sẽ được phát triển sau'))}
                         className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
                     </div>
                     <select value={formData.title} onChange={(e) => set('title', e.target.value)} className={selectClass()}>
-                      <option value="">-- Chọn danh xưng --</option>
+                      <option value="">-- {t('select.title', 'Chọn danh xưng')} --</option>
                       {TITLE_OPTIONS.map((t) => (
                         <option key={t} value={t}>
                           {t}
@@ -944,13 +1196,13 @@ export function AddCustomerForm({
 
                   {/* Customer code */}
                   <div>
-                    <FieldLabel icon={Building2}>Mã khách hàng</FieldLabel>
+                    <FieldLabel icon={Building2}>{t('form.customerCode', 'Mã khách hàng')}</FieldLabel>
                     <input
                       type="text"
-                      value={isEdit ? (formData.ref || displayRef || '') : (displayRef ?? '(Tự động)')}
+                      value={isEdit ? (formData.ref || displayRef || '') : (displayRef ?? t('auto', '(Tự động)'))}
                       onChange={isEdit ? (e) => set('ref', e.target.value) : undefined}
                       readOnly={!isEdit}
-                      placeholder="(Tự động)"
+                      placeholder={t('auto', '(Tự động)')}
                       className={`w-full px-4 py-3 border border-gray-200 rounded-xl text-sm ${
                         isEdit
                           ? 'bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all'
@@ -961,7 +1213,7 @@ export function AddCustomerForm({
 
                   {/* Email */}
                   <div>
-                    <FieldLabel icon={Mail}>Email</FieldLabel>
+                    <FieldLabel icon={Mail}>{t('form.email')}</FieldLabel>
                     <input
                       type="email"
                       value={formData.email}
@@ -977,13 +1229,13 @@ export function AddCustomerForm({
 
                   {/* Country */}
                   <div>
-                    <FieldLabel icon={Globe}>Quốc gia</FieldLabel>
+                    <FieldLabel icon={Globe}>{t('form.country', 'Quốc gia')}</FieldLabel>
                     <input type="text" defaultValue="Viet Nam" className={inputClass(false)} />
                   </div>
 
                   {/* Weight */}
                   <div>
-                    <FieldLabel icon={Scale}>Cân nặng (Kg)</FieldLabel>
+                    <FieldLabel icon={Scale}>{t('form.weight', 'Cân nặng (Kg)')}</FieldLabel>
                     <input
                       type="number"
                       value={formData.weight ?? ''}
@@ -996,7 +1248,7 @@ export function AddCustomerForm({
 
                   {/* Street */}
                   <div>
-                    <FieldLabel icon={MapPin}>Số nhà / Địa chỉ</FieldLabel>
+                    <FieldLabel icon={MapPin}>{t('form.street', 'Số nhà / Địa chỉ')}</FieldLabel>
                     <AddressAutocomplete
                       value={formData.street}
                       onChange={(address, details) => {
@@ -1004,17 +1256,17 @@ export function AddCustomerForm({
                         const updates: Partial<CustomerFormData> = {
                           street: address,
                         };
-                        
+
                         if (details) {
                           const matchedCity = details.city ? findBestMatch(details.city, VIET_CITIES) : null;
                           if (matchedCity) {
                             updates.cityname = matchedCity;
-                            
+
                             const districts = VIET_DISTRICTS[matchedCity] || [];
                             const matchedDistrict = details.district ? findBestMatch(details.district, districts) : null;
                             if (matchedDistrict) {
                               updates.districtname = matchedDistrict;
-                              
+
                               const wards = VIET_WARDS[matchedDistrict] || [];
                               const matchedWard = details.ward ? findBestMatch(details.ward, wards) : null;
                               if (matchedWard) {
@@ -1023,35 +1275,35 @@ export function AddCustomerForm({
                             }
                           }
                         }
-                        
+
                         // Update all fields at once
                         setFormData((prev) => ({ ...prev, ...updates }));
                         // Clear any address-related errors
                         setErrors((prev) => prev.filter((e) => !['street', 'cityname', 'districtname', 'wardname'].includes(e.field)));
                       }}
-                      placeholder="Nhập địa chỉ (ví dụ: 123 Nguyễn Huệ...)"
+                      placeholder={t('addressPlaceholder', 'Nhập địa chỉ (ví dụ: 123 Nguyễn Huệ...)')}
                     />
                     <p className="mt-1.5 text-xs text-gray-500 flex items-center gap-1">
                       <MapPin className="w-3 h-3 text-orange-500" />
-                      Gõ địa chỉ để tự động điền Tỉnh/Thành, Quận/Huyện, Phường/Xã
+                      {t('addressHint', 'Gõ địa chỉ để tự động điền Tỉnh/Thành, Quận/Huyện, Phường/Xã')}
                     </p>
                   </div>
 
                   {/* Occupation */}
                   <div>
-                    <FieldLabel icon={Briefcase}>Nghề nghiệp</FieldLabel>
+                    <FieldLabel icon={Briefcase}>{t('form.jobTitle', 'Nghề nghiệp')}</FieldLabel>
                     <input
                       type="text"
                       value={formData.jobtitle}
                       onChange={(e) => set('jobtitle', e.target.value)}
-                      placeholder="Nhân viên văn phòng"
+                      placeholder={t('jobPlaceholder', 'Nhân viên văn phòng')}
                       className={inputClass(false)}
                     />
                   </div>
 
                   {/* Province/City */}
                   <div>
-                    <FieldLabel icon={MapPin}>Tỉnh/Thành</FieldLabel>
+                    <FieldLabel icon={MapPin}>{t('form.city', 'Tỉnh/Thành')}</FieldLabel>
                     <select
                       value={formData.cityname}
                       onChange={(e) => {
@@ -1061,7 +1313,7 @@ export function AddCustomerForm({
                       }}
                       className={selectClass()}
                     >
-                      <option value="">-- Chọn Tỉnh/Thành --</option>
+                      <option value="">-- {t('select.city', 'Chọn Tỉnh/Thành')} --</option>
                       {VIET_CITIES.map((c) => (
                         <option key={c} value={c}>
                           {c}
@@ -1072,7 +1324,7 @@ export function AddCustomerForm({
 
                   {/* Health insurance */}
                   <div>
-                    <FieldLabel icon={ShieldCheck}>Số thẻ bảo hiểm y tế</FieldLabel>
+                    <FieldLabel icon={ShieldCheck}>{t('form.healthInsurance', 'Số thẻ bảo hiểm y tế')}</FieldLabel>
                     <input
                       type="text"
                       value={formData.healthinsurancecardnumber}
@@ -1084,7 +1336,7 @@ export function AddCustomerForm({
 
                   {/* District */}
                   <div>
-                    <FieldLabel icon={MapPin}>Quận/Huyện</FieldLabel>
+                    <FieldLabel icon={MapPin}>{t('form.district', 'Quận/Huyện')}</FieldLabel>
                     <ComboboxInput
                       value={formData.districtname}
                       onChange={(value) => {
@@ -1095,19 +1347,19 @@ export function AddCustomerForm({
                         }
                       }}
                       options={districtsForCity}
-                      placeholder="-- Chọn hoặc nhập Quận/Huyện --"
+                      placeholder={t('select.districtPlaceholder', '-- Chọn hoặc nhập Quận/Huyện --')}
                       disabled={!formData.cityname}
                     />
                     {formData.cityname && !formData.districtname && (
                       <p className="mt-1 text-xs text-orange-600">
-                        Nhập hoặc chọn Quận/Huyện từ danh sách
+                        {t('districtHint', 'Nhập hoặc chọn Quận/Huyện từ danh sách')}
                       </p>
                     )}
                   </div>
 
                   {/* ID / Passport */}
                   <div>
-                    <FieldLabel icon={CreditCard}>Căn cước / Hộ chiếu</FieldLabel>
+                    <FieldLabel icon={CreditCard}>{t('form.identity', 'Căn cước / Hộ chiếu')}</FieldLabel>
                     <input
                       type="text"
                       value={formData.identitynumber}
@@ -1119,17 +1371,17 @@ export function AddCustomerForm({
 
                   {/* Ward */}
                   <div>
-                    <FieldLabel icon={MapPin}>Phường/Xã</FieldLabel>
+                    <FieldLabel icon={MapPin}>{t('form.ward', 'Phường/Xã')}</FieldLabel>
                     <ComboboxInput
                       value={formData.wardname}
                       onChange={(value) => set('wardname', value)}
                       options={wardsForDistrict}
-                      placeholder="-- Chọn hoặc nhập Phường/Xã --"
+                      placeholder={t('select.wardPlaceholder', '-- Chọn hoặc nhập Phường/Xã --')}
                       disabled={!formData.districtname}
                     />
                     {formData.districtname && !formData.wardname && wardsForDistrict.length > 0 && (
                       <p className="mt-1 text-xs text-orange-600">
-                        Nhập hoặc chọn Phường/Xã từ danh sách
+                        {t('wardHint', 'Nhập hoặc chọn Phường/Xã từ danh sách')}
                       </p>
                     )}
                   </div>
@@ -1140,39 +1392,44 @@ export function AddCustomerForm({
             {activeTab === 'medical' && (
               <div className="max-w-3xl">
                 <div className="bg-orange-50 border border-orange-100 rounded-xl p-4 mb-4">
-                  <h4 className="text-sm font-medium text-orange-800 mb-1">Lưu ý y tế</h4>
+                  <h4 className="text-sm font-medium text-orange-800 mb-1">{t('medicalNotice.title', 'Lưu ý y tế')}</h4>
                   <p className="text-xs text-orange-600">
-                    Thông tin tiểu sử bệnh giúp bác sĩ đánh giá tốt hơn tình trạng sức khỏe của bệnh nhân.
+                    {t('medicalNotice.description', 'Thông tin tiểu sử bệnh giúp bác sĩ đánh giá tốt hơn tình trạng sức khỏe của bệnh nhân.')}
                   </p>
                 </div>
-                <FieldLabel icon={Stethoscope}>Tiểu sử bệnh</FieldLabel>
+                <FieldLabel icon={Stethoscope}>{t('form.medicalHistory', 'Tiểu sử bệnh')}</FieldLabel>
                 <textarea
                   value={formData.medicalhistory}
                   onChange={(e) => set('medicalhistory', e.target.value)}
-                  placeholder="Nhập tiểu sử bệnh, dị ứng, thuốc đang dùng..."
+                  placeholder={t('medicalHistoryPlaceholder', 'Nhập tiểu sử bệnh, dị ứng, thuốc đang dùng...')}
                   rows={8}
                   className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 resize-none transition-all hover:border-gray-300"
                 />
                 <div className="mt-4 grid grid-cols-3 gap-3">
-                  {['Tiểu đường', 'Tim mạch', 'Dị ứng thuốc', 'Huyết áp cao', 'Hen suyễn', 'Đang mang thai'].map(
-                    (cond) => (
-                      <label
-                        key={cond}
-                        className="flex items-center gap-2.5 text-sm text-gray-700 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          className="accent-orange-500 w-4 h-4 rounded"
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              set('medicalhistory', formData.medicalhistory ? `${formData.medicalhistory}\n${cond}` : cond);
-                            }
-                          }}
-                        />
-                        <span>{cond}</span>
-                      </label>
-                    ),
-                  )}
+                  {[
+                    t('conditions.diabetes', 'Tiểu đường'),
+                    t('conditions.cardiovascular', 'Tim mạch'),
+                    t('conditions.drugAllergy', 'Dị ứng thuốc'),
+                    t('conditions.hypertension', 'Huyết áp cao'),
+                    t('conditions.asthma', 'Hen suyễn'),
+                    t('conditions.pregnant', 'Đang mang thai'),
+                  ].map((cond) => (
+                    <label
+                      key={cond}
+                      className="flex items-center gap-2.5 text-sm text-gray-700 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        className="accent-orange-500 w-4 h-4 rounded"
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            set('medicalhistory', formData.medicalhistory ? `${formData.medicalhistory}\n${cond}` : cond);
+                          }
+                        }}
+                      />
+                      <span>{cond}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
             )}
@@ -1188,34 +1445,34 @@ export function AddCustomerForm({
                     className="accent-orange-500 w-5 h-5 rounded"
                   />
                   <label htmlFor="isbusinessinvoice" className="text-sm font-medium text-gray-800 cursor-pointer flex-1">
-                    Xuất hóa đơn doanh nghiệp
+                    {t('einvoice.businessInvoice', 'Xuất hóa đơn doanh nghiệp')}
                   </label>
                 </div>
 
                 {formData.isbusinessinvoice && (
                   <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
                     <div className="col-span-2">
-                      <FieldLabel>Tên công ty</FieldLabel>
+                      <FieldLabel>{t('einvoice.companyName', 'Tên công ty')}</FieldLabel>
                       <input
                         type="text"
                         value={formData.unitname}
                         onChange={(e) => set('unitname', e.target.value)}
-                        placeholder="Công ty TNHH..."
+                        placeholder={t('einvoice.companyPlaceholder', 'Công ty TNHH...')}
                         className={inputClass(false)}
                       />
                     </div>
                     <div className="col-span-2">
-                      <FieldLabel>Địa chỉ công ty</FieldLabel>
+                      <FieldLabel>{t('einvoice.companyAddress', 'Địa chỉ công ty')}</FieldLabel>
                       <input
                         type="text"
                         value={formData.unitaddress}
                         onChange={(e) => set('unitaddress', e.target.value)}
-                        placeholder="123 Đường..."
+                        placeholder={t('einvoice.addressPlaceholder', '123 Đường...')}
                         className={inputClass(false)}
                       />
                     </div>
                     <div>
-                      <FieldLabel>Mã số thuế</FieldLabel>
+                      <FieldLabel>{t('einvoice.taxCode', 'Mã số thuế')}</FieldLabel>
                       <input
                         type="text"
                         value={formData.taxcode}
@@ -1225,17 +1482,17 @@ export function AddCustomerForm({
                       />
                     </div>
                     <div>
-                      <FieldLabel>Họ tên ngưới nhận</FieldLabel>
+                      <FieldLabel>{t('einvoice.recipientName', 'Họ tên ngưới nhận')}</FieldLabel>
                       <input
                         type="text"
                         value={formData.personalname}
                         onChange={(e) => set('personalname', e.target.value)}
-                        placeholder="Nguyễn Văn A"
+                        placeholder={t('einvoice.namePlaceholder', 'Nguyễn Văn A')}
                         className={inputClass(false)}
                       />
                     </div>
                     <div>
-                      <FieldLabel>CCCD ngưới nhận</FieldLabel>
+                      <FieldLabel>{t('einvoice.recipientId', 'CCCD ngưới nhận')}</FieldLabel>
                       <input
                         type="text"
                         value={formData.personalidentitycard}
@@ -1245,7 +1502,7 @@ export function AddCustomerForm({
                       />
                     </div>
                     <div>
-                      <FieldLabel>MST cá nhân</FieldLabel>
+                      <FieldLabel>{t('einvoice.personalTaxCode', 'MST cá nhân')}</FieldLabel>
                       <input
                         type="text"
                         value={formData.personaltaxcode}
@@ -1255,12 +1512,12 @@ export function AddCustomerForm({
                       />
                     </div>
                     <div className="col-span-2">
-                      <FieldLabel>Địa chỉ ngưới nhận</FieldLabel>
+                      <FieldLabel>{t('einvoice.recipientAddress', 'Địa chỉ ngưới nhận')}</FieldLabel>
                       <input
                         type="text"
                         value={formData.personaladdress}
                         onChange={(e) => set('personaladdress', e.target.value)}
-                        placeholder="123 Đường..."
+                        placeholder={t('einvoice.addressPlaceholder', '123 Đường...')}
                         className={inputClass(false)}
                       />
                     </div>
@@ -1272,18 +1529,18 @@ export function AddCustomerForm({
                     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                       <Building2 className="w-8 h-8 text-gray-400" />
                     </div>
-                    <p className="text-sm text-gray-500">Bật tùy chọn trên để nhập thông tin hóa đơn doanh nghiệp.</p>
+                    <p className="text-sm text-gray-500">{t('einvoice.toggleHint', 'Bật tùy chọn trên để nhập thông tin hóa đơn doanh nghiệp.')}</p>
                   </div>
                 )}
               </div>
             )}
 
             {/* Notes — moved from left panel for better balance */}
-            <CardSection title="Ghi chú" icon={FileText} maxHeight="180px">
+            <CardSection title={t('form.notes')} icon={FileText} maxHeight="180px">
               <textarea
                 value={formData.note}
                 onChange={(e) => set('note', e.target.value)}
-                placeholder="Ghi chú về khách hàng..."
+                placeholder={t('notesPlaceholder', 'Ghi chú về khách hàng...')}
                 rows={3}
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 resize-none transition-all hover:border-gray-300"
               />
@@ -1297,7 +1554,7 @@ export function AddCustomerForm({
               onClick={onCancel}
               className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
             >
-              Đóng
+              {t('close', 'Đóng')}
             </button>
             <button
               type="submit"
@@ -1310,7 +1567,7 @@ export function AddCustomerForm({
               }
               className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/25"
             >
-              {isSubmitting ? 'Đang lưu...' : isEdit ? 'Cập nhật' : 'Lưu'}
+              {isSubmitting ? t('saving', 'Đang lưu...') : isEdit ? t('update', 'Cập nhật') : t('save', 'Lưu')}
             </button>
           </div>
         </div>
@@ -1318,7 +1575,7 @@ export function AddCustomerForm({
 
       <FaceCaptureModal
         isOpen={showRegisterModal}
-        title="Đăng ký khuôn mặt"
+        title={t('face.registerTitle', 'Đăng ký khuôn mặt')}
         onCapture={async (imageBlob) => {
           setShowRegisterModal(false);
           if (customerId) {

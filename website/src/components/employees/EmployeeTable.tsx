@@ -135,7 +135,7 @@ export function EmployeeTable({
       columns={columns}
       data={employees}
       keyExtractor={(emp) => emp.id}
-      pageSize={8}
+      pageSize={20}
       onRowClick={(emp) => onSelect(emp.id)}
       emptyMessage="No employees match your filters"
     />

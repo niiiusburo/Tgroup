@@ -1,0 +1,13 @@
+{
+  "name": "website-clone",
+  "version": "1.0.0",
+  "description": "Cloned website from https://tamdentist.tdental.vn/#/partners/customers/df9ae0c6-4f17-41fb-a2ec-b42c00fb7701/teeth-status",
+  "scripts": {
+    "start": "npx http-server . -p 3000 -c-1 -o /clone.html",
+    "start:original": "npx http-server . -p 3000 -c-1 -o /clone-original.html",
+    "serve": "npx serve . -l 3000 -s -n"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

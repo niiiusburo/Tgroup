@@ -39,7 +39,7 @@ export function DataTable<T>({
   columns,
   data,
   keyExtractor,
-  pageSize = 10,
+  pageSize = 20,
   onRowClick,
   emptyMessage = 'No data found',
   selection,

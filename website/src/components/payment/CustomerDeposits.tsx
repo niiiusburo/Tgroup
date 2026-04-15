@@ -395,24 +395,24 @@ export function CustomerDeposits({
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto min-w-0">
           {activeTab === 'deposits' ? (
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[640px]">
               <thead>
                 <tr className="bg-gray-50 text-left">
-                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Số phiếu tạm ứng</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày tạm ứng</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Phương thức</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Loại tạm ứng</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Số tiền</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Thao tác</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">Số phiếu</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">Phương thức</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">Loại</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Số tiền</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
+                    <td colSpan={7} className="px-2 sm:px-4 py-8 text-center text-gray-400">
                       <div className="flex items-center justify-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin" />
                         Đang tải...
@@ -421,38 +421,38 @@ export function CustomerDeposits({
                   </tr>
                 ) : paged.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
+                    <td colSpan={7} className="px-2 sm:px-4 py-8 text-center text-gray-400">
                       Không có dữ liệu
                     </td>
                   </tr>
                 ) : (
                   paged.map((tx) => (
                     <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3">
+                      <td className="px-2 sm:px-4 py-3">
                         <div className="flex flex-col">
                           {tx.referenceCode && <span className="text-sm font-medium text-gray-700">{tx.referenceCode}</span>}
                           {!tx.referenceCode && <span className="text-sm font-mono text-gray-700">{tx.receiptNumber || '-'}</span>}
                           {tx.referenceCode && tx.receiptNumber && <span className="text-[10px] font-mono text-gray-400">{tx.receiptNumber}</span>}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-gray-600">{formatDate(tx.date)}</td>
-                      <td className="px-4 py-3 text-gray-600">{tx.method}</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      <td className="px-2 sm:px-4 py-3 text-gray-600">{formatDate(tx.date)}</td>
+                      <td className="px-2 sm:px-4 py-3 text-gray-600">{tx.method}</td>
+                      <td className="px-2 sm:px-4 py-3">
+                        <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium ${
                           tx.type === 'refund'
                             ? 'bg-amber-100 text-amber-700'
                             : 'bg-blue-100 text-blue-700'
                         }`}>
-                          {tx.type === 'refund' ? 'Hoàn tạm ứng' : 'Đóng tạm ứng'}
+                          {tx.type === 'refund' ? 'Hoàn' : 'Đóng'}
                         </span>
                       </td>
-                      <td className={`px-4 py-3 text-right font-medium ${
+                      <td className={`px-2 sm:px-4 py-3 text-right font-medium ${
                         tx.type === 'refund' ? 'text-amber-600' : 'text-blue-600'
                       }`}>
                         {tx.type === 'refund' ? '-' : '+'}{formatVND(tx.amount)}
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      <td className="px-2 sm:px-4 py-3">
+                        <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium ${
                           tx.status === 'posted' || tx.status === 'confirmed'
                             ? 'bg-emerald-100 text-emerald-700'
                             : 'bg-red-100 text-red-700'
@@ -460,8 +460,8 @@ export function CustomerDeposits({
                           {tx.status === 'posted' || tx.status === 'confirmed' ? 'Đã xác nhận' : 'Đã hủy'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                      <td className="px-2 sm:px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1 sm:gap-2">
                           {onEditDeposit && (
                             <button
                               onClick={() => openEditModal(tx)}
@@ -497,14 +497,14 @@ export function CustomerDeposits({
               </tbody>
             </table>
           ) : (
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[480px]">
               <thead>
                 <tr className="bg-gray-50 text-left">
-                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày giao dịch</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Phương thức</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Ghi chú</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Số tiền</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày giao dịch</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">Phương thức</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">Ghi chú</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Số tiền</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -519,21 +519,21 @@ export function CustomerDeposits({
                   </tr>
                 ) : usageHistory.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                    <td colSpan={5} className="px-2 sm:px-4 py-8 text-center text-gray-400">
                       Không có dữ liệu sử dụng tạm ứng
                     </td>
                   </tr>
                 ) : (
                   usageHistory.map((tx) => (
                     <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 text-gray-600">{formatDate(tx.date)}</td>
-                      <td className="px-4 py-3 text-gray-600">{tx.method}</td>
-                      <td className="px-4 py-3 text-gray-600">{tx.note || '-'}</td>
-                      <td className="px-4 py-3 text-right font-medium text-rose-600">
+                      <td className="px-2 sm:px-4 py-3 text-gray-600">{formatDate(tx.date)}</td>
+                      <td className="px-2 sm:px-4 py-3 text-gray-600">{tx.method}</td>
+                      <td className="px-2 sm:px-4 py-3 text-gray-600">{tx.note || '-'}</td>
+                      <td className="px-2 sm:px-4 py-3 text-right font-medium text-rose-600">
                         -{formatVND(tx.amount)}
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      <td className="px-2 sm:px-4 py-3">
+                        <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium ${
                           tx.status === 'posted' || tx.status === 'confirmed'
                             ? 'bg-emerald-100 text-emerald-700'
                             : 'bg-red-100 text-red-700'

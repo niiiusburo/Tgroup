@@ -1,0 +1,52 @@
+{
+  "runId": "2026-04-14T01-38-30-060Z",
+  "since": "2026-02-22",
+  "startedAt": "2026-04-14T01:38:30.060Z",
+  "tables": {
+    "companies": {
+      "table": "companies",
+      "completedAt": "2026-04-14T01:38:30.624Z",
+      "fetched": 7,
+      "inserted": 0,
+      "updated": 0,
+      "errored": 0,
+      "elapsedMs": 50
+    },
+    "aspnetusers": {
+      "table": "aspnetusers",
+      "completedAt": "2026-04-14T01:38:31.043Z",
+      "fetched": 73,
+      "inserted": 0,
+      "updated": 0,
+      "errored": 0,
+      "elapsedMs": 417
+    },
+    "employees": {
+      "table": "employees",
+      "completedAt": "2026-04-14T01:38:32.648Z",
+      "fetched": 382,
+      "inserted": 0,
+      "updated": 0,
+      "errored": 0,
+      "elapsedMs": 1604
+    },
+    "productcategories": {
+      "table": "productcategories",
+      "completedAt": "2026-04-14T01:38:33.050Z",
+      "fetched": 18,
+      "inserted": 0,
+      "updated": 0,
+      "errored": 0,
+      "elapsedMs": 396
+    },
+    "products": {
+      "table": "products",
+      "completedAt": "2026-04-14T01:38:34.049Z",
+      "fetched": 77,
+      "inserted": 0,
+      "updated": 0,
+      "errored": 0,
+      "elapsedMs": 998
+    }
+  }
+}

@@ -33,16 +33,9 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 DUMP_FILE="/tmp/tgroup_tdental_demo_${TIMESTAMP}.sql"
 LOG_PREFIX="🌀 TGroup Deploy"
 
-# VPS .env content — the script writes this file on VPS if missing.
-# This ensures VPS always has the correct production values.
-read -r -d '' VPS_ENV_CONTENT << 'ENV_EOF' || true
-GOOGLE_PLACES_API_KEY=AIzaSyDVk_KxoeAtvTa1-LvewB2OwrdnmZn-64c
-HOSOONLINE_BASE_URL=https://hosoonline.com
-HOSOONLINE_API_KEY=af2e8cda5430c64575fb6f8bea6f5b71a0a7b6edcc99d36543bb047066b6a725
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-JWT_SECRET=tgclinic-production-secret-key-2026
-ENV_EOF
+# VPS .env is preserved — never overwritten by this script.
+# Secrets must be managed manually on the VPS or via a secure vault.
+# If the VPS .env is missing, the script will warn and abort.
 
 # ─── Flags ────────────────────────────────────────────────────────────────────
 DO_CODE=true
@@ -89,7 +82,7 @@ if [ "$DO_CODE" = true ]; then echo "  ✦ Code sync:     api/ + website/ + infr
 if [ "$DO_DB" = true ];   then echo "  ✦ Database:      local $DB_NAME → VPS $DB_NAME"; fi
 if [ "$DO_REBUILD" = true ]; then echo "  ✦ Rebuild:       docker compose build + up -d"; fi
 echo "  ✦ VPS host:      $VPS_HOST"
-echo "  ✦ VPS .env:      production values (auto-written)"
+echo "  ✦ VPS .env:      preserved (never overwritten by this script)"
 echo "  ✦ Local files:   NOT modified"
 echo ""
 
@@ -112,21 +105,32 @@ ok "SSH to $VPS_HOST works"
 vps "test -d $VPS_DIR" || die "VPS project dir $VPS_DIR does not exist."
 ok "VPS project dir $VPS_DIR exists"
 
-# Check local Docker DB is running (only needed for DB sync)
-if [ "$DO_DB" = true ]; then
-  docker exec "$LOCAL_DB_CONTAINER" pg_isready -U "$DB_USER" -d "$DB_NAME" >/dev/null 2>&1 \
-    || die "Local Docker container '$LOCAL_DB_CONTAINER' is not running or DB '$DB_NAME' not accessible."
-  ok "Local Docker DB ($DB_NAME) is accessible"
-fi
+  # Check local Docker DB is running (only needed for DB sync)
+  # Support both Colima and Docker Desktop sockets on macOS
+  if [ -z "${DOCKER_HOST:-}" ]; then
+    if [ -S /var/run/docker.sock ]; then
+      export DOCKER_HOST=unix:///var/run/docker.sock
+    elif [ -S "$HOME/.colima/default/docker.sock" ]; then
+      export DOCKER_HOST=unix://"$HOME/.colima/default/docker.sock"
+    fi
+  fi
+  if [ "$DO_DB" = true ]; then
+    if ! docker info >/dev/null 2>&1; then
+      die "Local Docker daemon is not running. Cannot dump DB."
+    fi
+    docker exec "$LOCAL_DB_CONTAINER" pg_isready -U "$DB_USER" -d "$DB_NAME" >/dev/null 2>&1 \
+      || die "Local Docker container '$LOCAL_DB_CONTAINER' is not running or DB '$DB_NAME' not accessible."
+    ok "Local Docker DB ($DB_NAME) is accessible"
+  fi
 
-# ─── STEP 1: Write / verify VPS .env ─────────────────────────────────────────
+# ─── STEP 1: Verify VPS .env exists ──────────────────────────────────────────
 if [ "$DO_CODE" = true ]; then
-  step "Ensure VPS .env is correct"
+  step "Verify VPS .env"
 
-  vps "cat > $VPS_DIR/$VPS_ENV_FILE << 'ENVEOF'
-$VPS_ENV_CONTENT
-ENVEOF"
-  ok "VPS $VPS_ENV_FILE written"
+  if ! vps "test -f $VPS_DIR/$VPS_ENV_FILE" >/dev/null 2>&1; then
+    die "VPS $VPS_ENV_FILE is missing. Please create it manually on the VPS with the required secrets."
+  fi
+  ok "VPS $VPS_ENV_FILE exists (preserved)"
 fi
 
 # ─── STEP 2: Sync code to VPS ────────────────────────────────────────────────
@@ -146,7 +150,7 @@ if [ "$DO_CODE" = true ]; then
 
   # First, wipe VPS api/ and website/ dirs to remove stale files
   vps "rm -rf $VPS_DIR/api/src $VPS_DIR/api/migrations $VPS_DIR/api/package* $VPS_DIR/api/migrate-*"
-  vps "rm -rf $VPS_DIR/website/src $VPS_DIR/website/public $VPS_DIR/website/package* $VPS_DIR/website/vite* $VPS_DIR/website/tailwind* $VPS_DIR/website/tsconfig* $VPS_DIR/website/index.html $VPS_DIR/website/components.json"
+  vps "rm -rf $VPS_DIR/website/src $VPS_DIR/website/public $VPS_DIR/website/package* $VPS_DIR/website/vite* $VPS_DIR/website/tailwind* $VPS_DIR/website/tsconfig* $VPS_DIR/website/index.html $VPS_DIR/website/components.json $VPS_DIR/website/.eslintrc*"
 
   # Sync api/ — backend code only
   rsync -az \
@@ -189,6 +193,8 @@ if [ "$DO_CODE" = true ]; then
     --exclude='.windsurf' \
     --exclude='docs/' \
     --exclude='skills/' \
+    --exclude='vitest.config.ts' \
+    --exclude='.eslintrc.cjs' \
     website/ "$VPS_HOST:$VPS_DIR/website/"
 
   # Sync essential root config files
@@ -245,8 +251,7 @@ if [ "$DO_DB" = true ]; then
   vps "rm -f /tmp/tgroup_db_dump.sql"
   rm -f "$DUMP_FILE"
 
-  # Verify table count on VPS
-  vps_table_count=$(vps "cd $VPS_DIR && docker exec tgroup-db psql -U $DB_USER -d $DB_NAME -t -c \"SELECT count(*) FROM information_schema.tables WHERE table_schema='public'\"" | tr -d ' ')
+  vps_table_count=$(vps "cd $VPS_DIR && docker exec tgroup-db psql -U $DB_USER -d $DB_NAME -t -c \"SELECT count(*) FROM information_schema.tables WHERE table_schema NOT IN ('pg_catalog', 'information_schema')\"" | tr -d ' ')
   ok "VPS $DB_NAME restored — $vps_table_count tables"
 fi
 
@@ -271,9 +276,8 @@ if [ "$DO_REBUILD" = true ]; then
   # Check all containers are running
   vps "cd $VPS_DIR && docker compose ps --format '{{.Name}} {{.Status}}'" 2>&1
 
-  # Check API health
-  api_status=$(vps "curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3002/api/health 2>/dev/null || echo '000'" 2>&1)
-  if [ "$api_status" = "200" ] || [ "$api_status" = "404" ]; then
+  api_status=$(vps "curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{}' http://127.0.0.1:3002/api/Auth/login 2>/dev/null || echo '000'" 2>&1)
+  if [ "$api_status" = "200" ] || [ "$api_status" = "400" ] || [ "$api_status" = "401" ] || [ "$api_status" = "404" ] || [ "$api_status" = "422" ]; then
     ok "API responding (HTTP $api_status)"
   else
     warn "API returned HTTP $api_status (may need a moment to start)"

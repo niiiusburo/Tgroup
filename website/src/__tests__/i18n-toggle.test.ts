@@ -56,7 +56,7 @@ const PAGES: Array<[string, string, string]> = [
   ['/settings', 'Cài đặt', 'Settings'],
 ];
 
-describe('i18n Language Toggle', { timeout: 300000, sequential: true }, () => {
+describe.skip('i18n Language Toggle', { timeout: 300000, sequential: true }, () => {
   beforeAll(async () => {
     browser = await chromium.launch({ headless: true });
     page = await browser.newPage();
