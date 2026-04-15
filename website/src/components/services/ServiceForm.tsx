@@ -22,12 +22,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, ClipboardPlus, Edit2, User, Stethoscope, MapPin, CalendarDays, Clock, FileText, DollarSign, Hash, Check } from 'lucide-react';
+
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
 import { ServiceCatalogSelector } from '@/components/shared/ServiceCatalogSelector';
 import { CustomerSelector } from '@/components/shared/CustomerSelector';
 import { DoctorSelector } from '@/components/shared/DoctorSelector';
 import { LocationSelector } from '@/components/shared/LocationSelector';
 import { DatePicker } from '@/components/ui/DatePicker';
+import { ToothPickerModal } from './ToothPickerModal';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
@@ -60,6 +62,7 @@ interface ServiceFormProps {
 
 export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose, initialData, isEdit = false }: ServiceFormProps) {
   const { t } = useTranslation('services');
+  const { t: tc } = useTranslation('common');
   const { customers: apiCustomers, loading: customersLoading } = useCustomers();
   const { employees: apiEmployees, isLoading: employeesLoading } = useEmployees();
   const { allLocations: apiLocations, isLoading: locationsLoading } = useLocations();
@@ -84,6 +87,9 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   const [totalCostOverride, setTotalCostOverride] = useState(
     initialData?.totalCost ? String(initialData.totalCost) : ''
   );
+  const [toothNumbers, setToothNumbers] = useState<string[]>(initialData?.toothNumbers ? [...initialData.toothNumbers] : []);
+  const [toothComment, setToothComment] = useState(initialData?.toothComment ?? '');
+  const [isToothModalOpen, setIsToothModalOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -103,6 +109,8 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       setQuantity(initialData.quantity ? String(initialData.quantity) : '1');
       setUnit(initialData.unit ?? 'răng');
       setTotalCostOverride(initialData.totalCost ? String(initialData.totalCost) : '');
+      setToothNumbers(initialData.toothNumbers ? [...initialData.toothNumbers] : []);
+      setToothComment(initialData.toothComment ?? '');
     }
   }, [initialData?.id, readonlyCustomerId]);
 
@@ -162,11 +170,11 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
 
   function validate(): boolean {
     const newErrors: Record<string, string> = {};
-    if (!catalogItemId) newErrors.service = 'Vui lòng chọn dịch vụ';
-    if (!customerId) newErrors.customer = 'Vui lòng chọn khách hàng';
-    if (!doctorId) newErrors.doctor = 'Vui lòng chọn bác sĩ';
-    if (!locationId) newErrors.location = 'Vui lòng chọn chi nhánh';
-    if (!startDate) newErrors.startDate = 'Vui lòng chọn ngày bắt đầu';
+    if (!catalogItemId) newErrors.service = t('formErrors.selectService', 'Vui lòng chọn dịch vụ');
+    if (!customerId) newErrors.customer = t('formErrors.selectCustomer', 'Vui lòng chọn khách hàng');
+    if (!doctorId) newErrors.doctor = t('formErrors.selectDoctor', 'Vui lòng chọn bác sĩ');
+    if (!locationId) newErrors.location = t('formErrors.selectLocation', 'Vui lòng chọn chi nhánh');
+    if (!startDate) newErrors.startDate = t('formErrors.selectStartDate', 'Vui lòng chọn ngày bắt đầu');
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -235,10 +243,11 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       totalVisits: selectedCatalog.totalVisits, totalCost: cost,
       startDate, expectedEndDate: expectedEndDate || startDate,
       notes: notes.trim(), quantity: Number(quantity) || 1, unit: unit.trim(),
-      toothNumbers: [],
+      toothNumbers,
+      toothComment: toothComment.trim(),
     });
     } catch (error) {
-      setErrors(prev => ({ ...prev, submit: error instanceof Error ? error.message : 'Lưu thất bại' }));
+      setErrors(prev => ({ ...prev, submit: error instanceof Error ? error.message : t('formErrors.saveFailed', 'Lưu thất bại') }));
     } finally {
       setIsSaving(false);
     }
@@ -259,9 +268,9 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
                 {isEdit ? <Edit2 className="w-5 h-5 text-white" /> : <ClipboardPlus className="w-5 h-5 text-white" />}
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">{isEdit ? 'Sửa dịch vụ' : 'Tạo dịch vụ'}</h2>
+                <h2 className="text-xl font-bold text-white">{isEdit ? t('editService') : t('addService')}</h2>
                 <p className="text-sm text-orange-100 mt-0.5">
-                  {isEdit ? 'Cập nhật thông tin điều trị' : 'Tạo hồ sơ dịch vụ điều trị mới'}
+                  {isEdit ? t('form.subtitleEdit', 'Cập nhật thông tin điều trị') : t('form.subtitleCreate', 'Tạo hồ sơ dịch vụ điều trị mới')}
                 </p>
               </div>
             </div>
@@ -276,7 +285,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
           {isLoading && (
             <div className="flex items-center justify-center py-8 text-gray-400">
               <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2" />
-              Đang tải...
+              {tc('loading')}
             </div>
           )}
 
@@ -284,14 +293,14 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Stethoscope className="w-3.5 h-3.5" />
-              Dịch vụ
+              {t('columns.name')}
             </label>
             <ServiceCatalogSelector catalog={serviceCatalog} selectedId={catalogItemId} onChange={handleCatalogChange} placeholder={t('convertToService.selectService', { ns: 'appointments' })} />
             {errors.service && <p className="mt-2 text-xs text-red-500">{errors.service}</p>}
             {selectedCatalog && (
               <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span>{selectedCatalog.totalVisits} lần khám · ~{selectedCatalog.estimatedDuration} phút/lần</span>
+                <span>{selectedCatalog.totalVisits} {t('visits')} · ~{selectedCatalog.estimatedDuration} {t('minutesPerVisit')}</span>
               </div>
             )}
           </div>
@@ -301,7 +310,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                 <User className="w-3.5 h-3.5" />
-                Khách hàng
+                {t('form.customer', 'Khách hàng')}
               </label>
               <CustomerSelector customers={customers} selectedId={customerId} onChange={handleCustomerChange} />
               {errors.customer && <p className="mt-2 text-xs text-red-500">{errors.customer}</p>}
@@ -312,7 +321,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Stethoscope className="w-3.5 h-3.5" />
-              Bác sĩ
+              {t('form.doctor', 'Bác sĩ')}
             </label>
             <DoctorSelector employees={employees} selectedId={doctorId} onChange={handleDoctorChange} filterRoles={['doctor']} />
             {errors.doctor && <p className="mt-2 text-xs text-red-500">{errors.doctor}</p>}
@@ -322,7 +331,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
-              Phụ tá
+              {t('form.assistant', 'Phụ tá')}
             </label>
             <DoctorSelector employees={employees} selectedId={assistantId} onChange={handleAssistantChange} filterRoles={['assistant']} placeholder={t('form.selectDoctor', { ns: 'appointments' })} />
           </div>
@@ -331,7 +340,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
-              Trợ lý Bác sĩ
+              {t('form.dentalAide', 'Trợ lý Bác sĩ')}
             </label>
             <DoctorSelector employees={employees} selectedId={dentalAideId} onChange={handleDentalAideChange} filterRoles={['doctor-assistant']} placeholder={t('form.selectDoctor', { ns: 'appointments' })} />
           </div>
@@ -340,7 +349,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <MapPin className="w-3.5 h-3.5" />
-              Chi nhánh
+              {t('form.location', 'Chi nhánh')}
             </label>
             <LocationSelector locations={locations} selectedId={locationId} onChange={handleLocationChange} excludeAll />
             {errors.location && <p className="mt-2 text-xs text-red-500">{errors.location}</p>}
@@ -348,8 +357,8 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
 
           {/* Ngày bắt đầu + Ngày kết thúc */}
           <div className="grid grid-cols-2 gap-4">
-            <DatePicker value={startDate} onChange={handleStartDateChange} label="Ngày bắt đầu" icon={<CalendarDays className="w-3.5 h-3.5" />} error={errors.startDate} />
-            <DatePicker value={expectedEndDate} onChange={setExpectedEndDate} label="Ngày kết thúc" icon={<Clock className="w-3.5 h-3.5" />} minDate={startDate} />
+            <DatePicker value={startDate} onChange={handleStartDateChange} label={t('form.startDate', 'Ngày bắt đầu')} icon={<CalendarDays className="w-3.5 h-3.5" />} error={errors.startDate} />
+            <DatePicker value={expectedEndDate} onChange={setExpectedEndDate} label={t('form.endDate', 'Ngày kết thúc')} icon={<Clock className="w-3.5 h-3.5" />} minDate={startDate} />
           </div>
 
           {/* Chi phí + Số lượng + Đơn vị */}
@@ -357,7 +366,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                 <DollarSign className="w-3.5 h-3.5" />
-                Tổng chi phí
+                {t('totalCost')}
               </label>
               <CurrencyInput
                 value={totalCostOverride ? Number(totalCostOverride) : null}
@@ -367,14 +376,14 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
               />
               {selectedCatalog && (
                 <p className="mt-1 text-xs text-gray-400">
-                  Mặc định: {new Intl.NumberFormat('vi-VN').format(selectedCatalog.defaultPrice)} VND
+                  {t('default', 'Mặc định')}: {new Intl.NumberFormat('vi-VN').format(selectedCatalog.defaultPrice)} VND
                 </p>
               )}
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                 <Hash className="w-3.5 h-3.5" />
-                Số lượng
+                {t('form.quantity', 'Số lượng')}
               </label>
               <input
                 type="number" value={quantity}
@@ -387,12 +396,12 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                 <FileText className="w-3.5 h-3.5" />
-                Đơn vị
+                {t('form.unit', 'Đơn vị')}
               </label>
               <input
                 type="text" value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                placeholder="răng"
+                placeholder={t('form.unitPlaceholder', 'răng')}
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
               />
             </div>
@@ -402,28 +411,83 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
-              Ghi chú
+              {t('form.notes', { ns: 'appointments' })}
             </label>
             <textarea
               value={notes} onChange={(e) => setNotes(e.target.value)}
-              rows={3} placeholder={t('form.notes', { ns: 'appointments' })}
+              rows={3} placeholder={t('enterNotes', 'Nhập ghi chú')}
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
             />
+          </div>
+
+          {/* Răng */}
+          <div className="border border-gray-200 rounded-xl p-4 bg-gray-50/50 space-y-3">
+            <label className="block text-sm font-semibold text-gray-700">
+              {t('form.teeth', 'Răng')}
+            </label>
+
+            {/* Tooth numbers display / picker trigger */}
+            <button
+              type="button"
+              onClick={() => setIsToothModalOpen(true)}
+              className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-orange-300 transition-colors"
+            >
+              {toothNumbers.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {toothNumbers.map((n) => (
+                    <span
+                      key={n}
+                      className="inline-flex items-center px-2 py-1 rounded bg-blue-100 text-blue-700 text-sm font-medium"
+                    >
+                      {n}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-sm text-gray-400">
+                  {t('form.selectTeeth', 'Chọn răng…')}
+                </span>
+              )}
+            </button>
+
+            {/* Tooth comment */}
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">
+                {t('form.toothComment', 'Ghi chú răng')}
+              </label>
+              <textarea
+                value={toothComment}
+                onChange={(e) => setToothComment(e.target.value)}
+                rows={2}
+                placeholder={t('form.toothCommentPlaceholder', 'Nhập ghi chú về răng')}
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
+              />
+            </div>
           </div>
         </form>
 
         {/* Footer */}
         <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
             <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
-              Hủy bỏ
+              {tc('cancel')}
             </button>
             <button type="button" onClick={() => handleSubmit()} disabled={isLoading || isSaving}
               className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25">
               <Check className="w-4 h-4" />
-              {isEdit ? 'Cập nhật' : 'Tạo dịch vụ'}
+              {isEdit ? tc('update') : t('addService')}
             </button>
           </div>
       </div>
+
+      <ToothPickerModal
+        isOpen={isToothModalOpen}
+        initialValues={toothNumbers}
+        onClose={() => setIsToothModalOpen(false)}
+        onSave={(values) => {
+          setToothNumbers(values);
+          setIsToothModalOpen(false);
+        }}
+      />
     </div>
   );
 }

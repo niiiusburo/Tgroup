@@ -322,6 +322,7 @@ export function fetchEmployees(params?: {
   companyId?: string;
   isDoctor?: boolean;
   isAssistant?: boolean;
+  active?: 'true' | 'false' | 'all';
 }) {
   return apiFetch<PaginatedResponse<ApiEmployee>>('/Employees', {
     params: {
@@ -331,6 +332,7 @@ export function fetchEmployees(params?: {
       companyId: params?.companyId,
       isDoctor: params?.isDoctor,
       isAssistant: params?.isAssistant,
+      active: params?.active,
     },
   });
 }
@@ -549,6 +551,8 @@ export interface ApiSaleOrder {
   datestart: string | null;
   dateend: string | null;
   notes: string | null;
+  tooth_numbers: string | null;
+  tooth_comment: string | null;
   lastupdated: string | null;
   isdeleted?: boolean;
   /** Sale order reference code (e.g. SO-2024-001). */
@@ -594,6 +598,8 @@ export function createSaleOrder(data: {
   datestart?: string;
   dateend?: string;
   notes?: string;
+  tooth_numbers?: string | null;
+  tooth_comment?: string | null;
 }) {
   return apiFetch<ApiSaleOrder>('/SaleOrders', { method: 'POST', body: data });
 }
@@ -616,6 +622,8 @@ export function updateSaleOrder(id: string, data: {
   datestart?: string | null;
   dateend?: string | null;
   notes?: string | null;
+  tooth_numbers?: string | null;
+  tooth_comment?: string | null;
 }) {
   return apiFetch<ApiSaleOrder>(`/SaleOrders/${id}`, { method: 'PATCH', body: data });
 }

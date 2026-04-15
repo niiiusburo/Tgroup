@@ -101,12 +101,23 @@ export function ServiceHistoryList({ records, onUpdateVisit, onCancel, onEdit }:
                   <span className="text-xs text-gray-400">
                     {record.startDate} - {record.expectedEndDate}
                   </span>
-                  {(record.toothNumbers?.length ?? 0) > 0 && (
-                    <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
-                      Tooth: {record.toothNumbers?.join(', ')}
-                    </span>
-                  )}
                 </div>
+
+                {/* Tooth info */}
+                {(record.toothNumbers?.length ?? 0) > 0 && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {record.toothNumbers?.map((n) => (
+                      <span key={n} className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-medium">
+                        {n}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {record.toothComment && (
+                  <p className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
+                    {record.toothComment}
+                  </p>
+                )}
 
                 {/* Notes */}
                 {record.notes && (
