@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ArrowLeft, Phone, Mail, MapPin, Calendar, Tag,
-  User, AlertCircle, Edit2, Plus, Clock, CalendarPlus, Receipt,
+  ArrowLeft, Calendar, Edit2, Plus, Clock, CalendarPlus, Receipt,
   Trash2, ChevronDown, Coins, Wallet, HandCoins,
 } from 'lucide-react';
 import { CustomerDeposits } from '@/components/payment/CustomerDeposits';
@@ -21,6 +20,10 @@ import type { PaymentWithAllocations } from '@/hooks/useCustomerPayments';
 import { HealthCheckupGallery } from './HealthCheckupGallery';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatVND, parseDisplayDate } from '@/lib/formatting';
+import { TabBadge } from './CustomerProfile/TabBadge';
+import { formatDate } from './CustomerProfile/formatDate';
+import { ProfileHeader } from './CustomerProfile/ProfileHeader';
+import { DeletePaymentDialog } from './CustomerProfile/DeletePaymentDialog';
 
 interface CustomerProfileProps {
   readonly profile: CustomerProfileData;
@@ -105,48 +108,6 @@ const TABS: readonly TabConfig[] = [
   { value: 'payment', label: 'payment', getCount: (p) => p.payments?.length ?? 0 },
 ];
 
-function TabBadge({ count, isActive }: { count: number; isActive: boolean }) {
-  if (count === 0) {
-    return (
-      <span className={`ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold rounded-full transition-colors ${
-        isActive 
-          ? 'bg-primary/20 text-primary' 
-          : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
-      }`}>
-        0
-      </span>
-    );
-  }
-  
-  return (
-    <span className={`ml-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-bold rounded-full transition-colors ${
-      isActive 
-        ? 'bg-primary text-white shadow-sm' 
-        : 'bg-primary/10 text-primary group-hover:bg-primary/20'
-    }`}>
-      {count > 99 ? '99+' : count}
-    </span>
-  );
-}
-
-function formatDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return '-';
-  try {
-    // Handle ISO date strings (e.g., "2024-03-15T00:00:00") by extracting just the date part
-    const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
-    
-    // Parse as local date to avoid timezone shifts
-    const [year, month, day] = datePart.split('-').map(Number);
-    if (!year || !month || !day) return '-';
-    
-    const date = new Date(year, month - 1, day); // month is 0-indexed
-    if (isNaN(date.getTime())) return '-';
-    
-    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-  } catch {
-    return '-';
-  }
-}
 
 export function CustomerProfile({
   profile,
@@ -284,95 +245,7 @@ export function CustomerProfile({
         </div>
       </div>
 
-      {/* Profile Card */}
-      <div className="bg-white rounded-xl shadow-card p-6">
-        <div className="flex flex-col sm:flex-row gap-6">
-          <div className="flex-shrink-0">
-            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-2xl font-bold text-primary">{profile.name.charAt(0)}</span>
-            </div>
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center gap-3">
-                <h2 className="text-xl font-bold text-gray-900">{profile.name}</h2>
-                <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
-                  profile.gender === 'female' ? 'bg-pink-50 text-pink-600' : 'bg-blue-50 text-blue-600'
-                }`}>
-                  <User className="w-3 h-3" />
-                  {profile.gender === 'male' ? 'Male' : 'Female'}
-                </span>
-              </div>
-              {profile.code && (
-                <span className="self-start inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
-                  <Tag className="w-3 h-3 text-slate-400" />
-                  {profile.code}
-                </span>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
-              <span className="flex items-center gap-2 text-sm text-gray-600">
-                <Phone className="w-4 h-4 text-gray-400" />
-                {profile.phone || 'No phone'}
-              </span>
-              <span className="flex items-center gap-2 text-sm text-gray-600">
-                <Mail className="w-4 h-4 text-gray-400" />
-                {profile.email || 'No email'}
-              </span>
-              <span className="flex items-center gap-2 text-sm text-gray-600">
-                <MapPin className="w-4 h-4 text-gray-400" />
-                {profile.address || 'No address'}
-              </span>
-              <span className="flex items-center gap-2 text-sm text-gray-600">
-                <Calendar className="w-4 h-4 text-gray-400" />
-                DOB: {profile.dateOfBirth}
-              </span>
-            </div>
-
-            {profile.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {profile.tags.map((tag) => (
-                  <span key={tag} className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full ${
-                    tag.includes('Allergy') ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-600'
-                  }`}>
-                    {tag.includes('Allergy') ? <AlertCircle className="w-3 h-3" /> : <Tag className="w-3 h-3" />}
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 sm:flex sm:flex-col gap-3 sm:gap-3 flex-shrink-0 sm:text-right">
-            <div>
-              <p className="text-xs text-gray-400">Member since</p>
-              <p className="text-sm font-medium text-gray-900">{profile.memberSince}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-400">Total visits</p>
-              <p className="text-sm font-medium text-gray-900">{profile.totalVisits}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-400">Deposit Balance</p>
-              <p className="text-sm font-bold text-emerald-600">{formatVND(profile.depositBalance)}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-400">Outstanding</p>
-              <p className="text-sm font-bold text-red-600">{formatVND(profile.outstandingBalance)}</p>
-            </div>
-          </div>
-        </div>
-
-        {profile.notes && (
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            <p className="text-xs text-gray-400 mb-1">Notes</p>
-            <p className="text-sm text-gray-600">{profile.notes}</p>
-          </div>
-        )}
-      </div>
-
+      <ProfileHeader profile={profile} />
       <CustomerAssignments
         companyName={profile.companyName}
         salestaffId={profile.salestaffid}
@@ -866,47 +739,23 @@ export function CustomerProfile({
         />
       )}
 
-      {/* Delete Payment Confirmation */}
-      {paymentToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Xóa thanh toán?</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Bạn có chắc muốn xóa bản ghi thanh toán này? Hành động này không thể hoàn tác.
-            </p>
-            <div className="flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setPaymentToDelete(null)}
-                disabled={isDeletingPayment}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
-              >
-                Hủy
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (!onDeletePayment || !paymentToDelete) return;
-                  setIsDeletingPayment(true);
-                  try {
-                    await onDeletePayment(paymentToDelete);
-                  } catch (err) {
-                    console.error('Failed to delete payment:', err);
-                  } finally {
-                    setIsDeletingPayment(false);
-                    setPaymentToDelete(null);
-                  }
-                }}
-                disabled={isDeletingPayment}
-                className="px-4 py-2 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                {isDeletingPayment ? 'Đang xóa...' : 'Xóa'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+      <DeletePaymentDialog
+        paymentToDelete={paymentToDelete}
+        isDeleting={isDeletingPayment}
+        onCancel={() => setPaymentToDelete(null)}
+        onConfirm={async () => {
+          if (!onDeletePayment || !paymentToDelete) return;
+          setIsDeletingPayment(true);
+          try {
+            await onDeletePayment(paymentToDelete);
+          } catch (err) {
+            console.error('Failed to delete payment:', err);
+          } finally {
+            setIsDeletingPayment(false);
+            setPaymentToDelete(null);
+          }
+        }}
+      />
       {/* Payment Modal */}
       {showPaymentModal && onMakePayment && payTargetService && (() => {
         const svcCtx: ServicePaymentContext = {
