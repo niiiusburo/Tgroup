@@ -40,12 +40,12 @@ interface FetchOptions {
   params?: Record<string, string | number | boolean | undefined>;
 }
 
-// Keys that must be passed through unchanged (backend expects camelCase for these)
-const SNAKE_CASE_ALLOWLIST = new Set(['isDoctor', 'isAssistant', 'isReceptionist']);
+// Keys that bypass camelCase → snake_case conversion (backend expects them as-is)
+const CAMEL_CASE_PASSTHROUGH = new Set(['isDoctor', 'isAssistant', 'isReceptionist', 'categId', 'companyId', 'sortField', 'sortOrder', 'saleOK']);
 
 // Convert camelCase to snake_case for backend API compatibility
 function toSnakeCase(str: string): string {
-  if (SNAKE_CASE_ALLOWLIST.has(str)) return str;
+  if (CAMEL_CASE_PASSTHROUGH.has(str)) return str;
   return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 }
 

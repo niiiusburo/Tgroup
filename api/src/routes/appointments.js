@@ -57,7 +57,13 @@ router.get('/', async (req, res) => {
       state = '',
       company_id = '',
       doctor_id = '',
+      companyId = '',
+      doctorId = '',
     } = req.query;
+
+    // Accept either snake_case (current frontend) or camelCase (new passthrough casing)
+    const effectiveCompanyId = company_id || companyId;
+    const effectiveDoctorId = doctor_id || doctorId;
 
     // Accept either date_from (snake_case from frontend) or dateFrom (camelCase)
     const effectiveDateFrom = date_from || dateFrom;
@@ -124,21 +130,21 @@ router.get('/', async (req, res) => {
       paramIdx++;
     }
 
-    if (company_id) {
-      if (!isValidUUID(company_id)) {
+    if (effectiveCompanyId) {
+      if (!isValidUUID(effectiveCompanyId)) {
         return errorResponse(res, 400, 'INVALID_COMPANY_ID', 'company_id must be a valid UUID');
       }
       conditions.push(`a.companyid = $${paramIdx}`);
-      params.push(company_id);
+      params.push(effectiveCompanyId);
       paramIdx++;
     }
 
-    if (doctor_id) {
-      if (!isValidUUID(doctor_id)) {
+    if (effectiveDoctorId) {
+      if (!isValidUUID(effectiveDoctorId)) {
         return errorResponse(res, 400, 'INVALID_DOCTOR_ID', 'doctor_id must be a valid UUID');
       }
       conditions.push(`a.doctorid = $${paramIdx}`);
-      params.push(doctor_id);
+      params.push(effectiveDoctorId);
       paramIdx++;
     }
 

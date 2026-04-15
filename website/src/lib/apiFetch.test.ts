@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { apiFetch, deleteFeedbackThread } from './api';
+import { apiFetch, deleteFeedbackThread, fetchProducts, fetchEmployees, fetchPartners } from './api';
 
 describe('apiFetch', () => {
   let fetchSpy: ReturnType<typeof vi.spyOn>;
@@ -51,3 +51,48 @@ describe('apiFetch', () => {
     );
   });
 });
+
+describe('apiFetch query param serialization', () => {
+  let fetchSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ totalItems: 0, items: [] }), { status: 200 })
+    );
+  });
+
+  afterEach(() => {
+    fetchSpy.mockRestore();
+  });
+
+  function calledUrl(): string {
+    const call = fetchSpy.mock.calls[0];
+    return String(call[0]);
+  }
+
+  it('preserves categId for /Products', async () => {
+    await fetchProducts({ categId: 'CAT-123' });
+    expect(calledUrl()).toMatch(/[?&]categId=CAT-123/);
+    expect(calledUrl()).not.toMatch(/categ_id=/);
+  });
+
+  it('preserves companyId for /Products', async () => {
+    await fetchProducts({ companyId: 'CO-1' });
+    expect(calledUrl()).toMatch(/[?&]companyId=CO-1/);
+    expect(calledUrl()).not.toMatch(/company_id=/);
+  });
+
+  it('preserves companyId for /Employees', async () => {
+    await fetchEmployees({ companyId: 'CO-1' });
+    expect(calledUrl()).toMatch(/[?&]companyId=CO-1/);
+    expect(calledUrl()).not.toMatch(/company_id=/);
+  });
+
+  it('preserves sortField/sortOrder when passed via apiFetch params', async () => {
+    await apiFetch('/Partners', { params: { sortField: 'name', sortOrder: 'asc' } });
+    expect(calledUrl()).toMatch(/[?&]sortField=name/);
+    expect(calledUrl()).toMatch(/[?&]sortOrder=asc/);
+    expect(calledUrl()).not.toMatch(/sort_field=|sort_order=/);
+  });
+});
+
