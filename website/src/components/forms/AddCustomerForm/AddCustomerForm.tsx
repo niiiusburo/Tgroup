@@ -2,7 +2,6 @@ import {
   X,
   Plus,
   Users,
-  UserPlus,
   Globe,
   MapPin,
   Briefcase,
@@ -40,11 +39,16 @@ import {
 } from '@/data/mockCustomerForm';
 import type { CustomerFormData, FormValidationError } from '@/data/mockCustomerForm';
 import { useCustomerSources } from '@/hooks/useSettings';
-import type { CustomerSource } from '@/data/mockSettings';
 import { AddressAutocomplete } from '@/components/shared/AddressAutocomplete';
 import { CustomerCameraWidget } from '@/components/customer/CustomerCameraWidget';
 import { FaceCaptureModal } from '@/components/shared/FaceCaptureModal';
 import { useFaceRecognition } from '@/hooks/useFaceRecognition';
+import { inputClass, selectClass } from './styles';
+import { TABS, DAYS, MONTHS, YEARS, TYPE_ICONS, TYPE_COLORS } from './constants';
+import type { TabId } from './constants';
+import { FieldLabel } from './FieldLabel';
+import { CardSection } from './CardSection';
+import { MiniAddDialog } from './MiniAddDialog';
 
 /**
  * ╔══════════════════════════════════════════════════════════════════════════════════════╗
@@ -83,190 +87,6 @@ interface AddCustomerFormProps {
   readonly canEdit?: boolean;
 }
 
-type TabId = 'basic' | 'medical' | 'einvoice';
-
-const TABS: { id: TabId; labelKey: string }[] = [
-  { id: 'basic', labelKey: 'tabs.basic' },
-  { id: 'medical', labelKey: 'tabs.medical' },
-  { id: 'einvoice', labelKey: 'tabs.einvoice' },
-];
-
-const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
-const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
-const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = Array.from({ length: 100 }, (_, i) => CURRENT_YEAR - i);
-
-// Type icons for sources
-const TYPE_ICONS: Record<CustomerSource['type'], React.ReactNode> = {
-  online: <Globe className="w-3.5 h-3.5" />,
-  offline: <MapPin className="w-3.5 h-3.5" />,
-  referral: <UserPlus className="w-3.5 h-3.5" />,
-};
-
-const TYPE_COLORS: Record<CustomerSource['type'], string> = {
-  online: 'bg-blue-50 text-blue-700 border-blue-200',
-  offline: 'bg-amber-50 text-amber-700 border-amber-200',
-  referral: 'bg-green-50 text-green-700 border-green-200',
-};
-
-/** Appointment-style input class — DO NOT ALTER without updating DESIGN STANDARD */
-function inputClass(hasError: boolean, disabled = false) {
-  return [
-    'w-full px-4 py-3 bg-white border rounded-xl text-sm transition-all',
-    'focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400',
-    hasError ? 'border-red-300' : 'border-gray-200',
-    disabled ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'hover:border-gray-300',
-  ].join(' ');
-}
-
-/** Appointment-style select class — DO NOT ALTER without updating DESIGN STANDARD */
-function selectClass(disabled = false) {
-  return [
-    'w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm',
-    'focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400',
-    'transition-all appearance-none',
-    disabled ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'hover:border-gray-300',
-  ].join(' ');
-}
-
-/** Appointment-style label with icon */
-function FieldLabel({
-  children,
-  icon: Icon,
-  required,
-}: {
-  children: React.ReactNode;
-  icon?: React.ElementType;
-  required?: boolean;
-}) {
-  return (
-    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
-      {Icon && <Icon className="w-3.5 h-3.5" />}
-      {children}
-      {required && <span className="text-red-500">*</span>}
-    </label>
-  );
-}
-
-/**
- * CardSection - Reusable card component with INDEPENDENT scrolling
- * IMPORTANT: This component enforces a fixed height container where:
- * - The header stays visible (flex-shrink-0)
- * - Only the content area scrolls (overflow-y-auto)
- */
-function CardSection({
-  title,
-  icon: Icon,
-  children,
-  action,
-  className = '',
-  maxHeight = 'none',
-}: {
-  title: string;
-  icon?: React.ElementType;
-  children: React.ReactNode;
-  action?: React.ReactNode;
-  className?: string;
-  maxHeight?: string;
-}) {
-  return (
-    <div
-      className={`bg-white rounded-2xl border border-gray-200 flex flex-col overflow-hidden ${className}`}
-      style={{ maxHeight: maxHeight !== 'none' ? maxHeight : undefined }}
-    >
-      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-2">
-          {Icon && <Icon className="w-4 h-4 text-orange-500" />}
-          <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
-        </div>
-        {action}
-      </div>
-      <div className="p-4 overflow-y-auto flex-1 min-h-0 custom-scrollbar">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-// Mini Dialog for adding sources/referrers
-function MiniAddDialog({
-  isOpen,
-  onClose,
-  title,
-  onSubmit,
-  placeholder,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  onSubmit: (value: string) => void;
-  placeholder: string;
-}) {
-  const { t } = useTranslation('customers');
-  const [value, setValue] = useState('');
-
-  if (!isOpen) return null;
-
-  const handleSubmit = () => {
-    if (value.trim()) {
-      onSubmit(value.trim());
-      setValue('');
-      onClose();
-    }
-  };
-
-  return (
-    <div className="modal-container">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden animate-in zoom-in-95 duration-200">
-        <div className="modal-header relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
-          <div className="relative flex items-center justify-between">
-            <h3 className="text-lg font-bold text-white">{title}</h3>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors"
-            >
-              <X className="w-5 h-5 text-white" />
-            </button>
-          </div>
-        </div>
-        <div className="px-6 py-6">
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            {placeholder}
-          </label>
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder={placeholder}
-            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
-            autoFocus
-            onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-          />
-        </div>
-        <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
-          >
-            {t('cancel', 'Hủy')}
-          </button>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={!value.trim()}
-            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/25"
-          >
-            {t('add', 'Thêm')}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export function AddCustomerForm({
   initialData,
