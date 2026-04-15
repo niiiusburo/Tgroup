@@ -117,6 +117,27 @@
     "first": "First",
     "last": "Last"
   },
+  "label": {
+    "highInfo": "Advanced Info",
+    "service": "Service",
+    "cardColor": "Card Color",
+    "reminder": "Appointment Reminder"
+  },
+  "reminder": {
+    "15": "15 minutes before",
+    "30": "30 minutes before",
+    "1h": "1 hour before",
+    "1d": "1 day before"
+  },
+  "customer": {
+    "type": {
+      "new": "New Customer",
+      "returning": "Returning Customer"
+    }
+  },
+  "common": {
+    "minutes": "minutes"
+  },
   "close": "Close",
   "cancel": "Cancel",
   "save": "Save",
@@ -146,6 +167,8 @@
   "columns": "Columns",
   "rows": "rows",
   "perPage": "per page",
+  "hide": "Hide",
+  "show": "Show",
   "of": "of",
   "showing": "Showing",
   "messages": {

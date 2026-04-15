@@ -117,6 +117,27 @@
     "first": "Đầu",
     "last": "Cuối"
   },
+  "label": {
+    "highInfo": "Thông tin nâng cao",
+    "service": "Dịch vụ",
+    "cardColor": "Màu thẻ",
+    "reminder": "Nhắc lịch hẹn"
+  },
+  "reminder": {
+    "15": "15 phút trước",
+    "30": "30 phút trước",
+    "1h": "1 giờ trước",
+    "1d": "1 ngày trước"
+  },
+  "customer": {
+    "type": {
+      "new": "Khách mới",
+      "returning": "Tái khám"
+    }
+  },
+  "common": {
+    "minutes": "phút"
+  },
   "close": "Đóng",
   "cancel": "Hủy",
   "save": "Lưu",
@@ -146,6 +167,8 @@
   "columns": "Cột",
   "rows": "dòng",
   "perPage": "mỗi trang",
+  "hide": "Ẩn",
+  "show": "Hiện",
   "of": "của",
   "showing": "Hiển thị",
   "messages": {
@@ -157,5 +180,5 @@
     "deleteError": "Xóa thất bại",
     "loadError": "Tải dữ liệu thất bại"
   },
-  "apiKeyInstruction": "Tạo file .env với VITE_GOOGLE_PLACES_API_KEY=your_key"
+  "apiKeyInstruction": "Tạo file .env với VITE_GOOGLE_PLACES_API_KEY=***"
 }

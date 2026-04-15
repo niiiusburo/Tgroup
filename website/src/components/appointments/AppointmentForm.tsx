@@ -434,7 +434,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                       min={5} max={300} step={5}
                       className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
                     />
-                    <span className="text-sm text-gray-500">phút</span>
+                    <span className="text-sm text-gray-500">{t('common.minutes')}</span>
                   </div>
                 </div>
               </div>
@@ -444,14 +444,14 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
             <div className="space-y-5">
               <h3 className="text-sm font-semibold text-gray-800 pb-2 border-b border-gray-100 flex items-center gap-2">
                 <Stethoscope className="w-4 h-4 text-orange-500" />
-                Thông tin nâng cao
+                {t('label.highInfo')}
               </h3>
 
               {/* Dịch vụ */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                   <Stethoscope className="w-3.5 h-3.5" />
-                  Dịch vụ
+                  {t('label.service')}
                 </label>
                 {isProductsLoading ? (
                   <div className="flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-500">
@@ -469,7 +469,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                 {selectedService && (
                   <p className="mt-1.5 text-xs text-gray-500 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    {selectedService.totalVisits} lần khám · ~{selectedService.estimatedDuration} phút
+                    {selectedService.totalVisits} lần khám · ~{selectedService.estimatedDuration} {t('common.minutes')}
                   </p>
                 )}
               </div>
@@ -505,7 +505,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                         : 'bg-white border-gray-200 text-gray-600 hover:border-orange-300'
                     }`}
                   >
-                    Khách mới
+                    {t('customer.type.new')}
                   </button>
                   <button
                     type="button"
@@ -516,7 +516,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                         : 'bg-white border-gray-200 text-gray-600 hover:border-emerald-300'
                     }`}
                   >
-                    Tái khám
+                    {t('customer.type.returning')}
                   </button>
                 </div>
               </div>
@@ -525,7 +525,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                   <Palette className="w-3.5 h-3.5" />
-                  Màu thẻ
+                  {t('label.cardColor')}
                 </label>
                 <div className="flex items-center gap-2 flex-wrap">
                   {Object.entries(APPOINTMENT_CARD_COLORS).map(([code, color]) => (
@@ -589,14 +589,14 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
           <div className="mt-6 pt-5 border-t border-gray-100">
             <h3 className="text-sm font-semibold text-gray-800 pb-2 mb-3 flex items-center gap-2">
               <Clock className="w-4 h-4 text-orange-500" />
-              Nhắc lịch hẹn
+              {t('label.reminder')}
             </h3>
             <div className="flex flex-wrap gap-2">
               {[
-                { label: '15 phút trước', value: '15min' },
-                { label: '30 phút trước', value: '30min' },
-                { label: '1 giờ trước', value: '1h' },
-                { label: '1 ngày trước', value: '1d' },
+                { label: t('reminder.15'), value: '15min' },
+                { label: t('reminder.30'), value: '30min' },
+                { label: t('reminder.1h'), value: '1h' },
+                { label: t('reminder.1d'), value: '1d' },
                 { label: 'SMS', value: 'sms' },
                 { label: 'Zalo', value: 'zalo' },
               ].map((reminder) => (
