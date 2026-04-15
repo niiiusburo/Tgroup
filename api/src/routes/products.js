@@ -5,6 +5,14 @@ const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
+function normalizeVietnamese(str) {
+  if (!str) return '';
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
 /**
  * GET /api/Products
  * Query params: offset, limit, search, type, categId, active, companyId
@@ -63,13 +71,15 @@ router.get('/', async (req, res) => {
     // SaleOK filter (column not present in demo schema, skip)
     // if (saleOK === 'true') { conditions.push(`p.saleok = true`); }
 
-    // Search by name, defaultcode, or description
+    // Search by name, defaultcode, or namenosign (accent-insensitive)
     if (search) {
+      const normalizedSearch = normalizeVietnamese(search);
       conditions.push(
-        `(p.name ILIKE $${paramIdx} OR p.defaultcode ILIKE $${paramIdx} OR p.namenosign ILIKE $${paramIdx})`
+        `(p.name ILIKE $${paramIdx} OR p.defaultcode ILIKE $${paramIdx} OR p.namenosign ILIKE $${paramIdx + 1})`
       );
       params.push(`%${search}%`);
-      paramIdx++;
+      params.push(`%${normalizedSearch}%`);
+      paramIdx += 2;
     }
 
     const whereClause = conditions.join(' AND ');
@@ -195,10 +205,12 @@ router.post('/', requirePermission('services.edit'), async (req, res) => {
     const id = uuidv4();
     const now = new Date().toISOString();
 
+    const trimmedName = name.trim();
+    const nameNoSign = normalizeVietnamese(trimmedName);
     await query(
       `INSERT INTO dbo.products (id, name, namenosign, defaultcode, type, type2, listprice, categid, uomname, companyid, canorderlab, active, datecreated, lastupdated)
        VALUES ($1, $2, $3, $4, $5, $5, $6, $7, $8, $9, $10, true, $11, $11)`,
-      [id, name.trim(), name.trim(), defaultcode || null, type || 'service', listprice || 0, categid || null, uomname || 'Lần', companyid || null, canorderlab || false, now]
+      [id, trimmedName, nameNoSign, defaultcode || null, type || 'service', listprice || 0, categid || null, uomname || 'Lần', companyid || null, canorderlab || false, now]
     );
 
     const rows = await query(
@@ -230,7 +242,15 @@ router.put('/:id', requirePermission('services.edit'), async (req, res) => {
     const params = [];
     let idx = 1;
 
-    if (name !== undefined) { updates.push(`name = $${idx}`, `namenosign = $${idx}`); params.push(name.trim()); idx++; }
+    if (name !== undefined) {
+      const trimmedName = name.trim();
+      updates.push(`name = $${idx}`);
+      params.push(trimmedName);
+      idx++;
+      updates.push(`namenosign = $${idx}`);
+      params.push(normalizeVietnamese(trimmedName));
+      idx++;
+    }
     if (defaultcode !== undefined) { updates.push(`defaultcode = $${idx}`); params.push(defaultcode); idx++; }
     if (listprice !== undefined) { updates.push(`listprice = $${idx}`); params.push(listprice); idx++; }
     if (categid !== undefined) { updates.push(`categid = $${idx}`); params.push(categid); idx++; }

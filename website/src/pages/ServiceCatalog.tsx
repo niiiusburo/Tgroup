@@ -18,6 +18,7 @@ import {
 import type { ApiProduct, ApiProductCategory, ApiCompany } from '@/lib/api';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { formatVND } from '@/lib/formatting';
+import { normalizeText } from '@/lib/utils';
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
 
 // ─── Types ───────────────────────────────────────────────────────
@@ -311,8 +312,8 @@ export function ServiceCatalog() {
   // ── Filtered categories for sidebar ──
   const filteredCategories = useMemo(() => {
     if (!catalogSearch) return categories;
-    const q = catalogSearch.toLowerCase();
-    return categories.filter((c) => c.name.toLowerCase().includes(q));
+    const q = normalizeText(catalogSearch);
+    return categories.filter((c) => normalizeText(c.name).includes(q));
   }, [categories, catalogSearch]);
 
   // ── Filtered products by active status (client-side since API defaults active=true) ──
