@@ -489,7 +489,7 @@ export function Calendar() {
             {(selectedDoctors.length + selectedStatuses.length + selectedColors.length) > 0 && (
               <span
                 data-testid="calendar-filter-badge"
-                className="inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-medium text-white bg-blue-600 rounded-full"
+                className="inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-medium text-white bg-primary rounded-full"
               >
                 {selectedDoctors.length + selectedStatuses.length + selectedColors.length}
               </span>

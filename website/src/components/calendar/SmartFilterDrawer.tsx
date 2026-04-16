@@ -196,7 +196,7 @@ export function SmartFilterDrawer({
               type="button"
               data-testid="smart-filter-apply"
               onClick={onApply}
-              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
             >
               Lọc {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
             </button>
