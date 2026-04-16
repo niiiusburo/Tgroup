@@ -21,7 +21,10 @@
     "from": "Từ",
     "to": "Đến",
     "apply": "Áp dụng bộ lọc",
-    "clear": "Xóa bộ lọc"
+    "clear": "Xóa bộ lọc",
+    "ytd": "Từ đầu năm",
+    "30d": "30 ngày",
+    "90d": "90 ngày"
   },
   "metrics": {
     "totalRevenue": "Tổng doanh thu",
@@ -63,7 +66,8 @@
     "avgPrice": "Giá TB",
     "completion": "Hoàn thành",
     "cancellation": "Hủy hẹn",
-    "conversion": "Chuyển đổi"
+    "conversion": "Chuyển đổi",
+    "totalCustomers": "Tổng khách hàng"
   },
   "charts": {
     "revenueTrend": "Xu hướng doanh thu",
@@ -96,7 +100,8 @@
     "employeeDirectory": "Danh sách nhân viên",
     "branchComparison": "So sánh chi nhánh",
     "productCatalogByCategory": "Danh mục sản phẩm theo nhóm",
-    "popularProducts": "Sản phẩm phổ biến"
+    "popularProducts": "Sản phẩm phổ biến",
+    "revenueBySource": "Doanh thu theo nguồn"
   },
   "table": {
     "date": "Ngày",

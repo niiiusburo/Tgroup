@@ -21,7 +21,10 @@
     "from": "From",
     "to": "To",
     "apply": "Apply Filters",
-    "clear": "Clear Filters"
+    "clear": "Clear Filters",
+    "ytd": "YTD",
+    "30d": "30d",
+    "90d": "90d"
   },
   "metrics": {
     "totalRevenue": "Total Revenue",
@@ -63,7 +66,8 @@
     "avgPrice": "Avg Price",
     "completion": "Completion",
     "cancellation": "Cancellation",
-    "conversion": "Conversion"
+    "conversion": "Conversion",
+    "totalCustomers": "Total Customers"
   },
   "charts": {
     "revenueTrend": "Revenue Trend",
@@ -96,7 +100,8 @@
     "employeeDirectory": "Employee Directory",
     "branchComparison": "Branch Comparison",
     "productCatalogByCategory": "Product Catalog by Category",
-    "popularProducts": "Popular Products"
+    "popularProducts": "Popular Products",
+    "revenueBySource": "Revenue by Source"
   },
   "table": {
     "date": "Date",

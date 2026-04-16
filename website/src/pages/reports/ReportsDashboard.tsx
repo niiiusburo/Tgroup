@@ -17,7 +17,7 @@ interface DashboardData {
 }
 
 export function ReportsDashboard() {
-  const { t } = useTranslation('reports');
+  const { t, i18n } = useTranslation('reports');
   const filters = useOutletContext<{ dateFrom: string; dateTo: string; companyId: string }>();
   const { data, loading, error, refetch } = useReportData<DashboardData>('/Reports/dashboard', filters);
 
@@ -28,7 +28,7 @@ export function ReportsDashboard() {
 
   const months = data.trend.map(t => {
     const d = new Date(t.month);
-    return { label: d.toLocaleDateString('en', { month: 'short' }), value: t.revenue };
+    return { label: d.toLocaleDateString(i18n.language || 'en', { month: 'short' }), value: t.revenue };
   });
 
   return (

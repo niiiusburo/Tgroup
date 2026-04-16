@@ -131,7 +131,7 @@ describe('Report subpages — error handling', () => {
     { name: 'Revenue', Component: ReportsRevenue, label: 'metrics.totalInvoiced', responses: getRevenueResponses, loadingText: 'loading' },
     { name: 'Appointments', Component: ReportsAppointments, label: 'metrics.totalAppointments', responses: getApptResponses, loadingText: 'loading' },
     { name: 'Doctors', Component: ReportsDoctors, label: 'metrics.totalDoctors', responses: () => [getDoctorsResponse()], loadingText: 'loading' },
-    { name: 'Customers', Component: ReportsCustomers, label: 'metrics.totalAppointments', responses: () => [getCustomersResponse()], loadingText: 'loading' },
+    { name: 'Customers', Component: ReportsCustomers, label: 'metrics.totalCustomers', responses: () => [getCustomersResponse()], loadingText: 'loading' },
     { name: 'Locations', Component: ReportsLocations, label: 'metrics.totalBranches', responses: () => [getLocationsResponse()], loadingText: 'loading' },
     { name: 'Services', Component: ReportsServices, label: 'metrics.categories', responses: () => [getServicesResponse()], loadingText: 'loading' },
     { name: 'Employees', Component: ReportsEmployees, label: 'metrics.totalEmployees', responses: () => [getEmployeesResponse()], loadingText: 'loading' },
