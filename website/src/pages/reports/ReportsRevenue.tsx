@@ -15,19 +15,20 @@ type RevByDoc = { id: string; name: string; orderCount: number; invoiced: number
 type RevByCat = { id: string; category: string; lineCount: number; revenue: number }[]
 
 export function ReportsRevenue() {
-  const { t } = useTranslation('reports');
+  const { t, i18n } = useTranslation('reports');
   const filters = useOutletContext<{ dateFrom: string; dateTo: string; companyId: string }>();
-  const { data: summary, loading: l1, error: e1, refetch: r1 } = useReportData<RevSummary>('/Reports/revenue/summary', filters);
-  const { data: trend, loading: l2, error: e2, refetch: r2 } = useReportData<RevTrend>('/Reports/revenue/trend', filters);
-  const { data: byLoc, loading: l3, error: e3, refetch: r3 } = useReportData<RevByLoc>('/Reports/revenue/by-location', filters);
-  const { data: byDoc, loading: l4, error: e4, refetch: r4 } = useReportData<RevByDoc>('/Reports/revenue/by-doctor', filters);
-  const { data: byCat, loading: l5, error: e5, refetch: r5 } = useReportData<RevByCat>('/Reports/revenue/by-category', filters);
+  const summaryQ = useReportData<RevSummary>('/Reports/revenue/summary', filters);
+  const trendQ = useReportData<RevTrend>('/Reports/revenue/trend', filters);
+  const byLocQ = useReportData<RevByLoc>('/Reports/revenue/by-location', filters);
+  const byDocQ = useReportData<RevByDoc>('/Reports/revenue/by-doctor', filters);
+  const byCatQ = useReportData<RevByCat>('/Reports/revenue/by-category', filters);
 
-  if (l1 || l2 || l3 || l4 || l5) return <div className="text-center py-12 text-gray-400">{t('loading')}</div>;
-  const firstError = e1 || e2 || e3 || e4 || e5;
-  if (firstError) return <ReportError error={firstError} onRetry={() => { r1(); r2(); r3(); r4(); r5(); }} />;
-  if (!summary) return <div className="text-center py-12 text-gray-400">{t('noData')}</div>;
+  const anyLoading = summaryQ.loading || trendQ.loading || byLocQ.loading || byDocQ.loading || byCatQ.loading;
+  if (anyLoading) return <div className="text-center py-12 text-gray-400">{t('loading')}</div>;
+  if (summaryQ.error) return <ReportError error={summaryQ.error} onRetry={summaryQ.refetch} />;
+  if (!summaryQ.data) return <div className="text-center py-12 text-gray-400">{t('noData')}</div>;
 
+  const summary = summaryQ.data;
   const totalInvoiced = summary.orders.reduce((s, o) => s + o.total, 0);
   const totalPaid = summary.orders.reduce((s, o) => s + o.paid, 0);
   const totalOutstanding = summary.orders.reduce((s, o) => s + o.outstanding, 0);
@@ -41,9 +42,9 @@ export function ReportsRevenue() {
       return acc;
     }, [] as { label: string; value: number; color: string }[]);
 
-  const trendMonths = (trend || []).map(t => {
+  const trendMonths = (trendQ.data || []).map(t => {
     const d = new Date(t.month);
-    return { label: d.toLocaleDateString('en', { month: 'short', year: '2-digit' }), value: t.paid, secondary: t.invoiced };
+    return { label: d.toLocaleDateString(i18n.language || 'en', { month: 'short', year: '2-digit' }), value: t.paid, secondary: t.invoiced };
   });
 
   return (
@@ -71,37 +72,43 @@ export function ReportsRevenue() {
       {/* Revenue by Doctor */}
       <SectionCard
         title={t('charts.revenueByDoctor')}
-        action={byDoc ? <ExportCSVButton data={byDoc.map(d => ({ Doctor: d.name, Orders: d.orderCount, Invoiced: d.invoiced, Collected: d.paid }))} filename="revenue-by-doctor" /> : undefined}
+        action={byDocQ.data ? <ExportCSVButton data={byDocQ.data.map(d => ({ Doctor: d.name, Orders: d.orderCount, Invoiced: d.invoiced, Collected: d.paid }))} filename="revenue-by-doctor" /> : undefined}
       >
-        <HorizontalBarList
-          items={(byDoc || []).filter(d => d.paid > 0).map(d => ({ label: d.name, value: d.paid }))}
-          formatValue={formatVND}
-          color="bg-emerald-500"
-        />
+        {byDocQ.error ? <ReportError error={byDocQ.error} onRetry={byDocQ.refetch} /> : (
+          <HorizontalBarList
+            items={(byDocQ.data || []).filter(d => d.paid > 0).map(d => ({ label: d.name, value: d.paid }))}
+            formatValue={formatVND}
+            color="bg-emerald-500"
+          />
+        )}
       </SectionCard>
 
       {/* Revenue by Location */}
       <SectionCard
         title={t('charts.revenueByBranch')}
-        action={byLoc ? <ExportCSVButton data={byLoc.filter(l => l.invoiced > 0).map(l => ({ Location: l.name, Orders: l.orderCount, Invoiced: l.invoiced, Collected: l.paid, Outstanding: l.outstanding }))} filename="revenue-by-location" /> : undefined}
+        action={byLocQ.data ? <ExportCSVButton data={byLocQ.data.filter(l => l.invoiced > 0).map(l => ({ Location: l.name, Orders: l.orderCount, Invoiced: l.invoiced, Collected: l.paid, Outstanding: l.outstanding }))} filename="revenue-by-location" /> : undefined}
       >
-        <HorizontalBarList
-          items={(byLoc || []).filter(l => l.invoiced > 0).map(l => ({ label: l.name, value: l.paid }))}
-          formatValue={formatVND}
-          color="bg-blue-500"
-        />
+        {byLocQ.error ? <ReportError error={byLocQ.error} onRetry={byLocQ.refetch} /> : (
+          <HorizontalBarList
+            items={(byLocQ.data || []).filter(l => l.invoiced > 0).map(l => ({ label: l.name, value: l.paid }))}
+            formatValue={formatVND}
+            color="bg-blue-500"
+          />
+        )}
       </SectionCard>
 
       {/* Revenue by Category */}
       <SectionCard
         title={t('charts.revenueByCategory')}
-        action={byCat ? <ExportCSVButton data={byCat.filter(c => c.revenue > 0).map(c => ({ Category: c.category, Orders: c.lineCount, Revenue: c.revenue }))} filename="revenue-by-category" /> : undefined}
+        action={byCatQ.data ? <ExportCSVButton data={byCatQ.data.filter(c => c.revenue > 0).map(c => ({ Category: c.category, Orders: c.lineCount, Revenue: c.revenue }))} filename="revenue-by-category" /> : undefined}
       >
-        <HorizontalBarList
-          items={(byCat || []).filter(c => c.revenue > 0).map(c => ({ label: c.category, value: c.revenue }))}
-          formatValue={formatVND}
-          color="bg-violet-500"
-        />
+        {byCatQ.error ? <ReportError error={byCatQ.error} onRetry={byCatQ.refetch} /> : (
+          <HorizontalBarList
+            items={(byCatQ.data || []).filter(c => c.revenue > 0).map(c => ({ label: c.category, value: c.revenue }))}
+            formatValue={formatVND}
+            color="bg-violet-500"
+          />
+        )}
       </SectionCard>
     </div>
   );

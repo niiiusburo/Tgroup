@@ -37,7 +37,6 @@ export function DonutChart({ segments, size = 160, strokeWidth = 24 }: DonutChar
               strokeWidth={strokeWidth}
               strokeDasharray={`${dashLen} ${circumference - dashLen}`}
               strokeDashoffset={dashOffset}
-              strokeLinecap="round"
               initial={{ strokeDasharray: `0 ${circumference}` }}
               animate={{ strokeDasharray: `${dashLen} ${circumference - dashLen}` }}
               transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1], delay: i * 0.1 }}
@@ -96,7 +95,7 @@ export function ProgressRing({ value, label, color = '#3B82F6', size = 100 }: Pr
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
         <text x="50%" y="50%" textAnchor="middle" dy=".35em" className="text-lg font-bold" fill="#111827">
-          {value.toFixed(0)}%
+          {Number.isFinite(value) ? Math.round(value) : 0}%
         </text>
       </svg>
       <span className="text-xs text-gray-500">{label}</span>

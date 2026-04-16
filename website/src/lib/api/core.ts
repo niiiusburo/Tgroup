@@ -38,6 +38,7 @@ interface FetchOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   body?: unknown;
   params?: Record<string, string | number | boolean | undefined>;
+  signal?: AbortSignal;
 }
 
 // Keys that bypass camelCase → snake_case conversion (backend expects them as-is)
@@ -80,6 +81,7 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
     method,
     headers,
     body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
+    signal: options.signal,
   });
 
   if (!res.ok) {

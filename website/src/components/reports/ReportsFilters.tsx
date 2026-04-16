@@ -10,11 +10,14 @@ interface ReportsFiltersProps {
   locations: { id: string; name: string }[];
 }
 
+import { useTranslation } from 'react-i18next';
+
 export function ReportsFilters({
   dateFrom, dateTo, companyId,
   onDateFromChange, onDateToChange, onCompanyChange,
   locations,
 }: ReportsFiltersProps) {
+  const { t } = useTranslation('reports');
   // Quick range presets
   const now = new Date();
   const ytd = `${now.getFullYear()}-01-01`;
@@ -32,9 +35,9 @@ export function ReportsFilters({
       {/* Quick presets */}
       <div className="flex items-center gap-1 mr-2">
         {[
-          { label: 'YTD', from: ytd, to: today },
-          { label: '30d', from: last30, to: today },
-          { label: '90d', from: last90, to: today },
+          { label: t('filters.ytd'), from: ytd, to: today },
+          { label: t('filters.30d'), from: last30, to: today },
+          { label: t('filters.90d'), from: last90, to: today },
         ].map((p) => (
           <button
             key={p.label}
@@ -120,7 +123,9 @@ export function ExportCSVButton({ data, filename, headers }: { data: Record<stri
       cols.join(','),
       ...data.map(row => cols.map(col => {
         const val = row[col] ?? '';
-        const str = String(val).replace(/"/g, '""');
+        let str = String(val).replace(/"/g, '""');
+        // Prevent CSV injection from formulas
+        if (/^[=+\-@]/.test(str)) str = "'" + str;
         return `"${str}"`;
       }).join(','))
     ];

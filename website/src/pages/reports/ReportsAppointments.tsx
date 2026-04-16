@@ -25,7 +25,7 @@ interface ApptTrend {
 }
 
 export function ReportsAppointments() {
-  const { t } = useTranslation('reports');
+  const { t, i18n } = useTranslation('reports');
   const filters = useOutletContext<{ dateFrom: string; dateTo: string; companyId: string }>();
   const { data: summary, loading: l1, error: e1, refetch: r1 } = useReportData<ApptSummary>('/Reports/appointments/summary', filters);
   const { data: trendData, loading: l2, error: e2, refetch: r2 } = useReportData<ApptTrend>('/Reports/appointments/trend', filters);
@@ -42,7 +42,7 @@ export function ReportsAppointments() {
 
   const weeklyTrend = (trendData?.trend || []).map(t => {
     const d = new Date(t.week);
-    return { label: d.toLocaleDateString('en', { month: 'short', day: 'numeric' }), value: t.total };
+    return { label: d.toLocaleDateString(i18n.language || 'en', { month: 'short', day: 'numeric' }), value: t.total };
   });
 
   const peakHours = (trendData?.peakHours || []).map(h => ({

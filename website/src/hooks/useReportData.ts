@@ -12,13 +12,17 @@ export function useReportData<T>(endpoint: string, params: ReportParams) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetcher = useCallback(async () => {
+  const fetcher = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     setError(null);
     try {
+      const cleanParams = Object.fromEntries(
+        Object.entries(params).filter(([, v]) => v !== '' && v !== null && v !== undefined)
+      );
       const result = await apiFetch<{ success: boolean; data: T }>(endpoint, {
         method: 'POST',
-        body: params,
+        body: cleanParams,
+        signal,
       });
       if (result.success) {
         setData(result.data);
@@ -26,13 +30,18 @@ export function useReportData<T>(endpoint: string, params: ReportParams) {
         setError('Failed to load report');
       }
     } catch (e: any) {
+      if (e.name === 'AbortError') return;
       setError(e.message || 'Network error');
     } finally {
       setLoading(false);
     }
   }, [endpoint, params.dateFrom, params.dateTo, params.companyId]);
 
-  useEffect(() => { fetcher(); }, [fetcher]);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetcher(controller.signal);
+    return () => controller.abort();
+  }, [fetcher]);
 
   return { data, loading, error, refetch: fetcher };
 }

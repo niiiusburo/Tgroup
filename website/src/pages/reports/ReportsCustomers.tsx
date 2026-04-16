@@ -19,7 +19,7 @@ interface CustSummary {
 }
 
 export function ReportsCustomers() {
-  const { t } = useTranslation('reports');
+  const { t, i18n } = useTranslation('reports');
   const filters = useOutletContext<{ dateFrom: string; dateTo: string; companyId: string }>();
   const { data, loading, error, refetch } = useReportData<CustSummary>('/Reports/customers/summary', filters);
 
@@ -38,7 +38,7 @@ export function ReportsCustomers() {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard label={t('metrics.totalAppointments')} value={data.total} format="number" icon={<Users className="w-4 h-4" />} color="blue" delay={0} />
+        <KPICard label={t('metrics.totalCustomers')} value={data.total} format="number" icon={<Users className="w-4 h-4" />} color="blue" delay={0} />
         <KPICard label={t('metrics.newThisPeriod')} value={data.newInPeriod} format="number" icon={<UserPlus className="w-4 h-4" />} color="emerald" delay={1} />
         <KPICard label={t('metrics.growthRate')} value={parseFloat(growthPct)} format="percent" icon={<UserCheck className="w-4 h-4" />} color="violet" delay={2} />
         <KPICard label={t('metrics.withOutstanding')} value={data.outstanding.length} format="number" icon={<MapPin className="w-4 h-4" />} color="amber" delay={3} />
@@ -56,7 +56,7 @@ export function ReportsCustomers() {
         <HorizontalBarList
           items={data.growth.map(g => {
             const d = new Date(g.month);
-            return { label: d.toLocaleDateString('en', { month: 'short', year: 'numeric' }), value: g.count };
+            return { label: d.toLocaleDateString(i18n.language || 'en', { month: 'short', year: 'numeric' }), value: g.count };
           })}
           formatValue={formatNum}
           color="bg-violet-500"

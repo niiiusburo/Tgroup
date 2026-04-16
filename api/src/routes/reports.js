@@ -11,12 +11,12 @@ function err(res, status, msg) {
 }
 
 function validDate(s) {
-  if (!s) return true;
+  if (s === undefined || s === null) return true;
   return /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(new Date(s).getTime());
 }
 
 function validUUID(s) {
-  if (!s) return true;
+  if (s === undefined || s === null) return true;
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 }
 
@@ -188,7 +188,7 @@ router.post('/revenue/by-doctor', requirePermission('reports.view'), async (req,
        FROM dbo.partners p
        LEFT JOIN dbo.saleorders so ON so.doctorid=p.id AND so.isdeleted=false AND so.state='sale' ${f.where}
        WHERE p.isdoctor=true AND p.isdeleted=false
-       GROUP BY p.id, p.name ORDER BY paid DESC`, f.params);
+       GROUP BY p.id, p.name ORDER BY paid DESC LIMIT 100`, f.params);
 
     return res.json({ success: true, data: rows.map(r => ({ ...r, orderCount: parseInt(r.order_count), invoiced: parseFloat(r.invoiced), paid: parseFloat(r.paid) })) });
   } catch (e) { console.error('reports/revenue/by-doctor:', e); return err(res, 500, 'Internal error'); }
@@ -210,7 +210,7 @@ router.post('/revenue/by-category', requirePermission('reports.view'), async (re
        LEFT JOIN dbo.saleorderlines sol ON sol.productid=pr.id
        LEFT JOIN dbo.saleorders so ON so.id=sol.orderid AND so.isdeleted=false AND so.state='sale' ${f.where}
        WHERE pc.active=true
-       GROUP BY pc.id, pc.name ORDER BY revenue DESC`, f.params);
+       GROUP BY pc.id, pc.name ORDER BY revenue DESC LIMIT 100`, f.params);
 
     return res.json({ success: true, data: rows.map(r => ({ ...r, lineCount: parseInt(r.line_count), revenue: parseFloat(r.revenue) })) });
   } catch (e) { console.error('reports/revenue/by-category:', e); return err(res, 500, 'Internal error'); }
@@ -299,7 +299,7 @@ router.post('/doctors/performance', requirePermission('reports.view'), async (re
        LEFT JOIN dbo.appointments a ON a.doctorid=p.id ${f.where}
        LEFT JOIN dbo.saleorders so ON a.saleorderid=so.id AND so.isdeleted=false
        WHERE p.isdoctor=true AND p.isdeleted=false
-       GROUP BY p.id, p.name ORDER BY done DESC`, f.params);
+       GROUP BY p.id, p.name ORDER BY done DESC LIMIT 100`, f.params);
 
     return res.json({ success: true, data: rows.map(r => ({
       ...r, totalAppointments: parseInt(r.total_appointments), done: parseInt(r.done),
@@ -515,21 +515,27 @@ router.post('/revenue/payment-plans', requirePermission('reports.view'), async (
     const { dateFrom, dateTo, companyId } = req.body || {};
     if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
-    const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'mp.created_at');
+    const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'mp.created_at', 'mp.company_id');
     const plans = await query(
       `SELECT mp.status, COUNT(*) as cnt, COALESCE(SUM(mp.total_amount),0) as total,
               COALESCE(SUM(mp.down_payment),0) as down_payment
        FROM dbo.monthlyplans mp WHERE 1=1 ${f.where}
        GROUP BY mp.status`, f.params);
 
+    const instConds = ['pi.due_date::date >= $1', 'pi.due_date::date <= $2'];
+    const instParams = [dateFrom, dateTo];
+    if (companyId) {
+      instConds.push('mp.company_id = $3');
+      instParams.push(companyId);
+    }
     const installments = await query(
       `SELECT pi.status, COUNT(*) as cnt, COALESCE(SUM(pi.amount),0) as total,
               COALESCE(SUM(pi.paid_amount),0) as paid
        FROM dbo.planinstallments pi
-       JOIN dbo.monthlyplans mp ON mp.id=pi.plan_id ${companyId ? 'AND mp.company_id=$1' : ''}
-       WHERE pi.due_date::date >= $${companyId ? 2 : 1} AND pi.due_date::date <= $${companyId ? 3 : 2}
+       JOIN dbo.monthlyplans mp ON mp.id=pi.plan_id
+       WHERE ${instConds.join(' AND ')}
        GROUP BY pi.status`,
-      companyId ? [companyId, dateFrom, dateTo].filter(Boolean) : [dateFrom, dateTo].filter(Boolean));
+      instParams);
 
     return res.json({ success: true, data: {
       plans: plans.map(p => ({ status: p.status, count: parseInt(p.cnt), total: parseFloat(p.total), downPayment: parseFloat(p.down_payment) })),

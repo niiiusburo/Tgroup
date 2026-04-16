@@ -38,7 +38,7 @@ export function ReportsServices() {
       {/* Revenue by source */}
       {(data.revenueBySource || []).length > 0 && (
         <SectionCard
-          title="Doanh thu theo nguồn"
+          title={t('charts.revenueBySource')}
           action={<ExportCSVButton data={(data.revenueBySource || []).map(s => ({ Source: s.source, Orders: s.orderCount, Revenue: s.revenue }))} filename="revenue-by-source" />}
         >
           <HorizontalBarList

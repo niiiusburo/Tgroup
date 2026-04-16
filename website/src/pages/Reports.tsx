@@ -4,7 +4,7 @@
  */
 import { useState, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+
 import {
   BarChart3, LayoutDashboard, CreditCard, Calendar, Stethoscope,
   Users, MapPin, FolderOpen, UserCog,
@@ -94,15 +94,10 @@ export default function Reports() {
         locations={locations}
       />
 
-      {/* Tab content — animated crossfade */}
-      <motion.div
-        key={location.pathname}
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-      >
+      {/* Tab content */}
+      <div className="transition-opacity duration-200">
         <Outlet context={filters} />
-      </motion.div>
+      </div>
     </div>
   );
 }
