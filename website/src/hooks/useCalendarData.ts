@@ -19,9 +19,10 @@ export function useCalendarData(selectedLocationId?: string) {
   const [viewMode, setViewMode] = useState<ViewMode>('week');
   // Store current date as string in YYYY-MM-DD format for timezone consistency
   const [currentDateStr, setCurrentDateStr] = useState(() => formatDate(new Date(), 'yyyy-MM-dd'));
-  const [selectedDoctorName, setSelectedDoctorName] = useState<string | null>(null);
+  const [selectedDoctors, setSelectedDoctors] = useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<AppointmentStatus[]>([]);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<CalendarStatusFilter>('all');
   const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [appointments, setAppointments] = useState<readonly CalendarAppointment[]>([]);
@@ -93,10 +94,9 @@ export function useCalendarData(selectedLocationId?: string) {
 
   const filteredAppointments = useMemo(() => {
     return appointments.filter((apt) => {
-      const matchesDoctorFilter = selectedDoctorName
-        ? normalizeText(apt.dentist).includes(normalizeText(selectedDoctorName))
-        : true;
-      const matchesStatus = statusFilter !== 'all' ? apt.status === statusFilter : true;
+      const matchesDoctor = selectedDoctors.length === 0 || selectedDoctors.includes(apt.dentist);
+      const matchesStatus = selectedStatuses.length === 0 || selectedStatuses.includes(apt.status);
+      const matchesColor = selectedColors.length === 0 || selectedColors.includes(apt.color ?? '0');
       const searchTerm = normalizeText(search.trim());
       const matchesSearch = searchTerm
         ? normalizeText(apt.customerName).includes(searchTerm) ||
@@ -105,9 +105,9 @@ export function useCalendarData(selectedLocationId?: string) {
           normalizeText(apt.dentist).includes(searchTerm) ||
           normalizeText(apt.serviceName || '').includes(searchTerm)
         : true;
-      return matchesDoctorFilter && matchesStatus && matchesSearch;
+      return matchesDoctor && matchesStatus && matchesColor && matchesSearch;
     });
-  }, [appointments, selectedDoctorName, statusFilter, search]);
+  }, [appointments, selectedDoctors, selectedStatuses, selectedColors, search]);
 
   const weekDates = useMemo(
     () => getWeekDates(currentDate),
@@ -123,6 +123,13 @@ export function useCalendarData(selectedLocationId?: string) {
     const dateStr = formatDate(date, 'yyyy-MM-dd');
     return filteredAppointments.filter((apt) => apt.date === dateStr);
   }, [filteredAppointments, formatDate]);
+
+  const clearFilters = useCallback(() => {
+    setSelectedDoctors([]);
+    setSelectedStatuses([]);
+    setSelectedColors([]);
+    setSearch('');
+  }, []);
 
   const dateLabel = useMemo(() => {
     if (viewMode === 'day') {
@@ -153,12 +160,16 @@ export function useCalendarData(selectedLocationId?: string) {
     monthDates,
     getAppointmentsForDate,
     dateLabel,
-    selectedDoctorName,
-    setSelectedDoctorName,
+    appointments,
+    selectedDoctors,
+    setSelectedDoctors,
+    selectedStatuses,
+    setSelectedStatuses,
+    selectedColors,
+    setSelectedColors,
     search,
     setSearch,
-    statusFilter,
-    setStatusFilter,
+    clearFilters,
     selectedAppointment,
     setSelectedAppointment,
     isLoading,
