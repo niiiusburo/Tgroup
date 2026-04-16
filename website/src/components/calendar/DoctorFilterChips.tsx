@@ -17,7 +17,7 @@ export function DoctorFilterChips({ doctors, selected, onToggle }: DoctorFilterC
         className={cn(
           'px-3 py-1.5 text-sm font-medium rounded-full border transition-colors',
           isAll
-            ? 'bg-blue-600 text-white border-blue-600'
+            ? 'bg-primary text-white border-primary'
             : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
         )}
       >
@@ -34,7 +34,7 @@ export function DoctorFilterChips({ doctors, selected, onToggle }: DoctorFilterC
             className={cn(
               'px-3 py-1.5 text-sm font-medium rounded-full border transition-colors',
               isSelected
-                ? 'bg-blue-600 text-white border-blue-600'
+                ? 'bg-primary text-white border-primary'
                 : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
             )}
           >
