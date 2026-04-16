@@ -72,6 +72,27 @@
     "thisWeek": "This Week",
     "thisMonth": "This Month"
   },
+  "label": {
+    "highInfo": "Advanced Info",
+    "service": "Service",
+    "cardColor": "Card Color",
+    "reminder": "Appointment Reminder"
+  },
+  "customer": {
+    "type": {
+      "new": "New Customer",
+      "returning": "Returning Customer"
+    }
+  },
+  "common": {
+    "minutes": "minutes"
+  },
+  "reminder": {
+    "15": "15 min",
+    "30": "30 min",
+    "1h": "1 hour",
+    "1d": "1 day"
+  },
   "messages": {
     "noAppointments": "No appointments found",
     "scheduleFirst": "Schedule your first appointment",

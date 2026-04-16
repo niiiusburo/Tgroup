@@ -72,6 +72,27 @@
     "thisWeek": "Tuần này",
     "thisMonth": "Tháng này"
   },
+  "label": {
+    "highInfo": "Thông tin nâng cao",
+    "service": "Dịch vụ",
+    "cardColor": "Màu thẻ",
+    "reminder": "Nhắc lịch hẹn"
+  },
+  "customer": {
+    "type": {
+      "new": "Khách mới",
+      "returning": "Khách quay lại"
+    }
+  },
+  "common": {
+    "minutes": "phút"
+  },
+  "reminder": {
+    "15": "15 phút",
+    "30": "30 phút",
+    "1h": "1 giờ",
+    "1d": "1 ngày"
+  },
   "messages": {
     "noAppointments": "Không có lịch hẹn",
     "scheduleFirst": "Đặt lịch hẹn đầu tiên",
