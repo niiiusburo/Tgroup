@@ -69,6 +69,7 @@ export function createSaleOrder(data: {
   doctorid?: string;
   doctorname?: string;
   assistantid?: string | null;
+  dentalaideid?: string | null;
   quantity?: number;
   unit?: string;
   amounttotal?: number;

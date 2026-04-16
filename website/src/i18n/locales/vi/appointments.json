@@ -19,6 +19,7 @@
   "form": {
     "customer": "Khách hàng",
     "doctor": "Bác sĩ",
+    "doctorOptional": "Bác sĩ (không bắt buộc)",
     "location": "Chi nhánh",
     "date": "Ngày",
     "time": "Giờ",

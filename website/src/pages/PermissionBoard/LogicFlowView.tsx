@@ -20,7 +20,7 @@ export function LogicFlowView({ groups, employees, getEffective }: LogicFlowView
             {
               step: 'STEP 1',
               title: 'Permission Group',
-              desc: 'Employee is assigned to a group (e.g., "Dentist"). This sets the base permissions.',
+              desc: 'Employee is assigned to a group (e.g., "Editor"). This sets the base permissions.',
               bg: '#eff6ff', border: '#bfdbfe', titleColor: '#1e40af', stepColor: '#3b82f6',
             },
             {

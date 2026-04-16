@@ -46,11 +46,11 @@
     "errorPasswordRequired": "Password is required"
   },
   "tiers": {
-    "junior": "Junior",
-    "mid": "Mid-Level",
-    "senior": "Senior",
-    "lead": "Lead",
-    "director": "Director"
+    "super-admin": "Super Admin",
+    "admin": "Admin",
+    "editor": "Editor",
+    "receptionist": "Receptionist",
+    "assistant": "Assistant"
   },
   "roles": {
     "dentist": "Dentist",

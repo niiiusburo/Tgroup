@@ -33,8 +33,8 @@ export interface ManagedAppointment {
   readonly customerId: string;
   readonly customerName: string;
   readonly customerPhone: string;
-  readonly doctorId: string;
-  readonly doctorName: string;
+  readonly doctorId?: string;
+  readonly doctorName?: string;
   readonly locationId: string;
   readonly locationName: string;
   readonly appointmentType: AppointmentType;

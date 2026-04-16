@@ -46,11 +46,11 @@
     "errorPasswordRequired": "Vui lòng nhập mật khẩu"
   },
   "tiers": {
-    "junior": "Junior",
-    "mid": "Trung cấp",
-    "senior": "Cao cấp",
-    "lead": "Trưởng nhóm",
-    "director": "Giám đốc"
+    "super-admin": "Quản trị viên cao cấp",
+    "admin": "Quản trị viên",
+    "editor": "Biên tập viên",
+    "receptionist": "Lễ tân",
+    "assistant": "Trợ lý"
   },
   "roles": {
     "dentist": "Bác sĩ",

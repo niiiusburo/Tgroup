@@ -82,8 +82,8 @@ export interface AppointmentFormData {
   readonly customerId: string;
   readonly customerName: string;
   readonly customerPhone: string;
-  readonly doctorId: string;
-  readonly doctorName: string;
+  readonly doctorId?: string;
+  readonly doctorName?: string;
   readonly assistantId?: string;
   readonly assistantName?: string;
   readonly dentalAideId?: string;
@@ -250,7 +250,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
   function validate(): boolean {
     const newErrors: Record<string, string> = {};
     if (!customerId) newErrors.customer = t('form.selectPatient');
-    if (!doctorId) newErrors.doctor = t('form.selectDoctor');
+    // Doctor is optional for appointments
     if (!locationId) newErrors.location = t('form.selectLocation');
     if (!date) newErrors.date = t('form.date');
     if (!startTime) newErrors.startTime = t('form.startTime');
@@ -272,7 +272,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
     const dentalAide = employees.find((emp) => emp.id === dentalAideId);
     const location = locations.find((l) => l.id === locationId);
 
-    if (!customer || !doctor || !location) return;
+    if (!customer || !location) return;
 
     // Auto-calculate endTime from startTime + estimatedDuration if not provided
     let computedEndTime = endTime;
@@ -290,8 +290,8 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
         customerId: customer.id,
         customerName: customer.name,
         customerPhone: customer.phone,
-        doctorId: doctor.id,
-        doctorName: doctor.name,
+        doctorId: doctor?.id,
+        doctorName: doctor?.name,
         assistantId: assistant?.id || undefined,
         assistantName: assistant?.name || undefined,
         dentalAideId: dentalAide?.id || undefined,
@@ -401,10 +401,9 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                   <Stethoscope className="w-3.5 h-3.5" />
-                  {t('form.doctor')}
+                  {t('form.doctorOptional')}
                 </label>
-                <DoctorSelector employees={employees} selectedId={doctorId} onChange={setDoctorId} filterRoles={['doctor']} />
-                {errors.doctor && <p className="text-xs text-red-500 mt-1">{errors.doctor}</p>}
+                <DoctorSelector employees={employees} selectedId={doctorId} onChange={setDoctorId} filterRoles={['doctor']} placeholder="Chọn bác sĩ..." allowClear />
               </div>
 
               {/* Phụ tá - Optional */}

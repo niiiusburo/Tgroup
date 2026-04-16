@@ -156,7 +156,7 @@ router.get('/employees', requirePermission('permissions.view'), async (req, res)
         pg.color AS "groupColor",
         COALESCE(ep.loc_scope, 'all') AS "locScope"
       FROM partners p
-      JOIN permission_groups pg ON pg.id = p.tier_id
+      LEFT JOIN permission_groups pg ON pg.id = p.tier_id
       LEFT JOIN employee_permissions ep ON ep.employee_id = p.id
       WHERE p.employee = true AND p.isdeleted = false
       ORDER BY p.name ASC
@@ -343,13 +343,17 @@ router.get('/resolve/:employeeId', requirePermission('permissions.view'), async 
         pg.name AS group_name,
         pg.color AS group_color
        FROM partners p
-       JOIN permission_groups pg ON pg.id = p.tier_id
+       LEFT JOIN permission_groups pg ON pg.id = p.tier_id
        WHERE p.id = $1`,
       [employeeId]
     );
 
-    if (!tierRows || tierRows.length === 0 || !tierRows[0].group_id) {
-      return res.status(404).json({ error: 'Employee permission assignment not found' });
+    if (!tierRows || tierRows.length === 0) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+    if (!tierRows[0].group_id) {
+      const e = tierRows[0];
+      return res.json({ employeeId: e.employee_id, employeeName: e.employee_name, group: null, overrides: { grant: [], revoke: [] }, effectivePermissions: [], locations: [] });
     }
 
     const ep = tierRows[0];

@@ -108,9 +108,9 @@ router.get('/', async (req, res) => {
       FROM saleorders so
       LEFT JOIN partners p ON p.id = so.partnerid
       LEFT JOIN companies c ON c.id = so.companyid
-      LEFT JOIN partners doc ON doc.id = so.doctorid
-      LEFT JOIN partners asst ON asst.id = so.assistantid
-      LEFT JOIN partners da ON da.id = so.dentalaideid
+      LEFT JOIN employees doc ON doc.id = so.doctorid
+      LEFT JOIN employees asst ON asst.id = so.assistantid
+      LEFT JOIN employees da ON da.id = so.dentalaideid
       WHERE ${whereClause}
       ORDER BY ${orderByCol} ${orderDir} NULLS LAST
       LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
@@ -192,9 +192,9 @@ router.get('/:id', async (req, res) => {
       FROM saleorders so
       LEFT JOIN partners p ON p.id = so.partnerid
       LEFT JOIN companies c ON c.id = so.companyid
-      LEFT JOIN partners doc ON doc.id = so.doctorid
-      LEFT JOIN partners asst ON asst.id = so.assistantid
-      LEFT JOIN partners da ON da.id = so.dentalaideid
+      LEFT JOIN employees doc ON doc.id = so.doctorid
+      LEFT JOIN employees asst ON asst.id = so.assistantid
+      LEFT JOIN employees da ON da.id = so.dentalaideid
       WHERE so.id = $1 AND so.isdeleted = false`,
       [id]
     );
@@ -364,9 +364,9 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
       FROM saleorders so
       LEFT JOIN partners p ON p.id = so.partnerid
       LEFT JOIN companies c ON c.id = so.companyid
-      LEFT JOIN partners doc ON doc.id = so.doctorid
-      LEFT JOIN partners asst ON asst.id = so.assistantid
-      LEFT JOIN partners da ON da.id = so.dentalaideid
+      LEFT JOIN employees doc ON doc.id = so.doctorid
+      LEFT JOIN employees asst ON asst.id = so.assistantid
+      LEFT JOIN employees da ON da.id = so.dentalaideid
       WHERE so.id = $1`,
       [id]
     );
@@ -462,9 +462,9 @@ router.patch('/:id/state', requirePermission('customers.edit'), async (req, res)
       FROM saleorders so
       LEFT JOIN partners p ON p.id = so.partnerid
       LEFT JOIN companies c ON c.id = so.companyid
-      LEFT JOIN partners doc ON doc.id = so.doctorid
-      LEFT JOIN partners asst ON asst.id = so.assistantid
-      LEFT JOIN partners da ON da.id = so.dentalaideid
+      LEFT JOIN employees doc ON doc.id = so.doctorid
+      LEFT JOIN employees asst ON asst.id = so.assistantid
+      LEFT JOIN employees da ON da.id = so.dentalaideid
       WHERE so.id = $1`,
       [id]
     );
@@ -648,9 +648,9 @@ router.patch('/:id', requirePermission('customers.edit'), async (req, res) => {
       FROM saleorders so
       LEFT JOIN partners p ON p.id = so.partnerid
       LEFT JOIN companies c ON c.id = so.companyid
-      LEFT JOIN partners doc ON doc.id = so.doctorid
-      LEFT JOIN partners asst ON asst.id = so.assistantid
-      LEFT JOIN partners da ON da.id = so.dentalaideid
+      LEFT JOIN employees doc ON doc.id = so.doctorid
+      LEFT JOIN employees asst ON asst.id = so.assistantid
+      LEFT JOIN employees da ON da.id = so.dentalaideid
       WHERE so.id = $1`,
       [id]
     );

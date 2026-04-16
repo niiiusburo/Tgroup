@@ -63,7 +63,7 @@ export function inferRoleFromFlags(
     if (lower.includes('sale')) return 'sales-staff';
     if (lower.includes('cskh') || lower.includes('customer service') || lower.includes('hỗ trợ')) return 'customer-service';
   }
-  return 'customer-service';
+  return 'assistant';
 }
 
 export const ROLE_TO_DB_FLAGS: Record<EmployeeRole, { 

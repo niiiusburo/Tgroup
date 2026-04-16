@@ -19,6 +19,7 @@
   "form": {
     "customer": "Customer",
     "doctor": "Doctor",
+    "doctorOptional": "Doctor (not mandatory)",
     "location": "Location",
     "date": "Date",
     "time": "Time",
