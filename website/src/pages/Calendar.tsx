@@ -2,17 +2,18 @@
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { useCalendarData, type ViewMode, type CalendarStatusFilter } from '@/hooks/useCalendarData';
+import { useCalendarData, type ViewMode } from '@/hooks/useCalendarData';
+import { useSmartFilter } from '@/hooks/useSmartFilter';
 import { normalizeText } from '@/lib/utils';
 import { useDragReschedule } from '@/hooks/useDragReschedule';
 import { DayView } from '@/components/calendar/DayView';
 import { WeekView } from '@/components/calendar/WeekView';
 import { MonthView } from '@/components/calendar/MonthView';
+import { SmartFilterDrawer } from '@/components/calendar/SmartFilterDrawer';
 
-import { FilterByDoctor, type DoctorOption } from '@/components/shared/FilterByDoctor';
-import { useEmployees } from '@/hooks/useEmployees';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import type { CalendarAppointment } from '@/data/mockCalendar';
+import type { AppointmentStatus } from '@/types/appointment';
 import { EditAppointmentModal } from '@/components/modules/EditAppointmentModal';
 import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
 import { QuickAddAppointmentButton } from '@/components/shared/QuickAddAppointmentButton';
@@ -22,7 +23,7 @@ import { cn } from '@/lib/utils';
  * Calendar Page with Day/Week/Month view modes
  * @crossref:route[/calendar]
  * @crossref:used-in[App]
- * @crossref:uses[DayView, WeekView, MonthView, AppointmentCard, EditAppointmentModal, FilterByDoctor, useLocationFilter, useDragReschedule]
+ * @crossref:uses[DayView, WeekView, MonthView, AppointmentCard, EditAppointmentModal, SmartFilterDrawer, useLocationFilter, useDragReschedule]
  *
  * Redesigned to match reference images with Vietnamese labels:
  * - Ngày (Day), Tuần (Week), Tháng (Month)
@@ -42,14 +43,7 @@ const VIEW_TABS: readonly { readonly mode: ViewMode; readonly label: string }[] 
   { mode: 'month', label: 'Tháng' },
 ];
 
-const STATUS_TABS: readonly { readonly value: CalendarStatusFilter; readonly label: string }[] = [
-  { value: 'all', label: 'Tất cả' },
-  { value: 'scheduled', label: 'Đang hẹn' },
-  { value: 'confirmed', label: 'Đã xác nhận' },
-  { value: 'in-progress', label: 'Đang khám' },
-  { value: 'completed', label: 'Hoàn thành' },
-  { value: 'cancelled', label: 'Hủy hẹn' },
-];
+
 
 export function Calendar() {
   const { t } = useTranslation('calendar');
@@ -65,12 +59,16 @@ export function Calendar() {
     monthDates,
     getAppointmentsForDate,
     dateLabel,
-    selectedDoctorName,
-    setSelectedDoctorName,
     search,
     setSearch,
-    statusFilter,
-    setStatusFilter,
+    selectedDoctors,
+    setSelectedDoctors,
+    selectedStatuses,
+    setSelectedStatuses,
+    selectedColors,
+    setSelectedColors,
+    clearFilters,
+    appointments,
     refresh,
   } = useCalendarData(selectedLocationId);
 
@@ -78,14 +76,36 @@ export function Calendar() {
   const [editingAppointment, setEditingAppointment] = useState<OverviewAppointment | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // Get real doctors from API for FilterByDoctor
-  const { allEmployees } = useEmployees();
-  const doctors = useMemo((): readonly DoctorOption[] =>
-    allEmployees
-      .filter((e) => e.status === 'active' && (e.roles.includes('doctor')))
-      .map((e) => ({ id: e.id, name: e.name, roles: [...e.roles] })),
-    [allEmployees],
-  );
+  // Smart filter drawer state
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const doctorsFilter = useSmartFilter<string>(selectedDoctors);
+  const statusesFilter = useSmartFilter<AppointmentStatus>(selectedStatuses);
+  const colorsFilter = useSmartFilter<string>(selectedColors);
+
+  const openFilter = useCallback(() => {
+    doctorsFilter.setSelected(selectedDoctors);
+    statusesFilter.setSelected(selectedStatuses);
+    colorsFilter.setSelected(selectedColors);
+    setIsFilterOpen(true);
+  }, [selectedDoctors, selectedStatuses, selectedColors]);
+
+  const closeFilter = useCallback(() => {
+    setIsFilterOpen(false);
+  }, []);
+
+  const applyFilter = useCallback(() => {
+    setSelectedDoctors(doctorsFilter.selected);
+    setSelectedStatuses(statusesFilter.selected);
+    setSelectedColors(colorsFilter.selected);
+    setIsFilterOpen(false);
+  }, [doctorsFilter.selected, statusesFilter.selected, colorsFilter.selected]);
+
+  const clearFilter = useCallback(() => {
+    doctorsFilter.clear();
+    statusesFilter.clear();
+    colorsFilter.clear();
+    clearFilters();
+  }, [clearFilters]);
 
   const handleReschedule = useCallback(async (result: { appointmentId: string; newDate: string; newTime: string }) => {
     try {
@@ -459,32 +479,23 @@ export function Calendar() {
             onSuccess={refresh}
             size="sm"
           />
-          <div className="flex-1 lg:flex-none">
-            <FilterByDoctor
-              selectedDoctorName={selectedDoctorName}
-              onChange={setSelectedDoctorName}
-              doctors={doctors}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Status filter tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {STATUS_TABS.map((tab) => (
           <button
-            key={tab.value}
             type="button"
-            onClick={() => setStatusFilter(tab.value)}
-            className={`px-4 py-2 text-sm font-medium rounded-lg border whitespace-nowrap transition-colors ${
-              statusFilter === tab.value
-                ? 'bg-primary text-white border-primary'
-                : 'text-gray-600 bg-white border-gray-200 hover:bg-gray-50'
-            }`}
+            data-testid="calendar-filter-button"
+            onClick={openFilter}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            {tab.label}
+            <span>Bộ lọc</span>
+            {(selectedDoctors.length + selectedStatuses.length + selectedColors.length) > 0 && (
+              <span
+                data-testid="calendar-filter-badge"
+                className="inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-medium text-white bg-blue-600 rounded-full"
+              >
+                {selectedDoctors.length + selectedStatuses.length + selectedColors.length}
+              </span>
+            )}
           </button>
-        ))}
+        </div>
       </div>
 
       {/* Calendar view */}
@@ -524,6 +535,29 @@ export function Calendar() {
         isOpen={isEditModalOpen}
         onClose={handleEditModalClose}
         onSaved={handleEditModalSaved}
+      />
+
+      <SmartFilterDrawer
+        isOpen={isFilterOpen}
+        onClose={closeFilter}
+        appointments={appointments}
+        draftDoctors={doctorsFilter.selected}
+        onToggleDoctor={(name) => {
+          if (name === '__ALL__') doctorsFilter.clear();
+          else doctorsFilter.toggle(name);
+        }}
+        draftStatuses={statusesFilter.selected}
+        onToggleStatus={(value) => {
+          if ((value as unknown as string) === '__ALL__') statusesFilter.clear();
+          else statusesFilter.toggle(value);
+        }}
+        draftColors={colorsFilter.selected}
+        onToggleColor={(code) => {
+          if (code === '__ALL__') colorsFilter.clear();
+          else colorsFilter.toggle(code);
+        }}
+        onApply={applyFilter}
+        onClear={clearFilter}
       />
     </div>
   );
