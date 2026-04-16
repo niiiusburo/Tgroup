@@ -83,5 +83,19 @@
   "cancelled": "Hủy hẹn",
   "labelsAppointments": "Lịch hẹn",
   "appointmentTypeTreatment": "Điều trị",
-  "appointmentTypeConsultation": "Tư vấn"
+  "appointmentTypeConsultation": "Tư vấn",
+  "smartFilter": {
+    "title": "Bộ lọc",
+    "close": "Đóng",
+    "clear": "Xóa bộ lọc",
+    "apply": "Lọc",
+    "doctors": "Bác sĩ",
+    "allDoctors": "Tất cả",
+    "status": "Trạng thái",
+    "allStatuses": "Tất cả",
+    "colorLabel": "Nhãn màu",
+    "allColors": "Tất cả",
+    "appointments": "Lịch hẹn",
+    "expectedDuration": "Dự kiến"
+  }
 }

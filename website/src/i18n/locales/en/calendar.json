@@ -83,5 +83,19 @@
   "cancelled": "Cancelled",
   "labelsAppointments": "Appointments",
   "appointmentTypeTreatment": "Treatment",
-  "appointmentTypeConsultation": "Consultation"
+  "appointmentTypeConsultation": "Consultation",
+  "smartFilter": {
+    "title": "Filter",
+    "close": "Close",
+    "clear": "Clear filters",
+    "apply": "Filter",
+    "doctors": "Doctors",
+    "allDoctors": "All",
+    "status": "Status",
+    "allStatuses": "All",
+    "colorLabel": "Color label",
+    "allColors": "All",
+    "appointments": "Appointments",
+    "expectedDuration": "Expected"
+  }
 }
