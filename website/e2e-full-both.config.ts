@@ -14,7 +14,7 @@
  */
 import { defineConfig, devices } from '@playwright/test';
 
-const LOCAL_BASE = process.env.LOCAL_URL || 'http://localhost:5174';
+const LOCAL_BASE = process.env.LOCAL_URL || 'http://localhost:5175';
 const VPS_BASE = process.env.VPS_URL || 'https://nk.2checkin.com';
 
 // Core test files — the ones that represent real features, not one-off debug sessions

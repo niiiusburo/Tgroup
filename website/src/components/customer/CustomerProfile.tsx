@@ -252,8 +252,6 @@ export function CustomerProfile({
         salestaffId={profile.salestaffid}
         cskhId={profile.cskhid}
         cskhName={profile.cskhname}
-        sourceId={profile.sourceid}
-        sourceName={profile.sourcename}
         referralUserId={profile.referraluserid}
       />
 

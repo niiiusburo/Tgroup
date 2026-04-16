@@ -10,6 +10,7 @@ import { ReportError } from '@/components/reports/ReportError';
 interface SvcData {
   categories: { category: string; productCount: number; avgPrice: number }[];
   revenueByCategory: { category: string; orderCount: number; revenue: number }[];
+  revenueBySource: { source: string; orderCount: number; revenue: number }[];
   popularProducts: { name: string; category: string; price: number; orderCount: number }[];
 }
 
@@ -33,6 +34,20 @@ export function ReportsServices() {
         <KPICard label={t('metrics.serviceRevenue')} value={totalRev} format="currency" icon={<DollarSign className="w-4 h-4" />} color="violet" delay={2} />
         <KPICard label={t('metrics.avgPrice')} value={data.categories.length > 0 ? data.categories.reduce((s, c) => s + c.avgPrice, 0) / data.categories.length : 0} format="currency" icon={<FolderOpen className="w-4 h-4" />} color="orange" delay={3} />
       </div>
+
+      {/* Revenue by source */}
+      {(data.revenueBySource || []).length > 0 && (
+        <SectionCard
+          title="Doanh thu theo nguồn"
+          action={<ExportCSVButton data={(data.revenueBySource || []).map(s => ({ Source: s.source, Orders: s.orderCount, Revenue: s.revenue }))} filename="revenue-by-source" />}
+        >
+          <HorizontalBarList
+            items={(data.revenueBySource || []).filter(s => s.revenue > 0).map(s => ({ label: s.source, value: s.revenue }))}
+            formatValue={formatVND}
+            color="bg-emerald-500"
+          />
+        </SectionCard>
+      )}
 
       {/* Revenue by category */}
       <SectionCard

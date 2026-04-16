@@ -1,10 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { User, Users, MapPin, Briefcase, Building2, Link, Plus, ScanFace, X, Phone } from 'lucide-react';
+import { User, Users, MapPin, Briefcase, Building2, Plus, ScanFace, X, Phone } from 'lucide-react';
 import { CardSection } from './CardSection';
 import { FieldLabel } from './FieldLabel';
 import { CustomerCameraWidget } from '@/components/customer/CustomerCameraWidget';
 import { inputClass, selectClass } from './styles';
-import { TYPE_ICONS, TYPE_COLORS } from './constants';
 import type { UseAddCustomerFormResult } from './useAddCustomerForm';
 
 interface LeftPanelProps {
@@ -17,7 +16,6 @@ export function LeftPanel({ formApi }: LeftPanelProps) {
     isFieldEditable, isEdit, customerId, formData, setFormData, setErrors, set, getError,
     nameUppercase, setNameUppercase, phoneCheck,
     pendingFaceImage, setPendingFaceImage, setShowRegisterModal, registerState, resetFace,
-    allSources, selectedSource, setShowSourceDialog,
     companies, employees, referrerQuery, referrerResults, referrerLoading, referrerOpen,
     setReferrerOpen, referrerContainerRef, handleReferrerInputChange, handleSelectReferrer,
     handleClearReferrer, salesQuery, salesResults, salesLoading, salesOpen, setSalesOpen,
@@ -347,43 +345,6 @@ export function LeftPanel({ formApi }: LeftPanelProps) {
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Source */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <FieldLabel icon={Link}>{t('form.source')}</FieldLabel>
-              <button
-                type="button"
-                onClick={() => setShowSourceDialog(true)}
-                className="p-1 text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
-                title={t('dialog.addSource', 'Thêm nguồn mới')}
-              >
-                <Plus className="w-3.5 h-3.5" />
-              </button>
-            </div>
-            <select value={formData.sourceid} onChange={(e) => set('sourceid', e.target.value)} className={selectClass()}>
-              <option value="">-- {t('select.source', 'Chọn nguồn')} --</option>
-              {allSources.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-            {selectedSource && (
-              <div
-                className={`mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs border ${TYPE_COLORS[selectedSource.type]}`}
-              >
-                {TYPE_ICONS[selectedSource.type]}
-                <span>
-                  {selectedSource.type === 'online'
-                    ? 'Online'
-                    : selectedSource.type === 'offline'
-                    ? 'Offline'
-                    : t('sources.referral')}
-                </span>
-              </div>
-            )}
           </div>
 
         </div>

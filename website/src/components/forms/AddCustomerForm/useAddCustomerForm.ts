@@ -4,7 +4,6 @@ import { fetchCompanies, fetchEmployees, fetchPartners, fetchPartnerById, ApiErr
 import { normalizeText } from '@/lib/utils';
 import type { ApiCompany, ApiEmployee, ApiPartner } from '@/lib/api';
 import { useUniqueFieldCheck } from '@/hooks/useUniqueFieldCheck';
-import { useCustomerSources } from '@/hooks/useSettings';
 import { useFaceRecognition } from '@/hooks/useFaceRecognition';
 import type { CustomerFormData, FormValidationError } from '@/data/mockCustomerForm';
 import { EMPTY_CUSTOMER_FORM, validateCustomerForm, VIET_DISTRICTS, VIET_WARDS } from '@/data/mockCustomerForm';
@@ -41,8 +40,6 @@ export interface UseAddCustomerFormResult {
   readonly setNameUppercase: React.Dispatch<React.SetStateAction<boolean>>;
   readonly displayRef: string | null;
   readonly setDisplayRef: React.Dispatch<React.SetStateAction<string | null>>;
-  readonly showSourceDialog: boolean;
-  readonly setShowSourceDialog: React.Dispatch<React.SetStateAction<boolean>>;
   readonly companies: ApiCompany[];
   readonly employees: ApiEmployee[];
   readonly pendingFaceImage: Blob | null;
@@ -52,8 +49,6 @@ export interface UseAddCustomerFormResult {
   readonly registerState: any;
   readonly register: (id: string, blob: Blob) => Promise<void>;
   readonly resetFace: () => void;
-  readonly allSources: any[];
-  readonly addSource: (source: any) => Promise<any>;
   readonly referrerQuery: string;
   readonly setReferrerQuery: React.Dispatch<React.SetStateAction<string>>;
   readonly referrerResults: ApiPartner[];
@@ -92,13 +87,11 @@ export interface UseAddCustomerFormResult {
   readonly clearError: (field: keyof CustomerFormData) => void;
   readonly phoneCheck: any;
   readonly emailCheck: any;
-  readonly handleAddSource: (name: string) => void;
   readonly handleSubmit: (e: React.FormEvent) => Promise<void>;
   readonly findBestMatch: (input: string, options: readonly string[]) => string | null;
   readonly districtsForCity: readonly string[];
   readonly wardsForDistrict: readonly string[];
   readonly today: string;
-  readonly selectedSource: any;
   readonly onSubmit: (data: CustomerFormData) => void | Promise<void>;
   readonly onCancel: () => void;
   readonly onPendingFaceImage?: (image: Blob | null) => void;
@@ -129,8 +122,6 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
   const [nameUppercase, setNameUppercase] = useState(false);
   const [displayRef, setDisplayRef] = useState<string | null>(customerRef ?? null);
 
-  const [showSourceDialog, setShowSourceDialog] = useState(false);
-
   const [companies, setCompanies] = useState<ApiCompany[]>([]);
   const [employees, setEmployees] = useState<ApiEmployee[]>([]);
 
@@ -141,8 +132,6 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
   useEffect(() => {
     onPendingFaceImage?.(pendingFaceImage);
   }, [pendingFaceImage, onPendingFaceImage]);
-
-  const { allSources, addSource } = useCustomerSources();
 
   useEffect(() => {
     fetchCompanies({ limit: 50 }).then((r) => setCompanies(r.items)).catch(() => {});
@@ -441,15 +430,6 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
     }
   }, [emailCheck.status, emailCheck.message, setError, clearError]);
 
-  const handleAddSource = (name: string) => {
-    addSource({
-      name,
-      type: 'offline',
-      description: 'Custom source',
-      isActive: true,
-    });
-  };
-
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -541,23 +521,20 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
     year: 'numeric',
   });
 
-  const selectedSource = allSources.find((s) => s.id === formData.sourceid);
-
-
   return {
     t, isFieldEditable, isEdit, canEdit, customerId, formData, setFormData, errors, setErrors,
     apiErrorDetail, setApiErrorDetail, activeTab, setActiveTab, isSubmitting, setIsSubmitting, nameUppercase, setNameUppercase,
-    displayRef, setDisplayRef, showSourceDialog, setShowSourceDialog, companies, employees,
+    displayRef, setDisplayRef, companies, employees,
     pendingFaceImage, setPendingFaceImage, showRegisterModal, setShowRegisterModal,
-    registerState, register, resetFace, allSources, addSource,
+    registerState, register, resetFace,
     referrerQuery, setReferrerQuery, referrerResults, referrerLoading, referrerOpen, setReferrerOpen,
     selectedReferrer, setSelectedReferrer, referrerContainerRef, handleReferrerInputChange, handleSelectReferrer, handleClearReferrer,
     salesQuery, setSalesQuery, salesResults, salesLoading, salesOpen, setSalesOpen, salesContainerRef,
     handleSalesInputChange, handleSelectSales, handleClearSales,
     cskhQuery, setCskhQuery, cskhResults, cskhLoading, cskhOpen, setCskhOpen, cskhContainerRef,
     handleCskhInputChange, handleSelectCskh, handleClearCskh,
-    getError, set, setError, clearError, phoneCheck, emailCheck, handleAddSource, handleSubmit,
-    findBestMatch, districtsForCity, wardsForDistrict, today, selectedSource,
+    getError, set, setError, clearError, phoneCheck, emailCheck, handleSubmit,
+    findBestMatch, districtsForCity, wardsForDistrict, today,
     onSubmit, onCancel, onPendingFaceImage, initialData,
   };
 }

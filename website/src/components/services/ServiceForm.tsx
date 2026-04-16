@@ -34,6 +34,7 @@ import { useCustomers } from '@/hooks/useCustomers';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
 import { useProducts } from '@/hooks/useProducts';
+import { useCustomerSources } from '@/hooks/useSettings';
 import { type ServiceCatalogItem } from '@/data/mockServices';
 import type { CreateServiceInput } from '@/hooks/useServices';
 import type { Customer } from '@/types/customer';
@@ -89,9 +90,11 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   );
   const [toothNumbers, setToothNumbers] = useState<readonly string[]>(initialData?.toothNumbers ?? []);
   const [toothComment, setToothComment] = useState(initialData?.toothComment ?? '');
+  const [sourceId, setSourceId] = useState<string | null>(initialData?.sourceId ?? null);
   const [showToothPicker, setShowToothPicker] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
+  const { allSources } = useCustomerSources();
 
   useEffect(() => {
     if (initialData) {
@@ -111,6 +114,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       setTotalCostOverride(initialData.totalCost ? String(initialData.totalCost) : '');
       setToothNumbers(initialData.toothNumbers ?? []);
       setToothComment(initialData.toothComment ?? '');
+      setSourceId(initialData.sourceId ?? null);
     }
   }, [initialData?.id, readonlyCustomerId]);
 
@@ -246,6 +250,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       notes: notes.trim(), quantity: Number(quantity) || 1, unit: unit.trim(),
       toothNumbers,
       toothComment: toothComment.trim(),
+      sourceId,
     });
     } catch (error) {
       setErrors(prev => ({ ...prev, submit: error instanceof Error ? error.message : t('formErrors.saveFailed', 'Lưu thất bại') }));
@@ -354,6 +359,26 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
             </label>
             <LocationSelector locations={locations} selectedId={locationId} onChange={handleLocationChange} excludeAll />
             {errors.location && <p className="mt-2 text-xs text-red-500">{errors.location}</p>}
+          </div>
+
+          {/* Nguồn khách hàng */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <FileText className="w-3.5 h-3.5" />
+              Nguồn khách hàng
+            </label>
+            <select
+              value={sourceId ?? ''}
+              onChange={(e) => setSourceId(e.target.value || null)}
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
+            >
+              <option value="">-- Chọn nguồn --</option>
+              {allSources.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Ngày bắt đầu + Ngày kết thúc */}

@@ -37,7 +37,6 @@ export const EMPTY_CUSTOMER_FORM: CustomerFormData = {
   identitynumber: '',
   healthinsurancecardnumber: '',
   title: '',
-  sourceid: '',
   referraluserid: '',
   salestaffid: '',
   cskhid: '',

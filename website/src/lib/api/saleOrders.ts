@@ -30,6 +30,8 @@ export interface ApiSaleOrder {
   notes: string | null;
   tooth_numbers: string | null;
   tooth_comment: string | null;
+  sourceid: string | null;
+  sourcename: string | null;
   lastupdated: string | null;
   isdeleted?: boolean;
   /** Sale order reference code (e.g. SO-2024-001). */

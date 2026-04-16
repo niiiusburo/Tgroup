@@ -393,7 +393,6 @@ export function Customers() {
         birthday: rawPartner.birthday ?? null,
         birthmonth: rawPartner.birthmonth ?? null,
         birthyear: rawPartner.birthyear ?? null,
-        sourceid: rawPartner.sourceid ?? '',
         referraluserid: rawPartner.referraluserid ?? '',
         salestaffid: rawPartner.salestaffid ?? '',
         cskhid: rawPartner.cskhid ?? '',
@@ -429,7 +428,6 @@ export function Customers() {
         note: hookProfile.notes || '',
         comment: '',
         medicalhistory: hookProfile.medicalHistory || '',
-        sourceid: '',
         referraluserid: '',
         salestaffid: '',
         cskhid: '',
@@ -452,7 +450,6 @@ export function Customers() {
       street: customer.street || '',
       note: customer.note || '',
       comment: customer.comment || '',
-      sourceid: customer.sourceid || '',
       referraluserid: '',
       salestaffid: '',
       cskhid: customer.cskhid || '',
@@ -527,8 +524,6 @@ export function Customers() {
         salestaffid: hookProfile.salestaffid,
         cskhid: hookProfile.cskhid,
         cskhname: hookProfile.cskhname,
-        sourceid: hookProfile.sourceid,
-        sourcename: hookProfile.sourcename,
         referraluserid: hookProfile.referraluserid,
       };
     } else {
@@ -555,8 +550,6 @@ export function Customers() {
         salestaffid: null,
         cskhid: null,
         cskhname: null,
-        sourceid: null,
-        sourcename: null,
         referraluserid: null,
       };
     }

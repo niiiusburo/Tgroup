@@ -4,7 +4,6 @@ import type { CustomerFormData } from '@/data/mockCustomerForm';
 import { FaceCaptureModal } from '@/components/shared/FaceCaptureModal';
 import { TABS } from './constants';
 import { CardSection } from './CardSection';
-import { MiniAddDialog } from './MiniAddDialog';
 
 /**
  * ╔══════════════════════════════════════════════════════════════════════════════════════╗
@@ -100,19 +99,10 @@ export function AddCustomerForm(props: AddCustomerFormProps) {
   const {
     t, isEdit, customerId, formData, set, activeTab, setActiveTab, isSubmitting,
     showRegisterModal, setShowRegisterModal, register, handleSubmit, onCancel,
-    phoneCheck, emailCheck, showSourceDialog, setShowSourceDialog, handleAddSource,
-    apiErrorDetail, setApiErrorDetail,
+    phoneCheck, emailCheck, apiErrorDetail, setApiErrorDetail,
   } = formApi;
   return (
     <div className="flex flex-col bg-gray-50/50 overflow-hidden flex-1" onWheel={(e) => e.stopPropagation()}>
-      <MiniAddDialog
-        isOpen={showSourceDialog}
-        onClose={() => setShowSourceDialog(false)}
-        title={t('sources.other', { ns: 'customers' })}
-        placeholder={t('form.fullName', { ns: 'customers' })}
-        onSubmit={handleAddSource}
-      />
-
       {/* ═══════════════════════════════════════════════════════════════════════════════
           HEADER — Appointment module style (icon + title + subtitle)
          ═══════════════════════════════════════════════════════════════════════════════ */}

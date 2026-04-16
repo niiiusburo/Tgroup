@@ -97,7 +97,7 @@ services:
     depends_on:
       - api
     ports:
-      - "5174:80"
+      - "5175:80"
 
 volumes:
   tgroup-pgdata:

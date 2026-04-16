@@ -6,10 +6,9 @@
  * @crossref:uses[useEmployees, useCustomerSources]
  */
 
-import { Building2, UserRound, Headphones, Link2, Users } from 'lucide-react';
+import { Building2, UserRound, Headphones, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useEmployees } from '@/hooks/useEmployees';
-import { useCustomerSources } from '@/hooks/useSettings';
 import type { Employee } from '@/data/mockEmployees';
 
 interface CustomerAssignmentsProps {
@@ -17,8 +16,6 @@ interface CustomerAssignmentsProps {
   readonly salestaffId: string | null | undefined;
   readonly cskhId: string | null | undefined;
   readonly cskhName: string | null | undefined;
-  readonly sourceId: string | null | undefined;
-  readonly sourceName: string | null | undefined;
   readonly referralUserId: string | null | undefined;
 }
 
@@ -57,16 +54,12 @@ export function CustomerAssignments({
   salestaffId,
   cskhId,
   cskhName,
-  sourceId,
-  sourceName,
   referralUserId,
 }: CustomerAssignmentsProps) {
   const { t } = useTranslation('customers');
   const { allEmployees } = useEmployees();
-  const { allSources: sources } = useCustomerSources();
 
   const employeeList = allEmployees as readonly Pick<Employee, 'id' | 'name'>[];
-  const sourceList = (sources ?? []) as readonly { id: string; name: string }[];
 
   return (
     <div className="bg-white rounded-xl shadow-card p-5 md:p-6 flex flex-col md:flex-row md:items-stretch gap-5 md:gap-6">
@@ -80,11 +73,11 @@ export function CustomerAssignments({
           <span className="text-[10.5px] font-bold tracking-[0.12em] text-primary-dark uppercase">PHÂN CÔNG</span>
         </div>
         <h3 className="text-[15px] font-bold text-gray-900">Phân công khách hàng</h3>
-        <p className="text-xs text-gray-500 leading-snug mt-1">Thông tin phụ trách và nguồn khách hàng.</p>
+        <p className="text-xs text-gray-500 leading-snug mt-1">Thông tin phụ trách khách hàng.</p>
       </div>
 
-      {/* Right grid of 5 fields */}
-      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      {/* Right grid of 4 fields */}
+      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <AssignmentField
           icon={Building2}
           label={t('columns.location', { ns: 'customers' })}
@@ -104,11 +97,6 @@ export function CustomerAssignments({
           icon={Users}
           label="NGƯỜI GIỚI THIỆU"
           value={resolveName(referralUserId, employeeList)}
-        />
-        <AssignmentField
-          icon={Link2}
-          label="NGUỒN"
-          value={sourceName || resolveName(sourceId, sourceList)}
         />
       </div>
     </div>

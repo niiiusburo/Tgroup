@@ -29,12 +29,6 @@ export function ReportsCustomers() {
 
   const growthPct = data.total > 0 ? (data.newInPeriod / data.total * 100).toFixed(1) : '0';
 
-  const sourceSegs = data.sources.filter(s => s.count > 0).map(s => ({
-    label: s.name || 'Unknown',
-    value: s.count,
-    color: s.name === 'Google' ? '#4285F4' : s.name === 'Facebook' ? '#1877F2' : s.name === 'Giới thiệu' ? '#10B981' : '#6B7280',
-  }));
-
   const genderSegs = data.gender.map(g => ({
     label: g.gender === 'male' ? 'Male' : g.gender === 'female' ? 'Female' : 'Other',
     value: g.count,
@@ -51,11 +45,6 @@ export function ReportsCustomers() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* By source */}
-        <SectionCard title={t('charts.customerSources')}>
-          <DonutChart segments={sourceSegs.length > 0 ? sourceSegs : [{ label: 'No data', value: 1, color: '#E5E7EB' }]} />
-        </SectionCard>
-
         {/* By gender */}
         <SectionCard title={t('charts.genderDistribution')}>
           <DonutChart segments={genderSegs.length > 0 ? genderSegs : [{ label: 'No data', value: 1, color: '#E5E7EB' }]} />
