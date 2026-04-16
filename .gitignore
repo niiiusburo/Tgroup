@@ -61,3 +61,6 @@ skills-lock.json
 .claude/skills/
 .claude/worktrees/
 .agents/
+
+# Local-only files (never push to GitHub)
+LOCAL/
