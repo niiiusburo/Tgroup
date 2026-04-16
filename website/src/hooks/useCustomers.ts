@@ -29,8 +29,6 @@ export interface Customer {
   readonly ward?: string | null;
   readonly comment?: string | null;
   readonly note?: string | null;
-  readonly sourcename?: string | null;
-  readonly sourceid?: string | null;
   readonly agentname?: string | null;
   readonly companyname?: string | null;
   // CSKH (Customer Service) assignment
@@ -59,8 +57,6 @@ function mapPartnerToCustomer(p: ApiPartner): Customer {
     ward: p.ward,
     comment: p.comment,
     note: p.note,
-    sourcename: p.sourcename,
-    sourceid: p.sourceid,
     agentname: p.agentname,
     companyname: p.companyname,
     cskhid: p.cskhid,
@@ -174,7 +170,6 @@ export function useCustomers(locationId: string = 'all') {
         medicalhistory: input.medicalhistory || undefined,
         note: input.note || undefined,
         comment: input.comment || undefined,
-        sourceid: input.sourceid || undefined,
         referraluserid: input.referraluserid || undefined,
         salestaffid: input.salestaffid || undefined,
         cskhid: input.cskhid || undefined,
@@ -222,7 +217,6 @@ export function useCustomers(locationId: string = 'all') {
       medicalhistory: updates.medicalhistory || undefined,
       note: updates.note || undefined,
       comment: updates.comment || undefined,
-      sourceid: updates.sourceid || undefined,
       referraluserid: updates.referraluserid || undefined,
       weight: updates.weight ?? undefined,
       identitynumber: updates.identitynumber || undefined,
