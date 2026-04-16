@@ -62,6 +62,18 @@ export function ServiceHistoryList({ records, onUpdateVisit, onCancel, onEdit }:
                 <div className="text-xs text-gray-500 mt-0.5 truncate ml-4">
                   {record.serviceName} &middot; {record.doctorName} &middot; {record.locationName}
                 </div>
+                <div className="flex flex-wrap items-center gap-1.5 mt-1 ml-4">
+                  {(record.toothNumbers?.length ?? 0) > 0 && (
+                    <span className="text-[11px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
+                      Tooth: {record.toothNumbers?.join(', ')}
+                    </span>
+                  )}
+                  {record.toothComment && (
+                    <span className="text-[11px] bg-amber-50 px-1.5 py-0.5 rounded text-amber-700 truncate max-w-[220px]">
+                      {record.toothComment}
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Progress compact */}
@@ -104,6 +116,11 @@ export function ServiceHistoryList({ records, onUpdateVisit, onCancel, onEdit }:
                   {(record.toothNumbers?.length ?? 0) > 0 && (
                     <span className="text-xs bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
                       Tooth: {record.toothNumbers?.join(', ')}
+                    </span>
+                  )}
+                  {record.toothComment && (
+                    <span className="text-xs bg-amber-50 px-1.5 py-0.5 rounded text-amber-700">
+                      {record.toothComment}
                     </span>
                   )}
                 </div>

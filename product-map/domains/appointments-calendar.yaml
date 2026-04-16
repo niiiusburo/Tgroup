@@ -1,0 +1,62 @@
+name: Appointments & Calendar
+summary: |
+  Appointment scheduling with day/week/month calendar views. Appointments link
+  partners (customer), partners (doctor), companies (location), and products
+  (service). Check-in flow and drag-to-reschedule are frontend features.
+owns:
+  - api/src/routes/appointments.js
+  - website/src/pages/Calendar.tsx
+  - website/src/pages/Appointments/index.tsx
+  - website/src/components/calendar/
+  - website/src/components/appointments/
+  - website/src/hooks/useAppointments.ts
+  - website/src/hooks/useCalendarData.ts
+  - website/src/hooks/useDragReschedule.ts
+  - website/src/lib/api/appointments.ts
+reads:
+  - api/src/db.js
+writes:
+  - dbo.appointments (insert/update)
+  - dbo.crmteams (read-only for team names)
+  - dbo.aspnetusers (read-only for creator names)
+tables:
+  - dbo.appointments
+  - dbo.partners (customer + doctor)
+  - dbo.companies
+  - dbo.products
+  - dbo.saleorders (linked order)
+  - dbo.dotkhams (linked record)
+  - dbo.crmteams
+endpoints:
+  - GET  /api/Appointments
+  - GET  /api/Appointments/:id
+  - POST /api/Appointments
+  - PUT  /api/Appointments/:id
+ui_surfaces:
+  - /calendar
+  - /appointments
+  - TodaySchedule / TodayAppointments on Overview
+  - AppointmentForm (modal)
+  - EditAppointmentModal
+  - CheckInFlow
+jobs:
+  - none
+shared_types:
+  - website/src/types/appointment.ts
+  - website/src/constants/index.ts (APPOINTMENT_CARD_COLORS, APPOINTMENT_STATUS_OPTIONS)
+  - website/src/lib/api/appointments.ts (ApiAppointment)
+dependencies:
+  - Customers & Partners (selectors)
+  - Services & Products (service selector)
+  - Auth & Permissions (appointments.view, appointments.add, appointments.edit)
+affected_by:
+  - Changes to dbo.appointments schema (especially color, status, timeexpected)
+  - Changes to APPOINTMENT_CARD_COLORS constants
+  - Changes to ApiAppointment type shape
+impact_tests:
+  - website/src/__tests__/appointment-form-edit.test.tsx
+  - website/e2e/team-alpha-appointments.spec.ts
+  - website/e2e/appointment-status-persistence.spec.ts
+  - website/e2e/calendar-april-seed-check.spec.ts
+  - website/src/components/modules/__tests__/EditAppointmentModal.test.tsx
+risk_level: high

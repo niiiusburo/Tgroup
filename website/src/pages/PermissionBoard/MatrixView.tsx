@@ -31,7 +31,7 @@ export function MatrixView({ groups, onToggle }: MatrixViewProps) {
         <tbody>
           {MODULES.map(mod =>
             mod.actions.map((action, ai) => {
-              const permId = `${mod.name.toLowerCase()}.${action.toLowerCase().replace(/\s+/g, '_')}`;
+              const permId = `${mod.name.toLowerCase().replace(/\s+/g, '_')}.${action.toLowerCase().replace(/\s+/g, '_')}`;
               const isLastAction = ai === mod.actions.length - 1;
               return (
                 <tr
@@ -71,12 +71,21 @@ export function MatrixView({ groups, onToggle }: MatrixViewProps) {
                       <td key={g.id} className="text-center px-2 py-2">
                         <button
                           type="button"
-                          onClick={() => onToggle(g.id, permId)}
+                          disabled={g.isSystem}
+                          onClick={() => !g.isSystem && onToggle(g.id, permId)}
                           className={`inline-flex w-6 h-6 rounded items-center justify-center text-xs font-bold transition-all ${
-                            'cursor-pointer hover:scale-110 hover:shadow-sm'
+                            g.isSystem
+                              ? 'cursor-not-allowed opacity-80'
+                              : 'cursor-pointer hover:scale-110 hover:shadow-sm'
                           }`}
                           style={has ? { background: `${g.color}18`, color: g.color } : { background: '#f8fafc', color: '#e2e8f0' }}
-                          title={has ? `Remove ${permId} from ${g.name}` : `Grant ${permId} to ${g.name}`}
+                          title={
+                            g.isSystem
+                              ? `${g.name} is locked (system group) — ${has ? 'has' : 'missing'} ${permId}`
+                              : has
+                                ? `Remove ${permId} from ${g.name}`
+                                : `Grant ${permId} to ${g.name}`
+                          }
                         >
                           {has ? '✓' : '—'}
                         </button>

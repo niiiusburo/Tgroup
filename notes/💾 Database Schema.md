@@ -2,11 +2,12 @@
 
 ## Connection
 
+**Local Development:**
 ```
-postgresql://postgres:postgres@127.0.0.1:55433/tdental_demo
+postgresql://postgres:postgres@127.0.0.1:5433/tdental_demo
 ```
 
-## Tables
+## Core Tables
 
 ### dbo.companies
 Clinic branches/locations.
@@ -47,10 +48,11 @@ Customers and employees (doctors/staff).
 | wage | numeric | Base wage |
 | allowance | numeric | Allowance |
 | password_hash | text | Auth password hash |
+| tier_id | uuid | FK → permission_groups |
 | datecreated | timestamp | Creation date |
 | lastupdated | timestamp | Last update |
 
-**Count:** 56 total (30 customers + 19 doctors + 7 branch accounts)
+**Count:** 370 total (employees + customers combined)
 
 ### dbo.appointments
 Patient appointments.
@@ -58,33 +60,42 @@ Patient appointments.
 | Column | Type | Description |
 |--------|------|-------------|
 | id | uuid | Primary key |
-| partner_id | uuid | FK → partners (patient) |
-| doctor_id | uuid | FK → partners (doctor) |
-| company_id | uuid | FK → companies |
-| appointment_date | timestamp | Date & time |
-| duration | integer | Minutes |
+| name | text | Appointment title |
+| partnerid | uuid | FK → partners (patient) |
+| doctorid | uuid | FK → partners (doctor) |
+| companyid | uuid | FK → companies |
+| date | timestamp | Date & time |
+| time | text | Time string |
 | status | varchar(50) | pending/confirmed/completed/cancelled |
-| notes | text | Appointment notes |
-| service_id | uuid | FK → services |
-| created_at | timestamp | Creation date |
-| updated_at | timestamp | Last update |
+| note | text | Appointment notes |
+| timeexpected | integer | Expected duration (minutes) |
+| color | text | Calendar color |
+| productid | uuid | FK → products (service) |
+| createdbyid | text | Creator user ID |
+| writebyid | text | Last editor ID |
+| datecreated | timestamp | Creation date |
+| lastupdated | timestamp | Last update |
 
-**Count:** 120 appointments
+**Count:** 259 appointments
 
-### dbo.services
-Dental services catalog.
+### dbo.products
+Dental services catalog. *(Legacy system uses `products` for services.)*
 
 | Column | Type | Description |
 |--------|------|-------------|
 | id | uuid | Primary key |
 | name | varchar(255) | Service name |
+| defaultcode | text | Internal code |
 | description | text | Service description |
-| price | decimal(10,2) | Price |
-| duration | integer | Duration in minutes |
-| category | varchar(100) | Service category |
-| status | varchar(50) | active/inactive |
-| created_at | timestamp | Creation date |
-| updated_at | timestamp | Last update |
+| listprice | decimal(10,2) | Price |
+| type | varchar(50) | Product type (usually 'service') |
+| categid | uuid | FK → productcategories |
+| companyid | uuid | FK → companies |
+| active | boolean | Active status |
+| datecreated | timestamp | Creation date |
+| lastupdated | timestamp | Last update |
+
+**Count:** 162 services
 
 ### dbo.saleorders
 Sales orders (treatment plans).
@@ -100,32 +111,86 @@ Sales orders (treatment plans).
 | notes | text | Notes |
 | created_at | timestamp | Creation date |
 
-### dbo.customerreceipts
-Payment receipts.
+**Count:** 47 sale orders
+
+### dbo.saleorderlines
+Order line items.
 
 | Column | Type | Description |
 |--------|------|-------------|
 | id | uuid | Primary key |
-| partner_id | uuid | FK → partners |
-| company_id | uuid | FK → companies |
-| receipt_date | date | Payment date |
-| amount | decimal(10,2) | Amount paid |
-| payment_method | varchar(50) | cash/card/transfer |
+| saleorderid | uuid | FK → saleorders |
+| productid | uuid | FK → products |
+| quantity | numeric | Quantity |
+| price_unit | decimal(10,2) | Unit price |
+| discount | numeric | Discount % |
+| amount | decimal(10,2) | Line total |
+
+### dbo.payments
+Payment records.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| partnerid | uuid | FK → partners |
+| companyid | uuid | FK → companies |
+| amount | decimal(10,2) | Payment amount |
+| paymentdate | date | Payment date |
+| paymentmethod | varchar(50) | cash/card/transfer |
+| state | varchar(50) | Payment status |
 | notes | text | Notes |
-| created_at | timestamp | Creation date |
+| datecreated | timestamp | Creation date |
+
+### dbo.monthlyplans
+Payment installment plans.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| partnerid | uuid | FK → partners |
+| companyid | uuid | FK → companies |
+| totalamount | decimal(10,2) | Total plan amount |
+| downpayment | decimal(10,2) | Initial deposit |
+| installments | integer | Number of installments |
+| startdate | date | First installment date |
+| status | varchar(50) | active/completed/cancelled |
+
+### dbo.dotkhams
+Medical records.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| partnerid | uuid | FK → partners (patient) |
+| doctorid | uuid | FK → partners (doctor) |
+| companyid | uuid | FK → companies |
+| date | timestamp | Record date |
+| note | text | Notes |
+
+### dbo.dotkhamsteps
+Medical record steps/procedures.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| dotkhamid | uuid | FK → dotkhams |
+| productid | uuid | FK → products (service) |
+| quantity | numeric | Quantity |
+| status | varchar(50) | Status |
+| note | text | Notes |
 
 ## Views
 
 ### dbo.employees
-View combining partners with `employee=true`. Passes through real columns from partners.
+View combining partners with `employee=true`.
 
 | Column | Source | Description |
 |--------|--------|-------------|
 | id | partners.id | Primary key |
 | name | partners.name | Full name |
-| isdoctor | partners.isdoctor | Is doctor (real column) |
-| isassistant | partners.isassistant | Is assistant (real column) |
-| isreceptionist | partners.isreceptionist | Is receptionist (real column) |
+| isdoctor | partners.isdoctor | Is doctor |
+| isassistant | partners.isassistant | Is assistant |
+| isreceptionist | partners.isreceptionist | Is receptionist |
 | active | partners.active | Active status |
 | jobtitle | partners.jobtitle | Job title |
 | companyid | partners.companyid | FK → companies |
@@ -135,47 +200,151 @@ View combining partners with `employee=true`. Passes through real columns from p
 | startworkdate | partners.startworkdate | Start work date |
 | address | partners.street | Home address |
 | birthday | derived | From birthyear/birthmonth/birthday |
-| hourlywage..enrollnumber | NULL | HR fields (not yet used) |
+| tier_id | partners.tier_id | FK → permission_groups |
 
-**Count:** 28 employees (19 doctors + test assistants + admin)
+**Count:** 319 employees
 
-## Empty Tables (Not Yet Used)
+## Permission System Tables
 
-- `partnersources` — Customer source tracking
-- `agents` — Sales agents
-- `aspnetusers` — Auth users
-- `dotkhams` — Medical records
-- `crmteams` — CRM team assignments
-- `saleorderlines` — Order line items
-- `accountpayments` — Account payments
+### dbo.permission_groups
+Role definitions.
 
-## Indexes
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| name | varchar(255) | Group name (Admin, Dentist, etc.) |
+| color | varchar(50) | Hex color for UI |
+| description | text | Description |
+| is_system | boolean | System group (non-deletable) |
 
-Common indexes to add for performance:
+**Rows:** Admin, Clinic Manager, Dentist, Receptionist, Dental Assistant
 
-```sql
--- Partners
-CREATE INDEX idx_partners_customer ON dbo.partners(customer) WHERE customer = true;
-CREATE INDEX idx_partners_employee ON dbo.partners(employee) WHERE employee = true;
-CREATE INDEX idx_partners_company ON dbo.partners(company_id);
+### dbo.group_permissions
+Role-to-permission mappings.
 
--- Appointments
-CREATE INDEX idx_appointments_date ON dbo.appointments(appointment_date);
-CREATE INDEX idx_appointments_partner ON dbo.appointments(partner_id);
-CREATE INDEX idx_appointments_doctor ON dbo.appointments(doctor_id);
-CREATE INDEX idx_appointments_company ON dbo.appointments(company_id);
-CREATE INDEX idx_appointments_status ON dbo.appointments(status);
-```
+| Column | Type | Description |
+|--------|------|-------------|
+| group_id | uuid | FK → permission_groups |
+| permission | varchar(255) | Permission string (e.g. customers.view) |
+
+### dbo.employee_permissions
+User-to-role assignments.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| employee_id | uuid | FK → partners |
+| group_id | uuid | FK → permission_groups |
+
+### dbo.permission_overrides
+Individual grant/revoke exceptions.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| employee_id | uuid | FK → partners |
+| permission | varchar(255) | Permission string |
+| override_type | varchar(50) | grant or revoke |
+
+### dbo.employee_location_scope
+User location access control.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| employee_id | uuid | FK → partners |
+| company_id | uuid | FK → companies |
+
+## Feedback Tables
+
+### dbo.feedback_threads
+Feedback conversation threads.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| title | text | Thread title |
+| status | varchar(50) | open/closed |
+| created_at | timestamp | Creation date |
+
+### dbo.feedback_messages
+Individual messages in threads.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| thread_id | uuid | FK → feedback_threads |
+| author_name | text | Author name |
+| content | text | Message body |
+| created_at | timestamp | Creation date |
+
+### dbo.feedback_attachments
+Message attachments.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| message_id | uuid | FK → feedback_messages |
+| file_url | text | Attachment URL |
+
+## Config Tables
+
+### dbo.systempreferences
+Application-wide settings.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| key | varchar(255) | Setting key |
+| value | text | Setting value |
+| updated_at | timestamp | Last update |
+
+### dbo.company_bank_settings
+Bank account for VietQR.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | integer | Primary key |
+| bank_bin | text | Bank BIN |
+| bank_number | text | Account number |
+| bank_account_name | text | Account holder name |
+| updated_at | timestamp | Last update |
+
+### dbo.websitepages
+CMS pages.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| slug | varchar(255) | URL slug |
+| title | text | Page title |
+| content | text | Page content |
+| meta_title | text | SEO title |
+| meta_description | text | SEO description |
+| active | boolean | Published status |
 
 ## Demo Data Summary
 
 | Entity | Count |
 |--------|-------|
 | Companies (Locations) | 7 |
-| Partners (Total) | 56 |
-| Customers | 30 |
-| Employees (Doctors) | 19 |
-| Appointments | 120 |
-| Services | ~20+ |
-| Sale Orders | 0 (empty) |
-| Customer Receipts | 0 (empty) |
+| Partners (Total) | 370 |
+| Employees (view) | 319 |
+| Appointments | 259 |
+| Products (Services) | 162 |
+| Sale Orders | 47 |
+| Customer Receipts | 0 |
+
+## Common Indexes
+
+```sql
+-- Partners
+CREATE INDEX idx_partners_customer ON dbo.partners(customer) WHERE customer = true;
+CREATE INDEX idx_partners_employee ON dbo.partners(employee) WHERE employee = true;
+CREATE INDEX idx_partners_company ON dbo.partners(companyid);
+
+-- Appointments
+CREATE INDEX idx_appointments_date ON dbo.appointments(date);
+CREATE INDEX idx_appointments_partner ON dbo.appointments(partnerid);
+CREATE INDEX idx_appointments_doctor ON dbo.appointments(doctorid);
+CREATE INDEX idx_appointments_company ON dbo.appointments(companyid);
+CREATE INDEX idx_appointments_status ON dbo.appointments(status);
+```

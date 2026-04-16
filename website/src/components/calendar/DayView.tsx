@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { User, Phone, Clock, MessageSquare, Pencil } from 'lucide-react';
+import { Phone, User, Clock } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
@@ -89,69 +90,70 @@ function DayCard({ appointment, onClick, onEdit }: DayCardProps) {
   return (
     <div
       onClick={() => onClick?.(appointment)}
-      className="group w-full text-left rounded-xl border border-gray-200 bg-white shadow-sm card-hover overflow-hidden cursor-pointer"
+      className={cn(
+        'group relative w-full text-left rounded-lg p-2.5 border-l-4 shadow-sm cursor-pointer',
+        'hover:shadow-md transition-shadow text-xs mb-2',
+        colors.bg,
+        colors.dot
+      )}
     >
-      {/* Colored left accent + content */}
-      <div className={`flex border-l-[3px] ${colors.dot}`}>
-        <div className="flex-1 p-3 space-y-2">
-          {/* Row 1: Time + Status badge + Edit icon */}
-          <div className="flex items-center justify-between gap-1">
-            <div className="flex items-center gap-2 min-w-0">
-              {/* Time */}
-              <span className="text-xs font-semibold text-gray-500 shrink-0">
-                {appointment.startTime}
-              </span>
-              {/* Status pill */}
-              <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ring-1 ring-inset ${status.bg} ${status.text} ${status.ring} truncate`}>
-                {status.label}
-              </span>
-            </div>
-            {onEdit && (
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); onEdit(appointment); }}
-                className="p-1 rounded opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-600 hover:bg-gray-100 transition-all"
-                title="Sửa"
-              >
-                <Pencil className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
+      {/* Status badge */}
+      <span
+        className={cn(
+          'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold mb-1.5',
+          status.bg,
+          status.text
+        )}
+      >
+        {status.label}
+      </span>
 
-          {/* Row 2: Patient name */}
-          <div className="text-sm font-bold text-gray-900 leading-tight truncate">
-            <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink>
-          </div>
+      {/* Customer name */}
+      <h5 className="font-semibold text-gray-900 truncate text-xs mb-1.5">
+        <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink>
+      </h5>
 
-          {/* Row 3: Doctor */}
-          <div className="flex items-center gap-1.5 text-xs text-gray-500">
-            <User className="w-3 h-3 text-gray-400 shrink-0" />
-            <span className="truncate">{appointment.dentist}</span>
-          </div>
+      {/* Details grid */}
+      <div className="space-y-1">
+        {/* Phone */}
+        <div className="flex items-center gap-1 text-[11px] text-gray-600">
+          <Phone className="w-3 h-3 text-gray-400" />
+          <span className="truncate">{appointment.customerPhone || '---'}</span>
+        </div>
 
-          {/* Row 4: Phone (if available) */}
-          {appointment.customerPhone && (
-            <div className="flex items-center gap-1.5 text-xs text-gray-500">
-              <Phone className="w-3 h-3 text-gray-400 shrink-0" />
-              <span>{appointment.customerPhone}</span>
-            </div>
-          )}
+        {/* Doctor */}
+        <div className="flex items-center gap-1 text-[11px] text-gray-600">
+          <User className="w-3 h-3 text-gray-400" />
+          <span className="truncate">{appointment.dentist}</span>
+        </div>
 
-          {/* Row 5: Service / Notes (if available) */}
-          {appointment.serviceName && (
-            <div className="flex items-start gap-1.5 text-xs text-gray-400">
-              <MessageSquare className="w-3 h-3 text-gray-300 shrink-0 mt-0.5" />
-              <span className="line-clamp-2">{appointment.serviceName}</span>
-            </div>
-          )}
-
-          {/* Row 6: Time range with clock icon */}
-          <div className="flex items-center gap-1.5 text-xs text-gray-400">
-            <Clock className="w-3 h-3 text-gray-300 shrink-0" />
-            <span>{appointment.startTime} – {appointment.endTime}</span>
-          </div>
+        {/* Time */}
+        <div className="flex items-center gap-1 text-[11px] text-gray-600">
+          <Clock className="w-3 h-3 text-gray-400" />
+          <span>{appointment.startTime} - {appointment.endTime}</span>
         </div>
       </div>
+
+      {/* Notes at bottom - only if exists */}
+      {appointment.notes && (
+        <p className="text-[10px] text-gray-400 mt-1.5 pt-1.5 border-t border-gray-200/50 truncate font-medium">
+          {appointment.notes}
+        </p>
+      )}
+
+      {/* Edit button on hover */}
+      {onEdit && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(appointment);
+          }}
+          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-blue-600"
+        >
+          ✎
+        </button>
+      )}
     </div>
   );
 }

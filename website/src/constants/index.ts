@@ -21,7 +21,7 @@ export const STATUS_COLORS = {
   inactive: '#6B7280',
   /** Draft/Temporary states */
   draft: '#9CA3AF',
-} as const;
+} as const
 
 /**
  * Appointment-specific status colors
@@ -33,7 +33,7 @@ export const APPOINTMENT_STATUS_COLORS = {
   completed: '#0EA5E9',
   cancelled: '#EF4444',
   'no-show': '#F59E0B',
-} as const;
+} as const
 
 /**
  * Payment status colors
@@ -44,7 +44,7 @@ export const PAYMENT_STATUS_COLORS = {
   overdue: '#EF4444',
   refunded: '#6B7280',
   partial: '#8B5CF6',
-} as const;
+} as const
 
 /**
  * Dental clinic theme colors
@@ -82,7 +82,7 @@ export const THEME_COLORS = {
     muted: '#9CA3AF',
     inverse: '#FFFFFF',
   },
-} as const;
+} as const
 
 /**
  * Route paths for navigation
@@ -93,6 +93,7 @@ export const ROUTES = {
   CUSTOMERS: '/customers',
   EMPLOYEES: '/employees',
   LOCATIONS: '/locations',
+  SERVICES: '/services',
   WEBSITE: '/website',
   SETTINGS: '/settings',
   RELATIONSHIPS: '/relationships',
@@ -110,25 +111,25 @@ export const ROUTES = {
   PERMISSIONS: '/permissions',
   PAYMENT: '/payment',
   FEEDBACK: '/feedback',
-} as const;
+} as const
 
 /**
  * Navigation item type with optional children for hierarchical menus
  */
 export interface NavigationItem {
-  path: string;
-  label: string;
-  icon: string;
-  count?: string;
-  isPremium?: boolean;
-  children?: NavigationItem[];
+  path: string
+  label: string
+  icon: string
+  count?: string
+  isPremium?: boolean
+  children?: NavigationItem[]
 }
 
 /**
- * Navigation items for sidebar/menu with hierarchical structure
- * @design-ref:submenu-indentation - Children items are indented under parents
- * @design-ref:count-badges - Shows completion counts like "0/5"
- */
+  * Navigation items for sidebar/menu with hierarchical structure
+  * @design-ref:submenu-indentation - Children items are indented under parents
+  * @design-ref:count-badges - Shows completion counts like "0/5"
+  */
 export const NAVIGATION_ITEMS: NavigationItem[] = [
   { path: ROUTES.OVERVIEW, label: 'overview', icon: 'BarChart3' },
   { path: ROUTES.CALENDAR, label: 'calendar', icon: 'Calendar' },
@@ -138,6 +139,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     label: 'clinic',
     icon: 'Stethoscope',
     children: [
+      { path: ROUTES.SERVICES, label: 'services', icon: 'Stethoscope' },
       { path: ROUTES.WEBSITE, label: 'serviceCatalog', icon: 'Stethoscope', count: '228' },
       { path: ROUTES.PAYMENT, label: 'paymentPlans', icon: 'CreditCard' },
     ],
@@ -179,7 +181,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
       { path: ROUTES.NOTIFICATIONS, label: 'notifications', icon: 'Bell' },
     ],
   },
-] as const;
+] as const
 
 /**
  * Appointment type definitions with color coding
@@ -192,9 +194,12 @@ export type AppointmentType =
   | 'surgery'
   | 'orthodontics'
   | 'cosmetic'
-  | 'emergency';
+  | 'emergency'
 
-export const APPOINTMENT_TYPE_COLORS: Record<AppointmentType, { bg: string; border: string; text: string; dot: string }> = {
+export const APPOINTMENT_TYPE_COLORS: Record<
+  AppointmentType,
+  { bg: string; border: string; text: string; dot: string }
+> = {
   cleaning:     { bg: 'bg-teal-50',    border: 'border-teal-200',    text: 'text-teal-700',    dot: 'bg-teal-500' },
   consultation: { bg: 'bg-blue-50',    border: 'border-blue-200',    text: 'text-blue-700',    dot: 'bg-blue-500' },
   treatment:    { bg: 'bg-amber-50',   border: 'border-amber-200',   text: 'text-amber-700',   dot: 'bg-amber-500' },
@@ -202,7 +207,7 @@ export const APPOINTMENT_TYPE_COLORS: Record<AppointmentType, { bg: string; bord
   orthodontics: { bg: 'bg-purple-50',  border: 'border-purple-200',  text: 'text-purple-700',  dot: 'bg-purple-500' },
   cosmetic:     { bg: 'bg-pink-50',    border: 'border-pink-200',    text: 'text-pink-700',    dot: 'bg-pink-500' },
   emergency:    { bg: 'bg-orange-50',  border: 'border-orange-200',  text: 'text-orange-700',  dot: 'bg-orange-500' },
-} as const;
+} as const
 
 export const APPOINTMENT_TYPE_LABELS: Record<AppointmentType, string> = {
   cleaning: 'calendar.appointmentTypes.cleaning',
@@ -212,7 +217,7 @@ export const APPOINTMENT_TYPE_LABELS: Record<AppointmentType, string> = {
   orthodontics: 'calendar.appointmentTypes.orthodontics',
   cosmetic: 'calendar.appointmentTypes.cosmetic',
   emergency: 'calendar.appointmentTypes.emergency',
-} as const;
+} as const
 
 /**
  * Common time slots for appointments
@@ -222,14 +227,14 @@ export const TIME_SLOTS = [
   '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
   '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
   '17:00', '17:30', '18:00', '18:30', '19:00', '19:30',
-] as const;
+] as const
 
 /**
  * Week days for scheduling
  */
 export const WEEK_DAYS = [
   'common.days.monday', 'common.days.tuesday', 'common.days.wednesday', 'common.days.thursday', 'common.days.friday', 'common.days.saturday', 'common.days.sunday',
-] as const;
+] as const
 
 /**
  * ═══════════════════════════════════════════════════════════════════════
@@ -247,19 +252,19 @@ export const WEEK_DAYS = [
  */
 export interface AppointmentCardColor {
   /** Tailwind bg class for card background */
-  bg: string;
+  bg: string
   /** Tailwind bg class for highlighted/gradient card */
-  bgHighlight: string;
+  bgHighlight: string
   /** Tailwind border class */
-  border: string;
+  border: string
   /** Tailwind text class */
-  text: string;
+  text: string
   /** Tailwind dot/accent class */
-  dot: string;
+  dot: string
   /** Human-readable label (Vietnamese) */
-  label: string;
+  label: string
   /** Tailwind gradient classes for color picker preview dots */
-  previewGradient: string;
+  previewGradient: string
 }
 
 export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
@@ -269,7 +274,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
     border: 'border-blue-200',
     text: 'text-blue-700',
     dot: 'border-l-blue-400',
-    label: 'common.colors.blue',
+    label: 'common:colors.blue',
     previewGradient: 'from-blue-200 to-blue-300',
   },
   '1': {
@@ -278,7 +283,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
     border: 'border-emerald-200',
     text: 'text-emerald-700',
     dot: 'border-l-emerald-400',
-    label: 'common.colors.green',
+    label: 'common:colors.green',
     previewGradient: 'from-emerald-200 to-emerald-300',
   },
   '2': {
@@ -287,7 +292,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
     border: 'border-amber-200',
     text: 'text-amber-700',
     dot: 'border-l-amber-400',
-    label: 'common.colors.orange',
+    label: 'common:colors.orange',
     previewGradient: 'from-amber-200 to-amber-300',
   },
   '3': {
@@ -296,7 +301,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
     border: 'border-red-200',
     text: 'text-red-700',
     dot: 'border-l-red-400',
-    label: 'common.colors.red',
+    label: 'common:colors.red',
     previewGradient: 'from-red-200 to-red-300',
   },
   '4': {
@@ -305,7 +310,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
     border: 'border-violet-200',
     text: 'text-violet-700',
     dot: 'border-l-violet-400',
-    label: 'common.colors.purple',
+    label: 'common:colors.purple',
     previewGradient: 'from-violet-200 to-violet-300',
   },
   '5': {
@@ -314,7 +319,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
     border: 'border-pink-200',
     text: 'text-pink-700',
     dot: 'border-l-pink-400',
-    label: 'common.colors.pink',
+    label: 'common:colors.pink',
     previewGradient: 'from-pink-200 to-pink-300',
   },
   '6': {
@@ -323,7 +328,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
     border: 'border-cyan-200',
     text: 'text-cyan-700',
     dot: 'border-l-cyan-400',
-    label: 'common.colors.cyan',
+    label: 'common:colors.cyan',
     previewGradient: 'from-cyan-200 to-cyan-300',
   },
   '7': {
@@ -332,13 +337,13 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
     border: 'border-lime-200',
     text: 'text-lime-700',
     dot: 'border-l-lime-400',
-    label: 'common.colors.lime',
+    label: 'common:colors.lime',
     previewGradient: 'from-lime-200 to-lime-300',
   },
-} as const;
+} as const
 
 /** Default color when no color code is set */
-export const DEFAULT_APPOINTMENT_COLOR = APPOINTMENT_CARD_COLORS['0'];
+export const DEFAULT_APPOINTMENT_COLOR = APPOINTMENT_CARD_COLORS['0']
 
 /**
  * ═══════════════════════════════════════════════════════════════════════
@@ -351,24 +356,20 @@ export const DEFAULT_APPOINTMENT_COLOR = APPOINTMENT_CARD_COLORS['0'];
  * ═══════════════════════════════════════════════════════════════════════
  */
 export const APPOINTMENT_STATUS_OPTIONS = [
-  { value: 'scheduled', label: 'appointments.status.scheduled', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-  { value: 'arrived', label: 'appointments.status.arrived', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-  { value: 'cancelled', label: 'appointments.status.cancelled', color: 'bg-red-100 text-red-700 border-red-200' },
-] as const;
+  { value: 'scheduled', label: 'status.scheduled', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  { value: 'arrived', label: 'status.arrived', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+  { value: 'cancelled', label: 'status.cancelled', color: 'bg-red-100 text-red-700 border-red-200' },
+] as const
 
-/**
- * i18n status keys for ALL appointment states (including extended ones).
- * Used by AppointmentDetailsModal for display.
- * Use with: t(`appointments.status.${APPOINTMENT_STATUS_LABELS[key]}`)
- */
+/** i18n status keys for ALL appointment states (including extended ones). */
 export const APPOINTMENT_STATUS_I18N_KEYS: Record<string, string> = {
-  scheduled: 'appointments.status.scheduled',
-  arrived: 'appointments.status.arrived',
-  confirmed: 'appointments.status.confirmed',
-  'in-progress': 'appointments.status.inProgress',
-  completed: 'appointments.status.completed',
-  cancelled: 'appointments.status.cancelled',
-};
+  scheduled: 'status.scheduled',
+  arrived: 'status.arrived',
+  confirmed: 'status.confirmed',
+  'in-progress': 'status.inProgress',
+  completed: 'status.completed',
+  cancelled: 'status.cancelled',
+}
 
 /** @deprecated Use APPOINTMENT_STATUS_I18N_KEYS with t() instead */
 export const APPOINTMENT_STATUS_LABELS_VI: Record<string, string> = {
@@ -378,6 +379,6 @@ export const APPOINTMENT_STATUS_LABELS_VI: Record<string, string> = {
   'in-progress': 'Đang khám',
   completed: 'Hoàn tất',
   cancelled: 'Hủy hẹn',
-};
+}
 
-export type AppointmentStatus = typeof APPOINTMENT_STATUS_OPTIONS[number]['value'];
+export type AppointmentStatus = typeof APPOINTMENT_STATUS_OPTIONS[number]['value']

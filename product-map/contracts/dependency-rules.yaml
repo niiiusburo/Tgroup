@@ -1,0 +1,139 @@
+# TGroup Dependency Rules
+# Describes required downstream updates when a given artifact type changes.
+
+rules:
+  - name: schema-change
+    trigger: "Any database schema change (table, column, FK, index, enum)"
+    must_update:
+      - migration script or init SQL snapshot
+      - backend route queries touching the table
+      - frontend types in website/src/types/
+      - frontend API DTOs in website/src/lib/api/
+      - delete guards if FK relationships changed
+      - E2E tests covering affected flows
+      - product-map/schema-map.md
+      - product-map/domains/<affected-domain>.yaml
+    should_review:
+      - website/src/constants/index.ts (if enums or status values affected)
+      - website/src/hooks/use*.ts consuming the entity
+      - DataTable column definitions
+      - i18n keys if labels depend on DB values
+
+  - name: shared-dto-change
+    trigger: "Change to a shared TypeScript interface or API DTO"
+    must_update:
+      - serializer / api client in website/src/lib/api/
+      - all component props consuming the DTO
+      - all hooks returning or accepting the DTO
+      - unit tests and E2E fixtures using the DTO
+      - barrel exports (website/src/lib/api.ts) if shapes changed
+    should_review:
+      - DataTable row renderers
+      - Form validation schemas
+      - Mock data in website/src/data/
+
+  - name: api-endpoint-change
+    trigger: "New, removed, or changed backend endpoint"
+    must_update:
+      - frontend API client in website/src/lib/api/
+      - frontend hooks calling the endpoint
+      - UI components using the hook
+      - E2E tests for the endpoint flow
+      - website/src/constants/index.ts ROUTE_PERMISSIONS if new page
+    should_review:
+      - nginx.conf / nginx.docker.conf if path or upload size changes
+      - docker-compose.yml if new env vars required
+      - scripts/deploy-tbot.sh
+
+  - name: permission-change
+    trigger: "Change to permission string, tier logic, location scope, or auth middleware"
+    must_update:
+      - api/src/middleware/auth.js
+      - api/src/routes/auth.js (resolvePermissions)
+      - website/src/constants/index.ts ROUTE_PERMISSIONS
+      - website/src/contexts/AuthContext.tsx (if payload shape changes)
+      - PermissionBoard UI and settings components
+      - E2E permission tests
+      - product-map/domains/auth.yaml
+    should_review:
+      - Every route using requirePermission()
+      - Sidebar nav item visibility logic
+      - Audit / logging if auth events are tracked
+
+  - name: ui-design-system-change
+    trigger: "Change to shared colors, status options, time slots, or Tailwind tokens"
+    must_update:
+      - website/src/constants/index.ts (canonical source)
+      - all components importing the changed constant
+      - i18n keys if label mappings changed
+      - unit tests asserting class names or labels
+    should_review:
+      - E2E screenshot baselines
+      - Accessibility contrast checks
+
+  - name: job-worker-change
+    trigger: "New or changed script, cron, or background worker"
+    must_update:
+      - script file in scripts/ or api/scripts/
+      - docker-compose.yml if new service or schedule env var
+      - notes/🚀 Deployment Guide.md
+      - idempotency and error-handling review
+    should_review:
+      - DB connection pattern (must use api/src/db.js style)
+      - Log aggregation / alerting
+      - scripts/deploy-tbot.sh
+
+  - name: deployment-config-change
+    trigger: "Change to docker-compose, Dockerfile, nginx, or env vars"
+    must_update:
+      - scripts/deploy-tbot.sh (updated FIRST)
+      - .env.example
+      - notes/🚀 Deployment Guide.md
+      - nginx.docker.conf if nginx.conf changed
+    should_review:
+      - api/src/server.js ALLOWED_ORIGINS
+      - CORS and CSP headers
+      - SSL certificate paths
+    verify:
+      - bash -n scripts/deploy-tbot.sh
+      - local docker-compose smoke test
+
+  - name: i18n-change
+    trigger: "New or changed translation keys"
+    must_update:
+      - Both en and vi JSON files for the namespace
+      - All components using the key
+      - Unit tests asserting rendered text
+    should_review:
+      - Key naming consistency (namespace.segment format)
+      - Missing-key fallback behavior
+
+  - name: shared-hook-change
+    trigger: "Change to a custom hook used across multiple pages"
+    must_update:
+      - all pages/components importing the hook
+      - hook unit tests
+      - E2E tests for affected pages
+    should_review:
+      - hook dependency arrays (stale closure risk)
+      - mock setups in tests
+
+blast_radius_map:
+  - file: api/src/db.js
+    radius: all_api_routes
+  - file: api/src/middleware/auth.js
+    radius: all_protected_routes_and_frontend_auth_context
+  - file: website/src/lib/api/core.ts
+    radius: all_frontend_api_calls
+  - file: website/src/contexts/AuthContext.tsx
+    radius: all_protected_routes_and_location_filter
+  - file: website/src/contexts/LocationContext.tsx
+    radius: all_list_views_and_filters
+  - file: website/src/constants/index.ts
+    radius: all_ui_components_and_tests
+  - file: dbo.partners
+    radius: auth_customers_employees_payments_appointments_reports_face_recognition
+  - file: dbo.appointments
+    radius: calendar_forms_overview_reports_feedback_kpis
+  - file: dbo.products
+    radius: service_catalog_appointments_saleorders_reports_delete_guards

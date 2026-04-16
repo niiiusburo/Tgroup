@@ -4,11 +4,11 @@
 
 | Status | Count |
 |--------|-------|
-| ✅ Done | 20 |
+| ✅ Done | 28 |
 | 🔄 In Progress | 0 |
 | ⏳ Todo | 0 |
 
-## All Features (20)
+## Core Features (20)
 
 ### Setup (Features 1-3)
 | ID | Feature | Status | Progress |
@@ -66,11 +66,26 @@
 |----|---------|--------|----------|
 | 20 | Multi-Location Management | ✅ Done | Session: 2026-04-07 |
 
+## Extended Features (8+)
+
+| ID | Feature | Status | Notes |
+|----|---------|--------|-------|
+| 21 | **Permission System / RBAC** | ✅ Done | `permission_groups`, `employee_permissions`, location scoping |
+| 22 | **Feedback System** | ✅ Done | Threads, messages, attachments, admin UI, widget |
+| 23 | **Reports Module** | ✅ Done | 6 sub-reports: dashboard, revenue, appointments, doctors, customers, locations |
+| 24 | **Commission Module** | ✅ Done | Commission tracking and payouts |
+| 25 | **Face Recognition** | ✅ Done | Compreface integration for patient check-in |
+| 26 | **Version Check / Force Update** | ✅ Done | `useVersionCheck` prompts users to refresh |
+| 27 | **IP Access Control** | ✅ Done | `useIpAccessControl` restricts logins by IP whitelist |
+| 28 | **Bank Settings / VietQR** | ✅ Done | Bank config, VietQR generation, payment proof upload |
+| 29 | **Website CMS** | ✅ Done | Page editor, SEO manager |
+| 30 | **Self-Service Password Change** | ✅ Done | Change password modal + `/Auth/change-password` API |
+
 ## Feature Details
 
 ### Feature 1: Project Scaffold
 - ✅ Vite + React + TypeScript + Tailwind configured
-- ✅ React Router with all 14 routes
+- ✅ React Router with all routes
 - ✅ Constants file with theme colors
 - ✅ All page placeholders created
 
@@ -108,15 +123,17 @@
 - ✅ Customer detail page
 - ✅ Customer edit form
 - ✅ Customer appointment history
+- ✅ Face recognition capture
 
 ### Feature 10-12: Appointments
 - ✅ Appointment list with filters
 - ✅ Appointment creation form
 - ✅ Status management
 - ✅ Calendar integration
+- ✅ Drag-to-reschedule
 
 ### Feature 13-14: Services
-- ✅ Service catalog
+- ✅ Service catalog (using `products` table)
 - ✅ Service categories
 - ✅ Service creation/editing
 - ✅ Price management
@@ -126,15 +143,76 @@
 - ✅ PaymentForm
 - ✅ MonthlyPlan component
 - ✅ Payment history
+- ✅ VietQR generation
+- ✅ Payment proof upload
 
 ### Feature 18-19: Employees
 - ✅ EmployeeTable
 - ✅ EmployeeProfile
 - ✅ TierSelector
 - ✅ Schedule management
+- ✅ Permission assignment
 
 ### Feature 20: Locations
 - ✅ LocationDashboard
 - ✅ LocationDetail
 - ✅ LocationCard
 - ✅ Multi-location filtering
+
+### Feature 21: Permission System
+- ✅ 5 permission tiers (Admin, Clinic Manager, Dentist, Receptionist, Dental Assistant)
+- ✅ `employee_permissions` mapping
+- ✅ `permission_overrides` for individual grant/revoke
+- ✅ `employee_location_scope` for branch-level access
+- ✅ JWT token includes permissions + locations
+- ✅ Frontend `hasPermission()` and `hasLocationAccess()` guards
+- ✅ PermissionBoard UI for visualization and editing
+
+### Feature 22: Feedback System
+- ✅ Feedback widget on all pages
+- ✅ Threaded conversations
+- ✅ Attachment uploads
+- ✅ Admin moderation panel
+
+### Feature 23: Reports
+- ✅ ReportsDashboard with KPI cards
+- ✅ Revenue report with charts
+- ✅ Appointment analytics
+- ✅ Doctor performance
+- ✅ Customer reports
+- ✅ Location comparison
+
+### Feature 24: Commission
+- ✅ Commission rules configuration
+- ✅ Auto-calculation on payments
+- ✅ Commission statements
+
+### Feature 25: Face Recognition
+- ✅ Compreface Docker services
+- ✅ Face registration for customers
+- ✅ Check-in verification
+
+### Feature 26: Version Check
+- ✅ `version.json` auto-generated on build
+- ✅ Polling check in background
+- ✅ Modal prompt when new version deployed
+
+### Feature 27: IP Access Control
+- ✅ IP whitelist configuration
+- ✅ Block login from unauthorized IPs
+- ✅ Admin bypass
+
+### Feature 28: Bank / VietQR
+- ✅ Bank account settings (bin, number, account name)
+- ✅ Dynamic VietQR URL generation
+- ✅ Upload and store payment proof images
+
+### Feature 29: Website CMS
+- ✅ Page list and editor
+- ✅ SEO title/description per page
+- ✅ Live preview
+
+### Feature 30: Password Management
+- ✅ Change password modal in sidebar
+- ✅ Backend `/Auth/change-password` endpoint
+- ✅ Old password verification + minimum length

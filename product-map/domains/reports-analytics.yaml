@@ -1,0 +1,77 @@
+name: Reports & Analytics
+summary: |
+  Dashboard KPIs and sub-reports (revenue, appointments, doctors, customers,
+  locations, services, employees). Aggregates data from appointments, payments,
+  saleorders, partners, and products.
+owns:
+  - api/src/routes/reports.js
+  - api/src/routes/dashboardReports.js
+  - website/src/pages/Reports.tsx
+  - website/src/pages/reports/
+  - website/src/components/reports/
+  - website/src/hooks/useReportData.ts
+  - website/src/hooks/useDashboardStats.ts
+  - website/src/hooks/useOverviewData.ts
+reads:
+  - api/src/db.js
+writes:
+  - none (read-only domain)
+tables:
+  - dbo.appointments
+  - dbo.payments
+  - dbo.saleorders
+  - dbo.saleorderlines
+  - dbo.partners
+  - dbo.products
+  - dbo.productcategories
+  - dbo.companies
+  - dbo.customersources
+  - dbo.monthlyplans
+  - dbo.planinstallments
+endpoints:
+  - POST /api/Reports/dashboard
+  - POST /api/Reports/revenue/summary
+  - POST /api/Reports/revenue/trend
+  - POST /api/Reports/revenue/by-location
+  - POST /api/Reports/revenue/by-doctor
+  - POST /api/Reports/revenue/by-category
+  - POST /api/Reports/revenue/payment-plans
+  - POST /api/Reports/appointments/summary
+  - POST /api/Reports/appointments/trend
+  - POST /api/Reports/doctors/performance
+  - POST /api/Reports/customers/summary
+  - POST /api/Reports/employees/overview
+  - POST /api/Reports/services/breakdown
+  - POST /api/Reports/locations/comparison
+  - POST /api/DashboardReports/GetSumary
+ui_surfaces:
+  - /reports
+  - /reports/dashboard
+  - /reports/revenue
+  - /reports/appointments
+  - /reports/doctors
+  - /reports/customers
+  - /reports/locations
+  - /reports/services
+  - /reports/employees
+  - Overview page (TodaySchedule, RevenueChartModule, StatCardModule)
+jobs:
+  - none
+shared_types:
+  - website/src/types/common.ts (RevenueDataPoint)
+  - website/src/hooks/useReportData.ts (return shapes)
+dependencies:
+  - Appointments & Calendar
+  - Payments & Deposits
+  - Services Catalog
+  - Customers & Partners
+  - Employees & HR
+affected_by:
+  - Any schema change to aggregated tables
+  - Any change to appointment status values
+  - Any change to payment method enum
+impact_tests:
+  - website/src/pages/reports/__tests__/ReportsDashboard.test.tsx
+  - website/src/pages/reports/__tests__/ReportsSubpages.test.tsx
+  - website/src/__tests__/useVersionCheck.test.ts (indirect)
+risk_level: medium

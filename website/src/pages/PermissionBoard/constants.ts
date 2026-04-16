@@ -3,7 +3,7 @@ import type { EmployeePermission } from '@/lib/api';
 export const MODULES = [
   { name: 'Overview', actions: ['View'] },
   { name: 'Calendar', actions: ['View', 'Edit'] },
-  { name: 'Customers', actions: ['View', 'View All', 'Add', 'Edit', 'Delete'] },
+  { name: 'Customers', actions: ['View', 'View All', 'Add', 'Edit', 'Delete', 'Hard Delete'] },
   { name: 'Appointments', actions: ['View', 'Add', 'Edit'] },
   { name: 'Services', actions: ['View', 'Add', 'Edit'] },
   { name: 'Payment', actions: ['View', 'Add', 'Refund'] },
@@ -16,7 +16,7 @@ export const MODULES = [
   { name: 'Permissions', actions: ['View', 'Edit'] },
   { name: 'Relationships', actions: ['View'] },
   { name: 'Website', actions: ['View', 'Edit'] },
-  { name: 'Health Checkups', actions: ['View', 'Create'] },
+  { name: 'External Checkups', actions: ['View', 'Create'] },
 ] as const;
 
 export const PERMISSION_DESCRIPTIONS: Record<string, string> = {
@@ -56,7 +56,9 @@ export const PERMISSION_DESCRIPTIONS: Record<string, string> = {
   'relationships.view': 'Xem mối quan hệ dữ liệu',
   'website.view': 'Xem trang website',
   'website.edit': 'Chỉnh sửa trang website',
+  'external_checkups.view': 'Xem ảnh khám ngoài',
   'external_checkups.create': 'Tải lên ảnh khám ngoài',
+  'customers.hard_delete': 'Xóa vĩnh viễn khách hàng khỏi hệ thống',
 };
 
 export function getInitials(name: string): string {

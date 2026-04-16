@@ -1,5 +1,37 @@
 [
   {
+    "version": "0.13.4",
+    "date": "2026-04-16",
+    "commit": "2275291c",
+    "highlights": "Fixed customer CRUD (add/edit) - repaired INSERT statement and auth permission middleware. Added E2E test suite for customer module.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Fixed API POST /api/Partners - repaired column count mismatch (45 columns, 42 VALUES expressions)",
+          "Fixed API auth middleware - queried non-existent 'tier_id' column, now uses 'employee_permissions' table",
+          "Fixed API auth.js location_id column name - changed to 'company_id' in employee_location_scope JOIN",
+          "Updated admin email from 'admin@tamdentist.vn' to 'tg@clinic.vn' for login compatibility",
+          "Fixed AddCustomerForm tabs (Basic, Medical, EInvoice) - all tabs now navigate and save correctly"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added comprehensive E2E test suite: customer-add-edit-full.spec.ts with 12 test cases",
+          "Verified customer create-save.spec.ts passes: Add Customer modal closes after save",
+          "Verified customer-persistence-sweep.spec.ts: 9/14 tests pass (profile, appointments, records tabs)"
+        ]
+      },
+      {
+        "title": "Dependencies",
+        "items": [
+          "All Docker containers (api, web, db) rebuilt and verified running locally"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.12.1",
     "date": "2026-04-14",
     "commit": "pending",

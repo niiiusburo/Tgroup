@@ -1,0 +1,247 @@
+# TGroup Permission Registry
+# Canonical mapping of all permission strings to backend routes, frontend routes, and UI components.
+
+meta:
+  total_backend_strings: 21
+  total_frontend_route_guards: 15
+  total_nav_guards: 13
+  wildcard: "*"
+  wildcard_meaning: "Grants all permissions (used in auth middleware and hasPermission)"
+
+# Backend permission strings used in requirePermission() middleware
+backend_permissions:
+  - string: appointments.add
+    routes:
+      - POST /api/Appointments
+  - string: appointments.edit
+    routes:
+      - PUT /api/Appointments/:id
+  - string: customers.add
+    routes:
+      - POST /api/Partners
+  - string: customers.delete
+    routes:
+      - PATCH /api/Partners/:id/soft-delete
+  - string: customers.edit
+    routes:
+      - PUT /api/Partners/:id
+  - string: customers.hard_delete
+    routes:
+      - DELETE /api/Partners/:id/hard-delete
+  - string: customers.view
+    routes:
+      - GET /api/Partners/:id
+      - GET /api/Partners/:id/GetKPIs
+  - string: employees.edit
+    routes:
+      - POST /api/Employees
+      - PUT /api/Employees/:id
+      - DELETE /api/Employees/:id
+  - string: external_checkups.create
+    routes:
+      - POST /api/ExternalCheckups/:customerCode/health-checkups
+  - string: external_checkups.view
+    routes:
+      - GET /api/ExternalCheckups/:customerCode
+  - string: payment.edit
+    routes:
+      - POST /api/Payments
+      - POST /api/Payments/refund
+      - PATCH /api/Payments/:id
+      - DELETE /api/Payments/:id
+      - POST /api/Payments/:id/void
+      - POST /api/Payments/:id/proof
+      - PUT /api/settings/bank
+      - PUT /api/MonthlyPlans/:id
+      - PUT /api/MonthlyPlans/:id/installments/:installmentId/pay
+      - POST /api/MonthlyPlans
+      - DELETE /api/MonthlyPlans/:id
+  - string: payment.view
+    routes:
+      - GET /api/MonthlyPlans
+      - GET /api/MonthlyPlans/:id
+  - string: permissions.edit
+    routes:
+      - POST /api/Permissions/groups
+      - PUT /api/Permissions/groups/:groupId
+      - PUT /api/Permissions/employees/:employeeId
+  - string: permissions.view
+    routes:
+      - GET /api/Permissions/groups
+      - GET /api/Permissions/employees
+      - GET /api/Permissions/resolve/:employeeId
+  - string: reports.view
+    routes:
+      - POST /api/Reports/*
+      - POST /api/DashboardReports/GetSumary
+  - string: services.edit
+    routes:
+      - POST /api/Products
+      - PUT /api/Products/:id
+      - DELETE /api/Products/:id
+      - POST /api/ProductCategories
+      - PUT /api/ProductCategories/:id
+      - DELETE /api/ProductCategories/:id
+  - string: services.view
+    routes:
+      - GET /api/Services
+  - string: settings.edit
+    routes:
+      - POST /api/CustomerSources
+      - PUT /api/CustomerSources/:id
+      - DELETE /api/CustomerSources/:id
+      - POST /api/SystemPreferences
+      - PUT /api/SystemPreferences/:key
+      - DELETE /api/SystemPreferences/:key
+      - POST /api/SystemPreferences/bulk
+      - POST /api/StockPickings
+      - PUT /api/StockPickings/:id
+      - DELETE /api/StockPickings/:id
+  - string: settings.view
+    routes:
+      - GET /api/SystemPreferences
+      - GET /api/SystemPreferences/:key
+      - GET /api/settings/bank
+      - GET /api/CustomerSources
+      - GET /api/CustomerSources/:id
+      - GET /api/StockPickings
+      - GET /api/StockPickings/:id
+  - string: website.edit
+    routes:
+      - POST /api/WebsitePages
+      - PUT /api/WebsitePages/:id
+      - DELETE /api/WebsitePages/:id
+  - string: website.view
+    routes:
+      - GET /api/WebsitePages
+      - GET /api/WebsitePages/:id
+
+# Frontend page-level permission guards (ProtectedRoute in App.tsx)
+frontend_route_permissions:
+  - string: calendar.view
+    paths:
+      - /calendar
+  - string: commission.view
+    paths:
+      - /commission
+  - string: customers.view
+    paths:
+      - /customers
+      - /customers/:id
+  - string: employees.view
+    paths:
+      - /employees
+  - string: locations.view
+    paths:
+      - /locations
+  - string: notifications.view
+    paths:
+      - /notifications
+  - string: overview.view
+    paths:
+      - /
+  - string: payment.view
+    paths:
+      - /payment
+  - string: permissions.view
+    paths:
+      - /permissions
+      - /feedback
+  - string: relationships.view
+    paths:
+      - /relationships
+  - string: reports.view
+    paths:
+      - /reports
+      - /reports/dashboard
+      - /reports/revenue
+      - /reports/appointments
+      - /reports/doctors
+      - /reports/customers
+      - /reports/locations
+      - /reports/services
+      - /reports/employees
+  - string: settings.view
+    paths:
+      - /settings
+  - string: website.view
+    paths:
+      - /website
+
+# Additional frontend permissions not in ROUTE_PERMISSIONS but checked inline
+frontend_inline_permissions:
+  - string: appointments.view
+    note: Implied by calendar.view; no explicit route guard but backend GET /api/Appointments is unguarded
+  - string: locations.edit
+    components:
+      - components/settings/RoleConfig.tsx (inferred from grep)
+    note: Not present in backend requirePermission list
+  - string: external_checkups.view
+    components:
+      - pages/Customers.tsx (conditionally renders HealthCheckupGallery)
+  - string: customers.view_all
+    components:
+      - components/shared/CustomerSelector.tsx or related customer list filters
+    note: Grep shows usage but source not fully traced
+  - string: customers.edit
+    components:
+      - pages/Customers.tsx (edit button guard)
+  - string: customers.add
+    components:
+      - pages/Customers.tsx (add button guard)
+  - string: customers.delete
+    components:
+      - pages/Customers.tsx (delete action guard)
+  - string: customers.hard_delete
+    components:
+      - pages/Customers.tsx (hard delete guard)
+
+# Nav sidebar permission mapping (Layout.tsx NAV_PERMISSION)
+nav_permissions:
+  - path: /
+    permission: overview.view
+  - path: /calendar
+    permission: calendar.view
+  - path: /customers
+    permission: customers.view
+  - path: /appointments
+    permission: appointments.view
+  - path: /website
+    permission: website.view
+  - path: /payment
+    permission: payment.view
+  - path: /employees
+    permission: employees.view
+  - path: /locations
+    permission: locations.view
+  - path: /reports
+    permission: reports.view
+  - path: /commission
+    permission: commission.view
+  - path: /settings
+    permission: settings.view
+  - path: /notifications
+    permission: notifications.view
+  - path: /permissions
+    permission: permissions.view
+  - path: /feedback
+    permission: permissions.view
+  - path: /clinic
+    permission: ""  # container, no guard
+  - path: /team
+    permission: ""  # container, no guard
+  - path: /admin
+    permission: ""  # container, no guard
+
+# Gaps / risks
+risks:
+  - desc: "appointments.view exists in NAV_PERMISSION but not in backend requirePermission list (GET /api/Appointments is open)"
+    severity: medium
+  - desc: "locations.edit is checked in frontend but no backend requirePermission('locations.edit') exists"
+    severity: low
+  - desc: "services.view guards GET /api/Services which is dead code (public.services table missing)"
+    severity: high
+  - desc: "No central enum means typos in any string cause silent failures or 403s"
+    severity: high
+  - desc: "Wildcard * bypasses all checks but is not documented for admins"
+    severity: low

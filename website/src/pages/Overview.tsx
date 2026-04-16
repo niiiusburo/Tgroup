@@ -1,5 +1,5 @@
 // @crossref:global-filter[FilterByLocation] — synced via LocationContext across: Overview, Customers, Calendar, Appointments, Employees, Services, Payment
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { PatientCheckIn } from '@/components/modules/PatientCheckIn';
 import { TodayServicesTable } from '@/components/modules/TodayServicesTable';
 import { TodayAppointments } from '@/components/modules/TodayAppointments';
@@ -9,6 +9,8 @@ import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { AppointmentHoverProvider } from '@/contexts/AppointmentHoverContext';
 import { QuickAddAppointmentButton } from '@/components/shared/QuickAddAppointmentButton';
+import { DateRangePicker } from '@/components/shared/DateRangePicker';
+import { useTimezone } from '@/contexts/TimezoneContext';
 
 /**
  * Overview Dashboard Page — Three-Zone Layout
@@ -22,6 +24,53 @@ import { QuickAddAppointmentButton } from '@/components/shared/QuickAddAppointme
  */
 export function Overview() {
   const { selectedLocationId } = useLocationFilter();
+  const { formatDate: _formatDate } = useTimezone();
+
+  // Date range picker state
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('day');
+
+  // Compute date label for the picker button
+  const dateLabel = useMemo(() => {
+    if (viewMode === 'day') {
+      return currentDate.toLocaleDateString('vi-VN', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+      });
+    } else if (viewMode === 'week') {
+      // Get week start (Monday)
+      const d = new Date(currentDate);
+      const day = d.getDay();
+      const start = new Date(d);
+      start.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+      return `${start.toLocaleDateString('vi-VN', opts)} — ${end.toLocaleDateString('vi-VN', { ...opts, year: 'numeric' })}`;
+    }
+    return currentDate.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' });
+  }, [viewMode, currentDate]);
+
+  // Navigate the calendar
+  const navigate = useCallback((dir: 'prev' | 'next') => {
+    setCurrentDate((d) => {
+      const next = new Date(d);
+      if (viewMode === 'day') {
+        next.setDate(d.getDate() + (dir === 'next' ? 1 : -1));
+      } else if (viewMode === 'week') {
+        next.setDate(d.getDate() + (dir === 'next' ? 7 : -7));
+      } else {
+        next.setMonth(d.getMonth() + (dir === 'next' ? 1 : -1));
+      }
+      return next;
+    });
+  }, [viewMode]);
+
+  const goToToday = useCallback(() => {
+    setCurrentDate(new Date());
+    setViewMode('day');
+  }, []);
 
   const {
     isLoading,
@@ -74,15 +123,43 @@ export function Overview() {
 
   return (
     <AppointmentHoverProvider>
-      {/* Quick Add Appointment Button — Top Right */}
-      <div className="flex justify-end mb-6 gap-3">
-        <QuickAddAppointmentButton
-          onSuccess={refresh}
-          size="sm"
+      {/* Header: View tabs + DateRangePicker + Quick Add */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+        {/* View mode tabs */}
+        <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-1">
+          {(['day', 'week', 'month'] as const).map((mode) => {
+            const labels = { day: 'Ngày', week: 'Tuần', month: 'Tháng' };
+            return (
+              <button
+                key={mode}
+                onClick={() => setViewMode(mode)}
+                className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${
+                  viewMode === mode
+                    ? 'bg-white text-primary shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {labels[mode]}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Date Range Picker */}
+        <DateRangePicker
+          viewMode={viewMode}
+          dateLabel={dateLabel}
+          onDateChange={setCurrentDate}
+          currentDate={currentDate}
+          navigate={navigate}
+          goToToday={goToToday}
         />
+
+        {/* Quick Add */}
+        <QuickAddAppointmentButton onSuccess={refresh} size="sm" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 min-h-0 lg:h-[calc(100vh-100px)]">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 min-h-0 lg:h-[calc(100vh-120px)]">
         {/* Left column: Zone 1 + Zone 2 stacked */}
         <div className="flex flex-col gap-6 min-h-0 overflow-y-auto">
           {/* Zone 1: Patient Check-in */}

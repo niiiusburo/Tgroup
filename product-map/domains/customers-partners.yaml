@@ -1,0 +1,75 @@
+name: Customers & Partners
+summary: |
+  Single-table inheritance on dbo.partners for customers and employees.
+  Partners route handles CRUD, uniqueness checks, soft/hard delete, and KPIs.
+  Customer data is consumed by the Customers page, selectors, appointments,
+  payments, and face-recognition flows.
+owns:
+  - api/src/routes/partners.js
+  - api/src/routes/customerBalance.js
+  - api/src/routes/customerReceipts.js
+  - api/src/routes/customerSources.js
+  - api/src/routes/faceRecognition.js
+  - website/src/pages/Customers.tsx
+  - website/src/components/forms/AddCustomerForm/
+  - website/src/components/customer/
+  - website/src/components/shared/CustomerSelector.tsx
+  - website/src/lib/api/partners.ts
+  - website/src/hooks/useCustomers.ts
+  - website/src/hooks/useCustomerProfile.ts
+reads:
+  - api/src/db.js
+writes:
+  - dbo.partners (insert/update/soft-delete/hard-delete)
+  - dbo.customersources (CRUD via customerSources route)
+  - dbo.partners.face_registered_at / face_subject_id (face recognition)
+tables:
+  - dbo.partners
+  - dbo.customersources
+  - dbo.appointments (read-only in KPIs)
+  - dbo.saleorders (read-only in KPIs)
+  - dbo.payments (read-only in balance)
+  - dbo.dotkhams (read-only in receipts/profile)
+endpoints:
+  - GET    /api/Partners
+  - GET    /api/Partners/check-unique
+  - GET    /api/Partners/:id
+  - GET    /api/Partners/:id/GetKPIs
+  - POST   /api/Partners
+  - PUT    /api/Partners/:id
+  - PATCH  /api/Partners/:id/soft-delete
+  - DELETE /api/Partners/:id/hard-delete
+  - GET    /api/CustomerBalance/:id
+  - GET    /api/CustomerReceipts
+  - GET    /api/CustomerSources
+  - POST   /api/CustomerSources
+  - PUT    /api/CustomerSources/:id
+  - DELETE /api/CustomerSources/:id
+  - POST   /api/face/recognize
+  - POST   /api/face/register
+ui_surfaces:
+  - /customers
+  - /customers/:id
+  - CustomerSelector dropdown (used in appointments, payments, services)
+  - CustomerProfile tabs (appointments, services, photos, payments)
+  - AddCustomerForm modal
+jobs:
+  - none (archive scripts in api/scripts/archive/ are stale)
+shared_types:
+  - website/src/types/customer.ts
+  - website/src/lib/api/partners.ts (ApiPartner)
+dependencies:
+  - api/src/db.js
+  - api/src/middleware/auth.js (permission checks)
+  - dbo.companies (for companyid FK)
+affected_by:
+  - Changes to dbo.partners schema (NOT NULL constraints recently caused login breakage)
+  - Changes to dbo.companies (location name display)
+  - Permission string changes (customers.view, customers.add, customers.edit, customers.delete, customers.hard_delete)
+impact_tests:
+  - website/e2e/customer-create-save.spec.ts
+  - website/e2e/customer-profile-crud.spec.ts
+  - website/e2e/customer-persistence-sweep.spec.ts
+  - website/e2e/face-recognition related flows
+  - website/src/__tests__/customer-deep-link.test.tsx
+risk_level: high

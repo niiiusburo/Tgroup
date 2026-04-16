@@ -179,8 +179,9 @@ async function fetchVersion(): Promise<VersionInfo> {
   try {
     const response = await fetch(`/version.json${cacheBuster}`, {
       signal: controller.signal,
+      cache: 'no-store',
       headers: {
-        'Cache-Control': 'no-cache',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
       },
     });
@@ -259,15 +260,6 @@ async function clearAllCaches(): Promise<void> {
     } catch {
       // ignore
     }
-  }
-}
-
-/** Store current path so we can return after reload */
-function saveReturnPath(): void {
-  try {
-    sessionStorage.setItem(RETURN_PATH_KEY, window.location.pathname + window.location.search);
-  } catch {
-    // ignore
   }
 }
 
@@ -493,6 +485,8 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
   useEffect(() => { checkRef.current = checkForUpdates; }, [checkForUpdates]);
 
   const applyUpdate = useCallback(async () => {
+    const returnPath = sessionStorage.getItem(RETURN_PATH_KEY);
+
     await clearAllCaches();
 
     localStorage.setItem(JUST_UPDATED_KEY, Date.now().toString());
@@ -502,18 +496,37 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
     }
 
     clearSnooze();
-    saveReturnPath();
     postBroadcast({ type: 'applyUpdate' });
 
     const timestamp = Date.now();
-    const returnPath = sessionStorage.getItem(RETURN_PATH_KEY);
-    const separator = returnPath?.includes('?') ? '&' : '?';
-    const newUrl = returnPath
-      ? `${window.location.origin}${returnPath}${separator}_v=${timestamp}`
-      : `${window.location.href.split('?')[0]}?_v=${timestamp}`;
 
+    // Aggressively invalidate the current document before reloading
+    try {
+      await fetch(window.location.href, {
+        method: 'HEAD',
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
+      });
+    } catch {
+      // ignore
+    }
+
+    // Build a cache-busting URL
+    const targetPath = returnPath || window.location.pathname + window.location.search;
+    const url = new URL(targetPath, window.location.origin);
+    url.searchParams.set('_v', timestamp.toString());
+
+    // Nuclear option: try hard reload first, then fall back to href navigation
     setTimeout(() => {
-      window.location.replace(newUrl);
+      try {
+        // @ts-expect-error deprecated but still the most reliable hard-reload API
+        window.location.reload(true);
+      } catch {
+        window.location.href = url.toString();
+      }
     }, 100);
   }, [latestVersion, postBroadcast]);
   // expose stable applyUpdate ref for bc callback

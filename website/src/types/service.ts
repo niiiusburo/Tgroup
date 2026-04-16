@@ -62,6 +62,7 @@ export interface ServiceRecord {
   readonly visits?: readonly ServiceVisit[];
   readonly expectedEndDate?: string;
   readonly toothNumbers?: readonly string[];
+  readonly toothComment?: string;
   readonly notes?: string;
   readonly orderName?: string;
   readonly orderCode?: string;

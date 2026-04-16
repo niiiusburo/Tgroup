@@ -1,58 +1,104 @@
 # TGroup Deployment Guide
 
-## Local Development
+## Local Development (Docker — Current)
 
-### Prerequisites
-- Node.js 18+
-- Docker & Docker Compose
-- PostgreSQL client (optional)
+The project now runs entirely via Docker Compose locally. Do **not** use Homebrew PostgreSQL for local development.
 
-### Setup
+### Quick Start
 
 ```bash
-# 1. Clone the repository
-git clone <repo-url>
-cd Tgroup
+# Start everything
+docker compose up -d
 
-# 2. Start the database
-docker-compose up -d
-
-# 3. Install frontend dependencies
-cd website && npm install
-
-# 4. Install backend dependencies
-cd ../api && npm install
-
-# 5. Start development servers
-# Terminal 1: Frontend
-cd website && npm run dev
-
-# Terminal 2: Backend
-cd api && npm run dev
+# Verify
+docker compose ps
 ```
 
-### Database Connection
-- **Host:** `127.0.0.1`
-- **Port:** `55433`
-- **Database:** `tdental_demo`
-- **User:** `postgres`
-- **Password:** `postgres`
+### Local URLs & Ports
+
+| Service | URL / Port | Notes |
+|---------|------------|-------|
+| Web (nginx) | http://localhost:5174 | Built React app served by nginx |
+| API | http://localhost:3002 | Express backend |
+| DB | localhost:55433 | PostgreSQL 16 (`tdental_demo`) |
+
+### Test Credentials
+- **Email:** `tg@clinic.vn`
+- **Password:** `123456`
+
+---
+
+## Docker Compose Stack
+
+### Services
+- `db` — PostgreSQL 16 (port `127.0.0.1:55433`)
+- `api` — Node/Express API (port `127.0.0.1:3002`)
+- `web` — nginx serving built React app (port `5174`)
+- `compreface-*` — Face recognition PostgreSQL + API + Core
+
+### Critical Pitfall: DB Initialization
+
+PostgreSQL **only runs init scripts on the first volume creation**. If the `tgroup-pgdata` volume already exists, it skips the SQL seed entirely, leaving you with a broken schema.
+
+**If the DB looks empty or APIs return 500s for missing tables/columns:**
 
 ```bash
-# Connect via CLI
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 55433 -U postgres -d tdental_demo
+# 1. Stop everything
+docker compose down
+
+# 2. Destroy the old volume
+docker volume rm tgroup_tgroup-pgdata
+
+# 3. Start fresh (this will re-run the init SQL)
+docker compose up -d
+```
+
+### Init SQL File
+
+`docker-compose.yml` mounts the seed file here:
+
+```yaml
+volumes:
+  - ./backups/tdental_demo_vps_20260415_162302.sql:/docker-entrypoint-initdb.d/01-init.sql
+```
+
+> **Do not** point this back to `website/demo_tdental_updated.sql` — that dump is stale and missing many tables/columns.
+
+### Rebuilding After Code Changes
+
+```bash
+# API only
+docker compose up -d --build api
+
+# Web only
+docker compose up -d --build web
+
+# Both
+docker compose up -d --build api web
+```
+
+### Connecting to the DB Container
+
+```bash
+docker exec -it tgroup-db psql -U postgres -d tdental_demo
+```
+
+### Applying Stray Migrations
+
+If the backup is slightly behind the code, run any missing migrations manually:
+
+```bash
+for f in api/migrations/*.sql; do
+  docker exec -i tgroup-db psql -U postgres -d tdental_demo < "$f"
+done
 ```
 
 ## Production Deployment (VPS)
 
-### Server Requirements
-- Ubuntu 20.04+ LTS
-- Docker 20.10+
-- Nginx
-- SSL certificates (Let's Encrypt)
+### Current State
+There is **no `scripts/deploy-vps.sh`** at this time. The existing deploy script is `scripts/deploy-tbot.sh`.
 
-### Deployment Steps
-
+### Manual VPS Deployment Steps
 1. **SSH to VPS**
 ```bash
 ssh root@<vps-ip>
@@ -69,78 +115,26 @@ cd /opt/tgroup
 git pull origin main
 ```
 
-4. **Build Docker Images**
+4. **Build and Run**
 ```bash
 docker-compose build
-```
-
-5. **Deploy**
-```bash
 docker-compose up -d
 ```
+
+5. **Expose Web Service**
+The `web` container does not expose a host port by default. You must either:
+- Map a port in `docker-compose.yml` (e.g. `ports: ["80:80"]` if using an nginx image)
+- Or add a reverse proxy container (nginx) pointing to `web` and `api:3002`
 
 6. **Verify**
 ```bash
 docker-compose ps
-curl -I https://tdental.example.com
+curl -I http://<vps-ip>:3002/api/Auth/login
 ```
 
-## Docker Configuration
+## Nginx Configuration (Example)
 
-### docker-compose.yml
-```yaml
-version: '3.8'
-
-services:
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: tdental_demo
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "55433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./demo_tdental.sql:/docker-entrypoint-initdb.d/init.sql
-
-  api:
-    build:
-      context: ./api
-      dockerfile: Dockerfile.api
-    ports:
-      - "3001:3001"
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/tdental_demo
-    depends_on:
-      - postgres
-
-  web:
-    build:
-      context: ./website
-      dockerfile: Dockerfile.web
-    ports:
-      - "3000:80"
-    depends_on:
-      - api
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
-    depends_on:
-      - web
-      - api
-
-volumes:
-  postgres_data:
-```
-
-## Nginx Configuration
+If you add nginx back to the stack:
 
 ```nginx
 server {
@@ -154,7 +148,7 @@ server {
     }
 
     location /api {
-        proxy_pass http://api:3001;
+        proxy_pass http://api:3002;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
@@ -166,12 +160,12 @@ server {
 ### Database Connection Issues
 ```bash
 # Check if postgres is running
-docker-compose ps postgres
+brew services list | grep postgresql
 
 # View postgres logs
-docker-compose logs postgres
+brew services log postgresql@15
 
-# Reset database
+# Reset database (WARNING: destroys data)
 docker-compose down -v
 docker-compose up -d
 ```
@@ -189,21 +183,34 @@ npm run build
 cd api
 rm -rf node_modules
 npm install
-npm run dev
+npm start
+```
+
+### Port Already in Use
+```bash
+# Kill process on 3002
+kill -9 $(lsof -t -i:3002)
+
+# Kill process on 5174
+kill -9 $(lsof -t -i:5174)
 ```
 
 ## Environment Variables
 
-### Frontend (.env)
+### Frontend (`.env` or Vite env)
 ```
-VITE_API_URL=http://localhost:3001
+VITE_API_URL=http://localhost:3002/api
 ```
 
-### Backend (.env)
+### Backend (`api/.env`)
 ```
-DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:55433/tdental_demo
-PORT=3001
+DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5433/tdental_demo
+PORT=3002
 NODE_ENV=development
+JWT_SECRET=your-jwt-secret
+GOOGLE_PLACES_API_KEY=...
+HOSOONLINE_BASE_URL=...
+HOSOONLINE_API_KEY=...
 ```
 
 ## Updating the Application

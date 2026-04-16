@@ -11,7 +11,7 @@ services:
       POSTGRES_DB: tdental_demo
     volumes:
       - tgroup-pgdata:/var/lib/postgresql/data
-      - ./website/demo_tdental_updated.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./backups/tdental_demo_vps_20260415_162302.sql:/docker-entrypoint-initdb.d/01-init.sql
     ports:
       - "127.0.0.1:55433:5432"
     healthcheck:

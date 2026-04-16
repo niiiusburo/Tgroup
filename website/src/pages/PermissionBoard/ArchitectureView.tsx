@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Search } from 'lucide-react';
 import type { PermissionGroup, EmployeePermission } from '@/lib/api';
 import { GroupCard } from './GroupCard';
 import { EmployeeCard } from './EmployeeCard';
@@ -35,9 +36,23 @@ export function ArchitectureView({
   onSelectGroup, onSelectEmployee,
   getEffective, updateEmployee,
 }: ArchitectureViewProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+
   const activeGroup = groups.find(g => g.id === selectedGroupId);
   const activeEmp = employees.find(e => e.employeeId === selectedEmployeeId);
   const activeEmpGroup = activeEmp ? groups.find(g => g.id === activeEmp.groupId) : undefined;
+
+  const filteredEmployees = employees.filter(emp => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    const group = groups.find(g => g.id === emp.groupId);
+    const locationNames = emp.locations.map(l => l.name).join(' ');
+    return (
+      emp.employeeName.toLowerCase().includes(q) ||
+      (group?.name ?? '').toLowerCase().includes(q) ||
+      locationNames.toLowerCase().includes(q)
+    );
+  });
 
   const [editState, setEditState] = useState<EditState | null>(null);
   const [saving, setSaving] = useState(false);
@@ -138,8 +153,19 @@ export function ArchitectureView({
         <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">
           Employees (WHO)
         </div>
+        {/* Search bar */}
+        <div className="relative mb-3">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search employees, tiers, locations..."
+            className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+          />
+        </div>
         <div className="flex flex-col gap-1.5">
-          {employees.map(emp => {
+          {filteredEmployees.map(emp => {
             const group = groups.find(g => g.id === emp.groupId);
             const effective = getEffective(emp);
             const isDimmed = selectedGroupId !== null && emp.groupId !== selectedGroupId;
@@ -160,8 +186,10 @@ export function ArchitectureView({
               />
             );
           })}
-          {employees.length === 0 && (
-            <div className="text-sm text-gray-400 text-center py-8">No employees found</div>
+          {filteredEmployees.length === 0 && (
+            <div className="text-sm text-gray-400 text-center py-8">
+              {searchQuery.trim() ? 'No employees match your search' : 'No employees found'}
+            </div>
           )}
         </div>
       </div>

@@ -71,13 +71,13 @@
       "category": "dashboard",
       "name": "Overview Dashboard - Actions and Notifications",
       "description": "Add quick actions, notifications panel, and revenue chart to the Overview page.",
-      "steps": [
-        "Build QuickActionsBar component with @crossref:used-in[Overview, Sidebar] — buttons for common actions",
-        "Build NotificationsPanel component with @crossref:used-in[Overview, Header] — recent alerts list",
-        "Integrate RevenueChartModule into Overview page with @crossref:used-in[Overview, Reports]",
-        "Add FilterByLocation to Overview page — state managed with @crossref:used-in[Overview, Calendar, Customers]",
-        "Wire up all Overview sections with mock data and verify page renders correctly"
-      ],
+"steps": [
+         "Build QuickActionsBar component with @crossref:used-in[Overview] — buttons for common actions",
+         "Build NotificationsPanel component with @crossref:used-in[Overview] — recent alerts list",
+         "Integrate RevenueChartModule into Overview page with @crossref:used-in[Overview]",
+         "Add FilterByLocation to Overview page — state managed with @crossref:used-in[Overview]",
+         "Wire up all Overview sections with mock data and verify page renders correctly"
+       ],
       "status": "done",
       "priority": "high",
       "progress": "Session: 2026-04-07 | PASSED | 2m 5s\nBranch: feature/5-overview-dashboard-actions-and-notifications | Session: UOm3zLhdlOn8lmqTWLoxq"
@@ -119,30 +119,29 @@
       "category": "sequential",
       "name": "Customer List and Search",
       "description": "Build the Customers page with searchable, sortable data table.",
-      "steps": [
-        "Create src/pages/Customers/index.tsx with @crossref:uses[SearchBar, DataTable, CustomerProfile]",
-        "Integrate SearchBar and DataTable for customer listing with sorting and pagination",
-        "Create hooks/useCustomers.ts with @crossref:used-in[Customers, Appointments, Payment, Services] — CRUD operations on mock data",
-        "Add filter components (location, status, date range) shared across pages",
-        "Wire up mock customer data and verify search/filter/sort works"
-      ],
-      "status": "open",
-      "priority": "high",
-      "failure_reason": "Merge failed: Failed to merge feature/8-customer-list-and-search into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
-      "failure_category": "verification"
+"steps": [
+         "Create src/pages/Customers/index.tsx with @crossref:uses[SearchBar, DataTable]",
+         "Integrate SearchBar and DataTable for customer listing with sorting and pagination",
+         "Create hooks/useCustomers.ts with @crossref:used-in[Customers] — CRUD operations on mock data",
+         "Add filter components (location, status, date range) shared across pages",
+         "Wire up mock customer data and verify search/filter/sort works"
+       ],
+      "status": "done",
+      "priority": "high"
     },
     {
       "id": 9,
       "category": "sequential",
       "name": "Customer Profile View",
       "description": "Build the detailed customer profile with photo gallery, deposits, and history sections.",
-      "steps": [
-        "Build CustomerProfile component with @crossref:used-in[Customers] — main profile layout",
-        "Build PhotoGallery component with @crossref:used-in[CustomerProfile] — before/after dental photos",
-        "Build DepositCard component with @crossref:used-in[CustomerProfile, Payment] — shows wallet balance",
-        "Build AppointmentHistory component with @crossref:used-in[CustomerProfile, Overview] — past appointments list",
-        "Build ServiceHistory component with @crossref:used-in[CustomerProfile, Services] — treatment history"
-      ],
+"steps": [
+         "Create src/pages/Customer/index.tsx with @crossref:uses[CustomerProfile]",
+         "Build CustomerProfile component with @crossref:used-in[Customer] — main profile layout",
+         "Build PhotoGallery component with @crossref:used-in[CustomerProfile] — before/after dental photos",
+         "Build DepositCard component with @crossref:used-in[CustomerProfile, Payment] — shows wallet balance",
+         "Build AppointmentHistory component with @crossref:used-in[CustomerProfile, Overview] — past appointments list",
+         "Build ServiceHistory component with @crossref:used-in[CustomerProfile, Services] — treatment history"
+       ],
       "status": "done",
       "priority": "high",
       "progress": "Session: 2026-04-07 | PASSED | 52s\nBranch: feature/9-customer-profile-view | Session: 7mHWZ6XN566UaCoxmXh2T"
@@ -152,13 +151,13 @@
       "category": "customers",
       "name": "Customer Forms",
       "description": "Build Add/Edit Customer forms with shared selectors.",
-      "steps": [
-        "Create src/components/forms/AddCustomerForm/ with @crossref:used-in[Customers, QuickActionsBar]",
-        "Integrate LocationSelector, ReferralCodeInput, CustomerSourceDropdown into form",
-        "Build ReferralCodeInput with @crossref:used-in[CustomerForm, EmployeeProfile]",
-        "Build CustomerSourceDropdown with @crossref:used-in[CustomerForm, Reports]",
-        "Add form validation and photo upload using shared ImageUpload component"
-      ],
+"steps": [
+         "Create src/components/shared/AddCustomerForm/ with @crossref:used-in[Customers, QuickActionsBar]",
+         "Integrate LocationSelector, ReferralCodeInput, CustomerSourceDropdown into form",
+         "Build ReferralCodeInput with @crossref:used-in[AddCustomerForm]",
+         "Build CustomerSourceDropdown with @crossref:used-in[AddCustomerForm]",
+         "Add form validation and photo upload using shared ImageUpload component"
+       ],
       "status": "done",
       "priority": "high",
       "progress": "Session: 2026-04-07 | PASSED | 52s\nBranch: feature/10-customer-forms | Session: 67JiyBzdJ-UnLKBWf6dTs"
@@ -168,13 +167,13 @@
       "category": "sequential",
       "name": "Appointments Management",
       "description": "Build appointment creation, check-in flow, and status workflow.",
-      "steps": [
-        "Create src/pages/Appointments/index.tsx with @crossref:uses[AppointmentForm, StatusBadge]",
-        "Build AppointmentForm with @crossref:used-in[Appointments, Calendar, Overview] using CustomerSelector, DoctorSelector, LocationSelector",
-        "Build CheckInFlow with @crossref:used-in[Appointments] — arrival, waiting, in-treatment, done",
-        "Build WaitTimer component with @crossref:used-in[CheckInFlow, Overview] — live wait time display",
-        "Build ConvertToService button and create hooks/useAppointments.ts with @crossref:used-in[Appointments, Calendar, Overview]"
-      ],
+"steps": [
+         "Create src/pages/Appointments/index.tsx with @crossref:uses[AppointmentForm, StatusBadge]",
+         "Build AppointmentForm with @crossref:used-in[Appointments] using CustomerSelector, DoctorSelector, LocationSelector",
+         "Build CheckInFlow with @crossref:used-in[Appointments] — arrival, waiting, in-treatment, done",
+         "Build WaitTimer component with @crossref:used-in[CheckInFlow] — live wait time display",
+         "Build ConvertToService button and create hooks/useAppointments.ts with @crossref:used-in[Appointments]"
+       ],
       "status": "done",
       "priority": "high",
       "progress": "Session: 2026-04-07 | PASSED | 53s\nBranch: feature/11-appointments-management | Session: 96MvaJR1a8v03ZuegTfe1"
@@ -184,13 +183,13 @@
       "category": "sequential",
       "name": "Service Records",
       "description": "Build service/treatment records with multi-visit tracking.",
-      "steps": [
-        "Create src/pages/Services/index.tsx with @crossref:uses[ServiceForm, ServiceHistory, MultiVisitTracker]",
-        "Build ServiceForm with @crossref:used-in[Services, Appointments] using ServiceCatalogSelector, CustomerSelector, DoctorSelector",
-        "Build ServiceCatalogSelector with @crossref:used-in[ServiceForm, Settings, Website]",
-        "Build MultiVisitTracker with @crossref:used-in[Services, CustomerProfile] — tracks treatment progress across visits",
-        "Create hooks/useServices.ts with @crossref:used-in[Services, Customers, Payment] and ServiceHistoryList component"
-      ],
+"steps": [
+         "Create src/pages/Services/index.tsx with @crossref:uses[ServiceForm]",
+         "Build ServiceForm with @crossref:used-in[Services, Appointments] using ServiceCatalogSelector, CustomerSelector, DoctorSelector",
+         "Build ServiceCatalogSelector with @crossref:used-in[ServiceForm]",
+         "Build MultiVisitTracker with @crossref:used-in[Services]",
+         "Create hooks/useServices.ts with @crossref:used-in[Services] and ServiceHistoryList component"
+       ],
       "status": "done",
       "priority": "high",
       "progress": "Session: 2026-04-07 | PASSED | 56s\nBranch: feature/12-service-records | Session: ByJk5hc9SinTW1XOpuPW5"
@@ -200,17 +199,14 @@
       "category": "sequential",
       "name": "Payment and Deposit Wallet",
       "description": "Build payment system with deposits, partial payments, and outstanding balance tracking.",
-      "steps": [
-        "Create src/pages/Payment/index.tsx with @crossref:uses[DepositWallet, PaymentForm, OutstandingBalance]",
-        "Build DepositWallet component with @crossref:used-in[Payment, CustomerProfile] — top-up and balance display",
-        "Build PaymentForm with @crossref:used-in[Payment, Services] using CustomerSelector, PaymentMethodSelector",
-        "Build OutstandingBalanceCard with @crossref:used-in[Payment, CustomerProfile, Services]",
-        "Build PaymentHistoryTable and create hooks/usePayment.ts with @crossref:used-in[Payment, Services, Customers]"
-      ],
-      "status": "open",
-      "priority": "high",
-      "failure_reason": "Merge failed: Failed to merge feature/13-payment-and-deposit-wallet into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
-      "failure_category": "verification"
+"steps": [
+         "Create src/pages/Payment/index.tsx with @crossref:uses[PaymentForm]",
+         "Build PaymentForm with @crossref:used-in[Payment, Services] using CustomerSelector, PaymentMethodSelector",
+         "Build OutstandingBalanceCard with @crossref:used-in[Payment]",
+         "Build PaymentHistoryTable and create hooks/usePayment.ts with @crossref:used-in[Payment]"
+       ],
+      "status": "done",
+      "priority": "high"
     },
     {
       "id": 14,
@@ -233,13 +229,14 @@
       "category": "sequential",
       "name": "Employees List and Profile",
       "description": "Build employee management with list view and detailed profiles.",
-      "steps": [
-        "Create src/pages/Employees/index.tsx with @crossref:uses[EmployeeTable, EmployeeProfile, TierSelector]",
-        "Build EmployeeTable with @crossref:used-in[Employees] using DataTable and StatusBadge",
-        "Build EmployeeProfile with @crossref:used-in[Employees] — personal info, stats, linked data",
-        "Build ReferralCodeDisplay with @crossref:used-in[EmployeeProfile, CustomerForm] — shows referral stats",
-        "Create hooks/useEmployees.ts with @crossref:used-in[Employees, Appointments, Calendar, Customers]"
-      ],
+"steps": [
+         "Create src/pages/EmployeeRoles/index.tsx with @crossref:uses[EmployeeForm, EmployeeProfile]",
+         "Build EmployeeForm with @crossref:used-in[EmployeeForm, EmployeeProfile]",
+         "Build EmployeeProfile with @crossref:used-in[EmployeeForm, EmployeeProfile] — personal info, stats, linked data",
+         "Build RoleMultiSelect with @crossref:used-in[EmployeeForm]",
+         "Build ScheduleCalendar with @crossref:used-in[EmployeeForm]",
+         "Build LinkedEmployees component showing team relationships"
+       ],
       "status": "done",
       "priority": "high",
       "progress": "Session: 2026-04-07 | PASSED | 1m 6s\nBranch: feature/15-employees-list-and-profile | Session: m9uuSXWDmGcjWEkZZlyXe"
@@ -265,30 +262,28 @@
       "category": "sequential",
       "name": "Locations and Branches",
       "description": "Build location management with cards, detail view, and mini-dashboard.",
-      "steps": [
-        "Create src/pages/Locations/index.tsx with @crossref:uses[LocationCard, LocationDetail, LocationDashboard]",
-        "Build LocationCard with @crossref:used-in[Locations, OverviewFilter, CustomerForm]",
-        "Build LocationDetail with @crossref:used-in[Locations] showing employees, customer stats, revenue",
-        "Build LocationDashboard with @crossref:used-in[LocationDetail, Overview] — branch-level metrics",
-        "Create hooks/useLocations.ts with @crossref:used-in[Locations, Customers, Employees, Appointments, Overview]"
-      ],
-      "status": "open",
-      "priority": "medium",
-      "failure_reason": "Merge failed: Failed to merge feature/17-locations-and-branches into ai-develop. This may indicate a merge conflict or incompatible changes. Please review the branch and resolve conflicts manually.",
-      "failure_category": "verification"
+"steps": [
+         "Create src/pages/Locations/index.tsx with @crossref:uses[LocationCard, LocationDetail, LocationDashboard]",
+         "Build LocationCard with @crossref:used-in[Locations]",
+         "Build LocationDetail with @crossref:used-in[Locations] showing employees, customer stats, revenue",
+         "Build LocationDashboard with @crossref:used-in[Locations]",
+         "Create hooks/useLocations.ts with @crossref:used-in[Locations]"
+       ],
+      "status": "done",
+      "priority": "medium"
     },
     {
       "id": 18,
       "category": "admin",
       "name": "Website CMS Management",
       "description": "Build CMS for managing public website pages with editor and SEO.",
-      "steps": [
-        "Create src/pages/Website/index.tsx with @crossref:uses[PageEditor, PageList, SEOManager]",
-        "Build PageList with @crossref:used-in[Website] using DataTable and StatusBadge — list of 14 pages",
-        "Build PageEditor with @crossref:used-in[Website] — rich text editing for page content",
-        "Build ServiceCatalogManager with @crossref:used-in[Website, Settings] — manage public service listings",
-        "Build SEOManager with @crossref:used-in[Website] — meta tags, descriptions per page"
-      ],
+"steps": [
+         "Create src/pages/Website/index.tsx with @crossref:uses[PageEditor, PageList, SEOManager]",
+         "Build PageList with @crossref:used-in[Website]",
+         "Build PageEditor with @crossref:used-in[Website] — rich text editing for page content",
+         "Build ServiceCatalogManager with @crossref:used-in[Website]",
+         "Build SEOManager with @crossref:used-in[Website] — meta tags, descriptions per page"
+       ],
       "status": "done",
       "priority": "high",
       "progress": "Session: 2026-04-07 | PASSED | 1m 9s\nBranch: feature/18-website-cms-management | Session: 27apqB8HenyOvse9bsyFz"
@@ -298,13 +293,13 @@
       "category": "sequential",
       "name": "Settings and Configuration",
       "description": "Build settings pages for service catalog, roles, and customer sources.",
-      "steps": [
-        "Create src/pages/Settings/index.tsx with @crossref:uses[ServiceCatalogSettings, RoleConfig, CustomerSourcesConfig]",
-        "Build ServiceCatalogSettings with @crossref:used-in[Settings, Website] — manage treatment types and pricing",
-        "Build RoleConfig with @crossref:used-in[Settings, Employees, Relationships] — define roles and permissions",
-        "Build CustomerSourcesConfig with @crossref:used-in[Settings, Customers, Reports] — manage referral sources",
-        "Build SystemPreferences with @crossref:used-in[Settings] — general app settings"
-      ],
+"steps": [
+         "Create src/pages/Settings/index.tsx with @crossref:uses[ServiceCatalogSettings, RoleConfig, CustomerSourcesConfig]",
+         "Build ServiceCatalogSettings with @crossref:used-in[Settings]",
+         "Build RoleConfig with @crossref:used-in[Settings]",
+         "Build CustomerSourcesConfig with @crossref:used-in[Settings]",
+         "Build SystemPreferences with @crossref:used-in[Settings] — general app settings"
+       ],
       "status": "passed",
       "priority": "medium",
       "progress": "Session: 2026-04-07 | PASSED | 1m 13s\nBranch: feature/19-settings-and-configuration | Session: 231za8JjgG8pJAKvea0-D"
@@ -314,13 +309,13 @@
       "category": "admin",
       "name": "Relationships, Permissions, and Placeholders",
       "description": "Build permission matrix, entity relationships, and placeholder pages for Commission, Reports, and Notifications.",
-      "steps": [
-        "Create src/pages/Relationships/index.tsx with @crossref:uses[PermissionMatrix, EntityRelationshipMap]",
-        "Build PermissionMatrix with @crossref:used-in[Relationships] — role-based access control grid",
-        "Build EntityRelationshipMap with @crossref:used-in[Relationships] — visual diagram of entity connections",
-        "Create hooks/usePermissions.ts with @crossref:used-in[ALL_PAGES] — permission checking hook",
-        "Create placeholder pages for Commission (@crossref:used-in[Employees, Reports]), Reports (@crossref:uses[RevenueChart, DataTable, StatCard]), and SMS/Email Notifications (@crossref:uses[Payment, Customers])"
-      ],
+"steps": [
+         "Create src/pages/Relationships/index.tsx with @crossref:uses[PermissionMatrix, EntityRelationshipMap]",
+         "Build PermissionMatrix with @crossref:used-in[Relationships]",
+         "Build EntityRelationshipMap with @crossref:used-in[Relationships]",
+         "Create hooks/usePermissions.ts with @crossref:used-in[Relationships]",
+         "Create placeholder pages for Commission (@crossref:used-in[Relationships]), Reports (@crossref:uses[RevenueChart, DataTable, StatCard]), and SMS/Email Notifications (@crossref:uses[Payment, Customers])"
+       ],
       "status": "done",
       "priority": "medium",
       "progress": "Session: 2026-04-07 | PASSED | 1m 48s\nBranch: feature/20-relationships-permissions-and-placeholders | Session: agza-OECC-nK5WAO00ry3"

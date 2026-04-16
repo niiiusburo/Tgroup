@@ -18,7 +18,18 @@
     "maxTurnsImplementation": 40,
     "maxTurnsVerification": 20,
     "allowedTools": "Bash,Read,Write,Edit",
-    "allowedToolsVerification": "Bash,Read,Write"
+    "allowedToolsVerification": "Bash,Read,Write",
+"kilo": {
+        "enabled": true,
+        "version": "latest",
+        "target": "Kilo Code",
+        "migration": {
+          "from": "kimi-legacy",
+          "to": "kimi-code",
+          "apiKeyManagement": "console",
+          "authMethod": "one-click"
+        }
+      }
   },
   "tracksConfigured": true
 }

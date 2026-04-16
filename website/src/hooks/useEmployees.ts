@@ -174,20 +174,25 @@ export function useEmployees(selectedLocationId?: string) {
   }, [searchQuery, fetchAndSetEmployees]);
 
   /**
-   * Filter counts derived from allEmployees (reflects search + location context)
+   * Filter counts derived from allEmployees (cross-filtered so counts reflect other active filters)
    */
   const filterCounts = useMemo(() => {
+    // Status counts: apply tier + role filters
     const statusCounts: Record<EmployeeStatus | 'all', number> = {
-      all: allEmployees.length,
+      all: 0,
       active: 0,
       'on-leave': 0,
       inactive: 0,
     };
+
+    // Tier counts: apply status + role filters
     const tierCounts: Record<string, number> = {
-      all: allEmployees.length,
+      all: 0,
     };
+
+    // Role counts: apply status + tier filters
     const roleCounts: Record<EmployeeRole | 'all', number> = {
-      all: allEmployees.length,
+      all: 0,
       'general-manager': 0,
       'branch-manager': 0,
       doctor: 0,
@@ -200,31 +205,58 @@ export function useEmployees(selectedLocationId?: string) {
     };
 
     for (const emp of allEmployees) {
-      if (emp.status === 'active') statusCounts.active++;
-      else if (emp.status === 'on-leave') statusCounts['on-leave']++;
-      else if (emp.status === 'inactive') statusCounts.inactive++;
+      const matchesTier = tierFilter === 'all' || emp.tierId === tierFilter;
+      const matchesRole = roleFilter === 'all' || emp.roles.includes(roleFilter);
+      const matchesStatus = statusFilter === 'all' || emp.status === statusFilter;
 
-      if (emp.tierId) {
-        tierCounts[emp.tierId] = (tierCounts[emp.tierId] || 0) + 1;
+      // Status counts need tier + role match
+      if (matchesTier && matchesRole) {
+        statusCounts.all++;
+        if (emp.status === 'active') statusCounts.active++;
+        else if (emp.status === 'on-leave') statusCounts['on-leave']++;
+        else if (emp.status === 'inactive') statusCounts.inactive++;
       }
 
-      for (const role of emp.roles) {
-        roleCounts[role]++;
+      // Tier counts need status + role match
+      if (matchesStatus && matchesRole) {
+        tierCounts.all++;
+        if (emp.tierId) {
+          tierCounts[emp.tierId] = (tierCounts[emp.tierId] || 0) + 1;
+        }
+      }
+
+      // Role counts need status + tier match
+      if (matchesStatus && matchesTier) {
+        roleCounts.all++;
+        for (const role of emp.roles) {
+          roleCounts[role]++;
+        }
       }
     }
 
     return { statusCounts, tierCounts, roleCounts };
-  }, [allEmployees]);
+  }, [allEmployees, tierFilter, roleFilter, statusFilter]);
 
   /**
    * Filter employees based on client-side filters
    */
   const employees = useMemo(() => {
-    return allEmployees.filter((emp) => {
+    const filtered = allEmployees.filter((emp) => {
       if (tierFilter !== 'all' && emp.tierId !== tierFilter) return false;
       if (roleFilter !== 'all' && !emp.roles.includes(roleFilter)) return false;
       if (statusFilter !== 'all' && emp.status !== statusFilter) return false;
       return true;
+    });
+    // Default sort: active first (A-Z), then on-leave (A-Z), then inactive (A-Z)
+    const statusPriority: Record<EmployeeStatus, number> = {
+      active: 0,
+      'on-leave': 1,
+      inactive: 2,
+    };
+    return filtered.sort((a, b) => {
+      const priorityDiff = statusPriority[a.status] - statusPriority[b.status];
+      if (priorityDiff !== 0) return priorityDiff;
+      return a.name.localeCompare(b.name, undefined, { numeric: true });
     });
   }, [allEmployees, tierFilter, roleFilter, statusFilter]);
 

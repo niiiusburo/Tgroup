@@ -1,0 +1,65 @@
+name: Feedback & CMS
+summary: |
+  Feedback system supports threaded conversations with file attachments.
+  Website CMS manages public pages (SEO, slugs, content). Both are admin-
+  manageable and have dedicated settings UI.
+owns:
+  - api/src/routes/feedback.js
+  - api/src/routes/websitePages.js
+  - website/src/pages/Feedback.tsx
+  - website/src/pages/Website.tsx
+  - website/src/components/shared/FeedbackWidget.tsx
+  - website/src/components/website/
+  - website/src/lib/api/feedback.ts
+  - website/src/lib/api/websitePages.ts
+  - website/src/hooks/useWebsiteData.ts
+reads:
+  - api/src/db.js
+  - api/uploads/feedback/ (static file storage)
+writes:
+  - dbo.feedback_threads
+  - dbo.feedback_messages
+  - dbo.feedback_attachments
+  - dbo.websitepages
+  - api/uploads/feedback/ (image files via multer + sharp)
+tables:
+  - dbo.feedback_threads
+  - dbo.feedback_messages
+  - dbo.feedback_attachments
+  - dbo.websitepages
+endpoints:
+  - POST   /api/Feedback
+  - GET    /api/Feedback/my
+  - GET    /api/Feedback/my/:threadId
+  - POST   /api/Feedback/my/:threadId/reply
+  - GET    /api/Feedback/all
+  - GET    /api/Feedback/all/:threadId
+  - POST   /api/Feedback/all/:threadId/reply
+  - PATCH  /api/Feedback/all/:threadId/status
+  - DELETE /api/Feedback/all/:threadId
+  - GET    /api/WebsitePages
+  - GET    /api/WebsitePages/:id
+  - POST   /api/WebsitePages
+  - PUT    /api/WebsitePages/:id
+  - DELETE /api/WebsitePages/:id
+ui_surfaces:
+  - /feedback
+  - /website
+  - FeedbackWidget (floating on all pages)
+  - FeedbackAdminContent
+  - PageList / PageEditor / SEOManager
+jobs:
+  - none
+shared_types:
+  - website/src/types/feedback.ts
+  - website/src/types/website.ts
+dependencies:
+  - Auth & Permissions (feedback admin requires requireAdmin inline check)
+  - file upload via multer + sharp
+affected_by:
+  - Changes to feedback attachment size limits
+  - Changes to nginx /uploads/feedback proxy config
+  - Changes to websitepages schema
+impact_tests:
+  - website/e2e/phase2-quick-features.spec.ts (indirect)
+risk_level: low

@@ -7,6 +7,13 @@
         "serve"
       ],
       "type": "stdio"
+    },
+    "kilo": {
+      "command": "node",
+      "args": [
+        "/Users/thuanle/.config/kilo/kilo-mcp.js"
+      ],
+      "type": "stdio"
     }
   }
 }

@@ -84,6 +84,10 @@ export interface AppointmentFormData {
   readonly customerPhone: string;
   readonly doctorId: string;
   readonly doctorName: string;
+  readonly assistantId?: string;
+  readonly assistantName?: string;
+  readonly dentalAideId?: string;
+  readonly dentalAideName?: string;
   readonly locationId: string;
   readonly locationName: string;
   readonly appointmentType: AppointmentType;
@@ -131,6 +135,8 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
   // Form state
   const [customerId, setCustomerId] = useState<string | null>(initialData?.customerId ?? null);
   const [doctorId, setDoctorId] = useState<string | null>(initialData?.doctorId ?? null);
+  const [assistantId, setAssistantId] = useState<string | null>(initialData?.assistantId ?? null);
+  const [dentalAideId, setDentalAideId] = useState<string | null>(initialData?.dentalAideId ?? null);
   const [locationId, setLocationId] = useState<string | null>(initialData?.locationId ?? (isEdit ? null : fallbackLocationId));
   const [serviceId, setServiceId] = useState<string | null>(initialData?.serviceId ?? null);
   const [serviceName, setServiceName] = useState(initialData?.serviceName ?? '');
@@ -151,6 +157,8 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
     if (initialData) {
       setCustomerId(initialData.customerId ?? null);
       setDoctorId(initialData.doctorId ?? null);
+      setAssistantId(initialData.assistantId ?? null);
+      setDentalAideId(initialData.dentalAideId ?? null);
       setLocationId(initialData.locationId ?? null);
       setServiceId(initialData.serviceId ?? null);
       setServiceName(initialData.serviceName ?? '');
@@ -260,6 +268,8 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
 
     const customer = customers.find((c) => c.id === customerId);
     const doctor = employees.find((emp) => emp.id === doctorId);
+    const assistant = employees.find((emp) => emp.id === assistantId);
+    const dentalAide = employees.find((emp) => emp.id === dentalAideId);
     const location = locations.find((l) => l.id === locationId);
 
     if (!customer || !doctor || !location) return;
@@ -278,24 +288,28 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
     try {
       await onSubmit({
         customerId: customer.id,
-      customerName: customer.name,
-      customerPhone: customer.phone,
-      doctorId: doctor.id,
-      doctorName: doctor.name,
-      locationId: location.id,
-      locationName: location.name,
-      appointmentType: selectedService?.category ?? 'consultation',
-      serviceName: selectedService?.name || serviceName.trim(),
-      date,
-      startTime,
-      endTime: computedEndTime,
-      notes: notes.trim(),
-      estimatedDuration,
-      customerType,
-      serviceId: serviceId || undefined,
-      status,
-      color: colorCode,
-    });
+        customerName: customer.name,
+        customerPhone: customer.phone,
+        doctorId: doctor.id,
+        doctorName: doctor.name,
+        assistantId: assistant?.id || undefined,
+        assistantName: assistant?.name || undefined,
+        dentalAideId: dentalAide?.id || undefined,
+        dentalAideName: dentalAide?.name || undefined,
+        locationId: location.id,
+        locationName: location.name,
+        appointmentType: selectedService?.category ?? 'consultation',
+        serviceName: selectedService?.name || serviceName.trim(),
+        date,
+        startTime,
+        endTime: computedEndTime,
+        notes: notes.trim(),
+        estimatedDuration,
+        customerType,
+        serviceId: serviceId || undefined,
+        status,
+        color: colorCode,
+      });
     } catch (error) {
       console.error('Appointment save failed:', error);
     } finally {
@@ -391,6 +405,24 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                 </label>
                 <DoctorSelector employees={employees} selectedId={doctorId} onChange={setDoctorId} filterRoles={['doctor']} />
                 {errors.doctor && <p className="text-xs text-red-500 mt-1">{errors.doctor}</p>}
+              </div>
+
+              {/* Phụ tá - Optional */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  <User className="w-3.5 h-3.5" />
+                  Phụ tá (không bắt buộc)
+                </label>
+                <DoctorSelector employees={employees} selectedId={assistantId} onChange={setAssistantId} filterRoles={['assistant']} placeholder="Chọn phụ tá..." allowClear />
+              </div>
+
+              {/* Trợ lý bác sĩ - Optional */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  <User className="w-3.5 h-3.5" />
+                  Trợ lý bác sĩ (không bắt buộc)
+                </label>
+                <DoctorSelector employees={employees} selectedId={dentalAideId} onChange={setDentalAideId} filterRoles={['doctor-assistant']} placeholder="Chọn trợ lý..." allowClear />
               </div>
 
               {/* Chi nhánh */}

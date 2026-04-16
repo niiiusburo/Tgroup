@@ -1,0 +1,76 @@
+name: Services Catalog
+summary: |
+  Dental service catalog is stored in the legacy dbo.products table.
+  The backend route /api/Products handles CRUD; /api/Services is dead code
+  targeting a non-existent public.services table. ProductCategories manage
+  service groupings. SaleOrders and SaleOrderLines handle actual patient
+  treatments.
+owns:
+  - api/src/routes/products.js
+  - api/src/routes/productCategories.js
+  - api/src/routes/saleOrders.js
+  - api/src/routes/saleOrderLines.js
+  - website/src/pages/ServiceCatalog.tsx
+  - website/src/pages/Services/index.tsx
+  - website/src/components/services/
+  - website/src/lib/api/products.ts
+  - website/src/lib/api/saleOrders.ts
+  - website/src/hooks/useProducts.ts
+  - website/src/hooks/useServices.ts
+reads:
+  - api/src/db.js
+writes:
+  - dbo.products (insert/update/delete)
+  - dbo.productcategories (insert/update/delete)
+  - dbo.saleorders (create + state patch)
+  - dbo.saleorderlines (CRUD via saleOrderLines route)
+  - dbo.saleorder_state_logs (audit logging)
+tables:
+  - dbo.products
+  - dbo.productcategories
+  - dbo.companies
+  - dbo.saleorders
+  - dbo.saleorderlines
+  - dbo.saleorder_state_logs
+  - dbo.dotkhamsteps (linked product usage)
+endpoints:
+  - GET    /api/Products
+  - GET    /api/Products/:id
+  - POST   /api/Products
+  - PUT    /api/Products/:id
+  - DELETE /api/Products/:id
+  - GET    /api/ProductCategories
+  - POST   /api/ProductCategories
+  - PUT    /api/ProductCategories/:id
+  - DELETE /api/ProductCategories/:id
+  - GET    /api/SaleOrders
+  - GET    /api/SaleOrders/:id
+  - POST   /api/SaleOrders
+  - PATCH  /api/SaleOrders/:id
+  - PATCH  /api/SaleOrders/:id/state
+  - GET    /api/SaleOrderLines
+ui_surfaces:
+  - /website (routed to ServiceCatalog in App.tsx)
+  - /services (patient service records)
+  - ServiceCatalogSelector
+  - ServiceForm
+  - ServiceHistoryList
+jobs:
+  - none
+shared_types:
+  - website/src/types/service.ts
+  - website/src/lib/api/products.ts
+  - website/src/lib/api/saleOrders.ts
+dependencies:
+  - dbo.products must remain compatible with saleorderlines/dotkhamsteps FKs
+  - product delete blocked if linked saleorderlines or dotkhamsteps exist
+affected_by:
+  - Schema changes to dbo.products (price fields, canorderlab, active)
+  - Dead route api/src/routes/services.js must not be revived accidentally
+impact_tests:
+  - website/src/__tests__/ServiceCatalog.test.tsx
+  - website/e2e/team-bravo-records.spec.ts
+risk_level: high
+notes:
+  - STALE/DEAD: api/src/routes/services.js queries public.services which does not exist.
+  - STALE/DEAD: website/src/lib/api/services.ts exports dead wrappers.

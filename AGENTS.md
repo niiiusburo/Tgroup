@@ -1,3 +1,12 @@
+## Local-First Development Rule
+
+**ALL changes MUST be made and verified locally BEFORE pushing to the VPS.**
+
+- Inspect local data, local code, and local behavior first.
+- Fix, test, and validate on the local environment.
+- Only deploy to the VPS once the local work is complete and verified.
+- Never modify VPS files directly without first confirming the fix locally.
+
 ## Module Size Rule
 
 **No single source file should exceed ~500 lines or ~10,000 characters.**
@@ -74,3 +83,17 @@ Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
 2. Use `detect_changes` for code review.
 3. Use `get_affected_flows` to understand impact.
 4. Use `query_graph` pattern="tests_for" to check coverage.
+
+## Product-Map Governance Rule (MANDATORY)
+
+**Before any agent touches code for a feature or bugfix, it MUST:**
+
+1. **Read `product-map/domains/<domain>.yaml`** for the affected domain.
+2. **Read `product-map/schema-map.md`** for table blast radius.
+3. **Read `product-map/contracts/dependency-rules.yaml`** for the exact checklist matching the change type (schema, API, permission, UI, etc.).
+4. **Check `product-map/unknowns.md`** — if the task intersects an unknown, **stop and ask for clarification** rather than guessing.
+5. **For multi-domain changes, treat the task as an Orchestrator job** and spawn parallel sub-agents per domain file, then merge.
+
+### Keep the map alive
+- If you discover a drift between the product-map and the actual codebase, update the relevant `product-map/` artifact before or alongside your code change.
+- After completing a significant change, add a follow-up task to verify the corresponding domain YAML and schema-map entries are still accurate.

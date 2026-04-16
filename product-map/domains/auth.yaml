@@ -1,0 +1,65 @@
+name: Auth & Permissions
+summary: |
+  JWT-based authentication, password management, RBAC permission resolution,
+  and location scoping. The auth middleware guards all non-public API routes.
+  Permission resolution combines tier (group) permissions with employee-level
+  overrides and location scopes.
+owns:
+  - api/src/routes/auth.js
+  - api/src/middleware/auth.js
+  - api/src/middleware/permissions.js
+  - website/src/contexts/AuthContext.tsx
+  - website/src/lib/api/auth.ts
+  - website/src/pages/Login.tsx
+  - website/src/components/shared/ChangePasswordModal.tsx
+reads:
+  - api/src/routes/partners.js (reads employee user record)
+  - api/src/db.js (shared pool)
+writes:
+  - dbo.partners (password_hash, last_login)
+  - dbo.employee_permissions (upsert on permission update)
+  - dbo.permission_overrides (grant/revoke edits)
+  - dbo.employee_location_scope (location access edits)
+tables:
+  - dbo.partners
+  - dbo.permission_groups
+  - dbo.group_permissions
+  - dbo.employee_permissions
+  - dbo.permission_overrides
+  - dbo.employee_location_scope
+endpoints:
+  - POST /api/Auth/login
+  - GET  /api/Auth/me
+  - POST /api/Auth/change-password
+  - GET  /api/Permissions/groups
+  - POST /api/Permissions/groups
+  - PUT  /api/Permissions/groups/:groupId
+  - GET  /api/Permissions/employees
+  - PUT  /api/Permissions/employees/:employeeId
+  - GET  /api/Permissions/resolve/:employeeId
+ui_surfaces:
+  - /login
+  - /permissions (PermissionBoard)
+  - Layout header (ChangePasswordModal)
+  - ProtectedRoute guards in App.tsx
+jobs:
+  - none
+shared_types:
+  - website/src/types/permissions.ts
+  - api/src/middleware/auth.js (inline effective-permission set)
+  - api/src/routes/auth.js (resolvePermissions return shape)
+dependencies:
+  - api/src/db.js
+  - dbo.partners (employee flag + password_hash must exist)
+affected_by:
+  - Any change to dbo.partners schema (especially password_hash, employee, active, isdeleted columns)
+  - Any change to permission system tables schema
+  - Changes to JWT_SECRET env var
+  - Changes to api/src/server.js PUBLIC_PATHS set
+impact_tests:
+  - website/e2e/auth-setup.spec.ts
+  - website/e2e/permissions-check.spec.ts
+  - website/e2e/permissions-matrix.spec.ts
+  - website/e2e/permissions-tooltips.spec.ts
+  - api/tests/faceRecognition.test.js (indirect, uses auth)
+risk_level: critical

@@ -28,6 +28,11 @@ export interface ApiAppointment {
   productname: string | null;
   datecreated: string | null;
   lastupdated: string | null;
+  // Assistant and dental aide (optional)
+  assistantid: string | null;
+  assistantname: string | null;
+  dentalaideid: string | null;
+  dentalaidename: string | null;
 }
 
 export function fetchAppointments(params?: {

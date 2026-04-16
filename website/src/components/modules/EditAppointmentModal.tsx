@@ -195,6 +195,8 @@ export function EditAppointmentModal({
 
   // Form state
   const [doctorId, setDoctorId] = useState('');
+  const [assistantId, setAssistantId] = useState('');
+  const [dentalAideId, setDentalAideId] = useState('');
   const [locationId, setLocationId] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
@@ -226,6 +228,8 @@ export function EditAppointmentModal({
   useEffect(() => {
     if (appointment && isOpen) {
       setDoctorId(appointment.doctorId || '');
+      setAssistantId((appointment as any).assistantid || '');
+      setDentalAideId((appointment as any).dentalaideid || '');
       setLocationId(appointment.locationId || '');
 
       // Use the appointment's stored date and time from the database
@@ -339,6 +343,62 @@ export function EditAppointmentModal({
     return list;
   }, [apiEmployees, appointment?.doctorId, appointment?.doctorName, appointment?.locationName]);
 
+  // Assistants (role: assistant)
+  const assistants = useMemo(() => {
+    const list = apiEmployees
+      .filter(e => e.roles?.includes('assistant') && e.status === 'active')
+      .map(e => ({
+        id: e.id,
+        name: e.name,
+        avatar: e.avatar || e.name.charAt(0).toUpperCase(),
+        roles: e.roles || ['assistant'],
+        locationName: e.locationName || '',
+      }));
+
+    // Include currently selected assistant even if not in filtered list
+    if (assistantId && !list.some(d => d.id === assistantId)) {
+      const selected = apiEmployees.find(e => e.id === assistantId);
+      if (selected) {
+        list.unshift({
+          id: selected.id,
+          name: selected.name,
+          avatar: selected.avatar || selected.name.charAt(0).toUpperCase(),
+          roles: selected.roles || ['assistant'],
+          locationName: selected.locationName || '',
+        });
+      }
+    }
+    return list;
+  }, [apiEmployees, assistantId]);
+
+  // Dental Aides (role: doctor-assistant)
+  const dentalAides = useMemo(() => {
+    const list = apiEmployees
+      .filter(e => e.roles?.includes('doctor-assistant') && e.status === 'active')
+      .map(e => ({
+        id: e.id,
+        name: e.name,
+        avatar: e.avatar || e.name.charAt(0).toUpperCase(),
+        roles: e.roles || ['doctor-assistant'],
+        locationName: e.locationName || '',
+      }));
+
+    // Include currently selected dental aide even if not in filtered list
+    if (dentalAideId && !list.some(d => d.id === dentalAideId)) {
+      const selected = apiEmployees.find(e => e.id === dentalAideId);
+      if (selected) {
+        list.unshift({
+          id: selected.id,
+          name: selected.name,
+          avatar: selected.avatar || selected.name.charAt(0).toUpperCase(),
+          roles: selected.roles || ['doctor-assistant'],
+          locationName: selected.locationName || '',
+        });
+      }
+    }
+    return list;
+  }, [apiEmployees, dentalAideId]);
+
   const locations: Location[] = apiLocations.map(l => ({
     id: l.id,
     name: l.name,
@@ -370,6 +430,8 @@ export function EditAppointmentModal({
 
       await updateAppointment(appointment.id, {
         doctorId: doctorId || undefined,
+        assistantid: assistantId || undefined,
+        dentalaideid: dentalAideId || undefined,
         companyid: locationId || undefined,
         date: date,
         timeExpected: estimatedDuration,
@@ -515,6 +577,58 @@ export function EditAppointmentModal({
             )}
           </div>
 
+          {/* Phụ tá - Optional */}
+          <div className="searchable-selector">
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <User className="w-3.5 h-3.5" />
+              Phụ tá (không bắt buộc)
+            </label>
+            <SearchableSelector
+              options={assistants}
+              selectedId={assistantId}
+              onChange={(id) => setAssistantId(id)}
+              placeholder="Chọn phụ tá..."
+              icon={<User className="w-4 h-4" />}
+              renderOption={(emp) => (
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-600 font-semibold text-xs">
+                    {emp.avatar}
+                  </div>
+                  <div>
+                    <p className="font-medium">{emp.name}</p>
+                    <p className="text-xs text-gray-400">{emp.locationName}</p>
+                  </div>
+                </div>
+              )}
+            />
+          </div>
+
+          {/* Trợ lý bác sĩ - Optional */}
+          <div className="searchable-selector">
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <User className="w-3.5 h-3.5" />
+              Trợ lý bác sĩ (không bắt buộc)
+            </label>
+            <SearchableSelector
+              options={dentalAides}
+              selectedId={dentalAideId}
+              onChange={(id) => setDentalAideId(id)}
+              placeholder="Chọn trợ lý..."
+              icon={<User className="w-4 h-4" />}
+              renderOption={(emp) => (
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center text-green-600 font-semibold text-xs">
+                    {emp.avatar}
+                  </div>
+                  <div>
+                    <p className="font-medium">{emp.name}</p>
+                    <p className="text-xs text-gray-400">{emp.locationName}</p>
+                  </div>
+                </div>
+              )}
+            />
+          </div>
+
           {/* Location - Luxurious Searchable Dropdown */}
           <div className="searchable-selector">
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
@@ -651,7 +765,7 @@ export function EditAppointmentModal({
                     }
                   `}
                 >
-                  {s.label}
+                  {t(s.label)}
                 </button>
               ))}
             </div>
@@ -676,7 +790,7 @@ export function EditAppointmentModal({
                       : 'border-transparent hover:border-gray-300 hover:scale-105'
                   }
                   `}
-                  title={color.label}
+                  title={t(color.label)}
                 >
                   {/* Color dot */}
                   <div className={`
@@ -691,7 +805,7 @@ export function EditAppointmentModal({
               ))}
             </div>
             <p className="mt-1.5 text-[11px] text-gray-400">
-              {APPOINTMENT_CARD_COLORS[colorCode]?.label ?? 'Default'}
+              {t(APPOINTMENT_CARD_COLORS[colorCode]?.label ?? 'Default')}
             </p>
           </div>
 

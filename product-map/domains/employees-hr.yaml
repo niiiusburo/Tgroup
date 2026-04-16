@@ -1,0 +1,71 @@
+name: Employees & HR
+summary: |
+  Employee management uses the dbo.partners table (employee=true) plus a
+  dbo.employees view. Features include employee CRUD, tier assignment,
+  schedule blocks, linked employees, payslips, and commissions.
+owns:
+  - api/src/routes/employees.js
+  - api/src/routes/hrPayslips.js
+  - api/src/routes/commissions.js
+  - website/src/pages/Employees/index.tsx
+  - website/src/components/employees/
+  - website/src/lib/api/employees.ts
+  - website/src/hooks/useEmployees.ts
+  - website/src/hooks/usePermissions.ts
+reads:
+  - api/src/db.js
+writes:
+  - dbo.partners (employees are partners with employee=true)
+  - dbo.employee_permissions (tier assignment)
+  - dbo.employee_location_scope (location scopes)
+  - dbo.hr_payslips (read-only in current UI)
+  - dbo.commissions / dbo.commissionhistories (read-only in current UI)
+tables:
+  - dbo.partners
+  - dbo.employees (view)
+  - dbo.hrjobs
+  - dbo.permission_groups
+  - dbo.employee_permissions
+  - dbo.employee_location_scope
+  - dbo.hr_payslips
+  - dbo.hr_payslip_runs
+  - dbo.hr_payroll_structures
+  - dbo.commissions
+  - dbo.commissionhistories
+endpoints:
+  - GET    /api/Employees
+  - GET    /api/Employees/:id
+  - POST   /api/Employees
+  - PUT    /api/Employees/:id
+  - DELETE /api/Employees/:id
+  - GET    /api/HrPayslips
+  - GET    /api/HrPayslips/:id
+  - GET    /api/HrPayslips/Runs
+  - GET    /api/HrPayslips/Structures
+  - GET    /api/Commissions
+  - GET    /api/Commissions/:id
+  - GET    /api/Commissions/:id/Histories
+ui_surfaces:
+  - /employees
+  - EmployeeTable
+  - EmployeeForm
+  - EmployeeProfile
+  - TierSelector
+  - ScheduleCalendar
+  - LinkedEmployees
+jobs:
+  - none
+shared_types:
+  - website/src/types/employee.ts
+  - website/src/lib/api/employees.ts
+dependencies:
+  - Auth & Permissions (tier assignment triggers permission updates)
+  - Customers & Partners (same partners table)
+affected_by:
+  - Changes to dbo.partners schema (jobtitle, isdoctor, isassistant, isreceptionist, wage, allowance)
+  - Changes to dbo.hrjobs (dropdown data)
+impact_tests:
+  - website/e2e/check_employees_page.spec.ts
+  - website/e2e/employee-save.spec.ts
+  - website/e2e/vps-tier-verification.spec.ts
+risk_level: high

@@ -133,7 +133,7 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
 
   useEffect(() => {
     fetchCompanies({ limit: 50 }).then((r) => setCompanies(r.items)).catch(() => {});
-    fetchEmployees({ limit: 100 }).then((r) => setEmployees(r.items)).catch(() => {});
+    fetchEmployees({ limit: 500 }).then((r) => setEmployees(r.items)).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -253,7 +253,15 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
   useEffect(() => {
     if (salesTimeoutRef.current) clearTimeout(salesTimeoutRef.current);
     const trimmed = salesQuery.trim();
-    if (!trimmed) { setSalesResults([]); setSalesLoading(false); return; }
+    if (!trimmed) {
+      const filtered = employees.filter((e) => {
+        const jt = (e.jobtitle ?? '').toLowerCase();
+        return jt.includes('sale');
+      });
+      setSalesResults(filtered);
+      setSalesLoading(false);
+      return;
+    }
     setSalesLoading(true);
     salesTimeoutRef.current = setTimeout(() => {
       fetchEmployees({ search: trimmed, limit: 100 })
@@ -268,7 +276,7 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
         .finally(() => setSalesLoading(false));
     }, 300);
     return () => { if (salesTimeoutRef.current) clearTimeout(salesTimeoutRef.current); };
-  }, [salesQuery]);
+  }, [salesQuery, employees]);
 
   const handleSalesInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSalesQuery(e.target.value);
@@ -307,7 +315,15 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
   useEffect(() => {
     if (cskhTimeoutRef.current) clearTimeout(cskhTimeoutRef.current);
     const trimmed = cskhQuery.trim();
-    if (!trimmed) { setCskhResults([]); setCskhLoading(false); return; }
+    if (!trimmed) {
+      const filtered = employees.filter((e) => {
+        const jt = (e.jobtitle ?? '').toLowerCase();
+        return jt.includes('cskh') || jt.includes('customer service') || jt.includes('hỗ trợ');
+      });
+      setCskhResults(filtered);
+      setCskhLoading(false);
+      return;
+    }
     setCskhLoading(true);
     cskhTimeoutRef.current = setTimeout(() => {
       fetchEmployees({ search: trimmed, limit: 100 })
@@ -322,7 +338,7 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
         .finally(() => setCskhLoading(false));
     }, 300);
     return () => { if (cskhTimeoutRef.current) clearTimeout(cskhTimeoutRef.current); };
-  }, [cskhQuery]);
+  }, [cskhQuery, employees]);
 
   const handleCskhInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCskhQuery(e.target.value);

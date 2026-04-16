@@ -23,5 +23,12 @@
         ]
       }
     ]
+  },
+  "migration": {
+    "from": "kimi-legacy",
+    "to": "kimi-code",
+    "apiKeyManagement": "console",
+    "authMethod": "one-click",
+    "target": "Kilo Code"
   }
 }

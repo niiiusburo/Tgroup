@@ -198,6 +198,10 @@ router.get('/', async (req, res) => {
         au.name AS username,
         a.doctorid,
         doc.name AS doctorname,
+        a.assistantid,
+        ass.name AS assistantname,
+        a.dentalaideid,
+        da.name AS dentalaidename,
         a.dotkhamid,
         dk.name AS dotkhamname,
         a.saleorderid,
@@ -228,6 +232,8 @@ router.get('/', async (req, res) => {
       LEFT JOIN companies c ON c.id = a.companyid
       LEFT JOIN aspnetusers au ON au.id = a.userid
       LEFT JOIN employees doc ON doc.id = a.doctorid
+      LEFT JOIN employees ass ON ass.id = a.assistantid
+      LEFT JOIN employees da ON da.id = a.dentalaideid
       LEFT JOIN dotkhams dk ON dk.id = a.dotkhamid
       LEFT JOIN saleorders so ON so.id = a.saleorderid
       LEFT JOIN crmteams t ON t.id = a.teamid
@@ -339,12 +345,18 @@ router.get('/:id', async (req, res) => {
         a.createdbyid,
         a.writebyid,
         a.productid,
-        prod.name AS productname
+        prod.name AS productname,
+        a.assistantid,
+        ass.name AS assistantname,
+        a.dentalaideid,
+        da.name AS dentalaidename
       FROM appointments a
       LEFT JOIN partners p ON p.id = a.partnerid
       LEFT JOIN companies c ON c.id = a.companyid
       LEFT JOIN aspnetusers au ON au.id = a.userid
       LEFT JOIN employees doc ON doc.id = a.doctorid
+      LEFT JOIN employees ass ON ass.id = a.assistantid
+      LEFT JOIN employees da ON da.id = a.dentalaideid
       LEFT JOIN dotkhams dk ON dk.id = a.dotkhamid
       LEFT JOIN saleorders so ON so.id = a.saleorderid
       LEFT JOIN crmteams t ON t.id = a.teamid
@@ -387,6 +399,8 @@ router.post('/', requirePermission('appointments.add'), async (req, res) => {
     const color = b.color || '1';
     const state = b.state || 'confirmed';
     const productId = b.productId || b.productid || null;
+    const assistantId = b.assistantId || b.assistantid || null;
+    const dentalAideId = b.dentalAideId || b.dentalaideid || null;
 
     // Validate required fields
     const missingFields = [];
@@ -451,12 +465,12 @@ router.post('/', requirePermission('appointments.add'), async (req, res) => {
     const result = await query(
       `INSERT INTO appointments (
         id, name, date, time, partnerid, doctorid, companyid, note, timeexpected,
-        color, state, aptstate, isrepeatcustomer, isnotreatment, productid,
+        color, state, aptstate, isrepeatcustomer, isnotreatment, productid, assistantid, dentalaideid,
         datecreated, lastupdated
       ) VALUES (
-        gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, false, false, $12, NOW(), NOW()
+        gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, false, false, $12, $13, $14, NOW(), NOW()
       ) RETURNING *`,
-      [name, date, time || null, partnerId, doctorId || null, companyId, note, timeExpectedNum, color, state, state, productId]
+      [name, date, time || null, partnerId, doctorId || null, companyId, note, timeExpectedNum, color, state, state, productId, assistantId, dentalAideId]
     );
 
     const newAppointment = result[0];
@@ -481,11 +495,17 @@ router.post('/', requirePermission('appointments.add'), async (req, res) => {
         a.productid,
         prod.name AS productname,
         a.datecreated,
-        a.lastupdated
+        a.lastupdated,
+        a.assistantid,
+        ass.name AS assistantname,
+        a.dentalaideid,
+        da.name AS dentalaidename
       FROM appointments a
       LEFT JOIN partners p ON p.id = a.partnerid
       LEFT JOIN companies c ON c.id = a.companyid
       LEFT JOIN employees doc ON doc.id = a.doctorid
+      LEFT JOIN employees ass ON ass.id = a.assistantid
+      LEFT JOIN employees da ON da.id = a.dentalaideid
       LEFT JOIN products prod ON prod.id = a.productid
       WHERE a.id = $1`,
       [newAppointment.id]
@@ -519,6 +539,8 @@ router.put('/:id', requirePermission('appointments.edit'), async (req, res) => {
     const color = b.color;
     const time = b.time;
     const productId = b.productId || b.productid;
+    const assistantId = b.assistantId || b.assistantid;
+    const dentalAideId = b.dentalAideId || b.dentalaideid;
 
     // Validate ID
     if (!isValidUUID(id)) {
@@ -604,6 +626,16 @@ router.put('/:id', requirePermission('appointments.edit'), async (req, res) => {
       params.push(productId || null);
       paramIdx++;
     }
+    if (assistantId !== undefined) {
+      updates.push(`assistantid = $${paramIdx}`);
+      params.push(assistantId || null);
+      paramIdx++;
+    }
+    if (dentalAideId !== undefined) {
+      updates.push(`dentalaideid = $${paramIdx}`);
+      params.push(dentalAideId || null);
+      paramIdx++;
+    }
 
     // Always update lastupdated
     updates.push(`lastupdated = NOW()`);
@@ -639,11 +671,17 @@ router.put('/:id', requirePermission('appointments.edit'), async (req, res) => {
         a.productid,
         prod.name AS productname,
         a.datecreated,
-        a.lastupdated
+        a.lastupdated,
+        a.assistantid,
+        ass.name AS assistantname,
+        a.dentalaideid,
+        da.name AS dentalaidename
       FROM appointments a
       LEFT JOIN partners p ON p.id = a.partnerid
       LEFT JOIN companies c ON c.id = a.companyid
       LEFT JOIN employees doc ON doc.id = a.doctorid
+      LEFT JOIN employees ass ON ass.id = a.assistantid
+      LEFT JOIN employees da ON da.id = a.dentalaideid
       LEFT JOIN products prod ON prod.id = a.productid
       WHERE a.id = $1`,
       [id]

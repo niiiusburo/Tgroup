@@ -1,0 +1,90 @@
+name: Payments & Deposits
+summary: |
+  Payment recording, deposit wallet tracking, refunds, VietQR generation,
+  and monthly installment plans. Payments are allocated to saleorders or
+  dotkhams. Bank settings support VietQR payload creation.
+owns:
+  - api/src/routes/payments.js
+  - api/src/routes/monthlyPlans.js
+  - api/src/routes/bankSettings.js
+  - api/src/routes/accountPayments.js
+  - api/src/routes/receipts.js
+  - api/src/routes/customerBalance.js
+  - website/src/pages/Payment.tsx
+  - website/src/components/payment/
+  - website/src/lib/api/payments.ts
+  - website/src/lib/api/monthlyPlans.ts
+  - website/src/lib/vietqr.ts
+  - website/src/hooks/usePayment.ts
+  - website/src/hooks/useDeposits.ts
+  - website/src/hooks/useMonthlyPlans.ts
+  - website/src/hooks/useBankSettings.ts
+reads:
+  - api/src/db.js
+writes:
+  - dbo.payments
+  - dbo.monthlyplans
+  - dbo.monthlyplan_items
+  - dbo.planinstallments
+  - dbo.company_bank_settings
+  - dbo.payment_proofs (image metadata)
+  - dbo.receipt_sequences (receipt number generation)
+tables:
+  - dbo.payments
+  - dbo.monthlyplans
+  - dbo.monthlyplan_items
+  - dbo.planinstallments
+  - dbo.company_bank_settings
+  - dbo.partners
+  - dbo.companies
+  - dbo.saleorders
+  - dbo.dotkhams
+endpoints:
+  - GET    /api/Payments
+  - GET    /api/Payments/deposits
+  - GET    /api/Payments/deposit-usage
+  - GET    /api/Payments/:id
+  - POST   /api/Payments
+  - POST   /api/Payments/refund
+  - PATCH  /api/Payments/:id
+  - DELETE /api/Payments/:id
+  - POST   /api/Payments/:id/void
+  - POST   /api/Payments/:id/proof
+  - GET    /api/MonthlyPlans
+  - GET    /api/MonthlyPlans/:id
+  - POST   /api/MonthlyPlans
+  - PUT    /api/MonthlyPlans/:id
+  - DELETE /api/MonthlyPlans/:id
+  - PUT    /api/MonthlyPlans/:id/installments/:installmentId/pay
+  - GET    /api/settings/bank
+  - PUT    /api/settings/bank
+  - GET    /api/AccountPayments
+  - GET    /api/Receipts
+ui_surfaces:
+  - /payment
+  - PaymentForm
+  - DepositWallet
+  - CustomerDeposits
+  - MonthlyPlanCreator / InstallmentTracker
+  - VietQrModal
+  - PaymentHistory
+jobs:
+  - none
+shared_types:
+  - website/src/types/payment.ts
+  - website/src/types/monthlyPlans.ts
+  - website/src/lib/api/payments.ts (ApiPayment, ApiPaymentAllocation)
+dependencies:
+  - Customers & Partners (balance calculation reads partners)
+  - Services Catalog (allocations to saleorders/dotkhams)
+affected_by:
+  - Changes to dbo.payments schema (method enum, deposit logic)
+  - Changes to receipt number generation rules
+  - Changes to VietQR library or bank BIN list
+impact_tests:
+  - website/e2e/team-charlie-payments.spec.ts
+  - website/e2e/vietqr-payment.spec.ts
+  - website/e2e/vps-payment-history.spec.ts
+  - website/src/components/payment/__tests__/PaymentForm.submit.test.tsx
+  - website/src/lib/allocatePaymentSources.test.ts
+risk_level: high

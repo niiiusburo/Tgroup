@@ -152,10 +152,10 @@ function AppointmentCard({
         </div>
       </div>
 
-      {/* Service note */}
-      {appointment.serviceName && (
-        <p className="text-[10px] text-gray-500 mt-1.5 pt-1.5 border-t border-gray-200/50 truncate">
-          {appointment.serviceName}
+      {/* Notes at bottom - only if exists */}
+      {appointment.notes && (
+        <p className="text-[10px] text-gray-400 mt-1.5 pt-1.5 border-t border-gray-200/50 truncate font-medium">
+          {appointment.notes}
         </p>
       )}
 

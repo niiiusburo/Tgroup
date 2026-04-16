@@ -13,7 +13,7 @@ interface RoleMultiSelectProps {
   readonly counts?: Record<EmployeeRole | 'all', number>;
 }
 
-export function RoleMultiSelect({ value, onChange, showAll = true }: RoleMultiSelectProps) {
+export function RoleMultiSelect({ value, onChange, showAll = true, counts }: RoleMultiSelectProps) {
   return (
     <div className="flex flex-wrap gap-2">
       {showAll && (
@@ -26,6 +26,7 @@ export function RoleMultiSelect({ value, onChange, showAll = true }: RoleMultiSe
           }`}
         >
           All Roles
+          {counts && <span className="ml-1.5 text-xs opacity-80">({counts['all']})</span>}
         </button>
       )}
       {ALL_ROLES.map((role) => (
@@ -39,6 +40,7 @@ export function RoleMultiSelect({ value, onChange, showAll = true }: RoleMultiSe
           }`}
         >
           {ROLE_LABELS[role]}
+          {counts && <span className="ml-1.5 text-xs opacity-80">({counts[role]})</span>}
         </button>
       ))}
     </div>

@@ -1,0 +1,52 @@
+name: External Integrations
+summary: |
+  Face-recognition check-in via Compreface Docker services, and external
+  health-checkup sync via Hosoonline API. Both are optional features gated
+  by env configuration.
+owns:
+  - api/src/routes/faceRecognition.js
+  - api/src/routes/externalCheckups.js
+  - api/src/services/comprefaceClient.js
+  - website/src/components/customer/CustomerCameraWidget.tsx
+  - website/src/components/shared/FaceCaptureModal.tsx
+  - website/src/components/modules/PatientCheckIn.tsx
+  - website/src/hooks/useFaceRecognition.ts
+  - website/src/hooks/useExternalCheckups.ts
+reads:
+  - api/src/db.js
+  - process.env.COMPREFACE_URL
+  - process.env.COMPREFACE_API_KEY
+  - process.env.HOSOONLINE_BASE_URL
+  - process.env.HOSOONLINE_API_KEY
+writes:
+  - dbo.partners (face_subject_id, face_registered_at)
+  - api/uploads/feedback/ (indirect, shared storage)
+tables:
+  - dbo.partners
+endpoints:
+  - POST /api/face/recognize
+  - POST /api/face/register
+  - GET  /api/ExternalCheckups/:customerCode
+  - POST /api/ExternalCheckups/:customerCode/health-checkups
+ui_surfaces:
+  - PatientCheckIn
+  - CustomerCameraWidget
+  - FaceCaptureModal
+  - HealthCheckupGallery
+jobs:
+  - none (Compreface runs as standalone Docker containers)
+shared_types:
+  - website/src/hooks/useFaceRecognition.ts
+dependencies:
+  - Customers & Partners
+  - Docker services: compreface-api, compreface-core, compreface-postgres-db
+affected_by:
+  - Changes to Compreface image size limits
+  - Changes to Hosoonline API contract
+  - Network reachability between api container and compreface-api
+impact_tests:
+  - website/src/hooks/__tests__/useFaceRecognition.test.ts
+  - api/tests/faceRecognition.test.js
+risk_level: medium
+notes:
+  - Compreface services are defined in docker-compose.yml but not required for core app startup.

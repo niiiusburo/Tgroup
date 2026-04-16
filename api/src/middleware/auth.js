@@ -41,24 +41,28 @@ function requirePermission(permission) {
         return res.status(403).json({ error: 'Forbidden' });
       }
 
-      const tierRows = await query(
-        `SELECT tier_id FROM partners WHERE id = $1`,
+      // Look up group from employee_permissions table
+      const permRows = await query(
+        `SELECT ep.group_id
+         FROM dbo.employee_permissions ep
+         WHERE ep.employee_id = $1
+         LIMIT 1`,
         [employeeId]
       );
 
-      if (!tierRows || tierRows.length === 0 || !tierRows[0].tier_id) {
+      if (!permRows || permRows.length === 0) {
         return res.status(403).json({ error: 'No permission assignment found' });
       }
 
-      const groupId = tierRows[0].tier_id;
+      const groupId = permRows[0].group_id;
 
       const [basePermRows, overrideRows] = await Promise.all([
         query(
-          `SELECT permission FROM group_permissions WHERE group_id = $1`,
+          `SELECT permission FROM dbo.group_permissions WHERE group_id = $1`,
           [groupId]
         ),
         query(
-          `SELECT permission, override_type FROM permission_overrides WHERE employee_id = $1`,
+          `SELECT permission, override_type FROM dbo.permission_overrides WHERE employee_id = $1`,
           [employeeId]
         ),
       ]);

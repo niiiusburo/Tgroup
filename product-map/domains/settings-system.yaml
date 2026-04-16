@@ -1,0 +1,71 @@
+name: Settings & System Config
+summary: |
+  Application-wide settings including system preferences, timezone config,
+  IP access control whitelist, customer sources, and bank/VietQR settings.
+  Some settings are stored in DB; others are env-driven.
+owns:
+  - api/src/routes/systemPreferences.js
+  - api/src/routes/bankSettings.js
+  - api/src/routes/customerSources.js
+  - api/src/routes/config.js
+  - api/src/routes/places.js
+  - website/src/pages/Settings/index.tsx
+  - website/src/components/settings/
+  - website/src/hooks/useSettings.ts
+  - website/src/hooks/useBankSettings.ts
+  - website/src/hooks/useIpAccessControl.ts
+  - website/src/lib/api/systemPreferences.ts
+  - website/src/lib/api/customerSources.ts
+reads:
+  - api/src/db.js
+  - process.env.GOOGLE_PLACES_API_KEY
+writes:
+  - dbo.systempreferences
+  - dbo.company_bank_settings
+  - dbo.customersources
+tables:
+  - dbo.systempreferences
+  - dbo.company_bank_settings
+  - dbo.customersources
+endpoints:
+  - GET    /api/SystemPreferences
+  - GET    /api/SystemPreferences/:key
+  - POST   /api/SystemPreferences
+  - PUT    /api/SystemPreferences/:key
+  - DELETE /api/SystemPreferences/:key
+  - POST   /api/SystemPreferences/bulk
+  - GET    /api/settings/bank
+  - PUT    /api/settings/bank
+  - GET    /api/CustomerSources
+  - POST   /api/CustomerSources
+  - PUT    /api/CustomerSources/:id
+  - DELETE /api/CustomerSources/:id
+  - GET    /api/IrConfigParameters/GetParam
+  - POST   /api/IrConfigParameters/GetParam
+  - GET    /api/Places/autocomplete
+  - GET    /api/Places/details
+ui_surfaces:
+  - /settings
+  - SystemPreferencesContent
+  - BankSettingsForm
+  - TimezoneSelector
+  - IpAccessControl
+  - CustomerSourcesConfig
+  - PermissionGroupConfig / RoleConfig
+jobs:
+  - none
+shared_types:
+  - website/src/types/settings.ts
+  - website/src/types/ipAccessControl.ts
+dependencies:
+  - Auth & Permissions (settings.view, settings.edit)
+  - Google Places API (env key)
+affected_by:
+  - Changes to dbo.systempreferences schema
+  - Changes to GOOGLE_PLACES_API_KEY env var
+  - Changes to IP whitelist logic in useIpAccessControl
+impact_tests:
+  - website/e2e/login-and-settings.spec.ts
+  - website/src/__tests__/useVersionCheck.test.ts
+  - website/src/__tests__/timezone.*.test.ts
+risk_level: medium

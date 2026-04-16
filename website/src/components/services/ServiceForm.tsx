@@ -25,6 +25,7 @@ import { X, ClipboardPlus, Edit2, User, Stethoscope, MapPin, CalendarDays, Clock
 
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
 import { ServiceCatalogSelector } from '@/components/shared/ServiceCatalogSelector';
+import { ToothPickerModal } from './ToothPickerModal';
 import { CustomerSelector } from '@/components/shared/CustomerSelector';
 import { DoctorSelector } from '@/components/shared/DoctorSelector';
 import { LocationSelector } from '@/components/shared/LocationSelector';
@@ -86,6 +87,9 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   const [totalCostOverride, setTotalCostOverride] = useState(
     initialData?.totalCost ? String(initialData.totalCost) : ''
   );
+  const [toothNumbers, setToothNumbers] = useState<readonly string[]>(initialData?.toothNumbers ?? []);
+  const [toothComment, setToothComment] = useState(initialData?.toothComment ?? '');
+  const [showToothPicker, setShowToothPicker] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -105,6 +109,8 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       setQuantity(initialData.quantity ? String(initialData.quantity) : '1');
       setUnit(initialData.unit ?? 'răng');
       setTotalCostOverride(initialData.totalCost ? String(initialData.totalCost) : '');
+      setToothNumbers(initialData.toothNumbers ?? []);
+      setToothComment(initialData.toothComment ?? '');
     }
   }, [initialData?.id, readonlyCustomerId]);
 
@@ -238,7 +244,8 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       totalVisits: selectedCatalog.totalVisits, totalCost: cost,
       startDate, expectedEndDate: expectedEndDate || startDate,
       notes: notes.trim(), quantity: Number(quantity) || 1, unit: unit.trim(),
-      toothNumbers: [],
+      toothNumbers,
+      toothComment: toothComment.trim(),
     });
     } catch (error) {
       setErrors(prev => ({ ...prev, submit: error instanceof Error ? error.message : t('formErrors.saveFailed', 'Lưu thất bại') }));
@@ -401,6 +408,41 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
             </div>
           </div>
 
+          {/* Chọn răng */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <Stethoscope className="w-3.5 h-3.5" />
+              Chọn răng
+            </label>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowToothPicker(true)}
+                className="px-3 py-2 text-sm font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-colors"
+              >
+                {toothNumbers.length > 0 ? `Đã chọn ${toothNumbers.length} răng` : 'Chọn răng'}
+              </button>
+              {toothNumbers.length > 0 && (
+                <span className="text-xs text-gray-500">
+                  {toothNumbers.join(', ')}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Ghi chú răng */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <FileText className="w-3.5 h-3.5" />
+              Ghi chú răng
+            </label>
+            <textarea
+              value={toothComment} onChange={(e) => setToothComment(e.target.value)}
+              rows={2} placeholder="Nhập ghi chú về răng"
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
+            />
+          </div>
+
           {/* Ghi chú */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
@@ -414,6 +456,18 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
             />
           </div>
         </form>
+
+        {showToothPicker && (
+          <ToothPickerModal
+            isOpen={showToothPicker}
+            initialValues={toothNumbers}
+            onClose={() => setShowToothPicker(false)}
+            onSave={(values) => {
+              setToothNumbers(values);
+              setShowToothPicker(false);
+            }}
+          />
+        )}
 
         {/* Footer */}
         <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">

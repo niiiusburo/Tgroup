@@ -30,6 +30,12 @@ import { cn } from '@/lib/utils';
  * - Month view shows status counts per day
  */
 
+const MONTH_NAMES = [
+  'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+  'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
+];
+const WEEKDAY_NAMES_SHORT = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+
 const VIEW_TABS: readonly { readonly mode: ViewMode; readonly label: string }[] = [
   { mode: 'day', label: 'Ngày' },
   { mode: 'week', label: 'Tuần' },
@@ -142,6 +148,53 @@ export function Calendar() {
     setViewMode('day');
   }, [setCurrentDate, setViewMode]);
 
+  // Inline date picker state
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [pickerViewDate, setPickerViewDate] = useState(currentDate);
+  const datePickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setPickerViewDate(currentDate);
+  }, [currentDate]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (datePickerRef.current && !datePickerRef.current.contains(event.target as Node)) {
+        setIsDatePickerOpen(false);
+      }
+    }
+    if (isDatePickerOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isDatePickerOpen]);
+
+  const pickerDays = useMemo(() => {
+    const year = pickerViewDate.getFullYear();
+    const month = pickerViewDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayOfMonth = new Date(year, month, 1).getDay();
+    const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+    const prevMonthDays = new Date(year, month, 0).getDate();
+    const days: Array<{ date: number | null; isCurrentMonth: boolean; dateKey?: string }> = [];
+    for (let i = startOffset - 1; i >= 0; i--) {
+      days.push({ date: prevMonthDays - i, isCurrentMonth: false });
+    }
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      days.push({ date: day, isCurrentMonth: true, dateKey });
+    }
+    const remainingCells = 42 - days.length;
+    for (let day = 1; day <= remainingCells; day++) {
+      days.push({ date: day, isCurrentMonth: false });
+    }
+    return days;
+  }, [pickerViewDate]);
+
+  const todayKeyForPicker = useMemo(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  }, []);
 
   // Helper to map Calendar status to OverviewAppointment topStatus
   function mapStatusToTopStatus(status: CalendarAppointment['status']): OverviewAppointment['topStatus'] {
@@ -257,9 +310,102 @@ export function Calendar() {
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h2 className="text-base font-semibold text-gray-900 min-w-[150px] text-center">
-            {dateLabel}
-          </h2>
+          <div ref={datePickerRef} className="relative">
+            <button
+              onClick={() => setIsDatePickerOpen((v) => !v)}
+              className={cn(
+                'text-base font-semibold text-gray-900 min-w-[150px] text-center px-3 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-2',
+                isDatePickerOpen ? 'bg-gray-200' : 'hover:bg-gray-100'
+              )}
+            >
+              <CalendarIcon className="w-4 h-4 text-gray-500" />
+              {dateLabel}
+            </button>
+
+            {isDatePickerOpen && (
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                {/* Header */}
+                <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
+                  <button
+                    type="button"
+                    onClick={() => setPickerViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
+                    className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <span className="text-sm font-semibold text-gray-900">
+                    {MONTH_NAMES[pickerViewDate.getMonth()]} {pickerViewDate.getFullYear()}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setPickerViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
+                    className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4 text-gray-600" />
+                  </button>
+                </div>
+
+                {/* Weekday headers */}
+                <div className="grid grid-cols-7 px-2 pt-2">
+                  {WEEKDAY_NAMES_SHORT.map((day) => (
+                    <div key={day} className="text-center text-xs font-medium text-gray-400 py-1">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Calendar grid */}
+                <div className="grid grid-cols-7 px-2 pb-2">
+                  {pickerDays.map((day, index) => {
+                    if (!day.isCurrentMonth || !day.date) {
+                      return (
+                        <div key={index} className="h-8 flex items-center justify-center">
+                          <span className="text-sm text-gray-300">{day.date}</span>
+                        </div>
+                      );
+                    }
+                    const dateKey = day.dateKey!;
+                    const isSelected = dateKey === currentDate.toISOString().split('T')[0];
+                    const isToday = dateKey === todayKeyForPicker;
+                    return (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => {
+                          setCurrentDate(new Date(dateKey + 'T00:00:00'));
+                          setIsDatePickerOpen(false);
+                        }}
+                        className={cn(
+                          'h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-all',
+                          isSelected
+                            ? 'bg-gradient-to-br from-orange-500 to-orange-400 text-white shadow-md'
+                            : isToday
+                              ? 'bg-orange-50 text-orange-600 border border-orange-200'
+                              : 'text-gray-700 hover:bg-gray-100'
+                        )}
+                      >
+                        {day.date}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Today button */}
+                <div className="px-2 pb-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      goToToday();
+                      setIsDatePickerOpen(false);
+                    }}
+                    className="w-full py-1.5 text-sm font-medium text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                  >
+                    Hôm nay
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
           <button
             onClick={() => navigate('next')}
             className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"

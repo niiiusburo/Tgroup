@@ -3,16 +3,6 @@ import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_CARD_COLORS } from '@/constants';
 import { STATUS_DOT_COLORS, type CalendarAppointment } from '@/data/mockCalendar';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 
-const TYPE_LABELS_VI: Record<string, string> = {
-  cleaning: 'Vệ sinh',
-  consultation: 'Tư vấn',
-  treatment: 'Điều trị',
-  surgery: 'Phẫu thuật',
-  orthodontics: 'Chỉnh nha',
-  cosmetic: 'Thẩm mỹ',
-  emergency: 'Cấp cứu',
-};
-
 /**
  * AppointmentCard - Compact appointment summary card
  * @crossref:used-in[Calendar, Overview, Appointments]
@@ -101,9 +91,7 @@ export function AppointmentCard({
             <Pencil className="w-3.5 h-3.5" />
           </button>
         )}
-        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${colorStyles.bg} ${colorStyles.text} border ${colorStyles.border}`}>
-          {TYPE_LABELS_VI[appointment.appointmentType] ?? appointment.appointmentType}
-        </span>
+
       </div>
       <button
         type="button"

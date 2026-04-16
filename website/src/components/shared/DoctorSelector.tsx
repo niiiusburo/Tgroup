@@ -12,10 +12,11 @@ import { ROLE_LABELS } from '@/data/mockEmployees';
 interface DoctorSelectorProps {
   readonly employees: readonly Employee[];
   readonly selectedId: string | null;
-  readonly onChange: (employeeId: string) => void;
+  readonly onChange: (employeeId: string | null) => void;
   readonly placeholder?: string;
   readonly disabled?: boolean;
   readonly filterRoles?: readonly string[];
+  readonly allowClear?: boolean;
 }
 
 export function DoctorSelector({
@@ -25,6 +26,7 @@ export function DoctorSelector({
   placeholder = 'Select doctor...',
   disabled = false,
   filterRoles,
+  allowClear = false,
 }: DoctorSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -107,6 +109,20 @@ export function DoctorSelector({
             </div>
           </div>
           <div className="max-h-48 overflow-y-auto py-1">
+            {allowClear && selectedEmployee && (
+              <button
+                key="__clear__"
+                type="button"
+                onClick={() => {
+                  onChange('');
+                  setIsOpen(false);
+                  setSearchTerm('');
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 border-b border-gray-100"
+              >
+                Xóa lựa chọn
+              </button>
+            )}
             {filteredEmployees.length === 0 ? (
               <div className="px-4 py-3 text-sm text-gray-400 text-center">No doctors found</div>
             ) : (

@@ -64,6 +64,26 @@ export function mapHexToColorCode(color: string | null | undefined): string | nu
 }
 
 /**
+ * Strip system metadata from notes, keeping only user comments
+ * Removes lines like "Duration: 30 min", "Type: Khách mới", "Auto-populated ..."
+ */
+export function stripNotesMetadata(note: string | null | undefined): string {
+  if (!note) return '';
+  const lines = note.split('\n');
+  const metadataPatterns = [
+    /^duration:\s*\d+\s*min/i,
+    /^type:\s*/i,
+    /^auto-populated/i,
+  ];
+  const userLines = lines.filter((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return false;
+    return !metadataPatterns.some((pattern) => pattern.test(trimmed));
+  });
+  return userLines.join('\n').trim();
+}
+
+/**
  * Derive appointment type from reason/note text
  */
 export function deriveAppointmentType(text: string): CalendarAppointment['appointmentType'] {
@@ -101,7 +121,7 @@ export function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppoin
     status: mapStateToStatus(apt.state),
     locationId: apt.companyid || '',
     locationName: apt.companyname || '',
-    notes: apt.note || '',
+    notes: stripNotesMetadata(apt.note),
     color: mapHexToColorCode(apt.color),
   };
 }
