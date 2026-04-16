@@ -64,3 +64,4 @@ skills-lock.json
 
 # Local-only files (never push to GitHub)
 LOCAL/
+.worktrees/
