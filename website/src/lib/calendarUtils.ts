@@ -123,5 +123,6 @@ export function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppoin
     locationName: apt.companyname || '',
     notes: stripNotesMetadata(apt.note),
     color: mapHexToColorCode(apt.color),
+    timeexpected: apt.timeexpected ?? apt.timeExpected ?? null,
   };
 }

@@ -26,6 +26,7 @@ export interface CalendarAppointment {
   readonly locationName: string;
   readonly notes: string;
   readonly color: string | null;
+  readonly timeexpected?: number | null;
 }
 
 export interface ManagedAppointment {
