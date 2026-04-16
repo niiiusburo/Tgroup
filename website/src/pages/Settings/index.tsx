@@ -1,8 +1,8 @@
 /**
- * Settings Page — tabbed settings for service catalog, roles, customer sources, and system preferences
+ * Settings Page — tabbed settings for service catalog and system preferences
  * @crossref:route[/settings]
  * @crossref:used-in[App]
- * @crossref:uses[ServiceCatalogSettings, RoleConfig, CustomerSourcesConfig, SystemPreferences]
+ * @crossref:uses[ServiceCatalogSettings, SystemPreferences]
  */
 
 import { useState } from 'react';
@@ -14,7 +14,7 @@ type SettingsTab = 'catalog' | 'preferences';
 
 const TABS: { id: SettingsTab; label: string; icon: React.ReactNode; description: string }[] = [
   { id: 'catalog', label: 'Service Catalog', icon: <Stethoscope className="w-4 h-4" />, description: 'Treatment types and pricing' },
-  { id: 'preferences', label: 'System Preferences', icon: <SlidersHorizontal className="w-4 h-4" />, description: 'General app settings' },
+  { id: 'preferences', label: 'System Preferences', icon: <SlidersHorizontal className="w-4 h-4" />, description: 'General settings and IP access control' },
 ];
 
 const TAB_COMPONENTS: Record<SettingsTab, React.ComponentType> = {
@@ -23,7 +23,7 @@ const TAB_COMPONENTS: Record<SettingsTab, React.ComponentType> = {
 };
 
 export function Settings() {
-  const [activeTab, setActiveTab] = useState<SettingsTab>('catalog');
+  const [activeTab, setActiveTab] = useState<SettingsTab>('preferences');
 
   const ActiveComponent = TAB_COMPONENTS[activeTab];
 
