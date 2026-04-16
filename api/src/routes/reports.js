@@ -428,7 +428,7 @@ router.post('/services/breakdown', requirePermission('reports.view'), async (req
        GROUP BY pc.name ORDER BY product_count DESC`);
 
     // Revenue by category via sale order lines
-    const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'so.datecreated');
+    const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'so.datecreated', 'so.companyid');
     const revByCat = await query(
       `SELECT pc.name as category, COUNT(sol.id) as order_count,
               COALESCE(SUM(sol.pricetotal),0) as revenue

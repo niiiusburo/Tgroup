@@ -5,6 +5,9 @@
   "editService": "Sửa dịch vụ",
   "serviceCatalog": "Danh mục dịch vụ",
   "searchPlaceholder": "Tìm kiếm dịch vụ...",
+  "catalog": {
+    "searchPlaceholder": "Tìm kiếm danh mục..."
+  },
   "columns": {
     "name": "Tên dịch vụ",
     "category": "Danh mục",

@@ -67,6 +67,9 @@
     "categoryName": "Tên danh mục",
     "services": "Dịch vụ"
   },
+  "catalog": {
+    "searchPlaceholder": "Tìm kiếm danh mục..."
+  },
   "customerSourcesConfig": {
     "title": "Nguồn khách hàng",
     "addSource": "Thêm nguồn",

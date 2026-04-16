@@ -5,6 +5,9 @@
   "editService": "Edit Service",
   "serviceCatalog": "Service Catalog",
   "searchPlaceholder": "Search services...",
+  "catalog": {
+    "searchPlaceholder": "Search catalog..."
+  },
   "columns": {
     "name": "Service Name",
     "category": "Category",

@@ -67,6 +67,9 @@
     "categoryName": "Category Name",
     "services": "Services"
   },
+  "catalog": {
+    "searchPlaceholder": "Search catalog..."
+  },
   "customerSourcesConfig": {
     "title": "Customer Sources",
     "addSource": "Add Source",

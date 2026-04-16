@@ -81,6 +81,7 @@ i18n.use(initReactI18next).init({
   },
   lng: savedLang && SUPPORTED_LANGS.includes(savedLang) ? savedLang : DEFAULT_LANG,
   fallbackLng: 'vi',
+  fallbackNS: 'common',
   ns: [
     'common', 'nav', 'overview', 'calendar', 'customers',
     'appointments', 'services', 'payment', 'employees',

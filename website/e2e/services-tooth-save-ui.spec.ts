@@ -23,32 +23,35 @@ test('create service with tooth comment via UI form', async ({ page, context }) 
 
   const modal = page.locator('.modal-content');
 
-  // Service catalog
-  await modal.locator('input').first().click();
+  // Service catalog: click the first selector button in the modal body (not the header close button)
+  await modal.locator('.modal-body').getByRole('button').first().click();
   await page.waitForTimeout(300);
-  await page.keyboard.type('Trám');
+  await page.locator('input[placeholder="Search services..."]').fill('Trám');
   await page.waitForTimeout(500);
   await page.locator('text=Trám răng').first().click({ force: true });
 
   // Customer
-  await modal.locator('input').nth(1).click();
+  await modal.locator('.modal-body').getByRole('button').nth(1).click();
   await page.waitForTimeout(300);
-  await page.keyboard.type('Nguyễn Thị Thanh');
+  await page.locator('input[placeholder="Search by name, phone, email..."]').fill('Nguyễn Thị Thanh');
   await page.waitForTimeout(500);
   await page.locator('text=Nguyễn Thị Thanh').first().click({ force: true });
 
   // Doctor
-  await modal.locator('input').nth(2).click();
+  await modal.locator('.modal-body').getByRole('button').nth(2).click();
   await page.waitForTimeout(300);
-  await page.keyboard.type('Nguyễn');
+  await page.locator('input[placeholder="Search by name or role..."]').fill('Nguyễn');
   await page.waitForTimeout(500);
   await page.locator('text=Nguyễn Thị Thanh').first().click({ force: true });
 
+  // Source (new dropdown added to service form)
+  await modal.locator('.modal-body').locator('select').nth(1).selectOption({ index: 1 });
+
   // Location
-  await modal.locator('select').first().selectOption({ label: 'Tấm Dentist Quận 3' });
+  await modal.locator('.modal-body').locator('select').first().selectOption({ label: 'Tấm Dentist Quận 3' });
 
   // Start date
-  await modal.locator('input[type="date"]').first().fill('2026-04-16');
+  await modal.locator('.modal-body').locator('input[type="date"]').first().fill('2026-04-16');
 
   // Pick teeth
   await page.click('button:has-text("Chọn răng")');
@@ -58,7 +61,7 @@ test('create service with tooth comment via UI form', async ({ page, context }) 
   await page.click('text=Lưu');
 
   // Add tooth comment
-  await modal.locator('textarea').first().fill('Test caries comment');
+  await modal.locator('.modal-body').locator('textarea').first().fill('Test caries comment');
 
   // Save
   await page.click('button:has-text("Tạo dịch vụ")');

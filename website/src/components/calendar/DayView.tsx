@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
+import { MedicalHistoryTooltip } from './MedicalHistoryTooltip';
 
 /**
  * DayView Component - responsive card grid layout for a single day's appointments
@@ -110,7 +111,9 @@ function DayCard({ appointment, onClick, onEdit }: DayCardProps) {
 
       {/* Customer name */}
       <h5 className="font-semibold text-gray-900 truncate text-xs mb-1.5">
-        <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink>
+        <MedicalHistoryTooltip customerId={appointment.customerId} customerName={appointment.customerName}>
+          <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink>
+        </MedicalHistoryTooltip>
       </h5>
 
       {/* Details grid */}

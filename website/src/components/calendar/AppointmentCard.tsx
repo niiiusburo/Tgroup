@@ -2,6 +2,7 @@ import { Clock, User, Pencil } from 'lucide-react';
 import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_CARD_COLORS } from '@/constants';
 import { STATUS_DOT_COLORS, type CalendarAppointment } from '@/data/mockCalendar';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
+import { MedicalHistoryTooltip } from './MedicalHistoryTooltip';
 
 /**
  * AppointmentCard - Compact appointment summary card
@@ -55,7 +56,10 @@ export function AppointmentCard({
       >
         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot}`} />
         <span className={`text-[11px] font-medium truncate ${colorStyles.text}`}>
-          {appointment.startTime} <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink>
+          {appointment.startTime}{' '}
+          <MedicalHistoryTooltip customerId={appointment.customerId} customerName={appointment.customerName}>
+            <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink>
+          </MedicalHistoryTooltip>
         </span>
       </button>
     );
@@ -75,7 +79,9 @@ export function AppointmentCard({
         >
           <span className={`w-2 h-2 rounded-full shrink-0 ${statusDot}`} />
           <span className="text-sm font-medium text-gray-900 truncate">
-            <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink>
+            <MedicalHistoryTooltip customerId={appointment.customerId} customerName={appointment.customerName}>
+              <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink>
+            </MedicalHistoryTooltip>
           </span>
         </button>
         {onEdit && (
