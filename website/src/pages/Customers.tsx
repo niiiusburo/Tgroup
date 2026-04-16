@@ -168,7 +168,7 @@ export function Customers() {
   const handleCreateService = useCallback(async (data: {
     catalogItemId: string;
     serviceName: string;
-    doctorId: string;
+    doctorId: string | null;
     doctorName: string;
     assistantId?: string | null;
     assistantName?: string;
@@ -209,7 +209,7 @@ export function Customers() {
     id: string;
     catalogItemId: string;
     serviceName: string;
-    doctorId: string;
+    doctorId: string | null;
     doctorName: string;
     assistantId?: string | null;
     assistantName?: string;

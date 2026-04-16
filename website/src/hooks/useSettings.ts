@@ -168,7 +168,14 @@ export function useRoleConfig() {
 
 // Default customer sources (fallback when API fails)
 const DEFAULT_CUSTOMER_SOURCES: readonly CustomerSource[] = [
-  { id: 'src-1', name: 'Sale Online', type: 'online', description: 'Kênh bán hàng trực tuyến', isActive: true, customerCount: 0 },
+  { id: 'src-1', name: 'Sale Online', type: 'online', description: 'Khách đến từ kênh sale online', isActive: true, customerCount: 0 },
+  { id: 'src-2', name: 'Khách vãng lai', type: 'offline', description: 'Khách vãng lai', isActive: true, customerCount: 0 },
+  { id: 'src-3', name: 'Hotline', type: 'online', description: 'Khách từ hotline', isActive: true, customerCount: 0 },
+  { id: 'src-4', name: 'Khách cũ', type: 'referral', description: 'Khách cũ quay lại', isActive: true, customerCount: 0 },
+  { id: 'src-5', name: 'Khách hàng giới thiệu', type: 'referral', description: 'Khách do khách hàng giới thiệu', isActive: true, customerCount: 0 },
+  { id: 'src-6', name: 'Nội bộ giới thiệu', type: 'referral', description: 'Khách do nội bộ giới thiệu', isActive: true, customerCount: 0 },
+  { id: 'src-7', name: 'MKT1', type: 'online', description: 'Kênh marketing 1', isActive: true, customerCount: 0 },
+  { id: 'src-8', name: 'ĐNCB', type: 'offline', description: 'Đối tượng ngoài cơ sở bệnh', isActive: true, customerCount: 0 },
 ];
 
 function mapApiSource(api: ApiCustomerSource): CustomerSource {

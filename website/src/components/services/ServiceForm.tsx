@@ -80,7 +80,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   const [assistantId, setAssistantId] = useState<string | null>(initialData?.assistantId ?? null);
   const [dentalAideId, setDentalAideId] = useState<string | null>(initialData?.dentalAideId ?? null);
   const [locationId, setLocationId] = useState<string | null>(initialData?.locationId ?? null);
-  const [startDate, setStartDate] = useState(initialData?.startDate ?? '');
+  const [startDate, setStartDate] = useState(initialData?.startDate ?? new Date().toISOString().slice(0, 10));
   const [expectedEndDate, setExpectedEndDate] = useState(initialData?.expectedEndDate ?? '');
   const [notes, setNotes] = useState(initialData?.notes ?? '');
   const [quantity, setQuantity] = useState(initialData?.quantity ? String(initialData.quantity) : '1');
@@ -106,7 +106,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       setAssistantId(initialData.assistantId ?? null);
       setDentalAideId(initialData.dentalAideId ?? null);
       setLocationId(initialData.locationId ?? null);
-      setStartDate(initialData.startDate ?? '');
+      setStartDate(initialData.startDate ?? new Date().toISOString().slice(0, 10));
       setExpectedEndDate(initialData.expectedEndDate ?? '');
       setNotes(initialData.notes ?? '');
       setQuantity(initialData.quantity ? String(initialData.quantity) : '1');
@@ -177,7 +177,6 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
     const newErrors: Record<string, string> = {};
     if (!catalogItemId) newErrors.service = t('formErrors.selectService', 'Vui lòng chọn dịch vụ');
     if (!customerId) newErrors.customer = t('formErrors.selectCustomer', 'Vui lòng chọn khách hàng');
-    if (!doctorId) newErrors.doctor = t('formErrors.selectDoctor', 'Vui lòng chọn bác sĩ');
     if (!locationId) newErrors.location = t('formErrors.selectLocation', 'Vui lòng chọn chi nhánh');
     if (!startDate) newErrors.startDate = t('formErrors.selectStartDate', 'Vui lòng chọn ngày bắt đầu');
     setErrors(newErrors);
@@ -231,7 +230,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
     const assistant = employees.find(emp => emp.id === assistantId);
     const dentalAide = employees.find(emp => emp.id === dentalAideId);
     const location = locations.find(l => l.id === locationId);
-    if (!customer || !doctor || !location || !selectedCatalog) return;
+    if (!customer || !location || !selectedCatalog) return;
 
     const cost = totalCostOverride ? Number(totalCostOverride) : selectedCatalog.defaultPrice;
 
@@ -241,7 +240,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       ...(initialData?.id ? { id: initialData.id } : {}),
       customerId: customer.id, customerName: customer.name, customerPhone: customer.phone,
       catalogItemId: selectedCatalog.id, serviceName: selectedCatalog.name,
-      category: selectedCatalog.category, doctorId: doctor.id, doctorName: doctor.name,
+      category: selectedCatalog.category, doctorId: doctor?.id ?? null, doctorName: doctor?.name ?? '',
       assistantId: assistant?.id ?? null, assistantName: assistant?.name ?? '',
       dentalAideId: dentalAide?.id ?? null, dentalAideName: dentalAide?.name ?? '',
       locationId: location.id, locationName: location.name,

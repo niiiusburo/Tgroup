@@ -48,7 +48,7 @@ interface CustomerProfileProps {
   readonly onCreateService?: (data: {
     catalogItemId: string;
     serviceName: string;
-    doctorId: string;
+    doctorId: string | null;
     doctorName: string;
     assistantId?: string | null;
     assistantName?: string;
@@ -65,7 +65,7 @@ interface CustomerProfileProps {
     id: string;
     catalogItemId: string;
     serviceName: string;
-    doctorId: string;
+    doctorId: string | null;
     doctorName: string;
     assistantId?: string | null;
     assistantName?: string;

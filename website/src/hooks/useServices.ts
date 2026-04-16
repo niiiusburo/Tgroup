@@ -29,7 +29,7 @@ export interface CreateServiceInput {
   readonly catalogItemId: string;
   readonly serviceName: string;
   readonly category: AppointmentType;
-  readonly doctorId: string;
+  readonly doctorId: string | null;
   readonly doctorName: string;
   readonly assistantId?: string | null;
   readonly assistantName?: string;
@@ -217,7 +217,7 @@ export function useServices(selectedLocationId?: string, partnerId?: string) {
       companyid: input.locationId,
       productid: input.catalogItemId,
       productname: input.serviceName,
-      doctorid: input.doctorId,
+      doctorid: input.doctorId ?? undefined,
       doctorname: input.doctorName,
       assistantid: input.assistantId ?? null,
       dentalaideid: input.dentalAideId ?? null,
@@ -249,7 +249,7 @@ export function useServices(selectedLocationId?: string, partnerId?: string) {
       companyid: input.locationId,
       productid: input.catalogItemId,
       productname: input.serviceName,
-      doctorid: input.doctorId,
+      doctorid: input.doctorId ?? undefined,
       doctorname: input.doctorName,
       assistantid: input.assistantId ?? null,
       dentalaideid: input.dentalAideId ?? null,
