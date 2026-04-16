@@ -12,15 +12,15 @@ export function ColorFilterCircles({ selected, counts, onToggle }: ColorFilterCi
   const colorEntries = Object.entries(APPOINTMENT_CARD_COLORS);
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-wrap items-center gap-2">
       <button
         type="button"
         data-testid="filter-color-all"
         onClick={() => isAll || onToggle('__ALL__')}
         className={cn(
-          'flex items-center gap-1.5 px-2 py-1 rounded-full border transition-colors',
+          'flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors',
           isAll
-            ? 'bg-blue-600 text-white border-blue-600'
+            ? 'bg-primary text-white border-primary'
             : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
         )}
       >
@@ -29,7 +29,7 @@ export function ColorFilterCircles({ selected, counts, onToggle }: ColorFilterCi
       </button>
       {colorEntries.map(([code, color]) => {
         const isSelected = selected.includes(code);
-        // Extract the tailwind color class from dot (border-l-*) and convert to bg-*
+        // Map border-l-* dot class to a bg-* class for the visible dot
         const dotClass = color.dot.replace('border-l-', 'bg-');
         return (
           <button
@@ -38,14 +38,14 @@ export function ColorFilterCircles({ selected, counts, onToggle }: ColorFilterCi
             data-testid={`filter-color-${code}`}
             onClick={() => onToggle(code)}
             className={cn(
-              'flex items-center gap-1.5 px-2 py-1 rounded-full border transition-colors',
+              'flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors',
               isSelected
-                ? 'bg-blue-600 text-white border-blue-600'
+                ? 'bg-primary text-white border-primary'
                 : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
             )}
           >
             <span className={cn('w-4 h-4 rounded-full', dotClass)} />
-            <span className="text-sm font-medium">({counts[code] ?? 0})</span>
+            <span className="text-sm font-medium">{counts[code] ?? 0}</span>
           </button>
         );
       })}
