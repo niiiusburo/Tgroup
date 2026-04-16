@@ -362,8 +362,12 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
     if (justUpdated) {
       const returnPath = consumeReturnPath();
       if (returnPath && returnPath !== window.location.pathname + window.location.search) {
-        // Prevent replacing state if already on correct path
-        window.history.replaceState({}, '', returnPath);
+        try {
+          // Prevent replacing state if already on correct path
+          window.history.replaceState({}, '', returnPath);
+        } catch {
+          // ignore cross-origin or jsdom security errors
+        }
       }
     }
   }, []);
@@ -485,6 +489,15 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
   useEffect(() => { checkRef.current = checkForUpdates; }, [checkForUpdates]);
 
   const applyUpdate = useCallback(async () => {
+    // Store current path for post-update return if not already stored
+    const currentPath = window.location.pathname + window.location.search;
+    if (!sessionStorage.getItem(RETURN_PATH_KEY)) {
+      try {
+        sessionStorage.setItem(RETURN_PATH_KEY, currentPath);
+      } catch {
+        // ignore
+      }
+    }
     const returnPath = sessionStorage.getItem(RETURN_PATH_KEY);
 
     await clearAllCaches();

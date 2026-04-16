@@ -317,10 +317,10 @@ describe('useVersionCheck hook', () => {
   });
 
   it('auto-applies critical update when countdown reaches zero', async () => {
-    const replaceFn = vi.fn();
+    const reloadFn = vi.fn();
     Object.defineProperty(window, 'location', {
       writable: true,
-      value: { ...window.location, replace: replaceFn },
+      value: { ...window.location, reload: reloadFn },
     });
     setupFakeFetch(mockV4Critical);
 
@@ -332,16 +332,16 @@ describe('useVersionCheck hook', () => {
 
     await waitFor(() => expect(result.current.countdownRemaining).not.toBeNull());
 
-    // Fast-forward 11 seconds past the 10s countdown
-    vi.advanceTimersByTime(11000);
+    // Fast-forward past the 10s countdown + 100ms setTimeout in applyUpdate
+    vi.advanceTimersByTime(12000);
 
     await waitFor(() => {
-      expect(replaceFn).toHaveBeenCalled();
+      expect(reloadFn).toHaveBeenCalled();
     }, { timeout: 3000 });
   });
 
   it('preserves return path when applying update', async () => {
-    const replaceFn = vi.fn();
+    const reloadFn = vi.fn();
     const originalHref = window.location.href;
     Object.defineProperty(window, 'location', {
       writable: true,
@@ -351,7 +351,7 @@ describe('useVersionCheck hook', () => {
         pathname: '/appointments',
         search: '?date=2026-04-13',
         origin: 'http://localhost:5174',
-        replace: replaceFn,
+        reload: reloadFn,
       },
     });
 
