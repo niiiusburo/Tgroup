@@ -246,6 +246,7 @@ export function CustomerProfile({
       </div>
 
       <ProfileHeader profile={profile} />
+
       <CustomerAssignments
         companyName={profile.companyName}
         salestaffId={profile.salestaffid}

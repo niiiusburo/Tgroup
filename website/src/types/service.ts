@@ -66,4 +66,6 @@ export interface ServiceRecord {
   readonly notes?: string;
   readonly orderName?: string;
   readonly orderCode?: string;
+  readonly sourceId?: string | null;
+  readonly sourceName?: string;
 }

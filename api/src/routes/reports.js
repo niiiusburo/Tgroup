@@ -323,11 +323,8 @@ router.post('/customers/summary', requirePermission('reports.view'), async (req,
     const newCust = await query(
       `SELECT COUNT(*) as cnt FROM dbo.partners WHERE customer=true AND isdeleted=false ${cf.where}`, cf.params);
 
-    // By source
-    const sources = await query(
-      `SELECT cs.name, COUNT(p.id) as cnt FROM dbo.customersources cs
-       LEFT JOIN dbo.partners p ON p.sourceid=cs.id AND p.customer=true AND p.isdeleted=false
-       GROUP BY cs.name ORDER BY cnt DESC`);
+    // By source (moved to services breakdown — placeholder kept for compatibility)
+    const sources = [];
 
     // By gender
     const gender = await query(
@@ -363,7 +360,6 @@ router.post('/customers/summary', requirePermission('reports.view'), async (req,
     return res.json({ success: true, data: {
       total: parseInt(total[0]?.cnt || 0),
       newInPeriod: parseInt(newCust[0]?.cnt || 0),
-      sources: sources.map(s => ({ name: s.name, count: parseInt(s.cnt) })),
       gender: gender.map(g => ({ gender: g.gender || 'Unknown', count: parseInt(g.cnt) })),
       cities: cities.map(c => ({ city: c.cityname, count: parseInt(c.cnt) })),
       topSpenders: ltv.map(l => ({ id: l.id, name: l.name, totalPaid: parseFloat(l.total_paid), orderCount: parseInt(l.order_count) })),
@@ -442,6 +438,14 @@ router.post('/services/breakdown', requirePermission('reports.view'), async (req
        JOIN dbo.saleorders so ON so.id=sol.orderid AND so.isdeleted=false AND so.state='sale' ${f.where}
        GROUP BY pc.name ORDER BY revenue DESC`, f.params);
 
+    // Revenue by source via sale orders
+    const revBySource = await query(
+      `SELECT cs.name as source, COUNT(so.id) as order_count,
+              COALESCE(SUM(so.amounttotal),0) as revenue
+       FROM dbo.customersources cs
+       LEFT JOIN dbo.saleorders so ON so.sourceid=cs.id AND so.isdeleted=false AND so.state='sale' ${f.where}
+       GROUP BY cs.name ORDER BY revenue DESC`, f.params);
+
     // Popular products
     const popular = await query(
       `SELECT p.name, pc.name as category, p.listprice, COUNT(sol.id) as order_count
@@ -455,6 +459,7 @@ router.post('/services/breakdown', requirePermission('reports.view'), async (req
     return res.json({ success: true, data: {
       categories: cats.map(c => ({ category: c.category, productCount: parseInt(c.product_count), avgPrice: parseFloat(c.avg_price) })),
       revenueByCategory: revByCat.map(r => ({ category: r.category, orderCount: parseInt(r.order_count), revenue: parseFloat(r.revenue) })),
+      revenueBySource: revBySource.map(r => ({ source: r.source, orderCount: parseInt(r.order_count), revenue: parseFloat(r.revenue) })),
       popularProducts: popular.map(p => ({ name: p.name, category: p.category, price: parseFloat(p.listprice || 0), orderCount: parseInt(p.order_count) })),
     }});
   } catch (e) { console.error('reports/services/breakdown:', e); return err(res, 500, 'Internal error'); }

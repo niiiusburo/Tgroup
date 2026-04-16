@@ -11,6 +11,16 @@ import { EMPTY_CUSTOMER_FORM, validateCustomerForm, VIET_DISTRICTS, VIET_WARDS }
 import type { AddCustomerFormProps } from './AddCustomerForm';
 import type { TabId } from './constants';
 
+export interface ApiErrorDetail {
+  readonly message: string;
+  readonly status?: number;
+  readonly code?: string;
+  readonly field?: string;
+  readonly detail?: string;
+  readonly hint?: string;
+  readonly raw?: unknown;
+}
+
 export interface UseAddCustomerFormResult {
   readonly t: (key: string, opts?: any) => string;
   readonly isFieldEditable: boolean;
@@ -21,6 +31,8 @@ export interface UseAddCustomerFormResult {
   readonly setFormData: React.Dispatch<React.SetStateAction<CustomerFormData>>;
   readonly errors: readonly FormValidationError[];
   readonly setErrors: React.Dispatch<React.SetStateAction<readonly FormValidationError[]>>;
+  readonly apiErrorDetail: ApiErrorDetail | null;
+  readonly setApiErrorDetail: React.Dispatch<React.SetStateAction<ApiErrorDetail | null>>;
   readonly activeTab: TabId;
   readonly setActiveTab: React.Dispatch<React.SetStateAction<TabId>>;
   readonly isSubmitting: boolean;
@@ -111,6 +123,7 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
     ...(initialData ?? {}),
   });
   const [errors, setErrors] = useState<readonly FormValidationError[]>([]);
+  const [apiErrorDetail, setApiErrorDetail] = useState<ApiErrorDetail | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [nameUppercase, setNameUppercase] = useState(false);
@@ -450,6 +463,7 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
         return;
       }
       setIsSubmitting(true);
+      setApiErrorDetail(null);
       try {
         await onSubmit(formData);
       } catch (err) {
@@ -460,10 +474,21 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
           } else if (err.code === 'VALIDATION') {
             setErrors([{ field: 'name', message: err.message }]);
           } else {
-            setErrors([{ field: 'name', message: t('errors.saveFailed', 'Lỗi lưu dữ liệu. Vui lòng thử lại.') }]);
+            setErrors([{ field: 'name', message: err.message }]);
+            setApiErrorDetail({
+              message: err.message,
+              status: err.status,
+              code: err.code,
+              field: err.field,
+              detail: (err.body as any)?.error?.detail ?? undefined,
+              hint: (err.body as any)?.error?.hint ?? undefined,
+              raw: err.body,
+            });
           }
         } else {
-          setErrors([{ field: 'name', message: t('errors.saveFailed', 'Lỗi lưu dữ liệu. Vui lòng thử lại.') }]);
+          const msg = err instanceof Error ? err.message : String(err);
+          setErrors([{ field: 'name', message: msg }]);
+          setApiErrorDetail({ message: msg, raw: err });
         }
       } finally {
         setIsSubmitting(false);
@@ -521,7 +546,7 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
 
   return {
     t, isFieldEditable, isEdit, canEdit, customerId, formData, setFormData, errors, setErrors,
-    activeTab, setActiveTab, isSubmitting, setIsSubmitting, nameUppercase, setNameUppercase,
+    apiErrorDetail, setApiErrorDetail, activeTab, setActiveTab, isSubmitting, setIsSubmitting, nameUppercase, setNameUppercase,
     displayRef, setDisplayRef, showSourceDialog, setShowSourceDialog, companies, employees,
     pendingFaceImage, setPendingFaceImage, showRegisterModal, setShowRegisterModal,
     registerState, register, resetFace, allSources, addSource,

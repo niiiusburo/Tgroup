@@ -1,4 +1,4 @@
-import { User, Tag, Phone, Mail, MapPin, Calendar } from 'lucide-react';
+import { User, Tag, Phone, Mail, MapPin, Calendar, Stethoscope } from 'lucide-react';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 
 interface ProfileHeaderProps {
@@ -52,6 +52,55 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
               DOB: {profile.dateOfBirth}
             </span>
           </div>
+
+          {/* Medical History — distinctive amber card */}
+          {(() => {
+            const MEDICAL_CONDITIONS = [
+              { label: 'Tiểu đường', icon: '🩸', bg: 'bg-orange-100/80 text-orange-800 ring-1 ring-orange-200' },
+              { label: 'Tim mạch', icon: '❤️', bg: 'bg-red-100/80 text-red-800 ring-1 ring-red-200' },
+              { label: 'Dị ứng thuốc', icon: '💊', bg: 'bg-purple-100/80 text-purple-800 ring-1 ring-purple-200' },
+              { label: 'Huyết áp cao', icon: '🔺', bg: 'bg-pink-100/80 text-pink-800 ring-1 ring-pink-200' },
+              { label: 'Hen suyễn', icon: '🌬️', bg: 'bg-sky-100/80 text-sky-800 ring-1 ring-sky-200' },
+              { label: 'Đang mang thai', icon: '🤰', bg: 'bg-emerald-100/80 text-emerald-800 ring-1 ring-emerald-200' },
+            ];
+            const raw = profile.medicalHistory?.trim() ?? '';
+            if (!raw) return null;
+
+            const activeConditions = MEDICAL_CONDITIONS.filter((c) => raw.includes(c.label));
+            const conditionLabels = new Set(MEDICAL_CONDITIONS.map((c) => c.label));
+            const freeText = raw
+              .split('\n')
+              .map((l) => l.trim())
+              .filter((l) => l && !conditionLabels.has(l))
+              .join(', ');
+
+            return (
+              <div className="mt-3 sm:max-w-[calc(50%-0.25rem)] rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 px-3.5 py-2.5 shadow-sm">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <div className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-400/20">
+                    <Stethoscope className="w-3.5 h-3.5 text-amber-600" />
+                  </div>
+                  <span className="text-xs font-semibold text-amber-700 uppercase tracking-wide">Tiểu sử bệnh</span>
+                </div>
+                {freeText && (
+                  <p className="text-sm text-amber-900/80 italic ml-7 mb-1.5">{freeText}</p>
+                )}
+                {activeConditions.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 ml-7">
+                    {activeConditions.map((c) => (
+                      <span
+                        key={c.label}
+                        className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full ${c.bg}`}
+                      >
+                        <span className="text-[10px]">{c.icon}</span>
+                        {c.label}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {profile.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">

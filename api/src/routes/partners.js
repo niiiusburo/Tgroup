@@ -4,6 +4,14 @@ const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
+// All uuid columns in dbo.partners — empty strings → null for PostgreSQL
+const UUID_FIELDS = [
+  'companyid','titleid','agentid','countryid','stateid',
+  'stageid','contactstatusid','marketingteamid','saleteamid',
+  'cskhid','salestaffid','hrjobid','tier_id',
+];
+function sanitizeUuids(o){for(const f of UUID_FIELDS)if(o[f]===''||o[f]===undefined)o[f]=null;}
+
 /**
  * GET /api/Partners
  * Query params: offset, limit, search, sortField, sortOrder, filters
@@ -71,8 +79,6 @@ router.get('/', async (req, res) => {
         p.note,
         p.active AS status,
         p.treatmentstatus,
-        p.sourceid,
-        ps.name AS sourcename,
         p.referraluserid,
         p.agentid,
         a.name AS agentname,
@@ -94,7 +100,6 @@ router.get('/', async (req, res) => {
         0 AS dotkhamcount
       FROM partners p
       LEFT JOIN companies c ON c.id = p.companyid
-      LEFT JOIN partnersources ps ON ps.id = p.sourceid
       LEFT JOIN agents a ON a.id = p.agentid
       WHERE ${whereClause}
       ORDER BY ${orderByCol} ${orderDir} NULLS LAST
@@ -237,8 +242,6 @@ router.get('/:id', requirePermission('customers.view'), async (req, res) => {
         p.note,
         p.active AS status,
         p.treatmentstatus,
-        p.sourceid,
-        ps.name AS sourcename,
         p.referraluserid,
         p.agentid,
         a.name AS agentname,
@@ -291,7 +294,6 @@ router.get('/:id', requirePermission('customers.view'), async (req, res) => {
         (SELECT COUNT(*) FROM dotkhams dk WHERE dk.partnerid = p.id AND dk.isdeleted = false) AS dotkhamcount
       FROM partners p
       LEFT JOIN companies c ON c.id = p.companyid
-      LEFT JOIN partnersources ps ON ps.id = p.sourceid
       LEFT JOIN agents a ON a.id = p.agentid
       LEFT JOIN aspnetusers au1 ON au1.id = p.createdbyid
       LEFT JOIN aspnetusers au2 ON au2.id = p.writebyid
@@ -383,6 +385,7 @@ router.get('/:id/GetKPIs', requirePermission('customers.view'), async (req, res)
  */
 router.post('/', requirePermission('customers.add'), async (req, res) => {
   try {
+    sanitizeUuids(req.body);
     const {
       name,
       phone,
@@ -399,7 +402,6 @@ router.post('/', requirePermission('customers.add'), async (req, res) => {
       medicalhistory,
       note,
       comment,
-      sourceid,
       referraluserid,
       weight,
       identitynumber,
@@ -471,13 +473,13 @@ router.post('/', requirePermission('customers.add'), async (req, res) => {
       `INSERT INTO partners (
         id, name, phone, email, companyid, gender,
         birthday, birthmonth, birthyear, street, cityname, districtname, wardname,
-        medicalhistory, note, comment, sourceid, referraluserid,
+        medicalhistory, note, comment, referraluserid,
         weight, identitynumber, healthinsurancecardnumber, emergencyphone, jobtitle,
         taxcode, unitname, unitaddress, isbusinessinvoice, personalname,
         personalidentitycard, personaltaxcode, personaladdress, salestaffid, cskhid,
         customer, active, ref, datecreated, lastupdated, isdeleted,
         supplier, employee, isagent, isinsurance, iscompany, ishead
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, NOW(), NOW(), false, false, false, false, false, false, false)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, NOW(), NOW(), false, false, false, false, false, false, false)
       RETURNING *`,
       [
         id,
@@ -496,7 +498,6 @@ router.post('/', requirePermission('customers.add'), async (req, res) => {
         medicalhistory || null,
         note || null,
         comment || null,
-        sourceid || null,
         referraluserid || null,
         weight || null,
         identitynumber || null,
@@ -522,8 +523,15 @@ router.post('/', requirePermission('customers.add'), async (req, res) => {
     return res.status(201).json(result[0]);
   } catch (err) {
     console.error('Error creating partner:', err);
+    const pg = err || {};
     return res.status(500).json({
-      error: err instanceof Error ? err.message : 'Unknown error',
+      error: {
+        code: pg.code || 'UNKNOWN',
+        message: err instanceof Error ? err.message : 'Unknown error',
+        detail: pg.detail || null,
+        field: pg.column || null,
+        hint: pg.hint || null,
+      },
     });
   }
 });
@@ -536,10 +544,11 @@ router.post('/', requirePermission('customers.add'), async (req, res) => {
 router.put('/:id', requirePermission('customers.edit'), async (req, res) => {
   try {
     const { id } = req.params;
+    sanitizeUuids(req.body);
     const {
       name, phone, email, companyid, gender, birthday, birthmonth, birthyear,
       street, cityname, districtname, wardname, medicalhistory, note, comment,
-      sourceid, referraluserid, weight, identitynumber, healthinsurancecardnumber,
+      referraluserid, weight, identitynumber, healthinsurancecardnumber,
       emergencyphone, jobtitle, taxcode, unitname, unitaddress, isbusinessinvoice,
       personalname, personalidentitycard, personaltaxcode, personaladdress, ref,
       cskhid, salestaffid,
@@ -595,7 +604,7 @@ router.put('/:id', requirePermission('customers.edit'), async (req, res) => {
 
     const fields = {
       name, phone, email, companyid, gender, birthday, birthmonth, birthyear,
-      street, medicalhistory, note, comment, sourceid, referraluserid,
+      street, medicalhistory, note, comment, referraluserid,
       cityname, districtname, wardname, weight, identitynumber,
       healthinsurancecardnumber, emergencyphone, jobtitle, taxcode,
       unitname, unitaddress, isbusinessinvoice, personalname,
@@ -625,8 +634,15 @@ router.put('/:id', requirePermission('customers.edit'), async (req, res) => {
     return res.json(result[0]);
   } catch (err) {
     console.error('Error updating partner:', err);
+    const pg = err || {};
     return res.status(500).json({
-      error: err instanceof Error ? err.message : 'Unknown error',
+      error: {
+        code: pg.code || 'UNKNOWN',
+        message: err instanceof Error ? err.message : 'Unknown error',
+        detail: pg.detail || null,
+        field: pg.column || null,
+        hint: pg.hint || null,
+      },
     });
   }
 });

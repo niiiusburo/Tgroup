@@ -1,4 +1,5 @@
-import { X, Edit2, CalendarPlus, FileText } from 'lucide-react';
+import { useState } from 'react';
+import { X, Edit2, CalendarPlus, FileText, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
 import type { CustomerFormData } from '@/data/mockCustomerForm';
 import { FaceCaptureModal } from '@/components/shared/FaceCaptureModal';
 import { TABS } from './constants';
@@ -31,7 +32,53 @@ import { MiniAddDialog } from './MiniAddDialog';
  * @crossref:used-in[Customers]
  */
 
-import { useAddCustomerForm } from './useAddCustomerForm';
+import { useAddCustomerForm, type ApiErrorDetail } from './useAddCustomerForm';
+
+function ApiErrorPanel({ detail, onDismiss }: { detail: ApiErrorDetail; onDismiss: () => void }) {
+  const [showRaw, setShowRaw] = useState(false);
+  return (
+    <div className="mx-6 mt-4 bg-red-50 border border-red-200 rounded-lg p-4 text-sm flex-shrink-0">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start gap-2 flex-1 min-w-0">
+          <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-red-700">Lỗi lưu dữ liệu</p>
+            <p className="text-red-600 mt-1 break-words">{detail.message}</p>
+            {detail.detail && (
+              <p className="text-red-500 mt-1 break-words">Chi tiết: {detail.detail}</p>
+            )}
+            {detail.field && (
+              <p className="text-red-500 mt-1">Trường lỗi: <code className="bg-red-100 px-1 rounded">{detail.field}</code></p>
+            )}
+            {detail.hint && (
+              <p className="text-orange-600 mt-1">Gợi ý: {detail.hint}</p>
+            )}
+            <button
+              type="button"
+              onClick={() => setShowRaw(!showRaw)}
+              className="flex items-center gap-1 mt-2 text-xs text-red-400 hover:text-red-600"
+            >
+              {showRaw ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+              Technical Details
+            </button>
+            {showRaw && (
+              <pre className="mt-1 p-2 bg-red-100/50 rounded text-xs text-red-700 overflow-x-auto max-h-32 overflow-y-auto">
+                {detail.status && <span>Status: {detail.status}
+</span>}
+                {detail.code && <span>Code: {detail.code}
+</span>}
+                {JSON.stringify(detail.raw, null, 2)}
+              </pre>
+            )}
+          </div>
+        </div>
+        <button type="button" onClick={onDismiss} className="text-red-400 hover:text-red-600 flex-shrink-0">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
 import { LeftPanel } from './LeftPanel';
 import { BasicInfoTab } from './BasicInfoTab';
 import { MedicalTab } from './MedicalTab';
@@ -54,6 +101,7 @@ export function AddCustomerForm(props: AddCustomerFormProps) {
     t, isEdit, customerId, formData, set, activeTab, setActiveTab, isSubmitting,
     showRegisterModal, setShowRegisterModal, register, handleSubmit, onCancel,
     phoneCheck, emailCheck, showSourceDialog, setShowSourceDialog, handleAddSource,
+    apiErrorDetail, setApiErrorDetail,
   } = formApi;
   return (
     <div className="flex flex-col bg-gray-50/50 overflow-hidden flex-1" onWheel={(e) => e.stopPropagation()}>
@@ -120,25 +168,34 @@ export function AddCustomerForm(props: AddCustomerFormProps) {
             ))}
           </div>
 
+          {/* API Error Detail Panel */}
+          {apiErrorDetail && (
+            <ApiErrorPanel detail={apiErrorDetail} onDismiss={() => setApiErrorDetail(null)} />
+          )}
+
           {/* Tab content */}
           <div className="flex-1 overflow-y-auto overscroll-contain px-8 py-6 custom-scrollbar">
-            <BasicInfoTab formApi={formApi} />
+            {activeTab === 'basic' && (
+              <>
+                <BasicInfoTab formApi={formApi} />
+                {/* Notes — moved from left panel for better balance */}
+                <CardSection title={t('form.notes')} icon={FileText} maxHeight="180px">
+                  <textarea
+                    value={formData.note}
+                    onChange={(e) => set('note', e.target.value)}
+                    placeholder={t('notesPlaceholder', 'Ghi chú về khách hàng...')}
+                    rows={3}
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 resize-none transition-all hover:border-gray-300"
+                  />
+                </CardSection>
+              </>
+            )}
             {activeTab === 'medical' && (
               <MedicalTab formApi={formApi} />
             )}
             {activeTab === 'einvoice' && (
               <EInvoiceTab formApi={formApi} />
             )}
-            {/* Notes — moved from left panel for better balance */}
-            <CardSection title={t('form.notes')} icon={FileText} maxHeight="180px">
-              <textarea
-                value={formData.note}
-                onChange={(e) => set('note', e.target.value)}
-                placeholder={t('notesPlaceholder', 'Ghi chú về khách hàng...')}
-                rows={3}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 resize-none transition-all hover:border-gray-300"
-              />
-            </CardSection>
           </div>
 
           {/* Footer */}

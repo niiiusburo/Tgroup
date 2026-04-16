@@ -238,7 +238,7 @@ export function useCustomers(locationId: string = 'all') {
       personaladdress: updates.personaladdress || undefined,
       ref: updates.ref || undefined,
       isbusinessinvoice: updates.isbusinessinvoice ?? undefined,
-      cskhid: updates.cskhid === '' ? '' : (updates.cskhid || undefined),
+      cskhid: updates.cskhid || undefined,
       salestaffid: updates.salestaffid || undefined,
     });
     // Only update local state after successful API call

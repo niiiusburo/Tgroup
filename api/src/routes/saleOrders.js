@@ -99,6 +99,8 @@ router.get('/', async (req, res) => {
         so.datestart,
         so.dateend,
         so.notes,
+        so.sourceid,
+        cs.name AS sourcename,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
         (SELECT sol.tooth_numbers FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_numbers,
@@ -111,6 +113,7 @@ router.get('/', async (req, res) => {
       LEFT JOIN employees doc ON doc.id = so.doctorid
       LEFT JOIN employees asst ON asst.id = so.assistantid
       LEFT JOIN employees da ON da.id = so.dentalaideid
+      LEFT JOIN customersources cs ON cs.id = so.sourceid
       WHERE ${whereClause}
       ORDER BY ${orderByCol} ${orderDir} NULLS LAST
       LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
@@ -183,6 +186,8 @@ router.get('/:id', async (req, res) => {
         so.datestart,
         so.dateend,
         so.notes,
+        so.sourceid,
+        cs.name AS sourcename,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
         (SELECT sol.tooth_numbers FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_numbers,
@@ -195,6 +200,7 @@ router.get('/:id', async (req, res) => {
       LEFT JOIN employees doc ON doc.id = so.doctorid
       LEFT JOIN employees asst ON asst.id = so.assistantid
       LEFT JOIN employees da ON da.id = so.dentalaideid
+      LEFT JOIN customersources cs ON cs.id = so.sourceid
       WHERE so.id = $1 AND so.isdeleted = false`,
       [id]
     );
@@ -250,6 +256,7 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
       notes,
       tooth_numbers,
       tooth_comment,
+      sourceid,
     } = req.body;
 
     if (!partnerid) {
@@ -282,9 +289,9 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
       `INSERT INTO saleorders (
         id, name, code, partnerid, companyid, doctorid, assistantid, dentalaideid,
         quantity, unit, amounttotal, residual, totalpaid, state,
-        datestart, dateend, notes,
+        datestart, dateend, notes, sourceid,
         isdeleted, datecreated
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,NOW())
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,NOW())
       RETURNING *`,
       [
         id,
@@ -304,6 +311,7 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
         datestart || null,
         dateend || null,
         notes || null,
+        sourceid || null,
         false, // isdeleted
       ]
     );
@@ -355,6 +363,8 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
         so.datestart,
         so.dateend,
         so.notes,
+        so.sourceid,
+        cs.name AS sourcename,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
         (SELECT sol.tooth_numbers FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_numbers,
@@ -367,6 +377,7 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
       LEFT JOIN employees doc ON doc.id = so.doctorid
       LEFT JOIN employees asst ON asst.id = so.assistantid
       LEFT JOIN employees da ON da.id = so.dentalaideid
+      LEFT JOIN customersources cs ON cs.id = so.sourceid
       WHERE so.id = $1`,
       [id]
     );
@@ -453,6 +464,8 @@ router.patch('/:id/state', requirePermission('customers.edit'), async (req, res)
         so.datestart,
         so.dateend,
         so.notes,
+        so.sourceid,
+        cs.name AS sourcename,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
         (SELECT sol.tooth_numbers FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_numbers,
@@ -465,6 +478,7 @@ router.patch('/:id/state', requirePermission('customers.edit'), async (req, res)
       LEFT JOIN employees doc ON doc.id = so.doctorid
       LEFT JOIN employees asst ON asst.id = so.assistantid
       LEFT JOIN employees da ON da.id = so.dentalaideid
+      LEFT JOIN customersources cs ON cs.id = so.sourceid
       WHERE so.id = $1`,
       [id]
     );
@@ -502,6 +516,7 @@ router.patch('/:id', requirePermission('customers.edit'), async (req, res) => {
       notes,
       tooth_numbers,
       tooth_comment,
+      sourceid,
     } = req.body;
 
     if (amounttotal != null && parseFloat(amounttotal) < 0) {
@@ -528,6 +543,7 @@ router.patch('/:id', requirePermission('customers.edit'), async (req, res) => {
       { key: 'datestart', val: datestart },
       { key: 'dateend', val: dateend },
       { key: 'notes', val: notes },
+      { key: 'sourceid', val: sourceid },
     ];
 
     for (const f of fields) {
@@ -639,6 +655,8 @@ router.patch('/:id', requirePermission('customers.edit'), async (req, res) => {
         so.datestart,
         so.dateend,
         so.notes,
+        so.sourceid,
+        cs.name AS sourcename,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
         (SELECT sol.tooth_numbers FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_numbers,
@@ -651,6 +669,7 @@ router.patch('/:id', requirePermission('customers.edit'), async (req, res) => {
       LEFT JOIN employees doc ON doc.id = so.doctorid
       LEFT JOIN employees asst ON asst.id = so.assistantid
       LEFT JOIN employees da ON da.id = so.dentalaideid
+      LEFT JOIN customersources cs ON cs.id = so.sourceid
       WHERE so.id = $1`,
       [id]
     );

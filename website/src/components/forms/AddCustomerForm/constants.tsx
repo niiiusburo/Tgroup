@@ -3,9 +3,9 @@ import { Globe, Users, UserPlus, Link } from 'lucide-react';
 export type TabId = 'basic' | 'medical' | 'einvoice';
 
 export const TABS: { id: TabId; labelKey: string }[] = [
-  { id: 'basic', labelKey: 'form.tabs.basic' },
-  { id: 'medical', labelKey: 'form.tabs.medical' },
-  { id: 'einvoice', labelKey: 'form.tabs.einvoice' },
+  { id: 'basic', labelKey: 'tabs.basic' },
+  { id: 'medical', labelKey: 'tabs.medical' },
+  { id: 'einvoice', labelKey: 'tabs.einvoice' },
 ];
 
 export const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);

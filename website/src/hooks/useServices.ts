@@ -46,6 +46,7 @@ export interface CreateServiceInput {
   readonly unit?: string;
   readonly toothNumbers: readonly string[];
   readonly toothComment?: string;
+  readonly sourceId?: string | null;
 }
 
 /**
@@ -114,6 +115,8 @@ function mapSaleOrderToServiceRecord(order: ApiSaleOrder): ServiceRecord {
     createdAt: order.datecreated?.slice(0, 10) || '',
     orderName: order.name || undefined,
     orderCode: extractOrderCode(order),
+    sourceId: order.sourceid ?? null,
+    sourceName: order.sourcename || undefined,
   };
 }
 
@@ -226,6 +229,7 @@ export function useServices(selectedLocationId?: string, partnerId?: string) {
       notes: input.notes,
       tooth_numbers: input.toothNumbers?.join(',') || null,
       tooth_comment: input.toothComment || null,
+      sourceid: input.sourceId ?? null,
     };
 
     const created = await createSaleOrder(apiPayload);
@@ -257,6 +261,7 @@ export function useServices(selectedLocationId?: string, partnerId?: string) {
       notes: input.notes,
       tooth_numbers: input.toothNumbers?.join(',') || null,
       tooth_comment: input.toothComment || null,
+      sourceid: input.sourceId ?? null,
     };
 
     const updated = await updateSaleOrder(input.id, apiPayload);
