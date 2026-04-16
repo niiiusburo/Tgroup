@@ -14,7 +14,7 @@ import type {
   IpAccessCheckResult,
   IpEntryType,
 } from '@/types/ipAccessControl';
-import { DEFAULT_IP_ACCESS_SETTINGS } from '@/types/ipAccessControl';
+import { DEFAULT_IP_ACCESS_SETTINGS } from '@/data/mockIpAccessControl';
 
 /** IPv4 validation regex - matches xxx.xxx.xxx.xxx where xxx is 0-255 */
 const IPV4_REGEX = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;

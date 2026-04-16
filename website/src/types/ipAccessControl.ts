@@ -63,9 +63,3 @@ export interface UpdateIpEntryInput {
   readonly type?: IpEntryType;
   readonly isActive?: boolean;
 }
-
-export const DEFAULT_IP_ACCESS_SETTINGS: IpAccessSettings = {
-  mode: 'allow_all',
-  entries: [],
-  lastUpdated: new Date().toISOString(),
-};

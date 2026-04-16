@@ -41,7 +41,7 @@ export function sanitizeIpInput(input: string): string {
 
   // Remove SQL injection characters but keep alphanumeric and spaces for descriptions
   // This allows "DROP TABLE" to remain but removes quotes, semicolons, etc.
-  return input.replace(/['";\-/*(){}[\]<>\\]/g, '');
+  return input.replace(/['";\-\/\*\(\)\{\}\[\]<>\\]/g, '');
 }
 
 /**
