@@ -15,7 +15,7 @@ const Calendar = lazy(() => import('@/pages/Calendar').then(m => ({ default: m.C
 const Customers = lazy(() => import('@/pages/Customers').then(m => ({ default: m.Customers })));
 const Employees = lazy(() => import('@/pages/Employees').then(m => ({ default: m.Employees })));
 const Locations = lazy(() => import('@/pages/Locations').then(m => ({ default: m.Locations })));
-const ServiceCatalog = lazy(() => import('@/pages/ServiceCatalog'));
+const Website = lazy(() => import('@/pages/Website').then(m => ({ default: m.Website })));
 const Settings = lazy(() => import('@/pages/Settings').then(m => ({ default: m.Settings })));
 const Relationships = lazy(() => import('@/pages/Relationships').then(m => ({ default: m.Relationships })));
 const Commission = lazy(() => import('@/pages/Commission').then(m => ({ default: m.Commission })));
@@ -247,12 +247,12 @@ function App() {
               }
             />
 
-            {/* @crossref:route[path="/website", component=ServiceCatalog] */}
+            {/* @crossref:route[path="/website", component=Website] */}
             <Route
               path={ROUTES.WEBSITE}
               element={
                 <ProtectedRoute path={ROUTES.WEBSITE}>
-                  <ServiceCatalog />
+                  <Website />
                 </ProtectedRoute>
               }
             />

@@ -172,7 +172,7 @@ export function useCustomers(locationId: string = 'all') {
         comment: input.comment || undefined,
         referraluserid: input.referraluserid || undefined,
         salestaffid: input.salestaffid || undefined,
-        cskhid: input.cskhid || undefined,
+        cskhid: input.cskhid !== undefined ? input.cskhid : undefined,
         weight: input.weight ?? undefined,
         identitynumber: input.identitynumber || undefined,
         healthinsurancecardnumber: input.healthinsurancecardnumber || undefined,
@@ -232,7 +232,7 @@ export function useCustomers(locationId: string = 'all') {
       personaladdress: updates.personaladdress || undefined,
       ref: updates.ref || undefined,
       isbusinessinvoice: updates.isbusinessinvoice ?? undefined,
-      cskhid: updates.cskhid || undefined,
+      cskhid: updates.cskhid !== undefined ? updates.cskhid : undefined,
       salestaffid: updates.salestaffid || undefined,
     });
     // Only update local state after successful API call

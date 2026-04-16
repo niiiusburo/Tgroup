@@ -119,26 +119,26 @@ describe('AppointmentForm Edit Mode', () => {
   });
 
   describe('RED: Validation error messages should appear for required fields', () => {
-    it('should show doctor validation error when submitting without doctor', () => {
+    it('should show customer validation error when submitting without customer', () => {
       render(
         <AppointmentForm
           onSubmit={mockSubmit}
           onClose={mockClose}
           initialData={{
-            customerId: 'cust-1',
-            customerName: 'John Doe',
-            customerPhone: '0901234567',
             locationId: 'loc-1',
+            doctorId: 'emp-1',
+            date: '2024-03-15',
+            startTime: '09:00',
           }}
         />
       );
 
-      // Act: click save without selecting doctor, date, or time
+      // Act: click save without selecting customer
       const saveButton = screen.getByRole('button', { name: /addAppointment/i });
       fireEvent.click(saveButton);
 
-      // Assert: doctor error should be visible
-      expect(screen.getByText('form.selectDoctor')).toBeInTheDocument();
+      // Assert: customer error should be visible
+      expect(screen.getByText('form.selectPatient')).toBeInTheDocument();
       expect(mockSubmit).not.toHaveBeenCalled();
     });
 
