@@ -12,20 +12,13 @@
     "name": "Tên dịch vụ",
     "category": "Danh mục",
     "price": "Giá",
-    "duration": "Thời lượng",
+    "duration": "Thờ lượng",
     "status": "Trạng thái",
     "location": "Chi nhánh",
-    "description": "Mô tả"
-  },
-  "form": {
-    "name": "Tên dịch vụ",
-    "category": "Danh mục",
-    "price": "Giá",
-    "duration": "Thời lượng (phút)",
     "description": "Mô tả",
-    "status": "Trạng thái",
-    "location": "Chi nhánh",
-    "color": "Màu sắc"
+    "serviceCode": "Mã dịch vụ",
+    "uom": "Đơn vị tính",
+    "listPrice": "Giá niêm yết"
   },
   "categories": {
     "all": "Tất cả danh mục",
@@ -97,7 +90,10 @@
     "endDate": "Ngày kết thúc",
     "quantity": "Số lượng",
     "unit": "Đơn vị",
-    "unitPlaceholder": "răng"
+    "unitPlaceholder": "răng",
+    "subtitleEdit": "Cập nhật thông tin điều trị",
+    "subtitleCreate": "Tạo hồ sơ dịch vụ điều trị mới",
+    "notes": "Ghi chú"
   },
   "formErrors": {
     "selectService": "Vui lòng chọn dịch vụ",

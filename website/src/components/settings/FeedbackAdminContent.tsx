@@ -158,7 +158,7 @@ export function FeedbackAdminContent() {
       await loadThreads();
     } catch (err) {
       console.error('Failed to delete feedback:', err);
-      alert('Failed to delete some feedback items. Please try again.');
+      alert(t('feedbackAdmin.deleteError'));
     } finally {
       setDeleting(false);
     }

@@ -15,17 +15,10 @@
     "duration": "Duration",
     "status": "Status",
     "location": "Location",
-    "description": "Description"
-  },
-  "form": {
-    "name": "Service Name",
-    "category": "Category",
-    "price": "Price",
-    "duration": "Duration (minutes)",
     "description": "Description",
-    "status": "Status",
-    "location": "Location",
-    "color": "Color"
+    "serviceCode": "Service Code",
+    "uom": "Unit",
+    "listPrice": "List Price"
   },
   "categories": {
     "all": "All Categories",
@@ -97,7 +90,10 @@
     "endDate": "End Date",
     "quantity": "Quantity",
     "unit": "Unit",
-    "unitPlaceholder": "tooth"
+    "unitPlaceholder": "tooth",
+    "subtitleEdit": "Update treatment information",
+    "subtitleCreate": "Create new treatment service record",
+    "notes": "Notes"
   },
   "formErrors": {
     "selectService": "Please select a service",

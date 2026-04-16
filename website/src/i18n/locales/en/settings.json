@@ -12,7 +12,8 @@
     "review": "Review",
     "status": "Status",
     "submittedAt": "Submitted At",
-    "noFeedback": "No feedback submissions"
+    "noFeedback": "No feedback submissions",
+    "deleteError": "Failed to delete some feedback items. Please try again."
   },
   "timezone": "Timezone",
   "general": "General",

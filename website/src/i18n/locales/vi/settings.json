@@ -12,7 +12,8 @@
     "review": "Xem xét",
     "status": "Trạng thái",
     "submittedAt": "Thời gian gửi",
-    "noFeedback": "Không có phản hồi"
+    "noFeedback": "Không có phản hồi",
+    "deleteError": "Xóa một số phản hồi thất bại. Vui lòng thử lại."
   },
   "timezone": "Múi giờ",
   "general": "Chung",
