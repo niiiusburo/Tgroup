@@ -1,7 +1,7 @@
 {
   "name": "tgclinic-website",
   "private": true,
-  "version": "0.19.6",
+  "version": "0.20.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -36,6 +36,10 @@
     "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {
+    "@babel/generator": "^7.29.1",
+    "@babel/parser": "^7.29.2",
+    "@babel/traverse": "^7.29.0",
+    "@babel/types": "^7.29.0",
     "@playwright/test": "^1.59.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

@@ -1,3 +1,75 @@
 {
-  "title": "Phân quyền"
+  "descriptions": {
+    "overview": {
+      "view": "Xem trang tổng quan Dashboard"
+    },
+    "calendar": {
+      "view": "Xem lịch hẹn trên Calendar",
+      "edit": "Chỉnh sửa, kéo thả lịch hẹn"
+    },
+    "customers": {
+      "view": "Xem danh sách khách hàng",
+      "viewAll": "Xem tất cả khách hàng không cần tìm kiếm — tự động hiển thị toàn bộ danh sách",
+      "add": "Thêm khách hàng mới",
+      "edit": "Chỉnh sửa thông tin khách hàng",
+      "delete": "Xóa khách hàng",
+      "hardDelete": "Xóa vĩnh viễn khách hàng khỏi hệ thống"
+    },
+    "appointments": {
+      "view": "Xem danh sách lịch hẹn",
+      "add": "Tạo lịch hẹn mới",
+      "edit": "Chỉnh sửa lịch hẹn"
+    },
+    "employees": {
+      "view": "Xem danh sách nhân viên",
+      "add": "Thêm nhân viên mới",
+      "edit": "Chỉnh sửa thông tin nhân viên"
+    },
+    "locations": {
+      "view": "Xem danh sách chi nhánh",
+      "add": "Thêm chi nhánh mới",
+      "edit": "Chỉnh sửa thông tin chi nhánh"
+    },
+    "services": {
+      "view": "Xem danh mục dịch vụ",
+      "add": "Thêm dịch vụ mới",
+      "edit": "Chỉnh sửa dịch vụ"
+    },
+    "payment": {
+      "view": "Xem lịch sử thanh toán",
+      "add": "Tạo thanh toán mới",
+      "refund": "Hoàn tiền thanh toán"
+    },
+    "reports": {
+      "view": "Xem báo cáo",
+      "export": "Xuất báo cáo"
+    },
+    "settings": {
+      "view": "Xem cài đặt hệ thống",
+      "edit": "Chỉnh sửa cài đặt"
+    },
+    "notifications": {
+      "view": "Xem thông báo",
+      "edit": "Quản lý thông báo"
+    },
+    "commission": {
+      "view": "Xem hoa hồng",
+      "edit": "Chỉnh sửa hoa hồng"
+    },
+    "permissions": {
+      "view": "Xem quyền hệ thống",
+      "edit": "Chỉnh sửa quyền hệ thống"
+    },
+    "relationships": {
+      "view": "Xem mối quan hệ dữ liệu"
+    },
+    "website": {
+      "view": "Xem trang website",
+      "edit": "Chỉnh sửa trang website"
+    },
+    "externalCheckups": {
+      "view": "Xem ảnh khám ngoài",
+      "create": "Tải lên ảnh khám ngoài"
+    }
+  }
 }

@@ -23,8 +23,8 @@ import {
   Menu,
   X,
   MessageSquare,
-  Lock,
-} from 'lucide-react';
+  Lock } from
+'lucide-react';
 import { NAVIGATION_ITEMS, type NavigationItem } from '@/constants';
 import { FilterByLocation } from '@/components/shared/FilterByLocation';
 import { useLocationFilter } from '@/contexts/LocationContext';
@@ -36,7 +36,7 @@ import { ChangePasswordModal } from '@/components/shared/ChangePasswordModal';
 import { useTranslation } from 'react-i18next';
 
 
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+const ICON_MAP: Record<string, React.ComponentType<{className?: string;}>> = {
   LayoutDashboard,
   Calendar,
   Users,
@@ -52,7 +52,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   FolderOpen,
   Shield,
   Bell,
-  MessageSquare,
+  MessageSquare
 };
 
 /** Maps route path to the permission required to see it in the nav */
@@ -73,7 +73,7 @@ const NAV_PERMISSION: Record<string, string> = {
   '/feedback': 'permissions.view',
   '/clinic': '',
   '/team': '',
-  '/admin': '',
+  '/admin': ''
 };
 
 interface SidebarItemProps {
@@ -101,8 +101,8 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
   }
 
   const isActive =
-    location.pathname === item.path ||
-    (item.children?.some((c) => c.path === location.pathname) ?? false);
+  location.pathname === item.path || (
+  item.children?.some((c) => c.path === location.pathname) ?? false);
 
   const hasChildren = (item.children?.length ?? 0) > 0;
 
@@ -116,41 +116,41 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
           relative h-11 flex items-center rounded-xl
           nav-smooth gap-3
           ${expanded ? 'px-3 w-full' : 'w-11 justify-center'}
-          ${isActive
-            ? 'text-primary bg-white/10'
-            : 'text-gray-400 hover:text-white hover:bg-white/8'
-          }
-        `}
-      >
-        {isActive && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-primary rounded-r-full" />
-        )}
+          ${isActive ?
+        'text-primary bg-white/10' :
+        'text-gray-400 hover:text-white hover:bg-white/8'}
+        `
+        }>
+        
+        {isActive &&
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-primary rounded-r-full" />
+        }
         {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
-        {expanded && (
-          <span className="text-sm font-medium whitespace-nowrap overflow-hidden">
+        {expanded &&
+        <span className="text-sm font-medium whitespace-nowrap overflow-hidden">
             {t(item.label)}
           </span>
-        )}
-        {expanded && item.count && (
-          <span className="ml-auto text-xs bg-white/10 text-gray-300 px-1.5 py-0.5 rounded-full">
+        }
+        {expanded && item.count &&
+        <span className="ml-auto text-xs bg-white/10 text-gray-300 px-1.5 py-0.5 rounded-full">
             {item.count}
           </span>
-        )}
-        {expanded && item.isPremium && (
-          <span className="ml-auto text-xs bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full">
+        }
+        {expanded && item.isPremium &&
+        <span className="ml-auto text-xs bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full">
             Pro
           </span>
-        )}
-      </NavLink>
-    );
+        }
+      </NavLink>);
+
   }
 
   return (
     <div
       className="relative"
-      onMouseEnter={() => { cancelHide(); setOpen(true); }}
-      onMouseLeave={scheduleHide}
-    >
+      onMouseEnter={() => {cancelHide();setOpen(true);}}
+      onMouseLeave={scheduleHide}>
+      
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
@@ -159,24 +159,24 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
           relative h-11 flex items-center rounded-xl
           nav-smooth gap-3
           ${expanded ? 'px-3 w-full' : 'w-11 justify-center'}
-          ${isActive
-            ? 'text-primary bg-white/10'
-            : 'text-gray-400 hover:text-white hover:bg-white/8'
-          }
-        `}
-      >
-        {isActive && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-primary rounded-r-full" />
-        )}
+          ${isActive ?
+        'text-primary bg-white/10' :
+        'text-gray-400 hover:text-white hover:bg-white/8'}
+        `
+        }>
+        
+        {isActive &&
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 bg-primary rounded-r-full" />
+        }
         {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
-        {expanded && (
-          <>
+        {expanded &&
+        <>
             <span className="text-sm font-medium whitespace-nowrap overflow-hidden flex-1 text-left">
               {t(item.label)}
             </span>
             <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
           </>
-        )}
+        }
       </button>
 
       <div
@@ -186,8 +186,8 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
           ${open ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 pointer-events-none'}
         `}
         onMouseEnter={cancelHide}
-        onMouseLeave={scheduleHide}
-      >
+        onMouseLeave={scheduleHide}>
+        
         <div className="bg-sidebar border border-white/10 rounded-xl shadow-lg p-2 min-w-[180px]">
           <div className="px-3 py-2 text-[10px] uppercase tracking-wider text-gray-500 font-semibold">
             {t(item.label)}
@@ -204,28 +204,28 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
                   className={`
                     flex items-center gap-2 rounded-lg px-3 py-2 text-sm
                     ${childActive ? 'text-primary bg-white/10' : 'text-gray-400 hover:text-white hover:bg-white/8'}
-                  `}
-                >
+                  `}>
+                  
                   {ChildIcon && <ChildIcon className="w-4 h-4 flex-shrink-0" />}
                   <span className="flex-1 whitespace-nowrap">{t(child.label)}</span>
-                  {child.count && (
-                    <span className="text-xs bg-white/10 text-gray-300 px-1.5 py-0.5 rounded-full">
+                  {child.count &&
+                  <span className="text-xs bg-white/10 text-gray-300 px-1.5 py-0.5 rounded-full">
                       {child.count}
                     </span>
-                  )}
-                  {child.isPremium && (
-                    <span className="text-xs bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full">
+                  }
+                  {child.isPremium &&
+                  <span className="text-xs bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded-full">
                       Pro
                     </span>
-                  )}
-                </NavLink>
-              );
+                  }
+                </NavLink>);
+
             })}
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 /**
@@ -260,8 +260,8 @@ export function Layout() {
 
   const currentPage = NAVIGATION_ITEMS.find(
     (item) =>
-      item.path === location.pathname ||
-      item.children?.some((c) => c.path === location.pathname)
+    item.path === location.pathname ||
+    item.children?.some((c) => c.path === location.pathname)
   );
   const currentChild = NAVIGATION_ITEMS.flatMap((item) => item.children ?? []).find(
     (c) => c.path === location.pathname
@@ -286,7 +286,7 @@ export function Layout() {
 
   const visibleNavItems = NAVIGATION_ITEMS.filter(isNavItemVisible).map((item) => ({
     ...item,
-    children: item.children?.filter(isNavItemVisible),
+    children: item.children?.filter(isNavItemVisible)
   }));
 
   function handleLogout() {
@@ -295,19 +295,19 @@ export function Layout() {
   }
 
   // User initials for avatar
-  const initials = user?.name
-    ? user.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
-    : '?';
+  const initials = user?.name ?
+  user.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase() :
+  '?';
 
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Mobile overlay */}
-      {mobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
+      {mobileMenuOpen &&
+      <div
+        className="fixed inset-0 bg-black/50 z-30 md:hidden"
+        onClick={() => setMobileMenuOpen(false)} />
+
+      }
 
       {/* Collapsible sidebar - hidden on mobile, fixed on desktop */}
       <aside
@@ -317,47 +317,47 @@ export function Layout() {
           ${!mobileMenuOpen && sidebarExpanded ? 'md:w-56' : ''}
           ${!mobileMenuOpen && !sidebarExpanded ? 'md:w-[72px]' : ''}
           ${mobileMenuOpen ? 'overflow-x-hidden' : ''}
-        `}
-      >
+        `}>
+        
         {/* Logo + Toggle */}
-        <div className={`flex items-center mb-8 flex-shrink-0 ${(mobileMenuOpen || sidebarExpanded) ? 'px-4 justify-between' : 'justify-center'}`}>
+        <div className={`flex items-center mb-8 flex-shrink-0 ${mobileMenuOpen || sidebarExpanded ? 'px-4 justify-between' : 'justify-center'}`}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold text-sm">TD</span>
             </div>
-            {(mobileMenuOpen || sidebarExpanded) && (
-              <span className="text-white font-semibold text-lg whitespace-nowrap">{t('app.name', { ns: 'common' })}</span>
-            )}
+            {(mobileMenuOpen || sidebarExpanded) &&
+            <span className="text-white font-semibold text-lg whitespace-nowrap">{t('app.name', { ns: 'common' })}</span>
+            }
           </div>
           {/* Mobile close button */}
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors md:hidden"
-          >
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors md:hidden">
+            
             <X className="w-4 h-4" />
           </button>
           {/* Desktop collapse button */}
-          {sidebarExpanded && (
-            <button
-              onClick={() => setSidebarExpanded(false)}
-              className="hidden md:flex w-7 h-7 items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
-            >
+          {sidebarExpanded &&
+          <button
+            onClick={() => setSidebarExpanded(false)}
+            className="hidden md:flex w-7 h-7 items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
+            
               <ChevronLeft className="w-4 h-4" />
             </button>
-          )}
+          }
         </div>
 
         {/* Navigation */}
         <nav className={`flex-1 flex flex-col gap-1 w-full ${sidebarExpanded ? 'px-3' : 'px-3 items-center'}`}>
-          {visibleNavItems.map((item) => (
-            <SidebarItem key={item.path} item={item} expanded={sidebarExpanded} />
-          ))}
+          {visibleNavItems.map((item) =>
+          <SidebarItem key={item.path} item={item} expanded={sidebarExpanded} />
+          )}
         </nav>
 
         {/* Bottom: user info + logout */}
-        <div className={`flex flex-col gap-3 mt-4 ${(mobileMenuOpen || sidebarExpanded) ? 'px-3' : 'items-center'}`}>
-          {(mobileMenuOpen || sidebarExpanded) ? (
-            <>
+        <div className={`flex flex-col gap-3 mt-4 ${mobileMenuOpen || sidebarExpanded ? 'px-3' : 'items-center'}`}>
+          {mobileMenuOpen || sidebarExpanded ?
+          <>
               {/* User info row */}
               <div className="flex items-center gap-3 px-1">
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
@@ -368,39 +368,39 @@ export function Layout() {
                   <p className="text-xs text-gray-400 truncate">{permissions?.groupName ?? ''}</p>
                 </div>
                 <button
-                  onClick={() => setChangePasswordOpen(true)}
-                  title="Đổi mật khẩu"
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
-                >
+                onClick={() => setChangePasswordOpen(true)}
+                title={t("iMtKhu")}
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0">
+                
                   <Lock className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={handleLogout}
-                  title={t('logout')}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-400 hover:bg-white/10 transition-colors flex-shrink-0"
-                >
+                onClick={handleLogout}
+                title={t('logout')}
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-400 hover:bg-white/10 transition-colors flex-shrink-0">
+                
                   <LogOut className="w-4 h-4" />
                 </button>
               </div>
-            </>
-          ) : (
-            <>
+            </> :
+
+          <>
               <button
-                onClick={() => setSidebarExpanded(true)}
-                className="hidden md:flex w-10 h-10 items-center justify-center rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
-              >
+              onClick={() => setSidebarExpanded(true)}
+              className="hidden md:flex w-10 h-10 items-center justify-center rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
+              
                 <ChevronRight className="w-5 h-5" />
               </button>
               {/* Avatar with logout on click-hold — keep simple: avatar opens expand */}
               <button
-                onClick={handleLogout}
-                title={t('logout')}
-                className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center hover:bg-red-500/20 transition-colors"
-              >
+              onClick={handleLogout}
+              title={t('logout')}
+              className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center hover:bg-red-500/20 transition-colors">
+              
                 <span className="text-xs text-primary font-semibold">{initials}</span>
               </button>
             </>
-          )}
+          }
 
           <div className="flex items-center gap-2 justify-center">
             <LanguageToggle compact={!sidebarExpanded} />
@@ -415,16 +415,16 @@ export function Layout() {
           w-full max-w-full md:w-auto
           ml-0
           ${sidebarExpanded ? 'md:ml-56' : 'md:ml-[72px]'}
-        `}
-      >
+        `}>
+        
         {/* Header */}
         <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 md:px-6 sticky top-0 z-50">
           {/* Mobile menu button + title */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
-            >
+              className="md:hidden w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
+              
               <Menu className="w-5 h-5 text-gray-600" />
             </button>
             <h1 className="text-xl md:text-2xl font-semibold text-gray-900 tracking-tight">
@@ -434,15 +434,15 @@ export function Layout() {
 
           <div className="flex items-center gap-2 md:gap-4">
             {/* Location Filter — hidden when user is locked to a single location */}
-            {!isSingleLocation && (
-              <div className="hidden sm:block">
+            {!isSingleLocation &&
+            <div className="hidden sm:block">
                 <FilterByLocation
-                  locations={locationsForFilter}
-                  selectedId={selectedLocationId}
-                  onChange={setSelectedLocationId}
-                />
+                locations={locationsForFilter}
+                selectedId={selectedLocationId}
+                onChange={setSelectedLocationId} />
+              
               </div>
-            )}
+            }
 
             {/* Feedback */}
             <FeedbackWidget />
@@ -471,6 +471,6 @@ export function Layout() {
 
       {/* Change Password Modal */}
       <ChangePasswordModal open={changePasswordOpen} onClose={() => setChangePasswordOpen(false)} />
-    </div>
-  );
+    </div>);
+
 }

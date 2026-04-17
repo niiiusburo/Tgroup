@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 
 interface ToothPickerModalProps {
@@ -30,6 +31,7 @@ function getToothImageUrl(num: number): string {
 }
 
 export function ToothPickerModal({ isOpen, initialValues = [], onClose, onSave }: ToothPickerModalProps) {
+  const { t } = useTranslation('services');
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [activeTab, setActiveTab] = useState<TabKey>('all');
   const [dentition, setDentition] = useState<Dentition>('permanent');
@@ -107,7 +109,7 @@ export function ToothPickerModal({ isOpen, initialValues = [], onClose, onSave }
       <div className="relative bg-white rounded-lg shadow-xl w-full max-w-4xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-          <h2 className="text-base font-semibold text-gray-900">Chọn răng</h2>
+          <h2 className="text-base font-semibold text-gray-900">{t('toothPickerTitle')}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -122,10 +124,10 @@ export function ToothPickerModal({ isOpen, initialValues = [], onClose, onSave }
         <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 border-b border-gray-200">
           <div className="flex rounded overflow-hidden border border-gray-300">
             {([
-              { key: 'all', label: 'Chọn răng' },
-              { key: 'upper', label: 'Hàm trên' },
-              { key: 'lower', label: 'Hàm dưới' },
-              { key: 'arch', label: 'Nguyên hàm' },
+              { key: 'all', label: t('tabAll') },
+              { key: 'upper', label: t('tabUpper') },
+              { key: 'lower', label: t('tabLower') },
+              { key: 'arch', label: t('tabArch') },
             ] as { key: TabKey; label: string }[]).map((tab) => (
               <button
                 key={tab.key}
@@ -153,7 +155,7 @@ export function ToothPickerModal({ isOpen, initialValues = [], onClose, onSave }
                 onChange={() => setDentition('permanent')}
                 className="accent-[#1976d2]"
               />
-              Răng vĩnh viễn
+              {t('permanentTeeth')}
             </label>
             <label className="flex items-center gap-1.5 cursor-pointer">
               <input
@@ -164,7 +166,7 @@ export function ToothPickerModal({ isOpen, initialValues = [], onClose, onSave }
                 onChange={() => setDentition('primary')}
                 className="accent-[#1976d2]"
               />
-              Răng sữa
+              {t('primaryTeeth')}
             </label>
           </div>
         </div>
@@ -215,14 +217,14 @@ export function ToothPickerModal({ isOpen, initialValues = [], onClose, onSave }
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
           >
-            Đóng
+            {t('close')}
           </button>
           <button
             type="button"
             onClick={handleSave}
             className="px-4 py-2 text-sm font-medium text-white bg-[#1976d2] border border-[#1976d2] rounded hover:bg-[#1565c0]"
           >
-            Lưu
+            {t('save')}
           </button>
         </div>
       </div>

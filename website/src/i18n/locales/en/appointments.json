@@ -98,5 +98,23 @@
     "scheduleFirst": "Schedule your first appointment",
     "confirmDelete": "Are you sure you want to delete this appointment?",
     "confirmCancel": "Are you sure you want to cancel this appointment?"
-  }
+  },
+  "angTiDLiu": "Loading data...",
+  "thngTinCBn": "Basic Information",
+  "thmKhchHngMi": "Add new customer",
+  "chnBcS": "Select doctor...",
+  "phTKhngBtBuc": "Assistant (optional)",
+  "chnPhT": "Select assistant...",
+  "trLBcSKhngBtBuc": "Doctor Assistant (optional)",
+  "chnTrL": "Select assistant...",
+  "angTiDanhMcDchV": "Loading service catalog...",
+  "chnDchV": "Select service...",
+  "lnKhm": "visits · ~",
+  "tnhNngNhcLchSCKchHotSau": "Reminder feature will be activated later",
+  "hyB": "Cancel",
+  "cpNht": "Update",
+  "thuGnChiTit": "Collapse details",
+  "mRngChiTit": "Expand details",
+  "returningCustomer": "Returning customer",
+  "newCustomer": "New customer"
 }

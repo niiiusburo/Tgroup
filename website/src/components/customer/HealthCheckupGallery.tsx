@@ -24,6 +24,7 @@ function formatDate(dateStr: string): string {
 }
 
 export function HealthCheckupGallery({ data, isLoading, error, customerCode, onUploaded }: HealthCheckupGalleryProps) {
+  const { t } = useTranslation('customers');
   const [lightboxIndex, setLightboxIndex] = useState<number>(-1);
   const [lightboxCheckup, setLightboxCheckup] = useState<number>(-1);
   const [showForm, setShowForm] = useState(false);
@@ -111,7 +112,7 @@ export function HealthCheckupGallery({ data, isLoading, error, customerCode, onU
                 className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
-                Thêm lịch khám
+                t('addCheckup')
               </button>
             )}
           </div>
@@ -145,34 +146,34 @@ export function HealthCheckupGallery({ data, isLoading, error, customerCode, onU
                   <div className="p-1.5 bg-primary/10 rounded-md">
                     <Calendar className="w-3.5 h-3.5 text-primary" />
                   </div>
-                  <span className="text-sm font-semibold text-gray-900">{checkup.title || 'Không có tên'}</span>
+                  <span className="text-sm font-semibold text-gray-900">{checkup.title || t('noCheckupName')}</span>
                 </div>
 
                 {/* Details grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm mb-4">
                   <div className="flex">
-                    <span className="w-36 text-gray-400 shrink-0">Dịch vụ</span>
+                    <span className="w-36 text-gray-400 shrink-0">t('service')</span>
                     <span className="font-medium text-gray-700">{checkup.title || '—'}</span>
                   </div>
                   <div className="flex">
-                    <span className="w-36 text-gray-400 shrink-0">Bác sĩ khám</span>
+                    <span className="w-36 text-gray-400 shrink-0">t('examiningDoctor')</span>
                     <span className="font-medium text-gray-700">{checkup.doctor || '—'}</span>
                   </div>
                   <div className="flex">
-                    <span className="w-36 text-gray-400 shrink-0">Ngày khám</span>
+                    <span className="w-36 text-gray-400 shrink-0">t('examDate')</span>
                     <span className="font-medium text-gray-700">{formatDate(checkup.date)}</span>
                   </div>
                   <div className="flex">
-                    <span className="w-36 text-gray-400 shrink-0">Nội dung khám</span>
+                    <span className="w-36 text-gray-400 shrink-0">t('examContent')</span>
                     <span className="font-medium text-gray-700">{checkup.notes || '—'}</span>
                   </div>
                   <div className="flex">
-                    <span className="w-36 text-gray-400 shrink-0">Ngày hẹn lịch tiếp theo</span>
+                    <span className="w-36 text-gray-400 shrink-0">t('nextAppointmentDate')</span>
                     <span className="font-medium text-gray-700">{formatDate(checkup.nextAppointmentDate || '') || '—'}</span>
                   </div>
                   <div className="flex">
-                    <span className="w-36 text-gray-400 shrink-0">Nội dung hẹn khám tiếp</span>
-                    <span className="font-medium text-gray-700">{checkup.nextDescription || 'Không có'}</span>
+                    <span className="w-36 text-gray-400 shrink-0">{t('nextAppointmentContent')}</span>
+                    <span className="font-medium text-gray-700">{checkup.nextDescription || t('noDescription')}</span>
                   </div>
                 </div>
 
@@ -315,7 +316,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
     <form onSubmit={handleSubmit} className="p-4 bg-gray-50/60 border-b border-gray-100 space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">Dịch vụ</label>
+          <label className="block text-xs font-medium text-gray-600 mb-1">t('service')</label>
           <input
             type="text"
             required
@@ -326,7 +327,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">Bác sĩ khám</label>
+          <label className="block text-xs font-medium text-gray-600 mb-1">t('examiningDoctor')</label>
           <input
             type="text"
             required
@@ -337,7 +338,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">Ngày khám</label>
+          <label className="block text-xs font-medium text-gray-600 mb-1">t('examDate')</label>
           <input
             type="date"
             required
@@ -347,7 +348,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">Ngày hẹn tiếp theo</label>
+          <label className="block text-xs font-medium text-gray-600 mb-1">t('nextAppointmentDate')</label>
           <input
             type="date"
             value={nextAppointmentDate}
@@ -358,7 +359,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">Nội dung khám</label>
+        <label className="block text-xs font-medium text-gray-600 mb-1">t('examContent')</label>
         <textarea
           rows={2}
           value={notes}
@@ -369,7 +370,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">Nội dung hẹn khám tiếp</label>
+        <label className="block text-xs font-medium text-gray-600 mb-1">t('nextAppointmentContent')</label>
         <input
           type="text"
           value={nextDescription}
@@ -380,7 +381,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">Tệp đính kèm</label>
+        <label className="block text-xs font-medium text-gray-600 mb-1">t('attachments')</label>
         <input
           type="file"
           multiple
@@ -397,7 +398,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
           disabled={saving}
           className="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50"
         >
-          Hủy
+          {t('cancel')}
         </button>
         <button
           type="submit"
@@ -405,7 +406,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
           className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-primary rounded-lg hover:bg-primary-dark disabled:opacity-50"
         >
           {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-          Thêm lịch
+          {t('addCheckup')}
         </button>
       </div>
     </form>

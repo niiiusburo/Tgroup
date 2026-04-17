@@ -32,19 +32,17 @@ export interface DepositBalance {
   totalRefunded: number;
 }
 
-function formatMethod(method: string): string {
-  const map: Record<string, string> = {
-    cash: 'Tiền mặt',
-    bank: 'Ngân hàng',
-    bank_transfer: 'Chuyển khoản',
-    deposit: 'Ví cọc',
-    mixed: 'Kết hợp',
-    momo: 'MoMo',
-    card: 'Thẻ',
-    wallet: 'Ví điện tử',
-  };
-  return map[method] || method;
-}
+/** Raw payment method codes from API. Components should translate via t('methods.' + code, { ns: 'payment' }). */
+export type PaymentMethodCode =
+  | 'cash'
+  | 'bank'
+  | 'bank_transfer'
+  | 'deposit'
+  | 'mixed'
+  | 'momo'
+  | 'card'
+  | 'wallet'
+  | string;
 
 function mapToDepositTransaction(p: ApiPayment): DepositTransaction {
   const isRefund = p.depositType === 'refund' || p.amount < 0;
@@ -53,8 +51,8 @@ function mapToDepositTransaction(p: ApiPayment): DepositTransaction {
     date: p.paymentDate || p.createdAt?.slice(0, 10) || new Date().toISOString().slice(0, 10),
     amount: Math.abs(p.amount),
     type: isRefund ? 'refund' : 'deposit',
-    method: formatMethod(p.method),
-    note: p.notes || (isRefund ? 'Hoàn tạm ứng' : 'Đóng tạm ứng'),
+    method: p.method,
+    note: p.notes || (isRefund ? 'refund' : 'deposit'),
     receiptNumber: p.receiptNumber,
     referenceCode: p.referenceCode,
     status: p.status,
@@ -69,8 +67,8 @@ function mapToUsageTransaction(p: ApiPayment): DepositTransaction {
     date: p.paymentDate || p.createdAt?.slice(0, 10) || new Date().toISOString().slice(0, 10),
     amount: amountFromDeposit,
     type: 'withdrawal',
-    method: formatMethod('deposit'),
-    note: p.notes || 'Thanh toán từ ví cọc',
+    method: 'deposit',
+    note: p.notes || 'paymentFromWallet',
     receiptNumber: p.receiptNumber,
     referenceCode: p.referenceCode,
     status: p.status,

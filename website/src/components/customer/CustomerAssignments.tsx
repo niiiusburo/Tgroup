@@ -20,9 +20,9 @@ interface CustomerAssignmentsProps {
 }
 
 function resolveName(
-  id: string | null | undefined,
-  list: readonly { id: string; name: string }[]
-): string | null {
+id: string | null | undefined,
+list: readonly {id: string;name: string;}[])
+: string | null {
   if (!id) return null;
   return list.find((e) => e.id === id)?.name ?? null;
 }
@@ -42,11 +42,11 @@ function AssignmentField({ icon: Icon, label, value }: AssignmentFieldProps) {
       <div className="min-w-0 leading-tight">
         <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-400">{label}</div>
         <div className="text-[13px] font-semibold text-gray-900 truncate mt-0.5">
-          {value ? value : <span className="text-gray-400 font-normal italic">— Chưa gán</span>}
+          {value ? value : <span className="text-gray-400 font-normal italic"></span>}
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export function CustomerAssignments({
@@ -54,7 +54,7 @@ export function CustomerAssignments({
   salestaffId,
   cskhId,
   cskhName,
-  referralUserId,
+  referralUserId
 }: CustomerAssignmentsProps) {
   const { t } = useTranslation('customers');
   const { allEmployees } = useEmployees();
@@ -70,10 +70,10 @@ export function CustomerAssignments({
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
           </span>
-          <span className="text-[10.5px] font-bold tracking-[0.12em] text-primary-dark uppercase">PHÂN CÔNG</span>
+          <span className="text-[10.5px] font-bold tracking-[0.12em] text-primary-dark uppercase"></span>
         </div>
-        <h3 className="text-[15px] font-bold text-gray-900">Phân công khách hàng</h3>
-        <p className="text-xs text-gray-500 leading-snug mt-1">Thông tin phụ trách khách hàng.</p>
+        <h3 className="text-[15px] font-bold text-gray-900"></h3>
+        <p className="text-xs text-gray-500 leading-snug mt-1"></p>
       </div>
 
       {/* Right grid of 4 fields */}
@@ -81,24 +81,24 @@ export function CustomerAssignments({
         <AssignmentField
           icon={Building2}
           label={t('columns.location', { ns: 'customers' })}
-          value={companyName}
-        />
+          value={companyName} />
+        
         <AssignmentField
           icon={UserRound}
           label={t('form.assignTo', { ns: 'customers' })}
-          value={resolveName(salestaffId, employeeList)}
-        />
+          value={resolveName(salestaffId, employeeList)} />
+        
         <AssignmentField
           icon={Headphones}
           label={t('assignments', { ns: 'customers' })}
-          value={cskhName || resolveName(cskhId, employeeList)}
-        />
+          value={cskhName || resolveName(cskhId, employeeList)} />
+        
         <AssignmentField
           icon={Users}
-          label="NGƯỜI GIỚI THIỆU"
-          value={resolveName(referralUserId, employeeList)}
-        />
+          label={t("ngiGiiThiu")}
+          value={resolveName(referralUserId, employeeList)} />
+        
       </div>
-    </div>
-  );
+    </div>);
+
 }

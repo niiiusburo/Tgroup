@@ -39,5 +39,12 @@
   "totalCustomers": "Total Customers",
   "monthlyRevenue": "Monthly Revenue",
   "noLocations": "No locations found",
-  "createNew": "Create a new clinic branch"
+  "createNew": "Create a new clinic branch",
+  "egTamDentistBnhDng": "e.g., Tam Dentist Binh Duong",
+  "123NgAbcPhngX": "123 ABC Street, Ward X",
+  "egQun1": "e.g., District 1",
+  "form.district": "District",
+  "registeredPatients": "Registered patients",
+  "target": "Target",
+  "acrossAllBranches": "Across all branches"
 }

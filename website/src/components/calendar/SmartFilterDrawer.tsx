@@ -8,6 +8,7 @@ import { ColorFilterCircles } from './ColorFilterCircles';
 import type { AppointmentStatus } from '@/types/appointment';
 import type { CalendarAppointment } from '@/data/mockCalendar';
 import { APPOINTMENT_STATUS_I18N_KEYS } from '@/constants';
+import { useTranslation } from 'react-i18next';
 
 interface SmartFilterDrawerProps {
   isOpen: boolean;
@@ -34,18 +35,19 @@ export function SmartFilterDrawer({
   draftColors,
   onToggleColor,
   onApply,
-  onClear,
+  onClear
 }: SmartFilterDrawerProps) {
+  const { t } = useTranslation('calendar');
   // Doctor list with counts (from unfiltered appointments)
   const doctorData = useMemo(() => {
     const map = new Map<string, number>();
     appointments.forEach((apt) => {
-      const name = apt.dentist || 'Không xác định';
+      const name = apt.dentist || t('common:unknown');
       map.set(name, (map.get(name) ?? 0) + 1);
     });
-    return Array.from(map.entries())
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+    return Array.from(map.entries()).
+    map(([name, count]) => ({ name, count })).
+    sort((a, b) => a.name.localeCompare(b.name));
   }, [appointments]);
 
   // Status list with counts
@@ -54,9 +56,9 @@ export function SmartFilterDrawer({
     appointments.forEach((apt) => {
       map.set(apt.status, (map.get(apt.status) ?? 0) + 1);
     });
-    return (Object.keys(APPOINTMENT_STATUS_I18N_KEYS) as AppointmentStatus[])
-      .filter((s) => map.has(s))
-      .map((value) => ({ value, count: map.get(value) ?? 0 }));
+    return (Object.keys(APPOINTMENT_STATUS_I18N_KEYS) as AppointmentStatus[]).
+    filter((s) => map.has(s)).
+    map((value) => ({ value, count: map.get(value) ?? 0 }));
   }, [appointments]);
 
   // Color counts
@@ -88,18 +90,18 @@ export function SmartFilterDrawer({
   const activeFilterCount = draftDoctors.length + draftStatuses.length + draftColors.length;
 
   const handleDoctorToggle = (name: string) => {
-    if (name === '__ALL__') onToggleDoctor('__ALL__');
-    else onToggleDoctor(name);
+    if (name === '__ALL__') onToggleDoctor('__ALL__');else
+    onToggleDoctor(name);
   };
 
   const handleStatusToggle = (value: AppointmentStatus) => {
-    if ((value as unknown as string) === '__ALL__') onToggleStatus('__ALL__' as AppointmentStatus);
-    else onToggleStatus(value);
+    if (value as unknown as string === '__ALL__') onToggleStatus('__ALL__' as AppointmentStatus);else
+    onToggleStatus(value);
   };
 
   const handleColorToggle = (code: string) => {
-    if (code === '__ALL__') onToggleColor('__ALL__');
-    else onToggleColor(code);
+    if (code === '__ALL__') onToggleColor('__ALL__');else
+    onToggleColor(code);
   };
 
   return (
@@ -112,8 +114,8 @@ export function SmartFilterDrawer({
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none hidden'
         )}
         onClick={onClose}
-        aria-hidden="true"
-      />
+        aria-hidden="true" />
+      
       {/* Drawer */}
       <div
         data-testid="smart-filter-drawer"
@@ -122,19 +124,19 @@ export function SmartFilterDrawer({
           isOpen ? 'translate-x-0' : 'translate-x-full hidden'
         )}
         role="dialog"
-        aria-label="Bộ lọc"
-        aria-modal="true"
-      >
+        aria-label={t("bLc")}
+        aria-modal="true">
+        
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900">Bộ lọc</h2>
+          <h2 className="text-lg font-bold text-gray-900"></h2>
           <button
             type="button"
             data-testid="smart-filter-close"
             onClick={onClose}
             className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
-            aria-label="Đóng"
-          >
+            aria-label={t("ng")}>
+            
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -143,34 +145,34 @@ export function SmartFilterDrawer({
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
           <FilterSummaryCards
             totalAppointments={totalAppointments}
-            totalDurationMinutes={totalDuration}
-          />
+            totalDurationMinutes={totalDuration} />
+          
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">Bác sĩ</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-3"></h3>
             <DoctorFilterChips
               doctors={doctorData}
               selected={draftDoctors}
-              onToggle={handleDoctorToggle}
-            />
+              onToggle={handleDoctorToggle} />
+            
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">Trạng thái</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-3"></h3>
             <StatusFilterChips
               statuses={statusData}
               selected={draftStatuses}
-              onToggle={handleStatusToggle}
-            />
+              onToggle={handleStatusToggle} />
+            
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">Nhãn màu</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-3"></h3>
             <ColorFilterCircles
               selected={draftColors}
               counts={colorCounts}
-              onToggle={handleColorToggle}
-            />
+              onToggle={handleColorToggle} />
+            
           </div>
         </div>
 
@@ -180,29 +182,29 @@ export function SmartFilterDrawer({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Đóng
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+              
+
             </button>
             <button
               type="button"
               data-testid="smart-filter-clear"
               onClick={onClear}
-              className="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
-            >
-              Xóa bộ lọc
+              className="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
+              
+
             </button>
             <button
               type="button"
               data-testid="smart-filter-apply"
               onClick={onApply}
-              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              Lọc {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
+              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors">
+              
+              {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
             </button>
           </div>
         </div>
       </div>
-    </>
-  );
+    </>);
+
 }

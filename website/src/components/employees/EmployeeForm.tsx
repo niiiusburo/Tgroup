@@ -36,7 +36,7 @@ const ROLE_TO_JOBTITLE: Record<EmployeeRole, string> = {
   'branch-manager': 'Quản lý cơ sở',
   'sales-staff': 'Nhân viên sale',
   'customer-service': 'CSKH',
-  'marketing': 'Marketing',
+  'marketing': 'Marketing'
 };
 
 interface EmployeeFormProps {
@@ -66,16 +66,16 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
   const isEdit = !!employee;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [locations, setLocations] = useState<{ id: string; name: string; address: string; phone: string; status: 'active' | 'inactive'; doctorCount: number; patientCount: number; appointmentCount: number }[]>([]);
+  const [locations, setLocations] = useState<{id: string;name: string;address: string;phone: string;status: 'active' | 'inactive';doctorCount: number;patientCount: number;appointmentCount: number;}[]>([]);
 
   const [name, setName] = useState(employee?.name ?? '');
   const [phone, setPhone] = useState(employee?.phone ?? '');
   const [email, setEmail] = useState(employee?.email ?? '');
   const [companyid, setCompanyid] = useState(employee?.companyid ?? '');
   // Determine initial role from DB flags + jobtitle
-  const initialRole = employee
-    ? inferRoleFromFlags(employee.isdoctor, employee.isassistant, employee.isreceptionist, employee.jobtitle)
-    : 'doctor';
+  const initialRole = employee ?
+  inferRoleFromFlags(employee.isdoctor, employee.isassistant, employee.isreceptionist, employee.jobtitle) :
+  'doctor';
   const [selectedRole, setSelectedRole] = useState<EmployeeRole>(initialRole);
   const [active, setActive] = useState(employee?.active ?? true);
   const [startworkdate, setStartworkdate] = useState(
@@ -88,9 +88,9 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
   const [selectedTierId, setSelectedTierId] = useState<string>(employee?.tierId ?? '');
 
   useEffect(() => {
-    fetchCompanies().then((res) => setLocations(res.items.map(l => ({
+    fetchCompanies().then((res) => setLocations(res.items.map((l) => ({
       id: l.id, name: l.name, address: '', phone: l.phone || '',
-      status: (l.active ? 'active' : 'inactive') as 'active' | 'inactive', doctorCount: 0, patientCount: 0, appointmentCount: 0,
+      status: (l.active ? 'active' : 'inactive') as 'active' | 'inactive', doctorCount: 0, patientCount: 0, appointmentCount: 0
     })))).catch((err) => console.error('Failed to fetch locations:', err));
     fetchPermissionGroups().then((groups) => setTiers(groups)).catch((err) => console.error('Failed to fetch tiers:', err));
   }, []);
@@ -100,11 +100,11 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
     setError(null);
 
     if (!name.trim()) {
-      setError('Vui lòng nhập tên nhân viên');
+      setError(t('errorNameRequired'));
       return;
     }
     if (!isEdit && !password.trim()) {
-      setError('Vui lòng nhập mật khẩu');
+      setError(t('errorPasswordRequired'));
       return;
     }
 
@@ -122,7 +122,7 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
       jobtitle: ROLE_TO_JOBTITLE[selectedRole],
       active,
       startworkdate: startworkdate || undefined,
-      tierId: selectedTierId || undefined,
+      tierId: selectedTierId || undefined
     };
 
     setLoading(true);
@@ -135,7 +135,7 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
       onSave();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Lưu thất bại');
+      setError(err instanceof Error ? err.message : t('saveFailed'));
     } finally {
       setLoading(false);
     }
@@ -156,9 +156,9 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
                 {isEdit ? <User className="w-5 h-5 text-white" /> : <UserPlus className="w-5 h-5 text-white" />}
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">{isEdit ? 'Sửa nhân viên' : 'Thêm nhân viên'}</h2>
+                <h2 className="text-xl font-bold text-white">{isEdit ? t("saNhnVin") : t("thmNhnVin")}</h2>
                 <p className="text-sm text-orange-100 mt-0.5">
-                  {isEdit ? 'Cập nhật thông tin nhân viên' : 'Tạo nhân viên mới'}
+                  {isEdit ? t("cpNhtThngTinNhnVin") : t("toNhnVinMi")}
                 </p>
               </div>
             </div>
@@ -170,39 +170,38 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="modal-body px-6 py-6 space-y-5">
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600 flex items-center gap-2">
+          {error &&
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600 flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
               {error}
             </div>
-          )}
+          }
 
-          {/* Họ và tên */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
-              Họ và tên <span className="text-red-500">*</span>
+              {t('form.fullName')}
+              <span className="text-red-500">*</span>
             </label>
             <input
               type="text" value={name} onChange={(e) => setName(e.target.value)}
               placeholder={t('enterName')}
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
-              required
-            />
+              required />
+            
           </div>
 
-          {/* Điện thoại + Email */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5" />
-                Điện thoại
+                {t('form.phone')}
               </label>
               <input
                 type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
                 placeholder={t('enterPhone')}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
-              />
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm" />
+              
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
@@ -212,66 +211,63 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
               <input
                 type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder={t('enterEmail')}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
-              />
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm" />
+              
             </div>
           </div>
 
-          {/* Mật khẩu */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Shield className="w-3.5 h-3.5" />
-              {isEdit ? 'Đặt lại mật khẩu' : 'Mật khẩu'} {!isEdit && <span className="text-red-500">*</span>}
+              {isEdit ? t("tLiMtKhu") : t("mtKhu")} {!isEdit && <span className="text-red-500">*</span>}
             </label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={isEdit ? 'Để trống nếu không đổi mật khẩu' : 'Nhập mật khẩu'}
+                placeholder={isEdit ? t("trngNuKhngIMtKhu") : t("nhpMtKhu")}
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm pr-16"
-                {...(!isEdit ? { required: true } : {})}
-              />
+                {...!isEdit ? { required: true } : {}} />
+              
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-gray-600 font-medium"
-              >
-                {showPassword ? (
-                  <EyeOff className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-gray-600 font-medium">
+                
+                {showPassword ?
+                <EyeOff className="w-4 h-4" /> :
+
+                <Eye className="w-4 h-4" />
+                }
               </button>
             </div>
-            {isEdit && (
-              <p className="mt-1 text-xs text-gray-400">Để trống nếu không muốn thay đổi mật khẩu</p>
-            )}
+            {isEdit &&
+            <p className="mt-1 text-xs text-gray-400"></p>
+            }
           </div>
 
-          {/* Chi nhánh */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <MapPin className="w-3.5 h-3.5" />
-              Chi nhánh
+              {t('form.location')}
             </label>
             <LocationSelector
               locations={locations}
               selectedId={companyid || null}
               onChange={setCompanyid}
-              excludeAll
-            />
+              excludeAll />
+            
           </div>
 
-          {/* Chi nhánh phụ */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Building2 className="w-3.5 h-3.5" />
-              Chi nhánh phụ
+              {t('form.additionalLocations')}
             </label>
-            {locations.length === 0 ? (
-              <p className="text-sm text-gray-400">Chưa có chi nhánh nào</p>
-            ) : (() => {
+            {locations.length === 0 ?
+            <p className="text-sm text-gray-400"></p> :
+            (() => {
               const otherLocs = locations.filter((loc) => loc.id !== companyid);
               const allSelected = otherLocs.length > 0 && otherLocs.every((loc) => locationScopeIds.includes(loc.id));
               return (
@@ -286,12 +282,12 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
                       }
                     }}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
-                      allSelected
-                        ? 'bg-orange-500 text-white border-orange-500'
-                        : 'bg-white text-orange-600 hover:bg-orange-50 border-orange-300'
-                    }`}
-                  >
-                    Tất cả chi nhánh
+                    allSelected ?
+                    'bg-orange-500 text-white border-orange-500' :
+                    'bg-white text-orange-600 hover:bg-orange-50 border-orange-300'}`
+                    }>
+                    
+
                   </button>
                   {otherLocs.map((loc) => {
                     const selected = locationScopeIds.includes(loc.id);
@@ -301,76 +297,74 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
                         type="button"
                         onClick={() => {
                           setLocationScopeIds((prev) =>
-                            selected ? prev.filter((id) => id !== loc.id) : [...prev, loc.id]
+                          selected ? prev.filter((id) => id !== loc.id) : [...prev, loc.id]
                           );
                         }}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
-                          selected
-                            ? 'bg-orange-100 text-orange-700 border-orange-200'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-transparent'
-                        }`}
-                      >
+                        selected ?
+                        'bg-orange-100 text-orange-700 border-orange-200' :
+                        'bg-gray-100 text-gray-600 hover:bg-gray-200 border-transparent'}`
+                        }>
+                        
                         {loc.name}
-                      </button>
-                    );
+                      </button>);
+
                   })}
-                </div>
-              );
+                </div>);
+
             })()}
           </div>
 
-          {/* Cấp bậc quyền (Tier) */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Shield className="w-3.5 h-3.5" />
-              Cấp bậc quyền (Tier)
+              {t('form.tierLabel')}
             </label>
             <select
               value={selectedTierId}
               onChange={(e) => setSelectedTierId(e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
-            >
-              <option value="">-- Chọn tier --</option>
-              {tiers.map((tier) => (
-                <option key={tier.id} value={tier.id}>{tier.name}</option>
-              ))}
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm">
+              
+              <option value=""></option>
+              {tiers.map((tier) =>
+              <option key={tier.id} value={tier.id}>{tier.name}</option>
+              )}
             </select>
-            <p className="mt-1 text-xs text-gray-400">Tier quyết định quyền truy cập của nhân viên trong hệ thống</p>
+            <p className="mt-1 text-xs text-gray-400"></p>
           </div>
 
-          {/* Vị trí / Vai trò */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Shield className="w-3.5 h-3.5" />
-              Vị trí / Vai trò <span className="text-red-500">*</span>
+              {t('form.roleLabel')}
+              <span className="text-red-500">*</span>
             </label>
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value as EmployeeRole)}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
-            >
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm">
+              
               {ALL_ROLES.map((role) => (
-                <option key={role} value={role}>{ROLE_LABELS[role]}</option>
+                <option key={role} value={role}>{t(ROLE_LABELS[role])}</option>
               ))}
             </select>
           </div>
 
-          {/* Ngày bắt đầu + Trạng thái */}
           <div className="grid grid-cols-2 gap-4">
-            <DatePicker value={startworkdate} onChange={setStartworkdate} label="Ngày bắt đầu" icon={<CalendarDays className="w-3.5 h-3.5" />} />
+            <DatePicker value={startworkdate} onChange={setStartworkdate} label={t("ngyBtU")} icon={<CalendarDays className="w-3.5 h-3.5" />} />
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                Trạng thái
+                {t('form.status')}
               </label>
               <button
                 type="button" onClick={() => setActive(!active)}
                 className={`w-full flex items-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 ${
-                  active ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-gray-300'
-                }`}
-              >
+                active ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-gray-300'}`
+                }>
+                
                 <div className={`w-2 h-2 rounded-full transition-colors ${active ? 'bg-emerald-500' : 'bg-gray-400'}`} />
-                <span className="text-sm font-medium">{active ? 'Đang làm việc' : 'Nghỉ việc'}</span>
+                <span className="text-sm font-medium">{active ? t("angLmVic") : t("nghVic")}</span>
               </button>
             </div>
           </div>
@@ -379,18 +373,16 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
         <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
           <button type="button" onClick={onClose} disabled={loading}
             className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50">
-            Hủy bỏ
-          </button>
+
+            </button>
           <button type="submit" disabled={loading || !isValid}
             className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/25">
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-            {isEdit ? 'Cập nhật' : 'Thêm nhân viên'}
+            {isEdit ? t("cpNht") : t("thmNhnVin")}
           </button>
         </div>
         </form>
       </div>
-    </div>
-  );
+    </div>);
+
 }
-
-

@@ -37,17 +37,20 @@ import { cn } from '@/lib/utils';
  * - Month view shows status counts per day
  */
 
-const MONTH_NAMES = [
-  'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-  'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
-];
-const WEEKDAY_NAMES_SHORT = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+const MONTH_NAME_KEYS = [
+  'common:months.january', 'common:months.february', 'common:months.march',
+  'common:months.april', 'common:months.may', 'common:months.june',
+  'common:months.july', 'common:months.august', 'common:months.september',
+  'common:months.october', 'common:months.november', 'common:months.december',
+] as const;
 
-const VIEW_TABS: readonly { readonly mode: ViewMode; readonly label: string }[] = [
-  { mode: 'day', label: 'Ngày' },
-  { mode: 'week', label: 'Tuần' },
-  { mode: 'month', label: 'Tháng' },
-];
+const WEEKDAY_NAME_SHORT_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
+
+const VIEW_TABS: readonly {readonly mode: ViewMode;readonly labelKey: string;}[] = [
+{ mode: 'day', labelKey: 'dayView' },
+{ mode: 'week', labelKey: 'weekView' },
+{ mode: 'month', labelKey: 'monthView' }];
+
 
 
 
@@ -77,7 +80,7 @@ export function Calendar() {
     appointments,
     refresh,
     updateAppointmentStatus,
-    markArrived,
+    markArrived
   } = useCalendarData(selectedLocationId);
 
   // Edit modal state - uses OverviewAppointment to match EditAppointmentModal interface
@@ -122,11 +125,11 @@ export function Calendar() {
     clearFilters();
   }, [clearFilters]);
 
-  const handleReschedule = useCallback(async (result: { appointmentId: string; newDate: string; newTime: string }) => {
+  const handleReschedule = useCallback(async (result: {appointmentId: string;newDate: string;newTime: string;}) => {
     try {
       const { updateAppointment } = await import('@/lib/api');
       await updateAppointment(result.appointmentId, {
-        date: `${result.newDate}T${result.newTime}:00`,
+        date: `${result.newDate}T${result.newTime}:00`
       });
       refresh?.();
     } catch (error) {
@@ -160,7 +163,7 @@ export function Calendar() {
       assistantId: appointment.assistantId ?? null,
       assistantName: appointment.assistantName ?? null,
       dentalAideId: appointment.dentalAideId ?? null,
-      dentalAideName: appointment.dentalAideName ?? null,
+      dentalAideName: appointment.dentalAideName ?? null
     };
     setEditingAppointment(overviewAppointment);
     setIsEditModalOpen(true);
@@ -195,14 +198,14 @@ export function Calendar() {
       }
       if (viewMode === 'week') {
         return [
-          weekDates[0].toISOString().split('T')[0],
-          weekDates[6].toISOString().split('T')[0],
-        ];
+        weekDates[0].toISOString().split('T')[0],
+        weekDates[6].toISOString().split('T')[0]];
+
       }
       return [
-        monthDates[0].toISOString().split('T')[0],
-        monthDates[monthDates.length - 1].toISOString().split('T')[0],
-      ];
+      monthDates[0].toISOString().split('T')[0],
+      monthDates[monthDates.length - 1].toISOString().split('T')[0]];
+
     }
     return ['', ''];
   }, [viewMode, currentDate, weekDates, monthDates]);
@@ -216,13 +219,13 @@ export function Calendar() {
         limit: 1000,
         dateFrom,
         dateTo,
-        companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
+        companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined
       });
       rows = response.items.map(mapApiAppointmentToCalendar);
     }
     const [from, to] = mode === 'current-filter' ? getExportDateRange('current-filter') : [dateFrom, dateTo];
     const suffix = from === to ? from : `${from}_${to}`;
-    await exportAppointmentsXlsx(rows, `DanhSachLichHen_${suffix}.xlsx`);
+    await exportAppointmentsXlsx(rows, `DanhSachLichHen_${suffix}.xlsx`, t);
   }, [appointments, selectedLocationId, getExportDateRange]);
 
   const handleCreateAppointment = useCallback((date: string, startTime: string) => {
@@ -233,7 +236,7 @@ export function Calendar() {
     setCreateInitialData({
       date,
       startTime,
-      endTime,
+      endTime
     });
     setCreateModalOpen(true);
   }, []);
@@ -248,7 +251,7 @@ export function Calendar() {
       date: data.date,
       time: data.startTime,
       note: data.notes,
-      state: 'scheduled',
+      state: 'scheduled'
     });
     setCreateModalOpen(false);
     refresh?.();
@@ -282,7 +285,7 @@ export function Calendar() {
     const firstDayOfMonth = new Date(year, month, 1).getDay();
     const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
     const prevMonthDays = new Date(year, month, 0).getDate();
-    const days: Array<{ date: number | null; isCurrentMonth: boolean; dateKey?: string }> = [];
+    const days: Array<{date: number | null;isCurrentMonth: boolean;dateKey?: string;}> = [];
     for (let i = startOffset - 1; i >= 0; i--) {
       days.push({ date: prevMonthDays - i, isCurrentMonth: false });
     }
@@ -329,14 +332,14 @@ export function Calendar() {
   }, [viewMode, currentDate, weekDates, monthDates, getAppointmentsForDate]);
 
   const customerSuggestions = useMemo(() => {
-    const map = new Map<string, { id: string; name: string; phone: string; code: string }>();
+    const map = new Map<string, {id: string;name: string;phone: string;code: string;}>();
     visibleAppointments.forEach((apt) => {
       if (!map.has(apt.customerId)) {
         map.set(apt.customerId, {
           id: apt.customerId,
           name: apt.customerName,
           phone: apt.customerPhone,
-          code: apt.customerCode,
+          code: apt.customerCode
         });
       }
     });
@@ -348,9 +351,9 @@ export function Calendar() {
     const term = normalizeText(search.trim());
     return customerSuggestions.filter(
       (c) =>
-        normalizeText(c.name).includes(term) ||
-        normalizeText(c.phone).includes(term) ||
-        normalizeText(c.code).includes(term),
+      normalizeText(c.name).includes(term) ||
+      normalizeText(c.phone).includes(term) ||
+      normalizeText(c.code).includes(term)
     );
   }, [customerSuggestions, search]);
 
@@ -393,20 +396,20 @@ export function Calendar() {
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 bg-white rounded-xl shadow-card px-4 py-3">
         {/* Left: view mode tabs (Vietnamese) */}
         <div className="flex items-center bg-gray-100 rounded-lg p-1">
-          {VIEW_TABS.map((tab) => (
-            <button
-              key={tab.mode}
-              onClick={() => setViewMode(tab.mode)}
-              className={cn(
-                'px-4 py-1.5 text-sm font-medium rounded-md transition-colors',
-                viewMode === tab.mode
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
+                  {VIEW_TABS.map((tab) =>
+                  <button
+                    key={tab.mode}
+                    onClick={() => setViewMode(tab.mode)}
+                    className={cn(
+                      'px-4 py-1.5 text-sm font-medium rounded-md transition-colors',
+                      viewMode === tab.mode ?
+                      'bg-white text-blue-600 shadow-sm' :
+                      'text-gray-600 hover:text-gray-900'
+                    )}>
+                    
+                      {t(tab.labelKey)}
+                    </button>
+                  )}
         </div>
 
         {/* Center: date navigation */}
@@ -414,8 +417,8 @@ export function Calendar() {
           <button
             onClick={() => navigate('prev')}
             className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
-            aria-label="Previous"
-          >
+            aria-label="Previous">
+            
             <ChevronLeft className="w-5 h-5" />
           </button>
           <div ref={datePickerRef} className="relative">
@@ -424,108 +427,108 @@ export function Calendar() {
               className={cn(
                 'text-base font-semibold text-gray-900 min-w-[150px] text-center px-3 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-2',
                 isDatePickerOpen ? 'bg-gray-200' : 'hover:bg-gray-100'
-              )}
-            >
+              )}>
+              
               <CalendarIcon className="w-4 h-4 text-gray-500" />
               {dateLabel}
             </button>
 
-            {isDatePickerOpen && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+            {isDatePickerOpen &&
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                 {/* Header */}
                 <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
                   <button
-                    type="button"
-                    onClick={() => setPickerViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
-                    className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
+                  type="button"
+                  onClick={() => setPickerViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
+                  className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                  
                     <ChevronLeft className="w-4 h-4 text-gray-600" />
                   </button>
                   <span className="text-sm font-semibold text-gray-900">
-                    {MONTH_NAMES[pickerViewDate.getMonth()]} {pickerViewDate.getFullYear()}
+                    {t(MONTH_NAME_KEYS[pickerViewDate.getMonth()])} {pickerViewDate.getFullYear()}
                   </span>
                   <button
-                    type="button"
-                    onClick={() => setPickerViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
-                    className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
+                  type="button"
+                  onClick={() => setPickerViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
+                  className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                  
                     <ChevronRight className="w-4 h-4 text-gray-600" />
                   </button>
                 </div>
 
                 {/* Weekday headers */}
                 <div className="grid grid-cols-7 px-2 pt-2">
-                  {WEEKDAY_NAMES_SHORT.map((day) => (
-                    <div key={day} className="text-center text-xs font-medium text-gray-400 py-1">
-                      {day}
+                  {WEEKDAY_NAME_SHORT_KEYS.map((day) =>
+                <div key={day} className="text-center text-xs font-medium text-gray-400 py-1">
+                      {t(`weekDays.${day}`)}
                     </div>
-                  ))}
+                )}
                 </div>
 
                 {/* Calendar grid */}
                 <div className="grid grid-cols-7 px-2 pb-2">
                   {pickerDays.map((day, index) => {
-                    if (!day.isCurrentMonth || !day.date) {
-                      return (
-                        <div key={index} className="h-8 flex items-center justify-center">
-                          <span className="text-sm text-gray-300">{day.date}</span>
-                        </div>
-                      );
-                    }
-                    const dateKey = day.dateKey!;
-                    const isSelected = dateKey === currentDate.toISOString().split('T')[0];
-                    const isToday = dateKey === todayKeyForPicker;
+                  if (!day.isCurrentMonth || !day.date) {
                     return (
-                      <button
-                        key={index}
-                        type="button"
-                        onClick={() => {
-                          setCurrentDate(new Date(dateKey + 'T00:00:00'));
-                          setIsDatePickerOpen(false);
-                        }}
-                        className={cn(
-                          'h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-all',
-                          isSelected
-                            ? 'bg-gradient-to-br from-orange-500 to-orange-400 text-white shadow-md'
-                            : isToday
-                              ? 'bg-orange-50 text-orange-600 border border-orange-200'
-                              : 'text-gray-700 hover:bg-gray-100'
-                        )}
-                      >
+                      <div key={index} className="h-8 flex items-center justify-center">
+                          <span className="text-sm text-gray-300">{day.date}</span>
+                        </div>);
+
+                  }
+                  const dateKey = day.dateKey!;
+                  const isSelected = dateKey === currentDate.toISOString().split('T')[0];
+                  const isToday = dateKey === todayKeyForPicker;
+                  return (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => {
+                        setCurrentDate(new Date(dateKey + 'T00:00:00'));
+                        setIsDatePickerOpen(false);
+                      }}
+                      className={cn(
+                        'h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-all',
+                        isSelected ?
+                        'bg-gradient-to-br from-orange-500 to-orange-400 text-white shadow-md' :
+                        isToday ?
+                        'bg-orange-50 text-orange-600 border border-orange-200' :
+                        'text-gray-700 hover:bg-gray-100'
+                      )}>
+                      
                         {day.date}
-                      </button>
-                    );
-                  })}
+                      </button>);
+
+                })}
                 </div>
 
                 {/* Today button */}
                 <div className="px-2 pb-2">
                   <button
-                    type="button"
-                    onClick={() => {
-                      goToToday();
-                      setIsDatePickerOpen(false);
-                    }}
-                    className="w-full py-1.5 text-sm font-medium text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                  >
-                    Hôm nay
-                  </button>
+                  type="button"
+                  onClick={() => {
+                    goToToday();
+                    setIsDatePickerOpen(false);
+                  }}
+                  className="w-full py-1.5 text-sm font-medium text-orange-600 hover:bg-orange-50 rounded-lg transition-colors">
+                  
+
+                </button>
                 </div>
               </div>
-            )}
+            }
           </div>
           <button
             onClick={() => navigate('next')}
             className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
-            aria-label="Next"
-          >
+            aria-label="Next">
+            
             <ChevronRight className="w-5 h-5" />
           </button>
           <button
             onClick={goToToday}
-            className="ml-2 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-          >
-            Hôm nay
+            className="ml-2 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+            
+
           </button>
         </div>
 
@@ -539,101 +542,101 @@ export function Calendar() {
               onChange={handleSearchInputChange}
               onFocus={() => setIsDropdownOpen(true)}
               placeholder={t('searchPlaceholder', { ns: 'customers' })}
-              className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-            />
-            {isDropdownOpen && search.trim().length >= 2 && (
-              <div className="absolute top-full left-0 mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-60 overflow-y-auto">
-                {filteredSuggestions.length === 0 ? (
-                  <div className="px-4 py-3 text-sm text-gray-400 text-center">Không tìm thấy kết quả</div>
-                ) : (
-                  filteredSuggestions.map((customer) => (
-                    <button
-                      key={customer.id}
-                      type="button"
-                      onClick={() => handleSelectCustomer(customer.name)}
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
-                    >
+              className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
+            
+            {isDropdownOpen && search.trim().length >= 2 &&
+            <div className="absolute top-full left-0 mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-60 overflow-y-auto">
+                {filteredSuggestions.length === 0 ?
+              <div className="px-4 py-3 text-sm text-gray-400 text-center"></div> :
+
+              filteredSuggestions.map((customer) =>
+              <button
+                key={customer.id}
+                type="button"
+                onClick={() => handleSelectCustomer(customer.name)}
+                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors">
+                
                       <div className="font-medium text-gray-900">{customer.name}</div>
                       <div className="text-xs text-gray-500">{customer.phone} · {customer.code}</div>
                     </button>
-                  ))
-                )}
+              )
+              }
               </div>
-            )}
+            }
           </div>
           <button
             type="button"
             onClick={() => setIsExportOpen(true)}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Xuất Excel
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            
+
           </button>
           <QuickAddAppointmentButton
             onSuccess={refresh}
-            size="sm"
-          />
+            size="sm" />
+          
           <button
             type="button"
             data-testid="calendar-filter-button"
             onClick={openFilter}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <span>Bộ lọc</span>
-            {(selectedDoctors.length + selectedStatuses.length + selectedColors.length) > 0 && (
-              <span
-                data-testid="calendar-filter-badge"
-                className="inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-medium text-white bg-primary rounded-full"
-              >
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            
+            <span></span>
+            {selectedDoctors.length + selectedStatuses.length + selectedColors.length > 0 &&
+            <span
+              data-testid="calendar-filter-badge"
+              className="inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-medium text-white bg-primary rounded-full">
+              
                 {selectedDoctors.length + selectedStatuses.length + selectedColors.length}
               </span>
-            )}
+            }
           </button>
         </div>
       </div>
 
       {/* Calendar view */}
-      {viewMode === 'day' && (
-        <DayView
-          currentDate={currentDate}
-          getAppointmentsForDate={getAppointmentsForDate}
-          onAppointmentClick={handleAppointmentClick}
-          onAppointmentEdit={handleEditClick}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onDragEnd={handleDragEnd}
-          onMarkArrived={markArrived}
-          onUpdateStatus={updateAppointmentStatus}
-          onCreateAppointment={handleCreateAppointment}
-        />
-      )}
-      {viewMode === 'week' && (
-        <WeekView
-          weekDates={weekDates}
-          getAppointmentsForDate={getAppointmentsForDate}
-          onAppointmentClick={handleAppointmentClick}
-          onAppointmentEdit={handleEditClick}
-          onDateChange={setCurrentDate}
-          onMarkArrived={markArrived}
-          onUpdateStatus={updateAppointmentStatus}
-        />
-      )}
-      {viewMode === 'month' && (
-        <MonthView
-          currentDate={currentDate}
-          monthDates={monthDates}
-          getAppointmentsForDate={getAppointmentsForDate}
-          onDayClick={handleDayClick}
-        />
-      )}
+      {viewMode === 'day' &&
+      <DayView
+        currentDate={currentDate}
+        getAppointmentsForDate={getAppointmentsForDate}
+        onAppointmentClick={handleAppointmentClick}
+        onAppointmentEdit={handleEditClick}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        onDragEnd={handleDragEnd}
+        onMarkArrived={markArrived}
+        onUpdateStatus={updateAppointmentStatus}
+        onCreateAppointment={handleCreateAppointment} />
+
+      }
+      {viewMode === 'week' &&
+      <WeekView
+        weekDates={weekDates}
+        getAppointmentsForDate={getAppointmentsForDate}
+        onAppointmentClick={handleAppointmentClick}
+        onAppointmentEdit={handleEditClick}
+        onDateChange={setCurrentDate}
+        onMarkArrived={markArrived}
+        onUpdateStatus={updateAppointmentStatus} />
+
+      }
+      {viewMode === 'month' &&
+      <MonthView
+        currentDate={currentDate}
+        monthDates={monthDates}
+        getAppointmentsForDate={getAppointmentsForDate}
+        onDayClick={handleDayClick} />
+
+      }
 
       {/* Edit Appointment Modal - single module for both card click and pencil icon */}
       <EditAppointmentModal
         appointment={editingAppointment}
         isOpen={isEditModalOpen}
         onClose={handleEditModalClose}
-        onSaved={handleEditModalSaved}
-      />
+        onSaved={handleEditModalSaved} />
+      
 
       <SmartFilterDrawer
         isOpen={isFilterOpen}
@@ -641,37 +644,37 @@ export function Calendar() {
         appointments={appointments}
         draftDoctors={doctorsFilter.selected}
         onToggleDoctor={(name) => {
-          if (name === '__ALL__') doctorsFilter.clear();
-          else doctorsFilter.toggle(name);
+          if (name === '__ALL__') doctorsFilter.clear();else
+          doctorsFilter.toggle(name);
         }}
         draftStatuses={statusesFilter.selected}
         onToggleStatus={(value) => {
-          if ((value as unknown as string) === '__ALL__') statusesFilter.clear();
-          else statusesFilter.toggle(value);
+          if (value as unknown as string === '__ALL__') statusesFilter.clear();else
+          statusesFilter.toggle(value);
         }}
         draftColors={colorsFilter.selected}
         onToggleColor={(code) => {
-          if (code === '__ALL__') colorsFilter.clear();
-          else colorsFilter.toggle(code);
+          if (code === '__ALL__') colorsFilter.clear();else
+          colorsFilter.toggle(code);
         }}
         onApply={applyFilter}
-        onClear={clearFilter}
-      />
+        onClear={clearFilter} />
+      
 
       <ExportDialog
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
         onExport={handleExport}
         defaultDateFrom={new Date().toISOString().split('T')[0]}
-        defaultDateTo={new Date().toISOString().split('T')[0]}
-      />
+        defaultDateTo={new Date().toISOString().split('T')[0]} />
+      
 
       <AppointmentFormModal
         isOpen={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
         onSubmit={handleCreateSubmit}
-        initialData={createInitialData}
-      />
-    </div>
-  );
+        initialData={createInitialData} />
+      
+    </div>);
+
 }

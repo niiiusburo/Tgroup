@@ -186,66 +186,66 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
   }, [customerId, apiCustomers]);
 
   // Convert API data to selector format
-  const customers: Customer[] = apiCustomers.map(c => ({
+  const customers: Customer[] = apiCustomers.map((c) => ({
     id: c.id,
     name: c.name,
     phone: c.phone,
     email: c.email,
     locationId: c.locationId,
     status: c.status,
-    lastVisit: c.lastVisit,
+    lastVisit: c.lastVisit
   }));
 
-  const employees: Employee[] = apiEmployees.map(e => ({
+  const employees: Employee[] = apiEmployees.map((e) => ({
     id: e.id,
     name: e.name,
     avatar: e.avatar || e.name.charAt(0).toUpperCase(),
     tierId: (e as any).tierId || '',
     tierName: (e as any).tierName || 'No Tier',
-    roles: (e.roles as Employee['roles']) || ['doctor'],
-    status: (e.status as Employee['status']) || 'active',
+    roles: e.roles as Employee['roles'] || ['doctor'],
+    status: e.status as Employee['status'] || 'active',
     locationId: e.locationId || '',
     locationName: e.locationName || '',
     phone: e.phone || '',
     email: e.email || '',
     schedule: e.schedule || [],
     linkedEmployeeIds: e.linkedEmployeeIds || [],
-    hireDate: e.hireDate || '',
+    hireDate: e.hireDate || ''
   }));
 
-  const locations: Location[] = apiLocations.map(l => ({
+  const locations: Location[] = apiLocations.map((l) => ({
     id: l.id,
     name: l.name,
     address: l.address || '',
     phone: l.phone || '',
-    status: (l.status as Location['status']) || 'active',
+    status: l.status as Location['status'] || 'active',
     doctorCount: 0,
     patientCount: 0,
-    appointmentCount: 0,
+    appointmentCount: 0
   }));
 
   // Map real products to ServiceCatalogItem format
   const serviceCatalog: ServiceCatalogItem[] = useMemo(() =>
-    products.map((p: Product) => ({
-      id: p.id,
-      name: p.name,
-      category: (p.categoryName?.toLowerCase().includes('ortho') ? 'orthodontics' :
-                 p.categoryName?.toLowerCase().includes('cosmetic') ? 'cosmetic' :
-                 p.categoryName?.toLowerCase().includes('surgery') ? 'surgery' :
-                 p.categoryName?.toLowerCase().includes('clean') ? 'cleaning' :
-                 p.categoryName?.toLowerCase().includes('consult') ? 'consultation' :
-                 p.categoryName?.toLowerCase().includes('emergency') ? 'emergency' :
-                 'treatment') as AppointmentType,
-      description: p.categoryName || 'Dental service',
-      defaultPrice: p.listPrice,
-      estimatedDuration: 30,
-      totalVisits: 1,
-      unit: p.uomName || undefined,
-    })),
-    [products]
+  products.map((p: Product) => ({
+    id: p.id,
+    name: p.name,
+    category: (p.categoryName?.toLowerCase().includes('ortho') ? 'orthodontics' :
+    p.categoryName?.toLowerCase().includes('cosmetic') ? 'cosmetic' :
+    p.categoryName?.toLowerCase().includes('surgery') ? 'surgery' :
+    p.categoryName?.toLowerCase().includes('clean') ? 'cleaning' :
+    p.categoryName?.toLowerCase().includes('consult') ? 'consultation' :
+    p.categoryName?.toLowerCase().includes('emergency') ? 'emergency' :
+    'treatment') as AppointmentType,
+    description: p.categoryName || 'Dental service',
+    defaultPrice: p.listPrice,
+    estimatedDuration: 30,
+    totalVisits: 1,
+    unit: p.uomName || undefined
+  })),
+  [products]
   );
 
-  const selectedService = serviceCatalog.find(s => s.id === serviceId);
+  const selectedService = serviceCatalog.find((s) => s.id === serviceId);
 
   function validate(): boolean {
     const newErrors: Record<string, string> = {};
@@ -308,7 +308,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
         customerType,
         serviceId: serviceId || undefined,
         status,
-        color: colorCode,
+        color: colorCode
       });
     } catch (error) {
       console.error('Appointment save failed:', error);
@@ -352,19 +352,19 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
 
         {/* Scrollable Form Body */}
         <form onSubmit={handleSubmit} className="modal-body px-6 py-6">
-          {isLoading && (
-            <div className="flex items-center justify-center py-8 text-gray-400">
+          {isLoading &&
+          <div className="flex items-center justify-center py-8 text-gray-400">
               <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2" />
-              Đang tải dữ liệu...
-            </div>
-          )}
+
+          </div>
+          }
 
           <div className="grid grid-cols-2 gap-6">
             {/* ── LEFT: Thông tin cơ bản ── */}
             <div className="space-y-5">
               <h3 className="text-sm font-semibold text-gray-800 pb-2 border-b border-gray-100 flex items-center gap-2">
                 <User className="w-4 h-4 text-orange-500" />
-                Thông tin cơ bản
+
               </h3>
 
               {/* Khách hàng */}
@@ -373,27 +373,27 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                   <User className="w-3.5 h-3.5" />
                   {t('form.patient')}
                 </label>
-                {isEdit ? (
-                  <div className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border bg-gray-50 border-gray-200 text-gray-700">
+                {isEdit ?
+                <div className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border bg-gray-50 border-gray-200 text-gray-700">
                     <User className="w-4 h-4 text-gray-400 shrink-0" />
                     <span className="flex-1 truncate font-medium">{initialData?.customerName || t('form.selectPatient')}</span>
                     <span className="text-xs text-gray-400">{initialData?.customerPhone}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
+                  </div> :
+
+                <div className="flex items-center gap-2">
                     <div className="flex-1">
                       <CustomerSelector customers={customers} selectedId={customerId} onChange={setCustomerId} onCreateNew={() => setShowCreateCustomer(true)} />
                     </div>
                     <button
-                      type="button"
-                      onClick={() => setShowCreateCustomer(true)}
-                      title="Thêm khách hàng mới"
-                      className="flex-shrink-0 p-2.5 text-orange-600 bg-orange-50 border border-orange-200 rounded-xl hover:bg-orange-100 transition-colors"
-                    >
+                    type="button"
+                    onClick={() => setShowCreateCustomer(true)}
+                    title={t("thmKhchHngMi")}
+                    className="flex-shrink-0 p-2.5 text-orange-600 bg-orange-50 border border-orange-200 rounded-xl hover:bg-orange-100 transition-colors">
+                    
                       <Plus className="w-4 h-4" />
                     </button>
                   </div>
-                )}
+                }
                 {errors.customer && <p className="text-xs text-red-500 mt-1">{errors.customer}</p>}
               </div>
 
@@ -403,25 +403,25 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                   <Stethoscope className="w-3.5 h-3.5" />
                   {t('form.doctorOptional')}
                 </label>
-                <DoctorSelector employees={employees} selectedId={doctorId} onChange={setDoctorId} filterRoles={['doctor']} placeholder="Chọn bác sĩ..." allowClear />
+                <DoctorSelector employees={employees} selectedId={doctorId} onChange={setDoctorId} filterRoles={['doctor']} placeholder={t("chnBcS")} allowClear />
               </div>
 
               {/* Phụ tá - Optional */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                   <User className="w-3.5 h-3.5" />
-                  Phụ tá (không bắt buộc)
+
                 </label>
-                <DoctorSelector employees={employees} selectedId={assistantId} onChange={setAssistantId} filterRoles={['assistant']} placeholder="Chọn phụ tá..." allowClear />
+                <DoctorSelector employees={employees} selectedId={assistantId} onChange={setAssistantId} filterRoles={['assistant']} placeholder={t("chnPhT")} allowClear />
               </div>
 
               {/* Trợ lý bác sĩ - Optional */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                   <User className="w-3.5 h-3.5" />
-                  Trợ lý bác sĩ (không bắt buộc)
+
                 </label>
-                <DoctorSelector employees={employees} selectedId={dentalAideId} onChange={setDentalAideId} filterRoles={['doctor-assistant']} placeholder="Chọn trợ lý..." allowClear />
+                <DoctorSelector employees={employees} selectedId={dentalAideId} onChange={setDentalAideId} filterRoles={['doctor-assistant']} placeholder={t("chnTrL")} allowClear />
               </div>
 
               {/* Chi nhánh */}
@@ -440,8 +440,8 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                 onChange={setDate}
                 label={t('form.date')}
                 icon={<Calendar className="w-3.5 h-3.5" />}
-                error={errors.date}
-              />
+                error={errors.date} />
+              
 
               {/* Giờ bắt đầu + Thời gian dự kiến */}
               <div className="grid grid-cols-2 gap-3">
@@ -451,8 +451,8 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                   label={t('form.startTime')}
                   icon={<Clock className="w-3.5 h-3.5" />}
                   error={errors.startTime}
-                  interval={15}
-                />
+                  interval={15} />
+                
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                     <Clock className="w-3.5 h-3.5" />
@@ -464,8 +464,8 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                       value={estimatedDuration}
                       onChange={(e) => setEstimatedDuration(parseInt(e.target.value) || 30)}
                       min={5} max={300} step={5}
-                      className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
-                    />
+                      className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm" />
+                    
                     <span className="text-sm text-gray-500">{t('common.minutes')}</span>
                   </div>
                 </div>
@@ -485,25 +485,25 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                   <Stethoscope className="w-3.5 h-3.5" />
                   {t('label.service')}
                 </label>
-                {isProductsLoading ? (
-                  <div className="flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-500">
+                {isProductsLoading ?
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-500">
                     <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
-                    Đang tải danh mục dịch vụ...
-                  </div>
-                ) : (
-                  <ServiceCatalogSelector
-                    catalog={serviceCatalog}
-                    selectedId={serviceId}
-                    onChange={setServiceId}
-                    placeholder="Chọn dịch vụ..."
-                  />
-                )}
-                {selectedService && (
-                  <p className="mt-1.5 text-xs text-gray-500 flex items-center gap-1.5">
+
+                </div> :
+
+                <ServiceCatalogSelector
+                  catalog={serviceCatalog}
+                  selectedId={serviceId}
+                  onChange={setServiceId}
+                  placeholder={t("chnDchV")} />
+
+                }
+                {selectedService &&
+                <p className="mt-1.5 text-xs text-gray-500 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    {selectedService.totalVisits} lần khám · ~{selectedService.estimatedDuration} {t('common.minutes')}
+                    {selectedService.totalVisits}{selectedService.estimatedDuration} {t('common.minutes')}
                   </p>
-                )}
+                }
               </div>
 
               {/* Ghi chú */}
@@ -517,8 +517,8 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
                   placeholder={t('form.notes')}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
-                />
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none" />
+                
               </div>
 
               {/* Loại khách */}
@@ -532,22 +532,22 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                     type="button"
                     onClick={() => setCustomerType('new')}
                     className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-all duration-200 ${
-                      customerType === 'new'
-                        ? 'bg-orange-100 text-orange-700 border-orange-300 ring-2 ring-orange-500/20'
-                        : 'bg-white border-gray-200 text-gray-600 hover:border-orange-300'
-                    }`}
-                  >
+                    customerType === 'new' ?
+                    'bg-orange-100 text-orange-700 border-orange-300 ring-2 ring-orange-500/20' :
+                    'bg-white border-gray-200 text-gray-600 hover:border-orange-300'}`
+                    }>
+                    
                     {t('customer.type.new')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setCustomerType('returning')}
                     className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-all duration-200 ${
-                      customerType === 'returning'
-                        ? 'bg-emerald-100 text-emerald-700 border-emerald-300 ring-2 ring-emerald-500/20'
-                        : 'bg-white border-gray-200 text-gray-600 hover:border-emerald-300'
-                    }`}
-                  >
+                    customerType === 'returning' ?
+                    'bg-emerald-100 text-emerald-700 border-emerald-300 ring-2 ring-emerald-500/20' :
+                    'bg-white border-gray-200 text-gray-600 hover:border-emerald-300'}`
+                    }>
+                    
                     {t('customer.type.returning')}
                   </button>
                 </div>
@@ -560,30 +560,30 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                   {t('label.cardColor')}
                 </label>
                 <div className="flex items-center gap-2 flex-wrap">
-                  {Object.entries(APPOINTMENT_CARD_COLORS).map(([code, color]) => (
-                    <button
-                      key={code}
-                      type="button"
-                      onClick={() => setColorCode(code)}
-                      className={`
+                  {Object.entries(APPOINTMENT_CARD_COLORS).map(([code, color]) =>
+                  <button
+                    key={code}
+                    type="button"
+                    onClick={() => setColorCode(code)}
+                    className={`
                         group relative rounded-full transition-all duration-200 border-2
-                        ${colorCode === code
-                          ? 'border-gray-800 shadow-md scale-110'
-                          : 'border-transparent hover:border-gray-300 hover:scale-105'
-                        }
-                      `}
-                      title={t(color.label)}
-                    >
+                        ${colorCode === code ?
+                    'border-gray-800 shadow-md scale-110' :
+                    'border-transparent hover:border-gray-300 hover:scale-105'}
+                      `
+                    }
+                    title={t(color.label)}>
+                    
                       <div className={`
                         w-8 h-8 rounded-full bg-gradient-to-br ${color.previewGradient}
                         flex items-center justify-center
                       `}>
-                        {colorCode === code && (
-                          <Check className="w-4 h-4 text-white drop-shadow-sm" />
-                        )}
+                        {colorCode === code &&
+                      <Check className="w-4 h-4 text-white drop-shadow-sm" />
+                      }
                       </div>
                     </button>
-                  ))}
+                  )}
                 </div>
                 <p className="mt-1.5 text-[11px] text-gray-400">
                   {t(APPOINTMENT_CARD_COLORS[colorCode]?.label ?? 'default')}
@@ -591,29 +591,29 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
               </div>
 
               {/* Trạng thái (edit mode only) */}
-              {isEdit && (
-                <div>
+              {isEdit &&
+              <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                     {t('form.status')}
                   </label>
                   <div className="grid grid-cols-3 gap-2">
-                    {STATUS_OPTIONS.map((s) => (
-                      <button
-                        key={s.value}
-                        type="button"
-                        onClick={() => setStatus(s.value)}
-                        className={`px-3 py-2 rounded-xl text-xs font-medium border transition-all duration-200 ${
-                          status === s.value
-                            ? `${s.color} ring-2 ring-offset-1 ring-orange-500/30 shadow-sm`
-                            : 'bg-white border-gray-200 text-gray-600 hover:border-orange-300'
-                        }`}
-                      >
+                    {STATUS_OPTIONS.map((s) =>
+                  <button
+                    key={s.value}
+                    type="button"
+                    onClick={() => setStatus(s.value)}
+                    className={`px-3 py-2 rounded-xl text-xs font-medium border transition-all duration-200 ${
+                    status === s.value ?
+                    `${s.color} ring-2 ring-offset-1 ring-orange-500/30 shadow-sm` :
+                    'bg-white border-gray-200 text-gray-600 hover:border-orange-300'}`
+                    }>
+                    
                         {t(s.label)}
                       </button>
-                    ))}
+                  )}
                   </div>
                 </div>
-              )}
+              }
             </div>
           </div>
 
@@ -625,23 +625,23 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
             </h3>
             <div className="flex flex-wrap gap-2">
               {[
-                { label: t('reminder.15'), value: '15min' },
-                { label: t('reminder.30'), value: '30min' },
-                { label: t('reminder.1h'), value: '1h' },
-                { label: t('reminder.1d'), value: '1d' },
-                { label: 'SMS', value: 'sms' },
-                { label: 'Zalo', value: 'zalo' },
-              ].map((reminder) => (
-                <button
-                  key={reminder.value}
-                  type="button"
-                  className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg text-gray-600 hover:border-orange-300 hover:bg-orange-50 transition-colors"
-                >
+              { label: t('reminder.15'), value: '15min' },
+              { label: t('reminder.30'), value: '30min' },
+              { label: t('reminder.1h'), value: '1h' },
+              { label: t('reminder.1d'), value: '1d' },
+              { label: 'SMS', value: 'sms' },
+              { label: 'Zalo', value: 'zalo' }].
+              map((reminder) =>
+              <button
+                key={reminder.value}
+                type="button"
+                className="px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg text-gray-600 hover:border-orange-300 hover:bg-orange-50 transition-colors">
+                
                   {reminder.label}
                 </button>
-              ))}
+              )}
             </div>
-            <p className="mt-2 text-xs text-gray-400">Tính năng nhắc lịch sẽ được kích hoạt sau</p>
+            <p className="mt-2 text-xs text-gray-400"></p>
           </div>
         </form>
 
@@ -650,36 +650,36 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
-          >
-            Hủy bỏ
+            className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
+            
+
           </button>
           <button
             type="button"
             onClick={() => handleSubmit()}
             disabled={isLoading || isSaving}
-            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25"
-          >
-            {isEdit ? 'Cập nhật' : t('addAppointment')}
+            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25">
+            
+            {isEdit ? t("cpNht") : t('addAppointment')}
           </button>
         </div>
       </div>
 
       {/* Quick-add customer modal */}
-      {showCreateCustomer && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
+      {showCreateCustomer &&
+      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
           <div className="w-full max-w-4xl max-h-[90vh] flex flex-col bg-white rounded-2xl shadow-xl overflow-hidden">
             <AddCustomerForm
-              onSubmit={async (data) => {
-                const created = await createCustomer(data);
-                setCustomerId(created.id);
-                setShowCreateCustomer(false);
-              }}
-              onCancel={() => setShowCreateCustomer(false)}
-            />
+            onSubmit={async (data) => {
+              const created = await createCustomer(data);
+              setCustomerId(created.id);
+              setShowCreateCustomer(false);
+            }}
+            onCancel={() => setShowCreateCustomer(false)} />
+          
           </div>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }

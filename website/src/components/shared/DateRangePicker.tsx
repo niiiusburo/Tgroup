@@ -11,12 +11,14 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
-const MONTH_NAMES = [
-  'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-  'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
-];
-const WEEKDAY_NAMES = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+const MONTH_KEYS = [
+  'january', 'february', 'march', 'april', 'may', 'june',
+  'july', 'august', 'september', 'october', 'november', 'december'
+] as const;
+
+const WEEKDAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
 
 interface DayInfo {
   dayNum: number;
@@ -44,8 +46,9 @@ export function DateRangePicker({
   currentDate,
   navigate,
   goToToday,
-  compact = false,
+  compact = false
 }: DateRangePickerProps) {
+  const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const [viewDate, setViewDate] = useState(new Date());
   const [selectMode, setSelectMode] = useState<'start' | 'end' | null>(null);
@@ -177,15 +180,15 @@ export function DateRangePicker({
           'hover:from-orange-600 hover:to-amber-600 hover:shadow-xl hover:scale-[1.02]',
           'active:scale-[0.98]',
           compact ? 'px-3 py-1.5 text-sm' : 'px-5 py-2.5 text-base'
-        )}
-      >
+        )}>
+        
         <MapPin className={compact ? 'w-4 h-4' : 'w-5 h-5'} />
         <span>{dateLabel}</span>
       </button>
 
       {/* Calendar Popup */}
-      {isOpen && (
-        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
+      {isOpen &&
+      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-orange-500 to-amber-500">
             <button type="button" onClick={handlePrevMonth} className="p-1.5 rounded-lg hover:bg-white/20 transition-colors">
@@ -193,14 +196,14 @@ export function DateRangePicker({
             </button>
             <div className="text-center">
               <span className="text-sm font-semibold text-white">
-                {MONTH_NAMES[viewDate.getMonth()]} {viewDate.getFullYear()}
+                {t(`months.${MONTH_KEYS[viewDate.getMonth()]}`)} {viewDate.getFullYear()}
               </span>
               <div className="text-xs text-orange-100 mt-0.5">
-                {selectMode === 'end' && startDate
-                  ? `Từ ${startDate.toLocaleDateString('vi-VN', { day: 'numeric', month: 'short' })} — Chọn ngày kết thúc`
-                  : selectMode === 'start'
-                  ? 'Chọn ngày bắt đầu'
-                  : 'Chọn khoảng ngày'}
+                {selectMode === 'end' && startDate ?
+              `${t('dateRange.from')} ${startDate.toLocaleDateString('vi-VN', { day: 'numeric', month: 'short' })} \u2014 ${t('dateRange.chooseEndDate')}` :
+              selectMode === 'start' ? t("chnNgyBtU") : t("chnKhongNgy")
+
+              }
               </div>
             </div>
             <button type="button" onClick={handleNextMonth} className="p-1.5 rounded-lg hover:bg-white/20 transition-colors">
@@ -210,95 +213,95 @@ export function DateRangePicker({
 
           {/* Weekday headers */}
           <div className="grid grid-cols-7 px-3 pt-3">
-            {WEEKDAY_NAMES.map((day) => (
-              <div key={day} className="text-center text-xs font-medium text-gray-400 py-1.5">
-                {day}
+            {WEEKDAY_KEYS.map((day) =>
+          <div key={day} className="text-center text-xs font-medium text-gray-400 py-1.5">
+                {t(`days.short.${day}`)}
               </div>
-            ))}
+          )}
           </div>
 
           {/* Calendar grid */}
           <div className="grid grid-cols-7 px-3 pb-2">
             {calendarDays.map((day, index) => {
-              const inRange = isInRange(day.dateKey);
-              const isStart = isRangeStart(day.dateKey);
-              const isEnd = isRangeEnd(day.dateKey);
-              const isTodayCellFlag = isTodayCell(day.dateKey);
-              const isPreview = selectMode === 'end' && hoverDate && startDate
-                ? day.dateKey > formatDateKey(startDate) && day.dateKey <= hoverDate
-                : false;
+            const inRange = isInRange(day.dateKey);
+            const isStart = isRangeStart(day.dateKey);
+            const isEnd = isRangeEnd(day.dateKey);
+            const isTodayCellFlag = isTodayCell(day.dateKey);
+            const isPreview = selectMode === 'end' && hoverDate && startDate ?
+            day.dateKey > formatDateKey(startDate) && day.dateKey <= hoverDate :
+            false;
 
-              return (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => handleDayClick(day)}
-                  onMouseEnter={() => selectMode === 'end' && setHoverDate(day.dateKey)}
-                  onMouseLeave={() => setHoverDate(null)}
-                  className={cn(
-                    'h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-150',
-                    'hover:bg-orange-100',
-                    inRange && !isStart && !isEnd ? 'bg-orange-100 text-orange-700' : undefined,
-                    isStart ? 'bg-gradient-to-br from-orange-500 to-orange-400 text-white rounded-r-none' : undefined,
-                    isEnd ? 'bg-gradient-to-br from-orange-500 to-orange-400 text-white rounded-l-none' : undefined,
-                    isPreview ? 'bg-orange-50 text-orange-500' : undefined,
-                    isStart && isEnd ? 'bg-gradient-to-br from-orange-500 to-orange-400 text-white rounded-lg shadow-md' : undefined,
-                    isTodayCellFlag && !inRange && !isStart && !isEnd
-                      ? 'border-2 border-orange-400 text-orange-600 font-bold' : undefined,
-                    !inRange && !isPreview && !isStart && !isEnd ? 'text-gray-700' : undefined,
-                    isStart && !isEnd ? 'rounded-r-none' : undefined,
-                    !isStart && isEnd ? 'rounded-l-none' : undefined,
-                  )}
-                >
+            return (
+              <button
+                key={index}
+                type="button"
+                onClick={() => handleDayClick(day)}
+                onMouseEnter={() => selectMode === 'end' && setHoverDate(day.dateKey)}
+                onMouseLeave={() => setHoverDate(null)}
+                className={cn(
+                  'h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-150',
+                  'hover:bg-orange-100',
+                  inRange && !isStart && !isEnd ? 'bg-orange-100 text-orange-700' : undefined,
+                  isStart ? 'bg-gradient-to-br from-orange-500 to-orange-400 text-white rounded-r-none' : undefined,
+                  isEnd ? 'bg-gradient-to-br from-orange-500 to-orange-400 text-white rounded-l-none' : undefined,
+                  isPreview ? 'bg-orange-50 text-orange-500' : undefined,
+                  isStart && isEnd ? 'bg-gradient-to-br from-orange-500 to-orange-400 text-white rounded-lg shadow-md' : undefined,
+                  isTodayCellFlag && !inRange && !isStart && !isEnd ?
+                  'border-2 border-orange-400 text-orange-600 font-bold' : undefined,
+                  !inRange && !isPreview && !isStart && !isEnd ? 'text-gray-700' : undefined,
+                  isStart && !isEnd ? 'rounded-r-none' : undefined,
+                  !isStart && isEnd ? 'rounded-l-none' : undefined
+                )}>
+                
                   {day.dayNum}
-                </button>
-              );
-            })}
+                </button>);
+
+          })}
           </div>
 
           {/* Quick actions */}
           <div className="flex items-center gap-2 px-3 pb-3">
             <button
-              type="button"
-              onClick={handleToday}
-              className="flex-1 py-2 text-sm font-medium text-orange-600 hover:bg-orange-50 rounded-lg transition-colors border border-orange-200 hover:border-orange-300"
-            >
-              Hôm nay
-            </button>
+            type="button"
+            onClick={handleToday}
+            className="flex-1 py-2 text-sm font-medium text-orange-600 hover:bg-orange-50 rounded-lg transition-colors border border-orange-200 hover:border-orange-300">
+            
 
-            {navigate && (
-              <>
+          </button>
+
+            {navigate &&
+          <>
                 <button
-                  type="button"
-                  onClick={() => { navigate('prev'); setIsOpen(false); }}
-                  className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
-                >
+              type="button"
+              onClick={() => {navigate('prev');setIsOpen(false);}}
+              className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
+              
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
-                  type="button"
-                  onClick={() => { navigate('next'); setIsOpen(false); }}
-                  className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
-                >
+              type="button"
+              onClick={() => {navigate('next');setIsOpen(false);}}
+              className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
+              
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </>
-            )}
+          }
 
-            {(startDate || endDate) && (
-              <button
-                type="button"
-                onClick={() => { setStartDate(null); setEndDate(null); setSelectMode(null); }}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors text-xs"
-              >
+            {(startDate || endDate) &&
+          <button
+            type="button"
+            onClick={() => {setStartDate(null);setEndDate(null);setSelectMode(null);}}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors text-xs">
+            
                 ✕
               </button>
-            )}
+          }
           </div>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
 
 export default DateRangePicker;

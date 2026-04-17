@@ -24,11 +24,11 @@ export interface UseUniqueFieldCheckResult {
 }
 
 const DUPLICATE_MESSAGES: Record<'phone' | 'email', string> = {
-  phone: 'Số điện thoại này đã được sử dụng',
-  email: 'Email này đã được sử dụng',
+  phone: 'validation.phoneInUse',
+  email: 'validation.emailInUse',
 };
 
-const ERROR_MESSAGE = 'Không kiểm tra được, sẽ xác nhận khi lưu';
+const ERROR_MESSAGE = 'validation.cannotVerify';
 
 interface CacheEntry {
   value: string;

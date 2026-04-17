@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft, Calendar, Edit2, Plus, Clock, CalendarPlus, Receipt,
-  Trash2, ChevronDown, Coins, Wallet, HandCoins,
-} from 'lucide-react';
+  Trash2, ChevronDown, Coins, Wallet, HandCoins } from
+'lucide-react';
 import { CustomerDeposits } from '@/components/payment/CustomerDeposits';
 import { AppointmentForm, type AppointmentFormData } from '@/components/appointments/AppointmentForm';
 import { ServiceForm } from '@/components/services/ServiceForm';
@@ -41,7 +41,7 @@ interface CustomerProfileProps {
   readonly onAddRefund?: (customerId: string, amount: number, method: 'cash' | 'bank_transfer', date?: string, note?: string) => Promise<void>;
   readonly onVoidDeposit?: (id: string) => Promise<void>;
   readonly onDeleteDeposit?: (id: string) => Promise<void>;
-  readonly onEditDeposit?: (id: string, data: Partial<{ amount: number; method: 'cash' | 'bank_transfer'; notes: string; paymentDate: string }>) => Promise<void>;
+  readonly onEditDeposit?: (id: string, data: Partial<{amount: number;method: 'cash' | 'bank_transfer';notes: string;paymentDate: string;}>) => Promise<void>;
   readonly onRefreshDeposits?: () => void;
   readonly onCreateAppointment?: (data: AppointmentFormData) => Promise<void>;
   readonly onUpdateAppointment?: (id: string, data: AppointmentFormData) => Promise<void>;
@@ -102,11 +102,11 @@ interface TabConfig {
 }
 
 const TABS: readonly TabConfig[] = [
-  { value: 'profile', label: 'profile' },
-  { value: 'appointments', label: 'appointments', getCount: (p) => p.appointments.length },
-  { value: 'records', label: 'records', getCount: (p) => p.services?.length ?? 0 },
-  { value: 'payment', label: 'payment', getCount: (p) => p.payments?.length ?? 0 },
-];
+{ value: 'profile', label: 'profile' },
+{ value: 'appointments', label: 'appointments', getCount: (p) => p.appointments.length },
+{ value: 'records', label: 'records', getCount: (p) => p.services?.length ?? 0 },
+{ value: 'payment', label: 'payment', getCount: (p) => p.payments?.length ?? 0 }];
+
 
 
 export function CustomerProfile({
@@ -143,7 +143,7 @@ export function CustomerProfile({
   checkupsError,
   onRefetchCheckups,
   onUpdateServiceStatus,
-  onDeletePayment,
+  onDeletePayment
 }: CustomerProfileProps) {
   const { t } = useTranslation();
   const [internalActiveTab, setInternalActiveTab] = useState<ProfileTab>('profile');
@@ -199,49 +199,49 @@ export function CustomerProfile({
           </div>
         </div>
         <div className="flex items-center gap-2 sm:ml-auto">
-          {onEdit && (
-            <button onClick={onEdit} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+          {onEdit &&
+          <button onClick={onEdit} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
               <Edit2 className="w-4 h-4" />
               Edit
             </button>
-          )}
-          {(canSoftDelete || canHardDelete) && (
-            <div className="relative flex items-center">
+          }
+          {(canSoftDelete || canHardDelete) &&
+          <div className="relative flex items-center">
               <button
-                onClick={() => { if (canSoftDelete) { onSoftDelete?.(); } else { onHardDelete?.(); } }}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-l-lg hover:bg-red-700 transition-colors"
-              >
+              onClick={() => {if (canSoftDelete) {onSoftDelete?.();} else {onHardDelete?.();}}}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-l-lg hover:bg-red-700 transition-colors">
+              
                 <Trash2 className="w-4 h-4" />
-                Xóa
-              </button>
+
+            </button>
               <button
-                onClick={() => setShowDeleteMenu((v) => !v)}
-                className="px-2 py-2 bg-red-600 text-white rounded-r-lg border-l border-red-500 hover:bg-red-700 transition-colors"
-              >
+              onClick={() => setShowDeleteMenu((v) => !v)}
+              className="px-2 py-2 bg-red-600 text-white rounded-r-lg border-l border-red-500 hover:bg-red-700 transition-colors">
+              
                 <ChevronDown className="w-4 h-4" />
               </button>
-              {showDeleteMenu && (
-                <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
-                  {canSoftDelete && (
-                    <button
-                      onClick={() => { setShowDeleteMenu(false); onSoftDelete?.(); }}
-                      className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                    >
-                      Xóa mềm
-                    </button>
-                  )}
-                  {canHardDelete && (
-                    <button
-                      onClick={() => { setShowDeleteMenu(false); onHardDelete?.(); }}
-                      className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-                    >
-                      Xóa vĩnh viễn
-                    </button>
-                  )}
+              {showDeleteMenu &&
+            <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+                  {canSoftDelete &&
+              <button
+                onClick={() => {setShowDeleteMenu(false);onSoftDelete?.();}}
+                className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                
+
+              </button>
+              }
+                  {canHardDelete &&
+              <button
+                onClick={() => {setShowDeleteMenu(false);onHardDelete?.();}}
+                className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50">
+                
+
+              </button>
+              }
                 </div>
-              )}
+            }
             </div>
-          )}
+          }
         </div>
       </div>
 
@@ -252,8 +252,8 @@ export function CustomerProfile({
         salestaffId={profile.salestaffid}
         cskhId={profile.cskhid}
         cskhName={profile.cskhname}
-        referralUserId={profile.referraluserid}
-      />
+        referralUserId={profile.referraluserid} />
+      
 
       {/* Tabs */}
       <div className="border-b border-gray-200 overflow-x-auto">
@@ -280,7 +280,7 @@ export function CustomerProfile({
               onCreateService,
               onMakePayment,
               loadingDeposits,
-              loadingPayments,
+              loadingPayments
             }) ?? 0;
             const showBadge = tab.getCount !== undefined;
             const isActive = activeTab === tab.value;
@@ -290,20 +290,20 @@ export function CustomerProfile({
                 key={tab.value}
                 onClick={() => setActiveTab(tab.value)}
                 className={`group flex items-center px-3 sm:px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-                  isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
+                isActive ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`
+                }>
+                
                 {t(tab.label, { ns: 'customers' })}
                 {showBadge && <TabBadge count={count} isActive={isActive} />}
-              </button>
-            );
+              </button>);
+
           })}
         </div>
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'profile' && (
-        <div className="space-y-6">
+      {activeTab === 'profile' &&
+      <div className="space-y-6">
           <div className="bg-white rounded-xl shadow-card p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -317,64 +317,64 @@ export function CustomerProfile({
               <div><p className="text-xs text-gray-400">Member Since</p><p className="text-sm font-medium text-gray-900">{profile.memberSince}</p></div>
             </div>
           </div>
-          {canViewHealthCheckups && (
-            <HealthCheckupGallery
-              data={checkupData ?? null}
-              isLoading={checkupsLoading}
-              error={checkupsError}
-              customerCode={profile.code}
-              onUploaded={onRefetchCheckups}
-            />
-          )}
-        </div>
-      )}
+          {canViewHealthCheckups &&
+        <HealthCheckupGallery
+          data={checkupData ?? null}
+          isLoading={checkupsLoading}
+          error={checkupsError}
+          customerCode={profile.code}
+          onUploaded={onRefetchCheckups} />
 
-      {activeTab === 'appointments' && (
-        <div className="space-y-4">
+        }
+        </div>
+      }
+
+      {activeTab === 'appointments' &&
+      <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <h3 className="text-lg font-semibold text-gray-900">{t('profileSection.appointmentHistory', { ns: 'customers' })} ({appointments.length})</h3>
             <button
-              onClick={() => { setEditingAppointment(null); setShowAppointmentModal(true); }}
-              disabled={!onCreateAppointment}
-              className={`flex items-center justify-center gap-2 px-4 py-2 text-white rounded-lg transition-colors text-sm ${
-                onCreateAppointment
-                  ? 'bg-primary hover:bg-primary-dark cursor-pointer'
-                  : 'bg-gray-300 cursor-not-allowed'
-              }`}
-            >
+            onClick={() => {setEditingAppointment(null);setShowAppointmentModal(true);}}
+            disabled={!onCreateAppointment}
+            className={`flex items-center justify-center gap-2 px-4 py-2 text-white rounded-lg transition-colors text-sm ${
+            onCreateAppointment ?
+            'bg-primary hover:bg-primary-dark cursor-pointer' :
+            'bg-gray-300 cursor-not-allowed'}`
+            }>
+            
               <CalendarPlus className="w-4 h-4" />
               Add Appointment
             </button>
           </div>
           <div className="bg-white rounded-xl shadow-card p-6">
-            {appointments.length === 0 ? (
-              <div className="text-center py-8">
+            {appointments.length === 0 ?
+          <div className="text-center py-8">
                 <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-400 mb-3">No appointments found</p>
-                {onCreateAppointment && (
-                  <button
-                    onClick={() => { setEditingAppointment(null); setShowAppointmentModal(true); }}
-                    className="text-primary hover:text-primary-dark text-sm font-medium"
-                  >
+                {onCreateAppointment &&
+            <button
+              onClick={() => {setEditingAppointment(null);setShowAppointmentModal(true);}}
+              className="text-primary hover:text-primary-dark text-sm font-medium">
+              
                     Schedule your first appointment
                   </button>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-3">
+            }
+              </div> :
+
+          <div className="space-y-3">
                 {appointments.slice(0, 20).map((apt) => {
-                  const statusConfig = getStatusConfig(apt.state ?? undefined);
-                  // Extract time from either time field or datetimeappointment
-                  const time = apt.time || (apt.datetimeappointment?.includes('T') 
-                    ? apt.datetimeappointment.split('T')[1]?.slice(0, 5) 
-                    : null) || '--:--';
-                  const isEditable = canEditAppointment(apt.state ?? undefined) && !!onUpdateAppointment;
-                  return (
-                    <div
-                      key={apt.id}
-                      onClick={() => { if (isEditable) { setEditingAppointment(apt); setShowAppointmentModal(true); } }}
-                      className={`group flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-primary/30 hover:bg-primary/5 transition-all ${isEditable ? 'cursor-pointer pr-2' : ''}`}
-                    >
+              const statusConfig = getStatusConfig(apt.state ?? undefined);
+              // Extract time from either time field or datetimeappointment
+              const time = apt.time || (apt.datetimeappointment?.includes('T') ?
+              apt.datetimeappointment.split('T')[1]?.slice(0, 5) :
+              null) || '--:--';
+              const isEditable = canEditAppointment(apt.state ?? undefined) && !!onUpdateAppointment;
+              return (
+                <div
+                  key={apt.id}
+                  onClick={() => {if (isEditable) {setEditingAppointment(apt);setShowAppointmentModal(true);}}}
+                  className={`group flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-primary/30 hover:bg-primary/5 transition-all ${isEditable ? 'cursor-pointer pr-2' : ''}`}>
+                  
                       <div className={`w-2 h-2 rounded-full ${statusConfig.dot}`} />
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
@@ -386,32 +386,32 @@ export function CustomerProfile({
                           <span>{apt.doctorname || 'N/A'}</span>
                           <span>{formatDate(apt.date ?? '')}</span>
                         </div>
-                        {apt.note && (
-                          <p className="text-xs text-gray-400 mt-1 truncate">{apt.note}</p>
-                        )}
+                        {apt.note &&
+                    <p className="text-xs text-gray-400 mt-1 truncate">{apt.note}</p>
+                    }
                       </div>
-                    </div>
-                  );
-                })}
+                    </div>);
+
+            })}
               </div>
-            )}
+          }
           </div>
         </div>
-      )}
+      }
 
-      {activeTab === 'records' && (
-        <div className="space-y-4">
+      {activeTab === 'records' &&
+      <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <h3 className="text-lg font-semibold text-gray-900">{t('profileSection.serviceHistory', { ns: 'customers' })}</h3>
-            {onCreateService && (
-              <button
-                onClick={() => setShowServiceModal(true)}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm"
-              >
+            {onCreateService &&
+          <button
+            onClick={() => setShowServiceModal(true)}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm">
+            
                 <Plus className="w-4 h-4" />
                 Add Service
               </button>
-            )}
+          }
           </div>
 
           {/* Financial Overview Cards */}
@@ -422,7 +422,7 @@ export function CustomerProfile({
                   <Coins className="w-5 h-5 text-sky-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-gray-500 truncate">Tổng tiền điều trị</p>
+                  <p className="text-xs text-gray-500 truncate"></p>
                   <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(totalServiceCost)}</p>
                 </div>
               </div>
@@ -463,14 +463,14 @@ export function CustomerProfile({
           </div>
 
           <ServiceHistory services={services} payments={payments} onEditService={setEditingService} onUpdateStatus={onUpdateServiceStatus} onPayForService={onMakePayment ? (svc) => {
-            setPayTargetService(svc);
-            setShowPaymentModal(true);
-          } : undefined} onDeletePayment={onDeletePayment ? (id) => setPaymentToDelete(id) : undefined} />
+          setPayTargetService(svc);
+          setShowPaymentModal(true);
+        } : undefined} onDeletePayment={onDeletePayment ? (id) => setPaymentToDelete(id) : undefined} />
         </div>
-      )}
+      }
 
-      {activeTab === 'payment' && (
-        <div className="space-y-6">
+      {activeTab === 'payment' &&
+      <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold text-gray-900">Payment & Deposits</h3>
   
@@ -483,11 +483,11 @@ export function CustomerProfile({
               <p className="text-lg font-bold text-gray-900">{formatVND(totalServiceCost)}</p>
             </div>
             <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
-              <p className="text-xs text-gray-500 mb-1">Đã thanh toán</p>
+              <p className="text-xs text-gray-500 mb-1"></p>
               <p className="text-lg font-bold text-emerald-600">{formatVND(amountPaid)}</p>
             </div>
             <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
-              <p className="text-xs text-gray-500 mb-1">Còn nợ</p>
+              <p className="text-xs text-gray-500 mb-1"></p>
               <p className="text-lg font-bold text-red-600">{formatVND(profile.outstandingBalance)}</p>
             </div>
           </div>
@@ -501,39 +501,39 @@ export function CustomerProfile({
                 {payments.length > 0 && <span className="text-xs font-normal text-gray-500 ml-1">({payments.length})</span>}
               </h4>
             </div>
-            {loadingPayments ? (
-              <div className="p-6 text-center text-sm text-gray-500">Loading payments...</div>
-            ) : payments.length === 0 ? (
-              <div className="p-6 text-center text-sm text-gray-400">No payment records found</div>
-            ) : (
-              <div className="divide-y divide-gray-100">
-                {payments.map((p) => {
-                  const isVoided = p.status === 'voided';
-                  const isNegative = p.amount < 0;
-                  const dateInfo = parseDisplayDate(p.paymentDate || p.createdAt);
-                  const dd = dateInfo?.day ?? '—';
-                  const mmm = dateInfo?.month ?? '';
-                  const yyyy = dateInfo?.year ?? '';
+            {loadingPayments ?
+          <div className="p-6 text-center text-sm text-gray-500">Loading payments...</div> :
+          payments.length === 0 ?
+          <div className="p-6 text-center text-sm text-gray-400">No payment records found</div> :
 
-                  const isExpanded = expandedPaymentId === p.id;
-                  return (
-                    <div
-                      key={p.id}
-                      className={`transition-all duration-200 group ${isNegative ? 'bg-red-50/20' : ''}`}
-                    >
+          <div className="divide-y divide-gray-100">
+                {payments.map((p) => {
+              const isVoided = p.status === 'voided';
+              const isNegative = p.amount < 0;
+              const dateInfo = parseDisplayDate(p.paymentDate || p.createdAt);
+              const dd = dateInfo?.day ?? '—';
+              const mmm = dateInfo?.month ?? '';
+              const yyyy = dateInfo?.year ?? '';
+
+              const isExpanded = expandedPaymentId === p.id;
+              return (
+                <div
+                  key={p.id}
+                  className={`transition-all duration-200 group ${isNegative ? 'bg-red-50/20' : ''}`}>
+                  
                       <button
-                        type="button"
-                        onClick={() => {
-                          if (isVoided) {
-                            setExpandedPaymentId(isExpanded ? null : p.id);
-                          }
-                        }}
-                        className={`w-full px-4 py-3 flex items-center gap-3 text-left transition-all duration-200 ${
-                          isVoided
-                            ? 'cursor-default opacity-60'
-                            : 'hover:bg-gray-50 hover:ring-2 hover:ring-primary/20 hover:ring-inset hover:shadow-sm hover:-translate-y-px'
-                        }`}
-                      >
+                    type="button"
+                    onClick={() => {
+                      if (isVoided) {
+                        setExpandedPaymentId(isExpanded ? null : p.id);
+                      }
+                    }}
+                    className={`w-full px-4 py-3 flex items-center gap-3 text-left transition-all duration-200 ${
+                    isVoided ?
+                    'cursor-default opacity-60' :
+                    'hover:bg-gray-50 hover:ring-2 hover:ring-primary/20 hover:ring-inset hover:shadow-sm hover:-translate-y-px'}`
+                    }>
+                    
                         {/* Date tear-off block */}
                         <div className={`flex-shrink-0 flex flex-col items-center justify-center w-11 h-12 rounded-lg border text-center ${isNegative ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-200'}`}>
                           <span className={`text-sm font-bold leading-none ${isNegative ? 'text-red-600' : 'text-orange-600'}`}>{dd}</span>
@@ -551,192 +551,192 @@ export function CustomerProfile({
                           <p className={`text-sm font-semibold ${isNegative ? 'text-red-600' : 'text-gray-900'} ${isVoided ? 'line-through' : ''}`}>
                             {formatVND(p.amount)}
                           </p>
-                          {p.notes && (
-                            <p className="text-[10px] text-gray-400 truncate max-w-[140px] sm:max-w-[200px]" title={p.notes}>{p.notes}</p>
-                          )}
+                          {p.notes &&
+                      <p className="text-[10px] text-gray-400 truncate max-w-[140px] sm:max-w-[200px]" title={p.notes}>{p.notes}</p>
+                      }
                         </div>
                         {/* Status + delete */}
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          {isVoided ? (
-                            <span className="text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">Voided</span>
-                          ) : (
-                            <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Posted</span>
-                          )}
-                          {!isVoided && onDeletePayment && (
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); setPaymentToDelete(p.id); }}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 rounded-full text-red-500 hover:bg-red-50 hover:text-red-600"
-                              title="Delete payment"
-                            >
+                          {isVoided ?
+                      <span className="text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">Voided</span> :
+
+                      <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Posted</span>
+                      }
+                          {!isVoided && onDeletePayment &&
+                      <button
+                        type="button"
+                        onClick={(e) => {e.stopPropagation();setPaymentToDelete(p.id);}}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 rounded-full text-red-500 hover:bg-red-50 hover:text-red-600"
+                        title="Delete payment">
+                        
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
-                          )}
+                      }
                         </div>
                       </button>
-                      {isVoided && isExpanded && (
-                        <div className="px-4 pb-3">
+                      {isVoided && isExpanded &&
+                  <div className="px-4 pb-3">
                           {p.notes && <p className="text-xs text-gray-500">Note: {p.notes}</p>}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+                  }
+                    </div>);
+
+            })}
               </div>
-            )}
+          }
           </div>
 
           <CustomerDeposits
-            depositList={depositList}
-            usageHistory={usageHistory}
-            balance={depositBalance ?? {
-              depositBalance: profile.depositBalance,
-              outstandingBalance: profile.outstandingBalance,
-              totalDeposited: 0,
-              totalUsed: 0,
-              totalRefunded: 0,
-            }}
-            loading={loadingDeposits}
-            onAddDeposit={onAddDeposit ? (amount, method, date, note) => onAddDeposit(profile.id, amount, method, date, note) : undefined}
-            onAddRefund={onAddRefund ? (amount, method, date, note) => onAddRefund(profile.id, amount, method, date, note) : undefined}
-            onVoidDeposit={onVoidDeposit}
-            onDeleteDeposit={onDeleteDeposit}
-            onEditDeposit={onEditDeposit}
-            onRefresh={onRefreshDeposits}
-          />
+          depositList={depositList}
+          usageHistory={usageHistory}
+          balance={depositBalance ?? {
+            depositBalance: profile.depositBalance,
+            outstandingBalance: profile.outstandingBalance,
+            totalDeposited: 0,
+            totalUsed: 0,
+            totalRefunded: 0
+          }}
+          loading={loadingDeposits}
+          onAddDeposit={onAddDeposit ? (amount, method, date, note) => onAddDeposit(profile.id, amount, method, date, note) : undefined}
+          onAddRefund={onAddRefund ? (amount, method, date, note) => onAddRefund(profile.id, amount, method, date, note) : undefined}
+          onVoidDeposit={onVoidDeposit}
+          onDeleteDeposit={onDeleteDeposit}
+          onEditDeposit={onEditDeposit}
+          onRefresh={onRefreshDeposits} />
+        
         </div>
-      )}
+      }
 
       {/* Appointment Modal */}
-      {showAppointmentModal && (onCreateAppointment || (editingAppointment && onUpdateAppointment)) && (
-        <AppointmentForm
-          isEdit={!!editingAppointment}
-          initialData={editingAppointment ? {
-            customerId: profile.id,
-            customerName: profile.name,
-            customerPhone: profile.phone,
-            doctorId: editingAppointment.doctorid ?? undefined,
-            locationId: editingAppointment.companyid ?? undefined,
-            serviceName: editingAppointment.name ?? '',
-            date: editingAppointment.date,
-            startTime: editingAppointment.time ?? '',
-            endTime: '',
-            notes: editingAppointment.note ?? '',
-          } : {
-            customerId: profile.id,
-            customerName: profile.name,
-            customerPhone: profile.phone,
-            locationId: profile.companyId,
-          }}
-          onSubmit={async (data) => {
-            try {
-              if (editingAppointment && onUpdateAppointment) {
-                await onUpdateAppointment(editingAppointment.id, data);
-              } else if (onCreateAppointment) {
-                await onCreateAppointment(data);
-              }
-              setShowAppointmentModal(false);
-              setEditingAppointment(null);
-            } catch (error) {
-              console.error('Failed to save appointment:', error);
+      {showAppointmentModal && (onCreateAppointment || editingAppointment && onUpdateAppointment) &&
+      <AppointmentForm
+        isEdit={!!editingAppointment}
+        initialData={editingAppointment ? {
+          customerId: profile.id,
+          customerName: profile.name,
+          customerPhone: profile.phone,
+          doctorId: editingAppointment.doctorid ?? undefined,
+          locationId: editingAppointment.companyid ?? undefined,
+          serviceName: editingAppointment.name ?? '',
+          date: editingAppointment.date,
+          startTime: editingAppointment.time ?? '',
+          endTime: '',
+          notes: editingAppointment.note ?? ''
+        } : {
+          customerId: profile.id,
+          customerName: profile.name,
+          customerPhone: profile.phone,
+          locationId: profile.companyId
+        }}
+        onSubmit={async (data) => {
+          try {
+            if (editingAppointment && onUpdateAppointment) {
+              await onUpdateAppointment(editingAppointment.id, data);
+            } else if (onCreateAppointment) {
+              await onCreateAppointment(data);
             }
-          }}
-          onClose={() => {
             setShowAppointmentModal(false);
             setEditingAppointment(null);
-          }}
-        />
-      )}
+          } catch (error) {
+            console.error('Failed to save appointment:', error);
+          }
+        }}
+        onClose={() => {
+          setShowAppointmentModal(false);
+          setEditingAppointment(null);
+        }} />
+
+      }
 
       {/* Service Modal */}
-      {showServiceModal && onCreateService && (
-        <ServiceForm
-          customerId={profile.id}
-          initialData={{
-            customerId: profile.id,
-            customerName: profile.name,
-            locationId: profile.companyId,
-          }}
-          onSubmit={async (data) => {
-            try {
-              if (onCreateService) {
-                await onCreateService({
-                  catalogItemId: data.catalogItemId,
-                  serviceName: data.serviceName,
-                  doctorId: data.doctorId,
-                  doctorName: data.doctorName,
-                  assistantId: data.assistantId,
-                  assistantName: data.assistantName,
-                  dentalAideId: data.dentalAideId,
-                  dentalAideName: data.dentalAideName,
-                  locationId: data.locationId,
-                  locationName: data.locationName,
-                  startDate: data.startDate,
-                  notes: data.notes,
-                  totalCost: data.totalCost,
-                  toothNumbers: data.toothNumbers,
-                });
-              }
-              setShowServiceModal(false);
-            } catch (error) {
-              console.error('Failed to create service:', error);
+      {showServiceModal && onCreateService &&
+      <ServiceForm
+        customerId={profile.id}
+        initialData={{
+          customerId: profile.id,
+          customerName: profile.name,
+          locationId: profile.companyId
+        }}
+        onSubmit={async (data) => {
+          try {
+            if (onCreateService) {
+              await onCreateService({
+                catalogItemId: data.catalogItemId,
+                serviceName: data.serviceName,
+                doctorId: data.doctorId,
+                doctorName: data.doctorName,
+                assistantId: data.assistantId,
+                assistantName: data.assistantName,
+                dentalAideId: data.dentalAideId,
+                dentalAideName: data.dentalAideName,
+                locationId: data.locationId,
+                locationName: data.locationName,
+                startDate: data.startDate,
+                notes: data.notes,
+                totalCost: data.totalCost,
+                toothNumbers: data.toothNumbers
+              });
             }
-          }}
-          onClose={() => setShowServiceModal(false)}
-        />
-      )}
+            setShowServiceModal(false);
+          } catch (error) {
+            console.error('Failed to create service:', error);
+          }
+        }}
+        onClose={() => setShowServiceModal(false)} />
+
+      }
 
       {/* Edit Service Modal */}
-      {editingService && (
-        <ServiceForm
-          customerId={profile.id}
-          isEdit={true}
-          initialData={{
-            id: editingService.id,
-            customerId: profile.id,
-            customerName: profile.name,
-            catalogItemId: editingService.catalogItemId,
-            serviceName: editingService.service,
-            doctorId: editingService.doctorId,
-            assistantId: editingService.assistantId,
-            dentalAideId: editingService.dentalAideId,
-            locationId: profile.companyId,
-            startDate: editingService.date,
-            notes: editingService.notes || '',
-            totalCost: editingService.cost,
-            toothNumbers: editingService.tooth
-              ? editingService.tooth.split(',').map((t) => t.trim()).filter(Boolean)
-              : [],
-          }}
-          onSubmit={async (data) => {
-            try {
-              if (onUpdateService && data.id) {
-                await onUpdateService({
-                  id: data.id,
-                  catalogItemId: data.catalogItemId,
-                  serviceName: data.serviceName,
-                  doctorId: data.doctorId,
-                  doctorName: data.doctorName,
-                  assistantId: data.assistantId,
-                  assistantName: data.assistantName,
-                  dentalAideId: data.dentalAideId,
-                  dentalAideName: data.dentalAideName,
-                  locationId: data.locationId,
-                  locationName: data.locationName,
-                  startDate: data.startDate,
-                  notes: data.notes,
-                  totalCost: data.totalCost,
-                  toothNumbers: data.toothNumbers,
-                });
-              }
-              setEditingService(null);
-            } catch (error) {
-              console.error('Failed to update service:', error);
+      {editingService &&
+      <ServiceForm
+        customerId={profile.id}
+        isEdit={true}
+        initialData={{
+          id: editingService.id,
+          customerId: profile.id,
+          customerName: profile.name,
+          catalogItemId: editingService.catalogItemId,
+          serviceName: editingService.service,
+          doctorId: editingService.doctorId,
+          assistantId: editingService.assistantId,
+          dentalAideId: editingService.dentalAideId,
+          locationId: profile.companyId,
+          startDate: editingService.date,
+          notes: editingService.notes || '',
+          totalCost: editingService.cost,
+          toothNumbers: editingService.tooth ?
+          editingService.tooth.split(',').map((t) => t.trim()).filter(Boolean) :
+          []
+        }}
+        onSubmit={async (data) => {
+          try {
+            if (onUpdateService && data.id) {
+              await onUpdateService({
+                id: data.id,
+                catalogItemId: data.catalogItemId,
+                serviceName: data.serviceName,
+                doctorId: data.doctorId,
+                doctorName: data.doctorName,
+                assistantId: data.assistantId,
+                assistantName: data.assistantName,
+                dentalAideId: data.dentalAideId,
+                dentalAideName: data.dentalAideName,
+                locationId: data.locationId,
+                locationName: data.locationName,
+                startDate: data.startDate,
+                notes: data.notes,
+                totalCost: data.totalCost,
+                toothNumbers: data.toothNumbers
+              });
             }
-          }}
-          onClose={() => setEditingService(null)}
-        />
-      )}
+            setEditingService(null);
+          } catch (error) {
+            console.error('Failed to update service:', error);
+          }
+        }}
+        onClose={() => setEditingService(null)} />
+
+      }
 
       <DeletePaymentDialog
         paymentToDelete={paymentToDelete}
@@ -753,8 +753,8 @@ export function CustomerProfile({
             setIsDeletingPayment(false);
             setPaymentToDelete(null);
           }
-        }}
-      />
+        }} />
+      
       {/* Payment Modal */}
       {showPaymentModal && onMakePayment && payTargetService && (() => {
         const svcCtx: ServicePaymentContext = {
@@ -765,7 +765,7 @@ export function CustomerProfile({
           paidAmount: payTargetService.paidAmount ?? Math.max(0, payTargetService.cost - (payTargetService.residual ?? payTargetService.cost)),
           residual: payTargetService.residual ?? payTargetService.cost,
           locationName: payTargetService.locationName ?? profile.companyName ?? '',
-          orderName: payTargetService.orderName,
+          orderName: payTargetService.orderName
         };
         return (
           <PaymentForm
@@ -788,10 +788,10 @@ export function CustomerProfile({
             onClose={() => {
               setShowPaymentModal(false);
               setPayTargetService(null);
-            }}
-          />
-        );
+            }} />);
+
+
       })()}
-    </div>
-  );
+    </div>);
+
 }

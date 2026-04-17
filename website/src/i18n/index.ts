@@ -30,6 +30,8 @@ import viReports from './locales/vi/reports.json';
 import viSettings from './locales/vi/settings.json';
 import viAuth from './locales/vi/auth.json';
 import viWebsite from './locales/vi/website.json';
+import enPermissions from './locales/en/permissions.json';
+import viPermissions from './locales/vi/permissions.json';
 
 const STORAGE_KEY = 'tg-lang';
 const DEFAULT_LANG = 'vi';
@@ -61,6 +63,7 @@ i18n.use(initReactI18next).init({
       settings: enSettings,
       auth: enAuth,
       website: enWebsite,
+      permissions: enPermissions,
     },
     vi: {
       common: viCommon,
@@ -77,6 +80,7 @@ i18n.use(initReactI18next).init({
       settings: viSettings,
       auth: viAuth,
       website: viWebsite,
+      permissions: viPermissions,
     },
   },
   lng: savedLang && SUPPORTED_LANGS.includes(savedLang) ? savedLang : DEFAULT_LANG,
@@ -85,7 +89,7 @@ i18n.use(initReactI18next).init({
   ns: [
     'common', 'nav', 'overview', 'calendar', 'customers',
     'appointments', 'services', 'payment', 'employees',
-    'locations', 'reports', 'settings', 'auth', 'website',
+    'locations', 'reports', 'settings', 'auth', 'website', 'permissions',
   ],
   defaultNS: 'common',
   interpolation: { escapeValue: false },

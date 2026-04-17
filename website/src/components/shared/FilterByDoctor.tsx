@@ -25,7 +25,7 @@ interface FilterByDoctorProps {
 }
 
 export function FilterByDoctor({ selectedDoctorName, onChange, doctors = [], className = '' }: FilterByDoctorProps) {
-  const { t } = useTranslation('appointments');
+  const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -34,10 +34,10 @@ export function FilterByDoctor({ selectedDoctorName, onChange, doctors = [], cla
 
   const availableDoctors = useMemo(
     () =>
-      doctors.filter(
-        (d) => d.roles === undefined || d.roles.some((r) => r === 'doctor'),
-      ),
-    [doctors],
+    doctors.filter(
+      (d) => d.roles === undefined || d.roles.some((r) => r === 'doctor')
+    ),
+    [doctors]
   );
 
   const filteredDoctors = useMemo(() => {
@@ -48,8 +48,8 @@ export function FilterByDoctor({ selectedDoctorName, onChange, doctors = [], cla
 
   const allOptionId = '__ALL__';
   const listItems = useMemo(
-    () => [{ id: allOptionId, name: 'Tất cả bác sĩ' }, ...filteredDoctors],
-    [filteredDoctors],
+    () => [{ id: allOptionId, name: t('filter.allDoctors') }, ...filteredDoctors],
+    [filteredDoctors, t]
   );
 
   const selectedDoctor = availableDoctors.find((d) => d.name === selectedDoctorName);
@@ -90,7 +90,7 @@ export function FilterByDoctor({ selectedDoctorName, onChange, doctors = [], cla
       setIsOpen(false);
       setQuery('');
     },
-    [onChange],
+    [onChange]
   );
 
   const handleKeyDown = useCallback(
@@ -106,11 +106,11 @@ export function FilterByDoctor({ selectedDoctorName, onChange, doctors = [], cla
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
-          setHighlightedIndex((prev) => (prev + 1 < listItems.length ? prev + 1 : prev));
+          setHighlightedIndex((prev) => prev + 1 < listItems.length ? prev + 1 : prev);
           break;
         case 'ArrowUp':
           e.preventDefault();
-          setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : 0));
+          setHighlightedIndex((prev) => prev > 0 ? prev - 1 : 0);
           break;
         case 'Enter':
           e.preventDefault();
@@ -127,10 +127,10 @@ export function FilterByDoctor({ selectedDoctorName, onChange, doctors = [], cla
           break;
       }
     },
-    [isOpen, listItems, highlightedIndex, handleSelect],
+    [isOpen, listItems, highlightedIndex, handleSelect]
   );
 
-  const displayLabel = selectedDoctor ? selectedDoctor.name : 'Bác sĩ';
+  const displayLabel = selectedDoctor ? selectedDoctor.name : t('filter.doctor');
 
   return (
     <div ref={containerRef} className={cn('relative inline-block', className)}>
@@ -145,85 +145,85 @@ export function FilterByDoctor({ selectedDoctorName, onChange, doctors = [], cla
             'flex items-center gap-2 min-w-[140px] max-w-[220px]',
             'pl-3 pr-2 py-1.5 text-sm font-medium rounded-lg border transition-colors',
             'bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
-            isOpen ? 'border-primary ring-1 ring-primary/20' : 'border-gray-200 text-gray-700',
-          )}
-        >
+            isOpen ? 'border-primary ring-1 ring-primary/20' : 'border-gray-200 text-gray-700'
+          )}>
+          
           <Stethoscope className="w-4 h-4 text-gray-400 shrink-0" />
           <span className="truncate flex-1 text-left">{displayLabel}</span>
           <ChevronDown
-            className={cn('w-4 h-4 text-gray-400 shrink-0 transition-transform', isOpen && 'rotate-180')}
-          />
+            className={cn('w-4 h-4 text-gray-400 shrink-0 transition-transform', isOpen && 'rotate-180')} />
+          
         </button>
-        {selectedDoctorName && (
-          <button
-            type="button"
-            onClick={() => onChange(null)}
-            className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
-            aria-label="Clear doctor filter"
-            title="Clear doctor filter"
-          >
+        {selectedDoctorName &&
+        <button
+          type="button"
+          onClick={() => onChange(null)}
+          className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+          aria-label="Clear doctor filter"
+          title="Clear doctor filter">
+          
             <X className="w-3.5 h-3.5" />
           </button>
-        )}
+        }
       </div>
 
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden">
+      {isOpen &&
+      <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden">
           <div className="px-3 py-2 border-b border-gray-100 bg-gray-50/50">
             <div className="relative">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
               <input
-                ref={searchInputRef}
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={t('searchPlaceholder', { ns: 'appointments' })}
-                className="w-full pl-7 pr-2 py-1.5 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-              />
+              ref={searchInputRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={t('searchPlaceholder', { ns: 'appointments' })}
+              className="w-full pl-7 pr-2 py-1.5 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
+            
             </div>
           </div>
 
           <div
-            className="max-h-72 overflow-y-auto py-1"
-            role="listbox"
-            aria-label="Doctor filter options"
-          >
+          className="max-h-72 overflow-y-auto py-1"
+          role="listbox"
+          aria-label="Doctor filter options">
+          
             {listItems.map((item, index) => {
-              const isSelected = item.id === allOptionId
-                ? !selectedDoctorName
-                : selectedDoctorName === item.name;
-              const isHighlighted = index === highlightedIndex;
+            const isSelected = item.id === allOptionId ?
+            !selectedDoctorName :
+            selectedDoctorName === item.name;
+            const isHighlighted = index === highlightedIndex;
 
-              return (
-                <div
-                  key={item.id}
-                  role="option"
-                  aria-selected={isSelected}
-                  onClick={() => handleSelect(item.id)}
-                  onMouseEnter={() => setHighlightedIndex(index)}
-                  className={cn(
-                    'flex items-center justify-between px-3 py-2 text-sm cursor-pointer transition-colors',
-                    isHighlighted ? 'bg-gray-100' : 'hover:bg-gray-50',
-                    isSelected ? 'text-primary font-medium' : 'text-gray-700',
-                  )}
-                >
+            return (
+              <div
+                key={item.id}
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => handleSelect(item.id)}
+                onMouseEnter={() => setHighlightedIndex(index)}
+                className={cn(
+                  'flex items-center justify-between px-3 py-2 text-sm cursor-pointer transition-colors',
+                  isHighlighted ? 'bg-gray-100' : 'hover:bg-gray-50',
+                  isSelected ? 'text-primary font-medium' : 'text-gray-700'
+                )}>
+                
                   <span className="truncate">{item.name}</span>
                   {isSelected && <Check className="w-4 h-4 text-primary shrink-0 ml-2" />}
-                </div>
-              );
-            })}
+                </div>);
 
-            {filteredDoctors.length === 0 && query.trim().length > 0 && (
-              <div className="px-3 py-3 text-sm text-gray-400 text-center">Không tìm thấy bác sĩ</div>
-            )}
+          })}
+
+            {filteredDoctors.length === 0 && query.trim().length > 0 &&
+          <div className="px-3 py-3 text-sm text-gray-400 text-center"></div>
+          }
           </div>
 
           <div className="px-3 py-1.5 text-xs text-gray-400 border-t border-gray-100 bg-gray-50/50 text-center">
-            {availableDoctors.length} bác sĩ
-          </div>
+            {availableDoctors.length}
         </div>
-      )}
-    </div>
-  );
+        </div>
+      }
+    </div>);
+
 }

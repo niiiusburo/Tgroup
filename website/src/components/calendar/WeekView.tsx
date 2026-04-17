@@ -13,7 +13,7 @@ import { type CalendarAppointment } from '@/data/mockCalendar';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import { MedicalHistoryTooltip } from './MedicalHistoryTooltip';
-import { calendarStatusToPhase, PHASE_VI_LABELS, PHASE_STYLES } from '@/lib/appointmentStatusMapping';
+import { calendarStatusToPhase, PHASE_LABEL_KEYS, PHASE_STYLES } from '@/lib/appointmentStatusMapping';
 import { StatusBadgeMenu } from './StatusBadgeMenu';
 import { CheckInActions } from './CheckInActions';
 
@@ -43,7 +43,7 @@ function formatDateKey(date: Date): string {
   return date.toISOString().split('T')[0];
 }
 
-const WEEKDAY_NAMES = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
+const WEEKDAY_NAME_KEYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
 
 function formatDateDisplay(date: Date): string {
   return date.toLocaleDateString('vi-VN', {
@@ -65,6 +65,7 @@ function AppointmentCard({
   readonly onMarkArrived?: (id: string) => void;
   readonly onUpdateStatus?: (id: string, phase: import('@/lib/appointmentStatusMapping').CalendarPhase) => void;
 }) {
+  const { t } = useTranslation('appointments');
   const phase = calendarStatusToPhase(appointment.status);
   const styles = PHASE_STYLES[phase];
   const cardStyles = getCardStyles(appointment);
@@ -89,7 +90,7 @@ function AppointmentCard({
               styles.border
             )}
           >
-            {PHASE_VI_LABELS[phase]}
+            {t(PHASE_LABEL_KEYS[phase], { ns: 'appointments' })}
           </span>
         ) : (
           <StatusBadgeMenu
@@ -213,7 +214,7 @@ export function WeekView({
                     isToday ? 'text-orange-600' : 'text-gray-500'
                   )}
                 >
-                  {WEEKDAY_NAMES[index]}
+                  {t(`weekDays.${WEEKDAY_NAME_KEYS[index]}`)}
                 </div>
               </div>
 

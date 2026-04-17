@@ -120,7 +120,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
 
   useEffect(() => {
     if (isProfileContext && readonlyCustomerId && apiCustomers.length > 0) {
-      const customer = apiCustomers.find(c => c.id === readonlyCustomerId);
+      const customer = apiCustomers.find((c) => c.id === readonlyCustomerId);
       if (customer) {
         setCustomerId(customer.id);
         setCustomerName(customer.name);
@@ -129,49 +129,49 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
     }
   }, [readonlyCustomerId, apiCustomers, isProfileContext]);
 
-  const customers: Customer[] = apiCustomers.map(c => ({
+  const customers: Customer[] = apiCustomers.map((c) => ({
     id: c.id, name: c.name, phone: c.phone, email: c.email,
-    locationId: c.locationId, status: c.status, lastVisit: c.lastVisit,
+    locationId: c.locationId, status: c.status, lastVisit: c.lastVisit
   }));
 
-  const employees: Employee[] = apiEmployees.map(e => ({
+  const employees: Employee[] = apiEmployees.map((e) => ({
     id: e.id, name: e.name,
     avatar: e.avatar || e.name.charAt(0).toUpperCase(),
     tierId: (e as any).tierId || '',
     tierName: (e as any).tierName || 'No Tier',
-    roles: (e.roles as Employee['roles']) || ['doctor'],
-    status: (e.status as Employee['status']) || 'active',
+    roles: e.roles as Employee['roles'] || ['doctor'],
+    status: e.status as Employee['status'] || 'active',
     locationId: e.locationId || '', locationName: e.locationName || '',
     phone: e.phone || '', email: e.email || '', schedule: e.schedule || [],
-    linkedEmployeeIds: e.linkedEmployeeIds || [], hireDate: e.hireDate || '',
+    linkedEmployeeIds: e.linkedEmployeeIds || [], hireDate: e.hireDate || ''
   }));
 
-  const locations: Location[] = apiLocations.map(l => ({
+  const locations: Location[] = apiLocations.map((l) => ({
     id: l.id, name: l.name, address: l.address || '', phone: l.phone || '',
-    status: (l.status as Location['status']) || 'active',
-    doctorCount: 0, patientCount: 0, appointmentCount: 0,
+    status: l.status as Location['status'] || 'active',
+    doctorCount: 0, patientCount: 0, appointmentCount: 0
   }));
 
   const serviceCatalog: ServiceCatalogItem[] = useMemo(() =>
-    products.map((p: Product) => ({
-      id: p.id, name: p.name,
-      category: (p.categoryName?.toLowerCase().includes('ortho') ? 'orthodontics' :
-                 p.categoryName?.toLowerCase().includes('cosmetic') ? 'cosmetic' :
-                 p.categoryName?.toLowerCase().includes('surgery') ? 'surgery' :
-                 p.categoryName?.toLowerCase().includes('clean') ? 'cleaning' :
-                 p.categoryName?.toLowerCase().includes('consult') ? 'consultation' :
-                 p.categoryName?.toLowerCase().includes('emergency') ? 'emergency' :
-                 'treatment') as AppointmentType,
-      description: p.categoryName || 'Dental service',
-      defaultPrice: p.listPrice,
-      estimatedDuration: 30,
-      totalVisits: 1,
-      unit: p.uomName || undefined,
-    })),
-    [products]
+  products.map((p: Product) => ({
+    id: p.id, name: p.name,
+    category: (p.categoryName?.toLowerCase().includes('ortho') ? 'orthodontics' :
+    p.categoryName?.toLowerCase().includes('cosmetic') ? 'cosmetic' :
+    p.categoryName?.toLowerCase().includes('surgery') ? 'surgery' :
+    p.categoryName?.toLowerCase().includes('clean') ? 'cleaning' :
+    p.categoryName?.toLowerCase().includes('consult') ? 'consultation' :
+    p.categoryName?.toLowerCase().includes('emergency') ? 'emergency' :
+    'treatment') as AppointmentType,
+    description: p.categoryName || 'Dental service',
+    defaultPrice: p.listPrice,
+    estimatedDuration: 30,
+    totalVisits: 1,
+    unit: p.uomName || undefined
+  })),
+  [products]
   );
 
-  const selectedCatalog = serviceCatalog.find(c => c.id === catalogItemId);
+  const selectedCatalog = serviceCatalog.find((c) => c.id === catalogItemId);
 
   function validate(): boolean {
     const newErrors: Record<string, string> = {};
@@ -187,23 +187,23 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   const handleCatalogChange = (id: string | null) => {
     setCatalogItemId(id);
     if (id) {
-      setErrors(prev => { const next = { ...prev }; delete next.service; return next; });
-      const catalogItem = serviceCatalog.find(c => c.id === id);
+      setErrors((prev) => {const next = { ...prev };delete next.service;return next;});
+      const catalogItem = serviceCatalog.find((c) => c.id === id);
       if (catalogItem?.unit) setUnit(catalogItem.unit);
     }
   };
   const handleCustomerChange = (id: string | null) => {
     setCustomerId(id);
-    const customer = customers.find(c => c.id === id);
+    const customer = customers.find((c) => c.id === id);
     if (customer) {
       setCustomerName(customer.name);
       setCustomerPhone(customer.phone);
     }
-    if (id) setErrors(prev => { const next = { ...prev }; delete next.customer; return next; });
+    if (id) setErrors((prev) => {const next = { ...prev };delete next.customer;return next;});
   };
   const handleDoctorChange = (id: string | null) => {
     setDoctorId(id);
-    if (id) setErrors(prev => { const next = { ...prev }; delete next.doctor; return next; });
+    if (id) setErrors((prev) => {const next = { ...prev };delete next.doctor;return next;});
   };
   const handleAssistantChange = (id: string | null) => {
     setAssistantId(id);
@@ -213,23 +213,23 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   };
   const handleLocationChange = (id: string | null) => {
     setLocationId(id);
-    if (id) setErrors(prev => { const next = { ...prev }; delete next.location; return next; });
+    if (id) setErrors((prev) => {const next = { ...prev };delete next.location;return next;});
   };
   const handleStartDateChange = (date: string) => {
     setStartDate(date);
-    if (date) setErrors(prev => { const next = { ...prev }; delete next.startDate; return next; });
+    if (date) setErrors((prev) => {const next = { ...prev };delete next.startDate;return next;});
   };
 
   async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
     if (!validate()) return;
 
-    const customer = customers.find(c => c.id === customerId) ||
-      (customerId ? { id: customerId, name: customerName, phone: customerPhone } : undefined);
-    const doctor = employees.find(emp => emp.id === doctorId);
-    const assistant = employees.find(emp => emp.id === assistantId);
-    const dentalAide = employees.find(emp => emp.id === dentalAideId);
-    const location = locations.find(l => l.id === locationId);
+    const customer = customers.find((c) => c.id === customerId) || (
+    customerId ? { id: customerId, name: customerName, phone: customerPhone } : undefined);
+    const doctor = employees.find((emp) => emp.id === doctorId);
+    const assistant = employees.find((emp) => emp.id === assistantId);
+    const dentalAide = employees.find((emp) => emp.id === dentalAideId);
+    const location = locations.find((l) => l.id === locationId);
     if (!customer || !location || !selectedCatalog) return;
 
     const cost = totalCostOverride ? Number(totalCostOverride) : selectedCatalog.defaultPrice;
@@ -237,22 +237,22 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
     setIsSaving(true);
     try {
       await onSubmit({
-      ...(initialData?.id ? { id: initialData.id } : {}),
-      customerId: customer.id, customerName: customer.name, customerPhone: customer.phone,
-      catalogItemId: selectedCatalog.id, serviceName: selectedCatalog.name,
-      category: selectedCatalog.category, doctorId: doctor?.id ?? null, doctorName: doctor?.name ?? '',
-      assistantId: assistant?.id ?? null, assistantName: assistant?.name ?? '',
-      dentalAideId: dentalAide?.id ?? null, dentalAideName: dentalAide?.name ?? '',
-      locationId: location.id, locationName: location.name,
-      totalVisits: selectedCatalog.totalVisits, totalCost: cost,
-      startDate, expectedEndDate: expectedEndDate || startDate,
-      notes: notes.trim(), quantity: Number(quantity) || 1, unit: unit.trim(),
-      toothNumbers,
-      toothComment: toothComment.trim(),
-      sourceId,
-    });
+        ...(initialData?.id ? { id: initialData.id } : {}),
+        customerId: customer.id, customerName: customer.name, customerPhone: customer.phone,
+        catalogItemId: selectedCatalog.id, serviceName: selectedCatalog.name,
+        category: selectedCatalog.category, doctorId: doctor?.id ?? null, doctorName: doctor?.name ?? '',
+        assistantId: assistant?.id ?? null, assistantName: assistant?.name ?? '',
+        dentalAideId: dentalAide?.id ?? null, dentalAideName: dentalAide?.name ?? '',
+        locationId: location.id, locationName: location.name,
+        totalVisits: selectedCatalog.totalVisits, totalCost: cost,
+        startDate, expectedEndDate: expectedEndDate || startDate,
+        notes: notes.trim(), quantity: Number(quantity) || 1, unit: unit.trim(),
+        toothNumbers,
+        toothComment: toothComment.trim(),
+        sourceId
+      });
     } catch (error) {
-      setErrors(prev => ({ ...prev, submit: error instanceof Error ? error.message : t('formErrors.saveFailed', 'Lưu thất bại') }));
+      setErrors((prev) => ({ ...prev, submit: error instanceof Error ? error.message : t('formErrors.saveFailed', 'Lưu thất bại') }));
     } finally {
       setIsSaving(false);
     }
@@ -287,18 +287,18 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="modal-body px-6 py-6 space-y-5">
-          {isLoading && (
-            <div className="flex items-center justify-center py-8 text-gray-400">
+          {isLoading &&
+          <div className="flex items-center justify-center py-8 text-gray-400">
               <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2" />
               {tc('loading')}
             </div>
-          )}
+          }
 
           {/* Nguồn khách hàng */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
-              Nguồn khách hàng
+
             </label>
             <div className="flex flex-wrap gap-2">
               {allSources.map((s) => {
@@ -310,14 +310,14 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
                     onClick={() => setSourceId(isSelected ? null : s.id)}
                     className={`
                       px-3 py-1.5 rounded-full text-sm font-medium transition-all border
-                      ${isSelected
-                        ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
-                        : 'bg-white text-gray-700 border-gray-200 hover:border-orange-300 hover:text-orange-600'}
-                    `}
-                  >
+                      ${isSelected ?
+                    'bg-orange-500 text-white border-orange-500 shadow-sm' :
+                    'bg-white text-gray-700 border-gray-200 hover:border-orange-300 hover:text-orange-600'}
+                    `}>
+                    
                     {s.name}
-                  </button>
-                );
+                  </button>);
+
               })}
             </div>
           </div>
@@ -330,17 +330,17 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
             </label>
             <ServiceCatalogSelector catalog={serviceCatalog} selectedId={catalogItemId} onChange={handleCatalogChange} placeholder={t('convertToService.selectService', { ns: 'appointments' })} />
             {errors.service && <p className="mt-2 text-xs text-red-500">{errors.service}</p>}
-            {selectedCatalog && (
-              <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
+            {selectedCatalog &&
+            <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 <span>{selectedCatalog.totalVisits} {t('visits')} · ~{selectedCatalog.estimatedDuration} {t('minutesPerVisit')}</span>
               </div>
-            )}
+            }
           </div>
 
           {/* Khách hàng */}
-          {!isProfileContext && (
-            <div>
+          {!isProfileContext &&
+          <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                 <User className="w-3.5 h-3.5" />
                 {t('form.customer', 'Khách hàng')}
@@ -348,7 +348,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
               <CustomerSelector customers={customers} selectedId={customerId} onChange={handleCustomerChange} />
               {errors.customer && <p className="mt-2 text-xs text-red-500">{errors.customer}</p>}
             </div>
-          )}
+          }
 
           {/* Bác sĩ */}
           <div>
@@ -404,13 +404,13 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
                 value={totalCostOverride ? Number(totalCostOverride) : null}
                 onChange={(v) => setTotalCostOverride(v === null ? '' : String(v))}
                 placeholder={selectedCatalog ? String(selectedCatalog.defaultPrice) : '0'}
-                className="w-full"
-              />
-              {selectedCatalog && (
-                <p className="mt-1 text-xs text-gray-400">
+                className="w-full" />
+              
+              {selectedCatalog &&
+              <p className="mt-1 text-xs text-gray-400">
                   {t('default', 'Mặc định')}: {new Intl.NumberFormat('vi-VN').format(selectedCatalog.defaultPrice)} VND
                 </p>
-              )}
+              }
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
@@ -422,20 +422,20 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
                 onChange={(e) => setQuantity(e.target.value)}
                 placeholder="1"
                 min={1}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
-              />
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm" />
+              
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                 <FileText className="w-3.5 h-3.5" />
-                {t('form.unit', 'Đơn vị')}
+                {t('form.unit', 'Unit')}
               </label>
               <input
                 type="text" value={unit}
                 onChange={(e) => setUnit(e.target.value)}
                 placeholder={t('form.unitPlaceholder', 'răng')}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
-              />
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm" />
+              
             </div>
           </div>
 
@@ -443,21 +443,21 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <Stethoscope className="w-3.5 h-3.5" />
-              Chọn răng
+
             </label>
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => setShowToothPicker(true)}
-                className="px-3 py-2 text-sm font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-colors"
-              >
-                {toothNumbers.length > 0 ? `Đã chọn ${toothNumbers.length} răng` : 'Chọn răng'}
+                className="px-3 py-2 text-sm font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-colors">
+                
+                {toothNumbers.length > 0 ? t('selectedTeethCount', { count: toothNumbers.length }) : t("chnRng")}
               </button>
-              {toothNumbers.length > 0 && (
-                <span className="text-xs text-gray-500">
+              {toothNumbers.length > 0 &&
+              <span className="text-xs text-gray-500">
                   {toothNumbers.join(', ')}
                 </span>
-              )}
+              }
             </div>
           </div>
 
@@ -465,13 +465,13 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
-              Ghi chú răng
+
             </label>
             <textarea
               value={toothComment} onChange={(e) => setToothComment(e.target.value)}
-              rows={2} placeholder="Nhập ghi chú về răng"
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
-            />
+              rows={2} placeholder={t("nhpGhiChVRng")}
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none" />
+            
           </div>
 
           {/* Ghi chú */}
@@ -483,22 +483,22 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
             <textarea
               value={notes} onChange={(e) => setNotes(e.target.value)}
               rows={3} placeholder={t('enterNotes', 'Nhập ghi chú')}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none"
-            />
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none" />
+            
           </div>
         </form>
 
-        {showToothPicker && (
-          <ToothPickerModal
-            isOpen={showToothPicker}
-            initialValues={toothNumbers}
-            onClose={() => setShowToothPicker(false)}
-            onSave={(values) => {
-              setToothNumbers(values);
-              setShowToothPicker(false);
-            }}
-          />
-        )}
+        {showToothPicker &&
+        <ToothPickerModal
+          isOpen={showToothPicker}
+          initialValues={toothNumbers}
+          onClose={() => setShowToothPicker(false)}
+          onSave={(values) => {
+            setToothNumbers(values);
+            setShowToothPicker(false);
+          }} />
+
+        }
 
         {/* Footer */}
         <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
@@ -506,12 +506,12 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
               {tc('cancel')}
             </button>
             <button type="button" onClick={() => handleSubmit()} disabled={isLoading || isSaving}
-              className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25">
+          className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25">
               <Check className="w-4 h-4" />
               {isEdit ? tc('update') : t('addService')}
             </button>
           </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }

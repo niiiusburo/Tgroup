@@ -122,15 +122,15 @@ export const TIER_STYLES: Record<string, string> = {
 };
 
 export const ROLE_LABELS: Record<string, string> = {
-  'general-manager': 'Quản lý tổng',
-  'branch-manager': 'Quản lý cơ sở',
-  doctor: 'Bác sĩ',
-  'doctor-assistant': 'Trợ lý Bác sĩ',
-  assistant: 'Phụ tá',
-  receptionist: 'Lễ tân',
-  'sales-staff': 'Nhân viên sale',
-  'customer-service': 'CSKH',
-  marketing: 'Marketing',
+  'general-manager': 'roles.generalManager',
+  'branch-manager': 'roles.branchManager',
+  doctor: 'roles.doctor',
+  'doctor-assistant': 'roles.doctorAssistant',
+  assistant: 'roles.assistant',
+  receptionist: 'roles.receptionist',
+  'sales-staff': 'roles.salesStaff',
+  'customer-service': 'roles.customerService',
+  marketing: 'roles.marketing',
 };
 
 export const ROLE_STYLES: Record<string, string> = {

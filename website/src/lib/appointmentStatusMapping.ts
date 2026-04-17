@@ -37,13 +37,22 @@ export function calendarStatusToPhase(status: 'scheduled' | 'confirmed' | 'in-pr
   }
 }
 
-export const PHASE_VI_LABELS: Record<CalendarPhase, string> = {
-  scheduled: 'Đang hẹn',
-  waiting: 'Chờ khám',
-  'in-treatment': 'Đang khám',
-  done: 'Hoàn thành',
-  cancelled: 'Hủy hẹn',
+/** Translation keys for calendar phases (appointments namespace). Callers should do `t(PHASE_LABEL_KEYS[phase], { ns: 'appointments' })`. */
+export const PHASE_LABEL_KEYS: Record<CalendarPhase, string> = {
+  scheduled: 'appointments.phase.scheduled',
+  waiting: 'appointments.phase.waiting',
+  'in-treatment': 'appointments.phase.in-treatment',
+  done: 'appointments.phase.done',
+  cancelled: 'appointments.phase.cancelled',
 };
+
+/** Convenience helper: returns the translated label for a phase. */
+export function getPhaseLabel(
+  t: (key: string, options?: Record<string, unknown>) => string,
+  phase: CalendarPhase
+): string {
+  return t(PHASE_LABEL_KEYS[phase], { ns: 'appointments' });
+}
 
 export const PHASE_STYLES: Record<CalendarPhase, { bg: string; text: string; border: string }> = {
   scheduled: { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-200' },

@@ -19,13 +19,13 @@ export function ColorFilterCircles({ selected, counts, onToggle }: ColorFilterCi
         onClick={() => isAll || onToggle('__ALL__')}
         className={cn(
           'flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors',
-          isAll
-            ? 'bg-primary text-white border-primary'
-            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-        )}
-      >
+          isAll ?
+          'bg-primary text-white border-primary' :
+          'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+        )}>
+        
         <span className="w-4 h-4 rounded-full border border-gray-300 bg-white" />
-        <span className="text-sm font-medium">Tất cả</span>
+        <span className="text-sm font-medium"></span>
       </button>
       {colorEntries.map(([code, color]) => {
         const isSelected = selected.includes(code);
@@ -39,16 +39,16 @@ export function ColorFilterCircles({ selected, counts, onToggle }: ColorFilterCi
             onClick={() => onToggle(code)}
             className={cn(
               'flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors',
-              isSelected
-                ? 'bg-primary text-white border-primary'
-                : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-            )}
-          >
+              isSelected ?
+              'bg-primary text-white border-primary' :
+              'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+            )}>
+            
             <span className={cn('w-4 h-4 rounded-full', dotClass)} />
             <span className="text-sm font-medium">{counts[code] ?? 0}</span>
-          </button>
-        );
+          </button>);
+
       })}
-    </div>
-  );
+    </div>);
+
 }

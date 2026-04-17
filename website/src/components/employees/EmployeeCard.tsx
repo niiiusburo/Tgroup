@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { MapPin, Clock } from 'lucide-react';
 import {
   ROLE_LABELS,
@@ -24,6 +25,7 @@ const LOCATION_NAMES: Record<string, string> = {
 };
 
 export function EmployeeCard({ employee, isSelected, onSelect }: EmployeeCardProps) {
+  const { t } = useTranslation('employees');
   const workDays = employee.schedule.length;
   const statusLabel = employee.status === 'on-leave' ? 'On Leave' : employee.status.charAt(0).toUpperCase() + employee.status.slice(1);
 
@@ -64,7 +66,7 @@ export function EmployeeCard({ employee, isSelected, onSelect }: EmployeeCardPro
       <div className="flex flex-wrap gap-1 mb-3">
         {employee.roles.map((role) => (
           <span key={role} className={`text-xs px-2 py-0.5 rounded ${ROLE_STYLES[role]}`}>
-            {ROLE_LABELS[role]}
+            {t(ROLE_LABELS[role])}
           </span>
         ))}
       </div>

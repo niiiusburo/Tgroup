@@ -165,7 +165,10 @@
   "relationships": "Relationships",
   "apply": "Apply",
   "reset": "Reset",
-  "filter": "Filter",
+  "filter": {
+    "allDoctors": "All doctors",
+    "doctor": "Doctor"
+  },
   "sort": "Sort",
   "columns": "Columns",
   "rows": "rows",
@@ -174,6 +177,17 @@
   "show": "Show",
   "of": "of",
   "showing": "Showing",
+  "roles": {
+    "generalManager": "General Manager",
+    "branchManager": "Branch Manager",
+    "doctor": "Doctor",
+    "doctorAssistant": "Doctor Assistant",
+    "assistant": "Assistant",
+    "receptionist": "Receptionist",
+    "salesStaff": "Sales Staff",
+    "customerService": "Customer Service",
+    "marketing": "Marketing"
+  },
   "messages": {
     "confirmDelete": "Are you sure you want to delete this item?",
     "confirmAction": "Are you sure you want to proceed?",
@@ -183,5 +197,97 @@
     "deleteError": "Failed to delete",
     "loadError": "Failed to load data"
   },
-  "apiKeyInstruction": "Set VITE_GOOGLE_PLACES_API_KEY in .env file"
+  "apiKeyInstruction": "Set VITE_GOOGLE_PLACES_API_KEY in .env file",
+  "iMtKhu": "Change Password",
+  "khngTmThy": "Not found",
+  "saLchHn": "Edit Appointment",
+  "bnhNhn": "Patient",
+  "bnhNhnLinKt": "Linked Patient",
+  "giKtThc": "End Time",
+  "pht": "min)",
+  "bcS": "Doctor",
+  "chn": "Selected:",
+  "phTKhngBtBuc": "Assistant (optional)",
+  "chnPhT": "Select assistant...",
+  "trLBcSKhngBtBuc": "Doctor Assistant (optional)",
+  "chnTrL": "Select assistant...",
+  "chiNhnh": "Branch",
+  "dchV": "Service",
+  "": "VND",
+  "thiGianDKin": "Expected Duration",
+  "pht1": "min",
+  "loiKhch": "Customer type",
+  "khchMi": "New customer",
+  "tiKhm": "Revisit",
+  "trngThi": "Status",
+  "muTh": "Card color",
+  "ghiCh": "Notes",
+  "hyB": "Cancel",
+  "angLu": "Saving...",
+  "luThayI": "Save changes",
+  "ng": "Close",
+  "lchHnHmNay": "Today's appointments",
+  "tmNhanhLchHn": "Quick search appointments...",
+  "khngCLchHn": "No appointments",
+  "n": "Arrived",
+  "hyHn": "Cancel appointment",
+  "angHn": "In progress",
+  "hngDnToFileEnvViVitegoogleplacesapikeyyourkey": "Guide: Create .env file with VITE_GOOGLE_PLACES_API_KEY=your_key",
+  "khngTmThyAChPhHp": "No matching address found",
+  "khngTmThyNgnHng": "No bank found",
+  "cpNhtMtKhuNgNhpCaBn": "Update your login password",
+  "iMtKhuThnhCng": "Password changed successfully!",
+  "bnCThNgNhpBngMtKhuMi": "You can log in with your new password",
+  "mtKhuHinTi": "Current password",
+  "nhpMtKhuHinTi": "Enter current password",
+  "mtKhuMi": "New password",
+  "nhpMtKhuMiTNht6KT": "Enter new password (at least 6 characters)",
+  "xcNhnMtKhuMi": "Confirm new password",
+  "nhpLiMtKhuMi": "Re-enter new password",
+  "angXL": "Processing...",
+  "khngTmThyKtQuBnCThNhpTrcTip": "No results found. You can enter directly.",
+  "khngTmThyKhchHng": "Customer not found",
+  "toKhchHngMi": "Create new customer",
+  "hmNay": "Today",
+  "xaLaChn": "Clear selection",
+  "chp": "Capture",
+  "hy": "Cancel",
+  "khngTmThyBcS": "No doctor found",
+  "bcS1": "doctors",
+  "chnGi": "Select time",
+  "chn1": "Selected",
+  "cpNhtMtKhu": "Update password",
+  "chnNgyBtU": "Select start date",
+  "chnKhongNgy": "Select date range",
+  "tingVit": "🇻🇳 Vietnamese",
+  "unknown": "Unknown",
+  "changePassword": {
+    "fillAllFields": "Please fill in all fields",
+    "newPasswordMinLength": "New password must be at least 6 characters",
+    "confirmPasswordMismatch": "Confirmation password does not match",
+    "changeFailed": "Password change failed"
+  },
+  "datePicker": {
+    "chooseDate": "Choose date"
+  },
+  "timePicker": {
+    "chooseTime": "Choose time",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening"
+  },
+  "faceCapture": {
+    "title": "Face Capture",
+    "cameraError": "Cannot access camera. Please grant permission."
+  },
+  "combobox": {
+    "placeholder": "Type or select..."
+  },
+  "bankSelector": {
+    "placeholder": "Select bank..."
+  },
+  "dateRange": {
+    "from": "From",
+    "chooseEndDate": "Choose end date"
+  }
 }
