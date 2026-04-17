@@ -1,5 +1,32 @@
 [
   {
+    "version": "0.17.0",
+    "date": "2026-04-17",
+    "commit": "pending",
+    "highlights": "Calendar Day/Week views: interactive status flow with live wait timer, hourly time rail (07:00–20:00), and Excel export",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Calendar Day/Week views: interactive check-in and status flow (Đang hẹn → Chờ khám → Đang khám → Hoàn thành / Hủy hẹn)",
+          "Calendar Day/Week views: live WaitTimer on waiting cards synced with Overview via shared localStorage",
+          "Calendar Day view: hourly time rail with 27 fixed 30-minute slots from 07:00 to 20:00",
+          "Calendar Day view: empty slots collapse to 24px and show '+ Thêm lịch hẹn' on hover; click opens prefilled appointment form",
+          "Calendar Day/Week/Month views: Excel export with two modes — current filter or custom date range",
+          "Exported file matches legacy TG Dental schema: DanhSachLichHen_<range>.xlsx with 10 Vietnamese columns"
+        ]
+      },
+      {
+        "title": "Architecture",
+        "items": [
+          "New shared utility: lib/appointmentStatusMapping.ts — single source of truth for phase ↔ API state mappings",
+          "New shared utility: lib/arrivalTimeStorage.ts — shared localStorage read/write for arrival times",
+          "Extracted AppointmentFormModal from QuickAddAppointmentButton for reuse across toolbar and time rail"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.16.6",
     "date": "2026-04-17",
     "commit": "c5f69521",
