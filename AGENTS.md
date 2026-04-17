@@ -45,6 +45,19 @@ At session start, read project context from local Obsidian notes:
 - `./notes/🚀 Deployment Guide.md` — VPS deploy workflow, Docker setup
 - `./notes/💾 Database Schema.md` — Database tables and relationships
 
+## Shared Session Memory (Claude-Mem Bridge)
+
+This project shares session memory with Claude IDE via `claude-mem`.
+
+**At session start, read:**
+- `.claude/memory.md` — Latest shared context synced from `~/.claude-mem/claude-mem.db`
+
+**After making code changes, run:**
+```bash
+bash scripts/sync-claude-mem.sh
+```
+This refreshes `.claude/memory.md` with the latest observations from the shared claude-mem database so both Claude IDE and this agent stay in sync.
+
 <!-- code-review-graph MCP tools -->
 ## MCP Tools: code-review-graph
 

@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.19.10",
+    "date": "2026-04-17",
+    "commit": "pending",
+    "highlights": "DepositWallet: payment method, date, and note are now persisted instead of being silently dropped",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "DepositWallet (Payment page): adding a deposit was only saving the amount — method, date, and note were silently discarded. The `onAddDeposit` callback in Payment.tsx ignored 3 of 4 parameters, and `topUpWallet` in usePayment.ts was a no-op client-side stub that only console.log'd.",
+          "Fixed `topUpWallet` to actually call `createPayment` with all fields: amount, method (vietqr mapped to bank_transfer), paymentDate, and composed notes from date + user note.",
+          "Deposit method now correctly tracked for reconciliation (cash vs bank vs VietQR)."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.19.8",
     "date": "2026-04-17",
     "commit": "pending",

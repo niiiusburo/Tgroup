@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { fetchSaleOrders, type ApiSaleOrder } from '@/lib/api';
+import { createPayment } from '@/lib/api/payments';
 import {
   type PaymentRecord,
   type PaymentMethod,
@@ -33,7 +34,9 @@ export interface CreatePaymentInput {
 export interface TopUpInput {
   readonly customerId: string;
   readonly amount: number;
-  readonly description: string;
+  readonly method: 'cash' | 'bank_transfer' | 'vietqr';
+  readonly date?: string;
+  readonly note?: string;
 }
 
 /**
@@ -205,9 +208,16 @@ export function usePayment(selectedLocationId?: string) {
     return newPayment;
   }, []);
 
-  const topUpWallet = useCallback((input: TopUpInput) => {
-    // Client-side only: no wallet API
-    console.log('Top-up wallet (client-side):', input);
+  const topUpWallet = useCallback(async (input: TopUpInput) => {
+    const composedNote = [input.date ? `Date: ${input.date}` : null, input.note].filter(Boolean).join(' | ');
+    await createPayment({
+      customerId: input.customerId,
+      amount: input.amount,
+      method: input.method === 'vietqr' ? 'bank_transfer' : input.method,
+      notes: composedNote || undefined,
+      paymentDate: input.date,
+      depositType: 'deposit',
+    });
   }, []);
 
   const getWalletByCustomer = useCallback(

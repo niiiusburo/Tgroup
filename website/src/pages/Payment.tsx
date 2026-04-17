@@ -70,8 +70,8 @@ export function Payment() {
     setShowCreator(false);
   };
 
-  const handleTopUp = (customerId: string) => (amount: number) => {
-    topUpWallet({ customerId, amount, description: 'Nap tien vi' });
+  const handleTopUp = (customerId: string) => async (amount: number, method: 'cash' | 'bank_transfer' | 'vietqr', date?: string, note?: string) => {
+    await topUpWallet({ customerId, amount, method, date, note });
   };
 
   return (
@@ -183,7 +183,7 @@ export function Payment() {
                 key={wallet.id}
                 depositBalance={wallet.balance}
                 outstandingBalance={0}
-                onAddDeposit={async (amount, _method, _date, _note) => { await handleTopUp(wallet.customerId)(amount); }}
+                onAddDeposit={async (amount, method, date, note) => { await handleTopUp(wallet.customerId)(amount, method, date, note); }}
               />
             ))}
 

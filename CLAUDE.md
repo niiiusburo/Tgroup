@@ -1,5 +1,9 @@
 # TGroup — TG Clinic Dashboard
 
+## Shared Session Memory (READ FIRST)
+
+At the start of EVERY session, read `.claude/memory.md` for the latest shared context synced from claude-mem. This file contains recent work, deployment status, and architecture notes that bridge Claude IDE and this agent session.
+
 ## Release Notes (MANDATORY)
 
 Every time you bump the version or deploy a new build, you MUST update `website/public/CHANGELOG.json`:

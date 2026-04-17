@@ -14,6 +14,16 @@
         "/Users/thuanle/.config/kilo/kilo-mcp.js"
       ],
       "type": "stdio"
+    },
+    "claude-mem": {
+      "command": "node",
+      "args": [
+        "/Users/thuanle/.claude/plugins/cache/thedotmack/claude-mem/10.6.2/scripts/mcp-server.cjs"
+      ],
+      "type": "stdio",
+      "env": {
+        "CLAUDE_MEM_DATA_DIR": "/Users/thuanle/.claude-mem"
+      }
     }
   }
 }
