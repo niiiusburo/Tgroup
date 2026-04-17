@@ -59,7 +59,7 @@ function ReleaseNotesModal({ isOpen, onClose, currentVersion }: {
   useEffect(() => {
     if (!isOpen) return;
     setLoading(true);
-    fetch('/CHANGELOG.json')
+    fetch('/CHANGELOG.json?v=' + Date.now(), { cache: 'no-store' })
       .then((res) => res.json())
       .then((data: ChangelogEntry[]) => {
         setEntries(data);
@@ -296,7 +296,7 @@ export function VersionDisplay({
       setDismissedHighlights('');
     }
 
-    fetch('/CHANGELOG.json')
+    fetch('/CHANGELOG.json?v=' + Date.now(), { cache: 'no-store' })
       .then((res) => res.json())
       .then((data: ChangelogEntry[]) => {
         const currentEntry = data.find(e => e.version === currentVersion.version);

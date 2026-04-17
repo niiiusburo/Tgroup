@@ -1,11 +1,11 @@
 {
   "name": "tgclinic-website",
   "private": true,
-  "version": "0.16.6",
+  "version": "0.18.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run version && tsc && vite build",
+    "build": "npm run version && tsc && VITE_APP_VERSION=$(node -p \"require('./package.json').version\") vite build",
     "build:prod": "npm run version && tsc && vite build --mode production",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 99",
     "preview": "vite",

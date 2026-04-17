@@ -96,6 +96,43 @@ type BroadcastMessage =
   | { type: 'applyUpdate' }
   | { type: 'snoozed'; until: number };
 
+const TELEMETRY_ENDPOINT = '/api/telemetry/version';
+
+export async function flushPendingTelemetry(): Promise<void> {
+  try {
+    const raw = localStorage.getItem('tgclinic:pendingTelemetry');
+    if (!raw) return;
+    const events: unknown[] = JSON.parse(raw);
+    if (!Array.isArray(events) || events.length === 0) return;
+
+    const results = await Promise.allSettled(
+      events.map((payload) =>
+        fetch(TELEMETRY_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          keepalive: true,
+        })
+      )
+    );
+
+    const failed: unknown[] = [];
+    results.forEach((r, i) => {
+      if (r.status === 'rejected' || !r.value.ok) {
+        failed.push(events[i]);
+      }
+    });
+
+    if (failed.length === 0) {
+      localStorage.removeItem('tgclinic:pendingTelemetry');
+    } else {
+      localStorage.setItem('tgclinic:pendingTelemetry', JSON.stringify(failed));
+    }
+  } catch {
+    // ignore
+  }
+}
+
 /**
  * Check if we just completed an update (based on URL param or localStorage)
  */
@@ -231,7 +268,7 @@ function isSemverNewer(current: VersionInfo, latest: VersionInfo): boolean {
  */
 export function hasUpdate(current: VersionInfo, latest: VersionInfo): boolean {
   if (isSemverNewer(current, latest)) return true;
-  if (current.version === latest.version && current.gitCommit !== latest.gitCommit) return true;
+  if (current.gitCommit !== latest.gitCommit) return true;
   return false;
 }
 
@@ -340,6 +377,9 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
   useEffect(() => {
     const buildVersion = getBuildTimeVersion();
 
+    // Flush any queued telemetry from previous sessions
+    void flushPendingTelemetry();
+
     const justUpdated = checkJustUpdated();
     const targetVersion = localStorage.getItem(TARGET_VERSION_KEY);
 
@@ -356,6 +396,36 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
       localStorage.removeItem(TARGET_VERSION_KEY);
       sessionStorage.removeItem(ACCEPTED_VERSION_KEY);
       setCurrentVersion(buildVersion);
+    }
+
+    // Telemetry: did the last update succeed?
+    if (justUpdated && targetVersion) {
+      try {
+        const pending = JSON.parse(localStorage.getItem('tgclinic:pendingTelemetry') || '[]');
+        if (targetVersion === buildVersion.version) {
+          pending.push({
+            event: 'version_update_succeeded',
+            from: targetVersion,
+            to: buildVersion.version,
+            trigger: 'button',
+            timestamp: Date.now(),
+            userAgent: navigator.userAgent,
+          });
+        } else {
+          pending.push({
+            event: 'version_update_failed',
+            from: targetVersion,
+            to: buildVersion.version,
+            trigger: 'button',
+            timestamp: Date.now(),
+            userAgent: navigator.userAgent,
+          });
+        }
+        localStorage.setItem('tgclinic:pendingTelemetry', JSON.stringify(pending));
+      } catch {
+        // ignore
+      }
+      localStorage.removeItem(TARGET_VERSION_KEY);
     }
 
     // Attempt to restore return path if we just updated
@@ -489,59 +559,63 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
   useEffect(() => { checkRef.current = checkForUpdates; }, [checkForUpdates]);
 
   const applyUpdate = useCallback(async () => {
-    // Store current path for post-update return if not already stored
     const currentPath = window.location.pathname + window.location.search;
-    if (!sessionStorage.getItem(RETURN_PATH_KEY)) {
-      try {
-        sessionStorage.setItem(RETURN_PATH_KEY, currentPath);
-      } catch {
-        // ignore
-      }
-    }
-    const returnPath = sessionStorage.getItem(RETURN_PATH_KEY);
-
-    await clearAllCaches();
-
-    localStorage.setItem(JUST_UPDATED_KEY, Date.now().toString());
-
-    if (latestVersion) {
-      localStorage.setItem(TARGET_VERSION_KEY, latestVersion.version);
-    }
-
-    clearSnooze();
-    postBroadcast({ type: 'applyUpdate' });
-
-    const timestamp = Date.now();
-
-    // Aggressively invalidate the current document before reloading
     try {
-      await fetch(window.location.href, {
-        method: 'HEAD',
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-        },
-      });
+      sessionStorage.setItem(RETURN_PATH_KEY, currentPath);
     } catch {
       // ignore
     }
 
-    // Build a cache-busting URL
-    const targetPath = returnPath || window.location.pathname + window.location.search;
-    const url = new URL(targetPath, window.location.origin);
-    url.searchParams.set('_v', timestamp.toString());
+    await clearAllCaches();
 
-    // Nuclear option: try hard reload first, then fall back to href navigation
-    setTimeout(() => {
+    // Emit telemetry event (client-side queue; backend in Phase 3)
+    const from = currentVersion?.version ?? getBuildTimeVersion().version;
+    const to = latestVersion?.version ?? from;
+    const event = {
+      event: 'version_update_initiated',
+      from,
+      to,
+      trigger: updateSeverity === 'critical' ? 'critical_modal' : 'button',
+      timestamp: Date.now(),
+      userAgent: navigator.userAgent,
+    };
+    try {
+      const pending = JSON.parse(localStorage.getItem('tgclinic:pendingTelemetry') || '[]');
+      pending.push(event);
+      localStorage.setItem('tgclinic:pendingTelemetry', JSON.stringify(pending));
+    } catch {
+      // ignore
+    }
+
+    // Wipe localStorage only on critical updates (Q2 decision)
+    if (updateSeverity === 'critical') {
       try {
-        // @ts-expect-error deprecated but still the most reliable hard-reload API
-        window.location.reload(true);
+        const keysToKeep = new Set([RETURN_PATH_KEY, JUST_UPDATED_KEY, TARGET_VERSION_KEY, 'tgclinic:pendingTelemetry']);
+        for (const key of Object.keys(localStorage)) {
+          if (!keysToKeep.has(key)) {
+            localStorage.removeItem(key);
+          }
+        }
       } catch {
-        window.location.href = url.toString();
+        // ignore
       }
-    }, 100);
-  }, [latestVersion, postBroadcast]);
+    }
+
+    localStorage.setItem(JUST_UPDATED_KEY, Date.now().toString());
+    if (latestVersion) {
+      localStorage.setItem(TARGET_VERSION_KEY, latestVersion.version);
+    }
+    clearSnooze();
+    postBroadcast({ type: 'applyUpdate' });
+
+    // Build cache-busting URL using server commit hash for debuggability
+    const returnPath = sessionStorage.getItem(RETURN_PATH_KEY) || currentPath;
+    const url = new URL(returnPath, window.location.origin);
+    const cacheBuster = latestVersion?.gitCommit ?? Date.now().toString();
+    url.searchParams.set('_v', cacheBuster);
+
+    window.location.replace(url.toString());
+  }, [currentVersion, latestVersion, updateSeverity, postBroadcast]);
   // expose stable applyUpdate ref for bc callback
   const applyUpdateRef = useRef(applyUpdate);
   useEffect(() => { applyUpdateRef.current = applyUpdate; }, [applyUpdate]);

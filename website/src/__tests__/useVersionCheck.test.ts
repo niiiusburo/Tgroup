@@ -114,8 +114,8 @@ describe('useVersionCheck utilities', () => {
       expect(hasUpdate(mockV1, { ...mockV1 })).toBe(false);
     });
 
-    it('returns false when semver is older', () => {
-      expect(hasUpdate(mockV3NewerSemver, mockV1)).toBe(false);
+    it('returns true when semver is older but commit differs (rollback detected)', () => {
+      expect(hasUpdate(mockV3NewerSemver, mockV1)).toBe(true);
     });
   });
 
@@ -317,10 +317,18 @@ describe('useVersionCheck hook', () => {
   });
 
   it('auto-applies critical update when countdown reaches zero', async () => {
-    const reloadFn = vi.fn();
+    const replaceFn = vi.fn();
+    const originalLocation = window.location;
     Object.defineProperty(window, 'location', {
       writable: true,
-      value: { ...window.location, reload: reloadFn },
+      value: {
+        href: 'http://localhost:5174/',
+        pathname: '/',
+        search: '',
+        origin: 'http://localhost:5174',
+        replace: replaceFn,
+        reload: vi.fn(),
+      },
     });
     setupFakeFetch(mockV4Critical);
 
@@ -332,26 +340,31 @@ describe('useVersionCheck hook', () => {
 
     await waitFor(() => expect(result.current.countdownRemaining).not.toBeNull());
 
-    // Fast-forward past the 10s countdown + 100ms setTimeout in applyUpdate
+    // Fast-forward past the 10s countdown
     vi.advanceTimersByTime(12000);
 
     await waitFor(() => {
-      expect(reloadFn).toHaveBeenCalled();
+      expect(replaceFn).toHaveBeenCalled();
     }, { timeout: 3000 });
+
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: originalLocation,
+    });
   });
 
   it('preserves return path when applying update', async () => {
-    const reloadFn = vi.fn();
-    const originalHref = window.location.href;
+    const replaceFn = vi.fn();
+    const originalLocation = window.location;
     Object.defineProperty(window, 'location', {
       writable: true,
       value: {
-        ...window.location,
         href: 'http://localhost:5174/appointments?date=2026-04-13',
         pathname: '/appointments',
         search: '?date=2026-04-13',
         origin: 'http://localhost:5174',
-        reload: reloadFn,
+        replace: replaceFn,
+        reload: vi.fn(),
       },
     });
 
@@ -373,7 +386,7 @@ describe('useVersionCheck hook', () => {
 
     Object.defineProperty(window, 'location', {
       writable: true,
-      value: { ...window.location, href: originalHref },
+      value: originalLocation,
     });
   });
 
