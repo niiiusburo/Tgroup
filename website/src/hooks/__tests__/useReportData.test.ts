@@ -70,10 +70,13 @@ describe('useReportData', () => {
     const { result } = renderHook(() => useReportData('/Reports/dashboard', defaultFilters));
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(mockFetch).toHaveBeenCalledWith('/Reports/dashboard', {
-      method: 'POST',
-      body: defaultFilters,
-    });
+    expect(mockFetch).toHaveBeenCalledWith(
+      '/Reports/dashboard',
+      expect.objectContaining({
+        method: 'POST',
+        body: { dateFrom: '2025-01-01', dateTo: '2025-12-31' },
+      })
+    );
   });
 
   it('refetch triggers a new API call', async () => {

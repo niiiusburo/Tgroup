@@ -1,6 +1,5 @@
 /**
- * TDD Tests for IpAccessControl Component
- * Agent 3: UI Component
+ * Tests for IpAccessControl Component
  */
 
 import { describe, it, expect, vi } from 'vitest';
@@ -18,11 +17,13 @@ vi.mock('@/hooks/useIpAccessControl', () => ({
       { id: 'ip-3', ipAddress: '172.16.0.1', type: 'whitelist', description: 'Inactive', isActive: false, createdAt: '2024-01-01', createdBy: 'admin' },
     ],
     stats: { totalEntries: 3, whitelistCount: 2, blacklistCount: 1, activeCount: 2, inactiveCount: 1 },
+    loading: false,
+    error: null,
     validateIp: (ip: string) => ({ valid: ip === '192.168.1.100', normalized: ip.trim() }),
-    addEntry: vi.fn(() => ({ success: true })),
-    removeEntry: vi.fn(),
-    toggleEntryActive: vi.fn(),
-    updateEntry: vi.fn(),
+    addEntry: vi.fn(() => Promise.resolve({ success: true })),
+    removeEntry: vi.fn(() => Promise.resolve()),
+    toggleEntryActive: vi.fn(() => Promise.resolve()),
+    updateEntry: vi.fn(() => Promise.resolve()),
     isIpAllowed: () => ({ allowed: true }),
   }),
 }));
@@ -35,10 +36,11 @@ describe('IpAccessControl Component', () => {
     expect(screen.getByLabelText(/Allow All/i)).toBeInTheDocument();
   });
 
-  it('should display mode selector with three options', () => {
+  it('should display mode selector with four options', () => {
     render(<IpAccessControl />);
 
     expect(screen.getByLabelText(/Allow All/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Block All/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Whitelist Only/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Blacklist Block/i)).toBeInTheDocument();
   });
