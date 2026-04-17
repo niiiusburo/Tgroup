@@ -156,7 +156,7 @@ export function Calendar() {
       color: appointment.color || '0',
       arrivalTime: null,
       treatmentStartTime: null,
-      productId: '',
+      productId: appointment.productId || '',
       assistantId: appointment.assistantId ?? null,
       assistantName: appointment.assistantName ?? null,
       dentalAideId: appointment.dentalAideId ?? null,
@@ -249,6 +249,11 @@ export function Calendar() {
       time: data.startTime,
       note: data.notes,
       state: 'scheduled',
+      assistantid: data.assistantId,
+      dentalaideid: data.dentalAideId,
+      color: data.color,
+      timeexpected: data.estimatedDuration,
+      productid: data.serviceId,
     });
     setCreateModalOpen(false);
     refresh?.();

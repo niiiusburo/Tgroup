@@ -25,6 +25,11 @@ export function QuickAddAppointmentButton({ onSuccess, size = 'md' }: QuickAddAp
         time: data.startTime,
         note: data.notes,
         state: 'scheduled',
+        assistantid: data.assistantId,
+        dentalaideid: data.dentalAideId,
+        color: data.color,
+        timeexpected: data.estimatedDuration,
+        productid: data.serviceId,
       });
       setIsOpen(false);
       onSuccess?.();

@@ -117,7 +117,7 @@ export function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppoin
     customerName: apt.partnername || '',
     customerPhone: apt.partnerphone || '',
     customerCode: apt.partnercode || '',
-    serviceName: apt.name || apt.note || '',
+    serviceName: apt.productname || apt.name || apt.note || '',
     appointmentType: deriveAppointmentType(apt.reason || apt.note || ''),
     dentist: apt.doctorname || '',
     dentistId: apt.doctorid || '',
@@ -136,5 +136,6 @@ export function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppoin
     assistantName: apt.assistantname ?? null,
     dentalAideId: apt.dentalaideid ?? null,
     dentalAideName: apt.dentalaidename ?? null,
+    productId: apt.productid ?? null,
   };
 }

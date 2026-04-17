@@ -35,6 +35,8 @@ export interface CalendarAppointment {
   readonly assistantName?: string | null;
   readonly dentalAideId?: string | null;
   readonly dentalAideName?: string | null;
+  // Service / product mapping
+  readonly productId?: string | null;
 }
 
 export interface ManagedAppointment {
@@ -44,10 +46,15 @@ export interface ManagedAppointment {
   readonly customerPhone: string;
   readonly doctorId?: string;
   readonly doctorName?: string;
+  readonly assistantId?: string;
+  readonly assistantName?: string;
+  readonly dentalAideId?: string;
+  readonly dentalAideName?: string;
   readonly locationId: string;
   readonly locationName: string;
   readonly appointmentType: AppointmentType;
   readonly serviceName: string;
+  readonly productId?: string;
   readonly date: string;
   readonly startTime: string;
   readonly endTime: string;
@@ -58,6 +65,8 @@ export interface ManagedAppointment {
   readonly completionTime: string | null;
   readonly notes: string;
   readonly convertedToServiceId: string | null;
+  readonly estimatedDuration?: number;
+  readonly color?: string;
 }
 
 // Check-in flow order

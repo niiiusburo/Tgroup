@@ -29,6 +29,10 @@ interface CreateAppointmentInput {
   readonly customerPhone: string;
   readonly doctorId?: string;
   readonly doctorName?: string;
+  readonly assistantId?: string;
+  readonly assistantName?: string;
+  readonly dentalAideId?: string;
+  readonly dentalAideName?: string;
   readonly locationId: string;
   readonly locationName: string;
   readonly appointmentType: AppointmentType;
@@ -39,6 +43,9 @@ interface CreateAppointmentInput {
   readonly notes: string;
   readonly estimatedDuration?: number;
   readonly color?: string;
+  readonly serviceId?: string;
+  readonly customerType?: 'new' | 'returning';
+  readonly status?: string;
 }
 
 function nowTimeString(): string {
@@ -83,10 +90,15 @@ function mapApiToManagedAppointment(
     customerPhone: api.partnerphone || '',
     doctorId: api.doctorid || '',
     doctorName: api.doctorname || '',
+    assistantId: api.assistantid || undefined,
+    assistantName: api.assistantname || undefined,
+    dentalAideId: api.dentalaideid || undefined,
+    dentalAideName: api.dentalaidename || undefined,
     locationId: api.companyid || '',
     locationName: api.companyname || '',
     appointmentType: 'consultation' as const,
-    serviceName: api.name || api.note || '',
+    serviceName: api.productname || api.name || api.note || '',
+    productId: api.productid || undefined,
     date,
     startTime,
     endTime,
@@ -97,6 +109,8 @@ function mapApiToManagedAppointment(
     completionTime: null,
     notes: api.note || '',
     convertedToServiceId: null,
+    estimatedDuration: api.timeexpected || undefined,
+    color: api.color || undefined,
   };
 }
 
@@ -200,6 +214,10 @@ export function useAppointments(selectedLocationId?: string) {
         partnerphone: input.customerPhone,
         doctorid: input.doctorId,
         doctorname: input.doctorName,
+        assistantid: input.assistantId,
+        assistantname: input.assistantName,
+        dentalaideid: input.dentalAideId,
+        dentalaidename: input.dentalAideName,
         companyid: input.locationId,
         companyname: input.locationName,
         name: input.serviceName,
@@ -209,6 +227,7 @@ export function useAppointments(selectedLocationId?: string) {
         timeexpected: input.estimatedDuration || 30,
         color: input.color || '1',
         state: 'scheduled',
+        productid: input.serviceId,
       };
 
       const created = await apiCreateAppointment(apiPayload);
@@ -331,12 +350,19 @@ export function useAppointments(selectedLocationId?: string) {
         partnerphone: input.customerPhone,
         doctorid: input.doctorId,
         doctorname: input.doctorName,
+        assistantid: input.assistantId,
+        assistantname: input.assistantName,
+        dentalaideid: input.dentalAideId,
+        dentalaidename: input.dentalAideName,
         companyid: input.locationId,
         companyname: input.locationName,
         name: input.serviceName,
         date: input.date,
         time: input.startTime,
         note: input.notes,
+        timeexpected: input.estimatedDuration,
+        color: input.color,
+        productid: input.serviceId,
       };
 
       await apiUpdateAppointment(appointmentId, apiPayload);
@@ -352,13 +378,20 @@ export function useAppointments(selectedLocationId?: string) {
                 customerPhone: input.customerPhone,
                 doctorId: input.doctorId,
                 doctorName: input.doctorName,
+                assistantId: input.assistantId,
+                assistantName: input.assistantName,
+                dentalAideId: input.dentalAideId,
+                dentalAideName: input.dentalAideName,
                 locationId: input.locationId,
                 locationName: input.locationName,
                 serviceName: input.serviceName,
+                productId: input.serviceId,
                 date: input.date,
                 startTime: input.startTime,
                 endTime: input.endTime,
                 notes: input.notes,
+                estimatedDuration: input.estimatedDuration,
+                color: input.color,
               }
             : apt,
         ),

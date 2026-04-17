@@ -99,14 +99,22 @@ export function Appointments() {
       customerPhone: apt.customerPhone,
       doctorId: apt.doctorId,
       doctorName: apt.doctorName,
+      assistantId: apt.assistantId,
+      assistantName: apt.assistantName,
+      dentalAideId: apt.dentalAideId,
+      dentalAideName: apt.dentalAideName,
       locationId: apt.locationId,
       locationName: apt.locationName,
       appointmentType: apt.appointmentType,
       serviceName: apt.serviceName,
+      serviceId: apt.productId,
       date: apt.date,
       startTime: apt.startTime,
       endTime: apt.endTime,
       notes: apt.notes,
+      estimatedDuration: apt.estimatedDuration,
+      color: apt.color,
+      status: apt.status,
     });
     setIsEditMode(true);
     setShowForm(true);
