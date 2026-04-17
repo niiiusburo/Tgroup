@@ -1,5 +1,114 @@
 [
   {
+    "version": "0.19.1",
+    "date": "2026-04-17",
+    "commit": "6b4723a3",
+    "highlights": "Add IP Access Control with whitelist/blacklist and 4 access modes",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": []
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
+    "version": "0.18.1",
+    "date": "2026-04-17",
+    "commit": "c6bb9d5b",
+    "highlights": "Fix jsdom localStorage in test setup for version-check and report tests",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": []
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
+    "version": "0.18.0",
+    "date": "2026-04-17",
+    "commit": "ed08e156",
+    "highlights": "Live Update Phase 3 — backend telemetry endpoint and client flush",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": []
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
+    "version": "0.17.1",
+    "date": "2026-04-17",
+    "commit": "2ff460b0",
+    "highlights": "Live Update Phase 2 — enforce version + CHANGELOG on every frontend deploy.",
+    "sections": [
+      {
+        "title": "Tooling",
+        "items": [
+          "Add scripts/bump-version.mjs one-liner for version + CHANGELOG prepending",
+          "Add repo-root Husky pre-commit hook enforcing bump on website/src and website/public changes",
+          "Add CI gate in pr-checks.yml to catch --no-verify bypasses",
+          "Add release-tag.yml workflow to auto-create vX.Y.Z tags on main"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.17.0",
+    "date": "2026-04-17",
+    "commit": "3593a69b",
+    "highlights": "Live Update Phase 1 — bulletproof update button, nginx cache fixes, telemetry groundwork.",
+    "sections": [
+      {
+        "title": "Runtime",
+        "items": [
+          "Rewrite applyUpdate to use location.replace with commit-hash cache buster",
+          "Remove deprecated location.reload(true) and HEAD preflight",
+          "Await cache clearing before reload",
+          "Treat any commit-hash mismatch as update available (supports rollback detection)"
+        ]
+      },
+      {
+        "title": "Delivery",
+        "items": [
+          "Add nginx Cache-Control for CHANGELOG.json",
+          "Switch index.html to no-cache for cheap 304 revalidation",
+          "Remove ignored meta http-equiv cache tags from index.html"
+        ]
+      },
+      {
+        "title": "Telemetry",
+        "items": [
+          "Queue version_update_initiated / succeeded / failed events client-side",
+          "Add window.__TG_VERSION__ for console debugging"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.17.0-rc1",
     "date": "2026-04-17",
     "commit": "a8d74bb4",
@@ -10,6 +119,20 @@
         "items": [
           "Add docs/superpowers/specs/2026-04-17-live-update-prd.md",
           "Add docs/superpowers/specs/2026-04-17-live-update-open-questions.md"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.16.6",
+    "date": "2026-04-17",
+    "commit": "c5f69521",
+    "highlights": "Fix SaleOrders SQL: use p.sourceid not so.sourceid",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "API: /api/SaleOrders no longer 500s (c5f69521)"
         ]
       }
     ]

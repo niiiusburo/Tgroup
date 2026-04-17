@@ -1,6 +1,5 @@
 /**
- * TDD Tests for IP Access Integration
- * Agent 4: Integration & Middleware
+ * Tests for IP Access Integration
  */
 
 import { describe, it, expect } from 'vitest';
@@ -35,6 +34,25 @@ describe('IP Access Integration', () => {
     });
   });
 
+  describe('checkIpAccess - block_all mode', () => {
+    const settings: IpAccessSettings = {
+      mode: 'block_all',
+      entries: [],
+      lastUpdated: '2024-01-01',
+    };
+
+    it('should block any IP when mode is block_all', () => {
+      expect(checkIpAccess('192.168.1.1', settings).allowed).toBe(false);
+      expect(checkIpAccess('1.2.3.4', settings).allowed).toBe(false);
+      expect(checkIpAccess('10.0.0.1', settings).allowed).toBe(false);
+    });
+
+    it('should return reason for block_all', () => {
+      const result = checkIpAccess('192.168.1.1', settings);
+      expect(result.reason).toContain('all IPs are blocked');
+    });
+  });
+
   describe('checkIpAccess - whitelist_only mode', () => {
     const entries: IpEntry[] = [
       { id: '1', ipAddress: '192.168.1.1', type: 'whitelist', description: '', isActive: true, createdAt: '', createdBy: '' },
@@ -56,7 +74,7 @@ describe('IP Access Integration', () => {
     it('should block IP if not in whitelist', () => {
       const result = checkIpAccess('1.2.3.4', settings);
       expect(result.allowed).toBe(false);
-      expect(result.reason).toContain('whitelist');
+      expect(result.reason).toContain('not in the whitelist');
     });
 
     it('should block IP if in inactive whitelist entry', () => {

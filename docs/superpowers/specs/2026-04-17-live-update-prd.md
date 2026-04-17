@@ -158,12 +158,22 @@ Each phase gets its own CHANGELOG entry and version bump, which is itself a dogf
 
 ---
 
-## 7. Open Questions (to resolve before Implementation Plan)
+## 7. Open Questions — RESOLVED (2026-04-17)
 
-- Q1. Should the "Update Now" button also clear `localStorage`? Today it preserves it. If a breaking change invalidates a schema stored in `localStorage`, we'd want the option.
-- Q2. Do we want the pre-commit hook at the repo root or inside `website/`? Root means it catches all commits; `website/`-local means it only fires when `cwd` is the website dir. Recommend root with a path filter.
-- Q3. For Phase 3 telemetry: reuse existing `/api/` Express server, or spin up a tiny `/api/telemetry/` sub-router? Recommend sub-router, migration goes in the main tdental-api repo.
-- Q4. Do we want a `window.__TG_VERSION__` global for easier debugging in the browser console? Cheap to add.
+All PRD open questions have been answered. Full decision log with rationale in companion file [`2026-04-17-live-update-open-questions.md`](./2026-04-17-live-update-open-questions.md). Summary:
+
+- **Q1 localStorage on update** → **Wipe only on critical.** Non-critical updates preserve state; `severity: "critical"` wipes everything.
+- **Q2 Pre-commit hook location** → **Repo root** with path filter on `website/src/**` and `website/public/**`.
+- **Q3 Telemetry endpoint** → **Reuse existing `tdental-api` route** (no new sub-router). New DB table `version_events` still lands.
+- **Q4 `window.__TG_VERSION__`** → **Yes**, add it.
+
+Additional decisions captured during review (from the tracker):
+
+- **Q6 Critical countdown** → keep 10s.
+- **Q7 Critical modal** → blocking (overlay + disabled inputs), not a banner.
+- **Q8 Polling interval** → keep 5 min; revisit via telemetry.
+- **Q9 CI gate on release commits** → skip commits whose only changes are `package.json` + `CHANGELOG.json` + `version.json`.
+- **Q10 Downgrade / rollback** → compare commit hash with `!==` (any mismatch triggers "update available"), not `<`.
 
 ---
 

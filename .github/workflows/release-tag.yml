@@ -1,0 +1,31 @@
+name: Release Tag
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  tag-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Create version tag if changed
+        run: |
+          PREV_VERSION=$(git show HEAD~1:website/package.json | grep '"version"' | head -1 | sed 's/.*: "\(.*\)",/\1/')
+          CURR_VERSION=$(grep '"version"' website/package.json | head -1 | sed 's/.*: "\(.*\)",/\1/')
+          if [ "$PREV_VERSION" != "$CURR_VERSION" ]; then
+            TAG="v$CURR_VERSION"
+            if git rev-parse "$TAG" >/dev/null 2>&1; then
+              echo "Tag $TAG already exists."
+            else
+              git config user.name "github-actions[bot]"
+              git config user.email "github-actions[bot]@users.noreply.github.com"
+              git tag -a "$TAG" -m "Release $TAG"
+              git push origin "$TAG"
+              echo "Created tag $TAG"
+            fi
+          else
+            echo "Version unchanged ($CURR_VERSION). No tag created."
+          fi

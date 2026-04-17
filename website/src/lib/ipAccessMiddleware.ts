@@ -23,6 +23,9 @@ export function checkIpAccess(
     case 'allow_all':
       return { allowed: true };
 
+    case 'block_all':
+      return { allowed: false, reason: 'Access denied: all IPs are blocked' };
+
     case 'whitelist_only': {
       const whitelistMatch = settings.entries.find(
         (e) => e.ipAddress === trimmedIp && e.type === 'whitelist' && e.isActive

@@ -16,6 +16,8 @@ import {
   Lock,
   Unlock,
   Server,
+  Ban,
+  Loader2,
 } from 'lucide-react';
 import { useIpAccessControl } from '@/hooks/useIpAccessControl';
 import type { IpEntryType, IpEntry } from '@/types/ipAccessControl';
@@ -30,7 +32,8 @@ export function IpAccessControl() {
     setMode,
     entries,
     stats,
-    validateIp: _validateIp,
+    loading,
+    error: hookError,
     addEntry,
     removeEntry,
     toggleEntryActive,
@@ -40,7 +43,8 @@ export function IpAccessControl() {
   const [ipInput, setIpInput] = useState('');
   const [selectedType, setSelectedType] = useState<IpEntryType>('whitelist');
   const [description, setDescription] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   // Filter state
   const [activeFilter, setActiveFilter] = useState<'all' | 'whitelist' | 'blacklist'>('all');
@@ -52,29 +56,40 @@ export function IpAccessControl() {
   }, [entries, activeFilter]);
 
   // Handle add entry
-  const handleAddEntry = (e: React.FormEvent) => {
+  const handleAddEntry = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setFormError(null);
 
     if (!ipInput.trim()) {
-      setError('Please enter an IP address');
+      setFormError('Please enter an IP address');
       return;
     }
 
-    const result = addEntry(ipInput, selectedType, description);
+    setActionLoading(true);
+    const result = await addEntry(ipInput, selectedType, description);
+    setActionLoading(false);
+
     if (result.success) {
       setIpInput('');
       setDescription('');
     } else {
-      setError(result.error || 'Failed to add entry');
+      setFormError(result.error || 'Failed to add entry');
     }
   };
 
   // Handle remove with confirmation
-  const handleRemove = (entry: IpEntry) => {
-    if (window.confirm(`Are you sure you want to remove ${entry.ipAddress}?`)) {
-      removeEntry(entry.id);
-    }
+  const handleRemove = async (entry: IpEntry) => {
+    if (!window.confirm(`Are you sure you want to remove ${entry.ipAddress}?`)) return;
+    setActionLoading(true);
+    await removeEntry(entry.id);
+    setActionLoading(false);
+  };
+
+  // Handle toggle
+  const handleToggle = async (id: string) => {
+    setActionLoading(true);
+    await toggleEntryActive(id);
+    setActionLoading(false);
   };
 
   // Mode options
@@ -84,6 +99,12 @@ export function IpAccessControl() {
       label: 'Allow All',
       description: 'No IP restrictions - all addresses can access',
       icon: Unlock,
+    },
+    {
+      value: 'block_all' as const,
+      label: 'Block All',
+      description: 'Deny access from all IP addresses',
+      icon: Ban,
     },
     {
       value: 'whitelist_only' as const,
@@ -99,15 +120,31 @@ export function IpAccessControl() {
     },
   ];
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <span className="ml-3 text-gray-600">Loading IP access settings...</span>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {hookError && (
+        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4" />
+          {hookError}
+        </div>
+      )}
+
       {/* Mode Selector */}
       <div className="bg-white rounded-xl shadow-card overflow-hidden">
         <div className="px-6 py-6">
           <label className="block text-sm font-medium text-gray-700 mb-3">
             Access Control Mode
           </label>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {modeOptions.map((option) => {
               const Icon = option.icon;
               return (
@@ -208,17 +245,17 @@ export function IpAccessControl() {
                 value={ipInput}
                 onChange={(e) => {
                   setIpInput(e.target.value);
-                  setError(null);
+                  setFormError(null);
                 }}
                 placeholder="e.g., 192.168.1.100"
                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary ${
-                  error ? 'border-red-300' : 'border-gray-200'
+                  formError ? 'border-red-300' : 'border-gray-200'
                 }`}
               />
-              {error && (
+              {formError && (
                 <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
-                  {error}
+                  {formError}
                 </p>
               )}
             </div>
@@ -254,9 +291,10 @@ export function IpAccessControl() {
 
             <button
               type="submit"
-              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 flex items-center gap-2 transition-colors"
+              disabled={actionLoading}
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 flex items-center gap-2 transition-colors disabled:opacity-60"
             >
-              <Plus className="w-4 h-4" />
+              {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               Add IP
             </button>
           </form>
@@ -347,10 +385,11 @@ export function IpAccessControl() {
                     </td>
                     <td className="px-6 py-4">
                       <button
-                        onClick={() => toggleEntryActive(entry.id)}
+                        onClick={() => handleToggle(entry.id)}
+                        disabled={actionLoading}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                           entry.isActive ? 'bg-green-500' : 'bg-gray-300'
-                        }`}
+                        } disabled:opacity-60`}
                         aria-label={entry.isActive ? 'Active' : 'Inactive'}
                       >
                         <span
@@ -363,7 +402,8 @@ export function IpAccessControl() {
                     <td className="px-6 py-4 text-right">
                       <button
                         onClick={() => handleRemove(entry)}
-                        className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-colors"
+                        disabled={actionLoading}
+                        className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-colors disabled:opacity-60"
                         aria-label={`Remove ${entry.ipAddress}`}
                       >
                         <Trash2 className="w-4 h-4" />
