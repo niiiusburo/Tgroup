@@ -493,8 +493,6 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
   }, []);
 
   const checkForUpdates = useCallback(async (forceCheck = false) => {
-    if (!enabled) return;
-
     const snoozeUntil = getSnoozeUntil();
     const isSnoozedNow = snoozeUntil > Date.now();
     setIsSnoozed(isSnoozedNow);
