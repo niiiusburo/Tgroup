@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Phone, User, Clock } from 'lucide-react';
+import { Phone, User, Users, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
@@ -68,7 +68,7 @@ function DayCard({ appointment, onClick, onEdit, onMarkArrived, onUpdateStatus }
       onClick={() => onClick?.(appointment)}
       className={cn(
         'group relative w-full text-left rounded-lg p-2.5 border-l-4 shadow-sm cursor-pointer',
-        'hover:shadow-md transition-shadow text-xs mb-2',
+        'hover:shadow-md transition-shadow text-xs mb-2 h-full',
         colors.bg,
         colors.dot
       )}
@@ -123,6 +123,22 @@ function DayCard({ appointment, onClick, onEdit, onMarkArrived, onUpdateStatus }
           <User className="w-3 h-3 text-gray-400" />
           <span className="truncate">{appointment.dentist}</span>
         </div>
+
+        {/* Assistant */}
+        {appointment.assistantName && (
+          <div className="flex items-center gap-1 text-[11px] text-gray-600">
+            <Users className="w-3 h-3 text-gray-400" />
+            <span className="truncate">{appointment.assistantName}</span>
+          </div>
+        )}
+
+        {/* Dental Aide */}
+        {appointment.dentalAideName && (
+          <div className="flex items-center gap-1 text-[11px] text-gray-600">
+            <Users className="w-3 h-3 text-gray-400" />
+            <span className="truncate">{appointment.dentalAideName}</span>
+          </div>
+        )}
 
         {/* Time */}
         <div className="flex items-center gap-1 text-[11px] text-gray-600">
@@ -221,7 +237,7 @@ export function DayView({
                   </div>
                   <div
                     className="grid gap-3"
-                    style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))' }}
+                    style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))', gridAutoRows: '1fr' }}
                   >
                     {slotAppointments.map((apt) => (
                       <DayCard

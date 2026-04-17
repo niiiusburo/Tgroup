@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.19.8",
+    "date": "2026-04-17",
+    "commit": "pending",
+    "highlights": "Calendar cards now show the assistant and dental-aide alongside the doctor",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "DayView and WeekView appointment cards display the assigned assistant and dental aide (when present) underneath the doctor, each with a Users icon — makes it obvious at a glance who's working the case.",
+          "Cards now stretch to equal height within their row/column so a staff-heavy card doesn't make siblings look stumpy."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.19.7",
     "date": "2026-04-17",
     "commit": "pending",

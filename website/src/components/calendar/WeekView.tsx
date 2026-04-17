@@ -6,7 +6,7 @@
  * Cards show: status badge, customer name, phone, doctor, time, service
  */
 
-import { CalendarDays, Phone, User, Clock } from 'lucide-react';
+import { CalendarDays, Phone, User, Users, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { type CalendarAppointment } from '@/data/mockCalendar';
@@ -74,7 +74,7 @@ function AppointmentCard({
       onClick={() => onClick?.(appointment)}
       className={cn(
         'relative group rounded-lg p-2.5 border-l-4 shadow-sm cursor-pointer',
-        'hover:shadow-md transition-shadow text-xs mb-2',
+        'hover:shadow-md transition-shadow text-xs mb-2 h-full',
         cardStyles
       )}
     >
@@ -128,6 +128,22 @@ function AppointmentCard({
           <User className="w-3 h-3 text-gray-400" />
           <span className="truncate">{appointment.dentist}</span>
         </div>
+
+        {/* Assistant */}
+        {appointment.assistantName && (
+          <div className="flex items-center gap-1 text-[11px] text-gray-600">
+            <Users className="w-3 h-3 text-gray-400" />
+            <span className="truncate">{appointment.assistantName}</span>
+          </div>
+        )}
+
+        {/* Dental Aide */}
+        {appointment.dentalAideName && (
+          <div className="flex items-center gap-1 text-[11px] text-gray-600">
+            <Users className="w-3 h-3 text-gray-400" />
+            <span className="truncate">{appointment.dentalAideName}</span>
+          </div>
+        )}
 
         {/* Time */}
         <div className="flex items-center gap-1 text-[11px] text-gray-600">
@@ -218,23 +234,25 @@ export function WeekView({
               </div>
 
               {/* Appointments */}
-              <div className="p-2.5 space-y-2 min-h-[400px]">
+              <div className="p-2.5 min-h-[400px]">
                 {sortedAppointments.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-24 text-gray-300">
                     <CalendarDays className="w-6 h-6 mb-1" />
                     <span className="text-xs">{`${t('noAppointments', { ns: 'calendar' })}`}</span>
                   </div>
                 ) : (
-                  sortedAppointments.map((apt) => (
-                    <AppointmentCard
-                      key={apt.id}
-                      appointment={apt}
-                      onClick={onAppointmentClick}
-                      onEdit={onAppointmentEdit}
-                      onMarkArrived={onMarkArrived}
-                      onUpdateStatus={onUpdateStatus}
-                    />
-                  ))
+                  <div className="grid gap-2" style={{ gridAutoRows: '1fr' }}>
+                    {sortedAppointments.map((apt) => (
+                      <AppointmentCard
+                        key={apt.id}
+                        appointment={apt}
+                        onClick={onAppointmentClick}
+                        onEdit={onAppointmentEdit}
+                        onMarkArrived={onMarkArrived}
+                        onUpdateStatus={onUpdateStatus}
+                      />
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
