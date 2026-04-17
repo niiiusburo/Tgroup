@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.19.4",
+    "date": "2026-04-17",
+    "commit": "pending",
+    "highlights": "Excel export: auto-fit column widths to content",
+    "sections": [
+      {
+        "title": "Improvements",
+        "items": [
+          "Excel export: column widths are now auto-fit per column based on the longest cell content (+2 padding, clamped to [10, 60] chars). Replaces the hardcoded legacy TG Dental widths so headers and values are never truncated."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.19.3",
     "date": "2026-04-17",
     "commit": "pending",

@@ -77,19 +77,18 @@ export async function exportAppointmentsXlsx(
     };
   }
 
-  // Column widths matching the original TG Dental file
-  worksheet['!cols'] = [
-    { wch: 62 }, // Khách hàng
-    { wch: 14 }, // Số điện thoại
-    { wch: 16 }, // Thời gian hẹn
-    { wch: 34 }, // Dịch vụ
-    { wch: 21 }, // Bác sĩ
-    { wch: 64 }, // Nội dung
-    { wch: 11 }, // Loại khám
-    { wch: 11 }, // Trạng thái
-    { wch: 31 }, // Lý do
-    { wch: 9 },  // (blank)
-  ];
+  // Auto-fit column widths to the longest cell content per column (+2 padding).
+  // Clamped to [10, 60] so short labels stay readable and long notes don't
+  // blow the sheet out horizontally.
+  worksheet['!cols'] = headers.map((h, i) => {
+    let max = h.length;
+    for (let r = 1; r < data.length; r++) {
+      const v = data[r][i];
+      const len = v ? String(v).length : 0;
+      if (len > max) max = len;
+    }
+    return { wch: Math.min(Math.max(max + 2, 10), 60) };
+  });
 
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
