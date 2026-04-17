@@ -1,0 +1,34 @@
+#!/usr/bin/env sh
+
+# Check if any website source or public files (excluding version/changelog files) are staged
+STAGED_WEBSITE=$(git diff --cached --name-only | grep -E '^website/(src/|public/([^C]|C[^H]|CH[^A]|CHA[^N]|CHAN[^G]|CHANG[^E]).*)' || true)
+
+if [ -z "$STAGED_WEBSITE" ]; then
+  exit 0
+fi
+
+# Check if package.json version changed compared to origin/main
+PKG_VERSION_MAIN=$(git show origin/main:website/package.json 2>/dev/null | grep '"version"' | head -1 | sed 's/.*: "\(.*\)",/\1/')
+PKG_VERSION_HEAD=$(grep '"version"' website/package.json | head -1 | sed 's/.*: "\(.*\)",/\1/')
+
+if [ "$PKG_VERSION_MAIN" = "$PKG_VERSION_HEAD" ]; then
+  echo "❌ Website files staged but version not bumped."
+  echo "   Run: node scripts/bump-version.mjs patch 'Your change summary'"
+  exit 1
+fi
+
+# Check if CHANGELOG.json is staged and its top entry version matches package.json
+CHANGELOG_STAGED=$(git diff --cached --name-only | grep '^website/public/CHANGELOG.json$' || true)
+if [ -z "$CHANGELOG_STAGED" ]; then
+  echo "❌ Version bumped but CHANGELOG.json is not staged."
+  echo "   Run: node scripts/bump-version.mjs patch 'Your change summary'"
+  exit 1
+fi
+
+CHANGELOG_TOP=$(node -e "console.log(JSON.parse(require('fs').readFileSync('website/public/CHANGELOG.json'))[0].version)")
+if [ "$CHANGELOG_TOP" != "$PKG_VERSION_HEAD" ]; then
+  echo "❌ Top CHANGELOG entry version ($CHANGELOG_TOP) does not match package.json ($PKG_VERSION_HEAD)."
+  exit 1
+fi
+
+echo "✅ Version + CHANGELOG bump verified."
