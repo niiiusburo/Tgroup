@@ -1,5 +1,22 @@
 [
   {
+    "version": "0.17.1",
+    "date": "2026-04-17",
+    "commit": "2ff460b0",
+    "highlights": "Live Update Phase 2 — enforce version + CHANGELOG on every frontend deploy.",
+    "sections": [
+      {
+        "title": "Tooling",
+        "items": [
+          "Add scripts/bump-version.mjs one-liner for version + CHANGELOG prepending",
+          "Add repo-root Husky pre-commit hook enforcing bump on website/src and website/public changes",
+          "Add CI gate in pr-checks.yml to catch --no-verify bypasses",
+          "Add release-tag.yml workflow to auto-create vX.Y.Z tags on main"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.17.0",
     "date": "2026-04-17",
     "commit": "3593a69b",
