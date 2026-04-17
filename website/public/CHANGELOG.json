@@ -1,5 +1,42 @@
 [
   {
+    "version": "0.16.5",
+    "date": "2026-04-17",
+    "commit": "3f504493",
+    "highlights": "Reports redesign, IP access control, calendar smart filter overhaul, services form improvements, and fixes rolled up from 0.14.x-0.16.x.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Reports: full data-flow redesign with improved UX (a117a18b)",
+          "IP access control merged into main (09ade7f3, 2c959c92)",
+          "Services: default start date today, doctor optional, restore 8 customer sources (f720afac)",
+          "Services: removed expected end date field from service form (3f504493)",
+          "Calendar: SmartFilterDrawer + toolbar badge primary orange (5bbe8d10)",
+          "Calendar: redesigned FilterSummaryCards to match stat-card vibe (7baba26c)",
+          "Calendar: StatusFilterChips primary orange selected state (0fef4693)",
+          "Calendar: DoctorFilterChips primary orange selected state (f7a1cb4c)",
+          "Calendar: ColorFilterCircles primary orange with visible zero-count dots (e6aa7ed0)"
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Reports: fixed backend validation and SQL bugs (a117a18b)",
+          "Migrations: removed duplicate customer sources re-inserted by restore migration (8c449db4)",
+          "Deploy: disabled nginx cache for index.html and version.json; added customer source merge migrations (6e67c730)",
+          "i18n: cleaned services.json duplicates, added missing columns keys, translated feedback alert (013391c6)",
+          "Sources: frontend fallbacks updated to only show Sale Online customer source (9a67e0cc)",
+          "Tests + routes: fixed vitest e2e conflict, appointment form validation, i18n test, useVersionCheck, jsdom errors, mapped /website (b5921ae0)"
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
     "version": "0.13.4",
     "date": "2026-04-16",
     "commit": "2275291c",
