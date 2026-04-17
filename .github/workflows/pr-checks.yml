@@ -118,3 +118,53 @@ jobs:
           
           echo "✅ Basic secrets check complete"
         continue-on-error: true
+
+  # ============================================================
+  # Version + CHANGELOG Bump Check
+  # ============================================================
+  version-bump-check:
+    name: Version / CHANGELOG Bump Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check for website changes
+        id: changes
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          WEBSITE_FILES=$(git diff --name-only "$BASE" "$HEAD" | grep -E '^website/(src/|public/([^C]|C[^H]|CH[^A]|CHA[^N]|CHAN[^G]|CHANG[^E]).*)' || true)
+          echo "website_files=$WEBSITE_FILES" >> $GITHUB_OUTPUT
+          if [ -n "$WEBSITE_FILES" ]; then
+            echo "has_website_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_website_changes=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Verify version bumped
+        if: steps.changes.outputs.has_website_changes == 'true'
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          MAIN_VERSION=$(git show "$BASE:website/package.json" | grep '"version"' | head -1 | sed 's/.*: "\(.*\)",/\1/')
+          HEAD_VERSION=$(grep '"version"' website/package.json | head -1 | sed 's/.*: "\(.*\)",/\1/')
+          if [ "$MAIN_VERSION" = "$HEAD_VERSION" ]; then
+            echo "❌ Website files changed but version not bumped."
+            echo "   Run: node scripts/bump-version.mjs patch 'Your change summary'"
+            exit 1
+          fi
+      - name: Verify CHANGELOG updated
+        if: steps.changes.outputs.has_website_changes == 'true'
+        run: |
+          CHANGELOG_IN_PR=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" | grep '^website/public/CHANGELOG.json$' || true)
+          if [ -z "$CHANGELOG_IN_PR" ]; then
+            echo "❌ Version bumped but CHANGELOG.json not updated."
+            echo "   Run: node scripts/bump-version.mjs patch 'Your change summary'"
+            exit 1
+          fi
+          HEAD_VERSION=$(grep '"version"' website/package.json | head -1 | sed 's/.*: "\(.*\)",/\1/')
+          CHANGELOG_TOP=$(node -e "console.log(JSON.parse(require('fs').readFileSync('website/public/CHANGELOG.json'))[0].version)")
+          if [ "$CHANGELOG_TOP" != "$HEAD_VERSION" ]; then
+            echo "❌ Top CHANGELOG entry ($CHANGELOG_TOP) does not match package.json ($HEAD_VERSION)."
+            exit 1
+          fi
+          echo "✅ Version + CHANGELOG bump verified."
