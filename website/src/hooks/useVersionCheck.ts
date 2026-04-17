@@ -587,14 +587,16 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
       // ignore
     }
 
-    // Wipe localStorage only on critical updates (Q2 decision)
+    // Wipe storage only on critical updates (Q2 decision)
     if (updateSeverity === 'critical') {
       try {
-        const keysToKeep = new Set([RETURN_PATH_KEY, JUST_UPDATED_KEY, TARGET_VERSION_KEY, 'tgclinic:pendingTelemetry']);
-        for (const key of Object.keys(localStorage)) {
-          if (!keysToKeep.has(key)) {
-            localStorage.removeItem(key);
-          }
+        localStorage.clear();
+        sessionStorage.clear();
+        // Re-preserve the minimal keys needed for the reload mechanism
+        sessionStorage.setItem(RETURN_PATH_KEY, currentPath);
+        localStorage.setItem(JUST_UPDATED_KEY, Date.now().toString());
+        if (latestVersion) {
+          localStorage.setItem(TARGET_VERSION_KEY, latestVersion.version);
         }
       } catch {
         // ignore
