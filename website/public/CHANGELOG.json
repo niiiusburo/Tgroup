@@ -1,5 +1,37 @@
 [
   {
+    "version": "0.17.0",
+    "date": "2026-04-17",
+    "commit": "3593a69b",
+    "highlights": "Live Update Phase 1 — bulletproof update button, nginx cache fixes, telemetry groundwork.",
+    "sections": [
+      {
+        "title": "Runtime",
+        "items": [
+          "Rewrite applyUpdate to use location.replace with commit-hash cache buster",
+          "Remove deprecated location.reload(true) and HEAD preflight",
+          "Await cache clearing before reload",
+          "Treat any commit-hash mismatch as update available (supports rollback detection)"
+        ]
+      },
+      {
+        "title": "Delivery",
+        "items": [
+          "Add nginx Cache-Control for CHANGELOG.json",
+          "Switch index.html to no-cache for cheap 304 revalidation",
+          "Remove ignored meta http-equiv cache tags from index.html"
+        ]
+      },
+      {
+        "title": "Telemetry",
+        "items": [
+          "Queue version_update_initiated / succeeded / failed events client-side",
+          "Add window.__TG_VERSION__ for console debugging"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.17.0-rc1",
     "date": "2026-04-17",
     "commit": "a8d74bb4",
