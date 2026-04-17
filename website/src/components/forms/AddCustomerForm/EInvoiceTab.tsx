@@ -39,7 +39,7 @@ export function EInvoiceTab({ formApi }: EInvoiceTabProps) {
         />
       </div>
       <div className="col-span-2">
-        <FieldLabel>{t('einvoice.companyAddress', 'Địa chỉ công ty')}</FieldLabel>
+        <FieldLabel>{t('einvoice.companyAddress', 'Company Address')}</FieldLabel>
         <input
           type="text"
           value={formData.unitaddress}
@@ -89,7 +89,7 @@ export function EInvoiceTab({ formApi }: EInvoiceTabProps) {
         />
       </div>
       <div className="col-span-2">
-        <FieldLabel>{t('einvoice.recipientAddress', 'Địa chỉ ngưới nhận')}</FieldLabel>
+        <FieldLabel>{t('einvoice.recipientAddress', 'Recipient Address')}</FieldLabel>
         <input
           type="text"
           value={formData.personaladdress}

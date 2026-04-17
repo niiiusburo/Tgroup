@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge, type StatusVariant } from '@/components/shared/StatusBadge';
 import { MapPin } from 'lucide-react';
@@ -28,6 +29,7 @@ const STATUS_MAP: Record<string, StatusVariant> = {
 };
 
 function useColumns(locationNameMap?: Map<string, string>): readonly Column<Employee>[] {
+  const { t } = useTranslation('employees');
   return [
     {
       key: 'name',
@@ -78,7 +80,7 @@ function useColumns(locationNameMap?: Map<string, string>): readonly Column<Empl
         <div className="flex flex-wrap gap-1">
           {emp.roles.map((role) => (
             <span key={role} className={`text-xs px-2 py-0.5 rounded ${ROLE_STYLES[role]}`}>
-              {ROLE_LABELS[role]}
+              {t(ROLE_LABELS[role])}
             </span>
           ))}
         </div>

@@ -6,7 +6,7 @@ import { type CalendarAppointment } from '@/data/mockCalendar';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import { MedicalHistoryTooltip } from './MedicalHistoryTooltip';
-import { calendarStatusToPhase, PHASE_VI_LABELS, PHASE_STYLES } from '@/lib/appointmentStatusMapping';
+import { calendarStatusToPhase, PHASE_LABEL_KEYS, PHASE_STYLES } from '@/lib/appointmentStatusMapping';
 import { StatusBadgeMenu } from './StatusBadgeMenu';
 import { CheckInActions } from './CheckInActions';
 import { EmptyTimeSlot } from './EmptyTimeSlot';
@@ -59,6 +59,7 @@ interface DayCardProps {
 }
 
 function DayCard({ appointment, onClick, onEdit, onMarkArrived, onUpdateStatus }: DayCardProps) {
+  const { t } = useTranslation('appointments');
   const phase = calendarStatusToPhase(appointment.status);
   const styles = PHASE_STYLES[phase];
   const colors = getCardColor(appointment.color);
@@ -84,7 +85,7 @@ function DayCard({ appointment, onClick, onEdit, onMarkArrived, onUpdateStatus }
               styles.border
             )}
           >
-            {PHASE_VI_LABELS[phase]}
+            {t(PHASE_LABEL_KEYS[phase], { ns: 'appointments' })}
           </span>
         ) : (
           <StatusBadgeMenu

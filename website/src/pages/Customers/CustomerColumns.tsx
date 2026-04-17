@@ -16,7 +16,7 @@ function formatDate(dateStr: string): string {
   return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-export function buildCustomerColumns(locationNameMap: Map<string, string>, canSoftDelete: boolean, onSoftDelete: (id: string, name: string) => void): readonly Column<Customer>[] {
+export function buildCustomerColumns(locationNameMap: Map<string, string>, canSoftDelete: boolean, onSoftDelete: (id: string, name: string) => void, t: (key: string) => string): readonly Column<Customer>[] {
   return [
     {
       key: 'code',
@@ -104,7 +104,7 @@ export function buildCustomerColumns(locationNameMap: Map<string, string>, canSo
             onClick={(e) => { e.stopPropagation(); onSoftDelete(row.id, row.name); }}
             className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
             aria-label="Delete"
-            title="Xóa"
+            title={t('delete')}
           >
             <Trash2 className="w-4 h-4" />
           </button>

@@ -51,6 +51,18 @@ website/public/version.json
 
 # Vite pre-bundle cache
 website/node_modules/.vite/
+website/.vite/
+
+# Test screenshots dumped at repo root
+/*.png
+
+# Generated audit reports
+locale_audit_report.md
+
+# Agent task artifacts
+.agent-tasks/
+.audit-tasks/
+.audit/
 
 # Project memory & agent artifacts
 .omc/project-memory.json

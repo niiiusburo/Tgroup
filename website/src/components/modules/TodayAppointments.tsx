@@ -32,7 +32,7 @@ interface TodayAppointmentsProps {
   readonly onFilterChange: (filter: Zone3Filter) => void;
   readonly searchTerm?: string;
   readonly onSearchChange?: (term: string) => void;
-  readonly counts: { all: number; arrived: number; cancelled: number };
+  readonly counts: {all: number;arrived: number;cancelled: number;};
   readonly onMarkArrived: (id: string) => void;
   readonly onMarkCancelled: (id: string) => void;
   readonly onEditSaved?: () => void;
@@ -49,14 +49,14 @@ export function TodayAppointments({
   onMarkArrived,
   onMarkCancelled,
   onEditSaved,
-  onEditClick,
+  onEditClick
 }: TodayAppointmentsProps) {
   const { t } = useTranslation();
-  const FILTER_TABS: { key: Zone3Filter; label: string }[] = [
-    { key: 'all', label: t('overview:zone3.filterAll') },
-    { key: 'arrived', label: t('overview:zone3.filterArrived') },
-    { key: 'cancelled', label: t('overview:zone3.filterCancelled') },
-  ];
+  const FILTER_TABS: {key: Zone3Filter;label: string;}[] = [
+  { key: 'all', label: t('overview:zone3.filterAll') },
+  { key: 'arrived', label: t('overview:zone3.filterArrived') },
+  { key: 'cancelled', label: t('overview:zone3.filterCancelled') }];
+
   const [editingAppointment, setEditingAppointment] = useState<OverviewAppointment | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -89,7 +89,7 @@ export function TodayAppointments({
         <div className="absolute bottom-0 right-8 w-16 h-16 bg-white/10 rounded-full translate-y-1/2" />
         
         <h2 className="text-base font-bold text-white uppercase tracking-wide mb-3">
-          Lịch hẹn hôm nay
+
         </h2>
 
         <div className="flex flex-col gap-3">
@@ -105,15 +105,15 @@ export function TodayAppointments({
                   onClick={() => onFilterChange(tab.key)}
                   className={`
                     px-3 py-1.5 rounded-full text-xs font-semibold transition-all
-                    ${isActive
-                      ? 'bg-white text-purple-700 shadow-lg'
-                      : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'
-                    }
-                  `}
-                >
+                    ${isActive ?
+                  'bg-white text-purple-700 shadow-lg' :
+                  'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'}
+                  `
+                  }>
+                  
                   {tab.label} · {count}
-                </button>
-              );
+                </button>);
+
             })}
           </div>
 
@@ -124,39 +124,39 @@ export function TodayAppointments({
               type="text"
               value={searchTerm}
               onChange={(e) => onSearchChange?.(e.target.value)}
-              placeholder="Tìm nhanh lịch hẹn..."
-              className="w-full pl-8 pr-3 py-1.5 text-sm rounded-lg bg-white/20 border border-white/30 text-white placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-white/30 transition-all"
-            />
+              placeholder={t("tmNhanhLchHn")}
+              className="w-full pl-8 pr-3 py-1.5 text-sm rounded-lg bg-white/20 border border-white/30 text-white placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-white/30 transition-all" />
+            
           </div>
         </div>
       </div>
 
       {/* Appointment list (scrollable) */}
       <div className="flex-1 overflow-y-auto px-5 pb-5 space-y-2.5">
-        {appointments.length === 0 && (
-          <p className="text-center text-gray-400 text-sm py-8">Không có lịch hẹn</p>
-        )}
+        {appointments.length === 0 &&
+        <p className="text-center text-gray-400 text-sm py-8"></p>
+        }
 
-        {appointments.map((apt) => (
-          <AppointmentCard
-            key={apt.id}
-            appointment={apt}
-            onMarkArrived={onMarkArrived}
-            onMarkCancelled={onMarkCancelled}
-            onEdit={handleEditClick}
-          />
-        ))}
+        {appointments.map((apt) =>
+        <AppointmentCard
+          key={apt.id}
+          appointment={apt}
+          onMarkArrived={onMarkArrived}
+          onMarkCancelled={onMarkCancelled}
+          onEdit={handleEditClick} />
+
+        )}
 
         {/* Edit Modal */}
         <EditAppointmentModal
           appointment={editingAppointment}
           isOpen={isEditModalOpen}
           onClose={handleModalClose}
-          onSaved={handleModalSaved}
-        />
+          onSaved={handleModalSaved} />
+        
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 // Color mapping uses SINGLE SOURCE OF TRUTH from constants
@@ -203,11 +203,11 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
   const colorConfig = getColorConfig(appointment.color);
 
   // Get status badge color
-  const statusBadgeColor = isArrived
-    ? 'bg-emerald-500 text-white'
-    : isCancelled
-    ? 'bg-red-500 text-white'
-    : 'bg-purple-500 text-white';
+  const statusBadgeColor = isArrived ?
+  'bg-emerald-500 text-white' :
+  isCancelled ?
+  'bg-red-500 text-white' :
+  'bg-purple-500 text-white';
 
   return (
     <div
@@ -216,12 +216,12 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
       onMouseLeave={handleMouseLeave}
       className={`
         rounded-xl border overflow-hidden transition-all cursor-pointer
-        ${isHighlighted 
-          ? 'ring-2 ring-blue-500 ring-offset-2 border-blue-300 shadow-lg' 
-          : 'border-gray-200 shadow-sm hover:shadow-md'
-        }
-      `}
-    >
+        ${isHighlighted ?
+      'ring-2 ring-blue-500 ring-offset-2 border-blue-300 shadow-lg' :
+      'border-gray-200 shadow-sm hover:shadow-md'}
+      `
+      }>
+      
       {/* Top row: name + action buttons */}
       <div className="flex items-center justify-between px-3.5 pt-3 pb-1.5 bg-gradient-to-r from-white to-slate-50">
         <span className="text-sm font-bold text-slate-800 truncate flex-1 mr-2">
@@ -233,28 +233,28 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
             type="button"
             onClick={() => onEdit(appointment)}
             className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-purple-600 hover:border-purple-300 hover:bg-purple-50 transition-all"
-            title="Edit appointment"
-          >
+            title="Edit appointment">
+            
             <Pencil className="w-3.5 h-3.5" />
           </button>
 
           {/* Check-in / status button */}
-          {!isCancelled && (
-            <button
-              type="button"
-              onClick={() => !isArrived && onMarkArrived(appointment.id)}
-              className={`
+          {!isCancelled &&
+          <button
+            type="button"
+            onClick={() => !isArrived && onMarkArrived(appointment.id)}
+            className={`
                 w-7 h-7 rounded-lg border flex items-center justify-center transition-all
-                ${isArrived
-                  ? 'bg-emerald-500 text-white border-emerald-500'
-                  : 'border-gray-200 bg-white text-gray-400 hover:text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50'
-                }
-              `}
-              title={isArrived ? 'Arrived' : 'Mark as arrived'}
-            >
+                ${isArrived ?
+            'bg-emerald-500 text-white border-emerald-500' :
+            'border-gray-200 bg-white text-gray-400 hover:text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50'}
+              `
+            }
+            title={isArrived ? 'Arrived' : 'Mark as arrived'}>
+            
               <UserCheck className="w-3.5 h-3.5" />
             </button>
-          )}
+          }
         </div>
       </div>
 
@@ -263,8 +263,8 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
         className={`
           mx-2.5 mb-2.5 rounded-lg px-3.5 py-2.5 flex items-center justify-between gap-2 border
           ${colorConfig}
-        `}
-      >
+        `}>
+        
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-1">
             <User className="w-3.5 h-3.5 text-purple-500 shrink-0" />
@@ -283,26 +283,26 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
         </div>
 
         {/* Status badge - 3 states only */}
-        {isArrived && (
-          <span className={`${statusBadgeColor} px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-sm`}>
-            Đã đến
-          </span>
-        )}
+        {isArrived &&
+        <span className={`${statusBadgeColor} px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-sm`}>
+
+        </span>
+        }
 
         {/* Cancelled badge */}
-        {isCancelled && (
-          <span className={`${statusBadgeColor} px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-sm`}>
-            Hủy hẹn
-          </span>
-        )}
+        {isCancelled &&
+        <span className={`${statusBadgeColor} px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-sm`}>
+
+        </span>
+        }
 
         {/* Scheduled badge */}
-        {!isArrived && !isCancelled && (
-          <span className={`${statusBadgeColor} px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-sm`}>
-            Đang hẹn
-          </span>
-        )}
+        {!isArrived && !isCancelled &&
+        <span className={`${statusBadgeColor} px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-sm`}>
+
+        </span>
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 }

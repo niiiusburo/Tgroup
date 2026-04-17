@@ -10,8 +10,8 @@ import { useState } from 'react';
 import {
   CalendarCheck, Plus, Search, Filter, Edit2,
   ChevronDown, ChevronUp, Clock, Users, Stethoscope, CheckCircle2,
-  Calendar,
-} from 'lucide-react';
+  Calendar } from
+'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { StatusBadge, type StatusVariant } from '@/components/shared/StatusBadge';
@@ -24,8 +24,8 @@ import { useAppointments, type AppointmentFilter } from '@/hooks/useAppointments
 import { useLocationFilter } from '@/contexts/LocationContext';
 import {
   CHECK_IN_STATUS_LABELS,
-  CHECK_IN_STATUS_STYLES,
-} from '@/data/mockAppointments';
+  CHECK_IN_STATUS_STYLES } from
+'@/data/mockAppointments';
 import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_TYPE_LABELS } from '@/constants';
 import type { AppointmentStatus } from '@/data/mockCalendar';
 
@@ -36,7 +36,7 @@ const STATUS_TO_BADGE: Record<AppointmentStatus, StatusVariant> = {
   confirmed: 'active',
   'in-progress': 'draft',
   completed: 'completed',
-  cancelled: 'cancelled',
+  cancelled: 'cancelled'
 };
 
 export function Appointments() {
@@ -54,24 +54,24 @@ export function Appointments() {
     createAppointment,
     updateAppointment,
     advanceCheckIn,
-    convertToService,
+    convertToService
   } = useAppointments(selectedLocationId);
 
   const [showForm, setShowForm] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<AppointmentFormData | null>(null);
-  const STATUS_TABS: { label: string; value: AppointmentFilter }[] = [
-    { label: t('all'), value: 'all' },
-    { label: t('status.scheduled'), value: 'scheduled' },
-    { label: t('status.confirmed'), value: 'confirmed' },
-    { label: t('status.inProgress'), value: 'in-progress' },
-    { label: t('status.completed'), value: 'completed' },
-    { label: t('status.cancelled'), value: 'cancelled' },
-  ];
+  const STATUS_TABS: {label: string;value: AppointmentFilter;}[] = [
+  { label: t('all'), value: 'all' },
+  { label: t('status.scheduled'), value: 'scheduled' },
+  { label: t('status.confirmed'), value: 'confirmed' },
+  { label: t('status.inProgress'), value: 'in-progress' },
+  { label: t('status.completed'), value: 'completed' },
+  { label: t('status.cancelled'), value: 'cancelled' }];
+
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
   function toggleExpanded(id: string) {
-    setExpandedId((prev) => (prev === id ? null : id));
+    setExpandedId((prev) => prev === id ? null : id);
   }
 
   function handleCreate(data: AppointmentFormData) {
@@ -140,8 +140,8 @@ export function Appointments() {
             setEditingAppointment(null);
             setShowForm(true);
           }}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-        >
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+          
           <Plus className="w-4 h-4" />
           {t('addAppointment')}
         </button>
@@ -165,8 +165,8 @@ export function Appointments() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t('searchPlaceholder')}
-            className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-          />
+            className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
+          
         </div>
         {/* Location filter */}
         {/* Date filter */}
@@ -177,54 +177,54 @@ export function Appointments() {
               value={dateFilter}
               onChange={setDateFilter}
               placeholder={t('form.date')}
-              icon={<Calendar className="w-3.5 h-3.5" />}
-            />
+              icon={<Calendar className="w-3.5 h-3.5" />} />
+            
           </div>
-          {dateFilter && (
-            <button
-              type="button"
-              onClick={() => setDateFilter('')}
-              className="text-xs text-gray-500 hover:text-gray-700"
-            >
+          {dateFilter &&
+          <button
+            type="button"
+            onClick={() => setDateFilter('')}
+            className="text-xs text-gray-500 hover:text-gray-700">
+            
               {t('cancel', { ns: 'common' })}
             </button>
-          )}
+          }
         </div>
       </div>
 
       {/* Status tabs */}
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {STATUS_TABS.map((tab) => (
-          <button
-            key={tab.value}
-            type="button"
-            onClick={() => setStatusFilter(tab.value)}
-            className={`px-4 py-2 text-sm font-medium rounded-lg border whitespace-nowrap transition-colors ${
-              statusFilter === tab.value
-                ? 'bg-primary text-white border-primary'
-                : 'text-gray-600 bg-white border-gray-200 hover:bg-gray-50'
-            }`}
-          >
+        {STATUS_TABS.map((tab) =>
+        <button
+          key={tab.value}
+          type="button"
+          onClick={() => setStatusFilter(tab.value)}
+          className={`px-4 py-2 text-sm font-medium rounded-lg border whitespace-nowrap transition-colors ${
+          statusFilter === tab.value ?
+          'bg-primary text-white border-primary' :
+          'text-gray-600 bg-white border-gray-200 hover:bg-gray-50'}`
+          }>
+          
             {tab.label}
           </button>
-        ))}
+        )}
       </div>
 
       {/* Appointments list */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {appointments.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">
+        {appointments.length === 0 ?
+        <div className="p-8 text-center text-gray-400">
             <CalendarCheck className="w-10 h-10 mx-auto mb-2 text-gray-300" />
             <p className="text-sm">{t('searchPlaceholder')}</p>
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {appointments.map((apt) => {
-              const typeColors = APPOINTMENT_TYPE_COLORS[apt.appointmentType];
-              const isExpanded = expandedId === apt.id;
+          </div> :
 
-              return (
-                <div key={apt.id} className="transition-colors hover:bg-gray-50/50">
+        <div className="divide-y divide-gray-100">
+            {appointments.map((apt) => {
+            const typeColors = APPOINTMENT_TYPE_COLORS[apt.appointmentType];
+            const isExpanded = expandedId === apt.id;
+
+            return (
+              <div key={apt.id} className="transition-colors hover:bg-gray-50/50">
                   {/* Row */}
                   <div className="w-full text-left p-4 flex items-center gap-4">
                     {/* Date/Time block */}
@@ -250,25 +250,25 @@ export function Appointments() {
                     </span>
 
                     {/* Wait timer compact */}
-                    {apt.checkInStatus === 'waiting' && (
-                      <WaitTimer arrivalTime={apt.arrivalTime} treatmentStartTime={apt.treatmentStartTime} compact />
-                    )}
+                    {apt.checkInStatus === 'waiting' &&
+                  <WaitTimer arrivalTime={apt.arrivalTime} treatmentStartTime={apt.treatmentStartTime} compact />
+                  }
 
                     {/* Status badge */}
                     <StatusBadge status={STATUS_TO_BADGE[apt.status]} label={apt.status.replace('-', ' ')} />
 
                     {/* Expand chevron */}
-                    <button type="button" onClick={() => toggleExpanded(apt.id)} className="shrink-0 p-1 rounded hover:bg-gray-100 transition-colors" aria-label={isExpanded ? 'Thu gọn chi tiết' : 'Mở rộng chi tiết'}>
-                      {isExpanded
-                        ? <ChevronUp className="w-4 h-4 text-gray-400" />
-                        : <ChevronDown className="w-4 h-4 text-gray-400" />
-                      }
+                    <button type="button" onClick={() => toggleExpanded(apt.id)} className="shrink-0 p-1 rounded hover:bg-gray-100 transition-colors" aria-label={isExpanded ? t("thuGnChiTit") : t("mRngChiTit")}>
+                      {isExpanded ?
+                    <ChevronUp className="w-4 h-4 text-gray-400" /> :
+                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                    }
                     </button>
                   </div>
 
                   {/* Expanded detail */}
-                  {isExpanded && (
-                    <div className="px-4 pb-4 pt-0 ml-0 sm:ml-20 space-y-4 border-t border-gray-50">
+                  {isExpanded &&
+                <div className="px-4 pb-4 pt-0 ml-0 sm:ml-20 space-y-4 border-t border-gray-50">
                       {/* Appointment type badge */}
                       <div className="flex items-center gap-2 pt-3">
                         <span className={`px-2 py-0.5 rounded text-xs font-medium ${typeColors.bg} ${typeColors.text}`}>
@@ -283,17 +283,17 @@ export function Appointments() {
                       </div>
 
                       {/* Notes */}
-                      {apt.notes && (
-                        <p className="text-sm text-gray-600">{apt.notes}</p>
-                      )}
+                      {apt.notes &&
+                  <p className="text-sm text-gray-600">{apt.notes}</p>
+                  }
 
                       {/* Actions */}
                       <div className="flex items-center gap-2 pt-2">
                         <button
-                          type="button"
-                          onClick={() => handleEditClick(apt)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/5 rounded-lg transition-colors"
-                        >
+                      type="button"
+                      onClick={() => handleEditClick(apt)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/5 rounded-lg transition-colors">
+                      
                           <Edit2 className="w-4 h-4" />
                           {t('edit', { ns: 'common' })}
                         </button>
@@ -301,40 +301,40 @@ export function Appointments() {
 
                       {/* Check-in flow */}
                       <CheckInFlow
-                        appointment={apt}
-                        onAdvance={advanceCheckIn}
-                      />
+                    appointment={apt}
+                    onAdvance={advanceCheckIn} />
+                  
 
                       {/* Convert to service */}
                       <ConvertToService
-                        appointment={apt}
-                        onConvert={convertToService}
-                      />
+                    appointment={apt}
+                    onConvert={convertToService} />
+                  
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                }
+                </div>);
+
+          })}
           </div>
-        )}
+        }
       </div>
 
       {/* Appointment form modal */}
-      {showForm && (
-        <AppointmentForm
-          isEdit={isEditMode}
-          initialData={editingAppointment || undefined}
-          onSubmit={isEditMode ? handleUpdate : handleCreate}
-          onClose={() => {
-            setShowForm(false);
-            setIsEditMode(false);
-            setEditingAppointmentId(null);
-            setEditingAppointment(null);
-          }}
-        />
-      )}
-    </div>
-  );
+      {showForm &&
+      <AppointmentForm
+        isEdit={isEditMode}
+        initialData={editingAppointment || undefined}
+        onSubmit={isEditMode ? handleUpdate : handleCreate}
+        onClose={() => {
+          setShowForm(false);
+          setIsEditMode(false);
+          setEditingAppointmentId(null);
+          setEditingAppointment(null);
+        }} />
+
+      }
+    </div>);
+
 }
 
 /* -- Internal stat card -- */
@@ -353,6 +353,6 @@ function StatCard({ icon, label, value, bg }: StatCardProps) {
         <div className="text-2xl font-bold text-gray-900">{value}</div>
         <div className="text-xs text-gray-600">{label}</div>
       </div>
-    </div>
-  );
+    </div>);
+
 }

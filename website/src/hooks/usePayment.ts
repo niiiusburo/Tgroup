@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { fetchSaleOrders, type ApiSaleOrder } from '@/lib/api';
-import { createPayment } from '@/lib/api/payments';
+import { createPayment as createPaymentApi } from '@/lib/api/payments';
 import {
   type PaymentRecord,
   type PaymentMethod,
@@ -210,7 +210,7 @@ export function usePayment(selectedLocationId?: string) {
 
   const topUpWallet = useCallback(async (input: TopUpInput) => {
     const composedNote = [input.date ? `Date: ${input.date}` : null, input.note].filter(Boolean).join(' | ');
-    await createPayment({
+    await createPaymentApi({
       customerId: input.customerId,
       amount: input.amount,
       method: input.method === 'vietqr' ? 'bank_transfer' : input.method,

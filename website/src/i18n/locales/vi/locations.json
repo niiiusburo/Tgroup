@@ -39,5 +39,12 @@
   "totalCustomers": "Tổng khách hàng",
   "monthlyRevenue": "Doanh thu tháng",
   "noLocations": "Không có chi nhánh",
-  "createNew": "Tạo chi nhánh mới"
+  "createNew": "Tạo chi nhánh mới",
+  "egTamDentistBnhDng": "e.g., Tam Dentist Bình Dương",
+  "123NgAbcPhngX": "123 Đường ABC, Phường X",
+  "egQun1": "e.g., Quận 1",
+  "form.district": "Quận/Huyện",
+  "registeredPatients": "Bệnh nhân đăng ký",
+  "target": "Mục tiêu",
+  "acrossAllBranches": "Tất cả chi nhánh"
 }

@@ -34,9 +34,9 @@ export function useUniqueCheck(checkFn: CheckFn, currentId?: string) {
         const result = await checkFn(trimmedPhone, trimmedEmail, currentId);
         if (result.exists) {
           if (result.field === 'phone') {
-            setPhoneError('Số điện thoại đã tồn tại');
+            setPhoneError('validation.phoneExists');
           } else if (result.field === 'email') {
-            setEmailError('Email đã tồn tại');
+            setEmailError('validation.emailExists');
           }
         } else {
           if (trimmedPhone) setPhoneError(null);

@@ -1,7 +1,7 @@
 import { X, Clock, User, MapPin, Phone, FileText, Tag, Calendar, Stethoscope, Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_TYPE_LABELS, APPOINTMENT_STATUS_LABELS_VI } from '@/constants';
-import { STATUS_LABELS, type CalendarAppointment } from '@/data/mockCalendar';
+import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_TYPE_LABELS, APPOINTMENT_STATUS_I18N_KEYS } from '@/constants';
+import { type CalendarAppointment } from '@/data/mockCalendar';
 
 /**
  * AppointmentDetailsModal - Full appointment info overlay
@@ -37,7 +37,9 @@ export function AppointmentDetailsModal({
   if (!appointment) return null;
 
   const typeColors = APPOINTMENT_TYPE_COLORS[appointment.appointmentType];
-  const statusLabel = APPOINTMENT_STATUS_LABELS_VI[appointment.status] ?? STATUS_LABELS[appointment.status];
+  const statusLabel = APPOINTMENT_STATUS_I18N_KEYS[appointment.status]
+    ? t(APPOINTMENT_STATUS_I18N_KEYS[appointment.status])
+    : appointment.status;
   const typeLabel = APPOINTMENT_TYPE_LABELS[appointment.appointmentType];
 
   return (

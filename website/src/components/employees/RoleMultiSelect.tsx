@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { ALL_ROLES, ROLE_LABELS, ROLE_STYLES, type EmployeeRole } from '@/data/mockEmployees';
 
 /**
@@ -14,6 +15,7 @@ interface RoleMultiSelectProps {
 }
 
 export function RoleMultiSelect({ value, onChange, showAll = true, counts }: RoleMultiSelectProps) {
+  const { t } = useTranslation('employees');
   return (
     <div className="flex flex-wrap gap-2">
       {showAll && (
@@ -39,7 +41,7 @@ export function RoleMultiSelect({ value, onChange, showAll = true, counts }: Rol
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
         >
-          {ROLE_LABELS[role]}
+          {t(ROLE_LABELS[role])}
           {counts && <span className="ml-1.5 text-xs opacity-80">({counts[role]})</span>}
         </button>
       ))}

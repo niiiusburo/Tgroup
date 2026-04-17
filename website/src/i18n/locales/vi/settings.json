@@ -81,5 +81,15 @@
     "label": "Chọn múi giờ",
     "searchPlaceholder": "Tìm múi giờ..."
   },
-  "subtitle": "Cấu hình hệ thống"
+  "subtitle": "Cấu hình hệ thống",
+  "angTi": "Đang tải...",
+  "tiKhonNgnHng": "Tài khoản ngân hàng",
+  "cuHnhTiKhonNhnThanhTonQrChoPhngKhm": "Cấu hình tài khoản nhận thanh toán QR cho phòng khám",
+  "mNgnHngBin": "Mã ngân hàng (BIN)",
+  "vD970436Vietcombank": "Ví dụ: 970436 (Vietcombank)",
+  "sTiKhon": "Số tài khoản",
+  "tnChTiKhon": "Tên chủ tài khoản",
+  "angLu": "Đang lưu...",
+  "lu": "Lưu",
+  "luCiTNgnHng": "Đã lưu cài đặt ngân hàng"
 }

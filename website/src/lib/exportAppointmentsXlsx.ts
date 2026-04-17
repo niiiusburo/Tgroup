@@ -3,19 +3,45 @@ import { apiStateToPhase, type CalendarPhase } from './appointmentStatusMapping'
 import { parseAppointmentNote } from './appointmentNotes';
 import type { CalendarAppointment } from '@/types/appointment';
 
-const EXCEL_STATUS_LABELS: Record<CalendarPhase, string> = {
-  scheduled: 'Đang hẹn',
-  waiting: 'Đã đến',
-  'in-treatment': 'Đang khám',
-  done: 'Hoàn thành',
-  cancelled: 'Hủy hẹn',
-};
+export function getExportHeaders(t: (key: string, options?: Record<string, unknown>) => string): string[] {
+  return [
+    t('appointments.export.customer', { defaultValue: 'Customer' }),
+    t('appointments.export.phone', { defaultValue: 'Phone' }),
+    t('appointments.export.appointmentTime', { defaultValue: 'Appointment Time' }),
+    t('appointments.export.service', { defaultValue: 'Service' }),
+    t('appointments.export.doctor', { defaultValue: 'Doctor' }),
+    t('appointments.export.content', { defaultValue: 'Content' }),
+    t('appointments.export.visitType', { defaultValue: 'Visit Type' }),
+    t('appointments.export.status', { defaultValue: 'Status' }),
+    t('appointments.export.reason', { defaultValue: 'Reason' }),
+    '', // column 10 intentionally blank
+  ];
+}
 
-function deriveVisitType(note: string): string {
+export function getExcelStatusLabel(
+  t: (key: string, options?: Record<string, unknown>) => string,
+  phase: CalendarPhase
+): string {
+  const map: Record<CalendarPhase, string> = {
+    scheduled: t('appointments.export.status.scheduled', { defaultValue: 'Scheduled' }),
+    waiting: t('appointments.export.status.waiting', { defaultValue: 'Arrived' }),
+    'in-treatment': t('appointments.export.status.in-treatment', { defaultValue: 'In Treatment' }),
+    done: t('appointments.export.status.done', { defaultValue: 'Completed' }),
+    cancelled: t('appointments.export.status.cancelled', { defaultValue: 'Cancelled' }),
+  };
+  return map[phase];
+}
+
+export function getVisitTypeLabel(
+  t: (key: string, options?: Record<string, unknown>) => string,
+  note: string
+): string {
   const parsed = parseAppointmentNote(note);
   const typeLower = parsed.type.toLowerCase();
-  if (typeLower.includes('tksn') || typeLower.includes('khám mới')) return 'Khám mới';
-  return 'Tái khám';
+  if (typeLower.includes('tksn') || typeLower.includes('khám mới')) {
+    return t('appointments.visitType.newExam', { defaultValue: 'New Exam' });
+  }
+  return t('appointments.visitType.followUp', { defaultValue: 'Follow-up' });
 }
 
 function formatAppointmentDateTime(date: string, time: string): string {
@@ -26,6 +52,7 @@ function formatAppointmentDateTime(date: string, time: string): string {
 export async function exportAppointmentsXlsx(
   appointments: CalendarAppointment[],
   filename: string,
+  t: (key: string, options?: Record<string, unknown>) => string,
 ): Promise<void> {
   const { saveAs } = await import('file-saver');
 
@@ -35,18 +62,7 @@ export async function exportAppointmentsXlsx(
     return a.startTime.localeCompare(b.startTime);
   });
 
-  const headers = [
-    'Khách hàng',
-    'Số điện thoại',
-    'Thời gian hẹn',
-    'Dịch vụ',
-    'Bác sĩ',
-    'Nội dung',
-    'Loại khám',
-    'Trạng thái',
-    'Lý do',
-    '', // column 10 intentionally blank
-  ];
+  const headers = getExportHeaders(t);
 
   const data: (string | null)[][] = [headers];
 
@@ -59,8 +75,8 @@ export async function exportAppointmentsXlsx(
       apt.serviceName || '',
       apt.dentist || '',
       apt.notes || '',
-      deriveVisitType(apt.notes || ''),
-      EXCEL_STATUS_LABELS[phase],
+      getVisitTypeLabel(t, apt.notes || ''),
+      getExcelStatusLabel(t, phase),
       phase === 'cancelled' ? apt.notes || '' : '',
       '',
     ]);

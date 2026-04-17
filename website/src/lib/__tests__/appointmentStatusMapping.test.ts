@@ -3,7 +3,7 @@ import {
   apiStateToPhase,
   calendarStatusToPhase,
   PHASE_TO_API_STATE,
-  PHASE_VI_LABELS,
+  PHASE_LABEL_KEYS,
 } from '../appointmentStatusMapping';
 
 describe('appointmentStatusMapping', () => {
@@ -28,9 +28,9 @@ describe('appointmentStatusMapping', () => {
     expect(calendarStatusToPhase('cancelled')).toBe('cancelled');
   });
 
-  it('has Vietnamese labels for every phase', () => {
+  it('has label keys for every phase', () => {
     Object.keys(PHASE_TO_API_STATE).forEach((phase) => {
-      expect(PHASE_VI_LABELS[phase as keyof typeof PHASE_VI_LABELS]).toBeTruthy();
+      expect(PHASE_LABEL_KEYS[phase as keyof typeof PHASE_LABEL_KEYS]).toBeTruthy();
     });
   });
 });

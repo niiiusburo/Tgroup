@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { PermissionGroup } from '@/lib/api';
 import { MODULES, PERMISSION_DESCRIPTIONS } from './constants';
 
@@ -7,6 +8,7 @@ interface MatrixViewProps {
 }
 
 export function MatrixView({ groups, onToggle }: MatrixViewProps) {
+  const { t } = useTranslation('permissions');
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
       <table className="w-full border-collapse text-xs min-w-[600px]">
@@ -59,7 +61,7 @@ export function MatrixView({ groups, onToggle }: MatrixViewProps) {
                             data-testid={`perm-tooltip-${permId}`}
                             className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-gray-900 text-white text-[11px] rounded-lg whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:pointer-events-auto transition-opacity z-50 shadow-lg"
                           >
-                            {PERMISSION_DESCRIPTIONS[permId]}
+                            {t(PERMISSION_DESCRIPTIONS[permId])}
                           </span>
                         </span>
                       )}

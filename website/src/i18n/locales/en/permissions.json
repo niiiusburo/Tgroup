@@ -1,3 +1,75 @@
 {
-  "title": "Permissions"
+  "descriptions": {
+    "overview": {
+      "view": "View Dashboard overview page"
+    },
+    "calendar": {
+      "view": "View appointments on Calendar",
+      "edit": "Edit, drag and drop appointments"
+    },
+    "customers": {
+      "view": "View customer list",
+      "viewAll": "View all customers without search — automatically display full list",
+      "add": "Add new customer",
+      "edit": "Edit customer information",
+      "delete": "Delete customer",
+      "hardDelete": "Permanently delete customer from system"
+    },
+    "appointments": {
+      "view": "View appointment list",
+      "add": "Create new appointment",
+      "edit": "Edit appointment"
+    },
+    "employees": {
+      "view": "View employee list",
+      "add": "Add new employee",
+      "edit": "Edit employee information"
+    },
+    "locations": {
+      "view": "View branch list",
+      "add": "Add new branch",
+      "edit": "Edit branch information"
+    },
+    "services": {
+      "view": "View service catalog",
+      "add": "Add new service",
+      "edit": "Edit service"
+    },
+    "payment": {
+      "view": "View payment history",
+      "add": "Create new payment",
+      "refund": "Process payment refund"
+    },
+    "reports": {
+      "view": "View reports",
+      "export": "Export reports"
+    },
+    "settings": {
+      "view": "View system settings",
+      "edit": "Edit settings"
+    },
+    "notifications": {
+      "view": "View notifications",
+      "edit": "Manage notifications"
+    },
+    "commission": {
+      "view": "View commissions",
+      "edit": "Edit commissions"
+    },
+    "permissions": {
+      "view": "View system permissions",
+      "edit": "Edit system permissions"
+    },
+    "relationships": {
+      "view": "View data relationships"
+    },
+    "website": {
+      "view": "View website page",
+      "edit": "Edit website page"
+    },
+    "externalCheckups": {
+      "view": "View external checkup images",
+      "create": "Upload external checkup images"
+    }
+  }
 }

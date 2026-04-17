@@ -39,7 +39,7 @@ const ADDRESS_TYPE_MAP: Record<string, keyof AddressDetails> = {
   sublocality_level_1: 'district',
   sublocality: 'ward',
   neighborhood: 'ward',
-  postal_code: 'postalCode' as keyof AddressDetails,
+  postal_code: 'postalCode' as keyof AddressDetails
 };
 
 // Common Vietnamese city normalizations
@@ -53,7 +53,7 @@ const CITY_NORMALIZATIONS: Record<string, string[]> = {
   'Bình Dương': ['Binh Duong', 'Thu Dau Mot', 'Tỉnh Bình Dương'],
   'Đồng Nai': ['Dong Nai', 'Bien Hoa', 'Biên Hòa', 'Tỉnh Đồng Nai'],
   'Bà Rịa - Vũng Tàu': ['Ba Ria Vung Tau', 'Vung Tau', 'Vũng Tàu', 'Bà Rịa', 'Tỉnh Bà Rịa Vũng Tàu'],
-  'Lâm Đồng': ['Lam Dong', 'Da Lat', 'Đà Lạt', 'Thành phố Đà Lạt', 'Tỉnh Lâm Đồng'],
+  'Lâm Đồng': ['Lam Dong', 'Da Lat', 'Đà Lạt', 'Thành phố Đà Lạt', 'Tỉnh Lâm Đồng']
 };
 
 // Suggestion interface
@@ -70,7 +70,7 @@ export function AddressAutocomplete({
   value,
   onChange,
   placeholder = 'Nhập địa chỉ...',
-  disabled = false,
+  disabled = false
 }: AddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -79,7 +79,7 @@ export function AddressAutocomplete({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState(value);
-  
+
   // Debounce timer ref
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -114,8 +114,8 @@ export function AddressAutocomplete({
 
     try {
       console.log('[AddressAutocomplete] Fetching suggestions for:', input);
-      
-      const data = await apiFetch<{ status: string; predictions?: AddressSuggestion[]; error_message?: string }>(
+
+      const data = await apiFetch<{status: string;predictions?: AddressSuggestion[];error_message?: string;}>(
         '/Places/autocomplete',
         { params: { input, types: 'address', language: 'vi' } }
       );
@@ -160,29 +160,29 @@ export function AddressAutocomplete({
   const parseAddressComponents = async (placeId: string, description: string): Promise<AddressDetails | null> => {
     try {
       console.log('[AddressAutocomplete] Fetching place details for:', placeId);
-      
+
       // Use the backend proxy to get place details
       const data = await apiFetch<{
         result?: {
-          address_components: Array<{ types: string[]; long_name: string; short_name: string }>;
-          geometry?: { location?: { lat: number; lng: number } };
+          address_components: Array<{types: string[];long_name: string;short_name: string;}>;
+          geometry?: {location?: {lat: number;lng: number;};};
         };
         status: string;
       }>('/Places/details', { params: { place_id: placeId } });
-      
+
       if (data.status !== 'OK' || !data.result) {
         console.error('[AddressAutocomplete] Place details error:', data.status);
         return null;
       }
-      
+
       const addressComponents = data.result.address_components;
-      
+
       const details: AddressDetails = {
         street: '',
         city: '',
         district: '',
         ward: '',
-        fullAddress: description,
+        fullAddress: description
       };
 
       // Extract lat/lng
@@ -193,14 +193,14 @@ export function AddressAutocomplete({
 
       // Parse address components
       const streetParts: string[] = [];
-      
+
       addressComponents.forEach((component) => {
         const types = component.types;
         const longName = component.long_name;
 
         types.forEach((type: string) => {
           const mappedKey = ADDRESS_TYPE_MAP[type];
-          
+
           if (mappedKey === 'street') {
             if (type === 'street_number') {
               streetParts.unshift(longName);
@@ -221,7 +221,7 @@ export function AddressAutocomplete({
 
       // Join street parts
       details.street = streetParts.join(', ');
-      
+
       // Fallback: if no street parts, use the description before the first comma
       if (!details.street && description.includes(',')) {
         details.street = description.split(',')[0];
@@ -235,7 +235,7 @@ export function AddressAutocomplete({
         city: '',
         district: '',
         ward: '',
-        fullAddress: description,
+        fullAddress: description
       };
     }
   };
@@ -243,8 +243,8 @@ export function AddressAutocomplete({
   // Normalize city name
   const normalizeCityName = (name: string): string => {
     for (const [standard, variations] of Object.entries(CITY_NORMALIZATIONS)) {
-      if (variations.some(v => name.toLowerCase().includes(v.toLowerCase())) || 
-          name.toLowerCase().includes(standard.toLowerCase())) {
+      if (variations.some((v) => name.toLowerCase().includes(v.toLowerCase())) ||
+      name.toLowerCase().includes(standard.toLowerCase())) {
         return standard;
       }
     }
@@ -253,40 +253,40 @@ export function AddressAutocomplete({
 
   // Normalize district name
   const normalizeDistrictName = (name: string): string => {
-    return name
-      .replace(/^Quận\s+/i, '')
-      .replace(/^Huyện\s+/i, '')
-      .replace(/^Thành phố\s+/i, '')
-      .replace(/^Thị xã\s+/i, '')
-      .trim();
+    return name.
+    replace(/^Quận\s+/i, '').
+    replace(/^Huyện\s+/i, '').
+    replace(/^Thành phố\s+/i, '').
+    replace(/^Thị xã\s+/i, '').
+    trim();
   };
 
   // Normalize ward name
   const normalizeWardName = (name: string): string => {
-    return name
-      .replace(/^Phường\s+/i, '')
-      .replace(/^Xã\s+/i, '')
-      .replace(/^Thị trấn\s+/i, '')
-      .trim();
+    return name.
+    replace(/^Phường\s+/i, '').
+    replace(/^Xã\s+/i, '').
+    replace(/^Thị trấn\s+/i, '').
+    trim();
   };
 
   // Handle suggestion selection
   const handleSelect = async (suggestion: AddressSuggestion) => {
     const { place_id, description } = suggestion;
-    
+
     console.log('[AddressAutocomplete] Selected:', description, 'Place ID:', place_id);
-    
+
     setShowSuggestions(false);
     setSuggestions([]);
-    
+
     try {
       // Update input value immediately for better UX
       setInputValue(description);
-      
+
       // Parse address components
       const details = await parseAddressComponents(place_id, description);
       console.log('[AddressAutocomplete] Parsed details:', details);
-      
+
       // Call onChange ONCE with both address and details
       // This ensures all values (street, city, district, ward) are set together
       onChange(description, details || undefined);
@@ -335,20 +335,20 @@ export function AddressAutocomplete({
             onChange={handleInputChange}
             placeholder={placeholder}
             disabled={disabled}
-            title={inputValue || placeholder}  // Show full address on hover
-            className="w-full pl-10 pr-4 py-3 bg-white border border-red-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all"
-          />
+            title={inputValue || placeholder} // Show full address on hover
+            className="w-full pl-10 pr-4 py-3 bg-white border border-red-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition-all" />
+          
         </div>
         <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-xs text-red-600 font-medium">⚠️ {error}</p>
-          {error.includes('API key') && (
-            <p className="text-xs text-red-500 mt-1">
-              Hướng dẫn: Tạo file .env với VITE_GOOGLE_PLACES_API_KEY=your_key
-            </p>
-          )}
+          {error.includes('API key') &&
+          <p className="text-xs text-red-500 mt-1">
+
+          </p>
+          }
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -364,50 +364,50 @@ export function AddressAutocomplete({
           onFocus={() => inputValue.length >= 3 && setShowSuggestions(true)}
           placeholder={placeholder}
           disabled={disabled || !apiKey}
-          title={inputValue || placeholder}  // Show full address on hover
+          title={inputValue || placeholder} // Show full address on hover
           className={`
             w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-xl 
             text-sm text-gray-900 placeholder:text-gray-400
             focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 
             transition-all
             ${disabled || !apiKey ? 'opacity-60 cursor-not-allowed bg-gray-50' : ''}
-          `}
-        />
+          `} />
+        
 
         {/* Clear button */}
-        {inputValue && (
-          <button
-            type="button"
-            onClick={handleClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
-          >
+        {inputValue &&
+        <button
+          type="button"
+          onClick={handleClear}
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all">
+          
             <X className="w-4 h-4" />
           </button>
-        )}
+        }
 
         {/* Loading indicator */}
-        {isLoading && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+        {isLoading &&
+        <div className="absolute right-3 top-1/2 -translate-y-1/2">
             <Loader2 className="w-4 h-4 text-orange-500 animate-spin" />
           </div>
-        )}
+        }
       </div>
 
       {/* Suggestions dropdown */}
-      {showSuggestions && suggestions.length > 0 && (
-        <div ref={dropdownRef} className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+      {showSuggestions && suggestions.length > 0 &&
+      <div ref={dropdownRef} className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="py-2 max-h-72 overflow-y-auto">
-            {suggestions.map((suggestion, index) => (
-              <button
-                key={suggestion.place_id}
-                type="button"
-                onClick={() => handleSelect(suggestion)}
-                className={`
+            {suggestions.map((suggestion, index) =>
+          <button
+            key={suggestion.place_id}
+            type="button"
+            onClick={() => handleSelect(suggestion)}
+            className={`
                   w-full px-4 py-3 text-left flex items-start gap-3 
                   transition-colors hover:bg-orange-50
                   ${index !== suggestions.length - 1 ? 'border-b border-gray-50' : ''}
-                `}
-              >
+                `}>
+            
                 <div className="mt-0.5 p-1.5 bg-orange-100 rounded-lg flex-shrink-0">
                   <MapPin className="w-3.5 h-3.5 text-orange-600" />
                 </div>
@@ -421,22 +421,22 @@ export function AddressAutocomplete({
                 </div>
                 <Check className="w-4 h-4 text-orange-500 opacity-0 group-hover:opacity-100" />
               </button>
-            ))}
+          )}
           </div>
         </div>
-      )}
+      }
 
       {/* No results message */}
-      {showSuggestions && !isLoading && inputValue.length >= 3 && suggestions.length === 0 && (
-        <div ref={dropdownRef} className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 z-[100]">
+      {showSuggestions && !isLoading && inputValue.length >= 3 && suggestions.length === 0 &&
+      <div ref={dropdownRef} className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 z-[100]">
           <div className="flex items-center gap-3 text-gray-500">
             <Search className="w-5 h-5" />
-            <p className="text-sm">Không tìm thấy địa chỉ phù hợp</p>
+            <p className="text-sm"></p>
           </div>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
 
 export default AddressAutocomplete;

@@ -35,22 +35,22 @@ import { buildCustomerColumns } from './Customers/CustomerColumns';
  * @crossref:uses[SearchBar, DataTable, StatusBadge, useCustomers, CustomerProfile, AddCustomerForm]
  */
 
-const STATUS_FILTER_OPTIONS: readonly { readonly value: 'all' | CustomerStatus; readonly label: string }[] = [
-  { value: 'all', label: 'All Status' },
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
-  { value: 'pending', label: 'Pending' },
-] as const;
+const STATUS_FILTER_OPTIONS: readonly {readonly value: 'all' | CustomerStatus;readonly label: string;}[] = [
+{ value: 'all', label: 'All Status' },
+{ value: 'active', label: 'Active' },
+{ value: 'inactive', label: 'Inactive' },
+{ value: 'pending', label: 'Pending' }] as
+const;
 
 export function Customers() {
   const { t } = useTranslation('customers');
-  const { id } = useParams<{ id?: string }>();
+  const { id } = useParams<{id?: string;}>();
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(id ?? null);
   const [profileTab, setProfileTab] = useState<ProfileTab>('profile');
-  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; customerId: string | null; customerName: string; mode: 'soft' | 'hard' } | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{open: boolean;customerId: string | null;customerName: string;mode: 'soft' | 'hard';} | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -74,7 +74,7 @@ export function Customers() {
   }, [selectedCustomerId]);
 
   const { hasPermission } = useAuth();
-  
+
   // Check permissions
   const canEditCustomers = hasPermission('customers.edit');
   const canAddCustomers = hasPermission('customers.add');
@@ -91,22 +91,22 @@ export function Customers() {
     createCustomer,
     updateCustomer,
     searchRequired,
-    minSearchLength,
-  // Load customers across all locations so staff can search by name/phone
-  // regardless of the global clinic filter.
+    minSearchLength
+    // Load customers across all locations so staff can search by name/phone
+    // regardless of the global clinic filter.
   } = useCustomers(undefined);
 
   const { allLocations } = useLocations();
   const locationNameMap = useMemo(
     () => new Map(allLocations.map((l) => [l.id, l.name])),
-    [allLocations],
+    [allLocations]
   );
   const customerColumns = useMemo(() => buildCustomerColumns(locationNameMap, canSoftDelete, (id, name) => {
     setDeleteDialog({ open: true, customerId: id, customerName: name, mode: 'soft' });
-  }), [locationNameMap, canSoftDelete]);
+  }, t), [locationNameMap, canSoftDelete, t]);
 
   const { profile: hookProfile, rawPartner, appointments: hookAppointments, linkedCounts, isLoading: profileLoading, refetch: refetchProfile } =
-    useCustomerProfile(selectedCustomerId);
+  useCustomerProfile(selectedCustomerId);
 
   // Hooks for profile actions (fetch across all locations — a customer's history
   // should never be hidden by the global clinic filter).
@@ -124,7 +124,7 @@ export function Customers() {
     addRefund,
     voidDeposit,
     removeDeposit,
-    editDeposit,
+    editDeposit
   } = useDeposits();
   const { payments: customerPayments, isLoading: paymentsLoading, addPayment, refetch: refetchPayments, deletePaymentById } = useCustomerPayments(selectedCustomerId);
 
@@ -143,7 +143,7 @@ export function Customers() {
       date: data.date,
       startTime: data.startTime,
       endTime: data.endTime,
-      notes: data.notes,
+      notes: data.notes
     });
   }, [createAppointment]);
 
@@ -161,7 +161,7 @@ export function Customers() {
       date: data.date,
       startTime: data.startTime,
       endTime: data.endTime,
-      notes: data.notes,
+      notes: data.notes
     });
   }, [updateAppointment]);
 
@@ -201,7 +201,7 @@ export function Customers() {
       startDate: data.startDate,
       expectedEndDate: data.startDate,
       notes: data.notes,
-      toothNumbers: data.toothNumbers,
+      toothNumbers: data.toothNumbers
     });
   }, [createServiceRecord, selectedCustomerId, hookProfile]);
 
@@ -243,7 +243,7 @@ export function Customers() {
       startDate: data.startDate,
       expectedEndDate: data.startDate,
       notes: data.notes,
-      toothNumbers: data.toothNumbers,
+      toothNumbers: data.toothNumbers
     });
   }, [updateServiceRecord, selectedCustomerId, hookProfile]);
 
@@ -261,8 +261,8 @@ export function Customers() {
       allocations: data.allocations?.map((a) => ({
         invoice_id: a.invoiceId,
         dotkham_id: a.dotkhamId,
-        allocated_amount: a.allocatedAmount,
-      })),
+        allocated_amount: a.allocatedAmount
+      }))
     });
     refetchProfile();
     refetchPayments();
@@ -271,24 +271,24 @@ export function Customers() {
   }, [addPayment, refetchProfile, refetchPayments, loadDeposits, refetchServices]);
 
   const handleAddDeposit = useCallback(async (
-    customerId: string,
-    amount: number,
-    method: 'cash' | 'bank_transfer' | 'vietqr',
-    date?: string,
-    note?: string
-  ) => {
+  customerId: string,
+  amount: number,
+  method: 'cash' | 'bank_transfer' | 'vietqr',
+  date?: string,
+  note?: string) =>
+  {
     await addDeposit(customerId, amount, method, date, note);
     refetchProfile();
     if (selectedCustomerId) loadDeposits(selectedCustomerId);
   }, [addDeposit, refetchProfile, selectedCustomerId, loadDeposits]);
 
   const handleAddRefund = useCallback(async (
-    customerId: string,
-    amount: number,
-    method: 'cash' | 'bank_transfer',
-    date?: string,
-    note?: string
-  ) => {
+  customerId: string,
+  amount: number,
+  method: 'cash' | 'bank_transfer',
+  date?: string,
+  note?: string) =>
+  {
     await addRefund(customerId, amount, method, date, note);
     refetchProfile();
     if (selectedCustomerId) loadDeposits(selectedCustomerId);
@@ -304,7 +304,7 @@ export function Customers() {
     if (selectedCustomerId) loadDeposits(selectedCustomerId);
   }, [removeDeposit, selectedCustomerId, loadDeposits]);
 
-  const handleEditDeposit = useCallback(async (id: string, data: Partial<{ amount: number; method: 'cash' | 'bank_transfer'; notes: string; paymentDate: string }>) => {
+  const handleEditDeposit = useCallback(async (id: string, data: Partial<{amount: number;method: 'cash' | 'bank_transfer';notes: string;paymentDate: string;}>) => {
     await editDeposit(id, data);
     if (selectedCustomerId) loadDeposits(selectedCustomerId);
   }, [editDeposit, selectedCustomerId, loadDeposits]);
@@ -326,12 +326,12 @@ export function Customers() {
       setDotKhams([]);
       return;
     }
-    fetchDotKhams({ partnerId: selectedCustomerId, limit: 500 })
-      .then((res) => setDotKhams(res.items))
-      .catch((err) => {
-        console.error('Failed to load dotkhams:', err);
-        setDotKhams([]);
-      });
+    fetchDotKhams({ partnerId: selectedCustomerId, limit: 500 }).
+    then((res) => setDotKhams(res.items)).
+    catch((err) => {
+      console.error('Failed to load dotkhams:', err);
+      setDotKhams([]);
+    });
   }, [selectedCustomerId]);
 
   const [createdCustomerCode, setCreatedCustomerCode] = useState<string | null>(null);
@@ -409,7 +409,7 @@ export function Customers() {
         personalidentitycard: rawPartner.personalidentitycard ?? '',
         personaltaxcode: rawPartner.personaltaxcode ?? '',
         personaladdress: rawPartner.personaladdress ?? '',
-        ref: rawPartner.code ?? '',
+        ref: rawPartner.code ?? ''
       };
     }
     // Fallback to summarised profile
@@ -418,11 +418,11 @@ export function Customers() {
         name: hookProfile.name,
         phone: hookProfile.phone,
         email: hookProfile.email,
-        gender: hookProfile.gender === 'female' || hookProfile.gender === 'Nữ' || hookProfile.gender === 'f'
-          ? 'female'
-          : hookProfile.gender && hookProfile.gender !== 'N/A'
-          ? 'male'
-          : '',
+        gender: hookProfile.gender === 'female' || hookProfile.gender === 'Nữ' || hookProfile.gender === 'f' ?
+        'female' :
+        hookProfile.gender && hookProfile.gender !== 'N/A' ?
+        'male' :
+        '',
         companyid: hookProfile.companyId,
         street: hookProfile.address !== 'N/A' ? hookProfile.address.split(', ')[0] || '' : '',
         note: hookProfile.notes || '',
@@ -431,7 +431,7 @@ export function Customers() {
         referraluserid: '',
         salestaffid: '',
         cskhid: '',
-        ref: hookProfile.code || '',
+        ref: hookProfile.code || ''
       };
     }
     // Fallback to paginated customers list
@@ -441,11 +441,11 @@ export function Customers() {
       name: customer.name,
       phone: customer.phone,
       email: customer.email,
-      gender: customer.gender === 'female' || customer.gender === 'Nữ' || customer.gender === 'f'
-        ? 'female'
-        : customer.gender
-        ? 'male'
-        : '',
+      gender: customer.gender === 'female' || customer.gender === 'Nữ' || customer.gender === 'f' ?
+      'female' :
+      customer.gender ?
+      'male' :
+      '',
       companyid: customer.locationId,
       street: customer.street || '',
       note: customer.note || '',
@@ -453,7 +453,7 @@ export function Customers() {
       referraluserid: '',
       salestaffid: '',
       cskhid: customer.cskhid || '',
-      ref: customer.code || '',
+      ref: customer.code || ''
     };
   };
 
@@ -486,8 +486,8 @@ export function Customers() {
       navigate('/customers');
       refetchProfile();
     } catch (err: unknown) {
-      if (typeof err === 'object' && err !== null && 'status' in err && (err as { status: number }).status === 409) {
-        setDeleteError('Khách hàng này đang có lịch hẹn, điều trị hoặc thanh toán liên quan. Vui lòng xóa các dữ liệu liên quan trước.');
+      if (typeof err === 'object' && err !== null && 'status' in err && (err as {status: number;}).status === 409) {
+        setDeleteError(t('deleteErrorHasLinkedData'));
       } else {
         setDeleteError(getErrorMessage(err));
       }
@@ -524,7 +524,7 @@ export function Customers() {
         salestaffid: hookProfile.salestaffid,
         cskhid: hookProfile.cskhid,
         cskhname: hookProfile.cskhname,
-        referraluserid: hookProfile.referraluserid,
+        referraluserid: hookProfile.referraluserid
       };
     } else {
       profileData = {
@@ -550,51 +550,51 @@ export function Customers() {
         salestaffid: null,
         cskhid: null,
         cskhname: null,
-        referraluserid: null,
+        referraluserid: null
       };
     }
 
-    const saleServices: CustomerService[] = selectedCustomerId
-      ? getRecordsByCustomer(selectedCustomerId).map((r) => ({
-          id: r.id,
-          date: r.startDate || r.createdAt || '-',
-          service: r.serviceName,
-          doctor: r.doctorName || 'N/A',
-          doctorId: r.doctorId,
-          assistantId: r.assistantId,
-          assistantName: r.assistantName,
-          dentalAideId: r.dentalAideId,
-          dentalAideName: r.dentalAideName,
-          catalogItemId: r.catalogItemId,
-          cost: r.totalCost,
-          status:
-            r.status === 'completed'
-              ? 'completed'
-              : r.status === 'cancelled'
-              ? 'cancelled'
-              : 'active',
-          tooth: r.toothNumbers?.join(', ') || '-',
-          notes: r.notes || '',
-          orderName: r.orderName,
-          orderCode: r.orderCode,
-          paidAmount: r.paidAmount,
-          residual: r.residual ?? Math.max(0, (r.totalCost ?? 0) - (r.paidAmount ?? 0)),
-        }))
-      : [];
+    const saleServices: CustomerService[] = selectedCustomerId ?
+    getRecordsByCustomer(selectedCustomerId).map((r) => ({
+      id: r.id,
+      date: r.startDate || r.createdAt || '-',
+      service: r.serviceName,
+      doctor: r.doctorName || 'N/A',
+      doctorId: r.doctorId,
+      assistantId: r.assistantId,
+      assistantName: r.assistantName,
+      dentalAideId: r.dentalAideId,
+      dentalAideName: r.dentalAideName,
+      catalogItemId: r.catalogItemId,
+      cost: r.totalCost,
+      status:
+      r.status === 'completed' ?
+      'completed' :
+      r.status === 'cancelled' ?
+      'cancelled' :
+      'active',
+      tooth: r.toothNumbers?.join(', ') || '-',
+      notes: r.notes || '',
+      orderName: r.orderName,
+      orderCode: r.orderCode,
+      paidAmount: r.paidAmount,
+      residual: r.residual ?? Math.max(0, (r.totalCost ?? 0) - (r.paidAmount ?? 0))
+    })) :
+    [];
 
     const dotkhamServices: CustomerService[] = dotKhams.map((dk) => {
       const cost = parseFloat(dk.totalamount || '0') || 0;
       const residual = parseFloat(dk.amountresidual || '0') || 0;
       const status =
-        dk.state === 'done' || dk.state === 'completed'
-          ? 'completed'
-          : dk.state === 'cancel' || dk.state === 'cancelled'
-          ? 'cancelled'
-          : 'active';
+      dk.state === 'done' || dk.state === 'completed' ?
+      'completed' :
+      dk.state === 'cancel' || dk.state === 'cancelled' ?
+      'cancelled' :
+      'active';
       return {
         id: dk.id,
         date: dk.date ? dk.date.slice(0, 10) : '-',
-        service: dk.name || 'Đợt khám',
+        service: dk.name || t('defaultCheckupName'),
         doctor: dk.doctorname || 'N/A',
         doctorId: dk.doctorid || '',
         assistantId: dk.assistantid,
@@ -609,7 +609,7 @@ export function Customers() {
         orderName: dk.name || undefined,
         paidAmount: Math.max(0, cost - residual),
         residual,
-        locationName: dk.companyname || undefined,
+        locationName: dk.companyname || undefined
       };
     });
 
@@ -646,7 +646,7 @@ export function Customers() {
           onCreateService={handleCreateService}
           onUpdateService={handleUpdateService}
           onMakePayment={handleMakePayment}
-          onDeletePayment={async (id) => { await deletePaymentById(id); refetchPayments(); refetchProfile(); }}
+          onDeletePayment={async (id) => {await deletePaymentById(id);refetchPayments();refetchProfile();}}
           canSoftDelete={canSoftDelete}
           canHardDelete={canHardDelete}
           onSoftDelete={() => {
@@ -667,26 +667,26 @@ export function Customers() {
           onRefetchCheckups={refetchCheckups}
           onUpdateServiceStatus={async (serviceId, newStatus) => {
             await updateServiceStatus(serviceId, newStatus as 'active' | 'completed' | 'cancelled');
-          }}
-        />
-        {showForm && isEditMode && (
-          <div className="modal-container">
+          }} />
+        
+        {showForm && isEditMode &&
+        <div className="modal-container">
             <div className="modal-content max-w-[1100px] animate-in zoom-in-95 duration-200 flex flex-col">
               <AddCustomerForm
-                isEdit={true}
-                canEdit={canEditCustomers}
-                initialData={getEditFormData()}
-                customerRef={getCustomerCode()}
-                customerId={selectedCustomerId ?? undefined}
-                onSubmit={handleSubmit}
-                onCancel={() => { setShowForm(false); setIsEditMode(false); }}
-                onPendingFaceImage={setPendingFaceImage}
-              />
+              isEdit={true}
+              canEdit={canEditCustomers}
+              initialData={getEditFormData()}
+              customerRef={getCustomerCode()}
+              customerId={selectedCustomerId ?? undefined}
+              onSubmit={handleSubmit}
+              onCancel={() => {setShowForm(false);setIsEditMode(false);}}
+              onPendingFaceImage={setPendingFaceImage} />
+            
             </div>
           </div>
-        )}
-      </>
-    );
+        }
+      </>);
+
   }
 
   return (
@@ -701,121 +701,121 @@ export function Customers() {
             <p className="text-sm text-gray-500">{stats.total} patients · {stats.active} active</p>
           </div>
         </div>
-        {canAddCustomers && (
-          <button
-            onClick={() => { setIsEditMode(false); setShowForm(true); }}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-          >
+        {canAddCustomers &&
+        <button
+          onClick={() => {setIsEditMode(false);setShowForm(true);}}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+          
             <Plus className="w-4 h-4" />
             Add Customer
           </button>
-        )}
+        }
       </div>
 
-      {showForm && !isEditMode && (
-        <div className="modal-container">
+      {showForm && !isEditMode &&
+      <div className="modal-container">
           <div className="modal-content max-w-[1100px] animate-in zoom-in-95 duration-200 flex flex-col">
             <AddCustomerForm
-              customerRef={createdCustomerCode}
-              customerId={selectedCustomerId ?? undefined}
-              onSubmit={handleSubmit}
-              onCancel={() => { setShowForm(false); setCreatedCustomerCode(null); }}
-              onPendingFaceImage={setPendingFaceImage}
-            />
+            customerRef={createdCustomerCode}
+            customerId={selectedCustomerId ?? undefined}
+            onSubmit={handleSubmit}
+            onCancel={() => {setShowForm(false);setCreatedCustomerCode(null);}}
+            onPendingFaceImage={setPendingFaceImage} />
+          
           </div>
         </div>
-      )}
+      }
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div className="w-full sm:max-w-xs">
           <SearchBar value={searchTerm} onChange={setSearchTerm} placeholder={t('searchPlaceholder')} />
         </div>
         <div className="flex items-center gap-1">
-          {STATUS_FILTER_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => setStatusFilter(opt.value)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                statusFilter === opt.value ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
+          {STATUS_FILTER_OPTIONS.map((opt) =>
+          <button
+            key={opt.value}
+            onClick={() => setStatusFilter(opt.value)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            statusFilter === opt.value ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`
+            }>
+            
               {opt.label}
             </button>
-          ))}
+          )}
         </div>
       </div>
 
       {/* Search Required Message */}
-      {searchRequired && !searchTerm && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
+      {searchRequired && !searchTerm &&
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
           <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
             <Search className="w-6 h-6 text-amber-600" />
           </div>
           <h3 className="text-sm font-medium text-amber-900 mb-1">{t('searchToView')}</h3>
           <p className="text-xs text-amber-700">
-            Nhập ít nhất {minSearchLength} ký tự để tìm kiếm khách hàng
-          </p>
+          {minSearchLength}
+        </p>
         </div>
-      )}
+      }
 
       {/* Customer Table - only show when not in search required mode or has results */}
-      {(!searchRequired || searchTerm.length >= minSearchLength) && (
-        <DataTable<Customer>
-          columns={customerColumns}
-          data={customers}
-          keyExtractor={(row) => row.id}
-          pageSize={20}
-          onRowClick={(row) => navigate(`/customers/${row.id}`)}
-          emptyMessage={t('table.noData', { ns: 'common' })}
-        />
-      )}
+      {(!searchRequired || searchTerm.length >= minSearchLength) &&
+      <DataTable<Customer>
+        columns={customerColumns}
+        data={customers}
+        keyExtractor={(row) => row.id}
+        pageSize={20}
+        onRowClick={(row) => navigate(`/customers/${row.id}`)}
+        emptyMessage={t('table.noData', { ns: 'common' })} />
+
+      }
 
       {/* Delete Confirmation Dialog */}
-      {deleteDialog?.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      {deleteDialog?.open &&
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 mx-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              {deleteDialog.mode === 'hard' ? 'Xóa vĩnh viễn' : 'Xóa khách hàng'}
+              {deleteDialog.mode === 'hard' ? t("xaVnhVin") : t("xaKhchHng")}
             </h3>
             <p className="text-sm text-gray-600 mb-4">
-              Bạn có chắc muốn <strong>{deleteDialog.mode === 'hard' ? 'xóa vĩnh viễn' : 'xóa'}</strong> khách hàng <strong>{deleteDialog.customerName}</strong>?
-              {deleteDialog.mode === 'soft' && ' Khách hàng sẽ bị ẩn khỏi danh sách nhưng dữ liệu vẫn được giữ lại.'}
-              {deleteDialog.mode === 'hard' && ' Hành động này không thể hoàn tác.'}
+            <strong>{deleteDialog.mode === 'hard' ? t("xaVnhVin1") : t("xa1")}</strong><strong>{deleteDialog.customerName}</strong>?
+              {deleteDialog.mode === 'soft' && t('softDeleteWarning')}
+              {deleteDialog.mode === 'hard' && t('hardDeleteWarning')}
             </p>
-            {linkedCounts && (linkedCounts.appointments > 0 || linkedCounts.saleorders > 0 || linkedCounts.dotkhams > 0) && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-800">
+            {linkedCounts && (linkedCounts.appointments > 0 || linkedCounts.saleorders > 0 || linkedCounts.dotkhams > 0) &&
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-800">
                 <p className="font-medium mb-1">{t('relatedData')}</p>
                 <ul className="list-disc list-inside space-y-0.5">
-                  {linkedCounts.appointments > 0 && <li>{linkedCounts.appointments} lịch hẹn</li>}
-                  {linkedCounts.saleorders > 0 && <li>{linkedCounts.saleorders} hóa đơn</li>}
-                  {linkedCounts.dotkhams > 0 && <li>{linkedCounts.dotkhams} đợt khám</li>}
+                  {linkedCounts.appointments > 0 && <li>{linkedCounts.appointments}</li>}
+                  {linkedCounts.saleorders > 0 && <li>{linkedCounts.saleorders}</li>}
+                  {linkedCounts.dotkhams > 0 && <li>{linkedCounts.dotkhams}</li>}
                 </ul>
               </div>
-            )}
-            {deleteError && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 text-sm text-red-700">
+          }
+            {deleteError &&
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 text-sm text-red-700">
                 {deleteError}
               </div>
-            )}
+          }
             <div className="flex items-center justify-end gap-3">
               <button
-                onClick={() => setDeleteDialog(null)}
-                disabled={deleteLoading}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
-              >
-                Hủy
-              </button>
+              onClick={() => setDeleteDialog(null)}
+              disabled={deleteLoading}
+              className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50">
+              
+
+            </button>
               <button
-                onClick={handleDeleteConfirm}
-                disabled={deleteLoading}
-                className="px-4 py-2 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                {deleteLoading ? 'Đang xử lý...' : (deleteDialog.mode === 'hard' ? 'Xóa vĩnh viễn' : 'Xóa')}
+              onClick={handleDeleteConfirm}
+              disabled={deleteLoading}
+              className="px-4 py-2 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50">
+              
+                {deleteLoading ? t("angXL") : deleteDialog.mode === 'hard' ? t("xaVnhVin") : t("xa")}
               </button>
             </div>
           </div>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }

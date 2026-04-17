@@ -27,7 +27,7 @@ export function VietQrModal({
   customerName = '',
   customerPhone = '',
   defaultAmount,
-  paymentId,
+  paymentId
 }: VietQrModalProps) {
   const { t } = useTranslation('payment');
   const { settings, loading } = useBankSettings();
@@ -55,15 +55,15 @@ export function VietQrModal({
   if (!open) return null;
 
   const qrUrl =
-    generated && settings && amount
-      ? buildVietQrUrl({
-          bin: settings.bankBin,
-          number: settings.bankNumber,
-          amount: Number(amount),
-          description: description || '',
-          name: settings.bankAccountName,
-        })
-      : null;
+  generated && settings && amount ?
+  buildVietQrUrl({
+    bin: settings.bankBin,
+    number: settings.bankNumber,
+    amount: Number(amount),
+    description: description || '',
+    name: settings.bankAccountName
+  }) :
+  null;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -98,8 +98,8 @@ export function VietQrModal({
       <div
         className="absolute inset-0 bg-black/30 backdrop-blur-sm"
         onClick={onClose}
-        aria-hidden="true"
-      />
+        aria-hidden="true" />
+      
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
@@ -110,15 +110,15 @@ export function VietQrModal({
                 <QrCode className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Thanh toán VietQR</h2>
-                <p className="text-sm text-orange-100 mt-0.5">Quét mã QR để chuyển khoản</p>
+                <h2 className="text-xl font-bold text-white"></h2>
+                <p className="text-sm text-orange-100 mt-0.5"></p>
               </div>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors"
-            >
+              className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors">
+              
               <X className="w-5 h-5 text-white" />
             </button>
           </div>
@@ -130,7 +130,7 @@ export function VietQrModal({
           <div className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                Số tiền (VND)
+
               </label>
               <CurrencyInput
                 value={amount ? Number(amount) : null}
@@ -138,13 +138,13 @@ export function VietQrModal({
                   setAmount(v === null ? '' : String(v));
                   setGenerated(false);
                 }}
-                placeholder={t('enterAmount', { ns: 'payment' })}
-              />
+                placeholder={t('enterAmount', { ns: 'payment' })} />
+              
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                Nội dung chuyển khoản
+
               </label>
               <input
                 type="text"
@@ -154,83 +154,83 @@ export function VietQrModal({
                   setGenerated(false);
                 }}
                 placeholder={t('enterNote', { ns: 'payment' })}
-                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
-              />
+                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm" />
+              
             </div>
 
             <button
               type="button"
               onClick={() => setGenerated(true)}
               disabled={!amount || loading || !settings}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all shadow-lg shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Tạo QR
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all shadow-lg shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed">
+              
+
             </button>
           </div>
 
           {/* Right panel - QR display + proof upload */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-center bg-gray-50 rounded-xl border border-gray-100 p-4 min-h-[200px]">
-              {loading ? (
-                <div className="flex items-center gap-2 text-gray-400">
+              {loading ?
+              <div className="flex items-center gap-2 text-gray-400">
                   <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
-                  Đang tải...
-                </div>
-              ) : !settings ? (
-                <div className="text-center text-gray-500">
-                  <p className="text-sm">Vui lòng cấu hình tài khoản ngân hàng trong Cài đặt</p>
-                </div>
-              ) : qrUrl ? (
-                <div className="text-center">
+
+              </div> :
+              !settings ?
+              <div className="text-center text-gray-500">
+                  <p className="text-sm"></p>
+                </div> :
+              qrUrl ?
+              <div className="text-center">
                   <img src={qrUrl} alt="VietQR" className="mx-auto rounded-lg" />
                   <p className="mt-2 text-xs text-gray-400">
                     {settings.bankAccountName} - {settings.bankNumber}
                   </p>
-                </div>
-              ) : (
-                <div className="text-center text-gray-400">
+                </div> :
+
+              <div className="text-center text-gray-400">
                   <QrCode className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">Nhập số tiền và nhấn "Tạo QR"</p>
+                  <p className="text-sm"></p>
                 </div>
-              )}
+              }
             </div>
 
-            {qrUrl && (
-              <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+            {qrUrl &&
+            <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Ảnh xác nhận chuyển khoản
-                </label>
+
+              </label>
                 <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100"
-                />
-                {proofImage && (
-                  <img src={proofImage} alt="Payment proof preview" className="w-full max-h-40 object-contain rounded-lg border border-gray-100" />
-                )}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100" />
+              
+                {proofImage &&
+              <img src={proofImage} alt="Payment proof preview" className="w-full max-h-40 object-contain rounded-lg border border-gray-100" />
+              }
                 <button
-                  type="button"
-                  onClick={handleConfirmPayment}
-                  disabled={!proofImage || uploading || !paymentId}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-green-600 rounded-xl hover:bg-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {uploading ? 'Đang lưu...' : 'Xác nhận đã thanh toán'}
+                type="button"
+                onClick={handleConfirmPayment}
+                disabled={!proofImage || uploading || !paymentId}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-green-600 rounded-xl hover:bg-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                
+                  {uploading ? t("angLu") : t("xcNhnThanhTon")}
                 </button>
-                {uploadSuccess && (
-                  <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg text-sm">
+                {uploadSuccess &&
+              <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg text-sm">
                     <CheckCircle className="w-4 h-4" />
-                    <span>Đã lưu xác nhận thanh toán thành công</span>
+                    <span></span>
                   </div>
-                )}
-                {uploadError && (
-                  <div className="text-red-600 bg-red-50 px-3 py-2 rounded-lg text-sm">{uploadError}</div>
-                )}
+              }
+                {uploadError &&
+              <div className="text-red-600 bg-red-50 px-3 py-2 rounded-lg text-sm">{uploadError}</div>
+              }
               </div>
-            )}
+            }
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }

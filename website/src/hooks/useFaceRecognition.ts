@@ -29,7 +29,7 @@ export function useFaceRecognition() {
       }
       return result;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Nhận diện thất bại';
+      const message = err instanceof Error ? err.message : 'faceRecognition.recognizeFailed';
       setRecognizeState({ status: 'error', message });
       return { match: null } as FaceMatchResult;
     }
@@ -41,7 +41,7 @@ export function useFaceRecognition() {
       await registerFace(partnerId, image);
       setRegisterState({ status: 'success' });
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Đăng ký khuôn mặt thất bại';
+      const message = err instanceof Error ? err.message : 'faceRecognition.registerFailed';
       setRegisterState({ status: 'error', message });
     }
   }, []);

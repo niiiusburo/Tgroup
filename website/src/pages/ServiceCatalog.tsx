@@ -52,7 +52,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
     defaultcode: '',
     listprice: 0,
     categid: '',
-    uomname: 'Lần',
+    uomname: t('defaultUnit'),
     companyid: '',
   });
   const [saving, setSaving] = useState(false);
@@ -64,11 +64,11 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
         defaultcode: initialData.defaultcode ?? '',
         listprice: initialData.listprice ? parseFloat(initialData.listprice) : 0,
         categid: initialData.categid ?? '',
-        uomname: initialData.uomname ?? 'Lần',
+        uomname: initialData.uomname ?? t('defaultUnit'),
         companyid: initialData.companyid ?? '',
       });
     } else {
-      setForm({ name: '', defaultcode: '', listprice: 0, categid: '', uomname: 'Lần', companyid: '' });
+      setForm({ name: '', defaultcode: '', listprice: 0, categid: '', uomname: t('defaultUnit'), companyid: '' });
     }
   }, [initialData, isOpen]);
 
@@ -108,7 +108,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('columns.serviceCode', 'Mã dịch vụ')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('columns.serviceCode')}</label>
               <input
                 type="text"
                 value={form.defaultcode}
@@ -117,7 +117,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('columns.uom', 'Đơn vị tính')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('columns.uom')}</label>
               <input
                 type="text"
                 value={form.uomname}
@@ -127,7 +127,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('columns.listPrice', 'Giá niêm yết')}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('columns.listPrice')}</label>
             <CurrencyInput
               value={form.listprice}
               onChange={(v) => setForm({ ...form, listprice: v ?? 0 })}
@@ -154,7 +154,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
               onChange={(e) => setForm({ ...form, companyid: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
             >
-              <option value="">{t('allLocations', 'Tất cả chi nhánh')}</option>
+              <option value="">{t('allLocations')}</option>
               {companies.map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
@@ -213,14 +213,14 @@ function CategoryAddModal({ isOpen, onClose, onSubmit }: CategoryAddModalProps) 
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-sm mx-4">
         <div className="flex items-center justify-between px-6 py-4 border-b">
-          <h3 className="text-lg font-semibold text-gray-900">{t('addCategory', 'Thêm nhóm dịch vụ')}</h3>
+          <h3 className="text-lg font-semibold text-gray-900">{t('addCategory')}</h3>
           <button type="button" onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('categoryName', 'Tên nhóm dịch vụ')} *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('categoryName')} *</label>
             <input
               type="text"
               value={name}
@@ -381,7 +381,7 @@ export function ServiceCatalog() {
   }
 
   async function handleDelete(product: ApiProduct) {
-    if (!window.confirm(t('confirmDeleteService', 'Xóa dịch vụ "{{name}}"?').replace('{{name}}', product.name))) return;
+    if (!window.confirm(t('confirmDeleteService', { name: product.name }))) return;
     await deleteProduct(product.id);
     await loadProducts();
     fetchProductCategories().then((res) => setCategories(res.items)).catch(() => {});
@@ -400,13 +400,13 @@ export function ServiceCatalog() {
         {/* Tabs */}
         <div className="flex gap-1 mt-3">
           <button type="button" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg">
-            {t('tabs.services', 'Dịch vụ')}
+            {t('tabs.services')}
           </button>
           <button type="button" className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
-            {t('tabs.supplies', 'Vật tư')}
+            {t('tabs.supplies')}
           </button>
           <button type="button" className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
-            {t('tabs.medicine', 'Thuốc')}
+            {t('tabs.medicine')}
           </button>
         </div>
       </div>
@@ -416,7 +416,7 @@ export function ServiceCatalog() {
         {/* ── Left Sidebar: Service Groups ── */}
         <div className="w-80 shrink-0 bg-white rounded-xl shadow-card">
           <div className="flex items-center justify-between px-4 py-3 border-b">
-            <h2 className="text-sm font-semibold text-gray-900">{t('serviceGroups', 'Nhóm dịch vụ')}</h2>
+            <h2 className="text-sm font-semibold text-gray-900">{t('serviceGroups')}</h2>
             <button
               type="button"
               onClick={() => setShowAddCategory(true)}
@@ -443,7 +443,7 @@ export function ServiceCatalog() {
 
           {/* Category header */}
           <div className="px-4 py-2 border-b">
-            <span className="text-xs font-medium text-gray-500 uppercase">{t('groupName', 'Tên nhóm dịch vụ')}</span>
+            <span className="text-xs font-medium text-gray-500 uppercase">{t('groupName')}</span>
           </div>
 
           {/* Category list */}
@@ -497,8 +497,8 @@ export function ServiceCatalog() {
                 onChange={(e) => setActiveFilter(e.target.value as 'all' | 'active' | 'inactive')}
                 className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
-                <option value="active">{t('filters.active', 'Đang sử dụng')}</option>
-                <option value="inactive">{t('filters.inactive', 'Ngừng sử dụng')}</option>
+                <option value="active">{t('filters.active')}</option>
+                <option value="inactive">{t('filters.inactive')}</option>
                 <option value="all">{tc('all')}</option>
               </select>
             </div>
@@ -507,7 +507,7 @@ export function ServiceCatalog() {
           {/* Selected category indicator */}
           {selectedCategoryName && (
             <div className="mb-3 flex items-center gap-2">
-              <span className="text-sm text-gray-500">{t('groupLabel', 'Nhóm')}:</span>
+              <span className="text-sm text-gray-500">{t('groupLabel')}:</span>
               <span className="inline-flex items-center gap-1 px-2.5 py-1 text-sm font-medium bg-blue-50 text-blue-700 rounded-lg">
                 {selectedCategoryName}
                 <button type="button" onClick={() => setSelectedCategoryId(null)} className="ml-1 hover:text-blue-900">
@@ -553,7 +553,7 @@ export function ServiceCatalog() {
                 ) : displayProducts.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-16 text-center">
-                      <p className="text-sm text-gray-500">{t('noServicesFound', 'Không tìm thấy dịch vụ nào')}</p>
+                      <p className="text-sm text-gray-500">{t('noServicesFound')}</p>
                     </td>
                   </tr>
                 ) : (
@@ -566,7 +566,7 @@ export function ServiceCatalog() {
                         <div>
                         <div className="text-sm font-medium text-gray-900">{product.name}</div>
                         <div className="text-xs text-gray-500">
-                          {t('uomLabel', 'Đơn vị tính')}: {product.uomname ?? 'Lần'}
+                          {t('uomLabel')}: {product.uomname ?? t('defaultUnit')}
                           {product.defaultcode && (
                             <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600">
                               {product.defaultcode}
@@ -579,7 +579,7 @@ export function ServiceCatalog() {
                         {product.categname ?? '-'}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600">
-                        {product.companyname ?? t('allLocations', 'Tất cả')}
+                        {product.companyname ?? t('allLocations')}
                       </td>
                       <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
                         {product.listprice && parseFloat(product.listprice) > 1 ? formatVND(parseFloat(product.listprice)) : '-'}
@@ -610,7 +610,7 @@ export function ServiceCatalog() {
                                 ? 'text-gray-400 hover:bg-gray-100'
                                 : 'text-green-600 hover:bg-green-50'
                             }`}
-                            title={product.active ? tc('hide', 'Ẩn') : tc('show', 'Hiện')}
+                            title={product.active ? tc('hide') : tc('show')}
                           >
                             {product.active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>

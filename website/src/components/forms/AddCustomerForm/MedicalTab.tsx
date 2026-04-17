@@ -9,13 +9,13 @@ interface MedicalTabProps {
 }
 
 const MEDICAL_CONDITIONS = [
-  'diabetes',
-  'cardiovascular',
-  'drugAllergy',
-  'hypertension',
-  'asthma',
-  'pregnant',
-] as const;
+'diabetes',
+'cardiovascular',
+'drugAllergy',
+'hypertension',
+'asthma',
+'pregnant'] as
+const;
 
 export function MedicalTab({ formApi }: MedicalTabProps) {
   const { t } = useTranslation('customers');
@@ -45,15 +45,15 @@ export function MedicalTab({ formApi }: MedicalTabProps) {
       }
 
       // Build updated medicalhistory with only checked conditions
-      const conditionsText = Array.from(newChecked)
-        .map((key) => t(`conditions.${key}`, key === 'drugAllergy' ? 'Dị ứng thuốc' : key === 'cardiovascular' ? 'Tim mạch' : key))
-        .join('\n');
+      const conditionsText = Array.from(newChecked).
+      map((key) => t(`conditions.${key}`, key === 'drugAllergy' ? 'Dị ứng thuốc' : key === 'cardiovascular' ? 'Tim mạch' : key)).
+      join('\n');
 
       // Preserve existing manual text, only manage checkbox-added items
       const baseText = MEDICAL_CONDITIONS.flatMap((key) => [
-        t(`conditions.${key}`, key === 'drugAllergy' ? 'Dị ứng thuốc' : key === 'cardiovascular' ? 'Tim mạch' : key),
-      ]);
-      
+      t(`conditions.${key}`, key === 'drugAllergy' ? 'Dị ứng thuốc' : key === 'cardiovascular' ? 'Tim mạch' : key)]
+      );
+
       // Remove all condition labels from current text, then add back checked ones
       let cleanText = formData.medicalhistory || '';
       baseText.forEach((label) => {
@@ -61,7 +61,7 @@ export function MedicalTab({ formApi }: MedicalTabProps) {
       });
       cleanText = cleanText.trim();
 
-      const newText = conditionsText ? (cleanText ? `${cleanText}\n${conditionsText}` : conditionsText) : cleanText;
+      const newText = conditionsText ? cleanText ? `${cleanText}\n${conditionsText}` : conditionsText : cleanText;
       set('medicalhistory', newText);
 
       return newChecked;
@@ -82,27 +82,27 @@ export function MedicalTab({ formApi }: MedicalTabProps) {
         onChange={(e) => set('medicalhistory', e.target.value)}
         placeholder={t('medicalHistoryPlaceholder', 'Nhập tiểu sử bệnh, dị ứng, thuốc đang dùng...')}
         rows={8}
-        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 resize-none transition-all hover:border-gray-300"
-      />
+        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 resize-none transition-all hover:border-gray-300" />
+      
       <div className="mt-4 grid grid-cols-3 gap-3">
         {MEDICAL_CONDITIONS.map((key) => {
-          const conditionLabel = t(`conditions.${key}`, key === 'drugAllergy' ? 'Dị ứng thuốc' : key === 'cardiovascular' ? 'Tim mạch' : key);
+          const conditionLabel = t(`conditions.${key}`, key === 'drugAllergy' ? t("dNgThuc") : key === 'cardiovascular' ? t("timMch") : key);
           return (
             <label
               key={key}
-              className="flex items-center gap-2.5 text-sm text-gray-700 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors"
-            >
+              className="flex items-center gap-2.5 text-sm text-gray-700 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors">
+              
               <input
                 type="checkbox"
                 className="accent-orange-500 w-4 h-4 rounded"
                 checked={checkedConditions.has(key)}
-                onChange={() => handleConditionToggle(key, conditionLabel)}
-              />
+                onChange={() => handleConditionToggle(key, conditionLabel)} />
+              
               <span>{conditionLabel}</span>
-            </label>
-          );
+            </label>);
+
         })}
       </div>
-    </div>
-  );
+    </div>);
+
 }

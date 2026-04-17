@@ -372,14 +372,6 @@ export const APPOINTMENT_STATUS_I18N_KEYS: Record<string, string> = {
   cancelled: 'status.cancelled',
 }
 
-/** @deprecated Use APPOINTMENT_STATUS_I18N_KEYS with t() instead */
-export const APPOINTMENT_STATUS_LABELS_VI: Record<string, string> = {
-  scheduled: 'Đang hẹn',
-  arrived: 'Đã đến',
-  confirmed: 'Đã xác nhận',
-  'in-progress': 'Đang khám',
-  completed: 'Hoàn tất',
-  cancelled: 'Hủy hẹn',
-}
+
 
 export type AppointmentStatus = typeof APPOINTMENT_STATUS_OPTIONS[number]['value']

@@ -81,5 +81,15 @@
     "label": "Select Timezone",
     "searchPlaceholder": "Search timezone..."
   },
-  "subtitle": "System configuration"
+  "subtitle": "System configuration",
+  "angTi": "Loading...",
+  "tiKhonNgnHng": "Bank Account",
+  "cuHnhTiKhonNhnThanhTonQrChoPhngKhm": "Configure QR payment receiving account for clinic",
+  "mNgnHngBin": "Bank code (BIN)",
+  "vD970436Vietcombank": "Example: 970436 (Vietcombank)",
+  "sTiKhon": "Account number",
+  "tnChTiKhon": "Account holder name",
+  "angLu": "Saving...",
+  "lu": "Save",
+  "luCiTNgnHng": "Bank settings saved"
 }

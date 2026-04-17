@@ -3,6 +3,7 @@ import { Wallet, Plus, Loader2, QrCode, DollarSign } from 'lucide-react';
 import { VietQrModal } from './VietQrModal';
 import { formatVND, formatVNDInput } from '@/lib/formatting';
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
+import { useTranslation } from 'react-i18next';
 
 interface DepositWalletProps {
   depositBalance: number;
@@ -11,12 +12,13 @@ interface DepositWalletProps {
   loading?: boolean;
 }
 
-export function DepositWallet({ 
-  depositBalance, 
+export function DepositWallet({
+  depositBalance,
   outstandingBalance,
   onAddDeposit,
-  loading = false 
+  loading = false
 }: DepositWalletProps) {
+  const { t } = useTranslation('payment');
   const [showAddModal, setShowAddModal] = useState(false);
   const [addAmount, setAddAmount] = useState('');
   const [addMethod, setAddMethod] = useState<'cash' | 'bank_transfer' | 'vietqr'>('cash');
@@ -27,7 +29,7 @@ export function DepositWallet({
 
   const handleAddDeposit = async () => {
     if (!onAddDeposit || !addAmount) return;
-    
+
     setSubmitting(true);
     try {
       await onAddDeposit(parseFloat(addAmount), addMethod, addDate, addNote || undefined);
@@ -48,16 +50,16 @@ export function DepositWallet({
           <Wallet className="w-5 h-5 text-primary" />
           <h3 className="font-semibold text-gray-900">Deposit Wallet</h3>
         </div>
-        {onAddDeposit && (
-          <button
-            onClick={() => setShowAddModal(true)}
-            disabled={loading}
-            className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
-          >
+        {onAddDeposit &&
+        <button
+          onClick={() => setShowAddModal(true)}
+          disabled={loading}
+          className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50">
+          
             <Plus className="w-4 h-4" />
             Add Deposit
           </button>
-        )}
+        }
       </div>
 
       {/* Balance Cards */}
@@ -77,63 +79,63 @@ export function DepositWallet({
       </div>
 
       {/* Add Deposit Modal */}
-      {showAddModal && (
-        <div className="modal-container">
+      {showAddModal &&
+      <div className="modal-container">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
           <div className="modal-content w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <h4 className="text-lg font-semibold text-gray-900 mb-4">Add Deposit</h4>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Ngày giao dịch</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1"></label>
                 <input
-                  type="date"
-                  value={addDate}
-                  onChange={(e) => setAddDate(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                />
+                type="date"
+                value={addDate}
+                onChange={(e) => setAddDate(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" />
+              
               </div>
 
               <div>
                 <div className="flex items-center justify-between px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl">
                   <div className="flex items-center gap-2 text-gray-500">
                     <DollarSign className="w-5 h-5" />
-                    <span className="text-sm font-medium text-gray-600">Tổng thanh toán</span>
+                    <span className="text-sm font-medium text-gray-600"></span>
                   </div>
                   <div className="flex items-baseline gap-1">
                     <CurrencyInput
-                      value={addAmount ? Number(addAmount) : null}
-                      onChange={(v) => setAddAmount(v === null ? '' : String(v))}
-                      placeholder="0"
-                      className="w-36"
-                    />
+                    value={addAmount ? Number(addAmount) : null}
+                    onChange={(v) => setAddAmount(v === null ? '' : String(v))}
+                    placeholder="0"
+                    className="w-36" />
+                  
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 mt-3">
                   <span className="text-xs text-gray-400">Nhanh:</span>
-                  {(outstandingBalance > 0
-                    ? [outstandingBalance, 500000, 1000000, 2000000, 5000000, 10000000]
-                    : [500000, 1000000, 2000000, 5000000, 10000000]
-                  )
-                    .filter((v, i, arr) => arr.indexOf(v) === i)
-                    .map((amt) => {
-                      const isInstallment = amt === outstandingBalance;
-                      return (
-                        <button
-                          key={amt}
-                          type="button"
-                          onClick={() => setAddAmount(String(amt))}
-                          className={`px-3 py-1 text-xs font-medium border rounded-full transition-colors ${
-                            isInstallment
-                              ? 'text-orange-700 bg-orange-50 border-orange-200 hover:bg-orange-100'
-                              : 'text-gray-600 bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                          }`}
-                          title={isInstallment ? 'Số tiền nợ hiện tại' : undefined}
-                        >
-                          {isInstallment ? 'Thanh toán nợ ' : ''}{formatVNDInput(amt)}
-                        </button>
-                      );
-                    })}
+                  {(outstandingBalance > 0 ?
+                [outstandingBalance, 500000, 1000000, 2000000, 5000000, 10000000] :
+                [500000, 1000000, 2000000, 5000000, 10000000]).
+
+                filter((v, i, arr) => arr.indexOf(v) === i).
+                map((amt) => {
+                  const isInstallment = amt === outstandingBalance;
+                  return (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => setAddAmount(String(amt))}
+                      className={`px-3 py-1 text-xs font-medium border rounded-full transition-colors ${
+                      isInstallment ?
+                      'text-orange-700 bg-orange-50 border-orange-200 hover:bg-orange-100' :
+                      'text-gray-600 bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`
+                      }
+                      title={isInstallment ? t("sTinNHinTi") : undefined}>
+                      
+                          {isInstallment ? t("thanhTonN") : ''}{formatVNDInput(amt)}
+                        </button>);
+
+                })}
                 </div>
               </div>
 
@@ -143,36 +145,36 @@ export function DepositWallet({
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   <button
-                    type="button"
-                    onClick={() => setAddMethod('cash')}
-                    className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                      addMethod === 'cash'
-                        ? 'bg-primary text-white border-primary'
-                        : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
+                  type="button"
+                  onClick={() => setAddMethod('cash')}
+                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                  addMethod === 'cash' ?
+                  'bg-primary text-white border-primary' :
+                  'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'}`
+                  }>
+                  
                     Cash
                   </button>
                   <button
-                    type="button"
-                    onClick={() => setAddMethod('bank_transfer')}
-                    className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                      addMethod === 'bank_transfer'
-                        ? 'bg-primary text-white border-primary'
-                        : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
+                  type="button"
+                  onClick={() => setAddMethod('bank_transfer')}
+                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                  addMethod === 'bank_transfer' ?
+                  'bg-primary text-white border-primary' :
+                  'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'}`
+                  }>
+                  
                     Bank Transfer
                   </button>
                   <button
-                    type="button"
-                    onClick={() => setAddMethod('vietqr')}
-                    className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                      addMethod === 'vietqr'
-                        ? 'bg-primary text-white border-primary'
-                        : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
+                  type="button"
+                  onClick={() => setAddMethod('vietqr')}
+                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                  addMethod === 'vietqr' ?
+                  'bg-primary text-white border-primary' :
+                  'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'}`
+                  }>
+                  
                     VietQR
                   </button>
                 </div>
@@ -183,47 +185,47 @@ export function DepositWallet({
                   Note (optional)
                 </label>
                 <input
-                  type="text"
-                  value={addNote}
-                  onChange={(e) => setAddNote(e.target.value)}
-                  placeholder="Add a note"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                />
+                type="text"
+                value={addNote}
+                onChange={(e) => setAddNote(e.target.value)}
+                placeholder="Add a note"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" />
+              
               </div>
             </div>
 
-            {addMethod === 'vietqr' && (
-              <button
-                type="button"
-                onClick={() => setShowVietQr(true)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-              >
+            {addMethod === 'vietqr' &&
+          <button
+            type="button"
+            onClick={() => setShowVietQr(true)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+            
                 <QrCode className="w-4 h-4" />
-                Tạo QR
-              </button>
-            )}
+
+          </button>
+          }
 
             <div className="flex justify-end gap-3 mt-6">
               <button
-                onClick={() => setShowAddModal(false)}
-                disabled={submitting}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
-              >
+              onClick={() => setShowAddModal(false)}
+              disabled={submitting}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50">
+              
                 Cancel
               </button>
               <button
-                onClick={handleAddDeposit}
-                disabled={submitting || !addAmount}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
-              >
+              onClick={handleAddDeposit}
+              disabled={submitting || !addAmount}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50">
+              
                 {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 Add Deposit
               </button>
             </div>
           </div>
         </div>
-      )}
+      }
       <VietQrModal open={showVietQr} onClose={() => setShowVietQr(false)} defaultAmount={addAmount ? Number(addAmount) : undefined} />
-    </div>
-  );
+    </div>);
+
 }

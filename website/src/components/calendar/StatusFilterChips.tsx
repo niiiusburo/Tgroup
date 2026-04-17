@@ -4,7 +4,7 @@ import { APPOINTMENT_STATUS_I18N_KEYS } from '@/constants';
 import { useTranslation } from 'react-i18next';
 
 interface StatusFilterChipsProps {
-  statuses: { value: AppointmentStatus; count: number }[];
+  statuses: {value: AppointmentStatus;count: number;}[];
   selected: AppointmentStatus[];
   onToggle: (value: AppointmentStatus) => void;
 }
@@ -23,12 +23,12 @@ export function StatusFilterChips({ statuses, selected, onToggle }: StatusFilter
         onClick={() => isAll || onToggle('__ALL__' as AppointmentStatus)}
         className={cn(
           'px-3 py-1.5 text-sm font-medium rounded-full border transition-colors',
-          isAll
-            ? 'bg-primary text-white border-primary'
-            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-        )}
-      >
-        Tất cả {totalCount}
+          isAll ?
+          'bg-primary text-white border-primary' :
+          'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+        )}>
+        
+        {totalCount}
       </button>
       {statuses.map((s) => {
         const isSelected = selected.includes(s.value);
@@ -41,15 +41,15 @@ export function StatusFilterChips({ statuses, selected, onToggle }: StatusFilter
             onClick={() => onToggle(s.value)}
             className={cn(
               'px-3 py-1.5 text-sm font-medium rounded-full border transition-colors',
-              isSelected
-                ? 'bg-primary text-white border-primary'
-                : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-            )}
-          >
+              isSelected ?
+              'bg-primary text-white border-primary' :
+              'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+            )}>
+            
             {label} {s.count}
-          </button>
-        );
+          </button>);
+
       })}
-    </div>
-  );
+    </div>);
+
 }

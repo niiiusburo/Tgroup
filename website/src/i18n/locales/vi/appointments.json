@@ -4,6 +4,13 @@
   "addAppointment": "Thêm lịch hẹn",
   "editAppointment": "Sửa lịch hẹn",
   "searchPlaceholder": "Tìm kiếm lịch hẹn...",
+  "phase": {
+    "scheduled": "Đang hẹn",
+    "waiting": "Đang chờ",
+    "in-treatment": "Đang khám",
+    "done": "Hoàn tất",
+    "cancelled": "Hủy hẹn"
+  },
   "status": {
     "scheduled": "Đang hẹn",
     "confirmed": "Đã xác nhận",
@@ -81,7 +88,7 @@
   "customer": {
     "type": {
       "new": "Khách mới",
-      "returning": "Khách quay lại"
+      "returning": "Khách tái khám"
     }
   },
   "common": {
@@ -98,5 +105,23 @@
     "scheduleFirst": "Đặt lịch hẹn đầu tiên",
     "confirmDelete": "Bạn có chắc muốn xóa lịch hẹn này?",
     "confirmCancel": "Bạn có chắc muốn hủy lịch hẹn này?"
-  }
+  },
+  "angTiDLiu": "Đang tải dữ liệu...",
+  "thngTinCBn": "Thông tin cơ bản",
+  "thmKhchHngMi": "Thêm khách hàng mới",
+  "chnBcS": "Chọn bác sĩ...",
+  "phTKhngBtBuc": "Phụ tá (không bắt buộc)",
+  "chnPhT": "Chọn phụ tá...",
+  "trLBcSKhngBtBuc": "Trợ lý bác sĩ (không bắt buộc)",
+  "chnTrL": "Chọn trợ lý...",
+  "angTiDanhMcDchV": "Đang tải danh mục dịch vụ...",
+  "chnDchV": "Chọn dịch vụ...",
+  "lnKhm": "lần khám · ~",
+  "tnhNngNhcLchSCKchHotSau": "Tính năng nhắc lịch sẽ được kích hoạt sau",
+  "hyB": "Hủy bỏ",
+  "cpNht": "Cập nhật",
+  "thuGnChiTit": "Thu gọn chi tiết",
+  "mRngChiTit": "Mở rộng chi tiết",
+  "returningCustomer": "Khách tái khám",
+  "newCustomer": "Khách mới"
 }

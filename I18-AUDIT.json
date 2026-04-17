@@ -1,0 +1,3902 @@
+{
+  "summary": {
+    "shared": {
+      "files": 18,
+      "lines": 100
+    },
+    "appointments": {
+      "files": 2,
+      "lines": 28
+    },
+    "calendar": {
+      "files": 14,
+      "lines": 58
+    },
+    "customers": {
+      "files": 14,
+      "lines": 83
+    },
+    "employees": {
+      "files": 3,
+      "lines": 41
+    },
+    "locations": {
+      "files": 2,
+      "lines": 13
+    },
+    "modules": {
+      "files": 3,
+      "lines": 39
+    },
+    "payment": {
+      "files": 6,
+      "lines": 94
+    },
+    "services": {
+      "files": 4,
+      "lines": 42
+    },
+    "settings": {
+      "files": 4,
+      "lines": 20
+    },
+    "website": {
+      "files": 2,
+      "lines": 3
+    },
+    "lib": {
+      "files": 15,
+      "lines": 69
+    },
+    "other": {
+      "files": 5,
+      "lines": 178
+    },
+    "auth": {
+      "files": 1,
+      "lines": 2
+    },
+    "permissions": {
+      "files": 2,
+      "lines": 39
+    }
+  },
+  "domains": {
+    "shared": [
+      {
+        "file": "components/Layout.tsx",
+        "findings": [
+          [
+            372,
+            "title=\"Đổi mật khẩu\""
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "components/shared/AddressAutocomplete.tsx",
+        "findings": [
+          [
+            47,
+            "'Hồ Chí Minh': ['Ho Chi Minh City', 'TP HCM', 'TP. Hồ Chí Minh', 'Sài Gòn', 'Saigon', 'Thành phố Hồ Chí Minh', 'Thành phố'],"
+          ],
+          [
+            48,
+            "'Hà Nội': ['Ha Noi', 'Hanoi', 'HN', 'Thành phố Hà Nội'],"
+          ],
+          [
+            49,
+            "'Đà Nẵng': ['Da Nang', 'Danang', 'Thành phố Đà Nẵng'],"
+          ],
+          [
+            50,
+            "'Hải Phòng': ['Hai Phong', 'Haiphong', 'Thành phố Hải Phòng'],"
+          ],
+          [
+            51,
+            "'Cần Thơ': ['Can Tho', 'Thành phố Cần Thơ'],"
+          ],
+          [
+            52,
+            "'Khánh Hòa': ['Nha Trang', 'Khanh Hoa', 'Thành phố Nha Trang'],"
+          ],
+          [
+            53,
+            "'Bình Dương': ['Binh Duong', 'Thu Dau Mot', 'Tỉnh Bình Dương'],"
+          ],
+          [
+            54,
+            "'Đồng Nai': ['Dong Nai', 'Bien Hoa', 'Biên Hòa', 'Tỉnh Đồng Nai'],"
+          ],
+          [
+            55,
+            "'Bà Rịa - Vũng Tàu': ['Ba Ria Vung Tau', 'Vung Tau', 'Vũng Tàu', 'Bà Rịa', 'Tỉnh Bà Rịa Vũng Tàu'],"
+          ],
+          [
+            56,
+            "'Lâm Đồng': ['Lam Dong', 'Da Lat', 'Đà Lạt', 'Thành phố Đà Lạt', 'Tỉnh Lâm Đồng'],"
+          ],
+          [
+            72,
+            "placeholder = 'Nhập địa chỉ...',"
+          ],
+          [
+            257,
+            ".replace(/^Quận\\s+/i, '')"
+          ],
+          [
+            258,
+            ".replace(/^Huyện\\s+/i, '')"
+          ],
+          [
+            259,
+            ".replace(/^Thành phố\\s+/i, '')"
+          ],
+          [
+            260,
+            ".replace(/^Thị xã\\s+/i, '')"
+          ],
+          [
+            267,
+            ".replace(/^Phường\\s+/i, '')"
+          ],
+          [
+            268,
+            ".replace(/^Xã\\s+/i, '')"
+          ],
+          [
+            269,
+            ".replace(/^Thị trấn\\s+/i, '')"
+          ],
+          [
+            346,
+            "Hướng dẫn: Tạo file .env với VITE_GOOGLE_PLACES_API_KEY=your_key"
+          ],
+          [
+            434,
+            "<p className=\"text-sm\">Không tìm thấy địa chỉ phù hợp</p>"
+          ]
+        ],
+        "count": 20
+      },
+      {
+        "file": "components/shared/AddressAutocompleteTest.tsx",
+        "findings": [
+          [
+            40,
+            "placeholder=\"Type an address...\""
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "components/shared/BankSelector.tsx",
+        "findings": [
+          [
+            33,
+            "placeholder = 'Chọn ngân hàng...',"
+          ],
+          [
+            172,
+            "aria-label=\"Clear\""
+          ],
+          [
+            172,
+            "aria-label=\"Clear\""
+          ],
+          [
+            182,
+            "aria-label=\"Toggle dropdown\""
+          ],
+          [
+            182,
+            "aria-label=\"Toggle dropdown\""
+          ],
+          [
+            216,
+            "Không tìm thấy ngân hàng"
+          ]
+        ],
+        "count": 6
+      },
+      {
+        "file": "components/shared/ChangePasswordModal.tsx",
+        "findings": [
+          [
+            50,
+            "setError('Vui lòng điền đầy đủ các trường');"
+          ],
+          [
+            55,
+            "setError('Mật khẩu mới phải có ít nhất 6 ký tự');"
+          ],
+          [
+            60,
+            "setError('Mật khẩu xác nhận không khớp');"
+          ],
+          [
+            72,
+            "const msg = err instanceof Error ? err.message : 'Đổi mật khẩu thất bại';"
+          ],
+          [
+            95,
+            "<h2 className=\"text-xl font-bold text-white\">Đổi mật khẩu</h2>"
+          ],
+          [
+            96,
+            "<p className=\"text-sm text-blue-100 mt-0.5\">Cập nhật mật khẩu đăng nhập của bạn</p>"
+          ],
+          [
+            117,
+            "<p className=\"text-lg font-semibold text-gray-900\">Đổi mật khẩu thành công!</p>"
+          ],
+          [
+            118,
+            "<p className=\"text-sm text-gray-500 mt-1\">Bạn có thể đăng nhập bằng mật khẩu mới</p>"
+          ],
+          [
+            126,
+            "Mật khẩu hiện tại"
+          ],
+          [
+            133,
+            "placeholder=\"Nhập mật khẩu hiện tại\""
+          ],
+          [
+            149,
+            "Mật khẩu mới"
+          ],
+          [
+            156,
+            "placeholder=\"Nhập mật khẩu mới (ít nhất 6 ký tự)\""
+          ],
+          [
+            172,
+            "Xác nhận mật khẩu mới"
+          ],
+          [
+            179,
+            "placeholder=\"Nhập lại mật khẩu mới\""
+          ],
+          [
+            204,
+            "Đang xử lý..."
+          ],
+          [
+            207,
+            "'Cập nhật mật khẩu'"
+          ]
+        ],
+        "count": 16
+      },
+      {
+        "file": "components/shared/ComboboxInput.tsx",
+        "findings": [
+          [
+            18,
+            "placeholder = 'Nhập hoặc chọn...',"
+          ],
+          [
+            137,
+            "Không tìm thấy kết quả. Bạn có thể nhập trực tiếp."
+          ]
+        ],
+        "count": 2
+      },
+      {
+        "file": "components/shared/CustomerSelector.tsx",
+        "findings": [
+          [
+            97,
+            "placeholder=\"Search by name, phone, email...\""
+          ],
+          [
+            104,
+            "<div className=\"px-4 py-3 text-sm text-gray-400 text-center\">Không tìm thấy khách hàng</div>"
+          ],
+          [
+            141,
+            "Tạo khách hàng mới"
+          ]
+        ],
+        "count": 3
+      },
+      {
+        "file": "components/shared/DateRangePicker.tsx",
+        "findings": [
+          [
+            16,
+            "'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',"
+          ],
+          [
+            17,
+            "'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'"
+          ],
+          [
+            200,
+            "? `Từ ${startDate.toLocaleDateString('vi-VN', { day: 'numeric', month: 'short' })} — Chọn ngày kết thúc`"
+          ],
+          [
+            202,
+            "? 'Chọn ngày bắt đầu'"
+          ],
+          [
+            203,
+            ": 'Chọn khoảng ngày'}"
+          ],
+          [
+            266,
+            "Hôm nay"
+          ]
+        ],
+        "count": 6
+      },
+      {
+        "file": "components/shared/DoctorSelector.tsx",
+        "findings": [
+          [
+            106,
+            "placeholder=\"Search by name or role...\""
+          ],
+          [
+            123,
+            "Xóa lựa chọn"
+          ]
+        ],
+        "count": 2
+      },
+      {
+        "file": "components/shared/FaceCaptureModal.tsx",
+        "findings": [
+          [
+            17,
+            "title = 'Chụp ảnh khuôn mặt',"
+          ],
+          [
+            53,
+            "setError('Không thể truy cập camera. Vui lòng cấp quyền.');"
+          ],
+          [
+            96,
+            "aria-label=\"Close\""
+          ],
+          [
+            96,
+            "aria-label=\"Close\""
+          ],
+          [
+            127,
+            "Chụp"
+          ],
+          [
+            134,
+            "Hủy"
+          ]
+        ],
+        "count": 6
+      },
+      {
+        "file": "components/shared/FeedbackWidget.tsx",
+        "findings": [
+          [
+            246,
+            "aria-label=\"Feedback\""
+          ],
+          [
+            246,
+            "aria-label=\"Feedback\""
+          ],
+          [
+            386,
+            "aria-label=\"Remove file\""
+          ],
+          [
+            386,
+            "aria-label=\"Remove file\""
+          ],
+          [
+            425,
+            "aria-label=\"Attach image\""
+          ],
+          [
+            425,
+            "aria-label=\"Attach image\""
+          ],
+          [
+            426,
+            "title=\"Attach image\""
+          ]
+        ],
+        "count": 7
+      },
+      {
+        "file": "components/shared/FilterByDoctor.tsx",
+        "findings": [
+          [
+            51,
+            "() => [{ id: allOptionId, name: 'Tất cả bác sĩ' }, ...filteredDoctors],"
+          ],
+          [
+            133,
+            "const displayLabel = selectedDoctor ? selectedDoctor.name : 'Bác sĩ';"
+          ],
+          [
+            162,
+            "aria-label=\"Clear doctor filter\""
+          ],
+          [
+            162,
+            "aria-label=\"Clear doctor filter\""
+          ],
+          [
+            163,
+            "title=\"Clear doctor filter\""
+          ],
+          [
+            190,
+            "aria-label=\"Doctor filter options\""
+          ],
+          [
+            190,
+            "aria-label=\"Doctor filter options\""
+          ],
+          [
+            218,
+            "<div className=\"px-3 py-3 text-sm text-gray-400 text-center\">Không tìm thấy bác sĩ</div>"
+          ],
+          [
+            223,
+            "{availableDoctors.length} bác sĩ"
+          ]
+        ],
+        "count": 9
+      },
+      {
+        "file": "components/shared/LanguageToggle.tsx",
+        "findings": [
+          [
+            36,
+            "aria-label=\"Switch language\""
+          ],
+          [
+            36,
+            "aria-label=\"Switch language\""
+          ],
+          [
+            69,
+            "aria-label=\"Switch language\""
+          ],
+          [
+            69,
+            "aria-label=\"Switch language\""
+          ],
+          [
+            73,
+            "{currentLang === 'en' ? '🇬🇧 English' : '🇻🇳 Tiếng Việt'}"
+          ]
+        ],
+        "count": 5
+      },
+      {
+        "file": "components/shared/ReferralCodeInput.tsx",
+        "findings": [
+          [
+            66,
+            "placeholder=\"Enter referral code (optional)\""
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "components/shared/ServiceCatalogSelector.tsx",
+        "findings": [
+          [
+            103,
+            "placeholder=\"Search services...\""
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "components/shared/VersionDisplay.tsx",
+        "findings": [
+          [
+            194,
+            "title=\"Dismiss\""
+          ],
+          [
+            463,
+            "title=\"Click to view version details\""
+          ],
+          [
+            665,
+            "title=\"Dismiss\""
+          ],
+          [
+            676,
+            "title=\"Click to check for updates\""
+          ]
+        ],
+        "count": 4
+      },
+      {
+        "file": "components/ui/DatePicker.tsx",
+        "findings": [
+          [
+            25,
+            "'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',"
+          ],
+          [
+            26,
+            "'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'"
+          ],
+          [
+            34,
+            "placeholder = 'Chọn ngày',"
+          ],
+          [
+            249,
+            "Hôm nay"
+          ]
+        ],
+        "count": 4
+      },
+      {
+        "file": "components/ui/TimePicker.tsx",
+        "findings": [
+          [
+            40,
+            "placeholder = 'Chọn giờ',"
+          ],
+          [
+            139,
+            "<span className=\"text-sm font-semibold text-gray-900\">Chọn giờ</span>"
+          ],
+          [
+            154,
+            "if (hour < 12) periodLabel = 'Sáng';"
+          ],
+          [
+            155,
+            "else if (hour < 17) periodLabel = 'Chiều';"
+          ],
+          [
+            156,
+            "else periodLabel = 'Tối';"
+          ],
+          [
+            185,
+            "Đã chọn"
+          ]
+        ],
+        "count": 6
+      }
+    ],
+    "appointments": [
+      {
+        "file": "components/appointments/AppointmentForm.tsx",
+        "findings": [
+          [
+            358,
+            "Đang tải dữ liệu..."
+          ],
+          [
+            363,
+            "{/* ── LEFT: Thông tin cơ bản ── */}"
+          ],
+          [
+            367,
+            "Thông tin cơ bản"
+          ],
+          [
+            370,
+            "{/* Khách hàng */}"
+          ],
+          [
+            390,
+            "title=\"Thêm khách hàng mới\""
+          ],
+          [
+            400,
+            "{/* Bác sĩ */}"
+          ],
+          [
+            406,
+            "<DoctorSelector employees={employees} selectedId={doctorId} onChange={setDoctorId} filterRoles={['doctor']} placeholder=\"Chọn bác sĩ...\" allowClear />"
+          ],
+          [
+            409,
+            "{/* Phụ tá - Optional */}"
+          ],
+          [
+            413,
+            "Phụ tá (không bắt buộc)"
+          ],
+          [
+            415,
+            "<DoctorSelector employees={employees} selectedId={assistantId} onChange={setAssistantId} filterRoles={['assistant']} placeholder=\"Chọn phụ tá...\" allowClear />"
+          ],
+          [
+            418,
+            "{/* Trợ lý bác sĩ - Optional */}"
+          ],
+          [
+            422,
+            "Trợ lý bác sĩ (không bắt buộc)"
+          ],
+          [
+            424,
+            "<DoctorSelector employees={employees} selectedId={dentalAideId} onChange={setDentalAideId} filterRoles={['doctor-assistant']} placeholder=\"Chọn trợ lý...\" allowClear />"
+          ],
+          [
+            427,
+            "{/* Chi nhánh */}"
+          ],
+          [
+            437,
+            "{/* Ngày hẹn */}"
+          ],
+          [
+            446,
+            "{/* Giờ bắt đầu + Thời gian dự kiến */}"
+          ],
+          [
+            475,
+            "{/* ── RIGHT: Thông tin nâng cao ── */}"
+          ],
+          [
+            482,
+            "{/* Dịch vụ */}"
+          ],
+          [
+            491,
+            "Đang tải danh mục dịch vụ..."
+          ],
+          [
+            498,
+            "placeholder=\"Chọn dịch vụ...\""
+          ],
+          [
+            509,
+            "{/* Ghi chú */}"
+          ],
+          [
+            524,
+            "{/* Loại khách */}"
+          ],
+          [
+            556,
+            "{/* Màu thẻ */}"
+          ],
+          [
+            593,
+            "{/* Trạng thái (edit mode only) */}"
+          ],
+          [
+            620,
+            "{/* ── Nhắc lịch hẹn ── */}"
+          ],
+          [
+            644,
+            "<p className=\"mt-2 text-xs text-gray-400\">Tính năng nhắc lịch sẽ được kích hoạt sau</p>"
+          ],
+          [
+            655,
+            "Hủy bỏ"
+          ]
+        ],
+        "count": 27
+      },
+      {
+        "file": "pages/Appointments/index.tsx",
+        "findings": [
+          [
+            253,
+            "<button type=\"button\" onClick={() => toggleExpanded(apt.id)} className=\"shrink-0 p-1 rounded hover:bg-gray-100 transition-colors\" aria-label={isExpanded ? 'Thu gọn chi tiết' : 'Mở "
+          ]
+        ],
+        "count": 1
+      }
+    ],
+    "calendar": [
+      {
+        "file": "components/calendar/AppointmentCard.tsx",
+        "findings": [
+          [
+            95,
+            "title=\"Edit appointment\""
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "components/calendar/CheckInActions.tsx",
+        "findings": [
+          [
+            18,
+            "title=\"Check-in\""
+          ],
+          [
+            19,
+            "aria-label=\"Check-in\""
+          ],
+          [
+            19,
+            "aria-label=\"Check-in\""
+          ],
+          [
+            30,
+            "title=\"Hủy hẹn\""
+          ],
+          [
+            31,
+            "aria-label=\"Hủy hẹn\""
+          ]
+        ],
+        "count": 5
+      },
+      {
+        "file": "components/calendar/ColorFilterCircles.tsx",
+        "findings": [
+          [
+            28,
+            "<span className=\"text-sm font-medium\">Tất cả</span>"
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "components/calendar/DoctorFilterChips.tsx",
+        "findings": [
+          [
+            24,
+            "Tất cả"
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "components/calendar/EmptyTimeSlot.tsx",
+        "findings": [
+          [
+            13,
+            "aria-label={`Thêm lịch hẹn lúc ${time}`}"
+          ],
+          [
+            19,
+            "Thêm lịch hẹn"
+          ]
+        ],
+        "count": 2
+      },
+      {
+        "file": "components/calendar/ExportDialog.tsx",
+        "findings": [
+          [
+            32,
+            "<h3 className=\"text-base font-semibold text-gray-900\">Xuất dữ liệu lịch hẹn</h3>"
+          ],
+          [
+            47,
+            "<span className=\"text-sm text-gray-700\">Theo bộ lọc hiện tại</span>"
+          ],
+          [
+            58,
+            "<span className=\"text-sm text-gray-700\">Theo khoảng thờigian</span>"
+          ],
+          [
+            85,
+            "Đóng"
+          ],
+          [
+            94,
+            "Xuất file"
+          ]
+        ],
+        "count": 5
+      },
+      {
+        "file": "components/calendar/FilterSummaryCards.tsx",
+        "findings": [
+          [
+            24,
+            "<div className=\"text-xs text-gray-500\">Lịch hẹn</div>"
+          ],
+          [
+            33,
+            "<div className=\"text-xs text-gray-500\">Dự kiến</div>"
+          ]
+        ],
+        "count": 2
+      },
+      {
+        "file": "components/calendar/MedicalHistoryTooltip.tsx",
+        "findings": [
+          [
+            14,
+            "{ label: 'Tiểu đường', icon: '🩸', bg: 'bg-orange-100/80 text-orange-800 ring-1 ring-orange-200' },"
+          ],
+          [
+            15,
+            "{ label: 'Tim mạch', icon: '❤️', bg: 'bg-red-100/80 text-red-800 ring-1 ring-red-200' },"
+          ],
+          [
+            16,
+            "{ label: 'Dị ứng thuốc', icon: '💊', bg: 'bg-purple-100/80 text-purple-800 ring-1 ring-purple-200' },"
+          ],
+          [
+            17,
+            "{ label: 'Huyết áp cao', icon: '🔺', bg: 'bg-pink-100/80 text-pink-800 ring-1 ring-pink-200' },"
+          ],
+          [
+            18,
+            "{ label: 'Hen suyễn', icon: '🌬️', bg: 'bg-sky-100/80 text-sky-800 ring-1 ring-sky-200' },"
+          ],
+          [
+            19,
+            "{ label: 'Đang mang thai', icon: '🤰', bg: 'bg-emerald-100/80 text-emerald-800 ring-1 ring-emerald-200' },"
+          ],
+          [
+            134,
+            "Tiểu sử bệnh"
+          ],
+          [
+            145,
+            "<span className=\"text-xs\">Đang tải...</span>"
+          ],
+          [
+            149,
+            "<p className=\"text-xs text-amber-700/60 italic\">Chưa có thông tin tiểu sử bệnh</p>"
+          ],
+          [
+            189,
+            "Đợt khám gần đây"
+          ],
+          [
+            198,
+            "<span className=\"truncate flex-1\">{dk.name || 'Đợt khám'}</span>"
+          ]
+        ],
+        "count": 11
+      },
+      {
+        "file": "components/calendar/MonthView.tsx",
+        "findings": [
+          [
+            123,
+            "<span>Đã đến: ({counts.confirmed})</span>"
+          ],
+          [
+            129,
+            "<span>Đang hẹn: ({counts.scheduled})</span>"
+          ],
+          [
+            135,
+            "<span>Hủy hẹn: ({counts.cancelled})</span>"
+          ]
+        ],
+        "count": 3
+      },
+      {
+        "file": "components/calendar/SmartFilterDrawer.tsx",
+        "findings": [
+          [
+            43,
+            "const name = apt.dentist || 'Không xác định';"
+          ],
+          [
+            125,
+            "aria-label=\"Bộ lọc\""
+          ],
+          [
+            130,
+            "<h2 className=\"text-lg font-bold text-gray-900\">Bộ lọc</h2>"
+          ],
+          [
+            136,
+            "aria-label=\"Đóng\""
+          ],
+          [
+            150,
+            "<h3 className=\"text-sm font-semibold text-gray-900 mb-3\">Bác sĩ</h3>"
+          ],
+          [
+            159,
+            "<h3 className=\"text-sm font-semibold text-gray-900 mb-3\">Trạng thái</h3>"
+          ],
+          [
+            168,
+            "<h3 className=\"text-sm font-semibold text-gray-900 mb-3\">Nhãn màu</h3>"
+          ],
+          [
+            185,
+            "Đóng"
+          ],
+          [
+            193,
+            "Xóa bộ lọc"
+          ],
+          [
+            201,
+            "Lọc {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}"
+          ]
+        ],
+        "count": 10
+      },
+      {
+        "file": "components/calendar/StatusBadgeMenu.tsx",
+        "findings": [
+          [
+            64,
+            "<div className=\"text-xs font-bold text-gray-700 mb-2\">Đổi trạng thái</div>"
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "components/calendar/StatusFilterChips.tsx",
+        "findings": [
+          [
+            31,
+            "Tất cả {totalCount}"
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "components/calendar/WeekView.tsx",
+        "findings": [
+          [
+            46,
+            "const WEEKDAY_NAMES = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];"
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "pages/Calendar.tsx",
+        "findings": [
+          [
+            41,
+            "'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',"
+          ],
+          [
+            42,
+            "'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'"
+          ],
+          [
+            47,
+            "{ mode: 'day', label: 'Ngày' },"
+          ],
+          [
+            48,
+            "{ mode: 'week', label: 'Tuần' },"
+          ],
+          [
+            49,
+            "{ mode: 'month', label: 'Tháng' },"
+          ],
+          [
+            417,
+            "aria-label=\"Previous\""
+          ],
+          [
+            417,
+            "aria-label=\"Previous\""
+          ],
+          [
+            511,
+            "Hôm nay"
+          ],
+          [
+            520,
+            "aria-label=\"Next\""
+          ],
+          [
+            520,
+            "aria-label=\"Next\""
+          ],
+          [
+            528,
+            "Hôm nay"
+          ],
+          [
+            547,
+            "<div className=\"px-4 py-3 text-sm text-gray-400 text-center\">Không tìm thấy kết quả</div>"
+          ],
+          [
+            569,
+            "Xuất Excel"
+          ],
+          [
+            581,
+            "<span>Bộ lọc</span>"
+          ]
+        ],
+        "count": 14
+      }
+    ],
+    "customers": [
+      {
+        "file": "components/customer/CustomerAssignments.tsx",
+        "findings": [
+          [
+            45,
+            "{value ? value : <span className=\"text-gray-400 font-normal italic\">— Chưa gán</span>}"
+          ],
+          [
+            73,
+            "<span className=\"text-[10.5px] font-bold tracking-[0.12em] text-primary-dark uppercase\">PHÂN CÔNG</span>"
+          ],
+          [
+            75,
+            "<h3 className=\"text-[15px] font-bold text-gray-900\">Phân công khách hàng</h3>"
+          ],
+          [
+            76,
+            "<p className=\"text-xs text-gray-500 leading-snug mt-1\">Thông tin phụ trách khách hàng.</p>"
+          ],
+          [
+            98,
+            "label=\"NGƯỜI GIỚI THIỆU\""
+          ]
+        ],
+        "count": 5
+      },
+      {
+        "file": "components/customer/CustomerCameraWidget.tsx",
+        "findings": [
+          [
+            18,
+            "name: 'NGUYỄN VĂN A',"
+          ],
+          [
+            24,
+            "street: '123 Nguyễn Huệ',"
+          ],
+          [
+            25,
+            "cityname: 'Hồ Chí Minh',"
+          ],
+          [
+            26,
+            "districtname: 'Quận 1',"
+          ],
+          [
+            27,
+            "wardname: 'Phường Bến Nghé',"
+          ],
+          [
+            111,
+            "<span className=\"text-[10px] text-gray-500\">Không nhận diện được</span>"
+          ],
+          [
+            148,
+            "{isProcessing ? 'Đang xử lý...' : isSuccess ? 'Thành công' : 'Đang chụp...'}"
+          ],
+          [
+            157,
+            "Hủy"
+          ],
+          [
+            174,
+            "Đóng"
+          ]
+        ],
+        "count": 9
+      },
+      {
+        "file": "components/customer/CustomerProfile/DeletePaymentDialog.tsx",
+        "findings": [
+          [
+            13,
+            "<h3 className=\"text-lg font-semibold text-gray-900 mb-2\">Xóa thanh toán?</h3>"
+          ],
+          [
+            15,
+            "Bạn có chắc muốn xóa bản ghi thanh toán này? Hành động này không thể hoàn tác."
+          ],
+          [
+            24,
+            "Hủy"
+          ],
+          [
+            32,
+            "{isDeleting ? 'Đang xóa...' : 'Xóa'}"
+          ]
+        ],
+        "count": 4
+      },
+      {
+        "file": "components/customer/CustomerProfile/ProfileHeader.tsx",
+        "findings": [
+          [
+            59,
+            "{ label: 'Tiểu đường', icon: '🩸', bg: 'bg-orange-100/80 text-orange-800 ring-1 ring-orange-200' },"
+          ],
+          [
+            60,
+            "{ label: 'Tim mạch', icon: '❤️', bg: 'bg-red-100/80 text-red-800 ring-1 ring-red-200' },"
+          ],
+          [
+            61,
+            "{ label: 'Dị ứng thuốc', icon: '💊', bg: 'bg-purple-100/80 text-purple-800 ring-1 ring-purple-200' },"
+          ],
+          [
+            62,
+            "{ label: 'Huyết áp cao', icon: '🔺', bg: 'bg-pink-100/80 text-pink-800 ring-1 ring-pink-200' },"
+          ],
+          [
+            63,
+            "{ label: 'Hen suyễn', icon: '🌬️', bg: 'bg-sky-100/80 text-sky-800 ring-1 ring-sky-200' },"
+          ],
+          [
+            64,
+            "{ label: 'Đang mang thai', icon: '🤰', bg: 'bg-emerald-100/80 text-emerald-800 ring-1 ring-emerald-200' },"
+          ],
+          [
+            83,
+            "<span className=\"text-xs font-semibold text-amber-700 uppercase tracking-wide\">Tiểu sử bệnh</span>"
+          ]
+        ],
+        "count": 7
+      },
+      {
+        "file": "components/customer/CustomerProfile.tsx",
+        "findings": [
+          [
+            215,
+            "Xóa"
+          ],
+          [
+            230,
+            "Xóa mềm"
+          ],
+          [
+            238,
+            "Xóa vĩnh viễn"
+          ],
+          [
+            425,
+            "<p className=\"text-xs text-gray-500 truncate\">Tổng tiền điều trị</p>"
+          ],
+          [
+            486,
+            "<p className=\"text-xs text-gray-500 mb-1\">Đã thanh toán</p>"
+          ],
+          [
+            490,
+            "<p className=\"text-xs text-gray-500 mb-1\">Còn nợ</p>"
+          ],
+          [
+            570,
+            "title=\"Delete payment\""
+          ]
+        ],
+        "count": 7
+      },
+      {
+        "file": "components/customer/HealthCheckupGallery.tsx",
+        "findings": [
+          [
+            114,
+            "Thêm lịch khám"
+          ],
+          [
+            148,
+            "<span className=\"text-sm font-semibold text-gray-900\">{checkup.title || 'Không có tên'}</span>"
+          ],
+          [
+            154,
+            "<span className=\"w-36 text-gray-400 shrink-0\">Dịch vụ</span>"
+          ],
+          [
+            158,
+            "<span className=\"w-36 text-gray-400 shrink-0\">Bác sĩ khám</span>"
+          ],
+          [
+            162,
+            "<span className=\"w-36 text-gray-400 shrink-0\">Ngày khám</span>"
+          ],
+          [
+            166,
+            "<span className=\"w-36 text-gray-400 shrink-0\">Nội dung khám</span>"
+          ],
+          [
+            170,
+            "<span className=\"w-36 text-gray-400 shrink-0\">Ngày hẹn lịch tiếp theo</span>"
+          ],
+          [
+            174,
+            "<span className=\"w-36 text-gray-400 shrink-0\">Nội dung hẹn khám tiếp</span>"
+          ],
+          [
+            175,
+            "<span className=\"font-medium text-gray-700\">{checkup.nextDescription || 'Không có'}</span>"
+          ],
+          [
+            318,
+            "<label className=\"block text-xs font-medium text-gray-600 mb-1\">Dịch vụ</label>"
+          ],
+          [
+            329,
+            "<label className=\"block text-xs font-medium text-gray-600 mb-1\">Bác sĩ khám</label>"
+          ],
+          [
+            340,
+            "<label className=\"block text-xs font-medium text-gray-600 mb-1\">Ngày khám</label>"
+          ],
+          [
+            350,
+            "<label className=\"block text-xs font-medium text-gray-600 mb-1\">Ngày hẹn tiếp theo</label>"
+          ],
+          [
+            361,
+            "<label className=\"block text-xs font-medium text-gray-600 mb-1\">Nội dung khám</label>"
+          ],
+          [
+            372,
+            "<label className=\"block text-xs font-medium text-gray-600 mb-1\">Nội dung hẹn khám tiếp</label>"
+          ],
+          [
+            383,
+            "<label className=\"block text-xs font-medium text-gray-600 mb-1\">Tệp đính kèm</label>"
+          ],
+          [
+            400,
+            "Hủy"
+          ],
+          [
+            408,
+            "Thêm lịch"
+          ]
+        ],
+        "count": 18
+      },
+      {
+        "file": "components/customer/ServiceHistory.tsx",
+        "findings": [
+          [
+            198,
+            "<p className=\"text-sm font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded\">Chưa có giá</p>"
+          ],
+          [
+            276,
+            "title=\"Delete payment\""
+          ]
+        ],
+        "count": 2
+      },
+      {
+        "file": "components/forms/AddCustomerForm/AddCustomerForm.tsx",
+        "findings": [
+          [
+            44,
+            "<p className=\"font-semibold text-red-700\">Lỗi lưu dữ liệu</p>"
+          ],
+          [
+            47,
+            "<p className=\"text-red-500 mt-1 break-words\">Chi tiết: {detail.detail}</p>"
+          ],
+          [
+            50,
+            "<p className=\"text-red-500 mt-1\">Trường lỗi: <code className=\"bg-red-100 px-1 rounded\">{detail.field}</code></p>"
+          ],
+          [
+            53,
+            "<p className=\"text-orange-600 mt-1\">Gợi ý: {detail.hint}</p>"
+          ]
+        ],
+        "count": 4
+      },
+      {
+        "file": "components/forms/AddCustomerForm/BasicInfoTab.tsx",
+        "findings": [
+          [
+            137,
+            "placeholder=\"email@example.com\""
+          ],
+          [
+            248,
+            "placeholder=\"DN4xxxxxxxx\""
+          ],
+          [
+            283,
+            "placeholder=\"0xxxxxxxxx\""
+          ]
+        ],
+        "count": 3
+      },
+      {
+        "file": "components/forms/AddCustomerForm/EInvoiceTab.tsx",
+        "findings": [
+          [
+            57,
+            "placeholder=\"0123456789\""
+          ],
+          [
+            77,
+            "placeholder=\"0xxxxxxxxx\""
+          ],
+          [
+            87,
+            "placeholder=\"0xxxxxxxxx\""
+          ]
+        ],
+        "count": 3
+      },
+      {
+        "file": "components/forms/AddCustomerForm/LeftPanel.tsx",
+        "findings": [
+          [
+            161,
+            "title=\"Số khẩn cấp\""
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "components/forms/AddCustomerForm/useAddCustomerForm.ts",
+        "findings": [
+          [
+            323,
+            "return jt.includes('cskh') || jt.includes('customer service') || jt.includes('hỗ trợ');"
+          ],
+          [
+            335,
+            "return jt.includes('cskh') || jt.includes('customer service') || jt.includes('hỗ trợ');"
+          ]
+        ],
+        "count": 2
+      },
+      {
+        "file": "pages/Customers/CustomerColumns.tsx",
+        "findings": [
+          [
+            106,
+            "aria-label=\"Delete\""
+          ],
+          [
+            106,
+            "aria-label=\"Delete\""
+          ],
+          [
+            107,
+            "title=\"Xóa\""
+          ]
+        ],
+        "count": 3
+      },
+      {
+        "file": "pages/Customers.tsx",
+        "findings": [
+          [
+            383,
+            "gender: g === 'female' || g === 'Nữ' || g === 'f' ? 'female' : g ? 'male' : '',"
+          ],
+          [
+            421,
+            "gender: hookProfile.gender === 'female' || hookProfile.gender === 'Nữ' || hookProfile.gender === 'f'"
+          ],
+          [
+            444,
+            "gender: customer.gender === 'female' || customer.gender === 'Nữ' || customer.gender === 'f'"
+          ],
+          [
+            490,
+            "setDeleteError('Khách hàng này đang có lịch hẹn, điều trị hoặc thanh toán liên quan. Vui lòng xóa các dữ liệu liên quan trước.');"
+          ],
+          [
+            597,
+            "service: dk.name || 'Đợt khám',"
+          ],
+          [
+            756,
+            "Nhập ít nhất {minSearchLength} ký tự để tìm kiếm khách hàng"
+          ],
+          [
+            778,
+            "{deleteDialog.mode === 'hard' ? 'Xóa vĩnh viễn' : 'Xóa khách hàng'}"
+          ],
+          [
+            781,
+            "Bạn có chắc muốn <strong>{deleteDialog.mode === 'hard' ? 'xóa vĩnh viễn' : 'xóa'}</strong> khách hàng <strong>{deleteDialog.customerName}</strong>?"
+          ],
+          [
+            782,
+            "{deleteDialog.mode === 'soft' && ' Khách hàng sẽ bị ẩn khỏi danh sách nhưng dữ liệu vẫn được giữ lại.'}"
+          ],
+          [
+            783,
+            "{deleteDialog.mode === 'hard' && ' Hành động này không thể hoàn tác.'}"
+          ],
+          [
+            789,
+            "{linkedCounts.appointments > 0 && <li>{linkedCounts.appointments} lịch hẹn</li>}"
+          ],
+          [
+            790,
+            "{linkedCounts.saleorders > 0 && <li>{linkedCounts.saleorders} hóa đơn</li>}"
+          ],
+          [
+            791,
+            "{linkedCounts.dotkhams > 0 && <li>{linkedCounts.dotkhams} đợt khám</li>}"
+          ],
+          [
+            806,
+            "Hủy"
+          ],
+          [
+            813,
+            "{deleteLoading ? 'Đang xử lý...' : (deleteDialog.mode === 'hard' ? 'Xóa vĩnh viễn' : 'Xóa')}"
+          ]
+        ],
+        "count": 15
+      }
+    ],
+    "employees": [
+      {
+        "file": "components/employees/EmployeeForm.tsx",
+        "findings": [
+          [
+            31,
+            "'doctor': 'Bác sĩ',"
+          ],
+          [
+            32,
+            "'doctor-assistant': 'Trợ lý bác sĩ',"
+          ],
+          [
+            33,
+            "'assistant': 'Phụ tá',"
+          ],
+          [
+            34,
+            "'receptionist': 'Lễ tân',"
+          ],
+          [
+            35,
+            "'general-manager': 'Quản lý tổng',"
+          ],
+          [
+            36,
+            "'branch-manager': 'Quản lý cơ sở',"
+          ],
+          [
+            37,
+            "'sales-staff': 'Nhân viên sale',"
+          ],
+          [
+            103,
+            "setError('Vui lòng nhập tên nhân viên');"
+          ],
+          [
+            107,
+            "setError('Vui lòng nhập mật khẩu');"
+          ],
+          [
+            138,
+            "setError(err instanceof Error ? err.message : 'Lưu thất bại');"
+          ],
+          [
+            159,
+            "<h2 className=\"text-xl font-bold text-white\">{isEdit ? 'Sửa nhân viên' : 'Thêm nhân viên'}</h2>"
+          ],
+          [
+            161,
+            "{isEdit ? 'Cập nhật thông tin nhân viên' : 'Tạo nhân viên mới'}"
+          ],
+          [
+            180,
+            "{/* Họ và tên */}"
+          ],
+          [
+            184,
+            "Họ và tên <span className=\"text-red-500\">*</span>"
+          ],
+          [
+            194,
+            "{/* Điện thoại + Email */}"
+          ],
+          [
+            199,
+            "Điện thoại"
+          ],
+          [
+            220,
+            "{/* Mật khẩu */}"
+          ],
+          [
+            224,
+            "{isEdit ? 'Đặt lại mật khẩu' : 'Mật khẩu'} {!isEdit && <span className=\"text-red-500\">*</span>}"
+          ],
+          [
+            231,
+            "placeholder={isEdit ? 'Để trống nếu không đổi mật khẩu' : 'Nhập mật khẩu'}"
+          ],
+          [
+            248,
+            "<p className=\"mt-1 text-xs text-gray-400\">Để trống nếu không muốn thay đổi mật khẩu</p>"
+          ],
+          [
+            252,
+            "{/* Chi nhánh */}"
+          ],
+          [
+            256,
+            "Chi nhánh"
+          ],
+          [
+            266,
+            "{/* Chi nhánh phụ */}"
+          ],
+          [
+            270,
+            "Chi nhánh phụ"
+          ],
+          [
+            273,
+            "<p className=\"text-sm text-gray-400\">Chưa có chi nhánh nào</p>"
+          ],
+          [
+            294,
+            "Tất cả chi nhánh"
+          ],
+          [
+            322,
+            "{/* Cấp bậc quyền (Tier) */}"
+          ],
+          [
+            326,
+            "Cấp bậc quyền (Tier)"
+          ],
+          [
+            333,
+            "<option value=\"\">-- Chọn tier --</option>"
+          ],
+          [
+            338,
+            "<p className=\"mt-1 text-xs text-gray-400\">Tier quyết định quyền truy cập của nhân viên trong hệ thống</p>"
+          ],
+          [
+            341,
+            "{/* Vị trí / Vai trò */}"
+          ],
+          [
+            345,
+            "Vị trí / Vai trò <span className=\"text-red-500\">*</span>"
+          ],
+          [
+            358,
+            "{/* Ngày bắt đầu + Trạng thái */}"
+          ],
+          [
+            360,
+            "<DatePicker value={startworkdate} onChange={setStartworkdate} label=\"Ngày bắt đầu\" icon={<CalendarDays className=\"w-3.5 h-3.5\" />} />"
+          ],
+          [
+            364,
+            "Trạng thái"
+          ],
+          [
+            373,
+            "<span className=\"text-sm font-medium\">{active ? 'Đang làm việc' : 'Nghỉ việc'}</span>"
+          ],
+          [
+            382,
+            "Hủy bỏ"
+          ],
+          [
+            387,
+            "{isEdit ? 'Cập nhật' : 'Thêm nhân viên'}"
+          ]
+        ],
+        "count": 38
+      },
+      {
+        "file": "components/employees/EmployeeProfile.tsx",
+        "findings": [
+          [
+            82,
+            "title=\"Edit employee\""
+          ],
+          [
+            151,
+            ": 'Không có chi nhánh phụ'"
+          ]
+        ],
+        "count": 2
+      },
+      {
+        "file": "components/employees/ReferralCodeDisplay.tsx",
+        "findings": [
+          [
+            61,
+            "title=\"Copy referral code\""
+          ]
+        ],
+        "count": 1
+      }
+    ],
+    "locations": [
+      {
+        "file": "components/locations/LocationDashboard.tsx",
+        "findings": [
+          [
+            64,
+            "label=\"Avg Rating\""
+          ],
+          [
+            68,
+            "subtitle=\"Out of 5.0\""
+          ],
+          [
+            71,
+            "label=\"Occupancy\""
+          ],
+          [
+            75,
+            "subtitle=\"Chair utilization\""
+          ],
+          [
+            78,
+            "label=\"Weekly Appts\""
+          ],
+          [
+            82,
+            "subtitle=\"Avg per day\""
+          ]
+        ],
+        "count": 6
+      },
+      {
+        "file": "pages/Locations.tsx",
+        "findings": [
+          [
+            261,
+            "placeholder=\"e.g., Tam Dentist Bình Dương\""
+          ],
+          [
+            277,
+            "placeholder=\"123 Đường ABC, Phường X\""
+          ],
+          [
+            289,
+            "placeholder=\"e.g., Quận 1\""
+          ],
+          [
+            305,
+            "placeholder=\"028-xxxx-xxxx\""
+          ],
+          [
+            318,
+            "placeholder=\"branch@tamdentist.vn\""
+          ],
+          [
+            334,
+            "placeholder=\"Mon-Sat 8:00-17:00\""
+          ],
+          [
+            346,
+            "placeholder=\"Branch manager name\""
+          ]
+        ],
+        "count": 7
+      }
+    ],
+    "modules": [
+      {
+        "file": "components/modules/EditAppointmentModal.tsx",
+        "findings": [
+          [
+            144,
+            "placeholder=\"Search...\""
+          ],
+          [
+            152,
+            "<div className=\"px-4 py-3 text-sm text-gray-400 text-center\">Không tìm thấy</div>"
+          ],
+          [
+            427,
+            "`Type: ${customerType === 'returning' ? 'Khách tái khám' : 'Khách mới'}`,"
+          ],
+          [
+            476,
+            "<h2 className=\"text-xl font-bold text-white\">Sửa lịch hẹn</h2>"
+          ],
+          [
+            513,
+            "Bệnh nhân"
+          ],
+          [
+            527,
+            "Bệnh nhân đã liên kết"
+          ],
+          [
+            554,
+            "Giờ kết thúc"
+          ],
+          [
+            559,
+            "<span className=\"ml-auto text-xs text-gray-400\">({estimatedDuration} phút)</span>"
+          ],
+          [
+            568,
+            "Bác sĩ"
+          ],
+          [
+            591,
+            "Đã chọn: <span className=\"font-medium text-gray-700\">{selectedDoctor.name}</span>"
+          ],
+          [
+            596,
+            "{/* Phụ tá - Optional */}"
+          ],
+          [
+            600,
+            "Phụ tá (không bắt buộc)"
+          ],
+          [
+            606,
+            "placeholder=\"Chọn phụ tá...\""
+          ],
+          [
+            622,
+            "{/* Trợ lý bác sĩ - Optional */}"
+          ],
+          [
+            626,
+            "Trợ lý bác sĩ (không bắt buộc)"
+          ],
+          [
+            632,
+            "placeholder=\"Chọn trợ lý...\""
+          ],
+          [
+            652,
+            "Chi nhánh"
+          ],
+          [
+            672,
+            "Đã chọn: <span className=\"font-medium text-gray-700\">{selectedLocation.name}</span>"
+          ],
+          [
+            681,
+            "Dịch vụ"
+          ],
+          [
+            701,
+            "Đã chọn: <span className=\"font-medium text-gray-700\">{selectedService.name}</span>"
+          ],
+          [
+            712,
+            "Thời gian dự kiến"
+          ],
+          [
+            724,
+            "<span className=\"text-sm text-gray-500\">phút</span>"
+          ],
+          [
+            732,
+            "Loại khách"
+          ],
+          [
+            746,
+            "Khách mới"
+          ],
+          [
+            759,
+            "Tái khám"
+          ],
+          [
+            768,
+            "Trạng thái"
+          ],
+          [
+            794,
+            "Màu thẻ"
+          ],
+          [
+            832,
+            "Ghi chú"
+          ],
+          [
+            852,
+            "Hủy bỏ"
+          ],
+          [
+            863,
+            "Đang lưu..."
+          ],
+          [
+            868,
+            "Lưu thay đổi"
+          ]
+        ],
+        "count": 31
+      },
+      {
+        "file": "components/modules/PatientCheckIn.tsx",
+        "findings": [
+          [
+            275,
+            "Đóng"
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "components/modules/TodayAppointments.tsx",
+        "findings": [
+          [
+            92,
+            "Lịch hẹn hôm nay"
+          ],
+          [
+            127,
+            "placeholder=\"Tìm nhanh lịch hẹn...\""
+          ],
+          [
+            137,
+            "<p className=\"text-center text-gray-400 text-sm py-8\">Không có lịch hẹn</p>"
+          ],
+          [
+            236,
+            "title=\"Edit appointment\""
+          ],
+          [
+            288,
+            "Đã đến"
+          ],
+          [
+            295,
+            "Hủy hẹn"
+          ],
+          [
+            302,
+            "Đang hẹn"
+          ]
+        ],
+        "count": 7
+      }
+    ],
+    "payment": [
+      {
+        "file": "components/payment/CustomerDeposits.tsx",
+        "findings": [
+          [
+            96,
+            "setFormMethod(tx.method === 'Tiền mặt' ? 'cash' : tx.method === 'Chuyển khoản' ? 'bank_transfer' : 'cash');"
+          ],
+          [
+            142,
+            "if (!confirm('Bạn có chắc muốn hủy phiếu tạm ứng này?')) return;"
+          ],
+          [
+            153,
+            "if (!confirm('Bạn có chắc muốn xóa phiếu tạm ứng này?')) return;"
+          ],
+          [
+            165,
+            "const title = editingTx ? 'Sửa phiếu tạm ứng' : isRefund ? 'Hoàn tạm ứng' : 'Đóng tạm ứng';"
+          ],
+          [
+            173,
+            "<label className=\"block text-sm font-medium text-gray-700 mb-1\">Ngày giao dịch</label>"
+          ],
+          [
+            186,
+            "<span className=\"text-sm font-medium text-gray-600\">Số tiền</span>"
+          ],
+          [
+            213,
+            "<label className=\"block text-sm font-medium text-gray-700 mb-1\">Phương thức</label>"
+          ],
+          [
+            224,
+            "Tiền mặt"
+          ],
+          [
+            235,
+            "Chuyển khoản"
+          ],
+          [
+            254,
+            "<label className=\"block text-sm font-medium text-gray-700 mb-1\">Ghi chú (tùy chọn)</label>"
+          ],
+          [
+            272,
+            "Tạo QR"
+          ],
+          [
+            282,
+            "Hủy"
+          ],
+          [
+            290,
+            "{editingTx ? 'Lưu thay đổi' : isRefund ? 'Hoàn tạm ứng' : 'Đóng tạm ứng'}"
+          ],
+          [
+            307,
+            "<p className=\"text-xs text-gray-500\">Tạm ứng đã đóng</p>"
+          ],
+          [
+            317,
+            "<p className=\"text-xs text-gray-500\">Tạm ứng còn lại</p>"
+          ],
+          [
+            327,
+            "<p className=\"text-xs text-gray-500\">Tạm ứng đã dùng</p>"
+          ],
+          [
+            337,
+            "<p className=\"text-xs text-gray-500\">Tạm ứng đã hoàn</p>"
+          ],
+          [
+            353,
+            "Danh sách tạm ứng"
+          ],
+          [
+            365,
+            "Lịch sử sử dụng"
+          ],
+          [
+            381,
+            "Đóng tạm ứng"
+          ],
+          [
+            389,
+            "Hoàn tạm ứng"
+          ],
+          [
+            403,
+            "<th className=\"px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider\">Số phiếu</th>"
+          ],
+          [
+            404,
+            "<th className=\"px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider\">Ngày</th>"
+          ],
+          [
+            405,
+            "<th className=\"px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider\">Phương thức</th>"
+          ],
+          [
+            406,
+            "<th className=\"px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider\">Loại</th>"
+          ],
+          [
+            407,
+            "<th className=\"px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider text-right\">Số tiền</th>"
+          ],
+          [
+            408,
+            "<th className=\"px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider\">Trạng thái</th>"
+          ],
+          [
+            409,
+            "<th className=\"px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider text-right\">Thao tác</th>"
+          ],
+          [
+            418,
+            "Đang tải..."
+          ],
+          [
+            425,
+            "Không có dữ liệu"
+          ],
+          [
+            446,
+            "{tx.type === 'refund' ? 'Hoàn' : 'Đóng'}"
+          ],
+          [
+            460,
+            "{tx.status === 'posted' || tx.status === 'confirmed' ? 'Đã xác nhận' : 'Đã hủy'}"
+          ],
+          [
+            469,
+            "title=\"Sửa\""
+          ],
+          [
+            478,
+            "title=\"Hủy\""
+          ],
+          [
+            487,
+            "title=\"Xóa\""
+          ],
+          [
+            503,
+            "<th className=\"px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider\">Ngày giao dịch</th>"
+          ],
+          [
+            504,
+            "<th className=\"px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider\">Phương thức</th>"
+          ],
+          [
+            505,
+            "<th className=\"px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider\">Ghi chú</th>"
+          ],
+          [
+            506,
+            "<th className=\"px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider text-right\">Số tiền</th>"
+          ],
+          [
+            507,
+            "<th className=\"px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider\">Trạng thái</th>"
+          ],
+          [
+            516,
+            "Đang tải..."
+          ],
+          [
+            523,
+            "Không có dữ liệu sử dụng tạm ứng"
+          ],
+          [
+            541,
+            "{tx.status === 'posted' || tx.status === 'confirmed' ? 'Đã xác nhận' : 'Đã hủy'}"
+          ],
+          [
+            564,
+            "{startRow}-{endRow} của {depositList.length} dòng"
+          ]
+        ],
+        "count": 44
+      },
+      {
+        "file": "components/payment/DepositWallet.tsx",
+        "findings": [
+          [
+            88,
+            "<label className=\"block text-sm font-medium text-gray-700 mb-1\">Ngày giao dịch</label>"
+          ],
+          [
+            101,
+            "<span className=\"text-sm font-medium text-gray-600\">Tổng thanh toán</span>"
+          ],
+          [
+            131,
+            "title={isInstallment ? 'Số tiền nợ hiện tại' : undefined}"
+          ],
+          [
+            189,
+            "placeholder=\"Add a note\""
+          ],
+          [
+            202,
+            "Tạo QR"
+          ]
+        ],
+        "count": 5
+      },
+      {
+        "file": "components/payment/MonthlyPlan/MonthlyPlanCreator.tsx",
+        "findings": [
+          [
+            129,
+            "placeholder=\"Enter customer name\""
+          ],
+          [
+            208,
+            "label=\"Start Date\""
+          ]
+        ],
+        "count": 2
+      },
+      {
+        "file": "components/payment/PaymentForm.tsx",
+        "findings": [
+          [
+            202,
+            "{isEdit ? 'Chỉnh sửa thanh toán' : 'Ghi nhận thanh toán'}"
+          ],
+          [
+            213,
+            "aria-label=\"Đóng\""
+          ],
+          [
+            223,
+            "<p className=\"text-xs text-emerald-600 mb-0.5\">Số dư ví (Deposit)</p>"
+          ],
+          [
+            227,
+            "<p className=\"text-xs text-red-600 mb-0.5\">Còn nợ (Outstanding)</p>"
+          ],
+          [
+            238,
+            "Nguồn thanh toán"
+          ],
+          [
+            242,
+            "Kết hợp nhiều nguồn — tối đa {formatVND(cap)}"
+          ],
+          [
+            245,
+            "{/* animate: key-driven crossfade between \"Còn lại\" and \"Đã đủ\" states */}"
+          ],
+          [
+            248,
+            "Còn lại: <span className=\"font-semibold text-gray-700 tabular-nums\">{formatVND(remaining)}</span>"
+          ],
+          [
+            251,
+            "<span key=\"full\" className=\"text-xs font-semibold text-emerald-600 animate-in fade-in duration-200\">Đã đủ</span>"
+          ],
+          [
+            273,
+            "<span className=\"text-sm font-medium text-gray-700\">Từ ví (Deposit)</span>"
+          ],
+          [
+            275,
+            "<span className=\"text-xs text-gray-500 ml-2\">Sẵn: {formatVND(availableDeposit)}</span>"
+          ],
+          [
+            283,
+            "title={cap <= 0 ? 'Số dư tối đa đã đạt' : undefined}"
+          ],
+          [
+            286,
+            "Dùng tất cả"
+          ],
+          [
+            311,
+            "<span className=\"text-sm font-medium text-gray-700\">Tiền mặt (Cash)</span>"
+          ],
+          [
+            336,
+            "<span className=\"text-sm font-medium text-gray-700\">Chuyển khoản (Bank)</span>"
+          ],
+          [
+            344,
+            "Tạo QR"
+          ],
+          [
+            364,
+            "<span className=\"text-sm font-semibold text-gray-700\">Tổng thanh toán</span>"
+          ],
+          [
+            375,
+            "<span className=\"text-emerald-600\">Từ ví</span>"
+          ],
+          [
+            382,
+            "<span className=\"text-amber-600\">Tiền mặt</span>"
+          ],
+          [
+            388,
+            "<span className=\"text-blue-600\">Chuyển khoản</span>"
+          ],
+          [
+            400,
+            "Đã đạt giới hạn còn nợ của dịch vụ"
+          ],
+          [
+            409,
+            "Ngày thanh toán"
+          ],
+          [
+            422,
+            "Mã tham chiếu / Ghi chú nhanh"
+          ],
+          [
+            436,
+            "Ghi chú"
+          ],
+          [
+            462,
+            "Hủy bỏ"
+          ],
+          [
+            473,
+            "Ghi nhận{totalPayment > 0 ? ` ${formatVND(totalPayment)}` : ''}"
+          ]
+        ],
+        "count": 26
+      },
+      {
+        "file": "components/payment/ServicePaymentCard.tsx",
+        "findings": [
+          [
+            42,
+            "{ctx.recordType === 'saleorder' ? 'Hóa đơn' : 'Đợt khám'}"
+          ],
+          [
+            61,
+            "Đã thanh toán đủ"
+          ],
+          [
+            69,
+            "<p className=\"text-[10px] text-gray-500 uppercase tracking-wider\">Tổng chi phí</p>"
+          ],
+          [
+            73,
+            "<p className=\"text-[10px] text-gray-500 uppercase tracking-wider\">Đã thanh toán</p>"
+          ],
+          [
+            77,
+            "<p className=\"text-[10px] text-gray-500 uppercase tracking-wider\">Còn nợ</p>"
+          ],
+          [
+            93,
+            "<p className=\"text-[10px] text-gray-400 mt-1 text-right\">{pct}% đã trả</p>"
+          ]
+        ],
+        "count": 6
+      },
+      {
+        "file": "components/payment/VietQrModal.tsx",
+        "findings": [
+          [
+            113,
+            "<h2 className=\"text-xl font-bold text-white\">Thanh toán VietQR</h2>"
+          ],
+          [
+            114,
+            "<p className=\"text-sm text-orange-100 mt-0.5\">Quét mã QR để chuyển khoản</p>"
+          ],
+          [
+            133,
+            "Số tiền (VND)"
+          ],
+          [
+            147,
+            "Nội dung chuyển khoản"
+          ],
+          [
+            167,
+            "Tạo QR"
+          ],
+          [
+            177,
+            "Đang tải..."
+          ],
+          [
+            181,
+            "<p className=\"text-sm\">Vui lòng cấu hình tài khoản ngân hàng trong Cài đặt</p>"
+          ],
+          [
+            193,
+            "<p className=\"text-sm\">Nhập số tiền và nhấn \"Tạo QR\"</p>"
+          ],
+          [
+            201,
+            "Ảnh xác nhận chuyển khoản"
+          ],
+          [
+            218,
+            "{uploading ? 'Đang lưu...' : 'Xác nhận đã thanh toán'}"
+          ],
+          [
+            223,
+            "<span>Đã lưu xác nhận thanh toán thành công</span>"
+          ]
+        ],
+        "count": 11
+      }
+    ],
+    "services": [
+      {
+        "file": "components/services/ServiceForm.tsx",
+        "findings": [
+          [
+            87,
+            "const [unit, setUnit] = useState(initialData?.unit ?? 'răng');"
+          ],
+          [
+            297,
+            "{/* Nguồn khách hàng */}"
+          ],
+          [
+            301,
+            "Nguồn khách hàng"
+          ],
+          [
+            325,
+            "{/* Dịch vụ */}"
+          ],
+          [
+            341,
+            "{/* Khách hàng */}"
+          ],
+          [
+            353,
+            "{/* Bác sĩ */}"
+          ],
+          [
+            363,
+            "{/* Phụ tá */}"
+          ],
+          [
+            372,
+            "{/* Trợ lý Bác sĩ */}"
+          ],
+          [
+            381,
+            "{/* Chi nhánh */}"
+          ],
+          [
+            391,
+            "{/* Ngày bắt đầu */}"
+          ],
+          [
+            396,
+            "{/* Chi phí + Số lượng + Đơn vị */}"
+          ],
+          [
+            442,
+            "{/* Chọn răng */}"
+          ],
+          [
+            446,
+            "Chọn răng"
+          ],
+          [
+            454,
+            "{toothNumbers.length > 0 ? `Đã chọn ${toothNumbers.length} răng` : 'Chọn răng'}"
+          ],
+          [
+            464,
+            "{/* Ghi chú răng */}"
+          ],
+          [
+            468,
+            "Ghi chú răng"
+          ],
+          [
+            472,
+            "rows={2} placeholder=\"Nhập ghi chú về răng\""
+          ],
+          [
+            477,
+            "{/* Ghi chú */}"
+          ]
+        ],
+        "count": 18
+      },
+      {
+        "file": "components/services/ToothPickerModal.tsx",
+        "findings": [
+          [
+            110,
+            "<h2 className=\"text-base font-semibold text-gray-900\">Chọn răng</h2>"
+          ],
+          [
+            115,
+            "aria-label=\"Close\""
+          ],
+          [
+            115,
+            "aria-label=\"Close\""
+          ],
+          [
+            125,
+            "{ key: 'all', label: 'Chọn răng' },"
+          ],
+          [
+            126,
+            "{ key: 'upper', label: 'Hàm trên' },"
+          ],
+          [
+            127,
+            "{ key: 'lower', label: 'Hàm dưới' },"
+          ],
+          [
+            128,
+            "{ key: 'arch', label: 'Nguyên hàm' },"
+          ],
+          [
+            156,
+            "Răng vĩnh viễn"
+          ],
+          [
+            167,
+            "Răng sữa"
+          ],
+          [
+            218,
+            "Đóng"
+          ],
+          [
+            225,
+            "Lưu"
+          ]
+        ],
+        "count": 11
+      },
+      {
+        "file": "pages/ServiceCatalog.tsx",
+        "findings": [
+          [
+            55,
+            "uomname: 'Lần',"
+          ],
+          [
+            67,
+            "uomname: initialData.uomname ?? 'Lần',"
+          ],
+          [
+            71,
+            "setForm({ name: '', defaultcode: '', listprice: 0, categid: '', uomname: 'Lần', companyid: '' });"
+          ],
+          [
+            613,
+            "title={product.active ? tc('hide', 'Ẩn') : tc('show', 'Hiện')}"
+          ]
+        ],
+        "count": 4
+      },
+      {
+        "file": "pages/Services/index.tsx",
+        "findings": [
+          [
+            24,
+            "{ label: 'Đang điều trị', value: 'active' },"
+          ],
+          [
+            25,
+            "{ label: 'Hoàn thành', value: 'completed' },"
+          ],
+          [
+            26,
+            "{ label: 'Đã hủy', value: 'cancelled' },"
+          ],
+          [
+            27,
+            "{ label: 'Tất cả', value: 'all' },"
+          ],
+          [
+            149,
+            "<StatCard icon={<Activity className=\"w-5 h-5 text-blue-600\" />} label=\"Đang điều trị\" value={stats.active} bg=\"bg-blue-50\" />"
+          ],
+          [
+            150,
+            "<StatCard icon={<CheckCircle2 className=\"w-5 h-5 text-green-600\" />} label=\"Hoàn thành\" value={stats.completed} bg=\"bg-green-50\" />"
+          ],
+          [
+            151,
+            "<StatCard icon={<XCircle className=\"w-5 h-5 text-red-600\" />} label=\"Đã hủy\" value={stats.cancelled} bg=\"bg-red-50\" />"
+          ],
+          [
+            152,
+            "<StatCard icon={<DollarSign className=\"w-5 h-5 text-amber-600\" />} label=\"Outstanding\" value={formatVND(stats.outstanding)} bg=\"bg-amber-50\" isText />"
+          ],
+          [
+            163,
+            "placeholder=\"Search by customer, service, doctor...\""
+          ]
+        ],
+        "count": 9
+      }
+    ],
+    "settings": [
+      {
+        "file": "components/settings/BankSettingsForm.tsx",
+        "findings": [
+          [
+            53,
+            "<span className=\"ml-2 text-sm text-gray-500\">Đang tải...</span>"
+          ],
+          [
+            65,
+            "<h3 className=\"text-base font-semibold text-gray-900\">Tài khoản ngân hàng</h3>"
+          ],
+          [
+            66,
+            "<p className=\"text-sm text-gray-500\">Cấu hình tài khoản nhận thanh toán QR cho phòng khám</p>"
+          ],
+          [
+            73,
+            "Mã ngân hàng (BIN)"
+          ],
+          [
+            80,
+            "<p className=\"text-xs text-gray-400\">Ví dụ: 970436 (Vietcombank)</p>"
+          ],
+          [
+            85,
+            "Số tài khoản"
+          ],
+          [
+            92,
+            "placeholder=\"1234567890\""
+          ],
+          [
+            100,
+            "Tên chủ tài khoản"
+          ],
+          [
+            107,
+            "placeholder=\"CONG TY TNHH NHA KHOA TAM DENTIST\""
+          ],
+          [
+            123,
+            "<span>Đang lưu...</span>"
+          ],
+          [
+            128,
+            "<span>Lưu</span>"
+          ],
+          [
+            136,
+            "<span className=\"text-sm font-medium\">Đã lưu cài đặt ngân hàng</span>"
+          ]
+        ],
+        "count": 12
+      },
+      {
+        "file": "components/settings/CustomerSourcesConfig.tsx",
+        "findings": [
+          [
+            196,
+            "title=\"Remove source\""
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "components/settings/FeedbackAdminContent.tsx",
+        "findings": [
+          [
+            452,
+            "aria-label=\"Remove file\""
+          ],
+          [
+            452,
+            "aria-label=\"Remove file\""
+          ],
+          [
+            483,
+            "aria-label=\"Attach image\""
+          ],
+          [
+            483,
+            "aria-label=\"Attach image\""
+          ],
+          [
+            484,
+            "title=\"Attach image\""
+          ]
+        ],
+        "count": 5
+      },
+      {
+        "file": "components/settings/PermissionGroupConfig.tsx",
+        "findings": [
+          [
+            216,
+            "title=\"Delete group\""
+          ],
+          [
+            372,
+            "title=\"Remove from group\""
+          ]
+        ],
+        "count": 2
+      }
+    ],
+    "website": [
+      {
+        "file": "components/website/PageList.tsx",
+        "findings": [
+          [
+            178,
+            "title=\"Edit page\""
+          ],
+          [
+            185,
+            "title=\"SEO settings\""
+          ]
+        ],
+        "count": 2
+      },
+      {
+        "file": "components/website/SEOManager.tsx",
+        "findings": [
+          [
+            221,
+            "placeholder=\"https://tgclinic.vn/page\""
+          ]
+        ],
+        "count": 1
+      }
+    ],
+    "lib": [
+      {
+        "file": "constants/index.ts",
+        "findings": [
+          [
+            376,
+            "scheduled: 'Đang hẹn',"
+          ],
+          [
+            377,
+            "arrived: 'Đã đến',"
+          ],
+          [
+            378,
+            "confirmed: 'Đã xác nhận',"
+          ],
+          [
+            379,
+            "'in-progress': 'Đang khám',"
+          ],
+          [
+            380,
+            "completed: 'Hoàn tất',"
+          ],
+          [
+            381,
+            "cancelled: 'Hủy hẹn',"
+          ]
+        ],
+        "count": 6
+      },
+      {
+        "file": "constants/statusStyles.ts",
+        "findings": [
+          [
+            125,
+            "'general-manager': 'Quản lý tổng',"
+          ],
+          [
+            126,
+            "'branch-manager': 'Quản lý cơ sở',"
+          ],
+          [
+            127,
+            "doctor: 'Bác sĩ',"
+          ],
+          [
+            128,
+            "'doctor-assistant': 'Trợ lý Bác sĩ',"
+          ],
+          [
+            129,
+            "assistant: 'Phụ tá',"
+          ],
+          [
+            130,
+            "receptionist: 'Lễ tân',"
+          ],
+          [
+            131,
+            "'sales-staff': 'Nhân viên sale',"
+          ]
+        ],
+        "count": 7
+      },
+      {
+        "file": "hooks/useDeposits.ts",
+        "findings": [
+          [
+            37,
+            "cash: 'Tiền mặt',"
+          ],
+          [
+            38,
+            "bank: 'Ngân hàng',"
+          ],
+          [
+            39,
+            "bank_transfer: 'Chuyển khoản',"
+          ],
+          [
+            40,
+            "deposit: 'Ví cọc',"
+          ],
+          [
+            41,
+            "mixed: 'Kết hợp',"
+          ],
+          [
+            43,
+            "card: 'Thẻ',"
+          ],
+          [
+            44,
+            "wallet: 'Ví điện tử',"
+          ],
+          [
+            57,
+            "note: p.notes || (isRefund ? 'Hoàn tạm ứng' : 'Đóng tạm ứng'),"
+          ],
+          [
+            73,
+            "note: p.notes || 'Thanh toán từ ví cọc',"
+          ]
+        ],
+        "count": 9
+      },
+      {
+        "file": "hooks/useEmployees.ts",
+        "findings": [
+          [
+            31,
+            "if (jobtitle && jobtitle.toLowerCase().includes('trợ lý')) {"
+          ],
+          [
+            40,
+            "if (lower.includes('quản lý') || lower.includes('manager')) return ['general-manager'];"
+          ],
+          [
+            43,
+            "if (lower.includes('cskh') || lower.includes('customer service') || lower.includes('hỗ trợ')) return ['customer-service'];"
+          ],
+          [
+            44,
+            "if (lower.includes('quản trị') || lower.includes('admin')) return ['general-manager'];"
+          ]
+        ],
+        "count": 4
+      },
+      {
+        "file": "hooks/useFaceRecognition.ts",
+        "findings": [
+          [
+            32,
+            "const message = err instanceof Error ? err.message : 'Nhận diện thất bại';"
+          ],
+          [
+            44,
+            "const message = err instanceof Error ? err.message : 'Đăng ký khuôn mặt thất bại';"
+          ]
+        ],
+        "count": 2
+      },
+      {
+        "file": "hooks/useLocations.ts",
+        "findings": [
+          [
+            30,
+            "const districtMatch = company.name.match(/(Quận \\d+|TP\\. \\w+|\\w+ \\w+)/);"
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "hooks/useOverviewAppointments.ts",
+        "findings": [
+          [
+            299,
+            "║  but \"Tất cả\" shows all sorted correctly.                            ║"
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "hooks/useServices.ts",
+        "findings": [
+          [
+            95,
+            "unit: order.unit || 'răng',"
+          ],
+          [
+            225,
+            "unit: input.unit ?? 'răng',"
+          ],
+          [
+            257,
+            "unit: input.unit ?? 'răng',"
+          ]
+        ],
+        "count": 3
+      },
+      {
+        "file": "hooks/useSettings.ts",
+        "findings": [
+          [
+            171,
+            "{ id: 'src-1', name: 'Sale Online', type: 'online', description: 'Khách đến từ kênh sale online', isActive: true, customerCount: 0 },"
+          ],
+          [
+            172,
+            "{ id: 'src-2', name: 'Khách vãng lai', type: 'offline', description: 'Khách vãng lai', isActive: true, customerCount: 0 },"
+          ],
+          [
+            173,
+            "{ id: 'src-3', name: 'Hotline', type: 'online', description: 'Khách từ hotline', isActive: true, customerCount: 0 },"
+          ],
+          [
+            174,
+            "{ id: 'src-4', name: 'Khách cũ', type: 'referral', description: 'Khách cũ quay lại', isActive: true, customerCount: 0 },"
+          ],
+          [
+            175,
+            "{ id: 'src-5', name: 'Khách hàng giới thiệu', type: 'referral', description: 'Khách do khách hàng giới thiệu', isActive: true, customerCount: 0 },"
+          ],
+          [
+            176,
+            "{ id: 'src-6', name: 'Nội bộ giới thiệu', type: 'referral', description: 'Khách do nội bộ giới thiệu', isActive: true, customerCount: 0 },"
+          ],
+          [
+            177,
+            "{ id: 'src-7', name: 'MKT1', type: 'online', description: 'Kênh marketing 1', isActive: true, customerCount: 0 },"
+          ],
+          [
+            178,
+            "{ id: 'src-8', name: 'ĐNCB', type: 'offline', description: 'Đối tượng ngoài cơ sở bệnh', isActive: true, customerCount: 0 },"
+          ]
+        ],
+        "count": 8
+      },
+      {
+        "file": "hooks/useUniqueCheck.ts",
+        "findings": [
+          [
+            37,
+            "setPhoneError('Số điện thoại đã tồn tại');"
+          ],
+          [
+            39,
+            "setEmailError('Email đã tồn tại');"
+          ]
+        ],
+        "count": 2
+      },
+      {
+        "file": "hooks/useUniqueFieldCheck.ts",
+        "findings": [
+          [
+            27,
+            "phone: 'Số điện thoại này đã được sử dụng',"
+          ],
+          [
+            28,
+            "email: 'Email này đã được sử dụng',"
+          ],
+          [
+            31,
+            "const ERROR_MESSAGE = 'Không kiểm tra được, sẽ xác nhận khi lưu';"
+          ]
+        ],
+        "count": 3
+      },
+      {
+        "file": "lib/appointmentStatusMapping.ts",
+        "findings": [
+          [
+            41,
+            "scheduled: 'Đang hẹn',"
+          ],
+          [
+            42,
+            "waiting: 'Chờ khám',"
+          ],
+          [
+            43,
+            "'in-treatment': 'Đang khám',"
+          ],
+          [
+            44,
+            "done: 'Hoàn thành',"
+          ],
+          [
+            45,
+            "cancelled: 'Hủy hẹn',"
+          ]
+        ],
+        "count": 5
+      },
+      {
+        "file": "lib/exportAppointmentsXlsx.ts",
+        "findings": [
+          [
+            7,
+            "scheduled: 'Đang hẹn',"
+          ],
+          [
+            8,
+            "waiting: 'Đã đến',"
+          ],
+          [
+            9,
+            "'in-treatment': 'Đang khám',"
+          ],
+          [
+            10,
+            "done: 'Hoàn thành',"
+          ],
+          [
+            11,
+            "cancelled: 'Hủy hẹn',"
+          ],
+          [
+            17,
+            "if (typeLower.includes('tksn') || typeLower.includes('khám mới')) return 'Khám mới';"
+          ],
+          [
+            18,
+            "return 'Tái khám';"
+          ],
+          [
+            39,
+            "'Khách hàng',"
+          ],
+          [
+            40,
+            "'Số điện thoại',"
+          ],
+          [
+            41,
+            "'Thời gian hẹn',"
+          ],
+          [
+            42,
+            "'Dịch vụ',"
+          ],
+          [
+            43,
+            "'Bác sĩ',"
+          ],
+          [
+            44,
+            "'Nội dung',"
+          ],
+          [
+            45,
+            "'Loại khám',"
+          ],
+          [
+            46,
+            "'Trạng thái',"
+          ],
+          [
+            47,
+            "'Lý do',"
+          ]
+        ],
+        "count": 16
+      },
+      {
+        "file": "lib/formatting.ts",
+        "findings": [
+          [
+            38,
+            "cleaned = cleaned.replace(/[đĐ]/g, '');"
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "lib/utils.ts",
+        "findings": [
+          [
+            20,
+            ".replace(/đ/g, 'd');"
+          ]
+        ],
+        "count": 1
+      }
+    ],
+    "other": [
+      {
+        "file": "data/serviceCatalog.ts",
+        "findings": [
+          [
+            23,
+            "'Bọc sứ',"
+          ],
+          [
+            24,
+            "'Dán sứ',"
+          ],
+          [
+            25,
+            "'Điều trị tổng quát',"
+          ],
+          [
+            27,
+            "'KHÍ CỤ TWINBLOCK',"
+          ],
+          [
+            28,
+            "'Máy tăm nước',"
+          ],
+          [
+            29,
+            "'Nhổ răng',"
+          ],
+          [
+            30,
+            "'Niềng răng',"
+          ],
+          [
+            31,
+            "'Phẫu thuật và điều trị',"
+          ],
+          [
+            32,
+            "'Phục hình',"
+          ],
+          [
+            33,
+            "'BỘC LỘ',"
+          ],
+          [
+            42,
+            "{ code: 'SP0288', name: 'Cắm chốt', canOrderLab: false, category: 'Bọc sứ', unit: 'răng', price: 1, cost: 0 },"
+          ],
+          [
+            43,
+            "{ code: 'DV0020', name: 'Chốt sợi', canOrderLab: true, category: 'Bọc sứ', unit: 'Răng', price: 2000000, cost: 0 },"
+          ],
+          [
+            44,
+            "{ code: 'SP0244', name: 'Chốt sợi thủy tinh', canOrderLab: false, category: 'Bọc sứ', unit: 'đồng', price: 800000, cost: 0 },"
+          ],
+          [
+            45,
+            "{ code: 'SP0265', name: 'Cùi giả kim loại', canOrderLab: false, category: 'Bọc sứ', unit: 'đồng', price: 1000000, cost: 0 },"
+          ],
+          [
+            46,
+            "{ code: 'SP0243', name: 'Cùi giả sứ', canOrderLab: false, category: 'Bọc sứ', unit: 'đồng', price: 1500000, cost: 0 },"
+          ],
+          [
+            47,
+            "{ code: 'SP0247', name: 'Đặt chốt', canOrderLab: false, category: 'Bọc sứ', unit: 'đồng', price: 800000, cost: 0 },"
+          ],
+          [
+            48,
+            "{ code: 'SP0248', name: 'KHUNG NHỰA', canOrderLab: false, category: 'Bọc sứ', unit: 'cái', price: 5000000, cost: 0 },"
+          ],
+          [
+            49,
+            "{ code: 'SP0246', name: 'Mão tạm', canOrderLab: false, category: 'Bọc sứ', unit: 'đồng', price: 300000, cost: 0 },"
+          ],
+          [
+            50,
+            "{ code: 'DV0011', name: 'RS 3M Lava Plus', canOrderLab: true, category: 'Bọc sứ', unit: 'Răng', price: 8000000, cost: 0 },"
+          ],
+          [
+            51,
+            "{ code: 'DV0012', name: 'RS Ceramill', canOrderLab: true, category: 'Bọc sứ', unit: 'Răng', price: 5500000, cost: 0 },"
+          ],
+          [
+            52,
+            "{ code: 'SP0245', name: 'RS CERCON', canOrderLab: false, category: 'Bọc sứ', unit: 'CÁI', price: 6000000, cost: 0 },"
+          ],
+          [
+            53,
+            "{ code: 'DV0013', name: 'RS Cercon HT', canOrderLab: true, category: 'Bọc sứ', unit: 'Răng', price: 6000000, cost: 0 },"
+          ],
+          [
+            54,
+            "{ code: 'DV0014', name: 'RS Emax', canOrderLab: true, category: 'Bọc sứ', unit: 'Răng', price: 5500000, cost: 0 },"
+          ],
+          [
+            55,
+            "{ code: 'DV0015', name: 'RS Ful Zirconia', canOrderLab: true, category: 'Bọc sứ', unit: 'Răng', price: 3500000, cost: 0 },"
+          ],
+          [
+            56,
+            "{ code: 'DV0016', name: 'RS HT Smile', canOrderLab: true, category: 'Bọc sứ', unit: 'Răng', price: 6000000, cost: 0 },"
+          ],
+          [
+            57,
+            "{ code: 'DV0017', name: 'RS Katana', canOrderLab: true, category: 'Bọc sứ', unit: 'Răng', price: 2500000, cost: 0 },"
+          ],
+          [
+            58,
+            "{ code: 'DV0018', name: 'RS Nacera Vita', canOrderLab: true, category: 'Bọc sứ', unit: 'Răng', price: 6500000, cost: 0 },"
+          ],
+          [
+            59,
+            "{ code: 'SP0290', name: 'RS Titan', canOrderLab: false, category: 'Bọc sứ', unit: 'Răng', price: 3000000, cost: 0 },"
+          ],
+          [
+            60,
+            "{ code: 'DV0019', name: 'RS Venus 3D', canOrderLab: true, category: 'Bọc sứ', unit: 'Răng', price: 3000000, cost: 0 },"
+          ],
+          [
+            63,
+            "{ code: 'SP0296', name: 'BỘC LỘ', canOrderLab: false, category: 'BỘC LỘ', unit: 'RĂNG', price: 1, cost: 0 },"
+          ],
+          [
+            66,
+            "{ code: 'DV0021', name: 'Dán sứ Veneer Caramay Ngọc Trai', canOrderLab: true, category: 'Dán sứ', unit: 'Răng', price: 9200000, cost: 0 },"
+          ],
+          [
+            67,
+            "{ code: 'DV0022', name: 'Dán sứ Veneer Emax Press', canOrderLab: true, category: 'Dán sứ', unit: 'Răng', price: 7200000, cost: 0 },"
+          ],
+          [
+            68,
+            "{ code: 'DV0023', name: 'Dán sứ Veneer Lava', canOrderLab: true, category: 'Dán sứ', unit: 'Răng', price: 14200000, cost: 0 },"
+          ],
+          [
+            69,
+            "{ code: 'SP0253', name: 'Đính đá', canOrderLab: false, category: 'Dán sứ', unit: 'đồng', price: 500000, cost: 0 },"
+          ],
+          [
+            70,
+            "{ code: 'SP0216', name: 'GẮN LẠI RĂNG SỨ', canOrderLab: false, category: 'Dán sứ', unit: 'CÁI', price: 500000, cost: 0 },"
+          ],
+          [
+            73,
+            "{ code: 'SP0237', name: 'Cắt cầu răng', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'răng', price: 1, cost: 0 },"
+          ],
+          [
+            74,
+            "{ code: 'SP0201', name: 'CẮT CHỈ', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Cái', price: 200000, cost: 0 },"
+          ],
+          [
+            75,
+            "{ code: 'SP0218', name: 'CẮT LỢI TRÙM (THƯỜNG)', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'cái', price: 300000, cost: 0 },"
+          ],
+          [
+            76,
+            "{ code: 'DV0051', name: 'Cắt lợi+ Hạ xương ổ răng', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Răng', price: 1500000, cost: 0 },"
+          ],
+          [
+            77,
+            "{ code: 'SP0303', name: 'CẮT NƯỚU', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'RĂNG', price: 1, cost: 0 },"
+          ],
+          [
+            78,
+            "{ code: 'SP0261', name: 'chữa áp xe chân răng số 46', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'cái', price: 500000, cost: 0 },"
+          ],
+          [
+            79,
+            "{ code: 'SP0269', name: 'Chụp phim', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'lần', price: 1, cost: 0 },"
+          ],
+          [
+            80,
+            "{ code: 'SP0252', name: 'Đánh bóng làm sạch', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'đ', price: 100000, cost: 0 },"
+          ],
+          [
+            81,
+            "{ code: 'SP0306', name: 'ĐIỀU TRỊ NHA CHU', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Răng', price: 1, cost: 0 },"
+          ],
+          [
+            82,
+            "{ code: 'SP0286', name: 'Điều trị sâu ngà răng phục hồi bằng composite', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'răng', price: 300000, cost: 0 },"
+          ],
+          [
+            83,
+            "{ code: 'DV0047', name: 'Điều trị tủy', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Răng', price: 2000000, cost: 0 },"
+          ],
+          [
+            84,
+            "{ code: 'DV0048', name: 'Điều trị tủy lại', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Răng', price: 3000000, cost: 0 },"
+          ],
+          [
+            85,
+            "{ code: 'SP0274', name: 'Điều trị viêm lợi', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'gói', price: 1, cost: 0 },"
+          ],
+          [
+            86,
+            "{ code: 'DV0056', name: 'Điều trị viêm quanh răng', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Ca', price: 750000, cost: 0 },"
+          ],
+          [
+            87,
+            "{ code: 'SP0202', name: 'GẮN HỘT', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Hột', price: 500000, cost: 0 },"
+          ],
+          [
+            88,
+            "{ code: 'SP0238', name: 'Gắn lại răng sứ bị rớt', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'răng', price: 1, cost: 0 },"
+          ],
+          [
+            89,
+            "{ code: 'SP0004', name: 'KHÍ CỤ NÂNG KHỚP', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Cái', price: 1500000, cost: 0 },"
+          ],
+          [
+            90,
+            "{ code: 'DV0058', name: 'Làm sạch chuyên sâu Clean Teeth', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Ca', price: 380000, cost: 0 },"
+          ],
+          [
+            91,
+            "{ code: 'DV0052', name: 'Laser Cắt lợi trùm (răng khôn)', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Răng', price: 1500000, cost: 0 },"
+          ],
+          [
+            92,
+            "{ code: 'DV0053', name: 'Laser Cắt Phanh môi (điều trị răng hô)', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Răng', price: 1500000, cost: 0 },"
+          ],
+          [
+            93,
+            "{ code: 'DV0057', name: 'Lấy cao răng', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Ca', price: 300000, cost: 0 },"
+          ],
+          [
+            94,
+            "{ code: 'SP0302', name: 'MÀI CHỈNH', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'RĂNG', price: 1, cost: 0 },"
+          ],
+          [
+            95,
+            "{ code: 'SP0234', name: 'MÀI RĂNG', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'CÁI', price: 1, cost: 0 },"
+          ],
+          [
+            96,
+            "{ code: 'SP0242', name: 'Máng chống nghiến', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'đồng', price: 1500000, cost: 0 },"
+          ],
+          [
+            97,
+            "{ code: 'SP0005', name: 'Nạo Nha Chu', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Răng', price: 1000000, cost: 0 },"
+          ],
+          [
+            98,
+            "{ code: 'SP0235', name: 'NHỔ RĂNG SỮA BÔI TÊ', canOrderLab: false, category: 'Điều trị tổng quát', unit: '0', price: 1, cost: 0 },"
+          ],
+          [
+            99,
+            "{ code: 'SP0011', name: 'NÚT GỠ', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'cái', price: 3000000, cost: 0 },"
+          ],
+          [
+            100,
+            "{ code: 'SP0285', name: 'Phá composite răng khểnh', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'răng', price: 1, cost: 0 },"
+          ],
+          [
+            101,
+            "{ code: 'DV0050', name: 'Phẫu thuật cưỡi hở lợi', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Răng', price: 1200000, cost: 0 },"
+          ],
+          [
+            102,
+            "{ code: 'SP0254', name: 'Phí quẹt thẻ', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'đồng', price: 150000, cost: 0 },"
+          ],
+          [
+            103,
+            "{ code: 'SP0255', name: 'Phí quẹt thẻ', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'đồng', price: 150000, cost: 0 },"
+          ],
+          [
+            104,
+            "{ code: 'SP0266', name: 'Răng tạm', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Răng', price: 500000, cost: 0 },"
+          ],
+          [
+            105,
+            "{ code: 'DV0055', name: 'Tẩy trắng răng tại nhà', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Ca', price: 800000, cost: 0 },"
+          ],
+          [
+            106,
+            "{ code: 'DV0054', name: 'Tẩy trắng răng tại Phòng khám', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Ca', price: 1500000, cost: 0 },"
+          ],
+          [
+            107,
+            "{ code: 'SP0236', name: 'THÁO SỨ', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'RĂNG', price: 300000, cost: 0 },"
+          ],
+          [
+            108,
+            "{ code: 'SP0298', name: 'Tiểu phẫu bộc lộ răng ngầm', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'răng', price: 1000000, cost: 0 },"
+          ],
+          [
+            109,
+            "{ code: 'SP0287', name: 'Trám cổ răng', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'răng', price: 1, cost: 0 },"
+          ],
+          [
+            110,
+            "{ code: 'DV0049', name: 'Trám răng', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'Răng', price: 1000000, cost: 0 },"
+          ],
+          [
+            111,
+            "{ code: 'SP0239', name: 'Trám răng sữa', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'răng', price: 1, cost: 0 },"
+          ],
+          [
+            112,
+            "{ code: 'SP0279', name: 'Trám thẩm mỹ', canOrderLab: false, category: 'Điều trị tổng quát', unit: 'cái', price: 1, cost: 0 },"
+          ],
+          [
+            115,
+            "{ code: 'DV0034', name: 'Abutment', canOrderLab: true, category: 'Implant', unit: 'Răng', price: 3000000, cost: 0 },"
+          ],
+          [
+            116,
+            "{ code: 'DV0028', name: 'Full Implant Hàn Quốc', canOrderLab: true, category: 'Implant', unit: 'Răng', price: 22000000, cost: 0 },"
+          ],
+          [
+            117,
+            "{ code: 'DV0024', name: 'Full Implant Mỹ', canOrderLab: true, category: 'Implant', unit: 'Răng', price: 24000000, cost: 0 },"
+          ],
+          [
+            118,
+            "{ code: 'DV0025', name: 'Full Implant Pháp', canOrderLab: true, category: 'Implant', unit: 'Răng', price: 27000000, cost: 0 },"
+          ],
+          [
+            119,
+            "{ code: 'DV0027', name: 'Full Implant Thụy Điển', canOrderLab: true, category: 'Implant', unit: 'Răng', price: 39000000, cost: 0 },"
+          ],
+          [
+            120,
+            "{ code: 'DV0026', name: 'Full Implant Thụy Sĩ', canOrderLab: true, category: 'Implant', unit: 'Răng', price: 36000000, cost: 0 },"
+          ],
+          [
+            121,
+            "{ code: 'SP0240', name: 'KHUNG TITAN', canOrderLab: false, category: 'Implant', unit: 'CÁI', price: 35000000, cost: 0 },"
+          ],
+          [
+            122,
+            "{ code: 'DV0035', name: 'Mão sứ', canOrderLab: true, category: 'Implant', unit: 'Răng', price: 8000000, cost: 0 },"
+          ],
+          [
+            123,
+            "{ code: 'DV0036', name: 'Phẫu thuật ghép xương bột', canOrderLab: false, category: 'Implant', unit: 'Đơn vị', price: 8000000, cost: 0 },"
+          ],
+          [
+            124,
+            "{ code: 'DV0037', name: 'Phẫu thuật lấy trụ Implant cũ', canOrderLab: false, category: 'Implant', unit: 'Răng', price: 3000000, cost: 0 },"
+          ],
+          [
+            125,
+            "{ code: 'DV0038', name: 'Phẫu thuật nâng xoang hở', canOrderLab: false, category: 'Implant', unit: 'Đơn vị', price: 15000000, cost: 0 },"
+          ],
+          [
+            126,
+            "{ code: 'DV0039', name: 'Phẫu thuật nâng xoang kín', canOrderLab: false, category: 'Implant', unit: 'Đơn vị', price: 6000000, cost: 0 },"
+          ],
+          [
+            129,
+            "{ code: 'SP0297', name: 'KHÍ CỤ TWINBLOCK', canOrderLab: false, category: 'KHÍ CỤ TWINBLOCK', unit: 'KHÍ CỤ', price: 1, cost: 0 },"
+          ],
+          [
+            132,
+            "{ code: 'PROCARE A3', name: 'MÁY TĂM NƯỚC PROCARE A3', canOrderLab: false, category: 'Máy tăm nước', unit: 'cái', price: 1200000, cost: 0 },"
+          ],
+          [
+            133,
+            "{ code: 'SP0270', name: 'Máy tăm nước Prosencor', canOrderLab: false, category: 'Máy tăm nước', unit: 'cái', price: 1300000, cost: 0 },"
+          ],
+          [
+            136,
+            "{ code: 'SP0272', name: 'Chấm thuốc', canOrderLab: false, category: 'Nhổ răng', unit: 'lần', price: 1, cost: 0 },"
+          ],
+          [
+            137,
+            "{ code: 'SP0267', name: 'Nhổ chân R26', canOrderLab: false, category: 'Nhổ răng', unit: 'cái', price: 700000, cost: 0 },"
+          ],
+          [
+            138,
+            "{ code: 'SP0257', name: 'Nhổ chân răng số 6', canOrderLab: false, category: 'Nhổ răng', unit: 'cái', price: 500000, cost: 0 },"
+          ],
+          [
+            139,
+            "{ code: 'DV0042', name: 'Nhổ chân răng Vĩnh viễn', canOrderLab: false, category: 'Nhổ răng', unit: 'Răng', price: 1000000, cost: 0 },"
+          ],
+          [
+            140,
+            "{ code: 'SP0214', name: 'nhổ răng dư', canOrderLab: false, category: 'Nhổ răng', unit: 'đồng', price: 1, cost: 0 },"
+          ],
+          [
+            141,
+            "{ code: 'SP0284', name: 'Nhổ răng kẹ', canOrderLab: false, category: 'Nhổ răng', unit: 'cái', price: 1, cost: 0 },"
+          ],
+          [
+            142,
+            "{ code: 'DV0045', name: 'Nhổ răng khôn hàm dưới', canOrderLab: false, category: 'Nhổ răng', unit: 'Răng', price: 4000000, cost: 0 },"
+          ],
+          [
+            143,
+            "{ code: 'DV0044', name: 'Nhổ răng khôn hàm trên', canOrderLab: false, category: 'Nhổ răng', unit: 'Răng', price: 3500000, cost: 0 },"
+          ],
+          [
+            144,
+            "{ code: 'DV0046', name: 'Nhổ răng ngầm', canOrderLab: false, category: 'Nhổ răng', unit: 'Răng', price: 7000000, cost: 0 },"
+          ],
+          [
+            145,
+            "{ code: 'SP0276', name: 'Nhổ răng sữa', canOrderLab: false, category: 'Nhổ răng', unit: 'cái', price: 1, cost: 0 },"
+          ],
+          [
+            146,
+            "{ code: 'SP0215', name: 'Nhổ răng sữa chích tê', canOrderLab: false, category: 'Nhổ răng', unit: '1', price: 100000, cost: 0 },"
+          ],
+          [
+            147,
+            "{ code: 'DV0043', name: 'Nhổ răng thừa, lạc chỗ', canOrderLab: false, category: 'Nhổ răng', unit: 'Răng', price: 2200000, cost: 0 },"
+          ],
+          [
+            148,
+            "{ code: 'DV0041', name: 'Nhổ răng Vĩnh viễn', canOrderLab: false, category: 'Nhổ răng', unit: 'Răng', price: 2200000, cost: 0 },"
+          ],
+          [
+            149,
+            "{ code: 'DV0040', name: 'Răng sữa', canOrderLab: false, category: 'Nhổ răng', unit: 'Răng', price: 0, cost: 0 },"
+          ],
+          [
+            150,
+            "{ code: 'SP0262', name: 'Tiểu phẫu răng', canOrderLab: false, category: 'Nhổ răng', unit: 'đ', price: 1200000, cost: 0 },"
+          ],
+          [
+            153,
+            "{ code: 'SP0299', name: 'CHỈNH DÂY FIX', canOrderLab: false, category: 'Niềng răng', unit: 'RĂNG', price: 1, cost: 0 },"
+          ],
+          [
+            154,
+            "{ code: 'SP0305', name: 'Band', canOrderLab: false, category: 'Niềng răng', unit: 'Cái', price: 300000, cost: 0 },"
+          ],
+          [
+            155,
+            "{ code: 'SP0292', name: 'Bộ Mắc Cài Kim Loại Tiêu Chuẩn', canOrderLab: false, category: 'Niềng răng', unit: 'Bộ', price: 1, cost: 0 },"
+          ],
+          [
+            156,
+            "{ code: 'SP0293', name: 'Bộ mắc cài kim loại tự đóng', canOrderLab: false, category: 'Niềng răng', unit: 'Bộ', price: 2500000, cost: 0 },"
+          ],
+          [
+            157,
+            "{ code: 'SP0294', name: 'Bộ mắc cài sứ tiêu chuẩn', canOrderLab: false, category: 'Niềng răng', unit: 'Bộ', price: 3500000, cost: 0 },"
+          ],
+          [
+            158,
+            "{ code: 'SP0295', name: 'Bộ mắc cài sứ tự đóng', canOrderLab: false, category: 'Niềng răng', unit: 'Bộ', price: 4500000, cost: 0 },"
+          ],
+          [
+            159,
+            "{ code: 'SP0258', name: 'Cắm 4 vít', canOrderLab: false, category: 'Niềng răng', unit: 'cái', price: 2000000, cost: 0 },"
+          ],
+          [
+            160,
+            "{ code: 'SP0282', name: 'Cắt dây cung', canOrderLab: false, category: 'Niềng răng', unit: 'lần', price: 1, cost: 0 },"
+          ],
+          [
+            161,
+            "{ code: 'SP0278', name: 'CẮT THẮNG MÔI', canOrderLab: false, category: 'Niềng răng', unit: 'ĐỒNG', price: 1000000, cost: 0 },"
+          ],
+          [
+            162,
+            "{ code: 'SP0300', name: 'CHỈNH DÂY FIX', canOrderLab: false, category: 'Niềng răng', unit: 'RĂNG', price: 1, cost: 0 },"
+          ],
+          [
+            163,
+            "{ code: 'SP0264', name: 'Chun chỉnh nha', canOrderLab: false, category: 'Niềng răng', unit: 'túi', price: 50000, cost: 0 },"
+          ],
+          [
+            164,
+            "{ code: 'DV0010', name: 'Cục cắn', canOrderLab: false, category: 'Niềng răng', unit: 'Ca', price: 50000, cost: 0 },"
+          ],
+          [
+            165,
+            "{ code: 'SP0251', name: 'Gắn Lại Dây Cung', canOrderLab: false, category: 'Niềng răng', unit: 'đ', price: 100000, cost: 0 },"
+          ],
+          [
+            166,
+            "{ code: 'SP0249', name: 'GẮN LẠI MẮC CÀI', canOrderLab: false, category: 'Niềng răng', unit: 'VND', price: 100000, cost: 0 },"
+          ],
+          [
+            167,
+            "{ code: 'SP0271', name: 'Gói niềng tiền chỉnh nha', canOrderLab: false, category: 'Niềng răng', unit: 'Ca', price: 15000000, cost: 0 },"
+          ],
+          [
+            168,
+            "{ code: 'SP0280', name: 'Hàm cung khẩu cái', canOrderLab: false, category: 'Niềng răng', unit: 'Hàm', price: 1, cost: 0 },"
+          ],
+          [
+            169,
+            "{ code: 'SP0275', name: 'Hàm cung lưỡi', canOrderLab: false, category: 'Niềng răng', unit: 'hàm', price: 1, cost: 0 },"
+          ],
+          [
+            170,
+            "{ code: 'DV0009', name: 'Hàm duy trì', canOrderLab: true, category: 'Niềng răng', unit: 'Ca', price: 4000000, cost: 0 },"
+          ],
+          [
+            171,
+            "{ code: 'SP0301', name: 'Hàm giữ khoảng', canOrderLab: false, category: 'Niềng răng', unit: 'hàm', price: 1, cost: 0 },"
+          ],
+          [
+            172,
+            "{ code: 'SP0012', name: 'KHAY TRONG SUỐT', canOrderLab: false, category: 'Niềng răng', unit: '1', price: 60000000, cost: 0 },"
+          ],
+          [
+            173,
+            "{ code: 'SP0006', name: 'KHÍ CỤ ĐỊNH VỊ HÀM', canOrderLab: false, category: 'Niềng răng', unit: 'Hàm', price: 2000000, cost: 0 },"
+          ],
+          [
+            174,
+            "{ code: 'SP0007', name: 'KHÍ CỤ NONG HÀM NHANH', canOrderLab: false, category: 'Niềng răng', unit: 'Hàm', price: 4000000, cost: 0 },"
+          ],
+          [
+            175,
+            "{ code: 'SP0003', name: 'KHÍ CỤ NONG HÀM THƯỜNG', canOrderLab: false, category: 'Niềng răng', unit: 'Hàm', price: 2500000, cost: 0 },"
+          ],
+          [
+            176,
+            "{ code: 'SP0256', name: 'Khí Cụ Tật Lưỡi', canOrderLab: false, category: 'Niềng răng', unit: 'Cái', price: 5000000, cost: 0 },"
+          ],
+          [
+            177,
+            "{ code: 'DV0006', name: 'Mắc cài kim loại lẻ', canOrderLab: false, category: 'Niềng răng', unit: 'Ca', price: 100000, cost: 0 },"
+          ],
+          [
+            178,
+            "{ code: 'SP0291', name: 'MẮC CÀI KIM LOẠI TIÊU CHUẨN', canOrderLab: false, category: 'Niềng răng', unit: '19000000', price: 1, cost: 0 },"
+          ],
+          [
+            179,
+            "{ code: 'DV0005', name: 'Mắc cài sứ lẻ', canOrderLab: false, category: 'Niềng răng', unit: 'Ca', price: 200000, cost: 0 },"
+          ],
+          [
+            180,
+            "{ code: 'SP0008', name: 'MẶT PHẲNG NGHIÊNG - CHỈNH NHA', canOrderLab: false, category: 'Niềng răng', unit: 'Hàm', price: 2000000, cost: 0 },"
+          ],
+          [
+            181,
+            "{ code: 'SP0009', name: 'MẶT PHẲNG NGHIÊNG - TRẺ EM', canOrderLab: false, category: 'Niềng răng', unit: 'Hàm', price: 4000000, cost: 0 },"
+          ],
+          [
+            182,
+            "{ code: 'SP0260', name: 'MCKL số 37', canOrderLab: false, category: 'Niềng răng', unit: 'cái', price: 1, cost: 0 },"
+          ],
+          [
+            183,
+            "{ code: 'DV0007', name: 'Mini vis', canOrderLab: false, category: 'Niềng răng', unit: 'Ca', price: 2000000, cost: 0 },"
+          ],
+          [
+            184,
+            "{ code: 'SP0277', name: 'Niềng Mắc Cài Cánh Cam', canOrderLab: false, category: 'Niềng răng', unit: 'Ca', price: 40000000, cost: 0 },"
+          ],
+          [
+            185,
+            "{ code: 'SP0263', name: 'Niềng mắc cài kim loại mặt lưỡi', canOrderLab: false, category: 'Niềng răng', unit: 'đ', price: 30000000, cost: 0 },"
+          ],
+          [
+            186,
+            "{ code: 'DV0001', name: 'Niềng Mắc Cài Kim Loại Tiêu Chuẩn', canOrderLab: false, category: 'Niềng răng', unit: 'Ca', price: 28000000, cost: 0 },"
+          ],
+          [
+            187,
+            "{ code: 'DV0002', name: 'Niềng Mắc Cài Kim Loại Tự Buộc 3M', canOrderLab: false, category: 'Niềng răng', unit: 'Ca', price: 32000000, cost: 0 },"
+          ],
+          [
+            188,
+            "{ code: 'DV0004', name: 'Niềng Mắc Cài Sứ Loại Tự Buộc 3M', canOrderLab: false, category: 'Niềng răng', unit: 'Ca', price: 45000000, cost: 0 },"
+          ],
+          [
+            189,
+            "{ code: 'DV0003', name: 'Niềng Mắc Cài Sứ Tiêu Chuẩn', canOrderLab: false, category: 'Niềng răng', unit: 'Ca', price: 39000000, cost: 0 },"
+          ],
+          [
+            190,
+            "{ code: 'SP0268', name: 'Niềng răng phân đoạn', canOrderLab: false, category: 'Niềng răng', unit: 'Ca', price: 30000000, cost: 0 },"
+          ],
+          [
+            191,
+            "{ code: 'SP0217', name: 'Niềng răng trong suốt', canOrderLab: false, category: 'Niềng răng', unit: 'Ca', price: 80000000, cost: 0 },"
+          ],
+          [
+            192,
+            "{ code: 'DV0008', name: 'Niềng trong suốt Invisalign', canOrderLab: true, category: 'Niềng răng', unit: 'Ca', price: 140000000, cost: 0 },"
+          ],
+          [
+            193,
+            "{ code: 'SP0304', name: 'Phí chênh lệch cấp độ', canOrderLab: false, category: 'Niềng răng', unit: 'Ca', price: 5000000, cost: 0 },"
+          ],
+          [
+            194,
+            "{ code: 'SP0250', name: 'Phí trễ hẹn', canOrderLab: false, category: 'Niềng răng', unit: 'đ', price: 112000, cost: 0 },"
+          ],
+          [
+            195,
+            "{ code: 'SP0002', name: 'Sáp chỉnh nha', canOrderLab: false, category: 'Niềng răng', unit: 'hộp', price: 20000, cost: 0 },"
+          ],
+          [
+            196,
+            "{ code: 'SP0281', name: 'Tạo Khoảng Phục Hình', canOrderLab: false, category: 'Niềng răng', unit: '1', price: 4000000, cost: 0 },"
+          ],
+          [
+            197,
+            "{ code: 'SP0289', name: 'Tháo mắc cài', canOrderLab: false, category: 'Niềng răng', unit: 'hàm', price: 1, cost: 0 },"
+          ],
+          [
+            198,
+            "{ code: 'SP0010', name: 'THÁO MẮC CÀI CŨ', canOrderLab: false, category: 'Niềng răng', unit: 'Hàm', price: 1500000, cost: 0 },"
+          ],
+          [
+            199,
+            "{ code: 'SP0219', name: 'THAY THUN', canOrderLab: false, category: 'Niềng răng', unit: 'Hàm', price: 100000, cost: 0 },"
+          ],
+          [
+            200,
+            "{ code: 'SP0241', name: 'TINH CHỈNH RĂNG TIẾP TỤC', canOrderLab: false, category: 'Niềng răng', unit: 'Đ', price: 3000000, cost: 0 },"
+          ],
+          [
+            203,
+            "{ code: 'SP0283', name: 'cắt lợi', canOrderLab: false, category: 'Phẫu thuật và điều trị', unit: 'răng', price: 1, cost: 0 },"
+          ],
+          [
+            204,
+            "{ code: 'DV0059', name: 'Chích áp xe lợi', canOrderLab: false, category: 'Phẫu thuật và điều trị', unit: 'Răng', price: 450000, cost: 0 },"
+          ],
+          [
+            205,
+            "{ code: 'DV0060', name: 'Điều trị áp xe quanh răng mạn', canOrderLab: false, category: 'Phẫu thuật và điều trị', unit: 'Răng', price: 750000, cost: 0 },"
+          ],
+          [
+            206,
+            "{ code: 'DV0061', name: 'Điều trị nhạy cảm ngà bằng máng với thuốc chống ê buốt', canOrderLab: false, category: 'Phẫu thuật và điều trị', unit: 'Răng', price: 300000, cost: 0 },"
+          ],
+          [
+            207,
+            "{ code: 'DV0062', name: 'Phẫu thuật cắt cuống răng', canOrderLab: false, category: 'Phẫu thuật và điều trị', unit: 'Răng', price: 5800000, cost: 0 },"
+          ],
+          [
+            208,
+            "{ code: 'DV0063', name: 'Phẫu thuật cắt nạo ổ xương', canOrderLab: false, category: 'Phẫu thuật và điều trị', unit: 'Răng', price: 6000000, cost: 0 },"
+          ],
+          [
+            209,
+            "{ code: 'DV0064', name: 'Phẫu thuật nạo quanh cuống răng', canOrderLab: false, category: 'Phẫu thuật và điều trị', unit: 'Răng', price: 4300000, cost: 0 },"
+          ],
+          [
+            210,
+            "{ code: 'DV0065', name: 'Phẫu thuật nhổ răng có tạo hình xương ổ răng', canOrderLab: false, category: 'Phẫu thuật và điều trị', unit: 'Răng', price: 1800000, cost: 0 },"
+          ],
+          [
+            211,
+            "{ code: 'DV0066', name: 'Phẫu thuật tạo hình xương ổ răng', canOrderLab: false, category: 'Phẫu thuật và điều trị', unit: 'Răng', price: 2900000, cost: 0 },"
+          ],
+          [
+            212,
+            "{ code: 'DV0067', name: 'Phục hồi thân răng có sử dụng pin ngà', canOrderLab: false, category: 'Phẫu thuật và điều trị', unit: 'Răng', price: 600000, cost: 0 },"
+          ],
+          [
+            215,
+            "{ code: 'SP0273', name: 'Răng nhựa', canOrderLab: false, category: 'Phục hình', unit: 'cái', price: 1, cost: 0 },"
+          ],
+          [
+            216,
+            "{ code: 'SP0001', name: 'Răng tháo lắp', canOrderLab: false, category: 'Phục hình', unit: 'cái', price: 2000000, cost: 0 },"
+          ]
+        ],
+        "count": 165
+      },
+      {
+        "file": "i18n/index.ts",
+        "findings": [
+          [
+            42,
+            "vi: 'Tiếng Việt',"
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "types/customer.ts",
+        "findings": [
+          [
+            21,
+            "ref: string;  // Customer code / mã khách hàng"
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "types/employee.ts",
+        "findings": [
+          [
+            55,
+            "if (jobtitle && jobtitle.toLowerCase().includes('trợ lý')) return 'doctor-assistant';"
+          ],
+          [
+            61,
+            "if (lower.includes('quản lý') || lower.includes('manager') || lower.includes('quản trị') || lower.includes('admin')) return 'general-manager';"
+          ],
+          [
+            64,
+            "if (lower.includes('cskh') || lower.includes('customer service') || lower.includes('hỗ trợ')) return 'customer-service';"
+          ]
+        ],
+        "count": 3
+      },
+      {
+        "file": "types/settings.ts",
+        "findings": [
+          [
+            49,
+            "{ id: 'src-1', name: 'Sale Online', label: 'Sale Online', type: 'online', description: 'Khách đến từ kênh sale online', isActive: true, customerCount: 0 },"
+          ],
+          [
+            50,
+            "{ id: 'src-2', name: 'Khách vãng lai', label: 'Khách vãng lai', type: 'offline', description: 'Khách vãng lai', isActive: true, customerCount: 0 },"
+          ],
+          [
+            51,
+            "{ id: 'src-3', name: 'Hotline', label: 'Hotline', type: 'online', description: 'Khách từ hotline', isActive: true, customerCount: 0 },"
+          ],
+          [
+            52,
+            "{ id: 'src-4', name: 'Khách cũ', label: 'Khách cũ', type: 'referral', description: 'Khách cũ quay lại', isActive: true, customerCount: 0 },"
+          ],
+          [
+            53,
+            "{ id: 'src-5', name: 'Khách hàng giới thiệu', label: 'Khách hàng giới thiệu', type: 'referral', description: 'Khách do khách hàng giới thiệu', isActive: true, customerCount: 0 },"
+          ],
+          [
+            54,
+            "{ id: 'src-6', name: 'Nội bộ giới thiệu', label: 'Nội bộ giới thiệu', type: 'referral', description: 'Khách do nội bộ giới thiệu', isActive: true, customerCount: 0 },"
+          ],
+          [
+            55,
+            "{ id: 'src-7', name: 'MKT1', label: 'MKT1', type: 'online', description: 'Kênh marketing 1', isActive: true, customerCount: 0 },"
+          ],
+          [
+            56,
+            "{ id: 'src-8', name: 'ĐNCB', label: 'ĐNCB', type: 'offline', description: 'Đối tượng ngoài cơ sở bệnh', isActive: true, customerCount: 0 },"
+          ]
+        ],
+        "count": 8
+      }
+    ],
+    "auth": [
+      {
+        "file": "pages/Login.tsx",
+        "findings": [
+          [
+            129,
+            "placeholder=\"you@tgclinic.vn\""
+          ],
+          [
+            145,
+            "placeholder=\"••••••••\""
+          ]
+        ],
+        "count": 2
+      }
+    ],
+    "permissions": [
+      {
+        "file": "pages/PermissionBoard/ArchitectureView.tsx",
+        "findings": [
+          [
+            163,
+            "placeholder=\"Search employees, tiers, locations...\""
+          ]
+        ],
+        "count": 1
+      },
+      {
+        "file": "pages/PermissionBoard/constants.ts",
+        "findings": [
+          [
+            23,
+            "'overview.view': 'Xem trang tổng quan Dashboard',"
+          ],
+          [
+            24,
+            "'calendar.view': 'Xem lịch hẹn trên Calendar',"
+          ],
+          [
+            25,
+            "'calendar.edit': 'Chỉnh sửa, kéo thả lịch hẹn',"
+          ],
+          [
+            26,
+            "'customers.view': 'Xem danh sách khách hàng',"
+          ],
+          [
+            27,
+            "'customers.view_all': 'Xem tất cả khách hàng không cần tìm kiếm — tự động hiển thị toàn bộ danh sách',"
+          ],
+          [
+            28,
+            "'customers.add': 'Thêm khách hàng mới',"
+          ],
+          [
+            29,
+            "'customers.edit': 'Chỉnh sửa thông tin khách hàng',"
+          ],
+          [
+            30,
+            "'customers.delete': 'Xóa khách hàng',"
+          ],
+          [
+            31,
+            "'appointments.view': 'Xem danh sách lịch hẹn',"
+          ],
+          [
+            32,
+            "'appointments.add': 'Tạo lịch hẹn mới',"
+          ],
+          [
+            33,
+            "'appointments.edit': 'Chỉnh sửa lịch hẹn',"
+          ],
+          [
+            34,
+            "'employees.view': 'Xem danh sách nhân viên',"
+          ],
+          [
+            35,
+            "'employees.add': 'Thêm nhân viên mới',"
+          ],
+          [
+            36,
+            "'employees.edit': 'Chỉnh sửa thông tin nhân viên',"
+          ],
+          [
+            37,
+            "'locations.view': 'Xem danh sách chi nhánh',"
+          ],
+          [
+            38,
+            "'locations.add': 'Thêm chi nhánh mới',"
+          ],
+          [
+            39,
+            "'locations.edit': 'Chỉnh sửa thông tin chi nhánh',"
+          ],
+          [
+            40,
+            "'services.view': 'Xem danh mục dịch vụ',"
+          ],
+          [
+            41,
+            "'services.add': 'Thêm dịch vụ mới',"
+          ],
+          [
+            42,
+            "'services.edit': 'Chỉnh sửa dịch vụ',"
+          ],
+          [
+            43,
+            "'payment.view': 'Xem lịch sử thanh toán',"
+          ],
+          [
+            44,
+            "'payment.add': 'Tạo thanh toán mới',"
+          ],
+          [
+            45,
+            "'payment.refund': 'Hoàn tiền thanh toán',"
+          ],
+          [
+            46,
+            "'reports.view': 'Xem báo cáo',"
+          ],
+          [
+            47,
+            "'reports.export': 'Xuất báo cáo',"
+          ],
+          [
+            48,
+            "'settings.view': 'Xem cài đặt hệ thống',"
+          ],
+          [
+            49,
+            "'settings.edit': 'Chỉnh sửa cài đặt',"
+          ],
+          [
+            50,
+            "'notifications.view': 'Xem thông báo',"
+          ],
+          [
+            51,
+            "'notifications.edit': 'Quản lý thông báo',"
+          ],
+          [
+            52,
+            "'commission.view': 'Xem hoa hồng',"
+          ],
+          [
+            53,
+            "'commission.edit': 'Chỉnh sửa hoa hồng',"
+          ],
+          [
+            54,
+            "'permissions.view': 'Xem quyền hệ thống',"
+          ],
+          [
+            55,
+            "'permissions.edit': 'Chỉnh sửa quyền hệ thống',"
+          ],
+          [
+            56,
+            "'relationships.view': 'Xem mối quan hệ dữ liệu',"
+          ],
+          [
+            58,
+            "'website.edit': 'Chỉnh sửa trang website',"
+          ],
+          [
+            59,
+            "'external_checkups.view': 'Xem ảnh khám ngoài',"
+          ],
+          [
+            60,
+            "'external_checkups.create': 'Tải lên ảnh khám ngoài',"
+          ],
+          [
+            61,
+            "'customers.hard_delete': 'Xóa vĩnh viễn khách hàng khỏi hệ thống',"
+          ]
+        ],
+        "count": 38
+      }
+    ]
+  }
+}

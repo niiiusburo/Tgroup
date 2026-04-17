@@ -16,7 +16,7 @@ export function ExportDialog({
   onClose,
   onExport,
   defaultDateFrom,
-  defaultDateTo,
+  defaultDateTo
 }: ExportDialogProps) {
   const [mode, setMode] = useState<ExportMode>('current-filter');
   const [dateFrom, setDateFrom] = useState(defaultDateFrom || '');
@@ -29,7 +29,7 @@ export function ExportDialog({
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-gray-900">Xuất dữ liệu lịch hẹn</h3>
+          <h3 className="text-base font-semibold text-gray-900"></h3>
           <button onClick={onClose} className="p-1 rounded hover:bg-gray-100">
             <X className="w-4 h-4 text-gray-500" />
           </button>
@@ -42,9 +42,9 @@ export function ExportDialog({
               name="export-mode"
               checked={mode === 'current-filter'}
               onChange={() => setMode('current-filter')}
-              className="w-4 h-4 text-orange-500"
-            />
-            <span className="text-sm text-gray-700">Theo bộ lọc hiện tại</span>
+              className="w-4 h-4 text-orange-500" />
+            
+            <span className="text-sm text-gray-700"></span>
           </label>
 
           <label className="flex items-center gap-2 cursor-pointer">
@@ -53,48 +53,48 @@ export function ExportDialog({
               name="export-mode"
               checked={mode === 'date-range'}
               onChange={() => setMode('date-range')}
-              className="w-4 h-4 text-orange-500"
-            />
-            <span className="text-sm text-gray-700">Theo khoảng thờigian</span>
+              className="w-4 h-4 text-orange-500" />
+            
+            <span className="text-sm text-gray-700"></span>
           </label>
 
-          {mode === 'date-range' && (
-            <div className="flex items-center gap-2 pl-6">
+          {mode === 'date-range' &&
+          <div className="flex items-center gap-2 pl-6">
               <input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg"
-              />
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg" />
+            
               <span className="text-gray-400">–</span>
               <input
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg"
-              />
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg" />
+            
             </div>
-          )}
+          }
         </div>
 
         <div className="flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg"
-          >
-            Đóng
+            className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg">
+            
+
           </button>
           <button
             onClick={() => {
               onExport(mode, dateFrom, dateTo);
               onClose();
             }}
-            className="px-4 py-2 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 rounded-lg"
-          >
-            Xuất file
+            className="px-4 py-2 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 rounded-lg">
+            
+
           </button>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }

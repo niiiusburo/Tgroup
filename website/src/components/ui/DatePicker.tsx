@@ -8,6 +8,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface DatePickerProps {
   readonly value: string; // YYYY-MM-DD
@@ -21,30 +22,32 @@ interface DatePickerProps {
   readonly disabled?: boolean;
 }
 
-const MONTH_NAMES = [
-  'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-  'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
-];
+const MONTH_KEYS = [
+  'january', 'february', 'march', 'april', 'may', 'june',
+  'july', 'august', 'september', 'october', 'november', 'december'
+] as const;
 
-const WEEKDAY_NAMES = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+const WEEKDAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
 
 export function DatePicker({
   value,
   onChange,
-  placeholder = 'Chọn ngày',
+  placeholder,
   label,
   icon = <Calendar className="w-4 h-4" />,
   minDate,
   maxDate,
   error,
-  disabled = false,
+  disabled = false
 }: DatePickerProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const { t } = useTranslation('common');
+  const resolvedPlaceholder = placeholder ?? t('datePicker.chooseDate');
   const [viewDate, setViewDate] = useState(() => {
     if (value) return new Date(value + 'T00:00:00');
     return new Date();
   });
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   // Close when clicking outside
   useEffect(() => {
@@ -74,7 +77,7 @@ export function DatePicker({
   const firstDayOfMonth = new Date(year, month, 1).getDay();
 
   // Generate calendar days
-  const calendarDays: Array<{ date: number | null; isCurrentMonth: boolean; dateKey?: string }> = [];
+  const calendarDays: Array<{date: number | null;isCurrentMonth: boolean;dateKey?: string;}> = [];
 
   // Previous month padding
   const prevMonthDays = new Date(year, month, 0).getDate();
@@ -126,12 +129,12 @@ export function DatePicker({
 
   return (
     <div ref={containerRef} className="relative">
-      {label && (
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+      {label &&
+      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
           {icon}
           {label}
         </label>
-      )}
+      }
 
       {/* Input trigger */}
       <button
@@ -140,13 +143,13 @@ export function DatePicker({
         disabled={disabled}
         className={cn(
           'w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200 text-left',
-          disabled
-            ? 'bg-gray-50 border-gray-200 cursor-not-allowed'
-            : 'bg-white border-gray-200 hover:border-orange-300 hover:shadow-md cursor-pointer',
+          disabled ?
+          'bg-gray-50 border-gray-200 cursor-not-allowed' :
+          'bg-white border-gray-200 hover:border-orange-300 hover:shadow-md cursor-pointer',
           error && 'border-red-300 focus:border-red-400',
           isOpen && 'border-orange-400 ring-2 ring-orange-500/20'
-        )}
-      >
+        )}>
+        
         <span className={cn(
           'text-gray-400',
           value && 'text-orange-500'
@@ -157,7 +160,7 @@ export function DatePicker({
           'flex-1 text-sm',
           value ? 'text-gray-900 font-medium' : 'text-gray-400'
         )}>
-          {value ? formatDisplayDate(value) : placeholder}
+          {value ? formatDisplayDate(value) : resolvedPlaceholder}
         </span>
         <ChevronLeft className={cn(
           'w-4 h-4 text-gray-400 transition-transform duration-200',
@@ -168,89 +171,89 @@ export function DatePicker({
       {error && <p className="mt-1.5 text-xs text-red-500">{error}</p>}
 
       {/* Calendar dropdown */}
-      {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+      {isOpen &&
+      <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <button
-              type="button"
-              onClick={handlePrevMonth}
-              className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-            >
+            type="button"
+            onClick={handlePrevMonth}
+            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+            
               <ChevronLeft className="w-4 h-4 text-gray-600" />
             </button>
             <span className="text-sm font-semibold text-gray-900">
-              {MONTH_NAMES[month]} {year}
+              {t(`months.${MONTH_KEYS[month]}`)} {year}
             </span>
             <button
-              type="button"
-              onClick={handleNextMonth}
-              className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-            >
+            type="button"
+            onClick={handleNextMonth}
+            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+            
               <ChevronRight className="w-4 h-4 text-gray-600" />
             </button>
           </div>
 
           {/* Weekday headers */}
           <div className="grid grid-cols-7 px-2 py-2">
-            {WEEKDAY_NAMES.map((day) => (
-              <div key={day} className="text-center text-xs font-medium text-gray-400 py-1">
-                {day}
+            {WEEKDAY_KEYS.map((day) =>
+          <div key={day} className="text-center text-xs font-medium text-gray-400 py-1">
+                {t(`days.short.${day}`)}
               </div>
-            ))}
+          )}
           </div>
 
           {/* Calendar grid */}
           <div className="grid grid-cols-7 px-2 pb-3">
             {calendarDays.map((day, index) => {
-              if (!day.isCurrentMonth || !day.date) {
-                return (
-                  <div key={index} className="h-9 flex items-center justify-center">
-                    <span className="text-sm text-gray-300">{day.date}</span>
-                  </div>
-                );
-              }
-
-              const dateKey = day.dateKey!;
-              const isSelected = dateKey === value;
-              const isToday = dateKey === todayKey;
-              const isDisabled = isDateDisabled(dateKey);
-
+            if (!day.isCurrentMonth || !day.date) {
               return (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => handleDateSelect(dateKey)}
-                  disabled={isDisabled}
-                  className={cn(
-                    'h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all',
-                    isSelected
-                      ? 'bg-gradient-to-br from-orange-500 to-orange-400 text-white shadow-md'
-                      : isToday
-                        ? 'bg-orange-50 text-orange-600 border border-orange-200'
-                        : 'text-gray-700 hover:bg-gray-100',
-                    isDisabled && 'opacity-40 cursor-not-allowed hover:bg-transparent'
-                  )}
-                >
+                <div key={index} className="h-9 flex items-center justify-center">
+                    <span className="text-sm text-gray-300">{day.date}</span>
+                  </div>);
+
+            }
+
+            const dateKey = day.dateKey!;
+            const isSelected = dateKey === value;
+            const isToday = dateKey === todayKey;
+            const isDisabled = isDateDisabled(dateKey);
+
+            return (
+              <button
+                key={index}
+                type="button"
+                onClick={() => handleDateSelect(dateKey)}
+                disabled={isDisabled}
+                className={cn(
+                  'h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all',
+                  isSelected ?
+                  'bg-gradient-to-br from-orange-500 to-orange-400 text-white shadow-md' :
+                  isToday ?
+                  'bg-orange-50 text-orange-600 border border-orange-200' :
+                  'text-gray-700 hover:bg-gray-100',
+                  isDisabled && 'opacity-40 cursor-not-allowed hover:bg-transparent'
+                )}>
+                
                   {day.date}
-                </button>
-              );
-            })}
+                </button>);
+
+          })}
           </div>
 
           {/* Today button */}
           <div className="px-3 pb-3">
             <button
-              type="button"
-              onClick={() => handleDateSelect(todayKey)}
-              disabled={isDateDisabled(todayKey)}
-              className="w-full py-2 text-sm font-medium text-orange-600 hover:bg-orange-50 rounded-lg transition-colors disabled:opacity-40"
-            >
-              Hôm nay
-            </button>
+            type="button"
+            onClick={() => handleDateSelect(todayKey)}
+            disabled={isDateDisabled(todayKey)}
+            className="w-full py-2 text-sm font-medium text-orange-600 hover:bg-orange-50 rounded-lg transition-colors disabled:opacity-40">
+            
+
+          </button>
           </div>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
