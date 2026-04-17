@@ -172,7 +172,9 @@ export function DayView({
   const slotMap = useMemo(() => {
     const map = new Map<string, CalendarAppointment[]>();
     for (const apt of appointments) {
-      const slot = apt.startTime.slice(0, 5); // "HH:mm"
+      const [hStr, mStr] = apt.startTime.slice(0, 5).split(':');
+      const mm = Number(mStr) >= 30 ? '30' : '00';
+      const slot = `${hStr.padStart(2, '0')}:${mm}`;
       if (!map.has(slot)) map.set(slot, []);
       map.get(slot)!.push(apt);
     }

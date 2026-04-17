@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.19.3",
+    "date": "2026-04-17",
+    "commit": "pending",
+    "highlights": "DayView: bucket appointments into correct 30-minute rail slots",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Calendar Day view: appointments whose start time was not on an exact 30-minute boundary (e.g. 11:51) never rendered because the slot key was the raw HH:MM instead of the 30-min rail key. Now bucketed by rounding the minute component down to 00 or 30. Surfaced after v0.19.2 day-view date-filter fix started actually returning rows."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.19.2",
     "date": "2026-04-17",
     "commit": "pending",
