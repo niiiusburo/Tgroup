@@ -21,7 +21,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, ClipboardPlus, Edit2, User, Stethoscope, MapPin, CalendarDays, Clock, FileText, DollarSign, Hash, Check } from 'lucide-react';
+import { X, ClipboardPlus, Edit2, User, Stethoscope, MapPin, CalendarDays, FileText, DollarSign, Hash, Check } from 'lucide-react';
 
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
 import { ServiceCatalogSelector } from '@/components/shared/ServiceCatalogSelector';
@@ -388,10 +388,9 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
             {errors.location && <p className="mt-2 text-xs text-red-500">{errors.location}</p>}
           </div>
 
-          {/* Ngày bắt đầu + Ngày kết thúc */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Ngày bắt đầu */}
+          <div>
             <DatePicker value={startDate} onChange={handleStartDateChange} label={t('form.startDate', 'Ngày bắt đầu')} icon={<CalendarDays className="w-3.5 h-3.5" />} error={errors.startDate} />
-            <DatePicker value={expectedEndDate} onChange={setExpectedEndDate} label={t('form.endDate', 'Ngày kết thúc')} icon={<Clock className="w-3.5 h-3.5" />} minDate={startDate} />
           </div>
 
           {/* Chi phí + Số lượng + Đơn vị */}
@@ -405,7 +404,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
                 value={totalCostOverride ? Number(totalCostOverride) : null}
                 onChange={(v) => setTotalCostOverride(v === null ? '' : String(v))}
                 placeholder={selectedCatalog ? String(selectedCatalog.defaultPrice) : '0'}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm"
+                className="w-full"
               />
               {selectedCatalog && (
                 <p className="mt-1 text-xs text-gray-400">
