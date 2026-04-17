@@ -104,6 +104,20 @@
     ]
   },
   {
+    "version": "0.16.6",
+    "date": "2026-04-17",
+    "commit": "c5f69521",
+    "highlights": "Fix SaleOrders SQL: use p.sourceid not so.sourceid",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "API: /api/SaleOrders no longer 500s (c5f69521)"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.16.5",
     "date": "2026-04-17",
     "commit": "3f504493",
