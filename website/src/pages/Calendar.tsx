@@ -17,6 +17,12 @@ import type { AppointmentStatus } from '@/types/appointment';
 import { EditAppointmentModal } from '@/components/modules/EditAppointmentModal';
 import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
 import { QuickAddAppointmentButton } from '@/components/shared/QuickAddAppointmentButton';
+import { AppointmentFormModal } from '@/components/shared/AppointmentFormModal';
+import type { AppointmentFormData } from '@/components/appointments/AppointmentForm';
+import { ExportDialog, type ExportMode } from '@/components/calendar/ExportDialog';
+import { exportAppointmentsXlsx } from '@/lib/exportAppointmentsXlsx';
+import { fetchAppointments } from '@/lib/api';
+import { mapApiAppointmentToCalendar } from '@/lib/calendarUtils';
 import { cn } from '@/lib/utils';
 
 /**
@@ -70,11 +76,20 @@ export function Calendar() {
     clearFilters,
     appointments,
     refresh,
+    updateAppointmentStatus,
+    markArrived,
   } = useCalendarData(selectedLocationId);
 
   // Edit modal state - uses OverviewAppointment to match EditAppointmentModal interface
   const [editingAppointment, setEditingAppointment] = useState<OverviewAppointment | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Export dialog state
+  const [isExportOpen, setIsExportOpen] = useState(false);
+
+  // Create appointment modal state (triggered from empty time slot)
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [createInitialData, setCreateInitialData] = useState<Partial<AppointmentFormData> | undefined>(undefined);
 
   // Smart filter drawer state
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -167,6 +182,73 @@ export function Calendar() {
     setCurrentDate(date);
     setViewMode('day');
   }, [setCurrentDate, setViewMode]);
+
+  const getExportDateRange = useCallback((mode: ExportMode): [string, string] => {
+    if (mode === 'current-filter') {
+      if (viewMode === 'day') {
+        const d = currentDate.toISOString().split('T')[0];
+        return [d, d];
+      }
+      if (viewMode === 'week') {
+        return [
+          weekDates[0].toISOString().split('T')[0],
+          weekDates[6].toISOString().split('T')[0],
+        ];
+      }
+      return [
+        monthDates[0].toISOString().split('T')[0],
+        monthDates[monthDates.length - 1].toISOString().split('T')[0],
+      ];
+    }
+    return ['', ''];
+  }, [viewMode, currentDate, weekDates, monthDates]);
+
+  const handleExport = useCallback(async (mode: ExportMode, dateFrom: string, dateTo: string) => {
+    let rows: CalendarAppointment[];
+    if (mode === 'current-filter') {
+      rows = [...appointments];
+    } else {
+      const response = await fetchAppointments({
+        limit: 1000,
+        dateFrom,
+        dateTo,
+        companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
+      });
+      rows = response.items.map(mapApiAppointmentToCalendar);
+    }
+    const [from, to] = mode === 'current-filter' ? getExportDateRange('current-filter') : [dateFrom, dateTo];
+    const suffix = from === to ? from : `${from}_${to}`;
+    await exportAppointmentsXlsx(rows, `DanhSachLichHen_${suffix}.xlsx`);
+  }, [appointments, selectedLocationId, getExportDateRange]);
+
+  const handleCreateAppointment = useCallback((date: string, startTime: string) => {
+    const [h, m] = startTime.split(':').map(Number);
+    const endH = h + Math.floor((m + 30) / 60);
+    const endM = (m + 30) % 60;
+    const endTime = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+    setCreateInitialData({
+      date,
+      startTime,
+      endTime,
+    });
+    setCreateModalOpen(true);
+  }, []);
+
+  const handleCreateSubmit = useCallback(async (data: AppointmentFormData) => {
+    const { createAppointment } = await import('@/lib/api');
+    await createAppointment({
+      partnerid: data.customerId,
+      doctorid: data.doctorId,
+      companyid: data.locationId,
+      name: data.serviceName || data.appointmentType,
+      date: data.date,
+      time: data.startTime,
+      note: data.notes,
+      state: 'scheduled',
+    });
+    setCreateModalOpen(false);
+    refresh?.();
+  }, [refresh]);
 
   // Inline date picker state
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -475,6 +557,13 @@ export function Calendar() {
               </div>
             )}
           </div>
+          <button
+            type="button"
+            onClick={() => setIsExportOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Xuất Excel
+          </button>
           <QuickAddAppointmentButton
             onSuccess={refresh}
             size="sm"
@@ -509,6 +598,9 @@ export function Calendar() {
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onDragEnd={handleDragEnd}
+          onMarkArrived={markArrived}
+          onUpdateStatus={updateAppointmentStatus}
+          onCreateAppointment={handleCreateAppointment}
         />
       )}
       {viewMode === 'week' && (
@@ -518,6 +610,8 @@ export function Calendar() {
           onAppointmentClick={handleAppointmentClick}
           onAppointmentEdit={handleEditClick}
           onDateChange={setCurrentDate}
+          onMarkArrived={markArrived}
+          onUpdateStatus={updateAppointmentStatus}
         />
       )}
       {viewMode === 'month' && (
@@ -558,6 +652,21 @@ export function Calendar() {
         }}
         onApply={applyFilter}
         onClear={clearFilter}
+      />
+
+      <ExportDialog
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
+        onExport={handleExport}
+        defaultDateFrom={new Date().toISOString().split('T')[0]}
+        defaultDateTo={new Date().toISOString().split('T')[0]}
+      />
+
+      <AppointmentFormModal
+        isOpen={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onSubmit={handleCreateSubmit}
+        initialData={createInitialData}
       />
     </div>
   );
