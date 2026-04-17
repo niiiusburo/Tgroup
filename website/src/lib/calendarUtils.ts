@@ -132,5 +132,9 @@ export function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppoin
     timeexpected: apt.timeexpected ?? apt.timeExpected ?? null,
     arrivalTime,
     treatmentStartTime,
+    assistantId: apt.assistantid ?? null,
+    assistantName: apt.assistantname ?? null,
+    dentalAideId: apt.dentalaideid ?? null,
+    dentalAideName: apt.dentalaidename ?? null,
   };
 }

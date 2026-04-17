@@ -157,6 +157,10 @@ export function Calendar() {
       arrivalTime: null,
       treatmentStartTime: null,
       productId: '',
+      assistantId: appointment.assistantId ?? null,
+      assistantName: appointment.assistantName ?? null,
+      dentalAideId: appointment.dentalAideId ?? null,
+      dentalAideName: appointment.dentalAideName ?? null,
     };
     setEditingAppointment(overviewAppointment);
     setIsEditModalOpen(true);

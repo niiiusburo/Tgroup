@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.19.6",
+    "date": "2026-04-17",
+    "commit": "pending",
+    "highlights": "Appointment Add/Edit parity: staff assistant and dental aide now persist through the read path; end-time display added to Edit modal",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Edit appointment: selecting a staff assistant or dental aide now survives a reload. The save path was already correct; the read path (mapApiAppointmentToCalendar + handleAppointmentClick) was silently dropping assistantid/dentalaideid, so the modal would reinitialise to blank and the user thought the save failed.",
+          "Edit modal used an untyped cast (appointment as any).assistantid — replaced with a typed field on CalendarAppointment/OverviewAppointment."
+        ]
+      },
+      {
+        "title": "Improvements",
+        "items": [
+          "Edit modal now shows 'Giờ kết thúc' (end time) alongside start time and duration, matching the Add form layout.",
+          "CalendarAppointment and OverviewAppointment types now carry assistantId/assistantName/dentalAideId/dentalAideName."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.19.5",
     "date": "2026-04-17",
     "commit": "pending",

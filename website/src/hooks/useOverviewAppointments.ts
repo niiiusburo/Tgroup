@@ -36,6 +36,11 @@ export interface OverviewAppointment {
   readonly productId: string | null; // FK to products(id) — the booked service
   readonly arrivalTime: string | null;
   readonly treatmentStartTime: string | null;
+  // Assistant / dental aide (populated from API)
+  readonly assistantId: string | null;
+  readonly assistantName: string | null;
+  readonly dentalAideId: string | null;
+  readonly dentalAideName: string | null;
 }
 
 // ─── Zone 3 filter tabs ──────────────────────────────────────────
@@ -124,6 +129,10 @@ function mapApiToOverview(
     productId: apt.productid || null,
     arrivalTime: fallbackArrivalTime,
     treatmentStartTime: checkInStatus === 'waiting' ? null : (apt.time || '09:00'),
+    assistantId: apt.assistantid ?? null,
+    assistantName: apt.assistantname ?? null,
+    dentalAideId: apt.dentalaideid ?? null,
+    dentalAideName: apt.dentalaidename ?? null,
   };
 }
 

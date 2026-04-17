@@ -46,6 +46,7 @@ import { TimePicker } from '@/components/ui/TimePicker';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
 import { normalizeText } from '@/lib/utils';
+import { calculateEndTime } from '@/lib/calendarUtils';
 import { updateAppointment, fetchProducts, type ApiProduct } from '@/lib/api';
 import { APPOINTMENT_CARD_COLORS, APPOINTMENT_STATUS_OPTIONS } from '@/constants';
 import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
@@ -228,8 +229,8 @@ export function EditAppointmentModal({
   useEffect(() => {
     if (appointment && isOpen) {
       setDoctorId(appointment.doctorId || '');
-      setAssistantId((appointment as any).assistantid || '');
-      setDentalAideId((appointment as any).dentalaideid || '');
+      setAssistantId(appointment.assistantId ?? '');
+      setDentalAideId(appointment.dentalAideId ?? '');
       setLocationId(appointment.locationId || '');
 
       // Use the appointment's stored date and time from the database
@@ -543,6 +544,21 @@ export function EditAppointmentModal({
               icon={<Clock className="w-3.5 h-3.5" />}
               interval={15}
             />
+          </div>
+
+          {/* End Time (read-only, derived from start + duration) */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <Clock className="w-3.5 h-3.5" />
+                Giờ kết thúc
+              </label>
+              <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-600">
+                <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <span>{time ? calculateEndTime(time, estimatedDuration) : '--:--'}</span>
+                <span className="ml-auto text-xs text-gray-400">({estimatedDuration} phút)</span>
+              </div>
+            </div>
           </div>
 
           {/* Doctor - Luxurious Searchable Dropdown */}

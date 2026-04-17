@@ -30,6 +30,11 @@ export interface CalendarAppointment {
   // NEW fields for V18.2 status flow
   readonly arrivalTime: string | null;
   readonly treatmentStartTime: string | null;
+  // Assistant / dental aide (populated from API)
+  readonly assistantId?: string | null;
+  readonly assistantName?: string | null;
+  readonly dentalAideId?: string | null;
+  readonly dentalAideName?: string | null;
 }
 
 export interface ManagedAppointment {
