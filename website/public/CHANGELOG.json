@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.17.0-rc1",
+    "date": "2026-04-17",
+    "commit": "a8d74bb4",
+    "highlights": "Worktree live-update initiated. PRD drafted to fix the update button + enforce release notes end-to-end. No runtime behavior changes yet.",
+    "sections": [
+      {
+        "title": "Docs",
+        "items": [
+          "Add docs/superpowers/specs/2026-04-17-live-update-prd.md",
+          "Add docs/superpowers/specs/2026-04-17-live-update-open-questions.md"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.16.5",
     "date": "2026-04-17",
     "commit": "3f504493",
