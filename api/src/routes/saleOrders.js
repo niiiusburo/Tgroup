@@ -99,7 +99,7 @@ router.get('/', async (req, res) => {
         so.datestart,
         so.dateend,
         so.notes,
-        so.sourceid,
+        p.sourceid,
         cs.name AS sourcename,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
@@ -113,7 +113,7 @@ router.get('/', async (req, res) => {
       LEFT JOIN employees doc ON doc.id = so.doctorid
       LEFT JOIN employees asst ON asst.id = so.assistantid
       LEFT JOIN employees da ON da.id = so.dentalaideid
-      LEFT JOIN customersources cs ON cs.id = so.sourceid
+      LEFT JOIN customersources cs ON cs.id = p.sourceid
       WHERE ${whereClause}
       ORDER BY ${orderByCol} ${orderDir} NULLS LAST
       LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
@@ -186,7 +186,7 @@ router.get('/:id', async (req, res) => {
         so.datestart,
         so.dateend,
         so.notes,
-        so.sourceid,
+        p.sourceid,
         cs.name AS sourcename,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
@@ -200,7 +200,7 @@ router.get('/:id', async (req, res) => {
       LEFT JOIN employees doc ON doc.id = so.doctorid
       LEFT JOIN employees asst ON asst.id = so.assistantid
       LEFT JOIN employees da ON da.id = so.dentalaideid
-      LEFT JOIN customersources cs ON cs.id = so.sourceid
+      LEFT JOIN customersources cs ON cs.id = p.sourceid
       WHERE so.id = $1 AND so.isdeleted = false`,
       [id]
     );
@@ -363,7 +363,7 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
         so.datestart,
         so.dateend,
         so.notes,
-        so.sourceid,
+        p.sourceid,
         cs.name AS sourcename,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
@@ -377,7 +377,7 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
       LEFT JOIN employees doc ON doc.id = so.doctorid
       LEFT JOIN employees asst ON asst.id = so.assistantid
       LEFT JOIN employees da ON da.id = so.dentalaideid
-      LEFT JOIN customersources cs ON cs.id = so.sourceid
+      LEFT JOIN customersources cs ON cs.id = p.sourceid
       WHERE so.id = $1`,
       [id]
     );
@@ -464,7 +464,7 @@ router.patch('/:id/state', requirePermission('customers.edit'), async (req, res)
         so.datestart,
         so.dateend,
         so.notes,
-        so.sourceid,
+        p.sourceid,
         cs.name AS sourcename,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
@@ -478,7 +478,7 @@ router.patch('/:id/state', requirePermission('customers.edit'), async (req, res)
       LEFT JOIN employees doc ON doc.id = so.doctorid
       LEFT JOIN employees asst ON asst.id = so.assistantid
       LEFT JOIN employees da ON da.id = so.dentalaideid
-      LEFT JOIN customersources cs ON cs.id = so.sourceid
+      LEFT JOIN customersources cs ON cs.id = p.sourceid
       WHERE so.id = $1`,
       [id]
     );
@@ -655,7 +655,7 @@ router.patch('/:id', requirePermission('customers.edit'), async (req, res) => {
         so.datestart,
         so.dateend,
         so.notes,
-        so.sourceid,
+        p.sourceid,
         cs.name AS sourcename,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
@@ -669,7 +669,7 @@ router.patch('/:id', requirePermission('customers.edit'), async (req, res) => {
       LEFT JOIN employees doc ON doc.id = so.doctorid
       LEFT JOIN employees asst ON asst.id = so.assistantid
       LEFT JOIN employees da ON da.id = so.dentalaideid
-      LEFT JOIN customersources cs ON cs.id = so.sourceid
+      LEFT JOIN customersources cs ON cs.id = p.sourceid
       WHERE so.id = $1`,
       [id]
     );
