@@ -18,6 +18,7 @@ import { WaitTimer } from '@/components/appointments/WaitTimer';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import type { OverviewAppointment, CheckInStatus, Zone1Filter } from '@/hooks/useOverviewAppointments';
 import { useAppointmentHover } from '@/contexts/AppointmentHoverContext';
+import { parseAppointmentNote } from '@/lib/appointmentNotes';
 
 interface PatientCheckInProps {
   readonly appointments: readonly OverviewAppointment[];
@@ -155,26 +156,6 @@ export function PatientCheckIn({
 }
 
 // ─── Individual Patient Card ────────────────────────────────────
-
-export function parseAppointmentNote(note: string) {
-  if (!note) return { duration: '', type: '', freeText: '' };
-  const lines = note.split('\n');
-  let duration = '';
-  let type = '';
-  const freeLines: string[] = [];
-  for (const line of lines) {
-    if (line.startsWith('Duration:')) {
-      duration = line.replace('Duration:', '').trim();
-    } else if (line.startsWith('Type:')) {
-      type = line.replace('Type:', '').trim();
-    } else if (line.startsWith('Service:')) {
-      // intentionally ignore service line; displayed elsewhere if needed
-    } else {
-      freeLines.push(line);
-    }
-  }
-  return { duration, type, freeText: freeLines.join('\n').trim() };
-}
 
 interface PatientCardProps {
   readonly appointment: OverviewAppointment;

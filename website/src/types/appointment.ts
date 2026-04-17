@@ -27,6 +27,9 @@ export interface CalendarAppointment {
   readonly notes: string;
   readonly color: string | null;
   readonly timeexpected?: number | null;
+  // NEW fields for V18.2 status flow
+  readonly arrivalTime: string | null;
+  readonly treatmentStartTime: string | null;
 }
 
 export interface ManagedAppointment {

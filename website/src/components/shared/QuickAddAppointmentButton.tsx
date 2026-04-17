@@ -1,18 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CalendarPlus } from 'lucide-react';
-import { AppointmentForm } from '@/components/appointments/AppointmentForm';
+import { AppointmentFormModal } from './AppointmentFormModal';
 import type { AppointmentFormData } from '@/components/appointments/AppointmentForm';
 
-
-/**
- * Quick Add Appointment Button — Small floating action button for quick access
- * 
- * Usage:
- * <QuickAddAppointmentButton onSuccess={refreshAppointments} />
- * 
- * @crossref:used-in[Overview, Calendar]
- */
 interface QuickAddAppointmentButtonProps {
   readonly onSuccess?: () => void;
   readonly size?: 'sm' | 'md';
@@ -39,7 +30,7 @@ export function QuickAddAppointmentButton({ onSuccess, size = 'md' }: QuickAddAp
       onSuccess?.();
     } catch (error) {
       console.error('Failed to create appointment:', error);
-      throw error; // Re-throw to let form handle error display
+      throw error;
     }
   };
 
@@ -67,22 +58,11 @@ export function QuickAddAppointmentButton({ onSuccess, size = 'md' }: QuickAddAp
         <span>{size === 'sm' ? t('overview:quickAdd') : t('overview:quickAddFull')}</span>
       </button>
 
-      {isOpen && (
-        <div className="modal-container">
-          {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setIsOpen(false)}
-          />
-          
-          <div className="modal-content animate-in zoom-in-95 duration-200 max-w-[900px]">
-            <AppointmentForm
-              onSubmit={handleSubmit}
-              onClose={() => setIsOpen(false)}
-            />
-          </div>
-        </div>
-      )}
+      <AppointmentFormModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        onSubmit={handleSubmit}
+      />
     </>
   );
 }
