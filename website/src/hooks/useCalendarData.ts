@@ -1,7 +1,9 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { type CalendarAppointment } from '@/data/mockCalendar';
-import { fetchAppointments } from '@/lib/api';
+import { fetchAppointments, updateAppointment } from '@/lib/api';
 import { useTimezone } from '@/contexts/TimezoneContext';
+import { PHASE_TO_API_STATE, type CalendarPhase } from '@/lib/appointmentStatusMapping';
+import { setStoredArrivalTime } from '@/lib/arrivalTimeStorage';
 import { normalizeText } from '@/lib/utils';
 import { mapApiAppointmentToCalendar } from '@/lib/calendarUtils';
 import type { AppointmentStatus } from '@/types/appointment';
@@ -60,15 +62,20 @@ export function useCalendarData(selectedLocationId?: string) {
       let dateFrom: string;
       let dateTo: string;
 
+      // Backend applies `date <= dateTo`; a bare date parses as 00:00:00, which
+      // drops everything after midnight. Pin dateTo to end-of-day so the full
+      // day is included (matters most in day view where from === to).
+      const endOfDay = (d: string) => `${d} 23:59:59`;
+
       if (viewMode === 'day') {
         dateFrom = currentDateStr;
-        dateTo = currentDateStr;
+        dateTo = endOfDay(currentDateStr);
       } else if (viewMode === 'week') {
         dateFrom = formatDate(weekDatesLocal[0], 'yyyy-MM-dd');
-        dateTo = formatDate(weekDatesLocal[6], 'yyyy-MM-dd');
+        dateTo = endOfDay(formatDate(weekDatesLocal[6], 'yyyy-MM-dd'));
       } else {
         dateFrom = formatDate(monthDatesLocal[0], 'yyyy-MM-dd');
-        dateTo = formatDate(monthDatesLocal[monthDatesLocal.length - 1], 'yyyy-MM-dd');
+        dateTo = endOfDay(formatDate(monthDatesLocal[monthDatesLocal.length - 1], 'yyyy-MM-dd'));
       }
 
       const response = await fetchAppointments({
@@ -131,6 +138,24 @@ export function useCalendarData(selectedLocationId?: string) {
     setSearch('');
   }, []);
 
+  const updateAppointmentStatus = useCallback(async (id: string, phase: CalendarPhase) => {
+    try {
+      await updateAppointment(id, { state: PHASE_TO_API_STATE[phase] });
+      if (phase === 'waiting') {
+        const now = new Date();
+        const arrivalTime = now.toLocaleTimeString('en-GB', { hour12: false });
+        setStoredArrivalTime(id, arrivalTime);
+      }
+      await loadAppointments();
+    } catch (error) {
+      console.error('Failed to update appointment status:', error);
+    }
+  }, [loadAppointments]);
+
+  const markArrived = useCallback(async (id: string) => {
+    await updateAppointmentStatus(id, 'waiting');
+  }, [updateAppointmentStatus]);
+
   const dateLabel = useMemo(() => {
     if (viewMode === 'day') {
       return currentDate.toLocaleDateString('vi-VN', {
@@ -174,6 +199,8 @@ export function useCalendarData(selectedLocationId?: string) {
     setSelectedAppointment,
     isLoading,
     refresh: loadAppointments,
+    updateAppointmentStatus,
+    markArrived,
   } as const;
 }
 

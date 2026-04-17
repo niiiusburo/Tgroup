@@ -4,6 +4,8 @@
 
 import { type CalendarAppointment } from '@/data/mockCalendar';
 import { type ApiAppointment } from '@/lib/api';
+import { apiStateToPhase } from './appointmentStatusMapping';
+import { getStoredArrivalTime } from './arrivalTimeStorage';
 
 /**
  * Calculate end time given a start time and duration in minutes
@@ -104,6 +106,10 @@ export function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppoin
   const dateStr = apt.date ? utcToLocalDateStr(apt.date) : '';
   const startTime = apt.time || '09:00';
   const endTime = calculateEndTime(startTime, apt.timeexpected);
+  const storedArrival = getStoredArrivalTime(apt.id);
+  const phase = apiStateToPhase(apt.state);
+  const arrivalTime = storedArrival ?? (phase !== 'scheduled' && phase !== 'cancelled' ? startTime : null);
+  const treatmentStartTime = phase === 'in-treatment' || phase === 'done' ? startTime : null;
 
   return {
     id: apt.id,
@@ -124,5 +130,7 @@ export function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppoin
     notes: stripNotesMetadata(apt.note),
     color: mapHexToColorCode(apt.color),
     timeexpected: apt.timeexpected ?? apt.timeExpected ?? null,
+    arrivalTime,
+    treatmentStartTime,
   };
 }

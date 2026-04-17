@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchAppointments, updateAppointment, type ApiAppointment } from '@/lib/api';
 import { useTimezone } from '@/contexts/TimezoneContext';
+import { getStoredArrivalTime, setStoredArrivalTime } from '@/lib/arrivalTimeStorage';
 
 /**
  * Hook for the Overview three-zone appointment flow
@@ -128,7 +129,6 @@ function mapApiToOverview(
 
 const ZONE3_FILTER_KEY = 'tgclinic:overview:zone3Filter';
 const ZONE1_FILTER_KEY = 'tgclinic:overview:zone1Filter';
-const ARRIVAL_TIMES_KEY = 'tgclinic:arrivalTimes';
 const ZONE3_OPTIONS: Zone3Filter[] = ['all', 'arrived', 'cancelled'];
 const ZONE1_OPTIONS: Zone1Filter[] = ['all', 'waiting', 'in-treatment', 'done'];
 
@@ -140,29 +140,6 @@ function extractTimeFromTimestamp(ts: string | null): string | null {
   const minutes = String(date.getMinutes()).padStart(2, '0');
   const seconds = String(date.getSeconds()).padStart(2, '0');
   return `${hours}:${minutes}:${seconds}`;
-}
-
-function getStoredArrivalTime(id: string): string | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    const raw = localStorage.getItem(ARRIVAL_TIMES_KEY);
-    const map = raw ? (JSON.parse(raw) as Record<string, string>) : {};
-    return map[id] || null;
-  } catch {
-    return null;
-  }
-}
-
-function setStoredArrivalTime(id: string, time: string): void {
-  if (typeof window === 'undefined') return;
-  try {
-    const raw = localStorage.getItem(ARRIVAL_TIMES_KEY);
-    const map = raw ? (JSON.parse(raw) as Record<string, string>) : {};
-    map[id] = time;
-    localStorage.setItem(ARRIVAL_TIMES_KEY, JSON.stringify(map));
-  } catch {
-    // ignore
-  }
 }
 
 function getSavedFilter<T extends string>(key: string, options: readonly T[], fallback: T): T {

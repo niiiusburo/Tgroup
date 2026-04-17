@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.19.2",
+    "date": "2026-04-17",
+    "commit": "pending",
+    "highlights": "Merge V18.2 calendar enhancements — interactive status flow, 27-slot day rail, Excel export with styled headers, day-view date-filter fix",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Calendar Day/Week views: interactive check-in + status flow (Đang hẹn → Chờ khám → Đang khám → Hoàn thành / Hủy hẹn)",
+          "Calendar Day view: 27-slot hourly rail (07:00–20:00) with empty-slot click-to-add",
+          "Calendar: Excel export (DanhSachLichHen_<range>.xlsx) with bold styled headers and legacy TG Dental column widths"
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Calendar Day view populated zero rows because dateFrom and dateTo were sent as the same bare date (Postgres parsed both as midnight against `date <= dateTo`). Pinned dateTo to end-of-day (23:59:59) in all view modes."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.19.1",
     "date": "2026-04-17",
     "commit": "6b4723a3",

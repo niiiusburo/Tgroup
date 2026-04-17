@@ -1,7 +1,7 @@
 {
   "name": "tgclinic-website",
   "private": true,
-  "version": "0.19.1",
+  "version": "0.19.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -23,6 +23,7 @@
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
     "clsx": "^2.1.0",
+    "file-saver": "^2.0.5",
     "framer-motion": "^12.38.0",
     "i18next": "^26.0.4",
     "lucide-react": "^0.330.0",
@@ -31,13 +32,15 @@
     "react-i18next": "^17.0.2",
     "react-router-dom": "^6.22.0",
     "tailwind-merge": "^2.2.0",
-    "use-places-autocomplete": "^4.0.1"
+    "use-places-autocomplete": "^4.0.1",
+    "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
+    "@types/file-saver": "^2.0.7",
     "@types/google.maps": "^3.58.1",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",

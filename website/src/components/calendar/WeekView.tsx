@@ -13,6 +13,9 @@ import { type CalendarAppointment } from '@/data/mockCalendar';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import { MedicalHistoryTooltip } from './MedicalHistoryTooltip';
+import { calendarStatusToPhase, PHASE_VI_LABELS, PHASE_STYLES } from '@/lib/appointmentStatusMapping';
+import { StatusBadgeMenu } from './StatusBadgeMenu';
+import { CheckInActions } from './CheckInActions';
 
 interface WeekViewProps {
   readonly weekDates: readonly Date[];
@@ -20,53 +23,9 @@ interface WeekViewProps {
   readonly onAppointmentClick?: (appointment: CalendarAppointment) => void;
   readonly onAppointmentEdit?: (appointment: CalendarAppointment) => void;
   readonly onDateChange?: (date: Date) => void;
+  readonly onMarkArrived?: (id: string) => void;
+  readonly onUpdateStatus?: (id: string, phase: import('@/lib/appointmentStatusMapping').CalendarPhase) => void;
 }
-
-// Status configuration matching reference image
-const STATUS_CONFIG: Record<string, { labelKey: string; bg: string; text: string; border: string }> = {
-  arrived: {
-    labelKey: 'arrived',
-    bg: 'bg-emerald-50',
-    text: 'text-emerald-700',
-    border: 'border-emerald-200',
-  },
-  confirmed: {
-    labelKey: 'confirmed',
-    bg: 'bg-blue-50',
-    text: 'text-blue-700',
-    border: 'border-blue-200',
-  },
-  scheduled: {
-    labelKey: 'scheduled',
-    bg: 'bg-blue-50',
-    text: 'text-blue-700',
-    border: 'border-blue-200',
-  },
-  cancelled: {
-    labelKey: 'cancelled',
-    bg: 'bg-red-50',
-    text: 'text-red-700',
-    border: 'border-red-200',
-  },
-  'no-show': {
-    labelKey: 'no-show',
-    bg: 'bg-amber-50',
-    text: 'text-amber-700',
-    border: 'border-amber-200',
-  },
-  completed: {
-    labelKey: 'completed',
-    bg: 'bg-gray-50',
-    text: 'text-gray-700',
-    border: 'border-gray-200',
-  },
-  'in-progress': {
-    labelKey: 'in-progress',
-    bg: 'bg-purple-50',
-    text: 'text-purple-700',
-    border: 'border-purple-200',
-  },
-};
 
 // Color mapping uses the SINGLE SOURCE OF TRUTH from constants
 // See APPOINTMENT_CARD_COLORS for the canonical mapping
@@ -76,9 +35,8 @@ function getCardStyles(appointment: CalendarAppointment): string {
     const c = APPOINTMENT_CARD_COLORS[appointment.color];
     return `${c.bg} ${c.dot}`;
   }
-  // Fallback to status-based color
-  const statusConfig = STATUS_CONFIG[appointment.status] || STATUS_CONFIG.scheduled;
-  return `${statusConfig.bg} border-l-4 ${statusConfig.border}`;
+  // Fallback to neutral border
+  return 'bg-white border-l-4 border-gray-200';
 }
 
 function formatDateKey(date: Date): string {
@@ -98,13 +56,17 @@ function AppointmentCard({
   appointment,
   onClick,
   onEdit,
+  onMarkArrived,
+  onUpdateStatus,
 }: {
   readonly appointment: CalendarAppointment;
   readonly onClick?: (apt: CalendarAppointment) => void;
   readonly onEdit?: (apt: CalendarAppointment) => void;
+  readonly onMarkArrived?: (id: string) => void;
+  readonly onUpdateStatus?: (id: string, phase: import('@/lib/appointmentStatusMapping').CalendarPhase) => void;
 }) {
-  const statusConfig = STATUS_CONFIG[appointment.status] || STATUS_CONFIG.scheduled;
-  const { t } = useTranslation('appointments');
+  const phase = calendarStatusToPhase(appointment.status);
+  const styles = PHASE_STYLES[phase];
   const cardStyles = getCardStyles(appointment);
 
   return (
@@ -116,16 +78,35 @@ function AppointmentCard({
         cardStyles
       )}
     >
-      {/* Status badge */}
-      <span
-        className={cn(
-          'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold mb-1.5',
-          statusConfig.bg,
-          statusConfig.text
+      {/* Header row: badge + actions */}
+      <div className="flex items-start justify-between gap-1 mb-1">
+        {phase === 'scheduled' ? (
+          <span
+            className={cn(
+              'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border',
+              styles.bg,
+              styles.text,
+              styles.border
+            )}
+          >
+            {PHASE_VI_LABELS[phase]}
+          </span>
+        ) : (
+          <StatusBadgeMenu
+            phase={phase}
+            arrivalTime={appointment.arrivalTime}
+            treatmentStartTime={appointment.treatmentStartTime}
+            onPhaseChange={(p) => onUpdateStatus?.(appointment.id, p)}
+          />
         )}
-      >
-        {t(`status.${statusConfig.labelKey}`)}
-      </span>
+
+        {phase === 'scheduled' && onMarkArrived && onUpdateStatus && (
+          <CheckInActions
+            onCheckIn={() => onMarkArrived(appointment.id)}
+            onCancel={() => onUpdateStatus(appointment.id, 'cancelled')}
+          />
+        )}
+      </div>
 
       {/* Customer name */}
       <h5 className="font-semibold text-gray-900 truncate text-xs mb-1.5">
@@ -184,6 +165,8 @@ export function WeekView({
   getAppointmentsForDate,
   onAppointmentClick,
   onAppointmentEdit,
+  onMarkArrived,
+  onUpdateStatus,
 }: WeekViewProps) {
   const { t } = useTranslation();
   const today = new Date();
@@ -248,6 +231,8 @@ export function WeekView({
                       appointment={apt}
                       onClick={onAppointmentClick}
                       onEdit={onAppointmentEdit}
+                      onMarkArrived={onMarkArrived}
+                      onUpdateStatus={onUpdateStatus}
                     />
                   ))
                 )}

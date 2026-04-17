@@ -6,17 +6,16 @@ import { type CalendarAppointment } from '@/data/mockCalendar';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import { MedicalHistoryTooltip } from './MedicalHistoryTooltip';
+import { calendarStatusToPhase, PHASE_VI_LABELS, PHASE_STYLES } from '@/lib/appointmentStatusMapping';
+import { StatusBadgeMenu } from './StatusBadgeMenu';
+import { CheckInActions } from './CheckInActions';
+import { EmptyTimeSlot } from './EmptyTimeSlot';
 
 /**
- * DayView Component - responsive card grid layout for a single day's appointments
+ * DayView Component - 27-slot hourly rail for a single day
  *
- * Cards are grouped by half-hour time slots. The grid auto-fills columns based
- * on available width (6 cols on wide screens, scaling down to 2 on narrow).
- * Each card has a colored left border matching the appointment's color code.
- *
- * ⚠️ LAYOUT LOCK: Do NOT change the responsive grid (grid-cols-[repeat(auto-fill,...)])
- *    without user approval. The auto-fill behavior is intentionally designed so cards
- *    reflow dynamically when the window resizes.
+ * Fixed 30-minute slots from 07:00 to 20:00. Empty slots collapse to 24px.
+ * Cards show interactive status flow matching WeekView.
  *
  * @crossref:used-in[Calendar]
  */
@@ -30,17 +29,10 @@ interface DayViewProps {
   readonly onDragOver?: (e: React.DragEvent) => void;
   readonly onDrop?: (e: React.DragEvent, targetDate: string, targetTime: string) => void;
   readonly onDragEnd?: () => void;
+  readonly onMarkArrived?: (id: string) => void;
+  readonly onUpdateStatus?: (id: string, phase: import('@/lib/appointmentStatusMapping').CalendarPhase) => void;
+  readonly onCreateAppointment?: (date: string, startTime: string) => void;
 }
-
-// ── Status config ────────────────────────────────────────────────
-
-const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string; ring: string }> = {
-  scheduled:     { label: 'Đang hẹn',    bg: 'bg-blue-100',   text: 'text-blue-700',   ring: 'ring-blue-200' },
-  confirmed:     { label: 'Đã xác nhận', bg: 'bg-blue-100',   text: 'text-blue-700',   ring: 'ring-blue-200' },
-  'in-progress': { label: 'Đang khám',   bg: 'bg-orange-100', text: 'text-orange-700', ring: 'ring-orange-200' },
-  completed:     { label: 'Hoàn thành',  bg: 'bg-green-100',  text: 'text-green-700',  ring: 'ring-green-200' },
-  cancelled:     { label: 'Hủy hẹn',     bg: 'bg-red-100',    text: 'text-red-700',    ring: 'ring-red-200' },
-};
 
 // Color mapping uses SINGLE SOURCE OF TRUTH from constants
 function getCardColor(color: string | null | undefined) {
@@ -50,30 +42,10 @@ function getCardColor(color: string | null | undefined) {
   return APPOINTMENT_CARD_COLORS['0'];
 }
 
-// ── Time group helpers ───────────────────────────────────────────
-
-interface TimeGroup {
-  time: string; // e.g. "15:00"
-  appointments: CalendarAppointment[];
-}
-
-function groupByHalfHour(appointments: readonly CalendarAppointment[]): TimeGroup[] {
-  const sorted = [...appointments].sort((a, b) => a.startTime.localeCompare(b.startTime));
-  const groups: Map<string, CalendarAppointment[]> = new Map();
-
-  for (const apt of sorted) {
-    // Round down to nearest half hour for grouping
-    const [h, m] = apt.startTime.split(':').map(Number);
-    const roundedMin = m < 30 ? '00' : '30';
-    const key = `${String(h).padStart(2, '0')}:${roundedMin}`;
-
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key)!.push(apt);
-  }
-
-  return Array.from(groups.entries())
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([time, appts]) => ({ time, appointments: appts }));
+const SLOTS: string[] = [];
+for (let h = 7; h <= 20; h++) {
+  SLOTS.push(`${String(h).padStart(2, '0')}:00`);
+  if (h !== 20) SLOTS.push(`${String(h).padStart(2, '0')}:30`);
 }
 
 // ── Appointment Card ─────────────────────────────────────────────
@@ -82,10 +54,13 @@ interface DayCardProps {
   readonly appointment: CalendarAppointment;
   readonly onClick?: (apt: CalendarAppointment) => void;
   readonly onEdit?: (apt: CalendarAppointment) => void;
+  readonly onMarkArrived?: (id: string) => void;
+  readonly onUpdateStatus?: (id: string, phase: import('@/lib/appointmentStatusMapping').CalendarPhase) => void;
 }
 
-function DayCard({ appointment, onClick, onEdit }: DayCardProps) {
-  const status = STATUS_CONFIG[appointment.status] ?? STATUS_CONFIG.scheduled;
+function DayCard({ appointment, onClick, onEdit, onMarkArrived, onUpdateStatus }: DayCardProps) {
+  const phase = calendarStatusToPhase(appointment.status);
+  const styles = PHASE_STYLES[phase];
   const colors = getCardColor(appointment.color);
 
   return (
@@ -98,16 +73,35 @@ function DayCard({ appointment, onClick, onEdit }: DayCardProps) {
         colors.dot
       )}
     >
-      {/* Status badge */}
-      <span
-        className={cn(
-          'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold mb-1.5',
-          status.bg,
-          status.text
+      {/* Header row: badge + actions */}
+      <div className="flex items-start justify-between gap-1 mb-1">
+        {phase === 'scheduled' ? (
+          <span
+            className={cn(
+              'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border',
+              styles.bg,
+              styles.text,
+              styles.border
+            )}
+          >
+            {PHASE_VI_LABELS[phase]}
+          </span>
+        ) : (
+          <StatusBadgeMenu
+            phase={phase}
+            arrivalTime={appointment.arrivalTime}
+            treatmentStartTime={appointment.treatmentStartTime}
+            onPhaseChange={(p) => onUpdateStatus?.(appointment.id, p)}
+          />
         )}
-      >
-        {status.label}
-      </span>
+
+        {phase === 'scheduled' && onMarkArrived && onUpdateStatus && (
+          <CheckInActions
+            onCheckIn={() => onMarkArrived(appointment.id)}
+            onCancel={() => onUpdateStatus(appointment.id, 'cancelled')}
+          />
+        )}
+      </div>
 
       {/* Customer name */}
       <h5 className="font-semibold text-gray-900 truncate text-xs mb-1.5">
@@ -168,11 +162,25 @@ export function DayView({
   getAppointmentsForDate,
   onAppointmentClick,
   onAppointmentEdit,
+  onMarkArrived,
+  onUpdateStatus,
+  onCreateAppointment,
 }: DayViewProps) {
   const { t } = useTranslation();
   const appointments = getAppointmentsForDate(currentDate);
 
-  const timeGroups = useMemo(() => groupByHalfHour(appointments), [appointments]);
+  const slotMap = useMemo(() => {
+    const map = new Map<string, CalendarAppointment[]>();
+    for (const apt of appointments) {
+      const slot = apt.startTime.slice(0, 5); // "HH:mm"
+      if (!map.has(slot)) map.set(slot, []);
+      map.get(slot)!.push(apt);
+    }
+    for (const arr of map.values()) {
+      arr.sort((a, b) => a.startTime.localeCompare(b.startTime));
+    }
+    return map;
+  }, [appointments]);
 
   return (
     <div className="bg-white rounded-xl shadow-card overflow-hidden">
@@ -192,50 +200,51 @@ export function DayView({
         </div>
       </div>
 
-      {/* Card grid — scrollable area */}
-      <div className="p-4 space-y-6 max-h-[calc(100vh-280px)] overflow-y-auto">
-        {timeGroups.length === 0 && (
-          <div className="py-16 text-center">
-            <p className="text-sm text-gray-400">{`${t('noAppointments', { ns: 'calendar' })}`}</p>
-          </div>
-        )}
+      {/* Time rail */}
+      <div className="p-3 space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto">
+        {SLOTS.map((slot) => {
+          const slotAppointments = slotMap.get(slot) ?? [];
+          const hasAppointments = slotAppointments.length > 0;
 
-        {timeGroups.map((group) => (
-          <div key={group.time}>
-            {/* Time group header */}
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-bold text-gray-400 tracking-wide">
-                {group.time}
-              </span>
-              <div className="flex-1 h-px bg-gray-200" />
-              <span className="text-[10px] text-gray-300 font-medium">
-                {`${group.appointments.length} ${t('labelsAppointments', { ns: 'calendar' })}`}
-              </span>
-            </div>
-
-            {/*
-              Responsive auto-fill grid:
-              - min 185px per card
-              - Wide screen (≈1200px content): ~6 columns
-              - Medium (≈900px): ~4 columns
-              - Narrow (≈600px): ~3 columns
-              - Small (≈400px): ~2 columns
-            */}
-            <div
-              className="grid gap-3"
-              style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))' }}
-            >
-              {group.appointments.map((apt) => (
-                <DayCard
-                  key={apt.id}
-                  appointment={apt}
-                  onClick={onAppointmentClick}
-                  onEdit={onAppointmentEdit}
+          return (
+            <div key={slot} className={hasAppointments ? 'py-2' : ''}>
+              {hasAppointments ? (
+                <>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-bold text-gray-400 tracking-wide">{slot}</span>
+                    <div className="flex-1 h-px bg-gray-200" />
+                    <span className="text-[10px] text-gray-300 font-medium">
+                      {`${slotAppointments.length} ${t('labelsAppointments', { ns: 'calendar' })}`}
+                    </span>
+                  </div>
+                  <div
+                    className="grid gap-3"
+                    style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))' }}
+                  >
+                    {slotAppointments.map((apt) => (
+                      <DayCard
+                        key={apt.id}
+                        appointment={apt}
+                        onClick={onAppointmentClick}
+                        onEdit={onAppointmentEdit}
+                        onMarkArrived={onMarkArrived}
+                        onUpdateStatus={onUpdateStatus}
+                      />
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <EmptyTimeSlot
+                  time={slot}
+                  onClick={(time: string) => {
+                    const dateStr = currentDate.toISOString().split('T')[0];
+                    onCreateAppointment?.(dateStr, time);
+                  }}
                 />
-              ))}
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
