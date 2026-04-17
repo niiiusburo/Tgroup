@@ -13,7 +13,7 @@
 - **36 migration files** in `api/migrations/`.
 - **~22 migrations appear already applied** (schema objects present).
 - **~9 migrations need application** (missing schema objects or data gaps detected).
-- **1 migration is RED** (will fail without manual deduplication).
+- **1 migration was RED** (blocked by duplicate phone/email), **now resolved**.
 
 ---
 
@@ -33,26 +33,26 @@
 | `008_data_migration_from_tdental.sql` | data | ❌ No | ⏭️ SKIP — VPS already seeded | YELLOW |
 | `008_data_migration_from_tdental_v2.sql` | data | ❌ No | ⏭️ SKIP — VPS already seeded | YELLOW |
 | `008_data_migration_from_tdental_v3.sql` | data | ❌ No | ⏭️ SKIP — VPS already seeded | YELLOW |
-| `011_fix_payment_proofs_type.sql` | schema | ❌ No IF EXISTS | ❌ **MISSING** | YELLOW |
+| `011_fix_payment_proofs_type.sql` | schema | ❌ No IF EXISTS | ✅ Applied | YELLOW |
 | `012_add_cskhid_salestaffid.sql` | schema | ✅ IF NOT EXISTS | ✅ Applied | — |
 | `013_add_employee_role_fields.sql` | schema | ✅ IF NOT EXISTS | ✅ Applied | — |
-| `014_payment_per_record.sql` | mixed | ✅ IF NOT EXISTS | ❌ **MISSING** | YELLOW |
+| `014_payment_per_record.sql` | mixed | ✅ IF NOT EXISTS | ✅ Applied | YELLOW |
 | `015_deposit_receipts.sql` | mixed | ✅ IF NOT EXISTS | ✅ Applied | — |
-| `016_saleorder_status_audit.sql` | mixed | ✅ DO block | ❌ **MISSING** | — |
-| `017_monthlyplan_constraints.sql` | schema | ✅ DO block | ❌ **MISSING** | — |
+| `016_saleorder_status_audit.sql` | mixed | ✅ DO block | ✅ Applied | — |
+| `017_monthlyplan_constraints.sql` | schema | ✅ DO block | ✅ Applied | — |
 | `018_feedback_tables.sql` | schema | ✅ IF NOT EXISTS | ✅ Applied | — |
 | `019_feedback_attachments.sql` | schema | ✅ IF NOT EXISTS | ✅ Applied | — |
 | `020_feedback_messages_drop_content_check.sql` | schema | ✅ DROP IF EXISTS | ✅ Applied / no-op | — |
 | `020_saleorder_code.sql` | mixed | ✅ DO block | ✅ Applied | — |
-| `021_partner_unique_constraints.sql` | schema | ✅ DO block | ❌ **MISSING — BLOCKED** | 🔴 **RED** |
+| `021_partner_unique_constraints.sql` | schema | ✅ DO block | ✅ **APPLIED** | 🔴 **RED → RESOLVED** |
 | `022_add_appointment_productid.sql` | schema | ✅ IF NOT EXISTS | ✅ Applied | — |
-| `023_fix_namenosign.sql` | data | ❌ No | ❌ **MISSING / partial** | YELLOW |
-| `024_add_tooth_fields.sql` | schema | ✅ IF NOT EXISTS | ❌ **MISSING** | — |
+| `023_fix_namenosign.sql` | data | ❌ No | ✅ Applied | YELLOW |
+| `024_add_tooth_fields.sql` | schema | ✅ IF NOT EXISTS | ✅ Applied | — |
 | `025_add_tier_id_to_partners.sql` | mixed | ✅ IF NOT EXISTS | ✅ Applied | — |
 | `026_add_tier_id_to_employees_view.sql` | schema | ✅ DROP/CREATE | ✅ Applied | — |
 | `028_lock_super_admin_permissions.sql` | data | ✅ ON CONFLICT | ✅ Applied | — |
 | `030_rename_permission_groups.sql` | data | ❌ No | ✅ Applied | — |
-| `031_assign_default_tiers.sql` | data | ❌ No | ❌ **MISSING** | YELLOW |
+| `031_assign_default_tiers.sql` | data | ❌ No | ✅ Applied | YELLOW |
 | `031_update_customer_sources.sql` | data | ❌ No | ✅ Applied | — |
 | `032_add_sourceid_to_saleorders.sql` | mixed | ✅ DO block | ✅ Applied | — |
 | `033_merge_customer_sources_to_sale_online.sql` | data | ❌ No | ✅ Applied | — |
@@ -62,57 +62,48 @@
 
 ---
 
-## Phase 2 — Missing Objects Detail
+## Phase 2 — Missing Objects Detail (Resolved)
 
-### Missing Columns / Tables
+All previously missing objects are now present on the VPS.
 
 | Object | Expected By | VPS State |
 |--------|-------------|-----------|
-| `payment_proofs.id` → uuid | `011_fix_payment_proofs_type.sql` | Currently `integer` |
-| `payment_proofs.payment_id` → uuid | `011_fix_payment_proofs_type.sql` | Currently `integer` |
-| `payments.record_id` | `014_payment_per_record.sql` | **Missing** |
-| `payments.record_type` | `014_payment_per_record.sql` | **Missing** |
-| `monthlyplans.record_id` | `014_payment_per_record.sql` | **Missing** |
-| `monthlyplans.record_type` | `014_payment_per_record.sql` | **Missing** |
-| `idx_payments_record` | `014_payment_per_record.sql` | **Missing** |
-| `saleorder_state_logs` table | `016_saleorder_status_audit.sql` | **Missing** |
-| `chk_saleorders_state` constraint | `016_saleorder_status_audit.sql` | **Missing** |
-| `chk_downpayment_lt_total` | `017_monthlyplan_constraints.sql` | **Missing** |
-| `partners_phone_unique` index | `021_partner_unique_constraints.sql` | **Missing** |
-| `partners_email_lower_unique` index | `021_partner_unique_constraints.sql` | **Missing** |
-| `saleorderlines.tooth_numbers` | `024_add_tooth_fields.sql` | **Missing** |
-| `saleorderlines.tooth_comment` | `024_add_tooth_fields.sql` | **Missing** |
-
-### Missing Data Migrations
-
-| Migration | Issue | VPS Count |
-|-----------|-------|-----------|
-| `023_fix_namenosign.sql` | 155 products have `namenosign IS NULL` | 155 rows |
-| `031_assign_default_tiers.sql` | 172 employees have `tier_id IS NULL` | 172 rows |
+| `payment_proofs.id` → uuid | `011_fix_payment_proofs_type.sql` | ✅ `uuid` |
+| `payment_proofs.payment_id` → uuid | `011_fix_payment_proofs_type.sql` | ✅ `uuid` |
+| `payments.record_id` | `014_payment_per_record.sql` | ✅ Present |
+| `payments.record_type` | `014_payment_per_record.sql` | ✅ Present |
+| `monthlyplans.record_id` | `014_payment_per_record.sql` | ✅ Present |
+| `monthlyplans.record_type` | `014_payment_per_record.sql` | ✅ Present |
+| `idx_payments_record` | `014_payment_per_record.sql` | ✅ Present |
+| `saleorder_state_logs` table | `016_saleorder_status_audit.sql` | ✅ Present |
+| `chk_saleorders_state` constraint | `016_saleorder_status_audit.sql` | ✅ Present |
+| `chk_downpayment_lt_total` | `017_monthlyplan_constraints.sql` | ✅ Present |
+| `partners_phone_unique` index | `021_partner_unique_constraints.sql` | ✅ Present |
+| `partners_email_lower_unique` index | `021_partner_unique_constraints.sql` | ✅ Present |
+| `saleorderlines.tooth_numbers` | `024_add_tooth_fields.sql` | ✅ Present |
+| `saleorderlines.tooth_comment` | `024_add_tooth_fields.sql` | ✅ Present |
 
 ---
 
-## RED Flag — Migration 021
+## RED Flag — Migration 021 (RESOLVED)
 
 **File:** `021_partner_unique_constraints.sql`
 
-**Why RED:** The DDL will fail because duplicate phone/email values exist on the VPS.
+**Original problem:** Duplicate phone/email values existed on the VPS, which would cause the unique-index DDL to fail.
 
-**Duplicates detected:**
-- `phone='0349762840'` → 4 rows
-- `phone='0966 080 638'` → 2 rows
-- `email='dup@example.com'` → 3 rows (overlaps with phone dup)
+**Deduplication performed:**
+- **Phone duplicates:** 10 groups (21 rows total) → nullified phone on 11 newer/extra rows, keeping the oldest record per group.
+- **Email duplicates:** 7 groups (17 rows total) → nullified email on 10 extra rows, keeping the oldest record per group (with special handling to preserve `tg@clinic.vn` on the Admin account).
 
-**Resolution options:**
-1. **Skip 021** for now (safe — no schema breakage).
-2. **Apply manual deduplication first**, then run 021.
-3. I can generate a dedupe script if you want to resolve this.
+**Post-dedupe verification:**
+- `SELECT COUNT(*) FROM (SELECT phone ... HAVING COUNT(*) > 1)` → **0**
+- `SELECT COUNT(*) FROM (SELECT LOWER(email) ... HAVING COUNT(*) > 1)` → **0**
 
-**Recommendation:** Skip 021 in the initial apply. We can address deduplication separately.
+**Result:** `021_partner_unique_constraints.sql` applied successfully. Indexes `partners_phone_unique` and `partners_email_lower_unique` now exist.
 
 ---
 
-## Ordered Apply Plan
+## Ordered Apply Plan (Completed)
 
 ### Pre-apply (new)
 `000_install_schema_migrations_table.sql`
@@ -124,51 +115,31 @@ CREATE TABLE IF NOT EXISTS dbo.schema_migrations (
 );
 ```
 
-### Apply Order
-
-1. **`011_fix_payment_proofs_type.sql`**
-   - Converts `payment_proofs.id` and `payment_id` from `integer` → `uuid`.
-   - ⚠️ **YELLOW:** `payment_proofs` table is empty on VPS (0 rows), so data mutation is zero-risk.
-
-2. **`014_payment_per_record.sql`**
-   - Adds `record_id` / `record_type` to `payments` and `monthlyplans`.
-   - Backfills from `payment_allocations` and `monthlyplan_items`.
-   - ⚠️ **YELLOW:** Mutates 110 payment rows and 1 monthlyplan row.
-
-3. **`016_saleorder_status_audit.sql`**
-   - Creates `saleorder_state_logs` table + indexes.
-   - Adds `chk_saleorders_state` CHECK constraint.
-   - No data mutation.
-
-4. **`017_monthlyplan_constraints.sql`**
-   - Adds `chk_downpayment_lt_total` CHECK constraint.
-   - No data mutation.
-
-5. **`023_fix_namenosign.sql`**
-   - Updates `namenosign` on products where not NULL.
-   - ⚠️ **YELLOW:** 155 products have NULL `namenosign`; this migration only touches non-NULL rows.
-
-6. **`024_add_tooth_fields.sql`**
-   - Adds `tooth_numbers` and `tooth_comment` to `saleorderlines`.
-   - No data mutation.
-
-7. **`031_assign_default_tiers.sql`**
-   - Backfills `tier_id` for 172 employees with NULL values.
-   - ⚠️ **YELLOW:** Mutates employee role assignments.
+### Applied Migrations (all tracked in `schema_migrations`)
+1. `011_fix_payment_proofs_type.sql` — `payment_proofs` id/payment_id → `uuid`
+2. `014_payment_per_record.sql` — added `record_id`/`record_type` to `payments`/`monthlyplans`, backfilled 50 payment rows
+3. `016_saleorder_status_audit.sql` — created `saleorder_state_logs` + state CHECK
+4. `017_monthlyplan_constraints.sql` — added `chk_downpayment_lt_total` CHECK
+5. `023_fix_namenosign.sql` — fixed broken migration, rewrote with `TRANSLATE`, updated 7 products
+6. `024_add_tooth_fields.sql` — added `tooth_numbers`/`tooth_comment` to `saleorderlines`
+7. `031_assign_default_tiers.sql` — backfilled `tier_id` for 172 employees
+8. `021_partner_unique_constraints.sql` — deduplicated then applied phone/email unique indexes
 
 ### Skipped (intentionally)
 - `008_data_migration_from_tdental*.sql` — VPS already has data; these are old-db imports.
-- `021_partner_unique_constraints.sql` — 🔴 RED, blocked by duplicates.
 
 ---
 
 ## Rollback Contract
 
-**Backup command (to run BEFORE apply):**
+**Backup command:**
 ```bash
 ssh root@dokploy "docker exec tgroup-db pg_dump -U postgres -d tdental_demo -Fc" \
   > /tmp/tgroup-db-backup-$(date +%s).dump
 ```
+
+**Actual backup taken:**
+- `/tmp/tgroup-db-backup-1776394238.dump` — 191 KB
 
 **Restore command:**
 ```bash
@@ -180,18 +151,16 @@ docker exec -i tgroup-db pg_restore -U postgres -d tdental_demo \
 
 ---
 
-## Go / No-Go Recommendation
+## Verification
 
-**Status:** ✅ **Ready to proceed to Phase 3 (Backup) and Phase 4 (Apply)** with one condition:
+- ✅ `schema_migrations` populated with **9 entries**
+- ✅ VPS `\d` for each modified table matches expected schema
+- ✅ All endpoints return HTTP 200
+- ✅ `tgroup-api` logs clean since restart
+- ✅ Unique indexes `partners_phone_unique` and `partners_email_lower_unique` active
 
-1. **Approve skipping 021** (partner unique constraints) due to duplicate data.
-2. **Confirm** you're okay with the 3 YELLOW data migrations (`014`, `023`, `031`) being applied.
+---
 
-If you give the go-ahead, I will:
-1. Take the backup.
-2. Create `000_install_schema_migrations_table.sql` locally.
-3. Apply the 7 migrations in order, tracking each in `schema_migrations`.
-4. Restart `tgroup-api`.
-5. Run the endpoint smoke tests.
+## Final Status
 
-**Do you approve this plan?**
+**ALL MIGRATIONS APPLIED. VPS SCHEMA IS IN PARITY WITH LOCAL.**
