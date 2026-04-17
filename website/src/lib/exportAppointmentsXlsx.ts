@@ -77,9 +77,9 @@ export async function exportAppointmentsXlsx(
     };
   }
 
-  // Auto-fit column widths to the longest cell content per column (+2 padding).
-  // Clamped to [10, 60] so short labels stay readable and long notes don't
-  // blow the sheet out horizontally.
+  // Auto-fit column widths to the longest cell content per column (+4 padding).
+  // Clamped to [16, 60] so empty/short columns still look spacious and long
+  // notes don't blow the sheet out horizontally.
   worksheet['!cols'] = headers.map((h, i) => {
     let max = h.length;
     for (let r = 1; r < data.length; r++) {
@@ -87,7 +87,7 @@ export async function exportAppointmentsXlsx(
       const len = v ? String(v).length : 0;
       if (len > max) max = len;
     }
-    return { wch: Math.min(Math.max(max + 2, 10), 60) };
+    return { wch: Math.min(Math.max(max + 4, 16), 60) };
   });
 
   const workbook = XLSX.utils.book_new();

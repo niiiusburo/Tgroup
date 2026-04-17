@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.19.5",
+    "date": "2026-04-17",
+    "commit": "pending",
+    "highlights": "Excel export: wider auto-fit — min 16 chars, +4 padding for a spacious layout",
+    "sections": [
+      {
+        "title": "Improvements",
+        "items": [
+          "Excel export: raised column min width from 10 → 16 and padding from +2 → +4 so even empty columns stay readable and content-heavy columns have breathing room."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.19.4",
     "date": "2026-04-17",
     "commit": "pending",
