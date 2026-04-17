@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTimezone } from '@/contexts/TimezoneContext';
 import { Phone, User, Users, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type CalendarAppointment } from '@/data/mockCalendar';
@@ -184,6 +185,7 @@ export function DayView({
   onCreateAppointment,
 }: DayViewProps) {
   const { t } = useTranslation();
+  const { formatDate, timezone } = useTimezone();
   const appointments = getAppointmentsForDate(currentDate);
 
   const slotMap = useMemo(() => {
@@ -208,6 +210,7 @@ export function DayView({
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-gray-900">
             {currentDate.toLocaleDateString('vi-VN', {
+              timeZone: timezone,
               weekday: 'long',
               month: 'long',
               day: 'numeric',
@@ -256,7 +259,7 @@ export function DayView({
                 <EmptyTimeSlot
                   time={slot}
                   onClick={(time: string) => {
-                    const dateStr = currentDate.toISOString().split('T')[0];
+                    const dateStr = formatDate(currentDate, 'yyyy-MM-dd');
                     onCreateAppointment?.(dateStr, time);
                   }}
                 />

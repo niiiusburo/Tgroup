@@ -8,6 +8,7 @@
 
 import { CalendarDays, Phone, User, Users, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useTimezone } from '@/contexts/TimezoneContext';
 import { cn } from '@/lib/utils';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
@@ -39,8 +40,9 @@ function getCardStyles(appointment: CalendarAppointment): string {
   return 'bg-white border-l-4 border-gray-200';
 }
 
-function formatDateKey(date: Date): string {
-  return date.toISOString().split('T')[0];
+function useFormatDateKey() {
+  const { formatDate } = useTimezone();
+  return (date: Date) => formatDate(date, 'yyyy-MM-dd');
 }
 
 const WEEKDAY_NAME_KEYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
@@ -186,8 +188,9 @@ export function WeekView({
   onUpdateStatus,
 }: WeekViewProps) {
   const { t } = useTranslation('calendar');
-  const today = new Date();
-  const todayKey = formatDateKey(today);
+  const { getToday } = useTimezone();
+  const formatDateKey = useFormatDateKey();
+  const todayKey = getToday();
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-card">

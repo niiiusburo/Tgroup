@@ -12,12 +12,17 @@ export type ViewMode = 'day' | 'week' | 'month';
 
 export type CalendarStatusFilter = AppointmentStatus | 'all';
 
+/** Create a Date at noon Vietnam time from a YYYY-MM-DD string */
+function toVnDate(dateStr: string): Date {
+  return new Date(`${dateStr}T12:00:00+07:00`);
+}
+
 /**
  * Hook for Calendar page state and data
  * @crossref:used-in[Calendar]
  */
 export function useCalendarData(selectedLocationId?: string) {
-  const { formatDate } = useTimezone();
+  const { formatDate, timezone } = useTimezone();
   const [viewMode, setViewMode] = useState<ViewMode>('week');
   // Store current date as string in YYYY-MM-DD format for timezone consistency
   const [currentDateStr, setCurrentDateStr] = useState(() => formatDate(new Date(), 'yyyy-MM-dd'));
@@ -29,8 +34,8 @@ export function useCalendarData(selectedLocationId?: string) {
   const [isLoading, setIsLoading] = useState(false);
   const [appointments, setAppointments] = useState<readonly CalendarAppointment[]>([]);
 
-  // Current date as Date object (for display purposes)
-  const currentDate = useMemo(() => new Date(currentDateStr), [currentDateStr]);
+  // Current date as Date object at noon Vietnam time (avoids all timezone drift)
+  const currentDate = useMemo(() => toVnDate(currentDateStr), [currentDateStr]);
 
   const goToToday = useCallback(() => {
     setCurrentDateStr(formatDate(new Date(), 'yyyy-MM-dd'));
@@ -38,26 +43,29 @@ export function useCalendarData(selectedLocationId?: string) {
 
   const navigate = useCallback((direction: 'prev' | 'next') => {
     setCurrentDateStr((prevStr) => {
-      const prev = new Date(prevStr);
-      const d = new Date(prev);
+      const [y, m, d] = prevStr.split('-').map(Number);
+      const date = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
       if (viewMode === 'day') {
-        d.setDate(d.getDate() + (direction === 'next' ? 1 : -1));
+        date.setUTCDate(date.getUTCDate() + (direction === 'next' ? 1 : -1));
       } else if (viewMode === 'week') {
-        d.setDate(d.getDate() + (direction === 'next' ? 7 : -7));
+        date.setUTCDate(date.getUTCDate() + (direction === 'next' ? 7 : -7));
       } else {
-        d.setMonth(d.getMonth() + (direction === 'next' ? 1 : -1));
+        date.setUTCMonth(date.getUTCMonth() + (direction === 'next' ? 1 : -1));
       }
-      return formatDate(d, 'yyyy-MM-dd');
+      const yy = date.getUTCFullYear();
+      const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const dd = String(date.getUTCDate()).padStart(2, '0');
+      return `${yy}-${mm}-${dd}`;
     });
-  }, [viewMode, formatDate]);
+  }, [viewMode]);
 
   // Fetch appointments when viewMode, currentDate, or timezone changes
   const loadAppointments = useCallback(async () => {
     setIsLoading(true);
     try {
-      const current = new Date(currentDateStr);
-      const weekDatesLocal = getWeekDates(current);
-      const monthDatesLocal = getMonthDates(current);
+      const current = toVnDate(currentDateStr);
+      const weekDatesLocal = getWeekDates(current, formatDate);
+      const monthDatesLocal = getMonthDates(current, formatDate);
 
       let dateFrom: string;
       let dateTo: string;
@@ -117,13 +125,13 @@ export function useCalendarData(selectedLocationId?: string) {
   }, [appointments, selectedDoctors, selectedStatuses, selectedColors, search]);
 
   const weekDates = useMemo(
-    () => getWeekDates(currentDate),
-    [currentDate]
+    () => getWeekDates(currentDate, formatDate),
+    [currentDate, formatDate]
   );
 
   const monthDates = useMemo(
-    () => getMonthDates(currentDate),
-    [currentDate]
+    () => getMonthDates(currentDate, formatDate),
+    [currentDate, formatDate]
   );
 
   const getAppointmentsForDate = useCallback((date: Date): readonly CalendarAppointment[] => {
@@ -157,8 +165,10 @@ export function useCalendarData(selectedLocationId?: string) {
   }, [updateAppointmentStatus]);
 
   const dateLabel = useMemo(() => {
+    const opts: Intl.DateTimeFormatOptions = { timeZone: timezone, month: 'short', day: 'numeric' };
     if (viewMode === 'day') {
       return currentDate.toLocaleDateString('vi-VN', {
+        timeZone: timezone,
         weekday: 'long',
         year: 'numeric',
         month: 'long',
@@ -168,11 +178,10 @@ export function useCalendarData(selectedLocationId?: string) {
     if (viewMode === 'week') {
       const start = weekDates[0];
       const end = weekDates[6];
-      const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
       return `${start.toLocaleDateString('vi-VN', opts)} - ${end.toLocaleDateString('vi-VN', { ...opts, year: 'numeric' })}`;
     }
-    return currentDate.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' });
-  }, [viewMode, currentDate, weekDates]);
+    return currentDate.toLocaleDateString('vi-VN', { timeZone: timezone, month: 'long', year: 'numeric' });
+  }, [viewMode, currentDate, weekDates, timezone]);
 
   return {
     viewMode,
@@ -204,32 +213,40 @@ export function useCalendarData(selectedLocationId?: string) {
   } as const;
 }
 
-function getWeekDates(currentDate: Date): Date[] {
-  const start = new Date(currentDate);
-  const day = start.getDay();
-  start.setDate(start.getDate() - (day === 0 ? 6 : day - 1));
+/** Compute week dates (Mon–Sun) in Vietnam timezone */
+function getWeekDates(currentDate: Date, formatDate: (date: Date, format: string) => string): Date[] {
+  const dateStr = formatDate(currentDate, 'yyyy-MM-dd');
+  const [year, month, day] = dateStr.split('-').map(Number);
+
+  // Noon UTC = 19:00 Vietnam — always same calendar day
+  const d = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+  const dayOfWeek = d.getUTCDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+  const start = new Date(Date.UTC(year, month - 1, day - daysToMonday, 12, 0, 0));
+
   return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(start);
-    d.setDate(d.getDate() + i);
-    return d;
+    const result = new Date(start);
+    result.setUTCDate(result.getUTCDate() + i);
+    return result;
   });
 }
 
-function getMonthDates(currentDate: Date): Date[] {
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
+/** Compute month grid dates in Vietnam timezone */
+function getMonthDates(currentDate: Date, formatDate: (date: Date, format: string) => string): Date[] {
+  const dateStr = formatDate(currentDate, 'yyyy-MM-dd');
+  const [year, month] = dateStr.split('-').map(Number);
 
-  const startOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
-  const start = new Date(firstDay);
-  start.setDate(start.getDate() - startOffset);
+  const daysInMonth = new Date(Date.UTC(year, month, 0, 12, 0, 0)).getUTCDate();
+  const firstDay = new Date(Date.UTC(year, month - 1, 1, 12, 0, 0));
+  const startOffset = firstDay.getUTCDay() === 0 ? 6 : firstDay.getUTCDay() - 1;
 
-  const totalCells = Math.ceil((startOffset + lastDay.getDate()) / 7) * 7;
+  const start = new Date(Date.UTC(year, month - 1, 1 - startOffset, 12, 0, 0));
+
+  const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
   return Array.from({ length: totalCells }, (_, i) => {
     const d = new Date(start);
-    d.setDate(d.getDate() + i);
+    d.setUTCDate(d.getUTCDate() + i);
     return d;
   });
 }
-

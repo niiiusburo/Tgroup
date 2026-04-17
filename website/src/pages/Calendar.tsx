@@ -12,6 +12,7 @@ import { MonthView } from '@/components/calendar/MonthView';
 import { SmartFilterDrawer } from '@/components/calendar/SmartFilterDrawer';
 
 import { useLocationFilter } from '@/contexts/LocationContext';
+import { useTimezone } from '@/contexts/TimezoneContext';
 import type { CalendarAppointment } from '@/data/mockCalendar';
 import type { AppointmentStatus } from '@/types/appointment';
 import { EditAppointmentModal } from '@/components/modules/EditAppointmentModal';
@@ -57,6 +58,7 @@ const VIEW_TABS: readonly {readonly mode: ViewMode;readonly labelKey: string;}[]
 export function Calendar() {
   const { t } = useTranslation('calendar');
   const { selectedLocationId } = useLocationFilter();
+  const { getToday, formatDate } = useTimezone();
   const {
     viewMode,
     setViewMode,
@@ -193,18 +195,18 @@ export function Calendar() {
   const getExportDateRange = useCallback((mode: ExportMode): [string, string] => {
     if (mode === 'current-filter') {
       if (viewMode === 'day') {
-        const d = currentDate.toISOString().split('T')[0];
+        const d = formatDate(currentDate, 'yyyy-MM-dd');
         return [d, d];
       }
       if (viewMode === 'week') {
         return [
-        weekDates[0].toISOString().split('T')[0],
-        weekDates[6].toISOString().split('T')[0]];
+        formatDate(weekDates[0], 'yyyy-MM-dd'),
+        formatDate(weekDates[6], 'yyyy-MM-dd')];
 
       }
       return [
-      monthDates[0].toISOString().split('T')[0],
-      monthDates[monthDates.length - 1].toISOString().split('T')[0]];
+      formatDate(monthDates[0], 'yyyy-MM-dd'),
+      formatDate(monthDates[monthDates.length - 1], 'yyyy-MM-dd')];
 
     }
     return ['', ''];
@@ -284,18 +286,19 @@ export function Calendar() {
   }, [isDatePickerOpen]);
 
   const pickerDays = useMemo(() => {
-    const year = pickerViewDate.getFullYear();
-    const month = pickerViewDate.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const firstDayOfMonth = new Date(year, month, 1).getDay();
-    const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
-    const prevMonthDays = new Date(year, month, 0).getDate();
+    const [yearStr, monthStr] = formatDate(pickerViewDate, 'yyyy-MM').split('-');
+    const year = Number(yearStr);
+    const month = Number(monthStr);
+    const daysInMonth = new Date(Date.UTC(year, month, 0, 12, 0, 0)).getUTCDate();
+    const firstDayOfMonth = new Date(Date.UTC(year, month - 1, 1, 12, 0, 0));
+    const startOffset = firstDayOfMonth.getUTCDay() === 0 ? 6 : firstDayOfMonth.getUTCDay() - 1;
+    const prevMonthDays = new Date(Date.UTC(year, month - 1, 0, 12, 0, 0)).getUTCDate();
     const days: Array<{date: number | null;isCurrentMonth: boolean;dateKey?: string;}> = [];
     for (let i = startOffset - 1; i >= 0; i--) {
       days.push({ date: prevMonthDays - i, isCurrentMonth: false });
     }
     for (let day = 1; day <= daysInMonth; day++) {
-      const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const dateKey = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       days.push({ date: day, isCurrentMonth: true, dateKey });
     }
     const remainingCells = 42 - days.length;
@@ -303,12 +306,9 @@ export function Calendar() {
       days.push({ date: day, isCurrentMonth: false });
     }
     return days;
-  }, [pickerViewDate]);
+  }, [pickerViewDate, formatDate]);
 
-  const todayKeyForPicker = useMemo(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  }, []);
+  const todayKeyForPicker = useMemo(() => getToday(), [getToday]);
 
   // Helper to map Calendar status to OverviewAppointment topStatus
   function mapStatusToTopStatus(status: CalendarAppointment['status']): OverviewAppointment['topStatus'] {
@@ -444,17 +444,32 @@ export function Calendar() {
                 <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
                   <button
                   type="button"
-                  onClick={() => setPickerViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
+                  onClick={() => setPickerViewDate((d) => {
+                    const [y, m] = formatDate(d, 'yyyy-MM').split('-').map(Number);
+                    const newMonth = m - 1;
+                    const newYear = newMonth < 1 ? y - 1 : y;
+                    const actualMonth = newMonth < 1 ? 12 : newMonth;
+                    return new Date(`${newYear}-${String(actualMonth).padStart(2, '0')}-01T12:00:00+07:00`);
+                  })}
                   className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
                   
                     <ChevronLeft className="w-4 h-4 text-gray-600" />
                   </button>
                   <span className="text-sm font-semibold text-gray-900">
-                    {t(MONTH_NAME_KEYS[pickerViewDate.getMonth()])} {pickerViewDate.getFullYear()}
+                    {(() => {
+                      const [y, m] = formatDate(pickerViewDate, 'yyyy-MM').split('-').map(Number);
+                      return `${t(MONTH_NAME_KEYS[m - 1])} ${y}`;
+                    })()}
                   </span>
                   <button
                   type="button"
-                  onClick={() => setPickerViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
+                  onClick={() => setPickerViewDate((d) => {
+                    const [y, m] = formatDate(d, 'yyyy-MM').split('-').map(Number);
+                    const newMonth = m + 1;
+                    const newYear = newMonth > 12 ? y + 1 : y;
+                    const actualMonth = newMonth > 12 ? 1 : newMonth;
+                    return new Date(`${newYear}-${String(actualMonth).padStart(2, '0')}-01T12:00:00+07:00`);
+                  })}
                   className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
                   
                     <ChevronRight className="w-4 h-4 text-gray-600" />
@@ -481,14 +496,14 @@ export function Calendar() {
 
                   }
                   const dateKey = day.dateKey!;
-                  const isSelected = dateKey === currentDate.toISOString().split('T')[0];
+                  const isSelected = dateKey === formatDate(currentDate, 'yyyy-MM-dd');
                   const isToday = dateKey === todayKeyForPicker;
                   return (
                     <button
                       key={index}
                       type="button"
                       onClick={() => {
-                        setCurrentDate(new Date(dateKey + 'T00:00:00'));
+                        setCurrentDate(new Date(dateKey + 'T12:00:00+07:00'));
                         setIsDatePickerOpen(false);
                       }}
                       className={cn(
@@ -670,8 +685,8 @@ export function Calendar() {
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
         onExport={handleExport}
-        defaultDateFrom={new Date().toISOString().split('T')[0]}
-        defaultDateTo={new Date().toISOString().split('T')[0]} />
+        defaultDateFrom={getToday()}
+        defaultDateTo={getToday()} />
       
 
       <AppointmentFormModal
