@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { requireAuth } = require('./middleware/auth');
+const { enforceIpAccess } = require('./middleware/ipAccess');
 
 if (!process.env.JWT_SECRET) {
   console.error('FATAL: JWT_SECRET not set');
@@ -49,6 +50,7 @@ const externalCheckupsRoutes = require('./routes/externalCheckups');
 const faceRecognitionRoutes = require('./routes/faceRecognition');
 const feedbackRoutes = require('./routes/feedback');
 const reportsRoutes = require('./routes/reports');
+const ipAccessRoutes = require('./routes/ipAccess');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -76,7 +78,10 @@ app.use((req, _res, next) => {
   next();
 });
 
-const PUBLIC_PATHS = new Set(['/api/Auth/login', '/api/Account/Login']);
+// IP Access Control enforcement — applies before auth so blocked IPs cannot even login
+app.use('/api', enforceIpAccess);
+
+const PUBLIC_PATHS = new Set(['/api/Auth/login', '/api/Account/Login', '/api/IpAccess/check']);
 app.use('/api', (req, res, next) => {
   const fullPath = req.originalUrl.split('?')[0];
   if (PUBLIC_PATHS.has(fullPath)) return next();
@@ -121,6 +126,7 @@ app.use('/api/ExternalCheckups', externalCheckupsRoutes);
 app.use('/api/face', faceRecognitionRoutes);
 app.use('/api/Feedback', feedbackRoutes);
 app.use('/api/Reports', reportsRoutes);
+app.use('/api/IpAccess', ipAccessRoutes);
 
 // Serve uploaded feedback attachments
 app.use('/uploads/feedback', express.static(path.join(__dirname, '..', 'uploads', 'feedback')));

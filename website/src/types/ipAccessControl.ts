@@ -7,7 +7,7 @@
 export type IpEntryType = 'whitelist' | 'blacklist';
 
 /** Access control mode for the system */
-export type IpAccessMode = 'allow_all' | 'whitelist_only' | 'blacklist_block';
+export type IpAccessMode = 'allow_all' | 'block_all' | 'whitelist_only' | 'blacklist_block';
 
 /** Single IP entry in the access control list */
 export interface IpEntry {
