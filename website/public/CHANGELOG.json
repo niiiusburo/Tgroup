@@ -1,5 +1,25 @@
 [
   {
+    "version": "0.18.1",
+    "date": "2026-04-17",
+    "commit": "c6bb9d5b",
+    "highlights": "Fix jsdom localStorage in test setup for version-check and report tests",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": []
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
     "version": "0.18.0",
     "date": "2026-04-17",
     "commit": "ed08e156",
