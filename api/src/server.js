@@ -49,6 +49,7 @@ const externalCheckupsRoutes = require('./routes/externalCheckups');
 const faceRecognitionRoutes = require('./routes/faceRecognition');
 const feedbackRoutes = require('./routes/feedback');
 const reportsRoutes = require('./routes/reports');
+const telemetryRoutes = require('./routes/telemetry');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -121,6 +122,7 @@ app.use('/api/ExternalCheckups', externalCheckupsRoutes);
 app.use('/api/face', faceRecognitionRoutes);
 app.use('/api/Feedback', feedbackRoutes);
 app.use('/api/Reports', reportsRoutes);
+app.use('/api/telemetry', telemetryRoutes);
 
 // Serve uploaded feedback attachments
 app.use('/uploads/feedback', express.static(path.join(__dirname, '..', 'uploads', 'feedback')));

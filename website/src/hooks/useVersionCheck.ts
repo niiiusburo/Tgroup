@@ -96,6 +96,43 @@ type BroadcastMessage =
   | { type: 'applyUpdate' }
   | { type: 'snoozed'; until: number };
 
+const TELEMETRY_ENDPOINT = '/api/telemetry/version';
+
+export async function flushPendingTelemetry(): Promise<void> {
+  try {
+    const raw = localStorage.getItem('tgclinic:pendingTelemetry');
+    if (!raw) return;
+    const events: unknown[] = JSON.parse(raw);
+    if (!Array.isArray(events) || events.length === 0) return;
+
+    const results = await Promise.allSettled(
+      events.map((payload) =>
+        fetch(TELEMETRY_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          keepalive: true,
+        })
+      )
+    );
+
+    const failed: unknown[] = [];
+    results.forEach((r, i) => {
+      if (r.status === 'rejected' || !r.value.ok) {
+        failed.push(events[i]);
+      }
+    });
+
+    if (failed.length === 0) {
+      localStorage.removeItem('tgclinic:pendingTelemetry');
+    } else {
+      localStorage.setItem('tgclinic:pendingTelemetry', JSON.stringify(failed));
+    }
+  } catch {
+    // ignore
+  }
+}
+
 /**
  * Check if we just completed an update (based on URL param or localStorage)
  */
@@ -339,6 +376,9 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
   // Initialize with build-time version
   useEffect(() => {
     const buildVersion = getBuildTimeVersion();
+
+    // Flush any queued telemetry from previous sessions
+    void flushPendingTelemetry();
 
     const justUpdated = checkJustUpdated();
     const targetVersion = localStorage.getItem(TARGET_VERSION_KEY);

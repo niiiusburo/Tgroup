@@ -1,5 +1,25 @@
 [
   {
+    "version": "0.18.0",
+    "date": "2026-04-17",
+    "commit": "ed08e156",
+    "highlights": "Live Update Phase 3 — backend telemetry endpoint and client flush",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": []
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
     "version": "0.17.1",
     "date": "2026-04-17",
     "commit": "2ff460b0",
