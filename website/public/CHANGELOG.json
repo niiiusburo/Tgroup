@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.19.7",
+    "date": "2026-04-17",
+    "commit": "pending",
+    "highlights": "Fixed sidebar 'Danh mục dịch vụ' link — it now opens the Service Catalog page instead of the Website CMS",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Sidebar item 'Danh mục dịch vụ' was routing to /website (Website CMS) instead of the Service Catalog page. It now points to /service-catalog, which renders the groups-sidebar + services-table view backed by the Products/ProductCategories API.",
+          "Added a dedicated /service-catalog route and wired the existing ServiceCatalog page into the router (it was never registered).",
+          "Switched the sidebar icon to FolderOpen so Service Catalog is visually distinct from its sibling 'Dịch vụ' (Stethoscope)."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.19.6",
     "date": "2026-04-17",
     "commit": "pending",

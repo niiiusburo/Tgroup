@@ -62,6 +62,7 @@ const NAV_PERMISSION: Record<string, string> = {
   '/customers': 'customers.view',
   '/appointments': 'appointments.view',
   '/website': 'website.view',
+  '/service-catalog': 'customers.edit',
   '/payment': 'payment.view',
   '/employees': 'employees.view',
   '/locations': 'locations.view',

@@ -33,6 +33,7 @@ const PermissionBoard = lazy(() => import('@/pages/PermissionBoard').then(m => (
 const Payment = lazy(() => import('@/pages/Payment').then(m => ({ default: m.Payment })));
 const Feedback = lazy(() => import('@/pages/Feedback').then(m => ({ default: m.Feedback })));
 const Services = lazy(() => import('@/pages/Services').then(m => ({ default: m.Services })));
+const ServiceCatalog = lazy(() => import('@/pages/ServiceCatalog').then(m => ({ default: m.ServiceCatalog })));
 
 /**
  * Route → required permission mapping
@@ -45,6 +46,7 @@ const ROUTE_PERMISSIONS: Record<string, string> = {
   '/employees': 'employees.view',
   '/locations': 'locations.view',
   '/services': 'customers.edit',
+  '/service-catalog': 'customers.edit',
   '/website': 'website.view',
   '/reports': 'reports.view',
   '/reports/dashboard': 'reports.view',
@@ -243,6 +245,16 @@ function App() {
               element={
                 <ProtectedRoute path={ROUTES.SERVICES}>
                   <Services />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* @crossref:route[path="/service-catalog", component=ServiceCatalog] */}
+            <Route
+              path={ROUTES.SERVICE_CATALOG}
+              element={
+                <ProtectedRoute path={ROUTES.SERVICE_CATALOG}>
+                  <ServiceCatalog />
                 </ProtectedRoute>
               }
             />

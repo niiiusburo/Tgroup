@@ -94,6 +94,7 @@ export const ROUTES = {
   EMPLOYEES: '/employees',
   LOCATIONS: '/locations',
   SERVICES: '/services',
+  SERVICE_CATALOG: '/service-catalog',
   WEBSITE: '/website',
   SETTINGS: '/settings',
   RELATIONSHIPS: '/relationships',
@@ -140,7 +141,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     icon: 'Stethoscope',
     children: [
       { path: ROUTES.SERVICES, label: 'services', icon: 'Stethoscope' },
-      { path: ROUTES.WEBSITE, label: 'serviceCatalog', icon: 'Stethoscope', count: '228' },
+      { path: ROUTES.SERVICE_CATALOG, label: 'serviceCatalog', icon: 'FolderOpen', count: '228' },
       { path: ROUTES.PAYMENT, label: 'paymentPlans', icon: 'CreditCard' },
     ],
   },
