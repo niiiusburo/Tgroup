@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.17.1",
+    "date": "2026-04-17",
+    "commit": "pending",
+    "highlights": "Calendar Day view now populates appointments; Excel export headers styled and typo fixed",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Calendar Day view was returning zero appointments because dateFrom and dateTo were sent as the same bare date string, which Postgres parses as midnight against the `date <= dateTo` filter. Pinned dateTo to end-of-day (23:59:59) in all view modes (also fixes silent same-edge-day dropouts in Week/Month views)",
+          "Excel export: fixed Vietnamese column header typo ('Thởi gian hẹn' → 'Thời gian hẹn')"
+        ]
+      },
+      {
+        "title": "Refactor",
+        "items": [
+          "Excel export: migrated from `xlsx` to `xlsx-js-style` to support bold header row; rebuilt worksheet via `aoa_to_sheet` with explicit column widths matching the legacy TG Dental file"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.17.0",
     "date": "2026-04-17",
     "commit": "pending",

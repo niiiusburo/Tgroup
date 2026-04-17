@@ -1,19 +1,15 @@
-import { apiStateToPhase, PHASE_VI_LABELS } from './appointmentStatusMapping';
+import * as XLSX from 'xlsx-js-style';
+import { apiStateToPhase, type CalendarPhase } from './appointmentStatusMapping';
 import { parseAppointmentNote } from './appointmentNotes';
 import type { CalendarAppointment } from '@/types/appointment';
 
-export interface ExportRow {
-  'Khách hàng': string;
-  'Số điện thoại': string;
-  'Thờigian hẹn': string;
-  'Dịch vụ': string;
-  'Bác sĩ': string;
-  'Nội dung': string;
-  'Loại khám': string;
-  'Trạng thái': string;
-  'Lý do': string;
-  '': string;
-}
+const EXCEL_STATUS_LABELS: Record<CalendarPhase, string> = {
+  scheduled: 'Đang hẹn',
+  waiting: 'Đã đến',
+  'in-treatment': 'Đang khám',
+  done: 'Hoàn thành',
+  cancelled: 'Hủy hẹn',
+};
 
 function deriveVisitType(note: string): string {
   const parsed = parseAppointmentNote(note);
@@ -31,8 +27,6 @@ export async function exportAppointmentsXlsx(
   appointments: CalendarAppointment[],
   filename: string,
 ): Promise<void> {
-  const mod = await import('xlsx');
-  const xlsx = (mod as any).default || mod;
   const { saveAs } = await import('file-saver');
 
   const sorted = [...appointments].sort((a, b) => {
@@ -41,26 +35,65 @@ export async function exportAppointmentsXlsx(
     return a.startTime.localeCompare(b.startTime);
   });
 
-  const rows: ExportRow[] = sorted.map((apt) => {
-    const phase = apiStateToPhase(apt.status);
-    return {
-      'Khách hàng': `${apt.customerCode ? `[${apt.customerCode}] ` : ''}${apt.customerName}`,
-      'Số điện thoại': apt.customerPhone || '',
-      'Thờigian hẹn': formatAppointmentDateTime(apt.date, apt.startTime),
-      'Dịch vụ': apt.serviceName || '',
-      'Bác sĩ': apt.dentist || '',
-      'Nội dung': apt.notes || '',
-      'Loại khám': deriveVisitType(apt.notes || ''),
-      'Trạng thái': PHASE_VI_LABELS[phase],
-      'Lý do': phase === 'cancelled' ? apt.notes || '' : '',
-      '': '',
-    };
-  });
+  const headers = [
+    'Khách hàng',
+    'Số điện thoại',
+    'Thời gian hẹn',
+    'Dịch vụ',
+    'Bác sĩ',
+    'Nội dung',
+    'Loại khám',
+    'Trạng thái',
+    'Lý do',
+    '', // column 10 intentionally blank
+  ];
 
-  const worksheet = xlsx.utils.json_to_sheet(rows);
-  const workbook = xlsx.utils.book_new();
-  xlsx.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-  const wbout = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+  const data: (string | null)[][] = [headers];
+
+  for (const apt of sorted) {
+    const phase = apiStateToPhase(apt.status);
+    data.push([
+      `${apt.customerCode ? `[${apt.customerCode}] ` : ''}${apt.customerName}`,
+      apt.customerPhone || '',
+      formatAppointmentDateTime(apt.date, apt.startTime),
+      apt.serviceName || '',
+      apt.dentist || '',
+      apt.notes || '',
+      deriveVisitType(apt.notes || ''),
+      EXCEL_STATUS_LABELS[phase],
+      phase === 'cancelled' ? apt.notes || '' : '',
+      '',
+    ]);
+  }
+
+  const worksheet = XLSX.utils.aoa_to_sheet(data);
+
+  // Bold header row
+  for (let c = 0; c < headers.length; c++) {
+    const cellRef = XLSX.utils.encode_cell({ r: 0, c });
+    if (!worksheet[cellRef]) continue;
+    worksheet[cellRef].s = {
+      font: { bold: true },
+    };
+  }
+
+  // Column widths matching the original TG Dental file
+  worksheet['!cols'] = [
+    { wch: 62 }, // Khách hàng
+    { wch: 14 }, // Số điện thoại
+    { wch: 16 }, // Thời gian hẹn
+    { wch: 34 }, // Dịch vụ
+    { wch: 21 }, // Bác sĩ
+    { wch: 64 }, // Nội dung
+    { wch: 11 }, // Loại khám
+    { wch: 11 }, // Trạng thái
+    { wch: 31 }, // Lý do
+    { wch: 9 },  // (blank)
+  ];
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+  const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
   const blob = new Blob([wbout], { type: 'application/octet-stream' });
   saveAs(blob, filename);
 }

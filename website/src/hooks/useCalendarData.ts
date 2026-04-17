@@ -62,15 +62,20 @@ export function useCalendarData(selectedLocationId?: string) {
       let dateFrom: string;
       let dateTo: string;
 
+      // Backend applies `date <= dateTo`; a bare date parses as 00:00:00, which
+      // drops everything after midnight. Pin dateTo to end-of-day so the full
+      // day is included (matters most in day view where from === to).
+      const endOfDay = (d: string) => `${d} 23:59:59`;
+
       if (viewMode === 'day') {
         dateFrom = currentDateStr;
-        dateTo = currentDateStr;
+        dateTo = endOfDay(currentDateStr);
       } else if (viewMode === 'week') {
         dateFrom = formatDate(weekDatesLocal[0], 'yyyy-MM-dd');
-        dateTo = formatDate(weekDatesLocal[6], 'yyyy-MM-dd');
+        dateTo = endOfDay(formatDate(weekDatesLocal[6], 'yyyy-MM-dd'));
       } else {
         dateFrom = formatDate(monthDatesLocal[0], 'yyyy-MM-dd');
-        dateTo = formatDate(monthDatesLocal[monthDatesLocal.length - 1], 'yyyy-MM-dd');
+        dateTo = endOfDay(formatDate(monthDatesLocal[monthDatesLocal.length - 1], 'yyyy-MM-dd'));
       }
 
       const response = await fetchAppointments({
