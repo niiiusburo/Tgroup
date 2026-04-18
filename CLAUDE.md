@@ -35,146 +35,6 @@ At session start, read project context from local Obsidian vault:
 - `./notes/💾\ Database\ Schema.md` — Database tables and relationships
 - `./notes/🗓️\ YYYY-MM-DD.md` — Daily session notes
 
-## Project Map
-
-```
-Tgroup/
-├── website/                    # Frontend (React + TypeScript + Tailwind + Vite)
-│   ├── src/
-│   │   ├── App.tsx             # Router + LocationProvider wrapper
-│   │   ├── contexts/           # Global state (LocationContext)
-│   │   ├── pages/              # 14 page components
-│   │   ├── components/
-│   │   │   ├── shared/         # Global reusable (SearchBar, DataTable, StatusBadge, FilterByLocation, Selectors)
-│   │   │   ├── modules/        # Dashboard modules (StatCard, RevenueChart, TodaySchedule)
-│   │   │   ├── forms/          # Form components (AddCustomerForm)
-│   │   │   ├── calendar/       # Calendar views (Day, Week, Month, TimeSlot)
-│   │   │   ├── payment/        # Payment components (DepositWallet, PaymentForm, MonthlyPlan)
-│   │   │   ├── locations/      # Location components (LocationCard, LocationDetail, LocationDashboard)
-│   │   │   ├── employees/      # Employee components (EmployeeTable, EmployeeProfile, TierSelector)
-│   │   │   ├── relationships/  # PermissionMatrix, EntityRelationshipMap
-│   │   │   └── website/        # CMS components (PageEditor, PageList, SEOManager)
-│   │   ├── hooks/              # Custom hooks (useCustomers, usePayment, useLocations, etc.)
-│   │   ├── data/               # Mock data files (will be replaced by real DB queries)
-│   │   ├── constants/          # App constants and theme colors
-│   │   └── lib/                # Utilities
-│   ├── package.json
-│   └── vite.config.ts
-│
-├── blueprint/                  # Architecture & design docs
-│   ├── BUTTON_MAP.md           # All buttons, filters, interactive elements mapped across pages
-│   ├── App.jsx                 # Reference app from original TG Clinic
-│   ├── components/             # Reference component specs
-│   ├── constants/              # Reference constants
-│   └── data/                   # Reference data structures
-│
-├── frontend-truth/             # Original TG Clinic frontend (ground truth for parity)
-│   ├── app/                    # Built app with all original components
-│   └── tech-spec.md            # Technical specification
-│
-├── features.json               # Feature tracker (20 features, all done)
-├── .orchestrator/              # Agent Orchestrator config and DB
-│   └── config.json             # Orchestrator settings (Claude agent, tracks)
-└── web.jsx.backup              # Backup of original web app
-```
-
-## Database
-
-> ⚠️ **Two Postgres instances exist on this machine — they are NOT the same data.** The local API reads from port **5433** (Homebrew native). The docker-compose stack uses port **55433** (container). Always verify which instance your change is targeting.
-
-### Port 5433 — Homebrew native Postgres (read by local `api/src/server.js`)
-
-| Field | Value |
-|-------|-------|
-| **URL** | `postgresql://postgres:postgres@127.0.0.1:5433/tdental_demo` |
-| **Host / Port** | `127.0.0.1` / `5433` |
-| **Database** | `tdental_demo` |
-| **User / Password** | `postgres` / `postgres` |
-| **PG version** | 15.14 (Homebrew, macOS native — NOT Docker) |
-| **Started by** | `brew services start postgresql@15` (runs automatically on boot) |
-| **Used by** | `api/.env` → this is what the local Node API connects to |
-| **Connect via CLI** | `PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -d tdental_demo` |
-
-### Port 55433 — Docker container `tgroup-db` (used by full docker-compose stack)
-
-| Field | Value |
-|-------|-------|
-| **URL** | `postgresql://postgres:postgres@127.0.0.1:55433/tdental_demo` |
-| **Host / Port** | `127.0.0.1` / `55433` |
-| **Database** | `tdental_demo` |
-| **User / Password** | `postgres` / `postgres` |
-| **PG version** | 16.11 (`postgres:16-alpine`) |
-| **Docker container** | `tgroup-db` (not `tdental-demo`) |
-| **Used by** | `tgroup-api` container (on 3002) + `tgroup-web` container (on 5175), all defined in `docker-compose.yml` |
-| **Connect via CLI** | `PGPASSWORD=postgres psql -h 127.0.0.1 -p 55433 -U postgres -d tdental_demo` |
-
-### Source SQL
-- `website/demo_tdental_updated.sql` (in-repo dump, includes 19 doctors + SQL views)
-- `/Users/thuanle/Documents/TamTMV/TamDental/demo_tdental.sql` (original external demo)
-
-### Migrations
-SQL migrations live in `api/migrations/`. They are NOT run automatically — apply manually to **each** instance you care about:
-```bash
-# Apply to native Postgres (what the local API actually uses)
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -d tdental_demo -f api/migrations/XXX_name.sql
-
-# Apply to Docker container (what docker-compose stack uses)
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 55433 -U postgres -d tdental_demo -f api/migrations/XXX_name.sql
-```
-
-### Demo Data
-
-| Table | Count | Description |
-|-------|-------|-------------|
-| `dbo.companies` | 7 | Dental clinic branches (locations) |
-| `dbo.partners` | 56 | All partners (30 customers + 19 doctors + 7 branches) |
-| `dbo.partners` (customer=true) | 30 | Active dental patients |
-| `dbo.partners` (employee=true) | 19 | Dentists reverse-engineered from appointment data |
-| `dbo.appointments` | 120 | Patient appointments |
-| `dbo.employees` (view) | 19 | View mapping partners with employee=true |
-| 10 empty views | — | partnersources, agents, aspnetusers, dotkhams, saleorders, crmteams, customerreceipts, hrjobs, saleorderlines, accountpayments |
-
-### Doctors (19, from dbo.partners where employee=true)
-
-| Doctor | Location | Appointments |
-|--------|----------|-------------|
-| BS. Trang | Gò Vấp | 11 |
-| BS. Trâm | Gò Vấp | 3 |
-| BS. Ly | Gò Vấp | 2 |
-| BS. Khánh | Gò Vấp | 1 |
-| BS. Dương | Quận 10 | 9 |
-| BS. Uyên | Quận 10 | 7 |
-| BS. Ý | Quận 3 | 13 |
-| BS. Duy | Quận 3 | 4 |
-| BS. Dũng | Quận 3 | 1 |
-| BS. Thu Thảo | Quận 7 | 15 |
-| BS. Thảo | Thủ Đức | 7 |
-| BS. Nga | Thủ Đức | 6 |
-| BS. Quyên | Thủ Đức | 5 |
-| BS. Quyên B | Thủ Đức | 3 |
-| BS. Hà | Đống Đa | 5 |
-| BS. Hải | Đống Đa | 4 |
-| BS. Minh | Đống Đa | 2 |
-| BS. Phương | Đống Đa | 1 |
-| BS. Linh | Đống Đa | 1 |
-
-### Locations (dbo.companies)
-
-| Branch |
-|--------|
-| Nha khoa Tấm Dentist (HQ) |
-| Tấm Dentist Gò Vấp |
-| Tấm Dentist Quận 10 |
-| Tấm Dentist Quận 3 |
-| Tấm Dentist Quận 7 |
-| Tấm Dentist Thủ Đức |
-| Tấm Dentist Đống Đa |
-
-### SQL Dump
-
-- **Demo dump:** `website/demo_tdental_updated.sql` (includes doctors + views)
-- **Original demo source:** `/Users/thuanle/Documents/TamTMV/TamDental/demo_tdental.sql`
-
 ## Environment Config
 
 Vite loads env files by priority: `.env.{mode}.local` > `.env.{mode}` > `.env.local` > `.env`
@@ -198,53 +58,24 @@ cd website && npx vite --port 5174
 
 ## Backend API
 
-The Node/Express API lives in **this repo** at `api/src/server.js`. It reads `api/.env` which currently points to the Homebrew Postgres on port **5433** (see Database section above).
+The Node/Express API lives at `api/src/server.js` and reads `api/.env` (points to Homebrew Postgres on port 5433). See `.claude/CONTEXT/database.md` for details on the two Postgres instances and `.claude/CONTEXT/reference-sites.md` for the endpoint table.
 
 ```bash
-# Start API (connects to native Postgres on port 5433 per api/.env)
 cd /Users/thuanle/Documents/TamTMV/Tgroup/api && node src/server.js
 # Runs on http://localhost:3002
 ```
 
-There is also a **dockerized** copy of the same API — container `tgroup-api`, also on port 3002, which reads from the Docker Postgres `tgroup-db` on 55433 via the docker-compose network. Only one of {local node, docker tgroup-api} can bind 3002 at a time.
+There is also a dockerized copy (container `tgroup-api`, also on port 3002) reading from Docker Postgres `tgroup-db` on 55433. Only one of {local node, docker tgroup-api} can bind 3002 at a time.
 
-| Endpoint | Data | Notes |
-|----------|------|-------|
-| `/api/Partners` | 30 customers | search, companyId filter |
-| `/api/Partners/:id` | Single customer profile | All 87 partner fields |
-| `/api/Employees` | 19 doctors | companyId, isDoctor filters |
-| `/api/Appointments` | 120 appointments | dateFrom/dateTo, state, partner_id, companyId |
-| `/api/Companies` | 7 locations | All branches |
-| `/api/SaleOrders` | 0 (empty view) | No sale orders in demo |
-| `/api/Products` | error | productcategories table missing |
-| `/api/DashboardReports` | varies | Aggregation endpoint |
+## Database
 
-## Database — operational commands
+Connection URL: `postgresql://postgres:postgres@127.0.0.1:5433/tdental_demo` (Homebrew native — what local API uses).
 
 ```bash
-# Start the Docker demo DB (tgroup-db container on port 55433)
-docker start tgroup-db
-
-# Or bring up the full compose stack (db + api + web)
-docker compose up -d
-
-# Connect to Homebrew Postgres on 5433 (what the local API actually reads)
 PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -d tdental_demo
-
-# Connect to Docker Postgres on 55433
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 55433 -U postgres -d tdental_demo
-
-# Restore demo DB from scratch into Docker (includes 19 doctors + SQL views)
-docker rm -f tgroup-db 2>/dev/null
-docker run -d --name tgroup-db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=tdental_demo -p 127.0.0.1:55433:5432 postgres:16-alpine
-sleep 5
-docker exec -i tgroup-db psql -U postgres -d tdental_demo < website/demo_tdental_updated.sql
-
-# Restore demo DB into native Postgres (Homebrew)
-PGPASSWORD=postgres dropdb -h 127.0.0.1 -p 5433 -U postgres tdental_demo 2>/dev/null
-PGPASSWORD=postgres createdb -h 127.0.0.1 -p 5433 -U postgres tdental_demo
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -d tdental_demo < website/demo_tdental_updated.sql
 ```
+
+> ⚠️ Second Postgres on port **55433** is a Docker container used by docker-compose — NOT the same data. See `.claude/CONTEXT/database.md` for full details, demo data tables, doctor roster, and restore commands.
 
 ## GitHub
 
@@ -252,247 +83,34 @@ PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -d tdental_demo < webs
 - **Branch:** `ai-develop`
 - **Push:** `git push origin ai-develop`
 
-## TODO: Apply Modular Card Scrolling to All Related Forms
+## VPS Access
 
-### Status: PARTIAL (CustomerForm done)
-
-All modular form components MUST follow the **independent card scrolling pattern** as implemented in `AddCustomerForm`.
-
-### The Pattern
-
-```
-┌─────────────────────────────────────┐
-│ Modal Container (flex, overflow-hidden, max-height)
-│ ├── Header (flex-shrink-0)          │ ← Does NOT scroll
-│ ├── Main Content (flex flex-1 overflow-hidden)
-│ │   ├── Left Sidebar (flex flex-col gap-4 overflow-hidden)
-│ │   │   ├── Card 1 (max-height: 300px, flex flex-col)
-│ │   │   │   ├── Header (flex-shrink-0)  │ ← Does NOT scroll
-│ │   │   │   └── Content (overflow-y-auto)│ ← Scrolls INDEPENDENTLY
-│ │   │   ├── Card 2 (max-height: 320px, flex flex-col)
-│ │   │   └── Card 3 (max-height: 180px, flex flex-col)
-│ │   └── Right Panel (flex-1 flex flex-col overflow-hidden)
-│ │       ├── Tabs (flex-shrink-0)     │ ← Does NOT scroll
-│ │       └── Tab Content (overflow-y-auto) ← Scrolls INDEPENDENTLY
-│ └── Footer (flex-shrink-0)          │ ← Does NOT scroll
-└─────────────────────────────────────┘
-```
-
-### Key CSS Properties
-
-| Element | Required CSS | Purpose |
-|---------|-------------|---------|
-| Card Container | `flex flex-col` + `max-height` | Fixed height container |
-| Card Header | `flex-shrink-0` | Header stays visible |
-| Card Content | `overflow-y-auto flex-1 min-h-0` | Content scrolls independently |
-| Content Wrapper | `overflow-hidden` | Prevents entire panel scroll |
-
-### Modules That Need This Pattern
-
-| Module | File | Status |
-|--------|------|--------|
-| ✅ CustomerForm (Add/Edit) | `components/forms/AddCustomerForm/AddCustomerForm.tsx` | DONE |
-| ⬜ AppointmentForm | `components/appointments/AppointmentForm.tsx` | TODO |
-| ⬜ ServiceForm | `components/services/ServiceForm.tsx` | TODO |
-| ⬜ PaymentForm | `components/payment/PaymentForm.tsx` | TODO |
-| ⬜ EmployeeForm | `components/employees/EmployeeForm.tsx` | TODO |
-
-### Reference Implementation
-
-See: `~/Downloads/CardScrollRedesign/app/src/App.tsx`
-
-### When Adding New Modular Forms
-
-1. Use the `CardSection` component with `maxHeight` prop
-2. Ensure headers have `flex-shrink-0`
-3. Ensure content has `overflow-y-auto flex-1 min-h-0`
-4. Add the `### CUSTOMER FORM MODULE` documentation block (copy from AddCustomerForm.tsx)
-5. Test: Verify each card scrolls independently without affecting others
-
----
-
-## Key Architecture Decisions
-
-1. **Global LocationFilter** — `contexts/LocationContext.tsx` syncs "All Locations" dropdown across 7 pages (Overview, Customers, Calendar, Appointments, Employees, Services, Payment)
-2. **@crossref comments** — Every component has `@crossref:used-in[...]` and `@crossref:uses[...]` comments tracking where it's used across the codebase
-3. **tgclinic-api backend** — Express server at `/Users/thuanle/Documents/TamTMV/TamDental/tdental-api/` queries demo DB with `search_path=dbo`
-4. **SQL views for missing tables** — 11 views created so the API routes work against the 3-table demo DB
-5. **Auto-Update Version System** — App detects new deployments and prompts users to refresh (see `docs/VERSION_SYSTEM.md`)
-6. **20 features** split across 5 categories: setup, dashboard, customers, services, admin
-
-## Layout Locking — Protect Approved UI Decisions
-
-### The Problem
-When the user approves a UI design, future AI agents often "fix" or "improve" it, breaking what was already approved.
-
-### The Solution
-Add `⚠️ LAYOUT LOCK` comments in component files to mark approved designs. Any agent MUST NOT change locked elements without explicit user approval.
-
-### Lock Format
-
-```typescript
-/**
- * ComponentName - Description
- * ...
- * ⚠️ LAYOUT LOCK: Do NOT change [specific element] without user approval.
- *    [Why it was locked, e.g., "User approved this exact size on 2024-04-08"]
- */
-```
-
-### Examples
-
-#### PatientCard (PatientCheckIn.tsx)
-```typescript
-/**
- * ⚠️ LAYOUT LOCK: Do NOT add width/height constraints or truncate classes to PatientCard.
- *    Card content (customer name, doctor info, notes) MUST display fully without truncation.
- *    Any changes to card dimensions require explicit user approval.
- */
-```
-
-#### CardGrid (Example)
-```typescript
-/**
- * ⚠️ LAYOUT LOCK: Grid uses 4 columns at fixed widths.
- *    Changing grid-template-columns will break the approved card layout.
- *    User approved: "4 columns, each card min-width 180px" on 2024-04-08
- */
-```
-
-### Rules for Agents
-1. **Read layout locks** — Check for `⚠️ LAYOUT LOCK` in component comments before making changes
-2. **Do NOT auto-fix** — Never add `truncate`, `w-*`, `h-*`, `max-w-*`, or `min-w-*` to locked elements
-3. **Ask first** — If you think a locked element needs fixing, describe the issue and ask for approval
-4. **Respect final approval** — If user says "looks good" or "don't change this", add a layout lock immediately
-
-## Version System
-
-**Current Version:** `0.1.6` - Fixed React hooks error in VersionDisplay, version update working correctly
-
-Auto-update notification system solves browser cache issues:
-
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| `VersionDisplay` | `components/shared/VersionDisplay.tsx` | Shows version in sidebar + update notifications |
-| `useVersionCheck` | `hooks/useVersionCheck.ts` | Polls for updates every 5 minutes |
-| `version.json` | `public/version.json` | Build metadata (version, git commit, build time) |
-| `generate-version.js` | `scripts/generate-version.js` | Creates version.json at build time |
-
-**CRITICAL: Update Version on Every Change**
-
-To ensure the auto-update system works and users get the latest code, you MUST update the version number in `website/package.json` every time you make changes:
-
-```bash
-# Before building, update the version
-# Open website/package.json and change:
-# "version": "0.0.0" → "version": "0.0.1" (or higher)
-
-# Semantic versioning guide:
-# - Patch (0.0.1 → 0.0.2): Bug fixes, small tweaks
-# - Minor (0.0.2 → 0.1.0): New features, components
-# - Major (0.1.0 → 1.0.0): Breaking changes, architecture shifts
-```
-
-**Build Process:**
-```bash
-cd website
-
-# 1. Update version in package.json
-# 2. Build (automatically generates version.json with git info)
-npm run build
-
-# 3. Deploy dist/ folder
-```
-
-**How Users Get Updates:**
-1. User has version `v0.0.1 (abc1234)` running
-2. You deploy version `v0.0.2 (def5678)`
-3. App detects version change within 5 minutes
-4. Sidebar shows: "Update Available" + "Update Now" button
-5. User clicks button → page reloads with new code
-6. No more "hard refresh" or "clear cache" needed!
-
-**Features:**
-- Version shows as `v0.0.0 (abc1234)` in sidebar footer
-- Green checkmark = up to date
-- Orange notification = update available
-- Hover for detailed build info (timestamp, git branch)
-- Click version to manually check for updates
-
-## VPS Access (TEMPORARY - REMOVE AFTER FIX)
-
-**SSH Credentials for 76.13.16.68:**
 ```
 ssh root@76.13.16.68
-Password: Tamyeu@234@234
+# Password stored in 1Password / local secrets — do NOT commit to this file
 ```
 
 **Backend Location:** `/root/tdental-api/`
 **Start Command:** `cd /root/tdental-api && pm2 start src/server.js --name tdental-api`
 
----
+## Key Architecture Decisions
 
-## Reference Sites
+1. **Global LocationFilter** — `contexts/LocationContext.tsx` syncs "All Locations" dropdown across 7 pages (Overview, Customers, Calendar, Appointments, Employees, Services, Payment)
+2. **@crossref comments** — Every component has `@crossref:used-in[...]` and `@crossref:uses[...]` comments tracking where it's used across the codebase
+3. **tgclinic-api backend** — Express server queries demo DB with `search_path=dbo`
+4. **SQL views for missing tables** — 11 views created so the API routes work against the 3-table demo DB
+5. **Auto-Update Version System** — App detects new deployments and prompts users to refresh (see `.claude/CONTEXT/version-system.md`)
+6. **20 features** split across 5 categories: setup, dashboard, customers, services, admin
 
-- **Original TG Clinic (legacy):** `https://tamdentist.tdental.vn` (admin / 123123@)
-- **Local replica:** `http://127.0.0.1:8899` (admin@tgclinic.vn / admin123) — requires Golden backend
-- **VPS Deployed:** `http://76.13.16.68:5174` (admin@tgclinic.vn / admin123)
+## Extended Context
 
-## What's Connected vs Mock
+Load on demand — these are NOT auto-loaded:
 
-### Connected to real DB
-- Customer list, search, create, profile view
-- Appointment list, search, create, calendar views
-- Employee/doctor list with location filter
-- Dashboard stats (patient count, appointment count)
-- Revenue chart (real appointment counts by month)
-- Location list and global location filter on all 7 pages
-- FilterByDoctor uses real doctors from API
-
-### Still using mock data (no DB tables)
-- Customer photos, deposits, service history
-- Payment wallets and installment plans
-- Service Catalog (Products table missing)
-- Settings (all 4 tabs)
-- Relationships / Permission matrix
-- Commission, Reports, Notifications (placeholder pages)
-- Notification panel on dashboard
-
-<!-- code-review-graph MCP tools -->
-## MCP Tools: code-review-graph
-
-**IMPORTANT: This project has a knowledge graph. ALWAYS use the
-code-review-graph MCP tools BEFORE using Grep/Glob/Read to explore
-the codebase.** The graph is faster, cheaper (fewer tokens), and gives
-you structural context (callers, dependents, test coverage) that file
-scanning cannot.
-
-### When to use graph tools FIRST
-
-- **Exploring code**: `semantic_search_nodes` or `query_graph` instead of Grep
-- **Understanding impact**: `get_impact_radius` instead of manually tracing imports
-- **Code review**: `detect_changes` + `get_review_context` instead of reading entire files
-- **Finding relationships**: `query_graph` with callers_of/callees_of/imports_of/tests_for
-- **Architecture questions**: `get_architecture_overview` + `list_communities`
-
-Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
-
-### Key Tools
-
-| Tool | Use when |
-|------|----------|
-| `detect_changes` | Reviewing code changes — gives risk-scored analysis |
-| `get_review_context` | Need source snippets for review — token-efficient |
-| `get_impact_radius` | Understanding blast radius of a change |
-| `get_affected_flows` | Finding which execution paths are impacted |
-| `query_graph` | Tracing callers, callees, imports, tests, dependencies |
-| `semantic_search_nodes` | Finding functions/classes by name or keyword |
-| `get_architecture_overview` | Understanding high-level codebase structure |
-| `refactor_tool` | Planning renames, finding dead code |
-
-### Workflow
-
-1. The graph auto-updates on file changes (via hooks).
-2. Use `detect_changes` for code review.
-3. Use `get_affected_flows` to understand impact.
-4. Use `query_graph` pattern="tests_for" to check coverage.
+- `.claude/CONTEXT/project-map.md` — full `Tgroup/` directory tree
+- `.claude/CONTEXT/database.md` — two Postgres instances, demo data, 19-doctor roster, locations, migrations, restore commands
+- `.claude/CONTEXT/version-system.md` — version bump mandate, build process, auto-update flow
+- `.claude/CONTEXT/layout-lock.md` — `⚠️ LAYOUT LOCK` convention and agent rules
+- `.claude/CONTEXT/modular-card-scrolling.md` — independent card scrolling pattern + TODO list of forms to migrate
+- `.claude/CONTEXT/feature-status.md` — what's wired to the real DB vs still mock
+- `.claude/CONTEXT/mcp-code-review-graph.md` — when to use graph MCP tools before Grep/Glob/Read
+- `.claude/CONTEXT/reference-sites.md` — legacy/local/VPS URLs and full API endpoint table
