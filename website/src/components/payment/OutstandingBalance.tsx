@@ -10,8 +10,10 @@ import { formatVND } from '@/lib/formatting';
 import { useTranslation } from 'react-i18next';
 
 function getDaysUntilDue(dueDate: string): number {
+  if (!dueDate) return NaN;
   const now = new Date();
   const due = new Date(dueDate);
+  if (isNaN(due.getTime())) return NaN;
   return Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 }
 
@@ -72,16 +74,18 @@ export function OutstandingBalance({ balances, onPayNow }: OutstandingBalancePro
                     ? 'bg-amber-100 text-amber-700'
                     : 'bg-blue-100 text-blue-700'
               }`}>
-                {isOverdue
-                  ? `${Math.abs(daysUntil)}d overdue`
-                  : `${daysUntil}d remaining`}
+                {isNaN(daysUntil)
+                  ? '—'
+                  : isOverdue
+                    ? `${Math.abs(daysUntil)}d ${t('overdue')}`
+                    : `${daysUntil}d ${t('remainingLabel')}`}
               </span>
             </div>
 
             {/* Progress bar */}
             <div className="mb-2">
               <div className="flex justify-between text-xs text-gray-400 mb-1">
-                <span>Paid: {formatVND(balance.paidAmount)}</span>
+                <span>{t('paid')}: {formatVND(balance.paidAmount)}</span>
                 <span>{paidPercent}%</span>
               </div>
               <div className="w-full bg-gray-100 rounded-full h-1.5">
