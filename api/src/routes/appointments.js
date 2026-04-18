@@ -1,6 +1,8 @@
 const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
+const { validate } = require('../middleware/validate');
+const { AppointmentCreateSchema, AppointmentUpdateSchema } = require('@tgroup/contracts');
 
 const router = express.Router();
 
@@ -385,7 +387,7 @@ router.get('/:id', async (req, res) => {
  * Body: { date, partnerId, doctorId, companyId, note, timeExpected, color, state }
  * Returns: created appointment
  */
-router.post('/', requirePermission('appointments.add'), async (req, res) => {
+router.post('/', requirePermission('appointments.add'), validate(AppointmentCreateSchema), async (req, res) => {
   try {
     // Accept both camelCase and lowercase field names (frontend sends lowercase)
     const b = req.body;
@@ -530,7 +532,7 @@ router.post('/', requirePermission('appointments.add'), async (req, res) => {
  * Body: { date, doctorId, note, state, timeExpected, color }
  * Returns: updated appointment
  */
-router.put('/:id', requirePermission('appointments.edit'), async (req, res) => {
+router.put('/:id', requirePermission('appointments.edit'), validate(AppointmentUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     // Accept both camelCase and lowercase field names
