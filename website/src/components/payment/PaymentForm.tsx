@@ -220,11 +220,11 @@ export function PaymentForm({
         <form onSubmit={handleSubmit} className="modal-body px-6 py-6 space-y-5">
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
-              <p className="text-xs text-emerald-600 mb-0.5"></p>
+              <p className="text-xs text-emerald-600 mb-0.5">{t('sDVDeposit')}</p>
               <p className="text-lg font-bold text-emerald-700 tabular-nums">{formatVND(availableDeposit)}</p>
             </div>
             <div className="bg-red-50 rounded-xl p-3 border border-red-100">
-              <p className="text-xs text-red-600 mb-0.5"></p>
+              <p className="text-xs text-red-600 mb-0.5">{t('cnNOutstanding')}</p>
               <p className="text-lg font-bold text-red-700 tabular-nums">{formatVND(outstandingBalance)}</p>
             </div>
           </div>
@@ -235,7 +235,7 @@ export function PaymentForm({
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-
+                  {t('ngunThanhTon')}
                 </label>
                 <span className="flex items-center gap-1 text-xs text-blue-500">
                   <Info className="w-3 h-3" />
@@ -245,7 +245,7 @@ export function PaymentForm({
               {/* animate: key-driven crossfade between "Còn lại" and "Đã đủ" states */}
               {remaining > 0 ?
               <span key="remaining" className="text-xs text-gray-500 animate-in fade-in duration-200">
-                <span className="font-semibold text-gray-700 tabular-nums">{formatVND(remaining)}</span>
+                  {t('cnLi')} <span className="font-semibold text-gray-700 tabular-nums">{formatVND(remaining)}</span>
                 </span> :
 
               <span key="full" className="text-xs font-semibold text-emerald-600 animate-in fade-in duration-200">{t('fullyPaid')}</span>
@@ -270,9 +270,9 @@ export function PaymentForm({
                       <Wallet className={`w-4 h-4 transition-colors duration-200 ${depositAmount > 0 ? 'text-emerald-600' : 'text-gray-400'}`} />
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-700"></span>
+                      <span className="text-sm font-medium text-gray-700">{t('fromWallet')}</span>
                       {/* polish: gray-400 → gray-500 for legibility */}
-                      <span className="text-xs text-gray-500 ml-2">{formatVND(availableDeposit)}</span>
+                      <span className="text-xs text-gray-500 ml-2">{t('sn')} {formatVND(availableDeposit)}</span>
                     </div>
                   </div>
                   {/* polish: title tooltip when cap=0 so disabled state explains itself */}
@@ -282,7 +282,7 @@ export function PaymentForm({
                     disabled={availableDeposit <= 0 || cap <= 0}
                     title={cap <= 0 ? t("sDTiAT") : undefined}
                     className="px-2 py-1 text-xs font-medium text-emerald-600 bg-emerald-100 rounded-lg hover:bg-emerald-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                    
+                    {t('dngTtC')}
 
                   </button>
                 </div>
@@ -308,7 +308,7 @@ export function PaymentForm({
                     
                     <Banknote className={`w-4 h-4 transition-colors duration-200 ${cashAmount > 0 ? 'text-amber-600' : 'text-gray-400'}`} />
                   </div>
-                  <span className="text-sm font-medium text-gray-700"></span>
+                  <span className="text-sm font-medium text-gray-700">{t('cash')}</span>
                 </div>
                 <CurrencyInput
                   value={cashAmount || null}
@@ -333,13 +333,13 @@ export function PaymentForm({
                       
                       <Building2 className={`w-4 h-4 transition-colors duration-200 ${bankAmount > 0 ? 'text-blue-600' : 'text-gray-400'}`} />
                     </div>
-                    <span className="text-sm font-medium text-gray-700"></span>
+                    <span className="text-sm font-medium text-gray-700">{t('bank')}</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowVietQr(true)}
                     className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors">
-                    
+                    {t('generateQR')}
                     <QrCode className="w-3.5 h-3.5" />
 
                   </button>
@@ -361,7 +361,7 @@ export function PaymentForm({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-orange-500" />
-                  <span className="text-sm font-semibold text-gray-700"></span>
+                  <span className="text-sm font-semibold text-gray-700">{t('tngThanhTon')}</span>
                 </div>
                 {/* animate: tabular-nums for stable width; transition-colors only on money figure */}
                 <span className="text-2xl font-bold text-orange-600 tabular-nums transition-colors duration-150">
@@ -372,20 +372,20 @@ export function PaymentForm({
               <div className="mt-2 pt-2 border-t border-orange-200 space-y-1">
                   {depositAmount > 0 &&
                 <div className="flex justify-between text-xs">
-                      <span className="text-emerald-600"></span>
+                      <span className="text-emerald-600">{t('fromWallet')}</span>
                       {/* polish: tabular-nums so breakdown amounts column-align */}
                       <span className="font-medium tabular-nums">{formatVND(depositAmount)}</span>
                     </div>
                 }
                   {cashAmount > 0 &&
                 <div className="flex justify-between text-xs">
-                      <span className="text-amber-600"></span>
+                      <span className="text-amber-600">{t('cash')}</span>
                       <span className="font-medium tabular-nums">{formatVND(cashAmount)}</span>
                     </div>
                 }
                   {bankAmount > 0 &&
                 <div className="flex justify-between text-xs">
-                      <span className="text-blue-600"></span>
+                      <span className="text-blue-600">{t('bank')}</span>
                       <span className="font-medium tabular-nums">{formatVND(bankAmount)}</span>
                     </div>
                 }
@@ -397,7 +397,7 @@ export function PaymentForm({
               {atCap &&
               <div className="flex items-center gap-1 mt-2 text-xs text-emerald-600 animate-in fade-in slide-in-from-bottom-1 duration-300">
                   <CheckCircle2 className="w-3 h-3" />
-
+                  {t('fullyPaid')}
               </div>
               }
             </div>
@@ -406,7 +406,7 @@ export function PaymentForm({
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <CalendarDays className="w-3.5 h-3.5" />
-
+              {t('ngyThanhTon')}
             </label>
             <input
               type="date"
@@ -419,7 +419,7 @@ export function PaymentForm({
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
-
+              {t('mThamChiuGhiChNhanh')}
             </label>
             <input
               type="text"
@@ -433,7 +433,7 @@ export function PaymentForm({
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
-
+              {t('notes')}
             </label>
             <textarea
               value={notes}
@@ -458,7 +458,7 @@ export function PaymentForm({
             type="button"
             onClick={onClose}
             className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
-            
+            {t('cancelBtn')}
 
           </button>
           {/* animate: active:scale-[0.98] for a felt-button press on confirmation; no bouncy easing */}
@@ -469,7 +469,7 @@ export function PaymentForm({
             className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed">
             
             <Check className="w-4 h-4" />
-            {/* polish: no trailing space when total is zero */}
+            {isEdit ? t('luThayI') : t('ghiNhnThanhTon')}
             {totalPayment > 0 ? ` ${formatVND(totalPayment)}` : ''}
           </button>
         </div>
