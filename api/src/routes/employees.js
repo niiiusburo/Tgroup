@@ -226,6 +226,10 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
       password = null,
       jobtitle = null,
       locationScopeIds = [],
+      wage = null,
+      allowance = null,
+      hrjobid = null,
+      tierId = null,
     } = req.body;
 
     if (!name || !name.trim()) {
@@ -251,8 +255,9 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
         employee, customer, supplier, isagent, isinsurance,
         active, isdoctor, isassistant, isreceptionist, startworkdate,
         iscompany, ishead, isdeleted, isbusinessinvoice,
-        password_hash, jobtitle, datecreated, lastupdated
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
+        password_hash, jobtitle, wage, allowance, hrjobid, tier_id,
+        datecreated, lastupdated
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
       RETURNING *`,
       [
         id,
@@ -276,6 +281,10 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
         false,  // isbusinessinvoice = false
         passwordHash,
         jobtitle,
+        wage,
+        allowance,
+        hrjobid,
+        tierId,
         now,    // datecreated
         now,    // lastupdated
       ]
@@ -349,6 +358,9 @@ router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
       isreceptionist,
       startworkdate,
       jobtitle,
+      wage,
+      allowance,
+      hrjobid,
     };
 
     if (tierId !== undefined) {
