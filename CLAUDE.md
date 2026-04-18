@@ -114,3 +114,33 @@ Load on demand — these are NOT auto-loaded:
 - `.claude/CONTEXT/feature-status.md` — what's wired to the real DB vs still mock
 - `.claude/CONTEXT/mcp-code-review-graph.md` — when to use graph MCP tools before Grep/Glob/Read
 - `.claude/CONTEXT/reference-sites.md` — legacy/local/VPS URLs and full API endpoint table
+\n
+## 4-Pillar Architecture Rules
+
+These rules enforce the Contract-First Monorepo pattern on the existing Vite+Express stack.
+
+### Pillar 1: SSOT Modules
+- Every reusable component lives in `website/src/components/shared/` and is exported from `shared/index.ts`.
+- Shared components receive data via props. NEVER fetch data inside a shared component.
+- If a page needs a variation, use props + variants. Do not copy-paste.
+- Modules in `website/src/components/modules/` are page-specific but still prop-driven.
+
+### Pillar 2: Type Contracts
+- Zod schemas in `contracts/` are the single source of truth for Partner, Appointment, Payment shapes.
+- Backend MUST validate `req.body` with Zod before DB insertion.
+- Frontend SHOULD validate API responses with Zod in `apiFetch`.
+- If the Zod schema changes, both frontend and backend types update automatically.
+
+### Pillar 3: Relationship Map
+- Before touching code, read `product-map/domains/<domain>.yaml`.
+- Before schema changes, update `product-map/schema-map.md`.
+- Run `npx depcruise --output-type err website/src` before PR.
+- Check `AGENT_SAFETY_PROTOCOL.md` before dispatching parallel agents.
+
+### Pillar 4: Safe CI / Worktrees
+- All changes happen in worktrees or ephemeral branches. Never edit `main` or `ai-develop` directly.
+- Backend PRs must pass lint + tests (add ESLint + Jest to CI).
+- Frontend PRs must pass lint + typecheck + depcruise + build.
+- Bump `website/package.json` version for every frontend change.
+- Run `bash scripts/sync-claude-mem.sh` after every session.
+
