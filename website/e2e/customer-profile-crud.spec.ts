@@ -21,7 +21,7 @@ const ORIGINAL_PHONE = '0349762840';
 async function login(page: Page) {
   // Auth state is pre-loaded from .auth/admin.json (storageState in playwright.config)
   // Just navigate to app — token in localStorage auto-authenticates
-  await page.goto('http://localhost:5174/');
+  await page.goto('http://localhost:5175/');
 
   // If login form appears (token expired), re-authenticate
   const emailInput = page.locator('#email');
@@ -33,17 +33,17 @@ async function login(page: Page) {
     await expect(emailInput).toBeHidden({ timeout: 15000 });
   }
 
-  await page.getByRole('link', { name: 'Customers' }).waitFor({ timeout: 10000 });
+  await page.locator('a[href="/customers"]').waitFor({ timeout: 10000 });
 }
 
 async function openCustomerProfile(page: Page, customerName: string) {
-  await page.getByRole('link', { name: 'Customers' }).click();
+  await page.locator('a[href="/customers"]').click();
   // Scope to main to avoid strict mode (banner also has h1 "Customers")
-  await expect(page.locator('main').getByRole('heading', { name: 'Customers' })).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('main').getByRole('heading', { name: /Customers|Khách hàng/i })).toBeVisible({ timeout: 10000 });
   await page.waitForTimeout(1500); // let table rows load from API
 
   await page.getByRole('cell', { name: new RegExp(customerName, 'i') }).first().click();
-  await expect(page.getByRole('heading', { name: 'Customer Profile' })).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole('heading', { name: /Customer Profile|Hồ sơ khách hàng/i })).toBeVisible({ timeout: 10000 });
 }
 
 // ─── tests ───────────────────────────────────────────────────────────────────
@@ -57,11 +57,11 @@ test.describe('Customer Profile CRUD', () => {
   test('TC1: Edit customer phone number and verify change persists', async ({ page }) => {
     await openCustomerProfile(page, CUSTOMER_NAME);
 
-    // Click the Edit button in the profile header
-    await page.getByRole('button', { name: 'Edit' }).click();
+    // Click the Edit button in the profile header ("Sửa" in Vietnamese)
+    await page.getByRole('button', { name: /Edit|Sửa/i }).click();
 
     // AddCustomerForm opens — wait for its title (Vietnamese)
-    await expect(page.getByText('Chỉnh sửa khách hàng')).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText(/Chỉnh sửa khách hàng|Sửa khách hàng/i)).toBeVisible({ timeout: 8000 });
 
     // Phone input has placeholder "0901 111 222" and current value "0349762840"
     const phoneInput = page.getByPlaceholder('0901 111 222');
@@ -73,29 +73,29 @@ test.describe('Customer Profile CRUD', () => {
     await page.getByRole('button', { name: 'Cập nhật' }).click();
 
     // Modal closes
-    await expect(page.getByText('Chỉnh sửa khách hàng')).not.toBeVisible({ timeout: 8000 });
+    await expect(page.getByText(/Chỉnh sửa khách hàng|Sửa khách hàng/i)).not.toBeVisible({ timeout: 8000 });
 
     // App bug fix (Customers.tsx): refetchProfile() called after updateCustomer.
     // Phone appears in TWO places (header span + Personal Information p) — use first()
     await expect(page.getByText(newPhone).first()).toBeVisible({ timeout: 10000 });
 
     // ── restore original phone ─────────────────────────────────────────────
-    await page.getByRole('button', { name: 'Edit' }).click();
-    await expect(page.getByText('Chỉnh sửa khách hàng')).toBeVisible({ timeout: 8000 });
+    await page.getByRole('button', { name: /Edit|Sửa/i }).click();
+    await expect(page.getByText(/Chỉnh sửa khách hàng|Sửa khách hàng/i)).toBeVisible({ timeout: 8000 });
     await page.getByPlaceholder('0901 111 222').fill(ORIGINAL_PHONE);
     await page.getByRole('button', { name: 'Cập nhật' }).click();
-    await expect(page.getByText('Chỉnh sửa khách hàng')).not.toBeVisible({ timeout: 8000 });
+    await expect(page.getByText(/Chỉnh sửa khách hàng|Sửa khách hàng/i)).not.toBeVisible({ timeout: 8000 });
   });
 
   // ─── TC2: Create appointment ──────────────────────────────────────────────
   test('TC2: Create appointment from customer profile', async ({ page }) => {
     await openCustomerProfile(page, CUSTOMER_NAME);
 
-    await page.getByRole('button', { name: /^Appointments/ }).click();
-    await expect(page.getByRole('button', { name: 'Add Appointment' })).toBeVisible({ timeout: 8000 });
-    await page.getByRole('button', { name: 'Add Appointment' }).click();
+    await page.getByRole('button', { name: /Lịch hẹn/ }).click();
+    await expect(page.getByRole('button', { name: /Thêm lịch hẹn/ })).toBeVisible({ timeout: 8000 });
+    await page.getByRole('button', { name: /Thêm lịch hẹn/ }).click();
 
-    await expect(page.getByRole('heading', { name: 'Tạo lịch hẹn' })).toBeVisible({ timeout: 8000 });
+    await expect(page.getByRole('heading', { name: /Tạo lịch hẹn/ })).toBeVisible({ timeout: 8000 });
     await page.waitForTimeout(1500); // Wait for API data to load
 
     // ── Select Doctor — use evaluate for reliable React state update ──
@@ -181,7 +181,7 @@ test.describe('Customer Profile CRUD', () => {
   test('TC3: Edit appointment notes and verify change', async ({ page }) => {
     await openCustomerProfile(page, CUSTOMER_NAME);
 
-    await page.getByRole('button', { name: /^Appointments/ }).click();
+    await page.getByRole('button', { name: /Lịch hẹn/ }).click();
     await page.waitForTimeout(1000);
 
     // Click the first edit button — use evaluate to bypass opacity-0 hover state
@@ -196,7 +196,7 @@ test.describe('Customer Profile CRUD', () => {
       return;
     }
 
-    await expect(page.getByRole('heading', { name: 'Sửa lịch hẹn' })).toBeVisible({ timeout: 8000 });
+    await expect(page.getByRole('heading', { name: /Sửa lịch hẹn/ })).toBeVisible({ timeout: 8000 });
 
     // serviceName may be empty — fill it to pass validation using catalog selector
     const serviceBtn = page.getByRole('button', { name: 'Chọn dịch vụ...' });
@@ -238,19 +238,19 @@ test.describe('Customer Profile CRUD', () => {
     await page.waitForTimeout(3000);
 
     // Modal should close — verify by checking profile is visible again
-    await expect(page.getByRole('heading', { name: 'Customer Profile' })).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole('heading', { name: /Customer Profile|Hồ sơ khách hàng/i })).toBeVisible({ timeout: 10000 });
   });
 
   // ─── TC4: Add service record ──────────────────────────────────────────────
   test('TC4: Add service record from Records tab', async ({ page }) => {
     await openCustomerProfile(page, CUSTOMER_NAME);
 
-    await page.getByRole('button', { name: /^Records/ }).click();
+    await page.getByRole('button', { name: /Phiếu khám/ }).click();
     await page.waitForTimeout(1000);
-    await expect(page.getByRole('button', { name: 'Add Service' })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('button', { name: /Thêm dịch vụ/ })).toBeVisible({ timeout: 5000 });
 
-    await page.getByRole('button', { name: 'Add Service' }).click();
-    await expect(page.getByRole('heading', { name: 'New Service Record' })).toBeVisible({ timeout: 8000 });
+    await page.getByRole('button', { name: /Thêm dịch vụ/ }).click();
+    await expect(page.getByRole('heading', { name: /Thêm dịch vụ/ })).toBeVisible({ timeout: 8000 });
     await page.waitForTimeout(1500); // Wait for API data
 
     // ── Select service from catalog ──
@@ -293,75 +293,74 @@ test.describe('Customer Profile CRUD', () => {
     await page.getByRole('button', { name: 'Create Service Record' }).click();
     await page.waitForTimeout(3000);
 
-    await expect(page.getByRole('heading', { name: 'New Service Record' })).not.toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: /Thêm dịch vụ/ })).not.toBeVisible({ timeout: 10000 });
   });
 
   // ─── TC5: Add deposit ─────────────────────────────────────────────────────
   test('TC5: Add deposit to customer wallet', async ({ page }) => {
     await openCustomerProfile(page, CUSTOMER_NAME);
 
-    await page.getByRole('button', { name: 'Payment' }).click();
-    await expect(page.getByText('Deposit Wallet')).toBeVisible({ timeout: 8000 });
+    await page.getByRole('button', { name: /Thanh toán/ }).click();
+    await expect(page.getByRole('heading', { name: /Thanh toán/ })).toBeVisible({ timeout: 8000 });
 
     // Click the "Add Deposit" button in the wallet header (first one)
-    await page.getByRole('button', { name: 'Add Deposit' }).first().click();
+    await page.getByRole('button', { name: /Thêm tiền gửi/ }).first().click();
 
     // Modal h4 heading
-    await expect(page.getByRole('heading', { name: 'Add Deposit' })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: /Thêm tiền gửi/ })).toBeVisible({ timeout: 5000 });
 
-    await page.getByPlaceholder('Enter amount').fill('500000');
+    await page.getByPlaceholder(/Nhập số tiền/).fill('500000');
 
     // Cash is default; confirm explicitly
-    await page.getByRole('button', { name: 'Cash' }).first().click();
+    await page.getByRole('button', { name: /Tiền mặt/ }).first().click();
 
-    await page.getByPlaceholder('Add a note').fill('QA test deposit');
+    await page.getByPlaceholder(/Thêm ghi chú/).fill('QA test deposit');
 
     await page.screenshot({ path: 'e2e/screenshots/tc5-deposit-form.png' });
 
     // Submit — last "Add Deposit" button in the modal footer
-    await page.getByRole('button', { name: 'Add Deposit' }).last().click();
+    await page.getByRole('button', { name: /Thêm tiền gửi/ }).last().click();
 
     // h4 heading should disappear
-    await expect(page.getByRole('heading', { name: 'Add Deposit' })).not.toBeVisible({ timeout: 8000 });
-    await expect(page.getByText('Deposit Wallet')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: /Thêm tiền gửi/ })).not.toBeVisible({ timeout: 8000 });
+    await expect(page.getByRole('heading', { name: /Thanh toán/ })).toBeVisible({ timeout: 5000 });
   });
 
   // ─── TC5b: Deposit modal submit keeps Payment tab active ─────────────────
   test('TC5b: Submitting deposit keeps Payment tab active', async ({ page }) => {
     await openCustomerProfile(page, CUSTOMER_NAME);
 
-    await page.getByRole('button', { name: 'Payment' }).click();
-    await expect(page.getByText('Deposit Wallet')).toBeVisible({ timeout: 8000 });
+    await page.getByRole('button', { name: /Thanh toán/ }).click();
+    await expect(page.getByRole('heading', { name: /Thanh toán/ })).toBeVisible({ timeout: 8000 });
 
     // Open the deposit modal, fill, and submit so onAddDeposit -> refetchProfile runs
-    await page.getByRole('button', { name: 'Add Deposit' }).first().click();
-    await expect(page.getByRole('heading', { name: 'Add Deposit' })).toBeVisible({ timeout: 5000 });
+    await page.getByRole('button', { name: /Thêm tiền gửi/ }).first().click();
+    await expect(page.getByRole('heading', { name: /Thêm tiền gửi/ })).toBeVisible({ timeout: 5000 });
 
-    await page.getByPlaceholder('Enter amount').fill('1000');
-    await page.getByPlaceholder('Add a note').fill('QA tab persistence test');
+    await page.getByPlaceholder(/Nhập số tiền/).fill('1000');
+    await page.getByPlaceholder(/Thêm ghi chú/).fill('QA tab persistence test');
 
-    await page.getByRole('button', { name: 'Add Deposit' }).last().click();
-    await expect(page.getByRole('heading', { name: 'Add Deposit' })).not.toBeVisible({ timeout: 8000 });
+    await page.getByRole('button', { name: /Thêm tiền gửi/ }).last().click();
+    await expect(page.getByRole('heading', { name: /Thêm tiền gửi/ })).not.toBeVisible({ timeout: 8000 });
 
     // Bug: tab was resetting to Profile after modal close because refetchProfile
     // unmounts CustomerProfile while loading, and activeTab defaulted to 'profile'.
-    await expect(page.getByRole('heading', { name: 'Payment & Deposits' })).toBeVisible({ timeout: 5000 });
-    await expect(page.getByText('Deposit Wallet')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: /Thanh toán/ })).toBeVisible({ timeout: 5000 });
   });
 
   // ─── TC6: Make payment ────────────────────────────────────────────────────
   test('TC6: Make payment from customer profile', async ({ page }) => {
     await openCustomerProfile(page, CUSTOMER_NAME);
 
-    await page.getByRole('button', { name: 'Payment' }).click();
-    await expect(page.getByRole('heading', { name: 'Payment & Deposits' })).toBeVisible({ timeout: 8000 });
+    await page.getByRole('button', { name: /Thanh toán/ }).click();
+    await expect(page.getByRole('heading', { name: /Thanh toán|Payment/ })).toBeVisible({ timeout: 8000 });
 
-    await page.getByRole('button', { name: 'Make Payment' }).click();
-    await expect(page.getByRole('heading', { name: 'Ghi nhận thanh toán' })).toBeVisible({ timeout: 8000 });
+    await page.getByRole('button', { name: /Thêm thanh toán/ }).click();
+    await expect(page.getByRole('heading', { name: /Ghi nhận thanh toán/ })).toBeVisible({ timeout: 8000 });
     await page.waitForTimeout(1000);
 
     // Service selector (required)
-    await page.getByRole('button', { name: 'Chọn dịch vụ...' }).click();
+    await page.getByRole('button', { name: /Chọn dịch vụ/ }).click();
     await page.waitForTimeout(500);
     await page.locator('button').filter({ hasText: /^Răng/ }).first().click();
     await page.waitForTimeout(300);
@@ -372,7 +371,7 @@ test.describe('Customer Profile CRUD', () => {
     await modal.locator('input[type="number"]').first().fill('300000');
 
     // Notes
-    await page.getByPlaceholder('Ghi chú thanh toán...').fill('QA test payment');
+    await page.getByPlaceholder(/Ghi chú thanh toán/).fill('QA test payment');
 
     await page.screenshot({ path: 'e2e/screenshots/tc6-payment-form.png' });
 
@@ -381,7 +380,7 @@ test.describe('Customer Profile CRUD', () => {
     await page.waitForTimeout(2000);
 
     // Modal should close — createPayment is client-side only (mock), so it resolves immediately
-    await expect(page.getByRole('heading', { name: 'Ghi nhận thanh toán' })).not.toBeVisible({ timeout: 8000 });
-    await expect(page.getByRole('heading', { name: 'Payment & Deposits' })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: /Ghi nhận thanh toán/ })).not.toBeVisible({ timeout: 8000 });
+    await expect(page.getByRole('heading', { name: /Thanh toán|Payment/ })).toBeVisible({ timeout: 5000 });
   });
 });
