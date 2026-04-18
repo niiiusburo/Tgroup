@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageSquare, X, ArrowLeft, Send, Loader2, Paperclip } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePasteImage } from '@/hooks/usePasteImage';
 import {
   fetchMyFeedback,
   fetchMyFeedbackThread,
@@ -114,6 +115,12 @@ export function FeedbackWidget() {
   const [sendError, setSendError] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePaste = usePasteImage({
+    onFiles: (imgs) => setFiles((prev) => [...prev, ...imgs]),
+    onError: setFileError,
+    currentCount: files.length,
+  });
 
   const loadThreads = useCallback(async () => {
     setLoadingList(true);
@@ -410,6 +417,7 @@ export function FeedbackWidget() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
                 placeholder={
                   selectedThreadId
                     ? 'Type a reply…'
