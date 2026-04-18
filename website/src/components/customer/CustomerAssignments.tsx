@@ -70,10 +70,10 @@ export function CustomerAssignments({
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
           </span>
-          <span className="text-[10.5px] font-bold tracking-[0.12em] text-primary-dark uppercase"></span>
+          <span className="text-[10.5px] font-bold tracking-[0.12em] text-primary-dark uppercase">Hoạt động</span>
         </div>
-        <h3 className="text-[15px] font-bold text-gray-900"></h3>
-        <p className="text-xs text-gray-500 leading-snug mt-1"></p>
+        <h3 className="text-[15px] font-bold text-gray-900">Phân công</h3>
+        <p className="text-xs text-gray-500 leading-snug mt-1">Nhân sự phụ trách khách hàng này</p>
       </div>
 
       {/* Right grid of 4 fields */}

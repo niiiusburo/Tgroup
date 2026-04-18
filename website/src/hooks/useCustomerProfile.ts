@@ -79,9 +79,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         .filter(Boolean)
         .join(', ') || 'N/A';
 
-      // Build tags from DB flags
       const tags: string[] = [];
-      if (partner.treatmentstatus) tags.push(partner.treatmentstatus);
 
       const memberSince = partner.datecreated?.slice(0, 10) ?? 'N/A';
       const lastVisit = partner.lastupdated?.slice(0, 10) ?? 'N/A';

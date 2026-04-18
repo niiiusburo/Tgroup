@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.20.6",
+    "date": "2026-04-18",
+    "commit": "pending",
+    "highlights": "Fix customer profile: remove bogus 'sale' chip and restore Assignments card title",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Remove treatmentstatus tag leak: partner.treatmentstatus (raw Odoo enum like 'sale', 'done') was pushed verbatim into the visible tag chips. Deleted the block so only real tags appear.",
+          "Restore empty CustomerAssignments header: kicker ('Hoạt động'), title ('Phân công'), and description ('Nhân sự phụ trách khách hàng này') were stripped during i18n migration and rendered blank."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.20.5",
     "date": "2026-04-18",
     "commit": "pending",
