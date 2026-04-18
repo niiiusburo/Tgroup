@@ -38,9 +38,14 @@ Thumbs.db
 website/test-results/
 test-results/
 website/e2e/screenshots/
-
-# Playwright MCP session snapshots
+website/playwright-report/
 .playwright-mcp/
+playwright-report/
+
+# Scratch / generated / screenshots
+overview-data.png
+*-verified.png
+frontend-truth/
 
 # Code graph build output
 graphify-out/
