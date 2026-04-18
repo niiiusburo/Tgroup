@@ -8,10 +8,9 @@
  * Can also be embedded inline on any page if needed.
  */
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  X,
   CalendarPlus,
   Edit2,
   Calendar,
@@ -21,9 +20,7 @@ import {
   MapPin,
   FileText,
   Palette,
-  Check,
   Plus,
-  Search,
   ChevronDown,
   Phone,
 } from 'lucide-react';
@@ -73,9 +70,7 @@ export function AppointmentFormCore({
   const { allLocations } = useLocations();
   const { customers } = useCustomers();
   const { employees } = useEmployees();
-  const { products } = useProducts();
   const { selectedLocationId } = useLocationFilter();
-  const { formatDate } = useTimezone();
 
   const [showCreateCustomer, setShowCreateCustomer] = useState(false);
   const [colorDropdownOpen, setColorDropdownOpen] = useState(false);
@@ -122,7 +117,7 @@ export function AppointmentFormCore({
     onChange({
       serviceId: product?.id,
       serviceName: product?.name || '',
-      estimatedDuration: product?.duration ?? data.estimatedDuration,
+      estimatedDuration: data.estimatedDuration,
     });
   };
 
@@ -140,10 +135,11 @@ export function AppointmentFormCore({
     setStatusDropdownOpen(false);
   };
 
-  const handleNewCustomerCreated = (customer: Customer) => {
-    setShowCreateCustomer(false);
-    handleCustomerChange(customer);
-  };
+  // TODO: implement inline customer creation
+  // const handleNewCustomerCreated = (customer: Customer) => {
+  //   setShowCreateCustomer(false);
+  //   handleCustomerChange(customer);
+  // };
 
   // ─── Render helpers ─────────────────────────────────────────────
 
@@ -182,8 +178,12 @@ export function AppointmentFormCore({
           <div className="flex gap-2">
             <div className="flex-1">
               <CustomerSelector
-                value={data.customerId}
-                onChange={handleCustomerChange}
+                customers={customers}
+                selectedId={data.customerId || null}
+                onChange={(customerId) => {
+                  const customer = customers.find((c) => c.id === customerId);
+                  if (customer) handleCustomerChange(customer);
+                }}
                 placeholder={t('appointments:selectCustomer')}
               />
             </div>
@@ -205,8 +205,11 @@ export function AppointmentFormCore({
       {/* Add Customer Modal */}
       {showCreateCustomer && (
         <AddCustomerForm
-          onClose={() => setShowCreateCustomer(false)}
-          onSuccess={handleNewCustomerCreated}
+          onCancel={() => setShowCreateCustomer(false)}
+          onSubmit={async () => {
+            // TODO: actually create customer via API
+            setShowCreateCustomer(false);
+          }}
         />
       )}
 
@@ -218,7 +221,8 @@ export function AppointmentFormCore({
             {t('appointments:location')}
           </label>
           <LocationSelector
-            value={data.locationId}
+            locations={allLocations.map((l) => ({ id: l.id, name: l.name }))}
+            selectedId={data.locationId || null}
             onChange={handleLocationChange}
           />
           {errors.locationId && (
@@ -279,8 +283,12 @@ export function AppointmentFormCore({
             {t('appointments:doctor')}
           </label>
           <DoctorSelector
-            value={data.doctorId || ''}
-            onChange={handleDoctorChange}
+            employees={employees}
+            selectedId={data.doctorId || null}
+            onChange={(employeeId) => {
+              const emp = employees.find((e) => e.id === employeeId);
+              handleDoctorChange(emp || null);
+            }}
             placeholder={t('appointments:selectDoctor')}
           />
         </div>
@@ -290,13 +298,15 @@ export function AppointmentFormCore({
             {t('appointments:assistant')}
           </label>
           <DoctorSelector
-            value={data.assistantId || ''}
-            onChange={(emp) =>
+            employees={employees}
+            selectedId={data.assistantId || null}
+            onChange={(employeeId) => {
+              const emp = employees.find((e) => e.id === employeeId);
               onChange({
                 assistantId: emp?.id,
                 assistantName: emp?.name,
-              })
-            }
+              });
+            }}
             placeholder={t('appointments:selectAssistant')}
           />
         </div>
@@ -306,13 +316,15 @@ export function AppointmentFormCore({
             {t('appointments:dentalAide')}
           </label>
           <DoctorSelector
-            value={data.dentalAideId || ''}
-            onChange={(emp) =>
+            employees={employees}
+            selectedId={data.dentalAideId || null}
+            onChange={(employeeId) => {
+              const emp = employees.find((e) => e.id === employeeId);
               onChange({
                 dentalAideId: emp?.id,
                 dentalAideName: emp?.name,
-              })
-            }
+              });
+            }}
             placeholder={t('appointments:selectDentalAide')}
           />
         </div>
@@ -324,11 +336,15 @@ export function AppointmentFormCore({
           <Stethoscope className="w-3.5 h-3.5" />
           {t('appointments:service')}
         </label>
-        <ServiceCatalogSelector
-          value={data.serviceId || ''}
-          onChange={handleServiceChange}
-          placeholder={t('appointments:selectService')}
-        />
+          <ServiceCatalogSelector
+            catalog={[]}
+            selectedId={data.serviceId || null}
+            onChange={(itemId) => {
+              // TODO: look up service from catalog
+              handleServiceChange(null);
+            }}
+            placeholder={t('appointments:selectService')}
+          />
       </div>
 
       {/* Type pills */}

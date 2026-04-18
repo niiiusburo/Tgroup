@@ -10,7 +10,7 @@ import { getStoredArrivalTime } from './arrivalTimeStorage';
 /**
  * Calculate end time given a start time and duration in minutes
  */
-export function calculateEndTime(startTime: string, durationMinutes: number | null): string {
+export function calculateEndTime(startTime: string, durationMinutes: number | null | undefined): string {
   const [hours, minutes] = startTime.split(':').map(Number);
   const totalMinutes = hours * 60 + minutes + (durationMinutes || 30);
   const endHours = Math.floor(totalMinutes / 60);

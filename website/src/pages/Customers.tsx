@@ -19,7 +19,7 @@ import { useServices } from '@/hooks/useServices';
 import { useDeposits } from '@/hooks/useDeposits';
 import { useCustomerPayments } from '@/hooks/useCustomerPayments';
 import { useExternalCheckups } from '@/hooks/useExternalCheckups';
-import type { UnifiedAppointmentFormData } from '@/components/appointments/unified';
+import type { AppointmentFormData } from '@/components/appointments/AppointmentForm';
 import type { PaymentFormData } from '@/components/payment/PaymentForm';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 import type { ProfileTab } from '@/components/customer/CustomerProfile';
@@ -130,7 +130,7 @@ export function Customers() {
   const { payments: customerPayments, isLoading: paymentsLoading, addPayment, refetch: refetchPayments, deletePaymentById } = useCustomerPayments(selectedCustomerId);
 
   // Callbacks for CustomerProfile — unified form data passes straight through
-  const handleCreateAppointment = useCallback(async (data: UnifiedAppointmentFormData) => {
+  const handleCreateAppointment = useCallback(async (data: AppointmentFormData) => {
     await createAppointment({
       customerId: data.customerId,
       customerName: data.customerName,
@@ -152,7 +152,7 @@ export function Customers() {
     refetchProfile();
   }, [createAppointment, refetchProfile]);
 
-  const handleUpdateAppointment = useCallback(async (id: string, data: UnifiedAppointmentFormData) => {
+  const handleUpdateAppointment = useCallback(async (id: string, data: AppointmentFormData) => {
     await updateAppointment(id, {
       customerId: data.customerId,
       customerName: data.customerName,
