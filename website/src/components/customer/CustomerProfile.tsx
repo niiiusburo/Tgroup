@@ -202,7 +202,7 @@ export function CustomerProfile({
         </div>
         <div className="flex items-center gap-2 sm:ml-auto">
           {onEdit &&
-          <button onClick={onEdit} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+          <button onClick={onEdit} className="flex items-center gap-2 h-10 px-4 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
               <Edit2 className="w-4 h-4" />
               Edit
             </button>
@@ -211,15 +211,12 @@ export function CustomerProfile({
           <div className="relative flex items-center">
               <button
               onClick={() => {if (canSoftDelete) {onSoftDelete?.();} else {onHardDelete?.();}}}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-l-lg hover:bg-red-700 transition-colors">
-              
+              className="flex items-center justify-center gap-2 h-10 px-4 bg-red-600 text-white rounded-l-lg hover:bg-red-700 transition-colors">
                 <Trash2 className="w-4 h-4" />
-
             </button>
               <button
               onClick={() => setShowDeleteMenu((v) => !v)}
-              className="px-2 py-2 bg-red-600 text-white rounded-r-lg border-l border-red-500 hover:bg-red-700 transition-colors">
-              
+              className="flex items-center justify-center h-10 px-2 bg-red-600 text-white rounded-r-lg border-l border-red-500 hover:bg-red-700 transition-colors">
                 <ChevronDown className="w-4 h-4" />
               </button>
               {showDeleteMenu &&
