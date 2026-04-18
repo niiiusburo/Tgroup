@@ -47,6 +47,7 @@ import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
 import { normalizeText } from '@/lib/utils';
 import { calculateEndTime } from '@/lib/calendarUtils';
+import { toISODateString } from '@/lib/dateUtils';
 import { updateAppointment, fetchProducts, type ApiProduct } from '@/lib/api';
 import { APPOINTMENT_CARD_COLORS, APPOINTMENT_STATUS_OPTIONS } from '@/constants';
 import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
@@ -234,8 +235,10 @@ export function EditAppointmentModal({
       setDentalAideId(appointment.dentalAideId ?? '');
       setLocationId(appointment.locationId || '');
 
-      // Use the appointment's stored date and time from the database
-      setDate(appointment.date || '');
+      // Use the appointment's stored date and time from the database.
+      // Normalize through toISODateString so we always get a clean YYYY-MM-DD
+      // in ICT even if the API returns an ISO timestamp (e.g. '...T17:00:00.000Z').
+      setDate(toISODateString(appointment.date));
       setTime(appointment.time || '09:00');
 
       // Extract customer type from note

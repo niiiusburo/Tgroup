@@ -56,6 +56,7 @@ import { useLocations } from '@/hooks/useLocations';
 import { useProducts } from '@/hooks/useProducts';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { useTimezone } from '@/contexts/TimezoneContext';
+import { toISODateString } from '@/lib/dateUtils';
 import type { ServiceCatalogItem } from '@/types/service';
 import { APPOINTMENT_CARD_COLORS, APPOINTMENT_STATUS_OPTIONS } from '@/constants';
 import type { AppointmentType } from '@/constants';
@@ -145,7 +146,10 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
   const [customerType, setCustomerType] = useState<'new' | 'returning'>(initialData?.customerType ?? 'new');
   const [showCreateCustomer, setShowCreateCustomer] = useState(false);
   const [estimatedDuration, setEstimatedDuration] = useState<number>(initialData?.estimatedDuration ?? 30);
-  const [date, setDate] = useState(() => (initialData?.date && initialData.date !== '') ? initialData.date : (isEdit ? '' : getToday()));
+  const [date, setDate] = useState(() => {
+    const normalized = toISODateString(initialData?.date);
+    return normalized || (isEdit ? '' : getToday());
+  });
   const [startTime, setStartTime] = useState(() => initialData?.startTime ?? (isEdit ? '' : getCurrentTimeStr()));
   const [endTime, setEndTime] = useState(initialData?.endTime ?? '');
   const [notes, setNotes] = useState(initialData?.notes ?? '');
@@ -167,7 +171,8 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
       setServiceName(initialData.serviceName ?? '');
       setCustomerType(initialData.customerType ?? 'new');
       setEstimatedDuration(initialData.estimatedDuration ?? 30);
-      setDate((initialData.date && initialData.date !== '') ? initialData.date : (isEdit ? '' : getToday()));
+      const normalizedDate = toISODateString(initialData.date);
+      setDate(normalizedDate || (isEdit ? '' : getToday()));
       setStartTime(initialData.startTime ?? '');
       setEndTime(initialData.endTime ?? '');
       setNotes(initialData.notes ?? '');

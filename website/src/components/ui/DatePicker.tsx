@@ -8,6 +8,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toISODateString } from '@/lib/dateUtils';
 import { useTranslation } from 'react-i18next';
 
 interface DatePickerProps {
@@ -30,7 +31,7 @@ const MONTH_KEYS = [
 const WEEKDAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
 
 export function DatePicker({
-  value,
+  value: rawValue,
   onChange,
   placeholder,
   label,
@@ -41,6 +42,8 @@ export function DatePicker({
   disabled = false
 }: DatePickerProps) {
   const { t } = useTranslation('common');
+  // Defensive normalize: accept clean YYYY-MM-DD, ISO timestamps, or empty.
+  const value = toISODateString(rawValue);
   const resolvedPlaceholder = placeholder ?? t('datePicker.chooseDate');
   const [viewDate, setViewDate] = useState(() => {
     if (value) return new Date(value + 'T00:00:00');
