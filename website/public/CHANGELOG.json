@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.20.2",
+    "date": "2026-04-18",
+    "commit": "pending",
+    "highlights": "Restore 8 customer sources in Add/Edit Service forms",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Commit 78761eb7 (feat(i18n): complete EN locale translations) replaced the 8 Vietnamese customer source names in DEFAULT_CUSTOMER_SOURCES (useSettings.ts) with non-existent i18n key strings like 'settings.customerSourceDefaults.saleOnline', causing all chips to render as raw key strings and only 'Sale Online' was previously visible from an earlier regression (9a67e0cc). Restored all 8 real names: Sale Online, Khách vãng lai, Hotline, Khách cũ, Khách hàng giới thiệu, Nội bộ giới thiệu, MKT1, ĐNCB."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.19.10",
     "date": "2026-04-17",
     "commit": "pending",

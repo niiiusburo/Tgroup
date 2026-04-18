@@ -166,16 +166,16 @@ export function useRoleConfig() {
 
 // ─── Customer Sources ────────────────────────────────────────────
 
-// Default customer sources (fallback when API fails) — keys are looked up in settings.json
+// Default customer sources (fallback when API fails)
 const DEFAULT_CUSTOMER_SOURCES: readonly CustomerSource[] = [
-  { id: 'src-1', name: 'settings.customerSourceDefaults.saleOnline', type: 'online', description: 'settings.customerSourceDefaults.saleOnlineDesc', isActive: true, customerCount: 0 },
-  { id: 'src-2', name: 'settings.customerSourceDefaults.walkIn', type: 'offline', description: 'settings.customerSourceDefaults.walkInDesc', isActive: true, customerCount: 0 },
-  { id: 'src-3', name: 'settings.customerSourceDefaults.hotline', type: 'online', description: 'settings.customerSourceDefaults.hotlineDesc', isActive: true, customerCount: 0 },
-  { id: 'src-4', name: 'settings.customerSourceDefaults.returning', type: 'referral', description: 'settings.customerSourceDefaults.returningDesc', isActive: true, customerCount: 0 },
-  { id: 'src-5', name: 'settings.customerSourceDefaults.referral', type: 'referral', description: 'settings.customerSourceDefaults.referralDesc', isActive: true, customerCount: 0 },
-  { id: 'src-6', name: 'settings.customerSourceDefaults.internalReferral', type: 'referral', description: 'settings.customerSourceDefaults.internalReferralDesc', isActive: true, customerCount: 0 },
-  { id: 'src-7', name: 'settings.customerSourceDefaults.mkt1', type: 'online', description: 'settings.customerSourceDefaults.mkt1Desc', isActive: true, customerCount: 0 },
-  { id: 'src-8', name: 'settings.customerSourceDefaults.dncb', type: 'offline', description: 'settings.customerSourceDefaults.dncbDesc', isActive: true, customerCount: 0 },
+  { id: 'src-1', name: 'Sale Online', type: 'online', description: 'Khách đến từ kênh sale online', isActive: true, customerCount: 0 },
+  { id: 'src-2', name: 'Khách vãng lai', type: 'offline', description: 'Khách vãng lai', isActive: true, customerCount: 0 },
+  { id: 'src-3', name: 'Hotline', type: 'online', description: 'Khách từ hotline', isActive: true, customerCount: 0 },
+  { id: 'src-4', name: 'Khách cũ', type: 'referral', description: 'Khách cũ quay lại', isActive: true, customerCount: 0 },
+  { id: 'src-5', name: 'Khách hàng giới thiệu', type: 'referral', description: 'Khách do khách hàng giới thiệu', isActive: true, customerCount: 0 },
+  { id: 'src-6', name: 'Nội bộ giới thiệu', type: 'referral', description: 'Khách do nội bộ giới thiệu', isActive: true, customerCount: 0 },
+  { id: 'src-7', name: 'MKT1', type: 'online', description: 'Kênh marketing 1', isActive: true, customerCount: 0 },
+  { id: 'src-8', name: 'ĐNCB', type: 'offline', description: 'Đối tượng ngoài cơ sở bệnh', isActive: true, customerCount: 0 },
 ];
 
 function mapApiSource(api: ApiCustomerSource): CustomerSource {
