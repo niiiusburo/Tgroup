@@ -25,6 +25,23 @@ Every time you bump the version or deploy a new build, you MUST update `website/
 
 Do NOT use old admin emails or any other email. This is the only admin account.
 
+## Verification Rule (MANDATORY)
+
+Before declaring ANY frontend, auth, API, CORS, env-var, or deploy fix complete, **actually perform the broken user action end-to-end in a real browser** — via Playwright MCP (`mcp__plugin_playwright_playwright__*`) or computer-use. Curl / OPTIONS tests and server logs are NOT sufficient proof.
+
+**Minimum check for auth/API changes:**
+1. Navigate to `http://127.0.0.1:5175` (NOT `localhost:5175` — Docker container may still be bound to `::1:5175` serving a stale bundle)
+2. Log in with `tg@clinic.vn` / `123456`
+3. Wait for dashboard to render
+4. Take a screenshot as evidence
+5. Check the browser console for JS errors
+
+**Applies to:** login/auth, CORS changes, env-var edits, API endpoint edits, frontend routing, build/deploys, Docker rebuilds, worktree switches.
+
+**Common trap:** Docker container on `:3002` (tgroup-api) or `:5175` (tgroup-web) holding old code masks local fixes. `lsof -i :3002` and `docker ps` are first-line checks when a fix "should work" but doesn't. If Docker is stale and you're running local node/Vite, `docker stop tgroup-api` / `docker stop tgroup-web` before re-testing.
+
+Full rule: `~/.claude/projects/-Users-thuanle-Documents-TamTMV-Tgroup/memory/feedback_verify_before_done.md`
+
 ## Obsidian Brain
 
 At session start, read project context from local Obsidian vault:
