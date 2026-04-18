@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const { query, pool } = require("../db");
 const { requirePermission } = require("../middleware/auth");
+const { validate } = require("../middleware/validate");
+const { PaymentCreateSchema, PaymentUpdateSchema } = require("@tgroup/contracts");
 
 function mapAllocations(allocResult) {
   return allocResult.map(a => {
@@ -529,7 +531,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST /api/Payments - Create a new payment with optional allocations
-router.post("/", requirePermission('payment.edit'), async (req, res) => {
+router.post("/", requirePermission('payment.edit'), validate(PaymentCreateSchema), async (req, res) => {
   try {
     let {
       customer_id, service_id, amount, method, notes,
@@ -706,7 +708,7 @@ router.post("/refund", requirePermission('payment.edit'), async (req, res) => {
 });
 
 // PATCH /api/Payments/:id - Update payment
-router.patch("/:id", requirePermission('payment.edit'), async (req, res) => {
+router.patch("/:id", requirePermission('payment.edit'), validate(PaymentUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
