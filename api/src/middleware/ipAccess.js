@@ -4,6 +4,7 @@
  */
 
 const { query } = require('../db');
+const { getVietnamNow } = require('../lib/dateUtils');
 
 // In-memory cache for settings to avoid DB query per request
 let cachedSettings = null;
@@ -31,7 +32,7 @@ function getClientIp(req) {
  */
 async function fetchIpAccessSettings() {
   const settingsRows = await query('SELECT mode, last_updated FROM dbo.ip_access_settings LIMIT 1');
-  const settings = settingsRows[0] || { mode: 'allow_all', last_updated: new Date() };
+  const settings = settingsRows[0] || { mode: 'allow_all', last_updated: getVietnamNow() };
 
   const entriesRows = await query(
     `SELECT id, ip_address::text AS ip_address, type, description, is_active, created_at, created_by

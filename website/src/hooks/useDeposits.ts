@@ -44,11 +44,17 @@ export type PaymentMethodCode =
   | 'wallet'
   | string;
 
+function getVietnamToday(): string {
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+  const get = (type: string) => parts.find((x) => x.type === type)?.value ?? '00';
+  return `${get('year')}-${get('month')}-${get('day')}`;
+}
+
 function mapToDepositTransaction(p: ApiPayment): DepositTransaction {
   const isRefund = p.depositType === 'refund' || p.amount < 0;
   return {
     id: p.id,
-    date: p.paymentDate || p.createdAt?.slice(0, 10) || new Date().toISOString().slice(0, 10),
+    date: p.paymentDate || p.createdAt?.slice(0, 10) || getVietnamToday(),
     amount: Math.abs(p.amount),
     type: isRefund ? 'refund' : 'deposit',
     method: p.method,
@@ -64,7 +70,7 @@ function mapToUsageTransaction(p: ApiPayment): DepositTransaction {
   const amountFromDeposit = p.method === 'deposit' ? p.amount : depositUsed;
   return {
     id: p.id,
-    date: p.paymentDate || p.createdAt?.slice(0, 10) || new Date().toISOString().slice(0, 10),
+    date: p.paymentDate || p.createdAt?.slice(0, 10) || getVietnamToday(),
     amount: amountFromDeposit,
     type: 'withdrawal',
     method: 'deposit',

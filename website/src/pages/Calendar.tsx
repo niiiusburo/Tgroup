@@ -12,6 +12,7 @@ import { MonthView } from '@/components/calendar/MonthView';
 import { SmartFilterDrawer } from '@/components/calendar/SmartFilterDrawer';
 
 import { useLocationFilter } from '@/contexts/LocationContext';
+import { useTimezone } from '@/contexts/TimezoneContext';
 import type { CalendarAppointment } from '@/data/mockCalendar';
 import type { AppointmentStatus } from '@/types/appointment';
 import { EditAppointmentModal } from '@/components/modules/EditAppointmentModal';
@@ -57,6 +58,7 @@ const VIEW_TABS: readonly {readonly mode: ViewMode;readonly labelKey: string;}[]
 export function Calendar() {
   const { t } = useTranslation('calendar');
   const { selectedLocationId } = useLocationFilter();
+  const { getToday, formatDate } = useTimezone();
   const {
     viewMode,
     setViewMode,
@@ -193,22 +195,22 @@ export function Calendar() {
   const getExportDateRange = useCallback((mode: ExportMode): [string, string] => {
     if (mode === 'current-filter') {
       if (viewMode === 'day') {
-        const d = currentDate.toISOString().split('T')[0];
+        const d = formatDate(currentDate, 'yyyy-MM-dd');
         return [d, d];
       }
       if (viewMode === 'week') {
         return [
-        weekDates[0].toISOString().split('T')[0],
-        weekDates[6].toISOString().split('T')[0]];
+        formatDate(weekDates[0], 'yyyy-MM-dd'),
+        formatDate(weekDates[6], 'yyyy-MM-dd')];
 
       }
       return [
-      monthDates[0].toISOString().split('T')[0],
-      monthDates[monthDates.length - 1].toISOString().split('T')[0]];
+      formatDate(monthDates[0], 'yyyy-MM-dd'),
+      formatDate(monthDates[monthDates.length - 1], 'yyyy-MM-dd')];
 
     }
     return ['', ''];
-  }, [viewMode, currentDate, weekDates, monthDates]);
+  }, [viewMode, currentDate, weekDates, monthDates, formatDate]);
 
   const handleExport = useCallback(async (mode: ExportMode, dateFrom: string, dateTo: string) => {
     let rows: CalendarAppointment[];
@@ -305,10 +307,7 @@ export function Calendar() {
     return days;
   }, [pickerViewDate]);
 
-  const todayKeyForPicker = useMemo(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  }, []);
+  const todayKeyForPicker = useMemo(() => getToday(), [getToday]);
 
   // Helper to map Calendar status to OverviewAppointment topStatus
   function mapStatusToTopStatus(status: CalendarAppointment['status']): OverviewAppointment['topStatus'] {
@@ -481,7 +480,7 @@ export function Calendar() {
 
                   }
                   const dateKey = day.dateKey!;
-                  const isSelected = dateKey === currentDate.toISOString().split('T')[0];
+                  const isSelected = dateKey === formatDate(currentDate, 'yyyy-MM-dd');
                   const isToday = dateKey === todayKeyForPicker;
                   return (
                     <button
@@ -670,8 +669,8 @@ export function Calendar() {
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
         onExport={handleExport}
-        defaultDateFrom={new Date().toISOString().split('T')[0]}
-        defaultDateTo={new Date().toISOString().split('T')[0]} />
+        defaultDateFrom={getToday()}
+        defaultDateTo={getToday()} />
       
 
       <AppointmentFormModal

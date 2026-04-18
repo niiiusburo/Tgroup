@@ -21,6 +21,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTimezone } from '@/contexts/TimezoneContext';
 import { X, ClipboardPlus, Edit2, User, Stethoscope, MapPin, CalendarDays, FileText, DollarSign, Hash, Check } from 'lucide-react';
 
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
@@ -64,6 +65,7 @@ interface ServiceFormProps {
 export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose, initialData, isEdit = false }: ServiceFormProps) {
   const { t } = useTranslation('services');
   const { t: tc } = useTranslation('common');
+  const { getToday } = useTimezone();
   const { customers: apiCustomers, loading: customersLoading } = useCustomers();
   const { employees: apiEmployees, isLoading: employeesLoading } = useEmployees();
   const { allLocations: apiLocations, isLoading: locationsLoading } = useLocations();
@@ -80,7 +82,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   const [assistantId, setAssistantId] = useState<string | null>(initialData?.assistantId ?? null);
   const [dentalAideId, setDentalAideId] = useState<string | null>(initialData?.dentalAideId ?? null);
   const [locationId, setLocationId] = useState<string | null>(initialData?.locationId ?? null);
-  const [startDate, setStartDate] = useState(initialData?.startDate ?? new Date().toISOString().slice(0, 10));
+  const [startDate, setStartDate] = useState(initialData?.startDate ?? getToday());
   const [expectedEndDate, setExpectedEndDate] = useState(initialData?.expectedEndDate ?? '');
   const [notes, setNotes] = useState(initialData?.notes ?? '');
   const [quantity, setQuantity] = useState(initialData?.quantity ? String(initialData.quantity) : '1');
@@ -106,7 +108,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       setAssistantId(initialData.assistantId ?? null);
       setDentalAideId(initialData.dentalAideId ?? null);
       setLocationId(initialData.locationId ?? null);
-      setStartDate(initialData.startDate ?? new Date().toISOString().slice(0, 10));
+      setStartDate(initialData.startDate ?? getToday());
       setExpectedEndDate(initialData.expectedEndDate ?? '');
       setNotes(initialData.notes ?? '');
       setQuantity(initialData.quantity ? String(initialData.quantity) : '1');

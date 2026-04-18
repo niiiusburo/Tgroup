@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 import { fetchAppointments } from '@/lib/api';
 import { mapApiAppointmentToCalendar } from '@/lib/calendarUtils';
+import { getTodayInTimezone } from '@/lib/dateUtils';
 
 /**
  * Hook for today's appointment schedule
@@ -21,11 +22,7 @@ export function useTodaySchedule(locationId?: string): TodayScheduleResult {
     async function loadTodaySchedule() {
       setIsLoading(true);
       try {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        const todayStr = `${yyyy}-${mm}-${dd}`;
+        const todayStr = getTodayInTimezone('Asia/Ho_Chi_Minh');
 
         const response = await fetchAppointments({
           limit: 100,

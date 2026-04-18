@@ -8,6 +8,7 @@ const multer = require('multer');
 const sharp = require('sharp');
 const { query, pool } = require('../db');
 const { requireAuth } = require('../middleware/auth');
+const { getVietnamNow } = require('../lib/dateUtils');
 
 const router = express.Router();
 
@@ -128,7 +129,7 @@ async function insertAttachments(client, messageId, files) {
     const url = `/uploads/feedback/${file.filename}`;
     await client.query(
       `INSERT INTO feedback_attachments (message_id, original_name, stored_name, mime_type, size_bytes, url, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+       VALUES ($1, $2, $3, $4, $5, $6, (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'))`,
       [messageId, file.originalname, file.filename, file.mimetype, file.size, url]
     );
   }
@@ -211,7 +212,7 @@ router.post('/', requireAuth, upload.array('files', 5), async (req, res) => {
     const pagePath = req.body.pagePath || null;
     const screenSize = req.body.screenSize || null;
     const userAgent = req.headers['user-agent'] || null;
-    const now = new Date().toISOString();
+    const now = getVietnamNow();
 
     await client.query('BEGIN');
 
@@ -358,7 +359,7 @@ router.post('/my/:threadId/reply', requireAuth, upload.array('files', 5), async 
       return res.status(404).json({ error: 'Thread not found' });
     }
 
-    const now = new Date().toISOString();
+    const now = getVietnamNow();
 
     await client.query(
       `UPDATE feedback_threads SET updated_at = $1 WHERE id = $2`,
@@ -500,7 +501,7 @@ router.post('/all/:threadId/reply', requireAuth, requireAdmin, upload.array('fil
       return res.status(404).json({ error: 'Thread not found' });
     }
 
-    const now = new Date().toISOString();
+    const now = getVietnamNow();
 
     await client.query(
       `UPDATE feedback_threads SET updated_at = $1 WHERE id = $2`,
@@ -548,7 +549,7 @@ router.patch('/all/:threadId/status', requireAuth, requireAdmin, async (req, res
     }
 
     const result = await query(
-      `UPDATE feedback_threads SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
+      `UPDATE feedback_threads SET status = $1, updated_at = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE id = $2 RETURNING *`,
       [status, threadId]
     );
 

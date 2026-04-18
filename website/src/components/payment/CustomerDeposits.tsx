@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTimezone } from '@/contexts/TimezoneContext';
 import {
   Wallet,
   Coins,
@@ -64,7 +65,8 @@ export function CustomerDeposits({
 
   const [formAmount, setFormAmount] = useState('');
   const [formMethod, setFormMethod] = useState<'cash' | 'bank_transfer' | 'vietqr'>('cash');
-  const [formDate, setFormDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const { getToday } = useTimezone();
+  const [formDate, setFormDate] = useState(getToday);
   const [formNote, setFormNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showVietQr, setShowVietQr] = useState(false);
@@ -77,7 +79,7 @@ export function CustomerDeposits({
   const openDepositModal = () => {
     setFormAmount('');
     setFormMethod('cash');
-    setFormDate(new Date().toISOString().slice(0, 10));
+    setFormDate(getToday());
     setFormNote('');
     setShowDepositModal(true);
   };
@@ -85,7 +87,7 @@ export function CustomerDeposits({
   const openRefundModal = () => {
     setFormAmount('');
     setFormMethod('cash');
-    setFormDate(new Date().toISOString().slice(0, 10));
+    setFormDate(getToday());
     setFormNote('');
     setShowRefundModal(true);
   };

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { query, pool } = require("../db");
 const { requirePermission } = require("../middleware/auth");
+const { getVietnamYear } = require('../lib/dateUtils');
 
 function mapAllocations(allocResult) {
   return allocResult.map(a => {
@@ -30,7 +31,7 @@ function mapAllocations(allocResult) {
 }
 
 async function generateReceiptNumber(prefix = "TUKH") {
-  const year = new Date().getFullYear();
+  const year = getVietnamYear();
   const result = await query(
     `INSERT INTO receipt_sequences (prefix, year, last_number)
      VALUES ($1, $2, 1)

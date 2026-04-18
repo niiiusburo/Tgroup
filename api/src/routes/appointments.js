@@ -468,7 +468,7 @@ router.post('/', requirePermission('appointments.add'), async (req, res) => {
         color, state, aptstate, isrepeatcustomer, isnotreatment, productid, assistantid, dentalaideid,
         datecreated, lastupdated
       ) VALUES (
-        gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, false, false, $12, $13, $14, NOW(), NOW()
+        gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, false, false, $12, $13, $14, (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'), (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
       ) RETURNING *`,
       [name, date, time || null, partnerId, doctorId || null, companyId, note, timeExpectedNum, color, state, state, productId, assistantId, dentalAideId]
     );
@@ -638,7 +638,7 @@ router.put('/:id', requirePermission('appointments.edit'), async (req, res) => {
     }
 
     // Always update lastupdated
-    updates.push(`lastupdated = NOW()`);
+    updates.push(`lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`);
 
     if (updates.length === 0) {
       return errorResponse(res, 400, 'NO_FIELDS_TO_UPDATE', 'No valid fields provided to update');

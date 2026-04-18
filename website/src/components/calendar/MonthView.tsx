@@ -7,6 +7,7 @@
 
 import { CheckCircle, Calendar, XCircle, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useTimezone } from '@/contexts/TimezoneContext';
 import { cn } from '@/lib/utils';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 
@@ -20,7 +21,8 @@ interface MonthViewProps {
 const WEEKDAY_HEADERS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
 
 function formatDateKey(date: Date): string {
-  return date.toISOString().split('T')[0];
+  // date comes from YYYY-MM-DD parse; get local components to avoid UTC shift
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
 interface StatusCounts {
@@ -64,9 +66,9 @@ export function MonthView({
   onDayClick
 }: MonthViewProps) {
   const { t } = useTranslation();
+  const { getToday } = useTimezone();
   const currentMonth = currentDate.getMonth();
-  const today = new Date();
-  const todayKey = formatDateKey(today);
+  const todayKey = getToday();
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-card">

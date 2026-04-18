@@ -2,6 +2,7 @@ const express = require('express');
 const { query } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const { requirePermission } = require('../middleware/auth');
+const { getVietnamNow } = require('../lib/dateUtils');
 
 const router = express.Router();
 
@@ -203,7 +204,7 @@ router.post('/', requirePermission('services.edit'), async (req, res) => {
     }
 
     const id = uuidv4();
-    const now = new Date().toISOString();
+    const now = getVietnamNow();
 
     const trimmedName = name.trim();
     const nameNoSign = normalizeVietnamese(trimmedName);
@@ -264,7 +265,7 @@ router.put('/:id', requirePermission('services.edit'), async (req, res) => {
     }
 
     updates.push(`lastupdated = $${idx}`);
-    params.push(new Date().toISOString());
+    params.push(getVietnamNow());
     idx++;
 
     params.push(id);

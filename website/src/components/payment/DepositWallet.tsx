@@ -4,6 +4,7 @@ import { VietQrModal } from './VietQrModal';
 import { formatVND, formatVNDInput } from '@/lib/formatting';
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
 import { useTranslation } from 'react-i18next';
+import { useTimezone } from '@/contexts/TimezoneContext';
 
 interface DepositWalletProps {
   depositBalance: number;
@@ -22,7 +23,8 @@ export function DepositWallet({
   const [showAddModal, setShowAddModal] = useState(false);
   const [addAmount, setAddAmount] = useState('');
   const [addMethod, setAddMethod] = useState<'cash' | 'bank_transfer' | 'vietqr'>('cash');
-  const [addDate, setAddDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const { getToday } = useTimezone();
+  const [addDate, setAddDate] = useState(getToday);
   const [addNote, setAddNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showVietQr, setShowVietQr] = useState(false);

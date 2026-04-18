@@ -7,6 +7,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { Notification, LocationOption, RevenueDataPoint } from '@/types/common';
 import { fetchCompanies, fetchSaleOrders } from '@/lib/api';
+import { getTodayInTimezone, formatInTimezone } from '@/lib/dateUtils';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
@@ -41,7 +42,8 @@ export function useOverviewData() {
     async function loadRevenueData() {
       try {
         setIsLoadingRevenue(true);
-        const year = new Date().getFullYear();
+        const todayStr = getTodayInTimezone('Asia/Ho_Chi_Minh');
+        const year = parseInt(todayStr.split('-')[0], 10);
         const dateFrom = `${year}-01-01`;
         const dateTo = `${year}-12-31`;
 
@@ -58,8 +60,9 @@ export function useOverviewData() {
         // Aggregate revenue by month
         for (const order of res.items) {
           if (order.datecreated && order.amounttotal) {
-            const date = new Date(order.datecreated);
-            const month = date.getMonth(); // 0-11
+            // Use Vietnam timezone to extract month from timestamp
+            const monthStr = formatInTimezone(order.datecreated, 'Asia/Ho_Chi_Minh', 'MM');
+            const month = parseInt(monthStr, 10) - 1; // 0-11
             const amount = parseFloat(order.amounttotal) || 0;
             revenueByMonth[month] += amount;
           }

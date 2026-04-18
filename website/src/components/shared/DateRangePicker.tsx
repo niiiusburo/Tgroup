@@ -10,6 +10,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
+import { useTimezone } from '@/contexts/TimezoneContext';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 
@@ -50,7 +51,8 @@ export function DateRangePicker({
 }: DateRangePickerProps) {
   const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
-  const [viewDate, setViewDate] = useState(new Date());
+  const { getToday } = useTimezone();
+  const [viewDate, setViewDate] = useState(() => new Date(getToday() + 'T00:00:00'));
   const [selectMode, setSelectMode] = useState<'start' | 'end' | null>(null);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
@@ -144,7 +146,8 @@ export function DateRangePicker({
   };
 
   const handleToday = () => {
-    const today = new Date();
+    const todayStr = getToday();
+    const today = new Date(todayStr + 'T00:00:00');
     setViewDate(today);
     onDateChange(today);
     if (goToToday) goToToday();
@@ -165,7 +168,7 @@ export function DateRangePicker({
   }
 
   function isTodayCell(dateKey: string): boolean {
-    return dateKey === formatDateKey(new Date());
+    return dateKey === getToday();
   }
 
   return (

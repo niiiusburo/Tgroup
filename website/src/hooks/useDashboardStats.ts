@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import type { StatCardData } from '@/components/modules/StatCardModule';
 import { fetchPartners, fetchAppointments, fetchSaleOrders } from '@/lib/api';
+import { getTodayInTimezone } from '@/lib/dateUtils';
 
 /**
  * Hook for dashboard statistics data
@@ -31,11 +32,8 @@ export function useDashboardStats(selectedLocationId?: string): DashboardStatsRe
     async function loadStats() {
       setIsLoading(true);
       try {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        const todayStr = `${yyyy}-${mm}-${dd}`;
+        const todayStr = getTodayInTimezone('Asia/Ho_Chi_Minh');
+        const [yyyy, mm] = todayStr.split('-');
 
         // Fetch total patients
         const partnersResponse = await fetchPartners({ limit: 1, companyId });

@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTimezone } from '@/contexts/TimezoneContext';
 import { fetchCompanies, fetchEmployees, fetchPartners, fetchPartnerById, ApiError } from '@/lib/api';
 import { normalizeText } from '@/lib/utils';
 import type { ApiCompany, ApiEmployee, ApiPartner } from '@/lib/api';
@@ -515,11 +516,8 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
   const districtsForCity = VIET_DISTRICTS[formData.cityname] ?? [];
   const wardsForDistrict = VIET_WARDS[formData.districtname] ?? [];
 
-  const today = new Date().toLocaleDateString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
+  const { getToday } = useTimezone();
+  const today = getToday();
 
   return {
     t, isFieldEditable, isEdit, canEdit, customerId, formData, setFormData, errors, setErrors,
