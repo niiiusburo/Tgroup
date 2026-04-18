@@ -33,8 +33,9 @@ echo "📦 Installing Python packages..."
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# 4. Install Chromium for browser-use
-echo "🌐 Installing Chromium (headless)..."
+# 4. Install Playwright + Chromium for browser-use
+echo "🌐 Installing Playwright + Chromium (headless)..."
+pip install playwright
 .venv/bin/python -m playwright install chromium
 .venv/bin/python -m playwright install-deps chromium 2>/dev/null || apt install -y \
     libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \

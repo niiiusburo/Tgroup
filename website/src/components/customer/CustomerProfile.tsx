@@ -307,16 +307,16 @@ export function CustomerProfile({
       {activeTab === 'profile' &&
       <div className="space-y-6">
           <div className="bg-white rounded-xl shadow-card p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('profileSection.personalInfo', { ns: 'customers' })}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><p className="text-xs text-gray-400">Full Name</p><p className="text-sm font-medium text-gray-900">{profile.name}</p></div>
-              <div><p className="text-xs text-gray-400">Phone</p><p className="text-sm font-medium text-gray-900">{profile.phone || 'N/A'}</p></div>
-              <div><p className="text-xs text-gray-400">Email</p><p className="text-sm font-medium text-gray-900">{profile.email || 'N/A'}</p></div>
-              <div><p className="text-xs text-gray-400">Date of Birth</p><p className="text-sm font-medium text-gray-900">{profile.dateOfBirth}</p></div>
-              <div><p className="text-xs text-gray-400">Gender</p><p className="text-sm font-medium text-gray-900">{profile.gender === 'male' ? 'Male' : 'Female'}</p></div>
-              <div><p className="text-xs text-gray-400">Address</p><p className="text-sm font-medium text-gray-900">{profile.address || 'N/A'}</p></div>
-              <div><p className="text-xs text-gray-400">Location</p><p className="text-sm font-medium text-gray-900">{profile.companyName || 'N/A'}</p></div>
-              <div><p className="text-xs text-gray-400">Member Since</p><p className="text-sm font-medium text-gray-900">{profile.memberSince}</p></div>
+              <div><p className="text-xs text-gray-400">{t('form.fullName', { ns: 'customers' })}</p><p className="text-sm font-medium text-gray-900">{profile.name}</p></div>
+              <div><p className="text-xs text-gray-400">{t('form.phone', { ns: 'customers' })}</p><p className="text-sm font-medium text-gray-900">{profile.phone || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-400">{t('form.email', { ns: 'customers' })}</p><p className="text-sm font-medium text-gray-900">{profile.email || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-400">{t('form.dateOfBirth', { ns: 'customers' })}</p><p className="text-sm font-medium text-gray-900">{profile.dateOfBirth}</p></div>
+              <div><p className="text-xs text-gray-400">{t('form.gender', { ns: 'customers' })}</p><p className="text-sm font-medium text-gray-900">{profile.gender === 'male' ? t('form.male', { ns: 'customers' }) : t('form.female', { ns: 'customers' })}</p></div>
+              <div><p className="text-xs text-gray-400">{t('form.address', { ns: 'customers' })}</p><p className="text-sm font-medium text-gray-900">{profile.address || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-400">{t('form.location', { ns: 'customers' })}</p><p className="text-sm font-medium text-gray-900">{profile.companyName || 'N/A'}</p></div>
+              <div><p className="text-xs text-gray-400">{t('memberSince', { ns: 'customers' })}</p><p className="text-sm font-medium text-gray-900">{profile.memberSince}</p></div>
             </div>
           </div>
           {canViewHealthCheckups &&
@@ -352,14 +352,13 @@ export function CustomerProfile({
             {appointments.length === 0 ?
           <div className="text-center py-8">
                 <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-400 mb-3">No appointments found</p>
+                <p className="text-gray-400 mb-3">{t('noAppointmentHistory', { ns: 'customers' })}</p>
                 {onCreateAppointment &&
             <button
               onClick={() => {setEditingAppointment(null);setShowAppointmentModal(true);}}
               className="text-primary hover:text-primary-dark text-sm font-medium">
-              
-                    Schedule your first appointment
-                  </button>
+              {t('thmLchHn', { ns: 'customers' })}
+            </button>
             }
               </div> :
 
@@ -411,7 +410,7 @@ export function CustomerProfile({
             className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm">
             
                 <Plus className="w-4 h-4" />
-                Add Service
+                {t('thmLchKhm')}
               </button>
           }
           </div>
@@ -435,7 +434,7 @@ export function CustomerProfile({
                   <Wallet className="w-5 h-5 text-purple-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-gray-500 truncate">Doanh thu</p>
+                  <p className="text-xs text-gray-500 truncate">{t('collected', { ns: 'services' })}</p>
                   <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(totalRevenue)}</p>
                 </div>
               </div>
@@ -474,7 +473,7 @@ export function CustomerProfile({
       {activeTab === 'payment' &&
       <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">Payment & Deposits</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('payment', { ns: 'customers' })} &amp; {t('profileSection.deposit', { ns: 'customers' })}</h3>
   
           </div>
 
@@ -499,14 +498,14 @@ export function CustomerProfile({
             <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
               <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                 <Receipt className="w-4 h-4 text-gray-500" />
-                Payment History
+                {t('paymentHistory', { ns: 'services' })}
                 {payments.length > 0 && <span className="text-xs font-normal text-gray-500 ml-1">({payments.length})</span>}
               </h4>
             </div>
             {loadingPayments ?
-          <div className="p-6 text-center text-sm text-gray-500">Loading payments...</div> :
+          <div className="p-6 text-center text-sm text-gray-500">{t('angTi', { ns: 'common' })}...</div> :
           payments.length === 0 ?
-          <div className="p-6 text-center text-sm text-gray-400">No payment records found</div> :
+          <div className="p-6 text-center text-sm text-gray-400">{t('noPayments', { ns: 'services' })}</div> :
 
           <div className="divide-y divide-gray-100">
                 {payments.map((p) => {

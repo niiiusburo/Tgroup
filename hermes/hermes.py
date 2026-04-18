@@ -67,17 +67,25 @@ async def run_all_flows(cfg: HermesConfig, logger: logging.Logger) -> list[dict]
         provider=provider,
         model=cfg.model,
         api_keys=cfg.model_api_keys,
-        api_base=cfg.model_api_base or None,
+        api_base=cfg.model_api_base if provider == "kimi" else None,
     )
 
-    # Get auth token for cleanup
+    # Get auth token for cleanup (with retry for 429 rate limits)
     auth_token = ""
-    try:
-        auth_token = await get_auth_token(
-            cfg.site.url, cfg.site.email, cfg.site.password
-        )
-    except Exception as e:
-        logger.error(f"Auth failed: {e}")
+    for attempt in range(cfg.rate_limit.max_retries):
+        try:
+            auth_token = await get_auth_token(
+                cfg.site.url, cfg.site.email, cfg.site.password
+            )
+            break
+        except Exception as e:
+            if "429" in str(e) and attempt < cfg.rate_limit.max_retries - 1:
+                wait = cfg.rate_limit.retry_backoff * (attempt + 1)
+                logger.warning(f"Auth rate limited (429), waiting {wait}s before retry {attempt + 1}/{cfg.rate_limit.max_retries}...")
+                await asyncio.sleep(wait)
+            else:
+                logger.error(f"Auth failed: {e}")
+                break
 
     # Clean up old screenshots
     deleted = cleanup_old_screenshots(cfg.screenshots.directory, cfg.screenshots.keep_days)
@@ -85,9 +93,14 @@ async def run_all_flows(cfg: HermesConfig, logger: logging.Logger) -> list[dict]
         logger.info(f"Cleaned up {deleted} old screenshots")
 
     # Run each flow
-    for flow_name, flow_class in FLOW_REGISTRY.items():
+    for i, (flow_name, flow_class) in enumerate(FLOW_REGISTRY.items()):
         if flow_name not in cfg.flows and flow_name != "login":
             continue
+
+        # Delay between flows (skip before first flow)
+        if i > 0 and cfg.rate_limit.delay_between_flows > 0:
+            logger.info(f"Waiting {cfg.rate_limit.delay_between_flows}s between flows...")
+            await asyncio.sleep(cfg.rate_limit.delay_between_flows)
 
         flow_config = cfg.flows.get(flow_name)
         flow = flow_class(
@@ -148,6 +161,11 @@ async def run_baseline(cfg: HermesConfig, logger: logging.Logger) -> None:
     cfg.first_run_mode = True
     logger.info("=== HERMES BASELINE RUN ===")
 
+    # Initial cooldown to avoid rate limits from previous runs
+    cooldown = cfg.rate_limit.delay_between_flows
+    logger.info(f"Initial cooldown: waiting {cooldown}s before first flow...")
+    await asyncio.sleep(cooldown)
+
     results = await run_all_flows(cfg, logger)
 
     # Save baseline
@@ -177,7 +195,7 @@ async def test_models(cfg: HermesConfig, logger: logging.Logger) -> None:
         site_url=cfg.site.url,
         site_email=cfg.site.email,
         site_password=cfg.site.password,
-        api_base=cfg.model_api_base or None,
+        api_base=cfg.model_api_base if cfg.model.startswith("kimi") else None,
     )
 
     print("\n" + "=" * 60)

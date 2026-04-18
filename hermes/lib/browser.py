@@ -48,6 +48,8 @@ def create_browser_profile(
         minimum_wait_page_load_time=1.0,
         wait_between_actions=0.5,
         disable_security=False,
+        chromium_sandbox=False,
+        args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
     )
 
 

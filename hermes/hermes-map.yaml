@@ -34,6 +34,11 @@ restart_safety:
   max_restarts_per_hour: 5
   on_exceeded: alert_telegram_and_stop
 
+rate_limit:
+  delay_between_flows: 15
+  max_retries: 3
+  retry_backoff: 60
+
 flows:
   login:
     critical: true

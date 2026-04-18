@@ -35,6 +35,13 @@ class RestartSafetyConfig:
 
 
 @dataclass
+class RateLimitConfig:
+    delay_between_flows: int = 10
+    max_retries: int = 3
+    retry_backoff: int = 30
+
+
+@dataclass
 class FlowStep:
     description: str
     fields: dict[str, str] = field(default_factory=dict)
@@ -69,6 +76,7 @@ class HermesConfig:
     screenshots: ScreenshotConfig = field(default_factory=ScreenshotConfig)
     telegram: TelegramConfig = field(default_factory=TelegramConfig)
     restart_safety: RestartSafetyConfig = field(default_factory=RestartSafetyConfig)
+    rate_limit: RateLimitConfig = field(default_factory=RateLimitConfig)
     flows: dict[str, FlowConfig] = field(default_factory=dict)
     model: str = ""
     model_api_keys: dict[str, str] = field(default_factory=dict)
@@ -160,6 +168,15 @@ def load_config(config_path: str | None = None) -> HermesConfig:
         cfg.restart_safety = RestartSafetyConfig(
             max_restarts_per_hour=rs.get("max_restarts_per_hour", 5),
             on_exceeded=rs.get("on_exceeded", "alert_telegram_and_stop"),
+        )
+
+    # Rate limiting
+    if "rate_limit" in raw:
+        rl = raw["rate_limit"]
+        cfg.rate_limit = RateLimitConfig(
+            delay_between_flows=rl.get("delay_between_flows", 10),
+            max_retries=rl.get("max_retries", 3),
+            retry_backoff=rl.get("retry_backoff", 30),
         )
 
     # Model

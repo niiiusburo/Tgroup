@@ -27,34 +27,31 @@ class ModelTestResult:
 # Models to test, in order of preference (cheapest first)
 CANDIDATE_MODELS: list[dict[str, str]] = [
     {"provider": "kimi", "model": "kimi-for-coding", "name": "Kimi K2.6"},
-    {"provider": "openai", "model": "gpt-4o-mini", "name": "GPT-4o-mini"},
-    {"provider": "anthropic", "model": "claude-3-5-haiku-20241022", "name": "Claude 3.5 Haiku"},
-    {"provider": "openai", "model": "gpt-4o", "name": "GPT-4o"},
 ]
 
 
 def _create_llm(provider: str, model: str, api_keys: dict[str, str], api_base: str | None = None) -> Any:
     """Create a browser-use LLM instance for the given provider."""
     if provider == "kimi":
-        # Kimi Code API requires claude-code User-Agent to identify as a coding agent
-        from langchain_openai import ChatOpenAI
+        # Kimi Code API requires claude-code User-Agent to identify as a coding agent.
+        # browser-use expects a 'provider' attribute on the LLM.
+        # Kimi API doesn't support full JSON schema structured output, so we use
+        # dont_force_structured_output to fall back to plain text.
+        from browser_use import ChatOpenAI
         import httpx
-        http_client = httpx.Client(
-            headers={"User-Agent": "claude-code/1.0"},
-            timeout=120.0,
-        )
+
         return ChatOpenAI(
             model=model,
             api_key=api_keys.get("kimi", ""),
             base_url=api_base or "https://api.kimi.com/coding/v1",
-            http_client=http_client,
+            default_headers={"User-Agent": "claude-code/1.0"},
             temperature=0.1,
+            frequency_penalty=0,
+            dont_force_structured_output=True,
         )
     elif provider == "openai":
         from browser_use import ChatOpenAI
         kwargs = {"model": model, "api_key": api_keys.get("openai", "")}
-        if api_base:
-            kwargs["base_url"] = api_base
         return ChatOpenAI(**kwargs)
     elif provider == "anthropic":
         from browser_use import ChatAnthropic
