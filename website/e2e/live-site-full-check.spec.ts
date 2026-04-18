@@ -211,25 +211,26 @@ test.describe('Live Site — nk.2checkin.com Full Verification', () => {
     const body = await page.locator('body').innerText();
     expect(body).toMatch(/Customer Profile|Hồ sơ/);
 
-    // 4. Look for "Add Service" or service-related button
-    // Tab buttons: Profile, Appointments, Records, Payment
-    const recordsTab = page.getByRole('button', { name: /Records|Lịch sử|Services|Dịch vụ/i });
-    if (await recordsTab.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await recordsTab.click();
-      await page.waitForTimeout(1500);
-    }
+    // 4. Click the "Phiếu khám" (Records) tab — Add Service button lives here
+    const recordsTab = page.locator('button').filter({ hasText: /Phiếu khám|Records|Lịch sử/i });
+    await expect(recordsTab).toBeVisible({ timeout: 5000 });
+    await recordsTab.click();
+    await page.waitForTimeout(2000);
 
-    // 5. Try to click "Add Service"
-    const addServiceBtn = page.getByRole('button', { name: /Add Service|Thêm dịch vụ|Tạo dịch vụ/i });
+    // 5. Scroll down to find the Add Service button
+    await page.evaluate(() => window.scrollBy(0, 300));
+    await page.waitForTimeout(500);
+
+    // Try to click "Add Service"
+    const addServiceBtn = page.getByRole('button', { name: /Add Service|Thêm dịch vụ|Tạo dịch vụ|Thêm lịch khám/i });
     const hasAddService = await addServiceBtn.isVisible({ timeout: 3000 }).catch(() => false);
 
     if (!hasAddService) {
-      // Try looking for any service-related button
       const allButtons = await page.locator('button').allInnerTexts();
-      console.log('Buttons on profile:', allButtons.filter((b) => b.trim()).slice(0, 20));
+      console.log('All buttons on profile:', allButtons.filter((b) => b.trim()).slice(0, 30));
     }
 
-    expect(hasAddService, 'Add Service button should be visible').toBe(true);
+    expect(hasAddService, 'Add Service button should be visible in Records tab').toBe(true);
 
     await addServiceBtn.click();
     await page.waitForTimeout(2000);

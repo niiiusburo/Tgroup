@@ -147,7 +147,7 @@ export function CustomerProfile({
   onUpdateServiceStatus,
   onDeletePayment
 }: CustomerProfileProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('customers');
   const [internalActiveTab, setInternalActiveTab] = useState<ProfileTab>('profile');
   const activeTab = controlledActiveTab ?? internalActiveTab;
   const setActiveTab = (tab: ProfileTab) => {
