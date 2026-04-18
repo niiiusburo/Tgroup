@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
 
@@ -8,6 +9,7 @@ interface ColorFilterCirclesProps {
 }
 
 export function ColorFilterCircles({ selected, counts, onToggle }: ColorFilterCirclesProps) {
+  const { t } = useTranslation('calendar');
   const isAll = selected.length === 0;
   const colorEntries = Object.entries(APPOINTMENT_CARD_COLORS);
 
@@ -25,7 +27,7 @@ export function ColorFilterCircles({ selected, counts, onToggle }: ColorFilterCi
         )}>
         
         <span className="w-4 h-4 rounded-full border border-gray-300 bg-white" />
-        <span className="text-sm font-medium"></span>
+        <span className="text-sm font-medium">{t('smartFilter.allColors')}</span>
       </button>
       {colorEntries.map(([code, color]) => {
         const isSelected = selected.includes(code);

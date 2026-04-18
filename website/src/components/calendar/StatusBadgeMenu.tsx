@@ -63,7 +63,7 @@ export function StatusBadgeMenu({
         className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl p-3 shadow-lg z-20 min-w-[160px]"
         onClick={(e) => e.stopPropagation()}>
         
-          <div className="text-xs font-bold text-gray-700 mb-2"></div>
+          <div className="text-xs font-bold text-gray-700 mb-2">{t('iTrngThi')}</div>
           {DROPDOWN_PHASES.map((p) => {
           const selected = phase === p;
           return (

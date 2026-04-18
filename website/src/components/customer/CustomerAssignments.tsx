@@ -34,6 +34,7 @@ interface AssignmentFieldProps {
 }
 
 function AssignmentField({ icon: Icon, label, value }: AssignmentFieldProps) {
+  const { t } = useTranslation('customers');
   return (
     <div className="flex items-start gap-2.5 p-3 rounded-lg bg-gray-50/70 border border-gray-200 hover:bg-white hover:border-gray-300 transition-colors min-w-0">
       <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-500">
@@ -42,7 +43,7 @@ function AssignmentField({ icon: Icon, label, value }: AssignmentFieldProps) {
       <div className="min-w-0 leading-tight">
         <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-400">{label}</div>
         <div className="text-[13px] font-semibold text-gray-900 truncate mt-0.5">
-          {value ? value : <span className="text-gray-400 font-normal italic"></span>}
+          {value ? value : <span className="text-gray-400 font-normal italic">{t('chaGn')}</span>}
         </div>
       </div>
     </div>);

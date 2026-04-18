@@ -1,5 +1,6 @@
 import { Search, User, ChevronDown, Plus } from 'lucide-react';
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { normalizeText } from '@/lib/utils';
 import type { Customer } from '@/types/customer';
 
@@ -25,6 +26,7 @@ export function CustomerSelector({
   disabled = false,
   onCreateNew
 }: CustomerSelectorProps) {
+  const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -101,7 +103,7 @@ export function CustomerSelector({
           </div>
           <div className="max-h-48 overflow-y-auto py-1">
             {filteredCustomers.length === 0 ?
-          <div className="px-4 py-3 text-sm text-gray-400 text-center"></div> :
+          <div className="px-4 py-3 text-sm text-gray-400 text-center">{t('khngTmThyKhchHng')}</div> :
 
           filteredCustomers.map((customer) =>
           <button

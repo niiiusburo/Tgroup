@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { CalendarDays, Clock } from 'lucide-react';
 
 interface FilterSummaryCardsProps {
@@ -13,6 +14,7 @@ function formatDuration(minutes: number): string {
 }
 
 export function FilterSummaryCards({ totalAppointments, totalDurationMinutes }: FilterSummaryCardsProps) {
+  const { t } = useTranslation('calendar');
   return (
     <div className="grid grid-cols-2 gap-3">
       <div className="flex items-center gap-3 bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm">
@@ -21,7 +23,7 @@ export function FilterSummaryCards({ totalAppointments, totalDurationMinutes }: 
         </div>
         <div>
           <div className="text-xl font-bold text-gray-900">{totalAppointments}</div>
-          <div className="text-xs text-gray-500"></div>
+          <div className="text-xs text-gray-500">{t('lchHn')}</div>
         </div>
       </div>
       <div className="flex items-center gap-3 bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm">
@@ -30,7 +32,7 @@ export function FilterSummaryCards({ totalAppointments, totalDurationMinutes }: 
         </div>
         <div>
           <div className="text-xl font-bold text-gray-900">{formatDuration(totalDurationMinutes)}</div>
-          <div className="text-xs text-gray-500"></div>
+          <div className="text-xs text-gray-500">{t('dKin')}</div>
         </div>
       </div>
     </div>);

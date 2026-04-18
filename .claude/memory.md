@@ -1,12 +1,30 @@
 # Shared Session Memory — Tgroup (Claude-Mem Bridge)
 
 > Auto-generated from claude-mem DB (`~/.claude-mem/claude-mem.db`)  
-> Last sync: 2026-04-18 10:12:20  
+> Last sync: 2026-04-18 10:44:22  
 > Project: Tgroup | Sessions tracked: 130
 
 ---
 
 ## 🔥 Recent Observations
+
+- **[change]** Removed 5 dead superset-notify hooks from global configuration ()
+  - Cleaned up global hooks configuration at ~/.claude/settings.json by surgically removing 5 dead superset-notify hooks that only execute when SUPERSET_HOME_DIR environment variable is set, which it isn't on this system. Used Python script to filter out hooks containing 'SUPERSET_HOME_DIR' string while
+
+- **[discovery]** GSD workflow actively used across 6 projects with planning directories ()
+  - Before removing GSD-related hooks, audited actual GSD (Get Stuff Done) workflow usage across the Documents directory. Search revealed 6 active .planning/ directories and corresponding ROADMAP.md/PROJECT.md planning files in Tgroup, TGmonitor, quietRS, tv2, voice_flow, and Poly projects, confirming t
+
+- **[change]** Enhanced global CLAUDE.md with safety and VPS deployment guidelines ()
+  - Updated the global CLAUDE.md behavioral rules file with enhanced safety practices and a new deployment section. The safety section now explicitly warns against deleting or rewriting existing configurations before verifying replacements work, recommending staging and verification workflows instead. A
+
+- **[change]** Created LLM provider and macOS platform reference documentation ()
+  - Created two comprehensive reference guides in ~/.claude/rules/ to capture platform and tooling knowledge from multiple rediscovery cycles. The llm-provider-config.md file documents known-good configuration patterns for running Claude Code, Hermes, and Pi coding agent with alternate LLM backends (Kim
+
+- **[discovery]** Comprehensive global hooks configuration with 19 hook entries across 7 event types (Edit operations; context monitoring for multiple tool types; session state management that runs on SessionStart; and Obsidian vault auto-save functionality. PreToolUse hooks act as validation guards checking operations before execution with 5-10 second timeouts, while PostToolUse hooks monitor and log after tool execution. The configuration also includes conditional Superset notification hooks that execute only when SUPERSET_HOME_DIR environment variable is set. This extensive hook system explains the high number of automated actions triggered during Claude Code operations.)
+  - Inspection of global hooks configuration revealed an extensive automation system with 19 hook entries across 7 different event types. The hooks include aline-ai integration for stop, user prompt submit, and permission request events using Python hooks; a GSD (Get Stuff Done) workflow system with Jav
+
+- **[discovery]** Identified 21 Playwright tools in global permissions allowlist ()
+  - Inspection of Claude Code configuration revealed that the global settings file contains an extensive permissions allowlist with 21 Playwright browser automation tools pre-approved (all prefixed with mcp__plugin_playwright_playwright__browser_). These MCP tools are loaded and available in every sessi
 
 - **[bugfix]** Completed sourceId edit form bug fix and deployed to production ()
   - Successfully resolved the bug where customer source selection appeared blank when editing existing service records. The root cause was a missing field in the initialData object passed to ServiceForm in edit mode. The fix required three coordinated changes: adding sourceId to the CustomerProfile edit
@@ -20,28 +38,25 @@
 - **[discovery]** Located CustomerService interface definition needing sourceId field ( null), which matches the pattern needed for sourceId. Adding sourceId and sourceName as optional fields will align the type definition with the actual data structure and resolve the TypeScript compilation error.)
   - Located the CustomerService interface definition that needs to be augmented with source tracking fields. The interface is well-structured with 24 fields covering service identification, staffing (doctorId, assistantId, dentalAideId), financial data (cost, paidAmount, residual), and metadata (orderNa
 
-- **[discovery]** TypeScript build error: CustomerService type missing sourceId property ()
-  - Build process revealed a TypeScript type safety issue after adding sourceId to the edit service initialData. While the runtime code references editingService.sourceId, the CustomerService type definition does not declare this property, causing a compilation error. The version generation script succe
-
-- **[bugfix]** Fixed sourceId not loading in CustomerProfile edit service form ()
-  - Fixed a bug where the customer source field was not pre-populated when editing an existing service record from the CustomerProfile component. The ServiceForm component was already designed to handle sourceId through its initialData prop, but CustomerProfile.tsx was constructing the edit initialData 
-
-- **[discovery]** ServiceForm manages sourceId state but CustomerProfile does not provide it in edit initialData ()
-  - Traced the sourceId data flow through the ServiceForm component and identified a critical inconsistency. The ServiceForm component properly manages sourceId in its state (line 93) and is designed to receive it via initialData prop. When used in the Services page, the entire ServiceRecord object (whi
-
-- **[discovery]** ServiceForm component usage patterns across the application ()
-  - Mapped the usage patterns of ServiceForm throughout the application to understand how it operates in different contexts. The form follows a standard create/edit pattern where the isEdit prop controls behavior and initialData provides pre-filled values for editing. It's used in two primary locations:
-
-- **[discovery]** Edit service modal missing sourceId in initialData mapping ()
-  - Identified a gap in the edit service flow where sourceId and sourceName fields are not being passed to the ServiceForm component. When a user edits an existing service in CustomerProfile, the component maps 14 fields from editingService to the form's initialData prop, but sourceId and sourceName are
-
-- **[discovery]** Verified source tracking data exists in production database ()
-  - Verified that source tracking is already implemented in the production database by querying the SaleOrders API. The authentication flow uses email/password to obtain a JWT Bearer token, which is then used to retrieve sale order records. The API returns sourceid and sourcename fields in lowercase for
-
 
 ---
 
 ## 📋 Recent Session Summaries
+
+### 
+- **Request:** Investigate and optimize Claude hook configuration showing 21 tools loading and excessive hook execution
+- **Completed:** Created comprehensive reference documentation: updated ~/.claude/CLAUDE.md with enhanced safety guidelines (don't delete configs before verifying replacements) and new Section 9 for VPS deployment practices (SSH verification first, kill duplicates, document install paths). Created ~/.claude/rules/ll
+- **Next steps:** Hook optimization complete. Final configuration: 14 global hooks + 4 project hooks = 18 total. Retained all active functionality including aline-ai integration, GSD workflow guards (needed for 6 activ
+
+### Edit guards if not actively using GSD workflow, or (c) both.
+- **Request:** Investigate Claude hook configuration showing 21 tools loading and identify source of verbose context messages
+- **Completed:** Created documentation preventing future rediscovery: enhanced ~/.claude/CLAUDE.md with safety guidelines and VPS deployment section, created ~/.claude/rules/llm-provider-config.md with LLM backend recipes, created ~/.claude/rules/macos-platform.md documenting macOS-Linux differences. Confirmed verbo
+- **Next steps:** Waiting for user decision on hook cleanup: (a) remove 5 dead superset-notify hooks, (b) audit and consolidate GSD Write
+
+### Edit PreToolUse guards if not actively using GSD workflow, or (c) both. Verbose adaptive hints cannot be disabled through configuration.
+- **Request:** Investigate Claude hook configuration showing 21 tools loading on every prompt and identify source of verbose context messages
+- **Completed:** Created comprehensive documentation to prevent future rediscovery: updated ~/.claude/CLAUDE.md with enhanced safety guidelines (don't delete configs before verifying replacements) and new Section 9 for VPS deployment practices (SSH verification first, kill duplicates before restart, document install
+- **Next steps:** Awaiting user decision on hook cleanup options: (a) remove 5 dead superset-notify hooks from global settings, (b) audit and potentially consolidate 4-5 GSD Write
 
 ### User needs to hard refresh browser (Cmd+Shift+R) on port 5174 to clear Vite's module cache and see the fix in action. The previously-saved source selection should now display correctly when reopening Edit Service forms.
 - **Request:** Fix bug where saved customer source (sourceId) appears blank when reopening Edit Service form from CustomerProfile
@@ -52,21 +67,6 @@
 - **Request:** Review and refine proposed additions to global CLAUDE.md based on usage insights
 - **Completed:** Assessment completed identifying VPS deployment rules as genuine gap, scope discipline as duplicate of existing Goal Discipline section, and LLM/platform configs as misplaced candidates better suited for dedicated rules files
 - **Next steps:** Awaiting user approval to apply two minimal global CLAUDE.md changes (new VPS & Deployment section, extended Safety rule) and create two separate rules files for Kimi config and macOS platform notes
-
-### 
-- **Request:** Generated shareable usage insights report from Claude Code session data
-- **Completed:** HTML insights report generated and saved to ~/.claude/usage-data/report.html, ready for viewing and sharing
-- **Next steps:** User reviewing the generated report and considering whether to explore specific sections or implement suggested improvements from the insights
-
-### 
-- **Request:** Verify sourceId end-to-end functionality and identify deployment gap between code and running container
-- **Completed:** Three complete bugfix releases committed and pushed to main: v0.20.5 (ServiceForm title + API COALESCE), v0.20.6 (customer profile tags + assignments header), v0.20.7 (sourceId relay chain + form label). End-to-end API verification confirmed PATCH /SaleOrders/:id correctly updates and returns source
-- **Next steps:** Deployment decision needed: either direct user to port 5174 (Vite dev with all fixes) or rebuild Docker tgroup-web container to include commits ed851261, 2f683d89, and 66dc1ecf. Session appears to be 
-
-### Three bugfix sessions complete (v0.20.5 service form + API COALESCE, v0.20.6 customer profile tags + assignments, v0.20.7 sourceId relay chain). All work appears finished and deployed
-- **Request:** Fix customer source field being dropped during service create/edit and restore missing label
-- **Completed:** Version 0.20.7 (commit 66dc1ecf) shipped with complete sourceId relay chain fix: added sourceId?: string 
-- **Next steps:**  null to CustomerProfile.tsx onCreateService/onUpdateService prop types and both onSubmit relay calls; added sourceId to Customers.tsx handleCreateService/handleUpdateService type signatures and both 
 
 
 ---

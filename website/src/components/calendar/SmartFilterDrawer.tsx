@@ -129,7 +129,7 @@ export function SmartFilterDrawer({
         
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900"></h2>
+          <h2 className="text-lg font-bold text-gray-900">{t('smartFilter.title')}</h2>
           <button
             type="button"
             data-testid="smart-filter-close"
@@ -149,7 +149,7 @@ export function SmartFilterDrawer({
           
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3"></h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">{t('smartFilter.doctors')}</h3>
             <DoctorFilterChips
               doctors={doctorData}
               selected={draftDoctors}
@@ -158,7 +158,7 @@ export function SmartFilterDrawer({
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3"></h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">{t('smartFilter.status')}</h3>
             <StatusFilterChips
               statuses={statusData}
               selected={draftStatuses}
@@ -167,7 +167,7 @@ export function SmartFilterDrawer({
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-3"></h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">{t('smartFilter.colorLabel')}</h3>
             <ColorFilterCircles
               selected={draftColors}
               counts={colorCounts}
@@ -183,24 +183,21 @@ export function SmartFilterDrawer({
               type="button"
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-              
-
+              {t('smartFilter.close')}
             </button>
             <button
               type="button"
               data-testid="smart-filter-clear"
               onClick={onClear}
               className="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
-              
-
+              {t('smartFilter.clear')}
             </button>
             <button
               type="button"
               data-testid="smart-filter-apply"
               onClick={onApply}
               className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors">
-              
-              {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
+              {t('smartFilter.apply')} {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}
             </button>
           </div>
         </div>

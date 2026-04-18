@@ -170,7 +170,7 @@ export function CustomerDeposits({
           <h4 className="text-lg font-semibold text-gray-900 mb-4">{title}</h4>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1"></label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('ngyGiaoDch')}</label>
               <input
                 type="date"
                 value={formDate}
@@ -183,7 +183,7 @@ export function CustomerDeposits({
               <div className="flex items-center justify-between px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl">
                 <div className="flex items-center gap-2 text-gray-500">
                   <DollarSign className="w-5 h-5" />
-                  <span className="text-sm font-medium text-gray-600"></span>
+                  <span className="text-sm font-medium text-gray-600">{t('sTin')}</span>
                 </div>
                 <div className="flex items-baseline gap-1">
                   <CurrencyInput
@@ -195,7 +195,7 @@ export function CustomerDeposits({
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 mt-3">
-                <span className="text-xs text-gray-400">Nhanh:</span>
+                <span className="text-xs text-gray-400">{t('quickAmount')}</span>
                 {[500000, 1000000, 2000000, 5000000].map((amt) =>
                 <button
                   key={amt}
@@ -210,7 +210,7 @@ export function CustomerDeposits({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1"></label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('phngThc')}</label>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
@@ -220,8 +220,7 @@ export function CustomerDeposits({
                   'bg-primary text-white border-primary' :
                   'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'}`
                   }>
-                  
-
+                  {t('tinMt')}
                 </button>
                 <button
                   type="button"
@@ -231,8 +230,7 @@ export function CustomerDeposits({
                   'bg-primary text-white border-primary' :
                   'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'}`
                   }>
-                  
-
+                  {t('chuynKhon')}
                 </button>
                 {!isRefund &&
                 <button
@@ -251,7 +249,7 @@ export function CustomerDeposits({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1"></label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('ghiChTyChn')}</label>
               <input
                 type="text"
                 value={formNote}
@@ -278,8 +276,7 @@ export function CustomerDeposits({
               onClick={closeModals}
               disabled={submitting}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50">
-              
-
+              {t('hy')}
             </button>
             <button
               onClick={handleSubmitDeposit}
@@ -304,7 +301,7 @@ export function CustomerDeposits({
             <Wallet className="w-6 h-6 text-blue-600" />
           </div>
           <div>
-            <p className="text-xs text-gray-500"></p>
+            <p className="text-xs text-gray-500">{t('tmNgNg')}</p>
             <p className="text-xl font-bold text-blue-600">{formatVND(balance.totalDeposited)}</p>
           </div>
         </div>
@@ -314,7 +311,7 @@ export function CustomerDeposits({
             <Coins className="w-6 h-6 text-emerald-600" />
           </div>
           <div>
-            <p className="text-xs text-gray-500"></p>
+            <p className="text-xs text-gray-500">{t('tmNgCnLi')}</p>
             <p className="text-xl font-bold text-emerald-600">{formatVND(balance.depositBalance)}</p>
           </div>
         </div>
@@ -324,7 +321,7 @@ export function CustomerDeposits({
             <Receipt className="w-6 h-6 text-rose-600" />
           </div>
           <div>
-            <p className="text-xs text-gray-500"></p>
+            <p className="text-xs text-gray-500">{t('tmNgDng')}</p>
             <p className="text-xl font-bold text-rose-600">{formatVND(balance.totalUsed)}</p>
           </div>
         </div>
@@ -334,7 +331,7 @@ export function CustomerDeposits({
             <History className="w-6 h-6 text-amber-600" />
           </div>
           <div>
-            <p className="text-xs text-gray-500"></p>
+            <p className="text-xs text-gray-500">{t('tmNgHon')}</p>
             <p className="text-xl font-bold text-amber-600">{formatVND(balance.totalRefunded)}</p>
           </div>
         </div>
@@ -378,15 +375,14 @@ export function CustomerDeposits({
                 className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50">
                 
                   <Plus className="w-4 h-4" />
-
+                  {t('ngTmNg')}
               </button>
                 {onAddRefund &&
               <button
                 onClick={openRefundModal}
                 disabled={loading}
                 className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50">
-                
-
+                {t('honTmNg')}
               </button>
               }
               </>
@@ -400,13 +396,13 @@ export function CustomerDeposits({
           <table className="w-full text-sm min-w-[640px]">
               <thead>
                 <tr className="bg-gray-50 text-left">
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider text-right"></th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider text-right"></th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('sPhiu')}</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('ngy')}</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('phngThc')}</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('loi')}</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider text-right">{t('sTin')}</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('trngThi')}</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider text-right">{t('thaoTc')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -422,7 +418,7 @@ export function CustomerDeposits({
               paged.length === 0 ?
               <tr>
                     <td colSpan={7} className="px-2 sm:px-4 py-8 text-center text-gray-400">
-
+                  {t('khngCDLieu')}
                 </td>
                   </tr> :
 
@@ -500,11 +496,11 @@ export function CustomerDeposits({
           <table className="w-full text-sm min-w-[480px]">
               <thead>
                 <tr className="bg-gray-50 text-left">
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider text-right"></th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('ngy')}</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('phngThc')}</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('ghiCh')}</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider text-right">{t('sTin')}</th>
+                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('trngThi')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -520,7 +516,7 @@ export function CustomerDeposits({
               usageHistory.length === 0 ?
               <tr>
                     <td colSpan={5} className="px-2 sm:px-4 py-8 text-center text-gray-400">
-
+                  {t('khngCDLieuSDngTmNg')}
                 </td>
                   </tr> :
 

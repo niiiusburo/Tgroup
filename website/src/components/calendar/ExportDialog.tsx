@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 
 export type ExportMode = 'current-filter' | 'date-range';
@@ -18,6 +19,7 @@ export function ExportDialog({
   defaultDateFrom,
   defaultDateTo
 }: ExportDialogProps) {
+  const { t } = useTranslation('calendar');
   const [mode, setMode] = useState<ExportMode>('current-filter');
   const [dateFrom, setDateFrom] = useState(defaultDateFrom || '');
   const [dateTo, setDateTo] = useState(defaultDateTo || '');
@@ -29,7 +31,7 @@ export function ExportDialog({
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-gray-900"></h3>
+          <h3 className="text-base font-semibold text-gray-900">{t('xutDLiuLchHn')}</h3>
           <button onClick={onClose} className="p-1 rounded hover:bg-gray-100">
             <X className="w-4 h-4 text-gray-500" />
           </button>
@@ -44,7 +46,7 @@ export function ExportDialog({
               onChange={() => setMode('current-filter')}
               className="w-4 h-4 text-orange-500" />
             
-            <span className="text-sm text-gray-700"></span>
+            <span className="text-sm text-gray-700">{t('theoBLcHinTi')}</span>
           </label>
 
           <label className="flex items-center gap-2 cursor-pointer">
@@ -55,7 +57,7 @@ export function ExportDialog({
               onChange={() => setMode('date-range')}
               className="w-4 h-4 text-orange-500" />
             
-            <span className="text-sm text-gray-700"></span>
+            <span className="text-sm text-gray-700">{t('theoKhongThigian')}</span>
           </label>
 
           {mode === 'date-range' &&
@@ -81,8 +83,7 @@ export function ExportDialog({
           <button
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg">
-            
-
+            {t('ng')}
           </button>
           <button
             onClick={() => {
@@ -90,8 +91,7 @@ export function ExportDialog({
               onClose();
             }}
             className="px-4 py-2 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 rounded-lg">
-            
-
+            {t('xutFile')}
           </button>
         </div>
       </div>

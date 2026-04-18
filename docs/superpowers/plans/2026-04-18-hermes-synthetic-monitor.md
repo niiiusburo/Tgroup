@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a standalone Python service that uses browser-use to test every business flow on tbot.vn every 30 minutes, alerting via Telegram on failures.
+**Goal:** Build a standalone Python service that uses browser-use to test every business flow on nk.2checkin.com every 30 minutes, alerting via Telegram on failures.
 
 **Architecture:** Hermes lives at `/opt/hermes/` on VPS `76.13.16.68`. A systemd timer triggers `hermes.py` every 30 minutes. It reads a YAML map of website flows, spawns one browser-use agent per flow, captures 3 screenshots per flow (before/middle/after), and aggregates results. Failures and novel findings go to Telegram using the existing bot token.
 
@@ -143,7 +143,7 @@ class FlowConfig:
 
 @dataclass
 class SiteConfig:
-    url: str = "https://tbot.vn"
+    url: str = "https://nk.2checkin.com"
     email: str = "hermes@clinic.vn"
     password: str = ""
 
@@ -210,7 +210,7 @@ def load_config(config_path: str | None = None) -> HermesConfig:
     if "site" in raw:
         s = raw["site"]
         cfg.site = SiteConfig(
-            url=s.get("url", "https://tbot.vn"),
+            url=s.get("url", "https://nk.2checkin.com"),
             email=s.get("email", "hermes@clinic.vn"),
             password=os.environ.get("HERMES_PASSWORD", s.get("password", "")),
         )
@@ -274,7 +274,7 @@ def load_ignore_patterns(path: str = "/opt/hermes/hermes-ignore.yaml") -> list[s
 
 ```yaml
 site:
-  url: "https://tbot.vn"
+  url: "https://nk.2checkin.com"
   email: "hermes@clinic.vn"
   password: "CHANGE_ME_ON_VPS"
 
@@ -1708,7 +1708,7 @@ git commit -m "feat: add calendar view test with test data visibility check"
 ```python
 #!/usr/bin/env python3
 """
-Hermes — Synthetic Website Monitor for TDental (tbot.vn)
+Hermes — Synthetic Website Monitor for TDental (nk.2checkin.com)
 Entry point. Reads config, runs flows, reports results.
 """
 

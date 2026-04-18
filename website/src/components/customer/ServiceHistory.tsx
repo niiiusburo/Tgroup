@@ -195,7 +195,7 @@ export function ServiceHistory({
                     {svc.cost > 0 ?
                   <p className="text-sm font-medium text-gray-900">{formatVND(svc.cost)}</p> :
 
-                  <p className="text-sm font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded"></p>
+                  <p className="text-sm font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">{t('noPrice')}</p>
                   }
                   </div>
                 </div>

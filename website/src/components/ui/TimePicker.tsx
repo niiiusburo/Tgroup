@@ -139,7 +139,7 @@ export function TimePicker({
       <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-100">
-            <span className="text-sm font-semibold text-gray-900"></span>
+            <span className="text-sm font-semibold text-gray-900">{t('timePicker.chooseTime')}</span>
           </div>
 
           {/* Time list */}

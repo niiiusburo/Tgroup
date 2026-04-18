@@ -641,7 +641,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                 </button>
               )}
             </div>
-            <p className="mt-2 text-xs text-gray-400"></p>
+            <p className="mt-2 text-xs text-gray-400">{t('tnhNngNhcLchSCKchHotSau')}</p>
           </div>
         </form>
 

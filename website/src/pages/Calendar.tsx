@@ -567,7 +567,7 @@ export function Calendar() {
             {isDropdownOpen && search.trim().length >= 2 &&
             <div className="absolute top-full left-0 mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-60 overflow-y-auto">
                 {filteredSuggestions.length === 0 ?
-              <div className="px-4 py-3 text-sm text-gray-400 text-center"></div> :
+              <div className="px-4 py-3 text-sm text-gray-400 text-center">{t('khngTmThyKtQu')}</div> :
 
               filteredSuggestions.map((customer) =>
               <button

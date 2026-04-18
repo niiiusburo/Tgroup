@@ -215,7 +215,7 @@ export function FilterByDoctor({ selectedDoctorName, onChange, doctors = [], cla
           })}
 
             {filteredDoctors.length === 0 && query.trim().length > 0 &&
-          <div className="px-3 py-3 text-sm text-gray-400 text-center"></div>
+          <div className="px-3 py-3 text-sm text-gray-400 text-center">{t('khngTmThyBcS')}</div>
           }
           </div>
 

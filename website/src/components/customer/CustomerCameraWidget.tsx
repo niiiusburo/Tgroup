@@ -108,7 +108,7 @@ export function CustomerCameraWidget({
             </div> :
         isNoMatch ?
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-2">
-              <span className="text-[10px] text-gray-500"></span>
+              <span className="text-[10px] text-gray-500">{t('khngNhnDinC')}</span>
             </div> :
         null}
         </div>

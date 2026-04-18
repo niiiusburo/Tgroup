@@ -61,8 +61,8 @@ const ALLOWED_ORIGINS = [
   'http://localhost:5173',
   'http://localhost:5175',
   'http://76.13.16.68:5174',
-  'https://tbot.vn',
-  'https://www.tbot.vn',
+  'https://nk.2checkin.com',
+  'https://www.nk.2checkin.com',
 ];
 app.use(helmet());
 app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));

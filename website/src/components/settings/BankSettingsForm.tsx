@@ -50,7 +50,7 @@ export function BankSettingsForm() {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
-        <span className="ml-2 text-sm text-gray-500"></span>
+        <span className="ml-2 text-sm text-gray-500">{t('angTi')}</span>
       </div>);
 
   }
@@ -62,27 +62,27 @@ export function BankSettingsForm() {
           <Building2 className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h3 className="text-base font-semibold text-gray-900"></h3>
-          <p className="text-sm text-gray-500"></p>
+          <h3 className="text-base font-semibold text-gray-900">{t('tiKhonNgnHng')}</h3>
+          <p className="text-sm text-gray-500">{t('cuHnhTiKhonNhnThanhTonQrChoPhngKhm')}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label htmlFor="bankBin" className="block text-sm font-medium text-gray-700">
-
+            {t('mNgnHngBin')}
           </label>
           <BankSelector
             value={formData.bankBin}
             onChange={(bin) => handleChange('bankBin', bin)}
             placeholder={t('bankSettingsContent.selectBank', { ns: 'settings' })} />
           
-          <p className="text-xs text-gray-400"></p>
+          <p className="text-xs text-gray-400">{t('vD970436Vietcombank')}</p>
         </div>
 
         <div className="space-y-2">
           <label htmlFor="bankNumber" className="block text-sm font-medium text-gray-700">
-
+            {t('sTiKhon')}
           </label>
           <input
             id="bankNumber"
@@ -97,7 +97,7 @@ export function BankSettingsForm() {
 
         <div className="md:col-span-2 space-y-2">
           <label htmlFor="bankAccountName" className="block text-sm font-medium text-gray-700">
-
+            {t('tnChTiKhon')}
           </label>
           <input
             id="bankAccountName"
@@ -120,12 +120,12 @@ export function BankSettingsForm() {
           {saving ?
           <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span></span>
+              <span>{t('angLu')}</span>
             </> :
 
           <>
               <Save className="w-4 h-4" />
-              <span></span>
+              <span>{t('lu')}</span>
             </>
           }
         </button>
@@ -133,7 +133,7 @@ export function BankSettingsForm() {
         {success &&
         <div className="flex items-center gap-2 text-green-600">
             <CheckCircle2 className="w-4 h-4" />
-            <span className="text-sm font-medium"></span>
+            <span className="text-sm font-medium">{t('luCiTNgnHng')}</span>
           </div>
         }
       </div>

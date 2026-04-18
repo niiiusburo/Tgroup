@@ -68,15 +68,15 @@ export function ServicePaymentCard({ ctx }: ServicePaymentCardProps) {
       {/* Amounts row */}
       <div className="grid grid-cols-3 gap-3 mb-3">
         <div>
-          <p className="text-[10px] text-gray-500 uppercase tracking-wider"></p>
+          <p className="text-[10px] text-gray-500 uppercase tracking-wider">{t('tngChiPh')}</p>
           <p className="text-sm font-bold text-gray-900">{formatVND(ctx.totalCost)}</p>
         </div>
         <div>
-          <p className="text-[10px] text-gray-500 uppercase tracking-wider"></p>
+          <p className="text-[10px] text-gray-500 uppercase tracking-wider">{t('thanhTon1')}</p>
           <p className="text-sm font-bold text-emerald-600">{formatVND(ctx.paidAmount)}</p>
         </div>
         <div>
-          <p className="text-[10px] text-gray-500 uppercase tracking-wider"></p>
+          <p className="text-[10px] text-gray-500 uppercase tracking-wider">{t('cnN')}</p>
           <p className={`text-sm font-bold ${isFullyPaid ? 'text-emerald-600' : 'text-red-600'}`}>
             {formatVND(ctx.residual)}
           </p>

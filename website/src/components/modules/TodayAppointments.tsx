@@ -134,7 +134,7 @@ export function TodayAppointments({
       {/* Appointment list (scrollable) */}
       <div className="flex-1 overflow-y-auto px-5 pb-5 space-y-2.5">
         {appointments.length === 0 &&
-        <p className="text-center text-gray-400 text-sm py-8"></p>
+        <p className="text-center text-gray-400 text-sm py-8">{t('khngCLchHn')}</p>
         }
 
         {appointments.map((apt) =>

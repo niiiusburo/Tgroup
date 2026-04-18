@@ -32,6 +32,8 @@
     "time": "Time",
     "duration": "Duration",
     "service": "Service",
+    "assistant": "Assistant",
+    "dentalAide": "Dental Aide",
     "notes": "Notes",
     "status": "Status",
     "color": "Color",
@@ -122,6 +124,7 @@
   "cpNht": "Update",
   "thuGnChiTit": "Collapse details",
   "mRngChiTit": "Expand details",
+  "khngTmThyKtQu": "No results found",
   "returningCustomer": "Returning customer",
   "newCustomer": "New customer",
   "weekDays": {

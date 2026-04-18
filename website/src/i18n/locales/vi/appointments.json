@@ -32,6 +32,8 @@
     "time": "Giờ",
     "duration": "Thời lượng",
     "service": "Dịch vụ",
+    "assistant": "Phụ tá",
+    "dentalAide": "Trợ lý bác sĩ",
     "notes": "Ghi chú",
     "status": "Trạng thái",
     "color": "Màu sắc",
@@ -122,6 +124,7 @@
   "cpNht": "Cập nhật",
   "thuGnChiTit": "Thu gọn chi tiết",
   "mRngChiTit": "Mở rộng chi tiết",
+  "khngTmThyKtQu": "Không tìm thấy kết quả",
   "returningCustomer": "Khách tái khám",
   "newCustomer": "Khách mới",
   "weekDays": {

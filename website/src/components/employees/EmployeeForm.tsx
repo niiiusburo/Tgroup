@@ -243,7 +243,7 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
               </button>
             </div>
             {isEdit &&
-            <p className="mt-1 text-xs text-gray-400"></p>
+            <p className="mt-1 text-xs text-gray-400">{t('trngNuKhngIMtKhu')}</p>
             }
           </div>
 
@@ -266,7 +266,7 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
               {t('form.additionalLocations')}
             </label>
             {locations.length === 0 ?
-            <p className="text-sm text-gray-400"></p> :
+            <p className="text-sm text-gray-400">{t('chaCChiNhnhNo')}</p> :
             (() => {
               const otherLocs = locations.filter((loc) => loc.id !== companyid);
               const allSelected = otherLocs.length > 0 && otherLocs.every((loc) => locationScopeIds.includes(loc.id));
@@ -286,8 +286,7 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
                     'bg-orange-500 text-white border-orange-500' :
                     'bg-white text-orange-600 hover:bg-orange-50 border-orange-300'}`
                     }>
-                    
-
+                    {allSelected ? t('ttCChiNhnh') : t('ttCChiNhnh')}
                   </button>
                   {otherLocs.map((loc) => {
                     const selected = locationScopeIds.includes(loc.id);
@@ -325,12 +324,12 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
               onChange={(e) => setSelectedTierId(e.target.value)}
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm">
               
-              <option value=""></option>
+              <option value="">{t('chnTier')}</option>
               {tiers.map((tier) =>
               <option key={tier.id} value={tier.id}>{tier.name}</option>
               )}
             </select>
-            <p className="mt-1 text-xs text-gray-400"></p>
+            <p className="mt-1 text-xs text-gray-400">{t('tierQuytNhQuynTruyCpCaNhnVinTrongHThng')}</p>
           </div>
 
           <div>
@@ -373,7 +372,7 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
         <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
           <button type="button" onClick={onClose} disabled={loading}
             className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50">
-
+            {t('hyB')}
             </button>
           <button type="submit" disabled={loading || !isValid}
             className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/25">

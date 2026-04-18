@@ -1,0 +1,3 @@
+# Dismissed novel findings — patterns that have been reviewed and are NOT bugs.
+# Add patterns here when Hermes reports a false alarm.
+ignore_patterns: []

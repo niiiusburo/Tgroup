@@ -87,7 +87,7 @@ export function DepositWallet({
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1"></label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('ngyGiaoDch')}</label>
                 <input
                 type="date"
                 value={addDate}
@@ -100,7 +100,7 @@ export function DepositWallet({
                 <div className="flex items-center justify-between px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl">
                   <div className="flex items-center gap-2 text-gray-500">
                     <DollarSign className="w-5 h-5" />
-                    <span className="text-sm font-medium text-gray-600"></span>
+                    <span className="text-sm font-medium text-gray-600">{t('sTin')}</span>
                   </div>
                   <div className="flex items-baseline gap-1">
                     <CurrencyInput
@@ -199,9 +199,8 @@ export function DepositWallet({
             type="button"
             onClick={() => setShowVietQr(true)}
             className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
-            
                 <QrCode className="w-4 h-4" />
-
+                {t('toQr')}
           </button>
           }
 

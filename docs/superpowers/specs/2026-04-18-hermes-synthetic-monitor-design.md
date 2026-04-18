@@ -2,7 +2,7 @@
 
 > **Status:** Design approved — awaiting implementation plan
 > **Date:** 2026-04-18
-> **Scope:** TGroup TDental Dashboard (tbot.vn, VPS 76.13.16.68)
+> **Scope:** TGroup TDental Dashboard (nk.2checkin.com, VPS 76.13.16.68)
 
 ---
 
@@ -12,7 +12,7 @@ After every deploy, bugs silently reach production — timezone date shifts, i18
 
 ## Solution
 
-Hermes is a standalone Python service on the VPS that uses `browser-use` (88k stars, Playwright-backed) to simulate real users on tbot.vn every 30 minutes. It creates, verifies, edits, and deletes test data — exercising every business flow like a real clinic employee.
+Hermes is a standalone Python service on the VPS that uses `browser-use` (88k stars, Playwright-backed) to simulate real users on nk.2checkin.com every 30 minutes. It creates, verifies, edits, and deletes test data — exercising every business flow like a real clinic employee.
 
 ---
 
@@ -215,7 +215,7 @@ python hermes.py --baseline
 2. Create Python venv at `/opt/hermes/.venv`
 3. `pip install -r requirements.txt`
 4. `playwright install chromium` (bundled Chromium, no system install needed)
-5. Create `hermes@clinic.vn` account via API call to tbot.vn
+5. Create `hermes@clinic.vn` account via API call to nk.2checkin.com
 6. Create systemd service unit + timer unit
 7. `systemctl enable --now hermes.timer`
 8. Run baseline: `python hermes.py --baseline`

@@ -1,0 +1,17 @@
+[Unit]
+Description=Hermes Synthetic Website Monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/hermes
+ExecStart=/opt/hermes/.venv/bin/python hermes.py
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=hermes
+
+# Resource limits
+MemoryMax=1G
+TimeoutStartSec=600

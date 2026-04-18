@@ -424,7 +424,7 @@ export function CustomerProfile({
                   <Coins className="w-5 h-5 text-sky-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-gray-500 truncate"></p>
+                  <p className="text-xs text-gray-500 truncate">{t('profileSection.totalCost')}</p>
                   <p className="text-base sm:text-lg font-bold text-gray-900 truncate">{formatVND(totalServiceCost)}</p>
                 </div>
               </div>
@@ -485,11 +485,11 @@ export function CustomerProfile({
               <p className="text-lg font-bold text-gray-900">{formatVND(totalServiceCost)}</p>
             </div>
             <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
-              <p className="text-xs text-gray-500 mb-1"></p>
+              <p className="text-xs text-gray-500 mb-1">{t('thanhTon')}</p>
               <p className="text-lg font-bold text-emerald-600">{formatVND(amountPaid)}</p>
             </div>
             <div className="bg-white rounded-xl shadow-card p-4 border border-gray-100">
-              <p className="text-xs text-gray-500 mb-1"></p>
+              <p className="text-xs text-gray-500 mb-1">{t('cnN')}</p>
               <p className="text-lg font-bold text-red-600">{formatVND(profile.outstandingBalance)}</p>
             </div>
           </div>

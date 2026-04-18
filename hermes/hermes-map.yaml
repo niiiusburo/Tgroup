@@ -1,0 +1,135 @@
+site:
+  url: "https://nk.2checkin.com"
+  email: "tg@clinic.vn"
+  password: "123456"
+
+model: kimi-for-coding
+model_api_base: "https://api.kimi.com/coding/v1"
+
+model_api_keys:
+  kimi: "sk-kimi-hG5387anC2htih7IRzEUP7CiTQhegxnNiiz03kA7ZEaWTU6d0mvHfcFWM1Hs4fud"
+  openai: ""
+  anthropic: ""
+
+observer:
+  enabled: true
+  watch_for:
+    - blank or missing text on buttons or labels
+    - error messages or red toast/banner notifications
+    - pages loading longer than 5 seconds
+    - unexpected redirects to login or 404 pages
+    - console errors visible in any error overlay
+  ignore_patterns: []
+
+screenshots:
+  directory: /opt/hermes/screenshots
+  per_flow: 3
+  keep_days: 7
+
+telegram:
+  bot_token: "8702816219:AAEKwLZTsW2NrueeNhBaK7acZdtT035tfqc"
+  chat_id: "760353533"
+
+restart_safety:
+  max_restarts_per_hour: 5
+  on_exceeded: alert_telegram_and_stop
+
+flows:
+  login:
+    critical: true
+    create:
+      description: "Navigate to /login, enter credentials, verify redirect to dashboard"
+      fields:
+        email: "{site.email}"
+        password: "{site.password}"
+      verify_fields:
+        - dashboard loads with sidebar
+        - /api/auth/me returns 200
+        - version.json matches deployed version
+
+  customer:
+    critical: true
+    pages_to_test:
+      - page: /customers
+        button: "Thêm khách hàng"
+    create:
+      description: "Click add customer, fill form with test data, submit"
+      cleanup_prefix: "HERMES_TEST_"
+      fields:
+        name: "HERMES_TEST_{timestamp}"
+        phone: "0000000000"
+        email: "hermes_test_{timestamp}@test.vn"
+      verify_fields: [name, phone, email]
+    edit:
+      description: "Open the created customer, edit the name, save, verify"
+      fields:
+        name: "HERMES_TEST_EDIT_{timestamp}"
+      verify_fields: [name]
+
+  service:
+    critical: true
+    pages_to_test:
+      - page: /services
+        button: "Thêm dịch vụ"
+      - page: /customers/{customer_id}
+        button: "Thêm dịch vụ vụ"
+    create:
+      description: "Click add service, fill form, submit"
+      cleanup_prefix: "HERMES_SVC_"
+      fields:
+        name: "HERMES_SVC_{timestamp}"
+        price: "1500000"
+      verify_fields: [name, price]
+    edit:
+      description: "Open created service, edit price, save, verify"
+      fields:
+        price: "2000000"
+      verify_fields: [price]
+
+  appointment:
+    critical: true
+    pages_to_test:
+      - page: /appointments
+        button: "Thêm lịch hẹn"
+      - page: /customers/{customer_id}
+        button: "Thêm lịch hẹn"
+      - page: /calendar
+        button: "click empty time slot"
+    create:
+      description: "Click add appointment, fill with test date 1900-01-01, submit"
+      cleanup_prefix: "HERMES_APT_"
+      fields:
+        customer: "{last_created_customer}"
+        date: "1900-01-01"
+        time: "09:00"
+      verify_fields: [date, time, status]
+      timezone_check: true
+    edit:
+      description: "Edit appointment time to 23:59, save, verify midnight boundary"
+      fields:
+        time: "23:59"
+      verify_fields: [time]
+      midnight_boundary: true
+
+  payment:
+    critical: true
+    create:
+      description: "Navigate to payment, add payment with test amount, submit"
+      cleanup_prefix: "HERMES_PAY_"
+      fields:
+        amount: "1500000"
+        method: "cash"
+      verify_fields: [amount, method]
+      amount_check: true
+
+  calendar:
+    critical: false
+    checks:
+      - day_view_renders: true
+        description: "Switch to day view, verify it loads without error"
+      - week_view_renders: true
+        description: "Switch to week view, verify it loads without error"
+      - month_view_renders: true
+        description: "Switch to month view, verify it loads without error"
+      - no_test_data_visible: true
+        description: "Verify HERMES test records do not appear in today's view"

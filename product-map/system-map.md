@@ -140,7 +140,7 @@
 | `docker-compose.yml` | `api/`, `website/`, `nginx.conf`, `.env` (POSTGRES_USER, POSTGRES_PASSWORD, JWT_SECRET, GOOGLE_PLACES_API_KEY, HOSOONLINE_*, COMPREFACE_*) |
 | `Dockerfile.api` | `api/package.json`, `api/src/` |
 | `Dockerfile.web` | `website/package.json`, `website/`, `nginx.docker.conf` |
-| `nginx.conf` | `tbot.vn` domain, SSL cert paths, `/api` proxy to `api:3002`, `/uploads/feedback` proxy |
+| `nginx.conf` | `nk.2checkin.com` domain, SSL cert paths, `/api` proxy to `api:3002`, `/uploads/feedback` proxy |
 | `nginx.docker.conf` | Inside `Dockerfile.web`; must match `nginx.conf` proxy rules |
 | `scripts/deploy-tbot.sh` | `nginx.conf`, certbot, Docker install on target VPS |
 

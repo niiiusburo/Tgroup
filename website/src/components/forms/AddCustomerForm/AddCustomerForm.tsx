@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Edit2, CalendarPlus, FileText, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
 import type { CustomerFormData } from '@/data/mockCustomerForm';
 import { FaceCaptureModal } from '@/components/shared/FaceCaptureModal';
@@ -35,13 +36,14 @@ import { useAddCustomerForm, type ApiErrorDetail } from './useAddCustomerForm';
 
 function ApiErrorPanel({ detail, onDismiss }: {detail: ApiErrorDetail;onDismiss: () => void;}) {
   const [showRaw, setShowRaw] = useState(false);
+  const { t } = useTranslation('customers');
   return (
     <div className="mx-6 mt-4 bg-red-50 border border-red-200 rounded-lg p-4 text-sm flex-shrink-0">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-start gap-2 flex-1 min-w-0">
           <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-red-700"></p>
+            <p className="font-semibold text-red-700">{t('liLuDLiu')}</p>
             <p className="text-red-600 mt-1 break-words">{detail.message}</p>
             {detail.detail &&
             <p className="text-red-500 mt-1 break-words">{detail.detail}</p>
