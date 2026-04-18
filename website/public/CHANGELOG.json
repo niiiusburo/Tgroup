@@ -1,5 +1,17 @@
 [
   {
+    "version": "0.23.4",
+    "date": "2026-04-18",
+    "commit": "pending",
+    "highlights": "Fix production build (TS errors under isolatedModules)",
+    "sections": [
+      {"title": "Bug Fixes", "items": [
+        "Removed unused getTodayStr() helper from AppointmentForm (superseded by useTimezone().getToday())",
+        "Use 'export type' for type-only re-exports in shared/index.ts (required under TS isolatedModules)"
+      ]}
+    ]
+  },
+  {
     "version": "0.23.3",
     "date": "2026-04-18",
     "commit": "pending",

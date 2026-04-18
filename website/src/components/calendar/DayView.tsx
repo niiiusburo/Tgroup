@@ -70,7 +70,7 @@ function DayCard({ appointment, onClick, onEdit, onMarkArrived, onUpdateStatus }
       onClick={() => onClick?.(appointment)}
       className={cn(
         'group relative w-full text-left rounded-lg p-2.5 border-l-4 shadow-sm cursor-pointer',
-        'hover:shadow-md transition-shadow text-xs mb-2 h-full',
+        'hover:shadow-md transition-shadow text-xs mb-2',
         colors.bg,
         colors.dot
       )}
@@ -106,7 +106,7 @@ function DayCard({ appointment, onClick, onEdit, onMarkArrived, onUpdateStatus }
       </div>
 
       {/* Customer name */}
-      <h5 className="font-semibold text-gray-900 truncate text-xs mb-1.5">
+      <h5 className="font-semibold text-gray-900 text-xs mb-1.5 break-words">
         <MedicalHistoryTooltip customerId={appointment.customerId} customerName={appointment.customerName}>
           <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink>
         </MedicalHistoryTooltip>
@@ -115,43 +115,43 @@ function DayCard({ appointment, onClick, onEdit, onMarkArrived, onUpdateStatus }
       {/* Details grid */}
       <div className="space-y-1">
         {/* Phone */}
-        <div className="flex items-center gap-1 text-[11px] text-gray-600">
-          <Phone className="w-3 h-3 text-gray-400" />
-          <span className="truncate">{appointment.customerPhone || '---'}</span>
+        <div className="flex items-start gap-1 text-[11px] text-gray-600">
+          <Phone className="w-3 h-3 text-gray-400 shrink-0 mt-0.5" />
+          <span className="break-words">{appointment.customerPhone || '---'}</span>
         </div>
 
         {/* Doctor */}
-        <div className="flex items-center gap-1 text-[11px] text-gray-600">
-          <User className="w-3 h-3 text-gray-400" />
-          <span className="truncate">{appointment.dentist}</span>
+        <div className="flex items-start gap-1 text-[11px] text-gray-600">
+          <User className="w-3 h-3 text-gray-400 shrink-0 mt-0.5" />
+          <span className="break-words">{appointment.dentist}</span>
         </div>
 
         {/* Assistant */}
         {appointment.assistantName && (
-          <div className="flex items-center gap-1 text-[11px] text-gray-600">
-            <Users className="w-3 h-3 text-gray-400" />
-            <span className="truncate">{appointment.assistantName}</span>
+          <div className="flex items-start gap-1 text-[11px] text-gray-600">
+            <Users className="w-3 h-3 text-gray-400 shrink-0 mt-0.5" />
+            <span className="break-words">{appointment.assistantName}</span>
           </div>
         )}
 
         {/* Dental Aide */}
         {appointment.dentalAideName && (
-          <div className="flex items-center gap-1 text-[11px] text-gray-600">
-            <Users className="w-3 h-3 text-gray-400" />
-            <span className="truncate">{appointment.dentalAideName}</span>
+          <div className="flex items-start gap-1 text-[11px] text-gray-600">
+            <Users className="w-3 h-3 text-gray-400 shrink-0 mt-0.5" />
+            <span className="break-words">{appointment.dentalAideName}</span>
           </div>
         )}
 
         {/* Time */}
-        <div className="flex items-center gap-1 text-[11px] text-gray-600">
-          <Clock className="w-3 h-3 text-gray-400" />
-          <span>{appointment.startTime} - {appointment.endTime}</span>
+        <div className="flex items-start gap-1 text-[11px] text-gray-600">
+          <Clock className="w-3 h-3 text-gray-400 shrink-0 mt-0.5" />
+          <span className="break-words">{appointment.startTime} - {appointment.endTime}</span>
         </div>
       </div>
 
       {/* Notes at bottom - only if exists */}
       {appointment.notes && (
-        <p className="text-[10px] text-gray-400 mt-1.5 pt-1.5 border-t border-gray-200/50 truncate font-medium">
+        <p className="text-[10px] text-gray-400 mt-1.5 pt-1.5 border-t border-gray-200/50 break-words font-medium">
           {appointment.notes}
         </p>
       )}
@@ -241,7 +241,7 @@ export function DayView({
                   </div>
                   <div
                     className="grid gap-3"
-                    style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))', gridAutoRows: '1fr' }}
+                    style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))' }}
                   >
                     {slotAppointments.map((apt) => (
                       <DayCard
