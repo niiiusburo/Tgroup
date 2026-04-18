@@ -273,7 +273,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
                 {isEdit ? <Edit2 className="w-5 h-5 text-white" /> : <ClipboardPlus className="w-5 h-5 text-white" />}
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">{isEdit ? t('editService') : t('addService')}</h2>
+                <h2 className="text-xl font-bold text-white">{isEdit ? t('editService', 'Sửa dịch vụ') : t('addService', 'Thêm dịch vụ')}</h2>
                 <p className="text-sm text-orange-100 mt-0.5">
                   {isEdit ? t('form.subtitleEdit', 'Cập nhật thông tin điều trị') : t('form.subtitleCreate', 'Tạo hồ sơ dịch vụ điều trị mới')}
                 </p>

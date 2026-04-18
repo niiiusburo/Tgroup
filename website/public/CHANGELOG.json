@@ -1,10 +1,32 @@
 [
   {
+    "version": "0.20.5",
+    "date": "2026-04-18",
+    "commit": "pending",
+    "highlights": "Fix Edit Service: modal title and customer source persistence",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Edit Service modal header shows Vietnamese fallback title (Sua dich vu / Them dich vu).",
+          "Customer source persists on reload via COALESCE(so.sourceid, p.sourceid) in all SELECT queries."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.20.4",
     "date": "2026-04-18",
     "commit": "pending",
     "highlights": "Fix Service start date shifting back one day due to pg date type parsing",
-    "sections": [{"title": "Bug Fixes","items": ["Register pg type parser for OID 1082 (date) to return raw YYYY-MM-DD strings, preventing TZ-shift."]}]
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Register pg type parser for OID 1082 (date) to return raw YYYY-MM-DD strings, preventing TZ-shift."
+        ]
+      }
+    ]
   },
   {
     "version": "0.20.3",
