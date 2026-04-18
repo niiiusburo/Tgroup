@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AddCustomerForm } from '@/components/forms/AddCustomerForm';
 import { CustomerProfile } from '@/components/customer';
 import { SearchBar } from '@/components/shared/SearchBar';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { DataTable } from '@/components/shared/DataTable';
 import { useCustomers, type Customer } from '@/hooks/useCustomers';
 
@@ -698,26 +699,22 @@ export function Customers() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Users className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-            <p className="text-sm text-gray-500">{stats.total} patients · {stats.active} active</p>
-          </div>
-        </div>
-        {canAddCustomers &&
-        <button
-          onClick={() => {setIsEditMode(false);setShowForm(true);}}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
-          
-            <Plus className="w-4 h-4" />
-            Add Customer
-          </button>
+      <PageHeader
+        title={t('title')}
+        subtitle={`${stats.total} patients · ${stats.active} active`}
+        icon={<Users className="w-6 h-6 text-primary" />}
+        actions={
+          canAddCustomers && (
+            <button
+              onClick={() => {setIsEditMode(false);setShowForm(true);}}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Add Customer
+            </button>
+          )
         }
-      </div>
+      />
 
       {showForm && !isEditMode &&
       <div className="modal-container">

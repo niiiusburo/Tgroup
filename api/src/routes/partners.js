@@ -1,6 +1,8 @@
 const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
+const { validate } = require('../middleware/validate');
+const { PartnerCreateSchema, PartnerUpdateSchema } = require('@tgroup/contracts');
 
 const router = express.Router();
 
@@ -383,7 +385,7 @@ router.get('/:id/GetKPIs', requirePermission('customers.view'), async (req, res)
  * Creates a new customer/partner
  * Body: partner fields
  */
-router.post('/', requirePermission('customers.add'), async (req, res) => {
+router.post('/', requirePermission('customers.add'), validate(PartnerCreateSchema), async (req, res) => {
   try {
     sanitizeUuids(req.body);
     const {
@@ -541,7 +543,7 @@ router.post('/', requirePermission('customers.add'), async (req, res) => {
  * Updates an existing customer/partner
  * Body: partner fields to update
  */
-router.put('/:id', requirePermission('customers.edit'), async (req, res) => {
+router.put('/:id', requirePermission('customers.edit'), validate(PartnerUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     sanitizeUuids(req.body);

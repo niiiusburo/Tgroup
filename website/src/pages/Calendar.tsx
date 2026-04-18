@@ -18,6 +18,7 @@ import type { AppointmentStatus } from '@/types/appointment';
 import { EditAppointmentModal } from '@/components/modules/EditAppointmentModal';
 import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
 import { QuickAddAppointmentButton } from '@/components/shared/QuickAddAppointmentButton';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { AppointmentFormModal } from '@/components/shared/AppointmentFormModal';
 import type { AppointmentFormData } from '@/components/appointments/AppointmentForm';
 import { ExportDialog, type ExportMode } from '@/components/calendar/ExportDialog';
@@ -384,18 +385,11 @@ export function Calendar() {
 
   return (
     <div className="space-y-4">
-      {/* Page header */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <CalendarIcon className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-            <p className="text-sm text-gray-500">{t('subtitle')}</p>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title={t('title')}
+        subtitle={t('subtitle')}
+        icon={<CalendarIcon className="w-6 h-6 text-primary" />}
+      />
 
       {/* Toolbar: view tabs + navigation + filters */}
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 bg-white rounded-xl shadow-card px-4 py-3">

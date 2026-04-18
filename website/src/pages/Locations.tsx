@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapPin, Plus, Search, Building2, Phone, Mail, Clock, Check, FileText } from 'lucide-react';
 import { LocationCard } from '@/components/locations/LocationCard';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { LocationDetail } from '@/components/locations/LocationDetail';
 import { useLocations } from '@/hooks/useLocations';
 import { STATUS_LABELS, type LocationStatus, type LocationBranch } from '@/data/mockLocations';
@@ -49,25 +50,20 @@ export function Locations() {
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <MapPin className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-            <p className="text-sm text-gray-500">{t('locations:subtitle')}</p>
-          </div>
-        </div>
-        <button
-          onClick={() => setShowAddForm(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
-          
-          <Plus className="w-4 h-4" />
-          Add Location
-        </button>
-      </div>
+      <PageHeader
+        title={t('title')}
+        subtitle={t('locations:subtitle')}
+        icon={<MapPin className="w-6 h-6 text-primary" />}
+        actions={
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Location
+          </button>
+        }
+      />
 
       {/* Summary stats */}
       {/* @crossref:uses[useLocations.totalStats] */}

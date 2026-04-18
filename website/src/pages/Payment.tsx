@@ -17,6 +17,7 @@ import { DepositWallet } from '@/components/payment/DepositWallet';
 import { OutstandingBalance } from '@/components/payment/OutstandingBalance';
 import { PaymentHistory } from '@/components/payment/PaymentHistory';
 import { usePayment } from '@/hooks/usePayment';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { useMonthlyPlans } from '@/hooks/useMonthlyPlans';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import type { PlanStatus } from '@/data/mockMonthlyPlans';
@@ -76,33 +77,25 @@ export function Payment() {
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <CreditCard className="w-6 h-6 text-primary" />
+      <PageHeader
+        title={t('title')}
+        subtitle={t('payment:subtitle')}
+        icon={<CreditCard className="w-6 h-6 text-primary" />}
+        actions={
+          <div className="flex gap-2">
+            {activeTab === 'plans' && !showCreator && (
+              <button
+                type="button"
+                onClick={() => setShowCreator(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                {t('newPlan')}
+              </button>
+            )}
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-            <p className="text-sm text-gray-500">{t('payment:subtitle')}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-        <div className="flex gap-2">
-
-          {activeTab === 'plans' && !showCreator && (
-            <button
-              type="button"
-              onClick={() => setShowCreator(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              {t('newPlan')}
-            </button>
-          )}
-        </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

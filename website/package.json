@@ -1,7 +1,7 @@
 {
   "name": "tgclinic-website",
   "private": true,
-  "version": "0.22.0",
+  "version": "0.23.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -33,7 +33,9 @@
     "react-router-dom": "^6.22.0",
     "tailwind-merge": "^2.2.0",
     "use-places-autocomplete": "^4.0.1",
-    "xlsx-js-style": "^1.2.0"
+    "xlsx-js-style": "^1.2.0",
+    "@tgroup/contracts": "file:../contracts",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@babel/generator": "^7.29.1",

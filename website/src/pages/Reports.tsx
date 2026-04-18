@@ -10,6 +10,7 @@ import {
   Users, MapPin, FolderOpen, UserCog,
 } from 'lucide-react';
 import { ROUTES } from '@/constants';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { useLocations } from '@/hooks/useLocations';
 import { ReportsFilters } from '@/components/reports/ReportsFilters';
 import { useTranslation } from 'react-i18next';
@@ -47,16 +48,11 @@ export default function Reports() {
 
   return (
     <div className="space-y-5">
-      {/* Page header */}
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-primary/10 rounded-lg">
-          <BarChart3 className="w-6 h-6 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-          <p className="text-sm text-gray-500">{activeTab.label} analytics &amp; insights</p>
-        </div>
-      </div>
+      <PageHeader
+        title={t('title')}
+        subtitle={`${activeTab.label} analytics & insights`}
+        icon={<BarChart3 className="w-6 h-6 text-primary" />}
+      />
 
       {/* Tab navigation */}
       <div className="bg-white rounded-xl shadow-card overflow-hidden">

@@ -236,6 +236,41 @@
 
 ---
 
+
+### dbo.ip_access_settings + ip_access_entries
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (uuid) on both tables |
+| **Key Relationships** | `ip_access_entries.created_by` → partners(id) |
+| **W** | `api/src/routes/ipAccess.js` |
+| **R** | `ipAccess.js`, middleware |
+| **E** | `GET/POST/DELETE /api/ip-access/*` |
+| **UI** | IPAccessControlContent |
+| **Risk** | **Medium** — `mode` enum values must match frontend dropdowns. |
+
+### dbo.version_events
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (serial) |
+| **W** | `api/src/routes/version.js` (frontend version tracking) |
+| **R** | `version.js` |
+| **E** | `POST /api/version/event` |
+| **UI** | VersionDisplay (forces reload on stale version) |
+| **Risk** | **Low** — isolated telemetry table. |
+
+### dbo.accountinvoices
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (uuid) |
+| **W** | TDental delta sync (external system) |
+| **R** | `api/src/routes/dotKhams.js` (LEFT JOIN) |
+| **E** | None directly — referenced via dotKhams |
+| **UI** | DotKham detail views |
+| **Risk** | **Medium** — table must exist or dotKhams queries 500. Populated by external sync, not app UI. |
+
 ## Shared DTO / Type / Serializer Risks
 
 | Type / DTO | Files Using It | Risk |

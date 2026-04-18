@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useWebsiteData } from '@/hooks/useWebsiteData';
 import type { WebsiteTab } from '@/hooks/useWebsiteData';
 import { PageList } from '@/components/website/PageList';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { PageEditor } from '@/components/website/PageEditor';
 import { ServiceCatalogManager } from '@/components/website/ServiceCatalogManager';
 import { SEOManager } from '@/components/website/SEOManager';
@@ -54,21 +55,16 @@ export function Website() {
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Globe className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-            <p className="text-sm text-gray-500">{t('website:subtitle')}</p>
-          </div>
-        </div>
-        <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm font-medium">
-          New Page
-        </button>
-      </div>
+      <PageHeader
+        title={t('title')}
+        subtitle={t('website:subtitle')}
+        icon={<Globe className="w-6 h-6 text-primary" />}
+        actions={
+          <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm font-medium">
+            New Page
+          </button>
+        }
+      />
 
       {/* Tab navigation */}
       <div className="bg-white rounded-xl shadow-card p-1 flex gap-1">

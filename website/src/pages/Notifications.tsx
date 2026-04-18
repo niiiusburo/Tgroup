@@ -7,26 +7,22 @@
 
 import { Bell, Mail, MessageSquare, Send } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 export function Notifications() {
   const { t } = useTranslation('common');
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Bell className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('notifications', { ns: 'nav' })}</h1>
-            <p className="text-sm text-gray-500">{t('notifications:subtitle')}</p>
-          </div>
-        </div>
-        <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm">
-          New Template
-        </button>
-      </div>
+      <PageHeader
+        title={t('notifications', { ns: 'nav' })}
+        subtitle={t('notifications:subtitle')}
+        icon={<Bell className="w-6 h-6 text-primary" />}
+        actions={
+          <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm">
+            New Template
+          </button>
+        }
+      />
 
       {/* Channel cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

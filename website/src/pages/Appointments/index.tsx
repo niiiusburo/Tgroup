@@ -15,6 +15,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { StatusBadge, type StatusVariant } from '@/components/shared/StatusBadge';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import { AppointmentForm, type AppointmentFormData } from '@/components/appointments/AppointmentForm';
 import { CheckInFlow } from '@/components/appointments/CheckInFlow';
@@ -122,30 +123,25 @@ export function Appointments() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <CalendarCheck className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-            <p className="text-sm text-gray-500">{t('list')}</p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => {
-            setIsEditMode(false);
-            setEditingAppointment(null);
-            setShowForm(true);
-          }}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
-          
-          <Plus className="w-4 h-4" />
-          {t('addAppointment')}
-        </button>
-      </div>
+      <PageHeader
+        title={t('title')}
+        subtitle={t('list')}
+        icon={<CalendarCheck className="w-6 h-6 text-primary" />}
+        actions={
+          <button
+            type="button"
+            onClick={() => {
+              setIsEditMode(false);
+              setEditingAppointment(null);
+              setShowForm(true);
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            {t('addAppointment')}
+          </button>
+        }
+      />
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
