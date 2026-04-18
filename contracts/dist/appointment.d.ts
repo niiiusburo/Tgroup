@@ -3,9 +3,9 @@ export declare const AppointmentBaseSchema: z.ZodObject<{
     id: z.ZodOptional<z.ZodString>;
     date: z.ZodString;
     time: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    partnerid: z.ZodString;
+    partnerid: z.ZodOptional<z.ZodString>;
     doctorid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    companyid: z.ZodString;
+    companyid: z.ZodOptional<z.ZodString>;
     note: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     timeexpected: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
     color: z.ZodNullable<z.ZodOptional<z.ZodString>>;
@@ -15,11 +15,11 @@ export declare const AppointmentBaseSchema: z.ZodObject<{
     dentalaideid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }, "strip", z.ZodTypeAny, {
     date: string;
-    partnerid: string;
-    companyid: string;
     id?: string | undefined;
     time?: string | null | undefined;
+    partnerid?: string | undefined;
     doctorid?: string | null | undefined;
+    companyid?: string | undefined;
     note?: string | null | undefined;
     timeexpected?: number | null | undefined;
     color?: string | null | undefined;
@@ -29,11 +29,11 @@ export declare const AppointmentBaseSchema: z.ZodObject<{
     dentalaideid?: string | null | undefined;
 }, {
     date: string;
-    partnerid: string;
-    companyid: string;
     id?: string | undefined;
     time?: string | null | undefined;
+    partnerid?: string | undefined;
     doctorid?: string | null | undefined;
+    companyid?: string | undefined;
     note?: string | null | undefined;
     timeexpected?: number | null | undefined;
     color?: string | null | undefined;
@@ -46,9 +46,9 @@ export declare const AppointmentCreateSchema: z.ZodObject<Omit<{
     id: z.ZodOptional<z.ZodString>;
     date: z.ZodString;
     time: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    partnerid: z.ZodString;
+    partnerid: z.ZodOptional<z.ZodString>;
     doctorid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    companyid: z.ZodString;
+    companyid: z.ZodOptional<z.ZodString>;
     note: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     timeexpected: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
     color: z.ZodNullable<z.ZodOptional<z.ZodString>>;
@@ -58,10 +58,10 @@ export declare const AppointmentCreateSchema: z.ZodObject<Omit<{
     dentalaideid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }, "id">, "strip", z.ZodTypeAny, {
     date: string;
-    partnerid: string;
-    companyid: string;
     time?: string | null | undefined;
+    partnerid?: string | undefined;
     doctorid?: string | null | undefined;
+    companyid?: string | undefined;
     note?: string | null | undefined;
     timeexpected?: number | null | undefined;
     color?: string | null | undefined;
@@ -71,10 +71,10 @@ export declare const AppointmentCreateSchema: z.ZodObject<Omit<{
     dentalaideid?: string | null | undefined;
 }, {
     date: string;
-    partnerid: string;
-    companyid: string;
     time?: string | null | undefined;
+    partnerid?: string | undefined;
     doctorid?: string | null | undefined;
+    companyid?: string | undefined;
     note?: string | null | undefined;
     timeexpected?: number | null | undefined;
     color?: string | null | undefined;
@@ -87,9 +87,9 @@ export declare const AppointmentUpdateSchema: z.ZodObject<Omit<{
     id: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     date: z.ZodOptional<z.ZodString>;
     time: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
-    partnerid: z.ZodOptional<z.ZodString>;
+    partnerid: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     doctorid: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
-    companyid: z.ZodOptional<z.ZodString>;
+    companyid: z.ZodOptional<z.ZodOptional<z.ZodString>>;
     note: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     timeexpected: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodNumber>>>;
     color: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;

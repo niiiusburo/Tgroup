@@ -55,6 +55,7 @@ import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
 import { useProducts } from '@/hooks/useProducts';
 import { useLocationFilter } from '@/contexts/LocationContext';
+import { useTimezone } from '@/contexts/TimezoneContext';
 import type { ServiceCatalogItem } from '@/types/service';
 import { APPOINTMENT_CARD_COLORS, APPOINTMENT_STATUS_OPTIONS } from '@/constants';
 import type { AppointmentType } from '@/constants';
@@ -123,6 +124,7 @@ function getCurrentTimeStr() {
 export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false }: AppointmentFormProps) {
   const { t } = useTranslation('appointments');
   const { selectedLocationId } = useLocationFilter();
+  const { getToday } = useTimezone();
 
   // Fetch real data from API
   const { customers: apiCustomers, loading: customersLoading, createCustomer } = useCustomers();
@@ -143,7 +145,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
   const [customerType, setCustomerType] = useState<'new' | 'returning'>(initialData?.customerType ?? 'new');
   const [showCreateCustomer, setShowCreateCustomer] = useState(false);
   const [estimatedDuration, setEstimatedDuration] = useState<number>(initialData?.estimatedDuration ?? 30);
-  const [date, setDate] = useState(() => initialData?.date ?? (isEdit ? '' : getTodayStr()));
+  const [date, setDate] = useState(() => (initialData?.date && initialData.date !== '') ? initialData.date : (isEdit ? '' : getToday()));
   const [startTime, setStartTime] = useState(() => initialData?.startTime ?? (isEdit ? '' : getCurrentTimeStr()));
   const [endTime, setEndTime] = useState(initialData?.endTime ?? '');
   const [notes, setNotes] = useState(initialData?.notes ?? '');
@@ -151,6 +153,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
   const [colorCode, setColorCode] = useState(initialData?.color ?? '0');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Sync with initialData when editing
   useEffect(() => {
@@ -164,7 +167,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
       setServiceName(initialData.serviceName ?? '');
       setCustomerType(initialData.customerType ?? 'new');
       setEstimatedDuration(initialData.estimatedDuration ?? 30);
-      setDate(initialData.date ?? '');
+      setDate((initialData.date && initialData.date !== '') ? initialData.date : (isEdit ? '' : getToday()));
       setStartTime(initialData.startTime ?? '');
       setEndTime(initialData.endTime ?? '');
       setNotes(initialData.notes ?? '');
@@ -285,6 +288,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
     }
 
     setIsSaving(true);
+    setSubmitError(null);
     try {
       await onSubmit({
         customerId: customer.id,
@@ -310,8 +314,15 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
         status,
         color: colorCode
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Appointment save failed:', error);
+      const msg =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        error?.errors?.[0]?.message ||
+        'Không thể lưu lịch hẹn. Vui lòng thử lại.';
+      setSubmitError(msg);
     } finally {
       setIsSaving(false);
     }
@@ -644,6 +655,12 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
             <p className="mt-2 text-xs text-gray-400">{t('tnhNngNhcLchSCKchHotSau')}</p>
           </div>
         </form>
+
+        {submitError && (
+          <div className="px-6 pt-3 text-sm text-red-700 bg-red-50 border-t border-red-200">
+            <b>Lỗi: </b>{submitError}
+          </div>
+        )}
 
         {/* Footer */}
         <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">

@@ -1,5 +1,12 @@
 [
   {
+    "version": "0.23.2",
+    "date": "2026-04-18",
+    "commit": "pending",
+    "highlights": "Fix Add Appointment: errors surfaced + date auto-fills to today (ICT)",
+    "sections": [{"title": "Bug Fixes", "items": ["Add Appointment: date auto-populates to today in Vietnam timezone (ICT, UTC+7)", "Add Appointment: save failures now show an inline error banner with the server message instead of failing silently", "Appointments API: relaxed Zod schema (partnerid/companyid optional at schema layer; route handler still validates required fields)"]}]
+  },
+  {
     "version": "0.23.1",
     "date": "2026-04-18",
     "commit": "pending",
