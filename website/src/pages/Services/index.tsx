@@ -11,6 +11,7 @@ import {
   Stethoscope, Plus, Search, Filter,
   Activity, CheckCircle2, XCircle, DollarSign } from
 'lucide-react';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { ServiceHistoryList } from '@/components/services/ServiceHistoryList';
 import { useLocationFilter } from '@/contexts/LocationContext';
@@ -120,30 +121,25 @@ export function Services() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Stethoscope className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-            <p className="text-sm text-gray-500">Manage service records and multi-visit treatments</p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => {
-            setIsEditMode(false);
-            setEditingRecord(null);
-            setShowForm(true);
-          }}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
-          
-          <Plus className="w-4 h-4" />
-          New Service
-        </button>
-      </div>
+      <PageHeader
+        title={t('title')}
+        subtitle="Manage service records and multi-visit treatments"
+        icon={<Stethoscope className="w-6 h-6 text-primary" />}
+        actions={
+          <button
+            type="button"
+            onClick={() => {
+              setIsEditMode(false);
+              setEditingRecord(null);
+              setShowForm(true);
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            New Service
+          </button>
+        }
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

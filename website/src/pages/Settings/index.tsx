@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import { Settings as SettingsIcon, SlidersHorizontal, Shield, Globe, Building2, MessageSquare } from 'lucide-react';
 import { SystemPreferencesContent } from '@/components/settings/SystemPreferencesContent';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { IpAccessControl } from '@/components/settings/IpAccessControl';
 import { TimezoneSelector } from '@/components/settings/TimezoneSelector';
 import { BankSettingsForm } from '@/components/settings/BankSettingsForm';
@@ -33,16 +34,11 @@ export function Settings() {
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-primary/10 rounded-lg">
-          <SettingsIcon className="w-6 h-6 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-          <p className="text-sm text-gray-500">{t('subtitle')}</p>
-        </div>
-      </div>
+      <PageHeader
+        title={t('title')}
+        subtitle={t('subtitle')}
+        icon={<SettingsIcon className="w-6 h-6 text-primary" />}
+      />
 
       {/* Timezone Selector - Prominent at top */}
       <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-xl border border-primary/20 overflow-hidden">

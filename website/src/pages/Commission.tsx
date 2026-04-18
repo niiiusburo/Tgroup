@@ -6,26 +6,22 @@
 
 import { Percent, Users, BarChart3 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 export function Commission() {
   const { t } = useTranslation('common');
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Percent className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('commission', { ns: 'nav' })}</h1>
-            <p className="text-sm text-gray-500">{t('commission:subtitle')}</p>
-          </div>
-        </div>
-        <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm">
-          Configure Rules
-        </button>
-      </div>
+      <PageHeader
+        title={t('commission', { ns: 'nav' })}
+        subtitle={t('commission:subtitle')}
+        icon={<Percent className="w-6 h-6 text-primary" />}
+        actions={
+          <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm">
+            Configure Rules
+          </button>
+        }
+      />
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

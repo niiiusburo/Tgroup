@@ -7,6 +7,7 @@
 
 import { Network, Shield, GitBranch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { useRelationshipsData } from '@/hooks/useRelationshipsData';
 import { PermissionMatrix } from '@/components/relationships/PermissionMatrix';
 import { EntityRelationshipMap } from '@/components/relationships/EntityRelationshipMap';
@@ -39,20 +40,11 @@ export function Relationships() {
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Network className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('relationships', { ns: 'nav' })}</h1>
-            <p className="text-sm text-gray-500">
-              Role-based access control and entity connections
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title={t('relationships', { ns: 'nav' })}
+        subtitle="Role-based access control and entity connections"
+        icon={<Network className="w-6 h-6 text-primary" />}
+      />
 
       {/* Stats row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

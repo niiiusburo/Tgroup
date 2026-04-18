@@ -8,6 +8,7 @@ import { TierSelector } from '@/components/employees/TierSelector';
 import { RoleMultiSelect } from '@/components/employees/RoleMultiSelect';
 import { useState as useStateReact, useEffect as useEffectReact } from 'react';
 import { fetchPermissionGroups, type PermissionGroup } from '@/lib/api';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { EmployeeTable } from '@/components/employees/EmployeeTable';
 import { EmployeeProfile } from '@/components/employees/EmployeeProfile';
 import { useTranslation } from 'react-i18next';
@@ -97,27 +98,19 @@ export function Employees() {
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <UserCog className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
-            <p className="text-sm text-gray-500">
-              {employees.length} staff member{employees.length !== 1 ? 's' : ''}
-              {hasFilters ? ' (filtered)' : ''}
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={handleAddEmployee}
-          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-        >
-          {t('addEmployee')}
-        </button>
-      </div>
+      <PageHeader
+        title={t('title')}
+        subtitle={`${employees.length} staff member${employees.length !== 1 ? 's' : ''}${hasFilters ? ' (filtered)' : ''}`}
+        icon={<UserCog className="w-6 h-6 text-primary" />}
+        actions={
+          <button
+            onClick={handleAddEmployee}
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+          >
+            {t('addEmployee')}
+          </button>
+        }
+      />
 
       {/* Search and filters */}
       <div className="bg-white rounded-xl shadow-card p-4 space-y-3">

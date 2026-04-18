@@ -22,6 +22,7 @@ export { ImageUpload } from './ImageUpload';
 export { LanguageToggle } from './LanguageToggle';
 export { LocationSelector } from './LocationSelector';
 export { NotificationsPanel } from './NotificationsPanel';
+export { PageHeader } from './PageHeader';
 export { QuickActionsBar } from './QuickActionsBar';
 export { QuickAddAppointmentButton } from './QuickAddAppointmentButton';
 export { ReferralCodeInput } from './ReferralCodeInput';
