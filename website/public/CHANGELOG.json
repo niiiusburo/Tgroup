@@ -1,5 +1,12 @@
 [
   {
+    "version": "0.20.4",
+    "date": "2026-04-18",
+    "commit": "pending",
+    "highlights": "Fix Service start date shifting back one day due to pg date type parsing",
+    "sections": [{"title": "Bug Fixes","items": ["Register pg type parser for OID 1082 (date) to return raw YYYY-MM-DD strings, preventing TZ-shift."]}]
+  },
+  {
     "version": "0.20.3",
     "date": "2026-04-18",
     "commit": "pending",
