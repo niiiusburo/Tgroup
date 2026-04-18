@@ -412,7 +412,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                   <User className="w-3.5 h-3.5" />
 
                 </label>
-                <DoctorSelector employees={employees} selectedId={assistantId} onChange={setAssistantId} filterRoles={['assistant']} placeholder={t("chnPhT")} allowClear />
+                <DoctorSelector employees={employees} selectedId={assistantId} onChange={setAssistantId} filterRoles={['assistant']} placeholder={t('form.selectAssistant')} allowClear />
               </div>
 
               {/* Trợ lý bác sĩ - Optional */}
@@ -421,7 +421,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                   <User className="w-3.5 h-3.5" />
 
                 </label>
-                <DoctorSelector employees={employees} selectedId={dentalAideId} onChange={setDentalAideId} filterRoles={['doctor-assistant']} placeholder={t("chnTrL")} allowClear />
+                <DoctorSelector employees={employees} selectedId={dentalAideId} onChange={setDentalAideId} filterRoles={['doctor-assistant']} placeholder={t('form.selectDoctorAssistant')} allowClear />
               </div>
 
               {/* Chi nhánh */}

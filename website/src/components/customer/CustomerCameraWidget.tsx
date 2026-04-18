@@ -145,7 +145,7 @@ export function CustomerCameraWidget({
                 {mode === 'face-id' &&
             <>
                     <span className="text-xs text-gray-500">
-                      {isProcessing ? t("angXL") : isSuccess ? t("thnhCng") : t("angChp")}
+                      {isProcessing ? t('loading') : isSuccess ? t("thnhCng") : t("angChp")}
                     </span>
                     <button
                 type="button"

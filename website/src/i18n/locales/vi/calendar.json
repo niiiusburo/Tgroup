@@ -133,5 +133,7 @@
     "hypertension": "Huyết áp cao",
     "asthma": "Hen suyễn",
     "pregnant": "Đang mang thai"
-  }
+  },
+  "cancelAppointment": "Hủy hẹn",
+  "checkup": "Đợt khám"
 }

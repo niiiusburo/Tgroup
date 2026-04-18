@@ -29,8 +29,8 @@ export function CheckInActions({ onCheckIn, onCancel }: CheckInActionsProps) {
           onCancel();
         }}
         className="p-1 rounded hover:bg-red-100 text-red-500"
-        title={t("hyHn")}
-        aria-label={t("hyHn")}>
+        title={t('cancelAppointment')}
+        aria-label={t('cancelAppointment')}>
         
         <X className="w-3.5 h-3.5" />
       </button>

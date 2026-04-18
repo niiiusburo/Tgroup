@@ -210,7 +210,7 @@ export function PaymentForm({
               type="button"
               onClick={onClose}
               className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors"
-              aria-label={t("ng")}>
+              aria-label={t('close')}>
               
               <X className="w-5 h-5 text-white" />
             </button>

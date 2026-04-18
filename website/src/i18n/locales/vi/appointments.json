@@ -38,7 +38,9 @@
     "startTime": "Giờ bắt đầu",
     "endTime": "Giờ kết thúc",
     "patient": "Bệnh nhân",
-    "selectStatus": "Chọn trạng thái"
+    "selectStatus": "Chọn trạng thái",
+    "selectAssistant": "Chọn phụ tá...",
+    "selectDoctorAssistant": "Chọn trợ lý bác sĩ..."
   },
   "checkIn": {
     "title": "Check In",
@@ -116,5 +118,34 @@
   "thuGnChiTit": "Thu gọn chi tiết",
   "mRngChiTit": "Mở rộng chi tiết",
   "returningCustomer": "Khách tái khám",
-  "newCustomer": "Khách mới"
+  "newCustomer": "Khách mới",
+  "phase": {
+    "scheduled": "Đang hẹn",
+    "waiting": "Đang chờ",
+    "in-treatment": "Đang khám",
+    "done": "Hoàn tất",
+    "cancelled": "Đã hủy"
+  },
+  "export": {
+    "customer": "Khách hàng",
+    "phone": "Số điện thoại",
+    "appointmentTime": "Thờ‌i gian hẹn",
+    "service": "Dịch vụ",
+    "doctor": "Bác sĩ",
+    "content": "Nội dung",
+    "visitType": "Loại khám",
+    "status": {
+      "scheduled": "Đang hẹn",
+      "waiting": "Đã đến",
+      "in-treatment": "Đang khám",
+      "done": "Hoàn tất",
+      "cancelled": "Đã hủy"
+    },
+    "reason": "Lý do",
+    "statusLabel": "Trạng thái"
+  },
+  "visitType": {
+    "newExam": "Khám mới",
+    "followUp": "Tái khám"
+  }
 }

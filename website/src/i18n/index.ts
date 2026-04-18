@@ -15,6 +15,12 @@ import enReports from './locales/en/reports.json';
 import enSettings from './locales/en/settings.json';
 import enAuth from './locales/en/auth.json';
 import enWebsite from './locales/en/website.json';
+import enCommission from './locales/en/commission.json';
+import enFeedback from './locales/en/feedback.json';
+import enNotifications from './locales/en/notifications.json';
+import enRelationships from './locales/en/relationships.json';
+import enServiceCatalog from './locales/en/serviceCatalog.json';
+import enPermissions from './locales/en/permissions.json';
 
 import viCommon from './locales/vi/common.json';
 import viNav from './locales/vi/nav.json';
@@ -30,7 +36,11 @@ import viReports from './locales/vi/reports.json';
 import viSettings from './locales/vi/settings.json';
 import viAuth from './locales/vi/auth.json';
 import viWebsite from './locales/vi/website.json';
-import enPermissions from './locales/en/permissions.json';
+import viCommission from './locales/vi/commission.json';
+import viFeedback from './locales/vi/feedback.json';
+import viNotifications from './locales/vi/notifications.json';
+import viRelationships from './locales/vi/relationships.json';
+import viServiceCatalog from './locales/vi/serviceCatalog.json';
 import viPermissions from './locales/vi/permissions.json';
 
 const STORAGE_KEY = 'tg-lang';
@@ -63,6 +73,11 @@ i18n.use(initReactI18next).init({
       settings: enSettings,
       auth: enAuth,
       website: enWebsite,
+      commission: enCommission,
+      feedback: enFeedback,
+      notifications: enNotifications,
+      relationships: enRelationships,
+      serviceCatalog: enServiceCatalog,
       permissions: enPermissions,
     },
     vi: {
@@ -80,6 +95,11 @@ i18n.use(initReactI18next).init({
       settings: viSettings,
       auth: viAuth,
       website: viWebsite,
+      commission: viCommission,
+      feedback: viFeedback,
+      notifications: viNotifications,
+      relationships: viRelationships,
+      serviceCatalog: viServiceCatalog,
       permissions: viPermissions,
     },
   },
@@ -89,10 +109,18 @@ i18n.use(initReactI18next).init({
   ns: [
     'common', 'nav', 'overview', 'calendar', 'customers',
     'appointments', 'services', 'payment', 'employees',
-    'locations', 'reports', 'settings', 'auth', 'website', 'permissions',
+    'locations', 'reports', 'settings', 'auth', 'website',
+    'commission', 'feedback', 'notifications', 'relationships',
+    'serviceCatalog', 'permissions',
   ],
   defaultNS: 'common',
   interpolation: { escapeValue: false },
+  debug: import.meta.env.DEV,
+  saveMissing: import.meta.env.DEV,
+  missingKeyHandler: (lng, ns, key) => {
+    // eslint-disable-next-line no-console
+    console.warn(`[i18n missing key] ${lng}.${ns}.${key}`);
+  },
 });
 
 export { STORAGE_KEY, DEFAULT_LANG };

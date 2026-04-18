@@ -133,5 +133,7 @@
     "hypertension": "Hypertension",
     "asthma": "Asthma",
     "pregnant": "Pregnant"
-  }
+  },
+  "cancelAppointment": "Cancel appointment",
+  "checkup": "Visit"
 }

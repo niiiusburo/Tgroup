@@ -26,5 +26,6 @@
   "logout": "Log Out",
   "collapse": "Collapse sidebar",
   "expand": "Expand sidebar",
-  "receptionists": "Receptionists"
+  "receptionists": "Receptionists",
+  "changePassword": "Change Password"
 }

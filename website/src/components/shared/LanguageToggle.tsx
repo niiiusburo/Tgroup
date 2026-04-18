@@ -71,7 +71,7 @@ export function LanguageToggle({ compact = false }: {compact?: boolean;}) {
         
         <Globe className="w-4 h-4 flex-shrink-0" />
         <span className="text-xs font-medium">
-          {currentLang === 'en' ? '🇬🇧 English' : t("tingVit")}
+          {currentLang === 'en' ? '🇬🇧 English' : t('languages.vietnamese')}
         </span>
       </button>
 

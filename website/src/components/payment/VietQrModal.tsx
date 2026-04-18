@@ -215,7 +215,7 @@ export function VietQrModal({
                 disabled={!proofImage || uploading || !paymentId}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-green-600 rounded-xl hover:bg-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                 
-                  {uploading ? t("angLu") : t("xcNhnThanhTon")}
+                  {uploading ? t('saving') : t("xcNhnThanhTon")}
                 </button>
                 {uploadSuccess &&
               <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg text-sm">

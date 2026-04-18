@@ -5,15 +5,15 @@ import type { CalendarAppointment } from '@/types/appointment';
 
 export function getExportHeaders(t: (key: string, options?: Record<string, unknown>) => string): string[] {
   return [
-    t('appointments.export.customer', { defaultValue: 'Customer' }),
-    t('appointments.export.phone', { defaultValue: 'Phone' }),
-    t('appointments.export.appointmentTime', { defaultValue: 'Appointment Time' }),
-    t('appointments.export.service', { defaultValue: 'Service' }),
-    t('appointments.export.doctor', { defaultValue: 'Doctor' }),
-    t('appointments.export.content', { defaultValue: 'Content' }),
-    t('appointments.export.visitType', { defaultValue: 'Visit Type' }),
-    t('appointments.export.status', { defaultValue: 'Status' }),
-    t('appointments.export.reason', { defaultValue: 'Reason' }),
+    t('export.customer', { ns: 'appointments', defaultValue: 'Customer' }),
+    t('export.phone', { ns: 'appointments', defaultValue: 'Phone' }),
+    t('export.appointmentTime', { ns: 'appointments', defaultValue: 'Appointment Time' }),
+    t('export.service', { ns: 'appointments', defaultValue: 'Service' }),
+    t('export.doctor', { ns: 'appointments', defaultValue: 'Doctor' }),
+    t('export.content', { ns: 'appointments', defaultValue: 'Content' }),
+    t('export.visitType', { ns: 'appointments', defaultValue: 'Visit Type' }),
+    t('export.statusLabel', { ns: 'appointments', defaultValue: 'Status' }),
+    t('export.reason', { ns: 'appointments', defaultValue: 'Reason' }),
     '', // column 10 intentionally blank
   ];
 }
@@ -23,11 +23,11 @@ export function getExcelStatusLabel(
   phase: CalendarPhase
 ): string {
   const map: Record<CalendarPhase, string> = {
-    scheduled: t('appointments.export.status.scheduled', { defaultValue: 'Scheduled' }),
-    waiting: t('appointments.export.status.waiting', { defaultValue: 'Arrived' }),
-    'in-treatment': t('appointments.export.status.in-treatment', { defaultValue: 'In Treatment' }),
-    done: t('appointments.export.status.done', { defaultValue: 'Completed' }),
-    cancelled: t('appointments.export.status.cancelled', { defaultValue: 'Cancelled' }),
+    scheduled: t('export.status.scheduled', { ns: 'appointments', defaultValue: 'Scheduled' }),
+    waiting: t('export.status.waiting', { ns: 'appointments', defaultValue: 'Arrived' }),
+    'in-treatment': t('export.status.in-treatment', { ns: 'appointments', defaultValue: 'In Treatment' }),
+    done: t('export.status.done', { ns: 'appointments', defaultValue: 'Completed' }),
+    cancelled: t('export.status.cancelled', { ns: 'appointments', defaultValue: 'Cancelled' }),
   };
   return map[phase];
 }
@@ -39,9 +39,9 @@ export function getVisitTypeLabel(
   const parsed = parseAppointmentNote(note);
   const typeLower = parsed.type.toLowerCase();
   if (typeLower.includes('tksn') || typeLower.includes('khám mới')) {
-    return t('appointments.visitType.newExam', { defaultValue: 'New Exam' });
+    return t('visitType.newExam', { ns: 'appointments', defaultValue: 'New Exam' });
   }
-  return t('appointments.visitType.followUp', { defaultValue: 'Follow-up' });
+  return t('visitType.followUp', { ns: 'appointments', defaultValue: 'Follow-up' });
 }
 
 function formatAppointmentDateTime(date: string, time: string): string {

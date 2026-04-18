@@ -16,6 +16,13 @@
     "arrived": "Arrived",
     "pending": "Pending"
   },
+  "phase": {
+    "scheduled": "Scheduled",
+    "waiting": "Waiting",
+    "in-treatment": "In Treatment",
+    "done": "Done",
+    "cancelled": "Cancelled"
+  },
   "form": {
     "customer": "Customer",
     "doctor": "Doctor",
@@ -38,7 +45,9 @@
     "startTime": "Start Time",
     "endTime": "End Time",
     "patient": "Patient",
-    "selectStatus": "Select status"
+    "selectStatus": "Select status",
+    "selectAssistant": "Select assistant...",
+    "selectDoctorAssistant": "Select doctor assistant..."
   },
   "checkIn": {
     "title": "Check In",
@@ -116,5 +125,27 @@
   "thuGnChiTit": "Collapse details",
   "mRngChiTit": "Expand details",
   "returningCustomer": "Returning customer",
-  "newCustomer": "New customer"
+  "newCustomer": "New customer",
+  "export": {
+    "customer": "Customer",
+    "phone": "Phone",
+    "appointmentTime": "Appointment Time",
+    "service": "Service",
+    "doctor": "Doctor",
+    "content": "Content",
+    "visitType": "Visit Type",
+    "reason": "Reason",
+    "statusLabel": "Status",
+    "status": {
+      "scheduled": "Scheduled",
+      "waiting": "Arrived",
+      "in-treatment": "In Treatment",
+      "done": "Completed",
+      "cancelled": "Cancelled"
+    }
+  },
+  "visitType": {
+    "newExam": "New Exam",
+    "followUp": "Follow-up"
+  }
 }
