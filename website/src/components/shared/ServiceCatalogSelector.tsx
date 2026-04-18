@@ -5,6 +5,7 @@
 
 import { Search, ChevronDown, Stethoscope } from 'lucide-react';
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { normalizeText } from '@/lib/utils';
 import type { ServiceCatalogItem } from '@/data/mockServices';
 import { APPOINTMENT_TYPE_LABELS, type AppointmentType } from '@/constants';
@@ -27,6 +28,7 @@ export function ServiceCatalogSelector({
   disabled = false,
   filterCategory,
 }: ServiceCatalogSelectorProps) {
+  const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -100,14 +102,14 @@ export function ServiceCatalogSelector({
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search services..."
+                placeholder={t('searchServices', 'Tìm dịch vụ...')}
                 className="w-full pl-8 pr-3 py-1.5 text-sm rounded-md border border-gray-200 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
               />
             </div>
           </div>
           <div className="max-h-56 overflow-y-auto py-1">
             {filteredItems.length === 0 ? (
-              <div className="px-4 py-3 text-sm text-gray-400 text-center">No services found</div>
+              <div className="px-4 py-3 text-sm text-gray-400 text-center">{t('noServicesFound', 'Không tìm thấy dịch vụ')}</div>
             ) : (
               filteredItems.map((item) => (
                 <button
@@ -133,7 +135,7 @@ export function ServiceCatalogSelector({
                   <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
                     <span>{APPOINTMENT_TYPE_LABELS[item.category]}</span>
                     <span>&middot;</span>
-                    <span>{item.totalVisits} visit{item.totalVisits > 1 ? 's' : ''}</span>
+                    <span>{item.totalVisits} {t('visitCount', 'lượt')}</span>
                     <span>&middot;</span>
                     <span>{item.estimatedDuration}min</span>
                     {item.unit && (

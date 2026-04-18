@@ -241,5 +241,8 @@
   "examDate": "Exam date",
   "examContent": "Exam content",
   "nextAppointmentDate": "Next appointment date",
-  "attachments": "Attachments"
+  "attachments": "Attachments",
+  "faceId": "Face ID",
+  "quickAdd": "Quick Add",
+  "noFaceRecognized": "No face recognized"
 }

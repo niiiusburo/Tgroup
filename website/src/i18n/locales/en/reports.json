@@ -143,5 +143,6 @@
     "title": "Error Loading Report",
     "message": "Could not load report data. Please try again.",
     "retry": "Retry"
-  }
+  },
+  "allLocations": "All Locations"
 }

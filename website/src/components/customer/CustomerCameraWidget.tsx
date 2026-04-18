@@ -128,7 +128,7 @@ export function CustomerCameraWidget({
               className="flex flex-col items-center justify-center gap-2 px-3 py-5 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-2xl hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm transition-all disabled:opacity-50">
               
                   <ScanFace className="w-7 h-7 text-orange-500" />
-                  <span>Face ID</span>
+                  <span>{t('faceId', 'Nhận diện khuôn mặt')}</span>
                 </button>
                 <button
               type="button"
@@ -137,7 +137,7 @@ export function CustomerCameraWidget({
               className="flex flex-col items-center justify-center gap-2 px-3 py-5 text-sm font-semibold text-white bg-gradient-to-br from-orange-500 to-orange-400 rounded-2xl hover:from-orange-600 hover:to-orange-500 hover:shadow-sm transition-all disabled:opacity-50">
               
                   <CreditCard className="w-7 h-7" />
-                  <span>Quick Add</span>
+                  <span>{t('quickAdd', 'Thêm nhanh')}</span>
                 </button>
               </div> :
 
@@ -164,7 +164,7 @@ export function CustomerCameraWidget({
 
         // No-match UI
         <div className="flex flex-col items-center gap-2">
-            <p className="text-[10px] text-gray-500 text-center">No face recognized</p>
+            <p className="text-[10px] text-gray-500 text-center">{t('noFaceRecognized', 'Không nhận diện được khuôn mặt')}</p>
             <button
             type="button"
             onClick={cancel}

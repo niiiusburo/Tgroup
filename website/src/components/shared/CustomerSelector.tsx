@@ -96,7 +96,7 @@ export function CustomerSelector({
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by name, phone, email..."
+              placeholder={t('searchByNamePhoneEmail', 'Tìm theo tên, SĐT, email...')}
               className="w-full pl-8 pr-3 py-1.5 text-sm rounded-md border border-gray-200 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
             
             </div>

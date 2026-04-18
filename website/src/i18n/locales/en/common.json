@@ -330,5 +330,13 @@
   "dNgThuc": "Drug Allergy",
   "timMch": "Cardiovascular",
   "medicalHistoryPlaceholder": "Enter medical history...",
-  "trngNuKhngIMtKhu": "Leave blank to keep current password"
+  "trngNuKhngIMtKhu": "Leave blank to keep current password",
+  "searchByNamePhoneEmail": "Search by name, phone, email...",
+  "searchServices": "Search services...",
+  "noServicesFound": "No services found",
+  "visitCount": "visit",
+  "searchByNameOrRole": "Search by name or role...",
+  "clearSelection": "Clear selection",
+  "noDoctorsFound": "No doctors found",
+  "clearDoctorFilter": "Clear doctor filter"
 }

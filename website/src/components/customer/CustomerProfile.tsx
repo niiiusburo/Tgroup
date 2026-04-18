@@ -568,7 +568,7 @@ export function CustomerProfile({
                         type="button"
                         onClick={(e) => {e.stopPropagation();setPaymentToDelete(p.id);}}
                         className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 rounded-full text-red-500 hover:bg-red-50 hover:text-red-600"
-                        title="Delete payment">
+                        title={t('deletePayment', 'Xóa thanh toán')}>
                         
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>

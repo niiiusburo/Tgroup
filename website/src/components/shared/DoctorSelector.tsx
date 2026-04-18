@@ -1,5 +1,6 @@
 import { Stethoscope, ChevronDown, Search } from 'lucide-react';
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { normalizeText } from '@/lib/utils';
 import type { Employee } from '@/data/mockEmployees';
 import { ROLE_LABELS } from '@/data/mockEmployees';
@@ -28,6 +29,7 @@ export function DoctorSelector({
   filterRoles,
   allowClear = false
 }: DoctorSelectorProps) {
+  const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -103,7 +105,7 @@ export function DoctorSelector({
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by name or role..."
+              placeholder={t('searchByNameOrRole', 'Tìm theo tên hoặc vai trò...')}
               className="w-full pl-8 pr-3 py-1.5 text-sm rounded-md border border-gray-200 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
             
             </div>
@@ -119,12 +121,11 @@ export function DoctorSelector({
               setSearchTerm('');
             }}
             className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 border-b border-gray-100">
-            
-
+            {t('clearSelection', 'Bỏ chọn')}
           </button>
           }
             {filteredEmployees.length === 0 ?
-          <div className="px-4 py-3 text-sm text-gray-400 text-center">No doctors found</div> :
+          <div className="px-4 py-3 text-sm text-gray-400 text-center">{t('noDoctorsFound', 'Không tìm thấy bác sĩ')}</div> :
 
           filteredEmployees.map((employee) =>
           <button

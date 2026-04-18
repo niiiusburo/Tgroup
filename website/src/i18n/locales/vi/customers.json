@@ -241,5 +241,8 @@
   "examDate": "Ngày khám",
   "examContent": "Nội dung khám",
   "nextAppointmentDate": "Ngày hẹn lịch tiếp theo",
-  "attachments": "Tệp đính kèm"
+  "attachments": "Tệp đính kèm",
+  "faceId": "Nhận diện khuôn mặt",
+  "quickAdd": "Thêm nhanh",
+  "noFaceRecognized": "Không nhận diện được khuôn mặt"
 }

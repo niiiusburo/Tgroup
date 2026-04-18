@@ -143,5 +143,6 @@
     "title": "Lỗi tải báo cáo",
     "message": "Không thể tải dữ liệu báo cáo. Vui lòng thử lại.",
     "retry": "Thử lại"
-  }
+  },
+  "allLocations": "Tất cả chi nhánh"
 }

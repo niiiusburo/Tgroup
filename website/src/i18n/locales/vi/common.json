@@ -330,5 +330,13 @@
   "dNgThuc": "Dị ứng thuốc",
   "timMch": "Tim mạch",
   "medicalHistoryPlaceholder": "Nhập tiền sử bệnh lý...",
-  "trngNuKhngIMtKhu": "Để trống nếu không đổi mật khẩu"
+  "trngNuKhngIMtKhu": "Để trống nếu không đổi mật khẩu",
+  "searchByNamePhoneEmail": "Tìm theo tên, SĐT, email...",
+  "searchServices": "Tìm dịch vụ...",
+  "noServicesFound": "Không tìm thấy dịch vụ",
+  "visitCount": "lượt",
+  "searchByNameOrRole": "Tìm theo tên hoặc vai trò...",
+  "clearSelection": "Bỏ chọn",
+  "noDoctorsFound": "Không tìm thấy bác sĩ",
+  "clearDoctorFilter": "Xóa lọc bác sĩ"
 }

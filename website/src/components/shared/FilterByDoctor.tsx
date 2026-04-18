@@ -160,7 +160,7 @@ export function FilterByDoctor({ selectedDoctorName, onChange, doctors = [], cla
           onClick={() => onChange(null)}
           className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
           aria-label="Clear doctor filter"
-          title="Clear doctor filter">
+          title={t('clearDoctorFilter', 'Xóa lọc bác sĩ')}>
           
             <X className="w-3.5 h-3.5" />
           </button>
