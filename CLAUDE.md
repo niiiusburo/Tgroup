@@ -80,19 +80,47 @@ Tgroup/
 
 ## Database
 
-**Connection URL:** `postgresql://postgres:postgres@127.0.0.1:55433/tdental_demo`
+> ⚠️ **Two Postgres instances exist on this machine — they are NOT the same data.** The local API reads from port **5433** (Homebrew native). The docker-compose stack uses port **55433** (container). Always verify which instance your change is targeting.
+
+### Port 5433 — Homebrew native Postgres (read by local `api/src/server.js`)
+
+| Field | Value |
+|-------|-------|
+| **URL** | `postgresql://postgres:postgres@127.0.0.1:5433/tdental_demo` |
+| **Host / Port** | `127.0.0.1` / `5433` |
+| **Database** | `tdental_demo` |
+| **User / Password** | `postgres` / `postgres` |
+| **PG version** | 15.14 (Homebrew, macOS native — NOT Docker) |
+| **Started by** | `brew services start postgresql@15` (runs automatically on boot) |
+| **Used by** | `api/.env` → this is what the local Node API connects to |
+| **Connect via CLI** | `PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -d tdental_demo` |
+
+### Port 55433 — Docker container `tgroup-db` (used by full docker-compose stack)
 
 | Field | Value |
 |-------|-------|
 | **URL** | `postgresql://postgres:postgres@127.0.0.1:55433/tdental_demo` |
-| **Host** | `127.0.0.1` |
-| **Port** | `55433` |
+| **Host / Port** | `127.0.0.1` / `55433` |
 | **Database** | `tdental_demo` |
-| **User** | `postgres` |
-| **Password** | `postgres` |
-| **Docker container** | `tdental-demo` |
-| **Source SQL** | `/Users/thuanle/Documents/TamTMV/TamDental/demo_tdental.sql` |
+| **User / Password** | `postgres` / `postgres` |
+| **PG version** | 16.11 (`postgres:16-alpine`) |
+| **Docker container** | `tgroup-db` (not `tdental-demo`) |
+| **Used by** | `tgroup-api` container (on 3002) + `tgroup-web` container (on 5175), all defined in `docker-compose.yml` |
 | **Connect via CLI** | `PGPASSWORD=postgres psql -h 127.0.0.1 -p 55433 -U postgres -d tdental_demo` |
+
+### Source SQL
+- `website/demo_tdental_updated.sql` (in-repo dump, includes 19 doctors + SQL views)
+- `/Users/thuanle/Documents/TamTMV/TamDental/demo_tdental.sql` (original external demo)
+
+### Migrations
+SQL migrations live in `api/migrations/`. They are NOT run automatically — apply manually to **each** instance you care about:
+```bash
+# Apply to native Postgres (what the local API actually uses)
+PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -d tdental_demo -f api/migrations/XXX_name.sql
+
+# Apply to Docker container (what docker-compose stack uses)
+PGPASSWORD=postgres psql -h 127.0.0.1 -p 55433 -U postgres -d tdental_demo -f api/migrations/XXX_name.sql
+```
 
 ### Demo Data
 
@@ -170,11 +198,15 @@ cd website && npx vite --port 5174
 
 ## Backend API
 
+The Node/Express API lives in **this repo** at `api/src/server.js`. It reads `api/.env` which currently points to the Homebrew Postgres on port **5433** (see Database section above).
+
 ```bash
-# Start API (connects to demo DB on port 55433)
-cd /Users/thuanle/Documents/TamTMV/TamDental/tdental-api && node src/server.js
+# Start API (connects to native Postgres on port 5433 per api/.env)
+cd /Users/thuanle/Documents/TamTMV/Tgroup/api && node src/server.js
 # Runs on http://localhost:3002
 ```
+
+There is also a **dockerized** copy of the same API — container `tgroup-api`, also on port 3002, which reads from the Docker Postgres `tgroup-db` on 55433 via the docker-compose network. Only one of {local node, docker tgroup-api} can bind 3002 at a time.
 
 | Endpoint | Data | Notes |
 |----------|------|-------|
@@ -187,19 +219,31 @@ cd /Users/thuanle/Documents/TamTMV/TamDental/tdental-api && node src/server.js
 | `/api/Products` | error | productcategories table missing |
 | `/api/DashboardReports` | varies | Aggregation endpoint |
 
-## Database
+## Database — operational commands
 
 ```bash
-# Start demo DB
-docker start tdental-demo
+# Start the Docker demo DB (tgroup-db container on port 55433)
+docker start tgroup-db
 
-# Connect
+# Or bring up the full compose stack (db + api + web)
+docker compose up -d
+
+# Connect to Homebrew Postgres on 5433 (what the local API actually reads)
+PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -d tdental_demo
+
+# Connect to Docker Postgres on 55433
 PGPASSWORD=postgres psql -h 127.0.0.1 -p 55433 -U postgres -d tdental_demo
 
-# Restore demo from scratch (includes 19 doctors + 11 SQL views)
-docker run -d --name tdental-demo -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=tdental_demo -p 55433:5432 postgres:16-alpine
+# Restore demo DB from scratch into Docker (includes 19 doctors + SQL views)
+docker rm -f tgroup-db 2>/dev/null
+docker run -d --name tgroup-db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=tdental_demo -p 127.0.0.1:55433:5432 postgres:16-alpine
 sleep 5
-docker exec -i tdental-demo psql -U postgres -d tdental_demo < website/demo_tdental_updated.sql
+docker exec -i tgroup-db psql -U postgres -d tdental_demo < website/demo_tdental_updated.sql
+
+# Restore demo DB into native Postgres (Homebrew)
+PGPASSWORD=postgres dropdb -h 127.0.0.1 -p 5433 -U postgres tdental_demo 2>/dev/null
+PGPASSWORD=postgres createdb -h 127.0.0.1 -p 5433 -U postgres tdental_demo
+PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -d tdental_demo < website/demo_tdental_updated.sql
 ```
 
 ## GitHub
