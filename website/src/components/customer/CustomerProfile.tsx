@@ -60,6 +60,7 @@ interface CustomerProfileProps {
     notes: string;
     totalCost: number;
     toothNumbers: readonly string[];
+    sourceId?: string | null;
   }) => Promise<void>;
   readonly onUpdateService?: (data: {
     id: string;
@@ -77,6 +78,7 @@ interface CustomerProfileProps {
     notes: string;
     totalCost: number;
     toothNumbers: readonly string[];
+    sourceId?: string | null;
   }) => Promise<void>;
   readonly onMakePayment?: (data: PaymentFormData) => Promise<void>;
   readonly onDeletePayment?: (id: string) => Promise<void>;
@@ -674,7 +676,8 @@ export function CustomerProfile({
                 startDate: data.startDate,
                 notes: data.notes,
                 totalCost: data.totalCost,
-                toothNumbers: data.toothNumbers
+                toothNumbers: data.toothNumbers,
+                sourceId: data.sourceId ?? null
               });
             }
             setShowServiceModal(false);
@@ -726,7 +729,8 @@ export function CustomerProfile({
                 startDate: data.startDate,
                 notes: data.notes,
                 totalCost: data.totalCost,
-                toothNumbers: data.toothNumbers
+                toothNumbers: data.toothNumbers,
+                sourceId: data.sourceId ?? null
               });
             }
             setEditingService(null);

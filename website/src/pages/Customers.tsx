@@ -180,6 +180,7 @@ export function Customers() {
     notes: string;
     totalCost: number;
     toothNumbers: readonly string[];
+    sourceId?: string | null;
   }) => {
     await createServiceRecord({
       customerId: selectedCustomerId ?? '',
@@ -201,7 +202,8 @@ export function Customers() {
       startDate: data.startDate,
       expectedEndDate: data.startDate,
       notes: data.notes,
-      toothNumbers: data.toothNumbers
+      toothNumbers: data.toothNumbers,
+      sourceId: data.sourceId ?? null
     });
   }, [createServiceRecord, selectedCustomerId, hookProfile]);
 
@@ -221,6 +223,7 @@ export function Customers() {
     notes: string;
     totalCost: number;
     toothNumbers: readonly string[];
+    sourceId?: string | null;
   }) => {
     await updateServiceRecord({
       id: data.id,
@@ -243,7 +246,8 @@ export function Customers() {
       startDate: data.startDate,
       expectedEndDate: data.startDate,
       notes: data.notes,
-      toothNumbers: data.toothNumbers
+      toothNumbers: data.toothNumbers,
+      sourceId: data.sourceId ?? null
     });
   }, [updateServiceRecord, selectedCustomerId, hookProfile]);
 

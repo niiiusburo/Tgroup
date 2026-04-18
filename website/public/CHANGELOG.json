@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.20.7",
+    "date": "2026-04-18",
+    "commit": "pending",
+    "highlights": "Fix Service form: sourceId field no longer dropped during save, restore source section label",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "ServiceForm: restore empty 'Nguồn khách hàng' label — FileText icon had text stripped, now shows correctly.",
+          "sourceId relay: Customers.tsx handleCreateService and handleUpdateService intermediate types now include sourceId?, and it is passed to createServiceRecord/updateServiceRecord.",
+          "CustomerProfile.tsx onCreateService/onUpdateService prop types now include sourceId?, and both onSubmit call sites relay data.sourceId ?? null to the parent handlers."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.20.6",
     "date": "2026-04-18",
     "commit": "pending",

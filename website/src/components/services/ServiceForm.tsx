@@ -298,7 +298,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
-
+              Nguồn khách hàng
             </label>
             <div className="flex flex-wrap gap-2">
               {allSources.map((s) => {
