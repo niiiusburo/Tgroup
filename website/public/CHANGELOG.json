@@ -1,5 +1,33 @@
 [
   {
+    "version": "0.23.4",
+    "date": "2026-04-18",
+    "commit": "pending",
+    "highlights": "Fix production build (TS errors under isolatedModules)",
+    "sections": [
+      {"title": "Bug Fixes", "items": [
+        "Removed unused getTodayStr() helper from AppointmentForm (superseded by useTimezone().getToday())",
+        "Use 'export type' for type-only re-exports in shared/index.ts (required under TS isolatedModules)"
+      ]}
+    ]
+  },
+  {
+    "version": "0.23.3",
+    "date": "2026-04-18",
+    "commit": "pending",
+    "highlights": "Fix edit-mode date parsing; share date normalizer across modules",
+    "sections": [
+      {"title": "Bug Fixes", "items": [
+        "Edit Appointment: date field parses ISO timestamps from API correctly (was '17T17:00:00.000Z/04/2026')",
+        "Edit Appointment: month picker no longer shows 'months.undefined NaN' with 42-day grid"
+      ]},
+      {"title": "Refactoring", "items": [
+        "Shared toISODateString() helper in lib/dateUtils; appointment date handling goes through it",
+        "DatePicker defensively normalizes any date-ish input"
+      ]}
+    ]
+  },
+  {
     "version": "0.23.2",
     "date": "2026-04-18",
     "commit": "pending",

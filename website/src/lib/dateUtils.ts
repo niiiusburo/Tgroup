@@ -43,6 +43,9 @@ export function getTodayInTimezone(timezone: string): string {
   return `${getPart('year')}-${getPart('month')}-${getPart('day')}`;
 }
 
+const DEFAULT_ICT_TIMEZONE = 'Asia/Ho_Chi_Minh';
+const YYYY_MM_DD_RE = /^\d{4}-\d{2}-\d{2}$/;
+
 /**
  * Format a date in the specified timezone
  */
@@ -75,6 +78,26 @@ export function formatInTimezone(
     .replace('HH', getPart('hour'))
     .replace('mm', getPart('minute'))
     .replace('ss', getPart('second'));
+}
+
+/**
+ * Normalize any date-ish input to a clean YYYY-MM-DD string in ICT.
+ * Single source of truth for form/display date handling.
+ * Examples:
+ *   '2026-04-18'                 => '2026-04-18'
+ *   '2026-04-17T17:00:00.000Z'   => '2026-04-18' (ICT)
+ *   Date instance                 => 'YYYY-MM-DD'
+ *   '' | null | undefined | bad   => ''
+ */
+export function toISODateString(
+  input: string | Date | null | undefined,
+  timezone: string = DEFAULT_ICT_TIMEZONE
+): string {
+  if (input == null || input === '') return '';
+  if (typeof input === 'string' && YYYY_MM_DD_RE.test(input)) return input;
+  const d = input instanceof Date ? input : new Date(input);
+  if (isNaN(d.getTime())) return '';
+  return formatInTimezone(d, timezone, 'yyyy-MM-dd');
 }
 
 /**
