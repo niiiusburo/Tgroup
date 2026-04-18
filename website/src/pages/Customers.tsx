@@ -145,7 +145,8 @@ export function Customers() {
       endTime: data.endTime,
       notes: data.notes
     });
-  }, [createAppointment]);
+    refetchProfile();
+  }, [createAppointment, refetchProfile]);
 
   const handleUpdateAppointment = useCallback(async (id: string, data: AppointmentFormData) => {
     await updateAppointment(id, {
@@ -163,7 +164,8 @@ export function Customers() {
       endTime: data.endTime,
       notes: data.notes
     });
-  }, [updateAppointment]);
+    refetchProfile();
+  }, [updateAppointment, refetchProfile]);
 
   const handleCreateService = useCallback(async (data: {
     catalogItemId: string;

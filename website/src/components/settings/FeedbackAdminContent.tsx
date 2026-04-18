@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { MessageSquare, Eye, Loader2, Send, X, Paperclip, Trash2 } from 'lucide-react';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusDropdown, type StatusOption } from '@/components/shared/StatusDropdown';
+import { usePasteImage } from '@/hooks/usePasteImage';
 import {
   fetchAllFeedback,
   fetchAdminFeedbackThread,
@@ -111,6 +112,12 @@ export function FeedbackAdminContent() {
   const [fileError, setFileError] = useState<string | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePaste = usePasteImage({
+    onFiles: (imgs) => setFiles((prev) => [...prev, ...imgs]),
+    onError: setFileError,
+    currentCount: files.length,
+  });
 
   const loadThreads = useCallback(async () => {
     setLoading(true);
@@ -276,7 +283,21 @@ export function FeedbackAdminContent() {
       key: 'pagePath',
       header: 'Page',
       sortable: true,
-      render: (row) => <span className="text-gray-600">{row.pagePath || row.pageUrl || '—'}</span>,
+      render: (row) => {
+        const path = row.pagePath || row.pageUrl;
+        if (!path) return <span className="text-gray-400">—</span>;
+        return (
+          <a
+            href={path}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+            title={`Open ${path} in new tab`}
+          >
+            {path}
+          </a>
+        );
+      },
     },
     {
       key: 'firstMessage',
@@ -472,6 +493,7 @@ export function FeedbackAdminContent() {
                   value={replyInput}
                   onChange={(e) => setReplyInput(e.target.value)}
                   onKeyDown={handleReplyKeyDown}
+                  onPaste={handlePaste}
                   placeholder={t('enterNotePlaceholder', { ns: 'payment' })}
                   rows={2}
                   className="flex-1 resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
