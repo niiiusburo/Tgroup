@@ -19,7 +19,7 @@ import { useServices } from '@/hooks/useServices';
 import { useDeposits } from '@/hooks/useDeposits';
 import { useCustomerPayments } from '@/hooks/useCustomerPayments';
 import { useExternalCheckups } from '@/hooks/useExternalCheckups';
-import type { AppointmentFormData } from '@/components/appointments/AppointmentForm';
+import type { UnifiedAppointmentFormData } from '@/components/appointments/unified';
 import type { PaymentFormData } from '@/components/payment/PaymentForm';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 import type { ProfileTab } from '@/components/customer/CustomerProfile';
@@ -129,8 +129,8 @@ export function Customers() {
   } = useDeposits();
   const { payments: customerPayments, isLoading: paymentsLoading, addPayment, refetch: refetchPayments, deletePaymentById } = useCustomerPayments(selectedCustomerId);
 
-  // Callbacks for CustomerProfile
-  const handleCreateAppointment = useCallback(async (data: AppointmentFormData) => {
+  // Callbacks for CustomerProfile — unified form data passes straight through
+  const handleCreateAppointment = useCallback(async (data: UnifiedAppointmentFormData) => {
     await createAppointment({
       customerId: data.customerId,
       customerName: data.customerName,
@@ -139,17 +139,20 @@ export function Customers() {
       doctorName: data.doctorName,
       locationId: data.locationId,
       locationName: data.locationName,
-      appointmentType: 'consultation',
+      appointmentType: data.appointmentType,
       serviceName: data.serviceName,
       date: data.date,
       startTime: data.startTime,
       endTime: data.endTime,
-      notes: data.notes
+      notes: data.notes,
+      estimatedDuration: data.estimatedDuration,
+      color: data.color,
+      serviceId: data.serviceId,
     });
     refetchProfile();
   }, [createAppointment, refetchProfile]);
 
-  const handleUpdateAppointment = useCallback(async (id: string, data: AppointmentFormData) => {
+  const handleUpdateAppointment = useCallback(async (id: string, data: UnifiedAppointmentFormData) => {
     await updateAppointment(id, {
       customerId: data.customerId,
       customerName: data.customerName,
@@ -158,12 +161,15 @@ export function Customers() {
       doctorName: data.doctorName,
       locationId: data.locationId,
       locationName: data.locationName,
-      appointmentType: 'consultation',
+      appointmentType: data.appointmentType,
       serviceName: data.serviceName,
       date: data.date,
       startTime: data.startTime,
       endTime: data.endTime,
-      notes: data.notes
+      notes: data.notes,
+      estimatedDuration: data.estimatedDuration,
+      color: data.color,
+      serviceId: data.serviceId,
     });
     refetchProfile();
   }, [updateAppointment, refetchProfile]);

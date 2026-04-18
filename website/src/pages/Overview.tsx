@@ -3,12 +3,13 @@ import { useCallback, useState } from 'react';
 import { PatientCheckIn } from '@/components/modules/PatientCheckIn';
 import { TodayServicesTable } from '@/components/modules/TodayServicesTable';
 import { TodayAppointments } from '@/components/modules/TodayAppointments';
-import { EditAppointmentModal } from '@/components/modules/EditAppointmentModal';
 import { useOverviewAppointments } from '@/hooks/useOverviewAppointments';
 import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { AppointmentHoverProvider } from '@/contexts/AppointmentHoverContext';
 import { QuickAddAppointmentButton } from '@/components/shared/QuickAddAppointmentButton';
+import { AppointmentFormShell } from '@/components/appointments/unified';
+import { overviewAppointmentToFormData } from '@/components/appointments/unified';
 
 /**
  * Overview Dashboard Page — Three-Zone Layout
@@ -64,6 +65,10 @@ export function Overview() {
     handleModalClose();
   }, [refresh, handleModalClose]);
 
+  const editFormInitialData = editingAppointment
+    ? overviewAppointmentToFormData(editingAppointment)
+    : undefined;
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -114,12 +119,14 @@ export function Overview() {
         </div>
       </div>
 
-      {/* Shared Edit Modal for both Zone 1 and Zone 3 */}
-      <EditAppointmentModal
-        appointment={editingAppointment}
+      {/* Unified Edit Modal for both Zone 1 and Zone 3 */}
+      <AppointmentFormShell
+        mode="edit"
         isOpen={isEditModalOpen}
         onClose={handleModalClose}
-        onSaved={handleEditAppointmentSaved}
+        onSuccess={handleEditAppointmentSaved}
+        initialData={editFormInitialData}
+        customerReadOnly
       />
     </AppointmentHoverProvider>
   );
