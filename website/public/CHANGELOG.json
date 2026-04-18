@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.20.3",
+    "date": "2026-04-18",
+    "commit": "pending",
+    "highlights": "Fix i18n Batch 1 regressions: raw phase keys, empty Excel/Filter buttons, empty ChangePasswordModal",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Calendar cards no longer show raw keys like 'appointments.phase.waiting'. Stripped namespace prefix from PHASE_LABEL_KEYS values so i18next resolves them correctly to 'Đang chờ', 'Đang hẹn', 'Hoàn tất', etc.",
+          "Calendar toolbar Excel ('Xuất Excel') and Filter ('Bộ lọc') buttons render their labels again via t(key, fallback).",
+          "ChangePasswordModal no longer renders empty h2/p/label tags. Restored title, subtitle, success message, and all three field labels via t(key, fallback)."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.20.2",
     "date": "2026-04-18",
     "commit": "pending",

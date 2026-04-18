@@ -39,11 +39,11 @@ export function calendarStatusToPhase(status: 'scheduled' | 'confirmed' | 'in-pr
 
 /** Translation keys for calendar phases (appointments namespace). Callers should do `t(PHASE_LABEL_KEYS[phase], { ns: 'appointments' })`. */
 export const PHASE_LABEL_KEYS: Record<CalendarPhase, string> = {
-  scheduled: 'appointments.phase.scheduled',
-  waiting: 'appointments.phase.waiting',
-  'in-treatment': 'appointments.phase.in-treatment',
-  done: 'appointments.phase.done',
-  cancelled: 'appointments.phase.cancelled',
+  scheduled: 'phase.scheduled',
+  waiting: 'phase.waiting',
+  'in-treatment': 'phase.in-treatment',
+  done: 'phase.done',
+  cancelled: 'phase.cancelled',
 };
 
 /** Convenience helper: returns the translated label for a phase. */

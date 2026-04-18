@@ -588,8 +588,7 @@ export function Calendar() {
             type="button"
             onClick={() => setIsExportOpen(true)}
             className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-            
-
+            {t('xutExcel', 'Xuất Excel')}
           </button>
           <QuickAddAppointmentButton
             onSuccess={refresh}
@@ -600,8 +599,7 @@ export function Calendar() {
             data-testid="calendar-filter-button"
             onClick={openFilter}
             className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-            
-            <span></span>
+            <span>{t('bLc', 'Bộ lọc')}</span>
             {selectedDoctors.length + selectedStatuses.length + selectedColors.length > 0 &&
             <span
               data-testid="calendar-filter-badge"

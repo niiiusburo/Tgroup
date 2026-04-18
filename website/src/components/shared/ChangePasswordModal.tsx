@@ -94,8 +94,8 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
                 <Lock className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white"></h2>
-                <p className="text-sm text-blue-100 mt-0.5"></p>
+                <h2 className="text-xl font-bold text-white">{t('iMtKhu', 'Đổi mật khẩu')}</h2>
+                <p className="text-sm text-blue-100 mt-0.5">{t('cpNhtMtKhuNgNhpCaBn', 'Cập nhật mật khẩu đăng nhập của bạn')}</p>
               </div>
             </div>
             <button
@@ -116,8 +116,8 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
                 <CheckCircle className="w-7 h-7 text-green-600" />
               </div>
               <div>
-                <p className="text-lg font-semibold text-gray-900"></p>
-                <p className="text-sm text-gray-500 mt-1"></p>
+                <p className="text-lg font-semibold text-gray-900">{t('iMtKhuThnhCng', 'Đổi mật khẩu thành công')}</p>
+                <p className="text-sm text-gray-500 mt-1">{t('bnCThNgNhpBngMtKhuMi', 'Bạn có thể đăng nhập bằng mật khẩu mới')}</p>
               </div>
             </div> :
 
@@ -125,7 +125,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
               {/* Old password */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-
+                {t('mtKhuHinTi', 'Mật khẩu hiện tại')}
               </label>
                 <div className="relative">
                   <input
@@ -148,7 +148,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
               {/* New password */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-
+                {t('mtKhuMi', 'Mật khẩu mới')}
               </label>
                 <div className="relative">
                   <input
@@ -171,7 +171,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
               {/* Confirm password */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-
+                {t('xcNhnMtKhuMi', 'Xác nhận mật khẩu mới')}
               </label>
                 <div className="relative">
                   <input
@@ -203,7 +203,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
                 {loading ?
               <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-
+                    {t('angXL', 'Đang xử lý...')}
               </> : t("cpNhtMtKhu")
 
 
