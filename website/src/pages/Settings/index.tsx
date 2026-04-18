@@ -13,6 +13,7 @@ import { TimezoneSelector } from '@/components/settings/TimezoneSelector';
 import { BankSettingsForm } from '@/components/settings/BankSettingsForm';
 import { FeedbackAdminContent } from '@/components/settings/FeedbackAdminContent';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 type SettingsTab = 'system' | 'bank' | 'ip' | 'feedback';
 
@@ -24,9 +25,10 @@ const ALL_TABS: { id: SettingsTab; label: string; icon: React.ReactNode; admin?:
 ];
 
 export function Settings() {
+  const { t } = useTranslation('settings');
   const { hasPermission } = useAuth();
   const isAdmin = hasPermission('permissions.view');
-  const TABS = ALL_TABS.filter((t) => !t.admin || isAdmin);
+  const TABS = ALL_TABS.filter((tab) => !tab.admin || isAdmin);
   const [activeTab, setActiveTab] = useState<SettingsTab>('system');
 
   return (
@@ -37,8 +39,8 @@ export function Settings() {
           <SettingsIcon className="w-6 h-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-          <p className="text-sm text-gray-500">Configure your clinic system settings, timezone, and IP access control</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+          <p className="text-sm text-gray-500">{t('subtitle')}</p>
         </div>
       </div>
 
@@ -50,8 +52,8 @@ export function Settings() {
               <Globe className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-gray-900">Timezone Setting</h3>
-              <p className="text-sm text-gray-500">Configure your clinic's timezone for all date and time displays</p>
+              <h3 className="text-base font-semibold text-gray-900">{t('timezoneSetting')}</h3>
+              <p className="text-sm text-gray-500">{t('timezoneDesc')}</p>
             </div>
           </div>
           <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4">

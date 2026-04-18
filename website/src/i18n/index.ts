@@ -33,6 +33,17 @@ import viWebsite from './locales/vi/website.json';
 import enPermissions from './locales/en/permissions.json';
 import viPermissions from './locales/vi/permissions.json';
 
+import enCommission from './locales/en/commission.json';
+import viCommission from './locales/vi/commission.json';
+import enFeedback from './locales/en/feedback.json';
+import viFeedback from './locales/vi/feedback.json';
+import enNotifications from './locales/en/notifications.json';
+import viNotifications from './locales/vi/notifications.json';
+import enRelationships from './locales/en/relationships.json';
+import viRelationships from './locales/vi/relationships.json';
+import enServiceCatalog from './locales/en/serviceCatalog.json';
+import viServiceCatalog from './locales/vi/serviceCatalog.json';
+
 const STORAGE_KEY = 'tg-lang';
 const DEFAULT_LANG = 'vi';
 
@@ -64,6 +75,11 @@ i18n.use(initReactI18next).init({
       auth: enAuth,
       website: enWebsite,
       permissions: enPermissions,
+      commission: enCommission,
+      feedback: enFeedback,
+      notifications: enNotifications,
+      relationships: enRelationships,
+      serviceCatalog: enServiceCatalog,
     },
     vi: {
       common: viCommon,
@@ -81,6 +97,11 @@ i18n.use(initReactI18next).init({
       auth: viAuth,
       website: viWebsite,
       permissions: viPermissions,
+      commission: viCommission,
+      feedback: viFeedback,
+      notifications: viNotifications,
+      relationships: viRelationships,
+      serviceCatalog: viServiceCatalog,
     },
   },
   lng: savedLang && SUPPORTED_LANGS.includes(savedLang) ? savedLang : DEFAULT_LANG,
@@ -90,6 +111,7 @@ i18n.use(initReactI18next).init({
     'common', 'nav', 'overview', 'calendar', 'customers',
     'appointments', 'services', 'payment', 'employees',
     'locations', 'reports', 'settings', 'auth', 'website', 'permissions',
+    'commission', 'feedback', 'notifications', 'relationships', 'serviceCatalog',
   ],
   defaultNS: 'common',
   interpolation: { escapeValue: false },

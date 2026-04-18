@@ -146,5 +146,7 @@
   "tabLower": "Lower jaw",
   "tabArch": "Full arch",
   "permanentTeeth": "Permanent teeth",
-  "primaryTeeth": "Primary teeth"
+  "primaryTeeth": "Primary teeth",
+  "close": "Close",
+  "save": "Save"
 }

@@ -97,7 +97,7 @@ export function Payment() {
               className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
             >
               <Plus className="w-4 h-4" />
-              New Plan
+              {t('newPlan')}
             </button>
           )}
         </div>
@@ -112,7 +112,7 @@ export function Payment() {
             <span className="text-xs font-medium">{t('payment:totalRevenue')}</span>
           </div>
           <p className="text-2xl font-bold text-gray-900">{formatVND(stats.totalRevenue)}</p>
-          <p className="text-xs text-gray-400 mt-0.5">{stats.completedPayments} payments</p>
+          <p className="text-xs text-gray-400 mt-0.5">{stats.completedPayments} {t('payments')}</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-card">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
@@ -120,7 +120,7 @@ export function Payment() {
             <span className="text-xs font-medium">{t('payment:walletBalance')}</span>
           </div>
           <p className="text-2xl font-bold text-gray-900">{formatVND(stats.totalWalletBalance)}</p>
-          <p className="text-xs text-gray-400 mt-0.5">{stats.activeWallets} active wallets</p>
+          <p className="text-xs text-gray-400 mt-0.5">{stats.activeWallets} {t('activeWallets')}</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-card">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
@@ -128,7 +128,7 @@ export function Payment() {
             <span className="text-xs font-medium">{t('payment:outstanding')}</span>
           </div>
           <p className="text-2xl font-bold text-red-500">{formatVND(stats.totalOutstanding)}</p>
-          <p className="text-xs text-gray-400 mt-0.5">{outstandingBalances.length} items</p>
+          <p className="text-xs text-gray-400 mt-0.5">{outstandingBalances.length} {t('items')}</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-card">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
@@ -136,7 +136,7 @@ export function Payment() {
             <span className="text-xs font-medium">{t('payment:activePlans')}</span>
           </div>
           <p className="text-2xl font-bold text-gray-900">{summary.activePlans}</p>
-          <p className="text-xs text-gray-400 mt-0.5">{summary.overdueCount} overdue</p>
+          <p className="text-xs text-gray-400 mt-0.5">{summary.overdueCount} {t('overdue')}</p>
         </div>
       </div>
 
@@ -153,7 +153,7 @@ export function Payment() {
         >
           <span className="flex items-center gap-2">
             <CreditCard className="w-4 h-4" />
-            Payments & Wallets
+            {t('paymentsAndWallets')}
           </span>
         </button>
         <button
@@ -167,7 +167,7 @@ export function Payment() {
         >
           <span className="flex items-center gap-2">
             <CalendarRange className="w-4 h-4" />
-            Installment Plans
+            {t('installmentPlans')}
           </span>
         </button>
       </div>
@@ -304,7 +304,7 @@ export function Payment() {
                       </div>
                       <p className="text-xs text-gray-500 truncate">{plan.treatmentDescription}</p>
                       <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs text-gray-400">{paidCount}/{plan.numberOfInstallments} paid</span>
+                        <span className="text-xs text-gray-400">{paidCount}/{plan.numberOfInstallments} {t('paid')}</span>
                         <span className="text-xs font-medium text-gray-700">{formatVND(plan.totalAmount)}</span>
                       </div>
                       <div className="w-full bg-gray-100 rounded-full h-1.5 mt-2">

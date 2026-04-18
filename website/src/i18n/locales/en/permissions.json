@@ -71,5 +71,13 @@
       "view": "View external checkup images",
       "create": "Upload external checkup images"
     }
-  }
+  },
+  "loadingPermissions": "Loading permissions...",
+  "retry": "Retry",
+  "systemArchitecture": "Permission System Architecture",
+  "clickToExplore": "Click on groups or employees to explore the permission logic",
+  "howPermissionsWork": "How Permissions Are Resolved",
+  "liveExamples": "Live Examples",
+  "noOverrideExamples": "No employees with overrides or location restrictions found.",
+  "addingNewTypes": "Adding New Employee Types"
 }

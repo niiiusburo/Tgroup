@@ -1,6 +1,7 @@
 import { Clock, ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import type { DepositTransaction } from '@/hooks/useDeposits';
 import { formatVND } from '@/lib/formatting';
+import { useTranslation } from 'react-i18next';
 
 interface DepositHistoryProps {
   transactions: DepositTransaction[];
@@ -17,14 +18,15 @@ function formatDate(dateStr: string): string {
 }
 
 export function DepositHistory({ transactions, loading }: DepositHistoryProps) {
+  const { t } = useTranslation('payment');
   if (loading) {
     return (
       <div className="bg-white rounded-xl shadow-card p-6">
         <div className="flex items-center gap-2 mb-4">
           <Clock className="w-5 h-5 text-primary" />
-          <h3 className="font-semibold text-gray-900">Deposit History</h3>
+          <h3 className="font-semibold text-gray-900">{t('depositHistory')}</h3>
         </div>
-        <div className="text-center py-8 text-gray-400">Loading...</div>
+        <div className="text-center py-8 text-gray-400">{t('angTi')}</div>
       </div>
     );
   }
@@ -33,13 +35,13 @@ export function DepositHistory({ transactions, loading }: DepositHistoryProps) {
     <div className="bg-white rounded-xl shadow-card p-6">
       <div className="flex items-center gap-2 mb-4">
         <Clock className="w-5 h-5 text-primary" />
-        <h3 className="font-semibold text-gray-900">Deposit History</h3>
-        <span className="text-xs text-gray-400">({transactions.length} transactions)</span>
+        <h3 className="font-semibold text-gray-900">{t('depositHistory')}</h3>
+        <span className="text-xs text-gray-400">({transactions.length} {t('transactions')})</span>
       </div>
 
       {transactions.length === 0 ? (
         <div className="text-center py-8 text-gray-400 text-sm">
-          No deposit history yet
+          {t('noDepositHistory')}
         </div>
       ) : (
         <div className="space-y-2">
@@ -78,7 +80,7 @@ export function DepositHistory({ transactions, loading }: DepositHistoryProps) {
                     </span>
                   </div>
                   <p className="text-xs text-gray-500 truncate">
-                    {tx.note || (isDeposit ? 'Deposit added' : 'Deposit used')}
+                    {tx.note || (isDeposit ? t('depositAdded') : t('depositUsed'))}
                   </p>
                 </div>
 
@@ -86,7 +88,7 @@ export function DepositHistory({ transactions, loading }: DepositHistoryProps) {
                   <p className="text-xs text-gray-400">{formatDate(tx.date)}</p>
                   {tx.balanceAfter !== undefined && (
                     <p className="text-xs text-gray-500">
-                      Bal: {formatVND(tx.balanceAfter)}
+                      {t('balance')}: {formatVND(tx.balanceAfter)}
                     </p>
                   )}
                 </div>

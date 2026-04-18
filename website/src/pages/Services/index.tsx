@@ -127,7 +127,7 @@ export function Services() {
             <Stethoscope className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Services</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
             <p className="text-sm text-gray-500">Manage service records and multi-visit treatments</p>
           </div>
         </div>

@@ -81,7 +81,7 @@
     "label": "Chọn múi giờ",
     "searchPlaceholder": "Tìm múi giờ..."
   },
-  "subtitle": "Cấu hình hệ thống",
+  "subtitle": "Cấu hình hệ thống phòng khám, múi giờ và kiểm soát truy cập IP",
   "angTi": "Đang tải...",
   "tiKhonNgnHng": "Tài khoản ngân hàng",
   "cuHnhTiKhonNhnThanhTonQrChoPhngKhm": "Cấu hình tài khoản nhận thanh toán QR cho phòng khám",
@@ -91,5 +91,8 @@
   "tnChTiKhon": "Tên chủ tài khoản",
   "angLu": "Đang lưu...",
   "lu": "Lưu",
-  "luCiTNgnHng": "Đã lưu cài đặt ngân hàng"
+  "luCiTNgnHng": "Đã lưu cài đặt ngân hàng",
+  "enterNotePlaceholder": "Nhập ghi chú...",
+  "timezoneSetting": "Cài đặt múi giờ",
+  "timezoneDesc": "Cấu hình múi giờ phòng khám cho tất cả hiển thị ngày và giờ"
 }

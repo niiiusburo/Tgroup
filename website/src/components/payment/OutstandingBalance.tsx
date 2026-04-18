@@ -7,6 +7,7 @@
 import { AlertTriangle, Clock } from 'lucide-react';
 import type { OutstandingBalanceItem } from '@/types/payment';
 import { formatVND } from '@/lib/formatting';
+import { useTranslation } from 'react-i18next';
 
 function getDaysUntilDue(dueDate: string): number {
   const now = new Date();
@@ -20,13 +21,14 @@ interface OutstandingBalanceProps {
 }
 
 export function OutstandingBalance({ balances, onPayNow }: OutstandingBalanceProps) {
+  const { t } = useTranslation('payment');
   if (balances.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-card p-6 text-center">
         <div className="p-3 bg-green-50 rounded-full w-fit mx-auto mb-2">
           <Clock className="w-5 h-5 text-green-500" />
         </div>
-        <p className="text-sm text-gray-500">No outstanding balances</p>
+        <p className="text-sm text-gray-500">{t('noOutstanding')}</p>
       </div>
     );
   }
@@ -41,11 +43,11 @@ export function OutstandingBalance({ balances, onPayNow }: OutstandingBalancePro
           <AlertTriangle className="w-5 h-5 text-amber-600" />
         </div>
         <div>
-          <p className="text-sm font-medium text-amber-800">Total Outstanding</p>
+          <p className="text-sm font-medium text-amber-800">{t('totalOutstanding')}</p>
           <p className="text-xl font-bold text-amber-900">{formatVND(totalOutstanding)}</p>
         </div>
         <span className="ml-auto text-xs text-amber-600 font-medium">
-          {balances.length} {balances.length === 1 ? 'item' : 'items'}
+          {balances.length} {balances.length === 1 ? t('item') : t('items')}
         </span>
       </div>
 
@@ -92,7 +94,7 @@ export function OutstandingBalance({ balances, onPayNow }: OutstandingBalancePro
 
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-xs text-gray-400">Remaining: </span>
+                <span className="text-xs text-gray-400">{t('remainingLabel')} </span>
                 <span className="text-sm font-bold text-gray-900">{formatVND(balance.remainingBalance ?? (balance.totalCost - balance.paidAmount))}</span>
               </div>
               {onPayNow && (
@@ -101,7 +103,7 @@ export function OutstandingBalance({ balances, onPayNow }: OutstandingBalancePro
                   onClick={() => onPayNow(balance)}
                   className="px-3 py-1.5 text-xs font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
                 >
-                  Pay Now
+                  {t('payNow')}
                 </button>
               )}
             </div>

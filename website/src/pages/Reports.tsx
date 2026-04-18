@@ -12,6 +12,7 @@ import {
 import { ROUTES } from '@/constants';
 import { useLocations } from '@/hooks/useLocations';
 import { ReportsFilters } from '@/components/reports/ReportsFilters';
+import { useTranslation } from 'react-i18next';
 
 const TABS = [
   { path: ROUTES.REPORTS_DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
@@ -25,6 +26,7 @@ const TABS = [
 ];
 
 export default function Reports() {
+  const { t } = useTranslation('reports');
   const location = useLocation();
   const navigate = useNavigate();
   const { allLocations } = useLocations();
@@ -51,7 +53,7 @@ export default function Reports() {
           <BarChart3 className="w-6 h-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
           <p className="text-sm text-gray-500">{activeTab.label} analytics &amp; insights</p>
         </div>
       </div>

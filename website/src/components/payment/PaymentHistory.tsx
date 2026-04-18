@@ -12,17 +12,19 @@ import {
   type PaymentRecord,
 } from '@/data/mockPayment';
 import { formatVND } from '@/lib/formatting';
+import { useTranslation } from 'react-i18next';
 
 interface PaymentHistoryProps {
   readonly payments: readonly PaymentRecord[];
 }
 
 export function PaymentHistory({ payments }: PaymentHistoryProps) {
+  const { t } = useTranslation('payment');
   if (payments.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-card p-8 text-center">
         <Receipt className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-        <p className="text-sm text-gray-500">No payment records found</p>
+        <p className="text-sm text-gray-500">{t('noPaymentRecords')}</p>
       </div>
     );
   }
@@ -33,13 +35,13 @@ export function PaymentHistory({ payments }: PaymentHistoryProps) {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-50 text-left">
-              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Receipt</th>
-              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
-              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('colReceipt')}</th>
+              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('colCustomer')}</th>
+              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('colService')}</th>
+              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('colAmount')}</th>
+              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('colMethod')}</th>
+              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('colStatus')}</th>
+              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('colDate')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">

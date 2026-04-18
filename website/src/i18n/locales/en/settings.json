@@ -81,7 +81,7 @@
     "label": "Select Timezone",
     "searchPlaceholder": "Search timezone..."
   },
-  "subtitle": "System configuration",
+  "subtitle": "Configure your clinic system settings, timezone, and IP access control",
   "angTi": "Loading...",
   "tiKhonNgnHng": "Bank Account",
   "cuHnhTiKhonNhnThanhTonQrChoPhngKhm": "Configure QR payment receiving account for clinic",
@@ -91,5 +91,8 @@
   "tnChTiKhon": "Account holder name",
   "angLu": "Saving...",
   "lu": "Save",
-  "luCiTNgnHng": "Bank settings saved"
+  "luCiTNgnHng": "Bank settings saved",
+  "enterNotePlaceholder": "Enter notes...",
+  "timezoneSetting": "Timezone Setting",
+  "timezoneDesc": "Configure your clinic's timezone for all date and time displays"
 }

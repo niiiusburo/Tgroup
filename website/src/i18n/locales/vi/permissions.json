@@ -71,5 +71,13 @@
       "view": "Xem ảnh khám ngoài",
       "create": "Tải lên ảnh khám ngoài"
     }
-  }
+  },
+  "loadingPermissions": "Đang tải quyền...",
+  "retry": "Thử lại",
+  "systemArchitecture": "Kiến trúc hệ thống quyền",
+  "clickToExplore": "Nhấp vào nhóm hoặc nhân viên để khám phá logic quyền",
+  "howPermissionsWork": "Cách quyền được phân giải",
+  "liveExamples": "Ví dụ thực tế",
+  "noOverrideExamples": "Không tìm thấy nhân viên có ghi đè hoặc giới hạn vị trí.",
+  "addingNewTypes": "Thêm loại nhân viên mới"
 }

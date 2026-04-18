@@ -123,5 +123,14 @@
   "thuGnChiTit": "Thu gọn chi tiết",
   "mRngChiTit": "Mở rộng chi tiết",
   "returningCustomer": "Khách tái khám",
-  "newCustomer": "Khách mới"
+  "newCustomer": "Khách mới",
+  "weekDays": {
+    "monday": "Thứ Hai",
+    "tuesday": "Thứ Ba",
+    "wednesday": "Thứ Tư",
+    "thursday": "Thứ Năm",
+    "friday": "Thứ Sáu",
+    "saturday": "Thứ Bảy",
+    "sunday": "Chủ Nhật"
+  }
 }

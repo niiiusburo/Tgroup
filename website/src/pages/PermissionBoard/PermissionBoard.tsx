@@ -10,8 +10,10 @@ import { usePermissionBoard } from '@/hooks/usePermissionBoard';
 import { ArchitectureView } from './ArchitectureView';
 import { MatrixView } from './MatrixView';
 import { LogicFlowView } from './LogicFlowView';
+import { useTranslation } from 'react-i18next';
 
 export function PermissionBoard() {
+  const { t } = useTranslation('permissions');
   const { groups, employees, locations, loading, error, updateEmployee, toggleGroupPermission, getEffective, refetch } = usePermissionBoard();
 
   const [view, setView] = useState<'architecture' | 'matrix' | 'flow'>('architecture');
@@ -23,7 +25,7 @@ export function PermissionBoard() {
       <div className="flex items-center justify-center h-64">
         <div className="flex items-center gap-3 text-gray-500">
           <RefreshCw className="w-5 h-5 animate-spin" />
-          <span className="text-sm">Loading permissions...</span>
+          <span className="text-sm">{t('loadingPermissions')}</span>
         </div>
       </div>
     );
@@ -40,7 +42,7 @@ export function PermissionBoard() {
           className="flex items-center gap-2 text-sm text-blue-600 border border-blue-200 rounded-lg px-3 py-1.5 hover:bg-blue-50 transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
-          Retry
+          {t('retry')}
         </button>
       </div>
     );
@@ -53,9 +55,9 @@ export function PermissionBoard() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Shield className="w-5 h-5 text-gray-500" />
-            <h2 className="text-base font-semibold text-gray-900">Permission System Architecture</h2>
+            <h2 className="text-base font-semibold text-gray-900">{t('systemArchitecture')}</h2>
           </div>
-          <p className="text-sm text-gray-500">Click on groups or employees to explore the permission logic</p>
+          <p className="text-sm text-gray-500">{t('clickToExplore')}</p>
         </div>
         <button
           onClick={refetch}

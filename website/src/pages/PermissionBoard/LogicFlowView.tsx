@@ -1,5 +1,6 @@
 import type { PermissionGroup, EmployeePermission } from '@/lib/api';
 import { getInitials } from './constants';
+import { useTranslation } from 'react-i18next';
 
 interface LogicFlowViewProps {
   groups: PermissionGroup[];
@@ -8,13 +9,14 @@ interface LogicFlowViewProps {
 }
 
 export function LogicFlowView({ groups, employees, getEffective }: LogicFlowViewProps) {
+  const { t } = useTranslation('permissions');
   const exampleEmployees = employees.filter(e => e.overrides.grant.length > 0 || e.overrides.revoke.length > 0 || e.locScope !== 'all').slice(0, 4);
 
   return (
     <div className="flex flex-col gap-6">
       {/* Step cards */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-        <h3 className="text-sm font-bold text-gray-900 mb-5">How Permissions Are Resolved</h3>
+        <h3 className="text-sm font-bold text-gray-900 mb-5">{t('howPermissionsWork')}</h3>
         <div className="flex items-start gap-3 flex-wrap">
           {[
             {
@@ -87,9 +89,9 @@ export function LogicFlowView({ groups, employees, getEffective }: LogicFlowView
 
       {/* Live examples */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-        <h3 className="text-sm font-bold text-gray-900 mb-4">Live Examples</h3>
+        <h3 className="text-sm font-bold text-gray-900 mb-4">{t('liveExamples')}</h3>
         {exampleEmployees.length === 0 ? (
-          <p className="text-sm text-gray-400">No employees with overrides or location restrictions found.</p>
+          <p className="text-sm text-gray-400">{t('noOverrideExamples')}</p>
         ) : (
           <div className="flex flex-col gap-3">
             {exampleEmployees.map(emp => {
@@ -141,7 +143,7 @@ export function LogicFlowView({ groups, employees, getEffective }: LogicFlowView
 
       {/* Tip box */}
       <div className="bg-green-50 rounded-xl border-2 border-green-200 p-5">
-        <h3 className="text-sm font-bold text-green-800 mb-2">Adding New Employee Types</h3>
+        <h3 className="text-sm font-bold text-green-800 mb-2">{t('addingNewTypes')}</h3>
         <div className="text-[13px] text-gray-600 leading-relaxed">
           Want to add a "Consultant" or "Intern" type? Just:<br />
           <strong>1.</strong> Create a new Tier with the right module access<br />
