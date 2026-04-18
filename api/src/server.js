@@ -65,7 +65,8 @@ const ALLOWED_ORIGINS = [
   'https://www.nk.2checkin.com',
 ];
 app.use(helmet());
-app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
+const DEV_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1):(517\d|3\d{3})$/;
+app.use(cors({ origin: (o, cb) => !o || ALLOWED_ORIGINS.includes(o) || DEV_ORIGIN.test(o) ? cb(null, true) : cb(new Error(`CORS: ${o}`)), credentials: true }));
 app.use(cookieParser());
 app.use(express.json({ limit: '1mb' }));
 
