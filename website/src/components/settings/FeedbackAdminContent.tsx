@@ -283,7 +283,21 @@ export function FeedbackAdminContent() {
       key: 'pagePath',
       header: 'Page',
       sortable: true,
-      render: (row) => <span className="text-gray-600">{row.pagePath || row.pageUrl || '—'}</span>,
+      render: (row) => {
+        const path = row.pagePath || row.pageUrl;
+        if (!path) return <span className="text-gray-400">—</span>;
+        return (
+          <a
+            href={path}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+            title={`Open ${path} in new tab`}
+          >
+            {path}
+          </a>
+        );
+      },
     },
     {
       key: 'firstMessage',
