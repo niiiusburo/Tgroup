@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.23.1",
+    "date": "2026-04-18",
+    "commit": "pending",
+    "highlights": "Infra consolidation: merged core-pillars-infra into ai-develop",
+    "sections": [
+      {
+        "title": "Consolidated",
+        "items": [
+          "Merged core-pillars-infra: Zod, contracts, dep-cruiser, Employee fix"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.23.0",
     "date": "2026-04-18",
     "changes": [
