@@ -581,6 +581,7 @@ export function Customers() {
       notes: r.notes || '',
       orderName: r.orderName,
       orderCode: r.orderCode,
+      sourceId: r.sourceId,
       paidAmount: r.paidAmount,
       residual: r.residual ?? Math.max(0, (r.totalCost ?? 0) - (r.paidAmount ?? 0))
     })) :

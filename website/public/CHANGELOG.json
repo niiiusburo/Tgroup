@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.20.8",
+    "date": "2026-04-18",
+    "commit": "pending",
+    "highlights": "Fix Edit Service: saved customer source now pre-selected on reopen",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "CustomerProfile.tsx: added sourceId to Edit Service initialData so the source chip row correctly shows the saved selection when reopening the form."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.20.7",
     "date": "2026-04-18",
     "commit": "pending",

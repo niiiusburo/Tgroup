@@ -703,6 +703,7 @@ export function CustomerProfile({
           doctorId: editingService.doctorId,
           assistantId: editingService.assistantId,
           dentalAideId: editingService.dentalAideId,
+          sourceId: editingService.sourceId,
           locationId: profile.companyId,
           startDate: editingService.date,
           notes: editingService.notes || '',

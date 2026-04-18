@@ -133,6 +133,7 @@ export interface CustomerService {
   readonly orderCode?: string;
   readonly paidAmount?: number;
   readonly residual?: number;
+  readonly sourceId?: string | null;
   /** Branch/clinic name where the service was performed. */
   readonly locationName?: string;
 }
