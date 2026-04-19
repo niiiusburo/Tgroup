@@ -134,5 +134,7 @@
     "asthma": "Asthma",
     "pregnant": "Pregnant"
   },
-  "tKhm": "Medical Exam"
+  "tKhm": "Medical Exam",
+  "cancelAppointment": "Cancel appointment",
+  "checkup": "Visit"
 }

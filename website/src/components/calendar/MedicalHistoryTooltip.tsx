@@ -197,7 +197,7 @@ export function MedicalHistoryTooltip({
                   key={dk.id}
                   className="flex items-start justify-between gap-2 text-[11px] text-amber-900/80 bg-white/40 rounded-md px-2 py-1">
                   
-                          <span className="truncate flex-1">{dk.name || t('tKhm')}</span>
+                          <span className="truncate flex-1">{dk.name || t('checkup')}</span>
                           <span className="text-[10px] text-amber-600/80 shrink-0">
                             {dk.date ? new Date(dk.date).toLocaleDateString('vi-VN') : ''}
                           </span>

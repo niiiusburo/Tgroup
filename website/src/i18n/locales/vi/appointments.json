@@ -9,7 +9,7 @@
     "waiting": "Đang chờ",
     "in-treatment": "Đang khám",
     "done": "Hoàn tất",
-    "cancelled": "Hủy hẹn"
+    "cancelled": "Đã hủy"
   },
   "status": {
     "scheduled": "Đang hẹn",
@@ -47,7 +47,9 @@
     "startTime": "Giờ bắt đầu",
     "endTime": "Giờ kết thúc",
     "patient": "Bệnh nhân",
-    "selectStatus": "Chọn trạng thái"
+    "selectStatus": "Chọn trạng thái",
+    "selectAssistant": "Chọn phụ tá...",
+    "selectDoctorAssistant": "Chọn trợ lý bác sĩ..."
   },
   "checkIn": {
     "title": "Check In",
@@ -135,5 +137,27 @@
     "friday": "Thứ Sáu",
     "saturday": "Thứ Bảy",
     "sunday": "Chủ Nhật"
+  },
+  "export": {
+    "customer": "Khách hàng",
+    "phone": "Số điện thoại",
+    "appointmentTime": "Thờ‌i gian hẹn",
+    "service": "Dịch vụ",
+    "doctor": "Bác sĩ",
+    "content": "Nội dung",
+    "visitType": "Loại khám",
+    "status": {
+      "scheduled": "Đang hẹn",
+      "waiting": "Đã đến",
+      "in-treatment": "Đang khám",
+      "done": "Hoàn tất",
+      "cancelled": "Đã hủy"
+    },
+    "reason": "Lý do",
+    "statusLabel": "Trạng thái"
+  },
+  "visitType": {
+    "newExam": "Khám mới",
+    "followUp": "Tái khám"
   }
 }

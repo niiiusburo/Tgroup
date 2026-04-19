@@ -145,7 +145,7 @@ export function Services() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <StatCard icon={<Activity className="w-5 h-5 text-blue-600" />} label={t("angIuTr")} value={stats.active} bg="bg-blue-50" />
         <StatCard icon={<CheckCircle2 className="w-5 h-5 text-green-600" />} label={t("honThnh")} value={stats.completed} bg="bg-green-50" />
-        <StatCard icon={<XCircle className="w-5 h-5 text-red-600" />} label={t("hy")} value={stats.cancelled} bg="bg-red-50" />
+        <StatCard icon={<XCircle className="w-5 h-5 text-red-600" />} label={t('cancel')} value={stats.cancelled} bg="bg-red-50" />
         <StatCard icon={<DollarSign className="w-5 h-5 text-amber-600" />} label="Outstanding" value={formatVND(stats.outstanding)} bg="bg-amber-50" isText />
       </div>
 

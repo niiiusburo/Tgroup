@@ -47,7 +47,9 @@
     "startTime": "Start Time",
     "endTime": "End Time",
     "patient": "Patient",
-    "selectStatus": "Select status"
+    "selectStatus": "Select status",
+    "selectAssistant": "Select assistant...",
+    "selectDoctorAssistant": "Select doctor assistant..."
   },
   "checkIn": {
     "title": "Check In",
@@ -135,5 +137,27 @@
     "friday": "Friday",
     "saturday": "Saturday",
     "sunday": "Sunday"
+  },
+  "export": {
+    "customer": "Customer",
+    "phone": "Phone",
+    "appointmentTime": "Appointment Time",
+    "service": "Service",
+    "doctor": "Doctor",
+    "content": "Content",
+    "visitType": "Visit Type",
+    "reason": "Reason",
+    "statusLabel": "Status",
+    "status": {
+      "scheduled": "Scheduled",
+      "waiting": "Arrived",
+      "in-treatment": "In Treatment",
+      "done": "Completed",
+      "cancelled": "Cancelled"
+    }
+  },
+  "visitType": {
+    "newExam": "New Exam",
+    "followUp": "Follow-up"
   }
 }

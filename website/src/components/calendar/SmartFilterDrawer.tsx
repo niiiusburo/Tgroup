@@ -135,7 +135,7 @@ export function SmartFilterDrawer({
             data-testid="smart-filter-close"
             onClick={onClose}
             className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
-            aria-label={t("ng")}>
+            aria-label={t('close')}>
             
             <X className="w-5 h-5" />
           </button>

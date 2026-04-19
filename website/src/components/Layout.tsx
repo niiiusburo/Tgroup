@@ -370,7 +370,7 @@ export function Layout() {
                 </div>
                 <button
                 onClick={() => setChangePasswordOpen(true)}
-                title={t("iMtKhu")}
+                title={t('changePassword')}
                 className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0">
                 
                   <Lock className="w-4 h-4" />

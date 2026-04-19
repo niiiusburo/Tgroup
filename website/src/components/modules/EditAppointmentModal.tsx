@@ -609,7 +609,7 @@ export function EditAppointmentModal({
               options={assistants}
               selectedId={assistantId}
               onChange={(id) => setAssistantId(id)}
-              placeholder={t("chnPhT")}
+              placeholder={t('form.selectAssistant')}
               icon={<User className="w-4 h-4" />}
               renderOption={(emp) =>
               <div className="flex items-center gap-3">
@@ -635,7 +635,7 @@ export function EditAppointmentModal({
               options={dentalAides}
               selectedId={dentalAideId}
               onChange={(id) => setDentalAideId(id)}
-              placeholder={t("chnTrL")}
+              placeholder={t('form.selectDoctorAssistant')}
               icon={<User className="w-4 h-4" />}
               renderOption={(emp) =>
               <div className="flex items-center gap-3">

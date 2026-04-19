@@ -820,7 +820,7 @@ export function Customers() {
               disabled={deleteLoading}
               className="px-4 py-2 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50">
               
-                {deleteLoading ? t("angXL") : deleteDialog.mode === 'hard' ? t("xaVnhVin") : t("xa")}
+                {deleteLoading ? t('loading') : deleteDialog.mode === 'hard' ? t("xaVnhVin") : t("xa")}
               </button>
             </div>
           </div>

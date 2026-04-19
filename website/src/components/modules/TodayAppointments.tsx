@@ -124,7 +124,7 @@ export function TodayAppointments({
               type="text"
               value={searchTerm}
               onChange={(e) => onSearchChange?.(e.target.value)}
-              placeholder={t("tmNhanhLchHn")}
+              placeholder={t('searchPlaceholder', {ns: 'appointments'})}
               className="w-full pl-8 pr-3 py-1.5 text-sm rounded-lg bg-white/20 border border-white/30 text-white placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-white/30 transition-all" />
             
           </div>

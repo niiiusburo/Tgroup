@@ -286,7 +286,7 @@ export function CustomerDeposits({
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50">
               
               {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              {editingTx ? t("luThayI") : isRefund ? t("honTmNg") : t("ngTmNg")}
+              {editingTx ? t('saveChanges') : isRefund ? t("honTmNg") : t("ngTmNg")}
             </button>
           </div>
         </div>
@@ -473,7 +473,7 @@ export function CustomerDeposits({
                     <button
                       onClick={() => handleVoid(tx.id)}
                       className="p-1.5 rounded-md text-gray-500 hover:text-amber-600 hover:bg-amber-50 transition-colors"
-                      title={t("hy")}>
+                      title={t('cancel')}>
                       
                               <X className="w-4 h-4" />
                             </button>
@@ -536,7 +536,7 @@ export function CustomerDeposits({
                   'bg-emerald-100 text-emerald-700' :
                   'bg-red-100 text-red-700'}`
                   }>
-                          {tx.status === 'posted' || tx.status === 'confirmed' ? t("xcNhn") : t("hy")}
+                          {tx.status === 'posted' || tx.status === 'confirmed' ? t("xcNhn") : t('cancel')}
                         </span>
                       </td>
                     </tr>

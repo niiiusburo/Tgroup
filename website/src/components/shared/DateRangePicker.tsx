@@ -204,7 +204,7 @@ export function DateRangePicker({
               <div className="text-xs text-orange-100 mt-0.5">
                 {selectMode === 'end' && startDate ?
               `${t('dateRange.from')} ${startDate.toLocaleDateString('vi-VN', { day: 'numeric', month: 'short' })} \u2014 ${t('dateRange.chooseEndDate')}` :
-              selectMode === 'start' ? t("chnNgyBtU") : t("chnKhongNgy")
+              selectMode === 'start' ? t('dateRange.chooseStartDate') : t('dateRange.chooseDateRange')
 
               }
               </div>
