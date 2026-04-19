@@ -10,6 +10,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTimezone } from '@/contexts/TimezoneContext';
 import {
   Banknote, Building2, CalendarDays, Check, CheckCircle2, CreditCard,
   DollarSign, FileText, Info, QrCode, Wallet, X } from
@@ -97,8 +98,9 @@ export function PaymentForm({
   const [cashAmount, setCashAmount] = useState(seed.cash);
   const [bankAmount, setBankAmount] = useState(seed.bank);
   const [notes, setNotes] = useState(defaultNotes);
+  const { getToday } = useTimezone();
   const [paymentDate, setPaymentDate] = useState(
-    () => defaultPaymentDate ?? new Date().toISOString().slice(0, 10)
+    () => defaultPaymentDate ?? getToday()
   );
   const [referenceCode, setReferenceCode] = useState(defaultReferenceCode);
   const [showVietQr, setShowVietQr] = useState(false);

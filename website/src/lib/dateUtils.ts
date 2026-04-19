@@ -1,6 +1,9 @@
 /**
  * Date utilities with timezone support
- * @crossref:used-in[TimezoneContext, useOverviewAppointments, useCalendarData]
+ * @crossref:used-in[TimezoneContext, useOverviewAppointments, useCalendarData, DatePicker, Calendar]
+ *
+ * All functions use Intl.DateTimeFormat for proper timezone-aware operations.
+ * Default timezone is Asia/Ho_Chi_Minh (Vietnam, UTC+7).
  */
 
 export interface TimezoneOption {
@@ -25,22 +28,34 @@ export const TIMEZONES: TimezoneOption[] = [
 ];
 
 /**
- * Get today's date in YYYY-MM-DD format for the specified timezone
+ * Get date parts in the specified timezone
  */
-export function getTodayInTimezone(timezone: string): string {
-  const now = new Date();
-  
-  const formatter = new Intl.DateTimeFormat('en-US', {
+function getDateParts(date: Date | string, timezone: string, includeTime = false) {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const options: Intl.DateTimeFormatOptions = {
     timeZone: timezone,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-  });
-  
-  const parts = formatter.formatToParts(now);
-  const getPart = (type: string) => parts.find(p => p.type === type)?.value ?? '00';
-  
-  return `${getPart('year')}-${getPart('month')}-${getPart('day')}`;
+  };
+  if (includeTime) {
+    options.hour = '2-digit';
+    options.minute = '2-digit';
+    options.second = '2-digit';
+    options.hour12 = false;
+  }
+  const formatter = new Intl.DateTimeFormat('en-GB', options);
+  const parts = formatter.formatToParts(d);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '00';
+  return { year: get('year'), month: get('month'), day: get('day'), hour: get('hour'), minute: get('minute'), second: get('second') };
+}
+
+/**
+ * Get today's date in YYYY-MM-DD format for the specified timezone
+ */
+export function getTodayInTimezone(timezone: string): string {
+  const parts = getDateParts(new Date(), timezone);
+  return `${parts.year}-${parts.month}-${parts.day}`;
 }
 
 const DEFAULT_ICT_TIMEZONE = 'Asia/Ho_Chi_Minh';
@@ -54,113 +69,85 @@ export function formatInTimezone(
   timezone: string,
   format: string = 'yyyy-MM-dd'
 ): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
+  const includeTime = format.includes('HH') || format.includes('mm') || format.includes('ss');
+  const parts = getDateParts(date, timezone, includeTime);
 
-  const formatter = new Intl.DateTimeFormat('en-US', {
+  return format
+    .replace('yyyy', parts.year)
+    .replace('MM', parts.month)
+    .replace('dd', parts.day)
+    .replace('HH', parts.hour)
+    .replace('mm', parts.minute)
+    .replace('ss', parts.second);
+}
+
+/**
+ * Get start of day string in timezone (YYYY-MM-DDTHH:mm:ss)
+ * Returns the local start-of-day time in the target timezone.
+ */
+export function getStartOfDayInTimezone(dateStr: string, _timezone: string): string {
+  // dateStr is already YYYY-MM-DD in the target timezone
+  // We just append the local midnight
+  return `${dateStr}T00:00:00`;
+}
+
+/**
+ * Get end of day string in timezone (YYYY-MM-DDTHH:mm:ss)
+ * Returns the local end-of-day time in the target timezone.
+ */
+export function getEndOfDayInTimezone(dateStr: string, _timezone: string): string {
+  // dateStr is already YYYY-MM-DD in the target timezone
+  return `${dateStr}T23:59:59`;
+}
+
+/**
+ * Get current date-time as YYYY-MM-DDTHH:mm:ss in the specified timezone
+ */
+export function getNowInTimezone(timezone: string): string {
+  return formatInTimezone(new Date(), timezone, 'yyyy-MM-ddTHH:mm:ss');
+}
+
+/**
+ * Parse a YYYY-MM-DD date string and return a Date object representing
+ * that date at midnight in the specified timezone.
+ *
+ * IMPORTANT: JavaScript Date objects are always in the browser's local
+ * timezone internally. This function creates a Date that, when formatted
+ * in the target timezone, yields the expected date.
+ */
+export function parseDateInTimezone(dateStr: string, timezone: string): Date {
+  // Best effort: create a date from the string plus timezone offset hint
+  // For Vietnam (UTC+7), we subtract 7 hours from UTC to get local midnight
+  const [year, month, day] = dateStr.split('-').map(Number);
+
+  // Create a UTC date at midnight for that date
+  const utcDate = Date.UTC(year, month - 1, day, 0, 0, 0);
+
+  // Get timezone offset in minutes for that UTC moment
+  const formatter = new Intl.DateTimeFormat('en-GB', {
     timeZone: timezone,
+    timeZoneName: 'shortOffset',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
   });
+  const parts = formatter.formatToParts(new Date(utcDate));
+  const tzName = parts.find((p) => p.type === 'timeZoneName')?.value ?? '';
 
-  const parts = formatter.formatToParts(d);
-  const getPart = (type: string) => parts.find(p => p.type === type)?.value ?? '00';
-
-  // Simple format replacement
-  return format
-    .replace('yyyy', getPart('year'))
-    .replace('MM', getPart('month'))
-    .replace('dd', getPart('day'))
-    .replace('HH', getPart('hour'))
-    .replace('mm', getPart('minute'))
-    .replace('ss', getPart('second'));
-}
-
-/**
- * Format a date using UTC parts (not timezone-shifted).
- * Use this when the input is already a timezone-agnostic date string
- * like '2026-04-17' or an ISO timestamp that should keep its calendar day.
- */
-export function formatInUTC(
-  date: Date | string,
-  format: string = 'yyyy-MM-dd'
-): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
-
-  const getPart = (type: Intl.DateTimeFormatPartTypes) =>
-    String(new Intl.DateTimeFormat('en-US', { [type]: 'numeric', timeZone: 'UTC' }).formatToParts(d).find(p => p.type === type)?.value ?? '00').padStart(2, '0');
-
-  // For year we need full 4 digits
-  const yearPart = new Intl.DateTimeFormat('en-US', { year: 'numeric', timeZone: 'UTC' }).formatToParts(d).find(p => p.type === 'year')?.value ?? '0000';
-
-  return format
-    .replace('yyyy', yearPart)
-    .replace('MM', getPart('month'))
-    .replace('dd', getPart('day'))
-    .replace('HH', getPart('hour'))
-    .replace('mm', getPart('minute'))
-    .replace('ss', getPart('second'));
-}
-
-/**
- * Normalize any date-ish input to a clean YYYY-MM-DD string in ICT.
- * Single source of truth for form/display date handling.
- * Examples:
- *   '2026-04-18'                 => '2026-04-18'
- *   '2026-04-17T17:00:00.000Z'   => '2026-04-18' (ICT)
- *   Date instance                 => 'YYYY-MM-DD'
- *   '' | null | undefined | bad   => ''
- */
-export function toISODateString(
-  input: string | Date | null | undefined,
-  timezone: string = DEFAULT_ICT_TIMEZONE
-): string {
-  if (input == null || input === '') return '';
-  if (typeof input === 'string' && YYYY_MM_DD_RE.test(input)) return input;
-  const d = input instanceof Date ? input : new Date(input);
-  if (isNaN(d.getTime())) return '';
-  // For ISO timestamps (contain 'T'), use UTC parts to preserve the original
-  // calendar day. Otherwise local timezone conversion shifts the date.
-  if (typeof input === 'string' && input.includes('T')) {
-    return formatInUTC(d, 'yyyy-MM-dd');
+  // Parse offset from string like "GMT+7" or "GMT+07:00"
+  const match = tzName.match(/GMT([+-]\d{1,2})(?::(\d{2}))?/);
+  let offsetMinutes = 0;
+  if (match) {
+    const sign = match[1].startsWith('-') ? -1 : 1;
+    const hours = Math.abs(parseInt(match[1], 10));
+    const minutes = parseInt(match[2] ?? '0', 10);
+    offsetMinutes = sign * (hours * 60 + minutes);
   }
-  return formatInTimezone(d, timezone, 'yyyy-MM-dd');
-}
 
-/**
- * Get start of day string in timezone
- */
-export function getStartOfDayInTimezone(dateStr: string, _timezone: string): string {
-  return `${dateStr}T00:00:00`;
-}
-
-/**
- * Get end of day string in timezone
- */
-export function getEndOfDayInTimezone(dateStr: string, _timezone: string): string {
-  return `${dateStr}T23:59:59`;
-}
-
-/**
- * Get current date-time in ISO format for specified timezone
- */
-export function getNowInTimezone(timezone: string): string {
-  const now = new Date();
-  return formatInTimezone(now, timezone, 'yyyy-MM-ddTHH:mm:ss');
-}
-
-/**
- * Parse a date string and convert to specified timezone
- */
-export function parseDateInTimezone(dateStr: string, timezone: string): Date {
-  // Create date and format it in the target timezone
-  const d = new Date(dateStr);
-  const formatted = formatInTimezone(d, timezone, 'yyyy-MM-ddTHH:mm:ss');
-  return new Date(formatted);
+  // Adjust UTC timestamp by offset to get local midnight in target timezone
+  return new Date(utcDate - offsetMinutes * 60 * 1000);
 }
 
 /**
@@ -174,4 +161,41 @@ export function isSameDayInTimezone(
   const d1 = formatInTimezone(date1, timezone, 'yyyy-MM-dd');
   const d2 = formatInTimezone(date2, timezone, 'yyyy-MM-dd');
   return d1 === d2;
+}
+
+/**
+ * Add days to a date string (YYYY-MM-DD) and return new YYYY-MM-DD in timezone
+ */
+export function addDaysInTimezone(dateStr: string, days: number, timezone: string): string {
+  const d = parseDateInTimezone(dateStr, timezone);
+  d.setDate(d.getDate() + days);
+  return formatInTimezone(d, timezone, 'yyyy-MM-dd');
+}
+
+/**
+ * Add months to a date string (YYYY-MM-DD) and return new YYYY-MM-DD in timezone
+ */
+export function addMonthsInTimezone(dateStr: string, months: number, timezone: string): string {
+  const d = parseDateInTimezone(dateStr, timezone);
+  d.setMonth(d.getMonth() + months);
+  return formatInTimezone(d, timezone, 'yyyy-MM-dd');
+}
+
+/**
+ * Get days in a month for a given YYYY-MM-DD anchor in timezone
+ */
+export function getDaysInMonthInTimezone(dateStr: string, timezone: string): number {
+  const d = parseDateInTimezone(dateStr, timezone);
+  d.setMonth(d.getMonth() + 1);
+  d.setDate(0);
+  return d.getDate();
+}
+
+/**
+ * Get weekday of first day of month (0=Sun..6=Sat) in timezone
+ */
+export function getFirstDayOfMonthInTimezone(dateStr: string, timezone: string): number {
+  const [year, month] = dateStr.split('-').map(Number);
+  const d = parseDateInTimezone(`${year}-${String(month).padStart(2, '0')}-01`, timezone);
+  return d.getDay();
 }

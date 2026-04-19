@@ -81,7 +81,7 @@ router.post('/register', requirePermission('customers.edit'), upload.single('ima
     await addExample(faceSubjectId, req.file.buffer, req.file.mimetype);
 
     await query(
-      `UPDATE dbo.partners SET face_subject_id = $1, face_registered_at = NOW() WHERE id = $2`,
+      `UPDATE dbo.partners SET face_subject_id = $1, face_registered_at = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE id = $2`,
       [faceSubjectId, partnerId]
     );
 

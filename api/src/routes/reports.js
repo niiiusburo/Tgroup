@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
+const { getVietnamToday } = require('../lib/dateUtils');
 
 const router = express.Router();
 
@@ -64,9 +65,9 @@ router.post('/dashboard', requirePermission('reports.view'), async (req, res) =>
       `SELECT COUNT(*) as new_customers FROM dbo.partners WHERE customer=true AND isdeleted=false ${cf.where}`, cf.params);
 
     // Previous period for comparison
-    const days = dateFrom && dateTo ? Math.ceil((new Date(dateTo) - new Date(dateFrom)) / 86400000) : 30;
-    const prevTo = dateFrom || dateTo || new Date().toISOString().split('T')[0];
-    const prevFromDate = new Date(new Date(prevTo) - days * 86400000);
+    const days = dateFrom && dateTo ? Math.ceil((new Date(dateTo + 'T00:00:00Z') - new Date(dateFrom + 'T00:00:00Z')) / 86400000) : 30;
+    const prevTo = dateFrom || dateTo || getVietnamToday();
+    const prevFromDate = new Date(new Date(prevTo + 'T00:00:00Z') - days * 86400000);
     const prevFrom = prevFromDate.toISOString().split('T')[0];
 
     const pso = dateCompanyFilter(prevFrom, prevTo, companyId, 'datecreated');
@@ -89,7 +90,7 @@ router.post('/dashboard', requirePermission('reports.view'), async (req, res) =>
               COALESCE(SUM(totalpaid),0) as revenue,
               COALESCE(SUM(amounttotal),0) as invoiced
        FROM dbo.saleorders WHERE isdeleted=false AND state='sale'
-       AND datecreated >= NOW() - INTERVAL '12 months'
+       AND datecreated >= (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') - INTERVAL '12 months'
        ${companyId ? 'AND companyid = $1' : ''}
        GROUP BY month ORDER BY month`,
       companyId ? [companyId] : []);

@@ -10,6 +10,7 @@ import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toISODateString } from '@/lib/dateUtils';
 import { useTranslation } from 'react-i18next';
+import { useTimezone } from '@/contexts/TimezoneContext';
 
 interface DatePickerProps {
   readonly value: string; // YYYY-MM-DD
@@ -44,7 +45,9 @@ export function DatePicker({
   const { t } = useTranslation('common');
   // Defensive normalize: accept clean YYYY-MM-DD, ISO timestamps, or empty.
   const value = toISODateString(rawValue);
+  const { getToday } = useTimezone();
   const resolvedPlaceholder = placeholder ?? t('datePicker.chooseDate');
+  const todayStr = getToday();
   const [viewDate, setViewDate] = useState(() => {
     if (value) return new Date(value + 'T00:00:00');
     return new Date();
@@ -72,6 +75,10 @@ export function DatePicker({
     }
   }, [value]);
 
+  // Compute calendar display using browser local Date methods (viewDate is local)
+  // but highlight "today" using the Vietnam timezone
+  const todayKey = todayStr;
+
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
 
@@ -89,9 +96,6 @@ export function DatePicker({
   }
 
   // Current month days
-  const today = new Date();
-  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
   for (let day = 1; day <= daysInMonth; day++) {
     const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     calendarDays.push({ date: day, isCurrentMonth: true, dateKey });
@@ -250,9 +254,9 @@ export function DatePicker({
             type="button"
             onClick={() => handleDateSelect(todayKey)}
             disabled={isDateDisabled(todayKey)}
-            className="w-full py-2 text-sm font-medium text-orange-600 hover:bg-orange-50 rounded-lg transition-colors disabled:opacity-40">
-            
-
+            className="w-full py-2 text-sm font-medium text-orange-600 hover:bg-orange-50 rounded-lg transition-colors disabled:opacity-40"
+          >
+            {t('datePicker.today')}
           </button>
           </div>
         </div>

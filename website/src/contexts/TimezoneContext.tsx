@@ -15,7 +15,10 @@ import {
 import {
   getTodayInTimezone,
   formatInTimezone,
+  getStartOfDayInTimezone,
   getEndOfDayInTimezone,
+  addDaysInTimezone,
+  addMonthsInTimezone,
   TIMEZONES,
   type TimezoneOption,
 } from '@/lib/dateUtils';
@@ -36,8 +39,14 @@ interface TimezoneContextValue {
   getNow: () => string;
   /** Format a date in the selected timezone */
   formatDate: (date: Date | string, format?: string) => string;
+  /** Get start of day string for a date in selected timezone */
+  getStartOfDay: (dateStr: string) => string;
   /** Get end of day string for a date in selected timezone */
   getEndOfDay: (dateStr: string) => string;
+  /** Add days to a date string in selected timezone */
+  addDaysInTimezone: (dateStr: string, days: number) => string;
+  /** Add months to a date string in selected timezone */
+  addMonthsInTimezone: (dateStr: string, months: number) => string;
 }
 
 const TimezoneContext = createContext<TimezoneContextValue | null>(null);
@@ -95,9 +104,30 @@ export function TimezoneProvider({ children }: TimezoneProviderProps) {
     [timezone]
   );
 
+  const getStartOfDay = useCallback(
+    (dateStr: string) => {
+      return getStartOfDayInTimezone(dateStr, timezone);
+    },
+    [timezone]
+  );
+
   const getEndOfDay = useCallback(
     (dateStr: string) => {
       return getEndOfDayInTimezone(dateStr, timezone);
+    },
+    [timezone]
+  );
+
+  const addDays = useCallback(
+    (dateStr: string, days: number) => {
+      return addDaysInTimezone(dateStr, days, timezone);
+    },
+    [timezone]
+  );
+
+  const addMonths = useCallback(
+    (dateStr: string, months: number) => {
+      return addMonthsInTimezone(dateStr, months, timezone);
     },
     [timezone]
   );
@@ -110,9 +140,12 @@ export function TimezoneProvider({ children }: TimezoneProviderProps) {
       getToday,
       getNow,
       formatDate,
+      getStartOfDay,
       getEndOfDay,
+      addDaysInTimezone: addDays,
+      addMonthsInTimezone: addMonths,
     }),
-    [timezone, setTimezone, getToday, getNow, formatDate, getEndOfDay]
+    [timezone, setTimezone, getToday, getNow, formatDate, getStartOfDay, getEndOfDay, addDays, addMonths]
   );
 
   return (

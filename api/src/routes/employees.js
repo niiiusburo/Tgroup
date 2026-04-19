@@ -236,8 +236,9 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
       return res.status(400).json({ error: 'Name is required' });
     }
 
+    const { getVietnamNow } = require('../lib/dateUtils');
     const id = require('crypto').randomUUID();
-    const now = new Date().toISOString();
+    const now = getVietnamNow();
 
     // Hash password if provided
     let passwordHash = null;
@@ -396,7 +397,7 @@ router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
     if (updates.length > 0) {
       // Add lastupdated
       updates.push(`lastupdated = $${paramIdx}`);
-      values.push(new Date().toISOString());
+      values.push(getVietnamNow());
       paramIdx++;
 
       values.push(id);
@@ -425,11 +426,11 @@ router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
     if (tierId !== undefined && tierId) {
       await client.query(
         `INSERT INTO employee_permissions (employee_id, group_id, loc_scope, lastupdated)
-         VALUES ($1, $2, 'all', NOW())
+         VALUES ($1, $2, 'all', (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'))
          ON CONFLICT (employee_id) DO UPDATE
            SET group_id = EXCLUDED.group_id,
                loc_scope = EXCLUDED.loc_scope,
-               lastupdated = NOW()`,
+               lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`,
         [id, tierId]
       );
     }
@@ -482,7 +483,7 @@ router.delete('/:id', requirePermission('employees.edit'), async (req, res) => {
     const { id } = req.params;
 
     const result = await query(
-      'UPDATE partners SET active = false, lastupdated = NOW() WHERE id = $1 AND employee = true RETURNING id',
+      `UPDATE partners SET active = false, lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE id = $1 AND employee = true RETURNING id`,
       [id]
     );
 

@@ -284,7 +284,13 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
   const { t } = useTranslation('customers');
   const [title, setTitle] = useState('');
   const [doctor, setDoctor] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(() => {
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit' });
+    const parts = formatter.formatToParts(now);
+    const get = (type: string) => parts.find(p => p.type === type)?.value ?? '00';
+    return `${get('year')}-${get('month')}-${get('day')}`;
+  });
   const [notes, setNotes] = useState('');
   const [nextAppointmentDate, setNextAppointmentDate] = useState('');
   const [nextDescription, setNextDescription] = useState('');

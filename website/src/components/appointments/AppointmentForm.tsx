@@ -64,6 +64,7 @@ import type { Customer } from '@/types/customer';
 import type { Employee } from '@/types/employee';
 import type { Product } from '@/hooks/useProducts';
 import { useTranslation } from 'react-i18next';
+import { useTimezone } from '@/contexts/TimezoneContext';
 
 interface Location {
   id: string;
@@ -112,15 +113,21 @@ interface AppointmentFormProps {
   readonly isEdit?: boolean;
 }
 
-function getCurrentTimeStr() {
-  const now = new Date();
-  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+function useTodayStr() {
+  const { getToday } = useTimezone();
+  return getToday;
+}
+
+function useCurrentTimeStr() {
+  const { formatDate } = useTimezone();
+  return () => formatDate(new Date(), 'HH:mm');
 }
 
 export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false }: AppointmentFormProps) {
   const { t } = useTranslation('appointments');
   const { selectedLocationId } = useLocationFilter();
-  const { getToday } = useTimezone();
+  const getTodayStr = useTodayStr();
+  const getCurrentTimeStr = useCurrentTimeStr();
 
   // Fetch real data from API
   const { customers: apiCustomers, loading: customersLoading, createCustomer } = useCustomers();

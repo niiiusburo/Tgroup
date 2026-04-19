@@ -99,7 +99,7 @@ router.put('/groups/:groupId', requirePermission('permissions.edit'), async (req
     if (name !== undefined) { updateFields.push(`name = $${paramIdx++}`); params.push(name); }
     if (color !== undefined) { updateFields.push(`color = $${paramIdx++}`); params.push(color); }
     if (description !== undefined) { updateFields.push(`description = $${paramIdx++}`); params.push(description); }
-    updateFields.push(`lastupdated = NOW()`);
+    updateFields.push(`lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`);
 
     if (updateFields.length > 1) {
       params.push(groupId);
@@ -229,18 +229,18 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
 
     // Update tier on partners record
     await query(
-      `UPDATE partners SET tier_id = $1, lastupdated = NOW() WHERE id = $2`,
+      `UPDATE partners SET tier_id = $1, lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE id = $2`,
       [groupId, employeeId]
     );
 
     // Upsert employee_permissions for backward compatibility
     await query(
       `INSERT INTO employee_permissions (employee_id, group_id, loc_scope, lastupdated)
-       VALUES ($1, $2, $3, NOW())
+       VALUES ($1, $2, $3, (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'))
        ON CONFLICT (employee_id) DO UPDATE
          SET group_id = EXCLUDED.group_id,
              loc_scope = EXCLUDED.loc_scope,
-             lastupdated = NOW()`,
+             lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`,
       [employeeId, groupId, locScope]
     );
 

@@ -40,9 +40,9 @@ function getCardStyles(appointment: CalendarAppointment): string {
   return 'bg-white border-l-4 border-gray-200';
 }
 
-function useFormatDateKey() {
-  const { formatDate } = useTimezone();
-  return (date: Date) => formatDate(date, 'yyyy-MM-dd');
+function formatDateKey(date: Date): string {
+  // date comes from YYYY-MM-DD parse; get local components to avoid UTC shift
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
 const WEEKDAY_NAME_KEYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
@@ -189,7 +189,6 @@ export function WeekView({
 }: WeekViewProps) {
   const { t } = useTranslation('calendar');
   const { getToday } = useTimezone();
-  const formatDateKey = useFormatDateKey();
   const todayKey = getToday();
 
   return (

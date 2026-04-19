@@ -5,16 +5,21 @@
  */
 
 import { AlertTriangle, Clock } from 'lucide-react';
+import { useTimezone } from '@/contexts/TimezoneContext';
 import type { OutstandingBalanceItem } from '@/types/payment';
 import { formatVND } from '@/lib/formatting';
 import { useTranslation } from 'react-i18next';
 
-function getDaysUntilDue(dueDate: string): number {
-  if (!dueDate) return NaN;
-  const now = new Date();
-  const due = new Date(dueDate);
-  if (isNaN(due.getTime())) return NaN;
-  return Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+function useDaysUntilDue() {
+  const { getToday } = useTimezone();
+  return (dueDate: string): number => {
+    if (!dueDate) return NaN;
+    const now = new Date(getToday() + 'T00:00:00');
+    const due = new Date(dueDate + 'T00:00:00');
+    if (isNaN(due.getTime())) return NaN;
+    return Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  };
+}
 }
 
 interface OutstandingBalanceProps {
@@ -24,6 +29,7 @@ interface OutstandingBalanceProps {
 
 export function OutstandingBalance({ balances, onPayNow }: OutstandingBalanceProps) {
   const { t } = useTranslation('payment');
+  const getDaysUntilDue = useDaysUntilDue();
   if (balances.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-card p-6 text-center">

@@ -321,8 +321,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
   const markArrived = useCallback(async (id: string) => {
     try {
       await updateAppointment(id, { state: 'arrived' });
-      const now = new Date();
-      const arrivalTime = now.toLocaleTimeString('en-GB', { hour12: false });
+      const arrivalTime = formatDate(new Date(), 'HH:mm:ss');
       setStoredArrivalTime(id, arrivalTime);
       setAppointments((prev) =>
         prev.map((a) =>
@@ -332,7 +331,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
     } catch (error) {
       console.error('Failed to mark arrived:', error);
     }
-  }, []);
+  }, [formatDate]);
 
   const markCancelled = useCallback(async (id: string) => {
     try {

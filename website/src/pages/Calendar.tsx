@@ -186,7 +186,7 @@ export function Calendar() {
 
     }
     return ['', ''];
-  }, [viewMode, currentDate, weekDates, monthDates]);
+  }, [viewMode, currentDate, weekDates, monthDates, formatDate]);
 
   const handleExport = useCallback(async (mode: ExportMode, dateFrom: string, dateTo: string) => {
     let rows: CalendarAppointment[];

@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Calculator, CalendarDays, User, FileText, ChevronRight, Check } from 'lucide-react';
+import { useTimezone } from '@/contexts/TimezoneContext';
 import { DatePicker } from '@/components/ui/DatePicker';
 import type { PlanCreationInput } from '@/types/monthlyPlans';
 import { formatVND } from '@/lib/formatting';
@@ -35,7 +36,8 @@ export function MonthlyPlanCreator({ onCreatePlan, onCancel }: MonthlyPlanCreato
   const [totalAmount, setTotalAmount] = useState('');
   const [downPaymentPercent, setDownPaymentPercent] = useState(25);
   const [numberOfInstallments, setNumberOfInstallments] = useState(6);
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const { getToday } = useTimezone();
+  const [startDate, setStartDate] = useState(getToday);
 
   const parsedTotal = Number(totalAmount) || 0;
   const downPayment = Math.round(parsedTotal * downPaymentPercent / 100);

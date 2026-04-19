@@ -22,10 +22,10 @@ function toVnDate(dateStr: string): Date {
  * @crossref:used-in[Calendar]
  */
 export function useCalendarData(selectedLocationId?: string) {
-  const { formatDate, timezone } = useTimezone();
+  const { formatDate, getToday, addDaysInTimezone, addMonthsInTimezone } = useTimezone();
   const [viewMode, setViewMode] = useState<ViewMode>('week');
   // Store current date as string in YYYY-MM-DD format for timezone consistency
-  const [currentDateStr, setCurrentDateStr] = useState(() => formatDate(new Date(), 'yyyy-MM-dd'));
+  const [currentDateStr, setCurrentDateStr] = useState(() => getToday());
   const [selectedDoctors, setSelectedDoctors] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<AppointmentStatus[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -38,26 +38,20 @@ export function useCalendarData(selectedLocationId?: string) {
   const currentDate = useMemo(() => toVnDate(currentDateStr), [currentDateStr]);
 
   const goToToday = useCallback(() => {
-    setCurrentDateStr(formatDate(new Date(), 'yyyy-MM-dd'));
-  }, [formatDate]);
+    setCurrentDateStr(getToday());
+  }, [getToday]);
 
   const navigate = useCallback((direction: 'prev' | 'next') => {
     setCurrentDateStr((prevStr) => {
-      const [y, m, d] = prevStr.split('-').map(Number);
-      const date = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
       if (viewMode === 'day') {
-        date.setUTCDate(date.getUTCDate() + (direction === 'next' ? 1 : -1));
+        return addDaysInTimezone(prevStr, direction === 'next' ? 1 : -1);
       } else if (viewMode === 'week') {
-        date.setUTCDate(date.getUTCDate() + (direction === 'next' ? 7 : -7));
+        return addDaysInTimezone(prevStr, direction === 'next' ? 7 : -7);
       } else {
-        date.setUTCMonth(date.getUTCMonth() + (direction === 'next' ? 1 : -1));
+        return addMonthsInTimezone(prevStr, direction === 'next' ? 1 : -1);
       }
-      const yy = date.getUTCFullYear();
-      const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
-      const dd = String(date.getUTCDate()).padStart(2, '0');
-      return `${yy}-${mm}-${dd}`;
     });
-  }, [viewMode]);
+  }, [viewMode, addDaysInTimezone, addMonthsInTimezone]);
 
   // Fetch appointments when viewMode, currentDate, or timezone changes
   const loadAppointments = useCallback(async () => {
@@ -150,15 +144,14 @@ export function useCalendarData(selectedLocationId?: string) {
     try {
       await updateAppointment(id, { state: PHASE_TO_API_STATE[phase] });
       if (phase === 'waiting') {
-        const now = new Date();
-        const arrivalTime = now.toLocaleTimeString('en-GB', { hour12: false });
+        const arrivalTime = formatDate(new Date(), 'HH:mm');
         setStoredArrivalTime(id, arrivalTime);
       }
       await loadAppointments();
     } catch (error) {
       console.error('Failed to update appointment status:', error);
     }
-  }, [loadAppointments]);
+  }, [loadAppointments, formatDate]);
 
   const markArrived = useCallback(async (id: string) => {
     await updateAppointmentStatus(id, 'waiting');

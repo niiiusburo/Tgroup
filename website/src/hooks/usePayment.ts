@@ -192,6 +192,10 @@ export function usePayment(selectedLocationId?: string) {
   }, [payments, outstandingBalances]);
 
   const createPayment = useCallback((input: CreatePaymentInput) => {
+    const todayParts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+    const getPart = (type: string) => todayParts.find(p => p.type === type)?.value ?? '00';
+    const todayStr = `${getPart('year')}-${getPart('month')}-${getPart('day')}`;
+    const year = parseInt(getPart('year'), 10);
     const newPayment: PaymentRecord = {
       ...input,
       id: `pay-${Date.now()}`,
@@ -199,8 +203,8 @@ export function usePayment(selectedLocationId?: string) {
       recordType: input.recordType ?? 'saleorder',
       recordName: input.recordName ?? '',
       status: 'completed',
-      date: new Date().toISOString().slice(0, 10),
-      receiptNumber: `RCP-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
+      date: todayStr,
+      receiptNumber: `RCP-${year}-${String(Date.now()).slice(-3)}`,
       isFullPayment: true,
     };
 

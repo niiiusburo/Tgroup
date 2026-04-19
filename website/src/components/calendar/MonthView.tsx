@@ -20,9 +20,9 @@ interface MonthViewProps {
 
 const WEEKDAY_HEADERS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
 
-function useFormatDateKey() {
-  const { formatDate } = useTimezone();
-  return (date: Date) => formatDate(date, 'yyyy-MM-dd');
+function formatDateKey(date: Date): string {
+  // date comes from YYYY-MM-DD parse; get local components to avoid UTC shift
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
 interface StatusCounts {
@@ -67,7 +67,6 @@ export function MonthView({
 }: MonthViewProps) {
   const { t } = useTranslation();
   const { getToday } = useTimezone();
-  const formatDateKey = useFormatDateKey();
   const currentMonth = currentDate.getMonth();
   const todayKey = getToday();
 

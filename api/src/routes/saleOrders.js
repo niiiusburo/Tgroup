@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
+const { getVietnamToday, getVietnamYear } = require('../lib/dateUtils');
 
 const router = express.Router();
 
@@ -276,10 +277,10 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
     const id = uuidv4();
 
     // Generate sale order name (service description)
-    const name = productname || `Service ${new Date().toISOString().slice(0, 10)}`;
+    const name = productname || `Service ${getVietnamToday()}`;
 
     // Generate a unique sale order code, e.g. SO-2024-0001
-    const year = new Date().getFullYear();
+    const year = getVietnamYear();
     const seqResult = await query(`SELECT nextval('dbo.saleorder_code_seq') AS seq`);
     const seqNum = parseInt(seqResult[0]?.seq || '1', 10);
     const code = `SO-${year}-${String(seqNum).padStart(4, '0')}`;
@@ -291,7 +292,7 @@ router.post('/', requirePermission('customers.edit'), async (req, res) => {
         quantity, unit, amounttotal, residual, totalpaid, state,
         datestart, dateend, notes, sourceid,
         isdeleted, datecreated
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,NOW())
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,(NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'))
       RETURNING *`,
       [
         id,
@@ -431,7 +432,7 @@ router.patch('/:id/state', requirePermission('customers.edit'), async (req, res)
       const { v4: uuidv4 } = require('uuid');
       await query(
         `INSERT INTO saleorder_state_logs (id, saleorder_id, old_state, new_state, changed_by, changed_at)
-         VALUES ($1, $2, $3, $4, $5, NOW())`,
+         VALUES ($1, $2, $3, $4, $5, (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'))`,
         [uuidv4(), id, oldState, state, changedBy]
       );
     } catch (logErr) {

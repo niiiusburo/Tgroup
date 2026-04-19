@@ -2,6 +2,7 @@ const express = require('express');
 const { query } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const { requirePermission } = require('../middleware/auth');
+const { getVietnamNow } = require('../lib/dateUtils');
 
 const router = express.Router();
 
@@ -71,7 +72,7 @@ router.post('/', requirePermission('services.edit'), async (req, res) => {
     }
 
     const id = uuidv4();
-    const now = new Date().toISOString();
+    const now = getVietnamNow();
 
     await query(
       `INSERT INTO dbo.productcategories (id, name, completename, parentid, active, datecreated, lastupdated)
@@ -124,7 +125,7 @@ router.put('/:id', requirePermission('services.edit'), async (req, res) => {
     }
 
     updates.push(`lastupdated = $${paramIdx}`);
-    params.push(new Date().toISOString());
+    params.push(getVietnamNow());
     paramIdx++;
 
     params.push(id);

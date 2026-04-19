@@ -41,14 +41,14 @@ router.put('/settings', requirePermission('settings.edit'), async (req, res) => 
     }
 
     const rows = await query(
-      'UPDATE dbo.ip_access_settings SET mode = $1, last_updated = NOW() RETURNING id, mode, last_updated AS "lastUpdated"',
+      `UPDATE dbo.ip_access_settings SET mode = $1, last_updated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') RETURNING id, mode, last_updated AS "lastUpdated"`,
       [mode]
     );
 
     if (rows.length === 0) {
       // Seed row if missing
       const inserted = await query(
-        'INSERT INTO dbo.ip_access_settings (mode, last_updated) VALUES ($1, NOW()) RETURNING id, mode, last_updated AS "lastUpdated"',
+        `INSERT INTO dbo.ip_access_settings (mode, last_updated) VALUES ($1, (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')) RETURNING id, mode, last_updated AS "lastUpdated"`,
         [mode]
       );
       invalidateIpAccessCache();

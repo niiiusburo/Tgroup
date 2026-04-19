@@ -11,6 +11,7 @@ interface ReportsFiltersProps {
 }
 
 import { useTranslation } from 'react-i18next';
+import { useTimezone } from '@/contexts/TimezoneContext';
 
 export function ReportsFilters({
   dateFrom, dateTo, companyId,
@@ -18,12 +19,15 @@ export function ReportsFilters({
   locations,
 }: ReportsFiltersProps) {
   const { t } = useTranslation('reports');
+  const { getToday } = useTimezone();
   // Quick range presets
-  const now = new Date();
-  const ytd = `${now.getFullYear()}-01-01`;
-  const today = now.toISOString().split('T')[0];
-  const last30 = new Date(now.getTime() - 30 * 86400000).toISOString().split('T')[0];
-  const last90 = new Date(now.getTime() - 90 * 86400000).toISOString().split('T')[0];
+  const today = getToday();
+  const year = parseInt(today.split('-')[0], 10);
+  const ytd = `${year}-01-01`;
+  const last30Date = new Date(new Date(today + 'T00:00:00Z').getTime() - 30 * 86400000);
+  const last30 = `${last30Date.getUTCFullYear()}-${String(last30Date.getUTCMonth() + 1).padStart(2, '0')}-${String(last30Date.getUTCDate()).padStart(2, '0')}`;
+  const last90Date = new Date(new Date(today + 'T00:00:00Z').getTime() - 90 * 86400000);
+  const last90 = `${last90Date.getUTCFullYear()}-${String(last90Date.getUTCMonth() + 1).padStart(2, '0')}-${String(last90Date.getUTCDate()).padStart(2, '0')}`;
 
   return (
     <motion.div

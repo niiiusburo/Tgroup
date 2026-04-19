@@ -56,7 +56,7 @@ router.put('/bank', requirePermission('payment.edit'), async (req, res) => {
 
     if (existing && existing.length > 0) {
       await query(
-        'UPDATE company_bank_settings SET bank_bin = $1, bank_number = $2, bank_account_name = $3, updated_at = NOW() WHERE id = $4',
+        `UPDATE company_bank_settings SET bank_bin = $1, bank_number = $2, bank_account_name = $3, updated_at = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE id = $4`,
         [bankBin.trim(), bankNumber.trim(), bankAccountName.trim(), existing[0].id]
       );
     } else {

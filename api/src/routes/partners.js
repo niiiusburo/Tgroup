@@ -481,7 +481,7 @@ router.post('/', requirePermission('customers.add'), validate(PartnerCreateSchem
         personalidentitycard, personaltaxcode, personaladdress, salestaffid, cskhid,
         customer, active, ref, datecreated, lastupdated, isdeleted,
         supplier, employee, isagent, isinsurance, iscompany, ishead
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, NOW(), NOW(), false, false, false, false, false, false, false)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'), (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'), false, false, false, false, false, false, false)
       RETURNING *`,
       [
         id,
@@ -625,7 +625,7 @@ router.put('/:id', requirePermission('customers.edit'), validate(PartnerUpdateSc
       return res.status(400).json({ error: 'No fields to update' });
     }
 
-    updates.push(`lastupdated = NOW()`);
+    updates.push(`lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`);
     values.push(id);
 
     const result = await query(
@@ -660,7 +660,7 @@ router.patch('/:id/soft-delete', requirePermission('customers.delete'), async (r
     const result = await query(
       `UPDATE partners SET
         isdeleted = true,
-        lastupdated = NOW()
+        lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
       WHERE id = $1 AND customer = true AND isdeleted = false
       RETURNING *`,
       [id]

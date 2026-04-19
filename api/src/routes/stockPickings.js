@@ -300,7 +300,7 @@ router.post('/', requirePermission('settings.edit'), async (req, res) => {
       ) VALUES (
         gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7,
         $8, $9, $10, $11, $12,
-        0, true, null, null, NOW(), NOW()
+        0, true, null, null, (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'), (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
       ) RETURNING *`,
       [
         pickingtypeid, name || null, note || null, state,
@@ -349,7 +349,7 @@ router.put('/:id', requirePermission('settings.edit'), async (req, res) => {
       return res.status(400).json({ error: 'No valid fields to update' });
     }
 
-    sets.push(`lastupdated = NOW()`);
+    sets.push(`lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`);
     values.push(id);
 
     const result = await query(
@@ -379,7 +379,7 @@ router.delete('/:id', requirePermission('settings.edit'), async (req, res) => {
     const { id } = req.params;
 
     const result = await query(
-      `UPDATE stockpickings SET state = 'cancelled', lastupdated = NOW() WHERE id = $1 RETURNING *`,
+      `UPDATE stockpickings SET state = 'cancelled', lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE id = $1 RETURNING *`,
       [id]
     );
 

@@ -98,7 +98,7 @@ router.post('/login', async (req, res) => {
 
     // Update last_login
     await query(
-      `UPDATE partners SET last_login = NOW() WHERE id = $1`,
+      `UPDATE partners SET last_login = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE id = $1`,
       [employee.id]
     );
 
