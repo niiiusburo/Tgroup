@@ -55,7 +55,7 @@ export function formatInTimezone(
   format: string = 'yyyy-MM-dd'
 ): string {
   const d = typeof date === 'string' ? new Date(date) : date;
-  
+
   const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone: timezone,
     year: 'numeric',
@@ -66,13 +66,39 @@ export function formatInTimezone(
     second: '2-digit',
     hour12: false,
   });
-  
+
   const parts = formatter.formatToParts(d);
   const getPart = (type: string) => parts.find(p => p.type === type)?.value ?? '00';
-  
+
   // Simple format replacement
   return format
     .replace('yyyy', getPart('year'))
+    .replace('MM', getPart('month'))
+    .replace('dd', getPart('day'))
+    .replace('HH', getPart('hour'))
+    .replace('mm', getPart('minute'))
+    .replace('ss', getPart('second'));
+}
+
+/**
+ * Format a date using UTC parts (not timezone-shifted).
+ * Use this when the input is already a timezone-agnostic date string
+ * like '2026-04-17' or an ISO timestamp that should keep its calendar day.
+ */
+export function formatInUTC(
+  date: Date | string,
+  format: string = 'yyyy-MM-dd'
+): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+
+  const getPart = (type: Intl.DateTimeFormatPartTypes) =>
+    String(new Intl.DateTimeFormat('en-US', { [type]: 'numeric', timeZone: 'UTC' }).formatToParts(d).find(p => p.type === type)?.value ?? '00').padStart(2, '0');
+
+  // For year we need full 4 digits
+  const yearPart = new Intl.DateTimeFormat('en-US', { year: 'numeric', timeZone: 'UTC' }).formatToParts(d).find(p => p.type === 'year')?.value ?? '0000';
+
+  return format
+    .replace('yyyy', yearPart)
     .replace('MM', getPart('month'))
     .replace('dd', getPart('day'))
     .replace('HH', getPart('hour'))
@@ -97,6 +123,11 @@ export function toISODateString(
   if (typeof input === 'string' && YYYY_MM_DD_RE.test(input)) return input;
   const d = input instanceof Date ? input : new Date(input);
   if (isNaN(d.getTime())) return '';
+  // For ISO timestamps (contain 'T'), use UTC parts to preserve the original
+  // calendar day. Otherwise local timezone conversion shifts the date.
+  if (typeof input === 'string' && input.includes('T')) {
+    return formatInUTC(d, 'yyyy-MM-dd');
+  }
   return formatInTimezone(d, timezone, 'yyyy-MM-dd');
 }
 

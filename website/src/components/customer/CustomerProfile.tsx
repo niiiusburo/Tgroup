@@ -6,6 +6,7 @@ import {
 'lucide-react';
 import { CustomerDeposits } from '@/components/payment/CustomerDeposits';
 import { AppointmentForm, type AppointmentFormData } from '@/components/appointments/AppointmentForm';
+import type { UnifiedAppointmentFormData } from '@/components/appointments/unified';
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { PaymentForm, type PaymentFormData } from '@/components/payment/PaymentForm';
 import { PaymentSourceBadges } from '@/components/payment/PaymentSourceBadges';

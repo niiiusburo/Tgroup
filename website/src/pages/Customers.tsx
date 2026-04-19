@@ -129,7 +129,7 @@ export function Customers() {
   } = useDeposits();
   const { payments: customerPayments, isLoading: paymentsLoading, addPayment, refetch: refetchPayments, deletePaymentById } = useCustomerPayments(selectedCustomerId);
 
-  // Callbacks for CustomerProfile
+  // Callbacks for CustomerProfile — unified form data passes straight through
   const handleCreateAppointment = useCallback(async (data: AppointmentFormData) => {
     await createAppointment({
       customerId: data.customerId,
@@ -139,12 +139,15 @@ export function Customers() {
       doctorName: data.doctorName,
       locationId: data.locationId,
       locationName: data.locationName,
-      appointmentType: 'consultation',
+      appointmentType: data.appointmentType,
       serviceName: data.serviceName,
       date: data.date,
       startTime: data.startTime,
       endTime: data.endTime,
-      notes: data.notes
+      notes: data.notes,
+      estimatedDuration: data.estimatedDuration,
+      color: data.color,
+      serviceId: data.serviceId,
     });
     refetchProfile();
   }, [createAppointment, refetchProfile]);
@@ -158,12 +161,15 @@ export function Customers() {
       doctorName: data.doctorName,
       locationId: data.locationId,
       locationName: data.locationName,
-      appointmentType: 'consultation',
+      appointmentType: data.appointmentType,
       serviceName: data.serviceName,
       date: data.date,
       startTime: data.startTime,
       endTime: data.endTime,
-      notes: data.notes
+      notes: data.notes,
+      estimatedDuration: data.estimatedDuration,
+      color: data.color,
+      serviceId: data.serviceId,
     });
     refetchProfile();
   }, [updateAppointment, refetchProfile]);

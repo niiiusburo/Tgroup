@@ -15,12 +15,11 @@ import { useLocationFilter } from '@/contexts/LocationContext';
 import { useTimezone } from '@/contexts/TimezoneContext';
 import type { CalendarAppointment } from '@/data/mockCalendar';
 import type { AppointmentStatus } from '@/types/appointment';
-import { EditAppointmentModal } from '@/components/modules/EditAppointmentModal';
+import { AppointmentFormShell, calendarAppointmentToFormData } from '@/components/appointments/unified';
 import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
 import { QuickAddAppointmentButton } from '@/components/shared/QuickAddAppointmentButton';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { AppointmentFormModal } from '@/components/shared/AppointmentFormModal';
-import type { AppointmentFormData } from '@/components/appointments/AppointmentForm';
+import type { UnifiedAppointmentFormData } from '@/components/appointments/unified';
 import { ExportDialog, type ExportMode } from '@/components/calendar/ExportDialog';
 import { exportAppointmentsXlsx } from '@/lib/exportAppointmentsXlsx';
 import { fetchAppointments } from '@/lib/api';
@@ -95,7 +94,7 @@ export function Calendar() {
 
   // Create appointment modal state (triggered from empty time slot)
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [createInitialData, setCreateInitialData] = useState<Partial<AppointmentFormData> | undefined>(undefined);
+  const [createInitialData, setCreateInitialData] = useState<Partial<UnifiedAppointmentFormData> | undefined>(undefined);
 
   // Smart filter drawer state
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -142,33 +141,9 @@ export function Calendar() {
 
   const { handleDragStart, handleDragOver, handleDrop, handleDragEnd } = useDragReschedule(handleReschedule);
 
-  // Click on appointment card opens edit modal directly (same as TodayAppointments)
+  // Click on appointment card opens edit modal directly using unified form
   const handleAppointmentClick = useCallback((appointment: CalendarAppointment) => {
-    // Map CalendarAppointment to OverviewAppointment format for EditAppointmentModal
-    const overviewAppointment: OverviewAppointment = {
-      id: appointment.id,
-      customerId: appointment.customerId,
-      customerName: appointment.customerName,
-      customerPhone: appointment.customerPhone,
-      doctorName: appointment.dentist,
-      doctorId: appointment.dentistId || '',
-      date: appointment.date,
-      time: appointment.startTime,
-      locationId: appointment.locationId,
-      locationName: appointment.locationName,
-      note: appointment.notes || '',
-      topStatus: mapStatusToTopStatus(appointment.status),
-      checkInStatus: null,
-      color: appointment.color || '0',
-      arrivalTime: null,
-      treatmentStartTime: null,
-      productId: appointment.productId || '',
-      assistantId: appointment.assistantId ?? null,
-      assistantName: appointment.assistantName ?? null,
-      dentalAideId: appointment.dentalAideId ?? null,
-      dentalAideName: appointment.dentalAideName ?? null
-    };
-    setEditingAppointment(overviewAppointment);
+    setEditingAppointment(calendarAppointmentToFormData(appointment) as unknown as OverviewAppointment);
     setIsEditModalOpen(true);
   }, []);
 
@@ -244,23 +219,7 @@ export function Calendar() {
     setCreateModalOpen(true);
   }, []);
 
-  const handleCreateSubmit = useCallback(async (data: AppointmentFormData) => {
-    const { createAppointment } = await import('@/lib/api');
-    await createAppointment({
-      partnerid: data.customerId,
-      doctorid: data.doctorId,
-      companyid: data.locationId,
-      name: data.serviceName || data.appointmentType,
-      date: data.date,
-      time: data.startTime,
-      note: data.notes,
-      state: 'scheduled',
-      assistantid: data.assistantId,
-      dentalaideid: data.dentalAideId,
-      color: data.color,
-      timeexpected: data.estimatedDuration,
-      productid: data.serviceId,
-    });
+  const handleCreateSuccess = useCallback(() => {
     setCreateModalOpen(false);
     refresh?.();
   }, [refresh]);
@@ -642,13 +601,15 @@ export function Calendar() {
 
       }
 
-      {/* Edit Appointment Modal - single module for both card click and pencil icon */}
-      <EditAppointmentModal
-        appointment={editingAppointment}
+      {/* Unified Appointment Form — edit mode */}
+      <AppointmentFormShell
+        mode="edit"
         isOpen={isEditModalOpen}
         onClose={handleEditModalClose}
-        onSaved={handleEditModalSaved} />
-      
+        onSuccess={handleEditModalSaved}
+        initialData={editingAppointment ? calendarAppointmentToFormData(editingAppointment as unknown as import('@/types/appointment').CalendarAppointment) : undefined}
+        customerReadOnly
+      />
 
       <SmartFilterDrawer
         isOpen={isFilterOpen}
@@ -681,11 +642,14 @@ export function Calendar() {
         defaultDateTo={getToday()} />
       
 
-      <AppointmentFormModal
+      {/* Unified Appointment Form — create mode */}
+      <AppointmentFormShell
+        mode="create"
         isOpen={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
-        onSubmit={handleCreateSubmit}
-        initialData={createInitialData} />
+        onSuccess={handleCreateSuccess}
+        initialData={createInitialData}
+      />
       
     </div>);
 
