@@ -188,9 +188,9 @@ export function PaymentForm({
   return (
     <div className="modal-container">
       {/* animate: backdrop fade-in coordinated with modal zoom-in — total ≤250ms */}
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40 animate-in fade-in duration-200" onClick={onClose} />
       <div className="modal-content animate-in zoom-in-95 duration-200 max-w-2xl">
-        <div className="modal-header relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
+        <div className="modal-header relative px-6 py-5 bg-primary">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
           <div className="relative flex items-start justify-between">
             <div className="flex items-center gap-3">
@@ -234,7 +234,7 @@ export function PaymentForm({
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <label className="text-sm font-medium text-gray-700">
                   {t('ngunThanhTon')}
                 </label>
                 <span className="flex items-center gap-1 text-xs text-blue-500">
@@ -404,7 +404,7 @@ export function PaymentForm({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <CalendarDays className="w-3.5 h-3.5" />
               {t('ngyThanhTon')}
             </label>
@@ -412,12 +412,12 @@ export function PaymentForm({
               type="date"
               value={paymentDate}
               onChange={(e) => setPaymentDate(e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm" />
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
             
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
               {t('mThamChiuGhiChNhanh')}
             </label>
@@ -426,12 +426,12 @@ export function PaymentForm({
               value={referenceCode}
               onChange={(e) => setReferenceCode(e.target.value)}
               placeholder={t('referenceOptional')}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm" />
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
             
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
               {t('notes')}
             </label>
@@ -440,7 +440,7 @@ export function PaymentForm({
               onChange={(e) => setNotes(e.target.value)}
               placeholder={t('enterNotePlaceholder')}
               rows={2}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none" />
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm resize-none" />
             
           </div>
         </form>
@@ -453,7 +453,7 @@ export function PaymentForm({
           customerPhone={defaultCustomerPhone} />
         
 
-        <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
+        <div className="modal-footer px-6 py-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
@@ -466,7 +466,7 @@ export function PaymentForm({
             type="button"
             onClick={() => handleSubmit()}
             disabled={submitDisabled}
-            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed">
+            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark active:scale-[0.98] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
             
             <Check className="w-4 h-4" />
             {isEdit ? t('luThayI') : t('ghiNhnThanhTon')}

@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.24.0",
+    "date": "2026-04-19",
+    "commit": "pending",
+    "highlights": "Full frontend design polish — eliminate AI slop, standardize UI primitives",
+    "sections": [
+      {"title": "Design System", "items": [
+        "Add UI primitives: Button, Input, Card, Modal with consistent design tokens",
+        "Add design.md — visual system reference (colors, typography, spacing, motion)",
+        "Add agents.md — build rules reference (stack, patterns, conventions)",
+        "Add .impeccable.md — design context for frontend-design skill"
+      ]},
+      {"title": "Polish", "items": [
+        "Remove glassmorphism (backdrop-blur) from all 16+ modal backdrops",
+        "Remove gradient overuse: modal headers, primary buttons, avatars, footers",
+        "Standardize form labels: remove aggressive uppercase tracking-wider",
+        "Standardize focus rings: all inputs use primary/15",
+        "Fix PageHeader: remove templated icon-in-colored-box pattern",
+        "Add missing CSS animation keyframes (fade-in, zoom-in, slide-in)",
+        "Standardize shadows: remove colored drop shadows"
+      ]}
+    ]
+  },
+  {
     "version": "0.23.4",
     "date": "2026-04-18",
     "commit": "pending",

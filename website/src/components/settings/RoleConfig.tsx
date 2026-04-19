@@ -79,7 +79,7 @@ export function RoleConfig() {
           <div className="divide-y divide-gray-50">
             {Object.entries(permissionsByModule).map(([module, perms]) => (
               <div key={module} className="px-4 py-3">
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                <div className="text-sm font-medium text-gray-700 mb-1.5">
                   {module}
                 </div>
                 <div className="flex flex-wrap gap-2">

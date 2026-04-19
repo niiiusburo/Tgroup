@@ -89,9 +89,9 @@ export function FaceCaptureModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
+      <div className="absolute inset-0 bg-black/60" onClick={onCancel} />
       <div className="relative z-10 w-full max-w-sm mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden">
-        <div className="px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-400 flex items-center justify-between">
+        <div className="px-4 py-3 bg-primary flex items-center justify-between">
           <h3 className="text-sm font-semibold text-white">{resolvedTitle}</h3>
           <button
             type="button"

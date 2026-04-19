@@ -33,7 +33,7 @@
  *   - modal-container + modal-content wrapper
  *   - Orange gradient header with icon, Vietnamese title, subtitle, X button
  *   - modal-body for scrollable content
- *   - Labels: text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 with icon
+ *   - Labels: text-sm font-medium text-gray-700 mb-1.5 with icon
  *   - Inputs: px-4 py-3 text-sm border border-gray-200 rounded-xl focus:ring-orange-500/20
  *   - Grid layouts for paired fields
  *   - Gradient footer with "Hủy bỏ" + primary action button
@@ -334,12 +334,12 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
   return (
     <div className="modal-container">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       {/* Modal */}
       <div className="modal-content animate-in zoom-in-95 duration-200 max-w-[900px]">
         {/* Header with gradient */}
-        <div className="modal-header relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
+        <div className="modal-header relative px-6 py-5 bg-primary">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -380,7 +380,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
 
               {/* Khách hàng */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                   <User className="w-3.5 h-3.5" />
                   {t('form.patient')}
                 </label>
@@ -410,7 +410,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
 
               {/* Bác sĩ */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                   <Stethoscope className="w-3.5 h-3.5" />
                   {t('form.doctorOptional')}
                 </label>
@@ -419,7 +419,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
 
               {/* Phụ tá - Optional */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                   <User className="w-3.5 h-3.5" />
 
                 </label>
@@ -428,7 +428,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
 
               {/* Trợ lý bác sĩ - Optional */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                   <User className="w-3.5 h-3.5" />
 
                 </label>
@@ -437,7 +437,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
 
               {/* Chi nhánh */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                   <MapPin className="w-3.5 h-3.5" />
                   {t('form.location')}
                 </label>
@@ -465,7 +465,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                   interval={15} />
                 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                     <Clock className="w-3.5 h-3.5" />
                     {t('form.endTime')}
                   </label>
@@ -475,7 +475,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                       value={estimatedDuration}
                       onChange={(e) => setEstimatedDuration(parseInt(e.target.value) || 30)}
                       min={5} max={300} step={5}
-                      className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm" />
+                      className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
                     
                     <span className="text-sm text-gray-500">{t('common.minutes')}</span>
                   </div>
@@ -492,7 +492,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
 
               {/* Dịch vụ */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                   <Stethoscope className="w-3.5 h-3.5" />
                   {t('label.service')}
                 </label>
@@ -519,7 +519,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
 
               {/* Ghi chú */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                   <FileText className="w-3.5 h-3.5" />
                   {t('form.notes')}
                 </label>
@@ -528,13 +528,13 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
                   placeholder={t('form.notes')}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none" />
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm resize-none" />
                 
               </div>
 
               {/* Loại khách */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                   <User className="w-3.5 h-3.5" />
                   {t('form.selectStatus')}
                 </label>
@@ -566,7 +566,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
 
               {/* Màu thẻ */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                   <Palette className="w-3.5 h-3.5" />
                   {t('label.cardColor')}
                 </label>
@@ -604,7 +604,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
               {/* Trạng thái (edit mode only) */}
               {isEdit &&
               <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     {t('form.status')}
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -663,7 +663,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
         )}
 
         {/* Footer */}
-        <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
+        <div className="modal-footer px-6 py-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
@@ -675,7 +675,7 @@ export function AppointmentForm({ onSubmit, onClose, initialData, isEdit = false
             type="button"
             onClick={() => handleSubmit()}
             disabled={isLoading || isSaving}
-            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25">
+            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark transition-all shadow-sm disabled:opacity-50">
             
             {isEdit ? t("cpNht") : t('addAppointment')}
           </button>

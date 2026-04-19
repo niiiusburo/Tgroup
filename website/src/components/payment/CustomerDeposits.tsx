@@ -165,7 +165,7 @@ export function CustomerDeposits({
     const title = editingTx ? t('editDeposit') : isRefund ? t('refundDeposit') : t('addDeposit');
     return (
       <div className="modal-container">
-        <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={closeModals} />
+        <div className="absolute inset-0 bg-black/40" onClick={closeModals} />
         <div className="modal-content w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
           <h4 className="text-lg font-semibold text-gray-900 mb-4">{title}</h4>
           <div className="space-y-4">

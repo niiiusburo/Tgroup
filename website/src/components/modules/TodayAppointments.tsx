@@ -83,7 +83,7 @@ export function TodayAppointments({
   return (
     <div className="bg-white rounded-2xl border border-gray-200 h-full flex flex-col overflow-hidden">
       {/* Gradient Header */}
-      <div className="relative bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 px-5 pt-5 pb-4">
+      <div className="relative bg-primary px-5 pt-5 pb-4">
         {/* Decorative circles */}
         <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4" />
         <div className="absolute bottom-0 right-8 w-16 h-16 bg-white/10 rounded-full translate-y-1/2" />
@@ -107,7 +107,7 @@ export function TodayAppointments({
                     px-3 py-1.5 rounded-full text-xs font-semibold transition-all
                     ${isActive ?
                   'bg-white text-purple-700 shadow-lg' :
-                  'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'}
+                  'bg-white/20 text-white hover:bg-white/30'}
                   `
                   }>
                   
@@ -165,7 +165,7 @@ function getColorConfig(color: string | null | undefined): string {
     const c = APPOINTMENT_CARD_COLORS[color];
     return `${c.bgHighlight} ${c.border}`;
   }
-  return 'bg-gradient-to-br from-gray-100 to-slate-200 border-gray-300';
+  return 'bg-gray-100 border-gray-300';
 }
 
 // ─── Individual Appointment Card ────────────────────────────────
@@ -223,7 +223,7 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
       }>
       
       {/* Top row: name + action buttons */}
-      <div className="flex items-center justify-between px-3.5 pt-3 pb-1.5 bg-gradient-to-r from-white to-slate-50">
+      <div className="flex items-center justify-between px-3.5 pt-3 pb-1.5 bg-white">
         <span className="text-sm font-bold text-slate-800 truncate flex-1 mr-2">
           <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName || t('overview:zone3.noPatients')}</CustomerNameLink>
         </span>

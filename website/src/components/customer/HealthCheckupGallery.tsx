@@ -211,7 +211,7 @@ export function HealthCheckupGallery({ data, isLoading, error, customerCode, onU
 
       {/* Lightbox */}
       {currentImage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 sm:p-8">
           <div className="relative bg-white rounded-xl shadow-2xl p-3 max-w-[min(520px,90vw)]">
             <button
               type="button"

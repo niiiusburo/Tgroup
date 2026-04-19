@@ -50,10 +50,10 @@ export function QuickAddAppointmentButton({ onSuccess, size = 'md' }: QuickAddAp
         className={`
           ${sizeClasses}
           inline-flex items-center
-          bg-gradient-to-r from-orange-500 to-orange-400 
+          bg-primary 
           hover:from-orange-600 hover:to-orange-500
           text-white font-medium rounded-lg
-          shadow-lg shadow-orange-500/25
+          shadow-sm
           transition-all duration-200
           hover:shadow-xl hover:shadow-orange-500/30
           hover:scale-105

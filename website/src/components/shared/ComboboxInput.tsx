@@ -83,7 +83,7 @@ export function ComboboxInput({
           className={`
             w-full px-4 py-3 pr-10 bg-white border border-gray-200 rounded-xl 
             text-sm text-gray-900 placeholder:text-gray-400
-            focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 
+            focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary 
             transition-all hover:border-gray-300
             ${disabled ? 'opacity-60 cursor-not-allowed bg-gray-50' : ''}
           `} />

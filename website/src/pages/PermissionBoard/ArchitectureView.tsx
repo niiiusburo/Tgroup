@@ -161,7 +161,7 @@ export function ArchitectureView({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search employees, tiers, locations..."
-            className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+            className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all"
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -296,7 +296,7 @@ export function ArchitectureView({
                 <div>
                   <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide block mb-1">Permission Group</label>
                   <select
-                    className="w-full text-sm border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    className="w-full text-sm border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/15"
                     value={editState.groupId}
                     onChange={e => setEditState({ ...editState, groupId: e.target.value })}
                   >

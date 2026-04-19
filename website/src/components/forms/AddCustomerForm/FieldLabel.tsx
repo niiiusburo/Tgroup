@@ -8,7 +8,7 @@ export function FieldLabel({
   required?: boolean;
 }) {
   return (
-    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+    <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
       {Icon && <Icon className="w-3.5 h-3.5" />}
       {children}
       {required && <span className="text-red-500">*</span>}

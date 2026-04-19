@@ -97,7 +97,7 @@ export function CustomerCameraWidget({
     <div className="flex flex-col items-center">
       {/* Status indicators */}
       {(isProcessing || isSuccess || isNoMatch) &&
-      <div className="relative w-28 h-28 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden mb-3">
+      <div className="relative w-28 h-28 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden mb-3">
           {isProcessing ?
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
               <Loader2 className="w-8 h-8 text-white animate-spin" />
@@ -134,7 +134,7 @@ export function CustomerCameraWidget({
               type="button"
               onClick={startQuickAdd}
               disabled={disabled}
-              className="flex flex-col items-center justify-center gap-2 px-3 py-5 text-sm font-semibold text-white bg-gradient-to-br from-orange-500 to-orange-400 rounded-2xl hover:from-orange-600 hover:to-orange-500 hover:shadow-sm transition-all disabled:opacity-50">
+              className="flex flex-col items-center justify-center gap-2 px-3 py-5 text-sm font-semibold text-white bg-primary rounded-2xl hover:bg-primary-dark hover:shadow-sm transition-all disabled:opacity-50">
               
                   <CreditCard className="w-7 h-7" />
                   <span>{t('quickAdd', 'Thêm nhanh')}</span>

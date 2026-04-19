@@ -13,7 +13,7 @@ export function AppointmentFormModal({ isOpen, onClose, onSubmit, initialData }:
   return (
     <div className="modal-container">
       <div 
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40"
         onClick={onClose}
       />
       <div className="modal-content animate-in zoom-in-95 duration-200 max-w-[900px]">

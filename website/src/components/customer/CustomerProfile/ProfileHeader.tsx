@@ -78,7 +78,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
             join(', ');
 
             return (
-              <div className="mt-3 sm:max-w-[calc(50%-0.25rem)] rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/60 px-3.5 py-2.5 shadow-sm">
+              <div className="mt-3 sm:max-w-[calc(50%-0.25rem)] rounded-lg bg-orange-50 border border-orange-200/60 px-3.5 py-2.5 shadow-sm">
                 <div className="flex items-center gap-2 mb-1.5">
                   <div className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-400/20">
                     <Stethoscope className="w-3.5 h-3.5 text-amber-600" />

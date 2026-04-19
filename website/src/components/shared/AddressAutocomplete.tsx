@@ -370,7 +370,7 @@ export function AddressAutocomplete({
           className={`
             w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-xl 
             text-sm text-gray-900 placeholder:text-gray-400
-            focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 
+            focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary 
             transition-all
             ${disabled || !apiKey ? 'opacity-60 cursor-not-allowed bg-gray-50' : ''}
           `} />

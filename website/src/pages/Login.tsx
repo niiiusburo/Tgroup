@@ -83,7 +83,7 @@ export function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-primary-dark flex items-center justify-center p-4">
       {/* Decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
@@ -92,14 +92,14 @@ export function Login() {
 
       <div className="w-full max-w-md relative">
         {/* Card */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8">
+        <div className="bg-white rounded-3xl shadow-2xl border border-white/20 p-8">
           {/* Logo */}
           <div className="flex flex-col items-center gap-3 mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-2xl">TD</span>
             </div>
             <div className="text-center">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold text-primary">
                 {t('title')}
               </h1>
               <p className="text-sm text-gray-500 mt-1">{t('signIn')}</p>
@@ -150,7 +150,7 @@ export function Login() {
             <button
               type="submit"
               disabled={isLoading}
-              className="mt-2 w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-150 flex items-center justify-center gap-2 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40"
+              className="mt-2 w-full h-12 bg-primary hover:bg-primary-dark disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-150 flex items-center justify-center gap-2 shadow-sm hover:shadow-purple-500/40"
             >
               {isLoading ? (
                 <>

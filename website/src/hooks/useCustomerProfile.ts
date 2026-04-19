@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { fetchPartnerById, fetchAppointments, fetchCustomerBalance, type ApiAppointment, type ApiPartner } from '@/lib/api';
+import { useTimezone } from '@/contexts/TimezoneContext';
 
 export interface CustomerProfileData {
   id: string;
@@ -48,6 +49,7 @@ export interface CustomerProfileResult {
 }
 
 export function useCustomerProfile(customerId: string | null): CustomerProfileResult {
+  const { formatDate: formatDateTz } = useTimezone();
   const [profile, setProfile] = useState<CustomerProfileData | null>(null);
   const [rawPartner, setRawPartner] = useState<ApiPartner | null>(null);
   const [appointments, setAppointments] = useState<ApiAppointment[]>([]);
@@ -118,10 +120,17 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
           limit: 500,
           partnerId: customerId, // auto-converted to partner_id by apiFetch
         });
-        setAppointments(aptRes.items);
+        // Normalize dates to YYYY-MM-DD in the selected timezone so display
+        // utilities don't mis-render ISO timestamps (e.g. showing 17 Apr when
+        // the appointment is actually 18 Apr in ICT).
+        const normalized = aptRes.items.map((apt) => ({
+          ...apt,
+          date: apt.date ? formatDateTz(apt.date, 'yyyy-MM-dd') : apt.date,
+        }));
+        setAppointments(normalized);
         profileData.totalVisits = aptRes.totalItems;
-        if (aptRes.items.length > 0) {
-          const sorted = [...aptRes.items].sort(
+        if (normalized.length > 0) {
+          const sorted = [...normalized].sort(
             (a, b) => b.date.localeCompare(a.date),
           );
           profileData.lastVisit = sorted[0].date.slice(0, 10);
@@ -155,7 +164,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
     } finally {
       setIsLoading(false);
     }
-  }, [customerId]);
+  }, [customerId, formatDateTz]);
 
   useEffect(() => {
     fetchProfile();

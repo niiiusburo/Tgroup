@@ -121,7 +121,7 @@ export function BasicInfoTab({ formApi }: BasicInfoTabProps) {
         placeholder={t('auto', '(Tự động)')}
         className={`w-full px-4 py-3 border border-gray-200 rounded-xl text-sm ${
           isEdit
-            ? 'bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all'
+            ? 'bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all'
             : 'bg-gray-50 text-gray-500 cursor-default'
         }`}
       />

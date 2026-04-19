@@ -81,7 +81,7 @@ export function DepositWallet({
       {/* Add Deposit Modal */}
       {showAddModal &&
       <div className="modal-container">
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowAddModal(false)} />
           <div className="modal-content w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <h4 className="text-lg font-semibold text-gray-900 mb-4">{t('addDepositBtn')}</h4>
             

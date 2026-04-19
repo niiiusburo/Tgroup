@@ -89,7 +89,7 @@ export function MedicalHistoryTooltip({
       <div
         className={cn(
           'fixed z-[100] w-72 rounded-xl shadow-xl border border-amber-200/60',
-          'bg-gradient-to-br from-amber-50 to-orange-50',
+          'bg-orange-50',
           'animate-in fade-in zoom-in-95 duration-150'
         )}
         style={{

@@ -133,7 +133,7 @@ export function DatePicker({
   return (
     <div ref={containerRef} className="relative">
       {label &&
-      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+      <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
           {icon}
           {label}
         </label>
@@ -231,7 +231,7 @@ export function DatePicker({
                 className={cn(
                   'h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all',
                   isSelected ?
-                  'bg-gradient-to-br from-orange-500 to-orange-400 text-white shadow-md' :
+                  'bg-primary text-white shadow-md' :
                   isToday ?
                   'bg-orange-50 text-orange-600 border border-orange-200' :
                   'text-gray-700 hover:bg-gray-100',

@@ -81,13 +81,13 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40"
         onClick={handleClose}
         aria-hidden="true" />
       
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="relative px-6 py-5 bg-gradient-to-br from-blue-500 via-blue-400 to-indigo-400">
+        <div className="relative px-6 py-5 bg-primary">
           <div className="relative flex items-start justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white/20 rounded-xl">
@@ -124,7 +124,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
           <>
               {/* Old password */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 {t('mtKhuHinTi', 'Mật khẩu hiện tại')}
               </label>
                 <div className="relative">
@@ -133,7 +133,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
                   value={oldPassword}
                   onChange={(e) => setOldPassword(e.target.value)}
                   placeholder={t("nhpMtKhuHinTi")}
-                  className="w-full px-4 py-2.5 pr-10 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all text-sm" />
+                  className="w-full px-4 py-2.5 pr-10 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
                 
                   <button
                   type="button"
@@ -147,7 +147,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
 
               {/* New password */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 {t('mtKhuMi', 'Mật khẩu mới')}
               </label>
                 <div className="relative">
@@ -156,7 +156,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder={t("nhpMtKhuMiTNht6KT")}
-                  className="w-full px-4 py-2.5 pr-10 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all text-sm" />
+                  className="w-full px-4 py-2.5 pr-10 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
                 
                   <button
                   type="button"
@@ -170,7 +170,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
 
               {/* Confirm password */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 {t('xcNhnMtKhuMi', 'Xác nhận mật khẩu mới')}
               </label>
                 <div className="relative">
@@ -179,7 +179,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder={t("nhpLiMtKhuMi")}
-                  className="w-full px-4 py-2.5 pr-10 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all text-sm" />
+                  className="w-full px-4 py-2.5 pr-10 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
                 
                   <button
                   type="button"
@@ -198,7 +198,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
               <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-400 rounded-xl hover:from-blue-600 hover:to-blue-500 transition-all shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed">
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
               
                 {loading ?
               <>

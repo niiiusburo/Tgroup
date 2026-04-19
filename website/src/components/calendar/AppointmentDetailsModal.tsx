@@ -46,14 +46,14 @@ export function AppointmentDetailsModal({
     <div className="modal-container">
       {/* Backdrop with blur */}
       <div
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-black/40 transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal */}
       <div className="modal-content animate-in zoom-in-95 duration-200 max-w-[900px]">
         {/* Header with gradient */}
-        <div className="modal-header relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
+        <div className="modal-header relative px-6 py-5 bg-primary">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
           <div className="relative flex items-start justify-between">
             <div>
@@ -87,12 +87,12 @@ export function AppointmentDetailsModal({
         <div className="modal-body px-6 py-6 space-y-5">
           {/* Patient Card */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
               {t('appointmentDetails.patient')}
             </label>
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center text-white font-semibold text-sm shadow-md">
+            <div className="bg-gray-50 rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-sm shadow-md">
                 {appointment.customerName.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
@@ -142,7 +142,7 @@ export function AppointmentDetailsModal({
         </div>
 
         {/* Footer */}
-        <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
+        <div className="modal-footer px-6 py-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
@@ -157,7 +157,7 @@ export function AppointmentDetailsModal({
                 onEdit(appointment);
                 onClose();
               }}
-              className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all shadow-lg shadow-orange-500/25"
+              className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark transition-all shadow-sm"
             >
               <Pencil className="w-4 h-4" />
               {t('appointmentDetails.edit')}
@@ -178,7 +178,7 @@ interface DetailRowProps {
 function DetailRow({ icon, label, children }: DetailRowProps) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+      <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
         {icon}
         {label}
       </label>

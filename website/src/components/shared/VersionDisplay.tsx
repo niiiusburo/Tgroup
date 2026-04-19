@@ -134,7 +134,7 @@ function ReleaseNotesModal({ isOpen, onClose, currentVersion }: {
                       <p className="text-sm text-gray-600 font-medium">{entry.highlights}</p>
                       {entry.sections.map((section) => (
                         <div key={section.title}>
-                          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{section.title}</h4>
+                          <h4 className="text-sm font-medium text-gray-700 mb-1">{section.title}</h4>
                           <ul className="space-y-1">
                             {section.items.map((item, i) => (
                               <li key={i} className="text-sm text-gray-700 flex items-start gap-2">
@@ -379,7 +379,7 @@ export function VersionDisplay({
 
         {/* Regular Update Available Card */}
         {isUpdateAvailable && updateSeverity !== 'critical' && (
-          <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl shadow-2xl p-4 animate-in slide-in-from-bottom-4 max-w-xs">
+          <div className="bg-primary text-white rounded-xl shadow-2xl p-4 animate-in slide-in-from-bottom-4 max-w-xs">
             <div className="flex items-start gap-3">
               <div className="p-2 bg-white/20 rounded-lg shrink-0">
                 <Download className="w-5 h-5" />
@@ -494,7 +494,7 @@ export function VersionDisplay({
               >
                 <div className="bg-gray-900 text-white text-xs rounded-xl shadow-xl min-w-[280px] overflow-hidden">
                   {/* Header with version */}
-                  <div className="px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600">
+                  <div className="px-4 py-3 bg-primary">
                     <div className="flex items-center gap-2 mb-1">
                       <Tag className="w-4 h-4 text-white/80" />
                       <span className="font-mono font-bold text-white">v{currentVersion.version}</span>

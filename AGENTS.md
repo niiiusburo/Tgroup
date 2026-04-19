@@ -1,3 +1,14 @@
+# TGClinic Project Orchestration
+
+> This is the **root-level orchestration guide**. It governs cross-cutting concerns that span the entire project (frontend, backend, infrastructure).
+>
+> For **frontend build rules** (React, Vite, Tailwind, component architecture): see `website/agents.md`
+> For **visual design system** (colors, typography, spacing, motion): see `website/design.md`
+>
+> **Crucial Rule**: Keep these concerns separate. `agents.md` dictates *how the project is built*. `design.md` dictates *how it looks and feels*. Never mix build logic and visual design into a single prompt.
+
+---
+
 ## Local-First Development Rule
 
 **ALL changes MUST be made and verified locally BEFORE pushing to the VPS.**
@@ -6,6 +17,8 @@
 - Fix, test, and validate on the local environment.
 - Only deploy to the VPS once the local work is complete and verified.
 - Never modify VPS files directly without first confirming the fix locally.
+
+---
 
 ## Module Size Rule
 
@@ -24,6 +37,8 @@ If a file approaches this limit, it MUST be split into smaller, focused modules 
 - Auto-generated files (e.g., `api.ts` with many endpoint definitions) may exceed this limit if splitting them harms maintainability.
 - Translation JSON files and static data files are exempt.
 
+---
+
 ## Version Policy
 
 **ALWAYS bump the version in `website/package.json` after making code changes.**
@@ -35,6 +50,8 @@ Version format: `major.minor.patch` (e.g., 0.4.5)
 
 After updating code, increment the appropriate version number in `website/package.json`.
 The build timestamp and git info are auto-generated from this version.
+
+---
 
 ## Obsidian Brain
 
@@ -110,3 +127,50 @@ Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
 ### Keep the map alive
 - If you discover a drift between the product-map and the actual codebase, update the relevant `product-map/` artifact before or alongside your code change.
 - After completing a significant change, add a follow-up task to verify the corresponding domain YAML and schema-map entries are still accurate.
+
+---
+
+## OpenCode Workflow Reference
+
+This project follows the OpenCode structured workflow. Agents must adhere to the **Plan and Build** phases:
+
+### Phase 1: Plan Mode (Read-Only)
+- Switch to Plan mode before writing any code.
+- Reference specific skills from `website/.agents/skills/` to outline the implementation.
+- Output a planning document covering: component hierarchy, folder structure, state management, API contracts, and testing approach.
+- **Do NOT write code in Plan mode.**
+
+### Phase 2: Build Mode
+- Switch to Build mode to implement the approved plan.
+- Always reference `website/design.md` for all visual/styling decisions.
+- Always reference `website/agents.md` for all architectural/build decisions.
+- Use `@design.md` or `@agents.md` syntax to explicitly ground the agent.
+
+### Skill Library
+Expert skills are installed in `website/.agents/skills/`. Available skill categories include:
+- `frontend-design` — Production-grade UI creation
+- `animate` — Motion and animation patterns
+- `arrange` — Layout and composition
+- `audit` — Code review and quality checks
+- `distill` — Refactoring and simplification
+- `extract` — Component extraction
+- `harden` — Error handling and resilience
+- `normalize` — Data transformation
+- `optimize` — Performance optimization
+- `polish` — Final quality pass
+- `teach-impeccable` — Design context gathering
+- And more — run `/skills` in OpenCode to list all available skills.
+
+---
+
+## File Reference Map
+
+| File | Purpose | When to Read |
+|------|---------|-------------|
+| `website/agents.md` | Build rules, tech stack, architecture | Before any code change |
+| `website/design.md` | Visual design system, colors, typography, motion | Before any UI work |
+| `product-map/domains/*.yaml` | Domain specifications and requirements | Before feature work |
+| `product-map/schema-map.md` | Database table blast radius | Before schema changes |
+| `product-map/contracts/dependency-rules.yaml` | Change-type checklists | Before API/UI/schema changes |
+| `.claude/memory.md` | Shared session memory | At session start |
+| `notes/*.md` | Obsidian project docs | At session start |

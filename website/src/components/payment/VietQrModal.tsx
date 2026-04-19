@@ -96,13 +96,13 @@ export function VietQrModal({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40"
         onClick={onClose}
         aria-hidden="true" />
 
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
+        <div className="relative px-6 py-5 bg-primary">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
           <div className="relative flex items-start justify-between">
             <div className="flex items-center gap-3">
@@ -129,7 +129,7 @@ export function VietQrModal({
           {/* Left panel - inputs */}
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 {t('sTinVnd')}
               </label>
               <CurrencyInput
@@ -143,7 +143,7 @@ export function VietQrModal({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 {t('niDungChuynKhon')}
               </label>
               <input
@@ -154,7 +154,7 @@ export function VietQrModal({
                   setGenerated(false);
                 }}
                 placeholder={t('enterNote', { ns: 'payment' })}
-                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm" />
+                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
 
             </div>
 
@@ -162,7 +162,7 @@ export function VietQrModal({
               type="button"
               onClick={() => setGenerated(true)}
               disabled={!amount || loading || !settings}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all shadow-lg shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed">
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
                 {t('toQr')}
             </button>
           </div>
@@ -196,7 +196,7 @@ export function VietQrModal({
 
             {qrUrl &&
             <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <label className="block text-sm font-medium text-gray-700">
                 {t('nhXcNhnChuynKhon')}
               </label>
                 <input

@@ -271,7 +271,7 @@ export interface AppointmentCardColor {
 export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
   '0': {
     bg: 'bg-blue-50',
-    bgHighlight: 'bg-gradient-to-br from-blue-100 to-blue-200',
+    bgHighlight: 'bg-blue-100',
     border: 'border-blue-200',
     text: 'text-blue-700',
     dot: 'border-l-blue-400',
@@ -280,7 +280,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
   },
   '1': {
     bg: 'bg-emerald-50',
-    bgHighlight: 'bg-gradient-to-br from-emerald-100 to-emerald-200',
+    bgHighlight: 'bg-emerald-100',
     border: 'border-emerald-200',
     text: 'text-emerald-700',
     dot: 'border-l-emerald-400',
@@ -289,7 +289,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
   },
   '2': {
     bg: 'bg-amber-50',
-    bgHighlight: 'bg-gradient-to-br from-amber-100 to-amber-200',
+    bgHighlight: 'bg-amber-100',
     border: 'border-amber-200',
     text: 'text-amber-700',
     dot: 'border-l-amber-400',
@@ -298,7 +298,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
   },
   '3': {
     bg: 'bg-red-50',
-    bgHighlight: 'bg-gradient-to-br from-red-100 to-red-200',
+    bgHighlight: 'bg-red-100',
     border: 'border-red-200',
     text: 'text-red-700',
     dot: 'border-l-red-400',
@@ -307,7 +307,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
   },
   '4': {
     bg: 'bg-violet-50',
-    bgHighlight: 'bg-gradient-to-br from-violet-100 to-violet-200',
+    bgHighlight: 'bg-violet-100',
     border: 'border-violet-200',
     text: 'text-violet-700',
     dot: 'border-l-violet-400',
@@ -316,7 +316,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
   },
   '5': {
     bg: 'bg-pink-50',
-    bgHighlight: 'bg-gradient-to-br from-pink-100 to-pink-200',
+    bgHighlight: 'bg-pink-100',
     border: 'border-pink-200',
     text: 'text-pink-700',
     dot: 'border-l-pink-400',
@@ -325,7 +325,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
   },
   '6': {
     bg: 'bg-cyan-50',
-    bgHighlight: 'bg-gradient-to-br from-cyan-100 to-cyan-200',
+    bgHighlight: 'bg-cyan-100',
     border: 'border-cyan-200',
     text: 'text-cyan-700',
     dot: 'border-l-cyan-400',
@@ -334,7 +334,7 @@ export const APPOINTMENT_CARD_COLORS: Record<string, AppointmentCardColor> = {
   },
   '7': {
     bg: 'bg-lime-50',
-    bgHighlight: 'bg-gradient-to-br from-lime-100 to-lime-200',
+    bgHighlight: 'bg-lime-100',
     border: 'border-lime-200',
     text: 'text-lime-700',
     dot: 'border-l-lime-400',

@@ -144,7 +144,7 @@ function SearchableSelector<T extends {id: string;name: string;}>({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search..."
-              className="w-full pl-9 pr-4 py-2 bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:bg-white transition-all"
+              className="w-full pl-9 pr-4 py-2 bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/15 focus:bg-white transition-all"
               autoFocus />
             
             </div>
@@ -468,14 +468,14 @@ export function EditAppointmentModal({
     <div className="modal-container">
       {/* Backdrop with blur */}
       <div
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-black/40 transition-opacity"
         onClick={handleClose} />
       
 
       {/* Modal */}
       <div className="modal-content animate-in zoom-in-95 duration-200 max-w-[900px]">
         {/* Header with gradient */}
-        <div className="modal-header relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
+        <div className="modal-header relative px-6 py-5 bg-primary">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
           <div className="relative flex items-start justify-between">
             <div>
@@ -514,12 +514,12 @@ export function EditAppointmentModal({
 
           {/* CUSTOMER - READ ONLY */}
           <div className="searchable-selector">
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
               {t('form.customer')}
             </label>
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center text-white font-semibold text-sm shadow-md">
+            <div className="bg-gray-50 rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-sm shadow-md">
                 {appointment.customerName.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
@@ -555,7 +555,7 @@ export function EditAppointmentModal({
           {/* End Time (read-only, derived from start + duration) */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5" />
                 {t('giKtThc')}
               </label>
@@ -569,7 +569,7 @@ export function EditAppointmentModal({
 
           {/* Doctor - Luxurious Searchable Dropdown */}
           <div className="searchable-selector">
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <Stethoscope className="w-3.5 h-3.5" />
               {t('form.doctor')}
             </label>
@@ -581,7 +581,7 @@ export function EditAppointmentModal({
               icon={<Stethoscope className="w-4 h-4" />}
               renderOption={(doctor) =>
               <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center text-orange-600 font-semibold text-xs">
+                  <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-semibold text-xs">
                     {doctor.avatar}
                   </div>
                   <div>
@@ -601,7 +601,7 @@ export function EditAppointmentModal({
 
           {/* Phụ tá - Optional */}
           <div className="searchable-selector">
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
               {t('form.assistant')}
             </label>
@@ -613,7 +613,7 @@ export function EditAppointmentModal({
               icon={<User className="w-4 h-4" />}
               renderOption={(emp) =>
               <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-600 font-semibold text-xs">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-xs">
                     {emp.avatar}
                   </div>
                   <div>
@@ -627,7 +627,7 @@ export function EditAppointmentModal({
 
           {/* Trợ lý bác sĩ - Optional */}
           <div className="searchable-selector">
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
               {t('form.dentalAide')}
             </label>
@@ -639,7 +639,7 @@ export function EditAppointmentModal({
               icon={<User className="w-4 h-4" />}
               renderOption={(emp) =>
               <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center text-green-600 font-semibold text-xs">
+                  <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-semibold text-xs">
                     {emp.avatar}
                   </div>
                   <div>
@@ -653,7 +653,7 @@ export function EditAppointmentModal({
 
           {/* Location - Luxurious Searchable Dropdown */}
           <div className="searchable-selector">
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <MapPin className="w-3.5 h-3.5" />
               {t('form.location')}
             </label>
@@ -682,7 +682,7 @@ export function EditAppointmentModal({
 
           {/* Service - Searchable Dropdown from Catalog */}
           <div className="searchable-selector">
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <Stethoscope className="w-3.5 h-3.5" />
               {t('form.service')}
             </label>
@@ -713,7 +713,7 @@ export function EditAppointmentModal({
           <div className="grid grid-cols-2 gap-4">
             {/* Estimated Duration */}
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5" />
                 {t('form.duration')}
               </label>
@@ -725,7 +725,7 @@ export function EditAppointmentModal({
                   min={5}
                   max={300}
                   step={5}
-                  className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm" />
+                  className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
                 
                 <span className="text-sm text-gray-500">{t('pht1')}</span>
               </div>
@@ -733,7 +733,7 @@ export function EditAppointmentModal({
 
             {/* Customer Type */}
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                 <User className="w-3.5 h-3.5" />
                 {t('loiKhch')}
               </label>
@@ -768,7 +768,7 @@ export function EditAppointmentModal({
 
           {/* Status */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               {t('trngThi')}
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -793,7 +793,7 @@ export function EditAppointmentModal({
 
           {/* Color Selection - Compact row of color dots */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <Palette className="w-3.5 h-3.5" />
               {t('muTh')}
             </label>
@@ -831,7 +831,7 @@ export function EditAppointmentModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
               {t('ghiCh')}
             </label>
@@ -840,13 +840,13 @@ export function EditAppointmentModal({
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
               placeholder={t('form.notes')}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none" />
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm resize-none" />
             
           </div>
         </div>
 
         {/* Footer */}
-        <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
+        <div className="modal-footer px-6 py-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
           <button
             type="button"
             onClick={handleClose}
@@ -858,7 +858,7 @@ export function EditAppointmentModal({
             type="button"
             onClick={handleSave}
             disabled={isSaving || isLoading}
-            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25">
+            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark transition-all shadow-sm disabled:opacity-50">
             
             {isSaving ?
             <>

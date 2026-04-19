@@ -94,7 +94,7 @@ export function TimePicker({
   return (
     <div ref={containerRef} className="relative">
       {label &&
-      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+      <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
           {icon}
           {label}
         </label>
@@ -167,7 +167,7 @@ export function TimePicker({
                 className={cn(
                   'w-full px-4 py-2.5 flex items-center justify-between transition-colors',
                   isSelected ?
-                  'bg-gradient-to-r from-orange-500 to-orange-400 text-white' :
+                  'bg-primary text-white' :
                   'hover:bg-gray-50 text-gray-700',
                   isDisabled && 'opacity-40 cursor-not-allowed hover:bg-transparent'
                 )}>

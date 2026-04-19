@@ -102,7 +102,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
               type="text"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-blue-500"
               required
             />
           </div>
@@ -113,7 +113,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
                 type="text"
                 value={form.defaultcode}
                 onChange={(e) => setForm({ ...form, defaultcode: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-blue-500"
               />
             </div>
             <div>
@@ -122,7 +122,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
                 type="text"
                 value={form.uomname}
                 onChange={(e) => setForm({ ...form, uomname: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-blue-500"
               />
             </div>
           </div>
@@ -131,7 +131,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
             <CurrencyInput
               value={form.listprice}
               onChange={(v) => setForm({ ...form, listprice: v ?? 0 })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-blue-500"
             />
           </div>
           <div>
@@ -139,7 +139,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
             <select
               value={form.categid}
               onChange={(e) => setForm({ ...form, categid: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-blue-500"
             >
               <option value="">-- {tc('form.selectOption')} --</option>
               {categories.map((c) => (
@@ -152,7 +152,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
             <select
               value={form.companyid}
               onChange={(e) => setForm({ ...form, companyid: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-blue-500"
             >
               <option value="">{t('allLocations')}</option>
               {companies.map((c) => (
@@ -225,7 +225,7 @@ function CategoryAddModal({ isOpen, onClose, onSubmit }: CategoryAddModalProps) 
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-blue-500"
               autoFocus
               required
             />
@@ -436,7 +436,7 @@ export function ServiceCatalog() {
                 value={catalogSearch}
                 onChange={(e) => setCatalogSearch(e.target.value)}
                 placeholder={t('catalog.searchPlaceholder', { ns: 'website' })}
-                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
               />
             </div>
           </div>
@@ -495,7 +495,7 @@ export function ServiceCatalog() {
               <select
                 value={activeFilter}
                 onChange={(e) => setActiveFilter(e.target.value as 'all' | 'active' | 'inactive')}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
               >
                 <option value="active">{t('filters.active')}</option>
                 <option value="inactive">{t('filters.inactive')}</option>

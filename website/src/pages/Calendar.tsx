@@ -503,7 +503,7 @@ export function Calendar() {
                       className={cn(
                         'h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-all',
                         isSelected ?
-                        'bg-gradient-to-br from-orange-500 to-orange-400 text-white shadow-md' :
+                        'bg-primary text-white shadow-md' :
                         isToday ?
                         'bg-orange-50 text-orange-600 border border-orange-200' :
                         'text-gray-700 hover:bg-gray-100'

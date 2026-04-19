@@ -46,7 +46,7 @@ export function MiniAddDialog({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder={placeholder}
-          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 mb-3"
+          className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary mb-3"
           onKeyDown={(e) => e.key === 'Enter' && handleSave()}
         />
         {children && (

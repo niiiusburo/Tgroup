@@ -41,7 +41,7 @@ export function Settings() {
       />
 
       {/* Timezone Selector - Prominent at top */}
-      <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-xl border border-primary/20 overflow-hidden">
+      <div className="bg-primary/5 rounded-xl border border-primary/20 overflow-hidden">
         <div className="px-6 py-5">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-primary/20 rounded-lg">
@@ -52,7 +52,7 @@ export function Settings() {
               <p className="text-sm text-gray-500">{t('timezoneDesc')}</p>
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4">
+          <div className="bg-white rounded-xl p-4">
             <TimezoneSelector compact />
           </div>
         </div>
@@ -61,7 +61,7 @@ export function Settings() {
       {/* Main tab navigation - Styled with website color */}
       <div className="bg-white rounded-xl shadow-card overflow-hidden">
         {/* Tab header with primary color background */}
-        <div className="bg-gradient-to-r from-primary to-primary/90 px-6 py-1">
+        <div className="bg-primary px-6 py-1">
           <div className="flex gap-1">
             {TABS.map((tab) => (
               <button

@@ -82,7 +82,7 @@ export function MedicalTab({ formApi }: MedicalTabProps) {
         onChange={(e) => set('medicalhistory', e.target.value)}
         placeholder={t('medicalHistoryPlaceholder', 'Nhập tiểu sử bệnh, dị ứng, thuốc đang dùng...')}
         rows={8}
-        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 resize-none transition-all hover:border-gray-300" />
+        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary resize-none transition-all hover:border-gray-300" />
       
       <div className="mt-4 grid grid-cols-3 gap-3">
         {MEDICAL_CONDITIONS.map((key) => {

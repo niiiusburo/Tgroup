@@ -58,7 +58,7 @@ export function EmployeeProfile({
   return (
     <div className="bg-white rounded-xl shadow-card overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-5">
+      <div className="bg-primary/5 p-5">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-full bg-white shadow-sm flex items-center justify-center text-lg font-bold text-primary">

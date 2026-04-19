@@ -262,10 +262,10 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
 
   return (
     <div className="modal-container z-[100]">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="modal-content animate-in zoom-in-95 duration-200 max-w-3xl">
         {/* Header */}
-        <div className="modal-header relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400">
+        <div className="modal-header relative px-6 py-5 bg-primary">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
           <div className="relative flex items-start justify-between">
             <div className="flex items-center gap-3">
@@ -296,7 +296,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
 
           {/* Nguồn khách hàng */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
               Nguồn khách hàng
             </label>
@@ -324,7 +324,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
 
           {/* Dịch vụ */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <Stethoscope className="w-3.5 h-3.5" />
               {t('columns.name')}
             </label>
@@ -341,7 +341,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
           {/* Khách hàng */}
           {!isProfileContext &&
           <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                 <User className="w-3.5 h-3.5" />
                 {t('form.customer', 'Khách hàng')}
               </label>
@@ -352,7 +352,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
 
           {/* Bác sĩ */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <Stethoscope className="w-3.5 h-3.5" />
               {t('form.doctor', 'Bác sĩ')}
             </label>
@@ -362,7 +362,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
 
           {/* Phụ tá */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
               {t('form.assistant', 'Phụ tá')}
             </label>
@@ -371,7 +371,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
 
           {/* Trợ lý Bác sĩ */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <User className="w-3.5 h-3.5" />
               {t('form.dentalAide', 'Trợ lý Bác sĩ')}
             </label>
@@ -380,7 +380,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
 
           {/* Chi nhánh */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <MapPin className="w-3.5 h-3.5" />
               {t('form.location', 'Chi nhánh')}
             </label>
@@ -396,7 +396,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
           {/* Chi phí + Số lượng + Đơn vị */}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                 <DollarSign className="w-3.5 h-3.5" />
                 {t('totalCost')}
               </label>
@@ -413,7 +413,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
               }
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                 <Hash className="w-3.5 h-3.5" />
                 {t('form.quantity', 'Số lượng')}
               </label>
@@ -422,11 +422,11 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
                 onChange={(e) => setQuantity(e.target.value)}
                 placeholder="1"
                 min={1}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm" />
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
               
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                 <FileText className="w-3.5 h-3.5" />
                 {t('form.unit', 'Unit')}
               </label>
@@ -434,14 +434,14 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
                 type="text" value={unit}
                 onChange={(e) => setUnit(e.target.value)}
                 placeholder={t('form.unitPlaceholder', 'răng')}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm" />
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
               
             </div>
           </div>
 
           {/* Chọn răng */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <Stethoscope className="w-3.5 h-3.5" />
 
             </label>
@@ -463,27 +463,27 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
 
           {/* Ghi chú răng */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
 
             </label>
             <textarea
               value={toothComment} onChange={(e) => setToothComment(e.target.value)}
               rows={2} placeholder={t("nhpGhiChVRng")}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none" />
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm resize-none" />
             
           </div>
 
           {/* Ghi chú */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
               {t('form.notes', { ns: 'appointments' })}
             </label>
             <textarea
               value={notes} onChange={(e) => setNotes(e.target.value)}
               rows={3} placeholder={t('enterNotes', 'Nhập ghi chú')}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all text-sm resize-none" />
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm resize-none" />
             
           </div>
         </form>
@@ -501,12 +501,12 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
         }
 
         {/* Footer */}
-        <div className="modal-footer px-6 py-5 bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 flex justify-end gap-3">
+        <div className="modal-footer px-6 py-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
             <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
               {tc('cancel')}
             </button>
             <button type="button" onClick={() => handleSubmit()} disabled={isLoading || isSaving}
-          className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 shadow-lg shadow-orange-500/25">
+          className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark transition-all shadow-sm disabled:opacity-50">
               <Check className="w-4 h-4" />
               {isEdit ? tc('update') : t('addService')}
             </button>

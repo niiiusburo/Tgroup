@@ -176,7 +176,7 @@ export function DateRangePicker({
         onClick={() => setIsOpen((v) => !v)}
         className={cn(
           'flex items-center gap-2 rounded-xl transition-all duration-200 font-semibold',
-          'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/25',
+          'bg-primary text-white shadow-sm',
           'hover:from-orange-600 hover:to-amber-600 hover:shadow-xl hover:scale-[1.02]',
           'active:scale-[0.98]',
           compact ? 'px-3 py-1.5 text-sm' : 'px-5 py-2.5 text-base'
@@ -190,7 +190,7 @@ export function DateRangePicker({
       {isOpen &&
       <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-orange-500 to-amber-500">
+          <div className="flex items-center justify-between px-4 py-3 bg-primary">
             <button type="button" onClick={handlePrevMonth} className="p-1.5 rounded-lg hover:bg-white/20 transition-colors">
               <ChevronLeft className="w-4 h-4 text-white" />
             </button>
@@ -242,10 +242,10 @@ export function DateRangePicker({
                   'h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-150',
                   'hover:bg-orange-100',
                   inRange && !isStart && !isEnd ? 'bg-orange-100 text-orange-700' : undefined,
-                  isStart ? 'bg-gradient-to-br from-orange-500 to-orange-400 text-white rounded-r-none' : undefined,
-                  isEnd ? 'bg-gradient-to-br from-orange-500 to-orange-400 text-white rounded-l-none' : undefined,
+                  isStart ? 'bg-primary text-white rounded-r-none' : undefined,
+                  isEnd ? 'bg-primary text-white rounded-l-none' : undefined,
                   isPreview ? 'bg-orange-50 text-orange-500' : undefined,
-                  isStart && isEnd ? 'bg-gradient-to-br from-orange-500 to-orange-400 text-white rounded-lg shadow-md' : undefined,
+                  isStart && isEnd ? 'bg-primary text-white rounded-lg shadow-md' : undefined,
                   isTodayCellFlag && !inRange && !isStart && !isEnd ?
                   'border-2 border-orange-400 text-orange-600 font-bold' : undefined,
                   !inRange && !isPreview && !isStart && !isEnd ? 'text-gray-700' : undefined,

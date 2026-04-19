@@ -108,7 +108,7 @@ export function AddCustomerForm(props: AddCustomerFormProps) {
       {/* ═══════════════════════════════════════════════════════════════════════════════
            HEADER — Appointment module style (icon + title + subtitle)
           ═══════════════════════════════════════════════════════════════════════════════ */}
-      <div className="relative px-6 py-5 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400 flex-shrink-0">
+      <div className="relative px-6 py-5 bg-primary flex-shrink-0">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -177,7 +177,7 @@ export function AddCustomerForm(props: AddCustomerFormProps) {
                   onChange={(e) => set('note', e.target.value)}
                   placeholder={t('notesPlaceholder', 'Ghi chú về khách hàng...')}
                   rows={3}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 resize-none transition-all hover:border-gray-300" />
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary resize-none transition-all hover:border-gray-300" />
                 
                 </CardSection>
               </>
@@ -191,7 +191,7 @@ export function AddCustomerForm(props: AddCustomerFormProps) {
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-5 border-t border-gray-200 flex-shrink-0 bg-gradient-to-b from-gray-50 to-white flex items-center justify-end gap-3">
+          <div className="px-6 py-5 border-t border-gray-200 flex-shrink-0 bg-gray-50 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onCancel}
@@ -208,7 +208,7 @@ export function AddCustomerForm(props: AddCustomerFormProps) {
               emailCheck.status === 'checking' ||
               emailCheck.status === 'duplicate'
               }
-              className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-orange-500 to-orange-400 rounded-xl hover:from-orange-600 hover:to-orange-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/25">
+              className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
               
               {isSubmitting ? t('saving', 'Saving...') : isEdit ? t('update', 'Update') : t('save', 'Save')}
             </button>

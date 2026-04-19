@@ -119,7 +119,7 @@ export function PatientCheckIn({
               value={searchTerm}
               onChange={(e) => onSearchChange?.(e.target.value)}
               placeholder={t('overview:zone1.searchPlaceholder')}
-              className="w-full sm:w-56 pl-8 pr-3 py-1.5 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all" />
+              className="w-full sm:w-56 pl-8 pr-3 py-1.5 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all" />
             
           </div>
         </div>

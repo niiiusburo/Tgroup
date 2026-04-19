@@ -27,7 +27,7 @@ export function DepositCard({ deposit }: DepositCardProps) {
       </div>
 
       {/* Balance Card */}
-      <div className="bg-gradient-to-br from-primary to-primary-dark rounded-xl p-5 text-white mb-4">
+      <div className="bg-primary rounded-xl p-5 text-white mb-4">
         <p className="text-sm opacity-80">Current Balance</p>
         <p className="text-3xl font-bold mt-1">{formatVND(deposit.balance)}</p>
         <div className="flex items-center gap-4 mt-3 text-sm opacity-80">
