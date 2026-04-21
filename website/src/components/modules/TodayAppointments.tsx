@@ -24,7 +24,7 @@ import type { OverviewAppointment, Zone3Filter } from '@/hooks/useOverviewAppoin
 import { useAppointmentHover } from '@/contexts/AppointmentHoverContext';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
-import { EditAppointmentModal } from './EditAppointmentModal';
+import { AppointmentFormShell, overviewAppointmentToFormData } from '@/components/appointments/unified';
 
 interface TodayAppointmentsProps {
   readonly appointments: readonly OverviewAppointment[];
@@ -148,11 +148,15 @@ export function TodayAppointments({
         )}
 
         {/* Edit Modal */}
-        <EditAppointmentModal
-          appointment={editingAppointment}
+        <AppointmentFormShell
+          key={editingAppointment?.id ?? 'edit'}
+          mode="edit"
           isOpen={isEditModalOpen}
           onClose={handleModalClose}
-          onSaved={handleModalSaved} />
+          onSuccess={handleModalSaved}
+          initialData={editingAppointment ? overviewAppointmentToFormData(editingAppointment) : undefined}
+          customerReadOnly
+        />
         
       </div>
     </div>);
@@ -266,9 +270,23 @@ function AppointmentCard({ appointment, onMarkArrived, onMarkCancelled: _onMarkC
         `}>
         
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 mb-1">
-            <User className="w-3.5 h-3.5 text-purple-500 shrink-0" />
-            <span className="truncate">{appointment.doctorName}</span>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mb-1">
+            <div className="flex items-center gap-1 text-xs font-semibold text-gray-700">
+              <User className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+              <span className="truncate">{appointment.doctorName}</span>
+            </div>
+            {appointment.assistantName && (
+              <div className="flex items-center gap-1 text-xs font-semibold text-gray-700">
+                <User className="w-3.5 h-3.5 text-teal-500 shrink-0" />
+                <span className="truncate">{appointment.assistantName}</span>
+              </div>
+            )}
+            {appointment.dentalAideName && (
+              <div className="flex items-center gap-1 text-xs font-semibold text-gray-700">
+                <User className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                <span className="truncate">{appointment.dentalAideName}</span>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-3 text-xs text-gray-600">
             <span className="flex items-center gap-1">

@@ -1,25 +1,51 @@
 [
   {
+    "version": "0.24.12",
+    "date": "2026-04-21",
+    "commit": "ecfb46c3",
+    "highlights": "feat(overview): display all 3 staff roles on appointment card",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": []
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
     "version": "0.24.0",
     "date": "2026-04-19",
     "commit": "pending",
     "highlights": "Full frontend design polish — eliminate AI slop, standardize UI primitives",
     "sections": [
-      {"title": "Design System", "items": [
-        "Add UI primitives: Button, Input, Card, Modal with consistent design tokens",
-        "Add design.md — visual system reference (colors, typography, spacing, motion)",
-        "Add agents.md — build rules reference (stack, patterns, conventions)",
-        "Add .impeccable.md — design context for frontend-design skill"
-      ]},
-      {"title": "Polish", "items": [
-        "Remove glassmorphism (backdrop-blur) from all 16+ modal backdrops",
-        "Remove gradient overuse: modal headers, primary buttons, avatars, footers",
-        "Standardize form labels: remove aggressive uppercase tracking-wider",
-        "Standardize focus rings: all inputs use primary/15",
-        "Fix PageHeader: remove templated icon-in-colored-box pattern",
-        "Add missing CSS animation keyframes (fade-in, zoom-in, slide-in)",
-        "Standardize shadows: remove colored drop shadows"
-      ]}
+      {
+        "title": "Design System",
+        "items": [
+          "Add UI primitives: Button, Input, Card, Modal with consistent design tokens",
+          "Add design.md — visual system reference (colors, typography, spacing, motion)",
+          "Add agents.md — build rules reference (stack, patterns, conventions)",
+          "Add .impeccable.md — design context for frontend-design skill"
+        ]
+      },
+      {
+        "title": "Polish",
+        "items": [
+          "Remove glassmorphism (backdrop-blur) from all 16+ modal backdrops",
+          "Remove gradient overuse: modal headers, primary buttons, avatars, footers",
+          "Standardize form labels: remove aggressive uppercase tracking-wider",
+          "Standardize focus rings: all inputs use primary/15",
+          "Fix PageHeader: remove templated icon-in-colored-box pattern",
+          "Add missing CSS animation keyframes (fade-in, zoom-in, slide-in)",
+          "Standardize shadows: remove colored drop shadows"
+        ]
+      }
     ]
   },
   {
@@ -28,10 +54,13 @@
     "commit": "pending",
     "highlights": "Fix production build (TS errors under isolatedModules)",
     "sections": [
-      {"title": "Bug Fixes", "items": [
-        "Removed unused getTodayStr() helper from AppointmentForm (superseded by useTimezone().getToday())",
-        "Use 'export type' for type-only re-exports in shared/index.ts (required under TS isolatedModules)"
-      ]}
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Removed unused getTodayStr() helper from AppointmentForm (superseded by useTimezone().getToday())",
+          "Use 'export type' for type-only re-exports in shared/index.ts (required under TS isolatedModules)"
+        ]
+      }
     ]
   },
   {
@@ -40,14 +69,20 @@
     "commit": "pending",
     "highlights": "Fix edit-mode date parsing; share date normalizer across modules",
     "sections": [
-      {"title": "Bug Fixes", "items": [
-        "Edit Appointment: date field parses ISO timestamps from API correctly (was '17T17:00:00.000Z/04/2026')",
-        "Edit Appointment: month picker no longer shows 'months.undefined NaN' with 42-day grid"
-      ]},
-      {"title": "Refactoring", "items": [
-        "Shared toISODateString() helper in lib/dateUtils; appointment date handling goes through it",
-        "DatePicker defensively normalizes any date-ish input"
-      ]}
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Edit Appointment: date field parses ISO timestamps from API correctly (was '17T17:00:00.000Z/04/2026')",
+          "Edit Appointment: month picker no longer shows 'months.undefined NaN' with 42-day grid"
+        ]
+      },
+      {
+        "title": "Refactoring",
+        "items": [
+          "Shared toISODateString() helper in lib/dateUtils; appointment date handling goes through it",
+          "DatePicker defensively normalizes any date-ish input"
+        ]
+      }
     ]
   },
   {
@@ -55,7 +90,16 @@
     "date": "2026-04-18",
     "commit": "pending",
     "highlights": "Fix Add Appointment: errors surfaced + date auto-fills to today (ICT)",
-    "sections": [{"title": "Bug Fixes", "items": ["Add Appointment: date auto-populates to today in Vietnam timezone (ICT, UTC+7)", "Add Appointment: save failures now show an inline error banner with the server message instead of failing silently", "Appointments API: relaxed Zod schema (partnerid/companyid optional at schema layer; route handler still validates required fields)"]}]
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Add Appointment: date auto-populates to today in Vietnam timezone (ICT, UTC+7)",
+          "Add Appointment: save failures now show an inline error banner with the server message instead of failing silently",
+          "Appointments API: relaxed Zod schema (partnerid/companyid optional at schema layer; route handler still validates required fields)"
+        ]
+      }
+    ]
   },
   {
     "version": "0.23.1",
@@ -105,7 +149,7 @@
       {
         "title": "Bug Fixes",
         "items": [
-          "ServiceForm: restore empty 'Ngu\u1ed3n kh\u00e1ch h\u00e0ng' label \u2014 FileText icon had text stripped, now shows correctly.",
+          "ServiceForm: restore empty 'Nguồn khách hàng' label — FileText icon had text stripped, now shows correctly.",
           "sourceId relay: Customers.tsx handleCreateService and handleUpdateService intermediate types now include sourceId?, and it is passed to createServiceRecord/updateServiceRecord.",
           "CustomerProfile.tsx onCreateService/onUpdateService prop types now include sourceId?, and both onSubmit call sites relay data.sourceId ?? null to the parent handlers."
         ]
@@ -122,7 +166,7 @@
         "title": "Bug Fixes",
         "items": [
           "Remove treatmentstatus tag leak: partner.treatmentstatus (raw Odoo enum like 'sale', 'done') was pushed verbatim into the visible tag chips. Deleted the block so only real tags appear.",
-          "Restore empty CustomerAssignments header: kicker ('Ho\u1ea1t \u0111\u1ed9ng'), title ('Ph\u00e2n c\u00f4ng'), and description ('Nh\u00e2n s\u1ef1 ph\u1ee5 tr\u00e1ch kh\u00e1ch h\u00e0ng n\u00e0y') were stripped during i18n migration and rendered blank."
+          "Restore empty CustomerAssignments header: kicker ('Hoạt động'), title ('Phân công'), and description ('Nhân sự phụ trách khách hàng này') were stripped during i18n migration and rendered blank."
         ]
       }
     ]
@@ -165,8 +209,8 @@
       {
         "title": "Bug Fixes",
         "items": [
-          "Calendar cards no longer show raw keys like 'appointments.phase.waiting'. Stripped namespace prefix from PHASE_LABEL_KEYS values so i18next resolves them correctly to '\u0110ang ch\u1edd', '\u0110ang h\u1eb9n', 'Ho\u00e0n t\u1ea5t', etc.",
-          "Calendar toolbar Excel ('Xu\u1ea5t Excel') and Filter ('B\u1ed9 l\u1ecdc') buttons render their labels again via t(key, fallback).",
+          "Calendar cards no longer show raw keys like 'appointments.phase.waiting'. Stripped namespace prefix from PHASE_LABEL_KEYS values so i18next resolves them correctly to 'Đang chờ', 'Đang hẹn', 'Hoàn tất', etc.",
+          "Calendar toolbar Excel ('Xuất Excel') and Filter ('Bộ lọc') buttons render their labels again via t(key, fallback).",
           "ChangePasswordModal no longer renders empty h2/p/label tags. Restored title, subtitle, success message, and all three field labels via t(key, fallback)."
         ]
       }
@@ -181,7 +225,7 @@
       {
         "title": "Bug Fixes",
         "items": [
-          "Commit 78761eb7 (feat(i18n): complete EN locale translations) replaced the 8 Vietnamese customer source names in DEFAULT_CUSTOMER_SOURCES (useSettings.ts) with non-existent i18n key strings like 'settings.customerSourceDefaults.saleOnline', causing all chips to render as raw key strings and only 'Sale Online' was previously visible from an earlier regression (9a67e0cc). Restored all 8 real names: Sale Online, Kh\u00e1ch v\u00e3ng lai, Hotline, Kh\u00e1ch c\u0169, Kh\u00e1ch h\u00e0ng gi\u1edbi thi\u1ec7u, N\u1ed9i b\u1ed9 gi\u1edbi thi\u1ec7u, MKT1, \u0110NCB."
+          "Commit 78761eb7 (feat(i18n): complete EN locale translations) replaced the 8 Vietnamese customer source names in DEFAULT_CUSTOMER_SOURCES (useSettings.ts) with non-existent i18n key strings like 'settings.customerSourceDefaults.saleOnline', causing all chips to render as raw key strings and only 'Sale Online' was previously visible from an earlier regression (9a67e0cc). Restored all 8 real names: Sale Online, Khách vãng lai, Hotline, Khách cũ, Khách hàng giới thiệu, Nội bộ giới thiệu, MKT1, ĐNCB."
         ]
       }
     ]
@@ -195,7 +239,7 @@
       {
         "title": "Bug Fixes",
         "items": [
-          "DepositWallet (Payment page): adding a deposit was only saving the amount \u2014 method, date, and note were silently discarded. The `onAddDeposit` callback in Payment.tsx ignored 3 of 4 parameters, and `topUpWallet` in usePayment.ts was a no-op client-side stub that only console.log'd.",
+          "DepositWallet (Payment page): adding a deposit was only saving the amount — method, date, and note were silently discarded. The `onAddDeposit` callback in Payment.tsx ignored 3 of 4 parameters, and `topUpWallet` in usePayment.ts was a no-op client-side stub that only console.log'd.",
           "Fixed `topUpWallet` to actually call `createPayment` with all fields: amount, method (vietqr mapped to bank_transfer), paymentDate, and composed notes from date + user note.",
           "Deposit method now correctly tracked for reconciliation (cash vs bank vs VietQR)."
         ]
@@ -211,7 +255,7 @@
       {
         "title": "New Features",
         "items": [
-          "DayView and WeekView appointment cards display the assigned assistant and dental aide (when present) underneath the doctor, each with a Users icon \u2014 makes it obvious at a glance who's working the case.",
+          "DayView and WeekView appointment cards display the assigned assistant and dental aide (when present) underneath the doctor, each with a Users icon — makes it obvious at a glance who's working the case.",
           "Cards now stretch to equal height within their row/column so a staff-heavy card doesn't make siblings look stumpy."
         ]
       }
@@ -221,14 +265,14 @@
     "version": "0.19.7",
     "date": "2026-04-17",
     "commit": "pending",
-    "highlights": "Fixed sidebar 'Danh m\u1ee5c d\u1ecbch v\u1ee5' link \u2014 it now opens the Service Catalog page instead of the Website CMS",
+    "highlights": "Fixed sidebar 'Danh mục dịch vụ' link — it now opens the Service Catalog page instead of the Website CMS",
     "sections": [
       {
         "title": "Bug Fixes",
         "items": [
-          "Sidebar item 'Danh m\u1ee5c d\u1ecbch v\u1ee5' was routing to /website (Website CMS) instead of the Service Catalog page. It now points to /service-catalog, which renders the groups-sidebar + services-table view backed by the Products/ProductCategories API.",
+          "Sidebar item 'Danh mục dịch vụ' was routing to /website (Website CMS) instead of the Service Catalog page. It now points to /service-catalog, which renders the groups-sidebar + services-table view backed by the Products/ProductCategories API.",
           "Added a dedicated /service-catalog route and wired the existing ServiceCatalog page into the router (it was never registered).",
-          "Switched the sidebar icon to FolderOpen so Service Catalog is visually distinct from its sibling 'D\u1ecbch v\u1ee5' (Stethoscope)."
+          "Switched the sidebar icon to FolderOpen so Service Catalog is visually distinct from its sibling 'Dịch vụ' (Stethoscope)."
         ]
       }
     ]
@@ -243,13 +287,13 @@
         "title": "Bug Fixes",
         "items": [
           "Edit appointment: selecting a staff assistant or dental aide now survives a reload. The save path was already correct; the read path (mapApiAppointmentToCalendar + handleAppointmentClick) was silently dropping assistantid/dentalaideid, so the modal would reinitialise to blank and the user thought the save failed.",
-          "Edit modal used an untyped cast (appointment as any).assistantid \u2014 replaced with a typed field on CalendarAppointment/OverviewAppointment."
+          "Edit modal used an untyped cast (appointment as any).assistantid — replaced with a typed field on CalendarAppointment/OverviewAppointment."
         ]
       },
       {
         "title": "Improvements",
         "items": [
-          "Edit modal now shows 'Gi\u1edd k\u1ebft th\u00fac' (end time) alongside start time and duration, matching the Add form layout.",
+          "Edit modal now shows 'Giờ kết thúc' (end time) alongside start time and duration, matching the Add form layout.",
           "CalendarAppointment and OverviewAppointment types now carry assistantId/assistantName/dentalAideId/dentalAideName."
         ]
       }
@@ -259,12 +303,12 @@
     "version": "0.19.5",
     "date": "2026-04-17",
     "commit": "pending",
-    "highlights": "Excel export: wider auto-fit \u2014 min 16 chars, +4 padding for a spacious layout",
+    "highlights": "Excel export: wider auto-fit — min 16 chars, +4 padding for a spacious layout",
     "sections": [
       {
         "title": "Improvements",
         "items": [
-          "Excel export: raised column min width from 10 \u2192 16 and padding from +2 \u2192 +4 so even empty columns stay readable and content-heavy columns have breathing room."
+          "Excel export: raised column min width from 10 → 16 and padding from +2 → +4 so even empty columns stay readable and content-heavy columns have breathing room."
         ]
       }
     ]
@@ -301,13 +345,13 @@
     "version": "0.19.2",
     "date": "2026-04-17",
     "commit": "pending",
-    "highlights": "Merge V18.2 calendar enhancements \u2014 interactive status flow, 27-slot day rail, Excel export with styled headers, day-view date-filter fix",
+    "highlights": "Merge V18.2 calendar enhancements — interactive status flow, 27-slot day rail, Excel export with styled headers, day-view date-filter fix",
     "sections": [
       {
         "title": "New Features",
         "items": [
-          "Calendar Day/Week views: interactive check-in + status flow (\u0110ang h\u1eb9n \u2192 Ch\u1edd kh\u00e1m \u2192 \u0110ang kh\u00e1m \u2192 Ho\u00e0n th\u00e0nh / H\u1ee7y h\u1eb9n)",
-          "Calendar Day view: 27-slot hourly rail (07:00\u201320:00) with empty-slot click-to-add",
+          "Calendar Day/Week views: interactive check-in + status flow (Đang hẹn → Chờ khám → Đang khám → Hoàn thành / Hủy hẹn)",
+          "Calendar Day view: 27-slot hourly rail (07:00–20:00) with empty-slot click-to-add",
           "Calendar: Excel export (DanhSachLichHen_<range>.xlsx) with bold styled headers and legacy TG Dental column widths"
         ]
       },
@@ -363,7 +407,7 @@
     "version": "0.18.0",
     "date": "2026-04-17",
     "commit": "ed08e156",
-    "highlights": "Live Update Phase 3 \u2014 backend telemetry endpoint and client flush",
+    "highlights": "Live Update Phase 3 — backend telemetry endpoint and client flush",
     "sections": [
       {
         "title": "New Features",
@@ -383,7 +427,7 @@
     "version": "0.17.1",
     "date": "2026-04-17",
     "commit": "2ff460b0",
-    "highlights": "Live Update Phase 2 \u2014 enforce version + CHANGELOG on every frontend deploy.",
+    "highlights": "Live Update Phase 2 — enforce version + CHANGELOG on every frontend deploy.",
     "sections": [
       {
         "title": "Tooling",
@@ -400,7 +444,7 @@
     "version": "0.17.0",
     "date": "2026-04-17",
     "commit": "3593a69b",
-    "highlights": "Live Update Phase 1 \u2014 bulletproof update button, nginx cache fixes, telemetry groundwork.",
+    "highlights": "Live Update Phase 1 — bulletproof update button, nginx cache fixes, telemetry groundwork.",
     "sections": [
       {
         "title": "Runtime",
@@ -530,15 +574,15 @@
     "version": "0.12.1",
     "date": "2026-04-14",
     "commit": "pending",
-    "highlights": "Fix: T\u1ea1m \u1ee9ng (advance/deposit) no longer double-counts regular invoice payments",
+    "highlights": "Fix: Tạm ứng (advance/deposit) no longer double-counts regular invoice payments",
     "sections": [
       {
         "title": "Bug Fixes",
         "items": [
-          "Fixed customer T\u1ea1m \u1ee9ng balance incorrectly increasing when a regular payment invoice was created",
+          "Fixed customer Tạm ứng balance incorrectly increasing when a regular payment invoice was created",
           "Root cause: /api/CustomerBalance SQL counted NULL-deposit_type cash/bank payments without excluding those with allocations",
           "Fix: added NOT EXISTS payment_allocations guard to total_deposited clause in api/src/routes/customerBalance.js",
-          "Verified: affected customer total_deposited dropped from 25,370,000\u0111 (inflated) to 0\u0111 (correct)"
+          "Verified: affected customer total_deposited dropped from 25,370,000đ (inflated) to 0đ (correct)"
         ]
       }
     ]
@@ -602,7 +646,7 @@
       {
         "title": "New Features",
         "items": [
-          "Live uniqueness check on the phone and email fields while typing (debounced 400ms) \u2014 errors appear inline under the specific field",
+          "Live uniqueness check on the phone and email fields while typing (debounced 400ms) — errors appear inline under the specific field",
           "New backend endpoint GET /api/Partners/check-unique for field-level live validation",
           "Save button now disabled while a duplicate is detected or a check is in flight"
         ]
@@ -610,8 +654,8 @@
       {
         "title": "Bug Fixes",
         "items": [
-          "Duplicate phone errors no longer appear under the Name field \u2014 they now appear under Phone with a specific Vietnamese message",
-          "PUT /api/Partners/:id now enforces duplicate phone/email checks (excluding self) \u2014 previously had none",
+          "Duplicate phone errors no longer appear under the Name field — they now appear under Phone with a specific Vietnamese message",
+          "PUT /api/Partners/:id now enforces duplicate phone/email checks (excluding self) — previously had none",
           "POST /api/Partners now also checks duplicate email (case-insensitive); previously only phone was checked",
           "API 4xx/409 responses now return a structured { error: { code, field, message } } shape; frontend throws a typed ApiError so callers can route messages to the correct field"
         ]
@@ -619,8 +663,8 @@
       {
         "title": "Infra",
         "items": [
-          "New hook useUniqueFieldCheck \u2014 debounced, cached, abort-safe live uniqueness check; reusable for future forms",
-          "New migration 021_partner_unique_constraints.sql adds UNIQUE on partners.phone and a case-insensitive UNIQUE on LOWER(email) \u2014 NOT YET APPLIED; resolve existing duplicates first (see migration comments)"
+          "New hook useUniqueFieldCheck — debounced, cached, abort-safe live uniqueness check; reusable for future forms",
+          "New migration 021_partner_unique_constraints.sql adds UNIQUE on partners.phone and a case-insensitive UNIQUE on LOWER(email) — NOT YET APPLIED; resolve existing duplicates first (see migration comments)"
         ]
       }
     ]
@@ -698,7 +742,7 @@
         "items": [
           "PaymentForm now opens with a locked service context from the invoking row",
           "Location is rendered as a read-only badge inside the service card",
-          "Multi-source payment (wallet + cash + bank) is capped at the service residual \u2014 overpay is impossible",
+          "Multi-source payment (wallet + cash + bank) is capped at the service residual — overpay is impossible",
           "Submit button label always reflects the true capped total"
         ]
       },
@@ -747,12 +791,12 @@
     "version": "0.4.23",
     "date": "2026-04-11",
     "commit": "",
-    "highlights": "Payment history rows now editable \u2014 click expand then Edit button",
+    "highlights": "Payment history rows now editable — click expand then Edit button",
     "sections": [
       {
         "title": "New Features",
         "items": [
-          "Click to edit payment records from customer profile \u2014 opens pre-populated PaymentForm",
+          "Click to edit payment records from customer profile — opens pre-populated PaymentForm",
           "PaymentForm now supports edit mode with pre-filled notes, date, and reference code"
         ]
       }
@@ -777,12 +821,12 @@
     "version": "0.4.21",
     "date": "2026-04-11",
     "commit": "",
-    "highlights": "Customer code (M\u00e3 kh\u00e1ch h\u00e0ng) field now editable in Edit Customer form",
+    "highlights": "Customer code (Mã khách hàng) field now editable in Edit Customer form",
     "sections": [
       {
         "title": "New Features",
         "items": [
-          "Make 'M\u00e3 kh\u00e1ch h\u00e0ng' field editable in Edit Customer form \u2014 saves to API on update"
+          "Make 'Mã khách hàng' field editable in Edit Customer form — saves to API on update"
         ]
       }
     ]
@@ -811,7 +855,7 @@
       {
         "title": "Bug Fixes",
         "items": [
-          "Fix FilterByLocation dropdown rendering empty for admin (all-access) users \u2014 now shows all 7 branches"
+          "Fix FilterByLocation dropdown rendering empty for admin (all-access) users — now shows all 7 branches"
         ]
       }
     ]
@@ -833,7 +877,7 @@
       {
         "title": "New Features",
         "items": [
-          "Add 'T\u1ea5t c\u1ea3 chi nh\u00e1nh' button to employee form for selecting all locations",
+          "Add 'Tất cả chi nhánh' button to employee form for selecting all locations",
           "Wait timer color thresholds: green (<10min), orange (10-20min), red (>20min)"
         ]
       }
@@ -874,7 +918,7 @@
     "version": "0.4.15",
     "date": "2026-04-11",
     "commit": "pending",
-    "highlights": "Phase 3 architecture shifts \u2014 multi-branch employees, admin customer delete, dotkham payment allocation",
+    "highlights": "Phase 3 architecture shifts — multi-branch employees, admin customer delete, dotkham payment allocation",
     "sections": [
       {
         "title": "New Features",
@@ -902,8 +946,8 @@
       {
         "title": "New Features",
         "items": [
-          "Soft delete (X\u00f3a m\u1ec1m) for customers with permission check customer:delete",
-          "Hard delete (X\u00f3a v\u0129nh vi\u1ec5n) with FK-safe checks for linked appointments, sale orders, and dotkhams",
+          "Soft delete (Xóa mềm) for customers with permission check customer:delete",
+          "Hard delete (Xóa vĩnh viễn) with FK-safe checks for linked appointments, sale orders, and dotkhams",
           "Delete confirmation dialogs show linked record counts before hard delete",
           "Delete actions available in both customer list and customer profile views"
         ]
@@ -946,13 +990,13 @@
     "version": "0.4.12",
     "date": "2026-04-10",
     "commit": "1119c7ef",
-    "highlights": "Phase 1 bug fixes \u2014 async save buttons, scroll-to-completed, branch filtering",
+    "highlights": "Phase 1 bug fixes — async save buttons, scroll-to-completed, branch filtering",
     "sections": [
       {
         "title": "Bug Fixes",
         "items": [
           "Fixed async save buttons in ServiceForm, PaymentForm, and AppointmentForm",
-          "Fixed PatientCheckIn scroll-to-completed on status change to \"Ho\u00e0n th\u00e0nh\"",
+          "Fixed PatientCheckIn scroll-to-completed on status change to \"Hoàn thành\"",
           "Verified Calendar branch filtering via global LocationContext"
         ]
       },
@@ -1011,22 +1055,22 @@
       {
         "title": "Bug Fixes",
         "items": [
-          "Fixed save button (L\u01b0u) \u2014 async handling now properly awaits API call with spinner and error feedback",
+          "Fixed save button (Lưu) — async handling now properly awaits API call with spinner and error feedback",
           "Fixed deposit modal resetting active tab after close"
         ]
       },
       {
         "title": "New Features",
         "items": [
-          "Quick-add customer button in appointment form \u2014 create new patients inline without leaving the form",
-          "CustomerSelector now shows 'T\u1ea1o kh\u00e1ch h\u00e0ng m\u1edbi' button at bottom of dropdown"
+          "Quick-add customer button in appointment form — create new patients inline without leaving the form",
+          "CustomerSelector now shows 'Tạo khách hàng mới' button at bottom of dropdown"
         ]
       },
       {
         "title": "UI Improvements",
         "items": [
-          "Moved Ghi ch\u00fa (Notes) from left panel to right panel in customer form for better balance",
-          "Ph\u00e2n c\u00f4ng (Assignment) section now has more vertical space for its 5 dropdown fields"
+          "Moved Ghi chú (Notes) from left panel to right panel in customer form for better balance",
+          "Phân công (Assignment) section now has more vertical space for its 5 dropdown fields"
         ]
       },
       {
@@ -1042,31 +1086,31 @@
     "version": "0.4.8",
     "date": "Apr 10, 2026",
     "commit": "pending",
-    "highlights": "\ud83d\ude80 Major customer module overhaul \u2014 auto codes, walk-ins, calendar search, service form refactor",
+    "highlights": "🚀 Major customer module overhaul — auto codes, walk-ins, calendar search, service form refactor",
     "sections": [
       {
-        "title": "\u2728 New Features",
+        "title": "✨ New Features",
         "items": [
           "Auto-generated customer codes now visible in AddCustomerForm and Customers table",
           "Floating '+' quick-add button on Customers page",
-          "Walk-in patient modal on Overview \u2014 instant customer + appointment creation",
+          "Walk-in patient modal on Overview — instant customer + appointment creation",
           "Calendar page now has text search and status filter tabs",
           "ServiceForm supports assistant selector, quantity, and unit fields"
         ]
       },
       {
-        "title": "\ud83d\udc1b Bug Fixes",
+        "title": "🐛 Bug Fixes",
         "items": [
-          "Fixed schedule logic bug \u2014 scheduled appointments no longer appear in Patient Check-in",
+          "Fixed schedule logic bug — scheduled appointments no longer appear in Patient Check-in",
           "Verified save buttons work across payment, appointment, and service forms",
           "E2E tests updated to match Vietnamese UI headings and auth state"
         ]
       },
       {
-        "title": "\ud83c\udfd7\ufe0f Backend",
+        "title": "🏗️ Backend",
         "items": [
           "Extended SaleOrders API with assistantid, quantity, and unit fields",
-          "Customer code auto-generation already active \u2014 now surfaced in UI"
+          "Customer code auto-generation already active — now surfaced in UI"
         ]
       }
     ]
@@ -1075,10 +1119,10 @@
     "version": "0.4.7",
     "date": "Apr 9, 2026",
     "commit": "pending",
-    "highlights": "\ud83d\udda5\ufe0f Widen AddCustomerForm modal to 1100px for better desktop layout",
+    "highlights": "🖥️ Widen AddCustomerForm modal to 1100px for better desktop layout",
     "sections": [
       {
-        "title": "\u2728 UX Improvement",
+        "title": "✨ UX Improvement",
         "items": [
           "AddCustomerForm modal expanded from 900px to 1100px",
           "Better use of screen real estate on desktop"
@@ -1090,10 +1134,10 @@
     "version": "0.4.4",
     "date": "Apr 8, 2026",
     "commit": "pending",
-    "highlights": "\ud83d\udcd0 Appointment modal reduced to 2/3 width \u2014 better desktop layout",
+    "highlights": "📐 Appointment modal reduced to 2/3 width — better desktop layout",
     "sections": [
       {
-        "title": "\u2728 UX Improvement",
+        "title": "✨ UX Improvement",
         "items": [
           "EditAppointmentModal, AppointmentForm, AppointmentDetailsModal all set to max-w-[900px]",
           "Modal now takes 2/3 width on desktop instead of stretching full-width",
@@ -1106,24 +1150,24 @@
     "version": "0.4.3",
     "date": "Apr 8, 2026",
     "commit": "pending",
-    "highlights": "\ud83d\udd27 Module consistency fix \u2014 unified appointment forms, color picker, status labels",
+    "highlights": "🔧 Module consistency fix — unified appointment forms, color picker, status labels",
     "sections": [
       {
-        "title": "\ud83d\udc1b Bug Fix",
+        "title": "🐛 Bug Fix",
         "items": [
-          "Added color picker to AppointmentForm (create) \u2014 was missing, only edit had it",
-          "Removed duplicate color definitions from EditAppointmentModal \u2014 now uses shared constants",
-          "Unified status labels across all appointment views (\u0110ang h\u1eb9n / \u0110\u00e3 \u0111\u1ebfn / H\u1ee7y h\u1eb9n)",
+          "Added color picker to AppointmentForm (create) — was missing, only edit had it",
+          "Removed duplicate color definitions from EditAppointmentModal — now uses shared constants",
+          "Unified status labels across all appointment views (Đang hẹn / Đã đến / Hủy hẹn)",
           "EmployeeForm now uses shared LocationSelector instead of native <select>",
           "Removed hardcoded max-width from PaymentForm"
         ]
       },
       {
-        "title": "\ud83c\udfd7\ufe0f Architecture",
+        "title": "🏗️ Architecture",
         "items": [
           "APPOINTMENT_CARD_COLORS now includes previewGradient for color picker dots",
-          "Added APPOINTMENT_STATUS_OPTIONS to constants \u2014 single source of truth",
-          "Added APPOINTMENT_STATUS_LABELS_VI to constants \u2014 unified Vietnamese labels",
+          "Added APPOINTMENT_STATUS_OPTIONS to constants — single source of truth",
+          "Added APPOINTMENT_STATUS_LABELS_VI to constants — unified Vietnamese labels",
           "Added @crossref:related[] annotations to 7 module files for future maintenance"
         ]
       }
@@ -1133,10 +1177,10 @@
     "version": "0.4.2",
     "date": "Apr 8, 2026",
     "commit": "pending",
-    "highlights": "\ud83d\udcd0 Reduced appointment card width by 1/3 \u2014 fits more in view",
+    "highlights": "📐 Reduced appointment card width by 1/3 — fits more in view",
     "sections": [
       {
-        "title": "\u2728 UX Improvement",
+        "title": "✨ UX Improvement",
         "items": [
           "DayView now shows 6 columns instead of 4 (66% of original width)",
           "Colored cards are more compact, showing more appointments at once",
@@ -1149,18 +1193,18 @@
     "version": "0.4.1",
     "date": "Apr 8, 2026",
     "commit": "pending",
-    "highlights": "\ud83c\udfa8 Fixed appointment card color mismatch across all views",
+    "highlights": "🎨 Fixed appointment card color mismatch across all views",
     "sections": [
       {
-        "title": "\ud83d\udc1b Bug Fix",
+        "title": "🐛 Bug Fix",
         "items": [
-          "WeekView COLOR_MAP was completely wrong \u2014 code 0 (blue) showed as rose/red",
+          "WeekView COLOR_MAP was completely wrong — code 0 (blue) showed as rose/red",
           "All 8 color codes were shifted/incorrect in WeekView",
           "Now all views show the same color for the same appointment"
         ]
       },
       {
-        "title": "\ud83d\udd27 Architecture",
+        "title": "🔧 Architecture",
         "items": [
           "Created APPOINTMENT_CARD_COLORS single source of truth in constants/index.ts",
           "WeekView, DayView, TodayAppointments, AppointmentCard all import from one place",
@@ -1173,48 +1217,48 @@
     "version": "0.4.0",
     "date": "Apr 8, 2026",
     "commit": "pending",
-    "highlights": "\ud83c\udfa8 Design standardization \u2014 All forms match AppointmentForm gold standard",
+    "highlights": "🎨 Design standardization — All forms match AppointmentForm gold standard",
     "sections": [
       {
-        "title": "\ud83c\udfa8 Design Standard",
+        "title": "🎨 Design Standard",
         "items": [
           "AppointmentForm set as GOLD STANDARD for all modal forms",
           "All 5 forms now use modal-container + modal-content + modal-body pattern",
           "Consistent orange gradient header with Vietnamese titles",
-          "Consistent footer with 'H\u1ee7y b\u1ecf' + primary action button"
+          "Consistent footer with 'Hủy bỏ' + primary action button"
         ]
       },
       {
-        "title": "\ud83c\udf10 Vietnamese Labels",
+        "title": "🌐 Vietnamese Labels",
         "items": [
-          "AppointmentForm: Kh\u00e1ch h\u00e0ng, B\u00e1c s\u0129, Chi nh\u00e1nh, D\u1ecbch v\u1ee5, Ghi ch\u00fa",
-          "ServiceForm: D\u1ecbch v\u1ee5, Kh\u00e1ch h\u00e0ng, B\u00e1c s\u0129, Chi nh\u00e1nh, T\u1ed5ng chi ph\u00ed, S\u1ed1 r\u0103ng",
-          "PaymentForm: Kh\u00e1ch h\u00e0ng, D\u1ecbch v\u1ee5, S\u1ed1 ti\u1ec1n, Ph\u01b0\u01a1ng th\u1ee9c thanh to\u00e1n, Ghi nh\u1eadn",
-          "EmployeeForm: H\u1ecd v\u00e0 t\u00ean, \u0110i\u1ec7n tho\u1ea1i, B\u00e1c s\u0129/Tr\u1ee3 l\u00fd/L\u1ec5 t\u00e2n, Tr\u1ea1ng th\u00e1i",
-          "EditAppointmentModal: B\u1ec7nh nh\u00e2n, B\u00e1c s\u0129, Chi nh\u00e1nh, D\u1ecbch v\u1ee5, Tr\u1ea1ng th\u00e1i, Ghi ch\u00fa",
-          "TodayAppointments header \u2192 'L\u1ecbch h\u1eb9n h\u00f4m nay'",
-          "PatientCheckIn header \u2192 '\u0110\u00f3n ti\u1ebfp / Ti\u1ebfp nh\u1eadn b\u1ec7nh nh\u00e2n'"
+          "AppointmentForm: Khách hàng, Bác sĩ, Chi nhánh, Dịch vụ, Ghi chú",
+          "ServiceForm: Dịch vụ, Khách hàng, Bác sĩ, Chi nhánh, Tổng chi phí, Số răng",
+          "PaymentForm: Khách hàng, Dịch vụ, Số tiền, Phương thức thanh toán, Ghi nhận",
+          "EmployeeForm: Họ và tên, Điện thoại, Bác sĩ/Trợ lý/Lễ tân, Trạng thái",
+          "EditAppointmentModal: Bệnh nhân, Bác sĩ, Chi nhánh, Dịch vụ, Trạng thái, Ghi chú",
+          "TodayAppointments header → 'Lịch hẹn hôm nay'",
+          "PatientCheckIn header → 'Đón tiếp / Tiếp nhận bệnh nhân'"
         ]
       },
       {
-        "title": "\u2728 New Features",
+        "title": "✨ New Features",
         "items": [
           "AppointmentForm now has service dropdown from catalog (no more free text)",
-          "AppointmentForm now has 'Lo\u1ea1i kh\u00e1ch' toggle (Kh\u00e1ch m\u1edbi / T\u00e1i kh\u00e1m)",
-          "AppointmentForm now has 'Th\u1eddigian d\u1ef1 ki\u1ebfn' field (estimated duration)",
+          "AppointmentForm now has 'Loại khách' toggle (Khách mới / Tái khám)",
+          "AppointmentForm now has 'Thờigian dự kiến' field (estimated duration)",
           "PaymentForm now uses real CustomerSelector + ServiceCatalogSelector",
           "PaymentForm now uses LocationSelector instead of free text",
           "All forms use label icons (User, Stethoscope, MapPin, etc.)"
         ]
       },
       {
-        "title": "\ud83d\udd27 Improvements",
+        "title": "🔧 Improvements",
         "items": [
           "CustomerForm wrapper now uses modal-container CSS classes for mobile support",
           "Customers page uses modal-container for edit/create modals",
-          "EditAppointmentModal search placeholder \u2192 Vietnamese",
-          "Appointments page labels \u2192 Vietnamese (stats, tabs, placeholders)",
-          "All form buttons use consistent 'H\u1ee7y b\u1ecf' / action label pattern"
+          "EditAppointmentModal search placeholder → Vietnamese",
+          "Appointments page labels → Vietnamese (stats, tabs, placeholders)",
+          "All form buttons use consistent 'Hủy bỏ' / action label pattern"
         ]
       }
     ]
@@ -1223,20 +1267,20 @@
     "version": "0.3.1",
     "date": "Apr 8, 2026",
     "commit": "a865479c",
-    "highlights": "\u2728 Simplified appointment statuses + Service catalog dropdown",
+    "highlights": "✨ Simplified appointment statuses + Service catalog dropdown",
     "sections": [
       {
-        "title": "\u2728 New Features",
+        "title": "✨ New Features",
         "items": [
           "Service dropdown linked to product catalog (no more free text)",
-          "Th\u1eddigian d\u1ef1 ki\u1ebfn field for estimated appointment duration",
-          "Lo\u1ea1i kh\u00e1ch field: Kh\u00e1ch m\u1edbi / T\u00e1i kh\u00e1m"
+          "Thờigian dự kiến field for estimated appointment duration",
+          "Loại khách field: Khách mới / Tái khám"
         ]
       },
       {
-        "title": "\ud83d\udd27 Improvements",
+        "title": "🔧 Improvements",
         "items": [
-          "Simplified status options to 3 states: \u0110ang h\u1eb9n, \u0110\u00e3 \u0111\u1ebfn, H\u1ee7y h\u1eb9n",
+          "Simplified status options to 3 states: Đang hẹn, Đã đến, Hủy hẹn",
           "Updated TodayAppointments labels to Vietnamese"
         ]
       }
@@ -1246,10 +1290,10 @@
     "version": "0.3.0",
     "date": "Apr 8, 2026",
     "commit": "a865479b",
-    "highlights": "\ud83d\udd10 Customer View All permission + X button to close release notes",
+    "highlights": "🔐 Customer View All permission + X button to close release notes",
     "sections": [
       {
-        "title": "\u2728 New Features",
+        "title": "✨ New Features",
         "items": [
           "customers.view.all permission - Admin can view all customers without typing",
           "Non-admin users must type 3+ characters to search customers",
@@ -1258,7 +1302,7 @@
         ]
       },
       {
-        "title": "\ud83d\udd27 Improvements",
+        "title": "🔧 Improvements",
         "items": [
           "Added X button to close 'New in this version' popup",
           "Dismissed notes stay hidden until next version update",
@@ -1271,10 +1315,10 @@
     "version": "0.2.0",
     "date": "Apr 8, 2026",
     "commit": "a865479a",
-    "highlights": "\ud83d\udcdd Release Notes popup - Click version badge to see what's new!",
+    "highlights": "📝 Release Notes popup - Click version badge to see what's new!",
     "sections": [
       {
-        "title": "\u2728 New Features",
+        "title": "✨ New Features",
         "items": [
           "Inline release notes preview below version badge",
           "Click to open full release notes modal",
@@ -1285,7 +1329,7 @@
         ]
       },
       {
-        "title": "\ud83d\udd27 Improvements",
+        "title": "🔧 Improvements",
         "items": [
           "Fixed tooltip hover behavior - now click to toggle",
           "Click outside to close tooltip",
@@ -1298,10 +1342,10 @@
     "version": "0.1.9",
     "date": "Apr 8, 2026",
     "commit": "ad993488",
-    "highlights": "\u2728 Bidirectional hover linking between Patient Check-in and Today's Appointments",
+    "highlights": "✨ Bidirectional hover linking between Patient Check-in and Today's Appointments",
     "sections": [
       {
-        "title": "\u2728 New Features",
+        "title": "✨ New Features",
         "items": [
           "Hover on Patient Check-in card highlights matching appointment in Today's Appointments",
           "Hover on Today's Appointments highlights corresponding Patient Check-in card",
@@ -1311,7 +1355,7 @@
         ]
       },
       {
-        "title": "\ud83d\udd27 Improvements",
+        "title": "🔧 Improvements",
         "items": [
           "Fixed VPS deployment configuration",
           "Added API proxy to nginx config",
@@ -1324,10 +1368,10 @@
     "version": "0.1.8",
     "date": "Apr 8, 2026",
     "commit": "eaf7a4f0",
-    "highlights": "\ud83d\udc1b Fixed React error #310 - Version display hooks issue",
+    "highlights": "🐛 Fixed React error #310 - Version display hooks issue",
     "sections": [
       {
-        "title": "\ud83d\udc1b Bug Fixes",
+        "title": "🐛 Bug Fixes",
         "items": [
           "Fixed React hooks error causing blank page on VPS",
           "Removed unused variables in useVersionCheck hook",
@@ -1340,10 +1384,10 @@
     "version": "0.1.7",
     "date": "Apr 7, 2026",
     "commit": "585a5b4d",
-    "highlights": "\ud83c\udf0d Added timezone support and VPS deployment",
+    "highlights": "🌍 Added timezone support and VPS deployment",
     "sections": [
       {
-        "title": "\u2728 New Features",
+        "title": "✨ New Features",
         "items": [
           "Global timezone selector in Settings",
           "Timezone-aware appointment scheduling",
@@ -1351,7 +1395,7 @@
         ]
       },
       {
-        "title": "\ud83d\udd27 Infrastructure",
+        "title": "🔧 Infrastructure",
         "items": [
           "Docker Compose setup for frontend + backend + DB",
           "Nginx reverse proxy configuration",
@@ -1364,10 +1408,10 @@
     "version": "0.1.6",
     "date": "Apr 6, 2026",
     "commit": "d2c4a8f2",
-    "highlights": "\ud83d\udd04 Auto-update system - No more hard refresh needed!",
+    "highlights": "🔄 Auto-update system - No more hard refresh needed!",
     "sections": [
       {
-        "title": "\u2728 New Features",
+        "title": "✨ New Features",
         "items": [
           "Automatic update detection every 5 minutes",
           "Update notification in sidebar footer",
@@ -1381,10 +1425,10 @@
     "version": "0.1.5",
     "date": "Apr 5, 2026",
     "commit": "b8e7c1d9",
-    "highlights": "\ud83d\udcf1 Overview dashboard with 3-zone layout",
+    "highlights": "📱 Overview dashboard with 3-zone layout",
     "sections": [
       {
-        "title": "\u2728 New Features",
+        "title": "✨ New Features",
         "items": [
           "Zone 1: Patient Check-in / Reception",
           "Zone 2: Today's Services / Activity table",
