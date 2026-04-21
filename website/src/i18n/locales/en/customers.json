@@ -244,5 +244,17 @@
   "attachments": "Attachments",
   "faceId": "Face ID",
   "quickAdd": "Quick Add",
-  "noFaceRecognized": "No face recognized"
+  "noFaceRecognized": "No face recognized",
+  "validation": {
+    "phoneInUse": "This phone number is already in use.",
+    "emailInUse": "This email is already in use.",
+    "cannotVerify": "Unable to verify. Please try again."
+  },
+  "errors": {
+    "saveFailedTitle": "Error saving data"
+  },
+  "faceRecognition": {
+    "registerFailed": "Face registration failed",
+    "recognizeFailed": "Face recognition failed"
+  }
 }

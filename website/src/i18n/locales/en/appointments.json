@@ -3,6 +3,11 @@
   "list": "Appointment List",
   "addAppointment": "Add Appointment",
   "editAppointment": "Edit Appointment",
+  "createTitle": "Add Appointment",
+  "createSubtitle": "Create a new appointment for patient",
+  "editTitle": "Edit Appointment",
+  "editSubtitle": "Update appointment details",
+  "createAppointment": "Create Appointment",
   "searchPlaceholder": "Search appointments...",
   "phase": {
     "scheduled": "Scheduled",
@@ -49,7 +54,9 @@
     "patient": "Patient",
     "selectStatus": "Select status",
     "selectAssistant": "Select assistant...",
-    "selectDoctorAssistant": "Select doctor assistant..."
+    "selectDoctorAssistant": "Select doctor assistant...",
+    "selectDentalAide": "Select dental aide...",
+    "selectService": "Select Service..."
   },
   "checkIn": {
     "title": "Check In",

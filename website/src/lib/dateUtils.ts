@@ -58,8 +58,33 @@ export function getTodayInTimezone(timezone: string): string {
   return `${parts.year}-${parts.month}-${parts.day}`;
 }
 
-const DEFAULT_ICT_TIMEZONE = 'Asia/Ho_Chi_Minh';
 const YYYY_MM_DD_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Extract YYYY-MM-DD from a date string, handling ISO timestamps correctly.
+ * For ISO timestamps (e.g. "2026-04-17T17:00:00.000Z"), extracts the UTC date
+ * to avoid timezone shifting.
+ */
+export function toISODateString(date: string | Date | null | undefined): string {
+  if (!date) return '';
+
+  const dateStr = typeof date === 'string' ? date : date.toISOString();
+
+  // If it's already a clean YYYY-MM-DD, return as-is
+  if (YYYY_MM_DD_RE.test(dateStr)) return dateStr;
+
+  // If it contains 'T', it's an ISO timestamp — extract UTC parts
+  if (dateStr.includes('T')) {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    const year = d.getUTCFullYear();
+    const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  return '';
+}
 
 /**
  * Format a date in the specified timezone

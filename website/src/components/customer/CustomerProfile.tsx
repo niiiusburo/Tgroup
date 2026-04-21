@@ -5,8 +5,7 @@ import {
   Trash2, ChevronDown, Coins, Wallet, HandCoins, User } from
 'lucide-react';
 import { CustomerDeposits } from '@/components/payment/CustomerDeposits';
-import { AppointmentForm, type AppointmentFormData } from '@/components/appointments/AppointmentForm';
-import type { UnifiedAppointmentFormData } from '@/components/appointments/unified';
+import { AppointmentFormShell, apiAppointmentToFormData } from '@/components/appointments/unified';
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { PaymentForm, type PaymentFormData } from '@/components/payment/PaymentForm';
 import { PaymentSourceBadges } from '@/components/payment/PaymentSourceBadges';
@@ -44,8 +43,8 @@ interface CustomerProfileProps {
   readonly onDeleteDeposit?: (id: string) => Promise<void>;
   readonly onEditDeposit?: (id: string, data: Partial<{amount: number;method: 'cash' | 'bank_transfer';notes: string;paymentDate: string;}>) => Promise<void>;
   readonly onRefreshDeposits?: () => void;
-  readonly onCreateAppointment?: (data: AppointmentFormData) => Promise<void>;
-  readonly onUpdateAppointment?: (id: string, data: AppointmentFormData) => Promise<void>;
+  readonly onCreateAppointment?: () => void | Promise<void>;
+  readonly onUpdateAppointment?: () => void | Promise<void>;
   readonly onCreateService?: (data: {
     catalogItemId: string;
     serviceName: string;
@@ -609,45 +608,40 @@ export function CustomerProfile({
       }
 
       {/* Appointment Modal */}
-      {showAppointmentModal && (onCreateAppointment || editingAppointment && onUpdateAppointment) &&
-      <AppointmentForm
-        isEdit={!!editingAppointment}
-        initialData={editingAppointment ? {
-          customerId: profile.id,
-          customerName: profile.name,
-          customerPhone: profile.phone,
-          doctorId: editingAppointment.doctorid ?? undefined,
-          locationId: editingAppointment.companyid ?? undefined,
-          serviceName: editingAppointment.name ?? '',
-          date: editingAppointment.date,
-          startTime: editingAppointment.time ?? '',
-          endTime: '',
-          notes: editingAppointment.note ?? ''
-        } : {
-          customerId: profile.id,
-          customerName: profile.name,
-          customerPhone: profile.phone,
-          locationId: profile.companyId
-        }}
-        onSubmit={async (data) => {
-          try {
-            if (editingAppointment && onUpdateAppointment) {
-              await onUpdateAppointment(editingAppointment.id, data);
-            } else if (onCreateAppointment) {
-              await onCreateAppointment(data);
-            }
+      {showAppointmentModal && (onCreateAppointment || editingAppointment && onUpdateAppointment) && (
+        <AppointmentFormShell
+          mode={editingAppointment ? 'edit' : 'create'}
+          isOpen={showAppointmentModal}
+          onClose={() => {
             setShowAppointmentModal(false);
             setEditingAppointment(null);
-          } catch (error) {
-            console.error('Failed to save appointment:', error);
+          }}
+          onSuccess={async () => {
+            try {
+              if (editingAppointment && onUpdateAppointment) {
+                await onUpdateAppointment();
+              } else if (onCreateAppointment) {
+                await onCreateAppointment();
+              }
+              setShowAppointmentModal(false);
+              setEditingAppointment(null);
+            } catch (error) {
+              console.error('Failed to save appointment:', error);
+            }
+          }}
+          initialData={
+            editingAppointment
+              ? apiAppointmentToFormData(editingAppointment)
+              : {
+                  customerId: profile.id,
+                  customerName: profile.name,
+                  customerPhone: profile.phone,
+                  locationId: profile.companyId,
+                }
           }
-        }}
-        onClose={() => {
-          setShowAppointmentModal(false);
-          setEditingAppointment(null);
-        }} />
-
-      }
+          customerReadOnly
+        />
+      )}
 
       {/* Service Modal */}
       {showServiceModal && onCreateService &&

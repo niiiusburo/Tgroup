@@ -50,6 +50,8 @@ async function assertNoValidationError(page: Page) {
 }
 
 async function saveAddForm(page: Page) {
+  // Wait for any uniqueness checks (phone/email) to finish — debounce 400ms + API latency
+  await page.waitForTimeout(1500);
   await assertNoApiError(page);
   const { isDisabled } = await getSaveButtonState(page, /^Lưu$/);
   if (isDisabled) {

@@ -28,7 +28,7 @@ export function login(email: string, password: string) {
 }
 
 export function fetchMe() {
-  return apiFetch<LoginResponse>('/auth/me');
+  return apiFetch<LoginResponse>('/Auth/me');
 }
 
 export function changePassword(oldPassword: string, newPassword: string) {

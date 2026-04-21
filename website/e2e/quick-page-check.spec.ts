@@ -12,7 +12,7 @@ const PAGES = [
 
 for (const pg of PAGES) {
   test(`${pg.label} (${pg.path}) - accessible`, async ({ page }) => {
-    await page.goto(`http://localhost:5174${pg.path}`);
+    await page.goto(`http://localhost:5175${pg.path}`);
     await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {});
     
     const denied = await page.getByText('Access Denied').isVisible().catch(() => false);

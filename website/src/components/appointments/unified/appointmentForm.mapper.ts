@@ -31,7 +31,7 @@ export function formDataToApiPayload(
     date: data.date,
     time: data.startTime,
     note: data.notes,
-    timeexpected: data.estimatedDuration ?? 30,
+    timeexpected: (data.estimatedDuration && data.estimatedDuration > 0) ? data.estimatedDuration : 30,
     color: data.color ?? '1',
     state: data.status ?? 'scheduled',
     productid: data.serviceId,

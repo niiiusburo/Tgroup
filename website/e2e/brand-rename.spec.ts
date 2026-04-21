@@ -2,12 +2,12 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Brand Rename: TDental -> TG Clinic', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5174/login');
+    await page.goto('http://localhost:5175/login');
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
     });
-    await page.goto('http://localhost:5174/login');
+    await page.goto('http://localhost:5175/login');
   });
 
   test('login page title contains TG Clinic', async ({ page }) => {

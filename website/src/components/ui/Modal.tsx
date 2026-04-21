@@ -36,7 +36,7 @@ export function Modal({
       {/* Modal content */}
       <div
         className={cn(
-          'relative bg-white rounded-3xl shadow-2xl w-full overflow-hidden',
+          'relative bg-white rounded-2xl shadow-2xl w-full overflow-hidden',
           'flex flex-col',
           'animate-in fade-in zoom-in-95 duration-200',
           className

@@ -132,7 +132,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
                     value={oldPassword}
                     onChange={(e) => setOldPassword(e.target.value)}
                     placeholder={t('changePassword.currentPasswordPlaceholder')}
-                    className="w-full px-4 py-2.5 pr-10 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all text-sm" />
+                    className="w-full px-4 py-2.5 pr-10 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
                   <button
                     type="button"
                     onClick={() => setShowOld((v) => !v)}
@@ -153,7 +153,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder={t('changePassword.newPasswordPlaceholder')}
-                    className="w-full px-4 py-2.5 pr-10 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all text-sm" />
+                    className="w-full px-4 py-2.5 pr-10 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
                   <button
                     type="button"
                     onClick={() => setShowNew((v) => !v)}
@@ -174,7 +174,7 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder={t('changePassword.confirmPasswordPlaceholder')}
-                    className="w-full px-4 py-2.5 pr-10 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all text-sm" />
+                    className="w-full px-4 py-2.5 pr-10 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
                   <button
                     type="button"
                     onClick={() => setShowConfirm((v) => !v)}

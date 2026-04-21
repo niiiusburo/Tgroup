@@ -11,8 +11,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  CalendarPlus,
-  Edit2,
   Calendar,
   Clock,
   User,
@@ -35,12 +33,10 @@ import { AddCustomerForm } from '@/components/forms/AddCustomerForm/AddCustomerF
 import { useCustomers } from '@/hooks/useCustomers';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
-import { useProducts } from '@/hooks/useProducts';
 import { useLocationFilter } from '@/contexts/LocationContext';
-import { useTimezone } from '@/contexts/TimezoneContext';
 import { APPOINTMENT_CARD_COLORS, APPOINTMENT_STATUS_OPTIONS } from '@/constants';
 import type { AppointmentType } from '@/constants';
-import type { Customer } from '@/types/customer';
+import type { Customer, CustomerFormData } from '@/types/customer';
 import type { Employee } from '@/types/employee';
 import type { Product } from '@/hooks/useProducts';
 
@@ -68,7 +64,7 @@ export function AppointmentFormCore({
 }: AppointmentFormCoreProps) {
   const { t } = useTranslation();
   const { allLocations } = useLocations();
-  const { customers } = useCustomers();
+  const { customers, createCustomer } = useCustomers();
   const { employees } = useEmployees();
   const { selectedLocationId } = useLocationFilter();
 
@@ -77,11 +73,6 @@ export function AppointmentFormCore({
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
 
   const isEdit = mode === 'edit';
-  const titleIcon = isEdit ? <Edit2 className="w-5 h-5" /> : <CalendarPlus className="w-5 h-5" />;
-  const titleText = isEdit ? t('appointments:editTitle') : t('appointments:createTitle');
-  const subtitleText = isEdit
-    ? t('appointments:editSubtitle')
-    : t('appointments:createSubtitle');
 
   // ─── Handlers ───────────────────────────────────────────────────
 
@@ -147,22 +138,11 @@ export function AppointmentFormCore({
 
   return (
     <div className="modal-body space-y-5">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-2">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-400 flex items-center justify-center text-white shadow-lg">
-          {titleIcon}
-        </div>
-        <div>
-          <h2 className="text-lg font-bold text-gray-900">{titleText}</h2>
-          <p className="text-xs text-gray-500">{subtitleText}</p>
-        </div>
-      </div>
-
       {/* Customer */}
       <div>
         <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
           <User className="w-3.5 h-3.5" />
-          {t('appointments:customer')}
+          {t('appointments:form.customer')}
         </label>
         {customerReadOnly ? (
           <div className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700">
@@ -184,14 +164,14 @@ export function AppointmentFormCore({
                   const customer = customers.find((c) => c.id === customerId);
                   if (customer) handleCustomerChange(customer);
                 }}
-                placeholder={t('appointments:selectCustomer')}
+                placeholder={t('appointments:form.selectCustomer')}
               />
             </div>
             <button
               type="button"
               onClick={() => setShowCreateCustomer(true)}
               className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-gray-600 transition-colors"
-              title={t('appointments:addNewCustomer')}
+              title={t('appointments:thmKhchHngMi', 'Thêm khách hàng mới')}
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -206,8 +186,9 @@ export function AppointmentFormCore({
       {showCreateCustomer && (
         <AddCustomerForm
           onCancel={() => setShowCreateCustomer(false)}
-          onSubmit={async () => {
-            // TODO: actually create customer via API
+          onSubmit={async (formData: CustomerFormData) => {
+            const created = await createCustomer(formData);
+            handleCustomerChange(created);
             setShowCreateCustomer(false);
           }}
         />
@@ -218,7 +199,7 @@ export function AppointmentFormCore({
         <div>
           <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
             <MapPin className="w-3.5 h-3.5" />
-            {t('appointments:location')}
+            {t('appointments:form.location')}
           </label>
           <LocationSelector
             locations={allLocations.map((l) => ({ id: l.id, name: l.name }))}
@@ -233,7 +214,7 @@ export function AppointmentFormCore({
         <div>
           <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
             <Calendar className="w-3.5 h-3.5" />
-            {t('appointments:date')}
+            {t('appointments:form.date')}
           </label>
           <DatePicker
             value={data.date}
@@ -247,7 +228,7 @@ export function AppointmentFormCore({
         <div>
           <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
             <Clock className="w-3.5 h-3.5" />
-            {t('appointments:startTime')}
+            {t('appointments:form.startTime')}
           </label>
           <TimePicker
             value={data.startTime}
@@ -261,7 +242,7 @@ export function AppointmentFormCore({
         <div>
           <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
             <Clock className="w-3.5 h-3.5" />
-            {t('appointments:endTime')}
+            {t('appointments:form.endTime')}
           </label>
           <input
             type="text"
@@ -280,26 +261,28 @@ export function AppointmentFormCore({
         <div>
           <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
             <Stethoscope className="w-3.5 h-3.5" />
-            {t('appointments:doctor')}
+            {t('appointments:form.doctor')}
           </label>
           <DoctorSelector
             employees={employees}
             selectedId={data.doctorId || null}
+            filterRoles={['doctor']}
             onChange={(employeeId) => {
               const emp = employees.find((e) => e.id === employeeId);
               handleDoctorChange(emp || null);
             }}
-            placeholder={t('appointments:selectDoctor')}
+            placeholder={t('appointments:form.selectDoctor')}
           />
         </div>
 
         <div>
           <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            {t('appointments:assistant')}
+            {t('appointments:form.assistant')}
           </label>
           <DoctorSelector
             employees={employees}
             selectedId={data.assistantId || null}
+            filterRoles={['assistant']}
             onChange={(employeeId) => {
               const emp = employees.find((e) => e.id === employeeId);
               onChange({
@@ -307,17 +290,18 @@ export function AppointmentFormCore({
                 assistantName: emp?.name,
               });
             }}
-            placeholder={t('appointments:selectAssistant')}
+            placeholder={t('appointments:form.selectAssistant')}
           />
         </div>
 
         <div>
           <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            {t('appointments:dentalAide')}
+            {t('appointments:form.dentalAide')}
           </label>
           <DoctorSelector
             employees={employees}
             selectedId={data.dentalAideId || null}
+            filterRoles={['doctor-assistant']}
             onChange={(employeeId) => {
               const emp = employees.find((e) => e.id === employeeId);
               onChange({
@@ -325,7 +309,7 @@ export function AppointmentFormCore({
                 dentalAideName: emp?.name,
               });
             }}
-            placeholder={t('appointments:selectDentalAide')}
+            placeholder={t('appointments:form.selectDentalAide')}
           />
         </div>
       </div>
@@ -334,23 +318,23 @@ export function AppointmentFormCore({
       <div>
         <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
           <Stethoscope className="w-3.5 h-3.5" />
-          {t('appointments:service')}
+          {t('appointments:form.service')}
         </label>
           <ServiceCatalogSelector
             catalog={[]}
             selectedId={data.serviceId || null}
-            onChange={(itemId) => {
+            onChange={(_itemId) => {
               // TODO: look up service from catalog
               handleServiceChange(null);
             }}
-            placeholder={t('appointments:selectService')}
+            placeholder={t('appointments:form.selectService')}
           />
       </div>
 
       {/* Type pills */}
       <div>
         <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-          {t('appointments:type')}
+          {t('appointments:label.service')}
         </label>
         <div className="flex flex-wrap gap-2">
           {APPOINTMENT_TYPES.map((type) => (
@@ -364,7 +348,7 @@ export function AppointmentFormCore({
                   : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100'
               }`}
             >
-              {t(`calendar.appointmentTypes.${type}`)}
+              {t(`calendar:appointmentTypes.${type}`)}
             </button>
           ))}
         </div>
@@ -375,7 +359,7 @@ export function AppointmentFormCore({
         <div>
           <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
             <Clock className="w-3.5 h-3.5" />
-            {t('appointments:duration')}
+            {t('appointments:form.duration')}
           </label>
           <input
             type="number"
@@ -385,12 +369,15 @@ export function AppointmentFormCore({
             onChange={(e) => onChange({ estimatedDuration: Number(e.target.value) })}
             className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400"
           />
+          {errors.estimatedDuration && (
+            <p className="text-xs text-red-500 mt-1">{errors.estimatedDuration}</p>
+          )}
         </div>
 
         <div className="relative">
           <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
             <Palette className="w-3.5 h-3.5" />
-            {t('appointments:color')}
+            {t('appointments:label.cardColor')}
           </label>
           <button
             type="button"
@@ -424,7 +411,7 @@ export function AppointmentFormCore({
         {isEdit && (
           <div className="relative">
             <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              {t('appointments:status')}
+              {t('appointments:form.status')}
             </label>
             <button
               type="button"
@@ -460,14 +447,14 @@ export function AppointmentFormCore({
       <div>
         <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
           <FileText className="w-3.5 h-3.5" />
-          {t('appointments:notes')}
+          {t('appointments:form.notes')}
         </label>
         <textarea
           value={data.notes}
           onChange={(e) => onChange({ notes: e.target.value })}
           rows={3}
           className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 resize-none"
-          placeholder={t('appointments:notesPlaceholder')}
+          placeholder={t('appointments:form.enterNotes')}
         />
       </div>
     </div>

@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Local Timezone Verification', () => {
   test('Settings page has Timezone selector', async ({ page }) => {
     // Navigate to login
-    await page.goto('http://localhost:5174/login');
+    await page.goto('http://localhost:5175/login');
     
     // Login (dev mode accepts any credentials)
     await page.fill('input#email', 'tg@clinic.vn');
@@ -38,7 +38,7 @@ test.describe('Local Timezone Verification', () => {
 
   test('Calendar and Overview show same date', async ({ page }) => {
     // Login
-    await page.goto('http://localhost:5174/login');
+    await page.goto('http://localhost:5175/login');
     await page.fill('input#email', 'tg@clinic.vn');
     await page.fill('input#password', 'admin123');
     await page.click('button[type="submit"]');

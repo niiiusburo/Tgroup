@@ -21,7 +21,7 @@ const PAGES = [
 
 test.describe('Audit verification — all pages load after login', () => {
   test('login succeeds and dashboard renders', async ({ page }) => {
-    await page.goto('http://localhost:5174/login');
+    await page.goto('http://localhost:5175/login');
 
     const emailInput = page.locator('#email');
     await expect(emailInput).toBeVisible({ timeout: 10_000 });
@@ -60,7 +60,7 @@ test.describe('Audit verification — all pages load after login', () => {
         await navLink.click();
       } else {
         // Fallback: direct navigation
-        await page.goto(`http://localhost:5174${pg.path}`);
+        await page.goto(`http://localhost:5175${pg.path}`);
       }
 
       // Wait for network idle
@@ -100,7 +100,7 @@ test.describe('Audit verification — all pages load after login', () => {
     });
 
     for (const pg of PAGES) {
-      await page.goto(`http://localhost:5174${pg.path}`, { waitUntil: 'networkidle' }).catch(() => {});
+      await page.goto(`http://localhost:5175${pg.path}`, { waitUntil: 'networkidle' }).catch(() => {});
       await page.waitForTimeout(2000);
     }
 
@@ -120,7 +120,7 @@ test.describe('Audit verification — all pages load after login', () => {
   });
 
   test('sidebar navigation items match routes', async ({ page }) => {
-    await page.goto('http://localhost:5174');
+    await page.goto('http://localhost:5175');
     await expect(page.locator('#email')).toBeHidden({ timeout: 10_000 });
     await page.waitForLoadState('networkidle');
 

@@ -6,7 +6,7 @@
  */
 import { test, expect, type Page } from '@playwright/test';
 
-const BASE = 'http://localhost:5174';
+const BASE = 'http://localhost:5175';
 const TEST_NAME = 'TDD Save Test ' + Date.now();
 const TEST_PHONE = '09' + Math.floor(10000000 + Math.random() * 90000000);
 

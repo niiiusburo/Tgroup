@@ -417,19 +417,19 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
   // Reflect duplicate status into field errors; clear on unique verdict
   useEffect(() => {
     if (phoneCheck.status === 'duplicate' && phoneCheck.message) {
-      setError('phone', phoneCheck.message);
+      setError('phone', t(phoneCheck.message));
     } else if (phoneCheck.status === 'unique') {
       clearError('phone');
     }
-  }, [phoneCheck.status, phoneCheck.message, setError, clearError]);
+  }, [phoneCheck.status, phoneCheck.message, setError, clearError, t]);
 
   useEffect(() => {
     if (emailCheck.status === 'duplicate' && emailCheck.message) {
-      setError('email', emailCheck.message);
+      setError('email', t(emailCheck.message));
     } else if (emailCheck.status === 'unique') {
       clearError('email');
     }
-  }, [emailCheck.status, emailCheck.message, setError, clearError]);
+  }, [emailCheck.status, emailCheck.message, setError, clearError, t]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {

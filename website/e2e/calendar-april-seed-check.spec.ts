@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('calendar shows appointments April 8-12', async ({ page }) => {
-  await page.goto('http://localhost:5174/calendar');
+  await page.goto('http://localhost:5175/calendar');
   await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {});
   await page.waitForTimeout(2000);
 

@@ -1,12 +1,11 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { X, Edit2, CalendarPlus, FileText, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
-import type { CustomerFormData } from '@/data/mockCustomerForm';
-import { FaceCaptureModal } from '@/components/shared/FaceCaptureModal';
-import { TABS } from './constants';
-import { CardSection } from './CardSection';
-
 /**
+ * AddCustomerForm - TG Clinic "Thêm khách hàng" modular card-based form
+ * Supports both create and edit modes.
+ *
+ * NOW USES FormShell module for unified modal structure.
+ *
+ * @crossref:used-in[Customers]
+ *
  * ╔══════════════════════════════════════════════════════════════════════════════════════╗
  * ║                    ⛔  D O   N O T   T O U C H   T H I S   M O D U L E  ⛔          ║
  * ╠══════════════════════════════════════════════════════════════════════════════════════╣
@@ -26,64 +25,18 @@ import { CardSection } from './CardSection';
  * ╚══════════════════════════════════════════════════════════════════════════════════════╝
  */
 
-/**
- * AddCustomerForm - TG Clinic "Thêm khách hàng" modular card-based form
- * Supports both create and edit modes.
- * @crossref:used-in[Customers]
- */
-
-import { useAddCustomerForm, type ApiErrorDetail } from './useAddCustomerForm';
-
-function ApiErrorPanel({ detail, onDismiss }: {detail: ApiErrorDetail;onDismiss: () => void;}) {
-  const [showRaw, setShowRaw] = useState(false);
-  const { t } = useTranslation('customers');
-  return (
-    <div className="mx-6 mt-4 bg-red-50 border border-red-200 rounded-lg p-4 text-sm flex-shrink-0">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-start gap-2 flex-1 min-w-0">
-          <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-red-700">{t('liLuDLiu')}</p>
-            <p className="text-red-600 mt-1 break-words">{detail.message}</p>
-            {detail.detail &&
-            <p className="text-red-500 mt-1 break-words">{detail.detail}</p>
-            }
-            {detail.field &&
-            <p className="text-red-500 mt-1"><code className="bg-red-100 px-1 rounded">{detail.field}</code></p>
-            }
-            {detail.hint &&
-            <p className="text-orange-600 mt-1">{detail.hint}</p>
-            }
-            <button
-              type="button"
-              onClick={() => setShowRaw(!showRaw)}
-              className="flex items-center gap-1 mt-2 text-xs text-red-400 hover:text-red-600">
-              
-              {showRaw ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-              Technical Details
-            </button>
-            {showRaw &&
-            <pre className="mt-1 p-2 bg-red-100/50 rounded text-xs text-red-700 overflow-x-auto max-h-32 overflow-y-auto">
-                {detail.status && <span>Status: {detail.status}
-</span>}
-                {detail.code && <span>Code: {detail.code}
-</span>}
-                {JSON.stringify(detail.raw, null, 2)}
-              </pre>
-            }
-          </div>
-        </div>
-        <button type="button" onClick={onDismiss} className="text-red-400 hover:text-red-600 flex-shrink-0">
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-    </div>);
-
-}
+import { useAddCustomerForm } from './useAddCustomerForm';
+import { FaceCaptureModal } from '@/components/shared/FaceCaptureModal';
+import { FormShell, FormHeader } from '@/components/modules/FormShell';
+import { TABS } from './constants';
 import { LeftPanel } from './LeftPanel';
 import { BasicInfoTab } from './BasicInfoTab';
 import { MedicalTab } from './MedicalTab';
 import { EInvoiceTab } from './EInvoiceTab';
+import { CardSection } from './CardSection';
+import { FileText, Edit2, CalendarPlus } from 'lucide-react';
+import type { CustomerFormData } from '@/data/mockCustomerForm';
+
 export interface AddCustomerFormProps {
   readonly initialData?: Partial<CustomerFormData>;
   readonly customerRef?: string | null;
@@ -95,121 +48,110 @@ export interface AddCustomerFormProps {
   readonly canEdit?: boolean;
 }
 
-
 export function AddCustomerForm(props: AddCustomerFormProps) {
   const formApi = useAddCustomerForm(props);
   const {
     t, isEdit, customerId, formData, set, activeTab, setActiveTab, isSubmitting,
     showRegisterModal, setShowRegisterModal, register, handleSubmit, onCancel,
-    phoneCheck, emailCheck, apiErrorDetail, setApiErrorDetail
+    phoneCheck, emailCheck, apiErrorDetail
   } = formApi;
+
+  const isSubmitDisabled =
+    isSubmitting ||
+    phoneCheck.status === 'checking' ||
+    phoneCheck.status === 'duplicate' ||
+    emailCheck.status === 'checking' ||
+    emailCheck.status === 'duplicate';
+
   return (
-    <div className="flex flex-col bg-gray-50/50 overflow-hidden flex-1" onWheel={(e) => e.stopPropagation()}>
-      {/* ═══════════════════════════════════════════════════════════════════════════════
-           HEADER — Appointment module style (icon + title + subtitle)
-          ═══════════════════════════════════════════════════════════════════════════════ */}
-      <div className="relative px-6 py-5 bg-primary flex-shrink-0">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
-        <div className="relative flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/20 rounded-xl">
-              {isEdit ?
-              <Edit2 className="w-5 h-5 text-white" /> :
+    <FormShell onClose={onCancel} maxWidth="4xl" className="max-h-[85vh]">
+      <FormHeader
+        title={isEdit ? t('editCustomer') : t('addCustomer')}
+        subtitle={isEdit ? t('subtitle.edit', 'Cập nhật thông tin hồ sơ bệnh nhân') : t('subtitle.create', 'Tạo hồ sơ bệnh nhân mới')}
+        icon={isEdit ? <Edit2 className="w-5 h-5 text-white" /> : <CalendarPlus className="w-5 h-5 text-white" />}
+        onClose={onCancel}
+        isEdit={isEdit}
+      />
 
-              <CalendarPlus className="w-5 h-5 text-white" />
-              }
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-white">
-                {isEdit ? t('editCustomer') : t('addCustomer')}
-              </h2>
-              <p className="text-sm text-orange-100 mt-0.5">
-                {isEdit ? t('subtitle.edit', 'Cập nhật thông tin hồ sơ bệnh nhân') : t('subtitle.create', 'Tạo hồ sơ bệnh nhân mới')}
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors">
-            
-            <X className="w-5 h-5 text-white" />
-          </button>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit} className="flex flex-1 min-h-0 overflow-hidden">
+      <form onSubmit={handleSubmit} className="flex flex-1 min-h-0 overflow-hidden" onWheel={(e) => e.stopPropagation()}>
         <LeftPanel formApi={formApi} />
-        {/* ══ RIGHT PANEL ═══════════════════════════════════════════════════════════ */}
+
+        {/* RIGHT PANEL */}
         <div className="flex-1 flex flex-col overflow-hidden bg-white">
           {/* Tabs */}
           <div className="flex border-b border-gray-200 flex-shrink-0 px-6 bg-gray-50/30">
-            {TABS.map((tab) =>
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-4 text-sm font-medium border-b-2 transition-all -mb-px ${
-              activeTab === tab.id ?
-              'border-orange-500 text-orange-600' :
-              'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-              }>
-              
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-6 py-4 text-sm font-medium border-b-2 transition-all -mb-px ${
+                  activeTab === tab.id
+                    ? 'border-orange-500 text-orange-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
                 {t(tab.labelKey)}
               </button>
-            )}
+            ))}
           </div>
 
           {/* API Error Detail Panel */}
-          {apiErrorDetail &&
-          <ApiErrorPanel detail={apiErrorDetail} onDismiss={() => setApiErrorDetail(null)} />
-          }
+          {apiErrorDetail && (
+            <div className="mx-6 mt-4">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm">
+                <p className="font-semibold text-red-700">{t('errors.saveFailedTitle', 'Lỗi lưu dữ liệu')}</p>
+                <p className="text-red-600 mt-1">{apiErrorDetail.message}</p>
+                {apiErrorDetail.detail && (
+                  <p className="text-red-500 mt-1">{apiErrorDetail.detail}</p>
+                )}
+                {apiErrorDetail.field && (
+                  <p className="text-red-500 mt-1">
+                    <code className="bg-red-100 px-1 rounded">{apiErrorDetail.field}</code>
+                  </p>
+                )}
+                {apiErrorDetail.hint && (
+                  <p className="text-orange-600 mt-1">{apiErrorDetail.hint}</p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Tab content */}
           <div className="flex-1 overflow-y-auto overscroll-contain px-8 py-6 custom-scrollbar">
-            {activeTab === 'basic' &&
-            <>
+            {activeTab === 'basic' && (
+              <>
                 <BasicInfoTab formApi={formApi} />
-                {/* Notes — moved from left panel for better balance */}
+                {/* Notes */}
                 <CardSection title={t('form.notes')} icon={FileText} maxHeight="180px">
                   <textarea
-                  value={formData.note}
-                  onChange={(e) => set('note', e.target.value)}
-                  placeholder={t('notesPlaceholder', 'Ghi chú về khách hàng...')}
-                  rows={3}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary resize-none transition-all hover:border-gray-300" />
-                
+                    value={formData.note}
+                    onChange={(e) => set('note', e.target.value)}
+                    placeholder={t('notesPlaceholder', 'Ghi chú về khách hàng...')}
+                    rows={3}
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary resize-none transition-all hover:border-gray-300"
+                  />
                 </CardSection>
               </>
-            }
-            {activeTab === 'medical' &&
-            <MedicalTab formApi={formApi} />
-            }
-            {activeTab === 'einvoice' &&
-            <EInvoiceTab formApi={formApi} />
-            }
+            )}
+            {activeTab === 'medical' && <MedicalTab formApi={formApi} />}
+            {activeTab === 'einvoice' && <EInvoiceTab formApi={formApi} />}
           </div>
 
-          {/* Footer */}
+          {/* Footer - Custom for AddCustomerForm due to special submit disabled logic */}
           <div className="px-6 py-5 border-t border-gray-200 flex-shrink-0 bg-gray-50 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onCancel}
-              className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
-              
+              className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
+            >
               {t('close', 'Close')}
             </button>
             <button
               type="submit"
-              disabled={
-              isSubmitting ||
-              phoneCheck.status === 'checking' ||
-              phoneCheck.status === 'duplicate' ||
-              emailCheck.status === 'checking' ||
-              emailCheck.status === 'duplicate'
-              }
-              className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
-              
+              disabled={isSubmitDisabled}
+              className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               {isSubmitting ? t('saving', 'Saving...') : isEdit ? t('update', 'Update') : t('save', 'Save')}
             </button>
           </div>
@@ -225,8 +167,8 @@ export function AddCustomerForm(props: AddCustomerFormProps) {
             await register(customerId, imageBlob);
           }
         }}
-        onCancel={() => setShowRegisterModal(false)} />
-      
-    </div>);
-
+        onCancel={() => setShowRegisterModal(false)}
+      />
+    </FormShell>
+  );
 }

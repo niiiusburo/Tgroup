@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Appointment Status Change Persistence', () => {
   test('should persist status change via API and survive page reload', async ({ page, request }) => {
     // Step 1: Login
-    await page.goto('http://localhost:5174/login');
+    await page.goto('http://localhost:5175/login');
     await page.waitForSelector('text=Sign In', { timeout: 10000 });
     await page.fill('input#email', 'admin@tamdentist.vn');
     await page.fill('input#password', '123456');
@@ -41,7 +41,7 @@ test.describe('Appointment Status Change Persistence', () => {
     expect(verifyData.state).toBe('done');
     
     // Step 5: Navigate to Overview and verify UI shows updated status
-    await page.goto('http://localhost:5174/');
+    await page.goto('http://localhost:5175/');
     await page.waitForTimeout(3000);
     await page.screenshot({ path: 'test-results/status-test-1-after-update.png', fullPage: true });
     
@@ -55,11 +55,11 @@ test.describe('Appointment Status Change Persistence', () => {
     expect(hasCompletionIndicator).toBe(true);
     
     // Step 6: Navigate away to Customers
-    await page.goto('http://localhost:5174/customers');
+    await page.goto('http://localhost:5175/customers');
     await page.waitForTimeout(3000);
     
     // Step 7: Come back to Overview
-    await page.goto('http://localhost:5174/');
+    await page.goto('http://localhost:5175/');
     await page.waitForTimeout(3000);
     await page.screenshot({ path: 'test-results/status-test-2-after-reload.png', fullPage: true });
     

@@ -19,7 +19,7 @@ const TIMESTAMP = Date.now();
 async function login(page: Page) {
   // Auth state is pre-loaded from .auth/admin.json (storageState in playwright.config)
   // Just navigate to app — token in localStorage auto-authenticates
-  await page.goto('http://localhost:5174/');
+  await page.goto('http://localhost:5175/');
 
   // If login form appears (token expired), re-authenticate
   const emailInput = page.locator('#email');

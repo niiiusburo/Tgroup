@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Login and Settings Flow', () => {
   test('should login and show IP Access settings', async ({ page }) => {
     // Navigate to login
-    await page.goto('http://localhost:5174/login');
+    await page.goto('http://localhost:5175/login');
     
     // Verify login page
     await expect(page.locator('h1')).toContainText('TG Clinic');
@@ -43,7 +43,7 @@ test.describe('Login and Settings Flow', () => {
 
   test('should add IP entry and validate input', async ({ page }) => {
     // Login
-    await page.goto('http://localhost:5174/login');
+    await page.goto('http://localhost:5175/login');
     await page.fill('input#email', 'tg@clinic.vn');
     await page.fill('input#password', 'admin123');
     await page.click('button[type="submit"]');

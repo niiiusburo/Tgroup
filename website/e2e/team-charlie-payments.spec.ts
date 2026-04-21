@@ -22,7 +22,7 @@ const TIMESTAMP = Date.now();
 
 async function login(page: Page) {
   // Tests use storageState from auth-setup; auto-login is already handled
-  await page.goto('http://localhost:5174/');
+  await page.goto('http://localhost:5175/');
   await page.getByRole('link', { name: 'Customers' }).waitFor({ timeout: 15000 });
 }
 

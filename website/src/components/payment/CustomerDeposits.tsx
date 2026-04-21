@@ -59,8 +59,7 @@ export function CustomerDeposits({
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState<'deposits' | 'usage'>('deposits');
 
-  const [showDepositModal, setShowDepositModal] = useState(false);
-  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [modalMode, setModalMode] = useState<'deposit' | 'refund' | null>(null);
   const [editingTx, setEditingTx] = useState<DepositTransaction | null>(null);
 
   const [formAmount, setFormAmount] = useState('');
@@ -76,20 +75,12 @@ export function CustomerDeposits({
   const startRow = depositList.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const endRow = Math.min(page * PAGE_SIZE, depositList.length);
 
-  const openDepositModal = () => {
+  const openModal = (mode: 'deposit' | 'refund') => {
     setFormAmount('');
     setFormMethod('cash');
     setFormDate(getToday());
     setFormNote('');
-    setShowDepositModal(true);
-  };
-
-  const openRefundModal = () => {
-    setFormAmount('');
-    setFormMethod('cash');
-    setFormDate(getToday());
-    setFormNote('');
-    setShowRefundModal(true);
+    setModalMode(mode);
   };
 
   const openEditModal = (tx: DepositTransaction) => {
@@ -98,23 +89,18 @@ export function CustomerDeposits({
     setFormMethod(tx.method === 'cash' ? 'cash' : tx.method === 'bank_transfer' ? 'bank_transfer' : 'cash');
     setFormDate(tx.date);
     setFormNote(tx.note || '');
-    if (tx.type === 'refund') {
-      setShowRefundModal(true);
-    } else {
-      setShowDepositModal(true);
-    }
+    setModalMode(tx.type === 'refund' ? 'refund' : 'deposit');
   };
 
   const closeModals = () => {
-    setShowDepositModal(false);
-    setShowRefundModal(false);
+    setModalMode(null);
     setEditingTx(null);
     setFormAmount('');
     setFormNote('');
   };
 
   const handleSubmitDeposit = async () => {
-    if (!formAmount || !showDepositModal && !showRefundModal) return;
+    if (!formAmount || !modalMode) return;
     setSubmitting(true);
     try {
       const amt = parseFloat(formAmount);
@@ -125,9 +111,9 @@ export function CustomerDeposits({
           notes: formNote || undefined,
           paymentDate: formDate
         });
-      } else if (showRefundModal && onAddRefund) {
+      } else if (modalMode === 'refund' && onAddRefund) {
         await onAddRefund(amt, formMethod === 'vietqr' ? 'bank_transfer' : formMethod, formDate, formNote || undefined);
-      } else if (showDepositModal && onAddDeposit) {
+      } else if (modalMode === 'deposit' && onAddDeposit) {
         await onAddDeposit(amt, formMethod, formDate, formNote || undefined);
       }
       closeModals();
@@ -161,9 +147,9 @@ export function CustomerDeposits({
     }
   };
 
-  const renderDepositFormModal = (isRefund: boolean) => {
-    const isOpen = isRefund ? showRefundModal : showDepositModal;
-    if (!isOpen) return null;
+  const renderFormModal = () => {
+    const isRefund = modalMode === 'refund';
+    if (!modalMode) return null;
     const title = editingTx ? t('editDeposit') : isRefund ? t('refundDeposit') : t('addDeposit');
     return (
       <div className="modal-container">
@@ -177,7 +163,7 @@ export function CustomerDeposits({
                 type="date"
                 value={formDate}
                 onChange={(e) => setFormDate(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" />
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary" />
               
             </div>
 
@@ -257,7 +243,7 @@ export function CustomerDeposits({
                 value={formNote}
                 onChange={(e) => setFormNote(e.target.value)}
                 placeholder={t('enterNote', { ns: 'payment' })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" />
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary" />
               
             </div>
           </div>
@@ -277,7 +263,7 @@ export function CustomerDeposits({
             <button
               onClick={closeModals}
               disabled={submitting}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50">
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50">
               {t('hy')}
             </button>
             <button
@@ -372,7 +358,7 @@ export function CustomerDeposits({
             {activeTab === 'deposits' && (onAddDeposit || onAddRefund) &&
             <>
                 <button
-                onClick={openDepositModal}
+                onClick={() => openModal('deposit')}
                 disabled={loading}
                 className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50">
                 
@@ -381,9 +367,9 @@ export function CustomerDeposits({
               </button>
                 {onAddRefund &&
               <button
-                onClick={openRefundModal}
+                onClick={() => openModal('refund')}
                 disabled={loading}
-                className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50">
+                className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50">
                 {t('honTmNg')}
               </button>
               }
@@ -554,7 +540,7 @@ export function CustomerDeposits({
               <select
               value={PAGE_SIZE}
               disabled
-              className="px-2 py-1 text-xs border border-gray-300 rounded bg-white text-gray-600">
+              className="px-2 py-1 text-xs border border-gray-200 rounded-md bg-white text-gray-600">
               
                 <option value={20}>20</option>
               </select>
@@ -583,8 +569,7 @@ export function CustomerDeposits({
         }
       </div>
 
-      {renderDepositFormModal(false)}
-      {renderDepositFormModal(true)}
+      {renderFormModal()}
       <VietQrModal open={showVietQr} onClose={() => setShowVietQr(false)} defaultAmount={formAmount ? Number(formAmount) : undefined} />
     </div>);
 

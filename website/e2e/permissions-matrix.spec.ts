@@ -42,7 +42,7 @@ const USERS = {
  * Helper: Login with given credentials
  */
 async function login(page: Page, email: string, password: string) {
-  await page.goto('http://localhost:5174/login');
+  await page.goto('http://localhost:5175/login');
   // Wait for login form to render (use language-independent selector)
   const emailInput = page.locator('input#email');
   await expect(emailInput).toBeVisible({ timeout: 10000 });

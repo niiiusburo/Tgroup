@@ -2,13 +2,13 @@ import { test, expect } from '@playwright/test';
 
 test('TC-VQ1: Generate VietQR from customer payments tab', async ({ page }) => {
   // Start from base URL (already authenticated via storageState)
-  await page.goto('http://localhost:5174');
+  await page.goto('http://localhost:5175');
 
   // Wait for dashboard to load
   await expect(page.locator('h1', { hasText: 'Overview' })).toBeVisible({ timeout: 15000 });
 
   // Navigate to Customers page
-  await page.goto('http://localhost:5174/customers');
+  await page.goto('http://localhost:5175/customers');
   await expect(page.locator('h1', { hasText: 'Customers' }).first()).toBeVisible({ timeout: 15000 });
 
   // Click first customer row to open profile

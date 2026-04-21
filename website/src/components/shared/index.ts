@@ -3,7 +3,6 @@
 
 export { default as AddressAutocomplete } from './AddressAutocomplete';
 export { default as AddressAutocompleteTest } from './AddressAutocompleteTest';
-export { AppointmentFormModal } from './AppointmentFormModal';
 export { type Bank, BankSelector } from './BankSelector';
 export { ChangePasswordModal } from './ChangePasswordModal';
 export { default as ComboboxInput } from './ComboboxInput';

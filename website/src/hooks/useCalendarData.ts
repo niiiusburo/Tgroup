@@ -22,7 +22,7 @@ function toVnDate(dateStr: string): Date {
  * @crossref:used-in[Calendar]
  */
 export function useCalendarData(selectedLocationId?: string) {
-  const { formatDate, getToday, addDaysInTimezone, addMonthsInTimezone } = useTimezone();
+  const { formatDate, getToday, addDaysInTimezone, addMonthsInTimezone, timezone } = useTimezone();
   const [viewMode, setViewMode] = useState<ViewMode>('week');
   // Store current date as string in YYYY-MM-DD format for timezone consistency
   const [currentDateStr, setCurrentDateStr] = useState(() => getToday());

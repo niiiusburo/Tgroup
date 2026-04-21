@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('Permissions page loads for admin', async ({ page }) => {
-  await page.goto('http://localhost:5174/permissions');
+  await page.goto('http://localhost:5175/permissions');
   await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {});
   
   const header = await page.locator('header h1').textContent();

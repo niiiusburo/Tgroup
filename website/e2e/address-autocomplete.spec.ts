@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Address Autocomplete', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the customers page
-    await page.goto('http://localhost:5174/customers');
+    await page.goto('http://localhost:5175/customers');
     
     // Wait for the page to load
     await page.waitForLoadState('networkidle');
@@ -134,7 +134,7 @@ test.describe('Address Autocomplete', () => {
     });
     
     await page.reload();
-    await page.goto('http://localhost:5174/customers');
+    await page.goto('http://localhost:5175/customers');
     await page.waitForLoadState('networkidle');
     
     // Click "Add Customer" button

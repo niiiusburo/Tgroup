@@ -322,10 +322,10 @@ describe('useVersionCheck hook', () => {
     Object.defineProperty(window, 'location', {
       writable: true,
       value: {
-        href: 'http://localhost:5174/',
+        href: 'http://localhost:5175/',
         pathname: '/',
         search: '',
-        origin: 'http://localhost:5174',
+        origin: 'http://localhost:5175',
         replace: replaceFn,
         reload: vi.fn(),
       },
@@ -359,10 +359,10 @@ describe('useVersionCheck hook', () => {
     Object.defineProperty(window, 'location', {
       writable: true,
       value: {
-        href: 'http://localhost:5174/appointments?date=2026-04-13',
+        href: 'http://localhost:5175/appointments?date=2026-04-13',
         pathname: '/appointments',
         search: '?date=2026-04-13',
-        origin: 'http://localhost:5174',
+        origin: 'http://localhost:5175',
         replace: replaceFn,
         reload: vi.fn(),
       },

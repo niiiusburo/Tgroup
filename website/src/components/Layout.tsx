@@ -80,10 +80,11 @@ const NAV_PERMISSION: Record<string, string> = {
 interface SidebarItemProps {
   item: NavigationItem;
   expanded: boolean;
+  mobileMenuOpen?: boolean;
   onClick?: () => void;
 }
 
-function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
+function SidebarItem({ item, expanded, mobileMenuOpen, onClick }: SidebarItemProps) {
   const { t } = useTranslation('nav');
   const Icon = ICON_MAP[item.icon];
   const location = useLocation();
@@ -149,12 +150,12 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
   return (
     <div
       className="relative"
-      onMouseEnter={() => {cancelHide();setOpen(true);}}
-      onMouseLeave={scheduleHide}>
+      onMouseEnter={mobileMenuOpen ? undefined : () => {cancelHide();setOpen(true);}}
+      onMouseLeave={mobileMenuOpen ? undefined : scheduleHide}>
       
       <button
         type="button"
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => setOpen(mobileMenuOpen ? (prev) => !prev : true)}
         title={!expanded ? t(item.label) : undefined}
         className={`
           relative h-11 flex items-center rounded-xl
@@ -182,12 +183,17 @@ function SidebarItem({ item, expanded, onClick }: SidebarItemProps) {
 
       <div
         className={`
-          absolute z-50 transition-all duration-200 ease-out
-          ${expanded ? 'left-full top-0 ml-2' : 'left-full top-0 ml-2'}
+          transition-all duration-200 ease-out
+          ${mobileMenuOpen
+            ? 'relative w-full mt-1 pl-3 border-l border-white/10'
+            : 'absolute z-50 left-full top-0 ml-2'
+          }
           ${open ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 pointer-events-none'}
+          ${mobileMenuOpen && !open ? 'max-h-0 overflow-hidden' : ''}
+          ${mobileMenuOpen && open ? 'max-h-96' : ''}
         `}
-        onMouseEnter={cancelHide}
-        onMouseLeave={scheduleHide}>
+        onMouseEnter={mobileMenuOpen ? undefined : cancelHide}
+        onMouseLeave={mobileMenuOpen ? undefined : scheduleHide}>
         
         <div className="bg-sidebar border border-white/10 rounded-xl shadow-lg p-2 min-w-[180px]">
           <div className="px-3 py-2 text-[10px] uppercase tracking-wider text-gray-500 font-semibold">
@@ -317,7 +323,6 @@ export function Layout() {
           ${mobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full w-0 md:translate-x-0'}
           ${!mobileMenuOpen && sidebarExpanded ? 'md:w-56' : ''}
           ${!mobileMenuOpen && !sidebarExpanded ? 'md:w-[72px]' : ''}
-          ${mobileMenuOpen ? 'overflow-x-hidden' : ''}
         `}>
         
         {/* Logo + Toggle */}
@@ -351,7 +356,7 @@ export function Layout() {
         {/* Navigation */}
         <nav className={`flex-1 flex flex-col gap-1 w-full ${sidebarExpanded ? 'px-3' : 'px-3 items-center'}`}>
           {visibleNavItems.map((item) =>
-          <SidebarItem key={item.path} item={item} expanded={sidebarExpanded} />
+          <SidebarItem key={item.path} item={item} expanded={sidebarExpanded} mobileMenuOpen={mobileMenuOpen} />
           )}
         </nav>
 

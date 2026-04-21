@@ -3,6 +3,11 @@
   "list": "Danh sách lịch hẹn",
   "addAppointment": "Thêm lịch hẹn",
   "editAppointment": "Sửa lịch hẹn",
+  "createTitle": "Thêm lịch hẹn",
+  "createSubtitle": "Tạo lịch hẹn mới cho bệnh nhân",
+  "editTitle": "Sửa lịch hẹn",
+  "editSubtitle": "Cập nhật thông tin lịch hẹn",
+  "createAppointment": "Tạo lịch hẹn",
   "searchPlaceholder": "Tìm kiếm lịch hẹn...",
   "phase": {
     "scheduled": "Đang hẹn",
@@ -49,7 +54,9 @@
     "patient": "Bệnh nhân",
     "selectStatus": "Chọn trạng thái",
     "selectAssistant": "Chọn phụ tá...",
-    "selectDoctorAssistant": "Chọn trợ lý bác sĩ..."
+    "selectDoctorAssistant": "Chọn trợ lý bác sĩ...",
+    "selectDentalAide": "Chọn trợ lý nha khoa...",
+    "selectService": "Chọn dịch vụ..."
   },
   "checkIn": {
     "title": "Check In",

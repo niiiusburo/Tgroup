@@ -16,7 +16,6 @@ import { useTimezone } from '@/contexts/TimezoneContext';
 import type { CalendarAppointment } from '@/data/mockCalendar';
 import type { AppointmentStatus } from '@/types/appointment';
 import { AppointmentFormShell, calendarAppointmentToFormData } from '@/components/appointments/unified';
-import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
 import { QuickAddAppointmentButton } from '@/components/shared/QuickAddAppointmentButton';
 import { PageHeader } from '@/components/shared/PageHeader';
 import type { UnifiedAppointmentFormData } from '@/components/appointments/unified';
@@ -85,8 +84,8 @@ export function Calendar() {
     markArrived
   } = useCalendarData(selectedLocationId);
 
-  // Edit modal state - uses OverviewAppointment to match EditAppointmentModal interface
-  const [editingAppointment, setEditingAppointment] = useState<OverviewAppointment | null>(null);
+  // Edit modal state - pre-mapped form data from calendar appointment
+  const [editingAppointment, setEditingAppointment] = useState<Partial<UnifiedAppointmentFormData> | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Export dialog state
@@ -143,7 +142,7 @@ export function Calendar() {
 
   // Click on appointment card opens edit modal directly using unified form
   const handleAppointmentClick = useCallback((appointment: CalendarAppointment) => {
-    setEditingAppointment(calendarAppointmentToFormData(appointment) as unknown as OverviewAppointment);
+    setEditingAppointment(calendarAppointmentToFormData(appointment));
     setIsEditModalOpen(true);
   }, []);
 
@@ -269,22 +268,6 @@ export function Calendar() {
   }, [pickerViewDate, formatDate]);
 
   const todayKeyForPicker = useMemo(() => getToday(), [getToday]);
-
-  // Helper to map Calendar status to OverviewAppointment topStatus
-  function mapStatusToTopStatus(status: CalendarAppointment['status']): OverviewAppointment['topStatus'] {
-    switch (status) {
-      case 'cancelled':
-        return 'cancelled';
-      case 'confirmed':
-        return 'arrived';
-      case 'in-progress':
-        return 'arrived';
-      case 'completed':
-        return 'arrived';
-      default:
-        return 'scheduled';
-    }
-  }
 
   // Unified search combobox state
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -543,9 +526,7 @@ export function Calendar() {
             className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             {t('xutExcel', 'Xuất Excel')}
           </button>
-          <QuickAddAppointmentButton
-            onSuccess={refresh}
-            size="sm" />
+          <QuickAddAppointmentButton onSuccess={refresh} size="sm" />
           
           <button
             type="button"
@@ -607,7 +588,7 @@ export function Calendar() {
         isOpen={isEditModalOpen}
         onClose={handleEditModalClose}
         onSuccess={handleEditModalSaved}
-        initialData={editingAppointment ? calendarAppointmentToFormData(editingAppointment as unknown as import('@/types/appointment').CalendarAppointment) : undefined}
+        initialData={editingAppointment ?? undefined}
         customerReadOnly
       />
 

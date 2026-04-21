@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CalendarPlus } from 'lucide-react';
-import { AppointmentFormModal } from './AppointmentFormModal';
-import type { AppointmentFormData } from '@/components/appointments/AppointmentForm';
+import { AppointmentFormShell } from '@/components/appointments/unified';
 
 interface QuickAddAppointmentButtonProps {
   readonly onSuccess?: () => void;
@@ -13,33 +12,7 @@ export function QuickAddAppointmentButton({ onSuccess, size = 'md' }: QuickAddAp
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleSubmit = async (data: AppointmentFormData) => {
-    try {
-      const { createAppointment } = await import('@/lib/api');
-      await createAppointment({
-        partnerid: data.customerId,
-        doctorid: data.doctorId,
-        companyid: data.locationId,
-        name: data.serviceName || data.appointmentType,
-        date: data.date,
-        time: data.startTime,
-        note: data.notes,
-        state: 'scheduled',
-        assistantid: data.assistantId,
-        dentalaideid: data.dentalAideId,
-        color: data.color,
-        timeexpected: data.estimatedDuration,
-        productid: data.serviceId,
-      });
-      setIsOpen(false);
-      onSuccess?.();
-    } catch (error) {
-      console.error('Failed to create appointment:', error);
-      throw error;
-    }
-  };
-
-  const sizeClasses = size === 'sm' 
+  const sizeClasses = size === 'sm'
     ? 'px-3 py-1.5 text-xs gap-1.5'
     : 'px-4 py-2 text-sm gap-2';
 
@@ -50,7 +23,7 @@ export function QuickAddAppointmentButton({ onSuccess, size = 'md' }: QuickAddAp
         className={`
           ${sizeClasses}
           inline-flex items-center
-          bg-primary 
+          bg-primary
           hover:from-orange-600 hover:to-orange-500
           text-white font-medium rounded-lg
           shadow-sm
@@ -63,10 +36,11 @@ export function QuickAddAppointmentButton({ onSuccess, size = 'md' }: QuickAddAp
         <span>{size === 'sm' ? t('overview:quickAdd') : t('overview:quickAddFull')}</span>
       </button>
 
-      <AppointmentFormModal
+      <AppointmentFormShell
+        mode="create"
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        onSubmit={handleSubmit}
+        onSuccess={onSuccess}
       />
     </>
   );

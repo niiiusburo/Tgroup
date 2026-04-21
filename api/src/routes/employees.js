@@ -324,6 +324,7 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
  * Updates an existing employee (updates partners table)
  */
 router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
+  const { getVietnamNow } = require('../lib/dateUtils');
   const client = await pool.connect();
   try {
     const { id } = req.params;
@@ -341,6 +342,9 @@ router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
       jobtitle,
       locationScopeIds,
       tierId,
+      wage,
+      allowance,
+      hrjobid,
     } = req.body;
 
     // Build dynamic update query for partners table

@@ -20,7 +20,6 @@ function useDaysUntilDue() {
     return Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
   };
 }
-}
 
 interface OutstandingBalanceProps {
   readonly balances: readonly OutstandingBalanceItem[];

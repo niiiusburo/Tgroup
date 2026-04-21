@@ -1,4 +1,5 @@
 import { Users } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ROLE_LABELS, type Employee } from '@/data/mockEmployees';
 
 /**
@@ -12,6 +13,8 @@ interface LinkedEmployeesProps {
 }
 
 export function LinkedEmployees({ employees, onSelect }: LinkedEmployeesProps) {
+  const { t } = useTranslation('common');
+
   if (employees.length === 0) {
     return (
       <div className="text-center py-6 text-gray-400">
@@ -35,7 +38,7 @@ export function LinkedEmployees({ employees, onSelect }: LinkedEmployeesProps) {
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-gray-900 truncate">{emp.name}</p>
             <p className="text-xs text-gray-500 truncate">
-              {emp.roles.map((r) => ROLE_LABELS[r]).join(', ')}
+              {emp.roles.map((r) => t(ROLE_LABELS[r], r)).join(', ')}
             </p>
           </div>
           <span className="px-2 py-0.5 rounded text-xs font-medium shrink-0 bg-purple-100 text-purple-700">

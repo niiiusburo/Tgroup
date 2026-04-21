@@ -94,7 +94,7 @@ export function DepositWallet({
                 type="date"
                 value={addDate}
                 onChange={(e) => setAddDate(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" />
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary" />
               
               </div>
 
@@ -191,7 +191,7 @@ export function DepositWallet({
                 value={addNote}
                 onChange={(e) => setAddNote(e.target.value)}
                 placeholder={t('addNotePlaceholder')}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" />
+                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary" />
               
               </div>
             </div>
@@ -210,7 +210,7 @@ export function DepositWallet({
               <button
               onClick={() => setShowAddModal(false)}
               disabled={submitting}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50">
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50">
               
                 {t('cancelBtn')}
               </button>

@@ -71,7 +71,7 @@ export function LeftPanel({ formApi }: LeftPanelProps) {
           }
           {registerState.status === 'error' &&
           <p className="mt-1.5 text-[10px] text-red-500 text-center">
-              {(registerState as {message: string;}).message}
+              {t((registerState as {message: string;}).message)}
             </p>
           }
         </div>
@@ -165,8 +165,8 @@ export function LeftPanel({ formApi }: LeftPanelProps) {
               </button>
             </div>
             {getError('phone') && <p className="mt-1 text-xs text-red-500">{getError('phone')}</p>}
-            {phoneCheck.status === 'error' && !getError('phone') &&
-            <p className="mt-1 text-xs text-gray-400">{phoneCheck.message}</p>
+            {phoneCheck.status === 'error' && !getError('phone') && phoneCheck.message &&
+            <p className="mt-1 text-xs text-gray-400">{t(phoneCheck.message)}</p>
             }
           </div>
         </div>

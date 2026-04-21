@@ -29,7 +29,7 @@ export function Card({
   return (
     <div
       className={cn(
-        'bg-white rounded-2xl border border-gray-100',
+        'bg-white rounded-xl border border-gray-200',
         'shadow-sm',
         paddingStyles[padding],
         hover && [
@@ -67,7 +67,7 @@ interface CardTitleProps {
 
 export function CardTitle({ children, className }: CardTitleProps) {
   return (
-    <h3 className={cn('text-base font-semibold text-gray-900', className)}>
+    <h3 className={cn('text-lg font-semibold text-gray-900', className)}>
       {children}
     </h3>
   );

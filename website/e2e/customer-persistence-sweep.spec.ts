@@ -16,7 +16,7 @@
 
 import { test, expect, type Page } from '@playwright/test';
 
-const BASE = 'http://localhost:5174';
+const BASE = 'http://localhost:5175';
 const CUSTOMER_NAME = 'Phạm Ngọc Huy';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('bank selector dropdown', async ({ page }) => {
-  await page.goto('http://localhost:5174/');
+  await page.goto('http://localhost:5175/');
   await expect(page.locator('h1', { hasText: /Overview|Tổng quan/i })).toBeVisible({ timeout: 15_000 });
 
   await page.getByRole('link', { name: /Settings|Cài đặt/i }).click();

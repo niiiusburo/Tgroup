@@ -16,7 +16,7 @@ test.describe('TDD: Version Display System', () => {
   
   test('RED: Should display actual version from package.json, not 0.0.0', async ({ page }) => {
     // Arrange: Load the app
-    await page.goto('http://localhost:5174/login');
+    await page.goto('http://localhost:5175/login');
     await page.waitForTimeout(2000);
     
     // Act: Login
@@ -53,7 +53,7 @@ test.describe('TDD: Version Display System', () => {
     });
     
     // Login
-    await page.goto('http://localhost:5174/login');
+    await page.goto('http://localhost:5175/login');
     await page.fill('input#email', 'tg@clinic.vn');
     await page.fill('input#password', 'admin123');
     await page.click('button[type="submit"]');

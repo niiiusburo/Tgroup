@@ -108,6 +108,32 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
       throw new ApiError({ status: res.status, code: e.code, field: e.field, message: e.message, body: parsed });
     }
 
+    // Backend route error: { errorCode: '...', message: '...' }
+    if (
+      parsed !== null &&
+      typeof parsed === 'object' &&
+      'errorCode' in parsed &&
+      typeof (parsed as Record<string, unknown>).errorCode === 'string' &&
+      'message' in parsed &&
+      typeof (parsed as Record<string, unknown>).message === 'string'
+    ) {
+      const e = parsed as { errorCode: string; message: string };
+      throw new ApiError({ status: res.status, code: e.errorCode, message: e.message, body: parsed });
+    }
+
+    // Zod validation error: { errors: [{ message, path }] }
+    if (
+      parsed !== null &&
+      typeof parsed === 'object' &&
+      'errors' in parsed &&
+      Array.isArray((parsed as Record<string, unknown>).errors)
+    ) {
+      const issues = (parsed as Record<string, unknown>).errors as Array<{ message?: string; path?: unknown[] }>;
+      const first = issues.find((i) => typeof i?.message === 'string');
+      const message = first?.message ?? `Validation failed (${issues.length} issue${issues.length === 1 ? '' : 's'})`;
+      throw new ApiError({ status: res.status, code: 'VALIDATION_ERROR', message, body: parsed });
+    }
+
     // Legacy string error: { error: "some string" }
     if (
       parsed !== null &&

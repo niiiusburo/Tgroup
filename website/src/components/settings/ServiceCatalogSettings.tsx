@@ -139,7 +139,7 @@ export function ServiceCatalogSettings() {
                           <CurrencyInput
                             value={editPrice ? Number(editPrice) : null}
                             onChange={(v) => setEditPrice(v === null ? '' : String(v))}
-                            className="w-32 px-2 py-1 text-sm border border-gray-300 rounded"
+                            className="w-32"
                             autoFocus
                           />
                           <button type="button" onClick={() => saveEdit(service.id)} className="p-1 text-green-600 hover:bg-green-50 rounded">

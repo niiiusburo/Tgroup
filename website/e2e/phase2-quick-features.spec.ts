@@ -15,7 +15,7 @@ import { test, expect, type Page } from '@playwright/test';
 const CUSTOMER_NAME = 'Phạm Ngọc Huy';
 
 async function login(page: Page) {
-  await page.goto('http://localhost:5174/');
+  await page.goto('http://localhost:5175/');
   const emailInput = page.locator('#email');
   const isLoginPage = await emailInput.isVisible({ timeout: 3000 }).catch(() => false);
   if (isLoginPage) {

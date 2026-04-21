@@ -31,7 +31,7 @@ export function EmployeeProfile({
   onSelectLinked,
   onEdit
 }: EmployeeProfileProps) {
-  const { t } = useTranslation('employees');
+  const { t } = useTranslation(['employees', 'common']);
   const [locations, setLocations] = useState<ApiCompany[]>([]);
   const [loadingLocations, setLoadingLocations] = useState(true);
 
@@ -103,7 +103,7 @@ export function EmployeeProfile({
           <div className="flex flex-wrap gap-1.5">
             {employee.roles.map((role) =>
             <span key={role} className={`text-xs px-2.5 py-1 rounded-lg ${ROLE_STYLES[role]}`}>
-                {ROLE_LABELS[role]}
+                {t(`common:${ROLE_LABELS[role]}`, role)}
               </span>
             )}
             {employee.roles.length === 0 &&

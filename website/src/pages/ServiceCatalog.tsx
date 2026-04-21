@@ -102,7 +102,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
               type="text"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary"
               required
             />
           </div>
@@ -113,7 +113,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
                 type="text"
                 value={form.defaultcode}
                 onChange={(e) => setForm({ ...form, defaultcode: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary"
               />
             </div>
             <div>
@@ -122,7 +122,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
                 type="text"
                 value={form.uomname}
                 onChange={(e) => setForm({ ...form, uomname: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary"
               />
             </div>
           </div>
@@ -131,7 +131,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
             <CurrencyInput
               value={form.listprice}
               onChange={(v) => setForm({ ...form, listprice: v ?? 0 })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary"
             />
           </div>
           <div>
@@ -139,7 +139,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
             <select
               value={form.categid}
               onChange={(e) => setForm({ ...form, categid: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary"
             >
               <option value="">-- {tc('form.selectOption')} --</option>
               {categories.map((c) => (
@@ -152,7 +152,7 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
             <select
               value={form.companyid}
               onChange={(e) => setForm({ ...form, companyid: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary"
             >
               <option value="">{t('allLocations')}</option>
               {companies.map((c) => (
@@ -161,13 +161,13 @@ function ServiceFormModal({ isOpen, onClose, onSubmit, categories, companies, in
             </select>
           </div>
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               {tc('cancel')}
             </button>
             <button
               type="submit"
               disabled={saving || !form.name.trim()}
-              className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark disabled:opacity-50 flex items-center gap-2 transition-colors"
             >
               {saving && <Loader2 className="w-4 h-4 animate-spin" />}
               {initialData ? tc('update') : tc('add')}
@@ -225,19 +225,19 @@ function CategoryAddModal({ isOpen, onClose, onSubmit }: CategoryAddModalProps) 
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary"
               autoFocus
               required
             />
           </div>
           <div className="flex justify-end gap-3">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               {tc('cancel')}
             </button>
             <button
               type="submit"
               disabled={saving || !name.trim()}
-              className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark disabled:opacity-50 flex items-center gap-2 transition-colors"
             >
               {saving && <Loader2 className="w-4 h-4 animate-spin" />}
               {tc('add')}
@@ -398,14 +398,14 @@ export function ServiceCatalog() {
       <div>
         <h1 className="text-xl font-bold text-gray-900">{t('serviceCatalog')}</h1>
         {/* Tabs */}
-        <div className="flex gap-1 mt-3">
-          <button type="button" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg">
+        <div className="flex gap-1 mt-3 bg-gray-100 p-1 rounded-lg w-fit">
+          <button type="button" className="px-4 py-2 text-sm font-medium text-gray-900 bg-white rounded-lg shadow-sm">
             {t('tabs.services')}
           </button>
-          <button type="button" className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+          <button type="button" className="px-4 py-2 text-sm font-medium text-gray-600 rounded-lg hover:text-gray-900 hover:bg-white/50 transition-colors">
             {t('tabs.supplies')}
           </button>
-          <button type="button" className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+          <button type="button" className="px-4 py-2 text-sm font-medium text-gray-600 rounded-lg hover:text-gray-900 hover:bg-white/50 transition-colors">
             {t('tabs.medicine')}
           </button>
         </div>

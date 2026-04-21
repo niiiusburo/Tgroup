@@ -19,6 +19,7 @@ import type {
 import { formDataToApiPayload } from './appointmentForm.mapper';
 import { createAppointment, updateAppointment } from '@/lib/api';
 import { calculateEndTime } from '@/lib/calendarUtils';
+import { getTodayInTimezone } from '@/lib/dateUtils';
 
 const DEFAULT_DURATION = 30;
 const DEFAULT_COLOR = '1';
@@ -39,7 +40,7 @@ function makeEmptyData(): UnifiedAppointmentFormData {
     appointmentType: 'consultation',
     serviceName: '',
     serviceId: undefined,
-    date: '',
+    date: getTodayInTimezone('Asia/Ho_Chi_Minh'),
     startTime: '09:00',
     endTime: calculateEndTime('09:00', DEFAULT_DURATION),
     notes: '',
@@ -114,6 +115,12 @@ export function useAppointmentForm(
     if (!data.date) nextErrors.date = 'Date is required';
     if (!data.startTime) nextErrors.startTime = 'Start time is required';
     if (!data.endTime) nextErrors.endTime = 'End time is required';
+
+    // Duration must be positive
+    const duration = data.estimatedDuration ?? DEFAULT_DURATION;
+    if (duration < 1 || duration > 480) {
+      nextErrors.estimatedDuration = 'Duration must be between 1 and 480 minutes';
+    }
 
     // Time logic: end must be after start
     if (data.startTime && data.endTime) {

@@ -138,8 +138,8 @@ export function BasicInfoTab({ formApi }: BasicInfoTabProps) {
         className={inputClass(!!getError('email'))}
       />
       {getError('email') && <p className="mt-1 text-xs text-red-500">{getError('email')}</p>}
-      {emailCheck.status === 'error' && !getError('email') && (
-        <p className="mt-1 text-xs text-gray-400">{emailCheck.message}</p>
+      {emailCheck.status === 'error' && !getError('email') && emailCheck.message && (
+        <p className="mt-1 text-xs text-gray-400">{t(emailCheck.message)}</p>
       )}
     </div>
 

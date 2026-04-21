@@ -244,5 +244,17 @@
   "attachments": "Tệp đính kèm",
   "faceId": "Nhận diện khuôn mặt",
   "quickAdd": "Thêm nhanh",
-  "noFaceRecognized": "Không nhận diện được khuôn mặt"
+  "noFaceRecognized": "Không nhận diện được khuôn mặt",
+  "validation": {
+    "phoneInUse": "Số điện thoại này đã được sử dụng.",
+    "emailInUse": "Email này đã được sử dụng.",
+    "cannotVerify": "Không thể kiểm tra. Vui lòng thử lại."
+  },
+  "errors": {
+    "saveFailedTitle": "Lỗi lưu dữ liệu"
+  },
+  "faceRecognition": {
+    "registerFailed": "Đăng ký khuôn mặt thất bại",
+    "recognizeFailed": "Nhận diện khuôn mặt thất bại"
+  }
 }

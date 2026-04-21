@@ -9,7 +9,7 @@
  */
 import { test, expect, type Page } from '@playwright/test';
 
-const BASE = 'http://localhost:5174';
+const BASE = 'http://localhost:5175';
 const EMPLOYEE_NAME = 'Test Playwright Employee';
 const UPDATED_NAME = 'Test Updated Employee';
 const EMPLOYEE_PHONE = '0999777888';
@@ -31,7 +31,7 @@ async function login(page: Page) {
 
 async function navigateToEmployees(page: Page) {
   await page.goto(`${BASE}/employees`);
-  await expect(page.locator('main').getByRole('heading', { name: 'Employees' })).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('main').getByRole('heading', { name: /Employees|Nhân viên/i })).toBeVisible({ timeout: 10000 });
   await page.waitForTimeout(1500);
 }
 
@@ -50,8 +50,8 @@ test.describe.serial('Employee Create & Update', () => {
     await navigateToEmployees(page);
     await hideVersionOverlay(page);
 
-    // Click "Add Employee" button
-    await page.getByRole('button', { name: /Add Employee/i }).click();
+    // Click "Add Employee" / "Thêm nhân viên" button
+    await page.getByRole('button', { name: /Add Employee|Thêm nhân viên/i }).click();
     await page.waitForTimeout(500);
 
     // Wait for form modal to appear
@@ -89,7 +89,7 @@ test.describe.serial('Employee Create & Update', () => {
     await page.waitForTimeout(2000);
 
     // Search for the new employee
-    const searchInput = page.getByPlaceholder(/Search by name/i);
+    const searchInput = page.getByPlaceholder(/Search by name|Tìm kiếm nhân viên/i);
     await searchInput.clear();
     await searchInput.fill(EMPLOYEE_NAME);
     await page.waitForTimeout(2000);
@@ -106,7 +106,7 @@ test.describe.serial('Employee Create & Update', () => {
     await hideVersionOverlay(page);
 
     // Search for the employee we just created
-    const searchInput = page.getByPlaceholder(/Search by name/i);
+    const searchInput = page.getByPlaceholder(/Search by name|Tìm kiếm nhân viên/i);
     await searchInput.clear();
     await searchInput.fill(EMPLOYEE_NAME);
     await page.waitForTimeout(2000);

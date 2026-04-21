@@ -50,7 +50,7 @@ export function DoctorSelector({
     return availableEmployees.filter(
       (e) =>
       normalizeText(e.name).includes(norm) ||
-      e.roles.some((r) => normalizeText(ROLE_LABELS[r]).includes(norm))
+      e.roles.some((r) => normalizeText(t(ROLE_LABELS[r], r)).includes(norm))
     );
   }, [availableEmployees, searchTerm]);
 
@@ -146,7 +146,7 @@ export function DoctorSelector({
             
                   <div className="font-medium">{employee.name}</div>
                   <div className="text-xs text-gray-400">
-                    {employee.roles.map((r) => ROLE_LABELS[r]).join(', ')}
+                    {employee.roles.map((r) => t(ROLE_LABELS[r], r)).join(', ')}
                   </div>
                 </button>
           )

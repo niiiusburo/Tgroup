@@ -68,8 +68,8 @@ Vite loads env files by priority: `.env.{mode}.local` > `.env.{mode}` > `.env.lo
 ## Dev Server
 
 ```bash
-cd website && npx vite --port 5174
-# Open http://localhost:5174
+cd website && npx vite --port 5175
+# Open http://localhost:5175
 # Uses .env.development → API at localhost:3002
 ```
 
@@ -107,6 +107,7 @@ ssh root@76.13.16.68
 # Password stored in 1Password / local secrets — do NOT commit to this file
 ```
 
+**Production Domain:** `https://nk.2checkin.com` (tg@clinic.vn / 123456)
 **Backend Location:** `/root/tdental-api/`
 **Start Command:** `cd /root/tdental-api && pm2 start src/server.js --name tdental-api`
 

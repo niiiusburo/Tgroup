@@ -121,6 +121,7 @@ export function Overview() {
 
       {/* Unified Edit Modal for both Zone 1 and Zone 3 */}
       <AppointmentFormShell
+        key={editingAppointment?.id ?? 'overview-edit'}
         mode="edit"
         isOpen={isEditModalOpen}
         onClose={handleModalClose}

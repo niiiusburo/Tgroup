@@ -4,7 +4,7 @@
  */
 import { test as base, expect, type Page } from '@playwright/test';
 
-const BASE_URL = 'http://localhost:5174';
+const BASE_URL = 'http://localhost:5175';
 
 const test = base.extend<{ authenticatedPage: Page }>({
   authenticatedPage: async ({ page }, use) => {

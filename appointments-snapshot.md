@@ -1,0 +1,2392 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e8]: TD
+    - navigation [ref=e9]:
+      - link "Tổng quan" [ref=e10] [cursor=pointer]:
+        - /url: /
+        - img [ref=e11]
+      - link "Lịch" [ref=e13] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e14]
+      - link "Khách hàng" [ref=e16] [cursor=pointer]:
+        - /url: /customers
+        - img [ref=e17]
+      - generic [ref=e22]:
+        - button "Phòng khám" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+        - generic:
+          - generic:
+            - generic: Phòng khám
+            - generic:
+              - link "Dịch vụ":
+                - /url: /services
+                - img
+                - generic: Dịch vụ
+              - link "Danh mục dịch vụ 228":
+                - /url: /service-catalog
+                - img
+                - generic: Danh mục dịch vụ
+                - generic: "228"
+              - link "Kế hoạch thanh toán":
+                - /url: /payment
+                - img
+                - generic: Kế hoạch thanh toán
+      - generic [ref=e28]:
+        - button "Nhóm" [ref=e29] [cursor=pointer]:
+          - img [ref=e30]
+        - generic:
+          - generic:
+            - generic: Nhóm
+            - generic:
+              - link "Nhân viên":
+                - /url: /employees
+                - img
+                - generic: Nhân viên
+              - link "Hoa hồng Pro":
+                - /url: /commission
+                - img
+                - generic: Hoa hồng
+                - generic: Pro
+              - link "Chi nhánh":
+                - /url: /locations
+                - img
+                - generic: Chi nhánh
+      - generic [ref=e72]:
+        - button "Báo cáo" [ref=e73] [cursor=pointer]:
+          - img [ref=e74]
+        - generic:
+          - generic:
+            - generic: Báo cáo
+            - generic:
+              - link "Bảng điều khiển":
+                - /url: /reports/dashboard
+                - img
+                - generic: Bảng điều khiển
+              - link "Doanh thu":
+                - /url: /reports/revenue
+                - img
+                - generic: Doanh thu
+              - link "Lịch hẹn":
+                - /url: /reports/appointments
+                - img
+                - generic: Lịch hẹn
+              - link "Bác sĩ":
+                - /url: /reports/doctors
+                - img
+                - generic: Bác sĩ
+              - link "Khách hàng":
+                - /url: /reports/customers
+                - img
+                - generic: Khách hàng
+              - link "Chi nhánh":
+                - /url: /reports/locations
+                - img
+                - generic: Chi nhánh
+              - link "Dịch vụ":
+                - /url: /reports/services
+                - img
+                - generic: Dịch vụ
+              - link "Nhân viên":
+                - /url: /reports/employees
+                - img
+                - generic: Nhân viên
+      - generic [ref=e76]:
+        - button "Quản trị" [ref=e77] [cursor=pointer]:
+          - img [ref=e78]
+        - generic:
+          - generic:
+            - generic: Quản trị
+            - generic:
+              - link "Cài đặt":
+                - /url: /settings
+                - img
+                - generic: Cài đặt
+              - link "Phản hồi":
+                - /url: /feedback
+                - img
+                - generic: Phản hồi
+              - link "Quyền hạn":
+                - /url: /permissions
+                - img
+                - generic: Quyền hạn
+              - link "Mối quan hệ":
+                - /url: /relationships
+                - img
+                - generic: Mối quan hệ
+              - link "Thông báo":
+                - /url: /notifications
+                - img
+                - generic: Thông báo
+    - generic [ref=e81]:
+      - button [ref=e82] [cursor=pointer]:
+        - img [ref=e83]
+      - button "A" [ref=e85] [cursor=pointer]:
+        - generic [ref=e86]: A
+      - button "Switch language" [ref=e89] [cursor=pointer]:
+        - img [ref=e90]
+  - generic [ref=e93]:
+    - banner [ref=e94]:
+      - heading "Dashboard" [level=1] [ref=e96]
+      - generic [ref=e97]:
+        - button "All Locations" [ref=e100] [cursor=pointer]:
+          - img [ref=e101]
+          - generic [ref=e104]: All Locations
+          - img [ref=e105]
+        - button "Feedback" [ref=e108] [cursor=pointer]:
+          - img [ref=e109]
+        - button [ref=e111] [cursor=pointer]:
+          - img [ref=e112]
+    - main [ref=e116]:
+      - generic [ref=e117]:
+        - generic [ref=e119]:
+          - generic [ref=e120]:
+            - img [ref=e122]
+            - generic [ref=e125]:
+              - heading "Lịch hẹn" [level=1] [ref=e126]
+              - paragraph [ref=e127]: Danh sách lịch hẹn
+          - button "Thêm lịch hẹn" [ref=e129] [cursor=pointer]:
+            - img [ref=e130]
+            - text: Thêm lịch hẹn
+        - generic [ref=e131]:
+          - generic [ref=e132]:
+            - img [ref=e134]
+            - generic [ref=e139]:
+              - generic [ref=e140]: "3"
+              - generic [ref=e141]: Đang chờ
+          - generic [ref=e142]:
+            - img [ref=e144]
+            - generic [ref=e147]:
+              - generic [ref=e148]: "0"
+              - generic [ref=e149]: Đang chờ
+          - generic [ref=e150]:
+            - img [ref=e152]
+            - generic [ref=e156]:
+              - generic [ref=e157]: "0"
+              - generic [ref=e158]: Đang khám
+          - generic [ref=e159]:
+            - img [ref=e161]
+            - generic [ref=e164]:
+              - generic [ref=e165]: "0"
+              - generic [ref=e166]: Hoàn tất
+        - generic [ref=e167]:
+          - generic [ref=e168]:
+            - img [ref=e169]
+            - textbox "Tìm kiếm lịch hẹn..." [ref=e172]
+          - generic [ref=e173]:
+            - img [ref=e174]
+            - button "Ngày" [ref=e178] [cursor=pointer]:
+              - img [ref=e180]
+              - generic [ref=e182]: Ngày
+              - img [ref=e183]
+        - generic [ref=e185]:
+          - button "Tất cả" [ref=e186] [cursor=pointer]
+          - button "Đang hẹn" [ref=e187] [cursor=pointer]
+          - button "Đã xác nhận" [ref=e188] [cursor=pointer]
+          - button "Đang khám" [ref=e189] [cursor=pointer]
+          - button "Hoàn thành" [ref=e190] [cursor=pointer]
+          - button "Hủy hẹn" [ref=e191] [cursor=pointer]
+        - generic [ref=e193]:
+          - generic [ref=e195]:
+            - button "03-27 09:00" [ref=e196] [cursor=pointer]:
+              - generic [ref=e197]: 03-27
+              - generic [ref=e198]: 09:00
+            - button "Trần Đỗ Gia Hân AP95617 · Bác sĩ 29 · Tấm Dentist Thủ Đức" [ref=e199] [cursor=pointer]:
+              - button "Trần Đỗ Gia Hân" [ref=e203]
+              - generic [ref=e204]: AP95617 · Bác sĩ 29 · Tấm Dentist Thủ Đức
+            - generic [ref=e205]: Done
+            - generic [ref=e206]: completed
+            - button "Mở rộng chi tiết" [ref=e208] [cursor=pointer]:
+              - img [ref=e209]
+          - generic [ref=e212]:
+            - button "04-04 09:00" [ref=e213] [cursor=pointer]:
+              - generic [ref=e214]: 04-04
+              - generic [ref=e215]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP97818 · BÁC SĨ 03 · Tấm Dentist Quận 3" [ref=e216] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e220]
+              - generic [ref=e221]: AP97818 · BÁC SĨ 03 · Tấm Dentist Quận 3
+            - generic [ref=e222]: Done
+            - generic [ref=e223]: completed
+            - button "Mở rộng chi tiết" [ref=e225] [cursor=pointer]:
+              - img [ref=e226]
+          - generic [ref=e229]:
+            - button "04-08 09:00" [ref=e230] [cursor=pointer]:
+              - generic [ref=e231]: 04-08
+              - generic [ref=e232]: 09:00
+            - button "NGUYỄN THỊ UYÊN AP105744 · BS. Trâm · Tấm Dentist Gò Vấp" [ref=e233] [cursor=pointer]:
+              - button "NGUYỄN THỊ UYÊN" [ref=e237]
+              - generic [ref=e238]: AP105744 · BS. Trâm · Tấm Dentist Gò Vấp
+            - generic [ref=e239]: Done
+            - generic [ref=e240]: completed
+            - button "Mở rộng chi tiết" [ref=e242] [cursor=pointer]:
+              - img [ref=e243]
+          - generic [ref=e246]:
+            - button "04-15 09:00" [ref=e247] [cursor=pointer]:
+              - generic [ref=e248]: 04-15
+              - generic [ref=e249]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP108909 · · Tấm Dentist Quận 3" [ref=e250] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e254]
+              - generic [ref=e255]: AP108909 · · Tấm Dentist Quận 3
+            - generic [ref=e256]: Done
+            - generic [ref=e257]: completed
+            - button "Mở rộng chi tiết" [ref=e259] [cursor=pointer]:
+              - img [ref=e260]
+          - generic [ref=e263]:
+            - button "04-15 09:00" [ref=e264] [cursor=pointer]:
+              - generic [ref=e265]: 04-15
+              - generic [ref=e266]: 09:00
+            - button "Trần Đỗ Gia Hân AP103773 · Bác sĩ 29 · Tấm Dentist Thủ Đức" [ref=e267] [cursor=pointer]:
+              - button "Trần Đỗ Gia Hân" [ref=e271]
+              - generic [ref=e272]: AP103773 · Bác sĩ 29 · Tấm Dentist Thủ Đức
+            - generic [ref=e273]: Done
+            - generic [ref=e274]: completed
+            - button "Mở rộng chi tiết" [ref=e276] [cursor=pointer]:
+              - img [ref=e277]
+          - generic [ref=e280]:
+            - button "04-17 09:00" [ref=e281] [cursor=pointer]:
+              - generic [ref=e282]: 04-17
+              - generic [ref=e283]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP109425 · · Tấm Dentist Quận 3" [ref=e284] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e288]
+              - generic [ref=e289]: AP109425 · · Tấm Dentist Quận 3
+            - generic [ref=e290]: Done
+            - generic [ref=e291]: completed
+            - button "Mở rộng chi tiết" [ref=e293] [cursor=pointer]:
+              - img [ref=e294]
+          - generic [ref=e297]:
+            - button "04-18 09:00" [ref=e298] [cursor=pointer]:
+              - generic [ref=e299]: 04-18
+              - generic [ref=e300]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP101882 · · Tấm Dentist Quận 3" [ref=e301] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e305]
+              - generic [ref=e306]: AP101882 · · Tấm Dentist Quận 3
+            - generic [ref=e307]: Done
+            - generic [ref=e308]: completed
+            - button "Mở rộng chi tiết" [ref=e310] [cursor=pointer]:
+              - img [ref=e311]
+          - generic [ref=e314]:
+            - button "05-05 09:00" [ref=e315] [cursor=pointer]:
+              - generic [ref=e316]: 05-05
+              - generic [ref=e317]: 09:00
+            - button "Trần Đỗ Gia Hân AP109210 · Bác sĩ 29 · Tấm Dentist Thủ Đức" [ref=e318] [cursor=pointer]:
+              - button "Trần Đỗ Gia Hân" [ref=e322]
+              - generic [ref=e323]: AP109210 · Bác sĩ 29 · Tấm Dentist Thủ Đức
+            - generic [ref=e324]: Done
+            - generic [ref=e325]: completed
+            - button "Mở rộng chi tiết" [ref=e327] [cursor=pointer]:
+              - img [ref=e328]
+          - generic [ref=e331]:
+            - button "05-06 09:00" [ref=e332] [cursor=pointer]:
+              - generic [ref=e333]: 05-06
+              - generic [ref=e334]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP112936 · · Tấm Dentist Quận 10" [ref=e335] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e339]
+              - generic [ref=e340]: AP112936 · · Tấm Dentist Quận 10
+            - generic [ref=e341]: Done
+            - generic [ref=e342]: completed
+            - button "Mở rộng chi tiết" [ref=e344] [cursor=pointer]:
+              - img [ref=e345]
+          - generic [ref=e348]:
+            - button "05-08 09:00" [ref=e349] [cursor=pointer]:
+              - generic [ref=e350]: 05-08
+              - generic [ref=e351]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP115904 · BÁC SĨ 03 · Tấm Dentist Quận 10" [ref=e352] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e356]
+              - generic [ref=e357]: AP115904 · BÁC SĨ 03 · Tấm Dentist Quận 10
+            - generic [ref=e358]: Done
+            - generic [ref=e359]: completed
+            - button "Mở rộng chi tiết" [ref=e361] [cursor=pointer]:
+              - img [ref=e362]
+          - generic [ref=e365]:
+            - button "05-17 09:00" [ref=e366] [cursor=pointer]:
+              - generic [ref=e367]: 05-17
+              - generic [ref=e368]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP110007 · · Tấm Dentist Quận 3" [ref=e369] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e373]
+              - generic [ref=e374]: AP110007 · · Tấm Dentist Quận 3
+            - generic [ref=e375]: Done
+            - generic [ref=e376]: completed
+            - button "Mở rộng chi tiết" [ref=e378] [cursor=pointer]:
+              - img [ref=e379]
+          - generic [ref=e382]:
+            - button "05-18 09:00" [ref=e383] [cursor=pointer]:
+              - generic [ref=e384]: 05-18
+              - generic [ref=e385]: 09:00
+            - button "Trần Đỗ Gia Hân AP114869 · Bác sĩ 29 · Tấm Dentist Thủ Đức" [ref=e386] [cursor=pointer]:
+              - button "Trần Đỗ Gia Hân" [ref=e390]
+              - generic [ref=e391]: AP114869 · Bác sĩ 29 · Tấm Dentist Thủ Đức
+            - generic [ref=e392]: Done
+            - generic [ref=e393]: completed
+            - button "Mở rộng chi tiết" [ref=e395] [cursor=pointer]:
+              - img [ref=e396]
+          - generic [ref=e399]:
+            - button "05-25 09:00" [ref=e400] [cursor=pointer]:
+              - generic [ref=e401]: 05-25
+              - generic [ref=e402]: 09:00
+            - button "Ngô Trí Nguyên AP122315 · · Tấm Dentist Đống Đa" [ref=e403] [cursor=pointer]:
+              - button "Ngô Trí Nguyên" [ref=e407]
+              - generic [ref=e408]: AP122315 · · Tấm Dentist Đống Đa
+            - generic [ref=e409]: Done
+            - generic [ref=e410]: completed
+            - button "Mở rộng chi tiết" [ref=e412] [cursor=pointer]:
+              - img [ref=e413]
+          - generic [ref=e416]:
+            - button "06-07 09:00" [ref=e417] [cursor=pointer]:
+              - generic [ref=e418]: 06-07
+              - generic [ref=e419]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP115404 · · Tấm Dentist Quận 10" [ref=e420] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e424]
+              - generic [ref=e425]: AP115404 · · Tấm Dentist Quận 10
+            - generic [ref=e426]: Not Arrived
+            - generic [ref=e427]: cancelled
+            - button "Mở rộng chi tiết" [ref=e429] [cursor=pointer]:
+              - img [ref=e430]
+          - generic [ref=e433]:
+            - button "06-07 09:00" [ref=e434] [cursor=pointer]:
+              - generic [ref=e435]: 06-07
+              - generic [ref=e436]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP119534 · · Tấm Dentist Quận 3" [ref=e437] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e441]
+              - generic [ref=e442]: AP119534 · · Tấm Dentist Quận 3
+            - generic [ref=e443]: Done
+            - generic [ref=e444]: completed
+            - button "Mở rộng chi tiết" [ref=e446] [cursor=pointer]:
+              - img [ref=e447]
+          - generic [ref=e450]:
+            - button "06-11 09:00" [ref=e451] [cursor=pointer]:
+              - generic [ref=e452]: 06-11
+              - generic [ref=e453]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP126667 · BÁC SĨ 03 · Tấm Dentist Quận 10" [ref=e454] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e458]
+              - generic [ref=e459]: AP126667 · BÁC SĨ 03 · Tấm Dentist Quận 10
+            - generic [ref=e460]: Done
+            - generic [ref=e461]: completed
+            - button "Mở rộng chi tiết" [ref=e463] [cursor=pointer]:
+              - img [ref=e464]
+          - generic [ref=e467]:
+            - button "06-16 09:00" [ref=e468] [cursor=pointer]:
+              - generic [ref=e469]: 06-16
+              - generic [ref=e470]: 09:00
+            - button "Trần Đỗ Gia Hân AP120161 · Bác sĩ 29 · Tấm Dentist Thủ Đức" [ref=e471] [cursor=pointer]:
+              - button "Trần Đỗ Gia Hân" [ref=e475]
+              - generic [ref=e476]: AP120161 · Bác sĩ 29 · Tấm Dentist Thủ Đức
+            - generic [ref=e477]: Done
+            - generic [ref=e478]: completed
+            - button "Mở rộng chi tiết" [ref=e480] [cursor=pointer]:
+              - img [ref=e481]
+          - generic [ref=e484]:
+            - button "06-20 09:00" [ref=e485] [cursor=pointer]:
+              - generic [ref=e486]: 06-20
+              - generic [ref=e487]: 09:00
+            - button "TRẦN NHẬT DUY - G AP130083 · BS. Ý · Tấm Dentist Quận 3" [ref=e488] [cursor=pointer]:
+              - button "TRẦN NHẬT DUY - G" [ref=e492]
+              - generic [ref=e493]: AP130083 · BS. Ý · Tấm Dentist Quận 3
+            - generic [ref=e494]: Done
+            - generic [ref=e495]: completed
+            - button "Mở rộng chi tiết" [ref=e497] [cursor=pointer]:
+              - img [ref=e498]
+          - generic [ref=e501]:
+            - button "06-25 09:00" [ref=e502] [cursor=pointer]:
+              - generic [ref=e503]: 06-25
+              - generic [ref=e504]: 09:00
+            - button "NGUYỄN QUANG TOẢN (0979199660) - G1 AP133002 · BS. Ý · Tấm Dentist Quận 3" [ref=e505] [cursor=pointer]:
+              - button "NGUYỄN QUANG TOẢN (0979199660) - G1" [ref=e509]
+              - generic [ref=e510]: AP133002 · BS. Ý · Tấm Dentist Quận 3
+            - generic [ref=e511]: Done
+            - generic [ref=e512]: completed
+            - button "Mở rộng chi tiết" [ref=e514] [cursor=pointer]:
+              - img [ref=e515]
+          - generic [ref=e518]:
+            - button "06-25 09:00" [ref=e519] [cursor=pointer]:
+              - generic [ref=e520]: 06-25
+              - generic [ref=e521]: 09:00
+            - button "TRẦN NHẬT DUY - G AP131394 · BS. Ý · Tấm Dentist Quận 3" [ref=e522] [cursor=pointer]:
+              - button "TRẦN NHẬT DUY - G" [ref=e526]
+              - generic [ref=e527]: AP131394 · BS. Ý · Tấm Dentist Quận 3
+            - generic [ref=e528]: Done
+            - generic [ref=e529]: completed
+            - button "Mở rộng chi tiết" [ref=e531] [cursor=pointer]:
+              - img [ref=e532]
+          - generic [ref=e535]:
+            - button "06-28 09:00" [ref=e536] [cursor=pointer]:
+              - generic [ref=e537]: 06-28
+              - generic [ref=e538]: 09:00
+            - button "TRẦN NHẬT DUY - G AP133199 · BS. Ý · Tấm Dentist Quận 3" [ref=e539] [cursor=pointer]:
+              - button "TRẦN NHẬT DUY - G" [ref=e543]
+              - generic [ref=e544]: AP133199 · BS. Ý · Tấm Dentist Quận 3
+            - generic [ref=e545]: Done
+            - generic [ref=e546]: completed
+            - button "Mở rộng chi tiết" [ref=e548] [cursor=pointer]:
+              - img [ref=e549]
+          - generic [ref=e552]:
+            - button "06-30 09:00" [ref=e553] [cursor=pointer]:
+              - generic [ref=e554]: 06-30
+              - generic [ref=e555]: 09:00
+            - button "HUỲNH THỊ HỒNG GẤM AP133987 · · Tấm Dentist Quận 7" [ref=e556] [cursor=pointer]:
+              - button "HUỲNH THỊ HỒNG GẤM" [ref=e560]
+              - generic [ref=e561]: AP133987 · · Tấm Dentist Quận 7
+            - generic [ref=e562]: Done
+            - generic [ref=e563]: completed
+            - button "Mở rộng chi tiết" [ref=e565] [cursor=pointer]:
+              - img [ref=e566]
+          - generic [ref=e569]:
+            - button "07-01 09:00" [ref=e570] [cursor=pointer]:
+              - generic [ref=e571]: 07-01
+              - generic [ref=e572]: 09:00
+            - button "TRẦN NHẬT DUY - G AP134125 · BS. Ý · Tấm Dentist Quận 3" [ref=e573] [cursor=pointer]:
+              - button "TRẦN NHẬT DUY - G" [ref=e577]
+              - generic [ref=e578]: AP134125 · BS. Ý · Tấm Dentist Quận 3
+            - generic [ref=e579]: Done
+            - generic [ref=e580]: completed
+            - button "Mở rộng chi tiết" [ref=e582] [cursor=pointer]:
+              - img [ref=e583]
+          - generic [ref=e586]:
+            - button "07-01 09:00" [ref=e587] [cursor=pointer]:
+              - generic [ref=e588]: 07-01
+              - generic [ref=e589]: 09:00
+            - button "TRẦN NHẬT DUY - G AP134123 · BS. Ý · Tấm Dentist Quận 3" [ref=e590] [cursor=pointer]:
+              - button "TRẦN NHẬT DUY - G" [ref=e594]
+              - generic [ref=e595]: AP134123 · BS. Ý · Tấm Dentist Quận 3
+            - generic [ref=e596]: Done
+            - generic [ref=e597]: completed
+            - button "Mở rộng chi tiết" [ref=e599] [cursor=pointer]:
+              - img [ref=e600]
+          - generic [ref=e603]:
+            - button "07-02 09:00" [ref=e604] [cursor=pointer]:
+              - generic [ref=e605]: 07-02
+              - generic [ref=e606]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP126653 · · Tấm Dentist Quận 3" [ref=e607] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e611]
+              - generic [ref=e612]: AP126653 · · Tấm Dentist Quận 3
+            - generic [ref=e613]: Done
+            - generic [ref=e614]: completed
+            - button "Mở rộng chi tiết" [ref=e616] [cursor=pointer]:
+              - img [ref=e617]
+          - generic [ref=e620]:
+            - button "07-09 09:00" [ref=e621] [cursor=pointer]:
+              - generic [ref=e622]: 07-09
+              - generic [ref=e623]: 09:00
+            - button "NGUYỄN QUANG TOẢN (0979199660) - G1 AP133247 · BS. Ý · Tấm Dentist Quận 3" [ref=e624] [cursor=pointer]:
+              - button "NGUYỄN QUANG TOẢN (0979199660) - G1" [ref=e628]
+              - generic [ref=e629]: AP133247 · BS. Ý · Tấm Dentist Quận 3
+            - generic [ref=e630]: Done
+            - generic [ref=e631]: completed
+            - button "Mở rộng chi tiết" [ref=e633] [cursor=pointer]:
+              - img [ref=e634]
+          - generic [ref=e637]:
+            - button "07-09 09:00" [ref=e638] [cursor=pointer]:
+              - generic [ref=e639]: 07-09
+              - generic [ref=e640]: 09:00
+            - button "NGUYỄN QUANG TOẢN (0979199660) - G1 AP138192 · BS. Ý · Tấm Dentist Quận 3" [ref=e641] [cursor=pointer]:
+              - button "NGUYỄN QUANG TOẢN (0979199660) - G1" [ref=e645]
+              - generic [ref=e646]: AP138192 · BS. Ý · Tấm Dentist Quận 3
+            - generic [ref=e647]: Done
+            - generic [ref=e648]: completed
+            - button "Mở rộng chi tiết" [ref=e650] [cursor=pointer]:
+              - img [ref=e651]
+          - generic [ref=e654]:
+            - button "07-09 09:00" [ref=e655] [cursor=pointer]:
+              - generic [ref=e656]: 07-09
+              - generic [ref=e657]: 09:00
+            - button "Ngô Trí Nguyên AP138225 · · Tấm Dentist Đống Đa" [ref=e658] [cursor=pointer]:
+              - button "Ngô Trí Nguyên" [ref=e662]
+              - generic [ref=e663]: AP138225 · · Tấm Dentist Đống Đa
+            - generic [ref=e664]: Done
+            - generic [ref=e665]: completed
+            - button "Mở rộng chi tiết" [ref=e667] [cursor=pointer]:
+              - img [ref=e668]
+          - generic [ref=e671]:
+            - button "07-10 09:00" [ref=e672] [cursor=pointer]:
+              - generic [ref=e673]: 07-10
+              - generic [ref=e674]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP128250 · BÁC SĨ 03 · Tấm Dentist Quận 10" [ref=e675] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e679]
+              - generic [ref=e680]: AP128250 · BÁC SĨ 03 · Tấm Dentist Quận 10
+            - generic [ref=e681]: Done
+            - generic [ref=e682]: completed
+            - button "Mở rộng chi tiết" [ref=e684] [cursor=pointer]:
+              - img [ref=e685]
+          - generic [ref=e688]:
+            - button "07-13 09:00" [ref=e689] [cursor=pointer]:
+              - generic [ref=e690]: 07-13
+              - generic [ref=e691]: 09:00
+            - button "Trần Đỗ Gia Hân AP129980 · Bác sĩ 29 · Tấm Dentist Thủ Đức" [ref=e692] [cursor=pointer]:
+              - button "Trần Đỗ Gia Hân" [ref=e696]
+              - generic [ref=e697]: AP129980 · Bác sĩ 29 · Tấm Dentist Thủ Đức
+            - generic [ref=e698]: Done
+            - generic [ref=e699]: completed
+            - button "Mở rộng chi tiết" [ref=e701] [cursor=pointer]:
+              - img [ref=e702]
+          - generic [ref=e705]:
+            - button "07-19 09:00" [ref=e706] [cursor=pointer]:
+              - generic [ref=e707]: 07-19
+              - generic [ref=e708]: 09:00
+            - button "NGUYỄN QUANG TOẢN (0979199660) - G1 AP138285 · BS. Ý · Tấm Dentist Quận 3" [ref=e709] [cursor=pointer]:
+              - button "NGUYỄN QUANG TOẢN (0979199660) - G1" [ref=e713]
+              - generic [ref=e714]: AP138285 · BS. Ý · Tấm Dentist Quận 3
+            - generic [ref=e715]: Done
+            - generic [ref=e716]: completed
+            - button "Mở rộng chi tiết" [ref=e718] [cursor=pointer]:
+              - img [ref=e719]
+          - generic [ref=e722]:
+            - button "07-23 09:00" [ref=e723] [cursor=pointer]:
+              - generic [ref=e724]: 07-23
+              - generic [ref=e725]: 09:00
+            - button "Ngô Trí Nguyên AP143209 · BS. Hà · Tấm Dentist Đống Đa" [ref=e726] [cursor=pointer]:
+              - button "Ngô Trí Nguyên" [ref=e730]
+              - generic [ref=e731]: AP143209 · BS. Hà · Tấm Dentist Đống Đa
+            - generic [ref=e732]: Done
+            - generic [ref=e733]: completed
+            - button "Mở rộng chi tiết" [ref=e735] [cursor=pointer]:
+              - img [ref=e736]
+          - generic [ref=e739]:
+            - button "07-23 09:00" [ref=e740] [cursor=pointer]:
+              - generic [ref=e741]: 07-23
+              - generic [ref=e742]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP135468 · · Tấm Dentist Quận 3" [ref=e743] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e747]
+              - generic [ref=e748]: AP135468 · · Tấm Dentist Quận 3
+            - generic [ref=e749]: Done
+            - generic [ref=e750]: completed
+            - button "Mở rộng chi tiết" [ref=e752] [cursor=pointer]:
+              - img [ref=e753]
+          - generic [ref=e756]:
+            - button "08-04 09:00" [ref=e757] [cursor=pointer]:
+              - generic [ref=e758]: 08-04
+              - generic [ref=e759]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP147185 · · Tấm Dentist Quận 3" [ref=e760] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e764]
+              - generic [ref=e765]: AP147185 · · Tấm Dentist Quận 3
+            - generic [ref=e766]: Done
+            - generic [ref=e767]: completed
+            - button "Mở rộng chi tiết" [ref=e769] [cursor=pointer]:
+              - img [ref=e770]
+          - generic [ref=e773]:
+            - button "08-06 09:00" [ref=e774] [cursor=pointer]:
+              - generic [ref=e775]: 08-06
+              - generic [ref=e776]: 09:00
+            - button "HUỲNH THỊ HỒNG GẤM AP144056 · BS. Thu Thảo · Tấm Dentist Quận 7" [ref=e777] [cursor=pointer]:
+              - button "HUỲNH THỊ HỒNG GẤM" [ref=e781]
+              - generic [ref=e782]: AP144056 · BS. Thu Thảo · Tấm Dentist Quận 7
+            - generic [ref=e783]: Done
+            - generic [ref=e784]: completed
+            - button "Mở rộng chi tiết" [ref=e786] [cursor=pointer]:
+              - img [ref=e787]
+          - generic [ref=e790]:
+            - button "08-08 09:00" [ref=e791] [cursor=pointer]:
+              - generic [ref=e792]: 08-08
+              - generic [ref=e793]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP138549 · BÁC SĨ 03 · Tấm Dentist Quận 10" [ref=e794] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e798]
+              - generic [ref=e799]: AP138549 · BÁC SĨ 03 · Tấm Dentist Quận 10
+            - generic [ref=e800]: Not Arrived
+            - generic [ref=e801]: confirmed
+            - button "Mở rộng chi tiết" [ref=e803] [cursor=pointer]:
+              - img [ref=e804]
+          - generic [ref=e807]:
+            - button "08-11 09:00" [ref=e808] [cursor=pointer]:
+              - generic [ref=e809]: 08-11
+              - generic [ref=e810]: 09:00
+            - button "Trần Đỗ Gia Hân AP139714 · Bác sĩ 29 · Tấm Dentist Thủ Đức" [ref=e811] [cursor=pointer]:
+              - button "Trần Đỗ Gia Hân" [ref=e815]
+              - generic [ref=e816]: AP139714 · Bác sĩ 29 · Tấm Dentist Thủ Đức
+            - generic [ref=e817]: Done
+            - generic [ref=e818]: completed
+            - button "Mở rộng chi tiết" [ref=e820] [cursor=pointer]:
+              - img [ref=e821]
+          - generic [ref=e824]:
+            - button "08-12 09:00" [ref=e825] [cursor=pointer]:
+              - generic [ref=e826]: 08-12
+              - generic [ref=e827]: 09:00
+            - button "HUỲNH THỊ HỒNG GẤM AP148845 · BS. Thu Thảo · Tấm Dentist Quận 7" [ref=e828] [cursor=pointer]:
+              - button "HUỲNH THỊ HỒNG GẤM" [ref=e832]
+              - generic [ref=e833]: AP148845 · BS. Thu Thảo · Tấm Dentist Quận 7
+            - generic [ref=e834]: Done
+            - generic [ref=e835]: completed
+            - button "Mở rộng chi tiết" [ref=e837] [cursor=pointer]:
+              - img [ref=e838]
+          - generic [ref=e841]:
+            - button "08-13 09:00" [ref=e842] [cursor=pointer]:
+              - generic [ref=e843]: 08-13
+              - generic [ref=e844]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP143171 · · Tấm Dentist Quận 3" [ref=e845] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e849]
+              - generic [ref=e850]: AP143171 · · Tấm Dentist Quận 3
+            - generic [ref=e851]: Done
+            - generic [ref=e852]: completed
+            - button "Mở rộng chi tiết" [ref=e854] [cursor=pointer]:
+              - img [ref=e855]
+          - generic [ref=e858]:
+            - button "08-16 09:00" [ref=e859] [cursor=pointer]:
+              - generic [ref=e860]: 08-16
+              - generic [ref=e861]: 09:00
+            - button "NGUYỄN QUANG TOẢN (0979199660) - G1 AP142471 · BS. Dũng · Tấm Dentist Quận 3" [ref=e862] [cursor=pointer]:
+              - button "NGUYỄN QUANG TOẢN (0979199660) - G1" [ref=e866]
+              - generic [ref=e867]: AP142471 · BS. Dũng · Tấm Dentist Quận 3
+            - generic [ref=e868]: Done
+            - generic [ref=e869]: completed
+            - button "Mở rộng chi tiết" [ref=e871] [cursor=pointer]:
+              - img [ref=e872]
+          - generic [ref=e875]:
+            - button "08-21 09:00" [ref=e876] [cursor=pointer]:
+              - generic [ref=e877]: 08-21
+              - generic [ref=e878]: 09:00
+            - button "HUỲNH THỊ HỒNG GẤM AP150346 · BS. Thu Thảo · Tấm Dentist Quận 7" [ref=e879] [cursor=pointer]:
+              - button "HUỲNH THỊ HỒNG GẤM" [ref=e883]
+              - generic [ref=e884]: AP150346 · BS. Thu Thảo · Tấm Dentist Quận 7
+            - generic [ref=e885]: Done
+            - generic [ref=e886]: completed
+            - button "Mở rộng chi tiết" [ref=e888] [cursor=pointer]:
+              - img [ref=e889]
+          - generic [ref=e892]:
+            - button "08-27 09:00" [ref=e893] [cursor=pointer]:
+              - generic [ref=e894]: 08-27
+              - generic [ref=e895]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP155376 · · Tấm Dentist Quận 3" [ref=e896] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e900]
+              - generic [ref=e901]: AP155376 · · Tấm Dentist Quận 3
+            - generic [ref=e902]: Done
+            - generic [ref=e903]: completed
+            - button "Mở rộng chi tiết" [ref=e905] [cursor=pointer]:
+              - img [ref=e906]
+          - generic [ref=e909]:
+            - button "08-31 09:00" [ref=e910] [cursor=pointer]:
+              - generic [ref=e911]: 08-31
+              - generic [ref=e912]: 09:00
+            - button "ĐẶNG NGỌC MINH THƯ AP156703 · BS. Thu Thảo · Tấm Dentist Quận 7" [ref=e913] [cursor=pointer]:
+              - button "ĐẶNG NGỌC MINH THƯ" [ref=e917]
+              - generic [ref=e918]: AP156703 · BS. Thu Thảo · Tấm Dentist Quận 7
+            - generic [ref=e919]: Done
+            - generic [ref=e920]: completed
+            - button "Mở rộng chi tiết" [ref=e922] [cursor=pointer]:
+              - img [ref=e923]
+          - generic [ref=e926]:
+            - button "09-03 09:00" [ref=e927] [cursor=pointer]:
+              - generic [ref=e928]: 09-03
+              - generic [ref=e929]: 09:00
+            - button "Nguyễn Thu Huyền AP157206 · BS. Hà · Tấm Dentist Đống Đa" [ref=e930] [cursor=pointer]:
+              - button "Nguyễn Thu Huyền" [ref=e934]
+              - generic [ref=e935]: AP157206 · BS. Hà · Tấm Dentist Đống Đa
+            - generic [ref=e936]: Done
+            - generic [ref=e937]: completed
+            - button "Mở rộng chi tiết" [ref=e939] [cursor=pointer]:
+              - img [ref=e940]
+          - generic [ref=e943]:
+            - button "09-03 09:00" [ref=e944] [cursor=pointer]:
+              - generic [ref=e945]: 09-03
+              - generic [ref=e946]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP150506 · · Tấm Dentist Quận 3" [ref=e947] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e951]
+              - generic [ref=e952]: AP150506 · · Tấm Dentist Quận 3
+            - generic [ref=e953]: Done
+            - generic [ref=e954]: completed
+            - button "Mở rộng chi tiết" [ref=e956] [cursor=pointer]:
+              - img [ref=e957]
+          - generic [ref=e960]:
+            - button "09-04 09:00" [ref=e961] [cursor=pointer]:
+              - generic [ref=e962]: 09-04
+              - generic [ref=e963]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP148321 · BÁC SĨ 03 · Tấm Dentist Quận 10" [ref=e964] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e968]
+              - generic [ref=e969]: AP148321 · BÁC SĨ 03 · Tấm Dentist Quận 10
+            - generic [ref=e970]: Not Arrived
+            - generic [ref=e971]: confirmed
+            - button "Mở rộng chi tiết" [ref=e973] [cursor=pointer]:
+              - img [ref=e974]
+          - generic [ref=e977]:
+            - button "09-07 09:00" [ref=e978] [cursor=pointer]:
+              - generic [ref=e979]: 09-07
+              - generic [ref=e980]: 09:00
+            - button "Nguyễn Thu Huyền AP157362 · BS. Hà · Tấm Dentist Đống Đa" [ref=e981] [cursor=pointer]:
+              - button "Nguyễn Thu Huyền" [ref=e985]
+              - generic [ref=e986]: AP157362 · BS. Hà · Tấm Dentist Đống Đa
+            - generic [ref=e987]: Done
+            - generic [ref=e988]: completed
+            - button "Mở rộng chi tiết" [ref=e990] [cursor=pointer]:
+              - img [ref=e991]
+          - generic [ref=e994]:
+            - button "09-07 09:00" [ref=e995] [cursor=pointer]:
+              - generic [ref=e996]: 09-07
+              - generic [ref=e997]: 09:00
+            - button "ĐẶNG NGỌC MINH THƯ AP156704 · BS. Thu Thảo · Tấm Dentist Quận 7" [ref=e998] [cursor=pointer]:
+              - button "ĐẶNG NGỌC MINH THƯ" [ref=e1002]
+              - generic [ref=e1003]: AP156704 · BS. Thu Thảo · Tấm Dentist Quận 7
+            - generic [ref=e1004]: Done
+            - generic [ref=e1005]: completed
+            - button "Mở rộng chi tiết" [ref=e1007] [cursor=pointer]:
+              - img [ref=e1008]
+          - generic [ref=e1011]:
+            - button "09-10 09:00" [ref=e1012] [cursor=pointer]:
+              - generic [ref=e1013]: 09-10
+              - generic [ref=e1014]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP158148 · BÁC SĨ 03 · Tấm Dentist Quận 10" [ref=e1015] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e1019]
+              - generic [ref=e1020]: AP158148 · BÁC SĨ 03 · Tấm Dentist Quận 10
+            - generic [ref=e1021]: Done
+            - generic [ref=e1022]: completed
+            - button "Mở rộng chi tiết" [ref=e1024] [cursor=pointer]:
+              - img [ref=e1025]
+          - generic [ref=e1028]:
+            - button "09-10 09:00" [ref=e1029] [cursor=pointer]:
+              - generic [ref=e1030]: 09-10
+              - generic [ref=e1031]: 09:00
+            - button "Trần Đỗ Gia Hân AP149871 · Bác sĩ 29 · Tấm Dentist Thủ Đức" [ref=e1032] [cursor=pointer]:
+              - button "Trần Đỗ Gia Hân" [ref=e1036]
+              - generic [ref=e1037]: AP149871 · Bác sĩ 29 · Tấm Dentist Thủ Đức
+            - generic [ref=e1038]: Done
+            - generic [ref=e1039]: completed
+            - button "Mở rộng chi tiết" [ref=e1041] [cursor=pointer]:
+              - img [ref=e1042]
+          - generic [ref=e1045]:
+            - button "09-12 09:00" [ref=e1046] [cursor=pointer]:
+              - generic [ref=e1047]: 09-12
+              - generic [ref=e1048]: 09:00
+            - button "NGUYỄN THANH HIỂN AP160936 · BS. Trang · Tấm Dentist Gò Vấp" [ref=e1049] [cursor=pointer]:
+              - button "NGUYỄN THANH HIỂN" [ref=e1053]
+              - generic [ref=e1054]: AP160936 · BS. Trang · Tấm Dentist Gò Vấp
+            - generic [ref=e1055]: Done
+            - generic [ref=e1056]: completed
+            - button "Mở rộng chi tiết" [ref=e1058] [cursor=pointer]:
+              - img [ref=e1059]
+          - generic [ref=e1062]:
+            - button "09-12 09:00" [ref=e1063] [cursor=pointer]:
+              - generic [ref=e1064]: 09-12
+              - generic [ref=e1065]: 09:00
+            - button "NGUYỄN THANH HIỂN AP160220 · · Tấm Dentist Gò Vấp" [ref=e1066] [cursor=pointer]:
+              - button "NGUYỄN THANH HIỂN" [ref=e1070]
+              - generic [ref=e1071]: AP160220 · · Tấm Dentist Gò Vấp
+            - generic [ref=e1072]: Done
+            - generic [ref=e1073]: completed
+            - button "Mở rộng chi tiết" [ref=e1075] [cursor=pointer]:
+              - img [ref=e1076]
+          - generic [ref=e1079]:
+            - button "09-14 09:00" [ref=e1080] [cursor=pointer]:
+              - generic [ref=e1081]: 09-14
+              - generic [ref=e1082]: 09:00
+            - button "ĐẶNG NGỌC MINH THƯ AP158949 · BS. Thu Thảo · Tấm Dentist Quận 7" [ref=e1083] [cursor=pointer]:
+              - button "ĐẶNG NGỌC MINH THƯ" [ref=e1087]
+              - generic [ref=e1088]: AP158949 · BS. Thu Thảo · Tấm Dentist Quận 7
+            - generic [ref=e1089]: Done
+            - generic [ref=e1090]: completed
+            - button "Mở rộng chi tiết" [ref=e1092] [cursor=pointer]:
+              - img [ref=e1093]
+          - generic [ref=e1096]:
+            - button "09-18 09:00" [ref=e1097] [cursor=pointer]:
+              - generic [ref=e1098]: 09-18
+              - generic [ref=e1099]: 09:00
+            - button "Trần Đỗ Gia Hân AP163181 · · Tấm Dentist Thủ Đức" [ref=e1100] [cursor=pointer]:
+              - button "Trần Đỗ Gia Hân" [ref=e1104]
+              - generic [ref=e1105]: AP163181 · · Tấm Dentist Thủ Đức
+            - generic [ref=e1106]: Not Arrived
+            - generic [ref=e1107]: confirmed
+            - button "Mở rộng chi tiết" [ref=e1109] [cursor=pointer]:
+              - img [ref=e1110]
+          - generic [ref=e1113]:
+            - button "09-20 09:00" [ref=e1114] [cursor=pointer]:
+              - generic [ref=e1115]: 09-20
+              - generic [ref=e1116]: 09:00
+            - button "ĐẶNG NGỌC MINH THƯ AP161657 · BS. Thu Thảo · Tấm Dentist Quận 7" [ref=e1117] [cursor=pointer]:
+              - button "ĐẶNG NGỌC MINH THƯ" [ref=e1121]
+              - generic [ref=e1122]: AP161657 · BS. Thu Thảo · Tấm Dentist Quận 7
+            - generic [ref=e1123]: Done
+            - generic [ref=e1124]: completed
+            - button "Mở rộng chi tiết" [ref=e1126] [cursor=pointer]:
+              - img [ref=e1127]
+          - generic [ref=e1130]:
+            - button "09-22 09:00" [ref=e1131] [cursor=pointer]:
+              - generic [ref=e1132]: 09-22
+              - generic [ref=e1133]: 09:00
+            - button "Trần Đỗ Gia Hân AP164726 · · Tấm Dentist Thủ Đức" [ref=e1134] [cursor=pointer]:
+              - button "Trần Đỗ Gia Hân" [ref=e1138]
+              - generic [ref=e1139]: AP164726 · · Tấm Dentist Thủ Đức
+            - generic [ref=e1140]: Done
+            - generic [ref=e1141]: completed
+            - button "Mở rộng chi tiết" [ref=e1143] [cursor=pointer]:
+              - img [ref=e1144]
+          - generic [ref=e1147]:
+            - button "09-29 09:00" [ref=e1148] [cursor=pointer]:
+              - generic [ref=e1149]: 09-29
+              - generic [ref=e1150]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP157223 · · Tấm Dentist Quận 3" [ref=e1151] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e1155]
+              - generic [ref=e1156]: AP157223 · · Tấm Dentist Quận 3
+            - generic [ref=e1157]: Done
+            - generic [ref=e1158]: completed
+            - button "Mở rộng chi tiết" [ref=e1160] [cursor=pointer]:
+              - img [ref=e1161]
+          - generic [ref=e1164]:
+            - button "10-01 09:00" [ref=e1165] [cursor=pointer]:
+              - generic [ref=e1166]: 10-01
+              - generic [ref=e1167]: 09:00
+            - button "ỨC NỮ KIM XOAN AP166864 · BS. Uyên · Tấm Dentist Quận 10" [ref=e1168] [cursor=pointer]:
+              - button "ỨC NỮ KIM XOAN" [ref=e1172]
+              - generic [ref=e1173]: AP166864 · BS. Uyên · Tấm Dentist Quận 10
+            - generic [ref=e1174]: Done
+            - generic [ref=e1175]: completed
+            - button "Mở rộng chi tiết" [ref=e1177] [cursor=pointer]:
+              - img [ref=e1178]
+          - generic [ref=e1181]:
+            - button "10-03 09:00" [ref=e1182] [cursor=pointer]:
+              - generic [ref=e1183]: 10-03
+              - generic [ref=e1184]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP160278 · BÁC SĨ 03 · Tấm Dentist Quận 10" [ref=e1185] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e1189]
+              - generic [ref=e1190]: AP160278 · BÁC SĨ 03 · Tấm Dentist Quận 10
+            - generic [ref=e1191]: Done
+            - generic [ref=e1192]: completed
+            - button "Mở rộng chi tiết" [ref=e1194] [cursor=pointer]:
+              - img [ref=e1195]
+          - generic [ref=e1198]:
+            - button "10-05 09:00" [ref=e1199] [cursor=pointer]:
+              - generic [ref=e1200]: 10-05
+              - generic [ref=e1201]: 09:00
+            - button "Ngô Trí Nguyên AP169485 · BS. Hà · Tấm Dentist Đống Đa" [ref=e1202] [cursor=pointer]:
+              - button "Ngô Trí Nguyên" [ref=e1206]
+              - generic [ref=e1207]: AP169485 · BS. Hà · Tấm Dentist Đống Đa
+            - generic [ref=e1208]: Done
+            - generic [ref=e1209]: completed
+            - button "Mở rộng chi tiết" [ref=e1211] [cursor=pointer]:
+              - img [ref=e1212]
+          - generic [ref=e1215]:
+            - button "10-11 09:00" [ref=e1216] [cursor=pointer]:
+              - generic [ref=e1217]: 10-11
+              - generic [ref=e1218]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP171724 · · Tấm Dentist Quận 3" [ref=e1219] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e1223]
+              - generic [ref=e1224]: AP171724 · · Tấm Dentist Quận 3
+            - generic [ref=e1225]: Done
+            - generic [ref=e1226]: completed
+            - button "Mở rộng chi tiết" [ref=e1228] [cursor=pointer]:
+              - img [ref=e1229]
+          - generic [ref=e1232]:
+            - button "10-14 09:00" [ref=e1233] [cursor=pointer]:
+              - generic [ref=e1234]: 10-14
+              - generic [ref=e1235]: 09:00
+            - button "Trần Đỗ Gia Hân AP160105 · Bác sĩ 29 · Tấm Dentist Thủ Đức" [ref=e1236] [cursor=pointer]:
+              - button "Trần Đỗ Gia Hân" [ref=e1240]
+              - generic [ref=e1241]: AP160105 · Bác sĩ 29 · Tấm Dentist Thủ Đức
+            - generic [ref=e1242]: Done
+            - generic [ref=e1243]: completed
+            - button "Mở rộng chi tiết" [ref=e1245] [cursor=pointer]:
+              - img [ref=e1246]
+          - generic [ref=e1249]:
+            - button "10-15 09:00" [ref=e1250] [cursor=pointer]:
+              - generic [ref=e1251]: 10-15
+              - generic [ref=e1252]: 09:00
+            - button "ỨC NỮ KIM XOAN AP167962 · BS. Uyên · Tấm Dentist Quận 10" [ref=e1253] [cursor=pointer]:
+              - button "ỨC NỮ KIM XOAN" [ref=e1257]
+              - generic [ref=e1258]: AP167962 · BS. Uyên · Tấm Dentist Quận 10
+            - generic [ref=e1259]: Done
+            - generic [ref=e1260]: completed
+            - button "Mở rộng chi tiết" [ref=e1262] [cursor=pointer]:
+              - img [ref=e1263]
+          - generic [ref=e1266]:
+            - button "10-16 09:00" [ref=e1267] [cursor=pointer]:
+              - generic [ref=e1268]: 10-16
+              - generic [ref=e1269]: 09:00
+            - button "PHẠM THỊ KIỀU OANH AP173558 · · Tấm Dentist Quận 10" [ref=e1270] [cursor=pointer]:
+              - button "PHẠM THỊ KIỀU OANH" [ref=e1274]
+              - generic [ref=e1275]: AP173558 · · Tấm Dentist Quận 10
+            - generic [ref=e1276]: Done
+            - generic [ref=e1277]: completed
+            - button "Mở rộng chi tiết" [ref=e1279] [cursor=pointer]:
+              - img [ref=e1280]
+          - generic [ref=e1283]:
+            - button "10-20 09:00" [ref=e1284] [cursor=pointer]:
+              - generic [ref=e1285]: 10-20
+              - generic [ref=e1286]: 09:00
+            - button "NGUYỄN THANH HIỂN AP161003 · BS. Trang · Tấm Dentist Gò Vấp" [ref=e1287] [cursor=pointer]:
+              - button "NGUYỄN THANH HIỂN" [ref=e1291]
+              - generic [ref=e1292]: AP161003 · BS. Trang · Tấm Dentist Gò Vấp
+            - generic [ref=e1293]: Done
+            - generic [ref=e1294]: completed
+            - button "Mở rộng chi tiết" [ref=e1296] [cursor=pointer]:
+              - img [ref=e1297]
+          - generic [ref=e1300]:
+            - button "10-22 09:00" [ref=e1301] [cursor=pointer]:
+              - generic [ref=e1302]: 10-22
+              - generic [ref=e1303]: 09:00
+            - button "ỨC NỮ KIM XOAN AP173401 · BS. Uyên · Tấm Dentist Quận 10" [ref=e1304] [cursor=pointer]:
+              - button "ỨC NỮ KIM XOAN" [ref=e1308]
+              - generic [ref=e1309]: AP173401 · BS. Uyên · Tấm Dentist Quận 10
+            - generic [ref=e1310]: Done
+            - generic [ref=e1311]: completed
+            - button "Mở rộng chi tiết" [ref=e1313] [cursor=pointer]:
+              - img [ref=e1314]
+          - generic [ref=e1317]:
+            - button "10-23 09:00" [ref=e1318] [cursor=pointer]:
+              - generic [ref=e1319]: 10-23
+              - generic [ref=e1320]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP167346 · · Tấm Dentist Quận 3" [ref=e1321] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e1325]
+              - generic [ref=e1326]: AP167346 · · Tấm Dentist Quận 3
+            - generic [ref=e1327]: Done
+            - generic [ref=e1328]: completed
+            - button "Mở rộng chi tiết" [ref=e1330] [cursor=pointer]:
+              - img [ref=e1331]
+          - generic [ref=e1334]:
+            - button "11-04 09:00" [ref=e1335] [cursor=pointer]:
+              - generic [ref=e1336]: 11-04
+              - generic [ref=e1337]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP168767 · BÁC SĨ 03 · Tấm Dentist Quận 10" [ref=e1338] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e1342]
+              - generic [ref=e1343]: AP168767 · BÁC SĨ 03 · Tấm Dentist Quận 10
+            - generic [ref=e1344]: Done
+            - generic [ref=e1345]: completed
+            - button "Mở rộng chi tiết" [ref=e1347] [cursor=pointer]:
+              - img [ref=e1348]
+          - generic [ref=e1351]:
+            - button "11-08 09:00" [ref=e1352] [cursor=pointer]:
+              - generic [ref=e1353]: 11-08
+              - generic [ref=e1354]: 09:00
+            - button "CAO HÀ TIÊN - G AP181555 · BS. Trang · Tấm Dentist Gò Vấp" [ref=e1355] [cursor=pointer]:
+              - button "CAO HÀ TIÊN - G" [ref=e1359]
+              - generic [ref=e1360]: AP181555 · BS. Trang · Tấm Dentist Gò Vấp
+            - generic [ref=e1361]: Done
+            - generic [ref=e1362]: completed
+            - button "Mở rộng chi tiết" [ref=e1364] [cursor=pointer]:
+              - img [ref=e1365]
+          - generic [ref=e1368]:
+            - button "11-10 09:00" [ref=e1369] [cursor=pointer]:
+              - generic [ref=e1370]: 11-10
+              - generic [ref=e1371]: 09:00
+            - button "Nguyễn Thu Huyền AP159102 · BS. Hà · Tấm Dentist Đống Đa" [ref=e1372] [cursor=pointer]:
+              - button "Nguyễn Thu Huyền" [ref=e1376]
+              - generic [ref=e1377]: AP159102 · BS. Hà · Tấm Dentist Đống Đa
+            - generic [ref=e1378]: Done
+            - generic [ref=e1379]: completed
+            - button "Mở rộng chi tiết" [ref=e1381] [cursor=pointer]:
+              - img [ref=e1382]
+          - generic [ref=e1385]:
+            - button "11-12 09:00" [ref=e1386] [cursor=pointer]:
+              - generic [ref=e1387]: 11-12
+              - generic [ref=e1388]: 09:00
+            - button "Trần Đỗ Gia Hân AP172898 · Bác sĩ 29 · Tấm Dentist Thủ Đức" [ref=e1389] [cursor=pointer]:
+              - button "Trần Đỗ Gia Hân" [ref=e1393]
+              - generic [ref=e1394]: AP172898 · Bác sĩ 29 · Tấm Dentist Thủ Đức
+            - generic [ref=e1395]: Done
+            - generic [ref=e1396]: completed
+            - button "Mở rộng chi tiết" [ref=e1398] [cursor=pointer]:
+              - img [ref=e1399]
+          - generic [ref=e1402]:
+            - button "11-13 09:00" [ref=e1403] [cursor=pointer]:
+              - generic [ref=e1404]: 11-13
+              - generic [ref=e1405]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP176313 · · Tấm Dentist Quận 3" [ref=e1406] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e1410]
+              - generic [ref=e1411]: AP176313 · · Tấm Dentist Quận 3
+            - generic [ref=e1412]: Done
+            - generic [ref=e1413]: completed
+            - button "Mở rộng chi tiết" [ref=e1415] [cursor=pointer]:
+              - img [ref=e1416]
+          - generic [ref=e1419]:
+            - button "11-14 09:00" [ref=e1420] [cursor=pointer]:
+              - generic [ref=e1421]: 11-14
+              - generic [ref=e1422]: 09:00
+            - button "NGÔ THỊ PHƯƠNG AP184686 · BS. Trang · Tấm Dentist Gò Vấp" [ref=e1423] [cursor=pointer]:
+              - button "NGÔ THỊ PHƯƠNG" [ref=e1427]
+              - generic [ref=e1428]: AP184686 · BS. Trang · Tấm Dentist Gò Vấp
+            - generic [ref=e1429]: Done
+            - generic [ref=e1430]: completed
+            - button "Mở rộng chi tiết" [ref=e1432] [cursor=pointer]:
+              - img [ref=e1433]
+          - generic [ref=e1436]:
+            - button "11-18 09:00" [ref=e1437] [cursor=pointer]:
+              - generic [ref=e1438]: 11-18
+              - generic [ref=e1439]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP185520 · · Tấm Dentist Quận 10" [ref=e1440] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e1444]
+              - generic [ref=e1445]: AP185520 · · Tấm Dentist Quận 10
+            - generic [ref=e1446]: Done
+            - generic [ref=e1447]: completed
+            - button "Mở rộng chi tiết" [ref=e1449] [cursor=pointer]:
+              - img [ref=e1450]
+          - generic [ref=e1453]:
+            - button "11-19 09:00" [ref=e1454] [cursor=pointer]:
+              - generic [ref=e1455]: 11-19
+              - generic [ref=e1456]: 09:00
+            - button "ỨC NỮ KIM XOAN AP176045 · BS. Uyên · Tấm Dentist Quận 10" [ref=e1457] [cursor=pointer]:
+              - button "ỨC NỮ KIM XOAN" [ref=e1461]
+              - generic [ref=e1462]: AP176045 · BS. Uyên · Tấm Dentist Quận 10
+            - generic [ref=e1463]: Done
+            - generic [ref=e1464]: completed
+            - button "Mở rộng chi tiết" [ref=e1466] [cursor=pointer]:
+              - img [ref=e1467]
+          - generic [ref=e1470]:
+            - button "11-20 09:00" [ref=e1471] [cursor=pointer]:
+              - generic [ref=e1472]: 11-20
+              - generic [ref=e1473]: 09:00
+            - button "Nguyễn Hữu Thịnh AP181225 · BS. Nga · Tấm Dentist Thủ Đức" [ref=e1474] [cursor=pointer]:
+              - button "Nguyễn Hữu Thịnh" [ref=e1478]
+              - generic [ref=e1479]: AP181225 · BS. Nga · Tấm Dentist Thủ Đức
+            - generic [ref=e1480]: Done
+            - generic [ref=e1481]: completed
+            - button "Mở rộng chi tiết" [ref=e1483] [cursor=pointer]:
+              - img [ref=e1484]
+          - generic [ref=e1487]:
+            - button "11-24 09:00" [ref=e1488] [cursor=pointer]:
+              - generic [ref=e1489]: 11-24
+              - generic [ref=e1490]: 09:00
+            - button "PHẠM THỊ KIỀU OANH AP180711 · BS. Uyên · Tấm Dentist Quận 10" [ref=e1491] [cursor=pointer]:
+              - button "PHẠM THỊ KIỀU OANH" [ref=e1495]
+              - generic [ref=e1496]: AP180711 · BS. Uyên · Tấm Dentist Quận 10
+            - generic [ref=e1497]: Done
+            - generic [ref=e1498]: completed
+            - button "Mở rộng chi tiết" [ref=e1500] [cursor=pointer]:
+              - img [ref=e1501]
+          - generic [ref=e1504]:
+            - button "11-28 09:00" [ref=e1505] [cursor=pointer]:
+              - generic [ref=e1506]: 11-28
+              - generic [ref=e1507]: 09:00
+            - button "Nguyễn Hữu Thịnh AP187067 · BS. Nga · Tấm Dentist Thủ Đức" [ref=e1508] [cursor=pointer]:
+              - button "Nguyễn Hữu Thịnh" [ref=e1512]
+              - generic [ref=e1513]: AP187067 · BS. Nga · Tấm Dentist Thủ Đức
+            - generic [ref=e1514]: Done
+            - generic [ref=e1515]: completed
+            - button "Mở rộng chi tiết" [ref=e1517] [cursor=pointer]:
+              - img [ref=e1518]
+          - generic [ref=e1521]:
+            - button "12-01 09:00" [ref=e1522] [cursor=pointer]:
+              - generic [ref=e1523]: 12-01
+              - generic [ref=e1524]: 09:00
+            - button "NGUYỄN THỊ NGỌC TRANG (ACB) AP191278 · BS. Dương · Tấm Dentist Quận 10" [ref=e1525] [cursor=pointer]:
+              - button "NGUYỄN THỊ NGỌC TRANG (ACB)" [ref=e1529]
+              - generic [ref=e1530]: AP191278 · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e1531]: Done
+            - generic [ref=e1532]: completed
+            - button "Mở rộng chi tiết" [ref=e1534] [cursor=pointer]:
+              - img [ref=e1535]
+          - generic [ref=e1538]:
+            - button "12-01 09:00" [ref=e1539] [cursor=pointer]:
+              - generic [ref=e1540]: 12-01
+              - generic [ref=e1541]: 09:00
+            - button "NGUYỄN THỊ NGỌC TRANG (ACB) AP180453 · BS. Dương · Tấm Dentist Quận 10" [ref=e1542] [cursor=pointer]:
+              - button "NGUYỄN THỊ NGỌC TRANG (ACB)" [ref=e1546]
+              - generic [ref=e1547]: AP180453 · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e1548]: Done
+            - generic [ref=e1549]: completed
+            - button "Mở rộng chi tiết" [ref=e1551] [cursor=pointer]:
+              - img [ref=e1552]
+          - generic [ref=e1555]:
+            - button "12-04 09:00" [ref=e1556] [cursor=pointer]:
+              - generic [ref=e1557]: 12-04
+              - generic [ref=e1558]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP184181 · · Tấm Dentist Quận 3" [ref=e1559] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e1563]
+              - generic [ref=e1564]: AP184181 · · Tấm Dentist Quận 3
+            - generic [ref=e1565]: Done
+            - generic [ref=e1566]: completed
+            - button "Mở rộng chi tiết" [ref=e1568] [cursor=pointer]:
+              - img [ref=e1569]
+          - generic [ref=e1572]:
+            - button "12-05 09:00" [ref=e1573] [cursor=pointer]:
+              - generic [ref=e1574]: 12-05
+              - generic [ref=e1575]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP180935 · BÁC SĨ 03 · Tấm Dentist Quận 10" [ref=e1576] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e1580]
+              - generic [ref=e1581]: AP180935 · BÁC SĨ 03 · Tấm Dentist Quận 10
+            - generic [ref=e1582]: Done
+            - generic [ref=e1583]: completed
+            - button "Mở rộng chi tiết" [ref=e1585] [cursor=pointer]:
+              - img [ref=e1586]
+          - generic [ref=e1589]:
+            - button "12-06 09:00" [ref=e1590] [cursor=pointer]:
+              - generic [ref=e1591]: 12-06
+              - generic [ref=e1592]: 09:00
+            - button "CAO HÀ TIÊN - G AP182371 · BS. Trang · Tấm Dentist Gò Vấp" [ref=e1593] [cursor=pointer]:
+              - button "CAO HÀ TIÊN - G" [ref=e1597]
+              - generic [ref=e1598]: AP182371 · BS. Trang · Tấm Dentist Gò Vấp
+            - generic [ref=e1599]: Done
+            - generic [ref=e1600]: completed
+            - button "Mở rộng chi tiết" [ref=e1602] [cursor=pointer]:
+              - img [ref=e1603]
+          - generic [ref=e1606]:
+            - button "12-09 09:00" [ref=e1607] [cursor=pointer]:
+              - generic [ref=e1608]: 12-09
+              - generic [ref=e1609]: 09:00
+            - button "Nguyễn Hữu Thịnh AP190358 · BS. Nga · Tấm Dentist Thủ Đức" [ref=e1610] [cursor=pointer]:
+              - button "Nguyễn Hữu Thịnh" [ref=e1614]
+              - generic [ref=e1615]: AP190358 · BS. Nga · Tấm Dentist Thủ Đức
+            - generic [ref=e1616]: Done
+            - generic [ref=e1617]: completed
+            - button "Mở rộng chi tiết" [ref=e1619] [cursor=pointer]:
+              - img [ref=e1620]
+          - generic [ref=e1623]:
+            - button "12-12 09:00" [ref=e1624] [cursor=pointer]:
+              - generic [ref=e1625]: 12-12
+              - generic [ref=e1626]: 09:00
+            - button "NGÔ THỊ PHƯƠNG AP184657 · BS. Trang · Tấm Dentist Gò Vấp" [ref=e1627] [cursor=pointer]:
+              - button "NGÔ THỊ PHƯƠNG" [ref=e1631]
+              - generic [ref=e1632]: AP184657 · BS. Trang · Tấm Dentist Gò Vấp
+            - generic [ref=e1633]: Done
+            - generic [ref=e1634]: completed
+            - button "Mở rộng chi tiết" [ref=e1636] [cursor=pointer]:
+              - img [ref=e1637]
+          - generic [ref=e1640]:
+            - button "12-12 09:00" [ref=e1641] [cursor=pointer]:
+              - generic [ref=e1642]: 12-12
+              - generic [ref=e1643]: 09:00
+            - button "Trần Đỗ Gia Hân AP183844 · Bác sĩ 29 · Tấm Dentist Thủ Đức" [ref=e1644] [cursor=pointer]:
+              - button "Trần Đỗ Gia Hân" [ref=e1648]
+              - generic [ref=e1649]: AP183844 · Bác sĩ 29 · Tấm Dentist Thủ Đức
+            - generic [ref=e1650]: Done
+            - generic [ref=e1651]: completed
+            - button "Mở rộng chi tiết" [ref=e1653] [cursor=pointer]:
+              - img [ref=e1654]
+          - generic [ref=e1657]:
+            - button "12-13 09:00" [ref=e1658] [cursor=pointer]:
+              - generic [ref=e1659]: 12-13
+              - generic [ref=e1660]: 09:00
+            - button "QUÁCH ĐẶNG QUỲNH ANH AP195987 · · Tấm Dentist Quận 3" [ref=e1661] [cursor=pointer]:
+              - button "QUÁCH ĐẶNG QUỲNH ANH" [ref=e1665]
+              - generic [ref=e1666]: AP195987 · · Tấm Dentist Quận 3
+            - generic [ref=e1667]: Done
+            - generic [ref=e1668]: completed
+            - button "Mở rộng chi tiết" [ref=e1670] [cursor=pointer]:
+              - img [ref=e1671]
+          - generic [ref=e1674]:
+            - button "12-15 09:00" [ref=e1675] [cursor=pointer]:
+              - generic [ref=e1676]: 12-15
+              - generic [ref=e1677]: 09:00
+            - button "TRẦN PHƯƠNG ANH AP197097 · BS. Dương · Tấm Dentist Quận 10" [ref=e1678] [cursor=pointer]:
+              - button "TRẦN PHƯƠNG ANH" [ref=e1682]
+              - generic [ref=e1683]: AP197097 · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e1684]: Done
+            - generic [ref=e1685]: completed
+            - button "Mở rộng chi tiết" [ref=e1687] [cursor=pointer]:
+              - img [ref=e1688]
+          - generic [ref=e1691]:
+            - button "12-15 09:00" [ref=e1692] [cursor=pointer]:
+              - generic [ref=e1693]: 12-15
+              - generic [ref=e1694]: 09:00
+            - button "TRẦN PHƯƠNG ANH AP196620 · · Tấm Dentist Quận 10" [ref=e1695] [cursor=pointer]:
+              - button "TRẦN PHƯƠNG ANH" [ref=e1699]
+              - generic [ref=e1700]: AP196620 · · Tấm Dentist Quận 10
+            - generic [ref=e1701]: Done
+            - generic [ref=e1702]: completed
+            - button "Mở rộng chi tiết" [ref=e1704] [cursor=pointer]:
+              - img [ref=e1705]
+          - generic [ref=e1708]:
+            - button "12-16 09:00" [ref=e1709] [cursor=pointer]:
+              - generic [ref=e1710]: 12-16
+              - generic [ref=e1711]: 09:00
+            - button "DƯƠNG NHẬT AN AP194138 · · Tấm Dentist Quận 3" [ref=e1712] [cursor=pointer]:
+              - button "DƯƠNG NHẬT AN" [ref=e1716]
+              - generic [ref=e1717]: AP194138 · · Tấm Dentist Quận 3
+            - generic [ref=e1718]: Done
+            - generic [ref=e1719]: completed
+            - button "Mở rộng chi tiết" [ref=e1721] [cursor=pointer]:
+              - img [ref=e1722]
+          - generic [ref=e1725]:
+            - button "12-24 09:00" [ref=e1726] [cursor=pointer]:
+              - generic [ref=e1727]: 12-24
+              - generic [ref=e1728]: 09:00
+            - button "Nguyễn Hữu Thịnh AP194534 · BS. Nga · Tấm Dentist Thủ Đức" [ref=e1729] [cursor=pointer]:
+              - button "Nguyễn Hữu Thịnh" [ref=e1733]
+              - generic [ref=e1734]: AP194534 · BS. Nga · Tấm Dentist Thủ Đức
+            - generic [ref=e1735]: Done
+            - generic [ref=e1736]: completed
+            - button "Mở rộng chi tiết" [ref=e1738] [cursor=pointer]:
+              - img [ref=e1739]
+          - generic [ref=e1742]:
+            - button "12-25 09:00" [ref=e1743] [cursor=pointer]:
+              - generic [ref=e1744]: 12-25
+              - generic [ref=e1745]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP192611 · · Tấm Dentist Quận 3" [ref=e1746] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e1750]
+              - generic [ref=e1751]: AP192611 · · Tấm Dentist Quận 3
+            - generic [ref=e1752]: Done
+            - generic [ref=e1753]: completed
+            - button "Mở rộng chi tiết" [ref=e1755] [cursor=pointer]:
+              - img [ref=e1756]
+          - generic [ref=e1759]:
+            - button "12-27 09:00" [ref=e1760] [cursor=pointer]:
+              - generic [ref=e1761]: 12-27
+              - generic [ref=e1762]: 09:00
+            - button "Trần Ngọc Kim Tỷ AP199481 · BS. Nga · Tấm Dentist Thủ Đức" [ref=e1763] [cursor=pointer]:
+              - button "Trần Ngọc Kim Tỷ" [ref=e1767]
+              - generic [ref=e1768]: AP199481 · BS. Nga · Tấm Dentist Thủ Đức
+            - generic [ref=e1769]: Done
+            - generic [ref=e1770]: completed
+            - button "Mở rộng chi tiết" [ref=e1772] [cursor=pointer]:
+              - img [ref=e1773]
+          - generic [ref=e1776]:
+            - button "12-27 09:00" [ref=e1777] [cursor=pointer]:
+              - generic [ref=e1778]: 12-27
+              - generic [ref=e1779]: 09:00
+            - button "PHẠM THỊ KIỀU OANH AP188527 · BS. Uyên · Tấm Dentist Quận 10" [ref=e1780] [cursor=pointer]:
+              - button "PHẠM THỊ KIỀU OANH" [ref=e1784]
+              - generic [ref=e1785]: AP188527 · BS. Uyên · Tấm Dentist Quận 10
+            - generic [ref=e1786]: Done
+            - generic [ref=e1787]: completed
+            - button "Mở rộng chi tiết" [ref=e1789] [cursor=pointer]:
+              - img [ref=e1790]
+          - generic [ref=e1793]:
+            - button "12-30 09:00" [ref=e1794] [cursor=pointer]:
+              - generic [ref=e1795]: 12-30
+              - generic [ref=e1796]: 09:00
+            - button "DƯƠNG NHẬT AN AP197469 · BS. Ý · Tấm Dentist Quận 3" [ref=e1797] [cursor=pointer]:
+              - button "DƯƠNG NHẬT AN" [ref=e1801]
+              - generic [ref=e1802]: AP197469 · BS. Ý · Tấm Dentist Quận 3
+            - generic [ref=e1803]: Done
+            - generic [ref=e1804]: completed
+            - button "Mở rộng chi tiết" [ref=e1806] [cursor=pointer]:
+              - img [ref=e1807]
+          - generic [ref=e1810]:
+            - button "12-31 09:00" [ref=e1811] [cursor=pointer]:
+              - generic [ref=e1812]: 12-31
+              - generic [ref=e1813]: 09:00
+            - button "NGUYỄN THỊ NGỌC TRANG (ACB) AP191207 · BS. Dương · Tấm Dentist Quận 10" [ref=e1814] [cursor=pointer]:
+              - button "NGUYỄN THỊ NGỌC TRANG (ACB)" [ref=e1818]
+              - generic [ref=e1819]: AP191207 · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e1820]: Done
+            - generic [ref=e1821]: completed
+            - button "Mở rộng chi tiết" [ref=e1823] [cursor=pointer]:
+              - img [ref=e1824]
+          - generic [ref=e1827]:
+            - button "01-03 09:00" [ref=e1828] [cursor=pointer]:
+              - generic [ref=e1829]: 01-03
+              - generic [ref=e1830]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP192874 · BÁC SĨ 03 · Tấm Dentist Quận 10" [ref=e1831] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e1835]
+              - generic [ref=e1836]: AP192874 · BÁC SĨ 03 · Tấm Dentist Quận 10
+            - generic [ref=e1837]: Done
+            - generic [ref=e1838]: completed
+            - button "Mở rộng chi tiết" [ref=e1840] [cursor=pointer]:
+              - img [ref=e1841]
+          - generic [ref=e1844]:
+            - button "01-03 09:00" [ref=e1845] [cursor=pointer]:
+              - generic [ref=e1846]: 01-03
+              - generic [ref=e1847]: 09:00
+            - button "CAO HÀ TIÊN - G AP193181 · BS. Trang · Tấm Dentist Gò Vấp" [ref=e1848] [cursor=pointer]:
+              - button "CAO HÀ TIÊN - G" [ref=e1852]
+              - generic [ref=e1853]: AP193181 · BS. Trang · Tấm Dentist Gò Vấp
+            - generic [ref=e1854]: Done
+            - generic [ref=e1855]: completed
+            - button "Mở rộng chi tiết" [ref=e1857] [cursor=pointer]:
+              - img [ref=e1858]
+          - generic [ref=e1861]:
+            - button "01-06 09:00" [ref=e1862] [cursor=pointer]:
+              - generic [ref=e1863]: 01-06
+              - generic [ref=e1864]: 09:00
+            - button "Trần Ngọc Kim Tỷ AP205624 · BS. Thảo · Tấm Dentist Thủ Đức" [ref=e1865] [cursor=pointer]:
+              - button "Trần Ngọc Kim Tỷ" [ref=e1869]
+              - generic [ref=e1870]: AP205624 · BS. Thảo · Tấm Dentist Thủ Đức
+            - generic [ref=e1871]: Done
+            - generic [ref=e1872]: completed
+            - button "Mở rộng chi tiết" [ref=e1874] [cursor=pointer]:
+              - img [ref=e1875]
+          - generic [ref=e1878]:
+            - button "01-08 09:00" [ref=e1879] [cursor=pointer]:
+              - generic [ref=e1880]: 01-08
+              - generic [ref=e1881]: 09:00
+            - button "Trần Đỗ Gia Hân AP195670 · Bác sĩ 29 · Tấm Dentist Thủ Đức" [ref=e1882] [cursor=pointer]:
+              - button "Trần Đỗ Gia Hân" [ref=e1886]
+              - generic [ref=e1887]: AP195670 · Bác sĩ 29 · Tấm Dentist Thủ Đức
+            - generic [ref=e1888]: Done
+            - generic [ref=e1889]: completed
+            - button "Mở rộng chi tiết" [ref=e1891] [cursor=pointer]:
+              - img [ref=e1892]
+          - generic [ref=e1895]:
+            - button "01-10 09:00" [ref=e1896] [cursor=pointer]:
+              - generic [ref=e1897]: 01-10
+              - generic [ref=e1898]: 09:00
+            - button "Trần Ngọc Kim Tỷ AP202251 · BS. Thảo · Tấm Dentist Thủ Đức" [ref=e1899] [cursor=pointer]:
+              - button "Trần Ngọc Kim Tỷ" [ref=e1903]
+              - generic [ref=e1904]: AP202251 · BS. Thảo · Tấm Dentist Thủ Đức
+            - generic [ref=e1905]: Done
+            - generic [ref=e1906]: completed
+            - button "Mở rộng chi tiết" [ref=e1908] [cursor=pointer]:
+              - img [ref=e1909]
+          - generic [ref=e1912]:
+            - button "01-10 09:00" [ref=e1913] [cursor=pointer]:
+              - generic [ref=e1914]: 01-10
+              - generic [ref=e1915]: 09:00
+            - button "NGÔ THỊ PHƯƠNG AP195834 · BS. Trang · Tấm Dentist Gò Vấp" [ref=e1916] [cursor=pointer]:
+              - button "NGÔ THỊ PHƯƠNG" [ref=e1920]
+              - generic [ref=e1921]: AP195834 · BS. Trang · Tấm Dentist Gò Vấp
+            - generic [ref=e1922]: Done
+            - generic [ref=e1923]: completed
+            - button "Mở rộng chi tiết" [ref=e1925] [cursor=pointer]:
+              - img [ref=e1926]
+          - generic [ref=e1929]:
+            - button "01-12 09:00" [ref=e1930] [cursor=pointer]:
+              - generic [ref=e1931]: 01-12
+              - generic [ref=e1932]: 09:00
+            - button "Phạm Ngọc Huy AP208562 · · Tấm Dentist Thủ Đức" [ref=e1933] [cursor=pointer]:
+              - button "Phạm Ngọc Huy" [ref=e1937]
+              - generic [ref=e1938]: AP208562 · · Tấm Dentist Thủ Đức
+            - generic [ref=e1939]: Done
+            - generic [ref=e1940]: completed
+            - button "Mở rộng chi tiết" [ref=e1942] [cursor=pointer]:
+              - img [ref=e1943]
+          - generic [ref=e1946]:
+            - button "01-13 09:00" [ref=e1947] [cursor=pointer]:
+              - generic [ref=e1948]: 01-13
+              - generic [ref=e1949]: 09:00
+            - button "DƯƠNG NHẬT AN AP203236 · BS. Ý · Tấm Dentist Quận 3" [ref=e1950] [cursor=pointer]:
+              - button "DƯƠNG NHẬT AN" [ref=e1954]
+              - generic [ref=e1955]: AP203236 · BS. Ý · Tấm Dentist Quận 3
+            - generic [ref=e1956]: Done
+            - generic [ref=e1957]: completed
+            - button "Mở rộng chi tiết" [ref=e1959] [cursor=pointer]:
+              - img [ref=e1960]
+          - generic [ref=e1963]:
+            - button "01-15 09:00" [ref=e1964] [cursor=pointer]:
+              - generic [ref=e1965]: 01-15
+              - generic [ref=e1966]: 09:00
+            - button "NGUYỄN THANH HIỂN AP175345 · BS. Trang · Tấm Dentist Gò Vấp" [ref=e1967] [cursor=pointer]:
+              - button "NGUYỄN THANH HIỂN" [ref=e1971]
+              - generic [ref=e1972]: AP175345 · BS. Trang · Tấm Dentist Gò Vấp
+            - generic [ref=e1973]: Done
+            - generic [ref=e1974]: completed
+            - button "Mở rộng chi tiết" [ref=e1976] [cursor=pointer]:
+              - img [ref=e1977]
+          - generic [ref=e1980]:
+            - button "01-15 09:00" [ref=e1981] [cursor=pointer]:
+              - generic [ref=e1982]: 01-15
+              - generic [ref=e1983]: 09:00
+            - button "Phạm Ngọc Huy AP208696 · BS. Quyên · Tấm Dentist Thủ Đức" [ref=e1984] [cursor=pointer]:
+              - button "Phạm Ngọc Huy" [ref=e1988]
+              - generic [ref=e1989]: AP208696 · BS. Quyên · Tấm Dentist Thủ Đức
+            - generic [ref=e1990]: Done
+            - generic [ref=e1991]: completed
+            - button "Mở rộng chi tiết" [ref=e1993] [cursor=pointer]:
+              - img [ref=e1994]
+          - generic [ref=e1997]:
+            - button "01-15 09:00" [ref=e1998] [cursor=pointer]:
+              - generic [ref=e1999]: 01-15
+              - generic [ref=e2000]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP201062 · · Tấm Dentist Quận 3" [ref=e2001] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e2005]
+              - generic [ref=e2006]: AP201062 · · Tấm Dentist Quận 3
+            - generic [ref=e2007]: Done
+            - generic [ref=e2008]: completed
+            - button "Mở rộng chi tiết" [ref=e2010] [cursor=pointer]:
+              - img [ref=e2011]
+          - generic [ref=e2014]:
+            - button "01-16 09:00" [ref=e2015] [cursor=pointer]:
+              - generic [ref=e2016]: 01-16
+              - generic [ref=e2017]: 09:00
+            - button "TRẦN PHƯƠNG ANH AP209028 · BS. Dương · Tấm Dentist Quận 10" [ref=e2018] [cursor=pointer]:
+              - button "TRẦN PHƯƠNG ANH" [ref=e2022]
+              - generic [ref=e2023]: AP209028 · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e2024]: Done
+            - generic [ref=e2025]: completed
+            - button "Mở rộng chi tiết" [ref=e2027] [cursor=pointer]:
+              - img [ref=e2028]
+          - generic [ref=e2031]:
+            - button "01-21 09:00" [ref=e2032] [cursor=pointer]:
+              - generic [ref=e2033]: 01-21
+              - generic [ref=e2034]: 09:00
+            - button "Nguyễn Hữu Thịnh AP200814 · BS. Nga · Tấm Dentist Thủ Đức" [ref=e2035] [cursor=pointer]:
+              - button "Nguyễn Hữu Thịnh" [ref=e2039]
+              - generic [ref=e2040]: AP200814 · BS. Nga · Tấm Dentist Thủ Đức
+            - generic [ref=e2041]: Done
+            - generic [ref=e2042]: completed
+            - button "Mở rộng chi tiết" [ref=e2044] [cursor=pointer]:
+              - img [ref=e2045]
+          - generic [ref=e2048]:
+            - button "01-22 09:00" [ref=e2049] [cursor=pointer]:
+              - generic [ref=e2050]: 01-22
+              - generic [ref=e2051]: 09:00
+            - button "NGUYỄN THỊ NHƯ Ý AP212589 · · Tấm Dentist Gò Vấp" [ref=e2052] [cursor=pointer]:
+              - button "NGUYỄN THỊ NHƯ Ý" [ref=e2056]
+              - generic [ref=e2057]: AP212589 · · Tấm Dentist Gò Vấp
+            - generic [ref=e2058]: Done
+            - generic [ref=e2059]: completed
+            - button "Mở rộng chi tiết" [ref=e2061] [cursor=pointer]:
+              - img [ref=e2062]
+          - generic [ref=e2065]:
+            - button "01-23 09:00" [ref=e2066] [cursor=pointer]:
+              - generic [ref=e2067]: 01-23
+              - generic [ref=e2068]: 09:00
+            - button "LƯU NGỌC THUÝ VY AP213308 · · Tấm Dentist Quận 10" [ref=e2069] [cursor=pointer]:
+              - button "LƯU NGỌC THUÝ VY" [ref=e2073]
+              - generic [ref=e2074]: AP213308 · · Tấm Dentist Quận 10
+            - generic [ref=e2075]: Done
+            - generic [ref=e2076]: completed
+            - button "Mở rộng chi tiết" [ref=e2078] [cursor=pointer]:
+              - img [ref=e2079]
+          - generic [ref=e2082]:
+            - button "01-24 09:00" [ref=e2083] [cursor=pointer]:
+              - generic [ref=e2084]: 01-24
+              - generic [ref=e2085]: 09:00
+            - button "NGUYỄN THỊ NHƯ Ý AP213160 · BS. Ly · Tấm Dentist Gò Vấp" [ref=e2086] [cursor=pointer]:
+              - button "NGUYỄN THỊ NHƯ Ý" [ref=e2090]
+              - generic [ref=e2091]: AP213160 · BS. Ly · Tấm Dentist Gò Vấp
+            - generic [ref=e2092]: Done
+            - generic [ref=e2093]: completed
+            - button "Mở rộng chi tiết" [ref=e2095] [cursor=pointer]:
+              - img [ref=e2096]
+          - generic [ref=e2099]:
+            - button "01-27 09:00" [ref=e2100] [cursor=pointer]:
+              - generic [ref=e2101]: 01-27
+              - generic [ref=e2102]: 09:00
+            - button "LƯU NGỌC THUÝ VY AP214408 · BS. Dương · Tấm Dentist Quận 10" [ref=e2103] [cursor=pointer]:
+              - button "LƯU NGỌC THUÝ VY" [ref=e2107]
+              - generic [ref=e2108]: AP214408 · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e2109]: Done
+            - generic [ref=e2110]: completed
+            - button "Mở rộng chi tiết" [ref=e2112] [cursor=pointer]:
+              - img [ref=e2113]
+          - generic [ref=e2116]:
+            - button "01-27 09:00" [ref=e2117] [cursor=pointer]:
+              - generic [ref=e2118]: 01-27
+              - generic [ref=e2119]: 09:00
+            - button "NGUYỄN THỊ NHƯ Ý AP214236 · BS. Khánh · Tấm Dentist Gò Vấp" [ref=e2120] [cursor=pointer]:
+              - button "NGUYỄN THỊ NHƯ Ý" [ref=e2124]
+              - generic [ref=e2125]: AP214236 · BS. Khánh · Tấm Dentist Gò Vấp
+            - generic [ref=e2126]: Done
+            - generic [ref=e2127]: completed
+            - button "Mở rộng chi tiết" [ref=e2129] [cursor=pointer]:
+              - img [ref=e2130]
+          - generic [ref=e2133]:
+            - button "01-29 09:00" [ref=e2134] [cursor=pointer]:
+              - generic [ref=e2135]: 01-29
+              - generic [ref=e2136]: 09:00
+            - button "Trần Ngọc Kim Tỷ AP207561 · BS. Thảo · Tấm Dentist Thủ Đức" [ref=e2137] [cursor=pointer]:
+              - button "Trần Ngọc Kim Tỷ" [ref=e2141]
+              - generic [ref=e2142]: AP207561 · BS. Thảo · Tấm Dentist Thủ Đức
+            - generic [ref=e2143]: Done
+            - generic [ref=e2144]: completed
+            - button "Mở rộng chi tiết" [ref=e2146] [cursor=pointer]:
+              - img [ref=e2147]
+          - generic [ref=e2150]:
+            - button "02-02 09:00" [ref=e2151] [cursor=pointer]:
+              - generic [ref=e2152]: 02-02
+              - generic [ref=e2153]: 09:00
+            - button "Trần Đỗ Gia Hân AP206587 · Bác sĩ 29 · Tấm Dentist Thủ Đức" [ref=e2154] [cursor=pointer]:
+              - button "Trần Đỗ Gia Hân" [ref=e2158]
+              - generic [ref=e2159]: AP206587 · Bác sĩ 29 · Tấm Dentist Thủ Đức
+            - generic [ref=e2160]: Done
+            - generic [ref=e2161]: completed
+            - button "Mở rộng chi tiết" [ref=e2163] [cursor=pointer]:
+              - img [ref=e2164]
+          - generic [ref=e2167]:
+            - button "02-03 09:00" [ref=e2168] [cursor=pointer]:
+              - generic [ref=e2169]: 02-03
+              - generic [ref=e2170]: 09:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP204545 · BÁC SĨ 03 · Tấm Dentist Quận 10" [ref=e2171] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e2175]
+              - generic [ref=e2176]: AP204545 · BÁC SĨ 03 · Tấm Dentist Quận 10
+            - generic [ref=e2177]: Done
+            - generic [ref=e2178]: completed
+            - button "Mở rộng chi tiết" [ref=e2180] [cursor=pointer]:
+              - img [ref=e2181]
+          - generic [ref=e2184]:
+            - button "02-03 09:00" [ref=e2185] [cursor=pointer]:
+              - generic [ref=e2186]: 02-03
+              - generic [ref=e2187]: 09:00
+            - button "NGUYỄN THỊ NGỌC TRANG (ACB) AP203528 · BS. Dương · Tấm Dentist Quận 10" [ref=e2188] [cursor=pointer]:
+              - button "NGUYỄN THỊ NGỌC TRANG (ACB)" [ref=e2192]
+              - generic [ref=e2193]: AP203528 · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e2194]: Done
+            - generic [ref=e2195]: completed
+            - button "Mở rộng chi tiết" [ref=e2197] [cursor=pointer]:
+              - img [ref=e2198]
+          - generic [ref=e2201]:
+            - button "02-05 09:00" [ref=e2202] [cursor=pointer]:
+              - generic [ref=e2203]: 02-05
+              - generic [ref=e2204]: 09:00
+            - button "NGUYỄN NGÔ QUỲNH TRÂM AP218268 · · Tấm Dentist Quận 7" [ref=e2205] [cursor=pointer]:
+              - button "NGUYỄN NGÔ QUỲNH TRÂM" [ref=e2209]
+              - generic [ref=e2210]: AP218268 · · Tấm Dentist Quận 7
+            - generic [ref=e2211]: Done
+            - generic [ref=e2212]: completed
+            - button "Mở rộng chi tiết" [ref=e2214] [cursor=pointer]:
+              - img [ref=e2215]
+          - generic [ref=e2218]:
+            - button "02-05 09:00" [ref=e2219] [cursor=pointer]:
+              - generic [ref=e2220]: 02-05
+              - generic [ref=e2221]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP209762 · · Tấm Dentist Quận 3" [ref=e2222] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e2226]
+              - generic [ref=e2227]: AP209762 · · Tấm Dentist Quận 3
+            - generic [ref=e2228]: Done
+            - generic [ref=e2229]: completed
+            - button "Mở rộng chi tiết" [ref=e2231] [cursor=pointer]:
+              - img [ref=e2232]
+          - generic [ref=e2235]:
+            - button "02-07 09:00" [ref=e2236] [cursor=pointer]:
+              - generic [ref=e2237]: 02-07
+              - generic [ref=e2238]: 09:00
+            - button "CAO HÀ TIÊN - G AP217201 · BS. Trang · Tấm Dentist Gò Vấp" [ref=e2239] [cursor=pointer]:
+              - button "CAO HÀ TIÊN - G" [ref=e2243]
+              - generic [ref=e2244]: AP217201 · BS. Trang · Tấm Dentist Gò Vấp
+            - generic [ref=e2245]: Done
+            - generic [ref=e2246]: completed
+            - button "Mở rộng chi tiết" [ref=e2248] [cursor=pointer]:
+              - img [ref=e2249]
+          - generic [ref=e2252]:
+            - button "02-10 09:00" [ref=e2253] [cursor=pointer]:
+              - generic [ref=e2254]: 02-10
+              - generic [ref=e2255]: 09:00
+            - button "NGÔ THỊ PHƯƠNG AP207435 · BS. Trang · Tấm Dentist Gò Vấp" [ref=e2256] [cursor=pointer]:
+              - button "NGÔ THỊ PHƯƠNG" [ref=e2260]
+              - generic [ref=e2261]: AP207435 · BS. Trang · Tấm Dentist Gò Vấp
+            - generic [ref=e2262]: Done
+            - generic [ref=e2263]: completed
+            - button "Mở rộng chi tiết" [ref=e2265] [cursor=pointer]:
+              - img [ref=e2266]
+          - generic [ref=e2269]:
+            - button "02-11 09:00" [ref=e2270] [cursor=pointer]:
+              - generic [ref=e2271]: 02-11
+              - generic [ref=e2272]: 09:00
+            - button "Phạm Ngọc Huy AP210080 · BS. Quyên · Tấm Dentist Thủ Đức" [ref=e2273] [cursor=pointer]:
+              - button "Phạm Ngọc Huy" [ref=e2277]
+              - generic [ref=e2278]: AP210080 · BS. Quyên · Tấm Dentist Thủ Đức
+            - generic [ref=e2279]: Done
+            - generic [ref=e2280]: completed
+            - button "Mở rộng chi tiết" [ref=e2282] [cursor=pointer]:
+              - img [ref=e2283]
+          - generic [ref=e2286]:
+            - button "02-24 09:00" [ref=e2287] [cursor=pointer]:
+              - generic [ref=e2288]: 02-24
+              - generic [ref=e2289]: 09:00
+            - button "NGUYỄN NGÔ QUỲNH TRÂM AP223319 · · Tấm Dentist Quận 7" [ref=e2290] [cursor=pointer]:
+              - button "NGUYỄN NGÔ QUỲNH TRÂM" [ref=e2294]
+              - generic [ref=e2295]: AP223319 · · Tấm Dentist Quận 7
+            - generic [ref=e2296]: Done
+            - generic [ref=e2297]: completed
+            - button "Mở rộng chi tiết" [ref=e2299] [cursor=pointer]:
+              - img [ref=e2300]
+          - generic [ref=e2303]:
+            - button "02-25 09:00" [ref=e2304] [cursor=pointer]:
+              - generic [ref=e2305]: 02-25
+              - generic [ref=e2306]: 09:00
+            - button "TRẦN PHƯƠNG ANH AP223506 · BS. Dương · Tấm Dentist Quận 10" [ref=e2307] [cursor=pointer]:
+              - button "TRẦN PHƯƠNG ANH" [ref=e2311]
+              - generic [ref=e2312]: AP223506 · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e2313]: Done
+            - generic [ref=e2314]: completed
+            - button "Mở rộng chi tiết" [ref=e2316] [cursor=pointer]:
+              - img [ref=e2317]
+          - generic [ref=e2320]:
+            - button "03-05 09:00" [ref=e2321] [cursor=pointer]:
+              - generic [ref=e2322]: 03-05
+              - generic [ref=e2323]: 09:00
+            - button "LƯƠNG HỒNG NHUNG - G - UP AP218762 · · Tấm Dentist Quận 3" [ref=e2324] [cursor=pointer]:
+              - button "LƯƠNG HỒNG NHUNG - G - UP" [ref=e2328]
+              - generic [ref=e2329]: AP218762 · · Tấm Dentist Quận 3
+            - generic [ref=e2330]: Not Arrived
+            - generic [ref=e2331]: confirmed
+            - button "Mở rộng chi tiết" [ref=e2333] [cursor=pointer]:
+              - img [ref=e2334]
+          - generic [ref=e2337]:
+            - button "03-06 09:00" [ref=e2338] [cursor=pointer]:
+              - generic [ref=e2339]: 03-06
+              - generic [ref=e2340]: 09:00
+            - button "LƯU NGỌC THUÝ VY AP228047 · BS. Dương · Tấm Dentist Quận 10" [ref=e2341] [cursor=pointer]:
+              - button "LƯU NGỌC THUÝ VY" [ref=e2345]
+              - generic [ref=e2346]: AP228047 · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e2347]: Done
+            - generic [ref=e2348]: completed
+            - button "Mở rộng chi tiết" [ref=e2350] [cursor=pointer]:
+              - img [ref=e2351]
+          - generic [ref=e2354]:
+            - button "03-08 09:00" [ref=e2355] [cursor=pointer]:
+              - generic [ref=e2356]: 03-08
+              - generic [ref=e2357]: 09:00
+            - button "QUÁCH ĐẶNG QUỲNH ANH AP228122 · BS. Ý · Tấm Dentist Quận 3" [ref=e2358] [cursor=pointer]:
+              - button "QUÁCH ĐẶNG QUỲNH ANH" [ref=e2362]
+              - generic [ref=e2363]: AP228122 · BS. Ý · Tấm Dentist Quận 3
+            - generic [ref=e2364]: Done
+            - generic [ref=e2365]: completed
+            - button "Mở rộng chi tiết" [ref=e2367] [cursor=pointer]:
+              - img [ref=e2368]
+          - generic [ref=e2371]:
+            - button "03-10 09:00" [ref=e2372] [cursor=pointer]:
+              - generic [ref=e2373]: 03-10
+              - generic [ref=e2374]: 09:00
+            - button "NGUYỄN NGÔ QUỲNH TRÂM AP230057 · · Tấm Dentist Quận 7" [ref=e2375] [cursor=pointer]:
+              - button "NGUYỄN NGÔ QUỲNH TRÂM" [ref=e2379]
+              - generic [ref=e2380]: AP230057 · · Tấm Dentist Quận 7
+            - generic [ref=e2381]: Done
+            - generic [ref=e2382]: completed
+            - button "Mở rộng chi tiết" [ref=e2384] [cursor=pointer]:
+              - img [ref=e2385]
+          - generic [ref=e2388]:
+            - button "03-10 17:30" [ref=e2389] [cursor=pointer]:
+              - generic [ref=e2390]: 03-10
+              - generic [ref=e2391]: 17:30
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP217991 · BÁC SĨ 03 · Tấm Dentist Quận 10" [ref=e2392] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e2396]
+              - generic [ref=e2397]: AP217991 · BÁC SĨ 03 · Tấm Dentist Quận 10
+            - generic [ref=e2398]: Done
+            - generic [ref=e2399]: completed
+            - button "Mở rộng chi tiết" [ref=e2401] [cursor=pointer]:
+              - img [ref=e2402]
+          - generic [ref=e2405]:
+            - button "03-11 09:00" [ref=e2406] [cursor=pointer]:
+              - generic [ref=e2407]: 03-11
+              - generic [ref=e2408]: 09:00
+            - button "QUÁCH ĐẶNG QUỲNH ANH AP230469 · · Tấm Dentist Quận 3" [ref=e2409] [cursor=pointer]:
+              - button "QUÁCH ĐẶNG QUỲNH ANH" [ref=e2413]
+              - generic [ref=e2414]: AP230469 · · Tấm Dentist Quận 3
+            - generic [ref=e2415]: Done
+            - generic [ref=e2416]: completed
+            - button "Mở rộng chi tiết" [ref=e2418] [cursor=pointer]:
+              - img [ref=e2419]
+          - generic [ref=e2422]:
+            - button "03-11 09:00" [ref=e2423] [cursor=pointer]:
+              - generic [ref=e2424]: 03-11
+              - generic [ref=e2425]: 09:00
+            - button "PHẠM THỊ KIỀU OANH AP226729 · BS. Uyên · Tấm Dentist Quận 10" [ref=e2426] [cursor=pointer]:
+              - button "PHẠM THỊ KIỀU OANH" [ref=e2430]
+              - generic [ref=e2431]: AP226729 · BS. Uyên · Tấm Dentist Quận 10
+            - generic [ref=e2432]: Done
+            - generic [ref=e2433]: completed
+            - button "Mở rộng chi tiết" [ref=e2435] [cursor=pointer]:
+              - img [ref=e2436]
+          - generic [ref=e2439]:
+            - button "03-12 09:00" [ref=e2440] [cursor=pointer]:
+              - generic [ref=e2441]: 03-12
+              - generic [ref=e2442]: 09:00
+            - button "NGUYỄN THỊ NHƯ Ý AP227383 · BS. Ly · Tấm Dentist Gò Vấp" [ref=e2443] [cursor=pointer]:
+              - button "NGUYỄN THỊ NHƯ Ý" [ref=e2447]
+              - generic [ref=e2448]: AP227383 · BS. Ly · Tấm Dentist Gò Vấp
+            - generic [ref=e2449]: Done
+            - generic [ref=e2450]: completed
+            - button "Mở rộng chi tiết" [ref=e2452] [cursor=pointer]:
+              - img [ref=e2453]
+          - generic [ref=e2456]:
+            - button "03-13 09:00" [ref=e2457] [cursor=pointer]:
+              - generic [ref=e2458]: 03-13
+              - generic [ref=e2459]: 09:00
+            - button "LƯU NGỌC THUÝ VY AP231904 · · Tấm Dentist Quận 10" [ref=e2460] [cursor=pointer]:
+              - button "LƯU NGỌC THUÝ VY" [ref=e2464]
+              - generic [ref=e2465]: AP231904 · · Tấm Dentist Quận 10
+            - generic [ref=e2466]: Done
+            - generic [ref=e2467]: completed
+            - button "Mở rộng chi tiết" [ref=e2469] [cursor=pointer]:
+              - img [ref=e2470]
+          - generic [ref=e2473]:
+            - button "03-16 09:00" [ref=e2474] [cursor=pointer]:
+              - generic [ref=e2475]: 03-16
+              - generic [ref=e2476]: 09:00
+            - button "Trần Đỗ Gia Hân AP217388 · Bác sĩ 29 · Tấm Dentist Thủ Đức" [ref=e2477] [cursor=pointer]:
+              - button "Trần Đỗ Gia Hân" [ref=e2481]
+              - generic [ref=e2482]: AP217388 · Bác sĩ 29 · Tấm Dentist Thủ Đức
+            - generic [ref=e2483]: Not Arrived
+            - generic [ref=e2484]: confirmed
+            - button "Mở rộng chi tiết" [ref=e2486] [cursor=pointer]:
+              - img [ref=e2487]
+          - generic [ref=e2490]:
+            - button "03-19 09:00" [ref=e2491] [cursor=pointer]:
+              - generic [ref=e2492]: 03-19
+              - generic [ref=e2493]: 09:00
+            - button "QUÁCH ĐẶNG QUỲNH ANH AP235011 · BS. Ý · Tấm Dentist Quận 3" [ref=e2494] [cursor=pointer]:
+              - button "QUÁCH ĐẶNG QUỲNH ANH" [ref=e2498]
+              - generic [ref=e2499]: AP235011 · BS. Ý · Tấm Dentist Quận 3
+            - generic [ref=e2500]: Done
+            - generic [ref=e2501]: completed
+            - button "Mở rộng chi tiết" [ref=e2503] [cursor=pointer]:
+              - img [ref=e2504]
+          - generic [ref=e2507]:
+            - button "03-20 09:00" [ref=e2508] [cursor=pointer]:
+              - generic [ref=e2509]: 03-20
+              - generic [ref=e2510]: 09:00
+            - button "Trần Ngọc Kim Tỷ AP235538 · · Tấm Dentist Thủ Đức" [ref=e2511] [cursor=pointer]:
+              - button "Trần Ngọc Kim Tỷ" [ref=e2515]
+              - generic [ref=e2516]: AP235538 · · Tấm Dentist Thủ Đức
+            - generic [ref=e2517]: Done
+            - generic [ref=e2518]: completed
+            - button "Mở rộng chi tiết" [ref=e2520] [cursor=pointer]:
+              - img [ref=e2521]
+          - generic [ref=e2524]:
+            - button "03-22 09:00" [ref=e2525] [cursor=pointer]:
+              - generic [ref=e2526]: 03-22
+              - generic [ref=e2527]: 09:00
+            - button "PHAN THỊ KIM ANH AP235908 · BS. Dương · Tấm Dentist Quận 10" [ref=e2528] [cursor=pointer]:
+              - button "PHAN THỊ KIM ANH" [ref=e2532]
+              - generic [ref=e2533]: AP235908 · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e2534]: Done
+            - generic [ref=e2535]: completed
+            - button "Mở rộng chi tiết" [ref=e2537] [cursor=pointer]:
+              - img [ref=e2538]
+          - generic [ref=e2541]:
+            - button "03-22 16:00" [ref=e2542] [cursor=pointer]:
+              - generic [ref=e2543]: 03-22
+              - generic [ref=e2544]: 16:00
+            - button "HÀ THỊ KHÁNH LY AP235451 · · Tấm Dentist Gò Vấp" [ref=e2545] [cursor=pointer]:
+              - button "HÀ THỊ KHÁNH LY" [ref=e2549]
+              - generic [ref=e2550]: AP235451 · · Tấm Dentist Gò Vấp
+            - generic [ref=e2551]: Done
+            - generic [ref=e2552]: completed
+            - button "Mở rộng chi tiết" [ref=e2554] [cursor=pointer]:
+              - img [ref=e2555]
+          - generic [ref=e2558]:
+            - button "03-23 09:00" [ref=e2559] [cursor=pointer]:
+              - generic [ref=e2560]: 03-23
+              - generic [ref=e2561]: 09:00
+            - button "Phạm Ngọc Huy AP235101 · BS. Quyên · Tấm Dentist Thủ Đức" [ref=e2562] [cursor=pointer]:
+              - button "Phạm Ngọc Huy" [ref=e2566]
+              - generic [ref=e2567]: AP235101 · BS. Quyên · Tấm Dentist Thủ Đức
+            - generic [ref=e2568]: Done
+            - generic [ref=e2569]: completed
+            - button "Mở rộng chi tiết" [ref=e2571] [cursor=pointer]:
+              - img [ref=e2572]
+          - generic [ref=e2575]:
+            - button "03-24 21:52" [ref=e2576] [cursor=pointer]:
+              - generic [ref=e2577]: 03-24
+              - generic [ref=e2578]: 21:52
+            - button "PHAN THỊ THÙY DƯƠNG-G AP237587 · · Tấm Dentist Gò Vấp" [ref=e2579] [cursor=pointer]:
+              - button "PHAN THỊ THÙY DƯƠNG-G" [ref=e2583]
+              - generic [ref=e2584]: AP237587 · · Tấm Dentist Gò Vấp
+            - generic [ref=e2585]: Not Arrived
+            - generic [ref=e2586]: confirmed
+            - button "Mở rộng chi tiết" [ref=e2588] [cursor=pointer]:
+              - img [ref=e2589]
+          - generic [ref=e2592]:
+            - button "03-29 13:30" [ref=e2593] [cursor=pointer]:
+              - generic [ref=e2594]: 03-29
+              - generic [ref=e2595]: 13:30
+            - button "PHAN THỊ KIM ANH AP236425 · BS. Dương · Tấm Dentist Quận 10" [ref=e2596] [cursor=pointer]:
+              - button "PHAN THỊ KIM ANH" [ref=e2600]
+              - generic [ref=e2601]: AP236425 · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e2602]: Done
+            - generic [ref=e2603]: completed
+            - button "Mở rộng chi tiết" [ref=e2605] [cursor=pointer]:
+              - img [ref=e2606]
+          - generic [ref=e2609]:
+            - button "04-01 09:20" [ref=e2610] [cursor=pointer]:
+              - generic [ref=e2611]: 04-01
+              - generic [ref=e2612]: 09:20
+            - button "PHAN THỊ THÙY DƯƠNG-G AP237761 · NGUYỄN THỊ KIM THOA · Tấm Dentist Gò Vấp" [ref=e2613] [cursor=pointer]:
+              - button "PHAN THỊ THÙY DƯƠNG-G" [ref=e2617]
+              - generic [ref=e2618]: AP237761 · NGUYỄN THỊ KIM THOA · Tấm Dentist Gò Vấp
+            - generic [ref=e2619]: Done
+            - generic [ref=e2620]: completed
+            - button "Mở rộng chi tiết" [ref=e2622] [cursor=pointer]:
+              - img [ref=e2623]
+          - generic [ref=e2626]:
+            - button "04-05 10:00" [ref=e2627] [cursor=pointer]:
+              - generic [ref=e2628]: 04-05
+              - generic [ref=e2629]: 10:00
+            - button "HÀ THỊ KHÁNH LY AP242140 · Bs (33) · Tấm Dentist Gò Vấp" [ref=e2630] [cursor=pointer]:
+              - button "HÀ THỊ KHÁNH LY" [ref=e2634]
+              - generic [ref=e2635]: AP242140 · Bs (33) · Tấm Dentist Gò Vấp
+            - generic [ref=e2636]: Done
+            - generic [ref=e2637]: completed
+            - button "Mở rộng chi tiết" [ref=e2639] [cursor=pointer]:
+              - img [ref=e2640]
+          - generic [ref=e2643]:
+            - button "04-06 17:00" [ref=e2644] [cursor=pointer]:
+              - generic [ref=e2645]: 04-06
+              - generic [ref=e2646]: 17:00
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP230484 · BÁC SĨ 03 · Tấm Dentist Quận 10" [ref=e2647] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e2651]
+              - generic [ref=e2652]: AP230484 · BÁC SĨ 03 · Tấm Dentist Quận 10
+            - generic [ref=e2653]: Not Arrived
+            - generic [ref=e2654]: confirmed
+            - button "Mở rộng chi tiết" [ref=e2656] [cursor=pointer]:
+              - img [ref=e2657]
+          - generic [ref=e2660]:
+            - button "04-07 08:00" [ref=e2661] [cursor=pointer]:
+              - generic [ref=e2662]: 04-07
+              - generic [ref=e2663]: 08:00
+            - button "PHẠM NGUYỄN MINH HIẾU Lịch sáng 8h · BS. Trang · Tấm Dentist Gò Vấp" [ref=e2664] [cursor=pointer]:
+              - button "PHẠM NGUYỄN MINH HIẾU" [ref=e2668]
+              - generic [ref=e2669]: Lịch sáng 8h · BS. Trang · Tấm Dentist Gò Vấp
+            - generic [ref=e2670]: Not Arrived
+            - generic [ref=e2671]: confirmed
+            - button "Mở rộng chi tiết" [ref=e2673] [cursor=pointer]:
+              - img [ref=e2674]
+          - generic [ref=e2677]:
+            - button "04-07 08:00" [ref=e2678] [cursor=pointer]:
+              - generic [ref=e2679]: 04-07
+              - generic [ref=e2680]: 08:00
+            - button "PHẠM NGUYỄN MINH HIẾU Lịch 8h · BS. Thu Thảo · Tấm Dentist Thủ Đức" [ref=e2681] [cursor=pointer]:
+              - button "PHẠM NGUYỄN MINH HIẾU" [ref=e2685]
+              - generic [ref=e2686]: Lịch 8h · BS. Thu Thảo · Tấm Dentist Thủ Đức
+            - generic [ref=e2687]: Not Arrived
+            - generic [ref=e2688]: scheduled
+            - button "Mở rộng chi tiết" [ref=e2690] [cursor=pointer]:
+              - img [ref=e2691]
+          - generic [ref=e2694]:
+            - button "04-07 08:30" [ref=e2695] [cursor=pointer]:
+              - generic [ref=e2696]: 04-07
+              - generic [ref=e2697]: 08:30
+            - button "Đặng Thị Hồng Thúy Lịch 8h30 · BS. Ý · Tấm Dentist Quận 3" [ref=e2698] [cursor=pointer]:
+              - button "Đặng Thị Hồng Thúy" [ref=e2702]
+              - generic [ref=e2703]: Lịch 8h30 · BS. Ý · Tấm Dentist Quận 3
+            - generic [ref=e2704]: Not Arrived
+            - generic [ref=e2705]: scheduled
+            - button "Mở rộng chi tiết" [ref=e2707] [cursor=pointer]:
+              - img [ref=e2708]
+          - generic [ref=e2711]:
+            - button "04-07 08:30" [ref=e2712] [cursor=pointer]:
+              - generic [ref=e2713]: 04-07
+              - generic [ref=e2714]: 08:30
+            - button "NGUYỄN THỊ UYÊN Lịch 8h30 · BS. Dũng · Tấm Dentist Đống Đa" [ref=e2715] [cursor=pointer]:
+              - button "NGUYỄN THỊ UYÊN" [ref=e2719]
+              - generic [ref=e2720]: Lịch 8h30 · BS. Dũng · Tấm Dentist Đống Đa
+            - generic [ref=e2721]: Not Arrived
+            - generic [ref=e2722]: scheduled
+            - button "Mở rộng chi tiết" [ref=e2724] [cursor=pointer]:
+              - img [ref=e2725]
+          - generic [ref=e2728]:
+            - button "04-07 09:00" [ref=e2729] [cursor=pointer]:
+              - generic [ref=e2730]: 04-07
+              - generic [ref=e2731]: 09:00
+            - button "Vũ Hữu Đạt Lịch 9h · BS. Dương · Tấm Dentist Quận 10" [ref=e2732] [cursor=pointer]:
+              - button "Vũ Hữu Đạt" [ref=e2736]
+              - generic [ref=e2737]: Lịch 9h · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e2738]: Not Arrived
+            - generic [ref=e2739]: confirmed
+            - button "Mở rộng chi tiết" [ref=e2741] [cursor=pointer]:
+              - img [ref=e2742]
+          - generic [ref=e2745]:
+            - button "04-07 09:00" [ref=e2746] [cursor=pointer]:
+              - generic [ref=e2747]: 04-07
+              - generic [ref=e2748]: 09:00
+            - button "Nguyễn Thị Thanh Lịch 9h · BS. Trang · Tấm Dentist Gò Vấp" [ref=e2749] [cursor=pointer]:
+              - button "Nguyễn Thị Thanh" [ref=e2753]
+              - generic [ref=e2754]: Lịch 9h · BS. Trang · Tấm Dentist Gò Vấp
+            - generic [ref=e2755]: Not Arrived
+            - generic [ref=e2756]: scheduled
+            - button "Mở rộng chi tiết" [ref=e2758] [cursor=pointer]:
+              - img [ref=e2759]
+          - generic [ref=e2762]:
+            - button "04-07 10:00" [ref=e2763] [cursor=pointer]:
+              - generic [ref=e2764]: 04-07
+              - generic [ref=e2765]: 10:00
+            - button "NGUYỄN THỊ UYÊN Lịch 10h nhổ · BS. Trâm · Tấm Dentist Gò Vấp" [ref=e2766] [cursor=pointer]:
+              - button "NGUYỄN THỊ UYÊN" [ref=e2770]
+              - generic [ref=e2771]: Lịch 10h nhổ · BS. Trâm · Tấm Dentist Gò Vấp
+            - generic [ref=e2772]: Done
+            - generic [ref=e2773]: completed
+            - button "Mở rộng chi tiết" [ref=e2775] [cursor=pointer]:
+              - img [ref=e2776]
+          - generic [ref=e2779]:
+            - button "04-07 10:00" [ref=e2780] [cursor=pointer]:
+              - generic [ref=e2781]: 04-07
+              - generic [ref=e2782]: 10:00
+            - button "Nguyễn Thị Thanh Lịch 10h · BS. Duy · Tấm Dentist Quận 3" [ref=e2783] [cursor=pointer]:
+              - button "Nguyễn Thị Thanh" [ref=e2787]
+              - generic [ref=e2788]: Lịch 10h · BS. Duy · Tấm Dentist Quận 3
+            - generic [ref=e2789]: Not Arrived
+            - generic [ref=e2790]: confirmed
+            - button "Mở rộng chi tiết" [ref=e2792] [cursor=pointer]:
+              - img [ref=e2793]
+          - generic [ref=e2796]:
+            - button "04-07 10:00" [ref=e2797] [cursor=pointer]:
+              - generic [ref=e2798]: 04-07
+              - generic [ref=e2799]: 10:00
+            - button "Nguyễn Thị Thanh Lịch 10h · BS. Thu Thảo · Tấm Dentist Thủ Đức" [ref=e2800] [cursor=pointer]:
+              - button "Nguyễn Thị Thanh" [ref=e2804]
+              - generic [ref=e2805]: Lịch 10h · BS. Thu Thảo · Tấm Dentist Thủ Đức
+            - generic [ref=e2806]: Not Arrived
+            - generic [ref=e2807]: scheduled
+            - button "Mở rộng chi tiết" [ref=e2809] [cursor=pointer]:
+              - img [ref=e2810]
+          - generic [ref=e2813]:
+            - button "04-07 10:30" [ref=e2814] [cursor=pointer]:
+              - generic [ref=e2815]: 04-07
+              - generic [ref=e2816]: 10:30
+            - button "NGUYỄN THỊ UYÊN Lịch 10h30 hủy · BS. Uyên · Tấm Dentist Quận 10" [ref=e2817] [cursor=pointer]:
+              - button "NGUYỄN THỊ UYÊN" [ref=e2821]
+              - generic [ref=e2822]: Lịch 10h30 hủy · BS. Uyên · Tấm Dentist Quận 10
+            - generic [ref=e2823]: Not Arrived
+            - generic [ref=e2824]: cancelled
+            - button "Mở rộng chi tiết" [ref=e2826] [cursor=pointer]:
+              - img [ref=e2827]
+          - generic [ref=e2830]:
+            - button "04-07 11:00" [ref=e2831] [cursor=pointer]:
+              - generic [ref=e2832]: 04-07
+              - generic [ref=e2833]: 11:00
+            - button "Đặng Thị Hồng Thúy Lịch 11h · BS. Dũng · Tấm Dentist Đống Đa" [ref=e2834] [cursor=pointer]:
+              - button "Đặng Thị Hồng Thúy" [ref=e2838]
+              - generic [ref=e2839]: Lịch 11h · BS. Dũng · Tấm Dentist Đống Đa
+            - generic [ref=e2840]: Not Arrived
+            - generic [ref=e2841]: confirmed
+            - button "Mở rộng chi tiết" [ref=e2843] [cursor=pointer]:
+              - img [ref=e2844]
+          - generic [ref=e2847]:
+            - button "04-07 11:00" [ref=e2848] [cursor=pointer]:
+              - generic [ref=e2849]: 04-07
+              - generic [ref=e2850]: 11:00
+            - button "Vũ Hữu Đạt Lịch 11h · BS. Ly · Tấm Dentist Gò Vấp" [ref=e2851] [cursor=pointer]:
+              - button "Vũ Hữu Đạt" [ref=e2855]
+              - generic [ref=e2856]: Lịch 11h · BS. Ly · Tấm Dentist Gò Vấp
+            - generic [ref=e2857]: Not Arrived
+            - generic [ref=e2858]: confirmed
+            - button "Mở rộng chi tiết" [ref=e2860] [cursor=pointer]:
+              - img [ref=e2861]
+          - generic [ref=e2864]:
+            - button "04-07 13:00" [ref=e2865] [cursor=pointer]:
+              - generic [ref=e2866]: 04-07
+              - generic [ref=e2867]: 13:00
+            - button "Đặng Thị Hồng Thúy Lịch 13h · BS. Dương · Tấm Dentist Quận 10" [ref=e2868] [cursor=pointer]:
+              - button "Đặng Thị Hồng Thúy" [ref=e2872]
+              - generic [ref=e2873]: Lịch 13h · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e2874]: Done
+            - generic [ref=e2875]: completed
+            - button "Mở rộng chi tiết" [ref=e2877] [cursor=pointer]:
+              - img [ref=e2878]
+          - generic [ref=e2881]:
+            - button "04-07 14:00" [ref=e2882] [cursor=pointer]:
+              - generic [ref=e2883]: 04-07
+              - generic [ref=e2884]: 14:00
+            - button "Vũ Hữu Đạt Lịch 14h · BS. Thu Thảo · Tấm Dentist Thủ Đức" [ref=e2885] [cursor=pointer]:
+              - button "Vũ Hữu Đạt" [ref=e2889]
+              - generic [ref=e2890]: Lịch 14h · BS. Thu Thảo · Tấm Dentist Thủ Đức
+            - generic [ref=e2891]: Not Arrived
+            - generic [ref=e2892]: scheduled
+            - button "Mở rộng chi tiết" [ref=e2894] [cursor=pointer]:
+              - img [ref=e2895]
+          - generic [ref=e2898]:
+            - button "04-07 14:00" [ref=e2899] [cursor=pointer]:
+              - generic [ref=e2900]: 04-07
+              - generic [ref=e2901]: 14:00
+            - button "PHẠM NGUYỄN MINH HIẾU Lịch 14h · BS. Ý · Tấm Dentist Quận 3" [ref=e2902] [cursor=pointer]:
+              - button "PHẠM NGUYỄN MINH HIẾU" [ref=e2906]
+              - generic [ref=e2907]: Lịch 14h · BS. Ý · Tấm Dentist Quận 3
+            - generic [ref=e2908]: Not Arrived
+            - generic [ref=e2909]: scheduled
+            - button "Mở rộng chi tiết" [ref=e2911] [cursor=pointer]:
+              - img [ref=e2912]
+          - generic [ref=e2915]:
+            - button "04-08 08:00" [ref=e2916] [cursor=pointer]:
+              - generic [ref=e2917]: 04-08
+              - generic [ref=e2918]: 08:00
+            - button "NGUYỄN THỊ NHƯ Ý Gắn sứ · BS. Hải · Tấm Dentist Đống Đa" [ref=e2919] [cursor=pointer]:
+              - button "NGUYỄN THỊ NHƯ Ý" [ref=e2923]
+              - generic [ref=e2924]: Gắn sứ · BS. Hải · Tấm Dentist Đống Đa
+            - generic [ref=e2925]: Not Arrived
+            - generic [ref=e2926]: scheduled
+            - button "Mở rộng chi tiết" [ref=e2928] [cursor=pointer]:
+              - img [ref=e2929]
+          - generic [ref=e2932]:
+            - button "04-08 09:00" [ref=e2933] [cursor=pointer]:
+              - generic [ref=e2934]: 04-08
+              - generic [ref=e2935]: 09:00
+            - button "PHẠM NGUYỄN MINH HIẾU Lấy dấu răng · BS. Hà · Tấm Dentist Đống Đa" [ref=e2936] [cursor=pointer]:
+              - button "PHẠM NGUYỄN MINH HIẾU" [ref=e2940]
+              - generic [ref=e2941]: Lấy dấu răng · BS. Hà · Tấm Dentist Đống Đa
+            - generic [ref=e2942]: Not Arrived
+            - generic [ref=e2943]: scheduled
+            - button "Mở rộng chi tiết" [ref=e2945] [cursor=pointer]:
+              - img [ref=e2946]
+          - generic [ref=e2949]:
+            - button "04-08 10:00" [ref=e2950] [cursor=pointer]:
+              - generic [ref=e2951]: 04-08
+              - generic [ref=e2952]: 10:00
+            - button "PHAN THỊ THÙY DƯƠNG-G AP240964 · Bs (33) · Tấm Dentist Gò Vấp" [ref=e2953] [cursor=pointer]:
+              - button "PHAN THỊ THÙY DƯƠNG-G" [ref=e2957]
+              - generic [ref=e2958]: AP240964 · Bs (33) · Tấm Dentist Gò Vấp
+            - generic [ref=e2959]: Done
+            - generic [ref=e2960]: completed
+            - button "Mở rộng chi tiết" [ref=e2962] [cursor=pointer]:
+              - img [ref=e2963]
+          - generic [ref=e2966]:
+            - button "04-08 11:00" [ref=e2967] [cursor=pointer]:
+              - generic [ref=e2968]: 04-08
+              - generic [ref=e2969]: 11:00
+            - button "NGUYỄN NGÔ QUỲNH TRÂM Gắn mão sứ · BS. Dương · Tấm Dentist Quận 10" [ref=e2970] [cursor=pointer]:
+              - button "NGUYỄN NGÔ QUỲNH TRÂM" [ref=e2974]
+              - generic [ref=e2975]: Gắn mão sứ · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e2976]: Not Arrived
+            - generic [ref=e2977]: scheduled
+            - button "Mở rộng chi tiết" [ref=e2979] [cursor=pointer]:
+              - img [ref=e2980]
+          - generic [ref=e2983]:
+            - button "04-08 13:00" [ref=e2984] [cursor=pointer]:
+              - generic [ref=e2985]: 04-08
+              - generic [ref=e2986]: 13:00
+            - button "NGUYỄN THANH HIỂN Gắn sứ · BS. Thu Thảo · Tấm Dentist Quận 7" [ref=e2987] [cursor=pointer]:
+              - button "NGUYỄN THANH HIỂN" [ref=e2991]
+              - generic [ref=e2992]: Gắn sứ · BS. Thu Thảo · Tấm Dentist Quận 7
+            - generic [ref=e2993]: Not Arrived
+            - generic [ref=e2994]: confirmed
+            - button "Mở rộng chi tiết" [ref=e2996] [cursor=pointer]:
+              - img [ref=e2997]
+          - generic [ref=e3000]:
+            - button "04-08 17:00" [ref=e3001] [cursor=pointer]:
+              - generic [ref=e3002]: 04-08
+              - generic [ref=e3003]: 17:00
+            - button "NGUYỄN THỊ NHƯ NGỌC Bọc răng sứ · BS. Duy · Tấm Dentist Quận 3" [ref=e3004] [cursor=pointer]:
+              - button "NGUYỄN THỊ NHƯ NGỌC" [ref=e3008]
+              - generic [ref=e3009]: Bọc răng sứ · BS. Duy · Tấm Dentist Quận 3
+            - generic [ref=e3010]: Not Arrived
+            - generic [ref=e3011]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3013] [cursor=pointer]:
+              - img [ref=e3014]
+          - generic [ref=e3017]:
+            - button "04-09 08:00" [ref=e3018] [cursor=pointer]:
+              - generic [ref=e3019]: 04-09
+              - generic [ref=e3020]: 08:00
+            - button "HUỲNH THỊ HỒNG GẤM Hàn răng · BS. Uyên · Tấm Dentist Quận 10" [ref=e3021] [cursor=pointer]:
+              - button "HUỲNH THỊ HỒNG GẤM" [ref=e3025]
+              - generic [ref=e3026]: Hàn răng · BS. Uyên · Tấm Dentist Quận 10
+            - generic [ref=e3027]: Not Arrived
+            - generic [ref=e3028]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3030] [cursor=pointer]:
+              - img [ref=e3031]
+          - generic [ref=e3034]:
+            - button "04-09 08:00" [ref=e3035] [cursor=pointer]:
+              - generic [ref=e3036]: 04-09
+              - generic [ref=e3037]: 08:00
+            - button "Nguyen Van Test AP235539 · BS. Duy · Tấm Dentist Quận 3" [ref=e3038] [cursor=pointer]:
+              - button "Nguyen Van Test" [ref=e3042]
+              - generic [ref=e3043]: AP235539 · BS. Duy · Tấm Dentist Quận 3
+            - generic [ref=e3044]: Not Arrived
+            - generic [ref=e3045]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3047] [cursor=pointer]:
+              - img [ref=e3048]
+          - generic [ref=e3051]:
+            - button "04-09 11:00" [ref=e3052] [cursor=pointer]:
+              - generic [ref=e3053]: 04-09
+              - generic [ref=e3054]: 11:00
+            - button "Nguyễn Thị Nguyệt Bọc răng sứ · BS. Hà · Tấm Dentist Đống Đa" [ref=e3055] [cursor=pointer]:
+              - button "Nguyễn Thị Nguyệt" [ref=e3059]
+              - generic [ref=e3060]: Bọc răng sứ · BS. Hà · Tấm Dentist Đống Đa
+            - generic [ref=e3061]: Not Arrived
+            - generic [ref=e3062]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3064] [cursor=pointer]:
+              - img [ref=e3065]
+          - generic [ref=e3068]:
+            - button "04-09 13:00" [ref=e3069] [cursor=pointer]:
+              - generic [ref=e3070]: 04-09
+              - generic [ref=e3071]: 13:00
+            - button "NGUYỄN NGÔ QUỲNH TRÂM Trám KT · BS. Quyên B · Tấm Dentist Thủ Đức" [ref=e3072] [cursor=pointer]:
+              - button "NGUYỄN NGÔ QUỲNH TRÂM" [ref=e3076]
+              - generic [ref=e3077]: Trám KT · BS. Quyên B · Tấm Dentist Thủ Đức
+            - generic [ref=e3078]: Not Arrived
+            - generic [ref=e3079]: confirmed
+            - button "Mở rộng chi tiết" [ref=e3081] [cursor=pointer]:
+              - img [ref=e3082]
+          - generic [ref=e3085]:
+            - button "04-09 14:00" [ref=e3086] [cursor=pointer]:
+              - generic [ref=e3087]: 04-09
+              - generic [ref=e3088]: 14:00
+            - button "NGUYỄN THỊ UYÊN MCLD sứ · BS. Dương · Tấm Dentist Quận 10" [ref=e3089] [cursor=pointer]:
+              - button "NGUYỄN THỊ UYÊN" [ref=e3093]
+              - generic [ref=e3094]: MCLD sứ · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e3095]: Not Arrived
+            - generic [ref=e3096]: confirmed
+            - button "Mở rộng chi tiết" [ref=e3098] [cursor=pointer]:
+              - img [ref=e3099]
+          - generic [ref=e3102]:
+            - button "04-09 17:00" [ref=e3103] [cursor=pointer]:
+              - generic [ref=e3104]: 04-09
+              - generic [ref=e3105]: 17:00
+            - button "Ngô Trí Nguyên Kiểm tra răng · BS. Minh · Tấm Dentist Đống Đa" [ref=e3106] [cursor=pointer]:
+              - button "Ngô Trí Nguyên" [ref=e3110]
+              - generic [ref=e3111]: Kiểm tra răng · BS. Minh · Tấm Dentist Đống Đa
+            - generic [ref=e3112]: Not Arrived
+            - generic [ref=e3113]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3115] [cursor=pointer]:
+              - img [ref=e3116]
+          - generic [ref=e3119]:
+            - button "04-10 09:00" [ref=e3120] [cursor=pointer]:
+              - generic [ref=e3121]: 04-10
+              - generic [ref=e3122]: 09:00
+            - button "Ngô Trí Nguyên Nắn chỉnh răng · BS. Dũng · Tấm Dentist Quận 3" [ref=e3123] [cursor=pointer]:
+              - button "Ngô Trí Nguyên" [ref=e3127]
+              - generic [ref=e3128]: Nắn chỉnh răng · BS. Dũng · Tấm Dentist Quận 3
+            - generic [ref=e3129]: Not Arrived
+            - generic [ref=e3130]: confirmed
+            - button "Mở rộng chi tiết" [ref=e3132] [cursor=pointer]:
+              - img [ref=e3133]
+          - generic [ref=e3136]:
+            - button "04-10 11:00" [ref=e3137] [cursor=pointer]:
+              - generic [ref=e3138]: 04-10
+              - generic [ref=e3139]: 11:00
+            - button "LÊ HỒNG KHANH MCLD sứ · BS. Ly · Tấm Dentist Gò Vấp" [ref=e3140] [cursor=pointer]:
+              - button "LÊ HỒNG KHANH" [ref=e3144]
+              - generic [ref=e3145]: MCLD sứ · BS. Ly · Tấm Dentist Gò Vấp
+            - generic [ref=e3146]: Not Arrived
+            - generic [ref=e3147]: confirmed
+            - button "Mở rộng chi tiết" [ref=e3149] [cursor=pointer]:
+              - img [ref=e3150]
+          - generic [ref=e3153]:
+            - button "04-10 13:00" [ref=e3154] [cursor=pointer]:
+              - generic [ref=e3155]: 04-10
+              - generic [ref=e3156]: 13:00
+            - button "NGUYỄN NGÔ QUỲNH TRÂM Gỡ mắc cài cũ · BS. Ý · Tấm Dentist Quận 3" [ref=e3157] [cursor=pointer]:
+              - button "NGUYỄN NGÔ QUỲNH TRÂM" [ref=e3161]
+              - generic [ref=e3162]: Gỡ mắc cài cũ · BS. Ý · Tấm Dentist Quận 3
+            - generic [ref=e3163]: Not Arrived
+            - generic [ref=e3164]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3166] [cursor=pointer]:
+              - img [ref=e3167]
+          - generic [ref=e3170]:
+            - button "04-10 14:00" [ref=e3171] [cursor=pointer]:
+              - generic [ref=e3172]: 04-10
+              - generic [ref=e3173]: 14:00
+            - button "NGUYỄN THANH HIỂN Bọc răng sứ · BS. Phương · Tấm Dentist Đống Đa" [ref=e3174] [cursor=pointer]:
+              - button "NGUYỄN THANH HIỂN" [ref=e3178]
+              - generic [ref=e3179]: Bọc răng sứ · BS. Phương · Tấm Dentist Đống Đa
+            - generic [ref=e3180]: Not Arrived
+            - generic [ref=e3181]: confirmed
+            - button "Mở rộng chi tiết" [ref=e3183] [cursor=pointer]:
+              - img [ref=e3184]
+          - generic [ref=e3187]:
+            - button "04-10 18:00" [ref=e3188] [cursor=pointer]:
+              - generic [ref=e3189]: 04-10
+              - generic [ref=e3190]: 18:00
+            - button "DƯƠNG NHẬT AN Thử sứ · BS. Linh · Tấm Dentist Đống Đa" [ref=e3191] [cursor=pointer]:
+              - button "DƯƠNG NHẬT AN" [ref=e3195]
+              - generic [ref=e3196]: Thử sứ · BS. Linh · Tấm Dentist Đống Đa
+            - generic [ref=e3197]: Not Arrived
+            - generic [ref=e3198]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3200] [cursor=pointer]:
+              - img [ref=e3201]
+          - generic [ref=e3204]:
+            - button "04-11 08:00" [ref=e3205] [cursor=pointer]:
+              - generic [ref=e3206]: 04-11
+              - generic [ref=e3207]: 08:00
+            - button "Nguyễn Thị Thanh MCLD sứ · BS. Thu Thảo · Tấm Dentist Quận 7" [ref=e3208] [cursor=pointer]:
+              - button "Nguyễn Thị Thanh" [ref=e3212]
+              - generic [ref=e3213]: MCLD sứ · BS. Thu Thảo · Tấm Dentist Quận 7
+            - generic [ref=e3214]: Not Arrived
+            - generic [ref=e3215]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3217] [cursor=pointer]:
+              - img [ref=e3218]
+          - generic [ref=e3221]:
+            - button "04-11 13:00" [ref=e3222] [cursor=pointer]:
+              - generic [ref=e3223]: 04-11
+              - generic [ref=e3224]: 13:00
+            - button "NGUYỄN THỊ UYÊN Gắn mão sứ · BS. Dương · Tấm Dentist Quận 10" [ref=e3225] [cursor=pointer]:
+              - button "NGUYỄN THỊ UYÊN" [ref=e3229]
+              - generic [ref=e3230]: Gắn mão sứ · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e3231]: Not Arrived
+            - generic [ref=e3232]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3234] [cursor=pointer]:
+              - img [ref=e3235]
+          - generic [ref=e3238]:
+            - button "04-11 15:00" [ref=e3239] [cursor=pointer]:
+              - generic [ref=e3240]: 04-11
+              - generic [ref=e3241]: 15:00
+            - button "PHAN THỊ KIM ANH AP243308 · · Tấm Dentist Quận 10" [ref=e3242] [cursor=pointer]:
+              - button "PHAN THỊ KIM ANH" [ref=e3246]
+              - generic [ref=e3247]: AP243308 · · Tấm Dentist Quận 10
+            - generic [ref=e3248]: Done
+            - generic [ref=e3249]: completed
+            - button "Mở rộng chi tiết" [ref=e3251] [cursor=pointer]:
+              - img [ref=e3252]
+          - generic [ref=e3255]:
+            - button "04-11 16:00" [ref=e3256] [cursor=pointer]:
+              - generic [ref=e3257]: 04-11
+              - generic [ref=e3258]: 16:00
+            - button "NGUYỄN THỊ NHƯ Ý MCLD sứ · BS. Quyên B · Tấm Dentist Thủ Đức" [ref=e3259] [cursor=pointer]:
+              - button "NGUYỄN THỊ NHƯ Ý" [ref=e3263]
+              - generic [ref=e3264]: MCLD sứ · BS. Quyên B · Tấm Dentist Thủ Đức
+            - generic [ref=e3265]: Not Arrived
+            - generic [ref=e3266]: confirmed
+            - button "Mở rộng chi tiết" [ref=e3268] [cursor=pointer]:
+              - img [ref=e3269]
+          - generic [ref=e3272]:
+            - button "04-11 17:00" [ref=e3273] [cursor=pointer]:
+              - generic [ref=e3274]: 04-11
+              - generic [ref=e3275]: 17:00
+            - button "NGÔ THỊ PHƯƠNG Thử sứ · BS. Trâm · Tấm Dentist Gò Vấp" [ref=e3276] [cursor=pointer]:
+              - button "NGÔ THỊ PHƯƠNG" [ref=e3280]
+              - generic [ref=e3281]: Thử sứ · BS. Trâm · Tấm Dentist Gò Vấp
+            - generic [ref=e3282]: Not Arrived
+            - generic [ref=e3283]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3285] [cursor=pointer]:
+              - img [ref=e3286]
+          - generic [ref=e3289]:
+            - button "04-11 17:30" [ref=e3290] [cursor=pointer]:
+              - generic [ref=e3291]: 04-11
+              - generic [ref=e3292]: 17:30
+            - button "KIM THỊ THẢO NHI - QUẬN 10 AP245961 · BÁC SĨ 03 · Tấm Dentist Quận 10" [ref=e3293] [cursor=pointer]:
+              - button "KIM THỊ THẢO NHI - QUẬN 10" [ref=e3297]
+              - generic [ref=e3298]: AP245961 · BÁC SĨ 03 · Tấm Dentist Quận 10
+            - generic [ref=e3299]: Not Arrived
+            - generic [ref=e3300]: confirmed
+            - button "Mở rộng chi tiết" [ref=e3302] [cursor=pointer]:
+              - img [ref=e3303]
+          - generic [ref=e3306]:
+            - button "04-11 18:00" [ref=e3307] [cursor=pointer]:
+              - generic [ref=e3308]: 04-11
+              - generic [ref=e3309]: 18:00
+            - button "LƯU NGỌC THUÝ VY Trám KT · BS. Nga · Tấm Dentist Thủ Đức" [ref=e3310] [cursor=pointer]:
+              - button "LƯU NGỌC THUÝ VY" [ref=e3314]
+              - generic [ref=e3315]: Trám KT · BS. Nga · Tấm Dentist Thủ Đức
+            - generic [ref=e3316]: Not Arrived
+            - generic [ref=e3317]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3319] [cursor=pointer]:
+              - img [ref=e3320]
+          - generic [ref=e3323]:
+            - button "04-12 09:00" [ref=e3324] [cursor=pointer]:
+              - generic [ref=e3325]: 04-12
+              - generic [ref=e3326]: 09:00
+            - button "Nguyễn Thị Nguyệt Tư vấn niềng răng · BS. Quyên · Tấm Dentist Thủ Đức" [ref=e3327] [cursor=pointer]:
+              - button "Nguyễn Thị Nguyệt" [ref=e3331]
+              - generic [ref=e3332]: Tư vấn niềng răng · BS. Quyên · Tấm Dentist Thủ Đức
+            - generic [ref=e3333]: Not Arrived
+            - generic [ref=e3334]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3336] [cursor=pointer]:
+              - img [ref=e3337]
+          - generic [ref=e3340]:
+            - button "04-12 11:00" [ref=e3341] [cursor=pointer]:
+              - generic [ref=e3342]: 04-12
+              - generic [ref=e3343]: 11:00
+            - button "DƯƠNG NHẬT AN Trám KT · BS. Nga · Tấm Dentist Thủ Đức" [ref=e3344] [cursor=pointer]:
+              - button "DƯƠNG NHẬT AN" [ref=e3348]
+              - generic [ref=e3349]: Trám KT · BS. Nga · Tấm Dentist Thủ Đức
+            - generic [ref=e3350]: Not Arrived
+            - generic [ref=e3351]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3353] [cursor=pointer]:
+              - img [ref=e3354]
+          - generic [ref=e3357]:
+            - button "04-12 14:00" [ref=e3358] [cursor=pointer]:
+              - generic [ref=e3359]: 04-12
+              - generic [ref=e3360]: 14:00
+            - button "NGUYỄN THỊ NGỌC TRANG (ACB) Gỡ mắc cài cũ · BS. Ly · Tấm Dentist Gò Vấp" [ref=e3361] [cursor=pointer]:
+              - button "NGUYỄN THỊ NGỌC TRANG (ACB)" [ref=e3365]
+              - generic [ref=e3366]: Gỡ mắc cài cũ · BS. Ly · Tấm Dentist Gò Vấp
+            - generic [ref=e3367]: Not Arrived
+            - generic [ref=e3368]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3370] [cursor=pointer]:
+              - img [ref=e3371]
+          - generic [ref=e3374]:
+            - button "04-12 17:00" [ref=e3375] [cursor=pointer]:
+              - generic [ref=e3376]: 04-12
+              - generic [ref=e3377]: 17:00
+            - button "PHẠM NGUYỄN MINH HIẾU Cạo vôi răng · BS. Dũng · Tấm Dentist Quận 3" [ref=e3378] [cursor=pointer]:
+              - button "PHẠM NGUYỄN MINH HIẾU" [ref=e3382]
+              - generic [ref=e3383]: Cạo vôi răng · BS. Dũng · Tấm Dentist Quận 3
+            - generic [ref=e3384]: Not Arrived
+            - generic [ref=e3385]: confirmed
+            - button "Mở rộng chi tiết" [ref=e3387] [cursor=pointer]:
+              - img [ref=e3388]
+          - generic [ref=e3391]:
+            - button "04-12 18:00" [ref=e3392] [cursor=pointer]:
+              - generic [ref=e3393]: 04-12
+              - generic [ref=e3394]: 18:00
+            - button "NGUYỄN THỊ NHƯ Ý Kiểm tra răng · BS. Hà · Tấm Dentist Đống Đa" [ref=e3395] [cursor=pointer]:
+              - button "NGUYỄN THỊ NHƯ Ý" [ref=e3399]
+              - generic [ref=e3400]: Kiểm tra răng · BS. Hà · Tấm Dentist Đống Đa
+            - generic [ref=e3401]: Not Arrived
+            - generic [ref=e3402]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3404] [cursor=pointer]:
+              - img [ref=e3405]
+          - generic [ref=e3408]:
+            - button "04-13 10:51" [ref=e3409] [cursor=pointer]:
+              - generic [ref=e3410]: 04-13
+              - generic [ref=e3411]: 10:51
+            - button "Trần Ngọc Kim Tỷ AP235541 · BS. Duy · Tấm Dentist Thủ Đức" [ref=e3412] [cursor=pointer]:
+              - button "Trần Ngọc Kim Tỷ" [ref=e3416]
+              - generic [ref=e3417]: AP235541 · BS. Duy · Tấm Dentist Thủ Đức
+            - generic [ref=e3418]: Not Arrived
+            - generic [ref=e3419]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3421] [cursor=pointer]:
+              - img [ref=e3422]
+          - generic [ref=e3425]:
+            - button "04-13 11:08" [ref=e3426] [cursor=pointer]:
+              - generic [ref=e3427]: 04-13
+              - generic [ref=e3428]: 11:08
+            - button "TDD Save Test 1776050904407 AP235542 · Admin · Tấm Dentist Quận 3" [ref=e3429] [cursor=pointer]:
+              - button "TDD Save Test 1776050904407" [ref=e3433]
+              - generic [ref=e3434]: AP235542 · Admin · Tấm Dentist Quận 3
+            - generic [ref=e3435]: Done
+            - generic [ref=e3436]: completed
+            - button "Mở rộng chi tiết" [ref=e3438] [cursor=pointer]:
+              - img [ref=e3439]
+          - generic [ref=e3442]:
+            - button "04-14 07:00" [ref=e3443] [cursor=pointer]:
+              - generic [ref=e3444]: 04-14
+              - generic [ref=e3445]: 07:00
+            - button "Phạm Ngọc Huy AP235540 · BS. Duy · Tấm Dentist Thủ Đức" [ref=e3446] [cursor=pointer]:
+              - button "Phạm Ngọc Huy" [ref=e3450]
+              - generic [ref=e3451]: AP235540 · BS. Duy · Tấm Dentist Thủ Đức
+            - generic [ref=e3452]: Not Arrived
+            - generic [ref=e3453]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3455] [cursor=pointer]:
+              - img [ref=e3456]
+          - generic [ref=e3459]:
+            - button "04-15 07:00" [ref=e3460] [cursor=pointer]:
+              - generic [ref=e3461]: 04-15
+              - generic [ref=e3462]: 07:00
+            - button "Phạm Ngọc Huy AP247632 · BS. Duy · Tấm Dentist Thủ Đức" [ref=e3463] [cursor=pointer]:
+              - button "Phạm Ngọc Huy" [ref=e3467]
+              - generic [ref=e3468]: AP247632 · BS. Duy · Tấm Dentist Thủ Đức
+            - generic [ref=e3469]: Not Arrived
+            - generic [ref=e3470]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3472] [cursor=pointer]:
+              - img [ref=e3473]
+          - generic [ref=e3476]:
+            - button "04-15 09:00" [ref=e3477] [cursor=pointer]:
+              - generic [ref=e3478]: 04-15
+              - generic [ref=e3479]: 09:00
+            - button "PHAN THỊ THÙY DƯƠNG-G AP247631 · NGUYỄN THỊ KIM THOA · Tấm Dentist Gò Vấp" [ref=e3480] [cursor=pointer]:
+              - button "PHAN THỊ THÙY DƯƠNG-G" [ref=e3484]
+              - generic [ref=e3485]: AP247631 · NGUYỄN THỊ KIM THOA · Tấm Dentist Gò Vấp
+            - generic [ref=e3486]: Not Arrived
+            - generic [ref=e3487]: confirmed
+            - button "Mở rộng chi tiết" [ref=e3489] [cursor=pointer]:
+              - img [ref=e3490]
+          - generic [ref=e3493]:
+            - button "04-16 16:48" [ref=e3494] [cursor=pointer]:
+              - generic [ref=e3495]: 04-16
+              - generic [ref=e3496]: 16:48
+            - button "TDD Save Test 1776329045678 AP247633 · · Tấm Dentist Quận 3" [ref=e3497] [cursor=pointer]:
+              - button "TDD Save Test 1776329045678" [ref=e3501]
+              - generic [ref=e3502]: AP247633 · · Tấm Dentist Quận 3
+            - generic [ref=e3503]: Not Arrived
+            - generic [ref=e3504]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3506] [cursor=pointer]:
+              - img [ref=e3507]
+          - generic [ref=e3510]:
+            - button "04-20 09:00" [ref=e3511] [cursor=pointer]:
+              - generic [ref=e3512]: 04-20
+              - generic [ref=e3513]: 09:00
+            - button "E2E Customer 564760 Updated AP247635 · · Tấm Dentist Quận 3" [ref=e3514] [cursor=pointer]:
+              - button "E2E Customer 564760 Updated" [ref=e3518]
+              - generic [ref=e3519]: AP247635 · · Tấm Dentist Quận 3
+            - generic [ref=e3520]: Not Arrived
+            - generic [ref=e3521]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3523] [cursor=pointer]:
+              - img [ref=e3524]
+          - generic [ref=e3527]:
+            - button "04-20 09:00" [ref=e3528] [cursor=pointer]:
+              - generic [ref=e3529]: 04-20
+              - generic [ref=e3530]: 09:00
+            - button "E2E Customer 564760 Updated AP247636 · · Tấm Dentist Quận 3" [ref=e3531] [cursor=pointer]:
+              - button "E2E Customer 564760 Updated" [ref=e3535]
+              - generic [ref=e3536]: AP247636 · · Tấm Dentist Quận 3
+            - generic [ref=e3537]: Not Arrived
+            - generic [ref=e3538]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3540] [cursor=pointer]:
+              - img [ref=e3541]
+          - generic [ref=e3544]:
+            - button "04-20 09:00" [ref=e3545] [cursor=pointer]:
+              - generic [ref=e3546]: 04-20
+              - generic [ref=e3547]: 09:00
+            - button "E2E Customer 564760 Updated AP247634 · · Tấm Dentist Quận 3" [ref=e3548] [cursor=pointer]:
+              - button "E2E Customer 564760 Updated" [ref=e3552]
+              - generic [ref=e3553]: AP247634 · · Tấm Dentist Quận 3
+            - generic [ref=e3554]: Not Arrived
+            - generic [ref=e3555]: scheduled
+            - button "Mở rộng chi tiết" [ref=e3557] [cursor=pointer]:
+              - img [ref=e3558]
+          - generic [ref=e3561]:
+            - button "04-28 13:30" [ref=e3562] [cursor=pointer]:
+              - generic [ref=e3563]: 04-28
+              - generic [ref=e3564]: 13:30
+            - button "PHAN THỊ KIM ANH AP239817 · BS. Dương · Tấm Dentist Quận 10" [ref=e3565] [cursor=pointer]:
+              - button "PHAN THỊ KIM ANH" [ref=e3569]
+              - generic [ref=e3570]: AP239817 · BS. Dương · Tấm Dentist Quận 10
+            - generic [ref=e3571]: Not Arrived
+            - generic [ref=e3572]: confirmed
+            - button "Mở rộng chi tiết" [ref=e3574] [cursor=pointer]:
+              - img [ref=e3575]
+          - generic [ref=e3578]:
+            - button "05-10 10:00" [ref=e3579] [cursor=pointer]:
+              - generic [ref=e3580]: 05-10
+              - generic [ref=e3581]: 10:00
+            - button "HÀ THỊ KHÁNH LY AP242940 · Bs (33) · Tấm Dentist Gò Vấp" [ref=e3582] [cursor=pointer]:
+              - button "HÀ THỊ KHÁNH LY" [ref=e3586]
+              - generic [ref=e3587]: AP242940 · Bs (33) · Tấm Dentist Gò Vấp
+            - generic [ref=e3588]: Not Arrived
+            - generic [ref=e3589]: confirmed
+            - button "Mở rộng chi tiết" [ref=e3591] [cursor=pointer]:
+              - img [ref=e3592]
+    - button "v0.24.0 (68e3d45)" [ref=e3598] [cursor=pointer]:
+      - img [ref=e3599]
+      - generic [ref=e3601]: v0.24.0
+      - generic [ref=e3602]: (68e3d45)

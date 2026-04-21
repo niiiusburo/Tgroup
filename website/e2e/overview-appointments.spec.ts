@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Overview Page - Appointments Display', () => {
   test('should display appointments for today (April 8th) - FULL VERIFICATION', async ({ page }) => {
     // Step 1: Navigate to login and authenticate
-    await page.goto('http://localhost:5174/login');
+    await page.goto('http://localhost:5175/login');
     await page.waitForSelector('text=Sign In', { timeout: 10000 });
     
     // Fill credentials

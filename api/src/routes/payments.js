@@ -112,7 +112,7 @@ router.get("/", async (req, res) => {
       sql += ` AND (
         EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = p.id)
         OR NOT (
-          p.deposit_type IN ('deposit', 'refund', 'usage')
+          COALESCE(p.deposit_type, '') IN ('deposit', 'refund', 'usage')
           OR p.amount < 0
           OR p.method = 'deposit'
           OR p.deposit_used > 0
@@ -127,7 +127,7 @@ router.get("/", async (req, res) => {
       )`;
     } else if (type === 'deposits') {
       sql += ` AND (
-        p.deposit_type IN ('deposit', 'refund')
+        COALESCE(p.deposit_type, '') IN ('deposit', 'refund')
         OR (
           p.deposit_type IS NULL
           AND p.method IN ('cash', 'bank_transfer')
@@ -196,7 +196,7 @@ router.get("/", async (req, res) => {
       countConditions.push(`(
         EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = p.id)
         OR NOT (
-          p.deposit_type IN ('deposit', 'refund', 'usage')
+          COALESCE(p.deposit_type, '') IN ('deposit', 'refund', 'usage')
           OR p.amount < 0
           OR p.method = 'deposit'
           OR p.deposit_used > 0
@@ -211,7 +211,7 @@ router.get("/", async (req, res) => {
       )`);
     } else if (type === 'deposits') {
       countConditions.push(`(
-        p.deposit_type IN ('deposit', 'refund')
+        COALESCE(p.deposit_type, '') IN ('deposit', 'refund')
         OR (
           p.deposit_type IS NULL
           AND p.method IN ('cash', 'bank_transfer')
@@ -317,7 +317,7 @@ router.get("/deposits", async (req, res) => {
         p.receipt_number, p.deposit_type
       FROM payments p
       WHERE (
-        p.deposit_type IN ('deposit', 'refund')
+        COALESCE(p.deposit_type, '') IN ('deposit', 'refund')
         OR (
           p.deposit_type IS NULL
           AND p.method IN ('cash', 'bank_transfer')
