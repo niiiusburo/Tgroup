@@ -10,7 +10,7 @@
  * Used by AppointmentFormShell (which wraps AppointmentFormCore).
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import type {
   UnifiedAppointmentFormData,
   UseAppointmentFormResult,
@@ -79,6 +79,19 @@ export function useAppointmentForm(
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Reset form state when initialData changes (e.g. editing a different appointment)
+  const lastInitialDataRef = useRef(initialData);
+  useEffect(() => {
+    const hasChanged =
+      JSON.stringify(initialData) !== JSON.stringify(lastInitialDataRef.current);
+    if (hasChanged) {
+      setData(mergeWithDefaults(initialData));
+      setErrors({});
+      setSubmitError(null);
+      lastInitialDataRef.current = initialData;
+    }
+  }, [initialData]);
 
   const handleChange = useCallback((patch: Partial<UnifiedAppointmentFormData>) => {
     setData((prev) => {

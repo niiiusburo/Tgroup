@@ -584,6 +584,7 @@ export function Calendar() {
 
       {/* Unified Appointment Form — edit mode */}
       <AppointmentFormShell
+        key={editingAppointment?.id ?? 'edit-closed'}
         mode="edit"
         isOpen={isEditModalOpen}
         onClose={handleEditModalClose}
@@ -625,6 +626,7 @@ export function Calendar() {
 
       {/* Unified Appointment Form — create mode */}
       <AppointmentFormShell
+        key={createInitialData ? `create-${createInitialData.date}-${createInitialData.startTime}` : 'create-closed'}
         mode="create"
         isOpen={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
