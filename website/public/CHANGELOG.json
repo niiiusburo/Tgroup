@@ -1,5 +1,29 @@
 [
   {
+    "version": "0.24.14",
+    "date": "2026-04-21",
+    "commit": "0174f26f",
+    "highlights": "fix(forms): unify AddCustomerForm globally + portal fix for nested modals + migrate to unified appointment form",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "AddCustomerForm now uses single canonical component everywhere (Calendar + button, Customer page)",
+          "FormShell renders via createPortal to escape CSS containing blocks from ancestor transforms",
+          "AppointmentFormCore: wire + button to real createCustomer() API instead of dummy close",
+          "CustomerProfile: migrate from deleted AppointmentForm to unified AppointmentFormShell",
+          "Remove obsolete AppointmentForm.tsx and related dead code"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "TypeScript compiles cleanly"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.24.13",
     "date": "2026-04-21",
     "commit": "c55220f5",
