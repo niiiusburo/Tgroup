@@ -59,29 +59,31 @@ export function AppointmentFormShell({
         isEdit={isEdit}
       />
 
-      <div className="flex-1 overflow-y-auto px-6 py-6 custom-scrollbar">
-        <AppointmentFormCore
-          mode={mode}
-          data={data}
-          onChange={handleChange}
-          customerReadOnly={customerReadOnly}
-          errors={errors}
+      <form id="appointment-form" onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+        <div className="flex-1 overflow-y-auto px-6 py-6 custom-scrollbar">
+          <AppointmentFormCore
+            mode={mode}
+            data={data}
+            onChange={handleChange}
+            customerReadOnly={customerReadOnly}
+            errors={errors}
+          />
+
+          {submitError && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+              {submitError}
+            </div>
+          )}
+        </div>
+
+        <FormFooter
+          onCancel={onClose}
+          form="appointment-form"
+          isSubmitting={isSaving}
+          isEdit={isEdit}
+          submitLabel={isEdit ? t('appointments:cpNht', 'Cập nhật') : t('appointments:createAppointment')}
         />
-
-        {submitError && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-            {submitError}
-          </div>
-        )}
-      </div>
-
-      <FormFooter
-        onCancel={onClose}
-        onSubmit={handleSubmit}
-        isSubmitting={isSaving}
-        isEdit={isEdit}
-        submitLabel={isEdit ? t('appointments:cpNht', 'Cập nhật') : t('appointments:createAppointment')}
-      />
+      </form>
     </FormShell>
   );
 }

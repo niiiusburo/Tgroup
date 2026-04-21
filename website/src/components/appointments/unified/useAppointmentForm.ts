@@ -135,7 +135,8 @@ export function useAppointmentForm(
 
   const isValid = useMemo(() => Object.keys(errors).length === 0, [errors]);
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(async (e?: React.FormEvent) => {
+    e?.preventDefault();
     setSubmitError(null);
 
     if (!validate()) {

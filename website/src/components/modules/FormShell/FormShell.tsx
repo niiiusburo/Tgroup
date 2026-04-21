@@ -28,7 +28,6 @@ export interface FormShellProps {
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
   showBackdrop?: boolean;
   closeOnBackdrop?: boolean;
-  isEdit?: boolean;
 }
 
 const MAX_WIDTH_MAP = {

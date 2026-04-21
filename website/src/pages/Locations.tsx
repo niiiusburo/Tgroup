@@ -257,7 +257,7 @@ function AddLocationForm({
             onChange={(e) => update('name', e.target.value)}
             placeholder={t("egTamDentistBnhDng")}
             className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
-          
+
           {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
         </div>
 
@@ -273,7 +273,7 @@ function AddLocationForm({
               onChange={(e) => update('address', e.target.value)}
               placeholder={t("123NgAbcPhngX")}
               className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
-            
+
             {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address}</p>}
           </div>
           <div>
@@ -285,7 +285,7 @@ function AddLocationForm({
               onChange={(e) => update('district', e.target.value)}
               placeholder={t("egQun1")}
               className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
-            
+
           </div>
         </div>
 
@@ -301,7 +301,7 @@ function AddLocationForm({
               onChange={(e) => update('phone', e.target.value)}
               placeholder="028-xxxx-xxxx"
               className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
-            
+
             {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone}</p>}
           </div>
           <div>
@@ -314,7 +314,7 @@ function AddLocationForm({
               onChange={(e) => update('email', e.target.value)}
               placeholder="branch@tamdentist.vn"
               className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
-            
+
           </div>
         </div>
 
@@ -330,7 +330,7 @@ function AddLocationForm({
               onChange={(e) => update('operatingHours', e.target.value)}
               placeholder="Mon-Sat 8:00-17:00"
               className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
-            
+
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
@@ -342,7 +342,7 @@ function AddLocationForm({
               onChange={(e) => update('manager', e.target.value)}
               placeholder="Branch manager name"
               className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
-            
+
           </div>
         </div>
 
@@ -365,25 +365,25 @@ function AddLocationForm({
               'bg-gray-100 text-gray-600 border-gray-300 ring-2 ring-gray-500/20' :
               'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'}`
               }>
-              
+
                 {STATUS_LABELS[s]}
               </button>
             )}
           </div>
         </div>
-      </form>
 
-      {/* Footer */}
-      <div className="modal-footer px-6 py-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
-        <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
-          {t('cancel', { ns: 'common' })}
-        </button>
-        <button type="button" onClick={() => handleSubmit()}
-        className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark transition-all shadow-sm">
-          <Check className="w-4 h-4" />
-          {t('addLocation')}
-        </button>
-      </div>
+        {/* Footer inside form for native submit support */}
+        <div className="modal-footer px-6 py-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3 -mx-6 -mb-6 mt-4">
+          <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
+            {t('cancel', { ns: 'common' })}
+          </button>
+          <button type="submit"
+          className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark transition-all shadow-sm">
+            <Check className="w-4 h-4" />
+            {t('addLocation')}
+          </button>
+        </div>
+      </form>
     </>);
 
 }

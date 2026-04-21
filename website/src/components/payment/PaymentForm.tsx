@@ -445,6 +445,25 @@ export function PaymentForm({
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm resize-none" />
             
           </div>
+          {/* Footer inside form so Enter key submits and type="submit" works natively */}
+          <div className="modal-footer px-6 py-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3 -mx-6 -mb-6 mt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
+            >
+              {t('cancelBtn')}
+            </button>
+            <button
+              type="submit"
+              disabled={submitDisabled}
+              className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark active:scale-[0.98] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Check className="w-4 h-4" />
+              {isEdit ? t('luThayI') : t('ghiNhnThanhTon')}
+              {totalPayment > 0 ? ` ${formatVND(totalPayment)}` : ''}
+            </button>
+          </div>
         </form>
 
         <VietQrModal
@@ -452,30 +471,10 @@ export function PaymentForm({
           onClose={() => setShowVietQr(false)}
           defaultAmount={bankAmount > 0 ? bankAmount : undefined}
           customerName={defaultCustomerName}
-          customerPhone={defaultCustomerPhone} />
-        
-
-        <div className="modal-footer px-6 py-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
-            {t('cancelBtn')}
-
-          </button>
-          {/* animate: active:scale-[0.98] for a felt-button press on confirmation; no bouncy easing */}
-          <button
-            type="button"
-            onClick={() => handleSubmit()}
-            disabled={submitDisabled}
-            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark active:scale-[0.98] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
-            
-            <Check className="w-4 h-4" />
-            {isEdit ? t('luThayI') : t('ghiNhnThanhTon')}
-            {totalPayment > 0 ? ` ${formatVND(totalPayment)}` : ''}
-          </button>
-        </div>
+          customerPhone={defaultCustomerPhone}
+        />
       </div>
-    </div>);
+    </div>
+  );
 
 }

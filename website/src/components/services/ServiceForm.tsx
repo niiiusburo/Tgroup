@@ -224,7 +224,8 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
     if (date) setErrors((prev) => { const next = { ...prev }; delete next.startDate; return next; });
   };
 
-  async function handleSubmitForm() {
+  async function handleSubmitForm(e?: React.FormEvent) {
+    e?.preventDefault();
     if (!validate()) return;
 
     const customer = customers.find((c) => c.id === customerId) || (
@@ -273,204 +274,206 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
         isEdit={isEdit}
       />
 
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5 custom-scrollbar">
-        {isLoading && (
-          <div className="flex items-center justify-center py-8 text-gray-400">
-            <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2" />
-            Loading...
-          </div>
-        )}
-
-        {/* Nguồn khách hàng */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-            <FileText className="w-3.5 h-3.5" />
-            Nguồn khách hàng
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {allSources.map((s) => {
-              const isSelected = sourceId === s.id;
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => setSourceId(isSelected ? null : s.id)}
-                  className={`
-                    px-3 py-1.5 rounded-full text-sm font-medium transition-all border
-                    ${isSelected ?
-                      'bg-orange-500 text-white border-orange-500 shadow-sm' :
-                      'bg-white text-gray-700 border-gray-200 hover:border-orange-300 hover:text-orange-600'}
-                  `}
-                >
-                  {s.name}
-                </button>);
-            })}
-          </div>
-        </div>
-
-        {/* Dịch vụ */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-            <Stethoscope className="w-3.5 h-3.5" />
-            {t('columns.name')}
-          </label>
-          <ServiceCatalogSelector catalog={serviceCatalog} selectedId={catalogItemId} onChange={handleCatalogChange} placeholder={t('convertToService.selectService', { ns: 'appointments' })} />
-          {errors.service && <p className="mt-2 text-xs text-red-500">{errors.service}</p>}
-          {selectedCatalog && (
-            <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span>{selectedCatalog.totalVisits} {t('visits')} · ~{selectedCatalog.estimatedDuration} {t('minutesPerVisit')}</span>
+      <form id="service-form" onSubmit={handleSubmitForm} className="flex flex-col flex-1 min-h-0">
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5 custom-scrollbar">
+          {isLoading && (
+            <div className="flex items-center justify-center py-8 text-gray-400">
+              <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2" />
+              Loading...
             </div>
           )}
-        </div>
 
-        {/* Khách hàng */}
-        {!isProfileContext && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-              <User className="w-3.5 h-3.5" />
-              {t('form.customer', 'Khách hàng')}
-            </label>
-            <CustomerSelector customers={customers} selectedId={customerId} onChange={handleCustomerChange} />
-            {errors.customer && <p className="mt-2 text-xs text-red-500">{errors.customer}</p>}
-          </div>
-        )}
-
-        {/* Bác sĩ + Phụ tá + Trợ lý Bác sĩ */}
-        <FormGrid cols={3}>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-              <Stethoscope className="w-3.5 h-3.5" />
-              {t('form.doctor', 'Bác sĩ')}
-            </label>
-            <DoctorSelector employees={employees} selectedId={doctorId} onChange={handleDoctorChange} filterRoles={['doctor']} />
-            {errors.doctor && <p className="mt-2 text-xs text-red-500">{errors.doctor}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-              <User className="w-3.5 h-3.5" />
-              {t('form.assistant', 'Phụ tá')}
-            </label>
-            <DoctorSelector employees={employees} selectedId={assistantId} onChange={handleAssistantChange} filterRoles={['assistant']} placeholder={t('form.selectDoctor', { ns: 'appointments' })} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-              <User className="w-3.5 h-3.5" />
-              {t('form.dentalAide', 'Trợ lý Bác sĩ')}
-            </label>
-            <DoctorSelector employees={employees} selectedId={dentalAideId} onChange={handleDentalAideChange} filterRoles={['doctor-assistant']} placeholder={t('form.selectDoctor', { ns: 'appointments' })} />
-          </div>
-        </FormGrid>
-
-        {/* Chi nhánh + Ngày bắt đầu */}
-        <FormGrid cols={2}>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-              <MapPin className="w-3.5 h-3.5" />
-              {t('form.location', 'Chi nhánh')}
-            </label>
-            <LocationSelector locations={locations} selectedId={locationId} onChange={handleLocationChange} excludeAll />
-            {errors.location && <p className="mt-2 text-xs text-red-500">{errors.location}</p>}
-          </div>
-          <div>
-            <DatePicker value={startDate} onChange={handleStartDateChange} label={t('form.startDate', 'Ngày bắt đầu')} icon={<CalendarDays className="w-3.5 h-3.5" />} error={errors.startDate} />
-          </div>
-        </FormGrid>
-
-        {/* Chi phí + Số lượng + Đơn vị */}
-        <FormGrid cols={3}>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-              <DollarSign className="w-3.5 h-3.5" />
-              {t('totalCost')}
-            </label>
-            <CurrencyInput
-              value={totalCostOverride ? Number(totalCostOverride) : null}
-              onChange={(v) => setTotalCostOverride(v === null ? '' : String(v))}
-              placeholder={selectedCatalog ? String(selectedCatalog.defaultPrice) : '0'}
-              className="w-full" />
-            {selectedCatalog && (
-              <p className="mt-1 text-xs text-gray-400">
-                {t('default', 'Mặc định')}: {new Intl.NumberFormat('vi-VN').format(selectedCatalog.defaultPrice)} VND
-              </p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-              <Hash className="w-3.5 h-3.5" />
-              {t('form.quantity', 'Số lượng')}
-            </label>
-            <input
-              type="number" value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              placeholder="1"
-              min={1}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
-          </div>
+          {/* Nguồn khách hàng */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
               <FileText className="w-3.5 h-3.5" />
-              {t('form.unit', 'Unit')}
+              Nguồn khách hàng
             </label>
-            <input
-              type="text" value={unit}
-              onChange={(e) => setUnit(e.target.value)}
-              placeholder={t('form.unitPlaceholder', 'răng')}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
+            <div className="flex flex-wrap gap-2">
+              {allSources.map((s) => {
+                const isSelected = sourceId === s.id;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setSourceId(isSelected ? null : s.id)}
+                    className={`
+                      px-3 py-1.5 rounded-full text-sm font-medium transition-all border
+                      ${isSelected ?
+                        'bg-orange-500 text-white border-orange-500 shadow-sm' :
+                        'bg-white text-gray-700 border-gray-200 hover:border-orange-300 hover:text-orange-600'}
+                    `}
+                  >
+                    {s.name}
+                  </button>);
+              })}
+            </div>
           </div>
-        </FormGrid>
 
-        {/* Chọn răng */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-            <Stethoscope className="w-3.5 h-3.5" />
-          </label>
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShowToothPicker(true)}
-              className="px-3 py-2 text-sm font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-colors">
-              {toothNumbers.length > 0 ? t('selectedTeethCount', { count: toothNumbers.length }) : t("chnRng")}
-            </button>
-            {toothNumbers.length > 0 && (
-              <span className="text-xs text-gray-500">
-                {toothNumbers.join(', ')}
-              </span>
+          {/* Dịch vụ */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
+              <Stethoscope className="w-3.5 h-3.5" />
+              {t('columns.name')}
+            </label>
+            <ServiceCatalogSelector catalog={serviceCatalog} selectedId={catalogItemId} onChange={handleCatalogChange} placeholder={t('convertToService.selectService', { ns: 'appointments' })} />
+            {errors.service && <p className="mt-2 text-xs text-red-500">{errors.service}</p>}
+            {selectedCatalog && (
+              <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span>{selectedCatalog.totalVisits} {t('visits')} · ~{selectedCatalog.estimatedDuration} {t('minutesPerVisit')}</span>
+              </div>
             )}
           </div>
+
+          {/* Khách hàng */}
+          {!isProfileContext && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
+                <User className="w-3.5 h-3.5" />
+                {t('form.customer', 'Khách hàng')}
+              </label>
+              <CustomerSelector customers={customers} selectedId={customerId} onChange={handleCustomerChange} />
+              {errors.customer && <p className="mt-2 text-xs text-red-500">{errors.customer}</p>}
+            </div>
+          )}
+
+          {/* Bác sĩ + Phụ tá + Trợ lý Bác sĩ */}
+          <FormGrid cols={3}>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
+                <Stethoscope className="w-3.5 h-3.5" />
+                {t('form.doctor', 'Bác sĩ')}
+              </label>
+              <DoctorSelector employees={employees} selectedId={doctorId} onChange={handleDoctorChange} filterRoles={['doctor']} />
+              {errors.doctor && <p className="mt-2 text-xs text-red-500">{errors.doctor}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
+                <User className="w-3.5 h-3.5" />
+                {t('form.assistant', 'Phụ tá')}
+              </label>
+              <DoctorSelector employees={employees} selectedId={assistantId} onChange={handleAssistantChange} filterRoles={['assistant']} placeholder={t('form.selectDoctor', { ns: 'appointments' })} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
+                <User className="w-3.5 h-3.5" />
+                {t('form.dentalAide', 'Trợ lý Bác sĩ')}
+              </label>
+              <DoctorSelector employees={employees} selectedId={dentalAideId} onChange={handleDentalAideChange} filterRoles={['doctor-assistant']} placeholder={t('form.selectDoctor', { ns: 'appointments' })} />
+            </div>
+          </FormGrid>
+
+          {/* Chi nhánh + Ngày bắt đầu */}
+          <FormGrid cols={2}>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
+                <MapPin className="w-3.5 h-3.5" />
+                {t('form.location', 'Chi nhánh')}
+              </label>
+              <LocationSelector locations={locations} selectedId={locationId} onChange={handleLocationChange} excludeAll />
+              {errors.location && <p className="mt-2 text-xs text-red-500">{errors.location}</p>}
+            </div>
+            <div>
+              <DatePicker value={startDate} onChange={handleStartDateChange} label={t('form.startDate', 'Ngày bắt đầu')} icon={<CalendarDays className="w-3.5 h-3.5" />} error={errors.startDate} />
+            </div>
+          </FormGrid>
+
+          {/* Chi phí + Số lượng + Đơn vị */}
+          <FormGrid cols={3}>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
+                <DollarSign className="w-3.5 h-3.5" />
+                {t('totalCost')}
+              </label>
+              <CurrencyInput
+                value={totalCostOverride ? Number(totalCostOverride) : null}
+                onChange={(v) => setTotalCostOverride(v === null ? '' : String(v))}
+                placeholder={selectedCatalog ? String(selectedCatalog.defaultPrice) : '0'}
+                className="w-full" />
+              {selectedCatalog && (
+                <p className="mt-1 text-xs text-gray-400">
+                  {t('default', 'Mặc định')}: {new Intl.NumberFormat('vi-VN').format(selectedCatalog.defaultPrice)} VND
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
+                <Hash className="w-3.5 h-3.5" />
+                {t('form.quantity', 'Số lượng')}
+              </label>
+              <input
+                type="number" value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                placeholder="1"
+                min={1}
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
+                <FileText className="w-3.5 h-3.5" />
+                {t('form.unit', 'Unit')}
+              </label>
+              <input
+                type="text" value={unit}
+                onChange={(e) => setUnit(e.target.value)}
+                placeholder={t('form.unitPlaceholder', 'răng')}
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
+            </div>
+          </FormGrid>
+
+          {/* Chọn răng */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
+              <Stethoscope className="w-3.5 h-3.5" />
+            </label>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowToothPicker(true)}
+                className="px-3 py-2 text-sm font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-colors">
+                {toothNumbers.length > 0 ? t('selectedTeethCount', { count: toothNumbers.length }) : t("chnRng")}
+              </button>
+              {toothNumbers.length > 0 && (
+                <span className="text-xs text-gray-500">
+                  {toothNumbers.join(', ')}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Ghi chú răng */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
+              <FileText className="w-3.5 h-3.5" />
+            </label>
+            <textarea
+              value={toothComment} onChange={(e) => setToothComment(e.target.value)}
+              rows={2} placeholder={t("nhpGhiChVRng")}
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm resize-none" />
+          </div>
+
+          {/* Ghi chú */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
+              <FileText className="w-3.5 h-3.5" />
+              {t('form.notes', { ns: 'appointments' })}
+            </label>
+            <textarea
+              value={notes} onChange={(e) => setNotes(e.target.value)}
+              rows={3} placeholder={t('enterNotes', 'Nhập ghi chú')}
+              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm resize-none" />
+          </div>
         </div>
 
-        {/* Ghi chú răng */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-            <FileText className="w-3.5 h-3.5" />
-          </label>
-          <textarea
-            value={toothComment} onChange={(e) => setToothComment(e.target.value)}
-            rows={2} placeholder={t("nhpGhiChVRng")}
-            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm resize-none" />
-        </div>
-
-        {/* Ghi chú */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-            <FileText className="w-3.5 h-3.5" />
-            {t('form.notes', { ns: 'appointments' })}
-          </label>
-          <textarea
-            value={notes} onChange={(e) => setNotes(e.target.value)}
-            rows={3} placeholder={t('enterNotes', 'Nhập ghi chú')}
-            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm resize-none" />
-        </div>
-      </div>
-
-      <FormFooter
-        onCancel={onClose}
-        onSubmit={handleSubmitForm}
-        isSubmitting={isSaving || isLoading}
-        isEdit={isEdit}
-        submitLabel={t('addService')}
-      />
+        <FormFooter
+          onCancel={onClose}
+          form="service-form"
+          isSubmitting={isSaving || isLoading}
+          isEdit={isEdit}
+          submitLabel={t('addService')}
+        />
+      </form>
 
       {showToothPicker && (
         <ToothPickerModal

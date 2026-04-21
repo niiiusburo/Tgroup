@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 export interface FormFooterProps {
   onCancel: () => void;
   onSubmit?: () => void;
+  form?: string; // HTML form id to submit (when inside a <form>, use this instead of onClick)
   submitLabel?: string;
   cancelLabel?: string;
   isSubmitting?: boolean;
@@ -35,6 +36,7 @@ export interface FormFooterProps {
 export function FormFooter({
   onCancel,
   onSubmit,
+  form,
   submitLabel = 'Save',
   cancelLabel = 'Cancel',
   isSubmitting = false,
@@ -43,6 +45,8 @@ export function FormFooter({
   className,
   showSubmit = true,
 }: FormFooterProps) {
+  const canSubmit = onSubmit || form;
+
   return (
     <div
       className={cn(
@@ -65,10 +69,11 @@ export function FormFooter({
         {cancelLabel}
       </button>
 
-      {showSubmit && onSubmit && (
+      {showSubmit && canSubmit && (
         <button
-          type="button"
-          onClick={onSubmit}
+          type={form ? 'submit' : 'button'}
+          form={form}
+          onClick={form ? undefined : onSubmit}
           disabled={isSubmitting || submitDisabled}
           className={cn(
             'flex items-center gap-2 px-6 py-2.5 text-sm font-medium',

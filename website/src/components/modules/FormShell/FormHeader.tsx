@@ -27,8 +27,11 @@ export function FormHeader({
   subtitle,
   icon,
   onClose,
+  isEdit,
   className,
 }: FormHeaderProps) {
+  // isEdit is accepted for API consistency but not used by the header layout
+  void isEdit;
   return (
     <div
       className={cn(

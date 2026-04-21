@@ -86,6 +86,6 @@ export interface UseAppointmentFormResult {
   readonly isSaving: boolean;
   readonly submitError: string | null;
   readonly handleChange: (patch: Partial<UnifiedAppointmentFormData>) => void;
-  readonly handleSubmit: () => Promise<void>;
+  readonly handleSubmit: (e?: React.FormEvent) => Promise<void>;
   readonly isValid: boolean;
 }
