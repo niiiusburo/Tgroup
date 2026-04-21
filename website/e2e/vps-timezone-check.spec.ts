@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test';
  * 4. Screenshots for visual verification
  */
 
-const VPS_URL = process.env.VPS_URL || 'http://localhost:5174';
+const VPS_URL = process.env.VPS_URL || 'http://localhost:5175';
 
 test.describe('VPS Timezone Diagnostics', () => {
   test('check overview appointments with date diagnostics', async ({ page }) => {

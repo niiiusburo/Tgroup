@@ -2,9 +2,10 @@
 
 ## Reference Sites
 
+- **Production:** `https://nk.2checkin.com` (tg@clinic.vn / 123456)
 - **Original TG Clinic (legacy):** `https://tamdentist.tdental.vn` (admin / 123123@)
 - **Local replica:** `http://127.0.0.1:8899` (admin@tgclinic.vn / admin123) — requires Golden backend
-- **VPS Deployed:** `http://76.13.16.68:5174` (admin@tgclinic.vn / admin123)
+- **VPS Direct:** `http://76.13.16.68:5175` (tg@clinic.vn / 123456) — bypasses nginx, for container-level debugging only
 
 ## API Endpoints
 

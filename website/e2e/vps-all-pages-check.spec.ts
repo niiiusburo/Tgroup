@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('VPS All Pages Verification', () => {
-  const VPS_URL = 'http://76.13.16.68:5174';
+  const VPS_URL = 'http://76.13.16.68:5175';
   const RESULTS_DIR = 'e2e/screenshots/vps-check';
 
   // Auth credentials

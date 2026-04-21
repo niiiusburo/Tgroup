@@ -127,7 +127,7 @@ Add meta tags to prevent caching:
 
 After all tasks:
 1. Run `npm run build`
-2. Serve the dist folder: `npx serve dist -p 5174`
+2. Serve the dist folder: `npx serve dist -p 5175`
 3. Change version.json version
 4. Click "Update Now" in browser
 5. Verify new version loads WITHOUT login

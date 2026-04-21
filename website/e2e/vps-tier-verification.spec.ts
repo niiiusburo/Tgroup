@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
  * Logs into the live VPS with different tier users and verifies tiers display correctly.
  */
 
-const VPS_URL = 'http://76.13.16.68:5174';
+const VPS_URL = 'http://76.13.16.68:5175';
 
 async function login(page: any, email: string, password: string) {
   await page.goto(`${VPS_URL}/login`);

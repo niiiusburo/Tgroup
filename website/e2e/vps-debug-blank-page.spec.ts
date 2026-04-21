@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('VPS Debug - Blank Page Investigation', () => {
-  const VPS_URL = 'http://76.13.16.68:5174';
+  const VPS_URL = 'http://76.13.16.68:5175';
 
   test('Check for console errors on Overview', async ({ page }) => {
     const consoleErrors: string[] = [];

@@ -85,7 +85,7 @@
 ### HIGH-1: Wildcard CORS Configuration
 **File:** `api/src/server.js:44`
 - `cors({ origin: true, credentials: true })` allows any website to make authenticated requests
-**Fix:** Restrict to `['http://localhost:5174', 'http://76.13.16.68:5174']`
+**Fix:** Restrict to `['http://localhost:5175', 'http://76.13.16.68:5175', 'https://nk.2checkin.com', 'https://www.nk.2checkin.com']`
 
 ### HIGH-2: No Rate Limiting on Login
 **Files:** `api/src/routes/auth.js`, `api/src/routes/account.js`

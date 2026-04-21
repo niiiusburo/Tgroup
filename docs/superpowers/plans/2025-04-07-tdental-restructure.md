@@ -219,7 +219,7 @@ Expected: Should pass or show only minor errors.
 
 ```bash
 cd /Users/thuanle/Documents/TamTMV/Tgroup/website && npm run dev &
-# Open http://localhost:5174
+# Open http://localhost:5175
 # Navigate to Customers → click a customer
 # Verify 4 tabs appear: Profile, Appointments, Records, Payment
 # Verify Profile tab shows merged content
@@ -394,7 +394,7 @@ Expected: Should pass.
 - [ ] **Step 4: Verify sidebar updates**
 
 ```bash
-# Dev server running at http://localhost:5174
+# Dev server running at http://localhost:5175
 # Verify sidebar shows: Overview, Calendar, Customers, Employees, Locations, Service Catalog, Settings
 # Verify Customers has NO submenu
 ```
@@ -589,7 +589,7 @@ cd /Users/thuanle/Documents/TamTMV/Tgroup/website && npm run build 2>&1 | head -
 - [ ] **Step 5: Verify in browser**
 
 ```bash
-# Navigate to http://localhost:5174/employees
+# Navigate to http://localhost:5175/employees
 # Verify 3 tabs appear: Admin, Managers, Staff
 # Verify clicking each tab filters the employee list
 # Verify Role and Status filters still work within each tab

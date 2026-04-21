@@ -10,7 +10,7 @@ VPS_URL=http://your-vps-ip-or-domain:port npx playwright test e2e/vps-date-check
 ```
 
 Replace `http://your-vps-ip-or-domain:port` with your actual VPS URL, for example:
-- `http://203.0.113.45:5174`
+- `http://203.0.113.45:5175`
 - `https://yourdomain.com`
 
 ## What This Test Does

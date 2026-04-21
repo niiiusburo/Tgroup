@@ -274,7 +274,7 @@
 |---------|------|-------|---------|
 | `db` | 55433 | postgres:16-alpine | PostgreSQL database |
 | `api` | 3002 | Custom (Dockerfile.api) | Express API server |
-| `web` | 5174 | Custom (Dockerfile.web) | React app via nginx |
+| `web` | 5175 | Custom (Dockerfile.web) | React app via nginx |
 
 ---
 

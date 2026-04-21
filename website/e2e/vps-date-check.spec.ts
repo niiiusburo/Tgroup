@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
  * and what date the application would send to the API
  */
 
-const VPS_URL = process.env.VPS_URL || 'http://localhost:5174';
+const VPS_URL = process.env.VPS_URL || 'http://localhost:5175';
 
 test.describe('Quick VPS Date Check', () => {
   test('check browser date vs Vietnam date', async ({ page }) => {

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('VPS Final Verification - Appointments', () => {
-  const VPS_URL = 'http://76.13.16.68:5174';
+  const VPS_URL = 'http://76.13.16.68:5175';
 
   test('VPS API returns 5 appointments for April 8th', async ({ request }) => {
     console.log('\n=== FINAL VPS VERIFICATION ===');

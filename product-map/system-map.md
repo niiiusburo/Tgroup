@@ -117,7 +117,7 @@
 - **Risk:** Accidental revival or copy-paste from this file will cause runtime SQL errors.
 
 ### 5.5 E2E ↔ Local Port Coupling
-- E2E auth-setup spec hardcodes `localhost:5174` (recently temporarily changed to `5175` for VPS sync testing).
+- E2E auth-setup spec uses `localhost:5175`.
 - **Risk:** Port changes in Vite or Docker require manual E2E updates.
 
 ## 6. Stale / Duplicate / Shadow / Legacy Files

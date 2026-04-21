@@ -128,7 +128,7 @@ Tgroup/
 ## Commands
 
 ```bash
-# Frontend dev server (port 5174)
+# Frontend dev server (port 5175)
 cd website && npm install && npm run dev
 
 # Backend dev server (port 3002)

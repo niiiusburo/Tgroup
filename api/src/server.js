@@ -57,10 +57,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const ALLOWED_ORIGINS = [
-  'http://localhost:5174',
-  'http://localhost:5173',
   'http://localhost:5175',
-  'http://76.13.16.68:5174',
+  'http://76.13.16.68:5175',
   'https://nk.2checkin.com',
   'https://www.nk.2checkin.com',
 ];
@@ -70,9 +68,15 @@ app.use(cors({ origin: (o, cb) => !o || ALLOWED_ORIGINS.includes(o) || DEV_ORIGI
 app.use(cookieParser());
 app.use(express.json({ limit: '1mb' }));
 
-const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === 'development' ? 100 : 10,
+  message: { error: 'Too many login attempts, please try again later.' },
+});
 app.use('/api/Auth/login', loginLimiter);
+app.use('/api/auth/login', loginLimiter);
 app.use('/api/Account/Login', loginLimiter);
+app.use('/api/account/login', loginLimiter);
 
 // Request logger
 app.use((req, _res, next) => {
@@ -83,7 +87,14 @@ app.use((req, _res, next) => {
 // IP Access Control enforcement — applies before auth so blocked IPs cannot even login
 app.use('/api', enforceIpAccess);
 
-const PUBLIC_PATHS = new Set(['/api/Auth/login', '/api/Account/Login', '/api/IpAccess/check']);
+const PUBLIC_PATHS = new Set([
+  '/api/Auth/login',
+  '/api/auth/login',
+  '/api/Account/Login',
+  '/api/account/login',
+  '/api/IpAccess/check',
+  '/api/ipaccess/check',
+]);
 app.use('/api', (req, res, next) => {
   const fullPath = req.originalUrl.split('?')[0];
   if (PUBLIC_PATHS.has(fullPath)) return next();

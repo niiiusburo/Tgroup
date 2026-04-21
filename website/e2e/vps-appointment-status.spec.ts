@@ -1,14 +1,14 @@
 import { test, expect } from '@playwright/test';
 
 test('appointment status labels are translated', async ({ page }) => {
-  await page.goto('http://76.13.16.68:5174/login');
+  await page.goto('http://76.13.16.68:5175/login');
   await page.locator('#email').fill('tg@clinic.vn');
   await page.locator('#password').fill('123456');
   await page.locator('button[type="submit"]').click();
   await expect(page.locator('#email')).toBeHidden({ timeout: 20000 });
 
   // Go to overview where today appointments are visible
-  await page.goto('http://76.13.16.68:5174/');
+  await page.goto('http://76.13.16.68:5175/');
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(3000);
 

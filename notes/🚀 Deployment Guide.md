@@ -18,7 +18,8 @@ docker compose ps
 
 | Service | URL / Port | Notes |
 |---------|------------|-------|
-| Web (nginx) | http://localhost:5174 | Built React app served by nginx |
+| **Production** | https://nk.2checkin.com | Live domain (nginx → Docker 5175) |
+| Web (nginx) | http://localhost:5175 | Built React app served by nginx |
 | API | http://localhost:3002 | Express backend |
 | DB | localhost:55433 | PostgreSQL 16 (`tdental_demo`) |
 
@@ -33,7 +34,7 @@ docker compose ps
 ### Services
 - `db` — PostgreSQL 16 (port `127.0.0.1:55433`)
 - `api` — Node/Express API (port `127.0.0.1:3002`)
-- `web` — nginx serving built React app (port `5174`)
+- `web` — nginx serving built React app (port `5175`)
 - `compreface-*` — Face recognition PostgreSQL + API + Core
 
 ### Critical Pitfall: DB Initialization
@@ -191,8 +192,8 @@ npm start
 # Kill process on 3002
 kill -9 $(lsof -t -i:3002)
 
-# Kill process on 5174
-kill -9 $(lsof -t -i:5174)
+# Kill process on 5175
+kill -9 $(lsof -t -i:5175)
 ```
 
 ## Environment Variables

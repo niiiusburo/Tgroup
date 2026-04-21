@@ -55,7 +55,7 @@
 - **`ipAccess.js` not represented**: The IP access control feature (7 `requirePermission` calls) is not mapped in the permission registry.
 
 ### system-map.md
-- **E2E port coupling note is slightly outdated**: The hardcoded port was changed from 5174 to 5175 and back; the note mentions 5174 and 5175 but may not reflect current `playwright.config.ts`.
+- **E2E port coupling note**: Unified to `5175` across all configs. `playwright.config.ts` and all e2e specs use `5175`.
 - **Dead code list is accurate but not actionable**: No deprecation tickets or scheduled removal dates are attached.
 
 ### unknowns.md

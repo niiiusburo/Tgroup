@@ -7,10 +7,10 @@ import { test, expect, type Page } from '@playwright/test';
  * correctly show up on the customer profile Payment tab.
  *
  * Run against VPS:
- *   VPS_URL=http://your-vps-ip:5174 npx playwright test e2e/vps-payment-history.spec.ts --workers=1
+ *   VPS_URL=http://your-vps-ip:5175 npx playwright test e2e/vps-payment-history.spec.ts --workers=1
  */
 
-const TARGET_URL = process.env.VPS_URL || 'http://localhost:5174';
+const TARGET_URL = process.env.VPS_URL || 'http://localhost:5175';
 const CUSTOMER_NAME = 'LƯƠNG HỒNG NHUNG';
 
 async function login(page: Page) {

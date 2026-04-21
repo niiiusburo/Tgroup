@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('VPS Overview Page - Appointments Display', () => {
-  const VPS_URL = 'http://76.13.16.68:5174';
+  const VPS_URL = 'http://76.13.16.68:5175';
   const VPS_API = 'http://76.13.16.68:3002';
 
   test('VPS API should return appointments for April 8th', async ({ request }) => {
