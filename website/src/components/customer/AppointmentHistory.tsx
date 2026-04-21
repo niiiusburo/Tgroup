@@ -53,9 +53,21 @@ export function AppointmentHistory({ appointments, limit }: AppointmentHistoryPr
                         {apt.date} at {apt.time}
                       </span>
                       <span className="flex items-center gap-1">
-                        <User className="w-3 h-3" />
+                        <User className="w-3 h-3 text-purple-500" />
                         {apt.doctor}
                       </span>
+                      {apt.assistant && (
+                        <span className="flex items-center gap-1">
+                          <User className="w-3 h-3 text-teal-500" />
+                          {apt.assistant}
+                        </span>
+                      )}
+                      {apt.dentalAide && (
+                        <span className="flex items-center gap-1">
+                          <User className="w-3 h-3 text-cyan-500" />
+                          {apt.dentalAide}
+                        </span>
+                      )}
                       <span className="flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
                         {apt.location}

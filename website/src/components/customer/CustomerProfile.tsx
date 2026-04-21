@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft, Calendar, Edit2, Plus, Clock, CalendarPlus, Receipt,
-  Trash2, ChevronDown, Coins, Wallet, HandCoins } from
+  Trash2, ChevronDown, Coins, Wallet, HandCoins, User } from
 'lucide-react';
 import { CustomerDeposits } from '@/components/payment/CustomerDeposits';
 import { AppointmentForm, type AppointmentFormData } from '@/components/appointments/AppointmentForm';
@@ -380,9 +380,11 @@ export function CustomerProfile({
                           <span className="text-sm font-medium text-gray-900">{apt.name || 'Appointment'}</span>
                           <span className={`text-xs px-2 py-0.5 rounded ${statusConfig.className}`}>{t(`status.${statusConfig.label}`, { ns: 'appointments' })}</span>
                         </div>
-                        <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500 mt-1">
                           <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{time}</span>
-                          <span>{apt.doctorname || 'N/A'}</span>
+                          <span className="flex items-center gap-1"><User className="w-3 h-3 text-purple-500" />{apt.doctorname || 'N/A'}</span>
+                          {apt.assistantname && <span className="flex items-center gap-1"><User className="w-3 h-3 text-teal-500" />{apt.assistantname}</span>}
+                          {apt.dentalaidename && <span className="flex items-center gap-1"><User className="w-3 h-3 text-cyan-500" />{apt.dentalaidename}</span>}
                           <span>{formatDate(apt.date ?? '')}</span>
                         </div>
                         {apt.note &&

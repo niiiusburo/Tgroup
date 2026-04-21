@@ -110,6 +110,8 @@ export interface CustomerAppointment {
   readonly status: 'completed' | 'cancelled' | 'no-show';
   readonly location: string;
   readonly notes: string;
+  readonly assistant?: string;
+  readonly dentalAide?: string;
 }
 
 export interface CustomerService {
