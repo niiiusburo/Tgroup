@@ -22,6 +22,7 @@ import { useLocations } from "@/hooks/useLocations";
 import { useAppointments } from "@/hooks/useAppointments";
 import { useServices } from "@/hooks/useServices";
 import { useDeposits } from "@/hooks/useDeposits";
+import { useEmployees } from "@/hooks/useEmployees";
 import { useCustomerPayments } from "@/hooks/useCustomerPayments";
 import { useExternalCheckups } from "@/hooks/useExternalCheckups";
 import type { PaymentFormData } from "@/components/payment/PaymentForm";
@@ -149,10 +150,11 @@ export function Customers() {
   // Fetch service records without location filter so the customer profile shows
   // treatment history across all locations (not just the currently selected one).
   const {
+    allRecords: allServiceRecords,
     createServiceRecord,
     updateServiceRecord,
-    getRecordsByCustomer,
     updateServiceStatus,
+    loading: servicesLoading,
     refetch: refetchServices,
   } = useServices(undefined, selectedCustomerId ?? undefined);
   const {
@@ -167,6 +169,7 @@ export function Customers() {
     removeDeposit,
     editDeposit,
   } = useDeposits();
+  const { employees: allEmployees } = useEmployees();
   const {
     payments: customerPayments,
     isLoading: paymentsLoading,
@@ -645,8 +648,18 @@ export function Customers() {
     };
   }
 
-  const saleServices: CustomerService[] = selectedCustomerId
-    ? getRecordsByCustomer(selectedCustomerId).map((r) => ({
+  // Explicitly refetch services when the selected customer changes
+  useEffect(() => {
+    if (selectedCustomerId) {
+      refetchServices();
+    }
+  }, [selectedCustomerId, refetchServices]);
+
+  const saleServices: CustomerService[] = useMemo(() => {
+    if (!selectedCustomerId) return [];
+    return allServiceRecords
+      .filter((r) => r.customerId === selectedCustomerId)
+      .map((r) => ({
         id: r.id,
         date: r.startDate || r.createdAt || "-",
         service: r.serviceName,
@@ -672,44 +685,46 @@ export function Customers() {
         paidAmount: r.paidAmount,
         residual:
           r.residual ?? Math.max(0, (r.totalCost ?? 0) - (r.paidAmount ?? 0)),
-      }))
-    : [];
+      }));
+  }, [allServiceRecords, selectedCustomerId]);
 
-  const dotkhamServices: CustomerService[] = dotKhams.map((dk) => {
-    const cost = parseFloat(dk.totalamount || "0") || 0;
-    const residual = parseFloat(dk.amountresidual || "0") || 0;
-    const status =
-      dk.state === "done" || dk.state === "completed"
-        ? "completed"
-        : dk.state === "cancel" || dk.state === "cancelled"
-          ? "cancelled"
-          : "active";
-    return {
-      id: dk.id,
-      date: dk.date ? dk.date.slice(0, 10) : "-",
-      service: dk.name || t("defaultCheckupName"),
-      doctor: dk.doctorname || "N/A",
-      doctorId: dk.doctorid || "",
-      assistantId: dk.assistantid,
-      assistantName: dk.assistantname || undefined,
-      dentalAideId: dk.assistantsecondaryid,
-      dentalAideName: dk.assistantsecondaryname || undefined,
-      catalogItemId: "",
-      cost,
-      status,
-      tooth: "-",
-      notes: dk.note || "",
-      orderName: dk.name || undefined,
-      paidAmount: Math.max(0, cost - residual),
-      residual,
-      locationName: dk.companyname || undefined,
-    };
-  });
+  const dotkhamServices: CustomerService[] = useMemo(() => {
+    return dotKhams.map((dk) => {
+      const cost = parseFloat(dk.totalamount || "0") || 0;
+      const residual = parseFloat(dk.amountresidual || "0") || 0;
+      const status =
+        dk.state === "done" || dk.state === "completed"
+          ? "completed"
+          : dk.state === "cancel" || dk.state === "cancelled"
+            ? "cancelled"
+            : "active";
+      return {
+        id: dk.id,
+        date: dk.date ? dk.date.slice(0, 10) : "-",
+        service: dk.name || t("defaultCheckupName"),
+        doctor: dk.doctorname || "N/A",
+        doctorId: dk.doctorid || "",
+        assistantId: dk.assistantid,
+        assistantName: dk.assistantname || undefined,
+        dentalAideId: dk.assistantsecondaryid,
+        dentalAideName: dk.assistantsecondaryname || undefined,
+        catalogItemId: "",
+        cost,
+        status,
+        tooth: "-",
+        notes: dk.note || "",
+        orderName: dk.name || undefined,
+        paidAmount: Math.max(0, cost - residual),
+        residual,
+        locationName: dk.companyname || undefined,
+      };
+    });
+  }, [dotKhams, t]);
 
-  const customerServices: CustomerService[] = [
-    ...saleServices,
-    ...dotkhamServices,
-  ].sort((a, b) => b.date.localeCompare(a.date));
+  const customerServices: CustomerService[] = useMemo(
+    () => [...saleServices, ...dotkhamServices].sort((a, b) => b.date.localeCompare(a.date)),
+    [saleServices, dotkhamServices]
+  );
 
   if (profileLoading) {
     return (
@@ -727,6 +742,8 @@ export function Customers() {
         profile={profileData}
         appointments={hookAppointments}
         services={customerServices}
+        loadingServices={servicesLoading}
+        employees={allEmployees}
         depositList={depositList}
         usageHistory={usageHistory}
         depositBalance={depositBalanceData}

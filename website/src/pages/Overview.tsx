@@ -10,6 +10,7 @@ import { AppointmentHoverProvider } from '@/contexts/AppointmentHoverContext';
 import { QuickAddAppointmentButton } from '@/components/shared/QuickAddAppointmentButton';
 import { AppointmentFormShell } from '@/components/appointments/unified';
 import { overviewAppointmentToFormData } from '@/components/appointments/unified';
+import { useEmployees } from '@/hooks/useEmployees';
 
 /**
  * Overview Dashboard Page — Three-Zone Layout
@@ -48,6 +49,9 @@ export function Overview() {
 
   const [editingAppointment, setEditingAppointment] = useState<OverviewAppointment | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Pre-fetch employees so the edit form selectors are already populated when opened
+  const { employees: allEmployees } = useEmployees();
 
   const handleEditClick = useCallback((appointment: OverviewAppointment) => {
     setEditingAppointment(appointment);
@@ -128,6 +132,7 @@ export function Overview() {
         onSuccess={handleEditAppointmentSaved}
         initialData={editFormInitialData}
         customerReadOnly
+        employees={allEmployees}
       />
     </AppointmentHoverProvider>
   );

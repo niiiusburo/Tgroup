@@ -18,6 +18,7 @@
 // ═══════════════════════════════════════════════════════════════════════
 
 import type { AppointmentType } from '@/constants';
+import type { Employee } from '@/data/mockEmployees';
 
 /**
  * UnifiedAppointmentFormData — the ONE type for create AND edit.
@@ -75,6 +76,8 @@ export interface AppointmentFormCoreProps {
   readonly onChange: (patch: Partial<UnifiedAppointmentFormData>) => void;
   readonly customerReadOnly?: boolean;
   readonly errors: Record<string, string>;
+  /** Optional pre-fetched employees. If omitted, core fetches its own. */
+  readonly employees?: readonly Employee[];
 }
 
 /**

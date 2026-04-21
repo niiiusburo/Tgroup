@@ -61,11 +61,13 @@ export function AppointmentFormCore({
   onChange,
   customerReadOnly,
   errors,
+  employees: employeesProp,
 }: AppointmentFormCoreProps) {
   const { t } = useTranslation();
   const { allLocations } = useLocations();
   const { customers, createCustomer } = useCustomers();
-  const { employees } = useEmployees();
+  const { employees: fetchedEmployees } = useEmployees();
+  const employees = employeesProp ?? fetchedEmployees;
   const { selectedLocationId } = useLocationFilter();
 
   const [showCreateCustomer, setShowCreateCustomer] = useState(false);

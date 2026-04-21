@@ -49,7 +49,7 @@ test.describe('VPS Overview Page - Appointments Display', () => {
     
     // Fill credentials
     await page.fill('input[type="email"]', 'tg@clinic.vn');
-    await page.fill('input[type="password"]', 'admin123');
+    await page.fill('input[type="password"]', '123456');
     
     // Click Sign In
     await page.click('button:has-text("Sign In")');

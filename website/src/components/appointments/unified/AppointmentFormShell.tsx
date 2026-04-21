@@ -31,6 +31,7 @@ import { CalendarPlus, Edit2 } from 'lucide-react';
 import { AppointmentFormCore } from './AppointmentFormCore';
 import { useAppointmentForm } from './useAppointmentForm';
 import type { AppointmentFormShellProps } from './appointmentForm.types';
+import type { Employee } from '@/data/mockEmployees';
 import { FormShell, FormHeader, FormFooter } from '@/components/modules/FormShell';
 
 export function AppointmentFormShell({
@@ -40,7 +41,8 @@ export function AppointmentFormShell({
   onSuccess,
   initialData,
   customerReadOnly,
-}: AppointmentFormShellProps) {
+  employees,
+}: AppointmentFormShellProps & { readonly employees?: readonly Employee[] }) {
   const { t } = useTranslation();
   const { data, errors, isSaving, submitError, handleChange, handleSubmit } =
     useAppointmentForm(mode, initialData, onSuccess);
@@ -67,6 +69,7 @@ export function AppointmentFormShell({
             onChange={handleChange}
             customerReadOnly={customerReadOnly}
             errors={errors}
+            employees={employees}
           />
 
           {submitError && (

@@ -6,6 +6,7 @@ import {
 'lucide-react';
 import { CustomerDeposits } from '@/components/payment/CustomerDeposits';
 import { AppointmentFormShell, apiAppointmentToFormData } from '@/components/appointments/unified';
+import type { Employee } from '@/data/mockEmployees';
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { PaymentForm, type PaymentFormData } from '@/components/payment/PaymentForm';
 import { PaymentSourceBadges } from '@/components/payment/PaymentSourceBadges';
@@ -29,6 +30,8 @@ interface CustomerProfileProps {
   readonly profile: CustomerProfileData;
   readonly appointments: readonly ApiAppointment[];
   readonly services?: readonly CustomerService[];
+  readonly loadingServices?: boolean;
+  readonly employees?: readonly Employee[];
   readonly depositList?: DepositTransaction[];
   readonly usageHistory?: DepositTransaction[];
   readonly depositBalance?: DepositBalance;
@@ -115,6 +118,8 @@ export function CustomerProfile({
   profile,
   appointments,
   services = [],
+  loadingServices = false,
+  employees,
   depositList = [],
   usageHistory = [],
   depositBalance,
@@ -293,7 +298,7 @@ export function CustomerProfile({
                 }>
                 
                 {t(tab.label, { ns: 'customers' })}
-                {showBadge && <TabBadge count={count} isActive={isActive} />}
+                {showBadge && <TabBadge count={count} isActive={isActive} loading={tab.value === 'records' && loadingServices} />}
               </button>);
 
           })}
@@ -462,10 +467,15 @@ export function CustomerProfile({
             </div>
           </div>
 
-          <ServiceHistory services={services} payments={payments} onEditService={setEditingService} onUpdateStatus={onUpdateServiceStatus} onPayForService={onMakePayment ? (svc) => {
-          setPayTargetService(svc);
-          setShowPaymentModal(true);
-        } : undefined} onDeletePayment={onDeletePayment ? (id) => setPaymentToDelete(id) : undefined} />
+          {loadingServices ?
+            <div className="bg-white rounded-xl shadow-card p-6 text-center text-sm text-gray-500">
+              {t('angTi', { ns: 'common' })}…
+            </div> :
+            <ServiceHistory services={services} payments={payments} onEditService={setEditingService} onUpdateStatus={onUpdateServiceStatus} onPayForService={onMakePayment ? (svc) => {
+              setPayTargetService(svc);
+              setShowPaymentModal(true);
+            } : undefined} onDeletePayment={onDeletePayment ? (id) => setPaymentToDelete(id) : undefined} />
+          }
         </div>
       }
 
@@ -640,6 +650,7 @@ export function CustomerProfile({
                 }
           }
           customerReadOnly
+          employees={employees}
         />
       )}
 
