@@ -1,5 +1,134 @@
 [
   {
+    "version": "0.25.6",
+    "date": "2026-04-24",
+    "commit": "pending",
+    "highlights": "style(customers): improve appointment history card readability",
+    "sections": [
+      {
+        "title": "Polish",
+        "items": [
+          "Customer appointment history cards now group appointment code, patient, status, staff, time, date, and notes into clearer scan zones.",
+          "Appointment notes now display in a readable note band instead of being truncated into the metadata row."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Ran website production build for version 0.25.6.",
+          "Verified locally with Playwright that PHAN LÊ MINH appointment cards render the improved layout."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.25.5",
+    "date": "2026-04-24",
+    "commit": "pending",
+    "highlights": "style(customers): make tooth values easier to scan",
+    "sections": [
+      {
+        "title": "Polish",
+        "items": [
+          "Customer service history now displays tooth and diagnosis values as compact tooth badges with a tooth emoji."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Ran website production build for version 0.25.5."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.25.4",
+    "date": "2026-04-24",
+    "commit": "pending",
+    "highlights": "fix(customers): show allocated service payments and progress pill",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Customer service rows now prefer payment allocations and inferred sale-order balance over stale zero amountpaid fields.",
+          "Outstanding service rows now show a rounded Thanh toán progress pill with green paid progress and orange unpaid remainder."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added a unit test for service-line payment amount resolution.",
+          "Ran the focused unit test and website production build for version 0.25.4."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.25.3",
+    "date": "2026-04-24",
+    "commit": "pending",
+    "highlights": "fix(customers): restore pay remainder action on service rows",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Restored the orange payment action on customer service rows with an outstanding balance.",
+          "Payment allocations from customer service rows now target the sale order id so paying a remainder updates the correct outstanding balance."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Ran website production build for version 0.25.3.",
+          "Verified locally with Playwright that the outstanding service row shows a Thanh toán action and opens the payment modal for the sale order remainder."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.25.2",
+    "date": "2026-04-24",
+    "commit": "pending",
+    "highlights": "fix(appointments): restore modal scrolling while dropdown menus are open",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Removed the nested modal scroll body from the unified appointment form so dropdown menus no longer trap wheel scrolling before it reaches the real modal body."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Ran website production build for version 0.25.2.",
+          "Verified locally with Playwright that the appointment color dropdown no longer prevents the modal body from receiving wheel scroll."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.25.1",
+    "date": "2026-04-24",
+    "commit": "pending",
+    "highlights": "fix(customer): expose appointment edit action on completed profile appointments",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Customer profile appointment history now shows a pencil edit action beside the AP appointment badge on hover/focus, including completed appointments.",
+          "Extracted the customer appointment history list into a focused component instead of adding more UI to the oversized profile component."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Ran website production build for version 0.25.1.",
+          "Verified locally with Playwright that completed appointment AP208562 reveals the edit pencil on hover and opens the edit appointment modal."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.0",
     "date": "2026-04-24",
     "commit": "pending",

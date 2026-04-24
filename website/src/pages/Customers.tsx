@@ -25,6 +25,7 @@ import { useDeposits } from "@/hooks/useDeposits";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useCustomerPayments } from "@/hooks/useCustomerPayments";
 import { useExternalCheckups } from "@/hooks/useExternalCheckups";
+import { resolveSaleOrderLinePayment } from "@/components/customer/servicePaymentAmounts";
 import type { PaymentFormData } from "@/components/payment/PaymentForm";
 import type { CustomerProfileData } from "@/hooks/useCustomerProfile";
 import type { ProfileTab } from "@/components/customer/CustomerProfile";
@@ -188,32 +189,35 @@ export function Customers() {
     setSaleOrderLinesLoading(true);
     try {
       const res = await fetchSaleOrderLines({ partnerId: selectedCustomerId, limit: 500 });
-      const mapped: CustomerService[] = res.items.map((line) => ({
-        id: line.id,
-        date: line.date ? line.date.slice(0, 10) : "-",
-        service: line.productname || "-",
-        doctor: line.doctorname || "N/A",
-        doctorId: line.employeeid || undefined,
-        assistantId: line.assistantid || undefined,
-        assistantName: line.assistantname || undefined,
-        catalogItemId: line.productid || undefined,
-        cost: parseFloat(line.pricetotal || "0") || 0,
-        quantity: parseFloat(line.productuomqty || "0") || undefined,
-        status:
-          line.sostate === "done" || line.sostate === "completed"
-            ? "completed"
-            : line.iscancelled
-              ? "cancelled"
-              : "active",
-        tooth: line.tooth_numbers || line.toothtype || line.diagnostic || "-",
-        notes: line.note || "",
-        orderId: line.orderid || undefined,
-        orderName: line.ordername || undefined,
-        orderCode: line.ordercode || undefined,
-        paidAmount: parseFloat(line.amountpaid || line.paid_amount || "0") || 0,
-        residual: parseFloat(line.so_residual || line.amountresidual || "0") || 0,
-        locationName: line.companyname || undefined,
-      }));
+      const mapped: CustomerService[] = res.items.map((line) => {
+        const paymentAmounts = resolveSaleOrderLinePayment(line);
+        return {
+          id: line.id,
+          date: line.date ? line.date.slice(0, 10) : "-",
+          service: line.productname || "-",
+          doctor: line.doctorname || "N/A",
+          doctorId: line.employeeid || undefined,
+          assistantId: line.assistantid || undefined,
+          assistantName: line.assistantname || undefined,
+          catalogItemId: line.productid || undefined,
+          cost: parseFloat(line.pricetotal || "0") || 0,
+          quantity: parseFloat(line.productuomqty || "0") || undefined,
+          status:
+            line.sostate === "done" || line.sostate === "completed"
+              ? "completed"
+              : line.iscancelled
+                ? "cancelled"
+                : "active",
+          tooth: line.tooth_numbers || line.toothtype || line.diagnostic || "-",
+          notes: line.note || "",
+          orderId: line.orderid || undefined,
+          orderName: line.ordername || undefined,
+          orderCode: line.ordercode || undefined,
+          paidAmount: paymentAmounts.paidAmount,
+          residual: paymentAmounts.residual,
+          locationName: line.companyname || undefined,
+        };
+      });
       setSaleOrderLines(mapped);
     } catch (err) {
       console.error("Failed to fetch sale order lines:", err);

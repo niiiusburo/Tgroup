@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ArrowLeft, Calendar, Edit2, Plus, Clock, CalendarPlus, Receipt,
-  Trash2, ChevronDown, Coins, Wallet, HandCoins, User } from
+  ArrowLeft, Edit2, Plus, Receipt,
+  Trash2, ChevronDown, Coins, Wallet, HandCoins } from
 'lucide-react';
 import { CustomerDeposits } from '@/components/payment/CustomerDeposits';
 import { AppointmentFormShell, apiAppointmentToFormData } from '@/components/appointments/unified';
@@ -13,6 +13,7 @@ import { PaymentSourceBadges } from '@/components/payment/PaymentSourceBadges';
 import { type ServicePaymentContext } from '@/components/payment/ServicePaymentCard';
 import { ServiceHistory } from '@/components/customer/ServiceHistory';
 import { CustomerAssignments } from '@/components/customer/CustomerAssignments';
+import { CustomerAppointmentHistory } from '@/components/customer/CustomerAppointmentHistory';
 import type { DepositTransaction, DepositBalance } from '@/hooks/useDeposits';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 import type { CustomerService } from '@/types/customer';
@@ -22,7 +23,6 @@ import { HealthCheckupGallery } from './HealthCheckupGallery';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatVND, parseDisplayDate } from '@/lib/formatting';
 import { TabBadge } from './CustomerProfile/TabBadge';
-import { formatDate } from './CustomerProfile/formatDate';
 import { ProfileHeader } from './CustomerProfile/ProfileHeader';
 import { DeletePaymentDialog } from './CustomerProfile/DeletePaymentDialog';
 
@@ -178,16 +178,6 @@ export function CustomerProfile({
   const totalRevenue = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
   const amountPaid = totalServiceCost - profile.outstandingBalance;
 
-  const getStatusConfig = (state: string | null | undefined) => {
-    const s = (state || '').toLowerCase();
-    if (s === 'done') return { label: 'completed', className: 'text-emerald-600 bg-emerald-50', dot: 'bg-emerald-500' };
-    if (s === 'cancelled' || s === 'cancel') return { label: 'cancelled', className: 'text-red-600 bg-red-50', dot: 'bg-red-500' };
-    if (s === 'no_show') return { label: 'noShow', className: 'text-amber-600 bg-amber-50', dot: 'bg-amber-500' };
-    if (s === 'confirmed') return { label: 'confirmed', className: 'text-blue-600 bg-blue-50', dot: 'bg-blue-500' };
-    return { label: 'scheduled', className: 'text-gray-600 bg-gray-50', dot: 'bg-gray-400' };
-  };
-
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -330,79 +320,24 @@ export function CustomerProfile({
       }
 
       {activeTab === 'appointments' &&
-      <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-            <h3 className="text-lg font-semibold text-gray-900">{t('profileSection.appointmentHistory', { ns: 'customers' })} ({appointments.length})</h3>
-            <button
-            onClick={() => {setEditingAppointment(null);setShowAppointmentModal(true);}}
-            disabled={!onCreateAppointment}
-            className={`flex items-center justify-center gap-2 px-4 py-2 text-white rounded-lg transition-colors text-sm ${
-            onCreateAppointment ?
-            'bg-primary hover:bg-primary-dark cursor-pointer' :
-            'bg-gray-300 cursor-not-allowed'}`
-            }>
-            
-              <CalendarPlus className="w-4 h-4" />
-              Add Appointment
-            </button>
-          </div>
-          <div className="bg-white rounded-xl shadow-card p-6">
-            {appointments.length === 0 ?
-          <div className="text-center py-8">
-                <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-400 mb-3">{t('noAppointmentHistory', { ns: 'customers' })}</p>
-                {onCreateAppointment &&
-            <button
-              onClick={() => {setEditingAppointment(null);setShowAppointmentModal(true);}}
-              className="text-primary hover:text-primary-dark text-sm font-medium">
-              {t('thmLchHn', { ns: 'customers' })}
-            </button>
+      <CustomerAppointmentHistory
+        appointments={appointments}
+        onCreateAppointment={
+          onCreateAppointment
+            ? () => {
+              setEditingAppointment(null);
+              setShowAppointmentModal(true);
             }
-              </div> :
-
-          <div className="space-y-3">
-                {appointments.map((apt) => {
-              const statusConfig = getStatusConfig(apt.state ?? undefined);
-              // Extract time from either time field or datetimeappointment
-              const time = apt.time || (apt.datetimeappointment?.includes('T') ?
-              apt.datetimeappointment.split('T')[1]?.slice(0, 5) :
-              null) || '--:--';
-              const isEditable = !!onUpdateAppointment;
-              return (
-                <div
-                  key={apt.id}
-                  onClick={() => {if (isEditable) {setEditingAppointment(apt);setShowAppointmentModal(true);}}}
-                  className={`group flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-primary/30 hover:bg-primary/5 transition-all ${isEditable ? 'cursor-pointer pr-2' : ''}`}>
-                  
-                      <div className={`w-2 h-2 rounded-full ${statusConfig.dot}`} />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          {apt.name && (
-                            <span className="text-[11px] font-mono font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                              {apt.name}
-                            </span>
-                          )}
-                          <span className="text-sm font-medium text-gray-900">{apt.partnername || apt.partnerdisplayname || 'Appointment'}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded ${statusConfig.className}`}>{t(`status.${statusConfig.label}`, { ns: 'appointments' })}</span>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500 mt-1">
-                          <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{time}</span>
-                          <span className="flex items-center gap-1"><User className="w-3 h-3 text-purple-500" />{apt.doctorname || 'N/A'}</span>
-                          {apt.assistantname && <span className="flex items-center gap-1"><User className="w-3 h-3 text-teal-500" />{apt.assistantname}</span>}
-                          {apt.dentalaidename && <span className="flex items-center gap-1"><User className="w-3 h-3 text-cyan-500" />{apt.dentalaidename}</span>}
-                          <span>{formatDate(apt.date ?? '')}</span>
-                        </div>
-                        {apt.note &&
-                    <p className="text-xs text-gray-400 mt-1 truncate">{apt.note}</p>
-                    }
-                      </div>
-                    </div>);
-
-            })}
-              </div>
-          }
-          </div>
-        </div>
+            : undefined
+        }
+        onEditAppointment={
+          onUpdateAppointment
+            ? (appointment) => {
+              setEditingAppointment(appointment);
+              setShowAppointmentModal(true);
+            }
+            : undefined
+        } />
       }
 
       {activeTab === 'records' &&
@@ -768,7 +703,7 @@ export function CustomerProfile({
       {/* Payment Modal */}
       {showPaymentModal && onMakePayment && payTargetService && (() => {
         const svcCtx: ServicePaymentContext = {
-          recordId: payTargetService.id,
+          recordId: payTargetService.orderId ?? payTargetService.id,
           recordName: payTargetService.orderCode || payTargetService.orderName || payTargetService.service,
           recordType: 'saleorder',
           totalCost: payTargetService.cost,
