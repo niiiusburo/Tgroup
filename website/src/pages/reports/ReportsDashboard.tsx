@@ -2,12 +2,13 @@ import { useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { DollarSign, Calendar, Users, AlertTriangle } from 'lucide-react';
 import { useReportData } from '@/hooks/useReportData';
+import { formatVND } from '@/lib/formatting';
 import { KPICard } from '@/components/reports/KPICard';
 import { BarChart } from '@/components/reports/BarChart';
 import { ProgressRing } from '@/components/reports/DonutChart';
 import { SectionCard } from '@/components/reports/ReportsFilters';
 import { ReportError } from '@/components/reports/ReportError';
-import { formatVND, formatNum } from '@/hooks/useReportData';
+import { formatNum } from '@/hooks/useReportData';
 
 interface DashboardData {
   revenue: { invoiced: number; paid: number; outstanding: number; change: number | null };

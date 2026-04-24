@@ -1,7 +1,8 @@
 import { useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { DollarSign } from 'lucide-react';
-import { useReportData, formatVND } from '@/hooks/useReportData';
+import { useReportData } from '@/hooks/useReportData';
+import { formatVND } from '@/lib/formatting';
 import { KPICard } from '@/components/reports/KPICard';
 import { BarChart, HorizontalBarList } from '@/components/reports/BarChart';
 import { DonutChart } from '@/components/reports/DonutChart';

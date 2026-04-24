@@ -1,7 +1,8 @@
 import { useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Stethoscope, Award, DollarSign, Activity } from 'lucide-react';
-import { useReportData, formatVND, formatNum } from '@/hooks/useReportData';
+import { useReportData, formatNum } from '@/hooks/useReportData';
+import { formatVND } from '@/lib/formatting';
 import { KPICard } from '@/components/reports/KPICard';
 import { HorizontalBarList } from '@/components/reports/BarChart';
 import { SectionCard, ExportCSVButton } from '@/components/reports/ReportsFilters';
