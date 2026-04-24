@@ -23,7 +23,7 @@ router.get('/:id', async (req, res) => {
     const depositResult = await query(`
       SELECT
         COALESCE(SUM(CASE WHEN deposit_type = 'deposit' OR (
-          deposit_type IS NULL AND method IN ('cash', 'bank_transfer')
+          deposit_type IS NULL AND method IN ('cash', 'bank', 'bank_transfer')
           AND service_id IS NULL AND (deposit_used IS NULL OR deposit_used = 0) AND amount > 0
           AND NOT EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = payments.id)
         ) THEN amount ELSE 0 END), 0) AS total_deposited,

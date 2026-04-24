@@ -118,7 +118,7 @@ router.get("/", async (req, res) => {
           OR p.deposit_used > 0
           OR (
             p.deposit_type IS NULL
-            AND p.method IN ('cash', 'bank_transfer')
+            AND p.method IN ('cash', 'bank', 'bank_transfer')
             AND p.service_id IS NULL
             AND (p.deposit_used IS NULL OR p.deposit_used = 0)
             AND p.amount > 0
@@ -130,7 +130,7 @@ router.get("/", async (req, res) => {
         COALESCE(p.deposit_type, '') IN ('deposit', 'refund')
         OR (
           p.deposit_type IS NULL
-          AND p.method IN ('cash', 'bank_transfer')
+          AND p.method IN ('cash', 'bank', 'bank_transfer')
           AND p.service_id IS NULL
           AND (p.deposit_used IS NULL OR p.deposit_used = 0)
           AND p.amount > 0
@@ -202,7 +202,7 @@ router.get("/", async (req, res) => {
           OR p.deposit_used > 0
           OR (
             p.deposit_type IS NULL
-            AND p.method IN ('cash', 'bank_transfer')
+            AND p.method IN ('cash', 'bank', 'bank_transfer')
             AND p.service_id IS NULL
             AND (p.deposit_used IS NULL OR p.deposit_used = 0)
             AND p.amount > 0
@@ -214,7 +214,7 @@ router.get("/", async (req, res) => {
         COALESCE(p.deposit_type, '') IN ('deposit', 'refund')
         OR (
           p.deposit_type IS NULL
-          AND p.method IN ('cash', 'bank_transfer')
+          AND p.method IN ('cash', 'bank', 'bank_transfer')
           AND p.service_id IS NULL
           AND (p.deposit_used IS NULL OR p.deposit_used = 0)
           AND p.amount > 0
@@ -320,7 +320,7 @@ router.get("/deposits", async (req, res) => {
         COALESCE(p.deposit_type, '') IN ('deposit', 'refund')
         OR (
           p.deposit_type IS NULL
-          AND p.method IN ('cash', 'bank_transfer')
+          AND p.method IN ('cash', 'bank', 'bank_transfer')
           AND p.service_id IS NULL
           AND (p.deposit_used IS NULL OR p.deposit_used = 0)
           AND NOT EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = p.id)
@@ -339,7 +339,7 @@ router.get("/deposits", async (req, res) => {
         p.deposit_type = 'deposit'
         OR (
           p.deposit_type IS NULL
-          AND p.method IN ('cash', 'bank_transfer')
+          AND p.method IN ('cash', 'bank', 'bank_transfer')
           AND p.service_id IS NULL
           AND (p.deposit_used IS NULL OR p.deposit_used = 0)
           AND p.amount > 0

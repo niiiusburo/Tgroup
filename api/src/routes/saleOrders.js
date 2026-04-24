@@ -155,6 +155,114 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * GET /api/SaleOrders/lines
+ * Returns: sale order lines (service lines) per customer, with payment info
+ * Query params: partner_id (required), offset, limit, sortField, sortOrder
+ */
+router.get('/lines', async (req, res) => {
+  try {
+    const {
+      partner_id,
+      offset = '0',
+      limit = '100',
+      sortField = 'date',
+      sortOrder = 'desc',
+    } = req.query;
+
+    if (!partner_id) {
+      return res.status(400).json({ error: 'partner_id is required' });
+    }
+
+    const offsetNum = parseInt(offset, 10);
+    const limitNum = Math.min(parseInt(limit, 10), 500);
+
+    const allowedSortFields = {
+      date: 'sol.date',
+      productname: 'sol.productname',
+      pricetotal: 'sol.pricetotal',
+      datecreated: 'sol.datecreated',
+    };
+
+    const orderByCol = allowedSortFields[sortField] || 'sol.date';
+    const orderDir = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+
+    const items = await query(
+      `SELECT
+        sol.id,
+        sol.productid,
+        sol.productname,
+        sol.productuomqty,
+        sol.priceunit,
+        sol.pricetotal,
+        sol.pricesubtotal,
+        sol.discount,
+        sol.amountpaid,
+        sol.amountresidual,
+        sol.date,
+        sol.tooth_numbers,
+        sol.toothtype,
+        sol.diagnostic,
+        sol.note,
+        sol.sequence,
+        sol.state as linestate,
+        sol.iscancelled,
+        sol.employeeid,
+        sol.assistantid,
+        so.id as orderid,
+        so.name as ordername,
+        so.code as ordercode,
+        so.amounttotal as so_amounttotal,
+        so.residual as so_residual,
+        so.totalpaid as so_totalpaid,
+        so.state as sostate,
+        doc.name as doctorname,
+        asst.name as assistantname,
+        c.name as companyname,
+        COALESCE(pa.total_paid, 0) as paid_amount
+      FROM saleorderlines sol
+      JOIN saleorders so ON so.id = sol.orderid
+      LEFT JOIN employees doc ON doc.id = sol.employeeid
+      LEFT JOIN employees asst ON asst.id = sol.assistantid
+      LEFT JOIN companies c ON c.id = so.companyid
+      LEFT JOIN (
+        SELECT invoice_id, SUM(allocated_amount) as total_paid
+        FROM payment_allocations
+        GROUP BY invoice_id
+      ) pa ON pa.invoice_id = so.id
+      WHERE so.partnerid = $1 AND so.isdeleted = false AND sol.isdeleted = false
+      ORDER BY ${orderByCol} ${orderDir} NULLS LAST
+      LIMIT $2 OFFSET $3`,
+      [partner_id, limitNum, offsetNum]
+    );
+
+    const countResult = await query(
+      `SELECT COUNT(*) as count
+       FROM saleorderlines sol
+       JOIN saleorders so ON so.id = sol.orderid
+       WHERE so.partnerid = $1 AND so.isdeleted = false AND sol.isdeleted = false`,
+      [partner_id]
+    );
+    const totalItems = parseInt(countResult[0].count, 10);
+
+    return res.json({
+      offset: offsetNum,
+      limit: limitNum,
+      totalItems,
+      items,
+    });
+  } catch (err) {
+    console.error('Error fetching sale order lines:', err);
+    return res.status(500).json({
+      offset: 0,
+      limit: 20,
+      totalItems: 0,
+      items: [],
+      error: err instanceof Error ? err.message : 'Unknown error',
+    });
+  }
+});
+
+/**
  * GET /api/SaleOrders/:id
  * Returns: single sale order with details
  */

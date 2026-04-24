@@ -86,7 +86,7 @@ router.get('/', async (req, res) => {
         dk.saleorderid,
         so.name AS saleordername,
         dk.accountinvoiceid,
-        ai.name AS invoicename,
+        NULL::text AS invoicename,
         dk.datecreated,
         dk.lastupdated,
         dk.createdbyid,
@@ -101,7 +101,6 @@ router.get('/', async (req, res) => {
       LEFT JOIN partners ast2 ON ast2.id = dk.assistantsecondaryid
       LEFT JOIN appointments a ON a.id = dk.appointmentid
       LEFT JOIN saleorders so ON so.id = dk.saleorderid
-      LEFT JOIN accountinvoices ai ON ai.id = dk.accountinvoiceid
       WHERE ${whereClause}
       ORDER BY ${orderByCol} ${orderDir} NULLS LAST
       LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
@@ -191,7 +190,7 @@ router.get('/:id', async (req, res) => {
         dk.saleorderid,
         so.name AS saleordername,
         dk.accountinvoiceid,
-        ai.name AS invoicename,
+        NULL::text AS invoicename,
         dk.datecreated,
         dk.lastupdated,
         dk.createdbyid,
@@ -204,7 +203,6 @@ router.get('/:id', async (req, res) => {
       LEFT JOIN partners ast2 ON ast2.id = dk.assistantsecondaryid
       LEFT JOIN appointments a ON a.id = dk.appointmentid
       LEFT JOIN saleorders so ON so.id = dk.saleorderid
-      LEFT JOIN accountinvoices ai ON ai.id = dk.accountinvoiceid
       WHERE dk.id = $1 AND dk.isdeleted = false`,
       [id]
     );
