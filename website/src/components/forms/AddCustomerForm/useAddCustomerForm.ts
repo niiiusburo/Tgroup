@@ -139,8 +139,14 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
     fetchEmployees({ limit: 500 }).then((r) => setEmployees(r.items)).catch(() => {});
   }, []);
 
+  const lastInitialDataRef = useRef(initialData);
   useEffect(() => {
-    setFormData({ ...EMPTY_CUSTOMER_FORM, ...(initialData ?? {}) });
+    const hasChanged =
+      JSON.stringify(initialData) !== JSON.stringify(lastInitialDataRef.current);
+    if (hasChanged) {
+      setFormData({ ...EMPTY_CUSTOMER_FORM, ...(initialData ?? {}) });
+      lastInitialDataRef.current = initialData;
+    }
   }, [initialData]);
 
   useEffect(() => {

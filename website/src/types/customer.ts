@@ -131,6 +131,7 @@ export interface CustomerService {
   readonly status: 'completed' | 'active' | 'cancelled';
   readonly tooth: string;
   readonly notes: string;
+  readonly orderId?: string;
   readonly orderName?: string;
   readonly orderCode?: string;
   readonly paidAmount?: number;

@@ -152,23 +152,23 @@ export function HealthCheckupGallery({ data, isLoading, error, customerCode, onU
                 {/* Details grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm mb-4">
                   <div className="flex">
-                    <span className="w-36 text-gray-400 shrink-0">t('service')</span>
+                    <span className="w-36 text-gray-400 shrink-0">{t('service')}</span>
                     <span className="font-medium text-gray-700">{checkup.title || '—'}</span>
                   </div>
                   <div className="flex">
-                    <span className="w-36 text-gray-400 shrink-0">t('examiningDoctor')</span>
+                    <span className="w-36 text-gray-400 shrink-0">{t('examiningDoctor')}</span>
                     <span className="font-medium text-gray-700">{checkup.doctor || '—'}</span>
                   </div>
                   <div className="flex">
-                    <span className="w-36 text-gray-400 shrink-0">t('examDate')</span>
+                    <span className="w-36 text-gray-400 shrink-0">{t('examDate')}</span>
                     <span className="font-medium text-gray-700">{formatDate(checkup.date)}</span>
                   </div>
                   <div className="flex">
-                    <span className="w-36 text-gray-400 shrink-0">t('examContent')</span>
+                    <span className="w-36 text-gray-400 shrink-0">{t('examContent')}</span>
                     <span className="font-medium text-gray-700">{checkup.notes || '—'}</span>
                   </div>
                   <div className="flex">
-                    <span className="w-36 text-gray-400 shrink-0">t('nextAppointmentDate')</span>
+                    <span className="w-36 text-gray-400 shrink-0">{t('nextAppointmentDate')}</span>
                     <span className="font-medium text-gray-700">{formatDate(checkup.nextAppointmentDate || '') || '—'}</span>
                   </div>
                   <div className="flex">
@@ -322,7 +322,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
     <form onSubmit={handleSubmit} className="p-4 bg-gray-50/60 border-b border-gray-100 space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">t('service')</label>
+          <label className="block text-xs font-medium text-gray-600 mb-1">{t('service')}</label>
           <input
             type="text"
             required
@@ -333,7 +333,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">t('examiningDoctor')</label>
+          <label className="block text-xs font-medium text-gray-600 mb-1">{t('examiningDoctor')}</label>
           <input
             type="text"
             required
@@ -344,7 +344,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">t('examDate')</label>
+          <label className="block text-xs font-medium text-gray-600 mb-1">{t('examDate')}</label>
           <input
             type="date"
             required
@@ -354,7 +354,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">t('nextAppointmentDate')</label>
+          <label className="block text-xs font-medium text-gray-600 mb-1">{t('nextAppointmentDate')}</label>
           <input
             type="date"
             value={nextAppointmentDate}
@@ -365,7 +365,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">t('examContent')</label>
+        <label className="block text-xs font-medium text-gray-600 mb-1">{t('examContent')}</label>
         <textarea
           rows={2}
           value={notes}
@@ -376,7 +376,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">t('nextAppointmentContent')</label>
+        <label className="block text-xs font-medium text-gray-600 mb-1">{t('nextAppointmentContent')}</label>
         <input
           type="text"
           value={nextDescription}
@@ -387,7 +387,7 @@ function UploadForm({ customerCode, onCancel, onSuccess, onError, onSaving, savi
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">t('attachments')</label>
+        <label className="block text-xs font-medium text-gray-600 mb-1">{t('attachments')}</label>
         <input
           type="file"
           multiple

@@ -6,7 +6,7 @@ import {
   softDeletePartner,
   hardDeletePartner,
   registerFace,
-  fetchDotKhams,
+  fetchSaleOrderLines,
 } from "@/lib/api";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,7 +31,7 @@ import type { ProfileTab } from "@/components/customer/CustomerProfile";
 import type { CustomerService } from "@/types/customer";
 import type { CustomerStatus } from "@/data/mockCustomers";
 import type { CustomerFormData } from "@/data/mockCustomerForm";
-import type { ApiDotKham } from "@/lib/api";
+
 import { buildCustomerColumns } from "./Customers/CustomerColumns";
 
 /**
@@ -150,11 +150,9 @@ export function Customers() {
   // Fetch service records without location filter so the customer profile shows
   // treatment history across all locations (not just the currently selected one).
   const {
-    allRecords: allServiceRecords,
     createServiceRecord,
     updateServiceRecord,
     updateServiceStatus,
-    loading: servicesLoading,
     refetch: refetchServices,
   } = useServices(undefined, selectedCustomerId ?? undefined);
   const {
@@ -177,6 +175,57 @@ export function Customers() {
     refetch: refetchPayments,
     deletePaymentById,
   } = useCustomerPayments(selectedCustomerId);
+
+  // Fetch sale order lines (service lines) for the records tab
+  const [saleOrderLines, setSaleOrderLines] = useState<CustomerService[]>([]);
+  const [saleOrderLinesLoading, setSaleOrderLinesLoading] = useState(false);
+
+  const loadSaleOrderLines = useCallback(async () => {
+    if (!selectedCustomerId) {
+      setSaleOrderLines([]);
+      return;
+    }
+    setSaleOrderLinesLoading(true);
+    try {
+      const res = await fetchSaleOrderLines({ partnerId: selectedCustomerId, limit: 500 });
+      const mapped: CustomerService[] = res.items.map((line) => ({
+        id: line.id,
+        date: line.date ? line.date.slice(0, 10) : "-",
+        service: line.productname || "-",
+        doctor: line.doctorname || "N/A",
+        doctorId: line.employeeid || undefined,
+        assistantId: line.assistantid || undefined,
+        assistantName: line.assistantname || undefined,
+        catalogItemId: line.productid || undefined,
+        cost: parseFloat(line.pricetotal || "0") || 0,
+        quantity: parseFloat(line.productuomqty || "0") || undefined,
+        status:
+          line.sostate === "done" || line.sostate === "completed"
+            ? "completed"
+            : line.iscancelled
+              ? "cancelled"
+              : "active",
+        tooth: line.tooth_numbers || line.toothtype || line.diagnostic || "-",
+        notes: line.note || "",
+        orderId: line.orderid || undefined,
+        orderName: line.ordername || undefined,
+        orderCode: line.ordercode || undefined,
+        paidAmount: parseFloat(line.amountpaid || line.paid_amount || "0") || 0,
+        residual: parseFloat(line.so_residual || line.amountresidual || "0") || 0,
+        locationName: line.companyname || undefined,
+      }));
+      setSaleOrderLines(mapped);
+    } catch (err) {
+      console.error("Failed to fetch sale order lines:", err);
+      setSaleOrderLines([]);
+    } finally {
+      setSaleOrderLinesLoading(false);
+    }
+  }, [selectedCustomerId]);
+
+  useEffect(() => {
+    loadSaleOrderLines();
+  }, [loadSaleOrderLines]);
 
   // AppointmentFormShell handles its own API calls; these callbacks just trigger a profile refresh
   const handleCreateAppointment = useCallback(() => {
@@ -275,8 +324,9 @@ export function Customers() {
         toothNumbers: data.toothNumbers,
         sourceId: data.sourceId ?? null,
       });
+      await loadSaleOrderLines();
     },
-    [updateServiceRecord, selectedCustomerId, hookProfile],
+    [updateServiceRecord, selectedCustomerId, hookProfile, loadSaleOrderLines],
   );
 
   const handleMakePayment = useCallback(
@@ -384,25 +434,10 @@ export function Customers() {
     }
   }, [selectedCustomerId, loadDeposits]);
 
-  // Load dotkhams (examination rounds) when a customer is selected
-  useEffect(() => {
-    if (!selectedCustomerId) {
-      setDotKhams([]);
-      return;
-    }
-    fetchDotKhams({ partnerId: selectedCustomerId, limit: 500 })
-      .then((res) => setDotKhams(res.items))
-      .catch((err) => {
-        console.error("Failed to load dotkhams:", err);
-        setDotKhams([]);
-      });
-  }, [selectedCustomerId]);
-
   const [createdCustomerCode, setCreatedCustomerCode] = useState<string | null>(
     null,
   );
   const [pendingFaceImage, setPendingFaceImage] = useState<Blob | null>(null);
-  const [dotKhams, setDotKhams] = useState<ApiDotKham[]>([]);
 
   useEffect(() => {
     if (!showForm) {
@@ -655,76 +690,8 @@ export function Customers() {
     }
   }, [selectedCustomerId, refetchServices]);
 
-  const saleServices: CustomerService[] = useMemo(() => {
-    if (!selectedCustomerId) return [];
-    return allServiceRecords
-      .filter((r) => r.customerId === selectedCustomerId)
-      .map((r) => ({
-        id: r.id,
-        date: r.startDate || r.createdAt || "-",
-        service: r.serviceName,
-        doctor: r.doctorName || "N/A",
-        doctorId: r.doctorId,
-        assistantId: r.assistantId,
-        assistantName: r.assistantName,
-        dentalAideId: r.dentalAideId,
-        dentalAideName: r.dentalAideName,
-        catalogItemId: r.catalogItemId,
-        cost: r.totalCost,
-        status:
-          r.status === "completed"
-            ? "completed"
-            : r.status === "cancelled"
-              ? "cancelled"
-              : "active",
-        tooth: r.toothNumbers?.join(", ") || "-",
-        notes: r.notes || "",
-        orderName: r.orderName,
-        orderCode: r.orderCode,
-        sourceId: r.sourceId,
-        paidAmount: r.paidAmount,
-        residual:
-          r.residual ?? Math.max(0, (r.totalCost ?? 0) - (r.paidAmount ?? 0)),
-      }));
-  }, [allServiceRecords, selectedCustomerId]);
-
-  const dotkhamServices: CustomerService[] = useMemo(() => {
-    return dotKhams.map((dk) => {
-      const cost = parseFloat(dk.totalamount || "0") || 0;
-      const residual = parseFloat(dk.amountresidual || "0") || 0;
-      const status =
-        dk.state === "done" || dk.state === "completed"
-          ? "completed"
-          : dk.state === "cancel" || dk.state === "cancelled"
-            ? "cancelled"
-            : "active";
-      return {
-        id: dk.id,
-        date: dk.date ? dk.date.slice(0, 10) : "-",
-        service: dk.name || t("defaultCheckupName"),
-        doctor: dk.doctorname || "N/A",
-        doctorId: dk.doctorid || "",
-        assistantId: dk.assistantid,
-        assistantName: dk.assistantname || undefined,
-        dentalAideId: dk.assistantsecondaryid,
-        dentalAideName: dk.assistantsecondaryname || undefined,
-        catalogItemId: "",
-        cost,
-        status,
-        tooth: "-",
-        notes: dk.note || "",
-        orderName: dk.name || undefined,
-        paidAmount: Math.max(0, cost - residual),
-        residual,
-        locationName: dk.companyname || undefined,
-      };
-    });
-  }, [dotKhams, t]);
-
-  const customerServices: CustomerService[] = useMemo(
-    () => [...saleServices, ...dotkhamServices].sort((a, b) => b.date.localeCompare(a.date)),
-    [saleServices, dotkhamServices]
-  );
+  // Use sale order lines (service lines) for the records tab to match old system
+  const customerServices: CustomerService[] = saleOrderLines;
 
   if (profileLoading) {
     return (
@@ -742,7 +709,7 @@ export function Customers() {
         profile={profileData}
         appointments={hookAppointments}
         services={customerServices}
-        loadingServices={servicesLoading}
+        loadingServices={saleOrderLinesLoading}
         employees={allEmployees}
         depositList={depositList}
         usageHistory={usageHistory}

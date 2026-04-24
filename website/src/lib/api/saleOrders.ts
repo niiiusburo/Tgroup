@@ -112,3 +112,57 @@ export function updateSaleOrderState(id: string, state: string) {
   return apiFetch<ApiSaleOrder>(`/SaleOrders/${id}/state`, { method: 'PATCH', body: { state } });
 }
 
+// ─── Sale Order Lines (service lines) ─────────────────────────────
+
+export interface ApiSaleOrderLine {
+  id: string;
+  productid: string | null;
+  productname: string | null;
+  productuomqty: string | null;
+  priceunit: string | null;
+  pricetotal: string | null;
+  pricesubtotal: string | null;
+  discount: string | null;
+  amountpaid: string | null;
+  amountresidual: string | null;
+  date: string | null;
+  tooth_numbers: string | null;
+  toothtype: string | null;
+  diagnostic: string | null;
+  note: string | null;
+  sequence: string | null;
+  linestate: string | null;
+  iscancelled: boolean | null;
+  employeeid: string | null;
+  assistantid: string | null;
+  orderid: string | null;
+  ordername: string | null;
+  ordercode: string | null;
+  so_amounttotal: string | null;
+  so_residual: string | null;
+  so_totalpaid: string | null;
+  sostate: string | null;
+  doctorname: string | null;
+  assistantname: string | null;
+  companyname: string | null;
+  paid_amount: string | null;
+}
+
+export function fetchSaleOrderLines(params?: {
+  partnerId?: string;
+  offset?: number;
+  limit?: number;
+  sortField?: string;
+  sortOrder?: string;
+}) {
+  return apiFetch<PaginatedResponse<ApiSaleOrderLine>>('/SaleOrders/lines', {
+    params: {
+      partner_id: params?.partnerId,
+      offset: params?.offset ?? 0,
+      limit: params?.limit ?? 100,
+      sortField: params?.sortField ?? 'date',
+      sortOrder: params?.sortOrder ?? 'desc',
+    },
+  });
+}
+

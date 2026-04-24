@@ -187,10 +187,6 @@ export function CustomerProfile({
     return { label: 'scheduled', className: 'text-gray-600 bg-gray-50', dot: 'bg-gray-400' };
   };
 
-  const canEditAppointment = (state: string | null | undefined) => {
-    const s = (state || '').toLowerCase();
-    return s !== 'done' && s !== 'cancelled' && s !== 'cancel';
-  };
 
   return (
     <div className="space-y-6">
@@ -365,13 +361,13 @@ export function CustomerProfile({
               </div> :
 
           <div className="space-y-3">
-                {appointments.slice(0, 20).map((apt) => {
+                {appointments.map((apt) => {
               const statusConfig = getStatusConfig(apt.state ?? undefined);
               // Extract time from either time field or datetimeappointment
               const time = apt.time || (apt.datetimeappointment?.includes('T') ?
               apt.datetimeappointment.split('T')[1]?.slice(0, 5) :
               null) || '--:--';
-              const isEditable = canEditAppointment(apt.state ?? undefined) && !!onUpdateAppointment;
+              const isEditable = !!onUpdateAppointment;
               return (
                 <div
                   key={apt.id}
@@ -380,8 +376,13 @@ export function CustomerProfile({
                   
                       <div className={`w-2 h-2 rounded-full ${statusConfig.dot}`} />
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-gray-900">{apt.name || 'Appointment'}</span>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {apt.name && (
+                            <span className="text-[11px] font-mono font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                              {apt.name}
+                            </span>
+                          )}
+                          <span className="text-sm font-medium text-gray-900">{apt.partnername || apt.partnerdisplayname || 'Appointment'}</span>
                           <span className={`text-xs px-2 py-0.5 rounded ${statusConfig.className}`}>{t(`status.${statusConfig.label}`, { ns: 'appointments' })}</span>
                         </div>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-500 mt-1">
@@ -699,7 +700,7 @@ export function CustomerProfile({
         customerId={profile.id}
         isEdit={true}
         initialData={{
-          id: editingService.id,
+          id: editingService.orderId || editingService.id,
           customerId: profile.id,
           customerName: profile.name,
           catalogItemId: editingService.catalogItemId,
