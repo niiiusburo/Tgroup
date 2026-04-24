@@ -41,10 +41,10 @@ export function ServiceCatalogSettings() {
     setEditPrice(String(price));
   }
 
-  function saveEdit(id: string) {
+  async function saveEdit(id: string) {
     const parsed = parseInt(editPrice, 10);
     if (!isNaN(parsed) && parsed > 0) {
-      updateService(id, { price: parsed });
+      await updateService(id, { price: parsed });
     }
     setEditingId(null);
   }
@@ -163,7 +163,7 @@ export function ServiceCatalogSettings() {
                     <td className="px-4 py-3 text-center">
                       <button
                         type="button"
-                        onClick={() => toggleServiceActive(service.id)}
+                        onClick={async () => toggleServiceActive(service.id)}
                         className="inline-flex items-center justify-center"
                         title={service.isActive ? 'Deactivate' : 'Activate'}
                       >

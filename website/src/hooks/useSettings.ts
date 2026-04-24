@@ -10,7 +10,7 @@ import type { CustomerSource, SystemPreference, CatalogService } from '@/types/s
 import { PERMISSIONS, ROLES } from '@/data/mockPermissionGroups';
 import type { Permission } from '@/data/mockPermissionGroups';
 import type { Role } from '@/types/permissions';
-import { fetchProducts, fetchCustomerSources, createCustomerSource, updateCustomerSource, deleteCustomerSource, fetchSystemPreferences, upsertSystemPreference, updateSystemPreference, deleteSystemPreference, type ApiCustomerSource, type ApiSystemPreference } from '@/lib/api';
+import { fetchProducts, updateProduct, fetchCustomerSources, createCustomerSource, updateCustomerSource, deleteCustomerSource, fetchSystemPreferences, upsertSystemPreference, updateSystemPreference, deleteSystemPreference, type ApiCustomerSource, type ApiSystemPreference } from '@/lib/api';
 
 // Export types
 export type { CustomerSource, SystemPreference, CatalogService };
@@ -77,16 +77,35 @@ export function useServiceCatalog() {
     categories: [...new Set(services.map((s) => s.category))].length,
   }), [services]);
 
-  function toggleServiceActive(id: string) {
-    setServices((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, isActive: !s.isActive } : s))
-    );
+  async function toggleServiceActive(id: string) {
+    const service = services.find((s) => s.id === id);
+    if (!service) return;
+    const nextActive = !service.isActive;
+    try {
+      await updateProduct(id, { active: nextActive });
+      setServices((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, isActive: nextActive } : s))
+      );
+    } catch (err) {
+      console.error('Failed to toggle service active state:', err);
+    }
   }
 
-  function updateService(id: string, updates: Partial<Pick<ApiCatalogService, 'name' | 'price' | 'duration' | 'visits' | 'description'>>) {
-    setServices((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, ...updates } : s))
-    );
+  async function updateService(id: string, updates: Partial<Pick<ApiCatalogService, 'name' | 'price' | 'duration' | 'visits' | 'description'>>) {
+    try {
+      const payload: Partial<Parameters<typeof updateProduct>[1]> = {};
+      if (updates.name !== undefined) payload.name = updates.name;
+      if (updates.price !== undefined) payload.listprice = updates.price;
+      if (updates.description !== undefined) payload.defaultcode = updates.description;
+      if (Object.keys(payload).length > 0) {
+        await updateProduct(id, payload);
+      }
+      setServices((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, ...updates } : s))
+      );
+    } catch (err) {
+      console.error('Failed to update service:', err);
+    }
   }
 
   function addService(service: Omit<ApiCatalogService, 'id'>) {

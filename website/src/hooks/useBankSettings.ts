@@ -1,25 +1,14 @@
 /**
  * useBankSettings - Clinic bank account settings hook
  * @crossref:used-in[Settings, PaymentForm, DepositWallet]
+ * @crossref:uses[apiFetch]
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { apiFetch } from '@/lib/api/core';
+import type { BankSettings, UseBankSettingsResult } from '@/types/bankSettings';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
-
-export interface BankSettings {
-  bankBin: string;
-  bankNumber: string;
-  bankAccountName: string;
-}
-
-export interface UseBankSettingsResult {
-  settings: BankSettings | null;
-  loading: boolean;
-  error: Error | null;
-  refresh: () => Promise<void>;
-  updateSettings: (data: BankSettings) => Promise<void>;
-}
+export { type BankSettings, type UseBankSettingsResult } from '@/types/bankSettings';
 
 export function useBankSettings(): UseBankSettingsResult {
   const [settings, setSettings] = useState<BankSettings | null>(null);
@@ -31,25 +20,7 @@ export function useBankSettings(): UseBankSettingsResult {
     setError(null);
 
     try {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-      const token = localStorage.getItem('tgclinic_token');
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      const res = await fetch(`${API_URL}/settings/bank`, {
-        method: 'GET',
-        headers,
-      });
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => 'Unknown error');
-        throw new Error(`API GET /settings/bank failed (${res.status}): ${text}`);
-      }
-
-      const data = (await res.json()) as BankSettings;
+      const data = await apiFetch<BankSettings>('/settings/bank', { method: 'GET' });
       setSettings(data);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to load bank settings'));
@@ -59,29 +30,14 @@ export function useBankSettings(): UseBankSettingsResult {
   }, []);
 
   const updateSettings = useCallback(async (data: BankSettings) => {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    const token = localStorage.getItem('tgclinic_token');
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const res = await fetch(`${API_URL}/settings/bank`, {
+    await apiFetch<BankSettings>('/settings/bank', {
       method: 'PUT',
-      headers,
-      body: JSON.stringify({
+      body: {
         bankBin: data.bankBin,
         bankNumber: data.bankNumber,
         bankAccountName: data.bankAccountName,
-      }),
+      },
     });
-
-    if (!res.ok) {
-      const text = await res.text().catch(() => 'Unknown error');
-      throw new Error(`API PUT /settings/bank failed (${res.status}): ${text}`);
-    }
-
     await refresh();
   }, [refresh]);
 
