@@ -29,7 +29,7 @@ import { cn } from '@/lib/utils';
  * Calendar Page with Day/Week/Month view modes
  * @crossref:route[/calendar]
  * @crossref:used-in[App]
- * @crossref:uses[DayView, WeekView, MonthView, AppointmentCard, EditAppointmentModal, SmartFilterDrawer, useLocationFilter, useDragReschedule]
+ * @crossref:uses[DayView, WeekView, MonthView, AppointmentCard, AppointmentFormShell, SmartFilterDrawer, useLocationFilter, useDragReschedule]
  *
  * Redesigned to match reference images with Vietnamese labels:
  * - Ngày (Day), Tuần (Week), Tháng (Month)

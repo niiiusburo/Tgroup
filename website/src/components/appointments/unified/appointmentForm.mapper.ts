@@ -40,10 +40,17 @@ export function formDataToApiPayload(
 
 // ─── API → Form (EDIT preload) ────────────────────────────────────
 
+function normalizeTime(time: string | null | undefined): string {
+  if (!time) return '09:00';
+  const match = time.match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return '09:00';
+  return `${String(parseInt(match[1], 10)).padStart(2, '0')}:${match[2]}`;
+}
+
 export function apiAppointmentToFormData(
   api: ApiAppointment,
 ): Partial<UnifiedAppointmentFormData> {
-  const startTime = api.time ?? '09:00';
+  const startTime = normalizeTime(api.time);
   const estimatedDuration = api.timeexpected ?? 30;
 
   return {
@@ -79,6 +86,7 @@ import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
 export function overviewAppointmentToFormData(
   overview: OverviewAppointment,
 ): Partial<UnifiedAppointmentFormData> {
+  const startTime = normalizeTime(overview.time);
   return {
     id: overview.id,
     customerId: overview.customerId,
@@ -96,8 +104,8 @@ export function overviewAppointmentToFormData(
     serviceName: overview.note || '', // Overview doesn't have serviceName directly
     serviceId: overview.productId ?? undefined,
     date: overview.date,
-    startTime: overview.time,
-    endTime: calculateEndTime(overview.time, 30), // Default duration
+    startTime,
+    endTime: calculateEndTime(startTime, 30), // Default duration
     notes: overview.note,
     color: overview.color ?? '1',
     status: overview.topStatus,
@@ -111,6 +119,7 @@ import type { CalendarAppointment } from '@/types/appointment';
 export function calendarAppointmentToFormData(
   cal: CalendarAppointment,
 ): Partial<UnifiedAppointmentFormData> {
+  const startTime = normalizeTime(cal.startTime);
   return {
     id: cal.id,
     customerId: cal.customerId,
@@ -128,8 +137,8 @@ export function calendarAppointmentToFormData(
     serviceName: cal.serviceName,
     serviceId: cal.productId ?? undefined,
     date: cal.date,
-    startTime: cal.startTime,
-    endTime: cal.endTime,
+    startTime,
+    endTime: calculateEndTime(startTime, cal.timeexpected ?? 30),
     notes: cal.notes ?? '',
     estimatedDuration: cal.timeexpected ?? 30,
     color: cal.color ?? '1',

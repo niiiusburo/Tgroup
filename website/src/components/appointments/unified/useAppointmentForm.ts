@@ -137,7 +137,9 @@ export function useAppointmentForm(
 
     // Time logic: end must be after start
     if (data.startTime && data.endTime) {
-      if (data.endTime <= data.startTime) {
+      const [startH, startM] = data.startTime.split(':').map(Number);
+      const [endH, endM] = data.endTime.split(':').map(Number);
+      if (endH * 60 + endM <= startH * 60 + startM) {
         nextErrors.endTime = 'End time must be after start time';
       }
     }

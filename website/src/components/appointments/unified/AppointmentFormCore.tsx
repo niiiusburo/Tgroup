@@ -8,7 +8,7 @@
  * Can also be embedded inline on any page if needed.
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Calendar,
@@ -33,12 +33,14 @@ import { AddCustomerForm } from '@/components/forms/AddCustomerForm/AddCustomerF
 import { useCustomers } from '@/hooks/useCustomers';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
+import { useProducts } from '@/hooks/useProducts';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { APPOINTMENT_CARD_COLORS, APPOINTMENT_STATUS_OPTIONS } from '@/constants';
 import type { AppointmentType } from '@/constants';
 import type { Customer, CustomerFormData } from '@/types/customer';
 import type { Employee } from '@/types/employee';
 import type { Product } from '@/hooks/useProducts';
+import type { ServiceCatalogItem } from '@/types/service';
 
 import type {
   AppointmentFormCoreProps,
@@ -69,6 +71,23 @@ export function AppointmentFormCore({
   const { employees: fetchedEmployees } = useEmployees();
   const employees = employeesProp ?? fetchedEmployees;
   const { selectedLocationId } = useLocationFilter();
+  const { products: serviceCatalog } = useProducts({ limit: 500 });
+
+  // Map Product[] to ServiceCatalogItem[] for the selector
+  const serviceCatalogItems: ServiceCatalogItem[] = useMemo(
+    () =>
+      serviceCatalog.map((p) => ({
+        id: p.id,
+        name: p.name,
+        category: (p.type as AppointmentType) || 'treatment',
+        description: p.categoryName || '',
+        defaultPrice: p.listPrice,
+        estimatedDuration: data.estimatedDuration ?? 30,
+        totalVisits: 1,
+        unit: p.uomName || undefined,
+      })),
+    [serviceCatalog, data.estimatedDuration]
+  );
 
   const [showCreateCustomer, setShowCreateCustomer] = useState(false);
   const [colorDropdownOpen, setColorDropdownOpen] = useState(false);
@@ -323,11 +342,11 @@ export function AppointmentFormCore({
           {t('appointments:form.service')}
         </label>
           <ServiceCatalogSelector
-            catalog={[]}
+            catalog={serviceCatalogItems}
             selectedId={data.serviceId || null}
-            onChange={(_itemId) => {
-              // TODO: look up service from catalog
-              handleServiceChange(null);
+            onChange={(itemId) => {
+              const product = serviceCatalog.find((p) => p.id === itemId);
+              handleServiceChange(product || null);
             }}
             placeholder={t('appointments:form.selectService')}
           />

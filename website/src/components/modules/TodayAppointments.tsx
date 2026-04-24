@@ -5,8 +5,7 @@
  * ╔════════════════════════════════════════════════════════════════════════╗
  * ║  APPOINTMENT MODULE FAMILY — @crossref:related[]                       ║
  * ╠════════════════════════════════════════════════════════════════════════╣
- * ║  @crossref:related[EditAppointmentModal] — opens edit modal            ║
- * ║  @crossref:related[AppointmentForm] — CREATE variant                   ║
+ * ║  @crossref:related[AppointmentFormShell] — opens edit modal            ║
  * ║  @crossref:color-source[constants/index.ts APPOINTMENT_CARD_COLORS]    ║
  * ║    • Card colors come from constants — DO NOT duplicate locally        ║
  * ╚════════════════════════════════════════════════════════════════════════╝
