@@ -1,18 +1,17 @@
 {
   "hooks": {
-    "PostToolUse": [
+    "Stop": [
       {
-        "matcher": "Edit|Write|Bash",
         "hooks": [
           {
             "type": "command",
             "command": "code-review-graph update --skip-flows",
-            "timeout": 5000
+            "timeout": 10000
           },
           {
             "type": "command",
             "command": "bash scripts/sync-claude-mem.sh",
-            "timeout": 5000
+            "timeout": 10000
           }
         ]
       }
