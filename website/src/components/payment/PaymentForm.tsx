@@ -105,6 +105,7 @@ export function PaymentForm({
   const [referenceCode, setReferenceCode] = useState(defaultReferenceCode);
   const [showVietQr, setShowVietQr] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const availableDeposit = externalDepositBalance ?? depositBalanceData.depositBalance;
   const outstandingBalance = externalOutstandingBalance ?? depositBalanceData.outstandingBalance;
@@ -164,6 +165,7 @@ export function PaymentForm({
     { dotkhamId: serviceContext.recordId, allocatedAmount: totalPayment };
 
     setIsSaving(true);
+    setSubmitError(null);
     try {
       await onSubmit({
         customerId: defaultCustomerId,
@@ -179,6 +181,8 @@ export function PaymentForm({
         allocations: [allocation]
       });
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Payment failed';
+      setSubmitError(message);
       console.error('Payment save failed:', error);
     } finally {
       setIsSaving(false);
@@ -220,6 +224,11 @@ export function PaymentForm({
         </div>
 
         <form onSubmit={handleSubmit} className="modal-body px-6 py-6 space-y-5">
+          {submitError && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+              {submitError}
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
               <p className="text-xs text-emerald-600 mb-0.5">{t('sDVDeposit')}</p>
