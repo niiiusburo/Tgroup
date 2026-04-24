@@ -311,7 +311,7 @@ export function Layout() {
       {/* Mobile overlay */}
       {mobileMenuOpen &&
       <div
-        className="fixed inset-0 bg-black/50 z-30 md:hidden"
+        className="fixed inset-0 bg-black/50 z-[55] md:hidden"
         onClick={() => setMobileMenuOpen(false)} />
 
       }
@@ -319,8 +319,8 @@ export function Layout() {
       {/* Collapsible sidebar - hidden on mobile, fixed on desktop */}
       <aside
         className={`
-          fixed left-0 top-0 h-full bg-sidebar flex flex-col py-4 z-40 transition-all duration-300 ease-in-out
-          ${mobileMenuOpen ? 'translate-x-0 w-64' : '-translate-x-full w-0 md:translate-x-0'}
+          fixed left-0 top-0 h-full bg-sidebar flex flex-col py-4 transition-all duration-300 ease-in-out
+          ${mobileMenuOpen ? 'translate-x-0 w-64 z-[60]' : '-translate-x-full w-64 md:translate-x-0 z-40'}
           ${!mobileMenuOpen && sidebarExpanded ? 'md:w-56' : ''}
           ${!mobileMenuOpen && !sidebarExpanded ? 'md:w-[72px]' : ''}
         `}>
@@ -354,9 +354,9 @@ export function Layout() {
         </div>
 
         {/* Navigation */}
-        <nav className={`flex-1 flex flex-col gap-1 w-full ${sidebarExpanded ? 'px-3' : 'px-3 items-center'}`}>
+        <nav className={`flex-1 flex flex-col gap-1 w-full ${mobileMenuOpen ? 'overflow-y-auto' : ''} ${sidebarExpanded || mobileMenuOpen ? 'px-3' : 'px-3 items-center'}`}>
           {visibleNavItems.map((item) =>
-          <SidebarItem key={item.path} item={item} expanded={sidebarExpanded} mobileMenuOpen={mobileMenuOpen} />
+          <SidebarItem key={item.path} item={item} expanded={sidebarExpanded || mobileMenuOpen} mobileMenuOpen={mobileMenuOpen} />
           )}
         </nav>
 
