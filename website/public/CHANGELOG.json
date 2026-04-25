@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.25.15",
+    "date": "2026-04-25",
+    "commit": "pending",
+    "highlights": "fix(payments): keep service paid and residual displays consistent",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Derive service residual from the displayed paid amount when imported residual values are stale",
+          "Show service history totals in the same order as the Total cost / Collected label"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add regression coverage for stale SO57144-style residual display after an additional payment"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.14",
     "date": "2026-04-25",
     "commit": "pending",

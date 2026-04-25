@@ -76,6 +76,44 @@ describe('ServiceHistory payment history', () => {
     expect(onPayForService).toHaveBeenCalledWith(mockServices[0]);
   });
 
+  it('derives residual from the displayed paid amount when imported residual is stale', () => {
+    render(
+      <ServiceHistory
+        services={[
+          {
+            id: 'so57144-line',
+            date: '2026-02-11',
+            service: 'Niềng Mắc Cài Kim Loại Tiêu Chuẩn',
+            doctor: 'N/A',
+            cost: 19200000,
+            paidAmount: 7212666,
+            residual: 12654000,
+            status: 'active',
+            tooth: '17',
+            notes: '',
+          },
+          {
+            id: 'so55172-line',
+            date: '2026-01-15',
+            service: 'Treatment',
+            doctor: 'N/A',
+            cost: 8800000,
+            paidAmount: 8800000,
+            residual: 0,
+            status: 'active',
+            tooth: '-',
+            notes: '',
+          },
+        ]}
+      />
+    );
+
+    expect(screen.getByText('28.000.000 ₫')).toBeInTheDocument();
+    expect(screen.getByText('/ 16.012.666 ₫')).toBeInTheDocument();
+    expect(screen.getByText('11.987.334 ₫')).toBeInTheDocument();
+    expect(screen.queryByText('12.654.000 ₫')).not.toBeInTheDocument();
+  });
+
   it('shows referenceCode as primary identifier for related payments when expanded', () => {
     render(
       <ServiceHistory
