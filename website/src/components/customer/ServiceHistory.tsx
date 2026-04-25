@@ -53,6 +53,21 @@ function ToothBadge({ value }: { readonly value: string }) {
   );
 }
 
+function resolveServiceFinancials(svc: CustomerService) {
+  const paidAmount = svc.paidAmount ?? Math.max(0, svc.cost - (svc.residual ?? svc.cost));
+  const derivedResidual = Math.max(0, svc.cost - paidAmount);
+  const rawResidual = svc.residual;
+  const residualIsStale =
+    rawResidual !== undefined &&
+    svc.cost > 0 &&
+    Math.abs(rawResidual + paidAmount - svc.cost) > 1;
+
+  return {
+    paidAmount,
+    residual: rawResidual === undefined || residualIsStale ? derivedResidual : rawResidual,
+  };
+}
+
 export function ServiceHistory({
   services,
   limit,
@@ -71,7 +86,7 @@ export function ServiceHistory({
     .reduce((sum, s) => sum + s.cost, 0);
   const totalPaid = services
     .filter((s) => s.status !== 'cancelled')
-    .reduce((sum, s) => sum + (s.paidAmount ?? 0), 0);
+    .reduce((sum, s) => sum + resolveServiceFinancials(s).paidAmount, 0);
   const zeroCostCount = services.filter((s) => s.cost === 0 && s.status !== 'cancelled').length;
 
   if (services.length === 0) {
@@ -103,7 +118,7 @@ export function ServiceHistory({
           )}
           <div>
             <p className="text-xs text-gray-400">{t('totalCost')} / {t('collected')}</p>
-            <p className="text-sm font-bold text-gray-900">{formatVND(totalPaid)} <span className="text-gray-400 font-normal">/ {formatVND(totalCost)}</span></p>
+            <p className="text-sm font-bold text-gray-900">{formatVND(totalCost)} <span className="text-gray-400 font-normal">/ {formatVND(totalPaid)}</span></p>
           </div>
         </div>
       </div>
@@ -133,8 +148,7 @@ export function ServiceHistory({
               const statusCfg = STATUS_CONFIG[svc.status];
               const isExpanded = expandedId === svc.id;
               const relatedPayments = getPaymentsForService(svc, payments);
-              const paidAmt = svc.paidAmount ?? 0;
-              const resAmt = svc.residual ?? Math.max(0, svc.cost - paidAmt);
+              const { paidAmount: paidAmt, residual: resAmt } = resolveServiceFinancials(svc);
               const hasPayment = relatedPayments.length > 0;
               const canPay = !!onPayForService && svc.status !== 'cancelled' && resAmt > 0;
               const paidPct = svc.cost > 0 ? Math.min(100, Math.max(0, (paidAmt / svc.cost) * 100)) : 0;
