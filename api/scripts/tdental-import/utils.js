@@ -10,6 +10,7 @@ const TABLE_FILES = {
   partners: 'dbo.Partners.csv',
   employees: 'dbo.Employees.csv',
   appointments: 'dbo.Appointments.csv',
+  customersources: 'dbo.PartnerSources.csv',
   customerreceipts: 'dbo.CustomerReceipts.csv',
   saleorders: 'dbo.SaleOrders.csv',
   saleorderlines: 'dbo.SaleOrderLines.csv',
@@ -95,6 +96,40 @@ function parseCsvContent(content) {
   });
 }
 
+function parseCsvRecords(content) {
+  return parse(content, {
+    columns: false,
+    bom: true,
+    skip_empty_lines: true,
+    relax_quotes: true,
+    relax_column_count: true,
+  });
+}
+
+function rowToObject(header, row) {
+  return header.reduce((obj, column, index) => {
+    obj[column] = row[index];
+    return obj;
+  }, {});
+}
+
+function repairPartnerRow(header, row) {
+  const extra = row.length - header.length;
+  const streetIndex = header.indexOf('Street');
+  if (extra <= 0 || streetIndex < 0) return row;
+  return [
+    ...row.slice(0, streetIndex),
+    row.slice(streetIndex, streetIndex + extra + 1).join(','),
+    ...row.slice(streetIndex + extra + 1),
+  ];
+}
+
+function parsePartnersCsvContent(content) {
+  const [header, ...rows] = parseCsvRecords(content);
+  if (!header) return [];
+  return rows.map((row) => rowToObject(header, repairPartnerRow(header, row)));
+}
+
 function sanitizeOddQuoteLines(content) {
   return content
     .split(/\r?\n/)
@@ -108,11 +143,12 @@ function sanitizeOddQuoteLines(content) {
 function readCsv(file) {
   const raw = fs.readFileSync(file, 'utf8').replace(/\u0000/g, '');
   const content = raw.charCodeAt(0) === 0xfeff ? raw.slice(1) : raw;
+  const parser = path.basename(file) === TABLE_FILES.partners ? parsePartnersCsvContent : parseCsvContent;
   try {
-    return parseCsvContent(content);
+    return parser(content);
   } catch (error) {
     if (!/Quote Not Closed|Invalid Opening Quote/.test(error.message)) throw error;
-    return parseCsvContent(sanitizeOddQuoteLines(content));
+    return parser(sanitizeOddQuoteLines(content));
   }
 }
 

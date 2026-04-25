@@ -25,7 +25,6 @@ import { useDeposits } from "@/hooks/useDeposits";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useCustomerPayments } from "@/hooks/useCustomerPayments";
 import { useExternalCheckups } from "@/hooks/useExternalCheckups";
-import type { PaymentFormData } from "@/components/payment/PaymentForm";
 import type { CustomerProfileData } from "@/hooks/useCustomerProfile";
 import type { ProfileTab } from "@/components/customer/CustomerProfile";
 import type { CustomerService } from "@/types/customer";
@@ -34,12 +33,13 @@ import type { CustomerFormData } from "@/data/mockCustomerForm";
 
 import { buildCustomerColumns } from "./Customers/CustomerColumns";
 import { mapSaleOrderLineToCustomerService } from "./Customers/mapSaleOrderLines";
+import { useCustomerPaymentActions } from "./Customers/useCustomerPaymentActions";
 
 /**
  * Customers Page - Patient records with search, filters, table, and profile view
  * @crossref:route[/customers]
  * @crossref:used-in[App]
- * @crossref:uses[SearchBar, DataTable, StatusBadge, useCustomers, CustomerProfile, AddCustomerForm, mapSaleOrderLineToCustomerService]
+ * @crossref:uses[SearchBar, DataTable, StatusBadge, useCustomers, CustomerProfile, AddCustomerForm, mapSaleOrderLineToCustomerService, useCustomerPaymentActions]
  */
 
 const STATUS_FILTER_OPTIONS: readonly {
@@ -305,37 +305,14 @@ export function Customers() {
     [updateServiceRecord, selectedCustomerId, hookProfile, loadSaleOrderLines],
   );
 
-  const handleMakePayment = useCallback(
-    async (data: PaymentFormData) => {
-      await addPayment({
-        customerId: data.customerId,
-        amount: data.amount,
-        method: data.method,
-        notes: data.notes,
-        paymentDate: data.paymentDate,
-        referenceCode: data.referenceCode,
-        depositUsed: data.sources?.depositAmount,
-        cashAmount: data.sources?.cashAmount,
-        bankAmount: data.sources?.bankAmount,
-        allocations: data.allocations?.map((a) => ({
-          invoice_id: a.invoiceId,
-          dotkham_id: a.dotkhamId,
-          allocated_amount: a.allocatedAmount,
-        })),
-      });
-      refetchProfile();
-      refetchPayments();
-      loadDeposits(data.customerId);
-      refetchServices();
-    },
-    [
-      addPayment,
-      refetchProfile,
-      refetchPayments,
-      loadDeposits,
-      refetchServices,
-    ],
-  );
+  const handleMakePayment = useCustomerPaymentActions({
+    addPayment,
+    refetchProfile,
+    refetchPayments,
+    loadDeposits,
+    refetchServices,
+    loadSaleOrderLines,
+  });
 
   const handleAddDeposit = useCallback(
     async (
@@ -626,10 +603,10 @@ export function Customers() {
       code: getCustomerCode() ?? "",
       depositBalance: hookProfile.depositBalance,
       outstandingBalance: hookProfile.outstandingBalance,
-      salestaffid: hookProfile.salestaffid,
+      salestaffid: hookProfile.salestaffid, salestaffLabel: hookProfile.salestaffLabel,
       cskhid: hookProfile.cskhid,
       cskhname: hookProfile.cskhname,
-      referraluserid: hookProfile.referraluserid,
+      referraluserid: hookProfile.referraluserid, sourcename: hookProfile.sourcename,
     };
   } else {
     profileData = {

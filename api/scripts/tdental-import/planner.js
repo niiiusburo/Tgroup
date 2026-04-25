@@ -21,6 +21,12 @@ function selectClientRows(source, partnerId) {
       (normalizeUuid(row.OrderPartnerId) === pid || orderIds.has(normalizeUuid(row.OrderId))),
   );
   const payments = (source.accountpayments || []).filter((row) => normalizeUuid(row.PartnerId) === pid);
+  const sourceIds = new Set([
+    partner.SourceId,
+    ...orders.map((row) => row.SourceId),
+    ...lines.map((row) => row.SourceId),
+  ].map(normalizeUuid).filter(Boolean));
+  const customersources = (source.customersources || []).filter((row) => sourceIds.has(normalizeUuid(row.Id)));
   const productIds = new Set(lines.map((row) => normalizeUuid(row.ProductId)).filter(Boolean));
   const products = (source.products || []).filter((row) => productIds.has(normalizeUuid(row.Id)));
   const localProductIds = new Set((source.products || []).map((row) => normalizeUuid(row.Id)).filter(Boolean));
@@ -55,6 +61,7 @@ function selectClientRows(source, partnerId) {
     productcategories,
     products,
     staffEmployees,
+    customersources,
     orders,
     lines,
     appointments,

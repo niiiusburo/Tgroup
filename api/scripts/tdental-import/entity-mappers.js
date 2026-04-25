@@ -65,6 +65,14 @@ function mapPartnerRow(row) {
   };
 }
 
+function mapCustomerSourceRow(row) {
+  return {
+    id: normalizeUuid(row.Id), name: nullable(row.Name), type: nullable(row.Type) || 'normal',
+    description: nullable(row.Description), is_active: booleanOrNull(row.IsActive) ?? true,
+    created_at: parseCsvTimestamp(row.DateCreated), updated_at: parseCsvTimestamp(row.LastUpdated),
+  };
+}
+
 function mapEmployeeRow(row) {
   return {
     id: normalizeUuid(row.Id), displayname: nullable(row.Name), name: nullable(row.Name),
@@ -79,4 +87,11 @@ function mapEmployeeRow(row) {
   };
 }
 
-module.exports = { mapCompanyRow, mapEmployeeRow, mapPartnerRow, mapProductCategoryRow, mapProductRow };
+module.exports = {
+  mapCompanyRow,
+  mapCustomerSourceRow,
+  mapEmployeeRow,
+  mapPartnerRow,
+  mapProductCategoryRow,
+  mapProductRow,
+};

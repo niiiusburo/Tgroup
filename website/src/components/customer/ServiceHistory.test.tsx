@@ -5,7 +5,18 @@ import type { CustomerService } from '@/types/customer';
 import type { PaymentWithAllocations } from '@/hooks/useCustomerPayments';
 
 const mockServices: CustomerService[] = [
-  { id: 's1', date: '2024-12-01', service: 'Cleaning', doctor: 'Dr A', cost: 2000000, status: 'completed', tooth: '', notes: '' },
+  {
+    id: 's1',
+    date: '2024-12-01',
+    service: 'Cleaning',
+    doctor: 'Dr A',
+    cost: 2000000,
+    paidAmount: 1500000,
+    residual: 500000,
+    status: 'completed',
+    tooth: 'manual',
+    notes: '',
+  },
 ];
 
 const mockPayments: PaymentWithAllocations[] = [
@@ -41,6 +52,30 @@ const mockPayments: PaymentWithAllocations[] = [
 ];
 
 describe('ServiceHistory payment history', () => {
+  it('renders the tooth marker and tooth value in the diagnosis column', () => {
+    render(<ServiceHistory services={mockServices} />);
+
+    expect(screen.getAllByLabelText('Tooth')).toHaveLength(2);
+    expect(screen.getByText('manual')).toBeInTheDocument();
+  });
+
+  it('shows an orange pay pill with progress fill for services that still have residual debt', () => {
+    const onPayForService = vi.fn();
+
+    render(
+      <ServiceHistory
+        services={mockServices}
+        onPayForService={onPayForService}
+      />
+    );
+
+    const payButton = screen.getByRole('button', { name: /pay 500\.000 ₫/ });
+    expect(payButton).toHaveClass('bg-orange-50', 'border-orange-300', 'rounded-full');
+
+    fireEvent.click(payButton);
+    expect(onPayForService).toHaveBeenCalledWith(mockServices[0]);
+  });
+
   it('shows referenceCode as primary identifier for related payments when expanded', () => {
     render(
       <ServiceHistory

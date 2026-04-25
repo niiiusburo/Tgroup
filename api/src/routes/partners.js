@@ -81,7 +81,7 @@ router.get('/', async (req, res) => {
         p.note,
         p.active AS status,
         p.treatmentstatus,
-        p.referraluserid,
+        p.sourceid, cs.name AS sourcename, p.referraluserid,
         p.agentid,
         a.name AS agentname,
         p.companyid,
@@ -100,7 +100,7 @@ router.get('/', async (req, res) => {
         0 AS appointmentcount,
         0 AS ordercount,
         0 AS dotkhamcount
-      FROM partners p
+      FROM partners p LEFT JOIN customersources cs ON cs.id = p.sourceid
       LEFT JOIN companies c ON c.id = p.companyid
       LEFT JOIN agents a ON a.id = p.agentid
       WHERE ${whereClause}
@@ -244,7 +244,7 @@ router.get('/:id', requirePermission('customers.view'), async (req, res) => {
         p.note,
         p.active AS status,
         p.treatmentstatus,
-        p.referraluserid,
+        p.sourceid, cs.name AS sourcename, p.referraluserid,
         p.agentid,
         a.name AS agentname,
         p.companyid,
@@ -294,7 +294,7 @@ router.get('/:id', requirePermission('customers.view'), async (req, res) => {
         (SELECT COUNT(*) FROM appointments apt WHERE apt.partnerid = p.id) AS appointmentcount,
         (SELECT COUNT(*) FROM saleorders so WHERE so.partnerid = p.id AND so.isdeleted = false) AS ordercount,
         (SELECT COUNT(*) FROM dotkhams dk WHERE dk.partnerid = p.id AND dk.isdeleted = false) AS dotkhamcount
-      FROM partners p
+      FROM partners p LEFT JOIN customersources cs ON cs.id = p.sourceid
       LEFT JOIN companies c ON c.id = p.companyid
       LEFT JOIN agents a ON a.id = p.agentid
       LEFT JOIN aspnetusers au1 ON au1.id = p.createdbyid

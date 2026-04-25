@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Stethoscope, CheckCircle2, Clock, XCircle, ChevronUp, Wallet, Edit2 } from 'lucide-react';
+import { Stethoscope, CheckCircle2, Clock, XCircle, ChevronUp, Wallet, Edit2, CreditCard } from 'lucide-react';
 import type { CustomerService } from '@/types/customer';
 import type { PaymentWithAllocations } from '@/hooks/useCustomerPayments';
 import { formatVND, parseDisplayDate } from '@/lib/formatting';
@@ -42,13 +42,24 @@ function getPaymentsForService(
   );
 }
 
+function ToothBadge({ value }: { readonly value: string }) {
+  const label = value?.trim() || '-';
+
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-xs font-medium text-gray-700">
+      <span role="img" aria-label="Tooth" className="text-sm leading-none">🦷</span>
+      <span>{label}</span>
+    </span>
+  );
+}
+
 export function ServiceHistory({
   services,
   limit,
   payments,
   onEditService,
   onUpdateStatus: _onUpdateStatus,
-  onPayForService: _onPayForService,
+  onPayForService,
   onDeletePayment: _onDeletePayment
 }: ServiceHistoryProps) {
   const { t } = useTranslation('services');
@@ -108,7 +119,12 @@ export function ServiceHistory({
               <th className="pb-3 pr-4 font-medium text-right">Thành tiền</th>
               <th className="pb-3 pr-4 font-medium text-right">Thanh toán</th>
               <th className="pb-3 pr-4 font-medium text-right">Còn lại</th>
-              <th className="pb-3 pr-4 font-medium">Răng & chẩn đoán</th>
+              <th className="pb-3 pr-4 font-medium">
+                <span className="inline-flex items-center gap-1.5">
+                  <span role="img" aria-label="Tooth">🦷</span>
+                  Răng & chẩn đoán
+                </span>
+              </th>
               <th className="pb-3 font-medium text-center"></th>
             </tr>
           </thead>
@@ -120,6 +136,8 @@ export function ServiceHistory({
               const paidAmt = svc.paidAmount ?? 0;
               const resAmt = svc.residual ?? Math.max(0, svc.cost - paidAmt);
               const hasPayment = relatedPayments.length > 0;
+              const canPay = !!onPayForService && svc.status !== 'cancelled' && resAmt > 0;
+              const paidPct = svc.cost > 0 ? Math.min(100, Math.max(0, (paidAmt / svc.cost) * 100)) : 0;
 
               return (
                 <React.Fragment key={svc.id}>
@@ -154,12 +172,38 @@ export function ServiceHistory({
                       </span>
                     </td>
                     <td className="py-3 pr-4 text-right whitespace-nowrap">
-                      <span className={`font-medium ${resAmt > 0 ? 'text-red-600' : 'text-gray-400'}`}>
-                        {formatVND(resAmt)}
-                      </span>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className={`font-medium ${resAmt > 0 ? 'text-red-600' : 'text-gray-400'}`}>
+                          {formatVND(resAmt)}
+                        </span>
+                        {canPay && (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); onPayForService?.(svc); }}
+                            className="relative inline-flex min-w-[118px] items-center justify-center gap-1 overflow-hidden rounded-full border border-orange-300 bg-orange-50 px-3 py-1 text-[11px] font-semibold text-gray-900 shadow-sm transition-colors hover:border-primary hover:bg-orange-100"
+                            title={`${t('outstanding')}: ${formatVND(resAmt)}`}
+                            aria-label={`${t('pay')} ${formatVND(resAmt)}`}
+                          >
+                            {paidPct > 0 && (
+                              <span
+                                aria-hidden="true"
+                                className="absolute inset-y-0 left-0 bg-emerald-200/90"
+                                style={{
+                                  width: `${paidPct}%`,
+                                  minWidth: '8px',
+                                }}
+                              />
+                            )}
+                            <span className="relative inline-flex items-center gap-1">
+                              <CreditCard className="h-3 w-3 text-orange-600" />
+                              {t('pay')}
+                            </span>
+                          </button>
+                        )}
+                      </div>
                     </td>
                     <td className="py-3 pr-4 whitespace-nowrap">
-                      <span className="text-gray-600 text-xs">{svc.tooth}</span>
+                      <ToothBadge value={svc.tooth} />
                     </td>
                     <td className="py-3 text-center">
                       <div className="flex items-center justify-center gap-1">
@@ -217,6 +261,9 @@ export function ServiceHistory({
                                         depositUsed={p.depositUsed}
                                       />
                                       {p.referenceCode && <span className="text-[10px] text-gray-500">{p.referenceCode}</span>}
+                                      {p.receiptNumber && p.receiptNumber !== p.referenceCode && (
+                                        <span className="text-[10px] text-gray-400">{p.receiptNumber}</span>
+                                      )}
                                     </div>
                                     <p className={`text-sm font-semibold ${isVoided ? 'line-through text-gray-400' : 'text-gray-900'}`}>
                                       {formatVND(p.amount)}

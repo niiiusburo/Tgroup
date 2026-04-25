@@ -5,60 +5,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { query } = require('../db');
 const { requireAuth } = require('../middleware/auth');
+const { resolveEffectivePermissions } = require('../services/permissionService');
 
 const router = express.Router();
-
-/**
- * Resolve effective permissions + locations for a given employee ID.
- * Returns { groupId, groupName, effectivePermissions, locations }
- */
-async function resolvePermissions(employeeId) {
-  const epRows = await query(
-    `SELECT ep.group_id, pg.name AS group_name
-     FROM employee_permissions ep
-     JOIN permission_groups pg ON pg.id = ep.group_id
-     WHERE ep.employee_id = $1`,
-    [employeeId]
-  );
-
-  if (!epRows || epRows.length === 0) {
-    return { groupId: null, groupName: null, effectivePermissions: [], locations: [] };
-  }
-
-  const { group_id: groupId, group_name: groupName } = epRows[0];
-
-  const [basePermRows, overrideRows, locRows] = await Promise.all([
-    query(
-      `SELECT permission FROM group_permissions WHERE group_id = $1 ORDER BY permission`,
-      [groupId]
-    ),
-    query(
-      `SELECT permission, override_type FROM permission_overrides WHERE employee_id = $1`,
-      [employeeId]
-    ),
-    query(
-      `SELECT c.id, c.name
-       FROM employee_location_scope els
-       JOIN companies c ON c.id = els.company_id
-       WHERE els.employee_id = $1`,
-      [employeeId]
-    ),
-  ]);
-
-  const basePerms = basePermRows.map(r => r.permission);
-  const granted = overrideRows.filter(r => r.override_type === 'grant').map(r => r.permission);
-  const revoked = overrideRows.filter(r => r.override_type === 'revoke').map(r => r.permission);
-
-  const effectiveSet = new Set([...basePerms, ...granted]);
-  for (const p of revoked) effectiveSet.delete(p);
-
-  return {
-    groupId,
-    groupName,
-    effectivePermissions: [...effectiveSet].sort(),
-    locations: locRows.map(l => ({ id: l.id, name: l.name })),
-  };
-}
 
 /**
  * POST /api/Auth/login
@@ -102,7 +51,7 @@ router.post('/login', async (req, res) => {
       [employee.id]
     );
 
-    const permissions = await resolvePermissions(employee.id);
+    const permissions = await resolveEffectivePermissions(employee.id);
 
     const tokenPayload = {
       employeeId: employee.id,
@@ -152,7 +101,7 @@ router.get('/me', requireAuth, async (req, res) => {
     }
 
     const employee = rows[0];
-    const permissions = await resolvePermissions(employeeId);
+    const permissions = await resolveEffectivePermissions(employeeId);
 
     return res.json({
       user: {

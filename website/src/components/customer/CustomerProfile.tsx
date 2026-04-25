@@ -249,10 +249,10 @@ export function CustomerProfile({
 
       <CustomerAssignments
         companyName={profile.companyName}
-        salestaffId={profile.salestaffid}
+        salestaffId={profile.salestaffid} salestaffLabel={profile.salestaffLabel}
         cskhId={profile.cskhid}
         cskhName={profile.cskhname}
-        referralUserId={profile.referraluserid} />
+        referralUserId={profile.referraluserid} sourceName={profile.sourcename} />
       
 
       {/* Tabs */}
@@ -768,7 +768,7 @@ export function CustomerProfile({
       {/* Payment Modal */}
       {showPaymentModal && onMakePayment && payTargetService && (() => {
         const svcCtx: ServicePaymentContext = {
-          recordId: payTargetService.id,
+          recordId: payTargetService.orderId || payTargetService.id,
           recordName: payTargetService.orderCode || payTargetService.orderName || payTargetService.service,
           recordType: 'saleorder',
           totalCost: payTargetService.cost,

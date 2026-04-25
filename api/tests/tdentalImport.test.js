@@ -3,10 +3,15 @@ const {
   mapAppointmentRow,
   mapAccountPaymentToPayment,
   mapSaleOrderLineRow,
+  loadSource,
   parseCsvDateOnly,
   parseCsvTimestamp,
 } = require('../scripts/tdental-import/import-client');
-const { uuidOrNull } = require('../scripts/tdental-import/utils');
+const { voidLocalOnlyPaymentRows } = require('../scripts/tdental-import/database');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const { readCsv, uuidOrNull } = require('../scripts/tdental-import/utils');
 const {
   DUPLICATE_PARTNER_KEY_POLICY,
   classifyPaymentSource,
@@ -70,6 +75,77 @@ describe('TDental one-client import helpers', () => {
     expect(plan.rows.appointments).toHaveLength(1);
   });
 
+  it('repairs unquoted commas in Partners.csv street without shifting profile fields', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tdental-partner-comma-'));
+    const file = path.join(dir, 'dbo.Partners.csv');
+    fs.writeFileSync(
+      file,
+      [
+        'Id,DisplayName,Name,NameNoSign,Street,Phone,Email,Supplier,Customer,IsAgent,IsInsurance,CompanyId,Ref,Comment,Active,Employee,Gender,JobTitle,BirthYear,BirthMonth,BirthDay,MedicalHistory,SourceId,DateCreated,LastUpdated,IsDeleted',
+        'F574A0CC-B910-4016-A09D-B2F4002CBAF4,[T049929] NGUYỄN TẤN PHƯƠNG -G,NGUYỄN TẤN PHƯƠNG -G,NGUYEN TAN PHUONG -G,TÂN THỚI NHẤT, Q12,0855892331,,0,1,0,0,765F6593-2B19-4D06-CC8C-08DC4D479451,T049929,,1,0,male,LYBAE,2000,8,11,,C7B3D31A-6325-4CF7-ABAE-AFE3007CF6F8,2025-06-06 09:42:51.4800556,2025-06-22 16:05:41.1032866,0',
+      ].join('\n'),
+    );
+
+    const [partner] = readCsv(file);
+
+    expect(partner).toMatchObject({
+      Id: 'F574A0CC-B910-4016-A09D-B2F4002CBAF4',
+      Street: 'TÂN THỚI NHẤT, Q12',
+      Phone: '0855892331',
+      CompanyId: '765F6593-2B19-4D06-CC8C-08DC4D479451',
+      Ref: 'T049929',
+      Gender: 'male',
+      JobTitle: 'LYBAE',
+      BirthYear: '2000',
+      BirthMonth: '8',
+      BirthDay: '11',
+      SourceId: 'C7B3D31A-6325-4CF7-ABAE-AFE3007CF6F8',
+    });
+  });
+
+  it('loads PartnerSources.csv so source names can be imported with partner source IDs', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'tdental-sources-'));
+    for (const file of [
+      'dbo.Companies.csv',
+      'dbo.ProductCategories.csv',
+      'dbo.Products.csv',
+      'dbo.Employees.csv',
+      'dbo.Appointments.csv',
+      'dbo.CustomerReceipts.csv',
+      'dbo.SaleOrders.csv',
+      'dbo.SaleOrderLines.csv',
+      'dbo.AccountPayments.csv',
+      'dbo.SaleOrderPayments.csv',
+      'dbo.SaleOrderPaymentAccountPaymentRels.csv',
+      'dbo.PartnerAdvances.csv',
+    ]) {
+      fs.writeFileSync(path.join(dir, file), 'Id\n');
+    }
+    fs.writeFileSync(
+      path.join(dir, 'dbo.Partners.csv'),
+      [
+        'Id,Name,Ref,Customer,SourceId,IsDeleted',
+        'F574A0CC-B910-4016-A09D-B2F4002CBAF4,NGUYỄN TẤN PHƯƠNG -G,T049929,1,C7B3D31A-6325-4CF7-ABAE-AFE3007CF6F8,0',
+      ].join('\n'),
+    );
+    fs.writeFileSync(
+      path.join(dir, 'dbo.PartnerSources.csv'),
+      [
+        'Id,Name,Type,DateCreated,LastUpdated,IsActive',
+        'C7B3D31A-6325-4CF7-ABAE-AFE3007CF6F8,Khách hàng giới thiệu,normal,2023-04-13 14:34:58.9600427,2023-04-13 14:34:58.9600430,1',
+      ].join('\n'),
+    );
+
+    const source = loadSource(dir);
+    const plan = buildClientImportPlan(source, { lineIds: new Set(), lineCount: 0, lineTotal: 0 }, 'f574a0cc-b910-4016-a09d-b2f4002cbaf4');
+
+    expect(plan.rows.customersources).toHaveLength(1);
+    expect(plan.rows.customersources[0]).toMatchObject({
+      Id: 'C7B3D31A-6325-4CF7-ABAE-AFE3007CF6F8',
+      Name: 'Khách hàng giới thiệu',
+    });
+  });
+
   it('maps canceled account payments to voided payments and keeps posted totals separate', () => {
     const mapped = mapAccountPaymentToPayment({
       Id: 'D3A002C1-11A1-4B09-A5B3-B431002218F6',
@@ -85,6 +161,29 @@ describe('TDental one-client import helpers', () => {
     expect(mapped.payment_date).toBe('2026-04-19');
     expect(mapped.amount).toBe(700000);
     expect(mapped.method).toBe('cash');
+    expect(mapped.payment_category).toBe('payment');
+  });
+
+  it('voids local-only payment rows with no TDental reference before allocating imported payments', async () => {
+    const client = {
+      query: jest.fn(async () => ({
+        rows: [{ voided_count: '1', deleted_allocation_count: '1' }],
+      })),
+    };
+    const sourcePaymentId = 'd3a002c1-11a1-4b09-a5b3-b431002218f6';
+
+    const result = await voidLocalOnlyPaymentRows(client, {
+      partner: { Id: partnerId },
+      rows: { payments: [{ Id: sourcePaymentId }] },
+    });
+
+    expect(result).toEqual({ voided: 1, deletedAllocations: 1 });
+    expect(client.query).toHaveBeenCalledTimes(1);
+    const [sql, params] = client.query.mock.calls[0];
+    expect(sql).toContain('DELETE FROM payment_allocations');
+    expect(sql).toContain("status = 'voided'");
+    expect(sql).toContain('reference_code IS NULL');
+    expect(params).toEqual([partnerId, [sourcePaymentId]]);
   });
 
   it('preserves CSV date text without JavaScript timezone conversion', () => {

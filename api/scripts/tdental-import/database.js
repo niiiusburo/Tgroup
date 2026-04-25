@@ -1,5 +1,12 @@
 const crypto = require('crypto');
-const { mapCompanyRow, mapEmployeeRow, mapPartnerRow, mapProductCategoryRow, mapProductRow } = require('./entity-mappers');
+const {
+  mapCompanyRow,
+  mapCustomerSourceRow,
+  mapEmployeeRow,
+  mapPartnerRow,
+  mapProductCategoryRow,
+  mapProductRow,
+} = require('./entity-mappers');
 const {
   mapAppointmentRow,
   mapAccountPaymentToPayment,
@@ -138,6 +145,46 @@ async function voidStaleDepositRows(client, partnerId) {
   return res.rowCount;
 }
 
+async function voidLocalOnlyPaymentRows(client, plan) {
+  const sourcePaymentIds = plan.rows.payments
+    .map((row) => normalizeUuid(row.Id))
+    .filter(Boolean);
+  const res = await client.query(
+    `WITH stale AS (
+       SELECT p.id
+       FROM payments p
+       WHERE p.customer_id = $1
+         AND p.status = 'posted'
+         AND COALESCE(p.payment_category, 'payment') = 'payment'
+         AND p.id <> ALL($2::uuid[])
+         AND (p.reference_code IS NULL OR BTRIM(p.reference_code) = '')
+     ),
+     deleted_allocations AS (
+       DELETE FROM payment_allocations pa
+       USING stale
+       WHERE pa.payment_id = stale.id
+       RETURNING pa.id
+     ),
+     voided_payments AS (
+       UPDATE payments p
+       SET status = 'voided',
+           notes = CONCAT_WS(' | ', NULLIF(p.notes, ''), 'VOIDED by TDental import: local-only no reference')
+       FROM stale
+       WHERE p.id = stale.id
+       RETURNING p.id
+     )
+     SELECT
+       (SELECT COUNT(*) FROM voided_payments) AS voided_count,
+       (SELECT COUNT(*) FROM deleted_allocations) AS deleted_allocation_count`,
+    [normalizeUuid(plan.partner.Id), sourcePaymentIds],
+  );
+  const row = res.rows[0] || {};
+  return {
+    voided: numberOrZero(row.voided_count),
+    deletedAllocations: numberOrZero(row.deleted_allocation_count),
+  };
+}
+
 async function updateCustomerSalesStaff(client, partnerId, salesStaff) {
   if (!salesStaff || !salesStaff.assistantId) return 0;
   const res = await client.query(
@@ -154,6 +201,7 @@ async function applyClientImport(client, plan) {
     inserted.companies = await upsertRows(client, 'companies', plan.rows.companies.map(mapCompanyRow));
     inserted.productcategories = await upsertRows(client, 'productcategories', plan.rows.productcategories.map(mapProductCategoryRow));
     inserted.products = await upsertRows(client, 'products', plan.rows.products.map(mapProductRow));
+    inserted.customersources = await upsertRows(client, 'customersources', plan.rows.customersources.map(mapCustomerSourceRow));
     inserted.staff_partners = await upsertRows(client, 'partners', plan.rows.staffEmployees.map(mapEmployeeRow));
     inserted.partners = await upsertRows(client, 'partners', [mapPartnerRow(plan.rows.partner)]);
     inserted.customer_sales_staff = await updateCustomerSalesStaff(client, plan.partner.Id, plan.mapping.salesStaff);
@@ -162,6 +210,9 @@ async function applyClientImport(client, plan) {
     inserted.appointments = await upsertRows(client, 'appointments', plan.rows.appointments.map(mapAppointmentRow));
     inserted.accountpayments = 0;
     inserted.payments = await upsertRows(client, 'payments', plan.rows.payments.map(mapAccountPaymentToPayment));
+    const localOnlyPaymentCleanup = await voidLocalOnlyPaymentRows(client, plan);
+    inserted.local_only_payments_voided = localOnlyPaymentCleanup.voided;
+    inserted.local_only_payment_allocations_removed = localOnlyPaymentCleanup.deletedAllocations;
     inserted.payment_allocations = await upsertPaymentAllocations(client, plan);
     inserted.stale_deposits_voided = await voidStaleDepositRows(client, plan.partner.Id);
     await client.query('COMMIT');
@@ -172,4 +223,4 @@ async function applyClientImport(client, plan) {
   }
 }
 
-module.exports = { applyClientImport, getLocalLineSummary };
+module.exports = { applyClientImport, getLocalLineSummary, voidLocalOnlyPaymentRows };

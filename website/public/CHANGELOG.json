@@ -1,5 +1,74 @@
 [
   {
+    "version": "0.25.13",
+    "date": "2026-04-25",
+    "commit": "pending",
+    "highlights": "fix(payments): stabilize service history payment records",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Restore service history tooth badges and payment progress pill controls",
+          "Resolve imported sale order lines with blank product names using product and line-name fallbacks",
+          "Allocate service-row payments to the parent sale order so payment saves succeed"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add regression coverage for service payment allocations and sale order line fallbacks",
+          "Add customer payment action coverage to refresh visible service history after recording payments"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.25.8",
+    "date": "2026-04-25",
+    "commit": "pending",
+    "highlights": "fix(tdental): restore T049929 source, assignment, dates, and legacy payment history",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Repair TDental partner CSV rows with unquoted commas so T049929 profile fields stay aligned",
+          "Import PartnerSources and show TDental source and assignment labels on customer profiles",
+          "Normalize database timestamp service dates in Vietnam time and include voided legacy payment history"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add backend coverage for PartnerSources import and legacy accountpayments fallback",
+          "Add frontend coverage for service date normalization and TDental assignment/source display"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.25.7",
+    "date": "2026-04-25",
+    "commit": "pending",
+    "highlights": "fix(saleorders): preserve unpaid residual after treatment price edits",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Recompute sale order paid and residual amounts from non-voided payment allocations when amounttotal changes",
+          "Update the primary sale order line price, paid amount, and residual amount during price-only edits",
+          "Trust explicit zero totalpaid in service mapping instead of inferring fully paid from stale residual values"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add backend coverage for reopening residual on sale order price edits",
+          "Add frontend hook coverage for explicit zero paid amount mapping"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.6",
     "date": "2026-04-25",
     "commit": "pending",

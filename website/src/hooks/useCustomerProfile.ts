@@ -29,9 +29,11 @@ export interface CustomerProfileData {
   depositBalance: number;
   outstandingBalance: number;
   salestaffid: string | null;
+  salestaffLabel?: string | null;
   cskhid: string | null;
   cskhname: string | null;
   referraluserid: string | null;
+  sourcename?: string | null;
 }
 
 export interface CustomerProfileResult {
@@ -120,9 +122,11 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         depositBalance: 0,
         outstandingBalance: 0,
         salestaffid: partner.salestaffid ?? null,
+        salestaffLabel: partner.jobtitle ?? null,
         cskhid: partner.cskhid ?? null,
         cskhname: partner.cskhname ?? null,
         referraluserid: partner.referraluserid ?? null,
+        sourcename: partner.sourcename ?? null,
       };
 
       // Fetch appointment history for this customer

@@ -1,17 +1,19 @@
 # TGroup Deployment Guide
 
-## Local Development (Docker — Current)
+## Local Development (Homebrew PostgreSQL)
 
-The project now runs entirely via Docker Compose locally. Do **not** use Homebrew PostgreSQL for local development.
+Use the local Homebrew PostgreSQL database on `127.0.0.1:5433` for day-to-day development and data checks.
+
+Do **not** use `127.0.0.1:55433` for local development unless you intentionally started the Docker database container. `55433` is the host-mapped Docker/PostgreSQL port used by deployment-style Docker workflows, while the VPS containers connect to Postgres internally as `db:5432`.
 
 ### Quick Start
 
 ```bash
-# Start everything
-docker compose up -d
+# Start the local database if needed
+brew services start postgresql@15
 
 # Verify
-docker compose ps
+pg_isready -h 127.0.0.1 -p 5433
 ```
 
 ### Local URLs & Ports
@@ -21,7 +23,7 @@ docker compose ps
 | **Production** | https://nk.2checkin.com | Live domain (nginx → Docker 5175) |
 | Web (nginx) | http://localhost:5175 | Built React app served by nginx |
 | API | http://localhost:3002 | Express backend |
-| DB | localhost:55433 | PostgreSQL 16 (`tdental_demo`) |
+| DB | localhost:5433 | Local Homebrew PostgreSQL (`tdental_demo`) |
 
 ### Test Credentials
 - **Email:** `tg@clinic.vn`
@@ -32,7 +34,7 @@ docker compose ps
 ## Docker Compose Stack
 
 ### Services
-- `db` — PostgreSQL 16 (port `127.0.0.1:55433`)
+- `db` — PostgreSQL 16 (Docker host port `127.0.0.1:55433`; VPS/internal container host `db:5432`)
 - `api` — Node/Express API (port `127.0.0.1:3002`)
 - `web` — nginx serving built React app (port `5175`)
 - `compreface-*` — Face recognition PostgreSQL + API + Core
