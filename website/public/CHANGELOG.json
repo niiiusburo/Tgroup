@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.25.14",
+    "date": "2026-04-25",
+    "commit": "pending",
+    "highlights": "fix(payments): update service paid amount from allocations",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Use backend payment allocation totals for single-line service records when imported line paid amounts are stale",
+          "Keep multi-line order service rows on line-level payment amounts to avoid duplicated order allocations"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add mapper coverage for stale imported paid amounts after new service payments",
+          "Add multi-line guard coverage for order-level payment totals"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.13",
     "date": "2026-04-25",
     "commit": "pending",

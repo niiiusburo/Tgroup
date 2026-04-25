@@ -37,8 +37,8 @@ export function mapSaleOrderLineToCustomerService(line: SaleOrderLineInput): Cus
   const linePaid = parseMoney(line.amountpaid);
   const backendPaid = parseMoney(line.paid_amount);
   const orderLineCount = parseCount(line.order_line_count) || 1;
-  const useBackendPaymentFallback = linePaid === 0 && backendPaid > 0 && orderLineCount === 1;
-  const paidAmount = useBackendPaymentFallback ? backendPaid : linePaid;
+  const useBackendPaymentFallback = backendPaid > linePaid && orderLineCount === 1;
+  const paidAmount = useBackendPaymentFallback ? Math.min(cost, backendPaid) : linePaid;
   const explicitResidual = parseMoney(line.so_residual ?? line.amountresidual);
   const residual = useBackendPaymentFallback ? Math.max(0, cost - paidAmount) : explicitResidual;
 

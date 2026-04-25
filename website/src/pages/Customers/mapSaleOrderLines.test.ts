@@ -68,4 +68,41 @@ describe('mapSaleOrderLineToCustomerService', () => {
     expect(service.paidAmount).toBe(3200000);
     expect(service.residual).toBe(16000000);
   });
+
+  it('uses backend paid_amount when a new allocation exceeds stale imported line amountpaid', () => {
+    const service = mapSaleOrderLineToCustomerService({
+      id: 'line-s057144',
+      orderid: 'order-so57144',
+      date: '2026-02-11',
+      productname: 'Niềng Mắc Cài Kim Loại Tiêu Chuẩn',
+      pricetotal: '19200000.00',
+      amountpaid: '6546000.00',
+      amountresidual: '0.00',
+      so_residual: '11987334.00',
+      paid_amount: '7212666.00',
+      order_line_count: '1',
+      productuomqty: '1.00',
+    });
+
+    expect(service.paidAmount).toBe(7212666);
+    expect(service.residual).toBe(11987334);
+  });
+
+  it('keeps line-level paid amounts for multi-line orders to avoid duplicating order allocations', () => {
+    const service = mapSaleOrderLineToCustomerService({
+      id: 'line-multi',
+      orderid: 'order-multi',
+      date: '2026-02-11',
+      productname: 'Service line',
+      pricetotal: '5000000.00',
+      amountpaid: '1000000.00',
+      amountresidual: '4000000.00',
+      paid_amount: '7000000.00',
+      order_line_count: '2',
+      productuomqty: '1.00',
+    });
+
+    expect(service.paidAmount).toBe(1000000);
+    expect(service.residual).toBe(4000000);
+  });
 });
