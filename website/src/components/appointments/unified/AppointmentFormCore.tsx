@@ -158,7 +158,7 @@ export function AppointmentFormCore({
   const colorConfig = data.color ? APPOINTMENT_CARD_COLORS[data.color] : APPOINTMENT_CARD_COLORS['1'];
 
   return (
-    <div className="modal-body space-y-5">
+    <div className="space-y-5">
       {/* Customer */}
       <div>
         <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
