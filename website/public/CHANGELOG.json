@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.25.6",
+    "date": "2026-04-25",
+    "commit": "pending",
+    "highlights": "feat(tdental): import T8250 client data locally",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Add local TDental CSV import workflow for one-client T8250 verification",
+          "Normalize customer service history dates in Vietnam time",
+          "Document payment allocation import behavior for local demo schemas"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add focused backend import helper tests",
+          "Add frontend sale order line date mapping tests"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.0",
     "date": "2026-04-24",
     "commit": "pending",

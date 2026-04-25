@@ -112,6 +112,8 @@
 | **UI** | Payment page, PaymentHistory, DepositWallet, CustomerProfile payments tab, Reports revenue |
 | **Risk** | **Critical** — `method` enum (`cash` | `bank_transfer` | `deposit` | `mixed`) is mirrored in `website/src/types/payment.ts`. Mismatches break type guards and allocation logic. |
 
+> Import note: `dbo.accountpayments` can be a non-writable legacy placeholder view in local demo schemas. New TDental import flows should populate `dbo.payments` and `dbo.payment_allocations`, and use `accountpayments` only as a read fallback when present.
+
 ### dbo.monthlyplans + dbo.monthlyplan_items + dbo.planinstallments
 
 | Attribute | Value |

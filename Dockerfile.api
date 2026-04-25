@@ -7,4 +7,5 @@ COPY api/src ./src
 EXPOSE 3002
 ENV PORT=3002
 ENV NODE_ENV=production
+ENV NODE_PATH=/app/node_modules
 CMD ["node", "src/server.js"]

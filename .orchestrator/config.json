@@ -13,8 +13,8 @@
   "agent": {
     "preferred": "pi",
     "fallbackAgents": [],
-    "piCommand": "pi",
-    "piArgs": "agent run --model z-ai/glm-5.1 --prompt '{{PROMPT}}'",
+    "piCommand": "pi-ds",
+    "piArgs": "--tools bash,read,edit,write,grep,find,ls -p '{{PROMPT}}'",
     "maxTurnsImplementation": 40,
     "maxTurnsVerification": 20,
     "allowedTools": "Bash,Read,Write,Edit",

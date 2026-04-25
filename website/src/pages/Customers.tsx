@@ -33,12 +33,13 @@ import type { CustomerStatus } from "@/data/mockCustomers";
 import type { CustomerFormData } from "@/data/mockCustomerForm";
 
 import { buildCustomerColumns } from "./Customers/CustomerColumns";
+import { mapSaleOrderLineToCustomerService } from "./Customers/mapSaleOrderLines";
 
 /**
  * Customers Page - Patient records with search, filters, table, and profile view
  * @crossref:route[/customers]
  * @crossref:used-in[App]
- * @crossref:uses[SearchBar, DataTable, StatusBadge, useCustomers, CustomerProfile, AddCustomerForm]
+ * @crossref:uses[SearchBar, DataTable, StatusBadge, useCustomers, CustomerProfile, AddCustomerForm, mapSaleOrderLineToCustomerService]
  */
 
 const STATUS_FILTER_OPTIONS: readonly {
@@ -188,32 +189,7 @@ export function Customers() {
     setSaleOrderLinesLoading(true);
     try {
       const res = await fetchSaleOrderLines({ partnerId: selectedCustomerId, limit: 500 });
-      const mapped: CustomerService[] = res.items.map((line) => ({
-        id: line.id,
-        date: line.date ? line.date.slice(0, 10) : "-",
-        service: line.productname || "-",
-        doctor: line.doctorname || "N/A",
-        doctorId: line.employeeid || undefined,
-        assistantId: line.assistantid || undefined,
-        assistantName: line.assistantname || undefined,
-        catalogItemId: line.productid || undefined,
-        cost: parseFloat(line.pricetotal || "0") || 0,
-        quantity: parseFloat(line.productuomqty || "0") || undefined,
-        status:
-          line.sostate === "done" || line.sostate === "completed"
-            ? "completed"
-            : line.iscancelled
-              ? "cancelled"
-              : "active",
-        tooth: line.tooth_numbers || line.toothtype || line.diagnostic || "-",
-        notes: line.note || "",
-        orderId: line.orderid || undefined,
-        orderName: line.ordername || undefined,
-        orderCode: line.ordercode || undefined,
-        paidAmount: parseFloat(line.amountpaid || line.paid_amount || "0") || 0,
-        residual: parseFloat(line.so_residual || line.amountresidual || "0") || 0,
-        locationName: line.companyname || undefined,
-      }));
+      const mapped = res.items.map(mapSaleOrderLineToCustomerService);
       setSaleOrderLines(mapped);
     } catch (err) {
       console.error("Failed to fetch sale order lines:", err);

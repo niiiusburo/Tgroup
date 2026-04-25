@@ -8,7 +8,7 @@
 - **`payment_allocations`** — Links a payment to `saleorders` (invoice) or `dotkhams` (medical record).
 - **`saleorders`** / **`dotkhams`** — Receivables with a `residual` / `amountresidual` balance.
 - **`receipt_sequences`** — Generates receipt numbers (e.g., `TUKH/2025/00001`).
-- **`accountpayments`** — Legacy historical table; used as a fallback when `payments` is empty for a customer.
+- **`accountpayments`** — Legacy historical source; in some local demo schemas this is only a non-writable placeholder view, so migration/import scripts should write canonical rows to `payments` + `payment_allocations` instead.
 
 ## 2. Payment Classification Algorithm
 
@@ -91,7 +91,7 @@ Returns payments that represent withdrawals from the deposit wallet:
 
 ## 9. Legacy Fallback
 
-If `GET /api/Payments?customerId=...` returns zero rows and no `type` filter is applied, the backend queries `accountpayments` (legacy table) and returns transformed rows with `method = 'cash'` and empty allocations.
+If `GET /api/Payments?customerId=...` returns zero rows and no `type` filter is applied, the backend queries `accountpayments` and returns transformed rows with `method = 'cash'` and empty allocations. Local demo schemas may expose this relation as a placeholder view rather than a writable table.
 
 > **Impact:** Any new client code that assumes `allocations` always exist will break when legacy rows are returned.
 

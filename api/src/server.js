@@ -55,6 +55,7 @@ const ipAccessRoutes = require('./routes/ipAccess');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+app.set('trust proxy', 1);
 
 const ALLOWED_ORIGINS = [
   'http://localhost:5175',
