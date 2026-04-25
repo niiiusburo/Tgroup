@@ -77,6 +77,8 @@ skills-lock.json
 # Local-only files (never push to GitHub)
 LOCAL/
 .worktrees/
+all Data-4-25/
+backups/db-sync/
 
 # Keep built contracts for local file: dependency
 !contracts/dist/

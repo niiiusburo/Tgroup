@@ -13,8 +13,8 @@ if (!process.env.JWT_SECRET) {
   process.exit(1);
 }
 
-const accountRoutes = require('./routes/account');
-const sessionRoutes = require('./routes/session');
+// const accountRoutes = require('./routes/account'); // LEGACY: duplicates /api/Auth
+// const sessionRoutes = require('./routes/session'); // LEGACY: deprecated
 const configRoutes = require('./routes/config');
 const companiesRoutes = require('./routes/companies');
 const partnersRoutes = require('./routes/partners');
@@ -38,7 +38,7 @@ const dashboardReportsRoutes = require('./routes/dashboardReports');
 const permissionsRoutes = require('./routes/permissions');
 const authRoutes = require('./routes/auth');
 const paymentsRoutes = require('./routes/payments');
-const servicesRoutes = require('./routes/services');
+// const servicesRoutes = require('./routes/services'); // DEAD: queries non-existent table
 const customerBalanceRoutes = require('./routes/customerBalance');
 const monthlyPlansRoutes = require('./routes/monthlyPlans');
 const customerSourcesRoutes = require('./routes/customerSources');
@@ -55,6 +55,7 @@ const ipAccessRoutes = require('./routes/ipAccess');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+app.set('trust proxy', 1);
 
 const ALLOWED_ORIGINS = [
   'http://localhost:5175',
@@ -75,8 +76,8 @@ const loginLimiter = rateLimit({
 });
 app.use('/api/Auth/login', loginLimiter);
 app.use('/api/auth/login', loginLimiter);
-app.use('/api/Account/Login', loginLimiter);
-app.use('/api/account/login', loginLimiter);
+// app.use('/api/Account/Login', loginLimiter);  // LEGACY
+// app.use('/api/account/login', loginLimiter);  // LEGACY
 
 // Request logger
 app.use((req, _res, next) => {
@@ -102,8 +103,10 @@ app.use('/api', (req, res, next) => {
 });
 
 // Routes
-app.use('/api/Account', accountRoutes);
-app.use('/Web/Session', sessionRoutes);
+// LEGACY: /api/Account duplicates /api/Auth — verify no external clients use this
+// app.use('/api/Account', accountRoutes);
+// LEGACY: Session route — verify no external clients before removing
+// app.use('/Web/Session', sessionRoutes);
 app.use('/api/IrConfigParameters', configRoutes);
 app.use('/api/Companies', companiesRoutes);
 app.use('/api/Partners', partnersRoutes);
@@ -127,7 +130,8 @@ app.use('/api/DashboardReports', dashboardReportsRoutes);
 app.use('/api/Permissions', permissionsRoutes);
 app.use('/api/Auth', authRoutes);
 app.use('/api/Payments', paymentsRoutes);
-app.use('/api/Services', servicesRoutes);
+// DEAD ROUTE: services.js queries non-existent public.services table
+// app.use('/api/Services', servicesRoutes);
 app.use('/api/CustomerBalance', customerBalanceRoutes);
 app.use('/api/MonthlyPlans', monthlyPlansRoutes);
 app.use('/api/CustomerSources', customerSourcesRoutes);

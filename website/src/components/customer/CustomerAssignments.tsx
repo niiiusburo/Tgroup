@@ -14,9 +14,11 @@ import type { Employee } from '@/data/mockEmployees';
 interface CustomerAssignmentsProps {
   readonly companyName: string | null | undefined;
   readonly salestaffId: string | null | undefined;
+  readonly salestaffLabel: string | null | undefined;
   readonly cskhId: string | null | undefined;
   readonly cskhName: string | null | undefined;
   readonly referralUserId: string | null | undefined;
+  readonly sourceName: string | null | undefined;
 }
 
 function resolveName(
@@ -53,9 +55,11 @@ function AssignmentField({ icon: Icon, label, value }: AssignmentFieldProps) {
 export function CustomerAssignments({
   companyName,
   salestaffId,
+  salestaffLabel,
   cskhId,
   cskhName,
-  referralUserId
+  referralUserId,
+  sourceName
 }: CustomerAssignmentsProps) {
   const { t } = useTranslation('customers');
   const { allEmployees } = useEmployees();
@@ -87,7 +91,7 @@ export function CustomerAssignments({
         <AssignmentField
           icon={UserRound}
           label={t('form.assignTo', { ns: 'customers' })}
-          value={resolveName(salestaffId, employeeList)} />
+          value={salestaffLabel || resolveName(salestaffId, employeeList)} />
         
         <AssignmentField
           icon={Headphones}
@@ -97,7 +101,7 @@ export function CustomerAssignments({
         <AssignmentField
           icon={Users}
           label={t("ngiGiiThiu")}
-          value={resolveName(referralUserId, employeeList)} />
+          value={resolveName(referralUserId, employeeList) || sourceName} />
         
       </div>
     </div>);

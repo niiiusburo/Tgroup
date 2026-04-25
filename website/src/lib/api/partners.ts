@@ -27,6 +27,8 @@ export interface ApiPartner {
   note: string | null;
   status: boolean;
   treatmentstatus: string | null;
+  sourceid?: string | null;
+  sourcename?: string | null;
   referraluserid: string | null;
   agentid: string | null;
   agentname: string | null;
@@ -120,4 +122,3 @@ export function registerFace(partnerId: string, image: Blob) {
     body: formData as unknown as Record<string, unknown>,
   });
 }
-

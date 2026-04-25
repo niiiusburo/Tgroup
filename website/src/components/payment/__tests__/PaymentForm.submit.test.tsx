@@ -12,12 +12,13 @@
  *   - Payload shape for saleorder and dotkham record types
  *   - locationName propagation
  *   - Async submit awaiting
- *   - "Dùng tất cả" button respects cap
+ *   - "Use all" button respects cap
  *   - isEdit mode header copy
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { renderWithProviders } from '@/test/test-utils';
 import '@testing-library/jest-dom/vitest';
 import { PaymentForm } from '../PaymentForm';
 import type { ServicePaymentContext } from '../ServicePaymentCard';
@@ -92,7 +93,7 @@ describe('PaymentForm — new contract', () => {
 
   // ── 1. Renders service card locked ─────────────────────────────────────────
   it('renders service card with recordName and no editable element for it', () => {
-    render(
+    renderWithProviders(
       <PaymentForm
         {...BASE_PROPS}
         serviceContext={SALEORDER_CTX}
@@ -116,7 +117,7 @@ describe('PaymentForm — new contract', () => {
 
   // ── 2. No service picker ───────────────────────────────────────────────────
   it('does not render a service picker (no "Chọn dịch vụ..." button, no checkboxes, no allocation tabs)', () => {
-    render(
+    renderWithProviders(
       <PaymentForm
         {...BASE_PROPS}
         serviceContext={SALEORDER_CTX}
@@ -147,7 +148,7 @@ describe('PaymentForm — new contract', () => {
 
   // ── 3. No location picker ──────────────────────────────────────────────────
   it('does not render a location picker — locationName is only a read-only badge inside the service card', () => {
-    render(
+    renderWithProviders(
       <PaymentForm
         {...BASE_PROPS}
         serviceContext={SALEORDER_CTX}
@@ -173,7 +174,7 @@ describe('PaymentForm — new contract', () => {
 
   // ── 4. Submit disabled at zero ─────────────────────────────────────────────
   it('disables submit button when all payment amounts are zero', () => {
-    render(
+    renderWithProviders(
       <PaymentForm
         {...BASE_PROPS}
         serviceContext={SALEORDER_CTX}
@@ -181,7 +182,7 @@ describe('PaymentForm — new contract', () => {
       />
     );
 
-    const submitButton = screen.getByRole('button', { name: /Ghi nhận/i });
+    const submitButton = screen.getByRole('button', { name: /ghiNhnThanhTon/i });
     expect(submitButton).toBeDisabled();
   });
 
@@ -193,7 +194,7 @@ describe('PaymentForm — new contract', () => {
       paidAmount: 1_000_000,
     };
 
-    render(
+    renderWithProviders(
       <PaymentForm
         {...BASE_PROPS}
         serviceContext={paidCtx}
@@ -205,7 +206,7 @@ describe('PaymentForm — new contract', () => {
     const inputs = getSourceInputs();
     fireEvent.change(inputs[1], { target: { value: '100000' } });
 
-    const submitButton = screen.getByRole('button', { name: /Ghi nhận/i });
+    const submitButton = screen.getByRole('button', { name: /ghiNhnThanhTon/i });
     expect(submitButton).toBeDisabled();
   });
 
@@ -215,7 +216,7 @@ describe('PaymentForm — new contract', () => {
     const residual = 300_000;
     const ctx: ServicePaymentContext = { ...SALEORDER_CTX, residual };
 
-    render(
+    renderWithProviders(
       <PaymentForm
         {...BASE_PROPS}
         serviceContext={ctx}
@@ -229,7 +230,7 @@ describe('PaymentForm — new contract', () => {
       typeCurrency(inputs[1], 999_999);
     });
 
-    const submitButton = screen.getByRole('button', { name: /Ghi nhận/i });
+    const submitButton = screen.getByRole('button', { name: /ghiNhnThanhTon/i });
     await act(async () => {
       fireEvent.click(submitButton);
     });
@@ -246,7 +247,7 @@ describe('PaymentForm — new contract', () => {
     const residual = 500_000;
     const ctx: ServicePaymentContext = { ...SALEORDER_CTX, residual };
 
-    render(
+    renderWithProviders(
       <PaymentForm
         {...BASE_PROPS}
         depositBalance={1_000_000}
@@ -261,7 +262,7 @@ describe('PaymentForm — new contract', () => {
     await act(async () => { typeCurrency(inputs[1], 200_000); });
     await act(async () => { typeCurrency(inputs[2], 200_000); });
 
-    const submitButton = screen.getByRole('button', { name: /Ghi nhận/i });
+    const submitButton = screen.getByRole('button', { name: /ghiNhnThanhTon/i });
     await act(async () => { fireEvent.click(submitButton); });
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
@@ -277,7 +278,7 @@ describe('PaymentForm — new contract', () => {
   it('submits allocations with invoiceId for recordType=saleorder', async () => {
     const onSubmit = vi.fn();
 
-    render(
+    renderWithProviders(
       <PaymentForm
         {...BASE_PROPS}
         serviceContext={SALEORDER_CTX}
@@ -289,7 +290,7 @@ describe('PaymentForm — new contract', () => {
     await act(async () => { typeCurrency(inputs[1], 100_000); });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /Ghi nhận/i }));
+      fireEvent.click(screen.getByRole('button', { name: /ghiNhnThanhTon/i }));
     });
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
@@ -305,7 +306,7 @@ describe('PaymentForm — new contract', () => {
   it('submits allocations with dotkhamId for recordType=dotkham', async () => {
     const onSubmit = vi.fn();
 
-    render(
+    renderWithProviders(
       <PaymentForm
         {...BASE_PROPS}
         serviceContext={DOTKHAM_CTX}
@@ -317,7 +318,7 @@ describe('PaymentForm — new contract', () => {
     await act(async () => { typeCurrency(inputs[1], 50_000); });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /Ghi nhận/i }));
+      fireEvent.click(screen.getByRole('button', { name: /ghiNhnThanhTon/i }));
     });
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
@@ -333,7 +334,7 @@ describe('PaymentForm — new contract', () => {
   it('payload.locationName equals serviceContext.locationName regardless of any global state', async () => {
     const onSubmit = vi.fn();
 
-    render(
+    renderWithProviders(
       <PaymentForm
         {...BASE_PROPS}
         serviceContext={SALEORDER_CTX}
@@ -345,7 +346,7 @@ describe('PaymentForm — new contract', () => {
     await act(async () => { typeCurrency(inputs[1], 100_000); });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /Ghi nhận/i }));
+      fireEvent.click(screen.getByRole('button', { name: /ghiNhnThanhTon/i }));
     });
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
@@ -363,7 +364,7 @@ describe('PaymentForm — new contract', () => {
       await submitPromise;
     });
 
-    render(
+    renderWithProviders(
       <PaymentForm
         {...BASE_PROPS}
         serviceContext={SALEORDER_CTX}
@@ -388,8 +389,8 @@ describe('PaymentForm — new contract', () => {
   });
 
   // ── 11. isEdit mode shows correct header ───────────────────────────────────
-  it('shows "Chỉnh sửa thanh toán" header and still renders locked service card when isEdit=true', () => {
-    render(
+  it('shows edit payment header and still renders locked service card when isEdit=true', () => {
+    renderWithProviders(
       <PaymentForm
         {...BASE_PROPS}
         serviceContext={SALEORDER_CTX}
@@ -398,19 +399,19 @@ describe('PaymentForm — new contract', () => {
       />
     );
 
-    expect(screen.getByText('Chỉnh sửa thanh toán')).toBeInTheDocument();
+    expect(screen.getByText('chnhSaThanhTon')).toBeInTheDocument();
     // Service card is still locked (recordName present, not editable)
     expect(screen.getByText(SALEORDER_CTX.recordName)).toBeInTheDocument();
   });
 
-  // ── 12. "Dùng tất cả" respects cap ────────────────────────────────────────
-  it('"Dùng tất cả" clamps deposit to residual when wallet balance > residual', async () => {
+  // ── 12. "Use all" respects cap ─────────────────────────────────────────────
+  it('use-all clamps deposit to residual when wallet balance > residual', async () => {
     const onSubmit = vi.fn();
     const residual = 300_000;
     const walletBalance = 1_000_000;
     const ctx: ServicePaymentContext = { ...SALEORDER_CTX, residual };
 
-    render(
+    renderWithProviders(
       <PaymentForm
         {...BASE_PROPS}
         depositBalance={walletBalance}
@@ -419,10 +420,10 @@ describe('PaymentForm — new contract', () => {
       />
     );
 
-    const useAllButton = screen.getByRole('button', { name: 'Dùng tất cả' });
+    const useAllButton = screen.getByRole('button', { name: 'dngTtC' });
     await act(async () => { fireEvent.click(useAllButton); });
 
-    const submitButton = screen.getByRole('button', { name: /Ghi nhận/i });
+    const submitButton = screen.getByRole('button', { name: /ghiNhnThanhTon/i });
     await act(async () => { fireEvent.click(submitButton); });
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));

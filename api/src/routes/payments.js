@@ -107,36 +107,9 @@ router.get("/", async (req, res) => {
     }
 
     if (type === 'payments') {
-      // Payments that are allocated to invoices/dotkhams are always "payments"
-      // even if they look like deposits on the surface
-      sql += ` AND (
-        EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = p.id)
-        OR NOT (
-          COALESCE(p.deposit_type, '') IN ('deposit', 'refund', 'usage')
-          OR p.amount < 0
-          OR p.method = 'deposit'
-          OR p.deposit_used > 0
-          OR (
-            p.deposit_type IS NULL
-            AND p.method IN ('cash', 'bank', 'bank_transfer')
-            AND p.service_id IS NULL
-            AND (p.deposit_used IS NULL OR p.deposit_used = 0)
-            AND p.amount > 0
-          )
-        )
-      )`;
+      sql += ` AND p.payment_category = 'payment'`;
     } else if (type === 'deposits') {
-      sql += ` AND (
-        COALESCE(p.deposit_type, '') IN ('deposit', 'refund')
-        OR (
-          p.deposit_type IS NULL
-          AND p.method IN ('cash', 'bank', 'bank_transfer')
-          AND p.service_id IS NULL
-          AND (p.deposit_used IS NULL OR p.deposit_used = 0)
-          AND p.amount > 0
-          AND NOT EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = p.id)
-        )
-      )`;
+      sql += ` AND p.payment_category = 'deposit'`;
     }
 
     sql += ` ORDER BY p.created_at DESC LIMIT $` + (params.length + 1) + ` OFFSET $` + (params.length + 2);
@@ -145,9 +118,8 @@ router.get("/", async (req, res) => {
     let result = await query(sql, params);
     let usedLegacyFallback = false;
 
-    // Fallback: if no payments found for a customer, query historical accountpayments
-    // Skip legacy fallback when type filter is applied since we cannot reliably classify legacy records
-    if (customerId && result.length === 0 && !type) {
+    // Fallback to historical accountpayments when modern payment rows are absent.
+    if (customerId && result.length === 0 && (!type || type === 'payments')) {
       try {
         const legacyRows = await query(
           `SELECT
@@ -167,7 +139,7 @@ router.get("/", async (req, res) => {
              NULL AS receipt_number,
              NULL AS deposit_type
            FROM accountpayments ap
-           WHERE ap.partnerid = $1 AND ap.state = 'posted'
+           WHERE ap.partnerid = $1
            ORDER BY ap.paymentdate DESC
            LIMIT $2 OFFSET $3`,
           [customerId, parseInt(limit), parseInt(offset)]
@@ -193,44 +165,18 @@ router.get("/", async (req, res) => {
       countConditions.push(`p.service_id = $${countParams.length}`);
     }
     if (type === 'payments') {
-      countConditions.push(`(
-        EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = p.id)
-        OR NOT (
-          COALESCE(p.deposit_type, '') IN ('deposit', 'refund', 'usage')
-          OR p.amount < 0
-          OR p.method = 'deposit'
-          OR p.deposit_used > 0
-          OR (
-            p.deposit_type IS NULL
-            AND p.method IN ('cash', 'bank', 'bank_transfer')
-            AND p.service_id IS NULL
-            AND (p.deposit_used IS NULL OR p.deposit_used = 0)
-            AND p.amount > 0
-          )
-        )
-      )`);
+      countConditions.push(`p.payment_category = 'payment'`);
     } else if (type === 'deposits') {
-      countConditions.push(`(
-        COALESCE(p.deposit_type, '') IN ('deposit', 'refund')
-        OR (
-          p.deposit_type IS NULL
-          AND p.method IN ('cash', 'bank', 'bank_transfer')
-          AND p.service_id IS NULL
-          AND (p.deposit_used IS NULL OR p.deposit_used = 0)
-          AND p.amount > 0
-          AND NOT EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = p.id)
-        )
-      )`);
+      countConditions.push(`p.payment_category = 'deposit'`);
     }
     const countWhere = countConditions.join(' AND ');
     let countResult = await query(`SELECT COUNT(*) FROM payments p WHERE ${countWhere}`, countParams);
     let totalItems = parseInt(countResult[0]?.count || 0);
 
-    // Legacy fallback only when no type filter and no payments found
-    if (customerId && totalItems === 0 && !type) {
+    if (customerId && totalItems === 0 && (!type || type === 'payments')) {
       try {
         const legacyCount = await query(
-          `SELECT COUNT(*) FROM accountpayments ap WHERE ap.partnerid = $1 AND ap.state = 'posted'`,
+          `SELECT COUNT(*) FROM accountpayments ap WHERE ap.partnerid = $1`,
           [customerId]
         );
         totalItems = parseInt(legacyCount[0]?.count || 0);
@@ -412,11 +358,7 @@ router.get("/deposit-usage", async (req, res) => {
         p.deposit_used, p.cash_amount, p.bank_amount,
         p.receipt_number, p.deposit_type
       FROM payments p
-      WHERE (
-        p.deposit_type = 'usage'
-        OR p.method = 'deposit'
-        OR (p.deposit_used IS NOT NULL AND p.deposit_used > 0)
-      )
+      WHERE p.deposit_type = 'usage'
     `;
     const params = [];
 
@@ -546,7 +488,7 @@ router.post("/", requirePermission('payment.edit'), validate(PaymentCreateSchema
       return res.status(400).json({ error: "customer_id, positive amount, and method are required" });
     }
 
-    // Auto-detect deposit top-up if not explicitly typed
+    // Determine payment_category explicitly
     const hasAllocations = Array.isArray(allocations) && allocations.some(a => parseFloat(a.allocated_amount || 0) > 0);
     const looksLikeDeposit =
       !deposit_type &&
@@ -556,6 +498,8 @@ router.post("/", requirePermission('payment.edit'), validate(PaymentCreateSchema
       !service_id &&
       !(deposit_used > 0) &&
       parseFloat(amount) > 0;
+
+    const payment_category = looksLikeDeposit ? 'deposit' : 'payment';
 
     if (looksLikeDeposit) {
       deposit_type = "deposit";
@@ -576,14 +520,14 @@ router.post("/", requirePermission('payment.edit'), validate(PaymentCreateSchema
         customer_id, service_id, amount, method, notes,
         payment_date, reference_code, status,
         deposit_used, cash_amount, bank_amount,
-        deposit_type, receipt_number
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        deposit_type, receipt_number, payment_category
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
       RETURNING *`,
       [
         customer_id, service_id || null, amount, method, notes || null,
         payment_date || null, reference_code || null, status || "posted",
         deposit_used || 0, cash_amount || 0, bank_amount || 0,
-        deposit_type || null, receipt_number || null,
+        deposit_type || null, receipt_number || null, payment_category,
       ]
     );
 

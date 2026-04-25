@@ -1,5 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
+import { renderWithProviders } from '@/test/test-utils';
 import { CustomerDeposits } from './CustomerDeposits';
 import type { DepositTransaction, DepositBalance } from '@/hooks/useDeposits';
 
@@ -18,7 +19,7 @@ const mockBalance: DepositBalance = {
 
 describe('CustomerDeposits deposit list', () => {
   it('shows referenceCode as primary identifier in deposits table', () => {
-    render(
+    renderWithProviders(
       <CustomerDeposits
         depositList={mockDepositList}
         usageHistory={[]}
@@ -31,7 +32,7 @@ describe('CustomerDeposits deposit list', () => {
   });
 
   it('shows receiptNumber alongside referenceCode when both exist', () => {
-    render(
+    renderWithProviders(
       <CustomerDeposits
         depositList={mockDepositList}
         usageHistory={[]}

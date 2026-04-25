@@ -27,6 +27,7 @@ export interface ApiPayment {
   bankAmount?: number;
   receiptNumber?: string;
   depositType?: 'deposit' | 'refund' | 'usage' | null;
+  paymentCategory?: 'payment' | 'deposit';
   notes?: string;
   paymentDate?: string;
   referenceCode?: string;

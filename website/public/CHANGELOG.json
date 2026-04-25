@@ -1,129 +1,114 @@
 [
   {
+    "version": "0.25.14",
+    "date": "2026-04-25",
+    "commit": "pending",
+    "highlights": "fix(payments): update service paid amount from allocations",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Use backend payment allocation totals for single-line service records when imported line paid amounts are stale",
+          "Keep multi-line order service rows on line-level payment amounts to avoid duplicated order allocations"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add mapper coverage for stale imported paid amounts after new service payments",
+          "Add multi-line guard coverage for order-level payment totals"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.25.13",
+    "date": "2026-04-25",
+    "commit": "pending",
+    "highlights": "fix(payments): stabilize service history payment records",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Restore service history tooth badges and payment progress pill controls",
+          "Resolve imported sale order lines with blank product names using product and line-name fallbacks",
+          "Allocate service-row payments to the parent sale order so payment saves succeed"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add regression coverage for service payment allocations and sale order line fallbacks",
+          "Add customer payment action coverage to refresh visible service history after recording payments"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.25.8",
+    "date": "2026-04-25",
+    "commit": "pending",
+    "highlights": "fix(tdental): restore T049929 source, assignment, dates, and legacy payment history",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Repair TDental partner CSV rows with unquoted commas so T049929 profile fields stay aligned",
+          "Import PartnerSources and show TDental source and assignment labels on customer profiles",
+          "Normalize database timestamp service dates in Vietnam time and include voided legacy payment history"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add backend coverage for PartnerSources import and legacy accountpayments fallback",
+          "Add frontend coverage for service date normalization and TDental assignment/source display"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.25.7",
+    "date": "2026-04-25",
+    "commit": "pending",
+    "highlights": "fix(saleorders): preserve unpaid residual after treatment price edits",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Recompute sale order paid and residual amounts from non-voided payment allocations when amounttotal changes",
+          "Update the primary sale order line price, paid amount, and residual amount during price-only edits",
+          "Trust explicit zero totalpaid in service mapping instead of inferring fully paid from stale residual values"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add backend coverage for reopening residual on sale order price edits",
+          "Add frontend hook coverage for explicit zero paid amount mapping"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.6",
-    "date": "2026-04-24",
+    "date": "2026-04-25",
     "commit": "pending",
-    "highlights": "style(customers): improve appointment history card readability",
+    "highlights": "feat(tdental): import T8250 client data locally",
     "sections": [
       {
-        "title": "Polish",
+        "title": "New Features",
         "items": [
-          "Customer appointment history cards now group appointment code, patient, status, staff, time, date, and notes into clearer scan zones.",
-          "Appointment notes now display in a readable note band instead of being truncated into the metadata row."
+          "Add local TDental CSV import workflow for one-client T8250 verification",
+          "Normalize customer service history dates in Vietnam time",
+          "Document payment allocation import behavior for local demo schemas"
         ]
       },
       {
         "title": "Testing",
         "items": [
-          "Ran website production build for version 0.25.6.",
-          "Verified locally with Playwright that PHAN LÊ MINH appointment cards render the improved layout."
-        ]
-      }
-    ]
-  },
-  {
-    "version": "0.25.5",
-    "date": "2026-04-24",
-    "commit": "pending",
-    "highlights": "style(customers): make tooth values easier to scan",
-    "sections": [
-      {
-        "title": "Polish",
-        "items": [
-          "Customer service history now displays tooth and diagnosis values as compact tooth badges with a tooth emoji."
-        ]
-      },
-      {
-        "title": "Testing",
-        "items": [
-          "Ran website production build for version 0.25.5."
-        ]
-      }
-    ]
-  },
-  {
-    "version": "0.25.4",
-    "date": "2026-04-24",
-    "commit": "pending",
-    "highlights": "fix(customers): show allocated service payments and progress pill",
-    "sections": [
-      {
-        "title": "Bug Fixes",
-        "items": [
-          "Customer service rows now prefer payment allocations and inferred sale-order balance over stale zero amountpaid fields.",
-          "Outstanding service rows now show a rounded Thanh toán progress pill with green paid progress and orange unpaid remainder."
-        ]
-      },
-      {
-        "title": "Testing",
-        "items": [
-          "Added a unit test for service-line payment amount resolution.",
-          "Ran the focused unit test and website production build for version 0.25.4."
-        ]
-      }
-    ]
-  },
-  {
-    "version": "0.25.3",
-    "date": "2026-04-24",
-    "commit": "pending",
-    "highlights": "fix(customers): restore pay remainder action on service rows",
-    "sections": [
-      {
-        "title": "Bug Fixes",
-        "items": [
-          "Restored the orange payment action on customer service rows with an outstanding balance.",
-          "Payment allocations from customer service rows now target the sale order id so paying a remainder updates the correct outstanding balance."
-        ]
-      },
-      {
-        "title": "Testing",
-        "items": [
-          "Ran website production build for version 0.25.3.",
-          "Verified locally with Playwright that the outstanding service row shows a Thanh toán action and opens the payment modal for the sale order remainder."
-        ]
-      }
-    ]
-  },
-  {
-    "version": "0.25.2",
-    "date": "2026-04-24",
-    "commit": "pending",
-    "highlights": "fix(appointments): restore modal scrolling while dropdown menus are open",
-    "sections": [
-      {
-        "title": "Bug Fixes",
-        "items": [
-          "Removed the nested modal scroll body from the unified appointment form so dropdown menus no longer trap wheel scrolling before it reaches the real modal body."
-        ]
-      },
-      {
-        "title": "Testing",
-        "items": [
-          "Ran website production build for version 0.25.2.",
-          "Verified locally with Playwright that the appointment color dropdown no longer prevents the modal body from receiving wheel scroll."
-        ]
-      }
-    ]
-  },
-  {
-    "version": "0.25.1",
-    "date": "2026-04-24",
-    "commit": "pending",
-    "highlights": "fix(customer): expose appointment edit action on completed profile appointments",
-    "sections": [
-      {
-        "title": "Bug Fixes",
-        "items": [
-          "Customer profile appointment history now shows a pencil edit action beside the AP appointment badge on hover/focus, including completed appointments.",
-          "Extracted the customer appointment history list into a focused component instead of adding more UI to the oversized profile component."
-        ]
-      },
-      {
-        "title": "Testing",
-        "items": [
-          "Ran website production build for version 0.25.1.",
-          "Verified locally with Playwright that completed appointment AP208562 reveals the edit pencil on hover and opens the edit appointment modal."
+          "Add focused backend import helper tests",
+          "Add frontend sale order line date mapping tests"
         ]
       }
     ]

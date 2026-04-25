@@ -137,7 +137,7 @@ export function ServiceHistory({
               const resAmt = svc.residual ?? Math.max(0, svc.cost - paidAmt);
               const hasPayment = relatedPayments.length > 0;
               const canPay = !!onPayForService && svc.status !== 'cancelled' && resAmt > 0;
-              const paidPct = svc.cost > 0 ? Math.min(100, Math.max(0, paidAmt / svc.cost * 100)) : 0;
+              const paidPct = svc.cost > 0 ? Math.min(100, Math.max(0, (paidAmt / svc.cost) * 100)) : 0;
 
               return (
                 <React.Fragment key={svc.id}>
@@ -190,7 +190,7 @@ export function ServiceHistory({
                                 className="absolute inset-y-0 left-0 bg-emerald-200/90"
                                 style={{
                                   width: `${paidPct}%`,
-                                  minWidth: paidPct > 0 ? '8px' : undefined,
+                                  minWidth: '8px',
                                 }}
                               />
                             )}
@@ -261,6 +261,9 @@ export function ServiceHistory({
                                         depositUsed={p.depositUsed}
                                       />
                                       {p.referenceCode && <span className="text-[10px] text-gray-500">{p.referenceCode}</span>}
+                                      {p.receiptNumber && p.receiptNumber !== p.referenceCode && (
+                                        <span className="text-[10px] text-gray-400">{p.receiptNumber}</span>
+                                      )}
                                     </div>
                                     <p className={`text-sm font-semibold ${isVoided ? 'line-through text-gray-400' : 'text-gray-900'}`}>
                                       {formatVND(p.amount)}

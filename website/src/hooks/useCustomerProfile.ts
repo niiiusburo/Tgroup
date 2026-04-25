@@ -4,7 +4,7 @@
  * @crossref:used-in[Customers]
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchPartnerById, fetchAppointments, fetchCustomerBalance, type ApiAppointment, type ApiPartner } from '@/lib/api';
 import { useTimezone } from '@/contexts/TimezoneContext';
 
@@ -29,9 +29,11 @@ export interface CustomerProfileData {
   depositBalance: number;
   outstandingBalance: number;
   salestaffid: string | null;
+  salestaffLabel?: string | null;
   cskhid: string | null;
   cskhname: string | null;
   referraluserid: string | null;
+  sourcename?: string | null;
 }
 
 export interface CustomerProfileResult {
@@ -50,6 +52,7 @@ export interface CustomerProfileResult {
 
 export function useCustomerProfile(customerId: string | null): CustomerProfileResult {
   const { formatDate: formatDateTz } = useTimezone();
+  const requestIdRef = useRef(0);
   const [profile, setProfile] = useState<CustomerProfileData | null>(null);
   const [rawPartner, setRawPartner] = useState<ApiPartner | null>(null);
   const [appointments, setAppointments] = useState<ApiAppointment[]>([]);
@@ -58,18 +61,30 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
   const [linkedCounts, setLinkedCounts] = useState({ appointments: 0, saleorders: 0, dotkhams: 0 });
 
   const fetchProfile = useCallback(async () => {
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
+
     if (!customerId) {
       setProfile(null);
       setRawPartner(null);
+      setAppointments([]);
+      setLinkedCounts({ appointments: 0, saleorders: 0, dotkhams: 0 });
+      setError(null);
+      setIsLoading(false);
       return;
     }
 
     setIsLoading(true);
     setError(null);
+    setAppointments([]);
+    setLinkedCounts({ appointments: 0, saleorders: 0, dotkhams: 0 });
+
+    const isCurrentRequest = () => requestIdRef.current === requestId;
 
     try {
       // Fetch partner details
       const partner = await fetchPartnerById(customerId);
+      if (!isCurrentRequest()) return;
 
       // Build DOB string from available fields
       const dob = [partner.birthday, partner.birthmonth, partner.birthyear]
@@ -107,9 +122,11 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         depositBalance: 0,
         outstandingBalance: 0,
         salestaffid: partner.salestaffid ?? null,
+        salestaffLabel: partner.jobtitle ?? null,
         cskhid: partner.cskhid ?? null,
         cskhname: partner.cskhname ?? null,
         referraluserid: partner.referraluserid ?? null,
+        sourcename: partner.sourcename ?? null,
       };
 
       // Fetch appointment history for this customer
@@ -127,6 +144,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
           ...apt,
           date: apt.date ? formatDateTz(apt.date, 'yyyy-MM-dd') : apt.date,
         }));
+        if (!isCurrentRequest()) return;
         setAppointments(normalized);
         profileData.totalVisits = aptRes.totalItems;
         if (normalized.length > 0) {
@@ -143,11 +161,14 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
       // Fetch deposit balance
       try {
         const balance = await fetchCustomerBalance(customerId);
+        if (!isCurrentRequest()) return;
         profileData.depositBalance = balance.depositBalance;
         profileData.outstandingBalance = balance.outstandingBalance;
       } catch {
         // Balance not available
       }
+
+      if (!isCurrentRequest()) return;
 
       // Extract linked record counts from partner API response
       setLinkedCounts({
@@ -159,10 +180,13 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
       setRawPartner(partner);
       setProfile(profileData);
     } catch (err) {
+      if (!isCurrentRequest()) return;
       setError(err instanceof Error ? err.message : 'Failed to load customer profile');
       console.error('useCustomerProfile: fetch error', err);
     } finally {
-      setIsLoading(false);
+      if (isCurrentRequest()) {
+        setIsLoading(false);
+      }
     }
   }, [customerId, formatDateTz]);
 

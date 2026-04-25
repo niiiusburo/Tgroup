@@ -146,6 +146,7 @@ export interface ApiSaleOrderLine {
   assistantname: string | null;
   companyname: string | null;
   paid_amount: string | null;
+  order_line_count: string | number | null;
 }
 
 export function fetchSaleOrderLines(params?: {
@@ -165,4 +166,3 @@ export function fetchSaleOrderLines(params?: {
     },
   });
 }
-
