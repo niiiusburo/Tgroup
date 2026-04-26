@@ -1,5 +1,33 @@
 [
   {
+    "version": "0.25.22",
+    "date": "2026-04-26",
+    "commit": "pending",
+    "highlights": "fix(customers): stabilize service records edit and delete flow",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Populate customer service edit forms from sale order fallback fields when imported line data is sparse",
+          "Add service deletion with confirmation and soft-delete backend handling",
+          "Keep overview, calendar, and customer profile labels translated instead of showing raw i18n keys"
+        ]
+      },
+      {
+        "title": "Refactor",
+        "items": [
+          "Split customer profile, service history, and customer page modules into focused files under project size limits"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add sale order line delete coverage and customer service action regression tests"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.15",
     "date": "2026-04-25",
     "commit": "pending",

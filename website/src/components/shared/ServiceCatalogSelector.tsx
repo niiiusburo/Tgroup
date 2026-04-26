@@ -8,7 +8,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { normalizeText } from '@/lib/utils';
 import type { ServiceCatalogItem } from '@/data/mockServices';
-import { APPOINTMENT_TYPE_LABELS, type AppointmentType } from '@/constants';
+import { APPOINTMENT_TYPE_I18N_KEYS, type AppointmentType } from '@/constants';
 import { formatVND } from '@/lib/formatting';
 
 interface ServiceCatalogSelectorProps {
@@ -28,13 +28,15 @@ export function ServiceCatalogSelector({
   disabled = false,
   filterCategory,
 }: ServiceCatalogSelectorProps) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'calendar']);
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const selectedItem = catalog.find((c) => c.id === selectedId);
+  const getCategoryLabel = (category: AppointmentType) =>
+    t(APPOINTMENT_TYPE_I18N_KEYS[category], { ns: 'calendar' });
 
   const filteredItems = useMemo(() => {
     let items = filterCategory
@@ -47,11 +49,11 @@ export function ServiceCatalogSelector({
         (c) =>
           normalizeText(c.name).includes(norm) ||
           normalizeText(c.description).includes(norm) ||
-          normalizeText(APPOINTMENT_TYPE_LABELS[c.category]).includes(norm),
+          normalizeText(getCategoryLabel(c.category)).includes(norm),
       );
     }
     return items;
-  }, [catalog, searchTerm, filterCategory]);
+  }, [catalog, searchTerm, filterCategory, t]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -133,7 +135,7 @@ export function ServiceCatalogSelector({
                     <span className="text-xs text-gray-400">{formatVND(item.defaultPrice)}</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
-                    <span>{APPOINTMENT_TYPE_LABELS[item.category]}</span>
+                    <span>{getCategoryLabel(item.category)}</span>
                     <span>&middot;</span>
                     <span>{item.totalVisits} {t('visitCount', 'lượt')}</span>
                     <span>&middot;</span>

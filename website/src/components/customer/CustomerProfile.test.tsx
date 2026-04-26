@@ -171,4 +171,34 @@ describe('CustomerProfile payment tab', () => {
     await waitFor(() => expect(onMakePayment).toHaveBeenCalledTimes(1));
     expect(onMakePayment.mock.calls[0][0].allocations[0].invoiceId).toBe('order-so57144');
   });
+
+  it('confirms before deleting a service row', async () => {
+    const onDeleteService = vi.fn().mockResolvedValue(undefined);
+
+    renderWithProviders(
+      <AuthProvider>
+        <CustomerProfile
+          profile={mockProfile}
+          appointments={[]}
+          services={mockServices}
+          payments={[]}
+          depositList={[]}
+          usageHistory={[]}
+          activeTab="records"
+          onBack={vi.fn()}
+          onDeleteService={onDeleteService}
+        />
+      </AuthProvider>
+    );
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'deleteTreatment' })[0]);
+
+    expect(screen.getByText('deleteTreatment')).toBeInTheDocument();
+    expect(screen.getAllByText('Cleaning')).toHaveLength(2);
+    expect(onDeleteService).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'confirmDeleteTreatment' }));
+
+    await waitFor(() => expect(onDeleteService).toHaveBeenCalledWith('s1'));
+  });
 });

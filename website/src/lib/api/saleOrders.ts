@@ -116,28 +116,54 @@ export function updateSaleOrderState(id: string, state: string) {
 
 export interface ApiSaleOrderLine {
   id: string;
-  productid: string | null;
-  productname: string | null;
-  productuomqty: string | null;
-  priceunit: string | null;
-  pricetotal: string | null;
-  pricesubtotal: string | null;
+  productid?: string | null;
+  productId?: string | null;
+  productname?: string | null;
+  productName?: string | null;
+  productuomqty?: string | null;
+  productUOMQty?: string | null;
+  priceunit?: string | null;
+  priceUnit?: string | null;
+  pricetotal?: string | null;
+  priceTotal?: string | null;
+  pricesubtotal?: string | null;
+  priceSubTotal?: string | null;
   discount: string | null;
-  amountpaid: string | null;
-  amountresidual: string | null;
+  amountpaid?: string | null;
+  amountPaid?: string | null;
+  amountresidual?: string | null;
+  amountResidual?: string | null;
   date: string | null;
+  datestart?: string | null;
+  dateend?: string | null;
   tooth_numbers: string | null;
-  toothtype: string | null;
+  tooth_comment?: string | null;
+  toothtype?: string | null;
+  toothType?: string | null;
   diagnostic: string | null;
   note: string | null;
   sequence: string | null;
   linestate: string | null;
   iscancelled: boolean | null;
-  employeeid: string | null;
-  assistantid: string | null;
-  orderid: string | null;
-  ordername: string | null;
-  ordercode: string | null;
+  employeeid?: string | null;
+  employeeId?: string | null;
+  doctorid?: string | null;
+  doctorId?: string | null;
+  assistantid?: string | null;
+  assistantId?: string | null;
+  dentalaideid?: string | null;
+  dentalAideId?: string | null;
+  companyid?: string | null;
+  companyId?: string | null;
+  sourceid?: string | null;
+  sourceId?: string | null;
+  unit?: string | null;
+  orderid?: string | null;
+  orderId?: string | null;
+  ordername?: string | null;
+  orderName?: string | null;
+  ordercode?: string | null;
+  orderCode?: string | null;
   so_amounttotal: string | null;
   so_residual: string | null;
   so_totalpaid: string | null;
@@ -165,4 +191,11 @@ export function fetchSaleOrderLines(params?: {
       sortOrder: params?.sortOrder ?? 'desc',
     },
   });
+}
+
+export function deleteSaleOrderLine(id: string) {
+  return apiFetch<{ success: boolean; id: string; orderId?: string | null; deletedOrder?: boolean }>(
+    `/SaleOrderLines/${id}`,
+    { method: 'DELETE' }
+  );
 }

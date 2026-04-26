@@ -7,6 +7,10 @@ const DB_TIMESTAMP = /^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})(?:\.(\d+))?/;
 
 type SaleOrderLineInput = Partial<ApiSaleOrderLine> & { id: string };
 
+function firstDefined<T>(...values: Array<T | null | undefined>): T | undefined {
+  return values.find((value): value is T => value !== null && value !== undefined);
+}
+
 function parseMoney(value: string | number | null | undefined): number {
   if (typeof value === "number") return Number.isFinite(value) ? value : 0;
   const parsed = Number.parseFloat(value ?? "0");
@@ -33,39 +37,47 @@ function normalizeServiceDate(value: string | null | undefined): string {
 }
 
 export function mapSaleOrderLineToCustomerService(line: SaleOrderLineInput): CustomerService {
-  const cost = parseMoney(line.pricetotal);
-  const linePaid = parseMoney(line.amountpaid);
+  const cost = parseMoney(firstDefined(line.priceTotal, line.pricetotal));
+  const linePaid = parseMoney(firstDefined(line.amountPaid, line.amountpaid));
   const backendPaid = parseMoney(line.paid_amount);
   const orderLineCount = parseCount(line.order_line_count) || 1;
   const useBackendPaymentFallback = backendPaid > linePaid && orderLineCount === 1;
   const paidAmount = useBackendPaymentFallback ? Math.min(cost, backendPaid) : linePaid;
-  const explicitResidual = parseMoney(line.so_residual ?? line.amountresidual);
+  const explicitResidual = parseMoney(
+    firstDefined(line.so_residual, line.amountResidual, line.amountresidual),
+  );
   const residual = useBackendPaymentFallback ? Math.max(0, cost - paidAmount) : explicitResidual;
+  const serviceName = firstDefined(line.productName, line.productname);
+  const tooth = firstDefined(line.tooth_numbers, line.toothType, line.toothtype, line.diagnostic);
 
   return {
     id: line.id,
-    date: normalizeServiceDate(line.date),
-    service: line.productname || "-",
+    date: normalizeServiceDate(firstDefined(line.date, line.datestart)),
+    service: serviceName || "-",
     doctor: line.doctorname || "N/A",
-    doctorId: line.employeeid || undefined,
-    assistantId: line.assistantid || undefined,
+    doctorId: firstDefined(line.employeeId, line.employeeid, line.doctorId, line.doctorid),
+    assistantId: firstDefined(line.assistantId, line.assistantid),
     assistantName: line.assistantname || undefined,
-    catalogItemId: line.productid || undefined,
+    dentalAideId: firstDefined(line.dentalAideId, line.dentalaideid),
+    catalogItemId: firstDefined(line.productId, line.productid),
     cost,
-    quantity: parseMoney(line.productuomqty) || undefined,
+    quantity: parseMoney(firstDefined(line.productUOMQty, line.productuomqty)) || undefined,
+    unit: line.unit || undefined,
     status:
       line.sostate === "done" || line.sostate === "completed"
         ? "completed"
         : line.iscancelled
           ? "cancelled"
           : "active",
-    tooth: line.tooth_numbers || line.toothtype || line.diagnostic || "-",
+    tooth: tooth || "-",
     notes: line.note || "",
-    orderId: line.orderid || undefined,
-    orderName: line.ordername || undefined,
-    orderCode: line.ordercode || undefined,
+    orderId: firstDefined(line.orderId, line.orderid),
+    orderName: firstDefined(line.orderName, line.ordername),
+    orderCode: firstDefined(line.orderCode, line.ordercode),
     paidAmount,
     residual,
+    sourceId: firstDefined(line.sourceId, line.sourceid),
+    locationId: firstDefined(line.companyId, line.companyid),
     locationName: line.companyname || undefined,
   };
 }

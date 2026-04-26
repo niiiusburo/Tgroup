@@ -1,6 +1,6 @@
 import { X, Clock, User, MapPin, Phone, FileText, Tag, Calendar, Stethoscope, Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_TYPE_LABELS, APPOINTMENT_STATUS_I18N_KEYS } from '@/constants';
+import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_TYPE_I18N_KEYS, APPOINTMENT_STATUS_I18N_KEYS } from '@/constants';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 
 /**
@@ -40,7 +40,7 @@ export function AppointmentDetailsModal({
   const statusLabel = APPOINTMENT_STATUS_I18N_KEYS[appointment.status]
     ? t(APPOINTMENT_STATUS_I18N_KEYS[appointment.status])
     : appointment.status;
-  const typeLabel = APPOINTMENT_TYPE_LABELS[appointment.appointmentType];
+  const typeLabel = t(APPOINTMENT_TYPE_I18N_KEYS[appointment.appointmentType]);
 
   return (
     <div className="modal-container">

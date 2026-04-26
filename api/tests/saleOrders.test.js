@@ -108,7 +108,7 @@ describe('GET /api/SaleOrders/lines', () => {
 
     const listQuery = query.mock.calls.find(([sql]) => sql.includes('LEFT JOIN products pr ON pr.id = sol.productid'));
     expect(listQuery?.[0]).toContain('LEFT JOIN products pr ON pr.id = sol.productid');
-    expect(listQuery?.[0]).toContain("COALESCE(NULLIF(sol.productname, ''), pr.name, NULLIF(sol.name, '')) as productname");
+    expect(listQuery?.[0]).toContain("COALESCE(NULLIF(sol.productname, ''), pr.name, NULLIF(sol.name, ''), so.name) as productname");
   });
 
   it('includes direct posted service payments when no allocation row exists', async () => {
@@ -146,5 +146,56 @@ describe('GET /api/SaleOrders/lines', () => {
     expect(listQuery?.[0]).toContain('p.service_id = so.id');
     expect(listQuery?.[0]).toContain('NOT EXISTS');
     expect(listQuery?.[0]).toContain('order_line_count');
+  });
+
+  it('falls back to sale order edit fields when imported line fields are blank', async () => {
+    query.mockImplementation(async (sql) => {
+      if (sql.includes('ip_access_settings')) {
+        return [{ mode: 'disabled' }];
+      }
+      if (sql.includes('ip_access_entries')) {
+        return [];
+      }
+      if (sql.includes('COUNT(*) as count')) {
+        return [{ count: '1' }];
+      }
+      if (sql.includes('FROM saleorderlines sol')) {
+        return [{
+          id: 'line-id',
+          orderid: 'order-id',
+          ordercode: 'SO-2026-0036',
+          productid: 'product-id',
+          productname: 'Cắt cầu răng',
+          date: '2026-04-26',
+          employeeid: 'doctor-id',
+          companyid: 'company-id',
+          unit: 'răng',
+          note: 'order note',
+        }];
+      }
+      throw new Error(`Unexpected query: ${sql}`);
+    });
+
+    const res = await request(app)
+      .get('/api/SaleOrders/lines')
+      .query({ partner_id: 'customer-id' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.items[0]).toMatchObject({
+      ordercode: 'SO-2026-0036',
+      productname: 'Cắt cầu răng',
+      date: '2026-04-26',
+      employeeid: 'doctor-id',
+      companyid: 'company-id',
+      unit: 'răng',
+      note: 'order note',
+    });
+
+    const listQuery = query.mock.calls.find(([sql]) => sql.includes('LEFT JOIN products pr ON pr.id = sol.productid'));
+    expect(listQuery?.[0]).toContain('COALESCE(sol.date, so.datestart::timestamp) as date');
+    expect(listQuery?.[0]).toContain('COALESCE(sol.employeeid, so.doctorid) as employeeid');
+    expect(listQuery?.[0]).toContain('so.companyid');
+    expect(listQuery?.[0]).toContain("COALESCE(NULLIF(NULLIF(so.unit, ''), 'services.form.unitPlaceholder'), pr.uomname) as unit");
+    expect(listQuery?.[0]).toContain("COALESCE(NULLIF(sol.note, ''), so.notes) as note");
   });
 });

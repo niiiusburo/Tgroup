@@ -210,6 +210,16 @@ export const APPOINTMENT_TYPE_COLORS: Record<
   emergency:    { bg: 'bg-orange-50',  border: 'border-orange-200',  text: 'text-orange-700',  dot: 'bg-orange-500' },
 } as const
 
+export const APPOINTMENT_TYPE_I18N_KEYS: Record<AppointmentType, string> = {
+  cleaning: 'appointmentTypes.cleaning',
+  consultation: 'appointmentTypes.consultation',
+  treatment: 'appointmentTypes.treatment',
+  surgery: 'appointmentTypes.surgery',
+  orthodontics: 'appointmentTypes.orthodontics',
+  cosmetic: 'appointmentTypes.cosmetic',
+  emergency: 'appointmentTypes.emergency',
+} as const
+
 export const APPOINTMENT_TYPE_LABELS: Record<AppointmentType, string> = {
   cleaning: 'calendar.appointmentTypes.cleaning',
   consultation: 'calendar.appointmentTypes.consultation',

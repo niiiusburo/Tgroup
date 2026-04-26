@@ -11,6 +11,15 @@ const HOSOONLINE_API_KEY = process.env.HOSOONLINE_API_KEY || null;
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+function emptyCheckups(customerCode, patientName, source = 'hosoonline-unavailable') {
+  return {
+    patientCode: customerCode,
+    patientName,
+    source,
+    checkups: [],
+  };
+}
+
 async function getLocalPartner(customerCode) {
   let partner = null;
   try {
@@ -49,13 +58,7 @@ async function searchHosoPatientByCode(code) {
 }
 
 async function resolveHosoPatientCode(customerCode) {
-  // Try direct first
-  let testRes = await fetch(
-    `${HOSOONLINE_BASE_URL}/api/patients/${encodeURIComponent(customerCode)}/health-checkups`,
-    { method: 'HEAD', headers: { 'X-API-Key': HOSOONLINE_API_KEY } }
-  );
-  // Since HEAD might not be supported, just try a lightweight GET
-  testRes = await fetch(
+  const testRes = await fetch(
     `${HOSOONLINE_BASE_URL}/api/patients/${encodeURIComponent(customerCode)}/health-checkups`,
     { headers: { 'X-API-Key': HOSOONLINE_API_KEY } }
   );
@@ -86,12 +89,7 @@ router.get('/:customerCode', requireAuth, requirePermission('external_checkups.v
     const customerName = partner?.name || 'Unknown';
 
     if (!HOSOONLINE_API_KEY) {
-      return res.status(503).json({
-        error: 'Hosoonline API key not configured',
-        patientCode: customerCode,
-        patientName: customerName,
-        checkups: [],
-      });
+      return res.json(emptyCheckups(customerCode, customerName, 'hosoonline-not-configured'));
     }
 
     const hosoCode = await resolveHosoPatientCode(customerCode);
@@ -102,11 +100,11 @@ router.get('/:customerCode', requireAuth, requirePermission('external_checkups.v
 
     if (!hosoRes.ok) {
       const text = await hosoRes.text().catch(() => 'Unknown error');
-      return res.status(hosoRes.status).json({
-        error: 'hosoonline request failed',
+      console.warn('ExternalCheckups hosoonline unavailable:', {
         status: hosoRes.status,
-        detail: text,
+        detail: text.slice(0, 200),
       });
+      return res.json(emptyCheckups(hosoCode, customerName));
     }
 
     const hosoData = await hosoRes.json();
@@ -118,7 +116,8 @@ router.get('/:customerCode', requireAuth, requirePermission('external_checkups.v
     });
   } catch (error) {
     console.error('ExternalCheckups error:', error);
-    res.status(500).json({ error: 'Failed to fetch external checkups' });
+    const customerCode = req.params.customerCode;
+    res.json(emptyCheckups(customerCode, 'Unknown'));
   }
 });
 

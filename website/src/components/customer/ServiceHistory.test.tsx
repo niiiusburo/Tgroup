@@ -76,6 +76,21 @@ describe('ServiceHistory payment history', () => {
     expect(onPayForService).toHaveBeenCalledWith(mockServices[0]);
   });
 
+  it('renders a delete action for service rows', () => {
+    const onDeleteService = vi.fn();
+
+    render(
+      <ServiceHistory
+        services={mockServices}
+        onDeleteService={onDeleteService}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'deleteTreatment' }));
+
+    expect(onDeleteService).toHaveBeenCalledWith(mockServices[0]);
+  });
+
   it('derives residual from the displayed paid amount when imported residual is stale', () => {
     render(
       <ServiceHistory

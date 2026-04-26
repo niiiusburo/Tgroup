@@ -180,9 +180,9 @@ router.get('/lines', async (req, res) => {
     const limitNum = Math.min(parseInt(limit, 10), 500);
 
     const allowedSortFields = {
-      date: 'sol.date',
-      productname: 'sol.productname',
-      pricetotal: 'sol.pricetotal',
+      date: 'COALESCE(sol.date, so.datestart::timestamp)',
+      productname: "COALESCE(NULLIF(sol.productname, ''), pr.name, NULLIF(sol.name, ''), so.name)",
+      pricetotal: 'COALESCE(sol.pricetotal, so.amounttotal)',
       datecreated: 'sol.datecreated',
     };
 
@@ -193,24 +193,31 @@ router.get('/lines', async (req, res) => {
       `SELECT
         sol.id,
         sol.productid,
-        COALESCE(NULLIF(sol.productname, ''), pr.name, NULLIF(sol.name, '')) as productname,
-        sol.productuomqty,
+        COALESCE(NULLIF(sol.productname, ''), pr.name, NULLIF(sol.name, ''), so.name) as productname,
+        COALESCE(sol.productuomqty, so.quantity) as productuomqty,
         sol.priceunit,
-        sol.pricetotal,
+        COALESCE(sol.pricetotal, so.amounttotal) as pricetotal,
         sol.pricesubtotal,
         sol.discount,
-        sol.amountpaid,
-        sol.amountresidual,
-        sol.date,
+        COALESCE(sol.amountpaid, so.totalpaid) as amountpaid,
+        COALESCE(sol.amountresidual, so.residual) as amountresidual,
+        COALESCE(sol.date, so.datestart::timestamp) as date,
+        so.datestart,
+        so.dateend,
         sol.tooth_numbers,
+        sol.tooth_comment,
         sol.toothtype,
         sol.diagnostic,
-        sol.note,
+        COALESCE(NULLIF(sol.note, ''), so.notes) as note,
         sol.sequence,
         sol.state as linestate,
         sol.iscancelled,
-        sol.employeeid,
-        sol.assistantid,
+        COALESCE(sol.employeeid, so.doctorid) as employeeid,
+        COALESCE(sol.assistantid, so.assistantid) as assistantid,
+        so.dentalaideid,
+        so.companyid,
+        so.sourceid,
+        COALESCE(NULLIF(NULLIF(so.unit, ''), 'services.form.unitPlaceholder'), pr.uomname) as unit,
         so.id as orderid,
         so.name as ordername,
         so.code as ordercode,
@@ -226,8 +233,8 @@ router.get('/lines', async (req, res) => {
       FROM saleorderlines sol
       JOIN saleorders so ON so.id = sol.orderid
       LEFT JOIN products pr ON pr.id = sol.productid
-      LEFT JOIN employees doc ON doc.id = sol.employeeid
-      LEFT JOIN employees asst ON asst.id = sol.assistantid
+      LEFT JOIN employees doc ON doc.id = COALESCE(sol.employeeid, so.doctorid)
+      LEFT JOIN employees asst ON asst.id = COALESCE(sol.assistantid, so.assistantid)
       LEFT JOIN companies c ON c.id = so.companyid
       LEFT JOIN (
         SELECT orderid, COUNT(*) as order_line_count
