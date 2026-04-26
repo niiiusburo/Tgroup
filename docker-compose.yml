@@ -34,6 +34,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       PORT: "3002"
       NODE_ENV: production
+      TZ: Asia/Ho_Chi_Minh
       GOOGLE_PLACES_API_KEY: ${GOOGLE_PLACES_API_KEY}
       HOSOONLINE_BASE_URL: ${HOSOONLINE_BASE_URL:-https://hosoonline.com}
       HOSOONLINE_API_KEY: ${HOSOONLINE_API_KEY}
