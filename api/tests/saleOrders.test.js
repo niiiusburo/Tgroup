@@ -109,6 +109,7 @@ describe('GET /api/SaleOrders/lines', () => {
     const listQuery = query.mock.calls.find(([sql]) => sql.includes('LEFT JOIN products pr ON pr.id = sol.productid'));
     expect(listQuery?.[0]).toContain('LEFT JOIN products pr ON pr.id = sol.productid');
     expect(listQuery?.[0]).toContain("COALESCE(NULLIF(sol.productname, ''), pr.name, NULLIF(sol.name, ''), so.name) as productname");
+    expect(listQuery?.[0]).toContain('so.code ASC NULLS LAST, sol.sequence ASC NULLS LAST, sol.id ASC');
   });
 
   it('includes direct posted service payments when no allocation row exists', async () => {

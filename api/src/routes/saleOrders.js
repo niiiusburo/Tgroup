@@ -260,7 +260,7 @@ router.get('/lines', async (req, res) => {
           )
       ) dp ON true
       WHERE so.partnerid = $1 AND so.isdeleted = false AND sol.isdeleted = false
-      ORDER BY ${orderByCol} ${orderDir} NULLS LAST
+      ORDER BY ${orderByCol} ${orderDir} NULLS LAST, so.code ASC NULLS LAST, sol.sequence ASC NULLS LAST, sol.id ASC
       LIMIT $2 OFFSET $3`,
       [partner_id, limitNum, offsetNum]
     );
