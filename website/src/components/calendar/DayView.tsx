@@ -1,16 +1,9 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTimezone } from '@/contexts/TimezoneContext';
-import { Phone, User, Users, Clock } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { type CalendarAppointment } from '@/data/mockCalendar';
-import { APPOINTMENT_CARD_COLORS } from '@/constants';
-import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
-import { MedicalHistoryTooltip } from './MedicalHistoryTooltip';
-import { calendarStatusToPhase, PHASE_LABEL_KEYS, PHASE_STYLES } from '@/lib/appointmentStatusMapping';
-import { StatusBadgeMenu } from './StatusBadgeMenu';
-import { CheckInActions } from './CheckInActions';
 import { EmptyTimeSlot } from './EmptyTimeSlot';
+import { DayAppointmentCard } from './DayAppointmentCard';
 
 /**
  * DayView Component - 27-slot hourly rail for a single day
@@ -35,142 +28,10 @@ interface DayViewProps {
   readonly onCreateAppointment?: (date: string, startTime: string) => void;
 }
 
-// Color mapping uses SINGLE SOURCE OF TRUTH from constants
-function getCardColor(color: string | null | undefined) {
-  if (color && APPOINTMENT_CARD_COLORS[color]) {
-    return APPOINTMENT_CARD_COLORS[color];
-  }
-  return APPOINTMENT_CARD_COLORS['0'];
-}
-
 const SLOTS: string[] = [];
 for (let h = 7; h <= 20; h++) {
   SLOTS.push(`${String(h).padStart(2, '0')}:00`);
   if (h !== 20) SLOTS.push(`${String(h).padStart(2, '0')}:30`);
-}
-
-// ── Appointment Card ─────────────────────────────────────────────
-
-interface DayCardProps {
-  readonly appointment: CalendarAppointment;
-  readonly onClick?: (apt: CalendarAppointment) => void;
-  readonly onEdit?: (apt: CalendarAppointment) => void;
-  readonly onMarkArrived?: (id: string) => void;
-  readonly onUpdateStatus?: (id: string, phase: import('@/lib/appointmentStatusMapping').CalendarPhase) => void;
-}
-
-function DayCard({ appointment, onClick, onEdit, onMarkArrived, onUpdateStatus }: DayCardProps) {
-  const { t } = useTranslation('appointments');
-  const phase = calendarStatusToPhase(appointment.status);
-  const styles = PHASE_STYLES[phase];
-  const colors = getCardColor(appointment.color);
-
-  return (
-    <div
-      onClick={() => onClick?.(appointment)}
-      className={cn(
-        'group relative w-full text-left rounded-lg p-2.5 border-l-4 shadow-sm cursor-pointer',
-        'hover:shadow-md transition-shadow text-xs mb-2',
-        colors.bg,
-        colors.dot
-      )}
-    >
-      {/* Header row: badge + actions */}
-      <div className="flex items-start justify-between gap-1 mb-1">
-        {phase === 'scheduled' ? (
-          <span
-            className={cn(
-              'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border',
-              styles.bg,
-              styles.text,
-              styles.border
-            )}
-          >
-            {t(PHASE_LABEL_KEYS[phase], { ns: 'appointments' })}
-          </span>
-        ) : (
-          <StatusBadgeMenu
-            phase={phase}
-            arrivalTime={appointment.arrivalTime}
-            treatmentStartTime={appointment.treatmentStartTime}
-            onPhaseChange={(p) => onUpdateStatus?.(appointment.id, p)}
-          />
-        )}
-
-        {phase === 'scheduled' && onMarkArrived && onUpdateStatus && (
-          <CheckInActions
-            onCheckIn={() => onMarkArrived(appointment.id)}
-            onCancel={() => onUpdateStatus(appointment.id, 'cancelled')}
-          />
-        )}
-      </div>
-
-      {/* Customer name */}
-      <h5 className="font-semibold text-gray-900 text-xs mb-1.5 break-words">
-        <MedicalHistoryTooltip customerId={appointment.customerId} customerName={appointment.customerName}>
-          <CustomerNameLink customerId={appointment.customerId}>{appointment.customerName}</CustomerNameLink>
-        </MedicalHistoryTooltip>
-      </h5>
-
-      {/* Details grid */}
-      <div className="space-y-1">
-        {/* Phone */}
-        <div className="flex items-start gap-1 text-[11px] text-gray-600">
-          <Phone className="w-3 h-3 text-gray-400 shrink-0 mt-0.5" />
-          <span className="break-words">{appointment.customerPhone || '---'}</span>
-        </div>
-
-        {/* Doctor */}
-        <div className="flex items-start gap-1 text-[11px] text-gray-600">
-          <User className="w-3 h-3 text-gray-400 shrink-0 mt-0.5" />
-          <span className="break-words">{appointment.dentist}</span>
-        </div>
-
-        {/* Assistant */}
-        {appointment.assistantName && (
-          <div className="flex items-start gap-1 text-[11px] text-gray-600">
-            <Users className="w-3 h-3 text-gray-400 shrink-0 mt-0.5" />
-            <span className="break-words">{appointment.assistantName}</span>
-          </div>
-        )}
-
-        {/* Dental Aide */}
-        {appointment.dentalAideName && (
-          <div className="flex items-start gap-1 text-[11px] text-gray-600">
-            <Users className="w-3 h-3 text-gray-400 shrink-0 mt-0.5" />
-            <span className="break-words">{appointment.dentalAideName}</span>
-          </div>
-        )}
-
-        {/* Time */}
-        <div className="flex items-start gap-1 text-[11px] text-gray-600">
-          <Clock className="w-3 h-3 text-gray-400 shrink-0 mt-0.5" />
-          <span className="break-words">{appointment.startTime} - {appointment.endTime}</span>
-        </div>
-      </div>
-
-      {/* Notes at bottom - only if exists */}
-      {appointment.notes && (
-        <p className="text-[10px] text-gray-400 mt-1.5 pt-1.5 border-t border-gray-200/50 break-words font-medium">
-          {appointment.notes}
-        </p>
-      )}
-
-      {/* Edit button on hover */}
-      {onEdit && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit(appointment);
-          }}
-          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-blue-600"
-        >
-          ✎
-        </button>
-      )}
-    </div>
-  );
 }
 
 // ── Main DayView ─────────────────────────────────────────────────
@@ -244,7 +105,7 @@ export function DayView({
                     style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))' }}
                   >
                     {slotAppointments.map((apt) => (
-                      <DayCard
+                      <DayAppointmentCard
                         key={apt.id}
                         appointment={apt}
                         onClick={onAppointmentClick}

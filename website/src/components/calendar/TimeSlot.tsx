@@ -1,6 +1,7 @@
 import { APPOINTMENT_TYPE_COLORS } from '@/constants';
 import { STATUS_DOT_COLORS, type CalendarAppointment } from '@/data/mockCalendar';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
+import { formatAppointmentStartDuration } from '@/lib/appointmentDuration';
 
 /**
  * TimeSlot Component - displays a time slot with optional appointments
@@ -54,6 +55,7 @@ interface AppointmentBlockProps {
 function AppointmentBlock({ appointment }: AppointmentBlockProps) {
   const dotColor = STATUS_DOT_COLORS[appointment.status];
   const typeColors = APPOINTMENT_TYPE_COLORS[appointment.appointmentType];
+  const timeLabel = formatAppointmentStartDuration(appointment.startTime, appointment.timeexpected);
 
   return (
     <div className={`${typeColors.bg} border ${typeColors.border} rounded-lg px-3 py-2 mb-1 cursor-pointer hover:shadow-card transition-shadow`}>
@@ -65,7 +67,7 @@ function AppointmentBlock({ appointment }: AppointmentBlockProps) {
       </div>
       <div className="ml-4 mt-0.5">
         <p className="text-xs text-gray-500">
-          {appointment.startTime} - {appointment.endTime} &middot; {appointment.serviceName}
+          {timeLabel} &middot; {appointment.serviceName}
         </p>
         <p className="text-xs text-gray-400">{appointment.dentist}</p>
       </div>

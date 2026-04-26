@@ -40,7 +40,7 @@ export const FORM_DATA_FIELDS = [
   'dentalAideId', 'dentalAideName',
   'locationId', 'locationName',
   'appointmentType', 'serviceName', 'serviceId',
-  'date', 'startTime', 'endTime',
+  'date', 'startTime',
   'notes', 'estimatedDuration', 'color', 'status', 'customerType',
 ] as const;
 
@@ -99,7 +99,7 @@ export function guardFormDataShape(
   }
 
   const record = data as Record<string, unknown>;
-  const required = ['customerId', 'locationId', 'date', 'startTime', 'endTime'];
+  const required = ['customerId', 'locationId', 'date', 'startTime'];
   for (const key of required) {
     if (!record[key]) {
       throw new AppointmentShapeError(`Missing required form field: ${key}`);

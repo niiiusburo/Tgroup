@@ -2,6 +2,7 @@ import { Clock, User, MapPin } from 'lucide-react';
 import type { CalendarAppointment } from '@/data/mockCalendar';
 import { STATUS_BADGE_STYLES } from '@/data/mockCalendar';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
+import { formatAppointmentDuration } from '@/lib/appointmentDuration';
 
 /**
  * TodaySchedule - Appointment timeline for today
@@ -47,7 +48,7 @@ export function TodaySchedule({
                 <div className="text-sm font-semibold text-gray-900">
                   {apt.startTime}
                 </div>
-                <div className="text-[11px] text-gray-400">{apt.endTime}</div>
+                <div className="text-[11px] text-gray-400">{formatAppointmentDuration(apt.timeexpected)}</div>
               </div>
 
               {/* Divider */}

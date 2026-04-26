@@ -17,6 +17,7 @@ import { MedicalHistoryTooltip } from './MedicalHistoryTooltip';
 import { calendarStatusToPhase, PHASE_LABEL_KEYS, PHASE_STYLES } from '@/lib/appointmentStatusMapping';
 import { StatusBadgeMenu } from './StatusBadgeMenu';
 import { CheckInActions } from './CheckInActions';
+import { formatAppointmentStartDuration } from '@/lib/appointmentDuration';
 
 interface WeekViewProps {
   readonly weekDates: readonly Date[];
@@ -71,6 +72,11 @@ function AppointmentCard({
   const phase = calendarStatusToPhase(appointment.status);
   const styles = PHASE_STYLES[phase];
   const cardStyles = getCardStyles(appointment);
+  const timeLabel = formatAppointmentStartDuration(
+    appointment.startTime,
+    appointment.timeexpected,
+    t('common.minutes'),
+  );
 
   return (
     <div
@@ -151,7 +157,7 @@ function AppointmentCard({
         {/* Time */}
         <div className="flex items-center gap-1 text-[11px] text-gray-600">
           <Clock className="w-3 h-3 text-gray-400" />
-          <span>{appointment.startTime} - {appointment.endTime}</span>
+          <span>{timeLabel}</span>
         </div>
       </div>
 

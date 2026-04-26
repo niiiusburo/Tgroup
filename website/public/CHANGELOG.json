@@ -1,22 +1,22 @@
 [
   {
-    "version": "0.25.25",
+    "version": "0.25.28",
     "date": "2026-04-26",
     "commit": "pending",
-    "highlights": "style(customers): align appointment and service history views",
+    "highlights": "fix(appointments): align duration controls and service quantity badges",
     "sections": [
       {
         "title": "Improvements",
         "items": [
-          "Render appointment history as a date-first table matching the service history layout",
-          "Share compact date badges across appointment and service rows",
-          "Show appointment reason, time, team, and status in dedicated columns"
+          "Use CSV-backed appointment start times with duration instead of an end-time field",
+          "Render appointment duration as preset minute choices from 10 through 120 minutes",
+          "Show tooth and manual service badges inside the quantity column next to the service count"
         ]
       },
       {
         "title": "Testing",
         "items": [
-          "Verify local customer record appointment and service tabs on desktop and mobile viewports",
+          "Verify appointment duration mapping, guard behavior, and dropdown rendering with focused tests",
           "Run focused ServiceHistory tests and the production website build"
         ]
       }

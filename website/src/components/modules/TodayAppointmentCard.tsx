@@ -5,6 +5,7 @@ import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
 import { useAppointmentHover } from '@/contexts/AppointmentHoverContext';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
+import { formatAppointmentStartDuration } from '@/lib/appointmentDuration';
 
 interface AppointmentCardProps {
   readonly appointment: OverviewAppointment;
@@ -50,6 +51,11 @@ export function AppointmentCard({
     : isCancelled
       ? t('stats.cancelled')
       : t('stats.pending');
+  const timeLabel = formatAppointmentStartDuration(
+    appointment.time,
+    appointment.timeexpected,
+    t('common.minutes', { ns: 'appointments' }),
+  );
 
   return (
     <div
@@ -129,7 +135,7 @@ export function AppointmentCard({
           <div className="flex items-center gap-3 text-xs text-gray-600">
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3 text-blue-500" />
-              {appointment.time}
+              {timeLabel}
             </span>
             <span className="flex items-center gap-1 text-blue-600 font-semibold">
               <Phone className="w-3 h-3" />

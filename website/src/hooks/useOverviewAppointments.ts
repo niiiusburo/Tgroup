@@ -30,6 +30,7 @@ export interface OverviewAppointment {
   readonly locationId: string;
   readonly locationName: string;
   readonly note: string;
+  readonly timeexpected: number | null;
   readonly topStatus: AppointmentTopStatus;
   readonly checkInStatus: CheckInStatus | null; // null until arrived
   readonly color: string | null; // color code 0-7 from database
@@ -123,6 +124,7 @@ function mapApiToOverview(
     locationId: apt.companyid || '',
     locationName: apt.companyname || '',
     note: apt.note || '',
+    timeexpected: apt.timeexpected ?? apt.timeExpected ?? null,
     topStatus,
     checkInStatus,
     color: apt.color,

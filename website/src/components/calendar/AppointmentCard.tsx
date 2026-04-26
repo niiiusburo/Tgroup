@@ -1,8 +1,10 @@
 import { Clock, User, Pencil } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_CARD_COLORS } from '@/constants';
 import { STATUS_DOT_COLORS, type CalendarAppointment } from '@/data/mockCalendar';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import { MedicalHistoryTooltip } from './MedicalHistoryTooltip';
+import { formatAppointmentStartDuration } from '@/lib/appointmentDuration';
 
 /**
  * AppointmentCard - Compact appointment summary card
@@ -31,8 +33,14 @@ export function AppointmentCard({
   draggable = false,
   onDragStart,
 }: AppointmentCardProps) {
+  const { t } = useTranslation();
   const typeColors = APPOINTMENT_TYPE_COLORS[appointment.appointmentType];
   const statusDot = STATUS_DOT_COLORS[appointment.status];
+  const timeLabel = formatAppointmentStartDuration(
+    appointment.startTime,
+    appointment.timeexpected,
+    t('appointments:common.minutes'),
+  );
   
   // Use appointment color if set, otherwise fall back to type-based colors
   const colorStyles = appointment.color && APPOINTMENT_CARD_COLORS[appointment.color]
@@ -107,7 +115,7 @@ export function AppointmentCard({
         <div className="ml-4 mt-1 space-y-0.5">
           <div className="flex items-center gap-1 text-xs text-gray-500">
             <Clock className="w-3 h-3" />
-            <span>{appointment.startTime} - {appointment.endTime}</span>
+            <span>{timeLabel}</span>
             <span className="mx-1">&middot;</span>
             <span className="truncate">{appointment.serviceName}</span>
           </div>

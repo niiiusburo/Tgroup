@@ -42,9 +42,8 @@ export interface UnifiedAppointmentFormData {
   readonly serviceId?: string;             // FK to products.id
   readonly date: string;                   // YYYY-MM-DD
   readonly startTime: string;              // HH:MM
-  readonly endTime: string;                // HH:MM (calculated from startTime + duration)
   readonly notes: string;
-  readonly estimatedDuration?: number;     // minutes, default 30
+  readonly estimatedDuration?: number;     // maps to dbo.appointments.timeexpected
   readonly color?: string;                 // '0'-'7', default '1'
   readonly status?: 'scheduled' | 'arrived' | 'cancelled'; // UI status (edit only)
   readonly customerType?: 'new' | 'returning';

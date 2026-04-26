@@ -2,6 +2,7 @@ import { X, Clock, User, MapPin, Phone, FileText, Tag, Calendar, Stethoscope, Pe
 import { useTranslation } from 'react-i18next';
 import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_TYPE_I18N_KEYS, APPOINTMENT_STATUS_I18N_KEYS } from '@/constants';
 import { type CalendarAppointment } from '@/data/mockCalendar';
+import { formatAppointmentStartDuration } from '@/lib/appointmentDuration';
 
 /**
  * AppointmentDetailsModal - Full appointment info overlay
@@ -41,6 +42,11 @@ export function AppointmentDetailsModal({
     ? t(APPOINTMENT_STATUS_I18N_KEYS[appointment.status])
     : appointment.status;
   const typeLabel = t(APPOINTMENT_TYPE_I18N_KEYS[appointment.appointmentType]);
+  const timeLabel = formatAppointmentStartDuration(
+    appointment.startTime,
+    appointment.timeexpected,
+    t('appointments:common.minutes'),
+  );
 
   return (
     <div className="modal-container">
@@ -111,7 +117,7 @@ export function AppointmentDetailsModal({
               {appointment.date}
             </DetailRow>
             <DetailRow icon={<Clock className="w-3.5 h-3.5" />} label={t('appointmentDetails.time')}>
-              {appointment.startTime} - {appointment.endTime}
+              {timeLabel}
             </DetailRow>
           </div>
 

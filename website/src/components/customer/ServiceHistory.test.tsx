@@ -11,6 +11,7 @@ const mockServices: CustomerService[] = [
     service: 'Cleaning',
     doctor: 'Dr A',
     cost: 2000000,
+    quantity: 2,
     paidAmount: 1500000,
     residual: 500000,
     status: 'completed',
@@ -52,11 +53,14 @@ const mockPayments: PaymentWithAllocations[] = [
 ];
 
 describe('ServiceHistory payment history', () => {
-  it('renders the tooth marker and tooth value in the diagnosis column', () => {
+  it('renders the tooth marker next to the quantity value', () => {
     render(<ServiceHistory services={mockServices} />);
 
-    expect(screen.getAllByLabelText('Tooth')).toHaveLength(2);
-    expect(screen.getByText('manual')).toBeInTheDocument();
+    expect(screen.getAllByLabelText('Tooth')).toHaveLength(1);
+    expect(screen.queryByText('Răng & chẩn đoán')).not.toBeInTheDocument();
+
+    const quantityCell = screen.getByText('2').closest('td');
+    expect(quantityCell).toContainElement(screen.getByText('manual'));
   });
 
   it('shows an orange pay pill with progress fill for services that still have residual debt', () => {

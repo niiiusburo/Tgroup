@@ -18,10 +18,9 @@ import type {
 } from './appointmentForm.types';
 import { formDataToApiPayload } from './appointmentForm.mapper';
 import { createAppointment, updateAppointment } from '@/lib/api';
-import { calculateEndTime } from '@/lib/calendarUtils';
+import { DEFAULT_APPOINTMENT_DURATION } from '@/lib/appointmentDuration';
 import { getTodayInTimezone } from '@/lib/dateUtils';
 
-const DEFAULT_DURATION = 30;
 const DEFAULT_COLOR = '1';
 
 function makeEmptyData(): UnifiedAppointmentFormData {
@@ -42,9 +41,8 @@ function makeEmptyData(): UnifiedAppointmentFormData {
     serviceId: undefined,
     date: getTodayInTimezone('Asia/Ho_Chi_Minh'),
     startTime: '09:00',
-    endTime: calculateEndTime('09:00', DEFAULT_DURATION),
     notes: '',
-    estimatedDuration: DEFAULT_DURATION,
+    estimatedDuration: DEFAULT_APPOINTMENT_DURATION,
     color: DEFAULT_COLOR,
     status: 'scheduled',
     customerType: 'returning',
@@ -59,12 +57,6 @@ function mergeWithDefaults(
   return {
     ...empty,
     ...partial,
-    endTime:
-      partial.endTime ??
-      calculateEndTime(
-        partial.startTime ?? empty.startTime,
-        partial.estimatedDuration ?? empty.estimatedDuration,
-      ),
   };
 }
 
@@ -95,16 +87,7 @@ export function useAppointmentForm(
 
   const handleChange = useCallback((patch: Partial<UnifiedAppointmentFormData>) => {
     setData((prev) => {
-      const next = { ...prev, ...patch };
-
-      // Auto-calculate endTime when startTime or duration changes
-      if (patch.startTime !== undefined || patch.estimatedDuration !== undefined) {
-        const start = patch.startTime ?? next.startTime;
-        const duration = patch.estimatedDuration ?? next.estimatedDuration ?? DEFAULT_DURATION;
-        next.endTime = calculateEndTime(start, duration);
-      }
-
-      return next;
+      return { ...prev, ...patch };
     });
 
     // Clear error for changed field
@@ -127,21 +110,10 @@ export function useAppointmentForm(
     if (!data.locationId) nextErrors.locationId = 'Location is required';
     if (!data.date) nextErrors.date = 'Date is required';
     if (!data.startTime) nextErrors.startTime = 'Start time is required';
-    if (!data.endTime) nextErrors.endTime = 'End time is required';
 
-    // Duration must be positive
-    const duration = data.estimatedDuration ?? DEFAULT_DURATION;
+    const duration = data.estimatedDuration ?? DEFAULT_APPOINTMENT_DURATION;
     if (duration < 1 || duration > 480) {
       nextErrors.estimatedDuration = 'Duration must be between 1 and 480 minutes';
-    }
-
-    // Time logic: end must be after start
-    if (data.startTime && data.endTime) {
-      const [startH, startM] = data.startTime.split(':').map(Number);
-      const [endH, endM] = data.endTime.split(':').map(Number);
-      if (endH * 60 + endM <= startH * 60 + startM) {
-        nextErrors.endTime = 'End time must be after start time';
-      }
     }
 
     setErrors(nextErrors);

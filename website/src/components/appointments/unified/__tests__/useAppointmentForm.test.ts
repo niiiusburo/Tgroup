@@ -88,4 +88,34 @@ describe('useAppointmentForm validation', () => {
     expect(mockCreateAppointment).toHaveBeenCalledTimes(1);
     expect(onSuccess).toHaveBeenCalled();
   });
+
+  it('should submit from database duration without requiring an end time', async () => {
+    mockCreateAppointment.mockResolvedValue({ id: 'new-id' });
+    const { result } = renderHook(() => useAppointmentForm('create'));
+
+    act(() => {
+      result.current.handleChange({
+        customerId: '550e8400-e29b-41d4-a716-446655440000',
+        customerName: 'Test',
+        locationId: '770e8400-e29b-41d4-a716-446655440002',
+        locationName: 'Clinic',
+        date: '2026-04-21',
+        startTime: '09:00',
+        estimatedDuration: 45,
+      });
+    });
+
+    await act(async () => {
+      await result.current.handleSubmit();
+    });
+
+    expect(mockCreateAppointment).toHaveBeenCalledTimes(1);
+    expect(mockCreateAppointment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        time: '09:00',
+        timeexpected: 45,
+      }),
+    );
+    expect(result.current.errors.endTime).toBeUndefined();
+  });
 });

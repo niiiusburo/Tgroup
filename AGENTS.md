@@ -179,77 +179,65 @@ Expert skills are installed in `website/.agents/skills/`. Available skill catego
 <claude-mem-context>
 # Memory Context
 
-# [Tgroup] recent context, 2026-04-25 12:23pm GMT+7
+# [Tgrouptest] recent context, 2026-04-26 11:56pm GMT+7
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
 Format: ID TIME TYPE TITLE
 Fetch details: get_observations([IDs]) | Search: mem-search skill
 
-Stats: 50 obs (21,223t read) | 958,805t work | 98% savings
+Stats: 50 obs (19,417t read) | 633,602t work | 97% savings
 
-### Apr 18, 2026
-S4362 Fix customer source field being dropped during service create/edit and restore missing label (Apr 18 at 8:33 AM)
-S4363 Verify sourceId end-to-end functionality and identify deployment gap between code and running container (Apr 18 at 8:37 AM)
-S4364 Generated shareable usage insights report from Claude Code session data (Apr 18 at 8:40 AM)
-S4366 Review and refine proposed additions to global CLAUDE.md based on usage insights (Apr 18 at 8:43 AM)
-S4367 Fix bug where saved customer source (sourceId) appears blank when reopening Edit Service form from CustomerProfile (Apr 18 at 8:51 AM)
-S4382 Investigate Claude hook configuration showing 21 tools loading on every prompt and identify source of verbose context messages (Apr 18 at 9:03 AM)
-S4385 Investigate Claude hook configuration showing 21 tools loading and identify source of verbose context messages (Apr 18 at 10:37 AM)
-S4387 Investigate and optimize Claude hook configuration showing 21 tools loading and excessive hook execution (Apr 18 at 10:39 AM)
-S4394 Documentation refactoring: Split CLAUDE.md into modular context files and clean up unused language rules (Apr 18 at 10:41 AM)
-S4397 Commit and deploy CLAUDE.md documentation refactoring with modular context files (Apr 18 at 11:54 AM)
-### Apr 24, 2026
-10105 6:02p 🔵 Appointments page does not exist despite domain map listing it
-10106 6:03p 🔵 Only appointment page file is ReportsAppointments for analytics
-10107 " 🔵 Appointment CRUD uses unified modal component across multiple surfaces
-10162 10:24p 🔵 TGClinic modal forms use unified FormShell pattern with consistent scroll and dropdown architecture
-10163 10:26p 🔵 AppointmentFormShell dropdown scroll conflict - non-portaled absolute menus inside overflow container
-10164 " 🔵 TGClinic has three competing modal architectures and inconsistent dropdown z-index layering strategy
-10165 " 🔵 AddCustomerForm implements wheel event stopPropagation workaround - not applied to AppointmentFormShell
-### Apr 25, 2026
-10211 7:54a 🔵 Customer treatment and payment record investigation
-10212 " 🔵 Tdental database schema and volume baseline
-10213 7:55a 🔵 Schema divergence between tdental_demo and tdental_real databases
-10214 " 🔵 Production database scale is 1000x larger than demo environment
-10215 " 🔵 Payment tracking inconsistency discovered in demo database
-10216 " 🔵 Demo and production databases contain divergent data for same customers
-10217 7:56a 🔵 Payment data model divergence between demo and production databases
-10218 " 🔵 SQL CTE scope limitation breaks multi-statement queries in single psql invocation
-10219 " 🔴 Corrected payment aggregation query eliminating false 6.4M vs 4.7M discrepancy
-10220 7:57a 🔵 Migration infrastructure uses PostgreSQL dblink for cross-database data synchronization
-10221 " 🔵 customersources table exists in demo but missing from production database
-10222 " 🔴 Deposit balance double-counting bug fixed via payment_allocations exclusion guard
-10223 7:58a 🔵 PostgreSQL cross-database references not supported blocking direct demo-production comparison queries
-10224 " 🔵 Saleorder state divergence confirmed between demo and production for shared customer records
-10225 " 🔵 Production contains 6 additional recent dotkhams for customer T8440 missing from demo database
-10226 7:59a 🔵 Application uses dual payment tracking architecture for cash flow vs revenue recognition
-10227 8:08a 🔵 Production database contains duplicate customer ref T8250 assigned to two different customers
-10228 8:10a 🔵 Demo database contains incomplete appointment data for PHAN LÊ MINH
-10229 8:12a 🔵 Customer profile appointments filtered by single partnerId, not by name similarity
-10230 8:13a 🟣 Added failing test for stale appointment clearing when switching customers
-10231 " 🔴 Fixed stale appointment display when switching customers using request ID tracking
-10232 8:14a 🟣 Successfully completed TDD cycle for stale appointment bugfix and verified build
-10234 8:54a 🔵 TDental to TG Clinic Migration Data Discrepancies Identified
-10235 8:55a 🔵 TDental Export RAR5 Archive Cannot Be Extracted with macOS 7z
-10236 8:57a 🔵 Fresh TDental Export Contains All Missing T8250 Treatment Records Confirming Local Database Staleness
-10237 " 🔵 TDental Uses Legacy AccountPayments Table While Local Database Uses New Payments Schema With No Data
-10238 8:58a 🔵 Local Database Has Payments But Missing Treatment Orders Causing Allocation Mismatch
-10239 9:09a 🔵 Data Migration Gaps Between TDental and TG Clinic Database
-10240 9:10a ✅ Configure Git to Ignore TDental Data Extraction Directory
-10241 9:11a 🔵 TDental Export Data Structure Mapped for Migration
-10242 9:12a 🔵 Missing Product Reference Data Blocks T8250 Treatment Import
-10243 9:13a 🟣 TDD Tests Added for TDental Import and Date Normalization
-10244 " 🔵 TDD RED Phase Confirmed - Tests Fail on Missing Implementation Modules
-10247 9:17a 🔵 TDental to TG Clinic data sync gaps for customer T8250
-10248 " 🟣 TDental CSV import script with incremental sync and payment allocation
-10249 " 🔴 Fixed payment allocation UPDATE query parameter mismatch
-10250 " 🟣 Sale order line to customer service mapper with timezone normalization
-10253 9:19a 🔄 Centralized sale order line mapping and cleaned up timestamp formatting
-10254 " 🔵 Jest test fixture missing products and productcategories arrays
-10255 9:20a 🔴 Added defensive null-coalescing to source array accesses in selectClientRows
-10256 " 🔵 TDental CSV export contains malformed quote escaping at line 37029
-10257 " 🔵 Malformed quotes isolated to Partners.csv line 37029 and AccountPayments.csv line 63050
-10258 9:21a 🔵 CSV quote parsing fixed by disabling quote handling with quote: false option
+### Apr 26, 2026
+10501 10:20p 🟣 Version 0.25.25 successfully deployed to production at nk.2checkin.com
+10502 10:23p 🔵 Playwright test failed due to ambiguous Payment tab selector
+10503 " 🔵 Refined Payment tab selector still matches 2 elements causing test failure
+10504 10:25p 🟣 Deployment verification successful: local and production data and UI match perfectly
+10506 10:26p ✅ Development session completed with successful deployment and verification
+10507 10:28p 🔵 Appointments table contains TimeExpected duration field
+10509 " 🔵 TimeExpected field populated in 99.5% of appointments with standard duration values
+10513 10:33p 🔵 Appointment Time Model: Duration-Based, Not End-Time-Based
+10515 " 🔵 EndTime Field in AppointmentFormCore Is Display-Only, Not Persisted
+10516 10:34p 🔵 EndTime Field Surface Area Spans 48 References Across 8 Component Categories
+10517 10:35p 🔵 EndTime Field Used Only in Local State Updates, Not API Calls
+10519 " ✅ TDD Test Added for EndTime-Free Appointment Submission
+10520 10:36p 🔵 Guard Test Fails as Expected - EndTime Currently Required
+10522 " 🔵 OverviewAppointment Interface Has No EndTime Field - Only Displays StartTime
+10526 10:37p 🟣 Duration Utilities and Dedicated Form Field Component Created
+10527 10:42p 🔄 Removed endTime from appointment form data model
+10528 " 🟣 Created centralized appointment duration utilities
+10529 " 🔄 Updated appointment mappers to use duration-based approach
+10530 " 🔄 Updated form guard to remove endTime validation requirement
+10531 " 🟣 Added timeexpected field to OverviewAppointment interface
+10532 " 🔄 Updated Calendar page to use duration-based appointment creation
+10533 10:44p 🔄 Updated all calendar display components to use duration-based time formatting
+10534 " 🔄 Extracted DayAppointmentCard component from DayView into separate file
+10535 10:45p 🔄 Extracted AppointmentAppearanceFields component from AppointmentFormCore
+10537 10:47p 🔄 Extracted AppointmentStaffFields component from AppointmentFormCore
+10547 10:55p 🔵 Tgrouptest local dev environment inactive
+10548 " 🔵 Tgrouptest Docker Compose environment not started
+10555 10:59p 🔵 Tgrouptest API started on port 3002 using tv2codex database on port 5433
+10556 11:00p 🔴 API configured to use port 5433 database and started persistently via tmux
+10557 " 🟣 Tgrouptest local dev environment fully operational with successful e2e login
+10572 11:13p 🔵 Appointment duration field uses datalist, not dropdown
+10574 " 🔵 Appointment duration distribution in production database
+10575 11:14p 🔵 Historical appointment data reveals 15min is most common duration
+10576 " 🟣 Appointment duration field converted to dropdown with preset options
+10578 11:15p 🟣 Added unit test for dropdown appointment duration field
+10579 11:16p 🟣 Duration dropdown verified working in production build
+10580 11:17p 🔄 Appointment form refactored into modular field components
+10584 11:38p 🔵 Past TamDentistExport3 timezone bug caused missing April 2026 treatments
+10585 " 🔵 Appointments TimeExpected column already fully populated, no backfill needed
+10586 11:39p 🔵 Database contains only 289 of 246,215 appointments from CSV source
+10587 " 🟣 Added appointment duration field component and utility library
+10588 11:40p 🔵 286 of 289 appointments missing time field, but time data exists in date column
+10589 11:41p 🔴 Backfilled missing time values for 286 appointments by extracting from date column
+10590 11:42p 🔵 Time backfill successful but revealed 5 appointments with timezone-shifted values
+10591 " 🔴 Corrected 5 appointments with incorrect date and time values using CSV source data
+10592 11:43p 🔵 One appointment remains with incorrect date, time, and duration after correction attempt
+10593 11:44p 🔵 AP210661 update failed - database shows wrong date, time, and duration despite recent update timestamp
+10594 11:45p 🔴 Manually corrected AP210661 completing full CSV reconciliation of all 289 appointments
+10604 11:52p 🔄 Moved tooth badge from dedicated column into quantity cell in ServiceHistory table
+10605 11:53p ✅ Verified tooth badge consolidation in live browser - appears correctly in quantity column
 
-Access 959k tokens of past work via get_observations([IDs]) or mem-search skill.
+Access 634k tokens of past work via get_observations([IDs]) or mem-search skill.
 </claude-mem-context>

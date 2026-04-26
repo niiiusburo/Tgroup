@@ -14,19 +14,14 @@ import {
   Calendar,
   Clock,
   User,
-  Stethoscope,
   MapPin,
   FileText,
-  Palette,
   Plus,
-  ChevronDown,
   Phone,
 } from 'lucide-react';
 
 import { CustomerSelector } from '@/components/shared/CustomerSelector';
-import { DoctorSelector } from '@/components/shared/DoctorSelector';
 import { LocationSelector } from '@/components/shared/LocationSelector';
-import { ServiceCatalogSelector } from '@/components/shared/ServiceCatalogSelector';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { TimePicker } from '@/components/ui/TimePicker';
 import { AddCustomerForm } from '@/components/forms/AddCustomerForm/AddCustomerForm';
@@ -35,27 +30,18 @@ import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
 import { useProducts } from '@/hooks/useProducts';
 import { useLocationFilter } from '@/contexts/LocationContext';
-import { APPOINTMENT_CARD_COLORS, APPOINTMENT_STATUS_OPTIONS } from '@/constants';
 import type { AppointmentType } from '@/constants';
 import type { Customer, CustomerFormData } from '@/types/customer';
-import type { Employee } from '@/types/employee';
 import type { Product } from '@/hooks/useProducts';
 import type { ServiceCatalogItem } from '@/types/service';
+import { AppointmentDurationField } from './AppointmentDurationField';
+import { AppointmentAppearanceFields } from './AppointmentAppearanceFields';
+import { AppointmentStaffFields } from './AppointmentStaffFields';
+import { AppointmentServiceFields } from './AppointmentServiceFields';
 
 import type {
   AppointmentFormCoreProps,
-  UnifiedAppointmentFormData,
 } from './appointmentForm.types';
-
-const APPOINTMENT_TYPES: AppointmentType[] = [
-  'cleaning',
-  'consultation',
-  'treatment',
-  'surgery',
-  'orthodontics',
-  'cosmetic',
-  'emergency',
-];
 
 export function AppointmentFormCore({
   mode,
@@ -90,10 +76,6 @@ export function AppointmentFormCore({
   );
 
   const [showCreateCustomer, setShowCreateCustomer] = useState(false);
-  const [colorDropdownOpen, setColorDropdownOpen] = useState(false);
-  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
-
-  const isEdit = mode === 'edit';
 
   // ─── Handlers ───────────────────────────────────────────────────
 
@@ -107,13 +89,6 @@ export function AppointmentFormCore({
       locationName:
         allLocations.find((l) => l.id === (customer.locationId || selectedLocationId))?.name ||
         data.locationName,
-    });
-  };
-
-  const handleDoctorChange = (doctor: Employee | null) => {
-    onChange({
-      doctorId: doctor?.id,
-      doctorName: doctor?.name,
     });
   };
 
@@ -137,16 +112,6 @@ export function AppointmentFormCore({
     onChange({ appointmentType: type });
   };
 
-  const handleColorChange = (colorCode: string) => {
-    onChange({ color: colorCode });
-    setColorDropdownOpen(false);
-  };
-
-  const handleStatusChange = (status: string) => {
-    onChange({ status: status as UnifiedAppointmentFormData['status'] });
-    setStatusDropdownOpen(false);
-  };
-
   // TODO: implement inline customer creation
   // const handleNewCustomerCreated = (customer: Customer) => {
   //   setShowCreateCustomer(false);
@@ -154,8 +119,6 @@ export function AppointmentFormCore({
   // };
 
   // ─── Render helpers ─────────────────────────────────────────────
-
-  const colorConfig = data.color ? APPOINTMENT_CARD_COLORS[data.color] : APPOINTMENT_CARD_COLORS['1'];
 
   return (
     <div className="space-y-5">
@@ -260,209 +223,34 @@ export function AppointmentFormCore({
           )}
         </div>
 
-        <div>
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            <Clock className="w-3.5 h-3.5" />
-            {t('appointments:form.endTime')}
-          </label>
-          <input
-            type="text"
-            value={data.endTime}
-            readOnly
-            className="w-full px-4 py-3 text-sm bg-gray-50 border border-gray-200 rounded-xl text-gray-500"
-          />
-          {errors.endTime && (
-            <p className="text-xs text-red-500 mt-1">{errors.endTime}</p>
-          )}
-        </div>
+        <AppointmentDurationField
+          value={data.estimatedDuration}
+          error={errors.estimatedDuration}
+          onChange={(estimatedDuration) => onChange({ estimatedDuration })}
+        />
       </div>
 
-      {/* Doctor + Assistants */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            <Stethoscope className="w-3.5 h-3.5" />
-            {t('appointments:form.doctor')}
-          </label>
-          <DoctorSelector
-            employees={employees}
-            selectedId={data.doctorId || null}
-            filterRoles={['doctor']}
-            onChange={(employeeId) => {
-              const emp = employees.find((e) => e.id === employeeId);
-              handleDoctorChange(emp || null);
-            }}
-            placeholder={t('appointments:form.selectDoctor')}
-          />
-        </div>
+      <AppointmentStaffFields employees={employees} data={data} onChange={onChange} />
 
-        <div>
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            {t('appointments:form.assistant')}
-          </label>
-          <DoctorSelector
-            employees={employees}
-            selectedId={data.assistantId || null}
-            filterRoles={['assistant']}
-            onChange={(employeeId) => {
-              const emp = employees.find((e) => e.id === employeeId);
-              onChange({
-                assistantId: emp?.id,
-                assistantName: emp?.name,
-              });
-            }}
-            placeholder={t('appointments:form.selectAssistant')}
-          />
-        </div>
+      <AppointmentServiceFields
+        catalog={serviceCatalogItems}
+        selectedServiceId={data.serviceId}
+        appointmentType={data.appointmentType}
+        onServiceChange={(itemId) => {
+          const product = serviceCatalog.find((p) => p.id === itemId);
+          handleServiceChange(product || null);
+        }}
+        onTypeChange={handleTypeChange}
+      />
 
-        <div>
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            {t('appointments:form.dentalAide')}
-          </label>
-          <DoctorSelector
-            employees={employees}
-            selectedId={data.dentalAideId || null}
-            filterRoles={['doctor-assistant']}
-            onChange={(employeeId) => {
-              const emp = employees.find((e) => e.id === employeeId);
-              onChange({
-                dentalAideId: emp?.id,
-                dentalAideName: emp?.name,
-              });
-            }}
-            placeholder={t('appointments:form.selectDentalAide')}
-          />
-        </div>
-      </div>
-
-      {/* Service */}
-      <div>
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-          <Stethoscope className="w-3.5 h-3.5" />
-          {t('appointments:form.service')}
-        </label>
-          <ServiceCatalogSelector
-            catalog={serviceCatalogItems}
-            selectedId={data.serviceId || null}
-            onChange={(itemId) => {
-              const product = serviceCatalog.find((p) => p.id === itemId);
-              handleServiceChange(product || null);
-            }}
-            placeholder={t('appointments:form.selectService')}
-          />
-      </div>
-
-      {/* Type pills */}
-      <div>
-        <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-          {t('appointments:label.service')}
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {APPOINTMENT_TYPES.map((type) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => handleTypeChange(type)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                data.appointmentType === type
-                  ? 'bg-orange-100 text-orange-700 border border-orange-300'
-                  : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100'
-              }`}
-            >
-              {t(`calendar:appointmentTypes.${type}`)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Duration + Color + Status (edit only) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            <Clock className="w-3.5 h-3.5" />
-            {t('appointments:form.duration')}
-          </label>
-          <input
-            type="number"
-            min={5}
-            max={300}
-            value={data.estimatedDuration ?? 30}
-            onChange={(e) => onChange({ estimatedDuration: Number(e.target.value) })}
-            className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400"
-          />
-          {errors.estimatedDuration && (
-            <p className="text-xs text-red-500 mt-1">{errors.estimatedDuration}</p>
-          )}
-        </div>
-
-        <div className="relative">
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            <Palette className="w-3.5 h-3.5" />
-            {t('appointments:label.cardColor')}
-          </label>
-          <button
-            type="button"
-            onClick={() => setColorDropdownOpen((v) => !v)}
-            className={`w-full px-4 py-3 text-sm border rounded-xl flex items-center gap-2 transition-all ${colorConfig?.bgHighlight || 'bg-gray-50'} ${colorConfig?.border || 'border-gray-200'}`}
-          >
-            <span className={`w-4 h-4 rounded-full ${colorConfig?.dot?.replace('border-l-', 'bg-') || 'bg-gray-400'}`} />
-            <span className="flex-1 text-left">{t(colorConfig?.label || 'common:colors.blue')}</span>
-            <ChevronDown className="w-4 h-4 text-gray-400" />
-          </button>
-
-          {colorDropdownOpen && (
-            <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg p-2 grid grid-cols-4 gap-2">
-              {Object.entries(APPOINTMENT_CARD_COLORS).map(([code, config]) => (
-                <button
-                  key={code}
-                  type="button"
-                  onClick={() => handleColorChange(code)}
-                  className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
-                    data.color === code ? 'ring-2 ring-orange-400 bg-orange-50' : 'hover:bg-gray-50'
-                  }`}
-                >
-                  <span className={`w-6 h-6 rounded-full bg-gradient-to-br ${config.previewGradient}`} />
-                  <span className="text-[10px] text-gray-600">{t(config.label)}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {isEdit && (
-          <div className="relative">
-            <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              {t('appointments:form.status')}
-            </label>
-            <button
-              type="button"
-              onClick={() => setStatusDropdownOpen((v) => !v)}
-              className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl flex items-center gap-2 bg-white"
-            >
-              <span className="flex-1 text-left capitalize">{data.status}</span>
-              <ChevronDown className="w-4 h-4 text-gray-400" />
-            </button>
-
-            {statusDropdownOpen && (
-              <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg p-2 space-y-1">
-                {APPOINTMENT_STATUS_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => handleStatusChange(opt.value)}
-                    className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
-                      data.status === opt.value ? 'bg-orange-50 text-orange-700' : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    <span className={`w-2 h-2 rounded-full ${opt.color.split(' ')[0].replace('bg-', 'bg-')}`} />
-                    {t(opt.label)}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      {/* Color + Status (edit only) */}
+      <AppointmentAppearanceFields
+        mode={mode}
+        color={data.color}
+        status={data.status}
+        onColorChange={(color) => onChange({ color })}
+        onStatusChange={(status) => onChange({ status })}
+      />
 
       {/* Notes */}
       <div>

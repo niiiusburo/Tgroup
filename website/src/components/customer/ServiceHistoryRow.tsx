@@ -64,8 +64,13 @@ export function ServiceHistoryRow({
           </div>
         </td>
         <td className="py-3 pr-4 text-right align-top whitespace-nowrap">
-          <span className="text-gray-700">{service.quantity ?? 1}</span>
-          {service.unit && <span className="text-gray-400 text-xs ml-1">{service.unit}</span>}
+          <div className="flex items-center justify-end gap-2">
+            <ToothBadge value={service.tooth} />
+            <span className="inline-flex min-w-[3rem] justify-end">
+              <span className="text-gray-700">{service.quantity ?? 1}</span>
+              {service.unit && <span className="text-gray-400 text-xs ml-1">{service.unit}</span>}
+            </span>
+          </div>
         </td>
         <td className="py-3 pr-4 text-right align-top whitespace-nowrap font-medium text-gray-900">
           {formatVND(service.cost)}
@@ -102,9 +107,6 @@ export function ServiceHistoryRow({
               </button>
             )}
           </div>
-        </td>
-        <td className="py-3 pr-4 align-top whitespace-nowrap">
-          <ToothBadge value={service.tooth} />
         </td>
         <td className="py-3 text-center align-top">
           <div className="flex items-center justify-center gap-1">

@@ -21,7 +21,6 @@ function makeValidFormData(): UnifiedAppointmentFormData {
     serviceId: undefined,
     date: '2026-04-21',
     startTime: '09:00',
-    endTime: '09:30',
     notes: '',
     estimatedDuration: 30,
     color: '1',
@@ -100,5 +99,21 @@ describe('apiAppointmentToFormData', () => {
     } as any;
     const formData = apiAppointmentToFormData(api);
     expect(formData.date).toBe('2026-04-21');
+  });
+
+  it('should preload duration from database timeexpected', () => {
+    const api = {
+      id: 'test-id',
+      date: '2026-04-21T00:00:00.000Z',
+      time: '14:30',
+      timeexpected: 45,
+      partnerid: 'p1',
+      companyid: 'c1',
+      state: 'scheduled',
+    } as any;
+    const formData = apiAppointmentToFormData(api);
+    expect(formData.startTime).toBe('14:30');
+    expect(formData.estimatedDuration).toBe(45);
+    expect(formData).not.toHaveProperty('endTime');
   });
 });

@@ -8,7 +8,10 @@
 
 import type { UnifiedAppointmentFormData } from './appointmentForm.types';
 import type { ApiAppointment } from '@/lib/api';
-import { calculateEndTime } from '@/lib/calendarUtils';
+import {
+  DEFAULT_APPOINTMENT_DURATION,
+  normalizeAppointmentDuration,
+} from '@/lib/appointmentDuration';
 
 // ─── Form → API (CREATE / UPDATE) ─────────────────────────────────
 
@@ -31,7 +34,7 @@ export function formDataToApiPayload(
     date: data.date,
     time: data.startTime,
     note: data.notes,
-    timeexpected: (data.estimatedDuration && data.estimatedDuration > 0) ? data.estimatedDuration : 30,
+    timeexpected: normalizeAppointmentDuration(data.estimatedDuration),
     color: data.color ?? '1',
     state: data.status ?? 'scheduled',
     productid: data.serviceId,
@@ -51,7 +54,7 @@ export function apiAppointmentToFormData(
   api: ApiAppointment,
 ): Partial<UnifiedAppointmentFormData> {
   const startTime = normalizeTime(api.time);
-  const estimatedDuration = api.timeexpected ?? 30;
+  const estimatedDuration = normalizeAppointmentDuration(api.timeexpected);
 
   return {
     id: api.id,
@@ -71,7 +74,6 @@ export function apiAppointmentToFormData(
     serviceId: api.productid ?? undefined,
     date: api.date ? api.date.split('T')[0] : '',
     startTime,
-    endTime: calculateEndTime(startTime, estimatedDuration),
     notes: api.note ?? '',
     estimatedDuration,
     color: api.color ?? '1',
@@ -105,8 +107,8 @@ export function overviewAppointmentToFormData(
     serviceId: overview.productId ?? undefined,
     date: overview.date,
     startTime,
-    endTime: calculateEndTime(startTime, 30), // Default duration
     notes: overview.note,
+    estimatedDuration: overview.timeexpected ?? DEFAULT_APPOINTMENT_DURATION,
     color: overview.color ?? '1',
     status: overview.topStatus,
   };
@@ -138,9 +140,8 @@ export function calendarAppointmentToFormData(
     serviceId: cal.productId ?? undefined,
     date: cal.date,
     startTime,
-    endTime: calculateEndTime(startTime, cal.timeexpected ?? 30),
     notes: cal.notes ?? '',
-    estimatedDuration: cal.timeexpected ?? 30,
+    estimatedDuration: normalizeAppointmentDuration(cal.timeexpected),
     color: cal.color ?? '1',
     status: mapApiStateToUiStatus(cal.status),
   };

@@ -206,14 +206,10 @@ export function Calendar() {
   }, [appointments, selectedLocationId, getExportDateRange]);
 
   const handleCreateAppointment = useCallback((date: string, startTime: string) => {
-    const [h, m] = startTime.split(':').map(Number);
-    const endH = h + Math.floor((m + 30) / 60);
-    const endM = (m + 30) % 60;
-    const endTime = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
     setCreateInitialData({
       date,
       startTime,
-      endTime
+      estimatedDuration: 30
     });
     setCreateModalOpen(true);
   }, []);
