@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.25.25",
+    "date": "2026-04-26",
+    "commit": "pending",
+    "highlights": "style(customers): align appointment and service history views",
+    "sections": [
+      {
+        "title": "Improvements",
+        "items": [
+          "Render appointment history as a date-first table matching the service history layout",
+          "Share compact date badges across appointment and service rows",
+          "Show appointment reason, time, team, and status in dedicated columns"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Verify local customer record appointment and service tabs on desktop and mobile viewports",
+          "Run focused ServiceHistory tests and the production website build"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.22",
     "date": "2026-04-26",
     "commit": "pending",

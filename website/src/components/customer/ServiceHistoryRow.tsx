@@ -6,6 +6,7 @@ import type { PaymentWithAllocations } from '@/hooks/useCustomerPayments';
 import { formatVND } from '@/lib/formatting';
 import { getPaymentsForService, resolveServiceFinancials } from './ServiceHistoryUtils';
 import { ServiceHistoryPayments } from './ServiceHistoryPayments';
+import { RecordDateBadge } from './RecordDateBadge';
 
 interface ServiceHistoryRowProps {
   readonly service: CustomerService;
@@ -45,33 +46,36 @@ export function ServiceHistoryRow({
         className={`transition-colors cursor-pointer ${isExpanded ? 'bg-primary/5' : 'hover:bg-gray-50'}`}
         onClick={() => hasPayment && onToggle()}
       >
-        <td className="py-3 pr-4 whitespace-nowrap">
-          <div className="text-gray-900 font-medium">{service.date}</div>
+        <td className="py-3 pr-4 align-top whitespace-nowrap">
+          <RecordDateBadge value={service.date} ariaLabel="Service date" />
         </td>
-        <td className="py-3 pr-4">
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${STATUS_DOT_CLASSES[service.status]}`} />
+        <td className="py-3 pr-4 align-top">
+          <div className="flex items-start gap-2">
+            <div className={`mt-2 w-2 h-2 shrink-0 rounded-full ${STATUS_DOT_CLASSES[service.status]}`} />
             <div className="min-w-0">
               <p className="font-medium text-gray-900 truncate">{service.service}</p>
               {(service.orderCode || service.orderName) && (
                 <p className="text-xs font-mono text-primary mt-0.5">{service.orderCode || service.orderName}</p>
               )}
+              {service.doctor && service.doctor !== 'N/A' && (
+                <p className="mt-0.5 truncate text-xs font-medium text-gray-500">{service.doctor}</p>
+              )}
             </div>
           </div>
         </td>
-        <td className="py-3 pr-4 text-right whitespace-nowrap">
+        <td className="py-3 pr-4 text-right align-top whitespace-nowrap">
           <span className="text-gray-700">{service.quantity ?? 1}</span>
           {service.unit && <span className="text-gray-400 text-xs ml-1">{service.unit}</span>}
         </td>
-        <td className="py-3 pr-4 text-right whitespace-nowrap font-medium text-gray-900">
+        <td className="py-3 pr-4 text-right align-top whitespace-nowrap font-medium text-gray-900">
           {formatVND(service.cost)}
         </td>
-        <td className="py-3 pr-4 text-right whitespace-nowrap">
+        <td className="py-3 pr-4 text-right align-top whitespace-nowrap">
           <span className={`font-medium ${paidAmount >= service.cost ? 'text-emerald-600' : 'text-gray-900'}`}>
             {formatVND(paidAmount)}
           </span>
         </td>
-        <td className="py-3 pr-4 text-right whitespace-nowrap">
+        <td className="py-3 pr-4 text-right align-top whitespace-nowrap">
           <div className="flex flex-col items-end gap-1">
             <span className={`font-medium ${residual > 0 ? 'text-red-600' : 'text-gray-400'}`}>
               {formatVND(residual)}
@@ -99,10 +103,10 @@ export function ServiceHistoryRow({
             )}
           </div>
         </td>
-        <td className="py-3 pr-4 whitespace-nowrap">
+        <td className="py-3 pr-4 align-top whitespace-nowrap">
           <ToothBadge value={service.tooth} />
         </td>
-        <td className="py-3 text-center">
+        <td className="py-3 text-center align-top">
           <div className="flex items-center justify-center gap-1">
             {onEditService && (
               <button

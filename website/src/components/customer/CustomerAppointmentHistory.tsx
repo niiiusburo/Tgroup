@@ -1,7 +1,7 @@
-import { Calendar, CalendarPlus, Clock, Pencil, User } from 'lucide-react';
+import { Calendar, CalendarPlus, Clock, Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { ApiAppointment } from '@/lib/api';
-import { formatDate } from './CustomerProfile/formatDate';
+import { RecordDateBadge } from './RecordDateBadge';
 
 interface CustomerAppointmentHistoryProps {
   readonly appointments: readonly ApiAppointment[];
@@ -12,18 +12,18 @@ interface CustomerAppointmentHistoryProps {
 function getStatusConfig(state: string | null | undefined) {
   const s = (state || '').toLowerCase();
   if (s === 'done') {
-    return { label: 'completed', className: 'text-emerald-600 bg-emerald-50', dot: 'bg-emerald-500' };
+    return { label: 'completed', className: 'border-emerald-200 bg-emerald-50 text-emerald-700', dot: 'bg-emerald-500' };
   }
   if (s === 'cancelled' || s === 'cancel') {
-    return { label: 'cancelled', className: 'text-red-600 bg-red-50', dot: 'bg-red-500' };
+    return { label: 'cancelled', className: 'border-red-200 bg-red-50 text-red-700', dot: 'bg-red-500' };
   }
   if (s === 'no_show') {
-    return { label: 'noShow', className: 'text-amber-600 bg-amber-50', dot: 'bg-amber-500' };
+    return { label: 'noShow', className: 'border-amber-200 bg-amber-50 text-amber-700', dot: 'bg-amber-500' };
   }
   if (s === 'confirmed') {
-    return { label: 'confirmed', className: 'text-blue-600 bg-blue-50', dot: 'bg-blue-500' };
+    return { label: 'confirmed', className: 'border-blue-200 bg-blue-50 text-blue-700', dot: 'bg-blue-500' };
   }
-  return { label: 'scheduled', className: 'text-gray-600 bg-gray-50', dot: 'bg-gray-400' };
+  return { label: 'scheduled', className: 'border-orange-200 bg-orange-50 text-orange-700', dot: 'bg-orange-500' };
 }
 
 function getAppointmentTime(appointment: ApiAppointment) {
@@ -32,20 +32,31 @@ function getAppointmentTime(appointment: ApiAppointment) {
     : null) || '--:--';
 }
 
-function MetaChip({
-  icon,
-  children,
-  accent = 'text-gray-400',
+function getDuration(appointment: ApiAppointment) {
+  const minutes = appointment.timeExpected ?? appointment.timeexpected;
+  return minutes && minutes > 0 ? `${minutes} min` : null;
+}
+
+function getAppointmentTitle(appointment: ApiAppointment) {
+  return appointment.productname || appointment.reason || appointment.note || 'Lịch hẹn';
+}
+
+function shouldRenderNote(appointment: ApiAppointment, title: string) {
+  return !!appointment.note && appointment.note !== title;
+}
+
+function TeamLine({
+  label,
+  value,
 }: {
-  readonly icon: React.ReactNode;
-  readonly children: React.ReactNode;
-  readonly accent?: string;
+  readonly label: string;
+  readonly value: string | null | undefined;
 }) {
   return (
-    <span className="inline-flex min-h-7 items-center gap-1.5 rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-600">
-      <span className={accent}>{icon}</span>
-      <span>{children}</span>
-    </span>
+    <p className="flex items-center gap-1.5 text-xs text-gray-500">
+      <span className="min-w-14 font-semibold text-gray-700">{label}</span>
+      <span className="truncate">{value || 'N/A'}</span>
+    </p>
   );
 }
 
@@ -57,6 +68,7 @@ export function CustomerAppointmentHistory({
   const { t } = useTranslation(['customers', 'appointments']);
   const canEdit = !!onEditAppointment;
   const editLabel = t('labels.edit', { ns: 'appointments' });
+  const addLabel = t('addAppointment', { ns: 'appointments', defaultValue: 'Add Appointment' });
 
   return (
     <div className="space-y-4">
@@ -74,7 +86,7 @@ export function CustomerAppointmentHistory({
           }`}
         >
           <CalendarPlus className="w-4 h-4" />
-          Add Appointment
+          {addLabel}
         </button>
       </div>
 
@@ -93,87 +105,98 @@ export function CustomerAppointmentHistory({
             )}
           </div>
         ) : (
-          <div className="space-y-3">
-            {appointments.map((appointment) => {
-              const statusConfig = getStatusConfig(appointment.state ?? undefined);
-              const time = getAppointmentTime(appointment);
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[820px] text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <th className="pb-3 pr-4">Ngày</th>
+                  <th className="pb-3 pr-4">Lịch hẹn</th>
+                  <th className="pb-3 pr-4">Giờ</th>
+                  <th className="pb-3 pr-4">Ê-kíp</th>
+                  <th className="pb-3 pr-4">Trạng thái</th>
+                  <th className="pb-3 text-center"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {appointments.map((appointment) => {
+                  const statusConfig = getStatusConfig(appointment.state ?? undefined);
+                  const time = getAppointmentTime(appointment);
+                  const duration = getDuration(appointment);
+                  const title = getAppointmentTitle(appointment);
 
-              return (
-                <div
-                  key={appointment.id}
-                  onClick={() => onEditAppointment?.(appointment)}
-                  className={`group relative rounded-xl border bg-white px-4 py-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
-                    statusConfig.label === 'scheduled'
-                      ? 'border-orange-200 bg-orange-50/35 hover:border-primary/50'
-                      : 'border-gray-200 hover:border-primary/30 hover:bg-primary/5'
-                  } ${canEdit ? 'cursor-pointer' : ''}`}
-                >
-                  <div className={`absolute left-4 top-5 h-2.5 w-2.5 rounded-full ${statusConfig.dot}`} />
-                  <div className="min-w-0 pl-7">
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          {appointment.name && (
-                            <span className="text-xs font-mono font-semibold text-primary bg-primary/10 px-2 py-1 rounded-lg">
-                              {appointment.name}
-                            </span>
-                          )}
-                          <span className="text-base font-semibold leading-snug text-gray-900">
-                            {appointment.partnername || appointment.partnerdisplayname || 'Appointment'}
-                          </span>
-                          <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusConfig.className}`}>
-                            {t(`status.${statusConfig.label}`, { ns: 'appointments' })}
-                          </span>
+                  return (
+                    <tr
+                      key={appointment.id}
+                      onClick={() => onEditAppointment?.(appointment)}
+                      className={`group transition-colors ${
+                        canEdit ? 'cursor-pointer' : ''
+                      } ${statusConfig.label === 'scheduled' ? 'bg-orange-50/25 hover:bg-orange-50/60' : 'hover:bg-gray-50'}`}
+                    >
+                      <td className="py-3 pr-4 align-top whitespace-nowrap">
+                        <RecordDateBadge value={appointment.date} ariaLabel="Appointment date" />
+                      </td>
+                      <td className="py-3 pr-4 align-top">
+                        <div className="flex items-start gap-2">
+                          <div className={`mt-2 h-2 w-2 shrink-0 rounded-full ${statusConfig.dot}`} />
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              {appointment.name && (
+                                <span className="rounded-lg bg-primary/10 px-2 py-1 font-mono text-xs font-semibold text-primary">
+                                  {appointment.name}
+                                </span>
+                              )}
+                              <span className="line-clamp-1 font-medium leading-snug text-gray-900">{title}</span>
+                            </div>
+                            <p className="mt-1 truncate text-xs font-medium text-gray-500">
+                              {appointment.partnerdisplayname || appointment.partnername || appointment.partnercode || 'N/A'}
+                            </p>
+                            {shouldRenderNote(appointment, title) && (
+                              <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-gray-400">{appointment.note}</p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-
-                      {canEdit && (
-                        <button
-                          type="button"
-                          title={editLabel}
-                          aria-label={`${editLabel} ${appointment.name || ''}`.trim()}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            onEditAppointment?.(appointment);
-                          }}
-                          className="h-8 w-8 shrink-0 inline-flex items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 shadow-sm opacity-100 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <MetaChip icon={<Clock className="w-3.5 h-3.5" />} accent="text-gray-500">
-                        {time}
-                      </MetaChip>
-                      <MetaChip icon={<User className="w-3.5 h-3.5" />} accent="text-purple-500">
-                        {appointment.doctorname || 'N/A'}
-                      </MetaChip>
-                      {appointment.assistantname && (
-                        <MetaChip icon={<User className="w-3.5 h-3.5" />} accent="text-teal-500">
-                          {appointment.assistantname}
-                        </MetaChip>
-                      )}
-                      {appointment.dentalaidename && (
-                        <MetaChip icon={<User className="w-3.5 h-3.5" />} accent="text-cyan-500">
-                          {appointment.dentalaidename}
-                        </MetaChip>
-                      )}
-                      <MetaChip icon={<Calendar className="w-3.5 h-3.5" />} accent="text-gray-500">
-                        {formatDate(appointment.date ?? '')}
-                      </MetaChip>
-                    </div>
-
-                    {appointment.note && (
-                      <p className="mt-2 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-xs font-medium leading-relaxed text-gray-500">
-                        {appointment.note}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                      </td>
+                      <td className="py-3 pr-4 align-top whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700">
+                          <Clock className="h-3.5 w-3.5 text-gray-500" />
+                          {time}
+                        </div>
+                        {duration && <p className="mt-1 text-xs font-medium text-gray-400">{duration}</p>}
+                      </td>
+                      <td className="py-3 pr-4 align-top">
+                        <div className="min-w-[150px] space-y-1">
+                          <TeamLine label="Bác sĩ" value={appointment.doctorname} />
+                          {appointment.assistantname && <TeamLine label="Phụ tá" value={appointment.assistantname} />}
+                          {appointment.dentalaidename && <TeamLine label="Nha tá" value={appointment.dentalaidename} />}
+                        </div>
+                      </td>
+                      <td className="py-3 pr-4 align-top whitespace-nowrap">
+                        <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${statusConfig.className}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${statusConfig.dot}`} />
+                          {t(`status.${statusConfig.label}`, { ns: 'appointments' })}
+                        </span>
+                      </td>
+                      <td className="py-3 text-center align-top">
+                        {canEdit && (
+                          <button
+                            type="button"
+                            title={editLabel}
+                            aria-label={`${editLabel} ${appointment.name || ''}`.trim()}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onEditAppointment?.(appointment);
+                            }}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

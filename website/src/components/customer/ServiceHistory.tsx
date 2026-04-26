@@ -81,22 +81,22 @@ export function ServiceHistory({
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[880px] text-sm">
           <thead>
-            <tr className="border-b border-gray-200 text-left text-xs text-gray-500 uppercase tracking-wider">
-              <th className="pb-3 pr-4 font-medium">Ngày</th>
-              <th className="pb-3 pr-4 font-medium">Dịch vụ</th>
-              <th className="pb-3 pr-4 font-medium text-right">Số lượng</th>
-              <th className="pb-3 pr-4 font-medium text-right">Thành tiền</th>
-              <th className="pb-3 pr-4 font-medium text-right">Thanh toán</th>
-              <th className="pb-3 pr-4 font-medium text-right">Còn lại</th>
-              <th className="pb-3 pr-4 font-medium">
+            <tr className="border-b border-gray-200 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              <th className="pb-3 pr-4">Ngày</th>
+              <th className="pb-3 pr-4">Dịch vụ</th>
+              <th className="pb-3 pr-4 text-right">Số lượng</th>
+              <th className="pb-3 pr-4 text-right">Thành tiền</th>
+              <th className="pb-3 pr-4 text-right">Thanh toán</th>
+              <th className="pb-3 pr-4 text-right">Còn lại</th>
+              <th className="pb-3 pr-4">
                 <span className="inline-flex items-center gap-1.5">
                   <span role="img" aria-label="Tooth">🦷</span>
                   Răng & chẩn đoán
                 </span>
               </th>
-              <th className="pb-3 font-medium text-center"></th>
+              <th className="pb-3 text-center"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
