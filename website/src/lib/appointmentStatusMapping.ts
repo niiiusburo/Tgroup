@@ -15,16 +15,16 @@ export const PHASE_TO_API_STATE: Record<CalendarPhase, string> = {
 
 export function apiStateToPhase(state: string | null | undefined): CalendarPhase {
   const s = (state ?? '').toLowerCase().trim();
-  if (s === 'arrived' || s === 'confirmed') return 'waiting';
+  if (s === 'arrived') return 'waiting';
   if (s === 'in examination' || s === 'in-progress') return 'in-treatment';
   if (s === 'done' || s === 'completed') return 'done';
   if (s === 'cancelled' || s === 'canceled') return 'cancelled';
   return 'scheduled';
 }
 
-export function calendarStatusToPhase(status: 'scheduled' | 'confirmed' | 'in-progress' | 'completed' | 'cancelled'): CalendarPhase {
+export function calendarStatusToPhase(status: 'scheduled' | 'confirmed' | 'arrived' | 'in-progress' | 'completed' | 'cancelled'): CalendarPhase {
   switch (status) {
-    case 'confirmed':
+    case 'arrived':
       return 'waiting';
     case 'in-progress':
       return 'in-treatment';

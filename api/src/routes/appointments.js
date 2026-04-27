@@ -590,6 +590,7 @@ router.put('/:id', requirePermission('appointments.edit'), validate(AppointmentU
     const updates = [];
     const params = [];
     let paramIdx = 1;
+    const nowSql = `(NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`;
 
     if (date !== undefined) {
       updates.push(`date = $${paramIdx}`);
@@ -609,6 +610,15 @@ router.put('/:id', requirePermission('appointments.edit'), validate(AppointmentU
     if (state !== undefined) {
       updates.push(`state = $${paramIdx}`);
       updates.push(`aptstate = $${paramIdx}`);
+      if (state === 'arrived') {
+        updates.push(`datetimearrived = COALESCE(datetimearrived, ${nowSql})`);
+      }
+      if (state === 'in Examination' || state === 'in-progress') {
+        updates.push(`datetimeseated = COALESCE(datetimeseated, ${nowSql})`);
+      }
+      if (state === 'done') {
+        updates.push(`datedone = COALESCE(datedone, ${nowSql})`);
+      }
       params.push(state);
       paramIdx++;
     }
@@ -644,7 +654,7 @@ router.put('/:id', requirePermission('appointments.edit'), validate(AppointmentU
     }
 
     // Always update lastupdated
-    updates.push(`lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`);
+    updates.push(`lastupdated = ${nowSql}`);
 
     if (updates.length === 0) {
       return errorResponse(res, 400, 'NO_FIELDS_TO_UPDATE', 'No valid fields provided to update');
@@ -664,6 +674,7 @@ router.put('/:id', requirePermission('appointments.edit'), validate(AppointmentU
         a.name,
         a.date,
         a.time,
+        a.timeexpected,
         a.state,
         a.partnerid,
         p.name AS partnername,
@@ -674,6 +685,10 @@ router.put('/:id', requirePermission('appointments.edit'), validate(AppointmentU
         a.doctorid,
         doc.name AS doctorname,
         a.note,
+        a.datetimearrived,
+        a.datetimeseated,
+        a.datetimedismissed,
+        a.datedone,
         a.productid,
         prod.name AS productname,
         a.datecreated,

@@ -9,7 +9,7 @@ import {
 describe('appointmentStatusMapping', () => {
   it('maps API states to phases tolerantly', () => {
     expect(apiStateToPhase('arrived')).toBe('waiting');
-    expect(apiStateToPhase('confirmed')).toBe('waiting');
+    expect(apiStateToPhase('confirmed')).toBe('scheduled');
     expect(apiStateToPhase('in Examination')).toBe('in-treatment');
     expect(apiStateToPhase('in-progress')).toBe('in-treatment');
     expect(apiStateToPhase('done')).toBe('done');
@@ -22,7 +22,8 @@ describe('appointmentStatusMapping', () => {
 
   it('maps CalendarAppointment statuses to phases', () => {
     expect(calendarStatusToPhase('scheduled')).toBe('scheduled');
-    expect(calendarStatusToPhase('confirmed')).toBe('waiting');
+    expect(calendarStatusToPhase('confirmed')).toBe('scheduled');
+    expect(calendarStatusToPhase('arrived')).toBe('waiting');
     expect(calendarStatusToPhase('in-progress')).toBe('in-treatment');
     expect(calendarStatusToPhase('completed')).toBe('done');
     expect(calendarStatusToPhase('cancelled')).toBe('cancelled');

@@ -10,6 +10,43 @@ const scrollIntoViewMock = vi.fn();
 Element.prototype.scrollIntoView = scrollIntoViewMock;
 
 describe('PatientCheckIn auto-scroll on done', () => {
+  it('caps the visible patient grid to two rows and scrolls the remaining cards', () => {
+    const appointments = Array.from({ length: 12 }, (_, index) => ({
+      id: `apt-${index}`,
+      customerId: `c${index}`,
+      customerName: `Patient ${index}`,
+      customerPhone: '0901111222',
+      doctorName: 'Bác sĩ X',
+      doctorId: 'd1',
+      time: '09:00',
+      locationId: 'l1',
+      locationName: 'CN1',
+      note: 'Khám răng',
+      topStatus: 'arrived' as const,
+      checkInStatus: 'waiting' as const,
+      color: null,
+      arrivalTime: '09:00',
+      treatmentStartTime: null,
+    }));
+
+    render(
+      <MemoryRouter>
+        <AppointmentHoverProvider>
+          <PatientCheckIn
+            appointments={appointments}
+            filter="all"
+            onFilterChange={() => {}}
+            counts={{ all: 12, waiting: 12, 'in-treatment': 0, done: 0 }}
+            onUpdateStatus={vi.fn()}
+          />
+        </AppointmentHoverProvider>
+      </MemoryRouter>
+    );
+
+    const scrollRegion = screen.getByTestId('patient-checkin-scroll-region');
+    expect(scrollRegion).toHaveClass('max-h-[24rem]', 'overflow-y-auto');
+  });
+
   it('scrolls the completed card into view when status changes to done', async () => {
     const onUpdateStatus = vi.fn((_id, _status, onSuccess) => {
       onSuccess?.();

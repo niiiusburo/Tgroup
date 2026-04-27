@@ -4,7 +4,9 @@ import * as api from '@/lib/api';
 
 const getToday = vi.fn().mockReturnValue('2024-01-01');
 const getEndOfDay = vi.fn().mockReturnValue('2024-01-01T23:59:59');
-function mockFormatDate(date: string) {
+function mockFormatDate(date: string | Date, format?: string) {
+  if (format === 'HH:mm:ss') return '12:34:56';
+  if (date instanceof Date) return date.toISOString().split('T')[0];
   return date.split('T')[0];
 }
 
@@ -79,5 +81,55 @@ describe('useOverviewAppointments search', () => {
       result.current.setZone1Search('Không có tên này');
     });
     expect(result.current.zone1Appointments).toHaveLength(0);
+  });
+
+  it('keeps confirmed appointments out of check-in until staff marks arrived', async () => {
+    vi.mocked(api.fetchAppointments).mockResolvedValueOnce({ items: [
+      { id: 'a4', partnerid: 'p4', partnername: 'Phạm Thị D', partnerphone: '0907777888', doctorname: 'Bác sĩ Z', doctorid: 'd3', date: '2024-01-01', time: '09:00', companyid: 'c1', companyname: 'CN1', note: 'Tư vấn', state: 'confirmed', lastupdated: '2024-01-01T09:00:00', color: null },
+    ]} as any);
+
+    const { result } = renderHook(() => useOverviewAppointments('c1'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.zone3Counts).toMatchObject({ all: 1, arrived: 0, cancelled: 0 });
+    expect(result.current.zone1Appointments).toHaveLength(0);
+    expect(result.current.appointments[0]).toMatchObject({
+      topStatus: 'scheduled',
+      checkInStatus: null,
+      arrivalTime: null,
+      treatmentStartTime: null,
+    });
+  });
+
+  it('does not use the scheduled time as a treatment timer fallback', async () => {
+    vi.mocked(api.fetchAppointments).mockResolvedValueOnce({ items: [
+      { id: 'a5', partnerid: 'p5', partnername: 'Võ Văn E', partnerphone: '0909999000', doctorname: 'Bác sĩ Z', doctorid: 'd3', date: '2024-01-01', time: '09:00', companyid: 'c1', companyname: 'CN1', note: 'Khám', state: 'in Examination', datetimeseated: null, lastupdated: '2024-01-01T09:00:00', color: null },
+    ]} as any);
+
+    const { result } = renderHook(() => useOverviewAppointments('c1'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.appointments[0]).toMatchObject({
+      checkInStatus: 'in-treatment',
+      treatmentStartTime: null,
+    });
+  });
+
+  it('starts treatment timer from staff action time', async () => {
+    const { result } = renderHook(() => useOverviewAppointments('c1'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await act(async () => {
+      await result.current.updateCheckInStatus('a1', 'in-treatment');
+    });
+
+    expect(api.updateAppointment).toHaveBeenCalledWith('a1', { state: 'in Examination' });
+    expect(result.current.appointments.find((apt) => apt.id === 'a1')).toMatchObject({
+      checkInStatus: 'in-treatment',
+      treatmentStartTime: '12:34:56',
+    });
   });
 });

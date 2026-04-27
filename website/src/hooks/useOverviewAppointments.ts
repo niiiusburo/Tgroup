@@ -79,7 +79,7 @@ interface UseOverviewAppointmentsResult {
 
 function mapStateToTopStatus(state: string | null): AppointmentTopStatus {
   const s = state?.toLowerCase() ?? '';
-  if (s === 'arrived' || s === 'confirmed') return 'arrived';
+  if (s === 'arrived') return 'arrived';
   // 'in examination' is a valid in-progress state — still counts as arrived
   if (s === 'in examination' || s === 'in-progress') return 'arrived';
   if (s === 'cancelled' || s === 'canceled') return 'cancelled';
@@ -91,7 +91,7 @@ function mapStateToTopStatus(state: string | null): AppointmentTopStatus {
 // Map any DB state to the unified check-in status
 function mapStateToCheckInStatus(state: string | null): CheckInStatus | null {
   const s = state?.toLowerCase() ?? '';
-  if (s === 'arrived' || s === 'confirmed') return 'waiting';
+  if (s === 'arrived') return 'waiting';
   if (s === 'in examination' || s === 'in-progress') return 'in-treatment';
   if (s === 'done' || s === 'completed') return 'done';
   return null;
@@ -104,14 +104,12 @@ function mapApiToOverview(
   formatDate: (date: Date | string, format?: string) => string,
 ): OverviewAppointment {
   const topStatus = mapStateToTopStatus(apt.state);
-  // Only cancelled appointments have no check-in status
-  const checkInStatus: CheckInStatus | null = topStatus === 'cancelled'
-    ? null
-    : (mapStateToCheckInStatus(apt.state) ?? 'waiting');
-  // Use stored arrival time if available, otherwise fall back to lastupdated time, then scheduled time
-  const fallbackArrivalTime = getStoredArrivalTime(apt.id)
-    ?? extractTimeFromTimestamp(apt.lastupdated)
-    ?? (apt.time || '09:00');
+  const checkInStatus: CheckInStatus | null = topStatus === 'arrived'
+    ? (mapStateToCheckInStatus(apt.state) ?? 'waiting')
+    : null;
+  const arrivalTime = topStatus === 'arrived'
+    ? getStoredArrivalTime(apt.id) ?? extractTimeFromTimestamp(apt.datetimearrived) ?? extractTimeFromTimestamp(apt.lastupdated)
+    : null;
   return {
     id: apt.id,
     customerId: apt.partnerid || '',
@@ -129,8 +127,10 @@ function mapApiToOverview(
     checkInStatus,
     color: apt.color,
     productId: apt.productid || null,
-    arrivalTime: fallbackArrivalTime,
-    treatmentStartTime: checkInStatus === 'waiting' ? null : (apt.time || '09:00'),
+    arrivalTime,
+    treatmentStartTime: checkInStatus === 'in-treatment' || checkInStatus === 'done'
+      ? extractTimeFromTimestamp(apt.datetimeseated)
+      : null,
     assistantId: apt.assistantid ?? null,
     assistantName: apt.assistantname ?? null,
     dentalAideId: apt.dentalaideid ?? null,
@@ -346,7 +346,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
     } catch (error) {
       console.error('Failed to mark cancelled:', error);
     }
-  }, []);
+  }, [formatDate]);
 
   const updateCheckInStatus = useCallback(async (id: string, status: CheckInStatus, onSuccess?: () => void) => {
     try {
@@ -357,9 +357,10 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
         done: 'done',
       };
       await updateAppointment(id, { state: stateMap[status] });
+      const treatmentStartTime = status === 'waiting' ? null : formatDate(new Date(), 'HH:mm:ss');
       setAppointments((prev) =>
         prev.map((a) =>
-          a.id === id ? { ...a, checkInStatus: status, treatmentStartTime: status === 'waiting' ? null : (a.treatmentStartTime || a.time) } : a,
+          a.id === id ? { ...a, checkInStatus: status, treatmentStartTime } : a,
         ),
       );
       onSuccess?.();

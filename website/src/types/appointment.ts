@@ -5,7 +5,7 @@
 
 import type { AppointmentType } from '@/constants';
 
-export type AppointmentStatus = 'scheduled' | 'confirmed' | 'in-progress' | 'completed' | 'cancelled';
+export type AppointmentStatus = 'scheduled' | 'confirmed' | 'arrived' | 'in-progress' | 'completed' | 'cancelled';
 export type CheckInStatus = 'not-arrived' | 'arrived' | 'waiting' | 'in-treatment' | 'done';
 
 export interface CalendarAppointment {

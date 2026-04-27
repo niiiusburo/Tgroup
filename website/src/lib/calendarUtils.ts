@@ -38,7 +38,7 @@ export function mapStateToStatus(state: string | null): CalendarAppointment['sta
     draft: 'scheduled',
     scheduled: 'scheduled',
     confirmed: 'confirmed',
-    arrived: 'confirmed',
+    arrived: 'arrived',
     'in examination': 'in-progress',
     'in-progress': 'in-progress',
     done: 'completed',
@@ -110,8 +110,12 @@ export function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppoin
   const endTime = calculateEndTime(startTime, apt.timeexpected);
   const storedArrival = getStoredArrivalTime(apt.id);
   const phase = apiStateToPhase(apt.state);
-  const arrivalTime = storedArrival ?? (phase !== 'scheduled' && phase !== 'cancelled' ? startTime : null);
-  const treatmentStartTime = phase === 'in-treatment' || phase === 'done' ? startTime : null;
+  const arrivalTime = phase === 'waiting' || phase === 'in-treatment' || phase === 'done'
+    ? storedArrival ?? extractTimeFromTimestamp(apt.datetimearrived)
+    : null;
+  const treatmentStartTime = phase === 'in-treatment' || phase === 'done'
+    ? extractTimeFromTimestamp(apt.datetimeseated)
+    : null;
 
   return {
     id: apt.id,
@@ -140,4 +144,14 @@ export function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppoin
     dentalAideName: apt.dentalaidename ?? null,
     productId: apt.productid ?? null,
   };
+}
+
+function extractTimeFromTimestamp(ts: string | null | undefined): string | null {
+  if (!ts) return null;
+  const date = new Date(ts);
+  if (Number.isNaN(date.getTime())) return null;
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${hours}:${minutes}:${seconds}`;
 }

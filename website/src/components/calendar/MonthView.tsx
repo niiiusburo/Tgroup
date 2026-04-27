@@ -38,6 +38,7 @@ function countByStatus(appointments: readonly CalendarAppointment[]): StatusCoun
     (acc, apt) => {
       switch (apt.status) {
         case 'confirmed':
+        case 'arrived':
           acc.confirmed += 1;
           break;
         case 'scheduled':

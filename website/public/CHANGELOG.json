@@ -1,5 +1,29 @@
 [
   {
+    "version": "0.25.34",
+    "date": "2026-04-27",
+    "commit": "pending",
+    "highlights": "fix(overview): require manual check-in before appointment timers start",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Limit the Overview daily schedule card grid to two visible rows",
+          "Keep overflow appointments scrollable inside the card area so the dashboard no longer stretches vertically",
+          "Keep confirmed appointments in the scheduled state until staff manually marks them arrived",
+          "Start waiting and treatment timers from staff action timestamps instead of scheduled appointment time"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add PatientCheckIn regression coverage for the capped scroll region",
+          "Add appointment status mapping and timer regression coverage for manual check-in behavior"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.33",
     "date": "2026-04-27",
     "commit": "pending",

@@ -28,6 +28,10 @@ export interface ApiAppointment {
   productname: string | null;
   datecreated: string | null;
   lastupdated: string | null;
+  datetimearrived: string | null;
+  datetimeseated: string | null;
+  datetimedismissed: string | null;
+  datedone: string | null;
   // Assistant and dental aide (optional)
   assistantid: string | null;
   assistantname: string | null;
@@ -68,4 +72,3 @@ export function createAppointment(data: Partial<ApiAppointment>) {
 export function updateAppointment(id: string, data: Partial<ApiAppointment>) {
   return apiFetch<ApiAppointment>(`/Appointments/${id}`, { method: 'PUT', body: data });
 }
-

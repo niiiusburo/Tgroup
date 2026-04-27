@@ -154,7 +154,7 @@ function mapApiStateToUiStatus(
 ): 'scheduled' | 'arrived' | 'cancelled' | undefined {
   const s = state?.toLowerCase() ?? '';
   if (s === 'cancelled' || s === 'canceled') return 'cancelled';
-  if (s === 'arrived' || s === 'confirmed' || s === 'in examination' || s === 'in-progress' || s === 'done' || s === 'completed') {
+  if (s === 'arrived' || s === 'in examination' || s === 'in-progress' || s === 'done' || s === 'completed') {
     return 'arrived';
   }
   return 'scheduled';
