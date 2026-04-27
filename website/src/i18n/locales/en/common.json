@@ -171,6 +171,7 @@
   "relationships": "Relationships",
   "apply": "Apply",
   "reset": "Reset",
+  "all": "All",
   "filter": {
     "allDoctors": "All doctors",
     "doctor": "Doctor"

@@ -82,6 +82,11 @@ describe('apiFetch query param serialization', () => {
     expect(calledUrl()).not.toMatch(/company_id=/);
   });
 
+  it('preserves active for /Products', async () => {
+    await fetchProducts({ active: 'false' });
+    expect(calledUrl()).toMatch(/[?&]active=false/);
+  });
+
   it('preserves companyId for /Employees', async () => {
     await fetchEmployees({ companyId: 'CO-1' });
     expect(calledUrl()).toMatch(/[?&]companyId=CO-1/);
@@ -95,4 +100,3 @@ describe('apiFetch query param serialization', () => {
     expect(calledUrl()).not.toMatch(/sort_field=|sort_order=/);
   });
 });
-

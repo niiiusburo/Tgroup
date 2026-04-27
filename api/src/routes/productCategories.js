@@ -6,9 +6,14 @@ const { getVietnamNow } = require('../lib/dateUtils');
 
 const router = express.Router();
 
+function categoryGroupKey(alias) {
+  return `CONCAT_WS('|', COALESCE(${alias}.parentid::text, ''), LOWER(COALESCE(NULLIF(TRIM(${alias}.completename), ''), NULLIF(TRIM(${alias}.name), ''), ${alias}.id::text)))`;
+}
+
 /**
  * GET /api/ProductCategories
- * Returns all product categories
+ * Returns product categories grouped by display name so migrated legacy
+ * categories do not duplicate the sidebar when UUIDs differ.
  */
 router.get('/', async (req, res) => {
   try {
@@ -25,7 +30,7 @@ router.get('/', async (req, res) => {
     }
 
     if (search) {
-      conditions.push(`(pc.name ILIKE $${paramIdx})`);
+      conditions.push(`(pc.name ILIKE $${paramIdx} OR pc.completename ILIKE $${paramIdx})`);
       params.push(`%${search}%`);
       paramIdx++;
     }
@@ -33,20 +38,38 @@ router.get('/', async (req, res) => {
     const whereClause = conditions.join(' AND ');
 
     const rows = await query(
-      `SELECT
-        pc.id,
-        pc.name,
-        pc.completename,
-        pc.parentid,
-        pc.active,
-        pc.datecreated,
-        pc.lastupdated,
-        COUNT(p.id)::int AS product_count
-      FROM dbo.productcategories pc
-      LEFT JOIN dbo.products p ON p.categid = pc.id AND p.active = true
-      WHERE ${whereClause}
-      GROUP BY pc.id, pc.name, pc.completename, pc.parentid, pc.active, pc.datecreated, pc.lastupdated
-      ORDER BY pc.name ASC`,
+      `WITH category_counts AS (
+        SELECT
+          pc.id,
+          pc.name,
+          pc.completename,
+          pc.parentid,
+          pc.active,
+          pc.datecreated,
+          pc.lastupdated,
+          ${categoryGroupKey('pc')} AS category_key,
+          COUNT(p.id)::int AS product_count
+        FROM dbo.productcategories pc
+        LEFT JOIN dbo.products p ON p.categid = pc.id AND p.active = true
+        WHERE ${whereClause}
+        GROUP BY pc.id, pc.name, pc.completename, pc.parentid, pc.active, pc.datecreated, pc.lastupdated
+      ),
+      grouped_categories AS (
+        SELECT
+          (ARRAY_AGG(id ORDER BY product_count DESC, datecreated ASC NULLS LAST, id ASC))[1] AS id,
+          (ARRAY_AGG(name ORDER BY product_count DESC, datecreated ASC NULLS LAST, id ASC))[1] AS name,
+          (ARRAY_AGG(completename ORDER BY product_count DESC, datecreated ASC NULLS LAST, id ASC))[1] AS completename,
+          (ARRAY_AGG(parentid ORDER BY product_count DESC, datecreated ASC NULLS LAST, id ASC))[1] AS parentid,
+          BOOL_OR(active) AS active,
+          MIN(datecreated) AS datecreated,
+          MAX(lastupdated) AS lastupdated,
+          SUM(product_count)::int AS product_count
+        FROM category_counts
+        GROUP BY category_key
+      )
+      SELECT *
+      FROM grouped_categories
+      ORDER BY name ASC`,
       params
     );
 

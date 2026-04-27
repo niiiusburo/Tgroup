@@ -293,6 +293,7 @@ export function ServiceCatalog() {
         search: catalogSearch || undefined,
         categId: selectedCategoryId || undefined,
         companyId: selectedLocationId !== 'all' ? selectedLocationId : undefined,
+        active: activeFilter === 'all' ? 'all' : activeFilter === 'active' ? 'true' : 'false',
       });
       setProducts(res.items);
       setTotalProducts(res.totalItems);
@@ -302,7 +303,7 @@ export function ServiceCatalog() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, catalogSearch, selectedCategoryId, selectedLocationId]);
+  }, [page, pageSize, catalogSearch, selectedCategoryId, selectedLocationId, activeFilter]);
 
   useEffect(() => { loadProducts(); }, [loadProducts]);
 
@@ -315,13 +316,6 @@ export function ServiceCatalog() {
     const q = normalizeText(catalogSearch);
     return categories.filter((c) => normalizeText(c.name).includes(q));
   }, [categories, catalogSearch]);
-
-  // ── Filtered products by active status (client-side since API defaults active=true) ──
-  const displayProducts = useMemo(() => {
-    if (activeFilter === 'all') return products;
-    if (activeFilter === 'active') return products.filter((p) => p.active);
-    return products.filter((p) => !p.active);
-  }, [products, activeFilter]);
 
   // ── Pagination ──
   const totalPages = Math.max(1, Math.ceil(totalProducts / pageSize));
@@ -518,8 +512,8 @@ export function ServiceCatalog() {
           )}
 
           {/* Table */}
-          <div className="bg-white rounded-xl shadow-card overflow-hidden">
-            <table className="w-full">
+          <div className="bg-white rounded-xl shadow-card overflow-x-auto">
+            <table className="w-full min-w-[820px]">
               <thead className="bg-gray-50 border-b">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-12">
@@ -550,14 +544,14 @@ export function ServiceCatalog() {
                       <p className="text-sm text-gray-500">{tc('loading')}</p>
                     </td>
                   </tr>
-                ) : displayProducts.length === 0 ? (
+                ) : products.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-16 text-center">
                       <p className="text-sm text-gray-500">{t('noServicesFound')}</p>
                     </td>
                   </tr>
                 ) : (
-                  displayProducts.map((product) => (
+                  products.map((product) => (
                     <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3">
                         <input type="checkbox" className="rounded border-gray-300" />
@@ -581,7 +575,7 @@ export function ServiceCatalog() {
                       <td className="px-4 py-3 text-sm text-gray-600">
                         {product.companyname ?? t('allLocations')}
                       </td>
-                      <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
+                      <td className="px-4 py-3 text-sm text-right font-medium text-gray-900 whitespace-nowrap">
                         {product.listprice && parseFloat(product.listprice) > 1 ? formatVND(parseFloat(product.listprice)) : '-'}
                       </td>
                       <td className="px-4 py-3">

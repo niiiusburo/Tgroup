@@ -14,6 +14,39 @@ function normalizeVietnamese(str) {
     .toLowerCase();
 }
 
+function categoryGroupKey(alias) {
+  return `CONCAT_WS('|', COALESCE(${alias}.parentid::text, ''), LOWER(COALESCE(NULLIF(TRIM(${alias}.completename), ''), NULLIF(TRIM(${alias}.name), ''), ${alias}.id::text)))`;
+}
+
+function representativeCategoryIdSql(categoryAlias = 'pc') {
+  return `(
+    SELECT pc_rep.id
+    FROM dbo.productcategories pc_rep
+    WHERE ${categoryGroupKey('pc_rep')} = ${categoryGroupKey(categoryAlias)}
+    ORDER BY (
+      SELECT COUNT(*)
+      FROM dbo.products p_rep_count
+      WHERE p_rep_count.categid = pc_rep.id
+        AND p_rep_count.active = true
+    ) DESC, pc_rep.datecreated ASC NULLS LAST, pc_rep.id ASC
+    LIMIT 1
+  )`;
+}
+
+function groupedCategoryCondition(paramIdx) {
+  return `(
+    p.categid = $${paramIdx}
+    OR EXISTS (
+      SELECT 1
+      FROM dbo.productcategories selected_pc
+      JOIN dbo.productcategories product_pc
+        ON ${categoryGroupKey('product_pc')} = ${categoryGroupKey('selected_pc')}
+      WHERE selected_pc.id = $${paramIdx}
+        AND product_pc.id = p.categid
+    )
+  )`;
+}
+
 /**
  * GET /api/Products
  * Query params: offset, limit, search, type, categId, active, companyId
@@ -57,7 +90,7 @@ router.get('/', async (req, res) => {
 
     // Category filter
     if (categId) {
-      conditions.push(`p.categid = $${paramIdx}`);
+      conditions.push(groupedCategoryCondition(paramIdx));
       params.push(categId);
       paramIdx++;
     }
@@ -97,7 +130,7 @@ router.get('/', async (req, res) => {
         p.saleprice,
         p.purchaseprice,
         p.laboprice,
-        p.categid,
+        COALESCE(${representativeCategoryIdSql('pc')}, p.categid) AS categid,
         pc.name AS categname,
         pc.completename AS categcompletename,
         p.uomid,

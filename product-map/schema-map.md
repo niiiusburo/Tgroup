@@ -73,7 +73,7 @@
 | **W** | `api/src/routes/productCategories.js` |
 | **R** | `products.js` (JOIN for categname), `reports.js` |
 | **E** | `GET/POST/PUT/DELETE /api/ProductCategories` |
-| **UI** | ServiceCatalog category filters, ServiceForm category dropdown |
+| **UI** | ServiceCatalog category filters (duplicate migrated display names are grouped by API), ServiceForm category dropdown |
 | **Risk** | **Medium** — deleting a category without reassigning `products.categid` will orphan products or break list queries. |
 
 ### dbo.saleorders (Treatment Plans / Orders)

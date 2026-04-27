@@ -171,6 +171,7 @@
   "relationships": "Mối quan hệ",
   "apply": "Áp dụng",
   "reset": "Đặt lại",
+  "all": "Tất cả",
   "filter": {
     "allDoctors": "Tất cả bác sĩ",
     "doctor": "Bác sĩ"

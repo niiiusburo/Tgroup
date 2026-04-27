@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.25.33",
+    "date": "2026-04-27",
+    "commit": "pending",
+    "highlights": "fix(service-catalog): group migrated duplicate categories",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Group duplicate migrated service category UUIDs by display name in the catalog sidebar",
+          "Expand category filtering to include every matching category UUID behind the selected display group",
+          "Remove the stale hardcoded service-catalog navigation count and restore the common all-label translation",
+          "Send active, inactive, and all filters to the products API instead of relying on active-only defaults"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Verify local category API counts, status filtering, and service-catalog browser rendering before VPS deployment"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.28",
     "date": "2026-04-26",
     "commit": "pending",

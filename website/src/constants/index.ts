@@ -141,7 +141,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     icon: 'Stethoscope',
     children: [
       { path: ROUTES.SERVICES, label: 'services', icon: 'Stethoscope' },
-      { path: ROUTES.SERVICE_CATALOG, label: 'serviceCatalog', icon: 'FolderOpen', count: '228' },
+      { path: ROUTES.SERVICE_CATALOG, label: 'serviceCatalog', icon: 'FolderOpen' },
       { path: ROUTES.PAYMENT, label: 'paymentPlans', icon: 'CreditCard' },
     ],
   },

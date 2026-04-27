@@ -74,3 +74,4 @@ risk_level: high
 notes:
   - STALE/DEAD: api/src/routes/services.js queries public.services which does not exist.
   - STALE/DEAD: website/src/lib/api/services.ts exports dead wrappers.
+  - /api/ProductCategories groups duplicate migrated category UUIDs by display name for the catalog sidebar; /api/Products category filtering expands the selected display group to all matching category UUIDs.

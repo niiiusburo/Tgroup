@@ -32,6 +32,7 @@ export function fetchProducts(params?: {
   search?: string;
   categId?: string;
   companyId?: string;
+  active?: 'true' | 'false' | 'all';
 }) {
   return apiFetch<PaginatedResponse<ApiProduct>>('/Products', {
     params: {
@@ -40,6 +41,7 @@ export function fetchProducts(params?: {
       search: params?.search,
       categId: params?.categId,
       companyId: params?.companyId,
+      active: params?.active,
     },
   });
 }
@@ -72,4 +74,3 @@ export function updateProduct(id: string, data: Partial<{
 export function deleteProduct(id: string) {
   return apiFetch<void>(`/Products/${id}`, { method: 'DELETE' });
 }
-
