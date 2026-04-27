@@ -104,6 +104,11 @@ export function SmartFilterDrawer({
     onToggleColor(code);
   };
 
+  const handleClear = () => {
+    onClear();
+    onClose();
+  };
+
   return (
     <>
       {/* Backdrop */}
@@ -188,7 +193,7 @@ export function SmartFilterDrawer({
             <button
               type="button"
               data-testid="smart-filter-clear"
-              onClick={onClear}
+              onClick={handleClear}
               className="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
               {t('smartFilter.clear')}
             </button>

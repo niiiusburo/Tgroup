@@ -91,7 +91,7 @@ function mapAccountPaymentToPayment(row) {
     notes: nullable(row.Communication) || nullable(row.Name), created_at: parseCsvTimestamp(row.DateCreated),
     payment_date: parseCsvDateOnly(row.PaymentDate), reference_code: nullable(row.Name),
     status, deposit_used: 0, cash_amount: 0, bank_amount: 0, receipt_number: null,
-    deposit_type: status === 'voided' ? 'usage' : null, payment_category: 'payment',
+    deposit_type: null, payment_category: 'payment',
   };
 }
 

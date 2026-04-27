@@ -51,6 +51,7 @@ export function Website() {
     openSEO,
     clearFilters,
     clearServiceFilters,
+    loading,
   } = useWebsiteData();
 
   return (
@@ -96,6 +97,7 @@ export function Website() {
           onViewSEO={openSEO}
           onClearFilters={clearFilters}
           stats={pageStats}
+          loading={loading}
         />
       )}
 

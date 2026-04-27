@@ -12,9 +12,36 @@ export type ViewMode = 'day' | 'week' | 'month';
 
 export type CalendarStatusFilter = AppointmentStatus | 'all';
 
+const CALENDAR_APPOINTMENTS_PAGE_SIZE = 500;
+
 /** Create a Date at noon Vietnam time from a YYYY-MM-DD string */
 function toVnDate(dateStr: string): Date {
   return new Date(`${dateStr}T12:00:00+07:00`);
+}
+
+type CalendarAppointmentQuery = Parameters<typeof fetchAppointments>[0];
+type CalendarAppointmentPage = Awaited<ReturnType<typeof fetchAppointments>>;
+
+export async function fetchAllCalendarAppointments(params: CalendarAppointmentQuery) {
+  const items: CalendarAppointmentPage['items'] = [];
+  let offset = 0;
+  let totalItems: number | null = null;
+
+  while (totalItems === null || offset < totalItems) {
+    const response = await fetchAppointments({
+      ...params,
+      offset,
+      limit: CALENDAR_APPOINTMENTS_PAGE_SIZE,
+    });
+
+    items.push(...response.items);
+    totalItems = response.totalItems ?? items.length;
+
+    if (response.items.length === 0) break;
+    offset += response.items.length;
+  }
+
+  return items;
 }
 
 /**
@@ -31,7 +58,7 @@ export function useCalendarData(selectedLocationId?: string) {
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [search, setSearch] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [appointments, setAppointments] = useState<readonly CalendarAppointment[]>([]);
 
   // Current date as Date object at noon Vietnam time (avoids all timezone drift)
@@ -80,14 +107,13 @@ export function useCalendarData(selectedLocationId?: string) {
         dateTo = endOfDay(formatDate(monthDatesLocal[monthDatesLocal.length - 1], 'yyyy-MM-dd'));
       }
 
-      const response = await fetchAppointments({
-        limit: 200,
+      const allAppointments = await fetchAllCalendarAppointments({
         dateFrom,
         dateTo,
         companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
       });
 
-      const mappedAppointments = response.items.map(mapApiAppointmentToCalendar);
+      const mappedAppointments = allAppointments.map(mapApiAppointmentToCalendar);
       setAppointments(mappedAppointments);
     } catch (error) {
       console.error('Failed to load calendar appointments:', error);

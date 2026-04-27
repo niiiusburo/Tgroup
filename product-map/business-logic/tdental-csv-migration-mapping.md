@@ -11,13 +11,28 @@ This contract defines how TDental source exports map into the reconstructed TGCl
 3. Local demo data is not truth; it is a reconstructed target that must match TDental after import.
 4. If a CSV import is used, run a live TDental delta check after import for appointments, orders, service lines, and posted payments. Any live row missing from the CSV must be imported from live API data or the batch must be rerun from a fresh export.
 
+## Approved App Scope
+
+The full export contains more TDental/Odoo workflow data than TGClinic intentionally exposes. Bulk import must target only the app-visible model:
+
+- customers/profile/assignment fields in `dbo.partners`
+- staff references through `dbo.employees`, `dbo.employee_permissions`, and `dbo.employee_location_scope`
+- locations in `dbo.companies`
+- service catalog rows in `dbo.products` / `dbo.productcategories`
+- appointment cards in `dbo.appointments`
+- customer service history through `dbo.saleorders` and `dbo.saleorderlines`
+- payment history through `dbo.payments` and `dbo.payment_allocations`
+- customer sources/referral/sales/CSKH fields already represented by the local schema
+
+Do not import `dotkhams`, `dotkhamsteps`, quotation internals, tooth diagnosis internals, or rich customer-receipt workflow internals as first-class data. If a hidden TDental table is only needed to explain an anomaly, preserve that fact in the dry-run audit rather than adding a new target table.
+
 ## Identity Rules
 
 | Source entity | Target entity | Primary match | Fallback | Rule |
 | --- | --- | --- | --- | --- |
 | `dbo.Partners` customer | `dbo.partners` customer | `Id` UUID | None for bulk import | Never merge by `Ref`, name, or phone when UUID is available. Duplicate refs and phones are allowed during this migration, but they are warning-only audit fields. |
-| `dbo.Employees` / staff partners | `dbo.partners` employee | source UUID | None for bulk import | If a staff UUID is referenced by services but missing locally, import or create the employee before linking. |
-| `dbo.Products` | `dbo.products` | `Id` UUID | Manual review | Do not remap same-name products to a different UUID. Import the source product UUID instead. |
+| `dbo.Employees` / staff partners | `dbo.partners` employee | existing local employee by source `Id`/`PartnerId` | normalized/similar name | Reuse existing staff first. If the same staff exists at another branch, add the missing branch to `employee_location_scope` instead of creating a duplicate employee. Create staff only when no confident match exists. |
+| `dbo.Products` | `dbo.products` | existing local product by source `Id` or `DefaultCode` | normalized/similar name with category/price review | Reuse existing services first. Create a product only when no confident match exists; log ambiguous same-name service matches. |
 | `dbo.SaleOrders` | `dbo.saleorders` | `Id` UUID | None | Order names such as `SO24329` are display codes, not primary identity. |
 | `dbo.SaleOrderLines` | `dbo.saleorderlines` | `Id` UUID | None | Lines are imported by UUID and tied to their source `OrderId`. |
 | `dbo.Appointments` | `dbo.appointments` | `Id` UUID | None | Appointment codes such as `AP210661` are display codes only. |

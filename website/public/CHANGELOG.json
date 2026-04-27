@@ -1,5 +1,29 @@
 [
   {
+    "version": "0.25.35",
+    "date": "2026-04-27",
+    "commit": "pending",
+    "highlights": "feat(migration): deploy TDental sync and paginated data surfaces",
+    "sections": [
+      {
+        "title": "Improvements",
+        "items": [
+          "Add TDental dry-run and apply scripts for the migrated export workflow",
+          "Add customer API list filters and paginated customer loading",
+          "Split the calendar toolbar, date navigator, and view panel into focused modules",
+          "Add loading states across customer, payment, employee, service, report, and selector surfaces"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add TDental apply and dry-run regression coverage",
+          "Add DataTable and calendar pagination regression coverage"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.34",
     "date": "2026-04-27",
     "commit": "pending",

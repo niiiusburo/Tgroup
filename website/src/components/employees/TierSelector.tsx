@@ -5,9 +5,18 @@ interface TierSelectorProps {
   readonly onChange: (tierId: string) => void;
   readonly tiers: PermissionGroup[];
   readonly counts?: Record<string, number>;
+  readonly loading?: boolean;
 }
 
-export function TierSelector({ value, onChange, tiers, counts }: TierSelectorProps) {
+export function TierSelector({ value, onChange, tiers, counts, loading = false }: TierSelectorProps) {
+  if (loading) {
+    return (
+      <div role="status" aria-live="polite" className="px-3 py-1.5 text-sm text-gray-400">
+        Loading tiers...
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-wrap gap-2">
       <button

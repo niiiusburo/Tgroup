@@ -38,6 +38,8 @@ Thumbs.db
 website/test-results/
 test-results/
 website/e2e/screenshots/
+.gstack/
+artifacts/
 
 # Playwright MCP session snapshots
 .playwright-mcp/
@@ -79,6 +81,7 @@ LOCAL/
 .worktrees/
 all Data-4-25/
 backups/db-sync/
+backups/*.dump
 
 # Keep built contracts for local file: dependency
 !contracts/dist/

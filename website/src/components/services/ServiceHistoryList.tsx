@@ -14,19 +14,25 @@ import {
 } from '@/data/mockServices';
 import { MultiVisitTracker } from './MultiVisitTracker';
 import { formatVND } from '@/lib/formatting';
+import { LoadingState } from '@/components/shared/LoadingState';
 
 interface ServiceHistoryListProps {
   readonly records: readonly ServiceRecord[];
   readonly onUpdateVisit?: (recordId: string, visitId: string, status: VisitStatus) => void;
   readonly onCancel?: (recordId: string) => void;
   readonly onEdit?: (record: ServiceRecord) => void;
+  readonly loading?: boolean;
 }
 
-export function ServiceHistoryList({ records, onUpdateVisit, onCancel, onEdit }: ServiceHistoryListProps) {
+export function ServiceHistoryList({ records, onUpdateVisit, onCancel, onEdit, loading = false }: ServiceHistoryListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   function toggleExpanded(id: string) {
     setExpandedId((prev) => (prev === id ? null : id));
+  }
+
+  if (loading) {
+    return <LoadingState title="Loading service records..." />;
   }
 
   if (records.length === 0) {

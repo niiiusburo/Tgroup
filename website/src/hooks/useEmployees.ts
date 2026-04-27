@@ -104,7 +104,7 @@ export function useEmployees(selectedLocationId?: string) {
   const [statusFilter, setStatusFilter] = useState<EmployeeStatus | 'all'>('all');
 
   const [allEmployees, setAllEmployees] = useState<EmployeeWithApiFields[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>();

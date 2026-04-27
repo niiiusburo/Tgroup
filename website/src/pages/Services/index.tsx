@@ -49,7 +49,8 @@ export function Services() {
     createServiceRecord,
     updateServiceRecord,
     updateVisitStatus,
-    cancelServiceRecord
+    cancelServiceRecord,
+    loading,
   } = useServices(selectedLocationId);
 
   const [showForm, setShowForm] = useState(false);
@@ -123,7 +124,7 @@ export function Services() {
     <div className="space-y-6">
       <PageHeader
         title={t('title')}
-        subtitle="Manage service records and multi-visit treatments"
+        subtitle={loading ? 'Loading service records...' : 'Manage service records and multi-visit treatments'}
         icon={<Stethoscope className="w-6 h-6 text-primary" />}
         actions={
           <button
@@ -198,7 +199,8 @@ export function Services() {
         records={sortedRecords}
         onUpdateVisit={updateVisitStatus}
         onCancel={cancelServiceRecord}
-        onEdit={handleEdit} />
+        onEdit={handleEdit}
+        loading={loading} />
       
 
       {/* Form modal */}

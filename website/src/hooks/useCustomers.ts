@@ -1,100 +1,49 @@
-/**
- * useCustomers - Customer CRUD, search, and filter hook
- * NOW CONNECTED TO REAL API (tgclinic-api → PostgreSQL)
- * @crossref:used-in[Customers, Appointments, Payment, Services]
- */
-
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { fetchPartners, createPartner, updatePartner, type ApiPartner } from '@/lib/api';
+import { fetchPartners, createPartner, updatePartner } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
-import type { CustomerStatus } from '@/data/mockCustomers';
 import type { CustomerFormData } from '@/data/mockCustomerForm';
+import {
+  CUSTOMER_LOOKUP_LIMIT,
+  CUSTOMER_PAGE_SIZE,
+  mapPartnerToCustomer,
+  type Customer,
+  type CustomerStatusFilter,
+} from './useCustomers/customerMapper';
 
-export type { CustomerStatus } from '@/data/mockCustomers';
+export type { Customer, CustomerLocationFilter, CustomerStatus, CustomerStatusFilter } from './useCustomers/customerMapper';
+export { CUSTOMER_PAGE_SIZE } from './useCustomers/customerMapper';
 
-export interface Customer {
-  readonly id: string;
-  readonly name: string;
-  readonly phone: string;
-  readonly email: string;
-  readonly locationId: string;
-  readonly status: CustomerStatus;
-  readonly lastVisit: string;
-  // Extra fields from real API
-  readonly code?: string | null;
-  readonly gender?: string | null;
-  readonly street?: string | null;
-  readonly city?: string | null;
-  readonly district?: string | null;
-  readonly ward?: string | null;
-  readonly comment?: string | null;
-  readonly note?: string | null;
-  readonly agentname?: string | null;
-  readonly companyname?: string | null;
-  // CSKH (Customer Service) assignment
-  readonly cskhid?: string | null;
-  readonly cskhname?: string | null;
-}
-
-export type CustomerStatusFilter = 'all' | CustomerStatus;
-export type CustomerLocationFilter = string; // companyId or 'all'
-
-
-function mapPartnerToCustomer(p: ApiPartner): Customer {
-  return {
-    id: p.id,
-    name: p.name || '',
-    phone: p.phone || '',
-    email: p.email || '',
-    locationId: p.companyid || '',
-    status: p.status ? 'active' : 'inactive',
-    lastVisit: p.lastupdated?.slice(0, 10) || p.datecreated?.slice(0, 10) || '',
-    code: p.code,
-    gender: p.gender,
-    street: p.street,
-    city: p.city,
-    district: p.district,
-    ward: p.ward,
-    comment: p.comment,
-    note: p.note,
-    agentname: p.agentname,
-    companyname: p.companyname,
-    cskhid: p.cskhid,
-    cskhname: p.cskhname,
-  };
-}
-
-// Permission constant for viewing all customers
 export const PERMISSION_VIEW_ALL_CUSTOMERS = 'customers.view.all';
-// Minimum search length when user lacks view.all permission
 export const MIN_SEARCH_LENGTH = 3;
 
-export function useCustomers(locationId: string = 'all') {
+interface UseCustomersOptions {
+  readonly paginated?: boolean;
+  readonly limit?: number;
+}
+
+export function useCustomers(locationId: string = 'all', options: UseCustomersOptions = {}) {
+  const isPaginated = options.paginated ?? false;
+  const pageSize = options.limit ?? (isPaginated ? CUSTOMER_PAGE_SIZE : CUSTOMER_LOOKUP_LIMIT);
   const { hasPermission } = useAuth();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [totalItems, setTotalItems] = useState(0);
+  const [activeItems, setActiveItems] = useState(0);
+  const [inactiveItems, setInactiveItems] = useState(0);
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<CustomerStatusFilter>('all');
+  const [searchTerm, setSearchTermValue] = useState('');
+  const [statusFilter, setStatusFilterValue] = useState<CustomerStatusFilter>('all');
 
-  // Check if user has permission to view all customers
-  // Support both legacy 'customers.view.all' and current 'customers.view_all'
   const canViewAllCustomers = hasPermission(PERMISSION_VIEW_ALL_CUSTOMERS) || hasPermission('customers.view_all');
-  // Search is required if user doesn't have view.all permission
   const searchRequired = !canViewAllCustomers;
 
-  // Debounce search
   const searchTimeout = useRef<ReturnType<typeof setTimeout>>();
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   useEffect(() => {
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
     searchTimeout.current = setTimeout(() => {
-      // Only update debounced search if:
-      // - User can view all customers (any search term is fine)
-      // - OR search term is empty (will show empty state for restricted users)
-      // - OR search term meets minimum length requirement
       if (canViewAllCustomers || !searchTerm || searchTerm.length >= MIN_SEARCH_LENGTH) {
         setDebouncedSearch(searchTerm);
       }
@@ -102,12 +51,27 @@ export function useCustomers(locationId: string = 'all') {
     return () => { if (searchTimeout.current) clearTimeout(searchTimeout.current); };
   }, [searchTerm, canViewAllCustomers]);
 
-  // Fetch from API
+  const setSearchTerm = useCallback((value: string) => {
+    setPage(0);
+    setSearchTermValue(value);
+  }, []);
+
+  const setStatusFilter = useCallback((value: CustomerStatusFilter) => {
+    setPage(0);
+    setStatusFilterValue(value);
+  }, []);
+
+  useEffect(() => {
+    setPage(0);
+  }, [locationId]);
+
   const loadCustomers = useCallback(async () => {
-    // If search is required and no valid search term provided, don't fetch
     if (searchRequired && !debouncedSearch) {
       setCustomers([]);
       setTotalItems(0);
+      setActiveItems(0);
+      setInactiveItems(0);
+      setPage(0);
       setLoading(false);
       return;
     }
@@ -116,30 +80,30 @@ export function useCustomers(locationId: string = 'all') {
     setError(null);
     try {
       const res = await fetchPartners({
-        offset: 0,
-        limit: 200,
+        offset: isPaginated ? page * pageSize : 0,
+        limit: pageSize,
         search: debouncedSearch || undefined,
         companyId: locationId !== 'all' ? locationId : undefined,
+        status: isPaginated && statusFilter !== 'all' ? statusFilter : undefined,
       });
       let mapped = res.items.map(mapPartnerToCustomer);
-
-      // Client-side status filter (API doesn't support it directly)
-      if (statusFilter !== 'all') {
+      if (!isPaginated && statusFilter !== 'all') {
         mapped = mapped.filter((c) => c.status === statusFilter);
       }
 
-      // Sort by lastVisit descending
       mapped.sort((a, b) => b.lastVisit.localeCompare(a.lastVisit));
 
       setCustomers(mapped);
       setTotalItems(res.totalItems);
+      setActiveItems(res.aggregates?.active ?? mapped.filter((c) => c.status === 'active').length);
+      setInactiveItems(res.aggregates?.inactive ?? mapped.filter((c) => c.status === 'inactive').length);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load customers');
       console.error('useCustomers: fetch error', err);
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, locationId, statusFilter, searchRequired]);
+  }, [debouncedSearch, isPaginated, locationId, page, pageSize, statusFilter, searchRequired]);
 
   useEffect(() => {
     loadCustomers();
@@ -147,8 +111,8 @@ export function useCustomers(locationId: string = 'all') {
 
   const stats = {
     total: totalItems,
-    active: customers.filter((c) => c.status === 'active').length,
-    inactive: customers.filter((c) => c.status === 'inactive').length,
+    active: activeItems,
+    inactive: inactiveItems,
     pending: customers.filter((c) => c.status === 'pending').length,
   };
 
@@ -191,8 +155,8 @@ export function useCustomers(locationId: string = 'all') {
       });
       const mapped = mapPartnerToCustomer(created);
       setCustomers((prev) => [...prev, mapped]);
-      // Update totalItems to reflect the new customer
       setTotalItems((prev) => prev + 1);
+      setActiveItems((prev) => prev + 1);
       return mapped;
     } catch (err) {
       console.error('Failed to create customer:', err);
@@ -235,7 +199,6 @@ export function useCustomers(locationId: string = 'all') {
       cskhid: updates.cskhid || undefined,
       salestaffid: updates.salestaffid || undefined,
     });
-    // Only update local state after successful API call
     setCustomers((prev) =>
       prev.map((c) =>
         c.id === id
@@ -256,7 +219,6 @@ export function useCustomers(locationId: string = 'all') {
   }, []);
 
   const deleteCustomer = useCallback((id: string) => {
-    // Soft-delete: mark as inactive
     setCustomers((prev) => prev.filter((c) => c.id !== id));
   }, []);
 
@@ -269,6 +231,10 @@ export function useCustomers(locationId: string = 'all') {
     customers,
     allCustomers: customers,
     stats,
+    page,
+    setPage,
+    pageSize,
+    totalItems,
     loading,
     error,
     searchTerm,
@@ -280,7 +246,6 @@ export function useCustomers(locationId: string = 'all') {
     deleteCustomer,
     getCustomerById,
     refetch: loadCustomers,
-    // Permission-related properties
     searchRequired,
     minSearchLength: MIN_SEARCH_LENGTH,
     canViewAllCustomers,

@@ -179,65 +179,65 @@ Expert skills are installed in `website/.agents/skills/`. Available skill catego
 <claude-mem-context>
 # Memory Context
 
-# [Tgrouptest] recent context, 2026-04-27 12:03am GMT+7
+# [Tgrouptest] recent context, 2026-04-27 11:57am GMT+7
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
 Format: ID TIME TYPE TITLE
 Fetch details: get_observations([IDs]) | Search: mem-search skill
 
-Stats: 50 obs (19,417t read) | 633,602t work | 97% savings
+Stats: 50 obs (20,876t read) | 1,625,431t work | 99% savings
 
-### Apr 26, 2026
-10501 10:20p 🟣 Version 0.25.25 successfully deployed to production at nk.2checkin.com
-10502 10:23p 🔵 Playwright test failed due to ambiguous Payment tab selector
-10503 " 🔵 Refined Payment tab selector still matches 2 elements causing test failure
-10504 10:25p 🟣 Deployment verification successful: local and production data and UI match perfectly
-10506 10:26p ✅ Development session completed with successful deployment and verification
-10507 10:28p 🔵 Appointments table contains TimeExpected duration field
-10509 " 🔵 TimeExpected field populated in 99.5% of appointments with standard duration values
-10513 10:33p 🔵 Appointment Time Model: Duration-Based, Not End-Time-Based
-10515 " 🔵 EndTime Field in AppointmentFormCore Is Display-Only, Not Persisted
-10516 10:34p 🔵 EndTime Field Surface Area Spans 48 References Across 8 Component Categories
-10517 10:35p 🔵 EndTime Field Used Only in Local State Updates, Not API Calls
-10519 " ✅ TDD Test Added for EndTime-Free Appointment Submission
-10520 10:36p 🔵 Guard Test Fails as Expected - EndTime Currently Required
-10522 " 🔵 OverviewAppointment Interface Has No EndTime Field - Only Displays StartTime
-10526 10:37p 🟣 Duration Utilities and Dedicated Form Field Component Created
-10527 10:42p 🔄 Removed endTime from appointment form data model
-10528 " 🟣 Created centralized appointment duration utilities
-10529 " 🔄 Updated appointment mappers to use duration-based approach
-10530 " 🔄 Updated form guard to remove endTime validation requirement
-10531 " 🟣 Added timeexpected field to OverviewAppointment interface
-10532 " 🔄 Updated Calendar page to use duration-based appointment creation
-10533 10:44p 🔄 Updated all calendar display components to use duration-based time formatting
-10534 " 🔄 Extracted DayAppointmentCard component from DayView into separate file
-10535 10:45p 🔄 Extracted AppointmentAppearanceFields component from AppointmentFormCore
-10537 10:47p 🔄 Extracted AppointmentStaffFields component from AppointmentFormCore
-10547 10:55p 🔵 Tgrouptest local dev environment inactive
-10548 " 🔵 Tgrouptest Docker Compose environment not started
-10555 10:59p 🔵 Tgrouptest API started on port 3002 using tv2codex database on port 5433
-10556 11:00p 🔴 API configured to use port 5433 database and started persistently via tmux
-10557 " 🟣 Tgrouptest local dev environment fully operational with successful e2e login
-10572 11:13p 🔵 Appointment duration field uses datalist, not dropdown
-10574 " 🔵 Appointment duration distribution in production database
-10575 11:14p 🔵 Historical appointment data reveals 15min is most common duration
-10576 " 🟣 Appointment duration field converted to dropdown with preset options
-10578 11:15p 🟣 Added unit test for dropdown appointment duration field
-10579 11:16p 🟣 Duration dropdown verified working in production build
-10580 11:17p 🔄 Appointment form refactored into modular field components
-10584 11:38p 🔵 Past TamDentistExport3 timezone bug caused missing April 2026 treatments
-10585 " 🔵 Appointments TimeExpected column already fully populated, no backfill needed
-10586 11:39p 🔵 Database contains only 289 of 246,215 appointments from CSV source
-10587 " 🟣 Added appointment duration field component and utility library
-10588 11:40p 🔵 286 of 289 appointments missing time field, but time data exists in date column
-10589 11:41p 🔴 Backfilled missing time values for 286 appointments by extracting from date column
-10590 11:42p 🔵 Time backfill successful but revealed 5 appointments with timezone-shifted values
-10591 " 🔴 Corrected 5 appointments with incorrect date and time values using CSV source data
-10592 11:43p 🔵 One appointment remains with incorrect date, time, and duration after correction attempt
-10593 11:44p 🔵 AP210661 update failed - database shows wrong date, time, and duration despite recent update timestamp
-10594 11:45p 🔴 Manually corrected AP210661 completing full CSV reconciliation of all 289 appointments
-10604 11:52p 🔄 Moved tooth badge from dedicated column into quantity cell in ServiceHistory table
-10605 11:53p ✅ Verified tooth badge consolidation in live browser - appears correctly in quantity column
+### Apr 27, 2026
+10661 12:50a 🔵 TDental CSV Data Quality Analysis Complete
+10662 8:32a 🔵 Tgroup local development environment verified healthy before QA
+10663 " ⚖️ Parallel agent QA strategy chosen for comprehensive module verification
+10664 8:33a 🔵 Baseline verification confirms Tgroup test infrastructure and auth/data health
+10665 8:35a 🟣 Comprehensive smoke test infrastructure for 15 core application routes
+10666 " 🔵 Customers route false positive in login redirect detection
+10667 " 🟣 Parallel QA agent deployment for comprehensive module verification
+10668 8:36a 🔵 Database schema column naming inconsistency discovered
+10669 " 🔵 Customer data analysis reveals missing avatar and face recognition enrollment
+10670 " 🔴 API authentication failure - login endpoint returns no token
+10671 8:37a 🔵 API authentication via Playwright stored token successfully bypasses rate limiting
+10672 " 🔴 API parameter naming inconsistency - partner_id with underscore required
+10673 " 🔵 Order line data successfully retrieved via API showing payment status and service details
+10674 " 🔵 Minimal image upload usage - only 2 feedback images in system
+10675 8:38a ⚖️ Data Migration Strategy: Partial Automated Migration with Manual Financial Verification
+10676 8:40a 🔵 Service Catalog Edit Button Blocked by Modal Overlay
+10677 8:41a 🔵 Calendar appointment display test failure on April 8-12 date range
+10680 8:46a 🔵 Customer Module QA Verification Completed
+10681 8:47a ⚖️ Data Migration Strategy: Accept Dirty Data, Manual Post-Migration Verification
+10682 8:48a 🔵 System Health Verification: All Core API Endpoints Operational
+10683 8:49a 🔵 Calendar and Appointments Module QA Verification
+10684 " 🔵 Admin Module and Employee Management QA Verification
+10685 8:50a 🔵 Services and Payment pages QA validation completed
+10686 8:51a 🔵 Tgroup multi-module verification identified migration blocker and P1 bugs
+10687 8:52a ✅ QA report created documenting Tgrouptest migration verification results
+10688 " 🔵 Parallel QA agents completed comprehensive Tgrouptest module verification
+10689 9:58a 🔵 Service catalog page screenshot timeout after migration
+10690 10:00a 🔵 Service catalog migration revealed duplicate product categories and orphaned products
+10691 " 🔵 Service catalog count hardcoded as 228 but database contains 407 active products
+10692 10:01a 🔵 Migration on 2026-04-07 seeded duplicate product categories instead of reusing existing ones
+10693 10:02a 🔵 TDental migration imported 253 products correctly; duplicate categories came from separate seed script
+10696 10:04a ✅ Fixed service catalog display by grouping duplicate product categories at query time
+10697 10:05a ✅ Service catalog fix validated via tests and production build
+10703 10:07a 🔴 Service catalog table display fix
+10710 10:51a ⚖️ Loading state audit initiated for Tgrouptest website
+10711 10:52a 🔵 Missing loading UI in Customers page main list
+10712 " 🔵 Missing loading UI in Payment page for payments and outstanding balances
+10713 " 🔵 ServiceCatalog and ServiceForm have proper loading UI
+10714 " 🔵 CustomerProfile tabs have complete loading coverage
+10715 10:54a 🔵 Loading State Architecture Audit Findings
+10716 11:08a ⚖️ Multi-agent code review workflow before VPS deployment
+10717 11:09a 🔴 Service catalog category deduplication for migrated legacy data
+10718 " 🟣 Service catalog dedups migrated category UUIDs by display name
+10719 11:10a 🔵 Version bump incomplete: CHANGELOG.json not updated to match package.json 0.25.33
+10720 " ✅ CHANGELOG.json updated to version 0.25.33 for service-catalog deploy
+10721 11:11a 🔵 Service catalog deduplication ready but blocked by version mismatch
+10722 11:13a 🟣 Loading state UI added to TGClinic frontend data pages
+10726 11:30a 🔵 Service catalog migration state verified in production
+10731 11:35a 🔄 Calendar page refactored with paginated appointment fetching
+10738 11:40a 🔵 Local development database has 431 appointments for today with null time values
 
-Access 634k tokens of past work via get_observations([IDs]) or mem-search skill.
+Access 1625k tokens of past work via get_observations([IDs]) or mem-search skill.
 </claude-mem-context>

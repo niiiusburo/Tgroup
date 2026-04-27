@@ -30,7 +30,7 @@ export default function Reports() {
   const { t } = useTranslation('reports');
   const location = useLocation();
   const navigate = useNavigate();
-  const { allLocations } = useLocations();
+  const { allLocations, isLoading: locationsLoading } = useLocations();
 
   // Default: start of this year → today (Vietnam timezone)
   const todayParts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
@@ -94,6 +94,7 @@ export default function Reports() {
         onDateToChange={setDateTo}
         onCompanyChange={setCompanyId}
         locations={locations}
+        locationsLoading={locationsLoading}
       />
 
       {/* Tab content */}

@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useLocations } from "@/hooks/useLocations";
 import type { ProfileTab } from "@/components/customer/CustomerProfile";
+import { LoadingState } from "@/components/shared/LoadingState";
 
 import { buildCustomerColumns } from "./Customers/CustomerColumns";
 import { CustomerListView } from "./Customers/CustomerListView";
@@ -74,6 +75,11 @@ export function Customers() {
   const {
     customers,
     stats,
+    page,
+    setPage,
+    pageSize,
+    totalItems,
+    loading,
     searchTerm,
     setSearchTerm,
     statusFilter,
@@ -84,7 +90,7 @@ export function Customers() {
     minSearchLength,
     // Load customers across all locations so staff can search by name/phone
     // regardless of the global clinic filter.
-  } = useCustomers(undefined);
+  } = useCustomers(undefined, { paginated: true });
 
   const { allLocations } = useLocations();
   const locationNameMap = useMemo(
@@ -198,11 +204,7 @@ export function Customers() {
 
   if (profileLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <span className="text-gray-500">
-          {t("loadingProfile") || "Loading..."}
-        </span>
-      </div>
+      <LoadingState title={t("loadingProfile") || "Loading profile..."} />
     );
   }
 
@@ -255,6 +257,11 @@ export function Customers() {
       customers={customers}
       columns={customerColumns}
       stats={stats}
+      page={page}
+      pageSize={pageSize}
+      totalItems={totalItems}
+      loading={loading}
+      onPageChange={setPage}
       searchTerm={searchTerm}
       onSearchChange={setSearchTerm}
       searchPlaceholder={t("searchPlaceholder")}

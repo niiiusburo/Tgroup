@@ -16,6 +16,7 @@ interface DoctorSelectorProps {
   readonly onChange: (employeeId: string | null) => void;
   readonly placeholder?: string;
   readonly disabled?: boolean;
+  readonly loading?: boolean;
   readonly filterRoles?: readonly string[];
   readonly allowClear?: boolean;
 }
@@ -26,6 +27,7 @@ export function DoctorSelector({
   onChange,
   placeholder = 'Select doctor...',
   disabled = false,
+  loading = false,
   filterRoles,
   allowClear = false
 }: DoctorSelectorProps) {
@@ -43,6 +45,7 @@ export function DoctorSelector({
   }, [employees, filterRoles]);
 
   const selectedEmployee = employees.find((e) => e.id === selectedId);
+  const isDisabled = disabled || loading;
 
   const filteredEmployees = useMemo(() => {
     if (!searchTerm) return availableEmployees;
@@ -76,13 +79,13 @@ export function DoctorSelector({
       <button
         type="button"
         onClick={() => {
-          if (!disabled) setIsOpen((prev) => !prev);
+          if (!isDisabled) setIsOpen((prev) => !prev);
         }}
-        disabled={disabled}
+        disabled={isDisabled}
         className={`
           flex items-center gap-2 w-full px-3 py-2 rounded-lg border
           text-sm text-left transition-colors duration-150
-          ${disabled ?
+          ${isDisabled ?
         'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' :
         'bg-white border-gray-300 hover:border-gray-400 text-gray-700 cursor-pointer'}
         `
@@ -90,7 +93,7 @@ export function DoctorSelector({
         
         <Stethoscope className="w-4 h-4 text-gray-400 shrink-0" />
         <span className={`flex-1 truncate ${selectedEmployee ? '' : 'text-gray-400'}`}>
-          {selectedEmployee?.name ?? placeholder}
+          {loading ? 'Loading staff...' : selectedEmployee?.name ?? placeholder}
         </span>
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>

@@ -8,6 +8,7 @@ interface ReportsFiltersProps {
   onDateToChange: (v: string) => void;
   onCompanyChange: (v: string) => void;
   locations: { id: string; name: string }[];
+  locationsLoading?: boolean;
 }
 
 import { useTranslation } from 'react-i18next';
@@ -17,6 +18,7 @@ export function ReportsFilters({
   dateFrom, dateTo, companyId,
   onDateFromChange, onDateToChange, onCompanyChange,
   locations,
+  locationsLoading = false,
 }: ReportsFiltersProps) {
   const { t } = useTranslation('reports');
   const { getToday } = useTimezone();
@@ -79,9 +81,10 @@ export function ReportsFilters({
       <select
         value={companyId}
         onChange={(e) => onCompanyChange(e.target.value)}
+        disabled={locationsLoading}
         className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
       >
-        <option value="">{t('allLocations', 'Tất cả chi nhánh')}</option>
+        <option value="">{locationsLoading ? t('loadingLocations', 'Loading locations...') : t('allLocations', 'Tất cả chi nhánh')}</option>
         {locations.map((loc) => (
           <option key={loc.id} value={loc.id}>{loc.name}</option>
         ))}

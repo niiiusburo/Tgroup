@@ -17,7 +17,7 @@ export function useLocations() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<LocationStatus | 'all'>('all');
   const [allLocations, setAllLocations] = useState<LocationBranch[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   /**

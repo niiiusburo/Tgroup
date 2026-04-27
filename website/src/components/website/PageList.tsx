@@ -7,6 +7,7 @@ import { FileText, Eye, Pencil, Search as SearchIcon, Globe, ArrowUpDown } from 
 import { useTranslation } from 'react-i18next';
 import type { WebsitePage, PageStatus } from '@/data/mockWebsite';
 import { PAGE_STATUS_LABELS, PAGE_STATUS_STYLES } from '@/data/mockWebsite';
+import { LoadingState } from '@/components/shared/LoadingState';
 
 interface PageListProps {
   readonly pages: readonly WebsitePage[];
@@ -17,6 +18,7 @@ interface PageListProps {
   readonly onEdit: (pageId: string) => void;
   readonly onViewSEO: (pageId: string) => void;
   readonly onClearFilters: () => void;
+  readonly loading?: boolean;
   readonly stats: {
     readonly total: number;
     readonly published: number;
@@ -52,6 +54,7 @@ export function PageList({
   onEdit,
   onViewSEO,
   onClearFilters,
+  loading = false,
   stats,
 }: PageListProps) {
   const { t } = useTranslation('website');
@@ -68,7 +71,7 @@ export function PageList({
           { label: 'Scheduled', value: stats.scheduled, color: 'bg-blue-100 text-blue-700' },
         ].map((stat) => (
           <div key={stat.label} className="bg-white rounded-xl shadow-card p-4 text-center">
-            <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+            <p className="text-2xl font-bold text-gray-900">{loading ? '...' : stat.value}</p>
             <p className={`text-xs font-medium mt-1 inline-block px-2 py-0.5 rounded-full ${stat.color}`}>
               {stat.label}
             </p>
@@ -122,7 +125,9 @@ export function PageList({
 
       {/* DataTable */}
       <div className="bg-white rounded-xl shadow-card overflow-hidden">
-        {pages.length === 0 ? (
+        {loading ? (
+          <LoadingState title="Loading website pages..." variant="inline" />
+        ) : pages.length === 0 ? (
           <div className="p-12 text-center">
             <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
             <p className="text-gray-500 font-medium">No pages match your filters</p>

@@ -22,6 +22,7 @@ export { type DoctorOption, FilterByDoctor } from './FilterByDoctor';
 export { FilterByLocation } from './FilterByLocation';
 export { ImageUpload } from './ImageUpload';
 export { LanguageToggle } from './LanguageToggle';
+export { LoadingState } from './LoadingState';
 export { LocationSelector } from './LocationSelector';
 export { NotificationsPanel } from './NotificationsPanel';
 export { PageHeader } from './PageHeader';

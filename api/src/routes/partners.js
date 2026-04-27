@@ -3,6 +3,7 @@ const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
 const { PartnerCreateSchema, PartnerUpdateSchema } = require('@tgroup/contracts');
+const { applyPartnerListFilters } = require('./partners/listFilters');
 
 const router = express.Router();
 
@@ -57,6 +58,7 @@ router.get('/', async (req, res) => {
       params.push(`%${search}%`);
       paramIdx++;
     }
+    paramIdx = applyPartnerListFilters({ query: req.query, conditions, params, paramIdx });
 
     const whereClause = conditions.join(' AND ');
 

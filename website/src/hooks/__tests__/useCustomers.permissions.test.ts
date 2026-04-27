@@ -47,14 +47,14 @@ describe('useCustomers - Permission-based List Display', () => {
       mockHasPermission.mockImplementation((perm: string) => perm === PERMISSION_VIEW_ALL_CUSTOMERS);
 
       // When: Hook is initialized with empty search
-      const { result } = renderHook(() => useCustomers('all'));
+      const { result } = renderHook(() => useCustomers('all', { paginated: true }));
 
       // Then: Should fetch customers immediately (no search required)
       await waitFor(() => {
         expect(mockFetchPartners).toHaveBeenCalledWith(
           expect.objectContaining({
             offset: 0,
-            limit: 200,
+            limit: 20,
             search: undefined,
           })
         );
@@ -71,7 +71,7 @@ describe('useCustomers - Permission-based List Display', () => {
       mockHasPermission.mockImplementation((perm: string) => perm === PERMISSION_VIEW_ALL_CUSTOMERS);
 
       // When: Hook is initialized
-      const { result } = renderHook(() => useCustomers('all'));
+      const { result } = renderHook(() => useCustomers('all', { paginated: true }));
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
@@ -167,6 +167,49 @@ describe('useCustomers - Permission-based List Display', () => {
       expect(result.current.searchRequired).toBe(true);
       expect(result.current.minSearchLength).toBe(MIN_SEARCH_LENGTH);
       expect(result.current.canViewAllCustomers).toBe(false);
+    });
+  });
+
+  it('should request the selected customer page from the API', async () => {
+    mockHasPermission.mockImplementation((perm: string) => perm === PERMISSION_VIEW_ALL_CUSTOMERS);
+
+    const { result } = renderHook(() => useCustomers('all', { paginated: true }));
+
+    await waitFor(() => {
+      expect(mockFetchPartners).toHaveBeenCalledWith(
+        expect.objectContaining({
+          offset: 0,
+          limit: 20,
+        })
+      );
+    });
+
+    act(() => {
+      result.current.setPage(2);
+    });
+
+    await waitFor(() => {
+      expect(mockFetchPartners).toHaveBeenCalledWith(
+        expect.objectContaining({
+          offset: 40,
+          limit: 20,
+        })
+      );
+    });
+  });
+
+  it('uses broader lookup loading by default for selectors', async () => {
+    mockHasPermission.mockImplementation((perm: string) => perm === PERMISSION_VIEW_ALL_CUSTOMERS);
+
+    renderHook(() => useCustomers('all'));
+
+    await waitFor(() => {
+      expect(mockFetchPartners).toHaveBeenCalledWith(
+        expect.objectContaining({
+          offset: 0,
+          limit: 200,
+        })
+      );
     });
   });
 });

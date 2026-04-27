@@ -40,6 +40,7 @@ export function Employees() {
     clearFilters,
     refetch,
     filterCounts,
+    isLoading,
   } = useEmployees(selectedLocationId);
 
   // Form state
@@ -48,7 +49,7 @@ export function Employees() {
 
   const hasFilters = searchQuery || tierFilter !== 'all' || roleFilter !== 'all' || statusFilter !== 'all';
 
-  const { locations: allLocations } = useLocations();
+  const { locations: allLocations, isLoading: locationsLoading } = useLocations();
   const locationNameMap = new Map(allLocations.map((l) => [l.id, l.name]));
 
   const handleAddEmployee = () => {
@@ -57,9 +58,14 @@ export function Employees() {
   };
 
   const [tiers, setTiers] = useStateReact<PermissionGroup[]>([]);
+  const [tiersLoading, setTiersLoading] = useStateReact(true);
 
   useEffectReact(() => {
-    fetchPermissionGroups().then(setTiers).catch(() => {});
+    setTiersLoading(true);
+    fetchPermissionGroups()
+      .then(setTiers)
+      .catch(() => {})
+      .finally(() => setTiersLoading(false));
   }, []);
 
   const handleEditEmployee = () => {
@@ -100,7 +106,7 @@ export function Employees() {
     <div className="space-y-6">
       <PageHeader
         title={t('title')}
-        subtitle={`${employees.length} staff member${employees.length !== 1 ? 's' : ''}${hasFilters ? ' (filtered)' : ''}`}
+        subtitle={isLoading ? 'Loading staff...' : `${employees.length} staff member${employees.length !== 1 ? 's' : ''}${hasFilters ? ' (filtered)' : ''}`}
         icon={<UserCog className="w-6 h-6 text-primary" />}
         actions={
           <button
@@ -167,7 +173,7 @@ export function Employees() {
         {/* Tier filter */}
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-gray-500 w-14 shrink-0">Tier:</span>
-          <TierSelector value={tierFilter} onChange={setTierFilter} tiers={tiers} counts={filterCounts.tierCounts} />
+          <TierSelector value={tierFilter} onChange={setTierFilter} tiers={tiers} counts={filterCounts.tierCounts} loading={tiersLoading} />
         </div>
 
         {/* Role filter */}
@@ -197,6 +203,8 @@ export function Employees() {
             selectedEmployeeId={selectedEmployeeId}
             onSelect={setSelectedEmployeeId}
             locationNameMap={locationNameMap}
+            loading={isLoading}
+            locationsLoading={locationsLoading}
           />
         </div>
 

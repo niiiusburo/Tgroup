@@ -8,12 +8,14 @@ interface AppointmentStaffFieldsProps {
   readonly employees: readonly Employee[];
   readonly data: UnifiedAppointmentFormData;
   readonly onChange: (patch: Partial<UnifiedAppointmentFormData>) => void;
+  readonly loading?: boolean;
 }
 
 export function AppointmentStaffFields({
   employees,
   data,
   onChange,
+  loading = false,
 }: AppointmentStaffFieldsProps) {
   const { t } = useTranslation();
 
@@ -28,6 +30,7 @@ export function AppointmentStaffFields({
           employees={employees}
           selectedId={data.doctorId || null}
           filterRoles={['doctor']}
+          loading={loading}
           onChange={(employeeId) => {
             const emp = employees.find((e) => e.id === employeeId);
             onChange({ doctorId: emp?.id, doctorName: emp?.name });
@@ -44,6 +47,7 @@ export function AppointmentStaffFields({
           employees={employees}
           selectedId={data.assistantId || null}
           filterRoles={['assistant']}
+          loading={loading}
           onChange={(employeeId) => {
             const emp = employees.find((e) => e.id === employeeId);
             onChange({ assistantId: emp?.id, assistantName: emp?.name });
@@ -60,6 +64,7 @@ export function AppointmentStaffFields({
           employees={employees}
           selectedId={data.dentalAideId || null}
           filterRoles={['doctor-assistant']}
+          loading={loading}
           onChange={(employeeId) => {
             const emp = employees.find((e) => e.id === employeeId);
             onChange({ dentalAideId: emp?.id, dentalAideName: emp?.name });

@@ -13,13 +13,19 @@ import {
 } from '@/data/mockPayment';
 import { formatVND } from '@/lib/formatting';
 import { useTranslation } from 'react-i18next';
+import { LoadingState } from '@/components/shared/LoadingState';
 
 interface PaymentHistoryProps {
   readonly payments: readonly PaymentRecord[];
+  readonly loading?: boolean;
 }
 
-export function PaymentHistory({ payments }: PaymentHistoryProps) {
+export function PaymentHistory({ payments, loading = false }: PaymentHistoryProps) {
   const { t } = useTranslation('payment');
+  if (loading) {
+    return <LoadingState title="Loading payments..." />;
+  }
+
   if (payments.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-card p-8 text-center">

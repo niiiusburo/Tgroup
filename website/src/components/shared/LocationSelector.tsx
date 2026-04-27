@@ -13,6 +13,7 @@ interface LocationSelectorProps {
   readonly onChange: (locationId: string) => void;
   readonly placeholder?: string;
   readonly disabled?: boolean;
+  readonly loading?: boolean;
   readonly excludeAll?: boolean;
 }
 
@@ -22,6 +23,7 @@ export function LocationSelector({
   onChange,
   placeholder = 'Select location...',
   disabled = false,
+  loading = false,
   excludeAll = false,
 }: LocationSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,6 +34,7 @@ export function LocationSelector({
     : locations;
 
   const selectedLocation = locations.find((l) => l.id === selectedId);
+  const isDisabled = disabled || loading;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -48,13 +51,13 @@ export function LocationSelector({
       <button
         type="button"
         onClick={() => {
-          if (!disabled) setIsOpen((prev) => !prev);
+          if (!isDisabled) setIsOpen((prev) => !prev);
         }}
-        disabled={disabled}
+        disabled={isDisabled}
         className={`
           flex items-center gap-2 w-full px-3 py-2 rounded-lg border
           text-sm text-left transition-colors duration-150
-          ${disabled
+          ${isDisabled
             ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
             : 'bg-white border-gray-300 hover:border-gray-400 text-gray-700 cursor-pointer'
           }
@@ -62,7 +65,7 @@ export function LocationSelector({
       >
         <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
         <span className={`flex-1 truncate ${selectedLocation ? '' : 'text-gray-400'}`}>
-          {selectedLocation?.name ?? placeholder}
+          {loading ? 'Loading locations...' : selectedLocation?.name ?? placeholder}
         </span>
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>

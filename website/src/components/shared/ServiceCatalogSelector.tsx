@@ -17,6 +17,7 @@ interface ServiceCatalogSelectorProps {
   readonly onChange: (itemId: string) => void;
   readonly placeholder?: string;
   readonly disabled?: boolean;
+  readonly loading?: boolean;
   readonly filterCategory?: AppointmentType;
 }
 
@@ -26,6 +27,7 @@ export function ServiceCatalogSelector({
   onChange,
   placeholder = 'Select service...',
   disabled = false,
+  loading = false,
   filterCategory,
 }: ServiceCatalogSelectorProps) {
   const { t } = useTranslation(['common', 'calendar']);
@@ -35,6 +37,7 @@ export function ServiceCatalogSelector({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const selectedItem = catalog.find((c) => c.id === selectedId);
+  const isDisabled = disabled || loading;
   const getCategoryLabel = (category: AppointmentType) =>
     t(APPOINTMENT_TYPE_I18N_KEYS[category], { ns: 'calendar' });
 
@@ -76,12 +79,12 @@ export function ServiceCatalogSelector({
     <div ref={dropdownRef} className="relative">
       <button
         type="button"
-        onClick={() => { if (!disabled) setIsOpen((prev) => !prev); }}
-        disabled={disabled}
+        onClick={() => { if (!isDisabled) setIsOpen((prev) => !prev); }}
+        disabled={isDisabled}
         className={`
           flex items-center gap-2 w-full px-3 py-2 rounded-lg border
           text-sm text-left transition-colors duration-150
-          ${disabled
+          ${isDisabled
             ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
             : 'bg-white border-gray-300 hover:border-gray-400 text-gray-700 cursor-pointer'
           }
@@ -89,7 +92,7 @@ export function ServiceCatalogSelector({
       >
         <Stethoscope className="w-4 h-4 text-gray-400 shrink-0" />
         <span className={`flex-1 truncate ${selectedItem ? '' : 'text-gray-400'}`}>
-          {selectedItem?.name ?? placeholder}
+          {loading ? 'Loading services...' : selectedItem?.name ?? placeholder}
         </span>
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>

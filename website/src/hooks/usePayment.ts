@@ -93,7 +93,7 @@ export function usePayment(selectedLocationId?: string) {
   const [wallets] = useState<readonly DepositWalletData[]>([]);
   const [statusFilter, setStatusFilter] = useState<PaymentFilter>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Debounce timer ref

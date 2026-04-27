@@ -19,6 +19,8 @@ interface EmployeeTableProps {
   readonly selectedEmployeeId: string | null;
   readonly onSelect: (id: string) => void;
   readonly locationNameMap?: Map<string, string>;
+  readonly loading?: boolean;
+  readonly locationsLoading?: boolean;
 }
 
 
@@ -28,7 +30,7 @@ const STATUS_MAP: Record<string, StatusVariant> = {
   inactive: 'inactive',
 };
 
-function useColumns(locationNameMap?: Map<string, string>): readonly Column<Employee>[] {
+function useColumns(locationNameMap?: Map<string, string>, locationsLoading = false): readonly Column<Employee>[] {
   const { t } = useTranslation('employees');
   return [
     {
@@ -92,6 +94,9 @@ function useColumns(locationNameMap?: Map<string, string>): readonly Column<Empl
       sortable: true,
       width: '160px',
       render: (emp) => {
+        if (locationsLoading) {
+          return <span className="text-gray-400">Loading locations...</span>;
+        }
         const scopeNames = (emp.locationScopeIds || [])
           .filter((id) => id !== emp.locationId)
           .map((id) => locationNameMap?.get(id) || id);
@@ -128,8 +133,10 @@ export function EmployeeTable({
   selectedEmployeeId: _selectedEmployeeId,
   onSelect,
   locationNameMap,
+  loading = false,
+  locationsLoading = false,
 }: EmployeeTableProps) {
-  const columns = useColumns(locationNameMap);
+  const columns = useColumns(locationNameMap, locationsLoading);
   return (
     <DataTable
       columns={columns}
@@ -138,6 +145,8 @@ export function EmployeeTable({
       pageSize={20}
       onRowClick={(emp) => onSelect(emp.id)}
       emptyMessage="No employees match your filters"
+      loading={loading}
+      loadingMessage="Loading staff..."
     />
   );
 }

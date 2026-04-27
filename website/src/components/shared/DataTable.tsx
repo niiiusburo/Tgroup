@@ -1,5 +1,7 @@
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useMemo } from 'react';
+import { LoadingState } from './LoadingState';
+import { getPaginationItems } from './dataTablePagination';
 
 /**
  * DataTable - Sortable, paginated data table
@@ -19,8 +21,13 @@ interface DataTableProps<T> {
   readonly data: readonly T[];
   readonly keyExtractor: (row: T) => string;
   readonly pageSize?: number;
+  readonly totalItems?: number;
+  readonly currentPage?: number;
+  readonly onPageChange?: (page: number) => void;
   readonly onRowClick?: (row: T) => void;
   readonly emptyMessage?: string;
+  readonly loading?: boolean;
+  readonly loadingMessage?: string;
   readonly selection?: {
     readonly selectedIds: Set<string>;
     readonly onSelect: (id: string, selected: boolean) => void;
@@ -40,12 +47,18 @@ export function DataTable<T>({
   data,
   keyExtractor,
   pageSize = 20,
+  totalItems,
+  currentPage: controlledPage,
+  onPageChange,
   onRowClick,
   emptyMessage = 'No data found',
+  loading = false,
+  loadingMessage = 'Loading data...',
   selection,
 }: DataTableProps<T>) {
   const [sort, setSort] = useState<SortState | null>(null);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [uncontrolledPage, setUncontrolledPage] = useState(0);
+  const isServerPaginated = typeof totalItems === 'number' && typeof onPageChange === 'function';
 
   const sortedData = useMemo(() => {
     if (!sort) return data;
@@ -59,13 +72,17 @@ export function DataTable<T>({
     return sorted;
   }, [data, sort]);
 
-  const totalPages = Math.max(1, Math.ceil(sortedData.length / pageSize));
-  const safePage = Math.min(currentPage, totalPages - 1);
+  const displayTotalItems = totalItems ?? sortedData.length;
+  const totalPages = Math.max(1, Math.ceil(displayTotalItems / pageSize));
+  const requestedPage = isServerPaginated ? (controlledPage ?? 0) : uncontrolledPage;
+  const safePage = Math.max(0, Math.min(requestedPage, totalPages - 1));
+  const paginationItems = getPaginationItems(totalPages, safePage);
 
   const pageData = useMemo(() => {
+    if (isServerPaginated) return sortedData;
     const start = safePage * pageSize;
     return sortedData.slice(start, start + pageSize);
-  }, [sortedData, safePage, pageSize]);
+  }, [isServerPaginated, sortedData, safePage, pageSize]);
 
   const allPageIdsSelected = pageData.length > 0 && pageData.every((row) => selection?.selectedIds.has(keyExtractor(row)));
   const somePageIdsSelected = pageData.some((row) => selection?.selectedIds.has(keyExtractor(row))) && !allPageIdsSelected;
@@ -79,8 +96,20 @@ export function DataTable<T>({
       }
       return { key, direction: 'asc' };
     });
-    setCurrentPage(0);
+    goToPage(0);
   }
+
+  function goToPage(page: number) {
+    const nextPage = Math.max(0, Math.min(page, totalPages - 1));
+    if (isServerPaginated) {
+      onPageChange?.(nextPage);
+      return;
+    }
+    setUncontrolledPage(nextPage);
+  }
+
+  const pageStart = displayTotalItems === 0 ? 0 : safePage * pageSize + 1;
+  const pageEnd = Math.min((safePage + 1) * pageSize, displayTotalItems);
 
   return (
     <div className="bg-white rounded-xl shadow-card overflow-hidden">
@@ -124,7 +153,13 @@ export function DataTable<T>({
             </tr>
           </thead>
           <tbody>
-            {pageData.length === 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan={columns.length + (selection ? 1 : 0)} className="px-4 py-8">
+                  <LoadingState title={loadingMessage} variant="inline" className="py-2" />
+                </td>
+              </tr>
+            ) : pageData.length === 0 ? (
               <tr>
                 <td colSpan={columns.length + (selection ? 1 : 0)} className="px-4 py-8 text-center text-sm text-gray-400">
                   {emptyMessage}
@@ -176,36 +211,45 @@ export function DataTable<T>({
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
           <span className="text-xs text-gray-500">
-            Showing {safePage * pageSize + 1}–{Math.min((safePage + 1) * pageSize, sortedData.length)} of {sortedData.length}
+            Showing {pageStart}–{pageEnd} of {displayTotalItems}
           </span>
           <div className="flex items-center gap-1">
             <button
               type="button"
+              aria-label="Previous page"
               disabled={safePage === 0}
-              onClick={() => setCurrentPage((p) => p - 1)}
+              onClick={() => goToPage(safePage - 1)}
               className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setCurrentPage(i)}
-                className={`
-                  w-8 h-8 rounded-md text-xs font-medium transition-colors
-                  ${i === safePage
-                    ? 'bg-primary text-white'
-                    : 'text-gray-600 hover:bg-gray-100'}
-                `}
-              >
-                {i + 1}
-              </button>
+            {paginationItems.map((item) => (
+              typeof item === 'number' ? (
+                <button
+                  key={item}
+                  type="button"
+                  aria-current={item === safePage ? 'page' : undefined}
+                  onClick={() => goToPage(item)}
+                  className={`
+                    w-8 h-8 rounded-md text-xs font-medium transition-colors
+                    ${item === safePage
+                      ? 'bg-primary text-white'
+                      : 'text-gray-600 hover:bg-gray-100'}
+                  `}
+                >
+                  {item + 1}
+                </button>
+              ) : (
+                <span key={item} className="w-8 text-center text-xs text-gray-400">
+                  ...
+                </span>
+              )
             ))}
             <button
               type="button"
+              aria-label="Next page"
               disabled={safePage >= totalPages - 1}
-              onClick={() => setCurrentPage((p) => p + 1)}
+              onClick={() => goToPage(safePage + 1)}
               className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <ChevronRight className="w-4 h-4" />

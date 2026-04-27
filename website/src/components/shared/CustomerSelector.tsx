@@ -15,6 +15,7 @@ interface CustomerSelectorProps {
   readonly onChange: (customerId: string) => void;
   readonly placeholder?: string;
   readonly disabled?: boolean;
+  readonly loading?: boolean;
   readonly onCreateNew?: () => void;
 }
 
@@ -24,6 +25,7 @@ export function CustomerSelector({
   onChange,
   placeholder = 'Select customer...',
   disabled = false,
+  loading = false,
   onCreateNew
 }: CustomerSelectorProps) {
   const { t } = useTranslation('common');
@@ -33,6 +35,7 @@ export function CustomerSelector({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const selectedCustomer = customers.find((c) => c.id === selectedId);
+  const isDisabled = disabled || loading;
 
   const filteredCustomers = useMemo(() => {
     if (!searchTerm) return customers;
@@ -67,13 +70,13 @@ export function CustomerSelector({
       <button
         type="button"
         onClick={() => {
-          if (!disabled) setIsOpen((prev) => !prev);
+          if (!isDisabled) setIsOpen((prev) => !prev);
         }}
-        disabled={disabled}
+        disabled={isDisabled}
         className={`
           flex items-center gap-2 w-full px-3 py-2 rounded-lg border
           text-sm text-left transition-colors duration-150
-          ${disabled ?
+          ${isDisabled ?
         'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' :
         'bg-white border-gray-300 hover:border-gray-400 text-gray-700 cursor-pointer'}
         `
@@ -81,7 +84,7 @@ export function CustomerSelector({
         
         <User className="w-4 h-4 text-gray-400 shrink-0" />
         <span className={`flex-1 truncate ${selectedCustomer ? '' : 'text-gray-400'}`}>
-          {selectedCustomer?.name ?? placeholder}
+          {loading ? 'Loading customers...' : selectedCustomer?.name ?? placeholder}
         </span>
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>

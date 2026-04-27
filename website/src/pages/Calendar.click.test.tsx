@@ -16,7 +16,7 @@ vi.mock('@/lib/api', () => ({
       companyid: 'loc-1',
       companyname: 'Main Clinic',
       name: 'Cleaning',
-      date: '2026-04-19',
+      date: '2026-04-27',
       time: '09:00',
       note: '',
       timeexpected: 30,
@@ -54,10 +54,12 @@ vi.mock('@/components/appointments/unified/AppointmentFormShell', () => ({
 describe('Calendar — appointment click', () => {
   it('opens edit form when clicking an appointment card', async () => {
     renderWithProviders(<Calendar />);
+
+    expect(screen.getByText('Loading calendar...')).toBeInTheDocument();
     
-    // Wait for calendar to load
+    // Wait for calendar data to load
     await waitFor(() => {
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+      expect(screen.getByText('Nguyen Van A')).toBeInTheDocument();
     });
     
     // Find and click an appointment card

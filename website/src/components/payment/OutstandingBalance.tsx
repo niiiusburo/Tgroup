@@ -9,6 +9,7 @@ import { useTimezone } from '@/contexts/TimezoneContext';
 import type { OutstandingBalanceItem } from '@/types/payment';
 import { formatVND } from '@/lib/formatting';
 import { useTranslation } from 'react-i18next';
+import { LoadingState } from '@/components/shared/LoadingState';
 
 function useDaysUntilDue() {
   const { getToday } = useTimezone();
@@ -24,11 +25,16 @@ function useDaysUntilDue() {
 interface OutstandingBalanceProps {
   readonly balances: readonly OutstandingBalanceItem[];
   readonly onPayNow?: (balance: OutstandingBalanceItem) => void;
+  readonly loading?: boolean;
 }
 
-export function OutstandingBalance({ balances, onPayNow }: OutstandingBalanceProps) {
+export function OutstandingBalance({ balances, onPayNow, loading = false }: OutstandingBalanceProps) {
   const { t } = useTranslation('payment');
   const getDaysUntilDue = useDaysUntilDue();
+  if (loading) {
+    return <LoadingState title="Loading balances..." />;
+  }
+
   if (balances.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-card p-6 text-center">

@@ -65,6 +65,7 @@ export interface PaymentTabProps {
   services: readonly CustomerService[];
   payments: readonly PaymentWithAllocations[];
   loadingPayments: boolean;
+  loadingDeposits: boolean;
   depositList: readonly DepositTransaction[];
   usageHistory: readonly DepositTransaction[];
   depositBalance: DepositBalance;

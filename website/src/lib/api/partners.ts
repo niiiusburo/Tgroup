@@ -60,18 +60,30 @@ export interface ApiPartner {
   personaladdress: string | null;
 }
 
+export interface PartnerAggregates {
+  readonly total: number;
+  readonly active: number;
+  readonly inactive: number;
+}
+
+export type PartnersResponse = PaginatedResponse<ApiPartner> & {
+  readonly aggregates?: PartnerAggregates | null;
+};
+
 export function fetchPartners(params?: {
   offset?: number;
   limit?: number;
   search?: string;
   companyId?: string;
+  status?: 'active' | 'inactive' | 'pending';
 }) {
-  return apiFetch<PaginatedResponse<ApiPartner>>('/Partners', {
+  return apiFetch<PartnersResponse>('/Partners', {
     params: {
       offset: params?.offset ?? 0,
       limit: params?.limit ?? 50,
       search: params?.search,
       companyId: params?.companyId,
+      status: params?.status,
     },
   });
 }

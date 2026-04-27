@@ -10,6 +10,7 @@ interface AppointmentServiceFieldsProps {
   readonly appointmentType: AppointmentType;
   readonly onServiceChange: (serviceId: string | null) => void;
   readonly onTypeChange: (type: AppointmentType) => void;
+  readonly loading?: boolean;
 }
 
 const APPOINTMENT_TYPES: AppointmentType[] = [
@@ -28,6 +29,7 @@ export function AppointmentServiceFields({
   appointmentType,
   onServiceChange,
   onTypeChange,
+  loading = false,
 }: AppointmentServiceFieldsProps) {
   const { t } = useTranslation();
 
@@ -43,6 +45,7 @@ export function AppointmentServiceFields({
           selectedId={selectedServiceId || null}
           onChange={onServiceChange}
           placeholder={t('appointments:form.selectService')}
+          loading={loading}
         />
       </div>
 

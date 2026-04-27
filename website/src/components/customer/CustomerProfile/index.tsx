@@ -30,7 +30,7 @@ export function CustomerProfile(props: OrchestratorProps) {
     onEditDeposit, onRefreshDeposits, onCreateAppointment, onUpdateAppointment,
     onCreateService, onUpdateService, onDeleteService, onMakePayment, onDeletePayment,
     onSoftDelete, onHardDelete, canSoftDelete, canHardDelete,
-    loadingPayments = false,
+    loadingPayments = false, loadingDeposits = false,
     checkupData, checkupsLoading, checkupsError, onRefetchCheckups,
     onUpdateServiceStatus,
   } = props;
@@ -207,6 +207,7 @@ export function CustomerProfile(props: OrchestratorProps) {
           services={services}
           payments={payments}
           loadingPayments={loadingPayments}
+          loadingDeposits={loadingDeposits}
           depositList={depositList}
           usageHistory={usageHistory}
           depositBalance={depositBalance ?? {

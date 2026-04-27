@@ -1,13 +1,3 @@
-/**
- * AppointmentFormCore — The actual form fields.
- *
- * This component knows NOTHING about modals, API calls, or pages.
- * It only renders form fields and calls onChange when the user edits.
- *
- * Used by: AppointmentFormShell (modal wrapper)
- * Can also be embedded inline on any page if needed.
- */
-
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -52,14 +42,14 @@ export function AppointmentFormCore({
   employees: employeesProp,
 }: AppointmentFormCoreProps) {
   const { t } = useTranslation();
-  const { allLocations } = useLocations();
-  const { customers, createCustomer } = useCustomers();
-  const { employees: fetchedEmployees } = useEmployees();
+  const { allLocations, isLoading: locationsLoading } = useLocations();
+  const { customers, createCustomer, loading: customersLoading } = useCustomers();
+  const { employees: fetchedEmployees, isLoading: employeesLoading } = useEmployees();
   const employees = employeesProp ?? fetchedEmployees;
   const { selectedLocationId } = useLocationFilter();
-  const { products: serviceCatalog } = useProducts({ limit: 500 });
+  const { products: serviceCatalog, isLoading: productsLoading } = useProducts({ limit: 500 });
+  const staffLoading = employeesProp ? false : employeesLoading;
 
-  // Map Product[] to ServiceCatalogItem[] for the selector
   const serviceCatalogItems: ServiceCatalogItem[] = useMemo(
     () =>
       serviceCatalog.map((p) => ({
@@ -76,8 +66,6 @@ export function AppointmentFormCore({
   );
 
   const [showCreateCustomer, setShowCreateCustomer] = useState(false);
-
-  // ─── Handlers ───────────────────────────────────────────────────
 
   const handleCustomerChange = (customer: Customer | null) => {
     if (!customer) return;
@@ -112,14 +100,6 @@ export function AppointmentFormCore({
     onChange({ appointmentType: type });
   };
 
-  // TODO: implement inline customer creation
-  // const handleNewCustomerCreated = (customer: Customer) => {
-  //   setShowCreateCustomer(false);
-  //   handleCustomerChange(customer);
-  // };
-
-  // ─── Render helpers ─────────────────────────────────────────────
-
   return (
     <div className="space-y-5">
       {/* Customer */}
@@ -149,6 +129,7 @@ export function AppointmentFormCore({
                   if (customer) handleCustomerChange(customer);
                 }}
                 placeholder={t('appointments:form.selectCustomer')}
+                loading={customersLoading}
               />
             </div>
             <button
@@ -189,6 +170,7 @@ export function AppointmentFormCore({
             locations={allLocations.map((l) => ({ id: l.id, name: l.name }))}
             selectedId={data.locationId || null}
             onChange={handleLocationChange}
+            loading={locationsLoading}
           />
           {errors.locationId && (
             <p className="text-xs text-red-500 mt-1">{errors.locationId}</p>
@@ -230,7 +212,7 @@ export function AppointmentFormCore({
         />
       </div>
 
-      <AppointmentStaffFields employees={employees} data={data} onChange={onChange} />
+      <AppointmentStaffFields employees={employees} data={data} onChange={onChange} loading={staffLoading} />
 
       <AppointmentServiceFields
         catalog={serviceCatalogItems}
@@ -241,6 +223,7 @@ export function AppointmentFormCore({
           handleServiceChange(product || null);
         }}
         onTypeChange={handleTypeChange}
+        loading={productsLoading}
       />
 
       {/* Color + Status (edit only) */}

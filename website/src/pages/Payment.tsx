@@ -18,6 +18,7 @@ import { OutstandingBalance } from '@/components/payment/OutstandingBalance';
 import { PaymentHistory } from '@/components/payment/PaymentHistory';
 import { usePayment } from '@/hooks/usePayment';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { LoadingState } from '@/components/shared/LoadingState';
 import { useMonthlyPlans } from '@/hooks/useMonthlyPlans';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import type { PlanStatus } from '@/data/mockMonthlyPlans';
@@ -49,6 +50,7 @@ export function Payment() {
     searchTerm,
     setSearchTerm,
     topUpWallet,
+    isLoading,
   } = usePayment(selectedLocationId);
 
   // Monthly plans hook
@@ -62,6 +64,7 @@ export function Payment() {
     searchQuery,
     setSearchQuery,
     summary,
+    loading: plansLoading,
     createPlan,
     markInstallmentPaid,
   } = useMonthlyPlans(selectedLocationId);
@@ -104,32 +107,32 @@ export function Payment() {
             <Receipt className="w-4 h-4" />
             <span className="text-xs font-medium">{t('payment:totalRevenue')}</span>
           </div>
-          <p className="text-2xl font-bold text-gray-900">{formatVND(stats.totalRevenue)}</p>
-          <p className="text-xs text-gray-400 mt-0.5">{stats.completedPayments} {t('payments')}</p>
+          <p className="text-2xl font-bold text-gray-900">{isLoading ? '...' : formatVND(stats.totalRevenue)}</p>
+          <p className="text-xs text-gray-400 mt-0.5">{isLoading ? '...' : stats.completedPayments} {t('payments')}</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-card">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
             <Wallet className="w-4 h-4" />
             <span className="text-xs font-medium">{t('payment:walletBalance')}</span>
           </div>
-          <p className="text-2xl font-bold text-gray-900">{formatVND(stats.totalWalletBalance)}</p>
-          <p className="text-xs text-gray-400 mt-0.5">{stats.activeWallets} {t('activeWallets')}</p>
+          <p className="text-2xl font-bold text-gray-900">{isLoading ? '...' : formatVND(stats.totalWalletBalance)}</p>
+          <p className="text-xs text-gray-400 mt-0.5">{isLoading ? '...' : stats.activeWallets} {t('activeWallets')}</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-card">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
             <AlertCircle className="w-4 h-4" />
             <span className="text-xs font-medium">{t('payment:outstanding')}</span>
           </div>
-          <p className="text-2xl font-bold text-red-500">{formatVND(stats.totalOutstanding)}</p>
-          <p className="text-xs text-gray-400 mt-0.5">{outstandingBalances.length} {t('items')}</p>
+          <p className="text-2xl font-bold text-red-500">{isLoading ? '...' : formatVND(stats.totalOutstanding)}</p>
+          <p className="text-xs text-gray-400 mt-0.5">{isLoading ? '...' : outstandingBalances.length} {t('items')}</p>
         </div>
         <div className="bg-white rounded-xl p-4 shadow-card">
           <div className="flex items-center gap-2 text-gray-500 mb-1">
             <CalendarRange className="w-4 h-4" />
             <span className="text-xs font-medium">{t('payment:activePlans')}</span>
           </div>
-          <p className="text-2xl font-bold text-gray-900">{summary.activePlans}</p>
-          <p className="text-xs text-gray-400 mt-0.5">{summary.overdueCount} {t('overdue')}</p>
+          <p className="text-2xl font-bold text-gray-900">{plansLoading ? '...' : summary.activePlans}</p>
+          <p className="text-xs text-gray-400 mt-0.5">{plansLoading ? '...' : summary.overdueCount} {t('overdue')}</p>
         </div>
       </div>
 
@@ -171,7 +174,9 @@ export function Payment() {
           {/* Left column: Wallets + Outstanding */}
           <div className="space-y-6">
             {/* Deposit wallets */}
-            {wallets.map((wallet) => (
+            {isLoading ? (
+              <LoadingState title="Loading wallets..." />
+            ) : wallets.map((wallet) => (
               <DepositWallet
                 key={wallet.id}
                 depositBalance={wallet.balance}
@@ -185,6 +190,7 @@ export function Payment() {
               <h3 className="text-sm font-semibold text-gray-700 mb-3">{t('payment:outstandingBalances')}</h3>
               <OutstandingBalance
                 balances={outstandingBalances}
+                loading={isLoading}
               />
             </div>
           </div>
@@ -221,7 +227,7 @@ export function Payment() {
               </div>
             </div>
 
-            <PaymentHistory payments={payments} />
+            <PaymentHistory payments={payments} loading={isLoading} />
           </div>
         </div>
       )}
@@ -271,7 +277,9 @@ export function Payment() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Plan list */}
             <div className="lg:col-span-1 space-y-2">
-              {plans.length === 0 ? (
+              {plansLoading ? (
+                <LoadingState title="Loading payment plans..." />
+              ) : plans.length === 0 ? (
                 <div className="bg-white rounded-xl shadow-card p-8 text-center">
                   <CalendarRange className="w-10 h-10 text-gray-300 mx-auto mb-2" />
                   <p className="text-sm text-gray-500">{t('payment:noPlans')}</p>
@@ -314,7 +322,9 @@ export function Payment() {
 
             {/* Plan detail */}
             <div className="lg:col-span-2">
-              {selectedPlan ? (
+              {plansLoading ? (
+                <LoadingState title="Loading plan details..." />
+              ) : selectedPlan ? (
                 <PaymentSchedule plan={selectedPlan} onMarkPaid={markInstallmentPaid} />
               ) : (
                 <div className="bg-white rounded-xl shadow-card p-12 text-center">

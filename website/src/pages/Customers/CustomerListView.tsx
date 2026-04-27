@@ -11,6 +11,11 @@ interface CustomerListViewProps {
   readonly customers: readonly Customer[];
   readonly columns: readonly Column<Customer>[];
   readonly stats: { total: number; active: number };
+  readonly page: number;
+  readonly pageSize: number;
+  readonly totalItems: number;
+  readonly loading: boolean;
+  readonly onPageChange: (page: number) => void;
   readonly searchTerm: string;
   readonly onSearchChange: (v: string) => void;
   readonly searchPlaceholder: string;
@@ -47,6 +52,11 @@ export function CustomerListView({
   customers,
   columns,
   stats,
+  page,
+  pageSize,
+  totalItems,
+  loading,
+  onPageChange,
   searchTerm,
   onSearchChange,
   searchPlaceholder,
@@ -70,7 +80,7 @@ export function CustomerListView({
     <div className="space-y-6">
       <PageHeader
         title={t('title')}
-        subtitle={`${stats.total} patients · ${stats.active} active`}
+        subtitle={loading ? 'Loading patients...' : `${stats.total} patients · ${stats.active} active`}
         icon={<Users className="w-6 h-6 text-primary" />}
         actions={
           canAddCustomers && (
@@ -127,9 +137,14 @@ export function CustomerListView({
           columns={columns}
           data={customers}
           keyExtractor={(row) => row.id}
-          pageSize={20}
+          pageSize={pageSize}
+          totalItems={totalItems}
+          currentPage={page}
+          onPageChange={onPageChange}
           onRowClick={onRowClick}
           emptyMessage={emptyMessage}
+          loading={loading}
+          loadingMessage="Loading patients..."
         />
       )}
 

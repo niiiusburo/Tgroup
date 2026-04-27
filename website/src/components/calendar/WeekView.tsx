@@ -199,8 +199,9 @@ export function WeekView({
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-card">
-      {/* Week grid - grid layout ensures equal column widths */}
-      <div className="grid grid-cols-7 overflow-x-auto">
+      {/* Week grid - keep day columns readable on narrow screens */}
+      <div className="overflow-x-auto">
+        <div className="grid min-w-[77rem] grid-cols-7 xl:min-w-0">
         {weekDates.map((date, index) => {
           const dateKey = formatDateKey(date);
           const isToday = dateKey === todayKey;
@@ -243,7 +244,7 @@ export function WeekView({
               </div>
 
               {/* Appointments */}
-              <div className="p-2.5 min-h-[400px]">
+              <div className="p-2.5 min-h-[400px] max-h-[65vh] overflow-y-auto overscroll-contain">
                 {sortedAppointments.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-24 text-gray-300">
                     <CalendarDays className="w-6 h-6 mb-1" />
@@ -267,6 +268,7 @@ export function WeekView({
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );

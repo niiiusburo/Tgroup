@@ -11,6 +11,7 @@ export function PaymentTab({
   services,
   payments,
   loadingPayments,
+  loadingDeposits,
   depositList,
   usageHistory,
   depositBalance,
@@ -76,7 +77,7 @@ export function PaymentTab({
         depositList={[...depositList]}
         usageHistory={[...usageHistory]}
         balance={depositBalance}
-        loading={false}
+        loading={loadingDeposits}
         onAddDeposit={onAddDeposit ? (amount, method, date, note) => onAddDeposit(amount, method, date, note) : undefined}
         onAddRefund={onAddRefund ? (amount, method, date, note) => onAddRefund(amount, method, date, note) : undefined}
         onVoidDeposit={onVoidDeposit}

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { MapPin, Plus, Search, Building2, Phone, Mail, Clock, Check, FileText } from 'lucide-react';
 import { LocationCard } from '@/components/locations/LocationCard';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { LoadingState } from '@/components/shared/LoadingState';
 import { LocationDetail } from '@/components/locations/LocationDetail';
 import { useLocations } from '@/hooks/useLocations';
 import { STATUS_LABELS, type LocationStatus, type LocationBranch } from '@/data/mockLocations';
@@ -26,7 +27,8 @@ export function Locations() {
     getMetricsByLocationId,
     totalStats,
     clearFilters,
-    updateLocation
+    updateLocation,
+    isLoading,
   } = useLocations();
 
   const [showAddForm, setShowAddForm] = useState(false);
@@ -65,6 +67,10 @@ export function Locations() {
         }
       />
 
+      {isLoading ? (
+        <LoadingState title="Loading locations..." description="Fetching clinic branches and filters." />
+      ) : (
+        <>
       {/* Summary stats */}
       {/* @crossref:uses[useLocations.totalStats] */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -152,6 +158,8 @@ export function Locations() {
         )}
         </div>
       }
+        </>
+      )}
 
       {/* Add Location Modal */}
       {showAddForm &&
