@@ -59,6 +59,7 @@ export function mapSaleOrderLineToCustomerService(line: SaleOrderLineInput): Cus
     assistantId: firstDefined(line.assistantId, line.assistantid),
     assistantName: line.assistantname || undefined,
     dentalAideId: firstDefined(line.dentalAideId, line.dentalaideid),
+    dentalAideName: line.dentalaidename || undefined,
     catalogItemId: firstDefined(line.productId, line.productid),
     cost,
     quantity: parseMoney(firstDefined(line.productUOMQty, line.productuomqty)) || undefined,

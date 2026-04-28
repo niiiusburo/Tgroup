@@ -179,6 +179,63 @@ describe('useCustomers - CSKH Role Assignment', () => {
         })
       );
     });
+
+    it('should allow clearing customer notes', async () => {
+      mockUpdatePartner.mockResolvedValue({
+        id: '1',
+        name: 'Updated Name',
+        note: '',
+      });
+
+      const { result } = renderHook(() => useCustomers('all'));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      await result.current.updateCustomer('1', {
+        name: 'Updated Name',
+        phone: '0901111111',
+        note: '',
+      } as CustomerFormData);
+
+      expect(mockUpdatePartner).toHaveBeenCalledWith(
+        '1',
+        expect.objectContaining({
+          note: '',
+        })
+      );
+    });
+
+    it('should not clear omitted nullable assignment and note fields on partial updates', async () => {
+      mockUpdatePartner.mockResolvedValue({
+        id: '1',
+        name: 'Updated Name',
+      });
+
+      const { result } = renderHook(() => useCustomers('all'));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      await result.current.updateCustomer('1', {
+        name: 'Updated Name',
+        phone: '0901111111',
+      } as CustomerFormData);
+
+      expect(mockUpdatePartner).toHaveBeenCalledWith(
+        '1',
+        expect.not.objectContaining({
+          note: null,
+          comment: null,
+          medicalhistory: null,
+          referraluserid: null,
+          cskhid: null,
+          salestaffid: null,
+        })
+      );
+    });
   });
 });
 
@@ -188,4 +245,5 @@ type CustomerFormData = {
   phone: string;
   companyid?: string;
   cskhid?: string;
+  note?: string;
 };

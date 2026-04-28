@@ -1,5 +1,43 @@
 [
   {
+    "version": "0.25.39",
+    "date": "2026-04-28",
+    "commit": "pending",
+    "highlights": "test(qa): add module edit-display audit runner",
+    "sections": [
+      {
+        "title": "Testing",
+        "items": [
+          "Add local and live Playwright commands for checking that saved module fields also render through downstream views, with live QA-record mutation disabled unless explicitly opted in",
+          "Include the module edit-display audit in the live Playwright config so customer and service persistence checks can run after deployment",
+          "Apply local Docker E2E schema compatibility patches automatically before starting API/Vite so fresh test databases match the current app contract"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.25.38",
+    "date": "2026-04-28",
+    "commit": "pending",
+    "highlights": "fix(customers): persist notes and show doctor assistant in records",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Allow customer note, comment, and medical history edits to clear existing values instead of dropping empty updates",
+          "Return doctor-assistant names from the SaleOrders lines API so customer records can display the saved Trợ lý Bác sĩ",
+          "Show Phụ tá and Trợ lý BS staff lines in the customer Phiếu khám service history"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add regression coverage for customer note clearing and SaleOrders lines doctor-assistant mapping"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.36",
     "date": "2026-04-28",
     "commit": "pending",

@@ -121,6 +121,7 @@ describe('mapSaleOrderLineToCustomerService', () => {
       diagnostic: 'TRÁM 1R TM - 750K (CĐDV)',
       employeeid: '58a26a1d-d02c-4358-b326-b30100a8268a',
       assistantid: 'fe8753b2-3814-43ee-81d0-b2c7006579bd',
+      dentalaideid: 'dental-aide-id',
       orderid: 'e3536a97-481e-4270-8c61-b30a0056e684',
       ordername: 'SO39042',
       ordercode: 'SO39042',
@@ -130,6 +131,7 @@ describe('mapSaleOrderLineToCustomerService', () => {
       sostate: 'sale',
       doctorname: 'Lê Thị Trang',
       assistantname: 'DungBTT Sale online',
+      dentalaidename: 'BÙI NGỌC TÚ QUYÊN',
       companyname: 'Tấm Dentist Quận 10',
     });
 
@@ -139,6 +141,9 @@ describe('mapSaleOrderLineToCustomerService', () => {
     expect(service.paidAmount).toBe(750000);
     expect(service.residual).toBe(0);
     expect(service.doctorId).toBe('58a26a1d-d02c-4358-b326-b30100a8268a');
+    expect(service.dentalAideId).toBe('dental-aide-id');
+    expect(service.assistantName).toBe('DungBTT Sale online');
+    expect(service.dentalAideName).toBe('BÙI NGỌC TÚ QUYÊN');
     expect(service.orderName).toBe('SO39042');
   });
 

@@ -64,6 +64,7 @@ wait_for() {
 start_db() {
   if check_db; then
     log "PostgreSQL already running on :${DB_PORT}"
+    apply_e2e_schema_patches
     return 0
   fi
 
@@ -71,6 +72,109 @@ start_db() {
   cd "$ROOT"
   docker compose up -d db
   wait_for "PostgreSQL" check_db 30
+  apply_e2e_schema_patches
+}
+
+apply_e2e_schema_patches() {
+  log "Applying local E2E schema compatibility patches..."
+  docker exec -i tgroup-db psql -U postgres -d tdental_demo -v ON_ERROR_STOP=1 <<'SQL' >/dev/null
+ALTER TABLE dbo.partners
+  ADD COLUMN IF NOT EXISTS tier_id UUID REFERENCES dbo.permission_groups(id);
+
+UPDATE dbo.partners p
+SET tier_id = ep.group_id
+FROM dbo.employee_permissions ep
+WHERE ep.employee_id = p.id AND p.tier_id IS NULL;
+
+CREATE TABLE IF NOT EXISTS dbo.ip_access_settings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  mode VARCHAR(50) NOT NULL DEFAULT 'allow_all' CHECK (mode IN ('allow_all', 'block_all', 'whitelist_only', 'blacklist_block')),
+  last_updated TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO dbo.ip_access_settings (mode, last_updated)
+SELECT 'allow_all', NOW()
+WHERE NOT EXISTS (SELECT 1 FROM dbo.ip_access_settings);
+
+CREATE TABLE IF NOT EXISTS dbo.ip_access_entries (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  ip_address INET NOT NULL,
+  type VARCHAR(50) NOT NULL CHECK (type IN ('whitelist', 'blacklist')),
+  description TEXT DEFAULT '',
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  created_by UUID REFERENCES dbo.partners(id) ON DELETE SET NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_ip_access_entries_address_type
+  ON dbo.ip_access_entries(ip_address, type);
+CREATE INDEX IF NOT EXISTS idx_ip_access_entries_type_active
+  ON dbo.ip_access_entries(type, is_active);
+
+ALTER TABLE dbo.saleorders
+  ADD COLUMN IF NOT EXISTS sourceid UUID;
+
+ALTER TABLE dbo.saleorderlines
+  ADD COLUMN IF NOT EXISTS name TEXT,
+  ADD COLUMN IF NOT EXISTS priceunit NUMERIC,
+  ADD COLUMN IF NOT EXISTS productuomqty NUMERIC,
+  ADD COLUMN IF NOT EXISTS state TEXT,
+  ADD COLUMN IF NOT EXISTS discount NUMERIC,
+  ADD COLUMN IF NOT EXISTS pricesubtotal NUMERIC,
+  ADD COLUMN IF NOT EXISTS note TEXT,
+  ADD COLUMN IF NOT EXISTS toothtype TEXT,
+  ADD COLUMN IF NOT EXISTS diagnostic TEXT,
+  ADD COLUMN IF NOT EXISTS sequence INTEGER,
+  ADD COLUMN IF NOT EXISTS amountpaid NUMERIC,
+  ADD COLUMN IF NOT EXISTS amountresidual NUMERIC,
+  ADD COLUMN IF NOT EXISTS iscancelled BOOLEAN,
+  ADD COLUMN IF NOT EXISTS employeeid UUID,
+  ADD COLUMN IF NOT EXISTS assistantid UUID,
+  ADD COLUMN IF NOT EXISTS date TIMESTAMP WITHOUT TIME ZONE,
+  ADD COLUMN IF NOT EXISTS toothrange TEXT,
+  ADD COLUMN IF NOT EXISTS tooth_numbers TEXT,
+  ADD COLUMN IF NOT EXISTS tooth_comment TEXT;
+
+ALTER TABLE dbo.payments
+  ADD COLUMN IF NOT EXISTS payment_category VARCHAR(20);
+
+UPDATE dbo.payments
+SET payment_category = 'deposit'
+WHERE payment_category IS NULL
+  AND deposit_type IN ('deposit', 'refund');
+
+UPDATE dbo.payments
+SET payment_category = 'deposit'
+WHERE payment_category IS NULL
+  AND deposit_type IS NULL
+  AND method IN ('cash', 'bank_transfer')
+  AND service_id IS NULL
+  AND (deposit_used IS NULL OR deposit_used = 0)
+  AND amount > 0
+  AND NOT EXISTS (SELECT 1 FROM dbo.payment_allocations WHERE payment_id = payments.id);
+
+UPDATE dbo.payments
+SET payment_category = 'payment'
+WHERE payment_category IS NULL;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'chk_payment_category'
+      AND conrelid = 'dbo.payments'::regclass
+  ) THEN
+    ALTER TABLE dbo.payments
+      ADD CONSTRAINT chk_payment_category
+      CHECK (payment_category IN ('payment', 'deposit'));
+  END IF;
+END $$;
+
+ALTER TABLE dbo.payments
+  ALTER COLUMN payment_category SET NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_payments_category ON dbo.payments(payment_category);
+SQL
 }
 
 start_api() {

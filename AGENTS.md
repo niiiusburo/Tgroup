@@ -39,6 +39,17 @@ If a file approaches this limit, it MUST be split into smaller, focused modules 
 
 ---
 
+## Bounded Dense-List UI Rule
+
+Dashboard cards and side panels that can receive many rows (appointments, services, payments, notifications, reports, etc.) MUST stay bounded instead of stretching the page indefinitely.
+
+- Keep the panel/header visible and put the repeated rows in an internal scroll region.
+- Use `min-h-0` on flex/grid parents and the scroll body so `overflow-y-auto` can actually shrink.
+- Add a viewport-aware `max-height` or a parent-constrained `h-full` for dense lists.
+- Verify with an oversized dataset before calling the UI done; "Lịch hẹn hôm nay" must remain a fixed-height panel even when hundreds of appointments are returned.
+
+---
+
 ## Version Policy
 
 **ALWAYS bump the version in `website/package.json` after making code changes.**
@@ -179,37 +190,16 @@ Expert skills are installed in `website/.agents/skills/`. Available skill catego
 <claude-mem-context>
 # Memory Context
 
-# [Tgrouptest] recent context, 2026-04-27 11:57am GMT+7
+# [Tgrouptest] recent context, 2026-04-28 11:09pm GMT+7
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
 Format: ID TIME TYPE TITLE
 Fetch details: get_observations([IDs]) | Search: mem-search skill
 
-Stats: 50 obs (20,876t read) | 1,625,431t work | 99% savings
+Stats: 50 obs (23,183t read) | 1,939,371t work | 99% savings
 
 ### Apr 27, 2026
-10661 12:50a 🔵 TDental CSV Data Quality Analysis Complete
-10662 8:32a 🔵 Tgroup local development environment verified healthy before QA
-10663 " ⚖️ Parallel agent QA strategy chosen for comprehensive module verification
-10664 8:33a 🔵 Baseline verification confirms Tgroup test infrastructure and auth/data health
-10665 8:35a 🟣 Comprehensive smoke test infrastructure for 15 core application routes
-10666 " 🔵 Customers route false positive in login redirect detection
-10667 " 🟣 Parallel QA agent deployment for comprehensive module verification
-10668 8:36a 🔵 Database schema column naming inconsistency discovered
-10669 " 🔵 Customer data analysis reveals missing avatar and face recognition enrollment
-10670 " 🔴 API authentication failure - login endpoint returns no token
-10671 8:37a 🔵 API authentication via Playwright stored token successfully bypasses rate limiting
-10672 " 🔴 API parameter naming inconsistency - partner_id with underscore required
-10673 " 🔵 Order line data successfully retrieved via API showing payment status and service details
-10674 " 🔵 Minimal image upload usage - only 2 feedback images in system
-10675 8:38a ⚖️ Data Migration Strategy: Partial Automated Migration with Manual Financial Verification
-10676 8:40a 🔵 Service Catalog Edit Button Blocked by Modal Overlay
-10677 8:41a 🔵 Calendar appointment display test failure on April 8-12 date range
-10680 8:46a 🔵 Customer Module QA Verification Completed
-10681 8:47a ⚖️ Data Migration Strategy: Accept Dirty Data, Manual Post-Migration Verification
-10682 8:48a 🔵 System Health Verification: All Core API Endpoints Operational
 10683 8:49a 🔵 Calendar and Appointments Module QA Verification
-10684 " 🔵 Admin Module and Employee Management QA Verification
 10685 8:50a 🔵 Services and Payment pages QA validation completed
 10686 8:51a 🔵 Tgroup multi-module verification identified migration blocker and P1 bugs
 10687 8:52a ✅ QA report created documenting Tgrouptest migration verification results
@@ -238,6 +228,28 @@ Stats: 50 obs (20,876t read) | 1,625,431t work | 99% savings
 10726 11:30a 🔵 Service catalog migration state verified in production
 10731 11:35a 🔄 Calendar page refactored with paginated appointment fetching
 10738 11:40a 🔵 Local development database has 431 appointments for today with null time values
+10744 11:58a 🔵 Project has 43 modified files and 43 untracked files pending commit
+10745 11:59a 🔵 Untracked files total 20MB from TDental migration artifacts and QA automation
+10746 12:00p 🔵 Gitignore missing patterns for generated artifacts causing dirty git tree
+10748 " 🔴 Fixed gitignore to exclude generated QA and migration artifacts
+10750 12:01p 🟣 Version 0.25.35 deployed with TDental migration tooling and paginated data surfaces
+10751 12:02p 🟣 Committed version 0.25.35 with TDental sync tooling to main branch
+10754 12:05p 🟣 Pushed version 0.25.35 to GitHub with clean working tree
+10756 " 🟣 Deployed version 0.25.35 to production VPS with database sync preparation
+10757 12:06p 🟣 Synchronized production database with local data completing full deployment
+10758 " 🟣 Production API verified functional with all endpoints returning data
+10759 12:07p 🔵 Production frontend timeout on customers page during browser smoke test
+10761 12:08p 🔵 Production frontend smoke test passed with SaleOrders endpoint showing aborted requests
+### Apr 28, 2026
+10869 10:31p 🟣 Field-level edit/display audit E2E test for QA records
+10870 " 🔵 Tgroup E2E and unit test coverage audit for customer notes and service doctor-assistant bugs
+10871 10:34p 🟣 E2E module edit-display audit suite for regression detection
+10872 " 🔴 Customer note/comment/medicalhistory clearing now works
+10873 " 🔴 Service history now displays doctor-assistant (Trợ lý BS) staff assignments
+10874 10:35p ✅ Regression test coverage for customer note clearing
+10875 10:39p 🔴 Customer note and assignment field persistence fix
+10876 " 🔴 Service staff display in customer records
+10877 " 🟣 E2E module edit-display audit testing infrastructure
 
-Access 1625k tokens of past work via get_observations([IDs]) or mem-search skill.
+Access 1939k tokens of past work via get_observations([IDs]) or mem-search skill.
 </claude-mem-context>

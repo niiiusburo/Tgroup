@@ -1,7 +1,7 @@
 {
   "name": "tgclinic-website",
   "private": true,
-  "version": "0.25.36",
+  "version": "0.25.39",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,6 +14,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "../scripts/dev-e2e.sh test",
+    "test:e2e:module-audit": "E2E_BASE_URL=http://localhost:5175 E2E_API_BASE_URL=http://localhost:3002 npx playwright test e2e/module-edit-display-audit.spec.ts --project=chromium",
+    "test:e2e:module-audit:live": "E2E_BASE_URL=https://nk.2checkin.com E2E_API_BASE_URL=https://nk.2checkin.com npx playwright test e2e/module-edit-display-audit.spec.ts --config=playwright-live.config.ts --project=live-chromium",
     "test:e2e:ui": "npx playwright test --ui",
     "test:e2e:headed": "npx playwright test --headed",
     "dev:e2e": "../scripts/dev-e2e.sh start",

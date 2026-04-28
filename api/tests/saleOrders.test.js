@@ -199,4 +199,42 @@ describe('GET /api/SaleOrders/lines', () => {
     expect(listQuery?.[0]).toContain("COALESCE(NULLIF(NULLIF(so.unit, ''), 'services.form.unitPlaceholder'), pr.uomname) as unit");
     expect(listQuery?.[0]).toContain("COALESCE(NULLIF(sol.note, ''), so.notes) as note");
   });
+
+  it('returns the dental aide name from the sale order when dentalaideid is set', async () => {
+    query.mockImplementation(async (sql) => {
+      if (sql.includes('ip_access_settings')) {
+        return [{ mode: 'disabled' }];
+      }
+      if (sql.includes('ip_access_entries')) {
+        return [];
+      }
+      if (sql.includes('COUNT(*) as count')) {
+        return [{ count: '1' }];
+      }
+      if (sql.includes('FROM saleorderlines sol')) {
+        return [{
+          id: 'line-id',
+          orderid: 'order-id',
+          dentalaideid: 'dental-aide-id',
+          dentalaidename: 'BÙI NGỌC TÚ QUYÊN',
+        }];
+      }
+      throw new Error(`Unexpected query: ${sql}`);
+    });
+
+    const res = await request(app)
+      .get('/api/SaleOrders/lines')
+      .query({ partner_id: 'customer-id' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.items[0]).toMatchObject({
+      dentalaideid: 'dental-aide-id',
+      dentalaidename: 'BÙI NGỌC TÚ QUYÊN',
+    });
+
+    const listQuery = query.mock.calls.find(([sql]) => sql.includes('LEFT JOIN products pr ON pr.id = sol.productid'));
+    expect(listQuery?.[0]).toContain('so.dentalaideid');
+    expect(listQuery?.[0]).toContain('da.name as dentalaidename');
+    expect(listQuery?.[0]).toContain('LEFT JOIN employees da ON da.id = so.dentalaideid');
+  });
 });

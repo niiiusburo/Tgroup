@@ -227,6 +227,7 @@ router.get('/lines', async (req, res) => {
         so.state as sostate,
         doc.name as doctorname,
         asst.name as assistantname,
+        da.name as dentalaidename,
         c.name as companyname,
         COALESCE(pa.total_paid, 0) + COALESCE(dp.total_paid, 0) as paid_amount,
         COALESCE(lc.order_line_count, 1) as order_line_count
@@ -235,6 +236,7 @@ router.get('/lines', async (req, res) => {
       LEFT JOIN products pr ON pr.id = sol.productid
       LEFT JOIN employees doc ON doc.id = COALESCE(sol.employeeid, so.doctorid)
       LEFT JOIN employees asst ON asst.id = COALESCE(sol.assistantid, so.assistantid)
+      LEFT JOIN employees da ON da.id = so.dentalaideid
       LEFT JOIN companies c ON c.id = so.companyid
       LEFT JOIN (
         SELECT orderid, COUNT(*) as order_line_count

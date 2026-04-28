@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import process from 'node:process';
+
+process.env.E2E_BASE_URL ??= 'https://nk.2checkin.com';
+process.env.E2E_API_BASE_URL ??= 'https://nk.2checkin.com';
 
 /**
  * Playwright config for live site E2E testing (nk.2checkin.com).
@@ -27,7 +31,7 @@ export default defineConfig({
     {
       name: 'live-chromium',
       use: { ...devices['Desktop Chrome'] },
-      testMatch: /live-site-full-check\.spec\.ts/,
+      testMatch: /(live-site-full-check|module-edit-display-audit)\.spec\.ts/,
     },
   ],
 });

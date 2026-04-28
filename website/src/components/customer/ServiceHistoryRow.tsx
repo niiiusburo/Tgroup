@@ -60,6 +60,8 @@ export function ServiceHistoryRow({
               {service.doctor && service.doctor !== 'N/A' && (
                 <p className="mt-0.5 truncate text-xs font-medium text-gray-500">{service.doctor}</p>
               )}
+              <StaffLine label="Phụ tá" value={service.assistantName} />
+              <StaffLine label="Trợ lý BS" value={service.dentalAideName} />
             </div>
           </div>
         </td>
@@ -157,5 +159,16 @@ function ToothBadge({ value }: { readonly value: string }) {
       <span role="img" aria-label="Tooth" className="text-sm leading-none">🦷</span>
       <span>{label}</span>
     </span>
+  );
+}
+
+function StaffLine({ label, value }: { readonly label: string; readonly value?: string }) {
+  if (!value) return null;
+
+  return (
+    <p className="mt-0.5 truncate text-xs text-gray-500">
+      <span className="text-gray-400">{label}: </span>
+      <span className="font-medium">{value}</span>
+    </p>
   );
 }

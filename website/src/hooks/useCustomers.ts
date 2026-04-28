@@ -165,7 +165,10 @@ export function useCustomers(locationId: string = 'all', options: UseCustomersOp
   }, []);
 
   const updateCustomerFn = useCallback(async (id: string, updates: CustomerFormData) => {
-    await updatePartner(id, {
+    const hasUpdate = (key: keyof CustomerFormData) =>
+      Object.prototype.hasOwnProperty.call(updates, key);
+
+    const updatePayload = {
       name: updates.name,
       phone: updates.phone,
       email: updates.email || undefined,
@@ -178,10 +181,10 @@ export function useCustomers(locationId: string = 'all', options: UseCustomersOp
       cityname: updates.cityname || undefined,
       districtname: updates.districtname || undefined,
       wardname: updates.wardname || undefined,
-      medicalhistory: updates.medicalhistory || undefined,
-      note: updates.note || undefined,
-      comment: updates.comment || undefined,
-      referraluserid: updates.referraluserid || undefined,
+      medicalhistory: hasUpdate('medicalhistory') ? updates.medicalhistory : undefined,
+      note: hasUpdate('note') ? updates.note : undefined,
+      comment: hasUpdate('comment') ? updates.comment : undefined,
+      referraluserid: hasUpdate('referraluserid') ? updates.referraluserid : undefined,
       weight: updates.weight ?? undefined,
       identitynumber: updates.identitynumber || undefined,
       healthinsurancecardnumber: updates.healthinsurancecardnumber || undefined,
@@ -196,23 +199,25 @@ export function useCustomers(locationId: string = 'all', options: UseCustomersOp
       personaladdress: updates.personaladdress || undefined,
       ref: updates.ref || undefined,
       isbusinessinvoice: updates.isbusinessinvoice ?? undefined,
-      cskhid: updates.cskhid || undefined,
-      salestaffid: updates.salestaffid || undefined,
-    });
+      cskhid: hasUpdate('cskhid') ? updates.cskhid : undefined,
+      salestaffid: hasUpdate('salestaffid') ? updates.salestaffid : undefined,
+    };
+
+    await updatePartner(id, updatePayload);
     setCustomers((prev) =>
       prev.map((c) =>
         c.id === id
-          ? {
-              ...c,
-              name: updates.name,
-              phone: updates.phone,
-              email: updates.email,
-              locationId: updates.companyid,
-              gender: updates.gender || null,
-              street: updates.street || null,
-              note: updates.note || null,
-              comment: updates.comment || null,
-            }
+          ? Object.assign(
+              { ...c },
+              hasUpdate('name') ? { name: updates.name } : {},
+              hasUpdate('phone') ? { phone: updates.phone } : {},
+              hasUpdate('email') ? { email: updates.email } : {},
+              hasUpdate('companyid') ? { locationId: updates.companyid } : {},
+              hasUpdate('gender') ? { gender: updates.gender || null } : {},
+              hasUpdate('street') ? { street: updates.street || null } : {},
+              hasUpdate('note') ? { note: updates.note || null } : {},
+              hasUpdate('comment') ? { comment: updates.comment || null } : {},
+            )
           : c,
       ),
     );

@@ -170,6 +170,7 @@ export interface ApiSaleOrderLine {
   sostate: string | null;
   doctorname: string | null;
   assistantname: string | null;
+  dentalaidename: string | null;
   companyname: string | null;
   paid_amount: string | null;
   order_line_count: string | number | null;

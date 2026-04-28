@@ -78,14 +78,18 @@ export function TodayAppointments({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 h-full flex flex-col overflow-hidden">
+    <section
+      data-testid="today-appointments-panel"
+      className="bg-white rounded-2xl border border-gray-200 h-full min-h-0 max-h-[calc(100vh-8rem)] flex flex-col overflow-hidden"
+      aria-labelledby="today-appointments-title"
+    >
       {/* Gradient Header */}
       <div className="relative bg-primary px-5 pt-5 pb-4">
         {/* Decorative circles */}
         <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4" />
         <div className="absolute bottom-0 right-8 w-16 h-16 bg-white/10 rounded-full translate-y-1/2" />
         
-        <h2 className="text-base font-bold text-white uppercase tracking-wide mb-3">
+        <h2 id="today-appointments-title" className="text-base font-bold text-white uppercase tracking-wide mb-3">
           {t('overview:zone3.title')}
         </h2>
 
@@ -129,7 +133,10 @@ export function TodayAppointments({
       </div>
 
       {/* Appointment list (scrollable) */}
-      <div className="flex-1 overflow-y-auto px-5 pb-5 space-y-2.5">
+      <div
+        data-testid="today-appointments-list"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-3 pb-5 space-y-2.5"
+      >
         {appointments.length === 0 &&
         <p className="text-center text-gray-400 text-sm py-8">{t('overview:zone3.noPatients')}</p>
         }
@@ -156,6 +163,6 @@ export function TodayAppointments({
         />
         
       </div>
-    </div>);
+    </section>);
 
 }

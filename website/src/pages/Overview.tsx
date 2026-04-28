@@ -107,7 +107,7 @@ export function Overview() {
         </div>
 
         {/* Right column: Zone 3 — full height */}
-        <div className="min-h-0">
+        <div className="min-h-0 h-full">
           <TodayAppointments
             appointments={zone3Appointments}
             filter={zone3Filter}
