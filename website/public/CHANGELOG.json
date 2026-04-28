@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.25.36",
+    "date": "2026-04-28",
+    "commit": "pending",
+    "highlights": "fix(migration): merge duplicate TDental employees by name alias",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Match TDental staff by exact normalized name and alias-normalized name before creating employees",
+          "Deduplicate repeated staff rows inside the same CSV export and map all staff references to one canonical employee",
+          "Add a dry-run-first duplicate employee cleanup script that reroutes references, adds branch scopes, preserves roles, and soft-retires duplicate staff rows"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add regression coverage for alias staff matching, source duplicate staff remapping, and cleanup dry-run planning"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.35",
     "date": "2026-04-27",
     "commit": "pending",

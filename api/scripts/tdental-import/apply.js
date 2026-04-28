@@ -333,5 +333,8 @@ module.exports = {
   batchUpsert,
   buildReferenceMaps,
   deterministicUuid,
+  mapAppointmentsForApply,
+  mapEmployeesForApply,
   mapPaymentAllocationsForApply,
+  mapSaleOrderLinesForApply,
 };

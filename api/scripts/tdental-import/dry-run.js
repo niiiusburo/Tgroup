@@ -11,6 +11,12 @@ const {
   readCsv,
   uuidOrNull,
 } = require('./utils');
+const {
+  chooseCanonicalEmployee,
+  normalizeAliasName,
+  normalizeMatchName,
+  sourceEmployeeCandidate,
+} = require('./staff-identity');
 
 const APP_SCOPE_TABLE_FILES = {
   companies: 'dbo.Companies.csv',
@@ -38,17 +44,6 @@ const EXCLUDED_TARGETS = [
   'tooth_diagnosis_tables',
 ];
 
-function normalizeMatchName(value) {
-  return clean(value)
-    .replace(/[đĐ]/g, 'd')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim()
-    .replace(/\s+/g, ' ');
-}
-
 function sourceId(row) {
   return normalizeUuid(row.Id || row.id);
 }
@@ -73,20 +68,6 @@ function indexBy(rows, keyFn) {
   return index;
 }
 
-function employeeScore(employee) {
-  return [
-    (employee.location_ids || []).length,
-    clean(employee.email) ? 1 : 0,
-    clean(employee.phone) ? 1 : 0,
-    clean(employee.ref) ? 1 : 0,
-    clean(employee.companyid) ? 1 : 0,
-  ].reduce((sum, value) => sum + value, 0);
-}
-
-function chooseCanonicalEmployee(matches) {
-  return [...matches].sort((a, b) => employeeScore(b) - employeeScore(a) || clean(a.id).localeCompare(clean(b.id)))[0];
-}
-
 function planStaffMatches(sourceEmployees, local) {
   const employees = local.employees || [];
   const byId = new Map();
@@ -94,15 +75,41 @@ function planStaffMatches(sourceEmployees, local) {
     byId.set(normalizeUuid(employee.id), employee);
   }
   const byName = indexBy(employees, (employee) => normalizeMatchName(employee.name));
+  const byAlias = indexBy(employees, (employee) => normalizeAliasName(employee.name));
+  const localCanonicalByName = new Map(
+    [...byName.entries()].map(([key, rows]) => [key, chooseCanonicalEmployee(rows)]),
+  );
+  const localCanonicalByAlias = new Map(
+    [...byAlias.entries()].map(([key, rows]) => [key, chooseCanonicalEmployee(rows)]),
+  );
+  const sourceCandidatesByAlias = indexBy(
+    sourceEmployees
+      .map((row) => {
+        const id = sourceId(row);
+        const aliasKey = normalizeAliasName(row.Name || row.DisplayName);
+        return id && aliasKey ? { row, aliasKey, candidate: sourceEmployeeCandidate(row, id) } : null;
+      })
+      .filter(Boolean),
+    (item) => item.aliasKey,
+  );
+  const sourceCanonicalByAlias = new Map(
+    [...sourceCandidatesByAlias.entries()].map(([key, rows]) => [
+      key,
+      chooseCanonicalEmployee(rows.map((item) => item.candidate)),
+    ]),
+  );
   const anomalies = [];
   const matches = [];
   const summary = {
     sourceCount: sourceEmployees.length,
     exactMatches: 0,
     nameMatches: 0,
+    aliasNameMatches: 0,
+    sourceDuplicateMatches: 0,
     creates: 0,
     locationScopeAdds: 0,
     ambiguousNameMatches: 0,
+    ambiguousAliasMatches: 0,
   };
 
   for (const row of sourceEmployees) {
@@ -110,14 +117,16 @@ function planStaffMatches(sourceEmployees, local) {
     const partnerId = normalizeUuid(row.PartnerId);
     const name = clean(row.Name || row.DisplayName);
     const nameKey = normalizeMatchName(name);
+    const aliasKey = normalizeAliasName(name);
     const sourceCompanyId = getSourceCompanyId(row);
     const exact = byId.get(id) || byId.get(partnerId);
     const nameMatches = nameKey ? byName.get(nameKey) || [] : [];
+    const aliasMatches = aliasKey ? byAlias.get(aliasKey) || [] : [];
     let target = exact || null;
     let action = exact ? 'exact_match' : 'create';
 
     if (!target && nameMatches.length > 0) {
-      target = chooseCanonicalEmployee(nameMatches);
+      target = localCanonicalByName.get(nameKey);
       action = 'name_match';
       summary.nameMatches += 1;
       if (nameMatches.length > 1) {
@@ -132,11 +141,33 @@ function planStaffMatches(sourceEmployees, local) {
           details: { localEmployeeIds: nameMatches.map((employee) => employee.id) },
         });
       }
+    } else if (!target && aliasMatches.length > 0) {
+      target = localCanonicalByAlias.get(aliasKey);
+      action = 'alias_name_match';
+      summary.aliasNameMatches += 1;
+      if (aliasMatches.length > 1) {
+        summary.ambiguousAliasMatches += 1;
+        anomalies.push({
+          severity: 'warning',
+          code: 'duplicate_local_employee_alias',
+          sourceTable: 'Employees',
+          sourceId: id,
+          targetId: target.id,
+          message: `Matched staff "${name}" to one existing employee by alias, but ${aliasMatches.length} local employees share that alias.`,
+          details: { localEmployeeIds: aliasMatches.map((employee) => employee.id) },
+        });
+      }
     } else if (target) {
       summary.exactMatches += 1;
     } else {
-      target = { id, name, loc_scope: 'assigned', location_ids: [] };
-      summary.creates += 1;
+      target = sourceCanonicalByAlias.get(aliasKey) || { id, name, loc_scope: 'assigned', location_ids: [] };
+      if (target.id === id) {
+        action = 'create';
+        summary.creates += 1;
+      } else {
+        action = 'source_alias_match';
+        summary.sourceDuplicateMatches += 1;
+      }
     }
 
     const locationIds = new Set((target?.location_ids || []).map(normalizeUuid).filter(Boolean));
@@ -406,11 +437,13 @@ function loadAppScopeSourceFromArchive(archivePath) {
 async function readLocalSnapshot(client) {
   const employees = await client.query(`
       SELECT e.id::text, e.name, e.ref, e.phone, e.email, e.companyid::text, ep.loc_scope,
+             e.active, e.isdoctor, e.isassistant, e.isreceptionist,
              COALESCE(ARRAY_AGG(els.company_id::text) FILTER (WHERE els.company_id IS NOT NULL), '{}'::text[]) AS location_ids
       FROM employees e
       LEFT JOIN employee_permissions ep ON ep.employee_id = e.id
       LEFT JOIN employee_location_scope els ON els.employee_id = e.id
-      GROUP BY e.id, e.name, e.ref, e.phone, e.email, e.companyid, ep.loc_scope
+      GROUP BY e.id, e.name, e.ref, e.phone, e.email, e.companyid, ep.loc_scope,
+               e.active, e.isdoctor, e.isassistant, e.isreceptionist
     `);
   const products = await client.query('SELECT id::text, name, defaultcode, categid::text, listprice, saleprice, companyid::text FROM products');
   const companies = await client.query('SELECT id::text, name FROM companies');
@@ -446,6 +479,7 @@ module.exports = {
   buildDryRunSummary,
   loadAppScopeSourceFromArchive,
   loadAppScopeSourceFromDir,
+  normalizeAliasName,
   normalizeMatchName,
   planPaymentAllocations,
   planProductMatches,

@@ -1,5 +1,6 @@
 const {
   buildDryRunSummary,
+  normalizeAliasName,
   normalizeMatchName,
   planProductMatches,
   planStaffMatches,
@@ -10,6 +11,8 @@ describe('TDental full-export dry run', () => {
     expect(normalizeMatchName('  BS. Hải  ')).toBe('bs hai');
     expect(normalizeMatchName('AnhVL saleonline')).toBe('anhvl saleonline');
     expect(normalizeMatchName('Răng sứ Emax')).toBe('rang su emax');
+    expect(normalizeAliasName('AnhVL Sale online')).toBe('anhvlsaleonline');
+    expect(normalizeAliasName('Bác sĩ (17)')).toBe('bacsi17');
   });
 
   it('adds employee location scope for same-name staff instead of creating a duplicate', () => {
@@ -59,6 +62,71 @@ describe('TDental full-export dry run', () => {
     });
     expect(plan.anomalies.map((a) => a.code)).toContain('duplicate_local_employee_name');
     expect(plan.anomalies.map((a) => a.code)).toContain('staff_location_scope_add');
+  });
+
+  it('matches alias-equivalent staff names before creating duplicate employees', () => {
+    const sourceEmployees = [
+      {
+        Id: '00000000-0000-0000-0000-000000000701',
+        PartnerId: '00000000-0000-0000-0000-000000000801',
+        Name: 'AnhVL Sale online',
+        CompanyId: '00000000-0000-0000-0000-000000000301',
+      },
+    ];
+    const localEmployees = [
+      {
+        id: '00000000-0000-0000-0000-000000000999',
+        name: 'AnhVL saleonline',
+        phone: '0373740697',
+        loc_scope: 'assigned',
+        location_ids: [],
+      },
+    ];
+
+    const plan = planStaffMatches(sourceEmployees, {
+      employees: localEmployees,
+      companiesById: new Map([
+        ['00000000-0000-0000-0000-000000000301', { id: '00000000-0000-0000-0000-000000000301', name: 'Tấm Dentist Gò Vấp' }],
+      ]),
+    });
+
+    expect(plan.summary.creates).toBe(0);
+    expect(plan.summary.aliasNameMatches).toBe(1);
+    expect(plan.matches[0]).toMatchObject({
+      action: 'alias_name_match',
+      targetId: '00000000-0000-0000-0000-000000000999',
+      needsLocationScope: true,
+    });
+  });
+
+  it('deduplicates same alias staff rows inside one source export', () => {
+    const sourceEmployees = [
+      {
+        Id: '00000000-0000-0000-0000-000000000701',
+        PartnerId: '00000000-0000-0000-0000-000000000801',
+        Name: 'Bác sĩ 17',
+        CompanyId: '00000000-0000-0000-0000-000000000301',
+      },
+      {
+        Id: '00000000-0000-0000-0000-000000000702',
+        PartnerId: '00000000-0000-0000-0000-000000000802',
+        Name: 'Bác sĩ (17)',
+        Phone: '0900000000',
+        CompanyId: '00000000-0000-0000-0000-000000000302',
+      },
+    ];
+
+    const plan = planStaffMatches(sourceEmployees, {
+      employees: [],
+      companiesById: new Map(),
+    });
+
+    expect(plan.summary.creates).toBe(1);
+    expect(plan.summary.sourceDuplicateMatches).toBe(1);
+    expect(plan.matches.map((match) => [match.sourceId, match.action, match.targetId])).toEqual([
+      ['00000000-0000-0000-0000-000000000701', 'source_alias_match', '00000000-0000-0000-0000-000000000702'],
+      ['00000000-0000-0000-0000-000000000702', 'create', '00000000-0000-0000-0000-000000000702'],
+    ]);
   });
 
   it('matches services by exact id, default code, then normalized name before creating', () => {
