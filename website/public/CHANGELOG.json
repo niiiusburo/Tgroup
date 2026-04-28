@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.25.40",
+    "date": "2026-04-28",
+    "commit": "pending",
+    "highlights": "test(qa): harden live smoke verification",
+    "sections": [
+      {
+        "title": "Testing",
+        "items": [
+          "Allow live Playwright smoke checks to use an injected auth token so production QA does not trip login rate limits",
+          "Accept the Vietnamese Tổng quan heading in the live Overview smoke test",
+          "Stop counting structural empty div wrappers as missing text labels in live smoke checks"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.39",
     "date": "2026-04-28",
     "commit": "pending",

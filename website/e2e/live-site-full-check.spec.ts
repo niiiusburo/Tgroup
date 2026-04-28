@@ -6,8 +6,18 @@ import { test, expect, type Page } from '@playwright/test';
  */
 
 const LIVE_URL = 'https://nk.2checkin.com';
+const E2E_AUTH_TOKEN = process.env.E2E_AUTH_TOKEN;
 
 async function login(page: Page) {
+  if (E2E_AUTH_TOKEN) {
+    await page.addInitScript((authToken) => {
+      localStorage.setItem('tgclinic_token', authToken);
+    }, E2E_AUTH_TOKEN);
+    await page.goto(LIVE_URL);
+    await page.waitForSelector('nav', { timeout: 20000 });
+    return;
+  }
+
   await page.goto(`${LIVE_URL}/login`);
   await page.waitForSelector('#email', { timeout: 15000 });
 
@@ -21,10 +31,10 @@ async function login(page: Page) {
 
 // ─── Helper: assert NO empty shell elements on the current page ─────────────
 async function assertNoEmptyElements(page: Page, pageName: string) {
-  // Empty spans, labels, p, divs, h1-h6, buttons
+  // Empty text-bearing elements. Empty divs are normally structural wrappers.
   const emptySelectors = [
     'span:empty', 'p:empty', 'label:empty',
-    'div:empty', 'h1:empty', 'h2:empty', 'h3:empty', 'h4:empty', 'h5:empty', 'h6:empty',
+    'h1:empty', 'h2:empty', 'h3:empty', 'h4:empty', 'h5:empty', 'h6:empty',
     'button:empty',
   ];
 
@@ -103,7 +113,7 @@ test.describe('Live Site — nk.2checkin.com Full Verification', () => {
     await page.waitForTimeout(3000);
 
     const body = await page.locator('body').innerText();
-    expect(body).toContain('Overview');
+    expect(body).toMatch(/Overview|Tổng quan/);
 
     const empty = await assertNoEmptyElements(page, 'Overview');
     const { networkErrors } = stopCapture();
