@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useAppointmentForm } from '../useAppointmentForm';
 
@@ -14,9 +14,22 @@ const mockCreateAppointment = createAppointment as ReturnType<typeof vi.fn>;
 const mockUpdateAppointment = updateAppointment as ReturnType<typeof vi.fn>;
 
 describe('useAppointmentForm validation', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   beforeEach(() => {
     mockCreateAppointment.mockClear();
     mockUpdateAppointment.mockClear();
+  });
+
+  it('defaults new appointment start time to the current Vietnam time rounded to 5 minutes', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-04-29T11:42:00.000Z')); // 18:42 in Vietnam
+
+    const { result } = renderHook(() => useAppointmentForm('create'));
+
+    expect(result.current.data.startTime).toBe('18:45');
   });
 
   it('should block submit when estimatedDuration is 0', async () => {

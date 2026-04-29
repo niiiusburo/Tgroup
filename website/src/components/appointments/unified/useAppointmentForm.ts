@@ -19,9 +19,26 @@ import type {
 import { formDataToApiPayload } from './appointmentForm.mapper';
 import { createAppointment, updateAppointment } from '@/lib/api';
 import { DEFAULT_APPOINTMENT_DURATION } from '@/lib/appointmentDuration';
-import { getTodayInTimezone } from '@/lib/dateUtils';
+import { formatInTimezone, getTodayInTimezone } from '@/lib/dateUtils';
 
 const DEFAULT_COLOR = '1';
+const DEFAULT_TIMEZONE = 'Asia/Ho_Chi_Minh';
+const START_TIME_INTERVAL_MINUTES = 5;
+const LAST_TIME_SLOT_MINUTES = (23 * 60) + 55;
+
+export function getCurrentAppointmentStartTime(now = new Date()): string {
+  const [hourPart, minutePart] = formatInTimezone(now, DEFAULT_TIMEZONE, 'HH:mm').split(':');
+  const hour = Number(hourPart) % 24;
+  const minute = Number(minutePart);
+  const totalMinutes = (hour * 60) + minute;
+  const roundedMinutes = Math.min(
+    Math.ceil(totalMinutes / START_TIME_INTERVAL_MINUTES) * START_TIME_INTERVAL_MINUTES,
+    LAST_TIME_SLOT_MINUTES,
+  );
+  const roundedHour = Math.floor(roundedMinutes / 60);
+  const roundedMinute = roundedMinutes % 60;
+  return `${String(roundedHour).padStart(2, '0')}:${String(roundedMinute).padStart(2, '0')}`;
+}
 
 function makeEmptyData(): UnifiedAppointmentFormData {
   return {
@@ -39,8 +56,8 @@ function makeEmptyData(): UnifiedAppointmentFormData {
     appointmentType: 'consultation',
     serviceName: '',
     serviceId: undefined,
-    date: getTodayInTimezone('Asia/Ho_Chi_Minh'),
-    startTime: '09:00',
+    date: getTodayInTimezone(DEFAULT_TIMEZONE),
+    startTime: getCurrentAppointmentStartTime(),
     notes: '',
     estimatedDuration: DEFAULT_APPOINTMENT_DURATION,
     color: DEFAULT_COLOR,

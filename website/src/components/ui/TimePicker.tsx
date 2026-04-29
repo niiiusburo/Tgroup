@@ -17,6 +17,8 @@ interface TimePickerProps {
   readonly label?: string;
   readonly icon?: React.ReactNode;
   readonly interval?: number; // minutes between options, default 15
+  readonly startHour?: number;
+  readonly endHour?: number;
   readonly minTime?: string;
   readonly maxTime?: string;
   readonly error?: string;
@@ -24,9 +26,9 @@ interface TimePickerProps {
 }
 
 // Generate time slots
-function generateTimeSlots(interval: number): string[] {
+function generateTimeSlots(interval: number, startHour: number, endHour: number): string[] {
   const slots: string[] = [];
-  for (let hour = 7; hour <= 20; hour++) {
+  for (let hour = startHour; hour <= endHour; hour++) {
     for (let minute = 0; minute < 60; minute += interval) {
       const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
       slots.push(time);
@@ -42,6 +44,8 @@ export function TimePicker({
   label,
   icon = <Clock className="w-4 h-4" />,
   interval = 15,
+  startHour = 7,
+  endHour = 20,
   minTime,
   maxTime,
   error,
@@ -53,7 +57,7 @@ export function TimePicker({
   const listRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  const timeSlots = generateTimeSlots(interval);
+  const timeSlots = generateTimeSlots(interval, startHour, endHour);
 
   // Close when clicking outside
   useEffect(() => {

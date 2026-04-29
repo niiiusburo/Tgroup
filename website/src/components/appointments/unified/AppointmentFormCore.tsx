@@ -208,6 +208,9 @@ export function AppointmentFormCore({
           <TimePicker
             value={data.startTime}
             onChange={(time) => onChange({ startTime: time })}
+            interval={5}
+            startHour={0}
+            endHour={23}
           />
           {errors.startTime && (
             <p className="text-xs text-red-500 mt-1">{errors.startTime}</p>

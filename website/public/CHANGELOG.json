@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.25.48",
+    "date": "2026-04-29",
+    "commit": "pending",
+    "highlights": "fix(calendar): default appointment start time to current 5-minute slot",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Default new calendar appointments to the current Vietnam time rounded to the next 5-minute interval instead of 09:00",
+          "Use 5-minute start-time slots in the appointment form dropdown so the selected current time is available"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add coverage for current-time appointment defaults and 5-minute TimePicker slots"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.47",
     "date": "2026-04-29",
     "commit": "pending",
