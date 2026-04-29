@@ -63,6 +63,27 @@ describe('ServiceHistory payment history', () => {
     expect(quantityCell).toContainElement(screen.getByText('manual'));
   });
 
+  it('shows doctor assistant before assistant in service rows', () => {
+    render(
+      <ServiceHistory
+        services={[
+          {
+            ...mockServices[0],
+            assistantName: 'TVV Trâm Anh',
+            dentalAideName: 'Lê Thị Kim Thoa',
+          },
+        ]}
+      />
+    );
+
+    const doctorAssistantLine = screen.getByText('Trợ lý BS:').closest('p');
+    const assistantLine = screen.getByText('Phụ tá:').closest('p');
+
+    expect(doctorAssistantLine).not.toBeNull();
+    expect(assistantLine).not.toBeNull();
+    expect(doctorAssistantLine!.compareDocumentPosition(assistantLine!)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
   it('shows an orange pay pill with progress fill for services that still have residual debt', () => {
     const onPayForService = vi.fn();
 

@@ -190,20 +190,15 @@ Expert skills are installed in `website/.agents/skills/`. Available skill catego
 <claude-mem-context>
 # Memory Context
 
-# [Tgrouptest] recent context, 2026-04-29 8:28pm GMT+7
+# [Tgrouptest] recent context, 2026-04-29 10:48pm GMT+7
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
 Format: ID TIME TYPE TITLE
 Fetch details: get_observations([IDs]) | Search: mem-search skill
 
-Stats: 50 obs (21,946t read) | 2,328,439t work | 99% savings
+Stats: 50 obs (22,417t read) | 2,504,162t work | 99% savings
 
 ### Apr 27, 2026
-10692 10:01a 🔵 Migration on 2026-04-07 seeded duplicate product categories instead of reusing existing ones
-10693 10:02a 🔵 TDental migration imported 253 products correctly; duplicate categories came from separate seed script
-10696 10:04a ✅ Fixed service catalog display by grouping duplicate product categories at query time
-10697 10:05a ✅ Service catalog fix validated via tests and production build
-10703 10:07a 🔴 Service catalog table display fix
 10710 10:51a ⚖️ Loading state audit initiated for Tgrouptest website
 10711 10:52a 🔵 Missing loading UI in Customers page main list
 10712 " 🔵 Missing loading UI in Payment page for payments and outstanding balances
@@ -251,6 +246,11 @@ Stats: 50 obs (21,946t read) | 2,328,439t work | 99% savings
 11013 " 🔵 Customer source update path uses conditional payload assembly
 11014 " 🔵 Service customer search implements debounced remote API calls
 11015 12:12p 🔵 Historical customer-record fix patterns consulted from project memory
+11079 10:41p 🔵 Customer/Employee API contract uses single-table inheritance with explicit assignment fields
+11080 " 🔵 Contract drift risk between customer overview list and edit modal assignment data
+11082 10:43p 🔴 Customer Edit Modal Sales Staff Field Now Resolves Inactive Employees
+11083 " 🔵 Data Fetching Inconsistency Between Customer Overview and Edit Modal
+11084 10:44p 🔄 Employee Assignment Fields Extracted to Dedicated Hook
 
-Access 2328k tokens of past work via get_observations([IDs]) or mem-search skill.
+Access 2504k tokens of past work via get_observations([IDs]) or mem-search skill.
 </claude-mem-context>

@@ -86,7 +86,7 @@ export function CustomerAssignments({
         
         <AssignmentField
           icon={UserRound}
-          label={t('form.assignTo', { ns: 'customers' })}
+          label={t('form.salesStaff', { ns: 'customers' })}
           value={salestaffLabel || resolveName(salestaffId, employeeList)} />
         
         <AssignmentField

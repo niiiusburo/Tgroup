@@ -234,6 +234,26 @@ describe('useCustomerProfile date normalization', () => {
     expect(result.current.appointments[0].date).toBe('2026-05-01');
   });
 
+  it('uses the sales employee name instead of the customer job title for profile assignments', async () => {
+    const { fetchPartnerById } = await import('@/lib/api');
+    vi.mocked(fetchPartnerById).mockResolvedValueOnce({
+      ...makePartner('cust-1', 'NGUYỄN THỊ HỒNG VÂN', 'T0082'),
+      salestaffid: '013fd634-4d88-45c6-9f3b-afe3007c9fb5',
+      salestaffname: 'Sale Nhung',
+      jobtitle: 'NhungHT,NHÂN VIÊN VĂN PHÒNG',
+    } as ApiPartner);
+
+    const { result } = renderHook(() => useCustomerProfile('cust-1'), {
+      wrapper: Wrapper,
+    });
+
+    await waitFor(() => {
+      expect(result.current.profile?.salestaffLabel).toBe('Sale Nhung');
+    });
+
+    expect(result.current.profile?.salestaffLabel).not.toBe('NhungHT,NHÂN VIÊN VĂN PHÒNG');
+  });
+
   it('clears stale appointments immediately when switching customers', async () => {
     const { fetchPartnerById, fetchAppointments, fetchCustomerBalance } = await import('@/lib/api');
 

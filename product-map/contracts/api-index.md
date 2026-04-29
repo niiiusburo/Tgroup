@@ -50,7 +50,7 @@
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/` | Auth | `?offset, limit, search, companyId, active` | `PaginatedResponse<Employee>` |
+| GET | `/` | Auth | `?offset, limit, search, companyId, active=true|false|all` | `PaginatedResponse<Employee>`; default is active-only, edit-form assignment hydration must request `active=all` |
 | GET | `/:id` | Auth | — | Employee detail |
 | POST | `/` | Perm:`employees.edit` | Employee fields | Created employee |
 | PUT | `/:id` | Perm:`employees.edit` | Employee fields | Updated employee |

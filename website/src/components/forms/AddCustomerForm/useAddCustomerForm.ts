@@ -10,6 +10,7 @@ import type { CustomerFormData, FormValidationError } from '@/data/mockCustomerF
 import { EMPTY_CUSTOMER_FORM, validateCustomerForm, VIET_DISTRICTS, VIET_WARDS } from '@/data/mockCustomerForm';
 import type { AddCustomerFormProps } from './AddCustomerForm';
 import type { TabId } from './constants';
+import { useEmployeeAssignmentFields } from './useEmployeeAssignmentFields';
 
 export interface ApiErrorDetail {
   readonly message: string;
@@ -136,7 +137,7 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
 
   useEffect(() => {
     fetchCompanies({ limit: 50 }).then((r) => setCompanies(r.items)).catch(() => {});
-    fetchEmployees({ limit: 500 }).then((r) => setEmployees(r.items)).catch(() => {});
+    fetchEmployees({ limit: 500, active: 'all' }).then((r) => setEmployees(r.items)).catch(() => {});
   }, []);
 
   const lastInitialDataRef = useRef(initialData);
@@ -217,6 +218,19 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const getError = useCallback(
+    (field: keyof CustomerFormData) => errors.find((e) => e.field === field)?.message,
+    [errors],
+  );
+
+  const set = useCallback(
+    <K extends keyof CustomerFormData>(field: K, value: CustomerFormData[K]) => {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+      setErrors((prev) => prev.filter((e) => e.field !== field));
+    },
+    [],
+  );
+
   const handleReferrerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setReferrerQuery(value);
@@ -242,152 +256,12 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
   };
   // ────────────────────────────────────────────────────────────────────────
 
-  // ─── Async employee search for sales staff ─────────────────────────────
-  const [salesQuery, setSalesQuery] = useState('');
-  const [salesResults, setSalesResults] = useState<ApiEmployee[]>([]);
-  const [salesLoading, setSalesLoading] = useState(false);
-  const [salesOpen, setSalesOpen] = useState(false);
-  const salesTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
-  const salesContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (formData.salestaffid) {
-      const emp = employees.find((e) => e.id === formData.salestaffid);
-      if (emp) setSalesQuery(emp.name);
-    } else {
-      setSalesQuery('');
-    }
-  }, [formData.salestaffid, employees]);
-
-  useEffect(() => {
-    if (salesTimeoutRef.current) clearTimeout(salesTimeoutRef.current);
-    const trimmed = salesQuery.trim();
-    if (!trimmed) {
-      const filtered = employees.filter((e) => {
-        const jt = (e.jobtitle ?? '').toLowerCase();
-        return jt.includes('sale');
-      });
-      setSalesResults(filtered);
-      setSalesLoading(false);
-      return;
-    }
-    setSalesLoading(true);
-    salesTimeoutRef.current = setTimeout(() => {
-      fetchEmployees({ search: trimmed, limit: 100 })
-        .then((res) => {
-          const filtered = res.items.filter((e) => {
-            const jt = (e.jobtitle ?? '').toLowerCase();
-            return jt.includes('sale');
-          });
-          setSalesResults(filtered);
-        })
-        .catch(() => setSalesResults([]))
-        .finally(() => setSalesLoading(false));
-    }, 300);
-    return () => { if (salesTimeoutRef.current) clearTimeout(salesTimeoutRef.current); };
-  }, [salesQuery, employees]);
-
-  const handleSalesInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSalesQuery(e.target.value);
-    set('salestaffid', '');
-    setSalesOpen(true);
-  };
-  const handleSelectSales = (emp: ApiEmployee) => {
-    setSalesQuery(emp.name);
-    set('salestaffid', emp.id);
-    setSalesOpen(false);
-  };
-  const handleClearSales = () => {
-    setSalesQuery('');
-    set('salestaffid', '');
-    setSalesResults([]);
-  };
-  // ────────────────────────────────────────────────────────────────────────
-
-  // ─── Async employee search for CSKH ────────────────────────────────────
-  const [cskhQuery, setCskhQuery] = useState('');
-  const [cskhResults, setCskhResults] = useState<ApiEmployee[]>([]);
-  const [cskhLoading, setCskhLoading] = useState(false);
-  const [cskhOpen, setCskhOpen] = useState(false);
-  const cskhTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
-  const cskhContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (formData.cskhid) {
-      const emp = employees.find((e) => e.id === formData.cskhid);
-      if (emp) setCskhQuery(emp.name);
-    } else {
-      setCskhQuery('');
-    }
-  }, [formData.cskhid, employees]);
-
-  useEffect(() => {
-    if (cskhTimeoutRef.current) clearTimeout(cskhTimeoutRef.current);
-    const trimmed = cskhQuery.trim();
-    if (!trimmed) {
-      const filtered = employees.filter((e) => {
-        const jt = (e.jobtitle ?? '').toLowerCase();
-        return jt.includes('cskh') || jt.includes('customer service') || jt.includes('hỗ trợ');
-      });
-      setCskhResults(filtered);
-      setCskhLoading(false);
-      return;
-    }
-    setCskhLoading(true);
-    cskhTimeoutRef.current = setTimeout(() => {
-      fetchEmployees({ search: trimmed, limit: 100 })
-        .then((res) => {
-          const filtered = res.items.filter((e) => {
-            const jt = (e.jobtitle ?? '').toLowerCase();
-            return jt.includes('cskh') || jt.includes('customer service') || jt.includes('hỗ trợ');
-          });
-          setCskhResults(filtered);
-        })
-        .catch(() => setCskhResults([]))
-        .finally(() => setCskhLoading(false));
-    }, 300);
-    return () => { if (cskhTimeoutRef.current) clearTimeout(cskhTimeoutRef.current); };
-  }, [cskhQuery, employees]);
-
-  const handleCskhInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCskhQuery(e.target.value);
-    set('cskhid', '');
-    setCskhOpen(true);
-  };
-  const handleSelectCskh = (emp: ApiEmployee) => {
-    setCskhQuery(emp.name);
-    set('cskhid', emp.id);
-    setCskhOpen(false);
-  };
-  const handleClearCskh = () => {
-    setCskhQuery('');
-    set('cskhid', '');
-    setCskhResults([]);
-  };
-  // ────────────────────────────────────────────────────────────────────────
-
-  // Close dropdowns on outside click
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (salesContainerRef.current && !salesContainerRef.current.contains(e.target as Node)) setSalesOpen(false);
-      if (cskhContainerRef.current && !cskhContainerRef.current.contains(e.target as Node)) setCskhOpen(false);
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const getError = useCallback(
-    (field: keyof CustomerFormData) => errors.find((e) => e.field === field)?.message,
-    [errors],
-  );
-
-  const set = useCallback(
-    <K extends keyof CustomerFormData>(field: K, value: CustomerFormData[K]) => {
-      setFormData((prev) => ({ ...prev, [field]: value }));
-      setErrors((prev) => prev.filter((e) => e.field !== field));
-    },
-    [],
-  );
+  const {
+    salesQuery, setSalesQuery, salesResults, salesLoading, salesOpen, setSalesOpen, salesContainerRef,
+    handleSalesInputChange, handleSelectSales, handleClearSales,
+    cskhQuery, setCskhQuery, cskhResults, cskhLoading, cskhOpen, setCskhOpen, cskhContainerRef,
+    handleCskhInputChange, handleSelectCskh, handleClearCskh,
+  } = useEmployeeAssignmentFields({ employees, formData, set });
 
   // Live uniqueness checks for phone and email
   const phoneCheck = useUniqueFieldCheck({

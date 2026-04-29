@@ -60,8 +60,8 @@ export function ServiceHistoryRow({
               {service.doctor && service.doctor !== 'N/A' && (
                 <p className="mt-0.5 truncate text-xs font-medium text-gray-500">{service.doctor}</p>
               )}
-              <StaffLine label="Phụ tá" value={service.assistantName} />
               <StaffLine label="Trợ lý BS" value={service.dentalAideName} />
+              <StaffLine label="Phụ tá" value={service.assistantName} />
             </div>
           </div>
         </td>

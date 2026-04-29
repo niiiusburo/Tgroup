@@ -23,6 +23,8 @@ export interface Customer {
   readonly sourcename?: string | null;
   readonly agentname?: string | null;
   readonly companyname?: string | null;
+  readonly salestaffid?: string | null;
+  readonly salestaffname?: string | null;
   readonly cskhid?: string | null;
   readonly cskhname?: string | null;
 }
@@ -53,6 +55,8 @@ export function mapPartnerToCustomer(p: ApiPartner): Customer {
     sourcename: p.sourcename ?? null,
     agentname: p.agentname,
     companyname: p.companyname,
+    salestaffid: p.salestaffid,
+    salestaffname: p.salestaffname,
     cskhid: p.cskhid,
     cskhname: p.cskhname,
   };

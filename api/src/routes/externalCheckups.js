@@ -8,7 +8,6 @@ const router = express.Router();
 // Environment/config for hosoonline integration
 const HOSOONLINE_BASE_URL = process.env.HOSOONLINE_BASE_URL || 'https://hosoonline.com';
 const HOSOONLINE_API_KEY = process.env.HOSOONLINE_API_KEY || null;
-const HOSOONLINE_AUTH_SCHEME = (process.env.HOSOONLINE_AUTH_SCHEME || '').toLowerCase();
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -26,17 +25,7 @@ function isHosoAuthFailure(status) {
 function getHosoHeaders(extraHeaders = {}) {
   const headers = { ...extraHeaders };
   if (!HOSOONLINE_API_KEY) return headers;
-
-  const shouldUseBearer =
-    HOSOONLINE_AUTH_SCHEME === 'bearer' ||
-    HOSOONLINE_API_KEY.split('.').length === 3;
-
-  if (shouldUseBearer) {
-    headers.Authorization = `Bearer ${HOSOONLINE_API_KEY}`;
-  } else {
-    headers['X-API-Key'] = HOSOONLINE_API_KEY;
-  }
-
+  headers['X-API-Key'] = HOSOONLINE_API_KEY;
   return headers;
 }
 
@@ -56,7 +45,7 @@ function emptyCheckups(customerCode, patientName, source = 'hosoonline-unavailab
 function authFailureCheckups(customerCode, patientName, status) {
   return emptyCheckups(customerCode, patientName, 'hosoonline-auth-failed', {
     status,
-    message: 'Hosoonline authentication failed. Update the Hosoonline token before images can load.',
+    message: 'Hosoonline authentication failed. Check the configured Hosoonline API key before images can load.',
   });
 }
 
@@ -235,7 +224,7 @@ router.post('/:customerCode/health-checkups', requireAuth, requirePermission('ex
         return res.status(hosoRes.status).json({
           error: 'hosoonline authentication failed',
           status: hosoRes.status,
-          detail: 'Update the Hosoonline token before uploading health checkup images.',
+          detail: 'Check the configured Hosoonline API key before uploading health checkup images.',
         });
       }
       return res.status(hosoRes.status).json({
@@ -252,7 +241,7 @@ router.post('/:customerCode/health-checkups', requireAuth, requirePermission('ex
       return res.status(error.status).json({
         error: 'hosoonline authentication failed',
         status: error.status,
-        detail: 'Update the Hosoonline token before uploading health checkup images.',
+        detail: 'Check the configured Hosoonline API key before uploading health checkup images.',
       });
     }
     console.error('ExternalCheckups upload error:', error);

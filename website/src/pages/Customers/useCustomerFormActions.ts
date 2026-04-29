@@ -115,9 +115,9 @@ export function useCustomerFormActions({
         comment: '',
         medicalhistory: hookProfile.medicalHistory || '',
         sourceid: hookProfile.sourceid || '',
-        referraluserid: '',
-        salestaffid: '',
-        cskhid: '',
+        referraluserid: hookProfile.referraluserid || '',
+        salestaffid: hookProfile.salestaffid || '',
+        cskhid: hookProfile.cskhid || '',
         ref: hookProfile.code || '',
       };
     }
@@ -143,7 +143,7 @@ export function useCustomerFormActions({
       comment: customer.comment || '',
       sourceid: customer.sourceid || '',
       referraluserid: '',
-      salestaffid: '',
+      salestaffid: customer.salestaffid || '',
       cskhid: customer.cskhid || '',
       ref: customer.code || '',
     };

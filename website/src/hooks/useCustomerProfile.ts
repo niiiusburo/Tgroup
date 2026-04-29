@@ -123,7 +123,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         depositBalance: 0,
         outstandingBalance: 0,
         salestaffid: partner.salestaffid ?? null,
-        salestaffLabel: partner.jobtitle ?? null,
+        salestaffLabel: partner.salestaffname ?? null,
         cskhid: partner.cskhid ?? null,
         cskhname: partner.cskhname ?? null,
         referraluserid: partner.referraluserid ?? null,

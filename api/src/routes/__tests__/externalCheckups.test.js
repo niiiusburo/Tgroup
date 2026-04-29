@@ -24,37 +24,37 @@ afterEach(() => {
 });
 
 describe('externalCheckups helpers', () => {
-  it('uses X-API-Key for legacy opaque Hosoonline tokens', () => {
+  it('uses X-API-Key for Hosoonline API keys', () => {
     const { helpers } = loadTestHelpers({
-      HOSOONLINE_API_KEY: 'legacy-token',
+      HOSOONLINE_API_KEY: 'hoso-api-key',
       HOSOONLINE_AUTH_SCHEME: '',
     });
 
     expect(helpers.getHosoHeaders({ Accept: 'application/json' })).toEqual({
       Accept: 'application/json',
-      'X-API-Key': 'legacy-token',
+      'X-API-Key': 'hoso-api-key',
     });
   });
 
-  it('uses Authorization Bearer for JWT-style Hosoonline tokens', () => {
+  it('does not convert JWT-shaped API keys into bearer tokens', () => {
     const { helpers } = loadTestHelpers({
       HOSOONLINE_API_KEY: 'header.payload.signature',
       HOSOONLINE_AUTH_SCHEME: '',
     });
 
     expect(helpers.getHosoHeaders()).toEqual({
-      Authorization: 'Bearer header.payload.signature',
+      'X-API-Key': 'header.payload.signature',
     });
   });
 
-  it('honors explicit bearer auth for opaque Hosoonline tokens', () => {
+  it('ignores legacy bearer auth scheme and still sends the API key header', () => {
     const { helpers } = loadTestHelpers({
-      HOSOONLINE_API_KEY: 'opaque-token',
+      HOSOONLINE_API_KEY: 'configured-api-key',
       HOSOONLINE_AUTH_SCHEME: 'bearer',
     });
 
     expect(helpers.getHosoHeaders()).toEqual({
-      Authorization: 'Bearer opaque-token',
+      'X-API-Key': 'configured-api-key',
     });
   });
 

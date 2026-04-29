@@ -1,5 +1,109 @@
 [
   {
+    "version": "0.25.56",
+    "date": "2026-04-29",
+    "commit": "pending",
+    "highlights": "refactor(customers): centralize assignment-field hydration",
+    "sections": [
+      {
+        "title": "Refactoring",
+        "items": [
+          "Extract customer edit employee-assignment lookup logic from the oversized AddCustomerForm hook",
+          "Apply the all-employees hydration contract to both sales and CSKH assignment fields"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add AddCustomerForm coverage for inactive assigned CSKH staff prefill"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.25.55",
+    "date": "2026-04-29",
+    "commit": "pending",
+    "highlights": "fix(integrations): use Hosoonline API key auth",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Send Hosoonline requests with the configured API key through the X-API-Key header instead of bearer-token authentication",
+          "Update Hosoonline error messages so staff are directed to check the API key, not rotate a token"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add route-level coverage that JWT-shaped and legacy bearer-configured Hosoonline keys still use API-key header authentication"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.25.54",
+    "date": "2026-04-29",
+    "commit": "pending",
+    "highlights": "fix(customers): populate sales staff in edit form",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Pre-fill assigned Nhân viên sale inside the customer edit module, including inactive migrated employees",
+          "Allow sales-staff search options to match migrated names such as Sale Nhung when job title is blank"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add AddCustomerForm coverage for inactive assigned sales staff prefill"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.25.53",
+    "date": "2026-04-29",
+    "commit": "pending",
+    "highlights": "fix(customers): show assigned sales staff on profiles",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Show the assigned Nhân viên sale from salestaffid on customer profile assignment cards",
+          "Stop using the customer's job title as the sales staff display value"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add API and profile-hook coverage for customer sales staff name mapping"
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.25.52",
+    "date": "2026-04-29",
+    "commit": "pending",
+    "highlights": "fix(customers): show doctor assistant before assistant",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Swap the service record staff display so Trợ lý BS appears above Phụ tá in customer profiles"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add customer service history coverage to lock the Trợ lý BS and Phụ tá display order"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.51",
     "date": "2026-04-29",
     "commit": "pending",

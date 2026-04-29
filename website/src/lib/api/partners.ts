@@ -42,6 +42,7 @@ export interface ApiPartner {
   cskhname: string | null;
   // Sales staff assignment
   salestaffid: string | null;
+  salestaffname?: string | null;
   datecreated: string | null;
   lastupdated: string | null;
   // Extended fields (returned by single-partner fetch)

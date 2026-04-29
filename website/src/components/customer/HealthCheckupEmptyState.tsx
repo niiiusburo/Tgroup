@@ -6,7 +6,7 @@ interface HealthCheckupEmptyStateProps {
 function getEmptyStateMessage(source?: string, message?: string): string {
   if (message) return message;
   if (source === 'hosoonline-auth-failed') {
-    return 'Hosoonline authentication failed. Update the Hosoonline token before images can load.';
+    return 'Hosoonline authentication failed. Check the configured Hosoonline API key before images can load.';
   }
   if (source === 'hosoonline-not-configured') {
     return 'Hosoonline is not configured for this environment.';
