@@ -56,4 +56,44 @@ describe('useServiceCustomerOptions', () => {
       expect(result.current.customers.map((c) => c.id)).toEqual(['remote-customer']);
     });
   });
+
+  it('keeps a selected remote customer visible after the search box clears', async () => {
+    mockFetchPartners.mockResolvedValue({
+      items: [{
+        id: 'remote-customer',
+        name: 'Nguyễn Remote',
+        phone: '0901333444',
+        email: null,
+        companyid: 'branch-id',
+        status: true,
+        lastupdated: '2026-04-29',
+      }],
+      totalItems: 1,
+    });
+
+    const baseCustomers = [{
+      id: 'local-customer',
+      name: 'Local Customer',
+      phone: '0901000000',
+      email: '',
+      locationId: 'branch-id',
+      status: 'active' as const,
+      lastVisit: '2026-04-29',
+    }];
+
+    const { result, rerender } = renderHook(
+      ({ selectedId, searchTerm }) => useServiceCustomerOptions(baseCustomers, selectedId, searchTerm),
+      { initialProps: { selectedId: null as string | null, searchTerm: '09013' } },
+    );
+
+    await waitFor(() => {
+      expect(result.current.customers.map((c) => c.id)).toEqual(['remote-customer']);
+    });
+
+    rerender({ selectedId: 'remote-customer', searchTerm: '' });
+
+    await waitFor(() => {
+      expect(result.current.customers.map((c) => c.id)).toContain('remote-customer');
+    });
+  });
 });

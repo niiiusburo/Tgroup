@@ -39,12 +39,25 @@ export function useServiceCustomerOptions(
   searchTerm: string,
 ) {
   const [remoteCustomers, setRemoteCustomers] = useState<Customer[]>([]);
+  const [selectedRemoteCustomer, setSelectedRemoteCustomer] = useState<Customer | null>(null);
   const [searching, setSearching] = useState(false);
 
   const baseSelectorCustomers = useMemo(
     () => baseCustomers.map(toSelectorCustomer),
     [baseCustomers],
   );
+
+  useEffect(() => {
+    if (!selectedId) {
+      setSelectedRemoteCustomer(null);
+      return;
+    }
+
+    const selected =
+      baseSelectorCustomers.find((customer) => customer.id === selectedId) ??
+      remoteCustomers.find((customer) => customer.id === selectedId);
+    if (selected) setSelectedRemoteCustomer(selected);
+  }, [selectedId, baseSelectorCustomers, remoteCustomers]);
 
   useEffect(() => {
     const trimmed = searchTerm.trim();
@@ -78,9 +91,10 @@ export function useServiceCustomerOptions(
 
   const shouldUseRemote = searchTerm.trim().length >= MIN_SEARCH_LENGTH;
   const sourceCustomers = shouldUseRemote ? remoteCustomers : baseSelectorCustomers;
+  const selectedCandidates = selectedRemoteCustomer ? [...baseSelectorCustomers, selectedRemoteCustomer] : baseSelectorCustomers;
 
   return {
-    customers: mergeSelectedCustomer(sourceCustomers, baseSelectorCustomers, selectedId),
+    customers: mergeSelectedCustomer(sourceCustomers, selectedCandidates, selectedId),
     searching,
   };
 }
