@@ -106,22 +106,21 @@ router.get('/', async (req, res) => {
       [...params, limitNum, offsetNum]
     );
 
+    // Single query: get total, active, and inactive counts in one pass
     const countResult = await query(
-      `SELECT COUNT(*) AS count FROM partners p WHERE ${whereClause}`,
+      `SELECT
+        COUNT(*)::int AS total,
+        COUNT(*) FILTER (WHERE p.active = true)::int AS active,
+        COUNT(*) FILTER (WHERE p.active = false)::int AS inactive
+      FROM partners p WHERE ${whereClause}`,
       params
     );
-    const totalItems = parseInt(countResult[0]?.count || '0', 10);
+    const totalItems = countResult[0]?.total || 0;
 
     const aggregates = {
       total: totalItems,
-      active: await query(
-        `SELECT COUNT(*) AS count FROM partners p WHERE ${whereClause} AND p.active = true`,
-        params
-      ).then(r => parseInt(r[0]?.count || '0', 10)),
-      inactive: await query(
-        `SELECT COUNT(*) AS count FROM partners p WHERE ${whereClause} AND p.active = false`,
-        params
-      ).then(r => parseInt(r[0]?.count || '0', 10)),
+      active: countResult[0]?.active || 0,
+      inactive: countResult[0]?.inactive || 0,
     };
 
     return res.json({

@@ -12,6 +12,32 @@ function makeFingerprint(err, route) {
   return crypto.createHash('sha256').update(raw).digest('hex').slice(0, 64);
 }
 
+const SENSITIVE_KEYS = new Set([
+  'password',
+  'password_hash',
+  'token',
+  'authorization',
+  'cookie',
+  'api_key',
+  'apikey',
+  'secret',
+]);
+
+function redactValue(value) {
+  if (Array.isArray(value)) {
+    return value.map(redactValue);
+  }
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+  return Object.fromEntries(
+    Object.entries(value).map(([key, nestedValue]) => [
+      key,
+      SENSITIVE_KEYS.has(key.toLowerCase()) ? '[REDACTED]' : redactValue(nestedValue),
+    ])
+  );
+}
+
 function errorHandler(err, req, res, _next) {
   const status = err.status || err.statusCode || 500;
   const message = status < 500 ? (err.message || 'Bad request') : 'Internal server error';
@@ -42,7 +68,7 @@ function errorHandler(err, req, res, _next) {
       req.method,
       status,
       req.ip || '',
-      JSON.stringify({ body: req.body, query: req.query }),
+      JSON.stringify({ body: redactValue(req.body), query: redactValue(req.query) }),
     ]
   ).catch(dbErr => {
     console.error('Failed to persist server error:', dbErr.message);

@@ -60,12 +60,13 @@ app.set('trust proxy', 1);
 
 const ALLOWED_ORIGINS = [
   'http://localhost:5175',
+  'http://localhost:5715',
   'http://76.13.16.68:5175',
   'https://nk.2checkin.com',
   'https://www.nk.2checkin.com',
 ];
 app.use(helmet());
-const DEV_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1):(517\d|3\d{3})$/;
+const DEV_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1):(517\d|5715|3\d{3})$/;
 app.use(cors({ origin: (o, cb) => !o || ALLOWED_ORIGINS.includes(o) || DEV_ORIGIN.test(o) ? cb(null, true) : cb(new Error(`CORS: ${o}`)), credentials: true }));
 app.use(cookieParser());
 app.use(express.json({ limit: '1mb' }));
@@ -80,6 +81,12 @@ app.use('/api/auth/login', loginLimiter);
 // app.use('/api/Account/Login', loginLimiter);  // LEGACY
 // app.use('/api/account/login', loginLimiter);  // LEGACY
 
+const telemetryErrorLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: process.env.NODE_ENV === 'development' ? 300 : 60,
+  message: { error: 'Too many error reports, please try again later.' },
+});
+
 // Request logger
 app.use((req, _res, next) => {
   console.log(`[${req.method}] ${req.path}`);
@@ -93,7 +100,7 @@ app.use('/api', enforceIpAccess);
 // Frontend reports errors here; management endpoints stay behind auth
 const crypto = require('crypto');
 const { query } = require('./db');
-app.post('/api/telemetry/errors', async (req, res) => {
+app.post('/api/telemetry/errors', telemetryErrorLimiter, async (req, res) => {
   try {
     const { error_type = 'Unknown', message = 'No message', stack = '', component_stack = '',
             route = '', source_file = '', source_line = null,
@@ -177,12 +184,9 @@ const PUBLIC_PATHS = new Set([
   '/api/ipaccess/check',
 ]);
 
-// AutoDebugger telemetry: error collection + management (internal use behind nginx)
-const TELEMETRY_PATH = /^\/api\/telemetry\//;
-
 app.use('/api', (req, res, next) => {
   const fullPath = req.originalUrl.split('?')[0];
-  if (PUBLIC_PATHS.has(fullPath) || TELEMETRY_PATH.test(fullPath)) return next();
+  if (PUBLIC_PATHS.has(fullPath)) return next();
   return requireAuth(req, res, next);
 });
 

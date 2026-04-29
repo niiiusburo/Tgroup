@@ -1,5 +1,34 @@
 [
   {
+    "version": "0.25.47",
+    "date": "2026-04-29",
+    "commit": "pending",
+    "highlights": "fix: secure telemetry management and prepare large-data indexes",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Keep anonymous AutoDebugger ingestion public while requiring auth for telemetry reads, updates, stats, and fix-attempt management",
+          "Rate-limit anonymous telemetry error ingestion to protect error_events and auto-created feedback threads from floods",
+          "Redact sensitive request body and query fields before server errors are persisted to error_events",
+          "Allow localhost:5715 as a local development origin without requiring a temporary CORS proxy"
+        ]
+      },
+      {
+        "title": "Performance",
+        "items": [
+          "Add migration 041 with large-table indexes for customer search, appointments, payments, sale orders, sale order lines, and dotkhams"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add telemetry auth-boundary coverage for public error ingestion versus protected management endpoints"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.46",
     "date": "2026-04-29",
     "commit": "pending",

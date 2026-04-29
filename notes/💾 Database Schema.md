@@ -326,19 +326,62 @@ CMS pages.
 | Entity | Count |
 |--------|-------|
 | Companies (Locations) | 7 |
-| Partners (Total) | 370 |
-| Employees (view) | 319 |
-| Appointments | 259 |
-| Products (Services) | 162 |
-| Sale Orders | 47 |
-| Customer Receipts | 0 |
+| Partners (Total) | 35,438 |
+| Partners (Customers) | ~35,000 |
+| Appointments | 222,079 |
+| Products (Services) | 407 |
+| Sale Orders | 61,459 |
+| Sale Order Lines | 63,429 |
+| Payments | 61,755 |
+| Dotkhams (Medical Records) | 69 |
+
+> ⚠️ These counts reflect the post-TDental-migration database. The original demo data had ~259 appointments and ~370 partners.
 
 ## Common Indexes
 
+### Performance-critical indexes (migration 041)
+```sql
+-- Partners: trigram indexes for fast text search (ILIKE phone/name/ref)
+CREATE INDEX idx_partners_phone_trgm ON dbo.partners USING gin (phone gin_trgm_ops);
+CREATE INDEX idx_partners_name_trgm ON dbo.partners USING gin (name gin_trgm_ops);
+CREATE INDEX idx_partners_namenosign_trgm ON dbo.partners USING gin (namenosign gin_trgm_ops);
+CREATE INDEX idx_partners_ref_trgm ON dbo.partners USING gin (ref gin_trgm_ops);
+
+-- Partners: partial index for customer listing (used in EVERY partners query)
+CREATE INDEX idx_partners_customer_active ON dbo.partners (datecreated DESC)
+    WHERE customer = true AND isdeleted = false;
+
+-- SaleOrders: FK indexes (61K rows — previously seq scan = 15ms)
+CREATE INDEX idx_saleorders_partnerid ON dbo.saleorders (partnerid, isdeleted)
+    WHERE isdeleted = false;
+CREATE INDEX idx_saleorders_companyid ON dbo.saleorders (companyid);
+CREATE INDEX idx_saleorders_doctorid ON dbo.saleorders (doctorid);
+CREATE INDEX idx_saleorders_state ON dbo.saleorders (state);
+CREATE INDEX idx_saleorders_datecreated ON dbo.saleorders (datecreated DESC);
+
+-- SaleOrderLines: FK indexes (63K rows — previously seq scan = 21.5ms)
+CREATE INDEX idx_saleorderlines_orderid ON dbo.saleorderlines (orderid);
+CREATE INDEX idx_saleorderlines_productid ON dbo.saleorderlines (productid);
+CREATE INDEX idx_saleorderlines_employeeid ON dbo.saleorderlines (employeeid);
+CREATE INDEX idx_saleorderlines_datecreated ON dbo.saleorderlines (datecreated DESC);
+
+-- Payments: FK + date indexes (62K rows — previously seq scan = 46ms)
+CREATE INDEX idx_payments_customer_id ON dbo.payments (customer_id);
+CREATE INDEX idx_payments_payment_date ON dbo.payments (payment_date DESC);
+CREATE INDEX idx_payments_service_id ON dbo.payments (service_id);
+CREATE INDEX idx_payments_category_date ON dbo.payments (payment_category, payment_date DESC);
+
+-- Appointments: additional FK indexes (222K rows)
+CREATE INDEX idx_appointments_doctorid ON dbo.appointments (doctorid);
+CREATE INDEX idx_appointments_state ON dbo.appointments (state);
+CREATE INDEX idx_appointments_productid ON dbo.appointments (productid);
+CREATE INDEX idx_appointments_assistantid ON dbo.appointments (assistantid);
+CREATE INDEX idx_appointments_date_state ON dbo.appointments (date, state);
+```
+
+### Original indexes (pre-TDental migration)
 ```sql
 -- Partners
-CREATE INDEX idx_partners_customer ON dbo.partners(customer) WHERE customer = true;
-CREATE INDEX idx_partners_employee ON dbo.partners(employee) WHERE employee = true;
 CREATE INDEX idx_partners_company ON dbo.partners(companyid);
 
 -- Appointments
