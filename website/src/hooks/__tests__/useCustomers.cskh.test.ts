@@ -207,6 +207,63 @@ describe('useCustomers - CSKH Role Assignment', () => {
       );
     });
 
+    it('should create customer with sourceid', async () => {
+      mockCreatePartner.mockResolvedValue({
+        id: '3',
+        name: 'Test Customer',
+        phone: '0903333333',
+        companyid: 'c1',
+        status: true,
+        sourceid: 'source-online',
+      });
+
+      const { result } = renderHook(() => useCustomers('all'));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      await result.current.createCustomer({
+        name: 'Test Customer',
+        phone: '0903333333',
+        companyid: 'c1',
+        sourceid: 'source-online',
+      } as CustomerFormData);
+
+      expect(mockCreatePartner).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sourceid: 'source-online',
+        })
+      );
+    });
+
+    it('should update customer with sourceid', async () => {
+      mockUpdatePartner.mockResolvedValue({
+        id: '1',
+        name: 'Updated Name',
+        sourceid: 'source-hotline',
+      });
+
+      const { result } = renderHook(() => useCustomers('all'));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      await result.current.updateCustomer('1', {
+        name: 'Updated Name',
+        phone: '0901111111',
+        sourceid: 'source-hotline',
+      } as CustomerFormData);
+
+      expect(mockUpdatePartner).toHaveBeenCalledWith(
+        '1',
+        expect.objectContaining({
+          sourceid: 'source-hotline',
+        })
+      );
+    });
+
     it('should not clear omitted nullable assignment and note fields on partial updates', async () => {
       mockUpdatePartner.mockResolvedValue({
         id: '1',
@@ -246,4 +303,5 @@ type CustomerFormData = {
   companyid?: string;
   cskhid?: string;
   note?: string;
+  sourceid?: string;
 };

@@ -22,6 +22,7 @@ exports.PartnerBaseSchema = zod_1.z.object({
     medicalhistory: zod_1.z.string().optional().nullable(),
     note: zod_1.z.string().optional().nullable(),
     comment: zod_1.z.string().optional().nullable(),
+    sourceid: zod_1.z.string().uuid().optional().nullable(),
     referraluserid: zod_1.z.string().uuid().optional().nullable(),
     weight: zod_1.z.coerce.number().optional().nullable(),
     identitynumber: zod_1.z.string().optional().nullable(),

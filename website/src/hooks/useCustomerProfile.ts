@@ -33,6 +33,7 @@ export interface CustomerProfileData {
   cskhid: string | null;
   cskhname: string | null;
   referraluserid: string | null;
+  sourceid?: string | null;
   sourcename?: string | null;
 }
 
@@ -126,6 +127,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         cskhid: partner.cskhid ?? null,
         cskhname: partner.cskhname ?? null,
         referraluserid: partner.referraluserid ?? null,
+        sourceid: partner.sourceid ?? null,
         sourcename: partner.sourcename ?? null,
       };
 

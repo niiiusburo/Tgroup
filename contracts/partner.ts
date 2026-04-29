@@ -21,6 +21,7 @@ export const PartnerBaseSchema = z.object({
   medicalhistory: z.string().optional().nullable(),
   note: z.string().optional().nullable(),
   comment: z.string().optional().nullable(),
+  sourceid: z.string().uuid().optional().nullable(),
   referraluserid: z.string().uuid().optional().nullable(),
   weight: z.coerce.number().optional().nullable(),
   identitynumber: z.string().optional().nullable(),

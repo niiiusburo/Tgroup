@@ -40,9 +40,9 @@ import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
 import { useProducts } from '@/hooks/useProducts';
 import { useCustomerSources } from '@/hooks/useSettings';
+import { useServiceCustomerOptions } from './useServiceCustomerOptions';
 import { type ServiceCatalogItem } from '@/data/mockServices';
 import type { CreateServiceInput } from '@/hooks/useServices';
-import type { Customer } from '@/types/customer';
 import type { Employee } from '@/types/employee';
 import type { Product } from '@/hooks/useProducts';
 import type { AppointmentType } from '@/constants';
@@ -96,6 +96,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   const [toothNumbers, setToothNumbers] = useState<readonly string[]>(initialData?.toothNumbers ?? []);
   const [toothComment, setToothComment] = useState(initialData?.toothComment ?? '');
   const [sourceId, setSourceId] = useState<string | null>(initialData?.sourceId ?? null);
+  const [customerSearchTerm, setCustomerSearchTerm] = useState('');
   const [showToothPicker, setShowToothPicker] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -134,10 +135,11 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
     }
   }, [readonlyCustomerId, apiCustomers, isProfileContext]);
 
-  const customers: Customer[] = apiCustomers.map((c) => ({
-    id: c.id, name: c.name, phone: c.phone, email: c.email,
-    locationId: c.locationId, status: c.status, lastVisit: c.lastVisit
-  }));
+  const { customers, searching: customersSearching } = useServiceCustomerOptions(
+    apiCustomers,
+    customerId,
+    customerSearchTerm,
+  );
 
   const employees: Employee[] = apiEmployees.map((e) => ({
     id: e.id, name: e.name,
@@ -333,7 +335,14 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
                 <User className="w-3.5 h-3.5" />
                 {t('form.customer', 'Khách hàng')}
               </label>
-              <CustomerSelector customers={customers} selectedId={customerId} onChange={handleCustomerChange} />
+              <CustomerSelector
+                customers={customers}
+                selectedId={customerId}
+                onChange={handleCustomerChange}
+                loading={customersLoading}
+                searching={customersSearching}
+                onSearchTermChange={setCustomerSearchTerm}
+              />
               {errors.customer && <p className="mt-2 text-xs text-red-500">{errors.customer}</p>}
             </div>
           )}

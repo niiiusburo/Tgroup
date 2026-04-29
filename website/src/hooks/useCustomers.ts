@@ -134,6 +134,7 @@ export function useCustomers(locationId: string = 'all', options: UseCustomersOp
         medicalhistory: input.medicalhistory || undefined,
         note: input.note || undefined,
         comment: input.comment || undefined,
+        sourceid: input.sourceid || undefined,
         referraluserid: input.referraluserid || undefined,
         salestaffid: input.salestaffid || undefined,
         cskhid: input.cskhid || undefined,
@@ -184,6 +185,7 @@ export function useCustomers(locationId: string = 'all', options: UseCustomersOp
       medicalhistory: hasUpdate('medicalhistory') ? updates.medicalhistory : undefined,
       note: hasUpdate('note') ? updates.note : undefined,
       comment: hasUpdate('comment') ? updates.comment : undefined,
+      sourceid: hasUpdate('sourceid') ? updates.sourceid : undefined,
       referraluserid: hasUpdate('referraluserid') ? updates.referraluserid : undefined,
       weight: updates.weight ?? undefined,
       identitynumber: updates.identitynumber || undefined,
@@ -217,6 +219,7 @@ export function useCustomers(locationId: string = 'all', options: UseCustomersOp
               hasUpdate('street') ? { street: updates.street || null } : {},
               hasUpdate('note') ? { note: updates.note || null } : {},
               hasUpdate('comment') ? { comment: updates.comment || null } : {},
+              hasUpdate('sourceid') ? { sourceid: updates.sourceid || null } : {},
             )
           : c,
       ),

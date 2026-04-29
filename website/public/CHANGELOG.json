@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.25.42",
+    "date": "2026-04-29",
+    "commit": "pending",
+    "highlights": "fix(customers): persist source and service staff edits",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Persist customer source changes through the customer edit form and Partners API",
+          "Refresh customer details after note edits so the profile no longer shows stale note text",
+          "Mirror edited doctor and assistant assignments onto SaleOrder line rows so customer Phiếu khám displays the saved staff",
+          "Use remote customer search in service creation so longer phone searches are not limited to the first preload page"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add regression tests for customer source payloads, SaleOrder staff line sync, and service-form remote customer lookup"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.40",
     "date": "2026-04-28",
     "commit": "pending",

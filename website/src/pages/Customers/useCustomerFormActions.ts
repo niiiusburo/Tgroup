@@ -17,7 +17,7 @@ interface UseCustomerFormActionsOptions {
   readonly customers: readonly Customer[];
   readonly createCustomer: (data: CustomerFormData) => Promise<Customer>;
   readonly updateCustomer: (id: string, data: CustomerFormData) => Promise<void>;
-  readonly refetchProfile: () => void;
+  readonly refetchProfile: () => void | Promise<void>;
   readonly setShowForm: (v: boolean) => void;
   readonly setIsEditMode: (v: boolean) => void;
 }
@@ -69,6 +69,7 @@ export function useCustomerFormActions({
         birthday: rawPartner.birthday ?? null,
         birthmonth: rawPartner.birthmonth ?? null,
         birthyear: rawPartner.birthyear ?? null,
+        sourceid: rawPartner.sourceid ?? '',
         referraluserid: rawPartner.referraluserid ?? '',
         salestaffid: rawPartner.salestaffid ?? '',
         cskhid: rawPartner.cskhid ?? '',
@@ -111,6 +112,7 @@ export function useCustomerFormActions({
         note: hookProfile.notes || '',
         comment: '',
         medicalhistory: hookProfile.medicalHistory || '',
+        sourceid: hookProfile.sourceid || '',
         referraluserid: '',
         salestaffid: '',
         cskhid: '',
@@ -137,6 +139,7 @@ export function useCustomerFormActions({
       street: customer.street || '',
       note: customer.note || '',
       comment: customer.comment || '',
+      sourceid: customer.sourceid || '',
       referraluserid: '',
       salestaffid: '',
       cskhid: customer.cskhid || '',
@@ -148,7 +151,7 @@ export function useCustomerFormActions({
     async (data: CustomerFormData) => {
       if (isEditMode && selectedCustomerId) {
         await updateCustomer(selectedCustomerId, data);
-        refetchProfile();
+        await refetchProfile();
         setShowForm(false);
         setIsEditMode(false);
       } else {

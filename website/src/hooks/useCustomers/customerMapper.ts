@@ -19,6 +19,8 @@ export interface Customer {
   readonly ward?: string | null;
   readonly comment?: string | null;
   readonly note?: string | null;
+  readonly sourceid?: string | null;
+  readonly sourcename?: string | null;
   readonly agentname?: string | null;
   readonly companyname?: string | null;
   readonly cskhid?: string | null;
@@ -47,6 +49,8 @@ export function mapPartnerToCustomer(p: ApiPartner): Customer {
     ward: p.ward,
     comment: p.comment,
     note: p.note,
+    sourceid: p.sourceid ?? null,
+    sourcename: p.sourcename ?? null,
     agentname: p.agentname,
     companyname: p.companyname,
     cskhid: p.cskhid,

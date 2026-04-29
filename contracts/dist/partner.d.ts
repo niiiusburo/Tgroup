@@ -16,6 +16,7 @@ export declare const PartnerBaseSchema: z.ZodObject<{
     medicalhistory: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     note: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     comment: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    sourceid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     referraluserid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     weight: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
     identitynumber: z.ZodNullable<z.ZodOptional<z.ZodString>>;
@@ -54,6 +55,7 @@ export declare const PartnerBaseSchema: z.ZodObject<{
     wardname?: string | null | undefined;
     medicalhistory?: string | null | undefined;
     comment?: string | null | undefined;
+    sourceid?: string | null | undefined;
     referraluserid?: string | null | undefined;
     weight?: number | null | undefined;
     identitynumber?: string | null | undefined;
@@ -89,6 +91,7 @@ export declare const PartnerBaseSchema: z.ZodObject<{
     wardname?: string | null | undefined;
     medicalhistory?: string | null | undefined;
     comment?: string | null | undefined;
+    sourceid?: string | null | undefined;
     referraluserid?: string | null | undefined;
     weight?: number | null | undefined;
     identitynumber?: string | null | undefined;
@@ -125,6 +128,7 @@ export declare const PartnerCreateSchema: z.ZodObject<Omit<{
     medicalhistory: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     note: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     comment: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    sourceid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     referraluserid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     weight: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
     identitynumber: z.ZodNullable<z.ZodOptional<z.ZodString>>;
@@ -162,6 +166,7 @@ export declare const PartnerCreateSchema: z.ZodObject<Omit<{
     wardname?: string | null | undefined;
     medicalhistory?: string | null | undefined;
     comment?: string | null | undefined;
+    sourceid?: string | null | undefined;
     referraluserid?: string | null | undefined;
     weight?: number | null | undefined;
     identitynumber?: string | null | undefined;
@@ -196,6 +201,7 @@ export declare const PartnerCreateSchema: z.ZodObject<Omit<{
     wardname?: string | null | undefined;
     medicalhistory?: string | null | undefined;
     comment?: string | null | undefined;
+    sourceid?: string | null | undefined;
     referraluserid?: string | null | undefined;
     weight?: number | null | undefined;
     identitynumber?: string | null | undefined;
@@ -232,6 +238,7 @@ export declare const PartnerUpdateSchema: z.ZodObject<Omit<{
     medicalhistory: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     note: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     comment: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
+    sourceid: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     referraluserid: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     weight: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodNumber>>>;
     identitynumber: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
@@ -268,6 +275,7 @@ export declare const PartnerUpdateSchema: z.ZodObject<Omit<{
     wardname?: string | null | undefined;
     medicalhistory?: string | null | undefined;
     comment?: string | null | undefined;
+    sourceid?: string | null | undefined;
     referraluserid?: string | null | undefined;
     weight?: number | null | undefined;
     identitynumber?: string | null | undefined;
@@ -303,6 +311,7 @@ export declare const PartnerUpdateSchema: z.ZodObject<Omit<{
     wardname?: string | null | undefined;
     medicalhistory?: string | null | undefined;
     comment?: string | null | undefined;
+    sourceid?: string | null | undefined;
     referraluserid?: string | null | undefined;
     weight?: number | null | undefined;
     identitynumber?: string | null | undefined;

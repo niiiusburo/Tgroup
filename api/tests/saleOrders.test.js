@@ -20,6 +20,50 @@ describe('PATCH /api/SaleOrders/:id', () => {
     jest.clearAllMocks();
   });
 
+  it('mirrors edited doctor and assistant onto the primary service line', async () => {
+    query.mockImplementation(async (sql) => {
+      if (sql.includes('ip_access_settings')) {
+        return [{ mode: 'disabled' }];
+      }
+      if (sql.includes('ip_access_entries')) {
+        return [];
+      }
+      if (sql.startsWith('UPDATE saleorders')) {
+        return [{ id: 'order-id' }];
+      }
+      if (sql.includes('SELECT id, productid FROM saleorderlines')) {
+        return [{ id: 'line-id', productid: 'product-id' }];
+      }
+      if (sql.startsWith('UPDATE saleorderlines')) {
+        return [{ id: 'line-id' }];
+      }
+      if (sql.includes('FROM saleorders so')) {
+        return [{
+          id: 'order-id',
+          name: 'SO12763',
+          doctorid: 'doctor-new',
+          assistantid: 'assistant-new',
+          amounttotal: '1000000',
+          residual: '1000000',
+          totalpaid: '0',
+          state: 'sale',
+        }];
+      }
+      throw new Error(`Unexpected query: ${sql}`);
+    });
+
+    const res = await request(app)
+      .patch('/api/SaleOrders/order-id')
+      .send({ doctorid: 'doctor-new', assistantid: 'assistant-new' });
+
+    expect(res.status).toBe(200);
+
+    const lineUpdate = query.mock.calls.find(([sql]) => sql.startsWith('UPDATE saleorderlines'));
+    expect(lineUpdate?.[0]).toContain('employeeid');
+    expect(lineUpdate?.[0]).toContain('assistantid');
+    expect(lineUpdate?.[1]).toEqual(expect.arrayContaining(['doctor-new', 'assistant-new', 'line-id']));
+  });
+
   it('reopens residual and updates the primary service line when amounttotal changes', async () => {
     query.mockImplementation(async (sql, params) => {
       if (sql.includes('ip_access_settings')) {

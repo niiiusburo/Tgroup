@@ -11,7 +11,7 @@ const router = express.Router();
 const UUID_FIELDS = [
   'companyid','titleid','agentid','countryid','stateid',
   'stageid','contactstatusid','marketingteamid','saleteamid',
-  'cskhid','salestaffid','hrjobid','tier_id',
+  'cskhid','salestaffid','sourceid','hrjobid','tier_id',
 ];
 function sanitizeUuids(o){for(const f of UUID_FIELDS)if(o[f]===''||o[f]===undefined)o[f]=null;}
 
@@ -52,11 +52,20 @@ router.get('/', async (req, res) => {
     let paramIdx = 1;
 
     if (search) {
-      conditions.push(
-        `(p.name ILIKE $${paramIdx} OR p.namenosign ILIKE $${paramIdx} OR p.phone ILIKE $${paramIdx} OR p.ref ILIKE $${paramIdx} OR p.email ILIKE $${paramIdx})`
-      );
-      params.push(`%${search}%`);
-      paramIdx++;
+      const digitSearch = String(search).replace(/\D/g, '');
+      if (digitSearch) {
+        conditions.push(
+          `(p.name ILIKE $${paramIdx} OR p.namenosign ILIKE $${paramIdx} OR p.phone ILIKE $${paramIdx} OR p.ref ILIKE $${paramIdx} OR p.email ILIKE $${paramIdx} OR regexp_replace(COALESCE(p.phone, ''), '[^0-9]', '', 'g') LIKE $${paramIdx + 1})`
+        );
+        params.push(`%${search}%`, `%${digitSearch}%`);
+        paramIdx += 2;
+      } else {
+        conditions.push(
+          `(p.name ILIKE $${paramIdx} OR p.namenosign ILIKE $${paramIdx} OR p.phone ILIKE $${paramIdx} OR p.ref ILIKE $${paramIdx} OR p.email ILIKE $${paramIdx})`
+        );
+        params.push(`%${search}%`);
+        paramIdx++;
+      }
     }
     paramIdx = applyPartnerListFilters({ query: req.query, conditions, params, paramIdx });
 
@@ -406,6 +415,7 @@ router.post('/', requirePermission('customers.add'), validate(PartnerCreateSchem
       medicalhistory,
       note,
       comment,
+      sourceid,
       referraluserid,
       weight,
       identitynumber,
@@ -477,13 +487,13 @@ router.post('/', requirePermission('customers.add'), validate(PartnerCreateSchem
       `INSERT INTO partners (
         id, name, phone, email, companyid, gender,
         birthday, birthmonth, birthyear, street, cityname, districtname, wardname,
-        medicalhistory, note, comment, referraluserid,
+        medicalhistory, note, comment, referraluserid, sourceid,
         weight, identitynumber, healthinsurancecardnumber, emergencyphone, jobtitle,
         taxcode, unitname, unitaddress, isbusinessinvoice, personalname,
         personalidentitycard, personaltaxcode, personaladdress, salestaffid, cskhid,
         customer, active, ref, datecreated, lastupdated, isdeleted,
         supplier, employee, isagent, isinsurance, iscompany, ishead
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'), (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'), false, false, false, false, false, false, false)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'), (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'), false, false, false, false, false, false, false)
       RETURNING *`,
       [
         id,
@@ -503,6 +513,7 @@ router.post('/', requirePermission('customers.add'), validate(PartnerCreateSchem
         note || null,
         comment || null,
         referraluserid || null,
+        sourceid || null,
         weight || null,
         identitynumber || null,
         healthinsurancecardnumber || null,
@@ -552,6 +563,7 @@ router.put('/:id', requirePermission('customers.edit'), validate(PartnerUpdateSc
     const {
       name, phone, email, companyid, gender, birthday, birthmonth, birthyear,
       street, cityname, districtname, wardname, medicalhistory, note, comment,
+      sourceid,
       referraluserid, weight, identitynumber, healthinsurancecardnumber,
       emergencyphone, jobtitle, taxcode, unitname, unitaddress, isbusinessinvoice,
       personalname, personalidentitycard, personaltaxcode, personaladdress, ref,
@@ -608,7 +620,7 @@ router.put('/:id', requirePermission('customers.edit'), validate(PartnerUpdateSc
 
     const fields = {
       name, phone, email, companyid, gender, birthday, birthmonth, birthyear,
-      street, medicalhistory, note, comment, referraluserid,
+      street, medicalhistory, note, comment, sourceid, referraluserid,
       cityname, districtname, wardname, weight, identitynumber,
       healthinsurancecardnumber, emergencyphone, jobtitle, taxcode,
       unitname, unitaddress, isbusinessinvoice, personalname,

@@ -13,19 +13,27 @@ interface CustomerSelectorProps {
   readonly customers: readonly Customer[];
   readonly selectedId: string | null;
   readonly onChange: (customerId: string) => void;
+  readonly onSearchTermChange?: (searchTerm: string) => void;
   readonly placeholder?: string;
   readonly disabled?: boolean;
   readonly loading?: boolean;
+  readonly searching?: boolean;
   readonly onCreateNew?: () => void;
+}
+
+function normalizePhone(value: string | null | undefined): string {
+  return (value ?? '').replace(/\D/g, '');
 }
 
 export function CustomerSelector({
   customers,
   selectedId,
   onChange,
+  onSearchTermChange,
   placeholder = 'Select customer...',
   disabled = false,
   loading = false,
+  searching = false,
   onCreateNew
 }: CustomerSelectorProps) {
   const { t } = useTranslation('common');
@@ -40,19 +48,30 @@ export function CustomerSelector({
   const filteredCustomers = useMemo(() => {
     if (!searchTerm) return customers;
     const norm = normalizeText(searchTerm);
+    const digitSearch = normalizePhone(searchTerm);
     return customers.filter(
       (c) =>
       normalizeText(c.name).includes(norm) ||
       normalizeText(c.phone).includes(norm) ||
-      normalizeText(c.email).includes(norm)
+      normalizeText(c.email).includes(norm) ||
+      (digitSearch.length > 0 && normalizePhone(c.phone).includes(digitSearch))
     );
   }, [customers, searchTerm]);
+
+  const updateSearchTerm = (value: string) => {
+    setSearchTerm(value);
+    onSearchTermChange?.(value);
+  };
+
+  const clearSearchTerm = () => {
+    updateSearchTerm('');
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
-        setSearchTerm('');
+        clearSearchTerm();
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -98,14 +117,16 @@ export function CustomerSelector({
               ref={inputRef}
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => updateSearchTerm(e.target.value)}
               placeholder={t('searchByNamePhoneEmail', 'Tìm theo tên, SĐT, email...')}
               className="w-full pl-8 pr-3 py-1.5 text-sm rounded-md border border-gray-200 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
             
             </div>
           </div>
           <div className="max-h-48 overflow-y-auto py-1">
-            {filteredCustomers.length === 0 ?
+            {searching ?
+          <div className="px-4 py-3 text-sm text-gray-400 text-center">{t('loading', 'Đang tải...')}</div> :
+            filteredCustomers.length === 0 ?
           <div className="px-4 py-3 text-sm text-gray-400 text-center">{t('khngTmThyKhchHng')}</div> :
 
           filteredCustomers.map((customer) =>
@@ -115,7 +136,7 @@ export function CustomerSelector({
             onClick={() => {
               onChange(customer.id);
               setIsOpen(false);
-              setSearchTerm('');
+              clearSearchTerm();
             }}
             className={`
                     w-full text-left px-4 py-2 text-sm transition-colors duration-150
@@ -137,7 +158,7 @@ export function CustomerSelector({
             type="button"
             onClick={() => {
               setIsOpen(false);
-              setSearchTerm('');
+              clearSearchTerm();
               onCreateNew();
             }}
             className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
