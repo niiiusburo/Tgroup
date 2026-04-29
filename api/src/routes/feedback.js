@@ -399,21 +399,37 @@ router.post('/my/:threadId/reply', requireAuth, upload.array('files', 5), async 
  */
 router.get('/all', requireAuth, requireAdmin, async (req, res) => {
   try {
+    const { source } = req.query; // 'manual', 'auto', or empty for all
+    let whereClause = '';
+    const params = [];
+
+    if (source === 'auto') {
+      whereClause = 'WHERE t.source = $1';
+      params.push('auto');
+    } else if (source === 'manual') {
+      whereClause = 'WHERE t.source = $1';
+      params.push('manual');
+    }
+
     const threads = await query(
       `SELECT
         t.id,
         t.employee_id AS "employeeId",
-        p.name AS "employeeName",
+        COALESCE(p.name, 'System') AS "employeeName",
         t.page_url AS "pageUrl",
         t.page_path AS "pagePath",
         t.status,
+        t.source,
+        t.error_event_id AS "errorEventId",
         t.created_at AS "createdAt",
         t.updated_at AS "updatedAt",
         (SELECT content FROM feedback_messages WHERE thread_id = t.id ORDER BY created_at ASC LIMIT 1) AS "firstMessage",
         (SELECT content FROM feedback_messages WHERE thread_id = t.id AND author_id != t.employee_id ORDER BY created_at DESC LIMIT 1) AS "latestReply"
        FROM feedback_threads t
-       JOIN partners p ON p.id = t.employee_id
-       ORDER BY t.updated_at DESC`
+       LEFT JOIN partners p ON p.id = t.employee_id
+       ${whereClause}
+       ORDER BY t.updated_at DESC`,
+      params
     );
 
     return res.json({ items: threads });
@@ -441,10 +457,12 @@ router.get('/all/:threadId', requireAuth, requireAdmin, async (req, res) => {
         t.screen_size AS "screenSize",
         t.user_agent AS "userAgent",
         t.status,
+        t.source,
+        t.error_event_id AS "errorEventId",
         t.created_at AS "createdAt",
         t.updated_at AS "updatedAt"
        FROM feedback_threads t
-       JOIN partners p ON p.id = t.employee_id
+       LEFT JOIN partners p ON p.id = t.employee_id
        WHERE t.id = $1`,
       [threadId]
     );

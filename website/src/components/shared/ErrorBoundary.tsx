@@ -1,10 +1,12 @@
 /**
  * ErrorBoundary — Catches runtime errors in React component trees
  * Prevents entire app crashes and displays user-friendly error messages.
+ * Reports errors to backend telemetry for AutoDebugger pipeline.
  * @crossref:used-in[App.tsx — wraps all page routes]
  */
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { logger } from '@/lib/logger';
+import { reportReactError } from '@/lib/errorReporter';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -32,6 +34,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     logger.error(`ErrorBoundary(${moduleName})`, error.message, {
       componentStack: errorInfo.componentStack,
     });
+
+    // Report to AutoDebugger pipeline
+    reportReactError(error, errorInfo.componentStack || '', moduleName);
   }
 
   render() {

@@ -2,8 +2,12 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import '@/i18n'
+import { installGlobalErrorHandlers } from '@/lib/errorReporter'
 import App from './App.tsx'
 import './index.css'
+
+// Install AutoDebugger global error handlers (window.onerror, unhandledrejection)
+installGlobalErrorHandlers();
 
 /**
  * Application entry point

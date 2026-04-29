@@ -190,23 +190,15 @@ Expert skills are installed in `website/.agents/skills/`. Available skill catego
 <claude-mem-context>
 # Memory Context
 
-# [Tgrouptest] recent context, 2026-04-28 11:09pm GMT+7
+# [Tgrouptest] recent context, 2026-04-29 5:11pm GMT+7
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
 Format: ID TIME TYPE TITLE
 Fetch details: get_observations([IDs]) | Search: mem-search skill
 
-Stats: 50 obs (23,183t read) | 1,939,371t work | 99% savings
+Stats: 50 obs (21,946t read) | 2,328,439t work | 99% savings
 
 ### Apr 27, 2026
-10683 8:49a 🔵 Calendar and Appointments Module QA Verification
-10685 8:50a 🔵 Services and Payment pages QA validation completed
-10686 8:51a 🔵 Tgroup multi-module verification identified migration blocker and P1 bugs
-10687 8:52a ✅ QA report created documenting Tgrouptest migration verification results
-10688 " 🔵 Parallel QA agents completed comprehensive Tgrouptest module verification
-10689 9:58a 🔵 Service catalog page screenshot timeout after migration
-10690 10:00a 🔵 Service catalog migration revealed duplicate product categories and orphaned products
-10691 " 🔵 Service catalog count hardcoded as 228 but database contains 407 active products
 10692 10:01a 🔵 Migration on 2026-04-07 seeded duplicate product categories instead of reusing existing ones
 10693 10:02a 🔵 TDental migration imported 253 products correctly; duplicate categories came from separate seed script
 10696 10:04a ✅ Fixed service catalog display by grouping duplicate product categories at query time
@@ -250,6 +242,15 @@ Stats: 50 obs (23,183t read) | 1,939,371t work | 99% savings
 10875 10:39p 🔴 Customer note and assignment field persistence fix
 10876 " 🔴 Service staff display in customer records
 10877 " 🟣 E2E module edit-display audit testing infrastructure
+### Apr 29, 2026
+11008 11:32a 🔵 Service record doctor/assistant/aide UI investigation initiated
+11009 11:34a 🔵 Customer phone search bug traced to two-stage filtering mechanism
+11010 11:35a 🔵 Customer source (sourceid) field missing from partner validation schema
+11011 11:36a 🔵 Service record doctor/assistant fields split across order and line tables
+11012 12:11p 🔵 Test infrastructure incompatibility issues blocking hotfix verification
+11013 " 🔵 Customer source update path uses conditional payload assembly
+11014 " 🔵 Service customer search implements debounced remote API calls
+11015 12:12p 🔵 Historical customer-record fix patterns consulted from project memory
 
-Access 1939k tokens of past work via get_observations([IDs]) or mem-search skill.
+Access 2328k tokens of past work via get_observations([IDs]) or mem-search skill.
 </claude-mem-context>

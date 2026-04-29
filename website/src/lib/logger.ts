@@ -1,6 +1,7 @@
 /**
  * Structured logger for TGClinic
  * Replaces console.log/debug/warn with module-tagged logging for pinpoint debugging.
+ * In production, logger.error() also reports to backend telemetry for AutoDebugger.
  * @crossref:used-in[all modules]
  *
  * Usage:
@@ -61,9 +62,19 @@ function log(level: LogLevel, module: string, message: string, data?: unknown) {
     console.log(formatEntry(entry));
   }
 
-  // In production, also send to error tracking service (future)
+  // In production, report errors to AutoDebugger pipeline
   if (import.meta.env.PROD && level === 'error') {
-    // TODO: Integrate with Sentry or similar
+    import('@/lib/errorReporter').then(({ reportError }) => {
+      const stack = data instanceof Error ? data.stack : (typeof data === 'object' && data !== null && 'stack' in data ? String((data as Record<string, unknown>).stack) : '');
+      const msg = data instanceof Error ? data.message : message;
+      reportError({
+        error_type: 'Console',
+        message: `[${module}] ${msg}`,
+        stack: stack || new Error().stack || '',
+        route: window.location.pathname,
+        metadata: { module, logData: data },
+      });
+    }).catch(() => {});
   }
 }
 

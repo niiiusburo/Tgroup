@@ -19,6 +19,8 @@ export interface FeedbackThread {
   pageUrl: string | null;
   pagePath: string | null;
   status: FeedbackStatus;
+  source: 'manual' | 'auto';
+  errorEventId?: string | null;
   createdAt: string;
   updatedAt: string;
   firstMessage?: string | null;

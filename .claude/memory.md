@@ -1,7 +1,7 @@
 # Shared Session Memory — Tgroup (Claude-Mem Bridge)
 
 > Auto-generated from claude-mem DB (`~/.claude-mem/claude-mem.db`)
-> Last sync: 2026-04-28 23:31:42
+> Last sync: 2026-04-29 17:12:09
 > Project: Tgroup | Sessions tracked: 169
 
 ---

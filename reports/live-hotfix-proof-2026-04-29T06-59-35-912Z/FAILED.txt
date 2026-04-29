@@ -1,0 +1,8 @@
+locator.waitFor: Error: strict mode violation: getByText('QA Live Hotfix 1777444896556') resolved to 2 elements:
+    1) <h2 class="text-xl font-bold text-gray-900">QA Live Hotfix 1777444896556</h2> aka getByRole('heading', { name: 'QA Live Hotfix' })
+    2) <p class="text-sm font-medium text-gray-900">QA Live Hotfix 1777444896556</p> aka getByRole('paragraph').filter({ hasText: 'QA Live Hotfix' })
+
+Call log:
+[2m  - waiting for getByText('QA Live Hotfix 1777444896556') to be visible[22m
+
+    at main ([stdin]:108:63)

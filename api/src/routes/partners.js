@@ -4,6 +4,7 @@ const { requirePermission } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
 const { PartnerCreateSchema, PartnerUpdateSchema } = require('@tgroup/contracts');
 const { applyPartnerListFilters } = require('./partners/listFilters');
+const { applyPartnerSearchFilter } = require('./partners/searchFilters');
 
 const router = express.Router();
 
@@ -51,22 +52,7 @@ router.get('/', async (req, res) => {
     const params = [];
     let paramIdx = 1;
 
-    if (search) {
-      const digitSearch = String(search).replace(/\D/g, '');
-      if (digitSearch) {
-        conditions.push(
-          `(p.name ILIKE $${paramIdx} OR p.namenosign ILIKE $${paramIdx} OR p.phone ILIKE $${paramIdx} OR p.ref ILIKE $${paramIdx} OR p.email ILIKE $${paramIdx} OR regexp_replace(COALESCE(p.phone, ''), '[^0-9]', '', 'g') LIKE $${paramIdx + 1})`
-        );
-        params.push(`%${search}%`, `%${digitSearch}%`);
-        paramIdx += 2;
-      } else {
-        conditions.push(
-          `(p.name ILIKE $${paramIdx} OR p.namenosign ILIKE $${paramIdx} OR p.phone ILIKE $${paramIdx} OR p.ref ILIKE $${paramIdx} OR p.email ILIKE $${paramIdx})`
-        );
-        params.push(`%${search}%`);
-        paramIdx++;
-      }
-    }
+    paramIdx = applyPartnerSearchFilter({ search, conditions, params, paramIdx });
     paramIdx = applyPartnerListFilters({ query: req.query, conditions, params, paramIdx });
 
     const whereClause = conditions.join(' AND ');

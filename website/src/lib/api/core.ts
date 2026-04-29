@@ -85,6 +85,13 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
   });
 
   if (!res.ok) {
+    // Report to AutoDebugger pipeline (production only)
+    if (import.meta.env.PROD) {
+      import('@/lib/errorReporter').then(({ reportApiError }) => {
+        reportApiError(endpoint, method, res.status, `HTTP ${res.status}`, undefined);
+      }).catch(() => {});
+    }
+
     let parsed: unknown;
     try {
       parsed = await res.clone().json();

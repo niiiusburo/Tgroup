@@ -17,8 +17,6 @@ describe('CustomerAssignments', () => {
         salestaffLabel="LYBAE"
         cskhId={null}
         cskhName={null}
-        referralUserId={null}
-        sourceName="Khách hàng giới thiệu"
       />,
     );
 
@@ -26,7 +24,7 @@ describe('CustomerAssignments', () => {
     expect(screen.queryByText('ĐINH NGUYỄN CẨM LY')).not.toBeInTheDocument();
   });
 
-  it('shows customer source when no specific referral user is assigned', () => {
+  it('does not show customer source on the profile assignment card', () => {
     render(
       <CustomerAssignments
         companyName="Tấm Dentist Thủ Đức"
@@ -34,11 +32,10 @@ describe('CustomerAssignments', () => {
         salestaffLabel={null}
         cskhId={null}
         cskhName={null}
-        referralUserId={null}
-        sourceName="Khách hàng giới thiệu"
       />,
     );
 
-    expect(screen.getByText('Khách hàng giới thiệu')).toBeInTheDocument();
+    expect(screen.queryByText('Nguồn khách hàng')).not.toBeInTheDocument();
+    expect(screen.queryByText('Khách hàng giới thiệu')).not.toBeInTheDocument();
   });
 });

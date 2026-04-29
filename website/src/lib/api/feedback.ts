@@ -56,8 +56,9 @@ export async function replyToMyFeedbackThread(
   });
 }
 
-export async function fetchAllFeedback(): Promise<{ items: AdminFeedbackThread[] }> {
-  return apiFetch('/Feedback/all');
+export async function fetchAllFeedback(source?: 'manual' | 'auto'): Promise<{ items: AdminFeedbackThread[] }> {
+  const params = source ? `?source=${source}` : '';
+  return apiFetch(`/Feedback/all${params}`);
 }
 
 export async function fetchAdminFeedbackThread(threadId: string): Promise<FeedbackThreadDetail> {

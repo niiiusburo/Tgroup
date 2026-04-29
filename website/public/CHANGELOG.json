@@ -1,5 +1,32 @@
 [
   {
+    "version": "0.25.46",
+    "date": "2026-04-29",
+    "commit": "pending",
+    "highlights": "chore: capture pending customer, search, and telemetry work",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Remove the customer source/referrer field from the customer profile assignment card",
+          "Keep prefixed customer-code searches from being treated as normalized phone searches"
+        ]
+      },
+      {
+        "title": "Telemetry",
+        "items": [
+          "Add error-event collection, feedback source filtering, frontend error reporting, and AutoDebugger support files"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Update CustomerAssignments, partner search, and telemetry coverage for the pending dirty-tree work"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.44",
     "date": "2026-04-29",
     "commit": "pending",

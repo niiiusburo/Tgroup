@@ -12,8 +12,6 @@ export function CustomerProfileIdentity({ profile }: { readonly profile: Custome
         salestaffLabel={profile.salestaffLabel}
         cskhId={profile.cskhid}
         cskhName={profile.cskhname}
-        referralUserId={profile.referraluserid}
-        sourceName={profile.sourcename}
       />
     </>
   );

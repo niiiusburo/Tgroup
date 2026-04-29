@@ -1,12 +1,12 @@
 /**
  * CustomerAssignments — mirrors the edit form's "Phân công" sidebar on the profile view.
- * Shows branch, sales staff, CSKH, source, and referrer for this customer.
+ * Shows branch, sales staff, and CSKH for this customer.
  *
  * @crossref:used-in[CustomerProfile]
- * @crossref:uses[useEmployees, useCustomerSources]
+ * @crossref:uses[useEmployees]
  */
 
-import { Building2, UserRound, Headphones, Users } from 'lucide-react';
+import { Building2, UserRound, Headphones } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useEmployees } from '@/hooks/useEmployees';
 import type { Employee } from '@/data/mockEmployees';
@@ -17,8 +17,6 @@ interface CustomerAssignmentsProps {
   readonly salestaffLabel: string | null | undefined;
   readonly cskhId: string | null | undefined;
   readonly cskhName: string | null | undefined;
-  readonly referralUserId: string | null | undefined;
-  readonly sourceName: string | null | undefined;
 }
 
 function resolveName(
@@ -57,9 +55,7 @@ export function CustomerAssignments({
   salestaffId,
   salestaffLabel,
   cskhId,
-  cskhName,
-  referralUserId,
-  sourceName
+  cskhName
 }: CustomerAssignmentsProps) {
   const { t } = useTranslation('customers');
   const { allEmployees } = useEmployees();
@@ -81,8 +77,8 @@ export function CustomerAssignments({
         <p className="text-xs text-gray-500 leading-snug mt-1">Nhân sự phụ trách khách hàng này</p>
       </div>
 
-      {/* Right grid of 4 fields */}
-      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Right grid of profile assignment fields */}
+      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <AssignmentField
           icon={Building2}
           label={t('columns.location', { ns: 'customers' })}
@@ -97,12 +93,6 @@ export function CustomerAssignments({
           icon={Headphones}
           label={t('assignments', { ns: 'customers' })}
           value={cskhName || resolveName(cskhId, employeeList)} />
-        
-        <AssignmentField
-          icon={Users}
-          label={t("ngiGiiThiu")}
-          value={resolveName(referralUserId, employeeList) || sourceName} />
-        
       </div>
     </div>);
 

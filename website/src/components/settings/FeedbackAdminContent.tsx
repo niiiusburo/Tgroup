@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MessageSquare, Eye, Loader2, Send, X, Paperclip, Trash2 } from 'lucide-react';
+import { MessageSquare, Eye, Loader2, Send, X, Paperclip, Trash2, Bug, Users } from 'lucide-react';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusDropdown, type StatusOption } from '@/components/shared/StatusDropdown';
 import { usePasteImage } from '@/hooks/usePasteImage';
@@ -96,8 +96,11 @@ function AttachmentThumbnails({ attachments }: { attachments?: { url: string; or
   );
 }
 
+type FeedbackSource = 'manual' | 'auto';
+
 export function FeedbackAdminContent() {
   const { t } = useTranslation('settings');
+  const [activeTab, setActiveTab] = useState<FeedbackSource>('manual');
   const [threads, setThreads] = useState<AdminFeedbackThread[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -119,10 +122,10 @@ export function FeedbackAdminContent() {
     currentCount: files.length,
   });
 
-  const loadThreads = useCallback(async () => {
+  const loadThreads = useCallback(async (source?: FeedbackSource) => {
     setLoading(true);
     try {
-      const res = await fetchAllFeedback();
+      const res = await fetchAllFeedback(source);
       setThreads(res.items);
     } catch (err) {
       console.error('Failed to load admin feedback:', err);
@@ -162,7 +165,7 @@ export function FeedbackAdminContent() {
     try {
       await Promise.all(Array.from(selectedIds).map((id) => deleteFeedbackThread(id)));
       setSelectedIds(new Set());
-      await loadThreads();
+      await loadThreads(activeTab);
     } catch (err) {
       console.error('Failed to delete feedback:', err);
       alert(t('feedbackAdmin.deleteError'));
@@ -172,8 +175,8 @@ export function FeedbackAdminContent() {
   }
 
   useEffect(() => {
-    loadThreads();
-  }, [loadThreads]);
+    loadThreads(activeTab);
+  }, [loadThreads, activeTab]);
 
   useEffect(() => {
     if (!modalThreadId) {
@@ -248,7 +251,7 @@ export function FeedbackAdminContent() {
       setDetail((prev) => (prev ? { ...prev, messages: [...prev.messages, msg] } : prev));
       setReplyInput('');
       setFiles([]);
-      await loadThreads();
+      await loadThreads(activeTab);
     } catch (err: unknown) {
       console.error('Failed to send reply:', err);
       const message = err instanceof Error ? err.message : 'Failed to send. Please try again.';
@@ -265,19 +268,33 @@ export function FeedbackAdminContent() {
     }
   }
 
+  const isAutoTab = activeTab === 'auto';
+
   const columns: Column<AdminFeedbackThread>[] = [
     {
       key: 'employeeName',
-      header: 'Employee',
+      header: isAutoTab ? 'Source' : 'Employee',
       sortable: true,
-      render: (row) => (
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-[10px] text-primary font-semibold">{getInitials(row.employeeName)}</span>
+      render: (row) => {
+        if (row.source === 'auto') {
+          return (
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full bg-red-50 flex items-center justify-center">
+                <Bug className="w-3.5 h-3.5 text-red-500" />
+              </div>
+              <span className="font-medium text-gray-900">Auto-detected</span>
+            </div>
+          );
+        }
+        return (
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+              <span className="text-[10px] text-primary font-semibold">{getInitials(row.employeeName)}</span>
+            </div>
+            <span className="font-medium text-gray-900">{row.employeeName}</span>
           </div>
-          <span className="font-medium text-gray-900">{row.employeeName}</span>
-        </div>
-      ),
+        );
+      },
     },
     {
       key: 'pagePath',
@@ -349,10 +366,44 @@ export function FeedbackAdminContent() {
 
   return (
     <div className="space-y-6">
+      {/* Tab bar */}
+      <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl w-fit">
+        <button
+          type="button"
+          onClick={() => { setActiveTab('manual'); setSelectedIds(new Set()); }}
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 ${
+            activeTab === 'manual'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          User Feedback
+        </button>
+        <button
+          type="button"
+          onClick={() => { setActiveTab('auto'); setSelectedIds(new Set()); }}
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 ${
+            activeTab === 'auto'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <Bug className="w-4 h-4" />
+          Auto-detected Errors
+        </button>
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Employee Feedback</h3>
-          <p className="text-sm text-gray-500">Review and respond to feedback submitted by employees.</p>
+          <h3 className="text-lg font-semibold text-gray-900">
+            {isAutoTab ? 'Auto-detected Errors' : 'Employee Feedback'}
+          </h3>
+          <p className="text-sm text-gray-500">
+            {isAutoTab
+              ? 'Errors automatically captured from the live website. Fix them via the AutoDebugger.'
+              : 'Review and respond to feedback submitted by employees.'}
+          </p>
         </div>
         <div className="flex items-center gap-3">
           {selectedIds.size > 0 && (
@@ -402,14 +453,21 @@ export function FeedbackAdminContent() {
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/50">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <MessageSquare className="w-4 h-4 text-primary" />
+                <div className={`p-2 rounded-lg ${detail.thread.source === 'auto' ? 'bg-red-50' : 'bg-primary/10'}`}>
+                  {detail.thread.source === 'auto'
+                    ? <Bug className="w-4 h-4 text-red-500" />
+                    : <MessageSquare className="w-4 h-4 text-primary" />
+                  }
                 </div>
                 <div>
-                  <h2 className="text-base font-semibold text-gray-900">Feedback Detail</h2>
+                  <h2 className="text-base font-semibold text-gray-900">
+                    {detail.thread.source === 'auto' ? 'Error Detail' : 'Feedback Detail'}
+                  </h2>
                   <p className="text-xs text-gray-500">
-                    {detail.thread.employeeName} • {detail.thread.pagePath || detail.thread.pageUrl || 'Unknown page'} •{' '}
-                    {formatTime(detail.thread.createdAt)}
+                    {detail.thread.source === 'auto'
+                      ? `Auto-detected • ${detail.thread.pagePath || detail.thread.pageUrl || 'Unknown'} • ${formatTime(detail.thread.createdAt)}`
+                      : `${detail.thread.employeeName} • ${detail.thread.pagePath || detail.thread.pageUrl || 'Unknown page'} • ${formatTime(detail.thread.createdAt)}`
+                    }
                   </p>
                 </div>
               </div>
