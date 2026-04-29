@@ -31,7 +31,6 @@ import { FormShell, FormHeader } from '@/components/modules/FormShell';
 import { TABS } from './constants';
 import { LeftPanel } from './LeftPanel';
 import { BasicInfoTab } from './BasicInfoTab';
-import { CustomerSourceField } from './CustomerSourceField';
 import { MedicalTab } from './MedicalTab';
 import { EInvoiceTab } from './EInvoiceTab';
 import { CardSection } from './CardSection';
@@ -123,7 +122,6 @@ export function AddCustomerForm(props: AddCustomerFormProps) {
             {activeTab === 'basic' && (
               <>
                 <BasicInfoTab formApi={formApi} />
-                <CustomerSourceField selectedId={formData.sourceid} onChange={(value) => set('sourceid', value)} />
                 {/* Notes */}
                 <CardSection title={t('form.notes')} icon={FileText} maxHeight="180px">
                   <textarea

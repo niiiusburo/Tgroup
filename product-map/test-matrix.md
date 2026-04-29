@@ -18,6 +18,7 @@
 | `components/customer/CustomerCameraWidget.test.tsx` | Integrations | Face capture camera widget UI |
 | `components/customer/CustomerProfile.test.tsx` | Customers | CustomerProfile tabs and data display |
 | `components/customer/ServiceHistory.test.tsx` | Services | Service history list rendering |
+| `components/forms/AddCustomerForm/AddCustomerForm.test.tsx` | Customers | Customer profile form excludes hidden customer source field |
 | `components/modules/__tests__/appointment-hover-link.test.tsx` | Appointments | Appointment hover card deep-linking |
 | `components/modules/__tests__/EditAppointmentModal.test.tsx` | Appointments | EditAppointmentModal state and actions |
 | `components/modules/__tests__/patient-checkin-hover.test.tsx` | Appointments | Patient check-in hover interactions |

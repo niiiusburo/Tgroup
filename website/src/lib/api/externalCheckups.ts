@@ -24,6 +24,8 @@ export interface ExternalCheckupsResponse {
   patientCode: string;
   patientName: string;
   source?: string;
+  status?: number;
+  message?: string;
   checkups: ExternalCheckup[];
 }
 
@@ -72,4 +74,3 @@ export async function createExternalCheckup(
   }
   return res.json();
 }
-

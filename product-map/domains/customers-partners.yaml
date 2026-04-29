@@ -53,6 +53,8 @@ ui_surfaces:
   - CustomerSelector dropdown (used in appointments, payments, services)
   - CustomerProfile tabs (appointments, services, photos, payments)
   - AddCustomerForm modal
+ui_invariants:
+  - Customer source (`sourceid` / `sourcename`, label `Nguồn khách hàng`) is stored for migration/reporting compatibility but must not appear in the customer profile assignment card or the customer profile add/edit form.
 jobs:
   - none (archive scripts in api/scripts/archive/ are stale)
 shared_types:

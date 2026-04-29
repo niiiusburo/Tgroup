@@ -34,8 +34,8 @@
 
 ## 6. External Checkups (Hosoonline)
 
-- **Unknown:** Is the `HOSOONLINE_API_KEY` and `HOSOONLINE_BASE_URL` integration actively used in production, or is it a prototype?
-  - Evidence: Routes exist (`api/src/routes/externalCheckups.js`) but no E2E test covers them.
+- **Unknown:** Is the current production Hosoonline credential a valid Bearer token, or does it need rotation?
+  - Evidence: Local `HOSOONLINE_API_KEY` is configured, but Hosoonline returns 401 for the current token/header and the repo has no credential-rotation note.
 - **Unknown:** What is the expected payload contract with Hosoonline? The backend appears to proxy file uploads, but the exact schema is not documented in repo.
 
 ## 7. Payment Allocation Logic Edge Cases

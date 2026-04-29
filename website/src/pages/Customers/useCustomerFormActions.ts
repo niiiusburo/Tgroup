@@ -39,8 +39,10 @@ export function useCustomerFormActions({
 
   const getCustomerCode = useCallback((): string | null | undefined => {
     if (!selectedCustomerId) return undefined;
+    if (rawPartner?.code) return rawPartner.code;
+    if (hookProfile?.code) return hookProfile.code;
     return customers.find((c) => c.id === selectedCustomerId)?.code;
-  }, [selectedCustomerId, customers]);
+  }, [selectedCustomerId, rawPartner, hookProfile, customers]);
 
   const getEditFormData = useCallback((): Partial<CustomerFormData> | undefined => {
     if (!isEditMode || !selectedCustomerId) return undefined;

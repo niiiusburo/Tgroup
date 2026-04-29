@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.25.50",
+    "date": "2026-04-29",
+    "commit": "pending",
+    "highlights": "fix(customers): health checkup images and hidden source guard",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Load Hosoonline health checkup images through the migrated customer ref before falling back to phone lookup",
+          "Support both legacy X-API-Key and Bearer Hosoonline authentication headers with explicit auth-failure messaging",
+          "Remove the customer source field from the customer profile edit form and document that it must stay hidden from profile UI"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add regression coverage for Hosoonline header/ref lookup behavior and the hidden customer-source profile form rule"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.48",
     "date": "2026-04-29",
     "commit": "pending",
