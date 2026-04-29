@@ -82,6 +82,10 @@ router.get('/', async (req, res) => {
         p.sourceid, cs.name AS sourcename, p.referraluserid,
         p.agentid,
         a.name AS agentname,
+        p.cskhid,
+        cskh_staff.name AS cskhname,
+        p.salestaffid,
+        sales_staff.name AS salestaffname,
         p.companyid,
         c.name AS companyname,
         p.datecreated,
@@ -101,6 +105,8 @@ router.get('/', async (req, res) => {
       FROM partners p LEFT JOIN customersources cs ON cs.id = p.sourceid
       LEFT JOIN companies c ON c.id = p.companyid
       LEFT JOIN agents a ON a.id = p.agentid
+      LEFT JOIN partners cskh_staff ON cskh_staff.id = p.cskhid
+      LEFT JOIN partners sales_staff ON sales_staff.id = p.salestaffid
       WHERE ${whereClause}
       ORDER BY ${orderByCol} ${orderDir} NULLS LAST
       LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,

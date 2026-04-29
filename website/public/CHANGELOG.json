@@ -1,5 +1,25 @@
 [
   {
+    "version": "0.25.57",
+    "date": "2026-04-29",
+    "commit": "pending",
+    "highlights": "fix(customers): include assignment fields in customer list DTO",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Return sales and CSKH assignment IDs/names from the customer list endpoint so edit-form fallback data stays complete"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Re-verify live customer search response includes assignment fields after deployment"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.56",
     "date": "2026-04-29",
     "commit": "pending",
