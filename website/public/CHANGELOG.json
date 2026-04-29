@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.25.51",
+    "date": "2026-04-29",
+    "commit": "pending",
+    "highlights": "fix(customers): search by appointment and service numbers",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Allow the customer search bar to find patients by appointment numbers such as AP00025",
+          "Allow the customer search bar to find patients by service/treatment order numbers such as SO00005"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add backend regression coverage for customer search matching related appointment and service order numbers"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.50",
     "date": "2026-04-29",
     "commit": "pending",

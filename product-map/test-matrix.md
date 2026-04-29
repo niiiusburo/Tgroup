@@ -104,6 +104,8 @@
 | Test File | Domain | What It Tests |
 |-----------|--------|---------------|
 | `faceRecognition.test.js` | Integrations | Compreface face register/recognize API |
+| `src/routes/__tests__/externalCheckups.test.js` | Integrations | Hosoonline auth header and migrated ref lookup behavior |
+| `src/routes/partners/__tests__/searchFilters.test.js` | Customers | Customer search matches related appointment and service order numbers |
 
 ## Coverage Gaps
 
@@ -115,7 +117,6 @@
 | **Reports** | No automated accuracy tests for SQL aggregations |
 | **Commission** | No E2E or unit tests for commission calculation |
 | **Monthly Plans** | No tests for installment payment flows |
-| **External Checkups** | No tests for Hosoonline integration |
 | **Feedback** | No tests for attachment upload or admin moderation |
 | **Website CMS** | No tests for page CRUD |
 | **Permissions** | No backend tests for permission override edge cases |

@@ -55,6 +55,7 @@ ui_surfaces:
   - AddCustomerForm modal
 ui_invariants:
   - Customer source (`sourceid` / `sourcename`, label `Nguồn khách hàng`) is stored for migration/reporting compatibility but must not appear in the customer profile assignment card or the customer profile add/edit form.
+  - Customer list search must resolve customers by migrated customer ref, appointment number (`appointments.name`), and service/treatment order number (`saleorders.code` / `saleorders.name`).
 jobs:
   - none (archive scripts in api/scripts/archive/ are stale)
 shared_types:
@@ -73,5 +74,6 @@ impact_tests:
   - website/e2e/customer-profile-crud.spec.ts
   - website/e2e/customer-persistence-sweep.spec.ts
   - website/e2e/face-recognition related flows
+  - api/src/routes/partners/__tests__/searchFilters.test.js
   - website/src/__tests__/customer-deep-link.test.tsx
 risk_level: high
