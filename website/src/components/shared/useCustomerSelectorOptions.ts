@@ -7,7 +7,7 @@ import {
 } from '@/hooks/useCustomers/customerMapper';
 import type { Customer } from '@/types/customer';
 
-const SERVICE_CUSTOMER_SEARCH_LIMIT = 20;
+const CUSTOMER_SEARCH_LIMIT = 20;
 const SEARCH_DEBOUNCE_MS = 300;
 
 function toSelectorCustomer(customer: ApiCustomer): Customer {
@@ -24,16 +24,18 @@ function toSelectorCustomer(customer: ApiCustomer): Customer {
 
 function mergeSelectedCustomer(
   customers: readonly Customer[],
-  baseCustomers: readonly Customer[],
+  selectedCandidates: readonly Customer[],
   selectedId: string | null,
 ): Customer[] {
   const byId = new Map(customers.map((customer) => [customer.id, customer]));
-  const selected = selectedId ? baseCustomers.find((customer) => customer.id === selectedId) : undefined;
+  const selected = selectedId
+    ? selectedCandidates.find((customer) => customer.id === selectedId)
+    : undefined;
   if (selected) byId.set(selected.id, selected);
   return Array.from(byId.values());
 }
 
-export function useServiceCustomerOptions(
+export function useCustomerSelectorOptions(
   baseCustomers: readonly ApiCustomer[],
   selectedId: string | null,
   searchTerm: string,
@@ -73,7 +75,7 @@ export function useServiceCustomerOptions(
       try {
         const response = await fetchPartners({
           search: trimmed,
-          limit: SERVICE_CUSTOMER_SEARCH_LIMIT,
+          limit: CUSTOMER_SEARCH_LIMIT,
         });
         if (!cancelled) {
           setRemoteCustomers(response.items.map(mapPartnerToCustomer).map(toSelectorCustomer));
@@ -91,7 +93,9 @@ export function useServiceCustomerOptions(
 
   const shouldUseRemote = searchTerm.trim().length >= MIN_SEARCH_LENGTH;
   const sourceCustomers = shouldUseRemote ? remoteCustomers : baseSelectorCustomers;
-  const selectedCandidates = selectedRemoteCustomer ? [...baseSelectorCustomers, selectedRemoteCustomer] : baseSelectorCustomers;
+  const selectedCandidates = selectedRemoteCustomer
+    ? [...baseSelectorCustomers, selectedRemoteCustomer]
+    : baseSelectorCustomers;
 
   return {
     customers: mergeSelectedCustomer(sourceCustomers, selectedCandidates, selectedId),

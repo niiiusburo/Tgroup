@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { useServiceCustomerOptions } from './useServiceCustomerOptions';
+import { useCustomerSelectorOptions } from '@/components/shared/useCustomerSelectorOptions';
 
 const mockFetchPartners = vi.fn();
 
@@ -8,7 +8,7 @@ vi.mock('@/lib/api', () => ({
   fetchPartners: (...args: unknown[]) => mockFetchPartners(...args),
 }));
 
-describe('useServiceCustomerOptions', () => {
+describe('useCustomerSelectorOptions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -38,7 +38,7 @@ describe('useServiceCustomerOptions', () => {
     }];
 
     const { result, rerender } = renderHook(
-      ({ searchTerm }) => useServiceCustomerOptions(baseCustomers, null, searchTerm),
+      ({ searchTerm }) => useCustomerSelectorOptions(baseCustomers, null, searchTerm),
       { initialProps: { searchTerm: '09' } },
     );
 
@@ -82,7 +82,7 @@ describe('useServiceCustomerOptions', () => {
     }];
 
     const { result, rerender } = renderHook(
-      ({ selectedId, searchTerm }) => useServiceCustomerOptions(baseCustomers, selectedId, searchTerm),
+      ({ selectedId, searchTerm }) => useCustomerSelectorOptions(baseCustomers, selectedId, searchTerm),
       { initialProps: { selectedId: null as string | null, searchTerm: '09013' } },
     );
 

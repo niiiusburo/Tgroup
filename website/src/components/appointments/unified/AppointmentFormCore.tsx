@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 
 import { CustomerSelector } from '@/components/shared/CustomerSelector';
+import { useCustomerSelectorOptions } from '@/components/shared/useCustomerSelectorOptions';
 import { LocationSelector } from '@/components/shared/LocationSelector';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { TimePicker } from '@/components/ui/TimePicker';
@@ -49,6 +50,12 @@ export function AppointmentFormCore({
   const { selectedLocationId } = useLocationFilter();
   const { products: serviceCatalog, isLoading: productsLoading } = useProducts({ limit: 500 });
   const staffLoading = employeesProp ? false : employeesLoading;
+  const [customerSearchTerm, setCustomerSearchTerm] = useState('');
+  const { customers: customerOptions, searching: customersSearching } = useCustomerSelectorOptions(
+    customers,
+    data.customerId || null,
+    customerSearchTerm,
+  );
 
   const serviceCatalogItems: ServiceCatalogItem[] = useMemo(
     () =>
@@ -122,14 +129,16 @@ export function AppointmentFormCore({
           <div className="flex gap-2">
             <div className="flex-1">
               <CustomerSelector
-                customers={customers}
+                customers={customerOptions}
                 selectedId={data.customerId || null}
                 onChange={(customerId) => {
-                  const customer = customers.find((c) => c.id === customerId);
+                  const customer = customerOptions.find((c) => c.id === customerId);
                   if (customer) handleCustomerChange(customer);
                 }}
                 placeholder={t('appointments:form.selectCustomer')}
                 loading={customersLoading}
+                searching={customersSearching}
+                onSearchTermChange={setCustomerSearchTerm}
               />
             </div>
             <button

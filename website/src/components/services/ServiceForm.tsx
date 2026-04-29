@@ -40,7 +40,7 @@ import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
 import { useProducts } from '@/hooks/useProducts';
 import { useCustomerSources } from '@/hooks/useSettings';
-import { useServiceCustomerOptions } from './useServiceCustomerOptions';
+import { useCustomerSelectorOptions } from '@/components/shared/useCustomerSelectorOptions';
 import { type ServiceCatalogItem } from '@/data/mockServices';
 import type { CreateServiceInput } from '@/hooks/useServices';
 import type { Employee } from '@/types/employee';
@@ -135,7 +135,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
     }
   }, [readonlyCustomerId, apiCustomers, isProfileContext]);
 
-  const { customers, searching: customersSearching } = useServiceCustomerOptions(
+  const { customers, searching: customersSearching } = useCustomerSelectorOptions(
     apiCustomers,
     customerId,
     customerSearchTerm,
