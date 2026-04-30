@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.25.58",
+    "date": "2026-04-30",
+    "commit": "pending",
+    "highlights": "chore(migration): guard service staff assignment sync",
+    "sections": [
+      {
+        "title": "Migration",
+        "items": [
+          "Correct the service Excel migration mapping so Phụ tá writes to assistantid and Trợ lý bác sĩ writes to dentalaideid",
+          "Add duplicate employee-name detection so future service staff migrations fail loudly instead of assigning ambiguous staff"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Verify local migrated customer samples T0095/T0127 and service samples SO00005/SO01053/SO01564 before VPS database sync"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.57",
     "date": "2026-04-29",
     "commit": "pending",

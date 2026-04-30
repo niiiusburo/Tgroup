@@ -57,6 +57,8 @@ website/.vite/
 
 # Test screenshots dumped at repo root
 /*.png
+scripts/screenshots/
+scripts/__pycache__/
 
 # Generated audit reports
 locale_audit_report.md

@@ -190,31 +190,15 @@ Expert skills are installed in `website/.agents/skills/`. Available skill catego
 <claude-mem-context>
 # Memory Context
 
-# [Tgrouptest] recent context, 2026-04-29 10:48pm GMT+7
+# [Tgrouptest] recent context, 2026-04-30 8:42am GMT+7
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
 Format: ID TIME TYPE TITLE
 Fetch details: get_observations([IDs]) | Search: mem-search skill
 
-Stats: 50 obs (22,417t read) | 2,504,162t work | 99% savings
+Stats: 50 obs (22,024t read) | 1,778,678t work | 99% savings
 
 ### Apr 27, 2026
-10710 10:51a ⚖️ Loading state audit initiated for Tgrouptest website
-10711 10:52a 🔵 Missing loading UI in Customers page main list
-10712 " 🔵 Missing loading UI in Payment page for payments and outstanding balances
-10713 " 🔵 ServiceCatalog and ServiceForm have proper loading UI
-10714 " 🔵 CustomerProfile tabs have complete loading coverage
-10715 10:54a 🔵 Loading State Architecture Audit Findings
-10716 11:08a ⚖️ Multi-agent code review workflow before VPS deployment
-10717 11:09a 🔴 Service catalog category deduplication for migrated legacy data
-10718 " 🟣 Service catalog dedups migrated category UUIDs by display name
-10719 11:10a 🔵 Version bump incomplete: CHANGELOG.json not updated to match package.json 0.25.33
-10720 " ✅ CHANGELOG.json updated to version 0.25.33 for service-catalog deploy
-10721 11:11a 🔵 Service catalog deduplication ready but blocked by version mismatch
-10722 11:13a 🟣 Loading state UI added to TGClinic frontend data pages
-10726 11:30a 🔵 Service catalog migration state verified in production
-10731 11:35a 🔄 Calendar page refactored with paginated appointment fetching
-10738 11:40a 🔵 Local development database has 431 appointments for today with null time values
 10744 11:58a 🔵 Project has 43 modified files and 43 untracked files pending commit
 10745 11:59a 🔵 Untracked files total 20MB from TDental migration artifacts and QA automation
 10746 12:00p 🔵 Gitignore missing patterns for generated artifacts causing dirty git tree
@@ -251,6 +235,22 @@ Stats: 50 obs (22,417t read) | 2,504,162t work | 99% savings
 11082 10:43p 🔴 Customer Edit Modal Sales Staff Field Now Resolves Inactive Employees
 11083 " 🔵 Data Fetching Inconsistency Between Customer Overview and Edit Modal
 11084 10:44p 🔄 Employee Assignment Fields Extracted to Dedicated Hook
+11087 10:49p 🔴 Fixed inactive sales employee not visible in customer edit form
+11088 " 🔵 Data consistency gap between display and edit components
+11089 10:50p 🔄 Simplified Hosoonline authentication to use X-API-Key only
+11090 " 🔴 Added salestaffname to partner API response for customer profile display
+11091 " ✅ Deployed customer assignment fixes to production
+11092 10:51p ✅ Deployed version 0.25.56 to production VPS
+11093 10:52p 🔴 Added assignment fields to customer list endpoint
+11094 10:53p ✅ Deployed version 0.25.57 with customer list assignment fields
+11096 10:54p ✅ Version 0.25.57 deployment completed on production VPS
+11097 " 🔵 Production verification confirms customer list endpoint returns assignment fields
+11098 11:02p 🔵 Production database missing core application tables
+11099 11:03p 🔵 Production database tables exist in dbo schema namespace
+11100 " 🔵 Production staff assignment pattern shows dual-level role tracking with counselor usage
+11101 11:04p ✅ Production database staff role swap executed for order SO00005
+11102 11:05p 🔵 Production API verification shows SaleOrders endpoint returns staff fields as lowercase snake_case
+11103 11:07p ✅ Production UI verified showing swapped staff roles after database update
 
-Access 2504k tokens of past work via get_observations([IDs]) or mem-search skill.
+Access 1779k tokens of past work via get_observations([IDs]) or mem-search skill.
 </claude-mem-context>
