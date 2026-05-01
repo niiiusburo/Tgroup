@@ -15,5 +15,11 @@
   "noData": "No data matches the current filters.",
   "previewError": "Unable to load preview",
   "downloadError": "Download failed",
-  "directExportError": "Export failed"
+  "directExportError": "Export failed",
+  "selectDateRange": "Select date range",
+  "customRange": "Or choose custom dates",
+  "fromDate": "From date",
+  "toDate": "To date",
+  "cancel": "Cancel",
+  "apply": "Apply"
 }

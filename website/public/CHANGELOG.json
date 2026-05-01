@@ -1,5 +1,25 @@
 [
   {
+    "version": "0.27.5",
+    "date": "2026-05-01",
+    "commit": "fe138c4f",
+    "highlights": "feat(exports): add date range selector for calendar appointment exports",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": []
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
     "version": "0.27.4",
     "date": "2026-05-01",
     "commit": "241d53ec",

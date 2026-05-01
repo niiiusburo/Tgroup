@@ -15,5 +15,11 @@
   "noData": "Không có dữ liệu phù hợp với bộ lọc hiện tại.",
   "previewError": "Không thể tải xem trước",
   "downloadError": "Tải file thất bại",
-  "directExportError": "Xuất file thất bại"
+  "directExportError": "Xuất file thất bại",
+  "selectDateRange": "Chọn khoảng thởi gian",
+  "customRange": "Hoặc chọn ngày tùy chỉnh",
+  "fromDate": "Từ ngày",
+  "toDate": "Đến ngày",
+  "cancel": "Hủy",
+  "apply": "Áp dụng"
 }

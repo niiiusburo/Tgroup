@@ -19,6 +19,7 @@ import { AppointmentFormShell, calendarAppointmentToFormData } from '@/component
 import { PageHeader } from '@/components/shared/PageHeader';
 import type { UnifiedAppointmentFormData } from '@/components/appointments/unified';
 import { ExportPreviewModal } from '@/components/shared/ExportPreviewModal';
+import { ExportDateRangeModal } from '@/components/calendar/ExportDateRangeModal';
 import { useExport } from '@/hooks/useExport';
 
 export function Calendar() {
@@ -57,6 +58,10 @@ export function Calendar() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createInitialData, setCreateInitialData] = useState<Partial<UnifiedAppointmentFormData> | undefined>(undefined);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [dateRangeModalOpen, setDateRangeModalOpen] = useState(false);
+  const [pendingExportAction, setPendingExportAction] = useState<'export' | 'preview' | null>(null);
+  const [exportDateFrom, setExportDateFrom] = useState('');
+  const [exportDateTo, setExportDateTo] = useState('');
   const doctorsFilter = useSmartFilter<string>(selectedDoctors);
   const statusesFilter = useSmartFilter<AppointmentStatus>(selectedStatuses);
   const colorsFilter = useSmartFilter<string>(selectedColors);
@@ -131,17 +136,20 @@ export function Calendar() {
   const canExportAppointments = hasPermission('appointments.export');
 
   const appointmentExportFilters = useMemo(() => {
-    let dateFrom = '';
-    let dateTo = '';
-    if (viewMode === 'day') {
-      dateFrom = formatDate(currentDate, 'yyyy-MM-dd');
-      dateTo = dateFrom;
-    } else if (viewMode === 'week') {
-      dateFrom = formatDate(weekDates[0], 'yyyy-MM-dd');
-      dateTo = formatDate(weekDates[6], 'yyyy-MM-dd');
-    } else {
-      dateFrom = formatDate(monthDates[0], 'yyyy-MM-dd');
-      dateTo = formatDate(monthDates[monthDates.length - 1], 'yyyy-MM-dd');
+    let dateFrom = exportDateFrom;
+    let dateTo = exportDateTo;
+    // Fall back to current calendar view if no custom range set
+    if (!dateFrom && !dateTo) {
+      if (viewMode === 'day') {
+        dateFrom = formatDate(currentDate, 'yyyy-MM-dd');
+        dateTo = dateFrom;
+      } else if (viewMode === 'week') {
+        dateFrom = formatDate(weekDates[0], 'yyyy-MM-dd');
+        dateTo = formatDate(weekDates[6], 'yyyy-MM-dd');
+      } else {
+        dateFrom = formatDate(monthDates[0], 'yyyy-MM-dd');
+        dateTo = formatDate(monthDates[monthDates.length - 1], 'yyyy-MM-dd');
+      }
     }
     return {
       search: search || '',
@@ -150,7 +158,7 @@ export function Calendar() {
       dateTo,
       state: selectedStatuses.length === 1 ? selectedStatuses[0] : '',
     };
-  }, [viewMode, currentDate, weekDates, monthDates, formatDate, search, selectedLocationId, selectedStatuses]);
+  }, [exportDateFrom, exportDateTo, viewMode, currentDate, weekDates, monthDates, formatDate, search, selectedLocationId, selectedStatuses]);
 
   const {
     previewOpen: aptPreviewOpen,
@@ -163,6 +171,31 @@ export function Calendar() {
     handleDownload: handleAptDownload,
     handleDirectExport: handleAptDirectExport,
   } = useExport({ type: 'appointments', filters: appointmentExportFilters });
+
+  const handleOpenDateRangeForExport = useCallback(() => {
+    setPendingExportAction('export');
+    setDateRangeModalOpen(true);
+  }, []);
+
+  const handleOpenDateRangeForPreview = useCallback(() => {
+    setPendingExportAction('preview');
+    setDateRangeModalOpen(true);
+  }, []);
+
+  const handleDateRangeApply = useCallback((dateFrom: string, dateTo: string) => {
+    setExportDateFrom(dateFrom);
+    setExportDateTo(dateTo);
+    setDateRangeModalOpen(false);
+    // Trigger the pending action after state updates (next tick)
+    setTimeout(() => {
+      if (pendingExportAction === 'export') {
+        handleAptDirectExport();
+      } else if (pendingExportAction === 'preview') {
+        openAptPreview();
+      }
+      setPendingExportAction(null);
+    }, 0);
+  }, [pendingExportAction, handleAptDirectExport, openAptPreview]);
 
   const handleCreateAppointment = useCallback((date: string, startTime: string) => {
     setCreateInitialData({
@@ -231,8 +264,8 @@ export function Calendar() {
         suggestions={filteredSuggestions}
         isLoading={isLoading}
         canExportAppointments={canExportAppointments}
-        onExportDirect={handleAptDirectExport}
-        onExportPreview={openAptPreview}
+        onExportDirect={handleOpenDateRangeForExport}
+        onExportPreview={handleOpenDateRangeForPreview}
         exportDownloading={aptExportDownloading}
         onQuickAddSuccess={refresh}
         onOpenFilter={openFilter}
@@ -301,6 +334,17 @@ export function Calendar() {
           preview={aptPreviewData}
           loading={aptExportLoading}
           error={aptExportError}
+        />
+      )}
+
+      {canExportAppointments && (
+        <ExportDateRangeModal
+          isOpen={dateRangeModalOpen}
+          onClose={() => {
+            setDateRangeModalOpen(false);
+            setPendingExportAction(null);
+          }}
+          onApply={handleDateRangeApply}
         />
       )}
 
