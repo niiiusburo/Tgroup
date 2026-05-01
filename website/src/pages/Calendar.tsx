@@ -1,6 +1,6 @@
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useCalendarData } from '@/hooks/useCalendarData';
 
 import { useSmartFilter } from '@/hooks/useSmartFilter';
@@ -186,16 +186,19 @@ export function Calendar() {
     setExportDateFrom(dateFrom);
     setExportDateTo(dateTo);
     setDateRangeModalOpen(false);
-    // Trigger the pending action after state updates (next tick)
-    setTimeout(() => {
-      if (pendingExportAction === 'export') {
-        handleAptDirectExport();
-      } else if (pendingExportAction === 'preview') {
-        openAptPreview();
-      }
-      setPendingExportAction(null);
-    }, 0);
-  }, [pendingExportAction, handleAptDirectExport, openAptPreview]);
+  }, []);
+
+  useEffect(() => {
+    if (!pendingExportAction || dateRangeModalOpen) return;
+
+    if (pendingExportAction === 'export') {
+      void handleAptDirectExport();
+    } else {
+      openAptPreview();
+    }
+
+    setPendingExportAction(null);
+  }, [pendingExportAction, dateRangeModalOpen, exportDateFrom, exportDateTo, handleAptDirectExport, openAptPreview]);
 
   const handleCreateAppointment = useCallback((date: string, startTime: string) => {
     setCreateInitialData({

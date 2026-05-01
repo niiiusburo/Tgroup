@@ -51,8 +51,9 @@ function buildWhere(filters) {
   }
 
   if (filters.dateTo) {
+    const dtVal = filters.dateTo.length <= 10 ? `${filters.dateTo} 23:59:59` : filters.dateTo;
     conditions.push(`so.datecreated <= $${idx}`);
-    params.push(filters.dateTo);
+    params.push(dtVal);
     idx++;
   }
 

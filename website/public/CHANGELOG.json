@@ -1,9 +1,9 @@
 [
   {
-    "version": "0.27.5",
+    "version": "0.27.6",
     "date": "2026-05-01",
     "commit": "fe138c4f",
-    "highlights": "feat(exports): add date range selector for calendar appointment exports",
+    "highlights": "fix(exports): harden Excel downloads and E2E coverage",
     "sections": [
       {
         "title": "New Features",
@@ -11,11 +11,17 @@
       },
       {
         "title": "Bug Fixes",
-        "items": []
+        "items": [
+          "Calendar Excel exports now use the selected date range before the download starts.",
+          "Appointment export date cells are populated as Excel dates instead of blank values.",
+          "Service catalog price columns export as numeric currency-formatted cells."
+        ]
       },
       {
         "title": "Release Notes",
-        "items": []
+        "items": [
+          "Added browser E2E coverage for customer, calendar, services, payment, and service catalog Excel exports."
+        ]
       }
     ]
   },

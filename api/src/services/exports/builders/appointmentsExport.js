@@ -135,6 +135,30 @@ function getVisitTypeLabel(isRepeat) {
   return isRepeat ? 'Tái khám' : 'Khám mới';
 }
 
+function buildAppointmentDate(row) {
+  if (row.datetimeappointment) {
+    const dt = new Date(row.datetimeappointment);
+    return Number.isNaN(dt.getTime()) ? null : dt;
+  }
+
+  if (!row.date) return null;
+
+  const dt = row.date instanceof Date ? new Date(row.date) : new Date(row.date);
+  if (Number.isNaN(dt.getTime())) return null;
+
+  if (row.time) {
+    const [hours = '0', minutes = '0', seconds = '0'] = String(row.time).split(':');
+    dt.setHours(
+      Number.parseInt(hours, 10) || 0,
+      Number.parseInt(minutes, 10) || 0,
+      Number.parseInt(seconds, 10) || 0,
+      0
+    );
+  }
+
+  return dt;
+}
+
 async function preview(filters, user) {
   const summary = await getSummary(filters);
   const total = parseInt(summary.total, 10);
@@ -176,14 +200,9 @@ async function build(filters, user) {
   });
 
   const dataRows = rows.map((r) => {
-    const dt = r.datetimeappointment
-      ? new Date(r.datetimeappointment)
-      : r.date && r.time
-        ? new Date(`${r.date}T${r.time}`)
-        : null;
     return {
       id: r.code || r.id || '',
-      datetime: dt,
+      datetime: buildAppointmentDate(r),
       customerCode: r.partnercode || '',
       customerName: r.partnerdisplayname || r.partnername || '',
       customerPhone: r.partnerphone || '',
