@@ -1,5 +1,30 @@
 [
   {
+    "version": "0.27.7",
+    "date": "2026-05-01",
+    "commit": "pending",
+    "highlights": "fix(exports): make production export migrations deployable",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Export permission migration now works on the dbo-schema production database.",
+          "Export audit records now store employee UUIDs correctly."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "Production export downloads are unblocked after applying the export permissions and audit migrations."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.6",
     "date": "2026-05-01",
     "commit": "fe138c4f",

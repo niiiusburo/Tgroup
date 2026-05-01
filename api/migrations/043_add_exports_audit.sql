@@ -1,7 +1,7 @@
 -- Audit log for export operations (PRD Section 11)
 CREATE TABLE IF NOT EXISTS dbo.exports_audit (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  employee_id   INTEGER NOT NULL,
+  employee_id   UUID NOT NULL,
   export_type   VARCHAR(50) NOT NULL,
   action        VARCHAR(20) NOT NULL CHECK (action IN ('preview', 'download')),
   filters       JSONB,
