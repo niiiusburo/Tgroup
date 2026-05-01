@@ -24,7 +24,7 @@ import { useExport } from '@/hooks/useExport';
 export function Calendar() {
   const { t } = useTranslation('calendar');
   const { selectedLocationId } = useLocationFilter();
-  const { getToday, formatDate } = useTimezone();
+  const { formatDate } = useTimezone();
   const {
     viewMode,
     setViewMode,

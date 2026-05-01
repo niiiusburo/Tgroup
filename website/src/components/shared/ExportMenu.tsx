@@ -42,7 +42,7 @@ export function ExportMenu({
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-1 w-56 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+        <div className="absolute left-0 mt-1 w-56 bg-white rounded-xl shadow-lg border border-gray-200 z-[120] overflow-hidden animate-in fade-in zoom-in-95 duration-100">
           <button
             onClick={() => {
               setOpen(false);
