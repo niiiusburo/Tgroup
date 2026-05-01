@@ -2,7 +2,7 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useState, useCallback, useMemo } from 'react';
 import { useCalendarData } from '@/hooks/useCalendarData';
-import { useCalendarExport } from '@/hooks/useCalendarExport';
+
 import { useSmartFilter } from '@/hooks/useSmartFilter';
 import { normalizeText } from '@/lib/utils';
 import { useDragReschedule } from '@/hooks/useDragReschedule';
@@ -18,7 +18,6 @@ import type { AppointmentStatus } from '@/types/appointment';
 import { AppointmentFormShell, calendarAppointmentToFormData } from '@/components/appointments/unified';
 import { PageHeader } from '@/components/shared/PageHeader';
 import type { UnifiedAppointmentFormData } from '@/components/appointments/unified';
-import { ExportDialog } from '@/components/calendar/ExportDialog';
 import { ExportPreviewModal } from '@/components/shared/ExportPreviewModal';
 import { useExport } from '@/hooks/useExport';
 
@@ -55,7 +54,6 @@ export function Calendar() {
 
   const [editingAppointment, setEditingAppointment] = useState<Partial<UnifiedAppointmentFormData> | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isExportOpen, setIsExportOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createInitialData, setCreateInitialData] = useState<Partial<UnifiedAppointmentFormData> | undefined>(undefined);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -128,17 +126,6 @@ export function Calendar() {
     setCurrentDate(date);
     setViewMode('day');
   }, [setCurrentDate, setViewMode]);
-
-  const handleExport = useCalendarExport({
-    viewMode,
-    currentDate,
-    weekDates,
-    monthDates,
-    formatDate,
-    appointments,
-    selectedLocationId,
-    t,
-  });
 
   const { hasPermission } = useAuth();
   const canExportAppointments = hasPermission('appointments.export');
@@ -243,7 +230,6 @@ export function Calendar() {
         onSearchChange={setSearch}
         suggestions={filteredSuggestions}
         isLoading={isLoading}
-        onExportClick={() => setIsExportOpen(true)}
         canExportAppointments={canExportAppointments}
         onExportDirect={handleAptDirectExport}
         onExportPreview={openAptPreview}
@@ -306,13 +292,6 @@ export function Calendar() {
         onApply={applyFilter}
         onClear={clearFilter} />
       
-
-      <ExportDialog
-        isOpen={isExportOpen}
-        onClose={() => setIsExportOpen(false)}
-        onExport={handleExport}
-        defaultDateFrom={getToday()}
-        defaultDateTo={getToday()} />
 
       {canExportAppointments && (
         <ExportPreviewModal

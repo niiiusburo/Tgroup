@@ -43,9 +43,7 @@ vi.mock('@/hooks/useDragReschedule', () => ({
     handleDragEnd: vi.fn(),
   }),
 }));
-vi.mock('@/lib/exportAppointmentsXlsx', () => ({
-  exportAppointmentsXlsx: vi.fn().mockResolvedValue(undefined),
-}));
+
 vi.mock('@/components/appointments/unified/AppointmentFormShell', () => ({
   AppointmentFormShell: ({ isOpen }: { isOpen: boolean }) =>
     isOpen ? <div data-testid="appointment-form-shell">Edit Form Open</div> : null,

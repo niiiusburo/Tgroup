@@ -26,7 +26,6 @@ interface CalendarToolbarProps {
   readonly onSearchChange: (value: string) => void;
   readonly suggestions: readonly CalendarCustomerSuggestion[];
   readonly isLoading: boolean;
-  readonly onExportClick: () => void;
   readonly canExportAppointments?: boolean;
   readonly onExportDirect?: () => void;
   readonly onExportPreview?: () => void;
@@ -54,7 +53,6 @@ export function CalendarToolbar({
   onSearchChange,
   suggestions,
   isLoading,
-  onExportClick,
   canExportAppointments = false,
   onExportDirect,
   onExportPreview,
@@ -144,20 +142,12 @@ export function CalendarToolbar({
             </div>
           )}
         </div>
-        {canExportAppointments && onExportDirect && onExportPreview ? (
+        {canExportAppointments && onExportDirect && onExportPreview && (
           <ExportMenu
             onExport={onExportDirect}
             onPreview={onExportPreview}
             loading={exportDownloading}
           />
-        ) : (
-          <button
-            type="button"
-            onClick={onExportClick}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            {t('xutExcel', 'Xuất Excel')}
-          </button>
         )}
         <QuickAddAppointmentButton onSuccess={onQuickAddSuccess} size="sm" />
 
