@@ -186,7 +186,7 @@ async function build(filters, user) {
     { label: 'Có ngày sinh', value: parseInt(summary.with_birthday, 10) },
   ]);
 
-  return { workbook };
+  return { workbook, rowCount: dataRows.length };
 }
 
 module.exports = { preview, build };

@@ -206,7 +206,7 @@ async function build(filters, user) {
     { label: 'Còn lại', value: parseFloat(summary.total_residual) },
   ]);
 
-  return { workbook };
+  return { workbook, rowCount: dataRows.length };
 }
 
 module.exports = { preview, build };

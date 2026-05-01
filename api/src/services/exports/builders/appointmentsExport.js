@@ -208,7 +208,7 @@ async function build(filters, user) {
     { label: 'Tái khám', value: parseInt(summary.repeat_count, 10) },
   ]);
 
-  return { workbook };
+  return { workbook, rowCount: dataRows.length };
 }
 
 module.exports = { preview, build };

@@ -1,0 +1,19 @@
+{
+  "exportData": "Xuất dữ liệu",
+  "exportExcel": "Xuất Excel",
+  "previewRowsAndFilters": "Xem trước số dòng / bộ lọc",
+  "previewTitle": "Xem trước xuất dữ liệu",
+  "loading": "Đang tải thông tin...",
+  "close": "Đóng",
+  "downloadExcel": "Tải Excel",
+  "downloading": "Đang tải...",
+  "exportType": "Loại xuất",
+  "rowCount": "Số dòng",
+  "filename": "Tên file",
+  "summary": "Tổng quan",
+  "exceedsMax": "Số dòng vượt quá giới hạn. Vui lòng thu hẹp bộ lọc.",
+  "noData": "Không có dữ liệu phù hợp với bộ lọc hiện tại.",
+  "previewError": "Không thể tải xem trước",
+  "downloadError": "Tải file thất bại",
+  "directExportError": "Xuất file thất bại"
+}

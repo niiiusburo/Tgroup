@@ -5,6 +5,7 @@ const { requireAuth } = require('../middleware/auth');
 const { getExportType, sanitizeFilters } = require('../services/exports/exportRegistry');
 const { buildFilename } = require('../services/exports/exportWorkbook');
 const { resolveEffectivePermissions } = require('../services/permissionService');
+const { query } = require('../db');
 
 const router = express.Router();
 
@@ -42,6 +43,15 @@ router.post('/:type/preview', requireAuth, requireExportPermission, async (req, 
     const filters = sanitizeFilters(type, req.body.filters || {});
     const result = await entry.builder.preview(filters, req.user);
 
+    // Audit log
+    await query(
+      `INSERT INTO dbo.exports_audit (employee_id, export_type, action, filters, row_count)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [req.user.employeeId, type, 'preview', JSON.stringify(req.body.filters || {}), result.rowCount]
+    ).catch((auditErr) => {
+      console.error('Export audit log error (preview):', auditErr);
+    });
+
     return res.json({
       type,
       label: entry.label,
@@ -66,7 +76,7 @@ router.post('/:type/download', requireAuth, requireExportPermission, async (req,
     const { type } = req.params;
     const entry = getExportType(type);
     const filters = sanitizeFilters(type, req.body.filters || {});
-    const { workbook } = await entry.builder.build(filters, req.user);
+    const { workbook, rowCount } = await entry.builder.build(filters, req.user);
 
     const filename = entry.filename();
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -74,6 +84,15 @@ router.post('/:type/download', requireAuth, requireExportPermission, async (req,
 
     await workbook.xlsx.write(res);
     res.end();
+
+    // Audit log (fire-and-forget after response)
+    query(
+      `INSERT INTO dbo.exports_audit (employee_id, export_type, action, filters, row_count, filename)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [req.user.employeeId, type, 'download', JSON.stringify(req.body.filters || {}), rowCount || null, filename]
+    ).catch((auditErr) => {
+      console.error('Export audit log error (download):', auditErr);
+    });
   } catch (err) {
     console.error('Export download error:', err);
     if (err.code === 'EXPORT_ROW_LIMIT_EXCEEDED') {

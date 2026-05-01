@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, FileSpreadsheet, Loader2, AlertCircle } from 'lucide-react';
 import type { ExportPreviewResponse } from '@/lib/api/exports';
 
@@ -19,6 +20,7 @@ export function ExportPreviewModal({
   loading,
   error,
 }: ExportPreviewModalProps) {
+  const { t } = useTranslation('exports');
   const [downloading, setDownloading] = useState(false);
 
   if (!isOpen) return null;
@@ -38,7 +40,7 @@ export function ExportPreviewModal({
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h3 className="text-base font-semibold text-gray-900">Xem trước xuất dữ liệu</h3>
+          <h3 className="text-base font-semibold text-gray-900">{t('previewTitle')}</h3>
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
             <X className="w-4 h-4 text-gray-500" />
           </button>
@@ -49,7 +51,7 @@ export function ExportPreviewModal({
           {loading && (
             <div className="flex items-center justify-center gap-2 py-8 text-gray-500">
               <Loader2 className="w-5 h-5 animate-spin" />
-              <span className="text-sm">Đang tải thông tin...</span>
+              <span className="text-sm">{t('loading')}</span>
             </div>
           )}
 
@@ -64,17 +66,17 @@ export function ExportPreviewModal({
             <>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">Loại xuất</span>
+                  <span className="text-sm text-gray-500">{t('exportType')}</span>
                   <span className="text-sm font-medium text-gray-900">{preview.label}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">Số dòng</span>
+                  <span className="text-sm text-gray-500">{t('rowCount')}</span>
                   <span className="text-sm font-medium text-gray-900">
                     {preview.rowCount.toLocaleString('vi-VN')} dòng
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">Tên file</span>
+                  <span className="text-sm text-gray-500">{t('filename')}</span>
                   <span className="text-sm font-medium text-gray-900 truncate max-w-[180px]">
                     {preview.filename}
                   </span>
@@ -83,7 +85,7 @@ export function ExportPreviewModal({
 
               {preview.summary.length > 0 && (
                 <div className="bg-gray-50 rounded-xl p-3 space-y-2">
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Tổng quan</p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('summary')}</p>
                   {preview.summary.map((s, i) => (
                     <div key={i} className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">{s.label}</span>
@@ -98,14 +100,14 @@ export function ExportPreviewModal({
               {preview.exceedsMax && (
                 <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-lg text-amber-700 text-sm">
                   <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                  <span>Số dòng vượt quá giới hạn. Vui lòng thu hẹp bộ lọc.</span>
+                  <span>{t('exceedsMax')}</span>
                 </div>
               )}
 
               {preview.rowCount === 0 && (
                 <div className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg text-gray-600 text-sm">
                   <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                  <span>Không có dữ liệu phù hợp với bộ lọc hiện tại.</span>
+                  <span>{t('noData')}</span>
                 </div>
               )}
             </>
@@ -118,7 +120,7 @@ export function ExportPreviewModal({
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            Đóng
+            {t('close')}
           </button>
           <button
             onClick={handleDownload}
@@ -128,12 +130,12 @@ export function ExportPreviewModal({
             {downloading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Đang tải...</span>
+                <span>{t('downloading')}</span>
               </>
             ) : (
               <>
                 <FileSpreadsheet className="w-4 h-4" />
-                <span>Tải Excel</span>
+                <span>{t('downloadExcel')}</span>
               </>
             )}
           </button>

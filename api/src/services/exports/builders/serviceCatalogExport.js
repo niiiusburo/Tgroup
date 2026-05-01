@@ -167,7 +167,7 @@ async function build(filters, user) {
     { label: 'Số nhóm', value: parseInt(summary.category_count, 10) },
   ]);
 
-  return { workbook };
+  return { workbook, rowCount: dataRows.length };
 }
 
 module.exports = { preview, build };

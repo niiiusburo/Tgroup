@@ -190,7 +190,7 @@ async function build(filters, user) {
     { label: 'Tổng tiền (đã ghi sổ)', value: parseFloat(summary.total_amount) },
   ]);
 
-  return { workbook };
+  return { workbook, rowCount: dataRows.length };
 }
 
 module.exports = { preview, build };

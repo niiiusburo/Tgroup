@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Download, ChevronDown, FileSpreadsheet, Eye } from 'lucide-react';
 
 export interface ExportMenuProps {
@@ -14,6 +15,7 @@ export function ExportMenu({
   disabled = false,
   loading = false,
 }: ExportMenuProps) {
+  const { t } = useTranslation('exports');
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -35,7 +37,7 @@ export function ExportMenu({
         className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         <Download className="w-4 h-4" />
-        <span>Xuất dữ liệu</span>
+        <span>{t('exportData')}</span>
         <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
@@ -49,7 +51,7 @@ export function ExportMenu({
             className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
           >
             <FileSpreadsheet className="w-4 h-4 text-green-600" />
-            <span>Xuất Excel</span>
+            <span>{t('exportExcel')}</span>
           </button>
           <div className="h-px bg-gray-100 mx-2" />
           <button
@@ -60,7 +62,7 @@ export function ExportMenu({
             className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
           >
             <Eye className="w-4 h-4 text-sky-600" />
-            <span>Xem trước số dòng / bộ lọc</span>
+            <span>{t('previewRowsAndFilters')}</span>
           </button>
         </div>
       )}

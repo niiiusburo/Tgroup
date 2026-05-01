@@ -1,0 +1,19 @@
+{
+  "exportData": "Export Data",
+  "exportExcel": "Export Excel",
+  "previewRowsAndFilters": "Preview rows / filters",
+  "previewTitle": "Export Preview",
+  "loading": "Loading preview...",
+  "close": "Close",
+  "downloadExcel": "Download Excel",
+  "downloading": "Downloading...",
+  "exportType": "Export type",
+  "rowCount": "Row count",
+  "filename": "Filename",
+  "summary": "Summary",
+  "exceedsMax": "Row count exceeds the limit. Please narrow your filters.",
+  "noData": "No data matches the current filters.",
+  "previewError": "Unable to load preview",
+  "downloadError": "Download failed",
+  "directExportError": "Export failed"
+}

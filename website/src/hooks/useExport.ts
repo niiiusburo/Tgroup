@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { previewExport, downloadExport } from '@/lib/api/exports';
 import type { ExportPreviewResponse } from '@/lib/api/exports';
 
@@ -20,6 +21,7 @@ interface UseExportResult {
 }
 
 export function useExport({ type, filters }: UseExportOptions): UseExportResult {
+  const { t } = useTranslation('exports');
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewData, setPreviewData] = useState<ExportPreviewResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -37,7 +39,7 @@ export function useExport({ type, filters }: UseExportOptions): UseExportResult 
         setPreviewData(data);
       })
       .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Không thể tải xem trước');
+        setError(err instanceof Error ? err.message : t('previewError'));
       })
       .finally(() => {
         setLoading(false);
@@ -67,7 +69,7 @@ export function useExport({ type, filters }: UseExportOptions): UseExportResult 
     try {
       await performDownload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Tải file thất bại');
+      setError(err instanceof Error ? err.message : t('downloadError'));
     } finally {
       setDownloading(false);
     }
@@ -79,7 +81,7 @@ export function useExport({ type, filters }: UseExportOptions): UseExportResult 
     try {
       await performDownload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Xuất file thất bại');
+      setError(err instanceof Error ? err.message : t('directExportError'));
     } finally {
       setDownloading(false);
     }
