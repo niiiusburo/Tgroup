@@ -53,6 +53,7 @@ const feedbackRoutes = require('./routes/feedback');
 const reportsRoutes = require('./routes/reports');
 const telemetryRoutes = require('./routes/telemetry');
 const ipAccessRoutes = require('./routes/ipAccess');
+const exportsRoutes = require('./routes/exports');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -233,6 +234,7 @@ app.use('/api/Feedback', feedbackRoutes);
 app.use('/api/Reports', reportsRoutes);
 app.use('/api/telemetry', telemetryRoutes);
 app.use('/api/IpAccess', ipAccessRoutes);
+app.use('/api/Exports', exportsRoutes);
 
 // Serve uploaded feedback attachments
 app.use('/uploads/feedback', express.static(path.join(__dirname, '..', 'uploads', 'feedback')));

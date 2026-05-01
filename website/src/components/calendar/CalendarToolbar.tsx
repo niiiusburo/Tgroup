@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CalendarDateNavigator } from './CalendarDateNavigator';
 import { QuickAddAppointmentButton } from '@/components/shared/QuickAddAppointmentButton';
+import { ExportMenu } from '@/components/shared/ExportMenu';
 import { cn } from '@/lib/utils';
 import type { ViewMode } from '@/hooks/useCalendarData';
 
@@ -26,6 +27,10 @@ interface CalendarToolbarProps {
   readonly suggestions: readonly CalendarCustomerSuggestion[];
   readonly isLoading: boolean;
   readonly onExportClick: () => void;
+  readonly canExportAppointments?: boolean;
+  readonly onExportDirect?: () => void;
+  readonly onExportPreview?: () => void;
+  readonly exportDownloading?: boolean;
   readonly onQuickAddSuccess: () => void | Promise<void>;
   readonly onOpenFilter: () => void;
   readonly filterCount: number;
@@ -50,6 +55,10 @@ export function CalendarToolbar({
   suggestions,
   isLoading,
   onExportClick,
+  canExportAppointments = false,
+  onExportDirect,
+  onExportPreview,
+  exportDownloading = false,
   onQuickAddSuccess,
   onOpenFilter,
   filterCount,
@@ -135,13 +144,21 @@ export function CalendarToolbar({
             </div>
           )}
         </div>
-        <button
-          type="button"
-          onClick={onExportClick}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          {t('xutExcel', 'Xuất Excel')}
-        </button>
+        {canExportAppointments && onExportDirect && onExportPreview ? (
+          <ExportMenu
+            onExport={onExportDirect}
+            onPreview={onExportPreview}
+            loading={exportDownloading}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={onExportClick}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            {t('xutExcel', 'Xuất Excel')}
+          </button>
+        )}
         <QuickAddAppointmentButton onSuccess={onQuickAddSuccess} size="sm" />
 
         <button

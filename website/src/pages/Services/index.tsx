@@ -6,7 +6,7 @@
  * @crossref:uses[ServiceForm, ServiceHistoryList, MultiVisitTracker, useLocationFilter]
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Stethoscope, Plus, Search, Filter,
   Activity, CheckCircle2, XCircle, DollarSign } from
@@ -15,12 +15,16 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { ServiceForm } from '@/components/services/ServiceForm';
 import { ServiceHistoryList } from '@/components/services/ServiceHistoryList';
 import { useLocationFilter } from '@/contexts/LocationContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useServices, type CategoryFilter, type CreateServiceInput } from '@/hooks/useServices';
 import type { ServiceRecord, ServiceStatus } from '@/data/mockServices';
 import { APPOINTMENT_TYPE_LABELS, type AppointmentType } from '@/constants';
 import { formatVND } from '@/lib/formatting';
 import { normalizeText } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
+import { ExportMenu } from '@/components/shared/ExportMenu';
+import { ExportPreviewModal } from '@/components/shared/ExportPreviewModal';
+import { useExport } from '@/hooks/useExport';
 
 const CATEGORY_OPTIONS: {label: string;value: CategoryFilter;}[] = [
 { label: 'All Categories', value: 'all' },
@@ -32,6 +36,9 @@ const CATEGORY_OPTIONS: {label: string;value: CategoryFilter;}[] = [
 
 export function Services() {
   const { t } = useTranslation('services');
+  const { hasPermission } = useAuth();
+  const canExportServices = hasPermission('services.export');
+
   const STATUS_TABS: {label: string;value: 'active' | 'completed' | 'cancelled' | 'all';}[] = [
   { label: t('active'), value: 'active' },
   { label: t('completed'), value: 'completed' },
@@ -57,6 +64,26 @@ export function Services() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingRecord, setEditingRecord] = useState<ServiceRecord | null>(null);
   const [statusTab, setStatusTab] = useState<'active' | 'completed' | 'cancelled' | 'all'>('all');
+
+  const exportFilters = useMemo(() => ({
+    search: searchTerm,
+    companyId: selectedLocationId !== 'all' ? selectedLocationId : 'all',
+    dateFrom: '',
+    dateTo: '',
+    state: statusTab === 'all' ? '' : statusTab,
+  }), [searchTerm, selectedLocationId, statusTab]);
+
+  const {
+    previewOpen,
+    previewData,
+    loading: exportLoading,
+    downloading: exportDownloading,
+    error: exportError,
+    openPreview,
+    closePreview,
+    handleDownload,
+    handleDirectExport,
+  } = useExport({ type: 'services', filters: exportFilters });
 
   // Sort records based on selected tab - selected status first, then others
   const sortedRecords = (() => {
@@ -127,18 +154,27 @@ export function Services() {
         subtitle={loading ? 'Loading service records...' : 'Manage service records and multi-visit treatments'}
         icon={<Stethoscope className="w-6 h-6 text-primary" />}
         actions={
-          <button
-            type="button"
-            onClick={() => {
-              setIsEditMode(false);
-              setEditingRecord(null);
-              setShowForm(true);
-            }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            New Service
-          </button>
+          <div className="flex items-center gap-2">
+            {canExportServices && (
+              <ExportMenu
+                onExport={handleDirectExport}
+                onPreview={openPreview}
+                loading={exportDownloading}
+              />
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setIsEditMode(false);
+                setEditingRecord(null);
+                setShowForm(true);
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              New Service
+            </button>
+          </div>
         }
       />
 
@@ -202,6 +238,18 @@ export function Services() {
         onEdit={handleEdit}
         loading={loading} />
       
+
+      {/* Export Preview Modal */}
+      {canExportServices && (
+        <ExportPreviewModal
+          isOpen={previewOpen}
+          onClose={closePreview}
+          onDownload={handleDownload}
+          preview={previewData}
+          loading={exportLoading}
+          error={exportError}
+        />
+      )}
 
       {/* Form modal */}
       {showForm &&

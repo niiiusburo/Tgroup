@@ -71,6 +71,7 @@ export function Customers() {
   const canAddCustomers = hasPermission("customers.add");
   const canSoftDelete = hasPermission("customers.delete");
   const canHardDelete = hasPermission("customers.hard_delete");
+  const canExportCustomers = hasPermission("customers.export");
 
   const {
     customers,
@@ -270,6 +271,7 @@ export function Customers() {
       searchRequired={searchRequired}
       minSearchLength={minSearchLength}
       canAddCustomers={canAddCustomers}
+      canExportCustomers={canExportCustomers}
       onAddCustomer={() => { setIsEditMode(false); setShowForm(true); }}
       onRowClick={(row) => navigate(`/customers/${row.id}`)}
       emptyMessage={t("table.noData", { ns: "common" })}

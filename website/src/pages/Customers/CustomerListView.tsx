@@ -6,6 +6,9 @@ import { DataTable } from '@/components/shared/DataTable';
 import type { Column } from '@/components/shared/DataTable';
 import { DeleteDialog } from './DeleteDialog';
 import type { CustomerStatus } from '@/data/mockCustomers';
+import { ExportMenu } from '@/components/shared/ExportMenu';
+import { ExportPreviewModal } from '@/components/shared/ExportPreviewModal';
+import { useExport } from '@/hooks/useExport';
 
 interface CustomerListViewProps {
   readonly customers: readonly Customer[];
@@ -24,6 +27,7 @@ interface CustomerListViewProps {
   readonly searchRequired: boolean;
   readonly minSearchLength: number;
   readonly canAddCustomers: boolean;
+  readonly canExportCustomers?: boolean;
   readonly onAddCustomer: () => void;
   readonly onRowClick: (row: Customer) => void;
   readonly emptyMessage: string;
@@ -65,6 +69,7 @@ export function CustomerListView({
   searchRequired,
   minSearchLength,
   canAddCustomers,
+  canExportCustomers = false,
   onAddCustomer,
   onRowClick,
   emptyMessage,
@@ -76,6 +81,24 @@ export function CustomerListView({
   onDeleteConfirm,
   t,
 }: CustomerListViewProps) {
+  const exportFilters = {
+    search: searchTerm,
+    status: statusFilter,
+    companyId: 'all',
+  };
+
+  const {
+    previewOpen,
+    previewData,
+    loading: exportLoading,
+    downloading: exportDownloading,
+    error: exportError,
+    openPreview,
+    closePreview,
+    handleDownload,
+    handleDirectExport,
+  } = useExport({ type: 'customers', filters: exportFilters });
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -83,15 +106,24 @@ export function CustomerListView({
         subtitle={loading ? 'Loading patients...' : `${stats.total} patients · ${stats.active} active`}
         icon={<Users className="w-6 h-6 text-primary" />}
         actions={
-          canAddCustomers && (
-            <button
-              onClick={onAddCustomer}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Add Customer
-            </button>
-          )
+          <div className="flex items-center gap-2">
+            {canExportCustomers && (
+              <ExportMenu
+                onExport={handleDirectExport}
+                onPreview={openPreview}
+                loading={exportDownloading}
+              />
+            )}
+            {canAddCustomers && (
+              <button
+                onClick={onAddCustomer}
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Add Customer
+              </button>
+            )}
+          </div>
         }
       />
 
@@ -159,6 +191,17 @@ export function CustomerListView({
         onCancel={onDeleteCancel}
         onConfirm={onDeleteConfirm}
       />
+
+      {canExportCustomers && (
+        <ExportPreviewModal
+          isOpen={previewOpen}
+          onClose={closePreview}
+          onDownload={handleDownload}
+          preview={previewData}
+          loading={exportLoading}
+          error={exportError}
+        />
+      )}
     </div>
   );
 }

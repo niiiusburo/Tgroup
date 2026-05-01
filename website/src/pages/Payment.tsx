@@ -23,6 +23,10 @@ import { useMonthlyPlans } from '@/hooks/useMonthlyPlans';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import type { PlanStatus } from '@/data/mockMonthlyPlans';
 import { formatVND } from '@/lib/formatting';
+import { useAuth } from '@/contexts/AuthContext';
+import { ExportMenu } from '@/components/shared/ExportMenu';
+import { ExportPreviewModal } from '@/components/shared/ExportPreviewModal';
+import { useExport } from '@/hooks/useExport';
 
 type ActiveTab = 'payments' | 'plans';
 
@@ -35,6 +39,8 @@ const PLAN_STATUS_FILTERS: readonly { readonly value: PlanStatus | 'all'; readon
 
 export function Payment() {
   const { t } = useTranslation('payment');
+  const { hasPermission } = useAuth();
+  const canExportPayments = hasPermission('payments.export');
   const { selectedLocationId } = useLocationFilter();
   const [activeTab, setActiveTab] = useState<ActiveTab>('payments');
   const [showCreator, setShowCreator] = useState(false);
@@ -77,6 +83,26 @@ export function Payment() {
   const handleTopUp = (customerId: string) => async (amount: number, method: 'cash' | 'bank_transfer' | 'vietqr', date?: string, note?: string) => {
     await topUpWallet({ customerId, amount, method, date, note });
   };
+
+  const paymentExportFilters = {
+    search: searchTerm,
+    companyId: selectedLocationId !== 'all' ? selectedLocationId : 'all',
+    dateFrom: '',
+    dateTo: '',
+    status: paymentStatusFilter === 'all' ? '' : paymentStatusFilter,
+  };
+
+  const {
+    previewOpen: paymentPreviewOpen,
+    previewData: paymentPreviewData,
+    loading: paymentExportLoading,
+    downloading: paymentExportDownloading,
+    error: paymentExportError,
+    openPreview: openPaymentPreview,
+    closePreview: closePaymentPreview,
+    handleDownload: handlePaymentDownload,
+    handleDirectExport: handlePaymentDirectExport,
+  } = useExport({ type: 'payments', filters: paymentExportFilters });
 
   return (
     <div className="space-y-6">
@@ -225,6 +251,13 @@ export function Payment() {
                   </button>
                 ))}
               </div>
+              {canExportPayments && (
+                <ExportMenu
+                  onExport={handlePaymentDirectExport}
+                  onPreview={openPaymentPreview}
+                  loading={paymentExportDownloading}
+                />
+              )}
             </div>
 
             <PaymentHistory payments={payments} loading={isLoading} />
@@ -233,6 +266,17 @@ export function Payment() {
       )}
 
       {/* Installment Plans Tab */}
+      {canExportPayments && (
+        <ExportPreviewModal
+          isOpen={paymentPreviewOpen}
+          onClose={closePaymentPreview}
+          onDownload={handlePaymentDownload}
+          preview={paymentPreviewData}
+          loading={paymentExportLoading}
+          error={paymentExportError}
+        />
+      )}
+
       {activeTab === 'plans' && (
         <>
           {/* Plan Creator */}

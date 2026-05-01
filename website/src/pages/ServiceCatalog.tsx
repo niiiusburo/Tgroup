@@ -17,9 +17,13 @@ import {
 } from '@/lib/api';
 import type { ApiProduct, ApiProductCategory, ApiCompany } from '@/lib/api';
 import { useLocationFilter } from '@/contexts/LocationContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { formatVND } from '@/lib/formatting';
 import { normalizeText } from '@/lib/utils';
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
+import { ExportMenu } from '@/components/shared/ExportMenu';
+import { ExportPreviewModal } from '@/components/shared/ExportPreviewModal';
+import { useExport } from '@/hooks/useExport';
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -254,6 +258,9 @@ function CategoryAddModal({ isOpen, onClose, onSubmit }: CategoryAddModalProps) 
 export function ServiceCatalog() {
   const { t } = useTranslation('services');
   const { t: tc } = useTranslation('common');
+  const { hasPermission } = useAuth();
+  const canExportProducts = hasPermission('products.export');
+
   // Data state
   const [categories, setCategories] = useState<ApiProductCategory[]>([]);
   const [products, setProducts] = useState<ApiProduct[]>([]);
@@ -333,6 +340,26 @@ export function ServiceCatalog() {
     }
     return pages;
   }
+
+  // ── Export ──
+  const exportFilters = useMemo(() => ({
+    search: catalogSearch,
+    categId: selectedCategoryId ?? '',
+    active: activeFilter === 'all' ? '' : activeFilter === 'active' ? 'true' : 'false',
+    companyId: selectedLocationId !== 'all' ? selectedLocationId : 'all',
+  }), [catalogSearch, selectedCategoryId, activeFilter, selectedLocationId]);
+
+  const {
+    previewOpen,
+    previewData,
+    loading: exportLoading,
+    downloading: exportDownloading,
+    error: exportError,
+    openPreview,
+    closePreview,
+    handleDownload,
+    handleDirectExport,
+  } = useExport({ type: 'service-catalog', filters: exportFilters });
 
   // ── Handlers ──
   async function handleAddCategory(name: string) {
@@ -486,6 +513,13 @@ export function ServiceCatalog() {
                 <Plus className="w-4 h-4" />
                 {tc('add')}
               </button>
+              {canExportProducts && (
+                <ExportMenu
+                  onExport={handleDirectExport}
+                  onPreview={openPreview}
+                  loading={exportDownloading}
+                />
+              )}
               <select
                 value={activeFilter}
                 onChange={(e) => setActiveFilter(e.target.value as 'all' | 'active' | 'inactive')}
@@ -665,6 +699,18 @@ export function ServiceCatalog() {
           </div>
         </div>
       </div>
+
+      {/* Export Preview Modal */}
+      {canExportProducts && (
+        <ExportPreviewModal
+          isOpen={previewOpen}
+          onClose={closePreview}
+          onDownload={handleDownload}
+          preview={previewData}
+          loading={exportLoading}
+          error={exportError}
+        />
+      )}
 
       {/* Modals */}
       <CategoryAddModal

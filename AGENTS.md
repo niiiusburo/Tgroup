@@ -190,37 +190,16 @@ Expert skills are installed in `website/.agents/skills/`. Available skill catego
 <claude-mem-context>
 # Memory Context
 
-# [Tgrouptest] recent context, 2026-04-30 8:42am GMT+7
+# [Tgrouptest] recent context, 2026-04-30 6:52pm GMT+7
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
 Format: ID TIME TYPE TITLE
 Fetch details: get_observations([IDs]) | Search: mem-search skill
 
-Stats: 50 obs (22,024t read) | 1,778,678t work | 99% savings
+Stats: 50 obs (25,478t read) | 1,666,551t work | 98% savings
 
-### Apr 27, 2026
-10744 11:58a 🔵 Project has 43 modified files and 43 untracked files pending commit
-10745 11:59a 🔵 Untracked files total 20MB from TDental migration artifacts and QA automation
-10746 12:00p 🔵 Gitignore missing patterns for generated artifacts causing dirty git tree
-10748 " 🔴 Fixed gitignore to exclude generated QA and migration artifacts
-10750 12:01p 🟣 Version 0.25.35 deployed with TDental migration tooling and paginated data surfaces
-10751 12:02p 🟣 Committed version 0.25.35 with TDental sync tooling to main branch
-10754 12:05p 🟣 Pushed version 0.25.35 to GitHub with clean working tree
-10756 " 🟣 Deployed version 0.25.35 to production VPS with database sync preparation
-10757 12:06p 🟣 Synchronized production database with local data completing full deployment
-10758 " 🟣 Production API verified functional with all endpoints returning data
-10759 12:07p 🔵 Production frontend timeout on customers page during browser smoke test
-10761 12:08p 🔵 Production frontend smoke test passed with SaleOrders endpoint showing aborted requests
 ### Apr 28, 2026
-10869 10:31p 🟣 Field-level edit/display audit E2E test for QA records
-10870 " 🔵 Tgroup E2E and unit test coverage audit for customer notes and service doctor-assistant bugs
-10871 10:34p 🟣 E2E module edit-display audit suite for regression detection
-10872 " 🔴 Customer note/comment/medicalhistory clearing now works
-10873 " 🔴 Service history now displays doctor-assistant (Trợ lý BS) staff assignments
-10874 10:35p ✅ Regression test coverage for customer note clearing
 10875 10:39p 🔴 Customer note and assignment field persistence fix
-10876 " 🔴 Service staff display in customer records
-10877 " 🟣 E2E module edit-display audit testing infrastructure
 ### Apr 29, 2026
 11008 11:32a 🔵 Service record doctor/assistant/aide UI investigation initiated
 11009 11:34a 🔵 Customer phone search bug traced to two-stage filtering mechanism
@@ -251,6 +230,27 @@ Stats: 50 obs (22,024t read) | 1,778,678t work | 99% savings
 11101 11:04p ✅ Production database staff role swap executed for order SO00005
 11102 11:05p 🔵 Production API verification shows SaleOrders endpoint returns staff fields as lowercase snake_case
 11103 11:07p ✅ Production UI verified showing swapped staff roles after database update
+### Apr 30, 2026
+11144 8:43a 🟣 Excel migration scripts for TGroup customer and service data
+11145 " 🔵 Tgrouptest VPS deployment topology and database sync readiness state
+11146 8:44a 🔵 Staff assignment migration counts and data volume disparity between local Postgres instances
+11147 8:45a 🔵 VPS production database has divergent staff assignment pattern from local with 19,527 line/order mismatches and minimal dental aide coverage
+11148 " 🔵 TGroup migration ship readiness audit
+11157 9:07a 🔵 Tgroup migration Excel sources and acceptance framework identified
+11158 9:08a 🔵 Production VPS database validated for SERVICE Excel cross-check
+11159 " 🔵 Excel migration file structure and scale confirmed
+11160 9:09a 🔵 Excel workbook contains 60,568 unique sale orders; production DB has 61,459 orders with ~891 missing from Excel
+11161 9:12a 🔵 Customer Excel workbook cross-checked against live production database
+11162 " 🔵 Full Excel-to-production cross-check completed: 888 production orders missing from Excel, 204 assistant mismatches, 2,675 missing source assignments
+11163 9:13a 🔵 Excel note field maps to partners.comment with 99.8% match after normalization
+11164 " 🔵 Excel source field contains 2,675+ #N/A formula errors masquerading as missing production data
+11165 9:14a 🔵 Source field Excel #N/A errors clarified: only 2 genuine missing values (SO11725, SO37064), not 2,675
+11166 9:33a 🔵 Customer Excel-to-database mismatch analysis reveals 383 records with correctable field gaps
+11167 9:34a 🔵 Excel source structure decoded and correction tooling identified for customer field migration
+11168 9:35a 🔵 Excel data quality analysis reveals correction blockers: 60 address conflicts and 20 sale_online conflicts require manual resolution
+11169 9:36a 🔵 Correction plan finalized: 134 safe corrections (1 gender, 116 note, 17 salestaffid), 249 blocked (246 address duplicates, 3 ambiguous staff)
+11170 9:37a 🔵 Address duplicates are distinct customers sharing ref codes; sale_online conflicts are temporal staff assignment changes tracked in Excel
+11172 9:38a 🔵 Note/comment mismatches are false positives: 100% equal after Unicode NFC normalization, only 18 real corrections needed
 
-Access 1779k tokens of past work via get_observations([IDs]) or mem-search skill.
+Access 1667k tokens of past work via get_observations([IDs]) or mem-search skill.
 </claude-mem-context>

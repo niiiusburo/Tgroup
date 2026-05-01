@@ -13,12 +13,14 @@
       "add": "Add new customer",
       "edit": "Edit customer information",
       "delete": "Delete customer",
-      "hardDelete": "Permanently delete customer from system"
+      "hardDelete": "Permanently delete customer from system",
+      "export": "Export customer list to Excel"
     },
     "appointments": {
       "view": "View appointment list",
       "add": "Create new appointment",
-      "edit": "Edit appointment"
+      "edit": "Edit appointment",
+      "export": "Export appointments to Excel"
     },
     "employees": {
       "view": "View employee list",
@@ -33,16 +35,21 @@
     "services": {
       "view": "View service catalog",
       "add": "Add new service",
-      "edit": "Edit service"
+      "edit": "Edit service",
+      "export": "Export treatment records to Excel"
     },
     "payment": {
       "view": "View payment history",
       "add": "Create new payment",
-      "refund": "Process payment refund"
+      "refund": "Process payment refund",
+      "export": "Export payments to Excel"
     },
     "reports": {
       "view": "View reports",
       "export": "Export reports"
+    },
+    "products": {
+      "export": "Export service catalog to Excel"
     },
     "settings": {
       "view": "View system settings",

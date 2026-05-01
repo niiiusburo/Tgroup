@@ -12,12 +12,15 @@ import { SmartFilterDrawer } from '@/components/calendar/SmartFilterDrawer';
 
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { useTimezone } from '@/contexts/TimezoneContext';
+import { useAuth } from '@/contexts/AuthContext';
 import type { CalendarAppointment } from '@/data/mockCalendar';
 import type { AppointmentStatus } from '@/types/appointment';
 import { AppointmentFormShell, calendarAppointmentToFormData } from '@/components/appointments/unified';
 import { PageHeader } from '@/components/shared/PageHeader';
 import type { UnifiedAppointmentFormData } from '@/components/appointments/unified';
 import { ExportDialog } from '@/components/calendar/ExportDialog';
+import { ExportPreviewModal } from '@/components/shared/ExportPreviewModal';
+import { useExport } from '@/hooks/useExport';
 
 export function Calendar() {
   const { t } = useTranslation('calendar');
@@ -137,6 +140,43 @@ export function Calendar() {
     t,
   });
 
+  const { hasPermission } = useAuth();
+  const canExportAppointments = hasPermission('appointments.export');
+
+  const appointmentExportFilters = useMemo(() => {
+    let dateFrom = '';
+    let dateTo = '';
+    if (viewMode === 'day') {
+      dateFrom = formatDate(currentDate, 'yyyy-MM-dd');
+      dateTo = dateFrom;
+    } else if (viewMode === 'week') {
+      dateFrom = formatDate(weekDates[0], 'yyyy-MM-dd');
+      dateTo = formatDate(weekDates[6], 'yyyy-MM-dd');
+    } else {
+      dateFrom = formatDate(monthDates[0], 'yyyy-MM-dd');
+      dateTo = formatDate(monthDates[monthDates.length - 1], 'yyyy-MM-dd');
+    }
+    return {
+      search: search || '',
+      companyId: selectedLocationId !== 'all' ? selectedLocationId : 'all',
+      dateFrom,
+      dateTo,
+      state: selectedStatuses.length === 1 ? selectedStatuses[0] : '',
+    };
+  }, [viewMode, currentDate, weekDates, monthDates, formatDate, search, selectedLocationId, selectedStatuses]);
+
+  const {
+    previewOpen: aptPreviewOpen,
+    previewData: aptPreviewData,
+    loading: aptExportLoading,
+    downloading: aptExportDownloading,
+    error: aptExportError,
+    openPreview: openAptPreview,
+    closePreview: closeAptPreview,
+    handleDownload: handleAptDownload,
+    handleDirectExport: handleAptDirectExport,
+  } = useExport({ type: 'appointments', filters: appointmentExportFilters });
+
   const handleCreateAppointment = useCallback((date: string, startTime: string) => {
     setCreateInitialData({
       date,
@@ -204,6 +244,10 @@ export function Calendar() {
         suggestions={filteredSuggestions}
         isLoading={isLoading}
         onExportClick={() => setIsExportOpen(true)}
+        canExportAppointments={canExportAppointments}
+        onExportDirect={handleAptDirectExport}
+        onExportPreview={openAptPreview}
+        exportDownloading={aptExportDownloading}
         onQuickAddSuccess={refresh}
         onOpenFilter={openFilter}
         filterCount={selectedDoctors.length + selectedStatuses.length + selectedColors.length}
@@ -269,7 +313,17 @@ export function Calendar() {
         onExport={handleExport}
         defaultDateFrom={getToday()}
         defaultDateTo={getToday()} />
-      
+
+      {canExportAppointments && (
+        <ExportPreviewModal
+          isOpen={aptPreviewOpen}
+          onClose={closeAptPreview}
+          onDownload={handleAptDownload}
+          preview={aptPreviewData}
+          loading={aptExportLoading}
+          error={aptExportError}
+        />
+      )}
 
       {/* Unified Appointment Form — create mode */}
       <AppointmentFormShell
