@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CalendarDateNavigator } from './CalendarDateNavigator';
 import { QuickAddAppointmentButton } from '@/components/shared/QuickAddAppointmentButton';
@@ -149,14 +149,14 @@ export function CalendarToolbar({
             loading={exportDownloading}
           />
         )}
-        <QuickAddAppointmentButton onSuccess={onQuickAddSuccess} size="sm" />
 
         <button
           type="button"
           data-testid="calendar-filter-button"
           onClick={onOpenFilter}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
         >
+          <Filter className="w-4 h-4" />
           <span>{t('bLc', 'Bộ lọc')}</span>
           {filterCount > 0 && (
             <span
@@ -167,6 +167,8 @@ export function CalendarToolbar({
             </span>
           )}
         </button>
+
+        <QuickAddAppointmentButton onSuccess={onQuickAddSuccess} size="sm" />
       </div>
     </div>
   );

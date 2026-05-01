@@ -24,12 +24,11 @@ export function QuickAddAppointmentButton({ onSuccess, size = 'md' }: QuickAddAp
           ${sizeClasses}
           inline-flex items-center
           bg-primary
-          hover:from-orange-600 hover:to-orange-500
+          hover:bg-primary-dark
           text-white font-medium rounded-lg
           shadow-sm
-          transition-all duration-200
-          hover:shadow-xl hover:shadow-orange-500/30
-          hover:scale-105
+          transition-all duration-150
+          active:scale-[0.98]
         `}
       >
         <CalendarPlus className={size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'} />

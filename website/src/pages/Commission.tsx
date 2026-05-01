@@ -17,7 +17,7 @@ export function Commission() {
         subtitle={t('commission:subtitle')}
         icon={<Percent className="w-6 h-6 text-primary" />}
         actions={
-          <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm">
+          <button className="px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm">
             Configure Rules
           </button>
         }

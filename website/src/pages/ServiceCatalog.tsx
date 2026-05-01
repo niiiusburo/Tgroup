@@ -508,7 +508,7 @@ export function ServiceCatalog() {
               <button
                 type="button"
                 onClick={() => { setEditingProduct(null); setShowServiceForm(true); }}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark"
               >
                 <Plus className="w-4 h-4" />
                 {tc('add')}
