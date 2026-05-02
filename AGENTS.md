@@ -190,67 +190,66 @@ Expert skills are installed in `website/.agents/skills/`. Available skill catego
 <claude-mem-context>
 # Memory Context
 
-# [Tgrouptest] recent context, 2026-04-30 6:52pm GMT+7
+# [Tgrouptest] recent context, 2026-05-02 11:54am GMT+7
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
 Format: ID TIME TYPE TITLE
 Fetch details: get_observations([IDs]) | Search: mem-search skill
 
-Stats: 50 obs (25,478t read) | 1,666,551t work | 98% savings
+Stats: 50 obs (19,071t read) | 305,312t work | 94% savings
 
-### Apr 28, 2026
-10875 10:39p 🔴 Customer note and assignment field persistence fix
-### Apr 29, 2026
-11008 11:32a 🔵 Service record doctor/assistant/aide UI investigation initiated
-11009 11:34a 🔵 Customer phone search bug traced to two-stage filtering mechanism
-11010 11:35a 🔵 Customer source (sourceid) field missing from partner validation schema
-11011 11:36a 🔵 Service record doctor/assistant fields split across order and line tables
-11012 12:11p 🔵 Test infrastructure incompatibility issues blocking hotfix verification
-11013 " 🔵 Customer source update path uses conditional payload assembly
-11014 " 🔵 Service customer search implements debounced remote API calls
-11015 12:12p 🔵 Historical customer-record fix patterns consulted from project memory
-11079 10:41p 🔵 Customer/Employee API contract uses single-table inheritance with explicit assignment fields
-11080 " 🔵 Contract drift risk between customer overview list and edit modal assignment data
-11082 10:43p 🔴 Customer Edit Modal Sales Staff Field Now Resolves Inactive Employees
-11083 " 🔵 Data Fetching Inconsistency Between Customer Overview and Edit Modal
-11084 10:44p 🔄 Employee Assignment Fields Extracted to Dedicated Hook
-11087 10:49p 🔴 Fixed inactive sales employee not visible in customer edit form
-11088 " 🔵 Data consistency gap between display and edit components
-11089 10:50p 🔄 Simplified Hosoonline authentication to use X-API-Key only
-11090 " 🔴 Added salestaffname to partner API response for customer profile display
-11091 " ✅ Deployed customer assignment fixes to production
-11092 10:51p ✅ Deployed version 0.25.56 to production VPS
-11093 10:52p 🔴 Added assignment fields to customer list endpoint
-11094 10:53p ✅ Deployed version 0.25.57 with customer list assignment fields
-11096 10:54p ✅ Version 0.25.57 deployment completed on production VPS
-11097 " 🔵 Production verification confirms customer list endpoint returns assignment fields
-11098 11:02p 🔵 Production database missing core application tables
-11099 11:03p 🔵 Production database tables exist in dbo schema namespace
-11100 " 🔵 Production staff assignment pattern shows dual-level role tracking with counselor usage
-11101 11:04p ✅ Production database staff role swap executed for order SO00005
-11102 11:05p 🔵 Production API verification shows SaleOrders endpoint returns staff fields as lowercase snake_case
-11103 11:07p ✅ Production UI verified showing swapped staff roles after database update
-### Apr 30, 2026
-11144 8:43a 🟣 Excel migration scripts for TGroup customer and service data
-11145 " 🔵 Tgrouptest VPS deployment topology and database sync readiness state
-11146 8:44a 🔵 Staff assignment migration counts and data volume disparity between local Postgres instances
-11147 8:45a 🔵 VPS production database has divergent staff assignment pattern from local with 19,527 line/order mismatches and minimal dental aide coverage
-11148 " 🔵 TGroup migration ship readiness audit
-11157 9:07a 🔵 Tgroup migration Excel sources and acceptance framework identified
-11158 9:08a 🔵 Production VPS database validated for SERVICE Excel cross-check
-11159 " 🔵 Excel migration file structure and scale confirmed
-11160 9:09a 🔵 Excel workbook contains 60,568 unique sale orders; production DB has 61,459 orders with ~891 missing from Excel
-11161 9:12a 🔵 Customer Excel workbook cross-checked against live production database
-11162 " 🔵 Full Excel-to-production cross-check completed: 888 production orders missing from Excel, 204 assistant mismatches, 2,675 missing source assignments
-11163 9:13a 🔵 Excel note field maps to partners.comment with 99.8% match after normalization
-11164 " 🔵 Excel source field contains 2,675+ #N/A formula errors masquerading as missing production data
-11165 9:14a 🔵 Source field Excel #N/A errors clarified: only 2 genuine missing values (SO11725, SO37064), not 2,675
-11166 9:33a 🔵 Customer Excel-to-database mismatch analysis reveals 383 records with correctable field gaps
-11167 9:34a 🔵 Excel source structure decoded and correction tooling identified for customer field migration
-11168 9:35a 🔵 Excel data quality analysis reveals correction blockers: 60 address conflicts and 20 sale_online conflicts require manual resolution
-11169 9:36a 🔵 Correction plan finalized: 134 safe corrections (1 gender, 116 note, 17 salestaffid), 249 blocked (246 address duplicates, 3 ambiguous staff)
-11170 9:37a 🔵 Address duplicates are distinct customers sharing ref codes; sale_online conflicts are temporal staff assignment changes tracked in Excel
-11172 9:38a 🔵 Note/comment mismatches are false positives: 100% equal after Unicode NFC normalization, only 18 real corrections needed
+### May 1, 2026
+11366 12:55p 🟣 Calendar export date range selector deployment preparation
+11367 12:56p 🔴 Changelog version sync to pass Tgroup release gate
+11368 " ✅ Excel export hardening committed and pushed to main
+11369 12:57p 🔵 VPS pre-deploy state at nk.2checkin.com
+11370 12:58p ✅ VPS git pull completed - deploying full export feature stack
+11371 1:06p ✅ VPS API container build completed successfully
+11372 1:09p 🔵 VPS web container build in progress - npm install running 7+ minutes
+11373 1:11p 🔵 VPS npm install progress check - actively processing with 10 worker threads
+11374 1:17p 🔵 VPS npm install actively writing lucide-react icons - near completion
+11375 1:19p ✅ VPS web frontend npm install completed successfully after 17 minutes
+11376 1:23p ✅ VPS web container Vite production build started, version 0.27.6 metadata generated
+11377 1:27p 🔵 VPS TypeScript compilation actively running for 4m20s at 145% CPU
+11378 1:29p ✅ VPS TypeScript compilation completed, Vite production bundling started
+11379 1:37p ✅ Tgroup application successfully rebuilt and deployed
+11380 1:38p 🔵 Production deployment verified running version 0.27.6
+11381 1:39p 🔵 Production server containers verified running after deployment
+11382 " 🔵 Production API endpoints verified functional after deployment
+11383 1:40p 🔵 Production export endpoints failing with 403 Forbidden despite valid authentication
+11384 " 🔵 Export permission strings identified from 403 error responses
+11385 1:41p 🔵 Export permissions migration exists but may not be applied to production database
+11386 " 🔵 Production database missing exports_audit table - migration 043 not applied
+11387 1:42p 🔵 Root cause confirmed: Admin group lacks export permissions, migration 042 not applied
+11388 1:43p 🔵 Export feature just deployed in v0.27.6 without running database migrations
+11389 " 🔴 Export migrations fixed and applied locally for v0.27.7 deployment
+11390 1:44p ✅ Export migration fix committed as v0.27.7 with production database verification
+11391 " ✅ Export migration fix pushed to GitHub repository
+11392 1:45p ✅ Production deployment in progress: migrations successfully applied to production database
+11393 1:56p ✅ Production web container build in progress: npm install completed after 7 minutes
+11394 1:59p ✅ Production vite build transforming modules: 2215 modules completed
+11395 2:00p ✅ Production deployment completed successfully: version 0.27.7 deployed with export fix
+11396 " ✅ Production deployment verified: version 0.27.7 running with all export permissions granted
+11397 2:03p 🔵 Export API processing customer download request without permission errors
+11400 2:07p 🔵 Excel export E2E test reveals timeout failures on large datasets
+11401 " 🔵 Production nginx at nk.2checkin.com lacks timeout configuration for API proxy
+11402 2:09p 🔴 Nginx timeout configuration updated on production to fix export failures
+11405 2:13p 🔵 Services export running beyond previous 60s timeout limit after nginx fix
+11407 2:15p 🔴 Services export now completes successfully after nginx timeout fix
+11408 2:16p 🔴 Payments export now completes successfully after nginx timeout fix
+11409 2:17p 🟣 Excel export E2E validation confirms proper formatting across all 5 endpoints
+11410 2:18p 🔵 E2E validation confirms file integrity and database audit trail for all exports
+11415 2:46p 🔵 Excel export E2E tests not configured for live site verification
+11416 2:47p 🟣 Live site Excel export verification script launched
+11417 2:57p 🔵 Live site Excel exports verified with production data volumes
+11418 2:58p 🔵 Complete live site Excel export validation successful across all 5 routes
+11419 3:10p 🔵 Live site service catalog export verified
+### May 2, 2026
+11484 9:49a 🔵 Hosoonline health checkup integration config and implementation state mapped
+11485 9:50a 🔵 Hosoonline health-checkup image integration code path traced
+11486 " 🔵 Hosoonline integration test suite passed with 5 passing tests
+11487 " 🔵 VPS deployment has Hosoonline credentials configured but Docker stack is not running
+11488 9:51a 🔵 VPS production stack is running with Hosoonline integration active and recent T8250 query logged
 
-Access 1667k tokens of past work via get_observations([IDs]) or mem-search skill.
+Access 305k tokens of past work via get_observations([IDs]) or mem-search skill.
 </claude-mem-context>
