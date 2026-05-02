@@ -18,6 +18,8 @@ reads:
   - process.env.COMPREFACE_API_KEY
   - process.env.HOSOONLINE_BASE_URL
   - process.env.HOSOONLINE_API_KEY
+  - process.env.HOSOONLINE_USERNAME
+  - process.env.HOSOONLINE_PASSWORD
 writes:
   - dbo.partners (face_subject_id, face_registered_at)
   - api/uploads/feedback/ (indirect, shared storage)
@@ -27,6 +29,7 @@ endpoints:
   - POST /api/face/recognize
   - POST /api/face/register
   - GET  /api/ExternalCheckups/:customerCode
+  - GET  /api/ExternalCheckups/images/:imageName
   - POST /api/ExternalCheckups/:customerCode/health-checkups
 ui_surfaces:
   - PatientCheckIn
@@ -50,4 +53,6 @@ impact_tests:
 risk_level: medium
 notes:
   - Compreface services are defined in docker-compose.yml but not required for core app startup.
-  - Hosoonline uses the configured `HOSOONLINE_API_KEY` through the `X-API-Key` request header. It does not use a rotating bearer token for image fetch/upload proxy calls.
+  - The older Hosoonline contract used `HOSOONLINE_API_KEY` through the `X-API-Key` request header.
+  - The current observed Hosoonline website contract logs in through `/api/auth/login`, searches images through `/api/appointments/search?q=<customerCode>&page=<page>`, and fetches bytes through `/api/appointments/image/:imageName`.
+  - TGClinic must proxy Hosoonline images because direct image URLs require Hosoonline session auth.

@@ -1,5 +1,30 @@
 [
   {
+    "version": "0.27.8",
+    "date": "2026-05-02",
+    "commit": "pending",
+    "highlights": "fix(integrations): restore Hosoonline image pulls",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Hosoonline checkup images now use the current website login and appointment-media API when login credentials are configured.",
+          "Hosoonline image URLs are proxied through TGClinic so staff can view protected image bytes inside customer profiles."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "Keep HOSOONLINE_USERNAME and HOSOONLINE_PASSWORD configured in the API runtime; the older HOSOONLINE_API_KEY remains as a fallback for the previous contract."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.7",
     "date": "2026-05-01",
     "commit": "pending",

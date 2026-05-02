@@ -7,6 +7,7 @@ set -e
 VPS_IP=${1:-""}
 DOMAIN="tbot.vn"
 PROJECT_DIR="/opt/tgroup"
+REQUIRED_ENV="POSTGRES_USER POSTGRES_PASSWORD JWT_SECRET HOSOONLINE_BASE_URL HOSOONLINE_USERNAME HOSOONLINE_PASSWORD"
 
 if [ -z "$VPS_IP" ]; then
     echo "Usage: ./deploy-tbot.sh <vps-ip>"
@@ -15,6 +16,7 @@ if [ -z "$VPS_IP" ]; then
 fi
 
 echo "🚀 Deploying TGroup to $DOMAIN on VPS $VPS_IP"
+echo "Required runtime env keys in .env: $REQUIRED_ENV"
 
 # SSH and execute deployment
 ssh root@$VPS_IP << 'ENDSSH'

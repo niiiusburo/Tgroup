@@ -35,7 +35,8 @@
 ## 6. External Checkups (Hosoonline)
 
 - **Resolved:** Hosoonline image fetch/upload proxy calls authenticate with the configured `HOSOONLINE_API_KEY` via the `X-API-Key` header, not a bearer token.
-- **Unknown:** What is the expected payload contract with Hosoonline? The backend appears to proxy file uploads, but the exact schema is not documented in repo.
+- **Resolved for image reads:** The current observed Hosoonline website contract logs in through `POST /api/auth/login`, searches records through `GET /api/appointments/search?q=<customerCode>&page=<page>`, and reads image bytes from `GET /api/appointments/image/:imageName`.
+- **Unknown:** Whether Hosoonline still supports API-key auth for any partner-only endpoints, and whether upload should now create/update appointments instead of posting to the older health-checkup endpoint.
 
 ## 7. Payment Allocation Logic Edge Cases
 

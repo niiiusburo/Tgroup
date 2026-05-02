@@ -8,8 +8,12 @@ const router = express.Router();
 // Environment/config for hosoonline integration
 const HOSOONLINE_BASE_URL = process.env.HOSOONLINE_BASE_URL || 'https://hosoonline.com';
 const HOSOONLINE_API_KEY = process.env.HOSOONLINE_API_KEY || null;
+const HOSOONLINE_USERNAME = process.env.HOSOONLINE_USERNAME || null;
+const HOSOONLINE_PASSWORD = process.env.HOSOONLINE_PASSWORD || null;
+const HOSOONLINE_SESSION_TTL_MS = 25 * 60 * 1000;
 
 const upload = multer({ storage: multer.memoryStorage() });
+let hosoSession = null;
 
 class HosoAuthError extends Error {
   constructor(status) {
@@ -26,6 +30,61 @@ function getHosoHeaders(extraHeaders = {}) {
   const headers = { ...extraHeaders };
   if (!HOSOONLINE_API_KEY) return headers;
   headers['X-API-Key'] = HOSOONLINE_API_KEY;
+  return headers;
+}
+
+function hasHosoLoginCredentials() {
+  return Boolean(HOSOONLINE_USERNAME && HOSOONLINE_PASSWORD);
+}
+
+function extractAccessTokenCookie(setCookieHeader) {
+  if (!setCookieHeader) return null;
+  const match = setCookieHeader.match(/(?:^|,\s*)(access_token=[^;]+)/);
+  return match?.[1] || null;
+}
+
+async function getHosoSession() {
+  if (!hasHosoLoginCredentials()) return null;
+  if (hosoSession && hosoSession.expiresAt > Date.now()) return hosoSession;
+
+  const loginRes = await fetch(`${HOSOONLINE_BASE_URL}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      username: HOSOONLINE_USERNAME,
+      password: HOSOONLINE_PASSWORD,
+    }),
+  });
+
+  if (isHosoAuthFailure(loginRes.status)) throw new HosoAuthError(loginRes.status);
+  if (!loginRes.ok) {
+    console.warn('ExternalCheckups hosoonline login unavailable:', { status: loginRes.status });
+    return null;
+  }
+
+  const loginData = await loginRes.json().catch(() => ({}));
+  if (!loginData.token) {
+    console.warn('ExternalCheckups hosoonline login did not return a token');
+    return null;
+  }
+
+  hosoSession = {
+    token: loginData.token,
+    cookie: extractAccessTokenCookie(loginRes.headers.get('set-cookie')),
+    expiresAt: Date.now() + HOSOONLINE_SESSION_TTL_MS,
+  };
+  return hosoSession;
+}
+
+async function getHosoRequestHeaders(extraHeaders = {}) {
+  const session = await getHosoSession();
+  if (!session) return getHosoHeaders(extraHeaders);
+
+  const headers = {
+    ...extraHeaders,
+    Authorization: `Bearer ${session.token}`,
+  };
+  if (session.cookie) headers.Cookie = session.cookie;
   return headers;
 }
 
@@ -73,7 +132,7 @@ async function searchHosoPatientByCode(code) {
   try {
     const searchRes = await fetch(
       `${HOSOONLINE_BASE_URL}/api/patients?code=${encodeURIComponent(code)}`,
-      { headers: getHosoHeaders() }
+      { headers: await getHosoRequestHeaders() }
     );
     if (isHosoAuthFailure(searchRes.status)) throw new HosoAuthError(searchRes.status);
     if (!searchRes.ok) return null;
@@ -87,9 +146,21 @@ async function searchHosoPatientByCode(code) {
 }
 
 async function resolveHosoPatientCode(customerCode) {
+  if (hasHosoLoginCredentials()) {
+    const matched = await searchHosoPatientByCode(customerCode);
+    if (matched?.code) return matched.code;
+
+    const partner = await getLocalPartner(customerCode);
+    if (partner?.phone && partner.phone !== customerCode) {
+      const phoneMatched = await searchHosoPatientByCode(partner.phone);
+      if (phoneMatched?.code) return phoneMatched.code;
+    }
+    return customerCode;
+  }
+
   const testRes = await fetch(
     `${HOSOONLINE_BASE_URL}/api/patients/${encodeURIComponent(customerCode)}/health-checkups`,
-    { headers: getHosoHeaders() }
+    { headers: await getHosoRequestHeaders() }
   );
   if (isHosoAuthFailure(testRes.status)) throw new HosoAuthError(testRes.status);
   if (testRes.status !== 404) return customerCode;
@@ -101,13 +172,137 @@ async function resolveHosoPatientCode(customerCode) {
   if (partner?.phone && partner.phone !== customerCode) {
     const phoneTest = await fetch(
       `${HOSOONLINE_BASE_URL}/api/patients/${encodeURIComponent(partner.phone)}/health-checkups`,
-      { headers: getHosoHeaders() }
+      { headers: await getHosoRequestHeaders() }
     );
     if (isHosoAuthFailure(phoneTest.status)) throw new HosoAuthError(phoneTest.status);
     if (phoneTest.status !== 404) return partner.phone;
   }
   return customerCode;
 }
+
+function toDateOnly(value) {
+  if (!value) return null;
+  if (typeof value === 'string') return value.slice(0, 10);
+  return null;
+}
+
+function imageProxyUrl(imageLink) {
+  return `/api/ExternalCheckups/images/${encodeURIComponent(imageLink)}`;
+}
+
+function mapHosoAppointmentsToCheckups(appointments) {
+  return appointments.map((appointment) => ({
+    id: appointment._id,
+    date: toDateOnly(appointment.date) || '',
+    title: appointment.service || 'Health checkup',
+    notes: appointment.description || '',
+    doctor: appointment.doctor || '',
+    nextAppointmentDate: toDateOnly(appointment.nextAppointmentDate),
+    nextDescription: appointment.nextDescription || '',
+    images: (appointment.media || []).map((media) => ({
+      url: imageProxyUrl(media.imageLink),
+      thumbnailUrl: imageProxyUrl(media.imageLink),
+      label: media.imageLink,
+      uploadedAt: appointment.createdAt || appointment.date || undefined,
+    })),
+  }));
+}
+
+async function fetchHosoAppointments(queryText) {
+  const allAppointments = [];
+  let total = 0;
+
+  for (let page = 0; page < 50; page += 1) {
+    const searchRes = await fetch(
+      `${HOSOONLINE_BASE_URL}/api/appointments/search?q=${encodeURIComponent(queryText)}&page=${page}`,
+      { headers: await getHosoRequestHeaders() }
+    );
+
+    if (isHosoAuthFailure(searchRes.status)) throw new HosoAuthError(searchRes.status);
+    if (!searchRes.ok) {
+      const text = await searchRes.text().catch(() => 'Unknown error');
+      console.warn('ExternalCheckups hosoonline appointment search unavailable:', {
+        status: searchRes.status,
+        detail: text.slice(0, 200),
+      });
+      return { appointments: [], total: 0, status: searchRes.status };
+    }
+
+    const searchData = await searchRes.json();
+    const pageAppointments = Array.isArray(searchData.data) ? searchData.data : [];
+    total = Number(searchData.total || pageAppointments.length || total);
+    allAppointments.push(...pageAppointments);
+
+    if (pageAppointments.length === 0 || allAppointments.length >= total) break;
+  }
+
+  return { appointments: allAppointments, total };
+}
+
+async function fetchCurrentHosoCheckups(customerCode, partner) {
+  const candidates = [customerCode, partner?.ref, partner?.phone].filter(Boolean);
+  const matched = await searchHosoPatientByCode(customerCode);
+  if (matched?.code) candidates.push(matched.code);
+
+  const uniqueCandidates = [...new Set(candidates.map((candidate) => String(candidate).trim()).filter(Boolean))];
+  for (const candidate of uniqueCandidates) {
+    const result = await fetchHosoAppointments(candidate);
+    if (result.appointments.length > 0 || result.total > 0) {
+      return {
+        patientCode: matched?.code || customerCode,
+        patientName: matched?.fullName || partner?.name || 'Unknown',
+        checkups: mapHosoAppointmentsToCheckups(result.appointments),
+      };
+    }
+  }
+
+  return {
+    patientCode: matched?.code || customerCode,
+    patientName: matched?.fullName || partner?.name || 'Unknown',
+    checkups: [],
+  };
+}
+
+router.get('/images/:imageName', requireAuth, requirePermission('external_checkups.view'), async (req, res) => {
+  try {
+    if (!HOSOONLINE_API_KEY && !hasHosoLoginCredentials()) {
+      return res.status(503).json({ error: 'Hosoonline credentials not configured' });
+    }
+
+    const imageName = req.params.imageName;
+    const hosoRes = await fetch(
+      `${HOSOONLINE_BASE_URL}/api/appointments/image/${encodeURIComponent(imageName)}`,
+      { headers: await getHosoRequestHeaders() }
+    );
+
+    if (isHosoAuthFailure(hosoRes.status)) {
+      return res.status(hosoRes.status).json({
+        error: 'hosoonline authentication failed',
+        status: hosoRes.status,
+        detail: 'Check the configured Hosoonline login credentials before images can load.',
+      });
+    }
+
+    if (!hosoRes.ok) {
+      return res.status(hosoRes.status).json({ error: 'hosoonline image fetch failed', status: hosoRes.status });
+    }
+
+    const buffer = Buffer.from(await hosoRes.arrayBuffer());
+    res.setHeader('Content-Type', hosoRes.headers.get('content-type') || 'application/octet-stream');
+    res.setHeader('Cache-Control', 'private, max-age=300');
+    return res.send(buffer);
+  } catch (error) {
+    if (error instanceof HosoAuthError) {
+      return res.status(error.status).json({
+        error: 'hosoonline authentication failed',
+        status: error.status,
+        detail: 'Check the configured Hosoonline login credentials before images can load.',
+      });
+    }
+    console.error('ExternalCheckups image proxy error:', error);
+    return res.status(500).json({ error: 'Failed to proxy external checkup image' });
+  }
+});
 
 /**
  * GET /api/ExternalCheckups/:customerCode
@@ -119,14 +314,24 @@ router.get('/:customerCode', requireAuth, requirePermission('external_checkups.v
     const partner = await getLocalPartner(customerCode);
     const customerName = partner?.name || 'Unknown';
 
-    if (!HOSOONLINE_API_KEY) {
+    if (!HOSOONLINE_API_KEY && !hasHosoLoginCredentials()) {
       return res.json(emptyCheckups(customerCode, customerName, 'hosoonline-not-configured'));
+    }
+
+    if (hasHosoLoginCredentials()) {
+      const currentData = await fetchCurrentHosoCheckups(customerCode, partner);
+      return res.json({
+        patientCode: currentData.patientCode,
+        patientName: currentData.patientName,
+        source: 'hosoonline',
+        checkups: currentData.checkups,
+      });
     }
 
     const hosoCode = await resolveHosoPatientCode(customerCode);
     const hosoRes = await fetch(
       `${HOSOONLINE_BASE_URL}/api/patients/${encodeURIComponent(hosoCode)}/health-checkups`,
-      { headers: getHosoHeaders() }
+      { headers: await getHosoRequestHeaders() }
     );
 
     if (isHosoAuthFailure(hosoRes.status)) {
@@ -174,8 +379,8 @@ router.post('/:customerCode/health-checkups', requireAuth, requirePermission('ex
   try {
     const { customerCode } = req.params;
 
-    if (!HOSOONLINE_API_KEY) {
-      return res.status(503).json({ error: 'Hosoonline API key not configured' });
+    if (!HOSOONLINE_API_KEY && !hasHosoLoginCredentials()) {
+      return res.status(503).json({ error: 'Hosoonline credentials not configured' });
     }
 
     const hosoCode = await resolveHosoPatientCode(customerCode);
@@ -213,7 +418,7 @@ router.post('/:customerCode/health-checkups', requireAuth, requirePermission('ex
       `${HOSOONLINE_BASE_URL}/api/patients/${encodeURIComponent(hosoCode)}/health-checkups`,
       {
         method: 'POST',
-        headers: getHosoHeaders(form.getHeaders()),
+        headers: await getHosoRequestHeaders(form.getHeaders()),
         body: form,
       }
     );
@@ -250,4 +455,11 @@ router.post('/:customerCode/health-checkups', requireAuth, requirePermission('ex
 });
 
 module.exports = router;
-module.exports._test = { getHosoHeaders, getLocalPartner, isHosoAuthFailure };
+module.exports._test = {
+  extractAccessTokenCookie,
+  getHosoHeaders,
+  getLocalPartner,
+  imageProxyUrl,
+  isHosoAuthFailure,
+  mapHosoAppointmentsToCheckups,
+};

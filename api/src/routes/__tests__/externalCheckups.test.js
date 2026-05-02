@@ -83,4 +83,48 @@ describe('externalCheckups helpers', () => {
     expect(query.mock.calls[1][0]).toContain('phone = $1');
     expect(query.mock.calls[1][1]).toEqual(['0900000000']);
   });
+
+  it('extracts the Hosoonline access token cookie from login response headers', () => {
+    const { helpers } = loadTestHelpers();
+
+    expect(helpers.extractAccessTokenCookie('access_token=abc123; Path=/; HttpOnly; SameSite=Lax')).toBe('access_token=abc123');
+  });
+
+  it('maps Hosoonline appointment media into proxied health-checkup images', () => {
+    const { helpers } = loadTestHelpers();
+
+    const checkups = helpers.mapHosoAppointmentsToCheckups([
+      {
+        _id: 'appt-1',
+        date: '2026-04-20T10:00:00.000Z',
+        service: 'X-ray',
+        doctor: 'Dr A',
+        description: 'Exam note',
+        nextAppointmentDate: null,
+        nextDescription: '',
+        createdAt: '2026-04-20T10:05:00.000Z',
+        media: [{ _id: 'media-1', imageLink: '2026-04-20_T8250_IMG.jpeg' }],
+      },
+    ]);
+
+    expect(checkups).toEqual([
+      {
+        id: 'appt-1',
+        date: '2026-04-20',
+        title: 'X-ray',
+        notes: 'Exam note',
+        doctor: 'Dr A',
+        nextAppointmentDate: null,
+        nextDescription: '',
+        images: [
+          {
+            url: '/api/ExternalCheckups/images/2026-04-20_T8250_IMG.jpeg',
+            thumbnailUrl: '/api/ExternalCheckups/images/2026-04-20_T8250_IMG.jpeg',
+            label: '2026-04-20_T8250_IMG.jpeg',
+            uploadedAt: '2026-04-20T10:05:00.000Z',
+          },
+        ],
+      },
+    ]);
+  });
 });
