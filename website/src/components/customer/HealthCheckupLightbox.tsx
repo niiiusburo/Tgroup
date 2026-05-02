@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, ExternalLink, X } from 'lucide-react';
 import type { ExternalCheckupImage } from '@/lib/api';
+import { AuthenticatedCheckupImage } from './AuthenticatedCheckupImage';
 
 interface HealthCheckupLightboxProps {
   readonly currentImage: ExternalCheckupImage;
@@ -30,7 +31,7 @@ export function HealthCheckupLightbox({
         </button>
 
         <div className="relative">
-          <img
+          <AuthenticatedCheckupImage
             src={currentImage.url}
             alt={currentImage.label || 'Checkup image'}
             className="max-w-full max-h-[55vh] object-contain rounded-lg"

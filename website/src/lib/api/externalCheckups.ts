@@ -33,6 +33,39 @@ export function fetchExternalCheckups(customerCode: string): Promise<ExternalChe
   return apiFetch<ExternalCheckupsResponse>(`/ExternalCheckups/${encodeURIComponent(customerCode)}`);
 }
 
+export function resolveExternalCheckupImageUrl(imagePath: string): string {
+  if (imagePath.startsWith('http')) return imagePath;
+
+  if (imagePath.startsWith('/api/')) {
+    return `${API_URL.replace(/\/api$/, '')}${imagePath}`;
+  }
+
+  if (imagePath.startsWith('/')) {
+    return `${API_URL}${imagePath}`;
+  }
+
+  return `${API_URL}/${imagePath}`;
+}
+
+export async function fetchExternalCheckupImageBlob(imagePath: string, signal?: AbortSignal): Promise<Blob> {
+  const token = localStorage.getItem('tgclinic_token');
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(resolveExternalCheckupImageUrl(imagePath), {
+    headers,
+    credentials: 'include',
+    signal,
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => 'Image load failed');
+    throw new Error(`External checkup image failed (${res.status}): ${text}`);
+  }
+
+  return res.blob();
+}
+
 export interface CreateExternalCheckupData {
   title?: string;
   doctor?: string;

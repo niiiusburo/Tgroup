@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Calendar, Image as ImageIcon, Plus } from 'lucide-react';
 import type { ExternalCheckupsResponse } from '@/lib/api';
+import { AuthenticatedCheckupImage } from './AuthenticatedCheckupImage';
 import { HealthCheckupEmptyState } from './HealthCheckupEmptyState';
 import { HealthCheckupLightbox } from './HealthCheckupLightbox';
 import { HealthCheckupUploadForm } from './HealthCheckupUploadForm';
@@ -193,11 +194,10 @@ export function HealthCheckupGallery({ data, isLoading, error, customerCode, onU
                         className="group relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 hover:border-primary transition-colors"
                         title={img.label || 'View image'}
                       >
-                        <img
+                        <AuthenticatedCheckupImage
                           src={img.thumbnailUrl || img.url}
                           alt={img.label || 'Checkup image'}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          loading="lazy"
                         />
                         {img.label && (
                           <span className="absolute bottom-0 left-0 right-0 text-[10px] truncate px-1.5 py-0.5 bg-black/50 text-white">

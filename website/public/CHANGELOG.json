@@ -1,5 +1,30 @@
 [
   {
+    "version": "0.27.9",
+    "date": "2026-05-02",
+    "commit": "7feb1cb9",
+    "highlights": "fix(integrations): load Hosoonline checkup images with website auth",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Hosoonline checkup thumbnails and lightbox images now fetch protected image bytes with the current TGClinic login token before rendering.",
+          "Customer profile checkup images no longer hit the protected image proxy as anonymous browser image requests."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "Verified against the T8250 Hosoonline image path that previously returned 401 No token when loaded as a plain image URL."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.8",
     "date": "2026-05-02",
     "commit": "pending",
