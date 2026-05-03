@@ -135,7 +135,11 @@ jobs:
           BASE="${{ github.event.pull_request.base.sha }}"
           HEAD="${{ github.event.pull_request.head.sha }}"
           WEBSITE_FILES=$(git diff --name-only "$BASE" "$HEAD" | grep -E '^website/(src/|public/([^C]|C[^H]|CH[^A]|CHA[^N]|CHAN[^G]|CHANG[^E]).*)' || true)
-          echo "website_files=$WEBSITE_FILES" >> $GITHUB_OUTPUT
+          {
+            echo "website_files<<EOF"
+            echo "$WEBSITE_FILES"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
           if [ -n "$WEBSITE_FILES" ]; then
             echo "has_website_changes=true" >> $GITHUB_OUTPUT
           else
