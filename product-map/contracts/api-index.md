@@ -153,7 +153,7 @@
 | GET | `/groups` | Perm:`permissions.view` | — | Permission groups array |
 | POST | `/groups` | Perm:`permissions.edit` | `{ name, color, description, permissions[] }` | Created group |
 | PUT | `/groups/:groupId` | Perm:`permissions.edit` | `{ name, color, description, permissions[] }` | Updated group |
-| GET | `/employees` | Perm:`permissions.view` | — | Employee permission assignments |
+| GET | `/employees` | Perm:`permissions.view` | — | Employee permission assignments, including employee email for admin search/display |
 | PUT | `/employees/:employeeId` | Perm:`permissions.edit` | `{ groupId, locScope, locationIds[], overrides{grant[],revoke[]} }` | Updated assignment |
 | GET | `/resolve/:employeeId` | Perm:`permissions.view` | — | Effective permissions breakdown |
 

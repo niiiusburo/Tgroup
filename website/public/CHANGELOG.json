@@ -1,5 +1,30 @@
 [
   {
+    "version": "0.27.11",
+    "date": "2026-05-03",
+    "commit": "pending",
+    "highlights": "fix(permissions): make employee emails searchable on Permission Board",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Permission Board employee search now matches login email addresses such as t@clinic.vn.",
+          "Employee permission cards now show email addresses so admin-created accounts are easier to identify."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "The /api/Permissions/employees response now includes employeeEmail for admin search and display."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.10",
     "date": "2026-05-02",
     "commit": "pending",

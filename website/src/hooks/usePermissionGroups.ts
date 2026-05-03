@@ -34,6 +34,7 @@ export interface LocationBranch {
 export interface EmployeePermissionAssignment {
   readonly employeeId: string;
   readonly employeeName: string;
+  readonly employeeEmail?: string | null;
   readonly groupId: string;
   readonly groupName: string;
   readonly groupColor?: string;
@@ -78,6 +79,7 @@ export function usePermissionGroups() {
         const mappedAssignments: EmployeePermissionAssignment[] = fetchedAssignments.map((a) => ({
           employeeId: a.employeeId,
           employeeName: a.employeeName,
+          employeeEmail: a.employeeEmail,
           groupId: a.groupId,
           groupName: a.groupName,
           groupColor: a.groupColor,
@@ -221,6 +223,7 @@ export function usePermissionGroups() {
         employeeId,
         groupId,
         employeeName: '', // Will be filled from API
+        employeeEmail: null,
         groupName: groups.find((g) => g.id === groupId)?.name ?? '',
         locations: [],
         locScope: locationScope,

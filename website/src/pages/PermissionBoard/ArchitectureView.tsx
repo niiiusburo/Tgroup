@@ -50,6 +50,7 @@ export function ArchitectureView({
     const locationNames = emp.locations.map(l => l.name).join(' ');
     return (
       emp.employeeName.toLowerCase().includes(q) ||
+      (emp.employeeEmail ?? '').toLowerCase().includes(q) ||
       (group?.name ?? '').toLowerCase().includes(q) ||
       locationNames.toLowerCase().includes(q)
     );
@@ -241,6 +242,9 @@ export function ArchitectureView({
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <h3 className="text-sm font-bold text-gray-900">{activeEmp.employeeName}</h3>
+                    {activeEmp.employeeEmail && (
+                      <p className="text-xs text-gray-400 mt-0.5 break-all">{activeEmp.employeeEmail}</p>
+                    )}
                     <span
                       className="text-[11px] font-semibold px-1.5 py-0.5 rounded mt-1 inline-block"
                       style={{ background: `${activeEmpGroup.color}18`, color: activeEmpGroup.color }}

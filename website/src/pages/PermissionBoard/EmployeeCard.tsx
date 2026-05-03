@@ -36,6 +36,9 @@ export function EmployeeCard({ emp, group, effectiveCount, isSelected, isDimmed,
         </div>
         <div className="flex-1 min-w-0">
           <div className="font-semibold text-[13px] text-gray-900 truncate">{emp.employeeName}</div>
+          {emp.employeeEmail && (
+            <div className="text-[11px] text-gray-500 truncate">{emp.employeeEmail}</div>
+          )}
           <div className="text-[11px] text-gray-400">{getRoleLabel(emp)}</div>
         </div>
       </div>

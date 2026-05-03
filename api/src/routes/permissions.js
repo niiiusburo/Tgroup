@@ -151,6 +151,7 @@ router.get('/employees', requirePermission('permissions.view'), async (req, res)
       SELECT
         p.id AS "employeeId",
         p.name AS "employeeName",
+        p.email AS "employeeEmail",
         p.tier_id AS "groupId",
         pg.name AS "groupName",
         pg.color AS "groupColor",
@@ -198,6 +199,7 @@ router.get('/employees', requirePermission('permissions.view'), async (req, res)
     const result = rows.map(r => ({
       employeeId: r.employeeId,
       employeeName: r.employeeName,
+      employeeEmail: r.employeeEmail,
       groupId: r.groupId,
       groupName: r.groupName,
       groupColor: r.groupColor,
@@ -277,6 +279,7 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
       `SELECT
         ep.employee_id AS "employeeId",
         p.name AS "employeeName",
+        p.email AS "employeeEmail",
         ep.group_id AS "groupId",
         pg.name AS "groupName",
         pg.color AS "groupColor",
@@ -314,6 +317,7 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
     return res.json({
       employeeId: emp.employeeId,
       employeeName: emp.employeeName,
+      employeeEmail: emp.employeeEmail,
       groupId: emp.groupId,
       groupName: emp.groupName,
       groupColor: emp.groupColor,

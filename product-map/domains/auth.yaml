@@ -46,6 +46,7 @@ jobs:
   - none
 shared_types:
   - website/src/types/permissions.ts
+  - website/src/lib/api/permissions.ts (PermissionBoard employee assignment DTO includes email for admin search)
   - api/src/middleware/auth.js (inline effective-permission set)
   - api/src/routes/auth.js (resolvePermissions return shape)
 dependencies:

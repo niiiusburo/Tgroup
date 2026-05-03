@@ -14,6 +14,7 @@ export interface PermissionGroup {
 export interface EmployeePermission {
   employeeId: string;
   employeeName: string;
+  employeeEmail?: string | null;
   groupId: string;
   groupName: string;
   groupColor: string;
@@ -59,4 +60,3 @@ export function createPermissionGroup(data: { name: string; color: string; descr
 export function updatePermissionGroup(groupId: string, data: { name: string; color: string; description: string; permissions: string[] }) {
   return apiFetch<PermissionGroup>(`/Permissions/groups/${groupId}`, { method: 'PUT', body: data });
 }
-
