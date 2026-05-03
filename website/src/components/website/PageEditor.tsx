@@ -14,6 +14,7 @@ import { PAGE_STATUS_LABELS, PAGE_STATUS_STYLES, PAGE_TEMPLATES } from '@/data/m
 interface PageEditorProps {
   readonly page: WebsitePage;
   readonly onBack: () => void;
+  readonly canEdit?: boolean;
 }
 
 interface ToolbarButton {
@@ -52,7 +53,7 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
 }
 
-export function PageEditor({ page, onBack }: PageEditorProps) {
+export function PageEditor({ page, onBack, canEdit = false }: PageEditorProps) {
   const { t } = useTranslation('website');
   const [content, setContent] = useState(stripHtml(page.content));
   const [title, setTitle] = useState(page.title);
@@ -91,10 +92,12 @@ export function PageEditor({ page, onBack }: PageEditorProps) {
             <Eye className="w-4 h-4" />
             Preview
           </button>
-          <button className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors">
-            <Save className="w-4 h-4" />
-            Save
-          </button>
+          {canEdit && (
+            <button className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors">
+              <Save className="w-4 h-4" />
+              Save
+            </button>
+          )}
         </div>
       </div>
 
@@ -107,6 +110,7 @@ export function PageEditor({ page, onBack }: PageEditorProps) {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              disabled={!canEdit}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </div>
@@ -116,6 +120,7 @@ export function PageEditor({ page, onBack }: PageEditorProps) {
               type="text"
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
+              disabled={!canEdit}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </div>
@@ -124,6 +129,7 @@ export function PageEditor({ page, onBack }: PageEditorProps) {
             <select
               value={template}
               onChange={(e) => setTemplate(e.target.value)}
+              disabled={!canEdit}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
             >
               {PAGE_TEMPLATES.map((t) => (
@@ -146,6 +152,7 @@ export function PageEditor({ page, onBack }: PageEditorProps) {
                   <button
                     key={btn.action}
                     title={btn.label}
+                    disabled={!canEdit}
                     className="p-1.5 rounded hover:bg-gray-200 text-gray-600 transition-colors"
                   >
                     <btn.icon className="w-4 h-4" />
@@ -168,6 +175,7 @@ export function PageEditor({ page, onBack }: PageEditorProps) {
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            readOnly={!canEdit}
             className="w-full p-6 min-h-[400px] text-sm text-gray-900 resize-y focus:outline-none leading-relaxed"
             placeholder={t('editor.content', { ns: 'website' })}
           />

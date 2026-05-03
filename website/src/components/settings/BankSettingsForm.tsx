@@ -10,7 +10,11 @@ import { useBankSettings, BankSettings } from '@/hooks/useBankSettings';
 import { Building2, Save, Loader2, CheckCircle2 } from 'lucide-react';
 import { BankSelector } from '@/components/shared/BankSelector';
 
-export function BankSettingsForm() {
+interface BankSettingsFormProps {
+  readonly canEdit?: boolean;
+}
+
+export function BankSettingsForm({ canEdit = false }: BankSettingsFormProps) {
   const { t } = useTranslation('settings');
   const { settings, loading, updateSettings } = useBankSettings();
   const [formData, setFormData] = useState<BankSettings>({
@@ -28,12 +32,14 @@ export function BankSettingsForm() {
   }, [settings]);
 
   const handleChange = (field: keyof BankSettings, value: string) => {
+    if (!canEdit) return;
     setFormData((prev) => ({ ...prev, [field]: value }));
     setSuccess(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canEdit) return;
     setSaving(true);
     setSuccess(false);
     try {
@@ -75,6 +81,7 @@ export function BankSettingsForm() {
           <BankSelector
             value={formData.bankBin}
             onChange={(bin) => handleChange('bankBin', bin)}
+            disabled={!canEdit}
             placeholder={t('bankSettingsContent.selectBank', { ns: 'settings' })} />
           
           <p className="text-xs text-gray-400">{t('vD970436Vietcombank')}</p>
@@ -89,6 +96,7 @@ export function BankSettingsForm() {
             type="text"
             value={formData.bankNumber}
             onChange={(e) => handleChange('bankNumber', e.target.value)}
+            disabled={!canEdit}
             placeholder="1234567890"
             className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
             required />
@@ -104,6 +112,7 @@ export function BankSettingsForm() {
             type="text"
             value={formData.bankAccountName}
             onChange={(e) => handleChange('bankAccountName', e.target.value)}
+            disabled={!canEdit}
             placeholder="CONG TY TNHH NHA KHOA TAM DENTIST"
             className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
             required />
@@ -114,7 +123,7 @@ export function BankSettingsForm() {
       <div className="flex items-center gap-4">
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || !canEdit}
           className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors">
           
           {saving ?

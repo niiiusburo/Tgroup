@@ -13,6 +13,8 @@
 
 Money behavior must be reconstructed from canonical local database truth, not from UI display text or legacy export assumptions.
 
+Canonical payment truth is `dbo.payments` plus `dbo.payment_allocations`. Legacy `accountpayments` and TDental receipt/export rows are source evidence or fallback reads, not the durable target for new imports.
+
 ## Main Surfaces
 
 - Customer profile payment tab.
@@ -28,6 +30,7 @@ Money behavior must be reconstructed from canonical local database truth, not fr
 - Allocation changes must be idempotent and auditable.
 - Residual display must come from current sale-order/payment allocation data.
 - Do not flatten TDental source rows in a way that loses treatment/payment relationships.
+- For TDental imports, prefer source payment relation tables for allocation mapping before any greedy remaining-balance allocation.
 - Treat one-day date shifts as timezone/import/display-boundary issues until proven otherwise.
 
 ## Verification

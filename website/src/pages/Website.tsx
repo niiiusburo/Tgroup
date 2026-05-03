@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { PageEditor } from '@/components/website/PageEditor';
 import { ServiceCatalogManager } from '@/components/website/ServiceCatalogManager';
 import { SEOManager } from '@/components/website/SEOManager';
+import { useAuth } from '@/contexts/AuthContext';
 
 /**
  * Website Page — CMS for managing public website pages
@@ -30,6 +31,8 @@ const TABS: readonly TabConfig[] = [
 
 export function Website() {
   const { t } = useTranslation('website');
+  const { hasPermission } = useAuth();
+  const canEditWebsite = hasPermission('website.edit');
   const {
     activeTab,
     setActiveTab,
@@ -61,9 +64,11 @@ export function Website() {
         subtitle={t('website:subtitle')}
         icon={<Globe className="w-6 h-6 text-primary" />}
         actions={
-          <button className="px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm font-medium">
-            New Page
-          </button>
+          canEditWebsite ? (
+            <button className="px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm font-medium">
+              {t('addPage')}
+            </button>
+          ) : undefined
         }
       />
 
@@ -98,6 +103,7 @@ export function Website() {
           onClearFilters={clearFilters}
           stats={pageStats}
           loading={loading}
+          canEdit={canEditWebsite}
         />
       )}
 
@@ -105,6 +111,7 @@ export function Website() {
         <PageEditor
           page={editingPage}
           onBack={() => setActiveTab('pages')}
+          canEdit={canEditWebsite}
         />
       )}
 
@@ -129,6 +136,7 @@ export function Website() {
           onSearchChange={setServiceSearch}
           onCategoryChange={setServiceCategoryFilter}
           onClearFilters={clearServiceFilters}
+          canEdit={canEditWebsite}
         />
       )}
 
@@ -139,6 +147,7 @@ export function Website() {
             setSelectedPageId(id);
           }}
           onBack={() => setSelectedPageId(null)}
+          canEdit={canEditWebsite}
         />
       )}
     </div>

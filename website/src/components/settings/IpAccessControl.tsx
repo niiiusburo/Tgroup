@@ -26,7 +26,11 @@ import type { IpEntryType, IpEntry } from '@/types/ipAccessControl';
  * IP Access Control Settings Component
  * Allows administrators to manage IP whitelist and blacklist
  */
-export function IpAccessControl() {
+interface IpAccessControlProps {
+  readonly canEdit?: boolean;
+}
+
+export function IpAccessControl({ canEdit = false }: IpAccessControlProps) {
   const {
     mode,
     setMode,
@@ -58,6 +62,7 @@ export function IpAccessControl() {
   // Handle add entry
   const handleAddEntry = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canEdit) return;
     setFormError(null);
 
     if (!ipInput.trim()) {
@@ -79,6 +84,7 @@ export function IpAccessControl() {
 
   // Handle remove with confirmation
   const handleRemove = async (entry: IpEntry) => {
+    if (!canEdit) return;
     if (!window.confirm(`Are you sure you want to remove ${entry.ipAddress}?`)) return;
     setActionLoading(true);
     await removeEntry(entry.id);
@@ -87,6 +93,7 @@ export function IpAccessControl() {
 
   // Handle toggle
   const handleToggle = async (id: string) => {
+    if (!canEdit) return;
     setActionLoading(true);
     await toggleEntryActive(id);
     setActionLoading(false);
@@ -161,7 +168,8 @@ export function IpAccessControl() {
                     name="accessMode"
                     value={option.value}
                     checked={mode === option.value}
-                    onChange={(e) => setMode(e.target.value as typeof mode)}
+                    disabled={!canEdit}
+                    onChange={(e) => canEdit && setMode(e.target.value as typeof mode)}
                     className="sr-only"
                     aria-label={option.label}
                   />
@@ -229,12 +237,13 @@ export function IpAccessControl() {
       </div>
 
       {/* Add Entry Form */}
-      <div className="bg-white rounded-xl shadow-card overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-          <h3 className="text-sm font-semibold text-gray-900">Add New IP Entry</h3>
-        </div>
-        <div className="p-6">
-          <form onSubmit={handleAddEntry} className="flex flex-wrap gap-4 items-end">
+      {canEdit && (
+        <div className="bg-white rounded-xl shadow-card overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+            <h3 className="text-sm font-semibold text-gray-900">Add New IP Entry</h3>
+          </div>
+          <div className="p-6">
+            <form onSubmit={handleAddEntry} className="flex flex-wrap gap-4 items-end">
             <div className="flex-1 min-w-[200px]">
               <label htmlFor="ip-address" className="block text-sm font-medium text-gray-700 mb-1">
                 IP Address
@@ -297,9 +306,10 @@ export function IpAccessControl() {
               {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               Add IP
             </button>
-          </form>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* IP Entries List */}
       <div className="bg-white rounded-xl shadow-card overflow-hidden">
@@ -386,7 +396,7 @@ export function IpAccessControl() {
                     <td className="px-6 py-4">
                       <button
                         onClick={() => handleToggle(entry.id)}
-                        disabled={actionLoading}
+                        disabled={actionLoading || !canEdit}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                           entry.isActive ? 'bg-green-500' : 'bg-gray-300'
                         } disabled:opacity-60`}
@@ -400,14 +410,16 @@ export function IpAccessControl() {
                       </button>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => handleRemove(entry)}
-                        disabled={actionLoading}
-                        className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-colors disabled:opacity-60"
-                        aria-label={`Remove ${entry.ipAddress}`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {canEdit && (
+                        <button
+                          onClick={() => handleRemove(entry)}
+                          disabled={actionLoading}
+                          className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-colors disabled:opacity-60"
+                          aria-label={`Remove ${entry.ipAddress}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

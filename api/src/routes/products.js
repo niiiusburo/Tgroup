@@ -54,7 +54,7 @@ function groupedCategoryCondition(paramIdx) {
  *
  * Used for: Services, materials, medicine catalog
  */
-router.get('/', async (req, res) => {
+router.get('/', requirePermission('services.view'), async (req, res) => {
   try {
     const {
       offset = '0',
@@ -178,7 +178,7 @@ router.get('/', async (req, res) => {
  * GET /api/Products/:id
  * Returns: Single product details
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', requirePermission('services.view'), async (req, res) => {
   try {
     const { id } = req.params;
 

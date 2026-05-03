@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -8,7 +9,7 @@ const router = express.Router();
  * Query params: partner_id, offset, limit, search, sortField, sortOrder
  * Returns: customer's payment receipts
  */
-router.get('/', async (req, res) => {
+router.get('/', requirePermission('customers.view'), async (req, res) => {
   try {
     const {
       partner_id,
@@ -139,7 +140,7 @@ router.get('/', async (req, res) => {
  * GET /api/CustomerReceipts/:id
  * Returns: single customer receipt with details
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', requirePermission('customers.view'), async (req, res) => {
   try {
     const { id } = req.params;
 

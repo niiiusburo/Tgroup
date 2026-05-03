@@ -67,10 +67,49 @@ Object.defineProperty(window, 'sessionStorage', {
   value: new MockStorage(),
 });
 
-// Mock react-i18next — return translation keys as-is in tests
+const TEST_TRANSLATIONS: Record<string, string> = {
+  'phase.scheduled': 'Đang hẹn',
+  'phase.waiting': 'Đang chờ',
+  'phase.in-treatment': 'Đang khám',
+  'phase.done': 'Hoàn tất',
+  'phase.cancelled': 'Đã hủy',
+  addAppointmentAt: 'Thêm lịch hẹn lúc {{time}}',
+  cancelAppointment: 'Hủy hẹn',
+  clearSelection: 'Bỏ chọn',
+  dKin: 'Dự kiến',
+  faceId: 'Nhận diện khuôn mặt',
+  'faceCapture.cameraError': 'Không thể truy cập camera. Vui lòng cấp quyền.',
+  'faceCapture.capture': 'Chụp',
+  'faceCapture.title': 'Chụp ảnh khuôn mặt',
+  iTrngThi: 'Đổi trạng thái',
+  lchHn: 'Lịch hẹn',
+  noDoctorsFound: 'Không tìm thấy bác sĩ',
+  quickAdd: 'Thêm nhanh',
+  searchByNameOrRole: 'Tìm theo tên hoặc vai trò...',
+  thanhTonVietqr: 'Thanh toán VietQR',
+  qutMQrChuynKhon: 'Quét mã QR chuyển khoản',
+  sTinVnd: 'Số tiền (VND)',
+  niDungChuynKhon: 'Nội dung chuyển khoản',
+  toQr: 'Tạo QR',
+  vuiLngCuHnhTiKhonNgnHngTrongCiT: 'Vui lòng cấu hình tài khoản ngân hàng trong cài đặt',
+};
+
+function interpolate(template: string, options?: Record<string, unknown>) {
+  return template.replace(/\{\{(\w+)\}\}/g, (_match, key) => String(options?.[key] ?? ''));
+}
+
+function translateForTest(key: string, options?: Record<string, unknown> | string) {
+  if (typeof options === 'string') {
+    return TEST_TRANSLATIONS[key] ?? options;
+  }
+  const defaultValue = typeof options?.defaultValue === 'string' ? options.defaultValue : undefined;
+  return interpolate(TEST_TRANSLATIONS[key] ?? defaultValue ?? key, options);
+}
+
+// Mock react-i18next with the small locale surface needed by component tests.
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => key,
+    t: translateForTest,
     i18n: { language: 'vi', changeLanguage: vi.fn() },
   }),
   initReactI18next: { type: '3rdParty', init: vi.fn() },

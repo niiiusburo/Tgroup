@@ -15,6 +15,7 @@ interface ServiceCatalogManagerProps {
   readonly onSearchChange: (query: string) => void;
   readonly onCategoryChange: (category: string) => void;
   readonly onClearFilters: () => void;
+  readonly canEdit?: boolean;
 }
 
 export function ServiceCatalogManager({
@@ -24,6 +25,7 @@ export function ServiceCatalogManager({
   onSearchChange,
   onCategoryChange,
   onClearFilters,
+  canEdit = false,
 }: ServiceCatalogManagerProps) {
   const { t } = useTranslation('website');
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -63,10 +65,12 @@ export function ServiceCatalogManager({
               className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </div>
-          <button className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors shrink-0">
-            <Plus className="w-4 h-4" />
-            Add Service
-          </button>
+          {canEdit && (
+            <button className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors shrink-0">
+              <Plus className="w-4 h-4" />
+              Add Service
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -181,12 +185,14 @@ export function ServiceCatalogManager({
                       </div>
                     </div>
                   </div>
-                  <div className="mt-3 flex justify-end">
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors">
-                      <Pencil className="w-3.5 h-3.5" />
-                      Edit Service
-                    </button>
-                  </div>
+                  {canEdit && (
+                    <div className="mt-3 flex justify-end">
+                      <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors">
+                        <Pencil className="w-3.5 h-3.5" />
+                        Edit Service
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

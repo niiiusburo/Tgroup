@@ -34,6 +34,7 @@ Thumbs.db
 
 # OMC state
 .omc/
+.orchestrator/
 .dev-api.pid
 .dev-api.log
 .dev-vite.pid
@@ -66,8 +67,11 @@ website/*.png
 website/e2e/*.png
 reports/**/*.png
 api/uploads/
+api/src/truth-session.json
 scripts/screenshots/
 scripts/__pycache__/
+tools/tdental-delta-sync/backups/
+website/demo_tdental_updated.sql
 
 # Generated audit reports
 locale_audit_report.md

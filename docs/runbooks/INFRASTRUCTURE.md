@@ -28,7 +28,15 @@ Important env groups:
 
 `nginx.conf` and `nginx.docker.conf` must stay aligned for API proxy behavior and upload/static paths.
 
-Large exports may require longer proxy timeouts. If export behavior changes, verify nginx timeouts locally or on production after deploy.
+Large exports require longer proxy timeouts than the default 60s behavior. Any production nginx config serving `/api/Exports/:type/download` should keep API proxy read/send timeouts at 300s or higher, then verify a services/payments export from the live site after deploy.
+
+When an infra worker changes nginx source files, keep these directives aligned for the `/api` proxy in both nginx configs:
+
+```nginx
+proxy_read_timeout 300s;
+proxy_send_timeout 300s;
+send_timeout 300s;
+```
 
 ## Docker
 

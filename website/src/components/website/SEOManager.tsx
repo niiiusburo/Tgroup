@@ -11,6 +11,7 @@ interface SEOManagerProps {
   readonly selectedPage: WebsitePage | null;
   readonly onSelectPage: (pageId: string) => void;
   readonly onBack: () => void;
+  readonly canEdit?: boolean;
 }
 
 function SEOScoreIndicator({ score }: { readonly score: number }) {
@@ -43,7 +44,7 @@ function computeSEOScore(page: WebsitePage): number {
   return score;
 }
 
-export function SEOManager({ selectedPage, onSelectPage, onBack }: SEOManagerProps) {
+export function SEOManager({ selectedPage, onSelectPage, onBack, canEdit = false }: SEOManagerProps) {
   const [seoTitle, setSeoTitle] = useState(selectedPage?.seo.title ?? '');
   const [seoDescription, setSeoDescription] = useState(selectedPage?.seo.description ?? '');
   const [seoKeywords, setSeoKeywords] = useState(selectedPage?.seo.keywords.join(', ') ?? '');
@@ -83,12 +84,14 @@ export function SEOManager({ selectedPage, onSelectPage, onBack }: SEOManagerPro
                         </span>
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <button
-                          onClick={() => onSelectPage(page.id)}
-                          className="text-sm text-primary hover:text-primary-dark transition-colors"
-                        >
-                          Edit SEO
-                        </button>
+                        {canEdit && (
+                          <button
+                            onClick={() => onSelectPage(page.id)}
+                            className="text-sm text-primary hover:text-primary-dark transition-colors"
+                          >
+                            Edit SEO
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );
@@ -121,10 +124,12 @@ export function SEOManager({ selectedPage, onSelectPage, onBack }: SEOManagerPro
         </div>
         <div className="flex items-center gap-3">
           <SEOScoreIndicator score={score} />
-          <button className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors">
-            <Save className="w-4 h-4" />
-            Save
-          </button>
+          {canEdit && (
+            <button className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors">
+              <Save className="w-4 h-4" />
+              Save
+            </button>
+          )}
         </div>
       </div>
 
@@ -144,6 +149,7 @@ export function SEOManager({ selectedPage, onSelectPage, onBack }: SEOManagerPro
                 type="text"
                 value={seoTitle}
                 onChange={(e) => setSeoTitle(e.target.value)}
+                disabled={!canEdit}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 maxLength={60}
               />
@@ -161,6 +167,7 @@ export function SEOManager({ selectedPage, onSelectPage, onBack }: SEOManagerPro
               <textarea
                 value={seoDescription}
                 onChange={(e) => setSeoDescription(e.target.value)}
+                disabled={!canEdit}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
                 maxLength={160}
@@ -180,6 +187,7 @@ export function SEOManager({ selectedPage, onSelectPage, onBack }: SEOManagerPro
                 type="text"
                 value={seoKeywords}
                 onChange={(e) => setSeoKeywords(e.target.value)}
+                disabled={!canEdit}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 placeholder="dental, HCMC, dentist..."
               />
@@ -202,6 +210,7 @@ export function SEOManager({ selectedPage, onSelectPage, onBack }: SEOManagerPro
                 type="text"
                 value={ogImage}
                 onChange={(e) => setOgImage(e.target.value)}
+                disabled={!canEdit}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 placeholder="/images/og-image.jpg"
               />
@@ -217,6 +226,7 @@ export function SEOManager({ selectedPage, onSelectPage, onBack }: SEOManagerPro
                 type="text"
                 value={canonicalUrl}
                 onChange={(e) => setCanonicalUrl(e.target.value)}
+                disabled={!canEdit}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 placeholder="https://tgclinic.vn/page"
               />

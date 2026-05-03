@@ -31,7 +31,12 @@ function findTsxFiles(dir, files = []) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory() && !entry.name.includes('node_modules')) {
       findTsxFiles(full, files);
-    } else if (entry.isFile() && full.endsWith('.tsx') && !full.endsWith('.test.tsx')) {
+    } else if (
+      entry.isFile() &&
+      /\.(tsx|ts)$/.test(entry.name) &&
+      !entry.name.includes('.test.') &&
+      !entry.name.includes('.spec.')
+    ) {
       files.push(full);
     }
   }
@@ -49,11 +54,20 @@ for (const file of files) {
   const defaultNs = nsMatch ? nsMatch[1] : 'common';
 
   // Find t('...') calls, possibly with ns override
-  const tCalls = [...content.matchAll(/t\(['"`]([^'"`]+)['"`](?:\s*,\s*\{[^}]*ns\s*:\s*['"`]([^'"`]+)['"`][^}]*\})?/g)];
+  const tCalls = [...content.matchAll(/(?<![\w$])t\s*\(\s*['"`]([^'"`]+)['"`]([^)]*)\)/g)];
 
-  for (const [, key, overrideNs] of tCalls) {
+  for (const [, rawKey, options] of tCalls) {
+    let key = rawKey;
+    let overrideNs = options.match(/ns\s*:\s*['"`]([^'"`]+)['"`]/)?.[1];
     if (key.includes('${') || key.includes('+') || key.startsWith('.')) continue;
-    if (key.includes(':')) continue; // skip namespace-prefixed keys
+    if (!key.trim() || /^[\s,./\\-]+$/.test(key)) continue;
+    if (key.includes(':')) {
+      const [prefix, ...rest] = key.split(':');
+      if (namespaces.en[prefix] || namespaces.vi[prefix]) {
+        overrideNs = prefix;
+        key = rest.join(':');
+      }
+    }
 
     const ns = overrideNs || defaultNs;
     const enVal = getValue(namespaces.en[ns], key);

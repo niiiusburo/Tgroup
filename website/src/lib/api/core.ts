@@ -4,6 +4,8 @@
  */
 
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+export const AUTH_UNAUTHORIZED_EVENT = 'tgclinic:auth-unauthorized';
+const TOKEN_KEY = 'tgclinic_token';
 
 export class ApiError extends Error {
   status: number;
@@ -72,7 +74,7 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
     headers['Content-Type'] = 'application/json';
   }
 
-  const token = localStorage.getItem('tgclinic_token');
+  const token = localStorage.getItem(TOKEN_KEY);
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
@@ -85,6 +87,11 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
   });
 
   if (!res.ok) {
+    if (res.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
+      window.dispatchEvent(new CustomEvent(AUTH_UNAUTHORIZED_EVENT));
+    }
+
     // Report to AutoDebugger pipeline (production only)
     if (import.meta.env.PROD) {
       import('@/lib/errorReporter').then(({ reportApiError }) => {

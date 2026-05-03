@@ -13,6 +13,7 @@ const {
   mapSaleOrderLineRow,
   mapSaleOrderRow,
 } = require('./transaction-mappers');
+const { assertLegacyGreedyAllocationAllowed } = require('./allocation-safety');
 const { clean, normalizeUuid, numberOrZero, parseCsvDateOnly, parseCsvTimestamp } = require('./utils');
 
 async function getLocalLineSummary(client, partnerId) {
@@ -195,6 +196,7 @@ async function updateCustomerSalesStaff(client, partnerId, salesStaff) {
 }
 
 async function applyClientImport(client, plan) {
+  assertLegacyGreedyAllocationAllowed(plan);
   const inserted = {};
   await client.query('BEGIN');
   try {

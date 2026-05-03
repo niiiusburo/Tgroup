@@ -20,6 +20,7 @@
     "address": "Address",
     "phone": "Phone",
     "email": "Email",
+    "district": "District",
     "status": "Status",
     "manager": "Manager",
     "openingHours": "Opening Hours",

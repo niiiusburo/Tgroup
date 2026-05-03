@@ -115,7 +115,8 @@
     "unauthorized": "Bạn không có quyền thực hiện hành động này.",
     "notFound": "Không tìm thấy tài nguyên yêu cầu.",
     "serverError": "Lỗi máy chủ. Vui lòng thử lại sau.",
-    "validation": "Vui lòng sửa các lỗi bên dưới."
+    "validation": "Vui lòng sửa các lỗi bên dưới.",
+    "saveFailedTitle": "Lưu thất bại"
   },
   "pagination": {
     "previous": "Trước",
@@ -151,6 +152,7 @@
   "edit": "Sửa",
   "search": "Tìm kiếm",
   "loading": "Đang tải...",
+  "angTi": "Đang tải...",
   "noData": "Không có dữ liệu",
   "confirm": "Xác nhận",
   "success": "Thành công",
@@ -168,6 +170,18 @@
   "ok": "OK",
   "commission": "Hoa hồng",
   "notifications": "Thông báo",
+  "khngCChiNhnhPh": "Không có chi nhánh phụ",
+  "khngTmThyAChPhHp": "Không tìm thấy địa chỉ phù hợp",
+  "khngTmThyKhchHng": "Không tìm thấy khách hàng",
+  "khngTmThyBcS": "Không tìm thấy bác sĩ",
+  "searchToView": "Tìm kiếm để xem",
+  "subtitle": {
+    "edit": "Cập nhật thông tin",
+    "create": "Tạo bản ghi mới"
+  },
+  "face": {
+    "registerTitle": "Đăng ký khuôn mặt"
+  },
   "relationships": "Mối quan hệ",
   "apply": "Áp dụng",
   "reset": "Đặt lại",
@@ -224,7 +238,8 @@
     "updatePassword": "Cập nhật mật khẩu"
   },
   "datePicker": {
-    "chooseDate": "Chọn ngày"
+    "chooseDate": "Chọn ngày",
+    "today": "Hôm nay"
   },
   "timePicker": {
     "chooseTime": "Chọn giờ",
@@ -234,6 +249,7 @@
   },
   "faceCapture": {
     "title": "Chụp ảnh khuôn mặt",
+    "capture": "Chụp ảnh",
     "cameraError": "Không thể truy cập camera. Vui lòng cấp quyền."
   },
   "combobox": {

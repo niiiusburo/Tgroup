@@ -55,6 +55,7 @@ async function main() {
   try {
     const result = await applyAppScopeMigration(client, loaded.source);
     for (const warning of loaded.warnings) result.anomalies.push({ severity: 'warning', code: 'source_file_missing', message: warning });
+    for (const anomaly of loaded.anomalies || []) result.anomalies.push(anomaly);
     const paths = outputPaths(args);
     writeArtifacts(result, paths);
     console.log('TDental app-scope migration applied');

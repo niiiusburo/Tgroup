@@ -3,19 +3,16 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from '@/test/test-utils';
 import { AppointmentFormShell } from './AppointmentFormShell';
 
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => ({
+    hasPermission: () => true,
+  }),
+}));
+
 describe('AppointmentFormShell — backdrop click leak', () => {
   it('does NOT close when the same click that opened the modal reaches the backdrop', () => {
     const onClose = vi.fn();
-    const { rerender } = renderWithProviders(
-      <AppointmentFormShell
-        mode="create"
-        isOpen={false}
-        onClose={onClose}
-      />
-    );
-    
-    // Open the modal
-    rerender(
+    renderWithProviders(
       <AppointmentFormShell
         mode="create"
         isOpen={true}

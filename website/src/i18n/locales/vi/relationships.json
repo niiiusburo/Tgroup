@@ -1,5 +1,7 @@
 {
   "title": "Quan hệ",
+  "appointmentGraphTitle": "Quan hệ lịch hẹn",
+  "appointmentGraphSubtitle": "Khách hàng, dịch vụ và lịch hẹn liên kết",
   "roles": "Vai trò",
   "entities": "Thực thể",
   "connections": "Kết nối"

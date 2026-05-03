@@ -84,7 +84,12 @@ async function main() {
   await client.connect();
   try {
     const local = await readLocalSnapshot(client);
-    const summary = buildDryRunSummary({ source: loaded.source, local, sourceWarnings: loaded.warnings });
+    const summary = buildDryRunSummary({
+      source: loaded.source,
+      local,
+      sourceWarnings: loaded.warnings,
+      sourceAnomalies: loaded.anomalies || [],
+    });
     const paths = writeAuditArtifacts(summary, args);
     printSummary(summary, paths);
   } finally {

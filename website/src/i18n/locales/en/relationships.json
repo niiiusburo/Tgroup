@@ -1,5 +1,7 @@
 {
   "title": "Relationships",
+  "appointmentGraphTitle": "Appointment relationships",
+  "appointmentGraphSubtitle": "Linked customers, services, and appointments",
   "roles": "Roles",
   "entities": "Entities",
   "connections": "Connections"

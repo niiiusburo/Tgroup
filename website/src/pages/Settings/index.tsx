@@ -29,6 +29,8 @@ export function Settings() {
   const { t } = useTranslation('settings');
   const { hasPermission } = useAuth();
   const isAdmin = hasPermission('permissions.view');
+  const canEditSettings = hasPermission('settings.edit');
+  const canEditFeedback = hasPermission('permissions.edit');
   const TABS = ALL_TABS.filter((tab) => !tab.admin || isAdmin);
   const [activeTab, setActiveTab] = useState<SettingsTab>('system');
 
@@ -88,10 +90,10 @@ export function Settings() {
 
         {/* Tab content area */}
         <div className="p-6">
-          {activeTab === 'system' && <SystemPreferencesContent />}
-          {activeTab === 'bank' && <BankSettingsForm />}
-          {activeTab === 'ip' && <IpAccessControl />}
-          {activeTab === 'feedback' && <FeedbackAdminContent />}
+          {activeTab === 'system' && <SystemPreferencesContent canEdit={canEditSettings} />}
+          {activeTab === 'bank' && <BankSettingsForm canEdit={canEditSettings} />}
+          {activeTab === 'ip' && <IpAccessControl canEdit={canEditSettings} />}
+          {activeTab === 'feedback' && <FeedbackAdminContent canEdit={canEditFeedback} />}
         </div>
       </div>
     </div>

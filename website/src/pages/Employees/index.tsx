@@ -13,6 +13,7 @@ import { EmployeeTable } from '@/components/employees/EmployeeTable';
 import { EmployeeProfile } from '@/components/employees/EmployeeProfile';
 import { useTranslation } from 'react-i18next';
 import { EmployeeForm } from '@/components/employees/EmployeeForm';
+import { useAuth } from '@/contexts/AuthContext';
 
 /**
  * Employees Page — staff management with list view and detailed profiles
@@ -22,6 +23,8 @@ import { EmployeeForm } from '@/components/employees/EmployeeForm';
  */
 export function Employees() {
   const { t } = useTranslation('employees');
+  const { hasPermission } = useAuth();
+  const canEditEmployees = hasPermission('employees.edit');
   const { selectedLocationId } = useLocationFilter();
   const {
     employees,
@@ -53,6 +56,7 @@ export function Employees() {
   const locationNameMap = new Map(allLocations.map((l) => [l.id, l.name]));
 
   const handleAddEmployee = () => {
+    if (!canEditEmployees) return;
     setEditingEmployee(null);
     setShowForm(true);
   };
@@ -69,7 +73,7 @@ export function Employees() {
   }, []);
 
   const handleEditEmployee = () => {
-    if (selectedEmployee) {
+    if (selectedEmployee && canEditEmployees) {
       // Map domain Employee type to EmployeeForm's expected shape
       const formData = {
         id: selectedEmployee.id,
@@ -109,12 +113,14 @@ export function Employees() {
         subtitle={isLoading ? 'Loading staff...' : `${employees.length} staff member${employees.length !== 1 ? 's' : ''}${hasFilters ? ' (filtered)' : ''}`}
         icon={<UserCog className="w-6 h-6 text-primary" />}
         actions={
-          <button
-            onClick={handleAddEmployee}
-            className="px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-          >
-            {t('addEmployee')}
-          </button>
+          canEditEmployees ? (
+            <button
+              onClick={handleAddEmployee}
+              className="px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+            >
+              {t('addEmployee')}
+            </button>
+          ) : undefined
         }
       />
 
@@ -217,7 +223,7 @@ export function Employees() {
                 linkedEmployees={getLinkedEmployees(selectedEmployee)}
                 onClose={() => setSelectedEmployeeId(null)}
                 onSelectLinked={setSelectedEmployeeId}
-                onEdit={handleEditEmployee}
+                onEdit={canEditEmployees ? handleEditEmployee : undefined}
               />
             </div>
           </div>
@@ -225,7 +231,7 @@ export function Employees() {
       </div>
 
       {/* Add/Edit form modal */}
-      {showForm && (
+      {showForm && canEditEmployees && (
         <EmployeeForm
           employee={editingEmployee as any}
           onClose={handleFormClose}

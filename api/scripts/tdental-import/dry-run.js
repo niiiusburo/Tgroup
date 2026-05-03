@@ -8,7 +8,7 @@ const {
   isDeleted,
   normalizeUuid,
   numberOrZero,
-  readCsv,
+  readCsvWithAnomalies,
   uuidOrNull,
 } = require('./utils');
 const {
@@ -348,7 +348,7 @@ function planPaymentAllocations(source) {
   return { summary, anomalies };
 }
 
-function buildDryRunSummary({ source, local, sourceWarnings = [] }) {
+function buildDryRunSummary({ source, local, sourceWarnings = [], sourceAnomalies = [] }) {
   const staffPlan = planStaffMatches(source.employees || [], local);
   const productPlan = planProductMatches(source.products || [], local);
   const allocationPlan = planPaymentAllocations(source);
@@ -357,6 +357,7 @@ function buildDryRunSummary({ source, local, sourceWarnings = [] }) {
   const voidedPaymentFilter = (row) => clean(row.State).toLowerCase() !== 'posted';
   const anomalies = [
     ...sourceWarnings.map((warning) => ({ severity: 'warning', code: 'source_file_missing', message: warning })),
+    ...sourceAnomalies,
     ...staffPlan.anomalies,
     ...productPlan.anomalies,
     ...allocationPlan.anomalies,
@@ -395,18 +396,21 @@ function buildDryRunSummary({ source, local, sourceWarnings = [] }) {
 
 function readCsvIfExists(file) {
   if (!fs.existsSync(file)) return { rows: [], warning: `Missing export file: ${file}` };
-  return { rows: readCsv(file), warning: null };
+  const result = readCsvWithAnomalies(file);
+  return { rows: result.rows, warning: null, anomalies: result.anomalies };
 }
 
 function loadAppScopeSourceFromDir(exportDir) {
   const source = {};
   const warnings = [];
+  const anomalies = [];
   for (const [key, file] of Object.entries(APP_SCOPE_TABLE_FILES)) {
     const result = readCsvIfExists(path.join(exportDir, file));
     source[key] = result.rows;
     if (result.warning) warnings.push(result.warning);
+    if (result.anomalies) anomalies.push(...result.anomalies);
   }
-  return { source, warnings };
+  return { source, warnings, anomalies };
 }
 
 function loadAppScopeSourceFromArchive(archivePath) {
@@ -416,6 +420,7 @@ function loadAppScopeSourceFromArchive(archivePath) {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tdental-dry-run-'));
   const source = {};
   const warnings = [];
+  const anomalies = [];
 
   for (const [key, file] of Object.entries(APP_SCOPE_TABLE_FILES)) {
     const member = members.find((entry) => path.basename(entry) === file);
@@ -427,11 +432,13 @@ function loadAppScopeSourceFromArchive(archivePath) {
     const content = execFileSync('bsdtar', ['-xOf', archivePath, member], { maxBuffer: 1024 * 1024 * 1024 });
     const extracted = path.join(tempDir, file);
     fs.writeFileSync(extracted, content);
-    source[key] = readCsv(extracted);
+    const result = readCsvWithAnomalies(extracted);
+    source[key] = result.rows;
+    anomalies.push(...result.anomalies);
   }
 
   fs.rmSync(tempDir, { recursive: true, force: true });
-  return { source, warnings };
+  return { source, warnings, anomalies };
 }
 
 async function readLocalSnapshot(client) {

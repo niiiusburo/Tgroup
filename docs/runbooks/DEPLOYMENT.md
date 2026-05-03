@@ -21,8 +21,9 @@ All changes are fixed and verified locally before VPS deployment. Do not edit VP
 3. Confirm `website/package.json` version and changelog are aligned for website/runtime code changes.
 4. If schema or permission data changed, apply and verify migrations locally first.
 5. Update `scripts/deploy-tbot.sh` before changing Docker/nginx/deploy behavior.
-6. Deploy to VPS.
-7. Verify production version, containers, API health, and the changed user flow.
+6. If operational exports changed, confirm production nginx has `/api` proxy timeouts long enough for large downloads.
+7. Deploy to VPS.
+8. Verify production version, containers, API health, and the changed user flow.
 
 ## Deployment Script
 
@@ -47,4 +48,5 @@ Every deployment recap should include:
 - URL checked.
 - API endpoint or UI page checked.
 - Any migration/permission/database checks performed.
+- For export changes, the `/api/Exports` route or page export checked and whether nginx timeout behavior was verified.
 - Remaining risks.

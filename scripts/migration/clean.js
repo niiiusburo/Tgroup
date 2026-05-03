@@ -3,7 +3,8 @@
  * Fixes known data quality issues before migration
  */
 
-const { sourcePool, CLEANING_RULES } = require('./config');
+const migrationConfig = require('./config');
+const { CLEANING_RULES } = migrationConfig;
 
 /**
  * Fix dummy UUID references by either:
@@ -13,7 +14,8 @@ const { sourcePool, CLEANING_RULES } = require('./config');
  */
 async function fixDummyUuids(strategy = 'nullify') {
   const fixes = [];
-  const client = await sourcePool.connect();
+  migrationConfig.assertSourceWritesAllowed();
+  const client = await migrationConfig.sourcePool.connect();
 
   try {
     await client.query('BEGIN');
@@ -62,7 +64,8 @@ async function fixDummyUuids(strategy = 'nullify') {
  * Strategy: 'preserve' or 'resequence'
  */
 async function fixSo2026Series(strategy = 'preserve') {
-  const client = await sourcePool.connect();
+  migrationConfig.assertSourceWritesAllowed();
+  const client = await migrationConfig.sourcePool.connect();
 
   try {
     await client.query('BEGIN');

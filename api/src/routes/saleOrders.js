@@ -13,7 +13,7 @@ const router = express.Router();
  * Query params: partner_id (filter by customer), offset, limit, search, sortField, sortOrder
  * Returns: customer's treatment/sale orders history
  */
-router.get('/', async (req, res) => {
+router.get('/', requirePermission('services.view'), async (req, res) => {
   try {
     const {
       partner_id,
@@ -162,7 +162,7 @@ router.get('/', async (req, res) => {
  * Returns: sale order lines (service lines) per customer, with payment info
  * Query params: partner_id (required), offset, limit, sortField, sortOrder
  */
-router.get('/lines', async (req, res) => {
+router.get('/lines', requirePermission('services.view'), async (req, res) => {
   try {
     const {
       partner_id,
@@ -298,7 +298,7 @@ router.get('/lines', async (req, res) => {
  * GET /api/SaleOrders/:id
  * Returns: single sale order with details
  */
-router.get('/:id', getSaleOrderById);
+router.get('/:id', requirePermission('services.view'), getSaleOrderById);
 
 /**
  * POST /api/SaleOrders

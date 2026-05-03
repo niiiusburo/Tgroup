@@ -16,56 +16,42 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  ACCEPTED_VERSION_KEY,
+  BROADCAST_CHANNEL_NAME,
+  CRITICAL_AUTO_RELOAD_SECONDS,
+  JUST_UPDATED_KEY,
+  RETURN_PATH_KEY,
+  SNOOZE_DURATION_MS,
+  TARGET_VERSION_KEY,
+} from './useVersionCheck/constants';
+import {
+  checkJustUpdated,
+  clearSnooze,
+  consumeReturnPath,
+  getSnoozeUntil,
+  migrateLegacyDismissal,
+  setSnoozeUntil,
+} from './useVersionCheck/storage';
+import { flushPendingTelemetry, queueVersionTelemetry } from './useVersionCheck/telemetry';
+import type {
+  BroadcastMessage,
+  UpdateSeverity,
+  UseVersionCheckOptions,
+  UseVersionCheckReturn,
+  VersionInfo,
+} from './useVersionCheck/types';
+import {
+  clearAllCaches,
+  fetchVersion,
+  getBuildTimeVersion,
+  getUpdateSeverity,
+  hasUpdate,
+} from './useVersionCheck/versionUtils';
 
-export type UpdateSeverity = 'regular' | 'critical';
-
-// Version info structure matching version.json
-export interface VersionInfo {
-  version: string;
-  buildTime: string;
-  gitCommit: string;
-  gitBranch: string;
-  environment?: string;
-  severity?: UpdateSeverity;
-  forceUpdate?: boolean;
-  updateDeadline?: string;
-}
-
-interface UseVersionCheckOptions {
-  /** Polling interval in milliseconds (default: 5 minutes) */
-  pollInterval?: number;
-  /** Enable/disable polling (default: true) */
-  enabled?: boolean;
-  /** Callback when update is available */
-  onUpdateAvailable?: (current: VersionInfo, latest: VersionInfo) => void;
-}
-
-interface UseVersionCheckReturn {
-  /** Current loaded version */
-  currentVersion: VersionInfo | null;
-  /** Latest version from server (if different) */
-  latestVersion: VersionInfo | null;
-  /** True when a newer version is available */
-  isUpdateAvailable: boolean;
-  /** Severity of the available update */
-  updateSeverity: UpdateSeverity | null;
-  /** True if current update is snoozed */
-  isSnoozed: boolean;
-  /** Seconds remaining for auto-reload countdown (critical updates) */
-  countdownRemaining: number | null;
-  /** True while checking for updates */
-  isChecking: boolean;
-  /** Last error if check failed */
-  error: Error | null;
-  /** Manually trigger a version check */
-  checkForUpdates: () => Promise<void>;
-  /** Apply the update by reloading the page */
-  applyUpdate: () => Promise<void>;
-  /** Dismiss (snooze) the update notification for 24 hours */
-  snoozeUpdate: () => void;
-  /** Legacy: dismiss/snooze the update notification (use snoozeUpdate) */
-  dismissUpdate: () => void;
-}
+export { consumeReturnPath } from './useVersionCheck/storage';
+export { getBuildTimeVersion, hasUpdate } from './useVersionCheck/versionUtils';
+export type { UpdateSeverity, VersionInfo } from './useVersionCheck/types';
 
 declare global {
   interface Window {
@@ -73,241 +59,6 @@ declare global {
     __APP_BUILD_TIME__?: string;
     __APP_GIT_COMMIT__?: string;
     __APP_GIT_BRANCH__?: string;
-  }
-}
-
-// localStorage / sessionStorage keys
-const DISMISSED_VERSION_KEY = 'tgclinic:dismissedVersion'; // legacy migration
-const SNOOZE_UNTIL_KEY = 'tgclinic:updateSnoozeUntil';
-const JUST_UPDATED_KEY = 'tgclinic:justUpdated';
-const TARGET_VERSION_KEY = 'tgclinic:targetVersion';
-const RETURN_PATH_KEY = 'tgclinic:updateReturnPath';
-const ACCEPTED_VERSION_KEY = 'tgclinic:acceptedVersion'; // legacy - removed from active use
-
-const SNOOZE_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
-const CRITICAL_AUTO_RELOAD_SECONDS = 10;
-const JUST_UPDATED_GRACE_MS = 30000;
-
-/** Broadcast channel name for cross-tab update sync */
-const BROADCAST_CHANNEL_NAME = 'tgclinic:versionCheck';
-
-type BroadcastMessage =
-  | { type: 'updateAvailable'; version: VersionInfo }
-  | { type: 'applyUpdate' }
-  | { type: 'snoozed'; until: number };
-
-const TELEMETRY_ENDPOINT = '/api/telemetry/version';
-
-export async function flushPendingTelemetry(): Promise<void> {
-  try {
-    const raw = localStorage.getItem('tgclinic:pendingTelemetry');
-    if (!raw) return;
-    const events: unknown[] = JSON.parse(raw);
-    if (!Array.isArray(events) || events.length === 0) return;
-
-    const results = await Promise.allSettled(
-      events.map((payload) =>
-        fetch(TELEMETRY_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-          keepalive: true,
-        })
-      )
-    );
-
-    const failed: unknown[] = [];
-    results.forEach((r, i) => {
-      if (r.status === 'rejected' || !r.value.ok) {
-        failed.push(events[i]);
-      }
-    });
-
-    if (failed.length === 0) {
-      localStorage.removeItem('tgclinic:pendingTelemetry');
-    } else {
-      localStorage.setItem('tgclinic:pendingTelemetry', JSON.stringify(failed));
-    }
-  } catch {
-    // ignore
-  }
-}
-
-/**
- * Check if we just completed an update (based on URL param or localStorage)
- */
-function checkJustUpdated(): boolean {
-  const url = new URL(window.location.href);
-  if (url.searchParams.has('_v')) {
-    url.searchParams.delete('_v');
-    window.history.replaceState({}, '', url.toString());
-    localStorage.setItem(JUST_UPDATED_KEY, Date.now().toString());
-    return true;
-  }
-
-  const justUpdated = localStorage.getItem(JUST_UPDATED_KEY);
-  if (justUpdated) {
-    const timeSinceUpdate = Date.now() - parseInt(justUpdated, 10);
-    if (timeSinceUpdate < JUST_UPDATED_GRACE_MS) {
-      return true;
-    }
-    localStorage.removeItem(JUST_UPDATED_KEY);
-  }
-
-  return false;
-}
-
-/** Get snooze expiry timestamp from localStorage */
-function getSnoozeUntil(): number {
-  try {
-    const raw = localStorage.getItem(SNOOZE_UNTIL_KEY);
-    return raw ? parseInt(raw, 10) : 0;
-  } catch {
-    return 0;
-  }
-}
-
-/** Set snooze expiry timestamp in localStorage */
-function setSnoozeUntil(until: number): void {
-  try {
-    localStorage.setItem(SNOOZE_UNTIL_KEY, until.toString());
-  } catch {
-    // ignore
-  }
-}
-
-/** Clear snooze */
-function clearSnooze(): void {
-  try {
-    localStorage.removeItem(SNOOZE_UNTIL_KEY);
-  } catch {
-    // ignore
-  }
-}
-
-/** Migrate legacy permanent dismissal to new snooze format */
-function migrateLegacyDismissal(): void {
-  try {
-    if (localStorage.getItem(DISMISSED_VERSION_KEY)) {
-      localStorage.removeItem(DISMISSED_VERSION_KEY);
-    }
-  } catch {
-    // ignore
-  }
-}
-
-export function getBuildTimeVersion(): VersionInfo {
-  const version = (globalThis as Record<string, unknown>).__APP_VERSION__ as string | undefined ?? '0.0.0-dev';
-  const buildTime = (globalThis as Record<string, unknown>).__APP_BUILD_TIME__ as string | undefined ?? new Date().toISOString();
-  const gitCommit = (globalThis as Record<string, unknown>).__APP_GIT_COMMIT__ as string | undefined ?? 'unknown';
-  const gitBranch = (globalThis as Record<string, unknown>).__APP_GIT_BRANCH__ as string | undefined ?? 'unknown';
-
-  return { version, buildTime, gitCommit, gitBranch };
-}
-
-/**
- * Fetches version.json with cache-busting and timeout
- */
-async function fetchVersion(): Promise<VersionInfo> {
-  const cacheBuster = `?t=${Date.now()}`;
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-  try {
-    const response = await fetch(`/version.json${cacheBuster}`, {
-      signal: controller.signal,
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch version: ${response.status} ${response.statusText}`);
-    }
-
-    return response.json();
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-
-/** Parse semver string to comparable parts */
-function parseVersion(version: string): { major: number; minor: number; patch: number; prerelease: string } {
-  const match = version.match(/^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$/);
-  if (!match) return { major: 0, minor: 0, patch: 0, prerelease: '' };
-  return {
-    major: parseInt(match[1], 10),
-    minor: parseInt(match[2], 10),
-    patch: parseInt(match[3], 10),
-    prerelease: match[4] || '',
-  };
-}
-
-/**
- * Check if `latest` semver is strictly newer than `current`.
- */
-function isSemverNewer(current: VersionInfo, latest: VersionInfo): boolean {
-  const cv = parseVersion(current.version);
-  const lv = parseVersion(latest.version);
-
-  if (lv.major > cv.major) return true;
-  if (lv.major < cv.major) return false;
-  if (lv.minor > cv.minor) return true;
-  if (lv.minor < cv.minor) return false;
-  if (lv.patch > cv.patch) return true;
-  if (lv.patch < cv.patch) return false;
-  return false;
-}
-
-/**
- * Determine if there's an update.
- * Primary: semver newer.
- * Secondary: same semver but different commit hash.
- */
-export function hasUpdate(current: VersionInfo, latest: VersionInfo): boolean {
-  if (isSemverNewer(current, latest)) return true;
-  if (current.gitCommit !== latest.gitCommit) return true;
-  return false;
-}
-
-/** Determine update severity from server version info */
-function getUpdateSeverity(serverVersion: VersionInfo): UpdateSeverity {
-  if (serverVersion.forceUpdate) return 'critical';
-  if (serverVersion.severity === 'critical') return 'critical';
-  return 'regular';
-}
-
-/** Clear all browser caches comprehensively */
-async function clearAllCaches(): Promise<void> {
-  if ('serviceWorker' in navigator) {
-    try {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(registrations.map((reg) => reg.unregister()));
-    } catch {
-      // ignore
-    }
-  }
-
-  if ('caches' in window) {
-    try {
-      const names = await caches.keys();
-      await Promise.all(names.map((name) => caches.delete(name)));
-    } catch {
-      // ignore
-    }
-  }
-}
-
-/** Restore path after reload */
-export function consumeReturnPath(): string | null {
-  try {
-    const path = sessionStorage.getItem(RETURN_PATH_KEY);
-    sessionStorage.removeItem(RETURN_PATH_KEY);
-    return path;
-  } catch {
-    return null;
   }
 }
 
@@ -401,9 +152,8 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
     // Telemetry: did the last update succeed?
     if (justUpdated && targetVersion) {
       try {
-        const pending = JSON.parse(localStorage.getItem('tgclinic:pendingTelemetry') || '[]');
         if (targetVersion === buildVersion.version) {
-          pending.push({
+          queueVersionTelemetry({
             event: 'version_update_succeeded',
             from: targetVersion,
             to: buildVersion.version,
@@ -412,7 +162,7 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
             userAgent: navigator.userAgent,
           });
         } else {
-          pending.push({
+          queueVersionTelemetry({
             event: 'version_update_failed',
             from: targetVersion,
             to: buildVersion.version,
@@ -421,7 +171,6 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
             userAgent: navigator.userAgent,
           });
         }
-        localStorage.setItem('tgclinic:pendingTelemetry', JSON.stringify(pending));
       } catch {
         // ignore
       }
@@ -577,13 +326,7 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): UseVersio
       timestamp: Date.now(),
       userAgent: navigator.userAgent,
     };
-    try {
-      const pending = JSON.parse(localStorage.getItem('tgclinic:pendingTelemetry') || '[]');
-      pending.push(event);
-      localStorage.setItem('tgclinic:pendingTelemetry', JSON.stringify(pending));
-    } catch {
-      // ignore
-    }
+    queueVersionTelemetry(event);
 
     // Wipe storage only on critical updates (Q2 decision)
     if (updateSeverity === 'critical') {

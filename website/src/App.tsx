@@ -1,12 +1,13 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/Layout';
 import { LocationProvider } from '@/contexts/LocationContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { TimezoneProvider } from '@/contexts/TimezoneContext';
 import { Login } from '@/pages';
-import { ROUTES } from '@/constants';
+import { ROUTES, ROUTE_PERMISSIONS } from '@/constants';
 import { AddressAutocompleteTest } from '@/components/shared/AddressAutocompleteTest';
 
 // Lazy-loaded pages (code-split for smaller initial bundle)
@@ -36,42 +37,12 @@ const Services = lazy(() => import('@/pages/Services').then(m => ({ default: m.S
 const ServiceCatalog = lazy(() => import('@/pages/ServiceCatalog').then(m => ({ default: m.ServiceCatalog })));
 
 /**
- * Route → required permission mapping
- * @crossref:used-in[ProtectedRoute]
- */
-const ROUTE_PERMISSIONS: Record<string, string> = {
-  '/': 'overview.view',
-  '/calendar': 'calendar.view',
-  '/customers': 'customers.view',
-  '/employees': 'employees.view',
-  '/locations': 'locations.view',
-  '/services': 'customers.edit',
-  '/service-catalog': 'customers.edit',
-  '/website': 'website.view',
-  '/reports': 'reports.view',
-  '/reports/dashboard': 'reports.view',
-  '/reports/revenue': 'reports.view',
-  '/reports/appointments': 'reports.view',
-  '/reports/doctors': 'reports.view',
-  '/reports/customers': 'reports.view',
-  '/reports/locations': 'reports.view',
-  '/reports/services': 'reports.view',
-  '/reports/employees': 'reports.view',
-  '/commission': 'commission.view',
-  '/settings': 'settings.view',
-  '/notifications': 'notifications.view',
-  '/relationships': 'relationships.view',
-  '/permissions': 'permissions.view',
-  '/payment': 'payment.view',
-  '/feedback': 'permissions.view',
-};
-
-/**
  * Access Denied page — shown when authenticated but lacking permission
  */
 function AccessDenied() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation('auth');
 
   function handleLogout() {
     logout();
@@ -83,15 +54,15 @@ function AccessDenied() {
       <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center">
         <span className="text-red-500 text-2xl font-bold">!</span>
       </div>
-      <h2 className="text-xl font-semibold text-gray-900">Access Denied</h2>
+      <h2 className="text-xl font-semibold text-gray-900">{t('accessDenied.title')}</h2>
       <p className="text-sm text-gray-500 text-center max-w-xs">
-        You do not have permission to view this page. Contact your administrator.
+        {t('accessDenied.message')}
       </p>
       <button
         onClick={handleLogout}
         className="mt-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
       >
-        Log Out
+        {t('signOut')}
       </button>
     </div>
   );
@@ -101,11 +72,12 @@ function AccessDenied() {
  * Loading spinner shown while auth state is resolving
  */
 function AuthLoading() {
+  const { t } = useTranslation('common');
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <div className="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-        <span className="text-sm text-gray-500">Loading…</span>
+        <span className="text-sm text-gray-500">{t('loading')}</span>
       </div>
     </div>
   );
