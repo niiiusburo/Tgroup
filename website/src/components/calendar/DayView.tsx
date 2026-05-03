@@ -117,13 +117,19 @@ export function DayView({
                   </div>
                 </>
               ) : (
-                <EmptyTimeSlot
-                  time={slot}
-                  onClick={(time: string) => {
-                    const dateStr = formatDate(currentDate, 'yyyy-MM-dd');
-                    onCreateAppointment?.(dateStr, time);
-                  }}
-                />
+                onCreateAppointment ? (
+                  <EmptyTimeSlot
+                    time={slot}
+                    onClick={(time: string) => {
+                      const dateStr = formatDate(currentDate, 'yyyy-MM-dd');
+                      onCreateAppointment(dateStr, time);
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-6 flex items-center px-3">
+                    <span className="text-xs text-gray-300 font-medium">{slot}</span>
+                  </div>
+                )
               )}
             </div>
           );

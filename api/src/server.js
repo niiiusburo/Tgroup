@@ -39,7 +39,7 @@ const dashboardReportsRoutes = require('./routes/dashboardReports');
 const permissionsRoutes = require('./routes/permissions');
 const authRoutes = require('./routes/auth');
 const paymentsRoutes = require('./routes/payments');
-// const servicesRoutes = require('./routes/services'); // DEAD: queries non-existent table
+// const servicesRoutes removed: dead route queries non-existent table
 const customerBalanceRoutes = require('./routes/customerBalance');
 const monthlyPlansRoutes = require('./routes/monthlyPlans');
 const customerSourcesRoutes = require('./routes/customerSources');

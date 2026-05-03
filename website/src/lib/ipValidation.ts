@@ -16,6 +16,8 @@ const PRIVATE_RANGES = [
   { start: '127.0.0.0', end: '127.255.255.255' }, // Loopback
 ];
 
+const DISALLOWED_IP_INPUT_CHARS = new Set(`'";-/*(){}[]<>\\`);
+
 /**
  * Validate IPv4 address format
  */
@@ -41,7 +43,7 @@ export function sanitizeIpInput(input: string): string {
 
   // Remove SQL injection characters but keep alphanumeric and spaces for descriptions
   // This allows "DROP TABLE" to remain but removes quotes, semicolons, etc.
-  return input.replace(/['";\-\/\*\(\)\{\}\[\]<>\\]/g, '');
+  return [...input].filter((char) => !DISALLOWED_IP_INPUT_CHARS.has(char)).join('');
 }
 
 /**

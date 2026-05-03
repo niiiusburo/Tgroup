@@ -1,31 +1,96 @@
 /**
  * Migration Configuration
- * Centralizes database connections, table ordering, and migration settings
+ * Centralizes database connections, table ordering, and migration settings.
  */
 
-require('dotenv').config();
+const path = require('path');
 
-const { Pool } = require('pg');
+function requireProjectDependency(name) {
+  try {
+    return require(name);
+  } catch (error) {
+    if (error.code !== 'MODULE_NOT_FOUND') throw error;
+    return require(path.resolve(__dirname, '../../api/node_modules', name));
+  }
+}
+
+function loadDotenv() {
+  try {
+    const dotenv = requireProjectDependency('dotenv');
+    dotenv.config({ path: path.resolve(__dirname, '../../.env'), quiet: true });
+    dotenv.config({ path: path.resolve(__dirname, '../../api/.env'), quiet: true });
+  } catch (error) {
+    if (error.code !== 'MODULE_NOT_FOUND') throw error;
+  }
+}
+
+loadDotenv();
 
 // ── Database Connections ──────────────────────────────────────────
 
-const sourcePool = new Pool({
-  host: process.env.SOURCE_DB_HOST || 'vps.tamtmv.com',
-  port: parseInt(process.env.SOURCE_DB_PORT || '5432'),
-  database: process.env.SOURCE_DB_NAME || 'tdental_demo',
-  user: process.env.SOURCE_DB_USER || 'postgres',
-  password: process.env.SOURCE_DB_PASSWORD,
-  ssl: process.env.SOURCE_DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
-});
+const SOURCE_WRITE_FLAG = 'ALLOW_SOURCE_DB_WRITES';
 
-const targetPool = new Pool({
-  host: process.env.TARGET_DB_HOST || '127.0.0.1',
-  port: parseInt(process.env.TARGET_DB_PORT || '5433'),
-  database: process.env.TARGET_DB_NAME || 'tdental_demo',
-  user: process.env.TARGET_DB_USER || 'postgres',
-  password: process.env.TARGET_DB_PASSWORD || 'postgres',
-  // Local dev uses search_path=dbo via connection string or SET command
-});
+function cleanEnv(value) {
+  return value === undefined || value === null ? '' : String(value).trim();
+}
+
+function parsePort(value, fallback) {
+  const raw = cleanEnv(value);
+  const port = Number.parseInt(raw || fallback, 10);
+  if (!Number.isInteger(port) || port <= 0) throw new Error(`Invalid database port: ${raw || fallback}`);
+  return port;
+}
+
+function resolveSourceDbConfig(env = process.env) {
+  const host = cleanEnv(env.SOURCE_DB_HOST);
+  if (!host) {
+    throw new Error('SOURCE_DB_HOST is required and must be explicit for source database operations. Refusing to use a remote/VPS default.');
+  }
+
+  return {
+    host,
+    port: parsePort(env.SOURCE_DB_PORT, '5432'),
+    database: cleanEnv(env.SOURCE_DB_NAME) || 'tdental_demo',
+    user: cleanEnv(env.SOURCE_DB_USER) || 'postgres',
+    password: env.SOURCE_DB_PASSWORD,
+    ssl: env.SOURCE_DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+  };
+}
+
+function resolveTargetDbConfig(env = process.env) {
+  return {
+    host: cleanEnv(env.TARGET_DB_HOST) || '127.0.0.1',
+    port: parsePort(env.TARGET_DB_PORT, '5433'),
+    database: cleanEnv(env.TARGET_DB_NAME) || 'tdental_demo',
+    user: cleanEnv(env.TARGET_DB_USER) || 'postgres',
+    password: cleanEnv(env.TARGET_DB_PASSWORD) || 'postgres',
+  };
+}
+
+function assertSourceWritesAllowed(env = process.env) {
+  resolveSourceDbConfig(env);
+  if (env[SOURCE_WRITE_FLAG] !== '1') {
+    throw new Error(`Source DB writes are disabled by default. Set ${SOURCE_WRITE_FLAG}=1 only after verifying SOURCE_DB_HOST points at the intended source.`);
+  }
+}
+
+function createPool(config) {
+  const { Pool } = requireProjectDependency('pg');
+  return new Pool(config);
+}
+
+let sourcePoolInstance;
+let targetPoolInstance;
+
+function getSourcePool() {
+  if (!sourcePoolInstance) sourcePoolInstance = createPool(resolveSourceDbConfig());
+  return sourcePoolInstance;
+}
+
+function getTargetPool() {
+  if (!targetPoolInstance) targetPoolInstance = createPool(resolveTargetDbConfig());
+  return targetPoolInstance;
+}
 
 // ── Table Migration Order (respects FK dependencies) ──────────────
 
@@ -111,8 +176,15 @@ const CLEANING_RULES = {
 // ── Export ────────────────────────────────────────────────────────
 
 module.exports = {
-  sourcePool,
-  targetPool,
+  get sourcePool() {
+    return getSourcePool();
+  },
+  get targetPool() {
+    return getTargetPool();
+  },
+  assertSourceWritesAllowed,
+  resolveSourceDbConfig,
+  resolveTargetDbConfig,
   TABLE_ORDER,
   PROTECTED_TABLES,
   SEQUENCES,

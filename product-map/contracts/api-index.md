@@ -95,10 +95,10 @@
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/` | Auth | `?customerId, serviceId, limit, offset, type` (`payments` | `deposits` | `all`) | `{ items[], totalItems }` (+ legacy fallback) |
-| GET | `/deposits` | Auth | `?customerId, dateFrom, dateTo, receiptNumber, type, limit, offset` | `{ items[], totalItems }` |
-| GET | `/deposit-usage` | Auth | `?customerId, dateFrom, dateTo, limit, offset` | `{ items[], totalItems }` |
-| GET | `/:id` | Auth | — | Payment with allocations |
+| GET | `/` | Perm:`payment.view` | `?customerId, serviceId, limit, offset, type` (`payments` | `deposits` | `all`) | `{ items[], totalItems }` (+ legacy fallback) |
+| GET | `/deposits` | Perm:`payment.view` | `?customerId, dateFrom, dateTo, receiptNumber, type, limit, offset` | `{ items[], totalItems }` |
+| GET | `/deposit-usage` | Perm:`payment.view` | `?customerId, dateFrom, dateTo, limit, offset` | `{ items[], totalItems }` |
+| GET | `/:id` | Perm:`payment.view` | — | Payment with allocations |
 | POST | `/` | Perm:`payment.edit` | `{ customer_id, service_id, amount, method, notes, payment_date, reference_code, status, deposit_used, cash_amount, bank_amount, deposit_type, receipt_number, allocations[] }` | Created payment |
 | POST | `/refund` | Perm:`payment.edit` | `{ customer_id, amount, method, notes, payment_date }` | Created refund |
 | PATCH | `/:id` | Perm:`payment.edit` | `{ amount, method, notes, payment_date, reference_code, status, deposit_type, receipt_number }` | Updated payment |
@@ -176,6 +176,16 @@
 | POST | `/services/breakdown` | Perm:`reports.view` | Date range | Services breakdown |
 | POST | `/locations/comparison` | Perm:`reports.view` | Date range | Location comparison |
 
+## Operational Exports (`/api/Exports`)
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/types` | Auth | — | Export types visible to the current user's effective permissions |
+| POST | `/:type/preview` | Auth + export permission | `{ filters }`; `type` is `customers`, `appointments`, `services`, `payments`, or `service-catalog` | `{ type, label, rowCount, filename, filters, summary, exceedsMax }` + best-effort `exports_audit` row |
+| POST | `/:type/download` | Auth + export permission | `{ filters }`; same type keys as preview | XLSX workbook stream + best-effort `exports_audit` row after response |
+
+Export permissions are defined by `api/src/services/exports/exportRegistry.js`: `customers.export`, `appointments.export`, `services.export`, `payments.export`, and `products.export`.
+
 ## Dashboard Reports (`/api/DashboardReports`)
 
 | Method | Path | Auth | Body / Query | Response |
@@ -235,8 +245,11 @@
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
+| GET | `/images/:imageName` | Perm:`external_checkups.view` | — | Proxied image bytes from Hosoonline appointment media |
 | GET | `/:customerCode` | Perm:`external_checkups.view` | — | External checkups list |
 | POST | `/:customerCode/health-checkups` | Perm:`external_checkups.create` | FormData (`files[]`) | Created checkups |
+
+Hosoonline uses a mixed current contract: if `HOSOONLINE_USERNAME` and `HOSOONLINE_PASSWORD` are configured, TGClinic logs in to Hosoonline, sends `Authorization: Bearer <token>` plus the returned cookie, searches appointments, and proxies `/api/appointments/image/:imageName`. If login credentials are absent, the route falls back to the older `HOSOONLINE_API_KEY` / `X-API-Key` patient health-checkup endpoints where still supported.
 
 ## Commissions (`/api/Commissions`)
 
@@ -313,6 +326,17 @@
 | GET | `/GetParam` | Auth | `?key` | Param value |
 | POST | `/GetParam` | Auth | `{ key }` | Param value |
 
+## Telemetry (`/api/telemetry`)
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| POST | `/errors` | Public ingestion, rate-limited | Error payload from frontend ErrorBoundary/ErrorReporter | `{ ok, id?, fingerprint?, is_duplicate? }`; never blocks client on DB write failure |
+| GET | `/errors` | Auth | `?status, limit, offset, type` | `{ items, total }` |
+| PUT | `/errors/:id` | Auth | `{ status, fix_summary?, fix_commit? }` | `{ ok }` |
+| POST | `/errors/:id/fix-attempts` | Auth | `{ attempt_number, action, status, details, files_changed, test_output, agent_session }` | `{ ok, attempt_id }` |
+| GET | `/stats` | Auth | — | `{ by_type, by_status, total, last_24h }` |
+| POST | `/version` | Auth | `{ event, from, to, trigger, timestamp, userAgent }` | `{ ok }` |
+
 ## Places (`/api/Places`)
 
 | Method | Path | Auth | Body / Query | Response |
@@ -330,9 +354,9 @@
 
 | Route | Status | Notes |
 |-------|--------|-------|
-| `GET /api/Services` | **DEAD** | Queries non-existent `public.services` table |
-| `POST /api/Services` | **DEAD** | Same as above |
-| `POST /api/Account/Login` | **LEGACY** | Likely unused; frontend uses `/api/Auth/login` |
+| `GET/POST /api/Services` | **UNMOUNTED DEAD CODE** | `api/src/routes/services.js` queries non-existent `public.services`; server.js no longer mounts it |
+| `POST /api/Account/Login` | **UNMOUNTED LEGACY** | Frontend uses `/api/Auth/login`; server.js comments this route out |
+| `/Web/Session/*` | **UNMOUNTED LEGACY** | Kept in source pending external-client confirmation |
 
 ---
 

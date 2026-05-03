@@ -114,6 +114,18 @@
 
 > Import note: `dbo.accountpayments` can be a non-writable legacy placeholder view in local demo schemas. New TDental import flows should populate `dbo.payments` and `dbo.payment_allocations`, and use `accountpayments` only as a read fallback when present.
 
+### dbo.payment_allocations
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (uuid) |
+| **Foreign Keys** | `payment_id` → payments; `invoice_id` → saleorders when allocated to a treatment order; `dotkham_id` is supported without FK because demo `dotkhams` can be a view |
+| **W** | `api/src/routes/payments.js`, `api/scripts/tdental-import/database.js`, archived migration/import scripts |
+| **R** | `payments.js`, `saleOrders.js`, `customerBalance.js`, `api/src/lib/saleOrderTotals.js`, TDental validation scripts |
+| **E** | Exposed through `/api/Payments`, `/api/SaleOrders`, and `/api/CustomerBalance` payload calculations; no standalone CRUD route |
+| **UI** | Payment allocations, customer balance, service residual display, deposit/payment classification |
+| **Risk** | **Critical** — deleting, double-counting, or greedily reconstructing allocations changes residuals and paid totals. TDental imports should be relation-driven where source relations exist. |
+
 ### dbo.monthlyplans + dbo.monthlyplan_items + dbo.planinstallments
 
 | Attribute | Value |
@@ -223,8 +235,19 @@
 | **W** | `api/src/routes/websitePages.js` |
 | **R** | `websitePages.js` |
 | **E** | `GET/POST/PUT/DELETE /api/WebsitePages` |
-| **UI** | Website page (/website routes to ServiceCatalog in App.tsx — naming mismatch), PageList, PageEditor, SEOManager |
+| **UI** | Website CMS at `/website`, PageList, PageEditor, SEOManager. Service catalog is now routed separately at `/service-catalog`. |
 | **Risk** | **Low** — isolated table. |
+
+### dbo.exports_audit
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (uuid) |
+| **W** | `api/src/routes/exports.js` logs preview and download attempts |
+| **R** | Operational audit queries only; no user-facing route yet |
+| **E** | Indirect via `POST /api/Exports/:type/preview` and `POST /api/Exports/:type/download` |
+| **UI** | No direct UI surface; supports auditability for operational Excel exports |
+| **Risk** | **Medium** — audit writes are non-blocking/catch-and-log in the route, so export success does not guarantee an audit row exists unless explicitly verified. |
 
 ### dbo.feedback_threads + feedback_messages + feedback_attachments
 
@@ -256,11 +279,22 @@
 | Attribute | Value |
 |-----------|-------|
 | **Primary Key** | `id` (serial) |
-| **W** | `api/src/routes/version.js` (frontend version tracking) |
-| **R** | `version.js` |
-| **E** | `POST /api/version/event` |
+| **W** | `api/src/routes/telemetry.js` (frontend version tracking) |
+| **R** | `telemetry.js` |
+| **E** | `POST /api/telemetry/version` |
 | **UI** | VersionDisplay (forces reload on stale version) |
 | **Risk** | **Low** — isolated telemetry table. |
+
+### dbo.error_events + dbo.error_fix_attempts
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (uuid) on both tables |
+| **W** | `api/src/server.js` public telemetry error ingestion, `api/src/routes/telemetry.js`, `api/src/middleware/errorHandler.js` |
+| **R** | `api/src/routes/telemetry.js`, `scripts/auto-fixer.js` |
+| **E** | `POST /api/telemetry/errors` public ingestion; authenticated `GET/PUT /api/telemetry/errors`, `POST /api/telemetry/errors/:id/fix-attempts`, `GET /api/telemetry/stats` |
+| **UI** | ErrorBoundary/ErrorReporter and auto-created Feedback threads |
+| **Risk** | **Medium** — ingestion is intentionally public and rate-limited; management endpoints must remain behind auth. |
 
 ### dbo.accountinvoices
 
@@ -294,6 +328,9 @@
 | `dbo.appointments` | Calendar components, AppointmentForm, constants (colors/status), Reports, E2E tests |
 | `dbo.products` | ServiceCatalog, ProductCategories, AppointmentForm, SaleOrders, Reports, delete guards |
 | `dbo.payments` | PaymentForm, DepositWallet, Reports, VietQR, CustomerProfile payment tab |
+| `dbo.payment_allocations` | Payments, SaleOrders residuals, CustomerBalance, TDental import scripts, service history paid/residual display |
 | `dbo.saleorders` | Service records UI, Payments (allocations), Reports, CustomerProfile |
+| `dbo.exports_audit` | Export route audit behavior, operational compliance checks |
+| `dbo.error_events` / `dbo.error_fix_attempts` | Telemetry ingestion, Feedback auto-thread creation, AutoDebugger scripts |
 | `dbo.permission_groups` / `group_permissions` | Auth middleware, PermissionBoard, Settings RoleConfig |
 | `dbo.company_bank_settings` | BankSettingsForm, VietQrModal, `lib/vietqr.ts` |

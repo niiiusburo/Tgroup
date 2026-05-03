@@ -23,6 +23,7 @@ reads:
   - api/src/db.js
 writes:
   - dbo.payments
+  - dbo.payment_allocations
   - dbo.monthlyplans
   - dbo.monthlyplan_items
   - dbo.planinstallments
@@ -31,6 +32,7 @@ writes:
   - dbo.receipt_sequences (receipt number generation)
 tables:
   - dbo.payments
+  - dbo.payment_allocations
   - dbo.monthlyplans
   - dbo.monthlyplan_items
   - dbo.planinstallments
@@ -88,3 +90,6 @@ impact_tests:
   - website/src/components/payment/__tests__/PaymentForm.submit.test.tsx
   - website/src/lib/allocatePaymentSources.test.ts
 risk_level: high
+notes:
+  - "`payments` is the canonical money row; `payment_allocations` is the canonical link from payments to saleorders or dotkhams."
+  - TDental import and reconciliation work should use relation-driven allocations when source payment relation tables exist, not greedy remaining-balance allocation as durable truth.

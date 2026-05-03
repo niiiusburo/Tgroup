@@ -91,7 +91,13 @@ export function Calendar() {
     clearFilters();
   }, [clearFilters]);
 
+  const { hasPermission } = useAuth();
+  const canCreateAppointments = hasPermission('appointments.add');
+  const canEditAppointments = hasPermission('appointments.edit');
+  const canExportAppointments = hasPermission('appointments.export');
+
   const handleReschedule = useCallback(async (result: {appointmentId: string;newDate: string;newTime: string;}) => {
+    if (!canEditAppointments) return;
     try {
       const { updateAppointment } = await import('@/lib/api');
       await updateAppointment(result.appointmentId, {
@@ -101,15 +107,16 @@ export function Calendar() {
     } catch (error) {
       console.error('Failed to reschedule appointment:', error);
     }
-  }, [refresh]);
+  }, [canEditAppointments, refresh]);
 
   const { handleDragStart, handleDragOver, handleDrop, handleDragEnd } = useDragReschedule(handleReschedule);
 
   // Click on appointment card opens edit modal directly using unified form
   const handleAppointmentClick = useCallback((appointment: CalendarAppointment) => {
+    if (!canEditAppointments) return;
     setEditingAppointment(calendarAppointmentToFormData(appointment));
     setIsEditModalOpen(true);
-  }, []);
+  }, [canEditAppointments]);
 
   // Handle pencil icon edit - same action as card click in Calendar
   const handleEditClick = useCallback((appointment: CalendarAppointment) => {
@@ -131,9 +138,6 @@ export function Calendar() {
     setCurrentDate(date);
     setViewMode('day');
   }, [setCurrentDate, setViewMode]);
-
-  const { hasPermission } = useAuth();
-  const canExportAppointments = hasPermission('appointments.export');
 
   const appointmentExportFilters = useMemo(() => {
     let dateFrom = exportDateFrom;
@@ -201,13 +205,14 @@ export function Calendar() {
   }, [pendingExportAction, dateRangeModalOpen, exportDateFrom, exportDateTo, handleAptDirectExport, openAptPreview]);
 
   const handleCreateAppointment = useCallback((date: string, startTime: string) => {
+    if (!canCreateAppointments) return;
     setCreateInitialData({
       date,
       startTime,
       estimatedDuration: 30
     });
     setCreateModalOpen(true);
-  }, []);
+  }, [canCreateAppointments]);
 
   const handleCreateSuccess = useCallback(() => {
     setCreateModalOpen(false);
@@ -267,6 +272,7 @@ export function Calendar() {
         suggestions={filteredSuggestions}
         isLoading={isLoading}
         canExportAppointments={canExportAppointments}
+        canQuickAddAppointments={canCreateAppointments}
         onExportDirect={handleOpenDateRangeForExport}
         onExportPreview={handleOpenDateRangeForPreview}
         exportDownloading={aptExportDownloading}
@@ -282,29 +288,31 @@ export function Calendar() {
         weekDates={weekDates}
         monthDates={monthDates}
         getAppointmentsForDate={getAppointmentsForDate}
-        onAppointmentClick={handleAppointmentClick}
-        onAppointmentEdit={handleEditClick}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        onDragEnd={handleDragEnd}
+        onAppointmentClick={canEditAppointments ? handleAppointmentClick : undefined}
+        onAppointmentEdit={canEditAppointments ? handleEditClick : undefined}
+        onDragStart={canEditAppointments ? handleDragStart : undefined}
+        onDragOver={canEditAppointments ? handleDragOver : undefined}
+        onDrop={canEditAppointments ? handleDrop : undefined}
+        onDragEnd={canEditAppointments ? handleDragEnd : undefined}
         onDateChange={setCurrentDate}
         onDayClick={handleDayClick}
-        onMarkArrived={markArrived}
-        onUpdateStatus={updateAppointmentStatus}
-        onCreateAppointment={handleCreateAppointment}
+        onMarkArrived={canEditAppointments ? markArrived : undefined}
+        onUpdateStatus={canEditAppointments ? updateAppointmentStatus : undefined}
+        onCreateAppointment={canCreateAppointments ? handleCreateAppointment : undefined}
       />
 
       {/* Unified Appointment Form — edit mode */}
-      <AppointmentFormShell
-        key={editingAppointment?.id ?? 'edit-closed'}
-        mode="edit"
-        isOpen={isEditModalOpen}
-        onClose={handleEditModalClose}
-        onSuccess={handleEditModalSaved}
-        initialData={editingAppointment ?? undefined}
-        customerReadOnly
-      />
+      {canEditAppointments && (
+        <AppointmentFormShell
+          key={editingAppointment?.id ?? 'edit-closed'}
+          mode="edit"
+          isOpen={isEditModalOpen}
+          onClose={handleEditModalClose}
+          onSuccess={handleEditModalSaved}
+          initialData={editingAppointment ?? undefined}
+          customerReadOnly
+        />
+      )}
 
       <SmartFilterDrawer
         isOpen={isFilterOpen}
@@ -352,14 +360,16 @@ export function Calendar() {
       )}
 
       {/* Unified Appointment Form — create mode */}
-      <AppointmentFormShell
-        key={createInitialData ? `create-${createInitialData.date}-${createInitialData.startTime}` : 'create-closed'}
-        mode="create"
-        isOpen={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-        onSuccess={handleCreateSuccess}
-        initialData={createInitialData}
-      />
+      {canCreateAppointments && (
+        <AppointmentFormShell
+          key={createInitialData ? `create-${createInitialData.date}-${createInitialData.startTime}` : 'create-closed'}
+          mode="create"
+          isOpen={createModalOpen}
+          onClose={() => setCreateModalOpen(false)}
+          onSuccess={handleCreateSuccess}
+          initialData={createInitialData}
+        />
+      )}
       
     </div>);
 

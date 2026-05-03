@@ -25,7 +25,7 @@ import {
   MessageSquare,
   Lock } from
 'lucide-react';
-import { NAVIGATION_ITEMS, type NavigationItem } from '@/constants';
+import { NAVIGATION_ITEMS, ROUTE_PERMISSIONS, type NavigationItem } from '@/constants';
 import { FilterByLocation } from '@/components/shared/FilterByLocation';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -53,28 +53,6 @@ const ICON_MAP: Record<string, React.ComponentType<{className?: string;}>> = {
   Shield,
   Bell,
   MessageSquare
-};
-
-/** Maps route path to the permission required to see it in the nav */
-const NAV_PERMISSION: Record<string, string> = {
-  '/': 'overview.view',
-  '/calendar': 'calendar.view',
-  '/customers': 'customers.view',
-  '/appointments': 'appointments.view',
-  '/website': 'website.view',
-  '/service-catalog': 'customers.edit',
-  '/payment': 'payment.view',
-  '/employees': 'employees.view',
-  '/locations': 'locations.view',
-  '/reports': 'reports.view',
-  '/commission': 'commission.view',
-  '/settings': 'settings.view',
-  '/notifications': 'notifications.view',
-  '/permissions': 'permissions.view',
-  '/feedback': 'permissions.view',
-  '/clinic': '',
-  '/team': '',
-  '/admin': ''
 };
 
 interface SidebarItemProps {
@@ -286,7 +264,7 @@ export function Layout() {
   function isNavItemVisible(item: NavigationItem): boolean {
     // If no permissions data yet, show everything (fallback to unrestricted)
     if (!permissions) return true;
-    const required = NAV_PERMISSION[item.path];
+    const required = ROUTE_PERMISSIONS[item.path];
     if (!required) return true;
     return hasPermission(required);
   }

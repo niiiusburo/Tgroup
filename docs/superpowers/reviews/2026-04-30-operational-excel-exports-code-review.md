@@ -3,7 +3,7 @@
 **Date:** 2026-04-30
 **Scope:** Backend export infrastructure + 5 export types (service-catalog, customers, appointments, services, payments)
 **Reviewer:** Agent (self-review pass)
-**Status:** ✅ Approved with minor notes
+**Status:** ✅ Approved with minor notes; 2026-05-02 audit follow-up implemented
 
 ---
 
@@ -19,8 +19,9 @@
 | `api/src/services/exports/builders/appointmentsExport.js` | 193 | Appointments export with status labels |
 | `api/src/services/exports/builders/servicesExport.js` | 212 | Sale orders (treatment records) export |
 | `api/src/services/exports/builders/paymentsExport.js` | 188 | Payments export using modern `payments` table |
-| `api/src/routes/exports.js` | 97 | Express routes: preview, download, types listing |
+| `api/src/routes/exports.js` | 97 | Express routes: preview, download, types listing, export audit inserts |
 | `api/migrations/042_add_export_permissions.sql` | 37 | Seeds 5 export permissions |
+| `api/migrations/043_add_exports_audit.sql` | 15 | Creates `dbo.exports_audit` for preview/download audit rows |
 | `api/src/server.js` | +2 | Registered `/api/Exports` route |
 | `api/package.json` | +1 | Added `exceljs` dependency |
 
@@ -83,11 +84,11 @@
 **Details:** For payments without a linked `service_id`, the company falls back to the partner's company. This is reasonable but may surprise users if a customer's default company differs from the branch where the payment was recorded.
 **Severity:** Low — matches the existing frontend behavior.
 
-### Issue 6: Missing audit logging
+### Issue 6: Missing audit logging (FIXED)
 **Location:** `api/src/routes/exports.js`
-**Details:** The PRD Section 11 says "Audit every download with user, type, filters, row count, and timestamp." This is not implemented.
-**Severity:** Medium — should be added before production hardening.
-**Recommendation:** Add an `exports_audit` table or log to `dbo.error_events` with a dedicated `export_download` type.
+**Details:** The PRD Section 11 says "Audit every download with user, type, filters, row count, and timestamp." This is now implemented through `dbo.exports_audit` and route inserts for preview/download.
+**Severity:** Low residual risk — audit writes catch-and-log, so exports can still succeed if audit insertion fails.
+**Recommendation:** Keep a direct audit-row check in production verification when export auditability is the thing being validated.
 
 ---
 
@@ -114,17 +115,17 @@ The services download at 5.1 MB for 61k rows is large because of the two `saleor
 - [x] Formula injection: Sanitized in `exportWorkbook.js`
 - [x] Row limit: Hard cap at 100,000
 - [x] Token validation: `requireAuth` runs before permission check
-- [ ] Audit logging: **NOT IMPLEMENTED** (see Issue 6)
+- [x] Audit logging: implemented in `dbo.exports_audit` (non-blocking route writes)
 
 ---
 
 ## Recommendations
 
-1. **Add audit logging** before production deployment (Issue 6).
-2. **Add i18n keys** for ExportPreviewModal hardcoded strings.
-3. **Remove old calendar export** once backend path is validated.
-4. **Consider streaming** for downloads > 50k rows to avoid holding the full workbook in memory.
-5. **Add `appointments(date, companyid)` index** if preview latency becomes problematic.
+1. **Add i18n keys** for ExportPreviewModal hardcoded strings.
+2. **Remove old calendar export** once backend path is validated.
+3. **Consider streaming** for downloads > 50k rows to avoid holding the full workbook in memory.
+4. **Add `appointments(date, companyid)` index** if preview latency becomes problematic.
+5. **Verify nginx timeout behavior** for large services/payments downloads after infra changes.
 
 ---
 

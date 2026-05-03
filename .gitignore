@@ -9,6 +9,11 @@ dist/
 .env
 .env.local
 .env.*.local
+website/.env
+website/.env.development
+website/.env.production
+website/.env.local
+api/.env
 
 # Logs
 *.log
@@ -29,6 +34,7 @@ Thumbs.db
 
 # OMC state
 .omc/
+.orchestrator/
 .dev-api.pid
 .dev-api.log
 .dev-vite.pid
@@ -57,8 +63,15 @@ website/.vite/
 
 # Test screenshots dumped at repo root
 /*.png
+website/*.png
+website/e2e/*.png
+reports/**/*.png
+api/uploads/
+api/src/truth-session.json
 scripts/screenshots/
 scripts/__pycache__/
+tools/tdental-delta-sync/backups/
+website/demo_tdental_updated.sql
 
 # Generated audit reports
 locale_audit_report.md
@@ -84,6 +97,8 @@ LOCAL/
 all Data-4-25/
 backups/db-sync/
 backups/*.dump
+backups/*.sql
+backups/*.sql.bak
 
 # Keep built contracts for local file: dependency
 !contracts/dist/

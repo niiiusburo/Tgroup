@@ -34,6 +34,7 @@ interface LocationDetailProps {
   readonly metrics: LocationMetrics | null;
   readonly onBack: () => void;
   readonly onUpdate?: (updated: LocationBranch) => void;
+  readonly canEdit?: boolean;
 }
 
 interface LocationFormData {
@@ -47,9 +48,9 @@ interface LocationFormData {
   readonly manager: string;
 }
 
-export function LocationDetail({ location, metrics, onBack, onUpdate }: LocationDetailProps) {
+export function LocationDetail({ location, metrics, onBack, onUpdate, canEdit: canEditProp }: LocationDetailProps) {
   const { hasPermission } = usePermissions();
-  const canEdit = hasPermission('locations.edit');
+  const canEdit = canEditProp ?? hasPermission('locations.edit');
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<LocationFormData>({
     name: location.name,
@@ -64,6 +65,7 @@ export function LocationDetail({ location, metrics, onBack, onUpdate }: Location
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleEditClick = () => {
+    if (!canEdit) return;
     setForm({
       name: location.name,
       address: location.address,
@@ -84,6 +86,7 @@ export function LocationDetail({ location, metrics, onBack, onUpdate }: Location
   };
 
   const handleSave = () => {
+    if (!canEdit) return;
     const newErrors: Record<string, string> = {};
     if (!form.name.trim()) newErrors.name = 'Branch name is required';
     if (!form.address.trim()) newErrors.address = 'Address is required';

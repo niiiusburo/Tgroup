@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import {
   fetchDeposits,
   fetchDepositUsage,
@@ -32,7 +32,7 @@ export interface DepositBalance {
   totalRefunded: number;
 }
 
-/** Raw payment method codes from API. Components should translate via t('methods.' + code, { ns: 'payment' }). */
+/** Raw payment method codes from API. Components translate with the payment namespace methods.<code> key. */
 export type PaymentMethodCode =
   | 'cash'
   | 'bank'
@@ -100,8 +100,10 @@ export function useDeposits() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const lastLoadRef = useRef<{ customerId: string; filters?: DepositFilters } | null>(null);
 
   const loadDeposits = useCallback(async (customerId: string, filters?: DepositFilters) => {
+    lastLoadRef.current = { customerId, filters };
     setLoading(true);
     setError(null);
     try {
@@ -139,6 +141,13 @@ export function useDeposits() {
     }
   }, []);
 
+  const reloadCurrentDeposits = useCallback(async () => {
+    const lastLoad = lastLoadRef.current;
+    if (lastLoad) {
+      await loadDeposits(lastLoad.customerId, lastLoad.filters);
+    }
+  }, [loadDeposits]);
+
   const addDeposit = useCallback(async (
     customerId: string,
     amount: number,
@@ -158,13 +167,14 @@ export function useDeposits() {
         paymentDate: date,
         depositType: 'deposit',
       });
+      await loadDeposits(customerId);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add deposit');
       throw err;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [loadDeposits]);
 
   const addRefund = useCallback(async (
     customerId: string,
@@ -183,37 +193,40 @@ export function useDeposits() {
         notes: note,
         paymentDate: date,
       });
+      await loadDeposits(customerId);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add refund');
       throw err;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [loadDeposits]);
 
   const voidDeposit = useCallback(async (id: string, reason?: string) => {
     setLoading(true);
     try {
       await voidPayment(id, reason);
+      await reloadCurrentDeposits();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to void deposit');
       throw err;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [reloadCurrentDeposits]);
 
   const removeDeposit = useCallback(async (id: string) => {
     setLoading(true);
     try {
       await deletePayment(id);
+      await reloadCurrentDeposits();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete deposit');
       throw err;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [reloadCurrentDeposits]);
 
   const editDeposit = useCallback(async (
     id: string,
@@ -227,13 +240,14 @@ export function useDeposits() {
         notes: data.notes,
         paymentDate: data.paymentDate,
       });
+      await reloadCurrentDeposits();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update deposit');
       throw err;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [reloadCurrentDeposits]);
 
   return {
     depositList,

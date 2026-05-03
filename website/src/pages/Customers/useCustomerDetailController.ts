@@ -195,6 +195,7 @@ export function useCustomerDetailController({
     paymentsLoading,
     refetchPayments,
     deletePaymentById,
+    loadSaleOrderLines,
     saleOrderLines,
     saleOrderLinesLoading,
     handleCreateAppointment,

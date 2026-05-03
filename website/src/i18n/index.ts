@@ -121,7 +121,6 @@ i18n.use(initReactI18next).init({
   debug: import.meta.env.DEV,
   saveMissing: import.meta.env.DEV,
   missingKeyHandler: (lng, ns, key) => {
-    // eslint-disable-next-line no-console
     console.warn(`[i18n missing key] ${lng}.${ns}.${key}`);
   },
 });

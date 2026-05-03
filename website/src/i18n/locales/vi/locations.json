@@ -20,6 +20,7 @@
     "address": "Địa chỉ",
     "phone": "Số điện thoại",
     "email": "Email",
+    "district": "Quận/Huyện",
     "status": "Trạng thái",
     "manager": "Quản lý",
     "openingHours": "Giờ mở cửa",

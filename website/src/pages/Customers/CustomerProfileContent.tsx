@@ -24,6 +24,7 @@ interface CustomerProfileContentProps
   readonly deletePaymentById: (id: string) => Promise<void>;
   readonly refetchPayments: () => void | Promise<void>;
   readonly refetchProfile: () => void | Promise<void>;
+  readonly loadSaleOrderLines: () => void | Promise<void>;
   readonly updateServiceStatus: (serviceId: string, status: 'active' | 'completed' | 'cancelled') => Promise<unknown>;
 }
 
@@ -40,6 +41,7 @@ export function CustomerProfileContent({
   deletePaymentById,
   refetchPayments,
   refetchProfile,
+  loadSaleOrderLines,
   updateServiceStatus,
   ...profileProps
 }: CustomerProfileContentProps) {
@@ -63,7 +65,7 @@ export function CustomerProfileContent({
       onEdit={canEditCustomers ? openEditForm : undefined}
       onDeletePayment={async (id) => {
         await deletePaymentById(id);
-        await Promise.all([refetchPayments(), refetchProfile()]);
+        await Promise.all([refetchPayments(), refetchProfile(), loadSaleOrderLines()]);
       }}
       onSoftDelete={() => openDelete('soft')}
       onHardDelete={() => openDelete('hard')}

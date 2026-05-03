@@ -115,7 +115,8 @@
     "unauthorized": "You are not authorized to perform this action.",
     "notFound": "The requested resource was not found.",
     "serverError": "Server error. Please try again later.",
-    "validation": "Please fix the errors below."
+    "validation": "Please fix the errors below.",
+    "saveFailedTitle": "Save failed"
   },
   "pagination": {
     "previous": "Previous",
@@ -151,6 +152,7 @@
   "edit": "Edit",
   "search": "Search",
   "loading": "Loading...",
+  "angTi": "Loading...",
   "noData": "No data",
   "confirm": "Confirm",
   "success": "Success",
@@ -168,6 +170,18 @@
   "ok": "OK",
   "commission": "Commission",
   "notifications": "Notifications",
+  "khngCChiNhnhPh": "No secondary branch",
+  "khngTmThyAChPhHp": "No matching address found",
+  "khngTmThyKhchHng": "No customer found",
+  "khngTmThyBcS": "No doctor found",
+  "searchToView": "Search to view",
+  "subtitle": {
+    "edit": "Update information",
+    "create": "Create a new record"
+  },
+  "face": {
+    "registerTitle": "Register face"
+  },
   "relationships": "Relationships",
   "apply": "Apply",
   "reset": "Reset",
@@ -224,7 +238,8 @@
     "updatePassword": "Update password"
   },
   "datePicker": {
-    "chooseDate": "Choose date"
+    "chooseDate": "Choose date",
+    "today": "Today"
   },
   "timePicker": {
     "chooseTime": "Choose time",
@@ -234,6 +249,7 @@
   },
   "faceCapture": {
     "title": "Face Capture",
+    "capture": "Capture",
     "cameraError": "Cannot access camera. Please grant permission."
   },
   "combobox": {

@@ -9,6 +9,7 @@ owns:
   - api/src/routes/customerSources.js
   - api/src/routes/config.js
   - api/src/routes/places.js
+  - api/src/routes/telemetry.js
   - website/src/pages/Settings/index.tsx
   - website/src/components/settings/
   - website/src/hooks/useSettings.ts
@@ -27,6 +28,9 @@ tables:
   - dbo.systempreferences
   - dbo.company_bank_settings
   - dbo.customersources
+  - dbo.error_events
+  - dbo.error_fix_attempts
+  - dbo.version_events
 endpoints:
   - GET    /api/SystemPreferences
   - GET    /api/SystemPreferences/:key
@@ -44,6 +48,12 @@ endpoints:
   - POST   /api/IrConfigParameters/GetParam
   - GET    /api/Places/autocomplete
   - GET    /api/Places/details
+  - POST   /api/telemetry/errors
+  - GET    /api/telemetry/errors
+  - PUT    /api/telemetry/errors/:id
+  - POST   /api/telemetry/errors/:id/fix-attempts
+  - GET    /api/telemetry/stats
+  - POST   /api/telemetry/version
 ui_surfaces:
   - /settings
   - SystemPreferencesContent
@@ -52,6 +62,8 @@ ui_surfaces:
   - IpAccessControl
   - CustomerSourcesConfig
   - PermissionGroupConfig / RoleConfig
+  - ErrorBoundary / ErrorReporter
+  - Version update prompt
 jobs:
   - none
 shared_types:
@@ -68,4 +80,8 @@ impact_tests:
   - website/e2e/login-and-settings.spec.ts
   - website/src/__tests__/useVersionCheck.test.ts
   - website/src/__tests__/timezone.*.test.ts
+  - api/tests/telemetry.test.js
+  - api/tests/telemetryAuth.test.js
 risk_level: medium
+notes:
+  - "`POST /api/telemetry/errors` is intentionally public and rate-limited before the global `/api` auth middleware; telemetry reads, writes, stats, fix-attempts, and version events are authenticated by the global middleware."

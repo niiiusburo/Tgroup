@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { fetchSaleOrders, type ApiSaleOrder } from '@/lib/api';
-import { createPayment as createPaymentApi } from '@/lib/api/payments';
+import { createPayment as createPaymentApi, fetchPayments as fetchPaymentsApi, type ApiPayment } from '@/lib/api/payments';
 import {
   type PaymentRecord,
   type PaymentMethod,
@@ -65,6 +65,35 @@ function mapSaleOrderToPayment(saleOrder: ApiSaleOrder): PaymentRecord {
   };
 }
 
+function mapApiPaymentToPayment(payment: ApiPayment): PaymentRecord {
+  const allocation = payment.allocations?.[0];
+  const recordId = allocation?.invoiceId ?? allocation?.dotkhamId ?? payment.serviceId ?? payment.id;
+  const recordName = allocation?.invoiceCode ?? allocation?.invoiceName ?? allocation?.dotkhamName ?? payment.referenceCode ?? payment.receiptNumber ?? payment.id;
+  return {
+    id: payment.id,
+    customerId: payment.customerId,
+    customerName: '',
+    customerPhone: '',
+    recordId,
+    recordType: allocation?.dotkhamId ? 'dotkham' : 'saleorder',
+    recordName,
+    amount: payment.amount,
+    method: payment.method,
+    status: payment.status === 'voided' ? 'refunded' : 'completed',
+    date: payment.paymentDate || payment.createdAt?.slice(0, 10) || '',
+    locationName: '',
+    notes: payment.notes || '',
+    receiptNumber: payment.receiptNumber || payment.referenceCode || '',
+    referenceCode: payment.referenceCode,
+    sources: {
+      depositAmount: payment.depositUsed ?? 0,
+      cashAmount: payment.cashAmount ?? 0,
+      bankAmount: payment.bankAmount ?? 0,
+    },
+    isFullPayment: true,
+  };
+}
+
 /**
  * Derive OutstandingBalanceItem from sale orders where residual > 0
  */
@@ -107,15 +136,26 @@ export function usePayment(selectedLocationId?: string) {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetchSaleOrders({
-        offset: 0,
-        limit: 100, // Accommodate all 76 records
-        search: search || undefined,
-        companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
-      });
+      const [saleOrdersResponse, paymentsResponse] = await Promise.all([
+        fetchSaleOrders({
+          offset: 0,
+          limit: 100, // Accommodate all 76 records
+          search: search || undefined,
+          companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
+        }),
+        selectedLocationId && selectedLocationId !== 'all'
+          ? Promise.resolve(null)
+          : fetchPaymentsApi(undefined, 'payments').catch((err) => {
+              console.warn('Canonical payments fetch failed, falling back to sale orders:', err);
+              return null;
+            }),
+      ]);
 
-      const paymentRecords = response.items.map(mapSaleOrderToPayment);
-      const outstanding = response.items
+      const saleOrderPayments = saleOrdersResponse.items.map(mapSaleOrderToPayment);
+      const paymentRecords = paymentsResponse?.items.length
+        ? paymentsResponse.items.map(mapApiPaymentToPayment)
+        : saleOrderPayments;
+      const outstanding = saleOrdersResponse.items
         .map(mapSaleOrderToOutstandingBalance)
         .filter((item): item is OutstandingBalanceItem => item !== null);
 
@@ -129,18 +169,22 @@ export function usePayment(selectedLocationId?: string) {
     }
   }, [selectedLocationId]);
 
+  const refreshPayments = useCallback(async () => {
+    await fetchPayments(searchTerm || undefined);
+  }, [fetchPayments, searchTerm]);
+
   /**
    * Refetch data
    */
   const refetch = useCallback(() => {
-    fetchPayments(searchTerm || undefined);
-  }, [fetchPayments, searchTerm]);
+    void refreshPayments();
+  }, [refreshPayments]);
 
   /**
    * Initial fetch on mount
    */
   useEffect(() => {
-    fetchPayments();
+    void fetchPayments();
   }, [fetchPayments]);
 
   /**
@@ -152,11 +196,7 @@ export function usePayment(selectedLocationId?: string) {
     }
 
     debounceTimerRef.current = setTimeout(() => {
-      if (searchTerm) {
-        fetchPayments(searchTerm);
-      } else {
-        fetchPayments();
-      }
+      void refreshPayments();
     }, 300);
 
     return () => {
@@ -164,17 +204,31 @@ export function usePayment(selectedLocationId?: string) {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [searchTerm, fetchPayments]);
+  }, [refreshPayments]);
 
   const filteredPayments = useMemo(() => {
     let result: readonly PaymentRecord[] = payments;
+
+    if (searchTerm) {
+      const normalized = searchTerm.toLowerCase();
+      result = result.filter((p) =>
+        [
+          p.customerName,
+          p.customerPhone,
+          p.recordName,
+          p.receiptNumber,
+          p.referenceCode,
+          p.notes,
+        ].some((value) => value?.toLowerCase().includes(normalized)),
+      );
+    }
 
     if (statusFilter !== 'all') {
       result = result.filter((p) => p.status === statusFilter);
     }
 
     return [...result].sort((a, b) => b.date.localeCompare(a.date));
-  }, [payments, statusFilter]);
+  }, [payments, searchTerm, statusFilter]);
 
   const stats = useMemo(() => {
     const completed = payments.filter((p) => p.status === 'completed');
@@ -222,7 +276,8 @@ export function usePayment(selectedLocationId?: string) {
       paymentDate: input.date,
       depositType: 'deposit',
     });
-  }, []);
+    await refreshPayments();
+  }, [refreshPayments]);
 
   const getWalletByCustomer = useCallback(
     (customerId: string) => wallets.find((w) => w.customerId === customerId) ?? null,

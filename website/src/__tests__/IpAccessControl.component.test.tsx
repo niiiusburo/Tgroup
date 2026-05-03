@@ -45,6 +45,14 @@ describe('IpAccessControl Component', () => {
     expect(screen.getByLabelText(/Blacklist Block/i)).toBeInTheDocument();
   });
 
+  it('should render write controls as read-only by default', () => {
+    render(<IpAccessControl />);
+
+    expect(screen.getByLabelText(/Allow All/i)).toBeDisabled();
+    expect(screen.queryByRole('button', { name: /Add IP/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Remove 192.168.1.1/i })).not.toBeInTheDocument();
+  });
+
   it('should display IP entries table', () => {
     render(<IpAccessControl />);
 
@@ -62,7 +70,7 @@ describe('IpAccessControl Component', () => {
   });
 
   it('should have add entry form with IP input', () => {
-    render(<IpAccessControl />);
+    render(<IpAccessControl canEdit />);
 
     expect(screen.getByRole('textbox', { name: /IP Address/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Add IP/i })).toBeInTheDocument();
@@ -77,7 +85,7 @@ describe('IpAccessControl Component', () => {
   });
 
   it('should show type selector in add form', () => {
-    render(<IpAccessControl />);
+    render(<IpAccessControl canEdit />);
 
     const select = screen.getByLabelText(/Type/i);
     expect(select).toBeInTheDocument();

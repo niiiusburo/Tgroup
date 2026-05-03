@@ -7,7 +7,11 @@
 import { ToggleLeft, ToggleRight } from 'lucide-react';
 import { useSystemPreferences } from '@/hooks/useSettings';
 
-export function SystemPreferencesContent() {
+interface SystemPreferencesContentProps {
+  readonly canEdit?: boolean;
+}
+
+export function SystemPreferencesContent({ canEdit = false }: SystemPreferencesContentProps) {
   const { groups, updatePreference } = useSystemPreferences();
 
   return (
@@ -28,7 +32,8 @@ export function SystemPreferencesContent() {
                   {pref.type === 'toggle' && (
                     <button
                       type="button"
-                      onClick={() => updatePreference(pref.key, !pref.value)}
+                      disabled={!canEdit}
+                      onClick={() => canEdit && updatePreference(pref.key, !pref.value)}
                     >
                       {pref.value ? (
                         <ToggleRight className="w-8 h-8 text-green-500" />
@@ -41,6 +46,7 @@ export function SystemPreferencesContent() {
                     <select
                       value={String(pref.value)}
                       onChange={(e) => updatePreference(pref.key, e.target.value)}
+                      disabled={!canEdit}
                       className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-white"
                     >
                       {pref.options.map((opt, idx) => {
@@ -55,6 +61,7 @@ export function SystemPreferencesContent() {
                       type="text"
                       value={String(pref.value)}
                       onChange={(e) => updatePreference(pref.key, e.target.value)}
+                      disabled={!canEdit}
                       className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary w-48"
                     />
                   )}
@@ -63,6 +70,7 @@ export function SystemPreferencesContent() {
                       type="number"
                       value={Number(pref.value)}
                       onChange={(e) => updatePreference(pref.key, parseInt(e.target.value, 10) || 0)}
+                      disabled={!canEdit}
                       className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary w-24 text-right"
                     />
                   )}

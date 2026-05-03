@@ -1,25 +1,19 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Plus } from 'lucide-react';
 import { useTimezone } from '@/contexts/TimezoneContext';
-import {
-  Wallet,
-  Coins,
-  Receipt,
-  History,
-  Plus,
-  Edit2,
-  X,
-  Trash2,
-  Loader2,
-  ChevronLeft,
-  ChevronRight,
-  QrCode,
-  DollarSign } from
-'lucide-react';
 import { VietQrModal } from './VietQrModal';
-import { formatVND, formatVNDInput } from '@/lib/formatting';
-import { CurrencyInput } from '@/components/shared/CurrencyInput';
 import type { DepositTransaction, DepositBalance } from '@/hooks/useDeposits';
+import {
+  CUSTOMER_DEPOSIT_PAGE_SIZE,
+  DepositFormModal,
+  DepositPagination,
+  DepositSummaryCards,
+  DepositTransactionsTable,
+  UsageHistoryTable,
+  type CustomerDepositMethod,
+  type CustomerDepositModalMode,
+} from './CustomerDepositSections';
 
 interface CustomerDepositsProps {
   depositList: DepositTransaction[];
@@ -33,15 +27,6 @@ interface CustomerDepositsProps {
   onEditDeposit?: (id: string, data: Partial<{amount: number;method: 'cash' | 'bank_transfer';notes: string;paymentDate: string;}>) => Promise<void>;
   onRefresh?: () => void;
 }
-
-function formatDate(dateStr: string): string {
-  if (!dateStr) return '-';
-  const [y, m, d] = dateStr.split('-').map(Number);
-  if (!y || !m || !d) return dateStr;
-  return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
-}
-
-const PAGE_SIZE = 20;
 
 export function CustomerDeposits({
   depositList,
@@ -58,22 +43,20 @@ export function CustomerDeposits({
   const { t } = useTranslation('payment');
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState<'deposits' | 'usage'>('deposits');
-
-  const [modalMode, setModalMode] = useState<'deposit' | 'refund' | null>(null);
+  const [modalMode, setModalMode] = useState<CustomerDepositModalMode>(null);
   const [editingTx, setEditingTx] = useState<DepositTransaction | null>(null);
-
   const [formAmount, setFormAmount] = useState('');
-  const [formMethod, setFormMethod] = useState<'cash' | 'bank_transfer' | 'vietqr'>('cash');
+  const [formMethod, setFormMethod] = useState<CustomerDepositMethod>('cash');
   const { getToday } = useTimezone();
   const [formDate, setFormDate] = useState(getToday);
   const [formNote, setFormNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showVietQr, setShowVietQr] = useState(false);
 
-  const totalPages = Math.max(1, Math.ceil(depositList.length / PAGE_SIZE));
-  const paged = depositList.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const startRow = depositList.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
-  const endRow = Math.min(page * PAGE_SIZE, depositList.length);
+  const totalPages = Math.max(1, Math.ceil(depositList.length / CUSTOMER_DEPOSIT_PAGE_SIZE));
+  const paged = depositList.slice((page - 1) * CUSTOMER_DEPOSIT_PAGE_SIZE, page * CUSTOMER_DEPOSIT_PAGE_SIZE);
+  const startRow = depositList.length === 0 ? 0 : (page - 1) * CUSTOMER_DEPOSIT_PAGE_SIZE + 1;
+  const endRow = Math.min(page * CUSTOMER_DEPOSIT_PAGE_SIZE, depositList.length);
 
   const openModal = (mode: 'deposit' | 'refund') => {
     setFormAmount('');
@@ -147,430 +130,100 @@ export function CustomerDeposits({
     }
   };
 
-  const renderFormModal = () => {
-    const isRefund = modalMode === 'refund';
-    if (!modalMode) return null;
-    const title = editingTx ? t('editDeposit') : isRefund ? t('refundDeposit') : t('addDeposit');
-    return (
-      <div className="modal-container">
-        <div className="absolute inset-0 bg-black/40" onClick={closeModals} />
-        <div className="modal-content w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">{title}</h4>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('ngyGiaoDch')}</label>
-              <input
-                type="date"
-                value={formDate}
-                onChange={(e) => setFormDate(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary" />
-              
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl">
-                <div className="flex items-center gap-2 text-gray-500">
-                  <DollarSign className="w-5 h-5" />
-                  <span className="text-sm font-medium text-gray-600">{t('sTin')}</span>
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <CurrencyInput
-                    value={formAmount ? Number(formAmount) : null}
-                    onChange={(v) => setFormAmount(v === null ? '' : String(v))}
-                    placeholder="0"
-                    className="w-36" />
-                  
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 mt-3">
-                <span className="text-xs text-gray-400">{t('quickAmount')}</span>
-                {[500000, 1000000, 2000000, 5000000].map((amt) =>
-                <button
-                  key={amt}
-                  type="button"
-                  onClick={() => setFormAmount(String(amt))}
-                  className="px-3 py-1 text-xs font-medium border rounded-full text-gray-600 bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-colors">
-                  
-                    {formatVNDInput(amt)}
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('phngThc')}</label>
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setFormMethod('cash')}
-                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                  formMethod === 'cash' ?
-                  'bg-primary text-white border-primary' :
-                  'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'}`
-                  }>
-                  {t('tinMt')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormMethod('bank_transfer')}
-                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                  formMethod === 'bank_transfer' ?
-                  'bg-primary text-white border-primary' :
-                  'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'}`
-                  }>
-                  {t('chuynKhon')}
-                </button>
-                {!isRefund &&
-                <button
-                  type="button"
-                  onClick={() => setFormMethod('vietqr')}
-                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                  formMethod === 'vietqr' ?
-                  'bg-primary text-white border-primary' :
-                  'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'}`
-                  }>
-                  
-                    VietQR
-                  </button>
-                }
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('ghiChTyChn')}</label>
-              <input
-                type="text"
-                value={formNote}
-                onChange={(e) => setFormNote(e.target.value)}
-                placeholder={t('enterNote', { ns: 'payment' })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary" />
-              
-            </div>
-          </div>
-
-          {formMethod === 'vietqr' && !isRefund &&
-          <button
-            type="button"
-            onClick={() => setShowVietQr(true)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 mt-4 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
-            
-              <QrCode className="w-4 h-4" />
-
-          </button>
-          }
-
-          <div className="flex justify-end gap-3 mt-6">
-            <button
-              onClick={closeModals}
-              disabled={submitting}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50">
-              {t('hy')}
-            </button>
-            <button
-              onClick={handleSubmitDeposit}
-              disabled={submitting || !formAmount}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50">
-              
-              {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              {editingTx ? t('saveChanges') : isRefund ? t("honTmNg") : t("ngTmNg")}
-            </button>
-          </div>
-        </div>
-      </div>);
-
-  };
-
   return (
     <div className="space-y-4">
-      {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
-            <Wallet className="w-6 h-6 text-blue-600" />
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">{t('tmNgNg')}</p>
-            <p className="text-xl font-bold text-blue-600">{formatVND(balance.totalDeposited)}</p>
-          </div>
-        </div>
+      <DepositSummaryCards balance={balance} />
 
-        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
-            <Coins className="w-6 h-6 text-emerald-600" />
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">{t('tmNgCnLi')}</p>
-            <p className="text-xl font-bold text-emerald-600">{formatVND(balance.depositBalance)}</p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center">
-            <Receipt className="w-6 h-6 text-rose-600" />
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">{t('tmNgDng')}</p>
-            <p className="text-xl font-bold text-rose-600">{formatVND(balance.totalUsed)}</p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
-            <History className="w-6 h-6 text-amber-600" />
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">{t('tmNgHon')}</p>
-            <p className="text-xl font-bold text-amber-600">{formatVND(balance.totalRefunded)}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Action bar + table */}
       <div className="bg-white rounded-xl shadow-card overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setActiveTab('deposits')}
               className={`text-sm font-semibold transition-colors ${
-              activeTab === 'deposits' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'}`
-              }>
-              
-
-              {depositList.length > 0 &&
-              <span className="text-xs font-normal text-gray-500 ml-1">({depositList.length})</span>
-              }
+                activeTab === 'deposits' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              {depositList.length > 0 && <span className="text-xs font-normal text-gray-500 ml-1">({depositList.length})</span>}
             </button>
             <span className="text-gray-300">|</span>
             <button
               onClick={() => setActiveTab('usage')}
               className={`text-sm font-semibold transition-colors ${
-              activeTab === 'usage' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'}`
-              }>
-              
-
-              {usageHistory.length > 0 &&
-              <span className="text-xs font-normal text-gray-500 ml-1">({usageHistory.length})</span>
-              }
+                activeTab === 'usage' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              {usageHistory.length > 0 && <span className="text-xs font-normal text-gray-500 ml-1">({usageHistory.length})</span>}
             </button>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {activeTab === 'deposits' && (onAddDeposit || onAddRefund) &&
-            <>
+            {activeTab === 'deposits' && (onAddDeposit || onAddRefund) && (
+              <>
                 <button
-                onClick={() => openModal('deposit')}
-                disabled={loading}
-                className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50">
-                
+                  onClick={() => openModal('deposit')}
+                  disabled={loading}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
+                >
                   <Plus className="w-4 h-4" />
                   {t('ngTmNg')}
-              </button>
-                {onAddRefund &&
-              <button
-                onClick={() => openModal('refund')}
-                disabled={loading}
-                className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50">
-                {t('honTmNg')}
-              </button>
-              }
+                </button>
+                {onAddRefund && (
+                  <button
+                    onClick={() => openModal('refund')}
+                    disabled={loading}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  >
+                    {t('honTmNg')}
+                  </button>
+                )}
               </>
-            }
+            )}
           </div>
         </div>
 
-        {/* Table */}
         <div className="overflow-x-auto min-w-0">
-          {activeTab === 'deposits' ?
-          <table className="w-full text-sm min-w-[640px]">
-              <thead>
-                <tr className="bg-gray-50 text-left">
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('sPhiu')}</th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('ngy')}</th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('phngThc')}</th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('loi')}</th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider text-right">{t('sTin')}</th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('trngThi')}</th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider text-right">{t('thaoTc')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {loading ?
-              <tr>
-                    <td colSpan={7} className="px-2 sm:px-4 py-8 text-center text-gray-400">
-                      <div className="flex items-center justify-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-
-                  </div>
-                    </td>
-                  </tr> :
-              paged.length === 0 ?
-              <tr>
-                    <td colSpan={7} className="px-2 sm:px-4 py-8 text-center text-gray-400">
-                  {t('khngCDLieu')}
-                </td>
-                  </tr> :
-
-              paged.map((tx) =>
-              <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-2 sm:px-4 py-3">
-                        <div className="flex flex-col">
-                          {tx.referenceCode && <span className="text-sm font-medium text-gray-700">{tx.referenceCode}</span>}
-                          {!tx.referenceCode && <span className="text-sm font-mono text-gray-700">{tx.receiptNumber || '-'}</span>}
-                          {tx.referenceCode && tx.receiptNumber && <span className="text-[10px] font-mono text-gray-400">{tx.receiptNumber}</span>}
-                        </div>
-                      </td>
-                      <td className="px-2 sm:px-4 py-3 text-gray-600">{formatDate(tx.date)}</td>
-                      <td className="px-2 sm:px-4 py-3 text-gray-600">{t(`methods.${tx.method}`, { defaultValue: tx.method })}</td>
-                      <td className="px-2 sm:px-4 py-3">
-                        <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium ${
-                  tx.type === 'refund' ?
-                  'bg-amber-100 text-amber-700' :
-                  'bg-blue-100 text-blue-700'}`
-                  }>
-                          {tx.type === 'refund' ? t('refund') : t('deposit')}
-                        </span>
-                      </td>
-                      <td className={`px-2 sm:px-4 py-3 text-right font-medium ${
-                tx.type === 'refund' ? 'text-amber-600' : 'text-blue-600'}`
-                }>
-                        {tx.type === 'refund' ? '-' : '+'}{formatVND(tx.amount)}
-                      </td>
-                      <td className="px-2 sm:px-4 py-3">
-                        <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium ${
-                  tx.status === 'posted' || tx.status === 'confirmed' ?
-                  'bg-emerald-100 text-emerald-700' :
-                  'bg-red-100 text-red-700'}`
-                  }>
-                          {tx.status === 'posted' || tx.status === 'confirmed' ? t('confirmed') : t('cancelled')}
-                        </span>
-                      </td>
-                      <td className="px-2 sm:px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1 sm:gap-2">
-                          {onEditDeposit &&
-                    <button
-                      onClick={() => openEditModal(tx)}
-                      className="p-1.5 rounded-md text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                      title={t("sa")}>
-                      
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                    }
-                          {onVoidDeposit && tx.status !== 'voided' &&
-                    <button
-                      onClick={() => handleVoid(tx.id)}
-                      className="p-1.5 rounded-md text-gray-500 hover:text-amber-600 hover:bg-amber-50 transition-colors"
-                      title={t('cancel')}>
-                      
-                              <X className="w-4 h-4" />
-                            </button>
-                    }
-                          {onDeleteDeposit &&
-                    <button
-                      onClick={() => handleDelete(tx.id)}
-                      className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-                      title={t("xa")}>
-                      
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                    }
-                        </div>
-                      </td>
-                    </tr>
-              )
-              }
-              </tbody>
-            </table> :
-
-          <table className="w-full text-sm min-w-[480px]">
-              <thead>
-                <tr className="bg-gray-50 text-left">
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('ngy')}</th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('phngThc')}</th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('ghiCh')}</th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider text-right">{t('sTin')}</th>
-                  <th className="px-2 sm:px-4 py-3 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">{t('trngThi')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {loading ?
-              <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
-                      <div className="flex items-center justify-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-
-                  </div>
-                    </td>
-                  </tr> :
-              usageHistory.length === 0 ?
-              <tr>
-                    <td colSpan={5} className="px-2 sm:px-4 py-8 text-center text-gray-400">
-                  {t('khngCDLieuSDngTmNg')}
-                </td>
-                  </tr> :
-
-              usageHistory.map((tx) =>
-              <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-2 sm:px-4 py-3 text-gray-600">{formatDate(tx.date)}</td>
-                      <td className="px-2 sm:px-4 py-3 text-gray-600">{tx.method}</td>
-                      <td className="px-2 sm:px-4 py-3 text-gray-600">{tx.note || '-'}</td>
-                      <td className="px-2 sm:px-4 py-3 text-right font-medium text-rose-600">
-                        -{formatVND(tx.amount)}
-                      </td>
-                      <td className="px-2 sm:px-4 py-3">
-                        <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-medium ${
-                  tx.status === 'posted' || tx.status === 'confirmed' ?
-                  'bg-emerald-100 text-emerald-700' :
-                  'bg-red-100 text-red-700'}`
-                  }>
-                          {tx.status === 'posted' || tx.status === 'confirmed' ? t("xcNhn") : t('cancel')}
-                        </span>
-                      </td>
-                    </tr>
-              )
-              }
-              </tbody>
-            </table>
-          }
+          {activeTab === 'deposits' ? (
+            <DepositTransactionsTable
+              loading={loading}
+              paged={paged}
+              onEditDeposit={onEditDeposit ? openEditModal : undefined}
+              onVoidDeposit={onVoidDeposit ? handleVoid : undefined}
+              onDeleteDeposit={onDeleteDeposit ? handleDelete : undefined}
+            />
+          ) : (
+            <UsageHistoryTable loading={loading} usageHistory={usageHistory} />
+          )}
         </div>
 
-        {/* Pagination */}
-        {activeTab === 'deposits' && depositList.length > 0 &&
-        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-            <div className="flex items-center gap-2">
-              <select
-              value={PAGE_SIZE}
-              disabled
-              className="px-2 py-1 text-xs border border-gray-200 rounded-md bg-white text-gray-600">
-              
-                <option value={20}>20</option>
-              </select>
-              <span className="text-xs text-gray-500">
-                {startRow}-{endRow}{depositList.length}
-            </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page <= 1}
-              className="p-1 rounded border border-gray-200 hover:bg-gray-50 disabled:opacity-40">
-              
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <span className="px-2 text-xs text-gray-600">{page}</span>
-              <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page >= totalPages}
-              className="p-1 rounded border border-gray-200 hover:bg-gray-50 disabled:opacity-40">
-              
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        }
+        {activeTab === 'deposits' && depositList.length > 0 && (
+          <DepositPagination
+            page={page}
+            totalPages={totalPages}
+            startRow={startRow}
+            endRow={endRow}
+            totalRows={depositList.length}
+            onPageChange={(updater) => setPage(updater)}
+          />
+        )}
       </div>
 
-      {renderFormModal()}
+      <DepositFormModal
+        modalMode={modalMode}
+        editingTx={editingTx}
+        formAmount={formAmount}
+        formMethod={formMethod}
+        formDate={formDate}
+        formNote={formNote}
+        submitting={submitting}
+        onAmountChange={setFormAmount}
+        onMethodChange={setFormMethod}
+        onDateChange={setFormDate}
+        onNoteChange={setFormNote}
+        onClose={closeModals}
+        onSubmit={handleSubmitDeposit}
+        onShowVietQr={() => setShowVietQr(true)}
+      />
       <VietQrModal open={showVietQr} onClose={() => setShowVietQr(false)} defaultAmount={formAmount ? Number(formAmount) : undefined} />
-    </div>);
-
+    </div>
+  );
 }

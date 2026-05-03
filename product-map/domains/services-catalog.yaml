@@ -3,8 +3,9 @@ summary: |
   Dental service catalog is stored in the legacy dbo.products table.
   The backend route /api/Products handles CRUD; /api/Services is dead code
   targeting a non-existent public.services table. ProductCategories manage
-  service groupings. SaleOrders and SaleOrderLines handle actual patient
-  treatments.
+  service groupings. The current service catalog page is /service-catalog;
+  /website is the Website CMS surface. SaleOrders and SaleOrderLines handle
+  actual patient treatments.
 owns:
   - api/src/routes/products.js
   - api/src/routes/productCategories.js
@@ -50,7 +51,8 @@ endpoints:
   - PATCH  /api/SaleOrders/:id/state
   - GET    /api/SaleOrderLines
 ui_surfaces:
-  - /website (routed to ServiceCatalog in App.tsx)
+  - /service-catalog (service catalog, routed to ServiceCatalog in App.tsx)
+  - /website is Website CMS, not the service catalog
   - /services (patient service records)
   - ServiceCatalogSelector
   - ServiceForm
@@ -74,4 +76,5 @@ risk_level: high
 notes:
   - STALE/DEAD: api/src/routes/services.js queries public.services which does not exist.
   - STALE/DEAD: website/src/lib/api/services.ts exports dead wrappers.
+  - Current routing: /service-catalog renders ServiceCatalog, /services renders patient treatment records, and /website renders the Website CMS page.
   - /api/ProductCategories groups duplicate migrated category UUIDs by display name for the catalog sidebar; /api/Products category filtering expands the selected display group to all matching category UUIDs.

@@ -12,6 +12,7 @@ import {
   useCallback,
   type ReactNode,
 } from 'react';
+import { AUTH_UNAUTHORIZED_EVENT } from '@/lib/api/core';
 import {
   login as apiLogin,
   fetchMe,
@@ -55,6 +56,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     );
   }
 
+  const clearSession = useCallback((clearRemember = false) => {
+    localStorage.removeItem(TOKEN_KEY);
+    if (clearRemember) {
+      localStorage.removeItem('tgclinic_remember');
+    }
+    setState({ user: null, permissions: null, isAuthenticated: false, isLoading: false });
+    dispatchAuthChange(null);
+  }, []);
+
+  useEffect(() => {
+    const handleUnauthorized = () => clearSession();
+    window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
+    return () => window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
+  }, [clearSession]);
+
   // On mount, validate existing token
   useEffect(() => {
     const token = localStorage.getItem(TOKEN_KEY);
@@ -74,11 +90,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         dispatchAuthChange(res.permissions.locations);
       })
       .catch(() => {
-        localStorage.removeItem(TOKEN_KEY);
-        setState({ user: null, permissions: null, isAuthenticated: false, isLoading: false });
-        dispatchAuthChange(null);
+        clearSession();
       });
-  }, []);
+  }, [clearSession]);
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await apiLogin(email, password);
@@ -93,12 +107,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
-    // Also clear saved login credentials
-    localStorage.removeItem('tgclinic_remember');
-    setState({ user: null, permissions: null, isAuthenticated: false, isLoading: false });
-    dispatchAuthChange(null);
-  }, []);
+    clearSession(true);
+  }, [clearSession]);
 
   const hasPermission = useCallback(
     (permission: string) => {

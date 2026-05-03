@@ -110,9 +110,14 @@ vi.mock('@/hooks/useAppointments', () => ({
   }),
 }));
 
+const refetchServicesMock = vi.hoisted(() => vi.fn());
+
 vi.mock('@/hooks/useServices', () => ({
   useServices: () => ({
     createServiceRecord: vi.fn(),
+    updateServiceRecord: vi.fn(),
+    updateServiceStatus: vi.fn(),
+    refetch: refetchServicesMock,
     getRecordsByCustomer: () => [],
   }),
 }));
@@ -125,11 +130,52 @@ vi.mock('@/hooks/usePayment', () => ({
 
 vi.mock('@/hooks/useDeposits', () => ({
   useDeposits: () => ({
-    addDeposit: vi.fn(),
-    deposits: [],
+    depositList: [],
+    usageHistory: [],
+    balance: {
+      depositBalance: 0,
+      outstandingBalance: 0,
+      totalDeposited: 0,
+      totalUsed: 0,
+      totalRefunded: 0,
+    },
     loading: false,
+    addDeposit: vi.fn(),
+    addRefund: vi.fn(),
+    voidDeposit: vi.fn(),
+    removeDeposit: vi.fn(),
+    editDeposit: vi.fn(),
     loadDeposits: vi.fn(),
   }),
+}));
+
+vi.mock('@/hooks/useEmployees', () => ({
+  useEmployees: () => ({
+    employees: [],
+  }),
+}));
+
+vi.mock('@/hooks/useCustomerPayments', () => ({
+  useCustomerPayments: () => ({
+    payments: [],
+    isLoading: false,
+    addPayment: vi.fn(),
+    refetch: vi.fn(),
+    deletePaymentById: vi.fn(),
+  }),
+}));
+
+vi.mock('@/hooks/useExternalCheckups', () => ({
+  useExternalCheckups: () => ({
+    data: null,
+    isLoading: false,
+    error: null,
+    refetch: vi.fn(),
+  }),
+}));
+
+vi.mock('@/lib/api', () => ({
+  fetchSaleOrderLines: vi.fn().mockResolvedValue({ items: [] }),
 }));
 
 function renderWithRouter(initialEntries: string[]) {

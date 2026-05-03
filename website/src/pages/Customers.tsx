@@ -138,6 +138,7 @@ export function Customers() {
     paymentsLoading,
     refetchPayments,
     deletePaymentById,
+    loadSaleOrderLines,
     saleOrderLines,
     saleOrderLinesLoading,
     handleCreateAppointment,
@@ -243,6 +244,7 @@ export function Customers() {
         deletePaymentById={deletePaymentById}
         refetchPayments={refetchPayments}
         refetchProfile={refetchProfile}
+        loadSaleOrderLines={loadSaleOrderLines}
         canSoftDelete={canSoftDelete}
         canHardDelete={canHardDelete}
         loadingDeposits={depositsLoading}

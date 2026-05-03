@@ -28,8 +28,8 @@ tables:
 endpoints:
   - POST /api/face/recognize
   - POST /api/face/register
-  - GET  /api/ExternalCheckups/:customerCode
   - GET  /api/ExternalCheckups/images/:imageName
+  - GET  /api/ExternalCheckups/:customerCode
   - POST /api/ExternalCheckups/:customerCode/health-checkups
 ui_surfaces:
   - PatientCheckIn
@@ -40,6 +40,7 @@ jobs:
   - none (Compreface runs as standalone Docker containers)
 shared_types:
   - website/src/hooks/useFaceRecognition.ts
+  - website/src/lib/api/externalCheckups.ts
 dependencies:
   - Customers & Partners
   - Docker services: compreface-api, compreface-core, compreface-postgres-db
@@ -50,9 +51,12 @@ affected_by:
 impact_tests:
   - website/src/hooks/__tests__/useFaceRecognition.test.ts
   - api/tests/faceRecognition.test.js
+  - api/src/routes/__tests__/externalCheckups.test.js
+  - website/src/components/customer/AuthenticatedCheckupImage.test.tsx
 risk_level: medium
 notes:
   - Compreface services are defined in docker-compose.yml but not required for core app startup.
-  - The older Hosoonline contract used `HOSOONLINE_API_KEY` through the `X-API-Key` request header.
-  - The current observed Hosoonline website contract logs in through `/api/auth/login`, searches images through `/api/appointments/search?q=<customerCode>&page=<page>`, and fetches bytes through `/api/appointments/image/:imageName`.
+  - "Hosoonline is currently mixed-contract: login credentials take precedence for image reads (`Authorization: Bearer <token>` plus access_token cookie); `HOSOONLINE_API_KEY` / `X-API-Key` remains as fallback for older patient health-checkup endpoints."
+  - The current observed Hosoonline website contract logs in through `/api/auth/login`, searches appointment media through `/api/appointments/search?q=<customerCode>&page=<page>`, and fetches bytes through `/api/appointments/image/:imageName`.
   - TGClinic must proxy Hosoonline images because direct image URLs require Hosoonline session auth.
+  - Upload still posts to the older `/api/patients/:code/health-checkups` endpoint; keep this as an unknown until upstream upload behavior is verified.

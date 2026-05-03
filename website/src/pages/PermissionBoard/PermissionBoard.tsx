@@ -11,9 +11,12 @@ import { ArchitectureView } from './ArchitectureView';
 import { MatrixView } from './MatrixView';
 import { LogicFlowView } from './LogicFlowView';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function PermissionBoard() {
   const { t } = useTranslation('permissions');
+  const { hasPermission } = useAuth();
+  const canEditPermissions = hasPermission('permissions.edit');
   const { groups, employees, locations, loading, error, updateEmployee, toggleGroupPermission, getEffective, refetch } = usePermissionBoard();
 
   const [view, setView] = useState<'architecture' | 'matrix' | 'flow'>('architecture');
@@ -101,9 +104,10 @@ export function PermissionBoard() {
           onSelectEmployee={setSelectedEmployeeId}
           getEffective={getEffective}
           updateEmployee={updateEmployee}
+          canEdit={canEditPermissions}
         />
       )}
-      {view === 'matrix' && <MatrixView groups={groups} onToggle={toggleGroupPermission} />}
+      {view === 'matrix' && <MatrixView groups={groups} onToggle={toggleGroupPermission} canEdit={canEditPermissions} />}
       {view === 'flow' && <LogicFlowView groups={groups} employees={employees} getEffective={getEffective} />}
     </div>
   );

@@ -9,9 +9,12 @@ import { MessageSquare } from 'lucide-react';
 import { FeedbackAdminContent } from '@/components/settings/FeedbackAdminContent';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function Feedback() {
   const { t } = useTranslation('feedback');
+  const { hasPermission } = useAuth();
+  const canEditFeedback = hasPermission('permissions.edit');
   return (
     <div className="space-y-6">
       <PageHeader
@@ -20,7 +23,7 @@ export function Feedback() {
         icon={<MessageSquare className="w-6 h-6 text-primary" />}
       />
 
-      <FeedbackAdminContent />
+      <FeedbackAdminContent canEdit={canEditFeedback} />
     </div>
   );
 }

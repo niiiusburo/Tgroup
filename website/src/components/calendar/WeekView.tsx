@@ -100,13 +100,24 @@ function AppointmentCard({
           >
             {t(PHASE_LABEL_KEYS[phase], { ns: 'appointments' })}
           </span>
-        ) : (
+        ) : onUpdateStatus ? (
           <StatusBadgeMenu
             phase={phase}
             arrivalTime={appointment.arrivalTime}
             treatmentStartTime={appointment.treatmentStartTime}
             onPhaseChange={(p) => onUpdateStatus?.(appointment.id, p)}
           />
+        ) : (
+          <span
+            className={cn(
+              'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border',
+              styles.bg,
+              styles.text,
+              styles.border
+            )}
+          >
+            {t(PHASE_LABEL_KEYS[phase], { ns: 'appointments' })}
+          </span>
         )}
 
         {phase === 'scheduled' && onMarkArrived && onUpdateStatus && (
