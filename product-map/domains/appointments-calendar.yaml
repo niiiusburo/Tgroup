@@ -51,6 +51,7 @@ dependencies:
   - Auth & Permissions (appointments.view, appointments.add, appointments.edit)
 affected_by:
   - Changes to dbo.appointments schema (especially color, status, timeexpected)
+  - Demo/legacy schemas missing optional assistant columns (assistantid, dentalaideid)
   - Changes to APPOINTMENT_CARD_COLORS constants
   - Changes to ApiAppointment type shape
 impact_tests:

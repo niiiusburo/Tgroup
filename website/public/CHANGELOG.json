@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.25.17",
+    "date": "2026-05-03",
+    "commit": "pending",
+    "highlights": "fix(appointments): load overview data with legacy appointment schemas",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Allow appointment reads to work when the database does not have assistantid or dentalaideid columns",
+          "Keep appointment create and update compatible with schemas before assistant assignment columns were added"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add regression coverage for appointment schema capability detection"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.16",
     "date": "2026-05-03",
     "commit": "f7587356",

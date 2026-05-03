@@ -3,6 +3,7 @@ const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
 const { AppointmentCreateSchema, AppointmentUpdateSchema } = require('@tgroup/contracts');
+const { getAppointmentSchemaCapabilities } = require('../services/appointmentSchema');
 
 const router = express.Router();
 
@@ -45,6 +46,7 @@ async function foreignKeyExists(table, id) {
  */
 router.get('/', async (req, res) => {
   try {
+    const appointmentSchema = await getAppointmentSchemaCapabilities();
     const {
       partner_id,
       offset = '0',
@@ -200,10 +202,10 @@ router.get('/', async (req, res) => {
         au.name AS username,
         a.doctorid,
         doc.name AS doctorname,
-        a.assistantid,
-        ass.name AS assistantname,
-        a.dentalaideid,
-        da.name AS dentalaidename,
+        ${appointmentSchema.assistantSelectSql},
+        ${appointmentSchema.assistantNameSelectSql},
+        ${appointmentSchema.dentalAideSelectSql},
+        ${appointmentSchema.dentalAideNameSelectSql},
         a.dotkhamid,
         dk.name AS dotkhamname,
         a.saleorderid,
@@ -234,8 +236,7 @@ router.get('/', async (req, res) => {
       LEFT JOIN companies c ON c.id = a.companyid
       LEFT JOIN aspnetusers au ON au.id = a.userid
       LEFT JOIN employees doc ON doc.id = a.doctorid
-      LEFT JOIN employees ass ON ass.id = a.assistantid
-      LEFT JOIN employees da ON da.id = a.dentalaideid
+      ${appointmentSchema.assistantJoinSql}
       LEFT JOIN dotkhams dk ON dk.id = a.dotkhamid
       LEFT JOIN saleorders so ON so.id = a.saleorderid
       LEFT JOIN crmteams t ON t.id = a.teamid
@@ -292,6 +293,7 @@ router.get('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
+    const appointmentSchema = await getAppointmentSchemaCapabilities();
     const { id } = req.params;
 
     if (!isValidUUID(id)) {
@@ -348,17 +350,16 @@ router.get('/:id', async (req, res) => {
         a.writebyid,
         a.productid,
         prod.name AS productname,
-        a.assistantid,
-        ass.name AS assistantname,
-        a.dentalaideid,
-        da.name AS dentalaidename
+        ${appointmentSchema.assistantSelectSql},
+        ${appointmentSchema.assistantNameSelectSql},
+        ${appointmentSchema.dentalAideSelectSql},
+        ${appointmentSchema.dentalAideNameSelectSql}
       FROM appointments a
       LEFT JOIN partners p ON p.id = a.partnerid
       LEFT JOIN companies c ON c.id = a.companyid
       LEFT JOIN aspnetusers au ON au.id = a.userid
       LEFT JOIN employees doc ON doc.id = a.doctorid
-      LEFT JOIN employees ass ON ass.id = a.assistantid
-      LEFT JOIN employees da ON da.id = a.dentalaideid
+      ${appointmentSchema.assistantJoinSql}
       LEFT JOIN dotkhams dk ON dk.id = a.dotkhamid
       LEFT JOIN saleorders so ON so.id = a.saleorderid
       LEFT JOIN crmteams t ON t.id = a.teamid
@@ -389,6 +390,7 @@ router.get('/:id', async (req, res) => {
  */
 router.post('/', requirePermission('appointments.add'), validate(AppointmentCreateSchema), async (req, res) => {
   try {
+    const appointmentSchema = await getAppointmentSchemaCapabilities();
     // Accept both camelCase and lowercase field names (frontend sends lowercase)
     const b = req.body;
     const date = b.date;
@@ -463,16 +465,42 @@ router.post('/', requirePermission('appointments.add'), validate(AppointmentCrea
     const nextSeq = nameResult[0]?.next_seq || 1;
     const name = `AP${String(nextSeq).padStart(6, '0')}`;
 
-    // Create appointment
+    const insertColumns = [
+      'id', 'name', 'date', 'time', 'partnerid', 'doctorid', 'companyid', 'note',
+      'timeexpected', 'color', 'state', 'aptstate', 'isrepeatcustomer', 'isnotreatment',
+      'productid',
+    ];
+    const insertValues = [
+      'gen_random_uuid()', '$1', '$2', '$3', '$4', '$5', '$6', '$7', '$8', '$9',
+      '$10', '$11', 'false', 'false', '$12',
+    ];
+    const insertParams = [
+      name, date, time || null, partnerId, doctorId || null, companyId, note,
+      timeExpectedNum, color, state, state, productId,
+    ];
+
+    if (appointmentSchema.hasAssistantId) {
+      insertColumns.push('assistantid');
+      insertParams.push(assistantId);
+      insertValues.push(`$${insertParams.length}`);
+    }
+    if (appointmentSchema.hasDentalAideId) {
+      insertColumns.push('dentalaideid');
+      insertParams.push(dentalAideId);
+      insertValues.push(`$${insertParams.length}`);
+    }
+
+    insertColumns.push('datecreated', 'lastupdated');
+    insertValues.push(
+      `(NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`,
+      `(NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`
+    );
+
     const result = await query(
-      `INSERT INTO appointments (
-        id, name, date, time, partnerid, doctorid, companyid, note, timeexpected,
-        color, state, aptstate, isrepeatcustomer, isnotreatment, productid, assistantid, dentalaideid,
-        datecreated, lastupdated
-      ) VALUES (
-        gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, false, false, $12, $13, $14, (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'), (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
-      ) RETURNING *`,
-      [name, date, time || null, partnerId, doctorId || null, companyId, note, timeExpectedNum, color, state, state, productId, assistantId, dentalAideId]
+      `INSERT INTO appointments (${insertColumns.join(', ')})
+       VALUES (${insertValues.join(', ')})
+       RETURNING *`,
+      insertParams
     );
 
     const newAppointment = result[0];
@@ -502,16 +530,15 @@ router.post('/', requirePermission('appointments.add'), validate(AppointmentCrea
         prod.name AS productname,
         a.datecreated,
         a.lastupdated,
-        a.assistantid,
-        ass.name AS assistantname,
-        a.dentalaideid,
-        da.name AS dentalaidename
+        ${appointmentSchema.assistantSelectSql},
+        ${appointmentSchema.assistantNameSelectSql},
+        ${appointmentSchema.dentalAideSelectSql},
+        ${appointmentSchema.dentalAideNameSelectSql}
       FROM appointments a
       LEFT JOIN partners p ON p.id = a.partnerid
       LEFT JOIN companies c ON c.id = a.companyid
       LEFT JOIN employees doc ON doc.id = a.doctorid
-      LEFT JOIN employees ass ON ass.id = a.assistantid
-      LEFT JOIN employees da ON da.id = a.dentalaideid
+      ${appointmentSchema.assistantJoinSql}
       LEFT JOIN products prod ON prod.id = a.productid
       WHERE a.id = $1`,
       [newAppointment.id]
@@ -534,6 +561,7 @@ router.post('/', requirePermission('appointments.add'), validate(AppointmentCrea
  */
 router.put('/:id', requirePermission('appointments.edit'), validate(AppointmentUpdateSchema), async (req, res) => {
   try {
+    const appointmentSchema = await getAppointmentSchemaCapabilities();
     const { id } = req.params;
     // Accept both camelCase and lowercase field names
     const b = req.body;
@@ -632,12 +660,12 @@ router.put('/:id', requirePermission('appointments.edit'), validate(AppointmentU
       params.push(productId || null);
       paramIdx++;
     }
-    if (assistantId !== undefined) {
+    if (assistantId !== undefined && appointmentSchema.hasAssistantId) {
       updates.push(`assistantid = $${paramIdx}`);
       params.push(assistantId || null);
       paramIdx++;
     }
-    if (dentalAideId !== undefined) {
+    if (dentalAideId !== undefined && appointmentSchema.hasDentalAideId) {
       updates.push(`dentalaideid = $${paramIdx}`);
       params.push(dentalAideId || null);
       paramIdx++;
@@ -678,16 +706,15 @@ router.put('/:id', requirePermission('appointments.edit'), validate(AppointmentU
         prod.name AS productname,
         a.datecreated,
         a.lastupdated,
-        a.assistantid,
-        ass.name AS assistantname,
-        a.dentalaideid,
-        da.name AS dentalaidename
+        ${appointmentSchema.assistantSelectSql},
+        ${appointmentSchema.assistantNameSelectSql},
+        ${appointmentSchema.dentalAideSelectSql},
+        ${appointmentSchema.dentalAideNameSelectSql}
       FROM appointments a
       LEFT JOIN partners p ON p.id = a.partnerid
       LEFT JOIN companies c ON c.id = a.companyid
       LEFT JOIN employees doc ON doc.id = a.doctorid
-      LEFT JOIN employees ass ON ass.id = a.assistantid
-      LEFT JOIN employees da ON da.id = a.dentalaideid
+      ${appointmentSchema.assistantJoinSql}
       LEFT JOIN products prod ON prod.id = a.productid
       WHERE a.id = $1`,
       [id]

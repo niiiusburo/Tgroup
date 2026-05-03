@@ -49,7 +49,7 @@
 | **R** | `appointments.js`, `customerReceipts.js`, `reports.js`, `dashboardReports.js`, `dotKhams.js` |
 | **E** | `GET/POST/PUT /api/Appointments` |
 | **UI** | Calendar, Appointments page, TodaySchedule, AppointmentForm, EditAppointmentModal, CustomerProfile appointment history |
-| **Risk** | **High** — `color` (string 0-7) and `status` (scheduled/arrived/cancelled) are hardcoded in frontend constants (`APPOINTMENT_CARD_COLORS`, `APPOINTMENT_STATUS_OPTIONS`). |
+| **Risk** | **High** — `color` (string 0-7) and `status` (scheduled/arrived/cancelled) are hardcoded in frontend constants (`APPOINTMENT_CARD_COLORS`, `APPOINTMENT_STATUS_OPTIONS`). Demo/legacy schemas may omit optional assistant columns (`assistantid`, `dentalaideid`), so appointment API reads/writes must detect column availability before referencing them. |
 
 ### dbo.products (Service Catalog)
 
