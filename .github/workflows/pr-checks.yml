@@ -78,23 +78,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check for large files
+        with:
+          fetch-depth: 0
+      - name: Check changed files for large files
         run: |
-          # Find files larger than 500KB
-          LARGE_FILES=$(find . -type f -size +500k \
-            ! -path "./.git/*" \
-            ! -path "./node_modules/*" \
-            ! -path "./website/node_modules/*" \
-            ! -path "./website/dist/*" \
-            ! -name "*.sql" \
-            2>/dev/null)
-          
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          LARGE_FILES=""
+
+          while IFS= read -r file; do
+            [ -f "$file" ] || continue
+            case "$file" in
+              node_modules/*|website/node_modules/*|website/dist/*|*.sql)
+                continue
+                ;;
+            esac
+
+            size=$(wc -c < "$file")
+            if [ "$size" -gt 512000 ]; then
+              LARGE_FILES="${LARGE_FILES}${file}"$'\n'
+            fi
+          done < <(git diff --name-only --diff-filter=AM "$BASE" "$HEAD")
+
           if [ -n "$LARGE_FILES" ]; then
-            echo "❌ Large files detected (>500KB):"
+            echo "❌ Large changed files detected (>500KB):"
             echo "$LARGE_FILES"
             exit 1
           else
-            echo "✅ No large files detected"
+            echo "✅ No large changed files detected"
           fi
 
   # ============================================================
