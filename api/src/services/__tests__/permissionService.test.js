@@ -27,26 +27,26 @@ describe('permissionService', () => {
       expect(result.effectivePermissions).toEqual([]);
     });
 
-    it('returns empty when no tier_id assigned', async () => {
-      query.mockResolvedValueOnce([{ tier_id: null, group_name: null }]);
+    it('returns empty when no permission group assigned', async () => {
+      query.mockResolvedValueOnce([{ group_id: null, group_name: null, loc_scope: 'assigned' }]);
       const result = await resolveEffectivePermissions('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
       expect(result.effectivePermissions).toEqual([]);
     });
 
     it('returns base permissions from group', async () => {
-      query.mockResolvedValueOnce([{ tier_id: 'group-1', group_name: 'Admin' }]);
+      query.mockResolvedValueOnce([{ group_id: 'group-1', group_name: 'Staff', loc_scope: 'assigned' }]);
       query.mockResolvedValueOnce([{ permission: 'customers.view' }, { permission: 'appointments.view' }]);
       query.mockResolvedValueOnce([]); // overrides
       query.mockResolvedValueOnce([]); // locations
 
       const result = await resolveEffectivePermissions('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
       expect(result.groupId).toBe('group-1');
-      expect(result.groupName).toBe('Admin');
+      expect(result.groupName).toBe('Staff');
       expect(result.effectivePermissions).toEqual(['customers.view', 'appointments.view']);
     });
 
     it('applies grant overrides', async () => {
-      query.mockResolvedValueOnce([{ tier_id: 'group-1', group_name: 'Staff' }]);
+      query.mockResolvedValueOnce([{ group_id: 'group-1', group_name: 'Staff', loc_scope: 'assigned' }]);
       query.mockResolvedValueOnce([{ permission: 'customers.view' }]);
       query.mockResolvedValueOnce([
         { permission: 'customers.edit', override_type: 'grant' },
@@ -59,7 +59,7 @@ describe('permissionService', () => {
     });
 
     it('applies revoke overrides', async () => {
-      query.mockResolvedValueOnce([{ tier_id: 'group-1', group_name: 'Staff' }]);
+      query.mockResolvedValueOnce([{ group_id: 'group-1', group_name: 'Staff', loc_scope: 'assigned' }]);
       query.mockResolvedValueOnce([
         { permission: 'customers.view' },
         { permission: 'customers.edit' },
@@ -75,7 +75,7 @@ describe('permissionService', () => {
     });
 
     it('returns location scope', async () => {
-      query.mockResolvedValueOnce([{ tier_id: 'group-1', group_name: 'Staff' }]);
+      query.mockResolvedValueOnce([{ group_id: 'group-1', group_name: 'Staff', loc_scope: 'assigned' }]);
       query.mockResolvedValueOnce([]);
       query.mockResolvedValueOnce([]);
       query.mockResolvedValueOnce([
@@ -90,8 +90,49 @@ describe('permissionService', () => {
       ]);
     });
 
+    it('falls back to legacy employee_permissions group assignment', async () => {
+      query.mockResolvedValueOnce([{ group_id: 'legacy-group', group_name: 'Receptionist', loc_scope: 'assigned' }]);
+      query.mockResolvedValueOnce([{ permission: 'customers.view' }]);
+      query.mockResolvedValueOnce([]);
+      query.mockResolvedValueOnce([]);
+
+      const result = await resolveEffectivePermissions('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
+      expect(result.groupId).toBe('legacy-group');
+      expect(result.effectivePermissions).toEqual(['customers.view']);
+    });
+
+    it('falls back when partners.tier_id column is absent', async () => {
+      query.mockRejectedValueOnce({ code: '42703', message: 'column p.tier_id does not exist' });
+      query.mockResolvedValueOnce([{ group_id: 'legacy-group', group_name: 'Receptionist', loc_scope: 'assigned' }]);
+      query.mockResolvedValueOnce([{ permission: 'customers.view' }]);
+      query.mockResolvedValueOnce([]);
+      query.mockResolvedValueOnce([]);
+
+      const result = await resolveEffectivePermissions('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
+      expect(result.groupId).toBe('legacy-group');
+      expect(result.groupName).toBe('Receptionist');
+      expect(result.effectivePermissions).toEqual(['customers.view']);
+    });
+
+    it('returns all locations for all-location scope', async () => {
+      query.mockResolvedValueOnce([{ group_id: 'group-1', group_name: 'Clinic Manager', loc_scope: 'all' }]);
+      query.mockResolvedValueOnce([]);
+      query.mockResolvedValueOnce([]);
+      query.mockResolvedValueOnce([
+        { id: 'loc-1', name: 'HCM Clinic' },
+        { id: 'loc-2', name: 'HN Clinic' },
+      ]);
+
+      const result = await resolveEffectivePermissions('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
+      expect(query.mock.calls[3][1]).toEqual([]);
+      expect(result.locations).toEqual([
+        { id: 'loc-1', name: 'HCM Clinic' },
+        { id: 'loc-2', name: 'HN Clinic' },
+      ]);
+    });
+
     it('reports 3 parallel DB calls (optimized)', async () => {
-      query.mockResolvedValueOnce([{ tier_id: 'group-1', group_name: 'Admin' }]);
+      query.mockResolvedValueOnce([{ group_id: 'group-1', group_name: 'Staff', loc_scope: 'assigned' }]);
       query.mockResolvedValueOnce([{ permission: 'customers.view' }]);
       query.mockResolvedValueOnce([]);
       query.mockResolvedValueOnce([]);
@@ -103,7 +144,7 @@ describe('permissionService', () => {
 
   describe('hasPermission', () => {
     it('returns true when permission in set', async () => {
-      query.mockResolvedValueOnce([{ tier_id: 'group-1', group_name: 'Admin' }]);
+      query.mockResolvedValueOnce([{ group_id: 'group-1', group_name: 'Staff', loc_scope: 'assigned' }]);
       query.mockResolvedValueOnce([{ permission: 'customers.view' }]);
       query.mockResolvedValueOnce([]);
       query.mockResolvedValueOnce([]);
@@ -113,7 +154,7 @@ describe('permissionService', () => {
     });
 
     it('returns false when permission not in set', async () => {
-      query.mockResolvedValueOnce([{ tier_id: 'group-1', group_name: 'Staff' }]);
+      query.mockResolvedValueOnce([{ group_id: 'group-1', group_name: 'Staff', loc_scope: 'assigned' }]);
       query.mockResolvedValueOnce([{ permission: 'appointments.view' }]);
       query.mockResolvedValueOnce([]);
       query.mockResolvedValueOnce([]);
@@ -130,7 +171,7 @@ describe('permissionService', () => {
     });
 
     it('wildcard grants everything', async () => {
-      query.mockResolvedValueOnce([{ tier_id: 'group-1', group_name: 'Admin' }]);
+      query.mockResolvedValueOnce([{ group_id: 'group-1', group_name: 'Admin', loc_scope: 'all' }]);
       query.mockResolvedValueOnce([{ permission: '*' }]);
       query.mockResolvedValueOnce([]);
       query.mockResolvedValueOnce([]);

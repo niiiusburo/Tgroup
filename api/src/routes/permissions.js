@@ -4,6 +4,82 @@ const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
+function isMissingTierIdColumn(err) {
+  return err && err.code === '42703' && /tier_id/.test(err.message || '');
+}
+
+async function fetchEmployeePermissionRows() {
+  try {
+    return await query(`
+      SELECT
+        p.id AS "employeeId",
+        p.name AS "employeeName",
+        COALESCE(p.tier_id, ep.group_id) AS "groupId",
+        pg.name AS "groupName",
+        pg.color AS "groupColor",
+        COALESCE(ep.loc_scope, 'assigned') AS "locScope"
+      FROM partners p
+      LEFT JOIN employee_permissions ep ON ep.employee_id = p.id
+      LEFT JOIN permission_groups pg ON pg.id = COALESCE(p.tier_id, ep.group_id)
+      WHERE p.employee = true AND p.isdeleted = false
+      ORDER BY p.name ASC
+    `);
+  } catch (err) {
+    if (!isMissingTierIdColumn(err)) throw err;
+
+    return query(`
+      SELECT
+        p.id AS "employeeId",
+        p.name AS "employeeName",
+        ep.group_id AS "groupId",
+        pg.name AS "groupName",
+        pg.color AS "groupColor",
+        COALESCE(ep.loc_scope, 'assigned') AS "locScope"
+      FROM partners p
+      LEFT JOIN employee_permissions ep ON ep.employee_id = p.id
+      LEFT JOIN permission_groups pg ON pg.id = ep.group_id
+      WHERE p.employee = true AND p.isdeleted = false
+      ORDER BY p.name ASC
+    `);
+  }
+}
+
+async function fetchEmployeePermissionAssignment(employeeId) {
+  try {
+    return await query(
+      `SELECT
+        p.id AS employee_id,
+        p.name AS employee_name,
+        COALESCE(p.tier_id, ep.group_id) AS group_id,
+        pg.name AS group_name,
+        pg.color AS group_color,
+        COALESCE(ep.loc_scope, 'assigned') AS loc_scope
+       FROM partners p
+       LEFT JOIN employee_permissions ep ON ep.employee_id = p.id
+       LEFT JOIN permission_groups pg ON pg.id = COALESCE(p.tier_id, ep.group_id)
+       WHERE p.id = $1`,
+      [employeeId]
+    );
+  } catch (err) {
+    if (!isMissingTierIdColumn(err)) throw err;
+
+    return query(
+      `SELECT
+        p.id AS employee_id,
+        p.name AS employee_name,
+        ep.group_id,
+        pg.name AS group_name,
+        pg.color AS group_color,
+        COALESCE(ep.loc_scope, 'assigned') AS loc_scope
+       FROM partners p
+       LEFT JOIN employee_permissions ep ON ep.employee_id = p.id
+       LEFT JOIN permission_groups pg ON pg.id = ep.group_id
+       WHERE p.id = $1`,
+      [employeeId]
+    );
+  }
+}
+
 /**
  * GET /api/Permissions/groups
  * Returns all permission groups with their permissions array
@@ -147,20 +223,7 @@ router.put('/groups/:groupId', requirePermission('permissions.edit'), async (req
  */
 router.get('/employees', requirePermission('permissions.view'), async (req, res) => {
   try {
-    const rows = await query(`
-      SELECT
-        p.id AS "employeeId",
-        p.name AS "employeeName",
-        p.tier_id AS "groupId",
-        pg.name AS "groupName",
-        pg.color AS "groupColor",
-        COALESCE(ep.loc_scope, 'all') AS "locScope"
-      FROM partners p
-      LEFT JOIN permission_groups pg ON pg.id = p.tier_id
-      LEFT JOIN employee_permissions ep ON ep.employee_id = p.id
-      WHERE p.employee = true AND p.isdeleted = false
-      ORDER BY p.name ASC
-    `);
+    const rows = await fetchEmployeePermissionRows();
 
     const employeeIds = rows.map(r => r.employeeId);
 
@@ -195,16 +258,27 @@ router.get('/employees', requirePermission('permissions.view'), async (req, res)
       }
     }
 
-    const result = rows.map(r => ({
-      employeeId: r.employeeId,
-      employeeName: r.employeeName,
-      groupId: r.groupId,
-      groupName: r.groupName,
-      groupColor: r.groupColor,
-      locScope: r.locScope,
-      locations: locationMap[r.employeeId] || [],
-      overrides: overridesMap[r.employeeId] || { grant: [], revoke: [] },
-    }));
+    let allLocations = [];
+    if (rows.some(r => r.locScope === 'all' || r.groupName === 'Admin')) {
+      allLocations = await query(`SELECT id, name FROM companies ORDER BY name`);
+    }
+
+    const result = rows.map(r => {
+      const locations = r.locScope === 'all' || r.groupName === 'Admin'
+        ? allLocations.map(l => ({ id: l.id, name: l.name }))
+        : locationMap[r.employeeId] || [];
+
+      return {
+        employeeId: r.employeeId,
+        employeeName: r.employeeName,
+        groupId: r.groupId,
+        groupName: r.groupName,
+        groupColor: r.groupColor,
+        locScope: r.locScope,
+        locations,
+        overrides: overridesMap[r.employeeId] || { grant: [], revoke: [] },
+      };
+    });
 
     return res.json(result);
   } catch (err) {
@@ -335,18 +409,7 @@ router.get('/resolve/:employeeId', requirePermission('permissions.view'), async 
   try {
     const { employeeId } = req.params;
 
-    const tierRows = await query(
-      `SELECT
-        p.id AS employee_id,
-        p.name AS employee_name,
-        p.tier_id AS group_id,
-        pg.name AS group_name,
-        pg.color AS group_color
-       FROM partners p
-       LEFT JOIN permission_groups pg ON pg.id = p.tier_id
-       WHERE p.id = $1`,
-      [employeeId]
-    );
+    const tierRows = await fetchEmployeePermissionAssignment(employeeId);
 
     if (!tierRows || tierRows.length === 0) {
       return res.status(404).json({ error: 'Employee not found' });
@@ -368,11 +431,14 @@ router.get('/resolve/:employeeId', requirePermission('permissions.view'), async 
         [employeeId]
       ),
       query(
-        `SELECT c.id, c.name
-         FROM employee_location_scope els
-         JOIN companies c ON c.id = els.company_id
-         WHERE els.employee_id = $1`,
-        [employeeId]
+        ep.loc_scope === 'all' || ep.group_name === 'Admin'
+          ? `SELECT c.id, c.name FROM companies c ORDER BY c.name`
+          : `SELECT c.id, c.name
+             FROM employee_location_scope els
+             JOIN companies c ON c.id = els.company_id
+             WHERE els.employee_id = $1
+             ORDER BY c.name`,
+        ep.loc_scope === 'all' || ep.group_name === 'Admin' ? [] : [employeeId]
       ),
     ]);
 

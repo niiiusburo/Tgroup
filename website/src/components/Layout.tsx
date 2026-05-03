@@ -62,7 +62,7 @@ const NAV_PERMISSION: Record<string, string> = {
   '/customers': 'customers.view',
   '/appointments': 'appointments.view',
   '/website': 'website.view',
-  '/service-catalog': 'customers.edit',
+  '/service-catalog': 'services.view',
   '/payment': 'payment.view',
   '/employees': 'employees.view',
   '/locations': 'locations.view',
@@ -248,7 +248,9 @@ export function Layout() {
   const { selectedLocationId, setSelectedLocationId, allowedLocations, isSingleLocation } = useLocationFilter();
   const { user, permissions, hasPermission, logout } = useAuth();
   const { allLocations: allApiLocations } = useLocations();
-  const locationsForFilter = allowedLocations.length > 0 ? allowedLocations : allApiLocations;
+  const locationsForFilter = allowedLocations.length > 0
+    ? [{ id: 'all', name: 'All Locations' }, ...allowedLocations]
+    : allApiLocations;
   const location = useLocation();
   const navigate = useNavigate();
 

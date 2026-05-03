@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.25.16",
+    "date": "2026-05-03",
+    "commit": "pending",
+    "highlights": "fix(auth): restore permission and location resolution for legacy assignments",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Resolve permissions from legacy employee_permissions group assignments when partners.tier_id is missing",
+          "Return explicit location lists for all-location and admin users so the UI does not infer access from an empty scope",
+          "Use the services.view permission for service catalog route and navigation access"
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Add permission service regression coverage for legacy group fallback and all-location scope resolution"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.25.15",
     "date": "2026-04-25",
     "commit": "pending",
