@@ -13,6 +13,7 @@ const {
   mapSaleOrderLineRow,
   mapSaleOrderRow,
 } = require('./transaction-mappers');
+const { assertRelationDrivenAllocationData } = require('./allocation-safety');
 const { buildDryRunSummary, planProductMatches, planStaffMatches, readLocalSnapshot } = require('./dry-run');
 const {
   booleanOrNull,
@@ -289,6 +290,7 @@ function mapPaymentAllocationsForApply(source, targetIds, anomalies) {
 }
 
 async function applyAppScopeMigration(client, source) {
+  assertRelationDrivenAllocationData(source);
   const local = await readLocalSnapshot(client);
   const refs = buildReferenceMaps(source, local);
   const dryRunSummary = buildDryRunSummary({ source, local });

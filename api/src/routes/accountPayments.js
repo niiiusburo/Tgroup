@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
+const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -8,7 +9,7 @@ const router = express.Router();
  * Query params: partner_id, offset, limit, search, sortField, sortOrder
  * Returns: customer's payments
  */
-router.get('/', async (req, res) => {
+router.get('/', requirePermission('payment.view'), async (req, res) => {
   try {
     const {
       partner_id,
@@ -175,7 +176,7 @@ router.get('/', async (req, res) => {
  * GET /api/AccountPayments/:id
  * Returns: single account payment with details
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', requirePermission('payment.view'), async (req, res) => {
   try {
     const { id } = req.params;
 

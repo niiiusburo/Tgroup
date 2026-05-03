@@ -19,6 +19,7 @@ interface PageListProps {
   readonly onViewSEO: (pageId: string) => void;
   readonly onClearFilters: () => void;
   readonly loading?: boolean;
+  readonly canEdit?: boolean;
   readonly stats: {
     readonly total: number;
     readonly published: number;
@@ -55,6 +56,7 @@ export function PageList({
   onViewSEO,
   onClearFilters,
   loading = false,
+  canEdit = false,
   stats,
 }: PageListProps) {
   const { t } = useTranslation('website');
@@ -177,20 +179,24 @@ export function PageList({
                     <td className="py-3 px-4 text-gray-500">{formatDate(page.lastModified)}</td>
                     <td className="py-3 px-4">
                       <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => onEdit(page.id)}
-                          className="p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/5 transition-colors"
-                          title="Edit page"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => onViewSEO(page.id)}
-                          className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                          title="SEO settings"
-                        >
-                          <SearchIcon className="w-4 h-4" />
-                        </button>
+                        {canEdit && (
+                          <>
+                            <button
+                              onClick={() => onEdit(page.id)}
+                              className="p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-primary/5 transition-colors"
+                              title="Edit page"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => onViewSEO(page.id)}
+                              className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                              title="SEO settings"
+                            >
+                              <SearchIcon className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

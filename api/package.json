@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "migrate-customer": "node ../scripts/migrate-customer.js",
-    "test": "jest tests/"
+    "test": "jest tests src"
   },
   "keywords": [],
   "author": "",

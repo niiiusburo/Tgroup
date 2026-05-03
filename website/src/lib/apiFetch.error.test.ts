@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { apiFetch, ApiError } from './api/core';
+import { apiFetch, ApiError, AUTH_UNAUTHORIZED_EVENT } from './api/core';
 
 describe('apiFetch error handling', () => {
   let fetchSpy: ReturnType<typeof vi.spyOn>;
@@ -77,5 +77,43 @@ describe('apiFetch error handling', () => {
     await expect(apiFetch('/Appointments', { method: 'POST', body: {} })).rejects.toSatisfy((err: any) => {
       return err instanceof ApiError && err.code === 'INVALID_DATE' && err.message === 'Bad date';
     });
+  });
+
+  it('should clear the saved token and notify auth listeners on 401 responses', async () => {
+    const listener = vi.fn();
+    window.addEventListener(AUTH_UNAUTHORIZED_EVENT, listener);
+    fetchSpy.mockResolvedValue({
+      ok: false,
+      status: 401,
+      clone: () => ({
+        json: () => Promise.resolve({ error: 'Invalid token' }),
+      }),
+      text: () => Promise.resolve(''),
+    } as any);
+
+    await expect(apiFetch('/Auth/me')).rejects.toBeInstanceOf(ApiError);
+
+    expect(localStorage.getItem('tgclinic_token')).toBeNull();
+    expect(listener).toHaveBeenCalledTimes(1);
+    window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, listener);
+  });
+
+  it('should not notify auth listeners on 403 permission denials', async () => {
+    const listener = vi.fn();
+    window.addEventListener(AUTH_UNAUTHORIZED_EVENT, listener);
+    fetchSpy.mockResolvedValue({
+      ok: false,
+      status: 403,
+      clone: () => ({
+        json: () => Promise.resolve({ error: 'Permission denied: appointments.add' }),
+      }),
+      text: () => Promise.resolve(''),
+    } as any);
+
+    await expect(apiFetch('/Appointments', { method: 'POST', body: {} })).rejects.toBeInstanceOf(ApiError);
+
+    expect(localStorage.getItem('tgclinic_token')).toBe('test-token');
+    expect(listener).not.toHaveBeenCalled();
+    window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, listener);
   });
 });

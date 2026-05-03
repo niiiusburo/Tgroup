@@ -27,6 +27,7 @@ interface CalendarToolbarProps {
   readonly suggestions: readonly CalendarCustomerSuggestion[];
   readonly isLoading: boolean;
   readonly canExportAppointments?: boolean;
+  readonly canQuickAddAppointments?: boolean;
   readonly onExportDirect?: () => void;
   readonly onExportPreview?: () => void;
   readonly exportDownloading?: boolean;
@@ -54,6 +55,7 @@ export function CalendarToolbar({
   suggestions,
   isLoading,
   canExportAppointments = false,
+  canQuickAddAppointments = false,
   onExportDirect,
   onExportPreview,
   exportDownloading = false,
@@ -168,7 +170,7 @@ export function CalendarToolbar({
           )}
         </button>
 
-        <QuickAddAppointmentButton onSuccess={onQuickAddSuccess} size="sm" />
+        {canQuickAddAppointments && <QuickAddAppointmentButton onSuccess={onQuickAddSuccess} size="sm" />}
       </div>
     </div>
   );

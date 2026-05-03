@@ -17,6 +17,7 @@
 | `components/customer/__tests__/CustomerProfile.i18n.test.tsx` | Customers | CustomerProfile i18n label rendering |
 | `components/customer/CustomerCameraWidget.test.tsx` | Integrations | Face capture camera widget UI |
 | `components/customer/CustomerProfile.test.tsx` | Customers | CustomerProfile tabs and data display |
+| `components/customer/AuthenticatedCheckupImage.test.tsx` | Integrations | Authenticated Hosoonline image proxy URL resolution |
 | `components/customer/ServiceHistory.test.tsx` | Services | Service history list rendering |
 | `components/forms/AddCustomerForm/AddCustomerForm.test.tsx` | Customers | Customer profile form excludes hidden customer source field |
 | `components/modules/__tests__/appointment-hover-link.test.tsx` | Appointments | Appointment hover card deep-linking |
@@ -71,6 +72,7 @@
 | `debug-login-network.spec.ts` | Auth | Login network request inspection |
 | `deep-audit-verification.spec.ts` | Cross-domain | Deep audit of data consistency |
 | `employee-save.spec.ts` | Employees | Employee create/edit persistence |
+| `export-downloads.spec.ts` | Reports/Exports | Operational Excel downloads for customers, calendar, services, payments, and service catalog; validates workbook sheets, headers, dates, and numeric cells |
 | `filter-location-dropdown.spec.ts` | Locations | Location filter dropdown behavior |
 | `location-filter-appointments.spec.ts` | Appointments | Location filter applied to appointments |
 | `login-and-settings.spec.ts` | Auth + Settings | Login + settings page smoke test |
@@ -106,12 +108,18 @@
 | `faceRecognition.test.js` | Integrations | Compreface face register/recognize API |
 | `src/routes/__tests__/externalCheckups.test.js` | Integrations | Hosoonline auth header and migrated ref lookup behavior |
 | `src/routes/partners/__tests__/searchFilters.test.js` | Customers | Customer search matches related appointment and service order numbers |
+| `saleOrders.test.js` | Services/Payments | Sale order edits recalculate residual display from `payment_allocations` |
+| `tdentalImport.test.js` | Data/Money | TDental import mapping, payment status, local-only payment cleanup, CSV date parsing, and anomaly policy |
+| `tdentalDryRun.test.js` | Data/Migration | Full-export dry-run staff/product matching and compact import planning |
+| `telemetry.test.js` | Settings/Telemetry | Telemetry error ingestion, deduplication, management updates, fix attempts, and stats |
+| `telemetryAuth.test.js` | Settings/Telemetry | Public-only error ingestion and auth-required telemetry management routes |
 
 ## Coverage Gaps
 
 | Domain | Missing Test Coverage |
 |--------|----------------------|
 | **Payments (backend)** | No backend tests for payment allocation, void, refund, or deposit logic |
+| **Exports (backend)** | E2E covers workbook shape, but there are no route-level unit tests for `/api/Exports` permission filtering, row-limit errors, or `exports_audit` failure behavior |
 | **Auth (backend)** | No backend tests for `requirePermission` or `resolvePermissions` divergence |
 | **Appointments (backend)** | No backend tests for appointment CRUD or validation |
 | **Reports** | No automated accuracy tests for SQL aggregations |

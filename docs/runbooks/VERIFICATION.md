@@ -16,10 +16,11 @@ npm --prefix contracts install
 
 ```bash
 git diff --check
+rg -n "/website.*routes to ServiceCatalog|/website.*renders.*ServiceCatalog|/api/version/event|NOT IMPLEMENTED" product-map docs/runbooks docs/superpowers/reviews --glob '!docs/runbooks/VERIFICATION.md'
 rg -n "TV2codex|Tradeverse|TVNUKE|CopyRelation|AtlasGo|USDT" AGENTS.md ARCHITECTURE.md DESIGN.md BEHAVIOR.md DECISIONS.md COORDINATION_REQUESTS.md IDEA.md docs/runbooks --glob '!docs/runbooks/VERIFICATION.md'
 ```
 
-Expected: no whitespace errors; no leaked Tradeverse product rules in TGClinic authority docs.
+Expected: no whitespace errors; no stale product-map contracts for current routes; no leaked Tradeverse product rules in TGClinic authority docs.
 
 ## Frontend Changes
 
@@ -38,6 +39,12 @@ npm --prefix api test
 ```
 
 For route changes, add or update Supertest/Jest coverage where practical.
+
+Export route changes should also run or update:
+
+```bash
+npm --prefix website run test:e2e -- e2e/export-downloads.spec.ts
+```
 
 ## Contracts Changes
 

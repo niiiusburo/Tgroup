@@ -3,6 +3,16 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithProviders } from '@/test/test-utils';
 import { Calendar } from './Calendar';
 
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => ({
+    hasPermission: (permission: string) => [
+      'appointments.add',
+      'appointments.edit',
+      'appointments.export',
+    ].includes(permission),
+  }),
+}));
+
 // Mock API
 vi.mock('@/lib/api', () => ({
   fetchAppointments: vi.fn().mockResolvedValue({

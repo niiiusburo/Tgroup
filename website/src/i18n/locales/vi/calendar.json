@@ -5,6 +5,8 @@
   "monthView": "Tháng",
   "today": "Hôm nay",
   "noAppointments": "Không có lịch hẹn",
+  "loadingAppointments": "Đang tải lịch hẹn...",
+  "close": "Đóng",
   "allDay": "Cả ngày",
   "appointmentTypes": {
     "cleaning": "Cạo vôi răng",

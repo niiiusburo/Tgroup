@@ -6,16 +6,21 @@ summary: |
 owns:
   - api/src/routes/reports.js
   - api/src/routes/dashboardReports.js
+  - api/src/routes/exports.js
+  - api/src/services/exports/
   - website/src/pages/Reports.tsx
   - website/src/pages/reports/
   - website/src/components/reports/
+  - website/src/components/shared/ExportMenu.tsx
+  - website/src/components/shared/ExportPreviewModal.tsx
   - website/src/hooks/useReportData.ts
   - website/src/hooks/useDashboardStats.ts
   - website/src/hooks/useOverviewData.ts
+  - website/src/hooks/useExport.ts
 reads:
   - api/src/db.js
 writes:
-  - none (read-only domain)
+  - dbo.exports_audit (preview/download audit rows only)
 tables:
   - dbo.appointments
   - dbo.payments
@@ -28,6 +33,7 @@ tables:
   - dbo.customersources
   - dbo.monthlyplans
   - dbo.planinstallments
+  - dbo.exports_audit
 endpoints:
   - POST /api/Reports/dashboard
   - POST /api/Reports/revenue/summary
@@ -44,6 +50,9 @@ endpoints:
   - POST /api/Reports/services/breakdown
   - POST /api/Reports/locations/comparison
   - POST /api/DashboardReports/GetSumary
+  - GET  /api/Exports/types
+  - POST /api/Exports/:type/preview
+  - POST /api/Exports/:type/download
 ui_surfaces:
   - /reports
   - /reports/dashboard
@@ -54,6 +63,7 @@ ui_surfaces:
   - /reports/locations
   - /reports/services
   - /reports/employees
+  - Export menus on /customers, /calendar, /services, /payment, and /service-catalog
   - Overview page (TodaySchedule, RevenueChartModule, StatCardModule)
 jobs:
   - none
@@ -73,5 +83,9 @@ affected_by:
 impact_tests:
   - website/src/pages/reports/__tests__/ReportsDashboard.test.tsx
   - website/src/pages/reports/__tests__/ReportsSubpages.test.tsx
+  - website/e2e/export-downloads.spec.ts
   - website/src/__tests__/useVersionCheck.test.ts (indirect)
 risk_level: medium
+notes:
+  - "`/api/Exports` is operational export infrastructure, not the full reports module; it belongs here for audit/test ownership because it reads across reporting-style aggregates."
+  - Export download audit logging is fire-and-forget after the XLSX response; preview audit logging is awaited but catch-and-log. Verification that an audit row exists requires a direct DB/API check.

@@ -25,11 +25,22 @@ jobs:
       - name: Get PR diff
         id: get-diff
         run: |
+          set +e
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }} > pr_diff.txt
           else
             gh pr diff ${{ inputs.pr_number }} --repo ${{ github.repository }} > pr_diff.txt
           fi
+          DIFF_EXIT=$?
+          set -e
+          if [ "$DIFF_EXIT" -ne 0 ]; then
+            : > pr_diff.txt
+            echo "diff_available=false" >> $GITHUB_OUTPUT
+            echo "diff_size=0" >> $GITHUB_OUTPUT
+            echo "PR diff was too large or unavailable; continuing with file-list summary." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "diff_available=true" >> $GITHUB_OUTPUT
           echo "diff_size=$(stat -c%s pr_diff.txt)" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -41,8 +52,29 @@ jobs:
           echo "" >> review_comment.md
           echo "### Files Changed" >> review_comment.md
           echo "\`\`\`" >> review_comment.md
-          git diff --name-only HEAD~1 >> review_comment.md 2>/dev/null || echo "See PR files tab" >> review_comment.md
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+            HEAD="${{ github.event.pull_request.head.sha }}"
+            CHANGED_COUNT=$(git diff --name-only "$BASE" "$HEAD" | wc -l | tr -d ' ')
+            git diff --name-only "$BASE" "$HEAD" | head -300 >> review_comment.md
+            if [ "$CHANGED_COUNT" -gt 300 ]; then
+              echo "... truncated; ${CHANGED_COUNT} files changed total." >> review_comment.md
+            fi
+          else
+            git diff --name-only HEAD~1 | head -300 >> review_comment.md 2>/dev/null || echo "See PR files tab" >> review_comment.md
+          fi
           echo "\`\`\`" >> review_comment.md
+          echo "" >> review_comment.md
+          if [ "${{ steps.get-diff.outputs.diff_available }}" = "false" ]; then
+            echo "> Full diff was too large for GitHub's PR diff endpoint; review the Files changed tab for complete details." >> review_comment.md
+            echo "" >> review_comment.md
+          fi
+          echo "### Local Verification" >> review_comment.md
+          echo "- npm --prefix website run lint" >> review_comment.md
+          echo "- npm --prefix website run build" >> review_comment.md
+          echo "- npm --prefix website run test" >> review_comment.md
+          echo "- npm --prefix api test -- --runInBand" >> review_comment.md
+          echo "- npm --prefix contracts run build" >> review_comment.md
           echo "" >> review_comment.md
           echo "### Review Checklist" >> review_comment.md
           echo "- [ ] Code follows project conventions" >> review_comment.md

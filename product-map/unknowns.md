@@ -34,9 +34,9 @@
 
 ## 6. External Checkups (Hosoonline)
 
-- **Resolved:** Hosoonline image fetch/upload proxy calls authenticate with the configured `HOSOONLINE_API_KEY` via the `X-API-Key` header, not a bearer token.
-- **Resolved for image reads:** The current observed Hosoonline website contract logs in through `POST /api/auth/login`, searches records through `GET /api/appointments/search?q=<customerCode>&page=<page>`, and reads image bytes from `GET /api/appointments/image/:imageName`.
-- **Unknown:** Whether Hosoonline still supports API-key auth for any partner-only endpoints, and whether upload should now create/update appointments instead of posting to the older health-checkup endpoint.
+- **Resolved for current image reads:** When `HOSOONLINE_USERNAME` and `HOSOONLINE_PASSWORD` are configured, TGClinic logs in through `POST /api/auth/login`, searches records through `GET /api/appointments/search?q=<customerCode>&page=<page>`, and reads image bytes from `GET /api/appointments/image/:imageName`.
+- **Resolved for legacy fallback:** If login credentials are absent, TGClinic still falls back to the older `HOSOONLINE_API_KEY` / `X-API-Key` contract for patient health-checkup endpoints where upstream still supports it.
+- **Unknown:** Whether Hosoonline still supports API-key auth for any current partner-only endpoints, and whether upload should now create/update appointment media instead of posting to the older `/api/patients/:code/health-checkups` endpoint.
 
 ## 7. Payment Allocation Logic Edge Cases
 

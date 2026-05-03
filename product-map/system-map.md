@@ -76,7 +76,18 @@
 - **Frontend:** `ProtectedRoute` in `App.tsx` maps paths to permission strings.
 - **Backend:** `requirePermission(permission)` middleware re-resolves effective permissions on every guarded request.
 
-### 3.4 Shared Table Hazards
+### 3.4 Operational Exports
+- **Route family:** `GET /api/Exports/types`, `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download`.
+- **Types:** `customers`, `appointments`, `services`, `payments`, `service-catalog`.
+- **Audit:** `exports_audit` records preview/download attempts, but route code catch-and-logs audit failures.
+- **Infra:** large downloads require nginx API proxy timeouts to exceed the default 60s behavior.
+
+### 3.5 Telemetry
+- **Public ingestion:** `POST /api/telemetry/errors` is mounted before global auth and rate-limited for frontend error capture.
+- **Authenticated management:** `GET/PUT /api/telemetry/errors`, fix attempts, stats, and version events run behind global `/api` auth.
+- **Storage:** `error_events`, `error_fix_attempts`, and `version_events`.
+
+### 3.6 Shared Table Hazards
 - **`dbo.partners`** stores **both customers and employees** (SMI via `customer`, `employee` boolean flags).
   - High blast radius: schema changes affect Customers, Employees, Auth, Face Recognition, Payments, Appointments.
 - **`dbo.products`** stores **services catalog** (legacy name from Odoo).
@@ -106,10 +117,10 @@
 - **Risk:** Adding a new query param with camelCase that is not in the passthrough set will send snake_case to the backend, which may ignore it silently.
 
 ### 5.3 Frontend Routing Mismatch
-- `/website` route in `App.tsx` renders `<ServiceCatalog />`, not a website CMS page.
-- The actual CMS is at `/website` in the nav label but uses `ServiceCatalog` component.
-- `/services` page handles patient treatment records.
-- **Risk:** Naming confusion during refactors.
+- `/service-catalog` route in `App.tsx` renders `<ServiceCatalog />` and is guarded by `customers.edit`.
+- `/website` route renders the Website CMS page and is guarded by `website.view`.
+- `/services` page handles patient treatment records and is guarded by `customers.edit`.
+- **Risk:** Older docs and page-level comments may still call the service catalog `/website`; refactors must use the current route constants.
 
 ### 5.4 Dead Backend Route
 - `api/src/routes/services.js` mounts at `/api/Services` but queries `public.services` (non-existent table).
@@ -140,7 +151,7 @@
 | `docker-compose.yml` | `api/`, `website/`, `nginx.conf`, `.env` (POSTGRES_USER, POSTGRES_PASSWORD, JWT_SECRET, GOOGLE_PLACES_API_KEY, HOSOONLINE_*, COMPREFACE_*) |
 | `Dockerfile.api` | `api/package.json`, `api/src/` |
 | `Dockerfile.web` | `website/package.json`, `website/`, `nginx.docker.conf` |
-| `nginx.conf` | `nk.2checkin.com` domain, SSL cert paths, `/api` proxy to `api:3002`, `/uploads/feedback` proxy |
+| `nginx.conf` | `nk.2checkin.com` domain, SSL cert paths, `/api` proxy to `api:3002`, `/uploads/feedback` proxy, long-running export timeout behavior |
 | `nginx.docker.conf` | Inside `Dockerfile.web`; must match `nginx.conf` proxy rules |
 | `scripts/deploy-tbot.sh` | `nginx.conf`, certbot, Docker install on target VPS |
 

@@ -19,7 +19,7 @@ export function StatusBadgeMenu({
   treatmentStartTime,
   onPhaseChange
 }: StatusBadgeMenuProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('calendar');
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const styles = PHASE_STYLES[phase];

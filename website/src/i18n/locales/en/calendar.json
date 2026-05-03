@@ -5,6 +5,8 @@
   "monthView": "Month",
   "today": "Today",
   "noAppointments": "No appointments",
+  "loadingAppointments": "Loading appointments...",
+  "close": "Close",
   "allDay": "All Day",
   "appointmentTypes": {
     "cleaning": "Cleaning",

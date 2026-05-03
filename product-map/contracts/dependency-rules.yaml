@@ -40,10 +40,59 @@ rules:
       - UI components using the hook
       - E2E tests for the endpoint flow
       - website/src/constants/index.ts ROUTE_PERMISSIONS if new page
+      - product-map/contracts/api-index.md
+      - product-map/domains/<affected-domain>.yaml
+      - product-map/test-matrix.md
     should_review:
       - nginx.conf / nginx.docker.conf if path or upload size changes
       - docker-compose.yml if new env vars required
       - scripts/deploy-tbot.sh
+
+  - name: export-contract-change
+    trigger: "New or changed /api/Exports type, filter, workbook shape, permission, or audit behavior"
+    must_update:
+      - api/src/services/exports/exportRegistry.js
+      - affected export builder in api/src/services/exports/builders/
+      - frontend export API client and useExport hook
+      - page filter mapping for each affected route
+      - export permission seed/registry if permission changes
+      - product-map/contracts/api-index.md
+      - product-map/schema-map.md if exports_audit changes
+      - product-map/test-matrix.md
+      - website/e2e/export-downloads.spec.ts or equivalent workbook verification
+    should_review:
+      - nginx proxy timeouts for long-running downloads
+      - row-limit and formula-injection behavior
+      - docs/runbooks/INFRASTRUCTURE.md and VERIFICATION.md
+
+  - name: external-integration-contract-change
+    trigger: "Change to Hosoonline, Compreface, or other vendor auth/path/payload behavior"
+    must_update:
+      - affected backend proxy route
+      - .env.example if env shape changes
+      - docker-compose.yml / deploy secret requirements if runtime env changes
+      - product-map/domains/integrations.yaml
+      - product-map/contracts/api-index.md
+      - product-map/unknowns.md if an unresolved vendor behavior changes status
+      - route-level integration tests or mocks
+      - staff-facing error copy if failure semantics change
+    should_review:
+      - docs/runbooks/INFRASTRUCTURE.md
+      - frontend image/upload components using the proxy
+
+  - name: telemetry-contract-change
+    trigger: "Change to telemetry ingestion, management endpoints, auth boundary, or error/version event schema"
+    must_update:
+      - api/src/server.js public ingestion bypass if auth boundary changes
+      - api/src/routes/telemetry.js
+      - product-map/contracts/api-index.md
+      - product-map/schema-map.md
+      - product-map/domains/settings-system.yaml
+      - product-map/test-matrix.md
+    should_review:
+      - api/tests/telemetryAuth.test.js
+      - api/tests/telemetry.test.js
+      - frontend ErrorBoundary/ErrorReporter and version update hooks
 
   - name: permission-change
     trigger: "Change to permission string, tier logic, location scope, or auth middleware"

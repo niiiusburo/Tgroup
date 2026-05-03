@@ -143,10 +143,15 @@ describe('P0.3 — Payment Category Column', () => {
   beforeAll(() => {
     const fs = require('fs');
     const path = require('path');
-    paymentJsCode = fs.readFileSync(
+    const paymentRouteCode = fs.readFileSync(
       path.join(__dirname, '..', 'routes', 'payments.js'),
       'utf8'
     );
+    const paymentReadCode = fs.readFileSync(
+      path.join(__dirname, '..', 'routes', 'payments', 'readHandlers.js'),
+      'utf8'
+    );
+    paymentJsCode = `${paymentRouteCode}\n${paymentReadCode}`;
   });
 
   describe('Migration applied', () => {
@@ -203,7 +208,7 @@ describe('P0.3 — Payment Category Column', () => {
     it('/deposit-usage route is simplified', () => {
       expect(paymentJsCode).toContain("p.deposit_type = 'usage'");
       // Old multi-condition filter removed
-      const depositUsageSection = paymentJsCode.split('router.get("/deposit-usage"')[1]?.split('router.')[0] || '';
+      const depositUsageSection = paymentJsCode.split('async function listDepositUsage')[1]?.split('async function getPaymentById')[0] || '';
       expect(depositUsageSection).not.toContain("p.method = 'deposit'");
     });
 

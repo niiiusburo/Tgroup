@@ -7,6 +7,7 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { LocationDetail } from '@/components/locations/LocationDetail';
 import { useLocations } from '@/hooks/useLocations';
 import { STATUS_LABELS, type LocationStatus, type LocationBranch } from '@/data/mockLocations';
+import { useAuth } from '@/contexts/AuthContext';
 
 /**
  * Locations Page - Manage clinic branches with grid, detail view, and dashboard
@@ -16,6 +17,8 @@ import { STATUS_LABELS, type LocationStatus, type LocationBranch } from '@/data/
  */
 export function Locations() {
   const { t } = useTranslation('locations');
+  const { hasPermission } = useAuth();
+  const canEditLocations = hasPermission('locations.edit');
   const {
     locations,
     selectedLocation,
@@ -41,6 +44,7 @@ export function Locations() {
         location={selectedLocation}
         metrics={metrics}
         onBack={() => setSelectedLocationId(null)}
+        canEdit={canEditLocations}
         onUpdate={(updated: LocationBranch) => {
           updateLocation(updated);
         }} />);
@@ -57,13 +61,15 @@ export function Locations() {
         subtitle={t('locations:subtitle')}
         icon={<MapPin className="w-6 h-6 text-primary" />}
         actions={
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Add Location
-          </button>
+          canEditLocations ? (
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Add Location
+            </button>
+          ) : undefined
         }
       />
 
@@ -162,7 +168,7 @@ export function Locations() {
       )}
 
       {/* Add Location Modal */}
-      {showAddForm &&
+      {showAddForm && canEditLocations &&
       <div className="modal-container">
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowAddForm(false)} />
           <div className="modal-content max-w-[560px] animate-in zoom-in-95 duration-200">

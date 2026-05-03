@@ -115,6 +115,37 @@ export const ROUTES = {
 } as const
 
 /**
+ * Route path to required view permission.
+ * Shared by App route guards and Layout navigation visibility.
+ */
+export const ROUTE_PERMISSIONS: Record<string, string> = {
+  [ROUTES.OVERVIEW]: 'overview.view',
+  [ROUTES.CALENDAR]: 'calendar.view',
+  [ROUTES.CUSTOMERS]: 'customers.view',
+  [ROUTES.EMPLOYEES]: 'employees.view',
+  [ROUTES.LOCATIONS]: 'locations.view',
+  [ROUTES.SERVICES]: 'customers.edit',
+  [ROUTES.SERVICE_CATALOG]: 'services.view',
+  [ROUTES.WEBSITE]: 'website.view',
+  [ROUTES.REPORTS]: 'reports.view',
+  [ROUTES.REPORTS_DASHBOARD]: 'reports.view',
+  [ROUTES.REPORTS_REVENUE]: 'reports.view',
+  [ROUTES.REPORTS_APPOINTMENTS]: 'reports.view',
+  [ROUTES.REPORTS_DOCTORS]: 'reports.view',
+  [ROUTES.REPORTS_CUSTOMERS]: 'reports.view',
+  [ROUTES.REPORTS_LOCATIONS]: 'reports.view',
+  [ROUTES.REPORTS_SERVICES]: 'reports.view',
+  [ROUTES.REPORTS_EMPLOYEES]: 'reports.view',
+  [ROUTES.COMMISSION]: 'commission.view',
+  [ROUTES.SETTINGS]: 'settings.view',
+  [ROUTES.NOTIFICATIONS]: 'notifications.view',
+  [ROUTES.RELATIONSHIPS]: 'relationships.view',
+  [ROUTES.PERMISSIONS]: 'permissions.view',
+  [ROUTES.PAYMENT]: 'payment.view',
+  [ROUTES.FEEDBACK]: 'permissions.view',
+} as const
+
+/**
  * Navigation item type with optional children for hierarchical menus
  */
 export interface NavigationItem {

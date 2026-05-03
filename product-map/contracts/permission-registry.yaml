@@ -2,20 +2,32 @@
 # Canonical mapping of all permission strings to backend routes, frontend routes, and UI components.
 
 meta:
-  total_backend_strings: 21
+  total_backend_strings: 29
   total_frontend_route_guards: 15
   total_nav_guards: 13
   wildcard: "*"
   wildcard_meaning: "Grants all permissions (used in auth middleware and hasPermission)"
 
-# Backend permission strings used in requirePermission() middleware
+# Backend permission strings enforced by route-level permission middleware
 backend_permissions:
+  - string: appointments.view
+    routes:
+      - GET /api/Appointments
+      - GET /api/Appointments/:id
   - string: appointments.add
     routes:
       - POST /api/Appointments
+  - string: appointments.export
+    routes:
+      - POST /api/Exports/appointments/preview
+      - POST /api/Exports/appointments/download
   - string: appointments.edit
     routes:
       - PUT /api/Appointments/:id
+  - string: customers.export
+    routes:
+      - POST /api/Exports/customers/preview
+      - POST /api/Exports/customers/download
   - string: customers.add
     routes:
       - POST /api/Partners
@@ -30,8 +42,16 @@ backend_permissions:
       - DELETE /api/Partners/:id/hard-delete
   - string: customers.view
     routes:
+      - GET /api/Partners
+      - GET /api/Partners/check-unique
       - GET /api/Partners/:id
       - GET /api/Partners/:id/GetKPIs
+      - GET /api/CustomerReceipts
+      - GET /api/CustomerReceipts/:id
+  - string: employees.view
+    routes:
+      - GET /api/Employees
+      - GET /api/Employees/:id
   - string: employees.edit
     routes:
       - POST /api/Employees
@@ -58,8 +78,18 @@ backend_permissions:
       - DELETE /api/MonthlyPlans/:id
   - string: payment.view
     routes:
+      - GET /api/Payments
+      - GET /api/Payments/deposits
+      - GET /api/Payments/deposit-usage
+      - GET /api/Payments/:id
+      - GET /api/AccountPayments
+      - GET /api/AccountPayments/:id
       - GET /api/MonthlyPlans
       - GET /api/MonthlyPlans/:id
+  - string: payments.export
+    routes:
+      - POST /api/Exports/payments/preview
+      - POST /api/Exports/payments/download
   - string: permissions.edit
     routes:
       - POST /api/Permissions/groups
@@ -74,6 +104,9 @@ backend_permissions:
     routes:
       - POST /api/Reports/*
       - POST /api/DashboardReports/GetSumary
+  - string: locations.view
+    routes:
+      - GET /api/Companies
   - string: services.edit
     routes:
       - POST /api/Products
@@ -84,7 +117,19 @@ backend_permissions:
       - DELETE /api/ProductCategories/:id
   - string: services.view
     routes:
-      - GET /api/Services
+      - GET /api/Products
+      - GET /api/Products/:id
+      - GET /api/SaleOrders
+      - GET /api/SaleOrders/lines
+      - GET /api/SaleOrders/:id
+  - string: products.export
+    routes:
+      - POST /api/Exports/service-catalog/preview
+      - POST /api/Exports/service-catalog/download
+  - string: services.export
+    routes:
+      - POST /api/Exports/services/preview
+      - POST /api/Exports/services/download
   - string: settings.edit
     routes:
       - POST /api/CustomerSources
@@ -171,7 +216,7 @@ frontend_route_permissions:
 # Additional frontend permissions not in ROUTE_PERMISSIONS but checked inline
 frontend_inline_permissions:
   - string: appointments.view
-    note: Implied by calendar.view; no explicit route guard but backend GET /api/Appointments is unguarded
+    note: Implied by calendar.view/nav appointments entry; backend GET /api/Appointments is now guarded
   - string: locations.edit
     components:
       - components/settings/RoleConfig.tsx (inferred from grep)
@@ -235,12 +280,10 @@ nav_permissions:
 
 # Gaps / risks
 risks:
-  - desc: "appointments.view exists in NAV_PERMISSION but not in backend requirePermission list (GET /api/Appointments is open)"
-    severity: medium
   - desc: "locations.edit is checked in frontend but no backend requirePermission('locations.edit') exists"
     severity: low
-  - desc: "services.view guards GET /api/Services which is dead code (public.services table missing)"
-    severity: high
+  - desc: "Frontend /services and /service-catalog route guards currently use customers.edit while backend service reads now use services.view"
+    severity: medium
   - desc: "No central enum means typos in any string cause silent failures or 403s"
     severity: high
   - desc: "Wildcard * bypasses all checks but is not documented for admins"

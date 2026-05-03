@@ -86,6 +86,16 @@ function parseCsvTimestamp(value) {
   return `${iso[1]} ${time}${frac}`;
 }
 
+function recordCsvAnomaly(context, anomaly) {
+  if (!context?.anomalies) return;
+  context.anomalies.push({
+    severity: anomaly.severity || 'warning',
+    sourceTable: anomaly.sourceTable || path.basename(context.file || ''),
+    file: context.file || null,
+    ...anomaly,
+  });
+}
+
 function parseCsvContent(content) {
   return parse(content, {
     columns: true,
@@ -113,10 +123,16 @@ function rowToObject(header, row) {
   }, {});
 }
 
-function repairPartnerRow(header, row) {
+function repairPartnerRow(header, row, context = {}) {
   const extra = row.length - header.length;
   const streetIndex = header.indexOf('Street');
   if (extra <= 0 || streetIndex < 0) return row;
+  recordCsvAnomaly(context, {
+    code: 'csv_partner_street_repair',
+    lineNumber: context.lineNumber,
+    message: 'Repaired Partners.csv row with extra columns by joining the Street field.',
+    details: { extraColumns: extra, expectedColumns: header.length, actualColumns: row.length },
+  });
   return [
     ...row.slice(0, streetIndex),
     row.slice(streetIndex, streetIndex + extra + 1).join(','),
@@ -124,32 +140,49 @@ function repairPartnerRow(header, row) {
   ];
 }
 
-function parsePartnersCsvContent(content) {
+function parsePartnersCsvContent(content, context = {}) {
   const [header, ...rows] = parseCsvRecords(content);
   if (!header) return [];
-  return rows.map((row) => rowToObject(header, repairPartnerRow(header, row)));
+  return rows.map((row, index) => rowToObject(header, repairPartnerRow(header, row, {
+    ...context,
+    lineNumber: index + 2,
+  })));
 }
 
-function sanitizeOddQuoteLines(content) {
+function sanitizeOddQuoteLines(content, context = {}) {
   return content
     .split(/\r?\n/)
-    .map((line) => {
+    .map((line, index) => {
       const quoteCount = (line.match(/"/g) || []).length;
-      return quoteCount % 2 === 1 ? line.replace(/"/g, '') : line;
+      if (quoteCount % 2 !== 1) return line;
+      recordCsvAnomaly(context, {
+        code: 'csv_odd_quote_sanitized',
+        lineNumber: index + 1,
+        message: 'Removed odd malformed quote characters from a CSV line before parsing.',
+        details: { quoteCount },
+      });
+      return line.replace(/"/g, '');
     })
     .join('\n');
 }
 
-function readCsv(file) {
+function readCsv(file, options = {}) {
   const raw = fs.readFileSync(file, 'utf8').replace(/\u0000/g, '');
   const content = raw.charCodeAt(0) === 0xfeff ? raw.slice(1) : raw;
   const parser = path.basename(file) === TABLE_FILES.partners ? parsePartnersCsvContent : parseCsvContent;
+  const context = { file, anomalies: options.anomalies };
   try {
-    return parser(content);
+    return parser(content, context);
   } catch (error) {
     if (!/Quote Not Closed|Invalid Opening Quote/.test(error.message)) throw error;
-    return parser(sanitizeOddQuoteLines(content));
+    return parser(sanitizeOddQuoteLines(content, context), context);
   }
+}
+
+function readCsvWithAnomalies(file) {
+  const anomalies = [];
+  const rows = readCsv(file, { anomalies });
+  return { rows, anomalies };
 }
 
 function loadSource(exportDir) {
@@ -176,5 +209,6 @@ module.exports = {
   parseCsvDateOnly,
   parseCsvTimestamp,
   readCsv,
+  readCsvWithAnomalies,
   uuidOrNull,
 };

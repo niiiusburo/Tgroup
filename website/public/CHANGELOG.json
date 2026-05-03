@@ -1,5 +1,30 @@
 [
   {
+    "version": "0.27.10",
+    "date": "2026-05-02",
+    "commit": "pending",
+    "highlights": "fix(payments): harden payment creation and refresh money surfaces",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Customer payment deletion now refreshes the visible service-record rows along with payment and profile totals.",
+          "The Payment page now reads canonical payment rows when the all-location view is active and refreshes after wallet top-ups."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "Payment creation now commits payment rows, allocation rows, and residual changes inside one API transaction."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.9",
     "date": "2026-05-02",
     "commit": "7feb1cb9",

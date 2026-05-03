@@ -28,13 +28,14 @@ interface ArchitectureViewProps {
     employeeId: string,
     data: { groupId: string; locScope: string; locationIds: string[]; overrides: { grant: string[]; revoke: string[] } }
   ) => Promise<EmployeePermission>;
+  canEdit: boolean;
 }
 
 export function ArchitectureView({
   groups, employees, locations,
   selectedGroupId, selectedEmployeeId,
   onSelectGroup, onSelectEmployee,
-  getEffective, updateEmployee,
+  getEffective, updateEmployee, canEdit,
 }: ArchitectureViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -59,7 +60,7 @@ export function ArchitectureView({
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const startEdit = () => {
-    if (!activeEmp) return;
+    if (!activeEmp || !canEdit) return;
     setEditState({
       groupId: activeEmp.groupId,
       locScope: activeEmp.locScope,
@@ -78,7 +79,7 @@ export function ArchitectureView({
   };
 
   const saveEdit = async () => {
-    if (!editState || !activeEmp) return;
+    if (!editState || !activeEmp || !canEdit) return;
     setSaving(true);
     setSaveError(null);
     try {
@@ -247,12 +248,14 @@ export function ArchitectureView({
                       {activeEmpGroup.name}
                     </span>
                   </div>
-                  <button
-                    onClick={startEdit}
-                    className="text-xs text-blue-600 hover:text-blue-800 font-medium border border-blue-200 px-2 py-1 rounded-lg hover:bg-blue-50 transition-colors"
-                  >
-                    Edit
-                  </button>
+                  {canEdit && (
+                    <button
+                      onClick={startEdit}
+                      className="text-xs text-blue-600 hover:text-blue-800 font-medium border border-blue-200 px-2 py-1 rounded-lg hover:bg-blue-50 transition-colors"
+                    >
+                      Edit
+                    </button>
+                  )}
                 </div>
                 <div className="text-xs text-gray-600 space-y-1.5">
                   <div className="flex justify-between">
