@@ -73,19 +73,19 @@ export function AddCustomerForm(props: AddCustomerFormProps) {
         isEdit={isEdit}
       />
 
-      <form onSubmit={handleSubmit} className="flex flex-1 min-h-0 overflow-hidden" onWheel={(e) => e.stopPropagation()}>
+      <form onSubmit={handleSubmit} className="flex flex-1 min-h-0 flex-col overflow-hidden md:flex-row" onWheel={(e) => e.stopPropagation()}>
         <LeftPanel formApi={formApi} />
 
         {/* RIGHT PANEL */}
         <div className="flex-1 flex flex-col overflow-hidden bg-white">
           {/* Tabs */}
-          <div className="flex border-b border-gray-200 flex-shrink-0 px-6 bg-gray-50/30">
+          <div className="flex flex-shrink-0 overflow-x-auto border-b border-gray-200 bg-gray-50/30 px-4 sm:px-6">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-4 text-sm font-medium border-b-2 transition-all -mb-px ${
+                className={`whitespace-nowrap px-4 py-4 text-sm font-medium border-b-2 transition-all -mb-px sm:px-6 ${
                   activeTab === tab.id
                     ? 'border-orange-500 text-orange-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -118,7 +118,7 @@ export function AddCustomerForm(props: AddCustomerFormProps) {
           )}
 
           {/* Tab content */}
-          <div className="flex-1 overflow-y-auto overscroll-contain px-8 py-6 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-5 custom-scrollbar sm:px-6 lg:px-8 lg:py-6">
             {activeTab === 'basic' && (
               <>
                 <BasicInfoTab formApi={formApi} />
@@ -139,7 +139,7 @@ export function AddCustomerForm(props: AddCustomerFormProps) {
           </div>
 
           {/* Footer - Custom for AddCustomerForm due to special submit disabled logic */}
-          <div className="px-6 py-5 border-t border-gray-200 flex-shrink-0 bg-gray-50 flex items-center justify-end gap-3">
+          <div className="px-4 py-4 border-t border-gray-200 flex-shrink-0 bg-gray-50 flex flex-wrap items-center justify-end gap-3 sm:px-6 sm:py-5">
             <button
               type="button"
               onClick={onCancel}

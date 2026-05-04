@@ -5,12 +5,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PartnerUpdateSchema = exports.PartnerCreateSchema = exports.PartnerBaseSchema = void 0;
 const zod_1 = require("zod");
+const optionalNullableUuid = zod_1.z.preprocess((value) => value === "" ? null : value, zod_1.z.string().uuid().optional().nullable());
 exports.PartnerBaseSchema = zod_1.z.object({
     id: zod_1.z.string().uuid().optional(),
     name: zod_1.z.string().min(1).max(255),
     phone: zod_1.z.string().max(50),
     email: zod_1.z.string().email().optional().nullable(),
-    companyid: zod_1.z.string().uuid().optional().nullable(),
+    companyid: optionalNullableUuid,
     gender: zod_1.z.string().optional().nullable(),
     birthday: zod_1.z.coerce.number().int().min(1).max(31).optional().nullable(),
     birthmonth: zod_1.z.coerce.number().int().min(1).max(12).optional().nullable(),
@@ -22,8 +23,8 @@ exports.PartnerBaseSchema = zod_1.z.object({
     medicalhistory: zod_1.z.string().optional().nullable(),
     note: zod_1.z.string().optional().nullable(),
     comment: zod_1.z.string().optional().nullable(),
-    sourceid: zod_1.z.string().uuid().optional().nullable(),
-    referraluserid: zod_1.z.string().uuid().optional().nullable(),
+    sourceid: optionalNullableUuid,
+    referraluserid: optionalNullableUuid,
     weight: zod_1.z.coerce.number().optional().nullable(),
     identitynumber: zod_1.z.string().optional().nullable(),
     healthinsurancecardnumber: zod_1.z.string().optional().nullable(),
@@ -37,8 +38,8 @@ exports.PartnerBaseSchema = zod_1.z.object({
     personalidentitycard: zod_1.z.string().optional().nullable(),
     personaltaxcode: zod_1.z.string().optional().nullable(),
     personaladdress: zod_1.z.string().optional().nullable(),
-    salestaffid: zod_1.z.string().uuid().optional().nullable(),
-    cskhid: zod_1.z.string().uuid().optional().nullable(),
+    salestaffid: optionalNullableUuid,
+    cskhid: optionalNullableUuid,
     customer: zod_1.z.boolean().default(true),
     status: zod_1.z.boolean().default(true),
     ref: zod_1.z.string().optional().nullable(),

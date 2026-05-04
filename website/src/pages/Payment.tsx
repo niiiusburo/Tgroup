@@ -116,7 +116,7 @@ export function Payment() {
               <button
                 type="button"
                 onClick={() => setShowCreator(true)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                className="flex items-center gap-2 rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-sm font-semibold text-orange-700 shadow-sm transition-colors hover:bg-orange-100"
               >
                 <Plus className="w-4 h-4" />
                 {t('newPlan')}

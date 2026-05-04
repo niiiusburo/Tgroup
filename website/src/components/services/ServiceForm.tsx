@@ -277,7 +277,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       />
 
       <form id="service-form" onSubmit={handleSubmitForm} className="flex flex-col flex-1 min-h-0">
-        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5 custom-scrollbar">
+        <div className="service-ipad-form flex-1 overflow-y-auto px-6 py-6 space-y-5 custom-scrollbar">
           {isLoading && (
             <div className="flex items-center justify-center py-8 text-gray-400">
               <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mr-2" />

@@ -65,19 +65,6 @@ async function createPartner(req, res) {
       });
     }
 
-    const phoneDup = await query(
-      'SELECT id FROM partners WHERE phone = $1 LIMIT 1',
-      [phone]
-    );
-    if (phoneDup && phoneDup.length > 0) {
-      return res.status(409).json({
-        error: {
-          code: 'DUPLICATE_FIELD',
-          field: 'phone',
-          message: 'Số điện thoại này đã được sử dụng',
-        },
-      });
-    }
     const trimmedEmail = typeof email === 'string' ? email.trim() : '';
     if (trimmedEmail) {
       const emailDup = await query(
@@ -199,22 +186,6 @@ async function updatePartner(req, res) {
       return res.status(404).json({ error: 'Partner not found' });
     }
 
-    // Check phone uniqueness excluding this partner
-    if (phone !== undefined) {
-      const phoneDup = await query(
-        'SELECT id FROM partners WHERE phone = $1 AND id <> $2 LIMIT 1',
-        [phone, id]
-      );
-      if (phoneDup && phoneDup.length > 0) {
-        return res.status(409).json({
-          error: {
-            code: 'DUPLICATE_FIELD',
-            field: 'phone',
-            message: 'Số điện thoại này đã được sử dụng',
-          },
-        });
-      }
-    }
     // Check email uniqueness (case-insensitive) excluding this partner
     const trimmedEmailPut = typeof email === 'string' ? email.trim() : '';
     if (trimmedEmailPut) {

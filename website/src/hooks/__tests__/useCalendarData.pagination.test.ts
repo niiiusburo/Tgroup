@@ -14,21 +14,9 @@ describe('fetchAllCalendarAppointments', () => {
     mockFetchAppointments
       .mockResolvedValueOnce({
         offset: 0,
-        limit: 500,
-        totalItems: 1001,
-        items: Array.from({ length: 500 }, (_, index) => ({ id: `apt-${index}` })),
-      } as Awaited<ReturnType<typeof fetchAppointments>>)
-      .mockResolvedValueOnce({
-        offset: 500,
-        limit: 500,
-        totalItems: 1001,
-        items: Array.from({ length: 500 }, (_, index) => ({ id: `apt-${index + 500}` })),
-      } as Awaited<ReturnType<typeof fetchAppointments>>)
-      .mockResolvedValueOnce({
-        offset: 1000,
-        limit: 500,
-        totalItems: 1001,
-        items: [{ id: 'apt-1000' }],
+        limit: 3000,
+        totalItems: null,
+        items: Array.from({ length: 1001 }, (_, index) => ({ id: `apt-${index}` })),
       } as Awaited<ReturnType<typeof fetchAppointments>>);
 
     const result = await fetchAllCalendarAppointments({
@@ -41,19 +29,9 @@ describe('fetchAllCalendarAppointments', () => {
       dateFrom: '2026-04-27',
       dateTo: '2026-05-03 23:59:59',
       offset: 0,
-      limit: 500,
-    });
-    expect(mockFetchAppointments).toHaveBeenNthCalledWith(2, {
-      dateFrom: '2026-04-27',
-      dateTo: '2026-05-03 23:59:59',
-      offset: 500,
-      limit: 500,
-    });
-    expect(mockFetchAppointments).toHaveBeenNthCalledWith(3, {
-      dateFrom: '2026-04-27',
-      dateTo: '2026-05-03 23:59:59',
-      offset: 1000,
-      limit: 500,
+      limit: 3000,
+      calendarMode: true,
+      includeCounts: false,
     });
   });
 });

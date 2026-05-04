@@ -1,0 +1,472 @@
+[
+  {
+    "id": "TC001",
+    "title": "Admin login reaches protected overview",
+    "description": "Navigate to /login; log in with configured credentials; verify overview/dashboard renders with authenticated layout.",
+    "category": "Authentication",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "log in with configured credentials"
+      },
+      {
+        "type": "assertion",
+        "description": "verify overview/dashboard renders with authenticated layout."
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Logout clears session",
+    "description": "Log in; open user menu; log out; verify /login is shown and protected routes redirect.",
+    "category": "Authentication",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in"
+      },
+      {
+        "type": "action",
+        "description": "open user menu"
+      },
+      {
+        "type": "action",
+        "description": "log out"
+      },
+      {
+        "type": "assertion",
+        "description": "verify /login is shown and protected routes redirect."
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Invalid credentials are rejected",
+    "description": "Navigate to /login; enter invalid password; submit; verify an auth error and no protected layout.",
+    "category": "Authentication",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "enter invalid password"
+      },
+      {
+        "type": "action",
+        "description": "submit"
+      },
+      {
+        "type": "assertion",
+        "description": "verify an auth error and no protected layout."
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Admin can access core guarded pages",
+    "description": "Log in; visit /, /calendar, /customers, /service-catalog, /payment, /employees, /reports/dashboard, /settings, /permissions; verify no Access Denied.",
+    "category": "Route permissions",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in"
+      },
+      {
+        "type": "action",
+        "description": "visit /, /calendar, /customers, /service-catalog, /payment, /employees, /reports/dashboard, /settings, /permissions"
+      },
+      {
+        "type": "assertion",
+        "description": "verify no Access Denied."
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Sidebar exposes expected admin navigation",
+    "description": "Log in; verify dashboard, calendar, customers, clinic/service catalog/payment, team/employees, reports, admin/settings/permissions entries are visible or reachable.",
+    "category": "Route permissions",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in"
+      },
+      {
+        "type": "assertion",
+        "description": "verify dashboard, calendar, customers, clinic/service catalog/payment, team/employees, reports, admin/settings/permissions entries are visible or reachable."
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Admin can create a new TEST SPRITE customer",
+    "description": "Log in; go to /customers; click Add Customer; create a uniquely named TEST SPRITE customer with unique phone/email; save; verify it appears in search results.",
+    "category": "Customer add",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in"
+      },
+      {
+        "type": "action",
+        "description": "go to /customers"
+      },
+      {
+        "type": "action",
+        "description": "click Add Customer"
+      },
+      {
+        "type": "action",
+        "description": "create a uniquely named TEST SPRITE customer with unique phone/email"
+      },
+      {
+        "type": "action",
+        "description": "save"
+      },
+      {
+        "type": "assertion",
+        "description": "verify it appears in search results."
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Admin can edit the existing TEST SPRITE customer",
+    "description": "Log in; go to /customers; search 0983171153; open the customer; edit note/comment or safe text field only; save; verify updated value displays.",
+    "category": "Customer edit",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in"
+      },
+      {
+        "type": "action",
+        "description": "go to /customers"
+      },
+      {
+        "type": "action",
+        "description": "search 0983171153"
+      },
+      {
+        "type": "action",
+        "description": "open the customer"
+      },
+      {
+        "type": "action",
+        "description": "edit note/comment or safe text field only"
+      },
+      {
+        "type": "action",
+        "description": "save"
+      },
+      {
+        "type": "assertion",
+        "description": "verify updated value displays."
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Customer profile mutation controls are visible for admin",
+    "description": "Log in; search 0983171153; open profile; verify edit/add service/deposit/payment controls that require permissions are visible; do not submit payment/delete/hard-delete.",
+    "category": "Customer permissions",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in"
+      },
+      {
+        "type": "action",
+        "description": "search 0983171153"
+      },
+      {
+        "type": "action",
+        "description": "open profile"
+      },
+      {
+        "type": "assertion",
+        "description": "verify edit/add service/deposit/payment controls that require permissions are visible"
+      },
+      {
+        "type": "action",
+        "description": "do not submit payment/delete/hard-delete."
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Delete and hard-delete require explicit confirmation and are not completed",
+    "description": "Log in; open TEST SPRITE customer; if delete controls exist, open only until confirmation state; cancel/close; verify customer remains searchable.",
+    "category": "Customer safety",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in"
+      },
+      {
+        "type": "action",
+        "description": "open TEST SPRITE customer"
+      },
+      {
+        "type": "action",
+        "description": "if delete controls exist, open only until confirmation state"
+      },
+      {
+        "type": "action",
+        "description": "cancel/close"
+      },
+      {
+        "type": "assertion",
+        "description": "verify customer remains searchable."
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Employees page loads and search works",
+    "description": "Log in; visit /employees; verify employee list/search renders; search TESTSPRITE employee; verify page remains usable even if none found.",
+    "category": "Employee page",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in"
+      },
+      {
+        "type": "action",
+        "description": "visit /employees"
+      },
+      {
+        "type": "assertion",
+        "description": "verify employee list/search renders"
+      },
+      {
+        "type": "action",
+        "description": "search TESTSPRITE employee"
+      },
+      {
+        "type": "assertion",
+        "description": "verify page remains usable even if none found."
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Employee creation should work for TESTSPRITE employee",
+    "description": "Log in; visit /employees; click Add Employee; fill TESTSPRITE employee unique name/phone/email/password and Dental Assistant-like role/tier if visible; submit; expected product behavior is success. Report any 500 or UI error.",
+    "category": "Employee add",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in"
+      },
+      {
+        "type": "action",
+        "description": "visit /employees"
+      },
+      {
+        "type": "action",
+        "description": "click Add Employee"
+      },
+      {
+        "type": "action",
+        "description": "fill TESTSPRITE employee unique name/phone/email/password and Dental Assistant-like role/tier if visible"
+      },
+      {
+        "type": "action",
+        "description": "submit"
+      },
+      {
+        "type": "assertion",
+        "description": "expected product behavior is success. Report any 500 or UI error."
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Employee edit should work for TESTSPRITE employee if creation succeeds",
+    "description": "After TC011 success, search TESTSPRITE employee; open profile; edit safe field such as job title/name suffix; save; verify updated value. If TC011 failed, mark blocked by employee creation bug.",
+    "category": "Employee edit",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "After TC011 success, search TESTSPRITE employee"
+      },
+      {
+        "type": "action",
+        "description": "open profile"
+      },
+      {
+        "type": "action",
+        "description": "edit safe field such as job title/name suffix"
+      },
+      {
+        "type": "action",
+        "description": "save"
+      },
+      {
+        "type": "assertion",
+        "description": "verify updated value. If TC011 failed, mark blocked by employee creation bug."
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Permission board loads groups and employees",
+    "description": "Log in; visit /permissions; verify permission groups and employee assignments load; open an employee card and group card read-only; do not save permission changes.",
+    "category": "Permission board",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in"
+      },
+      {
+        "type": "action",
+        "description": "visit /permissions"
+      },
+      {
+        "type": "assertion",
+        "description": "verify permission groups and employee assignments load"
+      },
+      {
+        "type": "action",
+        "description": "open an employee card and group card read-only"
+      },
+      {
+        "type": "action",
+        "description": "do not save permission changes."
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Employee create failure does not break permission surfaces",
+    "description": "After employee add attempt, revisit /permissions and /employees; verify pages still load and app has not crashed.",
+    "category": "Permission consistency",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "After employee add attempt, revisit /permissions and /employees"
+      },
+      {
+        "type": "assertion",
+        "description": "verify pages still load and app has not crashed."
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Reports protected routes render",
+    "description": "Log in; visit /reports/dashboard, /reports/revenue, /reports/appointments, /reports/customers, /reports/services, /reports/employees; verify each page renders or shows a controlled empty/loading state.",
+    "category": "Reports smoke",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in"
+      },
+      {
+        "type": "action",
+        "description": "visit /reports/dashboard, /reports/revenue, /reports/appointments, /reports/customers, /reports/services, /reports/employees"
+      },
+      {
+        "type": "assertion",
+        "description": "verify each page renders or shows a controlled empty/loading state."
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Payment page renders without submitting money actions",
+    "description": "Log in; visit /payment; verify payment/monthly-plan UI renders; do not submit create/refund/void/proof actions.",
+    "category": "Payment safety",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in"
+      },
+      {
+        "type": "action",
+        "description": "visit /payment"
+      },
+      {
+        "type": "assertion",
+        "description": "verify payment/monthly-plan UI renders"
+      },
+      {
+        "type": "action",
+        "description": "do not submit create/refund/void/proof actions."
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Service catalog page renders and search/filter works",
+    "description": "Log in; visit /service-catalog; search or filter; verify list/table remains usable.",
+    "category": "Service catalog smoke",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in"
+      },
+      {
+        "type": "action",
+        "description": "visit /service-catalog"
+      },
+      {
+        "type": "action",
+        "description": "search or filter"
+      },
+      {
+        "type": "assertion",
+        "description": "verify list/table remains usable."
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Settings page renders but does not save changes",
+    "description": "Log in; visit /settings; verify settings sections load; do not save bank/system/customer-source changes.",
+    "category": "Settings smoke",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in"
+      },
+      {
+        "type": "action",
+        "description": "visit /settings"
+      },
+      {
+        "type": "assertion",
+        "description": "verify settings sections load"
+      },
+      {
+        "type": "action",
+        "description": "do not save bank/system/customer-source changes."
+      }
+    ]
+  }
+]

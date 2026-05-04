@@ -286,21 +286,21 @@ export function Layout() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Mobile overlay */}
+      {/* Tablet/mobile overlay */}
       {mobileMenuOpen &&
       <div
-        className="fixed inset-0 bg-black/50 z-[55] md:hidden"
+        className="fixed inset-0 bg-black/50 z-[55] lg:hidden"
         onClick={() => setMobileMenuOpen(false)} />
 
       }
 
-      {/* Collapsible sidebar - hidden on mobile, fixed on desktop */}
+      {/* Collapsible sidebar - drawer on phones/tablets, fixed on desktop */}
       <aside
         className={`
           fixed left-0 top-0 h-full bg-sidebar flex flex-col py-4 transition-all duration-300 ease-in-out
-          ${mobileMenuOpen ? 'translate-x-0 w-64 z-[60]' : '-translate-x-full w-64 md:translate-x-0 z-40'}
-          ${!mobileMenuOpen && sidebarExpanded ? 'md:w-56' : ''}
-          ${!mobileMenuOpen && !sidebarExpanded ? 'md:w-[72px]' : ''}
+          ${mobileMenuOpen ? 'translate-x-0 w-[18rem] max-w-[86vw] z-[60]' : '-translate-x-full w-[18rem] max-w-[86vw] lg:translate-x-0 z-40'}
+          ${!mobileMenuOpen && sidebarExpanded ? 'lg:w-56' : ''}
+          ${!mobileMenuOpen && !sidebarExpanded ? 'lg:w-[72px]' : ''}
         `}>
         
         {/* Logo + Toggle */}
@@ -316,7 +316,7 @@ export function Layout() {
           {/* Mobile close button */}
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors md:hidden">
+            className="w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors lg:hidden">
             
             <X className="w-4 h-4" />
           </button>
@@ -324,7 +324,7 @@ export function Layout() {
           {sidebarExpanded &&
           <button
             onClick={() => setSidebarExpanded(false)}
-            className="hidden md:flex w-7 h-7 items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
+            className="hidden lg:flex w-10 h-10 items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
             
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -371,7 +371,7 @@ export function Layout() {
           <>
               <button
               onClick={() => setSidebarExpanded(true)}
-              className="hidden md:flex w-10 h-10 items-center justify-center rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
+              className="hidden lg:flex w-10 h-10 items-center justify-center rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
               
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -398,25 +398,25 @@ export function Layout() {
           min-h-screen flex flex-col transition-all duration-300 ease-in-out
           w-full max-w-full md:w-auto
           ml-0
-          ${sidebarExpanded ? 'md:ml-56' : 'md:ml-[72px]'}
+          ${sidebarExpanded ? 'lg:ml-56' : 'lg:ml-[72px]'}
         `}>
         
         {/* Header */}
-        <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 md:px-6 sticky top-0 z-50">
+        <header className="min-h-16 bg-white border-b border-gray-100 flex items-center justify-between gap-3 px-4 py-3 md:px-5 lg:px-6 sticky top-0 z-50">
           {/* Mobile menu button + title */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="md:hidden w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
+              className="lg:hidden w-11 h-11 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
               
               <Menu className="w-5 h-5 text-gray-600" />
             </button>
-            <h1 className="text-xl md:text-2xl font-semibold text-gray-900 tracking-tight">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 tracking-tight leading-snug">
               {pageTitle}
             </h1>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex min-w-0 items-center justify-end gap-2 md:gap-3 lg:gap-4">
             {/* Location Filter — hidden when user is locked to a single location */}
             {!isSingleLocation &&
             <div className="hidden sm:block">
@@ -440,7 +440,7 @@ export function Layout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 md:p-6 relative z-0 overflow-x-hidden">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 relative z-0 overflow-x-hidden tablet-flow">
           <Outlet />
         </main>
 

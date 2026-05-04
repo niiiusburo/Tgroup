@@ -26,7 +26,7 @@ vi.mock('@/lib/api', () => ({
       companyid: 'loc-1',
       companyname: 'Main Clinic',
       name: 'Cleaning',
-      date: '2026-04-27',
+      date: '2026-05-04',
       time: '09:00',
       note: '',
       timeexpected: 30,

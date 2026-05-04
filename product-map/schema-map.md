@@ -37,7 +37,7 @@
 | **R** | `partners.js`, `appointments.js`, `payments.js`, `reports.js`, `employees.js`, `auth.js`, `faceRecognition.js`, `dashboardReports.js`, `commissions.js` |
 | **E** | `GET/POST/PUT/PATCH/DELETE /api/Partners/*`, `GET/POST/PUT/DELETE /api/Employees/*`, `POST /api/Auth/login`, `GET /api/Auth/me`, `POST /api/Auth/change-password`, `POST /api/face/*` |
 | **UI** | Customers page, Employees page, Login, Appointment forms, Payment forms, Service records, Reports, Face capture |
-| **Risk** | **Critical** — recent breakage occurred when `password_hash` was missing and NOT NULL constraints were added without updating all INSERT paths. |
+| **Risk** | **Critical** — recent breakage occurred when `password_hash` was missing and NOT NULL constraints were added without updating all INSERT paths. Customer phone is not unique identity and may overlap migrated refs/phones; UUID remains the durable key. |
 
 ### dbo.appointments
 

@@ -72,15 +72,35 @@ app.use(cors({ origin: (o, cb) => !o || ALLOWED_ORIGINS.includes(o) || DEV_ORIGI
 app.use(cookieParser());
 app.use(express.json({ limit: '1mb' }));
 
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === 'development' ? 100 : 10,
-  message: { error: 'Too many login attempts, please try again later.' },
+const loginRateLimitMessage = { error: 'Too many login attempts, please try again later.' };
+const loginWindowMs = 15 * 60 * 1000;
+const normalizeLoginEmail = (req) => String(req.body?.email || 'missing-email').trim().toLowerCase();
+const safeIpKey = (req) => rateLimit.ipKeyGenerator(req.ip || req.socket?.remoteAddress || 'unknown-ip');
+
+const loginIpFailureLimiter = rateLimit({
+  windowMs: loginWindowMs,
+  max: process.env.NODE_ENV === 'development' ? 500 : 75,
+  skipSuccessfulRequests: true,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: loginRateLimitMessage,
 });
-app.use('/api/Auth/login', loginLimiter);
-app.use('/api/auth/login', loginLimiter);
-// app.use('/api/Account/Login', loginLimiter);  // LEGACY
-// app.use('/api/account/login', loginLimiter);  // LEGACY
+
+const loginAccountFailureLimiter = rateLimit({
+  windowMs: loginWindowMs,
+  max: process.env.NODE_ENV === 'development' ? 100 : 10,
+  skipSuccessfulRequests: true,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => `${normalizeLoginEmail(req)}:${safeIpKey(req)}`,
+  message: loginRateLimitMessage,
+});
+
+const loginLimiters = [loginIpFailureLimiter, loginAccountFailureLimiter];
+app.use('/api/Auth/login', loginLimiters);
+// Express routes are case-insensitive by default, so this also covers /api/auth/login.
+// app.use('/api/Account/Login', loginLimiters);  // LEGACY
+// app.use('/api/account/login', loginLimiters);  // LEGACY
 
 const telemetryErrorLimiter = rateLimit({
   windowMs: 60 * 1000,

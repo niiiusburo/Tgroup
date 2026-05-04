@@ -79,13 +79,13 @@ export function CalendarToolbar({
 
   return (
     <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 bg-white rounded-xl shadow-card px-4 py-3">
-      <div className="flex items-center bg-gray-100 rounded-lg p-1">
+      <div className="flex max-w-full items-center overflow-x-auto bg-gray-100 rounded-lg p-1">
         {VIEW_TABS.map((tab) => (
           <button
             key={tab.mode}
             onClick={() => onViewModeChange(tab.mode)}
             className={cn(
-              'px-4 py-1.5 text-sm font-medium rounded-md transition-colors',
+              'whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-md transition-colors',
               viewMode === tab.mode
                 ? 'bg-white text-blue-600 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900',
@@ -104,8 +104,8 @@ export function CalendarToolbar({
         onToday={onToday}
       />
 
-      <div className="flex items-center gap-2 w-full lg:w-auto">
-        <div ref={dropdownRef} className="relative w-full lg:w-72">
+      <div className="flex w-full flex-wrap items-center gap-2 lg:w-auto lg:flex-nowrap">
+        <div ref={dropdownRef} className="relative min-w-[220px] flex-1 lg:w-72 lg:flex-none">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           <input
             type="text"

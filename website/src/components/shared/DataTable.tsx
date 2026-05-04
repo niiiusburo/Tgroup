@@ -112,9 +112,9 @@ export function DataTable<T>({
   const pageEnd = Math.min((safePage + 1) * pageSize, displayTotalItems);
 
   return (
-    <div className="bg-white rounded-xl shadow-card overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
+    <div className="bg-white rounded-xl shadow-card overflow-hidden min-w-0">
+      <div className="overflow-x-auto overscroll-x-contain">
+        <table className="w-full min-w-[720px]">
           <thead>
             <tr className="border-b border-gray-100">
               {selection && (
@@ -209,11 +209,11 @@ export function DataTable<T>({
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+        <div className="flex flex-col gap-3 px-4 py-3 border-t border-gray-100 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-xs text-gray-500">
             Showing {pageStart}–{pageEnd} of {displayTotalItems}
           </span>
-          <div className="flex items-center gap-1">
+          <div className="flex flex-wrap items-center gap-1">
             <button
               type="button"
               aria-label="Previous page"

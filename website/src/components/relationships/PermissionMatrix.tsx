@@ -27,6 +27,7 @@ interface PermissionMatrixProps {
   readonly onToggleRole: (roleId: string) => void;
   readonly onTogglePermission: (roleId: string, permissionId: string, currentGranted: boolean) => void;
   readonly isDirty: boolean;
+  readonly canEdit: boolean;
   readonly onSave: () => void;
   readonly onReset: () => void;
 }
@@ -38,6 +39,7 @@ export function PermissionMatrix({
   onToggleRole,
   onTogglePermission,
   isDirty,
+  canEdit,
   onSave,
   onReset,
 }: PermissionMatrixProps) {
@@ -103,14 +105,14 @@ export function PermissionMatrix({
       {/* Action buttons */}
       <div className="flex items-center justify-between">
         <div className="text-xs text-gray-500">
-          Click on any permission cell to toggle access
+          {canEdit ? 'Click on any permission cell to toggle access' : 'Permission matrix is read-only'}
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={onReset}
-            disabled={!isDirty}
+            disabled={!canEdit || !isDirty}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              isDirty
+              canEdit && isDirty
                 ? 'text-gray-600 hover:bg-gray-100'
                 : 'text-gray-300 cursor-not-allowed'
             }`}
@@ -119,9 +121,9 @@ export function PermissionMatrix({
           </button>
           <button
             onClick={onSave}
-            disabled={!isDirty}
+            disabled={!canEdit || !isDirty}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              isDirty
+              canEdit && isDirty
                 ? 'bg-green-600 text-white hover:bg-green-700'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
@@ -178,6 +180,7 @@ export function PermissionMatrix({
                     totalGranted={totalGranted}
                     totalPossible={totalPossible}
                     onTogglePermission={onTogglePermission}
+                    canEdit={canEdit}
                   />
                 );
               })}
@@ -221,6 +224,7 @@ interface ModuleRowProps {
   readonly totalGranted: number;
   readonly totalPossible: number;
   readonly onTogglePermission: (roleId: string, permissionId: string, currentGranted: boolean) => void;
+  readonly canEdit: boolean;
 }
 
 function ModuleRow({
@@ -231,6 +235,7 @@ function ModuleRow({
   totalGranted,
   totalPossible,
   onTogglePermission,
+  canEdit,
 }: ModuleRowProps) {
   const Chevron = isExpanded ? ChevronUp : ChevronDown;
 
@@ -288,12 +293,19 @@ function ModuleRow({
                 <td key={ra.roleId} className="p-3 text-center">
                   <button
                     onClick={() => onTogglePermission(ra.roleId, perm.id, granted)}
+                    disabled={!canEdit}
                     className={`inline-flex items-center justify-center w-7 h-7 rounded transition-all hover:scale-110 ${
-                      granted
+                      !canEdit
+                        ? 'cursor-not-allowed opacity-70'
+                        : granted
                         ? 'bg-green-100 hover:bg-green-200'
                         : 'bg-gray-100 hover:bg-gray-200'
                     }`}
-                    title={granted ? 'Click to deny' : 'Click to grant'}
+                    title={
+                      canEdit
+                        ? granted ? 'Click to deny' : 'Click to grant'
+                        : 'Requires permissions.edit'
+                    }
                   >
                     {granted ? (
                       <Check className="w-4 h-4 text-green-600" />

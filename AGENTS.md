@@ -199,3 +199,70 @@ This project can use OpenCode Plan and Build phases:
 | `product-map/contracts/dependency-rules.yaml` | Change checklists | Before API/UI/schema/permission changes |
 | `.claude/memory.md` | Shared session memory | At session start |
 | `docs/runbooks/*.md` | Operational playbooks | Before deploy/infra/verification/money work |
+
+
+<claude-mem-context>
+# Memory Context
+
+# [Tgrouptest] recent context, 2026-05-04 10:19pm GMT+7
+
+Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
+Format: ID TIME TYPE TITLE
+Fetch details: get_observations([IDs]) | Search: mem-search skill
+
+Stats: 50 obs (23,039t read) | 1,000,942t work | 98% savings
+
+### May 4, 2026
+11882 12:07a 🔵 Live Production Authentication Test Confirms User Profile and Permission Set
+11883 " 🔵 Live Production Permission Groups Structure and Hierarchy
+11885 12:12a 🔵 Employee creation endpoint broken - missing dateUtils module
+11887 12:13a 🔵 TestSprite tunnel configuration and versioning system
+11888 12:17a 🟣 Comprehensive frontend test plan created with 18 test cases
+11889 12:18a 🔵 TestSprite MCP server misconfiguration - checks localhost:443 for remote production target
+11890 12:21a 🔵 Direct live QA automation blocked by authentication failure
+11891 " 🔵 Production login rate limiting blocks automated QA - 10 attempts per 15 minutes
+11892 12:22a 🔵 Direct token minting approach also fails - likely local DATABASE_URL issue
+11893 12:23a 🔵 Production database rejects SSL connections - blocks direct token minting strategy
+11894 " 🔵 Local DATABASE_URL points to schema-less database - partners table does not exist
+11895 12:24a 🔵 Production VPS stack confirmed - PostgreSQL on port 55433, admin employee in dbo schema
+11896 12:25a 🔵 Production token minting succeeds but fails due to non-ASCII character in JWT payload
+12151 6:22p 🔵 Appointment clearance preparation with safety guardrails active
+12152 " 🔵 Customer update spreadsheet contains 511 rows with customer code, name, phone, and branch
+12153 " 🔵 Appointment clearance scope: 6,082 future appointments with no dependent records
+12154 6:23p 🔵 Production database verified: 6,088 future appointments with CASCADE delete constraints
+12155 " 🔵 Customer update spreadsheet contains 510 new customers with no existing database matches
+12156 6:24p 🔵 Sample of 10 production appointments scheduled for clearance starting May 4, 2026
+12157 " 🔵 Customer update analysis reveals 70% new customers and 30% potential duplicates requiring manual review
+12158 6:25p 🟣 Bulk customer import dry-run transaction successfully tested 359 new customer inserts with rollback
+12159 6:28p 🔵 Appointment clearance scope and VPS database infrastructure mapped
+12160 " 🔵 Appointment data distribution across three VPS databases quantified
+12161 6:29p 🔵 VPS tdental-db contains 862 orphaned future appointments with zero linked treatment or payment data
+12162 6:30p 🔵 Cross-database comparison reveals 5,287 stale appointments in production tgroup-db requiring clearance
+12163 6:31p 🔵 VPS runs three independent calendar systems: TG Clinic production, TDental source, and standalone static calendar UI
+12164 6:32p ✅ Production tgroup-db cleared of all 6,088 future appointments from 2026-05-04 onward with full backup
+12165 " 🔵 Customer data import matching logic discovered
+12166 6:33p 🔵 Customer merge logic compares database state with field-level diff analysis
+12167 6:36p ✅ Complete clearance executed: all 216,512 remaining appointments deleted from production tgroup-db
+12168 6:37p 🔵 Post-clearance database verified intact with zero appointments and 35k+ preserved partners; new 7-row appointment source file identified
+12169 6:42p 🔵 Database configuration verified for tdental_demo
+12170 " ✅ Customer data migration committed to tdental_demo database
+12171 " 🔵 API server port mismatch discovered during verification
+12172 6:43p 🔵 Admin authentication credentials and API server port verified
+12174 6:44p 🔴 PostgreSQL COPY CSV Import Fixed with LF-Only Line Endings
+12175 " 🟣 Appointment Import System with Dry-Run Validation
+12176 " 🟣 Production Appointment Table Populated After Full Clearance
+12173 " 🔵 Customer data migration verified through API endpoint queries
+12177 6:45p 🔵 Production API Confirmed Serving Imported Appointments
+12196 9:45p 🟣 iPad responsive layout system implemented
+12197 " 🟣 DataTable component made horizontally scrollable for tablets
+12198 " 🟣 Form modals and complex layouts made tablet-responsive
+12199 " 🔵 TGroup clinic frontend uses Vite with React and real PostgreSQL API
+12200 9:47p 🟣 Automated iPad screenshot testing system implemented with Playwright
+12201 9:48p 🔵 iPad responsive design verified with zero horizontal overflow across all routes
+12202 " ✅ iPad responsive design changes staged for commit
+12214 10:08p 🔵 Employee Location Scope Selection Bug - Frontend State Not Persisted
+12215 " 🔴 Fixed Employee Primary Location Missing from Permission Response
+12216 10:09p ✅ Updated Auth Domain Documentation with Location Resolution Behavior
+
+Access 1001k tokens of past work via get_observations([IDs]) or mem-search skill.
+</claude-mem-context>

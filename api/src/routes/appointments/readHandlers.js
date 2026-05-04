@@ -24,11 +24,17 @@ async function listAppointments(req, res) {
       doctor_id = '',
       companyId = '',
       doctorId = '',
+      calendar_mode = '',
+      calendarMode = '',
+      include_counts = '',
+      includeCounts = '',
     } = req.query;
 
     // Accept either snake_case (current frontend) or camelCase (new passthrough casing)
     const effectiveCompanyId = company_id || companyId;
     const effectiveDoctorId = doctor_id || doctorId;
+    const calendarModeEnabled = String(calendar_mode || calendarMode).toLowerCase() === 'true';
+    const includeCountsEnabled = String(include_counts || includeCounts).toLowerCase() !== 'false';
 
     // Accept either date_from (snake_case from frontend) or dateFrom (camelCase)
     const effectiveDateFrom = date_from || dateFrom;
@@ -42,8 +48,9 @@ async function listAppointments(req, res) {
       return errorResponse(res, 400, 'INVALID_OFFSET', 'offset must be a non-negative integer');
     }
 
-    if (isNaN(limitNum) || limitNum < 1 || limitNum > 500) {
-      return errorResponse(res, 400, 'INVALID_LIMIT', 'limit must be between 1 and 500');
+    const maxLimit = calendarModeEnabled ? 3000 : 500;
+    if (isNaN(limitNum) || limitNum < 1 || limitNum > maxLimit) {
+      return errorResponse(res, 400, 'INVALID_LIMIT', `limit must be between 1 and ${maxLimit}`);
     }
 
     // Validate date range (accept both snake_case and camelCase)
@@ -139,8 +146,39 @@ async function listAppointments(req, res) {
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
 
-    const items = await query(
-      `SELECT
+    const calendarSelect = `
+        a.id,
+        a.name,
+        a.date,
+        a.time,
+        a.datetimeappointment,
+        a.timeexpected,
+        a.note,
+        a.state,
+        a.reason,
+        a.partnerid,
+        p.name AS partnername,
+        p.phone AS partnerphone,
+        p.ref AS partnercode,
+        a.companyid,
+        c.name AS companyname,
+        a.doctorid,
+        doc.name AS doctorname,
+        a.assistantid,
+        ass.name AS assistantname,
+        a.dentalaideid,
+        da.name AS dentalaidename,
+        a.color,
+        a.datetimearrived,
+        a.datetimeseated,
+        a.datetimedismissed,
+        a.datedone,
+        a.datecreated,
+        a.lastupdated,
+        a.productid,
+        prod.name AS productname`;
+
+    const fullSelect = `
         a.id,
         a.name,
         a.date,
@@ -191,7 +229,18 @@ async function listAppointments(req, res) {
         a.createdbyid,
         a.writebyid,
         a.productid,
-        prod.name AS productname
+        prod.name AS productname`;
+
+    const calendarJoins = `
+      FROM appointments a
+      LEFT JOIN partners p ON p.id = a.partnerid
+      LEFT JOIN companies c ON c.id = a.companyid
+      LEFT JOIN employees doc ON doc.id = a.doctorid
+      LEFT JOIN employees ass ON ass.id = a.assistantid
+      LEFT JOIN employees da ON da.id = a.dentalaideid
+      LEFT JOIN products prod ON prod.id = a.productid`;
+
+    const fullJoins = `
       FROM appointments a
       LEFT JOIN partners p ON p.id = a.partnerid
       LEFT JOIN companies c ON c.id = a.companyid
@@ -203,34 +252,43 @@ async function listAppointments(req, res) {
       LEFT JOIN saleorders so ON so.id = a.saleorderid
       LEFT JOIN crmteams t ON t.id = a.teamid
       LEFT JOIN customerreceipts cr ON cr.id = a.customerreceiptid
-      LEFT JOIN products prod ON prod.id = a.productid
+      LEFT JOIN products prod ON prod.id = a.productid`;
+
+    const items = await query(
+      `SELECT
+      ${calendarModeEnabled ? calendarSelect : fullSelect}
+      ${calendarModeEnabled ? calendarJoins : fullJoins}
       ${whereClause}
       ORDER BY ${orderByCol} ${orderDir} NULLS LAST
       LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
       [...params, limitNum, offsetNum]
     );
 
-    const countResult = await query(
-      `SELECT COUNT(*) AS count FROM appointments a LEFT JOIN partners p ON p.id = a.partnerid ${whereClause}`,
-      params
-    );
-    const totalItems = parseInt(countResult[0]?.count || '0', 10);
+    let totalItems = offsetNum + items.length;
+    let aggregates = null;
+    if (includeCountsEnabled) {
+      const countResult = await query(
+        `SELECT COUNT(*) AS count FROM appointments a LEFT JOIN partners p ON p.id = a.partnerid ${whereClause}`,
+        params
+      );
+      totalItems = parseInt(countResult[0]?.count || '0', 10);
 
-    const aggregates = {
-      total: totalItems,
-      byState: {},
-    };
+      aggregates = {
+        total: totalItems,
+        byState: {},
+      };
 
-    const stateCounts = await query(
-      `SELECT a.state, COUNT(*) AS count
-       FROM appointments a LEFT JOIN partners p ON p.id = a.partnerid
-       ${whereClause}
-       GROUP BY a.state`,
-      params
-    );
-    stateCounts.forEach((row) => {
-      aggregates.byState[row.state || 'unknown'] = parseInt(row.count, 10);
-    });
+      const stateCounts = await query(
+        `SELECT a.state, COUNT(*) AS count
+        FROM appointments a LEFT JOIN partners p ON p.id = a.partnerid
+        ${whereClause}
+        GROUP BY a.state`,
+        params
+      );
+      stateCounts.forEach((row) => {
+        aggregates.byState[row.state || 'unknown'] = parseInt(row.count, 10);
+      });
+    }
 
 
     return res.json({

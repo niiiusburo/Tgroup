@@ -12,7 +12,7 @@ export type ViewMode = 'day' | 'week' | 'month';
 
 export type CalendarStatusFilter = AppointmentStatus | 'all';
 
-const CALENDAR_APPOINTMENTS_PAGE_SIZE = 500;
+const CALENDAR_APPOINTMENTS_PAGE_SIZE = 3000;
 
 /** Create a Date at noon Vietnam time from a YYYY-MM-DD string */
 function toVnDate(dateStr: string): Date {
@@ -25,20 +25,31 @@ type CalendarAppointmentPage = Awaited<ReturnType<typeof fetchAppointments>>;
 export async function fetchAllCalendarAppointments(params: CalendarAppointmentQuery) {
   const items: CalendarAppointmentPage['items'] = [];
   let offset = 0;
-  let totalItems: number | null = null;
 
-  while (totalItems === null || offset < totalItems) {
+  let shouldFetchNextPage = true;
+  while (shouldFetchNextPage) {
     const response = await fetchAppointments({
       ...params,
       offset,
       limit: CALENDAR_APPOINTMENTS_PAGE_SIZE,
+      calendarMode: true,
+      includeCounts: false,
     });
 
     items.push(...response.items);
-    totalItems = response.totalItems ?? items.length;
 
-    if (response.items.length === 0) break;
+    if (response.items.length === 0) {
+      shouldFetchNextPage = false;
+      continue;
+    }
+    if (response.items.length < CALENDAR_APPOINTMENTS_PAGE_SIZE) {
+      shouldFetchNextPage = false;
+    }
+
     offset += response.items.length;
+    if (response.totalItems != null && offset >= response.totalItems) {
+      shouldFetchNextPage = false;
+    }
   }
 
   return items;
@@ -144,6 +155,22 @@ export function useCalendarData(selectedLocationId?: string) {
     });
   }, [appointments, selectedDoctors, selectedStatuses, selectedColors, search]);
 
+  const appointmentsByDate = useMemo(() => {
+    const grouped = new Map<string, CalendarAppointment[]>();
+    for (const appointment of filteredAppointments) {
+      const list = grouped.get(appointment.date);
+      if (list) {
+        list.push(appointment);
+      } else {
+        grouped.set(appointment.date, [appointment]);
+      }
+    }
+    for (const list of grouped.values()) {
+      list.sort((a, b) => a.startTime.localeCompare(b.startTime));
+    }
+    return grouped;
+  }, [filteredAppointments]);
+
   const weekDates = useMemo(
     () => getWeekDates(currentDate, formatDate),
     [currentDate, formatDate]
@@ -156,8 +183,8 @@ export function useCalendarData(selectedLocationId?: string) {
 
   const getAppointmentsForDate = useCallback((date: Date): readonly CalendarAppointment[] => {
     const dateStr = formatDate(date, 'yyyy-MM-dd');
-    return filteredAppointments.filter((apt) => apt.date === dateStr);
-  }, [filteredAppointments, formatDate]);
+    return appointmentsByDate.get(dateStr) ?? [];
+  }, [appointmentsByDate, formatDate]);
 
   const clearFilters = useCallback(() => {
     setSelectedDoctors([]);

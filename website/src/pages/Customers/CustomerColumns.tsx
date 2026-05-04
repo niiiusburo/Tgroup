@@ -75,7 +75,7 @@ export function buildCustomerColumns(locationNameMap: Map<string, string>, canSo
       render: (row) => (
         <span className="flex items-center gap-1.5 text-gray-600">
           <MapPin className="w-3.5 h-3.5 text-gray-400" />
-          {locationNameMap.get(row.locationId) ?? 'Unknown'}
+          {locationNameMap.get(row.locationId) ?? row.companyname ?? 'Unknown'}
         </span>
       ),
     },
@@ -113,4 +113,3 @@ export function buildCustomerColumns(locationNameMap: Map<string, string>, canSo
     },
   ];
 }
-

@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '@/test/test-utils';
 import { AddCustomerForm } from './AddCustomerForm';
@@ -155,5 +155,88 @@ describe('AddCustomerForm', () => {
       expect(screen.getByDisplayValue('CSKH Trang')).toBeInTheDocument();
     });
     expect(fetchEmployees).toHaveBeenCalledWith({ limit: 500, active: 'all' });
+  });
+
+  it('hides inactive duplicate sales staff from new selection suggestions', async () => {
+    vi.mocked(fetchEmployees).mockResolvedValueOnce({
+      items: [
+        {
+          id: 'sales-active-1',
+          name: 'Sale Nhung Active',
+          ref: 'NV00022',
+          phone: null,
+          email: null,
+          avatar: null,
+          isdoctor: false,
+          isassistant: true,
+          isreceptionist: false,
+          active: true,
+          companyid: 'loc-1',
+          companyname: 'Tấm Dentist Quận 3',
+          locationScopeIds: [],
+          hrjobid: null,
+          hrjobname: null,
+          tierId: null,
+          tierName: null,
+          jobtitle: 'Sale online',
+          wage: null,
+          allowance: null,
+          startworkdate: null,
+          datecreated: null,
+          lastupdated: null,
+        },
+        {
+          id: 'sales-inactive-1',
+          name: 'Sale Nhung Inactive',
+          ref: 'NV00012',
+          phone: null,
+          email: null,
+          avatar: null,
+          isdoctor: false,
+          isassistant: true,
+          isreceptionist: false,
+          active: false,
+          companyid: 'loc-1',
+          companyname: 'Tấm Dentist Quận 3',
+          locationScopeIds: [],
+          hrjobid: null,
+          hrjobname: null,
+          tierId: null,
+          tierName: null,
+          jobtitle: 'Sale online',
+          wage: null,
+          allowance: null,
+          startworkdate: null,
+          datecreated: null,
+          lastupdated: null,
+        },
+      ],
+    } as any);
+
+    renderWithProviders(
+      <AddCustomerForm
+        initialData={{
+          name: 'Customer With Duplicate Sales',
+          phone: '0909000001',
+        }}
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    );
+
+    let salesInput: HTMLInputElement | undefined;
+    await waitFor(() => {
+      salesInput = Array.from(document.querySelectorAll('input')).find((input) =>
+        input.placeholder.toLowerCase().includes('sale')
+      );
+      expect(salesInput).toBeTruthy();
+    });
+    if (!salesInput) throw new Error('Sales staff input was not rendered');
+    fireEvent.focus(salesInput);
+
+    await waitFor(() => {
+      expect(screen.getByText('Sale Nhung Active')).toBeInTheDocument();
+    });
+    expect(screen.queryByText('Sale Nhung Inactive')).not.toBeInTheDocument();
   });
 });

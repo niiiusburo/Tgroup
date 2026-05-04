@@ -116,7 +116,7 @@ export function OutstandingBalance({ balances, onPayNow, loading = false }: Outs
                 <button
                   type="button"
                   onClick={() => onPayNow(balance)}
-                  className="px-3 py-1.5 text-xs font-medium bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                  className="rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-700 shadow-sm transition-colors hover:bg-orange-100"
                 >
                   {t('payNow')}
                 </button>

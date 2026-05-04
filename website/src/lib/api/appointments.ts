@@ -49,6 +49,8 @@ export function fetchAppointments(params?: {
   state?: string;
   doctorId?: string;
   partnerId?: string;
+  calendarMode?: boolean;
+  includeCounts?: boolean;
 }) {
   return apiFetch<PaginatedResponse<ApiAppointment>>('/Appointments', {
     params: {
@@ -61,6 +63,8 @@ export function fetchAppointments(params?: {
       state: params?.state,
       doctorId: params?.doctorId,
       partnerId: params?.partnerId,
+      calendarMode: params?.calendarMode,
+      includeCounts: params?.includeCounts,
     },
   });
 }

@@ -36,6 +36,7 @@ Thumbs.db
 .omc/
 .orchestrator/
 .dev-api.pid
+.dev-api-*.pid
 .dev-api.log
 .dev-vite.pid
 .dev-vite.log
@@ -46,6 +47,8 @@ test-results/
 website/e2e/screenshots/
 .gstack/
 artifacts/
+testsprite_tests/local-run/
+testsprite_tests/tmp/
 
 # Playwright MCP session snapshots
 .playwright-mcp/

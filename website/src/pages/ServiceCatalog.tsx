@@ -193,7 +193,7 @@ export function ServiceCatalog() {
       <div>
         <h1 className="text-xl font-bold text-gray-900">{t('serviceCatalog')}</h1>
         {/* Tabs */}
-        <div className="flex gap-1 mt-3 bg-gray-100 p-1 rounded-lg w-fit">
+        <div className="flex w-full gap-1 overflow-x-auto rounded-lg bg-gray-100 p-1 sm:w-fit">
           <button type="button" className="px-4 py-2 text-sm font-medium text-gray-900 bg-white rounded-lg shadow-sm">
             {t('tabs.services')}
           </button>
@@ -207,16 +207,16 @@ export function ServiceCatalog() {
       </div>
 
       {/* Main two-panel layout */}
-      <div className="flex gap-4">
+      <div className="flex flex-col gap-4 xl:flex-row">
         {/* ── Left Sidebar: Service Groups ── */}
-        <div className="w-80 shrink-0 bg-white rounded-xl shadow-card">
+        <div className="w-full shrink-0 bg-white rounded-xl shadow-card xl:w-80">
           <div className="flex items-center justify-between px-4 py-3 border-b">
             <h2 className="text-sm font-semibold text-gray-900">{t('serviceGroups')}</h2>
             {canEditServices && (
               <button
                 type="button"
                 onClick={() => setShowAddCategory(true)}
-                className="p-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="rounded-lg border border-orange-200 bg-orange-50 p-1.5 text-orange-700 shadow-sm transition-colors hover:bg-orange-100"
                 title={tc('add')}
               >
                 <Plus className="w-4 h-4" />
@@ -244,7 +244,7 @@ export function ServiceCatalog() {
           </div>
 
           {/* Category list */}
-          <div className="max-h-[calc(100vh-320px)] overflow-y-auto">
+          <div className="max-h-72 overflow-y-auto xl:max-h-[calc(100vh-320px)]">
             {/* "All" option */}
             <button
               type="button"
@@ -280,12 +280,12 @@ export function ServiceCatalog() {
         <div className="flex-1 min-w-0">
           {/* Toolbar */}
           <div className="mb-3">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {canEditServices && (
                 <button
                   type="button"
                   onClick={() => { setEditingProduct(null); setShowServiceForm(true); }}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark"
+                  className="inline-flex items-center gap-2 rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-sm font-semibold text-orange-700 shadow-sm transition-colors hover:bg-orange-100"
                 >
                   <Plus className="w-4 h-4" />
                   {tc('add')}

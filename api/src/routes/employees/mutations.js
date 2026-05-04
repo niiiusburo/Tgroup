@@ -2,6 +2,7 @@ const express = require('express');
 const { query, pool } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
 const { fetchLocationScopeIds } = require('./locationScopes');
+const { getVietnamNow } = require('../../lib/dateUtils');
 
 const router = express.Router();
 
@@ -36,7 +37,6 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
       return res.status(400).json({ error: 'Name is required' });
     }
 
-    const { getVietnamNow } = require('../lib/dateUtils');
     const id = require('crypto').randomUUID();
     const now = getVietnamNow();
 
@@ -124,7 +124,6 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
  * Updates an existing employee (updates partners table)
  */
 router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
-  const { getVietnamNow } = require('../lib/dateUtils');
   const client = await pool.connect();
   try {
     const { id } = req.params;

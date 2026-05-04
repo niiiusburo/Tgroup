@@ -153,32 +153,22 @@ async function checkPartnerUnique(req, res) {
       return res.json({ unique: true });
     }
 
-    let rows;
     if (field === 'phone') {
-      if (excludeId) {
-        rows = await query(
-          'SELECT id FROM partners WHERE phone = $1 AND id <> $2 LIMIT 1',
-          [trimmed, excludeId]
-        );
-      } else {
-        rows = await query(
-          'SELECT id FROM partners WHERE phone = $1 LIMIT 1',
-          [trimmed]
-        );
-      }
+      return res.json({ unique: true });
+    }
+
+    let rows;
+    // email — case-insensitive comparison
+    if (excludeId) {
+      rows = await query(
+        'SELECT id FROM partners WHERE LOWER(email) = LOWER($1) AND id <> $2 LIMIT 1',
+        [trimmed, excludeId]
+      );
     } else {
-      // email — case-insensitive comparison
-      if (excludeId) {
-        rows = await query(
-          'SELECT id FROM partners WHERE LOWER(email) = LOWER($1) AND id <> $2 LIMIT 1',
-          [trimmed, excludeId]
-        );
-      } else {
-        rows = await query(
-          'SELECT id FROM partners WHERE LOWER(email) = LOWER($1) LIMIT 1',
-          [trimmed]
-        );
-      }
+      rows = await query(
+        'SELECT id FROM partners WHERE LOWER(email) = LOWER($1) LIMIT 1',
+        [trimmed]
+      );
     }
 
     if (rows && rows.length > 0) {

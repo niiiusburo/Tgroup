@@ -1,5 +1,152 @@
 [
   {
+    "version": "0.27.20",
+    "date": "2026-05-04",
+    "commit": "pending",
+    "highlights": "fix(tablet): tighten appointment service and payment forms",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Appointment, service, and payment form modules now use iPad-specific spacing and grid behavior so fields stay readable without changing desktop layouts.",
+          "The payment form footer now stays visible on iPad so the submit action is not buried below the scroll."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "Desktop behavior remains on the existing large-screen breakpoints; these adjustments apply only to tablet modal sizing."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.27.19",
+    "date": "2026-05-04",
+    "commit": "pending",
+    "highlights": "fix(domain-actions): soften appointment service and payment buttons",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Appointment quick-add, service creation, service catalog add, payment plan, deposit, and pay-now actions now use a light badge style instead of solid orange buttons."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "This keeps the domain actions visible while reducing the heavy orange visual weight across Appointments, Services, and Payments."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.27.18",
+    "date": "2026-05-04",
+    "commit": "pending",
+    "highlights": "fix(version): soften release notice badge color",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "The inline release notice now uses a light badge-style orange background instead of a solid orange block."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "The red X dismiss button remains prominent while the banner itself is visually softer."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.27.17",
+    "date": "2026-05-04",
+    "commit": "pending",
+    "highlights": "fix(version): make update notice easier to dismiss",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "The inline release notice now uses a solid orange background so it reads as an intentional update banner.",
+          "The dismiss action is now a prominent red X button with a larger touch target."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "Updated the floating Version Display release-notes preview shown above the version badge."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.27.16",
+    "date": "2026-05-04",
+    "commit": "pending",
+    "highlights": "fix(tablet): adapt clinic dashboard layout for iPad",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "iPad portrait now uses the touch drawer navigation instead of the collapsed hover sidebar.",
+          "Shared page headers, tables, calendar controls, Service Catalog, and Add Customer modal layouts now wrap or stack before tablet-width content clips."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "Captured iPad portrait and landscape screenshot evidence for 36 route and popup states with zero document-level overflow flags."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.27.15",
+    "date": "2026-05-04",
+    "commit": "pending",
+    "highlights": "fix(customers): show customer branch from API payload",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Customer list Location now falls back to the customer API company name when the location permission lookup is unavailable."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "Verified live customer searches for the May 4 customer update rows after the database deployment."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.11",
     "date": "2026-05-03",
     "commit": "pending",

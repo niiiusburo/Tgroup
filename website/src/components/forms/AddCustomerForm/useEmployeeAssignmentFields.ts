@@ -24,6 +24,13 @@ const employeeSearchHaystack = (employee: ApiEmployee) =>
 const isSalesStaffOption = (employee: ApiEmployee) =>
   employeeSearchHaystack(employee).includes('sale');
 
+const isActiveEmployeeOption = (employee: ApiEmployee) => employee.active;
+
+const filterActiveOptions = (
+  employees: readonly ApiEmployee[],
+  predicate: (employee: ApiEmployee) => boolean,
+) => employees.filter((employee) => isActiveEmployeeOption(employee) && predicate(employee));
+
 const isCskhStaffOption = (employee: ApiEmployee) => {
   const haystack = employeeSearchHaystack(employee);
   return haystack.includes('cskh') ||
@@ -64,14 +71,14 @@ export function useEmployeeAssignmentFields({
     if (salesTimeoutRef.current) clearTimeout(salesTimeoutRef.current);
     const trimmed = salesQuery.trim();
     if (!trimmed) {
-      setSalesResults(employees.filter(isSalesStaffOption));
+      setSalesResults(filterActiveOptions(employees, isSalesStaffOption));
       setSalesLoading(false);
       return;
     }
     setSalesLoading(true);
     salesTimeoutRef.current = setTimeout(() => {
-      fetchEmployees({ search: trimmed, limit: 100, active: 'all' })
-        .then((res) => setSalesResults(res.items.filter(isSalesStaffOption)))
+      fetchEmployees({ search: trimmed, limit: 100, active: 'true' })
+        .then((res) => setSalesResults(filterActiveOptions(res.items, isSalesStaffOption)))
         .catch(() => setSalesResults([]))
         .finally(() => setSalesLoading(false));
     }, 300);
@@ -91,14 +98,14 @@ export function useEmployeeAssignmentFields({
     if (cskhTimeoutRef.current) clearTimeout(cskhTimeoutRef.current);
     const trimmed = cskhQuery.trim();
     if (!trimmed) {
-      setCskhResults(employees.filter(isCskhStaffOption));
+      setCskhResults(filterActiveOptions(employees, isCskhStaffOption));
       setCskhLoading(false);
       return;
     }
     setCskhLoading(true);
     cskhTimeoutRef.current = setTimeout(() => {
-      fetchEmployees({ search: trimmed, limit: 100, active: 'all' })
-        .then((res) => setCskhResults(res.items.filter(isCskhStaffOption)))
+      fetchEmployees({ search: trimmed, limit: 100, active: 'true' })
+        .then((res) => setCskhResults(filterActiveOptions(res.items, isCskhStaffOption)))
         .catch(() => setCskhResults([]))
         .finally(() => setCskhLoading(false));
     }, 300);

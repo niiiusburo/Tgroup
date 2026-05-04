@@ -170,13 +170,39 @@ router.get('/employees', requirePermission('permissions.view'), async (req, res)
 
     if (employeeIds.length > 0) {
       const locRows = await query(`
-        SELECT
-          els.employee_id,
-          c.id AS location_id,
-          c.name AS location_name
-        FROM employee_location_scope els
-        JOIN companies c ON c.id = els.company_id
-        WHERE els.employee_id = ANY($1::uuid[])
+        WITH location_candidates AS (
+          SELECT
+            p.id AS employee_id,
+            c.id AS location_id,
+            c.name AS location_name,
+            0 AS sort_order
+          FROM partners p
+          JOIN companies c ON c.id = p.companyid
+          WHERE p.id = ANY($1::uuid[]) AND p.companyid IS NOT NULL
+
+          UNION ALL
+
+          SELECT
+            els.employee_id,
+            c.id AS location_id,
+            c.name AS location_name,
+            1 AS sort_order
+          FROM employee_location_scope els
+          JOIN companies c ON c.id = els.company_id
+          WHERE els.employee_id = ANY($1::uuid[])
+        ),
+        deduped_locations AS (
+          SELECT DISTINCT ON (employee_id, location_id)
+            employee_id,
+            location_id,
+            location_name,
+            sort_order
+          FROM location_candidates
+          ORDER BY employee_id, location_id, sort_order
+        )
+        SELECT employee_id, location_id, location_name
+        FROM deduped_locations
+        ORDER BY employee_id, sort_order, location_name
       `, [employeeIds]);
 
       for (const loc of locRows) {
@@ -296,10 +322,27 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
     }
 
     const locRows = await query(
-      `SELECT c.id AS location_id, c.name AS location_name
-       FROM employee_location_scope els
-       JOIN companies c ON c.id = els.company_id
-       WHERE els.employee_id = $1`,
+      `WITH location_candidates AS (
+         SELECT c.id AS location_id, c.name AS location_name, 0 AS sort_order
+         FROM partners p
+         JOIN companies c ON c.id = p.companyid
+         WHERE p.id = $1 AND p.companyid IS NOT NULL
+
+         UNION ALL
+
+         SELECT c.id AS location_id, c.name AS location_name, 1 AS sort_order
+         FROM employee_location_scope els
+         JOIN companies c ON c.id = els.company_id
+         WHERE els.employee_id = $1
+       ),
+       deduped_locations AS (
+         SELECT DISTINCT ON (location_id) location_id, location_name, sort_order
+         FROM location_candidates
+         ORDER BY location_id, sort_order
+       )
+       SELECT location_id, location_name
+       FROM deduped_locations
+       ORDER BY sort_order, location_name`,
       [employeeId]
     );
 
@@ -372,10 +415,27 @@ router.get('/resolve/:employeeId', requirePermission('permissions.view'), async 
         [employeeId]
       ),
       query(
-        `SELECT c.id, c.name
-         FROM employee_location_scope els
-         JOIN companies c ON c.id = els.company_id
-         WHERE els.employee_id = $1`,
+        `WITH location_candidates AS (
+           SELECT c.id, c.name, 0 AS sort_order
+           FROM partners p
+           JOIN companies c ON c.id = p.companyid
+           WHERE p.id = $1 AND p.companyid IS NOT NULL
+
+           UNION ALL
+
+           SELECT c.id, c.name, 1 AS sort_order
+           FROM employee_location_scope els
+           JOIN companies c ON c.id = els.company_id
+           WHERE els.employee_id = $1
+         ),
+         deduped_locations AS (
+           SELECT DISTINCT ON (id) id, name, sort_order
+           FROM location_candidates
+           ORDER BY id, sort_order
+         )
+         SELECT id, name
+         FROM deduped_locations
+         ORDER BY sort_order, name`,
         [employeeId]
       ),
     ]);

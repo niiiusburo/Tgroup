@@ -8,6 +8,7 @@
 import { Network, Shield, GitBranch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRelationshipsData } from '@/hooks/useRelationshipsData';
 import { PermissionMatrix } from '@/components/relationships/PermissionMatrix';
 import { EntityRelationshipMap } from '@/components/relationships/EntityRelationshipMap';
@@ -20,6 +21,8 @@ const TABS: readonly { readonly id: RelationshipsTab; readonly label: string; re
 
 export function Relationships() {
   const { t } = useTranslation('common');
+  const { hasPermission } = useAuth();
+  const canEditPermissions = hasPermission('permissions.edit');
   const {
     activeTab,
     setActiveTab,
@@ -110,6 +113,7 @@ export function Relationships() {
           onToggleRole={toggleRole}
           onTogglePermission={togglePermission}
           isDirty={isDirty}
+          canEdit={canEditPermissions}
           onSave={savePermissions}
           onReset={resetPermissions}
         />

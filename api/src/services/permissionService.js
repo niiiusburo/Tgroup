@@ -56,10 +56,27 @@ async function resolveEffectivePermissions(employeeId) {
       [employeeId]
     ),
     query(
-      `SELECT c.id, c.name
-       FROM dbo.employee_location_scope els
-       JOIN dbo.companies c ON c.id = els.company_id
-       WHERE els.employee_id = $1`,
+      `WITH location_candidates AS (
+         SELECT c.id, c.name, 0 AS sort_order
+         FROM dbo.partners p
+         JOIN dbo.companies c ON c.id = p.companyid
+         WHERE p.id = $1 AND p.companyid IS NOT NULL
+
+         UNION ALL
+
+         SELECT c.id, c.name, 1 AS sort_order
+         FROM dbo.employee_location_scope els
+         JOIN dbo.companies c ON c.id = els.company_id
+         WHERE els.employee_id = $1
+       ),
+       deduped_locations AS (
+         SELECT DISTINCT ON (id) id, name, sort_order
+         FROM location_candidates
+         ORDER BY id, sort_order
+       )
+       SELECT id, name
+       FROM deduped_locations
+       ORDER BY sort_order, name`,
       [employeeId]
     ),
   ]);

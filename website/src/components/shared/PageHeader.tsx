@@ -16,19 +16,19 @@ export function PageHeader({ title, subtitle, icon, actions, breadcrumbs }: Page
   return (
     <div className="flex flex-col gap-2">
       {breadcrumbs && <div className="text-sm text-gray-500">{breadcrumbs}</div>}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
+      <div className="flex items-start justify-between flex-wrap gap-3 md:gap-4">
+        <div className="flex min-w-0 items-start gap-3">
           {icon && (
-            <div className="text-primary">
+            <div className="mt-0.5 flex-shrink-0 text-primary">
               {icon}
             </div>
           )}
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
-            {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl font-semibold text-gray-900 leading-snug">{title}</h1>
+            {subtitle && <p className="text-sm text-gray-500 leading-relaxed">{subtitle}</p>}
           </div>
         </div>
-        {actions && <div className="flex items-center gap-3">{actions}</div>}
+        {actions && <div className="flex min-w-0 flex-wrap items-center justify-start gap-2 md:gap-3">{actions}</div>}
       </div>
     </div>
   );

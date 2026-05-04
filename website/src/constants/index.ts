@@ -139,7 +139,7 @@ export const ROUTE_PERMISSIONS: Record<string, string> = {
   [ROUTES.COMMISSION]: 'commission.view',
   [ROUTES.SETTINGS]: 'settings.view',
   [ROUTES.NOTIFICATIONS]: 'notifications.view',
-  [ROUTES.RELATIONSHIPS]: 'relationships.view',
+  [ROUTES.RELATIONSHIPS]: 'permissions.view',
   [ROUTES.PERMISSIONS]: 'permissions.view',
   [ROUTES.PAYMENT]: 'payment.view',
   [ROUTES.FEEDBACK]: 'permissions.view',

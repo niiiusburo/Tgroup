@@ -192,8 +192,6 @@ frontend_route_permissions:
     paths:
       - /permissions
       - /feedback
-  - string: relationships.view
-    paths:
       - /relationships
   - string: reports.view
     paths:
@@ -270,6 +268,8 @@ nav_permissions:
   - path: /permissions
     permission: permissions.view
   - path: /feedback
+    permission: permissions.view
+  - path: /relationships
     permission: permissions.view
   - path: /clinic
     permission: ""  # container, no guard

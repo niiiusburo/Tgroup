@@ -90,6 +90,25 @@ describe('permissionService', () => {
       ]);
     });
 
+    it('returns primary company plus additional scoped locations', async () => {
+      query.mockResolvedValueOnce([{ tier_id: 'group-1', group_name: 'Staff' }]);
+      query.mockResolvedValueOnce([{ permission: 'appointments.view' }]);
+      query.mockResolvedValueOnce([]);
+      query.mockResolvedValueOnce([
+        { id: 'primary-loc', name: 'Primary Clinic' },
+        { id: 'extra-loc', name: 'Second Clinic' },
+      ]);
+
+      const result = await resolveEffectivePermissions('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
+      expect(result.locations).toEqual([
+        { id: 'primary-loc', name: 'Primary Clinic' },
+        { id: 'extra-loc', name: 'Second Clinic' },
+      ]);
+      expect(query.mock.calls[3][0]).toContain('FROM dbo.partners p');
+      expect(query.mock.calls[3][0]).toContain('UNION ALL');
+      expect(query.mock.calls[3][0]).toContain('dbo.employee_location_scope');
+    });
+
     it('reports 3 parallel DB calls (optimized)', async () => {
       query.mockResolvedValueOnce([{ tier_id: 'group-1', group_name: 'Admin' }]);
       query.mockResolvedValueOnce([{ permission: 'customers.view' }]);

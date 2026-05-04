@@ -33,6 +33,7 @@
 | `components/shared/DoctorSelector.test.tsx` | Employees | DoctorSelector search and selection |
 | `components/shared/FaceCaptureModal.test.tsx` | Integrations | Face capture modal UI states |
 | `contexts/__tests__/appointment-hover.context.test.tsx` | Appointments | AppointmentHoverContext state |
+| `hooks/__tests__/useCalendarData.pagination.test.ts` | Appointments | Calendar range fetch uses the optimized calendar-mode appointment API and groups appointments by date |
 | `hooks/__tests__/useCustomers.cskh.test.ts` | Customers | `useCustomers` CSKH filtering |
 | `hooks/__tests__/useCustomers.permissions.test.ts` | Auth | `useCustomers` permission-gated behavior |
 | `hooks/__tests__/useFaceRecognition.test.ts` | Integrations | `useFaceRecognition` hook logic |
@@ -45,6 +46,7 @@
 | `lib/formatting.test.ts` | Shared | Date/currency formatting utilities |
 | `lib/utils.test.ts` | Shared | Generic utility functions |
 | `lib/vietqr.test.ts` | Payments | VietQR URL generation logic |
+| `pages/Calendar.click.test.tsx` | Appointments | Calendar week appointment click opens the edit modal without being hidden by range loading |
 | `pages/Overview.test.tsx` | Overview | Overview page stats and schedule rendering |
 | `pages/reports/__tests__/ReportsDashboard.test.tsx` | Reports | ReportsDashboard KPI cards |
 | `pages/reports/__tests__/ReportsSubpages.test.tsx` | Reports | Reports sub-page routing and data |
@@ -105,8 +107,12 @@
 
 | Test File | Domain | What It Tests |
 |-----------|--------|---------------|
+| `loginRateLimiter.test.js` | Auth | Login rate limiter counts failed attempts only and scopes account lockout by email plus IP |
 | `faceRecognition.test.js` | Integrations | Compreface face register/recognize API |
+| `src/routes/appointments/__tests__/readHandlers.test.js` | Appointments | Calendar-mode appointment list allows large week ranges while skipping count/aggregate queries; normal lists remain capped |
 | `src/routes/__tests__/externalCheckups.test.js` | Integrations | Hosoonline auth header and migrated ref lookup behavior |
+| `src/routes/partners/__tests__/mutationHandlers.test.js` | Customers | Customer edit allows phone values to overlap customer refs/phones while keeping UUID as identity |
+| `src/routes/partners/__tests__/readHandlers.test.js` | Customers | Customer uniqueness helper treats phone as non-blocking and keeps email duplicate checks active |
 | `src/routes/partners/__tests__/searchFilters.test.js` | Customers | Customer search matches related appointment and service order numbers |
 | `saleOrders.test.js` | Services/Payments | Sale order edits recalculate residual display from `payment_allocations` |
 | `tdentalImport.test.js` | Data/Money | TDental import mapping, payment status, local-only payment cleanup, CSV date parsing, and anomaly policy |
@@ -121,7 +127,7 @@
 | **Payments (backend)** | No backend tests for payment allocation, void, refund, or deposit logic |
 | **Exports (backend)** | E2E covers workbook shape, but there are no route-level unit tests for `/api/Exports` permission filtering, row-limit errors, or `exports_audit` failure behavior |
 | **Auth (backend)** | No backend tests for `requirePermission` or `resolvePermissions` divergence |
-| **Appointments (backend)** | No backend tests for appointment CRUD or validation |
+| **Appointments (backend)** | Calendar list optimization is covered; no backend tests for appointment create/update/delete validation |
 | **Reports** | No automated accuracy tests for SQL aggregations |
 | **Commission** | No E2E or unit tests for commission calculation |
 | **Monthly Plans** | No tests for installment payment flows |

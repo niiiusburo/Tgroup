@@ -56,7 +56,7 @@ export function DepositWallet({
         <button
           onClick={() => setShowAddModal(true)}
           disabled={loading}
-          className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50">
+          className="flex items-center gap-1 rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-sm font-semibold text-orange-700 shadow-sm transition-colors hover:bg-orange-100 disabled:opacity-50">
           
             <Plus className="w-4 h-4" />
             {t('addDepositBtn')}
@@ -217,7 +217,7 @@ export function DepositWallet({
               <button
               onClick={handleAddDeposit}
               disabled={submitting || !addAmount}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50">
+              className="flex items-center gap-2 rounded-lg border border-orange-200 bg-orange-50 px-4 py-2 text-sm font-semibold text-orange-700 shadow-sm transition-colors hover:bg-orange-100 disabled:opacity-50">
               
                 {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                 {t('addDepositBtn')}

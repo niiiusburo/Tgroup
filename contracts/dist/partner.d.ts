@@ -4,7 +4,7 @@ export declare const PartnerBaseSchema: z.ZodObject<{
     name: z.ZodString;
     phone: z.ZodString;
     email: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    companyid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    companyid: z.ZodEffects<z.ZodNullable<z.ZodOptional<z.ZodString>>, string | null | undefined, unknown>;
     gender: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     birthday: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
     birthmonth: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
@@ -16,8 +16,8 @@ export declare const PartnerBaseSchema: z.ZodObject<{
     medicalhistory: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     note: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     comment: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    sourceid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    referraluserid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    sourceid: z.ZodEffects<z.ZodNullable<z.ZodOptional<z.ZodString>>, string | null | undefined, unknown>;
+    referraluserid: z.ZodEffects<z.ZodNullable<z.ZodOptional<z.ZodString>>, string | null | undefined, unknown>;
     weight: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
     identitynumber: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     healthinsurancecardnumber: z.ZodNullable<z.ZodOptional<z.ZodString>>;
@@ -31,8 +31,8 @@ export declare const PartnerBaseSchema: z.ZodObject<{
     personalidentitycard: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     personaltaxcode: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     personaladdress: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    salestaffid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    cskhid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    salestaffid: z.ZodEffects<z.ZodNullable<z.ZodOptional<z.ZodString>>, string | null | undefined, unknown>;
+    cskhid: z.ZodEffects<z.ZodNullable<z.ZodOptional<z.ZodString>>, string | null | undefined, unknown>;
     customer: z.ZodDefault<z.ZodBoolean>;
     status: z.ZodDefault<z.ZodBoolean>;
     ref: z.ZodNullable<z.ZodOptional<z.ZodString>>;
@@ -77,7 +77,7 @@ export declare const PartnerBaseSchema: z.ZodObject<{
     name: string;
     phone: string;
     id?: string | undefined;
-    companyid?: string | null | undefined;
+    companyid?: unknown;
     note?: string | null | undefined;
     status?: boolean | undefined;
     email?: string | null | undefined;
@@ -91,8 +91,8 @@ export declare const PartnerBaseSchema: z.ZodObject<{
     wardname?: string | null | undefined;
     medicalhistory?: string | null | undefined;
     comment?: string | null | undefined;
-    sourceid?: string | null | undefined;
-    referraluserid?: string | null | undefined;
+    sourceid?: unknown;
+    referraluserid?: unknown;
     weight?: number | null | undefined;
     identitynumber?: string | null | undefined;
     healthinsurancecardnumber?: string | null | undefined;
@@ -106,8 +106,8 @@ export declare const PartnerBaseSchema: z.ZodObject<{
     personalidentitycard?: string | null | undefined;
     personaltaxcode?: string | null | undefined;
     personaladdress?: string | null | undefined;
-    salestaffid?: string | null | undefined;
-    cskhid?: string | null | undefined;
+    salestaffid?: unknown;
+    cskhid?: unknown;
     customer?: boolean | undefined;
     ref?: string | null | undefined;
 }>;
@@ -116,7 +116,7 @@ export declare const PartnerCreateSchema: z.ZodObject<Omit<{
     name: z.ZodString;
     phone: z.ZodString;
     email: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    companyid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    companyid: z.ZodEffects<z.ZodNullable<z.ZodOptional<z.ZodString>>, string | null | undefined, unknown>;
     gender: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     birthday: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
     birthmonth: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
@@ -128,8 +128,8 @@ export declare const PartnerCreateSchema: z.ZodObject<Omit<{
     medicalhistory: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     note: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     comment: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    sourceid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    referraluserid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    sourceid: z.ZodEffects<z.ZodNullable<z.ZodOptional<z.ZodString>>, string | null | undefined, unknown>;
+    referraluserid: z.ZodEffects<z.ZodNullable<z.ZodOptional<z.ZodString>>, string | null | undefined, unknown>;
     weight: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
     identitynumber: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     healthinsurancecardnumber: z.ZodNullable<z.ZodOptional<z.ZodString>>;
@@ -143,8 +143,8 @@ export declare const PartnerCreateSchema: z.ZodObject<Omit<{
     personalidentitycard: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     personaltaxcode: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     personaladdress: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    salestaffid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    cskhid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    salestaffid: z.ZodEffects<z.ZodNullable<z.ZodOptional<z.ZodString>>, string | null | undefined, unknown>;
+    cskhid: z.ZodEffects<z.ZodNullable<z.ZodOptional<z.ZodString>>, string | null | undefined, unknown>;
     customer: z.ZodDefault<z.ZodBoolean>;
     status: z.ZodDefault<z.ZodBoolean>;
     ref: z.ZodNullable<z.ZodOptional<z.ZodString>>;
@@ -187,7 +187,7 @@ export declare const PartnerCreateSchema: z.ZodObject<Omit<{
 }, {
     name: string;
     phone: string;
-    companyid?: string | null | undefined;
+    companyid?: unknown;
     note?: string | null | undefined;
     status?: boolean | undefined;
     email?: string | null | undefined;
@@ -201,8 +201,8 @@ export declare const PartnerCreateSchema: z.ZodObject<Omit<{
     wardname?: string | null | undefined;
     medicalhistory?: string | null | undefined;
     comment?: string | null | undefined;
-    sourceid?: string | null | undefined;
-    referraluserid?: string | null | undefined;
+    sourceid?: unknown;
+    referraluserid?: unknown;
     weight?: number | null | undefined;
     identitynumber?: string | null | undefined;
     healthinsurancecardnumber?: string | null | undefined;
@@ -216,8 +216,8 @@ export declare const PartnerCreateSchema: z.ZodObject<Omit<{
     personalidentitycard?: string | null | undefined;
     personaltaxcode?: string | null | undefined;
     personaladdress?: string | null | undefined;
-    salestaffid?: string | null | undefined;
-    cskhid?: string | null | undefined;
+    salestaffid?: unknown;
+    cskhid?: unknown;
     customer?: boolean | undefined;
     ref?: string | null | undefined;
 }>;
@@ -226,7 +226,7 @@ export declare const PartnerUpdateSchema: z.ZodObject<Omit<{
     name: z.ZodOptional<z.ZodString>;
     phone: z.ZodOptional<z.ZodString>;
     email: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
-    companyid: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
+    companyid: z.ZodOptional<z.ZodEffects<z.ZodNullable<z.ZodOptional<z.ZodString>>, string | null | undefined, unknown>>;
     gender: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     birthday: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodNumber>>>;
     birthmonth: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodNumber>>>;
@@ -238,8 +238,8 @@ export declare const PartnerUpdateSchema: z.ZodObject<Omit<{
     medicalhistory: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     note: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     comment: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
-    sourceid: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
-    referraluserid: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
+    sourceid: z.ZodOptional<z.ZodEffects<z.ZodNullable<z.ZodOptional<z.ZodString>>, string | null | undefined, unknown>>;
+    referraluserid: z.ZodOptional<z.ZodEffects<z.ZodNullable<z.ZodOptional<z.ZodString>>, string | null | undefined, unknown>>;
     weight: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodNumber>>>;
     identitynumber: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     healthinsurancecardnumber: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
@@ -253,8 +253,8 @@ export declare const PartnerUpdateSchema: z.ZodObject<Omit<{
     personalidentitycard: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     personaltaxcode: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     personaladdress: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
-    salestaffid: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
-    cskhid: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
+    salestaffid: z.ZodOptional<z.ZodEffects<z.ZodNullable<z.ZodOptional<z.ZodString>>, string | null | undefined, unknown>>;
+    cskhid: z.ZodOptional<z.ZodEffects<z.ZodNullable<z.ZodOptional<z.ZodString>>, string | null | undefined, unknown>>;
     customer: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
     status: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
     ref: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
@@ -295,7 +295,7 @@ export declare const PartnerUpdateSchema: z.ZodObject<Omit<{
     customer?: boolean | undefined;
     ref?: string | null | undefined;
 }, {
-    companyid?: string | null | undefined;
+    companyid?: unknown;
     note?: string | null | undefined;
     status?: boolean | undefined;
     name?: string | undefined;
@@ -311,8 +311,8 @@ export declare const PartnerUpdateSchema: z.ZodObject<Omit<{
     wardname?: string | null | undefined;
     medicalhistory?: string | null | undefined;
     comment?: string | null | undefined;
-    sourceid?: string | null | undefined;
-    referraluserid?: string | null | undefined;
+    sourceid?: unknown;
+    referraluserid?: unknown;
     weight?: number | null | undefined;
     identitynumber?: string | null | undefined;
     healthinsurancecardnumber?: string | null | undefined;
@@ -326,8 +326,8 @@ export declare const PartnerUpdateSchema: z.ZodObject<Omit<{
     personalidentitycard?: string | null | undefined;
     personaltaxcode?: string | null | undefined;
     personaladdress?: string | null | undefined;
-    salestaffid?: string | null | undefined;
-    cskhid?: string | null | undefined;
+    salestaffid?: unknown;
+    cskhid?: unknown;
     customer?: boolean | undefined;
     ref?: string | null | undefined;
 }>;

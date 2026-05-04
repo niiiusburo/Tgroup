@@ -25,7 +25,7 @@ export function LeftPanel({ formApi }: LeftPanelProps) {
   } = formApi;
   // LEFT PANEL
   return (
-    <div className="w-80 flex-shrink-0 border-r border-gray-200 flex flex-col gap-4 px-5 py-5 overflow-hidden bg-gray-50/30">
+    <div className="w-full flex-shrink-0 overflow-y-auto border-b border-gray-200 bg-gray-50/30 px-4 py-4 custom-scrollbar sm:px-5 sm:py-5 md:w-72 md:border-b-0 md:border-r xl:w-80">
       {/* Card 1: Personal Info */}
       <CardSection title={t('profileSection.personalInfo', { ns: 'customers' })} icon={User} maxHeight="280px">
         <div className="flex justify-center mb-4">

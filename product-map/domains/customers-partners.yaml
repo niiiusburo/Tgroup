@@ -58,6 +58,8 @@ ui_invariants:
   - Customer list search must resolve customers by migrated customer ref, appointment number (`appointments.name`), and service/treatment order number (`saleorders.code` / `saleorders.name`).
   - Customer profile assignment card and edit form must display the sales employee from `partners.salestaffid` / `salestaffname`, not the customer's `jobtitle` or other personal-detail fields.
   - Customer edit forms must resolve saved employee assignment IDs against all employees, including inactive migrated employees; active-only lists are for new selection defaults, not selected-value hydration.
+  - Employee assignment suggestions in customer forms must hide inactive employees so TDental duplicate staff records do not appear as selectable options.
+  - Customer phone is not a durable unique identity. Phone may overlap another phone or match a customer code (`partners.ref`) and must not block customer create/edit saves.
 jobs:
   - none (archive scripts in api/scripts/archive/ are stale)
 shared_types:
