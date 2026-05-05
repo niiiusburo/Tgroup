@@ -8,6 +8,12 @@
   "quickActions": "Quick Actions",
   "recentActivity": "Recent Activity",
   "noAppointments": "No appointments for today",
+  "stickySearch": {
+    "label": "Sticky appointment search",
+    "title": "Find appointment",
+    "placeholder": "Search by patient, phone, doctor, time, location, or note...",
+    "clear": "Clear appointment search"
+  },
   "zone1": {
     "title": "Daily Schedule",
     "searchPlaceholder": "Search by name or phone...",

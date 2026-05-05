@@ -225,6 +225,7 @@ export function VersionDisplay({
           <div className="relative" ref={tooltipRef}>
             <button
               ref={buttonRef}
+              data-testid="version-badge"
               onClick={() => setShowTooltip(!showTooltip)}
               disabled={isChecking}
               className={`

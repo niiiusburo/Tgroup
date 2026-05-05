@@ -14,6 +14,8 @@ import { EmployeeProfile } from '@/components/employees/EmployeeProfile';
 import { useTranslation } from 'react-i18next';
 import { EmployeeForm } from '@/components/employees/EmployeeForm';
 import { useAuth } from '@/contexts/AuthContext';
+import type { ApiEmployee } from '@/lib/api';
+import type { Employee } from '@/data/mockEmployees';
 
 /**
  * Employees Page — staff management with list view and detailed profiles
@@ -49,6 +51,7 @@ export function Employees() {
   // Form state
   const [showForm, setShowForm] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<typeof selectedEmployee>(null);
+  const [formFeedback, setFormFeedback] = useState<string | null>(null);
 
   const hasFilters = searchQuery || tierFilter !== 'all' || roleFilter !== 'all' || statusFilter !== 'all';
 
@@ -72,28 +75,40 @@ export function Employees() {
       .finally(() => setTiersLoading(false));
   }, []);
 
+  const openEmployeeEditor = (employee: Employee) => {
+    if (!canEditEmployees) return;
+    const formData = {
+      id: employee.id,
+      name: employee.name,
+      phone: employee.phone || undefined,
+      email: employee.email || undefined,
+      companyid: employee.locationId || undefined,
+      locationScopeIds: employee.locationScopeIds ?? [],
+      isdoctor: employee.roles.includes('doctor'),
+      isassistant: employee.roles.includes('assistant') || employee.roles.includes('doctor-assistant'),
+      isreceptionist: employee.roles.includes('receptionist'),
+      active: employee.status === 'active',
+      jobtitle: (employee as any).hrjobname || (employee as any).jobtitle || null,
+      wage: (employee as any).wage ?? null,
+      allowance: (employee as any).allowance ?? null,
+      startworkdate: employee.hireDate || null,
+      tierId: employee.tierId || null,
+    };
+    setSelectedEmployeeId(employee.id);
+    setEditingEmployee(formData as any);
+    setShowForm(true);
+  };
+
   const handleEditEmployee = () => {
-    if (selectedEmployee && canEditEmployees) {
-      // Map domain Employee type to EmployeeForm's expected shape
-      const formData = {
-        id: selectedEmployee.id,
-        name: selectedEmployee.name,
-        phone: selectedEmployee.phone || undefined,
-        email: selectedEmployee.email || undefined,
-        companyid: selectedEmployee.locationId || undefined,
-        locationScopeIds: selectedEmployee.locationScopeIds ?? [],
-        isdoctor: selectedEmployee.roles.includes('doctor'),
-        isassistant: selectedEmployee.roles.includes('assistant') || selectedEmployee.roles.includes('doctor-assistant'),
-        isreceptionist: selectedEmployee.roles.includes('receptionist'),
-        active: selectedEmployee.status === 'active',
-        jobtitle: (selectedEmployee as any).hrjobname || (selectedEmployee as any).jobtitle || null,
-        wage: (selectedEmployee as any).wage ?? null,
-        allowance: (selectedEmployee as any).allowance ?? null,
-        startworkdate: selectedEmployee.hireDate || null,
-        tierId: selectedEmployee.tierId || null,
-      };
-      setEditingEmployee(formData as any);
-      setShowForm(true);
+    if (selectedEmployee) {
+      openEmployeeEditor(selectedEmployee);
+    }
+  };
+
+  const handleEditEmployeeById = (employeeId: string) => {
+    const employee = employees.find((item) => item.id === employeeId);
+    if (employee) {
+      openEmployeeEditor(employee);
     }
   };
 
@@ -102,8 +117,18 @@ export function Employees() {
     setEditingEmployee(null);
   };
 
-  const handleFormSave = () => {
-    refetch();
+  const handleFormSave = async (savedEmployee: ApiEmployee, mode: 'create' | 'edit') => {
+    setSearchQuery('');
+    setTierFilter('all');
+    setRoleFilter('all');
+    setStatusFilter('all');
+    setSelectedEmployeeId(savedEmployee.id);
+    await refetch('');
+    setFormFeedback(
+      mode === 'create'
+        ? t('employeeCreated', { name: savedEmployee.name, defaultValue: `Created ${savedEmployee.name}` })
+        : t('employeeUpdated', { name: savedEmployee.name, defaultValue: `Updated ${savedEmployee.name}` }),
+    );
   };
 
   return (
@@ -123,6 +148,20 @@ export function Employees() {
           ) : undefined
         }
       />
+
+      {formFeedback && (
+        <div className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+          <span>{formFeedback}</span>
+          <button
+            type="button"
+            onClick={() => setFormFeedback(null)}
+            className="rounded-lg p-1 text-emerald-700 transition-colors hover:bg-emerald-100"
+            aria-label={t('dismissFeedback', 'Dismiss')}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       {/* Search and filters */}
       <div className="bg-white rounded-xl shadow-card p-4 space-y-3">
@@ -211,6 +250,7 @@ export function Employees() {
             locationNameMap={locationNameMap}
             loading={isLoading}
             locationsLoading={locationsLoading}
+            onEdit={canEditEmployees ? handleEditEmployeeById : undefined}
           />
         </div>
 

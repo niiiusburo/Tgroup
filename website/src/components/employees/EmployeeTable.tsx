@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge, type StatusVariant } from '@/components/shared/StatusBadge';
-import { MapPin } from 'lucide-react';
+import { Edit3, MapPin } from 'lucide-react';
 import {
   ROLE_LABELS,
   ROLE_STYLES,
@@ -21,6 +21,7 @@ interface EmployeeTableProps {
   readonly locationNameMap?: Map<string, string>;
   readonly loading?: boolean;
   readonly locationsLoading?: boolean;
+  readonly onEdit?: (id: string) => void;
 }
 
 
@@ -30,9 +31,13 @@ const STATUS_MAP: Record<string, StatusVariant> = {
   inactive: 'inactive',
 };
 
-function useColumns(locationNameMap?: Map<string, string>, locationsLoading = false): readonly Column<Employee>[] {
+function useColumns(
+  locationNameMap?: Map<string, string>,
+  locationsLoading = false,
+  onEdit?: (id: string) => void,
+): readonly Column<Employee>[] {
   const { t } = useTranslation('employees');
-  return [
+  const columns: Column<Employee>[] = [
     {
       key: 'name',
       header: 'Employee',
@@ -126,6 +131,30 @@ function useColumns(locationNameMap?: Map<string, string>, locationsLoading = fa
       ),
     },
   ];
+
+  if (onEdit) {
+    columns.push({
+      key: 'actions',
+      header: t('columns.actions', 'Actions'),
+      width: '96px',
+      render: (emp) => (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onEdit(emp.id);
+          }}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-2.5 py-1.5 text-xs font-semibold text-orange-700 transition-colors hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+          aria-label={t('editEmployeeNamed', { name: emp.name, defaultValue: `Edit employee ${emp.name}` })}
+        >
+          <Edit3 className="h-3.5 w-3.5" />
+          {t('editShort', 'Edit')}
+        </button>
+      ),
+    });
+  }
+
+  return columns;
 }
 
 export function EmployeeTable({
@@ -135,8 +164,9 @@ export function EmployeeTable({
   locationNameMap,
   loading = false,
   locationsLoading = false,
+  onEdit,
 }: EmployeeTableProps) {
-  const columns = useColumns(locationNameMap, locationsLoading);
+  const columns = useColumns(locationNameMap, locationsLoading, onEdit);
   return (
     <DataTable
       columns={columns}

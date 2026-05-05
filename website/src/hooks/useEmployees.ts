@@ -302,8 +302,8 @@ export function useEmployees(selectedLocationId?: string) {
     setStatusFilter('all');
   }, []);
 
-  const refetch = useCallback(() => {
-    fetchAndSetEmployees(searchQuery || undefined);
+  const refetch = useCallback((searchOverride?: string) => {
+    return fetchAndSetEmployees(searchOverride ?? (searchQuery || undefined));
   }, [searchQuery, fetchAndSetEmployees]);
 
   return {

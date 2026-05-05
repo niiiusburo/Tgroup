@@ -1,5 +1,32 @@
 [
   {
+    "version": "0.27.23",
+    "date": "2026-05-05",
+    "commit": "pending",
+    "highlights": "feat(overview): add sticky appointment search",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Overview now has a sticky top appointment search that filters the daily appointment areas underneath it and scrolls to the best matching appointment while staff type."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "The overview search panel stays pinned above the appointment, check-in, and services panels without showing a separate dropdown menu.",
+          "The version badge and release notice now sit in the bottom-right corner as a compact toast instead of covering the left side of the workspace."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "Search matches patient name, phone, doctor, staff, appointment time, location, and notes for today's appointments."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.20",
     "date": "2026-05-04",
     "commit": "pending",

@@ -14,7 +14,8 @@
     "email": "Email",
     "status": "Status",
     "schedule": "Schedule",
-    "joinDate": "Join Date"
+    "joinDate": "Join Date",
+    "actions": "Actions"
   },
   "form": {
     "fullName": "Full Name",
@@ -144,5 +145,10 @@
   "angLmVic": "Working",
   "nghVic": "Resigned",
   "cpNht": "Update",
-  "khngCChiNhnhPh": "No additional branches"
+  "khngCChiNhnhPh": "No additional branches",
+  "editShort": "Edit",
+  "editEmployeeNamed": "Edit employee {{name}}",
+  "employeeCreated": "Created {{name}}",
+  "employeeUpdated": "Updated {{name}}",
+  "dismissFeedback": "Dismiss"
 }

@@ -80,10 +80,12 @@ export function EmployeeProfile({
             {onEdit &&
             <button
               onClick={onEdit}
-              className="p-1.5 rounded-lg hover:bg-white/50 transition-colors"
-              title="Edit employee">
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1.5 text-xs font-semibold text-orange-700 shadow-sm transition-colors hover:bg-orange-50"
+              title={t('employees:editEmployee')}
+              aria-label={t('employees:editEmployee')}>
               
                 <Pencil className="w-4 h-4 text-gray-500" />
+                <span>{t('employees:editShort', 'Edit')}</span>
               </button>
             }
             <button

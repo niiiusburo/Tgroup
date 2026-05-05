@@ -80,6 +80,13 @@ function SidebarItem({ item, expanded, mobileMenuOpen, onClick }: SidebarItemPro
     }
   }
 
+  useEffect(() => {
+    setOpen(false);
+    cancelHide();
+
+    return cancelHide;
+  }, [location.pathname, mobileMenuOpen]);
+
   const isActive =
   location.pathname === item.path || (
   item.children?.some((c) => c.path === location.pathname) ?? false);
@@ -334,7 +341,13 @@ export function Layout() {
         {/* Navigation */}
         <nav className={`flex-1 flex flex-col gap-1 w-full ${mobileMenuOpen ? 'overflow-y-auto' : ''} ${sidebarExpanded || mobileMenuOpen ? 'px-3' : 'px-3 items-center'}`}>
           {visibleNavItems.map((item) =>
-          <SidebarItem key={item.path} item={item} expanded={sidebarExpanded || mobileMenuOpen} mobileMenuOpen={mobileMenuOpen} />
+          <SidebarItem
+            key={item.path}
+            item={item}
+            expanded={sidebarExpanded || mobileMenuOpen}
+            mobileMenuOpen={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen(false)}
+          />
           )}
         </nav>
 
@@ -445,7 +458,7 @@ export function Layout() {
         </main>
 
         {/* Version Display */}
-        <div className="fixed bottom-4 left-4 z-40 hidden sm:block">
+        <div className="fixed bottom-4 right-4 z-40 hidden sm:block">
           <VersionDisplay variant="floating" />
         </div>
       </div>

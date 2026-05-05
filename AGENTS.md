@@ -204,30 +204,16 @@ This project can use OpenCode Plan and Build phases:
 <claude-mem-context>
 # Memory Context
 
-# [Tgrouptest] recent context, 2026-05-04 10:19pm GMT+7
+# [Tgrouptest] recent context, 2026-05-05 9:38am GMT+7
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
 Format: ID TIME TYPE TITLE
 Fetch details: get_observations([IDs]) | Search: mem-search skill
 
-Stats: 50 obs (23,039t read) | 1,000,942t work | 98% savings
+Stats: 50 obs (21,678t read) | 1,041,275t work | 98% savings
 
 ### May 4, 2026
-11882 12:07a 🔵 Live Production Authentication Test Confirms User Profile and Permission Set
-11883 " 🔵 Live Production Permission Groups Structure and Hierarchy
-11885 12:12a 🔵 Employee creation endpoint broken - missing dateUtils module
-11887 12:13a 🔵 TestSprite tunnel configuration and versioning system
-11888 12:17a 🟣 Comprehensive frontend test plan created with 18 test cases
-11889 12:18a 🔵 TestSprite MCP server misconfiguration - checks localhost:443 for remote production target
-11890 12:21a 🔵 Direct live QA automation blocked by authentication failure
-11891 " 🔵 Production login rate limiting blocks automated QA - 10 attempts per 15 minutes
-11892 12:22a 🔵 Direct token minting approach also fails - likely local DATABASE_URL issue
-11893 12:23a 🔵 Production database rejects SSL connections - blocks direct token minting strategy
-11894 " 🔵 Local DATABASE_URL points to schema-less database - partners table does not exist
-11895 12:24a 🔵 Production VPS stack confirmed - PostgreSQL on port 55433, admin employee in dbo schema
-11896 12:25a 🔵 Production token minting succeeds but fails due to non-ASCII character in JWT payload
-12151 6:22p 🔵 Appointment clearance preparation with safety guardrails active
-12152 " 🔵 Customer update spreadsheet contains 511 rows with customer code, name, phone, and branch
+12152 6:22p 🔵 Customer update spreadsheet contains 511 rows with customer code, name, phone, and branch
 12153 " 🔵 Appointment clearance scope: 6,082 future appointments with no dependent records
 12154 6:23p 🔵 Production database verified: 6,088 future appointments with CASCADE delete constraints
 12155 " 🔵 Customer update spreadsheet contains 510 new customers with no existing database matches
@@ -263,6 +249,20 @@ Stats: 50 obs (23,039t read) | 1,000,942t work | 98% savings
 12214 10:08p 🔵 Employee Location Scope Selection Bug - Frontend State Not Persisted
 12215 " 🔴 Fixed Employee Primary Location Missing from Permission Response
 12216 10:09p ✅ Updated Auth Domain Documentation with Location Resolution Behavior
+12226 10:21p 🔵 Playwright test suite reveals sidebar interaction failures
+12227 " 🔵 Sidebar navigation elements visible but not clickable
+12228 10:23p 🔵 Syntax error in employee creation test assertion
+12229 10:25p 🔵 Complete test suite run reveals 72% failure rate with systematic UI interaction issues
+12230 10:27p ✅ Docker Deployment Completed
+12231 " 🔵 Production Deployment Verified
+12233 10:28p 🔵 Employee Location Scope Data Retrieved
+12235 " 🔵 Permission Resolution API Confirms Multi-Location Storage
+12236 10:29p 🔵 Production E2E Verification Passed
+12237 10:31p ✅ Production Screenshots Captured for Permission Release
+12239 " ✅ Development servers stopped on ports 3002 and 5175
+12243 10:37p 🟣 Employee table inline edit with post-save auto-selection
+12245 10:38p ✅ Development environment started for testing
+12247 10:39p 🔵 Customer form save succeeds but modal fails to close
 
-Access 1001k tokens of past work via get_observations([IDs]) or mem-search skill.
+Access 1041k tokens of past work via get_observations([IDs]) or mem-search skill.
 </claude-mem-context>

@@ -24,7 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { X, Loader2, UserPlus, User, Phone, Mail, MapPin, CalendarDays, CheckCircle2, Shield, Check, Eye, EyeOff, Building2 } from 'lucide-react';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { LocationSelector } from '@/components/shared/LocationSelector';
-import { createEmployee, updateEmployee, fetchCompanies, fetchPermissionGroups, type CreateEmployeeData, type PermissionGroup } from '@/lib/api';
+import { createEmployee, updateEmployee, fetchCompanies, fetchPermissionGroups, type ApiEmployee, type CreateEmployeeData, type PermissionGroup } from '@/lib/api';
 import { ALL_ROLES, ROLE_LABELS, ROLE_TO_DB_FLAGS, inferRoleFromFlags, type EmployeeRole } from '@/data/mockEmployees';
 
 const ROLE_TO_JOBTITLE: Record<EmployeeRole, string> = {
@@ -58,7 +58,7 @@ interface EmployeeFormProps {
     tierId?: string | null;
   };
   readonly onClose: () => void;
-  readonly onSave: () => void;
+  readonly onSave: (employee: ApiEmployee, mode: 'create' | 'edit') => void | Promise<void>;
 }
 
 export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
@@ -127,12 +127,13 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
 
     setLoading(true);
     try {
+      let savedEmployee: ApiEmployee;
       if (isEdit && employee) {
-        await updateEmployee(employee.id, data);
+        savedEmployee = await updateEmployee(employee.id, data);
       } else {
-        await createEmployee(data);
+        savedEmployee = await createEmployee(data);
       }
-      onSave();
+      await onSave(savedEmployee, isEdit ? 'edit' : 'create');
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('saveFailed'));

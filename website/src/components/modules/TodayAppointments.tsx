@@ -118,17 +118,18 @@ export function TodayAppointments({
             })}
           </div>
 
-          {/* Quick search */}
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => onSearchChange?.(e.target.value)}
-              placeholder={t('searchPlaceholder', {ns: 'appointments'})}
-              className="w-full pl-8 pr-3 py-1.5 text-sm rounded-lg bg-white/20 border border-white/30 text-white placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-white/30 transition-all" />
-            
-          </div>
+          {onSearchChange && (
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder={t('searchPlaceholder', {ns: 'appointments'})}
+                className="w-full pl-8 pr-3 py-1.5 text-sm rounded-lg bg-white/20 border border-white/30 text-white placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-white/30 transition-all" />
+              
+            </div>
+          )}
         </div>
       </div>
 

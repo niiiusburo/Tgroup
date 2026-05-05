@@ -283,6 +283,14 @@ Always respect `prefers-reduced-motion: reduce`.
 - Default gap: `gap-4` (16px)
 - Page padding: `p-4 md:p-6`
 
+### Sticky Toolbars And Search
+- Sticky dashboard toolbars use the standard card surface: `bg-white rounded-xl border border-gray-200 shadow-sm`.
+- Internal padding follows the compact card pattern: `px-4 py-3`.
+- Controls inside the toolbar use `gap-3` on mobile and `lg:gap-4` on desktop.
+- Labels should be `shrink-0` and content-sized; do not reserve fixed label columns such as `lg:w-52` unless the whole page uses aligned form columns.
+- Inputs inside sticky toolbars keep the canonical `h-10`, `rounded-xl`, `border-gray-200`, and primary focus ring.
+- Sticky toolbars should sit in normal document flow with `mb-4` by default, or `mb-6` when the sticky offset can otherwise cover adjacent dense panels during auto-scroll.
+
 ### Z-Index Scale
 | Layer | Z-Index | Usage |
 |-------|---------|-------|

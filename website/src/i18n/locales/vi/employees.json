@@ -14,7 +14,8 @@
     "email": "Email",
     "status": "Trạng thái",
     "schedule": "Lịch làm việc",
-    "joinDate": "Ngày vào"
+    "joinDate": "Ngày vào",
+    "actions": "Thao tác"
   },
   "form": {
     "fullName": "Họ và tên",
@@ -144,5 +145,10 @@
   "angLmVic": "Đang làm việc",
   "nghVic": "Nghỉ việc",
   "cpNht": "Cập nhật",
-  "khngCChiNhnhPh": "Không có chi nhánh phụ"
+  "khngCChiNhnhPh": "Không có chi nhánh phụ",
+  "editShort": "Sửa",
+  "editEmployeeNamed": "Sửa nhân viên {{name}}",
+  "employeeCreated": "Đã thêm {{name}}",
+  "employeeUpdated": "Đã cập nhật {{name}}",
+  "dismissFeedback": "Đóng"
 }

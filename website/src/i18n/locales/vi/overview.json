@@ -8,6 +8,12 @@
   "quickActions": "Thao tác nhanh",
   "recentActivity": "Hoạt động gần đây",
   "noAppointments": "Không có lịch hẹn hôm nay",
+  "stickySearch": {
+    "label": "Tìm lịch hẹn cố định",
+    "title": "Tìm lịch hẹn",
+    "placeholder": "Tìm theo bệnh nhân, SĐT, bác sĩ, giờ, chi nhánh hoặc ghi chú...",
+    "clear": "Xóa tìm kiếm lịch hẹn"
+  },
   "zone1": {
     "title": "Lịch trình ngày",
     "searchPlaceholder": "Tìm kiếm dịch vụ...",

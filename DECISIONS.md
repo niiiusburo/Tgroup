@@ -77,3 +77,16 @@ After website code changes, bump `website/package.json` according to patch/minor
 
 Consequences:
 Docs-only governance changes do not require a website version bump. UI, API-client, behavior, or frontend runtime changes do.
+
+## DEC-20260505-01: Sticky Toolbar Search Spacing
+
+Status: Accepted
+
+Context:
+Overview needs a search bar that remains reachable while staff scan filtered appointment results. The first implementation used a fixed desktop label width, which created uneven whitespace between the label and input.
+
+Decision:
+Sticky dashboard search/toolbars follow `website/design.md`: standard white card surface, `px-4 py-3`, `gap-3` on mobile, `lg:gap-4` on desktop, content-sized `shrink-0` labels, and no fixed label column unless the page uses an aligned form layout.
+
+Consequences:
+Future sticky search bars should feel like compact toolbars, not form rows with reserved label columns. The content below must remain in normal flow so the sticky bar does not overlap panels.
