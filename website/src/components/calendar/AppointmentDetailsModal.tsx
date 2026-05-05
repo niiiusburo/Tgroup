@@ -59,27 +59,27 @@ export function AppointmentDetailsModal({
       {/* Modal */}
       <div className="modal-content animate-in zoom-in-95 duration-200 max-w-[900px]">
         {/* Header with gradient */}
-        <div className="modal-header relative px-6 py-5 bg-primary">
+        <div className="modal-header relative px-4 py-4 bg-primary sm:px-6 sm:py-5">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
-          <div className="relative flex items-start justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-white">{appointment.customerName}</h2>
-              <p className="text-sm text-orange-100 mt-1 flex items-center gap-2">
-                <Stethoscope className="w-3.5 h-3.5" />
-                {appointment.serviceName}
+          <div className="relative flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="truncate text-lg font-bold leading-snug text-white sm:text-xl">{appointment.customerName}</h2>
+              <p className="mt-1 flex items-center gap-2 text-xs leading-snug text-orange-100 sm:text-sm">
+                <Stethoscope className="w-3.5 h-3.5 shrink-0" />
+                <span className="line-clamp-2">{appointment.serviceName}</span>
               </p>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors"
+              className="min-h-11 min-w-11 shrink-0 p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors"
             >
               <X className="w-5 h-5 text-white" />
             </button>
           </div>
 
           {/* Status + Type badges */}
-          <div className="flex items-center gap-2 mt-4">
+          <div className="flex flex-wrap items-center gap-2 mt-4">
             <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/90 text-gray-800 shadow-sm">
               {statusLabel}
             </span>
@@ -90,7 +90,7 @@ export function AppointmentDetailsModal({
         </div>
 
         {/* Scrollable Body */}
-        <div className="modal-body px-6 py-6 space-y-5">
+        <div className="modal-body px-4 py-5 space-y-5 sm:px-6 sm:py-6">
           {/* Patient Card */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
@@ -112,7 +112,7 @@ export function AppointmentDetailsModal({
           </div>
 
           {/* Date & Time Row */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <DetailRow icon={<Calendar className="w-3.5 h-3.5" />} label={t('appointmentDetails.date')}>
               {appointment.date}
             </DetailRow>
@@ -148,11 +148,11 @@ export function AppointmentDetailsModal({
         </div>
 
         {/* Footer */}
-        <div className="modal-footer px-6 py-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+        <div className="modal-footer px-4 py-4 bg-gray-50 border-t border-gray-100 flex flex-col-reverse justify-end gap-2 sm:flex-row sm:gap-3 sm:px-6 sm:py-5">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
+            className="min-h-11 px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
           >
             {t('close', { ns: 'common' })}
           </button>
@@ -163,7 +163,7 @@ export function AppointmentDetailsModal({
                 onEdit(appointment);
                 onClose();
               }}
-              className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark transition-all shadow-sm"
+              className="flex min-h-11 items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark transition-all shadow-sm"
             >
               <Pencil className="w-4 h-4" />
               {t('appointmentDetails.edit')}

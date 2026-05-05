@@ -30,7 +30,7 @@ export function BasicInfoTab({ formApi }: BasicInfoTabProps) {
     {t('section.detailInfo', 'Thông tin chi tiết')}
   </h3>
 
-  <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+  <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
     {/* DOB */}
     <div>
       <FieldLabel icon={Calendar}>{t('form.dateOfBirth')}</FieldLabel>

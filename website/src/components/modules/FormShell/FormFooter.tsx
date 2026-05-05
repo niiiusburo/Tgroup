@@ -50,8 +50,8 @@ export function FormFooter({
   return (
     <div
       className={cn(
-        'px-6 py-5 border-t border-gray-200 flex-shrink-0',
-        'bg-gray-50 flex items-center justify-end gap-3',
+        'px-4 py-4 border-t border-gray-200 flex-shrink-0 sm:px-6 sm:py-5',
+        'bg-gray-50 flex flex-col-reverse items-stretch justify-end gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3',
         className
       )}
     >
@@ -60,7 +60,7 @@ export function FormFooter({
         onClick={onCancel}
         disabled={isSubmitting}
         className={cn(
-          'px-5 py-2.5 text-sm font-medium',
+          'min-h-11 px-5 py-2.5 text-sm font-medium',
           'text-gray-600 bg-white border border-gray-200 rounded-xl',
           'hover:bg-gray-50 transition-all',
           'disabled:opacity-50 disabled:cursor-not-allowed'
@@ -76,7 +76,7 @@ export function FormFooter({
           onClick={form ? undefined : onSubmit}
           disabled={isSubmitting || submitDisabled}
           className={cn(
-            'flex items-center gap-2 px-6 py-2.5 text-sm font-medium',
+            'flex min-h-11 items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium',
             'text-white bg-primary rounded-xl',
             'hover:bg-primary-dark transition-all shadow-sm',
             'disabled:opacity-50 disabled:cursor-not-allowed'

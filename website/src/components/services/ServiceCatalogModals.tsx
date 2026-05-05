@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Loader2, X } from 'lucide-react';
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
@@ -65,16 +66,16 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit, categories, compan
     }
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4">
-        <div className="flex items-center justify-between px-6 py-4 border-b">
+  const modal = (
+    <div className="fixed inset-0 z-[100] flex items-end justify-center overflow-hidden bg-black/40 sm:items-center sm:p-4">
+      <div className="flex h-[100dvh] max-h-[100dvh] w-full max-w-lg flex-col overflow-hidden bg-white shadow-xl sm:h-auto sm:max-h-[90vh] sm:rounded-xl">
+        <div className="flex items-center justify-between gap-3 border-b px-4 py-4 sm:px-6">
           <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          <button type="button" onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg">
+          <button type="button" onClick={onClose} className="min-h-11 min-w-11 p-2 hover:bg-gray-100 rounded-lg">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-1 flex-col overflow-y-auto p-4 space-y-4 sm:p-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t('form.name')} *</label>
             <input
@@ -85,7 +86,7 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit, categories, compan
               required
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t('columns.serviceCode')}</label>
               <input
@@ -139,14 +140,14 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit, categories, compan
               ))}
             </select>
           </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          <div className="sticky bottom-[-1rem] -mx-4 -mb-4 mt-auto flex flex-col-reverse justify-end gap-2 border-t border-gray-100 bg-gray-50 px-4 py-3 sm:static sm:mx-0 sm:mb-0 sm:flex-row sm:border-t-0 sm:bg-transparent sm:p-0 sm:pt-2">
+            <button type="button" onClick={onClose} className="min-h-11 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               {tc('cancel')}
             </button>
             <button
               type="submit"
               disabled={saving || !form.name.trim()}
-              className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark disabled:opacity-50 flex items-center gap-2 transition-colors"
+              className="flex min-h-11 items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark disabled:opacity-50 transition-colors"
             >
               {saving && <Loader2 className="w-4 h-4 animate-spin" />}
               {initialData ? tc('update') : tc('add')}
@@ -156,6 +157,11 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit, categories, compan
       </div>
     </div>
   );
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modal, document.body);
+  }
+  return modal;
 }
 
 interface CategoryAddModalProps {
@@ -186,16 +192,16 @@ export function CategoryAddModal({ isOpen, onClose, onSubmit }: CategoryAddModal
     }
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm mx-4">
-        <div className="flex items-center justify-between px-6 py-4 border-b">
+  const modal = (
+    <div className="fixed inset-0 z-[100] flex items-end justify-center overflow-hidden bg-black/40 sm:items-center sm:p-4">
+      <div className="flex h-[100dvh] max-h-[100dvh] w-full max-w-sm flex-col overflow-hidden bg-white shadow-xl sm:h-auto sm:max-h-[90vh] sm:rounded-xl">
+        <div className="flex items-center justify-between gap-3 border-b px-4 py-4 sm:px-6">
           <h3 className="text-lg font-semibold text-gray-900">{t('addCategory')}</h3>
-          <button type="button" onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg">
+          <button type="button" onClick={onClose} className="min-h-11 min-w-11 p-2 hover:bg-gray-100 rounded-lg">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-1 flex-col overflow-y-auto p-4 space-y-4 sm:p-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t('categoryName')} *</label>
             <input
@@ -207,14 +213,14 @@ export function CategoryAddModal({ isOpen, onClose, onSubmit }: CategoryAddModal
               required
             />
           </div>
-          <div className="flex justify-end gap-3">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          <div className="sticky bottom-[-1rem] -mx-4 -mb-4 mt-auto flex flex-col-reverse justify-end gap-2 border-t border-gray-100 bg-gray-50 px-4 py-3 sm:static sm:mx-0 sm:mb-0 sm:flex-row sm:border-t-0 sm:bg-transparent sm:p-0">
+            <button type="button" onClick={onClose} className="min-h-11 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               {tc('cancel')}
             </button>
             <button
               type="submit"
               disabled={saving || !name.trim()}
-              className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark disabled:opacity-50 flex items-center gap-2 transition-colors"
+              className="flex min-h-11 items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark disabled:opacity-50 transition-colors"
             >
               {saving && <Loader2 className="w-4 h-4 animate-spin" />}
               {tc('add')}
@@ -224,4 +230,9 @@ export function CategoryAddModal({ isOpen, onClose, onSubmit }: CategoryAddModal
       </div>
     </div>
   );
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modal, document.body);
+  }
+  return modal;
 }

@@ -210,9 +210,9 @@ export function WeekView({
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-card">
-      {/* Week grid - keep day columns readable on narrow screens */}
-      <div className="overflow-x-auto">
-        <div className="grid min-w-[77rem] grid-cols-7 xl:min-w-0">
+      {/* Week grid - keep day columns readable by showing about five days per desktop viewport */}
+      <div className="overflow-x-auto overscroll-x-contain custom-scrollbar" data-testid="calendar-week-scroll">
+        <div className="grid min-w-[77rem] grid-cols-7 lg:min-w-[140%]">
         {weekDates.map((date, index) => {
           const dateKey = formatDateKey(date);
           const isToday = dateKey === todayKey;

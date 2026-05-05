@@ -275,20 +275,20 @@ body.modal-open {
 
 /* Modal container with proper mobile height handling */
 .modal-container {
-  @apply fixed inset-0 z-50 flex items-center justify-center;
+  @apply fixed inset-0 z-[100] flex items-end justify-center sm:items-center;
   overscroll-behavior: contain;
 }
 
 /* Modal content with responsive max-height */
 .modal-content {
-  @apply relative bg-white rounded-3xl shadow-2xl w-full;
-  @apply mx-4 overflow-hidden;
+  @apply relative bg-white rounded-none sm:rounded-3xl shadow-2xl w-full;
+  @apply mx-0 sm:mx-4 overflow-hidden;
   @apply flex flex-col;
   /* Mobile-first: use more screen space */
-  max-height: calc(100vh - 2rem); /* 2rem margin */
-  max-height: calc(100vh - env(safe-area-inset-bottom) - 2rem);
+  height: 100dvh;
+  max-height: 100dvh;
   /* Default for larger screens - max-width is set by the using component */
-  @apply md:max-h-[85vh] max-h-[90vh];
+  @apply sm:h-auto sm:max-h-[90vh] md:max-h-[85vh];
   /* NOTE: Do NOT add max-w classes here. Modal width is controlled by inline max-w on the element. */
 }
 
@@ -350,18 +350,19 @@ body.modal-open {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   /* Padding for mobile browser chrome */
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
 /* Modal header */
 .modal-header {
   @apply flex-shrink-0;
+  padding-top: max(1rem, env(safe-area-inset-top));
 }
 
 /* Modal footer */
 .modal-footer {
   @apply flex-shrink-0;
-  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
 /* Ensure form elements don't overflow */
@@ -374,7 +375,7 @@ body.modal-open {
 /* Better touch targets on mobile */
 @media (max-width: 640px) {
   .modal-content {
-    @apply rounded-b-3xl;
+    @apply rounded-none;
     /* Allow full height on small screens */
     max-height: 100vh;
     max-height: 100dvh; /* Dynamic viewport height for mobile browsers */
@@ -384,6 +385,31 @@ body.modal-open {
   .modal-body {
     /* Extra padding at bottom for comfortable scrolling */
     padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  }
+
+  .payment-ipad-form {
+    padding: 1rem;
+    row-gap: 1rem;
+  }
+
+  .payment-ipad-form .modal-footer {
+    position: sticky;
+    bottom: calc(-1rem - env(safe-area-inset-bottom));
+    z-index: 20;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    margin-bottom: -1rem;
+    padding: 0.875rem 1rem max(0.875rem, env(safe-area-inset-bottom));
+    box-shadow: 0 -10px 24px rgba(15, 23, 42, 0.08);
+  }
+
+  .payment-ipad-form .modal-footer button {
+    min-height: 44px;
+    justify-content: center;
   }
 }
 

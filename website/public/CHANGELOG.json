@@ -1,5 +1,32 @@
 [
   {
+    "version": "0.27.26",
+    "date": "2026-05-05",
+    "commit": "pending",
+    "highlights": "fix(mobile): make clinic modals iPhone-ready and widen calendar week cards",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Appointment, service, customer, and payment modals now use full-height mobile sheets with safer headers, scroll bodies, and reachable footer actions on iPhone-sized screens.",
+          "Payment and service creation layouts now stack narrow controls and amount cards so long Vietnamese labels and currency values do not squeeze or overflow on mobile.",
+          "Calendar week view on desktop now keeps appointment columns readable by showing about five days at a time with horizontal scrolling for the remaining days."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "This release keeps the existing desktop modal pattern at larger breakpoints while using mobile-first sizing below the tablet/desktop breakpoints.",
+          "Desktop calendar verification measured exactly five visible week columns in the 1440px browser viewport."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.23",
     "date": "2026-05-05",
     "commit": "pending",

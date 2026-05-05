@@ -78,7 +78,7 @@ export function CalendarToolbar({
   }, []);
 
   return (
-    <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 bg-white rounded-xl shadow-card px-4 py-3">
+    <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-white rounded-xl shadow-card px-4 py-3">
       <div className="flex max-w-full items-center overflow-x-auto bg-gray-100 rounded-lg p-1">
         {VIEW_TABS.map((tab) => (
           <button
@@ -104,8 +104,8 @@ export function CalendarToolbar({
         onToday={onToday}
       />
 
-      <div className="flex w-full flex-wrap items-center gap-2 lg:w-auto lg:flex-nowrap">
-        <div ref={dropdownRef} className="relative min-w-[220px] flex-1 lg:w-72 lg:flex-none">
+      <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center lg:w-auto lg:flex-nowrap">
+        <div ref={dropdownRef} className="relative col-span-2 min-w-0 flex-1 sm:min-w-[220px] lg:w-72 lg:flex-none">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           <input
             type="text"
@@ -156,7 +156,7 @@ export function CalendarToolbar({
           type="button"
           data-testid="calendar-filter-button"
           onClick={onOpenFilter}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
+          className="flex min-h-10 items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
         >
           <Filter className="w-4 h-4" />
           <span>{t('bLc', 'Bộ lọc')}</span>

@@ -49,7 +49,7 @@ export function FormShell({
   closeOnBackdrop = true,
 }: FormShellProps) {
   const modal = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-end justify-center overflow-hidden p-0 sm:items-center sm:p-4">
       {/* Backdrop */}
       {showBackdrop && (
         <div
@@ -62,10 +62,10 @@ export function FormShell({
       {/* Modal Content */}
       <div
         className={cn(
-          'relative bg-white rounded-2xl shadow-2xl w-full',
+          'relative bg-white rounded-none shadow-2xl w-full sm:rounded-2xl',
           'flex flex-col',
           'animate-in fade-in zoom-in-95 duration-200',
-          'max-h-[90vh]',
+          'h-[100dvh] max-h-[100dvh] min-h-0 sm:h-auto sm:max-h-[90vh]',
           MAX_WIDTH_MAP[maxWidth],
           className
         )}

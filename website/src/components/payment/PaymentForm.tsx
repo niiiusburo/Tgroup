@@ -196,18 +196,18 @@ export function PaymentForm({
       {/* animate: backdrop fade-in coordinated with modal zoom-in — total ≤250ms */}
       <div className="absolute inset-0 bg-black/40 animate-in fade-in duration-200" onClick={onClose} />
       <div className="payment-ipad-modal modal-content animate-in zoom-in-95 duration-200 max-w-2xl">
-        <div className="modal-header relative px-6 py-5 bg-primary">
+        <div className="modal-header relative px-4 py-4 bg-primary sm:px-6 sm:py-5">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
-          <div className="relative flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/20 rounded-xl">
+          <div className="relative flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="shrink-0 p-2 bg-white/20 rounded-xl">
                 <CreditCard className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-white">
+              <div className="min-w-0">
+                <h2 className="text-lg font-bold leading-snug text-white sm:text-xl">
                   {isEdit ? t("chnhSaThanhTon") : t("ghiNhnThanhTon")}
                 </h2>
-                <p className="text-sm text-orange-100 mt-0.5">
+                <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-orange-100 sm:text-sm">
                   {serviceContext.recordName} — {defaultCustomerName}
                 </p>
               </div>
@@ -215,7 +215,7 @@ export function PaymentForm({
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors"
+              className="min-h-11 min-w-11 shrink-0 p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors"
               aria-label={t('close')}>
               
               <X className="w-5 h-5 text-white" />
@@ -223,27 +223,27 @@ export function PaymentForm({
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="payment-ipad-form modal-body px-6 py-6 space-y-5">
+          <form onSubmit={handleSubmit} className="payment-ipad-form modal-body px-4 py-5 space-y-5 sm:px-6 sm:py-6">
           {submitError && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
               {submitError}
             </div>
           )}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2">
             <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
               <p className="text-xs text-emerald-600 mb-0.5">{t('sDVDeposit')}</p>
-              <p className="text-lg font-bold text-emerald-700 tabular-nums">{formatVND(availableDeposit)}</p>
+              <p className="break-words text-base font-bold text-emerald-700 tabular-nums sm:text-lg">{formatVND(availableDeposit)}</p>
             </div>
             <div className="bg-red-50 rounded-xl p-3 border border-red-100">
               <p className="text-xs text-red-600 mb-0.5">{t('cnNOutstanding')}</p>
-              <p className="text-lg font-bold text-red-700 tabular-nums">{formatVND(outstandingBalance)}</p>
+              <p className="break-words text-base font-bold text-red-700 tabular-nums sm:text-lg">{formatVND(outstandingBalance)}</p>
             </div>
           </div>
 
           <ServicePaymentCard ctx={serviceContext} />
 
           <div>
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex flex-col gap-2 mb-3 min-[380px]:flex-row min-[380px]:items-center min-[380px]:justify-between">
               <div className="flex items-center gap-2">
                 <label className="text-sm font-medium text-gray-700">
                   {t('ngunThanhTon')}
@@ -255,7 +255,7 @@ export function PaymentForm({
               </div>
               {/* animate: key-driven crossfade between "Còn lại" and "Đã đủ" states */}
               {remaining > 0 ?
-              <span key="remaining" className="text-xs text-gray-500 animate-in fade-in duration-200">
+                <span key="remaining" className="text-xs text-gray-500 animate-in fade-in duration-200">
                   {t('cnLi')} <span className="font-semibold text-gray-700 tabular-nums">{formatVND(remaining)}</span>
                 </span> :
 
@@ -270,8 +270,8 @@ export function PaymentForm({
                 depositAmount > 0 ? 'border-emerald-300 bg-emerald-50/50' : 'border-gray-200 bg-white'}`
                 }>
                 
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-2 mb-2 min-[380px]:flex-row min-[380px]:items-center min-[380px]:justify-between">
+                  <div className="flex min-w-0 items-center gap-2">
                     {/* animate: icon container scale-in + color shift on activation */}
                     <div
                       className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${
@@ -280,10 +280,10 @@ export function PaymentForm({
                       
                       <Wallet className={`w-4 h-4 transition-colors duration-200 ${depositAmount > 0 ? 'text-emerald-600' : 'text-gray-400'}`} />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <span className="text-sm font-medium text-gray-700">{t('fromWallet')}</span>
                       {/* polish: gray-400 → gray-500 for legibility */}
-                      <span className="text-xs text-gray-500 ml-2">{t('sn')} {formatVND(availableDeposit)}</span>
+                      <span className="ml-0 block break-words text-xs text-gray-500 min-[380px]:ml-2 min-[380px]:inline">{t('sn')} {formatVND(availableDeposit)}</span>
                     </div>
                   </div>
                   {/* polish: title tooltip when cap=0 so disabled state explains itself */}
@@ -292,7 +292,7 @@ export function PaymentForm({
                     onClick={useMaxDeposit}
                     disabled={availableDeposit <= 0 || cap <= 0}
                     title={cap <= 0 ? t("sDTiAT") : undefined}
-                    className="px-2 py-1 text-xs font-medium text-emerald-600 bg-emerald-100 rounded-lg hover:bg-emerald-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                    className="min-h-9 px-2 py-1 text-xs font-medium text-emerald-600 bg-emerald-100 rounded-lg hover:bg-emerald-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
                     {t('dngTtC')}
 
                   </button>
@@ -334,7 +334,7 @@ export function PaymentForm({
                 bankAmount > 0 ? 'border-blue-300 bg-blue-50/50' : 'border-gray-200 bg-white'}`
                 }>
                 
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex flex-col gap-2 mb-2 min-[380px]:flex-row min-[380px]:items-center min-[380px]:justify-between">
                   <div className="flex items-center gap-2">
                     {/* animate: icon container scale-in + color shift on activation */}
                     <div
@@ -349,7 +349,7 @@ export function PaymentForm({
                   <button
                     type="button"
                     onClick={() => setShowVietQr(true)}
-                    className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors">
+                    className="flex min-h-9 items-center justify-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors">
                     {t('generateQR')}
                     <QrCode className="w-3.5 h-3.5" />
 
@@ -369,13 +369,13 @@ export function PaymentForm({
               totalPayment > 0 ? 'border-orange-300 bg-orange-50' : 'border-gray-200 bg-gray-50'}`
               }>
               
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-2 min-[380px]:flex-row min-[380px]:items-center min-[380px]:justify-between">
                 <div className="flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-orange-500" />
                   <span className="text-sm font-semibold text-gray-700">{t('tngThanhTon')}</span>
                 </div>
                 {/* animate: tabular-nums for stable width; transition-colors only on money figure */}
-                <span className="text-2xl font-bold text-orange-600 tabular-nums transition-colors duration-150">
+                <span className="break-words text-xl font-bold text-orange-600 tabular-nums transition-colors duration-150 sm:text-2xl">
                   {formatVND(totalPayment)}
                 </span>
               </div>
@@ -455,18 +455,18 @@ export function PaymentForm({
             
           </div>
           {/* Footer inside form so Enter key submits and type="submit" works natively */}
-          <div className="modal-footer px-6 py-5 bg-gray-50 border-t border-gray-100 flex justify-end gap-3 -mx-6 -mb-6 mt-4">
+          <div className="modal-footer px-4 py-4 bg-gray-50 border-t border-gray-100 flex flex-col-reverse justify-end gap-2 -mx-4 -mb-5 mt-4 sm:-mx-6 sm:-mb-6 sm:flex-row sm:gap-3 sm:px-6 sm:py-5">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
+              className="min-h-11 px-5 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
             >
               {t('cancelBtn')}
             </button>
             <button
               type="submit"
               disabled={submitDisabled}
-              className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark active:scale-[0.98] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex min-h-11 items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-primary rounded-xl hover:bg-primary-dark active:scale-[0.98] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Check className="w-4 h-4" />
               {isEdit ? t('luThayI') : t('ghiNhnThanhTon')}

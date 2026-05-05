@@ -62,7 +62,7 @@ export function AppointmentFormShell({
       />
 
       <form id="appointment-form" onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-        <div className="appointment-ipad-form flex-1 overflow-y-auto px-6 py-6 custom-scrollbar">
+        <div className="appointment-ipad-form flex-1 overflow-y-auto px-4 py-5 custom-scrollbar sm:px-6 sm:py-6">
           <AppointmentFormCore
             mode={mode}
             data={data}

@@ -86,28 +86,28 @@ export function CalendarDateNavigator({
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex w-full items-center gap-2 sm:w-auto">
       <button
         onClick={() => onNavigate('prev')}
-        className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+        className="min-h-10 min-w-10 p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
         aria-label="Previous"
       >
         <ChevronLeft className="w-5 h-5" />
       </button>
-      <div ref={datePickerRef} className="relative">
+      <div ref={datePickerRef} className="relative min-w-0 flex-1 sm:flex-none">
         <button
           onClick={() => setIsOpen((value) => !value)}
           className={cn(
-            'text-base font-semibold text-gray-900 min-w-[150px] text-center px-3 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-2',
+            'min-h-10 w-full min-w-0 text-sm font-semibold text-gray-900 text-center px-3 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-2 sm:min-w-[150px] sm:text-base',
             isOpen ? 'bg-gray-200' : 'hover:bg-gray-100',
           )}
         >
           <CalendarIcon className="w-4 h-4 text-gray-500" />
-          {dateLabel}
+          <span className="truncate">{dateLabel}</span>
         </button>
 
         {isOpen && (
-          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[min(16rem,calc(100vw-2rem))] bg-white rounded-xl shadow-xl border border-gray-200 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
               <button type="button" onClick={() => shiftPickerMonth('prev')} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
                 <ChevronLeft className="w-4 h-4 text-gray-600" />
