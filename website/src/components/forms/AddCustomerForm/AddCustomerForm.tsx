@@ -64,7 +64,7 @@ export function AddCustomerForm(props: AddCustomerFormProps) {
     emailCheck.status === 'duplicate';
 
   return (
-    <FormShell onClose={onCancel} maxWidth="4xl" className="max-h-[85vh]">
+    <FormShell onClose={onCancel} maxWidth="4xl">
       <FormHeader
         title={isEdit ? t('editCustomer') : t('addCustomer')}
         subtitle={isEdit ? t('subtitle.edit', 'Cập nhật thông tin hồ sơ bệnh nhân') : t('subtitle.create', 'Tạo hồ sơ bệnh nhân mới')}
@@ -73,11 +73,11 @@ export function AddCustomerForm(props: AddCustomerFormProps) {
         isEdit={isEdit}
       />
 
-      <form onSubmit={handleSubmit} className="flex flex-1 min-h-0 flex-col overflow-hidden md:flex-row" onWheel={(e) => e.stopPropagation()}>
+      <form onSubmit={handleSubmit} className="flex flex-1 min-h-0 flex-col overflow-y-auto overscroll-contain md:flex-row md:overflow-hidden" onWheel={(e) => e.stopPropagation()}>
         <LeftPanel formApi={formApi} />
 
         {/* RIGHT PANEL */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-white">
+        <div className="flex flex-shrink-0 flex-col overflow-visible bg-white md:min-h-0 md:flex-1 md:overflow-hidden">
           {/* Tabs */}
           <div className="flex flex-shrink-0 overflow-x-auto border-b border-gray-200 bg-gray-50/30 px-4 sm:px-6">
             {TABS.map((tab) => (
@@ -118,7 +118,7 @@ export function AddCustomerForm(props: AddCustomerFormProps) {
           )}
 
           {/* Tab content */}
-          <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-5 custom-scrollbar sm:px-6 lg:px-8 lg:py-6">
+          <div className="overflow-visible px-4 py-5 custom-scrollbar sm:px-6 md:flex-1 md:overflow-y-auto md:overscroll-contain lg:px-8 lg:py-6">
             {activeTab === 'basic' && (
               <>
                 <BasicInfoTab formApi={formApi} />

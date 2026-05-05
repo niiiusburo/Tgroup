@@ -1,5 +1,30 @@
 [
   {
+    "version": "0.27.27",
+    "date": "2026-05-05",
+    "commit": "pending",
+    "highlights": "fix(customers): restore full-height iPhone customer modal",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "The customer add/edit modal now relies on the shared FormShell mobile height rules instead of overriding the sheet to 85vh on iPhone-sized screens.",
+          "Customer modal footer actions and the scrollable form body now have the full mobile viewport available, reducing cramped footer and trapped-scroll behavior."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "This is a targeted customer form follow-up to the iPhone modal release and does not change desktop modal sizing."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.26",
     "date": "2026-05-05",
     "commit": "pending",
