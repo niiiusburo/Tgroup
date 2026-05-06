@@ -305,6 +305,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/Image\.open/i);
     });
 
+    it('converts PIL image to RGB mode', () => {
+      expect(content).toMatch(/\.convert\("RGB"\)/i);
+    });
+
     it('uses io.BytesIO for in-memory buffer', () => {
       expect(content).toMatch(/io\.BytesIO/i);
     });
