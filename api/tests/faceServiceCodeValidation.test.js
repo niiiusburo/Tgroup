@@ -230,6 +230,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/FROM python/i);
     });
 
+    it('installs system dependencies with apt-get', () => {
+      expect(content).toMatch(/apt-get/i);
+    });
+
     it('copies requirements.txt', () => {
       expect(content).toMatch(/requirements\.txt/i);
     });
