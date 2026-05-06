@@ -426,4 +426,23 @@ describe('GET /api/face/status/:partnerId', () => {
     expect(res.status).toBe(500);
     expect(res.body.error).toBe('INTERNAL_ERROR');
   });
+
+  it('returns unregistered status with 0 samples', async () => {
+    query.mockResolvedValueOnce([{ id: 'p-1' }]);
+    getFaceStatus.mockResolvedValue({
+      partnerId: 'p-1',
+      registered: false,
+      sampleCount: 0,
+      lastRegisteredAt: null,
+    });
+
+    const res = await request(app)
+      .get('/api/face/status/p-1')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(200);
+    expect(res.body.registered).toBe(false);
+    expect(res.body.sampleCount).toBe(0);
+    expect(res.body.lastRegisteredAt).toBeNull();
+  });
 });
