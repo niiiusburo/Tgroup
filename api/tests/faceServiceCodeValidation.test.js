@@ -28,6 +28,15 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/import numpy/i);
     });
 
+    it('reads MODEL_DIR from environment', () => {
+      expect(content).toMatch(/MODEL_DIR/i);
+      expect(content).toMatch(/os\.environ\.get/i);
+    });
+
+    it('reads DETECTION_THRESHOLD from environment', () => {
+      expect(content).toMatch(/DETECTION_THRESHOLD/i);
+    });
+
     it('initializes FastAPI app with title', () => {
       expect(content).toMatch(/app = FastAPI\(/i);
       expect(content).toMatch(/title=/i);
