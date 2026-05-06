@@ -183,6 +183,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/\.feature\(/i);
     });
 
+    it('flattens embedding before returning', () => {
+      expect(content).toMatch(/\.flatten\(\)/i);
+    });
+
     it('uses setInputSize for dynamic image dimensions', () => {
       expect(content).toMatch(/setInputSize/i);
     });
