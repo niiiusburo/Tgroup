@@ -289,6 +289,18 @@ describe('registerSample', () => {
     expect(result.match.confidence).toBeCloseTo(0.64, 2);
   });
 
+  it('returns no-match when query embedding is null', async () => {
+    const { findMatches, query } = loadEngine({
+      FACE_CANDIDATE_THRESHOLD: '0.10',
+    });
+    query.mockResolvedValueOnce([
+      { partner_id: 'p1', embedding: [0.1, 0.2, 0.3], name: 'Alice', phone: '0901', ref: 'T001' },
+    ]);
+    const result = await findMatches(null);
+    expect(result.match).toBeNull();
+    expect(result.candidates).toEqual([]);
+  });
+
   it('uses defaults when optional fields are missing', async () => {
     const { registerSample, query } = loadEngine();
     query
