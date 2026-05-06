@@ -165,6 +165,23 @@ describe('POST /api/face/recognize', () => {
     expect(res.body.error).toBe('NO_FACE');
     expect(res.body.message).toBe('No face detected');
   });
+
+  it('returns 500 when findMatches throws an error', async () => {
+    getEmbedding.mockResolvedValue({
+      embedding: [0.1, 0.2, 0.3],
+      model: { recognizer: 'sface', version: 'v1' },
+      quality: { detectionScore: 0.95, faceCount: 1 },
+    });
+    findMatches.mockRejectedValue(new Error('Database timeout'));
+
+    const res = await request(app)
+      .post('/api/face/recognize')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('ENGINE_ERROR');
+  });
 });
 
 describe('POST /api/face/register', () => {
