@@ -175,6 +175,14 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/\.detect\(/i);
     });
 
+    it('uses recognizer.alignCrop for face alignment', () => {
+      expect(content).toMatch(/\.alignCrop/i);
+    });
+
+    it('uses recognizer.feature for embedding extraction', () => {
+      expect(content).toMatch(/\.feature\(/i);
+    });
+
     it('uses setInputSize for dynamic image dimensions', () => {
       expect(content).toMatch(/setInputSize/i);
     });
