@@ -16,6 +16,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/from fastapi import FastAPI/i);
     });
 
+    it('imports typing annotations', () => {
+      expect(content).toMatch(/from typing import/i);
+    });
+
     it('initializes FastAPI app with title', () => {
       expect(content).toMatch(/app = FastAPI\(/i);
       expect(content).toMatch(/title=/i);
