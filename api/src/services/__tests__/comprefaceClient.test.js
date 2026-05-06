@@ -69,6 +69,22 @@ describe('comprefaceClient', () => {
       );
     });
 
+    it('uses default compreface URL and empty API key when env vars are missing', async () => {
+      const { recognize } = loadClient({});
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        text: async () => JSON.stringify({ result: [{ subjects: [] }] }),
+      });
+
+      await recognize(Buffer.from('img'));
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining('http://compreface-api'),
+        expect.objectContaining({
+          headers: expect.objectContaining({ 'x-api-key': '' }),
+        }),
+      );
+    });
+
     it('returns empty array when no subjects found', async () => {
       const { recognize } = loadClient();
       fetchSpy.mockResolvedValue({
