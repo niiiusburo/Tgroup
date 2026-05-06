@@ -137,6 +137,16 @@ describe('healthCheck', () => {
     expect(result.status).toBe(503);
   });
 
+  it('returns ok=true even when health JSON is malformed', async () => {
+    const { healthCheck } = loadClient();
+    fetchSpy.mockResolvedValue({
+      ok: true,
+      json: async () => { throw new Error('Invalid JSON'); },
+    });
+
+    await expect(healthCheck()).rejects.toThrow('Invalid JSON');
+  });
+
   // Note: native fetch + jest.spyOn interaction makes network rejection
   // testing unreliable in Node.js 18+. The route-level tests cover this.
 });
