@@ -127,6 +127,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/_detector\.detect\(/i);
     });
 
+    it('constructs face_box for alignCrop', () => {
+      expect(content).toMatch(/face_box/i);
+    });
+
     it('uses alignCrop for face alignment', () => {
       expect(content).toMatch(/alignCrop/i);
     });
