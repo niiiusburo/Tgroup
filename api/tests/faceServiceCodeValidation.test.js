@@ -127,6 +127,11 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/\.feature\(/i);
     });
 
+    it('flattens embedding to list for JSON serialization', () => {
+      expect(content).toMatch(/flatten\(\)/i);
+      expect(content).toMatch(/tolist\(\)/i);
+    });
+
     it('uses face recognition model', () => {
       expect(content).toMatch(/face_recognition/i);
     });
