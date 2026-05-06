@@ -405,5 +405,15 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/img\.save/i);
       expect(content).toMatch(/JPEG/i);
     });
+
+    it('test_main.py uses client.get for HTTP GET tests', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/client\.get/i);
+    });
+
+    it('test_main.py uses client.post for HTTP POST tests', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/client\.post/i);
+    });
   });
 });
