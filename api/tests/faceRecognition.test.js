@@ -224,6 +224,7 @@ describe('POST /api/face/register', () => {
   });
 
   it('returns 422 when face engine reports multiple faces', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     query.mockResolvedValueOnce([{ id: 'p-1', name: 'Alice' }]);
     const { FaceEngineError } = require('../src/services/faceEngineClient');
     getEmbedding.mockRejectedValue(new FaceEngineError('MULTIPLE_FACES', 'More than one face detected', 422));
@@ -236,6 +237,10 @@ describe('POST /api/face/register', () => {
 
     expect(res.status).toBe(422);
     expect(res.body.error).toBe('MULTIPLE_FACES');
+    expect(consoleSpy).toHaveBeenCalled();
+    const callArgs = consoleSpy.mock.calls[0];
+    expect(callArgs[0]).toContain('[FaceRegister]');
+    consoleSpy.mockRestore();
   });
 
   it('returns 500 when database query fails during registration', async () => {
