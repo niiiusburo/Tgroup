@@ -103,6 +103,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/logger\.error/i);
     });
 
+    it('raises HTTPException in health endpoint', () => {
+      expect(content).toMatch(/raise HTTPException/i);
+    });
+
     it('imports OpenCV', () => {
       expect(content).toMatch(/import cv2/i);
     });
