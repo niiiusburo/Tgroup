@@ -206,6 +206,123 @@ describe('CustomerCameraWidget', () => {
         expect(screen.getByText(/Search customer to register/i)).toBeInTheDocument();
       }, { timeout: 3000 });
     });
+
+    it('searches customers when typing in rescue mode', async () => {
+      mocks.recognizeFace.mockResolvedValue({ match: null, candidates: [] });
+      mocks.fetchPartners.mockResolvedValue({
+        items: [
+          { id: 'p1', name: 'Alice', ref: 'T001', phone: '0901111111' },
+          { id: 'p2', name: 'Bob', ref: 'T002', phone: '0902222222' },
+        ],
+      });
+
+      render(<CustomerCameraWidget onQuickAddResult={vi.fn()} onFaceIdResult={vi.fn()} />);
+      fireEvent.click(screen.getByRole('button', { name: /Nhận diện khuôn mặt/i }));
+
+      const captureBtn = await screen.findByRole('button', { name: /Chụp/i });
+      fireEvent.click(captureBtn);
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText(/Name, phone, or code/i)).toBeInTheDocument();
+      }, { timeout: 3000 });
+
+      const searchInput = screen.getByPlaceholderText(/Name, phone, or code/i);
+      fireEvent.change(searchInput, { target: { value: 'Ali' } });
+
+      await waitFor(() => {
+        expect(mocks.fetchPartners).toHaveBeenCalledWith({ search: 'Ali', limit: 10, status: 'active' });
+      }, { timeout: 1000 });
+
+      await waitFor(() => {
+        expect(screen.getByText(/Alice/i)).toBeInTheDocument();
+      }, { timeout: 3000 });
+    });
+
+    it('registers face to selected customer in rescue mode', async () => {
+      mocks.recognizeFace.mockResolvedValue({ match: null, candidates: [] });
+      mocks.fetchPartners.mockResolvedValue({
+        items: [{ id: 'p1', name: 'Alice', ref: 'T001', phone: '0901111111' }],
+      });
+      mocks.registerFace.mockResolvedValue({
+        success: true,
+        partnerId: 'p1',
+        sampleId: 's-1',
+        sampleCount: 1,
+        faceRegisteredAt: '2026-05-07T10:00:00',
+      });
+
+      const onFaceIdResult = vi.fn();
+      render(<CustomerCameraWidget onQuickAddResult={vi.fn()} onFaceIdResult={onFaceIdResult} />);
+      fireEvent.click(screen.getByRole('button', { name: /Nhận diện khuôn mặt/i }));
+
+      const captureBtn = await screen.findByRole('button', { name: /Chụp/i });
+      fireEvent.click(captureBtn);
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText(/Name, phone, or code/i)).toBeInTheDocument();
+      }, { timeout: 3000 });
+
+      const searchInput = screen.getByPlaceholderText(/Name, phone, or code/i);
+      fireEvent.change(searchInput, { target: { value: 'Ali' } });
+
+      await waitFor(() => {
+        expect(screen.getByText(/Alice/i)).toBeInTheDocument();
+      }, { timeout: 3000 });
+
+      fireEvent.click(screen.getByText(/Alice/i));
+
+      // Wait for register button to appear
+      await waitFor(() => {
+        expect(screen.getByText(/Register face to/i)).toBeInTheDocument();
+      }, { timeout: 3000 });
+
+      fireEvent.click(screen.getByText(/Register face to/i));
+
+      await waitFor(() => {
+        expect(mocks.registerFace).toHaveBeenCalledWith('p1', expect.any(Blob), 'no_match_rescue');
+      }, { timeout: 3000 });
+
+      await waitFor(() => {
+        expect(onFaceIdResult).toHaveBeenCalled();
+      }, { timeout: 3000 });
+    });
+
+    it('shows error when registration fails in rescue mode', async () => {
+      mocks.recognizeFace.mockResolvedValue({ match: null, candidates: [] });
+      mocks.fetchPartners.mockResolvedValue({
+        items: [{ id: 'p1', name: 'Alice', ref: 'T001', phone: '0901111111' }],
+      });
+      mocks.registerFace.mockRejectedValue(new Error('Face service down'));
+
+      render(<CustomerCameraWidget onQuickAddResult={vi.fn()} onFaceIdResult={vi.fn()} />);
+      fireEvent.click(screen.getByRole('button', { name: /Nhận diện khuôn mặt/i }));
+
+      const captureBtn = await screen.findByRole('button', { name: /Chụp/i });
+      fireEvent.click(captureBtn);
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText(/Name, phone, or code/i)).toBeInTheDocument();
+      }, { timeout: 3000 });
+
+      const searchInput = screen.getByPlaceholderText(/Name, phone, or code/i);
+      fireEvent.change(searchInput, { target: { value: 'Ali' } });
+
+      await waitFor(() => {
+        expect(screen.getByText(/Alice/i)).toBeInTheDocument();
+      }, { timeout: 3000 });
+
+      fireEvent.click(screen.getByText(/Alice/i));
+
+      await waitFor(() => {
+        expect(screen.getByText(/Register face to/i)).toBeInTheDocument();
+      }, { timeout: 3000 });
+
+      fireEvent.click(screen.getByText(/Register face to/i));
+
+      await waitFor(() => {
+        expect(mocks.registerFace).toHaveBeenCalled();
+      }, { timeout: 3000 });
+    });
   });
 
   describe('Reset functionality', () => {
