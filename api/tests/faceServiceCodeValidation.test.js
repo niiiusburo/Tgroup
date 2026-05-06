@@ -160,6 +160,11 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/ENGINE_ERROR/i);
     });
 
+    it('validates image content_type', () => {
+      expect(content).toMatch(/content_type/i);
+      expect(content).toMatch(/image\//i);
+    });
+
     it('defines _decode_image helper', () => {
       expect(content).toMatch(/def _decode_image/i);
     });
