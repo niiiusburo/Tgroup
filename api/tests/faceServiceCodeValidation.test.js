@@ -399,5 +399,11 @@ describe('face-service code validation', () => {
       const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
       expect(content).toMatch(/Image\.new/i);
     });
+
+    it('test_main.py saves image as JPEG', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/img\.save/i);
+      expect(content).toMatch(/JPEG/i);
+    });
   });
 });
