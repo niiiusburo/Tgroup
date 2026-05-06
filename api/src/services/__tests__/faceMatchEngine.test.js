@@ -139,6 +139,37 @@ describe('findMatches', () => {
     const result = await findMatches([0.5, 0.5, 0]);
     expect(result.candidates.length).toBe(2);
   });
+
+  it('auto-matches at exact threshold boundary', async () => {
+    const { findMatches, query } = loadEngine({
+      FACE_AUTO_MATCH_THRESHOLD: '0.50',
+      FACE_AUTO_MATCH_MARGIN: '0.05',
+    });
+    query.mockResolvedValueOnce([
+      { partner_id: 'p1', embedding: [0.5, 0.5, 0], name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p2', embedding: [0, 0.4, 0], name: 'Bob', phone: '0902', ref: 'T002' },
+    ]);
+    const result = await findMatches([0.5, 0.5, 0]);
+    expect(result.match).not.toBeNull();
+    expect(result.match.partnerId).toBe('p1');
+  });
+
+  it('returns candidate at exact candidate threshold boundary', async () => {
+    const { findMatches, query } = loadEngine({
+      FACE_AUTO_MATCH_THRESHOLD: '0.99',
+      FACE_CANDIDATE_THRESHOLD: '0.363',
+    });
+    // For a vector [a, a, 0], dot product with itself is 2*a^2
+    // We want 2*a^2 = 0.363, so a = sqrt(0.1815) ≈ 0.426
+    const a = Math.sqrt(0.1815);
+    query.mockResolvedValueOnce([
+      { partner_id: 'p1', embedding: [a, a, 0], name: 'Alice', phone: '0901', ref: 'T001' },
+    ]);
+    const result = await findMatches([a, a, 0]);
+    expect(result.match).toBeNull();
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].partnerId).toBe('p1');
+  });
 });
 
 describe('registerSample', () => {
