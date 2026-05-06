@@ -191,5 +191,25 @@ describe('face-service code validation', () => {
       const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
       expect(content).toMatch(/from main import/i);
     });
+
+    it('test_main.py has TestDetectFace class', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/class TestDetectFace/i);
+    });
+
+    it('test_main.py has TestExtractEmbedding class', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/class TestExtractEmbedding/i);
+    });
+
+    it('test_main.py has TestCosineSimilarity class', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/class TestCosineSimilarity/i);
+    });
+
+    it('test_main.py has TestApp class', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/class TestApp/i);
+    });
   });
 });
