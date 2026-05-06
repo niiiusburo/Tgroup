@@ -276,6 +276,19 @@ describe('registerSample', () => {
     expect(query.mock.calls[0][1][4]).toBe('abc123hash');
   });
 
+  it('computes cosine similarity for 1-element embeddings', async () => {
+    const { findMatches, query } = loadEngine({
+      FACE_AUTO_MATCH_THRESHOLD: '0.50',
+    });
+    query.mockResolvedValueOnce([
+      { partner_id: 'p1', embedding: [0.8], name: 'Alice', phone: '0901', ref: 'T001' },
+    ]);
+    const result = await findMatches([0.8]);
+    expect(result.match).not.toBeNull();
+    expect(result.match.partnerId).toBe('p1');
+    expect(result.match.confidence).toBeCloseTo(0.64, 2);
+  });
+
   it('uses defaults when optional fields are missing', async () => {
     const { registerSample, query } = loadEngine();
     query
