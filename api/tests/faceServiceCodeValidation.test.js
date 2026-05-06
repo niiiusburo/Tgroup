@@ -143,6 +143,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/face_box/i);
     });
 
+    it('uses float32 dtype for face_box array', () => {
+      expect(content).toMatch(/dtype=np\.float32/i);
+    });
+
     it('uses alignCrop for face alignment', () => {
       expect(content).toMatch(/alignCrop/i);
     });
