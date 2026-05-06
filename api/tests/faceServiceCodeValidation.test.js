@@ -44,6 +44,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/import numpy/i);
     });
 
+    it('imports io for BytesIO', () => {
+      expect(content).toMatch(/import io/i);
+    });
+
     it('reads MODEL_DIR from environment', () => {
       expect(content).toMatch(/MODEL_DIR/i);
       expect(content).toMatch(/os\.environ\.get/i);
