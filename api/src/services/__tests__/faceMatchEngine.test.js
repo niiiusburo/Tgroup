@@ -238,6 +238,9 @@ describe('registerSample', () => {
     // Second call = UPDATE partner
     expect(query.mock.calls[1][0]).toContain('UPDATE dbo.partners');
     expect(query.mock.calls[1][1]).toEqual(['p1']);
+    // Third call = COUNT
+    expect(query.mock.calls[2][0]).toContain('COUNT');
+    expect(query.mock.calls[2][1]).toEqual(['p1']);
   });
 
   it('uses defaults when optional fields are missing', async () => {
