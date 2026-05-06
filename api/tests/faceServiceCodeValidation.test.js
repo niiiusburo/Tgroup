@@ -310,6 +310,10 @@ describe('face-service code validation', () => {
     it('defines _extract_embedding helper', () => {
       expect(content).toMatch(/def _extract_embedding/i);
     });
+
+    it('has broad exception handling with except Exception', () => {
+      expect(content).toMatch(/except Exception/i);
+    });
   });
 
   describe('Dockerfile', () => {
