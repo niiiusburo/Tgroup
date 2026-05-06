@@ -435,5 +435,10 @@ describe('face-service code validation', () => {
       const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
       expect(content).toMatch(/sys\.path\.insert/i);
     });
+
+    it('test_main.py uses Path(__file__) for relative paths', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/Path\(__file__\)/i);
+    });
   });
 });
