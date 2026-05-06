@@ -379,5 +379,10 @@ describe('face-service code validation', () => {
       const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
       expect(content).toMatch(/from fastapi\.testclient import TestClient/i);
     });
+
+    it('test_main.py uses np.zeros for fake face data', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/np\.zeros/i);
+    });
   });
 });
