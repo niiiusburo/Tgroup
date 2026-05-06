@@ -303,6 +303,11 @@ describe('face-service code validation', () => {
       const content = fs.readFileSync(path.join(faceServiceDir, 'Dockerfile'), 'utf8');
       expect(content).toMatch(/wget/i);
     });
+
+    it('creates models directory', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'Dockerfile'), 'utf8');
+      expect(content).toMatch(/mkdir.*models/i);
+    });
   });
 
   describe('face-service tests', () => {
