@@ -44,6 +44,20 @@ describe('getEmbedding', () => {
     expect(result.quality.detectionScore).toBe(0.94);
   });
 
+  it('returns undefined fields when response omits them', async () => {
+    const { getEmbedding } = loadClient();
+    fetchSpy.mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    });
+
+    const result = await getEmbedding(Buffer.from('img'));
+
+    expect(result.embedding).toBeUndefined();
+    expect(result.model).toBeUndefined();
+    expect(result.quality).toBeUndefined();
+  });
+
   it('throws FaceEngineError with code and status on face service error', async () => {
     const { getEmbedding, FaceEngineError } = loadClient();
     fetchSpy.mockResolvedValue({
