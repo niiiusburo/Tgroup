@@ -44,6 +44,10 @@
     "totalCollected": "Total Collected",
     "outstanding": "Outstanding",
     "collectionRate": "Collection Rate",
+    "moneyIn": "Cash In",
+    "moneyOut": "Cash Out",
+    "netCashFlow": "Net Cash Flow",
+    "internalDepositUsed": "Deposit Used",
     "invoiced": "Invoiced",
     "collected": "Collected",
     "appointmentsCompleted": "appointments completed",
@@ -86,6 +90,10 @@
     "outstandingBalances": "Outstanding Balances",
     "customersByCity": "Customers by City",
     "byPaymentMethod": "By Payment Method",
+    "cashFlowTrend": "Cash Flow Trend",
+    "cashFlowMovement": "Cash Flow Movement",
+    "employeeRevenueExcel": "Employee Revenue Excel Export",
+    "revenueRecognitionBasis": "Revenue Recognition Basis",
     "appointmentRates": "Appointment Rates",
     "weeklyAppointmentVolume": "Weekly Appointment Volume",
     "peakHours": "Peak Hours",
@@ -129,7 +137,63 @@
     "product": "Product",
     "category": "Category",
     "price": "Price",
-    "done": "done"
+    "done": "done",
+    "direction": "Direction",
+    "cashFlowType": "Cash Flow Type",
+    "net": "Net",
+    "rule": "Rule",
+    "treatment": "Treatment"
+  },
+  "cashFlow": {
+    "categories": {
+      "service_collections": "Service collections",
+      "customer_deposits": "Customer deposits",
+      "refunds": "Refunds",
+      "deposit_usage": "Deposit usage",
+      "voided_adjustments": "Voided adjustments"
+    },
+    "directions": {
+      "in": "In",
+      "out": "Out",
+      "internal": "Internal",
+      "adjustment": "Adjustment"
+    }
+  },
+  "employeeExport": {
+    "employeeType": "Employee Type",
+    "employee": "Employee",
+    "allEmployees": "All Employees",
+    "loadingEmployees": "Loading employees...",
+    "types": {
+      "doctor": "Doctor",
+      "assistant": "Assistant",
+      "consultant": "Consultant",
+      "sales": "Sales Employee"
+    }
+  },
+  "revenueRules": {
+    "servicePayments": {
+      "label": "Service payments"
+    },
+    "customerDeposits": {
+      "label": "Customer deposits"
+    },
+    "depositUsage": {
+      "label": "Deposit usage"
+    },
+    "refunds": {
+      "label": "Refunds"
+    },
+    "voidedPayments": {
+      "label": "Voided payments"
+    },
+    "treatments": {
+      "revenue": "Recognized as service revenue",
+      "cashFlowOnly": "Cash movement only until applied",
+      "internalMovement": "Internal wallet movement, not new cash",
+      "cashOutflow": "Cash outflow",
+      "excluded": "Excluded from net cash and revenue"
+    }
   },
   "kpi": {
     "repeatPatients": "Repeat Patients",

@@ -6,6 +6,7 @@ const customersExport = require('./builders/customersExport');
 const appointmentsExport = require('./builders/appointmentsExport');
 const servicesExport = require('./builders/servicesExport');
 const paymentsExport = require('./builders/paymentsExport');
+const reportSalesEmployeesExport = require('./builders/reportSalesEmployeesExport');
 
 /**
  * Export Registry
@@ -76,6 +77,19 @@ const REGISTRY = {
       dateFrom: { type: 'string', default: '' },
       dateTo: { type: 'string', default: '' },
       status: { type: 'string', default: '' },
+    },
+  },
+  'report-sales-employees': {
+    label: 'Báo cáo doanh thu theo nhân viên',
+    permission: 'reports.export',
+    filename: () => buildFilename('BaoCaoDoanhThu_TheoNhanVien'),
+    builder: reportSalesEmployeesExport,
+    filterSchema: {
+      companyId: { type: 'string', default: 'all' },
+      employeeType: { type: 'string', default: 'doctor' },
+      employeeId: { type: 'string', default: '' },
+      dateFrom: { type: 'string', default: '' },
+      dateTo: { type: 'string', default: '' },
     },
   },
 };

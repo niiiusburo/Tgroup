@@ -63,6 +63,9 @@ router.post('/:type/preview', requireAuth, requireExportPermission, async (req, 
     });
   } catch (err) {
     console.error('Export preview error:', err);
+    if (err.status) {
+      return res.status(err.status).json({ error: err.message, code: err.code });
+    }
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -97,6 +100,9 @@ router.post('/:type/download', requireAuth, requireExportPermission, async (req,
     console.error('Export download error:', err);
     if (err.code === 'EXPORT_ROW_LIMIT_EXCEEDED') {
       return res.status(400).json({ error: err.message, code: err.code });
+    }
+    if (err.status) {
+      return res.status(err.status).json({ error: err.message, code: err.code });
     }
     return res.status(500).json({ error: 'Internal server error' });
   }

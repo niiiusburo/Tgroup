@@ -44,6 +44,10 @@
     "totalCollected": "Tổng đã thu",
     "outstanding": "Còn nợ",
     "collectionRate": "Tỷ lệ thu hồi",
+    "moneyIn": "Tiền vào",
+    "moneyOut": "Tiền ra",
+    "netCashFlow": "Dòng tiền ròng",
+    "internalDepositUsed": "Đã dùng đặt cọc",
     "invoiced": "Đã xuất hóa đơn",
     "collected": "Đã thu",
     "appointmentsCompleted": "lịch hẹn hoàn thành",
@@ -86,6 +90,10 @@
     "outstandingBalances": "Công nợ",
     "customersByCity": "Khách hàng theo thành phố",
     "byPaymentMethod": "Theo phương thức thanh toán",
+    "cashFlowTrend": "Xu hướng dòng tiền",
+    "cashFlowMovement": "Biến động dòng tiền",
+    "employeeRevenueExcel": "Xuất Excel doanh thu theo nhân viên",
+    "revenueRecognitionBasis": "Cơ sở ghi nhận doanh thu",
     "appointmentRates": "Tỷ lệ lịch hẹn",
     "weeklyAppointmentVolume": "Số lượng lịch hẹn theo tuần",
     "peakHours": "Giờ cao điểm",
@@ -129,7 +137,63 @@
     "product": "Sản phẩm",
     "category": "Danh mục",
     "price": "Giá",
-    "done": "hoàn thành"
+    "done": "hoàn thành",
+    "direction": "Chiều tiền",
+    "cashFlowType": "Loại dòng tiền",
+    "net": "Ròng",
+    "rule": "Quy tắc",
+    "treatment": "Cách xử lý"
+  },
+  "cashFlow": {
+    "categories": {
+      "service_collections": "Thu dịch vụ",
+      "customer_deposits": "Khách nạp đặt cọc",
+      "refunds": "Hoàn tiền",
+      "deposit_usage": "Dùng đặt cọc",
+      "voided_adjustments": "Điều chỉnh đã hủy"
+    },
+    "directions": {
+      "in": "Vào",
+      "out": "Ra",
+      "internal": "Nội bộ",
+      "adjustment": "Điều chỉnh"
+    }
+  },
+  "employeeExport": {
+    "employeeType": "Loại nhân viên",
+    "employee": "Nhân viên",
+    "allEmployees": "Tất cả nhân viên",
+    "loadingEmployees": "Đang tải nhân viên...",
+    "types": {
+      "doctor": "Bác sĩ",
+      "assistant": "Phụ tá",
+      "consultant": "Tư vấn",
+      "sales": "Nhân viên sale"
+    }
+  },
+  "revenueRules": {
+    "servicePayments": {
+      "label": "Thanh toán dịch vụ"
+    },
+    "customerDeposits": {
+      "label": "Khách nạp đặt cọc"
+    },
+    "depositUsage": {
+      "label": "Dùng đặt cọc"
+    },
+    "refunds": {
+      "label": "Hoàn tiền"
+    },
+    "voidedPayments": {
+      "label": "Thanh toán đã hủy"
+    },
+    "treatments": {
+      "revenue": "Ghi nhận là doanh thu dịch vụ",
+      "cashFlowOnly": "Chỉ là dòng tiền đến khi được dùng",
+      "internalMovement": "Chuyển động ví nội bộ, không phải tiền mới",
+      "cashOutflow": "Dòng tiền ra",
+      "excluded": "Không tính vào dòng tiền ròng hoặc doanh thu"
+    }
   },
   "kpi": {
     "repeatPatients": "Bệnh nhân quay lại",

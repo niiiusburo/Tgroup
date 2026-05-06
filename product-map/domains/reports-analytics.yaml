@@ -42,6 +42,8 @@ endpoints:
   - POST /api/Reports/revenue/by-doctor
   - POST /api/Reports/revenue/by-category
   - POST /api/Reports/revenue/payment-plans
+  - POST /api/Reports/revenue/rules
+  - POST /api/Reports/cash-flow/summary
   - POST /api/Reports/appointments/summary
   - POST /api/Reports/appointments/trend
   - POST /api/Reports/doctors/performance
@@ -63,6 +65,7 @@ ui_surfaces:
   - /reports/locations
   - /reports/services
   - /reports/employees
+  - Employee revenue Excel export controls on /reports/revenue
   - Export menus on /customers, /calendar, /services, /payment, and /service-catalog
   - Overview page (TodaySchedule, RevenueChartModule, StatCardModule)
 jobs:
@@ -83,9 +86,14 @@ affected_by:
 impact_tests:
   - website/src/pages/reports/__tests__/ReportsDashboard.test.tsx
   - website/src/pages/reports/__tests__/ReportsSubpages.test.tsx
+  - api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js
+  - api/src/routes/reports/__tests__/cashFlow.test.js
   - website/e2e/export-downloads.spec.ts
   - website/src/__tests__/useVersionCheck.test.ts (indirect)
 risk_level: medium
 notes:
   - "`/api/Exports` is operational export infrastructure, not the full reports module; it belongs here for audit/test ownership because it reads across reporting-style aggregates."
   - Export download audit logging is fire-and-forget after the XLSX response; preview audit logging is awaited but catch-and-log. Verification that an audit row exists requires a direct DB/API check.
+  - Cash-flow reporting V1 separates service collections, customer deposits, refunds, deposit usage, and voided adjustments. Deposit usage is internal movement and must not be counted as new cash.
+  - Revenue and cash-flow report endpoints enforce employee location scope from primary branch plus `employee_location_scope`; remaining non-revenue report routes should be reviewed before exposing them to scoped managers.
+  - Employee revenue Excel export uses `/api/Exports/report-sales-employees` with `reports.export`, date/location scope, employee type, and optional employee filters; workbook rows are grouped by employee and derive revenue from posted `payment_allocations`.

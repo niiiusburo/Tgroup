@@ -21,7 +21,7 @@
 | **Primary Key** | `id` (uuid) |
 | **Key Relationships** | Referenced by `partners.companyid`, `appointments.companyid`, `payments.companyid`, `products.companyid`, `saleorders.company_id`, `monthlyplans.companyid`, `dotkhams.companyid`, `feedback_attachments` (indirect), `employee_location_scope.company_id` |
 | **W** | `api/src/routes/employees.js` (indirect via partner updates), `api/src/routes/stockPickings.js` |
-| **R** | Nearly every route file |
+| **R** | Nearly every route file; employee revenue export builder |
 | **E** | `GET /api/Companies` |
 | **UI** | LocationSelector, FilterByLocation, LocationDashboard, LocationCard, all page lists filtered by location |
 | **Risk** | **High** — adding a required column without defaults breaks every INSERT across the app. |
@@ -34,7 +34,7 @@
 | **Key Relationships** | FK `companyid` → companies; conceptually parent of `appointments.partnerid`, `appointments.doctorid`, `payments.partnerid`, `saleorders.partner_id`, `dotkhams.partnerid`, `dotkhams.doctorid`, `monthlyplans.partnerid`, `employee_permissions.employee_id`, `permission_overrides.employee_id`, `employee_location_scope.employee_id` |
 | **Discriminator Columns** | `customer` (bool), `employee` (bool), `isdoctor` (bool), `isassistant` (bool), `isreceptionist` (bool) |
 | **W** | `api/src/routes/partners.js`, `api/src/routes/employees.js`, `api/src/routes/auth.js` (password_hash, last_login), `api/src/routes/faceRecognition.js` (face_subject_id), `api/src/routes/permissions.js` (tier_id) |
-| **R** | `partners.js`, `appointments.js`, `payments.js`, `reports.js`, `employees.js`, `auth.js`, `faceRecognition.js`, `dashboardReports.js`, `commissions.js` |
+| **R** | `partners.js`, `appointments.js`, `payments.js`, `reports.js`, `employees.js`, `auth.js`, `faceRecognition.js`, `dashboardReports.js`, `commissions.js`, employee revenue export builder |
 | **E** | `GET/POST/PUT/PATCH/DELETE /api/Partners/*`, `GET/POST/PUT/DELETE /api/Employees/*`, `POST /api/Auth/login`, `GET /api/Auth/me`, `POST /api/Auth/change-password`, `POST /api/face/*` |
 | **UI** | Customers page, Employees page, Login, Appointment forms, Payment forms, Service records, Reports, Face capture |
 | **Risk** | **Critical** — recent breakage occurred when `password_hash` was missing and NOT NULL constraints were added without updating all INSERT paths. Customer phone is not unique identity and may overlap migrated refs/phones; UUID remains the durable key. |
@@ -83,7 +83,7 @@
 | **Primary Key** | `id` (uuid) |
 | **Foreign Keys** | `partner_id` → partners, `company_id` → companies |
 | **W** | `api/src/routes/saleOrders.js` |
-| **R** | `saleOrders.js`, `saleOrderLines.js`, `payments.js` (allocations), `reports.js`, `partners.js` (KPIs), `appointments.js` |
+| **R** | `saleOrders.js`, `saleOrderLines.js`, `payments.js` (allocations), `reports.js`, `partners.js` (KPIs), `appointments.js`, employee revenue export builder |
 | **E** | `GET/POST/PATCH /api/SaleOrders` |
 | **UI** | Services patient records, Payment allocations, CustomerProfile service history, Reports |
 | **Risk** | **High** — state transitions (`draft` → `confirmed` → `done` → `cancelled`) are logged in `saleorder_state_logs` and drive payment residual calculations. |
@@ -95,7 +95,7 @@
 | **Primary Key** | `id` (uuid) |
 | **Foreign Keys** | `saleorderid` → saleorders, `productid` → products |
 | **W** | `api/src/routes/saleOrderLines.js` (indirect via sale order patches) |
-| **R** | `saleOrderLines.js`, `reports.js`, `products.js` (delete guard) |
+| **R** | `saleOrderLines.js`, `reports.js`, `products.js` (delete guard), employee revenue export builder |
 | **E** | `GET /api/SaleOrderLines` |
 | **UI** | ServiceHistoryList, Reports |
 | **Risk** | **Medium** — `toothrange`, `toothtype`, `discounttype`, `isrewardline` are Odoo-specific and sparsely typed in frontend. |
@@ -107,7 +107,7 @@
 | **Primary Key** | `id` (uuid) |
 | **Foreign Keys** | `partnerid` → partners, `companyid` → companies |
 | **W** | `api/src/routes/payments.js`, `api/src/routes/accountPayments.js` |
-| **R** | `payments.js`, `reports.js`, `dashboardReports.js`, `customerBalance.js`, `receipts.js`, `partners.js` (KPIs) |
+| **R** | `payments.js`, `reports.js`, `dashboardReports.js`, `customerBalance.js`, `receipts.js`, `partners.js` (KPIs), employee revenue export builder |
 | **E** | `GET/POST/PATCH/DELETE /api/Payments`, `GET /api/AccountPayments` |
 | **UI** | Payment page, PaymentHistory, DepositWallet, CustomerProfile payments tab, Reports revenue |
 | **Risk** | **Critical** — `method` enum (`cash` | `bank_transfer` | `deposit` | `mixed`) is mirrored in `website/src/types/payment.ts`. Mismatches break type guards and allocation logic. |
@@ -121,7 +121,7 @@
 | **Primary Key** | `id` (uuid) |
 | **Foreign Keys** | `payment_id` → payments; `invoice_id` → saleorders when allocated to a treatment order; `dotkham_id` is supported without FK because demo `dotkhams` can be a view |
 | **W** | `api/src/routes/payments.js`, `api/scripts/tdental-import/database.js`, archived migration/import scripts |
-| **R** | `payments.js`, `saleOrders.js`, `customerBalance.js`, `api/src/lib/saleOrderTotals.js`, TDental validation scripts |
+| **R** | `payments.js`, `saleOrders.js`, `customerBalance.js`, `api/src/lib/saleOrderTotals.js`, TDental validation scripts, employee revenue export builder |
 | **E** | Exposed through `/api/Payments`, `/api/SaleOrders`, and `/api/CustomerBalance` payload calculations; no standalone CRUD route |
 | **UI** | Payment allocations, customer balance, service residual display, deposit/payment classification |
 | **Risk** | **Critical** — deleting, double-counting, or greedily reconstructing allocations changes residuals and paid totals. TDental imports should be relation-driven where source relations exist. |

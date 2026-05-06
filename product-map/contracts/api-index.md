@@ -168,6 +168,8 @@
 | POST | `/revenue/by-doctor` | Perm:`reports.view` | Date range | Revenue per doctor |
 | POST | `/revenue/by-category` | Perm:`reports.view` | Date range | Revenue per category |
 | POST | `/revenue/payment-plans` | Perm:`reports.view` | Date range | Payment plan revenue |
+| POST | `/revenue/rules` | Perm:`reports.view` | — | Revenue recognition rule metadata |
+| POST | `/cash-flow/summary` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | Cash in/out, net cash flow, deposit usage, void adjustments, and movement categories |
 | POST | `/appointments/summary` | Perm:`reports.view` | Date range | Appointment stats |
 | POST | `/appointments/trend` | Perm:`reports.view` | Date range | Appointment trend |
 | POST | `/doctors/performance` | Perm:`reports.view` | Date range | Doctor performance |
@@ -181,10 +183,10 @@
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
 | GET | `/types` | Auth | — | Export types visible to the current user's effective permissions |
-| POST | `/:type/preview` | Auth + export permission | `{ filters }`; `type` is `customers`, `appointments`, `services`, `payments`, or `service-catalog` | `{ type, label, rowCount, filename, filters, summary, exceedsMax }` + best-effort `exports_audit` row |
+| POST | `/:type/preview` | Auth + export permission | `{ filters }`; `type` is `customers`, `appointments`, `services`, `payments`, `service-catalog`, or `report-sales-employees` | `{ type, label, rowCount, filename, filters, summary, exceedsMax }` + best-effort `exports_audit` row |
 | POST | `/:type/download` | Auth + export permission | `{ filters }`; same type keys as preview | XLSX workbook stream + best-effort `exports_audit` row after response |
 
-Export permissions are defined by `api/src/services/exports/exportRegistry.js`: `customers.export`, `appointments.export`, `services.export`, `payments.export`, and `products.export`.
+Export permissions are defined by `api/src/services/exports/exportRegistry.js`: `customers.export`, `appointments.export`, `services.export`, `payments.export`, `products.export`, and `reports.export`. `report-sales-employees` accepts `companyId`, `employeeType` (`doctor`, `assistant`, `consultant`, `sales`), optional `employeeId`, `dateFrom`, and `dateTo`.
 
 ## Dashboard Reports (`/api/DashboardReports`)
 
@@ -228,11 +230,11 @@ Export permissions are defined by `api/src/services/exports/exportRegistry.js`: 
 | GET | `/my` | Auth | — | User's threads |
 | GET | `/my/:threadId` | Auth | — | Thread messages |
 | POST | `/my/:threadId/reply` | Auth | FormData | Reply created |
-| GET | `/all` | Auth + Admin | — | All threads (admin) |
-| GET | `/all/:threadId` | Auth + Admin | — | Thread messages (admin) |
-| POST | `/all/:threadId/reply` | Auth + Admin | FormData | Admin reply |
-| PATCH | `/all/:threadId/status` | Auth + Admin | `{ status }` | Thread status updated |
-| DELETE | `/all/:threadId` | Auth + Admin | — | Thread deleted |
+| GET | `/all` | Perm:`feedback.view` | `?source=manual|auto` | All threads |
+| GET | `/all/:threadId` | Perm:`feedback.view` | — | Thread messages |
+| POST | `/all/:threadId/reply` | Perm:`feedback.reply` | FormData | Admin reply |
+| PATCH | `/all/:threadId/status` | Perm:`feedback.edit` | `{ status }` | Thread status updated |
+| DELETE | `/all/:threadId` | Perm:`feedback.delete` | — | Thread deleted |
 
 ## Face Recognition (`/api/face`)
 
@@ -247,7 +249,7 @@ Export permissions are defined by `api/src/services/exports/exportRegistry.js`: 
 |--------|------|------|--------------|----------|
 | GET | `/images/:imageName` | Perm:`external_checkups.view` | — | Proxied image bytes from Hosoonline appointment media |
 | GET | `/:customerCode` | Perm:`external_checkups.view` | — | External checkups list |
-| POST | `/:customerCode/health-checkups` | Perm:`external_checkups.create` | FormData (`files[]`) | Created checkups |
+| POST | `/:customerCode/health-checkups` | Perm:`external_checkups.create` | FormData (`photos[]`, `service`, `doctor`, `date`, `description`) | Created checkups |
 
 Hosoonline uses a mixed current contract: if `HOSOONLINE_USERNAME` and `HOSOONLINE_PASSWORD` are configured, TGClinic logs in to Hosoonline, sends `Authorization: Bearer <token>` plus the returned cookie, searches appointments, and proxies `/api/appointments/image/:imageName`. If login credentials are absent, the route falls back to the older `HOSOONLINE_API_KEY` / `X-API-Key` patient health-checkup endpoints where still supported.
 

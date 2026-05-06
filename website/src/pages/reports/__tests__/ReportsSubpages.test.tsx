@@ -16,8 +16,14 @@ vi.mock('@/lib/api', () => ({
   apiFetch: vi.fn(),
 }));
 
+vi.mock('@/lib/api/employees', () => ({
+  fetchEmployees: vi.fn(),
+}));
+
 import { apiFetch } from '@/lib/api';
+import { fetchEmployees } from '@/lib/api/employees';
 const mockFetch = vi.mocked(apiFetch);
+const mockFetchEmployees = vi.mocked(fetchEmployees);
 
 vi.mock('framer-motion', async () => {
   const React = await import('react');
@@ -57,6 +63,27 @@ function getRevenueResponses() {
     { success: true, data: [
       { id: 'cat1', category: 'Răng sứ', lineCount: 15, revenue: 45000000 },
     ]},
+    { success: true, data: {
+      rules: [
+        { key: 'servicePayments', label: 'Service payments', treatment: 'revenue' },
+        { key: 'customerDeposits', label: 'Customer deposits', treatment: 'cashFlowOnly' },
+      ],
+    }},
+    { success: true, data: {
+      moneyIn: 6000000,
+      moneyOut: 500000,
+      netCashFlow: 5500000,
+      internalDepositUsed: 1000000,
+      adjustments: 3000000,
+      categories: [
+        { key: 'service_collections', direction: 'in', count: 1, amount: 4000000, signedAmount: 4000000 },
+        { key: 'customer_deposits', direction: 'in', count: 1, amount: 2000000, signedAmount: 2000000 },
+        { key: 'refunds', direction: 'out', count: 1, amount: 500000, signedAmount: -500000 },
+        { key: 'deposit_usage', direction: 'internal', count: 1, amount: 1000000, signedAmount: 0 },
+        { key: 'voided_adjustments', direction: 'adjustment', count: 1, amount: 3000000, signedAmount: 0 },
+      ],
+      trend: [{ date: '2026-05-06', moneyIn: 6000000, moneyOut: 500000, netCashFlow: 5500000 }],
+    }},
   ];
 }
 
@@ -125,6 +152,35 @@ function getEmployeesResponse() {
 describe('Report subpages — error handling', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockFetchEmployees.mockResolvedValue({
+      offset: 0,
+      limit: 500,
+      totalItems: 1,
+      items: [
+        {
+          id: 'e1',
+          name: 'Dr. An',
+          ref: 'BS01',
+          phone: null,
+          email: null,
+          avatar: null,
+          isdoctor: true,
+          isassistant: false,
+          isreceptionist: false,
+          active: true,
+          companyid: 'l1',
+          companyname: 'Location A',
+          hrjobid: null,
+          hrjobname: null,
+          jobtitle: 'Bác sĩ',
+          wage: null,
+          allowance: null,
+          startworkdate: null,
+          datecreated: null,
+          lastupdated: null,
+        },
+      ],
+    });
   });
 
   const subpages = [
@@ -165,4 +221,22 @@ describe('Report subpages — error handling', () => {
       });
     });
   }
+
+  it('renders employee revenue Excel export controls on the revenue report', async () => {
+    for (const resp of getRevenueResponses()) {
+      mockFetch.mockResolvedValueOnce(resp);
+    }
+
+    render(<ReportsRevenue />);
+
+    await screen.findByText('metrics.totalInvoiced', undefined, { timeout: 3000 });
+    expect(screen.getByText('charts.employeeRevenueExcel')).toBeInTheDocument();
+    expect(screen.getByText('employeeExport.employeeType')).toBeInTheDocument();
+    expect(screen.getByText('employeeExport.employee')).toBeInTheDocument();
+    expect(mockFetchEmployees).toHaveBeenCalledWith(expect.objectContaining({
+      limit: 500,
+      isDoctor: true,
+      active: 'true',
+    }));
+  });
 });

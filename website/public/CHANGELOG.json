@@ -1,5 +1,30 @@
 [
   {
+    "version": "0.28.0",
+    "date": "2026-05-06",
+    "commit": "pending",
+    "highlights": "feat(reports): add employee revenue Excel export",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Revenue reports now support a TDental-style employee revenue Excel export with location, date, employee type, and optional employee filters.",
+          "The employee revenue export includes preview support and grouped workbook sheets for data, summary, and applied filters."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": []
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "The export uses the shared /api/Exports registry and keeps report download access behind the existing reports.export permission."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.28",
     "date": "2026-05-06",
     "commit": "pending",

@@ -49,7 +49,7 @@
 | `pages/Calendar.click.test.tsx` | Appointments | Calendar week appointment click opens the edit modal without being hidden by range loading |
 | `pages/Overview.test.tsx` | Overview | Overview page stats and schedule rendering |
 | `pages/reports/__tests__/ReportsDashboard.test.tsx` | Reports | ReportsDashboard KPI cards |
-| `pages/reports/__tests__/ReportsSubpages.test.tsx` | Reports | Reports sub-page routing and data |
+| `pages/reports/__tests__/ReportsSubpages.test.tsx` | Reports | Reports sub-page routing, revenue recognition basis, cash-flow cards, and data |
 
 ## E2E Tests (`website/e2e/*.spec.ts`)
 
@@ -75,6 +75,7 @@
 | `deep-audit-verification.spec.ts` | Cross-domain | Deep audit of data consistency |
 | `employee-save.spec.ts` | Employees | Employee create/edit persistence |
 | `export-downloads.spec.ts` | Reports/Exports | Operational Excel downloads for customers, calendar, services, payments, and service catalog; validates workbook sheets, headers, dates, and numeric cells |
+| `src/services/exports/__tests__/reportSalesEmployeesExport.test.js` | Reports/Exports | Employee revenue Excel export location scope, employee-type filter SQL, grouped workbook rows, and out-of-scope location rejection |
 | `filter-location-dropdown.spec.ts` | Locations | Location filter dropdown behavior |
 | `location-filter-appointments.spec.ts` | Appointments | Location filter applied to appointments |
 | `login-and-settings.spec.ts` | Auth + Settings | Login + settings page smoke test |
@@ -119,18 +120,20 @@
 | `tdentalDryRun.test.js` | Data/Migration | Full-export dry-run staff/product matching and compact import planning |
 | `telemetry.test.js` | Settings/Telemetry | Telemetry error ingestion, deduplication, management updates, fix attempts, and stats |
 | `telemetryAuth.test.js` | Settings/Telemetry | Public-only error ingestion and auth-required telemetry management routes |
+| `readRoutePermissions.test.js` | Auth/Permissions | Backend route permission declarations, including scoped feedback admin actions |
+| `src/routes/reports/__tests__/cashFlow.test.js` | Reports/Payments | Cash-flow aggregation rules for service collections, deposits, refunds, deposit usage, and voided rows |
 
 ## Coverage Gaps
 
 | Domain | Missing Test Coverage |
 |--------|----------------------|
 | **Payments (backend)** | No backend tests for payment allocation, void, refund, or deposit logic |
-| **Exports (backend)** | E2E covers workbook shape, but there are no route-level unit tests for `/api/Exports` permission filtering, row-limit errors, or `exports_audit` failure behavior |
+| **Exports (backend)** | Employee revenue builder has focused unit coverage; route-level gaps remain for `/api/Exports` permission filtering, row-limit errors, and `exports_audit` failure behavior |
 | **Auth (backend)** | No backend tests for `requirePermission` or `resolvePermissions` divergence |
 | **Appointments (backend)** | Calendar list optimization is covered; no backend tests for appointment create/update/delete validation |
 | **Reports** | No automated accuracy tests for SQL aggregations |
 | **Commission** | No E2E or unit tests for commission calculation |
 | **Monthly Plans** | No tests for installment payment flows |
-| **Feedback** | No tests for attachment upload or admin moderation |
+| **Feedback** | Attachment upload rendering has partial UI coverage through admin moderation route permission checks; file upload storage/deletion still needs E2E coverage |
 | **Website CMS** | No tests for page CRUD |
 | **Permissions** | No backend tests for permission override edge cases |
