@@ -60,6 +60,7 @@ describe('POST /api/face/recognize', () => {
   });
 
   it('returns match when face engine finds a high-confidence match', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     getEmbedding.mockResolvedValue({
       embedding: [0.1, 0.2, 0.3],
       model: { recognizer: 'sface', version: 'v1' },
@@ -79,6 +80,8 @@ describe('POST /api/face/recognize', () => {
     expect(res.body.match.partnerId).toBe('p-1');
     expect(res.body.match.name).toBe('Alice');
     expect(res.body.candidates).toEqual([]);
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[FaceRecognize]'));
+    consoleSpy.mockRestore();
   });
 
   it('returns candidates when confidence is plausible but not auto-match', async () => {
