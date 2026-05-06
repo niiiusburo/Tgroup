@@ -38,4 +38,9 @@ describe('FaceCaptureModal', () => {
     fireEvent.click(await screen.findByText('Hủy'));
     expect(onCancel).toHaveBeenCalled();
   });
+
+  it('renders custom title when provided', async () => {
+    render(<FaceCaptureModal isOpen title="Custom Title" onCapture={vi.fn()} onCancel={vi.fn()} />);
+    expect(await screen.findByText('Custom Title')).toBeInTheDocument();
+  });
 });
