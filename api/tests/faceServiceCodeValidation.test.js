@@ -394,5 +394,10 @@ describe('face-service code validation', () => {
       const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
       expect(content).toMatch(/io\.BytesIO/i);
     });
+
+    it('test_main.py uses Image.new from PIL', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/Image\.new/i);
+    });
   });
 });
