@@ -65,6 +65,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/os\.path\.exists/i);
     });
 
+    it('raises RuntimeError for missing models', () => {
+      expect(content).toMatch(/RuntimeError/i);
+    });
+
     it('reads DETECTION_THRESHOLD from environment', () => {
       expect(content).toMatch(/DETECTION_THRESHOLD/i);
     });
