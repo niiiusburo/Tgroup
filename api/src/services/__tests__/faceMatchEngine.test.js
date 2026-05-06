@@ -178,6 +178,22 @@ describe('findMatches', () => {
     expect(result.candidates).toHaveLength(1);
     expect(result.candidates[0].partnerId).toBe('p1');
   });
+
+  it('does not return candidates when top auto-matches', async () => {
+    const { findMatches, query } = loadEngine({
+      FACE_AUTO_MATCH_THRESHOLD: '0.50',
+      FACE_AUTO_MATCH_MARGIN: '0.05',
+      FACE_CANDIDATE_THRESHOLD: '0.30',
+    });
+    query.mockResolvedValueOnce([
+      { partner_id: 'p1', embedding: [0.6, 0.6, 0], name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p2', embedding: [0.3, 0.3, 0], name: 'Bob', phone: '0902', ref: 'T002' },
+    ]);
+    const result = await findMatches([0.6, 0.6, 0]);
+    expect(result.match).not.toBeNull();
+    expect(result.match.partnerId).toBe('p1');
+    expect(result.candidates).toEqual([]);
+  });
 });
 
 describe('registerSample', () => {
