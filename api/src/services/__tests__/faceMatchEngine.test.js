@@ -148,6 +148,22 @@ describe('findMatches', () => {
     expect(result.candidates.length).toBe(2);
   });
 
+  it('excludes candidates below candidate threshold', async () => {
+    const { findMatches, query } = loadEngine({
+      FACE_AUTO_MATCH_THRESHOLD: '0.99',
+      FACE_CANDIDATE_THRESHOLD: '0.30',
+    });
+    query.mockResolvedValueOnce([
+      { partner_id: 'p1', embedding: [0.6, 0, 0], name: 'A', phone: '1', ref: 'T1' },
+      { partner_id: 'p2', embedding: [0.5, 0, 0], name: 'B', phone: '2', ref: 'T2' },
+      { partner_id: 'p3', embedding: [0.2, 0, 0], name: 'C', phone: '3', ref: 'T3' },
+    ]);
+    const result = await findMatches([0.7, 0, 0]);
+    expect(result.match).toBeNull();
+    expect(result.candidates).toHaveLength(2);
+    expect(result.candidates.map((c) => c.partnerId)).toEqual(['p1', 'p2']);
+  });
+
   it('auto-matches at exact threshold boundary', async () => {
     const { findMatches, query } = loadEngine({
       FACE_AUTO_MATCH_THRESHOLD: '0.50',
