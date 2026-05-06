@@ -24,6 +24,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/return JSONResponse/i);
     });
 
+    it('sets status_code in JSONResponse', () => {
+      expect(content).toMatch(/status_code=/i);
+    });
+
     it('imports UploadFile from fastapi', () => {
       expect(content).toMatch(/UploadFile/i);
     });
