@@ -305,6 +305,10 @@ describe('face-service code validation', () => {
     it('includes python-multipart for file uploads', () => {
       expect(content).toMatch(/python-multipart/i);
     });
+
+    it('pins dependency versions with ==', () => {
+      expect(content).toMatch(/==/);
+    });
   });
 
   describe('Dockerfile model downloads', () => {
