@@ -23,6 +23,8 @@ export interface ExternalCheckup {
 export interface ExternalCheckupsResponse {
   patientCode: string;
   patientName: string;
+  patientExists?: boolean;
+  suggestedPatientCode?: string;
   source?: string;
   status?: number;
   message?: string;
@@ -31,6 +33,24 @@ export interface ExternalCheckupsResponse {
 
 export function fetchExternalCheckups(customerCode: string): Promise<ExternalCheckupsResponse> {
   return apiFetch<ExternalCheckupsResponse>(`/ExternalCheckups/${encodeURIComponent(customerCode)}`);
+}
+
+export interface ExternalPatientCreateResponse {
+  patient: {
+    id?: string;
+    code: string;
+    fullName: string;
+  };
+  created: boolean;
+  conflict?: boolean;
+  patientCode: string;
+  suggestedPatientCode: string;
+}
+
+export function createExternalPatient(customerCode: string): Promise<ExternalPatientCreateResponse> {
+  return apiFetch<ExternalPatientCreateResponse>(`/ExternalCheckups/${encodeURIComponent(customerCode)}/patient`, {
+    method: 'POST',
+  });
 }
 
 export function resolveExternalCheckupImageUrl(imagePath: string): string {
@@ -87,7 +107,7 @@ export async function createExternalCheckup(
   Object.entries(data).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
     if (key === 'files' && Array.isArray(value)) {
-      value.forEach((file) => form.append('files', file));
+      value.forEach((file) => form.append('photos', file));
     } else {
       form.append(key, String(value));
     }

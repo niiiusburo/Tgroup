@@ -243,6 +243,8 @@
   "hardDeleteWarning": " This action cannot be undone.",
   "nextAppointmentContent": "Next appointment content",
   "addCheckup": "Add checkup",
+  "createExternalPatient": "Create HSO patient",
+  "createExternalPatientFailed": "Unable to create Hosoonline patient.",
   "service": "Service",
   "examiningDoctor": "Examining doctor",
   "examDate": "Exam date",

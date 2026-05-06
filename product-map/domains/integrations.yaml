@@ -30,6 +30,7 @@ endpoints:
   - POST /api/face/register
   - GET  /api/ExternalCheckups/images/:imageName
   - GET  /api/ExternalCheckups/:customerCode
+  - POST /api/ExternalCheckups/:customerCode/patient
   - POST /api/ExternalCheckups/:customerCode/health-checkups
 ui_surfaces:
   - PatientCheckIn
@@ -58,5 +59,8 @@ notes:
   - Compreface services are defined in docker-compose.yml but not required for core app startup.
   - "Hosoonline is currently mixed-contract: login credentials take precedence for image reads (`Authorization: Bearer <token>` plus access_token cookie); `HOSOONLINE_API_KEY` / `X-API-Key` remains as fallback for older patient health-checkup endpoints."
   - The current observed Hosoonline website contract logs in through `/api/auth/login`, searches appointment media through `/api/appointments/search?q=<customerCode>&page=<page>`, and fetches bytes through `/api/appointments/image/:imageName`.
+  - Hosoonline v2 API-key patient collection endpoints are routed through `/api/patients/_create` and `/api/patients/_search`; TGClinic proxies patient creation through `POST /api/ExternalCheckups/:customerCode/patient`.
+  - New Hosoonline patient codes are generated from the local TDental customer code plus the last four phone digits as a prefix, for example `T8250` + phone ending `6397` becomes `6397T8250`.
   - TGClinic must proxy Hosoonline images because direct image URLs require Hosoonline session auth.
-  - Upload still posts to the older `/api/patients/:code/health-checkups` endpoint; keep this as an unknown until upstream upload behavior is verified.
+  - Upload still posts to the older `/api/patients/:code/health-checkups` endpoint with `photos`, `service`, and `description`; when the local ref differs from Hosoonline, resolve the upload code from appointment search `customerCode`.
+  - When only `HOSOONLINE_API_KEY` is configured, `/api/patients?code=...` may require token auth while `/api/patients/:code/health-checkups` still accepts the API key, so upload resolution must not let optional search auth failures block the upload attempt.

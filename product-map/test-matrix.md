@@ -111,7 +111,7 @@
 | `loginRateLimiter.test.js` | Auth | Login rate limiter counts failed attempts only and scopes account lockout by email plus IP |
 | `faceRecognition.test.js` | Integrations | Compreface face register/recognize API |
 | `src/routes/appointments/__tests__/readHandlers.test.js` | Appointments | Calendar-mode appointment list allows large week ranges while skipping count/aggregate queries; normal lists remain capped |
-| `src/routes/__tests__/externalCheckups.test.js` | Integrations | Hosoonline auth header and migrated ref lookup behavior |
+| `src/routes/__tests__/externalCheckups.test.js` | Integrations | Hosoonline auth header, v2 patient search path, generated patient code, and migrated ref lookup behavior |
 | `src/routes/partners/__tests__/mutationHandlers.test.js` | Customers | Customer edit allows phone values to overlap customer refs/phones while keeping UUID as identity |
 | `src/routes/partners/__tests__/readHandlers.test.js` | Customers | Customer uniqueness helper treats phone as non-blocking and keeps email duplicate checks active |
 | `src/routes/partners/__tests__/searchFilters.test.js` | Customers | Customer search matches related appointment and service order numbers |

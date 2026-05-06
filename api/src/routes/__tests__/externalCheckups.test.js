@@ -1,6 +1,7 @@
 'use strict';
 
 const originalEnv = process.env;
+const originalFetch = global.fetch;
 
 function loadTestHelpers(env = {}) {
   jest.resetModules();
@@ -19,6 +20,7 @@ function loadTestHelpers(env = {}) {
 
 afterEach(() => {
   process.env = originalEnv;
+  global.fetch = originalFetch;
   jest.dontMock('../../db');
   jest.dontMock('../../middleware/auth');
 });
@@ -58,6 +60,18 @@ describe('externalCheckups helpers', () => {
     });
   });
 
+  it('prefers X-API-Key for upload requests when login credentials also exist', async () => {
+    const { helpers } = loadTestHelpers({
+      HOSOONLINE_API_KEY: 'configured-api-key',
+      HOSOONLINE_USERNAME: 'admin123',
+      HOSOONLINE_PASSWORD: 'adminpass',
+    });
+
+    await expect(helpers.getHosoUploadHeaders()).resolves.toEqual({
+      'X-API-Key': 'configured-api-key',
+    });
+  });
+
   it('looks up local customers by migrated ref before phone fallback', async () => {
     const { helpers, query } = loadTestHelpers();
     query.mockResolvedValueOnce([{ id: 'p1', ref: 'T112012', name: 'Patient', phone: '0900000000' }]);
@@ -88,6 +102,14 @@ describe('externalCheckups helpers', () => {
     const { helpers } = loadTestHelpers();
 
     expect(helpers.extractAccessTokenCookie('access_token=abc123; Path=/; HttpOnly; SameSite=Lax')).toBe('access_token=abc123');
+  });
+
+  it('builds Hosoonline patient codes from TDental code plus the last four phone digits', () => {
+    const { helpers } = loadTestHelpers();
+
+    expect(helpers.buildHosoPatientCode('T8250', '090 123 6397')).toBe('6397T8250');
+    expect(helpers.buildHosoPatientCode('4583T1447', '0900004583')).toBe('4583T1447');
+    expect(helpers.buildHosoPatientCode('T237465', '')).toBe('T237465');
   });
 
   it('maps Hosoonline appointment media into proxied health-checkup images', () => {
@@ -157,5 +179,42 @@ describe('externalCheckups helpers', () => {
 
     expect(checkups[0].images[0].url).toBeNull();
     expect(checkups[0].images[0].thumbnailUrl).toBeUndefined();
+  });
+
+  it('does not fail API-key upload resolution when optional patient search requires token auth', async () => {
+    const { helpers, query } = loadTestHelpers({
+      HOSOONLINE_API_KEY: 'hoso-api-key',
+      HOSOONLINE_USERNAME: '',
+      HOSOONLINE_PASSWORD: '',
+    });
+
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(new Response('{}', { status: 404 }))
+      .mockResolvedValueOnce(new Response('{"message":"No token provided."}', { status: 401 }));
+    query.mockResolvedValueOnce([]);
+    query.mockResolvedValueOnce([]);
+
+    await expect(helpers.resolveHosoPatientCode('T237465')).resolves.toBe('T237465');
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(global.fetch.mock.calls[1][0]).toContain('/api/patients/_search?code=T237465');
+  });
+
+  it('resolves upload code from Hosoonline appointment customerCode when patient search is unavailable', async () => {
+    const { helpers, query } = loadTestHelpers({
+      HOSOONLINE_USERNAME: 'admin123',
+      HOSOONLINE_PASSWORD: 'adminpass',
+    });
+
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(new Response('{"token":"hoso-token"}', { status: 200 }))
+      .mockResolvedValueOnce(new Response('<html>Cannot GET /api/patients</html>', { status: 404 }))
+      .mockResolvedValueOnce(new Response('{"data":[{"customerCode":"4583T1447"}],"total":1}', { status: 200 }));
+    query.mockResolvedValueOnce([]);
+    query.mockResolvedValueOnce([]);
+
+    await expect(helpers.resolveHosoPatientCode('T1447')).resolves.toBe('4583T1447');
+    expect(global.fetch.mock.calls[2][0]).toContain('/api/appointments/search?q=T1447');
   });
 });
