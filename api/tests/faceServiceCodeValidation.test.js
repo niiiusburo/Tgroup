@@ -187,6 +187,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/\.flatten\(\)/i);
     });
 
+    it('converts embedding to list with .tolist()', () => {
+      expect(content).toMatch(/\.tolist\(\)/i);
+    });
+
     it('uses setInputSize for dynamic image dimensions', () => {
       expect(content).toMatch(/setInputSize/i);
     });
