@@ -374,5 +374,10 @@ describe('face-service code validation', () => {
       const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
       expect(content).toMatch(/def create_test_image/i);
     });
+
+    it('test_main.py imports TestClient from fastapi', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/from fastapi\.testclient import TestClient/i);
+    });
   });
 });
