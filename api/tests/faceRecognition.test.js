@@ -31,6 +31,10 @@ jest.mock('../src/db', () => ({
   query: jest.fn(),
 }));
 
+const { getEmbedding } = require('../src/services/faceEngineClient');
+const { findMatches, registerSample, getFaceStatus } = require('../src/services/faceMatchEngine');
+const { query } = require('../src/db');
+
 describe('POST /api/face/recognize', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -43,6 +47,84 @@ describe('POST /api/face/recognize', () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('MISSING_IMAGE');
+  });
+
+  it('returns match when face engine finds a high-confidence match', async () => {
+    getEmbedding.mockResolvedValue({
+      embedding: [0.1, 0.2, 0.3],
+      model: { recognizer: 'sface', version: 'v1' },
+      quality: { detectionScore: 0.95, faceCount: 1 },
+    });
+    findMatches.mockResolvedValue({
+      match: { partnerId: 'p-1', name: 'Alice', code: 'T001', phone: '0901', confidence: 0.72 },
+      candidates: [],
+    });
+
+    const res = await request(app)
+      .post('/api/face/recognize')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(200);
+    expect(res.body.match.partnerId).toBe('p-1');
+    expect(res.body.match.name).toBe('Alice');
+    expect(res.body.candidates).toEqual([]);
+  });
+
+  it('returns candidates when confidence is plausible but not auto-match', async () => {
+    getEmbedding.mockResolvedValue({
+      embedding: [0.1, 0.2, 0.3],
+      model: { recognizer: 'sface', version: 'v1' },
+      quality: { detectionScore: 0.95, faceCount: 1 },
+    });
+    findMatches.mockResolvedValue({
+      match: null,
+      candidates: [
+        { partnerId: 'p-1', name: 'Alice', code: 'T001', phone: '0901', confidence: 0.42 },
+      ],
+    });
+
+    const res = await request(app)
+      .post('/api/face/recognize')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(200);
+    expect(res.body.match).toBeNull();
+    expect(res.body.candidates).toHaveLength(1);
+    expect(res.body.candidates[0].partnerId).toBe('p-1');
+  });
+
+  it('returns no-match when no candidate reaches threshold', async () => {
+    getEmbedding.mockResolvedValue({
+      embedding: [0.1, 0.2, 0.3],
+      model: { recognizer: 'sface', version: 'v1' },
+      quality: { detectionScore: 0.95, faceCount: 1 },
+    });
+    findMatches.mockResolvedValue({ match: null, candidates: [] });
+
+    const res = await request(app)
+      .post('/api/face/recognize')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(200);
+    expect(res.body.match).toBeNull();
+    expect(res.body.candidates).toEqual([]);
+  });
+
+  it('returns 422 when face engine reports no face', async () => {
+    const { FaceEngineError } = require('../src/services/faceEngineClient');
+    getEmbedding.mockRejectedValue(new FaceEngineError('NO_FACE', 'No face detected', 422));
+
+    const res = await request(app)
+      .post('/api/face/recognize')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(422);
+    expect(res.body.error).toBe('NO_FACE');
+    expect(res.body.message).toBe('No face detected');
   });
 });
 
@@ -69,5 +151,97 @@ describe('POST /api/face/register', () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('MISSING_IMAGE');
+  });
+
+  it('returns 404 when partner does not exist', async () => {
+    query.mockResolvedValueOnce([]);
+
+    const res = await request(app)
+      .post('/api/face/register')
+      .field('partnerId', 'p-unknown')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('PARTNER_NOT_FOUND');
+  });
+
+  it('returns 201 with sample details on successful registration', async () => {
+    query.mockResolvedValueOnce([{ id: 'p-1', name: 'Alice' }]);
+    getEmbedding.mockResolvedValue({
+      embedding: [0.1, 0.2, 0.3],
+      model: { recognizer: 'sface', version: 'v1' },
+      quality: { detectionScore: 0.95, faceCount: 1 },
+    });
+    registerSample.mockResolvedValue({ sampleId: 's-1', sampleCount: 3 });
+    getFaceStatus.mockResolvedValue({
+      partnerId: 'p-1',
+      registered: true,
+      sampleCount: 3,
+      lastRegisteredAt: '2026-05-07T10:00:00',
+    });
+
+    const res = await request(app)
+      .post('/api/face/register')
+      .field('partnerId', 'p-1')
+      .field('source', 'profile_register')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(201);
+    expect(res.body.success).toBe(true);
+    expect(res.body.partnerId).toBe('p-1');
+    expect(res.body.sampleId).toBe('s-1');
+    expect(res.body.sampleCount).toBe(3);
+  });
+
+  it('returns 422 when face engine reports multiple faces', async () => {
+    query.mockResolvedValueOnce([{ id: 'p-1', name: 'Alice' }]);
+    const { FaceEngineError } = require('../src/services/faceEngineClient');
+    getEmbedding.mockRejectedValue(new FaceEngineError('MULTIPLE_FACES', 'More than one face detected', 422));
+
+    const res = await request(app)
+      .post('/api/face/register')
+      .field('partnerId', 'p-1')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(422);
+    expect(res.body.error).toBe('MULTIPLE_FACES');
+  });
+});
+
+describe('GET /api/face/status/:partnerId', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns face registration status for an existing customer', async () => {
+    query.mockResolvedValueOnce([{ id: 'p-1' }]);
+    getFaceStatus.mockResolvedValue({
+      partnerId: 'p-1',
+      registered: true,
+      sampleCount: 2,
+      lastRegisteredAt: '2026-05-07T10:00:00',
+    });
+
+    const res = await request(app)
+      .get('/api/face/status/p-1')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(200);
+    expect(res.body.registered).toBe(true);
+    expect(res.body.sampleCount).toBe(2);
+  });
+
+  it('returns 404 when partner does not exist', async () => {
+    query.mockResolvedValueOnce([]);
+
+    const res = await request(app)
+      .get('/api/face/status/p-unknown')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('PARTNER_NOT_FOUND');
   });
 });
