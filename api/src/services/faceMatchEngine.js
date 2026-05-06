@@ -13,6 +13,7 @@ const MAX_CANDIDATES = parseInt(process.env.FACE_MAX_CANDIDATES || "3", 10);
  * SFace embeddings are L2-normalized, so cosine similarity = dot product.
  */
 function cosineSimilarity(a, b) {
+  if (!a || !b || a.length !== b.length) return 0;
   let dot = 0;
   for (let i = 0; i < a.length; i++) {
     dot += a[i] * b[i];

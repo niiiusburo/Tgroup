@@ -194,6 +194,19 @@ describe('findMatches', () => {
     expect(result.match.partnerId).toBe('p1');
     expect(result.candidates).toEqual([]);
   });
+
+  it('handles null embeddings gracefully by treating them as no-match', async () => {
+    const { findMatches, query } = loadEngine({
+      FACE_CANDIDATE_THRESHOLD: '0.10',
+    });
+    query.mockResolvedValueOnce([
+      { partner_id: 'p1', embedding: null, name: 'Alice', phone: '0901', ref: 'T001' },
+    ]);
+    const result = await findMatches([0.1, 0.2, 0.3]);
+    // NaN scores should be treated as below threshold
+    expect(result.match).toBeNull();
+    expect(result.candidates).toEqual([]);
+  });
 });
 
 describe('registerSample', () => {
