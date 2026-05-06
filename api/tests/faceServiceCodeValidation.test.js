@@ -241,6 +241,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/image\//i);
     });
 
+    it('reads uploaded image with await image.read()', () => {
+      expect(content).toMatch(/await image\.read\(\)/i);
+    });
+
     it('validates empty image files', () => {
       expect(content).toMatch(/len\(file_bytes\) == 0/i);
     });
