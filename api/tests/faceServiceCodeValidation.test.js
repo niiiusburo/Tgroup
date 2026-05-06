@@ -24,6 +24,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/JSONResponse/i);
     });
 
+    it('imports HTTPException from fastapi', () => {
+      expect(content).toMatch(/HTTPException/i);
+    });
+
     it('imports typing annotations', () => {
       expect(content).toMatch(/from typing import/i);
     });
