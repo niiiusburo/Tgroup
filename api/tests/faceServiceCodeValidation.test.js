@@ -365,6 +365,11 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/import io/i);
     });
 
+    it('test_main.py imports sys', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/import sys/i);
+    });
+
     it('test_main.py imports main module', () => {
       const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
       expect(content).toMatch(/from main import/i);
