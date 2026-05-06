@@ -48,6 +48,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/import io/i);
     });
 
+    it('imports os for environment and path handling', () => {
+      expect(content).toMatch(/import os/i);
+    });
+
     it('reads MODEL_DIR from environment', () => {
       expect(content).toMatch(/MODEL_DIR/i);
       expect(content).toMatch(/os\.environ\.get/i);
