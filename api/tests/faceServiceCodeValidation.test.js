@@ -369,5 +369,10 @@ describe('face-service code validation', () => {
       const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
       expect(content).toMatch(/class TestApp/i);
     });
+
+    it('test_main.py has create_test_image helper', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/def create_test_image/i);
+    });
   });
 });
