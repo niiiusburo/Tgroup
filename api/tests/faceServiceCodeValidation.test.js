@@ -196,6 +196,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/"model":/i);
     });
 
+    it('includes version in model metadata', () => {
+      expect(content).toMatch(/"version":/i);
+    });
+
     it('returns quality metadata in response', () => {
       expect(content).toMatch(/"quality":/i);
     });
