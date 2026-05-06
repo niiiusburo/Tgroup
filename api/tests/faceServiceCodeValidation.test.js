@@ -159,6 +159,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/cv2\.FaceRecognizerSF/i);
     });
 
+    it('creates detector with cv2.FaceDetectorYN.create', () => {
+      expect(content).toMatch(/cv2\.FaceDetectorYN\.create/i);
+    });
+
     it('uses setInputSize for dynamic image dimensions', () => {
       expect(content).toMatch(/setInputSize/i);
     });
