@@ -109,12 +109,32 @@ export function hardDeletePartner(id: string) {
   return apiFetch<{ success: boolean; id: string }>(`/Partners/${id}/hard-delete`, { method: 'DELETE' });
 }
 
+export interface FaceCandidate {
+  partnerId: string;
+  name: string;
+  code: string;
+  phone: string;
+  confidence: number;
+}
+
 export interface FaceMatchResult {
-  match: {
-    partnerId: string;
-    name: string;
-    confidence: number;
-  } | null;
+  match: FaceCandidate | null;
+  candidates: FaceCandidate[];
+}
+
+export interface FaceRegisterResult {
+  success: boolean;
+  partnerId: string;
+  sampleId: string;
+  sampleCount: number;
+  faceRegisteredAt: string;
+}
+
+export interface FaceStatusResult {
+  partnerId: string;
+  registered: boolean;
+  sampleCount: number;
+  lastRegisteredAt: string | null;
 }
 
 export function recognizeFace(image: Blob) {
@@ -126,12 +146,17 @@ export function recognizeFace(image: Blob) {
   });
 }
 
-export function registerFace(partnerId: string, image: Blob) {
+export function registerFace(partnerId: string, image: Blob, source?: string) {
   const formData = new FormData();
   formData.append('partnerId', partnerId);
   formData.append('image', image, 'face.jpg');
-  return apiFetch<{ success: boolean; faceSubjectId: string }>('/face/register', {
+  if (source) formData.append('source', source);
+  return apiFetch<FaceRegisterResult>('/face/register', {
     method: 'POST',
     body: formData as unknown as Record<string, unknown>,
   });
+}
+
+export function getFaceStatus(partnerId: string) {
+  return apiFetch<FaceStatusResult>(`/face/status/${encodeURIComponent(partnerId)}`);
 }

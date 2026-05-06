@@ -1,0 +1,90 @@
+<h2>Face ID Customer Search</h2>
+<p class="subtitle">Visual companion for choosing the local face-recognition system and the first implementation slice.</p>
+
+<div class="section">
+  <div class="label">Recommended System</div>
+  <div class="mockup">
+    <div class="mockup-header">OpenCV YuNet + SFace, local embedding service</div>
+    <div class="mockup-body">
+      <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:14px;align-items:center">
+        <div class="placeholder" style="min-height:92px">
+          <strong>Staff camera</strong><br>
+          Capture face on customer form or Face ID search
+        </div>
+        <div style="font-size:28px;color:#f97316">→</div>
+        <div class="placeholder" style="min-height:92px">
+          <strong>TGClinic API</strong><br>
+          Keeps current /api/face routes and permissions
+        </div>
+        <div style="font-size:28px;color:#f97316">→</div>
+        <div class="placeholder" style="min-height:92px">
+          <strong>Local face service</strong><br>
+          Detect face, create embedding, return quality score
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center;margin-top:16px">
+        <div class="placeholder" style="min-height:86px">
+          <strong>Register</strong><br>
+          Store embedding linked to partner id
+        </div>
+        <div style="font-size:28px;color:#f97316">↔</div>
+        <div class="placeholder" style="min-height:86px">
+          <strong>Search</strong><br>
+          Compare against active customer embeddings and return best match
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Current Data Shape</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-body">
+        <h3>56 Active Customers</h3>
+        <p>Small enough for direct cosine comparison before adding vector infrastructure.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h3>0 Registered Faces</h3>
+        <p>We can start with a clean enrollment flow and avoid migration complexity in V1.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h3>Existing Face Routes</h3>
+        <p>The frontend and API already know register vs recognize; implementation can replace the backend engine without redesigning the whole page.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Pick the first Face ID workflow to design in detail</h3>
+<p class="subtitle">Click one option in the browser, then tell me in chat if anything feels off.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Customer Profile First</h3>
+      <p>Staff opens a customer, captures their face, and locks that face to the customer record. Best first slice for correctness.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Search By Face First</h3>
+      <p>Staff clicks Face ID from /customers, scans a walk-in, and jumps to the matched customer. Best first slice for visible value.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Register + Search Together</h3>
+      <p>Build the complete loop in one pass: enroll face, verify face, search face, and handle low-confidence/no-face states.</p>
+    </div>
+  </div>
+</div>

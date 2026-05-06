@@ -124,7 +124,18 @@
     "registering": "Registering...",
     "registerSuccess": "Registration successful!",
     "registerTitle": "Register Face",
-    "savedHint": "Face photo saved. Fill in information and save to register."
+    "savedHint": "Face photo saved. Fill in information and save to register.",
+    "selectMatch": "Select the correct customer",
+    "possibleMatches": "Possible matches",
+    "noMatch": "No match found",
+    "searchToRegister": "Search customer to register this face",
+    "searchPlaceholder": "Name, phone, or code...",
+    "registerToCustomer": "Register face to {name}",
+    "addAnotherSample": "Add another face sample",
+    "faceRegistered": "Face registered",
+    "noFaceFound": "No face detected",
+    "multipleFaces": "More than one face detected",
+    "faceServiceUnavailable": "Face service is unavailable"
   },
   "dialog": {
     "addReferrer": "Add new referrer",

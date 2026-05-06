@@ -1,0 +1,1634 @@
+{
+  "createdAt": "2026-05-05T03:31:24.847Z",
+  "baseUrl": "http://127.0.0.1:5175",
+  "device": "iPhone 13 / 390x844",
+  "customerId": "c795b2d7-684d-422a-8eb0-b178004c5716",
+  "screenshotCount": 66,
+  "screenshots": [
+    {
+      "index": 1,
+      "label": "Login",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/01-page-login.png",
+      "url": "/login",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 664,
+      "overflowX": false,
+      "headings": [
+        "Đăng nhập"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 2,
+      "label": "Overview",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/02-page-overview.png",
+      "url": "/",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1421,
+      "overflowX": false,
+      "headings": [
+        "Tổng quan",
+        "Lịch trình ngày",
+        "Today's Services / Activity",
+        "Lịch hẹn hôm nay"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 3,
+      "label": "Calendar",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/03-page-calendar.png",
+      "url": "/calendar",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 920,
+      "overflowX": false,
+      "headings": [
+        "Lịch",
+        "Lịch hẹn",
+        "Bộ lọc",
+        "Bác sĩ",
+        "Trạng thái"
+      ],
+      "dialogs": [
+        "Bộ lọc2707Lịch hẹn894g25pDự kiếnBác sĩBác sĩ (17)Bác sĩ (17) FullBác sĩ 03Bác sĩ"
+      ]
+    },
+    {
+      "index": 4,
+      "label": "Customers",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/04-page-customers.png",
+      "url": "/customers",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2198,
+      "overflowX": false,
+      "headings": [
+        "Khách hàng",
+        "Khách hàng"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 5,
+      "label": "Customer Profile",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/05-page-customer-profile.png",
+      "url": "/customers/c795b2d7-684d-422a-8eb0-b178004c5716",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1803,
+      "overflowX": false,
+      "headings": [
+        "Dashboard",
+        "Hồ sơ khách hàng",
+        "TRẦN PHƯƠNG NAM",
+        "Phân công",
+        "Thông tin cá nhân"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 6,
+      "label": "Employees",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/06-page-employees.png",
+      "url": "/employees",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2136,
+      "overflowX": false,
+      "headings": [
+        "Nhân viên",
+        "Nhân viên"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 7,
+      "label": "Locations",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/07-page-locations.png",
+      "url": "/locations",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1857,
+      "overflowX": false,
+      "headings": [
+        "Chi nhánh",
+        "Chi nhánh",
+        "Tấm Dentist Quận 3",
+        "Tấm Dentist Thủ Đức",
+        "Tấm Dentist Gò Vấp"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 8,
+      "label": "Services",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/08-page-services.png",
+      "url": "/services",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 40364,
+      "overflowX": false,
+      "headings": [
+        "Dịch vụ",
+        "Dịch vụ"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 9,
+      "label": "Service Catalog",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/09-page-service-catalog.png",
+      "url": "/service-catalog",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2140,
+      "overflowX": false,
+      "headings": [
+        "Danh mục dịch vụ",
+        "Danh mục dịch vụ",
+        "Nhóm dịch vụ"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 10,
+      "label": "Website CMS",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/10-page-website-cms.png",
+      "url": "/website",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 701,
+      "overflowX": false,
+      "headings": [
+        "Dashboard",
+        "Website"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 11,
+      "label": "Settings",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/11-page-settings.png",
+      "url": "/settings",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 713,
+      "overflowX": false,
+      "headings": [
+        "Cài đặt",
+        "Cài đặt",
+        "Cài đặt múi giờ",
+        "General"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 12,
+      "label": "Relationships",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/12-page-relationships.png",
+      "url": "/relationships",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1762,
+      "overflowX": false,
+      "headings": [
+        "Mối quan hệ",
+        "Mối quan hệ"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 13,
+      "label": "Commission",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/13-page-commission.png",
+      "url": "/commission",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 916,
+      "overflowX": false,
+      "headings": [
+        "Hoa hồng",
+        "Hoa hồng",
+        "Bản ghi hoa hồng"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 14,
+      "label": "Reports Redirect",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/14-page-reports-redirect.png",
+      "url": "/reports/dashboard",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1917,
+      "overflowX": false,
+      "headings": [
+        "Bảng điều khiển",
+        "Báo cáo",
+        "Xu hướng doanh thu 12 tháng",
+        "Tỷ lệ lịch hẹn"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 15,
+      "label": "Reports Dashboard",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/15-page-reports-dashboard.png",
+      "url": "/reports/dashboard",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1917,
+      "overflowX": false,
+      "headings": [
+        "Bảng điều khiển",
+        "Báo cáo",
+        "Xu hướng doanh thu 12 tháng",
+        "Tỷ lệ lịch hẹn"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 16,
+      "label": "Reports Revenue",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/16-page-reports-revenue.png",
+      "url": "/reports/revenue",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2640,
+      "overflowX": false,
+      "headings": [
+        "Doanh thu",
+        "Báo cáo",
+        "Xu hướng doanh thu",
+        "Theo phương thức thanh toán",
+        "Doanh thu theo bác sĩ"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 17,
+      "label": "Reports Appointments",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/17-page-reports-appointments.png",
+      "url": "/reports/appointments",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2712,
+      "overflowX": false,
+      "headings": [
+        "Lịch hẹn",
+        "Báo cáo",
+        "Phân bố trạng thái",
+        "Các tỷ lệ chính",
+        "Loại bệnh nhân"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 18,
+      "label": "Reports Doctors",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/18-page-reports-doctors.png",
+      "url": "/reports/doctors",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 5004,
+      "overflowX": false,
+      "headings": [
+        "Bác sĩ",
+        "Báo cáo",
+        "Lịch hẹn theo bác sĩ",
+        "Doanh thu theo bác sĩ",
+        "Chi tiết hiệu suất bác sĩ"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 19,
+      "label": "Reports Customers",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/19-page-reports-customers.png",
+      "url": "/reports/customers",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2120,
+      "overflowX": false,
+      "headings": [
+        "Khách hàng",
+        "Báo cáo",
+        "Phân bố giới tính",
+        "Tăng trưởng khách hàng",
+        "Khách hàng chi tiêu nhiều nhất"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 20,
+      "label": "Reports Locations",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/20-page-reports-locations.png",
+      "url": "/reports/locations",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2310,
+      "overflowX": false,
+      "headings": [
+        "Chi nhánh",
+        "Báo cáo",
+        "So sánh chi nhánh",
+        "Lịch hẹn theo chi nhánh",
+        "Doanh thu theo chi nhánh"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 21,
+      "label": "Reports Services",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/21-page-reports-services.png",
+      "url": "/reports/services",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 3792,
+      "overflowX": false,
+      "headings": [
+        "Dịch vụ",
+        "Báo cáo",
+        "Doanh thu theo nguồn",
+        "Doanh thu theo danh mục dịch vụ",
+        "Danh mục sản phẩm theo nhóm"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 22,
+      "label": "Reports Employees",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/22-page-reports-employees.png",
+      "url": "/reports/employees",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 33042,
+      "overflowX": false,
+      "headings": [
+        "Nhân viên",
+        "Báo cáo",
+        "Phân bố vai trò",
+        "Nhân sự theo chi nhánh",
+        "Danh sách nhân viên"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 23,
+      "label": "Notifications",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/23-page-notifications.png",
+      "url": "/notifications",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1366,
+      "overflowX": false,
+      "headings": [
+        "Thông báo",
+        "Thông báo",
+        "Mẫu thông báo"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 24,
+      "label": "Permissions",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/24-page-permissions.png",
+      "url": "/permissions",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 32206,
+      "overflowX": false,
+      "headings": [
+        "Quyền hạn",
+        "Kiến trúc hệ thống quyền"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 25,
+      "label": "Payment",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/25-page-payment.png",
+      "url": "/payment",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 12646,
+      "overflowX": false,
+      "headings": [
+        "Kế hoạch thanh toán",
+        "Thanh toán",
+        "Danh sách công nợ"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 26,
+      "label": "Feedback",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/26-page-feedback.png",
+      "url": "/feedback",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 664,
+      "overflowX": false,
+      "headings": [
+        "Phản hồi",
+        "Phản hồi",
+        "Employee Feedback"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 27,
+      "label": "Address Autocomplete Test",
+      "kind": "page",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/27-page-address-autocomplete-test.png",
+      "url": "/test/address",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1061,
+      "overflowX": false,
+      "headings": [
+        "Address Autocomplete Test",
+        "Test Input",
+        "Current State",
+        "Debug Logs",
+        "How to Test"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 28,
+      "label": "App Shell - Mobile Navigation Drawer",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/28-popup-app-shell-mobile-navigation-drawer.png",
+      "url": "/",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1421,
+      "overflowX": false,
+      "headings": [
+        "Tổng quan",
+        "Lịch trình ngày",
+        "Today's Services / Activity",
+        "Lịch hẹn hôm nay"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 29,
+      "label": "App Shell - Feedback Widget",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/29-popup-app-shell-feedback-widget.png",
+      "url": "/",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1421,
+      "overflowX": false,
+      "headings": [
+        "Tổng quan",
+        "Your Feedback",
+        "Lịch trình ngày",
+        "Today's Services / Activity",
+        "Lịch hẹn hôm nay"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 30,
+      "label": "Calendar - Filter Drawer",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/30-popup-calendar-filter-drawer.png",
+      "url": "/calendar",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 920,
+      "overflowX": false,
+      "headings": [
+        "Lịch",
+        "Lịch hẹn",
+        "Bộ lọc",
+        "Bác sĩ",
+        "Trạng thái"
+      ],
+      "dialogs": [
+        "Bộ lọc2707Lịch hẹn894g25pDự kiếnBác sĩBác sĩ (17)Bác sĩ (17) FullBác sĩ 03Bác sĩ"
+      ]
+    },
+    {
+      "index": 31,
+      "label": "Customers - Add Customer Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/31-popup-customers-add-customer-modal.png",
+      "url": "/customers",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2238,
+      "overflowX": false,
+      "headings": [
+        "Khách hàng",
+        "Khách hàng",
+        "Thêm khách hàng",
+        "Thông tin cá nhân",
+        "CSKH"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 32,
+      "label": "Customer Profile - Edit Customer Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/32-popup-customer-profile-edit-customer-modal.png",
+      "url": "/customers/c795b2d7-684d-422a-8eb0-b178004c5716",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1803,
+      "overflowX": false,
+      "headings": [
+        "Dashboard",
+        "Hồ sơ khách hàng",
+        "TRẦN PHƯƠNG NAM",
+        "Phân công",
+        "Thông tin cá nhân"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 33,
+      "label": "Employees - Add Employee Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/33-popup-employees-add-employee-modal.png",
+      "url": "/employees",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2136,
+      "overflowX": false,
+      "headings": [
+        "Nhân viên",
+        "Nhân viên",
+        "Thêm nhân viên"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 34,
+      "label": "Locations - Add Location Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/34-popup-locations-add-location-modal.png",
+      "url": "/locations",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1857,
+      "overflowX": false,
+      "headings": [
+        "Chi nhánh",
+        "Chi nhánh",
+        "Tấm Dentist Quận 3",
+        "Tấm Dentist Thủ Đức",
+        "Tấm Dentist Gò Vấp"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 35,
+      "label": "Services - Add Service Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/35-popup-services-add-service-modal.png",
+      "url": "/services",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 40364,
+      "overflowX": false,
+      "headings": [
+        "Dịch vụ",
+        "Dịch vụ",
+        "Thêm dịch vụ"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 36,
+      "label": "Services - Catalog Picker Popup",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/36-popup-services-catalog-picker-popup.png",
+      "url": "/services",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 40364,
+      "overflowX": false,
+      "headings": [
+        "Dịch vụ",
+        "Dịch vụ",
+        "Thêm dịch vụ"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 37,
+      "label": "Services - Customer Picker Popup",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/37-popup-services-customer-picker-popup.png",
+      "url": "/services",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 40364,
+      "overflowX": false,
+      "headings": [
+        "Dịch vụ",
+        "Dịch vụ",
+        "Thêm dịch vụ"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 38,
+      "label": "Service Catalog - Add Service Item Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/38-popup-service-catalog-add-service-item-modal.png",
+      "url": "/service-catalog",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2140,
+      "overflowX": false,
+      "headings": [
+        "Danh mục dịch vụ",
+        "Danh mục dịch vụ",
+        "Nhóm dịch vụ",
+        "Thêm dịch vụ"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 39,
+      "label": "Website CMS - Editor Empty State",
+      "kind": "page-state",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/39-page-state-website-cms-editor-empty-state.png",
+      "url": "/website",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 664,
+      "overflowX": false,
+      "headings": [
+        "Dashboard",
+        "Website"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 40,
+      "label": "Settings - Bank Selector Dropdown",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/40-popup-settings-bank-selector-dropdown.png",
+      "url": "/settings",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1032,
+      "overflowX": false,
+      "headings": [
+        "Cài đặt",
+        "Cài đặt",
+        "Cài đặt múi giờ",
+        "Tài khoản ngân hàng"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 41,
+      "label": "Settings - IP Access Form",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/41-popup-settings-ip-access-form.png",
+      "url": "/settings",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2236,
+      "overflowX": false,
+      "headings": [
+        "Cài đặt",
+        "Cài đặt",
+        "Cài đặt múi giờ",
+        "Add New IP Entry",
+        "IP Entries"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 42,
+      "label": "Commission - Add Commission Rule Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/42-popup-commission-add-commission-rule-modal.png",
+      "url": "/commission",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 916,
+      "overflowX": false,
+      "headings": [
+        "Hoa hồng",
+        "Hoa hồng",
+        "Bản ghi hoa hồng"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 43,
+      "label": "Payment - Installment Plans Tab",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/43-popup-payment-installment-plans-tab.png",
+      "url": "/payment",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 6467,
+      "overflowX": false,
+      "headings": [
+        "Kế hoạch thanh toán",
+        "Thanh toán"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 44,
+      "label": "Payment - Create Installment Plan Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/44-popup-payment-create-installment-plan-modal.png",
+      "url": "/payment",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 6733,
+      "overflowX": false,
+      "headings": [
+        "Kế hoạch thanh toán",
+        "Thanh toán",
+        "Customer Information"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 45,
+      "label": "Feedback - Empty Feedback State",
+      "kind": "page-state",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/45-page-state-feedback-empty-feedback-state.png",
+      "url": "/feedback",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 664,
+      "overflowX": false,
+      "headings": [
+        "Phản hồi",
+        "Phản hồi",
+        "Employee Feedback"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 46,
+      "label": "Permissions - Matrix Popup",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/46-popup-permissions-matrix-popup.png",
+      "url": "/permissions",
+      "title": "TG Clinic - Clinic Management System",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1949,
+      "overflowX": false,
+      "headings": [
+        "Quyền hạn",
+        "Kiến trúc hệ thống quyền"
+      ],
+      "dialogs": []
+    },
+    {
+      "index": 47,
+      "label": "App Shell - Header Notification Icon State",
+      "kind": "page-state",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/47-page-state-app-shell-header-notification-icon-state.png",
+      "url": "/",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1421,
+      "overflowX": false,
+      "headings": [
+        "Tổng quan",
+        "Lịch trình ngày",
+        "Today's Services / Activity",
+        "Lịch hẹn hôm nay"
+      ],
+      "dialogs": [],
+      "supplemental": true
+    },
+    {
+      "index": 48,
+      "label": "Calendar - Add Appointment Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/48-popup-calendar-add-appointment-modal.png",
+      "url": "/calendar",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 920,
+      "overflowX": false,
+      "headings": [
+        "Lịch",
+        "Lịch hẹn",
+        "Bộ lọc",
+        "Bác sĩ",
+        "Trạng thái",
+        "Nhãn màu"
+      ],
+      "dialogs": [
+        "Bộ lọc2707Lịch hẹn894g25pDự kiếnBác sĩBác sĩ (17)Bác sĩ (17) FullBác sĩ 03Bác sĩ 08BÁC SĨ 09Bác sĩ 1"
+      ],
+      "supplemental": true
+    },
+    {
+      "index": 49,
+      "label": "Calendar - Date Picker Popover",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/49-popup-calendar-date-picker-popover.png",
+      "url": "/calendar",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 920,
+      "overflowX": false,
+      "headings": [
+        "Lịch",
+        "Lịch hẹn",
+        "Bộ lọc",
+        "Bác sĩ",
+        "Trạng thái",
+        "Nhãn màu"
+      ],
+      "dialogs": [
+        "Bộ lọc2707Lịch hẹn894g25pDự kiếnBác sĩBác sĩ (17)Bác sĩ (17) FullBác sĩ 03Bác sĩ 08BÁC SĨ 09Bác sĩ 1"
+      ],
+      "supplemental": true
+    },
+    {
+      "index": 50,
+      "label": "Calendar - Export Menu",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/50-popup-calendar-export-menu.png",
+      "url": "/calendar",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 920,
+      "overflowX": false,
+      "headings": [
+        "Lịch",
+        "Lịch hẹn",
+        "Bộ lọc",
+        "Bác sĩ",
+        "Trạng thái",
+        "Nhãn màu"
+      ],
+      "dialogs": [
+        "Bộ lọc2707Lịch hẹn894g25pDự kiếnBác sĩBác sĩ (17)Bác sĩ (17) FullBác sĩ 03Bác sĩ 08BÁC SĨ 09Bác sĩ 1"
+      ],
+      "supplemental": true
+    },
+    {
+      "index": 51,
+      "label": "Calendar - Appointment Opens Customer Profile",
+      "kind": "page-state",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/51-page-state-calendar-appointment-opens-customer-profile.png",
+      "url": "/customers/8daa4d59-85f2-4c10-8906-b05c002d40ef",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1770,
+      "overflowX": false,
+      "headings": [
+        "Dashboard",
+        "Hồ sơ khách hàng",
+        "Nguyễn Thị Kim Ngân",
+        "Phân công",
+        "Thông tin cá nhân"
+      ],
+      "dialogs": [],
+      "supplemental": true
+    },
+    {
+      "index": 52,
+      "label": "Calendar - Edit Appointment Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/52-popup-calendar-edit-appointment-modal.png",
+      "url": "/calendar",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 920,
+      "overflowX": false,
+      "headings": [
+        "Lịch",
+        "Lịch hẹn",
+        "Bộ lọc",
+        "Bác sĩ",
+        "Trạng thái",
+        "Nhãn màu"
+      ],
+      "dialogs": [
+        "Bộ lọc2707Lịch hẹn894g25pDự kiếnBác sĩBác sĩ (17)Bác sĩ (17) FullBác sĩ 03Bác sĩ 08BÁC SĨ 09Bác sĩ 1"
+      ],
+      "supplemental": true
+    },
+    {
+      "index": 53,
+      "label": "Customers - Export Menu",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/53-popup-customers-export-menu.png",
+      "url": "/customers",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2198,
+      "overflowX": false,
+      "headings": [
+        "Khách hàng",
+        "Khách hàng"
+      ],
+      "dialogs": [],
+      "supplemental": true
+    },
+    {
+      "index": 54,
+      "label": "Customer Profile - Action Menu",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/54-popup-customer-profile-action-menu.png",
+      "url": "/customers/c795b2d7-684d-422a-8eb0-b178004c5716",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1803,
+      "overflowX": false,
+      "headings": [
+        "Dashboard",
+        "Hồ sơ khách hàng",
+        "TRẦN PHƯƠNG NAM",
+        "Phân công",
+        "Thông tin cá nhân"
+      ],
+      "dialogs": [],
+      "supplemental": true
+    },
+    {
+      "index": 55,
+      "label": "Customer Profile - Add Service Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/55-popup-customer-profile-add-service-modal.png",
+      "url": "/customers/c795b2d7-684d-422a-8eb0-b178004c5716",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1880,
+      "overflowX": false,
+      "headings": [
+        "Dashboard",
+        "Hồ sơ khách hàng",
+        "TRẦN PHƯƠNG NAM",
+        "Phân công",
+        "Lịch sử dịch vụ",
+        "Lịch sử dịch vụ"
+      ],
+      "dialogs": [],
+      "supplemental": true
+    },
+    {
+      "index": 56,
+      "label": "Customer Profile - Deposit Payment Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/56-popup-customer-profile-deposit-payment-modal.png",
+      "url": "/customers/c795b2d7-684d-422a-8eb0-b178004c5716",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2242,
+      "overflowX": false,
+      "headings": [
+        "Dashboard",
+        "Hồ sơ khách hàng",
+        "TRẦN PHƯƠNG NAM",
+        "Phân công",
+        "Thanh toán & Tạm ứng"
+      ],
+      "dialogs": [],
+      "supplemental": true
+    },
+    {
+      "index": 57,
+      "label": "Customer Profile - Refund Deposit Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/57-popup-customer-profile-refund-deposit-modal.png",
+      "url": "/customers/c795b2d7-684d-422a-8eb0-b178004c5716",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2242,
+      "overflowX": false,
+      "headings": [
+        "Dashboard",
+        "Hồ sơ khách hàng",
+        "TRẦN PHƯƠNG NAM",
+        "Phân công",
+        "Thanh toán & Tạm ứng"
+      ],
+      "dialogs": [],
+      "supplemental": true
+    },
+    {
+      "index": 58,
+      "label": "Services - Export Menu",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/58-popup-services-export-menu.png",
+      "url": "/services",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 40364,
+      "overflowX": false,
+      "headings": [
+        "Dịch vụ",
+        "Dịch vụ"
+      ],
+      "dialogs": [],
+      "supplemental": true
+    },
+    {
+      "index": 59,
+      "label": "Services - Tooth Picker Popup",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/59-popup-services-tooth-picker-popup.png",
+      "url": "/services",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 40364,
+      "overflowX": false,
+      "headings": [
+        "Dịch vụ",
+        "Dịch vụ",
+        "Thêm dịch vụ",
+        "Chọn răng"
+      ],
+      "dialogs": [],
+      "supplemental": true
+    },
+    {
+      "index": 60,
+      "label": "Service Catalog - Add Category Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/60-popup-service-catalog-add-category-modal.png",
+      "url": "/service-catalog",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2140,
+      "overflowX": false,
+      "headings": [
+        "Danh mục dịch vụ",
+        "Danh mục dịch vụ",
+        "Nhóm dịch vụ",
+        "Thêm nhóm dịch vụ"
+      ],
+      "dialogs": [],
+      "supplemental": true
+    },
+    {
+      "index": 61,
+      "label": "Service Catalog - Edit Item Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/61-popup-service-catalog-edit-item-modal.png",
+      "url": "/service-catalog",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2140,
+      "overflowX": false,
+      "headings": [
+        "Danh mục dịch vụ",
+        "Danh mục dịch vụ",
+        "Nhóm dịch vụ",
+        "Sửa dịch vụ"
+      ],
+      "dialogs": [],
+      "supplemental": true
+    },
+    {
+      "index": 62,
+      "label": "Service Catalog - Export Menu",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/62-popup-service-catalog-export-menu.png",
+      "url": "/service-catalog",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 2140,
+      "overflowX": false,
+      "headings": [
+        "Danh mục dịch vụ",
+        "Danh mục dịch vụ",
+        "Nhóm dịch vụ"
+      ],
+      "dialogs": [],
+      "supplemental": true
+    },
+    {
+      "index": 63,
+      "label": "Payment - Refunded Filter State",
+      "kind": "page-state",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/63-popup-payment-refunded-filter-state.png",
+      "url": "/payment",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 6771,
+      "overflowX": false,
+      "headings": [
+        "Kế hoạch thanh toán",
+        "Thanh toán",
+        "Danh sách công nợ"
+      ],
+      "dialogs": [],
+      "supplemental": true
+    },
+    {
+      "index": 64,
+      "label": "Notifications - New Template Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/64-popup-notifications-new-template-modal.png",
+      "url": "/notifications",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1366,
+      "overflowX": false,
+      "headings": [
+        "Thông báo",
+        "Thông báo",
+        "Mẫu thông báo"
+      ],
+      "dialogs": [],
+      "supplemental": true
+    },
+    {
+      "index": 65,
+      "label": "Customer Profile - Mobile Tabs State",
+      "kind": "page-state",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/65-page-state-customer-profile-mobile-tabs-state.png",
+      "url": "/customers/c795b2d7-684d-422a-8eb0-b178004c5716",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1803,
+      "overflowX": false,
+      "headings": [
+        "Dashboard",
+        "Hồ sơ khách hàng",
+        "TRẦN PHƯƠNG NAM",
+        "Phân công",
+        "Thông tin cá nhân"
+      ],
+      "dialogs": [],
+      "supplemental": true
+    },
+    {
+      "index": 66,
+      "label": "Customer Profile - Add Appointment Modal",
+      "kind": "popup",
+      "file": "/Users/thuanle/Documents/TamTMV/Tgrouptest/website/screenshots/mobile-redesign-2026-05-05/66-popup-customer-profile-add-appointment-modal.png",
+      "url": "/customers/c795b2d7-684d-422a-8eb0-b178004c5716",
+      "viewport": {
+        "width": 390,
+        "height": 664
+      },
+      "scrollWidth": 390,
+      "scrollHeight": 1376,
+      "overflowX": false,
+      "headings": [
+        "Dashboard",
+        "Hồ sơ khách hàng",
+        "TRẦN PHƯƠNG NAM",
+        "Phân công",
+        "Lịch sử lịch hẹn (1)",
+        "Thêm lịch hẹn"
+      ],
+      "dialogs": [],
+      "supplemental": true
+    }
+  ],
+  "failures": [],
+  "consoleErrors": [
+    {
+      "text": "Warning: Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.%s Niềng răng \n    at div\n    at HorizontalBarList (http://127.0.0.1:5175/src/components/reports/BarChart.tsx:74:37)\n    at div\n    at div\n    at MotionDOMComponent (http://127.0.0.1:5175/node_modules/.vite/deps/framer-motion.",
+      "url": "http://127.0.0.1:5175/reports/revenue"
+    },
+    {
+      "text": "Warning: Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.%s Điều trị tổng quát \n    at div\n    at HorizontalBarList (http://127.0.0.1:5175/src/components/reports/BarChart.tsx:74:37)\n    at div\n    at div\n    at MotionDOMComponent (http://127.0.0.1:5175/node_modules/.vite/deps/framer",
+      "url": "http://127.0.0.1:5175/reports/revenue"
+    },
+    {
+      "text": "Warning: Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.%s Bọc sứ \n    at div\n    at HorizontalBarList (http://127.0.0.1:5175/src/components/reports/BarChart.tsx:74:37)\n    at div\n    at div\n    at MotionDOMComponent (http://127.0.0.1:5175/node_modules/.vite/deps/framer-motion.js?v",
+      "url": "http://127.0.0.1:5175/reports/revenue"
+    },
+    {
+      "text": "Warning: Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.%s Nhổ răng \n    at div\n    at HorizontalBarList (http://127.0.0.1:5175/src/components/reports/BarChart.tsx:74:37)\n    at div\n    at div\n    at MotionDOMComponent (http://127.0.0.1:5175/node_modules/.vite/deps/framer-motion.js",
+      "url": "http://127.0.0.1:5175/reports/revenue"
+    },
+    {
+      "text": "Warning: Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.%s Implant \n    at div\n    at HorizontalBarList (http://127.0.0.1:5175/src/components/reports/BarChart.tsx:74:37)\n    at div\n    at div\n    at MotionDOMComponent (http://127.0.0.1:5175/node_modules/.vite/deps/framer-motion.js?",
+      "url": "http://127.0.0.1:5175/reports/revenue"
+    }
+  ],
+  "supplemental": {
+    "added": 19,
+    "failed": []
+  },
+  "initialFailures": [
+    {
+      "label": "App Shell - Header Notifications Popover",
+      "route": "/",
+      "error": "Could not click notification bell"
+    },
+    {
+      "label": "Calendar - Add Appointment Modal",
+      "route": "/calendar",
+      "error": "Could not click add appointment"
+    },
+    {
+      "label": "Calendar - Date Picker Popover",
+      "route": "/calendar",
+      "error": "Could not click date picker"
+    },
+    {
+      "label": "Calendar - Export Menu",
+      "route": "/calendar",
+      "error": "Could not click calendar export menu"
+    },
+    {
+      "label": "Calendar - Appointment Detail Popup",
+      "route": "/calendar",
+      "error": "Could not click appointment card"
+    },
+    {
+      "label": "Customers - Export Menu",
+      "route": "/customers",
+      "error": "Could not click customer export"
+    },
+    {
+      "label": "Customer Profile - Add Appointment Modal",
+      "route": "/customers/c795b2d7-684d-422a-8eb0-b178004c5716",
+      "error": "Could not click customer add appointment"
+    },
+    {
+      "label": "Customer Profile - Add Service Modal",
+      "route": "/customers/c795b2d7-684d-422a-8eb0-b178004c5716",
+      "error": "Could not click customer add service"
+    },
+    {
+      "label": "Customer Profile - Add Deposit Modal",
+      "route": "/customers/c795b2d7-684d-422a-8eb0-b178004c5716",
+      "error": "Could not click customer add deposit"
+    },
+    {
+      "label": "Customer Profile - Record Payment Modal",
+      "route": "/customers/c795b2d7-684d-422a-8eb0-b178004c5716",
+      "error": "Could not click record payment"
+    },
+    {
+      "label": "Services - Tooth Picker Popup",
+      "route": "/services",
+      "error": "Could not click tooth picker"
+    },
+    {
+      "label": "Services - Export Menu",
+      "route": "/services",
+      "error": "Could not click services export"
+    },
+    {
+      "label": "Service Catalog - Add Category Modal",
+      "route": "/service-catalog",
+      "error": "Could not click add category"
+    },
+    {
+      "label": "Service Catalog - Edit Item Modal",
+      "route": "/service-catalog",
+      "error": "Could not click edit catalog item"
+    },
+    {
+      "label": "Service Catalog - Export Menu",
+      "route": "/service-catalog",
+      "error": "Could not click catalog export"
+    },
+    {
+      "label": "Relationships - Add Relationship Modal",
+      "route": "/relationships",
+      "error": "Could not click add relationship"
+    },
+    {
+      "label": "Payment - Add Deposit Modal",
+      "route": "/payment",
+      "error": "Could not click payment add deposit"
+    },
+    {
+      "label": "Payment - Export Menu",
+      "route": "/payment",
+      "error": "Could not click payment export"
+    },
+    {
+      "label": "Permissions - Permission Tooltip",
+      "route": "/permissions",
+      "error": "locator.waitFor: Timeout 2500ms exceeded. Call log: \u001b[2m - waiting for locator('[data-testid=\"perm-info-payment.refund\"], [data-testid^=\"perm-info-\"]').first() to be visible\u001b[22m "
+    },
+    {
+      "label": "Notifications - Detail Popup",
+      "route": "/notifications",
+      "error": "Could not click notification detail"
+    }
+  ],
+  "unavailablePopups": [
+    {
+      "label": "Relationships - Add Relationship Modal",
+      "reason": "No add/create control is exposed on the mobile Relationships page; visible controls are Permission Matrix, Entity Relationships, role chips, Reset, and Save Changes."
+    },
+    {
+      "label": "Standalone Payment - Add Deposit Modal",
+      "reason": "The standalone Payment page did not expose an add-deposit modal in the mobile controls; the customer-profile deposit payment modal was captured as the active deposit entry point."
+    },
+    {
+      "label": "Payment - Export Menu",
+      "reason": "The standalone Payment page export/menu state was not separately exposed as a modal; payment installment creation plus customer deposit/refund were captured."
+    },
+    {
+      "label": "Customer Profile - Record Payment Modal",
+      "reason": "The selected customer has no visible payable service action in the mobile customer profile; deposit and refund payment modals were captured instead."
+    },
+    {
+      "label": "Permissions - Permission Tooltip",
+      "reason": "No permission-info tooltip test id was present in the rendered mobile Permissions view; Permission Matrix state was captured."
+    },
+    {
+      "label": "Notifications - Detail Popup",
+      "reason": "The mobile Notifications page exposed New Template, not a visible notification-detail row; New Template modal was captured."
+    },
+    {
+      "label": "Header Notifications Popover",
+      "reason": "The header bell did not expose a separate popover in the iPhone viewport; the icon state and Notifications page were captured."
+    },
+    {
+      "label": "Website CMS - Edit Section Modal",
+      "reason": "The mobile Website CMS editor showed an empty editor state until a page is selected; no edit modal was exposed from the first viewport."
+    },
+    {
+      "label": "Feedback - Detail Modal",
+      "reason": "The Feedback page had no visible feedback rows in local data; the empty feedback state was captured."
+    }
+  ]
+}

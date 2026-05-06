@@ -1,0 +1,91 @@
+<h2>Face ID Complete Loop</h2>
+<p class="subtitle">Option C means V1 ships enrollment, verification, search, and failure handling together.</p>
+
+<div class="section">
+  <div class="label">Operational Flow</div>
+  <div class="mockup">
+    <div class="mockup-header">One engine, two staff workflows</div>
+    <div class="mockup-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <div class="placeholder" style="min-height:260px;text-align:left;padding:18px">
+          <strong style="display:block;margin-bottom:12px;color:#111827">1. Lock Face To Customer</strong>
+          <div style="display:grid;gap:10px">
+            <div>Open customer profile or edit modal</div>
+            <div style="color:#f97316">↓</div>
+            <div>Capture face with camera overlay</div>
+            <div style="color:#f97316">↓</div>
+            <div>Local service detects face and returns embedding</div>
+            <div style="color:#f97316">↓</div>
+            <div>API stores embedding linked to partner id</div>
+            <div style="color:#f97316">↓</div>
+            <div>Customer shows Face ID registered state</div>
+          </div>
+        </div>
+        <div class="placeholder" style="min-height:260px;text-align:left;padding:18px">
+          <strong style="display:block;margin-bottom:12px;color:#111827">2. Search Customer By Face</strong>
+          <div style="display:grid;gap:10px">
+            <div>Click Face ID search on /customers</div>
+            <div style="color:#f97316">↓</div>
+            <div>Capture walk-in face</div>
+            <div style="color:#f97316">↓</div>
+            <div>API compares embedding against registered customers</div>
+            <div style="color:#f97316">↓</div>
+            <div>High-confidence match opens customer profile</div>
+            <div style="color:#f97316">↓</div>
+            <div>No-match keeps image available for new customer registration</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Decision States</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-body">
+        <h3>Good Capture</h3>
+        <p>Exactly one face, quality passes, embedding stored or searched.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h3>No Face / Many Faces</h3>
+        <p>Do not store. Ask staff to retake with one visible customer face.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h3>Low Confidence</h3>
+        <p>Do not auto-open a record. Show closest candidates only if we explicitly allow staff review.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h3>Duplicate Risk</h3>
+        <p>When a new face looks close to an existing customer, require confirmation before overwriting or creating a second enrollment.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Design Check</h3>
+<p class="subtitle">For V1, should low-confidence search show staff possible matches, or should it only say no match?</p>
+
+<div class="options">
+  <div class="option" data-choice="strict-no-match" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Strict: No Match Only</h3>
+      <p>Safer and simpler. The app only opens a customer when confidence is high enough.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="candidate-review" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Staff Candidate Review</h3>
+      <p>More useful for imperfect captures. Show the top 3 possible customers, but require staff to choose manually.</p>
+    </div>
+  </div>
+</div>
