@@ -181,6 +181,24 @@ describe('externalCheckups helpers', () => {
     expect(checkups[0].images[0].thumbnailUrl).toBeUndefined();
   });
 
+  it('normalizes uploaded images to standard JPEG files before forwarding to Hosoonline', async () => {
+    const { helpers } = loadTestHelpers();
+    const source = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAI0lEQVR42mP8z8Dwn4ECwESJ5lEDRg0YNWDUgFEDhgYAZN4CHxAUc28AAAAASUVORK5CYII=',
+      'base64'
+    );
+
+    const prepared = await helpers.prepareHosoUploadFile({
+      buffer: source,
+      mimetype: 'image/png',
+      originalname: 'phone-upload.png',
+    });
+
+    expect(prepared.mimetype).toBe('image/jpeg');
+    expect(prepared.originalname).toBe('phone-upload.jpg');
+    expect(prepared.buffer.subarray(0, 2).toString('hex')).toBe('ffd8');
+  });
+
   it('does not fail API-key upload resolution when optional patient search requires token auth', async () => {
     const { helpers, query } = loadTestHelpers({
       HOSOONLINE_API_KEY: 'hoso-api-key',

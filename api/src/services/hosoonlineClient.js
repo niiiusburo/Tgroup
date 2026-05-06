@@ -1,5 +1,7 @@
 'use strict';
 
+const path = require('path');
+const sharp = require('sharp');
 const { query } = require('../db');
 
 const HOSOONLINE_BASE_URL = process.env.HOSOONLINE_BASE_URL || 'https://hosoonline.com';
@@ -14,6 +16,13 @@ class HosoAuthError extends Error {
   constructor(status) {
     super('Hosoonline authentication failed');
     this.status = status;
+  }
+}
+
+class HosoUploadImageError extends Error {
+  constructor(filename) {
+    super(`Unsupported image file: ${filename || 'upload'}`);
+    this.status = 400;
   }
 }
 
@@ -261,6 +270,35 @@ function normalizeHosoCheckups(checkups) {
   }));
 }
 
+async function prepareHosoUploadFile(file) {
+  if (!file?.buffer) return file;
+  if (!String(file.mimetype || '').startsWith('image/')) return file;
+
+  try {
+    const buffer = await sharp(file.buffer, { failOn: 'none' })
+      .rotate()
+      .resize({
+        width: 2000,
+        height: 2000,
+        fit: 'inside',
+        withoutEnlargement: true,
+      })
+      .flatten({ background: '#ffffff' })
+      .jpeg({ quality: 85, mozjpeg: true })
+      .toBuffer();
+
+    const baseName = path.basename(file.originalname || 'photo', path.extname(file.originalname || '') || undefined) || 'photo';
+    return {
+      ...file,
+      buffer,
+      mimetype: 'image/jpeg',
+      originalname: `${baseName}.jpg`,
+    };
+  } catch (err) {
+    throw new HosoUploadImageError(file.originalname);
+  }
+}
+
 function mapHosoAppointmentsToCheckups(appointments) {
   return appointments.map((appointment) => ({
     id: appointment._id,
@@ -398,6 +436,7 @@ module.exports = {
   HOSOONLINE_API_KEY,
   HOSOONLINE_BASE_URL,
   HosoAuthError,
+  HosoUploadImageError,
   authFailureCheckups,
   buildHosoPatientCode,
   createHosoPatientForLocalCustomer,
@@ -414,6 +453,7 @@ module.exports = {
   mapHosoAppointmentsToCheckups,
   normalizeHosoCheckups,
   normalizeHosoImageUrl,
+  prepareHosoUploadFile,
   resolveHosoPatientCode,
   searchHosoPatientByCode,
   searchHosoPatients,

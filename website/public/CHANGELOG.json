@@ -1,5 +1,30 @@
 [
   {
+    "version": "0.27.32",
+    "date": "2026-05-07",
+    "commit": "pending",
+    "highlights": "fix(integrations): stabilize Hosoonline photo uploads",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Hosoonline health-checkup uploads now normalize image files before forwarding them, reducing upstream failures from large or phone-formatted photos.",
+          "Health-checkup upload errors now show a readable message instead of raw JSON from the API."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "This keeps the existing /api/ExternalCheckups/:customerCode/health-checkups route and only changes how attached image files are prepared before sending to Hosoonline."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.31",
     "date": "2026-05-06",
     "commit": "pending",
