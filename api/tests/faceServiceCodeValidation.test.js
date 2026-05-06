@@ -420,5 +420,10 @@ describe('face-service code validation', () => {
       const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
       expect(content).toMatch(/status_code/i);
     });
+
+    it('test_main.py parses response.json()', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/response\.json\(\)/i);
+    });
   });
 });
