@@ -63,6 +63,14 @@ describe('face-service code validation', () => {
     it('has error handling for ENGINE_ERROR', () => {
       expect(content).toMatch(/ENGINE_ERROR/i);
     });
+
+    it('defines _decode_image helper', () => {
+      expect(content).toMatch(/def _decode_image/i);
+    });
+
+    it('defines _extract_embedding helper', () => {
+      expect(content).toMatch(/def _extract_embedding/i);
+    });
   });
 
   describe('Dockerfile', () => {
