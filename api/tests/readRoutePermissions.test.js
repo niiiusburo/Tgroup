@@ -106,4 +106,19 @@ describe('face recognition route permissions', () => {
   it('GET /status/:partnerId requires customers.view', () => {
     expectRoutePermission(faceRouter, 'get', '/status/:partnerId', 'customers.view');
   });
+
+  it('has exactly three face recognition endpoints', () => {
+    const routes = faceRouter.stack
+      .filter((layer) => layer.route)
+      .map((layer) => ({
+        path: layer.route.path,
+        methods: Object.keys(layer.route.methods),
+      }));
+    expect(routes).toHaveLength(3);
+    expect(routes.map((r) => `${r.methods[0].toUpperCase()} ${r.path}`).sort()).toEqual([
+      'GET /status/:partnerId',
+      'POST /recognize',
+      'POST /register',
+    ]);
+  });
 });
