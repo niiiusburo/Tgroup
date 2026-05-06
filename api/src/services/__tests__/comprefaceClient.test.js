@@ -85,6 +85,22 @@ describe('comprefaceClient', () => {
       );
     });
 
+    it('strips trailing slash from compreface URL', async () => {
+      const { recognize } = loadClient({
+        COMPREFACE_URL: 'http://compreface-test/',
+      });
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        text: async () => JSON.stringify({ result: [{ subjects: [] }] }),
+      });
+
+      await recognize(Buffer.from('img'));
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining('http://compreface-test/api/v1/recognition'),
+        expect.any(Object),
+      );
+    });
+
     it('returns empty array when no subjects found', async () => {
       const { recognize } = loadClient();
       fetchSpy.mockResolvedValue({
