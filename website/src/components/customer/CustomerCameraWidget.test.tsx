@@ -179,6 +179,32 @@ describe('CustomerCameraWidget', () => {
         expect(onFaceIdResult).toHaveBeenCalled();
       }, { timeout: 3000 });
     });
+
+    it('returns to idle when cancel is clicked during candidate review', async () => {
+      mocks.recognizeFace.mockResolvedValue({
+        match: null,
+        candidates: [
+          { partnerId: 'p1', name: 'Candidate One', confidence: 0.85, phone: '0901111111', code: 'C001' },
+        ],
+      });
+
+      render(<CustomerCameraWidget onQuickAddResult={vi.fn()} onFaceIdResult={vi.fn()} />);
+      fireEvent.click(screen.getByRole('button', { name: /Nhận diện khuôn mặt/i }));
+
+      const captureBtn = await screen.findByRole('button', { name: /Chụp/i });
+      fireEvent.click(captureBtn);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Candidate One/i)).toBeInTheDocument();
+      }, { timeout: 3000 });
+
+      const cancelBtn = screen.getByRole('button', { name: /cancel/i });
+      fireEvent.click(cancelBtn);
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Nhận diện khuôn mặt/i })).toBeInTheDocument();
+      });
+    });
   });
 
   describe('Face ID no-match rescue flow', () => {
