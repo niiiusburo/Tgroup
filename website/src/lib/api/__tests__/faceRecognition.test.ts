@@ -162,5 +162,20 @@ describe('Face Recognition API client', () => {
       expect(result.registered).toBe(false);
       expect(result.sampleCount).toBe(0);
     });
+
+    it('encodes partner ID with special characters', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ registered: true, sampleCount: 1, lastRegisteredAt: '2026-05-01' }),
+      });
+
+      await getFaceStatus('p1/abc');
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        'http://localhost:3002/api/face/status/p1%2Fabc',
+        expect.objectContaining({ method: 'GET' }),
+      );
+    });
   });
 });
