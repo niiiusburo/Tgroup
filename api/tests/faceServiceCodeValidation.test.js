@@ -181,6 +181,11 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/np\.frombuffer/i);
     });
 
+    it('uses cv2.cvtColor for PIL fallback color conversion', () => {
+      expect(content).toMatch(/cv2\.cvtColor/i);
+      expect(content).toMatch(/COLOR_RGB2BGR/i);
+    });
+
     it('defines _extract_embedding helper', () => {
       expect(content).toMatch(/def _extract_embedding/i);
     });
