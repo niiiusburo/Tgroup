@@ -204,6 +204,14 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/faceCount/i);
     });
 
+    it('includes bounding box in quality metadata', () => {
+      expect(content).toMatch(/"box":/i);
+      expect(content).toMatch(/"x":/i);
+      expect(content).toMatch(/"y":/i);
+      expect(content).toMatch(/"width":/i);
+      expect(content).toMatch(/"height":/i);
+    });
+
     it('rounds detection score in quality metadata', () => {
       expect(content).toMatch(/round\(.*4\)/i);
     });
