@@ -198,6 +198,9 @@ describe('registerSample', () => {
       'p1', [0.1, 0.2], 0.95, JSON.stringify({ x: 10, y: 20, width: 100, height: 120 }),
       'abc123', 'profile_register', 'sface', 'v1', 'user-1',
     ]);
+    // Second call = UPDATE partner
+    expect(query.mock.calls[1][0]).toContain('UPDATE dbo.partners');
+    expect(query.mock.calls[1][1]).toEqual(['p1']);
   });
 
   it('uses defaults when optional fields are missing', async () => {
