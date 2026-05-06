@@ -165,6 +165,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/image\//i);
     });
 
+    it('validates empty image files', () => {
+      expect(content).toMatch(/len\(file_bytes\) == 0/i);
+    });
+
     it('defines _decode_image helper', () => {
       expect(content).toMatch(/def _decode_image/i);
     });
