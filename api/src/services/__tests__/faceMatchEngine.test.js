@@ -30,6 +30,11 @@ describe('cosineSimilarity', () => {
     expect(cosineSimilarity(a, b)).toBe(0);
   });
 
+  it('returns 0 for empty arrays', () => {
+    const { cosineSimilarity } = loadEngine();
+    expect(cosineSimilarity([], [])).toBe(0);
+  });
+
   it('computes dot product for general vectors', () => {
     const { cosineSimilarity } = loadEngine();
     const a = [0.5, 0.5, 0];
@@ -105,6 +110,20 @@ describe('findMatches', () => {
     expect(result.candidates).toEqual([]);
   });
 
+  it('auto-matches when only one customer exists (no margin check needed)', async () => {
+    const { findMatches, query } = loadEngine({
+      FACE_AUTO_MATCH_THRESHOLD: '0.50',
+      FACE_AUTO_MATCH_MARGIN: '0.05',
+    });
+    query.mockResolvedValueOnce([
+      { partner_id: 'p1', embedding: [1, 0, 0], name: 'Alice', phone: '0901', ref: 'T001' },
+    ]);
+    const result = await findMatches([0.95, 0.05, 0]);
+    expect(result.match).not.toBeNull();
+    expect(result.match.partnerId).toBe('p1');
+    expect(result.candidates).toEqual([]);
+  });
+
   it('limits candidates to MAX_CANDIDATES', async () => {
     const { findMatches, query } = loadEngine({
       FACE_AUTO_MATCH_THRESHOLD: '0.99',
@@ -161,6 +180,20 @@ describe('registerSample', () => {
 
     expect(query.mock.calls[0][1]).toEqual([
       'p1', [0.1], null, null, null, 'manual_capture', 'sface', 'opencv-sface-2021', null,
+    ]);
+  });
+
+  it('handles quality with detectionScore but no box', async () => {
+    const { registerSample, query } = loadEngine();
+    query
+      .mockResolvedValueOnce([{ id: 'sample-3' }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ cnt: 1 }]);
+
+    await registerSample('p1', [0.1], { detectionScore: 0.88 }, null, null, null, null);
+
+    expect(query.mock.calls[0][1]).toEqual([
+      'p1', [0.1], 0.88, null, null, 'manual_capture', 'sface', 'opencv-sface-2021', null,
     ]);
   });
 });
