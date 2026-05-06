@@ -403,6 +403,18 @@ describe('registerSample', () => {
       'p1', [0.1], 0.88, null, null, 'manual_capture', 'sface', 'opencv-sface-2021', null,
     ]);
   });
+
+  it('stringifies empty box object as empty JSON object', async () => {
+    const { registerSample, query } = loadEngine();
+    query
+      .mockResolvedValueOnce([{ id: 'sample-4' }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ cnt: 1 }]);
+
+    await registerSample('p1', [0.1], { detectionScore: 0.9, box: {} }, { recognizer: 'sface', version: 'v1' }, null, 'test', 'u1');
+
+    expect(query.mock.calls[0][1][3]).toBe('{}');
+  });
 });
 
 describe('getFaceStatus', () => {
