@@ -91,6 +91,18 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/getLogger/i);
     });
 
+    it('uses logger.info for model loading', () => {
+      expect(content).toMatch(/logger\.info/i);
+    });
+
+    it('uses logger.warning for non-fatal issues', () => {
+      expect(content).toMatch(/logger\.warning/i);
+    });
+
+    it('uses logger.error for failures', () => {
+      expect(content).toMatch(/logger\.error/i);
+    });
+
     it('imports OpenCV', () => {
       expect(content).toMatch(/import cv2/i);
     });
