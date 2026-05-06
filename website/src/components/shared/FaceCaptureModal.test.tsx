@@ -43,4 +43,12 @@ describe('FaceCaptureModal', () => {
     render(<FaceCaptureModal isOpen title="Custom Title" onCapture={vi.fn()} onCancel={vi.fn()} />);
     expect(await screen.findByText('Custom Title')).toBeInTheDocument();
   });
+
+  it('does not render capture button when camera error occurs', async () => {
+    mockGetUserMedia.mockRejectedValue(new Error('Camera denied'));
+    render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
+    await vi.waitFor(() => {
+      expect(screen.queryByText('Chụp')).not.toBeInTheDocument();
+    });
+  });
 });
