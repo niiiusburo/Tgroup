@@ -309,6 +309,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/np\.frombuffer/i);
     });
 
+    it('uses np.array for PIL image conversion', () => {
+      expect(content).toMatch(/np\.array\(/i);
+    });
+
     it('decodes image with cv2.imdecode', () => {
       expect(content).toMatch(/cv2\.imdecode/i);
     });
