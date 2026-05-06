@@ -273,6 +273,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/cv2\.imdecode/i);
     });
 
+    it('uses cv2.IMREAD_COLOR for image loading', () => {
+      expect(content).toMatch(/cv2\.IMREAD_COLOR/i);
+    });
+
     it('validates empty image files', () => {
       expect(content).toMatch(/len\(file_bytes\) == 0/i);
     });
