@@ -21,6 +21,11 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/title=/i);
     });
 
+    it('configures logging', () => {
+      expect(content).toMatch(/logging\.basicConfig/i);
+      expect(content).toMatch(/getLogger/i);
+    });
+
     it('imports OpenCV', () => {
       expect(content).toMatch(/import cv2/i);
     });
