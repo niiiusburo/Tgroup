@@ -301,6 +301,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/image\//i);
     });
 
+    it('uses PIL Image.open for fallback decoding', () => {
+      expect(content).toMatch(/Image\.open/i);
+    });
+
     it('reads uploaded image with await image.read()', () => {
       expect(content).toMatch(/await image\.read\(\)/i);
     });
