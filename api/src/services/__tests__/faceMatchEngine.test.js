@@ -52,6 +52,14 @@ describe('findMatches', () => {
     expect(result.candidates).toEqual([]);
   });
 
+  it('returns no-match when DB query returns null', async () => {
+    const { findMatches, query } = loadEngine();
+    query.mockResolvedValueOnce(null);
+    const result = await findMatches([0.1, 0.2, 0.3]);
+    expect(result.match).toBeNull();
+    expect(result.candidates).toEqual([]);
+  });
+
   it('auto-matches when top score exceeds threshold with margin', async () => {
     const { findMatches, query } = loadEngine({
       FACE_AUTO_MATCH_THRESHOLD: '0.50',
