@@ -315,6 +315,19 @@ describe('registerSample', () => {
     expect(result.match.name).toBe('Alice');
   });
 
+  it('falls back to empty string when code is null', async () => {
+    const { findMatches, query } = loadEngine({
+      FACE_AUTO_MATCH_THRESHOLD: '0.50',
+      FACE_AUTO_MATCH_MARGIN: '0.05',
+    });
+    query.mockResolvedValueOnce([
+      { partner_id: 'p1', embedding: [0.5, 0.5, 0], name: 'Alice', phone: '0901', ref: null },
+    ]);
+    const result = await findMatches([0.5, 0.5, 0]);
+    expect(result.match).not.toBeNull();
+    expect(result.match.code).toBe('');
+  });
+
   it('uses defaults when optional fields are missing', async () => {
     const { registerSample, query } = loadEngine();
     query
