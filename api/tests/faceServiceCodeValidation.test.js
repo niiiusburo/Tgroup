@@ -246,6 +246,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/requirements\.txt/i);
     });
 
+    it('uses --no-cache-dir for pip install', () => {
+      expect(content).toMatch(/--no-cache-dir/i);
+    });
+
     it('exposes port 8000', () => {
       expect(content).toMatch(/EXPOSE\s+8000/i);
     });
