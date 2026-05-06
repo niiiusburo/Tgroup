@@ -301,6 +301,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/image\//i);
     });
 
+    it('checks content_type starts with image/', () => {
+      expect(content).toMatch(/\.startswith\("image\/"\)/i);
+    });
+
     it('uses PIL Image.open for fallback decoding', () => {
       expect(content).toMatch(/Image\.open/i);
     });
