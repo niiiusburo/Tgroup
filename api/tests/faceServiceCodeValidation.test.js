@@ -1,0 +1,104 @@
+const fs = require('fs');
+const path = require('path');
+
+const repoRoot = path.resolve(__dirname, '../..');
+const faceServiceDir = path.join(repoRoot, 'face-service');
+
+describe('face-service code validation', () => {
+  describe('main.py', () => {
+    let content;
+
+    beforeAll(() => {
+      content = fs.readFileSync(path.join(faceServiceDir, 'main.py'), 'utf8');
+    });
+
+    it('imports FastAPI', () => {
+      expect(content).toMatch(/from fastapi import FastAPI/i);
+    });
+
+    it('imports OpenCV', () => {
+      expect(content).toMatch(/import cv2/i);
+    });
+
+    it('defines /health endpoint', () => {
+      expect(content).toMatch(/@app\.get\(["']\/health["']\)/i);
+    });
+
+    it('defines /embed endpoint', () => {
+      expect(content).toMatch(/@app\.post\(["']\/embed["']\)/i);
+    });
+
+    it('uses YuNet detector', () => {
+      expect(content).toMatch(/YuNet|yunet/i);
+    });
+
+    it('uses SFace recognizer', () => {
+      expect(content).toMatch(/SFace|sface/i);
+    });
+
+    it('uses face recognition model', () => {
+      expect(content).toMatch(/face_recognition/i);
+    });
+  });
+
+  describe('Dockerfile', () => {
+    let content;
+
+    beforeAll(() => {
+      content = fs.readFileSync(path.join(faceServiceDir, 'Dockerfile'), 'utf8');
+    });
+
+    it('uses python base image', () => {
+      expect(content).toMatch(/FROM python/i);
+    });
+
+    it('copies requirements.txt', () => {
+      expect(content).toMatch(/requirements\.txt/i);
+    });
+
+    it('exposes port 8000', () => {
+      expect(content).toMatch(/EXPOSE\s+8000/i);
+    });
+
+    it('runs uvicorn', () => {
+      expect(content).toMatch(/uvicorn/i);
+    });
+  });
+
+  describe('requirements.txt', () => {
+    let content;
+
+    beforeAll(() => {
+      content = fs.readFileSync(path.join(faceServiceDir, 'requirements.txt'), 'utf8');
+    });
+
+    it('includes fastapi', () => {
+      expect(content).toMatch(/fastapi/i);
+    });
+
+    it('includes opencv', () => {
+      expect(content).toMatch(/opencv/i);
+    });
+
+    it('includes uvicorn', () => {
+      expect(content).toMatch(/uvicorn/i);
+    });
+
+    it('includes numpy', () => {
+      expect(content).toMatch(/numpy/i);
+    });
+
+    it('includes Pillow', () => {
+      expect(content).toMatch(/Pillow/i);
+    });
+  });
+
+  describe('Dockerfile model downloads', () => {
+    it('downloads YuNet and SFace models at build time', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'Dockerfile'), 'utf8');
+      expect(content).toMatch(/yunet/i);
+      expect(content).toMatch(/sface/i);
+      expect(content).toMatch(/wget.*onnx/i);
+    });
+  });
+});
