@@ -298,6 +298,11 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/sface/i);
       expect(content).toMatch(/wget.*onnx/i);
     });
+
+    it('installs wget for model downloads', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'Dockerfile'), 'utf8');
+      expect(content).toMatch(/wget/i);
+    });
   });
 
   describe('face-service tests', () => {
