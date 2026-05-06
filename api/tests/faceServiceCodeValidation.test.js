@@ -200,6 +200,14 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/"version":/i);
     });
 
+    it('includes detector name in model metadata', () => {
+      expect(content).toMatch(/"detector":/i);
+    });
+
+    it('includes recognizer name in model metadata', () => {
+      expect(content).toMatch(/"recognizer":/i);
+    });
+
     it('returns quality metadata in response', () => {
       expect(content).toMatch(/"quality":/i);
     });
