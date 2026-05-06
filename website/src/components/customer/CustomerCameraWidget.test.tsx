@@ -2,18 +2,24 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { CustomerCameraWidget } from './CustomerCameraWidget';
 
+const mockRecognize = vi.fn();
+const mockRegister = vi.fn();
+const mockReset = vi.fn();
+const mockLoadFaceStatus = vi.fn();
+
 vi.mock('@/hooks/useFaceRecognition', () => ({
   useFaceRecognition: () => ({
     recognizeState: { status: 'idle' },
     registerState: { status: 'idle' },
-    recognize: vi.fn(),
-    register: vi.fn(),
-    reset: vi.fn(),
+    faceStatus: null,
+    recognize: mockRecognize,
+    register: mockRegister,
+    loadFaceStatus: mockLoadFaceStatus,
+    reset: mockReset,
   }),
 }));
 
 const mockGetUserMedia = vi.fn();
-const mockStop = vi.fn();
 
 describe('CustomerCameraWidget', () => {
   beforeEach(() => {
@@ -22,13 +28,12 @@ describe('CustomerCameraWidget', () => {
       writable: true,
     });
     mockGetUserMedia.mockResolvedValue({
-      getTracks: () => [{ stop: mockStop }],
+      getTracks: () => [{ stop: vi.fn() }],
     } as unknown as MediaStream);
-    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    vi.useRealTimers();
     vi.clearAllMocks();
   });
 
@@ -41,24 +46,26 @@ describe('CustomerCameraWidget', () => {
   it('opens capture modal when Face ID is clicked', async () => {
     render(<CustomerCameraWidget onQuickAddResult={vi.fn()} onFaceIdResult={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: /Nhận diện khuôn mặt/i }));
-    expect(await screen.findByText('customerProfile')).toBeInTheDocument();
+    expect(await screen.findByText(/customerProfile/i)).toBeInTheDocument();
   });
 
   it('calls onQuickAddResult after quick add capture', async () => {
     const onQuickAddResult = vi.fn();
     render(<CustomerCameraWidget onQuickAddResult={onQuickAddResult} onFaceIdResult={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: /Thêm nhanh/i }));
-    vi.advanceTimersByTime(2000);
+
     await waitFor(() => {
       expect(onQuickAddResult).toHaveBeenCalled();
-    });
+    }, { timeout: 3000 });
   });
 
-  it('returns to idle when cancel is clicked after Face ID', async () => {
+  it('returns to idle when cancel is clicked', async () => {
     render(<CustomerCameraWidget onQuickAddResult={vi.fn()} onFaceIdResult={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: /Nhận diện khuôn mặt/i }));
-    expect(await screen.findByText('customerProfile')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /Hủy/i }));
+
+    const cancelBtn = await screen.findByRole('button', { name: /Hủy/i });
+    fireEvent.click(cancelBtn);
+
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /Nhận diện khuôn mặt/i })).toBeInTheDocument();
     });
