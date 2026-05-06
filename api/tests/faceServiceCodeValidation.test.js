@@ -308,6 +308,11 @@ describe('face-service code validation', () => {
       const content = fs.readFileSync(path.join(faceServiceDir, 'Dockerfile'), 'utf8');
       expect(content).toMatch(/mkdir.*models/i);
     });
+
+    it('has CMD instruction', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'Dockerfile'), 'utf8');
+      expect(content).toMatch(/^CMD/mi);
+    });
   });
 
   describe('face-service tests', () => {
