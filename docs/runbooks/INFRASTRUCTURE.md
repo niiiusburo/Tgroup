@@ -30,12 +30,15 @@ Important env groups:
 
 Large exports require longer proxy timeouts than the default 60s behavior. Any production nginx config serving `/api/Exports/:type/download` should keep API proxy read/send timeouts at 300s or higher, then verify a services/payments export from the live site after deploy.
 
+Hosoonline health-checkup photos can be up to 20 MB per file. Any production nginx config serving `/api/ExternalCheckups/:customerCode/health-checkups` must keep the `/api` proxy `client_max_body_size` above that limit.
+
 When an infra worker changes nginx source files, keep these directives aligned for the `/api` proxy in both nginx configs:
 
 ```nginx
 proxy_read_timeout 300s;
 proxy_send_timeout 300s;
 send_timeout 300s;
+client_max_body_size 25m;
 ```
 
 ## Docker
