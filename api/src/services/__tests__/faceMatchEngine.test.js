@@ -257,6 +257,25 @@ describe('registerSample', () => {
     expect(query.mock.calls[2][1]).toEqual(['p1']);
   });
 
+  it('includes imageSha256 when provided', async () => {
+    const { registerSample, query } = loadEngine();
+    query.mockResolvedValueOnce([{ id: 's-1' }]);
+    query.mockResolvedValueOnce([]);
+    query.mockResolvedValueOnce([{ cnt: 1 }]);
+
+    await registerSample(
+      'p1',
+      [0.1, 0.2],
+      { detectionScore: 0.9, box: { x: 1 } },
+      { recognizer: 'sface', version: 'v1' },
+      'abc123hash',
+      'test',
+      'u1'
+    );
+
+    expect(query.mock.calls[0][1][4]).toBe('abc123hash');
+  });
+
   it('uses defaults when optional fields are missing', async () => {
     const { registerSample, query } = loadEngine();
     query
