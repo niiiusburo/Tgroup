@@ -173,6 +173,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/def _decode_image/i);
     });
 
+    it('uses cv2.imdecode for image decoding', () => {
+      expect(content).toMatch(/cv2\.imdecode/i);
+    });
+
     it('defines _extract_embedding helper', () => {
       expect(content).toMatch(/def _extract_embedding/i);
     });
