@@ -35,8 +35,9 @@
 ## 6. External Checkups (Hosoonline)
 
 - **Resolved for current image reads:** When `HOSOONLINE_USERNAME` and `HOSOONLINE_PASSWORD` are configured, TGClinic logs in through `POST /api/auth/login`, searches records through `GET /api/appointments/search?q=<customerCode>&page=<page>`, and reads image bytes from `GET /api/appointments/image/:imageName`.
+- **Resolved for v2 patient management:** Hosoonline API-key patient create/search uses `POST /api/patients/_create` and `GET /api/patients/_search`; TGClinic avoids bare `/api/patients` so Caddy keeps staff UI patient search routed to v1.
 - **Resolved for legacy fallback:** If login credentials are absent, TGClinic still falls back to the older `HOSOONLINE_API_KEY` / `X-API-Key` contract for patient health-checkup endpoints where upstream still supports it.
-- **Unknown:** Whether Hosoonline still supports API-key auth for any current partner-only endpoints, and whether upload should now create/update appointment media instead of posting to the older `/api/patients/:code/health-checkups` endpoint.
+- **Unknown:** Whether upload should now create/update appointment media instead of posting to the older `/api/patients/:code/health-checkups` endpoint.
 
 ## 7. Payment Allocation Logic Edge Cases
 

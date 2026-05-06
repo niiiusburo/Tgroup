@@ -5,8 +5,8 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, Image as ImageIcon, Plus } from 'lucide-react';
-import type { ExternalCheckupsResponse } from '@/lib/api';
+import { Calendar, Image as ImageIcon, Loader2, Plus, UserPlus } from 'lucide-react';
+import { createExternalPatient, type ExternalCheckupsResponse } from '@/lib/api';
 import { AuthenticatedCheckupImage } from './AuthenticatedCheckupImage';
 import { HealthCheckupEmptyState } from './HealthCheckupEmptyState';
 import { HealthCheckupLightbox } from './HealthCheckupLightbox';
@@ -32,6 +32,7 @@ export function HealthCheckupGallery({ data, isLoading, error, customerCode, onU
   const [lightboxCheckup, setLightboxCheckup] = useState<number>(-1);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [creatingPatient, setCreatingPatient] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   if (isLoading) {
@@ -92,6 +93,21 @@ export function HealthCheckupGallery({ data, isLoading, error, customerCode, onU
   const prevImage = () => {
     if (lightboxIndex > 0) setLightboxIndex(lightboxIndex - 1);
   };
+  const canCreatePatient = Boolean(customerCode && data?.patientExists === false);
+
+  const handleCreatePatient = async () => {
+    if (!customerCode) return;
+    setFormError(null);
+    setCreatingPatient(true);
+    try {
+      await createExternalPatient(customerCode);
+      onUploaded?.();
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : t('createExternalPatientFailed'));
+    } finally {
+      setCreatingPatient(false);
+    }
+  };
 
   return (
     <>
@@ -108,7 +124,18 @@ export function HealthCheckupGallery({ data, isLoading, error, customerCode, onU
             {data?.patientCode && (
               <span className="text-xs text-gray-400">Code: {data.patientCode}</span>
             )}
-            {customerCode && (
+            {canCreatePatient && (
+              <button
+                type="button"
+                onClick={handleCreatePatient}
+                disabled={creatingPatient}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-50"
+              >
+                {creatingPatient ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserPlus className="w-3.5 h-3.5" />}
+                {t('createExternalPatient')}
+              </button>
+            )}
+            {customerCode && !canCreatePatient && (
               <button
                 type="button"
                 onClick={() => setShowForm((v) => !v)}

@@ -1,5 +1,32 @@
 [
   {
+    "version": "0.27.29",
+    "date": "2026-05-06",
+    "commit": "pending",
+    "highlights": "feat(integrations): create missing Hosoonline patients from customer profiles",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Customer profile health-checkup panels now show a Create HSO patient action when Hosoonline has no matching patient for the local customer.",
+          "TGClinic now proxies Hosoonline v2 patient creation through /api/ExternalCheckups/:customerCode/patient and generates HSO codes from the TDental code plus the last four phone digits."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Hosoonline patient lookup now uses /api/patients/_search so the staff UI's cookie-routed /api/patients path remains untouched."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "This release requires HOSOONLINE_API_KEY for patient creation and keeps image reads behind the existing authenticated TGClinic proxy."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.28",
     "date": "2026-05-06",
     "commit": "pending",

@@ -243,6 +243,8 @@
   "hardDeleteWarning": " Hành động này không thể hoàn tác.",
   "nextAppointmentContent": "Nội dung hẹn khám tiếp",
   "addCheckup": "Thêm lịch khám",
+  "createExternalPatient": "Tạo bệnh nhân HSO",
+  "createExternalPatientFailed": "Không thể tạo bệnh nhân trên Hosoonline.",
   "service": "Dịch vụ",
   "examiningDoctor": "Bác sĩ khám",
   "examDate": "Ngày khám",
