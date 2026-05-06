@@ -265,6 +265,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/await image\.read\(\)/i);
     });
 
+    it('converts file bytes with np.frombuffer', () => {
+      expect(content).toMatch(/np\.frombuffer/i);
+    });
+
     it('validates empty image files', () => {
       expect(content).toMatch(/len\(file_bytes\) == 0/i);
     });
