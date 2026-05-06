@@ -151,6 +151,20 @@ describe('POST /api/face/recognize', () => {
     expect(res.status).toBe(500);
     expect(res.body.error).toBe('ENGINE_ERROR');
   });
+
+  it('returns 422 when face engine reports no face', async () => {
+    const { FaceEngineError } = require('../src/services/faceEngineClient');
+    getEmbedding.mockRejectedValue(new FaceEngineError('NO_FACE', 'No face detected', 422));
+
+    const res = await request(app)
+      .post('/api/face/recognize')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(422);
+    expect(res.body.error).toBe('NO_FACE');
+    expect(res.body.message).toBe('No face detected');
+  });
 });
 
 describe('POST /api/face/register', () => {
