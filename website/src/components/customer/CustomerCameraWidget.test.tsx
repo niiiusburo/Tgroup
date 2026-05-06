@@ -50,6 +50,12 @@ describe('CustomerCameraWidget', () => {
     expect(screen.getByRole('button', { name: /Thêm nhanh/i })).toBeInTheDocument();
   });
 
+  it('disables buttons when disabled prop is true', () => {
+    render(<CustomerCameraWidget onQuickAddResult={vi.fn()} onFaceIdResult={vi.fn()} disabled />);
+    expect(screen.getByRole('button', { name: /Nhận diện khuôn mặt/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /Thêm nhanh/i })).toBeDisabled();
+  });
+
   it('opens capture modal when Face ID is clicked', async () => {
     render(<CustomerCameraWidget onQuickAddResult={vi.fn()} onFaceIdResult={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: /Nhận diện khuôn mặt/i }));
