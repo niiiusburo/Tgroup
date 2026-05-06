@@ -28,6 +28,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/HTTPException/i);
     });
 
+    it('imports File from fastapi', () => {
+      expect(content).toMatch(/File/i);
+    });
+
     it('imports typing annotations', () => {
       expect(content).toMatch(/from typing import/i);
     });
