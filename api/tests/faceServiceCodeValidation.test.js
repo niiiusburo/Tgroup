@@ -123,6 +123,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/setInputSize/i);
     });
 
+    it('calls detector.detect for face detection', () => {
+      expect(content).toMatch(/_detector\.detect\(/i);
+    });
+
     it('uses alignCrop for face alignment', () => {
       expect(content).toMatch(/alignCrop/i);
     });
