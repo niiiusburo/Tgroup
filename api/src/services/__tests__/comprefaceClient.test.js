@@ -50,6 +50,25 @@ describe('comprefaceClient', () => {
       expect(results[1].similarity).toBe(0.75);
     });
 
+    it('sends x-api-key header in requests', async () => {
+      const { recognize } = loadClient({
+        COMPREFACE_URL: 'http://compreface-test',
+        COMPREFACE_API_KEY: 'secret-key',
+      });
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        text: async () => JSON.stringify({ result: [{ subjects: [] }] }),
+      });
+
+      await recognize(Buffer.from('img'));
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          headers: expect.objectContaining({ 'x-api-key': 'secret-key' }),
+        }),
+      );
+    });
+
     it('returns empty array when no subjects found', async () => {
       const { recognize } = loadClient();
       fetchSpy.mockResolvedValue({
