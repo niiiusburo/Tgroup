@@ -183,8 +183,8 @@ router.post('/:customerCode/health-checkups', requireAuth, requirePermission('ex
     const hosoCode = await resolveHosoPatientCode(customerCode);
     const body = req.body || {};
 
-    if (!body.title || !body.doctor || !body.date) {
-      return res.status(400).json({ error: 'title, doctor, and date are required' });
+    if (!(body.title || body.service) || !body.doctor) {
+      return res.status(400).json({ error: 'service and doctor are required' });
     }
 
     const form = new FormData();

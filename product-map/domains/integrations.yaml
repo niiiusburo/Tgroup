@@ -63,5 +63,6 @@ notes:
   - New Hosoonline patient codes are generated from the local TDental customer code plus the last four phone digits as a prefix, for example `T8250` + phone ending `6397` becomes `6397T8250`.
   - Operational clinic roles (`Clinic Manager`, `Dentist`, `Receptionist`, `Dental Assistant`) need `external_checkups.create` so staff can create Hosoonline patients/checkups from the customer profile.
   - TGClinic must proxy Hosoonline images because direct image URLs require Hosoonline session auth.
-  - Upload still posts to the older `/api/patients/:code/health-checkups` endpoint with `photos`, `service`, and `description`; when the local ref differs from Hosoonline, resolve the upload code from appointment search `customerCode`.
+  - Upload still posts to the older `/api/patients/:code/health-checkups` endpoint with repeated `photos` fields plus required `service` and `doctor`; `date`, `description`, `nextAppointmentDate`, and `nextDescription` are optional. When the local ref differs from Hosoonline, resolve the upload code from appointment search `customerCode`.
+  - Hosoonline accepts JPEG, PNG, HEIC/HEIF, and WebP uploads up to 20 MB per photo; TGClinic prepares large browser uploads as high-quality JPEG before submit and keeps backend normalization as a fallback.
   - When only `HOSOONLINE_API_KEY` is configured, `/api/patients?code=...` may require token auth while `/api/patients/:code/health-checkups` still accepts the API key, so upload resolution must not let optional search auth failures block the upload attempt.

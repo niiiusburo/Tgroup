@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Loader2 } from 'lucide-react';
 import { createExternalCheckup } from '@/lib/api';
+import { formatUploadBytes, prepareImageForUpload } from '@/lib/imageUpload';
 
 interface HealthCheckupUploadFormProps {
   readonly customerCode: string;
@@ -33,10 +34,53 @@ export function HealthCheckupUploadForm({
   const [notes, setNotes] = useState('');
   const [nextAppointmentDate, setNextAppointmentDate] = useState('');
   const [nextDescription, setNextDescription] = useState('');
-  const [files, setFiles] = useState<FileList | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [fileSummary, setFileSummary] = useState('');
+  const [processingFiles, setProcessingFiles] = useState(false);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    setFileSummary('');
+    if (selectedFiles.length === 0) {
+      setFiles([]);
+      return;
+    }
+
+    setProcessingFiles(true);
+    try {
+      const prepared = await Promise.all(selectedFiles.map((file) => prepareImageForUpload(file)));
+      const preparedFiles = prepared.map((item) => item.file);
+      const originalSize = prepared.reduce((sum, item) => sum + item.originalSize, 0);
+      const preparedSize = prepared.reduce((sum, item) => sum + item.preparedSize, 0);
+      const changedCount = prepared.filter((item) => item.changed).length;
+
+      setFiles(preparedFiles);
+      setFileSummary(
+        changedCount > 0
+          ? t('imageUploadOptimized', {
+              count: selectedFiles.length,
+              original: formatUploadBytes(originalSize),
+              prepared: formatUploadBytes(preparedSize),
+            })
+          : t('imageUploadReady', {
+              count: selectedFiles.length,
+              size: formatUploadBytes(preparedSize),
+            }),
+      );
+    } catch {
+      setFiles(selectedFiles);
+      setFileSummary(t('imageUploadReady', {
+        count: selectedFiles.length,
+        size: formatUploadBytes(selectedFiles.reduce((sum, file) => sum + file.size, 0)),
+      }));
+    } finally {
+      setProcessingFiles(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (processingFiles) return;
     onError(null);
     onSaving(true);
     try {
@@ -47,7 +91,7 @@ export function HealthCheckupUploadForm({
         notes,
         nextAppointmentDate: nextAppointmentDate || undefined,
         nextDescription: nextDescription || undefined,
-        files: files ? Array.from(files) : undefined,
+        files: files.length > 0 ? files : undefined,
       });
       onSuccess();
     } catch (err) {
@@ -130,10 +174,15 @@ export function HealthCheckupUploadForm({
         <input
           type="file"
           multiple
-          accept="image/*"
-          onChange={(e) => setFiles(e.target.files)}
+          accept="image/jpeg,image/jpg,image/pjpeg,image/png,image/heic,image/heif,image/webp,.jpg,.jpeg,.png,.heic,.heif,.webp"
+          onChange={handleFileChange}
           className="block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-primary file:text-white hover:file:bg-primary-dark"
         />
+        {(processingFiles || fileSummary) && (
+          <p className="mt-1 text-xs text-gray-500">
+            {processingFiles ? t('imageUploadPreparing') : fileSummary}
+          </p>
+        )}
       </div>
 
       <div className="flex items-center justify-end gap-2 pt-1">
@@ -147,10 +196,10 @@ export function HealthCheckupUploadForm({
         </button>
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || processingFiles}
           className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-primary rounded-lg hover:bg-primary-dark disabled:opacity-50"
         >
-          {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+          {(saving || processingFiles) && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
           {t('addCheckup')}
         </button>
       </div>

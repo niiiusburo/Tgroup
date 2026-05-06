@@ -1,5 +1,32 @@
 [
   {
+    "version": "0.27.33",
+    "date": "2026-05-07",
+    "commit": "pending",
+    "highlights": "fix(integrations): prepare Hosoonline uploads in the browser",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Health-checkup image uploads now prepare large phone photos in the browser before submitting them to TGClinic and Hosoonline."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "The Hosoonline upload proxy now matches the confirmed contract that only service and doctor are required fields.",
+          "The upload file picker now limits selectable files to Hosoonline-supported image types."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "Client-side preparation uses high-quality JPEG output and the backend still keeps its existing normalization fallback."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.32",
     "date": "2026-05-07",
     "commit": "pending",
