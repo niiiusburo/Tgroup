@@ -278,6 +278,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/COLOR_RGB2BGR/i);
     });
 
+    it('defines _load_models helper', () => {
+      expect(content).toMatch(/def _load_models/i);
+    });
+
     it('defines _ensure_models helper', () => {
       expect(content).toMatch(/def _ensure_models/i);
     });
