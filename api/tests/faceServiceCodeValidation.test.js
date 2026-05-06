@@ -69,6 +69,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/RuntimeError/i);
     });
 
+    it('reads environment variables with os.environ.get', () => {
+      expect(content).toMatch(/os\.environ\.get/i);
+    });
+
     it('reads DETECTION_THRESHOLD from environment', () => {
       expect(content).toMatch(/DETECTION_THRESHOLD/i);
     });
