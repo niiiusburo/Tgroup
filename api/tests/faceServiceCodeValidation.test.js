@@ -123,6 +123,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/@app\.post\(["']\/embed["']\)/i);
     });
 
+    it('defines embed as async function', () => {
+      expect(content).toMatch(/async def embed/i);
+    });
+
     it('uses YuNet detector', () => {
       expect(content).toMatch(/YuNet|yunet/i);
     });
