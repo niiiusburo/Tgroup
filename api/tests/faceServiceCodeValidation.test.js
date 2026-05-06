@@ -350,6 +350,11 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/import numpy as np/i);
     });
 
+    it('test_main.py imports Image from PIL', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/from PIL import Image/i);
+    });
+
     it('test_main.py imports main module', () => {
       const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
       expect(content).toMatch(/from main import/i);
