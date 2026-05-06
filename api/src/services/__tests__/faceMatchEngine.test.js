@@ -415,6 +415,19 @@ describe('registerSample', () => {
 
     expect(query.mock.calls[0][1][3]).toBe('{}');
   });
+
+  it('stringifies complex box object with nested properties', async () => {
+    const { registerSample, query } = loadEngine();
+    query
+      .mockResolvedValueOnce([{ id: 'sample-5' }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ cnt: 1 }]);
+
+    const box = { x: 10, y: 20, width: 100, height: 120, landmarks: { leftEye: [30, 40] } };
+    await registerSample('p1', [0.1], { detectionScore: 0.9, box }, { recognizer: 'sface', version: 'v1' }, null, 'test', 'u1');
+
+    expect(query.mock.calls[0][1][3]).toBe(JSON.stringify(box));
+  });
 });
 
 describe('getFaceStatus', () => {
