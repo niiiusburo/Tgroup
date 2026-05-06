@@ -430,5 +430,10 @@ describe('face-service code validation', () => {
       const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
       expect(content).toMatch(/files=/i);
     });
+
+    it('test_main.py sets sys.path for module import', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/sys\.path\.insert/i);
+    });
   });
 });
