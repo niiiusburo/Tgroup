@@ -39,6 +39,30 @@ describe('face-service code validation', () => {
     it('uses face recognition model', () => {
       expect(content).toMatch(/face_recognition/i);
     });
+
+    it('has error handling for MODEL_NOT_READY', () => {
+      expect(content).toMatch(/MODEL_NOT_READY/i);
+    });
+
+    it('has error handling for IMAGE_UNREADABLE', () => {
+      expect(content).toMatch(/IMAGE_UNREADABLE/i);
+    });
+
+    it('has error handling for NO_FACE', () => {
+      expect(content).toMatch(/NO_FACE/i);
+    });
+
+    it('has error handling for MULTIPLE_FACES', () => {
+      expect(content).toMatch(/MULTIPLE_FACES/i);
+    });
+
+    it('has error handling for LOW_QUALITY', () => {
+      expect(content).toMatch(/LOW_QUALITY/i);
+    });
+
+    it('has error handling for ENGINE_ERROR', () => {
+      expect(content).toMatch(/ENGINE_ERROR/i);
+    });
   });
 
   describe('Dockerfile', () => {
