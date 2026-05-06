@@ -119,6 +119,14 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/cv2\.FaceRecognizerSF/i);
     });
 
+    it('uses alignCrop for face alignment', () => {
+      expect(content).toMatch(/alignCrop/i);
+    });
+
+    it('uses feature extraction after alignment', () => {
+      expect(content).toMatch(/\.feature\(/i);
+    });
+
     it('uses face recognition model', () => {
       expect(content).toMatch(/face_recognition/i);
     });
