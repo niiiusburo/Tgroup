@@ -389,5 +389,10 @@ describe('face-service code validation', () => {
       const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
       expect(content).toMatch(/pytest\.approx/i);
     });
+
+    it('test_main.py uses io.BytesIO for image buffer', () => {
+      const content = fs.readFileSync(path.join(faceServiceDir, 'tests', 'test_main.py'), 'utf8');
+      expect(content).toMatch(/io\.BytesIO/i);
+    });
   });
 });
