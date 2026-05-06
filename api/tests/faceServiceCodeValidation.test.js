@@ -20,6 +20,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/UploadFile/i);
     });
 
+    it('imports JSONResponse from fastapi', () => {
+      expect(content).toMatch(/JSONResponse/i);
+    });
+
     it('imports typing annotations', () => {
       expect(content).toMatch(/from typing import/i);
     });
