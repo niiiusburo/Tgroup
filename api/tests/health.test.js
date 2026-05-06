@@ -72,4 +72,14 @@ describe('GET /api/health', () => {
     expect(res.body.checks.db).toBe(false);
     expect(res.body.checks.faceService).toBe(false);
   });
+
+  it('returns a valid ISO timestamp', async () => {
+    query.mockResolvedValueOnce([{ '?column?': 1 }]);
+    faceServiceHealth.mockResolvedValueOnce({ ok: true, data: { status: 'ok' } });
+
+    const res = await request(app).get('/api/health');
+
+    expect(res.status).toBe(200);
+    expect(new Date(res.body.timestamp).toISOString()).toBe(res.body.timestamp);
+  });
 });
