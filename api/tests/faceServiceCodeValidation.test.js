@@ -115,6 +115,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/"status":\s*"ok"/i);
     });
 
+    it('returns models in health response', () => {
+      expect(content).toMatch(/"models":/i);
+    });
+
     it('defines /embed endpoint', () => {
       expect(content).toMatch(/@app\.post\(["']\/embed["']\)/i);
     });
