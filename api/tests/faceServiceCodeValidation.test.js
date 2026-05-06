@@ -234,6 +234,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/apt-get/i);
     });
 
+    it('uses --no-install-recommends for apt-get', () => {
+      expect(content).toMatch(/--no-install-recommends/i);
+    });
+
     it('copies requirements.txt', () => {
       expect(content).toMatch(/requirements\.txt/i);
     });
