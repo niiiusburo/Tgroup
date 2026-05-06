@@ -300,6 +300,26 @@ describe('POST /api/face/register', () => {
     expect(res.body.error).toBe('ENGINE_ERROR');
   });
 
+  it('returns 500 when getFaceStatus fails after successful registration', async () => {
+    query.mockResolvedValueOnce([{ id: 'p-1', name: 'Alice' }]);
+    getEmbedding.mockResolvedValue({
+      embedding: [0.1, 0.2, 0.3],
+      model: { recognizer: 'sface', version: 'v1' },
+      quality: { detectionScore: 0.95, faceCount: 1 },
+    });
+    registerSample.mockResolvedValue({ sampleId: 's-1', sampleCount: 1 });
+    getFaceStatus.mockRejectedValue(new Error('DB timeout'));
+
+    const res = await request(app)
+      .post('/api/face/register')
+      .field('partnerId', 'p-1')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('ENGINE_ERROR');
+  });
+
   it('registers without source when source is omitted', async () => {
     query.mockResolvedValueOnce([{ id: 'p-1', name: 'Alice' }]);
     getEmbedding.mockResolvedValue({
