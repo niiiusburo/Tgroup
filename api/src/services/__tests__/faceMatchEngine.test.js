@@ -381,6 +381,7 @@ describe('getFaceStatus', () => {
       .mockResolvedValueOnce([{ face_registered_at: '2026-05-06T09:00:00' }]);
 
     const result = await getFaceStatus('p1');
+    expect(result.partnerId).toBe('p1');
     expect(result.registered).toBe(true);
     expect(result.sampleCount).toBe(2);
     expect(result.lastRegisteredAt).toBe('2026-05-07T10:00:00');
