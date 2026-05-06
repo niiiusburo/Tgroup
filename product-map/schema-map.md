@@ -39,6 +39,18 @@
 | **UI** | Customers page, Employees page, Login, Appointment forms, Payment forms, Service records, Reports, Face capture |
 | **Risk** | **Critical** — recent breakage occurred when `password_hash` was missing and NOT NULL constraints were added without updating all INSERT paths. Customer phone is not unique identity and may overlap migrated refs/phones; UUID remains the durable key. |
 
+### dbo.customer_face_embeddings
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (uuid) |
+| **Foreign Keys** | `partner_id` → partners (customer), `created_by` → partners (employee) |
+| **W** | `api/src/routes/faceRecognition.js` |
+| **R** | `faceRecognition.js` |
+| **E** | `POST /api/face/*` |
+| **UI** | CustomerCameraWidget, PatientCheckIn, FaceCaptureModal |
+| **Risk** | **High** — embedding dimension must match the model (128 for SFace). Changing the face model requires re-registering all embeddings. Soft-delete via `deleted_at` preserves audit history. |
+
 ### dbo.appointments
 
 | Attribute | Value |
@@ -325,6 +337,7 @@
 | If you change this table... | You must also review... |
 |-----------------------------|--------------------------|
 | `dbo.partners` | Auth routes, Employee routes, Face Recognition, Payments, Appointments, Reports, E2E tests |
+| `dbo.customer_face_embeddings` | Face Recognition routes (register, recognize, status), customer profile Face ID tab |
 | `dbo.appointments` | Calendar components, AppointmentForm, constants (colors/status), Reports, E2E tests |
 | `dbo.products` | ServiceCatalog, ProductCategories, AppointmentForm, SaleOrders, Reports, delete guards |
 | `dbo.payments` | PaymentForm, DepositWallet, Reports, VietQR, CustomerProfile payment tab |
