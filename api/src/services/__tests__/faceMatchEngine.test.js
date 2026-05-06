@@ -176,6 +176,21 @@ describe('findMatches', () => {
     expect(result.candidates).toEqual([]);
   });
 
+  it('keeps first sample when scores are tied for same customer', async () => {
+    const { findMatches, query } = loadEngine({
+      FACE_AUTO_MATCH_THRESHOLD: '0.50',
+      FACE_AUTO_MATCH_MARGIN: '0.05',
+    });
+    query.mockResolvedValueOnce([
+      { partner_id: 'p1', embedding: [0.5, 0.5, 0], name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p1', embedding: [0.5, 0.5, 0], name: 'Alice2', phone: '0902', ref: 'T002' },
+    ]);
+    const result = await findMatches([0.5, 0.5, 0]);
+    expect(result.match).not.toBeNull();
+    expect(result.match.partnerId).toBe('p1');
+    expect(result.match.name).toBe('Alice');
+  });
+
   it('auto-matches at exact threshold boundary', async () => {
     const { findMatches, query } = loadEngine({
       FACE_AUTO_MATCH_THRESHOLD: '0.50',
