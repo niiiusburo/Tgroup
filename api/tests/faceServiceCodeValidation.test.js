@@ -341,6 +341,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/List\[float\]/i);
     });
 
+    it('uses Optional[np.ndarray] return type annotation', () => {
+      expect(content).toMatch(/Optional\[np\.ndarray\]/i);
+    });
+
     it('uses cv2.cvtColor for PIL fallback color conversion', () => {
       expect(content).toMatch(/cv2\.cvtColor/i);
       expect(content).toMatch(/COLOR_RGB2BGR/i);
