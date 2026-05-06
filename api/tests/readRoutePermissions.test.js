@@ -37,8 +37,8 @@ function routePermissions(router, method, path) {
     .filter(Boolean);
 }
 
-function expectReadPermission(router, path, permission) {
-  expect(routePermissions(router, 'get', path)).toContain(permission);
+function expectRoutePermission(router, method, path, permission) {
+  expect(routePermissions(router, method, path)).toContain(permission);
 }
 
 describe('owned backend read route permissions', () => {
@@ -87,7 +87,23 @@ describe('owned backend read route permissions', () => {
 
   it.each(routeCases)('%s GET routes declare expected view permissions', (_name, router, cases) => {
     for (const [path, permission] of cases) {
-      expectReadPermission(router, path, permission);
+      expectRoutePermission(router, 'get', path, permission);
     }
+  });
+});
+
+describe('face recognition route permissions', () => {
+  const faceRouter = require('../src/routes/faceRecognition');
+
+  it('POST /recognize requires customers.view', () => {
+    expectRoutePermission(faceRouter, 'post', '/recognize', 'customers.view');
+  });
+
+  it('POST /register requires customers.edit', () => {
+    expectRoutePermission(faceRouter, 'post', '/register', 'customers.edit');
+  });
+
+  it('GET /status/:partnerId requires customers.view', () => {
+    expectRoutePermission(faceRouter, 'get', '/status/:partnerId', 'customers.view');
   });
 });
