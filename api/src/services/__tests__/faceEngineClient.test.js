@@ -58,6 +58,20 @@ describe('getEmbedding', () => {
     expect(result.quality).toBeUndefined();
   });
 
+  it('returns empty embedding array when response has empty embedding', async () => {
+    const { getEmbedding } = loadClient();
+    fetchSpy.mockResolvedValue({
+      ok: true,
+      json: async () => ({ embedding: [], model: {}, quality: {} }),
+    });
+
+    const result = await getEmbedding(Buffer.from('img'));
+
+    expect(result.embedding).toEqual([]);
+    expect(result.model).toEqual({});
+    expect(result.quality).toEqual({});
+  });
+
   it('throws FaceEngineError with code and status on face service error', async () => {
     const { getEmbedding, FaceEngineError } = loadClient();
     fetchSpy.mockResolvedValue({
