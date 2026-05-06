@@ -34,7 +34,10 @@ export function fetchExternalCheckups(customerCode: string): Promise<ExternalChe
 }
 
 export function resolveExternalCheckupImageUrl(imagePath: string): string {
-  if (imagePath.startsWith('http')) return imagePath;
+  if (imagePath.startsWith('http')) {
+    // Fix mixed-content: rewrite hosoonline http:// to https://
+    return imagePath.replace(/^http:\/\//i, 'https://');
+  }
 
   if (imagePath.startsWith('/api/')) {
     return `${API_URL.replace(/\/api$/, '')}${imagePath}`;

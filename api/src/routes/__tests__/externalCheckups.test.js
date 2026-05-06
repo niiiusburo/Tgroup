@@ -127,4 +127,35 @@ describe('externalCheckups helpers', () => {
       },
     ]);
   });
+
+  it('normalizes http:// hosoonline image URLs to https://', () => {
+    const { helpers } = loadTestHelpers();
+
+    const checkups = helpers.normalizeHosoCheckups([
+      {
+        id: 'ck-1',
+        date: '2026-04-20',
+        title: 'X-ray',
+        images: [
+          { url: 'http://hosoonline.com/api/appointments/image/1.jpg?token=abc', thumbnailUrl: 'http://hosoonline.com/api/appointments/image/1_thumb.jpg?token=abc' },
+          { url: 'https://hosoonline.com/api/appointments/image/2.jpg?token=xyz' },
+        ],
+      },
+    ]);
+
+    expect(checkups[0].images[0].url).toBe('https://hosoonline.com/api/appointments/image/1.jpg?token=abc');
+    expect(checkups[0].images[0].thumbnailUrl).toBe('https://hosoonline.com/api/appointments/image/1_thumb.jpg?token=abc');
+    expect(checkups[0].images[1].url).toBe('https://hosoonline.com/api/appointments/image/2.jpg?token=xyz');
+  });
+
+  it('leaves non-string image URLs untouched during normalization', () => {
+    const { helpers } = loadTestHelpers();
+
+    const checkups = helpers.normalizeHosoCheckups([
+      { id: 'ck-1', date: '2026-04-20', images: [{ url: null, thumbnailUrl: undefined }] },
+    ]);
+
+    expect(checkups[0].images[0].url).toBeNull();
+    expect(checkups[0].images[0].thumbnailUrl).toBeUndefined();
+  });
 });

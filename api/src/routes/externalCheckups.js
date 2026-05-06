@@ -190,6 +190,23 @@ function imageProxyUrl(imageLink) {
   return `/api/ExternalCheckups/images/${encodeURIComponent(imageLink)}`;
 }
 
+function normalizeHosoImageUrl(url) {
+  if (typeof url !== 'string') return url;
+  return url.replace(/^http:\/\//i, 'https://');
+}
+
+function normalizeHosoCheckups(checkups) {
+  if (!Array.isArray(checkups)) return [];
+  return checkups.map((checkup) => ({
+    ...checkup,
+    images: (checkup.images || []).map((img) => ({
+      ...img,
+      url: normalizeHosoImageUrl(img.url),
+      thumbnailUrl: normalizeHosoImageUrl(img.thumbnailUrl),
+    })),
+  }));
+}
+
 function mapHosoAppointmentsToCheckups(appointments) {
   return appointments.map((appointment) => ({
     id: appointment._id,
@@ -355,7 +372,7 @@ router.get('/:customerCode', requireAuth, requirePermission('external_checkups.v
       patientCode: hosoData.patientCode || customerCode,
       patientName: hosoData.patientName || customerName,
       source: 'hosoonline',
-      checkups: hosoData.checkups || [],
+      checkups: normalizeHosoCheckups(hosoData.checkups),
     });
   } catch (error) {
     if (error instanceof HosoAuthError) {
@@ -462,4 +479,6 @@ module.exports._test = {
   imageProxyUrl,
   isHosoAuthFailure,
   mapHosoAppointmentsToCheckups,
+  normalizeHosoImageUrl,
+  normalizeHosoCheckups,
 };

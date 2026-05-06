@@ -1,5 +1,30 @@
 [
   {
+    "version": "0.27.28",
+    "date": "2026-05-06",
+    "commit": "pending",
+    "highlights": "fix(integrations): prevent Hosoonline mixed-content image blocks",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Hosoonline health-checkup image URLs now normalize http:// links to https:// before TGClinic returns them to the customer profile.",
+          "The customer health-checkup image loader also applies the same HTTPS fallback when it receives an absolute Hosoonline URL."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": [
+          "This release keeps image loading behind the existing TGClinic authenticated proxy and only changes URL normalization for Hosoonline image links."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.27",
     "date": "2026-05-05",
     "commit": "pending",
