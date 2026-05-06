@@ -54,6 +54,7 @@ const reportsRoutes = require('./routes/reports');
 const telemetryRoutes = require('./routes/telemetry');
 const ipAccessRoutes = require('./routes/ipAccess');
 const exportsRoutes = require('./routes/exports');
+const { healthCheck: faceServiceHealth } = require('./services/faceEngineClient');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -203,6 +204,7 @@ const PUBLIC_PATHS = new Set([
   '/api/account/login',
   '/api/IpAccess/check',
   '/api/ipaccess/check',
+  '/api/health',
 ]);
 
 app.use('/api', (req, res, next) => {
@@ -255,6 +257,38 @@ app.use('/api/Reports', reportsRoutes);
 app.use('/api/telemetry', telemetryRoutes);
 app.use('/api/IpAccess', ipAccessRoutes);
 app.use('/api/Exports', exportsRoutes);
+
+app.get('/api/health', async (_req, res) => {
+  const checks = { db: false, faceService: false };
+  let dbLatency = 0;
+  let faceLatency = 0;
+
+  const dbStart = Date.now();
+  try {
+    await query('SELECT 1');
+    checks.db = true;
+    dbLatency = Date.now() - dbStart;
+  } catch (err) {
+    console.error('[Health] DB check failed:', err.message);
+  }
+
+  const faceStart = Date.now();
+  try {
+    const fh = await faceServiceHealth();
+    checks.faceService = fh.ok;
+    faceLatency = Date.now() - faceStart;
+  } catch (err) {
+    console.error('[Health] Face service check failed:', err.message);
+  }
+
+  const allHealthy = checks.db && checks.faceService;
+  res.status(allHealthy ? 200 : 503).json({
+    status: allHealthy ? 'healthy' : 'degraded',
+    checks,
+    latency: { db: dbLatency, faceService: faceLatency },
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // Serve uploaded feedback attachments
 app.use('/uploads/feedback', express.static(path.join(__dirname, '..', 'uploads', 'feedback')));
