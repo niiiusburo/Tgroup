@@ -65,6 +65,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/DETECTION_THRESHOLD/i);
     });
 
+    it('defines INPUT_SIZE for YuNet', () => {
+      expect(content).toMatch(/INPUT_SIZE/i);
+    });
+
     it('initializes FastAPI app with title', () => {
       expect(content).toMatch(/app = FastAPI\(/i);
       expect(content).toMatch(/title=/i);
