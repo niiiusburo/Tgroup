@@ -16,6 +16,11 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/from fastapi import FastAPI/i);
     });
 
+    it('initializes FastAPI app with title', () => {
+      expect(content).toMatch(/app = FastAPI\(/i);
+      expect(content).toMatch(/title=/i);
+    });
+
     it('imports OpenCV', () => {
       expect(content).toMatch(/import cv2/i);
     });
