@@ -212,6 +212,17 @@ describe('POST /api/face/register', () => {
     expect(res.body.error).toBe('MISSING_PARTNER_ID');
   });
 
+  it('returns 400 when partnerId is empty string', async () => {
+    const res = await request(app)
+      .post('/api/face/register')
+      .field('partnerId', '')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('MISSING_PARTNER_ID');
+  });
+
   it('returns 400 when image is missing', async () => {
     const res = await request(app)
       .post('/api/face/register')
