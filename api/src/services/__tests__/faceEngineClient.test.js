@@ -58,6 +58,21 @@ describe('getEmbedding', () => {
     expect(result.quality).toBeUndefined();
   });
 
+  it('returns undefined fields when response JSON is invalid', async () => {
+    const { getEmbedding } = loadClient();
+    fetchSpy.mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.reject(new Error('Invalid JSON')),
+      })
+    );
+
+    const result = await getEmbedding(Buffer.from('img'));
+    expect(result.embedding).toBeUndefined();
+    expect(result.model).toBeUndefined();
+    expect(result.quality).toBeUndefined();
+  });
+
   it('returns empty embedding array when response has empty embedding', async () => {
     const { getEmbedding } = loadClient();
     fetchSpy.mockResolvedValue({
