@@ -49,6 +49,16 @@ describe('POST /api/face/recognize', () => {
     expect(res.body.error).toBe('MISSING_IMAGE');
   });
 
+  it('returns 500 when image exceeds 5MB limit (multer default)', async () => {
+    const bigBuffer = Buffer.alloc(6 * 1024 * 1024); // 6MB
+    const res = await request(app)
+      .post('/api/face/recognize')
+      .attach('image', bigBuffer, 'big.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(500);
+  });
+
   it('returns match when face engine finds a high-confidence match', async () => {
     getEmbedding.mockResolvedValue({
       embedding: [0.1, 0.2, 0.3],
