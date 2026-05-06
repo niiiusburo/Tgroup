@@ -164,6 +164,18 @@ describe('findMatches', () => {
     expect(result.candidates.map((c) => c.partnerId)).toEqual(['p1', 'p2']);
   });
 
+  it('returns no-match for negative cosine similarity scores', async () => {
+    const { findMatches, query } = loadEngine({
+      FACE_CANDIDATE_THRESHOLD: '0.10',
+    });
+    query.mockResolvedValueOnce([
+      { partner_id: 'p1', embedding: [-0.5, 0, 0], name: 'A', phone: '1', ref: 'T1' },
+    ]);
+    const result = await findMatches([0.5, 0, 0]);
+    expect(result.match).toBeNull();
+    expect(result.candidates).toEqual([]);
+  });
+
   it('auto-matches at exact threshold boundary', async () => {
     const { findMatches, query } = loadEngine({
       FACE_AUTO_MATCH_THRESHOLD: '0.50',
