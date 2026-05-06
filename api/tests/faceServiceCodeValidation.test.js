@@ -28,6 +28,14 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/status_code=/i);
     });
 
+    it('includes error field in error responses', () => {
+      expect(content).toMatch(/"error":/i);
+    });
+
+    it('includes message field in error responses', () => {
+      expect(content).toMatch(/"message":/i);
+    });
+
     it('imports UploadFile from fastapi', () => {
       expect(content).toMatch(/UploadFile/i);
     });
