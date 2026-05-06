@@ -238,6 +238,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/--no-install-recommends/i);
     });
 
+    it('cleans apt cache after installation', () => {
+      expect(content).toMatch(/rm -rf.*apt\/lists/i);
+    });
+
     it('copies requirements.txt', () => {
       expect(content).toMatch(/requirements\.txt/i);
     });
