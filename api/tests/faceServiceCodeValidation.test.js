@@ -167,6 +167,14 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/cv2\.FaceRecognizerSF\.create/i);
     });
 
+    it('uses detector.setInputSize for image dimensions', () => {
+      expect(content).toMatch(/\.setInputSize/i);
+    });
+
+    it('uses detector.detect for face detection', () => {
+      expect(content).toMatch(/\.detect\(/i);
+    });
+
     it('uses setInputSize for dynamic image dimensions', () => {
       expect(content).toMatch(/setInputSize/i);
     });
