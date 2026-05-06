@@ -126,6 +126,18 @@ describe('POST /api/face/recognize', () => {
     expect(res.body.error).toBe('NO_FACE');
     expect(res.body.message).toBe('No face detected');
   });
+
+  it('returns 500 for unexpected face engine errors', async () => {
+    getEmbedding.mockRejectedValue(new Error('Connection refused'));
+
+    const res = await request(app)
+      .post('/api/face/recognize')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('ENGINE_ERROR');
+  });
 });
 
 describe('POST /api/face/register', () => {
@@ -209,6 +221,44 @@ describe('POST /api/face/register', () => {
     expect(res.status).toBe(422);
     expect(res.body.error).toBe('MULTIPLE_FACES');
   });
+
+  it('returns 500 when database query fails during registration', async () => {
+    query.mockRejectedValue(new Error('Database connection lost'));
+
+    const res = await request(app)
+      .post('/api/face/register')
+      .field('partnerId', 'p-1')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('ENGINE_ERROR');
+  });
+
+  it('registers without source when source is omitted', async () => {
+    query.mockResolvedValueOnce([{ id: 'p-1', name: 'Alice' }]);
+    getEmbedding.mockResolvedValue({
+      embedding: [0.1, 0.2, 0.3],
+      model: { recognizer: 'sface', version: 'v1' },
+      quality: { detectionScore: 0.95, faceCount: 1 },
+    });
+    registerSample.mockResolvedValue({ sampleId: 's-1', sampleCount: 1 });
+    getFaceStatus.mockResolvedValue({
+      partnerId: 'p-1',
+      registered: true,
+      sampleCount: 1,
+      lastRegisteredAt: '2026-05-07T10:00:00',
+    });
+
+    const res = await request(app)
+      .post('/api/face/register')
+      .field('partnerId', 'p-1')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(201);
+    expect(registerSample).toHaveBeenCalled();
+  });
 });
 
 describe('GET /api/face/status/:partnerId', () => {
@@ -243,5 +293,16 @@ describe('GET /api/face/status/:partnerId', () => {
 
     expect(res.status).toBe(404);
     expect(res.body.error).toBe('PARTNER_NOT_FOUND');
+  });
+
+  it('returns 500 when database fails loading status', async () => {
+    query.mockRejectedValue(new Error('DB timeout'));
+
+    const res = await request(app)
+      .get('/api/face/status/p-1')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('INTERNAL_ERROR');
   });
 });
