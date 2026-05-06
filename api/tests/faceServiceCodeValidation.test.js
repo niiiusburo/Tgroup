@@ -71,6 +71,14 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/SFace|sface/i);
     });
 
+    it('uses cv2.FaceDetectorYN', () => {
+      expect(content).toMatch(/cv2\.FaceDetectorYN/i);
+    });
+
+    it('uses cv2.FaceRecognizerSF', () => {
+      expect(content).toMatch(/cv2\.FaceRecognizerSF/i);
+    });
+
     it('uses face recognition model', () => {
       expect(content).toMatch(/face_recognition/i);
     });
