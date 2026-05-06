@@ -1,7 +1,7 @@
 {
   "name": "tgclinic-website",
   "private": true,
-  "version": "0.27.29",
+  "version": "0.27.31",
   "type": "module",
   "scripts": {
     "dev": "vite",

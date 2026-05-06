@@ -1,6 +1,6 @@
 [
   {
-    "version": "0.27.29",
+    "version": "0.27.31",
     "date": "2026-05-06",
     "commit": "pending",
     "highlights": "feat(integrations): create missing Hosoonline patients from customer profiles",
@@ -15,7 +15,8 @@
       {
         "title": "Bug Fixes",
         "items": [
-          "Hosoonline patient lookup now uses /api/patients/_search so the staff UI's cookie-routed /api/patients path remains untouched."
+          "Hosoonline patient lookup now uses /api/patients/_search so the staff UI's cookie-routed /api/patients path remains untouched.",
+          "Direct customer profile loads preserve the loaded profile code before falling back to the paginated customer list."
         ]
       },
       {
