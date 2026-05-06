@@ -50,6 +50,11 @@ describe('CustomerCameraWidget', () => {
     expect(screen.getByRole('button', { name: /Thêm nhanh/i })).toBeInTheDocument();
   });
 
+  it('does not show capture modal in idle state', () => {
+    render(<CustomerCameraWidget onQuickAddResult={vi.fn()} onFaceIdResult={vi.fn()} />);
+    expect(screen.queryByTestId('face-capture-modal')).not.toBeInTheDocument();
+  });
+
   it('disables buttons when disabled prop is true', () => {
     render(<CustomerCameraWidget onQuickAddResult={vi.fn()} onFaceIdResult={vi.fn()} disabled />);
     expect(screen.getByRole('button', { name: /Nhận diện khuôn mặt/i })).toBeDisabled();
