@@ -106,6 +106,21 @@ describe('useFaceRecognition', () => {
     expect(api.registerFace).toHaveBeenCalledWith('p-1', expect.any(Blob), 'no_match_rescue');
   });
 
+  it('calls registerFace without source when source is omitted', async () => {
+    vi.mocked(api.registerFace).mockResolvedValue({
+      success: true,
+      partnerId: 'p-1',
+      sampleId: 's-1',
+      sampleCount: 1,
+      faceRegisteredAt: '2026-05-07T10:00:00',
+    });
+
+    const { result } = renderHook(() => useFaceRecognition());
+    await result.current.register('p-1', new Blob(['img']));
+
+    expect(api.registerFace).toHaveBeenCalledWith('p-1', expect.any(Blob), undefined);
+  });
+
   it('transitions registerState to error when API throws', async () => {
     vi.mocked(api.registerFace).mockRejectedValue(new Error('Upload failed'));
 
