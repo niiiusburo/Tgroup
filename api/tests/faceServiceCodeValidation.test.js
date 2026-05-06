@@ -142,6 +142,10 @@ describe('face-service code validation', () => {
     it('sets WORKDIR', () => {
       expect(content).toMatch(/WORKDIR/i);
     });
+
+    it('copies main.py', () => {
+      expect(content).toMatch(/COPY.*main\.py/i);
+    });
   });
 
   describe('requirements.txt', () => {
