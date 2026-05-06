@@ -10,6 +10,7 @@
     "customers": {
       "view": "Xem danh sách khách hàng",
       "viewAll": "Xem tất cả khách hàng không cần tìm kiếm — tự động hiển thị toàn bộ danh sách",
+      "search": "Chỉ tìm kiếm khách hàng — không được duyệt toàn bộ danh sách",
       "add": "Thêm khách hàng mới",
       "edit": "Chỉnh sửa thông tin khách hàng",
       "delete": "Xóa khách hàng",
@@ -42,6 +43,8 @@
       "view": "Xem lịch sử thanh toán",
       "add": "Tạo thanh toán mới",
       "refund": "Hoàn tiền thanh toán",
+      "confirm": "Xác nhận đã thu tiền",
+      "void": "Hủy hoặc xóa thanh toán",
       "export": "Xuất Excel thanh toán"
     },
     "reports": {

@@ -8,11 +8,11 @@ const { createPartner, hardDeletePartner, softDeletePartner, updatePartner } = r
 
 const router = express.Router();
 
-router.get('/', requirePermission('customers.view'), listPartners);
+router.get('/', requirePermission(['customers.view', 'customers.search']), listPartners);
 // declared before /:id to prevent Express matching 'check-unique' as an id param.
-router.get('/check-unique', requirePermission('customers.view'), checkPartnerUnique);
-router.get('/:id', requirePermission('customers.view'), getPartnerById);
-router.get('/:id/GetKPIs', requirePermission('customers.view'), getPartnerKpis);
+router.get('/check-unique', requirePermission(['customers.view', 'customers.search']), checkPartnerUnique);
+router.get('/:id', requirePermission(['customers.view', 'customers.search']), getPartnerById);
+router.get('/:id/GetKPIs', requirePermission(['customers.view', 'customers.search']), getPartnerKpis);
 router.post('/', requirePermission('customers.add'), validate(PartnerCreateSchema), createPartner);
 router.put('/:id', requirePermission('customers.edit'), validate(PartnerUpdateSchema), updatePartner);
 router.patch('/:id/soft-delete', requirePermission('customers.delete'), softDeletePartner);

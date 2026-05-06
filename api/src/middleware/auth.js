@@ -43,8 +43,16 @@ function requirePermission(permission) {
         return res.status(403).json({ error: 'No permission assignment found' });
       }
 
-      if (!effectivePermissions.includes('*') && !effectivePermissions.includes(permission)) {
-        return res.status(403).json({ error: `Permission denied: ${permission}` });
+      req.userPermissions = effectivePermissions;
+
+      if (effectivePermissions.includes('*')) {
+        return next();
+      }
+
+      const required = Array.isArray(permission) ? permission : [permission];
+      const hasPermission = required.some(p => effectivePermissions.includes(p));
+      if (!hasPermission) {
+        return res.status(403).json({ error: `Permission denied: ${required.join(' or ')}` });
       }
 
       next();

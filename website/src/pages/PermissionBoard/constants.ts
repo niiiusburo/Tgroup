@@ -3,10 +3,10 @@ import type { EmployeePermission } from '@/lib/api';
 export const MODULES = [
   { name: 'Overview', actions: ['View'] },
   { name: 'Calendar', actions: ['View', 'Edit'] },
-  { name: 'Customers', actions: ['View', 'View All', 'Add', 'Edit', 'Delete', 'Hard Delete'] },
+  { name: 'Customers', actions: ['View', 'View All', 'Search', 'Add', 'Edit', 'Delete', 'Hard Delete'] },
   { name: 'Appointments', actions: ['View', 'Add', 'Edit'] },
   { name: 'Services', actions: ['View', 'Add', 'Edit'] },
-  { name: 'Payment', actions: ['View', 'Add', 'Refund'] },
+  { name: 'Payment', actions: ['View', 'Add', 'Refund', 'Confirm', 'Void'] },
   { name: 'Employees', actions: ['View', 'Add', 'Edit'] },
   { name: 'Locations', actions: ['View', 'Add', 'Edit'] },
   { name: 'Reports', actions: ['View', 'Export'] },
@@ -58,7 +58,10 @@ export const PERMISSION_DESCRIPTIONS: Record<string, string> = {
   'website.edit': 'descriptions.website.edit',
   'external_checkups.view': 'descriptions.externalCheckups.view',
   'external_checkups.create': 'descriptions.externalCheckups.create',
+  'customers.search': 'descriptions.customers.search',
   'customers.hard_delete': 'descriptions.customers.hardDelete',
+  'payment.confirm': 'descriptions.payment.confirm',
+  'payment.void': 'descriptions.payment.void',
 };
 
 export function getInitials(name: string): string {

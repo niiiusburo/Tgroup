@@ -10,6 +10,7 @@
     "customers": {
       "view": "View customer list",
       "viewAll": "View all customers without search — automatically display full list",
+      "search": "Search customers only — cannot browse full list",
       "add": "Add new customer",
       "edit": "Edit customer information",
       "delete": "Delete customer",
@@ -42,6 +43,8 @@
       "view": "View payment history",
       "add": "Create new payment",
       "refund": "Process payment refund",
+      "confirm": "Confirm payment receipt",
+      "void": "Void or delete payments",
       "export": "Export payments to Excel"
     },
     "reports": {

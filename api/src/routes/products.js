@@ -229,7 +229,7 @@ router.get('/:id', requirePermission('services.view'), async (req, res) => {
  * POST /api/Products
  * Create a new product/service
  */
-router.post('/', requirePermission('services.edit'), async (req, res) => {
+router.post('/', requirePermission(['services.edit', 'services.add']), async (req, res) => {
   try {
     const { name, defaultcode, type, listprice, categid, uomname, companyid, canorderlab } = req.body;
     if (!name || !name.trim()) {

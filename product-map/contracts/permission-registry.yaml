@@ -42,12 +42,18 @@ backend_permissions:
       - DELETE /api/Partners/:id/hard-delete
   - string: customers.view
     routes:
-      - GET /api/Partners
-      - GET /api/Partners/check-unique
       - GET /api/Partners/:id
       - GET /api/Partners/:id/GetKPIs
       - GET /api/CustomerReceipts
       - GET /api/CustomerReceipts/:id
+  - string: customers.view_all
+    routes:
+      - GET /api/Partners
+      - GET /api/Partners/check-unique
+  - string: customers.search
+    routes:
+      - GET /api/Partners
+      - GET /api/Partners/check-unique
   - string: employees.view
     routes:
       - GET /api/Employees
@@ -63,19 +69,28 @@ backend_permissions:
   - string: external_checkups.view
     routes:
       - GET /api/ExternalCheckups/:customerCode
-  - string: payment.edit
+  - string: payment.add
     routes:
       - POST /api/Payments
-      - POST /api/Payments/refund
-      - PATCH /api/Payments/:id
-      - DELETE /api/Payments/:id
-      - POST /api/Payments/:id/void
       - POST /api/Payments/:id/proof
+  - string: payment.edit
+    routes:
+      - PATCH /api/Payments/:id
       - PUT /api/settings/bank
       - PUT /api/MonthlyPlans/:id
       - PUT /api/MonthlyPlans/:id/installments/:installmentId/pay
       - POST /api/MonthlyPlans
       - DELETE /api/MonthlyPlans/:id
+  - string: payment.refund
+    routes:
+      - POST /api/Payments/refund
+  - string: payment.void
+    routes:
+      - DELETE /api/Payments/:id
+      - POST /api/Payments/:id/void
+  - string: payment.confirm
+    routes:
+      - POST /api/Payments/:id/confirm
   - string: payment.view
     routes:
       - GET /api/Payments
@@ -107,12 +122,14 @@ backend_permissions:
   - string: locations.view
     routes:
       - GET /api/Companies
-  - string: services.edit
+  - string: services.add
     routes:
       - POST /api/Products
+      - POST /api/ProductCategories
+  - string: services.edit
+    routes:
       - PUT /api/Products/:id
       - DELETE /api/Products/:id
-      - POST /api/ProductCategories
       - PUT /api/ProductCategories/:id
       - DELETE /api/ProductCategories/:id
   - string: services.view

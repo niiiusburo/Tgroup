@@ -37,17 +37,27 @@ function routePermissions(router, method, path) {
     .filter(Boolean);
 }
 
+function expectRoutePermission(router, method, path, permission) {
+  const perms = routePermissions(router, method, path);
+  const required = Array.isArray(permission) ? permission : [permission];
+  const matched = perms.some((p) => {
+    const declared = Array.isArray(p) ? p : [p];
+    return required.some((r) => declared.includes(r));
+  });
+  expect(matched).toBe(true);
+}
+
 function expectReadPermission(router, path, permission) {
-  expect(routePermissions(router, 'get', path)).toContain(permission);
+  expectRoutePermission(router, 'get', path, permission);
 }
 
 describe('owned backend read route permissions', () => {
   const routeCases = [
     ['partners', require('../src/routes/partners'), [
-      ['/', 'customers.view'],
-      ['/check-unique', 'customers.view'],
-      ['/:id', 'customers.view'],
-      ['/:id/GetKPIs', 'customers.view'],
+      ['/', ['customers.view', 'customers.search']],
+      ['/check-unique', ['customers.view', 'customers.search']],
+      ['/:id', ['customers.view', 'customers.search']],
+      ['/:id/GetKPIs', ['customers.view', 'customers.search']],
     ]],
     ['appointments', require('../src/routes/appointments'), [
       ['/', 'appointments.view'],
@@ -89,5 +99,41 @@ describe('owned backend read route permissions', () => {
     for (const [path, permission] of cases) {
       expectReadPermission(router, path, permission);
     }
+  });
+});
+
+describe('payment route granular permissions', () => {
+  const payments = require('../src/routes/payments');
+
+  it('POST / uses payment.edit or payment.add', () => {
+    expectRoutePermission(payments, 'post', '/', ['payment.edit', 'payment.add']);
+  });
+
+  it('POST /refund uses payment.edit or payment.refund', () => {
+    expectRoutePermission(payments, 'post', '/refund', ['payment.edit', 'payment.refund']);
+  });
+
+  it('PATCH /:id uses payment.edit or payment.update', () => {
+    expectRoutePermission(payments, 'patch', '/:id', ['payment.edit', 'payment.update']);
+  });
+
+  it('DELETE /:id uses payment.edit or payment.void', () => {
+    expectRoutePermission(payments, 'delete', '/:id', ['payment.edit', 'payment.void']);
+  });
+
+  it('POST /:id/void uses payment.edit or payment.void', () => {
+    expectRoutePermission(payments, 'post', '/:id/void', ['payment.edit', 'payment.void']);
+  });
+
+  it('POST /:id/proof uses payment.edit or payment.add', () => {
+    expectRoutePermission(payments, 'post', '/:id/proof', ['payment.edit', 'payment.add']);
+  });
+});
+
+describe('products route granular permissions', () => {
+  const products = require('../src/routes/products');
+
+  it('POST / uses services.edit or services.add', () => {
+    expectRoutePermission(products, 'post', '/', ['services.edit', 'services.add']);
   });
 });

@@ -17,6 +17,15 @@ async function listPartners(req, res) {
       sortOrder = 'desc',
     } = req.query;
 
+    // Enforce search-only access for users without customers.view_all
+    const perms = req.userPermissions || [];
+    const canViewAll = perms.includes('*') || perms.includes('customers.view_all') || perms.includes('customers.view');
+    if (!canViewAll && (!search || String(search).trim().length < 2)) {
+      return res.status(403).json({
+        error: 'Search required: enter at least 2 characters to find customers',
+      });
+    }
+
     const offsetNum = parseInt(offset, 10);
     const limitNum = Math.min(parseInt(limit, 10), 500);
 
