@@ -174,6 +174,10 @@ describe('face-service code validation', () => {
     it('includes Pillow', () => {
       expect(content).toMatch(/Pillow/i);
     });
+
+    it('includes python-multipart for file uploads', () => {
+      expect(content).toMatch(/python-multipart/i);
+    });
   });
 
   describe('Dockerfile model downloads', () => {
