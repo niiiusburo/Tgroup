@@ -27,11 +27,12 @@ export function FaceCaptureModal({
   const resolvedTitle = title ?? t('faceCapture.title');
 
   useEffect(() => {
+    const video = videoRef.current;
     if (!isOpen) {
       stopStream(streamRef.current);
       streamRef.current = null;
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
+      if (video) {
+        video.srcObject = null;
       }
       setError(null);
       return;
@@ -49,8 +50,8 @@ export function FaceCaptureModal({
         return;
       }
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+      if (video) {
+        video.srcObject = stream;
       }
     }).
     catch(() => {
@@ -61,11 +62,11 @@ export function FaceCaptureModal({
       mounted = false;
       stopStream(streamRef.current);
       streamRef.current = null;
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
+      if (video) {
+        video.srcObject = null;
       }
     };
-  }, [isOpen]);
+  }, [isOpen, t]);
 
   const handleCapture = useCallback(() => {
     const video = videoRef.current;
