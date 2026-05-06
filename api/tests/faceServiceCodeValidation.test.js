@@ -230,6 +230,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/FROM python/i);
     });
 
+    it('uses python 3.12 slim variant', () => {
+      expect(content).toMatch(/python:3\.12-slim/i);
+    });
+
     it('installs system dependencies with apt-get', () => {
       expect(content).toMatch(/apt-get/i);
     });
