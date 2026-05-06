@@ -20,6 +20,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/from typing import/i);
     });
 
+    it('imports PIL for image fallback', () => {
+      expect(content).toMatch(/from PIL import Image/i);
+    });
+
     it('initializes FastAPI app with title', () => {
       expect(content).toMatch(/app = FastAPI\(/i);
       expect(content).toMatch(/title=/i);
