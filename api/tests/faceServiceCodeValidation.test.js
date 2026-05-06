@@ -119,6 +119,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/cv2\.FaceRecognizerSF/i);
     });
 
+    it('uses setInputSize for dynamic image dimensions', () => {
+      expect(content).toMatch(/setInputSize/i);
+    });
+
     it('uses alignCrop for face alignment', () => {
       expect(content).toMatch(/alignCrop/i);
     });
