@@ -465,4 +465,12 @@ describe('GET /api/face/status/:partnerId', () => {
     expect(res.body.sampleCount).toBe(0);
     expect(res.body.lastRegisteredAt).toBeNull();
   });
+
+  it('returns 404 for unknown face endpoints', async () => {
+    const res = await request(app)
+      .get('/api/face/unknown-path')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(404);
+  });
 });
