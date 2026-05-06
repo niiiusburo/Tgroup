@@ -305,6 +305,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/Image\.open/i);
     });
 
+    it('uses io.BytesIO for in-memory buffer', () => {
+      expect(content).toMatch(/io\.BytesIO/i);
+    });
+
     it('reads uploaded image with await image.read()', () => {
       expect(content).toMatch(/await image\.read\(\)/i);
     });
