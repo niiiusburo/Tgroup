@@ -106,6 +106,27 @@ describe('CustomerCameraWidget', () => {
         expect(onFaceIdResult).toHaveBeenCalled();
       }, { timeout: 3000 });
     });
+
+    it('shows processing indicator while recognize is in progress', async () => {
+      let resolveRecognize: (value: unknown) => void;
+      mocks.recognizeFace.mockImplementation(() => new Promise((resolve) => { resolveRecognize = resolve; }));
+
+      const { container } = render(<CustomerCameraWidget onQuickAddResult={vi.fn()} onFaceIdResult={vi.fn()} />);
+      fireEvent.click(screen.getByRole('button', { name: /Nhận diện khuôn mặt/i }));
+
+      const captureBtn = await screen.findByRole('button', { name: /Chụp/i });
+      fireEvent.click(captureBtn);
+
+      await waitFor(() => {
+        expect(container.querySelector('.animate-spin')).toBeInTheDocument();
+      }, { timeout: 3000 });
+
+      resolveRecognize({ match: { partnerId: 'p1', name: 'Test', code: 'T001', phone: '0901', confidence: 0.95 }, candidates: [] });
+
+      await waitFor(() => {
+        expect(container.querySelector('.animate-spin')).not.toBeInTheDocument();
+      }, { timeout: 3000 });
+    });
   });
 
   describe('Face ID candidate review flow', () => {
