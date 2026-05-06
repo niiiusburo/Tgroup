@@ -16,6 +16,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/from fastapi import FastAPI/i);
     });
 
+    it('imports UploadFile from fastapi', () => {
+      expect(content).toMatch(/UploadFile/i);
+    });
+
     it('imports typing annotations', () => {
       expect(content).toMatch(/from typing import/i);
     });
