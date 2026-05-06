@@ -166,6 +166,19 @@ describe('POST /api/face/recognize', () => {
     expect(res.body.message).toBe('No face detected');
   });
 
+  it('returns 503 when face engine reports model not ready', async () => {
+    const { FaceEngineError } = require('../src/services/faceEngineClient');
+    getEmbedding.mockRejectedValue(new FaceEngineError('MODEL_NOT_READY', 'Model loading', 503));
+
+    const res = await request(app)
+      .post('/api/face/recognize')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(503);
+    expect(res.body.error).toBe('MODEL_NOT_READY');
+  });
+
   it('returns 500 when findMatches throws an error', async () => {
     getEmbedding.mockResolvedValue({
       embedding: [0.1, 0.2, 0.3],
