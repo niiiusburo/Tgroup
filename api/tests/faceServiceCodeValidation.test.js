@@ -287,6 +287,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/_recognizer = None/i);
     });
 
+    it('uses global keyword for model variables', () => {
+      expect(content).toMatch(/global _detector/i);
+    });
+
     it('defines _ensure_models helper', () => {
       expect(content).toMatch(/def _ensure_models/i);
     });
