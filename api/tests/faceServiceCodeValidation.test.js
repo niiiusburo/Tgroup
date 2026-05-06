@@ -138,6 +138,10 @@ describe('face-service code validation', () => {
     it('runs uvicorn', () => {
       expect(content).toMatch(/uvicorn/i);
     });
+
+    it('sets WORKDIR', () => {
+      expect(content).toMatch(/WORKDIR/i);
+    });
   });
 
   describe('requirements.txt', () => {
