@@ -242,6 +242,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/uvicorn/i);
     });
 
+    it('sets PYTHONUNBUFFERED for logging', () => {
+      expect(content).toMatch(/PYTHONUNBUFFERED/i);
+    });
+
     it('sets WORKDIR', () => {
       expect(content).toMatch(/WORKDIR/i);
     });
