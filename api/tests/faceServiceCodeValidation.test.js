@@ -184,6 +184,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/"quality":/i);
     });
 
+    it('rounds detection score in quality metadata', () => {
+      expect(content).toMatch(/round\(.*4\)/i);
+    });
+
     it('validates image content_type', () => {
       expect(content).toMatch(/content_type/i);
       expect(content).toMatch(/image\//i);
