@@ -172,6 +172,18 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/ENGINE_ERROR/i);
     });
 
+    it('returns embedding in response', () => {
+      expect(content).toMatch(/"embedding":\s*embedding/i);
+    });
+
+    it('returns model metadata in response', () => {
+      expect(content).toMatch(/"model":/i);
+    });
+
+    it('returns quality metadata in response', () => {
+      expect(content).toMatch(/"quality":/i);
+    });
+
     it('validates image content_type', () => {
       expect(content).toMatch(/content_type/i);
       expect(content).toMatch(/image\//i);
