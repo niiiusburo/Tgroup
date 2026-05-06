@@ -349,6 +349,12 @@ describe('registerSample', () => {
     expect(cosineSimilarity([0.1, 0.2], [0.1, 0.2, 0.3])).toBe(0);
   });
 
+  it('returns 0 for cosineSimilarity with undefined embeddings', () => {
+    const { cosineSimilarity } = loadEngine();
+    expect(cosineSimilarity([0.1, 0.2], undefined)).toBe(0);
+    expect(cosineSimilarity(undefined, [0.1, 0.2])).toBe(0);
+  });
+
   it('preserves null phone in match result', async () => {
     const { findMatches, query } = loadEngine({
       FACE_AUTO_MATCH_THRESHOLD: '0.50',
