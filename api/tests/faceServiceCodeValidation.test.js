@@ -177,6 +177,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/cv2\.imdecode/i);
     });
 
+    it('uses np.frombuffer for byte-to-array conversion', () => {
+      expect(content).toMatch(/np\.frombuffer/i);
+    });
+
     it('defines _extract_embedding helper', () => {
       expect(content).toMatch(/def _extract_embedding/i);
     });
