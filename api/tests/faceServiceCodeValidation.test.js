@@ -61,6 +61,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/os\.path\.join/i);
     });
 
+    it('validates model files exist with os.path.exists', () => {
+      expect(content).toMatch(/os\.path\.exists/i);
+    });
+
     it('reads DETECTION_THRESHOLD from environment', () => {
       expect(content).toMatch(/DETECTION_THRESHOLD/i);
     });
