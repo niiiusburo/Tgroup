@@ -200,6 +200,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/"quality":/i);
     });
 
+    it('includes faceCount in quality metadata', () => {
+      expect(content).toMatch(/faceCount/i);
+    });
+
     it('rounds detection score in quality metadata', () => {
       expect(content).toMatch(/round\(.*4\)/i);
     });
