@@ -269,6 +269,35 @@ describe('POST /api/face/register', () => {
     expect(res.status).toBe(201);
     expect(registerSample).toHaveBeenCalled();
   });
+
+  it('passes source parameter to registerSample when provided', async () => {
+    query.mockResolvedValueOnce([{ id: 'p-1', name: 'Alice' }]);
+    getEmbedding.mockResolvedValue({
+      embedding: [0.1, 0.2, 0.3],
+      model: { recognizer: 'sface', version: 'v1' },
+      quality: { detectionScore: 0.95, faceCount: 1 },
+    });
+    registerSample.mockResolvedValue({ sampleId: 's-1', sampleCount: 1 });
+    getFaceStatus.mockResolvedValue({
+      partnerId: 'p-1',
+      registered: true,
+      sampleCount: 1,
+      lastRegisteredAt: '2026-05-07T10:00:00',
+    });
+
+    const res = await request(app)
+      .post('/api/face/register')
+      .field('partnerId', 'p-1')
+      .field('source', 'profile_register')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(201);
+    expect(registerSample).toHaveBeenCalled();
+    const callArgs = registerSample.mock.calls[0];
+    expect(callArgs[0]).toBe('p-1');
+    expect(callArgs[5]).toBe('profile_register');
+  });
 });
 
 describe('GET /api/face/status/:partnerId', () => {
