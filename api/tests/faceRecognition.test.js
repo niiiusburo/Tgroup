@@ -192,6 +192,7 @@ describe('POST /api/face/register', () => {
   });
 
   it('returns 201 with sample details on successful registration', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     query.mockResolvedValueOnce([{ id: 'p-1', name: 'Alice' }]);
     getEmbedding.mockResolvedValue({
       embedding: [0.1, 0.2, 0.3],
@@ -218,6 +219,8 @@ describe('POST /api/face/register', () => {
     expect(res.body.partnerId).toBe('p-1');
     expect(res.body.sampleId).toBe('s-1');
     expect(res.body.sampleCount).toBe(3);
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[FaceRegister]'));
+    consoleSpy.mockRestore();
   });
 
   it('returns 422 when face engine reports multiple faces', async () => {
