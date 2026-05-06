@@ -301,6 +301,20 @@ describe('registerSample', () => {
     expect(result.candidates).toEqual([]);
   });
 
+  it('preserves null phone in match result', async () => {
+    const { findMatches, query } = loadEngine({
+      FACE_AUTO_MATCH_THRESHOLD: '0.50',
+      FACE_AUTO_MATCH_MARGIN: '0.05',
+    });
+    query.mockResolvedValueOnce([
+      { partner_id: 'p1', embedding: [0.5, 0.5, 0], name: 'Alice', phone: null, ref: 'T001' },
+    ]);
+    const result = await findMatches([0.5, 0.5, 0]);
+    expect(result.match).not.toBeNull();
+    expect(result.match.phone).toBeNull();
+    expect(result.match.name).toBe('Alice');
+  });
+
   it('uses defaults when optional fields are missing', async () => {
     const { registerSample, query } = loadEngine();
     query
