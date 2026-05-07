@@ -1,4 +1,5 @@
 import { AddCustomerForm } from '@/components/forms/AddCustomerForm';
+import type { CapturedFaceImages } from '@/components/shared/faceCaptureProfile';
 import type { CustomerFormData } from '@/data/mockCustomerForm';
 
 interface CustomerFormModalProps {
@@ -10,7 +11,7 @@ interface CustomerFormModalProps {
   readonly customerId?: string;
   readonly onSubmit: (data: CustomerFormData) => Promise<void>;
   readonly onCancel: () => void;
-  readonly onPendingFaceImage: (image: Blob | null) => void;
+  readonly onPendingFaceImage: (image: CapturedFaceImages) => void;
 }
 
 export function CustomerFormModal({

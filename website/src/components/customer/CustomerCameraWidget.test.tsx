@@ -245,7 +245,7 @@ describe('CustomerCameraWidget', () => {
       fireEvent.click(captureBtn);
 
       await waitFor(() => {
-        expect(onFaceIdResult).toHaveBeenCalledWith(null, expect.any(Blob));
+        expect(onFaceIdResult).toHaveBeenCalledWith(null, expect.any(Blob), [expect.any(Blob)]);
       }, { timeout: 3000 });
     });
   });

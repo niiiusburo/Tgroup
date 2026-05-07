@@ -58,6 +58,8 @@ ui_surfaces:
 ui_invariants:
   - Customer source (`sourceid` / `sourcename`, label `Nguồn khách hàng`) is stored for migration/reporting compatibility but must not appear in the customer profile assignment card or the customer profile add/edit form.
   - Customer list search must resolve customers by migrated customer ref, appointment number (`appointments.name`), and service/treatment order number (`saleorders.code` / `saleorders.name`).
+  - Customer-facing searches must be accent-insensitive for Vietnamese names so staff can type without diacritics.
+  - Face registration for add/edit customer flows should collect straight, left, and right profile samples so recognition works when customers turn their head.
   - Customer profile assignment card and edit form must display the sales employee from `partners.salestaffid` / `salestaffname`, not the customer's `jobtitle` or other personal-detail fields.
   - Customer edit forms must resolve saved employee assignment IDs against all employees, including inactive migrated employees; active-only lists are for new selection defaults, not selected-value hydration.
   - Employee assignment suggestions in customer forms must hide inactive employees so TDental duplicate staff records do not appear as selectable options.

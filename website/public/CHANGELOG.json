@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.31.2",
+    "date": "2026-05-07",
+    "commit": "pending",
+    "highlights": "feat(face-id): guided customer face profile capture",
+    "sections": [
+      {
+        "title": "Face ID",
+        "items": [
+          "Customer face registration now guides staff through straight, left, and right head positions.",
+          "Add-customer no-match capture keeps all profile samples and registers them after the customer is saved.",
+          "Existing customer Register Face now stores multiple profile samples through the existing face-register endpoint."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added targeted modal coverage for the three-step profile capture flow.",
+          "Updated customer camera widget coverage for the captured sample list passed into no-match rescue."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.30.3",
     "date": "2026-05-07",
     "commit": "pending",

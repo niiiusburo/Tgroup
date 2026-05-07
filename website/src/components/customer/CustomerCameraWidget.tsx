@@ -1,34 +1,18 @@
 import { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScanFace, CreditCard, X, Check, Loader2, Search, UserCheck } from 'lucide-react';
-import type { CustomerFormData } from '@/types/customer';
+import { X, Check, Loader2 } from 'lucide-react';
 import type { ApiPartner } from '@/lib/api';
 import { FaceCaptureModal } from '@/components/shared/FaceCaptureModal';
 import { useFaceRecognition } from '@/hooks/useFaceRecognition';
 import { fetchPartners } from '@/lib/api';
+import { CustomerCameraCandidateReview } from './CustomerCameraCandidateReview';
+import { CustomerCameraIdleControls } from './CustomerCameraIdleControls';
+import { CustomerCameraNoMatchRescue } from './CustomerCameraNoMatchRescue';
+import type { CustomerCameraWidgetProps } from './CustomerCameraWidget.types';
+import { MOCK_QUICK_ADD_DATA } from './customerCameraMockData';
 
 type WidgetMode = 'idle' | 'face-id' | 'quick-add' | 'candidate-review' | 'no-match-rescue';
 type CaptureState = 'preview' | 'processing' | 'success';
-
-interface CustomerCameraWidgetProps {
-  readonly onQuickAddResult: (fields: Partial<CustomerFormData>) => void;
-  readonly onFaceIdResult: (fields: Partial<CustomerFormData> | null, imageBlob?: Blob) => void;
-  readonly disabled?: boolean;
-}
-
-const MOCK_QUICK_ADD_DATA: Partial<CustomerFormData> = {
-  name: 'NGUYỄN VĂN A',
-  gender: 'male',
-  birthday: 15,
-  birthmonth: 6,
-  birthyear: 1990,
-  identitynumber: '079199000123',
-  street: '123 Nguyễn Huệ',
-  cityname: 'Hồ Chí Minh',
-  districtname: 'Quận 1',
-  wardname: 'Phường Bến Nghé',
-  phone: '0901234567'
-};
 
 export function CustomerCameraWidget({
   onQuickAddResult,
@@ -40,6 +24,7 @@ export function CustomerCameraWidget({
   const [captureState, setCaptureState] = useState<CaptureState>('preview');
   const [showCaptureModal, setShowCaptureModal] = useState(false);
   const [capturedImage, setCapturedImage] = useState<Blob | null>(null);
+  const [capturedImages, setCapturedImages] = useState<readonly Blob[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<ApiPartner[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -55,6 +40,7 @@ export function CustomerCameraWidget({
     setMode('face-id');
     setShowCaptureModal(true);
     setCapturedImage(null);
+    setCapturedImages([]);
     setSelectedCustomer(null);
     setSearchResults([]);
     setSearchQuery('');
@@ -78,6 +64,7 @@ export function CustomerCameraWidget({
     setCaptureState('preview');
     setShowCaptureModal(false);
     setCapturedImage(null);
+    setCapturedImages([]);
     setSelectedCustomer(null);
     setSearchResults([]);
     setSearchQuery('');
@@ -85,10 +72,12 @@ export function CustomerCameraWidget({
   }, [reset]);
 
   const handleCapture = useCallback(
-    async (imageBlob: Blob) => {
+    async (imageBlob: Blob, imageBlobs?: readonly Blob[]) => {
+      const profileImages = imageBlobs?.length ? imageBlobs : [imageBlob];
       setShowCaptureModal(false);
       setCaptureState('processing');
       setCapturedImage(imageBlob);
+      setCapturedImages(profileImages);
       const result = await recognize(imageBlob);
 
       if (result.match) {
@@ -103,6 +92,7 @@ export function CustomerCameraWidget({
           setMode('idle');
           setCaptureState('preview');
           setCapturedImage(null);
+          setCapturedImages([]);
           reset();
         }, 400);
       } else if (result.candidates && result.candidates.length > 0) {
@@ -111,7 +101,7 @@ export function CustomerCameraWidget({
       } else {
         setCaptureState('preview');
         setMode('no-match-rescue');
-        onFaceIdResult(null, imageBlob);
+        onFaceIdResult(null, imageBlob, profileImages);
       }
     },
     [onFaceIdResult, recognize, reset]
@@ -122,6 +112,7 @@ export function CustomerCameraWidget({
     setMode('idle');
     setCaptureState('preview');
     setCapturedImage(null);
+    setCapturedImages([]);
     reset();
   }, [onFaceIdResult, capturedImage, reset]);
 
@@ -147,18 +138,22 @@ export function CustomerCameraWidget({
   }, []);
 
   const handleRegisterToCustomer = useCallback(async () => {
-    if (!selectedCustomer || !capturedImage) return;
+    const imagesToRegister = capturedImages.length ? capturedImages : capturedImage ? [capturedImage] : [];
+    if (!selectedCustomer || imagesToRegister.length === 0) return;
     setRegistering(true);
     try {
-      await register(selectedCustomer.id, capturedImage, 'no_match_rescue');
+      for (const image of imagesToRegister) {
+        await register(selectedCustomer.id, image, 'no_match_rescue');
+      }
       onFaceIdResult({
         name: selectedCustomer.name,
         phone: selectedCustomer.phone ?? '',
         ref: selectedCustomer.ref ?? '',
-      }, capturedImage);
+      }, imagesToRegister[0], imagesToRegister);
       setMode('idle');
       setCaptureState('preview');
       setCapturedImage(null);
+      setCapturedImages([]);
       setSelectedCustomer(null);
       setSearchResults([]);
       setSearchQuery('');
@@ -168,7 +163,7 @@ export function CustomerCameraWidget({
     } finally {
       setRegistering(false);
     }
-  }, [selectedCustomer, capturedImage, register, onFaceIdResult, reset]);
+  }, [selectedCustomer, capturedImage, capturedImages, register, onFaceIdResult, reset]);
 
   const isProcessing = captureState === 'processing' || recognizeState.status === 'processing';
   const isSuccess = captureState === 'success';
@@ -177,7 +172,6 @@ export function CustomerCameraWidget({
 
   return (
     <div className="flex flex-col items-center">
-      {/* Status indicators */}
       {(isProcessing || isSuccess || isCandidateReview || isNoMatchRescue) && (
         <div className="relative w-28 h-28 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden mb-3">
           {isProcessing ? (
@@ -200,27 +194,14 @@ export function CustomerCameraWidget({
         </div>
       )}
 
-      {/* Controls */}
       <div className="w-full">
         {mode === 'idle' && (
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={startFaceId}
-              disabled={disabled}
-              className="flex flex-col items-center justify-center gap-2 px-3 py-5 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-2xl hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm transition-all disabled:opacity-50">
-              <ScanFace className="w-7 h-7 text-orange-500" />
-              <span>{t('faceId', 'Nhận diện khuôn mặt')}</span>
-            </button>
-            <button
-              type="button"
-              onClick={startQuickAdd}
-              disabled={disabled}
-              className="flex flex-col items-center justify-center gap-2 px-3 py-5 text-sm font-semibold text-white bg-primary rounded-2xl hover:bg-primary-dark hover:shadow-sm transition-all disabled:opacity-50">
-              <CreditCard className="w-7 h-7" />
-              <span>{t('quickAdd', 'Thêm nhanh')}</span>
-            </button>
-          </div>
+          <CustomerCameraIdleControls
+            t={t}
+            disabled={disabled}
+            onFaceId={startFaceId}
+            onQuickAdd={startQuickAdd}
+          />
         )}
 
         {mode === 'face-id' && !isProcessing && !isSuccess && (
@@ -235,97 +216,41 @@ export function CustomerCameraWidget({
           </div>
         )}
 
-        {/* Candidate review */}
         {isCandidateReview && recognizeState.status === 'candidates' && (
-          <div className="w-full space-y-2">
-            <p className="text-[10px] text-gray-500 text-center">{t('face.selectMatch', 'Select the correct customer')}</p>
-            <div className="space-y-1.5 max-h-48 overflow-y-auto">
-              {recognizeState.candidates.map((c) => (
-                <button
-                  key={c.partnerId}
-                  type="button"
-                  onClick={() => handleSelectCandidate(c)}
-                  className="w-full flex items-center justify-between px-3 py-2 text-left text-sm bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all">
-                  <div className="flex flex-col">
-                    <span className="font-medium text-gray-800">{c.name}</span>
-                    <span className="text-xs text-gray-400">{c.code} · {c.phone}</span>
-                  </div>
-                  <span className="text-[10px] font-semibold text-orange-500">{(c.confidence * 100).toFixed(0)}%</span>
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={cancel}
-              className="w-full px-3 py-2 text-[10px] font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all">
-              {t('cancel')}
-            </button>
-          </div>
+          <CustomerCameraCandidateReview
+            t={t}
+            candidates={recognizeState.candidates}
+            onSelect={handleSelectCandidate}
+            onCancel={cancel}
+          />
         )}
 
-        {/* No-match rescue */}
         {isNoMatchRescue && (
-          <div className="w-full space-y-2">
-            <p className="text-[10px] text-gray-500 text-center">{t('face.searchToRegister', 'Search customer to register this face')}</p>
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => handleSearchCustomers(e.target.value)}
-                placeholder={t('face.searchPlaceholder', 'Name, phone, or code...')}
-                className="w-full pl-8 pr-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
-            {searchLoading && <p className="text-[10px] text-gray-400 text-center">{t('loading')}</p>}
-            <div className="space-y-1 max-h-40 overflow-y-auto">
-              {searchResults.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setSelectedCustomer(p)}
-                  className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm rounded-xl border transition-all ${
-                    selectedCustomer?.id === p.id
-                      ? 'bg-orange-50 border-orange-200'
-                      : 'bg-white border-gray-200 hover:bg-gray-50'
-                  }`}>
-                  <UserCheck className={`w-3.5 h-3.5 ${selectedCustomer?.id === p.id ? 'text-orange-500' : 'text-gray-400'}`} />
-                  <div className="flex flex-col">
-                    <span className="font-medium text-gray-800">{p.name}</span>
-                    <span className="text-xs text-gray-400">{p.ref ?? ''} · {p.phone ?? ''}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-            {selectedCustomer && (
-              <button
-                type="button"
-                onClick={handleRegisterToCustomer}
-                disabled={registering || registerState.status === 'processing'}
-                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-primary rounded-xl hover:bg-primary-dark disabled:opacity-50 transition-all">
-                {registering && <Loader2 className="w-3 h-3 animate-spin" />}
-                {t('face.registerToCustomer', 'Register face to {name}', { name: selectedCustomer.name })}
-              </button>
-            )}
-            {registerState.status === 'error' && (
-              <p className="text-[10px] text-red-500 text-center">{registerState.message}</p>
-            )}
-            <button
-              type="button"
-              onClick={cancel}
-              className="w-full px-3 py-2 text-[10px] font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-all">
-              {t('cancel')}
-            </button>
-          </div>
+          <CustomerCameraNoMatchRescue
+            t={t}
+            searchQuery={searchQuery}
+            searchResults={searchResults}
+            searchLoading={searchLoading}
+            selectedCustomer={selectedCustomer}
+            registering={registering}
+            registerProcessing={registerState.status === 'processing'}
+            registerError={registerState.status === 'error' ? registerState.message : undefined}
+            onSearch={handleSearchCustomers}
+            onSelectCustomer={setSelectedCustomer}
+            onRegister={handleRegisterToCustomer}
+            onCancel={cancel}
+          />
         )}
       </div>
 
       <FaceCaptureModal
         isOpen={showCaptureModal}
         title={t('customerProfile', { ns: 'customers' })}
+        captureMode="profile"
         onCapture={handleCapture}
         onCancel={() => {
           setShowCaptureModal(false);
+          setCapturedImages([]);
           if (mode === 'face-id') setMode('idle');
         }}
       />

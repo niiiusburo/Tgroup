@@ -27,6 +27,7 @@
 
 import { useAddCustomerForm } from './useAddCustomerForm';
 import { FaceCaptureModal } from '@/components/shared/FaceCaptureModal';
+import type { CapturedFaceImages } from '@/components/shared/faceCaptureProfile';
 import { FormShell, FormHeader } from '@/components/modules/FormShell';
 import { TABS } from './constants';
 import { LeftPanel } from './LeftPanel';
@@ -43,7 +44,7 @@ export interface AddCustomerFormProps {
   readonly customerId?: string;
   readonly onSubmit: (data: CustomerFormData) => void | Promise<void>;
   readonly onCancel: () => void;
-  readonly onPendingFaceImage?: (image: Blob | null) => void;
+  readonly onPendingFaceImage?: (image: CapturedFaceImages) => void;
   readonly isEdit?: boolean;
   readonly canEdit?: boolean;
 }
@@ -161,10 +162,13 @@ export function AddCustomerForm(props: AddCustomerFormProps) {
       <FaceCaptureModal
         isOpen={showRegisterModal}
         title={t('face.registerTitle', 'Register Face')}
-        onCapture={async (imageBlob) => {
+        captureMode="profile"
+        onCapture={async (imageBlob, imageBlobs) => {
           setShowRegisterModal(false);
           if (customerId) {
-            await register(customerId, imageBlob);
+            for (const image of imageBlobs?.length ? imageBlobs : [imageBlob]) {
+              await register(customerId, image, 'profile_register');
+            }
           }
         }}
         onCancel={() => setShowRegisterModal(false)}

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTimezone } from '@/contexts/TimezoneContext';
 import { fetchCompanies, fetchEmployees, fetchPartners, fetchPartnerById, ApiError } from '@/lib/api';
 import { normalizeText } from '@/lib/utils';
+import type { CapturedFaceImages } from '@/components/shared/faceCaptureProfile';
 import type { ApiCompany, ApiEmployee, ApiPartner } from '@/lib/api';
 import { useUniqueFieldCheck } from '@/hooks/useUniqueFieldCheck';
 import { useFaceRecognition } from '@/hooks/useFaceRecognition';
@@ -45,7 +46,7 @@ export interface UseAddCustomerFormResult {
   readonly companies: ApiCompany[];
   readonly employees: ApiEmployee[];
   readonly pendingFaceImage: Blob | null;
-  readonly setPendingFaceImage: React.Dispatch<React.SetStateAction<Blob | null>>;
+  readonly setPendingFaceImage: (image: CapturedFaceImages) => void;
   readonly showRegisterModal: boolean;
   readonly setShowRegisterModal: React.Dispatch<React.SetStateAction<boolean>>;
   readonly registerState: any;
@@ -127,13 +128,22 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
   const [companies, setCompanies] = useState<ApiCompany[]>([]);
   const [employees, setEmployees] = useState<ApiEmployee[]>([]);
 
-  const [pendingFaceImage, setPendingFaceImage] = useState<Blob | null>(null);
+  const [pendingFaceImages, setPendingFaceImages] = useState<readonly Blob[]>([]);
+  const pendingFaceImage = pendingFaceImages[0] ?? null;
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const { registerState, register, reset: resetFace } = useFaceRecognition();
 
+  const setPendingFaceImage = useCallback((image: CapturedFaceImages) => {
+    if (!image) {
+      setPendingFaceImages([]);
+      return;
+    }
+    setPendingFaceImages(Array.isArray(image) ? image : [image]);
+  }, []);
+
   useEffect(() => {
-    onPendingFaceImage?.(pendingFaceImage);
-  }, [pendingFaceImage, onPendingFaceImage]);
+    onPendingFaceImage?.(pendingFaceImages.length ? pendingFaceImages : null);
+  }, [pendingFaceImages, onPendingFaceImage]);
 
   useEffect(() => {
     fetchCompanies({ limit: 50 }).then((r) => setCompanies(r.items)).catch(() => {});

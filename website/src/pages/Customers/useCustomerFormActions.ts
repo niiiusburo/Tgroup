@@ -4,6 +4,7 @@
  */
 import { useCallback, useState } from 'react';
 import { registerFace } from '@/lib/api';
+import type { CapturedFaceImages } from '@/components/shared/faceCaptureProfile';
 import type { ApiPartner } from '@/lib/api/partners';
 import type { CustomerFormData } from '@/data/mockCustomerForm';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
@@ -35,7 +36,15 @@ export function useCustomerFormActions({
   setIsEditMode,
 }: UseCustomerFormActionsOptions) {
   const [createdCustomerCode, setCreatedCustomerCode] = useState<string | null>(null);
-  const [pendingFaceImage, setPendingFaceImage] = useState<Blob | null>(null);
+  const [pendingFaceImages, setPendingFaceImages] = useState<readonly Blob[]>([]);
+  const pendingFaceImage = pendingFaceImages[0] ?? null;
+  const setPendingFaceImage = useCallback((image: CapturedFaceImages) => {
+    if (!image) {
+      setPendingFaceImages([]);
+      return;
+    }
+    setPendingFaceImages(Array.isArray(image) ? image : [image]);
+  }, []);
 
   const getCustomerCode = useCallback((): string | null | undefined => {
     if (!selectedCustomerId) return undefined;
@@ -158,13 +167,15 @@ export function useCustomerFormActions({
         setIsEditMode(false);
       } else {
         const created = await createCustomer(data);
-        if (pendingFaceImage) {
+        if (pendingFaceImages.length > 0) {
           try {
-            await registerFace(created.id, pendingFaceImage);
+            for (const image of pendingFaceImages) {
+              await registerFace(created.id, image, 'profile_register');
+            }
           } catch (err) {
             console.error('Post-save face registration failed:', err);
           }
-          setPendingFaceImage(null);
+          setPendingFaceImages([]);
         }
         setCreatedCustomerCode(created.code ?? null);
         setShowForm(false);
@@ -179,7 +190,7 @@ export function useCustomerFormActions({
       refetchProfile,
       setShowForm,
       setIsEditMode,
-      pendingFaceImage,
+      pendingFaceImages,
     ],
   );
 

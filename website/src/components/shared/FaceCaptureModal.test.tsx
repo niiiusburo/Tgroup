@@ -123,10 +123,11 @@ describe('FaceCaptureModal', () => {
 
     await waitForCameraStart();
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(220);
+      await vi.advanceTimersByTimeAsync(320);
     });
 
     expect(screen.getByText('Đã phát hiện khuôn mặt')).toBeInTheDocument();
+    expect(screen.getByText('Chất lượng 100%')).toBeInTheDocument();
     expect(screen.getByTestId('face-outline').firstElementChild?.className).toContain(
       'border-emerald-400',
     );
@@ -142,11 +143,40 @@ describe('FaceCaptureModal', () => {
 
     await waitForCameraStart();
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(1000);
+      await vi.advanceTimersByTimeAsync(1800);
     });
 
     expect(onCapture).toHaveBeenCalledTimes(1);
     expect(onCapture.mock.calls[0][0]).toBeInstanceOf(Blob);
+  });
+
+  it('guides profile capture through straight, left, and right samples', async () => {
+    mockVideoWidth = 640;
+    mockVideoHeight = 480;
+    const onCapture = vi.fn();
+
+    render(<FaceCaptureModal isOpen captureMode="profile" onCapture={onCapture} onCancel={vi.fn()} />);
+
+    await waitForCameraStart();
+    expect(screen.getByText('Bước 1/3: Nhìn thẳng')).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Chụp/i }));
+    });
+    expect(screen.getByText('Bước 2/3: Quay đầu sang trái')).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Chụp/i }));
+    });
+    expect(screen.getByText('Bước 3/3: Quay đầu sang phải')).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Chụp/i }));
+    });
+
+    expect(onCapture).toHaveBeenCalledTimes(1);
+    expect(onCapture.mock.calls[0][0]).toBeInstanceOf(Blob);
+    expect(onCapture.mock.calls[0][1]).toHaveLength(3);
   });
 
   it('displays camera error message when access is denied', async () => {

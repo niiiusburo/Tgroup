@@ -37,7 +37,7 @@ export function LeftPanel({ formApi }: LeftPanelProps) {
               prev.filter((e) => !Object.keys(fields).includes(e.field))
               );
             }}
-            onFaceIdResult={(customer, imageBlob) => {
+            onFaceIdResult={(customer, imageBlob, imageBlobs) => {
               if (customer) {
                 setFormData((prev) => ({ ...prev, ...customer }));
                 setErrors((prev) =>
@@ -45,7 +45,7 @@ export function LeftPanel({ formApi }: LeftPanelProps) {
                 );
                 setPendingFaceImage(null);
               } else {
-                setPendingFaceImage(imageBlob ?? null);
+                setPendingFaceImage(imageBlobs?.length ? imageBlobs : imageBlob ?? null);
               }
             }} />
           
