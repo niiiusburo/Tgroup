@@ -157,6 +157,36 @@ describe('useFaceRecognition', () => {
     await waitFor(() => expect(result.current.faceStatus).toBeNull());
   });
 
+  it('recognize handles non-Error exceptions', async () => {
+    vi.mocked(api.recognizeFace).mockRejectedValue('string-error');
+
+    const { result } = renderHook(() => useFaceRecognition());
+    result.current.recognize(new Blob(['img']));
+
+    await waitFor(() => expect(result.current.recognizeState.status).toBe('error'));
+    const state = result.current.recognizeState as { status: 'error'; message: string };
+    expect(state.message).toBe('faceRecognition.recognizeFailed');
+  });
+
+  it('register handles non-Error exceptions', async () => {
+    vi.mocked(api.registerFace).mockRejectedValue(123);
+
+    const { result } = renderHook(() => useFaceRecognition());
+    await expect(result.current.register('p-1', new Blob(['img']))).rejects.toBe(123);
+    await waitFor(() => expect(result.current.registerState.status).toBe('error'));
+    const state = result.current.registerState as { status: 'error'; message: string };
+    expect(state.message).toBe('faceRecognition.registerFailed');
+  });
+
+  it('recognize returns empty result on error', async () => {
+    vi.mocked(api.recognizeFace).mockRejectedValue(new Error('fail'));
+
+    const { result } = renderHook(() => useFaceRecognition());
+    const returnValue = await result.current.recognize(new Blob(['img']));
+
+    expect(returnValue).toEqual({ match: null, candidates: [] });
+  });
+
   it('reset clears both states', async () => {
     vi.mocked(api.recognizeFace).mockResolvedValue({
       match: { partnerId: 'p-1', name: 'Alice', code: 'T001', phone: '0901', confidence: 0.95 },
