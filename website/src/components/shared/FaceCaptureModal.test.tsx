@@ -51,4 +51,52 @@ describe('FaceCaptureModal', () => {
       expect(screen.queryByText('Chụp')).not.toBeInTheDocument();
     });
   });
+
+  it('renders face outline overlay', async () => {
+    render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
+    await vi.waitFor(() => {
+      expect(screen.getByTestId('face-outline')).toBeInTheDocument();
+    });
+  });
+
+  it('displays camera error message when access is denied', async () => {
+    mockGetUserMedia.mockRejectedValue(new Error('Camera denied'));
+    render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
+    await vi.waitFor(() => {
+      expect(screen.getByText(/camera/i)).toBeInTheDocument();
+    });
+  });
+
+  it('has video element in the DOM when open', async () => {
+    render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
+    await vi.waitFor(() => {
+      expect(document.querySelector('video')).toBeInTheDocument();
+    });
+  });
+
+  it('has close button with X icon', async () => {
+    render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
+    const closeBtn = await screen.findByLabelText('Close');
+    expect(closeBtn).toBeInTheDocument();
+  });
+
+  it('calls onCancel when close button is clicked', async () => {
+    const onCancel = vi.fn();
+    render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={onCancel} />);
+    fireEvent.click(await screen.findByLabelText('Close'));
+    expect(onCancel).toHaveBeenCalled();
+  });
+
+  it('does not render when isOpen is false', () => {
+    const { container } = render(
+      <FaceCaptureModal isOpen={false} onCapture={vi.fn()} onCancel={vi.fn()} />,
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('renders camera icon in capture button', async () => {
+    render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
+    const captureBtn = await screen.findByText('Chụp');
+    expect(captureBtn).toBeInTheDocument();
+  });
 });

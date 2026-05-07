@@ -117,7 +117,7 @@ export function FaceCaptureModal({
                 muted
                 className="absolute inset-0 w-full h-full object-cover" />
               
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none" data-testid="face-outline">
                   <div className="w-32 h-40 border-2 border-white/70 rounded-[50%]" />
                 </div>
               </div>
