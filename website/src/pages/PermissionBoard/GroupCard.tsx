@@ -7,6 +7,8 @@ export interface GroupCardProps {
   onClick: () => void;
 }
 
+import { ExpandableText } from '@/components/shared/ExpandableText';
+
 export function GroupCard({ group, memberCount, isSelected, onClick }: GroupCardProps) {
   return (
     <button
@@ -31,7 +33,7 @@ export function GroupCard({ group, memberCount, isSelected, onClick }: GroupCard
             )}
           </div>
           {group.description && (
-            <div className="text-xs text-gray-400 mt-0.5 truncate">{group.description}</div>
+            <div className="text-xs text-gray-400 mt-0.5"><ExpandableText text={group.description} maxLines={1} className="text-xs text-gray-400" /></div>
           )}
           <div className="flex gap-2 mt-2 flex-wrap">
             <span

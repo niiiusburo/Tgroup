@@ -21,6 +21,7 @@ import { ExportPreviewModal } from '@/components/shared/ExportPreviewModal';
 import { useExport } from '@/hooks/useExport';
 import { CategoryAddModal, ServiceFormModal, type ServiceFormData } from '@/components/services/ServiceCatalogModals';
 import { ServiceCatalogTable } from '@/components/services/ServiceCatalogTable';
+import { ExpandableText } from '@/components/shared/ExpandableText';
 
 // ─── Main Page ───────────────────────────────────────────────────
 
@@ -269,7 +270,7 @@ export function ServiceCatalog() {
                     : 'text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                <span className="truncate">{cat.name}</span>
+                <ExpandableText text={cat.name} maxLines={1} className="text-sm" />
                 <span className="text-xs text-gray-400 ml-2">{cat.product_count}</span>
               </button>
             ))}

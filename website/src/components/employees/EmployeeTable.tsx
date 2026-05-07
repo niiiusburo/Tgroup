@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge, type StatusVariant } from '@/components/shared/StatusBadge';
 import { Edit3, MapPin } from 'lucide-react';
+import { ExpandableText } from '@/components/shared/ExpandableText';
 import {
   ROLE_LABELS,
   ROLE_STYLES,
@@ -49,8 +50,8 @@ function useColumns(
             {emp.avatar}
           </div>
           <div className="min-w-0">
-            <p className="font-medium text-gray-900 truncate">{emp.name}</p>
-            <p className="text-xs text-gray-500 truncate">{emp.email}</p>
+            <p className="font-medium text-gray-900"><ExpandableText text={emp.name} maxLines={1} className="text-sm font-medium text-gray-900" /></p>
+            <p className="text-xs text-gray-500"><ExpandableText text={emp.email} maxLines={1} className="text-xs text-gray-500" /></p>
           </div>
         </div>
       ),

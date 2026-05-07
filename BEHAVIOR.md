@@ -54,7 +54,26 @@ If behavior is accepted as product truth, promote it here or to a domain runbook
 - Staff-facing integration errors should say what action failed and whether the issue is credentials, customer match, network, or upstream data.
 - Compreface is optional for core app startup; face-recognition failures must not block unrelated customer workflows.
 
-## 8. Localization
+## 8. Text Overflow And Truncation
+
+Any user-visible text that can exceed its container width must be handled consistently:
+
+- **Default to truncation** with CSS `line-clamp` (1–3 lines depending on cell density).
+- **Overflow detection** must be runtime-measured (`scrollHeight > clientHeight`); do not assume overflow based on character count.
+- **Hover tooltip** must reveal the full text when truncation is active.
+- **Expand/collapse button** must appear when overflow is detected, allowing staff to toggle the full text inline.
+- **Table cells** must use `TruncatedCell` (or equivalent) so expand-toggle clicks do not trigger row-selection or navigation.
+- **Never use browser-native `title` alone** as the primary overflow remedy; it is slow, unstyled, and inaccessible.
+
+Surfaces that must apply this rule include, but are not limited to:
+- DataTable columns: employee names, roles, location lists, customer emails, service names, feedback previews.
+- Calendar cards: customer names, service names, dentist names.
+- Payment and deposit history: notes, method descriptions.
+- Settings panels: permission group descriptions, SEO titles/descriptions.
+
+Component reference: `website/src/components/shared/ExpandableText.tsx`.
+
+## 9. Localization
 
 - New user-visible text needs English and Vietnamese keys.
 - Do not mix hardcoded English labels into Vietnamese operational pages unless the product decision is explicit.

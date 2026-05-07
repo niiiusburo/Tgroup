@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.30.3",
+    "date": "2026-05-07",
+    "commit": "pending",
+    "highlights": "feat(face-id): auto-capture Face ID scan and strict match confidence",
+    "sections": [
+      {
+        "title": "Face ID",
+        "items": [
+          "FaceCaptureModal now scans automatically after camera open and captures after several stable high-quality frames.",
+          "The privacy-blurred camera preview shows scan status, a quality bar, and a green face oval when ready.",
+          "Face matching now requires 95% confidence for automatic match and 85% confidence for the candidate dropdown, so 41% no longer passes."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Expanded modal unit coverage for auto-capture and green detection feedback.",
+          "Added backend threshold coverage for 41%, 85%, and 95% Face ID confidence behavior."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.30.2",
     "date": "2026-05-07",
     "commit": "pending",

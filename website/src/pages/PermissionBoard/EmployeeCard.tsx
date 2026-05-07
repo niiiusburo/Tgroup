@@ -1,4 +1,5 @@
 import type { PermissionGroup, EmployeePermission } from '@/lib/api';
+import { ExpandableText } from '@/components/shared/ExpandableText';
 import { getInitials, getRoleLabel } from './constants';
 
 interface EmployeeCardProps {
@@ -35,9 +36,9 @@ export function EmployeeCard({ emp, group, effectiveCount, isSelected, isDimmed,
           {initials}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-[13px] text-gray-900 truncate">{emp.employeeName}</div>
+          <div className="font-semibold text-[13px] text-gray-900"><ExpandableText text={emp.employeeName} maxLines={1} className="text-[13px] font-semibold text-gray-900" /></div>
           {emp.employeeEmail && (
-            <div className="text-[11px] text-gray-500 truncate">{emp.employeeEmail}</div>
+            <div className="text-[11px] text-gray-500"><ExpandableText text={emp.employeeEmail} maxLines={1} className="text-[11px] text-gray-500" /></div>
           )}
           <div className="text-[11px] text-gray-400">{getRoleLabel(emp)}</div>
         </div>

@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { MapPin, Clock } from 'lucide-react';
+import { ExpandableText } from '@/components/shared/ExpandableText';
 import {
   ROLE_LABELS,
   ROLE_STYLES,
@@ -42,7 +43,7 @@ export function EmployeeCard({ employee, isSelected, onSelect }: EmployeeCardPro
           {employee.avatar}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="font-semibold text-gray-900 truncate">{employee.name}</p>
+          <p className="font-semibold text-gray-900"><ExpandableText text={employee.name} maxLines={1} className="text-sm font-semibold text-gray-900" /></p>
           <div className="flex items-center gap-1.5 mt-0.5">
             <span className={`inline-block w-2 h-2 rounded-full ${
               employee.status === 'active' ? 'bg-green-500' :

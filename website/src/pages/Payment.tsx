@@ -27,6 +27,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ExportMenu } from '@/components/shared/ExportMenu';
 import { ExportPreviewModal } from '@/components/shared/ExportPreviewModal';
 import { useExport } from '@/hooks/useExport';
+import { ExpandableText } from '@/components/shared/ExpandableText';
 
 type ActiveTab = 'payments' | 'plans';
 
@@ -347,7 +348,7 @@ export function Payment() {
                         <span className="font-medium text-gray-900 text-sm">{plan.customerName}</span>
                         {hasOverdue && <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />}
                       </div>
-                      <p className="text-xs text-gray-500 truncate">{plan.treatmentDescription}</p>
+                      <p className="text-xs text-gray-500"><ExpandableText text={plan.treatmentDescription} maxLines={1} className="text-xs text-gray-500" /></p>
                       <div className="flex items-center justify-between mt-2">
                         <span className="text-xs text-gray-400">{paidCount}/{plan.numberOfInstallments} {t('paid')}</span>
                         <span className="text-xs font-medium text-gray-700">{formatVND(plan.totalAmount)}</span>

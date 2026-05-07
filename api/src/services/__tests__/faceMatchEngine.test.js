@@ -1,10 +1,22 @@
 'use strict';
 
 const originalEnv = process.env;
+const faceEnvKeys = [
+  'FACE_AUTO_MATCH_THRESHOLD',
+  'FACE_CANDIDATE_THRESHOLD',
+  'FACE_AUTO_MATCH_MARGIN',
+  'FACE_MAX_CANDIDATES',
+];
 
 function loadEngine(env = {}) {
   jest.resetModules();
-  process.env = { ...originalEnv, ...env };
+  process.env = { ...originalEnv };
+  for (const key of faceEnvKeys) {
+    if (!(key in env)) {
+      delete process.env[key];
+    }
+  }
+  Object.assign(process.env, env);
   const mockQuery = jest.fn();
   jest.doMock('../../db', () => ({ query: mockQuery }));
   const mod = require('../faceMatchEngine');
@@ -57,6 +69,44 @@ describe('findMatches', () => {
     query.mockResolvedValueOnce(null);
     const result = await findMatches([0.1, 0.2, 0.3]);
     expect(result.match).toBeNull();
+    expect(result.candidates).toEqual([]);
+  });
+
+  it('uses conservative defaults so 41% confidence does not pass', async () => {
+    const { findMatches, query } = loadEngine();
+    query.mockResolvedValueOnce([
+      { partner_id: 'p1', embedding: [0.41], name: 'Alice', phone: '0901', ref: 'T001' },
+    ]);
+
+    const result = await findMatches([1]);
+
+    expect(result.match).toBeNull();
+    expect(result.candidates).toEqual([]);
+  });
+
+  it('uses default candidate review at 85% confidence', async () => {
+    const { findMatches, query } = loadEngine();
+    query.mockResolvedValueOnce([
+      { partner_id: 'p1', embedding: [0.85], name: 'Alice', phone: '0901', ref: 'T001' },
+    ]);
+
+    const result = await findMatches([1]);
+
+    expect(result.match).toBeNull();
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].confidence).toBe(0.85);
+  });
+
+  it('uses default auto-match only at 95% confidence', async () => {
+    const { findMatches, query } = loadEngine();
+    query.mockResolvedValueOnce([
+      { partner_id: 'p1', embedding: [0.95], name: 'Alice', phone: '0901', ref: 'T001' },
+    ]);
+
+    const result = await findMatches([1]);
+
+    expect(result.match).not.toBeNull();
+    expect(result.match.confidence).toBe(0.95);
     expect(result.candidates).toEqual([]);
   });
 

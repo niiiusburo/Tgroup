@@ -3,6 +3,9 @@
     "name": "TG Clinic",
     "loading": "Loading..."
   },
+  "states": {
+    "loading": "Loading..."
+  },
   "actions": "Actions",
   "table": {
     "noData": "No data available",
@@ -252,6 +255,9 @@
     "capture": "Capture",
     "switchCamera": "Switch camera",
     "cameraStarting": "Starting camera...",
+    "scanning": "Scanning for face...",
+    "faceDetected": "Face detected",
+    "autoCapturing": "Auto capturing...",
     "cameraError": "Cannot access camera. Please grant permission."
   },
   "combobox": {
