@@ -105,6 +105,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/INPUT_SIZE/i);
     });
 
+    it('defines INPUT_SIZE for YuNet', () => {
+      expect(content).toMatch(/INPUT_SIZE/i);
+    });
+
     it('configures score_threshold for YuNet', () => {
       expect(content).toMatch(/score_threshold/i);
     });
