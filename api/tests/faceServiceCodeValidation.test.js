@@ -28,6 +28,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/import cv2/i);
     });
 
+    it('imports PIL Image', () => {
+      expect(content).toMatch(/from PIL import Image/i);
+    });
+
     it('imports FastAPI', () => {
       expect(content).toMatch(/from fastapi import FastAPI/i);
     });
