@@ -133,7 +133,7 @@ describe('GET /api/Partners (customer visibility)', () => {
       .set('x-mock-permissions', mockPermissions(['customers.search'], [{ id: 'loc-a', name: 'Clinic A' }]));
 
     expect(res.status).toBe(403);
-    expect(res.body.error).toContain('Search parameter is required');
+    expect(res.body.error).toContain('Search required: enter at least 2 characters to find customers');
     expect(res.body.totalItems).toBe(0);
   });
 
@@ -144,7 +144,7 @@ describe('GET /api/Partners (customer visibility)', () => {
       .set('x-mock-permissions', mockPermissions(['customers.search'], [{ id: 'loc-a', name: 'Clinic A' }]));
 
     expect(res.status).toBe(403);
-    expect(res.body.error).toContain('Search parameter is required');
+    expect(res.body.error).toContain('Search required: enter at least 2 characters to find customers');
   });
 
   it('allows search for search-only user with valid search param', async () => {

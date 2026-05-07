@@ -77,11 +77,17 @@ async function listPartners(req, res) {
     } = req.query;
 
     // Enforce search-only access for users without customers.view_all
-    const perms = req.userPermissions || [];
+    const { effectivePermissions: perms = [] } = req.userPermissions || {};
     const canViewAll = perms.includes('*') || perms.includes('customers.view_all') || perms.includes('customers.view');
-    if (!canViewAll && (!search || String(search).trim().length < 2)) {
+    const search = typeof req.query.search === 'string' ? req.query.search.trim() : '';
+    if (!canViewAll && (!search || search.length < 2)) {
       return res.status(403).json({
         error: 'Search required: enter at least 2 characters to find customers',
+        offset: 0,
+        limit: 20,
+        totalItems: 0,
+        items: [],
+        aggregates: { total: 0, active: 0, inactive: 0 },
       });
     }
 
