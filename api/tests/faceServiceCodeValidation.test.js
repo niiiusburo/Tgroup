@@ -508,6 +508,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/except Exception/i);
     });
 
+    it('uses try blocks for error handling', () => {
+      expect(content).toMatch(/try:/i);
+    });
+
     it('uses f-strings for formatted messages', () => {
       expect(content).toMatch(/f"/i);
     });
