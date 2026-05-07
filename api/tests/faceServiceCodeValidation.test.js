@@ -12,6 +12,10 @@ describe('face-service code validation', () => {
       content = fs.readFileSync(path.join(faceServiceDir, 'main.py'), 'utf8');
     });
 
+    it('imports typing modules List and Optional', () => {
+      expect(content).toMatch(/from typing import/i);
+    });
+
     it('imports os module', () => {
       expect(content).toMatch(/import os/i);
     });
