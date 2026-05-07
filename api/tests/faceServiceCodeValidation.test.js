@@ -583,6 +583,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/quality/i);
     });
 
+    it('uses start variable for timing', () => {
+      expect(content).toMatch(/start/i);
+    });
+
     it('uses f-strings for formatted messages', () => {
       expect(content).toMatch(/f"/i);
     });
