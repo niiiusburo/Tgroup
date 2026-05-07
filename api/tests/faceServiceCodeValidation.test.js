@@ -630,6 +630,22 @@ describe('face-service code validation', () => {
     it('uses as keyword for exception binding', () => {
       expect(content).toMatch(/except.*as /i);
     });
+
+    it('uses def for function definitions', () => {
+      expect(content).toMatch(/def /i);
+    });
+
+    it('uses async for async functions', () => {
+      expect(content).toMatch(/async /i);
+    });
+
+    it('uses await for async operations', () => {
+      expect(content).toMatch(/await /i);
+    });
+
+    it('uses from for imports', () => {
+      expect(content).toMatch(/from /i);
+    });
   });
 
   describe('Dockerfile', () => {
