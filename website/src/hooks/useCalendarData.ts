@@ -47,9 +47,6 @@ export async function fetchAllCalendarAppointments(params: CalendarAppointmentQu
     }
 
     offset += response.items.length;
-    if (response.totalItems != null && offset >= response.totalItems) {
-      shouldFetchNextPage = false;
-    }
   }
 
   return items;

@@ -6,6 +6,7 @@
  * Cards show: status badge, customer name, phone, doctor, time, service
  */
 
+import { memo, useEffect, useMemo, useState } from 'react';
 import { CalendarDays, Phone, User, Users, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTimezone } from '@/contexts/TimezoneContext';
@@ -47,6 +48,9 @@ function formatDateKey(date: Date): string {
 }
 
 const WEEKDAY_NAME_KEYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
+const INITIAL_VISIBLE_APPOINTMENTS = 48;
+const APPOINTMENT_RENDER_CHUNK = 96;
+const APPOINTMENT_RENDER_DELAY_MS = 16;
 
 function formatDateDisplay(date: Date): string {
   return date.toLocaleDateString('vi-VN', {
@@ -55,7 +59,7 @@ function formatDateDisplay(date: Date): string {
   });
 }
 
-function AppointmentCard({
+const AppointmentCard = memo(function AppointmentCard({
   appointment,
   onClick,
   onEdit,
@@ -194,7 +198,107 @@ function AppointmentCard({
       )}
     </div>
   );
+});
+
+interface WeekDayColumnProps {
+  readonly date: Date;
+  readonly dayNameKey: typeof WEEKDAY_NAME_KEYS[number];
+  readonly isToday: boolean;
+  readonly appointments: readonly CalendarAppointment[];
+  readonly onAppointmentClick?: (appointment: CalendarAppointment) => void;
+  readonly onAppointmentEdit?: (appointment: CalendarAppointment) => void;
+  readonly onMarkArrived?: (id: string) => void;
+  readonly onUpdateStatus?: (id: string, phase: import('@/lib/appointmentStatusMapping').CalendarPhase) => void;
 }
+
+const WeekDayColumn = memo(function WeekDayColumn({
+  date,
+  dayNameKey,
+  isToday,
+  appointments,
+  onAppointmentClick,
+  onAppointmentEdit,
+  onMarkArrived,
+  onUpdateStatus,
+}: WeekDayColumnProps) {
+  const { t } = useTranslation('calendar');
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_APPOINTMENTS);
+  const sortedAppointments = useMemo(
+    () => [...appointments].sort((a, b) => a.startTime.localeCompare(b.startTime)),
+    [appointments]
+  );
+
+  useEffect(() => {
+    setVisibleCount(INITIAL_VISIBLE_APPOINTMENTS);
+  }, [sortedAppointments]);
+
+  useEffect(() => {
+    if (visibleCount >= sortedAppointments.length) return;
+    const timer = window.setTimeout(() => {
+      setVisibleCount((count) => Math.min(count + APPOINTMENT_RENDER_CHUNK, sortedAppointments.length));
+    }, APPOINTMENT_RENDER_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [visibleCount, sortedAppointments.length]);
+
+  const visibleAppointments = sortedAppointments.slice(0, visibleCount);
+
+  return (
+    <div
+      className={cn(
+        'border-r border-gray-100 last:border-r-0 min-w-0',
+        isToday && 'bg-orange-50/30 ring-2 ring-inset ring-orange-400'
+      )}
+    >
+      {/* Day header */}
+      <div
+        className={cn(
+          'text-center py-3 border-b border-gray-100',
+          isToday && 'bg-orange-100'
+        )}
+      >
+        <div
+          className={cn(
+            'text-sm font-semibold',
+            isToday ? 'text-orange-700' : 'text-gray-900'
+          )}
+        >
+          {formatDateDisplay(date)}
+        </div>
+        <div
+          className={cn(
+            'text-xs mt-0.5',
+            isToday ? 'text-orange-600' : 'text-gray-500'
+          )}
+        >
+          {t(`weekDays.${dayNameKey}`)}
+        </div>
+      </div>
+
+      {/* Appointments */}
+      <div className="p-2.5 min-h-[400px] max-h-[65vh] overflow-y-auto overscroll-contain">
+        {sortedAppointments.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-24 text-gray-300">
+            <CalendarDays className="w-6 h-6 mb-1" />
+            <span className="text-xs">{`${t('noAppointments', { ns: 'calendar' })}`}</span>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {visibleAppointments.map((apt) => (
+              <AppointmentCard
+                key={apt.id}
+                appointment={apt}
+                onClick={onAppointmentClick}
+                onEdit={onAppointmentEdit}
+                onMarkArrived={onMarkArrived}
+                onUpdateStatus={onUpdateStatus}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+});
 
 export function WeekView({
   weekDates,
@@ -204,7 +308,6 @@ export function WeekView({
   onMarkArrived,
   onUpdateStatus,
 }: WeekViewProps) {
-  const { t } = useTranslation('calendar');
   const { getToday } = useTimezone();
   const todayKey = getToday();
 
@@ -217,66 +320,19 @@ export function WeekView({
           const dateKey = formatDateKey(date);
           const isToday = dateKey === todayKey;
           const appointments = getAppointmentsForDate(date);
-          const sortedAppointments = [...appointments].sort((a, b) =>
-            a.startTime.localeCompare(b.startTime)
-          );
 
           return (
-            <div
+            <WeekDayColumn
               key={dateKey}
-              className={cn(
-                'border-r border-gray-100 last:border-r-0 min-w-0',
-                isToday && 'bg-orange-50/30 ring-2 ring-inset ring-orange-400'
-              )}
-            >
-              {/* Day header */}
-              <div
-                className={cn(
-                  'text-center py-3 border-b border-gray-100',
-                  isToday && 'bg-orange-100'
-                )}
-              >
-                <div
-                  className={cn(
-                    'text-sm font-semibold',
-                    isToday ? 'text-orange-700' : 'text-gray-900'
-                  )}
-                >
-                  {formatDateDisplay(date)}
-                </div>
-                <div
-                  className={cn(
-                    'text-xs mt-0.5',
-                    isToday ? 'text-orange-600' : 'text-gray-500'
-                  )}
-                >
-                  {t(`weekDays.${WEEKDAY_NAME_KEYS[index]}`)}
-                </div>
-              </div>
-
-              {/* Appointments */}
-              <div className="p-2.5 min-h-[400px] max-h-[65vh] overflow-y-auto overscroll-contain">
-                {sortedAppointments.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-24 text-gray-300">
-                    <CalendarDays className="w-6 h-6 mb-1" />
-                    <span className="text-xs">{`${t('noAppointments', { ns: 'calendar' })}`}</span>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-2">
-                    {sortedAppointments.map((apt) => (
-                      <AppointmentCard
-                        key={apt.id}
-                        appointment={apt}
-                        onClick={onAppointmentClick}
-                        onEdit={onAppointmentEdit}
-                        onMarkArrived={onMarkArrived}
-                        onUpdateStatus={onUpdateStatus}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+              date={date}
+              dayNameKey={WEEKDAY_NAME_KEYS[index]}
+              isToday={isToday}
+              appointments={appointments}
+              onAppointmentClick={onAppointmentClick}
+              onAppointmentEdit={onAppointmentEdit}
+              onMarkArrived={onMarkArrived}
+              onUpdateStatus={onUpdateStatus}
+            />
           );
         })}
         </div>

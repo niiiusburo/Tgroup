@@ -1,5 +1,26 @@
 [
     {
+        "version": "0.29.1",
+        "date": "2026-05-07",
+        "commit": "pending",
+        "highlights": "fix(calendar): speed up large week calendar loads",
+        "sections": [
+            {
+                "title": "Bug Fixes",
+                "items": [
+                    "Calendar week view now renders appointment cards progressively so large week ranges can paint before every card is mounted.",
+                    "Calendar no-count pagination now continues past a full 3,000-row page, so large week and month ranges do not stop early."
+                ]
+            },
+            {
+                "title": "Testing",
+                "items": [
+                    "Added focused coverage for exact-full calendar pagination pages."
+                ]
+            }
+        ]
+    },
+    {
         "version": "0.29.0",
         "date": "2026-05-07",
         "commit": "pending",
