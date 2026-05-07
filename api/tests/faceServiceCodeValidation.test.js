@@ -575,6 +575,14 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/pil_img/i);
     });
 
+    it('uses model variable for model metadata', () => {
+      expect(content).toMatch(/model/i);
+    });
+
+    it('uses quality variable for quality metadata', () => {
+      expect(content).toMatch(/quality/i);
+    });
+
     it('uses f-strings for formatted messages', () => {
       expect(content).toMatch(/f"/i);
     });
