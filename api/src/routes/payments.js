@@ -5,6 +5,7 @@ const { requirePermission } = require("../middleware/auth");
 const { validate } = require("../middleware/validate");
 const { PaymentCreateSchema, PaymentUpdateSchema } = require("@tgroup/contracts");
 const { generateReceiptNumber, mapAllocations, rowsFrom, validateAllocationResidual } = require("./payments/helpers");
+const { resolveEffectivePermissions } = require("../services/permissionService");
 const {
   getPaymentById,
   listDepositUsage,
@@ -71,14 +72,15 @@ router.post("/", requirePermission(['payment.edit', 'payment.add']), validate(Pa
         customer_id, service_id, amount, method, notes,
         payment_date, reference_code, status,
         deposit_used, cash_amount, bank_amount,
-        deposit_type, receipt_number, payment_category
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+        deposit_type, receipt_number, payment_category, created_by
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING *`,
       [
         customer_id, service_id || null, amount, method, notes || null,
         payment_date || null, reference_code || null, status || "posted",
         deposit_used || 0, cash_amount || 0, bank_amount || 0,
         deposit_type || null, receipt_number || null, payment_category,
+        req.user.employeeId,
       ]
     );
 
@@ -142,6 +144,10 @@ router.post("/", requirePermission(['payment.edit', 'payment.add']), validate(Pa
       receiptNumber: row.receipt_number,
       depositType: row.deposit_type,
       createdAt: row.created_at,
+      createdBy: row.created_by,
+      confirmedAt: row.confirmed_at,
+      confirmedBy: row.confirmed_by,
+      confirmationNotes: row.confirmation_notes,
       allocations: mapAllocations(createdAllocations.map(a => ({
         id: a.id,
         invoice_id: a.invoice_id,
@@ -179,13 +185,14 @@ router.post("/refund", requirePermission(['payment.edit', 'payment.refund']), as
       `INSERT INTO payments (
         customer_id, amount, method, notes,
         payment_date, status, deposit_type, receipt_number,
-        deposit_used, cash_amount, bank_amount, payment_category
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        deposit_used, cash_amount, bank_amount, payment_category, created_by
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *`,
       [
         customer_id, -Math.abs(amount), method, notes || null,
         payment_date || null, "posted", "refund", receipt_number,
         0, 0, 0, "deposit",
+        req.user.employeeId,
       ]
     );
 
@@ -201,6 +208,10 @@ router.post("/refund", requirePermission(['payment.edit', 'payment.refund']), as
       receiptNumber: row.receipt_number,
       depositType: row.deposit_type,
       createdAt: row.created_at,
+      createdBy: row.created_by,
+      confirmedAt: row.confirmed_at,
+      confirmedBy: row.confirmed_by,
+      confirmationNotes: row.confirmation_notes,
     });
   } catch (error) {
     console.error("Error creating refund:", error);
@@ -259,6 +270,10 @@ router.patch("/:id", requirePermission(['payment.edit', 'payment.update']), vali
       receiptNumber: row.receipt_number,
       depositType: row.deposit_type,
       createdAt: row.created_at,
+      createdBy: row.created_by,
+      confirmedAt: row.confirmed_at,
+      confirmedBy: row.confirmed_by,
+      confirmationNotes: row.confirmation_notes,
     });
   } catch (error) {
     console.error("Error updating payment:", error);
@@ -356,6 +371,108 @@ router.post("/:id/void", requirePermission(['payment.edit', 'payment.void']), as
     res.status(500).json({ error: "Failed to void payment" });
   } finally {
     client.release();
+  }
+});
+
+// POST /api/Payments/:id/confirm - Confirm or unconfirm a payment
+router.post("/:id/confirm", requirePermission('payment.confirm'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { confirmed, notes } = req.body;
+    const employeeId = req.user.employeeId;
+
+    if (typeof confirmed !== 'boolean') {
+      return res.status(400).json({ error: "confirmed (boolean) is required" });
+    }
+
+    const { effectivePermissions } = await resolveEffectivePermissions(employeeId);
+    const isSuperAdmin = effectivePermissions.includes('*');
+
+    // Fetch payment row
+    const paymentRows = await query(
+      `SELECT id, status, service_id, created_by FROM payments WHERE id = $1`,
+      [id]
+    );
+
+    if (paymentRows.length === 0) {
+      return res.status(404).json({ error: "Payment not found" });
+    }
+
+    const payment = paymentRows[0];
+
+    // Business rules:
+    // - Super Admins can override
+    // - Dentists can only confirm payments they created or for their assigned appointments
+    // - Admins (non-super, non-dentist) cannot confirm/unconfirm
+    if (!isSuperAdmin) {
+      const employeeRows = await query(
+        `SELECT isdoctor FROM partners WHERE id = $1 AND employee = true AND isdeleted = false`,
+        [employeeId]
+      );
+      const isDentist = employeeRows.length > 0 && employeeRows[0].isdoctor === true;
+
+      if (!isDentist) {
+        return res.status(403).json({ error: "Admins cannot confirm/unconfirm payments" });
+      }
+
+      // Dentist: must be creator OR service assigned to them
+      const isCreator = payment.created_by === employeeId;
+      let isAssigned = false;
+      if (!isCreator) {
+        const dkRows = await query(
+          `SELECT 1 FROM dotkhams WHERE doctorid = $1 AND id IN (
+            SELECT service_id FROM payments WHERE id = $2
+            UNION
+            SELECT dotkham_id FROM payment_allocations WHERE payment_id = $2
+          )`,
+          [employeeId, id]
+        );
+        isAssigned = dkRows.length > 0;
+      }
+
+      if (!isCreator && !isAssigned) {
+        return res.status(403).json({ error: "You can only confirm payments you created or for your assigned appointments" });
+      }
+    }
+
+    // Prevent confirming already-voided payments
+    if (confirmed && payment.status === 'voided') {
+      return res.status(400).json({ error: "Cannot confirm a voided payment" });
+    }
+
+    const updateResult = await query(
+      `UPDATE payments
+       SET status = $1,
+           confirmed_at = CASE WHEN $2 = true THEN NOW() ELSE NULL END,
+           confirmed_by = CASE WHEN $2 = true THEN $3 ELSE NULL END,
+           confirmation_notes = CASE WHEN $2 = true THEN $4 ELSE NULL END
+       WHERE id = $5
+       RETURNING *`,
+      [confirmed ? 'confirmed' : 'posted', confirmed, employeeId, notes || null, id]
+    );
+
+    const row = updateResult[0];
+    res.json({
+      id: row.id,
+      customerId: row.customer_id,
+      serviceId: row.service_id,
+      amount: parseFloat(row.amount),
+      method: row.method,
+      notes: row.notes,
+      paymentDate: row.payment_date,
+      referenceCode: row.reference_code,
+      status: row.status,
+      receiptNumber: row.receipt_number,
+      depositType: row.deposit_type,
+      createdAt: row.created_at,
+      createdBy: row.created_by,
+      confirmedAt: row.confirmed_at,
+      confirmedBy: row.confirmed_by,
+      confirmationNotes: row.confirmation_notes,
+    });
+  } catch (error) {
+    console.error("Error confirming payment:", error);
+    res.status(500).json({ error: "Failed to confirm payment" });
   }
 });
 

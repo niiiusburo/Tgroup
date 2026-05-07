@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { fetchSaleOrders, type ApiSaleOrder } from '@/lib/api';
-import { createPayment as createPaymentApi, fetchPayments as fetchPaymentsApi, type ApiPayment } from '@/lib/api/payments';
+import { createPayment as createPaymentApi, fetchPayments as fetchPaymentsApi, confirmPayment as confirmPaymentApi, type ApiPayment } from '@/lib/api/payments';
 import {
   type PaymentRecord,
   type PaymentMethod,
@@ -69,6 +69,7 @@ function mapApiPaymentToPayment(payment: ApiPayment): PaymentRecord {
   const allocation = payment.allocations?.[0];
   const recordId = allocation?.invoiceId ?? allocation?.dotkhamId ?? payment.serviceId ?? payment.id;
   const recordName = allocation?.invoiceCode ?? allocation?.invoiceName ?? allocation?.dotkhamName ?? payment.referenceCode ?? payment.receiptNumber ?? payment.id;
+  const status: PaymentStatus = payment.status === 'voided' ? 'refunded' : payment.status === 'confirmed' ? 'confirmed' : 'completed';
   return {
     id: payment.id,
     customerId: payment.customerId,
@@ -79,7 +80,7 @@ function mapApiPaymentToPayment(payment: ApiPayment): PaymentRecord {
     recordName,
     amount: payment.amount,
     method: payment.method,
-    status: payment.status === 'voided' ? 'refunded' : 'completed',
+    status,
     date: payment.paymentDate || payment.createdAt?.slice(0, 10) || '',
     locationName: '',
     notes: payment.notes || '',
@@ -91,6 +92,11 @@ function mapApiPaymentToPayment(payment: ApiPayment): PaymentRecord {
       bankAmount: payment.bankAmount ?? 0,
     },
     isFullPayment: true,
+    createdBy: payment.createdBy,
+    confirmedAt: payment.confirmedAt,
+    confirmedBy: payment.confirmedBy,
+    confirmedByName: payment.confirmedByName,
+    confirmationNotes: payment.confirmationNotes,
   };
 }
 
@@ -123,6 +129,7 @@ export function usePayment(selectedLocationId?: string) {
   const [statusFilter, setStatusFilter] = useState<PaymentFilter>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Debounce timer ref
@@ -279,6 +286,16 @@ export function usePayment(selectedLocationId?: string) {
     await refreshPayments();
   }, [refreshPayments]);
 
+  const confirmPayment = useCallback(async (paymentId: string, confirmed: boolean, notes?: string) => {
+    setConfirmingId(paymentId);
+    try {
+      await confirmPaymentApi(paymentId, { confirmed, notes });
+      await refreshPayments();
+    } finally {
+      setConfirmingId(null);
+    }
+  }, [refreshPayments]);
+
   const getWalletByCustomer = useCallback(
     (customerId: string) => wallets.find((w) => w.customerId === customerId) ?? null,
     [wallets],
@@ -325,11 +342,13 @@ export function usePayment(selectedLocationId?: string) {
     setSearchTerm,
     createPayment,
     topUpWallet,
+    confirmPayment,
     getWalletByCustomer,
     getOutstandingByCustomer,
     getPaymentsByCustomer,
     getRecordPaymentTrackers,
     isLoading,
+    confirmingId,
     error,
     refetch,
   };

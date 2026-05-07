@@ -1,0 +1,88 @@
+<h2>Face ID V1 Architecture</h2>
+<p class="subtitle">Consolidated design based on your choices: complete loop, candidate review, no-match rescue, and multiple samples per customer.</p>
+
+<div class="section">
+  <div class="label">Architecture</div>
+  <div class="mockup">
+    <div class="mockup-header">Local-only recognition with TGClinic-owned customer records</div>
+    <div class="mockup-body">
+      <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:14px;align-items:stretch">
+        <div class="placeholder" style="min-height:120px;text-align:left;padding:16px">
+          <strong>Browser UI</strong><br>
+          Customer profile register, /customers Face ID search, camera capture modal.
+        </div>
+        <div style="font-size:30px;color:#f97316;align-self:center">→</div>
+        <div class="placeholder" style="min-height:120px;text-align:left;padding:16px">
+          <strong>TGClinic API</strong><br>
+          Owns permissions, partner lookup, register/search endpoints, audit-safe errors.
+        </div>
+        <div style="font-size:30px;color:#f97316;align-self:center">→</div>
+        <div class="placeholder" style="min-height:120px;text-align:left;padding:16px">
+          <strong>Local Face Engine</strong><br>
+          OpenCV YuNet detects face; SFace creates embedding. No cloud calls.
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch;margin-top:16px">
+        <div class="placeholder" style="min-height:110px;text-align:left;padding:16px">
+          <strong>Postgres embeddings table</strong><br>
+          Multiple samples per customer, active/deleted flags, quality metadata.
+        </div>
+        <div style="font-size:30px;color:#f97316;align-self:center">↔</div>
+        <div class="placeholder" style="min-height:110px;text-align:left;padding:16px">
+          <strong>dbo.partners status</strong><br>
+          Existing face_subject_id / face_registered_at remain quick customer status fields.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">V1 Behavior</div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-body">
+        <h3>Register</h3>
+        <p>Register from an existing customer profile, or from a no-match search after staff selects the correct customer.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h3>Search</h3>
+        <p>High-confidence match opens the customer. Medium confidence shows top candidates. No match keeps the image for manual registration.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h3>Improve Over Time</h3>
+        <p>If a customer already has Face ID, new captures add another sample instead of replacing prior samples.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h3>Failure Rules</h3>
+        <p>No face, many faces, blurry image, or engine offline produce clear staff-facing retry states and do not block normal customer work.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Approval Check</h3>
+<p class="subtitle">Does this V1 architecture look right before I write the design spec?</p>
+
+<div class="options">
+  <div class="option" data-choice="approve-architecture" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Approve This Architecture</h3>
+      <p>Proceed to write the Face ID Customer Search design spec from this V1 shape.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="revise-architecture" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Revise Before Spec</h3>
+      <p>Change architecture, workflow, or failure handling before writing the design doc.</p>
+    </div>
+  </div>
+</div>

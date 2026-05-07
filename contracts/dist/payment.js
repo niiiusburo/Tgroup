@@ -12,7 +12,7 @@ exports.PaymentBaseSchema = zod_1.z.object({
     notes: zod_1.z.string().optional().nullable(),
     payment_date: zod_1.z.string().optional().nullable(),
     reference_code: zod_1.z.string().optional().nullable(),
-    status: zod_1.z.enum(["posted", "voided"]).optional().nullable(),
+    status: zod_1.z.enum(["posted", "voided", "confirmed"]).optional().nullable(),
     deposit_used: zod_1.z.coerce.number().optional().nullable(),
     cash_amount: zod_1.z.coerce.number().optional().nullable(),
     bank_amount: zod_1.z.coerce.number().optional().nullable(),

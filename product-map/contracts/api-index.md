@@ -240,8 +240,9 @@ Export permissions are defined by `api/src/services/exports/exportRegistry.js`: 
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| POST | `/recognize` | Perm:`customers.view` | FormData (`image`) | `{ match: { partnerId, name, confidence } \| null }` |
-| POST | `/register` | Perm:`customers.edit` | FormData (`partnerId`, `image`) | `{ success, faceSubjectId }` |
+| POST | `/recognize` | Perm:`customers.view` | FormData (`image`, optional `source`) | `{ status: 'auto_matched' \| 'candidates' \| 'no_match' \| 'error', partnerId?, name?, confidence?, candidates?: { partnerId, name, confidence, phone }[], error? }` |
+| POST | `/register` | Perm:`customers.edit` | FormData (`partnerId`, `image`) | `{ success: true, embeddingId, detectionScore }` |
+| GET | `/status/:partnerId` | Perm:`customers.view` | — | `{ registered: boolean, samplesCount: number, lastRegisteredAt? }` |
 
 ## External Checkups (`/api/ExternalCheckups`)
 

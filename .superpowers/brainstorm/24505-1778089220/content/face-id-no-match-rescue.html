@@ -1,0 +1,81 @@
+<h2>No-Match Rescue Flow</h2>
+<p class="subtitle">Updated from your feedback: keep the captured image and let staff attach it to a searched customer.</p>
+
+<div class="section">
+  <div class="label">V1 Smooth Flow</div>
+  <div class="mockup">
+    <div class="mockup-header">Capture once, then match or register</div>
+    <div class="mockup-body">
+      <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:14px;align-items:stretch">
+        <div class="placeholder" style="min-height:130px;text-align:left;padding:16px">
+          <strong>1. Capture Face</strong><br>
+          Staff scans the walk-in once from Face ID search.
+        </div>
+        <div style="font-size:30px;color:#f97316;align-self:center">→</div>
+        <div class="placeholder" style="min-height:130px;text-align:left;padding:16px">
+          <strong>2. Recognition Result</strong><br>
+          High confidence opens customer. Low confidence shows candidates. No match keeps the captured image.
+        </div>
+        <div style="font-size:30px;color:#f97316;align-self:center">→</div>
+        <div class="placeholder" style="min-height:130px;text-align:left;padding:16px">
+          <strong>3. Staff Search</strong><br>
+          Staff searches by name, phone, or customer code and picks the right customer.
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch;margin-top:16px">
+        <div class="placeholder" style="min-height:120px;text-align:left;padding:16px">
+          <strong>4. Register Captured Face</strong><br>
+          The same image is attached to the chosen customer. No second camera step unless quality failed.
+        </div>
+        <div style="font-size:30px;color:#f97316;align-self:center">→</div>
+        <div class="placeholder" style="min-height:120px;text-align:left;padding:16px">
+          <strong>5. Confirmed Customer</strong><br>
+          Customer profile shows Face ID registered and future Face ID searches can find them.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">What Staff Sees</div>
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">No match state</div>
+      <div class="mockup-body">
+        <div class="placeholder" style="min-height:90px">Captured face preview</div>
+        <input class="mock-input" placeholder="Search customer name, phone, or code">
+        <button class="mock-button">Register this face to selected customer</button>
+      </div>
+    </div>
+    <div class="mockup">
+      <div class="mockup-header">Candidate review state</div>
+      <div class="mockup-body">
+        <div class="placeholder">Top candidate 92% - Select</div>
+        <div class="placeholder">Second candidate 86% - Select</div>
+        <div class="placeholder">Not them - search manually</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Next Design Choice</h3>
+<p class="subtitle">When staff registers a captured face to a customer who already has Face ID, what should happen?</p>
+
+<div class="options">
+  <div class="option" data-choice="add-example" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Add Another Face Sample</h3>
+      <p>Keep old embeddings and add the new capture. Better recognition over time, but more samples per customer.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="replace-after-confirm" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Replace After Confirmation</h3>
+      <p>Ask staff to confirm replacing the existing Face ID. Simpler records, but loses old angle/lighting coverage.</p>
+    </div>
+  </div>
+</div>

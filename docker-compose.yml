@@ -42,8 +42,30 @@ services:
       HOSOONLINE_PASSWORD: ${HOSOONLINE_PASSWORD}
       COMPREFACE_URL: ${COMPREFACE_URL:-http://compreface-api}
       COMPREFACE_API_KEY: ${COMPREFACE_API_KEY}
+      FACE_SERVICE_URL: ${FACE_SERVICE_URL:-http://face-service:8000}
+      FACE_AUTO_MATCH_THRESHOLD: ${FACE_AUTO_MATCH_THRESHOLD:-0.50}
+      FACE_CANDIDATE_THRESHOLD: ${FACE_CANDIDATE_THRESHOLD:-0.363}
+      FACE_AUTO_MATCH_MARGIN: ${FACE_AUTO_MATCH_MARGIN:-0.05}
+      FACE_MAX_CANDIDATES: ${FACE_MAX_CANDIDATES:-3}
+      FACE_DETECTION_THRESHOLD: ${FACE_DETECTION_THRESHOLD:-0.90}
     ports:
       - "127.0.0.1:3002:3002"
+
+  face-service:
+    build:
+      context: ./face-service
+      dockerfile: Dockerfile
+    container_name: tgroup-face-service
+    restart: unless-stopped
+    environment:
+      DETECTION_THRESHOLD: ${FACE_DETECTION_THRESHOLD:-0.90}
+    ports:
+      - "127.0.0.1:8001:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   compreface-postgres-db:
     image: postgres:11.5-alpine

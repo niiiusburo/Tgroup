@@ -26,6 +26,7 @@ writes:
 tables:
   - dbo.partners
   - dbo.customersources
+  - dbo.customer_face_embeddings
   - dbo.appointments (read-only in KPIs)
   - dbo.saleorders (read-only in KPIs)
   - dbo.payments (read-only in balance)
@@ -47,6 +48,7 @@ endpoints:
   - DELETE /api/CustomerSources/:id
   - POST   /api/face/recognize
   - POST   /api/face/register
+  - GET    /api/face/status/:partnerId
 ui_surfaces:
   - /customers
   - /customers/:id

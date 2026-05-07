@@ -49,7 +49,7 @@ export interface UseAddCustomerFormResult {
   readonly showRegisterModal: boolean;
   readonly setShowRegisterModal: React.Dispatch<React.SetStateAction<boolean>>;
   readonly registerState: any;
-  readonly register: (id: string, blob: Blob) => Promise<void>;
+  readonly register: (id: string, blob: Blob, source?: string) => Promise<unknown>;
   readonly resetFace: () => void;
   readonly referrerQuery: string;
   readonly setReferrerQuery: React.Dispatch<React.SetStateAction<string>>;

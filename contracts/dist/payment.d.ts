@@ -8,7 +8,7 @@ export declare const PaymentBaseSchema: z.ZodObject<{
     notes: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     payment_date: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     reference_code: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    status: z.ZodNullable<z.ZodOptional<z.ZodEnum<["posted", "voided"]>>>;
+    status: z.ZodNullable<z.ZodOptional<z.ZodEnum<["posted", "voided", "confirmed"]>>>;
     deposit_used: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
     cash_amount: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
     bank_amount: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
@@ -32,7 +32,7 @@ export declare const PaymentBaseSchema: z.ZodObject<{
     amount: number;
     method: "cash" | "bank_transfer" | "card" | "momo" | "vnpay" | "zalopay" | "deposit" | "mixed";
     id?: string | undefined;
-    status?: "posted" | "voided" | null | undefined;
+    status?: "confirmed" | "posted" | "voided" | null | undefined;
     service_id?: string | null | undefined;
     notes?: string | null | undefined;
     payment_date?: string | null | undefined;
@@ -52,7 +52,7 @@ export declare const PaymentBaseSchema: z.ZodObject<{
     amount: number;
     method: "cash" | "bank_transfer" | "card" | "momo" | "vnpay" | "zalopay" | "deposit" | "mixed";
     id?: string | undefined;
-    status?: "posted" | "voided" | null | undefined;
+    status?: "confirmed" | "posted" | "voided" | null | undefined;
     service_id?: string | null | undefined;
     notes?: string | null | undefined;
     payment_date?: string | null | undefined;
@@ -77,7 +77,7 @@ export declare const PaymentCreateSchema: z.ZodObject<Omit<{
     notes: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     payment_date: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     reference_code: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    status: z.ZodNullable<z.ZodOptional<z.ZodEnum<["posted", "voided"]>>>;
+    status: z.ZodNullable<z.ZodOptional<z.ZodEnum<["posted", "voided", "confirmed"]>>>;
     deposit_used: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
     cash_amount: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
     bank_amount: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
@@ -100,7 +100,7 @@ export declare const PaymentCreateSchema: z.ZodObject<Omit<{
     customer_id: string;
     amount: number;
     method: "cash" | "bank_transfer" | "card" | "momo" | "vnpay" | "zalopay" | "deposit" | "mixed";
-    status?: "posted" | "voided" | null | undefined;
+    status?: "confirmed" | "posted" | "voided" | null | undefined;
     service_id?: string | null | undefined;
     notes?: string | null | undefined;
     payment_date?: string | null | undefined;
@@ -119,7 +119,7 @@ export declare const PaymentCreateSchema: z.ZodObject<Omit<{
     customer_id: string;
     amount: number;
     method: "cash" | "bank_transfer" | "card" | "momo" | "vnpay" | "zalopay" | "deposit" | "mixed";
-    status?: "posted" | "voided" | null | undefined;
+    status?: "confirmed" | "posted" | "voided" | null | undefined;
     service_id?: string | null | undefined;
     notes?: string | null | undefined;
     payment_date?: string | null | undefined;
@@ -144,7 +144,7 @@ export declare const PaymentUpdateSchema: z.ZodObject<Omit<{
     notes: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     payment_date: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     reference_code: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
-    status: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodEnum<["posted", "voided"]>>>>;
+    status: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodEnum<["posted", "voided", "confirmed"]>>>>;
     deposit_used: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodNumber>>>;
     cash_amount: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodNumber>>>;
     bank_amount: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodNumber>>>;
@@ -164,7 +164,7 @@ export declare const PaymentUpdateSchema: z.ZodObject<Omit<{
         allocated_amount?: number | undefined;
     }>, "many">>>>;
 }, "id">, "strip", z.ZodTypeAny, {
-    status?: "posted" | "voided" | null | undefined;
+    status?: "confirmed" | "posted" | "voided" | null | undefined;
     customer_id?: string | undefined;
     service_id?: string | null | undefined;
     amount?: number | undefined;
@@ -183,7 +183,7 @@ export declare const PaymentUpdateSchema: z.ZodObject<Omit<{
         allocated_amount?: number | undefined;
     }[] | null | undefined;
 }, {
-    status?: "posted" | "voided" | null | undefined;
+    status?: "confirmed" | "posted" | "voided" | null | undefined;
     customer_id?: string | undefined;
     service_id?: string | null | undefined;
     amount?: number | undefined;

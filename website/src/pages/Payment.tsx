@@ -56,8 +56,10 @@ export function Payment() {
     searchTerm,
     setSearchTerm,
     topUpWallet,
+    confirmPayment,
     isLoading,
   } = usePayment(selectedLocationId);
+  const [confirmLoading, setConfirmLoading] = useState<string | null>(null);
 
   // Monthly plans hook
   const {
@@ -82,6 +84,15 @@ export function Payment() {
 
   const handleTopUp = (customerId: string) => async (amount: number, method: 'cash' | 'bank_transfer' | 'vietqr', date?: string, note?: string) => {
     await topUpWallet({ customerId, amount, method, date, note });
+  };
+
+  const handleConfirmPayment = async (paymentId: string, confirmed: boolean, notes?: string) => {
+    setConfirmLoading(paymentId);
+    try {
+      await confirmPayment(paymentId, confirmed, notes);
+    } finally {
+      setConfirmLoading(null);
+    }
   };
 
   const paymentExportFilters = {
@@ -236,7 +247,7 @@ export function Payment() {
                 />
               </div>
               <div className="flex gap-1">
-                {(['all', 'completed', 'pending', 'refunded'] as const).map((filter) => (
+                {(['all', 'completed', 'pending', 'refunded', 'confirmed'] as const).map((filter) => (
                   <button
                     key={filter}
                     type="button"
@@ -260,7 +271,7 @@ export function Payment() {
               )}
             </div>
 
-            <PaymentHistory payments={payments} loading={isLoading} />
+            <PaymentHistory payments={payments} loading={isLoading} onConfirm={handleConfirmPayment} confirmLoading={confirmLoading} />
           </div>
         </div>
       )}

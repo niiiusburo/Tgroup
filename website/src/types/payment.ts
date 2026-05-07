@@ -6,8 +6,8 @@
 /** Live payment methods matching the backend `payments.method` column. */
 export type PaymentMethod = 'cash' | 'bank_transfer' | 'deposit' | 'mixed';
 
-/** Display statuses derived from backend `posted`/`voided` + payment state. */
-export type PaymentStatus = 'completed' | 'pending' | 'partial' | 'refunded';
+/** Display statuses derived from backend `posted`/`voided`/`confirmed` + payment state. */
+export type PaymentStatus = 'completed' | 'pending' | 'partial' | 'refunded' | 'confirmed';
 
 export type RecordType = 'saleorder' | 'dotkham';
 export type WalletTransactionType = 'topup' | 'payment' | 'refund';
@@ -56,6 +56,16 @@ export interface PaymentRecord {
   readonly isFullPayment: boolean;
   /** Due date for scheduled/installment payments. */
   readonly dueDate?: string;
+  /** Who created this payment. */
+  readonly createdBy?: string;
+  /** When this payment was confirmed. */
+  readonly confirmedAt?: string;
+  /** Who confirmed this payment. */
+  readonly confirmedBy?: string;
+  /** Name of the person who confirmed this payment. */
+  readonly confirmedByName?: string;
+  /** Notes from confirmation. */
+  readonly confirmationNotes?: string;
 }
 
 export interface OutstandingBalanceItem {
