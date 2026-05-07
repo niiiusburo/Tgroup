@@ -1,10 +1,27 @@
 const express = require('express');
 const multer = require('multer');
+const FormData = require('form-data');
 const { requireAuth, requirePermission } = require('../middleware/auth');
 const hosoClient = require('../services/hosoonlineClient');
 const router = express.Router();
 
-const upload = multer({ storage: multer.memoryStorage() });
+const MAX_FILE_SIZE_MB = 10;
+const MAX_FILE_COUNT = 10;
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: MAX_FILE_SIZE_MB * 1024 * 1024,
+    files: MAX_FILE_COUNT,
+  },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype && file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'), false);
+    }
+  },
+});
 const {
   HOSOONLINE_API_KEY,
   HOSOONLINE_BASE_URL,
@@ -204,8 +221,10 @@ router.post('/:customerCode/health-checkups', requireAuth, requirePermission('ex
 
     if (req.files && req.files.length > 0) {
       req.files.forEach((file) => {
-        const photo = new Blob([file.buffer], { type: file.mimetype || 'application/octet-stream' });
-        form.append('photos', photo, file.originalname);
+        form.append('photos', file.buffer, {
+          filename: file.originalname,
+          contentType: file.mimetype || 'application/octet-stream',
+        });
       });
     }
 
@@ -213,7 +232,10 @@ router.post('/:customerCode/health-checkups', requireAuth, requirePermission('ex
       `${HOSOONLINE_BASE_URL}/api/patients/${encodeURIComponent(hosoCode)}/health-checkups`,
       {
         method: 'POST',
-        headers: await getHosoUploadHeaders(),
+        headers: {
+          ...await getHosoUploadHeaders(),
+          ...form.getHeaders(),
+        },
         body: form,
       }
     );
@@ -243,6 +265,17 @@ router.post('/:customerCode/health-checkups', requireAuth, requirePermission('ex
         status: error.status,
         detail: 'Check the configured Hosoonline API key before uploading health checkup images.',
       });
+    }
+    if (error instanceof multer.MulterError) {
+      const message = error.code === 'LIMIT_FILE_SIZE'
+        ? `File too large. Maximum size is ${MAX_FILE_SIZE_MB}MB per file.`
+        : error.code === 'LIMIT_FILE_COUNT'
+        ? `Too many files. Maximum is ${MAX_FILE_COUNT} files.`
+        : error.message;
+      return res.status(400).json({ error: message });
+    }
+    if (error.message === 'Only image files are allowed') {
+      return res.status(400).json({ error: error.message });
     }
     console.error('ExternalCheckups upload error:', error);
     res.status(500).json({ error: 'Failed to upload external checkup' });

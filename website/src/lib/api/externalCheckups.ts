@@ -113,20 +113,8 @@ export async function createExternalCheckup(
     }
   });
 
-  const token = localStorage.getItem('tgclinic_token');
-  const authHeaders: Record<string, string> = {};
-  if (token) authHeaders['Authorization'] = `Bearer ${token}`;
-
-  const res = await fetch(`${API_URL}/ExternalCheckups/${encodeURIComponent(customerCode)}/health-checkups`, {
-    method: 'POST',
-    headers: authHeaders,
-    body: form,
-    credentials: 'include',
-  });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => 'Upload failed');
-    throw new Error(text);
-  }
-  return res.json();
+  return apiFetch<{ checkup: ExternalCheckup }>(
+    `/ExternalCheckups/${encodeURIComponent(customerCode)}/health-checkups`,
+    { method: 'POST', body: form }
+  );
 }

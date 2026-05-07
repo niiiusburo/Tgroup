@@ -18,6 +18,7 @@ interface HealthCheckupGalleryProps {
   readonly error?: string | null;
   readonly customerCode?: string;
   readonly onUploaded?: () => void;
+  readonly canCreateCheckup?: boolean;
 }
 
 function formatDate(dateStr: string): string {
@@ -26,7 +27,7 @@ function formatDate(dateStr: string): string {
   return new Date(y, m - 1, d).toLocaleDateString('vi-VN');
 }
 
-export function HealthCheckupGallery({ data, isLoading, error, customerCode, onUploaded }: HealthCheckupGalleryProps) {
+export function HealthCheckupGallery({ data, isLoading, error, customerCode, onUploaded, canCreateCheckup }: HealthCheckupGalleryProps) {
   const { t } = useTranslation('customers');
   const [lightboxIndex, setLightboxIndex] = useState<number>(-1);
   const [lightboxCheckup, setLightboxCheckup] = useState<number>(-1);
@@ -135,7 +136,7 @@ export function HealthCheckupGallery({ data, isLoading, error, customerCode, onU
                 {t('createExternalPatient')}
               </button>
             )}
-            {customerCode && !canCreatePatient && (
+            {customerCode && !canCreatePatient && canCreateCheckup && (
               <button
                 type="button"
                 onClick={() => setShowForm((v) => !v)}

@@ -34,6 +34,40 @@ export function HealthCheckupUploadForm({
   const [nextAppointmentDate, setNextAppointmentDate] = useState('');
   const [nextDescription, setNextDescription] = useState('');
   const [files, setFiles] = useState<FileList | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  const MAX_FILES = 10;
+
+  const validateFiles = (fileList: FileList | null): boolean => {
+    setFileError(null);
+    if (!fileList || fileList.length === 0) return true;
+    if (fileList.length > MAX_FILES) {
+      setFileError(`Maximum ${MAX_FILES} files allowed`);
+      return false;
+    }
+    for (const file of Array.from(fileList)) {
+      if (!file.type.startsWith('image/')) {
+        setFileError(`"${file.name}" is not an image file`);
+        return false;
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        setFileError(`"${file.name}" exceeds 10MB limit`);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = e.target.files;
+    if (validateFiles(fileList)) {
+      setFiles(fileList);
+    } else {
+      setFiles(null);
+      e.target.value = '';
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +81,7 @@ export function HealthCheckupUploadForm({
         notes,
         nextAppointmentDate: nextAppointmentDate || undefined,
         nextDescription: nextDescription || undefined,
-        files: files ? Array.from(files) : undefined,
+        files: files && fileError === null ? Array.from(files) : undefined,
       });
       onSuccess();
     } catch (err) {
@@ -131,9 +165,18 @@ export function HealthCheckupUploadForm({
           type="file"
           multiple
           accept="image/*"
-          onChange={(e) => setFiles(e.target.files)}
+          onChange={handleFileChange}
           className="block w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-primary file:text-white hover:file:bg-primary-dark"
         />
+        {fileError && (
+          <p className="mt-1 text-xs text-red-500">{fileError}</p>
+        )}
+        {files && files.length > 0 && !fileError && (
+          <p className="mt-1 text-xs text-gray-500">
+            {files.length} file{files.length > 1 ? 's' : ''} selected
+            {Array.from(files).map((f) => ` • ${f.name}`).join('')}
+          </p>
+        )}
       </div>
 
       <div className="flex items-center justify-end gap-2 pt-1">

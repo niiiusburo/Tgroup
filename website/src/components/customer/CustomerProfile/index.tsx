@@ -37,6 +37,7 @@ export function CustomerProfile(props: OrchestratorProps) {
 
   const { hasPermission } = useAuth();
   const canViewHealthCheckups = hasPermission('external_checkups.view');
+  const canCreateCheckups = hasPermission('external_checkups.create');
 
   const [internalActiveTab, setInternalActiveTab] = useState<CustomerProfileTab>('profile');
   const activeTab = controlledActiveTab ?? internalActiveTab;
@@ -175,6 +176,7 @@ export function CustomerProfile(props: OrchestratorProps) {
           checkupsError={checkupsError ?? null}
           onRefetchCheckups={onRefetchCheckups}
           canViewHealthCheckups={canViewHealthCheckups}
+          canCreateCheckups={canCreateCheckups}
         />
       )}
 
