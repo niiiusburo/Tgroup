@@ -563,6 +563,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/face_box/i);
     });
 
+    it('uses aligned variable for cropped face', () => {
+      expect(content).toMatch(/aligned/i);
+    });
+
     it('uses f-strings for formatted messages', () => {
       expect(content).toMatch(/f"/i);
     });
