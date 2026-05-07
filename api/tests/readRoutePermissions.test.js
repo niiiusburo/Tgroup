@@ -4,9 +4,16 @@ const mockRequirePermission = jest.fn((permission) => {
   return middleware;
 });
 
+const mockRequireAnyPermission = jest.fn((permissions) => {
+  const middleware = (_req, _res, next) => next();
+  middleware.permissions = permissions;
+  return middleware;
+});
+
 jest.mock('../src/middleware/auth', () => ({
   requireAuth: (_req, _res, next) => next(),
   requirePermission: mockRequirePermission,
+  requireAnyPermission: mockRequireAnyPermission,
 }));
 
 jest.mock('../src/db', () => ({
@@ -32,9 +39,16 @@ function routePermissions(router, method, path) {
   if (!layer) {
     return [];
   }
-  return layer.route.stack
-    .map((entry) => entry.handle.permission)
-    .filter(Boolean);
+  const perms = [];
+  for (const entry of layer.route.stack) {
+    if (entry.handle.permission) {
+      perms.push(entry.handle.permission);
+    }
+    if (entry.handle.permissions) {
+      perms.push(...entry.handle.permissions);
+    }
+  }
+  return perms;
 }
 
 function expectRoutePermission(router, method, path, permission) {

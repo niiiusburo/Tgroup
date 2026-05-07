@@ -107,7 +107,19 @@ async function getPartnerById(req, res) {
       return res.status(404).json({ error: 'Partner not found' });
     }
 
-    return res.json(rows[0]);
+    const partner = rows[0];
+
+    // ── Location scope enforcement ──────────────────────────
+    const { effectivePermissions = [], locations = [] } = req.userPermissions || {};
+    const isAdmin = effectivePermissions.includes('*');
+    if (!isAdmin) {
+      const allowedLocationIds = locations.map((l) => l.id).filter(Boolean);
+      if (!allowedLocationIds.includes(partner.companyid)) {
+        return res.status(403).json({ error: 'Partner not accessible from your location' });
+      }
+    }
+
+    return res.json(partner);
   } catch (err) {
     console.error('Error fetching partner:', err);
     return res.status(500).json({

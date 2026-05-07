@@ -63,4 +63,39 @@ function requirePermission(permission) {
   };
 }
 
-module.exports = { requireAuth, requirePermission };
+/**
+ * requireAnyPermission([permission1, permission2, ...]) middleware factory
+ *
+ * Allows the request if the user has ANY of the listed permissions (or wildcard *).
+ */
+function requireAnyPermission(permissions) {
+  return async (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'No token' });
+    }
+    try {
+      const { employeeId } = req.user;
+      const resolved = await resolveEffectivePermissions(employeeId);
+
+      if (resolved.effectivePermissions.length === 0) {
+        return res.status(403).json({ error: 'No permission assignment found' });
+      }
+
+      const hasWildcard = resolved.effectivePermissions.includes('*');
+      const hasAny = permissions.some((p) => resolved.effectivePermissions.includes(p));
+
+      if (!hasWildcard && !hasAny) {
+        return res.status(403).json({ error: `Permission denied: need one of [${permissions.join(', ')}]` });
+      }
+
+      // Attach resolved permissions so downstream handlers can enforce scope
+      req.userPermissions = resolved;
+      next();
+    } catch (err) {
+      console.error('requireAnyPermission error:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+}
+
+module.exports = { requireAuth, requirePermission, requireAnyPermission };
