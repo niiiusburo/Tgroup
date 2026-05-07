@@ -3,6 +3,66 @@ const { applyPartnerListFilters } = require('./listFilters');
 const { applyPartnerSearchFilter } = require('./searchFilters');
 
 /**
+ * Enforce customer visibility scope based on resolved permissions.
+ *
+ * @param {Object} req - Express request (expects req.userPermissions from requireAnyPermission)
+ * @param {Object} query - Query params
+ * @returns {{conditions: string[], params: any[], paramIdx: number, searchRequired: boolean}|{error: string, status: number}}
+ */
+function buildPartnerVisibilityScope(req, query) {
+  const { effectivePermissions = [], locations = [] } = req.userPermissions || {};
+  const isAdmin = effectivePermissions.includes('*');
+  const hasViewAll = effectivePermissions.includes('customers.view_all')
+    || effectivePermissions.includes('customers.view');
+  const hasSearch = effectivePermissions.includes('customers.search');
+
+  if (!isAdmin && !hasViewAll && !hasSearch) {
+    return { error: 'Permission denied', status: 403 };
+  }
+
+  const conditions = ['p.customer = true', 'p.isdeleted = false'];
+  const params = [];
+  let paramIdx = 1;
+
+  // ── Search-only enforcement ─────────────────────────────
+  const search = typeof query.search === 'string' ? query.search.trim() : '';
+  const searchRequired = !isAdmin && !hasViewAll;
+  if (searchRequired) {
+    if (!search || search.length < 2) {
+      return {
+        error: 'Search parameter is required (min 2 characters)',
+        status: 403,
+      };
+    }
+  }
+
+  // ── Location scope enforcement ──────────────────────────
+  if (!isAdmin) {
+    const allowedLocationIds = locations.map((l) => l.id).filter(Boolean);
+    const requestedCompanyId = query.companyId || query.company_id;
+
+    if (typeof requestedCompanyId === 'string' && requestedCompanyId.trim()) {
+      if (!allowedLocationIds.includes(requestedCompanyId.trim())) {
+        return { error: 'Location not allowed', status: 403 };
+      }
+      // Requested location is valid; let applyPartnerListFilters add the exact filter
+    } else if (allowedLocationIds.length > 0) {
+      conditions.push(`p.companyid = ANY($${paramIdx})`);
+      params.push(allowedLocationIds);
+      paramIdx++;
+    } else {
+      // No locations assigned → empty result set
+      conditions.push('FALSE');
+    }
+  }
+
+  paramIdx = applyPartnerSearchFilter({ search, conditions, params, paramIdx });
+  paramIdx = applyPartnerListFilters({ query, conditions, params, paramIdx });
+
+  return { conditions, params, paramIdx, searchRequired };
+}
+
+/**
  * GET /api/Partners
  * Query params: offset, limit, search, sortField, sortOrder, filters
  * Returns: {offset, limit, totalItems, items[], aggregates}
@@ -12,7 +72,6 @@ async function listPartners(req, res) {
     const {
       offset = '0',
       limit = '20',
-      search = '',
       sortField = 'datecreated',
       sortOrder = 'desc',
     } = req.query;
@@ -34,13 +93,19 @@ async function listPartners(req, res) {
     const orderByCol = allowedSortFields[sortField] || 'p.datecreated';
     const orderDir = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 
-    const conditions = ['p.customer = true', 'p.isdeleted = false'];
-    const params = [];
-    let paramIdx = 1;
+    const scope = buildPartnerVisibilityScope(req, req.query);
+    if (scope.error) {
+      return res.status(scope.status).json({
+        offset: offsetNum,
+        limit: limitNum,
+        totalItems: 0,
+        items: [],
+        aggregates: { total: 0, active: 0, inactive: 0 },
+        error: scope.error,
+      });
+    }
 
-    paramIdx = applyPartnerSearchFilter({ search, conditions, params, paramIdx });
-    paramIdx = applyPartnerListFilters({ query: req.query, conditions, params, paramIdx });
-
+    const { conditions, params, paramIdx } = scope;
     const whereClause = conditions.join(' AND ');
 
     const items = await query(

@@ -1,5 +1,5 @@
 const express = require('express');
-const { requirePermission } = require('../middleware/auth');
+const { requirePermission, requireAnyPermission } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
 const { PartnerCreateSchema, PartnerUpdateSchema } = require('@tgroup/contracts');
 const { getPartnerById } = require('./partners/getPartnerById');
@@ -8,11 +8,13 @@ const { createPartner, hardDeletePartner, softDeletePartner, updatePartner } = r
 
 const router = express.Router();
 
-router.get('/', requirePermission('customers.view'), listPartners);
+const CUSTOMER_READ_PERMS = ['customers.view', 'customers.view_all', 'customers.search'];
+
+router.get('/', requireAnyPermission(CUSTOMER_READ_PERMS), listPartners);
 // declared before /:id to prevent Express matching 'check-unique' as an id param.
-router.get('/check-unique', requirePermission('customers.view'), checkPartnerUnique);
-router.get('/:id', requirePermission('customers.view'), getPartnerById);
-router.get('/:id/GetKPIs', requirePermission('customers.view'), getPartnerKpis);
+router.get('/check-unique', requireAnyPermission(CUSTOMER_READ_PERMS), checkPartnerUnique);
+router.get('/:id', requireAnyPermission(CUSTOMER_READ_PERMS), getPartnerById);
+router.get('/:id/GetKPIs', requireAnyPermission(CUSTOMER_READ_PERMS), getPartnerKpis);
 router.post('/', requirePermission('customers.add'), validate(PartnerCreateSchema), createPartner);
 router.put('/:id', requirePermission('customers.edit'), validate(PartnerUpdateSchema), updatePartner);
 router.patch('/:id/soft-delete', requirePermission('customers.delete'), softDeletePartner);
