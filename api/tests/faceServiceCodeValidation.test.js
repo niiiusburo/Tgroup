@@ -12,6 +12,10 @@ describe('face-service code validation', () => {
       content = fs.readFileSync(path.join(faceServiceDir, 'main.py'), 'utf8');
     });
 
+    it('imports os module', () => {
+      expect(content).toMatch(/import os/i);
+    });
+
     it('imports FastAPI', () => {
       expect(content).toMatch(/from fastapi import FastAPI/i);
     });
