@@ -516,6 +516,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/if /i);
     });
 
+    it('uses return statements', () => {
+      expect(content).toMatch(/return /i);
+    });
+
     it('uses f-strings for formatted messages', () => {
       expect(content).toMatch(/f"/i);
     });
