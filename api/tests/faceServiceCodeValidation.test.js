@@ -646,6 +646,22 @@ describe('face-service code validation', () => {
     it('uses from for imports', () => {
       expect(content).toMatch(/from /i);
     });
+
+    it('uses bytes type annotation', () => {
+      expect(content).toMatch(/bytes/i);
+    });
+
+    it('uses List type from typing', () => {
+      expect(content).toMatch(/List/i);
+    });
+
+    it('uses Optional type from typing', () => {
+      expect(content).toMatch(/Optional/i);
+    });
+
+    it('uses None for null values', () => {
+      expect(content).toMatch(/None/i);
+    });
   });
 
   describe('Dockerfile', () => {
