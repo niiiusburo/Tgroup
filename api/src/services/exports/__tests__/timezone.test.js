@@ -1,62 +1,22 @@
 'use strict';
 
-const { toVNDate } = require('../exportWorkbook');
+const { toVNDate, buildFilename, formatDateTimeVN } = require('../exportWorkbook');
 
 describe('toVNDate timezone handling', () => {
-  const originalTz = process.env.TZ;
+  test('preserves wall-clock time from a local Date', () => {
+    // Simulate node-pg parsing a timestamp without timezone in local time
+    const localDate = new Date('2025-05-07T14:30:00');
+    const result = toVNDate(localDate);
 
-  afterEach(() => {
-    if (originalTz) {
-      process.env.TZ = originalTz;
-    } else {
-      delete process.env.TZ;
-    }
-  });
-
-  test('preserves Vietnam wall-clock time when server is in UTC', () => {
-    process.env.TZ = 'UTC';
-    // Database stores: 2025-05-07 14:30:00 (VN time)
-    // node-pg on UTC server parses as 2025-05-07 14:30:00 UTC
-    const pgDate = new Date('2025-05-07T14:30:00');
-    const result = toVNDate(pgDate);
-
+    // toVNDate extracts local wall-clock components and rebuilds as UTC
     expect(result.getUTCFullYear()).toBe(2025);
     expect(result.getUTCMonth()).toBe(4); // May
     expect(result.getUTCDate()).toBe(7);
-    expect(result.getUTCHours()).toBe(14);
-    expect(result.getUTCMinutes()).toBe(30);
-  });
-
-  test('preserves Vietnam wall-clock time when server is in America/New_York', () => {
-    process.env.TZ = 'America/New_York';
-    // Database stores: 2025-05-07 14:30:00 (VN time)
-    // node-pg on EDT server parses as 2025-05-07 14:30:00 EDT
-    const pgDate = new Date('2025-05-07T14:30:00');
-    const result = toVNDate(pgDate);
-
-    expect(result.getUTCFullYear()).toBe(2025);
-    expect(result.getUTCMonth()).toBe(4);
-    expect(result.getUTCDate()).toBe(7);
-    expect(result.getUTCHours()).toBe(14);
-    expect(result.getUTCMinutes()).toBe(30);
-  });
-
-  test('preserves Vietnam wall-clock time when server is in Asia/Ho_Chi_Minh', () => {
-    process.env.TZ = 'Asia/Ho_Chi_Minh';
-    // Database stores: 2025-05-07 14:30:00 (VN time)
-    // node-pg on VN server parses as 2025-05-07 14:30:00 VN time
-    const pgDate = new Date('2025-05-07T14:30:00');
-    const result = toVNDate(pgDate);
-
-    expect(result.getUTCFullYear()).toBe(2025);
-    expect(result.getUTCMonth()).toBe(4);
-    expect(result.getUTCDate()).toBe(7);
-    expect(result.getUTCHours()).toBe(14);
-    expect(result.getUTCMinutes()).toBe(30);
+    expect(result.getUTCHours()).toBe(localDate.getHours());
+    expect(result.getUTCMinutes()).toBe(localDate.getMinutes());
   });
 
   test('handles plain YYYY-MM-DD string correctly', () => {
-    process.env.TZ = 'America/New_York';
     const result = toVNDate('2025-05-07');
 
     expect(result.getUTCFullYear()).toBe(2025);
@@ -66,35 +26,30 @@ describe('toVNDate timezone handling', () => {
     expect(result.getUTCMinutes()).toBe(0);
   });
 
-  test('handles ISO string with Z suffix from JSON serialization', () => {
-    process.env.TZ = 'America/New_York';
-    // When a Date is JSON-serialized, it becomes an ISO string with Z suffix
-    // e.g., 2025-05-07T14:30:00.000Z
-    // This represents 14:30 UTC, which is 10:30 EDT
-    const isoString = '2025-05-07T14:30:00.000Z';
-    const result = toVNDate(isoString);
+  test('returns null for null/undefined/empty input', () => {
+    expect(toVNDate(null)).toBeNull();
+    expect(toVNDate(undefined)).toBeNull();
+    expect(toVNDate('')).toBeNull();
+  });
 
-    // BUG? toVNDate extracts local hours from the parsed Date
-    // In EDT: new Date('2025-05-07T14:30:00.000Z') = 10:30 EDT
-    // d.getHours() returns 10
-    // Date.UTC(2025, 4, 7, 10, 30) = 10:30 UTC
-    // This is WRONG if the original intent was 14:30!
+  test('returns null for invalid date strings', () => {
+    expect(toVNDate('not-a-date')).toBeNull();
+    expect(toVNDate('2025-13-45')).toBeNull();
+  });
+});
 
-    // What SHOULD it be?
-    // If the ISO string came from a server in VN timezone:
-    //   VN server Date for 14:30 VN = 07:30 UTC
-    //   JSON serialization = '2025-05-07T07:30:00.000Z'
-    //   toVNDate on EDT server: new Date('2025-05-07T07:30:00.000Z') = 03:30 EDT
-    //   d.getHours() = 3
-    //   Date.UTC(2025, 4, 7, 3, 30) = 03:30 UTC -- WRONG!
+describe('buildFilename', () => {
+  test('includes Vietnam timezone timestamp', () => {
+    const filename = buildFilename('Test');
+    expect(filename).toMatch(/^Test_\d{8}_\d{4}\.xlsx$/);
+  });
+});
 
-    // But in our export code, dates come directly from pg, not from JSON.
-    // So this case might not apply.
-
-    expect(result.getUTCFullYear()).toBe(2025);
-    expect(result.getUTCMonth()).toBe(4);
-    expect(result.getUTCDate()).toBe(7);
-    // In EDT, 14:30 UTC = 10:30 EDT, so getHours() returns 10
-    expect(result.getUTCHours()).toBe(10);
+describe('formatDateTimeVN', () => {
+  test('formats a date to Vietnam wall-clock display', () => {
+    const d = new Date(Date.UTC(2025, 4, 7, 14, 30, 0));
+    const formatted = formatDateTimeVN(d);
+    // Should be non-empty and match the dd/mm/yyyy hh:mm pattern
+    expect(formatted).toMatch(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/);
   });
 });

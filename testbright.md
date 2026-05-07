@@ -1,3 +1,43 @@
+# TestSprite Plan: Appointment Export Time Preservation
+
+Feature/edit name: Appointment Export Time Preservation
+
+Changed URLs and API routes:
+- `/calendar`
+- `/appointments`
+- `/reports/appointments`
+- `POST /api/Exports/:type/preview`
+- `POST /api/Exports/:type/download`
+
+Affected data flows:
+- Appointment operational Excel exports now preserve the full appointment timestamp from `dbo.appointments.date` when the legacy `time` column is empty.
+- Export filename and workbook date formatting should continue to use Vietnam time.
+- The API runtime should run with `TZ=Asia/Ho_Chi_Minh` so PostgreSQL timestamp parsing matches the clinic UI.
+
+User roles:
+- Authenticated admin or clinic staff with export access for calendar, appointments, or reports surfaces.
+
+Happy paths:
+- Export appointments where `date` contains a full timestamp and `time` is null; the exported workbook should show the stored appointment hour, not `00:00`.
+- Export appointments where both `date` and `time` are present; the explicit legacy time should still win.
+- Preview and download should return the same row count for the same filters.
+
+Edge cases:
+- Null appointment date returns a blank export date instead of crashing.
+- ISO string dates and plain `YYYY-MM-DD` strings still produce valid workbook dates.
+- Large date-range downloads should complete behind the production `/api` proxy timeout.
+
+Regressions:
+- Existing export types must still register and download.
+- Appointment calendar display should not shift by one day or lose appointment hours.
+- Export audit behavior should continue to record preview/download attempts.
+
+Setup data and login state:
+- Use an authenticated admin session, preferably `website/.auth/admin.json` if valid.
+- Use appointments with `dbo.appointments.date` values containing afternoon times and null `time` values.
+
+---
+
 # TestSprite Plan: Accent-Insensitive Search
 
 Feature/edit name: Accent-Insensitive Search

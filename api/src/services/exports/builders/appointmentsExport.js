@@ -142,16 +142,18 @@ function buildAppointmentDate(row) {
 
   if (!row.date) return null;
 
-  // row.date is a plain YYYY-MM-DD string thanks to our pg DATE parser
-  const dateStr = row.date instanceof Date ? row.date.toISOString().slice(0, 10) : String(row.date).slice(0, 10);
-
+  // row.date is a timestamp without timezone (OID 1114), not a plain DATE.
+  // It stores the full appointment datetime (e.g. 2025-05-22 13:00:00).
+  // When row.time is provided (legacy), combine date + time explicitly.
   if (row.time) {
+    const dateStr = row.date instanceof Date ? row.date.toISOString().slice(0, 10) : String(row.date).slice(0, 10);
     const [hours = '0', minutes = '0', seconds = '0'] = String(row.time).split(':');
     const dt = new Date(`${dateStr}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}Z`);
     return Number.isNaN(dt.getTime()) ? null : dt;
   }
 
-  return toVNDate(dateStr);
+  // Use the full timestamp from row.date, preserving the time component.
+  return toVNDate(row.date);
 }
 
 async function preview(filters, user) {
@@ -225,4 +227,4 @@ async function build(filters, user) {
   return { workbook, rowCount: dataRows.length };
 }
 
-module.exports = { preview, build };
+module.exports = { preview, build, buildAppointmentDate };

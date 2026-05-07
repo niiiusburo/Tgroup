@@ -31,7 +31,16 @@ function toVNDate(dateValue) {
 
   // Plain YYYY-MM-DD strings (from our custom pg DATE parser) — treat as midnight UTC
   if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
-    return new Date(`${dateValue}T00:00:00Z`);
+    const [year, month, day] = dateValue.split('-').map(Number);
+    const parsed = new Date(Date.UTC(year, month - 1, day));
+    if (
+      parsed.getUTCFullYear() !== year ||
+      parsed.getUTCMonth() !== month - 1 ||
+      parsed.getUTCDate() !== day
+    ) {
+      return null;
+    }
+    return parsed;
   }
 
   const d = new Date(dateValue);
