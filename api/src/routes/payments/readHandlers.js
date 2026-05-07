@@ -18,6 +18,11 @@ function mapPaymentRow(row, allocations = []) {
     receiptNumber: row.receipt_number,
     depositType: row.deposit_type,
     createdAt: row.created_at,
+    createdBy: row.created_by,
+    confirmedAt: row.confirmed_at,
+    confirmedBy: row.confirmed_by,
+    confirmedByName: row.confirmed_by_name,
+    confirmationNotes: row.confirmation_notes,
     allocations,
   };
 }
@@ -97,7 +102,12 @@ async function loadLegacyRows({ customerId, limit, offset }) {
        0 AS cash_amount,
        0 AS bank_amount,
        NULL AS receipt_number,
-       NULL AS deposit_type
+       NULL AS deposit_type,
+       NULL AS created_by,
+       NULL AS confirmed_at,
+       NULL AS confirmed_by,
+       NULL AS confirmation_notes,
+       NULL AS confirmed_by_name
      FROM accountpayments ap
      WHERE ap.partnerid = $1
      ORDER BY ap.paymentdate DESC
@@ -116,8 +126,11 @@ async function listPayments(req, res) {
         p.amount, p.method, p.notes, p.created_at,
         p.payment_date, p.reference_code, p.status,
         p.deposit_used, p.cash_amount, p.bank_amount,
-        p.receipt_number, p.deposit_type
+        p.receipt_number, p.deposit_type,
+        p.created_by, p.confirmed_at, p.confirmed_by, p.confirmation_notes,
+        confirmer.name AS confirmed_by_name
       FROM payments p
+      LEFT JOIN partners confirmer ON confirmer.id = p.confirmed_by
       WHERE 1=1
     `;
 
@@ -222,8 +235,11 @@ async function listDeposits(req, res) {
         p.amount, p.method, p.notes, p.created_at,
         p.payment_date, p.reference_code, p.status,
         p.deposit_used, p.cash_amount, p.bank_amount,
-        p.receipt_number, p.deposit_type
+        p.receipt_number, p.deposit_type,
+        p.created_by, p.confirmed_at, p.confirmed_by, p.confirmation_notes,
+        confirmer.name AS confirmed_by_name
       FROM payments p
+      LEFT JOIN partners confirmer ON confirmer.id = p.confirmed_by
       WHERE p.payment_category = 'deposit'
     `;
 
@@ -253,8 +269,11 @@ async function listDepositUsage(req, res) {
         p.amount, p.method, p.notes, p.created_at,
         p.payment_date, p.reference_code, p.status,
         p.deposit_used, p.cash_amount, p.bank_amount,
-        p.receipt_number, p.deposit_type
+        p.receipt_number, p.deposit_type,
+        p.created_by, p.confirmed_at, p.confirmed_by, p.confirmation_notes,
+        confirmer.name AS confirmed_by_name
       FROM payments p
+      LEFT JOIN partners confirmer ON confirmer.id = p.confirmed_by
       WHERE p.deposit_type = 'usage'
     `;
 
@@ -290,10 +309,14 @@ async function getPaymentById(req, res) {
   try {
     const { id } = req.params;
     const rows = await query(
-      `SELECT id, customer_id, service_id, amount, method, notes, created_at,
-              payment_date, reference_code, status, deposit_used, cash_amount, bank_amount,
-              receipt_number, deposit_type
-       FROM payments WHERE id = $1`,
+      `SELECT p.id, p.customer_id, p.service_id, p.amount, p.method, p.notes, p.created_at,
+              p.payment_date, p.reference_code, p.status, p.deposit_used, p.cash_amount, p.bank_amount,
+              p.receipt_number, p.deposit_type,
+              p.created_by, p.confirmed_at, p.confirmed_by, p.confirmation_notes,
+              confirmer.name AS confirmed_by_name
+       FROM payments p
+       LEFT JOIN partners confirmer ON confirmer.id = p.confirmed_by
+       WHERE p.id = $1`,
       [id]
     );
     if (rows.length === 0) return res.status(404).json({ error: "Payment not found" });

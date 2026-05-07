@@ -20,6 +20,7 @@ export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
   pending: 'Chờ xử lý',
   partial: 'Thanh toán một phần',
   refunded: 'Đã hủy',
+  confirmed: 'Đã xác nhận',
 };
 
 export const PAYMENT_STATUS_STYLES: Record<PaymentStatus, string> = {
@@ -27,6 +28,7 @@ export const PAYMENT_STATUS_STYLES: Record<PaymentStatus, string> = {
   pending: 'bg-yellow-100 text-yellow-700',
   partial: 'bg-blue-100 text-blue-700',
   refunded: 'bg-gray-100 text-gray-500',
+  confirmed: 'bg-emerald-100 text-emerald-700',
 };
 
 export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {

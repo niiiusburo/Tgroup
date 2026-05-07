@@ -10,7 +10,7 @@ export const PaymentBaseSchema = z.object({
   notes: z.string().optional().nullable(),
   payment_date: z.string().optional().nullable(),
   reference_code: z.string().optional().nullable(),
-  status: z.enum(["posted", "voided"]).optional().nullable(),
+  status: z.enum(["posted", "voided", "confirmed"]).optional().nullable(),
   deposit_used: z.coerce.number().optional().nullable(),
   cash_amount: z.coerce.number().optional().nullable(),
   bank_amount: z.coerce.number().optional().nullable(),

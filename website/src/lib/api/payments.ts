@@ -31,8 +31,13 @@ export interface ApiPayment {
   notes?: string;
   paymentDate?: string;
   referenceCode?: string;
-  status?: 'posted' | 'voided';
+  status?: 'posted' | 'voided' | 'confirmed';
   createdAt: string;
+  createdBy?: string;
+  confirmedAt?: string;
+  confirmedBy?: string;
+  confirmedByName?: string;
+  confirmationNotes?: string;
   allocations?: ApiPaymentAllocation[];
 }
 
@@ -171,5 +176,18 @@ export async function updatePayment(
 
 export async function deletePayment(id: string): Promise<{ success: boolean }> {
   return apiFetch<{ success: boolean }>(`/Payments/${id}`, { method: 'DELETE' });
+}
+
+export async function confirmPayment(
+  id: string,
+  data: { confirmed: boolean; notes?: string }
+): Promise<ApiPayment> {
+  return apiFetch<ApiPayment>(`/Payments/${id}/confirm`, {
+    method: 'POST',
+    body: {
+      confirmed: data.confirmed,
+      notes: data.notes,
+    },
+  });
 }
 
