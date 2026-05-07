@@ -199,6 +199,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/\.detect\(/i);
     });
 
+    it('handles faces detection result', () => {
+      expect(content).toMatch(/faces/i);
+    });
+
     it('uses img.shape for image dimensions', () => {
       expect(content).toMatch(/img\.shape/i);
     });
