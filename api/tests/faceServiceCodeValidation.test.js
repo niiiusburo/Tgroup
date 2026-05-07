@@ -20,6 +20,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/import os/i);
     });
 
+    it('imports io module', () => {
+      expect(content).toMatch(/import io/i);
+    });
+
     it('imports numpy as np', () => {
       expect(content).toMatch(/import numpy as np/i);
     });
