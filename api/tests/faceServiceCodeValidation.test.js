@@ -255,6 +255,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/\.feature\(/i);
     });
 
+    it('uses float() for score conversion', () => {
+      expect(content).toMatch(/float\(/i);
+    });
+
     it('flattens embedding to list for JSON serialization', () => {
       expect(content).toMatch(/flatten\(\)/i);
       expect(content).toMatch(/tolist\(\)/i);
