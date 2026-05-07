@@ -528,6 +528,14 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/for /i);
     });
 
+    it('uses img variable for image processing', () => {
+      expect(content).toMatch(/img/i);
+    });
+
+    it('uses embedding variable for face embedding', () => {
+      expect(content).toMatch(/embedding/i);
+    });
+
     it('uses f-strings for formatted messages', () => {
       expect(content).toMatch(/f"/i);
     });
