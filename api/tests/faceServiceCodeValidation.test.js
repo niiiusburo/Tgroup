@@ -567,6 +567,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/aligned/i);
     });
 
+    it('uses file_bytes for uploaded image data', () => {
+      expect(content).toMatch(/file_bytes/i);
+    });
+
     it('uses f-strings for formatted messages', () => {
       expect(content).toMatch(/f"/i);
     });
