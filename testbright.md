@@ -183,3 +183,167 @@ Regressions:
 Setup data and login state:
 - Use an authenticated admin session.
 - Capture browser network requests for `/customers` and compare duplicate initial API calls before and after the change.
+
+---
+
+# TestSprite Plan: Staff Selector Clear Option
+
+Feature/edit name: Staff Selector Clear Option
+
+Changed URLs and API routes:
+- `/appointments`
+- `/calendar`
+- `/services`
+- `/customers/:id` through the service edit modal
+- No API route shape changed; existing appointment and sale-order save routes should receive `null`/empty staff values when staff is cleared.
+
+Affected data flows:
+- Appointment edit/add form doctor, assistant, and dental-aide selectors.
+- Service edit/add form doctor, assistant, and dental-aide selectors.
+- Shared `DoctorSelector` clear action now emits `null` instead of an empty string.
+
+User roles:
+- Admin or clinic staff allowed to add/edit appointments and patient service records.
+
+Happy paths:
+- Open an appointment or service with a selected doctor, assistant, or TLBS.
+- Open the staff dropdown and click `Bỏ chọn`.
+- Save and reopen the record; the cleared field should stay empty.
+- Select another staff member after clearing and save successfully.
+
+Edge cases:
+- Clear only one staff role while leaving the other two selected.
+- Clear all three staff selectors and save.
+- Use search inside the dropdown, then clear the current selection.
+
+Regressions:
+- Staff search remains accent-insensitive.
+- Staff dropdown still filters by the correct role: doctor, assistant, and doctor-assistant.
+- Calendar/service edit saves still close normally and refresh visible records after success.
+
+Setup data and login state:
+- Use an authenticated admin session.
+- Use any appointment or service record that already has doctor, assistant, or TLBS selected.
+
+---
+
+# TestSprite Plan: Customer Payment Identity Reconciliation
+
+Feature/edit name: Customer Payment Identity Reconciliation
+
+Changed URLs and API routes:
+- `/payment`
+- `/customers/:id`
+- `GET /api/Payments`
+- `GET /api/Payments?customerId=...&type=payments`
+- `GET /api/Payments/deposits`
+- `GET /api/Payments/deposit-usage`
+- `GET /api/Payments/:id`
+
+Affected data flows:
+- Canonical payment rows now include the linked customer name, phone, and location name from `dbo.partners` / `dbo.companies`.
+- `/payment` history maps canonical `dbo.payments` rows into visible customer payment rows without losing customer identity.
+- Payment search can match customer names and phones on canonical payment rows, including accent-insensitive searches like `ma van thanh`.
+- Customer profile payment tabs and service history still use the same payment and allocation IDs.
+
+User roles:
+- Admin or clinic staff with `payment.view`.
+- Staff with customer profile access when checking `/customers/:id` payment history.
+
+Happy paths:
+- Open `/payment`, search `ma van thanh`, and confirm payments for `MÃ VĂN THÀNH - UP` remain visible.
+- Search `0985227087` and confirm both duplicate customer profiles can be reconciled from visible payment identity.
+- Open `T050559` customer profile and confirm orthodontic payments total `14.801.000 ₫` against `SO45244`.
+- Open `T058004` customer profile and confirm the two `700.000 ₫` payments remain separate on the QL profile.
+
+Edge cases:
+- Payment rows with missing partner records should still render without crashing.
+- Legacy `accountpayments` fallback rows should include customer identity when fallback is used.
+- Voided payments should keep existing status behavior.
+- Deposit and deposit-usage endpoints should still return the same rows and counts.
+
+Regressions:
+- `/payment` all-location history should not lose receipt/reference code display.
+- Outstanding balance cards should still derive from sale orders and not double-count canonical payment rows.
+- Customer profile service residual display should still use sale order residual and allocation data.
+- Existing accent-insensitive search behavior across payment text fields should remain intact.
+
+Setup data and login state:
+- Use an authenticated admin session with `payment.view`.
+- Use local customer records `T050559` (`MÃ VĂN THÀNH - UP`) and `T058004` (`MÃ VĂN THÀNH - QL`), both phone `0985227087`.
+- Use local sale order `SO45244` and payment references `CUST.IN/2026/103918`, `CUST.IN/2026/103919`, and `CUST.IN/2026/102219` as verification anchors.
+
+---
+
+# TestSprite Plan: Customer Service Paid Total Reconciliation
+
+Feature/edit name: Customer Service Paid Total Reconciliation
+
+Changed URLs and API routes:
+- `/customers/:id`
+- `GET /api/SaleOrders/lines`
+
+Affected data flows:
+- Customer service rows derive the paid total from posted payment amounts when imported payment allocation rows overstate the receipt amount.
+- Expanded service payment history remains tied to canonical `dbo.payments` rows and should match the service row total.
+- Residual display recalculates from the corrected paid amount and imported sale-order total.
+
+User roles:
+- Admin or clinic staff with `services.view`.
+- Staff reviewing customer service history and payment history on a customer profile.
+
+Happy paths:
+- Open customer `T050557` / sale order `SO45243` and expand the payment history.
+- Confirm the 8 history rows add to `15.400.000 ₫`.
+- Confirm the collapsed service row shows paid `15.400.000 ₫` and residual `4.400.000 ₫` for total `19.800.000 ₫`.
+- Confirm direct posted service payments without allocation rows still count in service paid totals.
+
+Edge cases:
+- Imported allocation rows where one payment is duplicated above its real posted amount.
+- Payments split across more than one invoice should be proportionally capped only when the total allocation exceeds the real payment.
+- Voided or non-payment category records should not increase the service paid total.
+
+Regressions:
+- Customer service rows with no overallocated imports should keep the same paid and residual totals.
+- Service history sorting and product/doctor/dental-aide fields should remain unchanged.
+- Payment button and expanded payment-history drawer should still render for partially paid services.
+
+Setup data and login state:
+- Use an authenticated admin session with `services.view`.
+- Use local customer `T050557` and sale order `SO45243`.
+- Verification anchor receipts: `CUST.IN/2025/80040`, `CUST.IN/2025/80041`, `CUST.IN/2025/84122`, `CUST.IN/2025/88698`, `CUST.IN/2025/92961`, `CUST.IN/2026/99621`, `CUST.IN/2026/102814`, `CUST.IN/2026/106326`.
+
+---
+
+# TestSprite Plan: Employee Sales Export Payment Reconciliation
+
+Feature/edit name: Employee Sales Export Payment Reconciliation
+
+Changed URLs and API routes:
+- `/reports`
+- Operational export preview/download route for the employee sales report builder.
+
+Affected data flows:
+- Employee sales report/export rows normalize overallocated imported `payment_allocations` rows before splitting payment amount across service lines.
+- Report totals should match actual posted payment amounts instead of duplicated imported allocation amounts.
+
+User roles:
+- Admin or reporting staff with report/export permission.
+
+Happy paths:
+- Preview and export employee sales revenue for a date range that includes a fully paid imported service.
+- Confirm the report total does not exceed the underlying posted payment amount when allocation rows are duplicated.
+- Confirm line-level splitting still works for services with multiple active sale-order lines.
+
+Edge cases:
+- Payment allocations whose total exceeds the posted payment amount.
+- Multi-line service orders where a normalized allocation needs to be split by line price.
+- Location-scoped report users should keep the same permission behavior.
+
+Regressions:
+- Normal report filters for date, company, employee type, and employee ID still apply.
+- Export workbook grouping and summary totals remain unchanged for non-overallocated data.
+
+Setup data and login state:
+- Use an authenticated admin/reporting session.
+- Use a date range containing known overallocated imported sale orders such as `SO45243` or high-delta examples from the audit query.

@@ -51,7 +51,7 @@ export function mapSaleOrderToServiceRecord(order: ApiSaleOrder): ServiceRecord 
     assistantName: order.assistantname || '',
     dentalAideId: order.dentalaideid ?? null,
     dentalAideName: order.dentalaidename || '',
-    quantity: order.quantity ? parseFloat(order.quantity) : 1,
+    quantity: order.quantity != null ? parseFloat(order.quantity) : 1,
     unit: order.unit || 'services.form.unitPlaceholder',
     locationId: order.companyid || '',
     locationName: order.companyname || '',

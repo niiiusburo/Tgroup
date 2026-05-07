@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.31.9",
+    "date": "2026-05-07",
+    "commit": "pending",
+    "highlights": "fix(services): quantity input uneditable + parseFloat 0 bug in mapper",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "ServiceForm quantity input was uneditable — changed state from string to number to fix React type=\"number\" controlled-input reconciliation",
+          "mapSaleOrderToServiceRecord: quantity 0 was incorrectly defaulting to 1 due to parseFloat(\"0\") being falsy; fixed to proper null check"
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.31.5",
     "date": "2026-05-07",
     "commit": "pending",
@@ -8,13 +23,13 @@
       {
         "title": "Bug Fixes",
         "items": [
-            "Calendar now opens on the Day view by default when there is no persisted state (previously defaulted to Week)."
+          "Calendar now opens on the Day view by default when there is no persisted state (previously defaulted to Week)."
         ]
       },
       {
         "title": "Notes",
         "items": [
-            "0.31.4 was bumped without a CHANGELOG entry; this 0.31.5 entry rolls that bump in along with the Calendar default-view tweak so package.json and CHANGELOG.json match the pre-commit hook check."
+          "0.31.4 was bumped without a CHANGELOG entry; this 0.31.5 entry rolls that bump in along with the Calendar default-view tweak so package.json and CHANGELOG.json match the pre-commit hook check."
         ]
       }
     ]
@@ -95,35 +110,35 @@
       {
         "title": "i18n",
         "items": [
-            "FormFooter (every modal): Save / Cancel / Update / Saving now read from common namespace.",
-            "DeleteConfirmDialog (every delete flow): title, message, linked-data warning, delete button now translated.",
-            "TodaySchedule (Overview/Calendar): heading + empty-state translated.",
-            "VersionDisplay (footer + bottom-right pill): Update Available, What's New translated.",
-            "FeedbackWidget (top-right on every page): list/detail title, empty state, status labels (Pending/In Progress/Resolved/Ignored), file-upload error messages now in feedback namespace.",
-            "GlobalFaceIdButton: tooltip uses customers.face.quickScan + new quickScanRecognizing key; added keyboard focus ring.",
-            "Locations page: 3 validation messages, Add Location button, loading state translated.",
-            "CustomerListView: 'Loading patients...' subtitle and table loadingMessage translated.",
-            "Payment page: 3 LoadingState titles (wallets, plans, plan details) translated.",
-            "ServiceHistory + CustomerAppointmentHistory: 10 Vietnamese table headers (Ngày/Dịch vụ/Lịch hẹn/Giờ/Ê-kíp/Trạng thái/Thành tiền/Thanh toán/Còn lại) now go through i18n."
+          "FormFooter (every modal): Save / Cancel / Update / Saving now read from common namespace.",
+          "DeleteConfirmDialog (every delete flow): title, message, linked-data warning, delete button now translated.",
+          "TodaySchedule (Overview/Calendar): heading + empty-state translated.",
+          "VersionDisplay (footer + bottom-right pill): Update Available, What's New translated.",
+          "FeedbackWidget (top-right on every page): list/detail title, empty state, status labels (Pending/In Progress/Resolved/Ignored), file-upload error messages now in feedback namespace.",
+          "GlobalFaceIdButton: tooltip uses customers.face.quickScan + new quickScanRecognizing key; added keyboard focus ring.",
+          "Locations page: 3 validation messages, Add Location button, loading state translated.",
+          "CustomerListView: 'Loading patients...' subtitle and table loadingMessage translated.",
+          "Payment page: 3 LoadingState titles (wallets, plans, plan details) translated.",
+          "ServiceHistory + CustomerAppointmentHistory: 10 Vietnamese table headers (Ngày/Dịch vụ/Lịch hẹn/Giờ/Ê-kíp/Trạng thái/Thành tiền/Thanh toán/Còn lại) now go through i18n."
         ]
       },
       {
         "title": "Locale Keys",
         "items": [
-            "common.json: confirmDelete, deleteConfirmDefault, linkedDataWarning, updateAvailable, whatsNew.",
-            "feedback.json: detailTitle, listTitle, emptyState, invalidFileType, fileTooLarge, statusLabels.{pending,inProgress,resolved,ignored}.",
-            "overview.json: todayScheduleTitle, noAppointmentsToday.",
-            "locations.json: validation.{nameRequired,addressRequired,phoneRequired}, actions.addLocation, states.{loading,loadingDescription}.",
-            "payment.json: states.{loadingWallets,loadingPlans,loadingDetails}.",
-            "customers.json: states.loading, face.{quickScan,quickScanRecognizing}.",
-            "services.json: table.{date,service,amount,paid,remaining}.",
-            "appointments.json: table.{date,appointment,time,team,status}, staff.{doctor,assistant,dentalAide}."
+          "common.json: confirmDelete, deleteConfirmDefault, linkedDataWarning, updateAvailable, whatsNew.",
+          "feedback.json: detailTitle, listTitle, emptyState, invalidFileType, fileTooLarge, statusLabels.{pending,inProgress,resolved,ignored}.",
+          "overview.json: todayScheduleTitle, noAppointmentsToday.",
+          "locations.json: validation.{nameRequired,addressRequired,phoneRequired}, actions.addLocation, states.{loading,loadingDescription}.",
+          "payment.json: states.{loadingWallets,loadingPlans,loadingDetails}.",
+          "customers.json: states.loading, face.{quickScan,quickScanRecognizing}.",
+          "services.json: table.{date,service,amount,paid,remaining}.",
+          "appointments.json: table.{date,appointment,time,team,status}, staff.{doctor,assistant,dentalAide}."
         ]
       },
       {
         "title": "Audit",
         "items": [
-            "4 parallel audit agents found ~321 hardcoded strings across the website. This release fixes the ~30 highest-impact (always-visible / shared / form footer / delete confirm / loading state / customer detail tables); ~290 lower-priority strings remain across forms, employees, settings, permission board — captured for follow-up."
+          "4 parallel audit agents found ~321 hardcoded strings across the website. This release fixes the ~30 highest-impact (always-visible / shared / form footer / delete confirm / loading state / customer detail tables); ~290 lower-priority strings remain across forms, employees, settings, permission board — captured for follow-up."
         ]
       }
     ]
@@ -158,16 +173,16 @@
       {
         "title": "New Features",
         "items": [
-            "Top header now has a Face ID quick-scan button next to the location filter — visible on every page through the shared Layout.",
-            "Click opens the existing FaceCaptureModal. On auto-match, navigates straight to /customers/:id; on candidate review, lists possible matches in a small popover and lets you pick; on no match, shows a brief 'No customer matched' note.",
-            "Click-outside dismisses the result popover; Escape/cancel closes the capture modal."
+          "Top header now has a Face ID quick-scan button next to the location filter — visible on every page through the shared Layout.",
+          "Click opens the existing FaceCaptureModal. On auto-match, navigates straight to /customers/:id; on candidate review, lists possible matches in a small popover and lets you pick; on no match, shows a brief 'No customer matched' note.",
+          "Click-outside dismisses the result popover; Escape/cancel closes the capture modal."
         ]
       },
       {
         "title": "Implementation",
         "items": [
-            "New component website/src/components/shared/GlobalFaceIdButton.tsx (~140 lines), hooked into Layout.tsx between FilterByLocation and FeedbackWidget.",
-            "Reuses the existing useFaceRecognition hook and recognizeFace API client — no new endpoints."
+          "New component website/src/components/shared/GlobalFaceIdButton.tsx (~140 lines), hooked into Layout.tsx between FilterByLocation and FeedbackWidget.",
+          "Reuses the existing useFaceRecognition hook and recognizeFace API client — no new endpoints."
         ]
       }
     ]

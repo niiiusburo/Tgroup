@@ -88,7 +88,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   const [startDate, setStartDate] = useState(initialData?.startDate ?? getToday());
   const [expectedEndDate, setExpectedEndDate] = useState(initialData?.expectedEndDate ?? '');
   const [notes, setNotes] = useState(initialData?.notes ?? '');
-  const [quantity, setQuantity] = useState(initialData?.quantity ? String(initialData.quantity) : '1');
+  const [quantity, setQuantity] = useState<number>(initialData?.quantity ?? 1);
   const [unit, setUnit] = useState(initialData?.unit ?? 'răng');
   const [totalCostOverride, setTotalCostOverride] = useState(
     initialData?.totalCost ? String(initialData.totalCost) : ''
@@ -115,7 +115,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       setStartDate(initialData.startDate ?? getToday());
       setExpectedEndDate(initialData.expectedEndDate ?? '');
       setNotes(initialData.notes ?? '');
-      setQuantity(initialData.quantity ? String(initialData.quantity) : '1');
+      setQuantity(initialData.quantity ?? 1);
       setUnit(initialData.unit ?? 'răng');
       setTotalCostOverride(initialData.totalCost ? String(initialData.totalCost) : '');
       setToothNumbers(initialData.toothNumbers ?? []);
@@ -252,7 +252,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
         locationId: location.id, locationName: location.name,
         totalVisits: selectedCatalog.totalVisits, totalCost: cost,
         startDate, expectedEndDate: expectedEndDate || startDate,
-        notes: notes.trim(), quantity: Number(quantity) || 1, unit: unit.trim(),
+        notes: notes.trim(), quantity: quantity || 1, unit: unit.trim(),
         toothNumbers,
         toothComment: toothComment.trim(),
         sourceId
@@ -354,7 +354,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
                 <Stethoscope className="w-3.5 h-3.5" />
                 {t('form.doctor', 'Bác sĩ')}
               </label>
-              <DoctorSelector employees={employees} selectedId={doctorId} onChange={handleDoctorChange} filterRoles={['doctor']} />
+              <DoctorSelector employees={employees} selectedId={doctorId} onChange={handleDoctorChange} filterRoles={['doctor']} allowClear />
               {errors.doctor && <p className="mt-2 text-xs text-red-500">{errors.doctor}</p>}
             </div>
             <div>
@@ -362,14 +362,14 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
                 <User className="w-3.5 h-3.5" />
                 {t('form.assistant', 'Phụ tá')}
               </label>
-              <DoctorSelector employees={employees} selectedId={assistantId} onChange={handleAssistantChange} filterRoles={['assistant']} placeholder={t('form.selectDoctor', { ns: 'appointments' })} />
+              <DoctorSelector employees={employees} selectedId={assistantId} onChange={handleAssistantChange} filterRoles={['assistant']} placeholder={t('form.selectDoctor', { ns: 'appointments' })} allowClear />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
                 <User className="w-3.5 h-3.5" />
                 {t('form.dentalAide', 'Trợ lý Bác sĩ')}
               </label>
-              <DoctorSelector employees={employees} selectedId={dentalAideId} onChange={handleDentalAideChange} filterRoles={['doctor-assistant']} placeholder={t('form.selectDoctor', { ns: 'appointments' })} />
+              <DoctorSelector employees={employees} selectedId={dentalAideId} onChange={handleDentalAideChange} filterRoles={['doctor-assistant']} placeholder={t('form.selectDoctor', { ns: 'appointments' })} allowClear />
             </div>
           </FormGrid>
 
@@ -413,7 +413,10 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
               </label>
               <input
                 type="number" value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setQuantity(v === '' ? 1 : Number(v));
+                }}
                 placeholder="1"
                 min={1}
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm" />
