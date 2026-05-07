@@ -250,6 +250,8 @@
   "faceCapture": {
     "title": "Chụp ảnh khuôn mặt",
     "capture": "Chụp ảnh",
+    "switchCamera": "Đổi camera",
+    "cameraStarting": "Đang mở camera...",
     "cameraError": "Không thể truy cập camera. Vui lòng cấp quyền."
   },
   "combobox": {
@@ -317,5 +319,10 @@
   "languages": {
     "vietnamese": "🇻🇳 Tiếng Việt"
   },
-  "unknown": "Không xác định"
+  "unknown": "Không xác định",
+  "confirmDelete": "Xác nhận xóa",
+  "deleteConfirmDefault": "Bạn có chắc muốn xóa mục này? Không thể hoàn tác.",
+  "linkedDataWarning": "Cảnh báo dữ liệu liên kết",
+  "updateAvailable": "Có bản cập nhật",
+  "whatsNew": "Có gì mới"
 }

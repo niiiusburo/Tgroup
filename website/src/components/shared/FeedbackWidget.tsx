@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageSquare, X, ArrowLeft, Send, Loader2, Paperclip } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePasteImage } from '@/hooks/usePasteImage';
 import {
@@ -18,11 +19,12 @@ const STATUS_STYLES: Record<FeedbackStatus, string> = {
   ignored: 'bg-gray-50 text-gray-600 ring-gray-500/20',
 };
 
-const STATUS_LABELS: Record<FeedbackStatus, string> = {
-  pending: 'Pending',
-  in_progress: 'In Progress',
-  resolved: 'Resolved',
-  ignored: 'Ignored',
+// Status label keys live in i18n: feedback.statusLabels.{pending|inProgress|resolved|ignored}
+const STATUS_LABEL_KEYS: Record<FeedbackStatus, string> = {
+  pending: 'statusLabels.pending',
+  in_progress: 'statusLabels.inProgress',
+  resolved: 'statusLabels.resolved',
+  ignored: 'statusLabels.ignored',
 };
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -100,6 +102,7 @@ function AttachmentThumbnails({ attachments }: { attachments?: { url: string; or
 }
 
 export function FeedbackWidget() {
+  const { t: tFeedback } = useTranslation('feedback');
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [threads, setThreads] = useState<FeedbackThread[]>([]);
@@ -190,12 +193,12 @@ export function FeedbackWidget() {
     }
     const invalid = newFiles.find((f) => !ALLOWED_TYPES.includes(f.type));
     if (invalid) {
-      setFileError('Only JPG, PNG, GIF, and WEBP images are allowed.');
+      setFileError(tFeedback('invalidFileType'));
       return;
     }
     const oversized = newFiles.find((f) => f.size > MAX_FILE_SIZE);
     if (oversized) {
-      setFileError('Each image must be smaller than 5 MB.');
+      setFileError(tFeedback('fileTooLarge'));
       return;
     }
     setFiles((prev) => [...prev, ...newFiles]);
@@ -242,7 +245,7 @@ export function FeedbackWidget() {
     }
   }
 
-  const title = selectedThreadId && detail ? 'Feedback Detail' : 'Your Feedback';
+  const title = selectedThreadId && detail ? tFeedback('detailTitle') : tFeedback('listTitle');
 
   return (
     <div className="relative" ref={panelRef}>
@@ -296,7 +299,7 @@ export function FeedbackWidget() {
                     <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
                       <MessageSquare className="w-5 h-5 text-primary" />
                     </div>
-                    <p className="text-sm font-medium text-gray-900">No feedback yet</p>
+                    <p className="text-sm font-medium text-gray-900">{tFeedback('emptyState')}</p>
                     <p className="text-xs text-gray-500 mt-1">
                       Spot something weird? Tell us what page you&apos;re on and what&apos;s happening.
                     </p>
@@ -313,7 +316,7 @@ export function FeedbackWidget() {
                         <span
                           className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ${STATUS_STYLES[t.status]}`}
                         >
-                          {STATUS_LABELS[t.status]}
+                          {tFeedback(STATUS_LABEL_KEYS[t.status])}
                         </span>
                         <span className="text-[10px] text-gray-400">{formatTime(t.updatedAt)}</span>
                       </div>

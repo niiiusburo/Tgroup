@@ -56,5 +56,7 @@
     "cancelled": "Cancelled",
     "pending": "Pending"
   },
-  "subtitle": "Dashboard overview"
+  "subtitle": "Dashboard overview",
+  "todayScheduleTitle": "Today's Schedule",
+  "noAppointmentsToday": "No appointments scheduled for today"
 }

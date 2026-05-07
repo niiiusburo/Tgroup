@@ -166,5 +166,17 @@
   "visitType": {
     "newExam": "New Exam",
     "followUp": "Follow-up"
+  },
+  "table": {
+    "date": "Date",
+    "appointment": "Appointment",
+    "time": "Time",
+    "team": "Team",
+    "status": "Status"
+  },
+  "staff": {
+    "doctor": "Doctor",
+    "assistant": "Assistant",
+    "dentalAide": "Dental Aide"
   }
 }

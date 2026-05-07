@@ -278,5 +278,10 @@
   "payments": "payments",
   "activeWallets": "active wallets",
   "overdue": "overdue",
-  "paid": "paid"
+  "paid": "paid",
+  "states": {
+    "loadingWallets": "Loading wallets...",
+    "loadingPlans": "Loading payment plans...",
+    "loadingDetails": "Loading plan details..."
+  }
 }

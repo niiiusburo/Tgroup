@@ -278,5 +278,10 @@
   "payments": "thanh toán",
   "activeWallets": "ví hoạt động",
   "overdue": "quá hạn",
-  "paid": "đã trả"
+  "paid": "đã trả",
+  "states": {
+    "loadingWallets": "Đang tải ví...",
+    "loadingPlans": "Đang tải kế hoạch thanh toán...",
+    "loadingDetails": "Đang tải chi tiết..."
+  }
 }

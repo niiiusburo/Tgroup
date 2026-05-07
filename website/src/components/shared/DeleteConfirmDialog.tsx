@@ -5,6 +5,7 @@
  * @crossref:used-in[Customers, ServiceCatalog, Employees, Services]
  */
 import { AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { FormShell, FormHeader, FormFooter } from '@/components/modules/FormShell';
 
 export interface LinkedItem {
@@ -33,6 +34,7 @@ export function DeleteConfirmDialog({
   isDeleting = false,
   deleteError,
 }: DeleteConfirmDialogProps) {
+  const { t } = useTranslation('common');
   if (!isOpen) return null;
 
   const hasLinkedItems = linkedItems && linkedItems.length > 0;
@@ -40,22 +42,22 @@ export function DeleteConfirmDialog({
   return (
     <FormShell onClose={onClose} maxWidth="md">
       <FormHeader
-        title="Confirm Delete"
-        subtitle={`Deleting "${itemName}"`}
+        title={t('confirmDelete')}
+        subtitle={`${t('delete')} "${itemName}"`}
         icon={<AlertTriangle className="w-5 h-5" />}
         onClose={onClose}
       />
 
       <div className="px-6 py-5 space-y-4">
         <p className="text-sm text-gray-700">
-          {warningMessage ?? 'Are you sure you want to delete this item? This action cannot be undone.'}
+          {warningMessage ?? t('deleteConfirmDefault')}
         </p>
 
         {hasLinkedItems && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-600" />
-              <span className="text-sm font-medium text-amber-800">Linked Data Warning</span>
+              <span className="text-sm font-medium text-amber-800">{t('linkedDataWarning')}</span>
             </div>
             <ul className="space-y-1">
               {linkedItems.map((item) => (
@@ -78,7 +80,7 @@ export function DeleteConfirmDialog({
       <FormFooter
         onCancel={onClose}
         onSubmit={onConfirm}
-        submitLabel="Delete"
+        submitLabel={t('delete')}
         isSubmitting={isDeleting}
         submitDisabled={isDeleting}
       />

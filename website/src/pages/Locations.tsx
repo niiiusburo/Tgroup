@@ -67,14 +67,14 @@ export function Locations() {
               className="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
             >
               <Plus className="w-4 h-4" />
-              Add Location
+              {t('actions.addLocation')}
             </button>
           ) : undefined
         }
       />
 
       {isLoading ? (
-        <LoadingState title="Loading locations..." description="Fetching clinic branches and filters." />
+        <LoadingState title={t('states.loading')} description={t('states.loadingDescription')} />
       ) : (
         <>
       {/* Summary stats */}
@@ -245,9 +245,9 @@ function AddLocationForm({
 
   function validate(): boolean {
     const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = 'Branch name is required';
-    if (!form.address.trim()) e.address = 'Address is required';
-    if (!form.phone.trim()) e.phone = 'Phone is required';
+    if (!form.name.trim()) e.name = t('validation.nameRequired');
+    if (!form.address.trim()) e.address = t('validation.addressRequired');
+    if (!form.phone.trim()) e.phone = t('validation.phoneRequired');
     setErrors(e);
     return Object.keys(e).length === 0;
   }

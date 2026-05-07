@@ -47,5 +47,17 @@
   "form.district": "Quận/Huyện",
   "registeredPatients": "Bệnh nhân đăng ký",
   "target": "Mục tiêu",
-  "acrossAllBranches": "Tất cả chi nhánh"
+  "acrossAllBranches": "Tất cả chi nhánh",
+  "validation": {
+    "nameRequired": "Vui lòng nhập tên chi nhánh",
+    "addressRequired": "Vui lòng nhập địa chỉ",
+    "phoneRequired": "Vui lòng nhập số điện thoại"
+  },
+  "actions": {
+    "addLocation": "Thêm chi nhánh"
+  },
+  "states": {
+    "loading": "Đang tải chi nhánh...",
+    "loadingDescription": "Đang tải danh sách chi nhánh và bộ lọc."
+  }
 }

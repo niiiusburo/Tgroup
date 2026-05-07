@@ -166,5 +166,17 @@
   "visitType": {
     "newExam": "Khám mới",
     "followUp": "Tái khám"
+  },
+  "table": {
+    "date": "Ngày",
+    "appointment": "Lịch hẹn",
+    "time": "Giờ",
+    "team": "Ê-kíp",
+    "status": "Trạng thái"
+  },
+  "staff": {
+    "doctor": "Bác sĩ",
+    "assistant": "Phụ tá",
+    "dentalAide": "Nha tá"
   }
 }

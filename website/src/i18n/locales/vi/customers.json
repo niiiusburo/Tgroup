@@ -130,6 +130,8 @@
     "noMatch": "Không tìm thấy",
     "searchToRegister": "Tìm khách hàng để đăng ký khuôn mặt",
     "searchPlaceholder": "Tên, SĐT hoặc mã...",
+    "quickScan": "Quét nhanh khuôn mặt",
+    "quickScanRecognizing": "Đang nhận diện…",
     "registerToCustomer": "Đăng ký khuôn mặt cho {name}",
     "addAnotherSample": "Thêm mẫu khuôn mặt",
     "faceRegistered": "Đã đăng ký khuôn mặt",
@@ -152,7 +154,7 @@
     "titleComingSoon": "Tính năng thêm danh xưng tuỳ chỉnh sẽ được phát triển sau"
   },
   "errors": {
-    "saveFailed": "Lỗi lưu dữ liệu. Vui lòng thử lại."
+    "saveFailedTitle": "Lỗi lưu dữ liệu"
   },
   "medicalNotice": {
     "title": "Lưu ý y tế",
@@ -273,11 +275,11 @@
     "emailInUse": "Email này đã được sử dụng.",
     "cannotVerify": "Không thể kiểm tra. Vui lòng thử lại."
   },
-  "errors": {
-    "saveFailedTitle": "Lỗi lưu dữ liệu"
-  },
   "faceRecognition": {
     "registerFailed": "Đăng ký khuôn mặt thất bại",
     "recognizeFailed": "Nhận diện khuôn mặt thất bại"
+  },
+  "states": {
+    "loading": "Đang tải khách hàng..."
   }
 }

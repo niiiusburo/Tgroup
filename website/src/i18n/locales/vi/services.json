@@ -154,5 +154,12 @@
   "close": "Đóng",
   "cancel": "Hủy",
   "save": "Lưu",
-  "deletePayment": "Xóa thanh toán"
+  "deletePayment": "Xóa thanh toán",
+  "table": {
+    "date": "Ngày",
+    "service": "Dịch vụ",
+    "amount": "Thành tiền",
+    "paid": "Thanh toán",
+    "remaining": "Còn lại"
+  }
 }

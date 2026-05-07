@@ -201,7 +201,7 @@ export function Payment() {
           <div className="space-y-6">
             {/* Deposit wallets */}
             {isLoading ? (
-              <LoadingState title="Loading wallets..." />
+              <LoadingState title={t('states.loadingWallets')} />
             ) : wallets.map((wallet) => (
               <DepositWallet
                 key={wallet.id}
@@ -322,7 +322,7 @@ export function Payment() {
             {/* Plan list */}
             <div className="lg:col-span-1 space-y-2">
               {plansLoading ? (
-                <LoadingState title="Loading payment plans..." />
+                <LoadingState title={t('states.loadingPlans')} />
               ) : plans.length === 0 ? (
                 <div className="bg-white rounded-xl shadow-card p-8 text-center">
                   <CalendarRange className="w-10 h-10 text-gray-300 mx-auto mb-2" />
@@ -367,7 +367,7 @@ export function Payment() {
             {/* Plan detail */}
             <div className="lg:col-span-2">
               {plansLoading ? (
-                <LoadingState title="Loading plan details..." />
+                <LoadingState title={t('states.loadingDetails')} />
               ) : selectedPlan ? (
                 <PaymentSchedule plan={selectedPlan} onMarkPaid={markInstallmentPaid} />
               ) : (

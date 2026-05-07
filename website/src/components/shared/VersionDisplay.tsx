@@ -14,6 +14,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useVersionCheck } from '@/hooks/useVersionCheck';
 import {
   RefreshCw,
@@ -47,6 +48,7 @@ export function VersionDisplay({
   variant = 'footer',
   showDetails = true
 }: VersionDisplayProps) {
+  const { t } = useTranslation('common');
   // All state hooks must be called first, before any early returns
   const [showTooltip, setShowTooltip] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -163,7 +165,7 @@ export function VersionDisplay({
                 <Download className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-sm">Update Available</h4>
+                <h4 className="font-semibold text-sm">{t('updateAvailable')}</h4>
                 <p className="text-xs text-white/90 mt-1">
                   New version {latestVersion?.version} is ready.
                 </p>
@@ -288,7 +290,7 @@ export function VersionDisplay({
                     <div className="px-4 py-3 border-b border-gray-700">
                       <div className="flex items-center gap-2 mb-2">
                         <Sparkles className="w-3 h-3 text-orange-400" />
-                        <span className="text-xs font-semibold text-orange-400 uppercase tracking-wider">What&apos;s New</span>
+                        <span className="text-xs font-semibold text-orange-400 uppercase tracking-wider">{t('whatsNew')}</span>
                       </div>
                       <p className="text-xs text-gray-300 mb-2">{currentHighlights}</p>
                       <button
@@ -395,7 +397,7 @@ export function VersionDisplay({
       {isUpdateAvailable && updateSeverity !== 'critical' && (
         <div className="mb-2 p-2 bg-amber-500/20 border border-amber-500/30 rounded-lg">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs text-amber-400 font-medium">Update Available</span>
+            <span className="text-xs text-amber-400 font-medium">{t('updateAvailable')}</span>
             <button
               onClick={(e) => {
                 e.stopPropagation();

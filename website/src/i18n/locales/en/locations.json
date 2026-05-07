@@ -47,5 +47,17 @@
   "form.district": "District",
   "registeredPatients": "Registered patients",
   "target": "Target",
-  "acrossAllBranches": "Across all branches"
+  "acrossAllBranches": "Across all branches",
+  "validation": {
+    "nameRequired": "Branch name is required",
+    "addressRequired": "Address is required",
+    "phoneRequired": "Phone is required"
+  },
+  "actions": {
+    "addLocation": "Add Location"
+  },
+  "states": {
+    "loading": "Loading locations...",
+    "loadingDescription": "Fetching clinic branches and filters."
+  }
 }

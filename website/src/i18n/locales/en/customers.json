@@ -130,6 +130,8 @@
     "noMatch": "No match found",
     "searchToRegister": "Search customer to register this face",
     "searchPlaceholder": "Name, phone, or code...",
+    "quickScan": "Quick Face ID",
+    "quickScanRecognizing": "Recognizing…",
     "registerToCustomer": "Register face to {name}",
     "addAnotherSample": "Add another face sample",
     "faceRegistered": "Face registered",
@@ -152,7 +154,7 @@
     "titleComingSoon": "Custom title feature will be developed later"
   },
   "errors": {
-    "saveFailed": "Error saving data. Please try again."
+    "saveFailedTitle": "Error saving data"
   },
   "medicalNotice": {
     "title": "Medical Notice",
@@ -273,11 +275,11 @@
     "emailInUse": "This email is already in use.",
     "cannotVerify": "Unable to verify. Please try again."
   },
-  "errors": {
-    "saveFailedTitle": "Error saving data"
-  },
   "faceRecognition": {
     "registerFailed": "Face registration failed",
     "recognizeFailed": "Face recognition failed"
+  },
+  "states": {
+    "loading": "Loading patients..."
   }
 }

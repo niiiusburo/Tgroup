@@ -60,26 +60,26 @@ export function GlobalFaceIdButton() {
   };
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="relative shrink-0">
       <button
         type="button"
-        title={t('faceId', 'Quick Face ID') as string}
-        aria-label={t('faceId', 'Quick Face ID') as string}
+        title={t('face.quickScan', 'Quick Face ID') as string}
+        aria-label={t('face.quickScan', 'Quick Face ID') as string}
         onClick={() => {
           reset();
           setShowPopover(false);
           setShowCapture(true);
         }}
-        className="relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-orange-50 transition-colors duration-150"
+        className="relative w-10 h-10 flex items-center justify-center rounded-lg border border-orange-200 bg-orange-50 text-orange-600 shadow-sm hover:bg-orange-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-1 transition-colors duration-150"
       >
-        <ScanFace className="w-5 h-5 text-orange-500" />
+        <ScanFace className="w-5 h-5" />
       </button>
 
       {showPopover && (
         <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl border border-gray-200 bg-white shadow-lg p-3 z-50">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-gray-700">
-              {t('faceId', 'Quick Face ID')}
+              {t('face.quickScan', 'Quick Face ID')}
             </span>
             <button
               type="button"
@@ -94,7 +94,7 @@ export function GlobalFaceIdButton() {
           {recognizeState.status === 'processing' && (
             <div className="flex items-center gap-2 py-2 text-sm text-gray-600">
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>{t('loading', 'Recognizing…')}</span>
+              <span>{t('face.quickScanRecognizing', 'Recognizing…')}</span>
             </div>
           )}
 
@@ -155,7 +155,7 @@ export function GlobalFaceIdButton() {
 
       <FaceCaptureModal
         isOpen={showCapture}
-        title={t('faceId', 'Quick Face ID') as string}
+        title={t('face.quickScan', 'Quick Face ID') as string}
         onCapture={handleCapture}
         onCancel={() => setShowCapture(false)}
       />

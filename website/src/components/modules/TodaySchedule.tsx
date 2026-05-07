@@ -1,4 +1,5 @@
 import { Clock, User, MapPin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { CalendarAppointment } from '@/data/mockCalendar';
 import { STATUS_BADGE_STYLES } from '@/data/mockCalendar';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
@@ -16,8 +17,9 @@ interface TodayScheduleProps {
 
 export function TodaySchedule({
   appointments,
-  title = "Today's Schedule",
+  title,
 }: TodayScheduleProps) {
+  const { t } = useTranslation('overview');
   const sorted = [...appointments].sort((a, b) =>
     a.startTime.localeCompare(b.startTime)
   );
@@ -25,7 +27,7 @@ export function TodaySchedule({
   return (
     <div className="bg-white rounded-xl shadow-card p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-gray-900">{title}</h3>
+        <h3 className="font-semibold text-gray-900">{title ?? t('todayScheduleTitle')}</h3>
         <span className="text-xs font-medium text-gray-400">
           {appointments.length} appointment{appointments.length !== 1 ? 's' : ''}
         </span>
@@ -34,7 +36,7 @@ export function TodaySchedule({
       {sorted.length === 0 ? (
         <div className="py-8 text-center">
           <Clock className="w-10 h-10 mx-auto mb-2 text-gray-200" />
-          <p className="text-sm text-gray-500">No appointments scheduled for today</p>
+          <p className="text-sm text-gray-500">{t('noAppointmentsToday')}</p>
         </div>
       ) : (
         <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">

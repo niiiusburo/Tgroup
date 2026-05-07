@@ -1,4 +1,15 @@
 {
   "title": "Feedback",
-  "subtitle": "Review and respond to employee feedback submissions"
+  "subtitle": "Review and respond to employee feedback submissions",
+  "detailTitle": "Feedback Detail",
+  "listTitle": "Your Feedback",
+  "emptyState": "No feedback yet",
+  "invalidFileType": "Only JPG, PNG, GIF, and WEBP images are allowed.",
+  "fileTooLarge": "Each image must be smaller than 5 MB.",
+  "statusLabels": {
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "resolved": "Resolved",
+    "ignored": "Ignored"
+  }
 }

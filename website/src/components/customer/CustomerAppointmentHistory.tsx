@@ -109,11 +109,11 @@ export function CustomerAppointmentHistory({
             <table className="w-full min-w-[820px] text-sm">
               <thead>
                 <tr className="border-b border-gray-200 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  <th className="pb-3 pr-4">Ngày</th>
-                  <th className="pb-3 pr-4">Lịch hẹn</th>
-                  <th className="pb-3 pr-4">Giờ</th>
-                  <th className="pb-3 pr-4">Ê-kíp</th>
-                  <th className="pb-3 pr-4">Trạng thái</th>
+                  <th className="pb-3 pr-4">{t('table.date', { ns: 'appointments' })}</th>
+                  <th className="pb-3 pr-4">{t('table.appointment', { ns: 'appointments' })}</th>
+                  <th className="pb-3 pr-4">{t('table.time', { ns: 'appointments' })}</th>
+                  <th className="pb-3 pr-4">{t('table.team', { ns: 'appointments' })}</th>
+                  <th className="pb-3 pr-4">{t('table.status', { ns: 'appointments' })}</th>
                   <th className="pb-3 text-center"></th>
                 </tr>
               </thead>

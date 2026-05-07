@@ -56,5 +56,7 @@
     "cancelled": "Đã hủy",
     "pending": "Đang chờ"
   },
-  "subtitle": "Tổng quan bảng điều khiển"
+  "subtitle": "Tổng quan bảng điều khiển",
+  "todayScheduleTitle": "Lịch hôm nay",
+  "noAppointmentsToday": "Không có lịch hẹn nào hôm nay"
 }

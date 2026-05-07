@@ -154,5 +154,12 @@
   "close": "Close",
   "cancel": "Cancel",
   "save": "Save",
-  "deletePayment": "Delete payment"
+  "deletePayment": "Delete payment",
+  "table": {
+    "date": "Date",
+    "service": "Service",
+    "amount": "Amount",
+    "paid": "Paid",
+    "remaining": "Remaining"
+  }
 }

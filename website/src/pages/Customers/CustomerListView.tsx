@@ -103,7 +103,7 @@ export function CustomerListView({
     <div className="space-y-6">
       <PageHeader
         title={t('title')}
-        subtitle={loading ? 'Loading patients...' : `${stats.total} patients · ${stats.active} active`}
+        subtitle={loading ? t('states.loading') : `${stats.total} patients · ${stats.active} active`}
         icon={<Users className="w-6 h-6 text-primary" />}
         actions={
           <div className="flex items-center gap-2">
@@ -176,7 +176,7 @@ export function CustomerListView({
           onRowClick={onRowClick}
           emptyMessage={emptyMessage}
           loading={loading}
-          loadingMessage="Loading patients..."
+          loadingMessage={t('states.loading')}
         />
       )}
 

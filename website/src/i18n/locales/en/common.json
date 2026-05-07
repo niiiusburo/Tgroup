@@ -250,6 +250,8 @@
   "faceCapture": {
     "title": "Face Capture",
     "capture": "Capture",
+    "switchCamera": "Switch camera",
+    "cameraStarting": "Starting camera...",
     "cameraError": "Cannot access camera. Please grant permission."
   },
   "combobox": {
@@ -317,5 +319,10 @@
   "languages": {
     "vietnamese": "🇻🇳 Vietnamese"
   },
-  "unknown": "Unknown"
+  "unknown": "Unknown",
+  "confirmDelete": "Confirm Delete",
+  "deleteConfirmDefault": "Are you sure you want to delete this item? This action cannot be undone.",
+  "linkedDataWarning": "Linked Data Warning",
+  "updateAvailable": "Update Available",
+  "whatsNew": "What's New"
 }

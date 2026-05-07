@@ -18,6 +18,7 @@
  */
 
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
 export interface FormFooterProps {
@@ -37,15 +38,18 @@ export function FormFooter({
   onCancel,
   onSubmit,
   form,
-  submitLabel = 'Save',
-  cancelLabel = 'Cancel',
+  submitLabel,
+  cancelLabel,
   isSubmitting = false,
   isEdit = false,
   submitDisabled = false,
   className,
   showSubmit = true,
 }: FormFooterProps) {
+  const { t } = useTranslation('common');
   const canSubmit = onSubmit || form;
+  const resolvedSubmitLabel = submitLabel ?? t('save');
+  const resolvedCancelLabel = cancelLabel ?? t('cancel');
 
   return (
     <div
@@ -66,7 +70,7 @@ export function FormFooter({
           'disabled:opacity-50 disabled:cursor-not-allowed'
         )}
       >
-        {cancelLabel}
+        {resolvedCancelLabel}
       </button>
 
       {showSubmit && canSubmit && (
@@ -83,7 +87,7 @@ export function FormFooter({
           )}
         >
           {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-          {isSubmitting ? 'Saving...' : isEdit ? `Update` : submitLabel}
+          {isSubmitting ? t('saving') : isEdit ? t('update') : resolvedSubmitLabel}
         </button>
       )}
     </div>

@@ -84,12 +84,12 @@ export function ServiceHistory({
         <table className="w-full min-w-[820px] text-sm">
           <thead>
             <tr className="border-b border-gray-200 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              <th className="pb-3 pr-4">Ngày</th>
-              <th className="pb-3 pr-4">Dịch vụ</th>
+              <th className="pb-3 pr-4">{t('table.date')}</th>
+              <th className="pb-3 pr-4">{t('table.service')}</th>
               <th className="pb-3 pr-4 text-right">Số lượng</th>
-              <th className="pb-3 pr-4 text-right">Thành tiền</th>
-              <th className="pb-3 pr-4 text-right">Thanh toán</th>
-              <th className="pb-3 pr-4 text-right">Còn lại</th>
+              <th className="pb-3 pr-4 text-right">{t('table.amount')}</th>
+              <th className="pb-3 pr-4 text-right">{t('table.paid')}</th>
+              <th className="pb-3 pr-4 text-right">{t('table.remaining')}</th>
               <th className="pb-3 text-center"></th>
             </tr>
           </thead>

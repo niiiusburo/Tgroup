@@ -1,5 +1,68 @@
 [
   {
+    "version": "0.30.2",
+    "date": "2026-05-07",
+    "commit": "pending",
+    "highlights": "i18n: replace ~30 hardcoded English/Vietnamese strings in always-visible UI with proper translation keys",
+    "sections": [
+      {
+        "title": "i18n",
+        "items": [
+            "FormFooter (every modal): Save / Cancel / Update / Saving now read from common namespace.",
+            "DeleteConfirmDialog (every delete flow): title, message, linked-data warning, delete button now translated.",
+            "TodaySchedule (Overview/Calendar): heading + empty-state translated.",
+            "VersionDisplay (footer + bottom-right pill): Update Available, What's New translated.",
+            "FeedbackWidget (top-right on every page): list/detail title, empty state, status labels (Pending/In Progress/Resolved/Ignored), file-upload error messages now in feedback namespace.",
+            "GlobalFaceIdButton: tooltip uses customers.face.quickScan + new quickScanRecognizing key; added keyboard focus ring.",
+            "Locations page: 3 validation messages, Add Location button, loading state translated.",
+            "CustomerListView: 'Loading patients...' subtitle and table loadingMessage translated.",
+            "Payment page: 3 LoadingState titles (wallets, plans, plan details) translated.",
+            "ServiceHistory + CustomerAppointmentHistory: 10 Vietnamese table headers (Ngày/Dịch vụ/Lịch hẹn/Giờ/Ê-kíp/Trạng thái/Thành tiền/Thanh toán/Còn lại) now go through i18n."
+        ]
+      },
+      {
+        "title": "Locale Keys",
+        "items": [
+            "common.json: confirmDelete, deleteConfirmDefault, linkedDataWarning, updateAvailable, whatsNew.",
+            "feedback.json: detailTitle, listTitle, emptyState, invalidFileType, fileTooLarge, statusLabels.{pending,inProgress,resolved,ignored}.",
+            "overview.json: todayScheduleTitle, noAppointmentsToday.",
+            "locations.json: validation.{nameRequired,addressRequired,phoneRequired}, actions.addLocation, states.{loading,loadingDescription}.",
+            "payment.json: states.{loadingWallets,loadingPlans,loadingDetails}.",
+            "customers.json: states.loading, face.{quickScan,quickScanRecognizing}.",
+            "services.json: table.{date,service,amount,paid,remaining}.",
+            "appointments.json: table.{date,appointment,time,team,status}, staff.{doctor,assistant,dentalAide}."
+        ]
+      },
+      {
+        "title": "Audit",
+        "items": [
+            "4 parallel audit agents found ~321 hardcoded strings across the website. This release fixes the ~30 highest-impact (always-visible / shared / form footer / delete confirm / loading state / customer detail tables); ~290 lower-priority strings remain across forms, employees, settings, permission board — captured for follow-up."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.30.1",
+    "date": "2026-05-07",
+    "commit": "pending",
+    "highlights": "fix(face-id): privacy-blurred camera preview with mobile front/back switching",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "FaceCaptureModal now shows the live camera feed with a strong privacy blur so staff cannot see a full face in the preview.",
+          "iPhone/mobile camera startup now retries exact facingMode, ideal facingMode, then generic video access, with a front/back camera switch button."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Expanded FaceCaptureModal coverage for privacy blur and front/back facingMode requests."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.30.0",
     "date": "2026-05-07",
     "commit": "pending",

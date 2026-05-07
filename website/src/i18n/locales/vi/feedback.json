@@ -1,4 +1,15 @@
 {
   "title": "Phản hồi",
-  "subtitle": "Xem và phản hồi ý kiến nhân viên"
+  "subtitle": "Xem và phản hồi ý kiến nhân viên",
+  "detailTitle": "Chi tiết phản hồi",
+  "listTitle": "Phản hồi của bạn",
+  "emptyState": "Chưa có phản hồi",
+  "invalidFileType": "Chỉ chấp nhận ảnh JPG, PNG, GIF, WEBP.",
+  "fileTooLarge": "Mỗi ảnh phải nhỏ hơn 5 MB.",
+  "statusLabels": {
+    "pending": "Đang chờ",
+    "inProgress": "Đang xử lý",
+    "resolved": "Đã giải quyết",
+    "ignored": "Đã bỏ qua"
+  }
 }
