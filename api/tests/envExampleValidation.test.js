@@ -45,4 +45,20 @@ describe('.env.example', () => {
     expect(content).toContain('POSTGRES_USER');
     expect(content).toContain('POSTGRES_PASSWORD');
   });
+
+  it('contains COMPREFACE_URL for legacy integration', () => {
+    expect(content).toContain('COMPREFACE_URL');
+  });
+
+  it('contains COMPREFACE_API_KEY for legacy integration', () => {
+    expect(content).toContain('COMPREFACE_API_KEY');
+  });
+
+  it('contains HOSOONLINE_USERNAME for authentication', () => {
+    expect(content).toContain('HOSOONLINE_USERNAME');
+  });
+
+  it('contains HOSOONLINE_PASSWORD for authentication', () => {
+    expect(content).toContain('HOSOONLINE_PASSWORD');
+  });
 });
