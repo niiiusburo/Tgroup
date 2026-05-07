@@ -471,4 +471,26 @@ describe('getFaceStatus', () => {
     const result = await getFaceStatus('p1');
     expect(result.lastRegisteredAt).toBe('2026-05-01T08:00:00');
   });
+
+  it('returns registered=true with single sample', async () => {
+    const { getFaceStatus, query } = loadEngine();
+    query
+      .mockResolvedValueOnce([{ cnt: 1, last_at: '2026-05-07T10:00:00' }])
+      .mockResolvedValueOnce([{ face_registered_at: '2026-05-07T10:00:00' }]);
+
+    const result = await getFaceStatus('p1');
+    expect(result.registered).toBe(true);
+    expect(result.sampleCount).toBe(1);
+  });
+
+  it('handles database returning empty array for partner', async () => {
+    const { getFaceStatus, query } = loadEngine();
+    query
+      .mockResolvedValueOnce([{ cnt: 0, last_at: null }])
+      .mockResolvedValueOnce([]);
+
+    const result = await getFaceStatus('p1');
+    expect(result.registered).toBe(false);
+    expect(result.lastRegisteredAt).toBeNull();
+  });
 });
