@@ -97,6 +97,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/DETECTION_THRESHOLD/i);
     });
 
+    it('uses DETECTION_THRESHOLD for score validation', () => {
+      expect(content).toMatch(/score.*DETECTION_THRESHOLD/i);
+    });
+
     it('defines INPUT_SIZE for YuNet', () => {
       expect(content).toMatch(/INPUT_SIZE/i);
     });
