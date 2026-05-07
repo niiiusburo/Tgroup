@@ -540,6 +540,15 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/embedding/i);
     });
 
+    it('uses score variable for detection confidence', () => {
+      expect(content).toMatch(/score/i);
+    });
+
+    it('uses x and y coordinates for face position', () => {
+      expect(content).toMatch(/x,/i);
+      expect(content).toMatch(/y,/i);
+    });
+
     it('uses f-strings for formatted messages', () => {
       expect(content).toMatch(/f"/i);
     });
