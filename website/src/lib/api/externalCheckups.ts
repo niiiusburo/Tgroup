@@ -31,6 +31,28 @@ export interface ExternalCheckupsResponse {
   checkups: ExternalCheckup[];
 }
 
+function extractExternalCheckupError(text: string, fallback: string): string {
+  if (!text) return fallback;
+  try {
+    const data = JSON.parse(text) as { error?: string; detail?: string; message?: string };
+    const detail = data.detail || data.message || data.error;
+    if (!detail) return fallback;
+
+    if (detail.trim().startsWith('{')) {
+      try {
+        const nested = JSON.parse(detail) as { message?: string; error?: string };
+        return nested.message || nested.error || detail;
+      } catch {
+        return detail;
+      }
+    }
+
+    return detail;
+  } catch {
+    return text;
+  }
+}
+
 export function fetchExternalCheckups(customerCode: string): Promise<ExternalCheckupsResponse> {
   return apiFetch<ExternalCheckupsResponse>(`/ExternalCheckups/${encodeURIComponent(customerCode)}`);
 }
@@ -126,7 +148,7 @@ export async function createExternalCheckup(
 
   if (!res.ok) {
     const text = await res.text().catch(() => 'Upload failed');
-    throw new Error(text);
+    throw new Error(extractExternalCheckupError(text, 'Upload failed'));
   }
   return res.json();
 }

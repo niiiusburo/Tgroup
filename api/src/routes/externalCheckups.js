@@ -9,6 +9,7 @@ const {
   HOSOONLINE_API_KEY,
   HOSOONLINE_BASE_URL,
   HosoAuthError,
+  HosoUploadImageError,
   authFailureCheckups,
   createHosoPatientForLocalCustomer,
   emptyCheckups,
@@ -19,6 +20,7 @@ const {
   hasHosoLoginCredentials,
   isHosoAuthFailure,
   normalizeHosoCheckups,
+  prepareHosoUploadFile,
   resolveHosoPatientCode,
 } = hosoClient;
 
@@ -181,8 +183,8 @@ router.post('/:customerCode/health-checkups', requireAuth, requirePermission('ex
     const hosoCode = await resolveHosoPatientCode(customerCode);
     const body = req.body || {};
 
-    if (!body.title || !body.doctor || !body.date) {
-      return res.status(400).json({ error: 'title, doctor, and date are required' });
+    if (!(body.title || body.service) || !body.doctor) {
+      return res.status(400).json({ error: 'service and doctor are required' });
     }
 
     const form = new FormData();
@@ -203,10 +205,11 @@ router.post('/:customerCode/health-checkups', requireAuth, requirePermission('ex
     });
 
     if (req.files && req.files.length > 0) {
-      req.files.forEach((file) => {
-        const photo = new Blob([file.buffer], { type: file.mimetype || 'application/octet-stream' });
-        form.append('photos', photo, file.originalname);
-      });
+      for (const file of req.files) {
+        const preparedFile = await prepareHosoUploadFile(file);
+        const photo = new Blob([preparedFile.buffer], { type: preparedFile.mimetype || 'application/octet-stream' });
+        form.append('photos', photo, preparedFile.originalname);
+      }
     }
 
     const hosoRes = await fetch(
@@ -242,6 +245,12 @@ router.post('/:customerCode/health-checkups', requireAuth, requirePermission('ex
         error: 'hosoonline authentication failed',
         status: error.status,
         detail: 'Check the configured Hosoonline API key before uploading health checkup images.',
+      });
+    }
+    if (error instanceof HosoUploadImageError) {
+      return res.status(error.status).json({
+        error: 'unsupported image file',
+        detail: error.message,
       });
     }
     console.error('ExternalCheckups upload error:', error);

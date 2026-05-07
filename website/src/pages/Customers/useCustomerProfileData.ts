@@ -16,8 +16,12 @@ export function useCustomerProfileData(
 ): CustomerProfileData {
   const customerCode = useMemo(() => {
     if (!selectedCustomerId) return '';
-    return customers.find((c) => c.id === selectedCustomerId)?.code ?? '';
-  }, [selectedCustomerId, customers]);
+    return (
+      hookProfile?.code ||
+      customers.find((c) => c.id === selectedCustomerId)?.code ||
+      ''
+    );
+  }, [selectedCustomerId, hookProfile, customers]);
 
   return useMemo(() => {
     if (hookProfile) {
