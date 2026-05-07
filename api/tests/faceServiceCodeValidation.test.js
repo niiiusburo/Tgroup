@@ -220,6 +220,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/@app\.post\(["']\/embed["']\)/i);
     });
 
+    it('defines embed endpoint function', () => {
+      expect(content).toMatch(/def embed/i);
+    });
+
     it('defines embed as async function', () => {
       expect(content).toMatch(/async def embed/i);
     });
