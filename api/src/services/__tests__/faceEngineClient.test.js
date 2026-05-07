@@ -217,4 +217,73 @@ describe('FaceEngineError', () => {
     expect(err.message).toBe('No face detected');
     expect(err instanceof Error).toBe(true);
   });
+
+  it('defaults status to undefined when not provided', () => {
+    const { FaceEngineError } = loadClient();
+    const err = new FaceEngineError('ENGINE_ERROR', 'Engine failed');
+    expect(err.status).toBeUndefined();
+    expect(err.code).toBe('ENGINE_ERROR');
+  });
+
+  it('has a stack trace', () => {
+    const { FaceEngineError } = loadClient();
+    const err = new FaceEngineError('TEST', 'Test error');
+    expect(err.stack).toBeDefined();
+  });
+});
+
+describe('getEmbedding', () => {
+  let localFetchSpy;
+
+  beforeEach(() => {
+    localFetchSpy = jest.spyOn(global, 'fetch').mockImplementation(() => Promise.resolve({ ok: true }));
+  });
+
+  afterEach(() => {
+    localFetchSpy.mockRestore();
+  });
+
+  it('posts image to face-service embed endpoint', async () => {
+    const { getEmbedding } = loadClient({ FACE_SERVICE_URL: 'http://face-test:8000' });
+    localFetchSpy.mockResolvedValue({
+      ok: true,
+      json: async () => ({ embedding: [0.1, 0.2, 0.3], model: { version: '1.0' }, quality: { faceCount: 1 } }),
+    });
+
+    const result = await getEmbedding(Buffer.from('fake-image'), 'image/jpeg');
+
+    expect(localFetchSpy).toHaveBeenCalledWith(
+      'http://face-test:8000/embed',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.any(FormData),
+      }),
+    );
+    expect(result.embedding).toEqual([0.1, 0.2, 0.3]);
+    expect(result.model.version).toBe('1.0');
+    expect(result.quality.faceCount).toBe(1);
+  });
+
+  it('throws FaceEngineError when face-service returns error JSON', async () => {
+    const { getEmbedding } = loadClient({ FACE_SERVICE_URL: 'http://face-test:8000' });
+    localFetchSpy.mockResolvedValue({
+      ok: false,
+      status: 422,
+      json: async () => ({ error: 'NO_FACE', message: 'No face detected' }),
+    });
+
+    await expect(getEmbedding(Buffer.from('fake-image'), 'image/jpeg')).rejects.toThrow('No face detected');
+  });
+
+  it('throws generic error when face-service returns non-JSON error', async () => {
+    const { getEmbedding } = loadClient({ FACE_SERVICE_URL: 'http://face-test:8000' });
+    localFetchSpy.mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => { throw new Error('Invalid JSON'); },
+      text: async () => 'Internal Server Error',
+    });
+
+    await expect(getEmbedding(Buffer.from('fake-image'), 'image/jpeg')).rejects.toThrow('Face service error (500)');
+  });
 });
