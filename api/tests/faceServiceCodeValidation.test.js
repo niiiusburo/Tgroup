@@ -105,10 +105,6 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/INPUT_SIZE/i);
     });
 
-    it('defines INPUT_SIZE for YuNet', () => {
-      expect(content).toMatch(/INPUT_SIZE/i);
-    });
-
     it('configures score_threshold for YuNet', () => {
       expect(content).toMatch(/score_threshold/i);
     });
@@ -449,6 +445,10 @@ describe('face-service code validation', () => {
 
     it('has broad exception handling with except Exception', () => {
       expect(content).toMatch(/except Exception/i);
+    });
+
+    it('uses f-strings for formatted messages', () => {
+      expect(content).toMatch(/f"/i);
     });
   });
 
