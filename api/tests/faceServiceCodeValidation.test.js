@@ -130,6 +130,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/os\.environ\.get/i);
     });
 
+    it('defines MODEL_DIR configuration', () => {
+      expect(content).toMatch(/MODEL_DIR/i);
+    });
+
     it('reads DETECTION_THRESHOLD from environment', () => {
       expect(content).toMatch(/DETECTION_THRESHOLD/i);
     });
