@@ -75,6 +75,17 @@ describe('Face Recognition API client', () => {
       expect(result.status).toBe('no_match');
     });
 
+    it('returns no_match with empty candidates array', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ status: 'no_match', candidates: [] }),
+      });
+
+      const result = await recognizeFace(new Blob(['image']));
+      expect(result.candidates).toEqual([]);
+    });
+
     it('throws on HTTP error', async () => {
       mockFetch.mockResolvedValue({
         ok: false,
@@ -119,6 +130,20 @@ describe('Face Recognition API client', () => {
       const callArgs = mockFetch.mock.calls[0];
       const formData = callArgs[1].body as FormData;
       expect(formData.get('source')).toBe('manual');
+    });
+
+    it('omits source when not provided', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ success: true, sampleCount: 1 }),
+      });
+
+      await registerFace('p1', new Blob(['image']));
+
+      const callArgs = mockFetch.mock.calls[0];
+      const formData = callArgs[1].body as FormData;
+      expect(formData.get('source')).toBeNull();
     });
 
     it('throws on HTTP error', async () => {
