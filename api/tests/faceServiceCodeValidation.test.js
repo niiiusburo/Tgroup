@@ -49,6 +49,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/title=/i);
     });
 
+    it('sets version in FastAPI app', () => {
+      expect(content).toMatch(/version=/i);
+    });
+
     it('imports JSONResponse from fastapi.responses', () => {
       expect(content).toMatch(/from fastapi\.responses import JSONResponse/i);
     });
