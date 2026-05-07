@@ -483,6 +483,30 @@ describe('getFaceStatus', () => {
     expect(result.sampleCount).toBe(1);
   });
 
+  it('handles null last_at by using face_registered_at fallback', async () => {
+    const { getFaceStatus, query } = loadEngine();
+    query
+      .mockResolvedValueOnce([{ cnt: 2, last_at: null }])
+      .mockResolvedValueOnce([{ face_registered_at: '2026-05-05T08:00:00' }]);
+
+    const result = await getFaceStatus('p1');
+    expect(result.registered).toBe(true);
+    expect(result.sampleCount).toBe(2);
+    expect(result.lastRegisteredAt).toBe('2026-05-05T08:00:00');
+  });
+
+  it('returns registered=false when both queries return empty', async () => {
+    const { getFaceStatus, query } = loadEngine();
+    query
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+
+    const result = await getFaceStatus('p1');
+    expect(result.registered).toBe(false);
+    expect(result.sampleCount).toBe(0);
+    expect(result.lastRegisteredAt).toBeNull();
+  });
+
   it('handles database returning empty array for partner', async () => {
     const { getFaceStatus, query } = loadEngine();
     query
