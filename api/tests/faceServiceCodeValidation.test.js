@@ -571,6 +571,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/file_bytes/i);
     });
 
+    it('uses pil_img for PIL image handling', () => {
+      expect(content).toMatch(/pil_img/i);
+    });
+
     it('uses f-strings for formatted messages', () => {
       expect(content).toMatch(/f"/i);
     });
