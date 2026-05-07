@@ -195,6 +195,45 @@ describe('POST /api/face/recognize', () => {
     expect(res.status).toBe(500);
     expect(res.body.error).toBe('ENGINE_ERROR');
   });
+
+  it('returns 422 when face engine reports multiple faces', async () => {
+    const { FaceEngineError } = require('../src/services/faceEngineClient');
+    getEmbedding.mockRejectedValue(new FaceEngineError('MULTIPLE_FACES', 'More than one face detected', 422));
+
+    const res = await request(app)
+      .post('/api/face/recognize')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(422);
+    expect(res.body.error).toBe('MULTIPLE_FACES');
+  });
+
+  it('returns 422 when face engine reports low quality', async () => {
+    const { FaceEngineError } = require('../src/services/faceEngineClient');
+    getEmbedding.mockRejectedValue(new FaceEngineError('LOW_QUALITY', 'Face detection score 0.5 below threshold', 422));
+
+    const res = await request(app)
+      .post('/api/face/recognize')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(422);
+    expect(res.body.error).toBe('LOW_QUALITY');
+  });
+
+  it('returns 503 when face engine returns 503 with different code', async () => {
+    const { FaceEngineError } = require('../src/services/faceEngineClient');
+    getEmbedding.mockRejectedValue(new FaceEngineError('SERVICE_UNAVAILABLE', 'Temporarily unavailable', 503));
+
+    const res = await request(app)
+      .post('/api/face/recognize')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(503);
+    expect(res.body.error).toBe('SERVICE_UNAVAILABLE');
+  });
 });
 
 describe('POST /api/face/register', () => {
