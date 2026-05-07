@@ -559,6 +559,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/\bw\b/i);
     });
 
+    it('uses face_box for alignCrop input', () => {
+      expect(content).toMatch(/face_box/i);
+    });
+
     it('uses f-strings for formatted messages', () => {
       expect(content).toMatch(/f"/i);
     });
