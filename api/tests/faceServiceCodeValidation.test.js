@@ -73,6 +73,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/"message":/i);
     });
 
+    it('uses dictionary literals for JSON content', () => {
+      expect(content).toMatch(/content=\{/i);
+    });
+
     it('imports UploadFile from fastapi', () => {
       expect(content).toMatch(/UploadFile/i);
     });
