@@ -45,6 +45,7 @@ export interface ProfileTabProps {
   checkupsError: string | null;
   onRefetchCheckups?: () => void;
   canViewHealthCheckups: boolean;
+  canCreateCheckups?: boolean;
 }
 
 export interface RecordsTabProps {
