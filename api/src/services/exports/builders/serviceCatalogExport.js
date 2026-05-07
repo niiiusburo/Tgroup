@@ -1,7 +1,7 @@
 'use strict';
 
 const { query } = require('../../../db');
-const { createWorkbook, populateDataSheet, populateSummarySheet } = require('../exportWorkbook');
+const { createWorkbook, populateDataSheet, populateSummarySheet, toVNDate } = require('../exportWorkbook');
 
 const MAX_ROWS = 100_000;
 
@@ -154,8 +154,8 @@ async function build(filters, user) {
     laboprice: parseFloat(r.laboprice || 0),
     companyname: r.companyname || '',
     active: r.active ? 'Hoạt động' : 'Ngừng',
-    datecreated: r.datecreated ? new Date(r.datecreated) : null,
-    lastupdated: r.lastupdated ? new Date(r.lastupdated) : null,
+    datecreated: r.datecreated ? toVNDate(r.datecreated) : null,
+    lastupdated: r.lastupdated ? toVNDate(r.lastupdated) : null,
   }));
 
   populateDataSheet(workbook.getWorksheet('Data'), COLUMNS, dataRows);

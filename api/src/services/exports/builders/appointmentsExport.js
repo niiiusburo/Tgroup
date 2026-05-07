@@ -1,7 +1,7 @@
 'use strict';
 
 const { query } = require('../../../db');
-const { createWorkbook, populateDataSheet, populateSummarySheet } = require('../exportWorkbook');
+const { createWorkbook, populateDataSheet, populateSummarySheet, toVNDate } = require('../exportWorkbook');
 
 const MAX_ROWS = 100_000;
 
@@ -137,26 +137,21 @@ function getVisitTypeLabel(isRepeat) {
 
 function buildAppointmentDate(row) {
   if (row.datetimeappointment) {
-    const dt = new Date(row.datetimeappointment);
-    return Number.isNaN(dt.getTime()) ? null : dt;
+    return toVNDate(row.datetimeappointment);
   }
 
   if (!row.date) return null;
 
-  const dt = row.date instanceof Date ? new Date(row.date) : new Date(row.date);
-  if (Number.isNaN(dt.getTime())) return null;
+  // row.date is a plain YYYY-MM-DD string thanks to our pg DATE parser
+  const dateStr = row.date instanceof Date ? row.date.toISOString().slice(0, 10) : String(row.date).slice(0, 10);
 
   if (row.time) {
     const [hours = '0', minutes = '0', seconds = '0'] = String(row.time).split(':');
-    dt.setHours(
-      Number.parseInt(hours, 10) || 0,
-      Number.parseInt(minutes, 10) || 0,
-      Number.parseInt(seconds, 10) || 0,
-      0
-    );
+    const dt = new Date(`${dateStr}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}Z`);
+    return Number.isNaN(dt.getTime()) ? null : dt;
   }
 
-  return dt;
+  return toVNDate(dateStr);
 }
 
 async function preview(filters, user) {

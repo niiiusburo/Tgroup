@@ -193,6 +193,42 @@ describe('GET /api/SaleOrders/lines', () => {
     expect(listQuery?.[0]).toContain('order_line_count');
   });
 
+  it('caps overallocated imported allocation rows to the posted payment amount', async () => {
+    query.mockImplementation(async (sql) => {
+      if (sql.includes('ip_access_settings')) {
+        return [{ mode: 'disabled' }];
+      }
+      if (sql.includes('ip_access_entries')) {
+        return [];
+      }
+      if (sql.includes('COUNT(*) as count')) {
+        return [{ count: '1' }];
+      }
+      if (sql.includes('FROM saleorderlines sol')) {
+        return [{
+          id: 'line-id',
+          orderid: 'order-id',
+          amountpaid: '15400000.00',
+          paid_amount: '15400000.00',
+          order_line_count: '1',
+        }];
+      }
+      throw new Error(`Unexpected query: ${sql}`);
+    });
+
+    const res = await request(app)
+      .get('/api/SaleOrders/lines')
+      .query({ partner_id: 'customer-id' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.items[0].paid_amount).toBe('15400000.00');
+
+    const listQuery = query.mock.calls.find(([sql]) => sql.includes('LEFT JOIN products pr ON pr.id = sol.productid'));
+    expect(listQuery?.[0]).toContain('invoice_allocated * payment_amount / total_allocated_for_payment');
+    expect(listQuery?.[0]).toContain('SUM(SUM(pa.allocated_amount)) OVER (PARTITION BY pa.payment_id)');
+    expect(listQuery?.[0]).toContain("COALESCE(p.payment_category, 'payment') = 'payment'");
+  });
+
   it('falls back to sale order edit fields when imported line fields are blank', async () => {
     query.mockImplementation(async (sql) => {
       if (sql.includes('ip_access_settings')) {

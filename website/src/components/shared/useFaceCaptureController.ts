@@ -3,6 +3,7 @@ import {
   AUTO_CAPTURE_READY_FRAMES,
   DETECTION_INTERVAL_MS,
   PROFILE_POSE_SETTLE_MS,
+  PROFILE_POSE_HOLD_MS,
   analyzeFrame,
   captureVideoFrame,
   getCameraStream,
@@ -150,6 +151,8 @@ export function useFaceCaptureController({
     let readyFrames = 0;
     const detector = getNativeFaceDetector();
     const poseStartedAt = Date.now();
+    const poseId = PROFILE_POSES[poseIndex]?.id ?? 'center';
+    const requireFaceDetection = !isProfileCapture || poseId === 'center';
 
     const runDetection = async () => {
       const video = videoRef.current;
@@ -168,7 +171,7 @@ export function useFaceCaptureController({
         return;
       }
 
-      const result = await analyzeFrame(video, detector);
+      const result = await analyzeFrame(video, detector, requireFaceDetection);
       if (cancelled) return;
 
       const nextScore = Math.max(0, Math.min(1, result.score));
@@ -182,7 +185,21 @@ export function useFaceCaptureController({
         setDetectionState('scanning');
       }
 
+      // Auto-capture when stable detection achieved
       if (readyFrames >= AUTO_CAPTURE_READY_FRAMES && !autoCapturedRef.current) {
+        autoCapturedRef.current = true;
+        setDetectionState('capturing');
+        void handleCapture();
+        return;
+      }
+
+      // Timeout auto-capture for profile poses after hold duration
+      if (
+        isProfileCapture &&
+        !requireFaceDetection &&
+        !autoCapturedRef.current &&
+        Date.now() - poseStartedAt >= PROFILE_POSE_HOLD_MS
+      ) {
         autoCapturedRef.current = true;
         setDetectionState('capturing');
         void handleCapture();

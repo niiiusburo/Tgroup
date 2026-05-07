@@ -1,5 +1,6 @@
 const { query } = require('../../db');
 const { errorResponse, isValidISODate, isValidUUID, VALID_STATES } = require('./helpers');
+const { addAccentInsensitiveSearchCondition } = require('../../utils/search');
 
 /**
  * GET /api/Appointments
@@ -136,11 +137,13 @@ async function listAppointments(req, res) {
     }
 
     if (search) {
-      conditions.push(
-        `(a.name ILIKE $${paramIdx} OR a.note ILIKE $${paramIdx} OR a.reason ILIKE $${paramIdx} OR p.name ILIKE $${paramIdx} OR p.namenosign ILIKE $${paramIdx} OR p.ref ILIKE $${paramIdx})`
-      );
-      params.push(`%${search}%`);
-      paramIdx++;
+      paramIdx = addAccentInsensitiveSearchCondition({
+        conditions,
+        params,
+        columns: ['a.name', 'a.note', 'a.reason', 'p.name', 'p.namenosign', 'p.ref', 'doc.name', 'prod.name'],
+        search,
+        paramIdx,
+      });
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -268,7 +271,12 @@ async function listAppointments(req, res) {
     let aggregates = null;
     if (includeCountsEnabled) {
       const countResult = await query(
-        `SELECT COUNT(*) AS count FROM appointments a LEFT JOIN partners p ON p.id = a.partnerid ${whereClause}`,
+        `SELECT COUNT(*) AS count
+        FROM appointments a
+        LEFT JOIN partners p ON p.id = a.partnerid
+        LEFT JOIN partners doc ON doc.id = a.doctorid
+        LEFT JOIN products prod ON prod.id = a.productid
+        ${whereClause}`,
         params
       );
       totalItems = parseInt(countResult[0]?.count || '0', 10);
@@ -281,6 +289,8 @@ async function listAppointments(req, res) {
       const stateCounts = await query(
         `SELECT a.state, COUNT(*) AS count
         FROM appointments a LEFT JOIN partners p ON p.id = a.partnerid
+        LEFT JOIN partners doc ON doc.id = a.doctorid
+        LEFT JOIN products prod ON prod.id = a.productid
         ${whereClause}
         GROUP BY a.state`,
         params

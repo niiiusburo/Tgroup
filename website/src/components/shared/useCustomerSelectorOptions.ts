@@ -19,6 +19,7 @@ function toSelectorCustomer(customer: ApiCustomer): Customer {
     locationId: customer.locationId,
     status: customer.status,
     lastVisit: customer.lastVisit,
+    code: customer.code ?? undefined,
   };
 }
 

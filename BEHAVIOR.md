@@ -20,6 +20,7 @@ If behavior is accepted as product truth, promote it here or to a domain runbook
 - Disabled controls must expose why they are disabled through nearby copy, tooltip, or state text.
 - Destructive actions require confirmation and should preserve enough context for staff to know what will be removed.
 - After successful writes, the visible surface must refresh immediately. Do not require a manual reload for normal staff workflows.
+- Search bars must be accent-insensitive across the project. Staff typing `Nguyen`, `Thoai`, `Duong`, or `Quyen` must match records such as `NGUYỄN`, `THOẠI`, `DƯƠNG`, or `Quyền`.
 
 ## 3. Auth And Permissions
 

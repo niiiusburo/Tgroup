@@ -82,7 +82,7 @@
 | GET | `/` | Auth | `?offset, limit, search, customerId, companyId, date_from, date_to, state` | `PaginatedResponse<SaleOrder>` |
 | GET | `/:id` | Auth | — | Sale order detail |
 | POST | `/` | Perm:`customers.edit` | `{ partner_id, company_id, ... }` | Created sale order |
-| PATCH | `/:id` | Perm:`customers.edit` | Order fields | Updated sale order |
+| PATCH | `/:id` | Perm:`customers.edit` | Order fields; quantity, service, tooth, and price fields also sync to the primary rendered sale-order line | Updated sale order |
 | PATCH | `/:id/state` | Perm:`customers.edit` | `{ new_state }` | State updated + audit log |
 
 ## Sale Order Lines (`/api/SaleOrderLines`)

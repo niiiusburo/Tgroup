@@ -89,6 +89,9 @@ describe('reportSalesEmployeesExport', () => {
 
     const [sql, params] = query.mock.calls[0];
     expect(sql).toContain('pa.allocated_amount');
+    expect(sql).toContain('allocation_totals AS');
+    expect(sql).toContain('total_allocated_for_payment > p.amount');
+    expect(sql).toContain('pa.allocated_amount * p.amount / at.total_allocated_for_payment');
     expect(sql).toContain('so.doctorid');
     expect(sql).toContain('so.companyid = ANY');
     expect(sql).toContain("p.status = 'posted'");

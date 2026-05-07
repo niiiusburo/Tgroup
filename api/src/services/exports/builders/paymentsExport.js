@@ -1,7 +1,7 @@
 'use strict';
 
 const { query } = require('../../../db');
-const { createWorkbook, populateDataSheet, populateSummarySheet } = require('../exportWorkbook');
+const { createWorkbook, populateDataSheet, populateSummarySheet, toVNDate } = require('../exportWorkbook');
 
 const MAX_ROWS = 100_000;
 
@@ -168,7 +168,7 @@ async function build(filters, user) {
 
   const dataRows = rows.map((r) => ({
     referenceCode: r.reference_code || '',
-    paymentDate: r.payment_date ? new Date(r.payment_date) : r.created_at ? new Date(r.created_at) : null,
+    paymentDate: r.payment_date ? toVNDate(r.payment_date) : r.created_at ? toVNDate(r.created_at) : null,
     customerCode: r.partnercode || '',
     customerName: r.partnerdisplayname || r.partnername || '',
     customerPhone: r.partnerphone || '',

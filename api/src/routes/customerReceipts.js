@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
+const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
 const router = express.Router();
 
@@ -46,11 +47,13 @@ router.get('/', requirePermission('customers.view'), async (req, res) => {
     }
 
     if (search) {
-      conditions.push(
-        `(cr.note ILIKE $${paramIdx} OR cr.reason ILIKE $${paramIdx})`
-      );
-      params.push(`%${search}%`);
-      paramIdx++;
+      paramIdx = addAccentInsensitiveSearchCondition({
+        conditions,
+        params,
+        columns: ['cr.note', 'cr.reason', 'p.name', 'p.displayname'],
+        search,
+        paramIdx,
+      });
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -95,7 +98,11 @@ router.get('/', requirePermission('customers.view'), async (req, res) => {
     );
 
     const countResult = await query(
-      `SELECT COUNT(*) AS count FROM customerreceipts cr ${whereClause}`,
+      `SELECT COUNT(*) AS count
+       FROM customerreceipts cr
+       LEFT JOIN partners p ON p.id = cr.partnerid
+       LEFT JOIN partners doc ON doc.id = cr.doctorid
+       ${whereClause}`,
       params
     );
     const totalItems = parseInt(countResult[0]?.count || '0', 10);
@@ -108,6 +115,8 @@ router.get('/', requirePermission('customers.view'), async (req, res) => {
     const stateCounts = await query(
       `SELECT cr.state, COUNT(*) AS count
        FROM customerreceipts cr
+       LEFT JOIN partners p ON p.id = cr.partnerid
+       LEFT JOIN partners doc ON doc.id = cr.doctorid
        ${whereClause}
        GROUP BY cr.state`,
       params

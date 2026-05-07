@@ -262,9 +262,11 @@
     "poseStraight": "Nhìn thẳng",
     "poseStraightHint": "Giữ khuôn mặt trong khung.",
     "poseLeft": "Quay đầu sang trái",
-    "poseLeftHint": "Từ từ quay đầu sang trái.",
+    "poseLeftHint": "Quay đầu sang trái, giữ yên rồi nhấn Chụp.",
     "poseRight": "Quay đầu sang phải",
-    "poseRightHint": "Từ từ quay đầu sang phải.",
+    "poseRightHint": "Quay đầu sang phải, giữ yên rồi nhấn Chụp.",
+    "holdSteady": "Giữ yên, nhấn Chụp",
+    "capturePose": "Chụp",
     "autoCapturing": "Đang tự chụp...",
     "cameraError": "Không thể truy cập camera. Vui lòng cấp quyền."
   },

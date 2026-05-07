@@ -1,8 +1,6 @@
-import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Clock, Pencil, Phone, User, UserCheck } from 'lucide-react';
 import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
-import { useAppointmentHover } from '@/contexts/AppointmentHoverContext';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
 import { APPOINTMENT_CARD_COLORS } from '@/constants';
 import { formatAppointmentStartDuration } from '@/lib/appointmentDuration';
@@ -29,16 +27,8 @@ export function AppointmentCard({
   onEdit,
 }: AppointmentCardProps) {
   const { t } = useTranslation('overview');
-  const { hoveredId, setHoveredId, registerRef } = useAppointmentHover();
-  const cardRef = useRef<HTMLDivElement>(null);
   const isArrived = appointment.topStatus === 'arrived';
   const isCancelled = appointment.topStatus === 'cancelled';
-  const isHighlighted = hoveredId === appointment.id;
-
-  useEffect(() => {
-    registerRef(appointment.id, cardRef.current);
-    return () => registerRef(appointment.id, null);
-  }, [appointment.id, registerRef]);
 
   const colorConfig = getColorConfig(appointment.color);
   const statusBadgeColor = isArrived
@@ -59,17 +49,7 @@ export function AppointmentCard({
 
   return (
     <div
-      ref={cardRef}
-      onMouseEnter={() => setHoveredId(appointment.id)}
-      onMouseLeave={() => setHoveredId(null)}
-      className={`
-        rounded-xl border overflow-hidden transition-all cursor-pointer
-        ${
-          isHighlighted
-            ? 'ring-2 ring-blue-500 ring-offset-2 border-blue-300 shadow-lg'
-            : 'border-gray-200 shadow-sm hover:shadow-md'
-        }
-      `}
+      className="rounded-xl border overflow-hidden transition-all cursor-pointer border-gray-200 shadow-sm hover:shadow-md"
     >
       <div className="flex items-center justify-between px-3.5 pt-3 pb-1.5 bg-white">
         <span className="text-sm font-bold text-slate-800 truncate flex-1 mr-2">

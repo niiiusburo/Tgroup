@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
+const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
 const router = express.Router();
 
@@ -69,11 +70,13 @@ router.get('/', async (req, res) => {
 
     // Search
     if (search) {
-      conditions.push(
-        `(cr.note ILIKE $${paramIdx} OR p.displayname ILIKE $${paramIdx} OR p.phone ILIKE $${paramIdx})`
-      );
-      params.push(`%${search}%`);
-      paramIdx++;
+      paramIdx = addAccentInsensitiveSearchCondition({
+        conditions,
+        params,
+        columns: ['cr.note', 'cr.reason', 'p.displayname', 'p.ref', 'p.phone'],
+        search,
+        paramIdx,
+      });
     }
 
     const whereClause = conditions.join(' AND ');
@@ -122,7 +125,10 @@ router.get('/', async (req, res) => {
     );
 
     const countResult = await query(
-      `SELECT COUNT(*) AS count FROM customerreceipts cr WHERE ${whereClause}`,
+      `SELECT COUNT(*) AS count
+       FROM customerreceipts cr
+       LEFT JOIN partners p ON p.id = cr.partnerid
+       WHERE ${whereClause}`,
       params
     );
     const totalItems = parseInt(countResult[0]?.count || '0', 10);
@@ -132,19 +138,19 @@ router.get('/', async (req, res) => {
       total: totalItems,
       byState: {
         draft: await query(
-          `SELECT COUNT(*) AS count FROM customerreceipts cr WHERE ${whereClause} AND cr.state = 'draft'`,
+          `SELECT COUNT(*) AS count FROM customerreceipts cr LEFT JOIN partners p ON p.id = cr.partnerid WHERE ${whereClause} AND cr.state = 'draft'`,
           params
         ).then(r => parseInt(r[0]?.count || '0', 10)),
         confirmed: await query(
-          `SELECT COUNT(*) AS count FROM customerreceipts cr WHERE ${whereClause} AND cr.state = 'confirmed'`,
+          `SELECT COUNT(*) AS count FROM customerreceipts cr LEFT JOIN partners p ON p.id = cr.partnerid WHERE ${whereClause} AND cr.state = 'confirmed'`,
           params
         ).then(r => parseInt(r[0]?.count || '0', 10)),
         done: await query(
-          `SELECT COUNT(*) AS count FROM customerreceipts cr WHERE ${whereClause} AND cr.state = 'done'`,
+          `SELECT COUNT(*) AS count FROM customerreceipts cr LEFT JOIN partners p ON p.id = cr.partnerid WHERE ${whereClause} AND cr.state = 'done'`,
           params
         ).then(r => parseInt(r[0]?.count || '0', 10)),
         cancelled: await query(
-          `SELECT COUNT(*) AS count FROM customerreceipts cr WHERE ${whereClause} AND cr.state = 'cancelled'`,
+          `SELECT COUNT(*) AS count FROM customerreceipts cr LEFT JOIN partners p ON p.id = cr.partnerid WHERE ${whereClause} AND cr.state = 'cancelled'`,
           params
         ).then(r => parseInt(r[0]?.count || '0', 10)),
       },

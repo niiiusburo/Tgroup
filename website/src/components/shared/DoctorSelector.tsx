@@ -119,7 +119,7 @@ export function DoctorSelector({
             key="__clear__"
             type="button"
             onClick={() => {
-              onChange('');
+              onChange(null);
               setIsOpen(false);
               setSearchTerm('');
             }}

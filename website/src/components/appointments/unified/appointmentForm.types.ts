@@ -29,6 +29,7 @@ export interface UnifiedAppointmentFormData {
   readonly customerId: string;
   readonly customerName: string;
   readonly customerPhone: string;
+  readonly customerCode?: string;
   readonly doctorId?: string;
   readonly doctorName?: string;
   readonly assistantId?: string;

@@ -15,6 +15,7 @@ import {
   type RecordPaymentTracker,
   type RecordType,
 } from '@/data/mockPayment';
+import { normalizeText } from '@/lib/utils';
 
 export type PaymentFilter = 'all' | PaymentStatus;
 
@@ -72,8 +73,8 @@ function mapApiPaymentToPayment(payment: ApiPayment): PaymentRecord {
   return {
     id: payment.id,
     customerId: payment.customerId,
-    customerName: '',
-    customerPhone: '',
+    customerName: payment.customerName ?? '',
+    customerPhone: payment.customerPhone ?? '',
     recordId,
     recordType: allocation?.dotkhamId ? 'dotkham' : 'saleorder',
     recordName,
@@ -81,7 +82,7 @@ function mapApiPaymentToPayment(payment: ApiPayment): PaymentRecord {
     method: payment.method,
     status: payment.status === 'voided' ? 'refunded' : 'completed',
     date: payment.paymentDate || payment.createdAt?.slice(0, 10) || '',
-    locationName: '',
+    locationName: payment.locationName ?? '',
     notes: payment.notes || '',
     receiptNumber: payment.receiptNumber || payment.referenceCode || '',
     referenceCode: payment.referenceCode,
@@ -145,7 +146,7 @@ export function usePayment(selectedLocationId?: string) {
         }),
         selectedLocationId && selectedLocationId !== 'all'
           ? Promise.resolve(null)
-          : fetchPaymentsApi(undefined, 'payments').catch((err) => {
+          : fetchPaymentsApi(undefined, 'payments', search || undefined).catch((err) => {
               console.warn('Canonical payments fetch failed, falling back to sale orders:', err);
               return null;
             }),
@@ -210,7 +211,7 @@ export function usePayment(selectedLocationId?: string) {
     let result: readonly PaymentRecord[] = payments;
 
     if (searchTerm) {
-      const normalized = searchTerm.toLowerCase();
+      const normalized = normalizeText(searchTerm);
       result = result.filter((p) =>
         [
           p.customerName,
@@ -219,7 +220,7 @@ export function usePayment(selectedLocationId?: string) {
           p.receiptNumber,
           p.referenceCode,
           p.notes,
-        ].some((value) => value?.toLowerCase().includes(normalized)),
+        ].some((value) => normalizeText(value).includes(normalized)),
       );
     }
 

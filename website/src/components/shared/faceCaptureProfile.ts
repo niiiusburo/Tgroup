@@ -24,13 +24,13 @@ export const PROFILE_POSES: readonly CapturePose[] = [
     labelKey: 'faceCapture.poseLeft',
     fallbackLabel: 'Turn head left',
     hintKey: 'faceCapture.poseLeftHint',
-    fallbackHint: 'Slowly turn the head to the left.',
+    fallbackHint: 'Turn head to the left, hold steady, then tap Capture.',
   },
   {
     id: 'right',
     labelKey: 'faceCapture.poseRight',
     fallbackLabel: 'Turn head right',
     hintKey: 'faceCapture.poseRightHint',
-    fallbackHint: 'Slowly turn the head to the right.',
+    fallbackHint: 'Turn head to the right, hold steady, then tap Capture.',
   },
 ];

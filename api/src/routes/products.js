@@ -3,16 +3,9 @@ const { query } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const { requirePermission } = require('../middleware/auth');
 const { getVietnamNow } = require('../lib/dateUtils');
+const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
 const router = express.Router();
-
-function normalizeVietnamese(str) {
-  if (!str) return '';
-  return str
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
-}
 
 function categoryGroupKey(alias) {
   return `CONCAT_WS('|', COALESCE(${alias}.parentid::text, ''), LOWER(COALESCE(NULLIF(TRIM(${alias}.completename), ''), NULLIF(TRIM(${alias}.name), ''), ${alias}.id::text)))`;
@@ -107,13 +100,13 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
 
     // Search by name, defaultcode, or namenosign (accent-insensitive)
     if (search) {
-      const normalizedSearch = normalizeVietnamese(search);
-      conditions.push(
-        `(p.name ILIKE $${paramIdx} OR p.defaultcode ILIKE $${paramIdx} OR p.namenosign ILIKE $${paramIdx + 1})`
-      );
-      params.push(`%${search}%`);
-      params.push(`%${normalizedSearch}%`);
-      paramIdx += 2;
+      paramIdx = addAccentInsensitiveSearchCondition({
+        conditions,
+        params,
+        columns: ['p.name', 'p.defaultcode', 'p.namenosign'],
+        search,
+        paramIdx,
+      });
     }
 
     const whereClause = conditions.join(' AND ');

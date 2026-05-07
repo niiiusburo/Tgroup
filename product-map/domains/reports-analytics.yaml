@@ -97,3 +97,4 @@ notes:
   - Cash-flow reporting V1 separates service collections, customer deposits, refunds, deposit usage, and voided adjustments. Deposit usage is internal movement and must not be counted as new cash.
   - Revenue and cash-flow report endpoints enforce employee location scope from primary branch plus `employee_location_scope`; remaining non-revenue report routes should be reviewed before exposing them to scoped managers.
   - Employee revenue Excel export uses `/api/Exports/report-sales-employees` with `reports.export`, date/location scope, employee type, and optional employee filters; workbook rows are grouped by employee and derive revenue from posted `payment_allocations`.
+  - Overview Zone 1 and Zone 3 searches must be accent-insensitive so unaccented input matches Vietnamese names and labels with diacritics.

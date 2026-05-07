@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchAppointments, updateAppointment, type ApiAppointment } from '@/lib/api';
 import { useTimezone } from '@/contexts/TimezoneContext';
 import { getStoredArrivalTime, setStoredArrivalTime } from '@/lib/arrivalTimeStorage';
+import { normalizeText } from '@/lib/utils';
 
 /**
  * Hook for the Overview three-zone appointment flow
@@ -23,6 +24,7 @@ export interface OverviewAppointment {
   readonly customerId: string;
   readonly customerName: string;
   readonly customerPhone: string;
+  readonly customerCode: string | null;
   readonly doctorName: string;
   readonly doctorId: string;
   readonly date: string;
@@ -115,6 +117,7 @@ function mapApiToOverview(
     customerId: apt.partnerid || '',
     customerName: apt.partnername || apt.partnerdisplayname || '',
     customerPhone: apt.partnerphone || '',
+    customerCode: apt.partnercode || null,
     doctorName: apt.doctorname || '---',
     doctorId: apt.doctorid || '',
     date: apt.date ? formatDate(apt.date, 'yyyy-MM-dd') : '',
@@ -251,14 +254,18 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
   const [zone3Search, setZone3Search] = useState('');
 
   function matchesSearch(apt: OverviewAppointment, term: string) {
-    if (!term.trim()) return true;
-    const q = term.toLowerCase();
-    return (
-      apt.customerName.toLowerCase().includes(q) ||
-      apt.customerPhone.toLowerCase().includes(q) ||
-      apt.doctorName.toLowerCase().includes(q) ||
-      apt.note.toLowerCase().includes(q)
-    );
+    const query = normalizeText(term.trim());
+    if (!query) return true;
+    return [
+      apt.customerName,
+      apt.customerPhone,
+      apt.doctorName,
+      apt.assistantName,
+      apt.dentalAideName,
+      apt.locationName,
+      apt.time,
+      apt.note,
+    ].some((value) => normalizeText(value).includes(query));
   }
 
   // ─── Zone 3: filtered appointments ─────────────────────────────

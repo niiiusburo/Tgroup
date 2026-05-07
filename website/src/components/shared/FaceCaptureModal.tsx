@@ -44,12 +44,19 @@ export function FaceCaptureModal({
   const poseLabel = t(currentPose.labelKey, currentPose.fallbackLabel);
   const poseHint = t(currentPose.hintKey, currentPose.fallbackHint);
   const completedPoseCount = isProfileCapture ? profileImages.length : 0;
+  const isSidePose = currentPose?.id !== 'center';
   const detectionLabel =
     detectionState === 'capturing' ?
       t('faceCapture.autoCapturing', 'Auto capturing...') :
       isReady ?
         t('faceCapture.faceDetected', 'Face detected') :
+      isSidePose ?
+        t('faceCapture.holdSteady', 'Hold steady, tap Capture') :
         t('faceCapture.scanning', 'Scanning for face...');
+  const captureBtnLabel =
+    isSidePose && detectionState === 'scanning'
+      ? t('faceCapture.capturePose', 'Chụp pose')
+      : t('faceCapture.capture', 'Chụp');
 
   if (!isOpen) return null;
 
@@ -163,9 +170,13 @@ export function FaceCaptureModal({
                 type="button"
                 onClick={() => void handleCapture()}
                 disabled={isStarting || detectionState === 'capturing'}
-                className="h-11 flex items-center gap-2 px-4 text-sm font-semibold text-white bg-emerald-500 rounded-xl hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-emerald-300 transition-colors">
+                className={`h-11 flex items-center gap-2 px-4 text-sm font-semibold text-white rounded-xl hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 transition-all ${
+                  isSidePose && detectionState === 'scanning'
+                    ? 'bg-orange-500 animate-pulse'
+                    : 'bg-emerald-500 hover:bg-emerald-600'
+                }`}>
                   <Camera className="w-4 h-4" />
-                  {t('faceCapture.capture', 'Chụp')}
+                  {captureBtnLabel}
               </button>
                 <button
                 type="button"

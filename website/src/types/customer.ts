@@ -13,6 +13,7 @@ export interface Customer {
   readonly locationId: string;
   readonly status: CustomerStatus;
   readonly lastVisit: string;
+  readonly code?: string | null;
 }
 
 // Customer Form Types

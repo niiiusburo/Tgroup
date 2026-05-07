@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import type { PermissionGroup, EmployeePermission } from '@/lib/api';
 import { GroupCard } from './GroupCard';
 import { EmployeeCard } from './EmployeeCard';
+import { normalizeText } from '@/lib/utils';
 
 interface EditState {
   groupId: string;
@@ -45,14 +46,14 @@ export function ArchitectureView({
 
   const filteredEmployees = employees.filter(emp => {
     if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
+    const q = normalizeText(searchQuery);
     const group = groups.find(g => g.id === emp.groupId);
     const locationNames = emp.locations.map(l => l.name).join(' ');
     return (
-      emp.employeeName.toLowerCase().includes(q) ||
-      (emp.employeeEmail ?? '').toLowerCase().includes(q) ||
-      (group?.name ?? '').toLowerCase().includes(q) ||
-      locationNames.toLowerCase().includes(q)
+      normalizeText(emp.employeeName).includes(q) ||
+      normalizeText(emp.employeeEmail).includes(q) ||
+      normalizeText(group?.name).includes(q) ||
+      normalizeText(locationNames).includes(q)
     );
   });
 

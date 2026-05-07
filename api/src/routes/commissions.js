@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
+const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
 const router = express.Router();
 
@@ -54,9 +55,13 @@ router.get('/', async (req, res) => {
     }
 
     if (search) {
-      conditions.push(`c.name ILIKE $${paramIdx}`);
-      params.push(`%${search}%`);
-      paramIdx++;
+      paramIdx = addAccentInsensitiveSearchCondition({
+        conditions,
+        params,
+        columns: ['c.name'],
+        search,
+        paramIdx,
+      });
     }
 
     const whereClause = conditions.join(' AND ');

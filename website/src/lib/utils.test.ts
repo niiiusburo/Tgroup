@@ -16,6 +16,7 @@ describe('normalizeText', () => {
     expect(normalizeText('Nguyễn Thị Thanh')).toBe('nguyen thi thanh');
     expect(normalizeText('Đặng Thị Hồng Thúy')).toBe('dang thi hong thuy');
     expect(normalizeText('Vũ Hữu Đạt')).toBe('vu huu dat');
+    expect(normalizeText('Phạm Thị Thảo Quyền')).toBe('pham thi thao quyen');
   });
 
   it('should strip mixed accents', () => {

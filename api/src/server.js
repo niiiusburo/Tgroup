@@ -66,6 +66,8 @@ const ALLOWED_ORIGINS = [
   'http://76.13.16.68:5175',
   'https://nk.2checkin.com',
   'https://www.nk.2checkin.com',
+  'https://nk2.2checkin.com',
+  'https://www.nk2.2checkin.com',
 ];
 app.use(helmet());
 const DEV_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1):(517\d|5715|3\d{3})$/;

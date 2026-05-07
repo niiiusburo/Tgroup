@@ -3,6 +3,7 @@ const { query } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const { requirePermission } = require('../middleware/auth');
 const { getVietnamNow } = require('../lib/dateUtils');
+const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
 const router = express.Router();
 
@@ -30,9 +31,13 @@ router.get('/', async (req, res) => {
     }
 
     if (search) {
-      conditions.push(`(pc.name ILIKE $${paramIdx} OR pc.completename ILIKE $${paramIdx})`);
-      params.push(`%${search}%`);
-      paramIdx++;
+      paramIdx = addAccentInsensitiveSearchCondition({
+        conditions,
+        params,
+        columns: ['pc.name', 'pc.completename'],
+        search,
+        paramIdx,
+      });
     }
 
     const whereClause = conditions.join(' AND ');

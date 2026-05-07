@@ -20,6 +20,7 @@ export const AUTO_CAPTURE_SCORE = 0.68;
 export const AUTO_CAPTURE_READY_FRAMES = 6;
 export const DETECTION_INTERVAL_MS = 260;
 export const PROFILE_POSE_SETTLE_MS = 650;
+export const PROFILE_POSE_HOLD_MS = 3000;
 
 export function stopStream(stream: MediaStream | null) {
   stream?.getTracks().forEach((track) => track.stop());
@@ -103,8 +104,10 @@ function estimateFrameQuality(video: HTMLVideoElement) {
 export async function analyzeFrame(
   video: HTMLVideoElement,
   detector: FaceDetectorInstance | null,
+  requireFaceDetection = true,
 ) {
   const frameQuality = estimateFrameQuality(video);
+
   if (!detector) {
     return {
       score: frameQuality,
@@ -115,7 +118,16 @@ export async function analyzeFrame(
   try {
     const faces = await detector.detect(video);
     const face = faces.length === 1 ? faces[0] : null;
+
     if (!face?.boundingBox) {
+      // For non-frontal poses where face detection is unreliable (left/right),
+      // fall back to quality-only scoring instead of penalizing heavily.
+      if (!requireFaceDetection) {
+        return {
+          score: frameQuality,
+          ready: frameQuality >= AUTO_CAPTURE_SCORE,
+        };
+      }
       return { score: frameQuality * 0.45, ready: false };
     }
 

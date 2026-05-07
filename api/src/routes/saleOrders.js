@@ -5,6 +5,7 @@ const { createSaleOrder } = require('./saleOrders/createSaleOrder');
 const { getSaleOrderById } = require('./saleOrders/getSaleOrderById');
 const { updateSaleOrder } = require('./saleOrders/updateSaleOrder');
 const { updateSaleOrderState } = require('./saleOrders/updateSaleOrderState');
+const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
 const router = express.Router();
 
@@ -51,11 +52,13 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
     }
 
     if (search) {
-      conditions.push(
-        `(so.name ILIKE $${paramIdx} OR p.name ILIKE $${paramIdx})`
-      );
-      params.push(`%${search}%`);
-      paramIdx++;
+      paramIdx = addAccentInsensitiveSearchCondition({
+        conditions,
+        params,
+        columns: ['so.name', 'so.code', 'p.name', 'p.ref', 'doc.name'],
+        search,
+        paramIdx,
+      });
     }
 
     if (date_from) {
@@ -125,7 +128,11 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
     );
 
     const countResult = await query(
-      `SELECT COUNT(*) AS count FROM saleorders so LEFT JOIN partners p ON p.id = so.partnerid WHERE ${whereClause}`,
+      `SELECT COUNT(*) AS count
+       FROM saleorders so
+       LEFT JOIN partners p ON p.id = so.partnerid
+       LEFT JOIN employees doc ON doc.id = so.doctorid
+       WHERE ${whereClause}`,
       params
     );
     const totalItems = parseInt(countResult[0]?.count || '0', 10);
@@ -245,8 +252,28 @@ router.get('/lines', requirePermission('services.view'), async (req, res) => {
         GROUP BY orderid
       ) lc ON lc.orderid = so.id
       LEFT JOIN (
-        SELECT invoice_id, SUM(allocated_amount) as total_paid
-        FROM payment_allocations
+        SELECT invoice_id, SUM(
+          CASE
+            WHEN payment_amount IS NOT NULL
+              AND total_allocated_for_payment > payment_amount
+              AND total_allocated_for_payment > 0
+            THEN invoice_allocated * payment_amount / total_allocated_for_payment
+            ELSE invoice_allocated
+          END
+        ) as total_paid
+        FROM (
+          SELECT
+            pa.invoice_id,
+            pa.payment_id,
+            SUM(pa.allocated_amount) as invoice_allocated,
+            MAX(p.amount) as payment_amount,
+            SUM(SUM(pa.allocated_amount)) OVER (PARTITION BY pa.payment_id) as total_allocated_for_payment
+          FROM payment_allocations pa
+          JOIN payments p ON p.id = pa.payment_id
+          WHERE p.status = 'posted'
+            AND COALESCE(p.payment_category, 'payment') = 'payment'
+          GROUP BY pa.invoice_id, pa.payment_id
+        ) allocated_payments
         GROUP BY invoice_id
       ) pa ON pa.invoice_id = so.id
       LEFT JOIN LATERAL (

@@ -7,6 +7,63 @@ const HEADER_FONT = { bold: true, color: { argb: 'FFFFFFFF' } };
 const BORDER_STYLE = { style: 'thin', color: { argb: 'FFE5E7EB' } };
 const DATE_FORMAT = 'dd/mm/yyyy';
 const DATETIME_FORMAT = 'dd/mm/yyyy hh:mm';
+const VN_TIMEZONE = 'Asia/Ho_Chi_Minh';
+
+/**
+ * Normalize a database date value for consistent Excel export display.
+ *
+ * PostgreSQL timestamp (without timezone) values are parsed by node-pg
+ * using the Node.js process local timezone. This means `new Date()` on
+ * the same database value produces different results on a UTC server vs
+ * a Vietnam server vs an American server.
+ *
+ * This function extracts the wall-clock components that pg interpreted
+ * and builds a new Date object treating those exact components as UTC.
+ * The resulting Date always serialises to the same Excel serial number,
+ * so the exported file shows the same time regardless of where the API
+ * server is running.
+ *
+ * @param {string|Date|null|undefined} dateValue
+ * @returns {Date|null}
+ */
+function toVNDate(dateValue) {
+  if (!dateValue) return null;
+
+  // Plain YYYY-MM-DD strings (from our custom pg DATE parser) — treat as midnight UTC
+  if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+    return new Date(`${dateValue}T00:00:00Z`);
+  }
+
+  const d = new Date(dateValue);
+  if (Number.isNaN(d.getTime())) return null;
+
+  // Extract wall-clock components as interpreted in the server local TZ
+  const year = d.getFullYear();
+  const month = d.getMonth();
+  const day = d.getDate();
+  const hours = d.getHours();
+  const minutes = d.getMinutes();
+  const seconds = d.getSeconds();
+
+  // Re-build as UTC so Excel stores the exact intended wall-clock time
+  return new Date(Date.UTC(year, month, day, hours, minutes, seconds));
+}
+
+function getDateTimeParts(date, timezone) {
+  const formatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+  const parts = formatter.formatToParts(date);
+  const get = (type) => parts.find((p) => p.type === type)?.value ?? '00';
+  return { year: get('year'), month: get('month'), day: get('day'), hour: get('hour'), minute: get('minute'), second: get('second') };
+}
 
 /**
  * Create a new workbook with the standard 3-sheet structure.
@@ -52,9 +109,10 @@ function populateFiltersSheet(worksheet, label, meta) {
 }
 
 function formatDateTimeVN(date) {
-  const d = new Date(date);
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return '';
+  const p = getDateTimeParts(d, VN_TIMEZONE);
+  return `${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}`;
 }
 
 /**
@@ -149,9 +207,8 @@ function populateSummarySheet(worksheet, summaryRows) {
  * @param {string} prefix - e.g. 'DichVu'
  */
 function buildFilename(prefix) {
-  const now = new Date();
-  const pad = (n) => String(n).padStart(2, '0');
-  const ts = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+  const p = getDateTimeParts(new Date(), VN_TIMEZONE);
+  const ts = `${p.year}${p.month}${p.day}_${p.hour}${p.minute}`;
   return `${prefix}_${ts}.xlsx`;
 }
 
@@ -161,4 +218,5 @@ module.exports = {
   populateSummarySheet,
   buildFilename,
   formatDateTimeVN,
+  toVNDate,
 };

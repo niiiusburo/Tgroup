@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
+const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
 const router = express.Router();
 
@@ -77,11 +78,13 @@ router.get('/', async (req, res) => {
 
     // Search by name, origin, or note
     if (search) {
-      conditions.push(
-        `(sp.name ILIKE $${paramIdx} OR sp.origin ILIKE $${paramIdx} OR sp.note ILIKE $${paramIdx})`
-      );
-      params.push(`%${search}%`);
-      paramIdx++;
+      paramIdx = addAccentInsensitiveSearchCondition({
+        conditions,
+        params,
+        columns: ['sp.name', 'sp.origin', 'sp.note'],
+        search,
+        paramIdx,
+      });
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';

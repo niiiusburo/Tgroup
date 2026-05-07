@@ -2,7 +2,7 @@
 
 const { query } = require('../../../db');
 const { resolveEffectivePermissions } = require('../../permissionService');
-const { createWorkbook, populateSummarySheet } = require('../exportWorkbook');
+const { createWorkbook, populateSummarySheet, toVNDate } = require('../exportWorkbook');
 
 const MAX_ROWS = 100_000;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -162,6 +162,13 @@ async function getRows(filters, user) {
       FROM saleorderlines
       WHERE COALESCE(isdeleted, false) = false
       GROUP BY orderid
+    ),
+    allocation_totals AS (
+      SELECT
+        payment_id,
+        SUM(allocated_amount) AS total_allocated_for_payment
+      FROM payment_allocations
+      GROUP BY payment_id
     )
     SELECT
       ${employeeType.employeeExpr} AS employeeid,
@@ -178,11 +185,23 @@ async function getRows(filters, user) {
       COALESCE(sol.productname, sol.name, so.notes, 'Thanh toán dịch vụ') AS productname,
       p.method AS paymentmethod,
       CASE
-        WHEN sol.id IS NULL OR lt.line_total IS NULL THEN pa.allocated_amount
-        ELSE pa.allocated_amount * ABS(COALESCE(sol.pricetotal, 0)) / lt.line_total
+        WHEN sol.id IS NULL OR lt.line_total IS NULL THEN
+          CASE
+            WHEN at.total_allocated_for_payment > p.amount AND at.total_allocated_for_payment > 0
+            THEN pa.allocated_amount * p.amount / at.total_allocated_for_payment
+            ELSE pa.allocated_amount
+          END
+        ELSE (
+          CASE
+            WHEN at.total_allocated_for_payment > p.amount AND at.total_allocated_for_payment > 0
+            THEN pa.allocated_amount * p.amount / at.total_allocated_for_payment
+            ELSE pa.allocated_amount
+          END
+        ) * ABS(COALESCE(sol.pricetotal, 0)) / lt.line_total
       END AS paymentamount
     FROM payment_allocations pa
     JOIN payments p ON p.id = pa.payment_id
+    LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
     JOIN saleorders so ON so.id = pa.invoice_id
     LEFT JOIN saleorderlines sol
       ON sol.orderid = so.id
@@ -297,7 +316,7 @@ function populateGroupedDataSheet(worksheet, rows, filters, employeeType) {
 
     group.rows.forEach((detail) => {
       const detailRow = worksheet.getRow(rowIndex);
-      detailRow.getCell(3).value = detail.paymentdate ? new Date(detail.paymentdate) : null;
+      detailRow.getCell(3).value = detail.paymentdate ? toVNDate(detail.paymentdate) : null;
       detailRow.getCell(4).value = sanitizeText(detail.paymentreference);
       detailRow.getCell(5).value = sanitizeText(detail.saleordername || detail.treatmentcode);
       detailRow.getCell(6).value = sanitizeText(detail.customername);

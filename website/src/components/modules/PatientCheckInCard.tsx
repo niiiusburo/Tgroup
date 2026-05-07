@@ -3,7 +3,6 @@ import { Clock, FileText, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { WaitTimer } from '@/components/appointments/WaitTimer';
 import { CustomerNameLink } from '@/components/shared/CustomerNameLink';
-import { useAppointmentHover } from '@/contexts/AppointmentHoverContext';
 import type { CheckInStatus, OverviewAppointment } from '@/hooks/useOverviewAppointments';
 import { parseAppointmentNote } from '@/lib/appointmentNotes';
 
@@ -38,23 +37,10 @@ const STATUS_CONFIG: Record<CheckInStatus, {labelKey: string;bg: string;text: st
 export function PatientCard({ appointment, onUpdateStatus, onEditClick, onDone }: PatientCardProps) {
   const { t } = useTranslation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { hoveredId, setHoveredId, registerRef, scrollToAppointment } = useAppointmentHover();
   const cardRef = useRef<HTMLDivElement>(null);
   const currentStatus = appointment.checkInStatus ?? 'waiting';
   const config = STATUS_CONFIG[currentStatus];
-  const isHighlighted = hoveredId === appointment.id;
   const parsed = parseAppointmentNote(appointment.note || '');
-
-  useEffect(() => {
-    registerRef(appointment.id, cardRef.current);
-    return () => registerRef(appointment.id, null);
-  }, [appointment.id, registerRef]);
-
-  useEffect(() => {
-    if (isHighlighted && cardRef.current && typeof cardRef.current.scrollIntoView === 'function') {
-      cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [isHighlighted]);
 
   useEffect(() => {
     if (currentStatus === 'done' && cardRef.current && typeof cardRef.current.scrollIntoView === 'function') {
@@ -62,24 +48,11 @@ export function PatientCard({ appointment, onUpdateStatus, onEditClick, onDone }
     }
   }, [currentStatus]);
 
-  const handleMouseEnter = () => {
-    setHoveredId(appointment.id);
-    scrollToAppointment(appointment.id);
-  };
-
   return (
     <div
       ref={cardRef}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={() => setHoveredId(null)}
       onClick={() => onEditClick?.(appointment)}
-      className={`
-        border rounded-xl p-3.5 transition-all relative cursor-pointer h-full flex flex-col
-        ${isHighlighted ?
-      'ring-2 ring-blue-500 ring-offset-2 bg-blue-50/50 border-blue-300' :
-      'border-gray-200 bg-gray-50/50 hover:shadow-sm'}
-      `
-      }
+      className="border rounded-xl p-3.5 transition-all relative cursor-pointer h-full flex flex-col border-gray-200 bg-gray-50/50 hover:shadow-sm"
     >
       <button
         type="button"

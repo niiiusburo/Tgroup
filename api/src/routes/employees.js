@@ -2,6 +2,7 @@ const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 const { attachLocationScopes, fetchLocationScopeIds } = require('./employees/locationScopes');
+const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
 const router = express.Router();
 
@@ -57,11 +58,13 @@ router.get('/', requirePermission('employees.view'), async (req, res) => {
 
     // Search by name, ref, phone, email
     if (search) {
-      conditions.push(
-        `(e.name ILIKE $${paramIdx} OR e.namenosign ILIKE $${paramIdx} OR e.ref ILIKE $${paramIdx} OR e.phone ILIKE $${paramIdx} OR e.email ILIKE $${paramIdx})`
-      );
-      params.push(`%${search}%`);
-      paramIdx++;
+      paramIdx = addAccentInsensitiveSearchCondition({
+        conditions,
+        params,
+        columns: ['e.name', 'e.namenosign', 'e.ref', 'e.phone', 'e.email', 'e.jobtitle'],
+        search,
+        paramIdx,
+      });
     }
 
     const whereClause = conditions.join(' AND ');

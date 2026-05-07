@@ -26,6 +26,10 @@ Supporting context:
 
 If an ad hoc prompt conflicts with the authority stack, follow the authority stack unless the user explicitly says they are changing policy.
 
+## 1.1 Global Session Rules
+
+- All project search bars must be accent-insensitive. Vietnamese names or labels with diacritics must still match when staff type the same words without accents; frontend code should use the shared `normalizeText()` helper or an equivalent canonical normalizer, and backend search should compare against accent-stripped text where the route owns filtering.
+
 ## 2. Local-First Development
 
 All changes must be made and verified locally before pushing to the VPS.

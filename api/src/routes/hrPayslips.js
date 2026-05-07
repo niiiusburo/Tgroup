@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
+const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
 const router = express.Router();
 
@@ -60,11 +61,13 @@ router.get('/', async (req, res) => {
     }
 
     if (search) {
-      conditions.push(
-        `(hp.name ILIKE $${paramIdx} OR hp.number ILIKE $${paramIdx} OR e.name ILIKE $${paramIdx})`
-      );
-      params.push(`%${search}%`);
-      paramIdx++;
+      paramIdx = addAccentInsensitiveSearchCondition({
+        conditions,
+        params,
+        columns: ['hp.name', 'hp.number', 'e.name', 'e.ref'],
+        search,
+        paramIdx,
+      });
     }
 
     const whereClause = conditions.join(' AND ');
@@ -129,7 +132,10 @@ router.get('/', async (req, res) => {
     );
 
     const countResult = await query(
-      `SELECT COUNT(*) AS count FROM hrpayslips hp WHERE ${whereClause}`,
+      `SELECT COUNT(*) AS count
+       FROM hrpayslips hp
+       LEFT JOIN employees e ON e.id = hp.employeeid
+       WHERE ${whereClause}`,
       params
     );
     const totalItems = parseInt(countResult[0]?.count || '0', 10);
@@ -145,8 +151,9 @@ router.get('/', async (req, res) => {
         COUNT(CASE WHEN hp.state = 'draft' THEN 1 END) AS draftcount,
         COUNT(CASE WHEN hp.state = 'done' THEN 1 END) AS donecount,
         COUNT(CASE WHEN hp.state = 'paid' THEN 1 END) AS paidcount
-      FROM hrpayslips hp
-      WHERE ${whereClause}`,
+        FROM hrpayslips hp
+        LEFT JOIN employees e ON e.id = hp.employeeid
+        WHERE ${whereClause}`,
       params
     );
 

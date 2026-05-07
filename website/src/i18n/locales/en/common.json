@@ -262,9 +262,11 @@
     "poseStraight": "Look straight",
     "poseStraightHint": "Hold the face inside the outline.",
     "poseLeft": "Turn head left",
-    "poseLeftHint": "Slowly turn the head to the left.",
+    "poseLeftHint": "Turn head to the left, hold steady, then tap Capture.",
     "poseRight": "Turn head right",
-    "poseRightHint": "Slowly turn the head to the right.",
+    "poseRightHint": "Turn head to the right, hold steady, then tap Capture.",
+    "holdSteady": "Hold steady, tap Capture",
+    "capturePose": "Capture",
     "autoCapturing": "Auto capturing...",
     "cameraError": "Cannot access camera. Please grant permission."
   },

@@ -103,7 +103,7 @@ export function CustomerSelector({
         
         <User className="w-4 h-4 text-gray-400 shrink-0" />
         <span className={`flex-1 truncate ${selectedCustomer ? '' : 'text-gray-400'}`}>
-          {loading ? 'Loading customers...' : selectedCustomer?.name ?? placeholder}
+          {loading ? 'Loading customers...' : selectedCustomer ? `${selectedCustomer.name}${selectedCustomer.code ? ` · ${selectedCustomer.code}` : ''}` : placeholder}
         </span>
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -147,7 +147,10 @@ export function CustomerSelector({
             }>
             
                   <div className="font-medium">{customer.name}</div>
-                  <div className="text-xs text-gray-400">{customer.phone} · {customer.email}</div>
+                  <div className="text-xs text-gray-400">
+                    {customer.code && <span className="text-orange-600 font-medium mr-1">{customer.code}</span>}
+                    {customer.phone} · {customer.email}
+                  </div>
                 </button>
           )
           }

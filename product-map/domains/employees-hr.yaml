@@ -64,6 +64,7 @@ dependencies:
 affected_by:
   - Changes to dbo.partners schema (jobtitle, isdoctor, isassistant, isreceptionist, wage, allowance)
   - Changes to dbo.hrjobs (dropdown data)
+  - Employee and permission-board searches must remain accent-insensitive for Vietnamese staff, role, and location names.
 impact_tests:
   - website/e2e/check_employees_page.spec.ts
   - website/e2e/employee-save.spec.ts

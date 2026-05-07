@@ -76,8 +76,8 @@ async function createSaleOrder(req, res) {
       await query(
         `INSERT INTO saleorderlines (
           id, orderid, productid, productname, employeeid, assistantid,
-          pricetotal, tooth_numbers, tooth_comment, isdeleted
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+          productuomqty, pricetotal, tooth_numbers, tooth_comment, isdeleted
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         [
           crypto.randomUUID(),
           id,
@@ -85,6 +85,7 @@ async function createSaleOrder(req, res) {
           productname || null,
           doctorid || null,
           assistantid || null,
+          quantity || null,
           amounttotal || 0,
           tooth_numbers || null,
           tooth_comment || null,

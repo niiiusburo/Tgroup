@@ -25,8 +25,11 @@ describe('usePayment', () => {
       items: [{
         id: 'payment-1',
         customerId: 'customer-1',
+        customerName: 'MÃ VĂN THÀNH - UP',
+        customerPhone: '0985227087',
         amount: 1200000,
         method: 'cash',
+        locationName: 'TGroup 1',
         paymentDate: '2026-05-02',
         referenceCode: 'CUST.IN/2026/1',
         status: 'posted',
@@ -46,14 +49,51 @@ describe('usePayment', () => {
 
     await waitFor(() => expect(result.current.payments).toHaveLength(1));
 
-    expect(fetchPayments).toHaveBeenCalledWith(undefined, 'payments');
+    expect(fetchPayments).toHaveBeenCalledWith(undefined, 'payments', undefined);
     expect(result.current.payments[0]).toEqual(expect.objectContaining({
       id: 'payment-1',
       recordId: 'saleorder-1',
       recordName: 'SO-1',
       amount: 1200000,
       status: 'completed',
+      customerName: 'MÃ VĂN THÀNH - UP',
+      customerPhone: '0985227087',
+      locationName: 'TGroup 1',
     }));
+  });
+
+  it('filters canonical payment rows by customer name', async () => {
+    vi.mocked(fetchPayments).mockResolvedValue({
+      totalItems: 1,
+      items: [{
+        id: 'payment-1',
+        customerId: 'customer-1',
+        customerName: 'MÃ VĂN THÀNH - UP',
+        customerPhone: '0985227087',
+        amount: 2109000,
+        method: 'cash',
+        paymentDate: '2026-03-21',
+        referenceCode: 'CUST.IN/2026/103918',
+        status: 'posted',
+        createdAt: '2026-03-21T00:00:00.000Z',
+        notes: 'TGL6',
+        allocations: [],
+      }],
+    });
+
+    const { result } = renderHook(() => usePayment());
+
+    await waitFor(() => expect(result.current.payments).toHaveLength(1));
+
+    act(() => {
+      result.current.setSearchTerm('ma van thanh');
+    });
+
+    await waitFor(() => expect(result.current.payments).toHaveLength(1));
+
+    await waitFor(() => {
+      expect(fetchPayments).toHaveBeenLastCalledWith(undefined, 'payments', 'ma van thanh');
+    });
   });
 
   it('refreshes payment history after a wallet top-up', async () => {

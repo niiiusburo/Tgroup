@@ -143,6 +143,18 @@ Setup data and login state:
 - Prefer the current customer URL `/customers/f72f8c86-34e9-4377-b59c-b414002ec20c` if seeded locally.
 - Use disposable or already-known QA service data when changing quantity.
 
+## Fix Implemented (2026-05-07)
+
+**Root cause:** `ServiceForm.tsx` stored `quantity` as a string, which caused React controlled-input reconciliation issues with `type="number"` — the browser's native number parsing conflicted with React's string value, making the input appear frozen/uneditable.
+
+**Changes:**
+- `website/src/components/services/ServiceForm.tsx`:
+  - Changed `quantity` state from `string` to `number` (`initialData?.quantity ?? 1`)
+  - Fixed `onChange` to parse to number: `setQuantity(v === '' ? 1 : Number(v))`
+  - Simplified submit: `quantity || 1` (no more `Number()` coercion needed)
+- `website/src/hooks/useServices/mapSaleOrderToServiceRecord.ts`:
+  - Fixed `parseFloat("0")` being falsy: changed `order.quantity ? parseFloat(...) : 1` → `order.quantity != null ? parseFloat(...) : 1`
+
 ---
 
 # TestSprite Plan: Customer Initial Load Performance

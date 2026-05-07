@@ -5,6 +5,7 @@
 const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
+const { accentInsensitiveSearchCondition, normalizeVietnamese } = require('../utils/search');
 
 const router = express.Router();
 
@@ -29,8 +30,9 @@ router.get('/', requirePermission('website.view'), async (req, res) => {
     }
     if (search) {
       paramCount++;
-      sql += ` AND (title ILIKE $${paramCount} OR slug ILIKE $${paramCount})`;
-      params.push(`%${search}%`);
+      sql += ` AND ${accentInsensitiveSearchCondition(['title', 'slug'], paramCount, paramCount + 1)}`;
+      params.push(`%${String(search).trim()}%`, `%${normalizeVietnamese(search)}%`);
+      paramCount++;
     }
 
     sql += ' ORDER BY updated_at DESC';

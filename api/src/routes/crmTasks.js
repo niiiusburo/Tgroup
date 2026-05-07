@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
+const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
 const router = express.Router();
 
@@ -69,11 +70,13 @@ router.get('/GetPagedV2', async (req, res) => {
     }
 
     if (search) {
-      conditions.push(
-        `(ct.title ILIKE $${paramIdx} OR ct.description ILIKE $${paramIdx} OR p.displayname ILIKE $${paramIdx})`
-      );
-      params.push(`%${search}%`);
-      paramIdx++;
+      paramIdx = addAccentInsensitiveSearchCondition({
+        conditions,
+        params,
+        columns: ['ct.title', 'ct.description', 'p.displayname', 'p.ref'],
+        search,
+        paramIdx,
+      });
     }
 
     const whereClause = conditions.join(' AND ');
@@ -133,7 +136,10 @@ router.get('/GetPagedV2', async (req, res) => {
     );
 
     const countResult = await query(
-      `SELECT COUNT(*) AS count FROM crmtasks ct WHERE ${whereClause}`,
+      `SELECT COUNT(*) AS count
+       FROM crmtasks ct
+       LEFT JOIN partners p ON p.id = ct.partnerid
+       WHERE ${whereClause}`,
       params
     );
     const totalItems = parseInt(countResult[0]?.count || '0', 10);
@@ -145,8 +151,9 @@ router.get('/GetPagedV2', async (req, res) => {
         COUNT(CASE WHEN ct.stage = 2 THEN 1 END) AS donecount,
         COUNT(CASE WHEN ct.stage = 3 THEN 1 END) AS cancelledcount,
         COUNT(CASE WHEN ct.priority = true THEN 1 END) AS prioritycount
-      FROM crmtasks ct
-      WHERE ${whereClause}`,
+        FROM crmtasks ct
+        LEFT JOIN partners p ON p.id = ct.partnerid
+        WHERE ${whereClause}`,
       params
     );
 

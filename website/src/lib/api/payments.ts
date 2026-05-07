@@ -19,6 +19,8 @@ export interface ApiPaymentAllocation {
 export interface ApiPayment {
   id: string;
   customerId: string;
+  customerName?: string;
+  customerPhone?: string;
   serviceId?: string;
   amount: number;
   method: 'cash' | 'bank_transfer' | 'deposit' | 'mixed';
@@ -28,6 +30,7 @@ export interface ApiPayment {
   receiptNumber?: string;
   depositType?: 'deposit' | 'refund' | 'usage' | null;
   paymentCategory?: 'payment' | 'deposit';
+  locationName?: string;
   notes?: string;
   paymentDate?: string;
   referenceCode?: string;
@@ -38,11 +41,13 @@ export interface ApiPayment {
 
 export async function fetchPayments(
   customerId?: string,
-  type?: 'payments' | 'deposits' | 'all'
+  type?: 'payments' | 'deposits' | 'all',
+  search?: string,
 ): Promise<{ items: ApiPayment[]; totalItems: number }> {
   const searchParams = new URLSearchParams();
   if (customerId) searchParams.set('customerId', customerId);
   if (type && type !== 'all') searchParams.set('type', type);
+  if (search?.trim()) searchParams.set('search', search.trim());
   searchParams.set('limit', '100');
   searchParams.set('offset', '0');
   return apiFetch<{ items: ApiPayment[]; totalItems: number }>(`/Payments?${searchParams.toString()}`);
@@ -172,4 +177,3 @@ export async function updatePayment(
 export async function deletePayment(id: string): Promise<{ success: boolean }> {
   return apiFetch<{ success: boolean }>(`/Payments/${id}`, { method: 'DELETE' });
 }
-

@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
+const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
 const router = express.Router();
 
@@ -46,11 +47,13 @@ router.get('/', async (req, res) => {
     }
 
     if (search) {
-      conditions.push(
-        `(dk.name ILIKE $${paramIdx} OR dk.reason ILIKE $${paramIdx} OR dk.note ILIKE $${paramIdx})`
-      );
-      params.push(`%${search}%`);
-      paramIdx++;
+      paramIdx = addAccentInsensitiveSearchCondition({
+        conditions,
+        params,
+        columns: ['dk.name', 'dk.reason', 'dk.note', 'p.name', 'p.displayname', 'doc.name'],
+        search,
+        paramIdx,
+      });
     }
 
     const whereClause = conditions.join(' AND ');
@@ -108,7 +111,11 @@ router.get('/', async (req, res) => {
     );
 
     const countResult = await query(
-      `SELECT COUNT(*) AS count FROM dotkhams dk WHERE ${whereClause}`,
+      `SELECT COUNT(*) AS count
+       FROM dotkhams dk
+       LEFT JOIN partners p ON p.id = dk.partnerid
+       LEFT JOIN partners doc ON doc.id = dk.doctorid
+       WHERE ${whereClause}`,
       params
     );
     const totalItems = parseInt(countResult[0]?.count || '0', 10);
@@ -123,6 +130,8 @@ router.get('/', async (req, res) => {
     const stateCounts = await query(
       `SELECT dk.state, COUNT(*) AS count
        FROM dotkhams dk
+       LEFT JOIN partners p ON p.id = dk.partnerid
+       LEFT JOIN partners doc ON doc.id = dk.doctorid
        WHERE ${whereClause}
        GROUP BY dk.state`,
       params

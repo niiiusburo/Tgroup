@@ -70,6 +70,7 @@ async function updateSaleOrder(req, res) {
       productname,
       doctorid,
       assistantid,
+      quantity,
       amounttotal,
       tooth_numbers,
       tooth_comment,
@@ -114,6 +115,7 @@ function hasLineUpdate(body) {
     body.productname !== undefined ||
     body.doctorid !== undefined ||
     body.assistantid !== undefined ||
+    body.quantity !== undefined ||
     body.amounttotal !== undefined ||
     body.tooth_numbers !== undefined ||
     body.tooth_comment !== undefined
@@ -160,6 +162,11 @@ async function updateExistingLine(lineId, fields) {
     lineValues.push(fields.assistantid || null);
     lineIdx++;
   }
+  if (fields.quantity !== undefined) {
+    lineSets.push(`productuomqty = $${lineIdx}`);
+    lineValues.push(fields.quantity === '' ? null : fields.quantity);
+    lineIdx++;
+  }
   if (fields.amounttotal !== undefined) {
     lineSets.push(`pricetotal = $${lineIdx}`);
     lineValues.push(fields.paymentState.amountTotal);
@@ -192,8 +199,8 @@ async function insertPrimaryLine(orderId, fields) {
   await query(
     `INSERT INTO saleorderlines (
       id, orderid, productid, productname, employeeid, assistantid,
-      pricetotal, tooth_numbers, tooth_comment, isdeleted
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      productuomqty, pricetotal, tooth_numbers, tooth_comment, isdeleted
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
     [
       lineId,
       orderId,
@@ -201,6 +208,7 @@ async function insertPrimaryLine(orderId, fields) {
       fields.productname || null,
       fields.doctorid || null,
       fields.assistantid || null,
+      fields.quantity ?? null,
       fields.paymentState?.amountTotal ?? fields.amounttotal ?? 0,
       fields.tooth_numbers || null,
       fields.tooth_comment || null,

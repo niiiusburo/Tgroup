@@ -80,6 +80,7 @@ export function AppointmentFormCore({
       customerId: customer.id,
       customerName: customer.name,
       customerPhone: customer.phone || '',
+      customerCode: customer.code ?? undefined,
       locationId: customer.locationId || selectedLocationId || data.locationId,
       locationName:
         allLocations.find((l) => l.id === (customer.locationId || selectedLocationId))?.name ||
@@ -118,12 +119,19 @@ export function AppointmentFormCore({
         {customerReadOnly ? (
           <div className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700">
             <div className="font-medium">{data.customerName}</div>
-            {data.customerPhone && (
-              <div className="text-xs text-gray-500 flex items-center gap-1 mt-1">
-                <Phone className="w-3 h-3" />
-                {data.customerPhone}
-              </div>
-            )}
+            <div className="flex items-center gap-3 mt-1">
+              {data.customerCode && (
+                <div className="text-xs text-orange-600 font-medium">
+                  {data.customerCode}
+                </div>
+              )}
+              {data.customerPhone && (
+                <div className="text-xs text-gray-500 flex items-center gap-1">
+                  <Phone className="w-3 h-3" />
+                  {data.customerPhone}
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <div className="flex gap-2">

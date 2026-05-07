@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 
 // Mock all child components and hooks so we only test Overview wiring
 vi.mock('@/components/modules/PatientCheckIn', () => ({
@@ -133,37 +133,31 @@ import { Overview } from './Overview';
 describe('Overview search boxes', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
-      callback(0);
-      return 1;
-    });
-    vi.stubGlobal('cancelAnimationFrame', vi.fn());
   });
 
-  it('renders the sticky appointment search above the overview zones', () => {
+  it('renders independent section searches without the sticky finder', () => {
     render(<Overview />);
 
-    expect(screen.getByTestId('overview-sticky-search')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('stickySearch.placeholder')).toBeInTheDocument();
+    expect(screen.queryByTestId('overview-sticky-search')).not.toBeInTheDocument();
+    expect(screen.getByTestId('zone1-search')).toBeInTheDocument();
     expect(screen.getByTestId('zone2-search')).toBeInTheDocument();
-    expect(screen.queryByTestId('zone1-search')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('zone3-search')).not.toBeInTheDocument();
+    expect(screen.getByTestId('zone3-search')).toBeInTheDocument();
   });
 
-  it('uses the sticky search to filter both appointment overview zones', async () => {
+  it('keeps Zone 1 and Zone 3 search state independent', () => {
     render(<Overview />);
 
-    fireEvent.change(
-      screen.getByPlaceholderText('stickySearch.placeholder'),
-      { target: { value: 'Minh' } },
-    );
+    fireEvent.change(screen.getByTestId('zone1-search'), { target: { value: 'Minh' } });
 
-    await waitFor(() => {
-      expect(setZone3Search).toHaveBeenCalledWith('Minh');
-      expect(setZone1Search).toHaveBeenCalledWith('Minh');
-      expect(setZone3Filter).toHaveBeenCalledWith('all');
-      expect(setZone1Filter).toHaveBeenCalledWith('all');
-    });
-    expect(screen.queryByText(/10:00 · Minh Tran/)).not.toBeInTheDocument();
+    expect(setZone1Search).toHaveBeenCalledWith('Minh');
+    expect(setZone3Search).not.toHaveBeenCalled();
+    expect(setZone1Filter).not.toHaveBeenCalled();
+    expect(setZone3Filter).not.toHaveBeenCalled();
+
+    vi.clearAllMocks();
+    fireEvent.change(screen.getByTestId('zone3-search'), { target: { value: 'Nguyen' } });
+
+    expect(setZone3Search).toHaveBeenCalledWith('Nguyen');
+    expect(setZone1Search).not.toHaveBeenCalled();
   });
 });

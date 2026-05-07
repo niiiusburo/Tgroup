@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const { requirePermission } = require('../middleware/auth');
+const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
 const router = express.Router();
 
@@ -46,11 +47,13 @@ router.get('/', requirePermission('payment.view'), async (req, res) => {
     }
 
     if (search) {
-      conditions.push(
-        `(ap.name ILIKE $${paramIdx} OR ap.communication ILIKE $${paramIdx})`
-      );
-      params.push(`%${search}%`);
-      paramIdx++;
+      paramIdx = addAccentInsensitiveSearchCondition({
+        conditions,
+        params,
+        columns: ['ap.name', 'ap.communication', 'p.name', 'p.displayname'],
+        search,
+        paramIdx,
+      });
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -115,7 +118,10 @@ router.get('/', requirePermission('payment.view'), async (req, res) => {
     );
 
     const countResult = await query(
-      `SELECT COUNT(*) AS count FROM accountpayments ap ${whereClause}`,
+      `SELECT COUNT(*) AS count
+       FROM accountpayments ap
+       LEFT JOIN partners p ON p.id = ap.partnerid
+       ${whereClause}`,
       params
     );
     const totalItems = parseInt(countResult[0]?.count || '0', 10);
@@ -130,6 +136,7 @@ router.get('/', requirePermission('payment.view'), async (req, res) => {
     const typeCounts = await query(
       `SELECT ap.paymenttype, COUNT(*) AS count, SUM(ap.amount) AS total
        FROM accountpayments ap
+       LEFT JOIN partners p ON p.id = ap.partnerid
        ${whereClause}
        GROUP BY ap.paymenttype`,
       params
@@ -144,6 +151,7 @@ router.get('/', requirePermission('payment.view'), async (req, res) => {
     const stateCounts = await query(
       `SELECT ap.state, COUNT(*) AS count
        FROM accountpayments ap
+       LEFT JOIN partners p ON p.id = ap.partnerid
        ${whereClause}
        GROUP BY ap.state`,
       params

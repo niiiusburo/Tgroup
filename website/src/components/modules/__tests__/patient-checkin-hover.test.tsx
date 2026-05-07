@@ -5,7 +5,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { PatientCheckIn } from '../PatientCheckIn';
-import { AppointmentHoverProvider } from '@/contexts/AppointmentHoverContext';
 import type { OverviewAppointment } from '@/hooks/useOverviewAppointments';
 
 function renderWithRouter(ui: React.ReactElement) {
@@ -15,35 +14,55 @@ function renderWithRouter(ui: React.ReactElement) {
 const mockAppointments: OverviewAppointment[] = [
   {
     id: 'apt-1',
+    customerId: 'customer-1',
     customerName: 'John Doe',
     customerPhone: '0901234567',
     doctorName: 'Dr. Smith',
     doctorId: 'doc-1',
+    date: '2026-05-07',
     time: '09:00',
     locationId: 'loc-1',
     locationName: 'Location A',
     note: 'Checkup',
+    timeexpected: 30,
     topStatus: 'arrived',
     checkInStatus: 'waiting',
     color: '0',
+    productId: null,
+    arrivalTime: '08:55:00',
+    treatmentStartTime: null,
+    assistantId: null,
+    assistantName: null,
+    dentalAideId: null,
+    dentalAideName: null,
   },
   {
     id: 'apt-2',
+    customerId: 'customer-2',
     customerName: 'Jane Smith',
     customerPhone: '0909876543',
     doctorName: 'Dr. Jones',
     doctorId: 'doc-2',
+    date: '2026-05-07',
     time: '10:00',
     locationId: 'loc-1',
     locationName: 'Location A',
     note: 'Cleaning',
+    timeexpected: 30,
     topStatus: 'arrived',
     checkInStatus: 'in-treatment',
     color: '1',
+    productId: null,
+    arrivalTime: '09:55:00',
+    treatmentStartTime: '10:00:00',
+    assistantId: null,
+    assistantName: null,
+    dentalAideId: null,
+    dentalAideName: null,
   },
 ];
 
-describe('PatientCheckIn Hover Linking', () => {
+describe('PatientCheckIn independent cards', () => {
   const mockOnFilterChange = vi.fn();
   const mockOnUpdateStatus = vi.fn();
 
@@ -60,85 +79,25 @@ describe('PatientCheckIn Hover Linking', () => {
   });
 
   it('should render appointment cards', () => {
-    renderWithRouter(
-      <AppointmentHoverProvider>
-        <PatientCheckIn {...defaultProps} />
-      </AppointmentHoverProvider>
-    );
+    renderWithRouter(<PatientCheckIn {...defaultProps} />);
 
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('Jane Smith')).toBeInTheDocument();
   });
 
-  it('should apply highlight class when card is hovered', () => {
-    renderWithRouter(
-      <AppointmentHoverProvider>
-        <PatientCheckIn {...defaultProps} />
-      </AppointmentHoverProvider>
-    );
-
-    const johnCard = screen.getByText('John Doe').closest('[class*="rounded-xl"]');
-    expect(johnCard).toBeInTheDocument();
-    
-    // Before hover, should not have highlight ring
-    expect(johnCard?.className).not.toContain('ring-2');
-    
-    // Hover over the card
-    fireEvent.mouseEnter(johnCard!);
-    
-    // After hover, should have highlight ring
-    expect(johnCard?.className).toContain('ring-2');
-    expect(johnCard?.className).toContain('ring-blue-500');
-  });
-
-  it('should remove highlight when mouse leaves', () => {
-    renderWithRouter(
-      <AppointmentHoverProvider>
-        <PatientCheckIn {...defaultProps} />
-      </AppointmentHoverProvider>
-    );
-
-    const johnCard = screen.getByText('John Doe').closest('[class*="rounded-xl"]');
-    
-    // Hover then leave
-    fireEvent.mouseEnter(johnCard!);
-    expect(johnCard?.className).toContain('ring-2');
-    
-    fireEvent.mouseLeave(johnCard!);
-    expect(johnCard?.className).not.toContain('ring-2');
-  });
-
-  it('should highlight when another component sets the hoveredId', () => {
-    // This tests that when TodayAppointments sets the hoveredId,
-    // PatientCheckIn will also highlight the matching card
-    const { container } = renderWithRouter(
-      <AppointmentHoverProvider>
-        <PatientCheckIn {...defaultProps} />
-      </AppointmentHoverProvider>
-    );
-
-    const johnCard = screen.getByText('John Doe').closest('[class*="rounded-xl"]');
-    expect(johnCard).toBeInTheDocument();
-  });
-
-  it('should call scrollIntoView when highlighted', () => {
+  it('does not apply cross-section highlight when a card is hovered', () => {
     const scrollIntoViewMock = vi.fn();
     Element.prototype.scrollIntoView = scrollIntoViewMock;
-
-    renderWithRouter(
-      <AppointmentHoverProvider>
-        <PatientCheckIn {...defaultProps} />
-      </AppointmentHoverProvider>
-    );
+    renderWithRouter(<PatientCheckIn {...defaultProps} />);
 
     const johnCard = screen.getByText('John Doe').closest('[class*="rounded-xl"]');
+    expect(johnCard).toBeInTheDocument();
+    
+    expect(johnCard?.className).not.toContain('ring-2');
+    
     fireEvent.mouseEnter(johnCard!);
-
-    // When hovering a PatientCheckIn card, it should scroll to the matching
-    // appointment in Today's Appointments
-    expect(scrollIntoViewMock).toHaveBeenCalledWith({
-      behavior: 'smooth',
-      block: 'center',
-    });
+    
+    expect(johnCard?.className).not.toContain('ring-2');
+    expect(scrollIntoViewMock).not.toHaveBeenCalled();
   });
 });

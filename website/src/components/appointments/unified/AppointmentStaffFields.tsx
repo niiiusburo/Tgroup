@@ -31,6 +31,7 @@ export function AppointmentStaffFields({
           selectedId={data.doctorId || null}
           filterRoles={['doctor']}
           loading={loading}
+          allowClear
           onChange={(employeeId) => {
             const emp = employees.find((e) => e.id === employeeId);
             onChange({ doctorId: emp?.id, doctorName: emp?.name });
@@ -48,6 +49,7 @@ export function AppointmentStaffFields({
           selectedId={data.assistantId || null}
           filterRoles={['assistant']}
           loading={loading}
+          allowClear
           onChange={(employeeId) => {
             const emp = employees.find((e) => e.id === employeeId);
             onChange({ assistantId: emp?.id, assistantName: emp?.name });
@@ -65,6 +67,7 @@ export function AppointmentStaffFields({
           selectedId={data.dentalAideId || null}
           filterRoles={['doctor-assistant']}
           loading={loading}
+          allowClear
           onChange={(employeeId) => {
             const emp = employees.find((e) => e.id === employeeId);
             onChange({ dentalAideId: emp?.id, dentalAideName: emp?.name });

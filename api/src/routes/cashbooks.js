@@ -1,5 +1,6 @@
 const express = require('express');
 const { query } = require('../db');
+const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
 const router = express.Router();
 
@@ -63,11 +64,13 @@ router.get('/GetDetails', async (req, res) => {
 
     // Search by name, communication, or partner
     if (search) {
-      conditions.push(
-        `(ap.name ILIKE $${paramIdx} OR ap.communication ILIKE $${paramIdx} OR p.displayname ILIKE $${paramIdx})`
-      );
-      params.push(`%${search}%`);
-      paramIdx++;
+      paramIdx = addAccentInsensitiveSearchCondition({
+        conditions,
+        params,
+        columns: ['ap.name', 'ap.communication', 'p.displayname', 'p.ref'],
+        search,
+        paramIdx,
+      });
     }
 
     const whereClause = conditions.join(' AND ');
@@ -109,7 +112,10 @@ router.get('/GetDetails', async (req, res) => {
     );
 
     const countResult = await query(
-      `SELECT COUNT(*) AS count FROM accountpayments ap WHERE ${whereClause}`,
+      `SELECT COUNT(*) AS count
+       FROM accountpayments ap
+       LEFT JOIN partners p ON p.id = ap.partnerid
+       WHERE ${whereClause}`,
       params
     );
     const totalItems = parseInt(countResult[0]?.count || '0', 10);
@@ -121,6 +127,7 @@ router.get('/GetDetails', async (req, res) => {
         COALESCE(SUM(CASE WHEN ap.paymenttype = 'outbound' AND ap.state = 'posted' THEN ap.amount ELSE 0 END), 0) AS totaloutbound,
         COALESCE(SUM(CASE WHEN ap.paymenttype = 'transfer' AND ap.state = 'posted' THEN ap.amount ELSE 0 END), 0) AS totaltransfer
       FROM accountpayments ap
+      LEFT JOIN partners p ON p.id = ap.partnerid
       WHERE ${whereClause}`,
       params
     );

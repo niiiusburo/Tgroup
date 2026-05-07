@@ -1,7 +1,7 @@
 'use strict';
 
 const { query } = require('../../../db');
-const { createWorkbook, populateDataSheet, populateSummarySheet } = require('../exportWorkbook');
+const { createWorkbook, populateDataSheet, populateSummarySheet, toVNDate } = require('../exportWorkbook');
 
 const MAX_ROWS = 100_000;
 
@@ -176,7 +176,7 @@ async function build(filters, user) {
     const toothParts = [r.tooth_numbers, r.tooth_comment].filter(Boolean);
     return {
       name: r.name || '',
-      datecreated: r.datecreated ? new Date(r.datecreated) : null,
+      datecreated: r.datecreated ? toVNDate(r.datecreated) : null,
       customerCode: r.partnercode || '',
       customerName: r.partnerdisplayname || r.partnername || '',
       productName: r.productname || '',

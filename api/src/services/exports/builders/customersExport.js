@@ -1,7 +1,7 @@
 'use strict';
 
 const { query } = require('../../../db');
-const { createWorkbook, populateDataSheet, populateSummarySheet } = require('../exportWorkbook');
+const { createWorkbook, populateDataSheet, populateSummarySheet, toVNDate } = require('../exportWorkbook');
 
 const MAX_ROWS = 100_000;
 
@@ -171,7 +171,7 @@ async function build(filters, user) {
       companyname: r.companyname || '',
       address: parts.join(', '),
       comment: r.comment || r.note || '',
-      datecreated: r.datecreated ? new Date(r.datecreated) : null,
+      datecreated: r.datecreated ? toVNDate(r.datecreated) : null,
       status: r.active ? 'Hoạt động' : 'Ngừng',
     };
   });
