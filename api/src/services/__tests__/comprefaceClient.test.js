@@ -122,6 +122,28 @@ describe('comprefaceClient', () => {
 
       await expect(recognize(Buffer.from('img'))).rejects.toThrow('Bad request');
     });
+
+    it('returns empty array when result field is missing', async () => {
+      const { recognize } = loadClient();
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        text: async () => JSON.stringify({}),
+      });
+
+      const results = await recognize(Buffer.from('img'));
+      expect(results).toEqual([]);
+    });
+
+    it('returns empty array when result array is empty', async () => {
+      const { recognize } = loadClient();
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        text: async () => JSON.stringify({ result: [] }),
+      });
+
+      const results = await recognize(Buffer.from('img'));
+      expect(results).toEqual([]);
+    });
   });
 
   describe('createSubject', () => {
@@ -139,6 +161,18 @@ describe('comprefaceClient', () => {
         expect.objectContaining({ method: 'POST' }),
       );
     });
+
+    it('parses JSON response with additional fields', async () => {
+      const { createSubject } = loadClient();
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        text: async () => JSON.stringify({ subject: 'p2', created: true }),
+      });
+
+      const result = await createSubject('p2');
+      expect(result.subject).toBe('p2');
+      expect(result.created).toBe(true);
+    });
   });
 
   describe('addExample', () => {
@@ -155,6 +189,17 @@ describe('comprefaceClient', () => {
         expect.stringContaining('/faces'),
         expect.objectContaining({ method: 'POST' }),
       );
+    });
+
+    it('throws when add example fails', async () => {
+      const { addExample } = loadClient();
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 400,
+        text: async () => 'Bad request',
+      });
+
+      await expect(addExample('p1', Buffer.from('img'))).rejects.toThrow('Bad request');
     });
   });
 
@@ -182,19 +227,6 @@ describe('comprefaceClient', () => {
       });
 
       await expect(deleteSubject('p1')).rejects.toThrow('Subject not found');
-    });
-  });
-
-  describe('addExample', () => {
-    it('throws when add example fails', async () => {
-      const { addExample } = loadClient();
-      fetchSpy.mockResolvedValue({
-        ok: false,
-        status: 400,
-        text: async () => 'Bad request',
-      });
-
-      await expect(addExample('p1', Buffer.from('img'))).rejects.toThrow('Bad request');
     });
   });
 
