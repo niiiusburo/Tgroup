@@ -207,6 +207,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/len\(faces\)/i);
     });
 
+    it('selects primary face with faces[0]', () => {
+      expect(content).toMatch(/faces\[0\]/i);
+    });
+
     it('uses img.shape for image dimensions', () => {
       expect(content).toMatch(/img\.shape/i);
     });
