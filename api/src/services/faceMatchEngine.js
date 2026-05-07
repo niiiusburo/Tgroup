@@ -131,9 +131,9 @@ async function registerSample(partnerId, embedding, quality, modelMeta, imageSha
   // Update partner face status
   await query(
     `UPDATE dbo.partners
-     SET face_subject_id = COALESCE(face_subject_id, $1),
+     SET face_subject_id = COALESCE(face_subject_id, $1::text),
          face_registered_at = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
-     WHERE id = $1`,
+     WHERE id = $1::uuid`,
     [partnerId]
   );
 

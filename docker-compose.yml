@@ -47,7 +47,7 @@ services:
       FACE_CANDIDATE_THRESHOLD: ${FACE_CANDIDATE_THRESHOLD:-0.363}
       FACE_AUTO_MATCH_MARGIN: ${FACE_AUTO_MATCH_MARGIN:-0.05}
       FACE_MAX_CANDIDATES: ${FACE_MAX_CANDIDATES:-3}
-      FACE_DETECTION_THRESHOLD: ${FACE_DETECTION_THRESHOLD:-0.90}
+      FACE_DETECTION_THRESHOLD: ${FACE_DETECTION_THRESHOLD:-0.6}
     ports:
       - "127.0.0.1:3002:3002"
 
@@ -58,7 +58,7 @@ services:
     container_name: tgroup-face-service
     restart: unless-stopped
     environment:
-      DETECTION_THRESHOLD: ${FACE_DETECTION_THRESHOLD:-0.90}
+      DETECTION_THRESHOLD: ${FACE_DETECTION_THRESHOLD:-0.6}
     ports:
       - "127.0.0.1:8001:8000"
     healthcheck:

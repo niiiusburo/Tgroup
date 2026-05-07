@@ -1,5 +1,33 @@
 [
     {
+        "version": "0.29.0",
+        "date": "2026-05-07",
+        "commit": "pending",
+        "highlights": "fix(face-id): wire embedding pipeline end-to-end so register and recognize actually work",
+        "sections": [
+            {
+                "title": "Bug Fixes",
+                "items": [
+                    "face-service: SFace embeddings are now L2-normalized before being returned. Previously they were raw vectors, so cosine similarity scores were O(magnitude²) (~6.7) instead of in [-1, 1]. Combined with auto-match threshold 0.50, this caused every recognition to auto-match the closest stored face regardless of identity.",
+                    "face-service: Split DETECTION_THRESHOLD into DETECTOR_SCORE_THRESHOLD (0.5, filters detector noise) and QUALITY_THRESHOLD (0.85, gates only the strongest face). Previous single-value 0.90 default rejected genuine portraits (score ~0.75) as NO_FACE.",
+                    "API: Cast $1 in faceMatchEngine.registerSample so dbo.partners UPDATE no longer fails with 'COALESCE types text and uuid cannot be matched' (face_subject_id is text from the legacy Compreface migration; partner id is uuid)."
+                ]
+            },
+            {
+                "title": "Infrastructure",
+                "items": [
+                    "docker-compose default FACE_DETECTION_THRESHOLD lowered from 0.90 to 0.6 (consumed as QUALITY_THRESHOLD by face-service). Override via env if you want a stricter capture gate."
+                ]
+            },
+            {
+                "title": "Testing",
+                "items": [
+                    "Added api/tests/faceRecognition.integration.test.js: a real end-to-end test that hits the live face-service and Postgres, registers two distinct faces, and asserts each recognizes back to the correct partner. This is the test that would have caught all three bugs above on run 1."
+                ]
+            }
+        ]
+    },
+    {
         "version": "0.28.2",
         "date": "2026-05-07",
         "commit": "pending",

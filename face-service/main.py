@@ -20,7 +20,8 @@ app = FastAPI(title="Face Embedding Service", version="1.0.0")
 MODEL_DIR = os.environ.get("MODEL_DIR", "/app/models")
 DETECTOR_PATH = os.path.join(MODEL_DIR, "face_detection_yunet_2023mar.onnx")
 RECOGNIZER_PATH = os.path.join(MODEL_DIR, "face_recognition_sface_2021dec.onnx")
-DETECTION_THRESHOLD = float(os.environ.get("DETECTION_THRESHOLD", "0.90"))
+DETECTOR_SCORE_THRESHOLD = float(os.environ.get("DETECTOR_SCORE_THRESHOLD", "0.5"))
+QUALITY_THRESHOLD = float(os.environ.get("DETECTION_THRESHOLD", "0.85"))
 INPUT_SIZE = (320, 320)  # YuNet default
 
 # ─── Model loading ──────────────────────────────────────────────────────────
@@ -42,7 +43,7 @@ def _load_models():
         model=DETECTOR_PATH,
         config="",
         input_size=INPUT_SIZE,
-        score_threshold=DETECTION_THRESHOLD,
+        score_threshold=DETECTOR_SCORE_THRESHOLD,
         nms_threshold=0.3,
         top_k=5000,
     )
@@ -78,12 +79,14 @@ def _decode_image(file_bytes: bytes) -> Optional[np.ndarray]:
 
 
 def _extract_embedding(img: np.ndarray, face_box: np.ndarray) -> List[float]:
-    """Align face and extract SFace embedding."""
+    """Align face, extract SFace embedding, L2-normalize for cosine-similarity matching."""
     _ensure_models()
     aligned = _recognizer.alignCrop(img, face_box)
-    embedding = _recognizer.feature(aligned)
-    # Flatten to 1D list
-    return embedding.flatten().tolist()
+    embedding = _recognizer.feature(aligned).flatten()
+    norm = float(np.linalg.norm(embedding))
+    if norm > 0:
+        embedding = embedding / norm
+    return embedding.tolist()
 
 
 # ─── Endpoints ──────────────────────────────────────────────────────────────
@@ -171,21 +174,33 @@ async def embed(image: UploadFile = File(...)):
             content={"error": "NO_FACE", "message": "No face detected"},
         )
 
-    if len(faces) > 1:
+    # Keep only faces above the quality bar; spurious low-score detections are dropped.
+    quality_faces = [f for f in faces if float(f[14]) >= QUALITY_THRESHOLD]
+
+    if len(quality_faces) == 0:
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": "LOW_QUALITY",
+                "message": f"No face above quality threshold {QUALITY_THRESHOLD}",
+            },
+        )
+
+    if len(quality_faces) > 1:
         return JSONResponse(
             status_code=422,
             content={"error": "MULTIPLE_FACES", "message": "More than one face detected"},
         )
 
-    face = faces[0]
+    face = quality_faces[0]
     # YuNet returns: [x, y, w, h, x_re, y_re, x_le, y_le, x_nt, y_nt, x_rcm, y_rcm, x_lcm, y_lcm, score]
     score = float(face[14])
-    if score < DETECTION_THRESHOLD:
+    if score < QUALITY_THRESHOLD:
         return JSONResponse(
             status_code=422,
             content={
                 "error": "LOW_QUALITY",
-                "message": f"Face detection score {score:.2f} below threshold {DETECTION_THRESHOLD}",
+                "message": f"Face detection score {score:.2f} below threshold {QUALITY_THRESHOLD}",
             },
         )
 
