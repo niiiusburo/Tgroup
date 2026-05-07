@@ -520,6 +520,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/return /i);
     });
 
+    it('uses for loops', () => {
+      expect(content).toMatch(/for /i);
+    });
+
     it('uses f-strings for formatted messages', () => {
       expect(content).toMatch(/f"/i);
     });
