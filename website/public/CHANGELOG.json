@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.31.3",
+    "date": "2026-05-07",
+    "commit": "pending",
+    "highlights": "perf(customers): remove duplicate initial data loads",
+    "sections": [
+      {
+        "title": "Performance",
+        "items": [
+          "Customers, employees, services, and appointments hooks no longer run the same empty-search fetch twice on first render.",
+          "The /customers list page now avoids profile-only Appointments, Employees, and SaleOrders requests until a customer profile is opened."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Measured authenticated nk2 /customers load before the fix and confirmed duplicate API requests in the browser waterfall."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.31.2",
     "date": "2026-05-07",
     "commit": "pending",

@@ -142,3 +142,44 @@ Setup data and login state:
 - Use an authenticated admin session.
 - Prefer the current customer URL `/customers/f72f8c86-34e9-4377-b59c-b414002ec20c` if seeded locally.
 - Use disposable or already-known QA service data when changing quantity.
+
+---
+
+# TestSprite Plan: Customer Initial Load Performance
+
+Feature/edit name: Customer Initial Load Performance
+
+Changed URLs and API routes:
+- `/customers`
+- `/customers/:id`
+- `/api/Appointments?offset=0&limit=200`
+- `/api/Employees?offset=0&limit=500&active=all`
+- `/api/SaleOrders?offset=0&limit=500`
+
+Affected data flows:
+- Customer list initial render after login.
+- Customer profile hooks that share appointment, employee, and service data.
+- Empty-search state for appointments, employees, and services.
+
+User roles:
+- Authenticated admin or clinic staff with customer access.
+
+Happy paths:
+- Open `/customers` after login and confirm the customer table renders.
+- Initial customer-list load should not request profile-only appointments, employees, or sale orders.
+- Opening `/customers/:id` should still request profile-specific employees and service data.
+- Searching appointments, employees, or services still triggers the debounced search request after typing.
+
+Edge cases:
+- Clearing a non-empty search term should reload the unfiltered data once.
+- Switching selected customer profile should still load profile-specific services.
+- Location-scoped views should still pass the selected location filter.
+
+Regressions:
+- Creating or updating appointments and services should still update local state.
+- Employee filters and service filters should still work after the initial fetch.
+- Version display and guided face capture should continue to load.
+
+Setup data and login state:
+- Use an authenticated admin session.
+- Capture browser network requests for `/customers` and compare duplicate initial API calls before and after the change.

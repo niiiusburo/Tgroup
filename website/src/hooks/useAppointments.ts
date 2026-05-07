@@ -125,6 +125,8 @@ export function useAppointments(selectedLocationId?: string) {
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState<string>('');
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const didInitialFetchRef = useRef(false);
+  const previousSearchTermRef = useRef('');
 
   // Initial load and refetch
   const refetch = useCallback(async () => {
@@ -150,6 +152,7 @@ export function useAppointments(selectedLocationId?: string) {
   // Load appointments on mount
   useEffect(() => {
     refetch();
+    didInitialFetchRef.current = true;
   }, [refetch]);
 
   // Debounced search with API call
@@ -157,11 +160,14 @@ export function useAppointments(selectedLocationId?: string) {
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
 
     if (!searchTerm) {
+      if (didInitialFetchRef.current && !previousSearchTermRef.current) return;
+      previousSearchTermRef.current = '';
       refetch();
       return;
     }
 
     setLoading(true);
+    previousSearchTermRef.current = searchTerm;
     searchDebounceRef.current = setTimeout(async () => {
       try {
         const response = await fetchAppointments({

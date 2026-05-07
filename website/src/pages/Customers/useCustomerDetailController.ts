@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { fetchSaleOrderLines } from '@/lib/api';
 import type { Customer } from '@/hooks/useCustomers';
 import { useCustomerProfile } from '@/hooks/useCustomerProfile';
-import { useAppointments } from '@/hooks/useAppointments';
 import { useServices } from '@/hooks/useServices';
 import { useDeposits } from '@/hooks/useDeposits';
 import { useEmployees } from '@/hooks/useEmployees';
@@ -47,14 +46,12 @@ export function useCustomerDetailController({
     refetch: refetchProfile,
   } = useCustomerProfile(selectedCustomerId);
 
-  useAppointments(undefined);
-
   const {
     createServiceRecord,
     updateServiceRecord,
     updateServiceStatus,
     refetch: refetchServices,
-  } = useServices(undefined, selectedCustomerId ?? undefined);
+  } = useServices(undefined, selectedCustomerId ?? undefined, { enabled: Boolean(selectedCustomerId) });
   const {
     depositList,
     usageHistory,
@@ -67,7 +64,7 @@ export function useCustomerDetailController({
     removeDeposit,
     editDeposit,
   } = useDeposits();
-  const { employees: allEmployees } = useEmployees();
+  const { employees: allEmployees } = useEmployees(undefined, { enabled: Boolean(selectedCustomerId) });
   const {
     payments: customerPayments,
     isLoading: paymentsLoading,

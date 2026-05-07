@@ -49,7 +49,12 @@ export interface CreateServiceInput {
   readonly sourceId?: string | null;
 }
 
-export function useServices(selectedLocationId?: string, partnerId?: string) {
+interface UseServicesOptions {
+  readonly enabled?: boolean;
+}
+
+export function useServices(selectedLocationId?: string, partnerId?: string, options: UseServicesOptions = {}) {
+  const enabled = options.enabled ?? true;
   const [records, setRecords] = useState<ServiceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +62,8 @@ export function useServices(selectedLocationId?: string, partnerId?: string) {
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didInitialFetchRef = useRef(false);
+  const previousSearchTermRef = useRef('');
 
   /**
    * Load service records from API (Sale Orders)
@@ -92,17 +99,32 @@ export function useServices(selectedLocationId?: string, partnerId?: string) {
    * Load records on mount
    */
   useEffect(() => {
+    if (!enabled) {
+      setRecords([]);
+      setLoading(false);
+      setError(null);
+      didInitialFetchRef.current = false;
+      previousSearchTermRef.current = '';
+      return;
+    }
     fetchRecords();
-  }, [fetchRecords]);
+    didInitialFetchRef.current = true;
+  }, [enabled, fetchRecords]);
 
   /**
    * Debounced search
    */
   useEffect(() => {
+    if (!enabled) return;
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
 
+    if (!searchTerm && didInitialFetchRef.current && !previousSearchTermRef.current) {
+      return;
+    }
+
+    previousSearchTermRef.current = searchTerm;
     debounceTimerRef.current = setTimeout(() => {
       fetchRecords(searchTerm || undefined);
     }, 300);
@@ -112,7 +134,7 @@ export function useServices(selectedLocationId?: string, partnerId?: string) {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [searchTerm, fetchRecords, partnerId]);
+  }, [enabled, searchTerm, fetchRecords, partnerId]);
 
   const filtered = useMemo(() => {
     let result: readonly ServiceRecord[] = records;

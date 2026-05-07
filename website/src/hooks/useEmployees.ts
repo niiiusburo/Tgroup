@@ -96,7 +96,12 @@ interface EmployeeWithApiFields extends Employee {
  * Hook for employee data and operations (using real API)
  * @crossref:used-in[Employees, Appointments, Calendar, Customers]
  */
-export function useEmployees(selectedLocationId?: string) {
+interface UseEmployeesOptions {
+  readonly enabled?: boolean;
+}
+
+export function useEmployees(selectedLocationId?: string, options: UseEmployeesOptions = {}) {
+  const enabled = options.enabled ?? true;
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [tierFilter, setTierFilter] = useState<string>('all');
@@ -108,6 +113,8 @@ export function useEmployees(selectedLocationId?: string) {
   const [error, setError] = useState<string | null>(null);
 
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const didInitialFetchRef = useRef(false);
+  const previousSearchQueryRef = useRef('');
 
   /**
    * Fetch employees from API with debounced search
@@ -151,17 +158,32 @@ export function useEmployees(selectedLocationId?: string) {
    * Initial fetch
    */
   useEffect(() => {
+    if (!enabled) {
+      setAllEmployees([]);
+      setIsLoading(false);
+      setError(null);
+      didInitialFetchRef.current = false;
+      previousSearchQueryRef.current = '';
+      return;
+    }
     fetchAndSetEmployees();
-  }, [fetchAndSetEmployees]);
+    didInitialFetchRef.current = true;
+  }, [enabled, fetchAndSetEmployees]);
 
   /**
    * Debounced search
    */
   useEffect(() => {
+    if (!enabled) return;
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
 
+    if (!searchQuery && didInitialFetchRef.current && !previousSearchQueryRef.current) {
+      return;
+    }
+
+    previousSearchQueryRef.current = searchQuery;
     searchTimeoutRef.current = setTimeout(() => {
       fetchAndSetEmployees(searchQuery || undefined);
     }, 300);
@@ -171,7 +193,7 @@ export function useEmployees(selectedLocationId?: string) {
         clearTimeout(searchTimeoutRef.current);
       }
     };
-  }, [searchQuery, fetchAndSetEmployees]);
+  }, [enabled, searchQuery, fetchAndSetEmployees]);
 
   /**
    * Filter counts derived from allEmployees (cross-filtered so counts reflect other active filters)
