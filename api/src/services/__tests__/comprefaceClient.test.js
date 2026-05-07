@@ -172,5 +172,42 @@ describe('comprefaceClient', () => {
         expect.objectContaining({ method: 'DELETE' }),
       );
     });
+
+    it('throws when delete fails', async () => {
+      const { deleteSubject } = loadClient();
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        text: async () => 'Subject not found',
+      });
+
+      await expect(deleteSubject('p1')).rejects.toThrow('Subject not found');
+    });
+  });
+
+  describe('addExample', () => {
+    it('throws when add example fails', async () => {
+      const { addExample } = loadClient();
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 400,
+        text: async () => 'Bad request',
+      });
+
+      await expect(addExample('p1', Buffer.from('img'))).rejects.toThrow('Bad request');
+    });
+  });
+
+  describe('createSubject', () => {
+    it('throws when create subject fails', async () => {
+      const { createSubject } = loadClient();
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 409,
+        text: async () => 'Subject already exists',
+      });
+
+      await expect(createSubject('p1')).rejects.toThrow('Subject already exists');
+    });
   });
 });
