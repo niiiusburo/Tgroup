@@ -236,6 +236,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/yunet/i);
     });
 
+    it('references SFace model file', () => {
+      expect(content).toMatch(/sface/i);
+    });
+
     it('uses cv2.FaceRecognizerSF', () => {
       expect(content).toMatch(/cv2\.FaceRecognizerSF/i);
     });
