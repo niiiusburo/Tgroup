@@ -312,6 +312,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/"height":/i);
     });
 
+    it('uses round() for detection score precision', () => {
+      expect(content).toMatch(/round\(/i);
+    });
+
     it('rounds detection score in quality metadata', () => {
       expect(content).toMatch(/round\(.*4\)/i);
     });
