@@ -134,6 +134,14 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/MODEL_DIR/i);
     });
 
+    it('defines DETECTOR_PATH for model file', () => {
+      expect(content).toMatch(/DETECTOR_PATH/i);
+    });
+
+    it('defines RECOGNIZER_PATH for model file', () => {
+      expect(content).toMatch(/RECOGNIZER_PATH/i);
+    });
+
     it('reads DETECTION_THRESHOLD from environment', () => {
       expect(content).toMatch(/DETECTION_THRESHOLD/i);
     });
