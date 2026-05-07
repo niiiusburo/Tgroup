@@ -554,6 +554,11 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/height/i);
     });
 
+    it('uses h and w variables for image dimensions', () => {
+      expect(content).toMatch(/\bh\b/i);
+      expect(content).toMatch(/\bw\b/i);
+    });
+
     it('uses f-strings for formatted messages', () => {
       expect(content).toMatch(/f"/i);
     });
