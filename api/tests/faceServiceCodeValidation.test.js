@@ -611,6 +611,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/getLogger/i);
     });
 
+    it('sets logging level to INFO', () => {
+      expect(content).toMatch(/logging\.INFO/i);
+    });
+
     it('uses f-strings for formatted messages', () => {
       expect(content).toMatch(/f"/i);
     });
