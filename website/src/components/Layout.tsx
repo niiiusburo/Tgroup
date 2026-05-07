@@ -31,6 +31,7 @@ import { useLocationFilter } from '@/contexts/LocationContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocations } from '@/hooks/useLocations';
 import { FeedbackWidget } from '@/components/shared/FeedbackWidget';
+import { GlobalFaceIdButton } from '@/components/shared/GlobalFaceIdButton';
 import { LanguageToggle } from '@/components/shared/LanguageToggle';
 import { ChangePasswordModal } from '@/components/shared/ChangePasswordModal';
 import { useTranslation } from 'react-i18next';
@@ -437,9 +438,12 @@ export function Layout() {
                 locations={locationsForFilter}
                 selectedId={selectedLocationId}
                 onChange={setSelectedLocationId} />
-              
+
               </div>
             }
+
+            {/* Quick Face ID — opens FaceCaptureModal, navigates to matched customer */}
+            <GlobalFaceIdButton />
 
             {/* Feedback */}
             <FeedbackWidget />

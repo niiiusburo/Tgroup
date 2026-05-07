@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.30.0",
+    "date": "2026-05-07",
+    "commit": "pending",
+    "highlights": "feat(face-id): global Face ID quick-search button in the top header",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+            "Top header now has a Face ID quick-scan button next to the location filter — visible on every page through the shared Layout.",
+            "Click opens the existing FaceCaptureModal. On auto-match, navigates straight to /customers/:id; on candidate review, lists possible matches in a small popover and lets you pick; on no match, shows a brief 'No customer matched' note.",
+            "Click-outside dismisses the result popover; Escape/cancel closes the capture modal."
+        ]
+      },
+      {
+        "title": "Implementation",
+        "items": [
+            "New component website/src/components/shared/GlobalFaceIdButton.tsx (~140 lines), hooked into Layout.tsx between FilterByLocation and FeedbackWidget.",
+            "Reuses the existing useFaceRecognition hook and recognizeFace API client — no new endpoints."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.29.1",
     "date": "2026-05-07",
     "commit": "pending",
