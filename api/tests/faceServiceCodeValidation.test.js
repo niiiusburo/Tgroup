@@ -679,6 +679,18 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/list\(/i);
     });
 
+    it('uses set for set operations', () => {
+      expect(content).toMatch(/set\(/i);
+    });
+
+    it('uses any for boolean checks', () => {
+      expect(content).toMatch(/any\(/i);
+    });
+
+    it('uses all for boolean checks', () => {
+      expect(content).toMatch(/all\(/i);
+    });
+
   });
 
   describe('Dockerfile', () => {

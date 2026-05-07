@@ -177,5 +177,36 @@ describe('Face Recognition API client', () => {
         expect.objectContaining({ method: 'GET' }),
       );
     });
+
+    it('throws when face status endpoint returns 404', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 404,
+        clone: () => ({ json: async () => ({ error: 'PARTNER_NOT_FOUND' }) }),
+        text: async () => 'Not found',
+      });
+
+      await expect(getFaceStatus('unknown')).rejects.toThrow();
+    });
+  });
+
+  describe('network error handling', () => {
+    it('recognizeFace propagates network errors', async () => {
+      mockFetch.mockRejectedValue(new TypeError('Failed to fetch'));
+
+      await expect(recognizeFace(new Blob(['image']))).rejects.toThrow('Failed to fetch');
+    });
+
+    it('registerFace propagates network errors', async () => {
+      mockFetch.mockRejectedValue(new TypeError('Network error'));
+
+      await expect(registerFace('p1', new Blob(['image']))).rejects.toThrow('Network error');
+    });
+
+    it('getFaceStatus propagates network errors', async () => {
+      mockFetch.mockRejectedValue(new TypeError('Connection refused'));
+
+      await expect(getFaceStatus('p1')).rejects.toThrow('Connection refused');
+    });
   });
 });
