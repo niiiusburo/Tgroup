@@ -666,6 +666,10 @@ describe('face-service code validation', () => {
     it('uses len for length checks', () => {
       expect(content).toMatch(/len\(/i);
     });
+
+    it('uses str for string conversion', () => {
+      expect(content).toMatch(/str\(/i);
+    });
   });
 
   describe('Dockerfile', () => {
