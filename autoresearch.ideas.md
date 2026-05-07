@@ -23,3 +23,7 @@
 - Add face clustering for deduplication
 - Add face recognition analytics dashboard
 - Support video stream recognition (not just still images)
+
+## Discovered Issues
+- face-service/tests/test_main.py imports `detect_face`, `extract_embedding`, `cosine_similarity` from main.py but these functions do NOT exist in the actual main.py. The test file appears outdated.
+- Pre-existing flaky test in paymentsTransaction.test.js and appointment-hover.context.test.tsx (unrelated to Face ID)
