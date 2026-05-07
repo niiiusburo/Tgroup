@@ -155,6 +155,43 @@ describe('getEmbedding', () => {
     await getEmbedding(Buffer.from('img'));
     expect(fetchSpy.mock.calls[0][0]).toBe('http://face-service:8000/embed');
   });
+
+  it('uses custom FACE_SERVICE_URL when set', async () => {
+    const { getEmbedding } = loadClient({ FACE_SERVICE_URL: 'http://custom:9000' });
+    fetchSpy.mockResolvedValue({
+      ok: true,
+      json: async () => ({ embedding: [], model: {}, quality: {} }),
+    });
+
+    await getEmbedding(Buffer.from('img'));
+    expect(fetchSpy.mock.calls[0][0]).toBe('http://custom:9000/embed');
+  });
+
+  it('passes mimeType to Blob constructor', async () => {
+    const { getEmbedding } = loadClient();
+    fetchSpy.mockResolvedValue({
+      ok: true,
+      json: async () => ({ embedding: [0.1], model: {}, quality: {} }),
+    });
+
+    await getEmbedding(Buffer.from('img'), 'image/png');
+    const formData = fetchSpy.mock.calls[0][1].body;
+    const blob = formData.get('image');
+    expect(blob.type).toBe('image/png');
+  });
+
+  it('defaults mimeType to image/jpeg when not provided', async () => {
+    const { getEmbedding } = loadClient();
+    fetchSpy.mockResolvedValue({
+      ok: true,
+      json: async () => ({ embedding: [0.1], model: {}, quality: {} }),
+    });
+
+    await getEmbedding(Buffer.from('img'));
+    const formData = fetchSpy.mock.calls[0][1].body;
+    const blob = formData.get('image');
+    expect(blob.type).toBe('image/jpeg');
+  });
 });
 
 describe('healthCheck', () => {
