@@ -43,6 +43,35 @@ describe('docker-compose.yml', () => {
     expect(faceService.healthcheck.test).toBeDefined();
   });
 
+  it('face-service healthcheck uses python urllib', () => {
+    const faceService = doc.services['face-service'];
+    const testCmd = faceService.healthcheck.test.join(' ');
+    expect(testCmd).toContain('urllib');
+    expect(testCmd).toContain('/health');
+  });
+
+  it('face-service has restart policy', () => {
+    const faceService = doc.services['face-service'];
+    expect(faceService.restart).toBe('unless-stopped');
+  });
+
+  it('face-service has container_name', () => {
+    const faceService = doc.services['face-service'];
+    expect(faceService.container_name).toBe('tgroup-face-service');
+  });
+
+  it('face-service passes DETECTION_THRESHOLD env var', () => {
+    const faceService = doc.services['face-service'];
+    expect(faceService.environment).toBeDefined();
+    const envVars = Array.isArray(faceService.environment)
+      ? faceService.environment
+      : Object.entries(faceService.environment).map(([k, v]) => `${k}=${v}`);
+    const found = envVars.find((e) =>
+      typeof e === 'string' ? e.includes('DETECTION_THRESHOLD') : false
+    );
+    expect(found).toBeDefined();
+  });
+
   it('api service has FACE_SERVICE_URL environment variable', () => {
     const api = doc.services.api;
     expect(api.environment).toBeDefined();
@@ -67,5 +96,13 @@ describe('docker-compose.yml', () => {
       );
       expect(found).toBeDefined();
     }
+  });
+
+  it('includes compreface-api service', () => {
+    expect(doc.services['compreface-api']).toBeDefined();
+  });
+
+  it('includes compreface-postgres-db service', () => {
+    expect(doc.services['compreface-postgres-db']).toBeDefined();
   });
 });
