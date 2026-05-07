@@ -674,6 +674,11 @@ describe('face-service code validation', () => {
     it('uses round for rounding numbers', () => {
       expect(content).toMatch(/round\(/i);
     });
+
+    it('uses list for list operations', () => {
+      expect(content).toMatch(/list\(/i);
+    });
+
   });
 
   describe('Dockerfile', () => {
