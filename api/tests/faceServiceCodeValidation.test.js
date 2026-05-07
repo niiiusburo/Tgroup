@@ -203,6 +203,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/faces/i);
     });
 
+    it('checks len(faces) for face count validation', () => {
+      expect(content).toMatch(/len\(faces\)/i);
+    });
+
     it('uses img.shape for image dimensions', () => {
       expect(content).toMatch(/img\.shape/i);
     });
