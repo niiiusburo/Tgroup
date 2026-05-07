@@ -618,6 +618,18 @@ describe('face-service code validation', () => {
     it('uses f-strings for formatted messages', () => {
       expect(content).toMatch(/f"/i);
     });
+
+    it('uses raise for error handling', () => {
+      expect(content).toMatch(/raise /i);
+    });
+
+    it('uses except for exception catching', () => {
+      expect(content).toMatch(/except /i);
+    });
+
+    it('uses as keyword for exception binding', () => {
+      expect(content).toMatch(/except.*as /i);
+    });
   });
 
   describe('Dockerfile', () => {
