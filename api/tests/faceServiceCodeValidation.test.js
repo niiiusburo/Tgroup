@@ -603,6 +603,14 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/logger\.error/i);
     });
 
+    it('uses basicConfig for logging setup', () => {
+      expect(content).toMatch(/basicConfig/i);
+    });
+
+    it('uses getLogger for logger creation', () => {
+      expect(content).toMatch(/getLogger/i);
+    });
+
     it('uses f-strings for formatted messages', () => {
       expect(content).toMatch(/f"/i);
     });
