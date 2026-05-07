@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ScanFace, Loader2, UserCheck, UserX, X } from 'lucide-react';
+import { ScanFace, Loader2, UserCheck, UserX, X, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { FaceCaptureModal } from '@/components/shared/FaceCaptureModal';
 import { useFaceRecognition } from '@/hooks/useFaceRecognition';
+import { fetchPartners, registerFace } from '@/lib/api';
+import type { ApiPartner } from '@/lib/api';
 
 /**
  * Global Face ID quick-search button.
@@ -18,12 +20,30 @@ export function GlobalFaceIdButton() {
   const { t } = useTranslation('customers');
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
+  const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [showCapture, setShowCapture] = useState(false);
   const [showPopover, setShowPopover] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<Blob | null>(null);
+
+  // No-match rescue state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<ApiPartner[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<ApiPartner | null>(null);
+  const [registering, setRegistering] = useState(false);
+  const [registerError, setRegisterError] = useState<string | null>(null);
+
   const { recognizeState, recognize, reset } = useFaceRecognition();
 
   const dismiss = useCallback(() => {
     setShowPopover(false);
+    setCapturedImage(null);
+    setSearchQuery('');
+    setSearchResults([]);
+    setSelectedCustomer(null);
+    setRegistering(false);
+    setRegisterError(null);
     reset();
   }, [reset]);
 
@@ -31,6 +51,8 @@ export function GlobalFaceIdButton() {
     async (image: Blob) => {
       setShowCapture(false);
       setShowPopover(true);
+      setCapturedImage(image);
+      setRegisterError(null);
       const result = await recognize(image);
       if (result.match) {
         // Auto-match: jump straight to the customer detail page.
@@ -59,6 +81,44 @@ export function GlobalFaceIdButton() {
     dismiss();
   };
 
+  const handleSearchCustomers = useCallback((query: string) => {
+    setSearchQuery(query);
+    setSelectedCustomer(null);
+    setRegisterError(null);
+    if (searchDebounce.current) clearTimeout(searchDebounce.current);
+    if (query.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    searchDebounce.current = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const res = await fetchPartners({ search: query.trim(), limit: 10, status: 'active' });
+        setSearchResults(res.items ?? []);
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+  }, []);
+
+  const handleRegisterToCustomer = useCallback(async () => {
+    if (!selectedCustomer || !capturedImage) return;
+    setRegistering(true);
+    setRegisterError(null);
+    try {
+      await registerFace(selectedCustomer.id, capturedImage, 'no_match_rescue');
+      navigate(`/customers/${selectedCustomer.id}`);
+      dismiss();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t('faceRecognition.registerFailed');
+      setRegisterError(message);
+    } finally {
+      setRegistering(false);
+    }
+  }, [selectedCustomer, capturedImage, navigate, dismiss, t]);
+
   return (
     <div ref={containerRef} className="relative shrink-0">
       <button
@@ -68,6 +128,11 @@ export function GlobalFaceIdButton() {
         onClick={() => {
           reset();
           setShowPopover(false);
+          setCapturedImage(null);
+          setSearchQuery('');
+          setSearchResults([]);
+          setSelectedCustomer(null);
+          setRegisterError(null);
           setShowCapture(true);
         }}
         className="relative w-10 h-10 flex items-center justify-center rounded-lg border border-orange-200 bg-orange-50 text-orange-600 shadow-sm hover:bg-orange-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-1 transition-colors duration-150"
@@ -76,7 +141,7 @@ export function GlobalFaceIdButton() {
       </button>
 
       {showPopover && (
-        <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl border border-gray-200 bg-white shadow-lg p-3 z-50">
+        <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-gray-200 bg-white shadow-lg p-3 z-50">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-gray-700">
               {t('face.quickScan', 'Quick Face ID')}
@@ -141,9 +206,76 @@ export function GlobalFaceIdButton() {
           )}
 
           {recognizeState.status === 'no_match' && (
-            <div className="flex items-center gap-2 py-2 text-sm text-gray-600">
-              <UserX className="w-4 h-4 text-gray-400" />
-              <span>{t('face.noMatch', 'No customer matched')}</span>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 py-1 text-sm text-gray-600">
+                <UserX className="w-4 h-4 text-gray-400" />
+                <span>{t('face.noMatch', 'No customer matched')}</span>
+              </div>
+
+              {/* No-match rescue: search customer to register face */}
+              <div className="border-t border-gray-100 pt-2 space-y-2">
+                <p className="text-[11px] text-gray-500">
+                  {t('face.searchToRegister', 'Search customer to register this face')}
+                </p>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => handleSearchCustomers(e.target.value)}
+                    placeholder={t('face.searchPlaceholder', 'Name, phone, or code...')}
+                    className="w-full pl-8 pr-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+                {searchLoading && (
+                  <p className="text-[10px] text-gray-400 text-center">{t('loading')}</p>
+                )}
+                <div className="space-y-1 max-h-40 overflow-y-auto">
+                  {searchResults.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedCustomer(p);
+                        setRegisterError(null);
+                      }}
+                      className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm rounded-xl border transition-all ${
+                        selectedCustomer?.id === p.id
+                          ? 'bg-orange-50 border-orange-200'
+                          : 'bg-white border-gray-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      <UserCheck
+                        className={`w-3.5 h-3.5 ${
+                          selectedCustomer?.id === p.id ? 'text-orange-500' : 'text-gray-400'
+                        }`}
+                      />
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-medium text-gray-800 truncate">{p.name}</span>
+                        <span className="text-xs text-gray-400 truncate">
+                          {p.ref ?? ''} · {p.phone ?? ''}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                {selectedCustomer && (
+                  <button
+                    type="button"
+                    onClick={handleRegisterToCustomer}
+                    disabled={registering}
+                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-primary rounded-xl hover:bg-primary-dark disabled:opacity-50 transition-all"
+                  >
+                    {registering && <Loader2 className="w-3 h-3 animate-spin" />}
+                    {t('face.registerToCustomer', 'Register face to {name}', {
+                      name: selectedCustomer.name,
+                    })}
+                  </button>
+                )}
+                {registerError && (
+                  <p className="text-[10px] text-red-500 text-center">{registerError}</p>
+                )}
+              </div>
             </div>
           )}
 
@@ -157,7 +289,10 @@ export function GlobalFaceIdButton() {
         isOpen={showCapture}
         title={t('face.quickScan', 'Quick Face ID') as string}
         onCapture={handleCapture}
-        onCancel={() => setShowCapture(false)}
+        onCancel={() => {
+          setShowCapture(false);
+          setCapturedImage(null);
+        }}
       />
     </div>
   );

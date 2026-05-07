@@ -3,6 +3,7 @@ import { test, expect, devices } from '@playwright/test';
 const FACE_ID_BUTTON_NAME = /Quét nhanh khuôn mặt|Nhận diện khuôn mặt|Quick Face ID|Face ID/i;
 const FACE_ID_SCAN_STATUS =
   /Đang tìm khuôn mặt|Đã phát hiện khuôn mặt|Đang tự chụp|Scanning for face|Face detected|Auto capturing/i;
+const FACE_ID_QUALITY_STATUS = /Chất lượng\s+\d+%|Quality\s+\d+%/i;
 const IPHONE_14_PRO = devices['iPhone 14 Pro'];
 
 test.use({
@@ -40,6 +41,7 @@ test.describe('Face ID Smoke', () => {
     await expect(page.locator('video')).toBeVisible({ timeout: 8000 });
     await expect(page.getByRole('button', { name: /Đổi camera|Switch camera/i })).toBeVisible();
     await expect(page.getByText(FACE_ID_SCAN_STATUS)).toBeVisible();
+    await expect(page.getByText(FACE_ID_QUALITY_STATUS)).toBeVisible();
     await expect(page.locator('video')).toHaveClass(/blur-\[12px\]/);
   });
 

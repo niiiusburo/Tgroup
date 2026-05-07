@@ -1,5 +1,25 @@
 [
   {
+    "version": "0.31.5",
+    "date": "2026-05-07",
+    "commit": "pending",
+    "highlights": "fix(calendar): default to Day view on first visit",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+            "Calendar now opens on the Day view by default when there is no persisted state (previously defaulted to Week)."
+        ]
+      },
+      {
+        "title": "Notes",
+        "items": [
+            "0.31.4 was bumped without a CHANGELOG entry; this 0.31.5 entry rolls that bump in along with the Calendar default-view tweak so package.json and CHANGELOG.json match the pre-commit hook check."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.31.3",
     "date": "2026-05-07",
     "commit": "pending",

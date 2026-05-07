@@ -58,7 +58,7 @@ export async function fetchAllCalendarAppointments(params: CalendarAppointmentQu
  */
 export function useCalendarData(selectedLocationId?: string) {
   const { formatDate, getToday, addDaysInTimezone, addMonthsInTimezone, timezone } = useTimezone();
-  const [viewMode, setViewMode] = useState<ViewMode>('week');
+  const [viewMode, setViewMode] = useState<ViewMode>('day');
   // Store current date as string in YYYY-MM-DD format for timezone consistency
   const [currentDateStr, setCurrentDateStr] = useState(() => getToday());
   const [selectedDoctors, setSelectedDoctors] = useState<string[]>([]);
