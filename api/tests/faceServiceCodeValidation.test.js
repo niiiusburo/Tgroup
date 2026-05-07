@@ -587,6 +587,22 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/start/i);
     });
 
+    it('uses logger for logging', () => {
+      expect(content).toMatch(/logger/i);
+    });
+
+    it('uses info level logging', () => {
+      expect(content).toMatch(/logger\.info/i);
+    });
+
+    it('uses warning level logging', () => {
+      expect(content).toMatch(/logger\.warning/i);
+    });
+
+    it('uses error level logging', () => {
+      expect(content).toMatch(/logger\.error/i);
+    });
+
     it('uses f-strings for formatted messages', () => {
       expect(content).toMatch(/f"/i);
     });
