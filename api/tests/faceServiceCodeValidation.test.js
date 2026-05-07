@@ -16,6 +16,10 @@ describe('face-service code validation', () => {
       expect(content).toMatch(/import os/i);
     });
 
+    it('imports numpy as np', () => {
+      expect(content).toMatch(/import numpy as np/i);
+    });
+
     it('imports FastAPI', () => {
       expect(content).toMatch(/from fastapi import FastAPI/i);
     });
