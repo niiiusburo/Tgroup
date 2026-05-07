@@ -670,6 +670,10 @@ describe('face-service code validation', () => {
     it('uses str for string conversion', () => {
       expect(content).toMatch(/str\(/i);
     });
+
+    it('uses round for rounding numbers', () => {
+      expect(content).toMatch(/round\(/i);
+    });
   });
 
   describe('Dockerfile', () => {
