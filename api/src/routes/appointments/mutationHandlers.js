@@ -1,6 +1,8 @@
 const { query } = require('../../db');
 const { errorResponse, foreignKeyExists, isValidISODate, isValidUUID, VALID_STATES } = require('./helpers');
 
+const VIETNAM_NOW_SQL = `(NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh')`;
+
 /**
  * POST /api/Appointments
  * Body: { date, partnerId, doctorId, companyId, note, timeExpected, color, state }
@@ -89,7 +91,7 @@ async function createAppointment(req, res) {
         color, state, aptstate, isrepeatcustomer, isnotreatment, productid, assistantid, dentalaideid,
         datecreated, lastupdated
       ) VALUES (
-        gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, false, false, $12, $13, $14, (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'), (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
+        gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, false, false, $12, $13, $14, ${VIETNAM_NOW_SQL}, ${VIETNAM_NOW_SQL}
       ) RETURNING *`,
       [name, date, time || null, partnerId, doctorId || null, companyId, note, timeExpectedNum, color, state, state, productId, assistantId, dentalAideId]
     );
@@ -209,7 +211,7 @@ async function updateAppointment(req, res) {
     const updates = [];
     const params = [];
     let paramIdx = 1;
-    const nowSql = `(NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`;
+    const nowSql = VIETNAM_NOW_SQL;
 
     if (date !== undefined) {
       updates.push(`date = $${paramIdx}`);

@@ -117,6 +117,39 @@ describe('useOverviewAppointments search', () => {
     });
   });
 
+  it('preserves full arrival and treatment timestamps for wait timers', async () => {
+    vi.mocked(api.fetchAppointments).mockResolvedValueOnce({ items: [
+      {
+        id: 'a6',
+        partnerid: 'p6',
+        partnername: 'Đỗ Văn F',
+        partnerphone: '0911111111',
+        doctorname: 'Bác sĩ Z',
+        doctorid: 'd3',
+        date: '2024-01-01',
+        time: '09:00',
+        companyid: 'c1',
+        companyname: 'CN1',
+        note: 'Khám',
+        state: 'in Examination',
+        datetimearrived: '2024-01-01T08:45:00.000Z',
+        datetimeseated: '2024-01-01T09:10:00.000Z',
+        lastupdated: '2024-01-01T09:10:00.000Z',
+        color: null,
+      },
+    ]} as any);
+
+    const { result } = renderHook(() => useOverviewAppointments('c1'));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.appointments[0]).toMatchObject({
+      checkInStatus: 'in-treatment',
+      arrivalTime: '2024-01-01T08:45:00.000Z',
+      treatmentStartTime: '2024-01-01T09:10:00.000Z',
+    });
+  });
+
   it('starts treatment timer from staff action time', async () => {
     const { result } = renderHook(() => useOverviewAppointments('c1'));
 

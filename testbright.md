@@ -1,3 +1,42 @@
+# TestSprite Plan: Overview Wait Timer Arrival Timestamp Repair
+
+Feature/edit name: Overview Wait Timer Arrival Timestamp Repair
+
+Changed URLs and API routes:
+- `/`
+- `PUT /api/Appointments/:id`
+
+Affected data flows:
+- Marking an appointment `arrived` writes `datetimearrived` as Vietnam wall-clock time instead of a DB-session-dependent double timezone conversion.
+- Overview `PatientCheckInCard` keeps the full `datetimearrived` timestamp through `useOverviewAppointments` and `WaitTimer` instead of comparing only time-of-day.
+- In-treatment and done transitions continue stamping `datetimeseated` and `datedone` from the same Vietnam timestamp source.
+
+User roles:
+- Admin and clinic staff with `appointments.edit` and `overview.view`.
+
+Happy paths:
+- Mark a scheduled appointment as arrived from `/`, wait 3-5 seconds, and confirm the card timer counts upward instead of staying at `0s`.
+- Refresh `/` after marking arrived and confirm the timer uses the persisted `datetimearrived` timestamp.
+- Move the same appointment to `Đang khám` and confirm the waiting timer becomes static using the treatment start time.
+
+Edge cases:
+- Existing arrived rows with bad historical timestamps should not block new check-ins from getting correct timestamps after this fix.
+- Local DB sessions with a non-Vietnam `current_setting('TimeZone')` should still stamp Vietnam wall-clock appointment timestamps.
+- Persisted timestamps whose date differs from today should not clamp to `0s` only because their clock time is later than the current clock time.
+- Check-in timers should not regress to whole-minute-only display after the first minute.
+
+Regressions:
+- Appointment creation still populates `datecreated` and `lastupdated`.
+- Staff clear/save behavior on `PUT /api/Appointments/:id` remains intact.
+- Calendar appointment listing and overview today-only filtering remain unchanged.
+
+Setup data and login state:
+- Use an authenticated admin session.
+- Use any today appointment that is still scheduled or confirmed.
+- For backend verification, assert the update SQL contains `NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh'` and does not contain the double `UTC` timezone conversion.
+
+---
+
 # TestSprite Plan: Customer Appointment Start Time
 
 Feature/edit name: Customer Appointment Start Time

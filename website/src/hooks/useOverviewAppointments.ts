@@ -110,7 +110,7 @@ function mapApiToOverview(
     ? (mapStateToCheckInStatus(apt.state) ?? 'waiting')
     : null;
   const arrivalTime = topStatus === 'arrived'
-    ? getStoredArrivalTime(apt.id) ?? extractTimeFromTimestamp(apt.datetimearrived) ?? extractTimeFromTimestamp(apt.lastupdated)
+    ? getStoredArrivalTime(apt.id) ?? apt.datetimearrived ?? apt.lastupdated
     : null;
   return {
     id: apt.id,
@@ -132,7 +132,7 @@ function mapApiToOverview(
     productId: apt.productid || null,
     arrivalTime,
     treatmentStartTime: checkInStatus === 'in-treatment' || checkInStatus === 'done'
-      ? extractTimeFromTimestamp(apt.datetimeseated)
+      ? apt.datetimeseated
       : null,
     assistantId: apt.assistantid ?? null,
     assistantName: apt.assistantname ?? null,
@@ -145,16 +145,6 @@ const ZONE3_FILTER_KEY = 'tgclinic:overview:zone3Filter';
 const ZONE1_FILTER_KEY = 'tgclinic:overview:zone1Filter';
 const ZONE3_OPTIONS: Zone3Filter[] = ['all', 'arrived', 'cancelled'];
 const ZONE1_OPTIONS: Zone1Filter[] = ['all', 'waiting', 'in-treatment', 'done'];
-
-function extractTimeFromTimestamp(ts: string | null): string | null {
-  if (!ts) return null;
-  const date = new Date(ts);
-  if (Number.isNaN(date.getTime())) return null;
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
-  return `${hours}:${minutes}:${seconds}`;
-}
 
 function getSavedFilter<T extends string>(key: string, options: readonly T[], fallback: T): T {
   if (typeof window === 'undefined') return fallback;

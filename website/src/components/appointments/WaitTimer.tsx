@@ -12,20 +12,28 @@ interface WaitTimerProps {
   readonly compact?: boolean;
 }
 
-function parseTimeToSeconds(time: string): number {
-  const parts = time.split(':').map(Number);
-  const hours = parts[0] || 0;
-  const minutes = parts[1] || 0;
-  const seconds = parts[2] || 0;
-  return hours * 3600 + minutes * 60 + seconds;
+function parseTimerPointToMs(value: string, referenceDate: Date): number | null {
+  if (/^\d{4}-\d{2}-\d{2}/.test(value)) {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed.getTime();
+  }
+
+  const match = value.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if (!match) return null;
+
+  const [, hours = '0', minutes = '0', seconds = '0'] = match;
+  const date = new Date(referenceDate);
+  date.setHours(Number(hours), Number(minutes), Number(seconds), 0);
+  return date.getTime();
 }
 
 function formatDuration(totalSeconds: number): string {
   if (totalSeconds < 60) return `${totalSeconds}s`;
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
-  if (hours === 0) return `${minutes}m`;
-  return `${hours}h ${minutes}m`;
+  const seconds = totalSeconds % 60;
+  if (hours === 0) return `${minutes}m ${seconds}s`;
+  return `${hours}h ${minutes}m ${seconds}s`;
 }
 
 export function WaitTimer({ arrivalTime, treatmentStartTime, compact = false }: WaitTimerProps) {
@@ -39,19 +47,20 @@ export function WaitTimer({ arrivalTime, treatmentStartTime, compact = false }: 
 
   if (!arrivalTime) return null;
 
-  const arrivalSeconds = parseTimeToSeconds(arrivalTime);
-  let waitSeconds: number;
+  const arrivalMs = parseTimerPointToMs(arrivalTime, now);
+  if (arrivalMs === null) return null;
 
-  if (treatmentStartTime) {
-    waitSeconds = parseTimeToSeconds(treatmentStartTime) - arrivalSeconds;
-  } else {
-    const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-    waitSeconds = Math.max(0, currentSeconds - arrivalSeconds);
-  }
+  const treatmentStartMs = treatmentStartTime
+    ? parseTimerPointToMs(treatmentStartTime, now)
+    : null;
+  const waitMs = treatmentStartMs !== null
+    ? treatmentStartMs - arrivalMs
+    : now.getTime() - arrivalMs;
+  const waitSeconds = Math.max(0, Math.floor(waitMs / 1_000));
 
   const waitMinutes = Math.floor(waitSeconds / 60);
   const timerColor = waitMinutes < 10 ? 'green' : waitMinutes < 20 ? 'orange' : 'red';
-  const isFinished = treatmentStartTime !== null;
+  const isFinished = treatmentStartMs !== null;
 
   if (compact) {
     return (

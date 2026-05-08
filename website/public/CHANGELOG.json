@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.31.14",
+    "date": "2026-05-08",
+    "commit": "pending",
+    "highlights": "Overview wait timers use stable Vietnam arrival timestamps after check-in",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Appointment check-in timestamps now use Vietnam wall-clock time directly, preventing overview wait timers from clamping to 0s when the database session timezone is not Vietnam.",
+          "Overview wait timers now keep full persisted timestamps instead of comparing only time-of-day, so older timestamp rows do not clamp to 0s when their clock time is later than the current clock."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added backend and frontend regression coverage for appointment arrival timestamp SQL and overview wait timer elapsed-time rendering."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.31.13",
     "date": "2026-05-08",
     "commit": "70a2a788",

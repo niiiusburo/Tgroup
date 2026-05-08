@@ -42,5 +42,8 @@ describe('PUT /api/Appointments/:id status timestamps', () => {
 
     expect(res.status).toBe(200);
     expect(updateSql[0]).toContain('datetimearrived = COALESCE');
+    expect(updateSql[0]).toContain("datetimearrived = COALESCE(datetimearrived, (NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh'))");
+    expect(updateSql[0]).toContain("lastupdated = (NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh')");
+    expect(updateSql[0]).not.toContain("AT TIME ZONE 'UTC' AT TIME ZONE");
   });
 });
