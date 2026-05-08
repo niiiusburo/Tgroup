@@ -88,13 +88,26 @@ docker exec -it tgroup-db psql -U postgres -d tdental_demo
 
 ### Applying Stray Migrations
 
+> **The canonical migration directory is `api/src/db/migrations/`** (the
+> `api/migrations/` path used in older docs is the legacy location and is
+> currently unused). Migrations are **not** auto-applied — they must be run
+> manually after any deploy that introduces a new file there.
+
 If the backup is slightly behind the code, run any missing migrations manually:
 
 ```bash
-for f in api/migrations/*.sql; do
+# Run all migrations (idempotent — every migration uses IF NOT EXISTS).
+for f in /opt/tgroup/api/src/db/migrations/*.sql; do
+  echo "Applying $f..."
   docker exec -i tgroup-db psql -U postgres -d tdental_demo < "$f"
 done
 ```
+
+**Symptom of a missed migration:** API endpoints return 500 with messages like
+`relation "dbo.<table>" does not exist`. Example: face recognition returned
+`ENGINE_ERROR` because `dbo.customer_face_embeddings` was never created on
+prod (migration `046_customer_face_embeddings.sql`). Apply the file above
+and the feature recovers without a redeploy.
 
 ## Production Deployment (VPS)
 

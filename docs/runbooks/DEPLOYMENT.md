@@ -19,7 +19,7 @@ All changes are fixed and verified locally before VPS deployment. Do not edit VP
 1. Confirm local git status and intended commit.
 2. Run the verification gates for the changed area.
 3. Confirm `website/package.json` version and changelog are aligned for website/runtime code changes.
-4. If schema or permission data changed, apply and verify migrations locally first.
+4. If schema or permission data changed, apply and verify migrations locally first. **After deploy, also apply unapplied migrations on the VPS DB** — migrations are not auto-run. Loop them with `for f in /opt/tgroup/api/src/db/migrations/*.sql; do docker exec -i tgroup-db psql -U postgres -d tdental_demo < "$f"; done` (idempotent — every migration uses `IF NOT EXISTS`). Symptom of a missed migration: API returns 500 with `relation "dbo.<table>" does not exist`.
 5. Update `scripts/deploy-tbot.sh` before changing Docker/nginx/deploy behavior.
 6. If Face ID changed, verify `face-service` container builds and starts, and model download URLs are reachable.
 7. If operational exports changed, confirm production nginx has `/api` proxy timeouts long enough for large downloads.
