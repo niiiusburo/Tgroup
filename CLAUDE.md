@@ -19,11 +19,14 @@ Every time you bump the version or deploy a new build, you MUST update `website/
 
 ## Admin Login Credentials
 
-**For Playwright E2E tests and browser testing, always use:**
-- Email: `tg@clinic.vn`
-- Password: `123456`
+**For Playwright E2E tests and browser testing:**
 
-Do NOT use old admin emails or any other email. This is the only admin account.
+| Environment | Email | Password |
+|-------------|-------|----------|
+| Production (`https://nk.2checkin.com`) | `t@clinic.vn` | `123123` |
+| Local dev (`http://127.0.0.1:5175`, Tgrouptest demo DB) | `tg@clinic.vn` | `123456` |
+
+The prod DB does NOT have `tg@clinic.vn`. Only `t@clinic.vn`, `kien@clinic.vn`, and `0397616697@clinic.vn` exist as admin accounts on production. Use `t@clinic.vn` for live verification.
 
 ## Verification Rule (MANDATORY)
 
@@ -107,9 +110,9 @@ ssh root@76.13.16.68
 # Password stored in 1Password / local secrets — do NOT commit to this file
 ```
 
-**Production Domain:** `https://nk.2checkin.com` (tg@clinic.vn / 123456)
-**Backend Location:** `/root/tdental-api/`
-**Start Command:** `cd /root/tdental-api && pm2 start src/server.js --name tdental-api`
+**Production Domain:** `https://nk.2checkin.com` (login: `t@clinic.vn` / `123123`)
+**Stack:** Docker Compose at `/opt/tgroup` (containers `tgroup-web`, `tgroup-api`, `tgroup-db`).
+**Deploy:** `ssh root@76.13.16.68`, `cd /opt/tgroup`, `git pull origin main`, `docker compose up -d --build api web` (per `docs/runbooks/DEPLOYMENT.md`). There is **no** auto-deploy; pushing to GitHub only auto-tags via `release-tag.yml` — it does not SSH or rebuild.
 
 ## Key Architecture Decisions
 
