@@ -60,7 +60,7 @@ services:
     environment:
       DETECTION_THRESHOLD: ${FACE_DETECTION_THRESHOLD:-0.6}
     ports:
-      - "127.0.0.1:8001:8000"
+      - "${FACE_SERVICE_BIND_HOST:-127.0.0.1}:${FACE_SERVICE_HOST_PORT:-8001}:8000"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 10s

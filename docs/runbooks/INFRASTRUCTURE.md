@@ -11,6 +11,10 @@
 - Optional Compreface services for face recognition.
 - External Hosoonline service for health-checkup images.
 
+When production and staging run on the same VPS, give each `face-service` a distinct
+host port with `FACE_SERVICE_HOST_PORT`. The API should still use the internal
+Docker URL `FACE_SERVICE_URL=http://face-service:8000`.
+
 ## Configuration
 
 Real env files are local/prod secrets and must not be tracked. Use `.env.example` as the documented shape and keep real values in local/VPS secret storage.
