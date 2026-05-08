@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.31.15",
+    "date": "2026-05-08",
+    "commit": "f8290aee",
+    "highlights": "Wait timer no longer counts from a previous visit when an appointment is reactivated",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Reactivating an appointment (state → 'arrived' from done/cancelled/etc.) now resets datetimearrived, datedone, and datetimeseated. Previously, the wait timer kept counting from the prior visit's check-in (e.g. 18h+ for an appointment freshly reactivated today)."
+        ]
+      },
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
     "version": "0.31.14",
     "date": "2026-05-08",
     "commit": "pending",
