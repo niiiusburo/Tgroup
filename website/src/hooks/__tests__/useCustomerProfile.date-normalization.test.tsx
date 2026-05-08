@@ -189,6 +189,53 @@ describe('useCustomerProfile date normalization', () => {
     expect(apt.date).toBe('2026-04-18');
   });
 
+  it('should preserve appointment start time from timestamp date when time is missing', async () => {
+    const { fetchAppointments } = await import('@/lib/api');
+    vi.mocked(fetchAppointments).mockResolvedValueOnce({
+      offset: 0,
+      limit: 500,
+      totalItems: 1,
+      items: [
+        {
+          id: 'apt-from-date-time',
+          name: 'AP244803',
+          date: '2026-05-08T10:30:00.000Z',
+          time: null,
+          datetimeappointment: null,
+          timeexpected: 30,
+          note: 'TĂNG LỰC - D',
+          state: 'done',
+          partnerid: 'cust-1',
+          partnername: 'Test Patient',
+          partnerdisplayname: 'Test Patient',
+          partnerphone: '0901234567',
+          partnercode: 'T001',
+          companyid: 'loc-1',
+          companyname: 'Main Clinic',
+          doctorid: 'doc-1',
+          doctorname: 'Dr. Smith',
+          color: '0',
+          datecreated: '2024-01-01T00:00:00Z',
+          lastupdated: '2024-01-01T00:00:00Z',
+          productid: null,
+          productname: null,
+        } as any,
+      ],
+      aggregates: { total: 1, byState: { done: 1 } },
+    });
+
+    const { result } = renderHook(() => useCustomerProfile('cust-1'), {
+      wrapper: Wrapper,
+    });
+
+    await waitFor(() => {
+      expect(result.current.appointments).toHaveLength(1);
+    });
+
+    expect(result.current.appointments[0].date).toBe('2026-05-08');
+    expect(result.current.appointments[0].time).toBe('17:30');
+  });
+
   it('should keep YYYY-MM-DD dates as-is', async () => {
     const { fetchAppointments } = await import('@/lib/api');
     vi.mocked(fetchAppointments).mockResolvedValueOnce({

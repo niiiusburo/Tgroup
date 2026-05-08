@@ -142,10 +142,14 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         // Normalize dates to YYYY-MM-DD in the selected timezone so display
         // utilities don't mis-render ISO timestamps (e.g. showing 17 Apr when
         // the appointment is actually 18 Apr in ICT).
-        const normalized = aptRes.items.map((apt) => ({
-          ...apt,
-          date: apt.date ? formatDateTz(apt.date, 'yyyy-MM-dd') : apt.date,
-        }));
+        const normalized = aptRes.items.map((apt) => {
+          const dateHasTime = typeof apt.date === 'string' && apt.date.includes('T');
+          return {
+            ...apt,
+            time: apt.time ?? (dateHasTime ? formatDateTz(apt.date, 'HH:mm') : apt.time),
+            date: apt.date ? formatDateTz(apt.date, 'yyyy-MM-dd') : apt.date,
+          };
+        });
         if (!isCurrentRequest()) return;
         setAppointments(normalized);
         profileData.totalVisits = aptRes.totalItems;

@@ -1,3 +1,39 @@
+# TestSprite Plan: Customer Appointment Start Time
+
+Feature/edit name: Customer Appointment Start Time
+
+Changed URLs and API routes:
+- `/customers/:id`
+- `GET /api/Appointments?partner_id=...`
+
+Affected data flows:
+- Customer profile appointment history now preserves a start time from `dbo.appointments.date` when the legacy `time` column is null.
+- The profile hook still normalizes appointment dates to the selected timezone for date badges.
+- Duration continues to use `timeexpected`.
+
+User roles:
+- Authenticated admin or clinic staff with customer profile access.
+
+Happy paths:
+- Open `/customers/9a358608-c0c2-47e5-88c0-b361006ddb39`.
+- Go to `Lịch sử lịch hẹn`.
+- Rows such as `AP244803` with `time = null` and timestamped `date` should show the local start time instead of `--:--`.
+- Rows with explicit `time`, such as `09:00`, should keep that explicit time.
+
+Edge cases:
+- Plain `YYYY-MM-DD` dates without a time component should still show `--:--` if `time` is null.
+- ISO timestamps should display in the selected app timezone, defaulting to `Asia/Ho_Chi_Minh`.
+
+Regressions:
+- Date badges must not shift one day.
+- Customer profile appointment counts, doctor/team display, status badges, and edit buttons should continue to render.
+
+Setup data and login state:
+- Use an authenticated admin session.
+- Use the current production customer URL `/customers/9a358608-c0c2-47e5-88c0-b361006ddb39` or another customer with migrated appointments where `time` is null and `date` contains a timestamp.
+
+---
+
 # TestSprite Plan: Appointment Export Time Preservation
 
 Feature/edit name: Appointment Export Time Preservation

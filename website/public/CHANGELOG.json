@@ -1,5 +1,25 @@
 [
   {
+    "version": "0.31.11",
+    "date": "2026-05-08",
+    "commit": "93367a34",
+    "highlights": "Customer appointment history shows start times from timestamp-only appointments",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": []
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
     "version": "0.31.10",
     "date": "2026-05-08",
     "commit": "8665c860",
