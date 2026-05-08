@@ -32,7 +32,7 @@ router.get('/', requirePermission('website.view'), async (req, res) => {
       paramCount++;
       sql += ` AND ${accentInsensitiveSearchCondition(['title', 'slug'], paramCount, paramCount + 1)}`;
       params.push(`%${String(search).trim()}%`, `%${normalizeVietnamese(search)}%`);
-      paramCount++;
+      paramCount += 2;
     }
 
     sql += ' ORDER BY updated_at DESC';

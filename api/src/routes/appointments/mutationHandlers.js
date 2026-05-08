@@ -185,6 +185,18 @@ async function updateAppointment(req, res) {
       }
     }
 
+    if (assistantId !== undefined && assistantId !== null) {
+      if (!isValidUUID(assistantId)) {
+        return errorResponse(res, 400, 'INVALID_ASSISTANT_ID', 'assistantId must be a valid UUID');
+      }
+    }
+
+    if (dentalAideId !== undefined && dentalAideId !== null) {
+      if (!isValidUUID(dentalAideId)) {
+        return errorResponse(res, 400, 'INVALID_DENTAL_AIDE_ID', 'dentalAideId must be a valid UUID');
+      }
+    }
+
     if (state !== undefined && !VALID_STATES.includes(state)) {
       return errorResponse(res, 400, 'INVALID_STATE', `state must be one of: ${VALID_STATES.join(', ')}`);
     }
@@ -205,6 +217,14 @@ async function updateAppointment(req, res) {
     // Check foreign key constraints after validation and existence check
     if (doctorId !== undefined && doctorId !== null && !(await foreignKeyExists('employees', doctorId))) {
       return errorResponse(res, 404, 'DOCTOR_NOT_FOUND', 'Doctor with given doctorId does not exist');
+    }
+
+    if (assistantId !== undefined && assistantId !== null && !(await foreignKeyExists('employees', assistantId))) {
+      return errorResponse(res, 404, 'ASSISTANT_NOT_FOUND', 'Assistant with given assistantId does not exist');
+    }
+
+    if (dentalAideId !== undefined && dentalAideId !== null && !(await foreignKeyExists('employees', dentalAideId))) {
+      return errorResponse(res, 404, 'DENTAL_AIDE_NOT_FOUND', 'Dental aide with given dentalAideId does not exist');
     }
 
     // Build update fields

@@ -14,7 +14,7 @@ describe('search utilities', () => {
     const condition = accentInsensitiveSearchCondition(['p.name', 'p.ref'], 1);
 
     expect(condition).toContain('p.name ILIKE $1');
-    expect(condition).toContain('TRANSLATE(COALESCE(p.name::text');
+    expect(condition).toContain('TRANSLATE(LOWER(COALESCE(p.name::text');
     expect(condition).toContain('LIKE $2');
     expect(condition).toContain('p.ref ILIKE $1');
   });

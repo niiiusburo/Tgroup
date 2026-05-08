@@ -7,6 +7,12 @@ BEGIN
     IF to_regclass('public.group_permissions') IS NOT NULL
        AND to_regclass('public.permission_groups') IS NOT NULL THEN
         INSERT INTO public.group_permissions (group_id, permission)
+        SELECT pg.id, 'payment.add'
+        FROM public.permission_groups pg
+        WHERE pg.name IN ('Super Admin', 'Admin', 'Clinic Manager', 'Receptionist', 'Dentist', 'Dental Assistant', 'Assistant')
+        ON CONFLICT (group_id, permission) DO NOTHING;
+
+        INSERT INTO public.group_permissions (group_id, permission)
         SELECT pg.id, 'payment.void'
         FROM public.permission_groups pg
         WHERE pg.name IN ('Super Admin', 'Admin')
@@ -33,6 +39,12 @@ BEGIN
 
     IF to_regclass('dbo.group_permissions') IS NOT NULL
        AND to_regclass('dbo.permission_groups') IS NOT NULL THEN
+        INSERT INTO dbo.group_permissions (group_id, permission)
+        SELECT pg.id, 'payment.add'
+        FROM dbo.permission_groups pg
+        WHERE pg.name IN ('Super Admin', 'Admin', 'Clinic Manager', 'Receptionist', 'Dentist', 'Dental Assistant', 'Assistant')
+        ON CONFLICT (group_id, permission) DO NOTHING;
+
         INSERT INTO dbo.group_permissions (group_id, permission)
         SELECT pg.id, 'payment.void'
         FROM dbo.permission_groups pg

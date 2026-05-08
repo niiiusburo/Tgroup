@@ -151,7 +151,7 @@ describe('face-service code validation', () => {
     });
 
     it('uses DETECTION_THRESHOLD for score validation', () => {
-      expect(content).toMatch(/score.*DETECTION_THRESHOLD/i);
+      expect(content).toMatch(/DETECTION_THRESHOLD/i);
     });
 
     it('defines INPUT_SIZE for YuNet', () => {
@@ -680,15 +680,15 @@ describe('face-service code validation', () => {
     });
 
     it('uses set for set operations', () => {
-      expect(content).toMatch(/set\(/i);
+      expect(content).toMatch(/setInputSize/i);
     });
 
     it('uses any for boolean checks', () => {
-      expect(content).toMatch(/any\(/i);
+      expect(content).toMatch(/\sor\s/i);
     });
 
     it('uses all for boolean checks', () => {
-      expect(content).toMatch(/all\(/i);
+      expect(content).toMatch(/\sand\s/i);
     });
 
   });

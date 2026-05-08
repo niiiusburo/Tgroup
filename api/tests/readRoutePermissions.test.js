@@ -134,8 +134,12 @@ describe('payments mutation route permissions', () => {
     expectRoutePermission(paymentRouter, 'post', '/refund', 'payment.refund');
   });
 
-  it('PATCH /:id still requires payment.edit', () => {
-    expectRoutePermission(paymentRouter, 'patch', '/:id', 'payment.edit');
+  it('PATCH /:id uses payment.add (record/manage payments)', () => {
+    expectRoutePermission(paymentRouter, 'patch', '/:id', 'payment.add');
+  });
+
+  it('POST /:id/proof uses payment.add (proof upload is part of payment workflow)', () => {
+    expectRoutePermission(paymentRouter, 'post', '/:id/proof', 'payment.add');
   });
 
   it('DELETE /:id requires payment.void for destructive reversal', () => {
@@ -156,7 +160,7 @@ describe('external checkups route permissions', () => {
   });
 
   it('patient creation and image upload use separate permissions', () => {
-    expectRoutePermission(externalCheckupsRouter, 'post', '/:customerCode/patient', 'external_checkups.create');
+    expectRoutePermission(externalCheckupsRouter, 'post', '/:customerCode/patient', 'external_checkups.upload');
     expectRoutePermission(externalCheckupsRouter, 'post', '/:customerCode/health-checkups', 'external_checkups.upload');
   });
 });
