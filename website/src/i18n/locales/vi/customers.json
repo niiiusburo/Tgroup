@@ -137,7 +137,9 @@
     "faceRegistered": "Đã đăng ký khuôn mặt",
     "noFaceFound": "Không phát hiện khuôn mặt",
     "multipleFaces": "Phát hiện nhiều khuôn mặt",
-    "faceServiceUnavailable": "Dịch vụ nhận diện khuôn mặt không khả dụng"
+    "faceServiceUnavailable": "Dịch vụ nhận diện khuôn mặt không khả dụng",
+    "registered": "Khuôn mặt",
+    "registeredOn": "Đã đăng ký khuôn mặt: {{date}}"
   },
   "dialog": {
     "addReferrer": "Thêm ngưới giới thiệu mới",

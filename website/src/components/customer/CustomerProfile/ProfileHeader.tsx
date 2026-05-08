@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { User, Tag, Phone, Mail, MapPin, Calendar, Stethoscope } from 'lucide-react';
+import { User, Tag, Phone, Mail, MapPin, Calendar, Stethoscope, ScanFace } from 'lucide-react';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 
 interface ProfileHeaderProps {
@@ -27,6 +27,16 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
                 <User className="w-3 h-3" />
                 {profile.gender === 'male' ? 'Male' : 'Female'}
               </span>
+              {profile.faceRegisteredAt && (
+                <span
+                  data-testid="profile-face-registered"
+                  title={t('face.registeredOn', { date: profile.faceRegisteredAt.slice(0, 10), defaultValue: `Face registered: ${profile.faceRegisteredAt.slice(0, 10)}` }) as string}
+                  className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 ring-1 ring-orange-200"
+                >
+                  <ScanFace className="w-3 h-3" />
+                  {t('face.registered', 'Face ID')}
+                </span>
+              )}
             </div>
             {profile.code &&
             <span className="self-start inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
