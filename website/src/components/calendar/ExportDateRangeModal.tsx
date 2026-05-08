@@ -9,7 +9,7 @@ interface ExportDateRangeModalProps {
   readonly onApply: (dateFrom: string, dateTo: string) => void;
 }
 
-type PresetKey = '3days' | '7days' | 'week' | 'month' | '3weeks' | 'all';
+type PresetKey = '1day' | '7days' | 'week' | 'month' | '3weeks' | 'all';
 
 interface Preset {
   readonly key: PresetKey;
@@ -17,7 +17,7 @@ interface Preset {
 }
 
 const PRESETS: readonly Preset[] = [
-  { key: '3days', label: '3 ngày' },
+  { key: '1day', label: '1 ngày' },
   { key: '7days', label: '7 ngày' },
   { key: 'week', label: 'Tuần này' },
   { key: 'month', label: 'Tháng này' },
@@ -55,10 +55,8 @@ export function ExportDateRangeModal({
     let from = '';
 
     switch (key) {
-      case '3days': {
-        const d = new Date(today);
-        d.setDate(d.getDate() - 2);
-        from = formatDate(d, 'yyyy-MM-dd');
+      case '1day': {
+        from = formatDate(today, 'yyyy-MM-dd');
         break;
       }
       case '7days': {

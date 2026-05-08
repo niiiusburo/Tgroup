@@ -13,6 +13,8 @@ const COLUMNS = [
   { key: 'customerPhone', header: 'SĐT', width: 14 },
   { key: 'serviceName', header: 'Dịch vụ', width: 24 },
   { key: 'doctorName', header: 'Bác sĩ', width: 18 },
+  { key: 'assistantName', header: 'Phụ tá', width: 18 },
+  { key: 'dentalAideName', header: 'Trợ lý BS', width: 18 },
   { key: 'companyName', header: 'Chi nhánh', width: 20 },
   { key: 'type', header: 'Loại hẹn', width: 14 },
   { key: 'status', header: 'Trạng thái', width: 14 },
@@ -100,11 +102,15 @@ async function getRows(filters) {
       p.phone AS partnerphone,
       c.name AS companyname,
       doc.name AS doctorname,
+      asst.name AS assistantname,
+      da.name AS dentalaidename,
       prod.name AS productname
     FROM appointments a
     LEFT JOIN partners p ON p.id = a.partnerid
     LEFT JOIN companies c ON c.id = a.companyid
     LEFT JOIN employees doc ON doc.id = a.doctorid
+    LEFT JOIN employees asst ON asst.id = a.assistantid
+    LEFT JOIN employees da ON da.id = a.dentalaideid
     LEFT JOIN products prod ON prod.id = a.productid
     ${where}
     ORDER BY a.date DESC, a.time DESC NULLS LAST
@@ -205,6 +211,8 @@ async function build(filters, user) {
       customerPhone: r.partnerphone || '',
       serviceName: r.productname || '',
       doctorName: r.doctorname || '',
+      assistantName: r.assistantname || '',
+      dentalAideName: r.dentalaidename || '',
       companyName: r.companyname || '',
       type: getVisitTypeLabel(r.isrepeatcustomer),
       status: STATUS_LABELS[r.state] || r.state || '',

@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.31.12",
+    "date": "2026-05-08",
+    "commit": "e71092f7",
+    "highlights": "Appointments export adds Phụ tá and Trợ lý BS columns; date range preset 3 ngày → 1 ngày",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Appointments Excel export now includes Phụ tá (assistant) and Trợ lý BS (dental aide) columns alongside Bác sĩ (doctor)",
+          "Export date range modal: replaced 3 ngày preset with 1 ngày for single-day exports"
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": []
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
     "version": "0.31.11",
     "date": "2026-05-08",
     "commit": "93367a34",
