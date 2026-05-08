@@ -81,6 +81,8 @@ const PARTNER_BY_ID_SQL = `SELECT
   cskh_staff.name AS cskhname,
   p.salestaffid,
   sales_staff.name AS salestaffname,
+  p.face_subject_id,
+  p.face_registered_at,
   (SELECT COUNT(*) FROM appointments apt WHERE apt.partnerid = p.id) AS appointmentcount,
   (SELECT COUNT(*) FROM saleorders so WHERE so.partnerid = p.id AND so.isdeleted = false) AS ordercount,
   (SELECT COUNT(*) FROM dotkhams dk WHERE dk.partnerid = p.id AND dk.isdeleted = false) AS dotkhamcount

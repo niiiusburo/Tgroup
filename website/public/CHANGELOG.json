@@ -1,5 +1,29 @@
 [
   {
+    "version": "0.31.16",
+    "date": "2026-05-08",
+    "commit": "d19ec7c7",
+    "highlights": "Customer profile now shows a Face ID badge next to gender once a face is registered",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Profile header displays an orange 'Face ID' pill next to the Male/Female pill when face_registered_at is set, with a tooltip showing the registration date."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "GET /api/Partners/:id now returns face_subject_id and face_registered_at — these columns existed but were never selected, so the UI had no way to know a face was registered."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
     "version": "0.31.15",
     "date": "2026-05-08",
     "commit": "f8290aee",

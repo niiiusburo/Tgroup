@@ -137,7 +137,9 @@
     "faceRegistered": "Face registered",
     "noFaceFound": "No face detected",
     "multipleFaces": "More than one face detected",
-    "faceServiceUnavailable": "Face service is unavailable"
+    "faceServiceUnavailable": "Face service is unavailable",
+    "registered": "Face ID",
+    "registeredOn": "Face registered: {{date}}"
   },
   "dialog": {
     "addReferrer": "Add new referrer",

@@ -35,6 +35,7 @@ export interface CustomerProfileData {
   referraluserid: string | null;
   sourceid?: string | null;
   sourcename?: string | null;
+  faceRegisteredAt: string | null;
 }
 
 export interface CustomerProfileResult {
@@ -129,6 +130,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         referraluserid: partner.referraluserid ?? null,
         sourceid: partner.sourceid ?? null,
         sourcename: partner.sourcename ?? null,
+        faceRegisteredAt: partner.face_registered_at ?? null,
       };
 
       // Fetch appointment history for this customer

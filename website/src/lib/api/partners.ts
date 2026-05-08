@@ -59,6 +59,8 @@ export interface ApiPartner {
   personalidentitycard: string | null;
   personaltaxcode: string | null;
   personaladdress: string | null;
+  face_subject_id?: string | null;
+  face_registered_at?: string | null;
 }
 
 export interface PartnerAggregates {
