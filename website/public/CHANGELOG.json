@@ -2,7 +2,7 @@
   {
     "version": "0.31.17",
     "date": "2026-05-08",
-    "commit": "pending",
+    "commit": "27b7aeb6",
     "highlights": "Wait timer is timezone-safe and no longer dated from a previous day; Overview \"Đang hẹn\" label disambiguated from Calendar's \"Đang chờ\".",
     "sections": [
       {
