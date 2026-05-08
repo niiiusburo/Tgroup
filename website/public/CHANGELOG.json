@@ -1,5 +1,31 @@
 [
   {
+    "version": "0.31.17",
+    "date": "2026-05-08",
+    "commit": "pending",
+    "highlights": "Wait timer is timezone-safe and no longer dated from a previous day; Overview \"Đang hẹn\" label disambiguated from Calendar's \"Đang chờ\".",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Calendar/Overview wait timer no longer gets stuck at 0s when the patient was checked in on a previous day or when the browser timezone differs from the configured app timezone. Both surfaces now feed the WaitTimer the API's ISO datetimearrived/datetimeseated directly instead of round-tripping through a lossy 'HH:mm' localStorage cache.",
+          "Removed the per-appointment 'HH:mm' arrival cache that could carry yesterday's wall-clock value into today's reference date, producing a future arrival time and clamping wait to 0."
+        ]
+      },
+      {
+        "title": "UX",
+        "items": [
+          "Right-side Today's Appointments panel now labels not-yet-arrived rows as 'Đang hẹn' / 'Scheduled' instead of 'Đang chờ' / 'Pending', removing the collision with Calendar's waiting state.",
+          "Overview now refreshes on window focus and every 60s while visible, so status changes made in another tab/window appear without a manual reload."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
     "version": "0.31.16",
     "date": "2026-05-08",
     "commit": "d19ec7c7",

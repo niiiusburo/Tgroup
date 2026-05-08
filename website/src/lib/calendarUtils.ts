@@ -5,7 +5,6 @@
 import { type CalendarAppointment } from '@/data/mockCalendar';
 import { type ApiAppointment } from '@/lib/api';
 import { apiStateToPhase } from './appointmentStatusMapping';
-import { getStoredArrivalTime } from './arrivalTimeStorage';
 
 /**
  * Calculate end time given a start time and duration in minutes
@@ -108,13 +107,15 @@ export function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppoin
   const dateStr = apt.date ? utcToLocalDateStr(apt.date) : '';
   const startTime = apt.time || '09:00';
   const endTime = calculateEndTime(startTime, apt.timeexpected);
-  const storedArrival = getStoredArrivalTime(apt.id);
   const phase = apiStateToPhase(apt.state);
+  // Use the API's ISO timestamps directly. WaitTimer accepts ISO and computes
+  // the diff in absolute UTC ms — this is timezone-safe and avoids stale
+  // "HH:mm" cache entries from previous days.
   const arrivalTime = phase === 'waiting' || phase === 'in-treatment' || phase === 'done'
-    ? storedArrival ?? extractTimeFromTimestamp(apt.datetimearrived)
+    ? apt.datetimearrived ?? null
     : null;
   const treatmentStartTime = phase === 'in-treatment' || phase === 'done'
-    ? extractTimeFromTimestamp(apt.datetimeseated)
+    ? apt.datetimeseated ?? null
     : null;
 
   return {
@@ -146,12 +147,3 @@ export function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppoin
   };
 }
 
-function extractTimeFromTimestamp(ts: string | null | undefined): string | null {
-  if (!ts) return null;
-  const date = new Date(ts);
-  if (Number.isNaN(date.getTime())) return null;
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
-  return `${hours}:${minutes}:${seconds}`;
-}

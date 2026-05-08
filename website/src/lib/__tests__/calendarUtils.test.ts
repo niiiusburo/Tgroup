@@ -1,10 +1,6 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { mapApiAppointmentToCalendar } from '../calendarUtils';
 import type { ApiAppointment } from '../api';
-
-vi.mock('../arrivalTimeStorage', () => ({
-  getStoredArrivalTime: vi.fn(() => null),
-}));
 
 function appointment(overrides: Partial<ApiAppointment>): ApiAppointment {
   return {
@@ -57,11 +53,13 @@ describe('mapApiAppointmentToCalendar', () => {
   it('uses the staff arrival timestamp for arrived appointments', () => {
     const mapped = mapApiAppointmentToCalendar(appointment({
       state: 'arrived',
-      datetimearrived: '2024-01-01T09:17:22',
+      datetimearrived: '2024-01-01T09:17:22.000Z',
     }));
 
     expect(mapped.status).toBe('arrived');
-    expect(mapped.arrivalTime).toBe('09:17:22');
+    // ISO timestamp passed through unchanged so WaitTimer can compute the
+    // diff in absolute UTC ms regardless of browser timezone.
+    expect(mapped.arrivalTime).toBe('2024-01-01T09:17:22.000Z');
     expect(mapped.treatmentStartTime).toBeNull();
   });
 });

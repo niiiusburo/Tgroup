@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchAppointments, updateAppointment, type ApiAppointment } from '@/lib/api';
 import { useTimezone } from '@/contexts/TimezoneContext';
-import { getStoredArrivalTime, setStoredArrivalTime } from '@/lib/arrivalTimeStorage';
 import { normalizeText } from '@/lib/utils';
 
 /**
@@ -109,8 +108,10 @@ function mapApiToOverview(
   const checkInStatus: CheckInStatus | null = topStatus === 'arrived'
     ? (mapStateToCheckInStatus(apt.state) ?? 'waiting')
     : null;
+  // ISO timestamp from API — WaitTimer parses ISO directly, so the wait diff
+  // is computed in absolute UTC ms regardless of browser timezone.
   const arrivalTime = topStatus === 'arrived'
-    ? getStoredArrivalTime(apt.id) ?? apt.datetimearrived ?? apt.lastupdated
+    ? apt.datetimearrived ?? null
     : null;
   return {
     id: apt.id,
@@ -228,15 +229,32 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
     loadAppointments();
   }, [loadAppointments, timezone]);
 
-  // Refresh appointments when the tab becomes visible again
+  // Refresh appointments when tab becomes visible OR window regains focus —
+  // covers both tab-switch and multi-window setups where users edit status
+  // in another window (Calendar) and expect Overview to catch up.
   useEffect(() => {
-    const handleVisibilityChange = () => {
+    const handleRefresh = () => {
       if (document.visibilityState === 'visible') {
         loadAppointments();
       }
     };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleRefresh);
+    window.addEventListener('focus', handleRefresh);
+    return () => {
+      document.removeEventListener('visibilitychange', handleRefresh);
+      window.removeEventListener('focus', handleRefresh);
+    };
+  }, [loadAppointments]);
+
+  // Periodic refresh while the tab is visible — keeps the dashboard in sync
+  // with status changes made elsewhere without needing a manual reload.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadAppointments();
+      }
+    }, 60_000);
+    return () => clearInterval(interval);
   }, [loadAppointments]);
 
   // ─── Search states ─────────────────────────────────────────────
@@ -319,9 +337,8 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
   // ─── Actions ───────────────────────────────────────────────────
   const markArrived = useCallback(async (id: string) => {
     try {
-      await updateAppointment(id, { state: 'arrived' });
-      const arrivalTime = formatDate(new Date(), 'HH:mm:ss');
-      setStoredArrivalTime(id, arrivalTime);
+      const updated = await updateAppointment(id, { state: 'arrived' });
+      const arrivalTime = updated.datetimearrived ?? new Date().toISOString();
       setAppointments((prev) =>
         prev.map((a) =>
           a.id === id ? { ...a, topStatus: 'arrived' as const, checkInStatus: 'waiting' as const, arrivalTime, treatmentStartTime: null } : a,
@@ -330,7 +347,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
     } catch (error) {
       console.error('Failed to mark arrived:', error);
     }
-  }, [formatDate]);
+  }, []);
 
   const markCancelled = useCallback(async (id: string) => {
     try {
@@ -353,8 +370,10 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
         'in-treatment': 'in Examination',
         done: 'done',
       };
-      await updateAppointment(id, { state: stateMap[status] });
-      const treatmentStartTime = status === 'waiting' ? null : formatDate(new Date(), 'HH:mm:ss');
+      const updated = await updateAppointment(id, { state: stateMap[status] });
+      const treatmentStartTime = status === 'waiting'
+        ? null
+        : updated.datetimeseated ?? new Date().toISOString();
       setAppointments((prev) =>
         prev.map((a) =>
           a.id === id ? { ...a, checkInStatus: status, treatmentStartTime } : a,

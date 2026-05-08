@@ -151,6 +151,10 @@ describe('useOverviewAppointments search', () => {
   });
 
   it('starts treatment timer from staff action time', async () => {
+    vi.mocked(api.updateAppointment).mockResolvedValueOnce({
+      datetimeseated: '2024-01-01T09:34:56.000Z',
+    } as any);
+
     const { result } = renderHook(() => useOverviewAppointments('c1'));
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -162,7 +166,7 @@ describe('useOverviewAppointments search', () => {
     expect(api.updateAppointment).toHaveBeenCalledWith('a1', { state: 'in Examination' });
     expect(result.current.appointments.find((apt) => apt.id === 'a1')).toMatchObject({
       checkInStatus: 'in-treatment',
-      treatmentStartTime: '12:34:56',
+      treatmentStartTime: '2024-01-01T09:34:56.000Z',
     });
   });
 });

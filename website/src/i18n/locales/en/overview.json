@@ -54,7 +54,7 @@
     "arrived": "Arrived",
     "completed": "Completed",
     "cancelled": "Cancelled",
-    "pending": "Pending"
+    "pending": "Scheduled"
   },
   "subtitle": "Dashboard overview",
   "todayScheduleTitle": "Today's Schedule",

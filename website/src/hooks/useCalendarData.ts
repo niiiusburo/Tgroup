@@ -3,7 +3,6 @@ import { type CalendarAppointment } from '@/data/mockCalendar';
 import { fetchAppointments, updateAppointment } from '@/lib/api';
 import { useTimezone } from '@/contexts/TimezoneContext';
 import { PHASE_TO_API_STATE, type CalendarPhase } from '@/lib/appointmentStatusMapping';
-import { setStoredArrivalTime } from '@/lib/arrivalTimeStorage';
 import { normalizeText } from '@/lib/utils';
 import { mapApiAppointmentToCalendar } from '@/lib/calendarUtils';
 import type { AppointmentStatus } from '@/types/appointment';
@@ -193,15 +192,14 @@ export function useCalendarData(selectedLocationId?: string) {
   const updateAppointmentStatus = useCallback(async (id: string, phase: CalendarPhase) => {
     try {
       await updateAppointment(id, { state: PHASE_TO_API_STATE[phase] });
-      if (phase === 'waiting') {
-        const arrivalTime = formatDate(new Date(), 'HH:mm');
-        setStoredArrivalTime(id, arrivalTime);
-      }
+      // The API resets datetimearrived on transitions into 'arrived' and the
+      // refetch below pulls the authoritative ISO timestamp — no local cache
+      // needed.
       await loadAppointments();
     } catch (error) {
       console.error('Failed to update appointment status:', error);
     }
-  }, [loadAppointments, formatDate]);
+  }, [loadAppointments]);
 
   const markArrived = useCallback(async (id: string) => {
     await updateAppointmentStatus(id, 'waiting');
