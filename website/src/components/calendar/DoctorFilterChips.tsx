@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
 interface DoctorFilterChipsProps {
@@ -7,12 +8,14 @@ interface DoctorFilterChipsProps {
 }
 
 export function DoctorFilterChips({ doctors, selected, onToggle }: DoctorFilterChipsProps) {
+  const { t } = useTranslation('calendar');
   const isAll = selected.length === 0;
 
   return (
     <div className="flex flex-wrap gap-2">
       <button
         type="button"
+        data-testid="filter-doctor-all"
         onClick={() => isAll || onToggle('__ALL__')}
         className={cn(
           'px-3 py-1.5 text-sm font-medium rounded-full border transition-colors',
@@ -20,8 +23,7 @@ export function DoctorFilterChips({ doctors, selected, onToggle }: DoctorFilterC
           'bg-primary text-white border-primary' :
           'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
         )}>
-        
-
+        {t('smartFilter.allDoctors')}
       </button>
       {doctors.map((doc) => {
         const isSelected = selected.includes(doc.name);

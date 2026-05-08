@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.31.13",
+    "date": "2026-05-08",
+    "commit": "70a2a788",
+    "highlights": "Calendar filter: doctor 'All' pill now shows 'Tất cả' label instead of rendering empty",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Calendar filter modal: the 'All' pill in the Bác sĩ section was rendering as an empty orange circle. Now displays 'Tất cả' (or 'All' in English), matching the styling of the Trạng thái and Nhãn màu sections."
+        ]
+      },
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
     "version": "0.31.12",
     "date": "2026-05-08",
     "commit": "e71092f7",
