@@ -94,8 +94,8 @@ function addPaymentSearchCondition({ conditions, params, search, paramIdx }) {
   const searchCondition = conditions.pop();
   if (conditions.length !== before || !searchCondition) return nextParamIdx;
 
-  const rawParamIdx = paramIdx;
-  const normalizedParamIdx = paramIdx + 1;
+  const rawParamIdx = nextParamIdx - 2;
+  const normalizedParamIdx = nextParamIdx - 1;
   conditions.push(`(${searchCondition} OR EXISTS (
     SELECT 1
     FROM payment_allocations search_pa

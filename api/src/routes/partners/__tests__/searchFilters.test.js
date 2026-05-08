@@ -71,7 +71,7 @@ describe('applyPartnerSearchFilter', () => {
 
     expect(nextParam).toBe(3);
     expect(params).toEqual(['%quyen%', '%quyen%']);
-    expect(conditions[0]).toContain('TRANSLATE(COALESCE(p.name::text');
+    expect(conditions[0]).toContain('TRANSLATE(LOWER(COALESCE(p.name::text');
     expect(conditions[0]).toContain('LIKE $2');
   });
 });

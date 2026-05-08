@@ -209,7 +209,7 @@ router.post("/refund", requirePermission('payment.refund'), async (req, res) => 
 });
 
 // PATCH /api/Payments/:id - Update payment
-router.patch("/:id", requirePermission('payment.edit'), validate(PaymentUpdateSchema), async (req, res) => {
+router.patch("/:id", requirePermission('payment.add'), validate(PaymentUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -360,7 +360,7 @@ router.post("/:id/void", requirePermission('payment.void'), async (req, res) => 
 });
 
 // POST /api/Payments/:id/proof - Upload payment proof image
-router.post("/:id/proof", requirePermission('payment.edit'), async (req, res) => {
+router.post("/:id/proof", requirePermission('payment.add'), async (req, res) => {
   try {
     const { id } = req.params;
     const { proofImageBase64, qrDescription } = req.body;

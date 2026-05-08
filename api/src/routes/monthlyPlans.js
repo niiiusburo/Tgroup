@@ -47,7 +47,7 @@ router.get('/', requirePermission('payment.view'), async (req, res) => {
       paramCount++;
       sql += ` AND ${accentInsensitiveSearchCondition(['p.name', 'mp.treatment_description'], paramCount, paramCount + 1)}`;
       params.push(`%${String(search).trim()}%`, `%${normalizeVietnamese(search)}%`);
-      paramCount++;
+      paramCount += 2;
     }
 
     sql += ' ORDER BY mp.created_at DESC';

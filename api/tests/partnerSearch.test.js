@@ -12,8 +12,8 @@ describe('partner customer search filters', () => {
       paramIdx: 1,
     });
 
-    expect(nextParamIdx).toBe(2);
-    expect(params).toEqual(['%T8250%']);
+    expect(nextParamIdx).toBe(3);
+    expect(params).toEqual(['%T8250%', '%t8250%']);
     expect(conditions[0]).toContain('p.ref ILIKE $1');
     expect(conditions[0]).not.toContain('regexp_replace');
   });
@@ -29,9 +29,9 @@ describe('partner customer search filters', () => {
       paramIdx: 1,
     });
 
-    expect(nextParamIdx).toBe(3);
-    expect(params).toEqual(['%8250%', '%8250%']);
+    expect(nextParamIdx).toBe(4);
+    expect(params).toEqual(['%8250%', '%8250%', '%8250%']);
     expect(conditions[0]).toContain('p.ref ILIKE $1');
-    expect(conditions[0]).toContain("regexp_replace(COALESCE(p.phone, ''), '[^0-9]', '', 'g') LIKE $2");
+    expect(conditions[0]).toContain("regexp_replace(COALESCE(p.phone, ''), '[^0-9]', '', 'g') LIKE $3");
   });
 });

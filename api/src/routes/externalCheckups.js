@@ -147,7 +147,7 @@ router.get('/:customerCode', requireAuth, requirePermission('external_checkups.v
  * POST /api/ExternalCheckups/:customerCode/patient
  * Create a Hosoonline patient using the local TDental code plus phone suffix.
  */
-router.post('/:customerCode/patient', requireAuth, requirePermission('external_checkups.create'), async (req, res) => {
+router.post('/:customerCode/patient', requireAuth, requirePermission('external_checkups.upload'), async (req, res) => {
   try {
     const result = await createHosoPatientForLocalCustomer(req.params.customerCode);
     return res.status(result.created ? 201 : 200).json(result);
@@ -183,8 +183,8 @@ router.post('/:customerCode/health-checkups', requireAuth, requirePermission('ex
     const hosoCode = await resolveHosoPatientCode(customerCode);
     const body = req.body || {};
 
-    if (!(body.title || body.service) || !body.doctor) {
-      return res.status(400).json({ error: 'service and doctor are required' });
+    if (!(body.title || body.service) || !body.doctor || !body.date) {
+      return res.status(400).json({ error: 'service, doctor, and date are required' });
     }
 
     const form = new FormData();
