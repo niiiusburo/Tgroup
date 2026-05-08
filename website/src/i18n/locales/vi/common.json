@@ -327,7 +327,7 @@
   "noServicesFound": "Không tìm thấy dịch vụ",
   "visitCount": "lượt",
   "searchByNameOrRole": "Tìm theo tên hoặc vai trò...",
-  "clearSelection": "Bỏ chọn",
+  "clearSelection": "Không chọn (None)",
   "noDoctorsFound": "Không tìm thấy bác sĩ",
   "clearDoctorFilter": "Xóa lọc bác sĩ",
   "saving": "Đang lưu...",

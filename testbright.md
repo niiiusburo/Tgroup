@@ -259,7 +259,7 @@ User roles:
 
 Happy paths:
 - Open an appointment or service with a selected doctor, assistant, or TLBS.
-- Open the staff dropdown and click `Bỏ chọn`.
+- Open the staff dropdown and click `Không chọn (None)`.
 - Save and reopen the record; the cleared field should stay empty.
 - Select another staff member after clearing and save successfully.
 
@@ -276,6 +276,9 @@ Regressions:
 Setup data and login state:
 - Use an authenticated admin session.
 - Use any appointment or service record that already has doctor, assistant, or TLBS selected.
+
+Fix implemented:
+- The shared staff selector now shows the `Không chọn (None)` clear row whenever clearing is enabled, even if the current record has a stale selected id that does not resolve in the active staff list.
 
 ---
 

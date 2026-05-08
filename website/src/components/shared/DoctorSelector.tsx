@@ -114,7 +114,7 @@ export function DoctorSelector({
             </div>
           </div>
           <div className="max-h-48 overflow-y-auto py-1">
-            {allowClear && selectedEmployee &&
+            {allowClear &&
           <button
             key="__clear__"
             type="button"
@@ -123,8 +123,11 @@ export function DoctorSelector({
               setIsOpen(false);
               setSearchTerm('');
             }}
-            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 border-b border-gray-100">
-            {t('clearSelection', 'Bỏ chọn')}
+            className={`
+                    w-full text-left px-4 py-2 text-sm font-medium transition-colors duration-150 border-b border-gray-100
+                    ${selectedEmployee ? 'text-red-600 hover:bg-red-50' : 'text-gray-500 hover:bg-gray-50'}
+                  `}>
+            {t('clearSelection', 'Không chọn (None)')}
           </button>
           }
             {filteredEmployees.length === 0 ?
