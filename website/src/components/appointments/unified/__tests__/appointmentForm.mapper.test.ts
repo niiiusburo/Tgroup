@@ -84,6 +84,32 @@ describe('formDataToApiPayload', () => {
     expect(parsed).not.toHaveProperty('doctorid');
     expect(parsed).not.toHaveProperty('productid');
   });
+
+  it('should keep explicit null staff fields so edit saves can clear them', () => {
+    const data = {
+      ...makeValidFormData(),
+      doctorId: null,
+      doctorName: null,
+      assistantId: null,
+      assistantName: null,
+      dentalAideId: null,
+      dentalAideName: null,
+    };
+
+    const payload = formDataToApiPayload(data);
+    const parsed = JSON.parse(JSON.stringify(payload));
+
+    expect(parsed).toEqual(
+      expect.objectContaining({
+        doctorid: null,
+        doctorname: null,
+        assistantid: null,
+        assistantname: null,
+        dentalaideid: null,
+        dentalaidename: null,
+      }),
+    );
+  });
 });
 
 describe('apiAppointmentToFormData', () => {

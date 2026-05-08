@@ -45,6 +45,8 @@ export interface ProfileTabProps {
   checkupsError: string | null;
   onRefetchCheckups?: () => void;
   canViewHealthCheckups: boolean;
+  canCreateExternalPatient: boolean;
+  canUploadHealthCheckups: boolean;
 }
 
 export interface RecordsTabProps {
@@ -55,8 +57,8 @@ export interface RecordsTabProps {
   onCreateService: () => void;
   onEditService: (service: CustomerService) => void;
   onDeleteService?: (service: CustomerService) => void;
-  onPayForService: (service: CustomerService) => void;
-  onDeletePayment: (id: string) => void;
+  onPayForService?: (service: CustomerService) => void;
+  onDeletePayment?: (id: string) => void;
   onUpdateServiceStatus: (serviceId: string, status: string) => Promise<void>;
 }
 
@@ -71,11 +73,11 @@ export interface PaymentTabProps {
   depositBalance: DepositBalance;
   onAddDeposit?: (amount: number, method: 'cash' | 'bank_transfer' | 'vietqr', date?: string, note?: string) => Promise<void>;
   onAddRefund?: (amount: number, method: 'cash' | 'bank_transfer', date?: string, note?: string) => Promise<void>;
-  onVoidDeposit: (id: string) => Promise<void>;
-  onDeleteDeposit: (id: string) => Promise<void>;
-  onEditDeposit: (id: string, data: Partial<{ amount: number; method: 'cash' | 'bank_transfer'; notes: string; paymentDate: string }>) => Promise<void>;
+  onVoidDeposit?: (id: string) => Promise<void>;
+  onDeleteDeposit?: (id: string) => Promise<void>;
+  onEditDeposit?: (id: string, data: Partial<{ amount: number; method: 'cash' | 'bank_transfer'; notes: string; paymentDate: string }>) => Promise<void>;
   onRefreshDeposits?: () => void;
-  onDeletePayment: (id: string) => void;
+  onDeletePayment?: (id: string) => void;
 }
 
 export interface OrchestratorProps {

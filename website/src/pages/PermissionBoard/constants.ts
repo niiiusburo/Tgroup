@@ -6,7 +6,7 @@ export const MODULES = [
   { name: 'Customers', actions: ['View', 'View All', 'Add', 'Edit', 'Delete', 'Hard Delete'] },
   { name: 'Appointments', actions: ['View', 'Add', 'Edit'] },
   { name: 'Services', actions: ['View', 'Add', 'Edit'] },
-  { name: 'Payment', actions: ['View', 'Add', 'Refund'] },
+  { name: 'Payment', actions: ['View', 'Add', 'Edit', 'Refund', 'Void'] },
   { name: 'Employees', actions: ['View', 'Add', 'Edit'] },
   { name: 'Locations', actions: ['View', 'Add', 'Edit'] },
   { name: 'Reports', actions: ['View', 'Export'] },
@@ -16,7 +16,7 @@ export const MODULES = [
   { name: 'Permissions', actions: ['View', 'Edit'] },
   { name: 'Relationships', actions: ['View'] },
   { name: 'Website', actions: ['View', 'Edit'] },
-  { name: 'External Checkups', actions: ['View', 'Create'] },
+  { name: 'External Checkups', actions: ['View', 'Create', 'Upload'] },
 ] as const;
 
 export const PERMISSION_DESCRIPTIONS: Record<string, string> = {
@@ -42,7 +42,9 @@ export const PERMISSION_DESCRIPTIONS: Record<string, string> = {
   'services.edit': 'descriptions.services.edit',
   'payment.view': 'descriptions.payment.view',
   'payment.add': 'descriptions.payment.add',
+  'payment.edit': 'descriptions.payment.edit',
   'payment.refund': 'descriptions.payment.refund',
+  'payment.void': 'descriptions.payment.void',
   'reports.view': 'descriptions.reports.view',
   'reports.export': 'descriptions.reports.export',
   'settings.view': 'descriptions.settings.view',
@@ -58,6 +60,7 @@ export const PERMISSION_DESCRIPTIONS: Record<string, string> = {
   'website.edit': 'descriptions.website.edit',
   'external_checkups.view': 'descriptions.externalCheckups.view',
   'external_checkups.create': 'descriptions.externalCheckups.create',
+  'external_checkups.upload': 'descriptions.externalCheckups.upload',
   'customers.hard_delete': 'descriptions.customers.hardDelete',
 };
 

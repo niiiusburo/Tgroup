@@ -71,6 +71,7 @@ affected_by:
   - Dead route api/src/routes/services.js must not be revived accidentally
 impact_tests:
   - website/src/__tests__/ServiceCatalog.test.tsx
+  - website/src/components/services/serviceFormToothQuantity.test.ts
   - website/e2e/team-bravo-records.spec.ts
 risk_level: high
 notes:
@@ -80,3 +81,4 @@ notes:
   - /api/ProductCategories groups duplicate migrated category UUIDs by display name for the catalog sidebar; /api/Products category filtering expands the selected display group to all matching category UUIDs.
   - Service catalog and patient treatment searches must remain accent-insensitive for Vietnamese service, category, doctor, and customer names.
   - Customer profile service edits patch the parent sale order but must also persist rendered line fields such as `saleorderlines.productuomqty`, `tooth_numbers`, and `tooth_comment` because the `Phiếu khám` table is sourced from `/api/SaleOrders/lines`.
+  - Tooth picker saves should sync quantity to selected tooth count only while quantity is still following the picker/default count; manual quantity overrides must be preserved.

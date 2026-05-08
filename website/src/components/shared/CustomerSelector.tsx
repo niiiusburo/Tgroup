@@ -52,6 +52,7 @@ export function CustomerSelector({
     return customers.filter(
       (c) =>
       normalizeText(c.name).includes(norm) ||
+      normalizeText(c.code).includes(norm) ||
       normalizeText(c.phone).includes(norm) ||
       normalizeText(c.email).includes(norm) ||
       (digitSearch.length > 0 && normalizePhone(c.phone).includes(digitSearch))
@@ -118,7 +119,7 @@ export function CustomerSelector({
               type="text"
               value={searchTerm}
               onChange={(e) => updateSearchTerm(e.target.value)}
-              placeholder={t('searchByNamePhoneEmail', 'Tìm theo tên, SĐT, email...')}
+              placeholder={t('searchByNameCodePhoneEmail', 'Tìm theo tên, mã KH, SĐT, email...')}
               className="w-full pl-8 pr-3 py-1.5 text-sm rounded-md border border-gray-200 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary" />
             
             </div>

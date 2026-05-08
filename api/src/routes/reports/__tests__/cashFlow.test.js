@@ -15,6 +15,7 @@ const request = require('supertest');
 const { query } = require('../../../db');
 const { resolveEffectivePermissions } = require('../../../services/permissionService');
 const cashFlowRouter = require('../cashFlow');
+const reportsRouter = require('../../reports');
 
 const {
   classifyCashFlowRow,
@@ -33,6 +34,17 @@ function makeApp() {
     next();
   });
   app.use('/api/Reports', cashFlowRouter);
+  return app;
+}
+
+function makeParentReportsApp() {
+  const app = express();
+  app.use(express.json());
+  app.use((req, _res, next) => {
+    req.user = { employeeId: '33333333-3333-4333-8333-333333333333' };
+    next();
+  });
+  app.use('/api/Reports', reportsRouter);
   return app;
 }
 
@@ -126,6 +138,26 @@ describe('reports cash-flow aggregation', () => {
     expect(sql).toContain('dbo.payment_allocations');
     expect(sql).toContain('COALESCE(report_so.companyid, report_dk.companyid) = ANY($3::uuid[])');
     expect(params).toEqual(['2026-05-01', '2026-05-31', [LOC_A]]);
+  });
+
+  it('mounts cash-flow summary through the parent reports router', async () => {
+    resolveEffectivePermissions.mockResolvedValue({
+      groupName: 'Admin',
+      effectivePermissions: ['reports.view'],
+      locations: [],
+    });
+    query.mockResolvedValueOnce([]);
+
+    const res = await request(makeParentReportsApp())
+      .post('/api/Reports/cash-flow/summary')
+      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toMatchObject({
+      moneyIn: 0,
+      moneyOut: 0,
+      netCashFlow: 0,
+    });
   });
 
   it('allows the Admin group to run all-location cash-flow reports without wildcard or location rows', async () => {

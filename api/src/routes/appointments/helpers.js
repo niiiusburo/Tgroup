@@ -27,10 +27,16 @@ async function foreignKeyExists(table, id) {
   return result.length > 0;
 }
 
+function readBodyField(body, camelKey, lowerKey = camelKey.toLowerCase()) {
+  if (Object.prototype.hasOwnProperty.call(body, camelKey)) return body[camelKey];
+  return body[lowerKey];
+}
+
 module.exports = {
   errorResponse,
   foreignKeyExists,
   isValidISODate,
   isValidUUID,
+  readBodyField,
   VALID_STATES,
 };

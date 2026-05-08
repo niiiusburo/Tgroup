@@ -1,3 +1,83 @@
+# TestSprite Task Ledger
+
+When TestSprite runs, treat this file as the task list. For each relevant feature/edit below, execute the listed checks and change each execution item from `PENDING` to `PASS` or `FAIL` with one short evidence note. Use this format:
+
+- [ ] PENDING: Check name.
+- [x] PASS: Check name - evidence.
+- [ ] FAIL: Check name - failure evidence or reproduction.
+
+Do not remove failed checks until the defect is fixed and rerun.
+
+---
+
+# TestSprite Plan: Reporting And Permission Feedback Completion
+
+Feature/edit name: Revenue Recognition Reports, Cash Flow Report, Payment Permission Split, and Ho so Online Upload Gate
+
+Changed URLs and API routes:
+- `/reports/revenue`
+- `/reports/services`
+- `/customers/:id`
+- `/permissions`
+- `POST /api/Reports/revenue/summary`
+- `POST /api/Reports/revenue/trend`
+- `POST /api/Reports/revenue/by-location`
+- `POST /api/Reports/revenue/by-doctor`
+- `POST /api/Reports/revenue/by-category`
+- `POST /api/Reports/services/breakdown`
+- `POST /api/Reports/cash-flow/summary`
+- `POST /api/Payments`
+- `POST /api/Payments/refund`
+- `DELETE /api/Payments/:id`
+- `POST /api/Payments/:id/void`
+- `GET /api/ExternalCheckups/:customerCode`
+- `POST /api/ExternalCheckups/:customerCode/patient`
+- `POST /api/ExternalCheckups/:customerCode/health-checkups`
+
+Affected data flows:
+- Revenue report paid totals now come from posted `payment_allocations` linked to treatment invoices instead of unpaid sale-order totals or deposits.
+- Deposits, refunds, deposit usage, and voided payments stay in cash-flow reporting and are excluded from revenue recognition.
+- Cash-flow summary is mounted through `/api/Reports/cash-flow/summary`.
+- Service/category/source report revenue uses posted payment allocations instead of listed service prices or unpaid order values.
+- Payment creation, refunds, and destructive void/delete actions use separate permission strings: `payment.add`, `payment.refund`, and `payment.void`.
+- Ho so Online view, patient creation, and image upload are split into `external_checkups.view`, `external_checkups.create`, and `external_checkups.upload`; the customer profile hides create/upload controls for view-only staff.
+
+User roles:
+- Super Admin/Admin with full reporting and permission access.
+- Receptionist or clinic staff with payment add/view but without destructive payment void permission.
+- Dentist/Dental Assistant or other clinic role with `external_checkups.view` but no upload permission.
+- Reporting staff with `reports.view`.
+
+TestSprite execution items:
+- [ ] PENDING: On `/reports/revenue`, verify summary paid totals match posted treatment payment allocations and do not count customer deposits.
+- [ ] PENDING: On `/reports/revenue`, verify trend, location, doctor, and category breakdowns show paid service revenue by payment date.
+- [ ] PENDING: On `/reports/services`, verify source/category revenue excludes unpaid listed treatment value and deposits.
+- [ ] PENDING: Call `POST /api/Reports/cash-flow/summary` and verify deposits, refunds, deposit usage, voided payments, money in/out, and net cash-flow are separated.
+- [ ] PENDING: With a user lacking `payment.void`, verify payment delete/void actions fail with 403 or are hidden where the UI has permission context.
+- [ ] PENDING: With a user lacking `external_checkups.upload`, open `/customers/:id` and verify Ho so Online images can be viewed but the add-checkup upload button is hidden.
+- [ ] PENDING: With a user that has `external_checkups.upload`, verify the add-checkup upload button appears and upload submits to `POST /api/ExternalCheckups/:customerCode/health-checkups`.
+- [ ] PENDING: Open `/permissions` and verify `payment.void` and `external_checkups.upload` are visible permission options with descriptions.
+
+Edge cases:
+- Partial payments split across multiple sale-order lines.
+- Overallocated imported payment allocation rows should not exceed the posted payment amount in service/person export-style calculations.
+- Deposit usage with `method = deposit` should not increase revenue.
+- Voided payments should stay out of recognized revenue and appear only as cash-flow adjustments.
+- Ho so Online patient missing state should not show create/upload controls unless the user has the matching permission.
+
+Regressions:
+- Existing `/reports/revenue` chart/table shapes remain compatible with the frontend.
+- Payment history, deposit list, and customer profile payment tabs still load for `payment.view` users.
+- Existing Hosoonline image proxy remains protected by `external_checkups.view`.
+- Existing permission-board role editing still saves unknown/new permission strings.
+
+Setup data and login state:
+- Use an authenticated admin session for full checks.
+- Use at least one scoped clinic role without `payment.void` and without `external_checkups.upload`.
+- Use customers with existing payments, deposits, and Ho so Online images.
+
+---
+
 # TestSprite Plan: Overview Wait Timer Arrival Timestamp Repair
 
 Feature/edit name: Overview Wait Timer Arrival Timestamp Repair

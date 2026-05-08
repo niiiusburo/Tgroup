@@ -19,7 +19,7 @@ router.get("/deposit-usage", requirePermission('payment.view'), listDepositUsage
 router.get("/:id", requirePermission('payment.view'), getPaymentById);
 
 // POST /api/Payments - Create a new payment with optional allocations
-router.post("/", requirePermission('payment.edit'), validate(PaymentCreateSchema), async (req, res) => {
+router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema), async (req, res) => {
   let client;
   try {
     let {
@@ -165,7 +165,7 @@ router.post("/", requirePermission('payment.edit'), validate(PaymentCreateSchema
 });
 
 // POST /api/Payments/refund - Create a refund (negative deposit payment)
-router.post("/refund", requirePermission('payment.edit'), async (req, res) => {
+router.post("/refund", requirePermission('payment.refund'), async (req, res) => {
   try {
     const { customer_id, amount, method, notes, payment_date } = req.body;
 
@@ -267,7 +267,7 @@ router.patch("/:id", requirePermission('payment.edit'), validate(PaymentUpdateSc
 });
 
 // DELETE /api/Payments/:id - Delete payment and reverse allocations
-router.delete("/:id", requirePermission('payment.edit'), async (req, res) => {
+router.delete("/:id", requirePermission('payment.void'), async (req, res) => {
   const { id } = req.params;
   const client = await pool.connect();
   try {
@@ -312,7 +312,7 @@ router.delete("/:id", requirePermission('payment.edit'), async (req, res) => {
 });
 
 // POST /api/Payments/:id/void - Void payment and reverse allocations
-router.post("/:id/void", requirePermission('payment.edit'), async (req, res) => {
+router.post("/:id/void", requirePermission('payment.void'), async (req, res) => {
   const { id } = req.params;
   const { reason } = req.body || {};
   const client = await pool.connect();

@@ -99,11 +99,11 @@
 | GET | `/deposits` | Perm:`payment.view` | `?customerId, dateFrom, dateTo, receiptNumber, type, limit, offset` | `{ items[], totalItems }` |
 | GET | `/deposit-usage` | Perm:`payment.view` | `?customerId, dateFrom, dateTo, limit, offset` | `{ items[], totalItems }` |
 | GET | `/:id` | Perm:`payment.view` | — | Payment with allocations |
-| POST | `/` | Perm:`payment.edit` | `{ customer_id, service_id, amount, method, notes, payment_date, reference_code, status, deposit_used, cash_amount, bank_amount, deposit_type, receipt_number, allocations[] }` | Created payment |
-| POST | `/refund` | Perm:`payment.edit` | `{ customer_id, amount, method, notes, payment_date }` | Created refund |
+| POST | `/` | Perm:`payment.add` | `{ customer_id, service_id, amount, method, notes, payment_date, reference_code, status, deposit_used, cash_amount, bank_amount, deposit_type, receipt_number, allocations[] }` | Created payment |
+| POST | `/refund` | Perm:`payment.refund` | `{ customer_id, amount, method, notes, payment_date }` | Created refund |
 | PATCH | `/:id` | Perm:`payment.edit` | `{ amount, method, notes, payment_date, reference_code, status, deposit_type, receipt_number }` | Updated payment |
-| DELETE | `/:id` | Perm:`payment.edit` | — | `{ success, id }` + reverses allocations |
-| POST | `/:id/void` | Perm:`payment.edit` | `{ reason }` | `{ success, payment }` + reverses allocations |
+| DELETE | `/:id` | Perm:`payment.void` | — | `{ success, id }` + reverses allocations |
+| POST | `/:id/void` | Perm:`payment.void` | `{ reason }` | `{ success, payment }` + reverses allocations |
 | POST | `/:id/proof` | Perm:`payment.edit` | `{ proofImageBase64, qrDescription }` | `{ success, proofId }` |
 
 ## Monthly Plans (`/api/MonthlyPlans`)
@@ -251,7 +251,7 @@ Export permissions are defined by `api/src/services/exports/exportRegistry.js`: 
 | GET | `/images/:imageName` | Perm:`external_checkups.view` | — | Proxied image bytes from Hosoonline appointment media |
 | GET | `/:customerCode` | Perm:`external_checkups.view` | — | External checkups list |
 | POST | `/:customerCode/patient` | Perm:`external_checkups.create` | — | Creates missing Hosoonline patient from local customer name, TDental code, and phone suffix |
-| POST | `/:customerCode/health-checkups` | Perm:`external_checkups.create` | FormData (`photos` repeated, required `service`/`doctor`, optional `date`/`description`/`nextAppointmentDate`/`nextDescription`) | Created checkups |
+| POST | `/:customerCode/health-checkups` | Perm:`external_checkups.upload` | FormData (`photos` repeated, required `service`/`doctor`, optional `date`/`description`/`nextAppointmentDate`/`nextDescription`) | Created checkups |
 
 Hosoonline uses a mixed current contract: if `HOSOONLINE_USERNAME` and `HOSOONLINE_PASSWORD` are configured, TGClinic logs in to Hosoonline, sends `Authorization: Bearer <token>` plus the returned cookie, searches appointments, and proxies `/api/appointments/image/:imageName`. Patient create/search uses the v2 API-key collection endpoints `/api/patients/_create` and `/api/patients/_search`; the bare `/api/patients` path remains reserved for the staff UI cookie-routed v1 behavior. If login credentials are absent, the route falls back to the older `HOSOONLINE_API_KEY` / `X-API-Key` patient health-checkup endpoints where still supported.
 

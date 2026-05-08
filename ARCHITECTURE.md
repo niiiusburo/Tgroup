@@ -23,6 +23,12 @@ Supporting material:
 
 When docs conflict, use the most specific current authority file. For schema, API, permission, and UI dependency rules, `product-map/contracts/dependency-rules.yaml` is mandatory.
 
+## 1.1 TestSprite Task Ledger For Features
+
+Every structural feature, feature addition, backend data-flow change, or user-facing feature edit must update the project-root `testbright.md` in the same change. The entry must name the feature/edit, list changed URLs or API routes, affected data flows, user roles, happy paths, edge cases, regressions, and setup/login data.
+
+`testbright.md` is the executable TestSprite task ledger, not a passive note file. When TestSprite is run, agents must read `testbright.md`, convert the relevant entry into checklist work, execute the listed checks, and mark each executed item as `PASS` or `FAIL` with short evidence. Testing expectations must not live only in chat summaries.
+
 ## 2. Current System Shape
 
 TGClinic is a local-first clinic operations dashboard with a React frontend, Express API, PostgreSQL database, Docker/VPS deployment, and optional external integrations.

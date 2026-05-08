@@ -34,7 +34,10 @@ export function AppointmentStaffFields({
           allowClear
           onChange={(employeeId) => {
             const emp = employees.find((e) => e.id === employeeId);
-            onChange({ doctorId: emp?.id, doctorName: emp?.name });
+            onChange({
+              doctorId: emp?.id ?? null,
+              doctorName: emp?.name ?? null,
+            });
           }}
           placeholder={t('appointments:form.selectDoctor')}
         />
@@ -52,7 +55,10 @@ export function AppointmentStaffFields({
           allowClear
           onChange={(employeeId) => {
             const emp = employees.find((e) => e.id === employeeId);
-            onChange({ assistantId: emp?.id, assistantName: emp?.name });
+            onChange({
+              assistantId: emp?.id ?? null,
+              assistantName: emp?.name ?? null,
+            });
           }}
           placeholder={t('appointments:form.selectAssistant')}
         />
@@ -70,7 +76,10 @@ export function AppointmentStaffFields({
           allowClear
           onChange={(employeeId) => {
             const emp = employees.find((e) => e.id === employeeId);
-            onChange({ dentalAideId: emp?.id, dentalAideName: emp?.name });
+            onChange({
+              dentalAideId: emp?.id ?? null,
+              dentalAideName: emp?.name ?? null,
+            });
           }}
           placeholder={t('appointments:form.selectDentalAide')}
         />

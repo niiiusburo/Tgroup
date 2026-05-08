@@ -34,7 +34,6 @@ endpoints:
   - PUT  /api/Appointments/:id
 ui_surfaces:
   - /calendar
-  - /appointments
   - TodaySchedule / TodayAppointments on Overview
   - AppointmentForm (modal)
   - EditAppointmentModal
@@ -56,8 +55,13 @@ affected_by:
 invariants:
   - Week/month calendar loading uses the calendar-mode appointment list with counts disabled so large appointment ranges do not trigger repeated aggregate queries.
   - Appointment and calendar searches must be accent-insensitive for Vietnamese staff input; unaccented terms such as `quyen` must match names and notes containing accents such as `Quyền`.
+  - Appointment edit saves must preserve explicit null staff fields so clearing doctor, assistant, or Trợ lý BS removes the stored assignment instead of omitting the field.
+  - Appointment customer selectors must search by customer code as well as name, phone, and email.
 impact_tests:
   - api/src/routes/appointments/__tests__/readHandlers.test.js
+  - api/src/routes/appointments/__tests__/mutationHandlers.test.js
+  - website/src/components/shared/CustomerSelector.test.tsx
+  - website/src/components/appointments/WaitTimer.test.tsx
   - website/src/hooks/__tests__/useCalendarData.pagination.test.ts
   - website/src/pages/Calendar.click.test.tsx
   - website/src/__tests__/appointment-form-edit.test.tsx

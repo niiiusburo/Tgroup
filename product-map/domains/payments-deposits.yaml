@@ -84,6 +84,7 @@ affected_by:
   - Changes to receipt number generation rules
   - Changes to VietQR library or bank BIN list
 impact_tests:
+  - api/tests/readRoutePermissions.test.js
   - website/e2e/team-charlie-payments.spec.ts
   - website/e2e/vietqr-payment.spec.ts
   - website/e2e/vps-payment-history.spec.ts
@@ -93,3 +94,4 @@ risk_level: high
 notes:
   - "`payments` is the canonical money row; `payment_allocations` is the canonical link from payments to saleorders or dotkhams."
   - TDental import and reconciliation work should use relation-driven allocations when source payment relation tables exist, not greedy remaining-balance allocation as durable truth.
+  - Payment create, refund, and destructive reversal are separate permissions: `payment.add`, `payment.refund`, and `payment.void`. `payment.edit` alone must not grant refund, delete, or void access.

@@ -42,6 +42,7 @@ import { useProducts } from '@/hooks/useProducts';
 import { useCustomerSources } from '@/hooks/useSettings';
 import { useCustomerSelectorOptions } from '@/components/shared/useCustomerSelectorOptions';
 import { type ServiceCatalogItem } from '@/data/mockServices';
+import { syncQuantityWithSelectedTeeth } from './serviceFormToothQuantity';
 import type { CreateServiceInput } from '@/hooks/useServices';
 import type { Employee } from '@/types/employee';
 import type { Product } from '@/hooks/useProducts';
@@ -493,6 +494,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
           initialValues={toothNumbers}
           onClose={() => setShowToothPicker(false)}
           onSave={(values) => {
+            setQuantity(syncQuantityWithSelectedTeeth(values, quantity, toothNumbers));
             setToothNumbers(values);
             setShowToothPicker(false);
           }} />

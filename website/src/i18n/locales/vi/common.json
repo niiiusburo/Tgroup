@@ -323,6 +323,7 @@
   "medicalHistoryPlaceholder": "Nhập tiền sử bệnh lý...",
   "trngNuKhngIMtKhu": "Để trống nếu không đổi mật khẩu",
   "searchByNamePhoneEmail": "Tìm theo tên, SĐT, email...",
+  "searchByNameCodePhoneEmail": "Tìm theo tên, mã KH, SĐT, email...",
   "searchServices": "Tìm dịch vụ...",
   "noServicesFound": "Không tìm thấy dịch vụ",
   "visitCount": "lượt",

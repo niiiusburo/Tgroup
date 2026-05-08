@@ -102,7 +102,7 @@ interface PaymentRowProps {
   payment: import('@/hooks/useCustomerPayments').PaymentWithAllocations;
   isExpanded: boolean;
   onToggleExpand: () => void;
-  onDelete: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 function PaymentRow({ payment: p, isExpanded, onToggleExpand, onDelete }: PaymentRowProps) {
@@ -164,7 +164,7 @@ function PaymentRow({ payment: p, isExpanded, onToggleExpand, onDelete }: Paymen
           ) : (
             <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Posted</span>
           )}
-          {!isVoided && (
+          {!isVoided && onDelete && (
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onDelete(p.id); }}

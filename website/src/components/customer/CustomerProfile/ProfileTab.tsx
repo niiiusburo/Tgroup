@@ -9,6 +9,8 @@ export function ProfileTab({
   checkupsError,
   onRefetchCheckups,
   canViewHealthCheckups,
+  canCreateExternalPatient,
+  canUploadHealthCheckups,
 }: ProfileTabProps) {
   const { t } = useTranslation('customers');
 
@@ -63,6 +65,8 @@ export function ProfileTab({
           error={checkupsError}
           customerCode={profile.code}
           onUploaded={onRefetchCheckups}
+          canCreateExternalPatient={canCreateExternalPatient}
+          canUploadCheckups={canUploadHealthCheckups}
         />
       )}
     </div>

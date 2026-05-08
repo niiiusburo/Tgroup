@@ -1,5 +1,5 @@
 const { query } = require('../../db');
-const { errorResponse, foreignKeyExists, isValidISODate, isValidUUID, VALID_STATES } = require('./helpers');
+const { errorResponse, foreignKeyExists, isValidISODate, isValidUUID, readBodyField, VALID_STATES } = require('./helpers');
 
 const VIETNAM_NOW_SQL = `(NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh')`;
 
@@ -159,15 +159,15 @@ async function updateAppointment(req, res) {
     // Accept both camelCase and lowercase field names
     const b = req.body;
     const date = b.date;
-    const doctorId = b.doctorId || b.doctorid;
+    const doctorId = readBodyField(b, 'doctorId', 'doctorid');
     const note = b.note;
     const state = b.state;
-    const timeExpected = b.timeExpected || b.timeexpected;
+    const timeExpected = readBodyField(b, 'timeExpected', 'timeexpected');
     const color = b.color;
     const time = b.time;
-    const productId = b.productId || b.productid;
-    const assistantId = b.assistantId || b.assistantid;
-    const dentalAideId = b.dentalAideId || b.dentalaideid;
+    const productId = readBodyField(b, 'productId', 'productid');
+    const assistantId = readBodyField(b, 'assistantId', 'assistantid');
+    const dentalAideId = readBodyField(b, 'dentalAideId', 'dentalaideid');
 
     // Validate ID
     if (!isValidUUID(id)) {
@@ -179,7 +179,7 @@ async function updateAppointment(req, res) {
       return errorResponse(res, 400, 'INVALID_DATE', 'date must be a valid ISO date');
     }
 
-    if (doctorId !== undefined) {
+    if (doctorId !== undefined && doctorId !== null) {
       if (!isValidUUID(doctorId)) {
         return errorResponse(res, 400, 'INVALID_DOCTOR_ID', 'doctorId must be a valid UUID');
       }
@@ -203,7 +203,7 @@ async function updateAppointment(req, res) {
     }
 
     // Check foreign key constraints after validation and existence check
-    if (doctorId !== undefined && !(await foreignKeyExists('employees', doctorId))) {
+    if (doctorId !== undefined && doctorId !== null && !(await foreignKeyExists('employees', doctorId))) {
       return errorResponse(res, 404, 'DOCTOR_NOT_FOUND', 'Doctor with given doctorId does not exist');
     }
 
@@ -220,7 +220,7 @@ async function updateAppointment(req, res) {
     }
     if (doctorId !== undefined) {
       updates.push(`doctorid = $${paramIdx}`);
-      params.push(doctorId);
+      params.push(doctorId || null);
       paramIdx++;
     }
     if (note !== undefined) {

@@ -18,6 +18,8 @@ interface HealthCheckupGalleryProps {
   readonly error?: string | null;
   readonly customerCode?: string;
   readonly onUploaded?: () => void;
+  readonly canCreateExternalPatient?: boolean;
+  readonly canUploadCheckups?: boolean;
 }
 
 function formatDate(dateStr: string): string {
@@ -26,7 +28,15 @@ function formatDate(dateStr: string): string {
   return new Date(y, m - 1, d).toLocaleDateString('vi-VN');
 }
 
-export function HealthCheckupGallery({ data, isLoading, error, customerCode, onUploaded }: HealthCheckupGalleryProps) {
+export function HealthCheckupGallery({
+  data,
+  isLoading,
+  error,
+  customerCode,
+  onUploaded,
+  canCreateExternalPatient = false,
+  canUploadCheckups = false,
+}: HealthCheckupGalleryProps) {
   const { t } = useTranslation('customers');
   const [lightboxIndex, setLightboxIndex] = useState<number>(-1);
   const [lightboxCheckup, setLightboxCheckup] = useState<number>(-1);
@@ -93,7 +103,8 @@ export function HealthCheckupGallery({ data, isLoading, error, customerCode, onU
   const prevImage = () => {
     if (lightboxIndex > 0) setLightboxIndex(lightboxIndex - 1);
   };
-  const canCreatePatient = Boolean(customerCode && data?.patientExists === false);
+  const canCreatePatient = Boolean(canCreateExternalPatient && customerCode && data?.patientExists === false);
+  const canUpload = Boolean(canUploadCheckups && customerCode && !canCreatePatient);
 
   const handleCreatePatient = async () => {
     if (!customerCode) return;
@@ -135,7 +146,7 @@ export function HealthCheckupGallery({ data, isLoading, error, customerCode, onU
                 {t('createExternalPatient')}
               </button>
             )}
-            {customerCode && !canCreatePatient && (
+            {canUpload && (
               <button
                 type="button"
                 onClick={() => setShowForm((v) => !v)}
@@ -148,7 +159,7 @@ export function HealthCheckupGallery({ data, isLoading, error, customerCode, onU
           </div>
         </div>
 
-        {showForm && customerCode && (
+        {showForm && canUpload && customerCode && (
           <HealthCheckupUploadForm
             customerCode={customerCode}
             onCancel={() => setShowForm(false)}

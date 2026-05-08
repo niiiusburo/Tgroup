@@ -37,6 +37,12 @@ export function CustomerProfile(props: OrchestratorProps) {
 
   const { hasPermission } = useAuth();
   const canViewHealthCheckups = hasPermission('external_checkups.view');
+  const canCreateExternalPatient = hasPermission('external_checkups.create');
+  const canUploadHealthCheckups = hasPermission('external_checkups.upload');
+  const canAddPayment = hasPermission('payment.add');
+  const canRefundPayment = hasPermission('payment.refund');
+  const canEditPayment = hasPermission('payment.edit');
+  const canVoidPayment = hasPermission('payment.void');
 
   const [internalActiveTab, setInternalActiveTab] = useState<CustomerProfileTab>('profile');
   const activeTab = controlledActiveTab ?? internalActiveTab;
@@ -175,6 +181,8 @@ export function CustomerProfile(props: OrchestratorProps) {
           checkupsError={checkupsError ?? null}
           onRefetchCheckups={onRefetchCheckups}
           canViewHealthCheckups={canViewHealthCheckups}
+          canCreateExternalPatient={canCreateExternalPatient}
+          canUploadHealthCheckups={canUploadHealthCheckups}
         />
       )}
 
@@ -195,8 +203,8 @@ export function CustomerProfile(props: OrchestratorProps) {
           onCreateService={handleInitiateServiceCreate}
           onEditService={handleInitiateServiceEdit}
           onDeleteService={onDeleteService ? setServiceToDelete : undefined}
-          onPayForService={handleInitiatePayment}
-          onDeletePayment={(id) => setPaymentToDelete(id)}
+          onPayForService={canAddPayment ? handleInitiatePayment : undefined}
+          onDeletePayment={canVoidPayment && onDeletePayment ? (id) => setPaymentToDelete(id) : undefined}
           onUpdateServiceStatus={onUpdateServiceStatus ?? (async () => {})}
         />
       )}
@@ -217,13 +225,13 @@ export function CustomerProfile(props: OrchestratorProps) {
             totalUsed: 0,
             totalRefunded: 0,
           }}
-          onAddDeposit={onAddDeposit ? async (amount, method, date, note) => onAddDeposit(profile.id, amount, method, date, note) : undefined}
-          onAddRefund={onAddRefund ? async (amount, method, date, note) => onAddRefund(profile.id, amount, method, date, note) : undefined}
-          onVoidDeposit={onVoidDeposit ?? (async () => {})}
-          onDeleteDeposit={onDeleteDeposit ?? (async () => {})}
-          onEditDeposit={onEditDeposit ?? (async () => {})}
+          onAddDeposit={canAddPayment && onAddDeposit ? async (amount, method, date, note) => onAddDeposit(profile.id, amount, method, date, note) : undefined}
+          onAddRefund={canRefundPayment && onAddRefund ? async (amount, method, date, note) => onAddRefund(profile.id, amount, method, date, note) : undefined}
+          onVoidDeposit={canVoidPayment ? onVoidDeposit : undefined}
+          onDeleteDeposit={canVoidPayment ? onDeleteDeposit : undefined}
+          onEditDeposit={canEditPayment ? onEditDeposit : undefined}
           onRefreshDeposits={onRefreshDeposits}
-          onDeletePayment={(id) => setPaymentToDelete(id)}
+          onDeletePayment={canVoidPayment && onDeletePayment ? (id) => setPaymentToDelete(id) : undefined}
         />
       )}
 
@@ -253,7 +261,7 @@ export function CustomerProfile(props: OrchestratorProps) {
         onConfirmDeleteService={handleConfirmDeleteService}
         showPaymentModal={showPaymentModal}
         payTargetService={payTargetService}
-        canMakePayment={Boolean(onMakePayment)}
+        canMakePayment={canAddPayment && Boolean(onMakePayment)}
         onPaymentSubmit={handlePaymentSubmit}
         onClosePayment={() => { setShowPaymentModal(false); setPayTargetService(null); }}
       />

@@ -122,3 +122,41 @@ describe('face recognition route permissions', () => {
     ]);
   });
 });
+
+describe('payments mutation route permissions', () => {
+  const paymentRouter = require('../src/routes/payments');
+
+  it('POST / uses payment.add instead of broad edit access', () => {
+    expectRoutePermission(paymentRouter, 'post', '/', 'payment.add');
+  });
+
+  it('POST /refund requires payment.refund', () => {
+    expectRoutePermission(paymentRouter, 'post', '/refund', 'payment.refund');
+  });
+
+  it('PATCH /:id still requires payment.edit', () => {
+    expectRoutePermission(paymentRouter, 'patch', '/:id', 'payment.edit');
+  });
+
+  it('DELETE /:id requires payment.void for destructive reversal', () => {
+    expectRoutePermission(paymentRouter, 'delete', '/:id', 'payment.void');
+  });
+
+  it('POST /:id/void requires payment.void', () => {
+    expectRoutePermission(paymentRouter, 'post', '/:id/void', 'payment.void');
+  });
+});
+
+describe('external checkups route permissions', () => {
+  const externalCheckupsRouter = require('../src/routes/externalCheckups');
+
+  it('GET routes require external_checkups.view', () => {
+    expectRoutePermission(externalCheckupsRouter, 'get', '/images/:imageName', 'external_checkups.view');
+    expectRoutePermission(externalCheckupsRouter, 'get', '/:customerCode', 'external_checkups.view');
+  });
+
+  it('patient creation and image upload use separate permissions', () => {
+    expectRoutePermission(externalCheckupsRouter, 'post', '/:customerCode/patient', 'external_checkups.create');
+    expectRoutePermission(externalCheckupsRouter, 'post', '/:customerCode/health-checkups', 'external_checkups.upload');
+  });
+});

@@ -51,7 +51,9 @@ export const PERMISSIONS: readonly Permission[] = [
   { id: 'services.edit', module: 'Services', action: 'Edit', description: 'Edit services' },
   { id: 'payment.view', module: 'Payment', action: 'View', description: 'View payments' },
   { id: 'payment.add', module: 'Payment', action: 'Add', description: 'Add payments' },
+  { id: 'payment.edit', module: 'Payment', action: 'Edit', description: 'Edit payments' },
   { id: 'payment.refund', module: 'Payment', action: 'Refund', description: 'Refund payments' },
+  { id: 'payment.void', module: 'Payment', action: 'Void', description: 'Void or delete payments' },
   { id: 'employees.view', module: 'Employees', action: 'View', description: 'View employees' },
   { id: 'employees.add', module: 'Employees', action: 'Add', description: 'Add employees' },
   { id: 'employees.edit', module: 'Employees', action: 'Edit', description: 'Edit employees' },
@@ -72,7 +74,8 @@ export const PERMISSIONS: readonly Permission[] = [
   { id: 'website.view', module: 'Website', action: 'View', description: 'View website pages' },
   { id: 'website.edit', module: 'Website', action: 'Edit', description: 'Edit website pages' },
   { id: 'external_checkups.view', module: 'Health Checkups', action: 'View', description: 'View external health checkup images' },
-  { id: 'external_checkups.create', module: 'Health Checkups', action: 'Create', description: 'Upload external health checkup images' },
+  { id: 'external_checkups.create', module: 'Health Checkups', action: 'Create', description: 'Create external patient records' },
+  { id: 'external_checkups.upload', module: 'Health Checkups', action: 'Upload', description: 'Upload external health checkup images' },
 ];
 
 export const ROLES: readonly Role[] = [

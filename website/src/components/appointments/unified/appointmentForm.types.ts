@@ -30,12 +30,12 @@ export interface UnifiedAppointmentFormData {
   readonly customerName: string;
   readonly customerPhone: string;
   readonly customerCode?: string;
-  readonly doctorId?: string;
-  readonly doctorName?: string;
-  readonly assistantId?: string;
-  readonly assistantName?: string;
-  readonly dentalAideId?: string;
-  readonly dentalAideName?: string;
+  readonly doctorId?: string | null;
+  readonly doctorName?: string | null;
+  readonly assistantId?: string | null;
+  readonly assistantName?: string | null;
+  readonly dentalAideId?: string | null;
+  readonly dentalAideName?: string | null;
   readonly locationId: string;
   readonly locationName: string;
   readonly appointmentType: AppointmentType;

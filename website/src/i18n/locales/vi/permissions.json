@@ -41,7 +41,9 @@
     "payment": {
       "view": "Xem lịch sử thanh toán",
       "add": "Tạo thanh toán mới",
+      "edit": "Chỉnh sửa thông tin thanh toán",
       "refund": "Hoàn tiền thanh toán",
+      "void": "Hủy hoặc xóa thanh toán đã ghi nhận và hoàn tác phân bổ",
       "export": "Xuất Excel thanh toán"
     },
     "reports": {
@@ -76,7 +78,8 @@
     },
     "externalCheckups": {
       "view": "Xem ảnh khám ngoài",
-      "create": "Tải lên ảnh khám ngoài"
+      "create": "Tạo hồ sơ bệnh nhân ngoài",
+      "upload": "Tải lên ảnh khám ngoài"
     }
   },
   "loadingPermissions": "Đang tải quyền...",

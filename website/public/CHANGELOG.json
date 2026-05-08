@@ -1,5 +1,34 @@
 [
   {
+    "version": "0.31.18",
+    "date": "2026-05-08",
+    "commit": "pending",
+    "highlights": "Revenue reports recognize posted treatment payments, cash-flow is mounted, payment permissions are split, and TestSprite has a task ledger.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Revenue report paid totals now derive from posted treatment payment allocations and exclude deposits, refunds, deposit usage, and voided payments.",
+          "Cash-flow summary is available through /api/Reports/cash-flow/summary.",
+          "Ho so Online view-only users can inspect images without seeing patient-create or upload controls."
+        ]
+      },
+      {
+        "title": "Permissions",
+        "items": [
+          "Payment creation, refund, and destructive void/delete actions now use payment.add, payment.refund, and payment.void instead of broad payment.edit.",
+          "Ho so Online patient creation and upload now use external_checkups.create and external_checkups.upload separately."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "ARCHITECTURE.md now defines testbright.md as the TestSprite task ledger with PASS/FAIL checklist execution."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.31.17",
     "date": "2026-05-08",
     "commit": "27b7aeb6",

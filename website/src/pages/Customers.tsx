@@ -72,6 +72,10 @@ export function Customers() {
   const canSoftDelete = hasPermission("customers.delete");
   const canHardDelete = hasPermission("customers.hard_delete");
   const canExportCustomers = hasPermission("customers.export");
+  const canAddPayment = hasPermission("payment.add");
+  const canRefundPayment = hasPermission("payment.refund");
+  const canEditPayment = hasPermission("payment.edit");
+  const canVoidPayment = hasPermission("payment.void");
 
   const {
     customers,
@@ -229,19 +233,19 @@ export function Customers() {
         selectedCustomerId={selectedCustomerId}
         hookProfile={hookProfile}
         setDeleteDialog={setDeleteDialog}
-        onAddDeposit={handleAddDeposit}
-        onAddRefund={handleAddRefund}
-        onVoidDeposit={handleVoidDeposit}
-        onDeleteDeposit={handleDeleteDeposit}
-        onEditDeposit={handleEditDeposit}
+        onAddDeposit={canAddPayment ? handleAddDeposit : undefined}
+        onAddRefund={canRefundPayment ? handleAddRefund : undefined}
+        onVoidDeposit={canVoidPayment ? handleVoidDeposit : undefined}
+        onDeleteDeposit={canVoidPayment ? handleDeleteDeposit : undefined}
+        onEditDeposit={canEditPayment ? handleEditDeposit : undefined}
         onRefreshDeposits={handleRefreshDeposits}
         onCreateAppointment={handleCreateAppointment}
         onUpdateAppointment={handleUpdateAppointment}
         onCreateService={handleCreateService}
         onUpdateService={handleUpdateService}
         onDeleteService={handleDeleteService}
-        onMakePayment={handleMakePayment}
-        deletePaymentById={deletePaymentById}
+        onMakePayment={canAddPayment ? handleMakePayment : undefined}
+        deletePaymentById={canVoidPayment ? deletePaymentById : undefined}
         refetchPayments={refetchPayments}
         refetchProfile={refetchProfile}
         loadSaleOrderLines={loadSaleOrderLines}

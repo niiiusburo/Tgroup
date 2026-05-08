@@ -41,7 +41,9 @@
     "payment": {
       "view": "View payment history",
       "add": "Create new payment",
+      "edit": "Edit payment details",
       "refund": "Process payment refund",
+      "void": "Void or delete posted payments and reverse allocations",
       "export": "Export payments to Excel"
     },
     "reports": {
@@ -76,7 +78,8 @@
     },
     "externalCheckups": {
       "view": "View external checkup images",
-      "create": "Upload external checkup images"
+      "create": "Create external patient records",
+      "upload": "Upload external checkup images"
     }
   },
   "loadingPermissions": "Loading permissions...",

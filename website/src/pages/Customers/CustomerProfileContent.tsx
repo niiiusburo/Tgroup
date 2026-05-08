@@ -21,7 +21,7 @@ interface CustomerProfileContentProps
   readonly openEditForm: () => void;
   readonly selectedCustomerId: string | null;
   readonly setDeleteDialog: (dialog: DeleteDialogState | null) => void;
-  readonly deletePaymentById: (id: string) => Promise<void>;
+  readonly deletePaymentById?: (id: string) => Promise<void>;
   readonly refetchPayments: () => void | Promise<void>;
   readonly refetchProfile: () => void | Promise<void>;
   readonly loadSaleOrderLines: () => void | Promise<void>;
@@ -63,10 +63,10 @@ export function CustomerProfileContent({
       onTabChange={onTabChange}
       onBack={onBack}
       onEdit={canEditCustomers ? openEditForm : undefined}
-      onDeletePayment={async (id) => {
+      onDeletePayment={deletePaymentById ? async (id) => {
         await deletePaymentById(id);
         await Promise.all([refetchPayments(), refetchProfile(), loadSaleOrderLines()]);
-      }}
+      } : undefined}
       onSoftDelete={() => openDelete('soft')}
       onHardDelete={() => openDelete('hard')}
       onUpdateServiceStatus={async (serviceId, newStatus) => {

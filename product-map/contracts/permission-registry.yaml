@@ -2,7 +2,7 @@
 # Canonical mapping of all permission strings to backend routes, frontend routes, and UI components.
 
 meta:
-  total_backend_strings: 29
+  total_backend_strings: 33
   total_frontend_route_guards: 15
   total_nav_guards: 13
   wildcard: "*"
@@ -59,23 +59,33 @@ backend_permissions:
       - DELETE /api/Employees/:id
   - string: external_checkups.create
     routes:
+      - POST /api/ExternalCheckups/:customerCode/patient
+  - string: external_checkups.upload
+    routes:
       - POST /api/ExternalCheckups/:customerCode/health-checkups
   - string: external_checkups.view
     routes:
+      - GET /api/ExternalCheckups/images/:imageName
       - GET /api/ExternalCheckups/:customerCode
   - string: payment.edit
     routes:
-      - POST /api/Payments
-      - POST /api/Payments/refund
       - PATCH /api/Payments/:id
-      - DELETE /api/Payments/:id
-      - POST /api/Payments/:id/void
       - POST /api/Payments/:id/proof
       - PUT /api/settings/bank
       - PUT /api/MonthlyPlans/:id
       - PUT /api/MonthlyPlans/:id/installments/:installmentId/pay
       - POST /api/MonthlyPlans
       - DELETE /api/MonthlyPlans/:id
+  - string: payment.add
+    routes:
+      - POST /api/Payments
+  - string: payment.refund
+    routes:
+      - POST /api/Payments/refund
+  - string: payment.void
+    routes:
+      - DELETE /api/Payments/:id
+      - POST /api/Payments/:id/void
   - string: payment.view
     routes:
       - GET /api/Payments
@@ -222,6 +232,12 @@ frontend_inline_permissions:
   - string: external_checkups.view
     components:
       - pages/Customers.tsx (conditionally renders HealthCheckupGallery)
+  - string: external_checkups.create
+    components:
+      - components/customer/HealthCheckupGallery.tsx (create external patient button)
+  - string: external_checkups.upload
+    components:
+      - components/customer/HealthCheckupGallery.tsx (upload checkup button and form)
   - string: customers.view_all
     components:
       - components/shared/CustomerSelector.tsx or related customer list filters

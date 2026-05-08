@@ -1,11 +1,29 @@
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { renderWithProviders } from '@/test/test-utils';
 import { CustomerProfile } from './CustomerProfile';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 import type { PaymentWithAllocations } from '@/hooks/useCustomerPayments';
 import type { CustomerService } from '@/types/customer';
+
+const authMock = vi.hoisted(() => ({
+  hasPermission: vi.fn((_permission: string) => true),
+}));
+
+vi.mock('@/contexts/AuthContext', () => ({
+  AuthProvider: ({ children }: { children: any }) => children,
+  useAuth: () => ({
+    user: null,
+    permissions: null,
+    isAuthenticated: true,
+    isLoading: false,
+    login: vi.fn(),
+    logout: vi.fn(),
+    hasPermission: authMock.hasPermission,
+    hasLocationAccess: vi.fn(() => true),
+  }),
+}));
 
 const mockProfile: CustomerProfileData = {
   id: '1',
@@ -66,6 +84,10 @@ const mockPayments: PaymentWithAllocations[] = [
 ];
 
 describe('CustomerProfile payment tab', () => {
+  beforeEach(() => {
+    authMock.hasPermission.mockImplementation((_permission: string) => true);
+  });
+
   it('renders 3-column bill summary', () => {
     renderWithProviders(
       <AuthProvider>
@@ -170,6 +192,65 @@ describe('CustomerProfile payment tab', () => {
 
     await waitFor(() => expect(onMakePayment).toHaveBeenCalledTimes(1));
     expect(onMakePayment.mock.calls[0][0].allocations[0].invoiceId).toBe('order-so57144');
+  });
+
+  it('hides pay actions when payment.add is missing', () => {
+    authMock.hasPermission.mockImplementation((permission: string) => permission !== 'payment.add');
+    const onMakePayment = vi.fn();
+    const serviceLine: CustomerService = {
+      id: 'line-s057144',
+      orderId: 'order-so57144',
+      orderName: 'SO57144',
+      date: '2026-02-11',
+      service: 'Niềng răng',
+      doctor: 'Dr A',
+      cost: 1000000,
+      paidAmount: 500000,
+      residual: 500000,
+      status: 'active',
+      tooth: 'manual',
+      notes: '',
+    };
+
+    renderWithProviders(
+      <AuthProvider>
+        <CustomerProfile
+          profile={mockProfile}
+          appointments={[]}
+          services={[serviceLine]}
+          payments={[]}
+          depositList={[]}
+          usageHistory={[]}
+          activeTab="records"
+          onBack={vi.fn()}
+          onMakePayment={onMakePayment}
+        />
+      </AuthProvider>
+    );
+
+    expect(screen.queryByRole('button', { name: /pay 500\.000 ₫/ })).not.toBeInTheDocument();
+  });
+
+  it('hides payment delete controls when payment.void is missing', () => {
+    authMock.hasPermission.mockImplementation((permission: string) => permission !== 'payment.void');
+
+    renderWithProviders(
+      <AuthProvider>
+        <CustomerProfile
+          profile={mockProfile}
+          appointments={[]}
+          services={mockServices}
+          payments={mockPayments}
+          depositList={[]}
+          usageHistory={[]}
+          activeTab="payment"
+          onBack={vi.fn()}
+          onDeletePayment={vi.fn()}
+        />
+      </AuthProvider>
+    );
+
+    expect(screen.queryByTitle(/deletePayment|Xóa thanh toán/)).not.toBeInTheDocument();
   });
 
   it('confirms before deleting a service row', async () => {

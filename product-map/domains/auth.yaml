@@ -56,6 +56,7 @@ behavior:
   - Login rate limiting counts failed attempts only; successful logins must not consume the lockout budget.
   - Failed-login lockout is scoped to normalized email plus client IP, with a higher IP-wide failure cap to preserve brute-force protection without blocking every staff member behind one clinic network.
   - Effective location access is the employee primary branch from partners.companyid plus any additional rows in employee_location_scope.
+  - Permission strings for dangerous or vendor-write actions should stay action-level. Current split examples: `payment.add`, `payment.refund`, `payment.void`, `external_checkups.create`, and `external_checkups.upload`.
 affected_by:
   - Any change to dbo.partners schema (especially password_hash, employee, active, isdeleted columns)
   - Any change to permission system tables schema
@@ -63,6 +64,7 @@ affected_by:
   - Changes to api/src/server.js PUBLIC_PATHS set
 impact_tests:
   - api/tests/loginRateLimiter.test.js
+  - api/tests/readRoutePermissions.test.js
   - website/e2e/auth-setup.spec.ts
   - website/e2e/permissions-check.spec.ts
   - website/e2e/permissions-matrix.spec.ts

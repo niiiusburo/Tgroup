@@ -5,6 +5,7 @@ const router = express.Router();
 router.use('/dashboard', require('./reports/dashboard'));
 router.use('/', require('./reports/revenue'));
 router.use('/', require('./reports/revenueBreakdowns'));
+router.use('/', require('./reports/cashFlow'));
 router.use('/', require('./reports/appointments'));
 router.use('/', require('./reports/doctors'));
 router.use('/', require('./reports/customers'));
