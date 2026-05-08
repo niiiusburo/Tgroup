@@ -232,7 +232,16 @@ async function updateAppointment(req, res) {
       updates.push(`state = $${paramIdx}`);
       updates.push(`aptstate = $${paramIdx}`);
       if (state === 'arrived') {
-        updates.push(`datetimearrived = COALESCE(datetimearrived, ${nowSql})`);
+        // Reset datetimearrived when transitioning INTO 'arrived' from any
+        // other state (re-activation after done/cancelled, or first arrival).
+        // Only preserve the existing value if the row was already 'arrived' —
+        // otherwise a re-arrival would inherit a stale check-in timestamp and
+        // the wait timer would count from the previous visit.
+        updates.push(`datetimearrived = CASE WHEN state = 'arrived' THEN COALESCE(datetimearrived, ${nowSql}) ELSE ${nowSql} END`);
+        // Clear datedone so the previous "done" timestamp doesn't bleed into
+        // the new visit. datetimeseated is also cleared so re-seating fires.
+        updates.push(`datedone = CASE WHEN state = 'arrived' THEN datedone ELSE NULL END`);
+        updates.push(`datetimeseated = CASE WHEN state = 'arrived' THEN datetimeseated ELSE NULL END`);
       }
       if (state === 'in Examination' || state === 'in-progress') {
         updates.push(`datetimeseated = COALESCE(datetimeseated, ${nowSql})`);

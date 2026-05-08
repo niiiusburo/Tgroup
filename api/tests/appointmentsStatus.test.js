@@ -20,7 +20,7 @@ describe('PUT /api/Appointments/:id status timestamps', () => {
     jest.clearAllMocks();
   });
 
-  it('stamps datetimearrived only when staff marks the appointment arrived', async () => {
+  it('resets datetimearrived when state transitions into arrived', async () => {
     const updateSql = [];
     query.mockImplementation(async (sql) => {
       if (sql.includes('ip_access_settings')) return [{ mode: 'disabled' }];
@@ -41,8 +41,15 @@ describe('PUT /api/Appointments/:id status timestamps', () => {
       .send({ state: 'arrived' });
 
     expect(res.status).toBe(200);
-    expect(updateSql[0]).toContain('datetimearrived = COALESCE');
-    expect(updateSql[0]).toContain("datetimearrived = COALESCE(datetimearrived, (NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh'))");
+    // When transitioning INTO 'arrived', datetimearrived must reset (reactivation
+    // case: previous done/cancelled visit must not leak its arrival timestamp).
+    // When the row was already 'arrived', preserve the existing value.
+    expect(updateSql[0]).toContain(
+      "datetimearrived = CASE WHEN state = 'arrived' THEN COALESCE(datetimearrived, (NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh')) ELSE (NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh') END",
+    );
+    // datedone and datetimeseated must clear on re-arrival so a new visit starts clean.
+    expect(updateSql[0]).toContain("datedone = CASE WHEN state = 'arrived' THEN datedone ELSE NULL END");
+    expect(updateSql[0]).toContain("datetimeseated = CASE WHEN state = 'arrived' THEN datetimeseated ELSE NULL END");
     expect(updateSql[0]).toContain("lastupdated = (NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh')");
     expect(updateSql[0]).not.toContain("AT TIME ZONE 'UTC' AT TIME ZONE");
   });
