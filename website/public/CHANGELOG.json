@@ -2,7 +2,7 @@
   {
     "version": "0.31.18",
     "date": "2026-05-08",
-    "commit": "pending",
+    "commit": "cdbda61f",
     "highlights": "Revenue reports recognize posted treatment payments, cash-flow is mounted, payment permissions are split, and TestSprite has a task ledger.",
     "sections": [
       {
