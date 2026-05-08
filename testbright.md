@@ -45,7 +45,8 @@ Affected data flows:
 User roles:
 - Super Admin/Admin with full reporting and permission access.
 - Receptionist or clinic staff with payment add/view but without destructive payment void permission.
-- Dentist/Dental Assistant or other clinic role with `external_checkups.view` but no upload permission.
+- Dentist or other view-only clinic role with `external_checkups.view` but no upload permission.
+- Dental Assistant/Assistant role with assigned-location customer access and `external_checkups.upload`.
 - Reporting staff with `reports.view`.
 
 TestSprite execution items:
@@ -56,6 +57,7 @@ TestSprite execution items:
 - [ ] PENDING: With a user lacking `payment.void`, verify payment delete/void actions fail with 403 or are hidden where the UI has permission context.
 - [ ] PENDING: With a user lacking `external_checkups.upload`, open `/customers/:id` and verify Ho so Online images can be viewed but the add-checkup upload button is hidden.
 - [ ] PENDING: With a user that has `external_checkups.upload`, verify the add-checkup upload button appears and upload submits to `POST /api/ExternalCheckups/:customerCode/health-checkups`.
+- [ ] PENDING: With a Dental Assistant/Assistant role, verify customer search/profile/Hồ sơ online upload works, while treatment, deposit, and payment creation remain blocked.
 - [ ] PENDING: Open `/permissions` and verify `payment.void` and `external_checkups.upload` are visible permission options with descriptions.
 
 Edge cases:
