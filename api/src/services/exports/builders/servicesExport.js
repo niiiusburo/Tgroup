@@ -57,6 +57,18 @@ function buildWhere(filters) {
     idx++;
   }
 
+  if (filters.timeFrom) {
+    conditions.push(`so.datecreated::time >= $${idx}::time`);
+    params.push(filters.timeFrom);
+    idx++;
+  }
+
+  if (filters.timeTo) {
+    conditions.push(`so.datecreated::time <= $${idx}::time`);
+    params.push(filters.timeTo);
+    idx++;
+  }
+
   if (filters.search) {
     conditions.push(`(so.name ILIKE $${idx} OR p.name ILIKE $${idx})`);
     params.push(`%${filters.search}%`);
@@ -66,6 +78,12 @@ function buildWhere(filters) {
   if (filters.state) {
     conditions.push(`so.state = $${idx}`);
     params.push(filters.state);
+    idx++;
+  }
+
+  if (filters.doctorId) {
+    conditions.push(`so.doctorid = $${idx}`);
+    params.push(filters.doctorId);
     idx++;
   }
 
@@ -168,6 +186,9 @@ async function build(filters, user) {
       { label: 'Chi nhánh', value: filters.companyId === 'all' ? 'Tất cả' : filters.companyId },
       { label: 'Từ ngày', value: filters.dateFrom || 'Tất cả' },
       { label: 'Đến ngày', value: filters.dateTo || 'Tất cả' },
+      { label: 'Từ giờ', value: filters.timeFrom || 'Tất cả' },
+      { label: 'Đến giờ', value: filters.timeTo || 'Tất cả' },
+      { label: 'Bác sĩ', value: filters.doctorId || 'Tất cả' },
       { label: 'Trạng thái', value: filters.state ? STATE_LABELS[filters.state] || filters.state : 'Tất cả' },
     ],
   });

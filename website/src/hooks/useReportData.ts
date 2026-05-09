@@ -5,6 +5,9 @@ interface ReportParams {
   dateFrom: string;
   dateTo: string;
   companyId?: string;
+  timeFrom?: string;
+  timeTo?: string;
+  doctorId?: string;
 }
 
 export function useReportData<T>(endpoint: string, params: ReportParams) {
@@ -35,7 +38,7 @@ export function useReportData<T>(endpoint: string, params: ReportParams) {
     } finally {
       setLoading(false);
     }
-  }, [endpoint, params.dateFrom, params.dateTo, params.companyId]);
+  }, [endpoint, params.dateFrom, params.dateTo, params.companyId, params.timeFrom, params.timeTo, params.doctorId]);
 
   useEffect(() => {
     const controller = new AbortController();

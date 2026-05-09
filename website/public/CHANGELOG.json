@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.31.29",
+    "date": "2026-05-09",
+    "commit": "PLACEHOLDER",
+    "highlights": "Reports can now export legacy flat revenue and deposit Excel workbooks from the shared Reports Export Center.",
+    "sections": [
+      {
+        "title": "Reports",
+        "items": [
+          "Added Báo cáo doanh thu and Báo cáo cọc tiền as flat one-sheet Excel export choices that match the legacy sample templates.",
+          "The new exports use the shared report filters for date range, custom time range, branch, and doctor."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added backend coverage for exact workbook headers, widths, filenames, previews, filters, and row limits.",
+          "Added Reports UI coverage for the new export choices and searchable doctor filter."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.31.25",
     "date": "2026-05-09",
     "commit": "645db57e",

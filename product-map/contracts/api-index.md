@@ -184,10 +184,10 @@
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
 | GET | `/types` | Auth | — | Export types visible to the current user's effective permissions |
-| POST | `/:type/preview` | Auth + export permission | `{ filters }`; `type` is `customers`, `appointments`, `services`, `payments`, `service-catalog`, or `report-sales-employees` | `{ type, label, rowCount, filename, filters, summary, exceedsMax }` + best-effort `exports_audit` row |
+| POST | `/:type/preview` | Auth + export permission | `{ filters }`; `type` is `customers`, `appointments`, `services`, `payments`, `deposits`, `revenue-flat`, `deposit-flat`, `service-catalog`, or `report-sales-employees` | `{ type, label, rowCount, filename, filters, summary, exceedsMax }` + best-effort `exports_audit` row |
 | POST | `/:type/download` | Auth + export permission | `{ filters }`; same type keys as preview | XLSX workbook stream + best-effort `exports_audit` row after response |
 
-Export permissions are defined by `api/src/services/exports/exportRegistry.js`: `customers.export`, `appointments.export`, `services.export`, `payments.export`, `products.export`, and `reports.export`. `report-sales-employees` accepts `companyId`, `employeeType` (`doctor`, `assistant`, `consultant`, `sales`), optional `employeeId`, `dateFrom`, and `dateTo`.
+Export permissions are defined by `api/src/services/exports/exportRegistry.js`: `customers.export`, `appointments.export`, `services.export`, `payments.export`, `products.export`, and `reports.export`. `appointments`, `services`, `payments`, `deposits`, `revenue-flat`, and `deposit-flat` accept report export filters `companyId`, `dateFrom`, `dateTo`, optional `timeFrom`, `timeTo`, and optional `doctorId` where the dataset has a doctor linkage. `deposits` uses `payments.export` and can additionally filter `depositType`; `revenue-flat` and `deposit-flat` also use `payments.export` and return one-sheet `Sheet1` legacy-template workbooks. `report-sales-employees` accepts `companyId`, `employeeType` (`doctor`, `assistant`, `consultant`, `sales`), optional `employeeId`, `dateFrom`, and `dateTo`.
 
 ## Dashboard Reports (`/api/DashboardReports`)
 

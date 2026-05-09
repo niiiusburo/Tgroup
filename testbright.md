@@ -10,6 +10,117 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: TDental Deposit Gap Audit
+
+Feature/edit name: TDental Deposit Gap Audit
+
+Changed URLs and API routes:
+- No frontend URLs changed.
+- No API routes changed.
+- Read-only local database inspection against `dbo.payments`, `dbo.payment_allocations`, and `dbo.partners`.
+- Read-only export inspection from `/Users/thuanle/Downloads/TamDentistExport3`.
+
+Affected data flows:
+- Compares TDental `PartnerAdvances` confirmed advances/refunds against local posted deposit/refund/usage rows.
+- Compares TDental posted `AccountPayments` by source UUID against local `dbo.payments.id`.
+- Preserves sale-order relation context so deposit candidates are not silently treated as already-safe imports.
+
+User roles:
+- Data/Money audit owner.
+- QA/Verification reviewer.
+
+Happy paths:
+- [ ] PENDING: Run `node scripts/audit-tdental-deposit-gaps.js --export-dir /Users/thuanle/Downloads/TamDentistExport3` and confirm it produces markdown, JSON, and CSV reports under `reports/`.
+- [ ] PENDING: Confirm the report shows source confirmed PartnerAdvances totals, local posted deposit totals, missing AccountPayments, and top customer gaps.
+- [ ] PENDING: Open the customer-level CSV and verify high-gap rows include partner ID, ref, name, local-customer existence, source totals, local totals, and gap totals.
+
+Edge cases:
+- [ ] PENDING: Missing export folder should fail before querying or mutating data.
+- [ ] PENDING: Malformed CSV quote lines should still parse through the existing TDental import CSV reader.
+- [ ] PENDING: Customers absent from the local DB should be marked `local_customer_exists=no` rather than merged by phone or name.
+
+Regressions:
+- [ ] PENDING: The script must not INSERT, UPDATE, DELETE, TRUNCATE, import, sync, or call VPS endpoints.
+- [ ] PENDING: Existing payment routes and frontend payment/deposit screens remain untouched.
+
+Setup data and login state:
+- Requires the real local app database on `127.0.0.1:5433` with database `tdental_demo`.
+- Do not use Docker demo database `127.0.0.1:55433` for this audit.
+- Requires the TDental export folder at `/Users/thuanle/Downloads/TamDentistExport3`.
+- No browser login state is needed.
+
+---
+
+# TestSprite Plan: Reports Export Center
+
+Feature/edit name: Reports Export Center
+
+Changed URLs and API routes:
+- `/reports`
+- `/reports/dashboard`
+- `/reports/revenue`
+- `/reports/appointments`
+- `/reports/services`
+- `POST /api/Exports/appointments/preview`
+- `POST /api/Exports/appointments/download`
+- `POST /api/Exports/services/preview`
+- `POST /api/Exports/services/download`
+- `POST /api/Exports/payments/preview`
+- `POST /api/Exports/payments/download`
+- `POST /api/Exports/deposits/preview`
+- `POST /api/Exports/deposits/download`
+- `POST /api/Exports/revenue-flat/preview`
+- `POST /api/Exports/revenue-flat/download`
+- `POST /api/Exports/deposit-flat/preview`
+- `POST /api/Exports/deposit-flat/download`
+
+Affected data flows:
+- Reports now expose a shared Excel Export Center for appointments, services/treatments, payments, deposits, legacy flat revenue, and legacy flat deposit reports.
+- Export filters include date range, Today preset, optional custom time window, location, and optional doctor.
+- Location and doctor export filters use matching searchable dropdowns; location filters live by branch name and doctor filters live by accent-insensitive doctor name or employee code.
+- Payment exports use the payment category read model so service payments stay separate from deposits.
+- Deposit exports use a dedicated `deposits` export key with deposit-specific workbook columns.
+- Legacy flat revenue exports use posted service payment allocations, prorate multi-allocation payment method amounts, and write one `Sheet1` workbook with the exact sample columns.
+- Legacy flat deposit exports include posted customer deposit top-ups only and write one `Sheet1` workbook with the exact sample columns.
+
+User roles:
+- Authenticated staff with `reports.view` can open reports.
+- Staff also need the underlying export permission for the selected dataset: `appointments.export`, `services.export`, or `payments.export`.
+
+Happy paths:
+- [ ] PENDING: Open `/reports`, click Today, choose Payments, preview, then download Excel for today's payments.
+- [ ] PENDING: Choose Deposits, preview, then download Excel for today's deposits.
+- [ ] PENDING: Choose Báo cáo doanh thu, preview, then download Excel and confirm it has only `Sheet1` with headers `Cơ sở` through `Trợ lý bác sĩ`.
+- [ ] PENDING: Choose Báo cáo cọc tiền, preview, then download Excel and confirm it has only `Sheet1` with headers `Cơ sở` through `CSKH`.
+- [ ] PENDING: Choose Appointments with a doctor and location filter, preview, then download Excel.
+- [ ] PENDING: Choose Services / treatments with a custom time window and location filter, preview, then download Excel.
+- [ ] PENDING: Type a doctor name or employee code into the doctor dropdown and confirm the matching doctor options populate immediately.
+- [ ] PENDING: Type a branch name into the location dropdown and confirm the matching location options populate immediately with the same visual design as the doctor dropdown.
+- [ ] PENDING: Open each workbook and confirm `Data`, `Summary`, and `Filters` sheets exist and the filters sheet records date, time, location, and doctor values.
+
+Edge cases:
+- [ ] PENDING: Use a time window with no matching records and confirm the preview shows zero rows without crashing.
+- [ ] PENDING: Use a location + doctor combination with no matches and confirm each dataset returns a safe empty preview.
+- [ ] PENDING: Search the doctor dropdown without Vietnamese accents and confirm accented doctor names still match.
+- [ ] PENDING: Search the location dropdown without Vietnamese accents and confirm accented branch names still match.
+- [ ] PENDING: Verify deposits do not appear in the Payments export and payments do not appear in the Deposits export.
+- [ ] PENDING: Verify customer deposit top-ups appear in Báo cáo cọc tiền but refunds, deposit usage, and service payments do not.
+- [ ] PENDING: Verify Báo cáo doanh thu excludes customer deposit top-ups, refunds, deposit usage-only rows, and voided payments.
+- [ ] PENDING: Verify a service payment split across multiple treatment invoices is prorated by allocation and does not double count cash, bank, or deposit-used amounts.
+- [ ] PENDING: Verify row-limit behavior still blocks oversized downloads.
+
+Regressions:
+- [ ] PENDING: Existing `/calendar`, `/services`, and `/payment` export buttons still preview and download.
+- [ ] PENDING: Existing employee revenue Excel export on `/reports/revenue` still works.
+- [ ] PENDING: Reports dashboard and subpages still render with global filters.
+
+Setup data and login state:
+- Use an authenticated admin session with `reports.view`, `appointments.export`, `services.export`, and `payments.export`.
+- Prefer a test date with at least one payment, deposit, appointment, and treatment row; otherwise use the zero-row edge-case checks.
+- For legacy flat report workbook checks, use rows with assigned Sale online, CSKH, doctor, assistant, and dental aide when available.
+
+---
+
 # TestSprite Plan: Calendar Excel Session Token Download
 
 Feature/edit name: Calendar Excel Session Token Download
