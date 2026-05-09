@@ -23,10 +23,10 @@ Every time you bump the version or deploy a new build, you MUST update `website/
 
 | Environment | Email | Password |
 |-------------|-------|----------|
-| Production (`https://nk.2checkin.com`) | `t@clinic.vn` | `123123` |
+| Production (`https://nk.2checkin.com`) | Read `LIVE_SITE_EMAIL` from `.agents/live-site.env` | Read `LIVE_SITE_PASSWORD` from `.agents/live-site.env` |
 | Local dev (`http://127.0.0.1:5175`, Tgrouptest demo DB) | `tg@clinic.vn` | `123456` |
 
-The prod DB does NOT have `tg@clinic.vn`. Only `t@clinic.vn`, `kien@clinic.vn`, and `0397616697@clinic.vn` exist as admin accounts on production. Use `t@clinic.vn` for live verification.
+The prod DB does NOT have `tg@clinic.vn`. For live verification, read the production credential from `.agents/live-site.env`. That file is gitignored and must not be copied into tracked docs, commits, PRs, or recaps.
 
 ## Verification Rule (MANDATORY)
 
@@ -110,7 +110,7 @@ ssh root@76.13.16.68
 # Password stored in 1Password / local secrets — do NOT commit to this file
 ```
 
-**Production Domain:** `https://nk.2checkin.com` (login: `t@clinic.vn` / `123123`)
+**Production Domain:** `https://nk.2checkin.com` (login comes from gitignored `.agents/live-site.env`)
 **Stack:** Docker Compose at `/opt/tgroup` (containers `tgroup-web`, `tgroup-api`, `tgroup-db`).
 **Deploy:** `ssh root@76.13.16.68`, `cd /opt/tgroup`, `git pull origin main`, `docker compose up -d --build api web` (per `docs/runbooks/DEPLOYMENT.md`). There is **no** auto-deploy; pushing to GitHub only auto-tags via `release-tag.yml` — it does not SSH or rebuild.
 
@@ -164,4 +164,3 @@ These rules enforce the Contract-First Monorepo pattern on the existing Vite+Exp
 - Frontend PRs must pass lint + typecheck + depcruise + build.
 - Bump `website/package.json` version for every frontend change.
 - Run `bash scripts/sync-claude-mem.sh` after every session.
-

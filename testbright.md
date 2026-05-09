@@ -10,6 +10,47 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: Calendar Excel Session Token Download
+
+Feature/edit name: Calendar Excel Session Token Download
+
+Changed URLs and API routes:
+- `/calendar`
+- `POST /api/Exports/appointments/download`
+- `POST /api/Exports/appointments/preview`
+
+Affected data flows:
+- Calendar appointment Excel downloads now read the same auth token source as normal API calls.
+- Staff logged in without Remember Me use `sessionStorage`; staff logged in with Remember Me use `localStorage`.
+- The appointment export workbook still comes from the backend export registry and includes current date/search/location/status filters.
+
+User roles:
+- Admin or clinic staff with `appointments.export`.
+- Staff without `appointments.export` should still not see or use the export action.
+
+TestSprite execution items:
+- [ ] PENDING: Log in without Remember Me, open `/calendar`, choose `Xuất dữ liệu` -> `Xuất Excel`, select `1 ngày`, apply, and verify an `.xlsx` download starts.
+- [ ] PENDING: Log in with Remember Me, repeat the same `/calendar` Excel download and verify it still starts.
+- [ ] PENDING: Use `Xem trước số dòng / bộ lọc` on `/calendar` and confirm preview still calls `POST /api/Exports/appointments/preview` successfully.
+- [ ] PENDING: Open the downloaded workbook and confirm `Data`, `Summary`, and `Filters` sheets exist with appointment headers including `Phụ tá` and `Trợ lý BS`.
+- [ ] PENDING: Verify a user without `appointments.export` cannot trigger the calendar export.
+
+Edge cases:
+- Expired or missing token should show the existing export error and must not silently download an empty file.
+- Large date ranges should still honor the backend row limit and return the existing row-limit message.
+- Date range presets and custom dates should both keep the selected filters.
+
+Regressions:
+- Customer, services, payment, service-catalog, and employee revenue exports still send auth headers.
+- Normal API calls through `apiFetch()` still read the same token source.
+- `/calendar` search, location, and single-status filters still flow into the appointment export request.
+
+Setup data and login state:
+- Use an authenticated local admin session for local checks.
+- For live confirmation, use the gitignored `.agents/live-site.env` account on `https://nk.2checkin.com` and do not record credentials.
+
+---
+
 # TestSprite Plan: Hosoonline Permission Contract Repair
 
 Feature/edit name: Hosoonline Permission Contract Repair

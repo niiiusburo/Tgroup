@@ -22,7 +22,7 @@ const EXPORT_CASES: readonly ExportCase[] = [
   {
     route: '/calendar',
     savedAs: 'appointments.xlsx',
-    headers: ['Mã lịch hẹn', 'Ngày giờ hẹn', 'Mã KH', 'Khách hàng', 'SĐT', 'Dịch vụ', 'Bác sĩ', 'Chi nhánh', 'Loại hẹn', 'Trạng thái', 'Nội dung', 'Ghi chú'],
+    headers: ['Mã lịch hẹn', 'Ngày giờ hẹn', 'Mã KH', 'Khách hàng', 'SĐT', 'Dịch vụ', 'Bác sĩ', 'Phụ tá', 'Trợ lý BS', 'Chi nhánh', 'Loại hẹn', 'Trạng thái', 'Nội dung', 'Ghi chú'],
     dateHeader: 'Ngày giờ hẹn',
     needsDateRange: true,
   },
@@ -59,7 +59,7 @@ async function triggerExport(page: Page, exportCase: ExportCase) {
 
   if (exportCase.needsDateRange) {
     await expect(page.getByText(/Chọn khoảng|Select date range/i)).toBeVisible();
-    await page.getByRole('button', { name: /3 ngày/i }).click();
+    await page.getByRole('button', { name: /1 ngày/i }).click();
     await page.getByRole('button', { name: /Áp dụng|Apply/i }).click();
   }
 

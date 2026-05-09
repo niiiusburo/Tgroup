@@ -1,8 +1,10 @@
 import asyncio
 from playwright import async_api
 from playwright.async_api import expect
+from credentials import get_live_site_credentials
 
 async def run_test():
+    live_email, live_password = get_live_site_credentials()
     pw = None
     browser = None
     context = None
@@ -37,12 +39,12 @@ async def run_test():
         frame = context.pages[-1]
         # Input text
         elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/div/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('t@clinic.vn')
+        await asyncio.sleep(3); await elem.fill(live_email)
 
         frame = context.pages[-1]
         # Input text
         elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/div[2]/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('123123')
+        await asyncio.sleep(3); await elem.fill(live_password)
 
         frame = context.pages[-1]
         # Click element
@@ -55,7 +57,7 @@ async def run_test():
         elem = frame.locator('xpath=/html/body/div/div/aside/nav/div[4]/div/div/div[2]/a[3]').nth(0)
         await asyncio.sleep(3); await elem.click()
 
-        # -> Open the employee card for 'Admin T (t@clinic.vn)' in read-only mode to inspect assignments and permissions.
+        # -> Open the configured admin employee card in read-only mode to inspect assignments and permissions.
         frame = context.pages[-1]
         # Click element
         elem = frame.locator('xpath=/html/body/div/div/div/main/div/div[3]/div[2]/div[3]/button[2]').nth(0)

@@ -2,10 +2,10 @@
 
 ## Reference Sites
 
-- **Production:** `https://nk.2checkin.com` (tg@clinic.vn / 123456)
+- **Production:** `https://nk.2checkin.com` (agent credential in gitignored `.agents/live-site.env`)
 - **Original TG Clinic (legacy):** `https://tamdentist.tdental.vn` (admin / 123123@)
 - **Local replica:** `http://127.0.0.1:8899` (admin@tgclinic.vn / admin123) — requires Golden backend
-- **VPS Direct:** `http://76.13.16.68:5175` (tg@clinic.vn / 123456) — bypasses nginx, for container-level debugging only
+- **VPS Direct:** `http://76.13.16.68:5175` (same agent credential file) — bypasses nginx, for container-level debugging only
 
 ## API Endpoints
 

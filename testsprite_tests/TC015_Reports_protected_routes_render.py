@@ -1,8 +1,10 @@
 import asyncio
 from playwright import async_api
 from playwright.async_api import expect
+from credentials import get_live_site_credentials
 
 async def run_test():
+    live_email, live_password = get_live_site_credentials()
     pw = None
     browser = None
     context = None

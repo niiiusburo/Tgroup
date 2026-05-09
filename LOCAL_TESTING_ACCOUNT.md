@@ -1,8 +1,9 @@
 # Local Testing Account
 
-For local and live website testing, use:
+For local and live website testing, use the gitignored local credential file:
 
-- Account: `t@clinic.vn`
-- Password: `123123`
+- `.agents/live-site.env`
+- `LIVE_SITE_EMAIL`
+- `LIVE_SITE_PASSWORD`
 
-Do not commit this file. It is listed in `.gitignore` and should stay local-only.
+Do not put production credentials in tracked docs, commits, PRs, or recaps.

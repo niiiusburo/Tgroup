@@ -1,8 +1,10 @@
 import asyncio
 from playwright import async_api
 from playwright.async_api import expect
+from credentials import get_live_site_credentials
 
 async def run_test():
+    live_email, live_password = get_live_site_credentials()
     pw = None
     browser = None
     context = None
@@ -33,16 +35,16 @@ async def run_test():
         # -> Navigate to http://127.0.0.1:5175
         await page.goto("http://127.0.0.1:5175")
 
-        # -> Submit the login form with t@clinic.vn / 123123 to sign in, then after successful login navigate to /employees and /permissions and verify they load (no crash).
+        # -> Submit the login form with configured live credentials to sign in, then after successful login navigate to /employees and /permissions and verify they load (no crash).
         frame = context.pages[-1]
         # Input text
         elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/div/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('t@clinic.vn')
+        await asyncio.sleep(3); await elem.fill(live_email)
 
         frame = context.pages[-1]
         # Input text
         elem = frame.locator('xpath=/html/body/div/div/div[2]/div/form/div[2]/input').nth(0)
-        await asyncio.sleep(3); await elem.fill('123123')
+        await asyncio.sleep(3); await elem.fill(live_password)
 
         frame = context.pages[-1]
         # Click element
