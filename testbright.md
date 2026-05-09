@@ -10,6 +10,48 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: Hosoonline Permission Contract Repair
+
+Feature/edit name: Hosoonline Permission Contract Repair
+
+Changed URLs and API routes:
+- `/customers/:id`
+- `/permissions`
+- `POST /api/ExternalCheckups/:customerCode/patient`
+- `POST /api/ExternalCheckups/:customerCode/health-checkups`
+
+Affected data flows:
+- Hosoonline patient creation now checks `external_checkups.create`.
+- Hosoonline image/checkup upload remains protected by `external_checkups.upload`.
+- Deployment-applied permission seed grants patient creation to admin/clinic-manager roles and upload to admin/assistant roles.
+
+User roles:
+- Admin or Clinic Manager with `external_checkups.create`.
+- Dental Assistant/Assistant with `external_checkups.upload`.
+- Dentist/Receptionist with view-only Hosoonline access.
+
+TestSprite execution items:
+- [ ] PENDING: On `/customers/:id`, verify a create-only admin/clinic-manager user can create a missing Hosoonline patient without needing `external_checkups.upload`.
+- [ ] PENDING: On `/customers/:id`, verify a user with `external_checkups.upload` can see the add-checkup upload action and submit to `POST /api/ExternalCheckups/:customerCode/health-checkups`.
+- [ ] PENDING: On `/customers/:id`, verify Dentist/Receptionist-style view-only users can see Hosoonline images but cannot create patients or upload checkups.
+- [ ] PENDING: On `/permissions`, verify `external_checkups.create` and `external_checkups.upload` are visible as separate permission options.
+
+Edge cases:
+- Existing patients should not show the create-patient action even when the user has `external_checkups.create`.
+- Missing patients should not show upload until after the patient exists or the customer lookup refreshes.
+- Users with wildcard `*` still pass both checks.
+
+Regressions:
+- `GET /api/ExternalCheckups/:customerCode` remains protected by `external_checkups.view`.
+- `POST /api/ExternalCheckups/:customerCode/health-checkups` still requires `external_checkups.upload`.
+- Existing payment permission split remains unchanged by the Hosoonline seed.
+
+Setup data and login state:
+- Use an authenticated admin session and at least one non-admin clinic role for permission comparison.
+- Use a customer code with a missing Hosoonline patient and one customer code with existing Hosoonline images.
+
+---
+
 # TestSprite Plan: Face ID Quality-Gated Quick Scan
 
 Feature/edit name: Face ID Quality-Gated Quick Scan

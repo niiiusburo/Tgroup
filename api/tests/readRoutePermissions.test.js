@@ -175,7 +175,7 @@ describe('external checkups route permissions', () => {
   });
 
   it('patient creation and image upload use separate permissions', () => {
-    expectRoutePermission(externalCheckupsRouter, 'post', '/:customerCode/patient', 'external_checkups.upload');
+    expectRoutePermission(externalCheckupsRouter, 'post', '/:customerCode/patient', 'external_checkups.create');
     expectRoutePermission(externalCheckupsRouter, 'post', '/:customerCode/health-checkups', 'external_checkups.upload');
   });
 });

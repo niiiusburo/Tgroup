@@ -147,7 +147,7 @@ router.get('/:customerCode', requireAuth, requirePermission('external_checkups.v
  * POST /api/ExternalCheckups/:customerCode/patient
  * Create a Hosoonline patient using the local TDental code plus phone suffix.
  */
-router.post('/:customerCode/patient', requireAuth, requirePermission('external_checkups.upload'), async (req, res) => {
+router.post('/:customerCode/patient', requireAuth, requirePermission('external_checkups.create'), async (req, res) => {
   try {
     const result = await createHosoPatientForLocalCustomer(req.params.customerCode);
     return res.status(result.created ? 201 : 200).json(result);

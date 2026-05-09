@@ -11,6 +11,7 @@ Add one row per request. Keep the request concrete and update the status instead
 |---|---|---|---|---|
 | 2026-05-02 | Architecture | All agents | Use this file for cross-domain blockers instead of leaving them only in chat. | OPEN |
 | 2026-05-06 | Integrations | QA + Release | Verify the new Hosoonline patient creation proxy against live v2 `/api/patients/_create` and `_search` with a disposable patient before deploy. | IN PROGRESS |
+| 2026-05-09 | Integrations + Auth | Release | Repair Hosoonline split-permission enforcement and verify live grants for `external_checkups.create` and `external_checkups.upload`. | IN PROGRESS |
 
 ## Status Values
 
