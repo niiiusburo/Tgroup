@@ -10,6 +10,46 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: Calendar Excel Session Token Download
+
+Feature/edit name: Calendar Excel Session Token Download
+
+Changed URLs and API routes:
+- `/calendar`
+- `POST /api/Exports/appointments/preview`
+- `POST /api/Exports/appointments/download`
+
+Affected data flows:
+- Calendar export preview still uses the shared `apiFetch()` auth path.
+- Calendar export download now uses the same shared auth token lookup as normal API calls.
+- Normal browser sessions with `tgclinic_token` in `sessionStorage` send `Authorization: Bearer <token>` on XLSX download.
+- Remember Me sessions with `tgclinic_token` in `localStorage` continue to download the same workbook.
+
+User roles:
+- Authenticated staff with `calendar.view` and `appointments.export`.
+- Admin account used for live and local regression checks.
+
+TestSprite execution items:
+- [ ] PENDING: Log in without Remember Me, open `/calendar`, choose Export Data -> Export Excel, select `1 ngày`, apply, and verify an `.xlsx` file downloads instead of a 401/no-token error.
+- [ ] PENDING: Log in with Remember Me, repeat the same `/calendar` Excel download and verify the workbook opens.
+- [ ] PENDING: Verify `POST /api/Exports/appointments/preview` still returns a row-count preview before the date-range download.
+- [ ] PENDING: Verify the downloaded workbook has `Data`, `Summary`, and `Filters` sheets with appointment headers including `Phụ tá` and `Trợ lý BS`.
+
+Edge cases:
+- Missing/expired token should still fail as an auth error instead of downloading unauthenticated data.
+- Date ranges with no appointments should preserve the existing export empty-state/error behavior.
+- The export menu should not navigate the browser to a `blob:` URL.
+
+Regressions:
+- `/customers`, `/services`, `/payment`, and `/service-catalog` exports still use the same download helper and should continue to send auth headers.
+- Session refresh and Remember Me token storage must continue to use `website/src/lib/authTokenStorage.ts` as the source of truth.
+
+Setup data and login state:
+- Use a live or local admin account with `appointments.export`.
+- For the no-Remember-Me path, confirm the token exists in `sessionStorage` and not `localStorage` before running the download.
+
+---
+
 # TestSprite Plan: Hosoonline Permission Contract Repair
 
 Feature/edit name: Hosoonline Permission Contract Repair

@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.31.25",
+    "date": "2026-05-09",
+    "commit": "pending",
+    "highlights": "Calendar Excel export now works for normal browser sessions after the Remember Me token-storage change.",
+    "sections": [
+      {
+        "title": "Calendar Export",
+        "items": [
+          "Calendar Excel downloads now use the shared auth token lookup, so sessions stored in browser sessionStorage send the required Authorization header.",
+          "Updated the calendar export regression test to match the current appointment workbook columns and date-range preset."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added direct API-client coverage for exporting with a session-only token."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.31.24",
     "date": "2026-05-09",
     "commit": "pending",

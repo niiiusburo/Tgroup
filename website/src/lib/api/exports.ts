@@ -1,4 +1,5 @@
 import { apiFetch, API_URL } from './core';
+import { getAuthToken } from '@/lib/authTokenStorage';
 
 export interface ExportPreviewResponse {
   type: string;
@@ -30,15 +31,19 @@ export async function downloadExport(
   type: string,
   filters: Record<string, unknown>
 ): Promise<Blob> {
-  const token = localStorage.getItem('tgclinic_token') || '';
+  const token = getAuthToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const res = await fetch(
     `${API_URL}/Exports/${type}/download`,
     {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      headers,
       body: JSON.stringify({ filters }),
     }
   );
