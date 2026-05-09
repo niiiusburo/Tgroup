@@ -1,6 +1,7 @@
 jest.mock('../src/middleware/auth', () => ({
   requireAuth: (_req, res, _next) => res.status(401).json({ error: 'No token' }),
   requirePermission: () => (_req, _res, next) => next(),
+  requireAnyPermission: () => (_req, _res, next) => next(),
 }));
 
 jest.mock('../src/db', () => ({

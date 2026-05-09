@@ -1,5 +1,5 @@
 const express = require('express');
-const { requirePermission } = require('../middleware/auth');
+const { requireAnyPermission, requirePermission } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
 const { PartnerCreateSchema, PartnerUpdateSchema } = require('@tgroup/contracts');
 const { getPartnerById } = require('./partners/getPartnerById');
@@ -8,7 +8,9 @@ const { createPartner, hardDeletePartner, softDeletePartner, updatePartner } = r
 
 const router = express.Router();
 
-router.get('/', requirePermission('customers.view'), listPartners);
+// Customer picker is used by appointment creation flows; allow staff with appointments.add
+// even if they don't have full Customers page access.
+router.get('/', requireAnyPermission(['customers.view', 'appointments.add']), listPartners);
 // declared before /:id to prevent Express matching 'check-unique' as an id param.
 router.get('/check-unique', requirePermission('customers.view'), checkPartnerUnique);
 router.get('/:id', requirePermission('customers.view'), getPartnerById);

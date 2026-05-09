@@ -11,6 +11,7 @@ function loadApp({ passwordMatches }) {
   jest.doMock('../src/middleware/auth', () => ({
     requireAuth: (_req, _res, next) => next(),
     requirePermission: () => (_req, _res, next) => next(),
+    requireAnyPermission: () => (_req, _res, next) => next(),
   }));
 
   jest.doMock('../src/services/permissionService', () => ({

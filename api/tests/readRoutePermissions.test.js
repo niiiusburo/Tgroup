@@ -4,9 +4,16 @@ const mockRequirePermission = jest.fn((permission) => {
   return middleware;
 });
 
+const mockRequireAnyPermission = jest.fn((permissions) => {
+  const middleware = (_req, _res, next) => next();
+  middleware.permissionAny = permissions;
+  return middleware;
+});
+
 jest.mock('../src/middleware/auth', () => ({
   requireAuth: (_req, _res, next) => next(),
   requirePermission: mockRequirePermission,
+  requireAnyPermission: mockRequireAnyPermission,
 }));
 
 jest.mock('../src/db', () => ({
@@ -32,9 +39,12 @@ function routePermissions(router, method, path) {
   if (!layer) {
     return [];
   }
-  return layer.route.stack
-    .map((entry) => entry.handle.permission)
-    .filter(Boolean);
+  const declared = [];
+  for (const entry of layer.route.stack) {
+    if (entry?.handle?.permission) declared.push(entry.handle.permission);
+    if (Array.isArray(entry?.handle?.permissionAny)) declared.push(...entry.handle.permissionAny);
+  }
+  return declared.filter(Boolean);
 }
 
 function expectRoutePermission(router, method, path, permission) {
@@ -45,6 +55,7 @@ describe('owned backend read route permissions', () => {
   const routeCases = [
     ['partners', require('../src/routes/partners'), [
       ['/', 'customers.view'],
+      ['/', 'appointments.add'],
       ['/check-unique', 'customers.view'],
       ['/:id', 'customers.view'],
       ['/:id/GetKPIs', 'customers.view'],
@@ -140,6 +151,10 @@ describe('payments mutation route permissions', () => {
 
   it('POST /:id/proof uses payment.add (proof upload is part of payment workflow)', () => {
     expectRoutePermission(paymentRouter, 'post', '/:id/proof', 'payment.add');
+  });
+
+  it('POST /:id/proof/confirm requires payment.confirm', () => {
+    expectRoutePermission(paymentRouter, 'post', '/:id/proof/confirm', 'payment.confirm');
   });
 
   it('DELETE /:id requires payment.void for destructive reversal', () => {

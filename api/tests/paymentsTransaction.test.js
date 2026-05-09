@@ -3,6 +3,7 @@ process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret';
 jest.mock('../src/middleware/auth', () => ({
   requireAuth: (_req, _res, next) => next(),
   requirePermission: jest.fn(() => (_req, _res, next) => next()),
+  requireAnyPermission: jest.fn(() => (_req, _res, next) => next()),
 }));
 
 jest.mock('../src/db', () => ({
