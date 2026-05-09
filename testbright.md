@@ -223,6 +223,62 @@ Edge cases:
 
 ---
 
+# TestSprite Plan: Old Payment System Restore
+
+Feature/edit name: Old Payment System Restore
+
+Changed URLs and API routes:
+- `/payment`
+- `/customers/:id`
+- `POST /api/Payments`
+- `GET /api/Payments`
+- `GET /api/Payments/deposits`
+- `GET /api/Payments/deposit-usage`
+- `DELETE /api/Payments/:id`
+- `POST /api/Payments/:id/void`
+
+Affected data flows:
+- Deposit top-up creation now stores explicit `deposit_type=deposit` rows with `payment_category=deposit`.
+- Existing rows with `deposit_type IN ('deposit', 'refund')` are backfilled into the deposit category.
+- Refund deposit rows continue to appear in the deposit section.
+- Regular payment rows and deposit-usage rows continue to stay out of the deposit top-up list unless explicitly categorized as deposits.
+- Admin and Super Admin roles regain `payment.void` for old cancel/delete payment behavior.
+
+User roles:
+- Admin or Super Admin with `payment.view`, `payment.add`, `payment.refund`, and `payment.void`.
+- Clinic staff with `payment.view` and `payment.add` but without `payment.void`.
+
+TestSprite execution items:
+- [ ] PENDING: On `/payment`, create or inspect a deposit top-up and verify it appears in the deposit section, not the normal payment section.
+- [x] PASS: On `/customers/:id`, submit a safe service payment from the customer profile service/records area - live disposable customer `T249444`, service order `SO-2026-0247`, and `POST /api/Payments` created payment `bccf3e81-8e68-4ad2-88ce-036c5f3befcd` with allocations, then cleanup removed it.
+- [x] PASS: On `/customers/:id`, submit a safe customer deposit from the customer profile payment tab - live disposable customer `T249444` created deposit `17c60f8f-41cd-470d-ad03-e72c9739028d` with `depositType=deposit`, deposit-only API bucket visibility, then cleanup removed it.
+- [ ] PENDING: On `/payment`, verify a refund deposit appears in the deposit section and does not move the original deposit into the wrong table.
+- [ ] PENDING: Call `GET /api/Payments?type=payments` for a customer with deposits and verify explicit deposit rows are excluded.
+- [ ] PENDING: Call `GET /api/Payments/deposits` for the same customer and verify explicit deposit and refund rows are included.
+- [ ] PENDING: With Admin/Super Admin, verify `POST /api/Payments/:id/void` can cancel a safe test payment and reverse allocations.
+- [ ] PENDING: With a role lacking `payment.void`, verify delete/void remains blocked with 403 or hidden by UI permission checks.
+- [x] PASS: Cleanup live disposable profile data - exact test rows for payments, allocations, sale order line, sale order, and partner all returned zero rows after cleanup.
+
+Edge cases:
+- Existing live rows with `deposit_type=deposit` but `payment_category=payment`.
+- Negative refund rows with `deposit_type=refund`.
+- Deposit usage rows with `deposit_type=usage`.
+- Allocated service payments that should remain normal payments.
+- Voided payments and deleted payments must keep allocation reversal behavior intact.
+
+Regressions:
+- Payment history still loads for `payment.view`.
+- Customer profile payment/deposit sections still refresh from canonical payment APIs.
+- Customer balance still calculates from canonical `payments` and `payment_allocations`.
+- Permission board still shows `payment.void` as a destructive payment permission.
+
+Setup data and login state:
+- Use the gitignored `.agents/live-site.env` admin account for live-style admin verification.
+- Use a customer with known deposit, refund, and payment rows.
+- For destructive checks, use a disposable test payment only.
+
+---
+
 # TestSprite Plan: Reporting And Permission Feedback Completion
 
 Feature/edit name: Revenue Recognition Reports, Cash Flow Report, Payment Permission Split, and Ho so Online Upload Gate

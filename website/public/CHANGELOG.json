@@ -1036,7 +1036,7 @@
       {
         "title": "Bug Fixes",
         "items": [
-          "Permission Board employee search now matches login email addresses such as t@clinic.vn.",
+          "Permission Board employee search now matches login email addresses.",
           "Employee permission cards now show email addresses so admin-created accounts are easier to identify."
         ]
       },
