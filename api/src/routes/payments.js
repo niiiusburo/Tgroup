@@ -45,7 +45,8 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
       !(deposit_used > 0) &&
       parseFloat(amount) > 0;
 
-    const payment_category = looksLikeDeposit ? 'deposit' : 'payment';
+    const explicitDepositCategory = ["deposit", "refund"].includes(deposit_type);
+    const payment_category = explicitDepositCategory || looksLikeDeposit ? 'deposit' : 'payment';
 
     if (looksLikeDeposit) {
       deposit_type = "deposit";

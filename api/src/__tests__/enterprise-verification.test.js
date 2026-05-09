@@ -214,7 +214,8 @@ describe('P0.3 — Payment Category Column', () => {
 
     it('POST route inserts payment_category', () => {
       expect(paymentJsCode).toContain('payment_category');
-      expect(paymentJsCode).toContain("const payment_category = looksLikeDeposit ? 'deposit' : 'payment'");
+      expect(paymentJsCode).toContain('const explicitDepositCategory = ["deposit", "refund"].includes(deposit_type);');
+      expect(paymentJsCode).toContain("const payment_category = explicitDepositCategory || looksLikeDeposit ? 'deposit' : 'payment'");
     });
   });
 
