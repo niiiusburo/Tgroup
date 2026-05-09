@@ -14,14 +14,15 @@ function createFlatWorkbook(columns, rows, meta = {}) {
   workbook.creator = meta.exportedBy || 'TGClinic';
 
   const worksheet = workbook.addWorksheet('Sheet1');
-  worksheet.columns = columns.map((column) => ({
-    header: column.header,
-    key: column.key,
-    width: column.width,
-  }));
+  worksheet.addRow(columns.map((column) => column.header));
+  columns.forEach((column, index) => {
+    if (column.width !== undefined && column.width !== null) {
+      worksheet.getColumn(index + 1).width = column.width;
+    }
+  });
 
   rows.forEach((rowData) => {
-    const row = worksheet.addRow(rowData);
+    const row = worksheet.addRow(columns.map((column) => rowData[column.key]));
     row.eachCell((cell, colNumber) => {
       const column = columns[colNumber - 1];
       if (cell.value !== null && cell.value !== undefined) {

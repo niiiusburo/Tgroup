@@ -83,9 +83,11 @@ describe('legacyFlatReportsExport', () => {
       'Phụ tá',
       'Trợ lý bác sĩ',
     ]);
-    expect(sheet.getColumn(1).width).toBe(13);
+    expect(sheet.getColumn(1).width).toBeUndefined();
     expect(sheet.getColumn(2).width).toBe(16);
     expect(sheet.getColumn(6).width).toBe(18.19921875);
+    expect(sheet.getColumn(12).width).toBeUndefined();
+    expect(sheet.getColumn(14).width).toBeUndefined();
     expect(sheet.autoFilter).toBeNull();
     expect(sheet.views).toEqual([]);
 
@@ -176,6 +178,7 @@ describe('legacyFlatReportsExport', () => {
       'CSKH',
     ]);
     expect(sheet.getColumn(5).width).toBe(12.796875);
+    expect(sheet.getColumn(10).width).toBeUndefined();
     expect(sheet.getCell('A2').value).toBe('Tấm Dentist Gò Vấp');
     expect(sheet.getCell('E2').value).toEqual(new Date(Date.UTC(2026, 4, 9)));
     expect(sheet.getCell('F2').value).toBe(2000000);

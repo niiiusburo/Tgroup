@@ -1,7 +1,7 @@
 'use strict';
 
 const REVENUE_COLUMNS = [
-  { key: 'companyName', header: 'Cơ sở', width: 13 },
+  { key: 'companyName', header: 'Cơ sở' },
   { key: 'customerCode', header: 'Mã Khách hàng', width: 16 },
   { key: 'customerName', header: 'Tên khách hàng', width: 14.09765625 },
   { key: 'customerPhone', header: 'Số điện thoại', width: 20.296875 },
@@ -12,14 +12,14 @@ const REVENUE_COLUMNS = [
   { key: 'bankAmount', header: 'Chuyển khoản', width: 18.69921875, style: 'vnd' },
   { key: 'depositUsed', header: 'Tiền cọc', width: 12.19921875, style: 'vnd' },
   { key: 'saleOnline', header: 'Sale online', width: 14.296875 },
-  { key: 'customerCare', header: 'CSKH', width: 13 },
+  { key: 'customerCare', header: 'CSKH' },
   { key: 'doctorName', header: 'Bác sĩ', width: 10.8984375 },
-  { key: 'assistantName', header: 'Phụ tá', width: 13 },
+  { key: 'assistantName', header: 'Phụ tá' },
   { key: 'dentalAideName', header: 'Trợ lý bác sĩ', width: 12.5 },
 ];
 
 const DEPOSIT_COLUMNS = [
-  { key: 'companyName', header: 'Cơ sở', width: 13 },
+  { key: 'companyName', header: 'Cơ sở' },
   { key: 'customerCode', header: 'Mã Khách hàng', width: 16 },
   { key: 'customerName', header: 'Tên khách hàng', width: 14.09765625 },
   { key: 'customerPhone', header: 'Số điện thoại', width: 20.296875 },
@@ -28,7 +28,7 @@ const DEPOSIT_COLUMNS = [
   { key: 'cashAmount', header: 'Tiền mặt', width: 11.8984375, style: 'vnd' },
   { key: 'bankAmount', header: 'Chuyển khoản', width: 18.69921875, style: 'vnd' },
   { key: 'saleOnline', header: 'Sale online', width: 14.296875 },
-  { key: 'customerCare', header: 'CSKH', width: 13 },
+  { key: 'customerCare', header: 'CSKH' },
 ];
 
 module.exports = {
