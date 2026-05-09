@@ -34,7 +34,7 @@ function buildDepositWhere(filters) {
   }
 
   if (filters.companyId && filters.companyId !== 'all') {
-    conditions.push(`COALESCE(p.companyid, pr.companyid) = $${idx}`);
+    conditions.push(`pr.companyid = $${idx}`);
     params.push(filters.companyId);
     idx += 1;
   }
@@ -56,7 +56,7 @@ function buildDepositWhere(filters) {
 function depositSelect(where) {
   return `
     SELECT
-      COALESCE(c.name, customer_company.name) AS companyname,
+      customer_company.name AS companyname,
       pr.ref AS partnercode,
       pr.name AS partnername,
       pr.displayname AS partnerdisplayname,
@@ -72,7 +72,6 @@ function depositSelect(where) {
     LEFT JOIN partners pr ON pr.id = p.customer_id
     LEFT JOIN partners sale_staff ON sale_staff.id = pr.salestaffid
     LEFT JOIN partners cskh_staff ON cskh_staff.id = pr.cskhid
-    LEFT JOIN companies c ON c.id = p.companyid
     LEFT JOIN companies customer_company ON customer_company.id = pr.companyid
     WHERE ${where}
   `;

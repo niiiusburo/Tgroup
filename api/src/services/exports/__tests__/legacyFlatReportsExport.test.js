@@ -201,7 +201,8 @@ describe('legacyFlatReportsExport', () => {
     expect(sql).toContain("p.payment_category = 'deposit'");
     expect(sql).toContain("p.deposit_type = 'deposit'");
     expect(sql).not.toContain('pa.invoice_id IS NOT NULL');
-    expect(sql).toContain('COALESCE(p.companyid, pr.companyid) = $5');
+    expect(sql).not.toContain('p.companyid');
+    expect(sql).toContain('pr.companyid = $5');
     expect(params).toEqual(['2026-05-09', '2026-05-09', '08:00', '17:30', LOC_A]);
   });
 
