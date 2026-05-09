@@ -249,8 +249,12 @@ async function updateAppointment(req, res) {
       paramIdx++;
     }
     if (state !== undefined) {
-      updates.push(`state = $${paramIdx}`);
-      updates.push(`aptstate = $${paramIdx}`);
+      // When state === 'arrived', these CASE expressions MUST appear BEFORE
+      // `state = ...` in the SET list. In PostgreSQL UPDATE, a column name on
+      // the RHS uses the NEW value if that column was already assigned earlier
+      // in the same SET clause; otherwise it uses the OLD row. If `state` were
+      // assigned first, `CASE WHEN state = 'arrived'` would always see the new
+      // state and could never distinguish re-arrival from first arrival.
       if (state === 'arrived') {
         // Reset datetimearrived when transitioning INTO 'arrived' from any
         // other state (re-activation after done/cancelled, or first arrival).
@@ -263,6 +267,8 @@ async function updateAppointment(req, res) {
         updates.push(`datedone = CASE WHEN state = 'arrived' THEN datedone ELSE NULL END`);
         updates.push(`datetimeseated = CASE WHEN state = 'arrived' THEN datetimeseated ELSE NULL END`);
       }
+      updates.push(`state = $${paramIdx}`);
+      updates.push(`aptstate = $${paramIdx}`);
       if (state === 'in Examination' || state === 'in-progress') {
         updates.push(`datetimeseated = COALESCE(datetimeseated, ${nowSql})`);
       }

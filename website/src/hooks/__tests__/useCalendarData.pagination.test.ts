@@ -70,4 +70,26 @@ describe('fetchAllCalendarAppointments', () => {
       includeCounts: false,
     });
   });
+
+  it('reports each page as soon as it arrives', async () => {
+    const onPage = vi.fn();
+    mockFetchAppointments
+      .mockResolvedValueOnce({
+        offset: 0,
+        limit: 3000,
+        totalItems: null,
+        items: [{ id: 'apt-first' }],
+      } as Awaited<ReturnType<typeof fetchAppointments>>);
+
+    await fetchAllCalendarAppointments(
+      {
+        dateFrom: '2026-05-09',
+        dateTo: '2026-05-09 23:59:59',
+      },
+      { onPage },
+    );
+
+    expect(onPage).toHaveBeenCalledTimes(1);
+    expect(onPage).toHaveBeenCalledWith([{ id: 'apt-first' }], 0);
+  });
 });

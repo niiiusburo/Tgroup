@@ -81,6 +81,10 @@ export function useCustomerSelectorOptions(
         if (!cancelled) {
           setRemoteCustomers(response.items.map(mapPartnerToCustomer).map(toSelectorCustomer));
         }
+      } catch (err) {
+        // Keep the selector resilient; failures should not crash the form.
+        console.error('useCustomerSelectorOptions: remote search failed', err);
+        if (!cancelled) setRemoteCustomers([]);
       } finally {
         if (!cancelled) setSearching(false);
       }

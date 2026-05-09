@@ -382,4 +382,94 @@ router.post("/:id/proof", requirePermission('payment.add'), async (req, res) => 
   }
 });
 
+// POST /api/Payments/:id/proof/confirm - Confirm latest payment proof receipt
+router.post("/:id/proof/confirm", requirePermission('payment.confirm'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const employeeId = req.user?.employeeId;
+
+    if (!employeeId) {
+      return res.status(401).json({ error: 'No token' });
+    }
+
+    const paymentRows = await query(
+      `SELECT id, status
+       FROM dbo.payments
+       WHERE id = $1`,
+      [id]
+    );
+
+    if (paymentRows.length === 0) {
+      return res.status(404).json({ error: 'Payment not found' });
+    }
+
+    const paymentStatus = paymentRows[0]?.status || 'posted';
+    if (paymentStatus !== 'posted') {
+      return res.status(409).json({ error: `Cannot confirm receipt for payment status: ${paymentStatus}` });
+    }
+
+    const proofRows = await query(
+      `SELECT id, confirmed_at, confirmed_by
+       FROM dbo.payment_proofs
+       WHERE payment_id = $1
+       ORDER BY created_at DESC NULLS LAST, id DESC
+       LIMIT 1`,
+      [id]
+    );
+
+    if (proofRows.length === 0) {
+      return res.status(404).json({ error: 'No receipt proof found' });
+    }
+
+    const proof = proofRows[0];
+    if (proof.confirmed_at) {
+      return res.json({
+        success: true,
+        proofId: proof.id,
+        confirmedAt: proof.confirmed_at,
+        confirmedBy: proof.confirmed_by,
+        alreadyConfirmed: true,
+      });
+    }
+
+    const updated = await query(
+      `UPDATE dbo.payment_proofs
+       SET confirmed_at = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'),
+           confirmed_by = $2
+       WHERE id = $1 AND confirmed_at IS NULL
+       RETURNING id, confirmed_at, confirmed_by`,
+      [proof.id, employeeId]
+    );
+
+    if (updated.length === 0) {
+      const latest = await query(
+        `SELECT id, confirmed_at, confirmed_by
+         FROM dbo.payment_proofs
+         WHERE id = $1`,
+        [proof.id]
+      );
+      const row = latest[0] || proof;
+      return res.json({
+        success: true,
+        proofId: row.id,
+        confirmedAt: row.confirmed_at,
+        confirmedBy: row.confirmed_by,
+        alreadyConfirmed: true,
+      });
+    }
+
+    const row = updated[0];
+    return res.json({
+      success: true,
+      proofId: row.id,
+      confirmedAt: row.confirmed_at,
+      confirmedBy: row.confirmed_by,
+      alreadyConfirmed: false,
+    });
+  } catch (error) {
+    console.error("Error confirming payment proof:", error);
+    return res.status(500).json({ error: "Failed to confirm payment proof" });
+  }
+});
+
 module.exports = router;

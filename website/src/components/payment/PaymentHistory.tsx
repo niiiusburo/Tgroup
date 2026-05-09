@@ -4,7 +4,7 @@
  * @crossref:uses[mockPayment]
  */
 
-import { Receipt, FileText } from 'lucide-react';
+import { Receipt, FileText, Image as ImageIcon } from 'lucide-react';
 import {
   PAYMENT_METHOD_LABELS,
   PAYMENT_STATUS_LABELS,
@@ -14,6 +14,8 @@ import {
 import { formatVND } from '@/lib/formatting';
 import { useTranslation } from 'react-i18next';
 import { LoadingState } from '@/components/shared/LoadingState';
+import { useState } from 'react';
+import { PaymentProofModal } from './PaymentProofModal';
 
 interface PaymentHistoryProps {
   readonly payments: readonly PaymentRecord[];
@@ -22,6 +24,7 @@ interface PaymentHistoryProps {
 
 export function PaymentHistory({ payments, loading = false }: PaymentHistoryProps) {
   const { t } = useTranslation('payment');
+  const [proofPaymentId, setProofPaymentId] = useState<string | null>(null);
   if (loading) {
     return <LoadingState title="Loading payments..." />;
   }
@@ -48,6 +51,7 @@ export function PaymentHistory({ payments, loading = false }: PaymentHistoryProp
               <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('colMethod')}</th>
               <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('colStatus')}</th>
               <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('colDate')}</th>
+              <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('colProof')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -85,11 +89,29 @@ export function PaymentHistory({ payments, loading = false }: PaymentHistoryProp
                   </span>
                 </td>
                 <td className="px-4 py-3 text-gray-500">{payment.date}</td>
+                <td className="px-4 py-3">
+                  <button
+                    type="button"
+                    onClick={() => setProofPaymentId(payment.id)}
+                    className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+                  >
+                    <ImageIcon className="h-3.5 w-3.5 text-gray-500" />
+                    {t('viewReceiptProof')}
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {proofPaymentId && (
+        <PaymentProofModal
+          paymentId={proofPaymentId}
+          isOpen={true}
+          onClose={() => setProofPaymentId(null)}
+        />
+      )}
     </div>
   );
 }

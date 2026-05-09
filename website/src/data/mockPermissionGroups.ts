@@ -52,6 +52,7 @@ export const PERMISSIONS: readonly Permission[] = [
   { id: 'payment.view', module: 'Payment', action: 'View', description: 'View payments' },
   { id: 'payment.add', module: 'Payment', action: 'Add', description: 'Add payments' },
   { id: 'payment.edit', module: 'Payment', action: 'Edit', description: 'Edit payments' },
+  { id: 'payment.confirm', module: 'Payment', action: 'Confirm', description: 'Confirm payment receipt proof' },
   { id: 'payment.refund', module: 'Payment', action: 'Refund', description: 'Refund payments' },
   { id: 'payment.void', module: 'Payment', action: 'Void', description: 'Void or delete payments' },
   { id: 'employees.view', module: 'Employees', action: 'View', description: 'View employees' },
@@ -79,7 +80,7 @@ export const PERMISSIONS: readonly Permission[] = [
 ];
 
 export const ROLES: readonly Role[] = [
-  { id: 'admin', name: 'Admin', color: '#EF4444', description: 'Full access', permissions: PERMISSIONS.map((p) => p.id) },
+  { id: 'admin', name: 'Admin', color: '#EF4444', description: 'Full access', permissions: PERMISSIONS.map((p) => p.id).filter((id) => id !== 'payment.confirm') },
   { id: 'manager', name: 'Manager', color: '#8B5CF6', description: 'Manager', permissions: ['overview.view', 'calendar.view', 'customers.view'] },
 ];
 

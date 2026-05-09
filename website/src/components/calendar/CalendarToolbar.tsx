@@ -78,20 +78,20 @@ export function CalendarToolbar({
   }, []);
 
   return (
-    <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-white rounded-xl shadow-card px-4 py-3">
-      <div className="flex max-w-full items-center overflow-x-auto bg-gray-100 rounded-lg p-1">
+    <div className="flex flex-col items-stretch gap-3 bg-white rounded-xl shadow-card px-4 py-3 xl:flex-row xl:items-center xl:justify-between">
+      <div className="grid w-full grid-cols-3 gap-1 bg-gray-100 rounded-lg p-1 sm:w-auto sm:min-w-[17rem] xl:shrink-0">
         {VIEW_TABS.map((tab) => (
           <button
             key={tab.mode}
             onClick={() => onViewModeChange(tab.mode)}
             className={cn(
-              'whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-md transition-colors',
+              'min-w-0 px-2 py-1.5 text-sm font-medium rounded-md transition-colors sm:px-4',
               viewMode === tab.mode
                 ? 'bg-white text-blue-600 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900',
             )}
           >
-            {t(tab.labelKey)}
+            <span className="block truncate">{t(tab.labelKey)}</span>
           </button>
         ))}
       </div>
@@ -104,8 +104,8 @@ export function CalendarToolbar({
         onToday={onToday}
       />
 
-      <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center lg:w-auto lg:flex-nowrap">
-        <div ref={dropdownRef} className="relative col-span-2 min-w-0 flex-1 sm:min-w-[220px] lg:w-72 lg:flex-none">
+      <div className="grid w-full grid-cols-2 gap-2 md:grid-cols-[minmax(16rem,1fr)_auto_auto_auto] xl:w-auto xl:flex xl:flex-nowrap xl:items-center">
+        <div ref={dropdownRef} className="relative col-span-2 min-w-0 md:col-span-1 md:min-w-[16rem] xl:w-72 xl:flex-none">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           <input
             type="text"

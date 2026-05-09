@@ -1,4 +1,6 @@
 import type { ComponentProps } from 'react';
+import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { DayView } from './DayView';
 import { WeekView } from './WeekView';
@@ -11,6 +13,7 @@ type MonthViewProps = ComponentProps<typeof MonthView>;
 
 interface CalendarViewPanelProps {
   readonly isLoading: boolean;
+  readonly isLoadingMore: boolean;
   readonly viewMode: ViewMode;
   readonly currentDate: Date;
   readonly weekDates: WeekViewProps['weekDates'];
@@ -31,6 +34,7 @@ interface CalendarViewPanelProps {
 
 export function CalendarViewPanel({
   isLoading,
+  isLoadingMore,
   viewMode,
   currentDate,
   weekDates,
@@ -48,6 +52,8 @@ export function CalendarViewPanel({
   onUpdateStatus,
   onCreateAppointment,
 }: CalendarViewPanelProps) {
+  const { t } = useTranslation('calendar');
+
   if (isLoading) {
     return (
       <LoadingState
@@ -59,42 +65,71 @@ export function CalendarViewPanel({
 
   if (viewMode === 'day') {
     return (
-      <DayView
-        currentDate={currentDate}
-        getAppointmentsForDate={getAppointmentsForDate}
-        onAppointmentClick={onAppointmentClick}
-        onAppointmentEdit={onAppointmentEdit}
-        onDragStart={onDragStart}
-        onDragOver={onDragOver}
-        onDrop={onDrop}
-        onDragEnd={onDragEnd}
-        onMarkArrived={onMarkArrived}
-        onUpdateStatus={onUpdateStatus}
-        onCreateAppointment={onCreateAppointment}
-      />
+      <div className="relative min-w-0">
+        <DayView
+          currentDate={currentDate}
+          getAppointmentsForDate={getAppointmentsForDate}
+          onAppointmentClick={onAppointmentClick}
+          onAppointmentEdit={onAppointmentEdit}
+          onDragStart={onDragStart}
+          onDragOver={onDragOver}
+          onDrop={onDrop}
+          onDragEnd={onDragEnd}
+          onMarkArrived={onMarkArrived}
+          onUpdateStatus={onUpdateStatus}
+          onCreateAppointment={onCreateAppointment}
+        />
+        <CalendarLoadingMoreBadge isLoading={isLoadingMore} label={t('loadingMoreAppointments')} />
+      </div>
     );
   }
 
   if (viewMode === 'week') {
     return (
-      <WeekView
-        weekDates={weekDates}
-        getAppointmentsForDate={getAppointmentsForDate}
-        onAppointmentClick={onAppointmentClick}
-        onAppointmentEdit={onAppointmentEdit}
-        onDateChange={onDateChange}
-        onMarkArrived={onMarkArrived}
-        onUpdateStatus={onUpdateStatus}
-      />
+      <div className="relative min-w-0">
+        <WeekView
+          weekDates={weekDates}
+          getAppointmentsForDate={getAppointmentsForDate}
+          onAppointmentClick={onAppointmentClick}
+          onAppointmentEdit={onAppointmentEdit}
+          onDateChange={onDateChange}
+          onMarkArrived={onMarkArrived}
+          onUpdateStatus={onUpdateStatus}
+        />
+        <CalendarLoadingMoreBadge isLoading={isLoadingMore} label={t('loadingMoreAppointments')} />
+      </div>
     );
   }
 
   return (
-    <MonthView
-      currentDate={currentDate}
-      monthDates={monthDates}
-      getAppointmentsForDate={getAppointmentsForDate}
-      onDayClick={onDayClick}
-    />
+    <div className="relative min-w-0">
+      <MonthView
+        currentDate={currentDate}
+        monthDates={monthDates}
+        getAppointmentsForDate={getAppointmentsForDate}
+        onDayClick={onDayClick}
+      />
+      <CalendarLoadingMoreBadge isLoading={isLoadingMore} label={t('loadingMoreAppointments')} />
+    </div>
+  );
+}
+
+function CalendarLoadingMoreBadge({
+  isLoading,
+  label,
+}: {
+  readonly isLoading: boolean;
+  readonly label: string;
+}) {
+  if (!isLoading) return null;
+
+  return (
+    <div
+      className="pointer-events-none absolute right-3 top-3 z-10 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50/95 px-3 py-1.5 text-xs font-medium text-orange-700 shadow-sm"
+      aria-live="polite"
+    >
+      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+      <span>{label}</span>
+    </div>
   );
 }

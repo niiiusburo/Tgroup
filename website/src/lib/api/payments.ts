@@ -37,6 +37,13 @@ export interface ApiPayment {
   status?: 'posted' | 'voided';
   createdAt: string;
   allocations?: ApiPaymentAllocation[];
+  proof?: {
+    id: string;
+    proofImageBase64: string;
+    qrDescription: string | null;
+    confirmedAt: string | null;
+    confirmedBy: string | null;
+  } | null;
 }
 
 export async function fetchPayments(
@@ -176,4 +183,18 @@ export async function updatePayment(
 
 export async function deletePayment(id: string): Promise<{ success: boolean }> {
   return apiFetch<{ success: boolean }>(`/Payments/${id}`, { method: 'DELETE' });
+}
+
+export async function fetchPaymentById(id: string): Promise<ApiPayment> {
+  return apiFetch<ApiPayment>(`/Payments/${id}`);
+}
+
+export async function confirmPaymentProof(id: string): Promise<{
+  success: boolean;
+  proofId: string;
+  confirmedAt?: string;
+  confirmedBy?: string;
+  alreadyConfirmed: boolean;
+}> {
+  return apiFetch(`/Payments/${id}/proof/confirm`, { method: 'POST' });
 }

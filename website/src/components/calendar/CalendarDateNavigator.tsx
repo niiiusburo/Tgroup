@@ -86,7 +86,7 @@ export function CalendarDateNavigator({
   }
 
   return (
-    <div className="flex w-full items-center gap-2 sm:w-auto">
+    <div className="flex w-full min-w-0 flex-wrap items-center gap-2 xl:w-auto xl:flex-nowrap">
       <button
         onClick={() => onNavigate('prev')}
         className="min-h-10 min-w-10 p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
@@ -94,11 +94,11 @@ export function CalendarDateNavigator({
       >
         <ChevronLeft className="w-5 h-5" />
       </button>
-      <div ref={datePickerRef} className="relative min-w-0 flex-1 sm:flex-none">
+      <div ref={datePickerRef} className="relative min-w-0 flex-1 basis-[16rem] xl:flex-none">
         <button
           onClick={() => setIsOpen((value) => !value)}
           className={cn(
-            'min-h-10 w-full min-w-0 text-sm font-semibold text-gray-900 text-center px-3 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-2 sm:min-w-[150px] sm:text-base',
+            'min-h-10 w-full min-w-0 text-sm font-semibold text-gray-900 text-center px-3 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-2 sm:text-base xl:min-w-[15rem]',
             isOpen ? 'bg-gray-200' : 'hover:bg-gray-100',
           )}
         >
@@ -183,14 +183,14 @@ export function CalendarDateNavigator({
       </div>
       <button
         onClick={() => onNavigate('next')}
-        className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+        className="min-h-10 min-w-10 p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
         aria-label="Next"
       >
         <ChevronRight className="w-5 h-5" />
       </button>
       <button
         onClick={onToday}
-        className="ml-2 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+        className="min-h-10 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors whitespace-nowrap xl:ml-2"
       >
         {t('today', 'Today')}
       </button>

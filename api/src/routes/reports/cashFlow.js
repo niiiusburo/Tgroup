@@ -98,6 +98,8 @@ function classifyCashFlowRow(row) {
 function summarizeCashFlow(rows) {
   const categoryMap = new Map();
   const trendMap = new Map();
+  let moneyInConfirmed = 0;
+  let moneyInUnconfirmed = 0;
 
   for (const row of rows) {
     const item = classifyCashFlowRow(row);
@@ -112,6 +114,12 @@ function summarizeCashFlow(rows) {
     category.amount += item.amount;
     category.signedAmount += item.signedAmount;
     categoryMap.set(item.key, category);
+
+    if (item.signedAmount > 0) {
+      const isConfirmed = Boolean(row.proof_confirmed_at);
+      if (isConfirmed) moneyInConfirmed += item.signedAmount;
+      else moneyInUnconfirmed += item.signedAmount;
+    }
 
     if (item.date) {
       const trend = trendMap.get(item.date) || {
@@ -145,6 +153,8 @@ function summarizeCashFlow(rows) {
 
   return {
     moneyIn,
+    moneyInConfirmed,
+    moneyInUnconfirmed,
     moneyOut,
     netCashFlow: moneyIn - moneyOut,
     internalDepositUsed: categoryMap.get('deposit_usage')?.amount || 0,
@@ -177,8 +187,16 @@ router.post('/cash-flow/summary', requirePermission('reports.view'), async (req,
          p.deposit_used,
          p.cash_amount,
          p.bank_amount,
+         proof.confirmed_at AS proof_confirmed_at,
          COALESCE(p.payment_date, p.created_at) AS report_date
        FROM dbo.payments p
+       LEFT JOIN LATERAL (
+         SELECT pp.confirmed_at
+         FROM dbo.payment_proofs pp
+         WHERE pp.payment_id = p.id
+         ORDER BY pp.created_at DESC NULLS LAST, pp.id DESC
+         LIMIT 1
+       ) proof ON TRUE
        WHERE p.status IN ('posted', 'voided') ${f.where}
        ORDER BY report_date ASC`,
       f.params

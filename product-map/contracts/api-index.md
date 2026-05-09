@@ -89,7 +89,7 @@
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/` | Auth | `?offset, limit, search, orderid, partnerid` | `PaginatedResponse<SaleOrderLine>` |
+| GET | `/` | Auth | `?offset, limit, companyId/company_id, dateFrom/date_from, dateTo/date_to, state, partnerId/partner_id` | `PaginatedResponse<SaleOrderLine>` for dashboard service activity; sparse lines fall back to parent sale order date, location, partner, doctor, and totals |
 
 ## Payments (`/api/Payments`)
 
@@ -105,6 +105,7 @@
 | DELETE | `/:id` | Perm:`payment.void` | — | `{ success, id }` + reverses allocations |
 | POST | `/:id/void` | Perm:`payment.void` | `{ reason }` | `{ success, payment }` + reverses allocations |
 | POST | `/:id/proof` | Perm:`payment.edit` | `{ proofImageBase64, qrDescription }` | `{ success, proofId }` |
+| POST | `/:id/proof/confirm` | Perm:`payment.confirm` | — | `{ success, proofId, confirmedAt, confirmedBy, alreadyConfirmed }` |
 
 ## Monthly Plans (`/api/MonthlyPlans`)
 

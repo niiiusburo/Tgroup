@@ -10,6 +10,105 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: Calendar Progressive Loading And iPad Toolbar Wrap
+
+Feature/edit name: Calendar Progressive Loading and iPad View Controls
+
+Changed URLs and API routes:
+- `/calendar`
+- `GET /api/Appointments` with `calendarMode=true`, `includeCounts=false`, date range filters, and paginated offsets.
+
+Affected data flows:
+- Calendar appointment pages render incrementally as each paginated API page arrives instead of waiting for the full day/week/month range.
+- Day view appointment cards mount in batches so large same-day schedules can paint before every card is rendered.
+- Closed smart filter drawer no longer recalculates doctor/status/color summaries for every appointment while staff are only viewing the calendar.
+- Calendar search suggestions only build after staff type at least two characters, preserving accent-insensitive matching through `normalizeText()`.
+- Day/Week/Month controls, date navigation, search, filter, export, and quick-add controls wrap into tablet-safe rows on iPad widths.
+
+User roles:
+- Any authenticated staff with `appointments.view`.
+- Staff with `appointments.add` should still see Quick Add.
+- Staff with `appointments.edit` should still open/edit appointment cards.
+- Staff with `appointments.export` should still see export actions.
+
+TestSprite execution items:
+- [ ] PENDING: Open `/calendar` as an appointment-view user and verify the calendar paints after the first appointment page while additional pages continue loading.
+- [ ] PENDING: Switch Day, Week, and Month views on iPad portrait and iPad landscape widths; verify the Day/Week/Month segmented control wraps cleanly and no label is clipped.
+- [ ] PENDING: On iPad widths, verify the date navigator, Today button, search, export, filter, and Quick Add controls do not overlap.
+- [ ] PENDING: Open the smart filter drawer after appointments load and verify doctor/status/color counts are available and Apply/Clear still work.
+- [ ] PENDING: Type an unaccented customer search term on `/calendar` and verify matching Vietnamese names/codes still appear.
+- [ ] PENDING: Click an appointment card as a user with `appointments.edit` and verify the edit form opens.
+
+Edge cases:
+- Empty date range: first page has no appointments and the calendar exits loading with the empty state.
+- Exact full API page: pagination must continue until the next short or empty page.
+- Rapid date/view switches: stale in-flight pages must not overwrite the newest selected calendar range.
+
+---
+
+# TestSprite Plan: Today's Services Activity Feed
+
+Feature/edit name: Today's Services Activity Feed
+
+Changed URLs and API routes:
+- `/` (Overview, Today's Services / Activity panel)
+- `GET /api/SaleOrderLines` (current-day service-line feed with date/location fallbacks)
+
+Affected data flows:
+- Overview loads sale order lines for the current clinic day using `dateFrom/dateTo` and selected location.
+- Sparse `saleorderlines` rows now fall back to parent `saleorders` for date, location, patient, doctor, status, and totals.
+- The panel search filters service, patient, phone/code, doctor, and order reference with accent-insensitive matching.
+
+User roles:
+- Any authenticated staff who can open `/` with `overview.view`; data still requires an authenticated API session.
+- Staff adding treatments through `/services` or customer records should see same-day services appear on Overview after refresh/focus.
+
+TestSprite execution items:
+- [ ] PENDING: Log in as admin/reception staff, open `/`, and verify Today's Services / Activity shows service rows for today.
+- [ ] PENDING: Create or edit a treatment dated today, return to `/`, and verify the new service appears without using mock data.
+- [ ] PENDING: Switch branch/location filter and verify only matching location services remain.
+- [ ] PENDING: Search with accent-insensitive text such as `tay trang` for `Tẩy trắng` and verify matching rows remain.
+- [ ] PENDING: Verify empty state appears when no services exist and filtered-empty state appears when search hides existing rows.
+
+Edge cases:
+- Service line has null `date`, `companyid`, `orderpartnerid`, or `employeeid`; Overview should still populate from parent sale order.
+- Cancelled service rows should show a cancelled status badge, not disappear silently.
+- API error should show the table error state instead of the old placeholder copy.
+
+---
+
+# TestSprite Plan: Payment Receipt Confirmation
+
+Feature/edit name: Payment Receipt Confirmation (Confirm Proof)
+
+Changed URLs and API routes:
+- `/payment`
+- `GET /api/Payments/:id` (now includes latest receipt proof metadata)
+- `POST /api/Payments/:id/proof/confirm`
+- `POST /api/Reports/cash-flow/summary` (adds confirmed vs unconfirmed money-in fields)
+
+Affected data flows:
+- Payment proof images are uploaded into `dbo.payment_proofs` and can be confirmed via `confirmed_at/confirmed_by`.
+- Cash-flow summary reports money-in split by whether a confirmed receipt proof exists for the payment.
+- Historical rows default to **unconfirmed** when there is no confirmed proof.
+
+User roles:
+- Super Admin: can confirm receipt proofs.
+- Dentist: can view payments and confirm receipt proofs (no add/refund/void unless separately granted).
+- Admin: must NOT be able to confirm receipt proofs.
+
+TestSprite execution items:
+- [ ] PENDING: With Dentist (payment.view + payment.confirm only), open `/payment`, view a payment receipt proof, and confirm it successfully.
+- [ ] PENDING: With Admin (no payment.confirm), open `/payment` and verify the confirm action is hidden and calling `POST /api/Payments/:id/proof/confirm` returns 403.
+- [ ] PENDING: Confirming an already-confirmed proof returns success with alreadyConfirmed=true.
+- [ ] PENDING: Call `POST /api/Reports/cash-flow/summary` and verify `moneyInConfirmed` + `moneyInUnconfirmed` equals `moneyIn`.
+
+Edge cases:
+- Payment is `voided`: receipt confirmation should be rejected with a clear conflict.
+- Payment has no proof uploaded: confirm endpoint returns 404 and UI shows "no proof" state.
+
+---
+
 # TestSprite Plan: Reporting And Permission Feedback Completion
 
 Feature/edit name: Revenue Recognition Reports, Cash Flow Report, Payment Permission Split, and Ho so Online Upload Gate
@@ -559,3 +658,89 @@ Regressions:
 Setup data and login state:
 - Use an authenticated admin/reporting session.
 - Use a date range containing known overallocated imported sale orders such as `SO45243` or high-delta examples from the audit query.
+
+---
+
+# TestSprite Plan: Face Recognition Live Enrollment Diagnostics
+
+Feature/edit name: Face Recognition Live Enrollment Diagnostics
+
+Changed URLs and API routes:
+- `https://nk.2checkin.com/customers/c34a3df9-6751-4835-8315-b432003b7fbc`
+- `GET /api/health`
+- `GET /api/Partners?search=T163752`
+- `GET /api/face/status/:partnerId`
+- `POST /api/face/recognize`
+- `POST /api/face/register`
+
+Affected data flows:
+- Customer profile Face ID badge reads `dbo.partners.face_registered_at` and `dbo.customer_face_embeddings`.
+- Quick face scan sends a live camera frame to `POST /api/face/recognize`, which compares it against active stored embeddings.
+- Face registration writes SFace embeddings into `dbo.customer_face_embeddings` and updates the customer profile face status.
+
+User roles:
+- Admin or clinic staff with `customers.view` can run quick scan and view customer profile status.
+- Staff with `customers.edit` can register or re-register face samples.
+
+Happy paths:
+- Open Eddie Munedane `T163752` and confirm the profile shows the Face ID badge.
+- Confirm `GET /api/face/status/:partnerId` reports `registered: true` with the expected sample count.
+- Capture a clear straight-on face scan and confirm it matches or shows a plausible candidate.
+- Register straight, left, and right samples and confirm a later scan matches the same profile.
+
+Edge cases:
+- Stored samples for the same customer scoring below the candidate threshold should be flagged as enrollment quality risk.
+- Low-light, angled, cropped, masked, or multi-face camera frames should fail clearly without corrupting existing samples.
+- Duplicate phone numbers across customer profiles should not affect face match identity.
+
+Regressions:
+- `/api/health` must continue reporting `faceService: true`.
+- Customer search for `T163752` must still resolve the exact profile.
+- Face recognition errors must not block unrelated customer profile workflows.
+
+Setup data and login state:
+- Use an authenticated live admin session on `https://nk.2checkin.com`.
+- Verification profile: `T163752`, partner id `c34a3df9-6751-4835-8315-b432003b7fbc`.
+- Current live evidence on 2026-05-09: two active SFace samples exist, but their stored-sample cosine similarity is only `0.6411`, below the live candidate threshold `0.85`.
+
+---
+
+# TestSprite Plan: Face ID Guided No-Match Enrollment
+
+Feature/edit name: Face ID Guided No-Match Enrollment
+
+Changed URLs and API routes:
+- Header Quick Face ID button on all authenticated pages
+- `POST /api/face/recognize`
+- `GET /api/Partners?search=...`
+- `POST /api/face/register`
+- `/customers/:id`
+
+Affected data flows:
+- A failed quick scan still runs recognition first and shows the customer search rescue panel.
+- After staff select a customer, the rescue flow opens guided profile capture and collects straight, left, and right face samples.
+- The frontend submits each guided sample to `POST /api/face/register` with source `no_match_rescue`.
+- Successful registration navigates staff to the selected customer profile.
+
+User roles:
+- Staff with `customers.view` can run Quick Face ID and search customers after no match.
+- Staff with `customers.edit` can save the guided no-match rescue samples.
+
+Happy paths:
+- Open Quick Face ID, capture a face that returns no match, search an existing customer, select the customer, and verify the button asks for 3 face angles.
+- Complete straight, left, and right captures and verify three `POST /api/face/register` calls are made for the selected customer.
+- Confirm the app navigates to `/customers/:id` after all samples save.
+
+Edge cases:
+- Staff cancels the guided enrollment modal and returns to the no-match rescue panel without losing the selected customer.
+- One of the three register calls fails; the popover should show the error and not navigate away.
+- Customer search returns duplicate phone numbers; staff must still select the intended customer by code/name before enrollment.
+
+Regressions:
+- A successful quick face match should still navigate directly to the matched customer.
+- Candidate review should still list possible matches without opening guided enrollment.
+- The existing add/edit customer face registration flow must still collect straight, left, and right samples.
+
+Setup data and login state:
+- Use an authenticated staff/admin session with `customers.view` and `customers.edit`.
+- For live regression, use `https://nk.2checkin.com` only when explicitly checking live; staging is `https://nk2.2checkin.com`, and local is this checkout.

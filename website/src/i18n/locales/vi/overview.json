@@ -42,6 +42,27 @@
     "noPatients": "Không có lịch hẹn hôm nay",
     "noPatientsYet": "Chưa có bệnh nhân"
   },
+  "todayServices": {
+    "title": "Dịch vụ / hoạt động hôm nay",
+    "searchPlaceholder": "Tìm kiếm dịch vụ...",
+    "loading": "Đang tải dịch vụ hôm nay...",
+    "error": "Không tải được dịch vụ hôm nay.",
+    "empty": "Dịch vụ sẽ hiển thị khi bệnh nhân được điều trị trong ngày.",
+    "filteredEmpty": "Không có dịch vụ khớp tìm kiếm.",
+    "columns": {
+      "service": "Dịch vụ",
+      "patient": "Bệnh nhân",
+      "qty": "SL",
+      "doctor": "Bác sĩ",
+      "amount": "Số tiền",
+      "status": "Trạng thái"
+    },
+    "status": {
+      "active": "Đang làm",
+      "completed": "Hoàn thành",
+      "cancelled": "Đã hủy"
+    }
+  },
   "addAppointment": "Thêm lịch hẹn",
   "editAppointment": "Sửa lịch hẹn",
   "markArrived": "Đánh dấu đã đến",

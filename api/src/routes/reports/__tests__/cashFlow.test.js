@@ -92,14 +92,16 @@ describe('reports cash-flow aggregation', () => {
 
   it('summarizes external money movement without double-counting deposit usage or voids', () => {
     const summary = summarizeCashFlow([
-      { amount: 5000000, method: 'mixed', cash_amount: 3000000, bank_amount: 1000000, deposit_used: 1000000, status: 'posted', report_date: '2026-05-06' },
-      { amount: 2000000, deposit_type: 'deposit', status: 'posted', report_date: '2026-05-06' },
+      { amount: 5000000, method: 'mixed', cash_amount: 3000000, bank_amount: 1000000, deposit_used: 1000000, status: 'posted', report_date: '2026-05-06', proof_confirmed_at: '2026-05-06T10:00:00Z' },
+      { amount: 2000000, deposit_type: 'deposit', status: 'posted', report_date: '2026-05-06', proof_confirmed_at: null },
       { amount: -500000, deposit_type: 'refund', status: 'posted', report_date: '2026-05-06' },
       { amount: 1000000, method: 'deposit', deposit_used: 1000000, status: 'posted', report_date: '2026-05-07' },
       { amount: 3000000, status: 'voided', report_date: '2026-05-07' },
     ]);
 
     expect(summary.moneyIn).toBe(6000000);
+    expect(summary.moneyInConfirmed).toBe(4000000);
+    expect(summary.moneyInUnconfirmed).toBe(2000000);
     expect(summary.moneyOut).toBe(500000);
     expect(summary.netCashFlow).toBe(5500000);
     expect(summary.internalDepositUsed).toBe(1000000);

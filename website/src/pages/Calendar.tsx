@@ -48,6 +48,7 @@ export function Calendar() {
     clearFilters,
     appointments,
     isLoading,
+    isLoadingMore,
     refresh,
     updateAppointmentStatus,
     markArrived
@@ -219,13 +220,17 @@ export function Calendar() {
     refresh?.();
   }, [refresh]);
 
+  const shouldBuildSuggestions = search.trim().length >= 2;
+
   const visibleAppointments = useMemo(() => {
+    if (!shouldBuildSuggestions) return [];
     if (viewMode === 'day') return getAppointmentsForDate(currentDate);
     if (viewMode === 'week') return weekDates.flatMap((d) => getAppointmentsForDate(d));
     return monthDates.flatMap((d) => getAppointmentsForDate(d));
-  }, [viewMode, currentDate, weekDates, monthDates, getAppointmentsForDate]);
+  }, [shouldBuildSuggestions, viewMode, currentDate, weekDates, monthDates, getAppointmentsForDate]);
 
   const customerSuggestions = useMemo(() => {
+    if (!shouldBuildSuggestions) return [];
     const map = new Map<string, {id: string;name: string;phone: string;code: string;}>();
     visibleAppointments.forEach((apt) => {
       if (!map.has(apt.customerId)) {
@@ -238,10 +243,10 @@ export function Calendar() {
       }
     });
     return Array.from(map.values());
-  }, [visibleAppointments]);
+  }, [shouldBuildSuggestions, visibleAppointments]);
 
   const filteredSuggestions = useMemo(() => {
-    if (search.trim().length < 2) return [];
+    if (!shouldBuildSuggestions) return [];
     const term = normalizeText(search.trim());
     return customerSuggestions.filter(
       (c) =>
@@ -249,7 +254,7 @@ export function Calendar() {
       normalizeText(c.phone).includes(term) ||
       normalizeText(c.code).includes(term)
     );
-  }, [customerSuggestions, search]);
+  }, [shouldBuildSuggestions, customerSuggestions, search]);
 
   return (
     <div className="space-y-4">
@@ -283,6 +288,7 @@ export function Calendar() {
 
       <CalendarViewPanel
         isLoading={isLoading}
+        isLoadingMore={isLoadingMore}
         viewMode={viewMode}
         currentDate={currentDate}
         weekDates={weekDates}
@@ -314,27 +320,30 @@ export function Calendar() {
         />
       )}
 
-      <SmartFilterDrawer
-        isOpen={isFilterOpen}
-        onClose={closeFilter}
-        appointments={appointments}
-        draftDoctors={doctorsFilter.selected}
-        onToggleDoctor={(name) => {
-          if (name === '__ALL__') doctorsFilter.clear();else
-          doctorsFilter.toggle(name);
-        }}
-        draftStatuses={statusesFilter.selected}
-        onToggleStatus={(value) => {
-          if (value as unknown as string === '__ALL__') statusesFilter.clear();else
-          statusesFilter.toggle(value);
-        }}
-        draftColors={colorsFilter.selected}
-        onToggleColor={(code) => {
-          if (code === '__ALL__') colorsFilter.clear();else
-          colorsFilter.toggle(code);
-        }}
-        onApply={applyFilter}
-        onClear={clearFilter} />
+      {isFilterOpen && (
+        <SmartFilterDrawer
+          isOpen={isFilterOpen}
+          onClose={closeFilter}
+          appointments={appointments}
+          draftDoctors={doctorsFilter.selected}
+          onToggleDoctor={(name) => {
+            if (name === '__ALL__') doctorsFilter.clear();else
+            doctorsFilter.toggle(name);
+          }}
+          draftStatuses={statusesFilter.selected}
+          onToggleStatus={(value) => {
+            if (value as unknown as string === '__ALL__') statusesFilter.clear();else
+            statusesFilter.toggle(value);
+          }}
+          draftColors={colorsFilter.selected}
+          onToggleColor={(code) => {
+            if (code === '__ALL__') colorsFilter.clear();else
+            colorsFilter.toggle(code);
+          }}
+          onApply={applyFilter}
+          onClear={clearFilter}
+        />
+      )}
       
 
       {canExportAppointments && (

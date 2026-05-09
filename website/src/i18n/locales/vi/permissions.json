@@ -42,6 +42,7 @@
       "view": "Xem lịch sử thanh toán",
       "add": "Tạo thanh toán mới",
       "edit": "Chỉnh sửa thông tin thanh toán",
+      "confirm": "Xác nhận biên lai/chứng từ thanh toán",
       "refund": "Hoàn tiền thanh toán",
       "void": "Hủy hoặc xóa thanh toán đã ghi nhận và hoàn tác phân bổ",
       "export": "Xuất Excel thanh toán"
