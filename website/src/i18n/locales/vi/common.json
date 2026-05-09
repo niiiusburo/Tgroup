@@ -257,6 +257,7 @@
     "cameraStarting": "Đang mở camera...",
     "scanning": "Đang tìm khuôn mặt...",
     "faceDetected": "Đã phát hiện khuôn mặt",
+    "lowQuality": "Chất lượng thấp",
     "quality": "Chất lượng",
     "profileStep": "Bước {{current}}/{{total}}: {{pose}}",
     "poseStraight": "Nhìn thẳng",
@@ -267,7 +268,6 @@
     "poseRightHint": "Quay đầu sang phải, giữ yên rồi nhấn Chụp.",
     "holdSteady": "Giữ yên, nhấn Chụp",
     "capturePose": "Chụp",
-    "autoCapturing": "Đang tự chụp...",
     "cameraError": "Không thể truy cập camera. Vui lòng cấp quyền."
   },
   "combobox": {

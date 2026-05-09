@@ -10,6 +10,37 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: Face ID Quality-Gated Quick Scan
+
+Feature/edit name: Face ID Quality-Gated Quick Scan
+
+Changed URLs and API routes:
+- Global header Face ID button on authenticated app pages
+- `POST /api/face/recognize` is called only after the browser capture reaches the hardened quality gate
+
+Affected data flows:
+- FaceCaptureModal analyzes the live camera stream before sending any image for recognition.
+- Medium-quality frames and tiny detected faces keep the camera open and show low-quality feedback.
+- High-quality, sufficiently large faces still auto-submit for recognition without showing internal auto-capture copy.
+- No-match recognition continues to show the customer search/rescue popover so staff can register straight, left, and right samples.
+
+User roles:
+- Any authenticated staff who can see the global header Face ID button.
+- Staff registering a no-match face to a customer through the quick-scan rescue flow.
+
+TestSprite execution items:
+- [ ] PENDING: Open the Face ID quick scan and verify a low-quality or poorly framed face keeps the modal open with low-quality feedback.
+- [ ] PENDING: Present a clear, close face and verify recognition runs and then shows either a match, possible matches, or the no-match registration search.
+- [ ] PENDING: Verify the overlay does not display internal "auto capturing" copy while it is collecting the final frame.
+- [ ] PENDING: From a no-match result, search a customer and verify the three-angle guided enrollment still starts.
+
+Edge cases:
+- Native FaceDetector unavailable: use frame quality only but still require the hardened quality percentage.
+- Native FaceDetector sees a very small face: do not recognize until the face fills enough of the frame.
+- Camera permission denied: existing camera error message remains visible.
+
+---
+
 # TestSprite Plan: Calendar Progressive Loading And iPad Toolbar Wrap
 
 Feature/edit name: Calendar Progressive Loading and iPad View Controls

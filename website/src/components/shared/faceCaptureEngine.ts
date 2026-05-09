@@ -16,7 +16,7 @@ type FaceDetectorConstructor = new (options?: {
   maxDetectedFaces?: number;
 }) => FaceDetectorInstance;
 
-export const AUTO_CAPTURE_SCORE = 0.68;
+export const AUTO_CAPTURE_SCORE = 0.85;
 export const AUTO_CAPTURE_READY_FRAMES = 6;
 export const DETECTION_INTERVAL_MS = 260;
 export const PROFILE_POSE_SETTLE_MS = 650;
@@ -134,7 +134,7 @@ export async function analyzeFrame(
     const faceArea =
       (face.boundingBox.width * face.boundingBox.height) / (video.videoWidth * video.videoHeight);
     const faceSizeScore = Math.max(0, Math.min(1, (faceArea - 0.06) / 0.18));
-    const score = Math.max(frameQuality * 0.45 + faceSizeScore * 0.55, frameQuality);
+    const score = frameQuality * 0.45 + faceSizeScore * 0.55;
 
     return {
       score,

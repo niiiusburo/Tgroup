@@ -46,13 +46,13 @@ export function FaceCaptureModal({
   const completedPoseCount = isProfileCapture ? profileImages.length : 0;
   const isSidePose = currentPose?.id !== 'center';
   const detectionLabel =
-    detectionState === 'capturing' ?
-      t('faceCapture.autoCapturing', 'Auto capturing...') :
-      isReady ?
-        t('faceCapture.faceDetected', 'Face detected') :
-      isSidePose ?
-        t('faceCapture.holdSteady', 'Hold steady, tap Capture') :
-        t('faceCapture.scanning', 'Scanning for face...');
+    isReady ?
+      t('faceCapture.faceDetected', 'Face detected') :
+    detectionScore > 0.4 ?
+      t('faceCapture.lowQuality', 'Low quality') :
+    isSidePose ?
+      t('faceCapture.holdSteady', 'Hold steady, tap Capture') :
+      t('faceCapture.scanning', 'Scanning for face...');
   const captureBtnLabel =
     isSidePose && detectionState === 'scanning'
       ? t('faceCapture.capturePose', 'Chụp pose')
@@ -98,10 +98,7 @@ export function FaceCaptureModal({
                   <div className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold shadow-sm ${
                     isReady ? 'bg-emerald-500 text-white' : 'bg-black/35 text-white'
                   }`}>
-                    {detectionState === 'capturing' ?
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> :
-                      <ScanFace className="w-3.5 h-3.5" />
-                    }
+                    <ScanFace className="w-3.5 h-3.5" />
                     <span>{detectionLabel}</span>
                     <span className="tabular-nums opacity-90">
                       {t('faceCapture.quality', 'Quality')} {detectionPercent}%

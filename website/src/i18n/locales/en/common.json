@@ -257,6 +257,7 @@
     "cameraStarting": "Starting camera...",
     "scanning": "Scanning for face...",
     "faceDetected": "Face detected",
+    "lowQuality": "Low quality",
     "quality": "Quality",
     "profileStep": "Step {{current}}/{{total}}: {{pose}}",
     "poseStraight": "Look straight",
@@ -267,7 +268,6 @@
     "poseRightHint": "Turn head to the right, hold steady, then tap Capture.",
     "holdSteady": "Hold steady, tap Capture",
     "capturePose": "Capture",
-    "autoCapturing": "Auto capturing...",
     "cameraError": "Cannot access camera. Please grant permission."
   },
   "combobox": {

@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.31.24",
+    "date": "2026-05-09",
+    "commit": "pending",
+    "highlights": "Face ID quick scan now waits for a stronger face sample before recognition.",
+    "sections": [
+      {
+        "title": "Face ID",
+        "items": [
+          "Quick Face ID keeps the camera open on low-quality or too-small faces instead of recognizing from weak samples.",
+          "The capture overlay now shows scanning, low quality, or face detected feedback without exposing internal auto-capture wording."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added FaceCaptureModal regression coverage for medium-quality frames, tiny detected faces, and quiet high-quality capture."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.31.23",
     "date": "2026-05-09",
     "commit": "da8a7d6e849f8173aa3d48f1d2b41aa27c657de4",

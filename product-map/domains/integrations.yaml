@@ -63,6 +63,7 @@ impact_tests:
 risk_level: medium
 notes:
   - face-service is the primary face recognition engine. It runs a Python FastAPI container with OpenCV YuNet (detection) and SFace (128-dim embedding extraction).
+  - FaceCaptureModal quick scan must wait for a high-quality, sufficiently large face sample before calling `/api/face/recognize`; low-quality or tiny detected faces should keep the camera open with quality feedback.
   - When quick scan cannot match a face, no-match rescue must guide staff through straight, left, and right captures before registering samples to a selected customer.
   - Compreface services remain defined in docker-compose.yml as a legacy fallback but are not required for core app startup.
   - "Hosoonline is currently mixed-contract: login credentials take precedence for image reads (`Authorization: Bearer <token>` plus access_token cookie); `HOSOONLINE_API_KEY` / `X-API-Key` remains as fallback for older patient health-checkup endpoints."

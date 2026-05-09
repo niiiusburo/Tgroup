@@ -20,6 +20,18 @@ describe('FaceCaptureModal', () => {
     return data;
   };
 
+  const createMediumQualityFrameData = () => {
+    const data = new Uint8ClampedArray(96 * 128 * 4);
+    for (let i = 0; i < data.length; i += 4) {
+      const luminance = (i / 4) % 2 === 0 ? 96 : 160;
+      data[i] = luminance;
+      data[i + 1] = luminance;
+      data[i + 2] = luminance;
+      data[i + 3] = 255;
+    }
+    return data;
+  };
+
   const mockCanvasContext = {
     drawImage: vi.fn(),
     getImageData: vi.fn(() => ({ data: createReadyFrameData() })),
@@ -63,6 +75,7 @@ describe('FaceCaptureModal', () => {
         callback(new Blob(['face'], { type: 'image/jpeg' }));
       }),
     });
+    mockCanvasContext.getImageData.mockImplementation(() => ({ data: createReadyFrameData() }));
     mockGetUserMedia.mockResolvedValue({
       getTracks: () => [{ stop: vi.fn() }],
     } as unknown as MediaStream);
@@ -72,6 +85,7 @@ describe('FaceCaptureModal', () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.clearAllMocks();
+    delete (globalThis as typeof globalThis & { FaceDetector?: unknown }).FaceDetector;
   });
 
   it('renders nothing when closed', () => {
@@ -148,6 +162,63 @@ describe('FaceCaptureModal', () => {
 
     expect(onCapture).toHaveBeenCalledTimes(1);
     expect(onCapture.mock.calls[0][0]).toBeInstanceOf(Blob);
+  });
+
+  it('keeps the camera open and avoids recognition when face quality is below the hardened threshold', async () => {
+    vi.useFakeTimers();
+    mockVideoWidth = 640;
+    mockVideoHeight = 480;
+    mockCanvasContext.getImageData.mockReturnValue({ data: createMediumQualityFrameData() });
+    const onCapture = vi.fn();
+
+    render(<FaceCaptureModal isOpen onCapture={onCapture} onCancel={vi.fn()} />);
+
+    await waitForCameraStart();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2600);
+    });
+
+    expect(screen.getByText('Chất lượng thấp')).toBeInTheDocument();
+    expect(screen.getByText('Chất lượng 78%')).toBeInTheDocument();
+    expect(onCapture).not.toHaveBeenCalled();
+  });
+
+  it('keeps scanning when the detected face is too small for a useful Face ID sample', async () => {
+    vi.useFakeTimers();
+    mockVideoWidth = 640;
+    mockVideoHeight = 480;
+    const detect = vi.fn().mockResolvedValue([{ boundingBox: { width: 40, height: 40 } }]);
+    (globalThis as typeof globalThis & { FaceDetector?: unknown }).FaceDetector = class {
+      detect = detect;
+    };
+    const onCapture = vi.fn();
+
+    render(<FaceCaptureModal isOpen onCapture={onCapture} onCancel={vi.fn()} />);
+
+    await waitForCameraStart();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2600);
+    });
+
+    expect(screen.getByText('Chất lượng thấp')).toBeInTheDocument();
+    expect(onCapture).not.toHaveBeenCalled();
+  });
+
+  it('does not reveal auto-capture copy while silently collecting the best frame', async () => {
+    vi.useFakeTimers();
+    mockVideoWidth = 640;
+    mockVideoHeight = 480;
+    const onCapture = vi.fn();
+
+    render(<FaceCaptureModal isOpen onCapture={onCapture} onCancel={vi.fn()} />);
+
+    await waitForCameraStart();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1800);
+    });
+
+    expect(onCapture).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText('Đang tự chụp...')).not.toBeInTheDocument();
   });
 
   it('guides profile capture through straight, left, and right samples', async () => {
