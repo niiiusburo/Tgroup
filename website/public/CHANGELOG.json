@@ -2,7 +2,7 @@
   {
     "version": "0.31.25",
     "date": "2026-05-09",
-    "commit": "pending",
+    "commit": "645db57e",
     "highlights": "Calendar Excel export now works for normal browser sessions after the Remember Me token-storage change.",
     "sections": [
       {
@@ -23,7 +23,7 @@
   {
     "version": "0.31.24",
     "date": "2026-05-09",
-    "commit": "pending",
+    "commit": "77ac2ab5",
     "highlights": "Face ID quick scan now waits for a stronger face sample before recognition.",
     "sections": [
       {
