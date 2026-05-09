@@ -16,7 +16,7 @@ const router = express.Router();
  */
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, rememberMe = false } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ error: 'email and password are required' });
@@ -58,9 +58,12 @@ router.post('/login', async (req, res) => {
       name: employee.name,
       email: employee.email,
       companyId: employee.companyId,
+      remember: Boolean(rememberMe),
     };
 
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
+      expiresIn: rememberMe ? '60d' : '24h',
+    });
 
     return res.json({
       token,
@@ -86,7 +89,7 @@ router.post('/login', async (req, res) => {
  */
 router.get('/me', requireAuth, async (req, res) => {
   try {
-    const { employeeId } = req.user;
+    const { employeeId, remember } = req.user;
 
     const rows = await query(
       `SELECT p.id, p.name, p.email, p.companyid AS "companyId", c.name AS "companyName"
@@ -103,7 +106,7 @@ router.get('/me', requireAuth, async (req, res) => {
     const employee = rows[0];
     const permissions = await resolveEffectivePermissions(employeeId);
 
-    return res.json({
+    const response = {
       user: {
         id: employee.id,
         name: employee.name,
@@ -112,7 +115,21 @@ router.get('/me', requireAuth, async (req, res) => {
         companyName: employee.companyName,
       },
       permissions,
-    });
+    };
+
+    // If the user is in "remember me" mode, refresh their JWT TTL on every /me call.
+    if (remember) {
+      const tokenPayload = {
+        employeeId: employee.id,
+        name: employee.name,
+        email: employee.email,
+        companyId: employee.companyId,
+        remember: true,
+      };
+      response.token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '60d' });
+    }
+
+    return res.json(response);
   } catch (err) {
     console.error('/me error:', err);
     return res.status(500).json({ error: 'Internal server error' });

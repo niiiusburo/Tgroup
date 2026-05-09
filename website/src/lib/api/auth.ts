@@ -23,12 +23,21 @@ export interface LoginResponse {
   permissions: AuthPermissions;
 }
 
-export function login(email: string, password: string) {
-  return apiFetch<LoginResponse>('/Auth/login', { method: 'POST', body: { email, password } });
+export interface MeResponse {
+  user: AuthUser;
+  permissions: AuthPermissions;
+  token?: string;
 }
 
 export function fetchMe() {
-  return apiFetch<LoginResponse>('/Auth/me');
+  return apiFetch<MeResponse>('/Auth/me');
+}
+
+export function login(email: string, password: string, rememberMe = false) {
+  return apiFetch<LoginResponse>('/Auth/login', {
+    method: 'POST',
+    body: { email, password, rememberMe },
+  });
 }
 
 export function changePassword(oldPassword: string, newPassword: string) {

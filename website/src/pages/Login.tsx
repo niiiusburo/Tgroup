@@ -8,6 +8,7 @@ import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { getRememberMeEnabled, setRememberMeEnabled } from '@/lib/authTokenStorage';
 
 const EMAIL_STORAGE_KEY = 'tgclinic_saved_email';
 
@@ -43,6 +44,7 @@ export function Login() {
 
   const [email, setEmail] = useState(() => getSavedEmail());
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(() => getRememberMeEnabled());
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -59,12 +61,13 @@ export function Login() {
     setIsLoading(true);
 
     try {
-      await login(email, password);
+      await login(email, password, rememberMe);
 
       if (!mountedRef.current) return;
 
       // Only save email (not password) for prefill convenience
       saveEmail(email);
+      setRememberMeEnabled(rememberMe);
 
       navigate('/', { replace: true });
     } catch (err: unknown) {
@@ -122,7 +125,8 @@ export function Login() {
               <input
                 id="email"
                 type="email"
-                autoComplete="email"
+                name="email"
+                autoComplete="username"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -138,6 +142,7 @@ export function Login() {
               <input
                 id="password"
                 type="password"
+                name="password"
                 autoComplete="current-password"
                 required
                 value={password}
@@ -145,6 +150,20 @@ export function Login() {
                 placeholder="••••••••"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-colors"
               />
+            </div>
+
+            <div className="flex items-start gap-3">
+              <input
+                id="rememberMe"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <label htmlFor="rememberMe" className="text-sm text-gray-700">
+                <div className="font-medium">{t('rememberMe.title')}</div>
+                <div className="text-xs text-gray-500">{t('rememberMe.subtitle')}</div>
+              </label>
             </div>
 
             <button

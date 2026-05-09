@@ -3,9 +3,10 @@
  * @crossref:used-in[lib/api/* domain modules]
  */
 
+import { clearAuthToken, getAuthToken } from '@/lib/authTokenStorage';
+
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
 export const AUTH_UNAUTHORIZED_EVENT = 'tgclinic:auth-unauthorized';
-const TOKEN_KEY = 'tgclinic_token';
 
 export class ApiError extends Error {
   status: number;
@@ -74,7 +75,7 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
     headers['Content-Type'] = 'application/json';
   }
 
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = getAuthToken();
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
@@ -88,7 +89,7 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
 
   if (!res.ok) {
     if (res.status === 401) {
-      localStorage.removeItem(TOKEN_KEY);
+      clearAuthToken();
       window.dispatchEvent(new CustomEvent(AUTH_UNAUTHORIZED_EVENT));
     }
 

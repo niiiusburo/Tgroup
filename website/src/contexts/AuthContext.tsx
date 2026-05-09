@@ -19,8 +19,13 @@ import {
   type AuthUser,
   type AuthPermissions,
 } from '@/lib/api';
-
-const TOKEN_KEY = 'tgclinic_token';
+import {
+  clearAuthToken,
+  getAuthToken,
+  getRememberMeEnabled,
+  setAuthToken,
+  setRememberMeEnabled,
+} from '@/lib/authTokenStorage';
 
 interface AuthState {
   user: AuthUser | null;
@@ -30,7 +35,7 @@ interface AuthState {
 }
 
 interface AuthContextValue extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   logout: () => void;
   hasPermission: (permission: string) => boolean;
   hasLocationAccess: (locationId: string) => boolean;
@@ -57,10 +62,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const clearSession = useCallback((clearRemember = false) => {
-    localStorage.removeItem(TOKEN_KEY);
     if (clearRemember) {
-      localStorage.removeItem('tgclinic_remember');
+      setRememberMeEnabled(false);
     }
+    clearAuthToken();
     setState({ user: null, permissions: null, isAuthenticated: false, isLoading: false });
     dispatchAuthChange(null);
   }, []);
@@ -73,7 +78,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // On mount, validate existing token
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY);
+    const token = getAuthToken();
     if (!token) {
       setState((prev) => ({ ...prev, isLoading: false }));
       return;
@@ -81,6 +86,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     fetchMe()
       .then((res) => {
+        // Backend refreshes JWT TTL for remember-me sessions
+        if (res.token) {
+          setAuthToken(res.token, getRememberMeEnabled() ? 'remember' : 'session');
+        }
         setState({
           user: res.user,
           permissions: res.permissions,
@@ -94,9 +103,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
   }, [clearSession]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const res = await apiLogin(email, password);
-    localStorage.setItem(TOKEN_KEY, res.token);
+  const login = useCallback(async (email: string, password: string, rememberMe = false) => {
+    const res = await apiLogin(email, password, rememberMe);
+    setRememberMeEnabled(rememberMe);
+    setAuthToken(res.token, rememberMe ? 'remember' : 'session');
     setState({
       user: res.user,
       permissions: res.permissions,
