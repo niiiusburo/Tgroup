@@ -183,8 +183,15 @@
     "create": "Create a new record"
   },
   "face": {
-    "registerTitle": "Register face"
+    "registerTitle": "Register face",
+    "selectMatch": "Select a match",
+    "searchToRegister": "Search to register",
+    "searchPlaceholder": "Name, phone, or code...",
+    "registerToCustomer": "Register to customer"
   },
+  "faceId": "Face ID",
+  "quickAdd": "Quick add",
+  "minSearchLengthHint": "Type at least {{min}} characters to search",
   "relationships": "Relationships",
   "apply": "Apply",
   "reset": "Reset",
