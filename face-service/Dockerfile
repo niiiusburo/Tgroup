@@ -19,6 +19,7 @@ RUN mkdir -p /app/models && \
 
 FROM base AS runtime
 COPY --from=deps /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=deps /usr/local/bin /usr/local/bin
 COPY --from=models /app/models /app/models
 COPY face-service/main.py .
 ENV MODEL_DIR=/app/models

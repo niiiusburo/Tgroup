@@ -49,12 +49,7 @@ services:
       FACE_DETECTION_THRESHOLD: ${FACE_DETECTION_THRESHOLD:-0.6}
     ports:
       - "127.0.0.1:3002:3002"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3002/api/health"]
-      interval: 10s
-      timeout: 5s
-      start_period: 10s
-      retries: 3
+    # Healthcheck inherited from Dockerfile.api (Node-based; alpine has no curl).
 
   face-service:
     image: ${DOCKER_REGISTRY:-ghcr.io/niiiusburo/Tgroup}/tgroup-face-service:${DOCKER_IMAGE_TAG:-latest}
