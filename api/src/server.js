@@ -260,35 +260,43 @@ app.use('/api/telemetry', telemetryRoutes);
 app.use('/api/IpAccess', ipAccessRoutes);
 app.use('/api/Exports', exportsRoutes);
 
-app.get('/api/health', async (_req, res) => {
-  const checks = { db: false, faceService: false };
-  let dbLatency = 0;
-  let faceLatency = 0;
+// Track process uptime for observability
+const startTime = Date.now();
+let shutdownInProgress = false;
 
-  const dbStart = Date.now();
+// OBS-01: Health endpoint — returns 200 with DB status, or 503 if DB unreachable
+app.get('/api/health', async (_req, res) => {
+  if (shutdownInProgress) {
+    return res.status(503).json({
+      status: 'unhealthy',
+      db: 'down',
+      uptime_s: Math.floor((Date.now() - startTime) / 1000),
+    });
+  }
+
   try {
     await query('SELECT 1');
-    checks.db = true;
-    dbLatency = Date.now() - dbStart;
+    res.status(200).json({
+      status: 'healthy',
+      db: 'up',
+      uptime_s: Math.floor((Date.now() - startTime) / 1000),
+    });
   } catch (err) {
     console.error('[Health] DB check failed:', err.message);
+    res.status(503).json({
+      status: 'unhealthy',
+      db: 'down',
+      uptime_s: Math.floor((Date.now() - startTime) / 1000),
+    });
   }
+});
 
-  const faceStart = Date.now();
-  try {
-    const fh = await faceServiceHealth();
-    checks.faceService = fh.ok;
-    faceLatency = Date.now() - faceStart;
-  } catch (err) {
-    console.error('[Health] Face service check failed:', err.message);
-  }
-
-  const allHealthy = checks.db && checks.faceService;
-  res.status(allHealthy ? 200 : 503).json({
-    status: allHealthy ? 'healthy' : 'degraded',
-    checks,
-    latency: { db: dbLatency, faceService: faceLatency },
-    timestamp: new Date().toISOString(),
+// OBS-02: Version endpoint — returns build-time env vars (set by Docker build or defaults)
+app.get('/api/version.json', (_req, res) => {
+  res.json({
+    version: process.env.APP_VERSION || 'dev',
+    sha: process.env.APP_SHA || 'local',
+    built_at: process.env.APP_BUILT_AT || new Date().toISOString(),
   });
 });
 
@@ -322,9 +330,31 @@ process.on('uncaughtException', (err) => {
 // Export for testing
 module.exports = app;
 
+// LIFE-01: Graceful shutdown handler for SIGTERM
+// When the process receives SIGTERM, stop accepting new connections,
+// drain in-flight requests within 30s, then exit cleanly.
+let server = null;
+
 // Only start server if not in test environment
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
+  server = app.listen(PORT, () => {
     console.log(`TG Clinic API running on http://localhost:${PORT}`);
+  });
+
+  process.on('SIGTERM', () => {
+    console.log('[SIGTERM] Received termination signal, shutting down gracefully...');
+    shutdownInProgress = true;
+
+    // Stop accepting new connections
+    server.close(() => {
+      console.log('[SIGTERM] Server stopped accepting connections');
+      process.exit(0);
+    });
+
+    // Force exit after 30 seconds to prevent hanging
+    setTimeout(() => {
+      console.error('[SIGTERM] Forced shutdown after 30 seconds');
+      process.exit(1);
+    }, 30000);
   });
 }
