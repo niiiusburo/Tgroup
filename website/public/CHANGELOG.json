@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.31.30",
+    "date": "2026-05-10",
+    "commit": "PLACEHOLDER",
+    "highlights": "Version check now fetches from API endpoint enabling real-time deployment tracking.",
+    "sections": [
+      {
+        "title": "Observability",
+        "items": [
+          "Frontend version check now reads from /api/version.json instead of static public file.",
+          "Enables coordinated deployment detection and update notifications."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.31.29",
     "date": "2026-05-09",
     "commit": "PLACEHOLDER",
