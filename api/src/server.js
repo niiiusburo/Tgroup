@@ -207,6 +207,7 @@ const PUBLIC_PATHS = new Set([
   '/api/IpAccess/check',
   '/api/ipaccess/check',
   '/api/health',
+  '/api/version.json',
 ]);
 
 app.use('/api', (req, res, next) => {
