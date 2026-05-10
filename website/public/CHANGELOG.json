@@ -1,5 +1,59 @@
 [
   {
+    "version": "0.32.0-rc1",
+    "date": "2026-05-10",
+    "commit": "PLACEHOLDER",
+    "highlights": "v2.0 Deploy Speed Refactor — prebuilt images via GHCR, atomic VPS swap with auto-rollback, target deploy cycle <3 min.",
+    "sections": [
+      {
+        "title": "Observability",
+        "items": [
+          "Added /api/health endpoint with DB connectivity check and uptime tracking.",
+          "Added /api/version.json endpoint exposing build-time version, SHA, and timestamp.",
+          "Frontend VersionDisplay now reads from /api/version.json for real-time deployment tracking."
+        ]
+      },
+      {
+        "title": "Lifecycle",
+        "items": [
+          "API process traps SIGTERM, drains in-flight requests within 30s, exits cleanly.",
+          "face-service Python process traps SIGTERM for graceful shutdown."
+        ]
+      },
+      {
+        "title": "Image build",
+        "items": [
+          "Multi-stage Dockerfiles for api/web/face with BuildKit cache mounts (warm rebuilds: 2.8s api, 22s web, 2.7s face).",
+          "Final image sizes: api 75MB, web 27MB, face 162MB.",
+          "Added .dockerignore exclusions for tests, env files, and reports."
+        ]
+      },
+      {
+        "title": "Deploy pipeline",
+        "items": [
+          "GitHub Actions workflow build-and-push-ghcr.yml builds 3 images in parallel and pushes to GHCR with semver + SHA tags (no :latest).",
+          "docker-compose.prod.yml pulls prebuilt images from ghcr.io/niiiusburo/Tgroup namespace.",
+          "scripts/deploy.sh provides atomic VPS swap with healthcheck-gated 60s window and auto-rollback to .last-good-image."
+        ]
+      },
+      {
+        "title": "Local development",
+        "items": [
+          "docker-compose.dev.yml override mounts source for hot reload.",
+          "scripts/local-prod-mirror.sh validates production images locally before VPS deploy.",
+          "Makefile targets: make dev, make dev-stop, make dev-logs."
+        ]
+      },
+      {
+        "title": "Documentation",
+        "items": [
+          "docs/runbooks/GHCR-SETUP.md describes one-time PAT minting for VPS pulls.",
+          "scripts/setup-ghcr-pat.sh interactive helper for the operator."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.31.30",
     "date": "2026-05-10",
     "commit": "PLACEHOLDER",
