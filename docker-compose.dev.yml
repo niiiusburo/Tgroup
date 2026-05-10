@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    # Mount source for hot reload (nodemon or manual restart)
+    volumes:
+      - ./api/src:/app/src
+    environment:
+      NODE_ENV: development
+    ports:
+      - "127.0.0.1:3002:3002"
+    healthcheck:
+      # More lenient start_period for dev (code may be reloading)
+      test: ["CMD", "curl", "-f", "http://localhost:3002/api/health"]
+      interval: 10s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+  face-service:
+    build:
+      context: ./face-service
+      dockerfile: Dockerfile
+    environment:
+      DETECTION_THRESHOLD: ${FACE_DETECTION_THRESHOLD:-0.6}
+    ports:
+      - "${FACE_SERVICE_BIND_HOST:-127.0.0.1}:${FACE_SERVICE_HOST_PORT:-8001}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        VITE_API_URL: http://localhost:3002/api
+    # Mount source for Vite hot reload
+    volumes:
+      - ./website/src:/app/src
+    ports:
+      - "5175:80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost/index.html"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 3

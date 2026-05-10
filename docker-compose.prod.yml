@@ -1,0 +1,145 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: tgroup-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: tdental_demo
+    volumes:
+      - tgroup-pgdata:/var/lib/postgresql/data
+      - ./backups/tdental_demo_vps_20260415_162302.sql:/docker-entrypoint-initdb.d/01-init.sql
+    ports:
+      - "127.0.0.1:55433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d tdental_demo"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    image: ${DOCKER_REGISTRY:-ghcr.io/niiiusburo/Tgroup}/tgroup-api:${DOCKER_IMAGE_TAG:-latest}
+    container_name: tgroup-api
+    restart: unless-stopped
+    pull_policy: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/tdental_demo
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: "3002"
+      NODE_ENV: production
+      TZ: Asia/Ho_Chi_Minh
+      GOOGLE_PLACES_API_KEY: ${GOOGLE_PLACES_API_KEY}
+      HOSOONLINE_BASE_URL: ${HOSOONLINE_BASE_URL:-https://hosoonline.com}
+      HOSOONLINE_API_KEY: ${HOSOONLINE_API_KEY}
+      HOSOONLINE_USERNAME: ${HOSOONLINE_USERNAME}
+      HOSOONLINE_PASSWORD: ${HOSOONLINE_PASSWORD}
+      COMPREFACE_URL: ${COMPREFACE_URL:-http://compreface-api}
+      COMPREFACE_API_KEY: ${COMPREFACE_API_KEY}
+      FACE_SERVICE_URL: ${FACE_SERVICE_URL:-http://face-service:8000}
+      FACE_AUTO_MATCH_THRESHOLD: ${FACE_AUTO_MATCH_THRESHOLD:-0.95}
+      FACE_CANDIDATE_THRESHOLD: ${FACE_CANDIDATE_THRESHOLD:-0.85}
+      FACE_AUTO_MATCH_MARGIN: ${FACE_AUTO_MATCH_MARGIN:-0.05}
+      FACE_MAX_CANDIDATES: ${FACE_MAX_CANDIDATES:-3}
+      FACE_DETECTION_THRESHOLD: ${FACE_DETECTION_THRESHOLD:-0.6}
+    ports:
+      - "127.0.0.1:3002:3002"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/api/health"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+  face-service:
+    image: ${DOCKER_REGISTRY:-ghcr.io/niiiusburo/Tgroup}/tgroup-face-service:${DOCKER_IMAGE_TAG:-latest}
+    container_name: tgroup-face-service
+    restart: unless-stopped
+    pull_policy: always
+    environment:
+      DETECTION_THRESHOLD: ${FACE_DETECTION_THRESHOLD:-0.6}
+    ports:
+      - "${FACE_SERVICE_BIND_HOST:-127.0.0.1}:${FACE_SERVICE_HOST_PORT:-8001}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+  compreface-postgres-db:
+    image: postgres:11.5-alpine
+    container_name: compreface-postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: frs
+    volumes:
+      - compreface-db-data:/var/lib/postgresql/data
+
+  compreface-api:
+    image: exadel/compreface:1.2.0
+    container_name: compreface-api
+    restart: unless-stopped
+    depends_on:
+      - compreface-postgres-db
+    ports:
+      - "127.0.0.1:8000:80"
+    environment:
+      POSTGRES_URL: jdbc:postgresql://compreface-postgres-db:5432/frs
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      ADMIN_JAVA_OPTS: -Xmx1g
+      API_JAVA_OPTS: -Xmx4g
+      SAVE_IMAGES_TO_DB: "true"
+      MAX_FILE_SIZE: 5MB
+      MAX_REQUEST_SIZE: 10MB
+      CONNECTION_TIMEOUT: 10000
+      READ_TIMEOUT: 60000
+      COMPREFACE_API_JAVA_OPTS: -Xmx4g
+    volumes:
+      - compreface-api-data:/app/model-data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+  compreface-core:
+    image: exadel/compreface-core:1.2.0
+    container_name: compreface-core
+    restart: unless-stopped
+    environment:
+      ML_PORT: "3000"
+      IMG_LENGTH_LIMIT: "640"
+    depends_on:
+      - compreface-api
+
+  web:
+    image: ${DOCKER_REGISTRY:-ghcr.io/niiiusburo/Tgroup}/tgroup-web:${DOCKER_IMAGE_TAG:-latest}
+    container_name: tgroup-web
+    restart: unless-stopped
+    pull_policy: always
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "5175:80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost/index.html"]
+      interval: 10s
+      timeout: 5s
+      start_period: 5s
+      retries: 3
+
+volumes:
+  tgroup-pgdata:
+  compreface-db-data:
+  compreface-api-data:

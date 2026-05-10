@@ -1,14 +1,21 @@
-FROM node:20-alpine AS build
+# syntax=docker/dockerfile:1.7
+FROM node:20-alpine AS deps
 WORKDIR /app
+COPY contracts/package*.json /contracts/
+COPY website/package*.json ./
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --legacy-peer-deps --no-audit --no-fund
+
+FROM deps AS vite-build
 COPY contracts/ /contracts/
-COPY website/package.json website/package-lock.json ./
-RUN npm install --legacy-peer-deps
 COPY website/ .
 ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
 RUN npm run build
 
 FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=vite-build /app/dist /usr/share/nginx/html
 COPY nginx.docker.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 \
+    CMD wget -q -O- http://localhost/index.html | grep -q "<!DOCTYPE" || exit 1
