@@ -111,3 +111,5 @@ backups/*.sql.bak
 
 # Keep built contracts for local file: dependency
 !contracts/dist/
+.env.local-test
+screenshots/
