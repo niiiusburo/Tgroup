@@ -3,6 +3,8 @@
 import io
 import os
 import logging
+import signal
+import sys
 from typing import List, Optional
 
 import cv2
@@ -245,3 +247,15 @@ async def embed(image: UploadFile = File(...)):
             },
         },
     }
+
+
+# ─── Graceful Shutdown (LIFE-02) ────────────────────────────────────────────
+def sigterm_handler(signum, frame):
+    """LIFE-02: Clean shutdown on SIGTERM — exit process within 30s."""
+    logger.info("[SIGTERM] Received termination signal, exiting cleanly...")
+    sys.exit(0)
+
+
+signal.signal(signal.SIGTERM, sigterm_handler)
+logger.info("SIGTERM handler registered")
+
