@@ -50,7 +50,7 @@ export async function fetchVersion(): Promise<VersionInfo> {
   const timeoutId = setTimeout(() => controller.abort(), 10000);
 
   try {
-    const response = await fetch(`/version.json${cacheBuster}`, {
+    const response = await fetch(`/api/version.json${cacheBuster}`, {
       signal: controller.signal,
       cache: 'no-store',
       headers: {
