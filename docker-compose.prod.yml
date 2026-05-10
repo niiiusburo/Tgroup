@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  api:
+    image: ghcr.io/niiiusburo/tgroup-api:${TAG:-latest}
+    ports:
+      - "3002:3002"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/tdental_demo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/api/health"]
+      interval: 5s
+      timeout: 3s
+      start_period: 10s
+      retries: 5
+
+  web:
+    image: ghcr.io/niiiusburo/tgroup-web:${TAG:-latest}
+    ports:
+      - "5175:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 5s
+      timeout: 3s
+      start_period: 10s
+      retries: 5
+
+  face-service:
+    image: ghcr.io/niiiusburo/tgroup-face:${TAG:-latest}
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 5s
+      timeout: 3s
+      start_period: 15s
+      retries: 5
