@@ -1,12 +1,59 @@
 node_modules
+dist
+build
+*.tsbuildinfo
+
+# Test files & reports
+tests
+test
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+jest.config.js
+coverage
+playwright-report
+screenshots
+
+# Development & IDE
+.env*
 .git
+.github
+.gitignore
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
 .omc
 .agents
 .playwright-mcp
-screenshots
 blueprint
 frontend-truth
+
+# Logs & temporary
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.cache
 *.backup
 *.dump
 **/__tests__
 **/e2e
+
+# Project specific
+notes
+.planning
+.worktrees
+.claude
+reports
+scripts/tdental-*.js
+scripts/audit-*.js
+
+# Documentation
+README.md
+CHANGELOG.md
+*.md
