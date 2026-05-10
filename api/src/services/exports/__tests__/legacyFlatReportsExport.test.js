@@ -53,6 +53,7 @@ describe('legacyFlatReportsExport', () => {
         doctorname: 'Bác sĩ C',
         assistantname: 'Phụ tá D',
         dentalaidename: 'Trợ lý E',
+        customersourcename: 'Sale Online',
       },
     ]);
 
@@ -82,6 +83,7 @@ describe('legacyFlatReportsExport', () => {
       'Bác sĩ',
       'Phụ tá',
       'Trợ lý bác sĩ',
+      'Nguồn khách',
     ]);
     expect(sheet.getColumn(1).width).toBeUndefined();
     expect(sheet.getColumn(2).width).toBe(16);
@@ -105,6 +107,7 @@ describe('legacyFlatReportsExport', () => {
     expect(sheet.getCell('M2').value).toBe('Bác sĩ C');
     expect(sheet.getCell('N2').value).toBe('Phụ tá D');
     expect(sheet.getCell('O2').value).toBe('Trợ lý E');
+    expect(sheet.getCell('P2').value).toBe('Sale Online');
   });
 
   it('previews revenue with posted service payment filters and allocation proration SQL', async () => {
@@ -153,6 +156,7 @@ describe('legacyFlatReportsExport', () => {
         bank_amount: '1500000',
         salestaffname: 'Sale Online C',
         cskhname: 'CSKH D',
+        customersourcename: 'Khách vãng lai',
       },
     ]);
 
@@ -176,6 +180,7 @@ describe('legacyFlatReportsExport', () => {
       'Chuyển khoản',
       'Sale online',
       'CSKH',
+      'Nguồn khách',
     ]);
     expect(sheet.getColumn(5).width).toBe(12.796875);
     expect(sheet.getColumn(10).width).toBeUndefined();
@@ -186,6 +191,7 @@ describe('legacyFlatReportsExport', () => {
     expect(sheet.getCell('H2').value).toBe(1500000);
     expect(sheet.getCell('I2').value).toBe('Sale Online C');
     expect(sheet.getCell('J2').value).toBe('CSKH D');
+    expect(sheet.getCell('K2').value).toBe('Khách vãng lai');
   });
 
   it('previews deposit top-ups only', async () => {

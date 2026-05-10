@@ -67,12 +67,14 @@ function depositSelect(where) {
       p.bank_amount,
       sale_staff.name AS salestaffname,
       cskh_staff.name AS cskhname,
+      cs.name AS customersourcename,
       p.created_at
     FROM payments p
     LEFT JOIN partners pr ON pr.id = p.customer_id
     LEFT JOIN partners sale_staff ON sale_staff.id = pr.salestaffid
     LEFT JOIN partners cskh_staff ON cskh_staff.id = pr.cskhid
     LEFT JOIN companies customer_company ON customer_company.id = pr.companyid
+    LEFT JOIN customersources cs ON cs.id = pr.sourceid
     WHERE ${where}
   `;
 }

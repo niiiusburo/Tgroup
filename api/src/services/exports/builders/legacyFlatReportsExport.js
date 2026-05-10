@@ -72,6 +72,7 @@ const revenue = createBuilder({
     doctorName: row.doctorname || '',
     assistantName: row.assistantname || '',
     dentalAideName: row.dentalaidename || '',
+    customerSource: row.customersourcename || '',
   }),
 });
 
@@ -90,6 +91,7 @@ const deposit = createBuilder({
     bankAmount: numberValue(row.bank_amount),
     saleOnline: row.salestaffname || '',
     customerCare: row.cskhname || '',
+    customerSource: row.customersourcename || '',
   }),
 });
 
