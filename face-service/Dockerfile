@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 FROM base AS deps
-COPY requirements.txt .
+COPY face-service/requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir -r requirements.txt
 
@@ -20,7 +20,7 @@ RUN mkdir -p /app/models && \
 FROM base AS runtime
 COPY --from=deps /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=models /app/models /app/models
-COPY main.py .
+COPY face-service/main.py .
 ENV MODEL_DIR=/app/models
 ENV DETECTION_THRESHOLD=0.90
 ENV PYTHONUNBUFFERED=1
