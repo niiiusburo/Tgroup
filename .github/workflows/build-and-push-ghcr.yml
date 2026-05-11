@@ -2,7 +2,7 @@ name: Build and Push Docker Images to GHCR
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/v2.0-integration]
     tags: [v*]
   workflow_dispatch:
 
@@ -46,13 +46,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - image: tgroup-api
+          - image: api
             dockerfile: Dockerfile.api
             context: .
-          - image: tgroup-web
+          - image: web
             dockerfile: Dockerfile.web
             context: .
-          - image: tgroup-face
+          - image: face
             dockerfile: face-service/Dockerfile
             context: face-service
 
@@ -72,8 +72,8 @@ jobs:
       - name: Determine push condition
         id: push
         run: |
-          # Only push on push events to main or on tags
-          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == refs/tags/* ]]; then
+          # Push on push events to main/feat/v2.0-integration, tags, or workflow_dispatch
+          if [[ "${{ github.event_name }}" == "push" && ( "${{ github.ref }}" == "refs/heads/main" || "${{ github.ref }}" == "refs/heads/feat/v2.0-integration" ) ]] || [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == refs/tags/* ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "should_push=true" >> $GITHUB_OUTPUT
           else
             echo "should_push=false" >> $GITHUB_OUTPUT
@@ -108,16 +108,16 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Images Built:**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- \`ghcr.io/${{ github.repository_owner }}/tgroup-tgroup-api:${{ needs.extract-version.outputs.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`ghcr.io/${{ github.repository_owner }}/tgroup-tgroup-web:${{ needs.extract-version.outputs.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`ghcr.io/${{ github.repository_owner }}/tgroup-tgroup-face:${{ needs.extract-version.outputs.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.repository_owner }}/tgroup-api:${{ needs.extract-version.outputs.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.repository_owner }}/tgroup-web:${{ needs.extract-version.outputs.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`ghcr.io/${{ github.repository_owner }}/tgroup-face:${{ needs.extract-version.outputs.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Short SHA:** \`${{ needs.extract-version.outputs.sha_short }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** \`${{ needs.extract-version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Cache Scopes:**" >> $GITHUB_STEP_SUMMARY
-          echo "- api: \`type=gha,scope=tgroup-api\`" >> $GITHUB_STEP_SUMMARY
-          echo "- web: \`type=gha,scope=tgroup-web\`" >> $GITHUB_STEP_SUMMARY
-          echo "- face: \`type=gha,scope=tgroup-face\`" >> $GITHUB_STEP_SUMMARY
+          echo "- api: \`type=gha,scope=api\`" >> $GITHUB_STEP_SUMMARY
+          echo "- web: \`type=gha,scope=web\`" >> $GITHUB_STEP_SUMMARY
+          echo "- face: \`type=gha,scope=face\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Note:** No \`:latest\` tag is pushed. Use explicit semver tags (e.g., \`v0.31.29\`) or short SHA (e.g., \`sha-abc1234\`) for deployment. This prevents tag mutability issues and enables safe rollbacks." >> $GITHUB_STEP_SUMMARY
