@@ -60,6 +60,18 @@
 - Commission auto-calculation trigger is unknown (`product-map/unknowns.md` #12).
 - Report SQL accuracy needs manual validation against legacy system.
 
+**Commission Unknown Resolution Path (CRITICAL):**
+1. Audit `api/src/routes/commissions.js` and `api/src/services/commissionService.js` (if exists) for any background job, trigger, or scheduled task references.
+2. Check `dbo.commissionproductrules` for rule rows that map products to commission percentages.
+3. Determine if commission is calculated:
+   - A) On sale order state change (`done`)
+   - B) On payment allocation post
+   - C) By external Odoo sync
+   - D) Manually via admin UI only
+4. If no auto-calculation exists, decision required: build trigger (A or B) or document manual-only workflow.
+5. Update `product-map/unknowns.md` #12 with resolution status.
+6. Add commission use cases to `docs/USE-CASES.md` and commission workflow to `docs/WORKFLOWS.md`.
+
 ---
 
 ## Phase 4: Enterprise Architecture & Scale (Planned)
