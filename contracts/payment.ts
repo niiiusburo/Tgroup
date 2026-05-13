@@ -6,7 +6,11 @@ export const PaymentBaseSchema = z.object({
   customer_id: z.string().uuid(),
   service_id: z.string().uuid().optional().nullable(),
   amount: z.coerce.number().positive(),
-  method: z.enum(["cash", "bank_transfer", "card", "momo", "vnpay", "zalopay", "deposit", "mixed"]),
+  // NOTE: card/momo/vnpay/zalopay are schema-reserved but not yet wired end-to-end.
+  // Backend DB column is TEXT without CHECK constraint; frontend only renders
+  // cash / bank_transfer / deposit / mixed. Keep enum wide for forward compat
+  // but validate at route level if needed before enabling new methods.
+  method: z.enum(["cash", "bank_transfer", "deposit", "mixed"]),
   notes: z.string().optional().nullable(),
   payment_date: z.string().optional().nullable(),
   reference_code: z.string().optional().nullable(),
