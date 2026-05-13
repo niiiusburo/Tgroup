@@ -29,6 +29,11 @@ describe('xlsx batch import helpers', () => {
     expect(parseTimePart('09:00')).toBe('09:00');
   });
 
+  it('parses typed Excel date/time values without coercing them to strings', () => {
+    expect(parseDatePart(new Date(Date.UTC(2026, 4, 14)))).toBe('2026-05-14');
+    expect(parseTimePart(new Date(Date.UTC(1899, 11, 30, 11, 30)))).toBe('11:30');
+  });
+
   it('maps appointment statuses from the daily appointment spreadsheet', () => {
     expect(mapAppointmentStatus('Đang hẹn')).toBe('scheduled');
     expect(mapAppointmentStatus('Đã đến')).toBe('arrived');
@@ -61,6 +66,39 @@ describe('xlsx batch import helpers', () => {
       time: '15:15',
       datetime: '2026-05-04 15:15:00',
       content: 'KIẾM TRA NƯỚU CÒN SƯNG - Q',
+      status: 'scheduled',
+    });
+  });
+
+  it('normalizes appointment rows from the Đống Đa upload sheet headers', () => {
+    const row = normalizeAppointmentSheetRow({
+      rowNumber: 2,
+      source: {
+        'Mã KH': 'T9045',
+        'Khách hàng': 'Nguyễn Thị Ngọc Trâm',
+        'SĐT': '0374192956',
+        'Giờ hẹn': new Date(Date.UTC(1899, 11, 30, 11, 0)),
+        'Ngày hẹn': new Date(Date.UTC(2026, 4, 14)),
+        'Dịch vụ': '',
+        'Bác sĩ': 'Bác sĩ 1',
+        'Chi nhánh': 'Tấm Dentist Đống Đa',
+        'Loại hẹn': 'Tái khám',
+        'Ghi chú': 'chỉnh',
+      },
+    });
+
+    expect(row).toMatchObject({
+      rowNumber: 2,
+      ref: 'T9045',
+      customerName: 'Nguyễn Thị Ngọc Trâm',
+      phone: '0374192956',
+      date: '2026-05-14',
+      time: '11:00',
+      datetime: '2026-05-14 11:00:00',
+      branchName: 'Tấm Dentist Đống Đa',
+      doctorName: 'Bác sĩ 1',
+      content: 'chỉnh',
+      appointmentType: 'Tái khám',
       status: 'scheduled',
     });
   });
