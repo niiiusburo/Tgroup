@@ -203,70 +203,66 @@ This project can use OpenCode Plan and Build phases:
 | `product-map/contracts/dependency-rules.yaml` | Change checklists | Before API/UI/schema/permission changes |
 | `.claude/memory.md` | Shared session memory | At session start |
 | `docs/runbooks/*.md` | Operational playbooks | Before deploy/infra/verification/money work |
+| `docs/GLOSSARY.md` | Domain terms and disambiguations | Any code change in an unfamiliar domain |
+| `docs/CONTRACTS.md` | Frozen API schemas and integration contracts | Any API, frontend client, or integration change |
+| `docs/DATA-MODEL.md` | Full schema + ERD + invariant rules | Schema, migration, or query changes |
+| `docs/USE-CASES.md` | Actor-trigger-flow-postcondition catalog | Feature work, UX changes, bugfix root-cause |
+| `docs/WORKFLOWS.md` | End-to-end sequence diagrams | Cross-domain changes or integration work |
+| `docs/INVARIANTS.md` | Global truths that must never break | Any commit touching money, auth, or data consistency |
+| `docs/DEPENDENCY-MAP.md` | Module import graph and blast radius | Refactors, extractions, shared-code changes |
+| `docs/OWNERSHIP.md` | File/directory edit allowlists per role | Any edit outside your normal scope |
+| `docs/TEST-MATRIX.md` | Module → regression test mapping | Any code change |
+| `docs/ADR/` | Architectural Decision Records | Before challenging an established pattern |
+| `docs/RUNBOOK.md` | Deploy, rollback, health checks, incidents | Any deployment or infra change |
+| `docs/FAILURE-MODES.md` | Known broken patterns and war stories | Debugging production issues |
+| `docs/OBSERVABILITY.md` | Logs, metrics, traces, alerts | Adding telemetry or debugging runtime |
+| `docs/SECURITY.md` | Auth flow, RBAC, secrets, token structure | Auth, permission, or secret changes |
+| `docs/CHANGELOG.md` | Append-only semver change log | Planning releases or investigating regressions |
+| `docs/MIGRATIONS.md` | Schema migration log with rollback notes | Schema changes and deploy timing |
+| `docs/ROADMAP.md` | Phases, scope, dependencies, current marker | Planning new features or scheduling releases |
 
+---
 
-<claude-mem-context>
-# Memory Context
+## 16. Documentation Enforcement Rule
 
-# [Tgrouptest] recent context, 2026-05-05 9:38am GMT+7
+**Every task that touches a contract, invariant, data-model, or workflow MUST update the relevant doc and append a CHANGELOG entry in the same commit.**
 
-Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
-Format: ID TIME TYPE TITLE
-Fetch details: get_observations([IDs]) | Search: mem-search skill
+### What qualifies as a "touch"
+- Changing an API request/response shape → update `CONTRACTS.md`.
+- Adding/removing a database column or table → update `DATA-MODEL.md` and `MIGRATIONS.md`.
+- Changing a business rule that affects money, auth, or data consistency → update `INVARIANTS.md` (append new invariant or mark superseded).
+- Adding or removing a use case → update `USE-CASES.md`.
+- Changing an end-to-end flow → update `WORKFLOWS.md`.
+- Adding a new module or changing import boundaries → update `DEPENDENCY-MAP.md`.
+- Changing test coverage or test mapping → update `TEST-MATRIX.md`.
+- Making an architectural decision → add an ADR.
+- Encountering a new known-failure pattern → append `FAILURE-MODES.md`.
 
-Stats: 50 obs (21,678t read) | 1,041,275t work | 98% savings
+### What happens if code ships without doc updates
+**The task is treated as failed and rolled back.** The commit must be reverted or amended to include the doc update before it can be considered complete.
 
-### May 4, 2026
-12152 6:22p 🔵 Customer update spreadsheet contains 511 rows with customer code, name, phone, and branch
-12153 " 🔵 Appointment clearance scope: 6,082 future appointments with no dependent records
-12154 6:23p 🔵 Production database verified: 6,088 future appointments with CASCADE delete constraints
-12155 " 🔵 Customer update spreadsheet contains 510 new customers with no existing database matches
-12156 6:24p 🔵 Sample of 10 production appointments scheduled for clearance starting May 4, 2026
-12157 " 🔵 Customer update analysis reveals 70% new customers and 30% potential duplicates requiring manual review
-12158 6:25p 🟣 Bulk customer import dry-run transaction successfully tested 359 new customer inserts with rollback
-12159 6:28p 🔵 Appointment clearance scope and VPS database infrastructure mapped
-12160 " 🔵 Appointment data distribution across three VPS databases quantified
-12161 6:29p 🔵 VPS tdental-db contains 862 orphaned future appointments with zero linked treatment or payment data
-12162 6:30p 🔵 Cross-database comparison reveals 5,287 stale appointments in production tgroup-db requiring clearance
-12163 6:31p 🔵 VPS runs three independent calendar systems: TG Clinic production, TDental source, and standalone static calendar UI
-12164 6:32p ✅ Production tgroup-db cleared of all 6,088 future appointments from 2026-05-04 onward with full backup
-12165 " 🔵 Customer data import matching logic discovered
-12166 6:33p 🔵 Customer merge logic compares database state with field-level diff analysis
-12167 6:36p ✅ Complete clearance executed: all 216,512 remaining appointments deleted from production tgroup-db
-12168 6:37p 🔵 Post-clearance database verified intact with zero appointments and 35k+ preserved partners; new 7-row appointment source file identified
-12169 6:42p 🔵 Database configuration verified for tdental_demo
-12170 " ✅ Customer data migration committed to tdental_demo database
-12171 " 🔵 API server port mismatch discovered during verification
-12172 6:43p 🔵 Admin authentication credentials and API server port verified
-12174 6:44p 🔴 PostgreSQL COPY CSV Import Fixed with LF-Only Line Endings
-12175 " 🟣 Appointment Import System with Dry-Run Validation
-12176 " 🟣 Production Appointment Table Populated After Full Clearance
-12173 " 🔵 Customer data migration verified through API endpoint queries
-12177 6:45p 🔵 Production API Confirmed Serving Imported Appointments
-12196 9:45p 🟣 iPad responsive layout system implemented
-12197 " 🟣 DataTable component made horizontally scrollable for tablets
-12198 " 🟣 Form modals and complex layouts made tablet-responsive
-12199 " 🔵 TGroup clinic frontend uses Vite with React and real PostgreSQL API
-12200 9:47p 🟣 Automated iPad screenshot testing system implemented with Playwright
-12201 9:48p 🔵 iPad responsive design verified with zero horizontal overflow across all routes
-12202 " ✅ iPad responsive design changes staged for commit
-12214 10:08p 🔵 Employee Location Scope Selection Bug - Frontend State Not Persisted
-12215 " 🔴 Fixed Employee Primary Location Missing from Permission Response
-12216 10:09p ✅ Updated Auth Domain Documentation with Location Resolution Behavior
-12226 10:21p 🔵 Playwright test suite reveals sidebar interaction failures
-12227 " 🔵 Sidebar navigation elements visible but not clickable
-12228 10:23p 🔵 Syntax error in employee creation test assertion
-12229 10:25p 🔵 Complete test suite run reveals 72% failure rate with systematic UI interaction issues
-12230 10:27p ✅ Docker Deployment Completed
-12231 " 🔵 Production Deployment Verified
-12233 10:28p 🔵 Employee Location Scope Data Retrieved
-12235 " 🔵 Permission Resolution API Confirms Multi-Location Storage
-12236 10:29p 🔵 Production E2E Verification Passed
-12237 10:31p ✅ Production Screenshots Captured for Permission Release
-12239 " ✅ Development servers stopped on ports 3002 and 5175
-12243 10:37p 🟣 Employee table inline edit with post-save auto-selection
-12245 10:38p ✅ Development environment started for testing
-12247 10:39p 🔵 Customer form save succeeds but modal fails to close
+### Change log requirement
+Every runtime code change (frontend, backend, contracts, migrations) MUST append an entry to `docs/CHANGELOG.md` with:
+- Version bump in `website/package.json` (patch/minor/major per `AGENTS.md` §8).
+- Date.
+- Author (human or agent identifier).
+- One-line reason referencing an invariant, ADR, failure mode, or use case ID where applicable.
 
-Access 1041k tokens of past work via get_observations([IDs]) or mem-search skill.
-</claude-mem-context>
+Docs-only governance changes do not require a version bump, but they still require a CHANGELOG entry under the `Docs` category.
+
+### Cross-linking requirement
+Wherever possible, cross-link related docs:
+- Use-cases should cite invariant IDs (e.g., "Invariants touched: INV-003").
+- Workflows should cite use-case IDs and invariant IDs.
+- Failure modes should cite invariant IDs and ADR references.
+- ADRs should cite the decisions they supersede.
+
+### Verification command
+Before claiming a task complete, run:
+```bash
+# Check that docs were modified in the same commit
+git diff --name-only HEAD | grep -E "^docs/"
+# Check that CHANGELOG has a new entry
+git diff HEAD -- docs/CHANGELOG.md | grep "^+" | head -5
+```
+If no docs changes appear, the commit is incomplete.
