@@ -30,7 +30,7 @@ interface AuthState {
 }
 
 interface AuthContextValue extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   logout: () => void;
   hasPermission: (permission: string) => boolean;
   hasLocationAccess: (locationId: string) => boolean;
@@ -94,9 +94,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
   }, [clearSession]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const res = await apiLogin(email, password);
+  const login = useCallback(async (email: string, password: string, rememberMe = false) => {
+    const res = await apiLogin(email, password, rememberMe);
     localStorage.setItem(TOKEN_KEY, res.token);
+    if (rememberMe) {
+      localStorage.setItem('tgclinic_remember', 'true');
+    } else {
+      localStorage.removeItem('tgclinic_remember');
+    }
     setState({
       user: res.user,
       permissions: res.permissions,

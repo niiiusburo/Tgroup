@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Permission Domain — 8 Decision Cards</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --ink: #1a1d23;
+      --muted: #5a6372;
+      --border: #e3e6eb;
+      --good: #0d9f63;
+      --good-bg: #e6f7f0;
+      --bad: #d93a3a;
+      --bad-bg: #fdeaea;
+      --warn: #c97c0b;
+      --warn-bg: #fdf3e1;
+      --accent: #3b6de8;
+      --accent-bg: #eef2ff;
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 40px 20px;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      line-height: 1.55;
+    }
+    .wrap { max-width: 920px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 36px; }
+    header h1 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.3px; }
+    header p { color: var(--muted); margin: 0; font-size: 15px; }
+    .legend {
+      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px;
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600;
+      border: 1px solid var(--border); background: var(--card);
+    }
+    .chip .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.good { background: var(--good); }
+    .dot.bad { background: var(--bad); }
+    .dot.warn { background: var(--warn); }
+    .card {
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: var(--shadow); border: 1px solid var(--border);
+      margin-bottom: 24px; overflow: hidden;
+    }
+    .card-header {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 22px 24px 18px; border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #fff 0%, #fafbfc 100%);
+    }
+    .num {
+      width: 36px; height: 36px; display: grid; place-items: center;
+      border-radius: 10px; background: var(--accent); color: #fff;
+      font-weight: 800; font-size: 16px; flex-shrink: 0;
+    }
+    .card-header h2 { margin: 0; font-size: 18px; line-height: 1.3; }
+    .card-header .subtitle { margin: 4px 0 0; color: var(--muted); font-size: 13.5px; }
+    .card-body { padding: 22px 24px 24px; }
+
+    /* Mini diagram boxes */
+    .diagram { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; }
+    .option-box {
+      flex: 1 1 240px; border: 2px solid var(--border); border-radius: 12px;
+      padding: 16px; background: #fff; position: relative; transition: transform .08s ease;
+    }
+    .option-box:hover { transform: translateY(-1px); }
+    .option-box.pick { border-color: var(--good); background: var(--good-bg); }
+    .option-box.reject { border-color: var(--bad); background: var(--bad-bg); opacity: .95; }
+    .option-box.warn { border-color: var(--warn); background: var(--warn-bg); }
+    .option-badge {
+      position: absolute; top: -11px; left: 14px;
+      padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .4px;
+    }
+    .option-badge.pick { background: var(--good); color: #fff; }
+    .option-badge.reject { background: var(--bad); color: #fff; }
+    .option-badge.warn { background: var(--warn); color: #fff; }
+    .option-title { font-weight: 700; font-size: 15px; margin-bottom: 8px; padding-top: 6px; }
+    .option-desc { font-size: 13.5px; color: var(--muted); }
+    .mini-list { margin: 10px 0 0; padding-left: 18px; font-size: 13px; color: var(--ink); }
+    .mini-list li { margin-bottom: 6px; }
+
+    /* Flow arrows */
+    .flow { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+    .node {
+      padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border);
+      background: #fff; font-size: 13px; font-weight: 600;
+    }
+    .node.accent { background: var(--accent-bg); border-color: #c7d4f9; }
+    .node.good { background: var(--good-bg); border-color: #b3e6d0; }
+    .node.warn { background: var(--warn-bg); border-color: #f2d6a2; }
+    .arrow { color: var(--muted); font-size: 18px; }
+
+    .recommendation {
+      margin-top: 18px; padding: 14px 16px; border-radius: 10px;
+      background: var(--accent-bg); border: 1px solid #c7d4f9; display: flex; gap: 10px; align-items: flex-start;
+    }
+    .recommendation .rec-icon { font-size: 20px; line-height: 1; }
+    .recommendation .rec-text { font-size: 13.5px; }
+    .recommendation strong { color: var(--accent); }
+
+    .visual-caption { font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic; }
+
+    footer { text-align: center; margin-top: 10px; color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>🔐 Permission Domain — 8 Decision Cards</h1>
+      <p>Pick an option for each card. The green box is the recommended path.</p>
+    </header>
+
+    <div class="legend">
+      <div class="chip"><span class="dot good"></span> Recommended</div>
+      <div class="chip"><span class="dot warn"></span> Cautions</div>
+      <div class="chip"><span class="dot bad"></span> Not recommended</div>
+    </div>
+
+    <!-- CARD 1 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="num">1</div>
+        <div>
+          <h2>What permission should protect the <code>/services</code> page?</h2>
+          <p class="subtitle">Right now the Services page is gated by <code>customers.edit</code>, which makes no sense — it’s not about customers.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <p style="margin:0 0 8px; font-size:14px;"><strong>Think of it like keys to rooms:</strong></p>
+        <div class="diagram">
+          <div class="option-box pick">
+            <div class="option-badge pick">Pick this</div>
+            <div class="option-title">🟢 services.view</div>
+            <div class="option-desc">A "Services" key opens the Services room. Clean and obvious.</div>
+            <ul class="mini-list">
+              <li>Staff with <code>services.view</code> can open the page</li>
+              <li>Staff with <code>services.edit</code> can change data</li>
+            </ul>
+          </div>
+          <div class="option-box reject">
+            <div class="option-badge reject">Don't pick</div>
+            <div class="option-title">🔴 customers.edit</div>
+            <div class="option-desc">Using a "Customer" key to open the "Services" room is confusing and hides real access.</div>
+            <ul class="mini-list">
+              <li>A receptionist who can edit customers might not need services</li>
+              <li>Creates hidden security holes</li>
+            </ul>
+          </div>
+        </div>
+        <div class="recommendation">
+          <div class="rec-icon">💡</div>
+          <div class="rec-text"><strong>Recommendation:</strong> Use <code>services.view</code> for read access and <code>services.edit</code> for mutations. This makes the key match the room.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 2 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="num">2</div>
+        <div>
+          <h2>What permission should control SaleOrders and treatment writes?</h2>
+          <p class="subtitle">When a staff member creates a treatment plan or a sale order, which key should unlock that action?</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="diagram">
+          <div class="option-box warn">
+            <div class="option-badge warn">Caution</div>
+            <div class="option-title">🟡 customers.edit</div>
+            <div class="option-desc">If a treatment is part of a customer record, the Customer key can work — but only if treatments are truly customer edits.</div>
+          </div>
+          <div class="option-box pick">
+            <div class="option-badge pick">Pick this</div>
+            <div class="option-title">🟢 saleorders.edit <em>or keep</em> customers.edit</div>
+            <div class="option-desc">If treatments are customer-record edits, keep <code>customers.edit</code>. If they are independent sales actions, create <code>saleorders.edit</code>.</div>
+          </div>
+        </div>
+        <div class="flow">
+          <div class="node">Treatment created</div>
+          <div class="arrow">→</div>
+          <div class="node accent">Is it part of the customer file?</div>
+          <div class="arrow">→</div>
+          <div class="node good">Yes → customers.edit</div>
+          <div class="arrow">→</div>
+          <div class="node warn">No → saleorders.edit</div>
+        </div>
+        <p class="visual-caption">Visual: A treatment note inside a customer folder uses the Customer key. A standalone sale invoice uses its own Sale key.</p>
+        <div class="recommendation">
+          <div class="rec-icon">💡</div>
+          <div class="rec-text"><strong>Recommendation:</strong> Keep <code>customers.edit</code> only if treatments are truly edits to the customer record. Otherwise, introduce <code>saleorders.edit</code> so sales actions have their own lock.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 3 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="num">3</div>
+        <div>
+          <h2>Should Hosoonline patient creation and upload have separate permissions?</h2>
+          <p class="subtitle">Right now docs say <code>external_checkups.create</code> but the backend checks <code>upload</code>. They are two different doors.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="diagram">
+          <div class="option-box pick">
+            <div class="option-badge pick">Pick this</div>
+            <div class="option-title">🟢 external_checkups.create <em>and</em> external_checkups.upload</div>
+            <div class="option-desc">Two separate keys: one to create the patient record, one to attach files.</div>
+          </div>
+          <div class="option-box reject">
+            <div class="option-badge reject">Don't pick</div>
+            <div class="option-title">🔴 Use only one for both</div>
+            <div class="option-desc">Giving someone the upload key and letting them create records (or vice versa) is a mismatch.</div>
+          </div>
+        </div>
+        <div class="flow">
+          <div class="node">Hosoonline patient</div>
+          <div class="arrow">→</div>
+          <div class="node good">external_checkups.create</div>
+          <div class="arrow">+</div>
+          <div class="node good">external_checkups.upload</div>
+          <div class="arrow">=</div>
+          <div class="node accent">Two separate checks</div>
+        </div>
+        <div class="recommendation">
+          <div class="rec-icon">💡</div>
+          <div class="rec-text"><strong>Recommendation:</strong> Yes — patient creation requires <code>external_checkups.create</code>; file upload requires <code>external_checkups.upload</code>. Docs and code must say the same thing.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 4 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="num">4</div>
+        <div>
+          <h2>Should payment patch and payment proof use the same permission?</h2>
+          <p class="subtitle">Patching a payment record is editing data. Uploading proof is adding a file. Same page, different actions.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="diagram">
+          <div class="option-box pick">
+            <div class="option-badge pick">Pick this</div>
+            <div class="option-title">🟢 payment.add (proof) + payment.edit (patch)</div>
+            <div class="option-desc">Proof upload = adding something new (add). Record patch = changing existing data (edit).</div>
+          </div>
+          <div class="option-box reject">
+            <div class="option-badge reject">Don't pick</div>
+            <div class="option-title">🔴 payment.add for everything</div>
+            <div class="option-desc">If anyone who can upload a receipt can also edit the amount, that’s dangerous.</div>
+          </div>
+        </div>
+        <div class="flow">
+          <div class="node">Upload proof image</div>
+          <div class="arrow">→</div>
+          <div class="node good">payment.add</div>
+          <div style="width:20px"></div>
+          <div class="node">Change amount / status</div>
+          <div class="arrow">→</div>
+          <div class="node good">payment.edit</div>
+        </div>
+        <div class="recommendation">
+          <div class="rec-icon">💡</div>
+          <div class="rec-text"><strong>Recommendation:</strong> Proof upload uses <code>payment.add</code>; record patch uses <code>payment.edit</code>. Registry and docs must match.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 5 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="num">5</div>
+        <div>
+          <h2>Should the Permission Board show only real, registry-backed permissions?</h2>
+          <p class="subtitle">Right now the matrix generates permission strings from labels, so it shows fake or missing permissions that don’t exist in the real registry.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="diagram">
+          <div class="option-box pick">
+            <div class="option-badge pick">Pick this</div>
+            <div class="option-title">🟢 Show only real permissions</div>
+            <div class="option-desc">The board reads from the canonical registry. If a permission isn’t in the registry, it doesn’t appear.</div>
+            <ul class="mini-list">
+              <li>No fake buttons</li>
+              <li>No missing permissions</li>
+              <li>What you see = what the backend enforces</li>
+            </ul>
+          </div>
+          <div class="option-box reject">
+            <div class="option-badge reject">Don't pick</div>
+            <div class="option-title">🔴 Generate from labels</div>
+            <div class="option-desc">Labels can be out of sync, so the board shows permissions that don’t exist or hides ones that do.</div>
+          </div>
+        </div>
+        <div class="recommendation">
+          <div class="rec-icon">💡</div>
+          <div class="rec-text"><strong>Recommendation:</strong> Yes — the Permission Board must be a direct mirror of the registry. If it’s not in the code, it shouldn’t be on the board.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 6 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="num">6</div>
+        <div>
+          <h2>If an employee has no location scope set, what does that mean?</h2>
+          <p class="subtitle">Empty location scope is ambiguous: their home branch? All branches? Nowhere?</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="diagram">
+          <div class="option-box pick">
+            <div class="option-badge pick">Pick this</div>
+            <div class="option-title">🟢 Primary branch only</div>
+            <div class="option-desc">If you don’t say where someone works, they work at their home branch. Safe default.</div>
+          </div>
+          <div class="option-box warn">
+            <div class="option-badge warn">Risky</div>
+            <div class="option-title">🟡 All branches</div>
+            <div class="option-desc">Empty means everywhere. A typo could give someone global access by accident.</div>
+          </div>
+          <div class="option-box reject">
+            <div class="option-badge reject">Don't pick</div>
+            <div class="option-title">🔴 No access</div>
+            <div class="option-desc">Empty means locked out. A new hire with no scope set can’t log in — support nightmare.</div>
+          </div>
+        </div>
+        <div class="flow">
+          <div class="node">Location scope = empty</div>
+          <div class="arrow">→</div>
+          <div class="node good">Home / primary branch</div>
+          <div class="arrow">(safe default)</div>
+        </div>
+        <div class="recommendation">
+          <div class="rec-icon">💡</div>
+          <div class="rec-text"><strong>Recommendation:</strong> Empty scope means <strong>primary branch only</strong>. It’s the least surprising behavior: if you don’t specify extra locations, you only see your own.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 7 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="num">7</div>
+        <div>
+          <h2>Should the system stop an admin from deleting their own <code>permissions.edit</code>?</h2>
+          <p class="subtitle">An admin with permissions.edit can edit anyone’s permissions — including their own. Should they be allowed to remove it from themselves?</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="diagram">
+          <div class="option-box pick">
+            <div class="option-badge pick">Pick this</div>
+            <div class="option-title">🟢 Block or confirm</div>
+            <div class="option-desc">If you try to remove your own admin key, the system says "Are you sure?" or simply blocks it.</div>
+            <ul class="mini-list">
+              <li>Prevents accidental self-lockout</li>
+              <li>Requires explicit confirmation if allowed at all</li>
+            </ul>
+          </div>
+          <div class="option-box reject">
+            <div class="option-badge reject">Don't pick</div>
+            <div class="option-title">🔴 Allow silently</div>
+            <div class="option-desc">One wrong click and the only admin is locked out of permissions forever. Someone else must rescue them.</div>
+          </div>
+        </div>
+        <div class="recommendation">
+          <div class="rec-icon">💡</div>
+          <div class="rec-text"><strong>Recommendation:</strong> Yes — block or require strong confirmation before an admin can remove their own <code>permissions.edit</code>. Think of it like a safety cover on a master key.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 8 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="num">8</div>
+        <div>
+          <h2>Should “Remember Me” actually last 60 days?</h2>
+          <p class="subtitle">The login screen and docs tell users "Remember me for 60 days." But the API signs tokens that expire in 24 hours.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="diagram">
+          <div class="option-box pick">
+            <div class="option-badge pick">Pick this</div>
+            <div class="option-title">🟢 Make it 60 days</div>
+            <div class="option-desc">If the checkbox says 60 days, the cookie/token should live for 60 days. Promise = reality.</div>
+          </div>
+          <div class="option-box reject">
+            <div class="option-badge reject">Don't pick</div>
+            <div class="option-title">🔴 Keep mismatch</div>
+            <div class="option-desc">Users think they stay logged in, but they’re kicked out tomorrow. Support tickets and frustration.</div>
+          </div>
+        </div>
+        <div class="flow">
+          <div class="node">User checks "Remember me"</div>
+          <div class="arrow">→</div>
+          <div class="node accent">UI says 60 days</div>
+          <div class="arrow">→</div>
+          <div class="node good">API must match: 60 days</div>
+        </div>
+        <div class="recommendation">
+          <div class="rec-icon">💡</div>
+          <div class="rec-text"><strong>Recommendation:</strong> Yes — implement the 60-day token lifetime so the backend keeps the promise the frontend already makes.</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Once you confirm these 8 decisions, the permission-domain repair can begin: central registry, matrix cleanup, route guards, resolver cleanup, tests, and e2e verification.
+    </footer>
+  </div>
+</body>
+</html>

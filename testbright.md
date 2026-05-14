@@ -10,6 +10,85 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: Permission Domain Audit And Matrix Repair
+
+Feature/edit name: Permission Domain Audit, Registry Parity, Permission Matrix Repair, and RBAC Regression Coverage
+
+Changed URLs and API routes:
+- `/permissions`
+- `/relationships`
+- `/services`
+- `/service-catalog`
+- `/customers/:id`
+- `/payment`
+- `/settings`
+- `POST /api/Auth/login`
+- `GET /api/Auth/me`
+- `GET /api/Permissions/groups`
+- `PUT /api/Permissions/groups/:groupId`
+- `GET /api/Permissions/employees`
+- `PUT /api/Permissions/employees/:employeeId`
+- `GET /api/Permissions/resolve/:employeeId`
+- `POST /api/ExternalCheckups/:customerCode/patient`
+- `POST /api/ExternalCheckups/:customerCode/health-checkups`
+- `POST /api/Exports/:type/preview`
+- `POST /api/Exports/:type/download`
+
+Affected data flows:
+- Effective permissions resolve from `partners.tier_id`, `group_permissions`, `permission_overrides`, and primary `partners.companyid` plus extra `employee_location_scope` rows.
+- Permission Board matrix rows must come from the canonical registry or a generated shared constant, not display-label string derivation.
+- Wildcard `*` grants effective access everywhere, including route guards and matrix display.
+- Backend `requirePermission()` strings, export registry permissions, frontend route guards, sidebar visibility, matrix rows, i18n descriptions, and `product-map/contracts/permission-registry.yaml` must stay aligned.
+- Permission edits should refresh visible state immediately and show controlled pending/error/disabled states.
+
+User roles:
+- Super Admin/Admin with wildcard `*`.
+- Permission admin with `permissions.view` and `permissions.edit`.
+- Permission viewer with `permissions.view` but not `permissions.edit`.
+- Limited clinic staff with customer/service/payment permissions but no permission-management mutation access.
+- Location-scoped staff with a primary branch and extra scoped branches.
+
+Happy paths:
+- Admin opens `/permissions`, sees groups, employees, locations, matrix rows, and effective permissions without loading or error loops.
+- Admin wildcard group displays effective access to every matrix row without requiring every permission string to be stored individually.
+- Permission viewer opens `/permissions` read-only and cannot toggle matrix cells or save employee assignment changes.
+- Updating an employee group or location scope changes `/api/Auth/me`, `/api/Permissions/resolve/:employeeId`, and Permission Board employee card consistently after refresh/re-auth.
+- `/services` is accessible to a user with the intended service-view permission and not blocked by unrelated customer-edit permission.
+- Ho so Online patient creation and upload enforce the intended split between `external_checkups.create` and `external_checkups.upload`.
+- Export buttons and backend export APIs require the matching export permission strings shown in the matrix.
+
+Edge cases:
+- Employee with `tier_id = null` should follow the final product rule, either blocked with a clear admin fix state or assigned a safe default, not silently drift between consumers.
+- Empty `employee_location_scope` should follow the final product rule consistently across Auth, Permission resolve, filters, and employee cards.
+- Revoking a permission from a wildcard group or wildcard user should follow the final product rule and be visible in tests.
+- Self-editing permission changes should prevent accidental admin self-lockout or require explicit confirmation.
+- Failed permission PUT requests should keep the previous UI state and show a recoverable error.
+- System groups should not be editable unless the final product rule explicitly allows it.
+
+Regressions:
+- Existing customer, payment, report, service catalog, Ho so Online, and location-scoped workflows must keep their current permission boundaries.
+- Route-denied users should see 403-style access denied UI, while expired sessions should go to login.
+- Sidebar visibility and direct URL access must agree for every guarded route.
+- Permission registry parity tests should fail on new unregistered strings.
+
+Setup data and login state:
+- Use an authenticated admin session with wildcard `*`.
+- Use one employee with `permissions.view` but without `permissions.edit`.
+- Use one employee with primary branch plus at least one extra `employee_location_scope` row.
+- Use at least one customer with Ho so Online data and one service/payment/export-capable dataset.
+
+TestSprite execution items:
+- [ ] PENDING: Open `/permissions` as wildcard admin and verify all matrix rows show effective access, including export permissions.
+- [ ] PENDING: Open `/permissions` as `permissions.view` only and verify toggles are disabled with visible reason text and no save mutations fire.
+- [ ] PENDING: Compare `/api/Auth/me` and `/api/Permissions/resolve/:employeeId` for the same user and verify effective permissions and locations match.
+- [ ] PENDING: Verify `/services` direct route and sidebar visibility use the intended service permission, not `customers.edit`.
+- [ ] PENDING: Verify Ho so Online patient creation requires `external_checkups.create` and upload requires `external_checkups.upload`.
+- [ ] PENDING: Verify export preview/download endpoints reject users without the matching export permission and that those permissions appear in the matrix.
+- [ ] PENDING: Attempt a failed permission update and verify the UI shows an error without optimistic state corruption.
+- [ ] PENDING: Verify a location-scoped employee card shows primary branch plus extra scoped branches and matches location filters.
+
+---
+
 # TestSprite Plan: Reporting And Permission Feedback Completion
 
 Feature/edit name: Revenue Recognition Reports, Cash Flow Report, Payment Permission Split, and Ho so Online Upload Gate

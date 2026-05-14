@@ -1,5 +1,40 @@
 [
   {
+    "version": "0.32.0",
+    "date": "2026-05-14",
+    "commit": "14977e11",
+    "highlights": "Permission domain repair — registry parity, matrix truth, route guards, self-lockout guard, Remember Me 60d.",
+    "sections": [
+      {
+        "title": "Fixed",
+        "items": [
+          "Permission domain registry drift repair — canonical YAML now drives backend guards, frontend matrix, route guards, and tests.",
+          "/services route guard changed from customers.edit to services.view.",
+          "Hosoonline patient creation now requires external_checkups.create (was external_checkups.upload).",
+          "Payment proof upload uses payment.add; record patch uses payment.edit.",
+          "Admin self-lockout guard: backend blocks accidental revocation of own permissions.edit without ?confirm=true.",
+          "Permission Board matrix rebuilt from generated registry (PERMISSION_BY_CATEGORY) — eliminates fake label-derived permissions like services.add, calendar.edit.",
+          "Remember Me token lifetime now 60 days (was 24 hours)."
+        ]
+      },
+      {
+        "title": "Added",
+        "items": [
+          "product-map/contracts/permission-registry.yaml is now single source of truth with build-time generator.",
+          "Registry parity test (api/tests/permissionRegistryParity.test.js) fails CI on drift.",
+          "Permission resolver, self-lockout, and auth token lifetime tests.",
+          "E2E specs for matrix, route guards, external-checkups gate, payment gate, remember-me."
+        ]
+      },
+      {
+        "title": "Changed",
+        "items": [
+          "/api/Permissions/resolve/:employeeId now delegates to permissionService.js (removes inline duplicate resolver)."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.31.18",
     "date": "2026-05-08",
     "commit": "cdbda61f",

@@ -43,6 +43,7 @@ export function Login() {
 
   const [email, setEmail] = useState(() => getSavedEmail());
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -59,7 +60,7 @@ export function Login() {
     setIsLoading(true);
 
     try {
-      await login(email, password);
+      await login(email, password, rememberMe);
 
       if (!mountedRef.current) return;
 
@@ -146,6 +147,16 @@ export function Login() {
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-colors"
               />
             </div>
+
+            <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              {t('rememberMe', { defaultValue: 'Ghi nhớ đăng nhập 60 ngày' })}
+            </label>
 
             <button
               type="submit"

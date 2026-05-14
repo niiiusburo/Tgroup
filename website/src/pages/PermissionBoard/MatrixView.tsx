@@ -1,6 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import type { PermissionGroup } from '@/lib/api';
-import { MODULES, PERMISSION_DESCRIPTIONS } from './constants';
+import { PERMISSION_BY_CATEGORY, type PermissionCategory } from '@/types/generated/permissions';
+import { PERMISSION_DESCRIPTIONS } from './constants';
+
+function displayNameFromPermission(perm: string): { category: string; action: string } {
+  const [cat, action] = perm.split('.');
+  const catDisplay = cat.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+  const actionDisplay = action.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+  return { category: catDisplay, action: actionDisplay };
+}
 
 interface MatrixViewProps {
   groups: PermissionGroup[];
@@ -32,42 +40,43 @@ export function MatrixView({ groups, onToggle, canEdit }: MatrixViewProps) {
           </tr>
         </thead>
         <tbody>
-          {MODULES.map(mod =>
-            mod.actions.map((action, ai) => {
-              const permId = `${mod.name.toLowerCase().replace(/\s+/g, '_')}.${action.toLowerCase().replace(/\s+/g, '_')}`;
-              const isLastAction = ai === mod.actions.length - 1;
-              return (
-                <tr
-                  key={permId}
-                  className={isLastAction ? 'border-b-2 border-gray-200' : 'border-b border-gray-50'}
-                  style={{ background: ai % 2 === 0 ? '#fff' : '#fafafa' }}
-                >
-                  <td className="px-4 py-2 sticky left-0 bg-inherit z-10">
-                    <div className="flex items-center gap-1.5">
-                      {ai === 0 ? (
-                        <>
-                          <span className="font-semibold text-gray-900">{mod.name}</span>
-                          <span className="ml-2 text-gray-300 text-[11px]">{action}</span>
-                        </>
-                      ) : (
-                        <span className="ml-4 text-gray-400">{action}</span>
-                      )}
-                      {PERMISSION_DESCRIPTIONS[permId] && (
-                        <span className="relative group/tooltip ml-1 cursor-help" data-testid={`perm-info-${permId}`}>
-                          <svg className="w-3.5 h-3.5 text-gray-300 hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <circle cx="12" cy="12" r="10" />
-                            <path d="M12 16v-4M12 8h.01" />
-                          </svg>
-                          <span
-                            data-testid={`perm-tooltip-${permId}`}
-                            className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-gray-900 text-white text-[11px] rounded-lg whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:pointer-events-auto transition-opacity z-50 shadow-lg"
-                          >
-                            {t(PERMISSION_DESCRIPTIONS[permId])}
+          {(Object.entries(PERMISSION_BY_CATEGORY) as [PermissionCategory, readonly string[]][]).map(
+            ([category, perms]) =>
+              perms.map((permId, ai) => {
+                const { category: catDisplay, action } = displayNameFromPermission(permId);
+                const isLastAction = ai === perms.length - 1;
+                return (
+                  <tr
+                    key={permId}
+                    className={isLastAction ? 'border-b-2 border-gray-200' : 'border-b border-gray-50'}
+                    style={{ background: ai % 2 === 0 ? '#fff' : '#fafafa' }}
+                  >
+                    <td className="px-4 py-2 sticky left-0 bg-inherit z-10">
+                      <div className="flex items-center gap-1.5">
+                        {ai === 0 ? (
+                          <>
+                            <span className="font-semibold text-gray-900">{catDisplay}</span>
+                            <span className="ml-2 text-gray-300 text-[11px]">{action}</span>
+                          </>
+                        ) : (
+                          <span className="ml-4 text-gray-400">{action}</span>
+                        )}
+                        {PERMISSION_DESCRIPTIONS[permId] && (
+                          <span className="relative group/tooltip ml-1 cursor-help" data-testid={`perm-info-${permId}`}>
+                            <svg className="w-3.5 h-3.5 text-gray-300 hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <circle cx="12" cy="12" r="10" />
+                              <path d="M12 16v-4M12 8h.01" />
+                            </svg>
+                            <span
+                              data-testid={`perm-tooltip-${permId}`}
+                              className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 bg-gray-900 text-white text-[11px] rounded-lg whitespace-nowrap opacity-0 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:pointer-events-auto transition-opacity z-50 shadow-lg"
+                            >
+                              {t(PERMISSION_DESCRIPTIONS[permId])}
+                            </span>
                           </span>
-                        </span>
-                      )}
-                    </div>
-                  </td>
+                        )}
+                      </div>
+                    </td>
                   {groups.map(g => {
                     const has = g.permissions.includes(permId);
                     const disabled = g.isSystem || !canEdit;

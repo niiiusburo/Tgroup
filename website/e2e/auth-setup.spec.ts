@@ -14,8 +14,8 @@ test('authenticate as admin', async ({ page }) => {
   await expect(emailInput).toBeVisible({ timeout: 10_000 });
 
   // Fill and submit login
-  await emailInput.fill('tg@clinic.vn');
-  await page.locator('#password').fill('123456');
+  await emailInput.fill('t@clinic.vn');
+  await page.locator('#password').fill('123123');
   await page.locator('button[type="submit"]').click();
 
   // Wait for auth to complete — the login form disappears and dashboard renders

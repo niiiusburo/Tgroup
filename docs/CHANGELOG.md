@@ -14,6 +14,25 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.0] — 2026-05-14
+### Fixed
+- Permission domain registry drift repair — @agent — 8 decision cards approved; canonical YAML now drives backend guards, frontend matrix, route guards, and tests (DEC-20260514-01).
+- `/services` route guard changed from `customers.edit` to `services.view` — @agent — Key must match the room (DEC-20260514-01).
+- Hosoonline patient creation now requires `external_checkups.create` (was `external_checkups.upload`) — @agent — Separate doors for create vs upload (DEC-20260514-01).
+- Payment proof upload uses `payment.add`; record patch uses `payment.edit` — @agent — Adding file ≠ mutating record (DEC-20260514-01).
+- Admin self-lockout guard: backend blocks accidental revocation of own `permissions.edit` without `?confirm=true` — @agent — Safety cover on master key (DEC-20260514-01).
+- Permission Board matrix rebuilt from generated registry (`PERMISSION_BY_CATEGORY`) — @agent — Eliminates fake label-derived permissions like `services.add`, `calendar.edit` (DEC-20260514-01).
+- Remember Me token lifetime now 60 days (was 24 hours) — @agent — Backend keeps the promise frontend/UI already made (DEC-20260514-01).
+### Added
+- `product-map/contracts/permission-registry.yaml` is now single source of truth — @agent — Generator emits TS + JS constants; parity test fails CI on drift (DEC-20260514-01).
+- `website/scripts/generate-permission-enum.ts` — @agent — Build-time generator from YAML to `website/src/types/generated/permissions.ts` and `api/src/constants/permissions.js` (DEC-20260514-01).
+- Registry parity test (`api/tests/permissionRegistryParity.test.js`) — @agent — Scans `requirePermission` calls and fails if strings drift from YAML (DEC-20260514-01).
+- Permission resolver tests (`api/tests/permissionResolve.test.js`) — @agent — Covers wildcard, empty scope, primary branch, overrides (DEC-20260514-01).
+- Self-lockout tests (`api/tests/selfLockout.test.js`) — @agent — Confirms block and confirmation bypass (DEC-20260514-01).
+- Auth token lifetime tests (`api/tests/authTokenLifetime.test.js`) — @agent — Confirms 24h default and 60d remember-me (DEC-20260514-01).
+### Changed
+- `/api/Permissions/resolve/:employeeId` now delegates to `permissionService.resolveEffectivePermissions` — @agent — Removes inline duplicate resolver (DEC-20260514-01).
+
 ## [0.27.27] — 2026-05-05
 ### Fixed
 - iPhone modal height overflow in AddCustomerForm and EditCustomerForm — @agent — Prevent form fields from being unreachable on 390px viewports (FM-20260505-01).

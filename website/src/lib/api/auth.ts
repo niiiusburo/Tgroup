@@ -23,8 +23,8 @@ export interface LoginResponse {
   permissions: AuthPermissions;
 }
 
-export function login(email: string, password: string) {
-  return apiFetch<LoginResponse>('/Auth/login', { method: 'POST', body: { email, password } });
+export function login(email: string, password: string, rememberMe = false) {
+  return apiFetch<LoginResponse>('/Auth/login', { method: 'POST', body: { email, password, rememberMe } });
 }
 
 export function fetchMe() {

@@ -93,6 +93,8 @@ async function resolveEffectivePermissions(employeeId) {
     groupName,
     effectivePermissions: [...effectiveSet],
     locations: locationRows.map(l => ({ id: l.id, name: l.name })),
+    basePermissions: basePerms,
+    overrides: { grant: granted, revoke: revoked },
   };
 }
 

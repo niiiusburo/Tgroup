@@ -255,6 +255,27 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
       return res.status(400).json({ error: 'groupId is required' });
     }
 
+    // Self-lockout guard: admin cannot strip their own permissions.edit without confirmation
+    if (employeeId === req.user?.employeeId) {
+      const groupPermRows = await query(
+        `SELECT permission FROM group_permissions WHERE group_id = $1`,
+        [groupId]
+      );
+      const groupPerms = groupPermRows.map(r => r.permission);
+      const granted = overrides.grant || [];
+      const revoked = overrides.revoke || [];
+      const wouldHaveEdit = groupPerms.includes('permissions.edit') || granted.includes('permissions.edit');
+      const explicitlyRevoked = revoked.includes('permissions.edit');
+      const keepsEdit = wouldHaveEdit && !explicitlyRevoked;
+
+      if (!keepsEdit && req.query.confirm !== 'true') {
+        return res.status(409).json({
+          error: 'SELF_LOCKOUT_RISK',
+          message: 'Removing your own permission-management access requires explicit confirmation.',
+        });
+      }
+    }
+
     // Update tier on partners record
     await query(
       `UPDATE partners SET tier_id = $1, lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE id = $2`,
@@ -381,8 +402,10 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
 router.get('/resolve/:employeeId', requirePermission('permissions.view'), async (req, res) => {
   try {
     const { employeeId } = req.params;
+    const { resolveEffectivePermissions } = require('../services/permissionService');
 
-    const tierRows = await query(
+    // Fetch employee + group metadata
+    const empRows = await query(
       `SELECT
         p.id AS employee_id,
         p.name AS employee_name,
@@ -395,74 +418,37 @@ router.get('/resolve/:employeeId', requirePermission('permissions.view'), async 
       [employeeId]
     );
 
-    if (!tierRows || tierRows.length === 0) {
+    if (!empRows || empRows.length === 0) {
       return res.status(404).json({ error: 'Employee not found' });
     }
-    if (!tierRows[0].group_id) {
-      const e = tierRows[0];
-      return res.json({ employeeId: e.employee_id, employeeName: e.employee_name, group: null, overrides: { grant: [], revoke: [] }, effectivePermissions: [], locations: [] });
+
+    const emp = empRows[0];
+
+    if (!emp.group_id) {
+      return res.json({
+        employeeId: emp.employee_id,
+        employeeName: emp.employee_name,
+        group: null,
+        overrides: { grant: [], revoke: [] },
+        effectivePermissions: [],
+        locations: [],
+      });
     }
 
-    const ep = tierRows[0];
-
-    const [basePermRows, overrideRows, locRows] = await Promise.all([
-      query(
-        `SELECT permission FROM group_permissions WHERE group_id = $1 ORDER BY permission`,
-        [ep.group_id]
-      ),
-      query(
-        `SELECT permission, override_type FROM permission_overrides WHERE employee_id = $1`,
-        [employeeId]
-      ),
-      query(
-        `WITH location_candidates AS (
-           SELECT c.id, c.name, 0 AS sort_order
-           FROM partners p
-           JOIN companies c ON c.id = p.companyid
-           WHERE p.id = $1 AND p.companyid IS NOT NULL
-
-           UNION ALL
-
-           SELECT c.id, c.name, 1 AS sort_order
-           FROM employee_location_scope els
-           JOIN companies c ON c.id = els.company_id
-           WHERE els.employee_id = $1
-         ),
-         deduped_locations AS (
-           SELECT DISTINCT ON (id) id, name, sort_order
-           FROM location_candidates
-           ORDER BY id, sort_order
-         )
-         SELECT id, name
-         FROM deduped_locations
-         ORDER BY sort_order, name`,
-        [employeeId]
-      ),
-    ]);
-
-    const basePermissions = basePermRows.map(r => r.permission);
-    const granted = overrideRows.filter(r => r.override_type === 'grant').map(r => r.permission);
-    const revoked = overrideRows.filter(r => r.override_type === 'revoke').map(r => r.permission);
-
-    const effectiveSet = new Set([...basePermissions, ...granted]);
-    for (const p of revoked) effectiveSet.delete(p);
-    const effectivePermissions = [...effectiveSet].sort();
+    const resolved = await resolveEffectivePermissions(employeeId);
 
     return res.json({
-      employeeId: ep.employee_id,
-      employeeName: ep.employee_name,
+      employeeId: emp.employee_id,
+      employeeName: emp.employee_name,
       group: {
-        id: ep.group_id,
-        name: ep.group_name,
-        color: ep.group_color,
-        basePermissions,
+        id: emp.group_id,
+        name: emp.group_name,
+        color: emp.group_color,
+        basePermissions: resolved.basePermissions || [],
       },
-      overrides: {
-        grant: granted,
-        revoke: revoked,
-      },
-      effectivePermissions,
-      locations: locRows.map(l => ({ id: l.id, name: l.name })),
+      overrides: resolved.overrides || { grant: [], revoke: [] },
+      effectivePermissions: resolved.effectivePermissions || [],
+      locations: resolved.locations || [],
     });
   } catch (err) {
     console.error('Error resolving permissions:', err);

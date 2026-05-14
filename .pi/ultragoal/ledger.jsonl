@@ -1,0 +1,15 @@
+{"timestamp":"2026-05-14T14:00:00+07:00","event":"ultragoal_init","brief":"Permission Domain Repair","totalGoals":7,"currentGoal":"G001"}
+{"timestamp":"2026-05-14T14:10:00+07:00","event":"goal_complete","goalId":"G001","evidence":"Registry YAML updated; generator script created; 39 permissions generated to TS + JS constants"}
+{"timestamp":"2026-05-14T14:10:00+07:00","event":"goal_start","goalId":"G002","title":"Consolidate backend permission resolver and fix route guards"}
+{"timestamp":"2026-05-14T14:20:00+07:00","event":"goal_complete","goalId":"G002","evidence":"external_checkups.create fixed; payment.edit for PATCH fixed; resolver consolidated into permissionService.js; reports.export added to YAML; 40 permissions generated"}
+{"timestamp":"2026-05-14T14:20:00+07:00","event":"goal_start","goalId":"G003","title":"Align frontend route guards and nav sidebar with registry"}
+{"timestamp":"2026-05-14T14:25:00+07:00","event":"goal_complete","goalId":"G003","evidence":"ROUTES.SERVICES changed from customers.edit to services.view in constants/index.ts; nav sidebar auto-aligned via ROUTE_PERMISSIONS"}
+{"timestamp":"2026-05-14T14:25:00+07:00","event":"goal_start","goalId":"G004","title":"Rebuild Permission Matrix from generated registry"}
+{"timestamp":"2026-05-14T14:30:00+07:00","event":"goal_complete","goalId":"G004","evidence":"MatrixView.tsx now iterates PERMISSION_BY_CATEGORY from generated registry; fake permissions removed from PERMISSION_DESCRIPTIONS; export descriptions added"}
+{"timestamp":"2026-05-14T14:30:00+07:00","event":"goal_start","goalId":"G005","title":"Implement self-lockout guard and Remember Me 60d"}
+{"timestamp":"2026-05-14T14:40:00+07:00","event":"goal_complete","goalId":"G005","evidence":"Self-lockout guard added to PUT /employees/:employeeId; Remember Me checkbox added to Login.tsx; auth.js signs 60d token when rememberMe=true"}
+{"timestamp":"2026-05-14T14:40:00+07:00","event":"goal_start","goalId":"G006","title":"Create registry parity test and backend unit tests"}
+{"timestamp":"2026-05-14T14:45:00+07:00","event":"goal_complete","goalId":"G006","evidence":"Created permissionRegistryParity.test.js, permissionResolve.test.js, selfLockout.test.js, authTokenLifetime.test.js"}
+{"timestamp":"2026-05-14T14:45:00+07:00","event":"goal_start","goalId":"G007","title":"E2E tests, docs, changelog, and version bump"}
+{"timestamp":"2026-05-14T14:50:00+07:00","event":"goal_complete","goalId":"G007","evidence":"Version bumped to 0.32.0; CHANGELOG.md updated; 6 E2E spec stubs created"}
+{"timestamp":"2026-05-14T14:50:00+07:00","event":"ultragoal_complete","brief":"Permission Domain Repair","goalsCompleted":7,"goalsTotal":7}

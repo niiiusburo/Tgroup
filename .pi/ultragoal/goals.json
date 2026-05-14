@@ -1,0 +1,144 @@
+{
+  "version": "1.0",
+  "status": "completed",
+  "currentGoal": null,
+  "goals": [
+    {
+      "id": "G001",
+      "title": "Update canonical permission registry YAML and build generator",
+      "status": "completed",
+      "priority": 1,
+      "acceptance": [
+        "permission-registry.yaml updated with all 8 confirmed decisions",
+        "generate-permission-enum.ts script reads YAML and emits TS + JS constants",
+        "npm run generate:permissions works and updates generated files"
+      ],
+      "files": [
+        "product-map/contracts/permission-registry.yaml",
+        "website/scripts/generate-permission-enum.ts",
+        "website/src/types/generated/permissions.ts",
+        "api/src/constants/permissions.js"
+      ],
+      "evidence": "payment.edit/payment.add split resolved in YAML; 39 permissions generated; TS + JS constants emitted"
+    },
+    {
+      "id": "G002",
+      "title": "Consolidate backend permission resolver and fix route guards",
+      "status": "completed",
+      "priority": 1,
+      "acceptance": [
+        "/api/Permissions/resolve/:employeeId uses permissionService.resolveEffectivePermissions",
+        "Inline duplicate resolver removed",
+        "external_checkups.create and external_checkups.upload gated correctly",
+        "Payment patch uses payment.edit; proof uses payment.add",
+        "Export routes map to correct export permission strings"
+      ],
+      "files": [
+        "api/src/services/permissionService.js",
+        "api/src/routes/permissions.js",
+        "api/src/routes/externalCheckups.js",
+        "api/src/routes/payments.js",
+        "api/src/routes/exports.js"
+      ],
+      "evidence": ""
+    },
+    {
+      "id": "G003",
+      "title": "Align frontend route guards and nav sidebar with registry",
+      "status": "completed",
+      "priority": 1,
+      "acceptance": [
+        "/services and /service-catalog gated by services.view",
+        "NAV_PERMISSION entries verified against generated registry",
+        "ROUTE_PERMISSIONS constants use generated enum values",
+        "No hand-typed permission strings in route/nav guards"
+      ],
+      "files": [
+        "website/src/constants/index.ts",
+        "website/src/components/layout/Layout.tsx",
+        "website/src/App.tsx"
+      ],
+      "evidence": ""
+    },
+    {
+      "id": "G004",
+      "title": "Rebuild Permission Matrix from generated registry",
+      "status": "completed",
+      "priority": 1,
+      "acceptance": [
+        "MatrixView.tsx iterates generated permission enum categories",
+        "No label-derived permission strings in matrix rows",
+        "i18n descriptions are lookups keyed by real permission string",
+        "Wildcard (*) users see all rows enabled without enumerating every string"
+      ],
+      "files": [
+        "website/src/components/permissions/MatrixView.tsx",
+        "website/src/components/permissions/PermissionBoard.tsx",
+        "website/src/types/permissions.ts"
+      ],
+      "evidence": ""
+    },
+    {
+      "id": "G005",
+      "title": "Implement self-lockout guard and Remember Me 60d",
+      "status": "completed",
+      "priority": 2,
+      "acceptance": [
+        "Backend blocks admin self-revoke of permissions.edit without confirmation",
+        "Frontend shows confirmation modal before sending self-revoke",
+        "Login with rememberMe=true signs JWT with 60d expiry",
+        "Login without rememberMe keeps default expiry"
+      ],
+      "files": [
+        "api/src/routes/permissions.js",
+        "website/src/components/permissions/PermissionBoard.tsx",
+        "api/src/routes/auth.js",
+        "website/src/pages/Login.tsx",
+        "website/src/contexts/AuthContext.tsx"
+      ],
+      "evidence": ""
+    },
+    {
+      "id": "G006",
+      "title": "Create registry parity test and backend unit tests",
+      "status": "completed",
+      "priority": 2,
+      "acceptance": [
+        "permissionRegistryParity.test.js scans code and YAML; fails on drift",
+        "permissionResolve.test.js asserts wildcard, empty scope, primary branch",
+        "selfLockout.test.js asserts block and confirmation bypass",
+        "authTokenLifetime.test.js asserts 60d expiry when rememberMe is true"
+      ],
+      "files": [
+        "api/tests/permissionRegistryParity.test.js",
+        "api/tests/permissionResolve.test.js",
+        "api/tests/selfLockout.test.js",
+        "api/tests/authTokenLifetime.test.js"
+      ],
+      "evidence": ""
+    },
+    {
+      "id": "G007",
+      "title": "E2E tests, docs, changelog, and version bump",
+      "status": "completed",
+      "priority": 3,
+      "acceptance": [
+        "Playwright specs for matrix, self-lockout, services route guard, external-checkups gate, payment gate, remember-me",
+        "docs/CHANGELOG.md updated with permission-domain repair entry",
+        "website/package.json version bumped (minor)",
+        "All existing auth/permissions E2E specs still pass"
+      ],
+      "files": [
+        "website/e2e/permissions-matrix.spec.ts",
+        "website/e2e/permissions-self-lockout.spec.ts",
+        "website/e2e/services-route-guard.spec.ts",
+        "website/e2e/external-checkups-gate.spec.ts",
+        "website/e2e/payment-gate.spec.ts",
+        "website/e2e/remember-me.spec.ts",
+        "docs/CHANGELOG.md",
+        "website/package.json"
+      ],
+      "evidence": ""
+    }
+  ]
+}

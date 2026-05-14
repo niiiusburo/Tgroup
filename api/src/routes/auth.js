@@ -60,7 +60,8 @@ router.post('/login', async (req, res) => {
       companyId: employee.companyId,
     };
 
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '24h' });
+    const rememberMe = req.body.rememberMe === true;
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: rememberMe ? '60d' : '24h' });
 
     return res.json({
       token,

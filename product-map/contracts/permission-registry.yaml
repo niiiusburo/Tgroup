@@ -2,9 +2,10 @@
 # Canonical mapping of all permission strings to backend routes, frontend routes, and UI components.
 
 meta:
-  total_backend_strings: 33
-  total_frontend_route_guards: 15
-  total_nav_guards: 13
+  total_backend_strings: 34
+  total_frontend_route_guards: 12
+  total_frontend_inline: 9
+  total_nav_guards: 15
   wildcard: "*"
   wildcard_meaning: "Grants all permissions (used in auth middleware and hasPermission)"
 
@@ -70,12 +71,15 @@ backend_permissions:
   - string: payment.edit
     routes:
       - PATCH /api/Payments/:id
-      - POST /api/Payments/:id/proof
       - PUT /api/settings/bank
       - PUT /api/MonthlyPlans/:id
       - PUT /api/MonthlyPlans/:id/installments/:installmentId/pay
       - POST /api/MonthlyPlans
       - DELETE /api/MonthlyPlans/:id
+  - string: payment.add
+    routes:
+      - POST /api/Payments
+      - POST /api/Payments/:id/proof
   - string: payment.add
     routes:
       - POST /api/Payments
@@ -114,6 +118,10 @@ backend_permissions:
     routes:
       - POST /api/Reports/*
       - POST /api/DashboardReports/GetSumary
+  - string: reports.export
+    routes:
+      - POST /api/Exports/report-sales-employees/preview
+      - POST /api/Exports/report-sales-employees/download
   - string: locations.view
     routes:
       - GET /api/Companies
@@ -298,9 +306,16 @@ nav_permissions:
 risks:
   - desc: "locations.edit is checked in frontend but no backend requirePermission('locations.edit') exists"
     severity: low
-  - desc: "Frontend /services and /service-catalog route guards currently use customers.edit while backend service reads now use services.view"
-    severity: medium
   - desc: "No central enum means typos in any string cause silent failures or 403s"
     severity: high
   - desc: "Wildcard * bypasses all checks but is not documented for admins"
     severity: low
+
+# Resolved in this repair
+resolved:
+  - desc: "Frontend /services route guard now uses services.view (was customers.edit)"
+    ticket: G003
+  - desc: "Payment proof upload now uses payment.add; record patch uses payment.edit"
+    ticket: G002
+  - desc: "External checkups patient creation uses external_checkups.create; upload uses external_checkups.upload"
+    ticket: G002

@@ -209,7 +209,7 @@ router.post("/refund", requirePermission('payment.refund'), async (req, res) => 
 });
 
 // PATCH /api/Payments/:id - Update payment
-router.patch("/:id", requirePermission('payment.add'), validate(PaymentUpdateSchema), async (req, res) => {
+router.patch("/:id", requirePermission('payment.edit'), validate(PaymentUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
