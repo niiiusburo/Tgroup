@@ -41,7 +41,7 @@ export function MatrixView({ groups, onToggle, canEdit }: MatrixViewProps) {
         </thead>
         <tbody>
           {(Object.entries(PERMISSION_BY_CATEGORY) as [PermissionCategory, readonly string[]][]).map(
-            ([category, perms]) =>
+            ([_category, perms]) =>
               perms.map((permId, ai) => {
                 const { category: catDisplay, action } = displayNameFromPermission(permId);
                 const isLastAction = ai === perms.length - 1;
