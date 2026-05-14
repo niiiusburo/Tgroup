@@ -30,6 +30,22 @@ If an ad hoc prompt conflicts with the authority stack, follow the authority sta
 
 - All project search bars must be accent-insensitive. Vietnamese names or labels with diacritics must still match when staff type the same words without accents; frontend code should use the shared `normalizeText()` helper or an equivalent canonical normalizer, and backend search should compare against accent-stripped text where the route owns filtering.
 
+- **Internet search from the terminal must use the DuckDuckGo HTML scraper.** Other methods (GitHub API search, jina.ai, direct Google scraping) are unreliable or blocked in this environment. The canonical working flow is:
+
+  ```bash
+  curl -sL "https://html.duckduckgo.com/html/?q=QUERY+GOES+HERE" \
+    -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" \
+    -H "Accept: text/html,application/xhtml+xml" | python3 -c "
+  import sys, re
+  html = sys.stdin.read()
+  links = re.findall(r'class=\"result__a\"[^>]*href=\"([^\"]+)\"', html)
+  for link in links[:15]:
+      print(link)
+  "
+  ```
+
+  Results are DuckDuckGo redirect URLs (`//duckduckgo.com/l/?uddg=...`). URL-decode the `uddg` parameter to get the real destination URL, then fetch content directly (e.g., `curl -sL https://raw.githubusercontent.com/...`). **Do not attempt GitHub API search, jina.ai, or direct Google scraping as a first step.**
+
 ## 2. Local-First Development
 
 All changes must be made and verified locally before pushing to the VPS.

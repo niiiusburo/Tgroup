@@ -97,6 +97,7 @@ skills-lock.json
 # Local-only files (never push to GitHub)
 LOCAL/
 .worktrees/
+VPS.md
 all Data-4-25/
 backups/db-sync/
 backups/*.dump
