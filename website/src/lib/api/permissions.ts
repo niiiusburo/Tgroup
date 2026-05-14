@@ -57,6 +57,17 @@ export function createPermissionGroup(data: { name: string; color: string; descr
   return apiFetch<PermissionGroup>('/Permissions/groups', { method: 'POST', body: data });
 }
 
-export function updatePermissionGroup(groupId: string, data: { name: string; color: string; description: string; permissions: string[] }) {
+export function updatePermissionGroup(groupId: string, data: { name?: string; color?: string; description?: string; permissions?: string[] }) {
   return apiFetch<PermissionGroup>(`/Permissions/groups/${groupId}`, { method: 'PUT', body: data });
+}
+
+export function deletePermissionGroup(groupId: string) {
+  return apiFetch<void>(`/Permissions/groups/${groupId}`, { method: 'DELETE' });
+}
+
+export function unassignEmployeePermission(employeeId: string) {
+  return apiFetch<EmployeePermission>(`/Permissions/employees/${employeeId}`, {
+    method: 'PUT',
+    body: { groupId: null, locScope: 'assigned', locationIds: [], overrides: { grant: [], revoke: [] } },
+  });
 }
