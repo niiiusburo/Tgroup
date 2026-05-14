@@ -142,6 +142,60 @@ router.put('/groups/:groupId', requirePermission('permissions.edit'), async (req
 });
 
 /**
+ * DELETE /api/Permissions/groups/:groupId
+ * Deletes a permission group. System groups cannot be deleted.
+ * Employees in the group have their tier_id set to NULL.
+ */
+router.delete('/groups/:groupId', requirePermission('permissions.edit'), async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    // Verify group exists and is not a system group
+    const checkRows = await query(
+      `SELECT id, is_system FROM permission_groups WHERE id = $1`,
+      [groupId]
+    );
+
+    if (!checkRows || checkRows.length === 0) {
+      return res.status(404).json({ error: 'Permission group not found' });
+    }
+
+    if (checkRows[0].is_system) {
+      return res.status(403).json({ error: 'System groups cannot be deleted' });
+    }
+
+    // Unassign all employees from this group
+    await query(
+      `UPDATE partners SET tier_id = NULL, lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE tier_id = $1`,
+      [groupId]
+    );
+
+    // Remove employee_permissions references
+    await query(
+      `DELETE FROM employee_permissions WHERE group_id = $1`,
+      [groupId]
+    );
+
+    // Remove group permissions
+    await query(
+      `DELETE FROM group_permissions WHERE group_id = $1`,
+      [groupId]
+    );
+
+    // Delete the group
+    await query(
+      `DELETE FROM permission_groups WHERE id = $1`,
+      [groupId]
+    );
+
+    return res.status(204).send();
+  } catch (err) {
+    console.error('Error deleting permission group:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
  * GET /api/Permissions/employees
  * Returns all employee permission assignments
  */
@@ -251,12 +305,10 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
     const { employeeId } = req.params;
     const { groupId, locScope = 'assigned', locationIds = [], overrides = { grant: [], revoke: [] } } = req.body;
 
-    if (!groupId) {
-      return res.status(400).json({ error: 'groupId is required' });
-    }
+    const isUnassign = groupId === null || groupId === undefined;
 
     // Self-lockout guard: admin cannot strip their own permissions.edit without confirmation
-    if (employeeId === req.user?.employeeId) {
+    if (!isUnassign && employeeId === req.user?.employeeId) {
       const groupPermRows = await query(
         `SELECT permission FROM group_permissions WHERE group_id = $1`,
         [groupId]
@@ -276,7 +328,30 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
       }
     }
 
-    // Update tier on partners record
+    if (isUnassign) {
+      // UNASSIGN: clear tier, remove from employee_permissions, clear scopes/overrides
+      await query(
+        `UPDATE partners SET tier_id = NULL, lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE id = $1`,
+        [employeeId]
+      );
+      await query(`DELETE FROM employee_permissions WHERE employee_id = $1`, [employeeId]);
+      await query(`DELETE FROM employee_location_scope WHERE employee_id = $1`, [employeeId]);
+      await query(`DELETE FROM permission_overrides WHERE employee_id = $1`, [employeeId]);
+
+      return res.json({
+        employeeId,
+        employeeName: null,
+        employeeEmail: null,
+        groupId: null,
+        groupName: null,
+        groupColor: null,
+        locScope: 'assigned',
+        locations: [],
+        overrides: { grant: [], revoke: [] },
+      });
+    }
+
+    // ASSIGN/UPDATE: normal flow
     await query(
       `UPDATE partners SET tier_id = $1, lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE id = $2`,
       [groupId, employeeId]
