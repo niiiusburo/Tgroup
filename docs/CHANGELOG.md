@@ -130,6 +130,17 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 ### Fixed
 - Aligned `contracts/payment.ts` method enum with actual backend/frontend support (`cash`, `bank_transfer`, `deposit`, `mixed`) — @agent — Remove `card`, `momo`, `vnpay`, `zalopay` placeholders until end-to-end wiring exists.
 
+## [0.32.3] — 2026-05-16
+### Changed
+- Auto-detected Errors tab on /feedback now shows structured error metadata (error type, message, occurrence count, source file, stack trace) — @agent — Richer error triage for ops team
+- Backend `GET /api/Feedback/all?source=auto` now JOINs `error_events` to return full error metadata — @agent — Support frontend structured display
+- Backend `GET /api/Feedback/all/:id` now JOINs `error_events` for detail view — @agent — Support modal stack trace display
+- Feedback detail modal widened to max-w-3xl with dark code blocks for stack traces — @agent — Readable stack trace viewing
+
+## [0.32.2] — 2026-05-16
+### Fixed
+- (intermediate build)
+
 ## [0.32.1] — 2026-05-16
 ### Fixed
 - Payments export now includes cash, bank, deposit columns — @agent — Staff feedback: deposit report missing payment method breakdown

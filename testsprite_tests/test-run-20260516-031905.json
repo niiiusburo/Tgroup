@@ -1,0 +1,141 @@
+{
+  "timestamp": "2026-05-16T03:19:05.230598",
+  "mode": "local",
+  "target_url": "http://127.0.0.1:5175",
+  "results": [
+    {
+      "id": "TC001",
+      "name": "Admin login reaches protected overview",
+      "status": "PASS",
+      "duration": 14.77,
+      "error": null
+    },
+    {
+      "id": "TC002",
+      "name": "Logout clears session",
+      "status": "FAIL",
+      "duration": 20.79,
+      "error": "on.py\", line 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Library/Python/3.12/lib/python/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"xpath=/html/body/div/div/aside/div[2]/button[2]\").first\n\n"
+    },
+    {
+      "id": "TC003",
+      "name": "Invalid credentials are rejected",
+      "status": "PASS",
+      "duration": 14.75,
+      "error": null
+    },
+    {
+      "id": "TC004",
+      "name": "Admin can access core guarded pages",
+      "status": "FAIL",
+      "duration": 26.71,
+      "error": "aiting for element to be visible, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <td class=\"px-4 py-3 text-sm text-gray-700\">\u2026</td> from <div class=\"\u21b5          min-h-screen flex flex-col transition-all duration-300 ease-in-out\u21b5          w-full max-w-full md:w-auto\u21b5          ml-0\u21b5          lg:ml-[72px]\u21b5        \">\u2026</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\n"
+    },
+    {
+      "id": "TC005",
+      "name": "Sidebar exposes expected admin navigation",
+      "status": "PASS",
+      "duration": 14.71,
+      "error": null
+    },
+    {
+      "id": "TC006",
+      "name": "Admin can create a new TEST_SPRITE customer",
+      "status": "FAIL",
+      "duration": 52.12,
+      "error": "prite_tests/TC006_Admin_can_create_a_new_TEST_SPRITE_customer.py\", line 136, in run_test\n    assert await frame.locator(\"xpath=//*[contains(., 'TEST SPRITE 20260504120001')]\").nth(0).is_visible(), \"The customers list should show TEST SPRITE 20260504120001 after saving the new customer.\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: The customers list should show TEST SPRITE 20260504120001 after saving the new customer.\n"
+    },
+    {
+      "id": "TC007",
+      "name": "Admin can edit the existing TEST_SPRITE customer",
+      "status": "FAIL",
+      "duration": 17.68,
+      "error": "ne 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Library/Python/3.12/lib/python/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.fill: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"xpath=/html/body/div/div/div/main/div/div[2]/div/div/input\").first\n\n"
+    },
+    {
+      "id": "TC008",
+      "name": "Customer profile mutation controls are visible for admin",
+      "status": "FAIL",
+      "duration": 23.79,
+      "error": "wait self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Library/Python/3.12/lib/python/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"xpath=/html/body/div/div/div/main/div/div[3]/div[1]/table/tbody/tr[2]/td[2]/div/span\").first\n\n"
+    },
+    {
+      "id": "TC009",
+      "name": "Delete and hard delete require explicit confirmation",
+      "status": "PASS",
+      "duration": 23.8,
+      "error": null
+    },
+    {
+      "id": "TC010",
+      "name": "Employees page loads and search works",
+      "status": "FAIL",
+      "duration": 17.68,
+      "error": "ne 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Library/Python/3.12/lib/python/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.fill: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"xpath=/html/body/div/div/div/main/div/div[2]/div/div/input\").first\n\n"
+    },
+    {
+      "id": "TC011",
+      "name": "Employee creation should work for TESTSPRITE employee",
+      "status": "FAIL",
+      "duration": 17.63,
+      "error": "le, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"flex flex-col items-center justify-center py-12 text-center\">\u2026</div> from <div class=\"\u21b5          min-h-screen flex flex-col transition-all duration-300 ease-in-out\u21b5          w-full max-w-full md:w-auto\u21b5          ml-0\u21b5          lg:ml-[72px]\u21b5        \">\u2026</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\n"
+    },
+    {
+      "id": "TC012",
+      "name": "Employee edit should work for TESTSPRITE employee",
+      "status": "FAIL",
+      "duration": 17.53,
+      "error": "t is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <td colspan=\"6\" class=\"text-center text-gray-400 text-sm py-8\">D\u1ecbch v\u1ee5 s\u1ebd hi\u1ec3n th\u1ecb khi b\u1ec7nh nh\u00e2n \u0111\u01b0\u1ee3c \u0111i\u1ec1u tr\u1ecb t\u2026</td> from <div class=\"\u21b5          min-h-screen flex flex-col transition-all duration-300 ease-in-out\u21b5          w-full max-w-full md:w-auto\u21b5          ml-0\u21b5          lg:ml-[72px]\u21b5        \">\u2026</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\n"
+    },
+    {
+      "id": "TC013",
+      "name": "Permission board loads groups and employees",
+      "status": "FAIL",
+      "duration": 17.65,
+      "error": "le\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <h2 class=\"text-sm font-bold text-gray-800 uppercase tracking-wide\">D\u1ecbch v\u1ee5 / ho\u1ea1t \u0111\u1ed9ng h\u00f4m nay</h2> from <div class=\"\u21b5          min-h-screen flex flex-col transition-all duration-300 ease-in-out\u21b5          w-full max-w-full md:w-auto\u21b5          ml-0\u21b5          lg:ml-[72px]\u21b5        \">\u2026</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\n"
+    },
+    {
+      "id": "TC014",
+      "name": "Employee create failure does not break permission surfaces",
+      "status": "FAIL",
+      "duration": 17.58,
+      "error": "9, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Library/Python/3.12/lib/python/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"xpath=/html/body/div/div/aside/nav/div[4]/div/div/div[2]/a[3]\").first\n\n"
+    },
+    {
+      "id": "TC015",
+      "name": "Reports protected routes render",
+      "status": "FAIL",
+      "duration": 17.77,
+      "error": "e 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Library/Python/3.12/lib/python/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"xpath=/html/body/div/div/div/main/div/div[2]/div/button[2]\").first\n\n"
+    },
+    {
+      "id": "TC016",
+      "name": "Payment page renders without submitting money actions",
+      "status": "FAIL",
+      "duration": 17.55,
+      "error": "le, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"flex flex-col items-center justify-center py-12 text-center\">\u2026</div> from <div class=\"\u21b5          min-h-screen flex flex-col transition-all duration-300 ease-in-out\u21b5          w-full max-w-full md:w-auto\u21b5          ml-0\u21b5          lg:ml-[72px]\u21b5        \">\u2026</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\n"
+    },
+    {
+      "id": "TC017",
+      "name": "Service catalog page renders and search/filter works",
+      "status": "FAIL",
+      "duration": 17.62,
+      "error": "le, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"flex flex-col items-center justify-center py-12 text-center\">\u2026</div> from <div class=\"\u21b5          min-h-screen flex flex-col transition-all duration-300 ease-in-out\u21b5          w-full max-w-full md:w-auto\u21b5          ml-0\u21b5          lg:ml-[72px]\u21b5        \">\u2026</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\n"
+    },
+    {
+      "id": "TC018",
+      "name": "Settings page renders but does not save changes",
+      "status": "PASS",
+      "duration": 14.61,
+      "error": null
+    }
+  ],
+  "summary": {
+    "total": 18,
+    "pass": 5,
+    "fail": 13,
+    "skip": 0,
+    "timeout": 0,
+    "error": 0
+  }
+}

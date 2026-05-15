@@ -1,0 +1,112 @@
+{
+  "timestamp": "2026-05-16T05:02:02.068363",
+  "results": [
+    {
+      "id": "TC001",
+      "name": "Admin login reaches protected overview",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 2.21,
+      "error": null,
+      "stdout": "\u2705 TC001 PASS: Admin login successful, protected overview rendered\n"
+    },
+    {
+      "id": "TC002",
+      "name": "Logout clears session",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 1.25,
+      "error": null,
+      "stdout": "\u2705 TC002 PASS: Logout cleared session, redirected to /login\n"
+    },
+    {
+      "id": "TC003",
+      "name": "Invalid credentials are rejected",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 15.09,
+      "error": null,
+      "stdout": null
+    },
+    {
+      "id": "TC004",
+      "name": "Admin can access core guarded pages",
+      "category": "Routes",
+      "status": "PASS",
+      "duration": 28.67,
+      "error": null,
+      "stdout": "  \u2705 T\u1ed5ng quan\n  \u2705 L\u1ecbch\n  \u2705 Kh\u00e1ch h\u00e0ng\n  \u2705 D\u1ecbch v\u1ee5\n  \u2705 Danh m\u1ee5c d\u1ecbch v\u1ee5\n  \u2705 K\u1ebf ho\u1ea1ch thanh to\u00e1n\n  \u2705 Nh\u00e2n vi\u00ean\n  \u2705 B\u00e1o c\u00e1o\n  \u2705 C\u00e0i \u0111\u1eb7t\n  \u2705 Quy\u1ec1n h\u1ea1n\n\u2705 TC004 PASS: All 10 guarded pages accessible\n"
+    },
+    {
+      "id": "TC005",
+      "name": "Sidebar exposes expected admin navigation",
+      "category": "UI",
+      "status": "PASS",
+      "duration": 14.63,
+      "error": null,
+      "stdout": null
+    },
+    {
+      "id": "TC006",
+      "name": "Admin can create TEST_SPRITE customer",
+      "category": "Customer",
+      "status": "PASS",
+      "duration": 5.77,
+      "error": null,
+      "stdout": "\u2705 TC006 PASS: Created customer 'TEST SPRITE 20260516050124' successfully\n"
+    },
+    {
+      "id": "TC007",
+      "name": "Admin can edit TEST_SPRITE customer",
+      "category": "Customer",
+      "status": "PASS",
+      "duration": 8.91,
+      "error": null,
+      "stdout": "\u2705 TC007 PASS: Customer edited successfully\n"
+    },
+    {
+      "id": "TC008",
+      "name": "Customer mutation controls visible for admin",
+      "category": "Permissions",
+      "status": "PASS",
+      "duration": 6.53,
+      "error": null,
+      "stdout": "\u2705 TC008 PASS: Found controls: Edit, Payment\n"
+    },
+    {
+      "id": "TC009",
+      "name": "Delete requires confirmation",
+      "category": "Safety",
+      "status": "PASS",
+      "duration": 23.58,
+      "error": null,
+      "stdout": null
+    },
+    {
+      "id": "TC010",
+      "name": "Employees page loads and search works",
+      "category": "Employee",
+      "status": "PASS",
+      "duration": 2.89,
+      "error": null,
+      "stdout": "\u2705 TC010 PASS: Employees page loaded, search executed\n"
+    },
+    {
+      "id": "TC011",
+      "name": "Employee creation for TESTSPRITE",
+      "category": "Employee",
+      "status": "PASS",
+      "duration": 5.05,
+      "error": null,
+      "stdout": "\u2705 TC011 PASS: Created employee 'TESTSPRITE EMP 20260516050142' successfully\n"
+    }
+  ],
+  "summary": {
+    "total": 11,
+    "pass": 11,
+    "fail": 0,
+    "skip": 0,
+    "timeout": 0,
+    "error": 0
+  }
+}

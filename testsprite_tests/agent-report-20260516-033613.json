@@ -1,0 +1,67 @@
+{
+  "timestamp": "2026-05-16T03:36:13.847755",
+  "target": "http://127.0.0.1:5175",
+  "results": [
+    {
+      "status": "PASS",
+      "test": "Login/Logout",
+      "duration": 2.29
+    },
+    {
+      "status": "PASS",
+      "test": "Guarded Pages",
+      "pages": 10,
+      "duration": 14.57
+    },
+    {
+      "status": "PASS",
+      "test": "Customer CRUD",
+      "customer": "AGENT 20260516033602",
+      "duration": 7.43
+    },
+    {
+      "status": "PASS",
+      "test": "Employees Page",
+      "duration": 1.79
+    },
+    {
+      "status": "PASS",
+      "test": "Services Route",
+      "duration": 1.87
+    },
+    {
+      "status": "PASS",
+      "test": "Permission Board",
+      "duration": 1.89
+    },
+    {
+      "status": "PASS",
+      "test": "Reports Routes",
+      "routes": 2,
+      "duration": 2.62
+    },
+    {
+      "status": "PASS",
+      "test": "Payment Page",
+      "duration": 3.09
+    },
+    {
+      "status": "PASS",
+      "test": "Accent Search",
+      "query": "nguyen",
+      "duration": 3.56
+    },
+    {
+      "status": "PASS",
+      "test": "Calendar Export",
+      "export_visible": true,
+      "duration": 1.92
+    }
+  ],
+  "summary": {
+    "total": 10,
+    "pass": 10,
+    "fail": 0,
+    "error": 0
+  }
+}

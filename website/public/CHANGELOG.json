@@ -1,5 +1,25 @@
 [
   {
+    "version": "0.32.4",
+    "date": "2026-05-15",
+    "commit": "423ede73",
+    "highlights": "Calendar export presets now use viewed date; feedback admin error detail",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": []
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
     "version": "0.32.2",
     "date": "2026-05-15",
     "commit": "e2ef5a6a",

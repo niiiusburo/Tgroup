@@ -1,0 +1,220 @@
+{
+  "timestamp": "2026-05-16T05:07:54.621068",
+  "results": [
+    {
+      "id": "TC001",
+      "name": "Admin login reaches protected overview",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 2.5,
+      "error": null,
+      "stdout": "\u2705 TC001 PASS: Admin login successful, protected overview rendered\n"
+    },
+    {
+      "id": "TC002",
+      "name": "Logout clears session",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 1.64,
+      "error": null,
+      "stdout": "\u2705 TC002 PASS: Logout cleared session, redirected to /login\n"
+    },
+    {
+      "id": "TC003",
+      "name": "Invalid credentials are rejected",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 15.42,
+      "error": null,
+      "stdout": null
+    },
+    {
+      "id": "TC004",
+      "name": "Admin can access core guarded pages",
+      "category": "Routes",
+      "status": "PASS",
+      "duration": 29.16,
+      "error": null,
+      "stdout": "  \u2705 T\u1ed5ng quan\n  \u2705 L\u1ecbch\n  \u2705 Kh\u00e1ch h\u00e0ng\n  \u2705 D\u1ecbch v\u1ee5\n  \u2705 Danh m\u1ee5c d\u1ecbch v\u1ee5\n  \u2705 K\u1ebf ho\u1ea1ch thanh to\u00e1n\n  \u2705 Nh\u00e2n vi\u00ean\n  \u2705 B\u00e1o c\u00e1o\n  \u2705 C\u00e0i \u0111\u1eb7t\n  \u2705 Quy\u1ec1n h\u1ea1n\n\u2705 TC004 PASS: All 10 guarded pages accessible\n"
+    },
+    {
+      "id": "TC005",
+      "name": "Sidebar exposes expected admin navigation",
+      "category": "UI",
+      "status": "PASS",
+      "duration": 15.39,
+      "error": null,
+      "stdout": null
+    },
+    {
+      "id": "TC006",
+      "name": "Admin can create TEST_SPRITE customer",
+      "category": "Customer",
+      "status": "PASS",
+      "duration": 5.79,
+      "error": null,
+      "stdout": "\u2705 TC006 PASS: Created customer 'TEST SPRITE 20260516050716' successfully\n"
+    },
+    {
+      "id": "TC007",
+      "name": "Admin can edit TEST_SPRITE customer",
+      "category": "Customer",
+      "status": "PASS",
+      "duration": 8.45,
+      "error": null,
+      "stdout": "\u2705 TC007 PASS: Customer edited successfully\n"
+    },
+    {
+      "id": "TC008",
+      "name": "Customer mutation controls visible for admin",
+      "category": "Permissions",
+      "status": "PASS",
+      "duration": 6.51,
+      "error": null,
+      "stdout": "\u2705 TC008 PASS: Found controls: Edit, Payment\n"
+    },
+    {
+      "id": "TC009",
+      "name": "Delete requires confirmation",
+      "category": "Safety",
+      "status": "FAIL",
+      "duration": 17.57,
+      "error": "  return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Documents/TamTMV/Tgrouptest/testsprite_tests/.venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"xpath=/html/body/div/div/aside/nav/a[3]\").first\n\n",
+      "stdout": null
+    },
+    {
+      "id": "TC010",
+      "name": "Employees page loads and search works",
+      "category": "Employee",
+      "status": "PASS",
+      "duration": 2.84,
+      "error": null,
+      "stdout": "\u2705 TC010 PASS: Employees page loaded, search executed\n"
+    },
+    {
+      "id": "TC011",
+      "name": "Employee creation for TESTSPRITE",
+      "category": "Employee",
+      "status": "PASS",
+      "duration": 5.36,
+      "error": null,
+      "stdout": "\u2705 TC011 PASS: Created employee 'TESTSPRITE EMP 20260516050729' successfully\n"
+    },
+    {
+      "id": "TC012",
+      "name": "Employee edit for TESTSPRITE",
+      "category": "Employee",
+      "status": "PASS",
+      "duration": 6.6,
+      "error": null,
+      "stdout": "\u2705 TC012 PASS: Employee edited successfully\n"
+    },
+    {
+      "id": "TC013",
+      "name": "Permission board loads",
+      "category": "Permissions",
+      "status": "PASS",
+      "duration": 4.34,
+      "error": null,
+      "stdout": "\u2705 TC013 PASS: Permission board loaded successfully\n"
+    },
+    {
+      "id": "TC014",
+      "name": "Employee fail doesn't break permissions",
+      "category": "Permissions",
+      "status": "PASS",
+      "duration": 4.08,
+      "error": null,
+      "stdout": "\u2705 TC014 PASS: Permission surfaces stable after employee operations\n"
+    },
+    {
+      "id": "TC015",
+      "name": "Reports routes render",
+      "category": "Reports",
+      "status": "PASS",
+      "duration": 11.26,
+      "error": null,
+      "stdout": "  \u2705 /reports/dashboard\n  \u2705 /reports/revenue\n  \u2705 /reports/appointments\n  \u2705 /reports/customers\n  \u2705 /reports/services\n  \u2705 /reports/employees\n\u2705 TC015 PASS: All 6 report routes rendered\n"
+    },
+    {
+      "id": "TC016",
+      "name": "Payment page renders safely",
+      "category": "Payment",
+      "status": "PASS",
+      "duration": 3.61,
+      "error": null,
+      "stdout": "\u2705 TC016 PASS: Payment page rendered safely\n"
+    },
+    {
+      "id": "TC017",
+      "name": "Service catalog renders",
+      "category": "Services",
+      "status": "PASS",
+      "duration": 4.41,
+      "error": null,
+      "stdout": "  \u2705 Search field works\n\u2705 TC017 PASS: Service catalog rendered and search works\n"
+    },
+    {
+      "id": "TC018",
+      "name": "Settings renders safely",
+      "category": "Settings",
+      "status": "PASS",
+      "duration": 14.6,
+      "error": null,
+      "stdout": null
+    },
+    {
+      "id": "TC019",
+      "name": "Permission matrix wildcard admin",
+      "category": "Permissions",
+      "status": "PASS",
+      "duration": 3.35,
+      "error": null,
+      "stdout": "\u2705 TC019 PASS: Admin sees permission matrix\n"
+    },
+    {
+      "id": "TC020",
+      "name": "Permission viewer read-only",
+      "category": "Permissions",
+      "status": "PASS",
+      "duration": 4.4,
+      "error": null,
+      "stdout": "\u2705 TC020 PASS: Permission viewer loaded\n"
+    },
+    {
+      "id": "TC022",
+      "name": "Services route permission",
+      "category": "Permissions",
+      "status": "PASS",
+      "duration": 1.48,
+      "error": null,
+      "stdout": "\u2705 TC022 PASS: Services route accessible, content verified\n"
+    },
+    {
+      "id": "TC030",
+      "name": "Calendar Excel with session token",
+      "category": "Calendar",
+      "status": "PASS",
+      "duration": 1.72,
+      "error": null,
+      "stdout": "\u26a0\ufe0f TC030 SKIP: Export menu not found\n"
+    },
+    {
+      "id": "TC031",
+      "name": "Accent-insensitive search",
+      "category": "Search",
+      "status": "PASS",
+      "duration": 5.1,
+      "error": null,
+      "stdout": "\u2705 TC031 PASS: Customer search 'nguyen' returned 20 results\n\u2705 TC031 PASS: Overview search 'quyen' executed\n"
+    }
+  ],
+  "summary": {
+    "total": 23,
+    "pass": 22,
+    "fail": 1,
+    "skip": 0,
+    "timeout": 0,
+    "error": 0
+  }
+}

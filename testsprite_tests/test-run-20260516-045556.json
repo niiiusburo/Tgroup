@@ -1,0 +1,49 @@
+{
+  "timestamp": "2026-05-16T04:55:56.447103",
+  "results": [
+    {
+      "id": "TC001",
+      "name": "Admin login reaches protected overview",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 2.03,
+      "error": null,
+      "stdout": "\u2705 TC001 PASS: Admin login successful, protected overview rendered\n"
+    },
+    {
+      "id": "TC002",
+      "name": "Logout clears session",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 0.99,
+      "error": null,
+      "stdout": "\u2705 TC002 PASS: Logout cleared session, redirected to /login\n"
+    },
+    {
+      "id": "TC003",
+      "name": "Invalid credentials are rejected",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 14.93,
+      "error": null,
+      "stdout": null
+    },
+    {
+      "id": "TC004",
+      "name": "Admin can access core guarded pages",
+      "category": "Routes",
+      "status": "PASS",
+      "duration": 28.19,
+      "error": null,
+      "stdout": "  \u2705 T\u1ed5ng quan\n  \u2705 L\u1ecbch\n  \u2705 Kh\u00e1ch h\u00e0ng\n  \u2705 D\u1ecbch v\u1ee5\n  \u2705 Danh m\u1ee5c d\u1ecbch v\u1ee5\n  \u2705 K\u1ebf ho\u1ea1ch thanh to\u00e1n\n  \u2705 Nh\u00e2n vi\u00ean\n  \u2705 B\u00e1o c\u00e1o\n  \u2705 C\u00e0i \u0111\u1eb7t\n  \u2705 Quy\u1ec1n h\u1ea1n\n\u2705 TC004 PASS: All 10 guarded pages accessible\n"
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "pass": 4,
+    "fail": 0,
+    "skip": 0,
+    "timeout": 0,
+    "error": 0
+  }
+}

@@ -36,26 +36,66 @@ router.get('/all', requireAuth, requireAdmin, async (req, res) => {
       params.push('manual');
     }
 
-    const threads = await query(
-      `SELECT
-        t.id,
-        t.employee_id AS "employeeId",
-        COALESCE(p.name, 'System') AS "employeeName",
-        t.page_url AS "pageUrl",
-        t.page_path AS "pagePath",
-        t.status,
-        t.source,
-        t.error_event_id AS "errorEventId",
-        t.created_at AS "createdAt",
-        t.updated_at AS "updatedAt",
-        (SELECT content FROM feedback_messages WHERE thread_id = t.id ORDER BY created_at ASC LIMIT 1) AS "firstMessage",
-        (SELECT content FROM feedback_messages WHERE thread_id = t.id AND author_id != t.employee_id ORDER BY created_at DESC LIMIT 1) AS "latestReply"
-       FROM feedback_threads t
-       LEFT JOIN partners p ON p.id = t.employee_id
-       ${whereClause}
-       ORDER BY t.updated_at DESC`,
-      params
-    );
+    let threads;
+    if (source === 'auto') {
+      threads = await query(
+        `SELECT
+          t.id,
+          t.employee_id AS "employeeId",
+          COALESCE(p.name, 'System') AS "employeeName",
+          t.page_url AS "pageUrl",
+          t.page_path AS "pagePath",
+          t.status,
+          t.source,
+          t.error_event_id AS "errorEventId",
+          t.created_at AS "createdAt",
+          t.updated_at AS "updatedAt",
+          (SELECT content FROM feedback_messages WHERE thread_id = t.id ORDER BY created_at ASC LIMIT 1) AS "firstMessage",
+          (SELECT content FROM feedback_messages WHERE thread_id = t.id AND author_id != t.employee_id ORDER BY created_at DESC LIMIT 1) AS "latestReply",
+          e.error_type AS "errorType",
+          e.message AS "errorMessage",
+          e.stack AS "errorStack",
+          e.source_file AS "errorSourceFile",
+          e.source_line AS "errorSourceLine",
+          e.route AS "errorRoute",
+          e.api_endpoint AS "errorApiEndpoint",
+          e.api_method AS "errorApiMethod",
+          e.api_status AS "errorApiStatus",
+          e.occurrence_count AS "errorOccurrenceCount",
+          e.first_seen_at AS "errorFirstSeenAt",
+          e.last_seen_at AS "errorLastSeenAt",
+          e.status AS "errorEventStatus",
+          e.fix_summary AS "errorFixSummary",
+          e.fix_commit AS "errorFixCommit"
+         FROM feedback_threads t
+         LEFT JOIN partners p ON p.id = t.employee_id
+         LEFT JOIN dbo.error_events e ON e.id = t.error_event_id
+         ${whereClause}
+         ORDER BY t.updated_at DESC`,
+        params
+      );
+    } else {
+      threads = await query(
+        `SELECT
+          t.id,
+          t.employee_id AS "employeeId",
+          COALESCE(p.name, 'System') AS "employeeName",
+          t.page_url AS "pageUrl",
+          t.page_path AS "pagePath",
+          t.status,
+          t.source,
+          t.error_event_id AS "errorEventId",
+          t.created_at AS "createdAt",
+          t.updated_at AS "updatedAt",
+          (SELECT content FROM feedback_messages WHERE thread_id = t.id ORDER BY created_at ASC LIMIT 1) AS "firstMessage",
+          (SELECT content FROM feedback_messages WHERE thread_id = t.id AND author_id != t.employee_id ORDER BY created_at DESC LIMIT 1) AS "latestReply"
+         FROM feedback_threads t
+         LEFT JOIN partners p ON p.id = t.employee_id
+         ${whereClause}
+         ORDER BY t.updated_at DESC`,
+        params
+      );
+    }
 
     return res.json({ items: threads });
   } catch (err) {
@@ -85,9 +125,27 @@ router.get('/all/:threadId', requireAuth, requireAdmin, async (req, res) => {
         t.source,
         t.error_event_id AS "errorEventId",
         t.created_at AS "createdAt",
-        t.updated_at AS "updatedAt"
+        t.updated_at AS "updatedAt",
+        e.error_type AS "errorType",
+        e.message AS "errorMessage",
+        e.stack AS "errorStack",
+        e.component_stack AS "errorComponentStack",
+        e.source_file AS "errorSourceFile",
+        e.source_line AS "errorSourceLine",
+        e.route AS "errorRoute",
+        e.api_endpoint AS "errorApiEndpoint",
+        e.api_method AS "errorApiMethod",
+        e.api_status AS "errorApiStatus",
+        e.api_body AS "errorApiBody",
+        e.occurrence_count AS "errorOccurrenceCount",
+        e.first_seen_at AS "errorFirstSeenAt",
+        e.last_seen_at AS "errorLastSeenAt",
+        e.status AS "errorEventStatus",
+        e.fix_summary AS "errorFixSummary",
+        e.fix_commit AS "errorFixCommit"
        FROM feedback_threads t
        LEFT JOIN partners p ON p.id = t.employee_id
+       LEFT JOIN dbo.error_events e ON e.id = t.error_event_id
        WHERE t.id = $1`,
       [threadId]
     );

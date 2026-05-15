@@ -1,0 +1,81 @@
+{
+  "timestamp": "2026-05-16T03:27:16.538714",
+  "target": "http://127.0.0.1:5175",
+  "results": [
+    {
+      "status": "FAIL",
+      "test": "Login/Logout",
+      "error": "Locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator(\"text='\u0110\u0103ng xu\u1ea5t'\").first\n",
+      "duration": 17.53
+    },
+    {
+      "status": "FAIL",
+      "test": "Guarded Pages",
+      "failures": [
+        "/calendar: Access Denied/403",
+        "/customers: Access Denied/403",
+        "/services: Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiti",
+        "/service-catalog: Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiti",
+        "/payment: Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiti",
+        "/employees: Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiti",
+        "/reports/dashboard: Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiti",
+        "/settings: Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiti",
+        "/permissions: Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiti"
+      ],
+      "duration": 73.87
+    },
+    {
+      "status": "PASS",
+      "test": "Customer CRUD",
+      "customer": "AGENT 20260516032605",
+      "duration": 7.1
+    },
+    {
+      "status": "PASS",
+      "test": "Employees Page",
+      "duration": 1.79
+    },
+    {
+      "status": "PASS",
+      "test": "Services Route",
+      "duration": 1.81
+    },
+    {
+      "status": "PASS",
+      "test": "Permission Board",
+      "duration": 1.78
+    },
+    {
+      "status": "FAIL",
+      "test": "Reports Routes",
+      "failures": [
+        "/reports/revenue: Access Denied"
+      ],
+      "duration": 3.51
+    },
+    {
+      "status": "FAIL",
+      "test": "Payment Page",
+      "error": "Access Denied",
+      "duration": 2.09
+    },
+    {
+      "status": "PASS",
+      "test": "Accent Search",
+      "query": "nguyen",
+      "duration": 3.25
+    },
+    {
+      "status": "PASS",
+      "test": "Calendar Export",
+      "export_visible": true,
+      "duration": 1.82
+    }
+  ],
+  "summary": {
+    "total": 10,
+    "pass": 6,
+    "fail": 4,
+    "error": 0
+  }
+}

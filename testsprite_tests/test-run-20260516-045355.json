@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-05-16T04:53:55.698901",
+  "results": [
+    {
+      "id": "TC001",
+      "name": "Admin login reaches protected overview",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 2.16,
+      "error": null,
+      "stdout": "\u2705 TC001 PASS: Admin login successful, protected overview rendered\n"
+    },
+    {
+      "id": "TC002",
+      "name": "Logout clears session",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 1.18,
+      "error": null,
+      "stdout": "\u2705 TC002 PASS: Logout cleared session, redirected to /login\n"
+    }
+  ],
+  "summary": {
+    "total": 2,
+    "pass": 2,
+    "fail": 0,
+    "skip": 0,
+    "timeout": 0,
+    "error": 0
+  }
+}

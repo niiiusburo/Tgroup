@@ -27,9 +27,45 @@ export interface FeedbackThread {
   latestReply?: string | null;
 }
 
+export interface ErrorEvent {
+  errorType: string;
+  errorMessage: string;
+  errorStack: string | null;
+  errorComponentStack: string | null;
+  errorSourceFile: string | null;
+  errorSourceLine: number | null;
+  errorRoute: string | null;
+  errorApiEndpoint: string | null;
+  errorApiMethod: string | null;
+  errorApiStatus: number | null;
+  errorApiBody: unknown | null;
+  errorOccurrenceCount: number;
+  errorFirstSeenAt: string;
+  errorLastSeenAt: string;
+  errorEventStatus: string;
+  errorFixSummary: string | null;
+  errorFixCommit: string | null;
+}
+
 export interface AdminFeedbackThread extends FeedbackThread {
   employeeId: string;
   employeeName: string;
+  errorType?: string;
+  errorMessage?: string;
+  errorStack?: string | null;
+  errorComponentStack?: string | null;
+  errorSourceFile?: string | null;
+  errorSourceLine?: number | null;
+  errorRoute?: string | null;
+  errorApiEndpoint?: string | null;
+  errorApiMethod?: string | null;
+  errorApiStatus?: number | null;
+  errorOccurrenceCount?: number;
+  errorFirstSeenAt?: string;
+  errorLastSeenAt?: string;
+  errorEventStatus?: string;
+  errorFixSummary?: string | null;
+  errorFixCommit?: string | null;
 }
 
 export interface FeedbackMessage {

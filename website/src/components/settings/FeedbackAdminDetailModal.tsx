@@ -1,4 +1,4 @@
-import { Bug, Loader2, MessageSquare, Paperclip, Send, X } from 'lucide-react';
+import { Bug, Loader2, MessageSquare, Paperclip, Send, X, FileCode, Hash, Clock, Route, Globe, GitCommit, CheckCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getUploadUrl } from '@/lib/api';
 import type { AdminFeedbackThread, FeedbackMessage } from '@/types/feedback';
@@ -64,6 +64,151 @@ function AttachmentThumbnails({ attachments }: { attachments?: { url: string; or
   );
 }
 
+function ErrorTypeBadge({ type }: { type: string }) {
+  const colors: Record<string, string> = {
+    React: 'bg-blue-50 text-blue-700 ring-blue-600/20',
+    API: 'bg-amber-50 text-amber-700 ring-amber-600/20',
+    Network: 'bg-purple-50 text-purple-700 ring-purple-600/20',
+    Global: 'bg-red-50 text-red-700 ring-red-600/20',
+    UnhandledRejection: 'bg-orange-50 text-orange-700 ring-orange-600/20',
+    Console: 'bg-gray-50 text-gray-700 ring-gray-500/20',
+    Server: 'bg-rose-50 text-rose-700 ring-rose-600/20',
+  };
+  const style = colors[type] || 'bg-gray-50 text-gray-700 ring-gray-500/20';
+  return (
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${style}`}>
+      {type}
+    </span>
+  );
+}
+
+function ErrorEventStatusBadge({ status }: { status: string }) {
+  const colors: Record<string, string> = {
+    new: 'bg-red-50 text-red-700 ring-red-600/20',
+    investigating: 'bg-amber-50 text-amber-700 ring-amber-600/20',
+    fix_in_progress: 'bg-blue-50 text-blue-700 ring-blue-600/20',
+    fix_verified: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+    deployed: 'bg-green-50 text-green-700 ring-green-600/20',
+    duplicate: 'bg-gray-50 text-gray-600 ring-gray-500/20',
+    won_t_fix: 'bg-gray-50 text-gray-600 ring-gray-500/20',
+    manual_review: 'bg-purple-50 text-purple-700 ring-purple-600/20',
+  };
+  const style = colors[status] || 'bg-gray-50 text-gray-600 ring-gray-500/20';
+  const label = status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  return (
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${style}`}>
+      {label}
+    </span>
+  );
+}
+
+function AutoErrorDetail({ thread }: { thread: AdminFeedbackThread }) {
+  const hasStack = thread.errorStack && thread.errorStack.length > 0;
+  const hasSource = thread.errorSourceFile;
+
+  return (
+    <div className="space-y-4">
+      {/* Error header */}
+      <div className="bg-red-50/50 border border-red-100 rounded-xl p-4 space-y-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          <ErrorTypeBadge type={thread.errorType || 'Unknown'} />
+          {thread.errorEventStatus && (
+            <ErrorEventStatusBadge status={thread.errorEventStatus} />
+          )}
+          {thread.errorOccurrenceCount !== undefined && thread.errorOccurrenceCount > 1 && (
+            <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-600/20">
+              <Hash className="w-3 h-3" />
+              {thread.errorOccurrenceCount} occurrences
+            </span>
+          )}
+        </div>
+
+        <p className="text-sm font-medium text-gray-900">
+          {thread.errorMessage || 'No message'}
+        </p>
+
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+          {thread.errorRoute && (
+            <span className="inline-flex items-center gap-1">
+              <Route className="w-3 h-3" />
+              {thread.errorRoute}
+            </span>
+          )}
+          {hasSource && (
+            <span className="inline-flex items-center gap-1">
+              <FileCode className="w-3 h-3" />
+              {thread.errorSourceFile}
+              {thread.errorSourceLine !== null && `:${thread.errorSourceLine}`}
+            </span>
+          )}
+          {thread.errorApiEndpoint && (
+            <span className="inline-flex items-center gap-1">
+              <Globe className="w-3 h-3" />
+              {thread.errorApiMethod || 'GET'} {thread.errorApiEndpoint}
+              {thread.errorApiStatus !== null && ` (${thread.errorApiStatus})`}
+            </span>
+          )}
+        </div>
+
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-400">
+          {thread.errorFirstSeenAt && (
+            <span className="inline-flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              First: {formatFeedbackTime(thread.errorFirstSeenAt)}
+            </span>
+          )}
+          {thread.errorLastSeenAt && (
+            <span className="inline-flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              Last: {formatFeedbackTime(thread.errorLastSeenAt)}
+            </span>
+          )}
+        </div>
+
+        {thread.errorFixSummary && (
+          <div className="flex items-start gap-2 text-xs text-emerald-700 bg-emerald-50 rounded-lg p-2">
+            <CheckCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+            <div>
+              <span className="font-medium">Fix: </span>
+              {thread.errorFixSummary}
+              {thread.errorFixCommit && (
+                <span className="inline-flex items-center gap-1 ml-1 text-emerald-600">
+                  <GitCommit className="w-3 h-3" />
+                  {thread.errorFixCommit.slice(0, 7)}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Stack trace */}
+      {hasStack && (
+        <div className="space-y-2">
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Stack Trace</h4>
+          <div className="bg-gray-900 rounded-xl p-4 overflow-x-auto">
+            <pre className="text-xs text-gray-300 font-mono whitespace-pre-wrap break-all">
+              {thread.errorStack}
+            </pre>
+          </div>
+        </div>
+      )}
+
+      {/* Component stack */}
+      {thread.errorComponentStack && thread.errorComponentStack.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Component Stack</h4>
+          <div className="bg-gray-900 rounded-xl p-4 overflow-x-auto">
+            <pre className="text-xs text-gray-300 font-mono whitespace-pre-wrap break-all">
+              {thread.errorComponentStack}
+            </pre>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface FeedbackAdminDetailModalProps {
   readonly threadId: string | null;
   readonly detail: { thread: AdminFeedbackThread; messages: FeedbackMessage[] } | null;
@@ -108,24 +253,26 @@ export function FeedbackAdminDetailModal({
   const { t } = useTranslation('settings');
   if (!threadId || !detail) return null;
 
+  const isAuto = detail.thread.source === 'auto';
+
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/50">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${detail.thread.source === 'auto' ? 'bg-red-50' : 'bg-primary/10'}`}>
-              {detail.thread.source === 'auto'
+            <div className={`p-2 rounded-lg ${isAuto ? 'bg-red-50' : 'bg-primary/10'}`}>
+              {isAuto
                 ? <Bug className="w-4 h-4 text-red-500" />
                 : <MessageSquare className="w-4 h-4 text-primary" />
               }
             </div>
             <div>
               <h2 className="text-base font-semibold text-gray-900">
-                {detail.thread.source === 'auto' ? 'Error Detail' : 'Feedback Detail'}
+                {isAuto ? 'Error Detail' : 'Feedback Detail'}
               </h2>
               <p className="text-xs text-gray-500">
-                {detail.thread.source === 'auto'
+                {isAuto
                   ? `Auto-detected • ${detail.thread.pagePath || detail.thread.pageUrl || 'Unknown'} • ${formatFeedbackTime(detail.thread.createdAt)}`
                   : `${detail.thread.employeeName} • ${detail.thread.pagePath || detail.thread.pageUrl || 'Unknown page'} • ${formatFeedbackTime(detail.thread.createdAt)}`
                 }
@@ -147,29 +294,45 @@ export function FeedbackAdminDetailModal({
               <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
             </div>
           ) : (
-            detail.messages.map((msg) => {
-              const isAdmin = msg.authorId !== detail.thread.employeeId;
-              return (
-                <div key={msg.id} className={`flex gap-3 ${isAdmin ? 'flex-row-reverse' : ''}`}>
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-[10px] text-primary font-semibold">{getFeedbackInitials(msg.authorName)}</span>
-                  </div>
-                  <div
-                    className={`rounded-xl px-4 py-2 text-sm max-w-[75%] ${
-                      isAdmin
-                        ? 'bg-primary text-white rounded-tr-none'
-                        : 'bg-gray-100 text-gray-800 rounded-tl-none'
-                    }`}
-                  >
-                    <p className="whitespace-pre-wrap">{msg.content}</p>
-                    <AttachmentThumbnails attachments={msg.attachments} />
-                    <p className={`text-[10px] mt-1 ${isAdmin ? 'text-white/70' : 'text-gray-500'}`}>
-                      {msg.authorName || 'Unknown'} • {formatFeedbackTime(msg.createdAt)}
-                    </p>
-                  </div>
+            <>
+              {/* Auto error structured detail */}
+              {isAuto && <AutoErrorDetail thread={detail.thread} />}
+
+              {/* Messages / Thread replies */}
+              {detail.messages.length > 0 && (
+                <div className="space-y-4 pt-2">
+                  {!isAuto && (
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Conversation</h4>
+                  )}
+                  {isAuto && (
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Discussion</h4>
+                  )}
+                  {detail.messages.map((msg) => {
+                    const isAdmin = msg.authorId !== detail.thread.employeeId;
+                    return (
+                      <div key={msg.id} className={`flex gap-3 ${isAdmin ? 'flex-row-reverse' : ''}`}>
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <span className="text-[10px] text-primary font-semibold">{getFeedbackInitials(msg.authorName)}</span>
+                        </div>
+                        <div
+                          className={`rounded-xl px-4 py-2 text-sm max-w-[75%] ${
+                            isAdmin
+                              ? 'bg-primary text-white rounded-tr-none'
+                              : 'bg-gray-100 text-gray-800 rounded-tl-none'
+                          }`}
+                        >
+                          <p className="whitespace-pre-wrap">{msg.content}</p>
+                          <AttachmentThumbnails attachments={msg.attachments} />
+                          <p className={`text-[10px] mt-1 ${isAdmin ? 'text-white/70' : 'text-gray-500'}`}>
+                            {msg.authorName || 'Unknown'} • {formatFeedbackTime(msg.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })
+              )}
+            </>
           )}
         </div>
 

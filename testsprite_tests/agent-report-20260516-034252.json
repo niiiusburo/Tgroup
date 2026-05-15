@@ -1,0 +1,138 @@
+{
+  "timestamp": "2026-05-16T03:42:52.839603",
+  "target": "http://127.0.0.1:5175",
+  "results": [
+    {
+      "status": "PASS",
+      "test": "Login/Logout",
+      "duration": 2.36
+    },
+    {
+      "status": "PASS",
+      "test": "Guarded Pages",
+      "pages": 10,
+      "duration": 14.84
+    },
+    {
+      "status": "PASS",
+      "test": "Customer CRUD",
+      "customer": "AGENT 20260516034235",
+      "duration": 7.53
+    },
+    {
+      "status": "PASS",
+      "test": "Employees Page",
+      "duration": 3.0
+    },
+    {
+      "status": "PASS",
+      "test": "Services Route",
+      "duration": 2.04
+    },
+    {
+      "status": "PASS",
+      "test": "Permission Board",
+      "duration": 1.8
+    },
+    {
+      "status": "PASS",
+      "test": "Reports Routes",
+      "routes": 2,
+      "duration": 2.63
+    },
+    {
+      "status": "PASS",
+      "test": "Payment Page",
+      "duration": 3.12
+    },
+    {
+      "status": "PASS",
+      "test": "Accent Search",
+      "query": "nguyen",
+      "duration": 3.54
+    },
+    {
+      "status": "PASS",
+      "test": "Calendar Export",
+      "export_visible": true,
+      "duration": 1.91
+    },
+    {
+      "status": "PASS",
+      "test": "Overview Page",
+      "checks": [
+        "overview_title",
+        "appointments_section",
+        "services_activity"
+      ],
+      "duration": 2.96
+    },
+    {
+      "status": "PASS",
+      "test": "Calendar Search",
+      "query": "nguyen",
+      "duration": 4.36
+    },
+    {
+      "status": "PASS",
+      "test": "Settings Page",
+      "duration": 1.72
+    },
+    {
+      "status": "PASS",
+      "test": "Service Catalog",
+      "duration": 1.75
+    },
+    {
+      "status": "PASS",
+      "test": "Customer Profile",
+      "checks": [
+        "profile_info",
+        "services_tab"
+      ],
+      "url": "http://127.0.0.1:5175/customers/073b9447-c36a-476f-ae75-6b352fc5fae3",
+      "duration": 3.93
+    },
+    {
+      "status": "PASS",
+      "test": "Permission Matrix Visibility",
+      "checks": [],
+      "duration": 2.84
+    },
+    {
+      "status": "PASS",
+      "test": "Cash Flow API",
+      "checks": [],
+      "math_ok": false,
+      "duration": 0.15
+    },
+    {
+      "status": "PASS",
+      "test": "Reports Revenue",
+      "duration": 1.88
+    },
+    {
+      "status": "PASS",
+      "test": "Hosoonline Customer",
+      "checks": [
+        "hosoonline_section",
+        "checkup_section"
+      ],
+      "duration": 6.03
+    },
+    {
+      "status": "PASS",
+      "test": "Auth Me API",
+      "checks": [
+        "has_permissions"
+      ],
+      "duration": 0.07
+    }
+  ],
+  "summary": {
+    "total": 20,
+    "pass": 20,
+    "fail": 0,
+    "error": 0
+  }
+}

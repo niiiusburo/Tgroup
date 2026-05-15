@@ -1,0 +1,81 @@
+{
+  "timestamp": "2026-05-16T03:24:46.876302",
+  "target": "http://127.0.0.1:5175",
+  "results": [
+    {
+      "status": "ERROR",
+      "agent": "Agent001_LoginLogout",
+      "error": "Locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator(\"button\").filter(has=locator(\".rounded-full:has-text('A')\")).first\n",
+      "duration": 16.07
+    },
+    {
+      "status": "FAIL",
+      "test": "Guarded Pages",
+      "failures": [
+        "/calendar: Page shows 403",
+        "/customers: Page shows 403",
+        "/payment: Page shows 403"
+      ],
+      "duration": 13.67,
+      "agent": "Agent002_GuardedPages"
+    },
+    {
+      "status": "ERROR",
+      "agent": "Agent003_CustomerCRUD",
+      "error": "Locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator(\"button:has-text('Th\u00eam')\").first\n",
+      "duration": 16.8
+    },
+    {
+      "status": "PASS",
+      "test": "Employees Page",
+      "duration": 1.28,
+      "agent": "Agent004_EmployeePage"
+    },
+    {
+      "status": "PASS",
+      "test": "Services Route Permission",
+      "duration": 1.31,
+      "agent": "Agent005_ServicesRoute"
+    },
+    {
+      "status": "PASS",
+      "test": "Permission Board",
+      "duration": 1.3,
+      "agent": "Agent006_PermissionBoard"
+    },
+    {
+      "status": "FAIL",
+      "test": "Reports Routes",
+      "failures": [
+        "/reports/revenue: Page shows 403"
+      ],
+      "duration": 2.9,
+      "agent": "Agent007_ReportsRoutes"
+    },
+    {
+      "status": "ERROR",
+      "agent": "Agent008_PaymentPage",
+      "error": "Page shows 403",
+      "duration": 1.59
+    },
+    {
+      "status": "PASS",
+      "test": "Accent-Insensitive Search",
+      "query": "nguyen",
+      "duration": 2.87,
+      "agent": "Agent009_AccentInsensitiveSearch"
+    },
+    {
+      "status": "PASS",
+      "test": "Calendar Export Menu",
+      "duration": 1.32,
+      "agent": "Agent010_CalendarExport"
+    }
+  ],
+  "summary": {
+    "total": 10,
+    "pass": 5,
+    "fail": 2,
+    "error": 3
+  }
+}

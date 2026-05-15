@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Eye, Loader2, Trash2, Bug, Users } from 'lucide-react';
+import { Eye, Loader2, Trash2, Bug, Users, Hash, FileCode } from 'lucide-react';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusDropdown, type StatusOption } from '@/components/shared/StatusDropdown';
 import { usePasteImage } from '@/hooks/usePasteImage';
@@ -225,31 +225,134 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
 
   const isAutoTab = activeTab === 'auto';
 
-  const columns: Column<AdminFeedbackThread>[] = [
+  const autoColumns: Column<AdminFeedbackThread>[] = [
     {
-      key: 'employeeName',
-      header: isAutoTab ? 'Source' : 'Employee',
+      key: 'errorType',
+      header: 'Type',
       sortable: true,
+      width: '100px',
       render: (row) => {
-        if (row.source === 'auto') {
-          return (
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-red-50 flex items-center justify-center">
-                <Bug className="w-3.5 h-3.5 text-red-500" />
-              </div>
-              <span className="font-medium text-gray-900">Auto-detected</span>
-            </div>
-          );
-        }
+        const type = row.errorType || 'Unknown';
+        const colors: Record<string, string> = {
+          React: 'bg-blue-50 text-blue-700 ring-blue-600/20',
+          API: 'bg-amber-50 text-amber-700 ring-amber-600/20',
+          Network: 'bg-purple-50 text-purple-700 ring-purple-600/20',
+          Global: 'bg-red-50 text-red-700 ring-red-600/20',
+          UnhandledRejection: 'bg-orange-50 text-orange-700 ring-orange-600/20',
+          Console: 'bg-gray-50 text-gray-700 ring-gray-500/20',
+          Server: 'bg-rose-50 text-rose-700 ring-rose-600/20',
+        };
+        const style = colors[type] || 'bg-gray-50 text-gray-700 ring-gray-500/20';
         return (
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-[10px] text-primary font-semibold">{getFeedbackInitials(row.employeeName)}</span>
-            </div>
-            <span className="font-medium text-gray-900">{row.employeeName}</span>
-          </div>
+          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ${style}`}>
+            {type}
+          </span>
         );
       },
+    },
+    {
+      key: 'errorMessage',
+      header: 'Error',
+      sortable: true,
+      render: (row) => (
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-gray-900 line-clamp-1 max-w-xs" title={row.errorMessage || undefined}>
+            {row.errorMessage || '—'}
+          </p>
+          {row.errorSourceFile && (
+            <p className="text-[10px] text-gray-400 inline-flex items-center gap-1">
+              <FileCode className="w-3 h-3" />
+              {row.errorSourceFile}{row.errorSourceLine !== null ? `:${row.errorSourceLine}` : ''}
+            </p>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'errorOccurrenceCount',
+      header: 'Count',
+      sortable: true,
+      width: '80px',
+      render: (row) => (
+        <div className="flex items-center gap-1 text-sm text-gray-700">
+          <Hash className="w-3.5 h-3.5 text-gray-400" />
+          {row.errorOccurrenceCount ?? 1}
+        </div>
+      ),
+    },
+    {
+      key: 'pagePath',
+      header: 'Page',
+      sortable: true,
+      width: '140px',
+      render: (row) => {
+        const path = row.pagePath || row.pageUrl || row.errorRoute;
+        if (!path) return <span className="text-gray-400">—</span>;
+        return (
+          <span className="text-xs text-gray-500 line-clamp-1" title={path}>
+            {path}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      sortable: true,
+      width: '120px',
+      render: (row) => (
+        <StatusDropdown
+          current={row.status}
+          options={STATUS_OPTIONS}
+          onChange={(val) => handleStatusChange(row, val)}
+          disabled={!canEdit}
+        />
+      ),
+    },
+    {
+      key: 'updatedAt',
+      header: 'Last Seen',
+      sortable: true,
+      width: '120px',
+      render: (row) => (
+        <span className="text-xs text-gray-500">
+          {row.errorLastSeenAt ? formatFeedbackTime(row.errorLastSeenAt) : formatFeedbackTime(row.updatedAt)}
+        </span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      sortable: false,
+      width: '80px',
+      render: (row) => (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setModalThreadId(row.id)}
+            className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-primary bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            View
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  const manualColumns: Column<AdminFeedbackThread>[] = [
+    {
+      key: 'employeeName',
+      header: 'Employee',
+      sortable: true,
+      render: (row) => (
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+            <span className="text-[10px] text-primary font-semibold">{getFeedbackInitials(row.employeeName)}</span>
+          </div>
+          <span className="font-medium text-gray-900">{row.employeeName}</span>
+        </div>
+      ),
     },
     {
       key: 'pagePath',
@@ -320,6 +423,8 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
     },
   ];
 
+  const columns = isAutoTab ? autoColumns : manualColumns;
+
   return (
     <div className="space-y-6">
       {/* Tab bar */}
@@ -357,7 +462,7 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
           </h3>
           <p className="text-sm text-gray-500">
             {isAutoTab
-              ? 'Errors automatically captured from the live website. Fix them via the AutoDebugger.'
+              ? `${threads.length} error${threads.length !== 1 ? 's' : ''} auto-captured from production. Click View to see stack traces, source locations, and occurrence counts.`
               : 'Review and respond to feedback submitted by employees.'}
           </p>
         </div>

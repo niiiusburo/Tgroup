@@ -1,0 +1,2956 @@
+id,status,source,category,employeeName,pagePath,pageUrl,createdAt,updatedAt,messageCount,attachmentCount,firstMessage,attachments
+7bd930b0-82b5-42a1-9137-167373f6cc38,pending,manual,hoso-online/images,Admin,/customers/e7bac056-69be-47d2-acc1-b1400020d3a3,https://nk.2checkin.com/customers/e7bac056-69be-47d2-acc1-b1400020d3a3,2026-05-15T07:37:18.000Z,2026-05-15T07:37:18.000Z,1,1,Cái Nk2 hiện tại đang xem được hồ sơ online mà nk thì không xem được ạ.,/uploads/feedback/b6f0e1dc-4da7-4951-9fa8-e5f2d1522d8d.jpg
+91eeb398-6ac9-4efa-9c33-46d3a6cc6a31,pending,manual,payments/reports,Admin,/reports/revenue,https://nk2.2checkin.com/reports/revenue,2026-05-15T07:26:24.000Z,2026-05-15T07:26:24.000Z,1,0,"Phần xuất báo cáo này bị sai rùi ạ, thực ra cái báo cáo anh để nguyên như hôm trc alf ok rồi, chỉ làm sao cho nó update được số tiền đúng ở dashboard thôi ạ",
+b660c63f-d241-45c3-8dcb-87b0d035dd0c,pending,manual,customers,Admin,/customers/9aa0b5c4-ac80-4851-9c0b-b14c0088ad79,https://nk2.2checkin.com/customers/9aa0b5c4-ac80-4851-9c0b-b14c0088ad79,2026-05-15T07:05:29.000Z,2026-05-15T07:05:29.000Z,1,0,Hiện tại khi tạo tạm ứng thì phiếu tạm ứng nó lại nhảy lên chỗ  phiếu thanh toán (dù số tiền nó vẫn cộng vào tạm ứng nhưng phiếu đang nhảy sai vị trí),
+3337d4d7-2f85-435e-bd9c-20aefd3ddd36,pending,auto,permissions,,/employees,,2026-05-15T03:51:15.933Z,2026-05-15T03:51:15.933Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Permissions/groups failed (403): HTTP 403
+**Stack:** ```
+Error
+    at $W (https://nk2.2checkin.com/assets/index-No1L6mrE.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-No1L6mrE.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-No1L6mrE.js:77
+**API:** GET /Permissions/groups
+**Occurrences:** 1",
+77415ecd-f128-4bb9-b188-160727c2b00a,pending,auto,calendar/appointments,,/,,2026-05-15T03:22:36.766Z,2026-05-15T03:22:36.766Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (403): HTTP 403
+**Stack:** ```
+Error
+    at $W (https://nk2.2checkin.com/assets/index-No1L6mrE.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-No1L6mrE.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-No1L6mrE.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+d40e6f04-2577-43ba-9a07-13dea8fee966,pending,auto,runtime-error,,/,,2026-05-15T03:22:36.676Z,2026-05-15T03:22:36.676Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (403): HTTP 403
+**Stack:** ```
+Error
+    at $W (https://nk2.2checkin.com/assets/index-No1L6mrE.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-No1L6mrE.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-No1L6mrE.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+ff243812-8b50-4e3f-9261-8221d5dba50a,pending,auto,runtime-error,,/,,2026-05-15T03:22:36.582Z,2026-05-15T03:22:36.582Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+Error
+    at $W (https://nk2.2checkin.com/assets/index-No1L6mrE.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-No1L6mrE.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-No1L6mrE.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+7970f889-6169-4505-8dc8-99988f4c090b,pending,auto,calendar/appointments,,/calendar,,2026-05-15T01:37:05.930Z,2026-05-15T01:37:05.930Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Script error.
+**Occurrences:** 1",
+a085d9ae-ff9a-4eaf-95ee-135320538a5e,pending,auto,hoso-online/images,,/customers/9aa0b5c4-ac80-4851-9c0b-b14c0088ad79,,2026-05-15T00:21:40.829Z,2026-05-15T00:21:40.829Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /ExternalCheckups/T6725 failed (403): HTTP 403
+**Stack:** ```
+Error
+    at H9 (https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:4523
+```
+**Source:** nk2.2checkin.com/assets/index-D-_qmhik.js:77
+**API:** GET /ExternalCheckups/T6725
+**Occurrences:** 1",
+0341ba12-3251-41ce-92cf-e3fe69845865,pending,auto,calendar/appointments,,/,,2026-05-15T00:20:12.257Z,2026-05-15T00:20:12.257Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (403): HTTP 403
+**Stack:** ```
+Error
+    at H9 (https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:4523
+```
+**Source:** nk2.2checkin.com/assets/index-D-_qmhik.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+2afda527-17bc-4ed6-8e35-693b8de65aea,pending,auto,permissions,,/employees,,2026-05-15T00:11:34.379Z,2026-05-15T00:11:34.379Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Permissions/groups failed (403): HTTP 403
+**Stack:** ```
+Error
+    at H9 (https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:4523
+```
+**Source:** nk2.2checkin.com/assets/index-D-_qmhik.js:77
+**API:** GET /Permissions/groups
+**Occurrences:** 1",
+7e2a8ffd-8867-4355-8670-d68932cbb4f8,pending,auto,customers,,/customers/d96f064b-cbbd-47ca-ac70-b401009082a4,,2026-05-15T00:08:33.069Z,2026-05-15T00:08:33.069Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught NotFoundError: Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.
+**Stack:** ```
+NotFoundError: Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.
+    at Yh (https://nk.2checkin.com/assets/index-DOGuWkus.js:41:26067)
+    at Qe (https://nk.2checkin.com/assets/index-DOGuWkus.js:41:27357)
+    at Jh (https://nk.2checkin.com/assets/index-DOGuWkus.js:41:27817)
+    at Qe (https://nk.2checkin.com/assets/index-DOGuWkus.js:41:27507)
+    at Jh (https://nk.2checkin.com/assets/index-DOGuWkus.js:41:27817)
+    at Qe (https://nk.2checkin.com/asset
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:39
+**Occurrences:** 1",
+bf101a87-9021-46a2-98ee-0a8ddb509054,pending,auto,auth,,/login,,2026-05-14T23:24:38.205Z,2026-05-14T23:24:38.205Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+TW@https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1400
+@https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+4c573787-697f-4b89-9136-c9bb7b7bc6ac,pending,auto,runtime-error,,/,,2026-05-14T23:24:28.493Z,2026-05-14T23:24:28.493Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /SaleOrderLines failed (401): HTTP 401
+**Stack:** ```
+Error
+    at TW (https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1391)
+    at https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** GET /SaleOrderLines
+**Occurrences:** 1",
+ec55a69c-6157-4987-8d1f-7abdbcfa9ec8,pending,auto,customers,,/customers/9aa0b5c4-ac80-4851-9c0b-b14c0088ad79,,2026-05-14T22:00:19.657Z,2026-05-14T22:00:19.657Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /settings/bank failed (403): HTTP 403
+**Stack:** ```
+Error
+    at H9 (https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:4523
+```
+**Source:** nk2.2checkin.com/assets/index-D-_qmhik.js:77
+**API:** GET /settings/bank
+**Occurrences:** 1",
+8835ce89-f1de-4155-ae0e-023feb09e6f4,pending,auto,customers,,/customers/9aa0b5c4-ac80-4851-9c0b-b14c0088ad79,,2026-05-14T21:55:28.709Z,2026-05-14T21:55:28.709Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments/deposit-usage?customerId=9aa0b5c4-ac80-4851-9c0b-b14c0088ad79&limit=100&offset=0 failed (403): HTTP 403
+**Stack:** ```
+Error
+    at H9 (https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:4523
+```
+**Source:** nk2.2checkin.com/assets/index-D-_qmhik.js:77
+**API:** GET /Payments/deposit-usage?customerId=9aa0b5c4-ac80-4851-9c0b-b14c0088ad79&limit=100&offset=0
+**Occurrences:** 1",
+c476d8c5-89a1-4f32-aa8c-da5873f08fd2,pending,auto,customers,,/customers/9aa0b5c4-ac80-4851-9c0b-b14c0088ad79,,2026-05-14T21:55:28.619Z,2026-05-14T21:55:28.619Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments?customerId=9aa0b5c4-ac80-4851-9c0b-b14c0088ad79&type=payments&limit=100&offset=0 failed (403): HTTP 403
+**Stack:** ```
+Error
+    at H9 (https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:4523
+```
+**Source:** nk2.2checkin.com/assets/index-D-_qmhik.js:77
+**API:** GET /Payments?customerId=9aa0b5c4-ac80-4851-9c0b-b14c0088ad79&type=payments&limit=100&offset=0
+**Occurrences:** 1",
+c46f90a4-384b-4977-a7d9-61c3282d710b,pending,auto,customers,,/customers/9aa0b5c4-ac80-4851-9c0b-b14c0088ad79,,2026-05-14T21:55:28.400Z,2026-05-14T21:55:28.400Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments/deposits?customerId=9aa0b5c4-ac80-4851-9c0b-b14c0088ad79&type=all&limit=100&offset=0 failed (403): HTTP 403
+**Stack:** ```
+Error
+    at H9 (https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:4523
+```
+**Source:** nk2.2checkin.com/assets/index-D-_qmhik.js:77
+**API:** GET /Payments/deposits?customerId=9aa0b5c4-ac80-4851-9c0b-b14c0088ad79&type=all&limit=100&offset=0
+**Occurrences:** 1",
+add40d73-5889-4d15-b337-efc33ee3329b,pending,auto,runtime-error,,/,,2026-05-14T21:51:26.011Z,2026-05-14T21:51:26.011Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (403): HTTP 403
+**Stack:** ```
+Error
+    at H9 (https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:4523
+```
+**Source:** nk2.2checkin.com/assets/index-D-_qmhik.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+ba00eac7-c8da-44d5-bbff-7ad0219f88cf,pending,auto,runtime-error,,/,,2026-05-14T21:51:25.919Z,2026-05-14T21:51:25.919Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+Error
+    at H9 (https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:4523
+```
+**Source:** nk2.2checkin.com/assets/index-D-_qmhik.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+f38645ab-a2d4-449b-8150-3a8cc3466f45,pending,auto,runtime-error,,/reports/doctors,,2026-05-14T20:25:11.569Z,2026-05-14T20:25:11.569Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/doctors/performance failed (500): HTTP 500
+**Stack:** ```
+Error
+    at H9 (https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:4523
+```
+**Source:** nk2.2checkin.com/assets/index-D-_qmhik.js:77
+**API:** POST /Reports/doctors/performance
+**Occurrences:** 1",
+9b13d06d-4982-4775-b686-bbb37d29870a,pending,auto,payments/reports,,/reports/revenue,,2026-05-14T20:22:05.953Z,2026-05-14T20:22:05.953Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Exports/report-sales-employees/preview failed (400): HTTP 400
+**Stack:** ```
+Error
+    at H9 (https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-D-_qmhik.js:77:4523
+```
+**Source:** nk2.2checkin.com/assets/index-D-_qmhik.js:77
+**API:** POST /Exports/report-sales-employees/preview
+**Occurrences:** 1",
+1f83120e-8b69-442a-81c8-e9cf46416a3f,pending,manual,payments/reports,Admin,/reports/revenue,https://nk2.2checkin.com/reports/revenue,2026-05-14T10:34:13.000Z,2026-05-14T10:34:13.000Z,1,0,Chỗ này bị mất luôn phần download báo cáo rồi ạ,
+59440e6c-e190-46b4-a238-5f0b4fe69a08,pending,auto,runtime-error,,/reports/doctors,,2026-05-14T03:36:33.459Z,2026-05-14T03:36:33.459Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/doctors/performance failed (500): HTTP 500
+**Stack:** ```
+Error
+    at H9 (https://nk2.2checkin.com/assets/index-CvBz_YmZ.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-CvBz_YmZ.js:77:4523
+```
+**Source:** nk2.2checkin.com/assets/index-CvBz_YmZ.js:77
+**API:** POST /Reports/doctors/performance
+**Occurrences:** 1",
+285f2c9b-94e9-4d43-994c-a0a1d8357591,pending,auto,runtime-error,,/,,2026-05-14T01:11:29.027Z,2026-05-14T01:11:29.027Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (403): HTTP 403
+**Stack:** ```
+Error
+    at p7 (https://nk.2checkin.com/assets/index-SoR5u0PP.js:77:1391)
+    at https://nk.2checkin.com/assets/index-SoR5u0PP.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-SoR5u0PP.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+845a47f1-e9be-418d-82d0-974bb177e6d2,pending,auto,runtime-error,,/,,2026-05-14T01:11:28.846Z,2026-05-14T01:11:28.846Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+Error
+    at p7 (https://nk.2checkin.com/assets/index-SoR5u0PP.js:77:1391)
+    at https://nk.2checkin.com/assets/index-SoR5u0PP.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-SoR5u0PP.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+1d394302-e836-4972-8a2a-a8c8ce181131,pending,auto,customers,,/customers/6cd6c60c-09ea-4dff-81ff-b0de00c1a445,,2026-05-13T20:49:06.952Z,2026-05-13T20:49:06.952Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /SaleOrders/lines failed (403): HTTP 403
+**Stack:** ```
+Error
+    at TW (https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1391)
+    at https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** GET /SaleOrders/lines
+**Occurrences:** 1",
+4b0b506d-e2cf-49e9-8d06-b71863f0e6cf,pending,auto,runtime-error,,/services,,2026-05-13T20:47:34.038Z,2026-05-13T20:47:34.038Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /SaleOrders failed (403): HTTP 403
+**Stack:** ```
+Error
+    at TW (https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1391)
+    at https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** GET /SaleOrders
+**Occurrences:** 1",
+81f27ee2-e7fd-462f-944d-46b3f368e7cb,pending,auto,customers,,/login,,2026-05-13T19:22:12.734Z,2026-05-13T19:22:12.734Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /CustomerBalance/22710a38-e5f7-45b4-b975-b1920026b680 failed (401): HTTP 401
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /CustomerBalance/22710a38-e5f7-45b4-b975-b1920026b680
+**Occurrences:** 1",
+b0c96900-68ff-4484-a75e-b43b35de4f51,pending,auto,customers,,/login,,2026-05-13T19:22:12.649Z,2026-05-13T19:22:12.649Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments/deposit-usage?customerId=22710a38-e5f7-45b4-b975-b1920026b680&limit=100&offset=0 failed (401): HTTP 401
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Payments/deposit-usage?customerId=22710a38-e5f7-45b4-b975-b1920026b680&limit=100&offset=0
+**Occurrences:** 1",
+fd17ffd8-09f5-4cba-938a-2db97bb76249,pending,auto,customers,,/login,,2026-05-13T19:22:12.485Z,2026-05-13T19:22:12.485Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments?customerId=22710a38-e5f7-45b4-b975-b1920026b680&type=payments&limit=100&offset=0 failed (401): HTTP 401
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Payments?customerId=22710a38-e5f7-45b4-b975-b1920026b680&type=payments&limit=100&offset=0
+**Occurrences:** 1",
+021ee467-30d8-49e7-bc12-6968af0a2fcd,pending,auto,customers,,/login,,2026-05-13T19:22:12.180Z,2026-05-13T19:22:12.180Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments/deposits?customerId=22710a38-e5f7-45b4-b975-b1920026b680&type=all&limit=100&offset=0 failed (401): HTTP 401
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Payments/deposits?customerId=22710a38-e5f7-45b4-b975-b1920026b680&type=all&limit=100&offset=0
+**Occurrences:** 1",
+4ec4b975-3cfc-49e2-942b-5a48873e5643,pending,auto,customers,,/customers/22710a38-e5f7-45b4-b975-b1920026b680,,2026-05-13T19:22:12.100Z,2026-05-13T19:22:12.100Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /DotKhams failed (401): HTTP 401
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /DotKhams
+**Occurrences:** 1",
+4987cf70-a2ec-40b0-811e-d457bb309af4,pending,auto,customers,,/customers/22710a38-e5f7-45b4-b975-b1920026b680,,2026-05-13T19:22:12.014Z,2026-05-13T19:22:12.014Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners/22710a38-e5f7-45b4-b975-b1920026b680 failed (401): HTTP 401
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Partners/22710a38-e5f7-45b4-b975-b1920026b680
+**Occurrences:** 1",
+ca82907a-5da4-4a66-9d6f-26a87ce49291,pending,auto,customers,,/customers,,2026-05-13T19:09:55.871Z,2026-05-13T19:09:55.871Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners failed (401): HTTP 401
+**Stack:** ```
+Error
+    at TW (https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1391)
+    at https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** GET /Partners
+**Occurrences:** 1",
+23450681-d078-4476-859e-99a5fed1798a,pending,auto,payments/reports,,/reports/revenue,,2026-05-13T09:13:52.872Z,2026-05-13T09:13:52.872Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (500): HTTP 500
+**Stack:** ```
+TW@https://nk2.2checkin.com/assets/index-BMRY8Ac1.js:77:1391
+Y/<@https://nk2.2checkin.com/assets/index-BMRY8Ac1.js:77:5011
+
+```
+**Source:** nk2.2checkin.com/assets/index-BMRY8Ac1.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+413303d3-6fc6-4cb1-baaa-e7d11bfe39ee,pending,auto,payments/reports,,/reports/revenue,,2026-05-13T09:13:36.067Z,2026-05-13T09:13:36.067Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (500): HTTP 500
+**Stack:** ```
+TW@https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1391
+Y/<@https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5011
+
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+9d5c4101-f0b5-4618-b456-670372df8309,pending,auto,auth,,/login,,2026-05-13T09:13:26.151Z,2026-05-13T09:13:26.151Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+TW@https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1391
+Y/<@https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5011
+
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+63b529a6-3604-4b0e-a443-fea03be83d96,pending,auto,customers,,/customers/fb3ecc4a-19a1-4851-9a29-de60a80e4ecd,,2026-05-13T05:03:49.624Z,2026-05-13T05:03:49.624Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API PATCH /SaleOrders/5bac7b6e-8b70-437b-afa6-73e26d77a1cf failed (404): HTTP 404
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** PATCH /SaleOrders/5bac7b6e-8b70-437b-afa6-73e26d77a1cf
+**Occurrences:** 1",
+f8173147-49bf-4cb0-aa1f-fac8437e3bb3,pending,auto,calendar/appointments,,/calendar,,2026-05-13T04:47:35.116Z,2026-05-13T04:47:35.116Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (401): HTTP 401
+**Stack:** ```
+Error
+    at TW (https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1391)
+    at https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+ec2653e8-e079-4035-9b86-ef021bdda05e,pending,auto,auth,,/?zarsrc=30&utm_source=zalo&utm_medium=zalo&utm_campaign=zalo&gidzl=2IUEN9XJFIi0FuPUbaKwAWytXLY043nyGcM61eSLRd4HPeO6XXnlTHLgXbA57cub4cxHL6EXGef2d5Oo9W,,2026-05-13T03:27:34.497Z,2026-05-13T03:27:34.497Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+TW@https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1400
+@https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+d37ec059-8636-41aa-ac11-9b91996da983,pending,auto,hoso-online/images,,/calendar,,2026-05-13T00:29:36.775Z,2026-05-13T00:29:36.775Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /ExternalCheckups/T383833 failed (504): HTTP 504
+**Stack:** ```
+Error
+    at TW (https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1391)
+    at https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** GET /ExternalCheckups/T383833
+**Occurrences:** 1",
+74373079-345e-44d5-9583-44c7fcd27c8b,pending,auto,customers,,/customers/0e85e081-8e10-4354-b555-b2cc00b178b1,,2026-05-12T22:28:34.723Z,2026-05-12T22:28:34.723Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API PUT /Partners/0e85e081-8e10-4354-b555-b2cc00b178b1 failed (400): HTTP 400
+**Stack:** ```
+TW@https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1400
+@https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** PUT /Partners/0e85e081-8e10-4354-b555-b2cc00b178b1
+**Occurrences:** 1",
+cc0a8cc2-fe83-4dff-9976-c00e6f770b35,pending,auto,customers,,/customers/c3c4200b-517d-478a-be42-b402002a85d4,,2026-05-12T20:22:46.891Z,2026-05-12T20:22:46.891Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+**Stack:** ```
+NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+    at ba (https://nk.2checkin.com/assets/index-DOGuWkus.js:41:25564)
+    at ba (https://nk.2checkin.com/assets/index-DOGuWkus.js:41:25639)
+    at st (https://nk.2checkin.com/assets/index-DOGuWkus.js:41:30785)
+    at Jh (https://nk.2checkin.com/assets/index-DOGuWkus.js:41:27628)
+    at Qe (https://nk.2checkin.com/assets/index-DOGuWkus.js:41:27507)
+    at Jh
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:39
+**Occurrences:** 1",
+70e04f7d-f94d-494c-9ddb-6849ef065a48,pending,auto,runtime-error,,/,,2026-05-12T20:13:09.789Z,2026-05-12T20:13:09.789Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (403): HTTP 403
+**Stack:** ```
+TW@https://nk2.2checkin.com/assets/index-BMRY8Ac1.js:77:1400
+@https://nk2.2checkin.com/assets/index-BMRY8Ac1.js:77:5011
+```
+**Source:** nk2.2checkin.com/assets/index-BMRY8Ac1.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+d49778b4-c729-4cda-b15e-6f74711326ab,pending,auto,runtime-error,,/,,2026-05-12T20:13:09.615Z,2026-05-12T20:13:09.615Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+TW@https://nk2.2checkin.com/assets/index-BMRY8Ac1.js:77:1400
+@https://nk2.2checkin.com/assets/index-BMRY8Ac1.js:77:5011
+```
+**Source:** nk2.2checkin.com/assets/index-BMRY8Ac1.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+6d45daf9-bbce-435f-9b18-8494792f086a,pending,auto,payments/reports,,/reports/revenue,,2026-05-12T19:56:17.386Z,2026-05-12T19:56:17.386Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (500): HTTP 500
+**Stack:** ```
+TW@https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1400
+@https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+00b251cf-ae95-4e46-9bb0-5478cb5b1547,pending,auto,auth,,/login,,2026-05-12T19:47:26.772Z,2026-05-12T19:47:26.772Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+Error
+    at TW (https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1391)
+    at https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+ec66b07b-36cb-42af-8b46-964f91a2120e,pending,auto,customers,,/customers/b8bfba23-f42b-40c2-8b52-b4100084cb83,,2026-05-12T19:42:21.528Z,2026-05-12T19:42:21.528Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API PUT /Partners/b8bfba23-f42b-40c2-8b52-b4100084cb83 failed (400): HTTP 400
+**Stack:** ```
+Error
+    at TW (https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1391)
+    at https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** PUT /Partners/b8bfba23-f42b-40c2-8b52-b4100084cb83
+**Occurrences:** 1",
+d0616d76-6f5c-4571-8dfc-b0300487d0fd,pending,auto,calendar/appointments,,/calendar,,2026-05-12T19:39:53.711Z,2026-05-12T19:39:53.711Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Products failed (403): HTTP 403
+**Stack:** ```
+Error
+    at TW (https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1391)
+    at https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** GET /Products
+**Occurrences:** 1",
+4d7fff29-0e9f-4ede-91a2-7f6d9520d4db,pending,auto,payments/reports,,/reports/revenue,,2026-05-12T19:39:40.793Z,2026-05-12T19:39:40.793Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (500): HTTP 500
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-BMRY8Ac1.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-BMRY8Ac1.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-BMRY8Ac1.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+759379ea-1eb7-485d-8670-743914638cbb,pending,auto,runtime-error,,/,,2026-05-12T19:16:36.408Z,2026-05-12T19:16:36.408Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Overview-BeVxVfyo.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Overview-BeVxVfyo.js
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:41
+**Occurrences:** 1",
+2bbcf1f4-e948-4a38-b10c-3038c59973c2,pending,auto,calendar/appointments,,/calendar,,2026-05-12T18:59:20.076Z,2026-05-12T18:59:20.076Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+Error
+    at TW (https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1391)
+    at https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+aaab3cf5-6f22-46c8-8e8a-13e78c7bbf7f,pending,manual,calendar/appointments,Admin,/calendar,https://nk.2checkin.com/calendar,2026-05-12T17:05:03.000Z,2026-05-12T17:05:03.000Z,1,0,"Phần xuất dữ liệu lịch hẹn về thì nó có xuất cả những ngày khác, ví dụ bảo xuất ngày 13.5 thôi nhưng dữ liệu có hiện các ngày khác nữa, em cũng không rõ lý do lắm.",
+84adb3d5-d7ec-4173-9813-71121e128e1f,pending,manual,hoso-online/images,Admin,/customers/57634e77-0055-4174-8ca8-b3a000860e8a,https://nk.2checkin.com/customers/57634e77-0055-4174-8ca8-b3a000860e8a,2026-05-12T17:04:10.000Z,2026-05-12T17:04:10.000Z,1,0,"Tạo được hồ sơ online nhưng chưa xem được ảnh và cũng chưa up ngược lên được, cái này a fix sau cũng được ạ, tạm thời bọn e dùng như cũ cũng dc.",
+926fe4a4-a010-48cb-8829-75b7ff5eef91,pending,manual,payments/reports,Admin,/reports/revenue,https://nk.2checkin.com/reports/revenue,2026-05-12T17:03:10.000Z,2026-05-12T17:03:10.000Z,1,1,"Phần báo cáo cọc tiền thì chưa trích xuất được tiền cọc và tiền mặt hay chuyển khoản ạ,",/uploads/feedback/c4b88ca9-55a9-4b19-a738-4facd2684649.jpg
+b064ee3d-fbb1-4876-8788-1ce6e4a16079,pending,manual,payments/reports,Admin,/reports/revenue,https://nk.2checkin.com/reports/revenue,2026-05-12T17:02:31.000Z,2026-05-12T17:02:31.000Z,1,1,"Khi xuất Báo cáo doanh thu thì cột ""Phiếu khám"" vẫn hiện lẫn lột lúc thì là mã phiếu khám lúc thì là dịch vụ. Cần tách riêng thành 2 cột Mã phiếu khám và dịch vụ, Còn lại ok rồi ạ.",/uploads/feedback/c1655a63-8d5d-4b92-b42f-1359f757c712.jpg
+74dab98b-e93e-4e58-9d4d-5283e9ddafe4,pending,auto,payments/reports,,/reports/revenue,,2026-05-12T09:50:32.257Z,2026-05-12T09:50:32.257Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (500): HTTP 500
+**Stack:** ```
+Error
+    at TW (https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1391)
+    at https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+ae86dd25-05f5-47bc-9e79-8af52ea98c4e,pending,auto,runtime-error,,/,,2026-05-12T09:21:38.761Z,2026-05-12T09:21:38.761Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-BMRY8Ac1.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-BMRY8Ac1.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-BMRY8Ac1.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+f70bedd7-f488-4c4b-a3e7-29fd2aa45f80,pending,auto,runtime-error,,/,,2026-05-12T09:21:38.683Z,2026-05-12T09:21:38.683Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (403): HTTP 403
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-BMRY8Ac1.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-BMRY8Ac1.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-BMRY8Ac1.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+fee3c859-205a-4b0c-8991-1555a9dc6664,pending,auto,runtime-error,,/,,2026-05-12T09:18:21.048Z,2026-05-12T09:18:21.048Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (403): HTTP 403
+**Stack:** ```
+Error
+    at TW (https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1391)
+    at https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+beca4e6c-2e96-434f-80bd-9cd37a0d3412,pending,auto,runtime-error,,/,,2026-05-12T09:18:20.971Z,2026-05-12T09:18:20.971Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+Error
+    at TW (https://nk.2checkin.com/assets/index-DOGuWkus.js:77:1391)
+    at https://nk.2checkin.com/assets/index-DOGuWkus.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-DOGuWkus.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+41b68b31-c310-4b43-99a5-1b1f1a7d5fcb,pending,auto,customers,,/customers/f3a33c8c-253e-4042-acfe-afff0071ddd1,,2026-05-12T02:47:30.418Z,2026-05-12T02:47:30.418Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /SaleOrders failed (500): HTTP 500
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** POST /SaleOrders
+**Occurrences:** 1",
+02a80317-ea70-48be-92e0-f05b977bf0dc,pending,auto,runtime-error,,/settings,,2026-05-12T02:36:12.995Z,2026-05-12T02:36:12.995Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Feedback/all?source=manual failed (403): HTTP 403
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Feedback/all?source=manual
+**Occurrences:** 1",
+a4969c4d-9fc3-4857-8ebf-6d5a3b0dc3b1,pending,auto,runtime-error,,/,,2026-05-11T23:00:50.560Z,2026-05-11T23:00:50.560Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /SaleOrderLines failed (401): HTTP 401
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-BYZDZF6G.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-BYZDZF6G.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-BYZDZF6G.js:77
+**API:** GET /SaleOrderLines
+**Occurrences:** 1",
+09786a44-e49b-4ee4-9468-d640ab459304,pending,auto,calendar/appointments,,/,,2026-05-11T23:00:50.426Z,2026-05-11T23:00:50.426Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (401): HTTP 401
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-BYZDZF6G.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-BYZDZF6G.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-BYZDZF6G.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+48cc63be-116b-419f-a9c2-f9ae327335b2,pending,auto,payments/reports,,/reports/revenue,,2026-05-11T22:02:51.452Z,2026-05-11T22:02:51.452Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/by-doctor failed (401): HTTP 401
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** POST /Reports/revenue/by-doctor
+**Occurrences:** 1",
+99ddbadd-b6a1-4dfb-952d-aadccf8d8f11,pending,auto,payments/reports,,/reports/revenue,,2026-05-11T22:02:51.363Z,2026-05-11T22:02:51.363Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/summary failed (401): HTTP 401
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** POST /Reports/revenue/summary
+**Occurrences:** 1",
+5e766bc7-4ab9-4632-8c93-6112fa637ed1,pending,auto,customers,,/customers/913e6145-5d0c-4705-992a-b287004d21c4,,2026-05-11T21:18:23.322Z,2026-05-11T21:18:23.322Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /settings/bank failed (403): HTTP 403
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /settings/bank
+**Occurrences:** 1",
+3b3ccd7b-5c46-4fc3-aa30-1318cb559d8a,pending,auto,customers,,/customers/913e6145-5d0c-4705-992a-b287004d21c4,,2026-05-11T21:17:50.227Z,2026-05-11T21:17:50.227Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments/deposit-usage?customerId=913e6145-5d0c-4705-992a-b287004d21c4&limit=100&offset=0 failed (403): HTTP 403
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Payments/deposit-usage?customerId=913e6145-5d0c-4705-992a-b287004d21c4&limit=100&offset=0
+**Occurrences:** 1",
+f237325e-5ee8-4d87-983e-baafd9d9c1dd,pending,auto,customers,,/customers/913e6145-5d0c-4705-992a-b287004d21c4,,2026-05-11T21:17:50.112Z,2026-05-11T21:17:50.112Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments/deposits?customerId=913e6145-5d0c-4705-992a-b287004d21c4&type=all&limit=100&offset=0 failed (403): HTTP 403
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Payments/deposits?customerId=913e6145-5d0c-4705-992a-b287004d21c4&type=all&limit=100&offset=0
+**Occurrences:** 1",
+b674a7be-5625-4e7a-b32d-b39ff9d78427,pending,auto,customers,,/customers/913e6145-5d0c-4705-992a-b287004d21c4,,2026-05-11T21:17:49.992Z,2026-05-11T21:17:49.992Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments?customerId=913e6145-5d0c-4705-992a-b287004d21c4&type=payments&limit=100&offset=0 failed (403): HTTP 403
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Payments?customerId=913e6145-5d0c-4705-992a-b287004d21c4&type=payments&limit=100&offset=0
+**Occurrences:** 1",
+7bd5bb4d-f9fd-4612-ba9f-68f3f1c35c74,pending,auto,customers,,/customers,,2026-05-11T21:16:11.217Z,2026-05-11T21:16:11.217Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Customers-3M3sHrGK.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Customers-3M3sHrGK.js
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:41
+**Occurrences:** 1",
+a46e830b-8e7b-4a26-a864-6dcabfbca0fc,pending,auto,runtime-error,,/,,2026-05-11T21:04:05.461Z,2026-05-11T21:04:05.461Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-BYZDZF6G.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-BYZDZF6G.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-BYZDZF6G.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+a1baec52-9ec9-493d-ab87-02141da5ea70,pending,auto,runtime-error,,/,,2026-05-11T21:04:05.331Z,2026-05-11T21:04:05.331Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (403): HTTP 403
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-BYZDZF6G.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-BYZDZF6G.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-BYZDZF6G.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+d135a1ea-5b62-4a36-9e0b-14a3de642262,pending,auto,auth,,/login,,2026-05-11T21:01:21.517Z,2026-05-11T21:01:21.517Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-BYZDZF6G.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-BYZDZF6G.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-BYZDZF6G.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+d96b572d-591c-4cfe-a69a-6d6c9c2ea4f2,pending,auto,calendar/appointments,,/calendar,,2026-05-11T19:26:46.808Z,2026-05-11T19:26:46.808Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (401): HTTP 401
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-fr2yBCN-.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+7b3468a5-1d1f-4be5-a221-8dbb2bc19c5a,pending,auto,customers,,/customers/5e7599b0-5ce1-45ee-afb6-b12400912154,,2026-05-11T05:32:48.066Z,2026-05-11T05:32:48.066Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Products failed (403): HTTP 403
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Products
+**Occurrences:** 1",
+243de5d9-74b5-4b07-a3e9-7499debbf480,pending,auto,customers,,/customers/5e7599b0-5ce1-45ee-afb6-b12400912154,,2026-05-11T05:32:37.207Z,2026-05-11T05:32:37.207Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /SaleOrders/lines failed (403): HTTP 403
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /SaleOrders/lines
+**Occurrences:** 1",
+d023df73-0590-48f9-8738-0861e82846c2,pending,auto,customers,,/customers/5e7599b0-5ce1-45ee-afb6-b12400912154,,2026-05-11T05:32:36.855Z,2026-05-11T05:32:36.855Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /SaleOrders failed (403): HTTP 403
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /SaleOrders
+**Occurrences:** 1",
+94b51fa2-653a-4509-9c0d-5f94d2feeba6,pending,auto,runtime-error,,/,,2026-05-11T05:31:33.936Z,2026-05-11T05:31:33.936Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+fadc7934-3387-4d5d-a2ab-8b55de5c5b0d,pending,auto,calendar/appointments,,/customers/43300467-b7c5-4db8-9f16-bbed5caf0aa2,,2026-05-11T03:51:31.888Z,2026-05-11T03:51:31.888Z,1,0,"🚨 **Auto-detected UnhandledRejection Error**
+**Message:** Failed to fetch
+**Stack:** ```
+TypeError: Failed to fetch
+    at Y (https://nk2.2checkin.com/assets/index-BYZDZF6G.js:77:4717)
+    at As (https://nk2.2checkin.com/assets/AppointmentFormShell-CeIlW_Th.js:1:1467)
+    at https://nk2.2checkin.com/assets/AppointmentFormShell-CeIlW_Th.js:39:23690
+    at Object.Qp (https://nk2.2checkin.com/assets/index-BYZDZF6G.js:38:9855)
+    at Xp (https://nk2.2checkin.com/assets/index-BYZDZF6G.js:38:10009)
+    at Yp (https://nk2.2checkin.com/assets/index-BYZDZF6G.js:38:10066)
+    at Sc (https://n
+```
+**Source:** nk2.2checkin.com/assets/index-BYZDZF6G.js:77
+**Occurrences:** 1",
+67d40e98-9fcd-43a1-8d6e-46679322203d,pending,auto,auth,,/login,,2026-05-11T03:48:04.483Z,2026-05-11T03:48:04.483Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+f59d5afd-9c5f-46dd-b539-f209039f409a,pending,auto,customers,,/customers/9aa0b5c4-ac80-4851-9c0b-b14c0088ad79,,2026-05-11T01:45:01.105Z,2026-05-11T01:45:01.105Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /SaleOrders failed (403): HTTP 403
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /SaleOrders
+**Occurrences:** 1",
+c0f01ef5-0c7b-494a-8a11-ab85f396c627,pending,auto,customers,,/customers/9aa0b5c4-ac80-4851-9c0b-b14c0088ad79,,2026-05-11T01:45:00.989Z,2026-05-11T01:45:00.989Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /SaleOrders/lines failed (403): HTTP 403
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /SaleOrders/lines
+**Occurrences:** 1",
+fa99dc8f-63d5-4a64-8202-805f7d210169,pending,auto,calendar/appointments,,/calendar?_v=1778483950737,,2026-05-11T00:19:14.158Z,2026-05-11T00:19:14.158Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-BYZDZF6G.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-BYZDZF6G.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-BYZDZF6G.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+4bbc3db4-0d56-48ce-bad7-10e465d29c49,pending,auto,auth,,/login,,2026-05-11T00:02:58.394Z,2026-05-11T00:02:58.394Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (401): HTTP 401
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+3924d3ea-6cf4-41f2-ae7a-44384e7bdad5,pending,auto,payments/reports,,/reports/revenue,,2026-05-10T22:08:59.774Z,2026-05-10T22:08:59.774Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (500): HTTP 500
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-BYZDZF6G.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-BYZDZF6G.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-BYZDZF6G.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+f08cca26-f44a-402c-a52c-8abd6af299a1,pending,auto,payments/reports,,/reports/revenue,,2026-05-10T21:46:19.449Z,2026-05-10T21:46:19.449Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (500): HTTP 500
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-n0UDhk2V.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-n0UDhk2V.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-n0UDhk2V.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+d07afc5b-5039-45bc-9263-4d5afde14086,pending,auto,auth,,/login?bust=2,,2026-05-10T21:42:12.172Z,2026-05-10T21:42:12.172Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-n0UDhk2V.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-n0UDhk2V.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-n0UDhk2V.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+5d3b085a-0549-4b01-9aa3-7b47b4af799f,pending,auto,permissions,,/employees,,2026-05-10T20:57:50.751Z,2026-05-10T20:57:50.751Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Permissions/groups failed (403): HTTP 403
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Permissions/groups
+**Occurrences:** 1",
+e76ce130-2261-4f1e-80c4-4a4944df9b21,pending,auto,payments/reports,,/reports/revenue,,2026-05-10T20:53:17.529Z,2026-05-10T20:53:17.529Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (500): HTTP 500
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+14f0a1d1-ec12-4b62-b39f-49b8df8354d5,pending,auto,customers,,/customers,,2026-05-10T20:38:22.283Z,2026-05-10T20:38:22.283Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners failed (401): HTTP 401
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Partners
+**Occurrences:** 1",
+5a476ab6-e4aa-4da6-bdc1-d541c682f452,pending,auto,runtime-error,,/,,2026-05-10T06:43:00.516Z,2026-05-10T06:43:00.516Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (403): HTTP 403
+**Stack:** ```
+TW@https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:1400
+@https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:5011
+```
+**Source:** nk2.2checkin.com/assets/index-fr2yBCN-.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+2b0b34be-d4e7-433b-912c-d562a90f7250,pending,auto,runtime-error,,/,,2026-05-10T06:43:00.401Z,2026-05-10T06:43:00.401Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+TW@https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:1400
+@https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:5011
+```
+**Source:** nk2.2checkin.com/assets/index-fr2yBCN-.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+003f9402-02d7-461d-865f-45fdf8a34746,pending,auto,customers,,/customers/8d1fa336-5021-403f-b8eb-b3f000a68f60,,2026-05-10T02:42:17.742Z,2026-05-10T02:42:17.742Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API PUT /Partners/8d1fa336-5021-403f-b8eb-b3f000a68f60 failed (400): HTTP 400
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-fr2yBCN-.js:77
+**API:** PUT /Partners/8d1fa336-5021-403f-b8eb-b3f000a68f60
+**Occurrences:** 1",
+8a974675-ee88-444c-95aa-7d91be75300a,pending,auto,runtime-error,,/reports/doctors,,2026-05-10T02:35:28.512Z,2026-05-10T02:35:28.512Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/doctors/performance failed (500): HTTP 500
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** POST /Reports/doctors/performance
+**Occurrences:** 1",
+54f0bd8b-552f-46e4-95bb-5a3e86737085,pending,auto,customers,,/customers,,2026-05-10T01:22:55.161Z,2026-05-10T01:22:55.161Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API PATCH /Partners/4352f974-26c0-4486-a7a1-363f55f085fb/soft-delete failed (404): HTTP 404
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** PATCH /Partners/4352f974-26c0-4486-a7a1-363f55f085fb/soft-delete
+**Occurrences:** 1",
+3add3cf9-5ea2-4fbd-89ee-c2b642714dd1,pending,auto,calendar/appointments,,/calendar,,2026-05-10T00:53:06.666Z,2026-05-10T00:53:06.666Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Products failed (502): HTTP 502
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-fr2yBCN-.js:77
+**API:** GET /Products
+**Occurrences:** 1",
+6d2b4ad7-6ae0-47f9-bd7d-92c51f616993,pending,auto,calendar/appointments,,/calendar,,2026-05-10T00:53:06.572Z,2026-05-10T00:53:06.572Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (502): HTTP 502
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-fr2yBCN-.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+2fb3c4dc-0a11-4276-9509-0080134c18f7,pending,auto,calendar/appointments,,/calendar,,2026-05-10T00:53:06.475Z,2026-05-10T00:53:06.475Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners failed (502): HTTP 502
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-fr2yBCN-.js:77
+**API:** GET /Partners
+**Occurrences:** 1",
+e6a4856d-0c82-49e2-9645-eaf746dd6e5c,pending,auto,calendar/appointments,,/calendar,,2026-05-10T00:53:06.367Z,2026-05-10T00:53:06.367Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (502): HTTP 502
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-fr2yBCN-.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+ac376443-67b5-4435-ac17-f9e8e9ae4730,pending,auto,customers,,/customers/4f651a0d-5358-4cda-8ecd-b41d0037afe6,,2026-05-10T00:19:03.300Z,2026-05-10T00:19:03.300Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /SaleOrders failed (500): HTTP 500
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-fr2yBCN-.js:77
+**API:** POST /SaleOrders
+**Occurrences:** 1",
+967c9a66-7b25-4bbd-927b-7e17e6ce399c,pending,auto,runtime-error,,/reports/doctors,,2026-05-09T23:57:45.872Z,2026-05-09T23:57:45.872Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/doctors/performance failed (500): HTTP 500
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-fr2yBCN-.js:77
+**API:** POST /Reports/doctors/performance
+**Occurrences:** 1",
+cb22db22-7c80-438d-a2ce-b9796a04d65a,pending,auto,runtime-error,,/,,2026-05-09T23:54:15.720Z,2026-05-09T23:54:15.720Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught ReferenceError: zaloJSV2 is not defined
+**Stack:** ```
+ReferenceError: zaloJSV2 is not defined
+    at <anonymous>:1:2
+```
+**Source:** /nk2.2checkin.com/:1
+**Occurrences:** 1",
+7594ac69-6e11-4f46-a979-68cab30e73c0,pending,auto,auth,,/,,2026-05-09T23:50:03.655Z,2026-05-09T23:50:03.655Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+TW@https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:1400
+@https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:5011
+```
+**Source:** nk2.2checkin.com/assets/index-fr2yBCN-.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+b24d9f1a-f593-491a-b756-c44f435f34e5,pending,auto,customers,,/customers/f93aa03b-3fe2-4f34-9862-b38700fe738d,,2026-05-09T23:37:21.222Z,2026-05-09T23:37:21.222Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught NotFoundError: Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.
+**Stack:** ```
+NotFoundError: Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.
+    at Yh (https://nk.2checkin.com/assets/index-ChcKGwea.js:41:26067)
+    at Qe (https://nk.2checkin.com/assets/index-ChcKGwea.js:41:27357)
+    at Jh (https://nk.2checkin.com/assets/index-ChcKGwea.js:41:27817)
+    at Qe (https://nk.2checkin.com/assets/index-ChcKGwea.js:41:27507)
+    at Jh (https://nk.2checkin.com/assets/index-ChcKGwea.js:41:27817)
+    at Qe (https://nk.2checkin.com/asset
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:39
+**Occurrences:** 1",
+de0a7c39-0480-4224-8eb9-61b08cbac62e,pending,auto,payments/reports,,/reports/revenue,,2026-05-09T23:24:55.785Z,2026-05-09T23:24:55.785Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (500): HTTP 500
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-fr2yBCN-.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-fr2yBCN-.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+6aece3bd-cc19-4ce5-abba-323ff93a96ce,pending,auto,calendar/appointments,,/calendar,,2026-05-09T20:56:05.470Z,2026-05-09T20:56:05.470Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /DotKhams failed (401): HTTP 401
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1400
+@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** GET /DotKhams
+**Occurrences:** 1",
+ff78192b-0cd3-49e6-8993-cdccd0cee01e,pending,auto,calendar/appointments,,/calendar,,2026-05-09T20:56:05.361Z,2026-05-09T20:56:05.361Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners/1f29a0c8-5095-4215-8b5c-b41800380f92 failed (401): HTTP 401
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1400
+@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** GET /Partners/1f29a0c8-5095-4215-8b5c-b41800380f92
+**Occurrences:** 1",
+b356be59-ede3-4582-9f93-4575a0278cbc,pending,auto,auth,,/login,,2026-05-09T20:22:43.975Z,2026-05-09T20:22:43.975Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+0b93eb5f-ddbc-45eb-97d1-8ad5bf465b08,pending,auto,calendar/appointments,,/calendar,,2026-05-09T19:18:38.593Z,2026-05-09T19:18:38.593Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (401): HTTP 401
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+b0aa2a86-8032-4f14-9434-2a6870d83cd9,pending,auto,calendar/appointments,,/calendar,,2026-05-09T19:14:35.350Z,2026-05-09T19:14:35.350Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /DotKhams failed (401): HTTP 401
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /DotKhams
+**Occurrences:** 1",
+2c27b6a2-40b5-4f9e-8f56-436dc67d6bb3,pending,auto,calendar/appointments,,/calendar,,2026-05-09T19:14:35.150Z,2026-05-09T19:14:35.150Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners/b5abdc2a-6da3-4597-9603-b13400af4b20 failed (401): HTTP 401
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Partners/b5abdc2a-6da3-4597-9603-b13400af4b20
+**Occurrences:** 1",
+4a398b8d-edb7-4714-8d9c-6208ab5e3703,pending,auto,customers,,/customers,,2026-05-09T19:13:21.235Z,2026-05-09T19:13:21.235Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners failed (401): HTTP 401
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Partners
+**Occurrences:** 1",
+67372420-77cc-404f-96d1-dc611c7ee01e,pending,auto,calendar/appointments,,/calendar,,2026-05-09T19:10:30.302Z,2026-05-09T19:10:30.302Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Products failed (403): HTTP 403
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Products
+**Occurrences:** 1",
+c589fce6-3748-4fb0-bc34-0c54da9b13ac,pending,auto,payments/reports,,/reports/revenue,,2026-05-09T09:04:02.566Z,2026-05-09T09:04:02.566Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (500): HTTP 500
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-f31sVrUp.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-f31sVrUp.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-f31sVrUp.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+baf83c88-2119-4b14-84d9-d2cdc8088d86,pending,auto,auth,,/,,2026-05-09T09:03:54.743Z,2026-05-09T09:03:54.743Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-f31sVrUp.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-f31sVrUp.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-f31sVrUp.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+bdd06d12-5909-4684-a9e7-c5df904f4d51,pending,auto,runtime-error,,/,,2026-05-09T05:07:19.949Z,2026-05-09T05:07:19.949Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+bb0fdce8-fd4c-4eae-9eb3-c3f52198e2f0,pending,auto,calendar/appointments,,/calendar,,2026-05-09T04:49:21.195Z,2026-05-09T04:49:21.195Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (401): HTTP 401
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+676516a3-d8b8-4844-b798-13964f6afad7,pending,auto,payments/reports,,/reports/revenue,,2026-05-09T04:40:53.202Z,2026-05-09T04:40:53.202Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (500): HTTP 500
+**Stack:** ```
+Error
+    at TW (https://nk2.2checkin.com/assets/index-n-lGhCoF.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-n-lGhCoF.js:77:5010
+```
+**Source:** nk2.2checkin.com/assets/index-n-lGhCoF.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+d555e455-34e1-4804-b0b2-9a14db4442ad,pending,auto,runtime-error,,/reports/dashboard,,2026-05-09T04:33:35.737Z,2026-05-09T04:33:35.737Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Reports-BGiZj-mE.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Reports-BGiZj-mE.js
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:41
+**Occurrences:** 1",
+6123b80d-e5ba-4992-a59d-8be396d80ecb,pending,auto,calendar/appointments,,/calendar,,2026-05-09T03:53:23.047Z,2026-05-09T03:53:23.047Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API PUT /Appointments/e7ef4da0-2e53-4234-9138-b42200b54efa failed (401): HTTP 401
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** PUT /Appointments/e7ef4da0-2e53-4234-9138-b42200b54efa
+**Occurrences:** 1",
+884d756f-12b5-41c5-9e0b-c19b38c8b5fb,pending,auto,calendar/appointments,,/customers/9c3c24fa-1134-4737-8dd1-b27d003ad7d7,,2026-05-09T03:44:22.720Z,2026-05-09T03:44:22.720Z,1,0,"🚨 **Auto-detected UnhandledRejection Error**
+**Message:** Failed to fetch
+**Stack:** ```
+TypeError: Failed to fetch
+    at Y (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:4717)
+    at ks (https://nk.2checkin.com/assets/AppointmentFormShell-ha7_oGfV.js:1:1395)
+    at https://nk.2checkin.com/assets/AppointmentFormShell-ha7_oGfV.js:39:23707
+    at Object.Qp (https://nk.2checkin.com/assets/index-ChcKGwea.js:38:9855)
+    at Xp (https://nk.2checkin.com/assets/index-ChcKGwea.js:38:10009)
+    at Yp (https://nk.2checkin.com/assets/index-ChcKGwea.js:38:10066)
+    at Sc (https://nk.2che
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**Occurrences:** 1",
+00c95215-57a4-4147-a9cc-dfb561bbf0c2,pending,auto,customers,,/customers/c99a0406-d530-4136-ab94-b41900687bd1,,2026-05-09T03:21:19.480Z,2026-05-09T03:21:19.480Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API PUT /Partners/c99a0406-d530-4136-ab94-b41900687bd1 failed (400): HTTP 400
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** PUT /Partners/c99a0406-d530-4136-ab94-b41900687bd1
+**Occurrences:** 1",
+cffffe7f-5ed0-4342-9c66-9fd097416a1a,pending,auto,customers,,/customers/7aedd8d6-959f-4037-882c-b406009e3b89,,2026-05-09T03:09:11.642Z,2026-05-09T03:09:11.642Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+**Stack:** ```
+NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+    at Ta (https://nk.2checkin.com/assets/index-ChcKGwea.js:41:25564)
+    at Ta (https://nk.2checkin.com/assets/index-ChcKGwea.js:41:25639)
+    at st (https://nk.2checkin.com/assets/index-ChcKGwea.js:41:30785)
+    at Jh (https://nk.2checkin.com/assets/index-ChcKGwea.js:41:27628)
+    at Qe (https://nk.2checkin.com/assets/index-ChcKGwea.js:41:27507)
+    at Jh
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:39
+**Occurrences:** 1",
+e0a59370-a77a-4efa-b085-cfdf27e93b83,pending,auto,calendar/appointments,,/calendar,,2026-05-09T02:28:25.736Z,2026-05-09T02:28:25.736Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (403): HTTP 403
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+cd218c98-7a6e-4b38-af79-7b86b5089ea9,pending,auto,auth,,/,,2026-05-09T02:15:46.006Z,2026-05-09T02:15:46.006Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+ac3601f9-3cf2-43fd-98cd-dc7cf3a1bb50,pending,auto,calendar/appointments,,/calendar,,2026-05-09T02:13:35.999Z,2026-05-09T02:13:35.999Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (401): HTTP 401
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:1391)
+    at https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-FgDaEVjJ.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+c1ac70f8-0f14-4d5c-b051-d0156599606f,pending,auto,calendar/appointments,,/calendar,,2026-05-09T01:56:39.966Z,2026-05-09T01:56:39.966Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (401): HTTP 401
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1400
+@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+08c8cdd5-9ed8-4a32-946b-d7ec09c5ead5,pending,auto,payments/reports,,/reports/revenue,,2026-05-09T01:34:39.287Z,2026-05-09T01:34:39.287Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (500): HTTP 500
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1391)
+    at https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+2cf5fcf4-c46d-4a06-8173-56a232648bad,pending,auto,runtime-error,,/,,2026-05-09T01:29:10.790Z,2026-05-09T01:29:10.790Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Overview-DplvHCAF.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Overview-DplvHCAF.js
+```
+**Source:** nk.2checkin.com/assets/index-FgDaEVjJ.js:41
+**Occurrences:** 1",
+b2e41a7a-0792-47b9-8309-91abd5959460,pending,auto,customers,,/customers,,2026-05-09T01:28:10.808Z,2026-05-09T01:28:10.808Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:1400
+@https://nk.2checkin.com/assets/index-ChcKGwea.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-ChcKGwea.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+6a1d758b-cdd9-4997-b16f-98fd4d450db7,pending,auto,customers,,/customers/3ace6565-bbdf-4115-a31e-b2fc010dc700,,2026-05-09T01:20:20.432Z,2026-05-09T01:20:20.432Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+**Stack:** ```
+NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+    at Ta (https://nk.2checkin.com/assets/index-FgDaEVjJ.js:41:25564)
+    at Ta (https://nk.2checkin.com/assets/index-FgDaEVjJ.js:41:25639)
+    at st (https://nk.2checkin.com/assets/index-FgDaEVjJ.js:41:30785)
+    at Jh (https://nk.2checkin.com/assets/index-FgDaEVjJ.js:41:27628)
+    at Qe (https://nk.2checkin.com/assets/index-FgDaEVjJ.js:41:27507)
+    at Jh
+```
+**Source:** nk.2checkin.com/assets/index-FgDaEVjJ.js:39
+**Occurrences:** 1",
+1be50f77-0fb9-4747-848a-b1009c87b46f,pending,auto,calendar/appointments,,/calendar,,2026-05-09T00:28:21.441Z,2026-05-09T00:28:21.441Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /DotKhams failed (502): HTTP 502
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:1391)
+    at https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-FgDaEVjJ.js:77
+**API:** GET /DotKhams
+**Occurrences:** 1",
+42fb1327-187b-49a4-9695-2121fdae9241,pending,auto,calendar/appointments,,/calendar,,2026-05-09T00:28:21.331Z,2026-05-09T00:28:21.331Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners/02ff4e1f-5b7a-4b45-bd44-b3900052952e failed (502): HTTP 502
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:1391)
+    at https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-FgDaEVjJ.js:77
+**API:** GET /Partners/02ff4e1f-5b7a-4b45-bd44-b3900052952e
+**Occurrences:** 1",
+dea7a39f-63d2-4d48-bc6a-39e987bef894,pending,auto,customers,,/customers,,2026-05-09T00:28:20.461Z,2026-05-09T00:28:20.461Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners failed (502): HTTP 502
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:1400
+@https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-FgDaEVjJ.js:77
+**API:** GET /Partners
+**Occurrences:** 1",
+65cdec77-6ade-482b-b47e-a558e1ce14e3,pending,auto,customers,,/customers,,2026-05-09T00:27:03.547Z,2026-05-09T00:27:03.547Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (401): HTTP 401
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1400
+@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+588f6bd5-0e6b-404f-91db-94ec5df002b0,pending,auto,customers,,/customers,,2026-05-09T00:27:03.459Z,2026-05-09T00:27:03.459Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners failed (401): HTTP 401
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1400
+@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** GET /Partners
+**Occurrences:** 1",
+2a770020-b554-4cdf-9088-5e86353b2e5a,pending,auto,auth,,/login,,2026-05-09T00:21:50.212Z,2026-05-09T00:21:50.212Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-CbArNANX.js:77:1400
+@https://nk.2checkin.com/assets/index-CbArNANX.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-CbArNANX.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+7bd7a640-d2db-406e-aea4-a5f724135d5d,pending,auto,customers,,/customers,,2026-05-09T00:21:43.727Z,2026-05-09T00:21:43.727Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners failed (401): HTTP 401
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-CbArNANX.js:77:1400
+@https://nk.2checkin.com/assets/index-CbArNANX.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-CbArNANX.js:77
+**API:** GET /Partners
+**Occurrences:** 1",
+ca9a6b4d-59df-4128-8e1a-21a3668a509a,pending,auto,payments/reports,,/reports/revenue,,2026-05-09T00:17:17.059Z,2026-05-09T00:17:17.059Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (500): HTTP 500
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:1400
+@https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-FgDaEVjJ.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+92dd4a3b-e173-4299-bb45-71942944f074,pending,auto,customers,,/customers,,2026-05-09T00:15:37.549Z,2026-05-09T00:15:37.549Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners failed (401): HTTP 401
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:1391)
+    at https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-FgDaEVjJ.js:77
+**API:** GET /Partners
+**Occurrences:** 1",
+c0b91abf-b789-42b8-bbfb-103aeba3a9bf,pending,auto,customers,,/customers,,2026-05-09T00:15:37.423Z,2026-05-09T00:15:37.423Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (401): HTTP 401
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:1391)
+    at https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-FgDaEVjJ.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+7cbb6f27-481b-4298-96db-c4ad24252669,pending,auto,runtime-error,,/,,2026-05-08T23:55:01.668Z,2026-05-08T23:55:01.668Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Overview-BDseJZQD.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Overview-BDseJZQD.js
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:41
+**Occurrences:** 1",
+570da376-dc29-4f56-91e4-765c80cc55d1,pending,auto,payments/reports,,/reports/revenue,,2026-05-08T23:27:17.664Z,2026-05-08T23:27:17.664Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (500): HTTP 500
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:1391)
+    at https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-FgDaEVjJ.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+a4e9bea1-224a-404f-ba05-72984c2b7f70,pending,auto,payments/reports,,/reports/revenue,,2026-05-08T23:27:12.977Z,2026-05-08T23:27:12.977Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Reports-DcZ8qkV6.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Reports-DcZ8qkV6.js
+```
+**Source:** nk.2checkin.com/assets/index-d4ieI6yf.js:41
+**Occurrences:** 1",
+29010777-665e-4f00-9fcb-1982a18439a9,pending,auto,customers,,/customers/c34a3df9-6751-4835-8315-b432003b7fbc,,2026-05-08T23:16:25.699Z,2026-05-08T23:16:25.699Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /face/register failed (422): HTTP 422
+**Stack:** ```
+fW@https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:1400
+@https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-FgDaEVjJ.js:77
+**API:** POST /face/register
+**Occurrences:** 1",
+076dd40d-be27-4b04-8486-cad69e97b6b7,pending,auto,calendar/appointments,,/calendar,,2026-05-08T23:13:40.699Z,2026-05-08T23:13:40.699Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+Error
+    at fW (https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:1391)
+    at https://nk.2checkin.com/assets/index-FgDaEVjJ.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-FgDaEVjJ.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+a180d216-bd5d-4364-b430-48e4d924d61b,pending,auto,auth,,/login,,2026-05-08T22:23:52.602Z,2026-05-08T22:23:52.602Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners failed (401): HTTP 401
+**Stack:** ```
+Error
+    at W9 (https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:1391)
+    at https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-d4ieI6yf.js:77
+**API:** GET /Partners
+**Occurrences:** 1",
+6ad4c4ec-fdf6-456f-9232-86817458031a,pending,auto,auth,,/login,,2026-05-08T22:12:15.665Z,2026-05-08T22:12:15.665Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners/061e0e50-2ec1-4499-bc96-b01600f4a28f failed (401): HTTP 401
+**Stack:** ```
+Error
+    at W9 (https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:1391)
+    at https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-d4ieI6yf.js:77
+**API:** GET /Partners/061e0e50-2ec1-4499-bc96-b01600f4a28f
+**Occurrences:** 1",
+edb84023-1b86-482b-9633-1d9d15b108fa,pending,auto,calendar/appointments,,/calendar,,2026-05-08T22:12:15.555Z,2026-05-08T22:12:15.555Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /DotKhams failed (401): HTTP 401
+**Stack:** ```
+Error
+    at W9 (https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:1391)
+    at https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-d4ieI6yf.js:77
+**API:** GET /DotKhams
+**Occurrences:** 1",
+d6012661-3f34-4b3b-b06c-4cf63727f6a2,pending,auto,hoso-online/images,,/customers/35b813af-2096-42cd-8aa2-04ce1c4f7538,,2026-05-08T22:01:17.924Z,2026-05-08T22:01:17.924Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /ExternalCheckups/T795090/patient failed (403): HTTP 403
+**Stack:** ```
+Error
+    at W9 (https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:1391)
+    at https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-d4ieI6yf.js:77
+**API:** POST /ExternalCheckups/T795090/patient
+**Occurrences:** 1",
+7ce7b969-4487-49b2-930a-57186b427ee8,pending,auto,calendar/appointments,,/calendar,,2026-05-08T21:52:49.648Z,2026-05-08T21:52:49.648Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+W9@https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:1400
+@https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-d4ieI6yf.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+dd87008f-a42b-4e99-a6a8-b48e97d85efe,pending,auto,hoso-online/images,,/customers/802874f2-24a4-40f2-a798-b06700c3fb89,,2026-05-08T21:49:09.079Z,2026-05-08T21:49:09.079Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /ExternalCheckups/T1254-DUP2/patient failed (403): HTTP 403
+**Stack:** ```
+Error
+    at W9 (https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:1391)
+    at https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-d4ieI6yf.js:77
+**API:** POST /ExternalCheckups/T1254-DUP2/patient
+**Occurrences:** 1",
+4aac89ab-31f6-458c-be94-67fe333715f1,pending,auto,auth,,/,,2026-05-08T21:47:30.283Z,2026-05-08T21:47:30.283Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+Error
+    at W9 (https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:1391)
+    at https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-d4ieI6yf.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+9e9c926d-2706-408d-8e8b-d420627fdfa7,pending,auto,hoso-online/images,,/customers/802874f2-24a4-40f2-a798-b06700c3fb89,,2026-05-08T21:45:26.219Z,2026-05-08T21:45:26.219Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /ExternalCheckups/T1254-DUP2/patient failed (403): HTTP 403
+**Stack:** ```
+W9@https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:1400
+@https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-d4ieI6yf.js:77
+**API:** POST /ExternalCheckups/T1254-DUP2/patient
+**Occurrences:** 1",
+94975e0e-bf16-4849-b0e4-bc123bbc80e8,pending,auto,hoso-online/images,,/customers/e3883bb0-ac61-405b-85fe-b0ff00b028b2,,2026-05-08T21:30:13.718Z,2026-05-08T21:30:13.718Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /ExternalCheckups/T4892/patient failed (403): HTTP 403
+**Stack:** ```
+W9@https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:1400
+@https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:5011
+```
+**Source:** nk.2checkin.com/assets/index-d4ieI6yf.js:77
+**API:** POST /ExternalCheckups/T4892/patient
+**Occurrences:** 1",
+96d01485-fd16-457c-91dc-bcc2999a1496,pending,auto,calendar/appointments,,/,,2026-05-08T21:29:38.171Z,2026-05-08T21:29:38.171Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (401): HTTP 401
+**Stack:** ```
+Error
+    at W9 (https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:1391)
+    at https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-d4ieI6yf.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+7fcb870f-8b87-4062-909f-14e2d79c966a,pending,auto,customers,,/customers/ce4a0232-a018-4c43-907f-cfd704a802d8,,2026-05-08T21:25:07.790Z,2026-05-08T21:25:07.790Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments/deposits?customerId=ce4a0232-a018-4c43-907f-cfd704a802d8&type=all&limit=100&offset=0 failed (403): HTTP 403
+**Stack:** ```
+Error
+    at W9 (https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:1391)
+    at https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-d4ieI6yf.js:77
+**API:** GET /Payments/deposits?customerId=ce4a0232-a018-4c43-907f-cfd704a802d8&type=all&limit=100&offset=0
+**Occurrences:** 1",
+9ec3c609-eca9-414a-986f-7487dbca3c39,pending,auto,customers,,/customers/ce4a0232-a018-4c43-907f-cfd704a802d8,,2026-05-08T21:25:07.719Z,2026-05-08T21:25:07.719Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments/deposit-usage?customerId=ce4a0232-a018-4c43-907f-cfd704a802d8&limit=100&offset=0 failed (403): HTTP 403
+**Stack:** ```
+Error
+    at W9 (https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:1391)
+    at https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-d4ieI6yf.js:77
+**API:** GET /Payments/deposit-usage?customerId=ce4a0232-a018-4c43-907f-cfd704a802d8&limit=100&offset=0
+**Occurrences:** 1",
+c1113a99-ff34-427b-acdc-5f209e9f9f15,pending,auto,customers,,/customers/ce4a0232-a018-4c43-907f-cfd704a802d8,,2026-05-08T21:25:07.574Z,2026-05-08T21:25:07.574Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments?customerId=ce4a0232-a018-4c43-907f-cfd704a802d8&type=payments&limit=100&offset=0 failed (403): HTTP 403
+**Stack:** ```
+Error
+    at W9 (https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:1391)
+    at https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-d4ieI6yf.js:77
+**API:** GET /Payments?customerId=ce4a0232-a018-4c43-907f-cfd704a802d8&type=payments&limit=100&offset=0
+**Occurrences:** 1",
+8787491f-9ad3-4a54-a7d9-bd5797b15f1e,pending,auto,customers,,/customers/ce4a0232-a018-4c43-907f-cfd704a802d8,,2026-05-08T21:25:07.501Z,2026-05-08T21:25:07.501Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+Error
+    at W9 (https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:1391)
+    at https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-d4ieI6yf.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+fabf65f5-71f0-40e1-8e79-1684db1451fc,pending,auto,calendar/appointments,,/calendar,,2026-05-08T21:17:42.473Z,2026-05-08T21:17:42.473Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (403): HTTP 403
+**Stack:** ```
+Error
+    at W9 (https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:1391)
+    at https://nk.2checkin.com/assets/index-d4ieI6yf.js:77:5010
+```
+**Source:** nk.2checkin.com/assets/index-d4ieI6yf.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+06074b2c-0248-4d68-8ec9-08d88ad3d4a6,pending,auto,calendar/appointments,,/calendar,,2026-05-08T21:17:32.823Z,2026-05-08T21:17:32.823Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Calendar-CR0U-wFq.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Calendar-CR0U-wFq.js
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:41
+**Occurrences:** 1",
+a0bfabe2-8d3d-4656-99a1-a4b0b28e6017,pending,auto,calendar/appointments,,/calendar,,2026-05-08T21:08:29.795Z,2026-05-08T21:08:29.795Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Products failed (502): HTTP 502
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** GET /Products
+**Occurrences:** 1",
+b069b253-fc7b-4537-bb27-c60f593f8c46,pending,auto,calendar/appointments,,/calendar,,2026-05-08T20:50:18.169Z,2026-05-08T20:50:18.169Z,1,0,"🚨 **Auto-detected UnhandledRejection Error**
+**Message:** Failed to fetch
+**Stack:** ```
+TypeError: Failed to fetch
+    at Y (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4207)
+    at K9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:5762)
+    at https://nk.2checkin.com/assets/ServiceCatalogSelector-CCwJ_m1_.js:8:6545
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**Occurrences:** 1",
+19349765-64e0-4796-bbe2-49fc737eefc3,pending,auto,payments/reports,,/reports/revenue,,2026-05-08T19:51:11.478Z,2026-05-08T19:51:11.478Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/by-category failed (500): HTTP 500
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** POST /Reports/revenue/by-category
+**Occurrences:** 1",
+d2e9df44-3ab4-4ca4-83df-857a8ed6c477,pending,auto,payments/reports,,/reports/revenue,,2026-05-08T19:51:11.375Z,2026-05-08T19:51:11.375Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/summary failed (500): HTTP 500
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** POST /Reports/revenue/summary
+**Occurrences:** 1",
+48f73baf-0f22-48b3-a1d3-da327081113f,pending,auto,runtime-error,,/employees,,2026-05-08T19:27:38.506Z,2026-05-08T19:27:38.506Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+**Stack:** ```
+NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+    at ba (https://nk.2checkin.com/assets/index-BgR3-fR7.js:41:25564)
+    at ba (https://nk.2checkin.com/assets/index-BgR3-fR7.js:41:25639)
+    at st (https://nk.2checkin.com/assets/index-BgR3-fR7.js:41:30785)
+    at qh (https://nk.2checkin.com/assets/index-BgR3-fR7.js:41:27628)
+    at Qe (https://nk.2checkin.com/assets/index-BgR3-fR7.js:41:27507)
+    at qh
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:39
+**Occurrences:** 1",
+2eceb83d-2ac7-4bde-b6d7-42b9dc0497cb,pending,auto,customers,,/customers/6297e381-661f-4567-a71c-b2e40064832d,,2026-05-08T19:16:27.800Z,2026-05-08T19:16:27.800Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /settings/bank failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** GET /settings/bank
+**Occurrences:** 1",
+61b1d7c6-6064-4693-8e68-95a684db2c68,pending,auto,calendar/appointments,,/calendar,,2026-05-08T19:14:57.582Z,2026-05-08T19:14:57.582Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /DotKhams failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** GET /DotKhams
+**Occurrences:** 1",
+923ecc3b-104d-45a6-ad5e-27ba81c71bc6,pending,auto,calendar/appointments,,/calendar,,2026-05-08T19:14:57.498Z,2026-05-08T19:14:57.498Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners/fd9e71de-abd2-4ca7-9855-9ad7f2a09670 failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** GET /Partners/fd9e71de-abd2-4ca7-9855-9ad7f2a09670
+**Occurrences:** 1",
+b5c729ba-02bd-4b1d-a8eb-fadc6fc8e49b,pending,auto,calendar/appointments,,/calendar,,2026-05-08T19:14:21.402Z,2026-05-08T19:14:21.402Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+02411054-bd96-4c32-9773-ee6aab3ddde6,pending,auto,payments/reports,,/reports/revenue,,2026-05-08T19:08:30.790Z,2026-05-08T19:08:30.790Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/rules failed (404): HTTP 404
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** POST /Reports/revenue/rules
+**Occurrences:** 1",
+45b3fcb7-45c2-4436-af71-845413b4a5ee,pending,auto,payments/reports,,/reports/revenue,,2026-05-08T19:08:30.691Z,2026-05-08T19:08:30.691Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (404): HTTP 404
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+520b178b-20cd-4836-8da5-24b4338728d1,pending,auto,runtime-error,,/,,2026-05-08T18:54:25.109Z,2026-05-08T18:54:25.109Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (403): HTTP 403
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+c41ed4fd-871d-4279-8141-7eee496fea5a,pending,auto,runtime-error,,/,,2026-05-08T18:54:24.103Z,2026-05-08T18:54:24.103Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+1708517c-b49e-40fb-812f-67036da7f63a,pending,auto,customers,,/customers,,2026-05-08T17:41:15.182Z,2026-05-08T17:41:15.182Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** GET /Partners
+**Occurrences:** 1",
+53869bb1-25b1-40a1-b548-43d6ba65b32d,pending,auto,runtime-error,,/,,2026-05-08T05:07:08.689Z,2026-05-08T05:07:08.689Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /face/recognize failed (422): HTTP 422
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1400
+@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** POST /face/recognize
+**Occurrences:** 1",
+3ba4c943-df1e-4e41-9c8e-df1e4c91d5e3,pending,auto,customers,,/customers,,2026-05-08T04:45:21.137Z,2026-05-08T04:45:21.137Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Customers-B9uTJxb8.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Customers-B9uTJxb8.js
+```
+**Source:** nk.2checkin.com/assets/index-Cfb9yb69.js:41
+**Occurrences:** 1",
+be42307b-2661-410d-8984-592e49e8b257,pending,auto,payments/reports,,/reports/revenue,,2026-05-08T04:12:25.853Z,2026-05-08T04:12:25.853Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/summary failed (500): HTTP 500
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1400
+@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** POST /Reports/revenue/summary
+**Occurrences:** 1",
+0c2fcf2a-d8e4-4891-bcbb-018b1ac09e6b,pending,auto,payments/reports,,/reports/revenue,,2026-05-08T04:12:25.749Z,2026-05-08T04:12:25.749Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/by-category failed (500): HTTP 500
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1400
+@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** POST /Reports/revenue/by-category
+**Occurrences:** 1",
+6e403414-242a-486a-9ef6-c91d6439d222,pending,auto,customers,,/customers/c6d33a3e-ec70-4ef3-8a46-b3370092d767,,2026-05-08T03:46:25.246Z,2026-05-08T03:46:25.246Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API PUT /Partners/c6d33a3e-ec70-4ef3-8a46-b3370092d767 failed (400): HTTP 400
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** PUT /Partners/c6d33a3e-ec70-4ef3-8a46-b3370092d767
+**Occurrences:** 1",
+4d6e4e19-ac6c-4f8b-8513-76a49942472c,pending,auto,customers,,/customers/f138fe54-0202-40c9-9d3d-b35f0038d971,,2026-05-08T03:41:30.244Z,2026-05-08T03:41:30.244Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API PUT /Partners/f138fe54-0202-40c9-9d3d-b35f0038d971 failed (400): HTTP 400
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** PUT /Partners/f138fe54-0202-40c9-9d3d-b35f0038d971
+**Occurrences:** 1",
+71a8644f-9f52-4dcc-a065-fc62bdfd3b80,pending,auto,customers,,/customers/8e07d6c1-5630-4738-9480-b38f00963420,,2026-05-08T03:21:08.042Z,2026-05-08T03:21:08.042Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API PATCH /SaleOrders/670bd199-7c29-4112-b906-b3ae006e83b2 failed (500): HTTP 500
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** PATCH /SaleOrders/670bd199-7c29-4112-b906-b3ae006e83b2
+**Occurrences:** 1",
+be58af6a-e340-4d07-9988-b1a378ada727,pending,auto,auth,,/login,,2026-05-08T03:15:48.355Z,2026-05-08T03:15:48.355Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1400
+@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+5e7394cb-79c4-4e82-a161-010906d9a454,pending,auto,auth,,/login,,2026-05-08T03:01:29.949Z,2026-05-08T03:01:29.949Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+29a52d3c-71d2-4f21-9f63-2a08d90c13e6,pending,auto,calendar/appointments,,/calendar,,2026-05-08T02:15:52.159Z,2026-05-08T02:15:52.159Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Calendar-C513cUse.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Calendar-C513cUse.js
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:41
+**Occurrences:** 1",
+69527074-25f0-4aa3-8146-0b1e8eeeaff3,pending,auto,payments/reports,,/reports/revenue,,2026-05-08T02:01:35.263Z,2026-05-08T02:01:35.263Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (404): HTTP 404
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1400
+@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+bd66f4be-cec8-4511-b4b9-84ef49795276,pending,auto,payments/reports,,/reports/revenue,,2026-05-08T02:01:35.148Z,2026-05-08T02:01:35.148Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/rules failed (404): HTTP 404
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1400
+@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** POST /Reports/revenue/rules
+**Occurrences:** 1",
+a2bdbab7-c7d4-4a92-a89d-204cec30b4e7,pending,auto,auth,,/,,2026-05-08T02:00:36.132Z,2026-05-08T02:00:36.132Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+9083179c-849e-493b-815e-0199852e0bee,pending,auto,calendar/appointments,,/calendar,,2026-05-08T01:55:33.488Z,2026-05-08T01:55:33.488Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (401): HTTP 401
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BIfE801X.js:77:1400
+@https://nk.2checkin.com/assets/index-BIfE801X.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+f3f38df2-ff7c-4ac1-bf69-27fd0cf2e0d5,pending,auto,runtime-error,,/,,2026-05-08T01:18:04.061Z,2026-05-08T01:18:04.061Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Overview-D2bgKYo5.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Overview-D2bgKYo5.js
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:41
+**Occurrences:** 1",
+59bb5055-463c-40ba-90b1-3e44c5780060,pending,auto,calendar/appointments,,/calendar,,2026-05-08T00:50:01.651Z,2026-05-08T00:50:01.651Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:1400
+@https://nk.2checkin.com/assets/index-BgR3-fR7.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BgR3-fR7.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+7c1441dc-3fe4-407c-b50f-2ab1f0c9b0e8,pending,auto,runtime-error,,/,,2026-05-08T00:34:11.289Z,2026-05-08T00:34:11.289Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Overview-C99HYFXx.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Overview-C99HYFXx.js
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:41
+**Occurrences:** 1",
+cb7ec04e-5c85-43a7-a03d-ef67ca022f71,pending,auto,customers,,/customers,,2026-05-08T00:29:50.770Z,2026-05-08T00:29:50.770Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Customers-CDT5XY98.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Customers-CDT5XY98.js
+```
+**Source:** nk.2checkin.com/assets/index-Dl-h2m__.js:41
+**Occurrences:** 1",
+bc0e4748-80ed-4af2-96cc-81a385f875d5,pending,auto,customers,,/customers/cdeb7563-0d55-41b9-be13-b0f20031c83d,,2026-05-08T00:21:04.583Z,2026-05-08T00:21:04.583Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API PUT /Partners/cdeb7563-0d55-41b9-be13-b0f20031c83d failed (400): HTTP 400
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**API:** PUT /Partners/cdeb7563-0d55-41b9-be13-b0f20031c83d
+**Occurrences:** 1",
+c8e945d2-1c0f-43e1-bff0-4aef080d5510,pending,auto,runtime-error,,/,,2026-05-08T00:03:55.113Z,2026-05-08T00:03:55.113Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Overview-BX666ZJ_.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Overview-BX666ZJ_.js
+```
+**Source:** nk.2checkin.com/assets/index--wJDeLYT.js:41
+**Occurrences:** 1",
+edee4f60-5b1a-44c3-951e-569d4d50fc0f,pending,auto,auth,,/login,,2026-05-08T00:03:21.855Z,2026-05-08T00:03:21.855Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index--wJDeLYT.js:77:1391)
+    at https://nk.2checkin.com/assets/index--wJDeLYT.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index--wJDeLYT.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+607fd3ef-3c6c-473a-ab34-ef27389426a3,pending,auto,calendar/appointments,,/customers/3ca4f1c6-e909-419b-87dc-b1ff01057149,,2026-05-08T00:02:58.671Z,2026-05-08T00:02:58.671Z,1,0,"🚨 **Auto-detected UnhandledRejection Error**
+**Message:** API PUT /Appointments/e98ca021-b2a5-40d9-8acb-dd15f725b450 failed (502): <html>
+<head><title>502 Bad Gateway</title></head>
+<body>
+<center><h1>502 Bad Gateway</h1></center>
+<hr><center>nginx/1.24.0 (Ubuntu)</center>
+</body>
+</html>
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+
+**Stack:** ```
+Error: API PUT /Appointments/e98ca021-b2a5-40d9-8acb-dd15f725b450 failed (502): <html>
+<head><title>502 Bad Gateway</title></head>
+<body>
+<center><h1>502 Bad Gateway</h1></center>
+<hr><center>nginx/1.24.0 (Ubuntu)</center>
+</body>
+</html>
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable MSIE and Chrome friendly er
+```
+**Source:** nk.2checkin.com/assets/index--wJDeLYT.js:77
+**Occurrences:** 1",
+45d93ca0-cf49-4c1f-a8d9-2bb415a44f49,pending,auto,calendar/appointments,,/customers/3ca4f1c6-e909-419b-87dc-b1ff01057149,,2026-05-08T00:02:58.569Z,2026-05-08T00:02:58.569Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API PUT /Appointments/e98ca021-b2a5-40d9-8acb-dd15f725b450 failed (502): HTTP 502
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index--wJDeLYT.js:77:1391)
+    at https://nk.2checkin.com/assets/index--wJDeLYT.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index--wJDeLYT.js:77
+**API:** PUT /Appointments/e98ca021-b2a5-40d9-8acb-dd15f725b450
+**Occurrences:** 1",
+749474b8-ea57-47cb-9c94-81eff5df07c5,pending,auto,calendar/appointments,,/calendar,,2026-05-08T00:02:57.353Z,2026-05-08T00:02:57.353Z,1,0,"🚨 **Auto-detected UnhandledRejection Error**
+**Message:** API GET /Partners failed (502): <html>
+<head><title>502 Bad Gateway</title></head>
+<body>
+<center><h1>502 Bad Gateway</h1></center>
+<hr><center>nginx/1.24.0 (Ubuntu)</center>
+</body>
+</html>
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+
+**Stack:** ```
+Error: API GET /Partners failed (502): <html>
+<head><title>502 Bad Gateway</title></head>
+<body>
+<center><h1>502 Bad Gateway</h1></center>
+<hr><center>nginx/1.24.0 (Ubuntu)</center>
+</body>
+</html>
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable MSIE and Chrome friendly error page -->
+<!-- a padding to disable M
+```
+**Source:** nk.2checkin.com/assets/index--wJDeLYT.js:77
+**Occurrences:** 1",
+33715301-d6b5-4a72-bf6b-fe13336a55ce,pending,auto,calendar/appointments,,/calendar,,2026-05-08T00:02:57.258Z,2026-05-08T00:02:57.258Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners failed (502): HTTP 502
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index--wJDeLYT.js:77:1391)
+    at https://nk.2checkin.com/assets/index--wJDeLYT.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index--wJDeLYT.js:77
+**API:** GET /Partners
+**Occurrences:** 1",
+6f6b9065-f130-4edc-9bd9-acd61819b042,pending,auto,customers,,/customers,,2026-05-07T23:49:02.513Z,2026-05-07T23:49:02.513Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Customers-D-Zo01AW.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Customers-D-Zo01AW.js
+```
+**Source:** nk.2checkin.com/assets/index-qlL7gDDM.js:41
+**Occurrences:** 1",
+d356d6bd-3bee-4edf-a8cd-6f8cddfefb25,pending,auto,runtime-error,,/,,2026-05-07T23:45:46.170Z,2026-05-07T23:45:46.170Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /face/recognize failed (500): HTTP 500
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index--wJDeLYT.js:77:1391)
+    at https://nk.2checkin.com/assets/index--wJDeLYT.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index--wJDeLYT.js:77
+**API:** POST /face/recognize
+**Occurrences:** 1",
+01545ac4-e678-49b4-afb4-9ad369a0c9cf,pending,auto,customers,,/customers/aa5a18cb-709a-468a-9812-b332002cbfed,,2026-05-07T23:45:45.114Z,2026-05-07T23:45:45.114Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+**Stack:** ```
+NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+    at ba (https://nk.2checkin.com/assets/index--wJDeLYT.js:41:25564)
+    at ba (https://nk.2checkin.com/assets/index--wJDeLYT.js:41:25639)
+    at st (https://nk.2checkin.com/assets/index--wJDeLYT.js:41:30785)
+    at qh (https://nk.2checkin.com/assets/index--wJDeLYT.js:41:27628)
+    at Qe (https://nk.2checkin.com/assets/index--wJDeLYT.js:41:27507)
+    at qh
+```
+**Source:** nk.2checkin.com/assets/index--wJDeLYT.js:39
+**Occurrences:** 1",
+9eedd8f5-ac05-4b1c-b613-0b903ead889f,pending,auto,customers,,/customers/aa5a18cb-709a-468a-9812-b332002cbfed,,2026-05-07T23:44:37.607Z,2026-05-07T23:44:37.607Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+**Stack:** ```
+NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+    at ba (https://nk.2checkin.com/assets/index-qlL7gDDM.js:41:25564)
+    at ba (https://nk.2checkin.com/assets/index-qlL7gDDM.js:41:25639)
+    at st (https://nk.2checkin.com/assets/index-qlL7gDDM.js:41:30785)
+    at qh (https://nk.2checkin.com/assets/index-qlL7gDDM.js:41:27628)
+    at Qe (https://nk.2checkin.com/assets/index-qlL7gDDM.js:41:27507)
+    at qh
+```
+**Source:** nk.2checkin.com/assets/index-qlL7gDDM.js:39
+**Occurrences:** 1",
+a0371208-8735-42cf-bf6e-5c9910d436de,pending,auto,calendar/appointments,,/calendar,,2026-05-07T23:42:32.436Z,2026-05-07T23:42:32.436Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-qlL7gDDM.js:77:1400
+@https://nk.2checkin.com/assets/index-qlL7gDDM.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-qlL7gDDM.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+1e42d64a-23ce-4d58-bede-88a649b92bc2,pending,auto,calendar/appointments,,/calendar,,2026-05-07T23:30:44.508Z,2026-05-07T23:30:44.508Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /face/recognize failed (500): HTTP 500
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-qlL7gDDM.js:77:1391)
+    at https://nk.2checkin.com/assets/index-qlL7gDDM.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-qlL7gDDM.js:77
+**API:** POST /face/recognize
+**Occurrences:** 1",
+8fd01d43-875d-49cc-be4f-547e0fb1ce85,pending,auto,calendar/appointments,,/calendar,,2026-05-07T23:30:29.883Z,2026-05-07T23:30:29.883Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Calendar-lkJ4U3-L.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Calendar-lkJ4U3-L.js
+```
+**Source:** nk.2checkin.com/assets/index-Dl-h2m__.js:41
+**Occurrences:** 1",
+09036e02-5350-496f-81bb-8d351579343f,pending,auto,auth,,/login,,2026-05-07T23:26:29.388Z,2026-05-07T23:26:29.388Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-qlL7gDDM.js:77:1391)
+    at https://nk.2checkin.com/assets/index-qlL7gDDM.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-qlL7gDDM.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+ae561135-bf7d-488f-9758-f61424e41ad1,pending,auto,calendar/appointments,,/,,2026-05-07T23:25:47.644Z,2026-05-07T23:25:47.644Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (502): HTTP 502
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:1391)
+    at https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-Dl-h2m__.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+c70da7f7-8605-4e5d-ba89-2cb8638aa4c5,pending,auto,runtime-error,,/,,2026-05-07T23:25:47.543Z,2026-05-07T23:25:47.543Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (502): HTTP 502
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:1391)
+    at https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-Dl-h2m__.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+4bcf1ff7-1a64-47ac-ab0a-dd61ed490400,pending,auto,hoso-online/images,,/customers/ff9aae0c-dd49-4118-9896-09eb6ff705ed,,2026-05-07T23:25:45.792Z,2026-05-07T23:25:45.792Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /ExternalCheckups/T282358 failed (502): HTTP 502
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**API:** GET /ExternalCheckups/T282358
+**Occurrences:** 1",
+8eccc99b-a0ba-469a-b2cf-ae9bd08a4e5f,pending,auto,runtime-error,,/settings,,2026-05-07T23:19:00.220Z,2026-05-07T23:19:00.220Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/index-SfeLvfJX.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/index-SfeLvfJX.js
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:41
+**Occurrences:** 1",
+ba2e3d33-ddb7-4f3d-a0a0-5d83de69e186,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T23:17:55.390Z,2026-05-07T23:17:55.390Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/summary failed (500): HTTP 500
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:1400
+@https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-Dl-h2m__.js:77
+**API:** POST /Reports/revenue/summary
+**Occurrences:** 1",
+292318d6-0316-43c1-b887-5562f27f0733,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T23:17:55.279Z,2026-05-07T23:17:55.279Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/by-category failed (500): HTTP 500
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:1400
+@https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-Dl-h2m__.js:77
+**API:** POST /Reports/revenue/by-category
+**Occurrences:** 1",
+db729008-446b-4ad7-9ccd-94236e371e05,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T23:17:40.252Z,2026-05-07T23:17:40.252Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (404): HTTP 404
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:1400
+@https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-Dl-h2m__.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+8606520b-cd60-45c3-a732-fd72d36bc27a,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T23:17:40.145Z,2026-05-07T23:17:40.145Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/rules failed (404): HTTP 404
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:1400
+@https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-Dl-h2m__.js:77
+**API:** POST /Reports/revenue/rules
+**Occurrences:** 1",
+d77d6bc6-72b8-4403-83ce-46a4d2ebebfd,pending,auto,auth,,/?fbclid=IwY2xjawRqXj1leHRuA2FlbQIxMABicmlkETFtOWlqdjhxamkxeHJlUVYwc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHkBO7n-r5Wy5nnuMLg5Oy6Z9o2_FAeQSKHhkdoxhwXM2_kYjkfePrcr9pME__aem_bRK-nzygwAzmXjQvoeDxAA,,2026-05-07T23:13:04.438Z,2026-05-07T23:13:04.438Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:1391)
+    at https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-Dl-h2m__.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+66672c43-c626-4181-92fa-22c61dfd9e74,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T22:57:24.254Z,2026-05-07T22:57:24.254Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (404): HTTP 404
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:1391)
+    at https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-Dl-h2m__.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+a5d7bfe5-1036-462e-8d5c-1ce816abe9fa,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T22:57:24.145Z,2026-05-07T22:57:24.145Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/rules failed (404): HTTP 404
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:1391)
+    at https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-Dl-h2m__.js:77
+**API:** POST /Reports/revenue/rules
+**Occurrences:** 1",
+849b051c-411f-44f1-94a9-806a607af0d3,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T22:51:28.486Z,2026-05-07T22:51:28.486Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Reports-DqsvWqV2.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Reports-DqsvWqV2.js
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:41
+**Occurrences:** 1",
+914014e8-0ddf-4853-9980-f72d811edd59,pending,auto,auth,,/login,,2026-05-07T22:49:30.871Z,2026-05-07T22:49:30.871Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:1391)
+    at https://nk.2checkin.com/assets/index-Dl-h2m__.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-Dl-h2m__.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+d6eed0e2-37ec-468d-ab8e-5a24126a67ad,pending,auto,customers,,/customers/352b960a-9705-4962-ac92-b17800dc70cc,,2026-05-07T22:32:49.276Z,2026-05-07T22:32:49.276Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+**Stack:** ```
+NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+    at ba (https://nk.2checkin.com/assets/index-CbArNANX.js:41:25564)
+    at ba (https://nk.2checkin.com/assets/index-CbArNANX.js:41:25639)
+    at st (https://nk.2checkin.com/assets/index-CbArNANX.js:41:30785)
+    at qh (https://nk.2checkin.com/assets/index-CbArNANX.js:41:27628)
+    at Qe (https://nk.2checkin.com/assets/index-CbArNANX.js:41:27507)
+    at qh
+```
+**Source:** nk.2checkin.com/assets/index-CbArNANX.js:39
+**Occurrences:** 1",
+2588eeb1-729c-47b8-8b4f-1c89e1fa99a1,pending,auto,auth,,/login,,2026-05-07T22:22:58.354Z,2026-05-07T22:22:58.354Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-CbArNANX.js:77:1391)
+    at https://nk.2checkin.com/assets/index-CbArNANX.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-CbArNANX.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+aaab6027-7c33-4cfc-8ed4-0a05fdeec161,pending,auto,auth,,/,,2026-05-07T22:22:53.006Z,2026-05-07T22:22:53.006Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-CbArNANX.js:77:1391)
+    at https://nk.2checkin.com/assets/index-CbArNANX.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-CbArNANX.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+09ef7e0a-386a-4aea-b97d-6105a7114431,pending,auto,customers,,/customers,,2026-05-07T22:11:23.078Z,2026-05-07T22:11:23.078Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** GET /Partners
+**Occurrences:** 1",
+ac37fbb4-233a-4a5d-8fd6-6809a80abfc2,pending,auto,permissions,,/employees,,2026-05-07T21:55:53.516Z,2026-05-07T21:55:53.516Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Permissions/groups failed (403): HTTP 403
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BIfE801X.js:77:1400
+@https://nk.2checkin.com/assets/index-BIfE801X.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** GET /Permissions/groups
+**Occurrences:** 1",
+07f9fc12-45d5-4ade-9016-3f97d7ae2f68,pending,auto,calendar/appointments,,/calendar,,2026-05-07T21:34:19.341Z,2026-05-07T21:34:19.341Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /face/recognize failed (422): HTTP 422
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** POST /face/recognize
+**Occurrences:** 1",
+d158a4b1-fe20-4c33-babc-e38fdad26443,pending,auto,calendar/appointments,,/,,2026-05-07T21:29:33.271Z,2026-05-07T21:29:33.271Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+bb716a8b-f736-4b01-a73e-e11bad66e61b,pending,auto,auth,,/login,,2026-05-07T20:47:34.831Z,2026-05-07T20:47:34.831Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /DotKhams failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** GET /DotKhams
+**Occurrences:** 1",
+ed43b616-416b-4962-b4ed-52e4d402b5d8,pending,auto,calendar/appointments,,/calendar,,2026-05-07T20:47:34.738Z,2026-05-07T20:47:34.738Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners/69fe81c2-7eff-4a18-b9b1-b1d50038ebb4 failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** GET /Partners/69fe81c2-7eff-4a18-b9b1-b1d50038ebb4
+**Occurrences:** 1",
+ce8aaae8-29a9-4341-a7f3-1bfa5a0b7a66,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T20:44:07.106Z,2026-05-07T20:44:07.106Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/by-category failed (500): HTTP 500
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BIfE801X.js:77:1400
+@https://nk.2checkin.com/assets/index-BIfE801X.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** POST /Reports/revenue/by-category
+**Occurrences:** 1",
+0c339f9e-88a2-4c44-a67e-02785487c0b8,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T20:44:06.768Z,2026-05-07T20:44:06.768Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/summary failed (500): HTTP 500
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BIfE801X.js:77:1400
+@https://nk.2checkin.com/assets/index-BIfE801X.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** POST /Reports/revenue/summary
+**Occurrences:** 1",
+6cb2eafc-ee66-4b92-9aa3-0082ff83a17f,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T20:43:55.158Z,2026-05-07T20:43:55.158Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/rules failed (404): HTTP 404
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BIfE801X.js:77:1400
+@https://nk.2checkin.com/assets/index-BIfE801X.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** POST /Reports/revenue/rules
+**Occurrences:** 1",
+5e9a01a0-6b59-48bd-b9ed-e64ca92a25f8,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T20:43:55.052Z,2026-05-07T20:43:55.052Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (404): HTTP 404
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BIfE801X.js:77:1400
+@https://nk.2checkin.com/assets/index-BIfE801X.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+1bf3ecd7-f0db-490d-b9f1-af4a6e47c4f1,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T20:43:07.987Z,2026-05-07T20:43:07.987Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/by-category failed (500): HTTP 500
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** POST /Reports/revenue/by-category
+**Occurrences:** 1",
+84320c74-365f-4c03-9acb-36bc8942cd4c,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T20:43:07.783Z,2026-05-07T20:43:07.783Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/summary failed (500): HTTP 500
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** POST /Reports/revenue/summary
+**Occurrences:** 1",
+864bc65d-ec88-4f22-935f-bd9be498e065,pending,auto,runtime-error,,/commission,,2026-05-07T20:35:19.622Z,2026-05-07T20:35:19.622Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Commission-BmsFA5-i.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Commission-BmsFA5-i.js
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:41
+**Occurrences:** 1",
+fa1b3033-908b-4e06-b22c-1a49ff32b21a,pending,auto,customers,,/customers/8cdbaa2c-5549-485a-a543-b35300a644c9,,2026-05-07T20:34:10.076Z,2026-05-07T20:34:10.076Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments/deposit-usage?customerId=8cdbaa2c-5549-485a-a543-b35300a644c9&limit=100&offset=0 failed (403): HTTP 403
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** GET /Payments/deposit-usage?customerId=8cdbaa2c-5549-485a-a543-b35300a644c9&limit=100&offset=0
+**Occurrences:** 1",
+c7a50915-d81d-423c-9851-e1db47330330,pending,auto,customers,,/customers/8cdbaa2c-5549-485a-a543-b35300a644c9,,2026-05-07T20:34:09.996Z,2026-05-07T20:34:09.996Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments/deposits?customerId=8cdbaa2c-5549-485a-a543-b35300a644c9&type=all&limit=100&offset=0 failed (403): HTTP 403
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** GET /Payments/deposits?customerId=8cdbaa2c-5549-485a-a543-b35300a644c9&type=all&limit=100&offset=0
+**Occurrences:** 1",
+62f2f6c6-6a56-46ac-ab52-169c8070ab47,pending,auto,customers,,/customers/8cdbaa2c-5549-485a-a543-b35300a644c9,,2026-05-07T20:34:09.915Z,2026-05-07T20:34:09.915Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments?customerId=8cdbaa2c-5549-485a-a543-b35300a644c9&type=payments&limit=100&offset=0 failed (403): HTTP 403
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** GET /Payments?customerId=8cdbaa2c-5549-485a-a543-b35300a644c9&type=payments&limit=100&offset=0
+**Occurrences:** 1",
+1cd57ade-79c1-411f-8691-222698e64176,pending,auto,auth,,/login,,2026-05-07T20:25:18.462Z,2026-05-07T20:25:18.462Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+ea46adc6-c74c-4389-85ee-860f8fe7f618,pending,auto,calendar/appointments,,/calendar,,2026-05-07T20:24:42.225Z,2026-05-07T20:24:42.225Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+**Stack:** ```
+NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+    at ba (https://nk.2checkin.com/assets/index-BIfE801X.js:41:25564)
+    at ba (https://nk.2checkin.com/assets/index-BIfE801X.js:41:25639)
+    at st (https://nk.2checkin.com/assets/index-BIfE801X.js:41:30785)
+    at qh (https://nk.2checkin.com/assets/index-BIfE801X.js:41:27628)
+    at Qe (https://nk.2checkin.com/assets/index-BIfE801X.js:41:27507)
+    at qh
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:39
+**Occurrences:** 1",
+bfb52919-9c34-4443-aa98-ffe4812b80af,pending,auto,calendar/appointments,,/calendar,,2026-05-07T20:23:01.411Z,2026-05-07T20:23:01.411Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+e3e092d8-a180-4256-9a3e-0d3aa2a86fef,pending,auto,calendar/appointments,,/calendar,,2026-05-07T20:17:26.170Z,2026-05-07T20:17:26.170Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /DotKhams failed (401): HTTP 401
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:1400
+@https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**API:** GET /DotKhams
+**Occurrences:** 1",
+94d9a1f4-74c3-4772-82c5-b768903c4089,pending,auto,calendar/appointments,,/calendar,,2026-05-07T20:17:26.048Z,2026-05-07T20:17:26.048Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners/662e7e3e-0e71-4824-966b-b0460085408b failed (401): HTTP 401
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:1400
+@https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**API:** GET /Partners/662e7e3e-0e71-4824-966b-b0460085408b
+**Occurrences:** 1",
+45d9e605-b7b3-4ea0-8fa9-e0c2038029c3,pending,auto,calendar/appointments,,/calendar,,2026-05-07T20:14:46.818Z,2026-05-07T20:14:46.818Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BIfE801X.js:77:1400
+@https://nk.2checkin.com/assets/index-BIfE801X.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+d7deec79-2d43-4131-b97a-405bd41d8f93,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T20:05:10.819Z,2026-05-07T20:05:10.819Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (404): HTTP 404
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+ca9e43bd-d07d-4bb1-8cb1-2a5ade4173e9,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T20:05:10.724Z,2026-05-07T20:05:10.724Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/rules failed (404): HTTP 404
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** POST /Reports/revenue/rules
+**Occurrences:** 1",
+d674e020-2a55-4976-ae70-b03dd9054f86,pending,auto,customers,,/customers/cf2b9ce5-3dcd-4e9a-afcc-b3a6010431cc,,2026-05-07T20:04:26.689Z,2026-05-07T20:04:26.689Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** TypeError: Importing a module script failed.
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:41
+**Occurrences:** 1",
+3c6ec8d7-336c-4872-9d57-4d0d1d130003,pending,auto,auth,,/login,,2026-05-07T19:56:20.617Z,2026-05-07T19:56:20.617Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /SaleOrders failed (401): HTTP 401
+**Stack:** ```
+N7@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1400
+@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /SaleOrders
+**Occurrences:** 1",
+1806022d-8eed-4506-88f5-649a28cef902,pending,auto,customers,,/customers,,2026-05-07T19:56:20.355Z,2026-05-07T19:56:20.355Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners failed (401): HTTP 401
+**Stack:** ```
+N7@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1400
+@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /Partners
+**Occurrences:** 1",
+042fe9dd-0a87-4b56-9296-f2b02c1b5e8a,pending,auto,runtime-error,,/,,2026-05-07T19:53:18.561Z,2026-05-07T19:53:18.561Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+75ff16da-c43f-4dc4-aaca-8370ad0aafc5,pending,auto,customers,,/customers,,2026-05-07T19:53:04.942Z,2026-05-07T19:53:04.942Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (403): HTTP 403
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BIfE801X.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BIfE801X.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BIfE801X.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+453c6fda-e464-48bb-8a13-1a6cc317a79a,pending,auto,customers,,/customers,,2026-05-07T19:51:13.617Z,2026-05-07T19:51:13.617Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Customers-DpONoPt5.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Customers-DpONoPt5.js
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:41
+**Occurrences:** 1",
+e128c447-1ca7-4d8d-b24e-033f76fdb0f4,pending,auto,runtime-error,,/,,2026-05-07T19:46:54.068Z,2026-05-07T19:46:54.068Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Overview-C6XvzK4W.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Overview-C6XvzK4W.js
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:41
+**Occurrences:** 1",
+d8cae3af-8e06-4805-b5cb-906be1ad2ea1,pending,auto,calendar/appointments,,/calendar,,2026-05-07T19:43:51.324Z,2026-05-07T19:43:51.324Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Calendar-Cse4wB4j.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Calendar-Cse4wB4j.js
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:41
+**Occurrences:** 1",
+27a470a0-8a2e-4d1c-9891-a19cf6507608,pending,auto,runtime-error,,/,,2026-05-07T19:38:24.928Z,2026-05-07T19:38:24.928Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (403): HTTP 403
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+7abb0eda-1da1-4823-88b6-54b2e4838aa6,pending,auto,runtime-error,,/,,2026-05-07T19:38:24.846Z,2026-05-07T19:38:24.846Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+53630b61-773a-40b0-9617-545921a32e16,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T19:35:07.949Z,2026-05-07T19:35:07.949Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (404): HTTP 404
+**Stack:** ```
+Error
+    at O9 (https://nk2.2checkin.com/assets/index-CQ2TUSRI.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-CQ2TUSRI.js:77:4523
+```
+**Source:** nk2.2checkin.com/assets/index-CQ2TUSRI.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+6b13e97d-2f43-47a9-ad42-c8188715a005,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T19:35:07.833Z,2026-05-07T19:35:07.833Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/rules failed (404): HTTP 404
+**Stack:** ```
+Error
+    at O9 (https://nk2.2checkin.com/assets/index-CQ2TUSRI.js:77:1391)
+    at https://nk2.2checkin.com/assets/index-CQ2TUSRI.js:77:4523
+```
+**Source:** nk2.2checkin.com/assets/index-CQ2TUSRI.js:77
+**API:** POST /Reports/revenue/rules
+**Occurrences:** 1",
+a3733697-b63e-4cdd-9fed-78da6d918fc3,pending,auto,auth,,/login,,2026-05-07T19:27:13.024Z,2026-05-07T19:27:13.024Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+8083a6a2-6023-416c-b66c-259c89308699,pending,auto,calendar/appointments,,/calendar,,2026-05-07T19:17:03.204Z,2026-05-07T19:17:03.204Z,1,0,"🚨 **Auto-detected UnhandledRejection Error**
+**Message:** Invalid token
+**Stack:** ```
+Y@https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:5555
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**Occurrences:** 1",
+521334ce-0dd6-4d1f-bf3d-ed9221aca506,pending,auto,calendar/appointments,,/calendar,,2026-05-07T19:17:03.097Z,2026-05-07T19:17:03.097Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API PUT /Appointments/39b86480-4d25-4a75-aa85-b42400a862dc failed (401): HTTP 401
+**Stack:** ```
+O9@https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:1400
+@https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**API:** PUT /Appointments/39b86480-4d25-4a75-aa85-b42400a862dc
+**Occurrences:** 1",
+90765dfa-c8a0-44e2-8299-8318d228b931,pending,auto,calendar/appointments,,/calendar,,2026-05-07T19:12:54.875Z,2026-05-07T19:12:54.875Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+f9ae1819-38af-4d11-8df7-35446e0f4bd5,pending,auto,runtime-error,,/reports/doctors,,2026-05-07T19:10:15.904Z,2026-05-07T19:10:15.904Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/doctors/performance failed (500): HTTP 500
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**API:** POST /Reports/doctors/performance
+**Occurrences:** 1",
+f69951ff-5203-4e1c-aa80-089d0669412d,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T19:10:09.740Z,2026-05-07T19:10:09.740Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/by-category failed (500): HTTP 500
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**API:** POST /Reports/revenue/by-category
+**Occurrences:** 1",
+865b6d59-4ee6-49d2-a7ec-e48cc63a5024,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T19:10:09.657Z,2026-05-07T19:10:09.657Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/summary failed (500): HTTP 500
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**API:** POST /Reports/revenue/summary
+**Occurrences:** 1",
+bfe5f319-a791-4233-9282-485f4b87601e,pending,auto,auth,,/login,,2026-05-07T19:10:02.368Z,2026-05-07T19:10:02.368Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /DotKhams failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**API:** GET /DotKhams
+**Occurrences:** 1",
+d8d57764-b3e5-47bc-90a1-e7b37e61fa75,pending,auto,calendar/appointments,,/calendar,,2026-05-07T19:10:02.252Z,2026-05-07T19:10:02.252Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners/3cf7907d-c0e5-4cd7-86f0-b37300a11300 failed (401): HTTP 401
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**API:** GET /Partners/3cf7907d-c0e5-4cd7-86f0-b37300a11300
+**Occurrences:** 1",
+230f52e1-6e7e-4384-b190-a7190daeaf36,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T19:05:37.960Z,2026-05-07T19:05:37.960Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/cash-flow/summary failed (404): HTTP 404
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**API:** POST /Reports/cash-flow/summary
+**Occurrences:** 1",
+bc93a40f-e3df-47ff-8abe-83c8e2927243,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T19:05:37.846Z,2026-05-07T19:05:37.846Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/rules failed (404): HTTP 404
+**Stack:** ```
+Error
+    at O9 (https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BzmNt4NH.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BzmNt4NH.js:77
+**API:** POST /Reports/revenue/rules
+**Occurrences:** 1",
+a7d1e6be-ac98-4b9f-acb4-bb855a97c422,pending,auto,hoso-online/images,,/customers/2aede899-00ac-4106-8cc9-0915fee28087,,2026-05-07T17:43:13.847Z,2026-05-07T17:43:13.847Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /ExternalCheckups/T951814/patient failed (403): HTTP 403
+**Stack:** ```
+N7@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1400
+@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** POST /ExternalCheckups/T951814/patient
+**Occurrences:** 1",
+c2dc11a1-97ce-4439-8ab0-d7cac6d0f437,pending,auto,customers,,/customers,,2026-05-07T01:51:39.803Z,2026-05-07T01:51:39.803Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Customers-cpNEY-ZJ.js
+**Stack:** ```
+TypeError: Failed to fetch dynamically imported module: https://nk.2checkin.com/assets/Customers-cpNEY-ZJ.js
+```
+**Source:** nk.2checkin.com/assets/index-B1sFADcZ.js:41
+**Occurrences:** 1",
+b562af2c-87d6-47b5-b752-1f674714b826,pending,auto,runtime-error,,/reports/doctors,,2026-05-07T01:09:36.299Z,2026-05-07T01:09:36.299Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/doctors/performance failed (500): HTTP 500
+**Stack:** ```
+N7@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1400
+@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** POST /Reports/doctors/performance
+**Occurrences:** 1",
+70e7d06a-d100-4175-869f-3a49900ca6ec,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T01:09:27.819Z,2026-05-07T01:09:27.819Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/summary failed (500): HTTP 500
+**Stack:** ```
+N7@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1400
+@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** POST /Reports/revenue/summary
+**Occurrences:** 1",
+c9d6b6ba-36d2-46f9-a407-43b5f9221f19,pending,auto,payments/reports,,/reports/revenue,,2026-05-07T01:09:27.712Z,2026-05-07T01:09:27.712Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/by-category failed (500): HTTP 500
+**Stack:** ```
+N7@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1400
+@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** POST /Reports/revenue/by-category
+**Occurrences:** 1",
+f181c859-cb0a-43b7-808c-a661c6e2ec1a,pending,auto,customers,,/customers,,2026-05-07T00:51:11.319Z,2026-05-07T00:51:11.319Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners failed (401): HTTP 401
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /Partners
+**Occurrences:** 1",
+c7d6dfa6-52e9-4232-9d32-462bbcb62e9c,pending,auto,customers,,/customers/e5d7b58f-9e52-4a42-9324-b1de00691a49,,2026-05-06T23:23:52.186Z,2026-05-06T23:23:52.186Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /settings/bank failed (403): HTTP 403
+**Stack:** ```
+N7@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1400
+@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /settings/bank
+**Occurrences:** 1",
+06d934a0-5224-4ea8-adfd-43c537d6b610,pending,auto,customers,,/customers/9d2b716a-0475-4141-8f5d-b33c00394274,,2026-05-06T22:12:13.055Z,2026-05-06T22:12:13.055Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API PUT /Partners/9d2b716a-0475-4141-8f5d-b33c00394274 failed (400): HTTP 400
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** PUT /Partners/9d2b716a-0475-4141-8f5d-b33c00394274
+**Occurrences:** 1",
+d0ef7e17-e10e-43b0-8e19-492c2119235a,pending,auto,calendar/appointments,,/,,2026-05-06T22:09:54.194Z,2026-05-06T22:09:54.194Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (401): HTTP 401
+**Stack:** ```
+Error
+    at p7 (https://nk.2checkin.com/assets/index-SoR5u0PP.js:77:1391)
+    at https://nk.2checkin.com/assets/index-SoR5u0PP.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-SoR5u0PP.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+b861f184-c163-437c-9a67-1e94e2f6e413,pending,auto,calendar/appointments,,/,,2026-05-06T22:09:45.596Z,2026-05-06T22:09:45.596Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (401): HTTP 401
+**Stack:** ```
+N7@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1400
+@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+8be716b0-6bbb-47e1-8f06-a1d7e3b3d0eb,pending,auto,auth,,/login,,2026-05-06T20:35:16.842Z,2026-05-06T20:35:16.842Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /DotKhams failed (401): HTTP 401
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /DotKhams
+**Occurrences:** 1",
+e97c8a9b-feaa-4430-95cb-adc8c8e41428,pending,auto,customers,,/customers/438c623b-3235-4659-9bbc-b2fd003548a0,,2026-05-06T20:35:04.823Z,2026-05-06T20:35:04.823Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments?customerId=438c623b-3235-4659-9bbc-b2fd003548a0&type=payments&limit=100&offset=0 failed (403): HTTP 403
+**Stack:** ```
+N7@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1400
+@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /Payments?customerId=438c623b-3235-4659-9bbc-b2fd003548a0&type=payments&limit=100&offset=0
+**Occurrences:** 1",
+4f1f12f5-0682-40b2-9ffb-bddd4d871ca8,pending,auto,customers,,/customers/438c623b-3235-4659-9bbc-b2fd003548a0,,2026-05-06T20:35:04.714Z,2026-05-06T20:35:04.714Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments/deposit-usage?customerId=438c623b-3235-4659-9bbc-b2fd003548a0&limit=100&offset=0 failed (403): HTTP 403
+**Stack:** ```
+N7@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1400
+@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /Payments/deposit-usage?customerId=438c623b-3235-4659-9bbc-b2fd003548a0&limit=100&offset=0
+**Occurrences:** 1",
+38f3a54b-f36d-4a7c-9cb5-8bf40cc0830f,pending,auto,customers,,/customers/438c623b-3235-4659-9bbc-b2fd003548a0,,2026-05-06T20:35:04.605Z,2026-05-06T20:35:04.605Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Payments/deposits?customerId=438c623b-3235-4659-9bbc-b2fd003548a0&type=all&limit=100&offset=0 failed (403): HTTP 403
+**Stack:** ```
+N7@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1400
+@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /Payments/deposits?customerId=438c623b-3235-4659-9bbc-b2fd003548a0&type=all&limit=100&offset=0
+**Occurrences:** 1",
+05225f24-e939-4645-b8df-a1b0fa17911a,pending,auto,runtime-error,,/,,2026-05-06T19:39:16.642Z,2026-05-06T19:39:16.642Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+Error
+    at p7 (https://nk.2checkin.com/assets/index-BWijRqGH.js:77:1391)
+    at https://nk.2checkin.com/assets/index-BWijRqGH.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-BWijRqGH.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+b9a3b46c-467d-49a1-a87e-5ccce5f4d231,pending,auto,runtime-error,,/reports/doctors,,2026-05-06T19:30:58.508Z,2026-05-06T19:30:58.508Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/doctors/performance failed (500): HTTP 500
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** POST /Reports/doctors/performance
+**Occurrences:** 1",
+eafb840b-f43b-4eba-81dd-4ed5c39a25d4,pending,auto,payments/reports,,/reports/revenue,,2026-05-06T19:30:51.974Z,2026-05-06T19:30:51.974Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/summary failed (500): HTTP 500
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** POST /Reports/revenue/summary
+**Occurrences:** 1",
+d134f4de-e1eb-4f90-b771-d38a511d1950,pending,auto,payments/reports,,/reports/revenue,,2026-05-06T19:30:51.885Z,2026-05-06T19:30:51.885Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Reports/revenue/by-category failed (500): HTTP 500
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** POST /Reports/revenue/by-category
+**Occurrences:** 1",
+054e4ac1-6b42-48d2-b96e-fd1054c47bc0,pending,auto,customers,,/customers/c23cafb0-29e8-4d77-b7e7-b4350026a871,,2026-05-06T19:21:19.888Z,2026-05-06T19:21:19.888Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /settings/bank failed (403): HTTP 403
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /settings/bank
+**Occurrences:** 1",
+bd61e678-d3b6-4bdf-9d16-e623dcf2e105,pending,auto,runtime-error,,/employees,,2026-05-06T19:16:10.440Z,2026-05-06T19:16:10.440Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** Uncaught NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+**Stack:** ```
+NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+    at va (https://nk.2checkin.com/assets/index-k52Vdz8R.js:41:25564)
+    at va (https://nk.2checkin.com/assets/index-k52Vdz8R.js:41:25639)
+    at ot (https://nk.2checkin.com/assets/index-k52Vdz8R.js:41:30785)
+    at Bh (https://nk.2checkin.com/assets/index-k52Vdz8R.js:41:27628)
+    at Ge (https://nk.2checkin.com/assets/index-k52Vdz8R.js:41:27507)
+    at Bh
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:39
+**Occurrences:** 1",
+0517d25b-dd98-4b5a-8f1b-1bcb405b3a20,pending,auto,customers,,/customers/6c4d411a-8501-4aa5-8960-b1830022ba2f,,2026-05-06T19:14:04.883Z,2026-05-06T19:14:04.883Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Products failed (403): HTTP 403
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /Products
+**Occurrences:** 1",
+329c0e01-ab94-4643-b38f-e56344aa3444,pending,auto,customers,,/customers/6c4d411a-8501-4aa5-8960-b1830022ba2f,,2026-05-06T19:13:57.231Z,2026-05-06T19:13:57.231Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /SaleOrders/lines failed (403): HTTP 403
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /SaleOrders/lines
+**Occurrences:** 1",
+8291b691-40b3-4b7f-915b-e2284fbdc08c,pending,auto,customers,,/customers,,2026-05-06T19:13:22.759Z,2026-05-06T19:13:22.759Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /SaleOrders failed (403): HTTP 403
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /SaleOrders
+**Occurrences:** 1",
+5cc058ab-866b-4421-96a6-3e5a31c9af15,pending,auto,permissions,,/employees,,2026-05-06T19:11:03.279Z,2026-05-06T19:11:03.279Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Permissions/groups failed (403): HTTP 403
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /Permissions/groups
+**Occurrences:** 1",
+e76c698a-09f6-450a-9908-8dfaf324f847,pending,auto,calendar/appointments,,/,,2026-05-06T19:08:34.320Z,2026-05-06T19:08:34.320Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Appointments failed (403): HTTP 403
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /Appointments
+**Occurrences:** 1",
+21fcac36-9d39-4ecb-8f84-a58be4e3f320,pending,auto,runtime-error,,/,,2026-05-06T18:49:40.310Z,2026-05-06T18:49:40.310Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (403): HTTP 403
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+074d1c76-4f3b-4c63-8aab-57c4b833d241,pending,auto,runtime-error,,/,,2026-05-06T18:49:40.228Z,2026-05-06T18:49:40.228Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+d389d28b-41f8-4884-858d-ef6de3b11da6,pending,auto,customers,,/customers/9fbb1709-df98-4ebe-9b27-a536074d5349,,2026-05-06T18:49:18.904Z,2026-05-06T18:49:18.904Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /CustomerBalance/9fbb1709-df98-4ebe-9b27-a536074d5349 failed (404): HTTP 404
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /CustomerBalance/9fbb1709-df98-4ebe-9b27-a536074d5349
+**Occurrences:** 1",
+70a758cf-685f-4924-9791-86e00b866a3d,pending,auto,customers,,/customers/9fbb1709-df98-4ebe-9b27-a536074d5349,,2026-05-06T18:49:18.742Z,2026-05-06T18:49:18.742Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Partners/9fbb1709-df98-4ebe-9b27-a536074d5349 failed (404): HTTP 404
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /Partners/9fbb1709-df98-4ebe-9b27-a536074d5349
+**Occurrences:** 1",
+fbf6fb73-5344-4eeb-a510-f33682bdbc77,pending,auto,customers,,/customers/646e9df5-e772-4753-8282-373ca2a6e42a?_v=unknown,,2026-05-06T18:46:18.531Z,2026-05-06T18:46:18.531Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",
+0fa551bc-0329-49fe-ae76-cf516e6b16eb,pending,auto,auth,,/login,,2026-05-06T18:43:05.440Z,2026-05-06T18:43:05.440Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+Error
+    at N7 (https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1391)
+    at https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4523
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+7a709b7f-c0f5-4b19-b78e-9abe97554792,pending,auto,auth,,/login,,2026-05-06T18:28:24.095Z,2026-05-06T18:28:24.095Z,1,0,"🚨 **Auto-detected Global Error**
+**Message:** ReferenceError: Can't find variable: zaloJSV2
+**Stack:** ```
+global code@https://nk.2checkin.com/login:1:21
+```
+**Source:** /nk.2checkin.com/login:1
+**Occurrences:** 1",
+aab7fe32-fc10-41b5-b427-50b8d8232a40,pending,auto,runtime-error,,/,,2026-05-06T17:53:03.694Z,2026-05-06T17:53:03.694Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Companies failed (403): HTTP 403
+**Stack:** ```
+N7@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1400
+@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /Companies
+**Occurrences:** 1",
+f8cce007-a180-4d73-9c2c-6d0e08f5d040,pending,auto,runtime-error,,/,,2026-05-06T17:53:03.544Z,2026-05-06T17:53:03.544Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Employees failed (403): HTTP 403
+**Stack:** ```
+N7@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1400
+@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /Employees
+**Occurrences:** 1",
+8a2e4413-68b4-40e0-8134-47d5829c9b23,pending,auto,auth,,/login,,2026-05-06T17:42:03.960Z,2026-05-06T17:42:03.960Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API POST /Auth/login failed (401): HTTP 401
+**Stack:** ```
+N7@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1400
+@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** POST /Auth/login
+**Occurrences:** 1",
+17721936-b9db-4a15-97b8-5d7a1a529274,pending,auto,calendar/appointments,,/calendar,,2026-05-06T17:42:00.700Z,2026-05-06T17:42:00.700Z,1,0,"🚨 **Auto-detected API Error**
+**Message:** API GET /Auth/me failed (401): HTTP 401
+**Stack:** ```
+N7@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:1400
+@https://nk.2checkin.com/assets/index-k52Vdz8R.js:77:4524
+```
+**Source:** nk.2checkin.com/assets/index-k52Vdz8R.js:77
+**API:** GET /Auth/me
+**Occurrences:** 1",

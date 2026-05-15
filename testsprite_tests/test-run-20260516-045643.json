@@ -1,0 +1,112 @@
+{
+  "timestamp": "2026-05-16T04:56:43.837042",
+  "results": [
+    {
+      "id": "TC001",
+      "name": "Admin login reaches protected overview",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 2.1,
+      "error": null,
+      "stdout": "\u2705 TC001 PASS: Admin login successful, protected overview rendered\n"
+    },
+    {
+      "id": "TC002",
+      "name": "Logout clears session",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 1.12,
+      "error": null,
+      "stdout": "\u2705 TC002 PASS: Logout cleared session, redirected to /login\n"
+    },
+    {
+      "id": "TC003",
+      "name": "Invalid credentials are rejected",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 15.1,
+      "error": null,
+      "stdout": null
+    },
+    {
+      "id": "TC004",
+      "name": "Admin can access core guarded pages",
+      "category": "Routes",
+      "status": "PASS",
+      "duration": 28.77,
+      "error": null,
+      "stdout": "  \u2705 T\u1ed5ng quan\n  \u2705 L\u1ecbch\n  \u2705 Kh\u00e1ch h\u00e0ng\n  \u2705 D\u1ecbch v\u1ee5\n  \u2705 Danh m\u1ee5c d\u1ecbch v\u1ee5\n  \u2705 K\u1ebf ho\u1ea1ch thanh to\u00e1n\n  \u2705 Nh\u00e2n vi\u00ean\n  \u2705 B\u00e1o c\u00e1o\n  \u2705 C\u00e0i \u0111\u1eb7t\n  \u2705 Quy\u1ec1n h\u1ea1n\n\u2705 TC004 PASS: All 10 guarded pages accessible\n"
+    },
+    {
+      "id": "TC005",
+      "name": "Sidebar exposes expected admin navigation",
+      "category": "UI",
+      "status": "PASS",
+      "duration": 15.01,
+      "error": null,
+      "stdout": null
+    },
+    {
+      "id": "TC006",
+      "name": "Admin can create TEST_SPRITE customer",
+      "category": "Customer",
+      "status": "FAIL",
+      "duration": 16.39,
+      "error": " self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Documents/TamTMV/Tgrouptest/testsprite_tests/.venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator(\"button svg, button i\").locator(\"..\").filter(has_text=\"Th\u00eam\")\n\n",
+      "stdout": "\u274c TC006 FAIL: Locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator(\"button svg, button i\").locator(\"..\").filter(has_text=\"Th\u00eam\")\n\n"
+    },
+    {
+      "id": "TC007",
+      "name": "Admin can edit TEST_SPRITE customer",
+      "category": "Customer",
+      "status": "FAIL",
+      "duration": 17.84,
+      "error": "f._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Documents/TamTMV/Tgrouptest/testsprite_tests/.venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.fill: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"xpath=/html/body/div/div/div/main/div/div[2]/div/div/input\").first\n\n",
+      "stdout": null
+    },
+    {
+      "id": "TC008",
+      "name": "Customer mutation controls visible for admin",
+      "category": "Permissions",
+      "status": "FAIL",
+      "duration": 23.54,
+      "error": "(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Documents/TamTMV/Tgrouptest/testsprite_tests/.venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"xpath=/html/body/div/div/div/main/div/div[3]/div[1]/table/tbody/tr[2]/td[2]/div/span\").first\n\n",
+      "stdout": null
+    },
+    {
+      "id": "TC009",
+      "name": "Delete requires confirmation",
+      "category": "Safety",
+      "status": "PASS",
+      "duration": 23.67,
+      "error": null,
+      "stdout": null
+    },
+    {
+      "id": "TC010",
+      "name": "Employees page loads and search works",
+      "category": "Employee",
+      "status": "PASS",
+      "duration": 2.99,
+      "error": null,
+      "stdout": "\u2705 TC010 PASS: Employees page loaded, search executed\n"
+    },
+    {
+      "id": "TC011",
+      "name": "Employee creation for TESTSPRITE",
+      "category": "Employee",
+      "status": "PASS",
+      "duration": 5.1,
+      "error": null,
+      "stdout": "\u2705 TC011 PASS: Created employee 'TESTSPRITE EMP 20260516045633' successfully\n"
+    }
+  ],
+  "summary": {
+    "total": 11,
+    "pass": 8,
+    "fail": 3,
+    "skip": 0,
+    "timeout": 0,
+    "error": 0
+  }
+}

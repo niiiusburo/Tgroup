@@ -1,0 +1,220 @@
+{
+  "timestamp": "2026-05-16T05:03:01.305264",
+  "results": [
+    {
+      "id": "TC001",
+      "name": "Admin login reaches protected overview",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 2.35,
+      "error": null,
+      "stdout": "\u2705 TC001 PASS: Admin login successful, protected overview rendered\n"
+    },
+    {
+      "id": "TC002",
+      "name": "Logout clears session",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 1.37,
+      "error": null,
+      "stdout": "\u2705 TC002 PASS: Logout cleared session, redirected to /login\n"
+    },
+    {
+      "id": "TC003",
+      "name": "Invalid credentials are rejected",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 15.11,
+      "error": null,
+      "stdout": null
+    },
+    {
+      "id": "TC004",
+      "name": "Admin can access core guarded pages",
+      "category": "Routes",
+      "status": "PASS",
+      "duration": 28.92,
+      "error": null,
+      "stdout": "  \u2705 T\u1ed5ng quan\n  \u2705 L\u1ecbch\n  \u2705 Kh\u00e1ch h\u00e0ng\n  \u2705 D\u1ecbch v\u1ee5\n  \u2705 Danh m\u1ee5c d\u1ecbch v\u1ee5\n  \u2705 K\u1ebf ho\u1ea1ch thanh to\u00e1n\n  \u2705 Nh\u00e2n vi\u00ean\n  \u2705 B\u00e1o c\u00e1o\n  \u2705 C\u00e0i \u0111\u1eb7t\n  \u2705 Quy\u1ec1n h\u1ea1n\n\u2705 TC004 PASS: All 10 guarded pages accessible\n"
+    },
+    {
+      "id": "TC005",
+      "name": "Sidebar exposes expected admin navigation",
+      "category": "UI",
+      "status": "PASS",
+      "duration": 14.9,
+      "error": null,
+      "stdout": null
+    },
+    {
+      "id": "TC006",
+      "name": "Admin can create TEST_SPRITE customer",
+      "category": "Customer",
+      "status": "PASS",
+      "duration": 5.98,
+      "error": null,
+      "stdout": "\u2705 TC006 PASS: Created customer 'TEST SPRITE 20260516050209' successfully\n"
+    },
+    {
+      "id": "TC007",
+      "name": "Admin can edit TEST_SPRITE customer",
+      "category": "Customer",
+      "status": "PASS",
+      "duration": 8.44,
+      "error": null,
+      "stdout": "\u2705 TC007 PASS: Customer edited successfully\n"
+    },
+    {
+      "id": "TC008",
+      "name": "Customer mutation controls visible for admin",
+      "category": "Permissions",
+      "status": "PASS",
+      "duration": 6.52,
+      "error": null,
+      "stdout": "\u2705 TC008 PASS: Found controls: Edit, Payment\n"
+    },
+    {
+      "id": "TC009",
+      "name": "Delete requires confirmation",
+      "category": "Safety",
+      "status": "PASS",
+      "duration": 23.58,
+      "error": null,
+      "stdout": null
+    },
+    {
+      "id": "TC010",
+      "name": "Employees page loads and search works",
+      "category": "Employee",
+      "status": "PASS",
+      "duration": 2.92,
+      "error": null,
+      "stdout": "\u2705 TC010 PASS: Employees page loaded, search executed\n"
+    },
+    {
+      "id": "TC011",
+      "name": "Employee creation for TESTSPRITE",
+      "category": "Employee",
+      "status": "PASS",
+      "duration": 5.15,
+      "error": null,
+      "stdout": "\u2705 TC011 PASS: Created employee 'TESTSPRITE EMP 20260516050222' successfully\n"
+    },
+    {
+      "id": "TC012",
+      "name": "Employee edit for TESTSPRITE",
+      "category": "Employee",
+      "status": "FAIL",
+      "duration": 17.6,
+      "error": "t is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <td colspan=\"6\" class=\"text-center text-gray-400 text-sm py-8\">Services will populate as patients are treated th\u2026</td> from <div class=\"\u21b5          min-h-screen flex flex-col transition-all duration-300 ease-in-out\u21b5          w-full max-w-full md:w-auto\u21b5          ml-0\u21b5          lg:ml-[72px]\u21b5        \">\u2026</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\n",
+      "stdout": null
+    },
+    {
+      "id": "TC013",
+      "name": "Permission board loads",
+      "category": "Permissions",
+      "status": "FAIL",
+      "duration": 17.66,
+      "error": "le\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <h2 class=\"text-sm font-bold text-gray-800 uppercase tracking-wide\">Today's Services / Activity</h2> from <div class=\"\u21b5          min-h-screen flex flex-col transition-all duration-300 ease-in-out\u21b5          w-full max-w-full md:w-auto\u21b5          ml-0\u21b5          lg:ml-[72px]\u21b5        \">\u2026</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\n",
+      "stdout": null
+    },
+    {
+      "id": "TC014",
+      "name": "Employee fail doesn't break permissions",
+      "category": "Permissions",
+      "status": "FAIL",
+      "duration": 17.59,
+      "error": "onnection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Documents/TamTMV/Tgrouptest/testsprite_tests/.venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"xpath=/html/body/div/div/aside/nav/div[4]/div/div/div[2]/a[3]\").first\n\n",
+      "stdout": null
+    },
+    {
+      "id": "TC015",
+      "name": "Reports routes render",
+      "category": "Reports",
+      "status": "FAIL",
+      "duration": 17.76,
+      "error": "._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Documents/TamTMV/Tgrouptest/testsprite_tests/.venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\"xpath=/html/body/div/div/div/main/div/div[2]/div/button[2]\").first\n\n",
+      "stdout": null
+    },
+    {
+      "id": "TC016",
+      "name": "Payment page renders safely",
+      "category": "Payment",
+      "status": "FAIL",
+      "duration": 17.63,
+      "error": "le, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"flex flex-col items-center justify-center py-12 text-center\">\u2026</div> from <div class=\"\u21b5          min-h-screen flex flex-col transition-all duration-300 ease-in-out\u21b5          w-full max-w-full md:w-auto\u21b5          ml-0\u21b5          lg:ml-[72px]\u21b5        \">\u2026</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\n",
+      "stdout": null
+    },
+    {
+      "id": "TC017",
+      "name": "Service catalog renders",
+      "category": "Services",
+      "status": "FAIL",
+      "duration": 17.51,
+      "error": "le, enabled and stable\n       - element is visible, enabled and stable\n       - scrolling into view if needed\n       - done scrolling\n       - <div class=\"flex flex-col items-center justify-center py-12 text-center\">\u2026</div> from <div class=\"\u21b5          min-h-screen flex flex-col transition-all duration-300 ease-in-out\u21b5          w-full max-w-full md:w-auto\u21b5          ml-0\u21b5          lg:ml-[72px]\u21b5        \">\u2026</div> subtree intercepts pointer events\n     - retrying click action\n       - waiting 500ms\n\n",
+      "stdout": null
+    },
+    {
+      "id": "TC018",
+      "name": "Settings renders safely",
+      "category": "Settings",
+      "status": "PASS",
+      "duration": 14.63,
+      "error": null,
+      "stdout": null
+    },
+    {
+      "id": "TC019",
+      "name": "Permission matrix wildcard admin",
+      "category": "Permissions",
+      "status": "FAIL",
+      "duration": 9.37,
+      "error": "ait self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Documents/TamTMV/Tgrouptest/testsprite_tests/.venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Page.wait_for_selector: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid='permission-matrix']\") to be visible\n\n",
+      "stdout": "\u274c TC019 FAIL: Page.wait_for_selector: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\"[data-testid='permission-matrix']\") to be visible\n\n"
+    },
+    {
+      "id": "TC020",
+      "name": "Permission viewer read-only",
+      "category": "Permissions",
+      "status": "FAIL",
+      "duration": 1.43,
+      "error": "sk)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.12/3.12.13/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/base_events.py\", line 691, in run_until_complete\n    return future.result()\n           ^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Documents/TamTMV/Tgrouptest/testsprite_tests/TC020_Permission_viewer_readonly.py\", line 33, in run_test\n    assert count > 0, \"No matrix cells found\"\n           ^^^^^^^^^\nAssertionError: No matrix cells found\n",
+      "stdout": "\u274c TC020 FAIL: No matrix cells found\n"
+    },
+    {
+      "id": "TC022",
+      "name": "Services route permission",
+      "category": "Permissions",
+      "status": "PASS",
+      "duration": 1.52,
+      "error": null,
+      "stdout": "\u2705 TC022 PASS: Services route accessible, content verified\n"
+    },
+    {
+      "id": "TC030",
+      "name": "Calendar Excel with session token",
+      "category": "Calendar",
+      "status": "FAIL",
+      "duration": 0.5,
+      "error": ": SyntaxError: Invalid flags supplied to RegExp constructor 'i, [data-testid='remember-me']'\n    at new RegExp (<anonymous>)\n    at createTextMatcher (<anonymous>:7846:16)\n    at Object.queryAll (<anonymous>:6672:33)\n    at InjectedScript._queryEngineAll (<anonymous>:6645:49)\n    at InjectedScript.querySelectorAll (<anonymous>:6632:30)\n    at eval (eval at evaluate (:302:30), <anonymous>:2:33)\n    at UtilityScript.evaluate (<anonymous>:304:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n",
+      "stdout": "nymous>:6672:33)\n    at InjectedScript._queryEngineAll (<anonymous>:6645:49)\n    at InjectedScript.querySelectorAll (<anonymous>:6632:30)\n    at eval (eval at evaluate (:302:30), <anonymous>:2:33)\n    at UtilityScript.evaluate (<anonymous>:304:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n"
+    },
+    {
+      "id": "TC031",
+      "name": "Accent-insensitive search",
+      "category": "Search",
+      "status": "PASS",
+      "duration": 5.06,
+      "error": null,
+      "stdout": "\u2705 TC031 PASS: Customer search 'nguyen' returned 20 results\n\u2705 TC031 PASS: Overview search 'quyen' executed\n"
+    }
+  ],
+  "summary": {
+    "total": 23,
+    "pass": 14,
+    "fail": 9,
+    "skip": 0,
+    "timeout": 0,
+    "error": 0
+  }
+}

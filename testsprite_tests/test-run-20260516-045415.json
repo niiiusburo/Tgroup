@@ -1,0 +1,49 @@
+{
+  "timestamp": "2026-05-16T04:54:15.052548",
+  "results": [
+    {
+      "id": "TC001",
+      "name": "Admin login reaches protected overview",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 2.01,
+      "error": null,
+      "stdout": "\u2705 TC001 PASS: Admin login successful, protected overview rendered\n"
+    },
+    {
+      "id": "TC002",
+      "name": "Logout clears session",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 1.04,
+      "error": null,
+      "stdout": "\u2705 TC002 PASS: Logout cleared session, redirected to /login\n"
+    },
+    {
+      "id": "TC003",
+      "name": "Invalid credentials are rejected",
+      "category": "Auth",
+      "status": "PASS",
+      "duration": 14.92,
+      "error": null,
+      "stdout": null
+    },
+    {
+      "id": "TC004",
+      "name": "Admin can access core guarded pages",
+      "category": "Routes",
+      "status": "FAIL",
+      "duration": 13.33,
+      "error": "ncio/base_events.py\", line 691, in run_until_complete\n    return future.result()\n           ^^^^^^^^^^^^^^^\n  File \"/Users/thuanle/Documents/TamTMV/Tgrouptest/testsprite_tests/TC004_Admin_can_access_core_guarded_pages_v2.py\", line 61, in run_test\n    raise AssertionError(\"Failed pages:\\n\" + \"\\n\".join(f\"    - {f}\" for f in failures))\nAssertionError: Failed pages:\n    - L\u1ecbch (/calendar): Access Denied\n    - Kh\u00e1ch h\u00e0ng (/customers): Access Denied\n    - K\u1ebf ho\u1ea1ch thanh to\u00e1n (/payment): Access Denied\n",
+      "stdout": "  \u2705 T\u1ed5ng quan\n  \u2705 D\u1ecbch v\u1ee5\n  \u2705 Danh m\u1ee5c d\u1ecbch v\u1ee5\n  \u2705 Nh\u00e2n vi\u00ean\n  \u2705 B\u00e1o c\u00e1o\n  \u2705 C\u00e0i \u0111\u1eb7t\n  \u2705 Quy\u1ec1n h\u1ea1n\n\u274c TC004 FAIL: Failed pages:\n    - L\u1ecbch (/calendar): Access Denied\n    - Kh\u00e1ch h\u00e0ng (/customers): Access Denied\n    - K\u1ebf ho\u1ea1ch thanh to\u00e1n (/payment): Access Denied\n"
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "pass": 3,
+    "fail": 1,
+    "skip": 0,
+    "timeout": 0,
+    "error": 0
+  }
+}
