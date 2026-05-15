@@ -129,3 +129,9 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ### Fixed
 - Aligned `contracts/payment.ts` method enum with actual backend/frontend support (`cash`, `bank_transfer`, `deposit`, `mixed`) — @agent — Remove `card`, `momo`, `vnpay`, `zalopay` placeholders until end-to-end wiring exists.
+
+## 0.32.0 — 2026-05-16
+- TestSprite: Complete v2 automated test suite (23/23 tests passing)
+- TestSprite: Parallel test runner with 5 workers, ~38s full suite
+- TestSprite: MCP config fixed with correct API_KEY in ~/.claude.json
+- TestSprite: Added TESTSPRITE_STATUS.md and TESTSPRITE_MCP_SETUP_GUIDE.md
