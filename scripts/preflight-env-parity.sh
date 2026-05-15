@@ -142,12 +142,13 @@ diff_against_remote() {
   rsync -an --itemize-changes $(rsync_excludes) "${VPS_HOST}:${remote_path}/" ./ 2>/dev/null \
     | awk '$1 ~ /^[<>ch.][f]/ { print }' > "$tmp/remote_to_local.itemize" || true
 
-  # Anything rsync would CREATE on remote = local-only (or content differs).
-  awk '$1 ~ /^>f\+\+\+/   { print $2 }' "$tmp/local_to_remote.itemize" | LC_ALL=C sort -u > "$tmp/local_only"
-  # Anything rsync would CREATE locally = remote-only.
-  awk '$1 ~ /^>f\+\+\+/   { print $2 }' "$tmp/remote_to_local.itemize" | LC_ALL=C sort -u > "$tmp/remote_only"
-  # Content differences appear with checksum/size flags.
-  awk '$1 ~ /^>f[^+]/     { print $2 }' "$tmp/local_to_remote.itemize" | LC_ALL=C sort -u > "$tmp/differ"
+  # rsync itemize prefixes: `<` = sending to destination, `>` = receiving on local.
+  # Direction 1 (./ → remote): `<f+++++++` means local file would be uploaded (= local-only).
+  # Direction 2 (remote → ./): `<f+++++++` means remote file would be downloaded (= remote-only).
+  # `<f` with non-+ change flags means content/metadata differs between the two trees.
+  awk '$1 ~ /^<f\+\+\+/   { print $2 }' "$tmp/local_to_remote.itemize" | LC_ALL=C sort -u > "$tmp/local_only"
+  awk '$1 ~ /^<f\+\+\+/   { print $2 }' "$tmp/remote_to_local.itemize" | LC_ALL=C sort -u > "$tmp/remote_only"
+  awk '$1 ~ /^<f[^+]/     { print $2 }' "$tmp/local_to_remote.itemize" | LC_ALL=C sort -u > "$tmp/differ"
 
   echo "$tmp"
 }

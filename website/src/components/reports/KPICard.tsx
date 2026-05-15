@@ -2,6 +2,12 @@ import { useEffect } from 'react';
 import { motion, useSpring, useTransform } from 'framer-motion';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
+interface KPICardBreakdown {
+  label: string;
+  value: number;
+  tone?: 'positive' | 'pending' | 'neutral';
+}
+
 interface KPICardProps {
   label: string;
   value: number;
@@ -10,6 +16,7 @@ interface KPICardProps {
   icon: React.ReactNode;
   color: string;
   delay?: number;
+  breakdown?: KPICardBreakdown[];
 }
 
 function formatValue(val: number, format: string): string {
@@ -30,7 +37,7 @@ function CountUp({ target, format, delay = 0 }: { target: number; format: string
   return <motion.span>{display}</motion.span>;
 }
 
-export function KPICard({ label, value, format = 'number', change, icon, color, delay = 0 }: KPICardProps) {
+export function KPICard({ label, value, format = 'number', change, icon, color, delay = 0, breakdown }: KPICardProps) {
   const isPositive = change !== null && change !== undefined && change > 0;
   const isNegative = change !== null && change !== undefined && change < 0;
   const isFlat = change === 0;
@@ -75,6 +82,24 @@ export function KPICard({ label, value, format = 'number', change, icon, color, 
             {isNegative && <TrendingDown className="w-3 h-3" />}
             {isFlat && <Minus className="w-3 h-3" />}
             {change > 0 ? '+' : ''}{change?.toFixed(1)}% vs prev period
+          </div>
+        )}
+        {breakdown && breakdown.length > 0 && (
+          <div className="mt-2 grid grid-cols-2 gap-1 text-[11px] leading-tight" data-testid="kpi-breakdown">
+            {breakdown.map((item, idx) => {
+              const toneClass =
+                item.tone === 'positive' ? 'text-emerald-700' :
+                item.tone === 'pending'  ? 'text-amber-700' :
+                'text-gray-600';
+              return (
+                <div key={idx} className="flex flex-col">
+                  <span className="text-gray-500">{item.label}</span>
+                  <span className={`font-semibold tabular-nums ${toneClass}`}>
+                    {formatValue(item.value, format)}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

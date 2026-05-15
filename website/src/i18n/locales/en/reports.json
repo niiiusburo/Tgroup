@@ -70,6 +70,8 @@
     "outstanding": "Outstanding",
     "collectionRate": "Collection Rate",
     "moneyIn": "Cash In",
+    "moneyInConfirmed": "Confirmed",
+    "moneyInUnconfirmed": "Pending",
     "moneyOut": "Cash Out",
     "netCashFlow": "Net Cash Flow",
     "internalDepositUsed": "Deposit Used",

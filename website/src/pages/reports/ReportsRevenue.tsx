@@ -23,6 +23,8 @@ type RevenueRule = { key: string; label?: string; treatment: string }
 type CashFlowCategory = { key: string; direction: string; count: number; amount: number; signedAmount: number }
 type CashFlowSummary = {
   moneyIn: number;
+  moneyInConfirmed: number;
+  moneyInUnconfirmed: number;
   moneyOut: number;
   netCashFlow: number;
   internalDepositUsed: number;
@@ -200,7 +202,18 @@ export function ReportsRevenue() {
 
       {cashFlowQ.error ? <ReportError error={cashFlowQ.error} onRetry={cashFlowQ.refetch} /> : cashFlowQ.data ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <KPICard label={t('metrics.moneyIn')} value={cashFlowQ.data.moneyIn} format="currency" icon={<ArrowUpCircle className="w-4 h-4" />} color="emerald" delay={0} />
+          <KPICard
+            label={t('metrics.moneyIn')}
+            value={cashFlowQ.data.moneyIn}
+            format="currency"
+            icon={<ArrowUpCircle className="w-4 h-4" />}
+            color="emerald"
+            delay={0}
+            breakdown={[
+              { label: t('metrics.moneyInConfirmed', { defaultValue: 'Đã xác nhận' }), value: cashFlowQ.data.moneyInConfirmed ?? 0, tone: 'positive' },
+              { label: t('metrics.moneyInUnconfirmed', { defaultValue: 'Chờ xác nhận' }), value: cashFlowQ.data.moneyInUnconfirmed ?? 0, tone: 'pending' },
+            ]}
+          />
           <KPICard label={t('metrics.moneyOut')} value={cashFlowQ.data.moneyOut} format="currency" icon={<ArrowDownCircle className="w-4 h-4" />} color="amber" delay={1} />
           <KPICard label={t('metrics.netCashFlow')} value={cashFlowQ.data.netCashFlow} format="currency" icon={<Scale className="w-4 h-4" />} color="blue" delay={2} />
           <KPICard label={t('metrics.internalDepositUsed')} value={cashFlowQ.data.internalDepositUsed} format="currency" icon={<WalletCards className="w-4 h-4" />} color="violet" delay={3} />

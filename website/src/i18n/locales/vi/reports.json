@@ -70,6 +70,8 @@
     "outstanding": "Còn nợ",
     "collectionRate": "Tỷ lệ thu hồi",
     "moneyIn": "Tiền vào",
+    "moneyInConfirmed": "Đã xác nhận",
+    "moneyInUnconfirmed": "Chờ xác nhận",
     "moneyOut": "Tiền ra",
     "netCashFlow": "Dòng tiền ròng",
     "internalDepositUsed": "Đã dùng đặt cọc",

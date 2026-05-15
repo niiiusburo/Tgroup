@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.32.3",
+    "date": "2026-05-15",
+    "commit": "pending",
+    "highlights": "Payment proof verification now functional end-to-end (was broken since launch).",
+    "sections": [
+      {
+        "title": "Fixed",
+        "items": [
+          "Payment proof upload — dbo.payment_proofs.payment_id was integer while dbo.payments.id is uuid; every upload had silently failed at the DB driver. Migration 051 changes the column to uuid and adds the missing FK. Verified end-to-end: upload + confirm round-trip now succeeds.",
+          "Cash-flow KPI on /reports/revenue now shows the Confirmed vs Pending split returned by the API. CashFlowSummary TS type now declares moneyInConfirmed and moneyInUnconfirmed."
+        ]
+      },
+      {
+        "title": "Added",
+        "items": [
+          "KPICard component accepts an optional `breakdown` prop for two-value sub-stats under the main value.",
+          "Migration regression test (api/tests/paymentProofMigration.test.js) locks the uuid type + FK + idempotency in place."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.2",
     "date": "2026-05-15",
     "commit": "pending",
