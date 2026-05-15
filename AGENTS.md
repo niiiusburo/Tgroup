@@ -55,6 +55,28 @@ All changes must be made and verified locally before pushing to the VPS.
 - Deploy to the VPS only after local work is complete.
 - Do not modify VPS files directly without first confirming the fix locally.
 
+### 2.1 Environment Check Routing
+
+When the user asks to check a specific environment, use these targets exactly:
+
+- `check live`: verify production at `https://nk.2checkin.com` and the production VPS runtime (`tgroup-web`, `tgroup-api`, `tgroup-face-service`, `tgroup-db`).
+- `check stage`: verify staging at `https://nk2.2checkin.com` and the staging VPS runtime (`tgroup-staging-web`, `tgroup-staging-api`, `tgroup-staging-face-service`).
+- `check local`: verify this local checkout on the user's computer, including the local dev server/process that actually owns the relevant port.
+
+For authenticated live checks, read `.agents/live-site.env` and use `LIVE_SITE_EMAIL` / `LIVE_SITE_PASSWORD`. That file is local-only and gitignored; do not put live credentials in tracked docs, commits, PRs, or final recaps. If the file is missing, stop and ask the user before guessing an account.
+
+Do not treat a local result as live proof, and do not treat staging as production proof unless the user explicitly says to compare environments.
+
+### 2.2 Live Deploy Timing And Worktree Lanes
+
+Before pushing or deploying to the production VPS/live site, classify the change as a big feature or a small fix and state the current Vietnam time (`Asia/Ho_Chi_Minh`) in the pre-deploy recap.
+
+- Big features must trigger a clear warning that live deploys should not happen during Vietnam work hours, from 09:00 to 21:00. Do not deploy a big feature during that window unless the user explicitly overrides the warning.
+- Big features must be isolated in the `big feature` worktree lane. If big-feature work starts in the wrong checkout, stash or checkpoint it first, create or reuse the dedicated big-feature worktree, then continue there.
+- Big-feature live deploys should be scheduled for night only, outside 21:00 to 09:00 Vietnam time.
+- Small fixes must be isolated in the `small fixes` worktree lane and must not be mixed into the big-feature lane.
+- If a requested live deploy contains both big-feature and small-fix work, split the work by lane before deployment so the release payload is not confusing.
+
 ## 3. Product-Map Governance
 
 Before touching code for a feature or bugfix:

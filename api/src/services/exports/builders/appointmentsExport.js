@@ -1,9 +1,8 @@
 'use strict';
 
 const { query } = require('../../../db');
-const { createWorkbook, populateDataSheet, populateSummarySheet, toVNDate } = require('../exportWorkbook');
-
-const MAX_ROWS = 100_000;
+const { toVNDate } = require('../exportWorkbook');
+const { createExportBuilder } = require('../exportBuilder');
 
 const COLUMNS = [
   { key: 'id', header: 'Mã lịch hẹn', width: 16 },
@@ -54,6 +53,18 @@ function buildWhere(filters) {
     const dtVal = filters.dateTo.length <= 10 ? `${filters.dateTo} 23:59:59` : filters.dateTo;
     conditions.push(`a.date <= $${idx}`);
     params.push(dtVal);
+    idx++;
+  }
+
+  if (filters.timeFrom) {
+    conditions.push(`a.date::time >= $${idx}::time`);
+    params.push(filters.timeFrom);
+    idx++;
+  }
+
+  if (filters.timeTo) {
+    conditions.push(`a.date::time <= $${idx}::time`);
+    params.push(filters.timeTo);
     idx++;
   }
 
@@ -114,7 +125,7 @@ async function getRows(filters) {
     LEFT JOIN products prod ON prod.id = a.productid
     ${where}
     ORDER BY a.date DESC, a.time DESC NULLS LAST
-    LIMIT ${MAX_ROWS + 1}
+    LIMIT ${100_000 + 1}
   `;
   return query(sql, params);
 }
@@ -153,8 +164,9 @@ function buildAppointmentDate(row) {
   // When row.time is provided (legacy), combine date + time explicitly.
   if (row.time) {
     const dateStr = row.date instanceof Date ? row.date.toISOString().slice(0, 10) : String(row.date).slice(0, 10);
-    const [hours = '0', minutes = '0', seconds = '0'] = String(row.time).split(':');
-    const dt = new Date(`${dateStr}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}Z`);
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const [hours = 0, minutes = 0, seconds = 0] = String(row.time).split(':').map(Number);
+    const dt = new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds));
     return Number.isNaN(dt.getTime()) ? null : dt;
   }
 
@@ -162,77 +174,58 @@ function buildAppointmentDate(row) {
   return toVNDate(row.date);
 }
 
-async function preview(filters, user) {
-  const summary = await getSummary(filters);
-  const total = parseInt(summary.total, 10);
+function toDataRow(r) {
   return {
-    rowCount: total,
-    summary: [
-      { label: 'Tổng lịch hẹn', value: total },
-      { label: 'Đã lên lịch', value: parseInt(summary.scheduled_count, 10) },
-      { label: 'Đã đến', value: parseInt(summary.arrived_count, 10) },
-      { label: 'Hoàn thành', value: parseInt(summary.done_count, 10) },
-      { label: 'Đã hủy', value: parseInt(summary.cancelled_count, 10) },
-      { label: 'Tái khám', value: parseInt(summary.repeat_count, 10) },
-    ],
-    exceedsMax: total > MAX_ROWS,
+    id: r.code || r.id || '',
+    datetime: buildAppointmentDate(r),
+    customerCode: r.partnercode || '',
+    customerName: r.partnerdisplayname || r.partnername || '',
+    customerPhone: r.partnerphone || '',
+    serviceName: r.productname || '',
+    doctorName: r.doctorname || '',
+    assistantName: r.assistantname || '',
+    dentalAideName: r.dentalaidename || '',
+    companyName: r.companyname || '',
+    type: getVisitTypeLabel(r.isrepeatcustomer),
+    status: STATUS_LABELS[r.state] || r.state || '',
+    content: r.reason || '',
+    notes: r.note || '',
   };
 }
 
-async function build(filters, user) {
-  const [rows, summary] = await Promise.all([
-    getRows(filters),
-    getSummary(filters),
-  ]);
+function getFilterMeta(filters) {
+  return [
+    { label: 'Tìm kiếm', value: filters.search || 'Tất cả' },
+    { label: 'Chi nhánh', value: filters.companyId === 'all' ? 'Tất cả' : filters.companyId },
+    { label: 'Từ ngày', value: filters.dateFrom || 'Tất cả' },
+    { label: 'Đến ngày', value: filters.dateTo || 'Tất cả' },
+    { label: 'Từ giờ', value: filters.timeFrom || 'Tất cả' },
+    { label: 'Đến giờ', value: filters.timeTo || 'Tất cả' },
+    { label: 'Bác sĩ', value: filters.doctorId || 'Tất cả' },
+    { label: 'Trạng thái', value: filters.state ? STATUS_LABELS[filters.state] || filters.state : 'Tất cả' },
+  ];
+}
 
-  if (rows.length > MAX_ROWS) {
-    const err = new Error(`Kết quả vượt quá ${MAX_ROWS.toLocaleString('vi-VN')} dòng. Vui lòng thu hẹp bộ lọc.`);
-    err.code = 'EXPORT_ROW_LIMIT_EXCEEDED';
-    throw err;
-  }
-
-  const workbook = createWorkbook('Danh sách lịch hẹn', {
-    exportedBy: user?.name || user?.email || '',
-    filters: [
-      { label: 'Tìm kiếm', value: filters.search || 'Tất cả' },
-      { label: 'Chi nhánh', value: filters.companyId === 'all' ? 'Tất cả' : filters.companyId },
-      { label: 'Từ ngày', value: filters.dateFrom || 'Tất cả' },
-      { label: 'Đến ngày', value: filters.dateTo || 'Tất cả' },
-      { label: 'Trạng thái', value: filters.state ? STATUS_LABELS[filters.state] || filters.state : 'Tất cả' },
-    ],
-  });
-
-  const dataRows = rows.map((r) => {
-    return {
-      id: r.code || r.id || '',
-      datetime: buildAppointmentDate(r),
-      customerCode: r.partnercode || '',
-      customerName: r.partnerdisplayname || r.partnername || '',
-      customerPhone: r.partnerphone || '',
-      serviceName: r.productname || '',
-      doctorName: r.doctorname || '',
-      assistantName: r.assistantname || '',
-      dentalAideName: r.dentalaidename || '',
-      companyName: r.companyname || '',
-      type: getVisitTypeLabel(r.isrepeatcustomer),
-      status: STATUS_LABELS[r.state] || r.state || '',
-      content: r.reason || '',
-      notes: r.note || '',
-    };
-  });
-
-  populateDataSheet(workbook.getWorksheet('Data'), COLUMNS, dataRows);
-
-  populateSummarySheet(workbook.getWorksheet('Summary'), [
+function getSummaryRows(summary) {
+  return [
     { label: 'Tổng lịch hẹn', value: parseInt(summary.total, 10) },
     { label: 'Đã lên lịch', value: parseInt(summary.scheduled_count, 10) },
     { label: 'Đã đến', value: parseInt(summary.arrived_count, 10) },
     { label: 'Hoàn thành', value: parseInt(summary.done_count, 10) },
     { label: 'Đã hủy', value: parseInt(summary.cancelled_count, 10) },
     { label: 'Tái khám', value: parseInt(summary.repeat_count, 10) },
-  ]);
-
-  return { workbook, rowCount: dataRows.length };
+  ];
 }
 
-module.exports = { preview, build, buildAppointmentDate };
+const builder = createExportBuilder({
+  columns: COLUMNS,
+  buildWhere,
+  getRows,
+  getSummary,
+  toDataRow,
+  getWorkbookLabel: () => 'Danh sách lịch hẹn',
+  getFilterMeta,
+  getSummaryRows,
+});
+
+module.exports = { ...builder, buildAppointmentDate };

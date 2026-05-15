@@ -22,6 +22,7 @@ jest.setTimeout(30_000);
 jest.mock('../src/middleware/auth', () => ({
   requireAuth: (_req, _res, next) => next(),
   requirePermission: () => (_req, _res, next) => next(),
+  requireAnyPermission: () => (_req, _res, next) => next(),
 }));
 
 // uuid v9+ ships as ESM; some sibling routes (e.g. products.js) `require('uuid')`,

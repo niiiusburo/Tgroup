@@ -3,6 +3,14 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithProviders } from '@/test/test-utils';
 import { Calendar } from './Calendar';
 
+vi.mock('@/lib/dateUtils', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/dateUtils')>('@/lib/dateUtils');
+  return {
+    ...actual,
+    getTodayInTimezone: () => '2026-05-04',
+  };
+});
+
 vi.mock('@/contexts/AuthContext', () => ({
   useAuth: () => ({
     hasPermission: (permission: string) => [

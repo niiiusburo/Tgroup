@@ -76,6 +76,9 @@
 | `employee-save.spec.ts` | Employees | Employee create/edit persistence |
 | `export-downloads.spec.ts` | Reports/Exports | Operational Excel downloads for customers, calendar, services, payments, and service catalog; validates workbook sheets, headers, dates, and numeric cells |
 | `src/services/exports/__tests__/reportSalesEmployeesExport.test.js` | Reports/Exports | Employee revenue Excel export location scope, employee-type filter SQL, grouped workbook rows, and out-of-scope location rejection |
+| `src/services/exports/__tests__/paymentsExport.test.js` | Reports/Exports | Payments/deposits Excel export date, time, location, doctor, category filters and deposit workbook columns |
+| `src/services/exports/__tests__/legacyFlatReportsExport.test.js` | Reports/Exports | Legacy flat revenue and deposit Excel export headers, widths, filenames, filters, row limits, and payment/deposit SQL source rules |
+| `src/pages/__tests__/ReportsExportCenter.test.tsx` | Reports/Exports | Reports Export Center dataset options include the legacy flat revenue and deposit choices and pass their export keys to the export hook |
 | `filter-location-dropdown.spec.ts` | Locations | Location filter dropdown behavior |
 | `location-filter-appointments.spec.ts` | Appointments | Location filter applied to appointments |
 | `login-and-settings.spec.ts` | Auth + Settings | Login + settings page smoke test |

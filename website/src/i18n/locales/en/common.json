@@ -183,8 +183,15 @@
     "create": "Create a new record"
   },
   "face": {
-    "registerTitle": "Register face"
+    "registerTitle": "Register face",
+    "selectMatch": "Select a match",
+    "searchToRegister": "Search to register",
+    "searchPlaceholder": "Name, phone, or code...",
+    "registerToCustomer": "Register to customer"
   },
+  "faceId": "Face ID",
+  "quickAdd": "Quick add",
+  "minSearchLengthHint": "Type at least {{min}} characters to search",
   "relationships": "Relationships",
   "apply": "Apply",
   "reset": "Reset",
@@ -257,6 +264,7 @@
     "cameraStarting": "Starting camera...",
     "scanning": "Scanning for face...",
     "faceDetected": "Face detected",
+    "lowQuality": "Low quality",
     "quality": "Quality",
     "profileStep": "Step {{current}}/{{total}}: {{pose}}",
     "poseStraight": "Look straight",
@@ -267,7 +275,6 @@
     "poseRightHint": "Turn head to the right, hold steady, then tap Capture.",
     "holdSteady": "Hold steady, tap Capture",
     "capturePose": "Capture",
-    "autoCapturing": "Auto capturing...",
     "cameraError": "Cannot access camera. Please grant permission."
   },
   "combobox": {

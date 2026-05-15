@@ -23,9 +23,34 @@
     "to": "To",
     "apply": "Apply Filters",
     "clear": "Clear Filters",
+    "today": "Today",
     "ytd": "YTD",
     "30d": "30d",
-    "90d": "90d"
+    "90d": "90d",
+    "timeFrom": "From time",
+    "timeTo": "To time",
+    "allTime": "All day",
+    "allDoctors": "All Doctors",
+    "loadingDoctors": "Loading doctors...",
+    "searchLocations": "Search location...",
+    "noLocationMatches": "No matching locations",
+    "clearLocation": "Clear location filter",
+    "searchDoctors": "Search doctor name or code...",
+    "noDoctorMatches": "No matching doctors",
+    "clearDoctor": "Clear doctor filter"
+  },
+  "exportCenter": {
+    "title": "Reports Export Center",
+    "subtitle": "Export today or any custom date/time window by location and doctor.",
+    "dataset": "Dataset",
+    "types": {
+      "appointments": "Appointments",
+      "services": "Services / treatments",
+      "payments": "Payments",
+      "deposits": "Deposits",
+      "revenueFlat": "Revenue report",
+      "depositFlat": "Deposit report"
+    }
   },
   "metrics": {
     "totalRevenue": "Total Revenue",

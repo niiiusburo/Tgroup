@@ -7,6 +7,7 @@ const HEADER_FONT = { bold: true, color: { argb: 'FFFFFFFF' } };
 const BORDER_STYLE = { style: 'thin', color: { argb: 'FFE5E7EB' } };
 const DATE_FORMAT = 'dd/mm/yyyy';
 const DATETIME_FORMAT = 'dd/mm/yyyy hh:mm';
+const MAX_ROWS = 100_000;
 const VN_TIMEZONE = 'Asia/Ho_Chi_Minh';
 
 /**
@@ -169,10 +170,10 @@ function populateDataSheet(worksheet, columns, rows) {
         cell.numFmt = DATETIME_FORMAT;
       }
 
-      // Sanitize formula injection
+      // Sanitize formula injection (Excel treats =, +, -, @, \t, \r as formula triggers)
       if (cell.value && typeof cell.value === 'string') {
         const trimmed = cell.value.trim();
-        if (/^[=+\-@]/.test(trimmed)) {
+        if (/^[\t\r\n]*[=+\-@]/.test(trimmed)) {
           cell.value = `'${cell.value}`;
         }
       }
@@ -228,4 +229,5 @@ module.exports = {
   buildFilename,
   formatDateTimeVN,
   toVNDate,
+  MAX_ROWS,
 };

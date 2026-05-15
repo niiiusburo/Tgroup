@@ -7,6 +7,7 @@ const appointmentsExport = require('./builders/appointmentsExport');
 const servicesExport = require('./builders/servicesExport');
 const paymentsExport = require('./builders/paymentsExport');
 const reportSalesEmployeesExport = require('./builders/reportSalesEmployeesExport');
+const legacyFlatReportsExport = require('./builders/legacyFlatReportsExport');
 
 /**
  * Export Registry
@@ -49,6 +50,8 @@ const REGISTRY = {
       companyId: { type: 'string', default: 'all' },
       dateFrom: { type: 'string', default: '' },
       dateTo: { type: 'string', default: '' },
+      timeFrom: { type: 'string', default: '' },
+      timeTo: { type: 'string', default: '' },
       state: { type: 'string', default: '' },
       doctorId: { type: 'string', default: '' },
     },
@@ -63,7 +66,10 @@ const REGISTRY = {
       companyId: { type: 'string', default: 'all' },
       dateFrom: { type: 'string', default: '' },
       dateTo: { type: 'string', default: '' },
+      timeFrom: { type: 'string', default: '' },
+      timeTo: { type: 'string', default: '' },
       state: { type: 'string', default: '' },
+      doctorId: { type: 'string', default: '' },
     },
   },
   'payments': {
@@ -76,7 +82,60 @@ const REGISTRY = {
       companyId: { type: 'string', default: 'all' },
       dateFrom: { type: 'string', default: '' },
       dateTo: { type: 'string', default: '' },
+      timeFrom: { type: 'string', default: '' },
+      timeTo: { type: 'string', default: '' },
+      doctorId: { type: 'string', default: '' },
       status: { type: 'string', default: '' },
+      paymentCategory: { type: 'string', default: 'payment' },
+      depositType: { type: 'string', default: '' },
+    },
+  },
+  'deposits': {
+    label: 'Danh sách đặt cọc',
+    permission: 'payments.export',
+    filename: () => buildFilename('DatCoc'),
+    builder: paymentsExport,
+    filterSchema: {
+      search: { type: 'string', default: '' },
+      companyId: { type: 'string', default: 'all' },
+      dateFrom: { type: 'string', default: '' },
+      dateTo: { type: 'string', default: '' },
+      timeFrom: { type: 'string', default: '' },
+      timeTo: { type: 'string', default: '' },
+      doctorId: { type: 'string', default: '' },
+      status: { type: 'string', default: '' },
+      paymentCategory: { type: 'string', default: 'deposit' },
+      depositType: { type: 'string', default: '' },
+    },
+  },
+  'revenue-flat': {
+    label: 'Báo cáo doanh thu',
+    permission: 'payments.export',
+    filename: () => buildFilename('BaoCaoDoanhThu'),
+    builder: legacyFlatReportsExport.revenue,
+    filterSchema: {
+      search: { type: 'string', default: '' },
+      companyId: { type: 'string', default: 'all' },
+      dateFrom: { type: 'string', default: '' },
+      dateTo: { type: 'string', default: '' },
+      timeFrom: { type: 'string', default: '' },
+      timeTo: { type: 'string', default: '' },
+      doctorId: { type: 'string', default: '' },
+    },
+  },
+  'deposit-flat': {
+    label: 'Báo cáo cọc tiền',
+    permission: 'payments.export',
+    filename: () => buildFilename('BaoCaoCocTien'),
+    builder: legacyFlatReportsExport.deposit,
+    filterSchema: {
+      search: { type: 'string', default: '' },
+      companyId: { type: 'string', default: 'all' },
+      dateFrom: { type: 'string', default: '' },
+      dateTo: { type: 'string', default: '' },
+      timeFrom: { type: 'string', default: '' },
+      timeTo: { type: 'string', default: '' },
+      doctorId: { type: 'string', default: '' },
     },
   },
   'report-sales-employees': {

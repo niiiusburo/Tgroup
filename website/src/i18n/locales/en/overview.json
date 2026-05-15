@@ -42,6 +42,27 @@
     "noPatients": "No appointments today",
     "noPatientsYet": "No patients yet"
   },
+  "todayServices": {
+    "title": "Today's Services / Activity",
+    "searchPlaceholder": "Search services...",
+    "loading": "Loading today's services...",
+    "error": "Today's services could not load.",
+    "empty": "Services will populate as patients are treated throughout the day.",
+    "filteredEmpty": "No services match this search.",
+    "columns": {
+      "service": "Service",
+      "patient": "Patient",
+      "qty": "Qty",
+      "doctor": "Doctor",
+      "amount": "Amount",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    }
+  },
   "addAppointment": "Add Appointment",
   "editAppointment": "Edit Appointment",
   "markArrived": "Mark Arrived",

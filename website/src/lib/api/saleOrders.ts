@@ -112,6 +112,73 @@ export function updateSaleOrderState(id: string, state: string) {
   return apiFetch<ApiSaleOrder>(`/SaleOrders/${id}/state`, { method: 'PATCH', body: { state } });
 }
 
+// ─── Sale Order Activity Lines (dashboard service activity) ───────
+
+export interface ApiSaleOrderActivityLine {
+  id: string;
+  date: string | null;
+  name: string | null;
+  state: string | null;
+  orderPartnerId: string | null;
+  orderPartnerName: string | null;
+  orderPartnerDisplayName: string | null;
+  orderPartnerPhone: string | null;
+  orderPartnerCode?: string | null;
+  orderId: string | null;
+  orderName: string | null;
+  productId: string | null;
+  productName: string | null;
+  productCode: string | null;
+  employeeId: string | null;
+  employeeName: string | null;
+  assistantId: string | null;
+  assistant: string | null;
+  counselorId: string | null;
+  counselor: string | null;
+  companyId: string | null;
+  companyName: string | null;
+  productUOMQty: string | number | null;
+  priceUnit: string | number | null;
+  priceSubTotal: string | number | null;
+  priceTotal: string | number | null;
+  amountInvoiced: string | number | null;
+  amountResidual: string | number | null;
+  diagnostic: string | null;
+  toothType: string | null;
+  toothRange: string | null;
+  isActive: boolean | null;
+  isRewardLine: boolean | null;
+  isGlobalDiscount: boolean | null;
+}
+
+export function fetchSaleOrderActivityLines(params?: {
+  offset?: number;
+  limit?: number;
+  companyId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  state?: string;
+  partnerId?: string;
+}) {
+  return apiFetch<PaginatedResponse<ApiSaleOrderActivityLine> & {
+    aggregates?: {
+      totalRevenue: number;
+      orderCount: number;
+      lineCount: number;
+    } | null;
+  }>('/SaleOrderLines', {
+    params: {
+      offset: params?.offset ?? 0,
+      limit: params?.limit ?? 100,
+      companyId: params?.companyId,
+      dateFrom: params?.dateFrom,
+      dateTo: params?.dateTo,
+      state: params?.state,
+      partnerId: params?.partnerId,
+    },
+  });
+}
+
 // ─── Sale Order Lines (service lines) ─────────────────────────────
 
 export interface ApiSaleOrderLine {

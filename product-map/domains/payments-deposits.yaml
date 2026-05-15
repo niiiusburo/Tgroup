@@ -52,6 +52,7 @@ endpoints:
   - DELETE /api/Payments/:id
   - POST   /api/Payments/:id/void
   - POST   /api/Payments/:id/proof
+  - POST   /api/Payments/:id/proof/confirm
   - GET    /api/MonthlyPlans
   - GET    /api/MonthlyPlans/:id
   - POST   /api/MonthlyPlans

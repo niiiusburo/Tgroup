@@ -23,6 +23,7 @@ const KEY_PERMISSIONS = [
   { id: 'appointments.edit', label: 'Edit Appointments', category: 'Appointments' },
   { id: 'payment.view', label: 'View Payments', category: 'Payment' },
   { id: 'payment.add', label: 'Add Payments', category: 'Payment' },
+  { id: 'payment.confirm', label: 'Confirm Receipt', category: 'Payment' },
   { id: 'payment.refund', label: 'Process Refunds', category: 'Payment' },
   { id: 'payment.void', label: 'Void Payments', category: 'Payment' },
   { id: 'employees.view', label: 'View Employees', category: 'Employees' },

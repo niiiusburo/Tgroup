@@ -183,8 +183,15 @@
     "create": "Tạo bản ghi mới"
   },
   "face": {
-    "registerTitle": "Đăng ký khuôn mặt"
+    "registerTitle": "Đăng ký khuôn mặt",
+    "selectMatch": "Chọn kết quả phù hợp",
+    "searchToRegister": "Tìm để đăng ký",
+    "searchPlaceholder": "Tên, SĐT hoặc mã...",
+    "registerToCustomer": "Đăng ký cho khách hàng"
   },
+  "faceId": "Face ID",
+  "quickAdd": "Thêm nhanh",
+  "minSearchLengthHint": "Nhập tối thiểu {{min}} ký tự để tìm kiếm",
   "relationships": "Mối quan hệ",
   "apply": "Áp dụng",
   "reset": "Đặt lại",
@@ -257,6 +264,7 @@
     "cameraStarting": "Đang mở camera...",
     "scanning": "Đang tìm khuôn mặt...",
     "faceDetected": "Đã phát hiện khuôn mặt",
+    "lowQuality": "Chất lượng thấp",
     "quality": "Chất lượng",
     "profileStep": "Bước {{current}}/{{total}}: {{pose}}",
     "poseStraight": "Nhìn thẳng",
@@ -267,7 +275,6 @@
     "poseRightHint": "Quay đầu sang phải, giữ yên rồi nhấn Chụp.",
     "holdSteady": "Giữ yên, nhấn Chụp",
     "capturePose": "Chụp",
-    "autoCapturing": "Đang tự chụp...",
     "cameraError": "Không thể truy cập camera. Vui lòng cấp quyền."
   },
   "combobox": {

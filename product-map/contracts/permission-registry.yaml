@@ -76,6 +76,9 @@ backend_permissions:
       - PUT /api/MonthlyPlans/:id/installments/:installmentId/pay
       - POST /api/MonthlyPlans
       - DELETE /api/MonthlyPlans/:id
+  - string: payment.confirm
+    routes:
+      - POST /api/Payments/:id/proof/confirm
   - string: payment.add
     routes:
       - POST /api/Payments
@@ -304,6 +307,8 @@ nav_permissions:
 
 # Gaps / risks
 risks:
+  - desc: "GET /api/Partners is used by appointment customer picker; route allows customers.view OR appointments.add (see api/src/routes/partners.js)"
+    severity: medium
   - desc: "locations.edit is checked in frontend but no backend requirePermission('locations.edit') exists"
     severity: low
   - desc: "No central enum means typos in any string cause silent failures or 403s"

@@ -47,6 +47,7 @@ test-results/
 website/e2e/screenshots/
 .gstack/
 artifacts/
+output/
 testsprite_tests/local-run/
 testsprite_tests/tmp/
 
@@ -73,6 +74,8 @@ api/uploads/
 api/src/truth-session.json
 scripts/screenshots/
 scripts/__pycache__/
+__pycache__/
+*.py[cod]
 tools/tdental-delta-sync/backups/
 website/demo_tdental_updated.sql
 
@@ -103,6 +106,9 @@ backups/db-sync/
 backups/*.dump
 backups/*.sql
 backups/*.sql.bak
+
+# Local agent credentials (never push to GitHub)
+.agents/live-site.env
 
 # Keep built contracts for local file: dependency
 !contracts/dist/

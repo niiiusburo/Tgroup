@@ -51,4 +51,29 @@ describe('appointment mutation handlers', () => {
       }),
     );
   });
+
+  it('places arrived CASE columns before state = so PostgreSQL evaluates OLD state', async () => {
+    const appointmentId = '550e8400-e29b-41d4-a716-446655440001';
+    query
+      .mockResolvedValueOnce([{ id: appointmentId }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ id: appointmentId, state: 'arrived' }]);
+
+    const req = { params: { id: appointmentId }, body: { state: 'arrived' } };
+    const res = mockResponse();
+
+    await updateAppointment(req, res);
+
+    expect(query).toHaveBeenCalledTimes(3);
+    const [updateSql] = query.mock.calls[1];
+    const setMatch = updateSql.match(/^UPDATE appointments SET (.+) WHERE id = \$\d+\s*$/s);
+    expect(setMatch).not.toBeNull();
+    const setClause = setMatch[1];
+    const datetimeIdx = setClause.indexOf('datetimearrived');
+    const stateIdx = setClause.search(/\bstate = \$/);
+    expect(datetimeIdx).toBeGreaterThanOrEqual(0);
+    expect(stateIdx).toBeGreaterThan(datetimeIdx);
+    expect(setClause.indexOf('datedone')).toBeLessThan(stateIdx);
+    expect(setClause.indexOf('datetimeseated = CASE')).toBeLessThan(stateIdx);
+  });
 });

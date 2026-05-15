@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTimezone } from '@/contexts/TimezoneContext';
 import { type CalendarAppointment } from '@/data/mockCalendar';
@@ -34,6 +34,10 @@ for (let h = 7; h <= 20; h++) {
   if (h !== 20) SLOTS.push(`${String(h).padStart(2, '0')}:30`);
 }
 
+const INITIAL_VISIBLE_APPOINTMENTS = 96;
+const APPOINTMENT_RENDER_CHUNK = 160;
+const APPOINTMENT_RENDER_DELAY_MS = 16;
+
 // ── Main DayView ─────────────────────────────────────────────────
 
 export function DayView({
@@ -48,10 +52,29 @@ export function DayView({
   const { t } = useTranslation();
   const { formatDate, timezone } = useTimezone();
   const appointments = getAppointmentsForDate(currentDate);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_APPOINTMENTS);
+  const sortedAppointments = useMemo(
+    () => [...appointments].sort((a, b) => a.startTime.localeCompare(b.startTime)),
+    [appointments]
+  );
+
+  useEffect(() => {
+    setVisibleCount(INITIAL_VISIBLE_APPOINTMENTS);
+  }, [sortedAppointments]);
+
+  useEffect(() => {
+    if (visibleCount >= sortedAppointments.length) return;
+    const timer = window.setTimeout(() => {
+      setVisibleCount((count) => Math.min(count + APPOINTMENT_RENDER_CHUNK, sortedAppointments.length));
+    }, APPOINTMENT_RENDER_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [visibleCount, sortedAppointments.length]);
+
+  const visibleAppointments = sortedAppointments.slice(0, visibleCount);
 
   const slotMap = useMemo(() => {
     const map = new Map<string, CalendarAppointment[]>();
-    for (const apt of appointments) {
+    for (const apt of visibleAppointments) {
       const [hStr, mStr] = apt.startTime.slice(0, 5).split(':');
       const mm = Number(mStr) >= 30 ? '30' : '00';
       const slot = `${hStr.padStart(2, '0')}:${mm}`;
@@ -62,7 +85,7 @@ export function DayView({
       arr.sort((a, b) => a.startTime.localeCompare(b.startTime));
     }
     return map;
-  }, [appointments]);
+  }, [visibleAppointments]);
 
   return (
     <div className="bg-white rounded-xl shadow-card overflow-hidden">

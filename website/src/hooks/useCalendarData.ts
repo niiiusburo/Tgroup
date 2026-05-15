@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { startTransition, useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { type CalendarAppointment } from '@/data/mockCalendar';
 import { fetchAppointments, updateAppointment } from '@/lib/api';
 import { useTimezone } from '@/contexts/TimezoneContext';
@@ -20,10 +20,19 @@ function toVnDate(dateStr: string): Date {
 
 type CalendarAppointmentQuery = Parameters<typeof fetchAppointments>[0];
 type CalendarAppointmentPage = Awaited<ReturnType<typeof fetchAppointments>>;
+type CalendarAppointmentPageItems = CalendarAppointmentPage['items'];
 
-export async function fetchAllCalendarAppointments(params: CalendarAppointmentQuery) {
+interface FetchAllCalendarAppointmentsOptions {
+  readonly onPage?: (items: CalendarAppointmentPageItems, pageIndex: number) => void;
+}
+
+export async function fetchAllCalendarAppointments(
+  params: CalendarAppointmentQuery,
+  options: FetchAllCalendarAppointmentsOptions = {},
+) {
   const items: CalendarAppointmentPage['items'] = [];
   let offset = 0;
+  let pageIndex = 0;
 
   let shouldFetchNextPage = true;
   while (shouldFetchNextPage) {
@@ -36,6 +45,8 @@ export async function fetchAllCalendarAppointments(params: CalendarAppointmentQu
     });
 
     items.push(...response.items);
+    options.onPage?.(response.items, pageIndex);
+    pageIndex += 1;
 
     if (response.items.length === 0) {
       shouldFetchNextPage = false;
@@ -66,7 +77,9 @@ export function useCalendarData(selectedLocationId?: string) {
   const [search, setSearch] = useState('');
   const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [appointments, setAppointments] = useState<readonly CalendarAppointment[]>([]);
+  const loadRequestIdRef = useRef(0);
 
   // Current date as Date object at noon Vietnam time (avoids all timezone drift)
   const currentDate = useMemo(() => toVnDate(currentDateStr), [currentDateStr]);
@@ -89,7 +102,12 @@ export function useCalendarData(selectedLocationId?: string) {
 
   // Fetch appointments when viewMode, currentDate, or timezone changes
   const loadAppointments = useCallback(async () => {
+    const requestId = loadRequestIdRef.current + 1;
+    loadRequestIdRef.current = requestId;
+    const mappedPages: CalendarAppointment[] = [];
+
     setIsLoading(true);
+    setIsLoadingMore(false);
     try {
       const current = toVnDate(currentDateStr);
       const weekDatesLocal = getWeekDates(current, formatDate);
@@ -114,19 +132,49 @@ export function useCalendarData(selectedLocationId?: string) {
         dateTo = endOfDay(formatDate(monthDatesLocal[monthDatesLocal.length - 1], 'yyyy-MM-dd'));
       }
 
-      const allAppointments = await fetchAllCalendarAppointments({
-        dateFrom,
-        dateTo,
-        companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
-      });
+      const allAppointments = await fetchAllCalendarAppointments(
+        {
+          dateFrom,
+          dateTo,
+          companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
+        },
+        {
+          onPage: (pageItems, pageIndex) => {
+            if (requestId !== loadRequestIdRef.current) return;
 
-      const mappedAppointments = allAppointments.map(mapApiAppointmentToCalendar);
-      setAppointments(mappedAppointments);
+            if (pageIndex === 0 && pageItems.length === 0) {
+              startTransition(() => setAppointments([]));
+              setIsLoading(false);
+              setIsLoadingMore(false);
+              return;
+            }
+
+            if (pageItems.length > 0) {
+              mappedPages.push(...pageItems.map(mapApiAppointmentToCalendar));
+              startTransition(() => setAppointments([...mappedPages]));
+            }
+
+            setIsLoading(false);
+            setIsLoadingMore(pageItems.length === CALENDAR_APPOINTMENTS_PAGE_SIZE);
+          },
+        },
+      );
+
+      if (requestId !== loadRequestIdRef.current) return;
+
+      const mappedAppointments = mappedPages.length === allAppointments.length
+        ? [...mappedPages]
+        : allAppointments.map(mapApiAppointmentToCalendar);
+      startTransition(() => setAppointments(mappedAppointments));
     } catch (error) {
+      if (requestId !== loadRequestIdRef.current) return;
       console.error('Failed to load calendar appointments:', error);
-      setAppointments([]);
+      startTransition(() => setAppointments([]));
     } finally {
-      setIsLoading(false);
+      if (requestId === loadRequestIdRef.current) {
+        setIsLoading(false);
+        setIsLoadingMore(false);
+      }
     }
   }, [viewMode, currentDateStr, selectedLocationId, formatDate]);
 
@@ -248,6 +296,7 @@ export function useCalendarData(selectedLocationId?: string) {
     selectedAppointment,
     setSelectedAppointment,
     isLoading,
+    isLoadingMore,
     refresh: loadAppointments,
     updateAppointmentStatus,
     markArrived,

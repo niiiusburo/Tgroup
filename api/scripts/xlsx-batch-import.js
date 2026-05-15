@@ -8,7 +8,7 @@ const { DEFAULT_DB, clean } = require('./tdental-import/utils');
 
 const HEADER_ALIASES = {
   customerCode: ['Mã khách hàng', 'Mã KH'],
-  customerName: ['Họ và tên', 'Tên KH', 'Tên Khách Hàng'],
+  customerName: ['Họ và tên', 'Tên KH', 'Tên Khách Hàng', 'Khách hàng'],
   phone: ['Số điện thoại', 'SĐT'],
   branch: ['Cơ sở', 'Chi nhánh', 'Chi nhánh tạo'],
   appointmentDate: ['Ngày hẹn'],
@@ -17,8 +17,8 @@ const HEADER_ALIASES = {
   doctor: ['Bác sĩ'],
   assistant: ['Phụ tá'],
   dentalAide: ['Trợ lý bác sĩ'],
-  content: ['Nội dung'],
-  appointmentType: ['Loại khám'],
+  content: ['Nội dung', 'Ghi chú'],
+  appointmentType: ['Loại khám', 'Loại hẹn'],
   status: ['Trạng thái'],
 };
 
@@ -42,7 +42,7 @@ function firstValue(row, aliases) {
   );
   for (const alias of aliases) {
     const value = normalizedValues.get(normalizeText(alias));
-    if (value !== undefined && value !== null && clean(value) !== '') return clean(value);
+    if (value !== undefined && value !== null && clean(value) !== '') return value;
   }
   return '';
 }
@@ -67,7 +67,19 @@ function excelDateSerialToDate(value) {
 
 function parseDatePart(value) {
   if (!value) return '';
-  if (value instanceof Date && !Number.isNaN(value.getTime())) return value.toISOString().slice(0, 10);
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    const useUtcDate = value.getUTCHours() === 0
+      && value.getUTCMinutes() === 0
+      && value.getUTCSeconds() === 0;
+    const year = useUtcDate ? value.getUTCFullYear() : value.getFullYear();
+    const month = useUtcDate ? value.getUTCMonth() : value.getMonth();
+    const date = useUtcDate ? value.getUTCDate() : value.getDate();
+    return [
+      year,
+      String(month + 1).padStart(2, '0'),
+      String(date).padStart(2, '0'),
+    ].join('-');
+  }
   if (typeof value === 'number') {
     const date = excelDateSerialToDate(value);
     return date ? date.toISOString().slice(0, 10) : '';
@@ -82,7 +94,7 @@ function parseDatePart(value) {
 function parseTimePart(value) {
   if (!value && value !== 0) return '';
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
-    return `${String(value.getHours()).padStart(2, '0')}:${String(value.getMinutes()).padStart(2, '0')}`;
+    return `${String(value.getUTCHours()).padStart(2, '0')}:${String(value.getUTCMinutes()).padStart(2, '0')}`;
   }
   if (typeof value === 'number') {
     const totalMinutes = Math.round((value % 1) * 24 * 60);
@@ -137,10 +149,10 @@ function normalizeCustomerSheetRow(entry) {
   const row = entry.source;
   return {
     rowNumber: entry.rowNumber,
-    ref: firstValue(row, HEADER_ALIASES.customerCode).replace(/\s+/g, '').toUpperCase(),
-    name: firstValue(row, HEADER_ALIASES.customerName),
-    phone: firstValue(row, HEADER_ALIASES.phone),
-    branchName: firstValue(row, HEADER_ALIASES.branch),
+    ref: clean(firstValue(row, HEADER_ALIASES.customerCode)).replace(/\s+/g, '').toUpperCase(),
+    name: clean(firstValue(row, HEADER_ALIASES.customerName)),
+    phone: clean(firstValue(row, HEADER_ALIASES.phone)),
+    branchName: clean(firstValue(row, HEADER_ALIASES.branch)),
   };
 }
 
@@ -150,19 +162,19 @@ function normalizeAppointmentSheetRow(entry) {
   const time = parseTimePart(firstValue(row, HEADER_ALIASES.appointmentTime));
   return {
     rowNumber: entry.rowNumber,
-    ref: firstValue(row, HEADER_ALIASES.customerCode).replace(/\s+/g, '').toUpperCase(),
-    customerName: firstValue(row, HEADER_ALIASES.customerName),
-    phone: firstValue(row, HEADER_ALIASES.phone),
-    branchName: firstValue(row, HEADER_ALIASES.branch),
+    ref: clean(firstValue(row, HEADER_ALIASES.customerCode)).replace(/\s+/g, '').toUpperCase(),
+    customerName: clean(firstValue(row, HEADER_ALIASES.customerName)),
+    phone: clean(firstValue(row, HEADER_ALIASES.phone)),
+    branchName: clean(firstValue(row, HEADER_ALIASES.branch)),
     date,
     time,
     datetime: date ? `${date} ${time || '00:00'}:00` : '',
-    service: firstValue(row, HEADER_ALIASES.service),
-    doctorName: firstValue(row, HEADER_ALIASES.doctor),
-    assistantName: firstValue(row, HEADER_ALIASES.assistant),
-    dentalAideName: firstValue(row, HEADER_ALIASES.dentalAide),
-    content: firstValue(row, HEADER_ALIASES.content),
-    appointmentType: firstValue(row, HEADER_ALIASES.appointmentType),
+    service: clean(firstValue(row, HEADER_ALIASES.service)),
+    doctorName: clean(firstValue(row, HEADER_ALIASES.doctor)),
+    assistantName: clean(firstValue(row, HEADER_ALIASES.assistant)),
+    dentalAideName: clean(firstValue(row, HEADER_ALIASES.dentalAide)),
+    content: clean(firstValue(row, HEADER_ALIASES.content)),
+    appointmentType: clean(firstValue(row, HEADER_ALIASES.appointmentType)),
     status: mapAppointmentStatus(firstValue(row, HEADER_ALIASES.status)),
   };
 }

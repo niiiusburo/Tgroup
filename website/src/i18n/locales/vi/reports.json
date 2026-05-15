@@ -23,9 +23,34 @@
     "to": "Đến",
     "apply": "Áp dụng bộ lọc",
     "clear": "Xóa bộ lọc",
+    "today": "Hôm nay",
     "ytd": "Từ đầu năm",
     "30d": "30 ngày",
-    "90d": "90 ngày"
+    "90d": "90 ngày",
+    "timeFrom": "Từ giờ",
+    "timeTo": "Đến giờ",
+    "allTime": "Cả ngày",
+    "allDoctors": "Tất cả bác sĩ",
+    "loadingDoctors": "Đang tải bác sĩ...",
+    "searchLocations": "Tìm chi nhánh...",
+    "noLocationMatches": "Không tìm thấy chi nhánh phù hợp",
+    "clearLocation": "Xóa lọc chi nhánh",
+    "searchDoctors": "Tìm tên hoặc mã bác sĩ...",
+    "noDoctorMatches": "Không tìm thấy bác sĩ phù hợp",
+    "clearDoctor": "Xóa lọc bác sĩ"
+  },
+  "exportCenter": {
+    "title": "Trung tâm xuất báo cáo",
+    "subtitle": "Xuất hôm nay hoặc khoảng ngày/giờ tùy chỉnh theo chi nhánh và bác sĩ.",
+    "dataset": "Bộ dữ liệu",
+    "types": {
+      "appointments": "Lịch hẹn",
+      "services": "Dịch vụ / phiếu điều trị",
+      "payments": "Thanh toán",
+      "deposits": "Đặt cọc",
+      "revenueFlat": "Báo cáo doanh thu",
+      "depositFlat": "Báo cáo cọc tiền"
+    }
   },
   "metrics": {
     "totalRevenue": "Tổng doanh thu",

@@ -32,20 +32,33 @@ vi.mock('@/lib/api', () => ({
 vi.mock('@/components/shared/FaceCaptureModal', () => ({
   FaceCaptureModal: ({
     isOpen,
+    captureMode,
     onCapture,
     onCancel,
   }: {
     isOpen: boolean;
-    onCapture: (image: Blob) => void;
+    captureMode?: 'single' | 'profile';
+    onCapture: (image: Blob, images?: readonly Blob[]) => void;
     onCancel: () => void;
   }) =>
     isOpen ? (
       <div>
         <button
           type="button"
-          onClick={() => onCapture(new Blob(['face'], { type: 'image/jpeg' }))}
+          onClick={() => {
+            if (captureMode === 'profile') {
+              const images = [
+                new Blob(['center'], { type: 'image/jpeg' }),
+                new Blob(['left'], { type: 'image/jpeg' }),
+                new Blob(['right'], { type: 'image/jpeg' }),
+              ];
+              onCapture(images[0], images);
+              return;
+            }
+            onCapture(new Blob(['face'], { type: 'image/jpeg' }));
+          }}
         >
-          Mock capture
+          {captureMode === 'profile' ? 'Mock profile capture' : 'Mock capture'}
         </button>
         <button type="button" onClick={onCancel}>
           Mock cancel
@@ -64,7 +77,7 @@ describe('GlobalFaceIdButton', () => {
     resetMock.mockReset();
   });
 
-  it('registers a no-match auto-captured face to a searched customer', async () => {
+  it('guides no-match registration through three profile captures before saving samples', async () => {
     recognizeState = { status: 'no_match' };
     vi.mocked(fetchPartners).mockResolvedValue({
       items: [
@@ -78,7 +91,7 @@ describe('GlobalFaceIdButton', () => {
     });
     vi.mocked(registerFace).mockResolvedValue({
       partnerId: 'p-1',
-      sampleCount: 1,
+      sampleCount: 3,
       faceRegisteredAt: '2026-05-07T09:00:00.000Z',
     });
 
@@ -101,15 +114,17 @@ describe('GlobalFaceIdButton', () => {
       });
     });
     fireEvent.click(await screen.findByText('TRẦN THANH DUY- QL'));
-    fireEvent.click(screen.getByRole('button', { name: /Register face/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Capture 3 face angles/i }));
+    fireEvent.click(await screen.findByText('Mock profile capture'));
 
     await waitFor(() => {
-      expect(registerFace).toHaveBeenCalledWith(
-        'p-1',
-        expect.any(Blob),
-        'no_match_rescue',
-      );
+      expect(registerFace).toHaveBeenCalledTimes(3);
       expect(navigateMock).toHaveBeenCalledWith('/customers/p-1');
     });
+    expect(vi.mocked(registerFace).mock.calls.map((call) => call[2])).toEqual([
+      'no_match_rescue',
+      'no_match_rescue',
+      'no_match_rescue',
+    ]);
   });
 });

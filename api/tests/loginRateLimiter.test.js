@@ -11,6 +11,7 @@ function loadApp({ passwordMatches }) {
   jest.doMock('../src/middleware/auth', () => ({
     requireAuth: (_req, _res, next) => next(),
     requirePermission: () => (_req, _res, next) => next(),
+    requireAnyPermission: () => (_req, _res, next) => next(),
   }));
 
   jest.doMock('../src/services/permissionService', () => ({
@@ -32,7 +33,7 @@ function loadApp({ passwordMatches }) {
         return [{
           id: 'employee-id',
           name: 'Test Employee',
-          email: 't@clinic.vn',
+          email: 'test-success@example.com',
           password_hash: 'stored-password-hash',
           companyId: 'company-id',
           companyName: 'Test Clinic',
@@ -61,7 +62,7 @@ describe('login rate limiter', () => {
     for (let i = 0; i < 12; i += 1) {
       const res = await request(app)
         .post('/api/Auth/login')
-        .send({ email: 't@clinic.vn', password: '123123' });
+        .send({ email: 'test-success@example.com', password: 'correct-password' });
 
       expect(res.status).toBe(200);
       expect(res.body.token).toBeTruthy();

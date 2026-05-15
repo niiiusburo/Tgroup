@@ -6,6 +6,7 @@
   "today": "Today",
   "noAppointments": "No appointments",
   "loadingAppointments": "Loading appointments...",
+  "loadingMoreAppointments": "Loading more appointments...",
   "close": "Close",
   "allDay": "All Day",
   "appointmentTypes": {

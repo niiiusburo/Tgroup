@@ -55,6 +55,10 @@ endpoints:
   - GET  /api/Exports/types
   - POST /api/Exports/:type/preview
   - POST /api/Exports/:type/download
+  - POST /api/Exports/revenue-flat/preview
+  - POST /api/Exports/revenue-flat/download
+  - POST /api/Exports/deposit-flat/preview
+  - POST /api/Exports/deposit-flat/download
 ui_surfaces:
   - /reports
   - /reports/dashboard
@@ -65,6 +69,7 @@ ui_surfaces:
   - /reports/locations
   - /reports/services
   - /reports/employees
+  - Reports Export Center on /reports for appointments, services/treatments, payments, deposits, legacy flat revenue, and legacy flat deposit reports
   - Employee revenue Excel export controls on /reports/revenue
   - Export menus on /customers, /calendar, /services, /payment, and /service-catalog
   - Overview page (TodaySchedule, RevenueChartModule, StatCardModule)
@@ -87,6 +92,9 @@ impact_tests:
   - website/src/pages/reports/__tests__/ReportsDashboard.test.tsx
   - website/src/pages/reports/__tests__/ReportsSubpages.test.tsx
   - api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js
+  - api/src/services/exports/__tests__/paymentsExport.test.js
+  - api/src/services/exports/__tests__/legacyFlatReportsExport.test.js
+  - website/src/pages/__tests__/ReportsExportCenter.test.tsx
   - api/src/routes/reports/__tests__/cashFlow.test.js
   - api/src/routes/reports/__tests__/revenueRecognition.test.js
   - api/src/routes/reports/__tests__/servicesBreakdown.test.js
@@ -100,4 +108,6 @@ notes:
   - Revenue reporting must derive paid revenue from posted `payment_allocations` linked to saleorders, excluding deposits, refunds, deposit usage, and voided payments. Unpaid `saleorders.amounttotal` remains invoiced/outstanding context, not paid revenue.
   - Revenue and cash-flow report endpoints enforce employee location scope from primary branch plus `employee_location_scope`; remaining non-revenue report routes should be reviewed before exposing them to scoped managers.
   - Employee revenue Excel export uses `/api/Exports/report-sales-employees` with `reports.export`, date/location scope, employee type, and optional employee filters; workbook rows are grouped by employee and derive revenue from posted `payment_allocations`.
+  - Reports Export Center uses `/api/Exports/appointments`, `/api/Exports/services`, `/api/Exports/payments`, and `/api/Exports/deposits` with shared date, optional time, location, and doctor filters; `deposits` is a dedicated export key backed by the payment export read model and `payments.export`.
+  - Legacy flat report exports `/api/Exports/revenue-flat` and `/api/Exports/deposit-flat` use `payments.export`, the same Reports filter contract, and one-sheet `Sheet1` workbook templates matching the user-provided TDental-style samples.
   - Overview Zone 1 and Zone 3 searches must be accent-insensitive so unaccented input matches Vietnamese names and labels with diacritics.

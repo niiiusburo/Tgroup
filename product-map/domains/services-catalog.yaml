@@ -78,6 +78,7 @@ notes:
   - STALE/DEAD: api/src/routes/services.js queries public.services which does not exist.
   - STALE/DEAD: website/src/lib/api/services.ts exports dead wrappers.
   - Current routing: /service-catalog renders ServiceCatalog, /services renders patient treatment records, and /website renders the Website CMS page.
+  - Overview Today's Services reads /api/SaleOrderLines with current-day date and optional location filters; service-line date/location/customer/doctor fields must fall back to parent saleorders when migrated or locally-created line rows are sparse.
   - /api/ProductCategories groups duplicate migrated category UUIDs by display name for the catalog sidebar; /api/Products category filtering expands the selected display group to all matching category UUIDs.
   - Service catalog and patient treatment searches must remain accent-insensitive for Vietnamese service, category, doctor, and customer names.
   - Customer profile service edits patch the parent sale order but must also persist rendered line fields such as `saleorderlines.productuomqty`, `tooth_numbers`, and `tooth_comment` because the `Phiếu khám` table is sourced from `/api/SaleOrders/lines`.

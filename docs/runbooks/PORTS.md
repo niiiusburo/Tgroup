@@ -18,8 +18,18 @@
 | Website/API through nginx | `https://nk.2checkin.com` |
 | API path | `https://nk.2checkin.com/api` |
 
+## Staging
+
+| Surface | URL |
+|---|---|
+| Website/API through nginx | `https://nk2.2checkin.com` |
+| API path | `https://nk2.2checkin.com/api` |
+
 ## Rules
 
+- `check live` means production `nk.2checkin.com`.
+- `check stage` means staging `nk2.2checkin.com`.
+- `check local` means this local checkout on the user's computer.
 - Before trusting a browser result, check which process owns the port.
 - Do not claim local verification from a stale dev server.
 - If a port changes, update E2E scripts/config, docs, and runbooks together.

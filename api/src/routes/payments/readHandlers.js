@@ -23,6 +23,13 @@ function mapPaymentRow(row, allocations = []) {
     locationName: row.company_name || '',
     createdAt: row.created_at,
     allocations,
+    proof: row.proof_id ? {
+      id: row.proof_id,
+      proofImageBase64: row.proof_image,
+      qrDescription: row.qr_description ?? null,
+      confirmedAt: row.proof_confirmed_at ?? null,
+      confirmedBy: row.proof_confirmed_by ?? null,
+    } : null,
   };
 }
 
@@ -377,10 +384,22 @@ async function getPaymentById(req, res) {
               p.amount, p.method, p.notes, p.created_at,
               payment_date, reference_code, status, deposit_used, cash_amount, bank_amount,
               receipt_number, deposit_type,
-              company.name AS company_name
+              company.name AS company_name,
+              proof.id AS proof_id,
+              proof.proof_image,
+              proof.qr_description,
+              proof.confirmed_at AS proof_confirmed_at,
+              proof.confirmed_by AS proof_confirmed_by
        FROM payments p
        LEFT JOIN partners partner ON partner.id = p.customer_id
        LEFT JOIN companies company ON company.id = partner.companyid
+       LEFT JOIN LATERAL (
+         SELECT pp.id, pp.proof_image, pp.qr_description, pp.confirmed_at, pp.confirmed_by
+         FROM dbo.payment_proofs pp
+         WHERE pp.payment_id = p.id
+         ORDER BY pp.created_at DESC NULLS LAST, pp.id DESC
+         LIMIT 1
+       ) proof ON TRUE
        WHERE p.id = $1`,
       [id]
     );

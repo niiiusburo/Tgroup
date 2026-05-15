@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 /**
  * Auth setup — runs before all other E2E tests.
- * Logs in as admin and saves storage state (localStorage token)
+ * Logs in as admin with Remember Me and saves storage state (localStorage token)
  * so subsequent tests skip the login flow entirely.
  */
 test('authenticate as admin', async ({ page }) => {
@@ -14,8 +14,9 @@ test('authenticate as admin', async ({ page }) => {
   await expect(emailInput).toBeVisible({ timeout: 10_000 });
 
   // Fill and submit login
-  await emailInput.fill('t@clinic.vn');
-  await page.locator('#password').fill('123123');
+  await emailInput.fill('tg@clinic.vn');
+  await page.locator('#password').fill('123456');
+  await page.locator('#rememberMe').setChecked(true);
   await page.locator('button[type="submit"]').click();
 
   // Wait for auth to complete — the login form disappears and dashboard renders

@@ -55,4 +55,45 @@ function requirePermission(permission) {
   };
 }
 
-module.exports = { requireAuth, requirePermission };
+/**
+ * requireAnyPermission(permissions) middleware factory
+ *
+ * Allows access if the user has '*' or ANY of the provided permission strings.
+ * Useful for shared read surfaces (e.g., customer picker used by appointments).
+ */
+function requireAnyPermission(permissions) {
+  const required = Array.isArray(permissions) ? permissions.filter(Boolean) : [];
+  if (required.length === 0) {
+    throw new Error('requireAnyPermission requires a non-empty permissions array');
+  }
+
+  return async (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'No token' });
+    }
+    try {
+      const { employeeId } = req.user;
+      const { effectivePermissions } = await resolveEffectivePermissions(employeeId);
+
+      if (effectivePermissions.length === 0) {
+        return res.status(403).json({ error: 'No permission assignment found' });
+      }
+
+      if (effectivePermissions.includes('*')) {
+        return next();
+      }
+
+      const ok = required.some((p) => effectivePermissions.includes(p));
+      if (!ok) {
+        return res.status(403).json({ error: `Permission denied (any): ${required.join(', ')}` });
+      }
+
+      next();
+    } catch (err) {
+      console.error('requireAnyPermission error:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+}
+
+module.exports = { requireAuth, requirePermission, requireAnyPermission };

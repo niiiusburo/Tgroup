@@ -73,6 +73,191 @@
     ]
   },
   {
+    "version": "0.31.29",
+    "date": "2026-05-09",
+    "commit": "d0989c87",
+    "highlights": "Reports can now export legacy flat revenue and deposit Excel workbooks from the shared Reports Export Center.",
+    "sections": [
+      {
+        "title": "Reports",
+        "items": [
+          "Added Báo cáo doanh thu and Báo cáo cọc tiền as flat one-sheet Excel export choices that match the legacy sample templates.",
+          "The new exports use the shared report filters for date range, custom time range, branch, and doctor."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added backend coverage for exact workbook headers, widths, filenames, previews, filters, and row limits.",
+          "Added Reports UI coverage for the new export choices and searchable doctor filter."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.31.25",
+    "date": "2026-05-09",
+    "commit": "645db57e",
+    "highlights": "Calendar Excel export now works for normal browser sessions after the Remember Me token-storage change.",
+    "sections": [
+      {
+        "title": "Calendar Export",
+        "items": [
+          "Appointment Excel downloads now use the shared auth token source, so staff signed in with a session token can download from /calendar.",
+          "The calendar export regression test now matches the current date-range preset and appointment workbook columns."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added focused coverage proving Excel downloads send sessionStorage auth tokens."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.31.24",
+    "date": "2026-05-09",
+    "commit": "77ac2ab5",
+    "highlights": "Face ID quick scan now waits for a stronger face sample before recognition.",
+    "sections": [
+      {
+        "title": "Face ID",
+        "items": [
+          "Quick Face ID keeps the camera open on low-quality or too-small faces instead of recognizing from weak samples.",
+          "The capture overlay now shows scanning, low quality, or face detected feedback without exposing internal auto-capture wording."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added FaceCaptureModal regression coverage for medium-quality frames, tiny detected faces, and quiet high-quality capture."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.31.23",
+    "date": "2026-05-09",
+    "commit": "da8a7d6e849f8173aa3d48f1d2b41aa27c657de4",
+    "highlights": "Login now supports Remember Me (60 days) and refreshes the session while you stay signed in.",
+    "sections": [
+      {
+        "title": "Auth",
+        "items": [
+          "Added a Remember Me checkbox on the login screen to keep staff signed in for 60 days on the same device.",
+          "When Remember Me is enabled, the app refreshes the session timer while the user stays logged in."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.31.22",
+    "date": "2026-05-09",
+    "commit": "PLACEHOLDER",
+    "highlights": "Face ID no-match rescue now guides staff through straight, left, and right captures before saving customer samples.",
+    "sections": [
+      {
+        "title": "Face ID",
+        "items": [
+          "Quick Face ID now asks staff to capture three face angles when recognition cannot match a customer and staff select a profile to register.",
+          "The rescue flow saves each guided pose as a separate no-match rescue sample instead of saving only the failed scan frame."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Updated the Global Face ID regression test to prove no-match rescue registers three guided samples before navigating to the customer profile."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.31.21",
+    "date": "2026-05-09",
+    "commit": "PLACEHOLDER",
+    "highlights": "Overview Today's Services now loads real same-day treatment activity from sale order lines instead of showing the placeholder.",
+    "sections": [
+      {
+        "title": "Overview",
+        "items": [
+          "Today's Services / Activity now fetches current-day service rows from /api/SaleOrderLines and renders service, patient, quantity, doctor, amount, and status.",
+          "The widget search is accent-insensitive across service, patient, phone/code, doctor, and order reference."
+        ]
+      },
+      {
+        "title": "API",
+        "items": [
+          "/api/SaleOrderLines now accepts snake_case and camelCase date/location/customer filters and falls back to parent sale order fields when service-line rows are sparse."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added focused API, hook, and component tests for the Today's Services activity feed."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.31.20",
+    "date": "2026-05-09",
+    "commit": "PLACEHOLDER",
+    "highlights": "Calendar now paints appointment pages progressively and wraps the Day/Week/Month controls correctly on iPad widths.",
+    "sections": [
+      {
+        "title": "Calendar",
+        "items": [
+          "Calendar appointment data now renders after each paginated API page arrives instead of waiting for the full day, week, or month range to finish loading.",
+          "Day view appointment cards now mount in batches so large same-day schedules can paint before every card is rendered.",
+          "Closed smart filters and idle search suggestions no longer recompute over the full appointment range during normal calendar viewing."
+        ]
+      },
+      {
+        "title": "Tablet Layout",
+        "items": [
+          "Day, Week, and Month controls now use a three-column tablet-safe segmented layout.",
+          "Calendar date navigation and action controls wrap into stable rows on iPad portrait and landscape widths."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added pagination coverage proving calendar pages are reported as they arrive.",
+          "Stabilized the calendar click test around a fixed timezone date."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.31.19",
+    "date": "2026-05-08",
+    "commit": "PLACEHOLDER",
+    "highlights": "Payment receipt proofs can be confirmed with the new payment.confirm permission, and cash-flow summary separates confirmed vs unconfirmed money-in.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Added payment.confirm permission and receipt-proof confirmation endpoint: POST /api/Payments/:id/proof/confirm.",
+          "Payment UI now lets permitted staff view receipt proofs and confirm them."
+        ]
+      },
+      {
+        "title": "Reports",
+        "items": [
+          "Cash-flow summary response includes moneyInConfirmed and moneyInUnconfirmed; historical rows default to unconfirmed when no confirmed proof exists."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added backend route + behavior tests for receipt confirmation and extended cash-flow tests for confirmed/unconfirmed grouping.",
+          "Added frontend test ensuring confirm UI is gated by payment.confirm."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.31.18",
     "date": "2026-05-08",
     "commit": "cdbda61f",
@@ -946,7 +1131,7 @@
       {
         "title": "Bug Fixes",
         "items": [
-          "Permission Board employee search now matches login email addresses such as t@clinic.vn.",
+          "Permission Board employee search now matches login email addresses.",
           "Employee permission cards now show email addresses so admin-created accounts are easier to identify."
         ]
       },

@@ -10,6 +10,7 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+<!-- ===== Local branch plan (feature/permission-domain-repair) =====
 # TestSprite Plan: Permission Domain Audit And Matrix Repair
 
 Feature/edit name: Permission Domain Audit, Registry Parity, Permission Matrix Repair, and RBAC Regression Coverage
@@ -86,6 +87,385 @@ TestSprite execution items:
 - [ ] PENDING: Verify export preview/download endpoints reject users without the matching export permission and that those permissions appear in the matrix.
 - [ ] PENDING: Attempt a failed permission update and verify the UI shows an error without optimistic state corruption.
 - [ ] PENDING: Verify a location-scoped employee card shows primary branch plus extra scoped branches and matches location filters.
+<!-- ===== NK plan (fix/remember-me-60d) =====
+# TestSprite Plan: TDental Deposit Gap Audit
+
+Feature/edit name: TDental Deposit Gap Audit
+
+Changed URLs and API routes:
+- No frontend URLs changed.
+- No API routes changed.
+- Read-only local database inspection against `dbo.payments`, `dbo.payment_allocations`, and `dbo.partners`.
+- Read-only export inspection from `/Users/thuanle/Downloads/TamDentistExport3`.
+
+Affected data flows:
+- Compares TDental `PartnerAdvances` confirmed advances/refunds against local posted deposit/refund/usage rows.
+- Compares TDental posted `AccountPayments` by source UUID against local `dbo.payments.id`.
+- Preserves sale-order relation context so deposit candidates are not silently treated as already-safe imports.
+
+User roles:
+- Data/Money audit owner.
+- QA/Verification reviewer.
+
+Happy paths:
+- [ ] PENDING: Run `node scripts/audit-tdental-deposit-gaps.js --export-dir /Users/thuanle/Downloads/TamDentistExport3` and confirm it produces markdown, JSON, and CSV reports under `reports/`.
+- [ ] PENDING: Confirm the report shows source confirmed PartnerAdvances totals, local posted deposit totals, missing AccountPayments, and top customer gaps.
+- [ ] PENDING: Open the customer-level CSV and verify high-gap rows include partner ID, ref, name, local-customer existence, source totals, local totals, and gap totals.
+
+Edge cases:
+- [ ] PENDING: Missing export folder should fail before querying or mutating data.
+- [ ] PENDING: Malformed CSV quote lines should still parse through the existing TDental import CSV reader.
+- [ ] PENDING: Customers absent from the local DB should be marked `local_customer_exists=no` rather than merged by phone or name.
+
+Regressions:
+- [ ] PENDING: The script must not INSERT, UPDATE, DELETE, TRUNCATE, import, sync, or call VPS endpoints.
+- [ ] PENDING: Existing payment routes and frontend payment/deposit screens remain untouched.
+
+Setup data and login state:
+- Requires the real local app database on `127.0.0.1:5433` with database `tdental_demo`.
+- Do not use Docker demo database `127.0.0.1:55433` for this audit.
+- Requires the TDental export folder at `/Users/thuanle/Downloads/TamDentistExport3`.
+- No browser login state is needed.
+
+---
+
+# TestSprite Plan: Reports Export Center
+
+Feature/edit name: Reports Export Center
+
+Changed URLs and API routes:
+- `/reports`
+- `/reports/dashboard`
+- `/reports/revenue`
+- `/reports/appointments`
+- `/reports/services`
+- `POST /api/Exports/appointments/preview`
+- `POST /api/Exports/appointments/download`
+- `POST /api/Exports/services/preview`
+- `POST /api/Exports/services/download`
+- `POST /api/Exports/payments/preview`
+- `POST /api/Exports/payments/download`
+- `POST /api/Exports/deposits/preview`
+- `POST /api/Exports/deposits/download`
+- `POST /api/Exports/revenue-flat/preview`
+- `POST /api/Exports/revenue-flat/download`
+- `POST /api/Exports/deposit-flat/preview`
+- `POST /api/Exports/deposit-flat/download`
+
+Affected data flows:
+- Reports now expose a shared Excel Export Center for appointments, services/treatments, payments, deposits, legacy flat revenue, and legacy flat deposit reports.
+- Export filters include date range, Today preset, optional custom time window, location, and optional doctor.
+- Location and doctor export filters use matching searchable dropdowns; location filters live by branch name and doctor filters live by accent-insensitive doctor name or employee code.
+- Payment exports use the payment category read model so service payments stay separate from deposits.
+- Deposit exports use a dedicated `deposits` export key with deposit-specific workbook columns.
+- Legacy flat revenue exports use posted service payment allocations, prorate multi-allocation payment method amounts, and write one `Sheet1` workbook with the exact sample columns.
+- Legacy flat deposit exports include posted customer deposit top-ups only and write one `Sheet1` workbook with the exact sample columns.
+
+User roles:
+- Authenticated staff with `reports.view` can open reports.
+- Staff also need the underlying export permission for the selected dataset: `appointments.export`, `services.export`, or `payments.export`.
+
+Happy paths:
+- [ ] PENDING: Open `/reports`, click Today, choose Payments, preview, then download Excel for today's payments.
+- [ ] PENDING: Choose Deposits, preview, then download Excel for today's deposits.
+- [ ] PENDING: Choose Báo cáo doanh thu, preview, then download Excel and confirm it has only `Sheet1` with headers `Cơ sở` through `Trợ lý bác sĩ`.
+- [ ] PENDING: Choose Báo cáo cọc tiền, preview, then download Excel and confirm it has only `Sheet1` with headers `Cơ sở` through `CSKH`.
+- [ ] PENDING: Choose Appointments with a doctor and location filter, preview, then download Excel.
+- [ ] PENDING: Choose Services / treatments with a custom time window and location filter, preview, then download Excel.
+- [ ] PENDING: Type a doctor name or employee code into the doctor dropdown and confirm the matching doctor options populate immediately.
+- [ ] PENDING: Type a branch name into the location dropdown and confirm the matching location options populate immediately with the same visual design as the doctor dropdown.
+- [ ] PENDING: Open each workbook and confirm `Data`, `Summary`, and `Filters` sheets exist and the filters sheet records date, time, location, and doctor values.
+
+Edge cases:
+- [ ] PENDING: Use a time window with no matching records and confirm the preview shows zero rows without crashing.
+- [ ] PENDING: Use a location + doctor combination with no matches and confirm each dataset returns a safe empty preview.
+- [ ] PENDING: Search the doctor dropdown without Vietnamese accents and confirm accented doctor names still match.
+- [ ] PENDING: Search the location dropdown without Vietnamese accents and confirm accented branch names still match.
+- [ ] PENDING: Verify deposits do not appear in the Payments export and payments do not appear in the Deposits export.
+- [ ] PENDING: Verify customer deposit top-ups appear in Báo cáo cọc tiền but refunds, deposit usage, and service payments do not.
+- [ ] PENDING: Verify Báo cáo doanh thu excludes customer deposit top-ups, refunds, deposit usage-only rows, and voided payments.
+- [ ] PENDING: Verify a service payment split across multiple treatment invoices is prorated by allocation and does not double count cash, bank, or deposit-used amounts.
+- [ ] PENDING: Verify row-limit behavior still blocks oversized downloads.
+
+Regressions:
+- [ ] PENDING: Existing `/calendar`, `/services`, and `/payment` export buttons still preview and download.
+- [ ] PENDING: Existing employee revenue Excel export on `/reports/revenue` still works.
+- [ ] PENDING: Reports dashboard and subpages still render with global filters.
+
+Setup data and login state:
+- Use an authenticated admin session with `reports.view`, `appointments.export`, `services.export`, and `payments.export`.
+- Prefer a test date with at least one payment, deposit, appointment, and treatment row; otherwise use the zero-row edge-case checks.
+- For legacy flat report workbook checks, use rows with assigned Sale online, CSKH, doctor, assistant, and dental aide when available.
+
+---
+
+# TestSprite Plan: Calendar Excel Session Token Download
+
+Feature/edit name: Calendar Excel Session Token Download
+
+Changed URLs and API routes:
+- `/calendar`
+- `POST /api/Exports/appointments/download`
+- `POST /api/Exports/appointments/preview`
+
+Affected data flows:
+- Calendar appointment Excel downloads now read the same auth token source as normal API calls.
+- Staff logged in without Remember Me use `sessionStorage`; staff logged in with Remember Me use `localStorage`.
+- The appointment export workbook still comes from the backend export registry and includes current date/search/location/status filters.
+
+User roles:
+- Admin or clinic staff with `appointments.export`.
+- Staff without `appointments.export` should still not see or use the export action.
+
+TestSprite execution items:
+- [ ] PENDING: Log in without Remember Me, open `/calendar`, choose `Xuất dữ liệu` -> `Xuất Excel`, select `1 ngày`, apply, and verify an `.xlsx` download starts.
+- [ ] PENDING: Log in with Remember Me, repeat the same `/calendar` Excel download and verify it still starts.
+- [ ] PENDING: Use `Xem trước số dòng / bộ lọc` on `/calendar` and confirm preview still calls `POST /api/Exports/appointments/preview` successfully.
+- [ ] PENDING: Open the downloaded workbook and confirm `Data`, `Summary`, and `Filters` sheets exist with appointment headers including `Phụ tá` and `Trợ lý BS`.
+- [ ] PENDING: Verify a user without `appointments.export` cannot trigger the calendar export.
+
+Edge cases:
+- Expired or missing token should show the existing export error and must not silently download an empty file.
+- Large date ranges should still honor the backend row limit and return the existing row-limit message.
+- Date range presets and custom dates should both keep the selected filters.
+
+Regressions:
+- Customer, services, payment, service-catalog, and employee revenue exports still send auth headers.
+- Normal API calls through `apiFetch()` still read the same token source.
+- `/calendar` search, location, and single-status filters still flow into the appointment export request.
+
+Setup data and login state:
+- Use an authenticated local admin session for local checks.
+- For live confirmation, use the gitignored `.agents/live-site.env` account on `https://nk.2checkin.com` and do not record credentials.
+
+---
+
+# TestSprite Plan: Hosoonline Permission Contract Repair
+
+Feature/edit name: Hosoonline Permission Contract Repair
+
+Changed URLs and API routes:
+- `/customers/:id`
+- `/permissions`
+- `POST /api/ExternalCheckups/:customerCode/patient`
+- `POST /api/ExternalCheckups/:customerCode/health-checkups`
+
+Affected data flows:
+- Hosoonline patient creation now checks `external_checkups.create`.
+- Hosoonline image/checkup upload remains protected by `external_checkups.upload`.
+- Deployment-applied permission seed grants patient creation to admin/clinic-manager roles and upload to admin/assistant roles.
+
+User roles:
+- Admin or Clinic Manager with `external_checkups.create`.
+- Dental Assistant/Assistant with `external_checkups.upload`.
+- Dentist/Receptionist with view-only Hosoonline access.
+
+TestSprite execution items:
+- [ ] PENDING: On `/customers/:id`, verify a create-only admin/clinic-manager user can create a missing Hosoonline patient without needing `external_checkups.upload`.
+- [ ] PENDING: On `/customers/:id`, verify a user with `external_checkups.upload` can see the add-checkup upload action and submit to `POST /api/ExternalCheckups/:customerCode/health-checkups`.
+- [ ] PENDING: On `/customers/:id`, verify Dentist/Receptionist-style view-only users can see Hosoonline images but cannot create patients or upload checkups.
+- [ ] PENDING: On `/permissions`, verify `external_checkups.create` and `external_checkups.upload` are visible as separate permission options.
+
+Edge cases:
+- Existing patients should not show the create-patient action even when the user has `external_checkups.create`.
+- Missing patients should not show upload until after the patient exists or the customer lookup refreshes.
+- Users with wildcard `*` still pass both checks.
+
+Regressions:
+- `GET /api/ExternalCheckups/:customerCode` remains protected by `external_checkups.view`.
+- `POST /api/ExternalCheckups/:customerCode/health-checkups` still requires `external_checkups.upload`.
+- Existing payment permission split remains unchanged by the Hosoonline seed.
+
+Setup data and login state:
+- Use an authenticated admin session and at least one non-admin clinic role for permission comparison.
+- Use a customer code with a missing Hosoonline patient and one customer code with existing Hosoonline images.
+
+---
+
+# TestSprite Plan: Face ID Quality-Gated Quick Scan
+
+Feature/edit name: Face ID Quality-Gated Quick Scan
+
+Changed URLs and API routes:
+- Global header Face ID button on authenticated app pages
+- `POST /api/face/recognize` is called only after the browser capture reaches the hardened quality gate
+
+Affected data flows:
+- FaceCaptureModal analyzes the live camera stream before sending any image for recognition.
+- Medium-quality frames and tiny detected faces keep the camera open and show low-quality feedback.
+- High-quality, sufficiently large faces still auto-submit for recognition without showing internal auto-capture copy.
+- No-match recognition continues to show the customer search/rescue popover so staff can register straight, left, and right samples.
+
+User roles:
+- Any authenticated staff who can see the global header Face ID button.
+- Staff registering a no-match face to a customer through the quick-scan rescue flow.
+
+TestSprite execution items:
+- [ ] PENDING: Open the Face ID quick scan and verify a low-quality or poorly framed face keeps the modal open with low-quality feedback.
+- [ ] PENDING: Present a clear, close face and verify recognition runs and then shows either a match, possible matches, or the no-match registration search.
+- [ ] PENDING: Verify the overlay does not display internal "auto capturing" copy while it is collecting the final frame.
+- [ ] PENDING: From a no-match result, search a customer and verify the three-angle guided enrollment still starts.
+
+Edge cases:
+- Native FaceDetector unavailable: use frame quality only but still require the hardened quality percentage.
+- Native FaceDetector sees a very small face: do not recognize until the face fills enough of the frame.
+- Camera permission denied: existing camera error message remains visible.
+
+---
+
+# TestSprite Plan: Calendar Progressive Loading And iPad Toolbar Wrap
+
+Feature/edit name: Calendar Progressive Loading and iPad View Controls
+
+Changed URLs and API routes:
+- `/calendar`
+- `GET /api/Appointments` with `calendarMode=true`, `includeCounts=false`, date range filters, and paginated offsets.
+
+Affected data flows:
+- Calendar appointment pages render incrementally as each paginated API page arrives instead of waiting for the full day/week/month range.
+- Day view appointment cards mount in batches so large same-day schedules can paint before every card is rendered.
+- Closed smart filter drawer no longer recalculates doctor/status/color summaries for every appointment while staff are only viewing the calendar.
+- Calendar search suggestions only build after staff type at least two characters, preserving accent-insensitive matching through `normalizeText()`.
+- Day/Week/Month controls, date navigation, search, filter, export, and quick-add controls wrap into tablet-safe rows on iPad widths.
+
+User roles:
+- Any authenticated staff with `appointments.view`.
+- Staff with `appointments.add` should still see Quick Add.
+- Staff with `appointments.edit` should still open/edit appointment cards.
+- Staff with `appointments.export` should still see export actions.
+
+TestSprite execution items:
+- [ ] PENDING: Open `/calendar` as an appointment-view user and verify the calendar paints after the first appointment page while additional pages continue loading.
+- [ ] PENDING: Switch Day, Week, and Month views on iPad portrait and iPad landscape widths; verify the Day/Week/Month segmented control wraps cleanly and no label is clipped.
+- [ ] PENDING: On iPad widths, verify the date navigator, Today button, search, export, filter, and Quick Add controls do not overlap.
+- [ ] PENDING: Open the smart filter drawer after appointments load and verify doctor/status/color counts are available and Apply/Clear still work.
+- [ ] PENDING: Type an unaccented customer search term on `/calendar` and verify matching Vietnamese names/codes still appear.
+- [ ] PENDING: Click an appointment card as a user with `appointments.edit` and verify the edit form opens.
+
+Edge cases:
+- Empty date range: first page has no appointments and the calendar exits loading with the empty state.
+- Exact full API page: pagination must continue until the next short or empty page.
+- Rapid date/view switches: stale in-flight pages must not overwrite the newest selected calendar range.
+
+---
+
+# TestSprite Plan: Today's Services Activity Feed
+
+Feature/edit name: Today's Services Activity Feed
+
+Changed URLs and API routes:
+- `/` (Overview, Today's Services / Activity panel)
+- `GET /api/SaleOrderLines` (current-day service-line feed with date/location fallbacks)
+
+Affected data flows:
+- Overview loads sale order lines for the current clinic day using `dateFrom/dateTo` and selected location.
+- Sparse `saleorderlines` rows now fall back to parent `saleorders` for date, location, patient, doctor, status, and totals.
+- The panel search filters service, patient, phone/code, doctor, and order reference with accent-insensitive matching.
+
+User roles:
+- Any authenticated staff who can open `/` with `overview.view`; data still requires an authenticated API session.
+- Staff adding treatments through `/services` or customer records should see same-day services appear on Overview after refresh/focus.
+
+TestSprite execution items:
+- [ ] PENDING: Log in as admin/reception staff, open `/`, and verify Today's Services / Activity shows service rows for today.
+- [ ] PENDING: Create or edit a treatment dated today, return to `/`, and verify the new service appears without using mock data.
+- [ ] PENDING: Switch branch/location filter and verify only matching location services remain.
+- [ ] PENDING: Search with accent-insensitive text such as `tay trang` for `Tẩy trắng` and verify matching rows remain.
+- [ ] PENDING: Verify empty state appears when no services exist and filtered-empty state appears when search hides existing rows.
+
+Edge cases:
+- Service line has null `date`, `companyid`, `orderpartnerid`, or `employeeid`; Overview should still populate from parent sale order.
+- Cancelled service rows should show a cancelled status badge, not disappear silently.
+- API error should show the table error state instead of the old placeholder copy.
+
+---
+
+# TestSprite Plan: Payment Receipt Confirmation
+
+Feature/edit name: Payment Receipt Confirmation (Confirm Proof)
+
+Changed URLs and API routes:
+- `/payment`
+- `GET /api/Payments/:id` (now includes latest receipt proof metadata)
+- `POST /api/Payments/:id/proof/confirm`
+- `POST /api/Reports/cash-flow/summary` (adds confirmed vs unconfirmed money-in fields)
+
+Affected data flows:
+- Payment proof images are uploaded into `dbo.payment_proofs` and can be confirmed via `confirmed_at/confirmed_by`.
+- Cash-flow summary reports money-in split by whether a confirmed receipt proof exists for the payment.
+- Historical rows default to **unconfirmed** when there is no confirmed proof.
+
+User roles:
+- Super Admin: can confirm receipt proofs.
+- Dentist: can view payments and confirm receipt proofs (no add/refund/void unless separately granted).
+- Admin: must NOT be able to confirm receipt proofs.
+
+TestSprite execution items:
+- [ ] PENDING: With Dentist (payment.view + payment.confirm only), open `/payment`, view a payment receipt proof, and confirm it successfully.
+- [ ] PENDING: With Admin (no payment.confirm), open `/payment` and verify the confirm action is hidden and calling `POST /api/Payments/:id/proof/confirm` returns 403.
+- [ ] PENDING: Confirming an already-confirmed proof returns success with alreadyConfirmed=true.
+- [ ] PENDING: Call `POST /api/Reports/cash-flow/summary` and verify `moneyInConfirmed` + `moneyInUnconfirmed` equals `moneyIn`.
+
+Edge cases:
+- Payment is `voided`: receipt confirmation should be rejected with a clear conflict.
+- Payment has no proof uploaded: confirm endpoint returns 404 and UI shows "no proof" state.
+
+---
+
+# TestSprite Plan: Old Payment System Restore
+
+Feature/edit name: Old Payment System Restore
+
+Changed URLs and API routes:
+- `/payment`
+- `/customers/:id`
+- `POST /api/Payments`
+- `GET /api/Payments`
+- `GET /api/Payments/deposits`
+- `GET /api/Payments/deposit-usage`
+- `DELETE /api/Payments/:id`
+- `POST /api/Payments/:id/void`
+
+Affected data flows:
+- Deposit top-up creation now stores explicit `deposit_type=deposit` rows with `payment_category=deposit`.
+- Existing rows with `deposit_type IN ('deposit', 'refund')` are backfilled into the deposit category.
+- Refund deposit rows continue to appear in the deposit section.
+- Regular payment rows and deposit-usage rows continue to stay out of the deposit top-up list unless explicitly categorized as deposits.
+- Admin and Super Admin roles regain `payment.void` for old cancel/delete payment behavior.
+
+User roles:
+- Admin or Super Admin with `payment.view`, `payment.add`, `payment.refund`, and `payment.void`.
+- Clinic staff with `payment.view` and `payment.add` but without `payment.void`.
+
+TestSprite execution items:
+- [ ] PENDING: On `/payment`, create or inspect a deposit top-up and verify it appears in the deposit section, not the normal payment section.
+- [x] PASS: On `/customers/:id`, submit a safe service payment from the customer profile service/records area - live disposable customer `T249444`, service order `SO-2026-0247`, and `POST /api/Payments` created payment `bccf3e81-8e68-4ad2-88ce-036c5f3befcd` with allocations, then cleanup removed it.
+- [x] PASS: On `/customers/:id`, submit a safe customer deposit from the customer profile payment tab - live disposable customer `T249444` created deposit `17c60f8f-41cd-470d-ad03-e72c9739028d` with `depositType=deposit`, deposit-only API bucket visibility, then cleanup removed it.
+- [ ] PENDING: On `/payment`, verify a refund deposit appears in the deposit section and does not move the original deposit into the wrong table.
+- [ ] PENDING: Call `GET /api/Payments?type=payments` for a customer with deposits and verify explicit deposit rows are excluded.
+- [ ] PENDING: Call `GET /api/Payments/deposits` for the same customer and verify explicit deposit and refund rows are included.
+- [ ] PENDING: With Admin/Super Admin, verify `POST /api/Payments/:id/void` can cancel a safe test payment and reverse allocations.
+- [ ] PENDING: With a role lacking `payment.void`, verify delete/void remains blocked with 403 or hidden by UI permission checks.
+- [x] PASS: Cleanup live disposable profile data - exact test rows for payments, allocations, sale order line, sale order, and partner all returned zero rows after cleanup.
+
+Edge cases:
+- Existing live rows with `deposit_type=deposit` but `payment_category=payment`.
+- Negative refund rows with `deposit_type=refund`.
+- Deposit usage rows with `deposit_type=usage`.
+- Allocated service payments that should remain normal payments.
+- Voided payments and deleted payments must keep allocation reversal behavior intact.
+
+Regressions:
+- Payment history still loads for `payment.view`.
+- Customer profile payment/deposit sections still refresh from canonical payment APIs.
+- Customer balance still calculates from canonical `payments` and `payment_allocations`.
+- Permission board still shows `payment.void` as a destructive payment permission.
+
+Setup data and login state:
+- Use the gitignored `.agents/live-site.env` admin account for live-style admin verification.
+- Use a customer with known deposit, refund, and payment rows.
+- For destructive checks, use a disposable test payment only.
+<!-- ===== end NK plan =====
 
 ---
 
@@ -640,3 +1020,89 @@ Regressions:
 Setup data and login state:
 - Use an authenticated admin/reporting session.
 - Use a date range containing known overallocated imported sale orders such as `SO45243` or high-delta examples from the audit query.
+
+---
+
+# TestSprite Plan: Face Recognition Live Enrollment Diagnostics
+
+Feature/edit name: Face Recognition Live Enrollment Diagnostics
+
+Changed URLs and API routes:
+- `https://nk.2checkin.com/customers/c34a3df9-6751-4835-8315-b432003b7fbc`
+- `GET /api/health`
+- `GET /api/Partners?search=T163752`
+- `GET /api/face/status/:partnerId`
+- `POST /api/face/recognize`
+- `POST /api/face/register`
+
+Affected data flows:
+- Customer profile Face ID badge reads `dbo.partners.face_registered_at` and `dbo.customer_face_embeddings`.
+- Quick face scan sends a live camera frame to `POST /api/face/recognize`, which compares it against active stored embeddings.
+- Face registration writes SFace embeddings into `dbo.customer_face_embeddings` and updates the customer profile face status.
+
+User roles:
+- Admin or clinic staff with `customers.view` can run quick scan and view customer profile status.
+- Staff with `customers.edit` can register or re-register face samples.
+
+Happy paths:
+- Open Eddie Munedane `T163752` and confirm the profile shows the Face ID badge.
+- Confirm `GET /api/face/status/:partnerId` reports `registered: true` with the expected sample count.
+- Capture a clear straight-on face scan and confirm it matches or shows a plausible candidate.
+- Register straight, left, and right samples and confirm a later scan matches the same profile.
+
+Edge cases:
+- Stored samples for the same customer scoring below the candidate threshold should be flagged as enrollment quality risk.
+- Low-light, angled, cropped, masked, or multi-face camera frames should fail clearly without corrupting existing samples.
+- Duplicate phone numbers across customer profiles should not affect face match identity.
+
+Regressions:
+- `/api/health` must continue reporting `faceService: true`.
+- Customer search for `T163752` must still resolve the exact profile.
+- Face recognition errors must not block unrelated customer profile workflows.
+
+Setup data and login state:
+- Use an authenticated live admin session on `https://nk.2checkin.com`.
+- Verification profile: `T163752`, partner id `c34a3df9-6751-4835-8315-b432003b7fbc`.
+- Current live evidence on 2026-05-09: two active SFace samples exist, but their stored-sample cosine similarity is only `0.6411`, below the live candidate threshold `0.85`.
+
+---
+
+# TestSprite Plan: Face ID Guided No-Match Enrollment
+
+Feature/edit name: Face ID Guided No-Match Enrollment
+
+Changed URLs and API routes:
+- Header Quick Face ID button on all authenticated pages
+- `POST /api/face/recognize`
+- `GET /api/Partners?search=...`
+- `POST /api/face/register`
+- `/customers/:id`
+
+Affected data flows:
+- A failed quick scan still runs recognition first and shows the customer search rescue panel.
+- After staff select a customer, the rescue flow opens guided profile capture and collects straight, left, and right face samples.
+- The frontend submits each guided sample to `POST /api/face/register` with source `no_match_rescue`.
+- Successful registration navigates staff to the selected customer profile.
+
+User roles:
+- Staff with `customers.view` can run Quick Face ID and search customers after no match.
+- Staff with `customers.edit` can save the guided no-match rescue samples.
+
+Happy paths:
+- Open Quick Face ID, capture a face that returns no match, search an existing customer, select the customer, and verify the button asks for 3 face angles.
+- Complete straight, left, and right captures and verify three `POST /api/face/register` calls are made for the selected customer.
+- Confirm the app navigates to `/customers/:id` after all samples save.
+
+Edge cases:
+- Staff cancels the guided enrollment modal and returns to the no-match rescue panel without losing the selected customer.
+- One of the three register calls fails; the popover should show the error and not navigate away.
+- Customer search returns duplicate phone numbers; staff must still select the intended customer by code/name before enrollment.
+
+Regressions:
+- A successful quick face match should still navigate directly to the matched customer.
+- Candidate review should still list possible matches without opening guided enrollment.
+- The existing add/edit customer face registration flow must still collect straight, left, and right samples.
+
+Setup data and login state:
+- Use an authenticated staff/admin session with `customers.view` and `customers.edit`.
+- For live regression, use `https://nk.2checkin.com` only when explicitly checking live; staging is `https://nk2.2checkin.com`, and local is this checkout.

@@ -4,21 +4,34 @@ interface ReportsFiltersProps {
   dateFrom: string;
   dateTo: string;
   companyId: string;
+  timeFrom?: string;
+  timeTo?: string;
+  doctorId?: string;
   onDateFromChange: (v: string) => void;
   onDateToChange: (v: string) => void;
   onCompanyChange: (v: string) => void;
+  onTimeFromChange?: (v: string) => void;
+  onTimeToChange?: (v: string) => void;
+  onDoctorChange?: (v: string) => void;
   locations: { id: string; name: string }[];
+  doctors?: { id: string; name: string; ref?: string | null }[];
   locationsLoading?: boolean;
+  doctorsLoading?: boolean;
 }
 
 import { useTranslation } from 'react-i18next';
 import { useTimezone } from '@/contexts/TimezoneContext';
+import { ReportDoctorCombobox, ReportFilterCombobox } from './ReportDoctorCombobox';
 
 export function ReportsFilters({
   dateFrom, dateTo, companyId,
+  timeFrom = '', timeTo = '', doctorId = 'all',
   onDateFromChange, onDateToChange, onCompanyChange,
+  onTimeFromChange, onTimeToChange, onDoctorChange,
   locations,
+  doctors = [],
   locationsLoading = false,
+  doctorsLoading = false,
 }: ReportsFiltersProps) {
   const { t } = useTranslation('reports');
   const { getToday } = useTimezone();
@@ -41,6 +54,7 @@ export function ReportsFilters({
       {/* Quick presets */}
       <div className="flex items-center gap-1 mr-2">
         {[
+          { label: t('filters.today'), from: today, to: today },
           { label: t('filters.ytd'), from: ytd, to: today },
           { label: t('filters.30d'), from: last30, to: today },
           { label: t('filters.90d'), from: last90, to: today },
@@ -78,17 +92,65 @@ export function ReportsFilters({
       </div>
 
       {/* Location filter */}
-      <select
-        value={companyId}
-        onChange={(e) => onCompanyChange(e.target.value)}
-        disabled={locationsLoading}
-        className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-      >
-        <option value="">{locationsLoading ? t('loadingLocations', 'Loading locations...') : t('allLocations', 'Tất cả chi nhánh')}</option>
-        {locations.map((loc) => (
-          <option key={loc.id} value={loc.id}>{loc.name}</option>
-        ))}
-      </select>
+      <ReportFilterCombobox
+        value={companyId || 'all'}
+        onChange={(value) => onCompanyChange(value === 'all' ? '' : value)}
+        options={locations.map((loc) => ({ id: loc.id, label: loc.name, searchText: loc.name }))}
+        loading={locationsLoading}
+        allLabel={t('allLocations', 'Tất cả chi nhánh')}
+        loadingLabel={t('loadingLocations', 'Loading locations...')}
+        searchPlaceholder={t('filters.searchLocations')}
+        noResultsLabel={t('filters.noLocationMatches')}
+        clearLabel={t('filters.clearLocation')}
+      />
+
+      {/* Optional doctor filter for report exports */}
+      {onDoctorChange && (
+        <ReportDoctorCombobox
+          value={doctorId}
+          onChange={onDoctorChange}
+          doctors={doctors}
+          loading={doctorsLoading}
+          allLabel={t('filters.allDoctors')}
+          loadingLabel={t('filters.loadingDoctors')}
+          searchPlaceholder={t('filters.searchDoctors')}
+          noResultsLabel={t('filters.noDoctorMatches')}
+          clearLabel={t('filters.clearDoctor')}
+        />
+      )}
+
+      {/* Optional time window for daily exports */}
+      {onTimeFromChange && onTimeToChange && (
+        <div className="flex items-center gap-2">
+          <input
+            type="time"
+            value={timeFrom}
+            aria-label={t('filters.timeFrom')}
+            onChange={(e) => onTimeFromChange(e.target.value)}
+            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+          />
+          <span className="text-gray-400 text-sm">→</span>
+          <input
+            type="time"
+            value={timeTo}
+            aria-label={t('filters.timeTo')}
+            onChange={(e) => onTimeToChange(e.target.value)}
+            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+          />
+          {(timeFrom || timeTo) && (
+            <button
+              type="button"
+              onClick={() => {
+                onTimeFromChange('');
+                onTimeToChange('');
+              }}
+              className="px-2.5 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-150"
+            >
+              {t('filters.allTime')}
+            </button>
+          )}
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -110,7 +172,7 @@ export function SectionCard({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-      className={`bg-white rounded-xl shadow-card overflow-hidden ${className}`}
+      className={`bg-white rounded-xl shadow-card ${className}`}
     >
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
         <h3 className="font-semibold text-gray-900">{title}</h3>

@@ -22,35 +22,46 @@ router.get('/', async (req, res) => {
       offset = '0',
       limit = '20',
       companyId = '',
+      company_id = '',
       dateFrom = '',
+      date_from = '',
       dateTo = '',
+      date_to = '',
       state = '',
       partnerId = '',
+      partner_id = '',
     } = req.query;
 
     const offsetNum = parseInt(offset, 10);
     const limitNum = Math.min(parseInt(limit, 10), 500);
+    const effectiveCompanyId = companyId || company_id;
+    const effectiveDateFrom = dateFrom || date_from;
+    const effectiveDateTo = dateTo || date_to;
+    const effectivePartnerId = partnerId || partner_id;
+    const effectiveDateSql = 'COALESCE(sol.date, so.datestart::timestamp, so.datecreated)';
+    const effectiveStateSql = "COALESCE(NULLIF(so.state, ''), sol.state)";
+    const effectiveLineTotalSql = 'COALESCE(NULLIF(sol.pricesubtotal, 0), sol.pricetotal, so.amounttotal, 0)';
 
     const conditions = ['sol.isdeleted = false'];
     const params = [];
     let paramIdx = 1;
 
     // Company filter
-    if (companyId) {
-      conditions.push(`sol.companyid = $${paramIdx}`);
-      params.push(companyId);
+    if (effectiveCompanyId) {
+      conditions.push(`COALESCE(sol.companyid, so.companyid) = $${paramIdx}`);
+      params.push(effectiveCompanyId);
       paramIdx++;
     }
 
     // Date range filter
-    if (dateFrom) {
-      conditions.push(`sol.date >= $${paramIdx}`);
-      params.push(dateFrom);
+    if (effectiveDateFrom) {
+      conditions.push(`${effectiveDateSql} >= $${paramIdx}`);
+      params.push(effectiveDateFrom);
       paramIdx++;
     }
-    if (dateTo) {
-      conditions.push(`sol.date <= $${paramIdx}`);
-      params.push(dateTo);
+    if (effectiveDateTo) {
+      conditions.push(`${effectiveDateSql} <= $${paramIdx}`);
+      params.push(effectiveDateTo);
       paramIdx++;
     }
 
@@ -59,16 +70,16 @@ router.get('/', async (req, res) => {
       const states = state.split(',').filter(s => s.trim());
       if (states.length > 0) {
         const placeholders = states.map((_, i) => `$${paramIdx + i}`).join(',');
-        conditions.push(`sol.state IN (${placeholders})`);
+        conditions.push(`${effectiveStateSql} IN (${placeholders})`);
         params.push(...states);
         paramIdx += states.length;
       }
     }
 
     // Partner filter
-    if (partnerId) {
-      conditions.push(`sol.orderpartnerid = $${paramIdx}`);
-      params.push(partnerId);
+    if (effectivePartnerId) {
+      conditions.push(`COALESCE(sol.orderpartnerid, so.partnerid) = $${paramIdx}`);
+      params.push(effectivePartnerId);
       paramIdx++;
     }
 
@@ -77,11 +88,12 @@ router.get('/', async (req, res) => {
     const rows = await query(
       `SELECT
         sol.id,
-        sol.date,
+        ${effectiveDateSql} AS date,
         sol.name,
-        sol.state,
-        sol.orderpartnerid,
+        ${effectiveStateSql} AS state,
+        COALESCE(sol.orderpartnerid, so.partnerid) AS orderpartnerid,
         p.displayname AS partner_displayname,
+        p.ref AS partner_ref,
         p.phone AS partner_phone,
         p.street AS partner_street,
         sol.orderid,
@@ -89,25 +101,27 @@ router.get('/', async (req, res) => {
         sol.productid,
         pr.name AS product_name,
         sol.diagnostic,
-        sol.employeeid,
+        COALESCE(sol.employeeid, so.doctorid) AS employeeid,
         e.name AS employee_name,
-        sol.assistantid,
+        COALESCE(sol.assistantid, so.assistantid) AS assistantid,
         a.name AS assistant_name,
         sol.counselorid,
         c.name AS counselor_name,
+        COALESCE(sol.companyid, so.companyid) AS companyid,
+        co.name AS company_name,
         pr.defaultcode AS product_defaultcode,
-        sol.productuomqty,
+        COALESCE(sol.productuomqty, so.quantity) AS productuomqty,
         sol.priceunit,
-        sol.pricesubtotal,
-        sol.pricetotal,
+        ${effectiveLineTotalSql} AS pricesubtotal,
+        COALESCE(sol.pricetotal, so.amounttotal) AS pricetotal,
         sol.toothtype,
         sol.toothrange,
         sol.discounttype,
         sol.discount,
         sol.discountfixed,
         sol.toothtypefilter,
-        sol.amountinvoiced,
-        sol.amountresidual,
+        COALESCE(NULLIF(sol.amountinvoiced, 0), so.amounttotal) AS amountinvoiced,
+        COALESCE(NULLIF(sol.amountresidual, 0), so.residual) AS amountresidual,
         sol.isactive,
         sol.datecreated,
         sol.lastupdated,
@@ -115,20 +129,24 @@ router.get('/', async (req, res) => {
         sol.isrewardline,
         sol.isglobaldiscount
       FROM saleorderlines sol
-      LEFT JOIN partners p ON p.id = sol.orderpartnerid
       LEFT JOIN saleorders so ON so.id = sol.orderid
+      LEFT JOIN partners p ON p.id = COALESCE(sol.orderpartnerid, so.partnerid)
       LEFT JOIN products pr ON pr.id = sol.productid
-      LEFT JOIN employees e ON e.id = sol.employeeid
-      LEFT JOIN employees a ON a.id = sol.assistantid
+      LEFT JOIN employees e ON e.id = COALESCE(sol.employeeid, so.doctorid)
+      LEFT JOIN employees a ON a.id = COALESCE(sol.assistantid, so.assistantid)
       LEFT JOIN employees c ON c.id = sol.counselorid
+      LEFT JOIN companies co ON co.id = COALESCE(sol.companyid, so.companyid)
       WHERE ${whereClause}
-      ORDER BY sol.date DESC
+      ORDER BY ${effectiveDateSql} DESC
       LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`,
       [...params, limitNum, offsetNum]
     );
 
     const countResult = await query(
-      `SELECT COUNT(*) AS count FROM saleorderlines sol WHERE ${whereClause}`,
+      `SELECT COUNT(*) AS count
+       FROM saleorderlines sol
+       LEFT JOIN saleorders so ON so.id = sol.orderid
+       WHERE ${whereClause}`,
       params
     );
     const totalItems = parseInt(countResult[0]?.count || '0', 10);
@@ -136,10 +154,11 @@ router.get('/', async (req, res) => {
     // Calculate aggregates
     const aggregatesResult = await query(
       `SELECT
-        COALESCE(SUM(sol.pricesubtotal), 0) AS totalrevenue,
+        COALESCE(SUM(${effectiveLineTotalSql}), 0) AS totalrevenue,
         COUNT(DISTINCT sol.orderid) AS ordercount,
         COUNT(*) AS linecount
       FROM saleorderlines sol
+      LEFT JOIN saleorders so ON so.id = sol.orderid
       WHERE ${whereClause}`,
       params
     );
@@ -156,6 +175,7 @@ router.get('/', async (req, res) => {
       orderPartnerName: row.partner_displayname,
       orderPartnerDisplayName: row.partner_displayname,
       orderPartnerPhone: row.partner_phone,
+      orderPartnerCode: row.partner_ref,
       orderPartnerAddress: row.partner_street,
       orderId: row.orderid,
       orderName: row.order_name,
@@ -170,6 +190,8 @@ router.get('/', async (req, res) => {
       assistant: row.assistant_name,
       counselorId: row.counselorid,
       counselor: row.counselor_name,
+      companyId: row.companyid,
+      companyName: row.company_name,
       productUOMQty: row.productuomqty,
       priceUnit: row.priceunit,
       priceSubTotal: row.pricesubtotal,

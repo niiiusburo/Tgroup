@@ -59,6 +59,14 @@ export function CustomerSelector({
     );
   }, [customers, searchTerm]);
 
+  const MIN_SEARCH_LENGTH = 3;
+  const trimmedSearch = searchTerm.trim();
+  const shouldShowMinHint =
+    !searching &&
+    customers.length === 0 &&
+    trimmedSearch.length > 0 &&
+    trimmedSearch.length < MIN_SEARCH_LENGTH;
+
   const updateSearchTerm = (value: string) => {
     setSearchTerm(value);
     onSearchTermChange?.(value);
@@ -127,6 +135,10 @@ export function CustomerSelector({
           <div className="max-h-48 overflow-y-auto py-1">
             {searching ?
           <div className="px-4 py-3 text-sm text-gray-400 text-center">{t('loading', 'Đang tải...')}</div> :
+            shouldShowMinHint ?
+          <div className="px-4 py-3 text-sm text-gray-400 text-center">
+                {t('minSearchLengthHint', `Nhập ít nhất ${MIN_SEARCH_LENGTH} ký tự để tìm kiếm`)}
+              </div> :
             filteredCustomers.length === 0 ?
           <div className="px-4 py-3 text-sm text-gray-400 text-center">{t('khngTmThyKhchHng')}</div> :
 

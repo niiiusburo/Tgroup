@@ -16,7 +16,7 @@ const employees: EmployeePermission[] = [
   {
     employeeId: 'admin-t',
     employeeName: 'Admin T',
-    employeeEmail: 't@clinic.vn',
+    employeeEmail: 'admin@example.test',
     groupId: 'admin',
     groupName: 'Admin',
     groupColor: '#ef4444',
@@ -55,11 +55,11 @@ describe('ArchitectureView employee search', () => {
     );
 
     fireEvent.change(screen.getByPlaceholderText('Search employees, tiers, locations...'), {
-      target: { value: 't@clinic.vn' },
+      target: { value: 'admin@example.test' },
     });
 
     expect(screen.getByText('Admin T')).toBeInTheDocument();
-    expect(screen.getByText('t@clinic.vn')).toBeInTheDocument();
+    expect(screen.getByText('admin@example.test')).toBeInTheDocument();
     expect(screen.queryByText('Front Desk')).not.toBeInTheDocument();
   });
 });

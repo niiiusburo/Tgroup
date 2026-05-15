@@ -3,6 +3,7 @@ process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret';
 jest.mock('../src/middleware/auth', () => ({
   requireAuth: (_req, _res, next) => next(),
   requirePermission: jest.fn(() => (_req, _res, next) => next()),
+  requireAnyPermission: jest.fn(() => (_req, _res, next) => next()),
 }));
 
 jest.mock('../src/db', () => ({
@@ -124,6 +125,56 @@ describe('POST /api/Payments transaction integrity', () => {
     expect(client.query.mock.calls.map(([sql]) => sql)).not.toContain('ROLLBACK');
     expect(client.release).toHaveBeenCalledTimes(1);
     expect(query.mock.calls.some(([sql]) => sql.includes('INSERT INTO payments'))).toBe(false);
+  });
+
+  it('keeps explicit deposit receipts in the deposit category', async () => {
+    const client = makeClient(async (sql) => {
+      if (sql === 'BEGIN' || sql === 'COMMIT' || sql === 'ROLLBACK') return { rows: [] };
+      if (sql.includes('INSERT INTO payments')) {
+        return {
+          rows: [{
+            id: PAYMENT_ID,
+            customer_id: CUSTOMER_ID,
+            service_id: null,
+            amount: '500000',
+            method: 'cash',
+            notes: 'deposit top-up',
+            payment_date: '2026-05-09',
+            reference_code: null,
+            status: 'posted',
+            deposit_used: '0',
+            cash_amount: '500000',
+            bank_amount: '0',
+            receipt_number: 'TUKH/2026/00001',
+            deposit_type: 'deposit',
+            payment_category: 'deposit',
+            created_at: '2026-05-09T00:00:00.000Z',
+          }],
+        };
+      }
+      throw new Error(`Unexpected client query: ${sql}`);
+    });
+
+    const res = await request(app)
+      .post('/api/Payments')
+      .send({
+        customer_id: CUSTOMER_ID,
+        amount: 500000,
+        method: 'cash',
+        notes: 'deposit top-up',
+        payment_date: '2026-05-09',
+        cash_amount: 500000,
+        deposit_type: 'deposit',
+        receipt_number: 'TUKH/2026/00001',
+      });
+
+    expect(res.status).toBe(201);
+    const insertCall = client.query.mock.calls.find(([sql]) => sql.includes('INSERT INTO payments'));
+    expect(insertCall).toBeTruthy();
+    expect(insertCall[1][11]).toBe('deposit');
+    expect(insertCall[1][13]).toBe('deposit');
+    expect(client.query.mock.calls.map(([sql]) => sql)).toContain('COMMIT');
+    expect(client.release).toHaveBeenCalledTimes(1);
   });
 
   it('rolls back the payment insert when allocation insert fails', async () => {
