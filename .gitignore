@@ -105,3 +105,5 @@ backups/*.sql.bak
 
 # Keep built contracts for local file: dependency
 !contracts/dist/
+.venv/
+__pycache__/

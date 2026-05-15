@@ -42,6 +42,7 @@ const DATA_COLUMNS = [
   { key: 'employeeTotal', header: 'Doanh thu', width: 16 },
   { key: 'paymentDate', header: 'Ngày thanh toán', width: 16 },
   { key: 'paymentReference', header: 'Mã phiếu thu', width: 18 },
+  { key: 'saleOrderCode', header: 'Mã phiếu khám', width: 18 },
   { key: 'saleOrderName', header: 'Số phiếu điều trị', width: 18 },
   { key: 'customerName', header: 'Khách hàng', width: 26 },
   { key: 'customerPhone', header: 'Số điện thoại', width: 16 },
@@ -179,7 +180,7 @@ async function getRows(filters, user) {
       COALESCE(p.payment_date, p.created_at)::date AS paymentdate,
       p.reference_code AS paymentreference,
       so.name AS saleordername,
-      COALESCE(so.code, so.name) AS treatmentcode,
+      so.code AS saleordercode,
       cust.name AS customername,
       cust.phone AS customerphone,
       COALESCE(sol.productname, sol.name, so.notes, 'Thanh toán dịch vụ') AS productname,
@@ -318,16 +319,17 @@ function populateGroupedDataSheet(worksheet, rows, filters, employeeType) {
       const detailRow = worksheet.getRow(rowIndex);
       detailRow.getCell(3).value = detail.paymentdate ? toVNDate(detail.paymentdate) : null;
       detailRow.getCell(4).value = sanitizeText(detail.paymentreference);
-      detailRow.getCell(5).value = sanitizeText(detail.saleordername || detail.treatmentcode);
-      detailRow.getCell(6).value = sanitizeText(detail.customername);
-      detailRow.getCell(7).value = sanitizeText(detail.customerphone);
-      detailRow.getCell(8).value = sanitizeText(detail.rolelabel);
-      detailRow.getCell(9).value = sanitizeText(detail.productname);
-      detailRow.getCell(10).value = toNumber(detail.paymentamount);
-      detailRow.getCell(11).value = sanitizeText(detail.companyname);
-      detailRow.getCell(12).value = METHOD_LABELS[detail.paymentmethod?.toLowerCase()] || detail.paymentmethod || '';
+      detailRow.getCell(5).value = sanitizeText(detail.saleordercode || '');
+      detailRow.getCell(6).value = sanitizeText(detail.saleordername || '');
+      detailRow.getCell(7).value = sanitizeText(detail.customername);
+      detailRow.getCell(8).value = sanitizeText(detail.customerphone);
+      detailRow.getCell(9).value = sanitizeText(detail.rolelabel);
+      detailRow.getCell(10).value = sanitizeText(detail.productname);
+      detailRow.getCell(11).value = toNumber(detail.paymentamount);
+      detailRow.getCell(12).value = sanitizeText(detail.companyname);
+      detailRow.getCell(13).value = METHOD_LABELS[detail.paymentmethod?.toLowerCase()] || detail.paymentmethod || '';
       detailRow.getCell(3).numFmt = 'dd/mm/yyyy';
-      detailRow.getCell(10).numFmt = '#,##0';
+      detailRow.getCell(11).numFmt = '#,##0';
       rowIndex += 1;
     });
   });
