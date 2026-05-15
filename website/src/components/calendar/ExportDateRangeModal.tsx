@@ -7,6 +7,7 @@ interface ExportDateRangeModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly onApply: (dateFrom: string, dateTo: string) => void;
+  readonly referenceDate?: Date;
 }
 
 type PresetKey = '1day' | '7days' | 'week' | 'month' | '3weeks' | 'all';
@@ -29,11 +30,15 @@ export function ExportDateRangeModal({
   isOpen,
   onClose,
   onApply,
+  referenceDate,
 }: ExportDateRangeModalProps) {
   const { t } = useTranslation('exports');
   const { getToday, formatDate } = useTimezone();
 
-  const today = useMemo(() => new Date(getToday() + 'T00:00:00'), [getToday]);
+  const baseDate = useMemo(() => {
+    if (referenceDate) return new Date(referenceDate);
+    return new Date(getToday() + 'T00:00:00');
+  }, [referenceDate, getToday]);
 
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -51,30 +56,30 @@ export function ExportDateRangeModal({
 
   const applyPreset = (key: PresetKey) => {
     setActivePreset(key);
-    const to = formatDate(today, 'yyyy-MM-dd');
+    const to = formatDate(baseDate, 'yyyy-MM-dd');
     let from = '';
 
     switch (key) {
       case '1day': {
-        from = formatDate(today, 'yyyy-MM-dd');
+        from = formatDate(baseDate, 'yyyy-MM-dd');
         break;
       }
       case '7days': {
-        const d = new Date(today);
+        const d = new Date(baseDate);
         d.setDate(d.getDate() - 6);
         from = formatDate(d, 'yyyy-MM-dd');
         break;
       }
       case 'week': {
-        from = formatDate(getMonday(today), 'yyyy-MM-dd');
+        from = formatDate(getMonday(baseDate), 'yyyy-MM-dd');
         break;
       }
       case 'month': {
-        from = formatDate(getMonthStart(today), 'yyyy-MM-dd');
+        from = formatDate(getMonthStart(baseDate), 'yyyy-MM-dd');
         break;
       }
       case '3weeks': {
-        const d = new Date(today);
+        const d = new Date(baseDate);
         d.setDate(d.getDate() - 20);
         from = formatDate(d, 'yyyy-MM-dd');
         break;

@@ -1,5 +1,25 @@
 [
   {
+    "version": "0.32.2",
+    "date": "2026-05-15",
+    "commit": "e2ef5a6a",
+    "highlights": "Export fixes: payments cash/bank/deposit columns, revenue exam code split, calendar export date fix",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": []
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
     "version": "0.31.18",
     "date": "2026-05-08",
     "commit": "cdbda61f",

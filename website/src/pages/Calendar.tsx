@@ -356,6 +356,7 @@ export function Calendar() {
             setPendingExportAction(null);
           }}
           onApply={handleDateRangeApply}
+          referenceDate={currentDate}
         />
       )}
 
