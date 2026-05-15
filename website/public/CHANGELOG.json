@@ -1,5 +1,43 @@
 [
   {
+    "version": "0.32.2",
+    "date": "2026-05-15",
+    "commit": "pending",
+    "highlights": "In-flight permission + face WIP captured before NK→NK2 merge.",
+    "sections": [
+      {
+        "title": "Fixed",
+        "items": [
+          "Face recognition matching: centroid-based scoring; thresholds tuned for SFace.",
+          "Frontend face capture: blur/brightness/face-size quality gates with real-time feedback.",
+          "Admin seed missing customers.hard_delete (migration 048; renumbered from 047 to avoid NK collision)."
+        ]
+      },
+      {
+        "title": "Added",
+        "items": [
+          "PermissionMemberCard component for matrix-view member detail.",
+          "Permissions tab wired into Settings page."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.1",
+    "date": "2026-05-14",
+    "commit": "48ffb6e6",
+    "highlights": "Permission matrix wired to real APIs + member assignment persistence.",
+    "sections": [
+      {
+        "title": "Fixed",
+        "items": [
+          "DELETE /Permissions/groups/:id + unassign support in PUT /employees/:id.",
+          "Permission matrix frontend wired to real APIs."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.0",
     "date": "2026-05-14",
     "commit": "14977e11",

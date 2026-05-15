@@ -10,6 +10,7 @@ import {
   getNativeFaceDetector,
   stopStream,
   type CameraFacingMode,
+  type QualityFeedback,
 } from './faceCaptureEngine';
 import { PROFILE_POSES, type DetectionState, type FaceCaptureMode } from './faceCaptureProfile';
 
@@ -35,6 +36,7 @@ export function useFaceCaptureController({
   const [facingMode, setFacingMode] = useState<CameraFacingMode>('environment');
   const [detectionState, setDetectionState] = useState<DetectionState>('scanning');
   const [detectionScore, setDetectionScore] = useState(0);
+  const [qualityFeedback, setQualityFeedback] = useState<QualityFeedback | null>(null);
   const [poseIndex, setPoseIndex] = useState(0);
   const [profileImages, setProfileImages] = useState<readonly Blob[]>([]);
 
@@ -139,6 +141,7 @@ export function useFaceCaptureController({
     autoCapturedRef.current = false;
     setDetectionState('scanning');
     setDetectionScore(0);
+    setQualityFeedback(null);
     resetGuidedCapture();
     setFacingMode((current) => (current === 'environment' ? 'user' : 'environment'));
   }, [resetGuidedCapture]);
@@ -149,6 +152,7 @@ export function useFaceCaptureController({
     let cancelled = false;
     let timeoutId: number | undefined;
     let readyFrames = 0;
+    let consecutiveIssues = 0;
     const detector = getNativeFaceDetector();
     const poseStartedAt = Date.now();
     const poseId = PROFILE_POSES[poseIndex]?.id ?? 'center';
@@ -176,16 +180,23 @@ export function useFaceCaptureController({
 
       const nextScore = Math.max(0, Math.min(1, result.score));
       setDetectionScore(nextScore);
+      if (result.feedback) {
+        setQualityFeedback(result.feedback);
+      }
 
-      if (result.ready) {
+      // Count frames with quality issues to prevent capture on transient good frames
+      const hasIssues = result.feedback ? result.feedback.issues.length > 0 : !result.ready;
+      if (result.ready && !hasIssues) {
         readyFrames += 1;
+        consecutiveIssues = 0;
         setDetectionState('detected');
       } else {
         readyFrames = 0;
+        consecutiveIssues += 1;
         setDetectionState('scanning');
       }
 
-      // Auto-capture when stable detection achieved
+      // Auto-capture only when we have stable good frames AND no quality issues
       if (readyFrames >= AUTO_CAPTURE_READY_FRAMES && !autoCapturedRef.current) {
         autoCapturedRef.current = true;
         setDetectionState('capturing');
@@ -194,11 +205,13 @@ export function useFaceCaptureController({
       }
 
       // Timeout auto-capture for profile poses after hold duration
+      // Only auto-capture on timeout if we haven't had persistent issues
       if (
         isProfileCapture &&
         !requireFaceDetection &&
         !autoCapturedRef.current &&
-        Date.now() - poseStartedAt >= PROFILE_POSE_HOLD_MS
+        Date.now() - poseStartedAt >= PROFILE_POSE_HOLD_MS &&
+        consecutiveIssues < 5
       ) {
         autoCapturedRef.current = true;
         setDetectionState('capturing');
@@ -223,6 +236,7 @@ export function useFaceCaptureController({
     isStarting,
     detectionState,
     detectionScore,
+    qualityFeedback,
     poseIndex,
     profileImages,
     isProfileCapture,

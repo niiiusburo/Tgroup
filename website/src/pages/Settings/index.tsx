@@ -6,22 +6,24 @@
  */
 
 import { useState } from 'react';
-import { Settings as SettingsIcon, SlidersHorizontal, Shield, Globe, Building2, MessageSquare } from 'lucide-react';
+import { Settings as SettingsIcon, SlidersHorizontal, Shield, Globe, Building2, MessageSquare, Key } from 'lucide-react';
 import { SystemPreferencesContent } from '@/components/settings/SystemPreferencesContent';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { IpAccessControl } from '@/components/settings/IpAccessControl';
 import { TimezoneSelector } from '@/components/settings/TimezoneSelector';
 import { BankSettingsForm } from '@/components/settings/BankSettingsForm';
 import { FeedbackAdminContent } from '@/components/settings/FeedbackAdminContent';
+import { PermissionGroupConfig } from '@/components/settings/PermissionGroupConfig';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
-type SettingsTab = 'system' | 'bank' | 'ip' | 'feedback';
+type SettingsTab = 'system' | 'bank' | 'ip' | 'feedback' | 'permissions';
 
 const ALL_TABS: { id: SettingsTab; label: string; icon: React.ReactNode; admin?: boolean }[] = [
   { id: 'system', label: 'System Settings', icon: <SlidersHorizontal className="w-5 h-5" /> },
   { id: 'bank', label: 'Bank Account', icon: <Building2 className="w-5 h-5" /> },
   { id: 'ip', label: 'IP Access Control', icon: <Shield className="w-5 h-5" /> },
+  { id: 'permissions', label: 'Permissions', icon: <Key className="w-5 h-5" />, admin: true },
   { id: 'feedback', label: 'Feedback', icon: <MessageSquare className="w-5 h-5" />, admin: true },
 ];
 
@@ -93,6 +95,7 @@ export function Settings() {
           {activeTab === 'system' && <SystemPreferencesContent canEdit={canEditSettings} />}
           {activeTab === 'bank' && <BankSettingsForm canEdit={canEditSettings} />}
           {activeTab === 'ip' && <IpAccessControl canEdit={canEditSettings} />}
+          {activeTab === 'permissions' && <PermissionGroupConfig />}
           {activeTab === 'feedback' && <FeedbackAdminContent canEdit={canEditFeedback} />}
         </div>
       </div>

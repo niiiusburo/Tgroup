@@ -140,6 +140,29 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.2] — 2026-05-15
+### Fixed
+- Face recognition matching accuracy — @agent — Centroid-based matching replaces best-sample scoring; all customer embeddings are averaged into a single representative vector, reducing variance from single bad samples.
+- Face recognition thresholds tuned for SFace real-world performance — @agent — Auto-match 0.95→0.72, candidate 0.85→0.58, margin 0.05→0.08; calibrated from SFace cosine similarity distribution on production data.
+- Frontend face capture quality checks — @agent — Added Laplacian blur detection, brightness range validation, face size enforcement (≥12% of frame); prevents capturing blurry/dark/distant photos that produce poor embeddings.
+- Face capture UX feedback — @agent — Real-time quality messages ("Too dark", "Too blurry", "Move closer", etc.) replace generic "Scanning"; CSS blur removed from video preview to avoid user confusion.
+- Face capture auto-capture stability — @agent — Consecutive issue counter prevents capture on transient good frames; requires 4 stable ready frames (was 6) with 200ms interval (was 260ms).
+### Changed
+- `faceCaptureEngine.ts` — `QualityFeedback` type exported; `analyzeFrame` returns feedback issues array.
+- `faceCaptureModal.tsx` — Dynamic feedback banner with color-coded status (green/amber/red).
+- `faceMatchEngine.js` — `computeCentroid()` helper; `findMatches()` groups by customer then scores against centroid.
+### Added
+- `computeCentroid` unit tests — @agent — Validates normalization behavior for identical, different, empty, and opposite-facing embeddings.
+
+## [0.32.1] — 2026-05-14
+### Fixed
+- Admin seed missing `customers.hard_delete` — @agent — Migration 048 ensures Super Admin group has hard-delete access (blocks partners hard-delete endpoint). Renumbered from 047 to avoid collision with NK prod migration 047_restore_payment_system.sql.
+- Location checkbox toggle wired in PermissionGroupConfig — @agent — Individual location checkboxes now interactive via `toggleLocation` + `allLocations` from `useLocations`.
+- PermissionGroupConfig not mounted in app — @agent — Added "Permissions" tab to Settings page; E2E test updated for tab navigation (no `/permissions` route change).
+- Revenue report employee Excel export restored above KPI cards — @agent — Keeps the report export control discoverable at the top of `/reports/revenue`.
+### Added
+- Permission override UI (grant/revoke) in member detail view — @agent — `PermissionMemberCard` extracted to keep module under 500 lines; supports blocking group perms and granting extras.
+
 ## Unreleased
 
 ### Added

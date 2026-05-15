@@ -12,12 +12,14 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Shield, ChevronRight, Check, X, Plus, MapPin,
-  Users, Globe, Trash2, Loader2, AlertCircle,
+  Shield, ChevronRight, Check, Plus,
+  Users, Trash2, Loader2, AlertCircle,
 } from 'lucide-react';
 import { usePermissionGroups } from '@/hooks/usePermissionGroups';
 import { useGroupMembers } from '@/hooks/useGroupMembers';
 import { useEmployees } from '@/hooks/useEmployees';
+import { useLocations } from '@/hooks/useLocations';
+import { PermissionMemberCard } from './PermissionMemberCard';
 
 const GROUP_COLORS = ['#EF4444', '#F59E0B', '#10B981', '#0EA5E9', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
 
@@ -32,6 +34,7 @@ export function PermissionGroupConfig() {
     selectedGroup,
     selectedGroupId,
     setSelectedGroupId,
+    permissions,
     toggleGroupPermission,
     toggleModulePermissions,
     createGroup,
@@ -47,9 +50,13 @@ export function PermissionGroupConfig() {
     assignEmployee,
     removeEmployee,
     setAllLocations,
+    toggleLocation,
+    toggleOverrideGrant,
+    toggleOverrideRevoke,
   } = useGroupMembers(selectedGroupId);
 
   const { employees } = useEmployees();
+  const { allLocations } = useLocations();
 
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
@@ -125,6 +132,30 @@ export function PermissionGroupConfig() {
   async function handleSetAllLocations(employeeId: string, all: boolean) {
     try {
       await setAllLocations(employeeId, all);
+    } catch {
+      // Rollback handled in hook
+    }
+  }
+
+  async function handleToggleLocation(employeeId: string, locationId: string) {
+    try {
+      await toggleLocation(employeeId, locationId, allLocations.map((l) => l.id));
+    } catch {
+      // Rollback handled in hook
+    }
+  }
+
+  async function handleToggleOverrideGrant(employeeId: string, permissionId: string) {
+    try {
+      await toggleOverrideGrant(employeeId, permissionId);
+    } catch {
+      // Rollback handled in hook
+    }
+  }
+
+  async function handleToggleOverrideRevoke(employeeId: string, permissionId: string) {
+    try {
+      await toggleOverrideRevoke(employeeId, permissionId);
     } catch {
       // Rollback handled in hook
     }
@@ -419,88 +450,22 @@ export function PermissionGroupConfig() {
                 No employees assigned to this group yet
               </div>
             ) : (
-              members.map((member) => {
-                const employee = employees.find((e) => e.id === member.employeeId);
-                const isAllLocations = member.locScope === 'all';
-
-                return (
-                  <div key={member.employeeId} className="px-5 py-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                          style={{ backgroundColor: selectedGroup.color }}
-                        >
-                          {employee?.name?.charAt(0)?.toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{member.employeeName}</div>
-                          <div className="text-xs text-gray-500">
-                            {member.employeeEmail}
-                          </div>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleRemoveEmployee(member.employeeId)}
-                        disabled={membersMutating}
-                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                        title="Remove from group"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    {/* Location scope */}
-                    <div className="ml-12 space-y-2">
-                      <div className="flex items-center gap-2 text-xs text-gray-600 font-medium">
-                        <MapPin className="w-3.5 h-3.5 text-gray-400" />
-                        Location Access:
-                      </div>
-
-                      <label className="flex items-center gap-2 cursor-pointer group">
-                        <input
-                          type="checkbox"
-                          checked={isAllLocations}
-                          onChange={(e) => handleSetAllLocations(member.employeeId, e.target.checked)}
-                          disabled={membersMutating}
-                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/20"
-                        />
-                        <Globe className="w-3.5 h-3.5 text-gray-400 group-hover:text-primary transition-colors" />
-                        <span className={`text-xs font-medium ${isAllLocations ? 'text-primary' : 'text-gray-600'}`}>
-                          All Locations
-                        </span>
-                      </label>
-
-                      {!isAllLocations && member.locations.length > 0 && (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 ml-6">
-                          {member.locations.map((loc) => (
-                            <label
-                              key={loc.id}
-                              className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-primary/30 bg-primary/5 cursor-pointer"
-                            >
-                              <input
-                                type="checkbox"
-                                checked
-                                disabled
-                                className="w-3.5 h-3.5 rounded border-gray-300 text-primary"
-                              />
-                              <span className="text-xs font-medium text-gray-900 truncate">{loc.name}</span>
-                            </label>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="text-[11px] text-gray-400 ml-6">
-                        {isAllLocations
-                          ? 'Access to all locations'
-                          : member.locations.length > 0
-                          ? `${member.locations.length} location(s) selected`
-                          : 'Primary location only'}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
+              members.map((member) => (
+                <PermissionMemberCard
+                  key={member.employeeId}
+                  member={member}
+                  groupColor={selectedGroup.color}
+                  groupPermissions={selectedGroup.permissions}
+                  allPermissions={permissions}
+                  allLocations={allLocations}
+                  membersMutating={membersMutating}
+                  onRemove={handleRemoveEmployee}
+                  onToggleLocation={handleToggleLocation}
+                  onSetAllLocations={handleSetAllLocations}
+                  onToggleOverrideGrant={handleToggleOverrideGrant}
+                  onToggleOverrideRevoke={handleToggleOverrideRevoke}
+                />
+              ))
             )}
           </div>
         </div>

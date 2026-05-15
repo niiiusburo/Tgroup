@@ -127,7 +127,6 @@ describe('FaceCaptureModal', () => {
     });
 
     expect(screen.getByText('Đã phát hiện khuôn mặt')).toBeInTheDocument();
-    expect(screen.getByText('Chất lượng 100%')).toBeInTheDocument();
     expect(screen.getByTestId('face-outline').firstElementChild?.className).toContain(
       'border-emerald-400',
     );
@@ -194,10 +193,11 @@ describe('FaceCaptureModal', () => {
     });
   });
 
-  it('renders the camera preview with privacy blur', async () => {
+  it('renders the camera preview without privacy blur', async () => {
     render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
     await vi.waitFor(() => {
-      expect(document.querySelector('video')?.className).toContain('blur-[12px]');
+      const videoClass = document.querySelector('video')?.className ?? '';
+      expect(videoClass).not.toContain('blur-[12px]');
     });
   });
 

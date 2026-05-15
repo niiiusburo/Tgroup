@@ -611,17 +611,19 @@ Setup data and login state:
 Feature/edit name: Employee Sales Export Payment Reconciliation
 
 Changed URLs and API routes:
-- `/reports`
+- `/reports/revenue`
 - Operational export preview/download route for the employee sales report builder.
 
 Affected data flows:
 - Employee sales report/export rows normalize overallocated imported `payment_allocations` rows before splitting payment amount across service lines.
 - Report totals should match actual posted payment amounts instead of duplicated imported allocation amounts.
+- Revenue report employee Excel export controls are restored above the KPI cards so staff can find the export before scrolling.
 
 User roles:
 - Admin or reporting staff with report/export permission.
 
 Happy paths:
+- Open `/reports/revenue` and confirm `Xuất Excel doanh thu theo nhân viên` appears above the KPI cards with the export dropdown visible.
 - Preview and export employee sales revenue for a date range that includes a fully paid imported service.
 - Confirm the report total does not exceed the underlying posted payment amount when allocation rows are duplicated.
 - Confirm line-level splitting still works for services with multiple active sale-order lines.

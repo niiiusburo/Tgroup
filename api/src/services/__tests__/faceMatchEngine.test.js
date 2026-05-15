@@ -6,6 +6,7 @@ const faceEnvKeys = [
   'FACE_CANDIDATE_THRESHOLD',
   'FACE_AUTO_MATCH_MARGIN',
   'FACE_MAX_CANDIDATES',
+  'FACE_EMBEDDING_DIM',
 ];
 
 function loadEngine(env = {}) {
@@ -15,6 +16,10 @@ function loadEngine(env = {}) {
     if (!(key in env)) {
       delete process.env[key];
     }
+  }
+  // Default to 3-dim embeddings for tests (unless overridden)
+  if (!('FACE_EMBEDDING_DIM' in env)) {
+    process.env.FACE_EMBEDDING_DIM = '3';
   }
   Object.assign(process.env, env);
   const mockQuery = jest.fn();
@@ -26,6 +31,33 @@ function loadEngine(env = {}) {
 afterEach(() => {
   process.env = originalEnv;
   jest.dontMock('../../db');
+});
+
+describe('computeCentroid', () => {
+  it('returns normalized centroid of two identical vectors', () => {
+    const { computeCentroid } = loadEngine();
+    const centroid = computeCentroid([[1, 0, 0], [1, 0, 0]]);
+    expect(centroid).toEqual([1, 0, 0]);
+  });
+
+  it('returns normalized centroid of two different vectors', () => {
+    const { computeCentroid } = loadEngine();
+    const centroid = computeCentroid([[1, 0, 0], [0, 1, 0]]);
+    // Average = [0.5, 0.5, 0], normalized = [0.7071..., 0.7071..., 0]
+    expect(centroid[0]).toBeCloseTo(0.7071, 3);
+    expect(centroid[1]).toBeCloseTo(0.7071, 3);
+    expect(centroid[2]).toBe(0);
+  });
+
+  it('returns null for empty array', () => {
+    const { computeCentroid } = loadEngine();
+    expect(computeCentroid([])).toBeNull();
+  });
+
+  it('returns null for undefined input', () => {
+    const { computeCentroid } = loadEngine();
+    expect(computeCentroid(undefined)).toBeNull();
+  });
 });
 
 describe('cosineSimilarity', () => {
@@ -72,41 +104,47 @@ describe('findMatches', () => {
     expect(result.candidates).toEqual([]);
   });
 
-  it('uses conservative defaults so 41% confidence does not pass', async () => {
+  it('uses tuned defaults so 55% confidence does not pass', async () => {
     const { findMatches, query } = loadEngine();
+    // Use unit vectors. [0.5, 0.866, 0] dot [1, 0, 0] = 0.5 (below candidate threshold 0.58)
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [0.41], name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p1', embedding: [0.5, 0.8660254, 0], name: 'Alice', phone: '0901', ref: 'T001' },
     ]);
 
-    const result = await findMatches([1]);
+    const result = await findMatches([1, 0, 0]);
 
     expect(result.match).toBeNull();
     expect(result.candidates).toEqual([]);
   });
 
-  it('uses default candidate review at 85% confidence', async () => {
+  it('uses default candidate review at 65% confidence', async () => {
     const { findMatches, query } = loadEngine();
+    // [0.65, 0.7599, 0] is a unit vector (0.65^2 + 0.7599^2 ≈ 1).
+    // Dot with [1, 0, 0] = 0.65. Above candidate 0.58, below auto-match 0.72.
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [0.85], name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p1', embedding: [0.65, 0.7599342, 0], name: 'Alice', phone: '0901', ref: 'T001' },
     ]);
 
-    const result = await findMatches([1]);
+    const result = await findMatches([1, 0, 0]);
 
     expect(result.match).toBeNull();
     expect(result.candidates).toHaveLength(1);
-    expect(result.candidates[0].confidence).toBe(0.85);
+    expect(result.candidates[0].confidence).toBeCloseTo(0.65, 2);
   });
 
-  it('uses default auto-match only at 95% confidence', async () => {
+  it('uses default auto-match at 80% confidence with margin', async () => {
     const { findMatches, query } = loadEngine();
+    // [0.8, 0.6, 0] is a unit vector (0.64 + 0.36 = 1). Dot with [1,0,0] = 0.8.
+    // [0.6, 0.8, 0] is a unit vector. Dot with [1,0,0] = 0.6. Margin = 0.2 >= 0.08.
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [0.95], name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p1', embedding: [0.8, 0.6, 0], name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p2', embedding: [0.6, 0.8, 0], name: 'Bob', phone: '0902', ref: 'T002' },
     ]);
 
-    const result = await findMatches([1]);
+    const result = await findMatches([1, 0, 0]);
 
     expect(result.match).not.toBeNull();
-    expect(result.match.confidence).toBe(0.95);
+    expect(result.match.confidence).toBeCloseTo(0.8, 2);
     expect(result.candidates).toEqual([]);
   });
 
@@ -115,11 +153,16 @@ describe('findMatches', () => {
       FACE_AUTO_MATCH_THRESHOLD: '0.50',
       FACE_AUTO_MATCH_MARGIN: '0.05',
     });
+    // Both embeddings are unit vectors; query [0.95,0.05,0] is nearly [1,0,0]
     query.mockResolvedValueOnce([
       { partner_id: 'p1', embedding: [1, 0, 0], name: 'Alice', phone: '0901', ref: 'T001' },
       { partner_id: 'p2', embedding: [0, 1, 0], name: 'Bob', phone: '0902', ref: 'T002' },
     ]);
-    const result = await findMatches([0.95, 0.05, 0]);
+    // Normalize query to unit vector
+    const q = [0.95, 0.05, 0];
+    const qNorm = Math.sqrt(q[0]**2 + q[1]**2 + q[2]**2);
+    const qUnit = q.map(v => v / qNorm);
+    const result = await findMatches(qUnit);
     expect(result.match).not.toBeNull();
     expect(result.match.partnerId).toBe('p1');
     expect(result.match.name).toBe('Alice');
@@ -132,38 +175,50 @@ describe('findMatches', () => {
       FACE_AUTO_MATCH_MARGIN: '0.20',
       FACE_CANDIDATE_THRESHOLD: '0.30',
     });
+    // Use unit vectors: [0.707,0.707,0] is normalized [0.7,0.7,0]
+    const emb1 = [0.70710678, 0.70710678, 0];
+    const emb2 = [0.6, 0.8, 0]; // also unit vector (0.36+0.64=1)
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [0.7, 0.7, 0], name: 'Alice', phone: '0901', ref: 'T001' },
-      { partner_id: 'p2', embedding: [0.6, 0.6, 0], name: 'Bob', phone: '0902', ref: 'T002' },
+      { partner_id: 'p1', embedding: emb1, name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p2', embedding: emb2, name: 'Bob', phone: '0902', ref: 'T002' },
     ]);
-    const result = await findMatches([0.7, 0.7, 0]);
+    const result = await findMatches(emb1);
     expect(result.match).toBeNull();
     expect(result.candidates.length).toBeGreaterThan(0);
     expect(result.candidates[0].partnerId).toBe('p1');
   });
 
-  it('groups multiple samples per customer and uses best score', async () => {
+  it('averages multiple samples per customer (centroid matching)', async () => {
     const { findMatches, query } = loadEngine({
       FACE_AUTO_MATCH_THRESHOLD: '0.50',
       FACE_AUTO_MATCH_MARGIN: '0.05',
     });
+    // Use unit vectors for meaningful similarity
+    const emb1 = [0.70710678, 0.70710678, 0]; // normalized [0.5,0.5,0]
+    const emb2 = [0.99388373, 0.11043152, 0]; // normalized [0.9,0.1,0]
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [0.5, 0.5, 0], name: 'Alice', phone: '0901', ref: 'T001' },
-      { partner_id: 'p1', embedding: [0.9, 0.1, 0], name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p1', embedding: emb1, name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p1', embedding: emb2, name: 'Alice', phone: '0901', ref: 'T001' },
       { partner_id: 'p2', embedding: [0, 1, 0], name: 'Bob', phone: '0902', ref: 'T002' },
     ]);
-    const result = await findMatches([0.95, 0.05, 0]);
+    // Query nearly aligned with emb2
+    const q = [0.95, 0.05, 0];
+    const qNorm = Math.sqrt(q[0]**2 + q[1]**2 + q[2]**2);
+    const qUnit = q.map(v => v / qNorm);
+    const result = await findMatches(qUnit);
     expect(result.match.partnerId).toBe('p1');
+    expect(result.match.confidence).toBeGreaterThan(0.70);
   });
 
   it('returns no-match when all scores are below candidate threshold', async () => {
     const { findMatches, query } = loadEngine({
       FACE_CANDIDATE_THRESHOLD: '0.80',
     });
+    // [0.7, 0.714, 0] is unit vector. Dot with [1,0,0] = 0.7 (below candidate 0.80)
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [0.3, 0.3, 0], name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p1', embedding: [0.7, 0.714142, 0], name: 'Alice', phone: '0901', ref: 'T001' },
     ]);
-    const result = await findMatches([0.95, 0.05, 0]);
+    const result = await findMatches([1, 0, 0]);
     expect(result.match).toBeNull();
     expect(result.candidates).toEqual([]);
   });
@@ -176,7 +231,10 @@ describe('findMatches', () => {
     query.mockResolvedValueOnce([
       { partner_id: 'p1', embedding: [1, 0, 0], name: 'Alice', phone: '0901', ref: 'T001' },
     ]);
-    const result = await findMatches([0.95, 0.05, 0]);
+    const q = [0.95, 0.05, 0];
+    const qNorm = Math.sqrt(q[0]**2 + q[1]**2 + q[2]**2);
+    const qUnit = q.map(v => v / qNorm);
+    const result = await findMatches(qUnit);
     expect(result.match).not.toBeNull();
     expect(result.match.partnerId).toBe('p1');
     expect(result.candidates).toEqual([]);
@@ -188,13 +246,14 @@ describe('findMatches', () => {
       FACE_CANDIDATE_THRESHOLD: '0.10',
       FACE_MAX_CANDIDATES: '2',
     });
+    const emb = [0.70710678, 0.70710678, 0];
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [0.5, 0.5, 0], name: 'A', phone: '1', ref: 'T1' },
-      { partner_id: 'p2', embedding: [0.4, 0.4, 0], name: 'B', phone: '2', ref: 'T2' },
-      { partner_id: 'p3', embedding: [0.3, 0.3, 0], name: 'C', phone: '3', ref: 'T3' },
-      { partner_id: 'p4', embedding: [0.2, 0.2, 0], name: 'D', phone: '4', ref: 'T4' },
+      { partner_id: 'p1', embedding: emb, name: 'A', phone: '1', ref: 'T1' },
+      { partner_id: 'p2', embedding: [0.6, 0.8, 0], name: 'B', phone: '2', ref: 'T2' },
+      { partner_id: 'p3', embedding: [0.8, 0.6, 0], name: 'C', phone: '3', ref: 'T3' },
+      { partner_id: 'p4', embedding: [0, 1, 0], name: 'D', phone: '4', ref: 'T4' },
     ]);
-    const result = await findMatches([0.5, 0.5, 0]);
+    const result = await findMatches(emb);
     expect(result.candidates.length).toBe(2);
   });
 
@@ -203,39 +262,48 @@ describe('findMatches', () => {
       FACE_AUTO_MATCH_THRESHOLD: '0.99',
       FACE_CANDIDATE_THRESHOLD: '0.30',
     });
+    // All unit vectors. Use query [0.9, 0.43589, 0] so no auto-match at 0.99 threshold.
+    // p1: [1,0,0] dot query = 0.90. p2: [0.6,0.8,0] dot query = 0.889. p3: [0.2,0.9798,0] dot query = 0.607.
+    // All >= 0.30 candidate threshold, but p3 score is lowest.
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [0.6, 0, 0], name: 'A', phone: '1', ref: 'T1' },
-      { partner_id: 'p2', embedding: [0.5, 0, 0], name: 'B', phone: '2', ref: 'T2' },
-      { partner_id: 'p3', embedding: [0.2, 0, 0], name: 'C', phone: '3', ref: 'T3' },
+      { partner_id: 'p1', embedding: [1, 0, 0], name: 'A', phone: '1', ref: 'T1' },
+      { partner_id: 'p2', embedding: [0.6, 0.8, 0], name: 'B', phone: '2', ref: 'T2' },
+      { partner_id: 'p3', embedding: [0.2, 0.9797959, 0], name: 'C', phone: '3', ref: 'T3' },
     ]);
-    const result = await findMatches([0.7, 0, 0]);
+    const queryVec = [0.9, 0.435889894, 0]; // unit vector
+    const result = await findMatches(queryVec);
     expect(result.match).toBeNull();
-    expect(result.candidates).toHaveLength(2);
-    expect(result.candidates.map((c) => c.partnerId)).toEqual(['p1', 'p2']);
+    expect(result.candidates).toHaveLength(3);
+    // p3 should be last (lowest score)
+    expect(result.candidates[2].partnerId).toBe('p3');
   });
 
-  it('returns no-match for negative cosine similarity scores', async () => {
+  it('returns no-match for opposite-facing embeddings (centroid near zero)', async () => {
     const { findMatches, query } = loadEngine({
       FACE_CANDIDATE_THRESHOLD: '0.10',
     });
+    // Two opposite unit vectors average to [0,0,0] → normalized = undefined
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [-0.5, 0, 0], name: 'A', phone: '1', ref: 'T1' },
+      { partner_id: 'p1', embedding: [1, 0, 0], name: 'A', phone: '1', ref: 'T1' },
+      { partner_id: 'p1', embedding: [-1, 0, 0], name: 'A', phone: '1', ref: 'T1' },
     ]);
     const result = await findMatches([0.5, 0, 0]);
+    // Centroid is [0,0,0] after normalization → similarity = 0
     expect(result.match).toBeNull();
     expect(result.candidates).toEqual([]);
   });
 
-  it('keeps first sample when scores are tied for same customer', async () => {
+  it('uses centroid when multiple identical samples exist', async () => {
     const { findMatches, query } = loadEngine({
       FACE_AUTO_MATCH_THRESHOLD: '0.50',
       FACE_AUTO_MATCH_MARGIN: '0.05',
     });
+    const emb = [0.70710678, 0.70710678, 0];
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [0.5, 0.5, 0], name: 'Alice', phone: '0901', ref: 'T001' },
-      { partner_id: 'p1', embedding: [0.5, 0.5, 0], name: 'Alice2', phone: '0902', ref: 'T002' },
+      { partner_id: 'p1', embedding: emb, name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p1', embedding: emb, name: 'Alice2', phone: '0902', ref: 'T002' },
     ]);
-    const result = await findMatches([0.5, 0.5, 0]);
+    const result = await findMatches(emb);
     expect(result.match).not.toBeNull();
     expect(result.match.partnerId).toBe('p1');
     expect(result.match.name).toBe('Alice');
@@ -246,11 +314,12 @@ describe('findMatches', () => {
       FACE_AUTO_MATCH_THRESHOLD: '0.50',
       FACE_AUTO_MATCH_MARGIN: '0.05',
     });
+    const emb = [0.70710678, 0.70710678, 0];
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [0.5, 0.5, 0], name: 'Alice', phone: '0901', ref: 'T001' },
-      { partner_id: 'p2', embedding: [0, 0.4, 0], name: 'Bob', phone: '0902', ref: 'T002' },
+      { partner_id: 'p1', embedding: emb, name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p2', embedding: [0, 1, 0], name: 'Bob', phone: '0902', ref: 'T002' },
     ]);
-    const result = await findMatches([0.5, 0.5, 0]);
+    const result = await findMatches(emb);
     expect(result.match).not.toBeNull();
     expect(result.match.partnerId).toBe('p1');
   });
@@ -260,11 +329,14 @@ describe('findMatches', () => {
       FACE_AUTO_MATCH_THRESHOLD: '0.50',
       FACE_AUTO_MATCH_MARGIN: '0.05',
     });
+    // emb1 = [0.707, 0.707, 0] (unit). emb2 = [0, 1, 0] (unit).
+    // dot(emb1, emb1) = 1.0. dot(emb2, emb1) = 0.707. margin = 0.293 >= 0.05.
+    const emb1 = [0.70710678, 0.70710678, 0];
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [0.55, 0.55, 0], name: 'Alice', phone: '0901', ref: 'T001' },
-      { partner_id: 'p2', embedding: [0.5, 0.5, 0], name: 'Bob', phone: '0902', ref: 'T002' },
+      { partner_id: 'p1', embedding: emb1, name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p2', embedding: [0, 1, 0], name: 'Bob', phone: '0902', ref: 'T002' },
     ]);
-    const result = await findMatches([0.55, 0.55, 0]);
+    const result = await findMatches(emb1);
     expect(result.match).not.toBeNull();
     expect(result.match.partnerId).toBe('p1');
   });
@@ -272,15 +344,14 @@ describe('findMatches', () => {
   it('returns candidate at exact candidate threshold boundary', async () => {
     const { findMatches, query } = loadEngine({
       FACE_AUTO_MATCH_THRESHOLD: '0.99',
-      FACE_CANDIDATE_THRESHOLD: '0.363',
+      FACE_CANDIDATE_THRESHOLD: '0.58',
     });
-    // For a vector [a, a, 0], dot product with itself is 2*a^2
-    // We want 2*a^2 = 0.363, so a = sqrt(0.1815) ≈ 0.426
-    const a = Math.sqrt(0.1815);
+    // Need a unit vector with dot product = 0.58 with [1,0,0].
+    // [0.58, sqrt(1-0.58^2), 0] = [0.58, 0.8146, 0]
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [a, a, 0], name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p1', embedding: [0.58, 0.814575, 0], name: 'Alice', phone: '0901', ref: 'T001' },
     ]);
-    const result = await findMatches([a, a, 0]);
+    const result = await findMatches([1, 0, 0]);
     expect(result.match).toBeNull();
     expect(result.candidates).toHaveLength(1);
     expect(result.candidates[0].partnerId).toBe('p1');
@@ -292,11 +363,13 @@ describe('findMatches', () => {
       FACE_AUTO_MATCH_MARGIN: '0.05',
       FACE_CANDIDATE_THRESHOLD: '0.30',
     });
+    const emb1 = [0.70710678, 0.70710678, 0];
+    const emb2 = [0.4472136, 0.89442719, 0]; // [0.3,0.6] normalized
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [0.6, 0.6, 0], name: 'Alice', phone: '0901', ref: 'T001' },
-      { partner_id: 'p2', embedding: [0.3, 0.3, 0], name: 'Bob', phone: '0902', ref: 'T002' },
+      { partner_id: 'p1', embedding: emb1, name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p2', embedding: emb2, name: 'Bob', phone: '0902', ref: 'T002' },
     ]);
-    const result = await findMatches([0.6, 0.6, 0]);
+    const result = await findMatches(emb1);
     expect(result.match).not.toBeNull();
     expect(result.match.partnerId).toBe('p1');
     expect(result.candidates).toEqual([]);
@@ -309,7 +382,10 @@ describe('findMatches', () => {
     query.mockResolvedValueOnce([
       { partner_id: 'p1', embedding: null, name: 'Alice', phone: '0901', ref: 'T001' },
     ]);
-    const result = await findMatches([0.1, 0.2, 0.3]);
+    const q = [0.1, 0.2, 0.3];
+    const qNorm = Math.sqrt(q[0]**2 + q[1]**2 + q[2]**2);
+    const qUnit = q.map(v => v / qNorm);
+    const result = await findMatches(qUnit);
     // NaN scores should be treated as below threshold
     expect(result.match).toBeNull();
     expect(result.candidates).toEqual([]);
@@ -369,17 +445,18 @@ describe('registerSample', () => {
     expect(query.mock.calls[0][1][4]).toBe('abc123hash');
   });
 
-  it('computes cosine similarity for 1-element embeddings', async () => {
+  it('computes cosine similarity for simple embeddings', async () => {
     const { findMatches, query } = loadEngine({
       FACE_AUTO_MATCH_THRESHOLD: '0.50',
     });
+    // [0.8, 0.6, 0] is a unit vector. Dot with [1, 0, 0] = 0.8.
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [0.8], name: 'Alice', phone: '0901', ref: 'T001' },
+      { partner_id: 'p1', embedding: [0.8, 0.6, 0], name: 'Alice', phone: '0901', ref: 'T001' },
     ]);
-    const result = await findMatches([0.8]);
+    const result = await findMatches([1, 0, 0]);
     expect(result.match).not.toBeNull();
     expect(result.match.partnerId).toBe('p1');
-    expect(result.match.confidence).toBeCloseTo(0.64, 2);
+    expect(result.match.confidence).toBeCloseTo(0.8, 2);
   });
 
   it('returns no-match when query embedding is null', async () => {
@@ -410,10 +487,11 @@ describe('registerSample', () => {
       FACE_AUTO_MATCH_THRESHOLD: '0.50',
       FACE_AUTO_MATCH_MARGIN: '0.05',
     });
+    const emb = [0.70710678, 0.70710678, 0];
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [0.5, 0.5, 0], name: 'Alice', phone: null, ref: 'T001' },
+      { partner_id: 'p1', embedding: emb, name: 'Alice', phone: null, ref: 'T001' },
     ]);
-    const result = await findMatches([0.5, 0.5, 0]);
+    const result = await findMatches(emb);
     expect(result.match).not.toBeNull();
     expect(result.match.phone).toBeNull();
     expect(result.match.name).toBe('Alice');
@@ -424,10 +502,11 @@ describe('registerSample', () => {
       FACE_AUTO_MATCH_THRESHOLD: '0.50',
       FACE_AUTO_MATCH_MARGIN: '0.05',
     });
+    const emb = [0.70710678, 0.70710678, 0];
     query.mockResolvedValueOnce([
-      { partner_id: 'p1', embedding: [0.5, 0.5, 0], name: 'Alice', phone: '0901', ref: null },
+      { partner_id: 'p1', embedding: emb, name: 'Alice', phone: '0901', ref: null },
     ]);
-    const result = await findMatches([0.5, 0.5, 0]);
+    const result = await findMatches(emb);
     expect(result.match).not.toBeNull();
     expect(result.match.code).toBe('');
   });

@@ -134,6 +134,62 @@ export function ReportsRevenue() {
 
   return (
     <div className="space-y-5">
+      <SectionCard
+        title={t('charts.employeeRevenueExcel')}
+        action={
+          <ExportMenu
+            onExport={employeeExport.handleDirectExport}
+            onPreview={employeeExport.openPreview}
+            disabled={employeeExport.downloading}
+            loading={employeeExport.downloading || employeeExport.loading}
+          />
+        }
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <label className="space-y-1.5">
+            <span className="block text-xs font-medium uppercase tracking-wide text-gray-500">
+              {t('employeeExport.employeeType')}
+            </span>
+            <select
+              value={employeeType}
+              onChange={(event) => setEmployeeType(event.target.value as EmployeeExportType)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+            >
+              {EMPLOYEE_EXPORT_TYPES.map((type) => (
+                <option key={type} value={type}>{t(`employeeExport.types.${type}`)}</option>
+              ))}
+            </select>
+          </label>
+
+          <label className="space-y-1.5 md:col-span-2">
+            <span className="block text-xs font-medium uppercase tracking-wide text-gray-500">
+              {t('employeeExport.employee')}
+            </span>
+            <select
+              value={employeeId}
+              onChange={(event) => setEmployeeId(event.target.value)}
+              disabled={employeesLoading}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary disabled:bg-gray-50 disabled:text-gray-400"
+            >
+              <option value="all">
+                {employeesLoading ? t('employeeExport.loadingEmployees') : t('employeeExport.allEmployees')}
+              </option>
+              {employeeOptions.map((employee) => (
+                <option key={employee.id} value={employee.id}>
+                  {employee.ref ? `${employee.name} (${employee.ref})` : employee.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        {employeeExport.error ? (
+          <div className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+            {employeeExport.error}
+          </div>
+        ) : null}
+      </SectionCard>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard label={t('metrics.totalInvoiced')} value={totalInvoiced} format="currency" icon={<DollarSign className="w-4 h-4" />} color="blue" delay={0} />
@@ -220,62 +276,6 @@ export function ReportsRevenue() {
                 ))}
               </tbody>
             </table>
-          </div>
-        ) : null}
-      </SectionCard>
-
-      <SectionCard
-        title={t('charts.employeeRevenueExcel')}
-        action={
-          <ExportMenu
-            onExport={employeeExport.handleDirectExport}
-            onPreview={employeeExport.openPreview}
-            disabled={employeeExport.downloading}
-            loading={employeeExport.downloading || employeeExport.loading}
-          />
-        }
-      >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <label className="space-y-1.5">
-            <span className="block text-xs font-medium uppercase tracking-wide text-gray-500">
-              {t('employeeExport.employeeType')}
-            </span>
-            <select
-              value={employeeType}
-              onChange={(event) => setEmployeeType(event.target.value as EmployeeExportType)}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-            >
-              {EMPLOYEE_EXPORT_TYPES.map((type) => (
-                <option key={type} value={type}>{t(`employeeExport.types.${type}`)}</option>
-              ))}
-            </select>
-          </label>
-
-          <label className="space-y-1.5 md:col-span-2">
-            <span className="block text-xs font-medium uppercase tracking-wide text-gray-500">
-              {t('employeeExport.employee')}
-            </span>
-            <select
-              value={employeeId}
-              onChange={(event) => setEmployeeId(event.target.value)}
-              disabled={employeesLoading}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary disabled:bg-gray-50 disabled:text-gray-400"
-            >
-              <option value="all">
-                {employeesLoading ? t('employeeExport.loadingEmployees') : t('employeeExport.allEmployees')}
-              </option>
-              {employeeOptions.map((employee) => (
-                <option key={employee.id} value={employee.id}>
-                  {employee.ref ? `${employee.name} (${employee.ref})` : employee.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        {employeeExport.error ? (
-          <div className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-            {employeeExport.error}
           </div>
         ) : null}
       </SectionCard>

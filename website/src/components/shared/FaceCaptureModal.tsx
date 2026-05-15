@@ -1,4 +1,4 @@
-import { X, Camera, SwitchCamera, Loader2, ScanFace, ArrowLeft, ArrowRight } from 'lucide-react';
+import { X, Camera, SwitchCamera, Loader2, ScanFace, ArrowLeft, ArrowRight, Sun, SunDim, Move, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PROFILE_POSES, type FaceCaptureMode } from './faceCaptureProfile';
 import { useFaceCaptureController } from './useFaceCaptureController';
@@ -26,6 +26,7 @@ export function FaceCaptureModal({
     isStarting,
     detectionState,
     detectionScore,
+    qualityFeedback,
     poseIndex,
     profileImages,
     isProfileCapture,
@@ -45,14 +46,38 @@ export function FaceCaptureModal({
   const poseHint = t(currentPose.hintKey, currentPose.fallbackHint);
   const completedPoseCount = isProfileCapture ? profileImages.length : 0;
   const isSidePose = currentPose?.id !== 'center';
-  const detectionLabel =
-    detectionState === 'capturing' ?
-      t('faceCapture.autoCapturing', 'Auto capturing...') :
-      isReady ?
-        t('faceCapture.faceDetected', 'Face detected') :
-      isSidePose ?
-        t('faceCapture.holdSteady', 'Hold steady, tap Capture') :
-        t('faceCapture.scanning', 'Scanning for face...');
+
+  // Build human-readable quality feedback message
+  const getFeedbackMessage = (): { text: string; icon: React.ReactNode; type: 'good' | 'warn' | 'error' } => {
+    if (detectionState === 'capturing') {
+      return { text: t('faceCapture.autoCapturing', 'Auto capturing...'), icon: <Loader2 className="w-3.5 h-3.5 animate-spin" />, type: 'good' };
+    }
+    if (isReady) {
+      return { text: t('faceCapture.faceDetected', 'Face detected — hold steady'), icon: <ScanFace className="w-3.5 h-3.5" />, type: 'good' };
+    }
+    const issues = qualityFeedback?.issues ?? [];
+    if (issues.includes('too_dark')) {
+      return { text: t('faceCapture.tooDark', 'Too dark — move to brighter area'), icon: <SunDim className="w-3.5 h-3.5" />, type: 'warn' };
+    }
+    if (issues.includes('too_bright')) {
+      return { text: t('faceCapture.tooBright', 'Too bright — reduce lighting'), icon: <Sun className="w-3.5 h-3.5" />, type: 'warn' };
+    }
+    if (issues.includes('too_blurry')) {
+      return { text: t('faceCapture.tooBlurry', 'Too blurry — hold steady'), icon: <Move className="w-3.5 h-3.5" />, type: 'warn' };
+    }
+    if (issues.includes('face_too_small')) {
+      return { text: t('faceCapture.faceTooSmall', 'Move closer to camera'), icon: <ArrowRight className="w-3.5 h-3.5" />, type: 'warn' };
+    }
+    if (issues.includes('no_face_detected')) {
+      return { text: t('faceCapture.noFace', 'No face detected — center your face'), icon: <AlertCircle className="w-3.5 h-3.5" />, type: 'error' };
+    }
+    if (isSidePose) {
+      return { text: t('faceCapture.holdSteady', 'Hold steady, tap Capture'), icon: <ScanFace className="w-3.5 h-3.5" />, type: 'warn' };
+    }
+    return { text: t('faceCapture.scanning', 'Scanning for face...'), icon: <ScanFace className="w-3.5 h-3.5" />, type: 'warn' };
+  };
+
+  const feedback = getFeedbackMessage();
   const captureBtnLabel =
     isSidePose && detectionState === 'scanning'
       ? t('faceCapture.capturePose', 'Chụp pose')
@@ -86,7 +111,7 @@ export function FaceCaptureModal({
                 autoPlay
                 playsInline
                 muted
-                className="absolute inset-0 w-full h-full scale-105 object-cover blur-[12px]" />
+                className="absolute inset-0 w-full h-full scale-105 object-cover" />
                 <div className="absolute inset-0 bg-black/10 pointer-events-none" />
                 {isStarting && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20" aria-live="polite">
@@ -96,15 +121,15 @@ export function FaceCaptureModal({
                 )}
                 <div className="absolute top-3 left-3 right-3 flex items-center justify-center pointer-events-none" aria-live="polite">
                   <div className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold shadow-sm ${
-                    isReady ? 'bg-emerald-500 text-white' : 'bg-black/35 text-white'
+                    isReady ? 'bg-emerald-500 text-white' :
+                    feedback.type === 'error' ? 'bg-red-500 text-white' :
+                    feedback.type === 'warn' ? 'bg-amber-500 text-white' :
+                    'bg-black/35 text-white'
                   }`}>
-                    {detectionState === 'capturing' ?
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> :
-                      <ScanFace className="w-3.5 h-3.5" />
-                    }
-                    <span>{detectionLabel}</span>
+                    {feedback.icon}
+                    <span>{feedback.text}</span>
                     <span className="tabular-nums opacity-90">
-                      {t('faceCapture.quality', 'Quality')} {detectionPercent}%
+                      {detectionPercent}%
                     </span>
                   </div>
                 </div>

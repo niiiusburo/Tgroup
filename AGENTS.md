@@ -239,7 +239,109 @@ This project can use OpenCode Plan and Build phases:
 
 ---
 
-## 16. Documentation Enforcement Rule
+## 16. Proactive Context Handoff Rule
+
+When a session approaches context limits, auto-compaction destroys fidelity and causes errors. The fix is to **proactively write a handoff and start fresh** before the model drops context.
+
+### When to handoff
+
+- Auto-compaction fires ("Context overflow detected, Auto-compacting...")
+- 40+ tool calls in the session
+- User says "handoff", "new session", "reload", "continue in fresh"
+- Multi-step task is >50% complete and has involved 5+ file reads
+- You catch yourself re-reading files or repeating explanations
+
+### Session identification
+
+Every handoff MUST identify which session produced it, because the user runs multiple sessions (Pi, Claude, Codex) in parallel. Include:
+- `**Session Tool:**` — `Pi`, `Claude`, `Codex`, `Gemini`, etc.
+- `**Session ID:**` — The actual session identifier
+- `**Handoff ID:**` — Unique ID (`<tool>-<timestamp>-<random>`)
+
+A session resuming work MUST verify the handoff's `Session Tool` matches itself before reading it. If it doesn't match, the handoff belongs to a different parallel session.
+
+### Handoff artifact location (GLOBAL — all projects)
+
+This handoff system applies to **all projects** the user works in. Handoffs must be session-scoped and stored in one of two locations:
+
+**1. Project-local (preferred for project work):**
+```
+<project-root>/.pi/handoffs/<handoff-id>.md
+<project-root>/.pi/handoffs/INDEX.md
+```
+
+**2. Global (for non-project work or when no project cwd is active):**
+```
+~/.pi/handoffs/<handoff-id>.md
+~/.pi/handoffs/INDEX.md
+```
+
+**Rule:** Always prefer the project-local `.pi/handoffs/` if a project working directory is active. Only fall back to `~/.pi/handoffs/` when there is no project context.
+
+Example: `.pi/handoffs/pi-20260514-161530-a7f3.md`
+
+**Registry file:** `.pi/handoffs/INDEX.md` — append a line for each handoff:
+```markdown
+| Handoff ID | Session Tool | Session ID | Date | Task | Status |
+|---|---|---|---|---|---|
+| pi-20260514-161530-a7f3 | Pi | abc123 | 2026-05-14 | Fix login bug | active |
+```
+
+### Handoff template
+
+```markdown
+# Handoff: <brief task name>
+
+**Handoff ID:** <tool>-<timestamp>-<random>
+**Date:** <ISO timestamp>
+**Session Tool:** <Pi / Claude / Codex / Gemini / etc.>
+**Session ID:** <actual session uuid or identifier>
+**Branch:** <git branch>
+**Worktree:** <path>
+
+## What we were doing
+<2-3 sentences>
+
+## Decisions made
+- <Decision 1>
+
+## Files changed
+- `<path>` — <what changed>
+
+## Current state
+<working / broken / partial>
+
+## Verification results
+- <command> → <result>
+
+## Blockers / open questions
+- <blocker>
+
+## Next steps
+1. <concrete step>
+2. <concrete step>
+3. <concrete step>
+
+## Context to preserve
+- <env vars, flags, ports, credentials>
+```
+
+### After writing the handoff
+
+1. Tell the user: "I've hit context pressure. Handoff written to `.pi/handoffs/<handoff-id>.md` (Session: <Tool> <SessionID>). Start a fresh session and say: `Continue from handoff <handoff-id> in .pi/handoffs/`"
+2. Do NOT continue in the same session after compaction fires.
+3. Delete the handoff file once the task is fully complete. Update `INDEX.md` status to `complete`.
+
+### Resuming from a handoff
+
+When a user says "continue from handoff":
+1. List `.pi/handoffs/` directory
+2. If multiple exist, ask: "Which handoff? Available: [list from INDEX.md]"
+3. Read the specified handoff ONLY after verifying `Session Tool` matches this session. If the handoff says `Session Tool: Pi` but this is a Claude session, STOP and ask the user which session should handle it.
+
+---
+
+## 17. Documentation Enforcement Rule
 
 **Every task that touches a contract, invariant, data-model, or workflow MUST update the relevant doc and append a CHANGELOG entry in the same commit.**
 
@@ -282,3 +384,58 @@ git diff --name-only HEAD | grep -E "^docs/"
 git diff HEAD -- docs/CHANGELOG.md | grep "^+" | head -5
 ```
 If no docs changes appear, the commit is incomplete.
+
+
+<claude-mem-context>
+# Memory Context
+
+# [Tgrouptest] recent context, 2026-05-15 9:27am GMT+7
+
+Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision
+Format: ID TIME TYPE TITLE
+Fetch details: get_observations([IDs]) | Search: mem-search skill
+
+Stats: 36 obs (14,449t read) | 460,661t work | 97% savings
+
+### May 13, 2026
+12799 8:28p 🔵 Đóng Đa appointment spreadsheet import planning initiated
+12800 8:29p 🔵 Spreadsheet download produced invalid or empty Excel file
+12801 8:30p 🔵 Đống Đa appointment spreadsheet parsed successfully with 581 rows but normalizer failed date/time extraction
+12803 8:34p 🔵 Database validation confirmed prerequisites for Đống Đa appointment import
+12819 9:54p 🔵 Customer profile "Paid" amount displays negative values incorrectly
+12822 9:59p 🔵 Revenue export column E (Phiếu khám) not displaying "SO" sale order names
+12826 10:10p 🔴 Revenue collected KPI now includes paid-only order states
+12827 10:11p 🔴 Hosoonline Health Checkup Images Now Use Authenticated Blob URLs
+12828 " 🟣 HealthCheckupLightbox Test Coverage for Authenticated Image Opening
+12829 " ✅ TestSprite Plan Created for Hosoonline Authenticated Image Viewer
+12851 11:15p 🔵 Staging server missing cash-flow fix deployment
+12852 " ✅ Staging API container rebuilt with cash-flow and revenue fixes
+12853 11:16p 🔵 Staging revenue and cash-flow endpoints verified working with corrected totals
+12854 11:17p 🔵 Staging logs show clean revenue endpoint requests with no SQL errors
+### May 14, 2026
+12860 12:05a 🔵 NK 2Checkin Login Monitor Blocked by Sandbox Network Restrictions
+12861 12:06a 🔵 Đống Đa appointment spreadsheet import infrastructure validated
+12871 12:22a 🔵 Production database state before Đống Đa appointment import
+12872 12:23a ✅ Production database backup completed before Đống Đa import
+12883 12:38a 🔵 Production Database Environment Confirmed
+12884 " ✅ SSH Tunnel Established for Remote Database Access
+12885 " 🔵 Missing ExcelJS Dependency Blocks Import Analysis
+12886 " 🔵 Appointment Import Dry-Run Analysis Complete
+12887 12:39a 🔵 Live Appointment Import Analysis Shows Clean 540-Row Import Window
+12888 " 🔵 Customer T3544 Exists on Live But Missing From Local Database
+12897 12:58a 🔵 Batch appointment import validated against tdental_demo database
+12898 1:01a 🟣 Batch imported 540 Đống Đa appointments to tdental_demo production database
+12899 " 🔵 Live site verification requires .agents/live-site.env credentials file
+12900 1:02a 🟣 Verified imported appointments are live and accessible on production calendar
+12902 1:03a 🔵 Production appointment search confirmed accent-insensitive for Vietnamese text
+12904 1:05a 🔴 Fixed timezone shifts and added header aliases in xlsx batch import
+12905 1:06a ✅ Completed end-to-end verification of Đống Đa appointment batch import
+12906 " ✅ Committed and pushed timezone fixes for appointment import script
+### May 15, 2026
+13099 12:02a 🔵 NK 2Checkin Login Monitor Network Failure
+13100 12:03a 🔵 Automation Executor Environment Has No DNS Configuration and Browser Permission Lockdown
+13102 12:04a 🔵 Complete Network and System Isolation Confirmed for NK 2Checkin Production VPS
+13103 " 🔵 Outbound HTTPS Connections Completely Blocked Including DNS-over-HTTPS Services
+
+Access 461k tokens of past work via get_observations([IDs]) or mem-search skill.
+</claude-mem-context>

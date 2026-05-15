@@ -230,7 +230,11 @@ describe('Report subpages — error handling', () => {
     render(<ReportsRevenue />);
 
     await screen.findByText('metrics.totalInvoiced', undefined, { timeout: 3000 });
-    expect(screen.getByText('charts.employeeRevenueExcel')).toBeInTheDocument();
+    const exportHeading = screen.getByText('charts.employeeRevenueExcel');
+    const totalInvoiced = screen.getByText('metrics.totalInvoiced');
+    expect(exportHeading).toBeInTheDocument();
+    expect(exportHeading.compareDocumentPosition(totalInvoiced) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByText('exportData')).toBeInTheDocument();
     expect(screen.getByText('employeeExport.employeeType')).toBeInTheDocument();
     expect(screen.getByText('employeeExport.employee')).toBeInTheDocument();
     expect(mockFetchEmployees).toHaveBeenCalledWith(expect.objectContaining({

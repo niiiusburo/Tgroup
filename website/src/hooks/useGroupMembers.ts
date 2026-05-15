@@ -105,7 +105,7 @@ export function useGroupMembers(groupId: string | null) {
   );
 
   const toggleLocation = useCallback(
-    async (employeeId: string, locationId: string) => {
+    async (employeeId: string, locationId: string, allLocationIds: string[]) => {
       const member = members.find((m) => m.employeeId === employeeId);
       if (!member || !groupId) return;
 
@@ -116,8 +116,7 @@ export function useGroupMembers(groupId: string | null) {
 
       if (member.locScope === 'all') {
         // Switching from all to specific: start with all EXCEPT toggled
-        nextIds = members[0]?.locations?.map((l) => l.id) ?? [];
-        nextIds = nextIds.filter((id) => id !== locationId);
+        nextIds = allLocationIds.filter((id) => id !== locationId);
         nextScope = 'specific';
       } else {
         nextIds = hasLocation

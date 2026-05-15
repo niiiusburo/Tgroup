@@ -13,11 +13,10 @@ test('admin can toggle permission and change persists after refresh', async ({ p
   await page.click('button[type="submit"]');
   await page.waitForSelector('text=Overview', { timeout: 15000 });
 
-  // Navigate to Settings > Permissions
+  // Navigate to Settings > Permissions tab
   await page.click('text=Settings');
   await page.waitForURL('**/settings');
   await page.click('text=Permissions');
-  await page.waitForURL('**/permissions');
 
   // Click on Dentist group
   await page.click('text=Dentist');
@@ -43,6 +42,7 @@ test('admin can toggle permission and change persists after refresh', async ({ p
   await page.reload();
   await page.waitForSelector('text=Overview', { timeout: 15000 });
   await page.click('text=Settings');
+  await page.waitForURL('**/settings');
   await page.click('text=Permissions');
   await page.click('text=Dentist');
   await page.waitForSelector('text=Members — Dentist');
