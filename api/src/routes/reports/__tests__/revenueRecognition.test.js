@@ -50,7 +50,7 @@ describe('reports revenue recognition', () => {
     expect(revenueSql).toContain('pa.allocated_amount * p.amount / at.total_allocated_for_payment');
     expect(revenueSql).toContain("p.status = 'posted'");
     expect(revenueSql).toContain("COALESCE(p.deposit_type, '') NOT IN ('deposit', 'refund', 'usage')");
-    expect(revenueSql).toContain("COALESCE(p.method, '') <> 'deposit'");
+    expect(revenueSql).toContain("COALESCE(p.payment_category, 'payment') = 'payment'");
     expect(methodsSql).toContain('dbo.payment_allocations pa');
     expect(methodsSql).toContain('allocation_totals AS');
     expect(methodsSql).toContain("COALESCE(p.deposit_type, '') NOT IN ('deposit', 'refund', 'usage')");
@@ -95,7 +95,7 @@ describe('reports revenue recognition', () => {
     expect(sql).toContain('allocation_totals AS');
     expect(sql).toContain('pa.allocated_amount * p.amount / at.total_allocated_for_payment');
     expect(sql).toContain("p.status = 'posted'");
-    expect(sql).toContain("COALESCE(p.method, '') <> 'deposit'");
+    expect(sql).toContain("COALESCE(p.payment_category, 'payment') = 'payment'");
   });
 
   it('allocates paid revenue across service categories instead of summing listed service prices', async () => {

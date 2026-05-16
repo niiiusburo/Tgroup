@@ -1,10 +1,14 @@
 'use strict';
 
+// Single source of truth for "service revenue" — matches the Excel revenue-flat
+// export's WHERE clause exactly (see api/src/services/exports/builders/legacyFlatRevenueQuery.js).
+// Any change here flows to: revenue.js, revenueBreakdowns.js, servicesBreakdown.js,
+// canonicalRevenue.js (used by dashboard/doctors/locations).
 const SERVICE_REVENUE_PAYMENT_CONDITION = [
   "p.status = 'posted'",
   'pa.invoice_id IS NOT NULL',
+  "COALESCE(p.payment_category, 'payment') = 'payment'",
   "COALESCE(p.deposit_type, '') NOT IN ('deposit', 'refund', 'usage')",
-  "COALESCE(p.method, '') <> 'deposit'",
 ].join('\nAND ');
 
 const ALLOCATION_TOTALS_CTE = `allocation_totals AS (

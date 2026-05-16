@@ -24,9 +24,10 @@ Every time you bump the version or deploy a new build, you MUST update `website/
 | Environment | Email | Password |
 |-------------|-------|----------|
 | Production (`https://nk.2checkin.com`) | `t@clinic.vn` | `123123` |
-| Local dev (`http://127.0.0.1:5175`, Tgrouptest demo DB) | `tg@clinic.vn` | `123456` |
+| Staging (`https://nk2.2checkin.com`) | `t@clinic.vn` | `123123` |
+| Local dev (`http://127.0.0.1:5175`, Tgrouptest demo DB) | `t@clinic.vn` | `123123` |
 
-The prod DB does NOT have `tg@clinic.vn`. Only `t@clinic.vn`, `kien@clinic.vn`, and `0397616697@clinic.vn` exist as admin accounts on production. Use `t@clinic.vn` for live verification.
+Only `t@clinic.vn`, `kien@clinic.vn`, and `0397616697@clinic.vn` exist as admin accounts. Use `t@clinic.vn` for all verification. Do not use `tg@clinic.vn`.
 
 ## Verification Rule (MANDATORY)
 
@@ -34,7 +35,7 @@ Before declaring ANY frontend, auth, API, CORS, env-var, or deploy fix complete,
 
 **Minimum check for auth/API changes:**
 1. Navigate to `http://127.0.0.1:5175` (NOT `localhost:5175` — Docker container may still be bound to `::1:5175` serving a stale bundle)
-2. Log in with `tg@clinic.vn` / `123456`
+2. Log in with `t@clinic.vn` / `123123`
 3. Wait for dashboard to render
 4. Take a screenshot as evidence
 5. Check the browser console for JS errors

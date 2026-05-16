@@ -2,6 +2,7 @@ const express = require('express');
 const { query } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
 const { err, validDate, validUUID, dateCompanyFilter } = require('./helpers');
+const { getCanonicalRevenueByLocation } = require('../../services/reports/canonicalRevenue');
 
 const router = express.Router();
 
@@ -13,26 +14,34 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
     if (!validDate(dateFrom) || !validDate(dateTo)) return err(res, 400, 'Invalid params');
 
     const af = dateCompanyFilter(dateFrom, dateTo, null, 'date');
-    // Offset sf params by af.idx so $N is correct in combined query
-    const sfConds = [];
-    const sfParams = [...af.params];
-    let sfIdx = af.idx;
-    if (dateFrom) { sfConds.push(`datecreated::date >= $${sfIdx}`); sfParams.push(dateFrom); sfIdx++; }
-    if (dateTo) { sfConds.push(`datecreated::date <= $${sfIdx}`); sfParams.push(dateTo); sfIdx++; }
-    const sfWhere = sfConds.length ? 'AND ' + sfConds.join(' AND ') : '';
+    // Offset so params by af.idx so $N is correct in combined query
+    const soConds = [];
+    const soParams = [...af.params];
+    let soIdx = af.idx;
+    if (dateFrom) { soConds.push(`datecreated::date >= $${soIdx}`); soParams.push(dateFrom); soIdx++; }
+    if (dateTo) { soConds.push(`datecreated::date <= $${soIdx}`); soParams.push(dateTo); soIdx++; }
+    const soWhere = soConds.length ? 'AND ' + soConds.join(' AND ') : '';
 
     const locations = await query(
       `SELECT c.id, c.name, c.active,
               COALESCE(appt.cnt, 0) as appointment_count,
               COALESCE(appt.done, 0) as done_count,
-              COALESCE(so.revenue, 0) as revenue,
               COALESCE(so.order_count, 0) as order_count,
               COALESCE(emp.cnt, 0) as employee_count
        FROM dbo.companies c
        LEFT JOIN (SELECT companyid, COUNT(*) as cnt, SUM(CASE WHEN state='done' THEN 1 ELSE 0 END) as done FROM dbo.appointments WHERE 1=1 ${af.where} GROUP BY companyid) appt ON appt.companyid=c.id
-       LEFT JOIN (SELECT companyid, COUNT(*) as order_count, COALESCE(SUM(totalpaid),0) as revenue FROM dbo.saleorders WHERE isdeleted=false AND state='sale' ${sfWhere} GROUP BY companyid) so ON so.companyid=c.id
-       LEFT JOIN (SELECT companyid, COUNT(*) as cnt FROM dbo.partners WHERE employee=true AND isdeleted=false GROUP BY companyid) emp ON emp.companyid=c.id
-       ORDER BY revenue DESC`, sfParams);
+       LEFT JOIN (SELECT companyid, COUNT(*) as order_count FROM dbo.saleorders WHERE isdeleted=false AND state='sale' ${soWhere} GROUP BY companyid) so ON so.companyid=c.id
+       LEFT JOIN (SELECT companyid, COUNT(*) as cnt FROM dbo.partners WHERE employee=true AND isdeleted=false GROUP BY companyid) emp ON emp.companyid=c.id`, soParams);
+
+    // Get canonical revenue by location and merge into locations
+    const revenueData = await getCanonicalRevenueByLocation({ dateFrom, dateTo });
+    const revenueMap = new Map(revenueData.map(r => [r.companyId, r.revenue]));
+
+    // Inject revenue into each location and sort by revenue DESC
+    locations.forEach(loc => {
+      loc.revenue = revenueMap.get(loc.id) || 0;
+    });
+    locations.sort((a, b) => b.revenue - a.revenue);
 
     // Location growth trend
     const trend = await query(
