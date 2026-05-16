@@ -110,6 +110,22 @@ describe('legacyFlatReportsExport', () => {
     expect(sheet.getCell('P2').value).toBe('Sale Online');
   });
 
+  it('uses saleorders.code in column E and search matches SO codes', async () => {
+    query.mockResolvedValueOnce([{ total: '0', total_amount: '0' }]);
+
+    await legacyFlatReportsExport.revenue.preview({
+      companyId: LOC_A,
+      dateFrom: '2026-05-09',
+      dateTo: '2026-05-09',
+      search: 'SO-2026-0644',
+    }, USER);
+
+    const [sql, params] = query.mock.calls[0];
+    expect(sql).toContain("COALESCE(NULLIF(so.code, ''), so.name) AS saleordername");
+    expect(sql).toContain('so.code ILIKE');
+    expect(params).toContain('%SO-2026-0644%');
+  });
+
   it('previews revenue with posted service payment filters and allocation proration SQL', async () => {
     query.mockResolvedValueOnce([{ total: '2', total_amount: '1500000' }]);
 

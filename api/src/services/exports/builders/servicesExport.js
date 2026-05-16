@@ -58,7 +58,7 @@ function buildWhere(filters) {
   }
 
   if (filters.search) {
-    conditions.push(`(so.name ILIKE $${idx} OR p.name ILIKE $${idx})`);
+    conditions.push(`(so.code ILIKE $${idx} OR so.name ILIKE $${idx} OR p.name ILIKE $${idx})`);
     params.push(`%${filters.search}%`);
     idx++;
   }
@@ -77,7 +77,7 @@ async function getRows(filters) {
   const sql = `
     SELECT
       so.id,
-      so.name,
+      COALESCE(NULLIF(so.code, ''), so.name) AS name,
       so.state,
       so.amounttotal,
       so.totalpaid,

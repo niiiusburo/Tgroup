@@ -25,7 +25,8 @@ function buildRevenueWhere(filters) {
 
   if (filters.search) {
     conditions.push(`(
-      so.name ILIKE $${idx}
+      so.code ILIKE $${idx}
+      OR so.name ILIKE $${idx}
       OR cust.ref ILIKE $${idx}
       OR cust.name ILIKE $${idx}
       OR cust.displayname ILIKE $${idx}
@@ -71,7 +72,7 @@ function revenueCte(where) {
         cust.name AS partnername,
         cust.displayname AS partnerdisplayname,
         cust.phone AS partnerphone,
-        so.name AS saleordername,
+        COALESCE(NULLIF(so.code, ''), so.name) AS saleordername,
         COALESCE(p.payment_date, p.created_at)::date AS paymentdate,
         ${allocatedAmountExpr} AS row_amount,
         COALESCE(p.amount, 0) AS payment_amount,
