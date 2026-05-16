@@ -6,12 +6,16 @@ import {
   softDeletePartner,
   hardDeletePartner,
 } from "@/lib/api";
+import { resolvePartnerKey, type PartnerResolveCandidate } from "@/lib/api/partners";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useLocations } from "@/hooks/useLocations";
 import type { ProfileTab } from "@/components/customer/CustomerProfile";
 import { LoadingState } from "@/components/shared/LoadingState";
+import { CustomerKeyPicker } from "@/components/customer/CustomerKeyPicker";
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 import { buildCustomerColumns } from "./Customers/CustomerColumns";
 import { CustomerListView } from "./Customers/CustomerListView";
@@ -54,10 +58,56 @@ export function Customers() {
     }
     return () => document.body.classList.remove("modal-open");
   }, [showForm]);
-  // Sync selected customer with URL param for deep-linking
+  // Resolver state — only used when URL contains a non-UUID key (e.g., /customers/T056733)
+  const [resolveState, setResolveState] = useState<
+    | { status: 'idle' }
+    | { status: 'resolving'; key: string }
+    | { status: 'not-found'; key: string }
+    | { status: 'ambiguous'; key: string; matchedBy: 'ref' | 'phone'; candidates: PartnerResolveCandidate[] }
+  >({ status: 'idle' });
+
+  // Sync selected customer with URL param for deep-linking.
+  // If the URL is a non-UUID key (customer code or phone), resolve it to a
+  // canonical UUID and redirect, so every downstream component stays UUID-only.
   useEffect(() => {
-    setSelectedCustomerId(id ?? null);
-  }, [id]);
+    if (!id) {
+      setSelectedCustomerId(null);
+      setResolveState({ status: 'idle' });
+      return;
+    }
+
+    if (UUID_RE.test(id)) {
+      setSelectedCustomerId(id);
+      setResolveState({ status: 'idle' });
+      return;
+    }
+
+    let cancelled = false;
+    setResolveState({ status: 'resolving', key: id });
+    resolvePartnerKey(id)
+      .then((result) => {
+        if (cancelled) return;
+        if (result.status === 'found') {
+          navigate(`/customers/${result.partner.id}`, { replace: true });
+        } else if (result.status === 'not-found') {
+          setResolveState({ status: 'not-found', key: id });
+        } else {
+          setResolveState({
+            status: 'ambiguous',
+            key: id,
+            matchedBy: result.matchedBy,
+            candidates: result.candidates,
+          });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setResolveState({ status: 'not-found', key: id });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, navigate]);
 
   // Reset profile tab when switching customers or returning to list
   useEffect(() => {
@@ -207,6 +257,38 @@ export function Customers() {
       setDeleteLoading(false);
     }
   };
+
+  if (resolveState.status === 'resolving') {
+    return <LoadingState title="Đang tra cứu bệnh nhân..." />;
+  }
+
+  if (resolveState.status === 'not-found') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center">
+        <h2 className="text-lg font-semibold text-slate-900">Không tìm thấy bệnh nhân</h2>
+        <p className="text-sm text-slate-500 mt-1">
+          Không có hồ sơ nào khớp với <span className="font-mono">{resolveState.key}</span>.
+        </p>
+        <button
+          type="button"
+          onClick={() => navigate('/customers')}
+          className="mt-4 text-sm text-blue-600 hover:underline"
+        >
+          Quay lại danh sách khách hàng
+        </button>
+      </div>
+    );
+  }
+
+  if (resolveState.status === 'ambiguous') {
+    return (
+      <CustomerKeyPicker
+        searchedKey={resolveState.key}
+        matchedBy={resolveState.matchedBy}
+        candidates={resolveState.candidates}
+      />
+    );
+  }
 
   if (profileLoading) {
     return (

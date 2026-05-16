@@ -5,12 +5,14 @@ const { PartnerCreateSchema, PartnerUpdateSchema } = require('@tgroup/contracts'
 const { getPartnerById } = require('./partners/getPartnerById');
 const { checkPartnerUnique, getPartnerKpis, listPartners } = require('./partners/readHandlers');
 const { createPartner, hardDeletePartner, softDeletePartner, updatePartner } = require('./partners/mutationHandlers');
+const { resolvePartner } = require('./partners/resolveHandler');
 
 const router = express.Router();
 
 router.get('/', requirePermission('customers.view'), listPartners);
-// declared before /:id to prevent Express matching 'check-unique' as an id param.
+// declared before /:id to prevent Express matching these as an id param.
 router.get('/check-unique', requirePermission('customers.view'), checkPartnerUnique);
+router.get('/resolve', requirePermission('customers.view'), resolvePartner);
 router.get('/:id', requirePermission('customers.view'), getPartnerById);
 router.get('/:id/GetKPIs', requirePermission('customers.view'), getPartnerKpis);
 router.post('/', requirePermission('customers.add'), validate(PartnerCreateSchema), createPartner);

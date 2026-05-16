@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.32.13",
+    "date": "2026-05-16",
+    "highlights": "Patient deep links (/customers/T056733, phone numbers) now resolve to the canonical patient and load the profile correctly.",
+    "sections": [
+      {
+        "title": "New",
+        "items": [
+          "Added GET /api/Partners/resolve?key=<key> that resolves UUID / customer code / normalized phone to a canonical patient. Returns 200/404/409.",
+          "Customer page (/customers/:id) now canonicalizes non-UUID keys: if the URL has a customer code or phone, it looks up the patient and rewrites the URL to the canonical UUID before loading the profile.",
+          "Collision picker: when a phone or code matches multiple patients, staff sees a list and picks the right one (no silent wrong-patient loads)."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Previously /customers/T056733 returned HTTP 500 because the route param was treated as a UUID directly. Now the page handles human-readable keys end-to-end."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.12",
     "date": "2026-05-16",
     "highlights": "Payments export now populates 'Số phiếu điều trị' from payment_allocations (covers 97% of payments instead of 0.5%). Sales-employees report accepts all legacy GUID company IDs.",

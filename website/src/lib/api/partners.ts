@@ -95,6 +95,54 @@ export function fetchPartnerById(id: string) {
   return apiFetch<ApiPartner>(`/Partners/${id}`);
 }
 
+export interface ResolvedPartner {
+  id: string;
+  code: string | null;
+  name: string | null;
+  phone: string | null;
+}
+
+export interface PartnerResolveSuccess {
+  matchedBy: 'uuid' | 'ref' | 'phone';
+  partner: ResolvedPartner;
+}
+
+export interface PartnerResolveCandidate {
+  id: string;
+  code: string | null;
+  name: string | null;
+  phone: string | null;
+  lastUpdated: string | null;
+}
+
+export interface PartnerResolveAmbiguous {
+  code: 'CUSTOMER_LOOKUP_AMBIGUOUS';
+  matchedBy: 'ref' | 'phone';
+  candidates: PartnerResolveCandidate[];
+}
+
+export type PartnerResolveResult =
+  | { status: 'found'; partner: ResolvedPartner; matchedBy: PartnerResolveSuccess['matchedBy'] }
+  | { status: 'not-found' }
+  | { status: 'ambiguous'; candidates: PartnerResolveCandidate[]; matchedBy: 'ref' | 'phone' };
+
+export async function resolvePartnerKey(key: string): Promise<PartnerResolveResult> {
+  try {
+    const data = await apiFetch<PartnerResolveSuccess>(
+      `/Partners/resolve?key=${encodeURIComponent(key)}`,
+    );
+    return { status: 'found', partner: data.partner, matchedBy: data.matchedBy };
+  } catch (err) {
+    const e = err as { status?: number; body?: unknown };
+    if (e.status === 404) return { status: 'not-found' };
+    if (e.status === 409) {
+      const body = (e.body || {}) as PartnerResolveAmbiguous;
+      return { status: 'ambiguous', candidates: body.candidates || [], matchedBy: body.matchedBy };
+    }
+    throw err;
+  }
+}
+
 export function createPartner(data: Partial<ApiPartner>) {
   return apiFetch<ApiPartner>('/Partners', { method: 'POST', body: data });
 }
