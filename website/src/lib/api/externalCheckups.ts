@@ -1,6 +1,7 @@
 import { apiFetch, API_URL } from './core';
 
 // ─── External Checkups (hosoonline.com integration) ───────────────
+const TOKEN_KEY = 'tgclinic_token';
 
 export interface ExternalCheckupImage {
   url: string;
@@ -92,13 +93,22 @@ export function resolveExternalCheckupImageUrl(imagePath: string): string {
   return `${API_URL}/${imagePath}`;
 }
 
-export async function fetchExternalCheckupImageBlob(imagePath: string, signal?: AbortSignal): Promise<Blob> {
-  const token = localStorage.getItem('tgclinic_token');
-  const headers: Record<string, string> = {};
-  if (token) headers.Authorization = `Bearer ${token}`;
+function getExternalCheckupAuthToken(): string | null {
+  try {
+    return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
 
+function getExternalCheckupAuthHeaders(): Record<string, string> {
+  const token = getExternalCheckupAuthToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+export async function fetchExternalCheckupImageBlob(imagePath: string, signal?: AbortSignal): Promise<Blob> {
   const res = await fetch(resolveExternalCheckupImageUrl(imagePath), {
-    headers,
+    headers: getExternalCheckupAuthHeaders(),
     credentials: 'include',
     signal,
   });
@@ -135,13 +145,9 @@ export async function createExternalCheckup(
     }
   });
 
-  const token = localStorage.getItem('tgclinic_token');
-  const authHeaders: Record<string, string> = {};
-  if (token) authHeaders['Authorization'] = `Bearer ${token}`;
-
   const res = await fetch(`${API_URL}/ExternalCheckups/${encodeURIComponent(customerCode)}/health-checkups`, {
     method: 'POST',
-    headers: authHeaders,
+    headers: getExternalCheckupAuthHeaders(),
     body: form,
     credentials: 'include',
   });

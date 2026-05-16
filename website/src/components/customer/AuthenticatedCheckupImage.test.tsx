@@ -10,6 +10,7 @@ describe('AuthenticatedCheckupImage', () => {
 
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     localStorage.setItem('tgclinic_token', 'tg-token');
     fetchMock.mockResolvedValue({
       ok: true,
@@ -28,6 +29,8 @@ describe('AuthenticatedCheckupImage', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.clearAllMocks();
+    localStorage.clear();
+    sessionStorage.clear();
   });
 
   it('fetches protected checkup images with the TGClinic token and renders a blob URL', async () => {
@@ -47,6 +50,31 @@ describe('AuthenticatedCheckupImage', () => {
       'http://localhost:3002/api/ExternalCheckups/images/2026-04-18-15-17-06_6397T8250_IMG_6734.jpeg',
       expect.objectContaining({
         headers: { Authorization: 'Bearer tg-token' },
+        credentials: 'include',
+      })
+    );
+  });
+
+  it('uses the session token for protected checkup images when remember-me is off', async () => {
+    localStorage.removeItem('tgclinic_token');
+    sessionStorage.setItem('tgclinic_token', 'session-token');
+
+    render(
+      <AuthenticatedCheckupImage
+        src="/api/ExternalCheckups/images/2026-04-20-17-55-55_1880T056733_image.jpg"
+        alt="Checkup image"
+        className="w-24 h-24"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('img', { name: 'Checkup image' })).toHaveAttribute('src', 'blob:checkup-image');
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://localhost:3002/api/ExternalCheckups/images/2026-04-20-17-55-55_1880T056733_image.jpg',
+      expect.objectContaining({
+        headers: { Authorization: 'Bearer session-token' },
         credentials: 'include',
       })
     );

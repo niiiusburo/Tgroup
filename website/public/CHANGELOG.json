@@ -1,5 +1,29 @@
 [
   {
+    "version": "0.32.6",
+    "date": "2026-05-16",
+    "commit": "1edb439d",
+    "highlights": "Hosoonline images on NK now use session-token auth for non-remembered logins.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Customer profile Hosoonline thumbnails now send Authorization from sessionStorage as well as localStorage."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added a focused component test for session-token protected Hosoonline image loads."
+        ]
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
     "version": "0.32.5",
     "date": "2026-05-16",
     "commit": "81f9a755",
