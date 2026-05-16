@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.32.16",
+    "date": "2026-05-16",
+    "highlights": "Header chat icon now shows a red badge with the unread feedback count — admins see pending tickets, staff see admin replies they haven't seen.",
+    "sections": [
+      {
+        "title": "New",
+        "items": [
+          "GET /api/Feedback/unread-count returns role-aware count: admins get pending user-submitted threads; staff get their own threads where the last message is from someone else (i.e., admin replied).",
+          "FeedbackWidget header icon shows a red badge (matches the bell-icon notification style) with the count (or '99+' if huge). Polls every 45s, refreshes on widget open and on reply submit."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.15",
     "date": "2026-05-16",
     "highlights": "Mobile feedback chat modal is closable again. Bottom-sheet layout on phones, sticky header, 44px touch targets, body scroll lock.",

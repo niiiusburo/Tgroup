@@ -4,6 +4,7 @@ const express = require('express');
 const { query, pool } = require('../../db');
 const { requireAuth } = require('../../middleware/auth');
 const { getVietnamNow } = require('../../lib/dateUtils');
+const { isAdmin } = require('./admin');
 const {
   upload,
   insertAttachments,
@@ -13,6 +14,54 @@ const {
 } = require('./attachments');
 
 const router = express.Router();
+
+/**
+ * GET /api/Feedback/unread-count
+ * Polled by the header chat icon to show a notification badge.
+ *
+ * - Admin role: count of pending USER-submitted threads (the queue of
+ *   feedback they still owe a response on; auto-detected errors are
+ *   excluded so the badge isn't permanently lit by telemetry noise).
+ * - Non-admin role: count of THEIR threads where the latest message
+ *   came from someone else (i.e., an admin replied and they haven't
+ *   acknowledged by sending another message).
+ */
+router.get('/unread-count', requireAuth, async (req, res) => {
+  try {
+    const employeeId = req.user.employeeId;
+    const userIsAdmin = await isAdmin(employeeId);
+
+    if (userIsAdmin) {
+      const rows = await query(
+        `SELECT COUNT(*)::int AS n
+         FROM feedback_threads
+         WHERE source != 'auto'
+           AND status = 'pending'`,
+        []
+      );
+      return res.json({ count: rows[0].n, role: 'admin' });
+    }
+
+    const rows = await query(
+      `WITH last_msg AS (
+         SELECT DISTINCT ON (thread_id) thread_id, author_id
+         FROM feedback_messages
+         ORDER BY thread_id, created_at DESC
+       )
+       SELECT COUNT(*)::int AS n
+       FROM feedback_threads t
+       JOIN last_msg lm ON lm.thread_id = t.id
+       WHERE t.employee_id = $1
+         AND lm.author_id IS NOT NULL
+         AND lm.author_id != $1`,
+      [employeeId]
+    );
+    return res.json({ count: rows[0].n, role: 'staff' });
+  } catch (err) {
+    console.error('Error fetching feedback unread count:', err);
+    return res.status(500).json({ error: 'Internal server error', count: 0 });
+  }
+});
 
 /**
  * POST /api/Feedback

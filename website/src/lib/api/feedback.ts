@@ -14,6 +14,15 @@ export async function fetchMyFeedback(): Promise<{ items: FeedbackThread[] }> {
   return apiFetch('/Feedback/my');
 }
 
+export interface FeedbackUnreadCount {
+  count: number;
+  role: 'admin' | 'staff';
+}
+
+export async function fetchFeedbackUnreadCount(): Promise<FeedbackUnreadCount> {
+  return apiFetch<FeedbackUnreadCount>('/Feedback/unread-count');
+}
+
 export async function fetchMyFeedbackThread(threadId: string): Promise<FeedbackThreadDetail> {
   return apiFetch(`/Feedback/my/${encodeURIComponent(threadId)}`);
 }

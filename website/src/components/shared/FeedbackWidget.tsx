@@ -8,6 +8,7 @@ import {
   fetchMyFeedbackThread,
   createFeedback,
   replyToMyFeedbackThread,
+  fetchFeedbackUnreadCount,
   getUploadUrl,
 } from '@/lib/api';
 import type { FeedbackThread, FeedbackMessage, FeedbackStatus } from '@/types/feedback';
@@ -116,8 +117,40 @@ export function FeedbackWidget() {
   const filePreviews = useObjectUrls(files);
   const [fileError, setFileError] = useState<string | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
   const panelRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Poll the unread count every 45s so the badge stays roughly fresh without
+  // hammering the API. Also refresh on widget open and immediately when the
+  // user posts a reply (their reply clears their own badge for that thread).
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    const refresh = async () => {
+      try {
+        const r = await fetchFeedbackUnreadCount();
+        if (!cancelled) setUnreadCount(r.count);
+      } catch {
+        /* swallow — bad network or perms; leave previous count */
+      }
+    };
+    refresh();
+    const id = window.setInterval(refresh, 45_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [user]);
+
+  // When the widget opens, refresh immediately — staff who just got pinged
+  // wants to see the new count drop as soon as they read the reply.
+  useEffect(() => {
+    if (!open) return;
+    fetchFeedbackUnreadCount()
+      .then((r) => setUnreadCount(r.count))
+      .catch(() => {});
+  }, [open]);
 
   const handlePaste = usePasteImage({
     onFiles: (imgs) => setFiles((prev) => [...prev, ...imgs]),
@@ -229,6 +262,13 @@ export function FeedbackWidget() {
         await loadThreads();
       }
       setInput('');
+      // Refresh the badge — replying clears unread-from-admin for this thread
+      // (staff side), and submitting a new thread doesn't affect their badge
+      // either way.
+      try {
+        const r = await fetchFeedbackUnreadCount();
+        setUnreadCount(r.count);
+      } catch { /* ignore */ }
     } catch (err: unknown) {
       console.error('Failed to send feedback:', err);
       const message = err instanceof Error ? err.message : 'Failed to send. Please try again.';
@@ -253,9 +293,17 @@ export function FeedbackWidget() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors duration-150"
-        aria-label="Feedback"
+        aria-label={unreadCount > 0 ? `Phản hồi (${unreadCount} mới)` : 'Phản hồi'}
       >
         <MessageSquare className="w-5 h-5 text-gray-500" />
+        {unreadCount > 0 && (
+          <span
+            aria-hidden="true"
+            className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center text-[10px] font-bold leading-none text-white bg-red-500 rounded-full ring-2 ring-white"
+          >
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
+        )}
       </button>
 
       {open && (
