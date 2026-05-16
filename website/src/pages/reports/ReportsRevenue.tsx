@@ -76,6 +76,20 @@ export function ReportsRevenue() {
     filters: employeeExportFilters,
   });
 
+  const flatRevenueExportFilters = useMemo(() => ({
+    companyId: filters.companyId || 'all',
+    dateFrom: filters.dateFrom,
+    dateTo: filters.dateTo,
+  }), [filters.companyId, filters.dateFrom, filters.dateTo]);
+  const flatRevenueExport = useExport({
+    type: 'revenue-flat',
+    filters: flatRevenueExportFilters,
+  });
+  const flatDepositExport = useExport({
+    type: 'deposit-flat',
+    filters: flatRevenueExportFilters,
+  });
+
   useEffect(() => {
     let active = true;
     setEmployeeId('all');
@@ -225,6 +239,42 @@ export function ReportsRevenue() {
       </SectionCard>
 
       <SectionCard
+        title={t('charts.legacyRevenueExcel', 'Báo cáo doanh thu (Excel)')}
+        action={
+          <ExportMenu
+            onExport={flatRevenueExport.handleDirectExport}
+            onPreview={flatRevenueExport.openPreview}
+            disabled={flatRevenueExport.downloading}
+            loading={flatRevenueExport.downloading || flatRevenueExport.loading}
+          />
+        }
+      >
+        {flatRevenueExport.error ? (
+          <div className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+            {flatRevenueExport.error}
+          </div>
+        ) : null}
+      </SectionCard>
+
+      <SectionCard
+        title={t('charts.legacyDepositExcel', 'Báo cáo cọc tiền (Excel)')}
+        action={
+          <ExportMenu
+            onExport={flatDepositExport.handleDirectExport}
+            onPreview={flatDepositExport.openPreview}
+            disabled={flatDepositExport.downloading}
+            loading={flatDepositExport.downloading || flatDepositExport.loading}
+          />
+        }
+      >
+        {flatDepositExport.error ? (
+          <div className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+            {flatDepositExport.error}
+          </div>
+        ) : null}
+      </SectionCard>
+
+      <SectionCard
         title={t('charts.employeeRevenueExcel')}
         action={
           <ExportMenu
@@ -329,6 +379,24 @@ export function ReportsRevenue() {
         preview={employeeExport.previewData}
         loading={employeeExport.loading}
         error={employeeExport.error}
+      />
+
+      <ExportPreviewModal
+        isOpen={flatRevenueExport.previewOpen}
+        onClose={flatRevenueExport.closePreview}
+        onDownload={flatRevenueExport.handleDownload}
+        preview={flatRevenueExport.previewData}
+        loading={flatRevenueExport.loading}
+        error={flatRevenueExport.error}
+      />
+
+      <ExportPreviewModal
+        isOpen={flatDepositExport.previewOpen}
+        onClose={flatDepositExport.closePreview}
+        onDownload={flatDepositExport.handleDownload}
+        preview={flatDepositExport.previewData}
+        loading={flatDepositExport.loading}
+        error={flatDepositExport.error}
       />
     </div>
   );

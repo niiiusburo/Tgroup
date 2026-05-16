@@ -1,5 +1,25 @@
 [
   {
+    "version": "0.32.5",
+    "date": "2026-05-16",
+    "commit": "81f9a755",
+    "highlights": "Fix deposit payment_category classification; restore legacy flat revenue/deposit exports",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": []
+      },
+      {
+        "title": "Bug Fixes",
+        "items": []
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
     "version": "0.32.4",
     "date": "2026-05-15",
     "commit": "423ede73",

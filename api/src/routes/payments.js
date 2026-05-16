@@ -36,18 +36,20 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
 
     // Determine payment_category explicitly
     const hasAllocations = Array.isArray(allocations) && allocations.some(a => parseFloat(a.allocated_amount || 0) > 0);
+    const isExplicitDeposit = deposit_type === 'deposit' || deposit_type === 'refund';
     const looksLikeDeposit =
-      !deposit_type &&
+      isExplicitDeposit ||
+      (!deposit_type &&
       !hasAllocations &&
       method !== "deposit" &&
       method !== "mixed" &&
       !service_id &&
       !(deposit_used > 0) &&
-      parseFloat(amount) > 0;
+      parseFloat(amount) > 0);
 
     const payment_category = looksLikeDeposit ? 'deposit' : 'payment';
 
-    if (looksLikeDeposit) {
+    if (looksLikeDeposit && !deposit_type) {
       deposit_type = "deposit";
     }
 
