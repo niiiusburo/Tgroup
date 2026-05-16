@@ -101,7 +101,13 @@ async function getRows(filters) {
       pr.displayname AS partnerdisplayname,
       pr.phone AS partnerphone,
       c.name AS companyname,
-      COALESCE(NULLIF(so.code, ''), so.name) AS saleordername
+      COALESCE(
+        (SELECT STRING_AGG(DISTINCT COALESCE(NULLIF(so2.code, ''), so2.name), ', ')
+         FROM payment_allocations pa
+         JOIN saleorders so2 ON so2.id = pa.invoice_id
+         WHERE pa.payment_id = p.id),
+        COALESCE(NULLIF(so.code, ''), so.name)
+      ) AS saleordername
     FROM payments p
     LEFT JOIN partners pr ON pr.id = p.customer_id
     LEFT JOIN saleorders so ON so.id = p.service_id

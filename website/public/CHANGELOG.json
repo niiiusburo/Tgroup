@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.32.12",
+    "date": "2026-05-16",
+    "highlights": "Payments export now populates 'Số phiếu điều trị' from payment_allocations (covers 97% of payments instead of 0.5%). Sales-employees report accepts all legacy GUID company IDs.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Payments Excel export (Danh sách thanh toán) — 'Số phiếu điều trị' column was empty for 99.5% of payments because the query used p.service_id (only 342/63883 populated). Switched to a payment_allocations subquery that aggregates linked SO codes (covers 61822/63883).",
+          "Sales-employees report (Báo cáo doanh thu theo nhân viên) — company filter rejected all 7 existing company GUIDs because the UUID regex required RFC 4122 strict variant bits. Relaxed to accept the legacy GUID format the rest of the system uses."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.11",
     "date": "2026-05-16",
     "highlights": "Excel exports now show real service names for old-format sale orders (SO54551 etc.) instead of repeating the SO code.",
