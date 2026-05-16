@@ -1,5 +1,30 @@
 [
   {
+    "version": "0.32.8",
+    "date": "2026-05-16",
+    "commit": "ae40c5df",
+    "highlights": "Revenue tab Excel exports consolidated into one picker at the top.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          {
+            "title": "Consolidated Excel export picker",
+            "description": "Single dropdown on the Revenue tab picks between Revenue, Deposit, and Employee-revenue exports; replaces three bottom panels."
+          }
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": []
+      },
+      {
+        "title": "Release Notes",
+        "items": []
+      }
+    ]
+  },
+  {
     "version": "0.32.6",
     "date": "2026-05-16",
     "commit": "1edb439d",

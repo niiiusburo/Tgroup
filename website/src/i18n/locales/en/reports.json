@@ -171,6 +171,15 @@
       "sales": "Sales Employee"
     }
   },
+  "revenueExport": {
+    "title": "Export Excel Report",
+    "reportType": "Report Type",
+    "kinds": {
+      "revenue": "Revenue Report",
+      "deposit": "Deposit Report",
+      "employee": "Revenue by Employee"
+    }
+  },
   "revenueRules": {
     "servicePayments": {
       "label": "Service payments"
