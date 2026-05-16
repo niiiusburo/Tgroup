@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.32.14",
+    "date": "2026-05-16",
+    "highlights": "Auto-detect feedback no longer floods on 4xx errors. Admin reply to feedback now works (was crashing with ReferenceError).",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Admin feedback reply (POST /api/Feedback/all/:threadId/reply) crashed with `ReferenceError: getVietnamNow is not defined` — missing import in adminRoutes.js. Now fixed; admins can reply to and resolve user feedback again.",
+          "Auto-detect feedback no longer creates tickets for 4xx HTTP responses. 404s from /Partners/resolve (unknown patient), 400s from validation, and other intentional client-side errors no longer flood the pending feedback queue. Only 5xx server errors auto-fire now."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.13",
     "date": "2026-05-16",
     "highlights": "Patient deep links (/customers/T056733, phone numbers) now resolve to the canonical patient and load the profile correctly.",

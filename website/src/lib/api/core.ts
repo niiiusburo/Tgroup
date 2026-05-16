@@ -92,8 +92,12 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
       window.dispatchEvent(new CustomEvent(AUTH_UNAUTHORIZED_EVENT));
     }
 
-    // Report to AutoDebugger pipeline (production only)
-    if (import.meta.env.PROD) {
+    // Report to AutoDebugger pipeline (production only, 5xx only).
+    // 4xx errors are intentional client-side conditions (404 from /Partners/resolve
+    // when a key doesn't exist, 400 from validation, etc.) — not bugs worth a
+    // feedback ticket. Auto-capture them and the pending-feedback queue floods
+    // with hundreds of false positives.
+    if (import.meta.env.PROD && res.status >= 500) {
       import('@/lib/errorReporter').then(({ reportApiError }) => {
         reportApiError(endpoint, method, res.status, `HTTP ${res.status}`, undefined);
       }).catch(() => {});

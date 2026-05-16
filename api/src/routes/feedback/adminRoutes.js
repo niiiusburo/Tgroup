@@ -6,6 +6,7 @@ const fs = require('fs');
 const { query, pool } = require('../../db');
 const { requireAuth } = require('../../middleware/auth');
 const { requireAdmin } = require('./admin');
+const { getVietnamNow } = require('../../lib/dateUtils');
 const {
   UPLOAD_DIR,
   upload,
