@@ -36,8 +36,11 @@ export function Customers() {
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  // Only seed with the URL id when it's already a UUID. Non-UUID keys must wait
+  // for the resolver to canonicalize, otherwise child components fire API calls
+  // with the raw key and get 500s before the redirect lands.
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
-    id ?? null,
+    id && UUID_RE.test(id) ? id : null,
   );
   const [profileTab, setProfileTab] = useState<ProfileTab>("profile");
   const [deleteDialog, setDeleteDialog] = useState<{
