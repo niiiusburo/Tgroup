@@ -16,6 +16,15 @@ function validUUID(s) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 }
 
+// NOTE on timestamps + ::date casts:
+// Every timestamp column in this DB (appointments.date, saleorders.datecreated,
+// payments.created_at, etc.) is `timestamp without time zone` storing the literal
+// Vietnam wall-clock value at insert time. The `::date` cast therefore already
+// returns the correct Vietnam-local date — DO NOT wrap with `AT TIME ZONE 'UTC'
+// AT TIME ZONE 'Asia/Ho_Chi_Minh'`. That would treat the naive timestamp as UTC
+// and shift every value +7h, pushing all evening appointments to the next day.
+// Verified 2026-05-17: hour-of-day histograms peak at 9–18 (clinic working hours)
+// across appointments/saleorders/payments — confirms VN-local-naive storage.
 function dateCompanyFilter(dateFrom, dateTo, companyId, dateCol = 'datecreated', companyCol = 'companyid') {
   const conds = [];
   const params = [];

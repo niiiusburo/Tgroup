@@ -14,13 +14,25 @@ interface ReportsFiltersProps {
 import { useTranslation } from 'react-i18next';
 import { useTimezone } from '@/contexts/TimezoneContext';
 
+function formatPeriod(dateFrom: string, dateTo: string, locale: string): string {
+  if (!dateFrom || !dateTo) return '';
+  const fromDate = new Date(dateFrom + 'T00:00:00Z');
+  const toDate = new Date(dateTo + 'T00:00:00Z');
+  if (Number.isNaN(fromDate.getTime()) || Number.isNaN(toDate.getTime())) return '';
+  const fmt = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const fmtSameYear = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  if (dateFrom === dateTo) return fmt.format(fromDate);
+  const sameYear = fromDate.getUTCFullYear() === toDate.getUTCFullYear();
+  return sameYear ? `${fmtSameYear.format(fromDate)} – ${fmt.format(toDate)}` : `${fmt.format(fromDate)} – ${fmt.format(toDate)}`;
+}
+
 export function ReportsFilters({
   dateFrom, dateTo, companyId,
   onDateFromChange, onDateToChange, onCompanyChange,
   locations,
   locationsLoading = false,
 }: ReportsFiltersProps) {
-  const { t } = useTranslation('reports');
+  const { t, i18n } = useTranslation('reports');
   const { getToday } = useTimezone();
   // Quick range presets (Vietnam timezone via getToday)
   const today = getToday();
@@ -35,13 +47,29 @@ export function ReportsFilters({
   const last90 = daysAgo(89);
   const allTimeStart = '2000-01-01';
 
+  const activeLocation = companyId ? locations.find((l) => l.id === companyId) : null;
+  const locationLabel = activeLocation ? activeLocation.name : t('allLocations', 'Tất cả chi nhánh');
+  const localeForFormat = i18n.language?.startsWith('vi') ? 'vi-VN' : 'en-GB';
+  const periodLabel = formatPeriod(dateFrom, dateTo, localeForFormat);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-      className="flex flex-wrap items-center gap-3 bg-white rounded-xl shadow-card p-4"
+      className="bg-white rounded-xl shadow-card p-4 space-y-2"
     >
+      {/* Active period + location — always-visible so users know exactly what window they're looking at */}
+      {periodLabel && (
+        <div className="text-xs text-gray-500 flex items-center gap-1.5" data-testid="reports-period-banner">
+          <span className="font-medium text-gray-700">{t('viewingPeriod.label', 'Đang xem')}:</span>
+          <span>{periodLabel}</span>
+          <span className="text-gray-300">·</span>
+          <span>{locationLabel}</span>
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center gap-3">
       {/* Quick presets */}
       <div className="flex items-center gap-1 mr-2">
         {[
@@ -96,6 +124,7 @@ export function ReportsFilters({
           <option key={loc.id} value={loc.id}>{loc.name}</option>
         ))}
       </select>
+      </div>
     </motion.div>
   );
 }

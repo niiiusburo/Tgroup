@@ -1,5 +1,24 @@
 [
   {
+    "version": "0.32.17",
+    "date": "2026-05-17",
+    "highlights": "Reports now show the active period and branch at the top of every tab, and the backend has a permanent safety comment preventing future timezone regressions.",
+    "sections": [
+      {
+        "title": "Reports",
+        "items": [
+          "Every report tab (Dashboard, Revenue, Appointments, Doctors, Customers, Locations, Services, Employees) now shows a 'Đang xem: 1 thg 4 – 30 thg 4, 2026 · Tất cả chi nhánh' line at the top of the filter card so you always know which window and branch the numbers reflect — no more scrolling back to the date picker to check."
+        ]
+      },
+      {
+        "title": "Backend",
+        "items": [
+          "helpers.js dateCompanyFilter now carries a multi-line safety comment documenting that DB timestamps are stored as Vietnam wall-clock naive — prevents a future agent or developer from 'fixing' a non-bug by wrapping with AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh', which would silently shift every evening row to the next day."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.16",
     "date": "2026-05-16",
     "highlights": "Header chat icon now shows a red badge with the unread feedback count — admins see pending tickets, staff see admin replies they haven't seen.",

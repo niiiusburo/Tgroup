@@ -11,6 +11,9 @@
   "loading": "Đang tải…",
   "loadingLocations": "Đang tải chi nhánh...",
   "noData": "Không có dữ liệu",
+  "viewingPeriod": {
+    "label": "Đang xem"
+  },
   "filters": {
     "dateRange": "Khoảng thời gian",
     "location": "Chi nhánh",

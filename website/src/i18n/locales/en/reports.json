@@ -11,6 +11,9 @@
   "loading": "Loading…",
   "loadingLocations": "Loading locations...",
   "noData": "No data available",
+  "viewingPeriod": {
+    "label": "Viewing"
+  },
   "filters": {
     "dateRange": "Date Range",
     "location": "Location",
