@@ -179,7 +179,16 @@ async function getRows(filters, user) {
       c.name AS companyname,
       COALESCE(p.payment_date, p.created_at)::date AS paymentdate,
       p.reference_code AS paymentreference,
-      so.name AS saleordername,
+      COALESCE(
+        NULLIF((
+          SELECT STRING_AGG(DISTINCT NULLIF(solx.productname, ''), ', ')
+          FROM saleorderlines solx
+          WHERE solx.orderid = so.id
+            AND COALESCE(solx.isdeleted, false) = false
+        ), ''),
+        NULLIF(so.name, so.code),
+        so.name
+      ) AS saleordername,
       so.code AS saleordercode,
       cust.name AS customername,
       cust.phone AS customerphone,

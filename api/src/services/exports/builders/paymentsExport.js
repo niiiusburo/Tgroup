@@ -101,7 +101,7 @@ async function getRows(filters) {
       pr.displayname AS partnerdisplayname,
       pr.phone AS partnerphone,
       c.name AS companyname,
-      so.name AS saleordername
+      COALESCE(NULLIF(so.code, ''), so.name) AS saleordername
     FROM payments p
     LEFT JOIN partners pr ON pr.id = p.customer_id
     LEFT JOIN saleorders so ON so.id = p.service_id

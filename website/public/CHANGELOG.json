@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.32.11",
+    "date": "2026-05-16",
+    "highlights": "Excel exports now show real service names for old-format sale orders (SO54551 etc.) instead of repeating the SO code.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Revenue export (Báo cáo doanh thu) — column F 'Tên dịch vụ' now reads service names from saleorderlines.productname for old-format SOs; falls back to so.name for new-format SOs.",
+          "Payments export — column 'Số phiếu điều trị' now reliably shows the SO code (e.g. SO-2026-0940) instead of the service name for new-format SOs.",
+          "Sales-employees report — same service-name resolution as revenue export."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.10",
     "date": "2026-05-16",
     "highlights": "Báo cáo doanh thu (Excel) restored service name and added per-SO totals + receipt number columns.",

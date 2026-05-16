@@ -73,7 +73,16 @@ function revenueCte(where) {
         cust.displayname AS partnerdisplayname,
         cust.phone AS partnerphone,
         COALESCE(NULLIF(so.code, ''), so.name) AS saleordercode,
-        so.name AS saleordername,
+        COALESCE(
+          NULLIF((
+            SELECT STRING_AGG(DISTINCT NULLIF(sol.productname, ''), ', ')
+            FROM saleorderlines sol
+            WHERE sol.orderid = so.id
+              AND COALESCE(sol.isdeleted, false) = false
+          ), ''),
+          NULLIF(so.name, so.code),
+          so.name
+        ) AS saleordername,
         COALESCE(so.amounttotal, 0) AS saleorder_total,
         COALESCE(so.residual, 0) AS saleorder_residual,
         p.receipt_number AS receipt_number,
