@@ -72,7 +72,11 @@ function revenueCte(where) {
         cust.name AS partnername,
         cust.displayname AS partnerdisplayname,
         cust.phone AS partnerphone,
-        COALESCE(NULLIF(so.code, ''), so.name) AS saleordername,
+        COALESCE(NULLIF(so.code, ''), so.name) AS saleordercode,
+        so.name AS saleordername,
+        COALESCE(so.amounttotal, 0) AS saleorder_total,
+        COALESCE(so.residual, 0) AS saleorder_residual,
+        p.receipt_number AS receipt_number,
         COALESCE(p.payment_date, p.created_at)::date AS paymentdate,
         ${allocatedAmountExpr} AS row_amount,
         COALESCE(p.amount, 0) AS payment_amount,
@@ -113,7 +117,11 @@ async function getRevenueRows(filters, maxRows) {
       partnername,
       partnerdisplayname,
       partnerphone,
+      saleordercode,
       saleordername,
+      saleorder_total,
+      saleorder_residual,
+      receipt_number,
       paymentdate,
       row_amount,
       CASE WHEN ABS(payment_amount) > 0 THEN payment_cash_amount * row_amount / payment_amount ELSE 0 END AS row_cash_amount,
@@ -126,7 +134,7 @@ async function getRevenueRows(filters, maxRows) {
       dentalaidename,
       customersourcename
     FROM revenue_rows
-    ORDER BY paymentdate DESC NULLS LAST, created_at DESC NULLS LAST, saleordername NULLS LAST
+    ORDER BY paymentdate DESC NULLS LAST, created_at DESC NULLS LAST, saleordercode NULLS LAST
     LIMIT ${maxRows + 1}
   `;
   return query(sql, params);

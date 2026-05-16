@@ -42,7 +42,11 @@ describe('legacyFlatReportsExport', () => {
         partnername: 'Nguyễn Văn A',
         partnerdisplayname: 'Nguyễn Văn A',
         partnerphone: '0909000000',
-        saleordername: 'SO001',
+        saleordercode: 'SO-2026-0644',
+        saleordername: 'KHÍ CỤ NONG HÀM THƯỜNG',
+        saleorder_total: '3000000',
+        saleorder_residual: '1000000',
+        receipt_number: 'BL-2026-0123',
         paymentdate: '2026-05-09',
         row_amount: '1000000',
         row_cash_amount: '600000',
@@ -73,11 +77,15 @@ describe('legacyFlatReportsExport', () => {
       'Tên khách hàng',
       'Số điện thoại',
       'Phiếu khám',
+      'Tên dịch vụ',
+      'Tổng tiền phiếu',
+      'Còn lại phiếu',
       'Ngày thanh toán',
       'Số tiền',
       'Tiền mặt',
       'Chuyển khoản',
       'Tiền cọc',
+      'Số biên lai',
       'Sale online',
       'CSKH',
       'Bác sĩ',
@@ -87,30 +95,32 @@ describe('legacyFlatReportsExport', () => {
     ]);
     expect(sheet.getColumn(1).width).toBeUndefined();
     expect(sheet.getColumn(2).width).toBe(16);
-    expect(sheet.getColumn(6).width).toBe(18.19921875);
-    expect(sheet.getColumn(12).width).toBeUndefined();
-    expect(sheet.getColumn(14).width).toBeUndefined();
+    expect(sheet.getColumn(9).width).toBe(18.19921875);
     expect(sheet.autoFilter).toBeNull();
     expect(sheet.views).toEqual([]);
 
     expect(sheet.getCell('A2').value).toBe('Tấm Dentist Quận 3');
     expect(sheet.getCell('B2').value).toBe('T8250');
     expect(sheet.getCell('C2').value).toBe('Nguyễn Văn A');
-    expect(sheet.getCell('E2').value).toBe('SO001');
-    expect(sheet.getCell('F2').value).toEqual(new Date(Date.UTC(2026, 4, 9)));
-    expect(sheet.getCell('G2').value).toBe(1000000);
-    expect(sheet.getCell('H2').value).toBe(600000);
-    expect(sheet.getCell('I2').value).toBe(300000);
-    expect(sheet.getCell('J2').value).toBe(100000);
-    expect(sheet.getCell('K2').value).toBe('Sale Online A');
-    expect(sheet.getCell('L2').value).toBe('CSKH B');
-    expect(sheet.getCell('M2').value).toBe('Bác sĩ C');
-    expect(sheet.getCell('N2').value).toBe('Phụ tá D');
-    expect(sheet.getCell('O2').value).toBe('Trợ lý E');
-    expect(sheet.getCell('P2').value).toBe('Sale Online');
+    expect(sheet.getCell('E2').value).toBe('SO-2026-0644');
+    expect(sheet.getCell('F2').value).toBe('KHÍ CỤ NONG HÀM THƯỜNG');
+    expect(sheet.getCell('G2').value).toBe(3000000);
+    expect(sheet.getCell('H2').value).toBe(1000000);
+    expect(sheet.getCell('I2').value).toEqual(new Date(Date.UTC(2026, 4, 9)));
+    expect(sheet.getCell('J2').value).toBe(1000000);
+    expect(sheet.getCell('K2').value).toBe(600000);
+    expect(sheet.getCell('L2').value).toBe(300000);
+    expect(sheet.getCell('M2').value).toBe(100000);
+    expect(sheet.getCell('N2').value).toBe('BL-2026-0123');
+    expect(sheet.getCell('O2').value).toBe('Sale Online A');
+    expect(sheet.getCell('P2').value).toBe('CSKH B');
+    expect(sheet.getCell('Q2').value).toBe('Bác sĩ C');
+    expect(sheet.getCell('R2').value).toBe('Phụ tá D');
+    expect(sheet.getCell('S2').value).toBe('Trợ lý E');
+    expect(sheet.getCell('T2').value).toBe('Sale Online');
   });
 
-  it('uses saleorders.code in column E and search matches SO codes', async () => {
+  it('uses saleorders.code in column E, exposes so.name separately, and search matches SO codes', async () => {
     query.mockResolvedValueOnce([{ total: '0', total_amount: '0' }]);
 
     await legacyFlatReportsExport.revenue.preview({
@@ -121,7 +131,8 @@ describe('legacyFlatReportsExport', () => {
     }, USER);
 
     const [sql, params] = query.mock.calls[0];
-    expect(sql).toContain("COALESCE(NULLIF(so.code, ''), so.name) AS saleordername");
+    expect(sql).toContain("COALESCE(NULLIF(so.code, ''), so.name) AS saleordercode");
+    expect(sql).toContain('so.name AS saleordername');
     expect(sql).toContain('so.code ILIKE');
     expect(params).toContain('%SO-2026-0644%');
   });
