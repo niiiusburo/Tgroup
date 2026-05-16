@@ -29,7 +29,15 @@ function amountNumber(value) {
 function dateKey(value) {
   if (!value) return null;
   if (typeof value === 'string') return value.slice(0, 10);
-  if (value instanceof Date && !Number.isNaN(value.getTime())) return value.toISOString().slice(0, 10);
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    // node-pg parses `timestamp without time zone` using the server-local TZ.
+    // Use local wall-clock components, not toISOString (UTC), to avoid an
+    // off-by-one day when the API runs in Asia/Ho_Chi_Minh (+07:00).
+    const y = value.getFullYear();
+    const m = String(value.getMonth() + 1).padStart(2, '0');
+    const d = String(value.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
   return String(value).slice(0, 10);
 }
 
@@ -194,6 +202,7 @@ router.post('/cash-flow/summary', requirePermission('reports.view'), async (req,
 router._test = {
   classifyCashFlowRow,
   summarizeCashFlow,
+  dateKey,
   REVENUE_RULES,
 };
 

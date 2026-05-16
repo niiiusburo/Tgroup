@@ -20,6 +20,7 @@ const reportsRouter = require('../../reports');
 const {
   classifyCashFlowRow,
   summarizeCashFlow,
+  dateKey,
   REVENUE_RULES,
 } = cashFlowRouter._test;
 
@@ -51,6 +52,28 @@ function makeParentReportsApp() {
 describe('reports cash-flow aggregation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('dateKey (timezone safety)', () => {
+    it('returns the YYYY-MM-DD slice for ISO strings unchanged', () => {
+      expect(dateKey('2026-05-06')).toBe('2026-05-06');
+      expect(dateKey('2026-05-06T00:00:00Z')).toBe('2026-05-06');
+    });
+
+    it('uses local wall-clock components for Date values (no UTC slice)', () => {
+      // node-pg parses `timestamp without time zone` using the server-local TZ.
+      // On a +07:00 server, midnight 2026-06-04 ICT has a UTC instant on 2026-06-03,
+      // so toISOString().slice(0,10) would return the wrong day.
+      // Simulate the same wall-clock locally: a Date whose getFullYear/Month/Date
+      // report 2026-06-04 must bucket as '2026-06-04'.
+      const d = new Date('2026-06-04T00:00:00');
+      expect(dateKey(d)).toBe('2026-06-04');
+    });
+
+    it('returns null for null/undefined', () => {
+      expect(dateKey(null)).toBeNull();
+      expect(dateKey(undefined)).toBeNull();
+    });
   });
 
   it('keeps deposit rules separate from revenue recognition', () => {

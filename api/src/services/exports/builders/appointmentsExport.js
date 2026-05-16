@@ -151,11 +151,20 @@ function buildAppointmentDate(row) {
   // row.date is a timestamp without timezone (OID 1114), not a plain DATE.
   // It stores the full appointment datetime (e.g. 2025-05-22 13:00:00).
   // When row.time is provided (legacy), combine date + time explicitly.
+  // Use wall-clock components from the server-local interpretation (matches toVNDate),
+  // never toISOString — that would shift to UTC and drop a day on a +07:00 server.
   if (row.time) {
-    const dateStr = row.date instanceof Date ? row.date.toISOString().slice(0, 10) : String(row.date).slice(0, 10);
+    const d = row.date instanceof Date ? row.date : new Date(row.date);
+    if (Number.isNaN(d.getTime())) return null;
     const [hours = '0', minutes = '0', seconds = '0'] = String(row.time).split(':');
-    const dt = new Date(`${dateStr}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}Z`);
-    return Number.isNaN(dt.getTime()) ? null : dt;
+    return new Date(Date.UTC(
+      d.getFullYear(),
+      d.getMonth(),
+      d.getDate(),
+      Number(hours) || 0,
+      Number(minutes) || 0,
+      Number(seconds) || 0,
+    ));
   }
 
   // Use the full timestamp from row.date, preserving the time component.
