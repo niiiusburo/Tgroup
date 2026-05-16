@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Bug, Loader2, MessageSquare, Paperclip, Send, X, FileCode, Hash, Clock, Route, Globe, GitCommit, CheckCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getUploadUrl } from '@/lib/api';
@@ -251,15 +252,36 @@ export function FeedbackAdminDetailModal({
   onSendReply,
 }: FeedbackAdminDetailModalProps) {
   const { t } = useTranslation('settings');
-  if (!threadId || !detail) return null;
+  const isOpen = Boolean(threadId && detail);
+
+  // Lock background scroll + close on Escape while the modal is open. Without
+  // these, on mobile the user can scroll the page underneath, the header (and
+  // its close button) feels out of reach, and there's no keyboard escape hatch.
+  useEffect(() => {
+    if (!isOpen) return;
+    document.body.classList.add('modal-open');
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.classList.remove('modal-open');
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !detail) return null;
 
   const isAuto = detail.thread.source === 'auto';
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center p-0 sm:items-center sm:p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden="true" />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+      <div
+        className="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[92dvh] sm:max-h-[85vh] animate-in zoom-in-95 duration-200"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-gray-100 bg-gray-50/50 sticky top-0 z-10">
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded-lg ${isAuto ? 'bg-red-50' : 'bg-primary/10'}`}>
               {isAuto
@@ -282,9 +304,10 @@ export function FeedbackAdminDetailModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-gray-200 text-gray-500 transition-colors"
+            aria-label="Đóng"
+            className="flex items-center justify-center min-w-[44px] min-h-[44px] -mr-2 rounded-lg hover:bg-gray-200 active:bg-gray-300 text-gray-600 transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
@@ -377,24 +400,25 @@ export function FeedbackAdminDetailModal({
                 onPaste={onPaste}
                 placeholder={t('enterNotePlaceholder', { ns: 'payment' })}
                 rows={2}
-                className="flex-1 resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                className="flex-1 resize-none rounded-lg border border-gray-200 px-3 py-2 text-base sm:text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
               />
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 active:bg-gray-100 transition-colors"
                 aria-label="Attach image"
                 title="Attach image"
               >
-                <Paperclip className="w-4 h-4" />
+                <Paperclip className="w-5 h-5" />
               </button>
               <button
                 type="button"
                 disabled={(!replyInput.trim() && files.length === 0) || sending}
                 onClick={onSendReply}
-                className="w-9 h-9 flex items-center justify-center rounded-lg bg-primary text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
+                aria-label="Gửi"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-primary text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 active:bg-primary/80 transition-colors"
               >
-                {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
               </button>
             </div>
           </div>

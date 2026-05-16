@@ -1,5 +1,23 @@
 [
   {
+    "version": "0.32.15",
+    "date": "2026-05-16",
+    "highlights": "Mobile feedback chat modal is closable again. Bottom-sheet layout on phones, sticky header, 44px touch targets, body scroll lock.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Feedback detail modal: close (X), attach, and send buttons were 28-36px wide on mobile (below Apple HIG 44px minimum) and easy to miss. Now all three are at least 44×44px.",
+          "Feedback detail modal: body scroll was not locked when the modal was open, so the page underneath could scroll and the modal felt unanchored. Body now locks until close.",
+          "Feedback detail modal: Escape key now closes the modal.",
+          "Feedback detail modal: on phones (<640px) the modal renders as a bottom sheet anchored to the bottom of the screen with safe-area-inset padding, instead of being centered with margin and clipped by the home indicator.",
+          "Feedback detail modal: uses 92dvh (dynamic viewport height) on mobile so iOS Safari's collapsing URL bar doesn't push the input out of view.",
+          "Feedback reply textarea: font-size now 16px on mobile so iOS no longer auto-zooms when focused."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.14",
     "date": "2026-05-16",
     "highlights": "Auto-detect feedback no longer floods on 4xx errors. Admin reply to feedback now works (was crashing with ReferenceError).",
