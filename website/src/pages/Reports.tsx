@@ -32,14 +32,15 @@ export default function Reports() {
   const navigate = useNavigate();
   const { allLocations, isLoading: locationsLoading } = useLocations();
 
-  // Default: start of this year → today (Vietnam timezone)
+  // Default: last 30 days → today (Vietnam timezone)
   const todayParts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
   const get = (type: string) => todayParts.find(p => p.type === type)?.value ?? '00';
   const year = get('year');
   const month = get('month');
   const day = get('day');
-  const defaultFrom = `${year}-01-01`;
   const defaultTo = `${year}-${month}-${day}`;
+  const last30 = new Date(new Date(defaultTo + 'T00:00:00Z').getTime() - 29 * 86400000);
+  const defaultFrom = `${last30.getUTCFullYear()}-${String(last30.getUTCMonth() + 1).padStart(2, '0')}-${String(last30.getUTCDate()).padStart(2, '0')}`;
 
   const [dateFrom, setDateFrom] = useState(defaultFrom);
   const [dateTo, setDateTo] = useState(defaultTo);

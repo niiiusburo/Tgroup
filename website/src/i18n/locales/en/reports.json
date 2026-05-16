@@ -23,9 +23,13 @@
     "to": "To",
     "apply": "Apply Filters",
     "clear": "Clear Filters",
-    "ytd": "YTD",
-    "30d": "30d",
-    "90d": "90d"
+    "today": "Today",
+    "3d": "3d",
+    "7d": "1w",
+    "30d": "1mo",
+    "90d": "90d",
+    "allTime": "All",
+    "ytd": "YTD"
   },
   "metrics": {
     "totalRevenue": "Total Revenue",

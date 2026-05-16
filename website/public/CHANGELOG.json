@@ -1,5 +1,25 @@
 [
   {
+    "version": "0.32.9",
+    "date": "2026-05-16",
+    "highlights": "Reports date presets reordered to Today / 3d / 1w / 1mo / 90d / All; default range is now last 30 days.",
+    "sections": [
+      {
+        "title": "Changed",
+        "items": [
+          {
+            "title": "Date quick presets",
+            "description": "Replaced YTD/30d/90d with Hôm nay, 3 ngày, 1 tuần, 1 tháng, 90 ngày, Tất cả."
+          },
+          {
+            "title": "Default range",
+            "description": "Reports page now opens on the last 30 days instead of start-of-year."
+          }
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.8",
     "date": "2026-05-16",
     "commit": "ae40c5df",

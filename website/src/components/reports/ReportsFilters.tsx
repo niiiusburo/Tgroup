@@ -22,14 +22,18 @@ export function ReportsFilters({
 }: ReportsFiltersProps) {
   const { t } = useTranslation('reports');
   const { getToday } = useTimezone();
-  // Quick range presets
+  // Quick range presets (Vietnam timezone via getToday)
   const today = getToday();
-  const year = parseInt(today.split('-')[0], 10);
-  const ytd = `${year}-01-01`;
-  const last30Date = new Date(new Date(today + 'T00:00:00Z').getTime() - 30 * 86400000);
-  const last30 = `${last30Date.getUTCFullYear()}-${String(last30Date.getUTCMonth() + 1).padStart(2, '0')}-${String(last30Date.getUTCDate()).padStart(2, '0')}`;
-  const last90Date = new Date(new Date(today + 'T00:00:00Z').getTime() - 90 * 86400000);
-  const last90 = `${last90Date.getUTCFullYear()}-${String(last90Date.getUTCMonth() + 1).padStart(2, '0')}-${String(last90Date.getUTCDate()).padStart(2, '0')}`;
+  const todayMs = new Date(today + 'T00:00:00Z').getTime();
+  const daysAgo = (n: number) => {
+    const d = new Date(todayMs - n * 86400000);
+    return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+  };
+  const last3 = daysAgo(2);   // today + 2 prior days = "3 days"
+  const last7 = daysAgo(6);   // 1 week including today
+  const last30 = daysAgo(29); // 1 month including today
+  const last90 = daysAgo(89);
+  const allTimeStart = '2000-01-01';
 
   return (
     <motion.div
@@ -41,9 +45,12 @@ export function ReportsFilters({
       {/* Quick presets */}
       <div className="flex items-center gap-1 mr-2">
         {[
-          { label: t('filters.ytd'), from: ytd, to: today },
+          { label: t('filters.today'), from: today, to: today },
+          { label: t('filters.3d'), from: last3, to: today },
+          { label: t('filters.7d'), from: last7, to: today },
           { label: t('filters.30d'), from: last30, to: today },
           { label: t('filters.90d'), from: last90, to: today },
+          { label: t('filters.allTime'), from: allTimeStart, to: today },
         ].map((p) => (
           <button
             key={p.label}
