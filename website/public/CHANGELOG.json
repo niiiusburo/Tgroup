@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.32.19",
+    "date": "2026-05-17",
+    "highlights": "The 'NEW IN THIS VERSION' release notes toast now auto-dismisses after 10 seconds (paused on hover), with a smooth slide-out — no longer permanently covers dashboard charts.",
+    "sections": [
+      {
+        "title": "UX",
+        "items": [
+          "InlineReleaseNotes toast auto-dismisses after 10s. Hovering the toast pauses the timer so you can read it; moving away resumes a fresh 10s countdown.",
+          "Clicking the toast (to open the full release notes modal) or the X button now triggers the same smooth slide-down + fade-out animation, then unmounts. No more abrupt pop disappearance.",
+          "Auto-dismiss persists via the same localStorage key as manual dismiss — once the toast goes away for a version, reloading the page does not bring it back."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.18",
     "date": "2026-05-17",
     "highlights": "Charts finally render: vertical bar charts on Dashboard, Revenue, Appointments and Customers now show the actual bars (were rendering as 0-height before). Dashboard's invoiced/outstanding/completion KPIs are no longer wrong by 3 orders of magnitude.",
