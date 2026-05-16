@@ -48,6 +48,8 @@ services:
       FACE_AUTO_MATCH_MARGIN: ${FACE_AUTO_MATCH_MARGIN:-0.05}
       FACE_MAX_CANDIDATES: ${FACE_MAX_CANDIDATES:-3}
       FACE_DETECTION_THRESHOLD: ${FACE_DETECTION_THRESHOLD:-0.6}
+    volumes:
+      - ./uploads:/app/uploads
     ports:
       - "127.0.0.1:3002:3002"
 
