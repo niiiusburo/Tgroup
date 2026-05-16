@@ -29,8 +29,8 @@ router.post('/locations/comparison', requirePermission('reports.view'), async (r
               COALESCE(so.order_count, 0) as order_count,
               COALESCE(emp.cnt, 0) as employee_count
        FROM dbo.companies c
-       LEFT JOIN (SELECT companyid, COUNT(*) as cnt, SUM(CASE WHEN state='done' THEN 1 ELSE 0 END) as done FROM dbo.appointments WHERE 1=1 ${af.where} GROUP BY companyid) appt ON appt.companyid=c.id
-       LEFT JOIN (SELECT companyid, COUNT(*) as order_count FROM dbo.saleorders WHERE isdeleted=false AND state='sale' ${soWhere} GROUP BY companyid) so ON so.companyid=c.id
+       LEFT JOIN (SELECT companyid, COUNT(*) as cnt, SUM(CASE WHEN state IN ('done','completed') THEN 1 ELSE 0 END) as done FROM dbo.appointments WHERE 1=1 ${af.where} GROUP BY companyid) appt ON appt.companyid=c.id
+       LEFT JOIN (SELECT companyid, COUNT(*) as order_count FROM dbo.saleorders WHERE isdeleted=false ${soWhere} GROUP BY companyid) so ON so.companyid=c.id
        LEFT JOIN (SELECT companyid, COUNT(*) as cnt FROM dbo.partners WHERE employee=true AND isdeleted=false GROUP BY companyid) emp ON emp.companyid=c.id`, soParams);
 
     // Get canonical revenue by location and merge into locations

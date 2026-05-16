@@ -16,8 +16,8 @@ router.post('/doctors/performance', requirePermission('reports.view'), async (re
     const f = dateCompanyFilter(dateFrom, dateTo, companyId, 'a.date');
     const rows = await query(
       `SELECT p.id, p.name, COUNT(a.id) as total_appointments,
-              SUM(CASE WHEN a.state='done' THEN 1 ELSE 0 END) as done,
-              SUM(CASE WHEN a.state='cancel' OR a.state='cancelled' THEN 1 ELSE 0 END) as cancelled
+              SUM(CASE WHEN a.state IN ('done','completed') THEN 1 ELSE 0 END) as done,
+              SUM(CASE WHEN a.state IN ('cancel','cancelled') THEN 1 ELSE 0 END) as cancelled
        FROM dbo.partners p
        LEFT JOIN dbo.appointments a ON a.doctorid=p.id ${f.where}
        WHERE p.isdoctor=true AND p.isdeleted=false

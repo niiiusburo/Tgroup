@@ -17,8 +17,12 @@ router.post('/appointments/summary', requirePermission('reports.view'), async (r
       `SELECT state, COUNT(*) as cnt FROM dbo.appointments WHERE 1=1 ${f.where} GROUP BY state`, f.params);
 
     const total = states.reduce((s, r) => s + parseInt(r.cnt), 0);
-    const done = parseInt(states.find(s => s.state === 'done')?.cnt || 0);
-    const cancelled = parseInt(states.find(s => s.state === 'cancel' || s.state === 'cancelled')?.cnt || 0);
+    const done = states
+      .filter(s => s.state === 'done' || s.state === 'completed')
+      .reduce((sum, s) => sum + parseInt(s.cnt), 0);
+    const cancelled = states
+      .filter(s => s.state === 'cancel' || s.state === 'cancelled')
+      .reduce((sum, s) => sum + parseInt(s.cnt), 0);
 
     // Conversion rate: appointments with saleorderid
     const conv = await query(

@@ -20,10 +20,13 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
     // Invoiced/outstanding still come from saleorders — they are different concepts
     // than "collected revenue" (which now matches the Excel canonical formula below).
     const so = dateCompanyFilter(dateFrom, dateTo, companyId, 'datecreated');
+    // No state filter — matches Revenue page behavior. Filtering to state='sale' alone
+    // excludes 99%+ of orders (most live in 'pending'/'completed') and shrinks the
+    // invoiced/outstanding KPIs by ~3 orders of magnitude.
     const rev = await query(
       `SELECT COALESCE(SUM(amounttotal),0) as invoiced,
               COALESCE(SUM(residual),0) as outstanding
-       FROM dbo.saleorders WHERE isdeleted=false AND state='sale' ${so.where}`, so.params);
+       FROM dbo.saleorders WHERE isdeleted=false ${so.where}`, so.params);
 
     // Collected revenue — single source of truth shared with the Excel revenue-flat export.
     const curPaid = await getCanonicalRevenue({ dateFrom, dateTo, companyId });
@@ -31,9 +34,11 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
     // Appointments
     const af = dateCompanyFilter(dateFrom, dateTo, companyId, 'date');
     const appt = await query(
+      // 'completed' is the canonical finished state in this DB (~84% of appointments);
+      // 'done' is a legacy spelling kept for backward compat with older imports.
       `SELECT COUNT(*) as total,
-              SUM(CASE WHEN state='done' THEN 1 ELSE 0 END) as done,
-              SUM(CASE WHEN state='cancel' OR state='cancelled' THEN 1 ELSE 0 END) as cancelled
+              SUM(CASE WHEN state IN ('done','completed') THEN 1 ELSE 0 END) as done,
+              SUM(CASE WHEN state IN ('cancel','cancelled') THEN 1 ELSE 0 END) as cancelled
        FROM dbo.appointments WHERE 1=1 ${af.where}`, af.params);
 
     // New customers
@@ -67,7 +72,7 @@ router.post('/', requirePermission('reports.view'), async (req, res) => {
       `SELECT DATE_TRUNC('month', datecreated) as month,
               COALESCE(SUM(amounttotal),0) as invoiced
        FROM dbo.saleorders
-       WHERE isdeleted=false AND state='sale'
+       WHERE isdeleted=false
          AND datecreated::date >= $1 AND datecreated::date <= $2
          ${companyId ? 'AND companyid = $3' : ''}
        GROUP BY month`,

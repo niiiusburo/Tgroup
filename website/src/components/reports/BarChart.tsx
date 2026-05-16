@@ -17,22 +17,25 @@ export function BarChart({ data, formatValue, color, height = 200, showValues = 
   const fmt = formatValue || ((v: number) => v.toLocaleString('vi-VN'));
 
   return (
-    <div className="flex items-end gap-2" style={{ height }}>
+    <div className="flex items-stretch gap-2" style={{ height }}>
       {data.map((d, i) => (
-        <div key={d.label} className="flex-1 flex flex-col items-center gap-1 min-w-0">
+        <div key={d.label + i} className="flex-1 flex flex-col items-center min-w-0 h-full">
           {showValues && (
-            <span className="text-[10px] text-gray-500 truncate w-full text-center">{fmt(d.value)}</span>
+            <span className="text-[10px] text-gray-500 truncate w-full text-center mb-1 flex-shrink-0">{fmt(d.value)}</span>
           )}
-          <motion.div
-            initial={{ scaleY: 0 }}
-            animate={{ scaleY: 1 }}
-            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: i * 0.03 }}
-            style={{ transformOrigin: 'bottom', height: `${(d.value / maxVal) * 100}%` }}
-            className={`w-full rounded-t ${color || COLORS[i % COLORS.length]} relative group cursor-default min-h-[4px]`}
-          >
-            <div className="absolute inset-0 bg-white/0 group-hover:bg-white/20 transition-colors duration-150 rounded-t" />
-          </motion.div>
-          <span className="text-[10px] text-gray-400 truncate w-full text-center">{d.label}</span>
+          {/* Bar wrapper: takes remaining height, anchors bar to its bottom so the % resolves */}
+          <div className="flex-1 w-full flex items-end min-h-0">
+            <motion.div
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: 1 }}
+              transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: i * 0.03 }}
+              style={{ transformOrigin: 'bottom', height: `${(d.value / maxVal) * 100}%` }}
+              className={`w-full rounded-t ${color || COLORS[i % COLORS.length]} relative group cursor-default min-h-[4px]`}
+            >
+              <div className="absolute inset-0 bg-white/0 group-hover:bg-white/20 transition-colors duration-150 rounded-t" />
+            </motion.div>
+          </div>
+          <span className="text-[10px] text-gray-400 truncate w-full text-center mt-1 flex-shrink-0">{d.label}</span>
         </div>
       ))}
     </div>

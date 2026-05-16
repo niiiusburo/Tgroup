@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.32.18",
+    "date": "2026-05-17",
+    "highlights": "Charts finally render: vertical bar charts on Dashboard, Revenue, Appointments and Customers now show the actual bars (were rendering as 0-height before). Dashboard's invoiced/outstanding/completion KPIs are no longer wrong by 3 orders of magnitude.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "BarChart component: each column wrapper now stretches to the full chart height so the bar's percentage-based height resolves correctly. Fixes blank vertical bars on the Dashboard 12-month trend, Revenue trend, Revenue cash-flow trend, Appointments weekly trend, and Customers growth trend.",
+          "Dashboard 'Đã xuất hóa đơn' (invoiced) and 'Còn nợ' (outstanding) KPIs: removed the overly-restrictive state='sale' filter on saleorders. Most invoices in this DB live in state='pending' (1,774 orders) or 'completed' — the old filter only matched 3 of them. April invoiced was showing 2.3M instead of 10.5B. Now matches the Revenue page exactly.",
+          "Dashboard 'Tỷ lệ thu hồi' (collection rate) was showing 378,600% because of the bug above. Now shows a sensible single-digit ratio.",
+          "Appointment 'completed' counts on Dashboard, Appointments, Doctors and Locations pages: filter now matches state IN ('done','completed') instead of state='done' alone. In this DB only ~458 of 228,044 appointments use the legacy 'done' spelling; the canonical state is 'completed' (~84% of rows)."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.17",
     "date": "2026-05-17",
     "highlights": "Reports now show the active period and branch at the top of every tab, and the backend has a permanent safety comment preventing future timezone regressions.",
