@@ -96,9 +96,27 @@ async function deleteSubject(subjectId) {
   });
 }
 
+async function healthCheck() {
+  if (!COMPREFACE_API_KEY) {
+    return { ok: false, status: 0, message: 'COMPREFACE_API_KEY is not configured' };
+  }
+
+  try {
+    await comprefaceFetch('/subjects', { method: 'GET' });
+    return { ok: true };
+  } catch (err) {
+    return {
+      ok: false,
+      status: err.status || 0,
+      message: err.message || 'Compreface health check failed',
+    };
+  }
+}
+
 module.exports = {
   recognize,
   createSubject,
   addExample,
   deleteSubject,
+  healthCheck,
 };

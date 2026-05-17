@@ -54,7 +54,10 @@ const reportsRoutes = require('./routes/reports');
 const telemetryRoutes = require('./routes/telemetry');
 const ipAccessRoutes = require('./routes/ipAccess');
 const exportsRoutes = require('./routes/exports');
-const { healthCheck: faceServiceHealth } = require('./services/faceEngineClient');
+const {
+  healthCheck: faceRecognitionHealth,
+  getFaceRecognitionProvider,
+} = require('./services/faceRecognitionRuntime');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -276,7 +279,7 @@ app.get('/api/health', async (_req, res) => {
 
   const faceStart = Date.now();
   try {
-    const fh = await faceServiceHealth();
+    const fh = await faceRecognitionHealth();
     checks.faceService = fh.ok;
     faceLatency = Date.now() - faceStart;
   } catch (err) {
@@ -287,6 +290,7 @@ app.get('/api/health', async (_req, res) => {
   res.status(allHealthy ? 200 : 503).json({
     status: allHealthy ? 'healthy' : 'degraded',
     checks,
+    faceProvider: getFaceRecognitionProvider(),
     latency: { db: dbLatency, faceService: faceLatency },
     timestamp: new Date().toISOString(),
   });

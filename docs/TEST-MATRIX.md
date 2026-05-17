@@ -43,7 +43,7 @@
 | `api/src/routes/partners.js` | `api/src/routes/partners/__tests__/*.test.js` | Customer CRUD, search, uniqueness logic. |
 | `website/src/components/forms/AddCustomerForm/` | `AddCustomerForm.test.tsx`, `website/e2e/customer-create-save.spec.ts` | New-customer intake is high-frequency workflow. |
 | `website/src/components/customer/CustomerProfile/` | `CustomerProfile.test.tsx`, `website/e2e/customer-profile-crud.spec.ts` | Profile tabs (appointments, services, payments, photos). |
-| `api/src/routes/faceRecognition.js` | `api/tests/faceRecognition.test.js` | Face registration and recognition. |
+| `api/src/routes/faceRecognition.js` | `api/tests/faceRecognition.test.js` | Face registration, re-registration, recognition, and provider routing. |
 
 ### Payments & Deposits
 
@@ -78,8 +78,9 @@
 | If you change... | Run these tests... | Why |
 |---|---|---|
 | `api/src/routes/externalCheckups.js` | `api/src/routes/__tests__/externalCheckups.test.js` | Hosoonline auth, patient search, image proxy. |
-| `api/src/routes/faceRecognition.js` | `api/tests/faceRecognition.test.js` | Face register/recognize API contract. |
-| `face-service/` Python code | `api/tests/faceRecognition.test.js`, manual face-service health check | Model inference and embedding generation. |
+| `api/src/routes/faceRecognition.js` | `api/tests/faceRecognition.test.js` | Face register/re-register/recognize API contract in local and CompreFace modes. |
+| `api/src/services/comprefaceClient.js` / `api/src/services/comprefaceFaceProvider.js` | `api/src/services/__tests__/comprefaceClient.test.js`, `api/src/services/__tests__/comprefaceFaceProvider.test.js` | CompreFace subject/example calls, health check, and partner subject mapping. |
+| `face-service/` Python code | `api/tests/faceRecognition.integration.test.js`, manual face-service health check | Local-provider model inference and embedding generation. |
 
 ### Infrastructure
 

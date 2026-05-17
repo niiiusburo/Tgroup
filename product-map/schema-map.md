@@ -49,7 +49,7 @@
 | **R** | `faceRecognition.js` |
 | **E** | `POST /api/face/*` |
 | **UI** | CustomerCameraWidget, PatientCheckIn, FaceCaptureModal |
-| **Risk** | **High** — embedding dimension must match the model (128 for SFace). Changing the face model requires re-registering all embeddings. Soft-delete via `deleted_at` preserves audit history. |
+| **Risk** | **High** — in local provider mode, embedding dimension must match the model (128 for SFace). Changing the local face model requires re-registering all local embeddings. CompreFace mode stores examples in CompreFace and uses `partners.face_subject_id` for status. Soft-delete via `deleted_at` preserves local audit history. |
 
 ### dbo.appointments
 

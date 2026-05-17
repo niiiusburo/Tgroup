@@ -242,4 +242,35 @@ describe('comprefaceClient', () => {
       await expect(createSubject('p1')).rejects.toThrow('Subject already exists');
     });
   });
+
+  describe('healthCheck', () => {
+    it('returns ok when subjects endpoint is reachable', async () => {
+      const { healthCheck } = loadClient({
+        COMPREFACE_URL: 'http://compreface-test',
+        COMPREFACE_API_KEY: 'secret-key',
+      });
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        text: async () => JSON.stringify({ subjects: [] }),
+      });
+
+      const result = await healthCheck();
+
+      expect(result.ok).toBe(true);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining('/subjects'),
+        expect.objectContaining({ method: 'GET' }),
+      );
+    });
+
+    it('returns not ok when API key is missing', async () => {
+      const { healthCheck } = loadClient({ COMPREFACE_API_KEY: '' });
+
+      const result = await healthCheck();
+
+      expect(result.ok).toBe(false);
+      expect(result.message).toContain('COMPREFACE_API_KEY');
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+  });
 });

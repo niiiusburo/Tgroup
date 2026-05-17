@@ -1,5 +1,12 @@
 import { useState, useCallback } from 'react';
-import { recognizeFace, registerFace, getFaceStatus, type FaceCandidate, type FaceStatusResult } from '@/lib/api';
+import {
+  recognizeFace,
+  registerFace,
+  reregisterFace,
+  getFaceStatus,
+  type FaceCandidate,
+  type FaceStatusResult,
+} from '@/lib/api';
 
 type RecognitionState =
   | { status: 'idle' }
@@ -15,9 +22,16 @@ type RegisterState =
   | { status: 'success'; sampleCount: number }
   | { status: 'error'; message: string };
 
+type ReregisterState =
+  | { status: 'idle' }
+  | { status: 'processing' }
+  | { status: 'success'; sampleCount: number }
+  | { status: 'error'; message: string };
+
 export function useFaceRecognition() {
   const [recognizeState, setRecognizeState] = useState<RecognitionState>({ status: 'idle' });
   const [registerState, setRegisterState] = useState<RegisterState>({ status: 'idle' });
+  const [reregisterState, setReregisterState] = useState<ReregisterState>({ status: 'idle' });
   const [faceStatus, setFaceStatus] = useState<FaceStatusResult | null>(null);
 
   const recognize = useCallback(async (image: Blob) => {
@@ -63,17 +77,33 @@ export function useFaceRecognition() {
     }
   }, []);
 
+  const reregister = useCallback(async (partnerId: string, images: readonly Blob[], source?: string) => {
+    setReregisterState({ status: 'processing' });
+    try {
+      const result = await reregisterFace(partnerId, images, source);
+      setReregisterState({ status: 'success', sampleCount: result.sampleCount });
+      return result;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'faceRecognition.reregisterFailed';
+      setReregisterState({ status: 'error', message });
+      throw err;
+    }
+  }, []);
+
   const reset = useCallback(() => {
     setRecognizeState({ status: 'idle' });
     setRegisterState({ status: 'idle' });
+    setReregisterState({ status: 'idle' });
   }, []);
 
   return {
     recognizeState,
     registerState,
+    reregisterState,
     faceStatus,
     recognize,
     register,
+    reregister,
     loadFaceStatus,
     reset,
   };

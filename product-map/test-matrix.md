@@ -109,7 +109,9 @@
 | Test File | Domain | What It Tests |
 |-----------|--------|---------------|
 | `loginRateLimiter.test.js` | Auth | Login rate limiter counts failed attempts only and scopes account lockout by email plus IP |
-| `faceRecognition.test.js` | Integrations | Compreface face register/recognize API |
+| `faceRecognition.test.js` | Integrations | Face register/recognize/re-register API in local and CompreFace provider modes |
+| `src/services/__tests__/comprefaceClient.test.js` | Integrations | CompreFace REST client, auth header, subject/example calls, and health check |
+| `src/services/__tests__/comprefaceFaceProvider.test.js` | Integrations | CompreFace provider mapping from subjects to customer records and registration status |
 | `src/routes/appointments/__tests__/readHandlers.test.js` | Appointments | Calendar-mode appointment list allows large week ranges while skipping count/aggregate queries; normal lists remain capped |
 | `src/routes/__tests__/externalCheckups.test.js` | Integrations | Hosoonline auth header, v2 patient search path, generated patient code, and migrated ref lookup behavior |
 | `src/routes/partners/__tests__/mutationHandlers.test.js` | Customers | Customer edit allows phone values to overlap customer refs/phones while keeping UUID as identity |

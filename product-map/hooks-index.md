@@ -88,8 +88,8 @@
   - `pages/Customers.tsx`
 
 ### `useFaceRecognition.ts`
-- **Purpose:** Face registration and recognition via Compreface.
-- **API Calls:** `POST /api/face/recognize`, `POST /api/face/register`
+- **Purpose:** Face registration, re-registration, and recognition through the configured Face ID provider.
+- **API Calls:** `POST /api/face/recognize`, `POST /api/face/register`, `POST /api/face/re-register`, `GET /api/face/status/:partnerId`
 - **Consumers:**
   - `components/customer/CustomerCameraWidget.tsx`
   - `components/forms/AddCustomerForm/useAddCustomerForm.ts`

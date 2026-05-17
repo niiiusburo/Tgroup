@@ -48,6 +48,7 @@ endpoints:
   - DELETE /api/CustomerSources/:id
   - POST   /api/face/recognize
   - POST   /api/face/register
+  - POST   /api/face/re-register
   - GET    /api/face/status/:partnerId
 ui_surfaces:
   - /customers

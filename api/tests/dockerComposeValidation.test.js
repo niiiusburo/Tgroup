@@ -89,7 +89,7 @@ describe('docker-compose.yml', () => {
     const envVars = Array.isArray(api.environment)
       ? api.environment
       : Object.entries(api.environment).map(([k, v]) => `${k}=${v}`);
-    const thresholds = ['FACE_AUTO_MATCH_THRESHOLD', 'FACE_CANDIDATE_THRESHOLD', 'FACE_AUTO_MATCH_MARGIN', 'FACE_MAX_CANDIDATES', 'FACE_DETECTION_THRESHOLD'];
+    const thresholds = ['FACE_AUTO_MATCH_THRESHOLD', 'FACE_CANDIDATE_THRESHOLD', 'FACE_AUTO_MATCH_MARGIN', 'FACE_MAX_CANDIDATES', 'FACE_MIN_QUALITY', 'FACE_DETECTION_THRESHOLD'];
     for (const key of thresholds) {
       const found = envVars.find((e) =>
         typeof e === 'string' ? e.includes(key) : false
@@ -98,11 +98,29 @@ describe('docker-compose.yml', () => {
     }
   });
 
+  it('api service has FACE_RECOGNITION_PROVIDER environment variable', () => {
+    const api = doc.services.api;
+    const envVars = Array.isArray(api.environment)
+      ? api.environment
+      : Object.entries(api.environment).map(([k, v]) => `${k}=${v}`);
+    const found = envVars.find((e) =>
+      typeof e === 'string' ? e.includes('FACE_RECOGNITION_PROVIDER') : false
+    );
+    expect(found).toBeDefined();
+  });
+
   it('includes compreface-api service', () => {
     expect(doc.services['compreface-api']).toBeDefined();
   });
 
   it('includes compreface-postgres-db service', () => {
     expect(doc.services['compreface-postgres-db']).toBeDefined();
+  });
+
+  it('compreface-api host port is configurable and defaults away from 8000', () => {
+    const comprefaceApi = doc.services['compreface-api'];
+    expect(comprefaceApi.ports).toBeDefined();
+    expect(comprefaceApi.ports.join('\n')).toContain('COMPREFACE_HOST_PORT');
+    expect(comprefaceApi.ports.join('\n')).toContain('8002');
   });
 });

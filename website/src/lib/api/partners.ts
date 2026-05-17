@@ -180,6 +180,14 @@ export interface FaceRegisterResult {
   faceRegisteredAt: string;
 }
 
+export interface FaceReRegisterResult {
+  success: boolean;
+  partnerId: string;
+  sampleIds: string[];
+  sampleCount: number;
+  faceRegisteredAt: string;
+}
+
 export interface FaceStatusResult {
   partnerId: string;
   registered: boolean;
@@ -209,4 +217,15 @@ export function registerFace(partnerId: string, image: Blob, source?: string) {
 
 export function getFaceStatus(partnerId: string) {
   return apiFetch<FaceStatusResult>(`/face/status/${encodeURIComponent(partnerId)}`);
+}
+
+export function reregisterFace(partnerId: string, images: readonly Blob[], source?: string) {
+  const formData = new FormData();
+  formData.append('partnerId', partnerId);
+  images.forEach((blob, idx) => formData.append('images', blob, `face-${idx}.jpg`));
+  if (source) formData.append('source', source);
+  return apiFetch<FaceReRegisterResult>('/face/re-register', {
+    method: 'POST',
+    body: formData as unknown as Record<string, unknown>,
+  });
 }

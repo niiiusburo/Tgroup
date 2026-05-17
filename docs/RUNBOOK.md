@@ -6,7 +6,7 @@
 
 | Environment | URL | Containers | Notes |
 |---|---|---|---|
-| Local | `http://localhost:5175` | `tgroup-db`, `tgroup-api`, `tgroup-web`, `face-service` (optional), `compreface-*` (optional) | Dev server + Docker Compose |
+| Local | `http://localhost:5175` | `tgroup-db`, `tgroup-api`, `tgroup-web`, `face-service` (optional), `compreface-*` (optional) | Dev server + Docker Compose; Face ID provider selected by `FACE_RECOGNITION_PROVIDER` |
 | Staging | `https://nk2.2checkin.com` | `tgroup-staging-web`, `tgroup-staging-api`, `tgroup-staging-face-service` | Pre-production verification |
 | Production | `https://nk.2checkin.com` | `tgroup-web`, `tgroup-api`, `tgroup-face-service`, `tgroup-db` | Live clinic operations |
 
@@ -81,11 +81,40 @@ Expected fields:
 docker exec -i tgroup-db pg_isready -U postgres -d tdental_demo
 ```
 
+### Production Database Backup
+NK production runs a root crontab backup on the VPS at 12:00 Vietnam time
+(`05:00 UTC` on the current server timezone). The job calls:
+
+```bash
+/opt/tgroup/scripts/backup-nk-db.sh
+```
+
+The script dumps `tdental_demo` from `tgroup-db` into
+`/opt/tgroup/backups/nk-db-daily/` as a compressed PostgreSQL custom-format
+dump, writes a `.sha256` checksum, and keeps only the latest 3 `.dump` files.
+Manual verification:
+
+```bash
+backup=$(ls -1 /opt/tgroup/backups/nk-db-daily/nk-tdental_demo-*.dump | sort | tail -1)
+sha256sum -c "${backup}.sha256"
+docker exec -i tgroup-db pg_restore -l < "$backup" | head -20
+crontab -l | grep -A1 "NK production database backup"
+```
+
 ### Face Service
 ```bash
-curl http://localhost:8000/health
-# or from API container:
+curl http://localhost:8001/health
+# or from API/API container when FACE_RECOGNITION_PROVIDER=local:
 curl $FACE_SERVICE_URL/health
+```
+
+### CompreFace Face ID Provider
+```bash
+# Host port defaults to 8002 so it does not collide with other local services.
+docker compose up -d compreface-postgres-db compreface-api compreface-core
+curl -H "x-api-key: $COMPREFACE_API_KEY" http://localhost:8002/api/v1/recognition/subjects
+# API health should include: "faceProvider":"compreface"
+curl -s http://localhost:3002/api/health | jq .
 ```
 
 ### Nginx / Static Serving
@@ -110,8 +139,8 @@ curl -I https://nk.2checkin.com/
 - **Fix:** Update nginx `proxy_read_timeout`, `proxy_send_timeout`, `send_timeout` to `300s`.
 
 ### Incident D: Face recognition stops working
-- **Cause:** `face-service` container down or model download failed.
-- **Fix:** `docker logs tgroup-face-service`; restart container. Check `FACE_SERVICE_URL` connectivity from API container.
+- **Cause:** Configured provider is down: `face-service` container/model failure for local mode, or CompreFace container/API-key failure for CompreFace mode.
+- **Fix:** Check `FACE_RECOGNITION_PROVIDER`, `/api/health.faceProvider`, and provider logs (`docker logs tgroup-face-service` or `docker logs compreface-api`). Confirm `FACE_SERVICE_URL` or `COMPREFACE_URL` connectivity from the API runtime.
 
 ### Incident E: Permission "No permissions" for active employee
 - **Cause:** `partners.tier_id` is NULL (INC-20260506-01).

@@ -349,7 +349,7 @@ erDiagram
 | `created_at` | timestamp | DEFAULT NOW() |
 | `deleted_at` | timestamp | soft delete |
 
-**Note:** Table existence and exact column set may vary by migration state. Face-service SQLite is the fallback storage.
+**Note:** Table existence and exact column set may vary by migration state. `FACE_RECOGNITION_PROVIDER=local` reads active rows here. `FACE_RECOGNITION_PROVIDER=compreface` stores face examples in CompreFace and uses `partners.face_subject_id` / `face_registered_at` as the local status bridge.
 
 ---
 
@@ -462,7 +462,7 @@ Soft-deleted rows (`isdeleted = true`) are hidden from normal queries but still 
 Rows in `dbo.permission_groups` with `is_system = true` must not be deletable through the admin UI. System groups are seed data required for baseline permission resolution.
 
 ### INV-SCHEMA-006 — Face Embedding Dimension
-If `dbo.customer_face_embeddings` exists, the embedding vector must be 128 dimensions (SFace model). Changing dimensions requires a migration to recreate the column and re-register all faces.
+If `dbo.customer_face_embeddings` exists and the local provider is active, the embedding vector must be 128 dimensions (SFace model). Changing dimensions requires a migration to recreate the column and re-register all locally stored faces. CompreFace mode does not write embedding vectors into this table.
 
 ### INV-SCHEMA-007 — Receipt Number Year Partition
 `payments.receipt_number` uses a per-year counter. The sequence MUST reset on January 1st of each calendar year. The generation function uses `EXTRACT(YEAR FROM NOW())` as the partition key.

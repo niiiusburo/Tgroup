@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ChevronDown, Edit2, Trash2 } from 'lucide-react';
+import { ArrowLeft, ChevronDown, Edit2, ScanFace, Trash2 } from 'lucide-react';
 
 interface ProfileActionsHeaderProps {
   readonly onBack: () => void;
   readonly onEdit?: () => void;
+  readonly onReregisterFace?: () => void;
+  readonly isReregisteringFace?: boolean;
   readonly onSoftDelete?: () => void;
   readonly onHardDelete?: () => void;
   readonly canSoftDelete?: boolean;
@@ -14,6 +16,8 @@ interface ProfileActionsHeaderProps {
 export function ProfileActionsHeader({
   onBack,
   onEdit,
+  onReregisterFace,
+  isReregisteringFace,
   onSoftDelete,
   onHardDelete,
   canSoftDelete,
@@ -34,6 +38,19 @@ export function ProfileActionsHeader({
         </div>
       </div>
       <div className="flex items-center gap-2 sm:ml-auto">
+        {onReregisterFace && (
+          <button
+            onClick={onReregisterFace}
+            disabled={isReregisteringFace}
+            className="flex items-center gap-2 h-10 px-4 text-sm font-semibold text-orange-600 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            title={t('face.reregisterHint', 'Replace stored face with a fresh multi-angle scan')}
+          >
+            <ScanFace className="w-4 h-4" />
+            {isReregisteringFace
+              ? t('face.registering', 'Đang đăng ký...')
+              : t('face.reregister', 'Tái đăng ký khuôn mặt')}
+          </button>
+        )}
         {onEdit && (
           <button onClick={onEdit} className="flex items-center gap-2 h-10 px-4 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
             <Edit2 className="w-4 h-4" />

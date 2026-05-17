@@ -89,7 +89,7 @@ Effective permissions = (Group ∪ Grants) − Revokes, then filtered by locatio
 | `DATABASE_URL` / DB password | Same as above | Same |
 | `GOOGLE_PLACES_API_KEY` | `.env`, VPS | Server-side only; never sent to browser. |
 | `HOSOONLINE_USERNAME`, `PASSWORD`, `API_KEY` | `.env`, VPS | Backend proxy only. |
-| `COMPREFACE_API_KEY` | `.env`, VPS | Backend → Compreface only. |
+| `COMPREFACE_API_KEY` | `.env`, VPS | Backend → CompreFace only when `FACE_RECOGNITION_PROVIDER=compreface`. |
 | `POSTGRES_USER`, `POSTGRES_PASSWORD` | `.env`, Docker Compose | Container startup only. |
 
 **Policy:** `.env.example` documents the shape. Real values are local-only and gitignored. If a secret is ever committed, treat it as exposed and rotate immediately.

@@ -240,9 +240,10 @@ Export permissions are defined by `api/src/services/exports/exportRegistry.js`: 
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| POST | `/recognize` | Perm:`customers.view` | FormData (`image`, optional `source`) | `{ status: 'auto_matched' \| 'candidates' \| 'no_match' \| 'error', partnerId?, name?, confidence?, candidates?: { partnerId, name, confidence, phone }[], error? }` |
-| POST | `/register` | Perm:`customers.edit` | FormData (`partnerId`, `image`) | `{ success: true, embeddingId, detectionScore }` |
-| GET | `/status/:partnerId` | Perm:`customers.view` | — | `{ registered: boolean, samplesCount: number, lastRegisteredAt? }` |
+| POST | `/recognize` | Perm:`customers.view` | FormData (`image`) | `{ match: FaceCandidate \| null, candidates: FaceCandidate[] }`; provider selected by `FACE_RECOGNITION_PROVIDER=local|compreface` |
+| POST | `/register` | Perm:`customers.edit` | FormData (`partnerId`, `image`, optional `source`) | `{ success: true, partnerId, sampleId, sampleCount, faceRegisteredAt }` |
+| POST | `/re-register` | Perm:`customers.edit` | FormData (`partnerId`, repeated `images`, optional `source`) | `{ success: true, partnerId, sampleIds, sampleCount, faceRegisteredAt }` |
+| GET | `/status/:partnerId` | Perm:`customers.view` | — | `{ partnerId, registered, sampleCount, lastRegisteredAt }` |
 
 ## External Checkups (`/api/ExternalCheckups`)
 

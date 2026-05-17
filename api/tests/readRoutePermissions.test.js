@@ -103,20 +103,25 @@ describe('face recognition route permissions', () => {
     expectRoutePermission(faceRouter, 'post', '/register', 'customers.edit');
   });
 
+  it('POST /re-register requires customers.edit', () => {
+    expectRoutePermission(faceRouter, 'post', '/re-register', 'customers.edit');
+  });
+
   it('GET /status/:partnerId requires customers.view', () => {
     expectRoutePermission(faceRouter, 'get', '/status/:partnerId', 'customers.view');
   });
 
-  it('has exactly three face recognition endpoints', () => {
+  it('has exactly four face recognition endpoints', () => {
     const routes = faceRouter.stack
       .filter((layer) => layer.route)
       .map((layer) => ({
         path: layer.route.path,
         methods: Object.keys(layer.route.methods),
       }));
-    expect(routes).toHaveLength(3);
+    expect(routes).toHaveLength(4);
     expect(routes.map((r) => `${r.methods[0].toUpperCase()} ${r.path}`).sort()).toEqual([
       'GET /status/:partnerId',
+      'POST /re-register',
       'POST /recognize',
       'POST /register',
     ]);

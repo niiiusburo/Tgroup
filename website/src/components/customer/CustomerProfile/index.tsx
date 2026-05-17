@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CustomerAppointmentHistory } from '../CustomerAppointmentHistory';
 import { CustomerProfileIdentity } from './CustomerProfileIdentity';
 import { ProfileActionsHeader } from './ProfileActionsHeader';
@@ -7,6 +8,8 @@ import { ProfileTab } from './ProfileTab';
 import { RecordsTab } from './RecordsTab';
 import { PaymentTab } from './PaymentTab';
 import { CustomerProfileModals } from './CustomerProfileModals';
+import { FaceCaptureModal } from '@/components/shared/FaceCaptureModal';
+import { useFaceRecognition } from '@/hooks/useFaceRecognition';
 import { useAuth } from '@/contexts/AuthContext';
 import type { CustomerService } from '@/types/customer';
 import type { ApiAppointment } from '@/lib/api';
@@ -36,6 +39,7 @@ export function CustomerProfile(props: OrchestratorProps) {
   } = props;
 
   const { hasPermission } = useAuth();
+  const { t } = useTranslation('customers');
   const canViewHealthCheckups = hasPermission('external_checkups.view');
   const canCreateExternalPatient = hasPermission('external_checkups.create');
   const canUploadHealthCheckups = hasPermission('external_checkups.upload');
@@ -43,6 +47,25 @@ export function CustomerProfile(props: OrchestratorProps) {
   const canRefundPayment = hasPermission('payment.refund');
   const canEditPayment = hasPermission('payment.edit');
   const canVoidPayment = hasPermission('payment.void');
+  const canReregisterFace = hasPermission('customers.edit');
+
+  const { reregister, reregisterState, reset: resetFaceState } = useFaceRecognition();
+  const [showFaceRecaptureModal, setShowFaceRecaptureModal] = useState(false);
+
+  const handleOpenFaceRecapture = () => {
+    resetFaceState();
+    setShowFaceRecaptureModal(true);
+  };
+
+  const handleFaceRecapture = async (firstBlob: Blob, blobs?: readonly Blob[]) => {
+    const images = blobs && blobs.length > 0 ? blobs : [firstBlob];
+    setShowFaceRecaptureModal(false);
+    try {
+      await reregister(profile.id, images, 'profile_reregister');
+    } catch (err) {
+      console.error('Face re-register failed:', err);
+    }
+  };
 
   const [internalActiveTab, setInternalActiveTab] = useState<CustomerProfileTab>('profile');
   const activeTab = controlledActiveTab ?? internalActiveTab;
@@ -163,13 +186,40 @@ export function CustomerProfile(props: OrchestratorProps) {
       <ProfileActionsHeader
         onBack={onBack}
         onEdit={onEdit}
+        onReregisterFace={canReregisterFace ? handleOpenFaceRecapture : undefined}
+        isReregisteringFace={reregisterState.status === 'processing'}
         onSoftDelete={onSoftDelete}
         onHardDelete={onHardDelete}
         canSoftDelete={canSoftDelete}
         canHardDelete={canHardDelete}
       />
 
+      {reregisterState.status === 'success' && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          {t('face.reregisterSuccess', {
+            defaultValue: 'Đã cập nhật khuôn mặt ({{count}} ảnh).',
+            count: reregisterState.sampleCount,
+          })}
+        </div>
+      )}
+      {reregisterState.status === 'error' && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {t('face.reregisterError', {
+            defaultValue: 'Tái đăng ký thất bại: {{message}}',
+            message: reregisterState.message,
+          })}
+        </div>
+      )}
+
       <CustomerProfileIdentity profile={profile} />
+
+      <FaceCaptureModal
+        isOpen={showFaceRecaptureModal}
+        title={t('face.reregisterTitle', 'Tái đăng ký khuôn mặt')}
+        captureMode="profile"
+        onCapture={(blob, blobs) => void handleFaceRecapture(blob, blobs)}
+        onCancel={() => setShowFaceRecaptureModal(false)}
+      />
 
       <ProfileTabs activeTab={activeTab} props={props} loadingServices={loadingServices} onSelect={setActiveTab} />
 

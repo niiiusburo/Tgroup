@@ -11,6 +11,8 @@ jest.mock('../src/services/faceEngineClient', () => ({
   healthCheck: jest.fn(),
 }));
 
+process.env.FACE_RECOGNITION_PROVIDER = 'local';
+
 const request = require('supertest');
 const app = require('../src/server');
 
@@ -32,6 +34,7 @@ describe('GET /api/health', () => {
     expect(res.body.status).toBe('healthy');
     expect(res.body.checks.db).toBe(true);
     expect(res.body.checks.faceService).toBe(true);
+    expect(res.body.faceProvider).toBe('local');
     expect(res.body.latency.db).toBeGreaterThanOrEqual(0);
     expect(res.body.latency.faceService).toBeGreaterThanOrEqual(0);
     expect(res.body.timestamp).toBeDefined();

@@ -34,7 +34,7 @@ graph TD
     subgraph Backend["api/src"]
         Routes["Routes (*.js)"]
         Middleware["Middleware (auth, ipAccess, validate)"]
-        Services["Services (permissionService, faceEngineClient)"]
+        Services["Services (permissionService, faceEngineClient, comprefaceFaceProvider)"]
         Db["db.js"]
         ContractsPkg["@tgroup/contracts"]
     end
@@ -44,6 +44,7 @@ graph TD
         Nginx["nginx.conf"]
         Deploy["scripts/deploy-tbot.sh"]
         FaceSvc["face-service/"]
+        CompreFace["compreface-*"]
     end
 
     Pages --> Components
@@ -71,6 +72,7 @@ graph TD
     Deploy --> Docker
     Deploy --> Nginx
     Docker --> FaceSvc
+    Docker --> CompreFace
 ```
 
 ## Blast Radius by Critical File
@@ -143,7 +145,7 @@ graph TD
 The codebase clusters into 17 communities. The most important cross-community edges:
 
 1. **Frontend (C17) ↔ Backend (C3/C4):** Routed through `apiFetch` (C17) → Express routes (C3/C4). The contract boundary is well-defined.
-2. **Face Service (C6) ↔ API (C3):** Via `api/src/services/faceEngineClient.js`.
+2. **Face ID providers (C6) ↔ API (C3):** Local mode uses `api/src/services/faceEngineClient.js`; CompreFace mode uses `api/src/services/comprefaceClient.js` and `comprefaceFaceProvider.js`.
 3. **E2E Tests (C15) ↔ Frontend (C17):** Playwright specs span many domains; low cohesion.
 4. **Scripts (C10) ↔ DB (C11):** Migration and import scripts touch the shared pool.
 

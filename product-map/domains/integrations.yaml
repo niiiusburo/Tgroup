@@ -1,8 +1,8 @@
 name: External Integrations
 summary: |
-  Face-recognition check-in via local OpenCV YuNet+SFace Docker service,
-  and external health-checkup sync via Hosoonline API. Both are optional
-  features gated by env configuration. Compreface remains as legacy fallback.
+  Face-recognition check-in via selectable local OpenCV YuNet+SFace or
+  CompreFace providers, and external health-checkup sync via Hosoonline API.
+  Both integration families are optional features gated by env configuration.
 owns:
   - api/src/routes/faceRecognition.js
   - api/src/routes/externalCheckups.js
@@ -17,8 +17,9 @@ owns:
 reads:
   - api/src/db.js
   - process.env.FACE_SERVICE_URL
-  - process.env.COMPREFACE_URL (legacy fallback)
-  - process.env.COMPREFACE_API_KEY (legacy fallback)
+  - process.env.FACE_RECOGNITION_PROVIDER
+  - process.env.COMPREFACE_URL
+  - process.env.COMPREFACE_API_KEY
   - process.env.HOSOONLINE_BASE_URL
   - process.env.HOSOONLINE_API_KEY
   - process.env.HOSOONLINE_USERNAME
@@ -33,6 +34,7 @@ tables:
 endpoints:
   - POST /api/face/recognize
   - POST /api/face/register
+  - POST /api/face/re-register
   - GET  /api/face/status/:partnerId
   - GET  /api/ExternalCheckups/images/:imageName
   - GET  /api/ExternalCheckups/:customerCode
@@ -50,7 +52,7 @@ shared_types:
   - website/src/lib/api/externalCheckups.ts
 dependencies:
   - Customers & Partners
-  - Docker services: face-service (OpenCV YuNet+SFace), compreface-api, compreface-core, compreface-postgres-db (legacy)
+  - Docker services: face-service (OpenCV YuNet+SFace), compreface-api, compreface-core, compreface-postgres-db
 affected_by:
   - Changes to Compreface image size limits
   - Changes to Hosoonline API contract
@@ -62,8 +64,9 @@ impact_tests:
   - website/src/components/customer/AuthenticatedCheckupImage.test.tsx
 risk_level: medium
 notes:
-  - face-service is the primary face recognition engine. It runs a Python FastAPI container with OpenCV YuNet (detection) and SFace (128-dim embedding extraction).
-  - Compreface services remain defined in docker-compose.yml as a legacy fallback but are not required for core app startup.
+  - `FACE_RECOGNITION_PROVIDER=local` uses the Python FastAPI face-service with OpenCV YuNet (detection) and SFace (128-dim embedding extraction).
+  - `FACE_RECOGNITION_PROVIDER=compreface` uses CompreFace recognition subjects keyed by `partners.id`; TGClinic still updates `partners.face_subject_id` and `face_registered_at`.
+  - Compreface services are defined in docker-compose.yml but are not required for core app startup.
   - "Hosoonline is currently mixed-contract: login credentials take precedence for image reads (`Authorization: Bearer <token>` plus access_token cookie); `HOSOONLINE_API_KEY` / `X-API-Key` remains as fallback for older patient health-checkup endpoints."
   - The current observed Hosoonline website contract logs in through `/api/auth/login`, searches appointment media through `/api/appointments/search?q=<customerCode>&page=<page>`, and fetches bytes through `/api/appointments/image/:imageName`.
   - Hosoonline v2 API-key patient collection endpoints are routed through `/api/patients/_create` and `/api/patients/_search`; TGClinic proxies patient creation through `POST /api/ExternalCheckups/:customerCode/patient`.

@@ -221,20 +221,47 @@ PaginatedResponse<{
 {
   partnerId: string;     // customer UUID
   image: File;           // JPEG/PNG, captured from camera
+  source?: string;       // profile_register | no_match_rescue | candidate_confirmation
 }
 ```
-**Response 200:** `{ success: true; faceSubjectId: string }`
+**Response 201:** `{ success: true; partnerId: string; sampleId: string; sampleCount: number; faceRegisteredAt: string }`
+
+#### POST /api/face/re-register
+**Body:** `multipart/form-data`
+```ts
+{
+  partnerId: string;     // customer UUID
+  images: File[];        // repeated field, 1-7 JPEG/PNG captures
+  source?: string;       // defaults to profile_reregister
+}
+```
+**Response 201:** `{ success: true; partnerId: string; sampleIds: string[]; sampleCount: number; faceRegisteredAt: string }`
 
 #### POST /api/face/recognize
 **Body:** `multipart/form-data` with `image: File`
 **Response 200:**
 ```ts
 {
-  matched: boolean;
-  partnerId?: string;    // null if no match
-  confidence?: number;   // distance score
+  match: null | {
+    partnerId: string;
+    name: string;
+    code: string;
+    phone: string | null;
+    confidence: number;
+  };
+  candidates: Array<{
+    partnerId: string;
+    name: string;
+    code: string;
+    phone: string | null;
+    confidence: number;
+  }>;
 }
 ```
+
+Provider behavior:
+- `FACE_RECOGNITION_PROVIDER=local` sends captures to `FACE_SERVICE_URL` for SFace embeddings and stores vectors in `dbo.customer_face_embeddings`.
+- `FACE_RECOGNITION_PROVIDER=compreface` sends captures to CompreFace, uses `partners.id` as the CompreFace subject, and keeps `partners.face_subject_id` / `face_registered_at` as TGClinic status.
 
 ---
 
@@ -351,12 +378,16 @@ async function query(text: string, params?: any[]): Promise<any[]>
 
 ## 4. Third-Party Integration Contracts
 
-### 4.1 Compreface (Legacy Fallback)
+### 4.1 Compreface Face ID Provider
 
 **Base URL:** `COMPREFACE_URL` env (default `http://compreface-api`)
+**Provider switch:** `FACE_RECOGNITION_PROVIDER=compreface`
 **Endpoints:**
+- `GET /api/v1/recognition/subjects` — service health/key check
+- `POST /api/v1/recognition/subjects` — create subject using `partners.id`
 - `POST /api/v1/recognition/faces` — register face
 - `POST /api/v1/recognition/recognize` — recognize face
+- `DELETE /api/v1/recognition/subjects/:subjectId` — reset subject during re-registration
 **Headers:** `x-api-key: COMPREFACE_API_KEY`
 **Version:** 1.2.0 (Docker image `exadel/compreface:1.2.0`)
 

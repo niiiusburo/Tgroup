@@ -8,12 +8,14 @@
 - `tgroup-web`: built Vite frontend.
 - `tgroup-api`: Express API.
 - `tgroup-db`: PostgreSQL 16 with `dbo` schema.
-- Optional Compreface services for face recognition.
+- Optional Face ID services: local `face-service`, or CompreFace (`compreface-api`, `compreface-core`, `compreface-postgres-db`) when `FACE_RECOGNITION_PROVIDER=compreface`.
 - External Hosoonline service for health-checkup images.
 
 When production and staging run on the same VPS, give each `face-service` a distinct
-host port with `FACE_SERVICE_HOST_PORT`. The API should still use the internal
-Docker URL `FACE_SERVICE_URL=http://face-service:8000`.
+host port with `FACE_SERVICE_HOST_PORT`, and each CompreFace API a distinct
+host port with `COMPREFACE_HOST_PORT`. The API should still use internal Docker
+URLs such as `FACE_SERVICE_URL=http://face-service:8000` and
+`COMPREFACE_URL=http://compreface-api`.
 
 ## Configuration
 
@@ -24,7 +26,7 @@ Important env groups:
 - PostgreSQL connection values.
 - JWT secret.
 - Google Places key.
-- Compreface URL/API key.
+- Face ID provider (`FACE_RECOGNITION_PROVIDER=local|compreface`), local face-service URL/thresholds, and CompreFace URL/API key.
 - Hosoonline base URL, API key, username, password.
 - Allowed origins / frontend URLs.
 

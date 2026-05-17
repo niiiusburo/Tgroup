@@ -263,35 +263,40 @@ sequenceDiagram
     participant Cam as Browser Camera
     participant FE as React (PatientCheckIn)
     participant API as Express API
-    participant FS as Face Service (Python/OpenCV)
+    participant FP as Face Provider (local or CompreFace)
     participant DB as Postgres (dbo)
     
     P->>Cam: Face visible
     Cam->>FE: Video stream
     FE->>FE: Capture frame
     FE->>API: POST /api/face/recognize { image }
-    API->>FS: Forward image buffer
-    FS->>FS: YuNet detect + SFace embed (128-dim)
-    FS->>DB: SELECT partner_id, embedding FROM customer_face_embeddings
-    DB-->>FS: Candidates
-    FS->>FS: Nearest neighbor search (distance < threshold)
+    API->>FP: Forward image buffer
+    alt local provider
+        FP->>FP: YuNet detect + SFace embed (128-dim)
+        API->>DB: SELECT partner_id, embedding FROM customer_face_embeddings
+        DB-->>API: Candidates
+        API->>API: cosine threshold + margin
+    else CompreFace provider
+        FP->>FP: Recognize against CompreFace subjects
+        FP-->>API: subjects + similarity
+        API->>DB: Map subject to partners.id / face_subject_id
+        DB-->>API: Customer candidates
+    end
     alt Match found
-        FS-->>API: { matched: true, partnerId, confidence }
-        API-->>FE: 200 { matched: true, partnerId }
+        API-->>FE: 200 { match: { partnerId, confidence }, candidates: [] }
         FE->>API: GET /api/Appointments?partnerId=...&date=today
         API-->>FE: Today's appointments[]
         FE-->>P: Display name + appointments
     else No match
-        FS-->>API: { matched: false }
-        API-->>FE: 200 { matched: false }
+        API-->>FE: 200 { match: null, candidates: [] }
         FE-->>P: "Không nhận diện được" + manual search
     end
 ```
 
 **Data state transitions:** None (read-only recognition).
-**Invariants:** INV-005 (128-dim embedding), INV-014 (Compreface optional).
+**Invariants:** INV-005 (local 128-dim embedding), INV-014 (optional Face ID provider).
 **Failure modes:**
-- Face service down → fallback to manual check-in (UC-008).
+- Configured Face ID provider down → fallback to manual check-in (UC-008).
 - Embedding dimension mismatch → recognition accuracy degrades or crashes.
 
 ---

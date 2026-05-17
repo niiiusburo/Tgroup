@@ -58,17 +58,17 @@
 - **Preconditions:** Customer exists; camera available.
 - **Main flow:**
   1. Actor clicks face capture button.
-  2. System detects face via live camera (OpenCV YuNet).
+  2. System detects/captures face via the live browser camera.
   3. Waits for high-quality sample (size, lighting, angle).
   4. Sends image to `POST /api/face/register` with `partnerId` and image buffer.
-  5. Backend extracts 128-dim embedding (SFace) and stores in `dbo.customer_face_embeddings`.
+  5. Backend uses the configured Face ID provider: local SFace stores 128-dim embeddings in `dbo.customer_face_embeddings`; CompreFace stores examples under subject `partners.id`.
   6. Updates `partners.face_subject_id` and `face_registered_at`.
 - **Alternate flows:**
   - **AF-1 No face detected after 10s:** Camera stays open; shows "Vui lòng hướng mặt vào camera".
   - **AF-2 Face too small:** Quality feedback "Xin vui lòng tiến lại gần".
   - **AF-3 Face already registered:** Overwrites with new embedding.
 - **Postconditions:** Customer can now use face recognition check-in (UC-007).
-- **Invariants touched:** INV-005 (128-dim embedding lock).
+- **Invariants touched:** INV-005 (local 128-dim embedding lock), INV-014 (optional face integration startup).
 
 ---
 
@@ -139,8 +139,8 @@
 - **Main flow:**
   1. Patient approaches check-in point; camera captures face.
   2. Frontend calls `POST /api/face/recognize` with image buffer.
-  3. Backend extracts embedding, searches `dbo.customer_face_embeddings`.
-  4. If match found (distance < threshold), returns matched `partnerId`.
+  3. Backend uses the configured provider: local SFace searches `dbo.customer_face_embeddings`; CompreFace returns subject candidates that map back to `partners.id`.
+  4. If match found above threshold, returns matched `partnerId`.
   5. Frontend displays customer name and today's appointments.
   6. Receptionist confirms check-in → `PUT /api/Appointments/:id` with `state='arrived'`.
   7. Appointment marked arrived; moves to "Hôm nay" queue.

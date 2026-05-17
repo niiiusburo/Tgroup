@@ -26,7 +26,7 @@
 │                                  │  search_path=dbo                    │   │
 │                                  └─────────────────────────────────────┘   │
 │                                                                            │
-│  Optional: compreface-api + compreface-core + compreface-postgres-db       │
+│  Optional Face ID: face-service or compreface-api/core/postgres-db         │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -58,7 +58,7 @@
 |------------|------|----------------|
 | Routes | `api/src/routes/` | 39 Express route files (no separate controllers) |
 | Middleware | `api/src/middleware/` | JWT validation (`auth.js`), permission checks |
-| Services | `api/src/services/` | Only `comprefaceClient.js` (thin layer) |
+| Services | `api/src/services/` | Face ID providers, Hosoonline client helpers, permissions, exports, telemetry utilities |
 | DB | `api/src/db.js` | Single `pg` Pool instance exported to all routes |
 
 ## 3. Key Integration Points

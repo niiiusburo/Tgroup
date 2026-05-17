@@ -10,6 +10,103 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK Production Database Daily Backup Rotation
+
+Feature/edit name: NK Production Database Daily Backup Rotation
+
+Changed URLs and API routes:
+- No user-facing URLs changed.
+- No API routes changed.
+- VPS target: `https://nk.2checkin.com`
+- VPS script: `/opt/tgroup/scripts/backup-nk-db.sh`
+- Backup directory: `/opt/tgroup/backups/nk-db-daily/`
+
+Affected data flows:
+- `pg_dump` reads the production `tdental_demo` database from Docker container `tgroup-db`.
+- The backup job writes compressed PostgreSQL custom-format dump files and `.sha256` checksums.
+- Retention keeps only the latest 3 `nk-tdental_demo-*.dump` files after a successful new backup.
+
+User roles:
+- Infra/Release operator with root SSH access to the VPS.
+- Clinic users should see no product behavior change.
+
+Happy paths:
+- Manual run of `/opt/tgroup/scripts/backup-nk-db.sh` creates a non-empty dump and checksum.
+- `sha256sum -c` passes for the newest dump.
+- `pg_restore -l` can list the dump table of contents through `tgroup-db`.
+- Root crontab contains one daily entry scheduled for 12:00 Vietnam time.
+
+Edge cases:
+- If `tgroup-db` is missing or unhealthy, the script exits before writing a successful backup.
+- If `pg_dump` creates an empty temp file, the temp file is removed and no retention cleanup runs.
+- Retention cleanup should only remove older matching NK dump/checksum pairs after a successful backup.
+- The VPS currently uses UTC, so the cron expression is `0 5 * * *`.
+
+Regressions:
+- Existing `tgroup-api`, `tgroup-web`, and `tgroup-db` containers must remain running.
+- Existing `/opt/tgroup/backups/db-sync/` backups must not be touched.
+- No database restore, sync, import, export to local, or schema migration should run as part of this job.
+
+Setup data and login state:
+- Use SSH alias `dokploy` or `root@76.13.16.68`.
+- Use app path `/opt/tgroup`, container `tgroup-db`, database `tdental_demo`.
+
+TestSprite execution items:
+- [ ] PENDING: Verify the newest backup file exists in `/opt/tgroup/backups/nk-db-daily/` and is non-empty.
+- [ ] PENDING: Verify the newest `.sha256` file passes `sha256sum -c`.
+- [ ] PENDING: Verify `docker exec -i tgroup-db pg_restore -l < newest.dump` lists `tdental_demo` archive contents.
+- [ ] PENDING: Verify `crontab -l` contains exactly one `backup-nk-db.sh` entry scheduled for `0 5 * * *`.
+- [ ] PENDING: Verify the retained matching `.dump` count is not greater than 3 after future daily runs.
+
+---
+
+# TestSprite Plan: NK Hosoonline Session-Token Image Hotfix
+
+Feature/edit name: NK Hosoonline Session-Token Image Hotfix
+
+Changed URLs and API routes:
+- `/customers/61d6759f-f2e2-4443-8d5b-b3a7003ab7c5`
+- `/customers/:id`
+- `GET /api/ExternalCheckups/:customerCode`
+- `GET /api/ExternalCheckups/images/:imageName`
+- `POST /api/ExternalCheckups/:customerCode/health-checkups`
+
+Affected data flows:
+- Hosoonline checkup list still loads through `GET /api/ExternalCheckups/:customerCode`.
+- Proxied Hosoonline image and upload fetches now send the TGClinic bearer token from either local storage or session storage.
+- Non-remembered NK login sessions should no longer get `401 {"error":"No token"}` for checkup thumbnails.
+
+User roles:
+- Authenticated admin or clinic staff with `external_checkups.view`.
+- Staff with `external_checkups.upload` for upload regression coverage.
+
+Happy paths:
+- Log into NK without Remember Me, open `/customers/61d6759f-f2e2-4443-8d5b-b3a7003ab7c5`, and verify Health Checkup Images thumbnails render.
+- Verify `GET /api/ExternalCheckups/images/:imageName` requests include `Authorization: Bearer ...` and return image bytes.
+- With upload permission, verify add-checkup upload still sends auth to `POST /api/ExternalCheckups/:customerCode/health-checkups`.
+
+Edge cases:
+- Remember Me sessions that store the token in local storage should continue to render images.
+- Missing or expired sessions should still receive 401 and trigger the existing failed-image state.
+- Hosoonline `http://` media URLs should still be normalized through the existing HTTPS/proxy path.
+
+Regressions:
+- Customer profile loading, profile tabs, and the checkup list must still render.
+- Existing `external_checkups.view` permission gate must continue to protect image bytes.
+- Existing upload form behavior and error parsing must remain unchanged.
+
+Setup data and login state:
+- Use NK production login state.
+- Use customer `T056733` from `/customers/61d6759f-f2e2-4443-8d5b-b3a7003ab7c5`, which currently has Hosoonline image records.
+
+TestSprite execution items:
+- [ ] PENDING: Verify non-remembered NK session renders Hosoonline thumbnails on `/customers/61d6759f-f2e2-4443-8d5b-b3a7003ab7c5`.
+- [ ] PENDING: Verify image requests include Authorization and return `image/*`, not 401 JSON.
+- [ ] PENDING: Verify remembered/local-storage sessions still render Hosoonline thumbnails.
+- [ ] PENDING: Verify the upload form still sends Authorization when staff has `external_checkups.upload`.
+
+---
+
 # TestSprite Plan: Reporting And Permission Feedback Completion
 
 Feature/edit name: Revenue Recognition Reports, Cash Flow Report, Payment Permission Split, and Ho so Online Upload Gate
@@ -298,6 +395,58 @@ Setup data and login state:
 
 ---
 
+# TestSprite Plan: CompreFace Face ID Provider
+
+Feature/edit name: CompreFace Face ID Provider
+
+Changed URLs and API routes:
+- `/customers`
+- `/customers/:id`
+- Header Quick Face ID button on all authenticated routes
+- `POST /api/face/recognize`
+- `POST /api/face/register`
+- `POST /api/face/re-register`
+- `GET /api/face/status/:partnerId`
+- `GET /api/health`
+
+Affected data flows:
+- Browser camera still captures the JPEG through `FaceCaptureModal`.
+- Backend Face ID provider is selected by `FACE_RECOGNITION_PROVIDER=local|compreface`.
+- CompreFace mode registers subjects with `partners.id`, uploads face examples to CompreFace, maps recognition subjects back to `dbo.partners`, and updates `partners.face_subject_id` / `face_registered_at`.
+- Local mode continues to use `face-service` embeddings in `dbo.customer_face_embeddings`.
+
+User roles:
+- Admin or clinic staff with `customers.view` for recognition.
+- Admin or clinic staff with `customers.edit` for registration/re-registration.
+
+Happy paths:
+- With `FACE_RECOGNITION_PROVIDER=compreface`, `/api/health` reports `faceProvider: "compreface"` and `checks.faceService: true` when CompreFace is reachable with a valid key.
+- Registering a customer face creates or reuses a CompreFace subject and returns `{ success, partnerId, sampleId, sampleCount, faceRegisteredAt }`.
+- Re-registering from `/customers/:id` replaces the CompreFace subject examples and returns all sample IDs.
+- Quick Face ID recognition maps a CompreFace subject back to the correct customer and opens `/customers/:id`.
+
+Edge cases:
+- Missing or invalid `COMPREFACE_API_KEY` degrades Face ID health without blocking unrelated customer pages.
+- Existing CompreFace subject returns 409 and registration still adds a new example.
+- Deleted/missing CompreFace subject during re-register is ignored before recreating it.
+- Unknown CompreFace subjects are ignored instead of linking to the wrong customer.
+- Low-confidence results return candidates or no-match, not an automatic customer jump.
+
+Regressions:
+- `FACE_RECOGNITION_PROVIDER=local` still uses `face-service` and `dbo.customer_face_embeddings`.
+- Single-image capture callers still work with `POST /api/face/register`.
+- Guided profile capture still sends three images for re-registration.
+- Manual customer search fallback still works after no-match.
+
+Setup data and login state:
+- Use an authenticated admin session with camera permission enabled.
+- Use fake camera media for automation or a real local camera for manual checks.
+- Start CompreFace with `docker compose up -d compreface-postgres-db compreface-api compreface-core`.
+- Set a valid `COMPREFACE_API_KEY` for the recognition service and set `FACE_RECOGNITION_PROVIDER=compreface`.
+- Use a safe test customer whose Face ID can be replaced.
+
+---
+
 # TestSprite Plan: Customer Service Quantity Save
 
 Feature/edit name: Customer Service Quantity Save
@@ -559,3 +708,50 @@ Regressions:
 Setup data and login state:
 - Use an authenticated admin/reporting session.
 - Use a date range containing known overallocated imported sale orders such as `SO45243` or high-delta examples from the audit query.
+
+---
+
+# TestSprite Plan: NK2 Feedback Bug Triage
+
+Feature/edit name: NK2 Feedback Bug Triage
+
+Changed URLs and API routes:
+- `https://nk2.2checkin.com/feedback`
+- `GET /api/Feedback/all`
+- `GET /api/Feedback/all/:threadId`
+
+Affected data flows:
+- Feedback admin page lists pending staff-submitted bug reports from `feedback_threads`.
+- Feedback verification API returns manual staff reports plus auto-detected API/frontend error threads.
+- Report artifacts are written under `reports/feedback-extract/`.
+
+User roles:
+- Admin with feedback moderation access.
+- QA/TestSprite reviewer reading pending bug reports and auto-error clusters.
+
+Happy paths:
+- Log into NK2 as an admin and open `/feedback`.
+- Confirm the page lists all pending manual staff reports.
+- Fetch `GET /api/Feedback/all` with the same admin session and confirm the manual count matches the visible table.
+- Confirm the generated report separates manual staff bugs from auto-detected 401/403 noise, backend 500 clusters, and frontend errors.
+
+Edge cases:
+- Expired or missing admin token should redirect to `/login` and not expose feedback data.
+- Auto-detected 401/403 threads should be treated as auth/session noise unless tied to a confirmed workflow.
+- Backend 500 clusters should preserve endpoint, status, latest timestamp, and occurrence count.
+- Manual reports from NK and NK2 URLs should keep the original page URL for reproduction.
+
+Regressions:
+- `/feedback` table filtering, status labels, and `View` actions should still work.
+- Login should still return to the authorized admin surface after authentication.
+- Release notes toast should not block access to the feedback table.
+
+Setup data and login state:
+- Use NK2 admin login from `.agents/live-site.env`.
+- Latest audit report: `reports/feedback-extract/2026-05-16T12-21-43-239Z-feedback-verification.md`.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `/feedback` shows the 8 pending manual staff reports.
+- [ ] PENDING: Verify `GET /api/Feedback/all` returns 345 pending feedback threads on NK2.
+- [ ] PENDING: Verify manual staff reports are prioritized above auto-error clusters.
+- [ ] PENDING: Verify auth/permission noise is not mixed into the manual bug list.

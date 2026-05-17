@@ -21,6 +21,7 @@ describe('.env.example', () => {
       'FACE_CANDIDATE_THRESHOLD',
       'FACE_AUTO_MATCH_MARGIN',
       'FACE_MAX_CANDIDATES',
+      'FACE_MIN_QUALITY',
       'FACE_DETECTION_THRESHOLD',
     ];
     for (const key of required) {
@@ -28,8 +29,8 @@ describe('.env.example', () => {
     }
   });
 
-  it('marks Compreface as legacy/fallback', () => {
-    expect(content).toMatch(/Compreface.*legacy|legacy.*Compreface/i);
+  it('contains the Face ID provider switch', () => {
+    expect(content).toContain('FACE_RECOGNITION_PROVIDER');
   });
 
   it('contains Hosoonline variables', () => {
@@ -46,12 +47,16 @@ describe('.env.example', () => {
     expect(content).toContain('POSTGRES_PASSWORD');
   });
 
-  it('contains COMPREFACE_URL for legacy integration', () => {
+  it('contains COMPREFACE_URL for CompreFace integration', () => {
     expect(content).toContain('COMPREFACE_URL');
   });
 
-  it('contains COMPREFACE_API_KEY for legacy integration', () => {
+  it('contains COMPREFACE_API_KEY for CompreFace integration', () => {
     expect(content).toContain('COMPREFACE_API_KEY');
+  });
+
+  it('contains COMPREFACE_HOST_PORT for local port routing', () => {
+    expect(content).toContain('COMPREFACE_HOST_PORT');
   });
 
   it('contains HOSOONLINE_USERNAME for authentication', () => {

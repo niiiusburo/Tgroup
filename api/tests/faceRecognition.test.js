@@ -20,20 +20,47 @@ jest.mock('../src/services/faceEngineClient', () => ({
 jest.mock('../src/services/faceMatchEngine', () => ({
   findMatches: jest.fn(),
   registerSample: jest.fn(),
+  replaceAllSamples: jest.fn(),
   getFaceStatus: jest.fn(),
   cosineSimilarity: jest.fn(),
+  FaceQualityError: class extends Error {
+    constructor(message, detectionScore) {
+      super(message);
+      this.code = 'LOW_QUALITY_FACE';
+      this.status = 422;
+      this.detectionScore = detectionScore;
+    }
+  },
   AUTO_MATCH_THRESHOLD: 0.5,
   CANDIDATE_THRESHOLD: 0.363,
   AUTO_MATCH_MARGIN: 0.05,
   MAX_CANDIDATES: 3,
+}));
+jest.mock('../src/services/comprefaceFaceProvider', () => ({
+  recognizeFace: jest.fn(),
+  registerFace: jest.fn(),
+  replaceFaceSamples: jest.fn(),
+  getFaceStatus: jest.fn(),
+  ComprefaceFaceError: class extends Error {
+    constructor(code, message, status) {
+      super(message);
+      this.code = code;
+      this.status = status;
+    }
+  },
 }));
 jest.mock('../src/db', () => ({
   query: jest.fn(),
 }));
 
 const { getEmbedding } = require('../src/services/faceEngineClient');
-const { findMatches, registerSample, getFaceStatus } = require('../src/services/faceMatchEngine');
+const { findMatches, registerSample, replaceAllSamples, getFaceStatus } = require('../src/services/faceMatchEngine');
+const comprefaceFaceProvider = require('../src/services/comprefaceFaceProvider');
 const { query } = require('../src/db');
+
+afterEach(() => {
+  delete process.env.FACE_RECOGNITION_PROVIDER;
+});
 
 describe('POST /api/face/recognize', () => {
   beforeEach(() => {
@@ -233,6 +260,27 @@ describe('POST /api/face/recognize', () => {
 
     expect(res.status).toBe(503);
     expect(res.body.error).toBe('SERVICE_UNAVAILABLE');
+  });
+
+  it('uses Compreface provider when FACE_RECOGNITION_PROVIDER=compreface', async () => {
+    process.env.FACE_RECOGNITION_PROVIDER = 'compreface';
+    comprefaceFaceProvider.recognizeFace.mockResolvedValue({
+      match: { partnerId: 'p-2', name: 'Bob', code: 'T002', phone: '0902', confidence: 0.91 },
+      candidates: [],
+    });
+
+    const res = await request(app)
+      .post('/api/face/recognize')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(200);
+    expect(res.body.match.partnerId).toBe('p-2');
+    expect(comprefaceFaceProvider.recognizeFace).toHaveBeenCalledWith(
+      expect.any(Buffer),
+      'image/jpeg'
+    );
+    expect(getEmbedding).not.toHaveBeenCalled();
   });
 });
 
@@ -449,6 +497,101 @@ describe('POST /api/face/register', () => {
     expect(res.status).toBe(201);
     expect(registerSample).toHaveBeenCalled();
     expect(registerSample.mock.calls[0][5]).toBe('');
+  });
+
+  it('registers through Compreface provider when configured', async () => {
+    process.env.FACE_RECOGNITION_PROVIDER = 'compreface';
+    query.mockResolvedValueOnce([{ id: 'p-1', name: 'Alice' }]);
+    comprefaceFaceProvider.registerFace.mockResolvedValue({
+      sampleId: 'img-1',
+      sampleCount: 1,
+      faceRegisteredAt: '2026-05-17T10:00:00',
+    });
+
+    const res = await request(app)
+      .post('/api/face/register')
+      .field('partnerId', 'p-1')
+      .attach('image', Buffer.from('fake-image'), 'face.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(201);
+    expect(res.body.sampleId).toBe('img-1');
+    expect(comprefaceFaceProvider.registerFace).toHaveBeenCalledWith(
+      'p-1',
+      expect.any(Buffer),
+      'image/jpeg'
+    );
+    expect(registerSample).not.toHaveBeenCalled();
+  });
+});
+
+describe('POST /api/face/re-register', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('re-registers a batch through local face-service by default', async () => {
+    query.mockResolvedValueOnce([{ id: 'p-1', name: 'Alice' }]);
+    getEmbedding
+      .mockResolvedValueOnce({
+        embedding: [0.1, 0.2, 0.3],
+        model: { recognizer: 'sface', version: 'v1' },
+        quality: { detectionScore: 0.95 },
+      })
+      .mockResolvedValueOnce({
+        embedding: [0.2, 0.3, 0.4],
+        model: { recognizer: 'sface', version: 'v1' },
+        quality: { detectionScore: 0.96 },
+      });
+    replaceAllSamples.mockResolvedValue({ sampleIds: ['s-1', 's-2'], sampleCount: 2 });
+    getFaceStatus.mockResolvedValue({
+      partnerId: 'p-1',
+      registered: true,
+      sampleCount: 2,
+      lastRegisteredAt: '2026-05-17T10:00:00',
+    });
+
+    const res = await request(app)
+      .post('/api/face/re-register')
+      .field('partnerId', 'p-1')
+      .attach('images', Buffer.from('face-a'), 'face-a.jpg')
+      .attach('images', Buffer.from('face-b'), 'face-b.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(201);
+    expect(res.body.sampleIds).toEqual(['s-1', 's-2']);
+    expect(replaceAllSamples).toHaveBeenCalledWith(
+      'p-1',
+      expect.arrayContaining([
+        expect.objectContaining({ imageSha256: expect.any(String) }),
+      ]),
+      null
+    );
+  });
+
+  it('re-registers a batch through Compreface provider when configured', async () => {
+    process.env.FACE_RECOGNITION_PROVIDER = 'compreface';
+    query.mockResolvedValueOnce([{ id: 'p-1', name: 'Alice' }]);
+    comprefaceFaceProvider.replaceFaceSamples.mockResolvedValue({
+      sampleIds: ['img-1', 'img-2'],
+      sampleCount: 2,
+      faceRegisteredAt: '2026-05-17T10:00:00',
+    });
+
+    const res = await request(app)
+      .post('/api/face/re-register')
+      .field('partnerId', 'p-1')
+      .attach('images', Buffer.from('face-a'), 'face-a.jpg')
+      .attach('images', Buffer.from('face-b'), 'face-b.jpg')
+      .set('Authorization', 'Bearer fake-token');
+
+    expect(res.status).toBe(201);
+    expect(res.body.sampleIds).toEqual(['img-1', 'img-2']);
+    expect(comprefaceFaceProvider.replaceFaceSamples).toHaveBeenCalledWith(
+      'p-1',
+      expect.arrayContaining([expect.objectContaining({ originalname: 'face-a.jpg' })])
+    );
+    expect(replaceAllSamples).not.toHaveBeenCalled();
   });
 });
 

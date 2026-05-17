@@ -1,12 +1,30 @@
 "use strict";
 
-const { query } = require("../db");
+const { query, pool } = require("../db");
 
-// Thresholds (environment-configurable with conservative defaults)
-const AUTO_MATCH_THRESHOLD = parseFloat(process.env.FACE_AUTO_MATCH_THRESHOLD || "0.95");
-const CANDIDATE_THRESHOLD = parseFloat(process.env.FACE_CANDIDATE_THRESHOLD || "0.85");
-const AUTO_MATCH_MARGIN = parseFloat(process.env.FACE_AUTO_MATCH_MARGIN || "0.05");
+// Thresholds (environment-configurable). Defaults retuned 2026-05-16:
+//   - AUTO_MATCH_THRESHOLD lowered 0.95 → 0.88: 0.95 rejected legitimate
+//     same-person re-captures (typically 0.88-0.94 under different lighting/pose),
+//     forcing operators to manually re-enroll and creating duplicate customers.
+//   - AUTO_MATCH_MARGIN lowered 0.05 → 0.03: with multi-pose enrollment,
+//     two real candidates rarely cluster within 0.03.
+//   - MIN_QUALITY added: low-quality samples poison the embedding pool and
+//     prevent future matches against that customer.
+const AUTO_MATCH_THRESHOLD = parseFloat(process.env.FACE_AUTO_MATCH_THRESHOLD || "0.88");
+const CANDIDATE_THRESHOLD = parseFloat(process.env.FACE_CANDIDATE_THRESHOLD || "0.80");
+const AUTO_MATCH_MARGIN = parseFloat(process.env.FACE_AUTO_MATCH_MARGIN || "0.03");
 const MAX_CANDIDATES = parseInt(process.env.FACE_MAX_CANDIDATES || "3", 10);
+const MIN_QUALITY = parseFloat(process.env.FACE_MIN_QUALITY || "0.55");
+
+class FaceQualityError extends Error {
+  constructor(message, detectionScore) {
+    super(message);
+    this.name = "FaceQualityError";
+    this.code = "LOW_QUALITY_FACE";
+    this.status = 422;
+    this.detectionScore = detectionScore;
+  }
+}
 
 /**
  * Cosine similarity between two embeddings (both 1-D arrays).
@@ -22,14 +40,46 @@ function cosineSimilarity(a, b) {
 }
 
 /**
+ * L2-normalize an embedding vector in place and return it.
+ */
+function l2Normalize(vec) {
+  let sumSq = 0;
+  for (let i = 0; i < vec.length; i++) sumSq += vec[i] * vec[i];
+  const norm = Math.sqrt(sumSq) || 1;
+  for (let i = 0; i < vec.length; i++) vec[i] = vec[i] / norm;
+  return vec;
+}
+
+/**
+ * Compute centroid (mean) embedding from a list of same-customer embeddings,
+ * then L2-normalize so cosine similarity vs the centroid is a fair score.
+ */
+function computeCentroid(embeddings) {
+  if (!embeddings || embeddings.length === 0) return null;
+  const dim = embeddings[0].length;
+  const sum = new Array(dim).fill(0);
+  for (const emb of embeddings) {
+    for (let i = 0; i < dim; i++) sum[i] += emb[i];
+  }
+  for (let i = 0; i < dim; i++) sum[i] /= embeddings.length;
+  return l2Normalize(sum);
+}
+
+/**
  * Compare one embedding against all active customer embeddings.
+ * Scoring per customer uses MAX(best-sample, centroid) so that:
+ *   - A close-match to any one captured pose wins (sample-best),
+ *   - AND the averaged identity also gets a vote (centroid),
+ *   - Whichever is higher decides — protects against both pose variance
+ *     and a single noisy sample dragging the customer down.
+ *
  * Returns: { match, candidates }
  *   match: best customer when auto-match rules pass
  *   candidates: up to MAX_CANDIDATES when plausible but not safe
  */
 async function findMatches(embedding) {
   const rows = await query(
-    `SELECT cfe.id, cfe.partner_id, cfe.embedding, p.name, p.phone, p.ref AS code
+    `SELECT cfe.partner_id, cfe.embedding, p.name, p.phone, p.ref AS code
      FROM dbo.customer_face_embeddings cfe
      JOIN dbo.partners p ON p.id = cfe.partner_id
      WHERE cfe.is_active = true
@@ -41,26 +91,45 @@ async function findMatches(embedding) {
     return { match: null, candidates: [] };
   }
 
-  // Score each sample, then group by customer and take best sample score
-  const sampleScores = rows.map((row) => ({
-    partnerId: row.partner_id,
-    name: row.name,
-    phone: row.phone,
-    code: row.code || "",
-    score: cosineSimilarity(embedding, row.embedding),
-  }));
-
-  // Group by partnerId, keep best score per customer
-  const customerBest = new Map();
-  for (const s of sampleScores) {
-    const existing = customerBest.get(s.partnerId);
-    if (!existing || s.score > existing.score) {
-      customerBest.set(s.partnerId, s);
+  // Group all active embeddings per customer.
+  const customerGroups = new Map();
+  for (const row of rows) {
+    if (!customerGroups.has(row.partner_id)) {
+      customerGroups.set(row.partner_id, {
+        partnerId: row.partner_id,
+        name: row.name,
+        phone: row.phone,
+        code: row.code || "",
+        embeddings: [],
+      });
     }
+    customerGroups.get(row.partner_id).embeddings.push(row.embedding);
   }
 
+  // Score: max(best-sample, centroid). Centroid only useful with ≥2 samples.
+  const scored = Array.from(customerGroups.values()).map((c) => {
+    let bestSample = -1;
+    for (const emb of c.embeddings) {
+      const s = cosineSimilarity(embedding, emb);
+      if (s > bestSample) bestSample = s;
+    }
+    let centroidScore = -1;
+    if (c.embeddings.length >= 2) {
+      const centroid = computeCentroid(c.embeddings);
+      centroidScore = cosineSimilarity(embedding, centroid);
+    }
+    return {
+      partnerId: c.partnerId,
+      name: c.name,
+      phone: c.phone,
+      code: c.code,
+      score: Math.max(bestSample, centroidScore),
+      sampleCount: c.embeddings.length,
+    };
+  });
+
   // Sort descending by score
-  const sorted = Array.from(customerBest.values()).sort((a, b) => b.score - a.score);
+  const sorted = scored.sort((a, b) => b.score - a.score);
 
   const top = sorted[0];
   const second = sorted[1];
@@ -102,9 +171,27 @@ async function findMatches(embedding) {
 }
 
 /**
+ * Reject samples whose detection score is below MIN_QUALITY.
+ * Without this gate, blurry / low-light captures pollute the embedding
+ * pool and cause that customer to stop matching future good captures.
+ */
+function assertQuality(quality) {
+  const score = quality?.detectionScore;
+  if (typeof score === "number" && score < MIN_QUALITY) {
+    throw new FaceQualityError(
+      `Face quality ${score.toFixed(2)} below minimum ${MIN_QUALITY.toFixed(2)}`,
+      score
+    );
+  }
+}
+
+/**
  * Insert a new face embedding sample for a customer.
+ * Enforces minimum quality.
  */
 async function registerSample(partnerId, embedding, quality, modelMeta, imageSha256, source, createdBy) {
+  assertQuality(quality);
+
   const detectionScore = quality?.detectionScore ?? null;
   const faceBox = quality?.box ? JSON.stringify(quality.box) : null;
 
@@ -128,7 +215,6 @@ async function registerSample(partnerId, embedding, quality, modelMeta, imageSha
 
   const sampleId = insertRes[0]?.id;
 
-  // Update partner face status
   await query(
     `UPDATE dbo.partners
      SET face_subject_id = COALESCE(face_subject_id, $1::text),
@@ -137,7 +223,6 @@ async function registerSample(partnerId, embedding, quality, modelMeta, imageSha
     [partnerId]
   );
 
-  // Count active samples
   const countRes = await query(
     `SELECT COUNT(*)::int AS cnt FROM dbo.customer_face_embeddings
      WHERE partner_id = $1 AND is_active = true`,
@@ -145,6 +230,72 @@ async function registerSample(partnerId, embedding, quality, modelMeta, imageSha
   );
 
   return { sampleId, sampleCount: countRes[0]?.cnt || 1 };
+}
+
+/**
+ * Replace all active embeddings for a customer with the supplied batch,
+ * inside a single transaction. Old samples are soft-deleted (is_active=false)
+ * so audit history is preserved. Used by the "Re-add Face" flow.
+ *
+ * samples: [{ embedding, quality, modelMeta, imageSha256, source }, ...]
+ */
+async function replaceAllSamples(partnerId, samples, createdBy) {
+  if (!Array.isArray(samples) || samples.length === 0) {
+    throw new Error("replaceAllSamples requires at least one sample");
+  }
+  for (const s of samples) assertQuality(s.quality);
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    await client.query(
+      `UPDATE dbo.customer_face_embeddings
+       SET is_active = false
+       WHERE partner_id = $1 AND is_active = true`,
+      [partnerId]
+    );
+
+    const insertedIds = [];
+    for (const s of samples) {
+      const detectionScore = s.quality?.detectionScore ?? null;
+      const faceBox = s.quality?.box ? JSON.stringify(s.quality.box) : null;
+      const ins = await client.query(
+        `INSERT INTO dbo.customer_face_embeddings
+         (partner_id, embedding, detection_score, face_box, image_sha256, source, model_name, model_version, created_by)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         RETURNING id`,
+        [
+          partnerId,
+          s.embedding,
+          detectionScore,
+          faceBox,
+          s.imageSha256 || null,
+          s.source || "profile_reregister",
+          s.modelMeta?.recognizer || "sface",
+          s.modelMeta?.version || "opencv-sface-2021",
+          createdBy || null,
+        ]
+      );
+      insertedIds.push(ins.rows[0]?.id);
+    }
+
+    await client.query(
+      `UPDATE dbo.partners
+       SET face_subject_id = COALESCE(face_subject_id, $1::text),
+           face_registered_at = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
+       WHERE id = $1::uuid`,
+      [partnerId]
+    );
+
+    await client.query("COMMIT");
+    return { sampleIds: insertedIds, sampleCount: insertedIds.length };
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 /**
@@ -176,10 +327,14 @@ async function getFaceStatus(partnerId) {
 module.exports = {
   findMatches,
   registerSample,
+  replaceAllSamples,
   getFaceStatus,
   cosineSimilarity,
+  computeCentroid,
+  FaceQualityError,
   AUTO_MATCH_THRESHOLD,
   CANDIDATE_THRESHOLD,
   AUTO_MATCH_MARGIN,
   MAX_CANDIDATES,
+  MIN_QUALITY,
 };

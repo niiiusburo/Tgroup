@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.32.20",
+    "date": "2026-05-17",
+    "highlights": "Face ID can now route through CompreFace without changing the browser camera flow. API health reports which Face ID provider is active.",
+    "sections": [
+      {
+        "title": "Face ID",
+        "items": [
+          "Added FACE_RECOGNITION_PROVIDER=local|compreface. Local mode keeps the existing face-service embedding flow; CompreFace mode uses partners.id as the recognition subject and maps results back to customer profiles.",
+          "POST /api/face/register and POST /api/face/re-register now support CompreFace registration while preserving the same frontend camera UI.",
+          "GET /api/health now includes faceProvider, and the CompreFace host port defaults to 8002 to avoid local port 8000 collisions."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.19",
     "date": "2026-05-17",
     "highlights": "The 'NEW IN THIS VERSION' release notes toast now auto-dismisses after 10 seconds (paused on hover), with a smooth slide-out — no longer permanently covers dashboard charts.",
