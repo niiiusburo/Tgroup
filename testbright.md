@@ -10,6 +10,52 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: TGClinic Orange Butterfly Favicon
+
+Feature/edit name: TGClinic Orange Butterfly Favicon
+
+Changed URLs and API routes:
+- `/`
+- All website routes that inherit `website/index.html`
+- Static asset: `/favicon.svg`
+- No API routes changed.
+
+Affected data flows:
+- Browser loads the SVG favicon from `website/public/favicon.svg`.
+- Vite serves the icon through the app shell defined in `website/index.html`.
+- No backend, database, auth, or user-record data flow changed.
+
+User roles:
+- Any authenticated or unauthenticated browser visitor.
+- Admin, receptionist, dentist, and manager roles should see the same browser-tab icon.
+
+Happy paths:
+- Open the local website and confirm the browser tab loads the orange butterfly favicon.
+- Fetch `/favicon.svg` and confirm it returns SVG content.
+- Navigate between routes and confirm the favicon remains stable because the app shell owns it.
+
+Edge cases:
+- Browser cache may keep the old Vite icon until hard refresh or cache clear.
+- SVG favicon should remain legible at 16x16 and 32x32 browser-tab sizes.
+- Missing favicon should not block app startup or route rendering.
+
+Regressions:
+- `website/index.html` still loads `/src/main.tsx`.
+- Existing page title and version bootstrap script remain unchanged.
+- No API route or permission behavior changes.
+
+Setup data and login state:
+- No special data or login state required.
+- Use the normal local website dev server.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `GET /favicon.svg` returns the orange butterfly SVG asset.
+- [ ] PENDING: Verify the browser tab icon changes from the default Vite icon to the orange butterfly on `/`.
+- [ ] PENDING: Verify a nested app route keeps the same favicon after navigation.
+- [ ] PENDING: Verify the app shell still mounts and renders the React app.
+
+---
+
 # TestSprite Plan: NK Production Database Daily Backup Rotation
 
 Feature/edit name: NK Production Database Daily Backup Rotation

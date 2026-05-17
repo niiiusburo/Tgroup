@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.32.21",
+    "date": "2026-05-17",
+    "highlights": "The site now uses an orange butterfly favicon instead of the default Vite icon.",
+    "sections": [
+      {
+        "title": "Branding",
+        "items": [
+          "Added `/favicon.svg` with the TGClinic orange background and butterfly mark.",
+          "Updated the app shell favicon link so every route inherits the new browser-tab icon."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.20",
     "date": "2026-05-17",
     "highlights": "Face ID can now route through CompreFace without changing the browser camera flow. API health reports which Face ID provider is active.",
