@@ -263,6 +263,16 @@ Provider behavior:
 - `FACE_RECOGNITION_PROVIDER=local` sends captures to `FACE_SERVICE_URL` for SFace embeddings and stores vectors in `dbo.customer_face_embeddings`.
 - `FACE_RECOGNITION_PROVIDER=compreface` sends captures to CompreFace, uses `partners.id` as the CompreFace subject, and keeps `partners.face_subject_id` / `face_registered_at` as TGClinic status.
 
+Face error responses:
+```ts
+{
+  error: 'NO_FACE' | 'MULTIPLE_FACES' | 'LOW_QUALITY' | 'MODEL_NOT_READY' | 'ENGINE_ERROR' | string;
+  message: string;
+}
+```
+- `NO_FACE` is HTTP 422 when the local provider or CompreFace cannot detect a face in the submitted image.
+- Frontend capture callers must keep the camera modal open on `NO_FACE`, show "Không phát hiện khuôn mặt" / "Face not detected", and dismiss capture only through an explicit close/cancel action.
+
 ---
 
 ### 1.7 Permissions

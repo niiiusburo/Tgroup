@@ -74,34 +74,40 @@ export function CustomerCameraWidget({
   const handleCapture = useCallback(
     async (imageBlob: Blob, imageBlobs?: readonly Blob[]) => {
       const profileImages = imageBlobs?.length ? imageBlobs : [imageBlob];
-      setShowCaptureModal(false);
       setCaptureState('processing');
       setCapturedImage(imageBlob);
       setCapturedImages(profileImages);
-      const result = await recognize(imageBlob);
 
-      if (result.match) {
-        const match = result.match;
-        setCaptureState('success');
-        setTimeout(() => {
-          onFaceIdResult({
-            name: match.name,
-            phone: match.phone,
-            ref: match.code,
-          }, imageBlob);
-          setMode('idle');
+      try {
+        const result = await recognize(imageBlob);
+        setShowCaptureModal(false);
+
+        if (result.match) {
+          const match = result.match;
+          setCaptureState('success');
+          setTimeout(() => {
+            onFaceIdResult({
+              name: match.name,
+              phone: match.phone,
+              ref: match.code,
+            }, imageBlob);
+            setMode('idle');
+            setCaptureState('preview');
+            setCapturedImage(null);
+            setCapturedImages([]);
+            reset();
+          }, 400);
+        } else if (result.candidates && result.candidates.length > 0) {
           setCaptureState('preview');
-          setCapturedImage(null);
-          setCapturedImages([]);
-          reset();
-        }, 400);
-      } else if (result.candidates && result.candidates.length > 0) {
+          setMode('candidate-review');
+        } else {
+          setCaptureState('preview');
+          setMode('no-match-rescue');
+          onFaceIdResult(null, imageBlob, profileImages);
+        }
+      } catch (err) {
         setCaptureState('preview');
-        setMode('candidate-review');
-      } else {
-        setCaptureState('preview');
-        setMode('no-match-rescue');
-        onFaceIdResult(null, imageBlob, profileImages);
+        throw err;
       }
     },
     [onFaceIdResult, recognize, reset]

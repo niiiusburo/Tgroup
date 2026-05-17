@@ -7,7 +7,7 @@ interface FaceCaptureModalProps {
   readonly isOpen: boolean;
   readonly title?: string;
   readonly captureMode?: FaceCaptureMode;
-  readonly onCapture: (image: Blob, images?: readonly Blob[]) => void;
+  readonly onCapture: (image: Blob, images?: readonly Blob[]) => void | Promise<void>;
   readonly onCancel: () => void;
 }
 
@@ -23,6 +23,7 @@ export function FaceCaptureModal({
   const {
     videoRef,
     error,
+    captureError,
     isStarting,
     detectionState,
     detectionScore,
@@ -36,6 +37,7 @@ export function FaceCaptureModal({
     isOpen,
     captureMode,
     cameraErrorMessage: t('faceCapture.cameraError'),
+    captureFailedMessage: t('faceCapture.captureFailed', 'Face capture failed. Please try again.'),
     onCapture,
   });
 
@@ -50,6 +52,8 @@ export function FaceCaptureModal({
       t('faceCapture.autoCapturing', 'Auto capturing...') :
       isReady ?
         t('faceCapture.faceDetected', 'Face detected') :
+      detectionState === 'no-face' ?
+        t('faceCapture.noFace', 'Face not detected') :
       isSidePose ?
         t('faceCapture.holdSteady', 'Hold steady, tap Capture') :
         t('faceCapture.scanning', 'Scanning for face...');
@@ -155,6 +159,12 @@ export function FaceCaptureModal({
                     </span>
                   </div>
                 </div>
+              )}
+
+              {captureError && (
+                <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-center text-xs font-medium text-red-700 ring-1 ring-red-100" aria-live="polite">
+                  {captureError}
+                </p>
               )}
 
               <div className="mt-4 flex items-center justify-center gap-2 sm:gap-3">

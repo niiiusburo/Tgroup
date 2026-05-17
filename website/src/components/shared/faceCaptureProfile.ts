@@ -1,4 +1,4 @@
-export type DetectionState = 'scanning' | 'detected' | 'capturing';
+export type DetectionState = 'scanning' | 'no-face' | 'detected' | 'capturing';
 export type FaceCaptureMode = 'single' | 'profile';
 export type CapturedFaceImages = Blob | readonly Blob[] | null;
 export type CapturePoseId = 'center' | 'left' | 'right';

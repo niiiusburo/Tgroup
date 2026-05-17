@@ -64,7 +64,7 @@
   5. Backend uses the configured Face ID provider: local SFace stores 128-dim embeddings in `dbo.customer_face_embeddings`; CompreFace stores examples under subject `partners.id`.
   6. Updates `partners.face_subject_id` and `face_registered_at`.
 - **Alternate flows:**
-  - **AF-1 No face detected after 10s:** Camera stays open; shows "Vui lòng hướng mặt vào camera".
+  - **AF-1 No face detected:** Camera stays open; shows "Không phát hiện khuôn mặt" / "Face not detected"; only explicit close/cancel dismisses capture.
   - **AF-2 Face too small:** Quality feedback "Xin vui lòng tiến lại gần".
   - **AF-3 Face already registered:** Overwrites with new embedding.
 - **Postconditions:** Customer can now use face recognition check-in (UC-007).
@@ -145,9 +145,10 @@
   6. Receptionist confirms check-in → `PUT /api/Appointments/:id` with `state='arrived'`.
   7. Appointment marked arrived; moves to "Hôm nay" queue.
 - **Alternate flows:**
-  - **AF-1 No face match:** Show "Không nhận diện được" and offer manual customer search (UC-004).
-  - **AF-2 No face registered:** Fallback to manual `CustomerSelector`.
-  - **AF-3 No appointments today:** Show "Hôm nay không có lịch hẹn".
+  - **AF-1 No face detected:** Camera stays open; shows "Không phát hiện khuôn mặt" / "Face not detected"; only explicit close/cancel dismisses capture.
+  - **AF-2 No face match:** Show "Không nhận diện được" and offer manual customer search (UC-004).
+  - **AF-3 No face registered:** Fallback to manual `CustomerSelector`.
+  - **AF-4 No appointments today:** Show "Hôm nay không có lịch hẹn".
 - **Postconditions:** Appointment state = `arrived`; check-in timestamp recorded.
 - **Invariants touched:** INV-005 (embedding dimension), INV-014 (Compreface optional startup).
 

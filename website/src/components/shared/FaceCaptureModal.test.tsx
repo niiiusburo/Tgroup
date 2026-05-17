@@ -118,6 +118,15 @@ describe('FaceCaptureModal', () => {
     vi.useFakeTimers();
     mockVideoWidth = 640;
     mockVideoHeight = 480;
+    class MockFaceDetector {
+      detect = vi.fn().mockResolvedValue([
+        { boundingBox: { width: 220, height: 260 } },
+      ]);
+    }
+    Object.defineProperty(globalThis, 'FaceDetector', {
+      configurable: true,
+      value: MockFaceDetector,
+    });
 
     render(<FaceCaptureModal isOpen onCapture={vi.fn()} onCancel={vi.fn()} />);
 
@@ -137,6 +146,15 @@ describe('FaceCaptureModal', () => {
     vi.useFakeTimers();
     mockVideoWidth = 640;
     mockVideoHeight = 480;
+    class MockFaceDetector {
+      detect = vi.fn().mockResolvedValue([
+        { boundingBox: { width: 220, height: 260 } },
+      ]);
+    }
+    Object.defineProperty(globalThis, 'FaceDetector', {
+      configurable: true,
+      value: MockFaceDetector,
+    });
     const onCapture = vi.fn();
 
     render(<FaceCaptureModal isOpen onCapture={onCapture} onCancel={vi.fn()} />);
@@ -148,6 +166,46 @@ describe('FaceCaptureModal', () => {
 
     expect(onCapture).toHaveBeenCalledTimes(1);
     expect(onCapture.mock.calls[0][0]).toBeInstanceOf(Blob);
+  });
+
+  it('shows face not detected and keeps the camera open when no detector can confirm a center face', async () => {
+    vi.useFakeTimers();
+    mockVideoWidth = 640;
+    mockVideoHeight = 480;
+    Object.defineProperty(globalThis, 'FaceDetector', {
+      configurable: true,
+      value: undefined,
+    });
+    const onCapture = vi.fn();
+
+    render(<FaceCaptureModal isOpen onCapture={onCapture} onCancel={vi.fn()} />);
+
+    await waitForCameraStart();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2400);
+    });
+
+    expect(screen.getByText(/Không phát hiện khuôn mặt|Face not detected/i)).toBeInTheDocument();
+    expect(document.querySelector('video')).toBeInTheDocument();
+    expect(onCapture).not.toHaveBeenCalled();
+  });
+
+  it('keeps the camera open and shows the backend message when capture processing fails', async () => {
+    mockVideoWidth = 640;
+    mockVideoHeight = 480;
+    const onCapture = vi.fn().mockRejectedValue(new Error('No face detected'));
+    const onCancel = vi.fn();
+
+    render(<FaceCaptureModal isOpen onCapture={onCapture} onCancel={onCancel} />);
+
+    await waitForCameraStart();
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Chụp/i }));
+    });
+
+    expect(await screen.findByText('No face detected')).toBeInTheDocument();
+    expect(document.querySelector('video')).toBeInTheDocument();
+    expect(onCancel).not.toHaveBeenCalled();
   });
 
   it('guides profile capture through straight, left, and right samples', async () => {

@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.32.22",
+    "date": "2026-05-17",
+    "highlights": "Face ID capture now keeps the camera open when no face is detected, with clear staff-facing feedback instead of closing into a failed flow.",
+    "sections": [
+      {
+        "title": "Face ID",
+        "items": [
+          "Camera capture stays open on local or CompreFace no-face responses and shows \"Face not detected\" / \"Không phát hiện khuôn mặt\".",
+          "CompreFace no-face errors are normalized to HTTP 422 `NO_FACE` instead of generic provider errors.",
+          "Header Quick Face ID, customer camera capture, and profile re-registration now share the same no-face retry behavior."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.21",
     "date": "2026-05-17",
     "highlights": "The site now uses an orange butterfly favicon instead of the default Vite icon.",

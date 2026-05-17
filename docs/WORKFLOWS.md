@@ -282,7 +282,10 @@ sequenceDiagram
         API->>DB: Map subject to partners.id / face_subject_id
         DB-->>API: Customer candidates
     end
-    alt Match found
+    alt No face detected
+        API-->>FE: 422 { error: "NO_FACE", message: "No face detected" }
+        FE-->>P: Keep camera open + show "Không phát hiện khuôn mặt"
+    else Match found
         API-->>FE: 200 { match: { partnerId, confidence }, candidates: [] }
         FE->>API: GET /api/Appointments?partnerId=...&date=today
         API-->>FE: Today's appointments[]
@@ -296,6 +299,7 @@ sequenceDiagram
 **Data state transitions:** None (read-only recognition).
 **Invariants:** INV-005 (local 128-dim embedding), INV-014 (optional Face ID provider).
 **Failure modes:**
+- Provider cannot detect a face → API returns `NO_FACE`; frontend keeps camera open until manual close.
 - Configured Face ID provider down → fallback to manual check-in (UC-008).
 - Embedding dimension mismatch → recognition accuracy degrades or crashes.
 

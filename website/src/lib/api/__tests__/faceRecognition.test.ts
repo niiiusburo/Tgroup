@@ -96,6 +96,21 @@ describe('Face Recognition API client', () => {
 
       await expect(recognizeFace(new Blob(['image']))).rejects.toThrow();
     });
+
+    it('uses backend message for legacy face errors with error and message fields', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 422,
+        clone: () => ({ json: async () => ({ error: 'NO_FACE', message: 'No face detected' }) }),
+        text: async () => 'No face detected',
+      });
+
+      await expect(recognizeFace(new Blob(['image']))).rejects.toMatchObject({
+        status: 422,
+        code: 'NO_FACE',
+        message: 'No face detected',
+      });
+    });
   });
 
   describe('registerFace', () => {

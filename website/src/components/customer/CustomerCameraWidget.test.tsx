@@ -20,13 +20,15 @@ vi.mock('@/lib/api', () => ({
 vi.mock('@/components/shared/FaceCaptureModal', () => ({
   FaceCaptureModal: ({ isOpen, onCapture, onCancel }: {
     isOpen: boolean;
-    onCapture: (blob: Blob) => void;
+    onCapture: (blob: Blob) => void | Promise<void>;
     onCancel: () => void;
   }) => {
     if (!isOpen) return null;
     return (
       <div data-testid="face-capture-modal">
-        <button onClick={() => onCapture(new Blob(['fake-image'], { type: 'image/jpeg' }))}>
+        <button onClick={() => {
+          void Promise.resolve(onCapture(new Blob(['fake-image'], { type: 'image/jpeg' }))).catch(() => {});
+        }}>
           Chụp
         </button>
         <button onClick={onCancel}>Hủy</button>
@@ -131,6 +133,25 @@ describe('CustomerCameraWidget', () => {
       await waitFor(() => {
         expect(container.querySelector('.animate-spin')).not.toBeInTheDocument();
       }, { timeout: 3000 });
+    });
+  });
+
+  describe('Face ID recognition errors', () => {
+    it('keeps the capture modal open when the backend says no face was detected', async () => {
+      mocks.recognizeFace.mockRejectedValue(new Error('No face detected'));
+
+      render(<CustomerCameraWidget onQuickAddResult={vi.fn()} onFaceIdResult={vi.fn()} />);
+      fireEvent.click(screen.getByRole('button', { name: /Nhận diện khuôn mặt/i }));
+
+      const captureBtn = await screen.findByRole('button', { name: /Chụp/i });
+      fireEvent.click(captureBtn);
+
+      await waitFor(() => {
+        expect(mocks.recognizeFace).toHaveBeenCalled();
+      }, { timeout: 3000 });
+
+      expect(screen.getByTestId('face-capture-modal')).toBeInTheDocument();
+      expect(screen.queryByText(/No match found/i)).not.toBeInTheDocument();
     });
   });
 

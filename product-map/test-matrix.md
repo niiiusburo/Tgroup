@@ -15,7 +15,7 @@
 | `__tests__/useVersionCheck.test.ts` | Settings | `useVersionCheck` polling and update prompt |
 | `components/appointments/AppointmentForm.test.tsx` | Appointments | AppointmentForm validation and submission |
 | `components/customer/__tests__/CustomerProfile.i18n.test.tsx` | Customers | CustomerProfile i18n label rendering |
-| `components/customer/CustomerCameraWidget.test.tsx` | Integrations | Face capture camera widget UI |
+| `components/customer/CustomerCameraWidget.test.tsx` | Integrations | Face capture camera widget UI and no-face capture retention |
 | `components/customer/CustomerProfile.test.tsx` | Customers | CustomerProfile tabs and data display |
 | `components/customer/AuthenticatedCheckupImage.test.tsx` | Integrations | Authenticated Hosoonline image proxy URL resolution |
 | `components/customer/ServiceHistory.test.tsx` | Services | Service history list rendering |
@@ -31,7 +31,9 @@
 | `components/payment/VietQrModal.test.tsx` | Payments | VietQR modal generation and copy |
 | `components/shared/CurrencyInput.test.tsx` | UI/Shared | CurrencyInput formatting and validation |
 | `components/shared/DoctorSelector.test.tsx` | Employees | DoctorSelector search and selection |
-| `components/shared/FaceCaptureModal.test.tsx` | Integrations | Face capture modal UI states |
+| `components/shared/FaceCaptureModal.test.tsx` | Integrations | Face capture modal UI states and no-face camera lifetime |
+| `components/shared/faceCaptureEngine.test.ts` | Integrations | Face capture scoring, no-face gating, and side-pose fallback behavior |
+| `components/shared/GlobalFaceIdButton.test.tsx` | Integrations | Header Face ID recognition, camera lifetime, and no-face errors |
 | `contexts/__tests__/appointment-hover.context.test.tsx` | Appointments | AppointmentHoverContext state |
 | `hooks/__tests__/useCalendarData.pagination.test.ts` | Appointments | Calendar range fetch uses the optimized calendar-mode appointment API and groups appointments by date |
 | `hooks/__tests__/useCustomers.cskh.test.ts` | Customers | `useCustomers` CSKH filtering |
@@ -111,7 +113,7 @@
 | `loginRateLimiter.test.js` | Auth | Login rate limiter counts failed attempts only and scopes account lockout by email plus IP |
 | `faceRecognition.test.js` | Integrations | Face register/recognize/re-register API in local and CompreFace provider modes |
 | `src/services/__tests__/comprefaceClient.test.js` | Integrations | CompreFace REST client, auth header, subject/example calls, and health check |
-| `src/services/__tests__/comprefaceFaceProvider.test.js` | Integrations | CompreFace provider mapping from subjects to customer records and registration status |
+| `src/services/__tests__/comprefaceFaceProvider.test.js` | Integrations | CompreFace provider mapping from subjects to customer records, registration status, and `NO_FACE` error normalization |
 | `src/routes/appointments/__tests__/readHandlers.test.js` | Appointments | Calendar-mode appointment list allows large week ranges while skipping count/aggregate queries; normal lists remain capped |
 | `src/routes/__tests__/externalCheckups.test.js` | Integrations | Hosoonline auth header, v2 patient search path, generated patient code, and migrated ref lookup behavior |
 | `src/routes/partners/__tests__/mutationHandlers.test.js` | Customers | Customer edit allows phone values to overlap customer refs/phones while keeping UUID as identity |

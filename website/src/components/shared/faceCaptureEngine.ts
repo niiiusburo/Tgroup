@@ -109,6 +109,13 @@ export async function analyzeFrame(
   const frameQuality = estimateFrameQuality(video);
 
   if (!detector) {
+    if (requireFaceDetection) {
+      return {
+        score: frameQuality * 0.45,
+        ready: false,
+      };
+    }
+
     return {
       score: frameQuality,
       ready: frameQuality >= AUTO_CAPTURE_SCORE,
@@ -141,6 +148,13 @@ export async function analyzeFrame(
       ready: score >= AUTO_CAPTURE_SCORE,
     };
   } catch {
+    if (requireFaceDetection) {
+      return {
+        score: frameQuality * 0.45,
+        ready: false,
+      };
+    }
+
     return {
       score: frameQuality,
       ready: frameQuality >= AUTO_CAPTURE_SCORE,

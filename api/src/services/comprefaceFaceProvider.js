@@ -37,6 +37,29 @@ function sampleIdFromResponse(response, fallback) {
   );
 }
 
+function isNoFaceError(err) {
+  const message = String(err?.message || "");
+  const code = String(err?.code || "");
+  return (
+    /no\s+face/i.test(message) ||
+    /face\s+(is\s+)?not\s+(found|detected)/i.test(message) ||
+    /not\s+found.*face/i.test(message) ||
+    code === "28"
+  );
+}
+
+function mapComprefaceFailure(err, fallbackCode, fallbackMessage) {
+  if (isNoFaceError(err)) {
+    return new ComprefaceFaceError("NO_FACE", "No face detected", 422);
+  }
+
+  return new ComprefaceFaceError(
+    fallbackCode,
+    err.message || fallbackMessage,
+    err.status || 502
+  );
+}
+
 async function loadPartnersBySubjects(subjects) {
   if (!subjects.length) return new Map();
 
@@ -57,7 +80,16 @@ async function loadPartnersBySubjects(subjects) {
 }
 
 async function recognizeFace(imageBuffer, mimetype) {
-  const rawResults = await recognize(imageBuffer, mimetype);
+  let rawResults;
+  try {
+    rawResults = await recognize(imageBuffer, mimetype);
+  } catch (err) {
+    throw mapComprefaceFailure(
+      err,
+      "COMPREFACE_RECOGNIZE_ERROR",
+      "Failed to recognize face in Compreface"
+    );
+  }
   const subjects = [...new Set(rawResults.map((r) => String(r.subject)).filter(Boolean))];
   const partnersBySubject = await loadPartnersBySubjects(subjects);
 
@@ -158,10 +190,10 @@ async function registerFace(partnerId, imageBuffer, mimetype) {
   try {
     response = await addExample(subjectId, imageBuffer, mimetype);
   } catch (err) {
-    throw new ComprefaceFaceError(
+    throw mapComprefaceFailure(
+      err,
       "COMPREFACE_REGISTER_ERROR",
-      err.message || "Failed to register face in Compreface",
-      err.status || 502
+      "Failed to register face in Compreface"
     );
   }
 
@@ -194,10 +226,10 @@ async function replaceFaceSamples(partnerId, files) {
     try {
       response = await addExample(subjectId, file.buffer, file.mimetype);
     } catch (err) {
-      throw new ComprefaceFaceError(
+      throw mapComprefaceFailure(
+        err,
         "COMPREFACE_REGISTER_ERROR",
-        err.message || "Failed to register face in Compreface",
-        err.status || 502
+        "Failed to register face in Compreface"
       );
     }
     sampleIds.push(sampleIdFromResponse(response, `${subjectId}:${idx}`));

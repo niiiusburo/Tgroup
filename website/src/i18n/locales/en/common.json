@@ -256,6 +256,7 @@
     "switchCamera": "Switch camera",
     "cameraStarting": "Starting camera...",
     "scanning": "Scanning for face...",
+    "noFace": "Face not detected",
     "faceDetected": "Face detected",
     "quality": "Quality",
     "profileStep": "Step {{current}}/{{total}}: {{pose}}",
@@ -268,6 +269,7 @@
     "holdSteady": "Hold steady, tap Capture",
     "capturePose": "Capture",
     "autoCapturing": "Auto capturing...",
+    "captureFailed": "Face capture failed. Please try again.",
     "cameraError": "Cannot access camera. Please grant permission."
   },
   "combobox": {

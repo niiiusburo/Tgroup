@@ -477,12 +477,16 @@ Edge cases:
 - Deleted/missing CompreFace subject during re-register is ignored before recreating it.
 - Unknown CompreFace subjects are ignored instead of linking to the wrong customer.
 - Low-confidence results return candidates or no-match, not an automatic customer jump.
+- Browser sessions without native `FaceDetector` support must not auto-capture a center face from frame quality alone.
+- `NO_FACE` from local or CompreFace providers must keep the camera modal open and show "Không phát hiện khuôn mặt" / "Face not detected".
+- CompreFace no-face responses must return HTTP 422 with `error: "NO_FACE"`, not a generic engine error.
 
 Regressions:
 - `FACE_RECOGNITION_PROVIDER=local` still uses `face-service` and `dbo.customer_face_embeddings`.
 - Single-image capture callers still work with `POST /api/face/register`.
 - Guided profile capture still sends three images for re-registration.
 - Manual customer search fallback still works after no-match.
+- Header Quick Face ID, customer camera widget, and profile re-registration all keep capture open on no-face failures until staff manually closes it.
 
 Setup data and login state:
 - Use an authenticated admin session with camera permission enabled.
@@ -490,6 +494,12 @@ Setup data and login state:
 - Start CompreFace with `docker compose up -d compreface-postgres-db compreface-api compreface-core`.
 - Set a valid `COMPREFACE_API_KEY` for the recognition service and set `FACE_RECOGNITION_PROVIDER=compreface`.
 - Use a safe test customer whose Face ID can be replaced.
+
+Execution checklist for the no-face fix:
+- [ ] PENDING: With the camera pointed away or covered, verify the capture modal shows "Không phát hiện khuôn mặt" and remains open until cancel/close.
+- [ ] PENDING: Trigger CompreFace no-face on `POST /api/face/re-register` and verify HTTP 422 `NO_FACE`, not `ENGINE_ERROR`.
+- [ ] PENDING: Trigger Header Quick Face ID no-face and verify it keeps capture open without opening the no-match rescue popover.
+- [ ] PENDING: Trigger customer profile re-registration no-face and verify no success toast appears until a valid face is captured.
 
 ---
 

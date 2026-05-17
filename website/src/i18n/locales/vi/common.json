@@ -256,6 +256,7 @@
     "switchCamera": "Đổi camera",
     "cameraStarting": "Đang mở camera...",
     "scanning": "Đang tìm khuôn mặt...",
+    "noFace": "Không phát hiện khuôn mặt",
     "faceDetected": "Đã phát hiện khuôn mặt",
     "quality": "Chất lượng",
     "profileStep": "Bước {{current}}/{{total}}: {{pose}}",
@@ -268,6 +269,7 @@
     "holdSteady": "Giữ yên, nhấn Chụp",
     "capturePose": "Chụp",
     "autoCapturing": "Đang tự chụp...",
+    "captureFailed": "Không thể chụp khuôn mặt. Vui lòng thử lại.",
     "cameraError": "Không thể truy cập camera. Vui lòng cấp quyền."
   },
   "combobox": {

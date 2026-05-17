@@ -157,6 +157,23 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
       parsed !== null &&
       typeof parsed === 'object' &&
       'error' in parsed &&
+      typeof (parsed as Record<string, unknown>).error === 'string' &&
+      'message' in parsed &&
+      typeof (parsed as Record<string, unknown>).message === 'string'
+    ) {
+      throw new ApiError({
+        status: res.status,
+        code: (parsed as Record<string, unknown>).error as string,
+        message: (parsed as Record<string, unknown>).message as string,
+        body: parsed,
+      });
+    }
+
+    // Legacy string error without message: { error: "some string" }
+    if (
+      parsed !== null &&
+      typeof parsed === 'object' &&
+      'error' in parsed &&
       typeof (parsed as Record<string, unknown>).error === 'string'
     ) {
       throw new ApiError({

@@ -49,7 +49,7 @@ export function useFaceRecognition() {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'faceRecognition.recognizeFailed';
       setRecognizeState({ status: 'error', message });
-      return { match: null, candidates: [] };
+      throw err;
     }
   }, []);
 

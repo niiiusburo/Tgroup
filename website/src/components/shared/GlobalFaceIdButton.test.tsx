@@ -43,7 +43,9 @@ vi.mock('@/components/shared/FaceCaptureModal', () => ({
       <div>
         <button
           type="button"
-          onClick={() => onCapture(new Blob(['face'], { type: 'image/jpeg' }))}
+          onClick={() => {
+            void Promise.resolve(onCapture(new Blob(['face'], { type: 'image/jpeg' }))).catch(() => {});
+          }}
         >
           Mock capture
         </button>
@@ -111,5 +113,21 @@ describe('GlobalFaceIdButton', () => {
       );
       expect(navigateMock).toHaveBeenCalledWith('/customers/p-1');
     });
+  });
+
+  it('keeps the capture modal open when recognition returns no-face error', async () => {
+    recognizeMock.mockRejectedValue(new Error('No face detected'));
+
+    render(<GlobalFaceIdButton />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Quick Face ID/i }));
+    fireEvent.click(await screen.findByText('Mock capture'));
+
+    await waitFor(() => {
+      expect(recognizeMock).toHaveBeenCalled();
+    });
+
+    expect(screen.getByText('Mock capture')).toBeInTheDocument();
+    expect(screen.queryByText('Quick Face ID')).not.toBeInTheDocument();
   });
 });

@@ -17,13 +17,15 @@ interface UseFaceCaptureControllerOptions {
   readonly isOpen: boolean;
   readonly captureMode: FaceCaptureMode;
   readonly cameraErrorMessage: string;
-  readonly onCapture: (image: Blob, images?: readonly Blob[]) => void;
+  readonly captureFailedMessage: string;
+  readonly onCapture: (image: Blob, images?: readonly Blob[]) => void | Promise<void>;
 }
 
 export function useFaceCaptureController({
   isOpen,
   captureMode,
   cameraErrorMessage,
+  captureFailedMessage,
   onCapture,
 }: UseFaceCaptureControllerOptions) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -31,6 +33,7 @@ export function useFaceCaptureController({
   const autoCapturedRef = useRef(false);
   const profileImagesRef = useRef<Blob[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [captureError, setCaptureError] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState(false);
   const [facingMode, setFacingMode] = useState<CameraFacingMode>('environment');
   const [detectionState, setDetectionState] = useState<DetectionState>('scanning');
@@ -47,28 +50,38 @@ export function useFaceCaptureController({
   }, []);
 
   const handleCapture = useCallback(async () => {
+    setCaptureError(null);
     const blob = await captureVideoFrame(videoRef.current);
     if (!blob) return;
 
-    if (!isProfileCapture) {
-      onCapture(blob, [blob]);
-      return;
+    try {
+      if (!isProfileCapture) {
+        await onCapture(blob, [blob]);
+        return;
+      }
+
+      const nextImages = [...profileImagesRef.current, blob];
+      profileImagesRef.current = nextImages;
+      setProfileImages(nextImages);
+
+      if (nextImages.length >= PROFILE_POSES.length) {
+        await onCapture(nextImages[0], nextImages);
+        return;
+      }
+
+      autoCapturedRef.current = false;
+      setDetectionState('scanning');
+      setDetectionScore(0);
+      setPoseIndex(nextImages.length);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : captureFailedMessage;
+      setCaptureError(message || captureFailedMessage);
+      autoCapturedRef.current = false;
+      setDetectionState('no-face');
+      setDetectionScore(0);
+      if (isProfileCapture) resetGuidedCapture();
     }
-
-    const nextImages = [...profileImagesRef.current, blob];
-    profileImagesRef.current = nextImages;
-    setProfileImages(nextImages);
-
-    if (nextImages.length >= PROFILE_POSES.length) {
-      onCapture(nextImages[0], nextImages);
-      return;
-    }
-
-    autoCapturedRef.current = false;
-    setDetectionState('scanning');
-    setDetectionScore(0);
-    setPoseIndex(nextImages.length);
-  }, [isProfileCapture, onCapture]);
+  }, [captureFailedMessage, isProfileCapture, onCapture, resetGuidedCapture]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -77,6 +90,7 @@ export function useFaceCaptureController({
       streamRef.current = null;
       if (video) video.srcObject = null;
       setError(null);
+      setCaptureError(null);
       setIsStarting(false);
       setDetectionState('scanning');
       setDetectionScore(0);
@@ -95,6 +109,7 @@ export function useFaceCaptureController({
 
       setIsStarting(true);
       setError(null);
+      setCaptureError(null);
       setDetectionState('scanning');
       setDetectionScore(0);
       autoCapturedRef.current = false;
@@ -139,6 +154,7 @@ export function useFaceCaptureController({
     autoCapturedRef.current = false;
     setDetectionState('scanning');
     setDetectionScore(0);
+    setCaptureError(null);
     resetGuidedCapture();
     setFacingMode((current) => (current === 'environment' ? 'user' : 'environment'));
   }, [resetGuidedCapture]);
@@ -180,9 +196,10 @@ export function useFaceCaptureController({
       if (result.ready) {
         readyFrames += 1;
         setDetectionState('detected');
+        setCaptureError(null);
       } else {
         readyFrames = 0;
-        setDetectionState('scanning');
+        setDetectionState(requireFaceDetection ? 'no-face' : 'scanning');
       }
 
       // Auto-capture when stable detection achieved
@@ -220,6 +237,7 @@ export function useFaceCaptureController({
   return {
     videoRef,
     error,
+    captureError,
     isStarting,
     detectionState,
     detectionScore,

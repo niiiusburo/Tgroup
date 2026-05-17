@@ -49,16 +49,20 @@ export function GlobalFaceIdButton() {
 
   const handleCapture = useCallback(
     async (image: Blob) => {
-      setShowCapture(false);
-      setShowPopover(true);
-      setCapturedImage(image);
       setRegisterError(null);
-      const result = await recognize(image);
-      if (result.match) {
-        // Auto-match: jump straight to the customer detail page.
-        navigate(`/customers/${result.match.partnerId}`);
-        // Small delay so the popover briefly confirms the match before dismissing.
-        setTimeout(dismiss, 800);
+      try {
+        const result = await recognize(image);
+        setShowCapture(false);
+        setShowPopover(true);
+        setCapturedImage(image);
+        if (result.match) {
+          // Auto-match: jump straight to the customer detail page.
+          navigate(`/customers/${result.match.partnerId}`);
+          // Small delay so the popover briefly confirms the match before dismissing.
+          setTimeout(dismiss, 800);
+        }
+      } catch (err) {
+        throw err;
       }
     },
     [recognize, navigate, dismiss]

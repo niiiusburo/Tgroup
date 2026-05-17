@@ -14,6 +14,10 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.22] — 2026-05-17
+### Fixed
+- Face ID capture now keeps the camera modal open on `NO_FACE` and provider no-face errors, shows "Không phát hiện khuôn mặt" / "Face not detected", and maps CompreFace no-face responses to `NO_FACE` instead of generic engine errors — @agent — Staff-reported Face ID failure; preserves UC-003, UC-007, and INV-014.
+
 ## [0.32.21] — 2026-05-17
 ### Changed
 - Site favicon now uses a TGClinic orange butterfly mark at `/favicon.svg` instead of the default Vite icon — @agent — Align app-shell identity with `DESIGN.md` warm orange brand direction.

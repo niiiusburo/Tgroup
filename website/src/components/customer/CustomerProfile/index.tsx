@@ -59,11 +59,12 @@ export function CustomerProfile(props: OrchestratorProps) {
 
   const handleFaceRecapture = async (firstBlob: Blob, blobs?: readonly Blob[]) => {
     const images = blobs && blobs.length > 0 ? blobs : [firstBlob];
-    setShowFaceRecaptureModal(false);
     try {
       await reregister(profile.id, images, 'profile_reregister');
+      setShowFaceRecaptureModal(false);
     } catch (err) {
       console.error('Face re-register failed:', err);
+      throw err;
     }
   };
 

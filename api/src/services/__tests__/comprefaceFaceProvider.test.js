@@ -54,6 +54,18 @@ describe('comprefaceFaceProvider', () => {
     expect(result.candidates[0].partnerId).toBe('partner-1');
   });
 
+  it('maps Compreface recognize no-face responses to NO_FACE instead of engine error', async () => {
+    const err = new Error('No face detected');
+    err.status = 400;
+    comprefaceClient.recognize.mockRejectedValue(err);
+
+    await expect(provider.recognizeFace(Buffer.from('face'), 'image/jpeg')).rejects.toMatchObject({
+      code: 'NO_FACE',
+      status: 422,
+      message: 'No face detected',
+    });
+  });
+
   it('creates a subject, adds an example, and marks partner face status', async () => {
     comprefaceClient.createSubject.mockResolvedValue({ subject: 'partner-1' });
     comprefaceClient.addExample.mockResolvedValue({ image_id: 'img-1' });
@@ -82,5 +94,18 @@ describe('comprefaceFaceProvider', () => {
 
     expect(result.sampleId).toBe('img-1');
     expect(comprefaceClient.addExample).toHaveBeenCalled();
+  });
+
+  it('maps Compreface register no-face responses to NO_FACE instead of generic register error', async () => {
+    const err = new Error('No face detected');
+    err.status = 400;
+    comprefaceClient.createSubject.mockResolvedValue({ subject: 'partner-1' });
+    comprefaceClient.addExample.mockRejectedValue(err);
+
+    await expect(provider.registerFace('partner-1', Buffer.from('face'), 'image/jpeg')).rejects.toMatchObject({
+      code: 'NO_FACE',
+      status: 422,
+      message: 'No face detected',
+    });
   });
 });
