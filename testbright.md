@@ -478,6 +478,7 @@ Edge cases:
 - Unknown CompreFace subjects are ignored instead of linking to the wrong customer.
 - Low-confidence results return candidates or no-match, not an automatic customer jump.
 - Browser sessions without native `FaceDetector` support must not auto-capture a center face from frame quality alone.
+- CompreFace recognize/register requests must send a native multipart `file` part; provider responses like "Required part file is missing" indicate the upload client is broken.
 - `NO_FACE` from local or CompreFace providers must keep the camera modal open and show "Không phát hiện khuôn mặt" / "Face not detected".
 - CompreFace no-face responses must return HTTP 422 with `error: "NO_FACE"`, not a generic engine error.
 

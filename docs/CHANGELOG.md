@@ -16,7 +16,7 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ## [0.32.22] — 2026-05-17
 ### Fixed
-- Face ID capture now keeps the camera modal open on `NO_FACE` and provider no-face errors, shows "Không phát hiện khuôn mặt" / "Face not detected", and maps CompreFace no-face responses to `NO_FACE` instead of generic engine errors — @agent — Staff-reported Face ID failure; preserves UC-003, UC-007, and INV-014.
+- Face ID capture now keeps the camera modal open on `NO_FACE` and provider no-face errors, shows "Không phát hiện khuôn mặt" / "Face not detected", maps CompreFace no-face responses to `NO_FACE`, and sends CompreFace uploads as native multipart `FormData` so the provider receives the `file` part — @agent — Staff-reported Face ID failure; preserves UC-003, UC-007, and INV-014.
 
 ## [0.32.21] — 2026-05-17
 ### Changed

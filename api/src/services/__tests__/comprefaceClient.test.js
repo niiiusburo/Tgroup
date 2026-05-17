@@ -69,6 +69,24 @@ describe('comprefaceClient', () => {
       );
     });
 
+    it('uses native FormData so fetch sends the image file part', async () => {
+      const { recognize } = loadClient({
+        COMPREFACE_URL: 'http://compreface-test',
+        COMPREFACE_API_KEY: 'secret-key',
+      });
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        text: async () => JSON.stringify({ result: [{ subjects: [] }] }),
+      });
+
+      await recognize(Buffer.from('img'), 'image/png');
+
+      const request = fetchSpy.mock.calls[0][1];
+      expect(request.body).toBeInstanceOf(FormData);
+      expect(request.body.get('file')).toBeTruthy();
+      expect(request.headers).not.toHaveProperty('content-type');
+    });
+
     it('uses default compreface URL and empty API key when env vars are missing', async () => {
       const { recognize } = loadClient({});
       fetchSpy.mockResolvedValue({
@@ -189,6 +207,22 @@ describe('comprefaceClient', () => {
         expect.stringContaining('/faces'),
         expect.objectContaining({ method: 'POST' }),
       );
+    });
+
+    it('uses native FormData with subject and file parts when adding examples', async () => {
+      const { addExample } = loadClient();
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        text: async () => JSON.stringify({ image_id: 'img-1' }),
+      });
+
+      await addExample('p1', Buffer.from('img'), 'image/png');
+
+      const request = fetchSpy.mock.calls[0][1];
+      expect(request.body).toBeInstanceOf(FormData);
+      expect(request.body.get('file')).toBeTruthy();
+      expect(request.body.get('subject')).toBe('p1');
+      expect(request.headers).not.toHaveProperty('content-type');
     });
 
     it('throws when add example fails', async () => {

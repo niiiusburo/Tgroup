@@ -80,7 +80,7 @@
 | `api/src/routes/externalCheckups.js` | `api/src/routes/__tests__/externalCheckups.test.js` | Hosoonline auth, patient search, image proxy. |
 | `website/src/components/shared/FaceCaptureModal.tsx` / `website/src/components/shared/useFaceCaptureController.ts` / `website/src/components/shared/faceCaptureEngine.ts` | `website/src/components/shared/FaceCaptureModal.test.tsx`, `website/src/components/shared/faceCaptureEngine.test.ts`, `website/src/components/customer/CustomerCameraWidget.test.tsx`, `website/src/components/shared/GlobalFaceIdButton.test.tsx`, `website/src/hooks/__tests__/useFaceRecognition.test.ts` | Camera lifetime, no-face messaging, auto-capture gating, and caller error propagation. |
 | `api/src/routes/faceRecognition.js` | `api/tests/faceRecognition.test.js` | Face register/re-register/recognize API contract in local and CompreFace modes. |
-| `api/src/services/comprefaceClient.js` / `api/src/services/comprefaceFaceProvider.js` | `api/src/services/__tests__/comprefaceClient.test.js`, `api/src/services/__tests__/comprefaceFaceProvider.test.js` | CompreFace subject/example calls, health check, and partner subject mapping. |
+| `api/src/services/comprefaceClient.js` / `api/src/services/comprefaceFaceProvider.js` | `api/src/services/__tests__/comprefaceClient.test.js`, `api/src/services/__tests__/comprefaceFaceProvider.test.js` | CompreFace multipart file upload, subject/example calls, health check, no-face normalization, and partner subject mapping. |
 | `face-service/` Python code | `api/tests/faceRecognition.integration.test.js`, manual face-service health check | Local-provider model inference and embedding generation. |
 
 ### Infrastructure

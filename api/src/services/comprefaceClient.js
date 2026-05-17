@@ -1,5 +1,3 @@
-const FormData = require('form-data');
-
 const COMPREFACE_URL = (process.env.COMPREFACE_URL || 'http://compreface-api').replace(/\/$/, '');
 const COMPREFACE_API_KEY = process.env.COMPREFACE_API_KEY || '';
 
@@ -33,6 +31,16 @@ async function comprefaceFetch(path, options = {}) {
   return json;
 }
 
+function createImageForm(imageBuffer, mimetype, fields = {}) {
+  const form = new FormData();
+  const blob = new Blob([imageBuffer], { type: mimetype });
+  form.append('file', blob, 'face.jpg');
+  Object.entries(fields).forEach(([key, value]) => {
+    form.append(key, value);
+  });
+  return form;
+}
+
 /**
  * Recognize a face in an image buffer.
  * @param {Buffer} imageBuffer
@@ -40,13 +48,11 @@ async function comprefaceFetch(path, options = {}) {
  * @returns {Promise<Array<{subject: string, similarity: number}>>}
  */
 async function recognize(imageBuffer, mimetype = 'image/jpeg') {
-  const form = new FormData();
-  form.append('file', imageBuffer, { filename: 'face.jpg', contentType: mimetype });
+  const form = createImageForm(imageBuffer, mimetype);
 
   const data = await comprefaceFetch('/recognize', {
     method: 'POST',
     body: form,
-    headers: form.getHeaders(),
   });
 
   const results = data?.result || [];
@@ -75,14 +81,11 @@ async function createSubject(subjectId) {
  * @param {string} [mimetype='image/jpeg']
  */
 async function addExample(subjectId, imageBuffer, mimetype = 'image/jpeg') {
-  const form = new FormData();
-  form.append('file', imageBuffer, { filename: 'face.jpg', contentType: mimetype });
-  form.append('subject', subjectId);
+  const form = createImageForm(imageBuffer, mimetype, { subject: subjectId });
 
   return comprefaceFetch('/faces', {
     method: 'POST',
     body: form,
-    headers: form.getHeaders(),
   });
 }
 
