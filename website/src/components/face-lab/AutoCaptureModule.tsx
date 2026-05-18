@@ -23,8 +23,9 @@ type Phase =
   | { kind: 'starting' }
   | { kind: 'scanning'; score: number; readyFrames: number; framesEvaluated: number }
   | { kind: 'capturing' }
-  | { kind: 'uploading' }
+  | { kind: 'uploading'; capturedBlob: Blob; resolution: string }
   | { kind: 'done'; result: ModuleResult; capturedBlob: Blob }
+  | { kind: 'recognize-failed'; message: string; capturedBlob: Blob; resolution: string }
   | { kind: 'error'; message: string };
 
 interface AutoCaptureModuleProps {
@@ -121,10 +122,29 @@ export function AutoCaptureModule({
     if (!blob) throw new Error('Failed to capture frame');
 
     const captureEnd = performance.now();
-    setPhase({ kind: 'uploading' });
+    const resolution = `${video.videoWidth}x${video.videoHeight}`;
+    // Camera can be released as soon as we have the blob — we don't need it for upload.
+    cleanup();
+    setPhase({ kind: 'uploading', capturedBlob: blob, resolution });
 
     const uploadStart = performance.now();
-    const apiResult = await recognizeFace(blob);
+    let apiResult;
+    try {
+      apiResult = await recognizeFace(blob);
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? `Recognition failed: ${err.message}`
+          : 'Recognition failed (network or server error)';
+      setPhase({
+        kind: 'recognize-failed',
+        message,
+        capturedBlob: blob,
+        resolution,
+      });
+      onDeactivate();
+      return;
+    }
     const uploadEnd = performance.now();
 
     const detectDuration = captureStart - detectStartRef.current;
@@ -153,12 +173,11 @@ export function AutoCaptureModule({
         total: Math.round(totalDuration),
       },
       imageSize: blob.size,
-      resolution: `${video.videoWidth}x${video.videoHeight}`,
+      resolution,
       framesEvaluated,
       bestFrameScore: Number(bestScore.toFixed(3)),
     };
 
-    cleanup();
     setPhase({ kind: 'done', result, capturedBlob: blob });
     onResult(result);
     onDeactivate();
@@ -286,11 +305,12 @@ export function AutoCaptureModule({
     if (forceCaptureRef.current) forceCaptureRef.current();
   };
 
-  const isRunning =
+  const isCameraOn =
     phase.kind === 'starting' ||
     phase.kind === 'scanning' ||
-    phase.kind === 'capturing' ||
-    phase.kind === 'uploading';
+    phase.kind === 'capturing';
+  const isRunning =
+    isCameraOn || phase.kind === 'uploading';
 
   const scoreNow = phase.kind === 'scanning' ? phase.score : 0;
   const readyNow = phase.kind === 'scanning' ? phase.readyFrames : 0;
@@ -327,16 +347,33 @@ export function AutoCaptureModule({
           playsInline
           muted
           className={`w-full h-full object-cover transition-opacity duration-200 ${
-            isRunning ? 'opacity-100' : 'opacity-0'
+            isCameraOn ? 'opacity-100' : 'opacity-0'
           }`}
         />
 
-        {/* Idle overlay */}
-        {(phase.kind === 'idle' || phase.kind === 'done' || phase.kind === 'error') && (
+        {/* Idle / done / error / recognize-failed overlay */}
+        {!isCameraOn && phase.kind !== 'uploading' && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-900 text-gray-400">
             <div className="flex flex-col items-center gap-2">
               <ScanFace className="w-10 h-10 text-gray-600" />
-              <p className="text-xs">{phase.kind === 'done' ? 'Done' : 'Camera inactive'}</p>
+              <p className="text-xs">
+                {phase.kind === 'done'
+                  ? 'Done'
+                  : phase.kind === 'recognize-failed'
+                  ? 'Captured (upload failed)'
+                  : 'Camera inactive'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Uploading overlay — show captured-frame preview */}
+        {phase.kind === 'uploading' && (
+          <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
+            <CapturedPreview blob={phase.capturedBlob} />
+            <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center gap-2 text-white">
+              <Loader2 className="w-8 h-8 animate-spin" />
+              <p className="text-xs font-medium">Sending to CompreFace...</p>
             </div>
           </div>
         )}
@@ -395,7 +432,7 @@ export function AutoCaptureModule({
             className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-semibold px-4 py-2.5 transition-colors"
           >
             <Power className="w-4 h-4" />
-            {phase.kind === 'done' || phase.kind === 'error' ? 'Run again' : 'Activate'}
+            {phase.kind === 'done' || phase.kind === 'error' || phase.kind === 'recognize-failed' ? 'Run again' : 'Activate'}
           </button>
         )}
         {isRunning && (
@@ -429,6 +466,22 @@ export function AutoCaptureModule({
           </>
         )}
 
+        {phase.kind === 'recognize-failed' && (
+          <>
+            <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-800 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">{phase.message}</p>
+                <p className="mt-1">
+                  Frame was captured ({(phase.capturedBlob.size / 1024).toFixed(0)} KB, {phase.resolution}).
+                  You can still register it to a customer below.
+                </p>
+              </div>
+            </div>
+            <RegisterFacePanel capturedBlob={phase.capturedBlob} sourceLabel={config.id} />
+          </>
+        )}
+
         {phase.kind === 'error' && (
           <div className="rounded-lg bg-red-50 border border-red-100 px-3 py-2 text-xs text-red-700 flex items-start gap-2">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -438,6 +491,17 @@ export function AutoCaptureModule({
       </div>
     </div>
   );
+}
+
+function CapturedPreview({ blob }: { blob: Blob }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    const objectUrl = URL.createObjectURL(blob);
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [blob]);
+  if (!url) return null;
+  return <img src={url} alt="captured" className="w-full h-full object-cover opacity-70" />;
 }
 
 async function captureFrameWithQuality(
@@ -490,6 +554,12 @@ function PhaseBadge({ phase }: { phase: Phase }) {
       bg: 'bg-blue-50',
       fg: 'text-blue-700',
       icon: <Loader2 className="w-3 h-3 animate-spin" />,
+    },
+    'recognize-failed': {
+      label: 'Upload failed',
+      bg: 'bg-amber-50',
+      fg: 'text-amber-800',
+      icon: <AlertCircle className="w-3 h-3" />,
     },
     done: {
       label: 'Done',

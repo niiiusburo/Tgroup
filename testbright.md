@@ -1039,3 +1039,9 @@ TestSprite execution items:
 - Verify: clicking opens search panel; typing 2+ chars calls `GET /api/Partners?search=...`
 - Verify: clicking a customer registers the captured blob; success badge shows partner name
 - Re-running the lab against same face should now return a match
+
+## Face Lab recognize-failed recovery (2026-05-18)
+- URL: `/face` (iPhone Safari especially)
+- Verify: if `POST /api/face/recognize` times out or fails, the lab still shows the captured frame and the Register-face panel
+- Verify: camera stops as soon as capture completes (LED off before upload)
+- Verify: Register-face still works against captured blob after a recognize failure

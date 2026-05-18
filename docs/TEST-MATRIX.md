@@ -151,4 +151,5 @@ docker compose config
 # Verify: all 4 modules complete capture within ~15s even without
 # browser native FaceDetector (Chrome flag off / Safari / Firefox)
 # Verify: inline "Register face" search → click customer → success → re-test matches
+# Verify: on recognize timeout/error, captured frame + register panel still appear (iPhone Safari)
 ```
