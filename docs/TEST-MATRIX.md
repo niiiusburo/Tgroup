@@ -150,4 +150,5 @@ docker compose config
 # compare confidence/timing/resolution in the BEST badge table
 # Verify: all 4 modules complete capture within ~15s even without
 # browser native FaceDetector (Chrome flag off / Safari / Firefox)
+# Verify: inline "Register face" search → click customer → success → re-test matches
 ```

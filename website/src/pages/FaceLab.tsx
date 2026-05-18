@@ -11,7 +11,39 @@ import { Microscope, Trash2 } from 'lucide-react';
 import { AutoCaptureModule } from '@/components/face-lab/AutoCaptureModule';
 import type { ModuleConfig, ModuleResult } from '@/components/face-lab/types';
 
+const RECOMMENDED_ID = 'burst';
+
 const MODULES: ModuleConfig[] = [
+  {
+    id: 'burst',
+    name: 'D — Burst (recommended)',
+    description: 'Grabs 5 rapid frames once stable, ships the sharpest. Best for registration.',
+    strategy: 'burst',
+    videoConstraints: {
+      facingMode: 'user',
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+    },
+    jpegQuality: 0.92,
+    autoScoreThreshold: 0.5,
+    readyFramesNeeded: 3,
+    burstFrameCount: 5,
+    burstIntervalMs: 100,
+  },
+  {
+    id: 'permissive',
+    name: 'B — Permissive 720p (fastest)',
+    description: 'Lower bar, captures faster. Best for low-light or moving subjects.',
+    strategy: 'quality-only',
+    videoConstraints: {
+      facingMode: 'user',
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+    },
+    jpegQuality: 0.92,
+    autoScoreThreshold: 0.42,
+    readyFramesNeeded: 4,
+  },
   {
     id: 'standard',
     name: 'A — Standard 720p',
@@ -27,23 +59,9 @@ const MODULES: ModuleConfig[] = [
     readyFramesNeeded: 5,
   },
   {
-    id: 'permissive',
-    name: 'B — Permissive 720p',
-    description: 'Lower bar, captures faster. Best for low-light or moving subjects.',
-    strategy: 'quality-only',
-    videoConstraints: {
-      facingMode: 'user',
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
-    },
-    jpegQuality: 0.92,
-    autoScoreThreshold: 0.42,
-    readyFramesNeeded: 4,
-  },
-  {
     id: 'highres',
-    name: 'C — High-Res 4K',
-    description: 'Requests up to 3840×2160; sends the full-res frame at JPEG 95%.',
+    name: 'C — High-Res 4K (slow)',
+    description: '3840×2160 capture. Upload alone takes 20-40s; usually not worth it.',
     strategy: 'highres',
     videoConstraints: {
       facingMode: 'user',
@@ -53,22 +71,6 @@ const MODULES: ModuleConfig[] = [
     jpegQuality: 0.95,
     autoScoreThreshold: 0.55,
     readyFramesNeeded: 5,
-  },
-  {
-    id: 'burst',
-    name: 'D — Burst (5 frames → pick sharpest)',
-    description: 'Once stable, grabs 5 rapid frames and ships the best one.',
-    strategy: 'burst',
-    videoConstraints: {
-      facingMode: 'user',
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
-    },
-    jpegQuality: 0.92,
-    autoScoreThreshold: 0.5,
-    readyFramesNeeded: 3,
-    burstFrameCount: 5,
-    burstIntervalMs: 100,
   },
 ];
 
@@ -95,8 +97,11 @@ export function FaceLab() {
             <div>
               <h1 className="text-xl font-bold text-gray-900">Face Detection Lab</h1>
               <p className="text-sm text-gray-600 mt-0.5">
-                Click <strong>Activate</strong> on each module to auto-capture and compare
-                results. Only one camera runs at a time.
+                Activate a module to auto-capture and send to CompreFace.
+                If no match, you can register the captured face to a customer right here.
+              </p>
+              <p className="text-xs text-emerald-700 mt-1">
+                <strong>Recommended:</strong> Start with the Burst module — sharpest frame, best for registration.
               </p>
             </div>
           </div>
@@ -204,6 +209,7 @@ export function FaceLab() {
               key={m.id}
               config={m}
               isActive={activeId === m.id}
+              isRecommended={m.id === RECOMMENDED_ID}
               onActivate={() => setActiveId(m.id)}
               onDeactivate={() => setActiveId((cur) => (cur === m.id ? null : cur))}
               onResult={(r) => handleResult(m.id, r)}

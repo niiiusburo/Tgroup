@@ -5,8 +5,8 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Power, Loader2, CheckCircle2, AlertCircle, ScanFace, StopCircle, Camera } from 'lucide-react';
-import { recognizeFace } from '@/lib/api';
+import { Power, Loader2, CheckCircle2, AlertCircle, ScanFace, StopCircle, Camera, UserPlus, Search } from 'lucide-react';
+import { recognizeFace, registerFace, fetchPartners, type ApiPartner } from '@/lib/api';
 import {
   getNativeFaceDetector,
   analyzeFrame,
@@ -24,12 +24,13 @@ type Phase =
   | { kind: 'scanning'; score: number; readyFrames: number; framesEvaluated: number }
   | { kind: 'capturing' }
   | { kind: 'uploading' }
-  | { kind: 'done'; result: ModuleResult }
+  | { kind: 'done'; result: ModuleResult; capturedBlob: Blob }
   | { kind: 'error'; message: string };
 
 interface AutoCaptureModuleProps {
   config: ModuleConfig;
   isActive: boolean;
+  isRecommended?: boolean;
   onActivate: () => void;
   onDeactivate: () => void;
   onResult: (result: ModuleResult) => void;
@@ -38,6 +39,7 @@ interface AutoCaptureModuleProps {
 export function AutoCaptureModule({
   config,
   isActive,
+  isRecommended = false,
   onActivate,
   onDeactivate,
   onResult,
@@ -157,7 +159,7 @@ export function AutoCaptureModule({
     };
 
     cleanup();
-    setPhase({ kind: 'done', result });
+    setPhase({ kind: 'done', result, capturedBlob: blob });
     onResult(result);
     onDeactivate();
   };
@@ -296,11 +298,22 @@ export function AutoCaptureModule({
   const readinessPercent = Math.round((readyNow / config.readyFramesNeeded) * 100);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+    <div
+      className={`bg-white rounded-xl shadow-sm overflow-hidden flex flex-col border-2 ${
+        isRecommended ? 'border-emerald-400 ring-1 ring-emerald-100' : 'border-gray-200'
+      }`}
+    >
       {/* Header */}
       <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-gray-900 truncate">{config.name}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-gray-900 truncate">{config.name}</h3>
+            {isRecommended && (
+              <span className="shrink-0 inline-flex items-center rounded-full bg-emerald-600 px-1.5 py-0.5 text-[9px] font-bold text-white tracking-wide">
+                RECOMMENDED
+              </span>
+            )}
+          </div>
           <p className="text-xs text-gray-500 truncate mt-0.5">{config.description}</p>
         </div>
         <PhaseBadge phase={phase} />
@@ -408,7 +421,12 @@ export function AutoCaptureModule({
         )}
 
         {phase.kind === 'done' && (
-          <ResultPanel result={phase.result} threshold={config.autoScoreThreshold} />
+          <>
+            <ResultPanel result={phase.result} threshold={config.autoScoreThreshold} />
+            {!phase.result.match && (
+              <RegisterFacePanel capturedBlob={phase.capturedBlob} sourceLabel={config.id} />
+            )}
+          </>
         )}
 
         {phase.kind === 'error' && (
@@ -546,6 +564,178 @@ function ResultPanel({ result, threshold }: { result: ModuleResult; threshold: n
         <span>Res</span>
         <span className="text-right tabular-nums">{result.resolution}</span>
       </div>
+    </div>
+  );
+}
+
+type RegisterState =
+  | { kind: 'idle' }
+  | { kind: 'searching' }
+  | { kind: 'registering'; partnerId: string }
+  | { kind: 'success'; name: string }
+  | { kind: 'error'; message: string };
+
+function RegisterFacePanel({
+  capturedBlob,
+  sourceLabel,
+}: {
+  capturedBlob: Blob;
+  sourceLabel: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [results, setResults] = useState<ApiPartner[]>([]);
+  const [state, setState] = useState<RegisterState>({ kind: 'idle' });
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (searchTerm.trim().length < 2) {
+      setResults([]);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      setState({ kind: 'searching' });
+      try {
+        const res = await fetchPartners({ search: searchTerm.trim(), limit: 10 });
+        setResults(res.items || []);
+        setState({ kind: 'idle' });
+      } catch (err) {
+        setState({
+          kind: 'error',
+          message: err instanceof Error ? err.message : 'Search failed',
+        });
+      }
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchTerm, open]);
+
+  const handleRegister = async (partner: ApiPartner) => {
+    setState({ kind: 'registering', partnerId: partner.id });
+    try {
+      await registerFace(partner.id, capturedBlob, `face_lab_${sourceLabel}`);
+      setState({ kind: 'success', name: partner.name });
+    } catch (err) {
+      setState({
+        kind: 'error',
+        message: err instanceof Error ? err.message : 'Registration failed',
+      });
+    }
+  };
+
+  if (state.kind === 'success') {
+    return (
+      <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs">
+        <p className="font-semibold text-emerald-800 flex items-center gap-1.5">
+          <CheckCircle2 className="w-3.5 h-3.5" />
+          Registered to {state.name}
+        </p>
+        <p className="text-emerald-700 mt-1">
+          Re-run the lab to verify the match. CompreFace will now recognize this face.
+        </p>
+      </div>
+    );
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-dashed border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-2 transition-colors"
+      >
+        <UserPlus className="w-3.5 h-3.5" />
+        Register this face to a customer
+      </button>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-3 text-xs space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <p className="font-semibold text-amber-900 flex items-center gap-1.5">
+          <UserPlus className="w-3.5 h-3.5" />
+          Register face
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            setOpen(false);
+            setSearchTerm('');
+            setResults([]);
+          }}
+          className="text-amber-700 hover:text-amber-900 text-[10px] font-medium"
+        >
+          Cancel
+        </button>
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search name, phone, or code..."
+          autoFocus
+          className="w-full pl-7 pr-2 py-1.5 text-xs bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-300"
+        />
+      </div>
+
+      {state.kind === 'searching' && (
+        <p className="text-gray-500 flex items-center gap-1.5">
+          <Loader2 className="w-3 h-3 animate-spin" />
+          Searching...
+        </p>
+      )}
+
+      {state.kind === 'error' && (
+        <p className="text-red-700 flex items-center gap-1.5">
+          <AlertCircle className="w-3 h-3" />
+          {state.message}
+        </p>
+      )}
+
+      {results.length > 0 && (
+        <ul className="max-h-44 overflow-y-auto rounded-md border border-gray-100 bg-white divide-y divide-gray-100">
+          {results.map((partner) => {
+            const isRegistering =
+              state.kind === 'registering' && state.partnerId === partner.id;
+            return (
+              <li key={partner.id}>
+                <button
+                  type="button"
+                  onClick={() => handleRegister(partner)}
+                  disabled={state.kind === 'registering'}
+                  className="w-full text-left px-2.5 py-1.5 hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-between gap-2"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-gray-900 truncate">{partner.name}</p>
+                    <p className="text-[10px] text-gray-500 truncate">
+                      {partner.code ? `${partner.code} · ` : ''}
+                      {partner.phone || 'No phone'}
+                    </p>
+                  </div>
+                  {isRegistering ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-700" />
+                  ) : (
+                    <UserPlus className="w-3.5 h-3.5 text-amber-700" />
+                  )}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {searchTerm.trim().length >= 2 &&
+        state.kind === 'idle' &&
+        results.length === 0 && (
+          <p className="text-gray-500 italic">No customers found</p>
+        )}
     </div>
   );
 }

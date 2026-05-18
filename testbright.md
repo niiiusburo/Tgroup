@@ -1031,3 +1031,11 @@ TestSprite execution items:
 - Verify forced-capture safety net fires at 15s using best frame seen.
 - Verify adaptive threshold relaxes after 6s and 10s of scanning.
 - Verify "Capture now" button immediately triggers capture using best frame.
+
+## Face Lab inline registration (2026-05-18)
+- URL: `/face`
+- API: `POST /api/face/register` (multipart partnerId + image)
+- Verify: activate Burst module, capture face, no_match result shows "Register this face to a customer" button
+- Verify: clicking opens search panel; typing 2+ chars calls `GET /api/Partners?search=...`
+- Verify: clicking a customer registers the captured blob; success badge shows partner name
+- Re-running the lab against same face should now return a match
