@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.32.30",
+    "date": "2026-05-18",
+    "highlights": "Calendar toolbar controls now wrap correctly on iPad/tablet widths, keeping the appointment cards populated and the filter/quick-add controls visible.",
+    "sections": [
+      {
+        "title": "Calendar",
+        "items": [
+          "The /calendar toolbar stays in the wrapped tablet layout until extra-wide desktop, preventing the date navigator and view tabs from colliding.",
+          "Search, export, filter, and quick-add controls remain visible at 1024px tablet width while day-view appointments populate below the toolbar."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.22",
     "date": "2026-05-17",
     "highlights": "Face ID capture now keeps the camera open when no face is detected, with clear staff-facing feedback instead of closing into a failed flow.",
