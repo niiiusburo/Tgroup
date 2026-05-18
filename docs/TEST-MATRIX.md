@@ -148,4 +148,6 @@ docker compose config
 # Face Lab — manual QA at /face (all envs)
 # Activate each module, hold face in frame, wait for auto-capture,
 # compare confidence/timing/resolution in the BEST badge table
+# Verify: all 4 modules complete capture within ~15s even without
+# browser native FaceDetector (Chrome flag off / Safari / Firefox)
 ```

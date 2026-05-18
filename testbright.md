@@ -1023,3 +1023,11 @@ TestSprite execution items:
 - [ ] PENDING: Verify `GET /api/Feedback/all` returns 345 pending feedback threads on NK2.
 - [ ] PENDING: Verify manual staff reports are prioritized above auto-error clusters.
 - [ ] PENDING: Verify auth/permission noise is not mixed into the manual bug list.
+
+## Face Lab auto-capture reliability (2026-05-18)
+- URL: `/face`
+- API: `POST /api/face/recognize`
+- Verify all 4 modules complete auto-capture within ~15s on browsers without native FaceDetector (Safari, Firefox, Chrome with flag off).
+- Verify forced-capture safety net fires at 15s using best frame seen.
+- Verify adaptive threshold relaxes after 6s and 10s of scanning.
+- Verify "Capture now" button immediately triggers capture using best frame.

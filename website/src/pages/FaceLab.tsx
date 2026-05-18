@@ -13,9 +13,9 @@ import type { ModuleConfig, ModuleResult } from '@/components/face-lab/types';
 
 const MODULES: ModuleConfig[] = [
   {
-    id: 'native',
-    name: 'A — Native FaceDetector',
-    description: 'Standard 720p + browser face detection, auto-capture when stable',
+    id: 'standard',
+    name: 'A — Standard 720p',
+    description: 'Auto-capture when frame quality is stable. Lightweight baseline.',
     strategy: 'native',
     videoConstraints: {
       facingMode: 'user',
@@ -23,13 +23,13 @@ const MODULES: ModuleConfig[] = [
       height: { ideal: 720 },
     },
     jpegQuality: 0.92,
-    autoScoreThreshold: 0.68,
-    readyFramesNeeded: 6,
+    autoScoreThreshold: 0.55,
+    readyFramesNeeded: 5,
   },
   {
-    id: 'quality',
-    name: 'B — Quality-only (no face detector)',
-    description: 'No detection API — auto-capture on brightness/contrast alone',
+    id: 'permissive',
+    name: 'B — Permissive 720p',
+    description: 'Lower bar, captures faster. Best for low-light or moving subjects.',
     strategy: 'quality-only',
     videoConstraints: {
       facingMode: 'user',
@@ -37,13 +37,13 @@ const MODULES: ModuleConfig[] = [
       height: { ideal: 720 },
     },
     jpegQuality: 0.92,
-    autoScoreThreshold: 0.7,
-    readyFramesNeeded: 8,
+    autoScoreThreshold: 0.42,
+    readyFramesNeeded: 4,
   },
   {
     id: 'highres',
     name: 'C — High-Res 4K',
-    description: 'Up to 3840×2160 capture with face detection',
+    description: 'Requests up to 3840×2160; sends the full-res frame at JPEG 95%.',
     strategy: 'highres',
     videoConstraints: {
       facingMode: 'user',
@@ -51,13 +51,13 @@ const MODULES: ModuleConfig[] = [
       height: { ideal: 2160 },
     },
     jpegQuality: 0.95,
-    autoScoreThreshold: 0.68,
-    readyFramesNeeded: 6,
+    autoScoreThreshold: 0.55,
+    readyFramesNeeded: 5,
   },
   {
     id: 'burst',
-    name: 'D — Burst (5 frames, pick best)',
-    description: 'Detect face → grab 5 rapid frames → send the sharpest',
+    name: 'D — Burst (5 frames → pick sharpest)',
+    description: 'Once stable, grabs 5 rapid frames and ships the best one.',
     strategy: 'burst',
     videoConstraints: {
       facingMode: 'user',
@@ -65,8 +65,8 @@ const MODULES: ModuleConfig[] = [
       height: { ideal: 720 },
     },
     jpegQuality: 0.92,
-    autoScoreThreshold: 0.6,
-    readyFramesNeeded: 4,
+    autoScoreThreshold: 0.5,
+    readyFramesNeeded: 3,
     burstFrameCount: 5,
     burstIntervalMs: 100,
   },

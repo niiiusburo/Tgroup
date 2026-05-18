@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Power, Loader2, CheckCircle2, AlertCircle, ScanFace, StopCircle } from 'lucide-react';
+import { Power, Loader2, CheckCircle2, AlertCircle, ScanFace, StopCircle, Camera } from 'lucide-react';
 import { recognizeFace } from '@/lib/api';
 import {
   getNativeFaceDetector,
@@ -47,6 +47,7 @@ export function AutoCaptureModule({
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const phaseRef = useRef<Phase>({ kind: 'idle' });
   const detectStartRef = useRef<number>(0);
+  const forceCaptureRef = useRef<(() => void) | null>(null);
   const [phase, setPhase] = useState<Phase>({ kind: 'idle' });
 
   // Keep ref synced with state to read latest phase inside the detection tick.
@@ -198,7 +199,19 @@ export function AutoCaptureModule({
       // Autoplay sometimes fails silently; we continue.
     }
 
+    let manualForce = false;
+    forceCaptureRef.current = () => {
+      manualForce = true;
+    };
     const detector = config.strategy === 'quality-only' ? null : getNativeFaceDetector();
+    // Critical: only REQUIRE face detection if we actually have a working detector.
+    // The browser native FaceDetector is unavailable in most browsers (Chrome-only,
+    // behind a flag) — when null, fall back to quality-only scoring so we don't
+    // stall at score = frameQuality × 0.45 (~34%) forever.
+    const requireFace = config.strategy !== 'quality-only' && detector !== null;
+    // Best score we've seen so far during scanning (for safety-net forced capture).
+    let bestScoreSoFar = 0;
+    let bestFrameCount = 0;
     let readyFrames = 0;
     let framesEvaluated = 0;
     setPhase({ kind: 'scanning', score: 0, readyFrames: 0, framesEvaluated: 0 });
@@ -210,10 +223,24 @@ export function AutoCaptureModule({
       if (video.videoWidth === 0) return;
 
       framesEvaluated++;
-      const requireFace = config.strategy !== 'quality-only';
       const { score, ready } = await analyzeFrame(video, detector, requireFace);
 
-      if (ready && score >= config.autoScoreThreshold) {
+      if (score > bestScoreSoFar) {
+        bestScoreSoFar = score;
+        bestFrameCount = framesEvaluated;
+      }
+
+      // Adaptive threshold: if we've been scanning for a while and not hitting the
+      // configured threshold, gradually accept lower scores so we still capture
+      // something instead of stalling forever.
+      const elapsedTicks = framesEvaluated;
+      const adaptiveThreshold =
+        elapsedTicks > 40 ? Math.max(0.35, config.autoScoreThreshold - 0.25)
+        : elapsedTicks > 24 ? Math.max(0.45, config.autoScoreThreshold - 0.15)
+        : config.autoScoreThreshold;
+
+      const meetsThreshold = score >= adaptiveThreshold;
+      if (meetsThreshold || ready) {
         readyFrames++;
       } else {
         readyFrames = Math.max(0, readyFrames - 1);
@@ -221,13 +248,22 @@ export function AutoCaptureModule({
 
       setPhase({ kind: 'scanning', score, readyFrames, framesEvaluated });
 
-      if (readyFrames >= config.readyFramesNeeded) {
+      // Forced capture safety net: after ~15 seconds (60 ticks @ 250ms), capture
+      // the best frame we've seen rather than stalling indefinitely.
+      const timeoutForce = framesEvaluated >= 60 && bestScoreSoFar > 0.15;
+      const isForced = manualForce || timeoutForce;
+      const shouldCapture = readyFrames >= config.readyFramesNeeded || isForced;
+
+      if (shouldCapture) {
         if (tickRef.current) {
           clearInterval(tickRef.current);
           tickRef.current = null;
         }
+        forceCaptureRef.current = null;
+        const captureScore = isForced ? Math.max(bestScoreSoFar, score) : score;
+        const captureFrames = isForced ? bestFrameCount || framesEvaluated : framesEvaluated;
         try {
-          await runCapture(video, framesEvaluated, score);
+          await runCapture(video, captureFrames, captureScore);
         } catch (err) {
           cleanup();
           const message = err instanceof Error ? err.message : 'Recognition failed';
@@ -242,6 +278,10 @@ export function AutoCaptureModule({
     cleanup();
     setPhase({ kind: 'idle' });
     onDeactivate();
+  };
+
+  const handleCaptureNow = () => {
+    if (forceCaptureRef.current) forceCaptureRef.current();
   };
 
   const isRunning =
@@ -346,14 +386,25 @@ export function AutoCaptureModule({
           </button>
         )}
         {isRunning && (
-          <button
-            type="button"
-            onClick={handleStop}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2.5 transition-colors"
-          >
-            <StopCircle className="w-4 h-4" />
-            Stop
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={handleCaptureNow}
+              disabled={phase.kind !== 'scanning'}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white text-sm font-semibold px-4 py-2.5 transition-colors"
+            >
+              <Camera className="w-4 h-4" />
+              Capture now
+            </button>
+            <button
+              type="button"
+              onClick={handleStop}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2.5 transition-colors"
+            >
+              <StopCircle className="w-4 h-4" />
+              Stop
+            </button>
+          </div>
         )}
 
         {phase.kind === 'done' && (
