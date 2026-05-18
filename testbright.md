@@ -10,6 +10,51 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: Calendar iPad Toolbar Wrapping
+
+Feature/edit name: Calendar iPad Toolbar Wrapping
+
+Changed URLs and API routes:
+- `/calendar`
+- No API routes changed.
+
+Affected data flows:
+- Calendar appointment data still loads through `GET /api/Appointments` with calendar-mode pagination.
+- The responsive toolbar layout now wraps at tablet widths instead of forcing one row, so view mode tabs, date navigation, search, export, filters, and quick-add remain visible while appointment cards populate below.
+- No appointment DTO, status, export, or mutation payload changed.
+
+User roles:
+- Admin and staff with `appointments.view`.
+- Staff with `appointments.add`, `appointments.edit`, or `appointments.export` should see the same controls without clipping when those permissions are granted.
+
+Happy paths:
+- Open `/calendar` at iPad landscape width (`1024x768`) and verify Ngày/Tuần/Tháng, date navigation, search, export, filter, and quick-add controls are all visible and non-overlapping.
+- Verify day-view appointment cards populate below the toolbar with the expected count for the selected day.
+- Switch between day, week, and month at tablet width and confirm controls stay reachable.
+
+Edge cases:
+- Long Vietnamese date labels such as `Thứ Hai, 18 tháng 5, 2026` must not overlap the view tabs.
+- Permission combinations that hide export or quick-add should not leave awkward empty toolbar space.
+- Search suggestions should still open below the search input after the toolbar wraps.
+
+Regressions:
+- Desktop wide layout should still use a single-row toolbar.
+- Mobile and narrow tablet layouts should keep controls wrapped instead of introducing horizontal page overflow.
+- Export date-range modal, smart filter drawer, and quick-add appointment modal should still open from `/calendar`.
+
+Setup data and login state:
+- Use an authenticated local or NK2 admin session.
+- Use a calendar day with multiple appointments, such as `2026-05-18` in local seeded data.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `/calendar` at `1024x768` shows all toolbar controls without overlap or right-edge clipping.
+- [ ] PENDING: Verify day-view appointment cards populate below the toolbar after calendar data finishes loading.
+- [ ] PENDING: Verify day/week/month switching at tablet width keeps the toolbar wrapped and reachable.
+- [ ] PENDING: Verify search, export menu, filter drawer, and quick-add controls still open from the wrapped tablet toolbar.
+- [ ] PENDING: Verify wide desktop keeps the single-row toolbar with no visual regression.
+
+---
+
 # TestSprite Plan: Payment Method Contract Alignment
 
 Feature/edit name: Payment Method Contract Alignment

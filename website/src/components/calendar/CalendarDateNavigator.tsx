@@ -86,7 +86,7 @@ export function CalendarDateNavigator({
   }
 
   return (
-    <div className="flex w-full items-center gap-2 sm:w-auto">
+    <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto xl:shrink-0">
       <button
         onClick={() => onNavigate('prev')}
         className="min-h-10 min-w-10 p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
@@ -183,14 +183,14 @@ export function CalendarDateNavigator({
       </div>
       <button
         onClick={() => onNavigate('next')}
-        className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+        className="min-h-10 min-w-10 p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
         aria-label="Next"
       >
         <ChevronRight className="w-5 h-5" />
       </button>
       <button
         onClick={onToday}
-        className="ml-2 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+        className="ml-2 min-h-10 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors whitespace-nowrap"
       >
         {t('today', 'Today')}
       </button>

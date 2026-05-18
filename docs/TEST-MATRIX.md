@@ -40,6 +40,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `api/src/routes/appointments.js` | `api/src/routes/appointments/__tests__/readHandlers.test.js`, `website/e2e/team-alpha-appointments.spec.ts` | Calendar data shape changes break all views. |
 | `website/src/pages/Calendar.tsx` | `website/e2e/team-alpha-appointments.spec.ts`, `website/src/pages/Calendar.click.test.tsx` | Core scheduling surface. |
 | `website/src/components/calendar/*.tsx` | Component unit tests + `website/e2e/team-alpha-appointments.spec.ts` | Drag-to-reschedule, filter chips, status badges. |
+| `website/src/components/calendar/CalendarToolbar.tsx` and `CalendarDateNavigator.tsx` | `website/src/components/calendar/__tests__/CalendarToolbar.test.tsx`, `/calendar` 1024x768 screenshot check | Tablet/iPad toolbar wrapping must keep view tabs, date navigation, search, export, filter, and quick-add visible while appointments populate. |
 | `contracts/appointment.ts` | All appointment-related unit and E2E tests | Schema change cascades to both runtimes. |
 
 ### Customers & Partners
