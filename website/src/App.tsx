@@ -148,7 +148,7 @@ function App() {
           {import.meta.env.DEV && (
             <Route path="/test/address" element={<AddressAutocompleteTest />} />
           )}
-          <Route path="/face-lab" element={<FaceLab />} />
+          <Route path="/face" element={<FaceLab />} />
 
           {/* Protected routes wrapped in Layout */}
           <Route

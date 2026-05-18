@@ -6,6 +6,8 @@
 
 Use UC/WF IDs from `docs/USE-CASES.md` and `docs/WORKFLOWS.md` for feature traceability. Contract IDs in this matrix are compact route labels, for example `CON-Reports-RevenueSummary` = `POST /api/Reports/revenue/summary`, `CON-Reports-CashFlowSummary` = `POST /api/Reports/cash-flow/summary`, `CON-Reports-ServicesBreakdown` = `POST /api/Reports/services/breakdown`, `CON-Exports-Preview` = `POST /api/Exports/:type/preview`, and `CON-Exports-Download` = `POST /api/Exports/:type/download`.
 
+Current governance note: when changing `contracts/payment.ts`, `website/src/hooks/useDeposits.ts`, or `/reports/revenue` payment totals together, run the contracts build plus the focused payment and reports tests before treating the method enum or revenue-recognition behavior as safe.
+
 ## Coverage Requirements by Domain
 
 | Domain | Minimum Coverage | Test Types Required |
@@ -142,6 +144,9 @@ bash -n scripts/deploy-tbot.sh
 
 # Docker compose validation
 docker compose config
+
+# Face Lab — manual QA at /face (all envs)
+# Grant camera, test all 4 modules, compare results
 
 # Face Lab — manual QA at /face-lab (all envs)
 # Grant camera, test all 4 modules, compare results
