@@ -35,6 +35,7 @@ const Payment = lazy(() => import('@/pages/Payment').then(m => ({ default: m.Pay
 const Feedback = lazy(() => import('@/pages/Feedback').then(m => ({ default: m.Feedback })));
 const Services = lazy(() => import('@/pages/Services').then(m => ({ default: m.Services })));
 const ServiceCatalog = lazy(() => import('@/pages/ServiceCatalog').then(m => ({ default: m.ServiceCatalog })));
+const FaceLab = lazy(() => import('@/pages/FaceLab').then(m => ({ default: m.FaceLab })));
 
 /**
  * Access Denied page — shown when authenticated but lacking permission
@@ -147,6 +148,7 @@ function App() {
           {import.meta.env.DEV && (
             <Route path="/test/address" element={<AddressAutocompleteTest />} />
           )}
+          <Route path="/face-lab" element={<FaceLab />} />
 
           {/* Protected routes wrapped in Layout */}
           <Route

@@ -56,7 +56,7 @@ Use UC/WF IDs from `docs/USE-CASES.md` and `docs/WORKFLOWS.md` for feature trace
 | `api/src/routes/payments.js` | `api/tests/readRoutePermissions.test.js`, `website/e2e/team-charlie-payments.spec.ts`, `website/src/lib/allocatePaymentSources.test.ts` | Money logic is high-risk. |
 | `api/src/routes/payments/helpers.js` | `website/src/lib/allocatePaymentSources.test.ts`, payment backend tests | Allocation math, receipt generation, residual validation. |
 | `website/src/components/payment/PaymentForm.tsx` | `PaymentForm.submit.test.tsx`, `website/e2e/vietqr-payment.spec.ts` | Payment entry and mixed-method breakdown. |
-| `contracts/payment.ts` | All payment-related tests | Schema change cascades. |
+| `contracts/payment.ts` | `npm --prefix contracts run build`, `website/src/hooks/useDeposits.test.tsx`, `website/src/components/payment/PaymentHistory.test.tsx`, `website/src/components/payment/CustomerDeposits.test.tsx`, `website/e2e/team-charlie-payments.spec.ts`, `website/e2e/vietqr-payment.spec.ts` | Schema change cascades into payment method labels, deposit history, VietQR-as-bank-transfer entry, reports/export grouping, and shared package consumers. |
 | `api/src/routes/monthlyPlans.js` | `website/e2e/team-charlie-payments.spec.ts` | Installment plan payments. |
 
 ### Reports & Exports
@@ -142,4 +142,7 @@ bash -n scripts/deploy-tbot.sh
 
 # Docker compose validation
 docker compose config
+
+# Face Lab — manual QA at /face-lab (all envs)
+# Grant camera, test all 4 modules, compare results
 ```

@@ -124,7 +124,7 @@ Changed URLs and API routes:
 
 Affected data flows:
 - Each new agent prompt in Claude-compatible local tooling now runs `scripts/prompt-authority-check.sh` through `.claude/settings.json` `UserPromptSubmit`.
-- The prompt gate verifies core authority files exist, checks that generated memory markers did not leak into authority docs, and prints prompt-matched docs/domains for agents to read before edits.
+- The prompt gate verifies core authority files exist, strips accidental generated-memory blocks from `AGENTS.md`, checks that generated memory markers did not leak into other authority docs, and prints prompt-matched docs/domains for agents to read before edits.
 - Root `npm run verify:prompt` provides the manual fallback for agents/tools that do not execute `.claude/settings.json` prompt hooks.
 - Root `npm run verify:governance` now includes the prompt authority gate before doc-update and whitespace checks.
 
@@ -139,7 +139,8 @@ Happy paths:
 
 Edge cases:
 - If authority docs are missing, the prompt gate must fail before work starts.
-- If generated memory markers leak into authority docs, the prompt gate must fail and print the matching file/line.
+- If generated memory markers leak into non-`AGENTS.md` authority docs, the prompt gate must fail and print the matching file/line.
+- If generated memory markers are appended to `AGENTS.md`, the prompt gate should strip them before checking so the next prompt is not blocked by memory-tool output.
 - If the active agent does not support `UserPromptSubmit`, the fallback is manual `npm run verify:prompt` at prompt start.
 
 Regressions:
@@ -157,6 +158,7 @@ TestSprite execution items:
 - [x] PASS 2026-05-17: Frontend prompt text surfaces website frontend/design docs, behavior, use-case, workflow, test matrix, and `testbright.md`.
 - [x] PASS 2026-05-17: `.claude/settings.json` contains a `UserPromptSubmit` hook that runs `bash scripts/prompt-authority-check.sh`.
 - [x] PASS 2026-05-17: `package.json` `verify:governance` runs the prompt authority gate before docs and whitespace checks.
+- [ ] PENDING: Verify prompt gate strips an accidental `<claude-mem-context>` block from `AGENTS.md` before running marker checks.
 
 ---
 
