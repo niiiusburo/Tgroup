@@ -146,8 +146,6 @@ bash -n scripts/deploy-tbot.sh
 docker compose config
 
 # Face Lab — manual QA at /face (all envs)
-# Grant camera, test all 4 modules, compare results
-
-# Face Lab — manual QA at /face-lab (all envs)
-# Grant camera, test all 4 modules, compare results
+# Activate each module, hold face in frame, wait for auto-capture,
+# compare confidence/timing/resolution in the BEST badge table
 ```

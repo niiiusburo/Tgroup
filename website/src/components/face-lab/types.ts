@@ -1,3 +1,16 @@
+export interface ModuleConfig {
+  id: string;
+  name: string;
+  description: string;
+  strategy: 'native' | 'quality-only' | 'highres' | 'burst';
+  videoConstraints: MediaTrackConstraints;
+  jpegQuality: number;
+  autoScoreThreshold: number;
+  readyFramesNeeded: number;
+  burstFrameCount?: number;
+  burstIntervalMs?: number;
+}
+
 export interface ModuleResult {
   moduleId: string;
   match: {
@@ -11,15 +24,14 @@ export interface ModuleResult {
     confidence: number;
   }>;
   timing: {
+    detect: number;
     capture: number;
     upload: number;
     total: number;
   };
   imageSize: number;
   resolution: string;
+  framesEvaluated: number;
+  bestFrameScore: number;
   error?: string;
-}
-
-export interface FaceLabModuleProps {
-  onResult: (result: ModuleResult) => void;
 }
