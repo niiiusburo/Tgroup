@@ -86,7 +86,7 @@ export function CalendarDateNavigator({
   }
 
   return (
-    <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto xl:shrink-0">
+    <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto 2xl:shrink-0">
       <button
         onClick={() => onNavigate('prev')}
         className="min-h-10 min-w-10 p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"

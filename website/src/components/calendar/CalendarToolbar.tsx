@@ -80,9 +80,9 @@ export function CalendarToolbar({
   return (
     <div
       data-testid="calendar-toolbar"
-      className="flex flex-col items-stretch justify-between gap-3 bg-white rounded-xl shadow-card px-4 py-3 xl:flex-row xl:items-center"
+      className="flex flex-col items-stretch justify-between gap-3 bg-white rounded-xl shadow-card px-4 py-3 2xl:flex-row 2xl:items-center"
     >
-      <div className="flex w-full max-w-full items-center overflow-x-auto bg-gray-100 rounded-lg p-1 sm:w-fit xl:shrink-0">
+      <div className="flex w-full max-w-full items-center overflow-x-auto bg-gray-100 rounded-lg p-1 sm:w-fit 2xl:shrink-0">
         {VIEW_TABS.map((tab) => (
           <button
             key={tab.mode}
@@ -109,9 +109,9 @@ export function CalendarToolbar({
 
       <div
         data-testid="calendar-toolbar-actions"
-        className="grid w-full grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center xl:w-auto xl:flex-nowrap"
+        className="grid w-full grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center 2xl:w-auto 2xl:flex-nowrap"
       >
-        <div ref={dropdownRef} className="relative col-span-2 min-w-0 flex-1 sm:min-w-[220px] xl:w-72 xl:flex-none">
+        <div ref={dropdownRef} className="relative col-span-2 min-w-0 flex-1 sm:min-w-[220px] 2xl:w-72 2xl:flex-none">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           <input
             type="text"

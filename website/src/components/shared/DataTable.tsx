@@ -14,6 +14,7 @@ export interface Column<T> {
   readonly sortable?: boolean;
   readonly render?: (row: T) => React.ReactNode;
   readonly width?: string;
+  readonly sticky?: 'right';
 }
 
 interface DataTableProps<T> {
@@ -136,6 +137,7 @@ export function DataTable<T>({
                   className={`
                     px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide
                     ${col.sortable ? 'cursor-pointer select-none hover:text-gray-700' : ''}
+                    ${col.sticky === 'right' ? 'sticky right-0 z-20 bg-white shadow-[-8px_0_12px_-12px_rgba(15,23,42,0.35)]' : ''}
                   `}
                   style={col.width ? { width: col.width } : undefined}
                   onClick={col.sortable ? () => handleSort(col.key) : undefined}
@@ -194,7 +196,14 @@ export function DataTable<T>({
                       </td>
                     )}
                     {columns.map((col) => (
-                      <td key={col.key} className="px-4 py-3 text-sm text-gray-700" style={col.width ? { width: col.width } : undefined}>
+                      <td
+                        key={col.key}
+                        className={`
+                          px-4 py-3 text-sm text-gray-700
+                          ${col.sticky === 'right' ? 'sticky right-0 z-10 bg-white shadow-[-8px_0_12px_-12px_rgba(15,23,42,0.35)]' : ''}
+                        `}
+                        style={col.width ? { width: col.width } : undefined}
+                      >
                         {col.render
                           ? col.render(row)
                           : String((row as Record<string, unknown>)[col.key] ?? '')}

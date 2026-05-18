@@ -84,8 +84,9 @@ function useColumns(
     {
       key: 'roles',
       header: 'Roles',
+      width: '120px',
       render: (emp) => (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex max-w-[120px] flex-wrap gap-1">
           {emp.roles.map((role) => (
             <span key={role} className={`text-xs px-2 py-0.5 rounded ${ROLE_STYLES[role]}`}>
               {t(ROLE_LABELS[role])}
@@ -98,7 +99,7 @@ function useColumns(
       key: 'locationId',
       header: 'Location',
       sortable: true,
-      width: '160px',
+      width: '180px',
       render: (emp) => {
         if (locationsLoading) {
           return <span className="text-gray-400">Loading locations...</span>;
@@ -108,9 +109,9 @@ function useColumns(
           .map((id) => locationNameMap?.get(id) || id);
         const branchNames = [emp.locationName || emp.locationId, ...scopeNames];
         return (
-          <span className="flex items-start gap-1 text-gray-600">
+          <span className="flex w-full max-w-[180px] min-w-0 items-start gap-1 text-gray-600">
             <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" />
-            <span className="truncate" title={branchNames.join(', ')}>
+            <span className="block min-w-0 flex-1 truncate" title={branchNames.join(', ')}>
               {branchNames.join(', ')}
             </span>
           </span>
@@ -138,8 +139,10 @@ function useColumns(
       key: 'actions',
       header: t('columns.actions', 'Actions'),
       width: '96px',
+      sticky: 'right',
       render: (emp) => (
         <button
+          data-testid="employee-edit-action"
           type="button"
           onClick={(event) => {
             event.stopPropagation();

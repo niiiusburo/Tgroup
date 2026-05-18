@@ -10,6 +10,52 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK2 Responsive Population Audit
+
+Feature/edit name: NK2 Responsive Population Audit
+
+Changed URLs and API routes:
+- Full NK2 route sweep across authenticated app pages.
+- No API routes changed by this QA pass.
+
+Affected data flows:
+- Authenticated page hydration from NK2 staging APIs.
+- Route-level list/detail/report data population across phone, tablet, and desktop viewport classes.
+- Browser console, network, overflow, and empty-state detection for visible app surfaces.
+
+User roles:
+- Authenticated NK2 admin/staff session used for broad route access.
+
+Happy paths:
+- Verify each primary route loads populated content or an intentional empty state on iPhone, iPad, and desktop widths.
+- Verify core navigation remains reachable on each device family.
+- Verify responsive wrapping prevents controls, filters, tabs, and action buttons from clipping offscreen.
+
+Edge cases:
+- Long Vietnamese labels, dense data tables, report tabs, modals, and side navigation must not overlap at iPhone or iPad widths.
+- Pages with low or missing data must show deliberate empty/loading/error states rather than blank panels.
+- API failures or unauthorized responses must not leave a false "populated" page.
+
+Regressions:
+- `/calendar` iPad toolbar wrapping must remain fixed while the broader app sweep runs.
+- Desktop layouts must not degrade while mobile/tablet wrapping is corrected.
+- Report/dashboard/customer/payment/service pages should not introduce page-level horizontal overflow.
+
+Setup data and login state:
+- Use NK2 staging: `https://nk2.2checkin.com`.
+- Use an authenticated admin/staff session with access to the main navigation.
+- Collect screenshot evidence for every checked device family and every failure.
+
+TestSprite execution items:
+- [x] PASS: Sweep iPhone representative widths across all primary authenticated routes for population, console errors, and horizontal overflow - 92 checks completed under `reports/responsive-qa/iphone`; no blank/unpopulated pages, console errors, failed network requests, or true page-wide overflow.
+- [x] PASS: Sweep iPad portrait/landscape representative widths across all primary authenticated routes for population, console errors, and horizontal overflow - 92 checks completed under `reports/responsive-qa/ipad`; `/feedback` visible "Auto-detected Errors" was confirmed as a tab label, not a runtime error.
+- [x] PASS: Sweep desktop representative widths across all primary authenticated routes for population, console errors, and horizontal overflow - 92 checks completed under `reports/responsive-qa/desktop`; true layout blockers isolated to `/calendar` toolbar controls and `/employees` edit action visibility.
+- [x] PASS: Record all failed routes with screenshot path, viewport, visible symptom, and suspected data/UI category - consolidated in `reports/responsive-qa/desktop/report.md`, `reports/responsive-qa/ipad/report.md`, and `reports/responsive-qa/iphone/report.md`.
+- [ ] PENDING: Recheck `/calendar` at 1280x720 and 1366x768 after the 0.32.32 toolbar breakpoint fix; verify export, filter, and quick-add controls are visible.
+- [ ] PENDING: Recheck `/employees` at 1280x720, 1366x768, and 1440x900 after the 0.32.32 sticky action/table text fix; verify the edit action is visible and long location text is truncated.
+
+---
+
 # TestSprite Plan: Calendar iPad Toolbar Wrapping
 
 Feature/edit name: Calendar iPad Toolbar Wrapping

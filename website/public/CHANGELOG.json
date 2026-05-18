@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.32.32",
+    "date": "2026-05-18",
+    "highlights": "Responsive population audit fixes keep calendar toolbar controls and employee edit actions visible on laptop and tablet-sized layouts.",
+    "sections": [
+      {
+        "title": "Responsive Layout",
+        "items": [
+          "/calendar keeps the wrapped toolbar layout through 1280px and 1366px laptop widths so export, filter, and quick-add controls remain visible.",
+          "/employees truncates long role/location content and keeps the edit action column sticky on the right edge of the table.",
+          "The NK2 iPhone/iPad/desktop population sweep found no blank pages, auth redirects, console errors, or failed network requests across the primary authenticated routes."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.30",
     "date": "2026-05-18",
     "highlights": "Calendar toolbar controls now wrap correctly on iPad/tablet widths, keeping the appointment cards populated and the filter/quick-add controls visible.",
