@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   AUTO_CAPTURE_READY_FRAMES,
+  AUTO_CAPTURE_SCORE,
   DETECTION_INTERVAL_MS,
   PROFILE_POSE_SETTLE_MS,
   PROFILE_POSE_HOLD_MS,
@@ -12,6 +13,24 @@ import {
   type CameraFacingMode,
 } from './faceCaptureEngine';
 import { PROFILE_POSES, type DetectionState, type FaceCaptureMode } from './faceCaptureProfile';
+
+// Burst-capture tuning (single-shot mode only — profile mode keeps multi-pose UX).
+// Validated in the face-lab comparison: Module D (burst) produced the sharpest
+// frames CompreFace receives, which directly raises match confidence.
+const BURST_FRAME_COUNT = 5;
+const BURST_FRAME_INTERVAL_MS = 100;
+// Adaptive-threshold tuning. The native FaceDetector API is Chrome-only behind a
+// flag; on Safari/Firefox/iOS the score is bottlenecked by quality scoring and
+// rarely reaches the default 0.68 threshold. We relax over time and finally force-
+// capture using the best frame seen, so capture never stalls indefinitely.
+const ADAPTIVE_RELAX_TICKS_MEDIUM = 24; // ~6s @ 260ms tick
+const ADAPTIVE_RELAX_TICKS_DEEP = 40; // ~10.5s
+const ADAPTIVE_THRESHOLD_RELAX_MEDIUM = 0.15;
+const ADAPTIVE_THRESHOLD_RELAX_DEEP = 0.25;
+const ADAPTIVE_THRESHOLD_FLOOR_MEDIUM = 0.45;
+const ADAPTIVE_THRESHOLD_FLOOR_DEEP = 0.35;
+const FORCE_CAPTURE_TICKS = 60; // ~15.6s
+const FORCE_CAPTURE_MIN_SCORE = 0.15;
 
 interface UseFaceCaptureControllerOptions {
   readonly isOpen: boolean;
@@ -49,16 +68,42 @@ export function useFaceCaptureController({
     setPoseIndex(0);
   }, []);
 
+  // Single-shot burst: capture N frames at short intervals, score each, ship the
+  // sharpest one to the caller. Gives CompreFace the cleanest frame possible.
+  // Profile mode keeps single-frame capture so the 3-pose flow stays predictable.
+  const captureBestOfBurst = useCallback(async (): Promise<Blob | null> => {
+    const video = videoRef.current;
+    if (!video) return null;
+    const detector = getNativeFaceDetector();
+    const frames: Array<{ blob: Blob; score: number }> = [];
+    for (let i = 0; i < BURST_FRAME_COUNT; i++) {
+      if (i > 0) await new Promise((r) => setTimeout(r, BURST_FRAME_INTERVAL_MS));
+      const frameBlob = await captureVideoFrame(video);
+      if (!frameBlob) continue;
+      // requireFace=false: if detector is null we still want a numeric quality score
+      // back, not a 0.45-penalty cap that would skew "best" selection.
+      const { score } = await analyzeFrame(video, detector, detector !== null);
+      frames.push({ blob: frameBlob, score });
+    }
+    if (frames.length === 0) return null;
+    return frames.reduce((a, b) => (b.score > a.score ? b : a)).blob;
+  }, []);
+
   const handleCapture = useCallback(async () => {
     setCaptureError(null);
-    const blob = await captureVideoFrame(videoRef.current);
-    if (!blob) return;
 
     try {
       if (!isProfileCapture) {
+        // Single-shot mode: burst → pick sharpest → send.
+        const blob = await captureBestOfBurst();
+        if (!blob) return;
         await onCapture(blob, [blob]);
         return;
       }
+
+      // Profile mode (3 poses): single-frame capture per pose, unchanged.
+      const blob = await captureVideoFrame(videoRef.current);
+      if (!blob) return;
 
       const nextImages = [...profileImagesRef.current, blob];
       profileImagesRef.current = nextImages;
@@ -81,7 +126,7 @@ export function useFaceCaptureController({
       setDetectionScore(0);
       // Don't reset profile progress on capture error; let user retry the current pose
     }
-  }, [captureFailedMessage, isProfileCapture, onCapture, resetGuidedCapture]);
+  }, [captureBestOfBurst, captureFailedMessage, isProfileCapture, onCapture]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -165,10 +210,18 @@ export function useFaceCaptureController({
     let cancelled = false;
     let timeoutId: number | undefined;
     let readyFrames = 0;
+    let elapsedTicks = 0;
+    let bestScoreSeen = 0;
     const detector = getNativeFaceDetector();
     const poseStartedAt = Date.now();
     const poseId = PROFILE_POSES[poseIndex]?.id ?? 'center';
-    const requireFaceDetection = !isProfileCapture || poseId === 'center';
+    // Critical fix: only REQUIRE face detection if we actually have a working
+    // detector. The browser native FaceDetector is null in most browsers
+    // (Chrome-only, behind a flag). When null, analyzeFrame would cap the score
+    // at frameQuality * 0.45 (≈34%) and capture would stall forever — exactly
+    // the bug seen on iPhone Safari.
+    const detectorReady = detector !== null;
+    const requireFaceDetection = detectorReady && (!isProfileCapture || poseId === 'center');
 
     const runDetection = async () => {
       const video = videoRef.current;
@@ -187,13 +240,25 @@ export function useFaceCaptureController({
         return;
       }
 
+      elapsedTicks += 1;
       const result = await analyzeFrame(video, detector, requireFaceDetection);
       if (cancelled) return;
 
       const nextScore = Math.max(0, Math.min(1, result.score));
       setDetectionScore(nextScore);
+      if (nextScore > bestScoreSeen) bestScoreSeen = nextScore;
 
-      if (result.ready) {
+      // Adaptive threshold: relax after sustained scanning so we still capture
+      // in dim lighting / odd angles instead of stalling at 34%.
+      const adaptiveThreshold =
+        elapsedTicks > ADAPTIVE_RELAX_TICKS_DEEP
+          ? Math.max(ADAPTIVE_THRESHOLD_FLOOR_DEEP, AUTO_CAPTURE_SCORE - ADAPTIVE_THRESHOLD_RELAX_DEEP)
+          : elapsedTicks > ADAPTIVE_RELAX_TICKS_MEDIUM
+          ? Math.max(ADAPTIVE_THRESHOLD_FLOOR_MEDIUM, AUTO_CAPTURE_SCORE - ADAPTIVE_THRESHOLD_RELAX_MEDIUM)
+          : AUTO_CAPTURE_SCORE;
+
+      const meetsAdaptive = nextScore >= adaptiveThreshold;
+      if (result.ready || meetsAdaptive) {
         readyFrames += 1;
         setDetectionState('detected');
         setCaptureError(null);
@@ -216,6 +281,22 @@ export function useFaceCaptureController({
         !requireFaceDetection &&
         !autoCapturedRef.current &&
         Date.now() - poseStartedAt >= PROFILE_POSE_HOLD_MS
+      ) {
+        autoCapturedRef.current = true;
+        setDetectionState('capturing');
+        void handleCapture();
+        return;
+      }
+
+      // Force-capture safety net: after ~15s of scanning, if we've seen anything
+      // remotely face-like at all, capture the best frame rather than stalling
+      // forever. Only kicks in for single-shot mode; profile mode has its own
+      // pose-hold timeout above.
+      if (
+        !isProfileCapture &&
+        !autoCapturedRef.current &&
+        elapsedTicks >= FORCE_CAPTURE_TICKS &&
+        bestScoreSeen >= FORCE_CAPTURE_MIN_SCORE
       ) {
         autoCapturedRef.current = true;
         setDetectionState('capturing');

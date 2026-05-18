@@ -1045,3 +1045,10 @@ TestSprite execution items:
 - Verify: if `POST /api/face/recognize` times out or fails, the lab still shows the captured frame and the Register-face panel
 - Verify: camera stops as soon as capture completes (LED off before upload)
 - Verify: Register-face still works against captured blob after a recognize failure
+
+## Face ID engine swap (2026-05-18)
+- Surface: Global Face ID button (top bar), CustomerCameraWidget, AddCustomerForm
+- Verify: opening Face ID and holding face captures within 5-15s on Safari, Firefox, iOS
+- Verify: 5-frame burst — best of 5 sent to /api/face/recognize (check captured-blob size > 30 KB)
+- Verify: profile-mode 3-pose registration on customer profile still works
+- Regression: /face URL returns 404 (lab removed)

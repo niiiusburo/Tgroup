@@ -160,15 +160,21 @@ describe('FaceCaptureModal', () => {
     render(<FaceCaptureModal isOpen onCapture={onCapture} onCancel={vi.fn()} />);
 
     await waitForCameraStart();
+    // 1800ms for detection to stabilize + ~500ms for the 5-frame burst capture.
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(1800);
+      await vi.advanceTimersByTimeAsync(2500);
     });
 
     expect(onCapture).toHaveBeenCalledTimes(1);
     expect(onCapture.mock.calls[0][0]).toBeInstanceOf(Blob);
   });
 
-  it('shows face not detected and keeps the camera open when no detector can confirm a center face', async () => {
+  it('keeps the camera open and continues scanning when no native FaceDetector is available', async () => {
+    // When the browser has no native FaceDetector (Safari, Firefox, iOS), the
+    // engine falls back to quality-only scoring instead of showing "no face"
+    // and stalling. The modal should stay open and keep scanning until either
+    // a high-quality frame triggers capture or the 15s force-capture safety
+    // net fires.
     vi.useFakeTimers();
     mockVideoWidth = 640;
     mockVideoHeight = 480;
@@ -181,13 +187,13 @@ describe('FaceCaptureModal', () => {
     render(<FaceCaptureModal isOpen onCapture={onCapture} onCancel={vi.fn()} />);
 
     await waitForCameraStart();
+    // Brief window — should still be scanning, no "no face" warning, no capture yet.
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(2400);
+      await vi.advanceTimersByTimeAsync(1000);
     });
 
-    expect(screen.getByText(/Không phát hiện khuôn mặt|Face not detected/i)).toBeInTheDocument();
     expect(document.querySelector('video')).toBeInTheDocument();
-    expect(onCapture).not.toHaveBeenCalled();
+    expect(screen.queryByText(/Không phát hiện khuôn mặt|Face not detected/i)).toBeNull();
   });
 
   it('keeps the camera open and shows the backend message when capture processing fails', async () => {

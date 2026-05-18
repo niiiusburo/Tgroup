@@ -145,11 +145,10 @@ bash -n scripts/deploy-tbot.sh
 # Docker compose validation
 docker compose config
 
-# Face Lab — manual QA at /face (all envs)
-# Activate each module, hold face in frame, wait for auto-capture,
-# compare confidence/timing/resolution in the BEST badge table
-# Verify: all 4 modules complete capture within ~15s even without
-# browser native FaceDetector (Chrome flag off / Safari / Firefox)
-# Verify: inline "Register face" search → click customer → success → re-test matches
-# Verify: on recognize timeout/error, captured frame + register panel still appear (iPhone Safari)
+# Face ID engine (Global Face ID button, customer camera, AddCustomerForm)
+# Validate: open via top-bar Face ID button → auto-capture in 5-15s on any browser
+# Validate: 5-frame burst → sharpest sent to /api/face/recognize
+# Validate: 15s force-capture safety net fires on poor light
+# Validate: profile-mode 3-pose registration unchanged
+# Tests: npm --prefix website run test -- shared/FaceCaptureModal shared/faceCaptureEngine shared/GlobalFaceIdButton customer/CustomerCameraWidget hooks/useFaceRecognition
 ```
