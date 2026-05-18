@@ -77,9 +77,9 @@ export function useFaceCaptureController({
       const message = err instanceof Error ? err.message : captureFailedMessage;
       setCaptureError(message || captureFailedMessage);
       autoCapturedRef.current = false;
-      setDetectionState('no-face');
+      setDetectionState('scanning');
       setDetectionScore(0);
-      if (isProfileCapture) resetGuidedCapture();
+      // Don't reset profile progress on capture error; let user retry the current pose
     }
   }, [captureFailedMessage, isProfileCapture, onCapture, resetGuidedCapture]);
 

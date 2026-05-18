@@ -72,7 +72,17 @@ function revenueCte(where) {
         cust.name AS partnername,
         cust.displayname AS partnerdisplayname,
         cust.phone AS partnerphone,
-        COALESCE(NULLIF(so.code, ''), so.name) AS saleordercode,
+        so.code AS saleordercode,
+        COALESCE(
+          NULLIF((
+            SELECT STRING_AGG(DISTINCT NULLIF(sol.productname, ''), ', ')
+            FROM saleorderlines sol
+            WHERE sol.orderid = so.id
+              AND COALESCE(sol.isdeleted, false) = false
+          ), ''),
+          NULLIF(so.name, so.code),
+          so.name
+        ) AS servicename,
         COALESCE(
           NULLIF((
             SELECT STRING_AGG(DISTINCT NULLIF(sol.productname, ''), ', ')
@@ -127,6 +137,7 @@ async function getRevenueRows(filters, maxRows) {
       partnerdisplayname,
       partnerphone,
       saleordercode,
+      servicename,
       saleordername,
       saleorder_total,
       saleorder_residual,

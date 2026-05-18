@@ -183,8 +183,14 @@
     "create": "Tạo bản ghi mới"
   },
   "face": {
-    "registerTitle": "Đăng ký khuôn mặt"
+    "registerTitle": "Đăng ký khuôn mặt",
+    "selectMatch": "Chọn kết quả",
+    "searchToRegister": "Tìm kiếm để đăng ký",
+    "searchPlaceholder": "Tìm theo tên, SĐT...",
+    "registerToCustomer": "Đăng ký cho khách hàng"
   },
+  "faceId": "Nhận diện",
+  "quickAdd": "Thêm nhanh",
   "relationships": "Mối quan hệ",
   "apply": "Áp dụng",
   "reset": "Đặt lại",

@@ -45,15 +45,14 @@ function buildWhere(filters) {
   }
 
   if (filters.dateFrom) {
-    conditions.push(`a.date >= $${idx}`);
+    conditions.push(`a.date::date >= $${idx}::date`);
     params.push(filters.dateFrom);
     idx++;
   }
 
   if (filters.dateTo) {
-    const dtVal = filters.dateTo.length <= 10 ? `${filters.dateTo} 23:59:59` : filters.dateTo;
-    conditions.push(`a.date <= $${idx}`);
-    params.push(dtVal);
+    conditions.push(`a.date::date <= $${idx}::date`);
+    params.push(filters.dateTo);
     idx++;
   }
 

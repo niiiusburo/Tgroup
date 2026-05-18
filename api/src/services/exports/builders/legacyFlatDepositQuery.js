@@ -65,6 +65,7 @@ function depositSelect(where) {
       p.amount,
       p.cash_amount,
       p.bank_amount,
+      p.method AS paymentmethod,
       sale_staff.name AS salestaffname,
       cskh_staff.name AS cskhname,
       cs.name AS customersourcename,

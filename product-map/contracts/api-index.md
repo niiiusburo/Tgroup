@@ -39,6 +39,7 @@
 |--------|------|------|--------------|----------|
 | GET | `/` | Auth | `?offset, limit, search, companyId` | `PaginatedResponse<Partner>` |
 | GET | `/check-unique` | Auth | `?field, value` (e.g. phone, email) | `{ available: boolean }` |
+| GET | `/resolve` | Perm:`customers.view` | `?key` (UUID, customer ref, or normalized phone) | `{ matchedBy, partner }`, 404 `CUSTOMER_NOT_FOUND`, or 409 `CUSTOMER_LOOKUP_AMBIGUOUS` with candidates |
 | GET | `/:id` | Perm:`customers.view` | — | Partner detail |
 | GET | `/:id/GetKPIs` | Perm:`customers.view` | — | KPI stats |
 | POST | `/` | Perm:`customers.add` | Partner fields | Created partner |
@@ -79,8 +80,9 @@
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/` | Auth | `?offset, limit, search, customerId, companyId, date_from, date_to, state` | `PaginatedResponse<SaleOrder>` |
-| GET | `/:id` | Auth | — | Sale order detail |
+| GET | `/` | Perm:`services.view` | `?offset, limit, search, customerId, companyId, date_from, date_to, state` | `PaginatedResponse<SaleOrder>` |
+| GET | `/lines` | Perm:`services.view` | `?partner_id` required, `offset, limit, sortField, sortOrder` | Customer service lines with payment/order metadata |
+| GET | `/:id` | Perm:`services.view` | — | Sale order detail |
 | POST | `/` | Perm:`customers.edit` | `{ partner_id, company_id, ... }` | Created sale order |
 | PATCH | `/:id` | Perm:`customers.edit` | Order fields; quantity, service, tooth, and price fields also sync to the primary rendered sale-order line | Updated sale order |
 | PATCH | `/:id/state` | Perm:`customers.edit` | `{ new_state }` | State updated + audit log |
@@ -89,22 +91,30 @@
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/` | Auth | `?offset, limit, search, orderid, partnerid` | `PaginatedResponse<SaleOrderLine>` |
+| GET | `/` | Auth | `?offset, limit, companyId, dateFrom, dateTo, state, partnerId` | `PaginatedResponse<SaleOrderLine> + aggregates` |
+| DELETE | `/:id` | Perm:`customers.edit` | — | `{ success, id, orderId, deletedOrder }`; soft-deletes line and parent order if no active lines remain |
+
+## Dot Khams (`/api/DotKhams`)
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/` | Auth | `?partner_id, offset, limit, search, sortField, sortOrder` | `PaginatedResponse<DotKham> + aggregates` |
+| GET | `/:id` | Auth | — | Dot kham detail with `steps[]` |
 
 ## Payments (`/api/Payments`)
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/` | Perm:`payment.view` | `?customerId, serviceId, limit, offset, type` (`payments` | `deposits` | `all`) | `{ items[], totalItems }` (+ legacy fallback) |
+| GET | `/` | Perm:`payment.view` | `?customerId, serviceId, limit, offset, type` (`payments` \| `deposits` \| `all`) | `{ items[], totalItems }` (+ legacy fallback) |
 | GET | `/deposits` | Perm:`payment.view` | `?customerId, dateFrom, dateTo, receiptNumber, type, limit, offset` | `{ items[], totalItems }` |
 | GET | `/deposit-usage` | Perm:`payment.view` | `?customerId, dateFrom, dateTo, limit, offset` | `{ items[], totalItems }` |
 | GET | `/:id` | Perm:`payment.view` | — | Payment with allocations |
-| POST | `/` | Perm:`payment.add` | `{ customer_id, service_id, amount, method, notes, payment_date, reference_code, status, deposit_used, cash_amount, bank_amount, deposit_type, receipt_number, allocations[] }` | Created payment |
+| POST | `/` | Perm:`payment.add` | `{ customer_id, service_id, amount, method: cash\|bank_transfer\|deposit\|mixed, notes, payment_date, reference_code, status, deposit_used, cash_amount, bank_amount, deposit_type, receipt_number, allocations[] }` | Created payment |
 | POST | `/refund` | Perm:`payment.refund` | `{ customer_id, amount, method, notes, payment_date }` | Created refund |
-| PATCH | `/:id` | Perm:`payment.edit` | `{ amount, method, notes, payment_date, reference_code, status, deposit_type, receipt_number }` | Updated payment |
+| PATCH | `/:id` | Perm:`payment.add` | `{ amount, method: cash\|bank_transfer\|deposit\|mixed, notes, payment_date, reference_code, status, deposit_type, receipt_number }` | Updated payment |
 | DELETE | `/:id` | Perm:`payment.void` | — | `{ success, id }` + reverses allocations |
 | POST | `/:id/void` | Perm:`payment.void` | `{ reason }` | `{ success, payment }` + reverses allocations |
-| POST | `/:id/proof` | Perm:`payment.edit` | `{ proofImageBase64, qrDescription }` | `{ success, proofId }` |
+| POST | `/:id/proof` | Perm:`payment.add` | `{ proofImageBase64, qrDescription }` | `{ success, proofId }` |
 
 ## Monthly Plans (`/api/MonthlyPlans`)
 
@@ -162,31 +172,31 @@
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
 | POST | `/dashboard` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | Dashboard KPIs |
-| POST | `/revenue/summary` | Perm:`reports.view` | Date range | Revenue summary |
-| POST | `/revenue/trend` | Perm:`reports.view` | Date range | Revenue trend |
-| POST | `/revenue/by-location` | Perm:`reports.view` | Date range | Revenue per location |
-| POST | `/revenue/by-doctor` | Perm:`reports.view` | Date range | Revenue per doctor |
-| POST | `/revenue/by-category` | Perm:`reports.view` | Date range | Revenue per category |
-| POST | `/revenue/payment-plans` | Perm:`reports.view` | Date range | Payment plan revenue |
+| POST | `/revenue/summary` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { orders[], payments[] } }` |
+| POST | `/revenue/trend` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: [{ month, orderCount, invoiced, paid, outstanding }] }` |
+| POST | `/revenue/by-location` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: [{ id, name, orderCount, invoiced, paid, outstanding }] }` |
+| POST | `/revenue/by-doctor` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: [{ id, name, orderCount, invoiced, paid }] }` |
+| POST | `/revenue/by-category` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: [{ id, category, lineCount, revenue }] }` |
+| POST | `/revenue/payment-plans` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { plans[], installments[] } }` |
 | POST | `/revenue/rules` | Perm:`reports.view` | — | Revenue recognition rule metadata |
-| POST | `/cash-flow/summary` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | Cash in/out, net cash flow, deposit usage, void adjustments, and movement categories |
-| POST | `/appointments/summary` | Perm:`reports.view` | Date range | Appointment stats |
-| POST | `/appointments/trend` | Perm:`reports.view` | Date range | Appointment trend |
-| POST | `/doctors/performance` | Perm:`reports.view` | Date range | Doctor performance |
-| POST | `/customers/summary` | Perm:`reports.view` | Date range | Customer summary |
-| POST | `/employees/overview` | Perm:`reports.view` | Date range | Employee overview |
-| POST | `/services/breakdown` | Perm:`reports.view` | Date range | Services breakdown |
-| POST | `/locations/comparison` | Perm:`reports.view` | Date range | Location comparison |
+| POST | `/cash-flow/summary` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { moneyIn, moneyOut, netCashFlow, internalDepositUsed, adjustments, categories[], trend[] } }` |
+| POST | `/appointments/summary` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { total, done, cancelled, completionRate, cancellationRate, conversionRate, states[], repeatCustomers, newCustomers } }` |
+| POST | `/appointments/trend` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { trend[], peakHours[] } }` |
+| POST | `/doctors/performance` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: [{ id, name, totalAppointments, done, cancelled, revenue, unassigned? }] }` |
+| POST | `/customers/summary` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { total, newInPeriod, gender[], cities[], topSpenders[], outstanding[], growth[] } }` |
+| POST | `/employees/overview` | Perm:`reports.view` | `{ companyId? }` | `{ success, data: { roles, byLocation[], employees[] } }` |
+| POST | `/services/breakdown` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | `{ success, data: { categories[], revenueByCategory[], revenueBySource[], popularProducts[] } }` |
+| POST | `/locations/comparison` | Perm:`reports.view` | `{ dateFrom?, dateTo? }` | `{ success, data: { locations[], trend[] } }` |
 
 ## Operational Exports (`/api/Exports`)
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
 | GET | `/types` | Auth | — | Export types visible to the current user's effective permissions |
-| POST | `/:type/preview` | Auth + export permission | `{ filters }`; `type` is `customers`, `appointments`, `services`, `payments`, `service-catalog`, or `report-sales-employees` | `{ type, label, rowCount, filename, filters, summary, exceedsMax }` + best-effort `exports_audit` row |
-| POST | `/:type/download` | Auth + export permission | `{ filters }`; same type keys as preview | XLSX workbook stream + best-effort `exports_audit` row after response |
+| POST | `/:type/preview` | Auth + registry permission | `{ filters }`; `type` is `service-catalog`, `customers`, `appointments`, `services`, `payments`, `report-sales-employees`, `revenue-flat`, or `deposit-flat` | `{ type, label, rowCount, filename, filters, summary, exceedsMax }` + best-effort `exports_audit` row |
+| POST | `/:type/download` | Auth + registry permission | `{ filters }`; same type keys as preview | XLSX workbook stream + best-effort `exports_audit` row after response |
 
-Export permissions are defined by `api/src/services/exports/exportRegistry.js`: `customers.export`, `appointments.export`, `services.export`, `payments.export`, `products.export`, and `reports.export`. `report-sales-employees` accepts `companyId`, `employeeType` (`doctor`, `assistant`, `consultant`, `sales`), optional `employeeId`, `dateFrom`, and `dateTo`.
+Export permissions are defined by `api/src/services/exports/exportRegistry.js`: `customers.export`, `appointments.export`, `services.export`, `payments.export`, `products.export`, and `reports.export`. `report-sales-employees` accepts `companyId`, `employeeType` (`doctor`, `assistant`, `consultant`, `sales`), optional `employeeId`, `dateFrom`, and `dateTo`; `revenue-flat` and `deposit-flat` use `payments.export` with `search`, `companyId`, `dateFrom`, and `dateTo`.
 
 ## Dashboard Reports (`/api/DashboardReports`)
 
@@ -212,6 +222,18 @@ Export permissions are defined by `api/src/services/exports/exportRegistry.js`: 
 | GET | `/bank` | Perm:`settings.view` | — | `{ bank_bin, bank_number, bank_account_name, updated_at }` |
 | PUT | `/bank` | Perm:`payment.edit` | `{ bank_bin, bank_number, bank_account_name }` | Updated settings |
 
+## IP Access (`/api/IpAccess`)
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/settings` | Perm:`settings.view` | — | `{ id, mode, lastUpdated }` |
+| PUT | `/settings` | Perm:`settings.edit` | `{ mode: allow_all\|block_all\|whitelist_only\|blacklist_block }` | Updated settings |
+| GET | `/entries` | Perm:`settings.view` | — | `{ entries: IpAccessEntry[] }` |
+| POST | `/entries` | Perm:`settings.edit` | `{ ipAddress, type: whitelist\|blacklist, description? }` | Created entry |
+| PUT | `/entries/:id` | Perm:`settings.edit` | `{ description?, type?, isActive? }` | Updated entry |
+| DELETE | `/entries/:id` | Perm:`settings.edit` | — | `{ success: true }` |
+| GET | `/check` | Public | caller IP from request/proxy headers | `{ allowed, reason, clientIp }` |
+
 ## Website Pages (`/api/WebsitePages`)
 
 | Method | Path | Auth | Body / Query | Response |
@@ -226,15 +248,16 @@ Export permissions are defined by `api/src/services/exports/exportRegistry.js`: 
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
+| GET | `/unread-count` | Auth | — | `{ count, role: admin\|staff }` |
 | POST | `/` | Auth | FormData (thread creation + files) | Created thread |
 | GET | `/my` | Auth | — | User's threads |
 | GET | `/my/:threadId` | Auth | — | Thread messages |
 | POST | `/my/:threadId/reply` | Auth | FormData | Reply created |
-| GET | `/all` | Perm:`feedback.view` | `?source=manual|auto` | All threads |
-| GET | `/all/:threadId` | Perm:`feedback.view` | — | Thread messages |
-| POST | `/all/:threadId/reply` | Perm:`feedback.reply` | FormData | Admin reply |
-| PATCH | `/all/:threadId/status` | Perm:`feedback.edit` | `{ status }` | Thread status updated |
-| DELETE | `/all/:threadId` | Perm:`feedback.delete` | — | Thread deleted |
+| GET | `/all` | Admin (`System Administrator` group or effective `permissions.view`) | `?source=manual\|auto` | All threads |
+| GET | `/all/:threadId` | Admin (`System Administrator` group or effective `permissions.view`) | — | Thread messages |
+| POST | `/all/:threadId/reply` | Admin (`System Administrator` group or effective `permissions.view`) | FormData | Admin reply |
+| PATCH | `/all/:threadId/status` | Admin (`System Administrator` group or effective `permissions.view`) | `{ status: pending\|in_progress\|resolved\|ignored }` | Thread status updated |
+| DELETE | `/all/:threadId` | Admin (`System Administrator` group or effective `permissions.view`) | — | Thread deleted |
 
 ## Face Recognition (`/api/face`)
 

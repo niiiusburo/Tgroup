@@ -94,13 +94,14 @@ export function AddressAutocomplete({
       setError('Google Places API key not configured. Please set VITE_GOOGLE_PLACES_API_KEY');
       console.error('[AddressAutocomplete] VITE_GOOGLE_PLACES_API_KEY not set');
     }
-  }, []);
+  }, [apiKey]);
 
   // Sync external value
   useEffect(() => {
     if (value !== inputValue) {
       setInputValue(value);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- only sync when external value changes
   }, [value]);
 
   // Fetch suggestions from backend proxy (which calls Google Places API)
@@ -115,8 +116,6 @@ export function AddressAutocomplete({
     setError(null);
 
     try {
-      console.log('[AddressAutocomplete] Fetching suggestions for:', input);
-
       const data = await apiFetch<{status: string;predictions?: AddressSuggestion[];error_message?: string;}>(
         '/Places/autocomplete',
         { params: { input, types: 'address', language: 'vi' } }
@@ -124,7 +123,6 @@ export function AddressAutocomplete({
 
       if (data.status === 'OK' && data.predictions) {
         setSuggestions(data.predictions);
-        console.log('[AddressAutocomplete] Got', data.predictions.length, 'suggestions');
       } else if (data.status === 'ZERO_RESULTS') {
         setSuggestions([]);
       } else {
@@ -138,7 +136,7 @@ export function AddressAutocomplete({
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [apiKey]);
 
   // Handle input change with debounce
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -161,8 +159,6 @@ export function AddressAutocomplete({
   // Parse address components from Google Places result using REST API
   const parseAddressComponents = async (placeId: string, description: string): Promise<AddressDetails | null> => {
     try {
-      console.log('[AddressAutocomplete] Fetching place details for:', placeId);
-
       // Use the backend proxy to get place details
       const data = await apiFetch<{
         result?: {
@@ -276,8 +272,6 @@ export function AddressAutocomplete({
   const handleSelect = async (suggestion: AddressSuggestion) => {
     const { place_id, description } = suggestion;
 
-    console.log('[AddressAutocomplete] Selected:', description, 'Place ID:', place_id);
-
     setShowSuggestions(false);
     setSuggestions([]);
 
@@ -287,7 +281,6 @@ export function AddressAutocomplete({
 
       // Parse address components
       const details = await parseAddressComponents(place_id, description);
-      console.log('[AddressAutocomplete] Parsed details:', details);
 
       // Call onChange ONCE with both address and details
       // This ensures all values (street, city, district, ward) are set together

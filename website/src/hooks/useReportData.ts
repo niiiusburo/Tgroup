@@ -7,6 +7,15 @@ interface ReportParams {
   companyId?: string;
 }
 
+function cleanReportParams(params: ReportParams) {
+  return Object.fromEntries(
+    Object.entries(params).filter(([key, value]) => {
+      if (value === '' || value === null || value === undefined) return false;
+      return !(key === 'companyId' && value === 'all');
+    })
+  );
+}
+
 export function useReportData<T>(endpoint: string, params: ReportParams) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
@@ -16,12 +25,9 @@ export function useReportData<T>(endpoint: string, params: ReportParams) {
     setLoading(true);
     setError(null);
     try {
-      const cleanParams = Object.fromEntries(
-        Object.entries(params).filter(([, v]) => v !== '' && v !== null && v !== undefined)
-      );
       const result = await apiFetch<{ success: boolean; data: T }>(endpoint, {
         method: 'POST',
-        body: cleanParams,
+        body: cleanReportParams(params),
         signal,
       });
       if (result.success) {
@@ -29,9 +35,9 @@ export function useReportData<T>(endpoint: string, params: ReportParams) {
       } else {
         setError('Failed to load report');
       }
-    } catch (e: any) {
-      if (e.name === 'AbortError') return;
-      setError(e.message || 'Network error');
+    } catch (e: unknown) {
+      if (e instanceof DOMException && e.name === 'AbortError') return;
+      setError(e instanceof Error ? e.message : 'Network error');
     } finally {
       setLoading(false);
     }

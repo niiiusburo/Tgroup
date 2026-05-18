@@ -138,7 +138,7 @@ router.post('/errors', async (req, res) => {
     return res.json({ ok: true, id: result[0].id, fingerprint, is_duplicate: false });
   } catch (err) {
     console.error('Telemetry errors insert failed:', err);
-    return res.json({ ok: true, error: 'db_write_failed' });
+    return res.status(500).json({ ok: false, error: 'db_write_failed' });
   }
 });
 
@@ -290,7 +290,7 @@ router.post('/version', async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error('Telemetry insert failed:', err);
-    res.json({ ok: true });
+    res.status(500).json({ ok: false, error: 'db_write_failed' });
   }
 });
 

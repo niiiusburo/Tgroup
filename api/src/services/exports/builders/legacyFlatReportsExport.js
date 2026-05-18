@@ -62,6 +62,7 @@ const revenue = createBuilder({
     customerName: row.partnerdisplayname || row.partnername || '',
     customerPhone: row.partnerphone || '',
     saleOrderCode: row.saleordercode || '',
+    serviceName: row.servicename || '',
     saleOrderName: row.saleordername || '',
     saleOrderTotal: numberValue(row.saleorder_total),
     saleOrderResidual: numberValue(row.saleorder_residual),
@@ -80,6 +81,18 @@ const revenue = createBuilder({
   }),
 });
 
+const METHOD_LABELS = {
+  cash: 'Tiền mặt',
+  bank: 'Chuyển khoản',
+  bank_transfer: 'Chuyển khoản',
+  card: 'Thẻ',
+  deposit: 'Cọc',
+  momo: 'MoMo',
+  vnpay: 'VNPay',
+  zalopay: 'ZaloPay',
+  vietqr: 'VietQR',
+};
+
 const deposit = createBuilder({
   columns: DEPOSIT_COLUMNS,
   getRows: getDepositRows,
@@ -93,6 +106,7 @@ const deposit = createBuilder({
     amount: numberValue(row.amount),
     cashAmount: numberValue(row.cash_amount),
     bankAmount: numberValue(row.bank_amount),
+    paymentMethod: METHOD_LABELS[row.paymentmethod?.toLowerCase()] || row.paymentmethod || '',
     saleOnline: row.salestaffname || '',
     customerCare: row.cskhname || '',
     customerSource: row.customersourcename || '',

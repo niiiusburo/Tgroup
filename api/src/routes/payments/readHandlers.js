@@ -20,6 +20,7 @@ function mapPaymentRow(row, allocations = []) {
     status: row.status,
     receiptNumber: row.receipt_number,
     depositType: row.deposit_type,
+    paymentCategory: row.payment_category,
     locationName: row.company_name || '',
     createdAt: row.created_at,
     allocations,
@@ -155,6 +156,7 @@ async function loadLegacyRows({ customerId, limit, offset }) {
        0 AS bank_amount,
        NULL AS receipt_number,
        NULL AS deposit_type,
+       'payment' AS payment_category,
        company.name AS company_name
      FROM accountpayments ap
      LEFT JOIN partners partner ON partner.id = ap.partnerid
@@ -178,7 +180,7 @@ async function listPayments(req, res) {
         p.amount, p.method, p.notes, p.created_at,
         p.payment_date, p.reference_code, p.status,
         p.deposit_used, p.cash_amount, p.bank_amount,
-        p.receipt_number, p.deposit_type,
+        p.receipt_number, p.deposit_type, p.payment_category,
         company.name AS company_name
       FROM payments p
       LEFT JOIN partners partner ON partner.id = p.customer_id
@@ -295,7 +297,7 @@ async function listDeposits(req, res) {
         p.amount, p.method, p.notes, p.created_at,
         p.payment_date, p.reference_code, p.status,
         p.deposit_used, p.cash_amount, p.bank_amount,
-        p.receipt_number, p.deposit_type,
+        p.receipt_number, p.deposit_type, p.payment_category,
         company.name AS company_name
       FROM payments p
       LEFT JOIN partners partner ON partner.id = p.customer_id
@@ -331,7 +333,7 @@ async function listDepositUsage(req, res) {
         p.amount, p.method, p.notes, p.created_at,
         p.payment_date, p.reference_code, p.status,
         p.deposit_used, p.cash_amount, p.bank_amount,
-        p.receipt_number, p.deposit_type,
+        p.receipt_number, p.deposit_type, p.payment_category,
         company.name AS company_name
       FROM payments p
       LEFT JOIN partners partner ON partner.id = p.customer_id
@@ -376,7 +378,7 @@ async function getPaymentById(req, res) {
               partner.phone AS customer_phone,
               p.amount, p.method, p.notes, p.created_at,
               payment_date, reference_code, status, deposit_used, cash_amount, bank_amount,
-              receipt_number, deposit_type,
+              receipt_number, deposit_type, p.payment_category,
               company.name AS company_name
        FROM payments p
        LEFT JOIN partners partner ON partner.id = p.customer_id

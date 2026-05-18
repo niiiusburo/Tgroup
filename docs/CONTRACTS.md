@@ -9,6 +9,7 @@
 | Version | Date | Scope |
 |---|---|---|
 | v1.0.0 | 2026-05-13 | Initial contract freeze covering all active API routes, shared types, and integration boundaries. |
+| v1.0.1 | 2026-05-17 | Contract documentation aligned to live payment method enum, report API, and operational export registry. |
 
 ---
 
@@ -156,38 +157,89 @@ PaginatedResponse<{
 
 ### 1.4 Payments
 
+#### GET /api/Payments
+**Query:** `customerId?`, `serviceId?`, `limit?`, `offset?`, `type? = payments|deposits|all`
+**Auth:** Requires `payment.view`.
+**Response:** `{ items: Payment[], totalItems: number }` with allocation metadata where available.
+
+#### GET /api/Payments/deposits
+**Query:** `customerId?`, `dateFrom?`, `dateTo?`, `receiptNumber?`, `type?`, `limit?`, `offset?`
+**Auth:** Requires `payment.view`.
+**Response:** `{ items: Payment[], totalItems: number }` scoped to deposit/refund rows.
+
+#### GET /api/Payments/deposit-usage
+**Query:** `customerId?`, `dateFrom?`, `dateTo?`, `limit?`, `offset?`
+**Auth:** Requires `payment.view`.
+**Response:** `{ items: Payment[], totalItems: number }` for internal deposit usage rows.
+
+#### GET /api/Payments/:id
+**Auth:** Requires `payment.view`.
+**Response:** Payment detail with allocations.
+
 #### POST /api/Payments
+**Auth:** Requires `payment.add`.
 **Body:** `PaymentCreateSchema` (from `@tgroup/contracts`)
 ```ts
 {
-  customerId: string;           // UUID
-  serviceId?: string | null;    // saleorder or dotkham id
+  customer_id: string;          // UUID
+  service_id?: string | null;   // saleorder or dotkham id
   amount: number;               // positive
-  method: 'cash' | 'bank_transfer' | 'card' | 'momo' | 'vnpay' | 'zalopay' | 'deposit' | 'mixed';
+  method: 'cash' | 'bank_transfer' | 'deposit' | 'mixed';
   notes?: string | null;
-  paymentDate?: string | null;
-  referenceCode?: string | null;
+  payment_date?: string | null;
+  reference_code?: string | null;
   status?: 'posted' | 'voided' | null;
-  depositUsed?: number | null;
-  cashAmount?: number | null;
-  bankAmount?: number | null;
-  depositType?: 'deposit' | 'refund' | 'usage' | null;
-  receiptNumber?: string | null;
+  deposit_used?: number | null;
+  cash_amount?: number | null;
+  bank_amount?: number | null;
+  deposit_type?: 'deposit' | 'refund' | 'usage' | null;
+  receipt_number?: string | null;
   allocations?: Array<{
-    invoiceId?: string | null;
-    dotkhamId?: string | null;
-    allocatedAmount?: number;
+    invoice_id?: string | null;
+    dotkham_id?: string | null;
+    allocated_amount?: number;
   }> | null;
 }
 ```
 **Behavior:** If no allocations and no serviceId, backend classifies as `deposit` (see INV-004).
 
+#### PATCH /api/Payments/:id
+**Auth:** Requires `payment.add`.
+**Body:** Partial `PaymentUpdateSchema` fields:
+```ts
+{
+  amount?: number;
+  method?: 'cash' | 'bank_transfer' | 'deposit' | 'mixed';
+  notes?: string | null;
+  payment_date?: string | null;
+  reference_code?: string | null;
+  status?: 'posted' | 'voided' | null;
+  deposit_type?: 'deposit' | 'refund' | 'usage' | null;
+  receipt_number?: string | null;
+}
+```
+**Response:** Updated payment row. Backend rejects an empty update body.
+
+#### DELETE /api/Payments/:id
+**Auth:** Requires `payment.void`.
+**Effect:** Deletes the payment row and reverses linked payment allocations against `saleorders.residual` or `dotkhams.amountresidual`.
+**Response:** `{ success: true, id: string }`
+
 #### POST /api/Payments/:id/void
-**Effect:** Marks payment `status = 'voided'`. Requires `payment.void`.
+**Auth:** Requires `payment.void`.
+**Body:** `{ reason?: string }`
+**Effect:** Marks payment `status = 'voided'` and reverses linked allocations.
 
 #### POST /api/Payments/refund
-**Body:** `{ paymentId: string; amount: number; reason?: string }`
-**Effect:** Creates a negative payment row. Requires `payment.refund`.
+**Auth:** Requires `payment.refund`.
+**Body:** `{ customer_id: string; amount: number; method: 'cash' | 'bank_transfer' | 'deposit' | 'mixed'; notes?: string | null; payment_date?: string | null }`
+**Effect:** Creates a negative deposit-category payment row with `deposit_type = 'refund'`.
+
+#### POST /api/Payments/:id/proof
+**Auth:** Requires `payment.add`.
+**Body:** `{ proofImageBase64: string; qrDescription?: string | null }`
+**Behavior:** `proofImageBase64` must be a `data:image/*` URI.
+**Response:** `{ success: true, proofId: string }`
 
 ---
 
@@ -290,16 +342,90 @@ Face error responses:
 
 ---
 
-### 1.8 Exports
+### 1.8 Reports
 
-#### GET /api/Exports/:type/download
-**Query Params:** Filter object specific to export type (date range, location, etc.)
-**Response:** `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` (Excel)
-**Timeout Requirement:** Nginx proxy read timeout ≥300s (INV-019).
+All current `/api/Reports` endpoints use `POST`, require `reports.view`, and return:
+```ts
+{
+  success: boolean;
+  data?: unknown;
+  error?: string;
+}
+```
+Date-scoped endpoints accept `{ dateFrom?: 'YYYY-MM-DD'; dateTo?: 'YYYY-MM-DD'; companyId?: string }` unless noted.
+
+| Endpoint | Body | `data` shape |
+|---|---|---|
+| `/api/Reports/revenue/summary` | Date scope | `{ orders: { state, cnt, total, paid, outstanding }[]; payments: { method, status, cnt, total }[] }` |
+| `/api/Reports/revenue/trend` | Date scope | `{ month, orderCount, invoiced, paid, outstanding }[]` |
+| `/api/Reports/revenue/by-location` | Date scope | `{ id, name, orderCount, invoiced, paid, outstanding }[]` |
+| `/api/Reports/revenue/by-doctor` | Date scope | `{ id, name, orderCount, invoiced, paid }[]` |
+| `/api/Reports/revenue/by-category` | Date scope | `{ id, category, lineCount, revenue }[]` |
+| `/api/Reports/revenue/payment-plans` | Date scope | `{ plans: { status, count, total, downPayment }[]; installments: { status, count, total, paid }[] }` |
+| `/api/Reports/cash-flow/summary` | Date scope | `{ moneyIn, moneyOut, netCashFlow, internalDepositUsed, adjustments, categories[], trend[] }` |
+| `/api/Reports/appointments/summary` | Date scope | `{ total, done, cancelled, completionRate, cancellationRate, conversionRate, states[], repeatCustomers, newCustomers }` |
+| `/api/Reports/services/breakdown` | Date scope | `{ categories[], revenueByCategory[], revenueBySource[], popularProducts[] }` |
+| `/api/Reports/employees/overview` | `{ companyId?: string }` | `{ roles, byLocation[], employees[] }` |
+| `/api/Reports/customers/summary` | Date scope | `{ total, newInPeriod, gender[], cities[], topSpenders[], outstanding[], growth[] }` |
+| `/api/Reports/locations/comparison` | `{ dateFrom?: string; dateTo?: string }` | `{ locations[], trend[] }` |
+| `/api/Reports/doctors/performance` | Date scope | `{ id, name, totalAppointments, done, cancelled, revenue, unassigned? }[]` |
+
+### 1.9 Exports
+
+Operational exports are registry-driven (`api/src/services/exports/exportRegistry.js`), require a valid JWT, and filter visible/exportable types by the current employee's effective permissions.
+
+#### GET /api/Exports/types
+**Response 200:**
+```ts
+Array<{
+  key: 'service-catalog' | 'customers' | 'appointments' | 'services' | 'payments' | 'report-sales-employees' | 'revenue-flat' | 'deposit-flat';
+  label: string;
+  permission: 'products.export' | 'customers.export' | 'appointments.export' | 'services.export' | 'payments.export' | 'reports.export';
+}>
+```
+
+#### POST /api/Exports/:type/preview
+**Body:**
+```ts
+{
+  filters?: Record<string, string | number | boolean | null | undefined>;
+}
+```
+**Response 200:**
+```ts
+{
+  type: string;
+  label: string;
+  rowCount: number;
+  filename: string;
+  filters: Record<string, unknown>;  // original request filters
+  summary: Array<{ label: string; value: string | number }>;
+  exceedsMax: boolean;
+}
+```
+
+#### POST /api/Exports/:type/download
+**Body:** Same `{ filters }` wrapper as preview.
+**Response 200:** `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` stream with `Content-Disposition` filename.
+**Errors:** 400 unknown type or row-limit exceeded, 403 missing registry permission, 500 internal error.
+**Timeout Requirement:** Nginx proxy read timeout >=300s (INV-019).
+
+Supported registry types:
+
+| Type | Permission | Filters |
+|---|---|---|
+| `service-catalog` | `products.export` | `search`, `companyId`, `categId`, `active` |
+| `customers` | `customers.export` | `search`, `companyId`, `status` |
+| `appointments` | `appointments.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `state`, `doctorId` |
+| `services` | `services.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `state` |
+| `payments` | `payments.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `status` |
+| `report-sales-employees` | `reports.export` | `companyId`, `employeeType`, `employeeId`, `dateFrom`, `dateTo` |
+| `revenue-flat` | `payments.export` | `search`, `companyId`, `dateFrom`, `dateTo` |
+| `deposit-flat` | `payments.export` | `search`, `companyId`, `dateFrom`, `dateTo` |
 
 ---
 
-### 1.9 Telemetry (Public)
+### 1.10 Telemetry (Public)
 
 #### POST /api/telemetry/errors
 **Auth:** None (public ingestion)
@@ -448,7 +574,7 @@ export const PaymentBaseSchema = z.object({
   customer_id: z.string().uuid(),
   service_id: z.string().uuid().optional().nullable(),
   amount: z.coerce.number().positive(),
-  method: z.enum(["cash","bank_transfer","card","momo","vnpay","zalopay","deposit","mixed"]),
+  method: z.enum(["cash","bank_transfer","deposit","mixed"]),
   notes: z.string().optional().nullable(),
   payment_date: z.string().optional().nullable(),
   reference_code: z.string().optional().nullable(),
@@ -483,4 +609,5 @@ export const PaymentBaseSchema = z.object({
 
 | Date | Version | Change | Commit |
 |---|---|---|---|
+| 2026-05-17 | v1.0.1 | Aligned API contracts with live payment enum, reports endpoints, and export registry routes. | pending |
 | 2026-05-13 | v1.0.0 | Initial contract freeze | feat/complete-documentation-stack |

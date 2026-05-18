@@ -2,6 +2,10 @@
 
 > "If you change X, run test suite Y." Maps modules → regression tests. Includes coverage requirements.
 
+## Traceability IDs
+
+Use UC/WF IDs from `docs/USE-CASES.md` and `docs/WORKFLOWS.md` for feature traceability. Contract IDs in this matrix are compact route labels, for example `CON-Reports-RevenueSummary` = `POST /api/Reports/revenue/summary`, `CON-Reports-CashFlowSummary` = `POST /api/Reports/cash-flow/summary`, `CON-Reports-ServicesBreakdown` = `POST /api/Reports/services/breakdown`, `CON-Exports-Preview` = `POST /api/Exports/:type/preview`, and `CON-Exports-Download` = `POST /api/Exports/:type/download`.
+
 ## Coverage Requirements by Domain
 
 | Domain | Minimum Coverage | Test Types Required |
@@ -59,9 +63,14 @@
 
 | If you change... | Run these tests... | Why |
 |---|---|---|
-| `api/src/routes/exports.js` | `website/e2e/export-downloads.spec.ts`, backend export builder tests | Download routes and workbook generation. |
-| `api/src/services/exports/builders/*.js` | `website/e2e/export-downloads.spec.ts`, builder unit tests | Excel shape, headers, formulas, numeric cells. |
-| `api/src/routes/reports.js` | `api/src/routes/reports/__tests__/cashFlow.test.js` | Aggregation accuracy. |
+| `api/src/routes/exports.js` | `website/e2e/export-downloads.spec.ts`, `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js` | UC-013/UC-019, WF-005. Locks `CON-Exports-Preview` and `CON-Exports-Download` as current `POST /api/Exports/:type/...` contracts plus workbook generation. |
+| `api/src/services/exports/builders/legacyFlatReportsExport*.js` | `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `website/e2e/export-downloads.spec.ts` | UC-013, WF-005. Locks `revenue-flat` and `deposit-flat` workbook templates, SO-code column mapping, posted service-payment filters, allocation proration SQL, row-limit errors, and deposit top-up filtering. |
+| `api/src/services/exports/builders/reportSalesEmployeesExport.js` | `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx` | UC-019, WF-005. Locks `report-sales-employees` preview/download filters, location scope, employee-type attribution, grouped workbook rows, and `/reports/revenue` export controls. |
+| `api/src/routes/reports/revenue*.js` | `api/src/routes/reports/__tests__/revenueRecognition.test.js`, `api/src/services/reports/__tests__/canonicalRevenue.test.js` | UC-013, WF-013. Locks `CON-Reports-RevenueSummary`, revenue trend, doctor/category/location paid revenue, canonical Excel-matching WHERE/JOIN topology, payment-date bucketing, and allocation capping. |
+| `api/src/routes/reports/cashFlow.js` | `api/src/routes/reports/__tests__/cashFlow.test.js` | UC-013, WF-013. Locks `CON-Reports-CashFlowSummary`, service collections vs deposits/refunds/deposit usage/voided rows, route mounting, timezone-safe date buckets, and scoped location rejection. |
+| `api/src/routes/reports/servicesBreakdown.js` | `api/src/routes/reports/__tests__/servicesBreakdown.test.js` | UC-013, WF-013. Locks `CON-Reports-ServicesBreakdown` so service/category/source revenue comes from posted payment allocations instead of listed service prices or raw order totals. |
+| `website/src/hooks/useReportData.ts` | `website/src/hooks/__tests__/useReportData.test.ts` | UC-013, WF-013. Locks report API calls as POST payloads and strips the all-location sentinel from request bodies. |
+| `website/src/pages/reports/ReportsRevenue.tsx` and other `website/src/pages/reports/*` subpages | `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`, `website/e2e/export-downloads.spec.ts` | UC-013/UC-019, WF-013. Locks visible revenue recognition basis, cash-flow cards, employee export controls, loading/error states, and report subpage routing. |
 | `nginx.conf` or `nginx.docker.conf` | `website/e2e/export-downloads.spec.ts` (large dataset) | Timeout behavior for long-running exports. |
 
 ### Settings & System
@@ -97,10 +106,12 @@
 |---|---|---|
 | **Payments (backend allocation/void/refund)** | No backend unit tests for allocation edge cases, void logic, or refund math | **High** — money correctness relies on manual testing. |
 | **Auth (backend permission resolution)** | No backend tests for `requirePermission` or `resolvePermissions` divergence | **High** — silent 403s or unauthorized access. |
-| **Reports (SQL aggregation accuracy)** | No automated accuracy tests against legacy Odoo reports | **Medium** — financial data may drift. |
+| **Reports (legacy reconciliation)** | Targeted tests now cover current revenue recognition, cash-flow classification, services breakdown, and canonical revenue SQL, but there is still no automated full reconciliation against legacy Odoo/TDental audit exports | **Medium** — financial data can still drift outside the covered route formulas. |
+| **Exports route shell** | Builder tests cover `legacyFlatReportsExport` and `reportSalesEmployeesExport`, but `/api/Exports/:type/preview` and `/api/Exports/:type/download` route-level permission filtering, audit-failure behavior, and row-limit response handling still need direct route tests | **Medium** — route wrapper behavior can drift while builder tests pass. |
 | **Commission calculation** | No E2E or unit tests | **Medium** — unknown auto-calc trigger. |
-| **Monthly plan installments** | No tests for installment payment flows | **Medium** — plan balance may miscalculate. |
-| **Feedback attachment upload** | No E2E for file upload storage/deletion | **Low** — partial UI coverage exists. |
+| **Monthly plan installments** | No tests for `PUT /api/MonthlyPlans/:id/installments/:installmentId/pay`, plan completion, or next-installment advancement | **Medium** — plan status may miscalculate and the current route does not create a payments ledger row. |
+| **Feedback moderation attachments** | Permission declarations are covered indirectly, but no E2E covers admin reply upload, attachment persistence, deletion, or orphan-file cleanup | **Low** — partial UI/permission coverage exists. |
+| **IP Access backend enforcement** | Frontend component/types/validation tests exist, but middleware and `/api/IpAccess/*` route behavior lack focused backend integration tests | **Medium** — lockout and fail-open behavior are operationally sensitive. |
 
 ## Test Commands Quick Reference
 

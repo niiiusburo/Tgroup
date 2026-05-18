@@ -10,6 +10,213 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: Payment Method Contract Alignment
+
+Feature/edit name: Payment Method Contract Alignment
+
+Changed URLs and API routes:
+- `/payment`
+- `/customers/:id` payment/deposit surfaces
+- `GET /api/Payments`
+- `GET /api/Payments/:id`
+- `POST /api/Payments`
+- `PATCH /api/Payments/:id`
+- `POST /api/Payments/:id/proof`
+- No new API routes added.
+
+Affected data flows:
+- Frontend deposit/payment display labels now align with the live payment contract methods: `cash`, `bank_transfer`, `deposit`, and `mixed`.
+- `contracts/dist` is rebuilt from `contracts/payment.ts`, so package consumers no longer see stale card/e-wallet enum values.
+- VietQR remains a frontend entry alias that sends `bank_transfer` to the backend; it is not stored as a separate payment method.
+
+User roles:
+- Admin or payment staff with `payment.view` and `payment.add`.
+- Customer-profile staff using deposit history and payment tabs.
+
+Happy paths:
+- Open `/payment` and verify existing cash, bank-transfer, deposit, and mixed payment rows display readable method labels.
+- Open a customer profile payment/deposit surface and verify deposit history displays `bank_transfer` as a bank-transfer label, not the raw key.
+- Create or edit a payment using cash/bank/deposit/mixed flows and confirm the backend receives only live method codes.
+
+Edge cases:
+- Legacy rows with unknown method strings should fall back to the raw method string instead of crashing.
+- VietQR top-up flows should still map to `bank_transfer`.
+- English and Vietnamese payment labels should both have `bank_transfer` and `deposit` keys.
+
+Regressions:
+- Payment history, deposit history, refunds, void/delete actions, payment proof uploads, and report/export payment-method grouping still work.
+- No card/e-wallet methods should appear as accepted live payment methods in contracts, docs, or payment UI labels.
+
+Setup data and login state:
+- Use an authenticated admin/staff session with payment permissions.
+- Use any customer with deposit/payment rows containing cash, bank transfer, deposit usage, or mixed payments.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `/payment` renders live payment method labels without card/e-wallet options.
+- [ ] PENDING: Verify `/customers/:id` deposit history renders `bank_transfer` and `deposit` labels in English and Vietnamese locales.
+- [ ] PENDING: Verify VietQR top-up still posts `bank_transfer` to `POST /api/Payments`.
+- [ ] PENDING: Verify `contracts/dist/payment.d.ts` and `contracts/payment.ts` expose the same live method enum.
+
+---
+
+# TestSprite Plan: Documentation Traceability And Governance Sync
+
+Feature/edit name: Documentation Traceability And Governance Sync
+
+Changed URLs and API routes:
+- No user-facing URLs changed.
+- No runtime API behavior changed.
+- Documentation coverage updated for `/api/Partners/resolve`, `/api/Feedback/unread-count`, `/api/IpAccess/*`, `/api/DotKhams`, `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download`, `/api/Reports/*`, `GET /api/SaleOrders/lines`, `PATCH /api/SaleOrders/:id`, `DELETE /api/SaleOrderLines/:id`, `PATCH /api/Payments/:id`, and `POST /api/Payments/:id/proof`.
+
+Affected data flows:
+- Feature work should now be traceable across use case, workflow, contract, data model, product-map domain, permission registry, and test matrix entries.
+- Deployment docs use `api/migrations/` as the canonical migration path and mark `api/src/db/migrations/` as supplemental stragglers needing explicit review.
+- `scripts/verify-docs.sh` now enforces docs, changelog, and TestSprite ledger updates for contract/schema/API/frontend/backend-data-flow changes.
+- Local `.husky/pre-commit`, root `npm run verify:docs` / `npm run verify:governance`, and PR checks now run the governance gate so future changes cannot rely on optional manual memory.
+- Authority docs no longer embed generated memory blocks, and `scripts/sync-claude-mem.sh` strips accidental generated-memory blocks from `AGENTS.md` while keeping the real memory mirror in `.claude/memory.md`.
+
+User roles:
+- Architecture and product agents checking feature blast radius before implementation.
+- Frontend, backend, data, QA, and release agents using the authority stack.
+- TestSprite verification agent reading this ledger after a feature/edit.
+
+Happy paths:
+- Pick a report/export feature and confirm the route appears in `docs/CONTRACTS.md`, `product-map/contracts/api-index.md`, `docs/USE-CASES.md`, `docs/WORKFLOWS.md`, and a test matrix entry.
+- Run `bash scripts/verify-docs.sh` with the current diff and confirm it passes when docs, changelog, and `testbright.md` are present.
+- Check `docs/RUNBOOK.md` and `docs/runbooks/DEPLOYMENT.md`; both should point canonical VPS migration application to `/opt/tgroup/api/migrations/*.sql`.
+
+Edge cases:
+- Docs-only governance edits still require `docs/CHANGELOG.md`.
+- Frontend, feature, contract, product-map, and backend data-flow edits require `testbright.md`.
+- Supplemental migrations under `api/src/db/migrations/` must not be silently assumed to run with the canonical migration loop.
+- Authority docs must not contain `<claude-mem-context>` blocks.
+
+Regressions:
+- Existing Revenue Report Excel Reconciliation TestSprite plan remains intact.
+- Existing production database backup, Hosoonline, Face ID, export, and search TestSprite plans remain intact.
+- Runtime behavior, API responses, and website routes should not change from this docs/governance sync alone.
+
+Setup data and login state:
+- No login state required for docs/script verification.
+- Use repository root `/Users/thuanle/Documents/TamTMV/Tgrouptest`.
+
+TestSprite execution items:
+- [x] PASS 2026-05-17: `bash scripts/verify-docs.sh` passes through `npm run verify:governance` with this synchronized docs/changelog/testbright diff.
+- [x] PASS 2026-05-17: `.husky/pre-commit` runs `bash scripts/verify-docs.sh` before website version checks.
+- [x] PASS 2026-05-17: `.github/workflows/pr-checks.yml` includes a `doc-governance` job that runs documentation governance against the PR base SHA.
+- [x] PASS 2026-05-17: `npm run verify:governance` runs the docs gate plus whitespace diff checks.
+- [x] PASS 2026-05-17: Generated-memory marker grep returns no matches outside `docs/runbooks/VERIFICATION.md`.
+- [x] PASS 2026-05-17: `bash scripts/sync-claude-mem.sh` does not leave generated-memory markers in `AGENTS.md`.
+- [ ] PENDING: Verify `docs/RUNBOOK.md` and `docs/runbooks/DEPLOYMENT.md` both use `/opt/tgroup/api/migrations/*.sql` as the canonical deploy loop.
+- [ ] PENDING: Verify `docs/DATA-MODEL.md` and `docs/MIGRATIONS.md` document 53 canonical root migrations and 2 supplemental migrations.
+- [ ] PENDING: Verify payment methods in docs/contracts are `cash`, `bank_transfer`, `deposit`, and `mixed`, with no unsupported card/e-wallet methods described as live.
+- [ ] PENDING: Verify key live routes above are represented in `docs/CONTRACTS.md` and `product-map/contracts/api-index.md`.
+
+---
+
+# TestSprite Plan: Prompt-Level Authority Gate
+
+Feature/edit name: Prompt-Level Authority Gate
+
+Changed URLs and API routes:
+- No user-facing URLs changed.
+- No runtime API routes changed.
+
+Affected data flows:
+- Each new agent prompt in Claude-compatible local tooling now runs `scripts/prompt-authority-check.sh` through `.claude/settings.json` `UserPromptSubmit`.
+- The prompt gate verifies core authority files exist, checks that generated memory markers did not leak into authority docs, and prints prompt-matched docs/domains for agents to read before edits.
+- Root `npm run verify:prompt` provides the manual fallback for agents/tools that do not execute `.claude/settings.json` prompt hooks.
+- Root `npm run verify:governance` now includes the prompt authority gate before doc-update and whitespace checks.
+
+User roles:
+- Architecture, product, frontend, backend, data, QA, and release agents starting or continuing project work.
+- TestSprite verification agent checking that prompt-start governance is visible before implementation.
+
+Happy paths:
+- Submit a prompt mentioning payments/revenue and verify the prompt gate points to money-flow, invariants, payment domain, and payment-allocation docs.
+- Submit a prompt mentioning frontend UI and verify the prompt gate points to `website/agents.md`, `website/design.md`, behavior/use-case/workflow/test docs, and `testbright.md`.
+- Run `npm run verify:prompt` from the repository root and verify it passes without stdin.
+
+Edge cases:
+- If authority docs are missing, the prompt gate must fail before work starts.
+- If generated memory markers leak into authority docs, the prompt gate must fail and print the matching file/line.
+- If the active agent does not support `UserPromptSubmit`, the fallback is manual `npm run verify:prompt` at prompt start.
+
+Regressions:
+- Existing commit/PR documentation governance must still run after the prompt gate.
+- The hook output must stay compact enough that prompt checking does not become token-heavy.
+- Runtime app behavior should not change from this governance hook.
+
+Setup data and login state:
+- No app login required.
+- Use repository root `/Users/thuanle/Documents/TamTMV/Tgrouptest`.
+
+TestSprite execution items:
+- [x] PASS 2026-05-17: `npm run verify:prompt` passes with no stdin and prints the compact authority reminder.
+- [x] PASS 2026-05-17: Payment/revenue prompt text surfaces money-flow, invariants, payment domain, payment allocation, reports, and test matrix docs.
+- [x] PASS 2026-05-17: Frontend prompt text surfaces website frontend/design docs, behavior, use-case, workflow, test matrix, and `testbright.md`.
+- [x] PASS 2026-05-17: `.claude/settings.json` contains a `UserPromptSubmit` hook that runs `bash scripts/prompt-authority-check.sh`.
+- [x] PASS 2026-05-17: `package.json` `verify:governance` runs the prompt authority gate before docs and whitespace checks.
+
+---
+
+# TestSprite Plan: Revenue Report Excel Reconciliation
+
+Feature/edit name: Revenue Report Excel Reconciliation
+
+Changed URLs and API routes:
+- `/reports/revenue`
+- `POST /api/Reports/revenue/summary`
+- `POST /api/Reports/revenue/by-location`
+- `POST /api/Exports/revenue-flat/preview`
+- `POST /api/Exports/revenue-flat/download`
+- `POST /api/Exports/report-sales-employees/preview`
+- `POST /api/Exports/report-sales-employees/download`
+
+Affected data flows:
+- Revenue page `Tổng đã thu` uses posted payment-method totals from `/api/Reports/revenue/summary`, matching the revenue-flat Excel collected total.
+- `/api/Reports/revenue/summary` keeps paid-only sale-order states instead of dropping payments whose sale order was created outside the selected report date.
+- Employee revenue Excel applies the same posted allocation, deposit/refund/usage exclusion rules as revenue-flat.
+- Branch revenue breakdown now honors the selected branch filter; all-location remains all branches.
+- Cash-flow cards still show raw cash movement and should not be used as the Excel paid-revenue comparison.
+
+User roles:
+- Admin or manager with `reports.view`.
+- Staff with `payments.export` for `revenue-flat` export.
+- Staff with `reports.export` for employee revenue export.
+- Scoped branch manager with assigned-location reporting access.
+
+Happy paths:
+- On `/reports/revenue`, select `2026-05-16` to `2026-05-16` and all locations; `Tổng đã thu` should equal `revenue-flat` preview `Tổng tiền` and downloaded workbook column `Số tiền`.
+- Select a specific branch; revenue summary, revenue by branch, and revenue-flat preview should all use the same branch scope.
+- Preview and download `Báo cáo doanh thu theo nhân viên`; deposits, refunds, deposit usage, and voided payments must not appear in employee revenue totals.
+
+Edge cases:
+- Payments collected in the selected date range for sale orders created before the selected date must still count in `Tổng đã thu`.
+- A branch/date range with paid revenue but no new sale orders should still show collected revenue.
+- `companyId: "all"` from any report caller should behave like no branch filter in frontend report payloads.
+- Deposit top-ups and internal deposit usage remain visible only in cash-flow or deposit reports, not recognized paid revenue.
+
+Regressions:
+- Existing revenue trend, payment method donut, doctor/category breakdowns, and export preview modal still render.
+- `Báo cáo doanh thu` workbook columns and filename stay unchanged.
+- Existing cash-flow summary still separates money in, money out, net cash flow, and internal deposit usage.
+
+Setup data and login state:
+- Use an authenticated NK2 or local admin session with report/export permissions.
+- For live reproduction, NK2 evidence used all-location filter `{ "dateFrom": "2026-05-16", "dateTo": "2026-05-16" }`.
+- Download workbook and sum column `Số tiền`; do not compare dashboard `Tổng đã thu` to workbook `Tổng tiền phiếu`.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `/reports/revenue` `Tổng đã thu` equals `POST /api/Exports/revenue-flat/preview` summary `Tổng tiền` for the same date/branch filters.
+- [ ] PENDING: Verify downloaded `Báo cáo doanh thu` workbook column `Số tiền` equals the page `Tổng đã thu`.
+- [ ] PENDING: Verify paid revenue from old sale orders inside the payment date range is not dropped from `Tổng đã thu`.
+- [ ] PENDING: Verify selecting a branch scopes summary, branch breakdown, and revenue-flat preview consistently.
+- [ ] PENDING: Verify employee revenue export excludes deposit, refund, deposit usage, and voided payment rows.
+- [ ] PENDING: Verify cash-flow cards still show raw cash movement separately and are not mislabeled as Excel paid revenue.
+
+---
+
 # TestSprite Plan: TGClinic Orange Butterfly Favicon
 
 Feature/edit name: TGClinic Orange Butterfly Favicon
