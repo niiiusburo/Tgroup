@@ -44,6 +44,7 @@ export function HealthCheckupGallery({
   const [saving, setSaving] = useState(false);
   const [creatingPatient, setCreatingPatient] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [formNotice, setFormNotice] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -109,9 +110,11 @@ export function HealthCheckupGallery({
   const handleCreatePatient = async () => {
     if (!customerCode) return;
     setFormError(null);
+    setFormNotice(null);
     setCreatingPatient(true);
     try {
       await createExternalPatient(customerCode);
+      setFormNotice(t('createExternalPatientSuccess'));
       onUploaded?.();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : t('createExternalPatientFailed'));
@@ -178,9 +181,14 @@ export function HealthCheckupGallery({
             {formError}
           </div>
         )}
+        {formNotice && (
+          <div className="px-4 py-2 text-sm text-emerald-700 bg-emerald-50 border-b border-emerald-100">
+            {formNotice}
+          </div>
+        )}
 
         {checkups.length === 0 ? (
-          <HealthCheckupEmptyState source={data?.source} message={data?.message} />
+          <HealthCheckupEmptyState source={data?.source} message={data?.message} patientExists={data?.patientExists} />
         ) : (
           <div className="divide-y divide-gray-100">
             {checkups.map((checkup, cIdx) => (

@@ -1,30 +1,36 @@
+import { useTranslation } from 'react-i18next';
+
 interface HealthCheckupEmptyStateProps {
   readonly source?: string;
   readonly message?: string;
+  readonly patientExists?: boolean;
 }
 
-function getEmptyStateMessage(source?: string, message?: string): string {
-  if (message) return message;
-  if (source === 'hosoonline-auth-failed') {
-    return 'Hosoonline authentication failed. Check the configured Hosoonline API key before images can load.';
-  }
-  if (source === 'hosoonline-not-configured') {
-    return 'Hosoonline is not configured for this environment.';
-  }
-  if (source === 'hosoonline-unavailable') {
-    return 'Hosoonline is unavailable right now. Images could not be checked.';
-  }
-  return 'No health checkup images found on hosoonline.com.';
+type Variant = 'warning' | 'info' | 'muted';
+
+function pickKey(source: string | undefined, patientExists: boolean | undefined): { key: string; variant: Variant } {
+  if (source === 'hosoonline-auth-failed') return { key: 'checkupEmptyAuthFailed', variant: 'warning' };
+  if (source === 'hosoonline-not-configured') return { key: 'checkupEmptyNotConfigured', variant: 'warning' };
+  if (source === 'hosoonline-unavailable') return { key: 'checkupEmptyUnavailable', variant: 'warning' };
+  if (patientExists === false) return { key: 'checkupEmptyPatientMissing', variant: 'info' };
+  if (patientExists === true) return { key: 'checkupEmptyNoImages', variant: 'info' };
+  return { key: 'checkupEmptyDefault', variant: 'muted' };
 }
 
-export function HealthCheckupEmptyState({ source, message }: HealthCheckupEmptyStateProps) {
-  const isWarning = source === 'hosoonline-auth-failed' || source === 'hosoonline-unavailable' || source === 'hosoonline-not-configured';
+const variantClass: Record<Variant, string> = {
+  warning: 'text-sm text-amber-700',
+  info: 'text-sm text-gray-600',
+  muted: 'text-sm text-gray-400',
+};
+
+export function HealthCheckupEmptyState({ source, message, patientExists }: HealthCheckupEmptyStateProps) {
+  const { t } = useTranslation('customers');
+  const { key, variant } = pickKey(source, patientExists);
+  const text = message || t(key);
 
   return (
     <div className="p-6">
-      <p className={isWarning ? 'text-sm text-amber-700' : 'text-sm text-gray-400'}>
-        {getEmptyStateMessage(source, message)}
-      </p>
+      <p className={variantClass[variant]}>{text}</p>
     </div>
   );
 }

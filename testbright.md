@@ -1143,3 +1143,67 @@ TestSprite execution items:
 - Verify: 5-frame burst — best of 5 sent to /api/face/recognize (check captured-blob size > 30 KB)
 - Verify: profile-mode 3-pose registration on customer profile still works
 - Regression: /face URL returns 404 (lab removed)
+
+## External-checkup empty state + Create success notice (2026-05-18, v0.32.31)
+- URL: `/customers/<UUID>` for any customer with no Hosoonline patient yet (e.g. `T056483`)
+- API: `GET /api/ExternalCheckups/:code`, `POST /api/ExternalCheckups/:code/patient`
+- Verify (patient missing): empty gallery shows `checkupEmptyPatientMissing` VN text "Khách hàng chưa có hồ sơ trên Hosoonline. Bấm 'Tạo bệnh nhân HSO' để bắt đầu tải ảnh lên." and the "Tạo bệnh nhân HSO" button is visible (requires `external_checkups.upload` perm)
+- Verify (patient exists, no images): empty gallery shows `checkupEmptyNoImages` VN text "Chưa có ảnh khám nào trên Hosoonline. Bấm 'Thêm lịch khám' để tải ảnh lên."
+- Verify (auth failed): shows amber `checkupEmptyAuthFailed` warning instead of generic gray text
+- Verify (create success): clicking "Tạo bệnh nhân HSO" shows emerald success notice "Đã tạo hồ sơ Hosoonline. Bạn có thể tải ảnh khám lên ngay." and the gallery refreshes so the upload button becomes available
+- Verify (i18n): switch language to EN; all 6 empty-state variants render English strings (no hardcoded fallbacks)
+- Regression: customer with existing checkups + images still renders the gallery normally (e.g. customer code `T6281` returns 2 checkups with images that load through `/api/ExternalCheckups/images/...`)
+
+---
+
+# TestSprite Plan: SMS/Zalo Appointment Messaging Research
+
+Feature/edit name: SMS/Zalo Appointment Messaging Research
+
+Changed URLs and API routes:
+- Research only; no runtime URL or API route changed.
+- Future implementation plan covers `/notifications`, `/calendar`, `/customers/:id`, Overview today queue.
+- Future API plan covers `GET /api/Notifications/templates`, `POST /api/Notifications/templates`, `PUT /api/Notifications/templates/:id`, `POST /api/Notifications/preview`, `POST /api/Notifications/send`, `GET /api/Notifications/messages`, `GET /api/Notifications/messages/:id`, `POST /api/Notifications/messages/:id/retry`, `GET /api/Notifications/late-appointments`, `POST /api/Notifications/appointments/:id/late-reminder`, and customer contact-preference endpoints.
+
+Affected data flows:
+- Appointment lateness detection from appointment schedule fields, appointment state, and `datetimearrived`.
+- Customer contact routing through `partners.id`, `phone`, `zaloid`, and `receiverzalonumber`; phone must not be treated as unique.
+- Future append-only messaging outbox, attempt log, template, provider-account, and contact-preference tables.
+- Provider adapter flow for dry-run, Vietnam SMS Brandname, and later Zalo ZBS/ZNS.
+
+User roles:
+- Reception/front desk with appointment view and future `notifications.send`.
+- Manager/admin with future `notifications.view`, `notifications.edit`, `notifications.send`, and `notifications.admin`.
+- Staff without notification permissions must not see send/retry/admin controls.
+
+Happy paths:
+- Open `/notifications` and verify templates, outbox statuses, provider status, and message detail history render after implementation.
+- Open `/calendar` on a day with a late eligible appointment and verify the manual late-reminder action is visible.
+- Send one late reminder and verify the message row records queued/sent status, rendered body snapshot, provider response, actor, channel, and appointment/customer links.
+- Open customer profile and verify communication preferences and recent message history are visible without assuming phone uniqueness.
+- Verify dry-run provider records the full send flow locally without contacting a real provider.
+
+Edge cases:
+- Missing phone, invalid phone, opted-out customer, duplicate phone across customers, missing appointment time, timezone boundary around midnight, already arrived, cancelled, done, in-progress, provider outage, provider timeout, rejected template, quiet-hours block, duplicate click, and worker race.
+- SMS copy must avoid treatment names, health details, balances, URLs, and phone numbers unless provider/legal approval explicitly allows them.
+- Zalo route must use approved template IDs and handle customers who do not have Zalo eligibility.
+
+Regressions:
+- `/notifications` existing route guard must continue to require notification permission.
+- Calendar appointment load, check-in, cancel, and quick-add flows must not change when the messaging controls are hidden.
+- Customer profile contact edits must not change the durable partner identity invariant.
+- Existing appointment reminder fields must not be silently repurposed as the only audit trail.
+
+Setup data and login state:
+- Use authenticated admin/manager and receptionist/staff sessions.
+- Seed at least one scheduled/confirmed appointment 15+ minutes late today, one arrived appointment, one cancelled appointment, one customer with no phone, one duplicate-phone customer pair, one opted-out customer, and one dry-run provider config.
+- Collect screenshot evidence for `/notifications`, `/calendar` late appointment state, and customer communication history when browser-visible verification runs.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `/notifications` messaging dashboard renders templates, outbox statuses, failed/skipped states, and retry details.
+- [ ] PENDING: Verify `/calendar` exposes manual late-reminder action only for eligible late appointments.
+- [ ] PENDING: Verify a manual late reminder creates one outbox row and one provider attempt with an idempotency key.
+- [ ] PENDING: Verify duplicate send attempts for the same appointment/template/customer do not create duplicate successful messages.
+- [ ] PENDING: Verify missing/invalid/opted-out contact cases create skipped or blocked states, not crashes.
+- [ ] PENDING: Verify customer profile communication preferences and message history key by `partners.id`, not phone number.
+- [ ] PENDING: Verify staff without `notifications.send` cannot send or retry reminders.

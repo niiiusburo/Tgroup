@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.32.33",
+    "date": "2026-05-18",
+    "highlights": "Online-checkup gallery now guides staff when a customer has no Hosoonline profile yet, and shows a green confirmation when Create succeeds.",
+    "sections": [
+      {
+        "title": "Customers / Health Checkups",
+        "items": [
+          "Empty state distinguishes 'no Hosoonline patient yet' vs 'patient exists but no images', with VN and EN copy.",
+          "Create-patient action shows a green success notice instead of silently refreshing.",
+          "Hosoonline auth/unavailable/not-configured warnings are now i18n'd instead of hardcoded English."
+        ]
+      },
+      {
+        "title": "Feedback (closed)",
+        "items": [
+          "#7bd930b0 — nk/nk2 online-profile parity: backend confirmed byte-identical; was a stale-bundle issue, no code change required.",
+          "#84adb3d5 — online profile photos: improved empty-state + create feedback."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.32",
     "date": "2026-05-18",
     "highlights": "Responsive population audit fixes keep calendar toolbar controls and employee edit actions visible on laptop and tablet-sized layouts.",

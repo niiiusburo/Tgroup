@@ -41,6 +41,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `website/src/pages/Calendar.tsx` | `website/e2e/team-alpha-appointments.spec.ts`, `website/src/pages/Calendar.click.test.tsx` | Core scheduling surface. |
 | `website/src/components/calendar/*.tsx` | Component unit tests + `website/e2e/team-alpha-appointments.spec.ts` | Drag-to-reschedule, filter chips, status badges. |
 | `website/src/components/calendar/CalendarToolbar.tsx` and `CalendarDateNavigator.tsx` | `website/src/components/calendar/__tests__/CalendarToolbar.test.tsx`, `/calendar` 1024x768, 1280x720, and 1366x768 screenshot checks | Tablet and laptop toolbar wrapping must keep view tabs, date navigation, search, export, filter, and quick-add visible while appointments populate. |
+| Appointment late-reminder messaging (`api/src/routes/appointments*`, future `api/src/routes/notifications*`, `api/src/workers/messagingWorker.js`, `/calendar`, `/notifications`) | Late-candidate query tests, notification permission tests, provider dry-run tests, idempotency tests, `/calendar` and `/notifications` TestSprite screenshot checks | UC-005/WF-002 planned extension. Late reminders must not duplicate sends, leak medical detail, ignore opt-out state, or treat `partners.phone` as a unique identity. |
 | `contracts/appointment.ts` | All appointment-related unit and E2E tests | Schema change cascades to both runtimes. |
 
 ### Customers & Partners
@@ -100,6 +101,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `website/src/components/shared/FaceCaptureModal.tsx` / `website/src/components/shared/useFaceCaptureController.ts` / `website/src/components/shared/faceCaptureEngine.ts` | `website/src/components/shared/FaceCaptureModal.test.tsx`, `website/src/components/shared/faceCaptureEngine.test.ts`, `website/src/components/customer/CustomerCameraWidget.test.tsx`, `website/src/components/shared/GlobalFaceIdButton.test.tsx`, `website/src/hooks/__tests__/useFaceRecognition.test.ts` | Camera lifetime, no-face messaging, auto-capture gating, and caller error propagation. |
 | `api/src/routes/faceRecognition.js` | `api/tests/faceRecognition.test.js` | Face register/re-register/recognize API contract in local and CompreFace modes. |
 | `api/src/services/comprefaceClient.js` / `api/src/services/comprefaceFaceProvider.js` | `api/src/services/__tests__/comprefaceClient.test.js`, `api/src/services/__tests__/comprefaceFaceProvider.test.js` | CompreFace multipart file upload, subject/example calls, health check, no-face normalization, and partner subject mapping. |
+| Future SMS/Zalo provider adapters and messaging provider env (`api/src/services/messaging*`, `api/src/providers/sms*`, `api/src/providers/zalo*`) | Provider contract tests with dry-run, failed response, invalid phone, template rejection, delivery status, and retry/backoff cases | External messaging providers must remain optional, auditable, and safe to disable without blocking appointment/calendar workflows. |
 | `face-service/` Python code | `api/tests/faceRecognition.integration.test.js`, manual face-service health check | Local-provider model inference and embedding generation. |
 
 ### Infrastructure
@@ -159,4 +161,12 @@ docker compose config
 # Validate: 15s force-capture safety net fires on poor light
 # Validate: profile-mode 3-pose registration unchanged
 # Tests: npm --prefix website run test -- shared/FaceCaptureModal shared/faceCaptureEngine shared/GlobalFaceIdButton customer/CustomerCameraWidget hooks/useFaceRecognition
+
+# External-checkup gallery (Hosoonline) — HealthCheckupGallery + HealthCheckupEmptyState
+# Validate: customer with patientExists:false → empty state shows checkupEmptyPatientMissing VN/EN guidance and Tạo bệnh nhân HSO CTA (requires external_checkups.upload)
+# Validate: customer with patientExists:true and no checkups → checkupEmptyNoImages, points at Thêm lịch khám
+# Validate: source=hosoonline-auth-failed|unavailable|not-configured → amber warning string from i18n, not hardcoded English
+# Validate: clicking Tạo bệnh nhân HSO → emerald createExternalPatientSuccess notice, then upload button appears after refresh
+# Regression: customer with checkups + images still renders gallery normally (e.g. /api/ExternalCheckups/T6281 returns 2 checkups; image proxy /api/ExternalCheckups/images/<name> returns 200 + JPEG)
+# Tests: npm --prefix website run test -- customer/HealthCheckupGallery customer/HealthCheckupEmptyState customer/AuthenticatedCheckupImage
 ```
