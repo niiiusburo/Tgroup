@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.32.34",
+    "date": "2026-05-19",
+    "highlights": "Feedback proof images now stay linked to their uploaded files, including file-only replies and admin resolution screenshots.",
+    "sections": [
+      {
+        "title": "Feedback Attachments",
+        "items": [
+          "New feedback, staff replies, and admin replies now wrap message and attachment writes in real DB transactions.",
+          "File-only feedback replies save safely with empty message content instead of crashing on content trimming.",
+          "Deleting a feedback thread removes attachment files only after the database delete commits, so rollback cannot leave broken image URLs.",
+          "Restored and verified the missing revenue-resolution proof image for feedback #06892fc6 on NK production."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.33",
     "date": "2026-05-18",
     "highlights": "Online-checkup gallery now guides staff when a customer has no Hosoonline profile yet, and shows a green confirmation when Create succeeds.",

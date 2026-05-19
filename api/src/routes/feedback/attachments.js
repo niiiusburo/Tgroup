@@ -20,6 +20,7 @@ const ALLOWED_MIME_TYPES = new Set([
 ]);
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+const STORED_ATTACHMENT_NAME = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(?:gif|jpe?g|png|webp)$/i;
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
@@ -145,6 +146,14 @@ function removeUploadedFiles(files) {
   }
 }
 
+function getAttachmentFilePath(storedName) {
+  if (!STORED_ATTACHMENT_NAME.test(storedName || '')) {
+    throw new Error('Invalid attachment filename');
+  }
+
+  return `${UPLOAD_DIR}${path.sep}${storedName}`;
+}
+
 module.exports = {
   UPLOAD_DIR,
   upload,
@@ -152,5 +161,6 @@ module.exports = {
   enrichMessageWithAttachments,
   enrichMessagesWithAttachments,
   mapAttachmentRows,
+  getAttachmentFilePath,
   removeUploadedFiles,
 };

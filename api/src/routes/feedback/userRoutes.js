@@ -71,10 +71,12 @@ router.get('/unread-count', requireAuth, async (req, res) => {
  */
 router.post('/', requireAuth, upload.array('files', 5), async (req, res) => {
   const client = await pool.connect();
+  let transactionStarted = false;
   try {
     const { content } = req.body;
+    const bodyContent = typeof content === 'string' ? content.trim() : '';
     const hasFiles = req.files && req.files.length > 0;
-    if ((!content || !content.trim()) && !hasFiles) {
+    if (!bodyContent && !hasFiles) {
       return res.status(400).json({ error: 'Content or file is required' });
     }
 
@@ -86,6 +88,7 @@ router.post('/', requireAuth, upload.array('files', 5), async (req, res) => {
     const now = getVietnamNow();
 
     await client.query('BEGIN');
+    transactionStarted = true;
 
     const threadResult = await client.query(
       `INSERT INTO feedback_threads (employee_id, page_url, page_path, screen_size, user_agent, status, created_at, updated_at)
@@ -100,16 +103,19 @@ router.post('/', requireAuth, upload.array('files', 5), async (req, res) => {
       `INSERT INTO feedback_messages (thread_id, author_id, content, created_at)
        VALUES ($1, $2, $3, $4)
        RETURNING id`,
-      [thread.id, employeeId, content.trim(), now]
+      [thread.id, employeeId, bodyContent, now]
     );
 
     await insertAttachments(client, msgResult.rows[0].id, req.files);
 
     await client.query('COMMIT');
+    transactionStarted = false;
 
     return res.status(201).json(thread);
   } catch (err) {
-    await client.query('ROLLBACK');
+    if (transactionStarted) {
+      await client.query('ROLLBACK');
+    }
     console.error('Error creating feedback:', err);
     // Clean up uploaded files on error
     removeUploadedFiles(req.files);
@@ -207,15 +213,20 @@ router.get('/my/:threadId', requireAuth, async (req, res) => {
  */
 router.post('/my/:threadId/reply', requireAuth, upload.array('files', 5), async (req, res) => {
   const client = await pool.connect();
+  let transactionStarted = false;
   try {
     const employeeId = req.user.employeeId;
     const { threadId } = req.params;
     const { content } = req.body;
+    const bodyContent = typeof content === 'string' ? content.trim() : '';
     const hasFiles = req.files && req.files.length > 0;
 
-    if ((!content || !content.trim()) && !hasFiles) {
+    if (!bodyContent && !hasFiles) {
       return res.status(400).json({ error: 'Content or file is required' });
     }
+
+    await client.query('BEGIN');
+    transactionStarted = true;
 
     const threadRows = await client.query(
       'SELECT id FROM feedback_threads WHERE id = $1 AND employee_id = $2 FOR UPDATE',
@@ -223,6 +234,9 @@ router.post('/my/:threadId/reply', requireAuth, upload.array('files', 5), async 
     );
 
     if (!threadRows.rows || threadRows.rows.length === 0) {
+      await client.query('ROLLBACK');
+      transactionStarted = false;
+      removeUploadedFiles(req.files);
       return res.status(404).json({ error: 'Thread not found' });
     }
 
@@ -237,7 +251,7 @@ router.post('/my/:threadId/reply', requireAuth, upload.array('files', 5), async 
       `INSERT INTO feedback_messages (thread_id, author_id, content, created_at)
        VALUES ($1, $2, $3, $4)
        RETURNING id, thread_id AS "threadId", author_id AS "authorId", content, created_at AS "createdAt"`,
-      [threadId, employeeId, content.trim(), now]
+      [threadId, employeeId, bodyContent, now]
     );
 
     await insertAttachments(client, msgResult.rows[0].id, req.files);
@@ -245,9 +259,12 @@ router.post('/my/:threadId/reply', requireAuth, upload.array('files', 5), async 
     const enrichedMsg = await enrichMessageWithAttachments(client, msgResult.rows[0]);
 
     await client.query('COMMIT');
+    transactionStarted = false;
     return res.status(201).json(enrichedMsg);
   } catch (err) {
-    await client.query('ROLLBACK');
+    if (transactionStarted) {
+      await client.query('ROLLBACK');
+    }
     console.error('Error replying to feedback:', err);
     removeUploadedFiles(req.files);
     return res.status(500).json({ error: 'Internal server error' });

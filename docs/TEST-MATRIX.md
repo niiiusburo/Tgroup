@@ -91,6 +91,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `website/src/contexts/TimezoneContext.tsx` | `website/src/__tests__/timezone.context.test.tsx`, `website/src/__tests__/timezone.core.test.ts` | Timezone conversion affects all date displays. |
 | `website/src/hooks/useVersionCheck.ts` | `website/src/__tests__/useVersionCheck.test.ts` | Version polling and update prompt. |
 | `api/src/routes/telemetry.js` | `api/tests/telemetry.test.js`, `api/tests/telemetryAuth.test.js` | Public vs auth-required telemetry routes. |
+| `api/src/routes/feedback/*.js` or `api/src/routes/feedback/attachments.js` | `api/tests/feedbackAttachments.test.js`, live `/feedback` screenshot check after any production restore | Feedback proof images cross DB rows and `/uploads/feedback` files; failures can leave broken resolution evidence. |
 | `api/src/middleware/ipAccess.js` | `website/e2e/login-and-settings.spec.ts` | IP whitelist enforcement. |
 
 ### Integrations

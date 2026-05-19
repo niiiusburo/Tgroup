@@ -10,6 +10,7 @@
 |---|---|---|
 | v1.0.0 | 2026-05-13 | Initial contract freeze covering all active API routes, shared types, and integration boundaries. |
 | v1.0.1 | 2026-05-17 | Contract documentation aligned to live payment method enum, report API, and operational export registry. |
+| v1.0.2 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
 
 ---
 
@@ -425,7 +426,33 @@ Supported registry types:
 
 ---
 
-### 1.10 Telemetry (Public)
+### 1.10 Feedback
+
+#### POST /api/Feedback
+**Auth:** Any authenticated employee.
+**Body:** `multipart/form-data` with `content?: string`, `pagePath?: string`, `screenSize?: string`, and repeated `files` image fields.
+**Response 201:** Created feedback thread row.
+
+#### POST /api/Feedback/my/:threadId/reply
+**Auth:** Thread owner.
+**Body:** `multipart/form-data` with `content?: string` and repeated `files` image fields.
+**Response 201:** Created message with `attachments[]`.
+
+#### POST /api/Feedback/all/:threadId/reply
+**Auth:** Admin.
+**Body:** `multipart/form-data` with `content?: string` and repeated `files` image fields.
+**Response 201:** Created message with `attachments[]`.
+
+Feedback attachment behavior:
+- A request is valid when it has either non-empty `content` or at least one image file. File-only messages store `content = ''`.
+- Message rows and `feedback_attachments` rows are committed in the same explicit database transaction.
+- If the target thread is missing or a DB/attachment insert fails after upload, uploaded physical files are removed and no attachment row should remain committed.
+- `DELETE /api/Feedback/all/:threadId` deletes DB rows inside one transaction, then removes physical files only after the DB commit succeeds.
+- Stored attachment filenames must match the generated UUID image filename allowlist before any physical file deletion.
+
+---
+
+### 1.11 Telemetry (Public)
 
 #### POST /api/telemetry/errors
 **Auth:** None (public ingestion)

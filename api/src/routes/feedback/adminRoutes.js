@@ -1,18 +1,17 @@
 'use strict';
 
 const express = require('express');
-const path = require('path');
 const fs = require('fs');
 const { query, pool } = require('../../db');
 const { requireAuth } = require('../../middleware/auth');
 const { requireAdmin } = require('./admin');
 const { getVietnamNow } = require('../../lib/dateUtils');
 const {
-  UPLOAD_DIR,
   upload,
   insertAttachments,
   enrichMessageWithAttachments,
   enrichMessagesWithAttachments,
+  getAttachmentFilePath,
   removeUploadedFiles,
 } = require('./attachments');
 
@@ -184,15 +183,20 @@ router.get('/all/:threadId', requireAuth, requireAdmin, async (req, res) => {
  */
 router.post('/all/:threadId/reply', requireAuth, requireAdmin, upload.array('files', 5), async (req, res) => {
   const client = await pool.connect();
+  let transactionStarted = false;
   try {
     const adminId = req.user.employeeId;
     const { threadId } = req.params;
     const { content } = req.body;
+    const bodyContent = typeof content === 'string' ? content.trim() : '';
     const hasFiles = req.files && req.files.length > 0;
 
-    if ((!content || !content.trim()) && !hasFiles) {
+    if (!bodyContent && !hasFiles) {
       return res.status(400).json({ error: 'Content or file is required' });
     }
+
+    await client.query('BEGIN');
+    transactionStarted = true;
 
     const threadRows = await client.query(
       'SELECT id FROM feedback_threads WHERE id = $1 FOR UPDATE',
@@ -200,6 +204,9 @@ router.post('/all/:threadId/reply', requireAuth, requireAdmin, upload.array('fil
     );
 
     if (!threadRows.rows || threadRows.rows.length === 0) {
+      await client.query('ROLLBACK');
+      transactionStarted = false;
+      removeUploadedFiles(req.files);
       return res.status(404).json({ error: 'Thread not found' });
     }
 
@@ -214,7 +221,7 @@ router.post('/all/:threadId/reply', requireAuth, requireAdmin, upload.array('fil
       `INSERT INTO feedback_messages (thread_id, author_id, content, created_at)
        VALUES ($1, $2, $3, $4)
        RETURNING id, thread_id AS "threadId", author_id AS "authorId", content, created_at AS "createdAt"`,
-      [threadId, adminId, content.trim(), now]
+      [threadId, adminId, bodyContent, now]
     );
 
     await insertAttachments(client, msgResult.rows[0].id, req.files);
@@ -222,9 +229,12 @@ router.post('/all/:threadId/reply', requireAuth, requireAdmin, upload.array('fil
     const enrichedMsg = await enrichMessageWithAttachments(client, msgResult.rows[0]);
 
     await client.query('COMMIT');
+    transactionStarted = false;
     return res.status(201).json(enrichedMsg);
   } catch (err) {
-    await client.query('ROLLBACK');
+    if (transactionStarted) {
+      await client.query('ROLLBACK');
+    }
     console.error('Error admin-replying to feedback:', err);
     removeUploadedFiles(req.files);
     return res.status(500).json({ error: 'Internal server error' });
@@ -268,20 +278,25 @@ router.patch('/all/:threadId/status', requireAuth, requireAdmin, async (req, res
  */
 router.delete('/all/:threadId', requireAuth, requireAdmin, async (req, res) => {
   const client = await pool.connect();
+  let transactionStarted = false;
+  let attachmentsToDelete = [];
   try {
     const { threadId } = req.params;
 
+    await client.query('BEGIN');
+    transactionStarted = true;
+
     // Verify thread exists
     const threadResult = await client.query(
-      'SELECT id FROM feedback_threads WHERE id = $1',
+      'SELECT id FROM feedback_threads WHERE id = $1 FOR UPDATE',
       [threadId]
     );
 
     if (!threadResult.rows || threadResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      transactionStarted = false;
       return res.status(404).json({ error: 'Thread not found' });
     }
-
-    await client.query('BEGIN');
 
     // Get all messages to find attachments
     const messageResult = await client.query(
@@ -296,18 +311,7 @@ router.delete('/all/:threadId', requireAuth, requireAdmin, async (req, res) => {
         'SELECT stored_name FROM feedback_attachments WHERE message_id = ANY($1)',
         [messageIds]
       );
-
-      // Delete physical files (log errors but don't block transaction)
-      for (const row of attachmentResult.rows) {
-        try {
-          const filePath = path.join(UPLOAD_DIR, row.stored_name);
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-          }
-        } catch (fileErr) {
-          console.error('Failed to delete attachment file:', row.stored_name, fileErr);
-        }
-      }
+      attachmentsToDelete = attachmentResult.rows.map(row => row.stored_name);
 
       // Delete attachment records
       await client.query(
@@ -329,9 +333,25 @@ router.delete('/all/:threadId', requireAuth, requireAdmin, async (req, res) => {
     );
 
     await client.query('COMMIT');
+    transactionStarted = false;
+
+    // Delete physical files only after the DB commit so rollback cannot leave broken attachment URLs.
+    for (const storedName of attachmentsToDelete) {
+      try {
+        const filePath = getAttachmentFilePath(storedName);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (fileErr) {
+        console.error('Failed to delete attachment file:', storedName, fileErr);
+      }
+    }
+
     return res.status(204).send();
   } catch (err) {
-    await client.query('ROLLBACK');
+    if (transactionStarted) {
+      await client.query('ROLLBACK');
+    }
     console.error('Error deleting feedback thread:', err);
     return res.status(500).json({ error: 'Internal server error' });
   } finally {

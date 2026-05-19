@@ -1207,3 +1207,51 @@ TestSprite execution items:
 - [ ] PENDING: Verify missing/invalid/opted-out contact cases create skipped or blocked states, not crashes.
 - [ ] PENDING: Verify customer profile communication preferences and message history key by `partners.id`, not phone number.
 - [ ] PENDING: Verify staff without `notifications.send` cannot send or retry reminders.
+
+## 2026-05-19 — Feedback Attachment Persistence / Revenue Proof Restore
+
+Feature/edit name:
+- Feedback attachment transaction hardening and NK revenue-resolution proof-image restore.
+
+Changed URLs and API routes:
+- Browser-visible: `https://nk.2checkin.com/feedback`, affected thread `06892fc6-5ccc-4c22-ad00-fed55199e9ad` on `/reports/revenue`.
+- Upload/static route: `/uploads/feedback/:storedName`.
+- API routes: `POST /api/Feedback`, `POST /api/Feedback/my/:threadId/reply`, `POST /api/Feedback/all/:threadId/reply`, `DELETE /api/Feedback/all/:threadId`.
+
+Affected data flows:
+- User/admin file upload -> `uploads/feedback/*` -> `feedback_messages` -> `feedback_attachments` -> `/uploads/feedback/*` static serving -> `/feedback` image preview.
+- Thread deletion -> DB attachment/message/thread delete commit -> physical file cleanup after commit.
+
+User roles:
+- Admin/manager viewing all feedback and replying with resolution proof images.
+- Staff creating feedback or replying to their own feedback with screenshots.
+
+Happy paths:
+- Admin opens `/feedback`, selects the May 17 revenue-report resolved thread, and sees the restored proof image load without a broken image/empty thumbnail.
+- Admin reply with text plus image succeeds and the returned attachment URL loads with HTTP 200.
+- Staff creates file-only feedback and staff/admin file-only replies succeed with empty message content plus a valid image attachment.
+- Admin deletes a feedback thread and attached files disappear only after the DB delete succeeds.
+
+Edge cases:
+- Reply with no text and no file returns 400 without creating rows or files.
+- Reply with uploaded file to a missing thread returns 404 and removes the uploaded file.
+- Attachment DB insert/enrichment failure rolls back message/thread updates and removes the uploaded file.
+- Delete-route DB failure before commit must not delete physical files that still have DB rows.
+
+Regressions:
+- Existing text-only feedback creation/reply behavior remains unchanged.
+- Existing feedback list/detail endpoints still populate messages and attachments.
+- `/uploads/feedback/*` continues to serve JPEG/PNG/GIF/WebP files through production nginx/API routing.
+
+Setup data and login state:
+- Use an authenticated admin session for `t@clinic.vn` on NK production.
+- Use feedback thread `06892fc6-5ccc-4c22-ad00-fed55199e9ad` and restored file `c51c44c8-8b39-4fdc-b881-6c70711160ca.jpg` as regression evidence.
+- Orphan-row backup for unrecoverable stale attachments: `/opt/tgroup/backups/feedback-orphan-attachments-20260519T0249Z.csv`.
+- Capture screenshot evidence of the loaded proof image in `/feedback` after deployment.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `/feedback` thread `06892fc6-5ccc-4c22-ad00-fed55199e9ad` loads the restored revenue proof image.
+- [ ] PENDING: Verify new admin reply with image returns a `/uploads/feedback/*` URL that loads HTTP 200.
+- [ ] PENDING: Verify file-only staff feedback and file-only staff/admin replies do not crash.
+- [ ] PENDING: Verify missing-thread file replies clean up uploaded files and do not create `feedback_attachments` rows.
+- [ ] PENDING: Verify delete rollback simulation does not remove physical files before DB commit.

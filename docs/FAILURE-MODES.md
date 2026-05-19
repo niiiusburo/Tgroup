@@ -14,6 +14,14 @@ Each entry:
 
 ---
 
+## FM-20260519-01: Feedback Attachment Row Points at Missing Uploaded File
+
+- **Symptom:** A resolved `/feedback` thread shows an uploaded image attachment card, but the proof image does not load and the `/uploads/feedback/<file>` URL returns 404.
+- **Root Cause:** Feedback reply routes inserted messages and `feedback_attachments` rows through a pooled client, then called `COMMIT`/`ROLLBACK` without first starting `BEGIN`. If later attachment enrichment or file-only content handling failed, cleanup could delete the uploaded file while already-autocommitted DB rows remained. The delete route also removed physical files before DB commit, so a rollback could leave attachment rows pointing at missing files.
+- **Fix:** Wrap feedback create/reply attachment writes in explicit transactions, normalize optional/file-only content before validation, clean uploaded files on missing-thread replies, and delete physical attachment files only after feedback-thread DB deletion commits. For existing production orphans, restore files from a same-original/same-size attachment where possible; back up and prune only unrecoverable attachment rows so the UI does not keep rendering dead image URLs.
+- **Prevention:** Any route that writes both DB attachment rows and physical files must make DB writes transactional and defer destructive file cleanup until the DB outcome is known. Add route tests that force post-upload DB failures and assert no committed row points at a missing file.
+- **Related:** `api/tests/feedbackAttachments.test.js`, `product-map/domains/feedback-cms.yaml`.
+
 ## FM-20260506-01: Permission System Shows "No Permissions" for Active Employee
 
 - **Symptom:** Employee logs in successfully but sees empty menus and "No permissions" toast. UI is unusable.

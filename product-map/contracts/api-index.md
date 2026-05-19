@@ -259,6 +259,8 @@ Export permissions are defined by `api/src/services/exports/exportRegistry.js`: 
 | PATCH | `/all/:threadId/status` | Admin (`System Administrator` group or effective `permissions.view`) | `{ status: pending\|in_progress\|resolved\|ignored }` | Thread status updated |
 | DELETE | `/all/:threadId` | Admin (`System Administrator` group or effective `permissions.view`) | — | Thread deleted |
 
+Attachment persistence contract: feedback create/reply routes accept file-only messages (`content = ''`), commit message rows and `feedback_attachments` rows in one explicit DB transaction, clean uploaded files on missing-thread or insert failure, and delete physical files only after `DELETE /all/:threadId` commits. Stored attachment filenames must match the generated UUID image filename allowlist before physical deletion.
+
 ## Face Recognition (`/api/face`)
 
 | Method | Path | Auth | Body / Query | Response |
