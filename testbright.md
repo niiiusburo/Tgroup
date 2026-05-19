@@ -1175,6 +1175,7 @@ User roles:
 - Reception/front desk with appointment view and future `notifications.send`.
 - Manager/admin with future `notifications.view`, `notifications.edit`, `notifications.send`, and `notifications.admin`.
 - Staff without notification permissions must not see send/retry/admin controls.
+- Location-scoped staff must not see or send reminders for another branch/location.
 
 Happy paths:
 - Open `/notifications` and verify templates, outbox statuses, provider status, and message detail history render after implementation.
@@ -1193,10 +1194,11 @@ Regressions:
 - Calendar appointment load, check-in, cancel, and quick-add flows must not change when the messaging controls are hidden.
 - Customer profile contact edits must not change the durable partner identity invariant.
 - Existing appointment reminder fields must not be silently repurposed as the only audit trail.
+- Provider webhook callbacks must require signature/shared-secret verification or remain internal polling only; unsigned callbacks must not update message status.
 
 Setup data and login state:
 - Use authenticated admin/manager and receptionist/staff sessions.
-- Seed at least one scheduled/confirmed appointment 15+ minutes late today, one arrived appointment, one cancelled appointment, one customer with no phone, one duplicate-phone customer pair, one opted-out customer, and one dry-run provider config.
+- Seed at least one scheduled/confirmed appointment 15+ minutes late today, one arrived appointment, one cancelled appointment, one other-branch late appointment, one customer with no phone, one duplicate-phone customer pair, one opted-out customer, and one dry-run provider config.
 - Collect screenshot evidence for `/notifications`, `/calendar` late appointment state, and customer communication history when browser-visible verification runs.
 
 TestSprite execution items:
@@ -1207,6 +1209,10 @@ TestSprite execution items:
 - [ ] PENDING: Verify missing/invalid/opted-out contact cases create skipped or blocked states, not crashes.
 - [ ] PENDING: Verify customer profile communication preferences and message history key by `partners.id`, not phone number.
 - [ ] PENDING: Verify staff without `notifications.send` cannot send or retry reminders.
+- [ ] PENDING: Verify staff without `notifications.edit` cannot create/edit templates or provider settings.
+- [ ] PENDING: Verify staff without `notifications.admin` cannot access provider/admin configuration.
+- [ ] PENDING: Verify location-scoped staff cannot view or send reminders for another branch/location.
+- [ ] PENDING: Verify unsigned or invalid provider webhook callbacks do not update message status.
 
 ## 2026-05-19 — Feedback Attachment Persistence / Revenue Proof Restore
 

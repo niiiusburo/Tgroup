@@ -2,6 +2,8 @@
 
 > Database entity map: relationships, writers, readers, endpoints, and frontend surfaces.
 
+> Migration inventory: 53 SQL files under `api/migrations/` as of 2026-05-17 local file inventory. Duplicate numeric prefixes exist, so treat filename order as inventory, not a strict linear version sequence.
+
 ## Legend
 
 - **W** = Writer (INSERT/UPDATE/DELETE)
@@ -106,11 +108,11 @@
 |-----------|-------|
 | **Primary Key** | `id` (uuid) |
 | **Foreign Keys** | `saleorderid` → saleorders, `productid` → products |
-| **W** | `api/src/routes/saleOrderLines.js` (indirect via sale order patches) |
-| **R** | `saleOrderLines.js`, `reports.js`, `products.js` (delete guard), employee revenue export builder |
-| **E** | `GET /api/SaleOrderLines` |
+| **W** | `api/src/routes/saleOrderLines.js` soft-delete endpoint; sale order patches update rendered line fields |
+| **R** | `saleOrderLines.js`, `saleOrders.js` (`/lines`), `reports.js`, `products.js` (delete guard), employee revenue export builder |
+| **E** | `GET /api/SaleOrderLines`, `DELETE /api/SaleOrderLines/:id`, `GET /api/SaleOrders/lines` |
 | **UI** | ServiceHistoryList, Reports |
-| **Risk** | **Medium** — `toothrange`, `toothtype`, `discounttype`, `isrewardline` are Odoo-specific and sparsely typed in frontend. |
+| **Risk** | **Medium** — `toothrange`, `toothtype`, `discounttype`, `isrewardline` are Odoo-specific and sparsely typed in frontend. Deleting the last active line also soft-deletes the parent sale order. |
 
 ### dbo.payments
 
@@ -156,11 +158,11 @@
 |-----------|-------|
 | **Primary Key** | `id` (uuid) on `dotkhams` |
 | **Foreign Keys** | `partnerid` → partners, `doctorid` → partners, `companyid` → companies; `dotkhamsteps.dotkhamid` → dotkhams, `dotkhamsteps.productid` → products |
-| **W** | `api/src/routes/dotKhams.js` (read-only in current UI; writes may happen via Odoo sync) |
-| **R** | `dotKhams.js`, `customerReceipts.js`, `reports.js`, `partners.js` |
-| **E** | `GET /api/DotKhams` |
+| **W** | Odoo/TDental sync owns records; `api/src/routes/payments.js` updates `amountresidual` when allocations are applied/reversed |
+| **R** | `dotKhams.js`, `customerReceipts.js`, `reports.js`, `partners.js`, `payments.js` allocation target reads |
+| **E** | `GET /api/DotKhams`, `GET /api/DotKhams/:id` |
 | **UI** | CustomerProfile health records, ServiceHistory (indirect) |
-| **Risk** | **Medium** — `products.js` delete guard checks `dotkhamsteps` linkage. |
+| **Risk** | **Medium** — `products.js` delete guard checks `dotkhamsteps` linkage; payment allocation changes can move `amountresidual` without a DotKhams write route. |
 
 ---
 
@@ -255,9 +257,9 @@
 | Attribute | Value |
 |-----------|-------|
 | **Primary Key** | `id` (uuid) |
-| **W** | `api/src/routes/exports.js` logs preview and download attempts |
+| **W** | `api/src/routes/exports.js` logs preview and download attempts; created by `api/migrations/043_add_exports_audit.sql` |
 | **R** | Operational audit queries only; no user-facing route yet |
-| **E** | Indirect via `POST /api/Exports/:type/preview` and `POST /api/Exports/:type/download` |
+| **E** | Indirect via `POST /api/Exports/:type/preview` and `POST /api/Exports/:type/download` for customers, appointments, services, payments, service-catalog, report-sales-employees, revenue-flat, and deposit-flat |
 | **UI** | No direct UI surface; supports auditability for operational Excel exports |
 | **Risk** | **Medium** — audit writes are non-blocking/catch-and-log in the route, so export success does not guarantee an audit row exists unless explicitly verified. |
 
@@ -265,9 +267,9 @@
 
 | Attribute | Value |
 |-----------|-------|
-| **W** | `api/src/routes/feedback.js` |
-| **R** | `feedback.js` |
-| **E** | `GET/POST/PATCH/DELETE /api/Feedback/*` |
+| **W** | `api/src/routes/feedback/userRoutes.js`, `api/src/routes/feedback/adminRoutes.js`, telemetry auto-thread creation in `api/src/server.js` |
+| **R** | `feedback/userRoutes.js`, `feedback/adminRoutes.js` |
+| **E** | `GET /api/Feedback/unread-count`, user `/api/Feedback/my*`, admin `/api/Feedback/all*`, and `POST /api/Feedback` |
 | **UI** | FeedbackWidget, FeedbackAdminContent |
 | **Risk** | **Medium** — attachments are stored on disk in `api/uploads/feedback/` with metadata in `feedback_attachments`. Moving storage requires nginx + backend path updates. |
 
@@ -282,9 +284,9 @@
 | **Key Relationships** | `ip_access_entries.created_by` → partners(id) |
 | **W** | `api/src/routes/ipAccess.js` |
 | **R** | `ipAccess.js`, middleware |
-| **E** | `GET/POST/DELETE /api/ip-access/*` |
+| **E** | `GET /api/IpAccess/check`, `GET/PUT /api/IpAccess/settings`, `GET/POST/PUT/DELETE /api/IpAccess/entries*` |
 | **UI** | IPAccessControlContent |
-| **Risk** | **Medium** — `mode` enum values must match frontend dropdowns. |
+| **Risk** | **Medium** — `ip_access_settings` is treated as one global mode row (`SELECT ... LIMIT 1` / `UPDATE` all rows, seed if missing); mode enum values `allow_all`, `block_all`, `whitelist_only`, and `blacklist_block` must match frontend dropdowns. `/api/IpAccess/check` is public allowlisted before global auth; all settings/entry management routes require settings permissions. |
 
 ### dbo.version_events
 

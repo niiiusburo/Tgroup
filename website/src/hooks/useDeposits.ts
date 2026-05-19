@@ -39,9 +39,6 @@ export type PaymentMethodCode =
   | 'bank_transfer'
   | 'deposit'
   | 'mixed'
-  | 'momo'
-  | 'card'
-  | 'wallet'
   | string;
 
 function getVietnamToday(): string {

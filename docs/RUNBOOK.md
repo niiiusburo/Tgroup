@@ -18,9 +18,11 @@
    - API: `npm --prefix api test`
    - Contracts: `npm --prefix contracts run build`
    - Infra: `bash -n scripts/deploy-tbot.sh && docker compose config`
+   - Governance: `bash scripts/verify-docs.sh`
 3. **Version and changelog aligned:**
    - `website/package.json` version bumped if runtime code changed.
    - `docs/CHANGELOG.md` entry appended.
+   - `testbright.md` updated when the change touches frontend, feature behavior, or backend data flow.
 4. **Migrations verified locally:**
    - Run unapplied migrations against local Docker DB.
    - Confirm idempotency (`IF NOT EXISTS`).
@@ -40,17 +42,23 @@ docker ps
 
 # 3. Check API health
 curl -s https://nk.2checkin.com/api/health | jq .
-# Expected: { "status": "ok", "faceService": true|false, "db": "connected" }
+# Expected: { "status": "healthy"|"degraded", "checks": { "db": true|false, "faceService": true|false }, "faceProvider": "local"|"compreface"|... }
 
 # 4. Verify web build version
 curl -s https://nk.2checkin.com/version.json | jq .
 # Expected: { "version": "x.y.z", "buildTime": "..." }
 
-# 5. Apply any pending DB migrations on VPS
+# 5. Apply any pending canonical DB migrations on VPS
 for f in /opt/tgroup/api/migrations/*.sql; do
   docker exec -i tgroup-db psql -U postgres -d tdental_demo < "$f"
 done
 ```
+
+`api/migrations/` is the canonical migration path for deployment. `api/src/db/migrations/`
+currently contains supplemental straggler SQL files (`003_add_payment_category.sql`,
+`046_customer_face_embeddings.sql`); review `docs/MIGRATIONS.md` before deploy when a
+change depends on either supplemental migration, and consolidate or run it explicitly
+instead of assuming it is covered by the canonical loop.
 
 ## Rollback Procedure
 
@@ -72,9 +80,10 @@ done
 curl https://nk.2checkin.com/api/health
 ```
 Expected fields:
-- `status: "ok"`
-- `db: "connected"`
-- `faceService: true|false` (optional; `false` is acceptable per INV-014)
+- `status: "healthy"|"degraded"`
+- `checks.db: true|false`
+- `checks.faceService: true|false` (optional provider failures are acceptable per INV-014 when the changed flow does not require Face ID)
+- `faceProvider: "local"|"compreface"|...`
 
 ### Database Connectivity
 ```bash

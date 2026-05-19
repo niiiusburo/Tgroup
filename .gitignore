@@ -29,6 +29,9 @@ Thumbs.db
 # Code review graph (large DB)
 .code-review-graph/
 
+# Brainstorm session artifacts (HTML mockups, server state)
+.superpowers/
+
 # Obsidian
 .obsidian/
 

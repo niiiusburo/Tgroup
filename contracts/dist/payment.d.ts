@@ -4,7 +4,7 @@ export declare const PaymentBaseSchema: z.ZodObject<{
     customer_id: z.ZodString;
     service_id: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     amount: z.ZodNumber;
-    method: z.ZodEnum<["cash", "bank_transfer", "card", "momo", "vnpay", "zalopay", "deposit", "mixed"]>;
+    method: z.ZodEnum<["cash", "bank_transfer", "deposit", "mixed"]>;
     notes: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     payment_date: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     reference_code: z.ZodNullable<z.ZodOptional<z.ZodString>>;
@@ -30,7 +30,7 @@ export declare const PaymentBaseSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     customer_id: string;
     amount: number;
-    method: "cash" | "bank_transfer" | "card" | "momo" | "vnpay" | "zalopay" | "deposit" | "mixed";
+    method: "cash" | "bank_transfer" | "deposit" | "mixed";
     id?: string | undefined;
     status?: "posted" | "voided" | null | undefined;
     service_id?: string | null | undefined;
@@ -50,7 +50,7 @@ export declare const PaymentBaseSchema: z.ZodObject<{
 }, {
     customer_id: string;
     amount: number;
-    method: "cash" | "bank_transfer" | "card" | "momo" | "vnpay" | "zalopay" | "deposit" | "mixed";
+    method: "cash" | "bank_transfer" | "deposit" | "mixed";
     id?: string | undefined;
     status?: "posted" | "voided" | null | undefined;
     service_id?: string | null | undefined;
@@ -73,7 +73,7 @@ export declare const PaymentCreateSchema: z.ZodObject<Omit<{
     customer_id: z.ZodString;
     service_id: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     amount: z.ZodNumber;
-    method: z.ZodEnum<["cash", "bank_transfer", "card", "momo", "vnpay", "zalopay", "deposit", "mixed"]>;
+    method: z.ZodEnum<["cash", "bank_transfer", "deposit", "mixed"]>;
     notes: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     payment_date: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     reference_code: z.ZodNullable<z.ZodOptional<z.ZodString>>;
@@ -99,7 +99,7 @@ export declare const PaymentCreateSchema: z.ZodObject<Omit<{
 }, "id">, "strip", z.ZodTypeAny, {
     customer_id: string;
     amount: number;
-    method: "cash" | "bank_transfer" | "card" | "momo" | "vnpay" | "zalopay" | "deposit" | "mixed";
+    method: "cash" | "bank_transfer" | "deposit" | "mixed";
     status?: "posted" | "voided" | null | undefined;
     service_id?: string | null | undefined;
     notes?: string | null | undefined;
@@ -118,7 +118,7 @@ export declare const PaymentCreateSchema: z.ZodObject<Omit<{
 }, {
     customer_id: string;
     amount: number;
-    method: "cash" | "bank_transfer" | "card" | "momo" | "vnpay" | "zalopay" | "deposit" | "mixed";
+    method: "cash" | "bank_transfer" | "deposit" | "mixed";
     status?: "posted" | "voided" | null | undefined;
     service_id?: string | null | undefined;
     notes?: string | null | undefined;
@@ -140,7 +140,7 @@ export declare const PaymentUpdateSchema: z.ZodObject<Omit<{
     customer_id: z.ZodOptional<z.ZodString>;
     service_id: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     amount: z.ZodOptional<z.ZodNumber>;
-    method: z.ZodOptional<z.ZodEnum<["cash", "bank_transfer", "card", "momo", "vnpay", "zalopay", "deposit", "mixed"]>>;
+    method: z.ZodOptional<z.ZodEnum<["cash", "bank_transfer", "deposit", "mixed"]>>;
     notes: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     payment_date: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     reference_code: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
@@ -168,7 +168,7 @@ export declare const PaymentUpdateSchema: z.ZodObject<Omit<{
     customer_id?: string | undefined;
     service_id?: string | null | undefined;
     amount?: number | undefined;
-    method?: "cash" | "bank_transfer" | "card" | "momo" | "vnpay" | "zalopay" | "deposit" | "mixed" | undefined;
+    method?: "cash" | "bank_transfer" | "deposit" | "mixed" | undefined;
     notes?: string | null | undefined;
     payment_date?: string | null | undefined;
     reference_code?: string | null | undefined;
@@ -187,7 +187,7 @@ export declare const PaymentUpdateSchema: z.ZodObject<Omit<{
     customer_id?: string | undefined;
     service_id?: string | null | undefined;
     amount?: number | undefined;
-    method?: "cash" | "bank_transfer" | "card" | "momo" | "vnpay" | "zalopay" | "deposit" | "mixed" | undefined;
+    method?: "cash" | "bank_transfer" | "deposit" | "mixed" | undefined;
     notes?: string | null | undefined;
     payment_date?: string | null | undefined;
     reference_code?: string | null | undefined;

@@ -4,9 +4,8 @@
 
 ## Schema Statistics
 
-- **Tables:** 39
-- **Views:** 8
-- **Migrations:** 54 SQL files in `api/migrations/`
+- **Tables / Views:** Baseline schema plus migration-added objects; verify the target database for an exact live count before sync/deploy decisions.
+- **Migrations:** 53 canonical SQL files in `api/migrations/`; 2 supplemental SQL files in `api/src/db/migrations/` need consolidation or an explicit runbook decision.
 - **Schema:** `dbo`
 - **Date handling:** `types.setTypeParser(1082, (val) => val)` returns DATE as plain `YYYY-MM-DD` strings. API process runs with `TZ=Asia/Ho_Chi_Minh`.
 
@@ -344,12 +343,19 @@ erDiagram
 |---|---|---|
 | `id` | uuid | PK |
 | `partner_id` | uuid | FK → partners |
-| `embedding` | vector(128) or text | depends on pgvector |
+| `embedding` | double precision[] | local provider embedding |
+| `detection_score` | double precision | |
+| `face_box` | jsonb | |
+| `image_sha256` | text | |
+| `source` | text | DEFAULT 'manual_capture' |
+| `model_name` | text | NOT NULL |
+| `model_version` | text | NOT NULL |
+| `is_active` | boolean | DEFAULT true |
 | `created_by` | uuid | FK → partners (employee) |
 | `created_at` | timestamp | DEFAULT NOW() |
 | `deleted_at` | timestamp | soft delete |
 
-**Note:** Table existence and exact column set may vary by migration state. `FACE_RECOGNITION_PROVIDER=local` reads active rows here. `FACE_RECOGNITION_PROVIDER=compreface` stores face examples in CompreFace and uses `partners.face_subject_id` / `face_registered_at` as the local status bridge.
+**Note:** This table currently lives in supplemental migration `api/src/db/migrations/046_customer_face_embeddings.sql`, not the canonical `api/migrations/` sequence. `FACE_RECOGNITION_PROVIDER=local` reads active rows here. `FACE_RECOGNITION_PROVIDER=compreface` stores face examples in CompreFace and uses `partners.face_subject_id` / `face_registered_at` as the local status bridge.
 
 ---
 
@@ -395,6 +401,20 @@ erDiagram
 | `published` | boolean | DEFAULT false |
 | `parent_id` | uuid | FK → websitepages (self-ref) |
 
+#### `dbo.exports_audit`
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | uuid | PK |
+| `employee_id` | uuid | NOT NULL; employee who requested export |
+| `export_type` | varchar(50) | NOT NULL; registry key from `exportRegistry.js` |
+| `action` | varchar(20) | CHECK (`preview`, `download`) |
+| `filters` | jsonb | submitted filters |
+| `row_count` | integer | preview/build row count |
+| `filename` | varchar(255) | set for downloads |
+| `created_at` | timestamptz | DEFAULT NOW() |
+
+**Behavior:** `api/src/routes/exports.js` writes audit rows for `POST /api/Exports/:type/preview` and `POST /api/Exports/:type/download`. Audit writes are catch-and-log/non-blocking, so a successful export does not prove an audit row was inserted unless verified separately.
+
 ---
 
 ### Settings & System
@@ -421,26 +441,86 @@ erDiagram
 | Column | Type | Constraints |
 |---|---|---|
 | `id` | uuid | PK |
-| `company_id` | uuid | FK → companies |
-| `enabled` | boolean | DEFAULT false |
+| `mode` | varchar(50) | CHECK (`allow_all`, `block_all`, `whitelist_only`, `blacklist_block`); DEFAULT `allow_all` |
+| `last_updated` | timestamp | DEFAULT NOW() |
+
+**Behavior:** IP access is a global single-row setting, not company-scoped. `api/src/routes/ipAccess.js` reads/updates the first row and seeds a row on settings update if missing.
 
 #### `dbo.ip_access_entries`
 | Column | Type | Constraints |
 |---|---|---|
 | `id` | uuid | PK |
-| `setting_id` | uuid | FK → ip_access_settings |
-| `ip_address` | text | NOT NULL |
+| `ip_address` | inet | NOT NULL |
+| `type` | varchar(50) | CHECK (`whitelist`, `blacklist`) |
+| `description` | text | DEFAULT '' |
+| `is_active` | boolean | DEFAULT true |
+| `created_at` | timestamp | DEFAULT NOW() |
+| `created_by` | uuid | FK → partners; ON DELETE SET NULL |
+
+**Indexes:** Unique `(ip_address, type)` plus `(type, is_active)` lookup index.
+
+#### `dbo.version_events`
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | serial | PK |
+| `event` | varchar(64) | NOT NULL |
+| `from_version` | varchar(32) | NOT NULL |
+| `to_version` | varchar(32) | NOT NULL |
+| `trigger` | varchar(32) | NOT NULL |
+| `timestamp` | bigint | frontend timestamp |
+| `user_agent` | text | |
+| `ip_address` | inet | |
+| `created_at` | timestamptz | DEFAULT NOW() |
+
+**Behavior:** `POST /api/telemetry/version` accepts only version update lifecycle events and writes with an unqualified `version_events` table name; the table is expected to resolve under the configured `search_path`.
 
 #### `dbo.error_events`
 | Column | Type | Constraints |
 |---|---|---|
 | `id` | uuid | PK |
-| `error_message` | text | NOT NULL |
-| `stack_trace` | text | |
-| `browser_info` | text | |
-| `url` | text | |
-| `version` | text | |
-| `created_at` | timestamp | DEFAULT NOW() |
+| `fingerprint` | varchar(64) | UNIQUE; dedupe key |
+| `error_type` | varchar(100) | NOT NULL |
+| `message` | text | NOT NULL |
+| `stack` | text | |
+| `component_stack` | text | |
+| `route` | varchar(500) | frontend route |
+| `source_file` | varchar(500) | top source file |
+| `source_line` | integer | |
+| `api_endpoint` | varchar(500) | |
+| `api_method` | varchar(10) | |
+| `api_status` | integer | |
+| `api_body` | jsonb | |
+| `user_agent` | text | |
+| `ip_address` | varchar(45) | |
+| `user_id` | uuid | partner id if known |
+| `location_id` | uuid | company id if known |
+| `metadata` | jsonb | DEFAULT '{}' |
+| `first_seen_at` | timestamptz | DEFAULT NOW() |
+| `last_seen_at` | timestamptz | DEFAULT NOW() |
+| `occurrence_count` | integer | DEFAULT 1 |
+| `status` | varchar(20) | DEFAULT `new` |
+| `fix_summary` | text | |
+| `fix_commit` | varchar(40) | |
+| `fixed_at` | timestamptz | |
+| `created_at` | timestamptz | DEFAULT NOW() |
+| `updated_at` | timestamptz | trigger-updated |
+
+#### `dbo.error_fix_attempts`
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | uuid | PK |
+| `error_id` | uuid | FK → error_events ON DELETE CASCADE |
+| `attempt_number` | integer | DEFAULT 1 |
+| `action` | varchar(50) | analyze/generate_fix/run_tests/build/deploy/verify |
+| `status` | varchar(20) | started/success/failed/skipped |
+| `details` | text | |
+| `files_changed` | text[] | |
+| `test_output` | text | |
+| `agent_session` | varchar(100) | |
+| `started_at` | timestamptz | DEFAULT NOW() |
+| `finished_at` | timestamptz | |
+
+**Behavior:** `POST /api/telemetry/errors` is intentionally public and rate-limited; it upserts by `fingerprint`. Management endpoints for errors and fix attempts are in `api/src/routes/telemetry.js` and must remain protected by upstream routing/auth policy if exposed beyond local tooling.
 
 ---
 
@@ -469,30 +549,12 @@ If `dbo.customer_face_embeddings` exists and the local provider is active, the e
 
 ---
 
-## Migration Index
+## Migration Inventory
 
-| # | File | Description |
-|---|---|---|
-| 000 | `000_install_schema_migrations_table.sql` | Tracks applied migrations |
-| 001 | `001_add_face_columns.sql` | Adds `face_subject_id`, `face_registered_at` to partners |
-| 001 | `001_company_bank_settings.sql` | Creates `company_bank_settings` |
-| 002 | `002_payment_proofs.sql` | Creates `payment_proofs` |
-| 003 | `003_payment_allocations.sql` | Creates `payment_allocations` |
-| 004 | `004_payment_plan_items.sql` | Creates `monthlyplan_items` |
-| 005 | `005_employee_location_scope.sql` | Creates `employee_location_scope` |
-| 006 | `006_dotkham_payment_allocations.sql` | Adds `dotkham_id` to allocations |
-| 006 | `006_fix_location_scope_column.sql` | Column rename/fix |
-| 007 | `007_add_external_checkups_permission.sql` | Adds permission strings |
-| 008 | `008_data_migration_from_tdental_v*.sql` | TDental import schema adjustments |
-| 011 | `011_fix_payment_proofs_type.sql` | Type correction |
-| 012 | `012_add_cskhid_salestaffid.sql` | Adds CSKH and sales staff columns |
-| 013 | `013_add_employee_role_fields.sql` | Adds `isdoctor`, `isassistant`, `isreceptionist` |
-| 014 | `014_payment_per_record.sql` | Per-record payment tracking |
-| 015 | `015_deposit_receipts.sql` | Receipt number generation |
-| 016 | `016_saleorder_status_audit.sql` | Creates `saleorder_state_logs` |
-| 017 | `017_monthlyplan_constraints.sql` | Plan/installment constraints |
-
-For the full list, see `api/migrations/` (54 files total).
+- Canonical root index: `docs/MIGRATIONS.md`.
+- Canonical migration directory: `api/migrations/` (53 SQL files, through `046_split_payment_and_hoso_permissions.sql`).
+- Supplemental migration directory: `api/src/db/migrations/` (2 SQL files: `003_add_payment_category.sql`, `046_customer_face_embeddings.sql`).
+- Runbook status: `docs/RUNBOOK.md` and `docs/runbooks/DEPLOYMENT.md` both use `api/migrations/*.sql` as the canonical deploy loop. Supplemental files under `api/src/db/migrations/` require explicit review, consolidation, or manual execution when a change depends on them.
 
 ---
 

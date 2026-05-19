@@ -1,5 +1,16 @@
 #!/usr/bin/env sh
 
+echo "🔎 Running documentation governance checks..."
+bash scripts/verify-docs.sh
+
+if grep -R -n -E '<claude-mem-context>|</claude-mem-context>' \
+  AGENTS.md ARCHITECTURE.md DESIGN.md BEHAVIOR.md DECISIONS.md docs product-map \
+  --exclude='VERIFICATION.md'; then
+  echo "❌ Generated memory block leaked into authority docs."
+  echo "   Keep shared memory in .claude/memory.md only."
+  exit 1
+fi
+
 # Check if any website source or public files (excluding CHANGELOG/version files) are staged
 STAGED_WEBSITE=$(git diff --cached --name-only | grep -E '^website/(src/|public/([^C]|C[^H]|CH[^A]|CHA[^N]|CHAN[^G]|CHANG[^E]).*)' || true)
 
@@ -17,11 +28,10 @@ if [ "$PKG_VERSION_MAIN" = "$PKG_VERSION_HEAD" ]; then
   exit 1
 fi
 
-# Verify top CHANGELOG entry matches the current version
-CHANGELOG_TOP=$(node -e "console.log(JSON.parse(require('fs').readFileSync('website/public/CHANGELOG.json'))[0].version)")
-if [ "$CHANGELOG_TOP" != "$PKG_VERSION_HEAD" ]; then
-  echo "❌ Top CHANGELOG entry version ($CHANGELOG_TOP) does not match package.json ($PKG_VERSION_HEAD)."
+# Verify docs changelog has a matching current-version entry
+if ! grep -q "## \\[$PKG_VERSION_HEAD\\]" docs/CHANGELOG.md; then
+  echo "❌ docs/CHANGELOG.md does not contain an entry for website version $PKG_VERSION_HEAD."
   exit 1
 fi
 
-echo "✅ Version + CHANGELOG bump verified."
+echo "✅ Version + docs changelog bump verified."

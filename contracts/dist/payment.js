@@ -8,7 +8,9 @@ exports.PaymentBaseSchema = zod_1.z.object({
     customer_id: zod_1.z.string().uuid(),
     service_id: zod_1.z.string().uuid().optional().nullable(),
     amount: zod_1.z.coerce.number().positive(),
-    method: zod_1.z.enum(["cash", "bank_transfer", "card", "momo", "vnpay", "zalopay", "deposit", "mixed"]),
+    // Keep this aligned with frontend payment types, report/export grouping, and
+    // allocation behavior before adding any new live method.
+    method: zod_1.z.enum(["cash", "bank_transfer", "deposit", "mixed"]),
     notes: zod_1.z.string().optional().nullable(),
     payment_date: zod_1.z.string().optional().nullable(),
     reference_code: zod_1.z.string().optional().nullable(),

@@ -133,7 +133,9 @@ export function ReportsRevenue() {
 
   const summary = summaryQ.data;
   const totalInvoiced = summary.orders.reduce((s, o) => s + o.total, 0);
-  const totalPaid = summary.orders.reduce((s, o) => s + o.paid, 0);
+  const totalPaid = summary.payments
+    .filter(p => p.status === 'posted')
+    .reduce((s, p) => s + p.total, 0);
   const totalOutstanding = summary.orders.reduce((s, o) => s + o.outstanding, 0);
 
   const methodSegments = summary.payments
@@ -338,11 +340,11 @@ export function ReportsRevenue() {
       {/* Revenue by Location */}
       <SectionCard
         title={t('charts.revenueByBranch')}
-        action={byLocQ.data ? <ExportCSVButton data={byLocQ.data.filter(l => l.invoiced > 0).map(l => ({ Location: l.name, Orders: l.orderCount, Invoiced: l.invoiced, Collected: l.paid, Outstanding: l.outstanding }))} filename="revenue-by-location" /> : undefined}
+        action={byLocQ.data ? <ExportCSVButton data={byLocQ.data.filter(l => l.invoiced > 0 || l.paid > 0 || l.outstanding > 0).map(l => ({ Location: l.name, Orders: l.orderCount, Invoiced: l.invoiced, Collected: l.paid, Outstanding: l.outstanding }))} filename="revenue-by-location" /> : undefined}
       >
         {byLocQ.error ? <ReportError error={byLocQ.error} onRetry={byLocQ.refetch} /> : (
           <HorizontalBarList
-            items={(byLocQ.data || []).filter(l => l.invoiced > 0).map(l => ({ label: l.name, value: l.paid }))}
+            items={(byLocQ.data || []).filter(l => l.invoiced > 0 || l.paid > 0 || l.outstanding > 0).map(l => ({ label: l.name, value: l.paid }))}
             formatValue={formatVND}
             color="bg-blue-500"
           />

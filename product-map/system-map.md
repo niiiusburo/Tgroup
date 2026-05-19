@@ -56,7 +56,7 @@
 
 | Sub-module | Path | Responsibility |
 |------------|------|----------------|
-| Routes | `api/src/routes/` | 39 Express route files (no separate controllers) |
+| Routes | `api/src/routes/` | 40 Express route files; `services.js` exists but is intentionally unmounted |
 | Middleware | `api/src/middleware/` | JWT validation (`auth.js`), permission checks |
 | Services | `api/src/services/` | Face ID providers, Hosoonline client helpers, permissions, exports, telemetry utilities |
 | DB | `api/src/db.js` | Single `pg` Pool instance exported to all routes |
@@ -78,7 +78,7 @@
 
 ### 3.4 Operational Exports
 - **Route family:** `GET /api/Exports/types`, `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download`.
-- **Types:** `customers`, `appointments`, `services`, `payments`, `service-catalog`.
+- **Types:** `customers`, `appointments`, `services`, `payments`, `service-catalog`, `report-sales-employees`, `revenue-flat`, `deposit-flat`.
 - **Audit:** `exports_audit` records preview/download attempts, but route code catch-and-logs audit failures.
 - **Infra:** large downloads require nginx API proxy timeouts to exceed the default 60s behavior.
 
@@ -117,13 +117,13 @@
 - **Risk:** Adding a new query param with camelCase that is not in the passthrough set will send snake_case to the backend, which may ignore it silently.
 
 ### 5.3 Frontend Routing Mismatch
-- `/service-catalog` route in `App.tsx` renders `<ServiceCatalog />` and is guarded by `customers.edit`.
+- `/service-catalog` route in `App.tsx` renders `<ServiceCatalog />` and is guarded by `services.view`.
 - `/website` route renders the Website CMS page and is guarded by `website.view`.
 - `/services` page handles patient treatment records and is guarded by `customers.edit`.
-- **Risk:** Older docs and page-level comments may still call the service catalog `/website`; refactors must use the current route constants.
+- **Risk:** `/services` frontend access can diverge from backend sale-order read routes (`services.view`); older docs and page-level comments may still call the service catalog `/website`; refactors must use the current route constants.
 
 ### 5.4 Dead Backend Route
-- `api/src/routes/services.js` mounts at `/api/Services` but queries `public.services` (non-existent table).
+- `api/src/routes/services.js` exists but is not mounted; `api/src/server.js` comments out `app.use('/api/Services', servicesRoutes)` because the route queries `public.services` (non-existent table).
 - Frontend uses `/api/Products` and `/api/SaleOrders` instead.
 - **Risk:** Accidental revival or copy-paste from this file will cause runtime SQL errors.
 
@@ -135,7 +135,7 @@
 
 | File/Folder | Issue | Recommendation |
 |-------------|-------|----------------|
-| `api/src/routes/services.js` | Dead route; queries non-existent `public.services` table. | Delete or repurpose with strong validation. |
+| `api/src/routes/services.js` | Dead route; not mounted in `server.js` and queries non-existent `public.services` table. | Delete or repurpose with strong validation before mounting. |
 | `website/src/lib/api/services.ts` | Dead wrappers exported from `api.ts`; nothing imports them. | Delete. |
 | `web.jsx.backup` | 123KB legacy React backup. | Move to `backups/` or delete. |
 | `api/scripts/archive/` | One-off migration scripts (fix-two-plans, import-customers, migrate-payments). | Keep archived; do not run in production without review. |

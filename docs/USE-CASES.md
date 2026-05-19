@@ -3,6 +3,10 @@
 > Every user-facing and system-facing use case: Actor → Trigger → Preconditions → Main flow → Alternate flows → Postconditions → Invariants touched.
 > For the full legacy catalog (52 use cases), see the historical snapshot in the repo root `docs/USE_CASES.md`.
 
+## Traceability Convention
+
+When a use case is created or materially edited, add one compact `Traceability` line with known links: related workflow IDs, current contracts/routes, data/tables, invariant IDs, regression tests, and product-map domains. Use `unknown` instead of guessing, and keep route methods current.
+
 ---
 
 ## UC-001 — Intake New Patient
@@ -69,6 +73,7 @@
   - **AF-3 Face already registered:** Overwrites with new embedding.
 - **Postconditions:** Customer can now use face recognition check-in (UC-007).
 - **Invariants touched:** INV-005 (local 128-dim embedding lock), INV-014 (optional face integration startup).
+- **Traceability:** Related WF: WF-007. Contracts/routes: `POST /api/face/register`, `POST /api/face/re-register`, `GET /api/face/status/:partnerId`. Data/tables: `dbo.partners.face_subject_id`, `dbo.partners.face_registered_at`, `dbo.customer_face_embeddings` when local provider is active. Tests: `api/tests/faceRecognition.test.js`, `api/src/services/__tests__/comprefaceClient.test.js`, `api/src/services/__tests__/comprefaceFaceProvider.test.js`, `website/src/hooks/__tests__/useFaceRecognition.test.ts`, `website/src/components/shared/FaceCaptureModal.test.tsx`. Product-map domains: `customers-partners`, `integrations`.
 
 ---
 
@@ -151,6 +156,7 @@
   - **AF-4 No appointments today:** Show "Hôm nay không có lịch hẹn".
 - **Postconditions:** Appointment state = `arrived`; check-in timestamp recorded.
 - **Invariants touched:** INV-005 (embedding dimension), INV-014 (Compreface optional startup).
+- **Traceability:** Related WF: WF-007, UC-003, UC-008. Contracts/routes: `POST /api/face/recognize`, `GET /api/Appointments?partnerId=...&date=...`, `PUT /api/Appointments/:id`. Data/tables: `dbo.customer_face_embeddings`, `dbo.partners`, `dbo.appointments`. Tests: `api/tests/faceRecognition.test.js`, `website/src/hooks/__tests__/useFaceRecognition.test.ts`, `website/src/components/shared/GlobalFaceIdButton.test.tsx`, `website/src/components/modules/PatientCheckIn.test.tsx`. Product-map domains: `customers-partners`, `appointments-calendar`, `integrations`.
 
 ---
 
@@ -225,6 +231,7 @@
   - **AF-2 Full payment:** `isFullPayment=true` flag covers entire remaining balance.
 - **Postconditions:** Invoice residual reduced; payment history updated.
 - **Invariants touched:** INV-003, INV-012.
+- **Traceability:** Related WF: WF-003, WF-010. Contracts/routes: `POST /api/Payments`. Data/tables: `dbo.payments`, `dbo.payment_allocations`, `dbo.saleorders`, `dbo.dotkhams` when allocated to a medical record. Tests: `website/src/components/payment/__tests__/PaymentForm.submit.test.tsx`, `website/src/lib/allocatePaymentSources.test.ts`, `api/tests/readRoutePermissions.test.js`; backend allocation/void/refund edge coverage remains a known gap. Product-map domains: `payments-deposits`, `services-catalog`, `customers-partners`.
 
 ---
 
@@ -237,11 +244,12 @@
   1. Actor finds payment in `PaymentHistory`.
   2. Clicks Void → confirmation modal.
   3. Confirms → `POST /api/Payments/:id/void`.
-  4. Backend marks `status='voided'`; does NOT reverse allocations (INV-010).
+  4. Current backend marks `status='voided'`, deletes payment allocation rows for that payment, and restores `saleorders.residual` or `dotkhams.amountresidual`.
 - **Alternate flows:**
   - **AF-1 Already voided:** Button disabled; backend idempotent.
-- **Postconditions:** Payment status = `voided`; allocations remain in ledger for audit.
-- **Invariants touched:** INV-010 (allocation immutability).
+- **Postconditions:** Payment status = `voided`; invoice or medical-record residual is restored by the current route.
+- **Invariants touched:** INV-003 (residual non-negative). Current route behavior diverges from INV-010's immutable-allocation wording; fix the invariant or route before treating void semantics as locked.
+- **Traceability:** Related WF: WF-003. Contracts/routes: `POST /api/Payments/:id/void`, `DELETE /api/Payments/:id` legacy destructive path. Data/tables: `dbo.payments`, `dbo.payment_allocations`, `dbo.saleorders`, `dbo.dotkhams`. Tests: `api/tests/readRoutePermissions.test.js`; backend void math coverage remains a known gap. Product-map domains: `payments-deposits`.
 
 ---
 
@@ -249,18 +257,19 @@
 
 - **Actor:** Manager / Admin
 - **Trigger:** Reports page → Revenue → Export Excel
-- **Preconditions:** Actor has `reports.view`; date range selected.
+- **Preconditions:** Actor has the export permission for the selected export type; date range selected.
 - **Main flow:**
   1. Actor navigates to `/reports/revenue`.
   2. Sets date range, location, doctor filters.
-  3. Clicks Export → frontend calls `GET /api/Exports/revenue/download?...`.
-  4. Backend runs SQL aggregation, builds Excel workbook.
-  5. File downloads; `exports_audit` row created.
+  3. Clicks Export → frontend calls `POST /api/Exports/revenue-flat/download` with `{ filters }`.
+  4. Backend runs the legacy flat revenue export builder, using posted service payment allocations and allocation proration.
+  5. File downloads; an `exports_audit` row is attempted on a best-effort basis.
 - **Alternate flows:**
   - **AF-1 Large dataset >60s:** Nginx timeout must be ≥300s (INV-019).
   - **AF-2 No data:** Returns empty workbook with headers.
-- **Postconditions:** Excel file downloaded; audit log written.
+- **Postconditions:** Excel file downloaded; audit log attempted without blocking the workbook response.
 - **Invariants touched:** INV-019 (nginx timeout), INV-020 (version bump if export builder changed).
+- **Traceability:** Related WF: WF-005, WF-013, UC-019. Contracts/routes: `POST /api/Reports/revenue/summary`, `POST /api/Reports/revenue/trend`, `POST /api/Reports/revenue/by-location`, `POST /api/Reports/revenue/by-doctor`, `POST /api/Reports/revenue/by-category`, `POST /api/Reports/cash-flow/summary`, `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download` with type `revenue-flat`. Data/tables: `dbo.payment_allocations`, `dbo.payments`, `dbo.saleorders`, `dbo.saleorderlines`, `dbo.partners`, `dbo.products`, `dbo.companies`, `dbo.customersources`, `dbo.exports_audit`. Tests: `api/src/routes/reports/__tests__/revenueRecognition.test.js`, `api/src/routes/reports/__tests__/cashFlow.test.js`, `api/src/routes/reports/__tests__/servicesBreakdown.test.js`, `api/src/services/reports/__tests__/canonicalRevenue.test.js`, `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `website/src/hooks/__tests__/useReportData.test.ts`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`. Product-map domains: `reports-analytics`, `payments-deposits`, `services-catalog`, `customers-partners`, `employees-hr`.
 
 ---
 
@@ -310,9 +319,10 @@
   1. ErrorBoundary catches exception.
   2. Frontend calls `POST /api/telemetry/errors` (no auth required).
   3. Backend inserts `dbo.error_events` row.
-  4. Admin can view telemetry in Settings → System.
+  4. Admin can view, update, summarize, and attach fix attempts to telemetry in Settings/System tooling.
 - **Postconditions:** Error event logged with stack trace and browser info.
-- **Invariants touched:** None (public endpoint).
+- **Invariants touched:** INV-018 when telemetry is used to diagnose deploy/runtime incidents.
+- **Traceability:** Related WF: none yet. Contracts/routes: `POST /api/telemetry/errors` public ingestion, `GET /api/telemetry/errors`, `PUT /api/telemetry/errors/:id`, `POST /api/telemetry/errors/:id/fix-attempts`, `GET /api/telemetry/stats`, `POST /api/telemetry/version`. Data/tables: `dbo.error_events`, `dbo.error_fix_attempts`, `dbo.version_events`. Tests: `api/tests/telemetry.test.js`, `api/tests/telemetryAuth.test.js`, `website/src/__tests__/useVersionCheck.test.ts`. Product-map domains: `settings-system`.
 
 ---
 
@@ -320,14 +330,17 @@
 
 - **Actor:** Admin
 - **Trigger:** Settings → IP Access Control
-- **Preconditions:** Admin has `settings.edit`; company selected.
+- **Preconditions:** Admin has `settings.view` to inspect settings and `settings.edit` to mutate mode or entries.
 - **Main flow:**
-  1. Admin enables IP access control for a company.
-  2. Adds allowed IP addresses to whitelist.
-  3. Backend enforces `enforceIpAccess` middleware on all non-public routes.
-  4. Requests from non-whitelisted IPs receive 403.
-- **Postconditions:** Only whitelisted IPs can access API for that company scope.
-- **Invariants touched:** None additional.
+  1. Admin opens `/settings` → IP Access Control.
+  2. Frontend loads `GET /api/IpAccess/settings` and `GET /api/IpAccess/entries`.
+  3. Admin sets mode (`allow_all`, `block_all`, `whitelist_only`, or `blacklist_block`) and creates/updates/deletes IP entries.
+  4. Backend invalidates the IP access cache after mutation.
+  5. `enforceIpAccess` checks non-`/IpAccess/*` API requests using the cached mode and active entries.
+  6. Blocked requests receive 403 with the access-denial reason; `/api/IpAccess/*` remains reachable so admins can recover from lockout through normal permissions.
+- **Postconditions:** IP gate reflects the selected mode and active entries; management endpoints remain available behind `settings.view` / `settings.edit`.
+- **Invariants touched:** INV-008 (permission checks stay aligned), INV-018 for deploy/runtime verification.
+- **Traceability:** Related WF: WF-006. Contracts/routes: `GET /api/IpAccess/settings`, `PUT /api/IpAccess/settings`, `GET /api/IpAccess/entries`, `POST /api/IpAccess/entries`, `PUT /api/IpAccess/entries/:id`, `DELETE /api/IpAccess/entries/:id`, `GET /api/IpAccess/check`. Data/tables: `dbo.ip_access_settings`, `dbo.ip_access_entries`. Tests: `website/src/__tests__/IpAccessControl.component.test.tsx`, `website/src/__tests__/ipAccessControl.types.test.ts`, `website/src/__tests__/ipValidation.edgecases.test.ts`, `website/e2e/login-and-settings.spec.ts`; backend middleware/route E2E remains a known gap. Product-map domains: `settings-system`, `auth`.
 
 ---
 
@@ -335,42 +348,65 @@
 
 - **Actor:** Cashier
 - **Trigger:** Customer profile → Monthly Plans → Pay Installment
-- **Preconditions:** Monthly plan exists with unpaid installment; actor has `payment.add`.
+- **Preconditions:** Monthly plan exists with unpaid installment; current route requires `payment.edit`.
 - **Main flow:**
   1. Actor selects installment to pay.
   2. Enters payment method and amount.
   3. Clicks Pay → `PUT /api/MonthlyPlans/:id/installments/:installmentId/pay`.
-  4. Backend records payment, updates installment `status='paid'`.
-- **Postconditions:** Installment marked paid; plan balance reduced.
-- **Invariants touched:** INV-003 (if allocation to saleorder occurs).
+  4. Backend updates the installment `status='paid'`, `paid_date`, and `paid_amount`.
+  5. If all installments are paid, backend marks the monthly plan `status='completed'`; otherwise it advances the next pending installment to `upcoming`.
+- **Postconditions:** Installment status and plan status are updated; current route does not create a `dbo.payments` row by itself.
+- **Invariants touched:** INV-020 when runtime code changes; payment-ledger invariants apply only if this flow is later wired to `dbo.payments`.
+- **Traceability:** Related WF: WF-012. Contracts/routes: `GET /api/MonthlyPlans`, `GET /api/MonthlyPlans/:id`, `PUT /api/MonthlyPlans/:id/installments/:installmentId/pay`. Data/tables: `dbo.monthlyplans`, `dbo.monthlyplan_items`, `dbo.planinstallments`; no current write to `dbo.payments` from the installment-pay route. Tests: no dedicated monthly-plan installment tests yet; see `docs/TEST-MATRIX.md` gap. Product-map domains: `payments-deposits`, `customers-partners`.
 
 ---
 
 ## UC-019 — Employee Revenue Export
 
 - **Actor:** Manager / Admin
-- **Trigger:** Reports → Employees → Export Excel
-- **Preconditions:** Actor has `reports.view`.
+- **Trigger:** `/reports/revenue` → employee revenue Excel export controls
+- **Preconditions:** Actor has `reports.export`; date range selected; optional employee type and employee filters selected.
 - **Main flow:**
   1. Actor sets date range, location filter, employee type filter.
-  2. Clicks Export → `GET /api/Exports/employees/download?...`.
-  3. Backend queries `payments`, `payment_allocations`, `saleorders`, `partners`.
+  2. Clicks Export → `POST /api/Exports/report-sales-employees/download` with `{ filters }`.
+  3. Backend queries `payments`, `payment_allocations`, `saleorders`, `partners`, and `companies` using the requested employee role attribution.
   4. Groups by employee; builds Excel with revenue per employee.
-  5. File downloads.
+  5. File downloads and an `exports_audit` row is attempted.
 - **Postconditions:** Excel downloaded; audit log written.
 - **Invariants touched:** INV-019 (nginx timeout).
+- **Traceability:** Related WF: WF-005, WF-013, UC-013. Contracts/routes: `POST /api/Exports/report-sales-employees/preview`, `POST /api/Exports/report-sales-employees/download`. Data/tables: `dbo.payment_allocations`, `dbo.payments`, `dbo.saleorders`, `dbo.partners`, `dbo.companies`, `dbo.exports_audit`. Tests: `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`, `website/e2e/export-downloads.spec.ts` for broader export downloads. Product-map domains: `reports-analytics`, `payments-deposits`, `employees-hr`.
 
 ---
 
 ## UC-020 — Feedback Thread Moderation
 
 - **Actor:** Admin
-- **Trigger:** Settings → Feedback Inbox
-- **Preconditions:** Actor has `feedback.admin`.
+- **Trigger:** `/feedback` admin thread inbox
+- **Preconditions:** Actor has the scoped feedback permission for the action (`feedback.view`, `feedback.reply`, `feedback.edit`, or `feedback.delete`).
 - **Main flow:**
   1. Admin views list of feedback threads.
   2. Opens thread; reads messages and attachments.
   3. Replies or changes status (`pending` → `in_progress` → `resolved` / `ignored`).
-  4. Status update saved via `PUT /api/feedback/threads/:id`.
+  4. Status update saved via `PATCH /api/Feedback/all/:threadId/status`; admin reply saved via `POST /api/Feedback/all/:threadId/reply`.
 - **Postconditions:** Thread status updated; reporter sees resolution.
 - **Invariants touched:** INV-016 (i18n labels).
+- **Traceability:** Related WF: WF-011. Contracts/routes: `GET /api/Feedback/all`, `GET /api/Feedback/all/:threadId`, `POST /api/Feedback/all/:threadId/reply`, `PATCH /api/Feedback/all/:threadId/status`, `DELETE /api/Feedback/all/:threadId`. Data/tables: `dbo.feedback_threads`, `dbo.feedback_messages`, `dbo.feedback_attachments`, `api/uploads/feedback/`. Tests: `api/tests/readRoutePermissions.test.js`, `website/e2e/phase2-quick-features.spec.ts` indirect; attachment storage/deletion E2E remains a known gap. Product-map domains: `feedback-cms`, `auth`.
+
+---
+
+## UC-021 — Read DotKham / Medical-History Context Without Losing Long Text
+
+- **Actor:** Receptionist / Doctor
+- **Trigger:** Customer profile medical-history or health-record surface renders long migrated notes / DotKham-linked text.
+- **Preconditions:** Customer exists; actor has customer/profile visibility.
+- **Main flow:**
+  1. Actor opens `/customers/:id`.
+  2. Frontend reads customer profile and linked medical-record context.
+  3. Long medical-history or DotKham-related text is rendered in a bounded cell or card using runtime overflow detection.
+  4. Hover or expand action reveals the full text without navigating away or clipping Vietnamese content.
+- **Alternate flows:**
+  - **AF-1 No medical history:** Empty state distinguishes missing data from load failure.
+  - **AF-2 DotKham record is read-only:** UI shows the record context but does not offer unsupported edits.
+- **Postconditions:** Staff can inspect long migrated clinical notes without breaking dense profile layout.
+- **Invariants touched:** INV-015 (expandable overflow), INV-016 (i18n), INV-017 (dense list scroll).
+- **Traceability:** Related WF: WF-014. Contracts/routes: `GET /api/Partners/:id`, `GET /api/DotKhams`. Data/tables: `dbo.partners.medicalhistory`, `dbo.dotkhams`, `dbo.dotkhamsteps`. Tests: `website/src/components/customer/CustomerProfile.test.tsx`, `website/src/hooks/__tests__/useCustomerProfile.date-normalization.test.tsx`, no dedicated DotKham tooltip regression yet. Product-map domains: `customers-partners`, `services-catalog`, `payments-deposits` when DotKham allocations are shown.

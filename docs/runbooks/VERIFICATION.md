@@ -16,11 +16,16 @@ npm --prefix contracts install
 
 ```bash
 git diff --check
+npm run verify:prompt
+npm run verify:governance
+bash scripts/verify-docs.sh
+test -f testbright.md
 rg -n "/website.*routes to ServiceCatalog|/website.*renders.*ServiceCatalog|/api/version/event|NOT IMPLEMENTED" product-map docs/runbooks docs/superpowers/reviews --glob '!docs/runbooks/VERIFICATION.md'
 rg -n "TV2codex|Tradeverse|TVNUKE|CopyRelation|AtlasGo|USDT" AGENTS.md ARCHITECTURE.md DESIGN.md BEHAVIOR.md DECISIONS.md COORDINATION_REQUESTS.md IDEA.md docs/runbooks --glob '!docs/runbooks/VERIFICATION.md'
+! rg -n -e "<claude-mem-context>" -e "</claude-mem-context>" AGENTS.md ARCHITECTURE.md DESIGN.md BEHAVIOR.md DECISIONS.md docs product-map --glob '!docs/runbooks/VERIFICATION.md'
 ```
 
-Expected: no whitespace errors; no stale product-map contracts for current routes; no leaked Tradeverse product rules in TGClinic authority docs.
+Expected: no whitespace errors; prompt-level authority, doc/changelog/TestSprite enforcement, pre-commit, and PR gates pass; no stale product-map contracts for current routes; no leaked Tradeverse product rules or generated memory blocks in TGClinic authority docs.
 
 ## Frontend Changes
 
@@ -31,6 +36,7 @@ npm --prefix website run build
 ```
 
 For UI changes, add browser verification or Playwright coverage for the affected page.
+Update root `testbright.md` with the changed URLs/API routes, roles, data flows, happy paths, edge cases, regressions, and setup/login state for TestSprite.
 
 ## API Changes
 
@@ -39,6 +45,7 @@ npm --prefix api test
 ```
 
 For route changes, add or update Supertest/Jest coverage where practical.
+Update root `testbright.md` with the changed API routes, affected data flows, roles, happy paths, edge cases, regressions, and setup/login state for TestSprite.
 
 Export route changes should also run or update:
 
@@ -53,6 +60,7 @@ npm --prefix contracts run build
 ```
 
 Then run affected frontend/API tests.
+Update root `testbright.md` when the contract change affects a feature or backend data flow.
 
 ## Deployment/Infra Changes
 

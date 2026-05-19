@@ -263,7 +263,12 @@ export function useFaceCaptureController({
         setDetectionState('detected');
         setCaptureError(null);
       } else {
-        readyFrames = 0;
+        // Decay (not hard reset): the native FaceDetector intermittently drops a
+        // frame even when the user is holding still, so a hard reset to 0 would
+        // make capture stall at e.g. 84% quality whenever the readiness streak
+        // keeps getting wiped by a single dropped frame. This matches the
+        // lab Module D behavior that was validated as reliable.
+        readyFrames = Math.max(0, readyFrames - 1);
         setDetectionState(requireFaceDetection ? 'no-face' : 'scanning');
       }
 

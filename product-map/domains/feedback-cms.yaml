@@ -5,6 +5,10 @@ summary: |
   manageable and have dedicated settings UI.
 owns:
   - api/src/routes/feedback.js
+  - api/src/routes/feedback/userRoutes.js
+  - api/src/routes/feedback/adminRoutes.js
+  - api/src/routes/feedback/admin.js
+  - api/src/routes/feedback/attachments.js
   - api/src/routes/websitePages.js
   - website/src/pages/Feedback.tsx
   - website/src/pages/Website.tsx
@@ -28,6 +32,7 @@ tables:
   - dbo.feedback_attachments
   - dbo.websitepages
 endpoints:
+  - GET    /api/Feedback/unread-count
   - POST   /api/Feedback
   - GET    /api/Feedback/my
   - GET    /api/Feedback/my/:threadId
@@ -54,7 +59,7 @@ shared_types:
   - website/src/types/feedback.ts
   - website/src/types/website.ts
 dependencies:
-  - Auth & Permissions (feedback admin requires requireAdmin inline check)
+  - Auth & Permissions (user routes require global auth; admin routes use requireAdmin, which allows System Administrator or effective permissions.view)
   - file upload via multer + sharp
 affected_by:
   - Changes to feedback attachment size limits
@@ -62,4 +67,5 @@ affected_by:
   - Changes to websitepages schema
 impact_tests:
   - website/e2e/phase2-quick-features.spec.ts (indirect)
+  - api feedback route tests should cover unread-count admin/staff counts, /all admin-only access, attachments, reply, status, and delete behavior.
 risk_level: low

@@ -1,7 +1,7 @@
 name: Services Catalog
 summary: |
   Dental service catalog is stored in the legacy dbo.products table.
-  The backend route /api/Products handles CRUD; /api/Services is dead code
+  The backend route /api/Products handles CRUD; /api/Services is unmounted dead code
   targeting a non-existent public.services table. ProductCategories manage
   service groupings. The current service catalog page is /service-catalog;
   /website is the Website CMS surface. SaleOrders and SaleOrderLines handle
@@ -11,6 +11,7 @@ owns:
   - api/src/routes/productCategories.js
   - api/src/routes/saleOrders.js
   - api/src/routes/saleOrderLines.js
+  - api/src/routes/dotKhams.js (read-only treatment-round context)
   - website/src/pages/ServiceCatalog.tsx
   - website/src/pages/Services/index.tsx
   - website/src/components/services/
@@ -26,6 +27,7 @@ writes:
   - dbo.saleorders (create + state patch)
   - dbo.saleorderlines (CRUD via saleOrderLines route)
   - dbo.saleorder_state_logs (audit logging)
+  - dbo.dotkhams (payment residual context)
 tables:
   - dbo.products
   - dbo.productcategories
@@ -34,6 +36,7 @@ tables:
   - dbo.saleorderlines
   - dbo.saleorder_state_logs
   - dbo.dotkhamsteps (linked product usage)
+  - dbo.dotkhams
 endpoints:
   - GET    /api/Products
   - GET    /api/Products/:id
@@ -45,11 +48,15 @@ endpoints:
   - PUT    /api/ProductCategories/:id
   - DELETE /api/ProductCategories/:id
   - GET    /api/SaleOrders
+  - GET    /api/SaleOrders/lines
   - GET    /api/SaleOrders/:id
   - POST   /api/SaleOrders
   - PATCH  /api/SaleOrders/:id
   - PATCH  /api/SaleOrders/:id/state
   - GET    /api/SaleOrderLines
+  - DELETE /api/SaleOrderLines/:id
+  - GET    /api/DotKhams
+  - GET    /api/DotKhams/:id
 ui_surfaces:
   - /service-catalog (service catalog, routed to ServiceCatalog in App.tsx)
   - /website is Website CMS, not the service catalog
@@ -66,18 +73,21 @@ shared_types:
 dependencies:
   - dbo.products must remain compatible with saleorderlines/dotkhamsteps FKs
   - product delete blocked if linked saleorderlines or dotkhamsteps exist
+  - Sale order treatment records use `/api/SaleOrders/lines`; `/api/SaleOrderLines/:id` soft-deletes a line and soft-deletes the parent order when it was the last active line.
 affected_by:
   - Schema changes to dbo.products (price fields, canorderlab, active)
-  - Dead route api/src/routes/services.js must not be revived accidentally
+  - Dead unmounted route api/src/routes/services.js must not be revived accidentally
 impact_tests:
   - website/src/__tests__/ServiceCatalog.test.tsx
   - website/src/components/services/serviceFormToothQuantity.test.ts
+  - website/e2e/export-downloads.spec.ts (services/service-catalog export menus)
   - website/e2e/team-bravo-records.spec.ts
 risk_level: high
 notes:
-  - STALE/DEAD: api/src/routes/services.js queries public.services which does not exist.
+  - STALE/DEAD: api/src/routes/services.js is not mounted in server.js and queries public.services which does not exist.
   - STALE/DEAD: website/src/lib/api/services.ts exports dead wrappers.
   - Current routing: /service-catalog renders ServiceCatalog, /services renders patient treatment records, and /website renders the Website CMS page.
+  - Current frontend guards: /service-catalog uses `services.view`, while /services patient treatment records still use `customers.edit` even though backend sale-order read routes use `services.view`.
   - /api/ProductCategories groups duplicate migrated category UUIDs by display name for the catalog sidebar; /api/Products category filtering expands the selected display group to all matching category UUIDs.
   - Service catalog and patient treatment searches must remain accent-insensitive for Vietnamese service, category, doctor, and customer names.
   - Customer profile service edits patch the parent sale order but must also persist rendered line fields such as `saleorderlines.productuomqty`, `tooth_numbers`, and `tooth_comment` because the `Phiếu khám` table is sourced from `/api/SaleOrders/lines`.

@@ -31,6 +31,17 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/prompt-authority-check.sh",
+            "timeout": 5000
+          }
+        ]
+      }
     ]
   },
   "migration": {

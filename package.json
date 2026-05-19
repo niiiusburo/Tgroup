@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "verify:prompt": "bash scripts/prompt-authority-check.sh",
+    "verify:docs": "bash scripts/verify-docs.sh",
+    "verify:governance": "bash scripts/prompt-authority-check.sh && bash scripts/verify-docs.sh && git diff --check HEAD"
   },
   "devDependencies": {
     "husky": "^9.1.7"

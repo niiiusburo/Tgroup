@@ -28,8 +28,8 @@ describe('reports revenue recognition', () => {
   it('uses posted service payment allocations for revenue summary and excludes deposits', async () => {
     query
       .mockResolvedValueOnce([{ state: 'sale', cnt: '2', total: '1000', outstanding: '200' }])
-      .mockResolvedValueOnce([{ state: 'sale', paid: '700' }])
-      .mockResolvedValueOnce([{ method: 'cash', status: 'posted', cnt: '1', total: '700' }]);
+      .mockResolvedValueOnce([{ state: 'sale', paid: '700' }, { state: 'done', paid: '300' }])
+      .mockResolvedValueOnce([{ method: 'cash', status: 'posted', cnt: '2', total: '1000' }]);
 
     const res = await request(makeApp())
       .post('/api/Reports/revenue/summary')
@@ -38,9 +38,10 @@ describe('reports revenue recognition', () => {
     expect(res.status).toBe(200);
     expect(res.body.data.orders).toEqual([
       { state: 'sale', cnt: 2, total: 1000, paid: 700, outstanding: 200 },
+      { state: 'done', cnt: 0, total: 0, paid: 300, outstanding: 0 },
     ]);
     expect(res.body.data.payments).toEqual([
-      { method: 'cash', status: 'posted', cnt: 1, total: 700 },
+      { method: 'cash', status: 'posted', cnt: 2, total: 1000 },
     ]);
 
     const revenueSql = query.mock.calls[1][0];

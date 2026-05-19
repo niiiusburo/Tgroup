@@ -103,6 +103,8 @@
 
 ## Payments (`/api/Payments`)
 
+Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR is a UI/entry alias that posts `bank_transfer`; card and e-wallet labels are not live API values until contracts, reports, exports, allocation logic, and docs are updated together.
+
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
 | GET | `/` | Perm:`payment.view` | `?customerId, serviceId, limit, offset, type` (`payments` \| `deposits` \| `all`) | `{ items[], totalItems }` (+ legacy fallback) |

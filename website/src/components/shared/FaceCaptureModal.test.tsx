@@ -169,6 +169,47 @@ describe('FaceCaptureModal', () => {
     expect(onCapture.mock.calls[0][0]).toBeInstanceOf(Blob);
   });
 
+  it('still auto-captures when the native detector intermittently drops a frame', async () => {
+    // Regression: useFaceCaptureController used to hard-reset readyFrames to 0
+    // whenever a single tick fell below the auto-capture threshold. The native
+    // FaceDetector occasionally returns zero faces even while the user holds
+    // still, so under the old behavior the readiness streak got wiped over and
+    // over, the quality score sat high (e.g. 84%) and capture never fired until
+    // the 15s safety-net force-capture kicked in — long enough that users gave
+    // up. The fix is to decay readyFrames by 1 instead of resetting, matching
+    // the lab Module D that was validated as reliable.
+    vi.useFakeTimers();
+    mockVideoWidth = 640;
+    mockVideoHeight = 480;
+    let tick = 0;
+    class MockFaceDetector {
+      detect = vi.fn().mockImplementation(async () => {
+        // Pattern: 4 frames with face, 1 frame without. Repeats. Under the old
+        // hard-reset behavior this never accumulates 6 ready frames in a row,
+        // so capture would stall until the ~15s safety net.
+        const inWindow = tick++ % 5;
+        return inWindow < 4 ? [{ boundingBox: { width: 220, height: 260 } }] : [];
+      });
+    }
+    Object.defineProperty(globalThis, 'FaceDetector', {
+      configurable: true,
+      value: MockFaceDetector,
+    });
+    const onCapture = vi.fn();
+
+    render(<FaceCaptureModal isOpen onCapture={onCapture} onCancel={vi.fn()} />);
+
+    await waitForCameraStart();
+    // ~3s: well short of the 15.6s safety-net force-capture. With decay this
+    // must capture; with the old hard-reset it would not.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3500);
+    });
+
+    expect(onCapture).toHaveBeenCalledTimes(1);
+    expect(onCapture.mock.calls[0][0]).toBeInstanceOf(Blob);
+  });
+
   it('keeps the camera open and continues scanning when no native FaceDetector is available', async () => {
     // When the browser has no native FaceDetector (Safari, Firefox, iOS), the
     // engine falls back to quality-only scoring instead of showing "no face"

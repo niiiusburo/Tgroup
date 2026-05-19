@@ -2,6 +2,10 @@
 
 > End-to-end business workflows as mermaid sequence diagrams. Actor, system, external services, and data state transitions shown.
 
+## Traceability Convention
+
+Every new or materially edited workflow should include one compact traceability line after the diagram or state-transition block: related UC IDs, current contracts/routes, data/tables, invariants, tests, and product-map domains. Prefer the current route method from `product-map/contracts/api-index.md`; use `unknown` instead of guessing.
+
 ---
 
 ## WF-001 — Login with Remember Me
@@ -15,7 +19,7 @@ sequenceDiagram
     participant FE as React (website/)
     participant API as Express API
     participant DB as Postgres (dbo)
-    
+
     U->>FE: Enter email, password, check "Remember Me"
     FE->>API: POST /api/Auth/login { email, password, rememberMe }
     API->>DB: SELECT FROM partners WHERE email=$1 AND employee=true AND isdeleted=false AND active=true
@@ -62,7 +66,7 @@ sequenceDiagram
     participant FE as React (Calendar/Overview)
     participant API as Express API
     participant DB as Postgres (dbo)
-    
+
     R->>FE: Click "Hẹn mới"
     FE->>FE: Open modal, defaults from LocationContext
     R->>FE: Select customer, doctor, date, time, optional service
@@ -108,7 +112,7 @@ sequenceDiagram
     participant FE as React (CustomerProfile)
     participant API as Express API
     participant DB as Postgres (dbo)
-    
+
     S->>FE: Click "Đặt cọc"
     FE->>FE: Open modal, show open sale orders (residual > 0)
     S->>FE: Enter amount, select allocation method
@@ -156,7 +160,7 @@ sequenceDiagram
     participant FE as React (PatientCheckIn/Calendar)
     participant API as Express API
     participant DB as Postgres (dbo)
-    
+
     D->>FE: Mark appointment "Done"
     FE->>API: PUT /api/Appointments/:id { state='done' }
     API->>DB: UPDATE appointments SET state='done', lastupdated=NOW()
@@ -184,42 +188,58 @@ sequenceDiagram
 
 ## WF-005 — Generate Revenue Report Excel Export
 
-**Trigger:** Reports page → Revenue → Export.
+**Trigger:** `/reports/revenue` → operational export menu.
 
 ```mermaid
 sequenceDiagram
     actor M as Manager
-    participant FE as React (Reports)
+    participant FE as React (/reports/revenue)
     participant API as Express API
+    participant Builder as Export Builder
     participant DB as Postgres (dbo)
     participant Nginx as Nginx
-    
-    M->>FE: Select date range, location, doctor filters
-    M->>FE: Click Export
-    FE->>API: GET /api/Exports/revenue/download?from=...&to=...&companyId=...
-    API->>DB: Complex aggregation SQL (appointments, payments, saleorders, partners)
-    DB-->>API: Result rows
-    API->>API: Build Excel workbook (sheets, headers, numeric formatting)
-    API-->>Nginx: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-    Nginx-->>FE: Stream response (timeout ≥300s)
-    FE->>FE: Trigger browser download
-    API->>DB: INSERT INTO exports_audit { user_id, export_type='revenue', file_name }
-    FE-->>M: ✓ Download complete
+
+    M->>FE: Select date range, location, doctor/employee filters
+    M->>FE: Preview or download export
+    alt Preview
+        FE->>API: POST /api/Exports/revenue-flat/preview { filters }
+        API->>Builder: legacyFlatReportsExport.revenue.preview(filters, user)
+        Builder->>DB: Count + total using posted payment allocations
+        DB-->>Builder: rowCount, totalAmount
+        Builder-->>API: { rowCount, summary, exceedsMax }
+        API->>DB: INSERT exports_audit action='preview' (best effort)
+        API-->>FE: Preview summary
+    else Download
+        FE->>API: POST /api/Exports/revenue-flat/download { filters }
+        API->>Builder: legacyFlatReportsExport.revenue.build(filters, user)
+        Builder->>DB: Revenue-flat rows from payments/payment_allocations/saleorders
+        DB-->>Builder: Result rows
+        Builder->>Builder: Build TDental-style flat workbook
+        Builder-->>API: workbook, filename, rowCount
+        API-->>Nginx: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+        Nginx-->>FE: Stream response (timeout >=300s)
+        FE->>FE: Trigger browser download
+        API->>DB: INSERT exports_audit action='download' (best effort)
+    end
+    FE-->>M: Preview shown or download complete
 ```
 
 **Data state transitions:**
-- New `exports_audit` row.
+- Optional `exports_audit` row with `export_type='revenue-flat'` and `action='preview'` or `action='download'`.
+- Report data is read-only; revenue is recognized from posted payment allocations, not raw order totals.
 
-**Invariants:** INV-019 (nginx timeout), INV-020 (version bump).
+**Traceability:** Related UCs: UC-013, UC-019. Contracts/routes: `POST /api/Reports/revenue/*`, `POST /api/Reports/cash-flow/summary`, `POST /api/Exports/:type/preview`, `POST /api/Exports/:type/download` with `revenue-flat` or `report-sales-employees`. Data/tables: `dbo.payment_allocations`, `dbo.payments`, `dbo.saleorders`, `dbo.saleorderlines`, `dbo.partners`, `dbo.companies`, `dbo.exports_audit`. Invariants: INV-019, INV-020. Tests: `api/src/routes/reports/__tests__/revenueRecognition.test.js`, `api/src/routes/reports/__tests__/cashFlow.test.js`, `api/src/routes/reports/__tests__/servicesBreakdown.test.js`, `api/src/services/reports/__tests__/canonicalRevenue.test.js`, `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js`, `website/src/hooks/__tests__/useReportData.test.ts`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`. Product-map domains: `reports-analytics`, `payments-deposits`, `employees-hr`.
+
 **Failure modes:**
 - Dataset too large → nginx 504 if timeout <300s.
-- Memory exhaustion → API crash on extremely large date ranges.
+- `EXPORT_ROW_LIMIT_EXCEEDED` → preview/download must surface row-limit guidance.
+- Export audit insert failure is best effort and must not corrupt the workbook response.
 
 ---
 
 ## WF-006 — IP Access Gate
 
-**Trigger:** Every non-public API request when IP access control is enabled for the company.
+**Trigger:** Every non-`/api/IpAccess/*` API request after IP access middleware is mounted.
 
 ```mermaid
 sequenceDiagram
@@ -228,30 +248,36 @@ sequenceDiagram
     participant Nginx as Nginx
     participant API as Express API
     participant DB as Postgres (dbo)
-    
-    U->>FE: Any authenticated action
-    FE->>Nginx: Request with Authorization header
+
+    U->>FE: Any API-backed action
+    FE->>Nginx: Request to /api/... with Authorization when protected
     Nginx->>API: Proxy to /api/...
-    API->>API: requireAuth → decode JWT
     API->>API: enforceIpAccess middleware
-    API->>DB: SELECT enabled FROM ip_access_settings WHERE company_id=$companyId
-    DB-->>API: enabled=true
-    API->>DB: SELECT ip_address FROM ip_access_entries WHERE setting_id=$settingId
-    DB-->>API: Whitelist[]
-    alt Client IP in whitelist
-        API-->>FE: 200 / normal response
-    else Client IP not in whitelist
-        API-->>FE: 403 { error: 'IP access denied' }
-        FE-->>U: Permission-specific denial
+    alt Request path starts /IpAccess/
+        API->>API: Skip IP gate to preserve admin recovery
+    else Cache empty or stale
+        API->>DB: SELECT mode FROM dbo.ip_access_settings LIMIT 1
+        API->>DB: SELECT active rows FROM dbo.ip_access_entries
+        DB-->>API: mode + active entries
+    end
+    API->>API: getClientIp from X-Forwarded-For, X-Real-IP, or socket
+    alt mode allows client IP
+        API->>API: Continue to auth/route permission checks
+        API-->>FE: Normal route response
+    else mode blocks client IP
+        API-->>FE: 403 { error: reason }
+        FE-->>U: Access-denied state
     end
 ```
 
-**Data state transitions:** None (read-only enforcement).
-**Failure modes:**
-- Admin locks themselves out → must connect from whitelisted IP or disable via DB directly.
-- Proxy/load balancer changes client IP → whitelist mismatch.
+**Data state transitions:** None during enforcement; settings changes through `/api/IpAccess/settings` and `/api/IpAccess/entries` invalidate the in-memory IP access cache.
 
----
+**Traceability:** Related UC: UC-017. Contracts/routes: `GET /api/IpAccess/settings`, `PUT /api/IpAccess/settings`, `GET /api/IpAccess/entries`, `POST /api/IpAccess/entries`, `PUT /api/IpAccess/entries/:id`, `DELETE /api/IpAccess/entries/:id`, `GET /api/IpAccess/check`. Data/tables: `dbo.ip_access_settings`, `dbo.ip_access_entries`. Invariants: INV-008, INV-018. Tests: `website/src/__tests__/IpAccessControl.component.test.tsx`, `website/src/__tests__/ipAccessControl.types.test.ts`, `website/src/__tests__/ipValidation.edgecases.test.ts`, `website/e2e/login-and-settings.spec.ts`; backend middleware/route coverage is still a gap. Product-map domains: `settings-system`, `auth`.
+
+**Failure modes:**
+- DB read failure in the middleware fails open and logs the problem.
+- Proxy/load balancer changes client IP → whitelist/blacklist may not match the intended address.
+- `block_all` can lock staff out of non-management API routes; `/api/IpAccess/*` is intentionally skipped by the IP gate but still requires normal settings permissions.
 
 ## WF-007 — Face Recognition Check-In
 
@@ -265,7 +291,7 @@ sequenceDiagram
     participant API as Express API
     participant FP as Face Provider (local or CompreFace)
     participant DB as Postgres (dbo)
-    
+
     P->>Cam: Face visible
     Cam->>FE: Video stream
     FE->>FE: Capture frame
@@ -315,7 +341,7 @@ sequenceDiagram
     participant Script as Node Script (api/scripts/)
     participant CSV as TDental Export CSV
     participant DB as Postgres (dbo)
-    
+
     A->>Script: Run tdental-import script
     Script->>CSV: Read CSV rows
     Script->>Script: Map columns to TGClinic schema
@@ -350,7 +376,7 @@ sequenceDiagram
     participant FE as React (PermissionBoard)
     participant API as Express API
     participant DB as Postgres (dbo)
-    
+
     A->>FE: Open /permissions
     FE->>API: GET /api/Permissions/groups
     API-->>FE: Groups + permissions[]
@@ -391,7 +417,7 @@ sequenceDiagram
     participant FE as React (PaymentForm)
     participant API as Express API
     participant DB as Postgres (dbo)
-    
+
     C->>FE: Click VietQR button
     FE->>API: GET /api/settings/bank?companyId=...
     API->>DB: SELECT * FROM company_bank_settings WHERE company_id=$id
@@ -409,3 +435,163 @@ sequenceDiagram
 **Failure modes:**
 - No bank settings for location → empty QR; cashier must configure in Settings first.
 - Invalid VietQR payload format → bank app rejects scan.
+
+---
+
+## WF-011 — Feedback Thread Moderation
+
+**Trigger:** Admin opens `/feedback` to triage staff/user feedback.
+
+```mermaid
+sequenceDiagram
+    actor A as Admin
+    participant FE as React (/feedback)
+    participant API as Express API
+    participant FS as Upload Storage
+    participant DB as Postgres (dbo)
+
+    A->>FE: Open feedback inbox
+    FE->>API: GET /api/Feedback/all?source=...
+    API->>DB: SELECT feedback_threads with latest message metadata
+    DB-->>API: Thread list
+    API-->>FE: Threads
+    A->>FE: Open thread
+    FE->>API: GET /api/Feedback/all/:threadId
+    API->>DB: SELECT messages + attachments
+    API-->>FE: Conversation
+    alt Admin reply
+        A->>FE: Write reply and attach file(s)
+        FE->>API: POST /api/Feedback/all/:threadId/reply FormData
+        API->>FS: Store uploaded attachment(s)
+        API->>DB: INSERT feedback_messages / feedback_attachments
+    else Status change
+        A->>FE: Mark in_progress/resolved/ignored
+        FE->>API: PATCH /api/Feedback/all/:threadId/status { status }
+        API->>DB: UPDATE feedback_threads.status
+    end
+    API-->>FE: Updated thread state
+    FE-->>A: Inbox refreshes
+```
+
+**Data state transitions:**
+- `feedback_threads.status` changes for moderation.
+- `feedback_messages` and `feedback_attachments` rows are inserted for admin replies; files are stored under `api/uploads/feedback/`.
+
+**Traceability:** Related UC: UC-020. Contracts/routes: `GET /api/Feedback/all`, `GET /api/Feedback/all/:threadId`, `POST /api/Feedback/all/:threadId/reply`, `PATCH /api/Feedback/all/:threadId/status`, `DELETE /api/Feedback/all/:threadId`. Data/tables: `dbo.feedback_threads`, `dbo.feedback_messages`, `dbo.feedback_attachments`, `api/uploads/feedback/`. Invariants: INV-015, INV-016, INV-017. Tests: `api/tests/readRoutePermissions.test.js`, `website/e2e/phase2-quick-features.spec.ts` indirect; file storage/deletion E2E remains a gap. Product-map domains: `feedback-cms`, `auth`.
+
+**Failure modes:**
+- Missing scoped feedback permission causes 403 on the specific action.
+- Attachment upload succeeds but DB insert fails → orphan-file cleanup must be checked when changing upload handling.
+
+---
+
+## WF-012 — Monthly Plan Installment Payment
+
+**Trigger:** Cashier pays an installment from a monthly plan.
+
+```mermaid
+sequenceDiagram
+    actor C as Cashier
+    participant FE as React (MonthlyPlan/Payment)
+    participant API as Express API
+    participant DB as Postgres (dbo)
+
+    C->>FE: Select unpaid installment
+    C->>FE: Enter paid amount and paid date
+    FE->>API: PUT /api/MonthlyPlans/:id/installments/:installmentId/pay
+    API->>DB: UPDATE planinstallments SET status='paid', paid_date, paid_amount
+    DB-->>API: Updated installment
+    API->>DB: SELECT COUNT(*) remaining unpaid installments
+    alt No unpaid installments remain
+        API->>DB: UPDATE monthlyplans SET status='completed'
+    else Unpaid installments remain
+        API->>DB: UPDATE next pending installment SET status='upcoming'
+    end
+    API-->>FE: Updated installment row
+    FE-->>C: Plan schedule refreshes
+```
+
+**Data state transitions:**
+- `planinstallments.status` becomes `paid`.
+- `monthlyplans.status` becomes `completed` only when all installments are paid.
+- Current route does not create a `payments` ledger row.
+
+**Traceability:** Related UC: UC-018. Contracts/routes: `GET /api/MonthlyPlans`, `GET /api/MonthlyPlans/:id`, `PUT /api/MonthlyPlans/:id/installments/:installmentId/pay`. Data/tables: `dbo.monthlyplans`, `dbo.monthlyplan_items`, `dbo.planinstallments`. Invariants: INV-020 for runtime changes; payment invariants apply if ledger creation is later added. Tests: no dedicated monthly-plan installment tests yet. Product-map domains: `payments-deposits`, `customers-partners`.
+
+**Failure modes:**
+- Route currently requires `payment.edit`, not `payment.add`; permission wording must stay explicit until product decides otherwise.
+- Plan can show paid without a matching `dbo.payments` row, so finance reconciliation must not assume installment-pay equals cash receipt.
+
+---
+
+## WF-013 — Reports Revenue Screen Uses Canonical Revenue and Operational Exports
+
+**Trigger:** Manager opens `/reports/revenue`.
+
+```mermaid
+sequenceDiagram
+    actor M as Manager
+    participant FE as React (/reports/revenue)
+    participant Hook as useReportData
+    participant API as Express API
+    participant DB as Postgres (dbo)
+
+    M->>FE: Open revenue report and set filters
+    FE->>Hook: useReportData('/Reports/revenue/summary', filters)
+    Hook->>API: POST /api/Reports/revenue/summary { dateFrom, dateTo, companyId? }
+    API->>DB: Canonical revenue from payment_allocations/payments/saleorders
+    DB-->>API: Result rows
+    API-->>Hook: Revenue summary response
+    Hook-->>FE: KPI data
+    FE->>API: POST /api/Reports/cash-flow/summary { filters }
+    API->>DB: Cash-flow classification rows
+    API-->>FE: Cash movement cards
+    FE-->>M: Revenue KPIs + cash-flow context + export controls
+```
+
+**Data state transitions:**
+- None. This screen reads canonical paid revenue and cash-flow context.
+
+**Traceability:** Related UCs: UC-013, UC-019. Contracts/routes: `POST /api/Reports/revenue/summary`, `POST /api/Reports/revenue/trend`, `POST /api/Reports/revenue/by-location`, `POST /api/Reports/revenue/by-doctor`, `POST /api/Reports/revenue/by-category`, `POST /api/Reports/revenue/rules`, `POST /api/Reports/cash-flow/summary`, `POST /api/Exports/report-sales-employees/preview`. Data/tables: `dbo.payment_allocations`, `dbo.payments`, `dbo.saleorders`, `dbo.saleorderlines`, `dbo.partners`, `dbo.companies`. Invariants: INV-003, INV-012, INV-019. Tests: `api/src/routes/reports/__tests__/revenueRecognition.test.js`, `api/src/routes/reports/__tests__/cashFlow.test.js`, `api/src/services/reports/__tests__/canonicalRevenue.test.js`, `website/src/hooks/__tests__/useReportData.test.ts`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx`. Product-map domains: `reports-analytics`, `payments-deposits`.
+
+**Failure modes:**
+- Cash-flow cards are cash movement context and must not be treated as the paid-revenue source of truth.
+- Location scope mismatches can make report totals differ by user role.
+
+---
+
+## WF-014 — DotKham / Medical-History Long-Text Inspection
+
+**Trigger:** Staff opens a customer profile containing long migrated medical-history or DotKham-related text.
+
+```mermaid
+sequenceDiagram
+    actor S as Staff
+    participant FE as React (CustomerProfile)
+    participant API as Express API
+    participant DB as Postgres (dbo)
+
+    S->>FE: Open /customers/:id
+    FE->>API: GET /api/Partners/:id
+    API->>DB: SELECT partner profile including medicalhistory
+    DB-->>API: Partner row
+    FE->>API: GET /api/DotKhams?partnerId=...
+    API->>DB: SELECT read-only DotKham rows
+    DB-->>API: Medical records
+    API-->>FE: Profile + DotKham context
+    FE->>FE: Render bounded text with overflow measurement
+    alt Text overflows
+        S->>FE: Hover or expand
+        FE-->>S: Full medical text visible inline
+    else Text fits
+        FE-->>S: Normal profile view
+    end
+```
+
+**Data state transitions:** None; DotKham records are read-only in the current UI.
+
+**Traceability:** Related UC: UC-021. Contracts/routes: `GET /api/Partners/:id`, `GET /api/DotKhams`. Data/tables: `dbo.partners.medicalhistory`, `dbo.dotkhams`, `dbo.dotkhamsteps`. Invariants: INV-015, INV-016, INV-017. Tests: `website/src/components/customer/CustomerProfile.test.tsx`, `website/src/hooks/__tests__/useCustomerProfile.date-normalization.test.tsx`; no dedicated DotKham tooltip regression yet. Product-map domains: `customers-partners`, `services-catalog`, `payments-deposits` when payment allocation context is shown.
+
+**Failure modes:**
+- Long Vietnamese text clips or overlaps if `ExpandableText`/runtime overflow detection is bypassed.
+- DotKham rows may be read-only or sync-owned; avoid implying unsupported edits.

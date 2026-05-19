@@ -122,7 +122,7 @@ React context (`website/src/contexts/LocationContext.tsx`) filtering list views 
 ## M
 
 **Method (Payment)**  
-Enum on `dbo.payments.method`: `cash`, `bank_transfer`, `deposit`, `mixed`. Frontend type in `website/src/types/payment.ts`. Backend Zod schema in `contracts/payment.ts` also accepts `card`, `momo`, `vnpay`, `zalopay` but these may not be fully wired.
+Live enum on `dbo.payments.method`, frontend types, and `contracts/payment.ts`: `cash`, `bank_transfer`, `deposit`, `mixed`. Card and e-wallet labels are not live payment methods until the contract, UI, backend allocation behavior, reports, and exports are wired together.
 
 **Mixed Payment**  
 A payment combining cash, bank transfer, and deposit wallet in a single transaction. Stored with `method = 'mixed'` and broken down in `cash_amount`, `bank_amount`, `deposit_used`.

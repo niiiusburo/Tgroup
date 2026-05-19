@@ -6,6 +6,7 @@ set -euo pipefail
 
 DB="${HOME}/.claude-mem/claude-mem.db"
 OUT="$(dirname "$0")/../.claude/memory.md"
+AGENTS_OUT="$(dirname "$0")/../AGENTS.md"
 PROJECT="Tgroup"
 
 if [[ ! -f "$DB" ]]; then
@@ -27,8 +28,8 @@ SUMS=$(sqlite3 "$DB" "SELECT request, completed, next_steps, datetime(created_at
 cat > "$OUT" <<EOF
 # Shared Session Memory — $PROJECT (Claude-Mem Bridge)
 
-> Auto-generated from claude-mem DB (\`~/.claude-mem/claude-mem.db\`)  
-> Last sync: $NOW  
+> Auto-generated from claude-mem DB (\`~/.claude-mem/claude-mem.db\`)
+> Last sync: $NOW
 > Project: $PROJECT | Sessions tracked: $SESSION_COUNT
 
 ---
@@ -79,6 +80,20 @@ cat >> "$OUT" <<EOF
 
 > 💡 Tip: Run \`./scripts/sync-claude-mem.sh\` to refresh this file from the latest claude-mem data.
 EOF
+
+if [[ -f "$AGENTS_OUT" ]] && grep -q "<claude-mem-context>" "$AGENTS_OUT"; then
+  TMP_AGENTS="$(mktemp)"
+  awk '
+    /<claude-mem-context>/ { skip = 1; next }
+    /<\/claude-mem-context>/ { skip = 0; next }
+    !skip { lines[++n] = $0 }
+    END {
+      while (n > 0 && lines[n] == "") n--
+      for (i = 1; i <= n; i++) print lines[i]
+    }
+  ' "$AGENTS_OUT" > "$TMP_AGENTS"
+  mv "$TMP_AGENTS" "$AGENTS_OUT"
+fi
 
 echo "✅ Synced claude-mem → $OUT"
 echo "   Sessions: $SESSION_COUNT | Observations: $(echo "$OBS" | wc -l | xargs) | Summaries: $(echo "$SUMS" | wc -l | xargs)"

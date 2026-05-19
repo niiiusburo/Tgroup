@@ -16,11 +16,23 @@ const router = express.Router();
 // ── Revenue Summary ──────────────────────────────────────────────────
 
 function mergePaidByKey(baseRows, paidRows, key) {
-  const paidMap = new Map(paidRows.map(row => [row[key], toNumber(row.paid)]));
-  return baseRows.map(row => ({
-    ...row,
-    paid: paidMap.get(row[key]) || 0,
-  }));
+  const rowsByKey = new Map(baseRows.map(row => [row[key], { ...row, paid: 0 }]));
+  for (const paidRow of paidRows) {
+    const rowKey = paidRow[key];
+    const existing = rowsByKey.get(rowKey);
+    if (existing) {
+      existing.paid = toNumber(paidRow.paid);
+    } else {
+      rowsByKey.set(rowKey, {
+        [key]: rowKey,
+        cnt: 0,
+        total: 0,
+        outstanding: 0,
+        paid: toNumber(paidRow.paid),
+      });
+    }
+  }
+  return Array.from(rowsByKey.values());
 }
 
 router.post('/revenue/summary', requirePermission('reports.view'), async (req, res) => {
@@ -130,13 +142,13 @@ router.post('/revenue/trend', requirePermission('reports.view'), async (req, res
 
 router.post('/revenue/by-location', requirePermission('reports.view'), async (req, res) => {
   try {
-    const { dateFrom, dateTo } = req.body || {};
-    if (!validDate(dateFrom) || !validDate(dateTo)) return err(res, 400, 'Invalid params');
+    const { dateFrom, dateTo, companyId } = req.body || {};
+    if (!validDate(dateFrom) || !validDate(dateTo) || !validUUID(companyId)) return err(res, 400, 'Invalid params');
 
     const f = buildPairedRevenueFilters({
       dateFrom,
       dateTo,
-      companyId: null,
+      companyId,
       orderDateCol: 'so.datecreated',
       paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
       orderCompanyCol: 'so.companyid',

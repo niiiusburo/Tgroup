@@ -34,6 +34,7 @@ tables:
 endpoints:
   - GET    /api/Partners
   - GET    /api/Partners/check-unique
+  - GET    /api/Partners/resolve
   - GET    /api/Partners/:id
   - GET    /api/Partners/:id/GetKPIs
   - POST   /api/Partners
@@ -46,6 +47,8 @@ endpoints:
   - POST   /api/CustomerSources
   - PUT    /api/CustomerSources/:id
   - DELETE /api/CustomerSources/:id
+  - GET    /api/DotKhams
+  - GET    /api/DotKhams/:id
   - POST   /api/face/recognize
   - POST   /api/face/register
   - POST   /api/face/re-register
@@ -59,6 +62,7 @@ ui_surfaces:
 ui_invariants:
   - Customer source (`sourceid` / `sourcename`, label `Nguồn khách hàng`) is stored for migration/reporting compatibility but must not appear in the customer profile assignment card or the customer profile add/edit form.
   - Customer list search must resolve customers by migrated customer ref, appointment number (`appointments.name`), and service/treatment order number (`saleorders.code` / `saleorders.name`).
+  - Lightweight customer resolution uses `GET /api/Partners/resolve?key=` for UUID/ref/phone lookup and returns 404/409 payloads for no-match or ambiguous-match picker flows.
   - Customer-facing searches must be accent-insensitive for Vietnamese names so staff can type without diacritics.
   - Face registration for add/edit customer flows should collect straight, left, and right profile samples so recognition works when customers turn their head.
   - Customer profile assignment card and edit form must display the sales employee from `partners.salestaffid` / `salestaffname`, not the customer's `jobtitle` or other personal-detail fields.

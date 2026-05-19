@@ -113,7 +113,7 @@ docker exec tgroup-web cat /var/log/nginx/error.log | tail -n 50
 
 | Endpoint | Purpose | Expected |
 |---|---|---|
-| `GET /api/health` | API + DB + face service status | `{"status":"ok","db":"connected","faceService":true\|false}` |
+| `GET /api/health` | API + DB + face service status | `{"status":"healthy"\|"degraded","checks":{"db":true\|false,"faceService":true\|false},"faceProvider":"local"\|"compreface"\|...}` |
 | `GET /health` (face-service) | Face inference service | `{"status":"ok"}` |
 | `GET /version.json` | Frontend build version | `{"version":"x.y.z","buildTime":"..."}` |
 

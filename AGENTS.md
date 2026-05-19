@@ -30,6 +30,18 @@ If an ad hoc prompt conflicts with the authority stack, follow the authority sta
 
 - All project search bars must be accent-insensitive. Vietnamese names or labels with diacritics must still match when staff type the same words without accents; frontend code should use the shared `normalizeText()` helper or an equivalent canonical normalizer, and backend search should compare against accent-stripped text where the route owns filtering.
 
+## 1.2 Prompt-Level Authority Gate
+
+Every prompt that starts or continues project work must run the lightweight authority gate before edits:
+
+```bash
+bash scripts/prompt-authority-check.sh
+```
+
+For Claude-compatible local agents, `.claude/settings.json` wires this through the `UserPromptSubmit` hook so the guard runs automatically on each user prompt. For agents or tools that do not execute that hook, run `npm run verify:prompt` manually at prompt start.
+
+The prompt gate verifies that the authority files exist, strips accidental generated-memory blocks from `AGENTS.md`, blocks generated-memory leakage into other authority docs, and prints the prompt-matched docs/domains that must be read before changing code. It is a start-of-work guard, not a replacement for the commit/PR governance gates in §16.
+
 ## 2. Local-First Development
 
 All changes must be made and verified locally before pushing to the VPS.
@@ -266,3 +278,13 @@ git diff --name-only HEAD | grep -E "^docs/"
 git diff HEAD -- docs/CHANGELOG.md | grep "^+" | head -5
 ```
 If no docs changes appear, the commit is incomplete.
+
+### Enforcement paths
+The documentation gate is enforced in:
+- `scripts/verify-docs.sh`
+- `npm run verify:docs`
+- `npm run verify:governance`
+- `.husky/pre-commit`
+- `.github/workflows/pr-checks.yml` documentation-governance job
+
+Bypassing these gates with `--no-verify`, direct VPS edits, or direct pushes outside PR review is outside the normal project workflow and must be called out explicitly in the final recap.

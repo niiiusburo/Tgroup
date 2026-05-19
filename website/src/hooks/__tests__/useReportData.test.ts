@@ -79,6 +79,25 @@ describe('useReportData', () => {
     );
   });
 
+  it('omits the all-location sentinel from report payloads', async () => {
+    mockFetch.mockResolvedValueOnce({ success: true, data: {} });
+
+    const { result } = renderHook(() => useReportData('/Reports/dashboard', {
+      dateFrom: '2025-01-01',
+      dateTo: '2025-12-31',
+      companyId: 'all',
+    }));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      '/Reports/dashboard',
+      expect.objectContaining({
+        method: 'POST',
+        body: { dateFrom: '2025-01-01', dateTo: '2025-12-31' },
+      })
+    );
+  });
+
   it('refetch triggers a new API call', async () => {
     mockFetch.mockResolvedValueOnce({ success: true, data: { v: 1 } });
     mockFetch.mockResolvedValueOnce({ success: true, data: { v: 2 } });

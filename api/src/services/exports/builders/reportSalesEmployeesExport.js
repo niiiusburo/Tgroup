@@ -3,6 +3,7 @@
 const { query } = require('../../../db');
 const { resolveEffectivePermissions } = require('../../permissionService');
 const { createWorkbook, populateSummarySheet, toVNDate } = require('../exportWorkbook');
+const { SERVICE_REVENUE_PAYMENT_CONDITION } = require('../../../routes/reports/revenueRecognition');
 
 const MAX_ROWS = 100_000;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -113,8 +114,7 @@ async function resolveCompanyScope(user, companyId) {
 
 function buildWhere(filters, scope, employeeType) {
   const conditions = [
-    "p.status = 'posted'",
-    'pa.invoice_id IS NOT NULL',
+    SERVICE_REVENUE_PAYMENT_CONDITION,
     'COALESCE(so.isdeleted, false) = false',
     `${employeeType.employeeExpr} IS NOT NULL`,
   ];

@@ -10,7 +10,8 @@
 |---|---|---|
 | v1.0.0 | 2026-05-13 | Initial contract freeze covering all active API routes, shared types, and integration boundaries. |
 | v1.0.1 | 2026-05-17 | Contract documentation aligned to live payment method enum, report API, and operational export registry. |
-| v1.0.2 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
+| v1.0.2 | 2026-05-18 | Reconfirmed `@tgroup/contracts` payment method enum and generated contract artifacts are limited to live methods only. |
+| v1.0.3 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
 
 ---
 
@@ -594,6 +595,8 @@ export const AppointmentUpdateSchema = AppointmentBaseSchema.partial().omit({ id
 ```
 
 ### 5.2 Payments
+Live payment methods are `cash`, `bank_transfer`, `deposit`, and `mixed`. Do not add `card`, `momo`, `vnpay`, `zalopay`, or wallet aliases to the shared contract until backend storage, frontend forms, reports, exports, allocation math, and TestSprite coverage are promoted together.
+
 ```ts
 // contracts/payment.ts
 export const PaymentBaseSchema = z.object({

@@ -95,6 +95,8 @@ describe('reportSalesEmployeesExport', () => {
     expect(sql).toContain('so.doctorid');
     expect(sql).toContain('so.companyid = ANY');
     expect(sql).toContain("p.status = 'posted'");
+    expect(sql).toContain("COALESCE(p.payment_category, 'payment') = 'payment'");
+    expect(sql).toContain("COALESCE(p.deposit_type, '') NOT IN ('deposit', 'refund', 'usage')");
     expect(params).toContain('2026-05-01');
     expect(params).toContain('2026-05-31');
     expect(params).toContainEqual([LOC_A]);
@@ -126,8 +128,8 @@ describe('reportSalesEmployeesExport', () => {
     expect(dataSheet.getCell('A4').value).toBe('BS An (BS01)');
     expect(dataSheet.getCell('B4').value).toBe(1500000);
     expect(dataSheet.getCell('C5').value).toEqual(new Date('2026-05-02'));
-    expect(dataSheet.getCell('F5').value).toBe('Nguyễn Văn A');
-    expect(dataSheet.getCell('J5').value).toBe(1000000);
+    expect(dataSheet.getCell('G5').value).toBe('Nguyễn Văn A');
+    expect(dataSheet.getCell('K5').value).toBe(1000000);
 
     const summarySheet = result.workbook.getWorksheet('Summary');
     expect(summarySheet.getCell('A2').value).toBe('Số nhân viên');

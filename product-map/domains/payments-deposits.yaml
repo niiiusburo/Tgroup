@@ -5,6 +5,7 @@ summary: |
   dotkhams. Bank settings support VietQR payload creation.
 owns:
   - api/src/routes/payments.js
+  - api/src/routes/dotKhams.js (read endpoints for allocation targets)
   - api/src/routes/monthlyPlans.js
   - api/src/routes/bankSettings.js
   - api/src/routes/accountPayments.js
@@ -42,6 +43,8 @@ tables:
   - dbo.saleorders
   - dbo.dotkhams
 endpoints:
+  - GET    /api/DotKhams
+  - GET    /api/DotKhams/:id
   - GET    /api/Payments
   - GET    /api/Payments/deposits
   - GET    /api/Payments/deposit-usage
@@ -94,4 +97,10 @@ risk_level: high
 notes:
   - "`payments` is the canonical money row; `payment_allocations` is the canonical link from payments to saleorders or dotkhams."
   - TDental import and reconciliation work should use relation-driven allocations when source payment relation tables exist, not greedy remaining-balance allocation as durable truth.
-  - Payment create, refund, and destructive reversal are separate permissions: `payment.add`, `payment.refund`, and `payment.void`. `payment.edit` alone must not grant refund, delete, or void access.
+  - >-
+    Payment create, update (`PATCH /api/Payments/:id`), and proof upload
+    (`POST /api/Payments/:id/proof`) currently require `payment.add`; refund
+    and destructive reversal are separate permissions: `payment.refund` and
+    `payment.void`. `payment.edit` alone must not grant refund, delete, void,
+    PATCH, or proof-upload access unless the code changes.
+  - Payment allocation flows can update `dotkhams.amountresidual`, so DotKhams route/schema drift belongs in payment verification even though `/api/DotKhams` itself is read-only.

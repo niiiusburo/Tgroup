@@ -2,7 +2,7 @@
 # Canonical mapping of all permission strings to backend routes, frontend routes, and UI components.
 
 meta:
-  total_backend_strings: 33
+  total_backend_strings: 34
   total_frontend_route_guards: 15
   total_nav_guards: 13
   wildcard: "*"
@@ -37,6 +37,10 @@ backend_permissions:
   - string: customers.edit
     routes:
       - PUT /api/Partners/:id
+      - POST /api/SaleOrders
+      - PATCH /api/SaleOrders/:id
+      - PATCH /api/SaleOrders/:id/state
+      - DELETE /api/SaleOrderLines/:id
   - string: customers.hard_delete
     routes:
       - DELETE /api/Partners/:id/hard-delete
@@ -44,6 +48,7 @@ backend_permissions:
     routes:
       - GET /api/Partners
       - GET /api/Partners/check-unique
+      - GET /api/Partners/resolve
       - GET /api/Partners/:id
       - GET /api/Partners/:id/GetKPIs
       - GET /api/CustomerReceipts
@@ -69,8 +74,6 @@ backend_permissions:
       - GET /api/ExternalCheckups/:customerCode
   - string: payment.edit
     routes:
-      - PATCH /api/Payments/:id
-      - POST /api/Payments/:id/proof
       - PUT /api/settings/bank
       - PUT /api/MonthlyPlans/:id
       - PUT /api/MonthlyPlans/:id/installments/:installmentId/pay
@@ -79,6 +82,8 @@ backend_permissions:
   - string: payment.add
     routes:
       - POST /api/Payments
+      - PATCH /api/Payments/:id
+      - POST /api/Payments/:id/proof
   - string: payment.refund
     routes:
       - POST /api/Payments/refund
@@ -100,6 +105,10 @@ backend_permissions:
     routes:
       - POST /api/Exports/payments/preview
       - POST /api/Exports/payments/download
+      - POST /api/Exports/revenue-flat/preview
+      - POST /api/Exports/revenue-flat/download
+      - POST /api/Exports/deposit-flat/preview
+      - POST /api/Exports/deposit-flat/download
   - string: permissions.edit
     routes:
       - POST /api/Permissions/groups
@@ -110,10 +119,20 @@ backend_permissions:
       - GET /api/Permissions/groups
       - GET /api/Permissions/employees
       - GET /api/Permissions/resolve/:employeeId
+      - GET /api/Feedback/all
+      - GET /api/Feedback/all/:threadId
+      - POST /api/Feedback/all/:threadId/reply
+      - PATCH /api/Feedback/all/:threadId/status
+      - DELETE /api/Feedback/all/:threadId
+    note: Feedback admin routes use requireAdmin, which allows System Administrator or effective permissions.view.
   - string: reports.view
     routes:
       - POST /api/Reports/*
       - POST /api/DashboardReports/GetSumary
+  - string: reports.export
+    routes:
+      - POST /api/Exports/report-sales-employees/preview
+      - POST /api/Exports/report-sales-employees/download
   - string: locations.view
     routes:
       - GET /api/Companies
@@ -152,15 +171,17 @@ backend_permissions:
       - POST /api/StockPickings
       - PUT /api/StockPickings/:id
       - DELETE /api/StockPickings/:id
+      - PUT /api/IpAccess/settings
+      - POST /api/IpAccess/entries
+      - PUT /api/IpAccess/entries/:id
+      - DELETE /api/IpAccess/entries/:id
   - string: settings.view
     routes:
       - GET /api/SystemPreferences
       - GET /api/SystemPreferences/:key
       - GET /api/settings/bank
-      - GET /api/CustomerSources
-      - GET /api/CustomerSources/:id
-      - GET /api/StockPickings
-      - GET /api/StockPickings/:id
+      - GET /api/IpAccess/settings
+      - GET /api/IpAccess/entries
   - string: website.edit
     routes:
       - POST /api/WebsitePages
@@ -255,6 +276,22 @@ frontend_inline_permissions:
     components:
       - pages/Customers.tsx (hard delete guard)
 
+# Authenticated/public backend routes without route-level requirePermission().
+backend_auth_only_routes:
+  - routes:
+      - GET /api/DotKhams
+      - GET /api/DotKhams/:id
+      - GET /api/SaleOrderLines
+      - GET /api/CustomerSources
+      - GET /api/CustomerSources/:id
+      - GET /api/StockPickings
+      - GET /api/StockPickings/:id
+      - GET /api/ProductCategories
+    enforcement: Global /api requireAuth only.
+  - routes:
+      - GET /api/IpAccess/check
+    enforcement: Public allowlist before global /api auth.
+
 # Nav sidebar permission mapping (Layout.tsx NAV_PERMISSION)
 nav_permissions:
   - path: /
@@ -298,7 +335,7 @@ nav_permissions:
 risks:
   - desc: "locations.edit is checked in frontend but no backend requirePermission('locations.edit') exists"
     severity: low
-  - desc: "Frontend /services and /service-catalog route guards currently use customers.edit while backend service reads now use services.view"
+  - desc: "Frontend /services is guarded by customers.edit while backend sale-order service reads use services.view; /service-catalog is guarded by services.view"
     severity: medium
   - desc: "No central enum means typos in any string cause silent failures or 403s"
     severity: high

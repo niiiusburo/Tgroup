@@ -4,6 +4,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ReportsRevenue } from '../ReportsRevenue';
 import { ReportsAppointments } from '../ReportsAppointments';
 import { ReportsDoctors } from '../ReportsDoctors';
@@ -230,7 +231,8 @@ describe('Report subpages — error handling', () => {
     render(<ReportsRevenue />);
 
     await screen.findByText('metrics.totalInvoiced', undefined, { timeout: 3000 });
-    expect(screen.getByText('charts.employeeRevenueExcel')).toBeInTheDocument();
+    expect(screen.getByText('Xuất Excel báo cáo')).toBeInTheDocument();
+    await userEvent.selectOptions(screen.getByLabelText('Loại báo cáo'), 'employee');
     expect(screen.getByText('employeeExport.employeeType')).toBeInTheDocument();
     expect(screen.getByText('employeeExport.employee')).toBeInTheDocument();
     expect(mockFetchEmployees).toHaveBeenCalledWith(expect.objectContaining({

@@ -86,6 +86,19 @@ docker compose up -d --build api web
 docker exec -it tgroup-db psql -U postgres -d tdental_demo
 ```
 
+### Daily NK DB Backup
+
+The VPS has a root crontab entry for the production database backup:
+
+```bash
+# 12:00 Asia/Ho_Chi_Minh, 05:00 UTC on the current VPS timezone
+0 5 * * * /opt/tgroup/scripts/backup-nk-db.sh >> /opt/tgroup/backups/nk-db-daily/backup.log 2>&1
+```
+
+The script stores compressed custom-format dumps in
+`/opt/tgroup/backups/nk-db-daily/`, creates a `.sha256` checksum, and retains
+only the latest 3 dump files.
+
 ### Applying Stray Migrations
 
 > **The canonical migration directory is `api/src/db/migrations/`** (the
