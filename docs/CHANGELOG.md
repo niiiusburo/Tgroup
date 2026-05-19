@@ -13,6 +13,10 @@
 Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `Docs`.
 
 ---
+## [unreleased] — 2026-05-19
+### Docs
+- Added cosmetic line-of-business design specs (v1, v2, visual companion) and SMS messaging system research under `docs/superpowers/specs/`. These design documents are now present on the `feat/cosmetic-line-of-business` worktree (cherry-picked from the parking branch) to guide implementation of the new Cosmetic LOB feature — @agent — Pre-implementation design capture for feat/cosmetic-line-of-business.
+
 
 ## [0.27.27] — 2026-05-05
 ### Fixed
