@@ -392,9 +392,31 @@ async function ensureCtvDemoTransactionData(ctvId) {
         const earnId = randomUUID();
         const earnAmount = commission > 0 ? commission : Math.round(payAmount * 0.10 * 100) / 100;
         try {
-          // Grab any valid saleorderline id (demo only; not required to match the synthetic payment)
-          const sol = await client.query(`SELECT id FROM dbo.saleorderlines LIMIT 1`);
-          const serviceLineId = (sol.rows[0] && sol.rows[0].id) || '00000000-0000-0000-0000-000000000000';
+          // Grab any valid saleorderline id (demo only; not required to match the synthetic payment).
+          // If the LOB DB has none (fresh cosmetic clone), insert minimal saleorders+saleorderlines
+          // synthetic rows so the earnings_service_line_id_fkey can be satisfied.
+          let sol = await client.query(`SELECT id FROM dbo.saleorderlines LIMIT 1`);
+          let serviceLineId;
+          if (sol.rows[0] && sol.rows[0].id) {
+            serviceLineId = sol.rows[0].id;
+          } else {
+            const synthOrderId = randomUUID();
+            const synthLineId = randomUUID();
+            await client.query(
+              `INSERT INTO dbo.saleorders (id, name, partnerid, amounttotal, state, datecreated)
+               VALUES ($1, $2, $3, $4, 'collected', NOW())
+               ON CONFLICT (id) DO NOTHING`,
+              [synthOrderId, `CTV-DEMO-${lobName}-${Date.now()}`, custId, payAmount]
+            );
+            await client.query(
+              `INSERT INTO dbo.saleorderlines (id, orderid, orderpartnerid, productname, pricesubtotal, pricetotal, datecreated)
+               VALUES ($1, $2, $3, $4, $5, $5, NOW())
+               ON CONFLICT (id) DO NOTHING`,
+              [synthLineId, synthOrderId, custId, `CTV demo service (${lobName})`, payAmount]
+            );
+            serviceLineId = synthLineId;
+            console.log(`[seed-ctv-txn] ${lobName}: created synthetic saleorder+line ${synthLineId} for FK satisfaction`);
+          }
           await client.query(
             `INSERT INTO dbo.earnings (id, client_id, recipient_partner_id, payment_id, service_line_id, source, amount, status, earned_at, created_at)
              VALUES ($1, $2, $3, $4, $5, 'ctv', $6, 'pending', NOW(), NOW())
@@ -499,6 +521,30 @@ async function ensureCosmeticAdminBootstrap() {
     }
 
     console.log(`[seed-cosmetic-admin] Mirrored ${mirrored} multi-scope admin(s) into cosmetic DB; copied ${copiedKeys} new Admin permission key(s). /api/cosmetic/* now resolves perms for these admins.`);
+
+    // Also mirror CTV partners (is_ctv=true) into cosmetic so that earnings rows
+    // with recipient_partner_id = a CTV can satisfy the FK in the cosmetic DB.
+    // CTV partners are NOT employees and have NO tier_id in either DB; the JWT's
+    // is_ctv flag is what gates /api/ctv/* — we just need the row to exist.
+    const { rows: ctvs } = await dentalClient.query(
+      `SELECT id, name, email, phone FROM partners WHERE is_ctv = true`
+    );
+    let ctvMirrored = 0;
+    for (const c of ctvs) {
+      await cosmeticClient.query(
+        `INSERT INTO partners (id, name, email, phone, companyid, supplier, customer, isagent, isinsurance, active, employee, iscompany, ishead, isbusinessinvoice, isdeleted, isdoctor, isassistant, isreceptionist, is_ctv, datecreated)
+         VALUES ($1, $2, $3, $4, NULL, false, false, false, false, true, false, false, false, false, false, false, false, false, true, now())
+         ON CONFLICT (id) DO UPDATE
+           SET name = EXCLUDED.name,
+               email = EXCLUDED.email,
+               phone = EXCLUDED.phone,
+               is_ctv = true,
+               active = true`,
+        [c.id, c.name || c.email, c.email, c.phone]
+      );
+      ctvMirrored++;
+    }
+    console.log(`[seed-cosmetic-admin] Mirrored ${ctvMirrored} CTV partner(s) into cosmetic DB. Cosmetic earnings FK for these CTVs will now succeed.`);
   } catch (e) {
     console.warn('[seed-cosmetic-admin] Non-fatal error mirroring admin to cosmetic:', e.message);
   } finally {
@@ -518,11 +564,14 @@ async function main() {
     await seedCosmeticData();
     const ctvId = await ensureCtvUserInDental();
 
+    // Admin + CTV permission/partner mirror into cosmetic DB. MUST run before
+    // ensureCtvDemoTransactionData so that the cosmetic earnings FK
+    // (earnings_recipient_partner_id_fkey → partners.id) can resolve when the
+    // engine writes an earnings row in the cosmetic DB for the CTV recipient.
+    await ensureCosmeticAdminBootstrap();
+
     // NEW: txn demo data + D13 proof + perm grants (makes CTV dashboard real/live)
     await ensureCtvDemoTransactionData(ctvId);
-
-    // Admin permission mirror — fixes /api/cosmetic/* 403 for multi-scope admins.
-    await ensureCosmeticAdminBootstrap();
 
     // Quick verification counts
     const [cosCounts, denCounts] = await Promise.all([
