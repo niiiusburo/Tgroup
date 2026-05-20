@@ -1,19 +1,44 @@
 'use strict';
 
-const { buildAppointmentDate } = require('../builders/appointmentsExport');
+jest.mock('../../../db', () => ({
+  query: jest.fn(),
+}));
+
+const { query } = require('../../../db');
+const { buildAppointmentDate, build, preview } = require('../builders/appointmentsExport');
+
+beforeEach(() => {
+  query.mockReset();
+});
 
 describe('buildAppointmentDate', () => {
-  test('uses datetimeappointment when available', () => {
-    // datetimeappointment is passed directly to toVNDate
-    // We verify the structure is preserved
+  test('prefers calendar date over stale datetimeappointment', () => {
     const row = {
-      datetimeappointment: new Date(Date.UTC(2025, 4, 7, 14, 30, 0)),
-      date: new Date(Date.UTC(2025, 4, 7, 10, 0, 0)),
+      datetimeappointment: new Date('2026-05-08T09:00:00'),
+      date: new Date('2026-05-20T00:00:00'),
       time: '09:00',
     };
     const result = buildAppointmentDate(row);
     expect(result instanceof Date).toBe(true);
     expect(Number.isNaN(result.getTime())).toBe(false);
+    expect(result.getUTCFullYear()).toBe(2026);
+    expect(result.getUTCMonth()).toBe(4);
+    expect(result.getUTCDate()).toBe(20);
+    expect(result.getUTCHours()).toBe(9);
+  });
+
+  test('falls back to datetimeappointment when calendar date is missing', () => {
+    const row = {
+      datetimeappointment: new Date('2025-05-07T14:30:00'),
+      date: null,
+      time: '09:00',
+    };
+    const result = buildAppointmentDate(row);
+    expect(result instanceof Date).toBe(true);
+    expect(Number.isNaN(result.getTime())).toBe(false);
+    expect(result.getUTCFullYear()).toBe(2025);
+    expect(result.getUTCMonth()).toBe(4);
+    expect(result.getUTCDate()).toBe(7);
   });
 
   test('combines date + time when time is provided', () => {
@@ -103,5 +128,80 @@ describe('buildAppointmentDate', () => {
     expect(result.getUTCDate()).toBe(7);
     expect(result.getUTCHours()).toBe(0);
     expect(result.getUTCMinutes()).toBe(0);
+  });
+});
+
+describe('appointments export filters', () => {
+  const USER = { name: 'Admin' };
+
+  test('filters selected clinic day by calendar date and phone search', async () => {
+    query.mockResolvedValueOnce([{
+      total: '1',
+      scheduled_count: '1',
+      done_count: '0',
+      cancelled_count: '0',
+      arrived_count: '0',
+      repeat_count: '0',
+    }]);
+
+    await preview({
+      search: '922403152',
+      companyId: 'all',
+      dateFrom: '2026-05-20',
+      dateTo: '2026-05-20',
+      state: '',
+      doctorId: '',
+    }, USER);
+
+    const [sql, params] = query.mock.calls[0];
+    expect(sql).toContain('a.date::date >= $1::date');
+    expect(sql).toContain('a.date::date <= $2::date');
+    expect(sql).toContain('p.phone ILIKE $3');
+    expect(params).toEqual(['2026-05-20', '2026-05-20', '%922403152%']);
+  });
+
+  test('exports the displayed calendar date when datetimeappointment is stale', async () => {
+    query
+      .mockResolvedValueOnce([{
+        id: 'appointment-922403152',
+        code: 'AP-922403152',
+        date: new Date('2026-05-20T00:00:00'),
+        time: '10:30:00',
+        datetimeappointment: new Date('2026-05-08T10:30:00'),
+        state: 'scheduled',
+        reason: 'Feedback regression',
+        note: '',
+        isrepeatcustomer: false,
+        partnercode: 'T922403152',
+        partnername: 'Safe Fixture',
+        partnerdisplayname: 'Safe Fixture',
+        partnerphone: '922403152',
+        companyname: 'Tấm Dentist',
+        doctorname: '',
+        assistantname: '',
+        dentalaidename: '',
+        productname: 'Khám',
+      }])
+      .mockResolvedValueOnce([{
+        total: '1',
+        scheduled_count: '1',
+        done_count: '0',
+        cancelled_count: '0',
+        arrived_count: '0',
+        repeat_count: '0',
+      }]);
+
+    const result = await build({
+      search: '922403152',
+      companyId: 'all',
+      dateFrom: '2026-05-20',
+      dateTo: '2026-05-20',
+      state: '',
+      doctorId: '',
+    }, USER);
+
+    const sheet = result.workbook.getWorksheet('Data');
+    expect(sheet.getCell('B2').value).toEqual(new Date(Date.UTC(2026, 4, 20, 10, 30, 0)));
+    expect(sheet.getCell('E2').value).toBe('922403152');
   });
 });

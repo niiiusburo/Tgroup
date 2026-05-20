@@ -96,6 +96,7 @@ function revenueCte(where) {
         COALESCE(so.amounttotal, 0) AS saleorder_total,
         COALESCE(so.residual, 0) AS saleorder_residual,
         p.receipt_number AS receipt_number,
+        p.notes AS paymentnote,
         COALESCE(p.payment_date, p.created_at)::date AS paymentdate,
         ${allocatedAmountExpr} AS row_amount,
         COALESCE(p.amount, 0) AS payment_amount,
@@ -120,7 +121,7 @@ function revenueCte(where) {
       LEFT JOIN employees doc ON doc.id = so.doctorid
       LEFT JOIN employees asst ON asst.id = so.assistantid
       LEFT JOIN employees da ON da.id = so.dentalaideid
-      LEFT JOIN customersources cs ON cs.id = cust.sourceid
+      LEFT JOIN customersources cs ON cs.id = COALESCE(so.sourceid, cust.sourceid)
       WHERE ${where}
     )
   `;
@@ -142,6 +143,7 @@ async function getRevenueRows(filters, maxRows) {
       saleorder_total,
       saleorder_residual,
       receipt_number,
+      paymentnote,
       paymentdate,
       row_amount,
       CASE WHEN ABS(payment_amount) > 0 THEN payment_cash_amount * row_amount / payment_amount ELSE 0 END AS row_cash_amount,

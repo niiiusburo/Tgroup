@@ -58,6 +58,7 @@ describe('legacyFlatReportsExport', () => {
         doctorname: 'Bác sĩ C',
         assistantname: 'Phụ tá D',
         dentalaidename: 'Trợ lý E',
+        paymentnote: 'Khách chuyển khoản BIDV, thu đủ đợt 1',
         customersourcename: 'Sale Online',
       },
     ]);
@@ -88,6 +89,7 @@ describe('legacyFlatReportsExport', () => {
       'Chuyển khoản',
       'Tiền cọc',
       'Số biên lai',
+      'Note thanh toán',
       'Sale online',
       'CSKH',
       'Bác sĩ',
@@ -115,15 +117,16 @@ describe('legacyFlatReportsExport', () => {
     expect(sheet.getCell('M2').value).toBe(300000);
     expect(sheet.getCell('N2').value).toBe(100000);
     expect(sheet.getCell('O2').value).toBe('BL-2026-0123');
-    expect(sheet.getCell('P2').value).toBe('Sale Online A');
-    expect(sheet.getCell('Q2').value).toBe('CSKH B');
-    expect(sheet.getCell('R2').value).toBe('Bác sĩ C');
-    expect(sheet.getCell('S2').value).toBe('Phụ tá D');
-    expect(sheet.getCell('T2').value).toBe('Trợ lý E');
-    expect(sheet.getCell('U2').value).toBe('Sale Online');
+    expect(sheet.getCell('P2').value).toBe('Khách chuyển khoản BIDV, thu đủ đợt 1');
+    expect(sheet.getCell('Q2').value).toBe('Sale Online A');
+    expect(sheet.getCell('R2').value).toBe('CSKH B');
+    expect(sheet.getCell('S2').value).toBe('Bác sĩ C');
+    expect(sheet.getCell('T2').value).toBe('Phụ tá D');
+    expect(sheet.getCell('U2').value).toBe('Trợ lý E');
+    expect(sheet.getCell('V2').value).toBe('Sale Online');
   });
 
-  it('uses saleorders.code in column E, exposes so.name separately, and search matches SO codes', async () => {
+  it('uses saleorders.code in column E, exposes so.name separately, and search/source precedence matches SO context', async () => {
     query.mockResolvedValueOnce([{ total: '0', total_amount: '0' }]);
 
     await legacyFlatReportsExport.revenue.preview({
@@ -140,6 +143,8 @@ describe('legacyFlatReportsExport', () => {
     expect(sql).toContain(') AS servicename');
     expect(sql).toContain(') AS saleordername');
     expect(sql).toContain('so.code ILIKE');
+    expect(sql).toContain('p.notes AS paymentnote');
+    expect(sql).toContain('LEFT JOIN customersources cs ON cs.id = COALESCE(so.sourceid, cust.sourceid)');
     expect(params).toContain('%SO-2026-0644%');
   });
 
@@ -188,6 +193,7 @@ describe('legacyFlatReportsExport', () => {
         cash_amount: '500000',
         bank_amount: '1500000',
         paymentmethod: 'bank_transfer',
+        depositnote: 'Cọc tiền chỉnh nha, chuyển khoản',
         salestaffname: 'Sale Online C',
         cskhname: 'CSKH D',
         customersourcename: 'Khách vãng lai',
@@ -213,22 +219,25 @@ describe('legacyFlatReportsExport', () => {
       'Tiền mặt',
       'Chuyển khoản',
       'Phương thức',
+      'Note cọc tiền',
       'Sale online',
       'CSKH',
       'Nguồn khách',
     ]);
     expect(sheet.getColumn(5).width).toBe(12.796875);
     expect(sheet.getColumn(9).width).toBe(16);
-    expect(sheet.getColumn(11).width).toBeUndefined();
+    expect(sheet.getColumn(10).width).toBe(28);
+    expect(sheet.getColumn(12).width).toBeUndefined();
     expect(sheet.getCell('A2').value).toBe('Tấm Dentist Gò Vấp');
     expect(sheet.getCell('E2').value).toEqual(new Date(Date.UTC(2026, 4, 9)));
     expect(sheet.getCell('F2').value).toBe(2000000);
     expect(sheet.getCell('G2').value).toBe(500000);
     expect(sheet.getCell('H2').value).toBe(1500000);
     expect(sheet.getCell('I2').value).toBe('Chuyển khoản');
-    expect(sheet.getCell('J2').value).toBe('Sale Online C');
-    expect(sheet.getCell('K2').value).toBe('CSKH D');
-    expect(sheet.getCell('L2').value).toBe('Khách vãng lai');
+    expect(sheet.getCell('J2').value).toBe('Cọc tiền chỉnh nha, chuyển khoản');
+    expect(sheet.getCell('K2').value).toBe('Sale Online C');
+    expect(sheet.getCell('L2').value).toBe('CSKH D');
+    expect(sheet.getCell('M2').value).toBe('Khách vãng lai');
   });
 
   it('previews deposit top-ups only', async () => {
@@ -246,6 +255,9 @@ describe('legacyFlatReportsExport', () => {
     expect(sql).toContain("p.status = 'posted'");
     expect(sql).toContain("p.payment_category = 'deposit'");
     expect(sql).toContain("p.deposit_type = 'deposit'");
+    expect(sql).toContain("LOWER(COALESCE(p.method, '')) = 'cash'");
+    expect(sql).toContain("LOWER(COALESCE(p.method, '')) IN ('bank', 'bank_transfer', 'vietqr')");
+    expect(sql).toContain('p.notes AS depositnote');
     expect(sql).not.toContain('pa.invoice_id IS NOT NULL');
     expect(sql).not.toContain('p.companyid');
     expect(sql).toContain('pr.companyid = $5');
