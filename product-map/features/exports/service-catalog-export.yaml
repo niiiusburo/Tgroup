@@ -1,0 +1,110 @@
+feature_id: service-catalog-export
+display_name_vi: Báo cáo Danh mục dịch vụ
+display_name_en: Service Catalog Excel Export
+status: live
+
+ui_entry_points:
+  - page: /admin/service-catalog
+    component: website/src/pages/admin/AdminServiceCatalog.tsx
+    user_action: "Click 'Xuất danh mục' button in catalog toolbar"
+
+api_routes:
+  - method: POST
+    path: /api/Exports/service-catalog/preview
+    handler: api/src/routes/exports.js#/:type/preview
+  - method: POST
+    path: /api/Exports/service-catalog/download
+    handler: api/src/routes/exports.js#/:type/download
+
+permission_required: services.export
+
+code_refs:
+  registry_entry: api/src/services/exports/exportRegistry.js#service-catalog
+  column_definition: api/src/services/exports/builders/serviceCatalogExport.js#COLUMNS
+  sql_query: api/src/services/exports/builders/serviceCatalogExport.js#getRows
+  row_mapper: api/src/services/exports/builders/serviceCatalogExport.js#build
+  unit_tests: api/src/services/exports/__tests__/serviceCatalogExport.test.js
+
+columns:
+  - position: 1
+    key: defaultcode
+    header_vi: Mã dịch vụ
+    style: text
+    width: 16
+    source: productproduct.default_code
+  - position: 2
+    key: name
+    header_vi: Tên dịch vụ
+    style: text
+    width: 28
+    source: productproduct.name
+  - position: 3
+    key: categname
+    header_vi: Nhóm dịch vụ
+    style: text
+    width: 20
+    source: productcategory.name
+  - position: 4
+    key: uomname
+    header_vi: Đơn vị
+    style: text
+    width: 12
+    source: uom.name
+  - position: 5
+    key: listprice
+    header_vi: Giá niêm yết
+    style: vnd
+    width: 14
+    source: productproduct.list_price
+  - position: 6
+    key: saleprice
+    header_vi: Giá bán
+    style: vnd
+    width: 14
+    source: productproduct.sale_price
+  - position: 7
+    key: laboprice
+    header_vi: Giá labo
+    style: vnd
+    width: 14
+    source: productproduct.labo_price
+  - position: 8
+    key: companyname
+    header_vi: Chi nhánh
+    style: text
+    width: 20
+    source: companies.name
+  - position: 9
+    key: active
+    header_vi: Trạng thái
+    style: text
+    width: 10
+    source: productproduct.active (boolean to Y/N)
+  - position: 10
+    key: datecreated
+    header_vi: Ngày tạo
+    style: datetime
+    width: 14
+    source: productproduct.create_date
+  - position: 11
+    key: lastupdated
+    header_vi: Cập nhật lần cuối
+    style: datetime
+    width: 14
+    source: productproduct.write_date
+
+filters_accepted:
+  - name: search
+    type: string
+  - name: category
+    type: string (category name or code)
+  - name: companyId
+    type: uuid or 'all'
+
+verified_against_live: "2026-05-20 — verified from serviceCatalogExport.js COLUMNS array"
+
+notes: |
+  Service catalog export is a master-data export showing all defined services
+  and their pricing tiers (sale price, labo price). It includes metadata columns
+  (category, UOM, company) for filtering and analysis. Active column is a boolean
+  rendered as 'Yes' or 'No' in the export. This is reference data, not transactional.

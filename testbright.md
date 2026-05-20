@@ -10,6 +10,51 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: Feature Catalog 2026-05-20
+
+Feature/edit name: Feature Catalog — Canonical Export Specifications 2026-05-20
+
+Changed URLs and resources:
+- No API routes changed.
+- 8 new YAML feature specifications created in `product-map/features/exports/`: appointments-export.yaml, customers-export.yaml, payments-export.yaml, services-export.yaml, service-catalog-export.yaml, report-sales-employees-export.yaml, revenue-flat-export.yaml, deposit-flat-export.yaml.
+- 1 new Jest cross-check test added: `api/src/services/exports/__tests__/featureCatalog.crosscheck.test.js`.
+- Documentation updated: `docs/CHANGELOG.md`, `docs/TEST-MATRIX.md`.
+
+Affected data flows:
+- YAML files in `product-map/features/exports/` are now the canonical specifications for export columns, API routes, UI entry points, and permissions.
+- Each YAML specifies columns (position, key, header_vi, style, width, source), filters accepted, and code references (builder file, column array name, test file).
+- Jest cross-check test validates that YAML column definitions match builder code COLUMNS arrays exactly (keys and headers_vi, order-sensitive) for all 8 exports.
+
+Roles and scopes:
+- Admin exporting all 8 export types: appointments, customers, payments, services, service-catalog, report-sales-employees, revenue, deposit.
+- Each export must have columns in the correct order and with correct header_vi values per YAML spec.
+
+Happy paths:
+- All 8 exports render the correct columns in the correct order.
+- Each export's UI lists the correct filters accepted (dateFrom, dateTo, companyId, search, etc.).
+- Feature YAML spec matches the builder code COLUMNS array for all 8 exports.
+
+Edge cases:
+- Column order must match YAML position exactly.
+- Column header_vi values must match YAML spec exactly (used for Excel header translation).
+- Column keys must match builder code COLUMNS array keys exactly.
+
+Regressions to prevent:
+- Divergence between YAML spec and builder code (caught by featureCatalog.crosscheck.test.js).
+- Silent column drops, reordering, or header changes.
+- Missing code references in YAML files.
+
+Setup and execution items:
+- [x] PASS: All 8 YAML feature specs created in product-map/features/exports/ with complete column definitions and code references - verified by reading all 8 YAML files.
+- [x] PASS: Jest cross-check test featureCatalog.crosscheck.test.js validates YAML columns match builder COLUMNS arrays for all 8 exports - `npm --prefix api test -- src/services/exports/__tests__/featureCatalog.crosscheck.test.js` passes all 8 assertions.
+- [x] PASS: npm test passes all 696 tests and 53 test suites after YAML creation - final verification run.
+- [x] PASS: docs/CHANGELOG.md updated with feature catalog entry - verified by reading file.
+- [x] PASS: docs/TEST-MATRIX.md updated with feature catalog lock row - added row explaining YAML-to-code sync requirement.
+- [ ] PENDING: Live NK/NK2/NK3 export downloads verify correct columns and headers for all 8 exports (appointments, customers, payments, services, service-catalog, report-sales-employees, revenue, deposit).
+- [ ] PENDING: featureCatalog.crosscheck.test.js remains passing in CI after merge.
+
+---
+
 # TestSprite Plan: Export Column Registry Lock 2026-05-20
 
 Feature/edit name: Export Column Registry Lock 2026-05-20

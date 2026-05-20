@@ -1,0 +1,128 @@
+feature_id: deposit-flat-export
+display_name_vi: Báo cáo tiền cọc (Deposit)
+display_name_en: Deposit Report Excel Export
+status: live
+
+ui_entry_points:
+  - page: /reports/deposit
+    component: website/src/pages/reports/ReportsDeposit.tsx
+    user_action: "Click 'Xuất dữ liệu' with 'Báo cáo tiền cọc' radio selected"
+
+api_routes:
+  - method: POST
+    path: /api/Exports/deposit-flat/preview
+    handler: api/src/routes/exports.js#/:type/preview
+  - method: POST
+    path: /api/Exports/deposit-flat/download
+    handler: api/src/routes/exports.js#/:type/download
+
+permission_required: payments.export
+
+code_refs:
+  registry_entry: api/src/services/exports/exportRegistry.js#deposit-flat
+  column_definition: api/src/services/exports/builders/legacyFlatReportColumns.js#DEPOSIT_COLUMNS
+  sql_query: api/src/services/exports/builders/legacyFlatDepositQuery.js
+  row_mapper: api/src/services/exports/builders/legacyFlatReportsExport.js
+  lock_test: api/src/services/exports/__tests__/legacyFlatReportColumns.lock.test.js
+  unit_tests: api/src/services/exports/__tests__/legacyFlatReportsExport.test.js
+
+columns:
+  - position: 1
+    key: companyName
+    header_vi: Cơ sở
+    style: text
+    width: null
+    source: companies.name (via partners.companyid)
+  - position: 2
+    key: customerCode
+    header_vi: Mã Khách hàng
+    style: text
+    width: 16
+    source: dbo.partners.ref
+  - position: 3
+    key: customerName
+    header_vi: Tên khách hàng
+    style: text
+    width: 14.09765625
+    source: dbo.partners.displayname
+  - position: 4
+    key: customerPhone
+    header_vi: Số điện thoại
+    style: text
+    width: 20.296875
+    source: dbo.partners.phone
+  - position: 5
+    key: depositDate
+    header_vi: Ngày cọc
+    style: date
+    width: 18.19921875
+    source: dbo.payments.payment_date OR created_at
+  - position: 6
+    key: amount
+    header_vi: Số tiền cọc
+    style: vnd
+    width: 11.09765625
+    source: dbo.payments.amount
+  - position: 7
+    key: cashAmount
+    header_vi: Tiền mặt
+    style: vnd
+    width: 11.8984375
+    source: dbo.payments.cash_amount (conditional logic)
+  - position: 8
+    key: bankAmount
+    header_vi: Chuyển khoản
+    style: vnd
+    width: 18.69921875
+    source: dbo.payments.bank_amount (conditional logic)
+  - position: 9
+    key: paymentMethod
+    header_vi: Phương thức
+    style: text
+    width: 14
+    source: dbo.payments.method
+  - position: 10
+    key: depositNote
+    header_vi: Note cọc tiền
+    style: text
+    width: 28
+    source: dbo.payments.notes
+  - position: 11
+    key: saleOnline
+    header_vi: Sale online
+    style: text
+    width: 18
+    source: dbo.partners.name (via salestaffid)
+  - position: 12
+    key: customerCare
+    header_vi: CSKH
+    style: text
+    width: 18
+    source: dbo.partners.name (via cskhid)
+  - position: 13
+    key: customerSource
+    header_vi: Nguồn khách
+    style: text
+    width: 14
+    source: dbo.customersources.name (via sourceid)
+
+filters_accepted:
+  - name: dateFrom
+    type: string
+    format: YYYY-MM-DD
+  - name: dateTo
+    type: string
+    format: YYYY-MM-DD
+  - name: companyId
+    type: uuid or 'all'
+  - name: search
+    type: string
+
+verified_against_live: "2026-05-20 — verified from lock test legacyFlatReportColumns.lock.test.js"
+
+notes: |
+  This export shares row mapper with revenue-flat (uses the same
+  legacyFlatReportsExport.js builder, but with DEPOSIT_COLUMNS instead of
+  REVENUE_COLUMNS). The SQL query is specific to deposits
+  (legacyFlatDepositQuery vs legacyFlatRevenueQuery). Deposit type is filtered
+  by payment_category = 'deposit' AND deposit_type = 'deposit'.

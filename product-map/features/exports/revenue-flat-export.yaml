@@ -1,0 +1,181 @@
+feature_id: revenue-flat-export
+display_name_vi: Báo cáo doanh thu (Revenue)
+display_name_en: Revenue Report Excel Export
+status: live
+
+ui_entry_points:
+  - page: /reports/revenue
+    component: website/src/pages/reports/ReportsRevenue.tsx
+    user_action: "Click 'Xuất dữ liệu' with 'Báo cáo doanh thu' radio selected"
+
+api_routes:
+  - method: POST
+    path: /api/Exports/revenue-flat/preview
+    handler: api/src/routes/exports.js#/:type/preview
+  - method: POST
+    path: /api/Exports/revenue-flat/download
+    handler: api/src/routes/exports.js#/:type/download
+
+permission_required: payments.export
+
+code_refs:
+  registry_entry: api/src/services/exports/exportRegistry.js#revenue-flat
+  column_definition: api/src/services/exports/builders/legacyFlatReportColumns.js#REVENUE_COLUMNS
+  sql_query: api/src/services/exports/builders/legacyFlatRevenueQuery.js
+  row_mapper: api/src/services/exports/builders/legacyFlatReportsExport.js
+  lock_test: api/src/services/exports/__tests__/legacyFlatReportColumns.lock.test.js
+  unit_tests: api/src/services/exports/__tests__/legacyFlatReportsExport.test.js
+
+columns:
+  - position: 1
+    key: companyName
+    header_vi: Cơ sở
+    style: text
+    width: null
+    source: dbo.companies.name (via SO companyid)
+  - position: 2
+    key: customerCode
+    header_vi: Mã Khách hàng
+    style: text
+    width: 16
+    source: dbo.partners.ref
+  - position: 3
+    key: customerName
+    header_vi: Tên khách hàng
+    style: text
+    width: 14.09765625
+    source: dbo.partners.displayname
+  - position: 4
+    key: customerPhone
+    header_vi: Số điện thoại
+    style: text
+    width: 20.296875
+    source: dbo.partners.phone
+  - position: 5
+    key: saleOrderCode
+    header_vi: Mã phiếu khám
+    style: text
+    width: 16
+    source: dbo.saleorder.name
+  - position: 6
+    key: serviceName
+    header_vi: Dịch vụ
+    style: text
+    width: 32
+    source: dbo.productproduct.name
+  - position: 7
+    key: saleOrderName
+    header_vi: Tên dịch vụ
+    style: text
+    width: 32
+    source: dbo.saleorderline.name
+  - position: 8
+    key: saleOrderTotal
+    header_vi: Tổng tiền phiếu
+    style: vnd
+    width: 14
+    source: dbo.saleorder.amount_total
+  - position: 9
+    key: saleOrderResidual
+    header_vi: Còn lại phiếu
+    style: vnd
+    width: 14
+    source: dbo.saleorder.residual
+  - position: 10
+    key: paymentDate
+    header_vi: Ngày thanh toán
+    style: date
+    width: 18.19921875
+    source: dbo.accountpayment.date
+  - position: 11
+    key: amount
+    header_vi: Số tiền
+    style: vnd
+    width: 11.09765625
+    source: dbo.accountpaymentline.amount
+  - position: 12
+    key: cashAmount
+    header_vi: Tiền mặt
+    style: vnd
+    width: 11.8984375
+    source: dbo.accountpaymentline.amount (where method = cash)
+  - position: 13
+    key: bankAmount
+    header_vi: Chuyển khoản
+    style: vnd
+    width: 18.69921875
+    source: dbo.accountpaymentline.amount (where method = bank)
+  - position: 14
+    key: depositUsed
+    header_vi: Tiền cọc
+    style: vnd
+    width: 12.19921875
+    source: dbo.accountpaymentline.amount (where method = deposit)
+  - position: 15
+    key: receiptNumber
+    header_vi: Số biên lai
+    style: text
+    width: 16
+    source: dbo.accountpaymentline.receipt
+  - position: 16
+    key: paymentNote
+    header_vi: Note thanh toán
+    style: text
+    width: 28
+    source: dbo.accountpaymentline.note
+  - position: 17
+    key: saleOnline
+    header_vi: Sale online
+    style: text
+    width: 14.296875
+    source: employee name or empty
+  - position: 18
+    key: customerCare
+    header_vi: CSKH
+    style: text
+    width: null
+    source: employee name (customer care staff)
+  - position: 19
+    key: doctorName
+    header_vi: Bác sĩ
+    style: text
+    width: 10.8984375
+    source: dbo.hremployee.name (doctor)
+  - position: 20
+    key: assistantName
+    header_vi: Phụ tá
+    style: text
+    width: null
+    source: dbo.hremployee.name (assistant)
+  - position: 21
+    key: dentalAideName
+    header_vi: Trợ lý bác sĩ
+    style: text
+    width: 12.5
+    source: dbo.hremployee.name (dental aid)
+  - position: 22
+    key: customerSource
+    header_vi: Nguồn khách
+    style: text
+    width: 14
+    source: dbo.utmsource.name (customer source)
+
+filters_accepted:
+  - name: dateFrom
+    type: string
+    format: YYYY-MM-DD
+  - name: dateTo
+    type: string
+    format: YYYY-MM-DD
+  - name: companyId
+    type: uuid or 'all'
+  - name: search
+    type: string
+
+verified_against_live: "2026-05-20 — verified from lock test legacyFlatReportColumns.lock.test.js"
+
+notes: |
+  This export shares row mapper with deposit-flat (uses the same
+  legacyFlatReportsExport.js builder, but with REVENUE_COLUMNS instead of
+  DEPOSIT_COLUMNS). The SQL query is specific to each (legacyFlatRevenueQuery vs
+  legacyFlatDepositQuery).
