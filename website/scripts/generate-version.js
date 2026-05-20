@@ -27,8 +27,18 @@ const packageJson = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8')
 );
 
-// Try to get git info
+// Try to get git info — prefer GIT_SHA / GIT_BRANCH env vars (passed by Docker
+// build), fall back to running `git` (works on dev machine), then "unknown".
+// The env-var path matters because `git` is NOT installed in the build container.
 function getGitInfo() {
+  const envCommit = process.env.GIT_SHA || process.env.GIT_COMMIT;
+  const envBranch = process.env.GIT_BRANCH;
+  if (envCommit) {
+    return {
+      commit: envCommit.slice(0, 7),
+      branch: envBranch || 'unknown',
+    };
+  }
   try {
     const commit = execSync('git rev-parse --short HEAD').toString().trim();
     const branch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();

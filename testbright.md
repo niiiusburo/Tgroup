@@ -1520,3 +1520,20 @@ TestSprite execution items:
 - [x] VERIFIED: Local backup created before deletion with SHA-256 `a5aafd000539625ff9f92f960e6a1e3d7eb737ac10065f819fcd7ce69daa57e3`.
 - [x] VERIFIED: `tdental-db` no longer appears in `docker ps -a`; preserved Docker volume `tdental-postgres-data` still exists.
 - [x] VERIFIED: Strict post-delete env scan found no running container pointed at `tdental-db` or `/tdental`.
+
+# TestSprite Plan: Defense-in-Depth Anti-Regression 2026-05-20
+
+Feature/edit name: Defense-in-Depth Anti-Regression 2026-05-20
+
+Changed paths:
+- New: `scripts/require-clean-tree.sh`, `scripts/deploy-build-args.sh`, `api/src/services/exports/__tests__/allBuilderColumns.lock.test.js`
+- Modified: `Dockerfile.web` (ARG GIT_SHA / GIT_BRANCH), `docker-compose.yml` (passes them through), `website/scripts/generate-version.js` (prefers env vars over `git` shell-out).
+
+Affected data flows:
+- Build process now refuses dirty trees; `version.json` reports real commit; 6 more Excel export column lists are locked against silent drops.
+
+Execution items:
+- [ ] PENDING: `bash scripts/require-clean-tree.sh` exits 1 on dirty tree, exits 0 on clean tree.
+- [ ] PENDING: After `GIT_SHA=$(git rev-parse HEAD) docker compose up -d --build web`, `curl <host>/version.json` returns the real short SHA.
+- [ ] PENDING: `npx jest src/services/exports/__tests__/allBuilderColumns.lock.test.js` passes 24/24.
+- [ ] PENDING: Simulated removal of any one column in any of the 6 builders causes 3+ test failures in allBuilderColumns.lock.test.js.

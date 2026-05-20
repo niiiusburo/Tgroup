@@ -177,3 +177,5 @@ docker compose config
 # Regression: customer with checkups + images still renders gallery normally (e.g. /api/ExternalCheckups/T6281 returns 2 checkups; image proxy /api/ExternalCheckups/images/<name> returns 200 + JPEG)
 # Tests: npm --prefix website run test -- customer/HealthCheckupGallery customer/HealthCheckupEmptyState customer/AuthenticatedCheckupImage
 ```
+
+| `scripts/require-clean-tree.sh`, `Dockerfile.web` GIT_SHA arg, `api/src/services/exports/__tests__/allBuilderColumns.lock.test.js` | bash smoke test on dirty tree; `/version.json` curl; `npx jest src/services/exports/__tests__/allBuilderColumns.lock.test.js` | 2026-05-20 defense-in-depth additions: refuse dirty builds (Layer 1), stamp real git SHA into version.json (Layer 2), lock 6 more export column registries (Layer 4). |
