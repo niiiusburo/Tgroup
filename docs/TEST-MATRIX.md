@@ -2,6 +2,8 @@
 
 > "If you change X, run test suite Y." Maps modules → regression tests. Includes coverage requirements.
 
+> **Cosmetic LOB v2 (Phase 0):** 8 new test classes per v2 design Testing Strategy + PLAN (dental regression, LOB isolation, CTV agg, CTV gating, D13 resolution, toggle remount, refund reversal, migration rollback). Registered in product-map/test-matrix.md + governance-delta.md. TDD red-green mandatory; 80%+ coverage on new modules. Full dental suite green at every checkpoint.
+
 ## Coverage Requirements by Domain
 
 | Domain | Minimum Coverage | Test Types Required |
@@ -25,6 +27,7 @@
 | `api/src/routes/auth.js` | Same as above + `website/e2e/auth-setup.spec.ts` | Login payload shape changes break frontend AuthContext. |
 | `api/src/services/permissionService.js` | `api/tests/readRoutePermissions.test.js`, `website/e2e/permissions-*.spec.ts` | Effective permission divergence causes 403s. |
 | `website/src/contexts/AuthContext.tsx` | `website/e2e/auth-setup.spec.ts`, `website/e2e/permissions-check.spec.ts` | Auth state hydration affects every protected page. |
+| `website/src/contexts/BusinessUnitContext.tsx` | `website/src/contexts/__tests__/BusinessUnitContext.test.tsx`, browser header smoke | LOB selector must remain Admin-only; non-admin staff with stale multi-scope data must stay pinned to one LOB. |
 | `website/src/constants/index.ts` (ROUTE_PERMISSIONS) | All E2E specs that navigate protected routes | Route guard changes may hide/show pages incorrectly. |
 
 ### Appointments & Calendar

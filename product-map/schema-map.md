@@ -2,6 +2,8 @@
 
 > Database entity map: relationships, writers, readers, endpoints, and frontend surfaces.
 
+**⚠️ Cosmetic LOB v2 update (2026-05):** Two physical DBs (tdental_demo + tcosmetic_demo). See new section at end of this file + `docs/DATA-MODEL.md` + migration 047. `getDb(lob)` required for all new code. `partners` carries `lob_scope`/`is_ctv` (no users table).
+
 ## Legend
 
 - **W** = Writer (INSERT/UPDATE/DELETE)
@@ -9,6 +11,34 @@
 - **E** = Endpoint exposing this entity
 - **UI** = Frontend surface depending on this entity
 - **Risk** = Shared DTO / type / serializer hazard level
+
+---
+
+## Two-DB Topology (Cosmetic LOB v2 — Phase 0 Governance)
+
+**Invariant:** Physical isolation. No cross-DB SQL. Composition only in API layer (getDb('dental'|'cosmetic') factory in api/src/db/index.js, ctv aggregator, cross-LOB probe).
+
+- **tdental_demo** (existing, 127.0.0.1:5433, additive only)
+  - All prior tables +:
+    - partners: +lob_scope TEXT[] NULL, +is_ctv BOOLEAN NULL DEFAULT FALSE (backfill ARRAY['dental'])
+    - partners (customer rows): +referred_by_ctv_id UUID NULL
+    - products: +commission_rate_percent NUMERIC(5,2) NULL DEFAULT 0
+    - earnings (NEW transactional, append-only)
+    - payouts (NEW)
+    - referral_locks (NEW, dental-internal)
+  - Legacy commissions / commissionproductrules / saleorderlinepartnercommissions untouched (rules/config only)
+
+- **tcosmetic_demo** (new, provisioned empty in Phase 0, same server)
+  - Full mirror schema in dbo (clients instead of partners for customers, staff/companies/employee_location_scope, etc.)
+  - clients: +referred_by_ctv_id, +consulting_staff_id
+  - products/services: +commission_rate_percent
+  - earnings, payouts (NEW)
+  - consultations (NEW, invisible attribution, cosmetic-only)
+  - staff/companies initially empty (D16)
+
+All cosmetic routes (/api/cosmetic/*) use cosmetic pool exclusively. Earnings writes use correct pool per LOB context.
+
+See: business-unit.yaml, earnings-commissions.yaml, cosmetic-clients.yaml, docs/DATA-MODEL.md (updated), ARCHITECTURE.md (two-DB diagram)
 
 ---
 
@@ -319,6 +349,52 @@
 | **UI** | DotKham detail views |
 | **Risk** | **Medium** — table must exist or dotKhams queries 500. Populated by external sync, not app UI. |
 
+## Cosmetic LOB v2 — New / Additive Tables (earnings, two-DB)
+
+### dbo.earnings (both tdental_demo and tcosmetic_demo; append-only transactional commissions)
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (uuid) |
+| **Key Relationships** | client_id → clients or partners (depending on DB); recipient_user_id → users; payout_id → payouts (nullable); source in ('ctv','consultation','salestaff') |
+| **W** | commissionEngine.js (on payment collect + refund reversal); payout runner |
+| **R** | ctv/commission-summary aggregator (cross DB), future admin reports, CTV dashboard |
+| **E** | Internal only (via payment paths); exposed via /api/ctv/* and payout endpoints |
+| **UI** | CTV tabs (pending/paid), admin payout UI (earnings lists) |
+| **Risk** | **High** — append-only invariant: refunds create new negative row; never UPDATE original status to 'reversed'. Must write to correct DB pool per LOB. Collision avoided by naming (earnings vs legacy dbo.commissions). |
+
+### dbo.payouts (both DBs)
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (uuid) |
+| **W** | Admin payout runner (POST /api/payouts, commissions.payout.run) |
+| **R** | CTV dashboard (paid status), reports |
+| **E** | payout endpoints |
+| **UI** | Payout admin flow, CTV "paid" view |
+| **Risk** | **Medium** — links many earnings rows; must be idempotent. |
+
+### tcosmetic_demo.dbo.consultations (cosmetic-only, invisible to admin UI)
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Key** | `id` (uuid) |
+| **W** | Cosmetic appointment booking path (auto-create with consulting_staff_id); supersede logic |
+| **R** | commissionEngine (D13 resolution step 2) |
+| **E** | None (internal) |
+| **UI** | None (per spec; backend attribution detail only) |
+| **Risk** | **Medium** — 6mo TTL from last activity; status machine (open → superseded/attached/expired). |
+
+### Additive columns (dental DB only)
+
+- partners.lob_scope, partners.is_ctv (backfill required; see DATA-MODEL)
+- partners.referred_by_ctv_id (on customer=true rows)
+- products.commission_rate_percent (DEFAULT 0 for dental compat)
+
+All cosmetic core tables (clients, staff, companies, employee_location_scope, appointments, etc.) mirror dental in tcosmetic_demo.dbo but are owned by cosmetic domain when LOB=cosmetic.
+
+See earnings-commissions.yaml, cosmetic-clients.yaml, business-unit.yaml for full ownership.
+
 ## Shared DTO / Type / Serializer Risks
 
 | Type / DTO | Files Using It | Risk |
@@ -347,3 +423,29 @@
 | `dbo.error_events` / `dbo.error_fix_attempts` | Telemetry ingestion, Feedback auto-thread creation, AutoDebugger scripts |
 | `dbo.permission_groups` / `group_permissions` | Auth middleware, PermissionBoard, Settings RoleConfig |
 | `dbo.company_bank_settings` | BankSettingsForm, VietQrModal, `lib/vietqr.ts` |
+
+## Cosmetic LOB v2 — Two-DB Schema Additions (Phase 0)
+
+**Physical databases:**
+- `tdental_demo.dbo.*` — additive only (existing dental data byte-untouched except new nullable cols + backfill)
+- `tcosmetic_demo.dbo.*` — full mirror of dental tables (bootstrapped empty via schema-only dump + script `api/scripts/bootstrap-cosmetic-db.sh`), plus cosmetic-specific tables
+
+**Additive columns (both DBs via migration 047):**
+- `partners.lob_scope` (TEXT[]), `partners.is_ctv` (BOOLEAN), `partners.referred_by_ctv_id` (UUID)
+- `products.commission_rate_percent` (NUMERIC(5,2) DEFAULT 0)
+
+**New tables (both DBs):**
+- `earnings` (append-only transactional; source ctv/consultation/salestaff; amount can be negative for reversals; payout_id links to payouts)
+- `payouts`
+
+**Dental-only new:**
+- `referral_locks`
+
+**Cosmetic-only new:**
+- `consultations` (invisible; 6mo TTL attribution cards; auto-managed by booking flows)
+
+**Factory:** All access via `api/src/db/index.js:getDb('dental' | 'cosmetic')` (separate pg pools, search_path=dbo).
+
+**Blast radius note:** See `product-map/domains/cosmetic.yaml` and full v2 spec. Update this map + ERD after each phase.
+
+See `docs/MIGRATIONS.md`, `DECISIONS.md#DEC-20260519-COSMETIC-V2-01`, `api/migrations/047_*.sql` for exact reversible DDL.

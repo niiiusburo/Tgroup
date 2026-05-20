@@ -1,15 +1,17 @@
 jest.mock('../src/middleware/auth', () => ({
   requireAuth: (_req, _res, next) => next(),
   requirePermission: () => (_req, _res, next) => next(),
+  requireLobScope: () => (_req, _res, next) => next(),
 }));
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid'),
 }));
 
-jest.mock('../src/db', () => ({
-  query: jest.fn(),
-}));
+jest.mock('../src/db', () => {
+  const query = jest.fn();
+  return { query, getQuery: () => query };
+});
 
 const request = require('supertest');
 const app = require('../src/server');

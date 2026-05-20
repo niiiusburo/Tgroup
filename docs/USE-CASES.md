@@ -271,16 +271,16 @@
 - **Main flow:**
   1. Actor enters email, password, checks "Remember Me".
   2. Frontend calls `POST /api/Auth/login`.
-  3. Backend validates credentials, resolves effective permissions and location scope.
+  3. Backend validates credentials, resolves effective permissions, location scope, and visible LOB scope.
   4. Signs JWT (`expiresIn: rememberMe ? '60d' : '24h'`).
-  5. Returns token + user + permissions.
+  5. Returns token + user + permissions; only Admin users may receive multiple visible LOBs for the header selector.
   6. Frontend stores token in `localStorage`; redirects to `/overview`.
 - **Alternate flows:**
   - **AF-1 Invalid credentials:** 401 with generic message (rate limiter tracks failed attempts).
   - **AF-2 Missing password_hash:** 401 (legacy employee not yet activated).
   - **AF-3 Rate limited:** 429 after excessive failures.
 - **Postconditions:** Session active; `AuthContext` populated; polling hooks start.
-- **Invariants touched:** INV-007 (JWT_SECRET required), INV-008 (shared permission resolution), INV-018 (local-first deploy discipline for auth changes).
+- **Invariants touched:** INV-007 (JWT_SECRET required), INV-008 (shared permission resolution), INV-008A (Admin-only LOB selection), INV-018 (local-first deploy discipline for auth changes).
 
 ---
 

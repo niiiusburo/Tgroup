@@ -2,6 +2,8 @@
 
 > VPS deployment authority for TGClinic.
 
+> **Cosmetic LOB v2 (Phase 0):** "local only, NK2 later" per PLAN.md and governance-delta.md. Feature flag COSMETIC_LOB_ENABLED=false by default in all envs. tcosmetic_demo provisioning/restore steps + dual-pool connection details in VERIFICATION.md and INFRASTRUCTURE.md. No direct NK2/prod changes in this worktree until Phase 4 after local gates + rollback dry-run. See v2 design migration plan steps 1-8.
+
 ## Rule
 
 All changes are fixed and verified locally before VPS deployment. Do not edit VPS files directly as the first fix path.

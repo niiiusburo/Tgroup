@@ -33,13 +33,17 @@
     id: string;            // partners.id (UUID)
     name: string;
     email: string;
-    companyId: string;     // primary branch
-    companyName: string;
-  };
-  permissions: {
-    effectivePermissions: string[];  // e.g., ["customers.view", "appointments.add"]
-    locations: { id: string; name: string }[];
-  };
+	    companyId: string;     // primary branch
+	    companyName: string;
+	    lob_scope: Array<'dental' | 'cosmetic'>; // Admin can receive multiple; non-admin staff receive one visible LOB
+	    is_ctv: boolean;
+	  };
+	  permissions: {
+	    groupId: string | null;
+	    groupName: string | null;
+	    effectivePermissions: string[];  // e.g., ["customers.view", "appointments.add"]
+	    locations: { id: string; name: string }[];
+	  };
 }
 ```
 **Errors:** 400 (missing fields), 401 (invalid credentials), 429 (rate limited).

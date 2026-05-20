@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 interface ReportParams {
   dateFrom: string;
@@ -8,6 +9,7 @@ interface ReportParams {
 }
 
 export function useReportData<T>(endpoint: string, params: ReportParams) {
+  const { currentLOB } = useBusinessUnit();
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +25,7 @@ export function useReportData<T>(endpoint: string, params: ReportParams) {
         method: 'POST',
         body: cleanParams,
         signal,
+        lob: currentLOB,
       });
       if (result.success) {
         setData(result.data);
@@ -35,7 +38,7 @@ export function useReportData<T>(endpoint: string, params: ReportParams) {
     } finally {
       setLoading(false);
     }
-  }, [endpoint, params.dateFrom, params.dateTo, params.companyId]);
+  }, [endpoint, params.dateFrom, params.dateTo, params.companyId, currentLOB]);
 
   useEffect(() => {
     const controller = new AbortController();

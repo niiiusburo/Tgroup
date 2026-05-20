@@ -1,0 +1,90 @@
+name: Earnings & Commissions Engine (v2) — Transactional Attribution
+summary: |
+  Append-only transactional earnings table (dbo.earnings) in BOTH databases.
+  Separate from legacy commission *rules* system (commissions, commissionproductrules, saleorderlinepartnercommissions tables — untouched by v2).
+  Triggered on payment collected (positive row); refunds create negative reversal row (original untouched).
+  Recipient resolution (D13, first match wins, strict order):
+    1. If client has referred_by_ctv_id → that CTV (crosses LOBs)
+    2. Else if cosmetic + active consultation card (consultations table) → consulting_staff
+    3. Else if dental + partners.salestaffid → that salestaff
+    4. Else no earnings row
+  Products carry commission_rate_percent (additive, dental defaults 0 for compat).
+  Payouts table for admin batch runs (earnings.payout_id link); admin-only via commissions.payout.run perm.
+  consultations table cosmetic-only, invisible to UI, auto-managed, 6mo TTL.
+owns:
+  - api/src/services/commissionEngine.js (resolveRecipient, createEarningsForPayment, reverseOnRefund)
+  - api/src/routes/payments.js + saleorder close paths (hook engine on collect)
+  - api/src/routes/cosmetic/appointments.js (auto create/supersede consultation card)
+  - Future: admin payout runner (POST /api/payouts)
+  - api/src/routes/earnings.js or reports (if team views added)
+reads:
+  - tdental_demo.dbo.earnings
+  - tcosmetic_demo.dbo.earnings
+  - tdental_demo.dbo.payouts
+  - tcosmetic_demo.dbo.payouts
+  - tcosmetic_demo.dbo.consultations
+  - tdental_demo.dbo.partners (salestaffid, referred_by_ctv_id)
+  - tcosmetic_demo.dbo.clients (referred_by_ctv_id, consulting_staff_id)
+  - tdental_demo.dbo.products (+ commission_rate_percent)
+  - tcosmetic_demo.dbo.products
+writes:
+  - Both DBs: dbo.earnings (append only)
+  - Both DBs: dbo.payouts
+  - tcosmetic_demo.dbo.consultations (auto)
+  - tdental_demo.dbo.partners (referred_by_ctv_id additive)
+  - tdental_demo.dbo.products (commission_rate_percent additive)
+  - tcosmetic_demo.dbo.products
+tables:
+  # NEW transactional (both DBs)
+  - tdental_demo.dbo.earnings (append-only; payout_id nullable FK to payouts; status pending/paid/reversed; source ctv/consultation/salestaff)
+  - tcosmetic_demo.dbo.earnings (identical)
+  - tdental_demo.dbo.payouts (batch header; run_by, cycle, total)
+  - tcosmetic_demo.dbo.payouts (identical)
+  # Cosmetic attribution
+  - tcosmetic_demo.dbo.consultations (id, client_id, consulting_staff_id, status, created_at, superseded_by, expires_at; 6mo TTL from activity)
+  # Additive dental
+  - tdental_demo.dbo.partners (+ referred_by_ctv_id UUID NULL)
+  - tdental_demo.dbo.products (+ commission_rate_percent NUMERIC(5,2) NULL DEFAULT 0)
+  - tcosmetic_demo.dbo.products (+ commission_rate_percent)
+  # Legacy (untouched by engine; rules/config only)
+  - tdental_demo.dbo.commissions (legacy rules)
+  - tdental_demo.dbo.commissionproductrules
+  - tdental_demo.dbo.saleorderlinepartnercommissions
+endpoints:
+  - (internal to payment paths)
+  - POST /api/payouts (admin, creates batch + links earnings rows)
+  - GET /api/ctv/commission-summary (uses earnings)
+  - Future earnings list/report endpoints (gated)
+ui_surfaces:
+  - CTV dashboard tabs (consumes via ctv api)
+  - Admin payout UI (under reports or new /payouts; gated by commissions.payout.run)
+  - (No direct /earnings admin page in v1; legacy /commission page remains rules-only)
+jobs:
+  - Commission engine (pure + DB write on payment success path)
+  - Payout batch runner (admin triggered)
+shared_types:
+  - api/src/services/commissionEngine.js types (RecipientResolution, EarningsRow)
+  - website/src/lib/api/ctv.ts (CommissionRow)
+dependencies:
+  - Payments & Deposits (trigger on collect + refund)
+  - Cosmetic Clients (referred + consultation)
+  - Customers & Partners (dental salestaffid)
+  - Services Catalog (rate on product)
+  - Business Unit (earnings written to correct DB via getDb(lob))
+affected_by:
+  - Any mutation to legacy commission tables (forbidden for v2 engine)
+  - Payment allocation/refund paths
+  - Appointment booking for cosmetic (consultation card)
+impact_tests:
+  - D13 precedence: referred_by_ctv_id wins over active consultation
+  - Refund reversal: +row on collect; -row on refund; net 0; original status untouched
+  - Isolation: earnings written only to correct LOB DB
+  - Payout: admin run links rows; CTV sees status change
+  - No impact on legacy commission UI/queries
+risk_level: high
+notes:
+  - "Chosen naming per DB specialist + PLAN: earnings for transactional to avoid collision on 'commissions' (legacy rules vs new earnings)."
+  - "Permissions remain commissions.* (logical domain name)."
+  - "Engine lives in payment mutation path; pure functions + getDb(lob) writes."
+  - "consultations invisible per spec; auto-created on cosmetic booking with consulting_staff_id."
+  - "Legacy commission rules system (saleorderlinepartnercommissions etc.) continues to operate independently for dental."

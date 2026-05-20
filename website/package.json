@@ -1,7 +1,7 @@
 {
   "name": "tgclinic-website",
   "private": true,
-  "version": "0.31.18",
+  "version": "0.31.19",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
+    "@tgroup/contracts": "file:../contracts",
     "clsx": "^2.1.0",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.38.0",
@@ -36,7 +37,6 @@
     "tailwind-merge": "^2.2.0",
     "use-places-autocomplete": "^4.0.1",
     "xlsx-js-style": "^1.2.0",
-    "@tgroup/contracts": "file:../contracts",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -56,6 +56,7 @@
     "@typescript-eslint/parser": "^6.21.0",
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.17",
+    "dependency-cruiser": "^17.4.0",
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",

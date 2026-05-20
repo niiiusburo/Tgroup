@@ -1,6 +1,6 @@
 'use strict';
 
-const { query } = require('../../db');
+const { query, getQuery } = require('../../db');
 
 const PARTNER_BY_ID_SQL = `SELECT
   p.id,
@@ -103,7 +103,8 @@ async function fetchPartnerProfileById(id, runQuery = query) {
 async function getPartnerById(req, res) {
   try {
     const { id } = req.params;
-    const rows = await fetchPartnerProfileById(id);
+    const q = getQuery(req);
+    const rows = await fetchPartnerProfileById(id, q);
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({ error: 'Partner not found' });

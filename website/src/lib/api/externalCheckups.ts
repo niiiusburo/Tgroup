@@ -53,8 +53,8 @@ function extractExternalCheckupError(text: string, fallback: string): string {
   }
 }
 
-export function fetchExternalCheckups(customerCode: string): Promise<ExternalCheckupsResponse> {
-  return apiFetch<ExternalCheckupsResponse>(`/ExternalCheckups/${encodeURIComponent(customerCode)}`);
+export function fetchExternalCheckups(customerCode: string, lob?: 'dental' | 'cosmetic'): Promise<ExternalCheckupsResponse> {
+  return apiFetch<ExternalCheckupsResponse>(`/ExternalCheckups/${encodeURIComponent(customerCode)}`, { lob });
 }
 
 export interface ExternalPatientCreateResponse {

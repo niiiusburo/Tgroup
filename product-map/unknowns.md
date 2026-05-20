@@ -74,3 +74,22 @@
 
 - **Unknown:** Are `APPOINTMENT_STATUS_LABELS_VI` (deprecated) and `APPOINTMENT_STATUS_I18N_KEYS` both still referenced in production code?
   - Evidence: `APPOINTMENT_STATUS_LABELS_VI` is marked `@deprecated` but may still be imported in untested components.
+
+## 14. Cosmetic LOB v2 Parked Items (per approved design-v2 § Open Questions)
+
+- **Unknown:** Cosmetic role-flag rename — owner intends to rename isdoctor/isassistant/isreceptionist to cosmetic-appropriate names in a follow-up v1.1 spec. Current schema is forward-compatible (D15).
+  - Evidence: v2 spec Open Questions #1; cosmetic.staff table mirrors dental flags for v1.
+
+- **Unknown:** Dental auto-unlock rules for referral_locks — eight candidates surveyed in v1 brainstorm; deferred to a follow-up spec.
+  - Evidence: v2 spec Open Questions #3; referral_locks is dental-only (no cross-LOB).
+
+- **Unknown:** Should admin /reports/commission (or new earnings views) show CTV rollup aggregated across both DBs?
+  - Evidence: v2 spec Open Questions #5; out of v1 scope. Current ctv summary is self-only for CTV users.
+
+- **Unknown:** Provider commission split — when (if ever) split commission between referrer and provider?
+  - Evidence: v2 spec Open Questions #4; not in D13 resolution for v1.
+
+- **Unknown:** Dental commission policy — do dental services ever earn non-zero commission? (column + engine in place, rates default 0%).
+  - Evidence: v2 spec Open Questions #2; mechanism ready but policy TBD.
+
+- **Note:** All unknowns above must be resolved before Phase 4 or explicitly parked in DECISIONS.md. Cosmetic LOB work must not touch legacy commission rules tables.

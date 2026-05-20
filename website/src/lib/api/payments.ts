@@ -43,6 +43,7 @@ export async function fetchPayments(
   customerId?: string,
   type?: 'payments' | 'deposits' | 'all',
   search?: string,
+  lob?: 'dental' | 'cosmetic',
 ): Promise<{ items: ApiPayment[]; totalItems: number }> {
   const searchParams = new URLSearchParams();
   if (customerId) searchParams.set('customerId', customerId);
@@ -50,7 +51,7 @@ export async function fetchPayments(
   if (search?.trim()) searchParams.set('search', search.trim());
   searchParams.set('limit', '100');
   searchParams.set('offset', '0');
-  return apiFetch<{ items: ApiPayment[]; totalItems: number }>(`/Payments?${searchParams.toString()}`);
+  return apiFetch<{ items: ApiPayment[]; totalItems: number }>(`/Payments?${searchParams.toString()}`, { lob });
 }
 
 export async function createPayment(data: {
@@ -103,6 +104,7 @@ export async function fetchDeposits(params: {
   type?: 'deposit' | 'refund' | 'all';
   limit?: number;
   offset?: number;
+  lob?: 'dental' | 'cosmetic';
 }): Promise<{ items: ApiPayment[]; totalItems: number }> {
   const searchParams = new URLSearchParams();
   searchParams.set('customerId', params.customerId);
@@ -112,7 +114,7 @@ export async function fetchDeposits(params: {
   if (params.type) searchParams.set('type', params.type);
   searchParams.set('limit', String(params.limit ?? 100));
   searchParams.set('offset', String(params.offset ?? 0));
-  return apiFetch<{ items: ApiPayment[]; totalItems: number }>(`/Payments/deposits?${searchParams.toString()}`);
+  return apiFetch<{ items: ApiPayment[]; totalItems: number }>(`/Payments/deposits?${searchParams.toString()}`, { lob: params.lob });
 }
 
 export async function fetchDepositUsage(params: {
@@ -121,6 +123,7 @@ export async function fetchDepositUsage(params: {
   dateTo?: string;
   limit?: number;
   offset?: number;
+  lob?: 'dental' | 'cosmetic';
 }): Promise<{ items: ApiPayment[]; totalItems: number }> {
   const searchParams = new URLSearchParams();
   searchParams.set('customerId', params.customerId);
@@ -128,7 +131,7 @@ export async function fetchDepositUsage(params: {
   if (params.dateTo) searchParams.set('dateTo', params.dateTo);
   searchParams.set('limit', String(params.limit ?? 100));
   searchParams.set('offset', String(params.offset ?? 0));
-  return apiFetch<{ items: ApiPayment[]; totalItems: number }>(`/Payments/deposit-usage?${searchParams.toString()}`);
+  return apiFetch<{ items: ApiPayment[]; totalItems: number }>(`/Payments/deposit-usage?${searchParams.toString()}`, { lob: params.lob });
 }
 
 export async function createRefund(data: {

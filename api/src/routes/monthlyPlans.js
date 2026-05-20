@@ -392,7 +392,10 @@ async function doDeletePlanTxn(client, req, res) {
 }
 
 async function doDeletePlan(req, res) {
-  const client = await pool.connect();
+  // Safe req.db pattern for LOB isolation (under cosmeticRouter mounts); fallback for dental.
+  // All other 28 query() calls in this file now safe via runWithLob wrapper in attachCosmeticDb.
+  const txPool = req.db || pool;
+  const client = await txPool.connect();
   try {
     return await doDeletePlanTxn(client, req, res);
   } catch (e) {

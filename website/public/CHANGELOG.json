@@ -1,5 +1,43 @@
 [
   {
+    "version": "0.31.19",
+    "date": "2026-05-20",
+    "commit": "fdb5b013",
+    "highlights": "Cosmetic line-of-business v2: physical two-DB isolation, CTV referrer commission dashboard with real cross-DB earnings, multi-scope admin permission mirroring.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Cosmetic LOB toggle in the header for multi-scope admins (Dental | Cosmetic) with per-LOB physical DB routing (tdental_demo / tcosmetic_demo) via AsyncLocalStorage and the unified /api/cosmetic/* router.",
+          "CTV (Cong Tac Vien / referrer) 4-tab mobile-first dashboard: Home, Commission, Referrals, Me — aggregating real earnings across both DBs for the logged-in CTV (no mocks).",
+          "D13 commission engine wired end-to-end: payment-collected → earnings row written with source attribution (ctv | consultation | salestaff), refunds emit append-only negative reversals.",
+          "Admin permission bootstrap into the cosmetic DB so multi-scope admins (t@) can use cosmetic admin surfaces without manual PermissionBoard grants."
+        ]
+      },
+      {
+        "title": "Schema",
+        "items": [
+          "Migration 047 (additive only): partners.lob_scope TEXT[], partners.is_ctv, partners.referred_by_ctv_id, products.commission_rate_percent; new tables earnings, payouts, referral_locks, consultations in both DBs.",
+          "Dental data path untouched: cosmetic routes return 503 when COSMETIC_LOB_ENABLED=false."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "New Playwright spec website/e2e/cosmetic-lob-full-matrix.spec.ts covers 14 flows: LOB toggle, every admin surface in both LOBs, CTV 4-tab desktop+mobile, 403 gating, and toggle remount isolation. Deterministic 14/14 green.",
+          "loginAs helper now clears prior session storage before navigating to /login, eliminating cross-test flakiness."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Removed duplicate /api/cosmetic/* mount block in api/src/server.js — the unified cosmeticRouter (with ALS wrapper) now owns the entire prefix; CTV mount is kept separate because it queries both DBs.",
+          "Eight backend test suites patched to mock requireLobScope after the auth middleware gained LOB scope gating."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.31.18",
     "date": "2026-05-08",
     "commit": "cdbda61f",

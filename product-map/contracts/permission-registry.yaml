@@ -2,9 +2,9 @@
 # Canonical mapping of all permission strings to backend routes, frontend routes, and UI components.
 
 meta:
-  total_backend_strings: 33
-  total_frontend_route_guards: 15
-  total_nav_guards: 13
+  total_backend_strings: 42
+  total_frontend_route_guards: 17
+  total_nav_guards: 14
   wildcard: "*"
   wildcard_meaning: "Grants all permissions (used in auth middleware and hasPermission)"
 
@@ -170,6 +170,35 @@ backend_permissions:
     routes:
       - GET /api/WebsitePages
       - GET /api/WebsitePages/:id
+  # Cosmetic LOB v2 — 9 new keys (registered Phase 0; see cosmetic.yaml + v2 design)
+  - string: cosmetic.access
+    routes:
+      - "All /api/cosmetic/* (mirrors of dental routes; gated by requireLobScope('cosmetic') + this perm)"
+  - string: dental.access
+    routes:
+      - "Legacy dental routes (implicit for dental-scoped users; admins + dental staff)"
+  - string: ctv.dashboard.view
+    routes:
+      - GET /api/ctv/*
+  - string: ctv.commission.view.self
+    routes:
+      - GET /api/ctv/commission-summary
+  - string: ctv.referrals.view.self
+    routes:
+      - GET /api/ctv/referrals
+  - string: commissions.view.team
+    routes:
+      - "Future /api/reports/commissions/* or earnings team views (admin/manager)"
+  - string: commissions.payout.run
+    routes:
+      - POST /api/payouts
+      - "Payout batch runner endpoints"
+  - string: commissions.export
+    routes:
+      - "POST /api/Exports/commissions/* or earnings exports"
+  - string: lob.crossview
+    routes:
+      - "Internal cross-LOB client probe endpoints (admin-only badge; e.g. /Partners/:id/cross-lob)"
 
 # Frontend page-level permission guards (ProtectedRoute in App.tsx)
 frontend_route_permissions:
@@ -220,6 +249,13 @@ frontend_route_permissions:
   - string: website.view
     paths:
       - /website
+  # Cosmetic LOB v2 frontend guards
+  - string: cosmetic.access
+    paths:
+      - "/ (when LOB=cosmetic; context-driven)"
+  - string: ctv.dashboard.view
+    paths:
+      - /ctv
 
 # Additional frontend permissions not in ROUTE_PERMISSIONS but checked inline
 frontend_inline_permissions:
@@ -287,6 +323,8 @@ nav_permissions:
     permission: permissions.view
   - path: /relationships
     permission: permissions.view
+  - path: /ctv
+    permission: ctv.dashboard.view
   - path: /clinic
     permission: ""  # container, no guard
   - path: /team
@@ -297,6 +335,8 @@ nav_permissions:
 # Gaps / risks
 risks:
   - desc: "locations.edit is checked in frontend but no backend requirePermission('locations.edit') exists"
+  - desc: "Cosmetic LOB v2: 9 new perms added; ensure seed scripts + permission groups in dental DB get defaults for admins (cosmetic.access, lob.crossview, commissions.* for admins)"
+  - desc: "ctv.* perms only for is_ctv users; dental/cosmetic.access respect lob_scope hard gate first"
     severity: low
   - desc: "Frontend /services and /service-catalog route guards currently use customers.edit while backend service reads now use services.view"
     severity: medium

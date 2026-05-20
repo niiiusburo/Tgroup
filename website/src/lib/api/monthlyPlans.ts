@@ -60,6 +60,7 @@ export function fetchMonthlyPlans(params?: {
   status?: string;
   customerId?: string;
   search?: string;
+  lob?: 'dental' | 'cosmetic';
 }) {
   return apiFetch<MonthlyPlansResponse>('/MonthlyPlans', {
     params: {
@@ -68,6 +69,7 @@ export function fetchMonthlyPlans(params?: {
       customer_id: params?.customerId,
       search: params?.search,
     },
+    lob: params?.lob,
   });
 }
 

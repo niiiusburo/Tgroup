@@ -1,5 +1,5 @@
 const express = require('express');
-const { query } = require('../db');
+const { query: legacyQuery, getQuery } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const { requirePermission } = require('../middleware/auth');
 const { getVietnamNow } = require('../lib/dateUtils');
@@ -18,6 +18,7 @@ function categoryGroupKey(alias) {
  */
 router.get('/', async (req, res) => {
   try {
+    const q = getQuery(req);
     const { search = '', active = '' } = req.query;
 
     const conditions = ['1=1'];
@@ -42,7 +43,7 @@ router.get('/', async (req, res) => {
 
     const whereClause = conditions.join(' AND ');
 
-    const rows = await query(
+    const rows = await q(
       `WITH category_counts AS (
         SELECT
           pc.id,

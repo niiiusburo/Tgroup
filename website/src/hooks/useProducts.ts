@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { fetchProducts, type ApiProduct } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 export interface Product {
   id: string;
@@ -52,6 +53,7 @@ function mapApiProduct(api: ApiProduct): Product {
 
 export function useProducts(options: UseProductsOptions = {}): UseProductsReturn {
   const { limit = 1000, search, categId } = options;
+  const { currentLOB } = useBusinessUnit();
   
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,6 +69,7 @@ export function useProducts(options: UseProductsOptions = {}): UseProductsReturn
         limit,
         search,
         categId,
+        lob: currentLOB,
       });
       
       setProducts(response.items.map(mapApiProduct));
@@ -77,7 +80,7 @@ export function useProducts(options: UseProductsOptions = {}): UseProductsReturn
     } finally {
       setIsLoading(false);
     }
-  }, [limit, search, categId]);
+  }, [limit, search, categId, currentLOB]);
 
   useEffect(() => {
     refetch();

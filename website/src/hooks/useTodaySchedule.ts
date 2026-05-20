@@ -3,6 +3,7 @@ import { type CalendarAppointment } from '@/data/mockCalendar';
 import { fetchAppointments } from '@/lib/api';
 import { mapApiAppointmentToCalendar } from '@/lib/calendarUtils';
 import { getTodayInTimezone } from '@/lib/dateUtils';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 /**
  * Hook for today's appointment schedule
@@ -15,6 +16,7 @@ interface TodayScheduleResult {
 }
 
 export function useTodaySchedule(locationId?: string): TodayScheduleResult {
+  const { currentLOB } = useBusinessUnit();
   const [isLoading, setIsLoading] = useState(true);
   const [appointments, setAppointments] = useState<readonly CalendarAppointment[]>([]);
 
@@ -29,6 +31,7 @@ export function useTodaySchedule(locationId?: string): TodayScheduleResult {
           dateFrom: todayStr,
           dateTo: `${todayStr}T23:59:59`,
           companyId: locationId && locationId !== 'all' ? locationId : undefined,
+          lob: currentLOB,
         });
 
         const mappedAppointments = response.items.map(mapApiAppointmentToCalendar);
@@ -42,7 +45,7 @@ export function useTodaySchedule(locationId?: string): TodayScheduleResult {
     }
 
     loadTodaySchedule();
-  }, [locationId]);
+  }, [locationId, currentLOB]);
 
   return { appointments, isLoading } as const;
 }

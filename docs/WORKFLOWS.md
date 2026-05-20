@@ -28,6 +28,7 @@ sequenceDiagram
         DB-->>API: groupId, groupName, effectivePermissions[]
         API->>DB: Query employee_location_scope
         DB-->>API: locations[] (id, name)
+        API->>API: Cap visible lob_scope to one LOB unless group is Admin
         API->>API: JWT.sign(payload, JWT_SECRET, expiresIn: rememberMe ? '60d' : '24h')
         API-->>FE: { token, user, permissions, locations }
         FE->>FE: localStorage.setItem('tgclinic_token', token)
@@ -41,10 +42,11 @@ sequenceDiagram
 
 **Data state transitions:**
 - `partners.last_login` → current timestamp.
+- `user.lob_scope` / JWT `lob_scope` → multiple LOBs only for Admin; non-admin staff get one visible scoped LOB.
 - `localStorage.tgclinic_token` → new JWT string.
 - `AuthContext` → populated with user, permissions, locations.
 
-**Invariants:** INV-007, INV-008.
+**Invariants:** INV-007, INV-008, INV-008A.
 **Failure modes:**
 - `tier_id` NULL → empty permissions (INC-20260506-01).
 - `JWT_SECRET` missing → API exits FATAL before listening.

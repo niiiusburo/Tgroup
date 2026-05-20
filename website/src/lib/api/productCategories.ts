@@ -13,21 +13,22 @@ export interface ApiProductCategory {
   lastupdated: string | null;
 }
 
-export function fetchProductCategories(params?: { search?: string }) {
+export function fetchProductCategories(params?: { search?: string; lob?: 'dental' | 'cosmetic' }) {
   return apiFetch<{ totalItems: number; items: ApiProductCategory[] }>('/ProductCategories', {
     params: { search: params?.search },
+    lob: params?.lob,
   });
 }
 
-export function createProductCategory(data: { name: string; parentid?: string }) {
-  return apiFetch<ApiProductCategory>('/ProductCategories', { method: 'POST', body: data });
+export function createProductCategory(data: { name: string; parentid?: string }, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiProductCategory>('/ProductCategories', { method: 'POST', body: data, lob });
 }
 
-export function updateProductCategory(id: string, data: Partial<{ name: string; active: boolean }>) {
-  return apiFetch<ApiProductCategory>(`/ProductCategories/${id}`, { method: 'PUT', body: data });
+export function updateProductCategory(id: string, data: Partial<{ name: string; active: boolean }>, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiProductCategory>(`/ProductCategories/${id}`, { method: 'PUT', body: data, lob });
 }
 
-export function deleteProductCategory(id: string) {
-  return apiFetch<void>(`/ProductCategories/${id}`, { method: 'DELETE' });
+export function deleteProductCategory(id: string, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<void>(`/ProductCategories/${id}`, { method: 'DELETE', lob });
 }
 

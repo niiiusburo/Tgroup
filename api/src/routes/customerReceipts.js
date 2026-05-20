@@ -1,5 +1,5 @@
 const express = require('express');
-const { query } = require('../db');
+const { query: legacyQuery, getQuery } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');
 
@@ -12,6 +12,7 @@ const router = express.Router();
  */
 router.get('/', requirePermission('customers.view'), async (req, res) => {
   try {
+    const q = getQuery(req);
     const {
       partner_id,
       offset = '0',
@@ -58,7 +59,7 @@ router.get('/', requirePermission('customers.view'), async (req, res) => {
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-    const items = await query(
+    const items = await q(
       `SELECT
         cr.id,
         cr.datewaiting,
@@ -97,7 +98,7 @@ router.get('/', requirePermission('customers.view'), async (req, res) => {
       [...params, limitNum, offsetNum]
     );
 
-    const countResult = await query(
+    const countResult = await q(
       `SELECT COUNT(*) AS count
        FROM customerreceipts cr
        LEFT JOIN partners p ON p.id = cr.partnerid
@@ -112,7 +113,7 @@ router.get('/', requirePermission('customers.view'), async (req, res) => {
       byState: {},
     };
 
-    const stateCounts = await query(
+    const stateCounts = await q(
       `SELECT cr.state, COUNT(*) AS count
        FROM customerreceipts cr
        LEFT JOIN partners p ON p.id = cr.partnerid
@@ -153,7 +154,7 @@ router.get('/:id', requirePermission('customers.view'), async (req, res) => {
   try {
     const { id } = req.params;
 
-    const rows = await query(
+    const rows = await q(
       `SELECT
         cr.id,
         cr.datewaiting,
@@ -193,7 +194,7 @@ router.get('/:id', requirePermission('customers.view'), async (req, res) => {
       return res.status(404).json({ error: 'Customer receipt not found' });
     }
 
-    const appointments = await query(
+    const appointments = await q(
       `SELECT
         a.id,
         a.name,

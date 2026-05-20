@@ -1,5 +1,5 @@
 const express = require('express');
-const { query } = require('../db');
+const { query: legacyQuery, getQuery } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
@@ -7,7 +7,8 @@ const router = express.Router();
 router.get('/', requirePermission('locations.view'), async (req, res) => {
   let items = [];
   try {
-    items = await query('SELECT * FROM dbo.companies');
+    const q = getQuery(req);
+    items = await q('SELECT * FROM dbo.companies');
   } catch (err) {
     items = [];
   }

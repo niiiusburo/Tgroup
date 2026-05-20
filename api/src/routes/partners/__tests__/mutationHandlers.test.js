@@ -1,6 +1,11 @@
-jest.mock('../../../db', () => ({
-  query: jest.fn(),
-}));
+jest.mock('../../../db', () => {
+  const mockQuery = jest.fn();
+  return {
+    query: mockQuery,
+    getQuery: jest.fn((reqOrLob) => mockQuery),
+    getDb: jest.fn(() => ({ queryRows: mockQuery })),
+  };
+});
 
 const { query } = require('../../../db');
 const { updatePartner } = require('../mutationHandlers');

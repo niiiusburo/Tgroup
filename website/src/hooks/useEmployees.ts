@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { fetchEmployees, type ApiEmployee } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import {
   type Employee,
   type EmployeeRole,
@@ -102,6 +103,7 @@ interface UseEmployeesOptions {
 
 export function useEmployees(selectedLocationId?: string, options: UseEmployeesOptions = {}) {
   const enabled = options.enabled ?? true;
+  const { currentLOB } = useBusinessUnit();
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [tierFilter, setTierFilter] = useState<string>('all');
@@ -129,6 +131,7 @@ export function useEmployees(selectedLocationId?: string, options: UseEmployeesO
         search,
         companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
         active: 'all',
+        lob: currentLOB,
       });
 
       const employeesWithApiFields: EmployeeWithApiFields[] = response.items.map((apiEmp) => {
@@ -152,7 +155,7 @@ export function useEmployees(selectedLocationId?: string, options: UseEmployeesO
     } finally {
       setIsLoading(false);
     }
-  }, [selectedLocationId]);
+  }, [selectedLocationId, currentLOB]);
 
   /**
    * Initial fetch

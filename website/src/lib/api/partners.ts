@@ -79,6 +79,7 @@ export function fetchPartners(params?: {
   search?: string;
   companyId?: string;
   status?: 'active' | 'inactive' | 'pending';
+  lob?: 'dental' | 'cosmetic';
 }) {
   return apiFetch<PartnersResponse>('/Partners', {
     params: {
@@ -88,11 +89,12 @@ export function fetchPartners(params?: {
       companyId: params?.companyId,
       status: params?.status,
     },
+    lob: params?.lob,
   });
 }
 
-export function fetchPartnerById(id: string) {
-  return apiFetch<ApiPartner>(`/Partners/${id}`);
+export function fetchPartnerById(id: string, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiPartner>(`/Partners/${id}`, { lob });
 }
 
 export function createPartner(data: Partial<ApiPartner>) {
@@ -161,4 +163,21 @@ export function registerFace(partnerId: string, image: Blob, source?: string) {
 
 export function getFaceStatus(partnerId: string) {
   return apiFetch<FaceStatusResult>(`/face/status/${encodeURIComponent(partnerId)}`);
+}
+
+// ─── Cross-LOB Badge Probe (D6 / lob.crossview) ────────────────────────────────
+// Soft phone match across dental/cosmetic DBs. Returns match details for the *other* LOB.
+// Called only when user has 'lob.crossview' permission. Endpoint is top-level (no /cosmetic prefix).
+export interface CrossLobProbeResult {
+  readonly matched: boolean;
+  readonly otherLob?: 'dental' | 'cosmetic';
+  readonly otherId?: string;
+  readonly otherName?: string;
+  readonly matchedPhone?: string;
+}
+
+export async function probeCrossLob(phone: string, currentLob: 'dental' | 'cosmetic'): Promise<CrossLobProbeResult> {
+  if (!phone) return { matched: false };
+  const params = new URLSearchParams({ phone: String(phone), lob: currentLob });
+  return apiFetch<CrossLobProbeResult>(`/cross-lob-probe?${params.toString()}`);
 }

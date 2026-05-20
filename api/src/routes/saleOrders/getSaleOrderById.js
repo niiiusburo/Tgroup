@@ -1,16 +1,17 @@
-const { query } = require('../../db');
+const { query: legacyQuery, getQuery } = require('../../db');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
 
 async function getSaleOrderById(req, res) {
   try {
+    const q = getQuery(req);
     const { id } = req.params;
-    const rows = await fetchSaleOrderById(id);
+    const rows = await fetchSaleOrderById(id, q);
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({ error: 'Sale order not found' });
     }
 
-    const lines = await query(
+    const lines = await q(
       `SELECT
         sol.id,
         sol.orderid,

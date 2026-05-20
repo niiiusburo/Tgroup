@@ -1,5 +1,5 @@
 const express = require('express');
-const { query } = require('../db');
+const { query: legacyQuery, getQuery } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const { requirePermission } = require('../middleware/auth');
 const { getVietnamNow } = require('../lib/dateUtils');
@@ -49,6 +49,7 @@ function groupedCategoryCondition(paramIdx) {
  */
 router.get('/', requirePermission('services.view'), async (req, res) => {
   try {
+    const q = getQuery(req);
     const {
       offset = '0',
       limit = '50',
@@ -111,7 +112,7 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
 
     const whereClause = conditions.join(' AND ');
 
-    const items = await query(
+    const items = await q(
       `SELECT
         p.id,
         p.name,
@@ -143,7 +144,7 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
       [...params, limitNum, offsetNum]
     );
 
-    const countResult = await query(
+    const countResult = await q(
       `SELECT COUNT(*) AS count FROM dbo.products p WHERE ${whereClause}`,
       params
     );
@@ -174,8 +175,9 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
 router.get('/:id', requirePermission('services.view'), async (req, res) => {
   try {
     const { id } = req.params;
+    const q = getQuery(req);
 
-    const rows = await query(
+    const rows = await q(
       `SELECT
         p.id,
         p.name,
@@ -224,6 +226,7 @@ router.get('/:id', requirePermission('services.view'), async (req, res) => {
  */
 router.post('/', requirePermission('services.edit'), async (req, res) => {
   try {
+    const q = getQuery(req);
     const { name, defaultcode, type, listprice, categid, uomname, companyid, canorderlab } = req.body;
     if (!name || !name.trim()) {
       return res.status(400).json({ error: 'Name is required' });
@@ -234,13 +237,13 @@ router.post('/', requirePermission('services.edit'), async (req, res) => {
 
     const trimmedName = name.trim();
     const nameNoSign = normalizeVietnamese(trimmedName);
-    await query(
+    await q(
       `INSERT INTO dbo.products (id, name, namenosign, defaultcode, type, type2, listprice, categid, uomname, companyid, canorderlab, active, datecreated, lastupdated)
        VALUES ($1, $2, $3, $4, $5, $5, $6, $7, $8, $9, $10, true, $11, $11)`,
       [id, trimmedName, nameNoSign, defaultcode || null, type || 'service', listprice || 0, categid || null, uomname || 'Lần', companyid || null, canorderlab || false, now]
     );
 
-    const rows = await query(
+    const rows = await q(
       `SELECT p.*, pc.name AS categname, pc.completename AS categcompletename, c.name AS companyname
        FROM dbo.products p
        LEFT JOIN dbo.productcategories pc ON pc.id = p.categid
@@ -263,6 +266,7 @@ router.post('/', requirePermission('services.edit'), async (req, res) => {
 router.put('/:id', requirePermission('services.edit'), async (req, res) => {
   try {
     const { id } = req.params;
+    const q = getQuery(req);
     const { name, defaultcode, listprice, categid, uomname, companyid, canorderlab, active } = req.body;
 
     const updates = [];
@@ -296,12 +300,12 @@ router.put('/:id', requirePermission('services.edit'), async (req, res) => {
 
     params.push(id);
 
-    await query(
+    await q(
       `UPDATE dbo.products SET ${updates.join(', ')} WHERE id = $${idx}`,
       params
     );
 
-    const rows = await query(
+    const rows = await q(
       `SELECT p.*, pc.name AS categname, pc.completename AS categcompletename, c.name AS companyname
        FROM dbo.products p
        LEFT JOIN dbo.productcategories pc ON pc.id = p.categid
@@ -327,10 +331,11 @@ router.put('/:id', requirePermission('services.edit'), async (req, res) => {
 router.delete('/:id', requirePermission('services.edit'), async (req, res) => {
   try {
     const { id } = req.params;
+    const q = getQuery(req);
 
     const [solResult, dksResult] = await Promise.all([
-      query('SELECT COUNT(*) AS count FROM dbo.saleorderlines WHERE productid = $1 AND isdeleted = false', [id]),
-      query('SELECT COUNT(*) AS count FROM dbo.dotkhamsteps WHERE productid = $1', [id]),
+      q('SELECT COUNT(*) AS count FROM dbo.saleorderlines WHERE productid = $1 AND isdeleted = false', [id]),
+      q('SELECT COUNT(*) AS count FROM dbo.dotkhamsteps WHERE productid = $1', [id]),
     ]);
 
     const saleOrderLines = parseInt(solResult[0]?.count || '0', 10);
@@ -343,7 +348,7 @@ router.delete('/:id', requirePermission('services.edit'), async (req, res) => {
       });
     }
 
-    await query(`DELETE FROM dbo.products WHERE id = $1`, [id]);
+    await q(`DELETE FROM dbo.products WHERE id = $1`, [id]);
     return res.status(204).end();
   } catch (err) {
     console.error('Error deleting product:', err);

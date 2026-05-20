@@ -4,6 +4,7 @@
  * @crossref:uses[fetchPermissionGroups, fetchEmployeePermissions, fetchCompanies]
  */
 import { useState, useEffect, useCallback } from 'react';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import {
   fetchPermissionGroups,
   fetchEmployeePermissions,
@@ -16,6 +17,7 @@ import {
 } from '@/lib/api';
 
 export function usePermissionBoard() {
+  const { currentLOB } = useBusinessUnit();
   const [groups, setGroups] = useState<PermissionGroup[]>([]);
   const [employees, setEmployees] = useState<EmployeePermission[]>([]);
   const [locations, setLocations] = useState<ApiCompany[]>([]);
@@ -29,7 +31,7 @@ export function usePermissionBoard() {
       const [groupsRes, employeesRes, locationsRes] = await Promise.all([
         fetchPermissionGroups(),
         fetchEmployeePermissions(),
-        fetchCompanies({ offset: 0, limit: 50 }),
+        fetchCompanies({ offset: 0, limit: 50, lob: currentLOB }),
       ]);
       setGroups(groupsRes);
       setEmployees(employeesRes);
@@ -39,7 +41,7 @@ export function usePermissionBoard() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentLOB]);
 
   useEffect(() => { loadAll(); }, [loadAll]);
 

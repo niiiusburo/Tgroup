@@ -34,7 +34,19 @@
 | 016 | `016_saleorder_status_audit.sql` | Creates `saleorder_state_logs` | `CREATE TABLE saleorder_state_logs (...)` | `DROP TABLE saleorder_state_logs` | 2026-03 |
 | 017 | `017_monthlyplan_constraints.sql` | Plan/installment constraints | `ALTER TABLE monthlyplans ADD CONSTRAINT ...` | `ALTER TABLE monthlyplans DROP CONSTRAINT ...` | 2026-04 |
 
-**Total migrations:** 54 files in `api/migrations/`.
+**Total migrations:** 54+ files in `api/migrations/`.
+
+## Cosmetic LOB v2 Migrations (2026-05, feat/cosmetic-line-of-business)
+
+All v2 migrations are **additive and reversible**. Dental DB receives only additive columns + new tables. Cosmetic DB (tcosmetic_demo) receives full schema bootstrap + the common additive tables/columns.
+
+| #   | File                                      | Description                                                                 | Up (key statements)                                      | Down / Rollback (key)                                      | Notes |
+|-----|-------------------------------------------|-----------------------------------------------------------------------------|----------------------------------------------------------|------------------------------------------------------------|-------|
+| 047 | `047_add_cosmetic_lob_v2_dental_additive.sql` | LOB v2 foundation: lob_scope/is_ctv/referred_by_ctv_id on partners (auth lives on partners, **not** a users table), commission_rate_percent on products, new earnings (not commissions — collision avoidance), payouts, referral_locks (dental), consultations (cosmetic). Applied to **both** DBs. | ALTER TABLE partners ADD ...; ALTER products ADD ...; CREATE TABLE earnings/payouts/... | DROP COLUMN ...; DROP TABLE earnings; etc. (see file comments) | Phase 0/2. Run on staging clone first. Backfill lob_scope=ARRAY['dental']. Use `getDb(lob)` everywhere after. |
+
+**Key deviation from early v2 spec text:** `lob_scope` + `is_ctv` + recipient refs live on `partners` (single source of truth for identity/auth per live system audit). See DECISIONS.md, DATA-MODEL.md.
+
+Rollback dry-run (local): run the DROP statements from the migration file comments against a clone; schema must return to pre-047 shape with zero data loss on legacy columns.
 
 ## Rollback Procedures
 

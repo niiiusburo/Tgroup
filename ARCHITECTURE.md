@@ -66,7 +66,7 @@ Frontend:
 Backend:
 
 - Node.js, Express 5, CommonJS.
-- PostgreSQL through `pg` and `api/src/db.js`.
+- PostgreSQL through `pg` and `api/src/db/index.js` (v2 dual-pool factory for cosmetic LOB).
 - JWT authentication and route-level permission middleware.
 - `@tgroup/contracts` for shared contract work where used.
 - Jest, Supertest, and targeted scripts for API verification.
@@ -76,6 +76,11 @@ Infrastructure:
 - Docker Compose for local and VPS runtime.
 - Nginx for TLS/static hosting/API proxy.
 - PostgreSQL 16 using `dbo` schema.
+- **Cosmetic LOB v2 (feat/cosmetic-line-of-business worktree):** Two physical databases on same server (127.0.0.1:5433):
+  - `tdental_demo` — existing, **additive only** (new columns + new tables earnings/payouts/referral_locks; legacy shape + data untouched)
+  - `tcosmetic_demo` — new, provisioned empty (full mirror schema + earnings + consultations + staff empty per D16)
+- Dual connection pools via `api/src/db/index.js` getDb('dental'|'cosmetic'). No cross-DB JOINs ever. All LOB selection via BusinessUnitContext + requireLobScope middleware.
+- See `docs/superpowers/specs/2026-05-18-cosmetic-line-of-business-governance-delta.md` and `product-map/domains/earnings-commissions.yaml` + `business-unit.yaml`.
 - Optional Compreface containers for face recognition.
 - Hosoonline as an external health-checkup image integration.
 
@@ -123,16 +128,20 @@ If a change touches multiple domains, treat it as orchestrated work. Each domain
 
 Treat these as shared infrastructure:
 
-- `api/src/db.js`: shared PostgreSQL pool.
+- `api/src/db/index.js`: DB factory with separate pools (`getDb('dental')` / `getDb('cosmetic')`) for two physical DBs (tdental_demo + tcosmetic_demo). Legacy exports preserved for dental.
 - `api/src/middleware/auth.js`: protected route auth and permission checks.
 - `api/src/routes/auth.js`: login/me permission resolution.
 - `website/src/lib/api/core.ts`: all frontend API calls and query conversion.
 - `website/src/contexts/AuthContext.tsx`: auth state and session lifecycle.
 - `website/src/contexts/LocationContext.tsx`: location filtering across list views.
+- `website/src/contexts/BusinessUnitContext.tsx` (v2): LOB toggle + scope (new shared infra; read business-unit.yaml before touching).
+- Dual DB factory + all LOB-gated routes (cosmetic + ctv).
 - `website/src/constants/index.ts`: routes, permission mapping, status/options.
 - `dbo.partners`: customers and employees share this table.
 - `dbo.products`: user-facing service catalog is stored in products.
 - `dbo.saleorders`, `dbo.saleorderlines`, `dbo.accountpayments`, `dbo.payments`: service and money flows.
+- **v2 additive (dental):** users (lob_scope, is_ctv), partners (referred_by_ctv_id), products (commission_rate_percent), + new earnings/payouts/referral_locks tables.
+- **v2 (cosmetic DB):** full set including clients, earnings, consultations (see schema-map two-DB section and earnings-commissions.yaml).
 
 Before editing any of these, read `product-map/schema-map.md`, the affected domain YAML, and `product-map/contracts/dependency-rules.yaml`.
 

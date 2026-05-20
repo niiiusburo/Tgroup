@@ -364,6 +364,24 @@ Hosoonline uses a mixed current contract: if `HOSOONLINE_USERNAME` and `HOSOONLI
 
 ---
 
+## Cosmetic LOB Mirrors (v2, gated by COSMETIC_LOB_ENABLED + requireLobScope('cosmetic') + cosmetic.access)
+All existing dental route shapes are mirrored at `/api/cosmetic/*` (e.g. /api/cosmetic/Partners, /api/cosmetic/Appointments, /api/cosmetic/Employees, /api/cosmetic/Products, /api/cosmetic/Payments, /api/cosmetic/Reports/* etc.).
+- Auth: same as dental equivalent + lob_scope check (hard) + permission (soft)
+- Response: identical shape, but sourced exclusively from tcosmetic_demo
+- Flag off or missing scope → 503 or 403 S_LOB_FORBIDDEN
+
+See cosmetic-clients.yaml, business-unit.yaml for details.
+
+## CTV Dashboard (v2)
+- GET /api/ctv/commission-summary — CTV only (is_ctv + ctv.commission.view.self); aggregates earnings from both DBs; returns { totals: { pending, paid, dental, cosmetic }, rows: [...] with lob tags }
+- GET /api/ctv/referrals — self referred clients across LOBs + earning status
+- GET /api/ctv/me — profile
+- All CTV routes return 403 for non-is_ctv; admin routes 403 for CTV
+
+## Me / LOB Scope (v2)
+- GET /api/me/lob-scope — returns current user's { lob_scope: string[], is_ctv: boolean, available_lobs: string[] }
+- Augmented on login/me responses
+
 ## Common Response Patterns
 
 ### Paginated List

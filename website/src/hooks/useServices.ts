@@ -16,6 +16,7 @@ import {
   updateSaleOrder,
   updateSaleOrderState,
 } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { mapSaleOrderToServiceRecord } from './useServices/mapSaleOrderToServiceRecord';
 
 export type ServiceFilter = 'all' | ServiceStatus;
@@ -55,6 +56,7 @@ interface UseServicesOptions {
 
 export function useServices(selectedLocationId?: string, partnerId?: string, options: UseServicesOptions = {}) {
   const enabled = options.enabled ?? true;
+  const { currentLOB } = useBusinessUnit();
   const [records, setRecords] = useState<ServiceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,6 +80,7 @@ export function useServices(selectedLocationId?: string, partnerId?: string, opt
         search,
         companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
         partnerId: partnerId || undefined,
+        lob: currentLOB,
       });
       setRecords(response.items.map(mapSaleOrderToServiceRecord));
     } catch (err) {
@@ -86,7 +89,7 @@ export function useServices(selectedLocationId?: string, partnerId?: string, opt
     } finally {
       setLoading(false);
     }
-  }, [selectedLocationId, partnerId]);
+  }, [selectedLocationId, partnerId, currentLOB]);
 
   /**
    * Refetch with current search term

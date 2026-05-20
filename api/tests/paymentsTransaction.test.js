@@ -3,6 +3,7 @@ process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret';
 jest.mock('../src/middleware/auth', () => ({
   requireAuth: (_req, _res, next) => next(),
   requirePermission: jest.fn(() => (_req, _res, next) => next()),
+  requireLobScope: jest.fn(() => (_req, _res, next) => next()),
 }));
 
 jest.mock('../src/db', () => ({
@@ -10,6 +11,13 @@ jest.mock('../src/db', () => ({
   pool: {
     connect: jest.fn(),
   },
+  getQuery: jest.fn(() => jest.fn(async () => ({ rows: [] }))),
+  getDb: jest.fn(() => ({
+    query: jest.fn(async () => ({ rows: [] })),
+    queryRows: jest.fn(async () => []),
+  })),
+  runWithLob: jest.fn((lob, fn) => (fn ? fn() : undefined)),
+  getCurrentLob: jest.fn(() => 'dental'),
 }));
 
 jest.mock('uuid', () => ({ v4: jest.fn(() => 'mock-uuid') }));

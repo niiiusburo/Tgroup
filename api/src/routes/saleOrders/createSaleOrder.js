@@ -1,10 +1,11 @@
 const crypto = require('crypto');
-const { query } = require('../../db');
+const { query: legacyQuery, getQuery } = require('../../db');
 const { getVietnamToday, getVietnamYear } = require('../../lib/dateUtils');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
 
 async function createSaleOrder(req, res) {
   try {
+    const q = getQuery(req);
     const {
       partnerid,
       companyid,
@@ -37,11 +38,11 @@ async function createSaleOrder(req, res) {
     const id = crypto.randomUUID();
     const name = productname || `Service ${getVietnamToday()}`;
     const year = getVietnamYear();
-    const seqResult = await query(`SELECT nextval('dbo.saleorder_code_seq') AS seq`);
+    const seqResult = await q(`SELECT nextval('dbo.saleorder_code_seq') AS seq`);
     const seqNum = parseInt(seqResult[0]?.seq || '1', 10);
     const code = `SO-${year}-${String(seqNum).padStart(4, '0')}`;
 
-    await query(
+    await q(
       `INSERT INTO saleorders (
         id, name, code, partnerid, companyid, doctorid, assistantid, dentalaideid,
         quantity, unit, amounttotal, residual, totalpaid, state,
@@ -73,7 +74,7 @@ async function createSaleOrder(req, res) {
     );
 
     if (productid) {
-      await query(
+      await q(
         `INSERT INTO saleorderlines (
           id, orderid, productid, productname, employeeid, assistantid,
           productuomqty, pricetotal, tooth_numbers, tooth_comment, isdeleted
@@ -94,7 +95,7 @@ async function createSaleOrder(req, res) {
       );
     }
 
-    const rows = await fetchSaleOrderById(id);
+    const rows = await fetchSaleOrderById(id, q);
     return res.status(201).json(rows[0]);
   } catch (err) {
     console.error('Error creating sale order:', err);

@@ -7,6 +7,7 @@
  */
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import {
   fetchPermissionGroups,
   fetchEmployeePermissions,
@@ -44,6 +45,7 @@ export interface EmployeePermissionAssignment {
 }
 
 export function usePermissionGroups() {
+  const { currentLOB } = useBusinessUnit();
   const [groups, setGroups] = useState<PermissionGroup[]>([]);
   const [assignments, setAssignments] = useState<EmployeePermissionAssignment[]>([]);
   const [locations, setLocations] = useState<readonly LocationBranch[]>([]);
@@ -63,7 +65,7 @@ export function usePermissionGroups() {
         const [fetchedGroups, fetchedAssignments, fetchedCompanies] = await Promise.all([
           fetchPermissionGroups(),
           fetchEmployeePermissions(),
-          fetchCompanies({ limit: 100 }),
+          fetchCompanies({ limit: 100, lob: currentLOB }),
         ]);
 
         // Map API response to our types
@@ -100,7 +102,7 @@ export function usePermissionGroups() {
     }
 
     loadData();
-  }, []);
+  }, [currentLOB]);
 
   // ─── Derived state ────────────────────────────────────────
 

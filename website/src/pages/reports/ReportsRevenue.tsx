@@ -6,6 +6,7 @@ import { useReportData } from '@/hooks/useReportData';
 import { useExport } from '@/hooks/useExport';
 import { formatVND } from '@/lib/formatting';
 import { fetchEmployees, type ApiEmployee } from '@/lib/api/employees';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { KPICard } from '@/components/reports/KPICard';
 import { BarChart, HorizontalBarList } from '@/components/reports/BarChart';
 import { DonutChart } from '@/components/reports/DonutChart';
@@ -52,6 +53,7 @@ function isEmployeeForType(employee: ApiEmployee, employeeType: EmployeeExportTy
 
 export function ReportsRevenue() {
   const { t, i18n } = useTranslation('reports');
+  const { currentLOB } = useBusinessUnit();
   const filters = useOutletContext<{ dateFrom: string; dateTo: string; companyId: string }>();
   const [employeeType, setEmployeeType] = useState<EmployeeExportType>('doctor');
   const [employeeId, setEmployeeId] = useState('all');
@@ -87,6 +89,7 @@ export function ReportsRevenue() {
       isDoctor: employeeType === 'doctor' ? true : undefined,
       isAssistant: employeeType === 'assistant' ? true : undefined,
       active: 'true',
+      lob: currentLOB,
     })
       .then((response) => {
         if (!active) return;
@@ -102,7 +105,7 @@ export function ReportsRevenue() {
     return () => {
       active = false;
     };
-  }, [filters.companyId, employeeType]);
+  }, [filters.companyId, employeeType, currentLOB]);
 
   const anyLoading = summaryQ.loading || trendQ.loading || byLocQ.loading || byDocQ.loading || byCatQ.loading || rulesQ.loading || cashFlowQ.loading;
   if (anyLoading) return <div className="text-center py-12 text-gray-400">{t('loading')}</div>;

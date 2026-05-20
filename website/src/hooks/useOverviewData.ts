@@ -8,6 +8,7 @@ import { useState, useCallback, useEffect } from 'react';
 import type { Notification, LocationOption, RevenueDataPoint } from '@/types/common';
 import { fetchCompanies, fetchSaleOrders } from '@/lib/api';
 import { getTodayInTimezone, formatInTimezone } from '@/lib/dateUtils';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
@@ -22,9 +23,11 @@ export function useOverviewData() {
   const [revenueData, setRevenueData] = useState<readonly RevenueDataPoint[]>([]);
   const [isLoadingRevenue, setIsLoadingRevenue] = useState(true);
 
+  const { currentLOB } = useBusinessUnit();
+
   // Fetch real locations from API
   useEffect(() => {
-    fetchCompanies({ limit: 50 })
+    fetchCompanies({ limit: 50, lob: currentLOB })
       .then((res) => {
         const opts: LocationOption[] = [
           { id: 'all', name: 'All Locations' },
@@ -35,7 +38,7 @@ export function useOverviewData() {
       .catch((err) => {
         console.error('useOverviewData: failed to fetch locations', err);
       });
-  }, []);
+  }, [currentLOB]);
 
   // Fetch REAL revenue data from Sale Orders API (single call for full year)
   useEffect(() => {
@@ -52,6 +55,7 @@ export function useOverviewData() {
           dateFrom,
           dateTo,
           limit: 1000, // Get up to 1000 orders
+          lob: currentLOB,
         });
 
         // Initialize monthly revenue array
@@ -86,7 +90,7 @@ export function useOverviewData() {
     }
 
     loadRevenueData();
-  }, []);
+  }, [currentLOB]);
 
   const markNotificationRead = useCallback((id: string) => {
     setNotifications((prev) =>

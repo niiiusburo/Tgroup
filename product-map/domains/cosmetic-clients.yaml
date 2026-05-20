@@ -1,0 +1,48 @@
+name: Cosmetic Clients (v2)
+summary: |
+  Independent client identity in the cosmetic LOB (tcosmetic_demo.dbo.clients table).
+  No shared identity with dental partners — same human in both LOBs = two unrelated rows (loose phone match for admin cross-view badge only, gated by lob.crossview).
+  Mirrors dental partners shape for core fields but lives in separate DB; supports referred_by_ctv_id (soft-ref to dental users) and consulting_staff_id (for attribution).
+  All cosmetic client CRUD flows through /api/cosmetic/Partners (mirror of dental) against cosmetic DB only.
+  Seeded empty; populated via existing Employees/Services UI under cosmetic LOB or via booking flows.
+owns:
+  - api/src/routes/cosmetic/partners.js (or mirror wrapper)
+  - website/src/pages/Customers.tsx (when LOB=cosmetic, sources from cosmetic DB)
+  - All customer-related hooks when currentLOB=cosmetic
+reads:
+  - tcosmetic_demo.dbo.clients
+  - tcosmetic_demo.dbo.earnings (for client KPI/earned)
+  - tdental_demo.dbo.users (for cross-view probe + referred_by_ctv_id resolution)
+writes:
+  - tcosmetic_demo.dbo.clients
+  - tcosmetic_demo.dbo.consultations (auto on booking)
+tables:
+  - tcosmetic_demo.dbo.clients (PK uuid; referred_by_ctv_id UUID NULL soft-ref dental users; consulting_staff_id UUID NULL refs cosmetic.staff; + standard fields mirrored from partners)
+  - tcosmetic_demo.dbo.consultations (invisible attribution cards; status open/superseded/etc; 6mo TTL)
+endpoints:
+  - GET/POST/PUT/PATCH/DELETE /api/cosmetic/Partners (and /:id, /check-unique, /GetKPIs etc.) — exact mirror, LOB-gated
+  - Internal: consultation card lifecycle on cosmetic appointment create
+ui_surfaces:
+  - /customers (under cosmetic LOB) — empty state until seeded
+  - /customers/:id with optional "Also a dental client" badge (if lob.crossview + phone match in other DB)
+  - Cross-LOB badge opens other LOB profile in new tab (admin only)
+jobs:
+  - none (attribution engine in earnings domain)
+shared_types:
+  - contracts/partner.ts (extended or cosmetic variant)
+dependencies:
+  - Business Unit Context (all client surfaces LOB-aware)
+  - Earnings / Commissions (referred_by_ctv_id + consultation resolution for attribution)
+  - Employees HR (cosmetic staff for consulting_staff_id)
+affected_by:
+  - Changes to dental partners schema (no impact, separate table)
+  - Consultation card auto-create logic
+impact_tests:
+  - No data leak: cosmetic client list never returns dental rows
+  - Cross-view badge: only visible with lob.crossview; probe does not mutate data
+  - Referral by CTV: client row with referred_by_ctv_id correctly attributes earnings on payment
+risk_level: medium
+notes:
+  - "D2: No shared identity table. Independent clients per LOB."
+  - "Cross-LOB badge is soft phone match only; never a FK or merge operation."
+  - "cosmetic.staff and companies seeded empty per D16; admins create via UI under cosmetic LOB."

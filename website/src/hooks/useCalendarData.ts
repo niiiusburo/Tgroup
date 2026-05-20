@@ -6,6 +6,7 @@ import { PHASE_TO_API_STATE, type CalendarPhase } from '@/lib/appointmentStatusM
 import { normalizeText } from '@/lib/utils';
 import { mapApiAppointmentToCalendar } from '@/lib/calendarUtils';
 import type { AppointmentStatus } from '@/types/appointment';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 export type ViewMode = 'day' | 'week' | 'month';
 
@@ -56,6 +57,7 @@ export async function fetchAllCalendarAppointments(params: CalendarAppointmentQu
  * @crossref:used-in[Calendar]
  */
 export function useCalendarData(selectedLocationId?: string) {
+  const { currentLOB } = useBusinessUnit();
   const { formatDate, getToday, addDaysInTimezone, addMonthsInTimezone, timezone } = useTimezone();
   const [viewMode, setViewMode] = useState<ViewMode>('day');
   // Store current date as string in YYYY-MM-DD format for timezone consistency
@@ -118,6 +120,7 @@ export function useCalendarData(selectedLocationId?: string) {
         dateFrom,
         dateTo,
         companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
+        lob: currentLOB,
       });
 
       const mappedAppointments = allAppointments.map(mapApiAppointmentToCalendar);
@@ -128,7 +131,7 @@ export function useCalendarData(selectedLocationId?: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [viewMode, currentDateStr, selectedLocationId, formatDate]);
+  }, [viewMode, currentDateStr, selectedLocationId, formatDate, currentLOB]);
 
   useEffect(() => {
     loadAppointments();
@@ -191,7 +194,7 @@ export function useCalendarData(selectedLocationId?: string) {
 
   const updateAppointmentStatus = useCallback(async (id: string, phase: CalendarPhase) => {
     try {
-      await updateAppointment(id, { state: PHASE_TO_API_STATE[phase] });
+      await updateAppointment(id, { state: PHASE_TO_API_STATE[phase] }, currentLOB);
       // The API resets datetimearrived on transitions into 'arrived' and the
       // refetch below pulls the authoritative ISO timestamp — no local cache
       // needed.
@@ -199,7 +202,7 @@ export function useCalendarData(selectedLocationId?: string) {
     } catch (error) {
       console.error('Failed to update appointment status:', error);
     }
-  }, [loadAppointments]);
+  }, [loadAppointments, currentLOB]);
 
   const markArrived = useCallback(async (id: string) => {
     await updateAppointmentStatus(id, 'waiting');

@@ -8,6 +8,11 @@ export interface AuthUser {
   email: string;
   companyId: string;
   companyName: string;
+  // Cosmetic LOB v2 additions (additive, optional for backward compat)
+  lob_scope?: string[];
+  is_ctv?: boolean;
+  isCtv?: boolean;
+  referred_by_ctv_id?: string | null;
 }
 
 export interface AuthPermissions {
@@ -21,6 +26,8 @@ export interface LoginResponse {
   token: string;
   user: AuthUser;
   permissions: AuthPermissions;
+  // Cosmetic LOB v2: CTV users may get explicit redirect target from backend
+  redirectTo?: string;
 }
 
 export function login(email: string, password: string) {

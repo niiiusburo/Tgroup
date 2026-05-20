@@ -1,4 +1,4 @@
-const { query } = require("../../db");
+const { query: legacyQuery, getQuery } = require("../../db");
 const { getVietnamYear } = require("../../lib/dateUtils");
 
 async function rowsFrom(queryable, sql, params) {
@@ -34,7 +34,7 @@ function mapAllocations(allocResult) {
   });
 }
 
-async function generateReceiptNumber(prefix = "TUKH", queryable = query) {
+async function generateReceiptNumber(prefix = "TUKH", queryable = legacyQuery) {
   const year = getVietnamYear();
   const result = await rowsFrom(
     queryable,

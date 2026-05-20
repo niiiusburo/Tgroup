@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchAppointments, updateAppointment, type ApiAppointment } from '@/lib/api';
 import { useTimezone } from '@/contexts/TimezoneContext';
 import { normalizeText } from '@/lib/utils';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 /**
  * Hook for the Overview three-zone appointment flow
@@ -169,6 +170,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
    *
    * Any AI or developer reading this: DO NOT TOUCH THE DATE RANGE.
    */
+  const { currentLOB } = useBusinessUnit();
   const { getToday, getEndOfDay, timezone, formatDate } = useTimezone();
   const [appointments, setAppointments] = useState<OverviewAppointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -205,6 +207,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
         dateFrom: todayStr,
         dateTo: endOfDay,
         companyId: locationId && locationId !== 'all' ? locationId : undefined,
+        lob: currentLOB,
       });
       // =========================================================================
 
@@ -223,7 +226,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
     } finally {
       setIsLoading(false);
     }
-  }, [locationId, timezone, getToday, getEndOfDay, formatDate]);
+  }, [locationId, timezone, getToday, getEndOfDay, formatDate, currentLOB]);
 
   useEffect(() => {
     loadAppointments();
@@ -337,7 +340,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
   // ─── Actions ───────────────────────────────────────────────────
   const markArrived = useCallback(async (id: string) => {
     try {
-      const updated = await updateAppointment(id, { state: 'arrived' });
+      const updated = await updateAppointment(id, { state: 'arrived' }, currentLOB);
       const arrivalTime = updated.datetimearrived ?? new Date().toISOString();
       setAppointments((prev) =>
         prev.map((a) =>
@@ -347,11 +350,11 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
     } catch (error) {
       console.error('Failed to mark arrived:', error);
     }
-  }, []);
+  }, [currentLOB]);
 
   const markCancelled = useCallback(async (id: string) => {
     try {
-      await updateAppointment(id, { state: 'cancelled' });
+      await updateAppointment(id, { state: 'cancelled' }, currentLOB);
       setAppointments((prev) =>
         prev.map((a) =>
           a.id === id ? { ...a, topStatus: 'cancelled' as const, checkInStatus: null } : a,
@@ -360,7 +363,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
     } catch (error) {
       console.error('Failed to mark cancelled:', error);
     }
-  }, [formatDate]);
+  }, [formatDate, currentLOB]);
 
   const updateCheckInStatus = useCallback(async (id: string, status: CheckInStatus, onSuccess?: () => void) => {
     try {
@@ -370,7 +373,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
         'in-treatment': 'in Examination',
         done: 'done',
       };
-      const updated = await updateAppointment(id, { state: stateMap[status] });
+      const updated = await updateAppointment(id, { state: stateMap[status] }, currentLOB);
       const treatmentStartTime = status === 'waiting'
         ? null
         : updated.datetimeseated ?? new Date().toISOString();
@@ -383,7 +386,7 @@ export function useOverviewAppointments(locationId?: string): UseOverviewAppoint
     } catch (error) {
       console.error('Failed to update check-in status:', error);
     }
-  }, []);
+  }, [currentLOB]);
 
   return {
     appointments,

@@ -1,10 +1,11 @@
 const crypto = require('crypto');
-const { query } = require('../../db');
+const { query: legacyQuery, getQuery } = require('../../db');
 const { calculateSaleOrderPaymentStateFromAllocations } = require('../../lib/saleOrderTotals');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
 
 async function updateSaleOrder(req, res) {
   try {
+    const q = getQuery(req);
     const { id } = req.params;
     const {
       partnerid,
@@ -77,7 +78,7 @@ async function updateSaleOrder(req, res) {
       paymentState,
     });
 
-    const rows = await fetchSaleOrderById(id);
+    const rows = await fetchSaleOrderById(id, q);
     return res.json(rows[0]);
   } catch (err) {
     console.error('Error updating sale order:', err);
@@ -102,7 +103,7 @@ async function updateSaleOrderFields(id, fields) {
 
   if (sets.length === 0) return undefined;
   values.push(id);
-  const rows = await query(
+  const rows = await q(
     `UPDATE saleorders SET ${sets.join(', ')} WHERE id = $${paramIdx} AND isdeleted = false RETURNING *`,
     values,
   );
@@ -125,7 +126,7 @@ function hasLineUpdate(body) {
 async function updatePrimarySaleOrderLine(orderId, fields) {
   if (!hasLineUpdate(fields)) return;
 
-  const existingLine = await query(
+  const existingLine = await q(
     `SELECT id, productid FROM saleorderlines WHERE orderid = $1 AND isdeleted = false LIMIT 1`,
     [orderId],
   );
@@ -191,12 +192,12 @@ async function updateExistingLine(lineId, fields) {
 
   if (lineSets.length === 0) return;
   lineValues.push(lineId);
-  await query(`UPDATE saleorderlines SET ${lineSets.join(', ')} WHERE id = $${lineIdx}`, lineValues);
+  await q(`UPDATE saleorderlines SET ${lineSets.join(', ')} WHERE id = $${lineIdx}`, lineValues);
 }
 
 async function insertPrimaryLine(orderId, fields) {
   const lineId = crypto.randomUUID();
-  await query(
+  await q(
     `INSERT INTO saleorderlines (
       id, orderid, productid, productname, employeeid, assistantid,
       productuomqty, pricetotal, tooth_numbers, tooth_comment, isdeleted

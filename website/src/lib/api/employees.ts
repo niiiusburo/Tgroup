@@ -67,6 +67,7 @@ export function fetchEmployees(params?: {
   isDoctor?: boolean;
   isAssistant?: boolean;
   active?: 'true' | 'false' | 'all';
+  lob?: 'dental' | 'cosmetic';
 }) {
   return apiFetch<PaginatedResponse<ApiEmployee>>('/Employees', {
     params: {
@@ -78,6 +79,7 @@ export function fetchEmployees(params?: {
       isAssistant: params?.isAssistant,
       active: params?.active,
     },
+    lob: params?.lob,
   });
 }
 

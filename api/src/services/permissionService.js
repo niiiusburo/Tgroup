@@ -2,6 +2,37 @@
 
 const { query } = require('../db');
 
+const ADMIN_GROUP_ID = '11111111-0000-0000-0000-000000000001';
+
+/**
+ * V2 Cosmetic LOB + CTV permission keys (registered per v2 spec D5/D14 + PLAN).
+ * These are enforced via requirePermission('xxx') on future cosmetic/ctv/commission routes.
+ * LOB hard-gating is done via requireLobScope() in addition to these soft perms.
+ * Source of truth for list also lives in product-map/contracts/permission-registry.yaml
+ */
+const V2_LOB_PERMISSIONS = [
+  'cosmetic.access',            // admins + cosmetic staff for /api/cosmetic/* mirrors
+  'dental.access',              // legacy (backfilled)
+  'ctv.dashboard.view',         // CTV users only — /ctv surface
+  'ctv.commission.view.self',   // CTV self commissions
+  'ctv.referrals.view.self',    // CTV referred clients
+  'commissions.view.team',      // admin/manager team view
+  'commissions.payout.run',     // admin payout batches
+  'commissions.export',         // admin/manager export
+  'lob.crossview',              // admin only — cross-LOB client badge probe
+];
+
+function isAdminPermissionState(permissionState) {
+  const groupId = String(permissionState?.groupId || '').trim().toLowerCase();
+  const groupName = String(permissionState?.groupName || '').trim().toLowerCase();
+  return (
+    groupId === ADMIN_GROUP_ID ||
+    groupName === 'admin' ||
+    groupName === 'super admin' ||
+    groupName === 'system administrator'
+  );
+}
+
 /**
  * SINGLE SOURCE OF TRUTH for permission resolution.
  *
@@ -41,7 +72,19 @@ async function resolveEffectivePermissions(employeeId) {
   const groupId = partnerRows[0].tier_id;
   const groupName = partnerRows[0].group_name;
 
+  // CTV self-only perms (v2): is_ctv users (no tier/group) get dashboard/commission/referrals self-view automatically.
+  // This allows ctv-demo@clinic.vn (and future CTVs) to hit /api/ctv/* without needing group assignment.
+  // Soft-gated by is_ctv flag in JWT + route logic; additive, does not affect admin groups.
   if (!groupId) {
+    const ctvCheck = await query(`SELECT is_ctv FROM dbo.partners WHERE id = $1 LIMIT 1`, [employeeId]);
+    if (ctvCheck && ctvCheck[0] && ctvCheck[0].is_ctv) {
+      return {
+        groupId: null,
+        groupName: 'CTV',
+        effectivePermissions: ['ctv.dashboard.view', 'ctv.commission.view.self', 'ctv.referrals.view.self'],
+        locations: [],
+      };
+    }
     return { groupId: null, groupName: null, effectivePermissions: [], locations: [] };
   }
 
@@ -109,4 +152,10 @@ async function hasPermission(employeeId, permission) {
   return effectivePermissions.includes(permission);
 }
 
-module.exports = { resolveEffectivePermissions, hasPermission };
+module.exports = {
+  resolveEffectivePermissions,
+  hasPermission,
+  V2_LOB_PERMISSIONS,
+  ADMIN_GROUP_ID,
+  isAdminPermissionState,
+};

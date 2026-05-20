@@ -6,7 +6,13 @@ jest.mock('../../db', () => ({
 }));
 
 const { query } = require('../../db');
-const { resolveEffectivePermissions, hasPermission } = require('../permissionService');
+const {
+  resolveEffectivePermissions,
+  hasPermission,
+  V2_LOB_PERMISSIONS,
+  ADMIN_GROUP_ID,
+  isAdminPermissionState,
+} = require('../permissionService');
 
 beforeEach(() => {
   query.mockReset();
@@ -156,6 +162,42 @@ describe('permissionService', () => {
 
       const result = await hasPermission('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 'any.permission');
       expect(result).toBe(true);
+    });
+  });
+
+  describe('V2_LOB_PERMISSIONS (cosmetic LOB + CTV + crossview auto-seeding)', () => {
+    it('exports the canonical 9 keys used by seed-cosmetic-lob.js + permission-registry + requirePermission gates', () => {
+      expect(Array.isArray(V2_LOB_PERMISSIONS)).toBe(true);
+      expect(V2_LOB_PERMISSIONS).toContain('cosmetic.access');
+      expect(V2_LOB_PERMISSIONS).toContain('dental.access');
+      expect(V2_LOB_PERMISSIONS).toContain('ctv.dashboard.view');
+      expect(V2_LOB_PERMISSIONS).toContain('ctv.commission.view.self');
+      expect(V2_LOB_PERMISSIONS).toContain('ctv.referrals.view.self');
+      expect(V2_LOB_PERMISSIONS).toContain('commissions.view.team');
+      expect(V2_LOB_PERMISSIONS).toContain('commissions.payout.run');
+      expect(V2_LOB_PERMISSIONS).toContain('commissions.export');
+      expect(V2_LOB_PERMISSIONS).toContain('lob.crossview');
+      expect(V2_LOB_PERMISSIONS.length).toBe(9);
+    });
+
+    it('keys match those auto-granted by ensureAdminV2Permissions + ctv overrides in seed (no manual PermissionBoard required for t@ / ctv-demo)', () => {
+      // This test documents the contract so future seed/auth changes keep them in sync
+      const expectedForAdminAndCtvDemo = [
+        'cosmetic.access', 'dental.access', 'lob.crossview',
+        'ctv.dashboard.view', 'ctv.commission.view.self', 'ctv.referrals.view.self'
+      ];
+      expectedForAdminAndCtvDemo.forEach(k => expect(V2_LOB_PERMISSIONS).toContain(k));
+    });
+  });
+
+  describe('isAdminPermissionState', () => {
+    it('recognizes only admin permission groups for multi-LOB selection', () => {
+      expect(isAdminPermissionState({ groupId: ADMIN_GROUP_ID, groupName: 'Doctor' })).toBe(true);
+      expect(isAdminPermissionState({ groupId: 'x', groupName: 'Admin' })).toBe(true);
+      expect(isAdminPermissionState({ groupId: 'x', groupName: 'Super Admin' })).toBe(true);
+      expect(isAdminPermissionState({ groupId: 'x', groupName: 'Doctor' })).toBe(false);
+      expect(isAdminPermissionState({ groupId: 'x', groupName: 'Manager' })).toBe(false);
+      expect(isAdminPermissionState(null)).toBe(false);
     });
   });
 });

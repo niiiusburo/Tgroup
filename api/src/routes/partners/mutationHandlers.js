@@ -1,4 +1,4 @@
-const { query } = require('../../db');
+const { query: legacyQuery, getQuery } = require('../../db');
 
 const UUID_FIELDS = [
   'companyid','titleid','agentid','countryid','stateid',
@@ -17,6 +17,7 @@ function sanitizeUuids(o) {
  */
 async function createPartner(req, res) {
   try {
+    const q = getQuery(req);
     sanitizeUuids(req.body);
     const {
       name,
@@ -67,7 +68,7 @@ async function createPartner(req, res) {
 
     const trimmedEmail = typeof email === 'string' ? email.trim() : '';
     if (trimmedEmail) {
-      const emailDup = await query(
+      const emailDup = await q(
         'SELECT id FROM partners WHERE LOWER(email) = LOWER($1) LIMIT 1',
         [trimmedEmail]
       );
@@ -89,7 +90,7 @@ async function createPartner(req, res) {
     // Generate customer code (T + random 6 digits)
     const code = 'T' + Math.floor(100000 + Math.random() * 900000);
 
-    const result = await query(
+    const result = await q(
       `INSERT INTO partners (
         id, name, phone, email, companyid, gender,
         birthday, birthmonth, birthyear, street, cityname, districtname, wardname,
@@ -164,6 +165,7 @@ async function createPartner(req, res) {
  */
 async function updatePartner(req, res) {
   try {
+    const q = getQuery(req);
     const { id } = req.params;
     sanitizeUuids(req.body);
     const {
@@ -177,7 +179,7 @@ async function updatePartner(req, res) {
     } = req.body;
 
     // Check if partner exists
-    const existing = await query(
+    const existing = await q(
       'SELECT id FROM partners WHERE id = $1 AND isdeleted = false',
       [id]
     );
@@ -189,7 +191,7 @@ async function updatePartner(req, res) {
     // Check email uniqueness (case-insensitive) excluding this partner
     const trimmedEmailPut = typeof email === 'string' ? email.trim() : '';
     if (trimmedEmailPut) {
-      const emailDup = await query(
+      const emailDup = await q(
         'SELECT id FROM partners WHERE LOWER(email) = LOWER($1) AND id <> $2 LIMIT 1',
         [trimmedEmailPut, id]
       );
@@ -232,7 +234,7 @@ async function updatePartner(req, res) {
     updates.push(`lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')`);
     values.push(id);
 
-    const result = await query(
+    const result = await q(
       `UPDATE partners SET ${updates.join(', ')} WHERE id = $${paramIdx} RETURNING *`,
       values
     );
@@ -259,9 +261,10 @@ async function updatePartner(req, res) {
  */
 async function softDeletePartner(req, res) {
   try {
+    const q = getQuery(req);
     const { id } = req.params;
 
-    const result = await query(
+    const result = await q(
       `UPDATE partners SET
         isdeleted = true,
         lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
@@ -289,9 +292,10 @@ async function softDeletePartner(req, res) {
  */
 async function hardDeletePartner(req, res) {
   try {
+    const q = getQuery(req);
     const { id } = req.params;
 
-    const existing = await query(
+    const existing = await q(
       'SELECT id FROM partners WHERE id = $1 AND customer = true',
       [id]
     );
@@ -347,7 +351,7 @@ async function hardDeletePartner(req, res) {
       });
     }
 
-    const deleteResult = await query(
+    const deleteResult = await q(
       'DELETE FROM partners WHERE id = $1 AND customer = true RETURNING id',
       [id]
     );

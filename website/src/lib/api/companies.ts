@@ -27,17 +27,18 @@ export interface CreateCompanyData {
   active?: boolean;
 }
 
-export function fetchCompanies(params?: { offset?: number; limit?: number }) {
+export function fetchCompanies(params?: { offset?: number; limit?: number; lob?: 'dental' | 'cosmetic' }) {
   return apiFetch<PaginatedResponse<ApiCompany>>('/Companies', {
     params: { offset: params?.offset ?? 0, limit: params?.limit ?? 50 },
+    lob: params?.lob,
   });
 }
 
-export function createCompany(data: CreateCompanyData) {
-  return apiFetch<ApiCompany>('/Companies', { method: 'POST', body: data });
+export function createCompany(data: CreateCompanyData, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiCompany>('/Companies', { method: 'POST', body: data, lob });
 }
 
-export function updateCompany(id: string, data: Partial<CreateCompanyData>) {
-  return apiFetch<ApiCompany>(`/Companies/${id}`, { method: 'PUT', body: data });
+export function updateCompany(id: string, data: Partial<CreateCompanyData>, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiCompany>(`/Companies/${id}`, { method: 'PUT', body: data, lob });
 }
 

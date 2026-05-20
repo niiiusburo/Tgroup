@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/Layout';
 import { LocationProvider } from '@/contexts/LocationContext';
+import { BusinessUnitProvider } from '@/contexts/BusinessUnitContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { TimezoneProvider } from '@/contexts/TimezoneContext';
@@ -35,6 +36,7 @@ const Payment = lazy(() => import('@/pages/Payment').then(m => ({ default: m.Pay
 const Feedback = lazy(() => import('@/pages/Feedback').then(m => ({ default: m.Feedback })));
 const Services = lazy(() => import('@/pages/Services').then(m => ({ default: m.Services })));
 const ServiceCatalog = lazy(() => import('@/pages/ServiceCatalog').then(m => ({ default: m.ServiceCatalog })));
+const CtvDashboard = lazy(() => import('@/pages/CtvDashboard').then(m => ({ default: m.CtvDashboard })));
 
 /**
  * Access Denied page — shown when authenticated but lacking permission
@@ -93,10 +95,16 @@ interface ProtectedRouteProps {
 }
 
 function ProtectedRoute({ children, path }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, hasPermission } = useAuth();
+  const { isAuthenticated, isLoading, hasPermission, user } = useAuth();
 
   if (isLoading) return <AuthLoading />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+
+  // CTV users (is_ctv) are blocked from ALL admin routes — hard gate
+  if (user?.is_ctv || user?.isCtv) {
+    // redirect back to their surface
+    return <Navigate to="/ctv" replace />;
+  }
 
   const requiredPermission = ROUTE_PERMISSIONS[path];
   if (requiredPermission && !hasPermission(requiredPermission)) {
@@ -119,7 +127,7 @@ function LoginRoute() {
 /**
  * Main Application Component
  * @crossref:root-component
- * @crossref:uses[Layout, Routes, Route, LocationProvider, AuthProvider]
+ * @crossref:uses[Layout, Routes, Route, LocationProvider, BusinessUnitProvider, AuthProvider]
  * @crossref:routes[
  *   / -> Overview,
  *   /calendar -> Calendar,
@@ -140,13 +148,17 @@ function App() {
     <AuthProvider>
       <TimezoneProvider>
         <LocationProvider>
-        <Suspense fallback={<div className="flex items-center justify-center h-screen text-gray-500">Loading...</div>}>
-        <Routes>
+          <BusinessUnitProvider>
+          <Suspense fallback={<div className="flex items-center justify-center h-screen text-gray-500">Loading...</div>}>
+          <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginRoute />} />
           {import.meta.env.DEV && (
             <Route path="/test/address" element={<AddressAutocompleteTest />} />
           )}
+
+          {/* CTV v2 dashboard — mobile-first, bypasses admin Layout entirely for is_ctv users */}
+          <Route path="/ctv" element={<CtvDashboard />} />
 
           {/* Protected routes wrapped in Layout */}
           <Route
@@ -337,7 +349,8 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
-        </Suspense>
+          </Suspense>
+          </BusinessUnitProvider>
       </LocationProvider>
       </TimezoneProvider>
     </AuthProvider>

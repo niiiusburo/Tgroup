@@ -5,9 +5,11 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const { requireAuth } = require('./middleware/auth');
+const { requireAuth, requireLobScope, requirePermission } = require('./middleware/auth');
 const { enforceIpAccess } = require('./middleware/ipAccess');
 const { errorHandler } = require('./middleware/errorHandler');
+const { attachCosmeticDb } = require('./middleware/lob');
+const { runWithLob } = require('./db');
 
 if (!process.env.JWT_SECRET) {
   console.error('FATAL: JWT_SECRET not set');
@@ -39,6 +41,7 @@ const dashboardReportsRoutes = require('./routes/dashboardReports');
 const permissionsRoutes = require('./routes/permissions');
 const authRoutes = require('./routes/auth');
 const paymentsRoutes = require('./routes/payments');
+const ctvRoutes = require('./routes/ctv');
 // const servicesRoutes removed: dead route queries non-existent table
 const customerBalanceRoutes = require('./routes/customerBalance');
 const monthlyPlansRoutes = require('./routes/monthlyPlans');
@@ -234,6 +237,7 @@ app.use('/api/AccountJournals', journalsRoutes);
 app.use('/api/StockPickings', stockPickingsRoutes);
 app.use('/api/CrmTasks', crmTasksRoutes);
 app.use('/api/Commissions', commissionsRoutes);
+app.use('/api/Ctv', require('./routes/ctv')); // v2 CTV dashboard (is_ctv gate inside)
 app.use('/api/HrPayslips', hrPayslipsRoutes);
 app.use('/api/Employees', employeesRoutes);
 app.use('/api/Products', productsRoutes);
@@ -243,6 +247,103 @@ app.use('/api/DashboardReports', dashboardReportsRoutes);
 app.use('/api/Permissions', permissionsRoutes);
 app.use('/api/Auth', authRoutes);
 app.use('/api/Payments', paymentsRoutes);
+
+// Cosmetic LOB v2: dedicated /api/me/lob-scope (lightweight, re-queries canonical partners row)
+// Returns current user's { lob_scope, is_ctv, available } for frontend BusinessUnitContext + CTV gating.
+// Protected by the global /api requireAuth (above).
+const { query: dbQuery } = require('./db');
+const { resolveEffectivePermissions, isAdminPermissionState } = require('./services/permissionService');
+
+app.get('/api/me/lob-scope', async (req, res) => {
+  try {
+    const employeeId = req.user?.employeeId;
+    if (!employeeId) return res.status(401).json({ error: 'No token' });
+    const rows = await dbQuery(
+      `SELECT lob_scope AS "lobScope", is_ctv AS "isCtv"
+       FROM partners
+       WHERE id = $1 AND employee = true AND isdeleted = false`,
+      [employeeId]
+    );
+    const r = rows?.[0];
+    if (!r) return res.status(404).json({ error: 'User not found' });
+    const rawLobScope = Array.isArray(r.lobScope) ? r.lobScope.filter((s) => s === 'dental' || s === 'cosmetic') : [];
+    const permissions = await resolveEffectivePermissions(employeeId);
+    const lobScope = isAdminPermissionState(permissions) ? rawLobScope : rawLobScope.slice(0, 1);
+    return res.json({ lob_scope: lobScope, is_ctv: !!r.isCtv, available: lobScope });
+  } catch (err) {
+    console.error('/me/lob-scope error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Cross-LOB badge probe (D6 / ui_surfaces in cosmetic.yaml + permission-registry.yaml)
+// GET /api/cross-lob-probe?phone=...&lob=dental|cosmetic
+// Soft phone match (normalized last 9 digits) against the *other* LOB's partners table.
+// Gated by lob.crossview permission only (no LOB-scope gate — cross by design).
+// Returns {matched, otherLob, otherId?, otherName?, matchedPhone?} or 403 if no perm.
+app.get('/api/cross-lob-probe', requirePermission('lob.crossview'), async (req, res) => {
+  const { phone, lob } = req.query || {};
+  if (!phone || !lob || (lob !== 'dental' && lob !== 'cosmetic')) {
+    return res.status(400).json({ error: { code: 'BAD_REQUEST', message: 'phone and lob=dental|cosmetic required' } });
+  }
+
+  const currentLob = lob;
+  const otherLob = currentLob === 'dental' ? 'cosmetic' : 'dental';
+
+  // Soft phone key: last 9 significant digits (handles 090/8490/84 variants common in VN data)
+  function getPhoneKey(p) {
+    if (!p) return '';
+    const digits = String(p).replace(/\D/g, '');
+    let k = digits.replace(/^84/, '').replace(/^0/, '');
+    return k.slice(-9);
+  }
+
+  const key = getPhoneKey(phone);
+  if (!key) {
+    return res.json({ matched: false, otherLob });
+  }
+
+  try {
+    const { getDb } = require('./db');
+    const otherPool = getDb(otherLob);
+    const rows = await otherPool.query(
+      `SELECT id, name, phone FROM partners WHERE customer = true AND phone IS NOT NULL AND phone <> '' LIMIT 300`,
+      []
+    );
+
+    for (const r of (rows.rows || rows)) {
+      if (getPhoneKey(r.phone) === key) {
+        return res.json({
+          matched: true,
+          otherLob,
+          otherId: r.id,
+          otherName: r.name,
+          matchedPhone: r.phone,
+        });
+      }
+    }
+    return res.json({ matched: false, otherLob });
+  } catch (err) {
+    console.error('cross-lob-probe error:', err);
+    return res.status(500).json({ error: { code: 'PROBE_FAILED' } });
+  }
+});
+
+// Cosmetic LOB v2: CTV dashboard mount (gated by flag + permission).
+// /api/cosmetic/* mirrors are owned solely by the unified cosmeticRouter below
+// ("Cosmetic LOB v2: /api/cosmetic/* mirrors (Phase 1)"). Individual
+// /api/cosmetic/X mounts were removed here: they shadowed the unified router
+// and the two blocks could silently drift apart.
+// CTV has NO requireLobScope/attachCosmeticDb on purpose: ctvRoutes aggregates
+// across BOTH dental and cosmetic DBs, so it must not be pinned to one LOB pool.
+const COSMETIC_ENABLED = process.env.COSMETIC_LOB_ENABLED === 'true';
+if (COSMETIC_ENABLED) {
+  app.use('/api/ctv', requirePermission('ctv.dashboard.view'), ctvRoutes);
+  console.log('[cosmetic] CTV dashboard mounted (COSMETIC_LOB_ENABLED=true)');
+} else {
+  app.use('/api/ctv', (req, res) => res.status(503).json({ error: { code: 'S_COSMETIC_DISABLED', message: 'Cosmetic LOB disabled (set COSMETIC_LOB_ENABLED=true for verification)' } }));
+}
+
 // DEAD ROUTE: services.js queries non-existent public.services table
 // app.use('/api/Services', servicesRoutes);
 app.use('/api/CustomerBalance', customerBalanceRoutes);
@@ -259,6 +360,70 @@ app.use('/api/Reports', reportsRoutes);
 app.use('/api/telemetry', telemetryRoutes);
 app.use('/api/IpAccess', ipAccessRoutes);
 app.use('/api/Exports', exportsRoutes);
+
+// === Cosmetic LOB v2: /api/cosmetic/* mirrors (Phase 1) ===
+// Reuses the *exact same* route handler modules as dental (DRY).
+// Dynamic DB resolution via ALS + runWithLob in db/index.js makes their internal `query()` calls
+// target tcosmetic_demo when the request context is set.
+// Gated by feature flag (503) + requireLobScope('cosmetic') hard gate (S_LOB_FORBIDDEN).
+// All core admin surfaces (customers, employees, products, services, appointments, payments, reports, etc.)
+// become functional against the empty cosmetic DB with zero handler duplication.
+const COSMETIC_FLAG = process.env.COSMETIC_LOB_ENABLED === 'true';
+if (COSMETIC_FLAG) {
+  const cosmeticRouter = express.Router();
+
+  // 1. LOB scope hard gate (CTV and dental-only users get 403 S_LOB_FORBIDDEN)
+  cosmeticRouter.use(requireLobScope('cosmetic'));
+
+  // 2. Attach cosmetic DB context (req.db + req.lob) so that handlers using getQuery(req) or updated paths target tcosmetic_demo
+  // (Dental paths remain untouched and default to dental.)
+  cosmeticRouter.use(attachCosmeticDb);
+
+  // 2b. ALS context wrapper (Finishing Swarm): ensures bare legacy `query()` calls (via getCurrentLob) also resolve to cosmetic
+  // when inside /api/cosmetic/* . Complements getQuery(req) migrations. Safe additive; dental paths unaffected.
+  cosmeticRouter.use((req, res, next) => {
+    const lob = req.lob || 'cosmetic';
+    runWithLob(lob, next);
+  });
+
+  // 3. Soft permission gate (cosmetic.access registered in permissionService + product-map)
+  cosmeticRouter.use(requirePermission('cosmetic.access'));
+
+  // 4. Mount the identical dental routers under /cosmetic prefix.
+  // Client calls /api/cosmetic/Partners → partnersRoutes (which registers GET /) → listPartners etc see req.db via getQuery(req).
+  cosmeticRouter.use('/Partners', partnersRoutes);
+  cosmeticRouter.use('/Employees', employeesRoutes);
+  cosmeticRouter.use('/Products', productsRoutes);
+  cosmeticRouter.use('/ProductCategories', productCategoriesRoutes);
+  cosmeticRouter.use('/SaleOrders', saleOrdersRoutes);
+  cosmeticRouter.use('/SaleOrderLines', saleOrderLinesRoutes);
+  cosmeticRouter.use('/Appointments', appointmentsRoutes);
+  cosmeticRouter.use('/Payments', paymentsRoutes);
+  cosmeticRouter.use('/Companies', companiesRoutes);
+  cosmeticRouter.use('/Reports', reportsRoutes);
+  cosmeticRouter.use('/DashboardReports', dashboardReportsRoutes);
+  cosmeticRouter.use('/CustomerReceipts', customerReceiptsRoutes);
+  cosmeticRouter.use('/AccountPayments', accountPaymentsRoutes);
+  cosmeticRouter.use('/CrmTasks', crmTasksRoutes);
+  cosmeticRouter.use('/MonthlyPlans', monthlyPlansRoutes);
+  // Add more mirrors (e.g. /Services if revived, feedback, etc.) as needed for full admin reuse
+
+  app.use('/api/cosmetic', cosmeticRouter);
+  console.log('[CosmeticLOB] /api/cosmetic/* mirrors mounted (flag=true, using tcosmetic_demo via req context)');
+} else {
+  // When flag off, still register a 503 handler so clients get clear signal (no 404 mystery)
+  app.use('/api/cosmetic', (req, res) => {
+    res.status(503).json({
+      error: {
+        code: 'COSMETIC_LOB_DISABLED',
+        message: 'Cosmetic LOB is disabled (COSMETIC_LOB_ENABLED=false)',
+      },
+    });
+  });
+}
+
+// CTV dashboard routes (gated internally by is_ctv + ctv.* perms; cross-DB aggregation)
+app.use('/api/ctv', ctvRoutes);
 
 app.get('/api/health', async (_req, res) => {
   const checks = { db: false, faceService: false };

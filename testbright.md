@@ -1,5 +1,7 @@
 # TestSprite Task Ledger
 
+> **Cosmetic LOB v2 Phase 0:** Product-map + all authority docs + Governance Delta updated. New acceptance scenarios (admin LOB toggle + empty cosmetic + dental intact, CTV redirect + dashboard numbers from both DBs, earnings D13 + refund reversal, full dental regression, migration rollback) will be appended here before Phase 1 code. See v2 design, governance-delta.md, PLAN.md. All verification local + Playwright + screenshots.
+
 When TestSprite runs, treat this file as the task list. For each relevant feature/edit below, execute the listed checks and change each execution item from `PENDING` to `PASS` or `FAIL` with one short evidence note. Use this format:
 
 - [ ] PENDING: Check name.
@@ -559,3 +561,48 @@ Regressions:
 Setup data and login state:
 - Use an authenticated admin/reporting session.
 - Use a date range containing known overallocated imported sale orders such as `SO45243` or high-delta examples from the audit query.
+
+---
+
+# TestSprite Plan: Cosmetic LOB Selector Admin-Only Guard
+
+Feature/edit name: Cosmetic LOB Selector Admin-Only Guard
+
+Changed URLs and API routes:
+- `/overview`
+- Header LOB selector beside the location filter
+- `POST /api/Auth/login`
+- `GET /api/Auth/me`
+- `GET /api/me/lob-scope`
+
+Affected data flows:
+- Login and session refresh return visible `lob_scope` values.
+- `BusinessUnitContext` derives the active LOB from auth state, feature flag, localStorage, and `?lob=...`.
+- Header renders `FilterByBusinessUnit` only when the authenticated user is in the Admin permission group and has more than one visible LOB.
+- API requests under cosmetic LOB remain routed by the selected LOB, but non-admin staff cannot switch LOB from the header or persisted browser state.
+
+User roles:
+- Admin user `t@clinic.vn` with `lob_scope=['dental','cosmetic']`.
+- Dental staff user with non-admin permission group and dental-only or stale multi-scope data.
+- Cosmetic staff user with non-admin permission group and cosmetic-only scope.
+- CTV user, which must still redirect to `/ctv` and never see admin chrome.
+
+Happy paths:
+- Login as Admin with `COSMETIC_LOB_ENABLED=true`; verify the Dental/Cosmetic selector appears in the header and can switch between Dental and Cosmetic.
+- Login as dental staff; verify the selector is absent and the current LOB remains Dental.
+- Login as cosmetic staff; verify the selector is absent and the current LOB remains Cosmetic when that is the only visible scope.
+
+Edge cases:
+- Seed or mock a non-admin staff session with `lob_scope=['dental','cosmetic']`; verify auth responses and UI expose only Dental.
+- Set `localStorage.tgclinic_lob='cosmetic'` before dental staff login; verify the app pins to Dental and does not render the selector.
+- Open a staff session with `?lob=cosmetic`; verify query params cannot expand visible staff LOB access.
+
+Regressions:
+- Existing Admin location filter, Face ID button, feedback button, and notification icon stay visible.
+- `requireLobScope('cosmetic')` still allows properly scoped cosmetic staff to use Cosmetic APIs without needing selector access.
+- CTV `/ctv` redirect and CTV permission gating remain unchanged.
+
+Setup data and login state:
+- Run local app with `COSMETIC_LOB_ENABLED=true` and `VITE_COSMETIC_LOB_ENABLED=true`.
+- Use `t@clinic.vn` as Admin verification account.
+- Use or create a non-admin dental staff account for negative selector checks.

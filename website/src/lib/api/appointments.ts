@@ -51,6 +51,7 @@ export function fetchAppointments(params?: {
   partnerId?: string;
   calendarMode?: boolean;
   includeCounts?: boolean;
+  lob?: 'dental' | 'cosmetic';
 }) {
   return apiFetch<PaginatedResponse<ApiAppointment>>('/Appointments', {
     params: {
@@ -66,13 +67,14 @@ export function fetchAppointments(params?: {
       calendarMode: params?.calendarMode,
       includeCounts: params?.includeCounts,
     },
+    lob: params?.lob,
   });
 }
 
-export function createAppointment(data: Partial<ApiAppointment>) {
-  return apiFetch<ApiAppointment>('/Appointments', { method: 'POST', body: data });
+export function createAppointment(data: Partial<ApiAppointment>, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiAppointment>('/Appointments', { method: 'POST', body: data, lob });
 }
 
-export function updateAppointment(id: string, data: Partial<ApiAppointment>) {
-  return apiFetch<ApiAppointment>(`/Appointments/${id}`, { method: 'PUT', body: data });
+export function updateAppointment(id: string, data: Partial<ApiAppointment>, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiAppointment>(`/Appointments/${id}`, { method: 'PUT', body: data, lob });
 }

@@ -24,9 +24,15 @@
 │         │                        ┌─────────────────────────────────────┐   │
 │         └───────────────────────►│  tgroup-db (PostgreSQL 16)          │   │
 │                                  │  search_path=dbo                    │   │
+│                                  │  - tdental_demo (existing, additive)│   │
+│                                  │  - tcosmetic_demo (new, isolated)   │   │
 │                                  └─────────────────────────────────────┘   │
 │                                                                            │
 │  Optional: compreface-api + compreface-core + compreface-postgres-db       │
+│                                                                            │
+│  Cosmetic LOB v2 adds: BusinessUnitContext + LOB toggle (admin), /ctv      │
+│  dashboard (CTV only), /api/cosmetic/* mirrors, /api/ctv/* aggregator,     │
+│  earnings engine (D13) writing to correct DB per LOB. No cross-DB JOINs.   │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 

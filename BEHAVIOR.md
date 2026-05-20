@@ -29,6 +29,8 @@ If behavior is accepted as product truth, promote it here or to a domain runbook
 - Manager-like roles may view admin surfaces only when permission rules allow it; mutation still requires explicit edit/create/delete permissions.
 - 401 means the session is invalid or expired; return the user to login or trigger re-auth.
 - 403 means the user is authenticated but not allowed; show a permission-specific denial rather than a generic failure.
+- **Cosmetic LOB v2:** New `S_LOB_FORBIDDEN` error envelope for LOB scope violations (dental user hits /cosmetic/* or CTV hits admin). See governance-delta.md and BEHAVIOR updates in v2 spec. CTV users see hard redirect to /ctv instead of admin 403s.
+- **Cosmetic LOB selector:** Only Admin permission-group users can select between Dental and Cosmetic. Non-admin staff are pinned to one LOB from their scoped auth payload and must not see the header LOB dropdown, even if a stale database row contains multiple LOB values.
 
 ## 4. Forms
 

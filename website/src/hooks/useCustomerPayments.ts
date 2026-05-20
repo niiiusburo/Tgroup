@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchPayments, createPayment, voidPayment, deletePayment, type ApiPayment, type ApiPaymentAllocation } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 export interface PaymentWithAllocations extends ApiPayment {
   allocations: ApiPaymentAllocation[];
@@ -27,6 +28,7 @@ export interface UseCustomerPaymentsResult {
 }
 
 export function useCustomerPayments(customerId: string | null): UseCustomerPaymentsResult {
+  const { currentLOB } = useBusinessUnit();
   const [payments, setPayments] = useState<PaymentWithAllocations[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,14 +41,14 @@ export function useCustomerPayments(customerId: string | null): UseCustomerPayme
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetchPayments(customerId, 'payments');
+      const res = await fetchPayments(customerId, 'payments', undefined, currentLOB);
       setPayments(res.items as PaymentWithAllocations[]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load payments');
     } finally {
       setIsLoading(false);
     }
-  }, [customerId]);
+  }, [customerId, currentLOB]);
 
   useEffect(() => {
     load();

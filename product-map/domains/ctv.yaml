@@ -1,0 +1,58 @@
+name: CTV (Cộng tác viên / Referrer) Role & Dashboard (v2)
+summary: |
+  Dedicated role for external referrers (CTV). Flagged by users.is_ctv = true (additive on dental DB).
+  CTV users have empty lob_scope; on login hard-redirected to /ctv and 403'd on any admin route (including cosmetic/dental).
+  Permissions: ctv.dashboard.view, ctv.commission.view.self, ctv.referrals.view.self.
+  Single new UI surface: mobile-first 4-tab dashboard (Home, Commission, Referrals, Me) at /ctv with bottom nav.
+  /api/ctv/commission-summary aggregates earnings from BOTH physical DBs (tdental_demo.earnings + tcosmetic_demo.earnings) server-side for the CTV user only.
+  Shows pending/paid, LOB-tagged activity, referred clients across LOBs, split bars, etc. per visual companion.
+owns:
+  - api/src/routes/ctv.js (or ctv/ folder)
+  - website/src/pages/CTV/* (CtvDashboard, CtvHome, CtvCommission, CtvReferrals, CtvMe)
+  - website/src/lib/api/ctv.ts
+  - website/src/components/ctv/* (LOB pills, split bars, bottom nav)
+  - Login redirect logic in AuthContext / ProtectedRoute / LoginRoute
+reads:
+  - tdental_demo.dbo.users (is_ctv, for role)
+  - tdental_demo.dbo.earnings (CTV's rows via recipient_user_id)
+  - tcosmetic_demo.dbo.earnings
+  - tdental_demo.dbo.partners (referred clients via referred_by_ctv_id on dental side)
+  - tcosmetic_demo.dbo.clients (referred clients on cosmetic side)
+writes:
+  - (none at CTV level; earnings written by payment path in earnings domain)
+tables:
+  - tdental_demo.dbo.users (+ is_ctv)
+  - (earnings tables owned by earnings domain)
+endpoints:
+  - GET /api/ctv/commission-summary (auth: is_ctv + ctv.commission.view.self; returns aggregates + per-LOB breakdown + recent rows)
+  - GET /api/ctv/referrals (self referred clients + status)
+  - GET /api/ctv/me (profile)
+ui_surfaces:
+  - /ctv (full bypass of admin Layout/sidebar; mobile-first with bottom nav 4 tabs; also usable desktop)
+    - Home: greeting + pending tile (split dental/cosmetic) + this-month + recent activity feed with [den]/[cos] pills
+    - Commission: Pending/Paid segmented; earnings list
+    - Referrals: list of referred clients (dual LOB badges possible)
+    - Me: profile, logout
+  - Hard redirect on login for is_ctv=true
+  - 403 guards on all / (admin) routes for CTV
+shared_types:
+  - website/src/lib/api/ctv.ts : CtvCommissionSummary, CtvReferral, CommissionRow (with lob tag)
+  - api/src/routes/ctv.js payload contracts
+dependencies:
+  - Business Unit Context (CTV has no LOB toggle)
+  - Earnings / Commissions (aggregation source)
+  - Auth & Permissions (is_ctv gate + ctv.* perms)
+affected_by:
+  - Any change to earnings attribution or payout linking
+  - Login payload changes
+impact_tests:
+  - CTV role gating: is_ctv user GET /api/Partners → 403; only ctv/* succeed
+  - Aggregation correctness: dental + cosmetic earnings sum + per-LOB match seeds
+  - Redirect: CTV lands on /ctv, cannot reach customers or toggle
+  - Visual fidelity to companion (Playwright + screenshots)
+risk_level: high
+notes:
+  - "D14: CTV never enters admin UI."
+  - "Aggregation is server-side only; no client-side cross-DB."
+  - "CTV dashboard is the ONLY new screen in v1; everything else reuses dental UI via LOB toggle."
+  - "Payouts visible to CTV as 'paid' status after admin runs payout batch (earnings.payout_id link)."
