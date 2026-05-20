@@ -18,21 +18,25 @@ export interface ExportTypeInfo {
 
 export async function previewExport(
   type: string,
-  filters: Record<string, unknown>
+  filters: Record<string, unknown>,
+  lob?: 'dental' | 'cosmetic'
 ): Promise<ExportPreviewResponse> {
   return apiFetch(`/Exports/${type}/preview`, {
     method: 'POST',
     body: { filters },
+    lob,
   });
 }
 
 export async function downloadExport(
   type: string,
-  filters: Record<string, unknown>
+  filters: Record<string, unknown>,
+  lob?: 'dental' | 'cosmetic'
 ): Promise<Blob> {
   const token = localStorage.getItem('tgclinic_token') || '';
+  const lobPrefix = lob === 'cosmetic' ? '/cosmetic' : '';
   const res = await fetch(
-    `${API_URL}/Exports/${type}/download`,
+    `${API_URL}${lobPrefix}/Exports/${type}/download`,
     {
       method: 'POST',
       headers: {

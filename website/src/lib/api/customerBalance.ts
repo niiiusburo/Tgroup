@@ -12,8 +12,8 @@ export interface ApiCustomerBalance {
   totalRefunded: number;
 }
 
-export async function fetchCustomerBalance(customerId: string): Promise<ApiCustomerBalance> {
-  const res = await apiFetch<{ deposit_balance: number; outstanding_balance: number; total_deposited?: number; total_used?: number; total_refunded?: number }>(`/CustomerBalance/${customerId}`);
+export async function fetchCustomerBalance(customerId: string, lob?: 'dental' | 'cosmetic'): Promise<ApiCustomerBalance> {
+  const res = await apiFetch<{ deposit_balance: number; outstanding_balance: number; total_deposited?: number; total_used?: number; total_refunded?: number }>(`/CustomerBalance/${customerId}`, { lob });
   return {
     id: customerId,
     name: '',

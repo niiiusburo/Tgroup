@@ -1,5 +1,5 @@
 const express = require('express');
-const { query } = require('../db');
+const { query: legacyQuery, getQuery } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 const { attachLocationScopes, fetchLocationScopeIds } = require('./employees/locationScopes');
 const { addAccentInsensitiveSearchCondition } = require('../utils/search');
@@ -15,6 +15,7 @@ const router = express.Router();
  */
 router.get('/', requirePermission('employees.view'), async (req, res) => {
   try {
+    const q = getQuery(req);
     const {
       offset = '0',
       limit = '100',
@@ -69,7 +70,7 @@ router.get('/', requirePermission('employees.view'), async (req, res) => {
 
     const whereClause = conditions.join(' AND ');
 
-    const items = await query(
+    const items = await q(
       `SELECT
         e.id,
         e.name,
@@ -103,7 +104,7 @@ router.get('/', requirePermission('employees.view'), async (req, res) => {
       [...params, limitNum, offsetNum]
     );
 
-    const countResult = await query(
+    const countResult = await q(
       `SELECT COUNT(*) AS count FROM employees e WHERE ${whereClause}`,
       params
     );
@@ -135,9 +136,10 @@ router.get('/', requirePermission('employees.view'), async (req, res) => {
  */
 router.get('/:id', requirePermission('employees.view'), async (req, res) => {
   try {
+    const q = getQuery(req);
     const { id } = req.params;
 
-    const rows = await query(
+    const rows = await q(
       `SELECT
         e.id,
         e.name,

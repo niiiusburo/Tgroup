@@ -13,6 +13,7 @@ import {
   type ApiMonthlyPlan,
   type ApiInstallment,
 } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 // Export types for consumers
 export type { MonthlyPlan, PlanCreationInput, PlanStatus, Installment, InstallmentStatus };
@@ -59,6 +60,7 @@ function mapApiInstallment(api: ApiInstallment): Installment {
 }
 
 export function useMonthlyPlans(locationId?: string) {
+  const { currentLOB } = useBusinessUnit();
   const [plans, setPlans] = useState<readonly MonthlyPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -82,6 +84,7 @@ export function useMonthlyPlans(locationId?: string) {
         companyId: locationId && locationId !== 'all' ? locationId : undefined,
         status: statusFilter !== 'all' ? statusFilter : undefined,
         search: searchQuery || undefined,
+        lob: currentLOB,
       });
       setPlans(response.items.map(mapApiPlan));
       setSummary(response.aggregates);
@@ -91,7 +94,7 @@ export function useMonthlyPlans(locationId?: string) {
     } finally {
       setLoading(false);
     }
-  }, [locationId, statusFilter, searchQuery]);
+  }, [locationId, statusFilter, searchQuery, currentLOB]);
 
   useEffect(() => {
     loadPlans();

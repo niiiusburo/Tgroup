@@ -104,6 +104,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isLoading: false,
     });
     dispatchAuthChange(res.permissions.locations);
+
+    // CTV v2 hard redirect (D14): if is_ctv, never enter admin UI
+    if (res.user?.is_ctv || res.user?.isCtv) {
+      // hard redirect to guarantee clean CTV chrome (no Layout/sidebar flash)
+      window.location.href = '/ctv';
+      return;
+    }
+    // backend may also return redirectTo
+    if (res.redirectTo === '/ctv') {
+      window.location.href = '/ctv';
+    }
   }, []);
 
   const logout = useCallback(() => {

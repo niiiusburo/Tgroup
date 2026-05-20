@@ -5,6 +5,7 @@ jest.mock('uuid', () => ({
 jest.mock('../src/middleware/auth', () => ({
   requireAuth: (_req, _res, next) => next(),
   requirePermission: () => (_req, _res, next) => next(),
+  requireLobScope: () => (_req, _res, next) => next(),
 }));
 
 const request = require('supertest');

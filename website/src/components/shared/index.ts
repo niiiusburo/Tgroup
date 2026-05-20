@@ -20,6 +20,7 @@ export { FeedbackWidget } from './FeedbackWidget';
 export { FilterBar, type FilterBarProps, type FilterOption } from './FilterBar';
 export { type DoctorOption, FilterByDoctor } from './FilterByDoctor';
 export { FilterByLocation } from './FilterByLocation';
+export { FilterByBusinessUnit } from './FilterByBusinessUnit';
 export { ImageUpload } from './ImageUpload';
 export { LanguageToggle } from './LanguageToggle';
 export { LoadingState } from './LoadingState';

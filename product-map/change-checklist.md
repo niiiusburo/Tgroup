@@ -100,3 +100,19 @@
 - [ ] Update `notes/🚀 Deployment Guide.md`
 - [ ] Run a local Docker smoke test (`docker-compose up -d` & healthcheck)
 - [ ] Ensure `api/src/server.js` `ALLOWED_ORIGINS` includes any new frontend hosts
+
+## LOB / Business-Unit / Two-DB Changes (Cosmetic v2)
+- [ ] Read `product-map/domains/business-unit.yaml`, `earnings-commissions.yaml`, `cosmetic-clients.yaml`, `ctv.yaml` and parent `cosmetic.yaml`
+- [ ] Confirm change touches only one DB or uses getDb(lob) factory (never raw cross-DB SQL)
+- [ ] If additive column on dental: provide reversible migration + backfill + COUNT(*) = 0 check for NULLs
+- [ ] If new table (earnings, payouts, consultations, referral_locks): include in both DB bootstrap if needed; update schema-map
+- [ ] Update or add requireLobScope('cosmetic'|'dental') + permission gate on every new route
+- [ ] For earnings writes: verify append-only + reversal path (refund never mutates original)
+- [ ] Frontend: all LOB-aware hooks/clients use BusinessUnitContext; test keyed remount on toggle
+- [ ] CTV paths: enforce is_ctv + ctv.* perms; redirect logic tested
+- [ ] Update `product-map/schema-map.md` (two-DB section + new tables)
+- [ ] Update authority docs per v2 spec "Documentation updates" list
+- [ ] Feature flag (COSMETIC_LOB_ENABLED) respected in all new code paths (503 when false)
+- [ ] Run full dental regression suite + new LOB isolation tests before merge
+- [ ] "local only" verification on 127.0.0.1 before any NK2/prod consideration
+- [ ] Capture real-browser screenshots + Playwright results for toggle, empty cosmetic, CTV redirect, earnings attribution

@@ -1,5 +1,5 @@
 const express = require('express');
-const { query, pool } = require('../../db');
+const { query: legacyQuery, getQuery, pool } = require('../../db');
 const { requirePermission } = require('../../middleware/auth');
 const { fetchLocationScopeIds } = require('./locationScopes');
 const { getVietnamNow } = require('../../lib/dateUtils');
@@ -12,7 +12,10 @@ const router = express.Router();
  * Body: { name, phone?, email?, companyid?, active? }
  */
 router.post('/', requirePermission('employees.edit'), async (req, res) => {
-  const client = await pool.connect();
+  // Use req.db (from attachCosmeticDb + runWithLob) for LOB isolation under /api/cosmetic/*;
+  // fallback to dental pool for direct dental calls. Safe req.db pattern.
+  const txPool = req.db || pool;
+  const client = await txPool.connect();
   try {
     const {
       name,
@@ -124,7 +127,10 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
  * Updates an existing employee (updates partners table)
  */
 router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
-  const client = await pool.connect();
+  // Use req.db (from attachCosmeticDb + runWithLob) for LOB isolation under /api/cosmetic/*;
+  // fallback to dental pool for direct dental calls. Safe req.db pattern.
+  const txPool = req.db || pool;
+  const client = await txPool.connect();
   try {
     const { id } = req.params;
     const {
@@ -281,7 +287,10 @@ router.delete('/:id', requirePermission('employees.edit'), async (req, res) => {
   try {
     const { id } = req.params;
 
-    const result = await query(
+    // Explicit getQuery(req) for LOB safety (cosmetic mirrors hit tcosmetic_demo via req.db/lob).
+    // (Bare query would now also work thanks to runWithLob in attach, but explicit is preferred.)
+    const q = getQuery(req);
+    const result = await q(
       `UPDATE partners SET active = false, lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE id = $1 AND employee = true RETURNING id`,
       [id]
     );

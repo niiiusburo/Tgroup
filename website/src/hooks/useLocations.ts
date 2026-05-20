@@ -6,6 +6,7 @@ import {
   type LocationMetrics,
   type LocationStatus,
 } from '@/data/mockLocations';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 /**
  * Hook for location/branch data and operations
@@ -13,6 +14,7 @@ import {
  * @crossref:used-in[Locations, Customers, Employees, Appointments, Overview]
  */
 export function useLocations() {
+  const { currentLOB } = useBusinessUnit();
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<LocationStatus | 'all'>('all');
@@ -59,7 +61,7 @@ export function useLocations() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetchCompanies({ limit: 50 });
+      const response = await fetchCompanies({ limit: 50, lob: currentLOB });
       const mapped = response.items.map((company) =>
         mapApiCompanyToLocationBranch(company)
       );
@@ -71,7 +73,7 @@ export function useLocations() {
     } finally {
       setIsLoading(false);
     }
-  }, [mapApiCompanyToLocationBranch]);
+  }, [mapApiCompanyToLocationBranch, currentLOB]);
 
   /**
    * Load locations on mount

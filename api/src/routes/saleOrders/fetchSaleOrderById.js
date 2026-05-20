@@ -1,7 +1,8 @@
-const { query } = require('../../db');
+const { query: legacyQuery, getQuery } = require('../../db');
 
-function fetchSaleOrderById(id) {
-  return query(
+function fetchSaleOrderById(id, reqOrLobOrQ) {
+  const q = typeof reqOrLobOrQ === 'function' ? reqOrLobOrQ : getQuery(reqOrLobOrQ);
+  return q(
     `SELECT
       so.id,
       so.name,

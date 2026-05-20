@@ -3,7 +3,7 @@
  * @crossref:used-in[lib/api/* domain modules]
  */
 
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+export const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3000/api';
 export const AUTH_UNAUTHORIZED_EVENT = 'tgclinic:auth-unauthorized';
 const TOKEN_KEY = 'tgclinic_token';
 
@@ -41,6 +41,8 @@ interface FetchOptions {
   body?: unknown;
   params?: Record<string, string | number | boolean | undefined>;
   signal?: AbortSignal;
+  /** LOB scoping for cosmetic mirror routes (future use by data hooks) */
+  lob?: 'dental' | 'cosmetic';
 }
 
 // Keys that bypass camelCase → snake_case conversion (backend expects them as-is)
@@ -53,9 +55,11 @@ function toSnakeCase(str: string): string {
 }
 
 export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
-  const { method = 'GET', body, params } = options;
+  const { method = 'GET', body, params, lob } = options;
 
-  let url = `${API_URL}${endpoint}`;
+  // LOB-aware routing: cosmetic uses /api/cosmetic/* mirrors; dental uses legacy paths (no prefix)
+  const lobPrefix = lob === 'cosmetic' ? '/cosmetic' : '';
+  let url = `${API_URL}${lobPrefix}${endpoint}`;
   if (params) {
     const searchParams = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {

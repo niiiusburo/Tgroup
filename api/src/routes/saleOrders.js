@@ -1,5 +1,5 @@
 const express = require('express');
-const { query } = require('../db');
+const { query: legacyQuery, getQuery } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 const { createSaleOrder } = require('./saleOrders/createSaleOrder');
 const { getSaleOrderById } = require('./saleOrders/getSaleOrderById');
@@ -16,6 +16,7 @@ const router = express.Router();
  */
 router.get('/', requirePermission('services.view'), async (req, res) => {
   try {
+    const q = getQuery(req);
     const {
       partner_id,
       offset = '0',
@@ -81,7 +82,7 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
 
     const whereClause = conditions.join(' AND ');
 
-    const items = await query(
+    const items = await q(
       `SELECT
         so.id,
         so.name,
@@ -127,7 +128,7 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
       [...params, limitNum, offsetNum]
     );
 
-    const countResult = await query(
+    const countResult = await q(
       `SELECT COUNT(*) AS count
        FROM saleorders so
        LEFT JOIN partners p ON p.id = so.partnerid
@@ -171,6 +172,7 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
  */
 router.get('/lines', requirePermission('services.view'), async (req, res) => {
   try {
+    const q = getQuery(req);
     const {
       partner_id,
       offset = '0',
@@ -196,7 +198,7 @@ router.get('/lines', requirePermission('services.view'), async (req, res) => {
     const orderByCol = allowedSortFields[sortField] || 'sol.date';
     const orderDir = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 
-    const items = await query(
+    const items = await q(
       `SELECT
         sol.id,
         sol.productid,
@@ -294,7 +296,7 @@ router.get('/lines', requirePermission('services.view'), async (req, res) => {
       [partner_id, limitNum, offsetNum]
     );
 
-    const countResult = await query(
+    const countResult = await q(
       `SELECT COUNT(*) as count
        FROM saleorderlines sol
        JOIN saleorders so ON so.id = sol.orderid

@@ -1,6 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import { User, Tag, Phone, Mail, MapPin, Calendar, Stethoscope, ScanFace } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { User, Tag, Phone, Mail, MapPin, Calendar, Stethoscope, ScanFace, ArrowRight } from 'lucide-react';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
+import { useAuth } from '@/contexts/AuthContext';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
+import { probeCrossLob, type CrossLobProbeResult } from '@/lib/api/partners';
 
 interface ProfileHeaderProps {
   profile: CustomerProfileData;
@@ -8,6 +12,39 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ profile }: ProfileHeaderProps) {
   const { t } = useTranslation('customers');
+
+  // Cross-LOB badge (lob.crossview gated, server-side soft phone probe)
+  const { hasPermission } = useAuth();
+  const { currentLOB } = useBusinessUnit();
+  const canCrossView = hasPermission('lob.crossview');
+  const [crossMatch, setCrossMatch] = useState<CrossLobProbeResult | null>(null);
+
+  useEffect(() => {
+    if (!canCrossView || !profile.phone || !currentLOB) {
+      setCrossMatch(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await probeCrossLob(profile.phone, currentLOB);
+        if (!cancelled) setCrossMatch(res);
+      } catch (e) {
+        if (!cancelled) setCrossMatch(null);
+        // silent fail — badge just won't show
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [profile.phone, currentLOB, canCrossView]);
+
+  const handleOpenOtherLob = () => {
+    if (!crossMatch?.matched || !crossMatch.otherId || !crossMatch.otherLob) return;
+    const url = `/customers/${crossMatch.otherId}?lob=${crossMatch.otherLob}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-card p-6">
       <div className="flex flex-col sm:flex-row gap-6">
@@ -64,6 +101,19 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
               DOB: {profile.dateOfBirth}
             </span>
           </div>
+
+          {/* Cross-LOB badge: only for lob.crossview users; driven by phone probe; opens other LOB profile in new tab */}
+          {canCrossView && crossMatch?.matched && crossMatch.otherId && (
+            <button
+              type="button"
+              onClick={handleOpenOtherLob}
+              className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-blue-200 transition hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              title={`View matching profile in ${crossMatch.otherLob} LOB (new tab)`}
+              data-testid="cross-lob-badge"
+            >
+              also a {crossMatch.otherLob} client <ArrowRight className="h-3 w-3" />
+            </button>
+          )}
 
           {/* Medical History — distinctive amber card */}
           {(() => {

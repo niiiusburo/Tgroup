@@ -33,6 +33,7 @@ export function fetchProducts(params?: {
   categId?: string;
   companyId?: string;
   active?: 'true' | 'false' | 'all';
+  lob?: 'dental' | 'cosmetic';
 }) {
   return apiFetch<PaginatedResponse<ApiProduct>>('/Products', {
     params: {
@@ -43,6 +44,7 @@ export function fetchProducts(params?: {
       companyId: params?.companyId,
       active: params?.active,
     },
+    lob: params?.lob,
   });
 }
 
@@ -54,8 +56,8 @@ export function createProduct(data: {
   uomname?: string;
   companyid?: string;
   canorderlab?: boolean;
-}) {
-  return apiFetch<ApiProduct>('/Products', { method: 'POST', body: data });
+}, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiProduct>('/Products', { method: 'POST', body: data, lob });
 }
 
 export function updateProduct(id: string, data: Partial<{
@@ -67,10 +69,10 @@ export function updateProduct(id: string, data: Partial<{
   companyid: string;
   canorderlab: boolean;
   active: boolean;
-}>) {
-  return apiFetch<ApiProduct>(`/Products/${id}`, { method: 'PUT', body: data });
+}>, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiProduct>(`/Products/${id}`, { method: 'PUT', body: data, lob });
 }
 
-export function deleteProduct(id: string) {
-  return apiFetch<void>(`/Products/${id}`, { method: 'DELETE' });
+export function deleteProduct(id: string, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<void>(`/Products/${id}`, { method: 'DELETE', lob });
 }

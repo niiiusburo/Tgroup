@@ -16,6 +16,7 @@ import {
   type RecordType,
 } from '@/data/mockPayment';
 import { normalizeText } from '@/lib/utils';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 export type PaymentFilter = 'all' | PaymentStatus;
 
@@ -118,6 +119,7 @@ function mapSaleOrderToOutstandingBalance(saleOrder: ApiSaleOrder): OutstandingB
 }
 
 export function usePayment(selectedLocationId?: string) {
+  const { currentLOB } = useBusinessUnit();
   const [payments, setPayments] = useState<readonly PaymentRecord[]>([]);
   const [outstandingBalances, setOutstandingBalances] = useState<readonly OutstandingBalanceItem[]>([]);
   const [wallets] = useState<readonly DepositWalletData[]>([]);
@@ -143,10 +145,11 @@ export function usePayment(selectedLocationId?: string) {
           limit: 100, // Accommodate all 76 records
           search: search || undefined,
           companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
+          lob: currentLOB,
         }),
         selectedLocationId && selectedLocationId !== 'all'
           ? Promise.resolve(null)
-          : fetchPaymentsApi(undefined, 'payments', search || undefined).catch((err) => {
+          : fetchPaymentsApi(undefined, 'payments', search || undefined, currentLOB).catch((err) => {
               console.warn('Canonical payments fetch failed, falling back to sale orders:', err);
               return null;
             }),
@@ -168,7 +171,7 @@ export function usePayment(selectedLocationId?: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedLocationId]);
+  }, [selectedLocationId, currentLOB]);
 
   const refreshPayments = useCallback(async () => {
     await fetchPayments(searchTerm || undefined);

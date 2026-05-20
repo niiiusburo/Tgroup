@@ -48,6 +48,7 @@ export function fetchSaleOrders(params?: {
   companyId?: string;
   dateFrom?: string;
   dateTo?: string;
+  lob?: 'dental' | 'cosmetic';
 }) {
   return apiFetch<PaginatedResponse<ApiSaleOrder>>('/SaleOrders', {
     params: {
@@ -59,6 +60,7 @@ export function fetchSaleOrders(params?: {
       dateFrom: params?.dateFrom,
       dateTo: params?.dateTo,
     },
+    lob: params?.lob,
   });
 }
 

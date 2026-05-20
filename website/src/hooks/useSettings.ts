@@ -10,6 +10,7 @@ import type { CustomerSource, SystemPreference, CatalogService } from '@/types/s
 import { PERMISSIONS, ROLES } from '@/data/mockPermissionGroups';
 import type { Permission } from '@/data/mockPermissionGroups';
 import type { Role } from '@/types/permissions';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { fetchProducts, updateProduct, fetchCustomerSources, createCustomerSource, updateCustomerSource, deleteCustomerSource, fetchSystemPreferences, upsertSystemPreference, updateSystemPreference, deleteSystemPreference, type ApiCustomerSource, type ApiSystemPreference } from '@/lib/api';
 
 // Export types
@@ -30,6 +31,7 @@ export interface ApiCatalogService {
 }
 
 export function useServiceCatalog() {
+  const { currentLOB } = useBusinessUnit();
   const [services, setServices] = useState<ApiCatalogService[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,7 +40,7 @@ export function useServiceCatalog() {
 
   useEffect(() => {
     setLoading(true);
-    fetchProducts({ limit: 200 })
+    fetchProducts({ limit: 200, lob: currentLOB })
       .then((res) => {
         const mapped: ApiCatalogService[] = res.items.map((p) => ({
           id: p.id,
@@ -56,7 +58,7 @@ export function useServiceCatalog() {
         // Keep empty state on error
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [currentLOB]);
 
   const filtered = useMemo(() => {
     return services.filter((s) => {
@@ -82,7 +84,7 @@ export function useServiceCatalog() {
     if (!service) return;
     const nextActive = !service.isActive;
     try {
-      await updateProduct(id, { active: nextActive });
+      await updateProduct(id, { active: nextActive }, currentLOB);
       setServices((prev) =>
         prev.map((s) => (s.id === id ? { ...s, isActive: nextActive } : s))
       );
@@ -98,7 +100,7 @@ export function useServiceCatalog() {
       if (updates.price !== undefined) payload.listprice = updates.price;
       if (updates.description !== undefined) payload.defaultcode = updates.description;
       if (Object.keys(payload).length > 0) {
-        await updateProduct(id, payload);
+        await updateProduct(id, payload, currentLOB);
       }
       setServices((prev) =>
         prev.map((s) => (s.id === id ? { ...s, ...updates } : s))

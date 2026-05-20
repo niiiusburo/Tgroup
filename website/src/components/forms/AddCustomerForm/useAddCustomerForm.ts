@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTimezone } from '@/contexts/TimezoneContext';
 import { fetchCompanies, fetchEmployees, fetchPartners, fetchPartnerById, ApiError } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { normalizeText } from '@/lib/utils';
 import type { CapturedFaceImages } from '@/components/shared/faceCaptureProfile';
 import type { ApiCompany, ApiEmployee, ApiPartner } from '@/lib/api';
@@ -113,6 +114,7 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
     canEdit = false,
   } = props;
   const { t } = useTranslation('customers');
+  const { currentLOB } = useBusinessUnit();
   const isFieldEditable = !isEdit || canEdit;
   const [formData, setFormData] = useState<CustomerFormData>({
     ...EMPTY_CUSTOMER_FORM,
@@ -146,9 +148,9 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
   }, [pendingFaceImages, onPendingFaceImage]);
 
   useEffect(() => {
-    fetchCompanies({ limit: 50 }).then((r) => setCompanies(r.items)).catch(() => {});
-    fetchEmployees({ limit: 500, active: 'all' }).then((r) => setEmployees(r.items)).catch(() => {});
-  }, []);
+    fetchCompanies({ limit: 50, lob: currentLOB }).then((r) => setCompanies(r.items)).catch(() => {});
+    fetchEmployees({ limit: 500, active: 'all', lob: currentLOB }).then((r) => setEmployees(r.items)).catch(() => {});
+  }, [currentLOB]);
 
   const lastInitialDataRef = useRef(initialData);
   useEffect(() => {

@@ -1,5 +1,7 @@
 # TGroup Clinic — Security
 
+> **Cosmetic LOB v2 (Phase 0):** LOB scope (lob_scope + requireLobScope) is hard gate; new perms are soft gate. Multi-LOB selection is Admin-only: non-admin staff receive one visible LOB in auth responses and must not see the header selector. CTV role (is_ctv) + ctv.* perms gate /ctv surface; is_ctv users receive 403 on all admin routes and are redirected at login. No PII in CTV aggregation responses. See governance-delta.md, SECURITY section of v2 design, and ctv.yaml. All new routes behind COSMETIC_LOB_ENABLED flag until Phase 4.
+
 > Auth flow, RBAC roles, secret storage locations, token structure, sensitive-action approval thresholds.
 
 ## Auth Flow
@@ -22,6 +24,8 @@ Staff → /login form → POST /api/Auth/login
   name: string;
   email: string;
   companyId: string;     // primary branch
+  lob_scope: Array<'dental' | 'cosmetic'>; // Admin may receive multiple; staff receive one
+  is_ctv: boolean;
   remember: boolean;     // true = 60d expiry
   iat: number;
   exp: number;

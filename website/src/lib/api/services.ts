@@ -18,9 +18,9 @@ export interface ApiService {
   createdAt: string;
 }
 
-export async function fetchServices(customerId?: string): Promise<{ items: ApiService[]; totalItems: number }> {
+export async function fetchServices(customerId?: string, lob?: 'dental' | 'cosmetic'): Promise<{ items: ApiService[]; totalItems: number }> {
   const url = customerId ? `/Services?customerId=${customerId}` : '/Services';
-  return apiFetch<{ items: ApiService[]; totalItems: number }>(url);
+  return apiFetch<{ items: ApiService[]; totalItems: number }>(url, { lob });
 }
 
 export async function createService(data: {
@@ -31,6 +31,7 @@ export async function createService(data: {
   discount?: number;
   doctorId?: string;
   notes?: string;
+  lob?: 'dental' | 'cosmetic';
 }): Promise<ApiService> {
   return apiFetch<ApiService>('/Services', {
     method: 'POST',
@@ -43,6 +44,7 @@ export async function createService(data: {
       doctor_id: data.doctorId,
       notes: data.notes,
     },
+    lob: data.lob,
   });
 }
 

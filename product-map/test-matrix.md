@@ -1,5 +1,7 @@
 # TGroup Test Matrix
 
+> **Cosmetic LOB v2 Phase 0:** 8 new test classes (see docs/TEST-MATRIX.md + v2 spec + governance-delta.md) added to matrix. LOB isolation, CTV, earnings engine, toggle remount, dental regression must be green. New tests live in api/src/__tests__ and website e2e before impl. All reference the split domains.
+
 > Map of all test files to the domains, endpoints, components, and flows they cover.
 
 ## Traceability Convention

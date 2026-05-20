@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { previewExport, downloadExport } from '@/lib/api/exports';
 import type { ExportPreviewResponse } from '@/lib/api/exports';
 
@@ -22,6 +23,7 @@ interface UseExportResult {
 
 export function useExport({ type, filters }: UseExportOptions): UseExportResult {
   const { t } = useTranslation('exports');
+  const { currentLOB } = useBusinessUnit();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewData, setPreviewData] = useState<ExportPreviewResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -34,7 +36,7 @@ export function useExport({ type, filters }: UseExportOptions): UseExportResult 
     setPreviewData(null);
     setLoading(true);
 
-    previewExport(type, filters)
+    previewExport(type, filters, currentLOB)
       .then((data) => {
         setPreviewData(data);
       })
@@ -44,7 +46,7 @@ export function useExport({ type, filters }: UseExportOptions): UseExportResult 
       .finally(() => {
         setLoading(false);
       });
-  }, [type, filters]);
+  }, [type, filters, currentLOB]);
 
   const closePreview = useCallback(() => {
     setPreviewOpen(false);
@@ -52,7 +54,7 @@ export function useExport({ type, filters }: UseExportOptions): UseExportResult 
   }, []);
 
   const performDownload = useCallback(async () => {
-    const blob = await downloadExport(type, filters);
+    const blob = await downloadExport(type, filters, currentLOB);
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -61,7 +63,7 @@ export function useExport({ type, filters }: UseExportOptions): UseExportResult 
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
-  }, [type, filters, previewData]);
+  }, [type, filters, previewData, currentLOB]);
 
   const handleDownload = useCallback(async () => {
     setDownloading(true);

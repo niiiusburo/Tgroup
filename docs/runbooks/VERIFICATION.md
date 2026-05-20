@@ -1,5 +1,7 @@
 # VERIFICATION.md
 
+> **Cosmetic LOB v2:** New verification gates (dental regression 100%, LOB isolation, CTV aggregation, rollback dry-run, real-browser toggle + CTV + earnings attribution + screenshots) listed in v2 design § Pre-deploy verification gates + PLAN Phase 0-4 checklists + governance-delta.md. All runs local-first on 127.0.0.1. Playwright + real browser required after every UI change. testbright.md + artifacts/cosmetic/ for evidence.
+
 > Verification gates for TGClinic changes.
 
 ## Before Running Commands

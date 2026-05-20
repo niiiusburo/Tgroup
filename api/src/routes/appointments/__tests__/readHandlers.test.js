@@ -1,6 +1,11 @@
-jest.mock('../../../db', () => ({
-  query: jest.fn(),
-}));
+jest.mock('../../../db', () => {
+  const mockQuery = jest.fn();
+  return {
+    query: mockQuery,
+    getQuery: jest.fn((reqOrLob) => mockQuery), // test shim: always delegate to the spied query fn (dental path in tests)
+    getDb: jest.fn(() => ({ queryRows: mockQuery })),
+  };
+});
 
 const { query } = require('../../../db');
 const { listAppointments } = require('../readHandlers');

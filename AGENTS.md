@@ -63,6 +63,8 @@ Before touching code for a feature or bugfix:
 
 For multi-domain work, split by domain ownership and merge only after each domain's map and tests are checked.
 
+**Cosmetic LOB v2 extension (feat/cosmetic-line-of-business worktree only):** Always read the four split domains in addition to cosmetic.yaml: `business-unit.yaml`, `cosmetic-clients.yaml`, `ctv.yaml`, `earnings-commissions.yaml`. See `docs/superpowers/specs/2026-05-18-cosmetic-line-of-business-governance-delta.md` for the full governance delta. Two-DB topology (tdental_demo additive + tcosmetic_demo) is the core invariant — never write cross-DB SQL; use getDb(lob) factory. "local only, NK2 later" until explicit Phase 4 gate. Every LOB/cosmetic/earnings/ctv change must specify LOB in agent logs and update the relevant domain yaml + schema-map.
+
 Keep the map alive:
 
 - If code drifts from the product-map, update the relevant product-map artifact with the code change.
@@ -110,6 +112,7 @@ For frontend work:
 For backend/data work:
 
 - Read `ARCHITECTURE.md`, `product-map/schema-map.md`, and the affected domain YAML.
+- **Cosmetic LOB v2:** When touching db, auth, payments, or any new /cosmetic or /ctv path, also read the LOB governance delta + business-unit.yaml + earnings-commissions.yaml. Use dual-pool db factory; enforce lob_scope + requireLobScope on every cosmetic/ctv route. Specify LOB ('dental' or 'cosmetic') explicitly in all logs and coordination.
 - Treat `api/src/db.js`, auth middleware, permission resolution, and high-blast-radius tables as shared infrastructure.
 - Keep route, frontend client, type/DTO, permission, tests, and product-map updates aligned.
 - Do not delete legacy routes or mock/data files that intersect `product-map/unknowns.md` without clarification.
@@ -218,6 +221,8 @@ This project can use OpenCode Plan and Build phases:
 | `docs/GLOSSARY.md` | Domain terms and disambiguations | Any code change in an unfamiliar domain |
 | `docs/CONTRACTS.md` | Frozen API schemas and integration contracts | Any API, frontend client, or integration change |
 | `docs/DATA-MODEL.md` | Full schema + ERD + invariant rules | Schema, migration, or query changes |
+| `docs/superpowers/specs/2026-05-18-cosmetic-line-of-business-governance-delta.md` | Cosmetic LOB v2 governance, product-map, authority delta | Every session touching LOB/cosmetic/ctv/earnings |
+| `product-map/domains/business-unit.yaml` + `cosmetic-clients.yaml` + `ctv.yaml` + `earnings-commissions.yaml` | Split LOB sub-domains (earnings table naming, two-DB) | Before any LOB code or docs change (in addition to cosmetic.yaml) |
 | `docs/USE-CASES.md` | Actor-trigger-flow-postcondition catalog | Feature work, UX changes, bugfix root-cause |
 | `docs/WORKFLOWS.md` | End-to-end sequence diagrams | Cross-domain changes or integration work |
 | `docs/INVARIANTS.md` | Global truths that must never break | Any commit touching money, auth, or data consistency |

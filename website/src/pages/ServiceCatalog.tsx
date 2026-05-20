@@ -15,6 +15,7 @@ import {
 import type { ApiProduct, ApiProductCategory, ApiCompany } from '@/lib/api';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { normalizeText } from '@/lib/utils';
 import { ExportMenu } from '@/components/shared/ExportMenu';
 import { ExportPreviewModal } from '@/components/shared/ExportPreviewModal';
@@ -49,17 +50,18 @@ export function ServiceCatalog() {
   const pageSize = 20;
 
   const { selectedLocationId } = useLocationFilter();
+  const { currentLOB } = useBusinessUnit();
 
   // Modals
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ApiProduct | null>(null);
 
-  // ── Load categories + companies (once) ──
+  // ── Load categories + companies (once, but re-run on LOB change for isolation) ──
   useEffect(() => {
-    fetchProductCategories().then((res) => setCategories(res.items)).catch(() => {});
-    fetchCompanies().then((res) => setCompanies(res.items)).catch(() => {});
-  }, []);
+    fetchProductCategories({ lob: currentLOB }).then((res) => setCategories(res.items)).catch(() => {});
+    fetchCompanies({ lob: currentLOB }).then((res) => setCompanies(res.items)).catch(() => {});
+  }, [currentLOB]);
 
   // ── Load products (on filter/page change) ──
   const loadProducts = useCallback(async () => {
@@ -72,6 +74,7 @@ export function ServiceCatalog() {
         categId: selectedCategoryId || undefined,
         companyId: selectedLocationId !== 'all' ? selectedLocationId : undefined,
         active: activeFilter === 'all' ? 'all' : activeFilter === 'active' ? 'true' : 'false',
+        lob: currentLOB,
       });
       setProducts(res.items);
       setTotalProducts(res.totalItems);
@@ -81,12 +84,12 @@ export function ServiceCatalog() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, catalogSearch, selectedCategoryId, selectedLocationId, activeFilter]);
+  }, [page, pageSize, catalogSearch, selectedCategoryId, selectedLocationId, activeFilter, currentLOB]);
 
   useEffect(() => { loadProducts(); }, [loadProducts]);
 
-  // Reset page when filters change
-  useEffect(() => { setPage(1); }, [catalogSearch, selectedCategoryId, activeFilter, selectedLocationId]);
+  // Reset page when filters or LOB change
+  useEffect(() => { setPage(1); }, [catalogSearch, selectedCategoryId, activeFilter, selectedLocationId, currentLOB]);
 
   // ── Filtered categories for sidebar ──
   const filteredCategories = useMemo(() => {
@@ -135,7 +138,7 @@ export function ServiceCatalog() {
   // ── Handlers ──
   async function handleAddCategory(name: string) {
     if (!canEditServices) return;
-    const created = await createProductCategory({ name });
+    const created = await createProductCategory({ name }, currentLOB);
     setCategories((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
   }
 
@@ -148,10 +151,10 @@ export function ServiceCatalog() {
       categid: data.categid || undefined,
       uomname: data.uomname || undefined,
       companyid: data.companyid || undefined,
-    });
+    }, currentLOB);
     await loadProducts();
-    // Refresh categories to update counts
-    fetchProductCategories().then((res) => setCategories(res.items)).catch(() => {});
+    // Refresh categories to update counts (LOB-aware)
+    fetchProductCategories({ lob: currentLOB }).then((res) => setCategories(res.items)).catch(() => {});
   }
 
   async function handleUpdateService(data: ServiceFormData) {
@@ -163,24 +166,24 @@ export function ServiceCatalog() {
       categid: data.categid || undefined,
       uomname: data.uomname || undefined,
       companyid: data.companyid || undefined,
-    });
+    }, currentLOB);
     setEditingProduct(null);
     await loadProducts();
   }
 
   async function handleToggleActive(product: ApiProduct) {
     if (!canEditServices) return;
-    await updateProduct(product.id, { active: !product.active });
+    await updateProduct(product.id, { active: !product.active }, currentLOB);
     await loadProducts();
-    fetchProductCategories().then((res) => setCategories(res.items)).catch(() => {});
+    fetchProductCategories({ lob: currentLOB }).then((res) => setCategories(res.items)).catch(() => {});
   }
 
   async function handleDelete(product: ApiProduct) {
     if (!canEditServices) return;
     if (!window.confirm(t('confirmDeleteService', { name: product.name }))) return;
-    await deleteProduct(product.id);
+    await deleteProduct(product.id, currentLOB);
     await loadProducts();
-    fetchProductCategories().then((res) => setCategories(res.items)).catch(() => {});
+    fetchProductCategories({ lob: currentLOB }).then((res) => setCategories(res.items)).catch(() => {});
   }
 
   // ── Selected category name ──

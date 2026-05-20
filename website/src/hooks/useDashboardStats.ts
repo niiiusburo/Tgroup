@@ -8,6 +8,7 @@ import {
 import type { StatCardData } from '@/components/modules/StatCardModule';
 import { fetchPartners, fetchAppointments, fetchSaleOrders } from '@/lib/api';
 import { getTodayInTimezone } from '@/lib/dateUtils';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 /**
  * Hook for dashboard statistics data
@@ -20,6 +21,7 @@ interface DashboardStatsResult {
 }
 
 export function useDashboardStats(selectedLocationId?: string): DashboardStatsResult {
+  const { currentLOB } = useBusinessUnit();
   const [isLoading, setIsLoading] = useState(true);
   const [totalPatients, setTotalPatients] = useState(0);
   const [appointmentsToday, setAppointmentsToday] = useState(0);
@@ -36,7 +38,7 @@ export function useDashboardStats(selectedLocationId?: string): DashboardStatsRe
         const [yyyy, mm] = todayStr.split('-');
 
         // Fetch total patients
-        const partnersResponse = await fetchPartners({ limit: 1, companyId });
+        const partnersResponse = await fetchPartners({ limit: 1, companyId, lob: currentLOB });
         setTotalPatients(partnersResponse.totalItems);
 
         // Fetch today's appointments
@@ -45,6 +47,7 @@ export function useDashboardStats(selectedLocationId?: string): DashboardStatsRe
           dateFrom: todayStr,
           dateTo: `${todayStr}T23:59:59`,
           companyId,
+          lob: currentLOB,
         });
         setAppointmentsToday(appointmentsResponse.totalItems);
 
@@ -55,6 +58,7 @@ export function useDashboardStats(selectedLocationId?: string): DashboardStatsRe
           companyId,
           dateFrom: firstDayOfMonth,
           dateTo: todayStr,
+          lob: currentLOB,
         });
         const totalRevenue = ordersResponse.items.reduce((sum, order) => {
           const amount = parseFloat(order.amounttotal || '0');
@@ -69,7 +73,7 @@ export function useDashboardStats(selectedLocationId?: string): DashboardStatsRe
     }
 
     loadStats();
-  }, [companyId]);
+  }, [companyId, currentLOB]);
 
   const stats = useMemo<readonly StatCardData[]>(() => {
     const avgPerVisit =

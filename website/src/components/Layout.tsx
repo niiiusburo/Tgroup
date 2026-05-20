@@ -27,8 +27,10 @@ import {
 'lucide-react';
 import { NAVIGATION_ITEMS, ROUTE_PERMISSIONS, type NavigationItem } from '@/constants';
 import { FilterByLocation } from '@/components/shared/FilterByLocation';
+import { FilterByBusinessUnit } from '@/components/shared/FilterByBusinessUnit';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { useLocations } from '@/hooks/useLocations';
 import { FeedbackWidget } from '@/components/shared/FeedbackWidget';
 import { GlobalFaceIdButton } from '@/components/shared/GlobalFaceIdButton';
@@ -233,6 +235,7 @@ export function Layout() {
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const { selectedLocationId, setSelectedLocationId, allowedLocations, isSingleLocation } = useLocationFilter();
   const { user, permissions, hasPermission, logout } = useAuth();
+  const { currentLOB, setCurrentLOB, availableLOBs, isMultiLOBUser } = useBusinessUnit();
   const { allLocations: allApiLocations } = useLocations();
   const locationsForFilter = allowedLocations.length > 0 ? allowedLocations : allApiLocations;
   const location = useLocation();
@@ -431,6 +434,17 @@ export function Layout() {
           </div>
 
           <div className="flex min-w-0 items-center justify-end gap-2 md:gap-3 lg:gap-4">
+            {/* LOB Toggle (BusinessUnit) — Admin-only, immediately left of location filter per spec. */}
+            {isMultiLOBUser && (
+              <div className="hidden sm:block">
+                <FilterByBusinessUnit
+                  current={currentLOB}
+                  available={availableLOBs}
+                  onChange={setCurrentLOB}
+                />
+              </div>
+            )}
+
             {/* Location Filter — hidden when user is locked to a single location */}
             {!isSingleLocation &&
             <div className="hidden sm:block">
@@ -458,7 +472,10 @@ export function Layout() {
 
         {/* Page content */}
         <main className="flex-1 p-3 sm:p-4 lg:p-6 relative z-0 overflow-x-hidden tablet-flow">
-          <Outlet />
+          {/* Keyed subtree: toggling LOB causes full remount of page content (prevents stale data from other LOB) */}
+          <div key={currentLOB}>
+            <Outlet />
+          </div>
         </main>
 
         {/* Version Display */}

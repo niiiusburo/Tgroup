@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchPartners, createPartner, updatePartner } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import type { CustomerFormData } from '@/data/mockCustomerForm';
 import {
   CUSTOMER_LOOKUP_LIMIT,
@@ -25,6 +26,7 @@ export function useCustomers(locationId: string = 'all', options: UseCustomersOp
   const isPaginated = options.paginated ?? false;
   const pageSize = options.limit ?? (isPaginated ? CUSTOMER_PAGE_SIZE : CUSTOMER_LOOKUP_LIMIT);
   const { hasPermission } = useAuth();
+  const { currentLOB } = useBusinessUnit();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [activeItems, setActiveItems] = useState(0);
@@ -85,6 +87,7 @@ export function useCustomers(locationId: string = 'all', options: UseCustomersOp
         search: debouncedSearch || undefined,
         companyId: locationId !== 'all' ? locationId : undefined,
         status: isPaginated && statusFilter !== 'all' ? statusFilter : undefined,
+        lob: currentLOB,
       });
       let mapped = res.items.map(mapPartnerToCustomer);
       if (!isPaginated && statusFilter !== 'all') {
@@ -103,7 +106,7 @@ export function useCustomers(locationId: string = 'all', options: UseCustomersOp
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, isPaginated, locationId, page, pageSize, statusFilter, searchRequired]);
+  }, [debouncedSearch, isPaginated, locationId, page, pageSize, statusFilter, searchRequired, currentLOB]);
 
   useEffect(() => {
     loadCustomers();

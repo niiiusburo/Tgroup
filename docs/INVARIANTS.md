@@ -65,6 +65,12 @@
 **Enforced by:** Code review + `ARCHITECTURE.md` §6.
 **Cite when:** Editing auth middleware, login, or permission resolution.
 
+### INV-008A — Admin-Only LOB Selection
+**Rule:** Only Admin permission-group users may receive/select multiple visible LOBs. Non-admin staff must be pinned to one scoped LOB in auth responses and `BusinessUnitContext`; localStorage or URL query state must not expand staff LOB access.
+**Rationale:** Dental staff must not be able to switch into Cosmetic, and cosmetic staff should not be able to switch into Dental.
+**Enforced by:** `api/src/routes/auth.js`, `/api/me/lob-scope`, `api/src/services/permissionService.js:isAdminPermissionState`, and `website/src/contexts/BusinessUnitContext.tsx`.
+**Cite when:** Editing LOB selector, auth payloads, `lob_scope`, or admin/staff permission-group behavior.
+
 ### INV-009 — Location Scope Frontend-Only Filter
 **Rule:** Backend list routes generally do NOT enforce location scope. The frontend `LocationContext` is responsible for filtering by `companyid`.
 **Rationale:** Backend location scoping was historically inconsistent; frontend filtering is the current operational contract.
