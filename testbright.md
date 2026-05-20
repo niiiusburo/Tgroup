@@ -762,6 +762,61 @@ TestSprite execution items:
 - [ ] PENDING: Verify live NK3 browser requests from `https://76-13-16-68.sslip.io` do not trigger CORS failures.
 - [ ] PENDING: Verify live NK3 Docker web build forwards `VITE_COSMETIC_LOB_ENABLED=true` and does not compile the Cosmetic selector as disabled.
 - [ ] PENDING: Verify Dental mode still uses dental data for customers, employees, appointments, payments, customer balance, sale-order lines, and revenue.
+# TestSprite Plan: Live NK Feedback Bugs 2026-05-19
+
+Feature/edit name: Live NK Feedback Bugs 2026-05-19
+
+Changed URLs and API routes:
+- Worker A export fix changed backend workbook output for `POST /api/Exports/revenue-flat/download`, `POST /api/Exports/revenue-flat/preview`, `POST /api/Exports/deposit-flat/download`, and `POST /api/Exports/deposit-flat/preview`.
+- Worker B calendar export fix changed backend workbook output for `POST /api/Exports/appointments/download` and `POST /api/Exports/appointments/preview`.
+- Appointment location fix changed backend edit behavior for `PUT /api/Appointments/:id` and regression coverage for the frontend appointment form mapper.
+- Checked `https://nk.2checkin.com/feedback`.
+- Bug surfaces from Google Doc feedback: `/reports/revenue`, `/calendar`, `/customers/:id`, and appointment edit/location update flows.
+
+Affected data flows:
+- Revenue report Excel export must include payment note and customer source values consistently.
+- Deposit report Excel export must split cash vs bank transfer and include deposit note.
+- Calendar/appointment export must preserve appointment date for customer phone `922403152` and similar rows.
+- Appointment edit must persist changed clinic/location/co so for an existing appointment when an admin saves.
+- In-app Feedback page should continue listing employee feedback and opening read-only detail without API errors.
+
+User roles:
+- Live admin/staff account with report export permission.
+- Admin account editing an existing appointment only in a controlled verification environment unless production-safe reproduction is explicitly approved.
+
+Happy paths:
+- Export revenue report for the same date range shown in feedback and confirm `note thanh toan` is present.
+- Export revenue report and confirm highlighted rows with customer source in the UI/export source data also show source in Excel.
+- Export deposit report and confirm cash and bank-transfer deposits are separated into distinct columns/values.
+- Export deposit report and confirm `note coc tien` is populated.
+- Export calendar/appointment data for a patient matching phone `922403152` and confirm the appointment date remains `20/05/2026`, not `08/05/2026`.
+- Change an appointment's clinic/location in a safe test record, save, refresh, and confirm the new clinic persists.
+
+Edge cases:
+- Revenue rows with source only on sale order/invoice context must not export blank source.
+- Mixed payment/deposit rows must not collapse cash and bank transfer into one total.
+- Calendar export must handle timezone/date boundary conversion without shifting by day or month.
+- Appointment location update must work for admin and preserve other appointment fields.
+
+Regressions:
+- Existing feedback page `/feedback` must keep loading with no API or console errors.
+- Existing resolved report/download fixes must not regress.
+- Existing customer/profile and calendar pages must not require production data mutation for read-only checks.
+
+Setup data and login state:
+- Live login verified with `t@clinic.vn / 123123`.
+- Google Doc source: `https://docs.google.com/document/d/1cpHPoA-EVSZHCrGfbhCAfZ_n6W7fN3O44rD2RuA1O9o/edit?usp=sharing`.
+- Screenshot evidence from triage: `output/playwright/live-feedback-review/feedback-list-2026-05-19T17-40-27-888Z.png`, `output/playwright/live-feedback-review/feedback-detail-2026-05-19T17-40-27-888Z.png`, and `output/playwright/live-feedback-review/google-doc-2026-05-19T17-39-18-766Z.png`.
+- Before/after fix evidence: `output/playwright/live-feedback-fix/before/revenue-workbook.png`, `output/playwright/live-feedback-fix/after/revenue-workbook.png`, `output/playwright/live-feedback-fix/before/deposit-workbook.png`, `output/playwright/live-feedback-fix/after/deposit-workbook.png`, `output/playwright/live-feedback-fix/before/calendar-922403152-workbook.png`, `output/playwright/live-feedback-fix/after/calendar-922403152-workbook.png`, `output/playwright/live-feedback-fix/before/appointment-location-save.png`, and `output/playwright/live-feedback-fix/after/appointment-location-save.png`.
+
+TestSprite execution items:
+- [x] PASS: Verify `/feedback` still lists the 2026-05-19 appointment-location feedback item and opens its detail view without API or console errors - live read-only check on 2026-05-20 saved `output/playwright/live-feedback-meaning/feedback-list-2026-05-20T02-28-01-413Z.png`, `output/playwright/live-feedback-meaning/feedback-detail-2026-05-20T02-28-01-413Z.png`, and `output/playwright/live-feedback-meaning/result-2026-05-20T02-28-01-413Z.json`; API/console errors were 0.
+- [x] PASS: Verify revenue Excel export includes payment note values - `npx jest src/services/exports/__tests__/legacyFlatReportsExport.test.js --runInBand` coverage asserts `Note thanh toan` workbook column/value.
+- [x] PASS: Verify revenue Excel export keeps customer source populated for rows where the UI/source data has a customer source - focused Jest asserts `COALESCE(so.sourceid, cust.sourceid)` source precedence.
+- [x] PASS: Verify deposit Excel export splits cash and bank-transfer amounts - focused Jest asserts workbook split columns and SQL method fallback for cash/bank-transfer/VietQR.
+- [x] PASS: Verify deposit Excel export includes deposit note values - focused Jest asserts `Note coc tien` workbook column/value.
+- [x] PASS: Verify calendar/appointment export preserves the correct `20/05/2026` appointment date for phone `922403152` - `npx jest src/services/exports/__tests__/appointmentsExport.test.js --runInBand` coverage checked phone search/date serialization; before/after screenshots saved at `output/playwright/live-feedback-fix/before/calendar-922403152-workbook.png` and `output/playwright/live-feedback-fix/after/calendar-922403152-workbook.png`.
+- [x] PASS: Verify admin appointment edit persists a changed clinic/location/co so after save and refresh in a safe test environment - backend mutation and frontend mapper tests passed; before/after screenshots saved at `output/playwright/live-feedback-fix/before/appointment-location-save.png` and `output/playwright/live-feedback-fix/after/appointment-location-save.png`.
 
 ---
 
