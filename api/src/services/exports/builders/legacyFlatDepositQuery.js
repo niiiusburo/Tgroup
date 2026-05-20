@@ -63,9 +63,22 @@ function depositSelect(where) {
       pr.phone AS partnerphone,
       COALESCE(p.payment_date, p.created_at)::date AS paymentdate,
       p.amount,
-      p.cash_amount,
-      p.bank_amount,
+      CASE
+        WHEN COALESCE(p.cash_amount, 0) = 0
+          AND COALESCE(p.bank_amount, 0) = 0
+          AND LOWER(COALESCE(p.method, '')) = 'cash'
+        THEN COALESCE(p.amount, 0)
+        ELSE COALESCE(p.cash_amount, 0)
+      END AS cash_amount,
+      CASE
+        WHEN COALESCE(p.cash_amount, 0) = 0
+          AND COALESCE(p.bank_amount, 0) = 0
+          AND LOWER(COALESCE(p.method, '')) IN ('bank', 'bank_transfer', 'vietqr')
+        THEN COALESCE(p.amount, 0)
+        ELSE COALESCE(p.bank_amount, 0)
+      END AS bank_amount,
       p.method AS paymentmethod,
+      p.notes AS depositnote,
       sale_staff.name AS salestaffname,
       cskh_staff.name AS cskhname,
       cs.name AS customersourcename,

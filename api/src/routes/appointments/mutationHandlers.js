@@ -150,7 +150,7 @@ async function createAppointment(req, res) {
 
 /**
  * PUT /api/Appointments/:id
- * Body: { date, doctorId, note, state, timeExpected, color }
+ * Body: { date, doctorId, companyId, note, state, timeExpected, color }
  * Returns: updated appointment
  */
 async function updateAppointment(req, res) {
@@ -160,6 +160,7 @@ async function updateAppointment(req, res) {
     const b = req.body;
     const date = b.date;
     const doctorId = readBodyField(b, 'doctorId', 'doctorid');
+    const companyId = readBodyField(b, 'companyId', 'companyid');
     const note = b.note;
     const state = b.state;
     const timeExpected = readBodyField(b, 'timeExpected', 'timeexpected');
@@ -182,6 +183,12 @@ async function updateAppointment(req, res) {
     if (doctorId !== undefined && doctorId !== null) {
       if (!isValidUUID(doctorId)) {
         return errorResponse(res, 400, 'INVALID_DOCTOR_ID', 'doctorId must be a valid UUID');
+      }
+    }
+
+    if (companyId !== undefined) {
+      if (!isValidUUID(companyId)) {
+        return errorResponse(res, 400, 'INVALID_COMPANY_ID', 'companyId must be a valid UUID');
       }
     }
 
@@ -219,6 +226,10 @@ async function updateAppointment(req, res) {
       return errorResponse(res, 404, 'DOCTOR_NOT_FOUND', 'Doctor with given doctorId does not exist');
     }
 
+    if (companyId !== undefined && !(await foreignKeyExists('companies', companyId))) {
+      return errorResponse(res, 404, 'COMPANY_NOT_FOUND', 'Company with given companyId does not exist');
+    }
+
     if (assistantId !== undefined && assistantId !== null && !(await foreignKeyExists('employees', assistantId))) {
       return errorResponse(res, 404, 'ASSISTANT_NOT_FOUND', 'Assistant with given assistantId does not exist');
     }
@@ -241,6 +252,11 @@ async function updateAppointment(req, res) {
     if (doctorId !== undefined) {
       updates.push(`doctorid = $${paramIdx}`);
       params.push(doctorId || null);
+      paramIdx++;
+    }
+    if (companyId !== undefined) {
+      updates.push(`companyid = $${paramIdx}`);
+      params.push(companyId);
       paramIdx++;
     }
     if (note !== undefined) {

@@ -64,7 +64,7 @@ function buildWhere(filters) {
 
   if (filters.search) {
     conditions.push(
-      `(a.name ILIKE $${idx} OR a.note ILIKE $${idx} OR a.reason ILIKE $${idx} OR p.name ILIKE $${idx} OR p.namenosign ILIKE $${idx} OR p.ref ILIKE $${idx})`
+      `(a.name ILIKE $${idx} OR a.note ILIKE $${idx} OR a.reason ILIKE $${idx} OR p.name ILIKE $${idx} OR p.namenosign ILIKE $${idx} OR p.ref ILIKE $${idx} OR p.phone ILIKE $${idx})`
     );
     params.push(`%${filters.search}%`);
     idx++;
@@ -141,14 +141,14 @@ function getVisitTypeLabel(isRepeat) {
 }
 
 function buildAppointmentDate(row) {
-  if (row.datetimeappointment) {
-    return toVNDate(row.datetimeappointment);
+  if (!row.date) {
+    return row.datetimeappointment ? toVNDate(row.datetimeappointment) : null;
   }
-
-  if (!row.date) return null;
 
   // row.date is a timestamp without timezone (OID 1114), not a plain DATE.
   // It stores the full appointment datetime (e.g. 2025-05-22 13:00:00).
+  // Calendar UI also renders this field, so export must prefer it over
+  // datetimeappointment when legacy rows have stale reminder/import values.
   // When row.time is provided (legacy), combine date + time explicitly.
   // Use wall-clock components from the server-local interpretation (matches toVNDate),
   // never toISOString — that would shift to UTC and drop a day on a +07:00 server.

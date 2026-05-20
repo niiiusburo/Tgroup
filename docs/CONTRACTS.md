@@ -11,6 +11,7 @@
 | v1.0.0 | 2026-05-13 | Initial contract freeze covering all active API routes, shared types, and integration boundaries. |
 | v1.0.1 | 2026-05-17 | Contract documentation aligned to live payment method enum, report API, and operational export registry. |
 | v1.0.2 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
+| v1.0.3 | 2026-05-20 | Appointment update accepts clinic/location changes, appointment export date/search semantics are clarified, and legacy flat report export columns cover notes/source/payment split feedback. |
 
 ---
 
@@ -110,7 +111,22 @@ PaginatedResponse<{
 
 #### PUT /api/Appointments/:id
 **Body:** `AppointmentUpdateSchema` (partial omit `id`)
-**Response 200:** Updated row.
+```ts
+{
+  date?: string;
+  time?: string | null;
+  doctorId?: string | null;
+  companyId?: string;
+  note?: string | null;
+  state?: AppointmentStatus | null;
+  timeExpected?: number | null;
+  color?: string | null;
+  productId?: string | null;
+  assistantId?: string | null;
+  dentalAideId?: string | null;
+}
+```
+**Response 200:** Updated row, including refreshed `companyid/companyname` when location changes.
 
 ---
 
@@ -417,12 +433,14 @@ Supported registry types:
 |---|---|---|
 | `service-catalog` | `products.export` | `search`, `companyId`, `categId`, `active` |
 | `customers` | `customers.export` | `search`, `companyId`, `status` |
-| `appointments` | `appointments.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `state`, `doctorId` |
+| `appointments` | `appointments.export` | `search` (appointment/customer fields including phone), `companyId`, `dateFrom`, `dateTo`, `state`, `doctorId`; workbook date prefers `appointments.date` + `time` before legacy `datetimeappointment` |
 | `services` | `services.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `state` |
 | `payments` | `payments.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `status` |
 | `report-sales-employees` | `reports.export` | `companyId`, `employeeType`, `employeeId`, `dateFrom`, `dateTo` |
 | `revenue-flat` | `payments.export` | `search`, `companyId`, `dateFrom`, `dateTo` |
 | `deposit-flat` | `payments.export` | `search`, `companyId`, `dateFrom`, `dateTo` |
+
+`revenue-flat` includes payment note values and resolves customer source from the sale order first, then customer fallback. `deposit-flat` includes deposit note values and splits cash vs bank-transfer amounts from explicit split columns or payment-method fallback.
 
 ---
 
