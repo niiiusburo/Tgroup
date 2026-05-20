@@ -2,6 +2,10 @@
 
 > "If you change X, run test suite Y." Maps modules → regression tests. Includes coverage requirements.
 
+**Cosmetic LOB v2 Sync (2026-05-19):** Registered LOB isolation, CTV earnings aggregation (both DBs via getDb), D13 engine tests, partners identity cases, two-pool db-factory tests, migration rollback. See product-map/domains/earnings-commissions.yaml + ctv.yaml + v2 spec Testing Strategy. Full matrix in product-map/test-matrix.md.
+
+
+
 ## Traceability IDs
 
 Use UC/WF IDs from `docs/USE-CASES.md` and `docs/WORKFLOWS.md` for feature traceability. Contract IDs in this matrix are compact route labels, for example `CON-Reports-RevenueSummary` = `POST /api/Reports/revenue/summary`, `CON-Reports-CashFlowSummary` = `POST /api/Reports/cash-flow/summary`, `CON-Reports-ServicesBreakdown` = `POST /api/Reports/services/breakdown`, `CON-Exports-Preview` = `POST /api/Exports/:type/preview`, and `CON-Exports-Download` = `POST /api/Exports/:type/download`.
@@ -38,6 +42,8 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | If you change... | Run these tests... | Why |
 |---|---|---|
 | `api/src/routes/appointments.js` | `api/src/routes/appointments/__tests__/readHandlers.test.js`, `website/e2e/team-alpha-appointments.spec.ts` | Calendar data shape changes break all views. |
+| `api/src/routes/appointments/mutationHandlers.js` and `website/src/components/appointments/unified/appointmentForm.mapper.ts` | `api/src/routes/appointments/__tests__/mutationHandlers.test.js`, `website/src/components/appointments/unified/__tests__/appointmentForm.mapper.test.ts` | Appointment edit saves must persist changed clinic/location (`companyid`) and still preserve explicit null staff clears. |
+| `api/src/services/exports/builders/appointmentsExport.js` | `api/src/services/exports/__tests__/appointmentsExport.test.js`, `api/src/services/exports/__tests__/timezone.test.js` | Appointment exports must use the calendar `appointments.date` value, preserve date/time boundaries, and match phone searches such as `922403152`. |
 | `website/src/pages/Calendar.tsx` | `website/e2e/team-alpha-appointments.spec.ts`, `website/src/pages/Calendar.click.test.tsx` | Core scheduling surface. |
 | `website/src/components/calendar/*.tsx` | Component unit tests + `website/e2e/team-alpha-appointments.spec.ts` | Drag-to-reschedule, filter chips, status badges. |
 | `website/src/components/calendar/CalendarToolbar.tsx` and `CalendarDateNavigator.tsx` | `website/src/components/calendar/__tests__/CalendarToolbar.test.tsx`, `/calendar` 1024x768, 1280x720, and 1366x768 screenshot checks | Tablet and laptop toolbar wrapping must keep view tabs, date navigation, search, export, filter, and quick-add visible while appointments populate. |
@@ -75,7 +81,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | If you change... | Run these tests... | Why |
 |---|---|---|
 | `api/src/routes/exports.js` | `website/e2e/export-downloads.spec.ts`, `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js` | UC-013/UC-019, WF-005. Locks `CON-Exports-Preview` and `CON-Exports-Download` as current `POST /api/Exports/:type/...` contracts plus workbook generation. |
-| `api/src/services/exports/builders/legacyFlatReportsExport*.js` | `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `website/e2e/export-downloads.spec.ts` | UC-013, WF-005. Locks `revenue-flat` and `deposit-flat` workbook templates, SO-code column mapping, posted service-payment filters, allocation proration SQL, row-limit errors, and deposit top-up filtering. |
+| `api/src/services/exports/builders/legacyFlatReportsExport*.js` | `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `website/e2e/export-downloads.spec.ts` | UC-013, WF-005. Locks `revenue-flat` and `deposit-flat` workbook templates, SO-code column mapping, payment/deposit note columns, revenue source precedence, deposit cash/bank split fallback, posted service-payment filters, allocation proration SQL, row-limit errors, and deposit top-up filtering. |
 | `api/src/services/exports/builders/reportSalesEmployeesExport.js` | `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx` | UC-019, WF-005. Locks `report-sales-employees` preview/download filters, location scope, employee-type attribution, grouped workbook rows, and `/reports/revenue` export controls. |
 | `api/src/routes/reports/revenue*.js` | `api/src/routes/reports/__tests__/revenueRecognition.test.js`, `api/src/services/reports/__tests__/canonicalRevenue.test.js` | UC-013, WF-013. Locks `CON-Reports-RevenueSummary`, revenue trend, doctor/category/location paid revenue, canonical Excel-matching WHERE/JOIN topology, payment-date bucketing, and allocation capping. |
 | `api/src/routes/reports/cashFlow.js` | `api/src/routes/reports/__tests__/cashFlow.test.js` | UC-013, WF-013. Locks `CON-Reports-CashFlowSummary`, service collections vs deposits/refunds/deposit usage/voided rows, route mounting, timezone-safe date buckets, and scoped location rejection. |

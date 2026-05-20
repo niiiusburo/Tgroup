@@ -10,6 +10,97 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: Export Column Registry Lock 2026-05-20
+
+Feature/edit name: Export Column Registry Lock 2026-05-20
+
+Changed URLs and API routes:
+- `POST /api/Exports/revenue-flat/download` — workbook must contain exactly 22 columns in locked order, including `Note thanh toán` at column P.
+- `POST /api/Exports/deposit-flat/download` — workbook must contain exactly 13 columns in locked order, including `Note cọc tiền` at column J.
+
+Affected data flows:
+- REVENUE_COLUMNS and DEPOSIT_COLUMNS (in `legacyFlatReportColumns.js`) are now the locked source of truth. Any change requires editing two test arrays + the data file + the SQL query + the row mapper in one PR.
+- New test file `legacyFlatReportColumns.lock.test.js` (9 assertions) blocks silent column drops in CI.
+
+Roles, paths, edge cases:
+- Admin (`t@clinic.vn`) exports revenue and deposit reports — both must contain all expected columns.
+- Edge: dropping any column from REVENUE_COLUMNS or DEPOSIT_COLUMNS must make the lock test fail (verified by simulated removal).
+- Edge: NK production deploy after this commit gains the 2 Note columns (was 21/12, becomes 22/13).
+
+Regressions to prevent:
+- The 5-cycle pattern: Note column reappearing then disappearing in successive fix commits.
+
+Setup data:
+- NK2 staging or NK3 — login `t@clinic.vn` / `123123`, navigate `/reports/revenue`, export "Từ đầu năm" range, open .xlsx and verify column P = `Note thanh toán`.
+
+Execution items:
+- [ ] PENDING: NK2 revenue export returns exactly 22 columns with `Note thanh toán` at column P.
+- [ ] PENDING: NK2 deposit export returns exactly 13 columns with `Note cọc tiền` at column J.
+- [ ] PENDING: `legacyFlatReportColumns.lock.test.js` passes 9/9 on the committed tree.
+- [ ] PENDING: NK production export gains the Note columns after next deploy.
+
+---
+
+# TestSprite Plan: Live NK Feedback Bugs 2026-05-19
+
+Feature/edit name: Live NK Feedback Bugs 2026-05-19
+
+Changed URLs and API routes:
+- Live read-only review only; no app code or API routes changed in this triage pass.
+- Worker A export fix changed backend workbook output for `POST /api/Exports/revenue-flat/download`, `POST /api/Exports/revenue-flat/preview`, `POST /api/Exports/deposit-flat/download`, and `POST /api/Exports/deposit-flat/preview`.
+- Worker B calendar export fix changed backend workbook output for `POST /api/Exports/appointments/download` and `POST /api/Exports/appointments/preview`.
+- Appointment location fix changed backend edit behavior for `PUT /api/Appointments/:id` and regression coverage for the frontend appointment form mapper.
+- Checked `https://nk.2checkin.com/feedback`.
+- Bug surfaces from Google Doc feedback: `/reports/revenue`, `/calendar`, `/customers/:id`, and appointment edit/location update flows.
+- Likely export routes to verify after fixes: revenue report export/download, deposit report export/download, and calendar export/download.
+
+Affected data flows:
+- Revenue report Excel export must include payment note and customer source values consistently.
+- Deposit report Excel export must split cash vs bank transfer and include deposit note.
+- Calendar/appointment export must preserve appointment date for customer phone `922403152` and similar rows.
+- Appointment edit must persist changed clinic/location/cơ sở for an existing appointment when an admin saves.
+- In-app Feedback page should continue listing employee feedback and opening read-only detail without API errors.
+
+User roles:
+- Live admin/staff account with report export permission.
+- Admin account editing an existing appointment only in a controlled verification environment unless production-safe reproduction is explicitly approved.
+
+Happy paths:
+- Export revenue report for the same date range shown in feedback and confirm `note thanh toán` is present.
+- Export revenue report and confirm highlighted rows with customer source in the UI/export source data also show source in Excel.
+- Export deposit report and confirm cash and bank-transfer deposits are separated into distinct columns/values.
+- Export deposit report and confirm `note cọc tiền` is populated.
+- Export calendar/appointment data for a patient matching phone `922403152` and confirm the appointment date remains `20/05/2026`, not `08/05/2026`.
+- Change an appointment's clinic/location in a safe test record, save, refresh, and confirm the new clinic persists.
+
+Edge cases:
+- Revenue rows with source only on sale order/invoice context must not export blank source.
+- Mixed payment/deposit rows must not collapse cash and bank transfer into one total.
+- Calendar export must handle timezone/date boundary conversion without shifting by day or month.
+- Appointment location update must work for admin and preserve other appointment fields.
+
+Regressions:
+- Existing feedback page `/feedback` must keep loading with no API or console errors.
+- Existing resolved report/download fixes must not regress.
+- Existing customer/profile and calendar pages must not require production data mutation for read-only checks.
+
+Setup data and login state:
+- Live login verified with `t@clinic.vn / 123123`.
+- Google Doc source: `https://docs.google.com/document/d/1cpHPoA-EVSZHCrGfbhCAfZ_n6W7fN3O44rD2RuA1O9o/edit?usp=sharing`.
+- Screenshot evidence from this triage: `output/playwright/live-feedback-review/feedback-list-2026-05-19T17-40-27-888Z.png`, `output/playwright/live-feedback-review/feedback-detail-2026-05-19T17-40-27-888Z.png`, and `output/playwright/live-feedback-review/google-doc-2026-05-19T17-39-18-766Z.png`.
+- Before/after fix evidence: `output/playwright/live-feedback-fix/before/revenue-workbook.png`, `output/playwright/live-feedback-fix/after/revenue-workbook.png`, `output/playwright/live-feedback-fix/before/deposit-workbook.png`, `output/playwright/live-feedback-fix/after/deposit-workbook.png`, `output/playwright/live-feedback-fix/before/calendar-922403152-workbook.png`, `output/playwright/live-feedback-fix/after/calendar-922403152-workbook.png`, `output/playwright/live-feedback-fix/before/appointment-location-save.png`, and `output/playwright/live-feedback-fix/after/appointment-location-save.png`.
+
+TestSprite execution items:
+- [x] PASS: Verify `/feedback` still lists the 2026-05-19 appointment-location feedback item and opens its detail view without API or console errors - live read-only check on 2026-05-20 saved `output/playwright/live-feedback-meaning/feedback-list-2026-05-20T02-28-01-413Z.png`, `output/playwright/live-feedback-meaning/feedback-detail-2026-05-20T02-28-01-413Z.png`, and `output/playwright/live-feedback-meaning/result-2026-05-20T02-28-01-413Z.json`; API/console errors were 0.
+- [x] PASS: Verify revenue Excel export includes payment note values - `npx jest src/services/exports/__tests__/legacyFlatReportsExport.test.js --runInBand` coverage asserts `Note thanh toán` workbook column/value.
+- [x] PASS: Verify revenue Excel export keeps customer source populated for rows where the UI/source data has a customer source - focused Jest asserts `COALESCE(so.sourceid, cust.sourceid)` source precedence.
+- [x] PASS: Verify deposit Excel export splits cash and bank-transfer amounts - focused Jest asserts workbook split columns and SQL method fallback for cash/bank-transfer/VietQR.
+- [x] PASS: Verify deposit Excel export includes deposit note values - focused Jest asserts `Note cọc tiền` workbook column/value.
+- [x] PASS: Verify calendar/appointment export preserves the correct `20/05/2026` appointment date for phone `922403152` - `npx jest src/services/exports/__tests__/appointmentsExport.test.js --runInBand` coverage checked phone search/date serialization; before/after screenshots saved at `output/playwright/live-feedback-fix/before/calendar-922403152-workbook.png` and `output/playwright/live-feedback-fix/after/calendar-922403152-workbook.png`.
+- [x] PASS: Verify admin appointment edit persists a changed clinic/location/cơ sở after save and refresh in a safe test environment - backend mutation and frontend mapper tests passed; before/after screenshots saved at `output/playwright/live-feedback-fix/before/appointment-location-save.png` and `output/playwright/live-feedback-fix/after/appointment-location-save.png`.
+
+---
+
 # TestSprite Plan: NK2 Responsive Population Audit
 
 Feature/edit name: NK2 Responsive Population Audit
@@ -1261,3 +1352,171 @@ TestSprite execution items:
 - [ ] PENDING: Verify file-only staff feedback and file-only staff/admin replies do not crash.
 - [ ] PENDING: Verify missing-thread file replies clean up uploaded files and do not create `feedback_attachments` rows.
 - [ ] PENDING: Verify delete rollback simulation does not remove physical files before DB commit.
+
+## 2026-05-20 — Calendar Export Date Correctness
+
+Feature/edit name:
+- Calendar appointment Excel export local clinic date serialization and phone-filter regression.
+
+Changed URLs and API routes:
+- Browser-visible: `/calendar` export controls.
+- API route: `POST /api/Exports/appointments/preview`, `POST /api/Exports/appointments/download`.
+
+Affected data flows:
+- Calendar appointment list date source (`appointments.date`) -> appointment export row serializer -> Excel `Ngày giờ hẹn`.
+- Calendar search/filter state -> appointment export filters -> SQL selected-day and phone search conditions.
+
+User roles:
+- Admin/manager/staff users with `appointments.export`.
+
+Happy paths:
+- Appointment visible on `/calendar` for `20/05/2026` exports as `20/05/2026` even when legacy `datetimeappointment` is stale.
+- Searching/exporting phone `922403152` filters by customer phone.
+- One-day export for `2026-05-20` includes only appointments whose clinic calendar date is `2026-05-20`.
+
+Edge cases:
+- `datetimeappointment` older than `appointments.date`, null `datetimeappointment`, null `appointments.date`, legacy `time` column present, null `time`, server timezone not equal to Vietnam, and selected-day range passed as bare `YYYY-MM-DD`.
+
+Regressions:
+- Existing calendar day/week/month loading remains unchanged.
+- Existing timezone export formatter tests remain green.
+- Appointment edit modal and backend mutation behavior are outside this Worker B lane.
+
+Setup data and login state:
+- Use authenticated admin/manager session with `appointments.export`.
+- Safe fixture should include a phone `922403152` or equivalent appointment displayed on `20/05/2026` with stale `datetimeappointment` set to an earlier date.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `/calendar` one-day export for `2026-05-20` writes `20/05/2026` for phone `922403152` or safe equivalent.
+- [ ] PENDING: Verify `/api/Exports/appointments/preview` row count changes when filtering by phone `922403152`.
+- [ ] PENDING: Verify one-day calendar export does not include rows from `2026-05-08` or any date outside `2026-05-20`.
+
+## 2026-05-20 — NK2 Customer Appointment Location Feedback
+
+Feature/edit name:
+- Customer-page appointment clinic/location edit persistence for unresolved feedback.
+
+Changed URLs and API routes:
+- Browser-visible: `https://nk2.2checkin.com/feedback`, `https://nk2.2checkin.com/customers/ee5881cb-5a08-483b-80d2-aff80048b36b`.
+- API route: `PUT /api/Appointments/:id`, verified with appointment `d2f961fd-7384-4d18-bf4e-65cb49688d28`.
+
+Affected data flows:
+- Customer page appointment edit modal -> branch selector `companyid` -> `PUT /api/Appointments/:id` -> appointment readback -> reopened edit modal display.
+
+User roles:
+- Admin user on NK2 staging with permission to edit appointments.
+
+Happy paths:
+- Admin opens customer `TEST` / `T0365`, edits appointment `AP9568610`, changes `CHI NHÁNH`, saves, and the reopened modal shows the saved branch.
+- API readback returns the updated `companyid` and `companyname`.
+
+Edge cases:
+- Feedback source page references a different customer, but the bug reproduces through any customer-page appointment edit with an existing appointment.
+- The verification must restore the original branch after proving persistence because NK2 shares production-backed data.
+
+Regressions:
+- Existing appointment date, time, duration, doctor, service tags, status, and note should remain unchanged while only `companyid` changes.
+- NK production should not be deployed or modified while verifying NK2.
+
+Setup data and login state:
+- Login: authenticated admin session on NK2.
+- Safe existing test data: customer `[T0365] TEST`, appointment `AP9568610`, original branch `Tấm Dentist Gò Vấp`.
+- Verification evidence path: `/Users/thuanle/Documents/TamTMV/Tgrouptest/output/playwright/nk2-appointment-location-proof-20260520/`.
+
+TestSprite execution items:
+- [x] VERIFIED: Feedback page shows one pending item for changing appointment/customer location after appointment creation.
+- [x] VERIFIED: Customer `[T0365] TEST` appointment `AP9568610` changed from `Tấm Dentist Gò Vấp` to `Tấm Dentist Quận 3` through the customer-page edit modal.
+- [x] VERIFIED: `PUT /api/Appointments/d2f961fd-7384-4d18-bf4e-65cb49688d28` returned 200 and API readback showed `Tấm Dentist Quận 3`.
+- [x] VERIFIED: Appointment was restored to `Tấm Dentist Gò Vấp` and final API readback confirmed the original branch.
+- [x] VERIFIED: Feedback thread `769230ed-53ac-4f0f-9816-0b9c5c564f5b` was replied to with the verification summary and three proof screenshots, then marked `Resolved`.
+
+## 2026-05-20 — NK2 Clone Payment Allocation Merge
+
+Feature/edit name:
+- Targeted VPS database repair for one clone-only payment and payment allocation from `tdental_smoketest` into main `tdental_demo`.
+
+Changed URLs and API routes:
+- No code URLs changed.
+- Data surfaces to verify after merge: `/customers/67e36450-fc43-4b7a-bdae-b4350079dc96`, `/payment`, and payment reads through `GET /api/Payments`.
+
+Affected data flows:
+- `tdental_smoketest.dbo.payments` -> `tdental_demo.dbo.payments`.
+- `tdental_smoketest.dbo.payment_allocations` -> `tdental_demo.dbo.payment_allocations`.
+- Customer `T163974` payment history and service allocation display.
+
+User roles:
+- Admin/manager users with customer/payment view permissions.
+
+Happy paths:
+- Customer `T163974` / `[T163974] TRINH - G1` shows bank transfer payment `14,725,000` with reference `06 - ACB - GẮN MCKLTD`.
+- Payment allocation `545e7c79-06cb-4b7f-add3-a3d7d67aa8dc` links payment `9e198971-669d-422f-9120-209a856c1f22` to sale order `17dd5dd8-976c-4d60-8b46-c040b4b99351`.
+
+Edge cases:
+- Main `tdental_demo` sale order `17dd5dd8-976c-4d60-8b46-c040b4b99351` is currently `isdeleted=true`; verification must confirm whether the UI intentionally hides or still reports the inserted payment.
+- Re-running the merge should be idempotent and not duplicate payment or allocation rows.
+
+Regressions:
+- No customer, appointment, service order, service line, or product rows should be added from the clone as part of this targeted repair.
+- Existing main database appointment/service/payment counts should only change by the inserted payment and allocation.
+
+Setup data and login state:
+- Source clone backup: `backups/db-sync/tdental_smoketest-source-before-merge-20260520-154050.dump`.
+- VPS source DB: `tdental_smoketest`.
+- VPS target DB: `tdental_demo`.
+
+TestSprite execution items:
+- [ ] PENDING: Verify target DB contains payment `9e198971-669d-422f-9120-209a856c1f22` exactly once.
+- [ ] PENDING: Verify target DB contains allocation `545e7c79-06cb-4b7f-add3-a3d7d67aa8dc` exactly once and linked to invoice `17dd5dd8-976c-4d60-8b46-c040b4b99351`.
+- [ ] PENDING: Verify customer `T163974` payment surface after merge.
+
+## 2026-05-20 — NK2 Database Target and Customer Creation Audit
+
+Feature/edit name:
+- VPS database target audit for NK2 customer creation claim around phone `0972020908`, followed by cleanup of the unused legacy `tdental-db` container.
+
+Changed URLs and API routes:
+- No code URLs changed.
+- Checked public routes/logs for `https://nk2.2checkin.com/api/Partners` and `https://nk.2checkin.com/api/Partners`.
+- Checked running API database targets for `tgroup-staging-api`, `tgroup-nk3-api`, and `tgroup-api`.
+- Removed the unused legacy Docker container `tdental-db` after creating a local backup.
+
+Affected data flows:
+- NK2 nginx route `/api` -> `tgroup-staging-api` port `3102` -> `tdental_demo`.
+- Smoketest-backed `tgroup-nk3-api` -> `tdental_smoketest`.
+- Legacy `tdental-db` container -> `tdental` database, not referenced by current TGroup API containers; container removed after backup.
+- Customer lookup in `dbo.partners` by normalized phone `0972020908`.
+
+User roles:
+- Staff/admin customer creation and customer search flows.
+
+Happy paths:
+- If staff creates a customer through NK2, nginx should show `POST /api/Partners` with `nk2.2checkin.com` referrer and the target DB should receive a new `dbo.partners` row.
+- If staff only searches/opens an existing customer, nginx should show `GET /api/Partners?search=0972020908` and no new partner row should appear.
+
+Edge cases:
+- The same phone exists on two historical customers: `T6725` and `KH0001`.
+- A separate running `tgroup-nk3-api` points to `tdental_smoketest`, but current nginx has no `nk3` server_name route and NK2 does not proxy to that container.
+- Before removal, legacy `tdental-db` also contained the same two old phone matches, but it was not a hidden NK2 write target.
+
+Regressions:
+- Do not merge or insert any partner/customer row unless a clone-only or alternate-target-only row is found with matching creation evidence.
+- Do not treat production `nk.2checkin.com` `POST /api/Partners` lines as NK2 writes.
+
+Setup data and login state:
+- VPS host: `76.13.16.68`.
+- Primary Postgres container: `tgroup-db`.
+- Legacy Postgres container inspected for exclusion and then removed: `tdental-db`.
+- Backup before removal: `backups/db-sync/tdental-legacy-before-container-delete-20260520-163907.dump`.
+- Preserved rollback volume: `tdental-postgres-data`.
+- Audit phone: `0972020908`.
+
+TestSprite execution items:
+- [x] VERIFIED: `nk2.2checkin.com/api` proxies to `127.0.0.1:3102`, which is `tgroup-staging-api`.
+- [x] VERIFIED: Current `tgroup-staging-api` uses `tdental_demo`; current `tgroup-nk3-api` uses `tdental_smoketest`; `tgroup-api` uses `tdental_demo`.
+- [x] VERIFIED: `tgroup-db` databases are `tdental_demo`, `tdental_smoketest`, `tcosmetic_smoketest`, `tgroup_restore_probe_20260507`, and `postgres`.
+- [x] VERIFIED: `tdental-db` has database `tdental`, but no current TGroup API container has `DATABASE_URL` pointing to it.
+- [x] VERIFIED: `0972020908` resolves to existing old rows `T6725` and `KH0001` in `tdental_demo`, `tdental_smoketest`, and legacy `tdental`.
+- [x] VERIFIED: NK2 nginx logs have zero `POST /api/Partners` on May 20, 2026; the phone appears only in GET search/open requests on NK2.
+- [x] VERIFIED: Local backup created before deletion with SHA-256 `a5aafd000539625ff9f92f960e6a1e3d7eb737ac10065f819fcd7ce69daa57e3`.
+- [x] VERIFIED: `tdental-db` no longer appears in `docker ps -a`; preserved Docker volume `tdental-postgres-data` still exists.
+- [x] VERIFIED: Strict post-delete env scan found no running container pointed at `tdental-db` or `/tdental`.
