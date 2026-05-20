@@ -230,6 +230,7 @@ export function reregisterFace(partnerId: string, images: readonly Blob[], sourc
     method: 'POST',
     body: formData as unknown as Record<string, unknown>,
   });
+}
 
 // ─── Cross-LOB Badge Probe (D6 / lob.crossview) ────────────────────────────────
 // Soft phone match across dental/cosmetic DBs. Returns match details for the *other* LOB.
