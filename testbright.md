@@ -1817,3 +1817,62 @@ Regressions:
 TestSprite execution items:
 - [ ] PENDING: `npx jest --testPathPatterns=cosmeticLobGuards` passes 9/9.
 - [ ] PENDING: With `COSMETIC_LOB_ENABLED=false` set in `api/.env`, restart API and `curl http://127.0.0.1:3002/api/cosmetic/Partners` — expect 503 `COSMETIC_LOB_DISABLED`. With flag=true and a dental-only user token, expect 403 `S_LOB_FORBIDDEN`.
+
+---
+
+# TestSprite Plan: Cosmetic LOB v2 Phase 2
+
+Feature/edit name: Cosmetic LOB v2 Phase 2 — Admin Permissions + Transactional Seed (2026-05-21)
+
+Changed files:
+- `api/migrations/048_grant_lob_permissions_to_admin.sql` — New migration that grants cosmetic.access, dental.access, and lob.crossview to the Admin group (UUID 11111111-0000-0000-0000-000000000001).
+- `api/scripts/seed-cosmetic-lob-transactional.js` — New seed script that populates tcosmetic_demo with 2-3 customers, 3-5 appointments (past/today/future), 3-5 payments, earnings rows with source='ctv', and refund reversals.
+- `api/src/__tests__/adminLobPermissions.test.js` — New Jest test file (9 assertions) verifying migration 048 structure, naming, permission keys, idempotency, admin UUID, and rollback instructions.
+- `api/src/__tests__/cosmeticTransactionalSeed.test.js` — New Jest test file (15 assertions) verifying seed script structure, INSERT statements, CTV referrer validation, source='ctv' attribution, refund logic, and --dry-run support.
+- `docs/MIGRATIONS.md` — Updated migration index to include 048 and updated header sync note.
+- `docs/TEST-MATRIX.md` — Updated header note and added Phase 2 test entries.
+- `docs/CHANGELOG.md` — Added Phase-2 Task-1 and Task-2 entries with full descriptions and test counts.
+
+Affected data flows:
+- Admin login now receives cosmetic.access permission (grants /api/cosmetic/* route access) and lob.crossview permission (enables "also a cosmetic client" badge).
+- tcosmetic_demo seeded with transactional data for CTV dashboard: customers with referred_by_ctv_id set (D13 path), appointments, payments, and earnings rows with source='ctv' and refund reversals.
+- Both migrations are idempotent (ON CONFLICT DO NOTHING) and safe to re-run.
+
+User roles:
+- Multi-LOB Admin (lob_scope=['dental','cosmetic']) receives cosmetic.access via migration 048 and can now access /api/cosmetic/* routes.
+- CTV users with is_ctv=true see CTV earnings attributed by D13 recipient-resolution algorithm.
+
+Happy paths:
+- Both Jest test suites pass: `npx jest api/src/__tests__/{adminLobPermissions,cosmeticTransactionalSeed}.test.js` → 24/24 tests passing.
+- Migration 048 can be applied to both tdental_demo and tcosmetic_demo without errors.
+- Seed script can be run with `node api/scripts/seed-cosmetic-lob-transactional.js` (creates data) or `node ... --dry-run` (validates structure only).
+- Admin user gets cosmetic.access, dental.access, and lob.crossview permissions after migration 048 is applied.
+- tcosmetic_demo receives transactional data with 2-3 customers, 3-5 appointments/payments/earnings, and at least one refund reversal.
+
+Edge cases:
+- CTV referrer (ctv-demo@clinic.vn) must exist in cosmetic DB before seed script runs; script validates and fails gracefully with error message.
+- Consultations table may not exist in tcosmetic_demo schema; seed script handles with try/catch and continues without consulting cards.
+- Refund reversals are negative-amount earnings rows, testing append-only ledger pattern.
+
+Regressions to prevent:
+- Do NOT remove migration 048 from api/migrations/ or delete the two test files.
+- Do NOT change the permission keys (cosmetic.access, dental.access, lob.crossview) without updating all three locations (migration, permission-registry, tests).
+- Do NOT remove the CTV referrer validation or refund reversal logic from the seed script.
+- Do NOT remove idempotency (ON CONFLICT DO NOTHING) from migration or seed script.
+
+Setup data and login state:
+- Local dev environment with api/migrations/ and api/scripts/ accessible.
+- Homebrew Postgres running on 127.0.0.1:5433 with tdental_demo and tcosmetic_demo databases.
+- npm/node with Jest installed in api/ directory.
+
+TestSprite execution items:
+- [x] PASS: `npm --prefix api test -- api/src/__tests__/adminLobPermissions.test.js` passes 9/9 tests - migration 048 structure verified.
+- [x] PASS: `npm --prefix api test -- api/src/__tests__/cosmeticTransactionalSeed.test.js` passes 15/15 tests - seed script structure verified.
+- [x] PASS: Both test suites combined pass 24/24 tests - `npm --prefix api test -- api/src/__tests__/{adminLobPermissions,cosmeticTransactionalSeed}.test.js`.
+- [ ] PENDING: Apply migration 048 to local tdental_demo — `PGPASSWORD=postgres psql -h 127.0.0.1 -p 5433 -U postgres -d tdental_demo < api/migrations/048_grant_lob_permissions_to_admin.sql` completes without errors.
+- [ ] PENDING: Apply migration 048 to local tcosmetic_demo — same as above but target tcosmetic_demo.
+- [ ] PENDING: Run seed script with `cd api && node scripts/seed-cosmetic-lob-transactional.js` — creates appointments, payments, earnings, and refund reversals in tcosmetic_demo without errors.
+- [ ] PENDING: Run seed script with `cd api && node scripts/seed-cosmetic-lob-transactional.js --dry-run` — validates script structure and exits with code 0 without requiring DB connection.
+- [ ] PENDING: Query tcosmetic_demo to verify transactional data — `SELECT COUNT(*) FROM appointments WHERE created_at > NOW() - INTERVAL '1 hour'` shows 2-3 new appointments.
+- [ ] PENDING: Query tcosmetic_demo earnings table — `SELECT COUNT(*) FROM earnings WHERE source='ctv'` shows 3-5 CTV earnings; `SELECT COUNT(*) FROM earnings WHERE amount < 0` shows >=1 refund reversals.
+- [ ] PENDING: Verify admin partner has new permissions after migration 048 — `SELECT permission FROM group_permissions WHERE group_id='11111111-0000-0000-0000-000000000001' ORDER BY permission` includes cosmetic.access, dental.access, lob.crossview.
