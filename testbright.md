@@ -1660,3 +1660,36 @@ TestSprite execution items:
 - [ ] PENDING: Edit any appointment on `/calendar`, change Cơ sở, save, reload, verify location persisted.
 - [ ] PENDING: `npx jest api/src/routes/appointments/__tests__/mutationHandlers.test.js` passes (incl. the new companyId valid-UUID / 400 / 404 cases).
 - [ ] PENDING: `npx vitest run website/src/components/appointments/unified/__tests__/appointmentForm.mapper.test.ts` passes (incl. the new locationId→companyid case).
+
+## 2026-05-21 — Export feature-catalog YAML/code cross-check
+
+Feature/edit name:
+- Lock product-map export YAML specs against builder COLUMNS arrays via a Jest cross-check.
+
+Changed URLs and API routes:
+- None. Test-only change.
+
+Affected data flows:
+- Build-time guard: `product-map/features/exports/*.yaml` ↔ `api/src/services/exports/builders/*.js` COLUMNS / DATA_COLUMNS / REVENUE_COLUMNS / DEPOSIT_COLUMNS arrays.
+
+User roles:
+- Internal/dev only.
+
+Happy paths:
+- `npx jest api/src/services/exports/__tests__/featureCatalog.crosscheck.test.js` reports 40 passed / 40 total.
+
+Edge cases:
+- YAML adds/removes a column without builder change → test fails (key or header mismatch, or count mismatch).
+- Builder reorders columns → order-sensitive comparison fails.
+- Builder adds/removes a column without YAML change → test fails.
+
+Regressions:
+- Test must not touch builder source; if it did, this commit would conflict with the export work shipping on nk3-deploy / nk2.
+- Do not weaken assertions to silence drift; update YAML + builder together.
+
+Setup data and login state:
+- None. Pure file-parsing Jest run.
+
+TestSprite execution items:
+- [ ] PENDING: `npx jest api/src/services/exports/__tests__/featureCatalog.crosscheck.test.js` passes 40/40.
+- [ ] PENDING: Hand-edit one column header in any builder COLUMNS array and confirm the cross-check fails with a clear key/header mismatch message. Revert the edit.
