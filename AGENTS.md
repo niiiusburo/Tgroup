@@ -68,6 +68,16 @@ Keep the map alive:
 - If code drifts from the product-map, update the relevant product-map artifact with the code change.
 - After significant changes, verify the affected domain YAML and schema-map entries still match reality.
 
+### Cosmetic LOB v2 / Two-DB Discipline (mandatory for any touch)
+- Always read the 5 split domains: business-unit.yaml, cosmetic.yaml, cosmetic-clients.yaml, ctv.yaml, earnings-commissions.yaml + schema-map.md before any LOB or earnings change.
+- Cosmetic routes and handlers MUST use `requireLobScope(lob)` + `attachCosmeticDb` + `getQuery(req)` (or explicit `getDb(lob)`) — never bare dental pool.
+- CTV paths and commissionEngine are the only surfaces allowed to read BOTH pools (getDb('dental') + getDb('cosmetic')).
+- partners table (in both DBs) is the canonical identity/auth source for lob_scope, is_ctv, referred_by_ctv_id. Never assume a `users` table for LOB decisions.
+- earnings table (append-only, both DBs) is the transactional attribution log (D13); distinct from legacy commissions/* rules tables.
+- When editing, also update the corresponding domain YAML(s), schema-map, permission-registry, and this AGENTS.md if coordination rules change.
+- Feature flag COSMETIC_LOB_ENABLED + per-route LOB gates are non-negotiable for safety.
+- See governance-delta-cosmetic-lob-v2.md, MIGRATIONS.md §047, and DECISIONS.md for D1–D16 + deviations from early spec.
+
 ## 4. Roles
 
 Roles are task scopes, not permanent people. A task should declare the owned role before editing.
@@ -211,7 +221,8 @@ This project can use OpenCode Plan and Build phases:
 | `website/agents.md` | Frontend build/component rules | Before frontend code changes |
 | `website/design.md` | Detailed visual system | Before UI styling changes |
 | `product-map/domains/*.yaml` | Domain specs | Before feature or bugfix work |
-| `product-map/schema-map.md` | Table blast radius | Before schema/data changes |
+| `product-map/domains/{business-unit,cosmetic,cosmetic-clients,ctv,earnings-commissions}.yaml` | LOB v2 split domains | Before any cosmetic/earnings/CTV/LOB work |
+| `product-map/schema-map.md` | Table blast radius (incl. two-DB + partners/earnings) | Before schema/data changes |
 | `product-map/contracts/dependency-rules.yaml` | Change checklists | Before API/UI/schema/permission changes |
 | `.claude/memory.md` | Shared session memory | At session start |
 | `docs/runbooks/*.md` | Operational playbooks | Before deploy/infra/verification/money work |

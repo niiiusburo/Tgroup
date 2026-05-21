@@ -1582,3 +1582,44 @@ Execution items:
 - [ ] PENDING: After `GIT_SHA=$(git rev-parse HEAD) docker compose up -d --build web`, `curl <host>/version.json` returns the real short SHA.
 - [ ] PENDING: `npx jest src/services/exports/__tests__/allBuilderColumns.lock.test.js` passes 24/24.
 - [ ] PENDING: Simulated removal of any one column in any of the 6 builders causes 3+ test failures in allBuilderColumns.lock.test.js.
+
+## 2026-05-21 — NK 2Checkin Login Monitor
+
+Feature/edit name:
+- Automation health check for production login and three non-destructive navigation screens.
+
+Changed URLs and API routes:
+- Checked target URL: `https://nk.2checkin.com`.
+- Intended login API route: `POST /api/Auth/login`.
+- No production URLs, routes, or data were changed.
+
+Affected data flows:
+- Browser login form -> frontend auth context -> `/api/Auth/login` -> JWT/localStorage session -> read-only navigation screens.
+
+User roles:
+- Admin monitor credentials: `t@clinic.vn` / fallback `t@clinic.com`.
+
+Happy paths:
+- `t@clinic.vn / 123123` logs in and lands on authenticated navigation.
+- If the first account fails, `t@clinic.com / 123123` is attempted.
+- Three distinct navigation screens load with visible content and no obvious broken UI, blank content, or page-level error messages.
+
+Edge cases:
+- DNS or browser sandbox failure prevents the monitor from reaching the live host.
+- Login API returns 4xx/5xx or visible invalid-credential message.
+- Auth succeeds but one or more read-only screens show blank content, broken layout, or API error banners.
+
+Regressions:
+- Do not create, edit, delete, submit, import, export, or modify production data during this monitor.
+- Do not use destructive navigation items such as add, edit, delete, save, payment, import, export, or logout as validation screens.
+
+Setup data and login state:
+- Production URL: `https://nk.2checkin.com`.
+- Primary credential: `t@clinic.vn / 123123`.
+- Fallback credential: `t@clinic.com / 123123`.
+- Screenshot evidence required when browser access is available.
+
+TestSprite execution items:
+- [ ] PENDING: Re-run from a browser-capable environment because this sandbox reported no DNS configuration and denied desktop browser control.
+- [ ] PENDING: Capture authenticated screenshots for three distinct read-only screens after login.
+- [ ] PENDING: Record visible login error text if both credentials fail.

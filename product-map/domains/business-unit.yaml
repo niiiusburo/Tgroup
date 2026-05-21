@@ -1,0 +1,61 @@
+name: Business Unit / LOB Context (Cosmetic v2)
+summary: |
+  The BusinessUnitContext (mirrors LocationContext) manages the active LOB ("dental" | "cosmetic") for admin users.
+  Stored in partners.lob_scope TEXT[] (additive column on both DBs, backfilled on dental).
+  CTV partners have empty/null lob_scope + is_ctv=true; never see toggle or admin UI (hard redirect to /ctv).
+  Feature flag COSMETIC_LOB_ENABLED gates the entire surface (default false → 503 on cosmetic routes, toggle hidden).
+  Header LOBSelector placed next to FilterByLocation; selection persisted in localStorage; triggers keyed remount of main content subtree to prevent stale dental/cosmetic data.
+  All data hooks and API clients become LOB-aware: resolve to /api/cosmetic/* or legacy dental paths based on context + flag via getDb(lob) / getQuery(req).
+  dental.access / cosmetic.access are soft gates; lob_scope is the hard gate via requireLobScope(lob) middleware.
+  Two physical DBs (tdental_demo + tcosmetic_demo on 5433); no cross-DB JOINs.
+owns:
+  - website/src/contexts/BusinessUnitContext.tsx
+  - website/src/components/header/LOBSelector.tsx (or integrated in Layout.tsx header)
+  - website/src/hooks/useBusinessUnit.ts (or useLOB)
+  - website/src/lib/api/lob.ts (me/lob-scope client)
+  - api/src/middleware/lobScope.js (requireLobScope, attachCosmeticDb)
+  - api/src/routes/me.js (or auth extension: GET /api/me/lob-scope)
+  - api/src/routes/auth.js (augment login/me responses with lob_scope + is_ctv)
+  - api/src/db/index.js (getDb, getQuery, dual pools, runWithLob)
+reads:
+  - tdental_demo.dbo.partners (lob_scope, is_ctv — partners is the canonical auth/identity source; NO users table for LOB)
+  - api/src/db/index.js (dual pool factory getDb(lob) + getQuery(req) for handler reuse)
+writes:
+  - tdental_demo.dbo.partners (additive: lob_scope, is_ctv backfill; never mutates existing rows for legacy)
+  - tcosmetic_demo.dbo.partners (same columns for consistency on mirror DB)
+tables:
+  - tdental_demo.dbo.partners (+ lob_scope TEXT[] NULL, + is_ctv BOOLEAN NULL DEFAULT FALSE; backfilled to ARRAY['dental'] for existing)
+  - tcosmetic_demo.dbo.partners (same additive columns for 1:1 handler compatibility)
+endpoints:
+  - GET /api/me/lob-scope (returns { lob_scope, is_ctv, available_lobs })
+  - POST /api/Auth/login (response now includes lob_scope + is_ctv in user payload; CTV redirect)
+  - GET /api/Auth/me (augmented)
+ui_surfaces:
+  - Header: LOB toggle dropdown (Dental / Cosmetic) — visible only if partner.lob_scope.length >= 2 AND flag enabled; immediately left of location filter
+  - Keyed remount wrapper in Layout/App for <Outlet /> or main content (key={currentLOB})
+  - Login redirect logic: is_ctv ? '/ctv' : normal dashboard (toggle visible iff multi-scope)
+  - No toggle ever for CTV or single-scope users
+shared_types:
+  - website/src/types/lob.ts (type LOB = 'dental' | 'cosmetic'; BusinessUnitState; etc.)
+  - website/src/contexts/BusinessUnitContext.tsx (interface)
+dependencies:
+  - Auth & Permissions (lob_scope + is_ctv on partners, new perms, middleware)
+  - All domains (every data hook and route must read current LOB from context or default to dental)
+  - db factory for getDb(lob) routing
+affected_by:
+  - Any change to Auth login/me payload or JWT claims
+  - Changes to db factory or connection pooling (two pools)
+  - Feature flag env plumbing (VITE_COSMETIC_LOB_ENABLED, process.env.COSMETIC_LOB_ENABLED)
+impact_tests:
+  - LOB isolation: dental-scoped cannot hit cosmetic routes (403 S_LOB_FORBIDDEN)
+  - Toggle remount: after switch, no stale dental data visible in cosmetic view (Playwright + keyed key check)
+  - Flag off: no toggle rendered, cosmetic routes 503, dental untouched
+  - CTV never sees toggle or reaches admin surfaces
+  - Persistence: localStorage survives refresh; server state authoritative
+risk_level: high
+notes:
+  - "Physical DB isolation invariant: BusinessUnitContext only selects which pool + route prefix; never mixes data. getQuery(req) in handlers provides the right pool transparently."
+  - "Per PLAN + migration 047: partners is the identity table for LOB scope (deviation from early v2 spec's 'users' and 'clients' concepts; documented in DECISIONS.md and MIGRATIONS.md)."
+  - "cosmetic.yaml is the parent LOB domain; this is the cross-cutting context mechanism."
+  - "Update AGENTS.md, ARCHITECTURE.md, product-map when adding new LOB-aware surfaces."
+  - "Two-DB topology on same Postgres server (port 5433 for both tdental_demo / tcosmetic_demo in local; dual pools in docker too)."

@@ -1,0 +1,127 @@
+name: Cosmetic Line of Business (v2)
+summary: |
+  Fully isolated cosmetic business unit provisioned in a physically separate Postgres database (tcosmetic_demo) alongside the untouched dental database (tdental_demo).
+  One shared login with role-based LOB scoping via partners.lob_scope TEXT[] and is_ctv flag (partners is the canonical auth/identity source; NO separate users table for LOB scope per migration 047).
+  Admin users with multiple scopes see a header LOB dropdown (BusinessUnitContext); staff see only their LOB; CTV-flagged users are redirected to the dedicated mobile-first /ctv dashboard and never enter admin UI.
+  Existing dental admin UI (overview, customers, calendar, appointments, employees, services, payment, reports, settings) is reused 1:1 for cosmetic when LOB=cosmetic; all /api/cosmetic/* routes mirror dental routes against the cosmetic DB.
+  The single new UI surface is the CTV (Cộng tác viên / referrer) commission dashboard at /ctv with four bottom-nav tabs (Home, Commission, Referrals, Me) that aggregates commission rows across both physical databases.
+  Commission attribution engine (D13 recipient resolution using partners + earnings) and consultation cards (cosmetic-only, invisible to admin UI) are backend-only in v1. All dental schema changes are strictly additive (new nullable columns + new tables per migration 047). Two-DB topology (tdental_demo + tcosmetic_demo); getDb(lob)/getQuery(req) for routing. Feature-flagged behind COSMETIC_LOB_ENABLED.
+owns:
+  - api/src/routes/cosmetic/*.js (mirrors of dental routes, gated by requireLobScope('cosmetic'))
+  - api/src/routes/ctv.js (commission-summary cross-DB aggregator)
+  - api/src/middleware/lobScope.js (requireLobScope)
+  - website/src/contexts/BusinessUnitContext.tsx
+  - website/src/components/header/LOBSelector.tsx (or equivalent in Layout header)
+  - website/src/pages/CTV/index.tsx (mobile-first 4-tab surface)
+  - website/src/lib/api/ctv.ts
+  - website/src/lib/api/lob.ts (me/lob-scope)
+  - website/src/hooks/useBusinessUnit.ts
+  - website/src/hooks/useCTVSummary.ts
+reads:
+  - api/src/db.js (dual-pool: dental pool + cosmetic pool)
+  - tdental_demo.partners (lob_scope, is_ctv — canonical auth/identity source per 047; NO users table for LOB)
+  - tdental_demo.partners (referred_by_ctv_id on customer rows)
+  - tdental_demo.earnings (for CTV aggregation + admin team view; D13)
+  - tcosmetic_demo.partners (client/identity rows in cosmetic DB; for 1:1 mirror handler reuse via getQuery; referred_by_ctv_id soft-ref)
+  - tcosmetic_demo.earnings (for CTV aggregation + admin; D13)
+  - tcosmetic_demo.consultations (backend attribution only)
+  - tcosmetic_demo.staff (mirrors dental employee flags; via partners table too)
+  - tcosmetic_demo.companies
+  - tcosmetic_demo.payments / saleorders / saleorderlines (with consultation_id)
+writes:
+  - tdental_demo.partners (lob_scope / is_ctv / referred_by_ctv_id additive columns)
+  - tdental_demo.partners (referred_by_ctv_id)
+  - tdental_demo.products (commission_rate_percent)
+  - tdental_demo.earnings (append-only earnings + reversals per D12/D13)
+  - tdental_demo.payouts
+  - tdental_demo.referral_locks (dental-internal)
+  - tcosmetic_demo.* (full mirror writes via /api/cosmetic/* using partners table in cosmetic DB)
+  - tcosmetic_demo.earnings
+  - tcosmetic_demo.payouts
+  - tcosmetic_demo.consultations (auto-created on cosmetic booking with consulting_staff_id)
+tables:
+  # DENTAL DB (tdental_demo, dbo schema) — additive only
+  - tdental_demo.dbo.partners (as canonical auth/identity source) (+ lob_scope TEXT[] NULL, + is_ctv BOOLEAN NULL DEFAULT FALSE)
+  - tdental_demo.dbo.partners (+ referred_by_ctv_id UUID NULL on customer rows)
+  - tdental_demo.dbo.products (+ commission_rate_percent NUMERIC(5,2) NULL DEFAULT 0)
+  - tdental_demo.dbo.earnings (NEW — append-only; client_id refs partners; recipient_partner_id refs partners; source in ('ctv','consultation','salestaff'); refunds = negative)
+  - tdental_demo.dbo.payouts (NEW)
+  - tdental_demo.dbo.referral_locks (NEW — dental-internal)
+  # COSMETIC DB (tcosmetic_demo, dbo schema) — full new DB, seeded empty
+  - tcosmetic_demo.dbo.partners (identity/clients table for mirror reuse; + referred_by_ctv_id, lob_scope, is_ctv, consulting_staff_id per 047 migration)
+  - tcosmetic_demo.dbo.staff (mirror of dental employee role flags via partners; seeded EMPTY per D16)
+  - tcosmetic_demo.dbo.companies (cosmetic locations; seeded EMPTY)
+  - tcosmetic_demo.dbo.employee_location_scope
+  - tcosmetic_demo.dbo.appointments
+  - tcosmetic_demo.dbo.products / services (+ commission_rate_percent)
+  - tcosmetic_demo.dbo.saleorders / saleorderlines (+ consultation_id FK on lines)
+  - tcosmetic_demo.dbo.payments / payment_allocations / monthlyplans / planinstallments
+  - tcosmetic_demo.dbo.consultations (NEW — invisible; status open/attached/converted/superseded/expired; 6mo TTL)
+  - tcosmetic_demo.dbo.earnings (NEW — identical shape to dental; recipient_partner_id refs partners)
+  - tcosmetic_demo.dbo.payouts (NEW)
+endpoints:
+  - GET    /api/me/lob-scope
+  - GET    /api/cosmetic/* (mirrors all existing dental routes: /Partners, /Appointments, /Products, /Payments, /Employees, /Companies, /SaleOrders, /Reports/* etc. — each gated by requireLobScope('cosmetic'))
+  - POST   /api/cosmetic/* (same)
+  - PUT/PATCH/DELETE /api/cosmetic/* (same)
+  - GET    /api/ctv/commission-summary (cross-DB read of both earnings tables via recipient_partner_id for the authenticated CTV partner; returns LOB-tagged rows + aggregates per D13)
+  - GET    /api/ctv/referrals (CTV's referred partners across LOBs with status/earned totals)
+  - POST   /api/Auth/login (now returns lob_scope + is_ctv; triggers hard redirect to /ctv when is_ctv=true)
+  - GET    /api/Auth/me (augmented with lob_scope / is_ctv)
+ui_surfaces:
+  - Header LOB dropdown (visible only when user.lob_scope.length >= 2; renders next to LocationContext; Dental/Cosmetic options; last selection in localStorage; toggling keys entire React subtree via BusinessUnitContext to prevent stale dental/cosmetic data flash)
+  - /overview, /customers, /customers/:id, /calendar, /appointments, /employees, /services, /payment, /reports/* , /settings (all reuse existing dental components when LOB=cosmetic; data sourced from cosmetic DB)
+  - /customers/:id cross-LOB badge ("also a dental client →") — visible only to users with lob.crossview permission; server-side phone match probe; opens other LOB profile in new tab
+  - /ctv (CTV-only mobile-first dashboard; hard redirect on login for is_ctv users; 403 on any admin route)
+    - Home tab: greeting, pending-commission tile (dental/cosmetic split bar + totals), this-month stats (referrals, services, paid out), recent-activity feed with [den]/[cos] LOB pills
+    - Commission tab: segmented Pending vs Paid toggle; list of commission rows (client, service, amount, LOB pill); payout cycles view
+    - Referrals tab: list of referred clients (LOB pill(s) — some appear in both DBs); earning status; total earned; last activity
+    - Me tab: CTV profile, language, notifications, logout
+  - CTV bottom nav (4 tabs)
+  - Login redirect logic: is_ctv=true → /ctv; lob_scope present and !is_ctv → existing dashboard (toggle visible iff >=2 scopes); no scope → 403
+ui_invariants:
+  - LOB toggle must never be shown to CTV users (scope may be empty for them).
+  - Cosmetic admin experience is pixel-identical to dental; only data source and optional cross-LOB badge differ.
+  - Commission rows are append-only. Refunds create negative-amount reversal rows; original row status remains 'pending' (never mutated to 'reversed').
+  - CTV recipient resolution (D13, first match wins): 1. client.referred_by_ctv_id → CTV, 2. cosmetic + active consultation card → consulting_staff, 3. dental + clients.salestaffid → salestaff, 4. no row.
+  - Consultation cards (cosmetic) are auto-created on appointment booking with consulting_staff_id; superseded by next card; 6-month TTL from last activity; never exposed in any admin UI.
+  - All searches and lists under cosmetic LOB must be accent-insensitive (Vietnamese names).
+  - Cross-LOB "also a X client" badge is admin-only (lob.crossview) and performs soft phone match only — no FK or merge.
+jobs:
+  - none (commission payout run is admin-triggered via commissions.payout.run)
+shared_types:
+  - website/src/types/lob.ts (Lob, BusinessUnitScope, LOBToggleState)
+  - website/src/lib/api/ctv.ts (CtvCommissionSummary, CtvReferral, CommissionRow with lob tag)
+  - api/src/routes/ctv.js (cross-DB aggregation payload contract)
+dependencies:
+  - Auth & Permissions (lob_scope + is_ctv columns, ctv.* and lob.* permission keys, requireLobScope middleware)
+  - Customers & Partners (dental side; partners.referred_by_ctv_id and salestaffid resolution)
+  - Payments & Deposits (earnings triggered on payment collection; reversal on refund)
+  - Services Catalog (products.commission_rate_percent; saleorderlines)
+  - Employees HR (staff seeding in cosmetic; role flags mirrored)
+  - Reports & Analytics (future team commission views gated by commissions.view.team)
+affected_by:
+  - Any change to tdental_demo.dbo.users (lob_scope / is_ctv must be backfilled and respected by every auth path)
+  - Any change to commission recipient resolution algorithm (D13) or payout cycle logic
+  - Introduction of /api/cosmetic/* or /api/ctv/* routes (must duplicate all permission + LOB gates)
+  - Changes to dental commission_rate_percent or cosmetic consultation card lifecycle
+impact_tests:
+  - Pre-existing full Jest + Playwright suite (dental regression must remain 100% green)
+  - LOB isolation tests: cosmetic-scoped user cannot call dental routes and vice-versa (403 S_LOB_FORBIDDEN)
+  - CTV role gating: is_ctv=true cannot reach any /customers or admin route
+  - CTV aggregation: seed commissions in both DBs for one CTV; /api/ctv/commission-summary must return correct per-LOB split and totals
+  - LOB toggle unmount-remount: toggle must cause full subtree remount (no stale dental customer visible after switch to cosmetic)
+  - Commission recipient precedence: referred_by_ctv_id wins over active consultation card
+  - Refund reversal: payment creates +amount row; refund creates -amount reversal; net zero; original row untouched
+  - Migration rollback dry-run on dental additive changes
+  - Real-browser smoke: admin with both scopes sees toggle, can switch, sees empty cosmetic state, switches back with dental data intact
+  - CTV login lands on /ctv and sees cross-DB pending/paid data
+risk_level: high
+notes:
+  - "Physical DB isolation is the core invariant of v2. No cross-DB JOINs are ever allowed; all composition happens in the API layer (ctv aggregator, crossview badge probe)."
+  - "cosmetic.staff ships empty. Admins populate via the existing Employees UI under Cosmetic LOB."
+  - "Dental referral_locks and commission rules for dental remain dental-internal; no cross-LOB referral locking in v1."
+  - "Permission keys are the soft gate; lob_scope in the JWT/user object is the hard gate. Both must be enforced on every /cosmetic/* and /ctv/* route."
+  - "The 9 new permission keys (cosmetic.access, dental.access, ctv.dashboard.view, ctv.commission.view.self, ctv.referrals.view.self, commissions.view.team, commissions.payout.run, commissions.export, lob.crossview) must be seeded and appear in permission-registry.yaml."
+  - "Feature flag COSMETIC_LOB_ENABLED gates the entire surface until step 8 of the rollout. Pre-flip, cosmetic routes return 503."
+  - "Verification gates (detailed in parent spec) must all pass before flag flip on nk2 and again on nk prod."

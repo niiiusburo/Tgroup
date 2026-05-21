@@ -3,6 +3,8 @@
 > Accepted project decisions for TGClinic. Add entries when a rule or direction
 > should remain durable across sessions.
 
+**2026-05-19 Sync Note (Documentation & Authority Sync Agent):** Cosmetic LOB v2 D1–D16 + reality alignment complete. partners table (both DBs) is the identity source for LOB/CTV flags and D13 attribution (deviation from v2 spec early text calling for users/clients); earnings (append-only) vs legacy commissions rules. See governance-delta-cosmetic-lob-v2.md, product-map split domains (business-unit, earnings-commissions etc.), MIGRATIONS.md:047, AGENTS.md LOB discipline. All listed authority files updated.
+
 ## Decision Format
 
 ```text

@@ -4,6 +4,10 @@
 > 
 > **Rule:** If you change any contract in this file, you MUST update the version, the consumer code, the tests, and append a CHANGELOG entry in the same commit.
 
+**Cosmetic LOB v2 Sync (2026-05-19):** Added/aligned: `Lob` ('dental'|'cosmetic'), `BusinessUnitScope`, `EarningsRow` (append-only with recipient_partner_id on partners, source enum, negative reversals), `Payout`, `CtvCommissionSummary` (cross-DB aggregate), `ConsultationCard`, `getDb(lob)` / `getQuery(req)` factory contracts, `LobScope` middleware types. partners (both DBs) is identity for all LOB/CTV/earnings. See product-map/earnings-commissions.yaml + db/index.js + commissionEngine. Per v2 §269 + migration 047 reality.
+
+
+
 ## Contract Versioning
 
 | Version | Date | Scope |
@@ -111,7 +115,22 @@ PaginatedResponse<{
 
 #### PUT /api/Appointments/:id
 **Body:** `AppointmentUpdateSchema` (partial omit `id`)
-**Response 200:** Updated row.
+```ts
+{
+  date?: string;
+  time?: string | null;
+  doctorId?: string | null;
+  companyId?: string;
+  note?: string | null;
+  state?: AppointmentStatus | null;
+  timeExpected?: number | null;
+  color?: string | null;
+  productId?: string | null;
+  assistantId?: string | null;
+  dentalAideId?: string | null;
+}
+```
+**Response 200:** Updated row, including refreshed `companyid/companyname` when location changes.
 
 ---
 
@@ -418,7 +437,7 @@ Supported registry types:
 |---|---|---|
 | `service-catalog` | `products.export` | `search`, `companyId`, `categId`, `active` |
 | `customers` | `customers.export` | `search`, `companyId`, `status` |
-| `appointments` | `appointments.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `state`, `doctorId` |
+| `appointments` | `appointments.export` | `search` (appointment/customer fields including phone), `companyId`, `dateFrom`, `dateTo`, `state`, `doctorId`; workbook date prefers `appointments.date` + `time` before legacy `datetimeappointment` |
 | `services` | `services.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `state` |
 | `payments` | `payments.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `status` |
 | `report-sales-employees` | `reports.export` | `companyId`, `employeeType`, `employeeId`, `dateFrom`, `dateTo` |
