@@ -1728,3 +1728,92 @@ Setup data and login state:
 TestSprite execution items:
 - [ ] PENDING: `npx vitest run src/__tests__/App.remount.test.tsx` passes 4/4 (covers smoke render, context access, source-level key prop lock, and provider hierarchy).
 - [ ] PENDING: Live-browser check on `http://127.0.0.1:5175` with `t@clinic.vn` — open /customers, note a row count, toggle header LOB to cosmetic, confirm row count changes (different DB), toggle back, confirm dental rows return. No flash of opposite-LOB data during the transition. Screenshot evidence required.
+- [x] DONE 2026-05-21: Live-browser verified on feat/cosmetic-lob-nk3 HEAD `1297b40e` — 20 dental → 8 cosmetic → 20 dental, no flash, no console errors. Screenshots at `docs/audits/2026-05-21-phase1-gap-a/`.
+
+## 2026-05-21 — Cosmetic LOB Phase-1 gap B: apiFetch LOB-aware routing
+
+Feature/edit name:
+- `website/src/lib/api/core.ts` already prepends `/cosmetic` to every endpoint when `apiFetch` is called with `{ lob: 'cosmetic' }`. This test commit adds the missing regression lock so the line cannot be silently deleted.
+
+Changed URLs and API routes:
+- None modified. Existing rewrite verified: `/api/Partners` → `/api/cosmetic/Partners` when `lob === 'cosmetic'`.
+
+Affected data flows:
+- Every `useXxx` hook that passes the active LOB into `apiFetch` (e.g. via `useBusinessUnit().currentLOB`).
+
+User roles:
+- Multi-LOB admins (users with both 'dental' and 'cosmetic' in `partners.lob_scope`).
+
+Happy paths:
+- `apiFetch('/Partners', { lob: 'cosmetic' })` resolves to `http://127.0.0.1:3000/api/cosmetic/Partners` (or whatever `API_URL` is on the environment).
+- `apiFetch('/Partners', { lob: 'dental' })` and `apiFetch('/Partners')` resolve to `http://127.0.0.1:3000/api/Partners`.
+
+Edge cases:
+- Query params land AFTER the LOB prefix: `apiFetch('/Partners', { lob: 'cosmetic', params: { offset: 0 } })` → `/api/cosmetic/Partners?offset=0`.
+- Path params (e.g. `/Appointments/:id`) survive the prefix intact.
+
+Regressions:
+- Do NOT remove `const lobPrefix = lob === 'cosmetic' ? '/cosmetic' : '';` from `core.ts` apiFetch — the new vitest fails immediately.
+
+TestSprite execution items:
+- [ ] PENDING: `npx vitest run src/lib/api/__tests__/apiFetch.lob.test.ts` passes 5/5.
+
+## 2026-05-21 — Cosmetic LOB Phase-1 gap C: ProtectedRoute is_ctv → /ctv redirect
+
+Feature/edit name:
+- `ProtectedRoute` in `website/src/App.tsx` already redirects authenticated users with `is_ctv === true` (or legacy camelCase `isCtv === true`) to `/ctv` before any admin route renders. This test commit adds the missing regression lock.
+
+Changed URLs and API routes:
+- None modified. Existing behavior verified.
+
+Affected data flows:
+- Every protected admin route (`/customers`, `/calendar`, `/payments`, etc.) — CTV-flagged users see the CTV dashboard instead.
+
+User roles:
+- Partners with `partners.is_ctv = true`.
+
+Happy paths:
+- A `is_ctv: true` user on `/customers` is redirected and the CTV dashboard renders.
+- A legacy `isCtv: true` user on `/calendar` is redirected the same way.
+- A normal admin user (is_ctv false) sees the requested admin route.
+
+Edge cases:
+- Both `is_ctv` (snake_case from the API) and `isCtv` (legacy camelCase from older code paths) are honored — the OR condition `user?.is_ctv || user?.isCtv` handles either.
+
+Regressions:
+- Do NOT delete the `is_ctv` gate or the `<Navigate to="/ctv" replace />` JSX — source-level grep in the vitest fails immediately.
+
+TestSprite execution items:
+- [ ] PENDING: `npx vitest run src/__tests__/ProtectedRoute.ctv.test.tsx` passes 4/4.
+- [ ] PENDING: Live-browser check on `http://127.0.0.1:5175` — set `partners.is_ctv = true` on a test user, log in, confirm hard redirect to `/ctv` from any admin URL. Screenshot evidence required.
+
+## 2026-05-21 — Cosmetic LOB Phase-1 gap D: /api/cosmetic/* mount guards (503 + 403)
+
+Feature/edit name:
+- `api/src/server.js` already gates the `/api/cosmetic/*` mount: when `COSMETIC_LOB_ENABLED !== 'true'` the entire family returns 503 `COSMETIC_LOB_DISABLED`; when on, `requireLobScope('cosmetic')` returns 403 `S_LOB_FORBIDDEN` for any user missing the cosmetic scope or flagged `is_ctv`. This test commit adds the missing regression lock.
+
+Changed URLs and API routes:
+- None modified. Existing gate composition verified.
+
+Affected data flows:
+- Every cosmetic mirror route mounted via the cosmetic router (`/Partners`, `/Appointments`, `/Payments`, `/Employees`, `/Products`, `/SaleOrders`, etc.).
+
+User roles:
+- Admin partners with `partners.lob_scope ∋ 'cosmetic'` clear the gate.
+- Dental-only admins and CTV-flagged users are blocked at the gate.
+
+Happy paths:
+- Flag off + any user → 503 `COSMETIC_LOB_DISABLED` on any cosmetic endpoint.
+- Flag on + dental-only admin → 403 `S_LOB_FORBIDDEN` with `required='cosmetic'` and `has=['dental']`.
+- Flag on + CTV user (regardless of scope) → 403 `S_LOB_FORBIDDEN` with `is_ctv=true`.
+- Flag on + dental+cosmetic admin → request clears the gate.
+
+Edge cases:
+- Test does not load `api/src/server.js` because the jest haste map collides across sibling worktrees sharing the `@tgroup/contracts` package name (tooling, not code). A structural regex on `server.js` catches deletion of the flag check, the 503 branch, the `requireLobScope('cosmetic')` call, or the `app.use('/api/cosmetic', ...)` mount.
+
+Regressions:
+- Do NOT remove `COSMETIC_LOB_ENABLED === 'true'` check, the 503 fallback, the `requireLobScope('cosmetic')` call, or the `/api/cosmetic` mount from server.js.
+
+TestSprite execution items:
+- [ ] PENDING: `npx jest --testPathPatterns=cosmeticLobGuards` passes 9/9.
+- [ ] PENDING: With `COSMETIC_LOB_ENABLED=false` set in `api/.env`, restart API and `curl http://127.0.0.1:3002/api/cosmetic/Partners` — expect 503 `COSMETIC_LOB_DISABLED`. With flag=true and a dental-only user token, expect 403 `S_LOB_FORBIDDEN`.
