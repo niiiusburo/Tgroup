@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { formDataToApiPayload, apiAppointmentToFormData } from '../appointmentForm.mapper';
-import { AppointmentCreateSchema } from '@tgroup/contracts';
+import { AppointmentCreateSchema, AppointmentUpdateSchema } from '@tgroup/contracts';
 import type { UnifiedAppointmentFormData } from '../appointmentForm.types';
 
 function makeValidFormData(): UnifiedAppointmentFormData {
@@ -109,6 +109,21 @@ describe('formDataToApiPayload', () => {
         dentalaidename: null,
       }),
     );
+  });
+
+  it('should include selected location as companyid for edit saves', () => {
+    const data = {
+      ...makeValidFormData(),
+      locationId: '880e8400-e29b-41d4-a716-446655440003',
+      locationName: 'Tâm Dentist Quận 3',
+    };
+
+    const payload = formDataToApiPayload(data);
+    const parsed = JSON.parse(JSON.stringify(payload));
+
+    expect(parsed.companyid).toBe('880e8400-e29b-41d4-a716-446655440003');
+    expect(parsed.companyname).toBe('Tâm Dentist Quận 3');
+    expect(AppointmentUpdateSchema.safeParse(parsed).success).toBe(true);
   });
 });
 

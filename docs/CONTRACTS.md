@@ -132,6 +132,11 @@ PaginatedResponse<{
 ```
 **Response 200:** Updated row, including refreshed `companyid/companyname` when location changes.
 
+**Validation (handler-level, in addition to Zod):**
+- `companyId` (when present) must be a UUID; otherwise `400 INVALID_COMPANY_ID`.
+- `companyId` (when present) must reference an existing `companies` row; otherwise `404 COMPANY_NOT_FOUND`.
+- Persisted column: `appointments.companyid`. Test coverage: `api/src/routes/appointments/__tests__/mutationHandlers.test.js`.
+
 ---
 
 ### 1.3 Partners (Customers + Employees)

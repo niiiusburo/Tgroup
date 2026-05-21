@@ -69,6 +69,8 @@ CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin ro
 | POST | `/` | Perm:`appointments.add` | `{ date, time, partnerId/partnerid, doctorId/doctorid, companyId/companyid, note, timeExpected/timeexpected, color, state, productId/productid }` | Created appointment |
 | PUT | `/:id` | Perm:`appointments.edit` | `{ date, doctorId/doctorid, companyId/companyid, note, state, timeExpected/timeexpected, color, time, productId/productid, assistantId/assistantid, dentalAideId/dentalaideid }` | Updated appointment, including refreshed `companyid/companyname` when clinic/location changes |
 
+PUT handler-level validation: `companyId` (when present) must be a UUID (`400 INVALID_COMPANY_ID`) and reference an existing `companies` row (`404 COMPANY_NOT_FOUND`); persisted to `appointments.companyid`. Covered by `api/src/routes/appointments/__tests__/mutationHandlers.test.js`.
+
 ## Partners / Customers (`/api/Partners`)
 
 | Method | Path | Auth | Body / Query | Response |

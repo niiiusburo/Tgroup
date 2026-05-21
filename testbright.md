@@ -1623,3 +1623,40 @@ TestSprite execution items:
 - [ ] PENDING: Re-run from a browser-capable environment because this sandbox reported no DNS configuration and denied desktop browser control.
 - [ ] PENDING: Capture authenticated screenshots for three distinct read-only screens after login.
 - [ ] PENDING: Record visible login error text if both credentials fail.
+
+## 2026-05-21 — Appointment companyId persistence (PUT /api/Appointments/:id)
+
+Feature/edit name:
+- Persist the selected clinic/location (companyid) when editing an appointment.
+
+Changed URLs and API routes:
+- `PUT /api/Appointments/:id` — now reads `companyId` (and `companyid` alias) from the body, UUID-validates, FK-checks against `companies`, and writes `appointments.companyid`.
+
+Affected data flows:
+- Calendar / Appointments edit form (`appointmentForm.mapper.ts`) → API client `lib/api/appointments.ts` → `PUT /api/Appointments/:id` (`mutationHandlers.updateAppointment`) → `dbo.appointments.companyid` → response includes refreshed `companyid` + `companyname`.
+
+User roles:
+- Admin (`appointments.edit` permission).
+
+Happy paths:
+- Open an appointment, change Cơ sở to a different location, click Save. After page reload the appointment still shows the new location.
+- API response from PUT echoes the new `companyid` + `companyname`.
+
+Edge cases:
+- companyId omitted from body → existing companyid is preserved (column not in UPDATE SET).
+- companyId present but malformed → `400 INVALID_COMPANY_ID`.
+- companyId references a nonexistent companies row → `404 COMPANY_NOT_FOUND`.
+- locationId field cleared in the form → mapper sends companyid as the current selection (form keeps locationId required).
+
+Regressions:
+- Do not introduce companyId on POST path that previously worked; the create endpoint already accepted companyId/companyid and is unchanged.
+- Do not break null-clear semantics for `doctorId`, `assistantId`, or `dentalAideId`; they remain explicit `null`-able.
+
+Setup data and login state:
+- Local dev: `http://127.0.0.1:5175`, login `t@clinic.vn / 123123` (Tgrouptest demo DB).
+- A valid `companies.id` UUID for the target clinic.
+
+TestSprite execution items:
+- [ ] PENDING: Edit any appointment on `/calendar`, change Cơ sở, save, reload, verify location persisted.
+- [ ] PENDING: `npx jest api/src/routes/appointments/__tests__/mutationHandlers.test.js` passes (incl. the new companyId valid-UUID / 400 / 404 cases).
+- [ ] PENDING: `npx vitest run website/src/components/appointments/unified/__tests__/appointmentForm.mapper.test.ts` passes (incl. the new locationId→companyid case).

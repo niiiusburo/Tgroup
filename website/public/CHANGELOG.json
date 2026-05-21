@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.32.35",
+    "date": "2026-05-21",
+    "commit": "1a0e96ba",
+    "highlights": "Appointment edits now persist the chosen clinic location (companyid) end-to-end.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "PUT /api/Appointments/:id now reads companyId (and companyid alias) from the request body, validates it as a UUID, checks the foreign key against companies, and writes it to appointments.companyid so the edited cơ sở value survives the save.",
+          "Frontend appointmentForm.mapper now sends locationId as companyid (plus companyname) inside the update payload."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added mutationHandlers.test.js coverage for the companyId path: valid UUID writes, missing-FK 404, malformed UUID 400.",
+          "Added appointmentForm.mapper.test.ts case asserting locationId becomes companyid and the payload passes AppointmentUpdateSchema."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.34",
     "date": "2026-05-19",
     "highlights": "Feedback proof images now stay linked to their uploaded files, including file-only replies and admin resolution screenshots.",
