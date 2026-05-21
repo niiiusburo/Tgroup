@@ -121,6 +121,13 @@ services:
       dockerfile: Dockerfile.web
       args:
         VITE_API_URL: /api
+        # Stamp the real git SHA into the bundle so /version.json reports
+        # the actual deployed commit instead of "unknown". Set in shell:
+        #   export GIT_SHA=$(git rev-parse HEAD) GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+        # then `docker compose up -d --build web`. Or use the deploy script,
+        # which exports these automatically after running require-clean-tree.sh.
+        GIT_SHA: ${GIT_SHA:-unknown}
+        GIT_BRANCH: ${GIT_BRANCH:-unknown}
     container_name: tgroup-web
     restart: unless-stopped
     depends_on:

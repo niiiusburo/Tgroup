@@ -1,0 +1,150 @@
+feature_id: services-export
+display_name_vi: Báo cáo Dịch vụ / Phẫu thuật
+display_name_en: Services & Procedures Excel Export
+status: live
+
+ui_entry_points:
+  - page: /services
+    component: website/src/pages/services/ServicesPage.tsx
+    user_action: "Click 'Xuất dữ liệu' button in services toolbar"
+
+api_routes:
+  - method: POST
+    path: /api/Exports/services/preview
+    handler: api/src/routes/exports.js#/:type/preview
+  - method: POST
+    path: /api/Exports/services/download
+    handler: api/src/routes/exports.js#/:type/download
+
+permission_required: services.export
+
+code_refs:
+  registry_entry: api/src/services/exports/exportRegistry.js#services
+  column_definition: api/src/services/exports/builders/servicesExport.js#COLUMNS
+  sql_query: api/src/services/exports/builders/servicesExport.js#getRows
+  row_mapper: api/src/services/exports/builders/servicesExport.js#build
+  unit_tests: api/src/services/exports/__tests__/servicesExport.test.js
+
+columns:
+  - position: 1
+    key: name
+    header_vi: Số phiếu
+    style: text
+    width: 16
+    source: saleorder.code
+  - position: 2
+    key: datecreated
+    header_vi: Ngày tạo
+    style: datetime
+    width: 14
+    source: saleorder.datecreated
+  - position: 3
+    key: customerCode
+    header_vi: Mã KH
+    style: text
+    width: 12
+    source: partners.ref
+  - position: 4
+    key: customerName
+    header_vi: Khách hàng
+    style: text
+    width: 24
+    source: partners.displayname
+  - position: 5
+    key: productName
+    header_vi: Dịch vụ
+    style: text
+    width: 20
+    source: productproduct.name
+  - position: 6
+    key: quantity
+    header_vi: Số lượng
+    style: numeric
+    width: 10
+    source: saleorderline.product_uom_qty
+  - position: 7
+    key: tooth
+    header_vi: Răng
+    style: text
+    width: 14
+    source: saleorderline.tooth_number
+  - position: 8
+    key: doctorName
+    header_vi: Bác sĩ
+    style: text
+    width: 18
+    source: employees.name (doctor)
+  - position: 9
+    key: assistantName
+    header_vi: Phụ tá
+    style: text
+    width: 18
+    source: employees.name (assistant)
+  - position: 10
+    key: dentalAideName
+    header_vi: Trợ lý BS
+    style: text
+    width: 18
+    source: employees.name (dental aid)
+  - position: 11
+    key: sourcename
+    header_vi: Nguồn
+    style: text
+    width: 18
+    source: customersources.name
+  - position: 12
+    key: amountTotal
+    header_vi: Tổng tiền
+    style: vnd
+    width: 14
+    source: saleorder.amount_total
+  - position: 13
+    key: totalPaid
+    header_vi: Đã thu
+    style: vnd
+    width: 14
+    source: saleorder.amount_paid
+  - position: 14
+    key: residual
+    header_vi: Còn lại
+    style: vnd
+    width: 14
+    source: saleorder.residual
+  - position: 15
+    key: state
+    header_vi: Trạng thái
+    style: text
+    width: 12
+    source: saleorder.state (mapped via STATE_LABELS)
+  - position: 16
+    key: companyName
+    header_vi: Chi nhánh
+    style: text
+    width: 20
+    source: companies.name
+  - position: 17
+    key: notes
+    header_vi: Ghi chú
+    style: text
+    width: 28
+    source: saleorderline.note
+
+filters_accepted:
+  - name: dateFrom
+    type: string
+    format: YYYY-MM-DD
+  - name: dateTo
+    type: string
+    format: YYYY-MM-DD
+  - name: companyId
+    type: uuid or 'all'
+  - name: search
+    type: string
+
+verified_against_live: "2026-05-20 — verified from servicesExport.js COLUMNS array"
+
+notes: |
+  Services export operates at the saleorderline level, combining line-item details
+  with sale order and payment aggregates. The 'state' field is mapped via STATE_LABELS
+  lookup table. Amount fields (totalPaid, residual) are aggregates from the
+  associated sale order.
