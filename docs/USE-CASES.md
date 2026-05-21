@@ -319,8 +319,9 @@ When a use case is created or materially edited, add one compact `Traceability` 
   1. ErrorBoundary catches exception.
   2. Frontend calls `POST /api/telemetry/errors` (no auth required).
   3. Backend inserts `dbo.error_events` row.
-  4. Admin can view, update, summarize, and attach fix attempts to telemetry in Settings/System tooling.
-- **Postconditions:** Error event logged with stack trace and browser info.
+  4. First-seen errors auto-create a `source='auto'` feedback thread and queue a Lark alert when `LARK_FEEDBACK_WEBHOOK_URL` is configured.
+  5. Admin can view, update, summarize, and attach fix attempts to telemetry in Settings/System tooling.
+- **Postconditions:** Error event logged with stack trace and browser info; optional Lark alert points admins back to `/feedback`.
 - **Invariants touched:** INV-018 when telemetry is used to diagnose deploy/runtime incidents.
 - **Traceability:** Related WF: none yet. Contracts/routes: `POST /api/telemetry/errors` public ingestion, `GET /api/telemetry/errors`, `PUT /api/telemetry/errors/:id`, `POST /api/telemetry/errors/:id/fix-attempts`, `GET /api/telemetry/stats`, `POST /api/telemetry/version`. Data/tables: `dbo.error_events`, `dbo.error_fix_attempts`, `dbo.version_events`. Tests: `api/tests/telemetry.test.js`, `api/tests/telemetryAuth.test.js`, `website/src/__tests__/useVersionCheck.test.ts`. Product-map domains: `settings-system`.
 
@@ -384,13 +385,14 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Trigger:** `/feedback` admin thread inbox
 - **Preconditions:** Actor has the scoped feedback permission for the action (`feedback.view`, `feedback.reply`, `feedback.edit`, or `feedback.delete`).
 - **Main flow:**
-  1. Admin views list of feedback threads.
-  2. Opens thread; reads messages and attachments.
-  3. Replies or changes status (`pending` → `in_progress` → `resolved` / `ignored`).
-  4. Status update saved via `PATCH /api/Feedback/all/:threadId/status`; admin reply saved via `POST /api/Feedback/all/:threadId/reply`.
-- **Postconditions:** Thread status updated; reporter sees resolution.
+  1. Staff creates a feedback thread via the floating feedback widget; backend commits the thread/message and queues an optional Lark alert when configured.
+  2. Admin views list of feedback threads.
+  3. Opens thread; reads messages and attachments.
+  4. Replies or changes status (`pending` → `in_progress` → `resolved` / `ignored`).
+  5. Status update saved via `PATCH /api/Feedback/all/:threadId/status`; admin reply saved via `POST /api/Feedback/all/:threadId/reply`.
+- **Postconditions:** Thread status updated; reporter sees resolution; optional Lark alert exists for initial thread creation only.
 - **Invariants touched:** INV-016 (i18n labels).
-- **Traceability:** Related WF: WF-011. Contracts/routes: `GET /api/Feedback/all`, `GET /api/Feedback/all/:threadId`, `POST /api/Feedback/all/:threadId/reply`, `PATCH /api/Feedback/all/:threadId/status`, `DELETE /api/Feedback/all/:threadId`. Data/tables: `dbo.feedback_threads`, `dbo.feedback_messages`, `dbo.feedback_attachments`, `api/uploads/feedback/`. Tests: `api/tests/readRoutePermissions.test.js`, `website/e2e/phase2-quick-features.spec.ts` indirect; attachment storage/deletion E2E remains a known gap. Product-map domains: `feedback-cms`, `auth`.
+- **Traceability:** Related WF: WF-011. Contracts/routes: `POST /api/Feedback`, `GET /api/Feedback/all`, `GET /api/Feedback/all/:threadId`, `POST /api/Feedback/all/:threadId/reply`, `PATCH /api/Feedback/all/:threadId/status`, `DELETE /api/Feedback/all/:threadId`. Data/tables: `dbo.feedback_threads`, `dbo.feedback_messages`, `dbo.feedback_attachments`, `api/uploads/feedback/`; optional outbound Lark webhook via `api/src/services/larkNotifier.js`. Tests: `api/tests/feedbackAttachments.test.js`, `api/src/services/__tests__/larkNotifier.test.js`, `api/tests/readRoutePermissions.test.js`, `website/e2e/phase2-quick-features.spec.ts` indirect; live Lark delivery and attachment storage/deletion E2E remain known gaps. Product-map domains: `feedback-cms`, `auth`, `integrations`.
 
 ---
 

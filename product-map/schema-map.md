@@ -395,7 +395,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | Attribute | Value |
 |-----------|-------|
 | **Primary Key** | `id` (uuid) on both tables |
-| **W** | `api/src/server.js` public telemetry error ingestion, `api/src/routes/telemetry.js`, `api/src/middleware/errorHandler.js` |
+| **W** | `api/src/routes/publicTelemetryErrors.js`, `api/src/routes/telemetry.js`, `api/src/middleware/errorHandler.js` |
 | **R** | `api/src/routes/telemetry.js`, `scripts/auto-fixer.js` |
 | **E** | `POST /api/telemetry/errors` public ingestion; authenticated `GET/PUT /api/telemetry/errors`, `POST /api/telemetry/errors/:id/fix-attempts`, `GET /api/telemetry/stats` |
 | **UI** | ErrorBoundary/ErrorReporter and auto-created Feedback threads |

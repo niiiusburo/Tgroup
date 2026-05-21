@@ -1693,3 +1693,51 @@ Setup data and login state:
 TestSprite execution items:
 - [ ] PENDING: `npx jest api/src/services/exports/__tests__/featureCatalog.crosscheck.test.js` passes 40/40.
 - [ ] PENDING: Hand-edit one column header in any builder COLUMNS array and confirm the cross-check fails with a clear key/header mismatch message. Revert the edit.
+
+## 2026-05-21 — Feedback Lark T-Group alerts
+
+Feature/edit name:
+- Send TGClinic feedback creation alerts to the Lark `T-Group` chat through a custom bot webhook.
+
+Changed URLs and API routes:
+- `POST /api/Feedback` — after a manual feedback thread commits, queue an optional non-blocking Lark alert.
+- `POST /api/telemetry/errors` — after a first-seen frontend error creates an auto feedback thread, queue an optional non-blocking Lark alert.
+- `/feedback` — target inbox link included in the Lark message; no UI route behavior changed.
+- Outbound webhook: `https://open.larksuite.com/open-apis/bot/v2/hook/*` from backend only when `LARK_FEEDBACK_WEBHOOK_URL` is configured.
+
+Affected data flows:
+- FeedbackWidget / staff feedback -> `POST /api/Feedback` -> `feedback_threads` + `feedback_messages` commit -> `api/src/services/larkNotifier.js` -> Lark custom bot text message.
+- ErrorBoundary / API error telemetry -> `POST /api/telemetry/errors` -> `error_events` + auto `feedback_threads` commit -> `api/src/services/larkNotifier.js` -> Lark custom bot text message.
+
+User roles:
+- Any authenticated employee can create manual feedback.
+- Admin / manager with feedback inbox access receives the operational benefit by watching Lark and opening `/feedback`.
+
+Happy paths:
+- Manual staff feedback with text only sends a Lark alert containing thread id, reporter id/name when available, page path, screen size, zero files, bounded preview, and `/feedback` link.
+- Manual staff feedback with attachments sends a Lark alert with the correct file count but does not forward attachment bytes.
+- First-seen telemetry error creates an auto feedback thread and sends a Lark alert with route/API context and bounded error preview.
+
+Edge cases:
+- `LARK_FEEDBACK_WEBHOOK_URL` missing -> feedback request still succeeds and alert is skipped.
+- Invalid/non-Lark webhook host -> feedback request still succeeds and API logs invalid config.
+- Lark returns non-2xx or network failure -> feedback request still succeeds and API logs `[Lark]` failure.
+- `LARK_FEEDBACK_WEBHOOK_SECRET` configured -> request body includes Lark timestamp/sign fields.
+
+Regressions:
+- Feedback DB transaction must still roll back on attachment insert failure and must not be coupled to Lark delivery.
+- Telemetry ingestion must remain public/rate-limited and must never fail the browser because Lark is unavailable.
+- Webhook secret must stay backend-only in `.env`/VPS env, never in browser bundles or committed real values.
+
+Setup data and login state:
+- Local `.env` and `api/.env` now contain `LARK_FEEDBACK_WEBHOOK_URL` from the Lark `T-Group` custom bot.
+- Local `.env` and `api/.env` now contain `LARK_FEEDBACK_WEBHOOK_SECRET`; Lark signature verification is enabled for the bot.
+- Configure `TGROUP_PUBLIC_URL=https://nk.2checkin.com` in production so the inbox link opens the live site.
+- Local dev feedback check can use `http://127.0.0.1:5175`, login `t@clinic.vn / 123123`.
+
+TestSprite execution items:
+- [ ] PENDING: Submit manual feedback from any authenticated page and confirm a new message appears in Lark `T-Group`.
+- [ ] PENDING: Submit manual feedback with an image and confirm Lark shows the file count while the attachment still renders from `/feedback`.
+- [ ] PENDING: Trigger a safe frontend telemetry error in a test environment and confirm the auto-detected thread plus Lark alert appear.
+- [ ] PENDING: Temporarily unset the webhook env in a local/test environment and confirm `POST /api/Feedback` still returns `201`.
+- [x] DONE 2026-05-21: `npm test -- --runInBand tests/feedbackAttachments.test.js tests/telemetryAuth.test.js src/services/__tests__/larkNotifier.test.js tests/envExampleValidation.test.js` passed from `api/` (Jest ran 54 suites, 703 tests).

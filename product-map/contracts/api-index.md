@@ -26,6 +26,25 @@
 
 Note: All existing routes are now implicitly under a selected LOB via BusinessUnitContext. Cosmetic routes live under `/api/cosmetic/*` prefix and are distinct from dental.
 
+## Frontend LOB-Aware Routing (`apiFetch` with automatic path rewriting)
+
+**File:** `website/src/lib/api/core.ts`
+
+**Behavior (v2.0):** When `VITE_COSMETIC_LOB_ENABLED=true` and current LOB (from `localStorage.getItem('tgclinic_lob')`) is `'cosmetic'`, all endpoint paths are automatically rewritten from `/api/X` to `/api/cosmetic/X` before making the HTTP request. This centralizes LOB-aware routing in the API fetch layer without requiring conditional URLs at every call site.
+
+**Whitelisted Routes (bypass rewriting regardless of LOB):**
+- `/Auth/*` (login, logout, refresh, register)
+- `/me/*` (user profile)
+- `/version/*` (version info)
+- `/ctv/*` (CTV dashboard)
+
+**Default Behavior:** If feature flag is false or missing (recommended production default), no rewriting occurs; all routes resolve to `/api/X` (dental LOB). Backward-compatible with existing dental-only deployments.
+
+**Example:**
+- LOB=`'cosmetic'`, flag=`true`, endpoint=`'/Partners'` → rewrites to `/api/cosmetic/Partners`
+- LOB=`'cosmetic'`, flag=`true`, endpoint=`'/Auth/me'` → whitelisted, stays `/api/Auth/me`
+- LOB=`'dental'` or flag=`false` → no rewriting; all routes unchanged
+
 ## Cosmetic (`/api/cosmetic/*`) — mirrors of all dental routes (gated by requireLobScope('cosmetic') + cosmetic.access)
 
 All dental endpoints have exact cosmetic mirrors:
@@ -301,6 +320,8 @@ Export permissions are defined by `api/src/services/exports/exportRegistry.js`: 
 
 Attachment persistence contract: feedback create/reply routes accept file-only messages (`content = ''`), commit message rows and `feedback_attachments` rows in one explicit DB transaction, clean uploaded files on missing-thread or insert failure, and delete physical files only after `DELETE /all/:threadId` commits. Stored attachment filenames must match the generated UUID image filename allowlist before physical deletion.
 
+Lark alert contract: when `LARK_FEEDBACK_WEBHOOK_URL` is configured, `POST /api/Feedback` queues a non-blocking Lark custom bot text alert after the new thread and first message commit. The alert includes thread id, reporter id/name when available, page context, screen size, attachment count, a bounded content preview, and a `/feedback` inbox link derived from the request origin or `TGROUP_PUBLIC_URL`. Webhook failures are logged but must not roll back or fail the feedback request.
+
 ## Face Recognition (`/api/face`)
 
 | Method | Path | Auth | Body / Query | Response |
@@ -406,6 +427,8 @@ Hosoonline uses a mixed current contract: if `HOSOONLINE_USERNAME` and `HOSOONLI
 | POST | `/errors/:id/fix-attempts` | Auth | `{ attempt_number, action, status, details, files_changed, test_output, agent_session }` | `{ ok, attempt_id }` |
 | GET | `/stats` | Auth | — | `{ by_type, by_status, total, last_24h }` |
 | POST | `/version` | Auth | `{ event, from, to, trigger, timestamp, userAgent }` | `{ ok }` |
+
+Public telemetry alert behavior: public `POST /api/telemetry/errors` ingestion auto-creates a `source='auto'` feedback thread for first-seen errors; when `LARK_FEEDBACK_WEBHOOK_URL` is configured, it queues the same non-blocking Lark text alert with error type, route, API context, and a bounded message preview.
 
 ## Places (`/api/Places`)
 

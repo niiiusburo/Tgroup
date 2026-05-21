@@ -15,6 +15,7 @@
 | v1.0.0 | 2026-05-13 | Initial contract freeze covering all active API routes, shared types, and integration boundaries. |
 | v1.0.1 | 2026-05-17 | Contract documentation aligned to live payment method enum, report API, and operational export registry. |
 | v1.0.2 | 2026-05-18 | Reconfirmed `@tgroup/contracts` payment method enum and generated contract artifacts are limited to live methods only. |
+| v1.0.4 | 2026-05-21 | Feedback creation now queues optional Lark custom bot alerts after manual or auto-detected feedback threads commit. |
 | v1.0.3 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
 
 ---
@@ -458,6 +459,8 @@ Supported registry types:
 **Body:** `multipart/form-data` with `content?: string`, `pagePath?: string`, `screenSize?: string`, and repeated `files` image fields.
 **Response 201:** Created feedback thread row.
 
+**Side effect:** If `LARK_FEEDBACK_WEBHOOK_URL` is configured, the API queues a non-blocking Lark custom bot text alert after the transaction commits. The alert contains thread id, reporter id/name when available, page context, screen size, attachment count, a bounded content preview, and a `/feedback` inbox link. A Lark delivery failure is logged and must not fail the request or roll back the committed feedback thread.
+
 #### POST /api/Feedback/my/:threadId/reply
 **Auth:** Thread owner.
 **Body:** `multipart/form-data` with `content?: string` and repeated `files` image fields.
@@ -493,6 +496,8 @@ Feedback attachment behavior:
 ```
 **Response 201:** `{ id: string }` (error_event row id)
 
+**Side effect:** The public telemetry ingestion route creates a `source='auto'` feedback thread for first-seen errors. If `LARK_FEEDBACK_WEBHOOK_URL` is configured, that new auto-feedback thread queues the same non-blocking Lark alert with error type, route, API context, and bounded error-message preview.
+
 ---
 
 ## 2. Cross-Module Function Signatures
@@ -516,6 +521,7 @@ async function apiFetch<T>(
 - CamelCase keys in `params` are converted to snake_case on the wire (except `CAMEL_CASE_PASSTHROUGH` set).
 - 401 responses clear `localStorage` token and dispatch `AUTH_UNAUTHORIZED_EVENT`.
 - Structured errors are thrown as `ApiError` with `status`, `code`, `field`, `message`.
+- **LOB-Aware Routing (v2.0):** If `VITE_COSMETIC_LOB_ENABLED=true` and `localStorage.getItem('tgclinic_lob')='cosmetic'`, endpoint paths are rewritten from `/api/X` to `/api/cosmetic/X`. Whitelisted routes (`/Auth/*`, `/me/*`, `/version/*`, `/ctv/*`) bypass rewriting regardless of LOB. Default behavior (flag false or missing) performs no rewriting; dental LOB is unaffected.
 
 ### 2.2 resolveEffectivePermissions (Backend Auth)
 

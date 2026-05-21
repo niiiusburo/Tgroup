@@ -93,6 +93,7 @@ Effective permissions = (Group ∪ Grants) − Revokes, then filtered by locatio
 | `DATABASE_URL` / DB password | Same as above | Same |
 | `GOOGLE_PLACES_API_KEY` | `.env`, VPS | Server-side only; never sent to browser. |
 | `HOSOONLINE_USERNAME`, `PASSWORD`, `API_KEY` | `.env`, VPS | Backend proxy only. |
+| `LARK_FEEDBACK_WEBHOOK_URL`, `LARK_FEEDBACK_WEBHOOK_SECRET` | `.env`, VPS | Backend-only outbound feedback alerts to the T-Group Lark custom bot. Never expose in browser bundles or commit to git. |
 | `COMPREFACE_API_KEY` | `.env`, VPS | Backend → CompreFace only when `FACE_RECOGNITION_PROVIDER=compreface`. |
 | `POSTGRES_USER`, `POSTGRES_PASSWORD` | `.env`, Docker Compose | Container startup only. |
 
@@ -113,6 +114,7 @@ Effective permissions = (Group ∪ Grants) − Revokes, then filtered by locatio
 - **SQL Injection:** Mitigated by parameterized queries (`$1`, `$2`) in all `api/src/db.js` usages. No raw string concatenation in route handlers.
 - **XSS:** Mitigated by React's default escaping. User-generated content in feedback/website pages must be sanitized before storage.
 - **File Uploads:** `feedback_attachments` uses `multer` + `sharp` for image resizing. Max file size enforced by nginx `client_max_body_size 25m`.
+- **Outbound Lark alerts:** Feedback alerts send bounded text previews and metadata only after the feedback transaction commits. Attachment bytes are not forwarded. `api/src/services/larkNotifier.js` only accepts HTTPS custom bot URLs on `open.larksuite.com` or `open.feishu.cn` and supports optional Lark signature verification through `LARK_FEEDBACK_WEBHOOK_SECRET`. Fields that cross the boundary into Lark: feedback content preview (≤900 chars), thread ID, reporter (employee ID/name), page URL or page path (may contain query params with patient identifiers), screen size, attachment count, and for auto-detected alerts the error type, error message preview (≤900 chars), route, and API endpoint/method. The inbox link in `auto` alerts is pinned to `TGROUP_PUBLIC_URL` and ignores client-supplied `Origin`/`Referer` to prevent phishing redirects through the unauthenticated `/api/telemetry/errors` endpoint.
 - **CORS:** `ALLOWED_ORIGINS` whitelist in `api/src/server.js`. Dev origin regex allows `localhost` ports.
 
 ## Network Security

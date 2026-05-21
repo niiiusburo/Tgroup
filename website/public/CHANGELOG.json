@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.32.36",
+    "date": "2026-05-21",
+    "highlights": "New feedback and auto-detected website errors can now alert the Lark T-Group chat through a backend-only custom bot webhook.",
+    "sections": [
+      {
+        "title": "Feedback Alerts",
+        "items": [
+          "POST /api/Feedback queues a non-blocking Lark alert after the feedback thread and first message commit.",
+          "POST /api/telemetry/errors queues the same alert when a first-seen frontend error creates an auto-detected feedback thread.",
+          "Alerts include thread/page context, a bounded preview, attachment count, and the /feedback inbox link; attachment bytes and webhook secrets stay out of the browser."
+        ]
+      },
+      {
+        "title": "Configuration",
+        "items": [
+          "Added LARK_FEEDBACK_WEBHOOK_URL, optional LARK_FEEDBACK_WEBHOOK_SECRET, and TGROUP_PUBLIC_URL env documentation.",
+          "The notifier accepts only HTTPS Lark/Feishu custom bot webhook hosts and keeps feedback submission successful if Lark is unavailable."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.35",
     "date": "2026-05-21",
     "commit": "fb9f3884",

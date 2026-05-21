@@ -447,8 +447,19 @@ sequenceDiagram
     actor A as Admin
     participant FE as React (/feedback)
     participant API as Express API
+    participant Lark as Lark T-Group Webhook
     participant FS as Upload Storage
     participant DB as Postgres (dbo)
+
+    Note over FE,API: Initial staff thread creation
+    FE->>API: POST /api/Feedback FormData
+    API->>FS: Store uploaded attachment(s)
+    API->>DB: INSERT feedback_threads / feedback_messages / feedback_attachments
+    DB-->>API: Commit thread
+    opt LARK_FEEDBACK_WEBHOOK_URL configured
+        API-->>Lark: POST custom bot text alert (non-blocking)
+    end
+    API-->>FE: Created thread
 
     A->>FE: Open feedback inbox
     FE->>API: GET /api/Feedback/all?source=...
@@ -474,14 +485,16 @@ sequenceDiagram
 ```
 
 **Data state transitions:**
+- `feedback_threads` / `feedback_messages` rows are inserted for initial staff feedback; optional Lark alert delivery has no database write.
 - `feedback_threads.status` changes for moderation.
 - `feedback_messages` and `feedback_attachments` rows are inserted for admin replies; files are stored under `api/uploads/feedback/`.
 
-**Traceability:** Related UC: UC-020. Contracts/routes: `GET /api/Feedback/all`, `GET /api/Feedback/all/:threadId`, `POST /api/Feedback/all/:threadId/reply`, `PATCH /api/Feedback/all/:threadId/status`, `DELETE /api/Feedback/all/:threadId`. Data/tables: `dbo.feedback_threads`, `dbo.feedback_messages`, `dbo.feedback_attachments`, `api/uploads/feedback/`. Invariants: INV-015, INV-016, INV-017. Tests: `api/tests/readRoutePermissions.test.js`, `website/e2e/phase2-quick-features.spec.ts` indirect; file storage/deletion E2E remains a gap. Product-map domains: `feedback-cms`, `auth`.
+**Traceability:** Related UC: UC-020. Contracts/routes: `POST /api/Feedback`, `GET /api/Feedback/all`, `GET /api/Feedback/all/:threadId`, `POST /api/Feedback/all/:threadId/reply`, `PATCH /api/Feedback/all/:threadId/status`, `DELETE /api/Feedback/all/:threadId`. Data/tables: `dbo.feedback_threads`, `dbo.feedback_messages`, `dbo.feedback_attachments`, `api/uploads/feedback/`; optional outbound Lark webhook via `api/src/services/larkNotifier.js`. Invariants: INV-015, INV-016, INV-017. Tests: `api/tests/feedbackAttachments.test.js`, `api/src/services/__tests__/larkNotifier.test.js`, `api/tests/readRoutePermissions.test.js`, `website/e2e/phase2-quick-features.spec.ts` indirect; file storage/deletion and live Lark delivery E2E remain gaps. Product-map domains: `feedback-cms`, `auth`, `integrations`.
 
 **Failure modes:**
 - Missing scoped feedback permission causes 403 on the specific action.
 - Attachment upload succeeds but DB insert fails → orphan-file cleanup must be checked when changing upload handling.
+- Lark webhook unavailable or invalid → feedback request still succeeds; API logs the alert failure for ops follow-up.
 
 ---
 

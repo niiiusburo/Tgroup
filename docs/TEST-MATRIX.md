@@ -37,6 +37,12 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `website/src/contexts/AuthContext.tsx` | `website/e2e/auth-setup.spec.ts`, `website/e2e/permissions-check.spec.ts` | Auth state hydration affects every protected page. |
 | `website/src/constants/index.ts` (ROUTE_PERMISSIONS) | All E2E specs that navigate protected routes | Route guard changes may hide/show pages incorrectly. |
 
+### API & Frontend Bridge
+
+| If you change... | Run these tests... | Why |
+|---|---|---|
+| `website/src/lib/api/core.ts` (`apiFetch` LOB-aware routing) | `website/src/lib/api/__tests__/apiFetch.lob.test.ts` | Cosmetic LOB v2 Phase-1 Gap B: LOB-aware path rewriting routes `/api/X` to `/api/cosmetic/X` when `VITE_COSMETIC_LOB_ENABLED=true` and `tgclinic_lob='cosmetic'`. Whitelisted routes (`/Auth/*`, `/me/*`, `/version/*`, `/ctv/*`) bypass rewriting. Feature flag and localStorage fallbacks tested with 4 vitest cases. |
+
 ### Appointments & Calendar
 
 | If you change... | Run these tests... | Why |
@@ -97,8 +103,8 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 |---|---|---|
 | `website/src/contexts/TimezoneContext.tsx` | `website/src/__tests__/timezone.context.test.tsx`, `website/src/__tests__/timezone.core.test.ts` | Timezone conversion affects all date displays. |
 | `website/src/hooks/useVersionCheck.ts` | `website/src/__tests__/useVersionCheck.test.ts` | Version polling and update prompt. |
-| `api/src/routes/telemetry.js` | `api/tests/telemetry.test.js`, `api/tests/telemetryAuth.test.js` | Public vs auth-required telemetry routes. |
-| `api/src/routes/feedback/*.js` or `api/src/routes/feedback/attachments.js` | `api/tests/feedbackAttachments.test.js`, live `/feedback` screenshot check after any production restore | Feedback proof images cross DB rows and `/uploads/feedback` files; failures can leave broken resolution evidence. |
+| `api/src/routes/telemetry.js` or `api/src/routes/publicTelemetryErrors.js` | `api/tests/telemetry.test.js`, `api/tests/telemetryAuth.test.js`, `api/src/services/__tests__/larkNotifier.test.js` | Public vs auth-required telemetry routes; first-seen errors can auto-create feedback and queue optional Lark alerts. |
+| `api/src/routes/feedback/*.js`, `api/src/routes/feedback/attachments.js`, or `api/src/services/larkNotifier.js` | `api/tests/feedbackAttachments.test.js`, `api/src/services/__tests__/larkNotifier.test.js`, live `/feedback` screenshot check after any production restore | Feedback proof images cross DB rows and `/uploads/feedback` files; Lark alerts are non-blocking and env-gated. Failures can leave broken resolution evidence or missing external alerting. |
 | `api/src/middleware/ipAccess.js` | `website/e2e/login-and-settings.spec.ts` | IP whitelist enforcement. |
 
 ### Integrations
@@ -106,6 +112,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | If you change... | Run these tests... | Why |
 |---|---|---|
 | `api/src/routes/externalCheckups.js` | `api/src/routes/__tests__/externalCheckups.test.js` | Hosoonline auth, patient search, image proxy. |
+| `docker-compose.yml` / `.env.example` Lark feedback env vars | `api/tests/envExampleValidation.test.js`, `api/src/services/__tests__/larkNotifier.test.js` | Ensures the webhook/secret are documented as backend-only env and notifier accepts only the intended Lark/Feishu custom bot endpoints. |
 | `website/src/components/shared/FaceCaptureModal.tsx` / `website/src/components/shared/useFaceCaptureController.ts` / `website/src/components/shared/faceCaptureEngine.ts` | `website/src/components/shared/FaceCaptureModal.test.tsx`, `website/src/components/shared/faceCaptureEngine.test.ts`, `website/src/components/customer/CustomerCameraWidget.test.tsx`, `website/src/components/shared/GlobalFaceIdButton.test.tsx`, `website/src/hooks/__tests__/useFaceRecognition.test.ts` | Camera lifetime, no-face messaging, auto-capture gating, and caller error propagation. |
 | `api/src/routes/faceRecognition.js` | `api/tests/faceRecognition.test.js` | Face register/re-register/recognize API contract in local and CompreFace modes. |
 | `api/src/services/comprefaceClient.js` / `api/src/services/comprefaceFaceProvider.js` | `api/src/services/__tests__/comprefaceClient.test.js`, `api/src/services/__tests__/comprefaceFaceProvider.test.js` | CompreFace multipart file upload, subject/example calls, health check, no-face normalization, and partner subject mapping. |

@@ -36,6 +36,7 @@ All API logs are written to stdout/stderr and collected by Docker logging driver
 
 - **Production only:** `apiFetch` reports API errors to the AutoDebugger pipeline.
 - **ErrorBoundary:** Catches React render errors and calls `POST /api/telemetry/errors`.
+- **Feedback Lark alert:** When `LARK_FEEDBACK_WEBHOOK_URL` is configured, new manual feedback threads and first-seen auto-detected feedback threads queue a non-blocking text alert to the T-Group Lark custom bot after DB commit. Alert failures log with the `[Lark]` prefix and do not fail the source request.
 - **Shape:**
 ```json
 {

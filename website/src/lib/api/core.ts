@@ -52,10 +52,79 @@ function toSnakeCase(str: string): string {
   return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 }
 
+// Routes that bypass LOB rewriting (whitelisted for all LOBs)
+const LOB_BYPASS_ROUTES = new Set([
+  '/Auth/login',
+  '/Auth/logout',
+  '/Auth/refresh',
+  '/Auth/register',
+  '/me',
+  '/me/',
+  '/version',
+  '/version/',
+  '/ctv/',
+  '/ctv',
+]);
+
+/**
+ * Check if a route should bypass LOB rewriting.
+ * Matches routes like /Auth/*, /me/*, /version/*, /ctv/*, /api/Auth/*, etc.
+ */
+function shouldBypassLobRewrite(endpoint: string): boolean {
+  // Check direct bypasses
+  if (LOB_BYPASS_ROUTES.has(endpoint)) return true;
+
+  // Check prefix patterns
+  const patterns = [
+    '/Auth/',
+    '/me/',
+    '/version/',
+    '/ctv/',
+  ];
+
+  return patterns.some((pattern) => endpoint.startsWith(pattern));
+}
+
+/**
+ * Rewrite endpoint for LOB-aware routing.
+ * If cosmetic LOB is selected and flag is enabled, rewrite /api/X to /api/cosmetic/X
+ * unless the route is whitelisted.
+ */
+function rewriteEndpointForLob(endpoint: string): string {
+  // Check if feature flag is enabled
+  const isFlagEnabled = import.meta.env.VITE_COSMETIC_LOB_ENABLED === 'true' ||
+                       import.meta.env.VITE_COSMETIC_LOB_ENABLED === true;
+
+  if (!isFlagEnabled) {
+    return endpoint;
+  }
+
+  // Check if current LOB is cosmetic
+  const currentLob = localStorage.getItem('tgclinic_lob') || 'dental';
+  if (currentLob !== 'cosmetic') {
+    return endpoint;
+  }
+
+  // Check if this route should bypass rewriting
+  if (shouldBypassLobRewrite(endpoint)) {
+    return endpoint;
+  }
+
+  // Rewrite /SomeRoute to /cosmetic/SomeRoute
+  // Handle both /SomeRoute and /Some/Nested/Route patterns
+  if (endpoint.startsWith('/')) {
+    return `/cosmetic${endpoint}`;
+  }
+
+  return endpoint;
+}
+
 export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
   const { method = 'GET', body, params } = options;
 
-  let url = `${API_URL}${endpoint}`;
+  // Apply LOB-aware rewriting
+  const rewrittenEndpoint = rewriteEndpointForLob(endpoint);
+  let url = `${API_URL}${rewrittenEndpoint}`;
   if (params) {
     const searchParams = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {

@@ -15,6 +15,10 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 ---
 
 ## [unreleased] — 2026-05-21
+### Added
+- **apiFetch LOB-aware routing (Gap B):** `website/src/lib/api/core.ts` now rewrites endpoint paths from `/api/*` to `/api/cosmetic/*` when VITE_COSMETIC_LOB_ENABLED flag is true and current LOB (via localStorage tgclinic_lob) is 'cosmetic'. Whitelisted routes (/Auth/*, /me/*, /version/*, /ctv/*) bypass rewriting regardless of LOB. Added vitest coverage: `website/src/lib/api/__tests__/apiFetch.lob.test.ts` (4 assertions: dental LOB routing, cosmetic LOB routing, whitelist bypass, missing LOB fallback). Feature locked behind optional feature flag (defaults false in .env); zero impact on existing dental-only deployments. — @phase-1-executor — 2026-05-21 closes cosmetic LOB v2 Gap B.
+- Feedback Lark alerts for the `T-Group` custom bot: `POST /api/Feedback` and public `POST /api/telemetry/errors` now queue non-blocking backend-only Lark text alerts after manual or auto-detected feedback threads commit. Added `api/src/services/larkNotifier.js`, `api/src/routes/publicTelemetryErrors.js`, env documentation for `LARK_FEEDBACK_WEBHOOK_URL` / optional `LARK_FEEDBACK_WEBHOOK_SECRET` / `TGROUP_PUBLIC_URL`, Docker env passthrough, Jest coverage, product-map updates, `testbright.md`, and website release metadata for `0.32.36`. — @agent — 2026-05-21 preserves UC-016/UC-020 and WF-011 by alerting without coupling feedback persistence to external delivery.
+
 ### Changed
 - Archived agent audit reports under `docs/audits/<date>-<topic>/`: 2026-05-19 cosmetic-LOB v2 finishing-swarm pack (brutal audit #2, cross-LOB badge, docs-sync, overall-status) and the 2026-05-16 NK2 deeplink proof report. Added `docs/audits/README.md` as the index. Added `.gitignore` entries for `output/playwright/`, `reports/feedback-extract/`, `reports/responsive-qa/`, and `reports/calendar-five-digit-proof-2026-04-29/` so future Playwright runs do not dirty the working tree (already-tracked files in those paths remain tracked). — @agent — 2026-05-21 working-tree cleanup before starting the cosmetic LOB UI build.
 

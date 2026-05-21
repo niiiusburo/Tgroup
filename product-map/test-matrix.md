@@ -49,6 +49,7 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 | `i18n/__tests__/i18n-coverage.test.ts` | i18n | Namespace coverage and missing keys |
 | `lib/allocatePaymentSources.test.ts` | Payments | `allocatePaymentSources` utility math |
 | `lib/apiFetch.test.ts` | API/Core | `apiFetch` error handling and conversions |
+| `lib/api/__tests__/apiFetch.lob.test.ts` | API/LOB | `apiFetch` LOB-aware routing v2.0: automatic path rewriting from `/api/X` to `/api/cosmetic/X` when `VITE_COSMETIC_LOB_ENABLED=true` and `tgclinic_lob='cosmetic'`; whitelisted routes bypass rewriting; feature flag and localStorage defaults tested |
 | `lib/formatting.test.ts` | Shared | Date/currency formatting utilities |
 | `lib/utils.test.ts` | Shared | Generic utility functions |
 | `lib/vietqr.test.ts` | Payments | VietQR URL generation logic |
@@ -126,7 +127,8 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 | `tdentalImport.test.js` | Data/Money | TDental import mapping, payment status, local-only payment cleanup, CSV date parsing, and anomaly policy |
 | `tdentalDryRun.test.js` | Data/Migration | Full-export dry-run staff/product matching and compact import planning |
 | `telemetry.test.js` | Settings/Telemetry | Telemetry error ingestion, deduplication, management updates, fix attempts, and stats |
-| `telemetryAuth.test.js` | Settings/Telemetry | Public-only error ingestion and auth-required telemetry management routes |
+| `telemetryAuth.test.js` | Settings/Telemetry | Public-only error ingestion, auto-feedback Lark alert queueing, and auth-required telemetry management routes |
+| `src/services/__tests__/larkNotifier.test.js` | Feedback/Integrations | Lark custom bot webhook URL validation, signed payload construction, and manual/auto feedback alert text |
 | `readRoutePermissions.test.js` | Auth/Permissions | Backend route permission declarations, including scoped feedback admin actions |
 | `src/routes/reports/__tests__/cashFlow.test.js` | Reports/Payments | UC-013/WF-013: `CON-Reports-CashFlowSummary`; cash-flow aggregation rules for service collections, deposits, refunds, deposit usage, voided rows, timezone-safe date buckets, route mounting, and scoped location rejection |
 | `src/routes/reports/__tests__/revenueRecognition.test.js` | Reports/Payments | UC-013/WF-013: `CON-Reports-RevenueSummary` plus trend/doctor/category revenue; posted service payment allocations, deposit exclusion, allocation proration, and payment-date recognition |
@@ -146,7 +148,7 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 | **Reports** | Current revenue recognition, cash-flow classification, services breakdown, and canonical revenue SQL have targeted tests; missing full reconciliation against legacy Odoo/TDental audit exports |
 | **Commission** | No E2E or unit tests for commission calculation |
 | **Monthly Plans** | No tests for `PUT /api/MonthlyPlans/:id/installments/:installmentId/pay`, completed-plan status, or next pending installment advancement |
-| **Feedback** | Attachment upload rendering has partial UI coverage through admin moderation route permission checks; admin reply upload, file storage/deletion, and orphan-file cleanup still need E2E coverage |
+| **Feedback** | Attachment upload rendering has partial UI coverage through admin moderation route permission checks; admin reply upload, file storage/deletion, orphan-file cleanup, and live Lark delivery screenshot/proof still need E2E or manual production coverage |
 | **IP Access** | Frontend component/type/validation coverage exists; backend middleware and `/api/IpAccess/*` route integration tests are still missing |
 | **Website CMS** | No tests for page CRUD |
 | **Permissions** | No backend tests for permission override edge cases |

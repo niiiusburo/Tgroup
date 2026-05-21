@@ -34,7 +34,7 @@ graph TD
     subgraph Backend["api/src"]
         Routes["Routes (*.js)"]
         Middleware["Middleware (auth, ipAccess, validate)"]
-        Services["Services (permissionService, faceEngineClient, comprefaceFaceProvider)"]
+        Services["Services (permissionService, faceEngineClient, comprefaceFaceProvider, larkNotifier)"]
         Db["db.js"]
         ContractsPkg["@tgroup/contracts"]
     end
@@ -139,6 +139,13 @@ graph TD
 - **Downstream:** Frontend validation, backend `validate()` middleware, type inference in both runtimes.
 - **Blast radius:** **Both frontend and backend for every schema changed.**
 - **Change rules:** Must rebuild `contracts/` and reinstall in `website/` and `api/` after change.
+
+### `api/src/services/larkNotifier.js`
+- **Layer:** 3
+- **Upstream:** Node `crypto`, runtime `fetch`, `LARK_FEEDBACK_WEBHOOK_URL`, optional `LARK_FEEDBACK_WEBHOOK_SECRET`, `TGROUP_PUBLIC_URL`.
+- **Downstream:** `api/src/routes/feedback/userRoutes.js` and public telemetry ingestion in `api/src/routes/publicTelemetryErrors.js`.
+- **Blast radius:** **Feedback thread creation + public telemetry auto-feedback alerts.**
+- **Change rules:** Must remain non-blocking after feedback/error rows commit. It must not throw into route handlers or expose webhook secrets to the frontend. Webhook URL validation should stay restricted to HTTPS Lark/Feishu custom bot hosts unless an accepted integration decision expands the provider list.
 
 ## Cross-Community Edges (from CODEBASE_GRAPH.md)
 

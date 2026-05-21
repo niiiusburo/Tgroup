@@ -9,6 +9,8 @@ owns:
   - api/src/routes/feedback/adminRoutes.js
   - api/src/routes/feedback/admin.js
   - api/src/routes/feedback/attachments.js
+  - api/src/routes/publicTelemetryErrors.js
+  - api/src/services/larkNotifier.js
   - api/src/routes/websitePages.js
   - website/src/pages/Feedback.tsx
   - website/src/pages/Website.tsx
@@ -20,6 +22,9 @@ owns:
 reads:
   - api/src/db.js
   - api/uploads/feedback/ (static file storage)
+  - process.env.LARK_FEEDBACK_WEBHOOK_URL
+  - process.env.LARK_FEEDBACK_WEBHOOK_SECRET
+  - process.env.TGROUP_PUBLIC_URL
 writes:
   - dbo.feedback_threads
   - dbo.feedback_messages
@@ -42,11 +47,16 @@ endpoints:
   - POST   /api/Feedback/all/:threadId/reply
   - PATCH  /api/Feedback/all/:threadId/status
   - DELETE /api/Feedback/all/:threadId
+  - POST   /api/telemetry/errors
   - GET    /api/WebsitePages
   - GET    /api/WebsitePages/:id
   - POST   /api/WebsitePages
   - PUT    /api/WebsitePages/:id
   - DELETE /api/WebsitePages/:id
+external_notifications:
+  - Lark custom bot alert is queued after a new manual feedback thread commits.
+  - Lark custom bot alert is queued after public telemetry creates a new auto-detected feedback thread.
+  - Alerts include thread id, route/page context, limited text preview, attachment count, and `/feedback` inbox link; attachment bytes are not forwarded.
 ui_surfaces:
   - /feedback
   - /website
