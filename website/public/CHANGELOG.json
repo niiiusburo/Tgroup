@@ -2,7 +2,7 @@
   {
     "version": "0.32.35",
     "date": "2026-05-21",
-    "commit": "1a0e96ba",
+    "commit": "fb9f3884",
     "highlights": "Appointment edits now persist the chosen clinic location (companyid) end-to-end.",
     "sections": [
       {
