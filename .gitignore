@@ -72,6 +72,14 @@ website/.vite/
 website/*.png
 website/e2e/*.png
 reports/**/*.png
+
+# Playwright + feedback-extract + responsive-qa artifacts
+# (Screenshots, JSON traces, and per-run dirs from local automation runs.
+# Audit-grade evidence belongs under docs/audits/<date>-<topic>/.)
+output/playwright/
+reports/feedback-extract/
+reports/responsive-qa/
+reports/calendar-five-digit-proof-2026-04-29/
 api/uploads/
 api/src/truth-session.json
 scripts/screenshots/
