@@ -4,6 +4,9 @@
   "detailTitle": "Feedback Detail",
   "listTitle": "Your Feedback",
   "emptyState": "No feedback yet",
+  "loginHintTitle": "Any problem?",
+  "loginHintBody": "Tap here to report it — we read every one.",
+  "loginHintDismiss": "Dismiss",
   "invalidFileType": "Only JPG, PNG, GIF, and WEBP images are allowed.",
   "fileTooLarge": "Each image must be smaller than 5 MB.",
   "statusLabels": {

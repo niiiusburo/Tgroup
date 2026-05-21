@@ -1,5 +1,56 @@
 [
   {
+    "version": "0.32.37",
+    "date": "2026-05-21",
+    "commit": "pending",
+    "highlights": "Friendly feedback hint shows on every login, and the Xu hướng dòng tiền chart now shows dates vertically so they're readable.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "FeedbackWidget shows a small 'Có vấn đề? Nhấn vào đây để báo cho chúng tôi' (\"Any problem? Tap here to report it\") bubble next to the speech-bubble icon on every fresh login. Dismiss with the × button — hint reappears after each logout/login cycle (session-scoped).",
+          "Vietnamese and English copy provided via i18n (feedback.json: loginHintTitle / loginHintBody / loginHintDismiss)."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Xu hướng dòng tiền (cash flow trend) chart on /reports/revenue no longer truncates dates to '4...' '2...' — labels render vertically with the full date readable.",
+          "BarChart component now auto-rotates labels to vertical when there are >= 8 bars, fixing the same truncation pattern across weekly trends, monthly summaries, and any other dense chart automatically.",
+          "BarChart accepts a new `labelOrientation` prop ('auto' | 'horizontal' | 'vertical') for explicit control where the auto-detection isn't sufficient."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Verified locally via Playwright: VI hint copy renders with full text, dismiss X button visible, cash flow chart labels confirmed to use CSS rotate(-90deg) via computed style and visual screenshot."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.36",
+    "date": "2026-05-21",
+    "highlights": "New feedback and auto-detected website errors can now alert the Lark T-Group chat through a backend-only custom bot webhook.",
+    "sections": [
+      {
+        "title": "Feedback Alerts",
+        "items": [
+          "POST /api/Feedback queues a non-blocking Lark alert after the feedback thread and first message commit.",
+          "POST /api/telemetry/errors queues the same alert when a first-seen frontend error creates an auto-detected feedback thread.",
+          "Alerts include thread/page context, a bounded preview, attachment count, and the /feedback inbox link; attachment bytes and webhook secrets stay out of the browser."
+        ]
+      },
+      {
+        "title": "Configuration",
+        "items": [
+          "Added LARK_FEEDBACK_WEBHOOK_URL, optional LARK_FEEDBACK_WEBHOOK_SECRET, and TGROUP_PUBLIC_URL env documentation.",
+          "The notifier accepts only HTTPS Lark/Feishu custom bot webhook hosts and keeps feedback submission successful if Lark is unavailable."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.35",
     "date": "2026-05-21",
     "commit": "fb9f3884",

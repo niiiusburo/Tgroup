@@ -6,18 +6,43 @@ interface BarChartProps {
   color?: string;
   height?: number;
   showValues?: boolean;
+  /**
+   * X-axis label orientation. 'auto' picks 'vertical' when there are too many
+   * bars for horizontal labels to fit without truncation, else 'horizontal'.
+   */
+  labelOrientation?: 'auto' | 'horizontal' | 'vertical';
 }
 
 const COLORS = ['bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-violet-500', 'bg-rose-500', 'bg-cyan-500', 'bg-orange-500', 'bg-pink-500', 'bg-indigo-500', 'bg-teal-500', 'bg-lime-500', 'bg-red-500'];
 
-export function BarChart({ data, formatValue, color, height = 200, showValues = true }: BarChartProps) {
+// At ~10 bars the per-column width drops below ~50px and any label longer than
+// 3-4 chars gets sliced into "4..." "1..." etc. Switching to vertical labels
+// removes the width constraint and keeps full dates readable.
+const VERTICAL_LABEL_BAR_THRESHOLD = 8;
+// Reserved vertical space for rotated labels (px). Big enough for "Apr 30" / "T5 2026".
+const VERTICAL_LABEL_HEIGHT = 56;
+
+export function BarChart({
+  data,
+  formatValue,
+  color,
+  height = 200,
+  showValues = true,
+  labelOrientation = 'auto',
+}: BarChartProps) {
   if (!data.length) return <div className="flex items-center justify-center text-gray-400 text-sm py-8">No data</div>;
 
   const maxVal = Math.max(...data.map(d => d.value), 1);
   const fmt = formatValue || ((v: number) => v.toLocaleString('vi-VN'));
+  const useVerticalLabels =
+    labelOrientation === 'vertical' ||
+    (labelOrientation === 'auto' && data.length >= VERTICAL_LABEL_BAR_THRESHOLD);
 
   return (
-    <div className="flex items-stretch gap-2" style={{ height }}>
+    <div
+      className="flex items-stretch gap-2"
+      style={{ height: useVerticalLabels ? height + VERTICAL_LABEL_HEIGHT : height }}
+    >
       {data.map((d, i) => (
         <div key={d.label + i} className="flex-1 flex flex-col items-center min-w-0 h-full">
           {showValues && (
@@ -35,7 +60,27 @@ export function BarChart({ data, formatValue, color, height = 200, showValues = 
               <div className="absolute inset-0 bg-white/0 group-hover:bg-white/20 transition-colors duration-150 rounded-t" />
             </motion.div>
           </div>
-          <span className="text-[10px] text-gray-400 truncate w-full text-center mt-1 flex-shrink-0">{d.label}</span>
+          {useVerticalLabels ? (
+            <div
+              className="w-full flex justify-center flex-shrink-0 mt-1.5"
+              style={{ height: VERTICAL_LABEL_HEIGHT }}
+            >
+              <span
+                title={d.label}
+                className="text-[10px] text-gray-500 whitespace-nowrap leading-none origin-top -rotate-90 translate-y-1"
+                style={{ transformOrigin: 'top center' }}
+              >
+                {d.label}
+              </span>
+            </div>
+          ) : (
+            <span
+              title={d.label}
+              className="text-[10px] text-gray-400 truncate w-full text-center mt-1 flex-shrink-0"
+            >
+              {d.label}
+            </span>
+          )}
         </div>
       ))}
     </div>
