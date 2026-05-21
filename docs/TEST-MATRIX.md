@@ -36,6 +36,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `api/src/services/permissionService.js` | `api/tests/readRoutePermissions.test.js`, `website/e2e/permissions-*.spec.ts` | Effective permission divergence causes 403s. |
 | `website/src/contexts/AuthContext.tsx` | `website/e2e/auth-setup.spec.ts`, `website/e2e/permissions-check.spec.ts` | Auth state hydration affects every protected page. |
 | `website/src/constants/index.ts` (ROUTE_PERMISSIONS) | All E2E specs that navigate protected routes | Route guard changes may hide/show pages incorrectly. |
+| `website/src/App.tsx` (`AppRoutes`, `<Routes key={currentLOB}>`) and `website/src/contexts/BusinessUnitContext.tsx` | `website/src/__tests__/App.remount.test.tsx` (4 assertions, incl. source-level grep for `<Routes key={currentLOB}>`), `website/src/contexts/__tests__/BusinessUnitContext.test.tsx` | LOB toggle relies on `<Routes>` being keyed by `currentLOB` so the subtree unmounts+remounts and stale dental data does not flash when switching to cosmetic. Spec §"LOB Toggle Behavior" line ~195. |
 
 ### Appointments & Calendar
 

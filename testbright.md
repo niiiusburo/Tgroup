@@ -1693,3 +1693,38 @@ Setup data and login state:
 TestSprite execution items:
 - [ ] PENDING: `npx jest api/src/services/exports/__tests__/featureCatalog.crosscheck.test.js` passes 40/40.
 - [ ] PENDING: Hand-edit one column header in any builder COLUMNS array and confirm the cross-check fails with a clear key/header mismatch message. Revert the edit.
+
+## 2026-05-21 — Cosmetic LOB Phase-1 gap A: keyed remount of <Routes> on LOB toggle
+
+Feature/edit name:
+- App.tsx now keys the entire <Routes> subtree by currentLOB so toggling dental ↔ cosmetic forces React to unmount + remount everything beneath it. Prevents "flash of dental data" when switching LOBs.
+
+Changed URLs and API routes:
+- None. Frontend-only structural change inside `website/src/App.tsx`.
+
+Affected data flows:
+- Any data-fetching hook that reads from the LOB-aware API client will now see a fresh component instance on LOB switch, dropping in-memory state (selected rows, scroll position, partial form input). React Query / SWR caches survive because they live outside the subtree.
+
+User roles:
+- Admin users whose `partners.lob_scope` array has length ≥ 2 (the only users who can toggle).
+
+Happy paths:
+- Multi-LOB admin logs in, navigates to /customers, toggles header LOB dropdown from dental → cosmetic. Customers list reloads from cosmetic DB; no stale dental rows flicker.
+- Admin toggles back to dental. Customers list reloads from dental DB; no stale cosmetic rows flicker.
+
+Edge cases:
+- Single-LOB user: header toggle never renders (gated by isMultiLOBUser); App still works because `currentLOB` stays constant and the key never changes.
+- LOB switch mid-network-request: in-flight request resolves into an unmounted component; the keyed remount discards its state. Caches handle the staleness on the new key's mount.
+- localStorage hydration after a hard refresh: `currentLOB` initializes from `tgclinic_lob` key in BusinessUnitContext, so the first paint already uses the correct LOB and no remount fires.
+
+Regressions:
+- Do not remove `key={currentLOB}` from `<Routes>` — `website/src/__tests__/App.remount.test.tsx` has a source-level grep assertion that fails immediately if anyone deletes it.
+- Do not move the `useBusinessUnit()` call back into the legacy `<App>` body; it MUST be inside `<BusinessUnitProvider>`. The new `AppRoutes` component is where it lives.
+
+Setup data and login state:
+- Local dev: `http://127.0.0.1:5175`, login `t@clinic.vn / 123123` (Tgrouptest demo DB).
+- Multi-LOB admin requires `partners.lob_scope = '{dental,cosmetic}'` on the t@clinic.vn row (migration 047 + seed already in place on feat/cosmetic-lob-nk3).
+
+TestSprite execution items:
+- [ ] PENDING: `npx vitest run src/__tests__/App.remount.test.tsx` passes 4/4 (covers smoke render, context access, source-level key prop lock, and provider hierarchy).
+- [ ] PENDING: Live-browser check on `http://127.0.0.1:5175` with `t@clinic.vn` — open /customers, note a row count, toggle header LOB to cosmetic, confirm row count changes (different DB), toggle back, confirm dental rows return. No flash of opposite-LOB data during the transition. Screenshot evidence required.

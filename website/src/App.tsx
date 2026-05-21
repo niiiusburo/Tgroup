@@ -3,7 +3,7 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/Layout';
 import { LocationProvider } from '@/contexts/LocationContext';
-import { BusinessUnitProvider } from '@/contexts/BusinessUnitContext';
+import { BusinessUnitProvider, useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { TimezoneProvider } from '@/contexts/TimezoneContext';
@@ -143,14 +143,19 @@ function LoginRoute() {
  *   /notifications -> Notifications
  * ]
  */
-function App() {
+
+/**
+ * AppRoutes — keyed by currentLob to force remount when LOB changes
+ * This ensures all state and contexts reset when switching between dental and cosmetic
+ *
+ * @see BusinessUnitContext for LOB state management
+ */
+function AppRoutes() {
+  const { currentLOB } = useBusinessUnit();
+
   return (
-    <AuthProvider>
-      <TimezoneProvider>
-        <LocationProvider>
-          <BusinessUnitProvider>
-          <Suspense fallback={<div className="flex items-center justify-center h-screen text-gray-500">Loading...</div>}>
-          <Routes>
+    <Suspense fallback={<div className="flex items-center justify-center h-screen text-gray-500">Loading...</div>}>
+      <Routes key={currentLOB}>
           {/* Public routes */}
           <Route path="/login" element={<LoginRoute />} />
           {import.meta.env.DEV && (
@@ -349,9 +354,19 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
-          </Suspense>
+      </Suspense>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <TimezoneProvider>
+        <LocationProvider>
+          <BusinessUnitProvider>
+            <AppRoutes />
           </BusinessUnitProvider>
-      </LocationProvider>
+        </LocationProvider>
       </TimezoneProvider>
     </AuthProvider>
   );

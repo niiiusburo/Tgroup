@@ -2,6 +2,10 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [unreleased] — 2026-05-21 (feat/cosmetic-lob-nk3)
+### Added
+- Phase-1 gap A: `<Routes>` in `website/src/App.tsx` is now keyed by `currentLOB` from `BusinessUnitContext`, so toggling the LOB unmounts and remounts the entire route subtree. This is the spec §"LOB Toggle Behavior" requirement (line ~195 of `docs/superpowers/specs/2026-05-18-cosmetic-line-of-business-design-v2.md`): "The React tree under `<App>` is keyed on the LOB, so toggling unmounts+remounts the subtree — this is how we prevent 'flash of dental data' without per-component cache code." App.tsx was refactored to extract an `AppRoutes` component that calls `useBusinessUnit()` and renders `<Routes key={currentLOB}>`; the `BusinessUnitProvider` now sits above `AppRoutes` so the hook resolves. Regression-locked by `website/src/__tests__/App.remount.test.tsx` (4 assertions, incl. a source-level grep for `<Routes key={currentLOB}>`). — @agent — 2026-05-21 closes the foundation UX gap for the cosmetic LOB toggle.
+
 ## [Cosmetic LOB v2 — Phase 0 Governance] — 2026-05-19 (feat/cosmetic-line-of-business worktree only)
 
 - Product-map domains split/created: business-unit, cosmetic-clients, ctv, earnings-commissions (earnings table per PLAN); cosmetic.yaml corrected.
