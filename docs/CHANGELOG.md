@@ -14,6 +14,13 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [0.32.37] — 2026-05-21
+### Added
+- **FeedbackWidget login hint:** small dismissible bubble next to the speech-bubble icon in the header that prompts "Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc." (EN: "Any problem? Tap here to report it — we read every one."). Shows once per fresh login session — `AuthContext.login` clears `sessionStorage['tg_feedback_hint_dismissed']`, the X button on the bubble sets it. New i18n keys: `feedback.loginHintTitle`, `feedback.loginHintBody`, `feedback.loginHintDismiss` (EN + VI). — @agent — 2026-05-21 surfaces the feedback channel to staff on every login.
+
+### Fixed
+- **`Xu hướng dòng tiền` cash flow chart no longer truncates dates.** `BarChart` (`website/src/components/reports/BarChart.tsx`) gains a `labelOrientation: 'auto' | 'horizontal' | 'vertical'` prop. `'auto'` (default) rotates labels -90° when there are >= 8 bars so per-column width is no longer the constraint. `ReportsRevenue.tsx` passes `labelOrientation="vertical"` explicitly to the cash-flow chart since daily dates with month suffix are always long. The same auto-rotation applies to every other `BarChart` consumer (weekly trend, monthly summary) without per-call changes. — @agent — 2026-05-21 fixes the "4..." / "2..." mid-character truncation on /reports/revenue.
+
 ## [0.32.36] — 2026-05-21
 ### Added
 - **apiFetch LOB-aware routing (Gap B):** `website/src/lib/api/core.ts` now rewrites endpoint paths from `/api/*` to `/api/cosmetic/*` when VITE_COSMETIC_LOB_ENABLED flag is true and current LOB (via localStorage tgclinic_lob) is 'cosmetic'. Whitelisted routes (/Auth/*, /me/*, /version/*, /ctv/*) bypass rewriting regardless of LOB. Added vitest coverage: `website/src/lib/api/__tests__/apiFetch.lob.test.ts` (4 assertions: dental LOB routing, cosmetic LOB routing, whitelist bypass, missing LOB fallback). Feature locked behind optional feature flag (defaults false in .env); zero impact on existing dental-only deployments. — @phase-1-executor — 2026-05-21 closes cosmetic LOB v2 Gap B.

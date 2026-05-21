@@ -264,7 +264,7 @@ export function ReportsRevenue() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <SectionCard title={t('charts.cashFlowTrend')}>
-          {cashFlowQ.data ? <BarChart data={cashFlowTrend} formatValue={formatVND} color="bg-emerald-500" height={220} /> : null}
+          {cashFlowQ.data ? <BarChart data={cashFlowTrend} formatValue={formatVND} color="bg-emerald-500" height={220} labelOrientation="vertical" /> : null}
         </SectionCard>
 
         <SectionCard title={t('charts.revenueRecognitionBasis')}>

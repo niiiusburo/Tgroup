@@ -1786,8 +1786,55 @@ Setup data and login state:
 - Local dev feedback check can use `http://127.0.0.1:5175`, login `t@clinic.vn / 123123`.
 
 TestSprite execution items:
+- [x] DONE 2026-05-21: Sent a signed no-customer-data live webhook smoke test through `api/src/services/larkNotifier.js`; Lark `T-Group` displayed the `TGroup Feedback` bot message with `/feedback` link.
 - [ ] PENDING: Submit manual feedback from any authenticated page and confirm a new message appears in Lark `T-Group`.
 - [ ] PENDING: Submit manual feedback with an image and confirm Lark shows the file count while the attachment still renders from `/feedback`.
 - [ ] PENDING: Trigger a safe frontend telemetry error in a test environment and confirm the auto-detected thread plus Lark alert appear.
 - [ ] PENDING: Temporarily unset the webhook env in a local/test environment and confirm `POST /api/Feedback` still returns `201`.
 - [x] DONE 2026-05-21: `npm test -- --runInBand tests/feedbackAttachments.test.js tests/telemetryAuth.test.js src/services/__tests__/larkNotifier.test.js tests/envExampleValidation.test.js` passed from `api/` (Jest ran 54 suites, 703 tests).
+
+---
+
+# TestSprite Plan: Feedback Login Hint + Vertical Chart Labels (2026-05-21, v0.32.37)
+
+Feature/edit name: FeedbackWidget login hint + BarChart vertical labels
+
+Changed URLs and resources:
+- No API routes changed.
+- Frontend: `website/src/components/shared/FeedbackWidget.tsx` (new login-hint bubble), `website/src/contexts/AuthContext.tsx` (clears `sessionStorage.tg_feedback_hint_dismissed` on login), `website/src/components/reports/BarChart.tsx` (new `labelOrientation` prop, auto-vertical when bar count >= 8), `website/src/pages/reports/ReportsRevenue.tsx` (cashFlowTrend explicitly `labelOrientation="vertical"`).
+- i18n keys added: `feedback.loginHintTitle`, `feedback.loginHintBody`, `feedback.loginHintDismiss` (EN + VI).
+
+Data flow:
+- AuthContext.login → removes `sessionStorage['tg_feedback_hint_dismissed']`.
+- FeedbackWidget mount (after `user` becomes truthy) → reads sessionStorage, sets `showLoginHint=true` when key absent.
+- User clicks X or clicks the feedback icon → writes `sessionStorage['tg_feedback_hint_dismissed']='1'`, hides hint.
+- Next logout → fresh login resets the flag, hint shows again.
+
+Roles affected: all authenticated users (any role with access to the dashboard chrome).
+
+URL paths in scope: `/` (Overview) and any authenticated page that renders the Layout (the header is global). `/reports/revenue` for the chart verification.
+
+Edge cases:
+- Reload mid-session must NOT re-show the hint (sessionStorage survives reload).
+- Closing the tab + reopening: hint shows again (sessionStorage cleared by tab close).
+- Logout + login in same tab: hint shows again (AuthContext.login clears the key).
+- BarChart with `data.length < 8` keeps horizontal labels.
+- BarChart with `data.length >= 8` rotates labels -90°.
+- BarChart with explicit `labelOrientation="vertical"` rotates regardless of data length.
+
+Regressions to monitor:
+- FeedbackWidget unread badge still works.
+- FeedbackWidget panel still opens on icon click.
+- Other BarChart consumers (ReportsAppointments weeklyTrend, ReportsDashboard months, ReportsRevenue trendMonths) render correctly with auto-detection.
+- Chart height with vertical labels extends by 56px to reserve the label slot — confirm no card overflow.
+
+Setup data: any account with auth (e.g. `t@clinic.vn / 123123` on local/staging/prod).
+
+TestSprite execution items:
+- [x] DONE 2026-05-21: Local browser verified VI hint shows on fresh login (screenshot: feedback-hint-local-vi.png).
+- [x] DONE 2026-05-21: Local browser verified Xu hướng dòng tiền chart labels are rotated -90° (computed transform = `matrix(0, -1, 1, 0, 0, 4)`) with full text "22 thg 4" etc.; screenshot: cashflow-chart-verified.png.
+- [ ] PENDING: After deploy to NK2 / NK, log in as t@clinic.vn, confirm hint shows in EN locale too.
+- [ ] PENDING: After deploy, click X, reload, confirm hint stays dismissed.
+- [ ] PENDING: After deploy, logout + log back in, confirm hint reappears.
+- [ ] PENDING: After deploy, open /reports/revenue, confirm cash flow chart dates readable on production data (will have ~30 bars there).
+- [ ] PENDING: Regression on /reports/appointments weekly trend — confirm labels readable when data spans many weeks.

@@ -4,6 +4,9 @@
   "detailTitle": "Chi tiết phản hồi",
   "listTitle": "Phản hồi của bạn",
   "emptyState": "Chưa có phản hồi",
+  "loginHintTitle": "Có vấn đề?",
+  "loginHintBody": "Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc.",
+  "loginHintDismiss": "Bỏ qua",
   "invalidFileType": "Chỉ chấp nhận ảnh JPG, PNG, GIF, WEBP.",
   "fileTooLarge": "Mỗi ảnh phải nhỏ hơn 5 MB.",
   "statusLabels": {

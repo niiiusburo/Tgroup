@@ -97,6 +97,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = useCallback(async (email: string, password: string) => {
     const res = await apiLogin(email, password);
     localStorage.setItem(TOKEN_KEY, res.token);
+    // Show the FeedbackWidget login hint once on each fresh login.
+    sessionStorage.removeItem('tg_feedback_hint_dismissed');
     setState({
       user: res.user,
       permissions: res.permissions,
