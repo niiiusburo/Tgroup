@@ -8,6 +8,8 @@ export interface AuthUser {
   email: string;
   companyId: string;
   companyName: string;
+  is_ctv?: boolean;
+  lob_scope?: string[];
 }
 
 export interface AuthPermissions {

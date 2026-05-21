@@ -14,7 +14,7 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
-## [unreleased] — 2026-05-21
+## [0.32.36] — 2026-05-21
 ### Added
 - **apiFetch LOB-aware routing (Gap B):** `website/src/lib/api/core.ts` now rewrites endpoint paths from `/api/*` to `/api/cosmetic/*` when VITE_COSMETIC_LOB_ENABLED flag is true and current LOB (via localStorage tgclinic_lob) is 'cosmetic'. Whitelisted routes (/Auth/*, /me/*, /version/*, /ctv/*) bypass rewriting regardless of LOB. Added vitest coverage: `website/src/lib/api/__tests__/apiFetch.lob.test.ts` (4 assertions: dental LOB routing, cosmetic LOB routing, whitelist bypass, missing LOB fallback). Feature locked behind optional feature flag (defaults false in .env); zero impact on existing dental-only deployments. — @phase-1-executor — 2026-05-21 closes cosmetic LOB v2 Gap B.
 - Feedback Lark alerts for the `T-Group` custom bot: `POST /api/Feedback` and public `POST /api/telemetry/errors` now queue non-blocking backend-only Lark text alerts after manual or auto-detected feedback threads commit. Added `api/src/services/larkNotifier.js`, `api/src/routes/publicTelemetryErrors.js`, env documentation for `LARK_FEEDBACK_WEBHOOK_URL` / optional `LARK_FEEDBACK_WEBHOOK_SECRET` / `TGROUP_PUBLIC_URL`, Docker env passthrough, Jest coverage, product-map updates, `testbright.md`, and website release metadata for `0.32.36`. — @agent — 2026-05-21 preserves UC-016/UC-020 and WF-011 by alerting without coupling feedback persistence to external delivery.

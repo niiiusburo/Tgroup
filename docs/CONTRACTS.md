@@ -43,6 +43,8 @@
     email: string;
     companyId: string;     // primary branch
     companyName: string;
+    is_ctv?: boolean;      // optional, true if user is a CTV (cosmetic TV) member
+    lob_scope?: string[];  // optional, array of permitted lines of business (e.g., ["dental", "cosmetic"])
   };
   permissions: {
     effectivePermissions: string[];  // e.g., ["customers.view", "appointments.add"]
@@ -54,7 +56,7 @@
 
 #### GET /api/Auth/me
 **Headers:** `Authorization: Bearer <token>`
-**Response 200:** Same shape as login `user` + `permissions`.
+**Response 200:** Same shape as login response — `user` (with optional `is_ctv` and `lob_scope` fields) + `permissions`.
 
 ---
 

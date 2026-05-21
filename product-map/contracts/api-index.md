@@ -13,8 +13,8 @@
 
 | Method | Path | Auth | Body | Response |
 |--------|------|------|------|----------|
-| POST | `/login` | Public | `{ email, password }` | `{ token, user, permissions }` |
-| GET | `/me` | Auth | — | `{ user, permissions }` |
+| POST | `/login` | Public | `{ email, password }` | `{ token, user (with is_ctv?, lob_scope?), permissions }` |
+| GET | `/me` | Auth | — | `{ user (with is_ctv?, lob_scope?), permissions }` |
 | POST | `/change-password` | Auth | `{ oldPassword, newPassword }` | `{ success, message }` |
 
 ## LOB & Business Unit (`/api/me` + context) — Cosmetic LOB v2

@@ -50,6 +50,7 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 | `lib/allocatePaymentSources.test.ts` | Payments | `allocatePaymentSources` utility math |
 | `lib/apiFetch.test.ts` | API/Core | `apiFetch` error handling and conversions |
 | `lib/api/__tests__/apiFetch.lob.test.ts` | API/LOB | `apiFetch` LOB-aware routing v2.0: automatic path rewriting from `/api/X` to `/api/cosmetic/X` when `VITE_COSMETIC_LOB_ENABLED=true` and `tgclinic_lob='cosmetic'`; whitelisted routes bypass rewriting; feature flag and localStorage defaults tested |
+| `components/ProtectedRoute/__tests__/protectedRoute.ctvRedirect.test.tsx` | Auth | AuthUser type extends with optional `is_ctv` and `lob_scope` fields; ProtectedRoute checks `is_ctv === true` and redirects CTV users to `/ctv` route; backward compatibility with undefined fields verified |
 | `lib/formatting.test.ts` | Shared | Date/currency formatting utilities |
 | `lib/utils.test.ts` | Shared | Generic utility functions |
 | `lib/vietqr.test.ts` | Payments | VietQR URL generation logic |

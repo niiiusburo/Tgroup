@@ -286,6 +286,56 @@ TestSprite execution items:
 
 ---
 
+# TestSprite Plan: Auth Type Extension And CTV User Redirect (Gap C)
+
+Feature/edit name: Auth Type Extension And CTV User Redirect (Gap C) 2026-05-21
+
+Changed URLs and API routes:
+- Auth response documents updated for `POST /api/Auth/login` and `GET /api/Auth/me` to include optional `is_ctv` and `lob_scope` fields in user object.
+- No runtime API changes; backend already supports optional fields.
+- Frontend ProtectedRoute logic checks `is_ctv === true` and redirects to `/ctv` route.
+
+Affected data flows:
+- `AuthUser` TypeScript interface in `website/src/lib/api/auth.ts` extends with optional `is_ctv?: boolean` and `lob_scope?: string[]` fields (backward-compatible).
+- ProtectedRoute component in `website/src/App.tsx` extracts user from `useAuth()` hook and redirects CTV users (where `is_ctv === true`) away from main dashboard to `/ctv` route.
+- All other users pass through to main dashboard unaffected.
+
+User roles and scopes:
+- CTV users (`is_ctv === true`) — redirected to dedicated `/ctv` route.
+- Regular admin/staff users — access main dashboard as before.
+- Users where `is_ctv` is undefined or false — pass through to main dashboard (backward-compatible).
+
+Happy paths:
+- AuthUser type accepts optional `is_ctv` and `lob_scope` fields on login and `/me` responses.
+- CTV users are immediately redirected from `/` or any protected route to `/ctv` without accessing the main dashboard.
+- Non-CTV users continue to access main dashboard routes without interruption.
+- Type validation passes; no TypeScript errors in auth usage.
+
+Edge cases:
+- `is_ctv: false` should be treated same as `is_ctv: undefined` (non-CTV, pass through).
+- `lob_scope` array may be empty, single-element, or multiple elements — only `is_ctv === true` triggers redirect.
+- ProtectedRoute redirect happens before permission checks (CTV users never reach permission evaluation).
+- Backward compatibility: responses without `is_ctv` field work without modification.
+
+Regressions to prevent:
+- Existing non-CTV users accidentally redirected to `/ctv`.
+- CTV users able to access main dashboard routes or bypass redirect.
+- Type system regression on AuthUser usage sites across the app.
+- Loss of existing permission/auth flow for non-CTV users.
+
+Setup and execution items:
+- [x] PASS: AuthUser interface extends with optional is_ctv and lob_scope fields - verified in `website/src/lib/api/auth.ts` at lines 1-15.
+- [x] PASS: ProtectedRoute checks is_ctv === true and redirects to /ctv route - verified in `website/src/App.tsx` lines 95-107 and passing test assertions.
+- [x] PASS: New test file website/src/components/ProtectedRoute/__tests__/protectedRoute.ctvRedirect.test.tsx created with 5 passing Vitest tests - verifies type support, redirect logic, and backward compatibility.
+- [x] PASS: CONTRACTS.md updated to document new optional fields in Auth response - verified at lines 36-52 and 55-57.
+- [x] PASS: product-map/contracts/api-index.md updated to reflect user response changes - verified at Auth section table.
+- [x] PASS: product-map/test-matrix.md updated with new test file entry - documented under Unit Tests section.
+- [x] PASS: Git commit passes pre-commit governance hooks for CONTRACTS.md, api-index.md, and test-matrix.md updates.
+- [ ] PENDING: Manual E2E verification that CTV user with is_ctv=true is redirected to /ctv on login flow (requires test user account with is_ctv field set from backend).
+- [ ] PENDING: Manual E2E verification that non-CTV user with is_ctv=false or undefined reaches main dashboard on login flow.
+
+---
+
 # TestSprite Plan: Documentation Traceability And Governance Sync
 
 Feature/edit name: Documentation Traceability And Governance Sync

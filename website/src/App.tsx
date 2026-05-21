@@ -93,10 +93,15 @@ interface ProtectedRouteProps {
 }
 
 function ProtectedRoute({ children, path }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, hasPermission } = useAuth();
+  const { isAuthenticated, isLoading, hasPermission, user } = useAuth();
 
   if (isLoading) return <AuthLoading />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+
+  // Redirect is_ctv=true users to /ctv dashboard
+  if (user?.is_ctv === true) {
+    return <Navigate to="/ctv" replace />;
+  }
 
   const requiredPermission = ROUTE_PERMISSIONS[path];
   if (requiredPermission && !hasPermission(requiredPermission)) {
