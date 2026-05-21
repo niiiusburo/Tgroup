@@ -1,19 +1,28 @@
 /**
- * CtvDashboard.tsx — Full mobile-first 4-tab CTV experience (v2 Phase 3)
- * Exact match to visual-companion.md ASCII mockups + design tokens.
- * Bottom nav fixed, LOB pills, split bars (dental blue / cosmetic pink), segmented controls.
+ * CtvDashboard.tsx — Mobile-first 4-tab CTV experience (v2 Phase 3 + orange brand repaint).
+ *
+ * Repaint 2026-05-21: switched from hardcoded blue/pink hex to the warm
+ * orange primary token (#F97316) used everywhere else in the app, per
+ * DESIGN.md §"Warm but restrained orange accent system" and
+ * MODULE_CONSISTENCY_AUDIT.md §"Orange gradient header" pattern. The
+ * dental vs cosmetic split bar still keeps two distinct hues but both
+ * sit in the warm spectrum (orange + rose) instead of blue + pink.
+ *
  * Bypasses admin Layout/sidebar completely.
  */
 
 import { useEffect, useState } from 'react';
+import { Home, Wallet, Users, User, LogOut, Sparkles, Stethoscope, BellRing, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { fetchCtvSummary, fetchCtvReferrals, fetchCtvMe, type CtvCommissionSummary, type CtvReferral } from '@/lib/api/ctv';
 
 type Tab = 'home' | 'commission' | 'referrals' | 'me';
 type CommissionSub = 'pending' | 'paid';
 
-const DENTAL_COLOR = '#3b82f6'; // blue
-const COSMETIC_COLOR = '#ec4899'; // pink
+// Warm split: dental = primary orange, cosmetic = warm rose. Both stay
+// on-brand; neither cools the palette.
+const DENTAL_COLOR = '#F97316'; // primary orange-500
+const COSMETIC_COLOR = '#FB7185'; // rose-400 (warm complement)
 
 export function CtvDashboard() {
   const { logout, user } = useAuth();
@@ -51,7 +60,7 @@ export function CtvDashboard() {
       }
     }
     load();
-  }, []); // stable for CTV session; reload on tab if needed via future refresh button
+  }, []);
 
   const pending = summary?.totals?.pending || 0;
   const paid = summary?.totals?.paid || 0;
@@ -69,96 +78,125 @@ export function CtvDashboard() {
     const isDen = lob === 'dental' || lob === 'den';
     return (
       <span
-        className={`inline-block px-1.5 py-0.5 text-[10px] font-semibold rounded ${isDen ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}
+        className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full ${
+          isDen
+            ? 'bg-orange-50 text-orange-700 ring-1 ring-orange-200'
+            : 'bg-rose-50 text-rose-700 ring-1 ring-rose-200'
+        }`}
       >
-        {isDen ? 'den' : 'cos'}
+        {isDen ? <Stethoscope className="w-2.5 h-2.5" /> : <Sparkles className="w-2.5 h-2.5" />}
+        {isDen ? 'Dental' : 'Cosmetic'}
       </span>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] text-[#111] pb-20 font-sans" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-      {/* Top bar (simple, no admin chrome) */}
-      <div className="sticky top-0 z-10 bg-white border-b px-4 py-3 flex items-center justify-between">
-        <div className="font-semibold text-lg">TG Clinic • CTV</div>
-        <div className="text-xs text-gray-500">Mobile • {activeTab.toUpperCase()}</div>
+    <div className="min-h-screen bg-gradient-to-b from-orange-50/40 via-white to-white text-gray-900 pb-24 font-sans">
+      {/* Top bar — orange gradient brand header */}
+      <div className="sticky top-0 z-10 bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-lg shadow-orange-500/20">
+        <div className="max-w-md mx-auto px-5 py-4 flex items-center justify-between">
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.18em] text-orange-100/90 font-medium">TG Clinic</div>
+            <div className="text-lg font-semibold tracking-tight">CTV Portal</div>
+          </div>
+          <button
+            aria-label="Notifications"
+            className="relative w-10 h-10 rounded-full bg-white/15 backdrop-blur flex items-center justify-center hover:bg-white/25 transition"
+          >
+            <BellRing className="w-5 h-5" />
+            <span className="absolute top-2 right-2 w-2 h-2 bg-white rounded-full" />
+          </button>
+        </div>
       </div>
 
       {/* Content per tab */}
-      <div className="max-w-md mx-auto p-4">
-        {loading && <div className="text-center py-10 text-gray-500">Loading your earnings…</div>}
+      <div className="max-w-md mx-auto px-4 pt-5">
+        {loading && (
+          <div className="text-center py-16 text-gray-500">
+            <div className="mx-auto w-10 h-10 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mb-3" />
+            Loading your earnings…
+          </div>
+        )}
 
         {error && !loading && (
           <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-2xl mb-4 text-sm">
             ⚠️ {error}
-            <button onClick={() => window.location.reload()} className="ml-3 underline font-medium">Reload page</button>
+            <button onClick={() => window.location.reload()} className="ml-3 underline font-medium">Reload</button>
           </div>
         )}
 
         {/* HOME TAB */}
         {activeTab === 'home' && !loading && (
           <>
-            <div className="text-2xl font-semibold mb-1">Hi, {displayName} 👋</div>
-            <div className="text-sm text-gray-600 mb-4">Your referral commissions across dental &amp; cosmetic</div>
+            <div className="text-2xl font-semibold tracking-tight mb-1">Hi, {displayName} <span className="inline-block animate-[wave_1s_ease-in-out_2]">👋</span></div>
+            <div className="text-sm text-gray-600 mb-5">Your referral commissions across dental &amp; cosmetic</div>
 
             {/* PENDING COMMISSION TILE */}
-            <div className="bg-white rounded-2xl shadow p-4 mb-4 border">
-              <div className="uppercase tracking-widest text-xs font-bold text-gray-500 mb-1">PENDING COMMISSION</div>
-              <div className="text-4xl font-bold tabular-nums tracking-tighter mb-2">{formatVnd(pending)}</div>
+            <div className="bg-white rounded-3xl shadow-sm shadow-orange-500/5 ring-1 ring-gray-100 p-5 mb-4">
+              <div className="uppercase tracking-[0.15em] text-[11px] font-semibold text-orange-600 mb-1">Pending commission</div>
+              <div className="text-[2.5rem] leading-none font-bold tabular-nums tracking-tight text-gray-900 mb-4">{formatVnd(pending)}</div>
 
-              {/* Split bar exactly per visual */}
-              <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden flex mb-2">
-                <div style={{ width: `${dentalPct}%`, background: DENTAL_COLOR }} className="h-full" />
-                <div style={{ width: `${cosPct}%`, background: COSMETIC_COLOR }} className="h-full" />
+              {/* Split bar */}
+              <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden flex mb-3">
+                <div style={{ width: `${dentalPct}%`, background: DENTAL_COLOR }} className="h-full transition-all duration-500" />
+                <div style={{ width: `${cosPct}%`, background: COSMETIC_COLOR }} className="h-full transition-all duration-500" />
               </div>
 
-              <div className="flex gap-4 text-sm">
-                <div className="flex items-center gap-1.5">
-                  <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: DENTAL_COLOR }} /> Dental <span className="font-semibold tabular-nums">{formatVnd(dentalP)}</span>
+              <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: DENTAL_COLOR }} />
+                  <span className="text-gray-600">Dental</span>
+                  <span className="font-semibold tabular-nums">{formatVnd(dentalP)}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: COSMETIC_COLOR }} /> Cosmetic <span className="font-semibold tabular-nums">{formatVnd(cosP)}</span>
+                <div className="flex items-center gap-2">
+                  <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: COSMETIC_COLOR }} />
+                  <span className="text-gray-600">Cosmetic</span>
+                  <span className="font-semibold tabular-nums">{formatVnd(cosP)}</span>
                 </div>
               </div>
             </div>
 
             {/* THIS MONTH */}
-            <div className="bg-white rounded-2xl shadow p-4 mb-4 border">
-              <div className="uppercase tracking-widest text-xs font-bold text-gray-500 mb-2">THIS MONTH</div>
+            <div className="bg-white rounded-3xl shadow-sm ring-1 ring-gray-100 p-5 mb-4">
+              <div className="uppercase tracking-[0.15em] text-[11px] font-semibold text-gray-500 mb-3">This month</div>
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div>
-                  <div className="text-2xl font-bold">{summary?.counts?.pending || 8}</div>
-                  <div className="text-xs text-gray-500">Referrals</div>
+                  <div className="text-2xl font-bold text-gray-900">{summary?.counts?.pending || 0}</div>
+                  <div className="text-xs text-gray-500 mt-1">Referrals</div>
+                </div>
+                <div className="border-x border-gray-100">
+                  <div className="text-2xl font-bold text-gray-900">{summary?.counts?.paid || 0}</div>
+                  <div className="text-xs text-gray-500 mt-1">Services</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">{summary?.counts?.paid || 14}</div>
-                  <div className="text-xs text-gray-500">Services</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">{formatVnd(paid)}</div>
-                  <div className="text-xs text-gray-500">Paid out</div>
+                  <div className="text-2xl font-bold text-orange-600 tabular-nums">{formatVnd(paid).replace(/\s+₫$/, '')}</div>
+                  <div className="text-xs text-gray-500 mt-1">Paid (₫)</div>
                 </div>
               </div>
             </div>
 
             {/* RECENT ACTIVITY */}
-            <div className="bg-white rounded-2xl shadow p-4 border">
-              <div className="uppercase tracking-widest text-xs font-bold text-gray-500 mb-2">RECENT ACTIVITY</div>
+            <div className="bg-white rounded-3xl shadow-sm ring-1 ring-gray-100 p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="uppercase tracking-[0.15em] text-[11px] font-semibold text-gray-500">Recent activity</div>
+                <button onClick={() => setActiveTab('commission')} className="text-orange-600 text-xs font-semibold flex items-center gap-0.5">
+                  See all <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
               <div className="space-y-2 text-sm">
                 {(summary?.recent || []).slice(0, 5).map((act, i) => (
-                  <div key={i} className="flex justify-between items-center py-1 border-b last:border-0">
-                    <div className="flex items-center gap-2">
+                  <div key={i} className="flex justify-between items-center py-2 border-b last:border-0 border-gray-50">
+                    <div className="flex items-center gap-2 min-w-0">
                       <Pill lob={act.lob} />
-                      <span className="font-medium">{act.client_name}</span>
-                      <span className="text-gray-400">· {act.source?.slice(0,2)}</span>
+                      <span className="font-medium truncate">{act.client_name}</span>
                     </div>
-                    <div className={`font-semibold tabular-nums ${parseFloat(String(act.amount)) < 0 ? 'text-red-500' : 'text-emerald-600'}`}>
+                    <div className={`font-semibold tabular-nums shrink-0 ${parseFloat(String(act.amount)) < 0 ? 'text-red-500' : 'text-emerald-600'}`}>
                       {parseFloat(String(act.amount)) < 0 ? '' : '+'}{formatVnd(Math.abs(act.amount))}
                     </div>
                   </div>
                 ))}
                 {(!summary?.recent || summary.recent.length === 0) && (
-                  <div className="text-gray-400 text-sm py-2">No recent activity yet. Refer clients to start earning.</div>
+                  <div className="text-gray-400 text-sm py-4 text-center">No recent activity yet.<br />Refer clients to start earning.</div>
                 )}
               </div>
             </div>
@@ -168,19 +206,27 @@ export function CtvDashboard() {
         {/* COMMISSION TAB */}
         {activeTab === 'commission' && !loading && (
           <>
-            <div className="text-xl font-semibold mb-3">My Commission</div>
+            <div className="text-xl font-semibold tracking-tight mb-4">My Commission</div>
 
-            {/* Segmented */}
-            <div className="inline-flex bg-gray-100 rounded-full p-0.5 mb-4">
+            {/* Segmented control */}
+            <div className="inline-flex bg-orange-50 ring-1 ring-orange-100 rounded-full p-1 mb-5">
               <button
                 onClick={() => setCommissionSub('pending')}
-                className={`px-5 py-1 rounded-full text-sm font-medium transition ${commissionSub === 'pending' ? 'bg-white shadow' : 'text-gray-600'}`}
+                className={`px-6 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                  commissionSub === 'pending'
+                    ? 'bg-white text-orange-700 shadow-sm shadow-orange-500/20'
+                    : 'text-orange-600/70 hover:text-orange-700'
+                }`}
               >
                 Pending
               </button>
               <button
                 onClick={() => setCommissionSub('paid')}
-                className={`px-5 py-1 rounded-full text-sm font-medium transition ${commissionSub === 'paid' ? 'bg-white shadow' : 'text-gray-600'}`}
+                className={`px-6 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                  commissionSub === 'paid'
+                    ? 'bg-white text-orange-700 shadow-sm shadow-orange-500/20'
+                    : 'text-orange-600/70 hover:text-orange-700'
+                }`}
               >
                 Paid
               </button>
@@ -188,39 +234,45 @@ export function CtvDashboard() {
 
             {commissionSub === 'pending' ? (
               <div className="space-y-3">
-                <div className="bg-white rounded-2xl p-4 border shadow">
-                  <div className="text-xs text-gray-500">TOTAL PENDING</div>
-                  <div className="text-3xl font-bold">{formatVnd(pending)}</div>
-                  <div className="text-sm text-gray-500">{summary?.counts?.pending || 0} services · {summary?.pendingList?.length || 8} clients</div>
+                <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-3xl p-5 shadow-lg shadow-orange-500/25">
+                  <div className="text-[11px] uppercase tracking-[0.15em] font-semibold text-orange-100/90">Total pending</div>
+                  <div className="text-3xl font-bold tabular-nums mt-1">{formatVnd(pending)}</div>
+                  <div className="text-sm text-orange-100/90 mt-1">{summary?.counts?.pending || 0} services across {summary?.pendingList?.length || 0} clients</div>
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-gray-500 mb-1 px-1">BY SERVICE</div>
+                  <div className="text-[11px] uppercase tracking-[0.15em] font-semibold text-gray-500 mb-2 px-1">By service</div>
                   {(summary?.pendingList || summary?.recent || []).filter(r => r.status === 'pending').map((row: any, idx: number) => (
-                    <div key={idx} className="bg-white rounded-xl p-3 mb-2 border flex justify-between text-sm">
-                      <div><Pill lob={row.lob} /> {row.client_name} <span className="text-gray-400 text-xs">{row.source}</span></div>
-                      <div className="font-semibold text-right">{formatVnd(row.amount)}</div>
+                    <div key={idx} className="bg-white rounded-2xl p-4 mb-2 ring-1 ring-gray-100 flex justify-between items-center text-sm">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Pill lob={row.lob} />
+                        <span className="font-medium truncate">{row.client_name}</span>
+                      </div>
+                      <div className="font-semibold tabular-nums shrink-0">{formatVnd(row.amount)}</div>
                     </div>
                   ))}
-                  {(!summary?.pendingList || summary.pendingList.length === 0) && <div className="text-gray-400 px-2">No pending commissions.</div>}
+                  {(!summary?.pendingList || summary.pendingList.length === 0) && <div className="text-gray-400 px-2 py-2 text-sm">No pending commissions.</div>}
                 </div>
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="bg-white rounded-2xl p-4 border shadow">
-                  <div className="text-xs text-gray-500">TOTAL PAID OUT</div>
-                  <div className="text-3xl font-bold">{formatVnd(paid)}</div>
-                  <div className="text-sm text-gray-500">{summary?.counts?.paid || 0} payout cycles</div>
+                <div className="bg-white rounded-3xl p-5 ring-1 ring-gray-100 shadow-sm">
+                  <div className="text-[11px] uppercase tracking-[0.15em] font-semibold text-gray-500">Total paid out</div>
+                  <div className="text-3xl font-bold tabular-nums text-gray-900 mt-1">{formatVnd(paid)}</div>
+                  <div className="text-sm text-gray-500 mt-1">{summary?.counts?.paid || 0} payout cycles</div>
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-gray-500 mb-1 px-1">PAYOUT CYCLES</div>
-                  <div className="text-sm text-gray-500 px-1">(Payout batch history will appear here after admin runs payouts. Earnings linked via payout_id.)</div>
-                  {/* Placeholder cycles from paidList */}
+                  <div className="text-[11px] uppercase tracking-[0.15em] font-semibold text-gray-500 mb-2 px-1">Payout cycles</div>
                   {(summary?.paidList || []).slice(0, 3).map((p: any, i: number) => (
-                    <div key={i} className="bg-white p-3 rounded-xl border mb-2 flex justify-between">
-                      <div>2026-0{i+2} · Paid</div>
-                      <div className="font-medium">{formatVnd(p.amount)}</div>
+                    <div key={i} className="bg-white p-4 rounded-2xl ring-1 ring-gray-100 mb-2 flex justify-between items-center">
+                      <div className="text-sm">2026-0{i+2} <span className="text-emerald-600 font-medium ml-1">· Paid</span></div>
+                      <div className="font-semibold tabular-nums">{formatVnd(p.amount)}</div>
                     </div>
                   ))}
+                  {(!summary?.paidList || summary.paidList.length === 0) && (
+                    <div className="bg-white rounded-2xl p-4 ring-1 ring-gray-100 text-sm text-gray-500">
+                      Payout batch history will appear here after admin runs payouts.
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -230,19 +282,31 @@ export function CtvDashboard() {
         {/* REFERRALS TAB */}
         {activeTab === 'referrals' && !loading && (
           <>
-            <div className="text-xl font-semibold mb-3">My Referrals</div>
+            <div className="text-xl font-semibold tracking-tight mb-4">My Referrals</div>
             <div className="space-y-2">
-              {referrals.length === 0 && <div className="text-gray-400">No referred clients yet.</div>}
+              {referrals.length === 0 && (
+                <div className="bg-white rounded-3xl p-6 ring-1 ring-gray-100 text-center">
+                  <div className="text-gray-400 text-sm">No referred clients yet.</div>
+                </div>
+              )}
               {referrals.map((ref, i) => (
-                <div key={i} className="bg-white rounded-2xl p-4 border shadow">
-                  <div className="flex items-center gap-2 mb-1">
+                <div key={i} className="bg-white rounded-2xl p-4 ring-1 ring-gray-100 shadow-sm">
+                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                     {ref.lobs.map((l, li) => <Pill key={li} lob={l} />)}
-                    <span className="font-semibold">{ref.name}</span>
+                    <span className="font-semibold ml-auto sm:ml-0">{ref.name}</span>
                   </div>
-                  <div className="text-sm text-gray-600">{ref.phone || ''}</div>
-                  <div className="mt-2 flex justify-between text-sm">
-                    <span className={`font-medium ${ref.status === 'earning' ? 'text-emerald-600' : 'text-amber-600'}`}>{ref.status}</span>
-                    <span>{ref.earned_count} svc · {formatVnd(ref.total_earned)}</span>
+                  {ref.phone && <div className="text-sm text-gray-500">{ref.phone}</div>}
+                  <div className="mt-2 flex justify-between items-center text-sm">
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        ref.status === 'earning'
+                          ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                          : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'
+                      }`}
+                    >
+                      {ref.status}
+                    </span>
+                    <span className="text-gray-600">{ref.earned_count} svc · <span className="font-semibold text-gray-900 tabular-nums">{formatVnd(ref.total_earned)}</span></span>
                   </div>
                 </div>
               ))}
@@ -252,44 +316,69 @@ export function CtvDashboard() {
 
         {/* ME TAB */}
         {activeTab === 'me' && !loading && (
-          <div className="text-center pt-6">
-            <div className="mx-auto w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center text-3xl mb-3">👤</div>
-            <div className="text-2xl font-semibold">{displayName}</div>
-            <div className="text-sm text-gray-500 mb-1">(CTV)</div>
-            <div className="text-sm mb-6">{me?.email || user?.email || '—'}<br />{me?.phone || '—'}</div>
+          <div className="pt-2">
+            <div className="bg-white rounded-3xl p-6 ring-1 ring-gray-100 shadow-sm text-center">
+              <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-3xl text-white shadow-lg shadow-orange-500/25 mb-3">
+                {displayName.slice(0, 1).toUpperCase()}
+              </div>
+              <div className="text-xl font-semibold tracking-tight">{displayName}</div>
+              <div className="text-xs text-orange-600 uppercase tracking-[0.15em] font-semibold mt-1">CTV partner</div>
+              <div className="text-sm text-gray-600 mt-3">{me?.email || user?.email || '—'}</div>
+              {me?.phone && <div className="text-sm text-gray-600">{me.phone}</div>}
+            </div>
 
-            <div className="bg-white rounded-2xl p-4 text-left text-sm border mb-6">
-              <div className="flex justify-between py-1"><span>Language</span><span className="font-medium">VI ▾</span></div>
-              <div className="flex justify-between py-1"><span>Notifications</span><span className="font-medium">On</span></div>
+            <div className="bg-white rounded-3xl ring-1 ring-gray-100 mt-4 divide-y divide-gray-50 text-sm">
+              <div className="flex justify-between items-center px-5 py-3.5">
+                <span className="text-gray-600">Language</span>
+                <span className="font-medium text-gray-900">VI</span>
+              </div>
+              <div className="flex justify-between items-center px-5 py-3.5">
+                <span className="text-gray-600">Notifications</span>
+                <span className="font-medium text-emerald-600">On</span>
+              </div>
             </div>
 
             <button
               onClick={() => { logout(); window.location.href = '/login'; }}
-              className="w-full py-3 bg-red-600 text-white rounded-2xl font-semibold active:opacity-90"
+              className="w-full mt-6 py-3.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl font-semibold shadow-lg shadow-orange-500/25 active:opacity-90 active:scale-[0.99] transition flex items-center justify-center gap-2"
             >
-              Log out
+              <LogOut className="w-4 h-4" /> Log out
             </button>
           </div>
         )}
       </div>
 
-      {/* BOTTOM NAV — exact per visual companion */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t max-w-md mx-auto flex text-center text-xs">
-        {[
-          { key: 'home', label: 'Home', icon: '⌂' },
-          { key: 'commission', label: 'Comm', icon: '💰' },
-          { key: 'referrals', label: 'Refs', icon: '👥' },
-          { key: 'me', label: 'Me', icon: '👤' },
-        ].map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setActiveTab(t.key as Tab)}
-            className={`flex-1 py-3 flex flex-col items-center justify-center border-t-2 ${activeTab === t.key ? 'border-black text-black font-semibold' : 'border-transparent text-gray-400'}`}
-          >
-            <span className="text-lg leading-none mb-0.5">{t.icon}</span>
-            <span>{t.label}</span>
-          </button>
-        ))}
+      {/* BOTTOM NAV — orange active state, rounded pills */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-100 shadow-[0_-2px_10px_rgba(249,115,22,0.05)]">
+        <div className="max-w-md mx-auto flex">
+          {[
+            { key: 'home', label: 'Home', Icon: Home },
+            { key: 'commission', label: 'Comm', Icon: Wallet },
+            { key: 'referrals', label: 'Refs', Icon: Users },
+            { key: 'me', label: 'Me', Icon: User },
+          ].map(({ key, label, Icon }) => {
+            const active = activeTab === key;
+            return (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key as Tab)}
+                className={`flex-1 py-2.5 flex flex-col items-center justify-center gap-0.5 text-[11px] transition ${
+                  active ? 'text-orange-600' : 'text-gray-400'
+                }`}
+                aria-current={active ? 'page' : undefined}
+              >
+                <div
+                  className={`w-10 h-7 rounded-full flex items-center justify-center transition-all ${
+                    active ? 'bg-orange-100' : ''
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 ${active ? 'stroke-[2.5]' : ''}`} />
+                </div>
+                <span className={active ? 'font-semibold' : 'font-medium'}>{label}</span>
+              </button>
+            );
+          })}
+        </div>
       </nav>
     </div>
   );
