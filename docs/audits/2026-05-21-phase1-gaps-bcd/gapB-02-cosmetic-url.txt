@@ -1,0 +1,1 @@
+http://127.0.0.1:3002/api/cosmetic/Partners?offset=0&limit=20
