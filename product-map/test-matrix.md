@@ -137,7 +137,6 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 | `src/services/reports/__tests__/canonicalRevenue.test.js` | Reports/Exports | UC-013/WF-013: canonical revenue SQL mirrors the Excel `revenue-flat` export WHERE/JOIN topology, allocation capping expression, saleorder attribution, and payment-date bucketing |
 | `src/services/exports/__tests__/legacyFlatReportsExport.test.js` | Reports/Exports | UC-013/WF-005: `revenue-flat` and `deposit-flat` registry, workbook templates, SO-code column mapping, posted service-payment filters, allocation proration SQL, deposit top-up filtering, and row-limit error |
 | `src/services/exports/__tests__/reportSalesEmployeesExport.test.js` | Reports/Exports | UC-019/WF-005: `report-sales-employees` preview/download filters, location scope, employee-type SQL attribution, grouped workbook rows, and out-of-scope location rejection |
-| `src/services/__tests__/referralClaim.test.js` | Commission/Referrals | `computeClaim` pure function: anchor date selection (latest of referral card date and last paid service date), 6-month expiration window, active/inactive state transitions; `getReferralClaimStatus` database queries: owner lookup via `referred_by_ctv_id`, referral product card date, last paid service date from `dbo.payments` with `customer_id` and `payment_date` columns, supports both direct DB and transaction context |
 
 ## Coverage Gaps
 
