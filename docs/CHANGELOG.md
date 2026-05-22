@@ -3,6 +3,8 @@
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
 ## [unreleased] — 2026-05-22 (feat/ctv-mlm-commission)
+### Docs
+- `docs/superpowers/specs/2026-05-22-ctv-referral-claim-design.md` — design for CTV referral claims: exclusive ownership via `referred_by_ctv_id`, a "Referral Start" saleorderline card as the claim anchor, a rolling 6-month expiry computed from `max(card date, last paid service)`, a hard eligibility gate that blocks booking a client actively claimed by another CTV (CTVs and admins), and crediting only while the claim is active as of payment date. No new tables; one additive column `commission_settings.referral_start_product_id`. No runtime code yet. — @agent — 2026-05-22.
 ### Fixed
 - NK3/CTV Cosmetic LOB employee add/edit modal leaked dental branches because EmployeeForm and EmployeeProfile loaded `/api/Companies` without the active LOB. They now load branches with `lob=currentLOB`, and employee create/update sends the same LOB so Cosmetic uses `/api/cosmetic/Companies` and `/api/cosmetic/Employees`. Added form and API-client regression tests. — @agent — 2026-05-22 (0.32.40, preserves Cosmetic LOB v2 D5/D6 data isolation).
 - Commission Config % inputs (global default + per-level share) were unusable: parse-and-clamp on every keystroke dropped the decimal point (typing `14.5` reverted to `14`) and clearing the field snapped to `0`. Now backed by a raw-text draft per input — type freely incl. decimals, parsed into the model on change, clamped to 0–100 on blur. — @agent — 2026-05-22 (0.32.39).
