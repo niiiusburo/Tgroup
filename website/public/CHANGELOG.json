@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.32.41",
+    "date": "2026-05-23",
+    "commit": "pending",
+    "highlights": "CTVs can book a referred client straight from the portal — the client is linked to them, gets a Referral Start card, and the booking is blocked if the client already belongs to another CTV. The customer profile now shows who referred them.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "CTV Portal '+ Client': now creates a booking and claims the client for that CTV (6-month exclusive window). If the client is already active with another CTV, the booking is blocked with a clear message.",
+          "Customer profile shows 'Người giới thiệu (CTV)' with active/expired status.",
+          "Commission is credited to the referring CTV only while their claim is active as of the payment date."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.40",
     "date": "2026-05-22",
     "commit": "pending",

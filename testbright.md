@@ -1983,3 +1983,12 @@ TestSprite execution items:
 - [ ] PENDING (NK3 live): log in as a CTV, /ctv header "+ Client" → refer a customer (success); "+ CTV" → recruit (success), confirm new CTV can log in (employee=true).
 - [ ] PENDING (NK3 live): collect a payment on a service with a referral % for a CTV-referred client; confirm earnings rows split across the upline per config.
 - [ ] PENDING (NK3 live): confirm NK + NK2 untouched (no deploy there).
+
+## Feature: CTV referral claim + eligibility (feat/ctv-mlm-commission, 2026-05-23)
+
+- [x] PASS: api jest full suite green; web tsc + depcruise + vite build green — evidence: exit 0 across all.
+- [x] PASS: engine credits CTV only while claim active (lapsed → falls through, no credit); 11 engine + 14 claim-helper jest cases.
+- [x] PASS: POST /api/ctv/bookings unit tests — block (B_CLIENT_CLAIMED) + new-client create — 2 jest cases.
+- [ ] PENDING (NK3 live): set commission_settings.referral_start_product_id to a created "Referral Start" product on the smoketest DB(s).
+- [ ] PENDING (NK3 live, Origin header): CTV books a new client → client created + Referral Start card + appointment; profile shows "Người giới thiệu (CTV)".
+- [ ] PENDING (NK3 live): a second CTV booking the same active client → 400 B_CLIENT_CLAIMED.

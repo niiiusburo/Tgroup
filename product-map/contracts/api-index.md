@@ -51,6 +51,8 @@ When `COSMETIC_LOB_ENABLED=false` the entire family returns 503.
 | GET | `/api/ctv/referrals` | CTV (ctv.referrals.view.self) | — | List of referred clients across both DBs with status (earning / no visit), totals earned, LOB pills |
 | POST | `/api/ctv` | CTV or admin | `{ name, phone, email, password, lob_scope?, referred_by_ctv_id? (admin) }` | 201 created CTV. Closed signup (no public). `employee=true`, instant active; referred_by = caller (CTV) or body (admin). Dups → `U_DUPLICATE_PHONE`/`U_DUPLICATE_EMAIL`; non-CTV/non-admin → 403 `S_CTV_CREATE_FORBIDDEN` |
 | POST | `/api/ctv/clients` | CTV or admin | `{ name, phone, lob }` | 201 referred customer in one LOB DB, `referred_by_ctv_id` = caller |
+| POST | `/api/ctv/bookings` | CTV or admin | `{ clientId?, name?, phone, lob, date, time?, companyId?, productId? }` | 201 `{ clientId, appointmentId }`. Eligibility gate: `400 B_CLIENT_CLAIMED {ownerName, expiresAt}` if actively claimed by another CTV; creates/re-claims client + Referral Start card + appointment. `409 REFERRAL_PRODUCT_NOT_CONFIGURED` if referral product unset |
+| (augmented) | `GET /api/Partners/resolve` & `GET /api/Partners/:id` | Auth | — | responses now include `referralClaim: { ownerCtvId, ownerName, active, expiresAt } | null` |
 | (internal) | commission recipient resolution | — | — | Implements D13 priority: referred_by_ctv_id > active consultation card (cosmetic) > salestaffid (dental). For `ctv` source the pool is split up the upline per `commission_level_config` |
 
 CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin route.
