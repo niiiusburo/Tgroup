@@ -58,10 +58,11 @@ CREATE TABLE IF NOT EXISTS dbo.commission_settings (
   updated_at                  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Seed default settings
+-- Seed default settings (idempotent: singleton — only insert if table is empty;
+-- a plain ON CONFLICT DO NOTHING would not dedupe because id is a random uuid).
 INSERT INTO dbo.commission_settings (default_referral_percent)
-VALUES (20.0)
-ON CONFLICT DO NOTHING;
+SELECT 20.0
+WHERE NOT EXISTS (SELECT 1 FROM dbo.commission_settings);
 
 -- ROLLBACK:
 --   DELETE FROM dbo.commission_settings;

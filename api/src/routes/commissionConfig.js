@@ -84,7 +84,13 @@ router.put('/', requireAuth, async (req, res) => {
     }
 
     if (typeof defaultReferralPercent === 'number') {
-      await query('UPDATE dbo.commission_settings SET default_referral_percent = $1 WHERE id = 1', [defaultReferralPercent]);
+      // commission_settings is a singleton; update the existing row regardless of
+      // id type (int in fresh migrations, uuid in pre-existing envs), insert if empty.
+      const updated = await query('UPDATE dbo.commission_settings SET default_referral_percent = $1', [defaultReferralPercent]);
+      const settingsCount = await query('SELECT 1 FROM dbo.commission_settings LIMIT 1');
+      if (!settingsCount || settingsCount.length === 0) {
+        await query('INSERT INTO dbo.commission_settings (default_referral_percent) VALUES ($1)', [defaultReferralPercent]);
+      }
     }
 
     const levelRows = await query('SELECT level, label, enabled, share_percent FROM dbo.commission_level_config ORDER BY level');
