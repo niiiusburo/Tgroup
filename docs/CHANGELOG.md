@@ -14,6 +14,13 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [unreleased] — 2026-05-22
+### Docs
+- `ctv.2checkin.com/tbot` static Feature Board deploy documented in `testbright.md`; live route now serves `/Users/thuanle/Downloads/feature_kanban_2.html` from `/var/www/ctv.2checkin.com/tbot/` with browser backup plus shared file sync through `/tbot/state/board.json`, leaving shared `/var/www/tbot` and other vhosts untouched. — @agent — 2026-05-22 CTV-only static deploy proof.
+- `ctv.2checkin.com/tbot` board content seeded with 36 Backlog feature cards from the linked 6-week TBot planning spreadsheet; no NK route or clinic data changed. — @agent — 2026-05-22 live board content import.
+- `ctv.2checkin.com/tbot` header now shows live day counters for the July 3, 2026 six-week checkpoint and October 15, 2026 final checkpoint; deployed source snapshot added under `docs/live-artifacts/ctv-tbot/`. — @agent — 2026-05-22 deadline visibility for the shared TBot board.
+- `testbright.md` — appended NK3 Cosmetic LOB feedback triage with live screenshot evidence, pending manual feedback IDs, related auto-detected API error clusters, and TestSprite follow-up checks. No runtime code changed. — @agent — 2026-05-22 preserves cosmetic LOB feedback scope for follow-up fixes.
+
 ## [0.32.37] — 2026-05-21
 ### Added
 - **FeedbackWidget login hint:** small dismissible bubble next to the speech-bubble icon in the header that prompts "Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc." (EN: "Any problem? Tap here to report it — we read every one."). Shows once per fresh login session — `AuthContext.login` clears `sessionStorage['tg_feedback_hint_dismissed']`, the X button on the bubble sets it. New i18n keys: `feedback.loginHintTitle`, `feedback.loginHintBody`, `feedback.loginHintDismiss` (EN + VI). — @agent — 2026-05-21 surfaces the feedback channel to staff on every login.

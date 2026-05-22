@@ -1838,3 +1838,141 @@ TestSprite execution items:
 - [ ] PENDING: After deploy, logout + log back in, confirm hint reappears.
 - [ ] PENDING: After deploy, open /reports/revenue, confirm cash flow chart dates readable on production data (will have ~30 bars there).
 - [ ] PENDING: Regression on /reports/appointments weekly trend — confirm labels readable when data spans many weeks.
+
+---
+
+# TestSprite Plan: NK3 Cosmetic LOB Feedback Triage (2026-05-22)
+
+Feature/edit name: NK3 Cosmetic Line-of-Business feedback triage
+
+Changed URLs and API routes:
+- Live read-only triage only; no app code or API routes changed in this pass.
+- Checked `https://76-13-16-68.sslip.io/reports/revenue`.
+- Checked `https://76-13-16-68.sslip.io/feedback`.
+- Evidence artifacts: `output/playwright/nk3-revenue-feedback-2026-05-22T08-28-07-446Z/`.
+- Relevant live API routes observed: `POST /api/cosmetic/Reports/revenue/*`, `GET /api/Feedback/all?source=manual`, `GET /api/Feedback/all?source=auto`, `GET /api/Feedback/all/:threadId`.
+
+Affected data flows:
+- Cosmetic LOB selection via `localStorage.tgclinic_lob=cosmetic` routes report reads to `/api/cosmetic/Reports/revenue/*`.
+- Staff feedback for NK3 cosmetic work reports failed writes on employees, customers, appointments, sale orders, and payments.
+- Auto-detected feedback confirms related `500` clusters on `/Partners`, `/Payments`, and `/SaleOrders/:id`, plus `Partner with given partnerId does not exist`.
+
+User roles:
+- Admin with `lob_scope: ["dental", "cosmetic"]`, feedback moderation access, and report access.
+- Cosmetic staff/admin testing customer, appointment, employee, payment, and report workflows.
+
+Happy paths:
+- Admin can log into NK3 and switch the header LOB to Cosmetic.
+- `/reports/revenue` in Cosmetic should load without console/network/API errors.
+- `/feedback` should list current employee reports and open detail modal with attached screenshots.
+
+Edge cases:
+- Cosmetic employee create must list only cosmetic branches (`Thẩm mỹ Hà Nội`, `Thẩm mỹ Hồ Chí Minh`) and save against the cosmetic DB.
+- Cosmetic customer create must not post a cosmetic `companyid` into the dental DB.
+- Cosmetic appointment create must save when the selected customer exists in the cosmetic DB.
+- Cosmetic advance/deposit payment must update the "Tạm ứng đã đóng" / remaining deposit summary immediately after confirmation.
+- Cosmetic revenue report should reconcile `Tổng đã thu` with posted service payments, while deposits stay in cash-flow-only cards.
+
+Regressions:
+- Dental LOB reports and write flows must remain unchanged.
+- Resolved revenue/export feedback on `/reports/revenue` must stay resolved.
+- CTV/cross-DB feedback noise must not be mixed into manual staff bugs unless tied to a current workflow.
+
+Setup data and login state:
+- Live NK3 URL: `https://76-13-16-68.sslip.io`.
+- Use admin credentials from `.agents/live-site.env`.
+- Browser screenshots captured on 2026-05-22:
+  - `03-revenue-report.png` (Dental revenue default)
+  - `06-revenue-report-cosmetic-lob.png` (Cosmetic revenue)
+  - `04-feedback-list.png` (manual feedback list)
+  - `05-feedback-detail.png` (first pending feedback detail)
+  - `attachment-41028b7a-d842-4049-b5de-5b9b30f01983.jpg` (employee branch bug)
+  - `attachment-d5a65a64-b10b-4aef-83a8-b846b8bc3f25.jpg` (appointment create bug)
+  - `attachment-86c1ce96-04dc-4ef0-b39c-5e25d3ce0fe3.jpg` (customer-detail appointment create bug)
+  - `attachment-be9ed1b8-0d5e-4ac6-bf4a-329713c9f921.jpg` (deposit summary bug)
+  - `attachment-97aca05b-d881-4f5b-a029-502583aae916.jpg` (customer create FK bug)
+
+TestSprite execution items:
+- [x] PASS 2026-05-22: Logged into NK3 with `t@clinic.vn`, user payload had `lob_scope: ["dental","cosmetic"]`, and `/feedback` loaded 15 manual reports plus 426 auto-detected reports with no browser console errors, failed requests, or API 4xx/5xx during the checked flow.
+- [x] PASS 2026-05-22: Cosmetic `/reports/revenue` loaded through `/api/cosmetic/Reports/revenue/*` with no API 4xx/5xx; screenshot `06-revenue-report-cosmetic-lob.png`.
+- [ ] FAIL 2026-05-22: Employee create in Cosmetic shows dental branch options (`Tấm Dentist Quận 3`, `Tấm Dentist Thủ Đức`, etc.) instead of cosmetic branches; feedback `41028b7a-d842-4049-b5de-5b9b30f01983`.
+- [ ] FAIL 2026-05-22: Appointment create in Cosmetic fails with `Partner with given partnerId does not exist`; feedback `d5a65a64-b10b-4aef-83a8-b846b8bc3f25` and `86c1ce96-04dc-4ef0-b39c-5e25d3ce0fe3`.
+- [ ] FAIL 2026-05-22: Cosmetic customer create fails FK validation because `companyid=5c92246f-a77c-4e8c-a88e-b727757afa68` is not present in the target `companies` table; feedback `97aca05b-d881-4f5b-a029-502583aae916`.
+- [ ] FAIL 2026-05-22: Cosmetic deposit/advance payment row shows `+500.000 đ` confirmed, but summary cards still show `Tạm ứng đã đóng 0 đ` and `Tạm ứng còn lại 0 đ`; feedback `be9ed1b8-0d5e-4ac6-bf4a-329713c9f921`.
+- [ ] PENDING: Reproduce the failed write flows locally against the two-DB setup before fixing NK3.
+- [ ] PENDING: After fixes, rerun the exact NK3 cosmetic flows and attach fresh screenshots for each resolved feedback item.
+
+---
+
+# TestSprite Plan: CTV TBot Feature Board Static Deploy (2026-05-22)
+
+Feature/edit name: CTV TBot Feature Board static page deploy with shared file sync
+
+Changed URLs and API routes:
+- Changed live URL: `https://ctv.2checkin.com/tbot`
+- Changed live URL alias: `https://ctv.2checkin.com/tbot/`
+- Changed live shared state file: `https://ctv.2checkin.com/tbot/state/board.json`
+- No app API routes changed; this uses nginx WebDAV `PUT` for one CTV-only JSON file.
+- No `nk.2checkin.com`, `nk2.2checkin.com`, `nk3` sslip, or `ctv.thammyvientam.com` route was intentionally changed.
+- Screenshot evidence: `output/playwright/ctv-tbot-feature-board-2026-05-22.png`.
+- Shared-sync screenshot evidence: `output/playwright/ctv-tbot-shared-sync-2026-05-22.png`.
+
+Affected data flows:
+- Static HTML page copied from `/Users/thuanle/Downloads/feature_kanban_2.html`.
+- The deploy copy adds browser backup through `localStorage` and primary shared persistence through `/tbot/state/board.json`.
+- Each save writes the normalized feature list with `PUT /tbot/state/board.json`; each browser polls the same file every 3 seconds and applies updates when another browser changes it.
+- Nginx `ctv.2checkin.com` now serves `/tbot` from `/var/www/ctv.2checkin.com/tbot/`; all other paths still proxy to the existing CTV/NK3 web container on `127.0.0.1:5375`.
+- Shared legacy folder `/var/www/tbot/` remains untouched.
+
+User roles:
+- Public browser visitor for the static board.
+- Internal staff using the board to track backlog, planned, in-progress, and shipped feature cards.
+
+Happy paths:
+- Opening `https://ctv.2checkin.com/tbot` returns HTTP 200 and renders the Feature Board.
+- Opening `https://ctv.2checkin.com/tbot/` returns HTTP 200 and renders the same board.
+- User can add cards, move them across columns, assign people, edit estimates/details, and persist state in the browser.
+- A card added by one browser appears in another browser through the shared JSON file.
+- Export and import backup controls remain visible.
+
+Edge cases:
+- Direct `/tbot` without trailing slash must work.
+- Direct `/tbot/` with trailing slash must work.
+- Refresh after adding a feature must keep the saved card through the shared JSON file, with `localStorage` as local backup.
+- Malformed or unavailable shared JSON must not blank the board; browser falls back to local backup.
+- The page must not load the TG Clinic app shell for `/tbot`.
+- The CTV root `https://ctv.2checkin.com/` must continue loading the existing TG Clinic app, not the static board.
+
+Regressions:
+- `https://nk.2checkin.com/tbot` must continue using the existing shared `/var/www/tbot/` content.
+- `ctv.thammyvientam.com` canonical CTV app routing must stay untouched.
+- Nginx config test must pass before reload.
+
+Setup data and login state:
+- No login required.
+- VPS host: `76.13.16.68`.
+- CTV-only static target: `/var/www/ctv.2checkin.com/tbot/index.html`.
+- CTV-only shared state file: `/var/www/ctv.2checkin.com/tbot/state/board.json`.
+- CTV-only nginx vhost: `/etc/nginx/sites-available/ctv.2checkin.com`.
+- Deployment backup path: `/var/backups/ctv.2checkin.com/tbot-20260522T091005Z`.
+- Shared-sync deployment backup path: `/var/backups/ctv.2checkin.com/tbot-sync-20260522T091828Z`.
+
+TestSprite execution items:
+- [x] PASS 2026-05-22: `curl -I https://ctv.2checkin.com/tbot` returned HTTP 200, `content-length: 29324`, and `cache-control: no-store, no-cache, must-revalidate`.
+- [x] PASS 2026-05-22: `curl -I https://ctv.2checkin.com/tbot/` returned HTTP 200 with the same deployed Feature Board content.
+- [x] PASS 2026-05-22: Live HTML contains `Feature Board`, `feature-board-v1`, and the `localStorage` fallback for `window.storage`.
+- [x] PASS 2026-05-22: Playwright interaction added `Persist check`, verified it survived reload through `localStorage`, then cleared the browser test data; no console errors.
+- [x] PASS 2026-05-22: Live HTML contains `REMOTE_STATE_URL = '/tbot/state/board.json'`, `SYNC_INTERVAL_MS = 3000`, `Saved live`, and `Live update`.
+- [x] PASS 2026-05-22: `curl -I https://ctv.2checkin.com/tbot/state/board.json` returned HTTP 200 and `content-type: application/json`.
+- [x] PASS 2026-05-22: Two-browser Playwright sync test: browser A added `Shared sync check`, browser B saw it; browser B added `Second browser card`, browser A saw it through polling; no console errors.
+- [x] PASS 2026-05-22: Test cards were cleaned afterward; `board.json` returned `features: []` with no `Shared sync check` or `Second browser card` markers.
+- [x] PASS 2026-05-22: `https://ctv.2checkin.com/` still returned the TG Clinic shell (`window.__TG_VERSION__ = '0.32.35'`) instead of the Feature Board.
+- [x] PASS 2026-05-22: `https://nk.2checkin.com/tbot/` still returned the previous `Bibo v3 — 20 Soft 3D Mascot Variants` page, not the Feature Board.
+- [x] PASS 2026-05-22: `https://ctv.thammyvientam.com/` still returned HTTP 200 from the canonical CTV app and was not routed to `/tbot`.
+- [x] PASS 2026-05-22: Shared `/var/www/tbot/index.html` checksum remained `5e7da6bb1412788eb284fd4038bfc5494e658f040cec638e7bc1299a1183dfdb`, confirming the old shared TBot folder was not overwritten.
+- [x] PASS 2026-05-22: Playwright screenshot captured `output/playwright/ctv-tbot-feature-board-2026-05-22.png`.
+- [x] PASS 2026-05-22: Imported 36 Backlog feature cards from Google Sheet `1wRzN3NN8nUhsS6HDBaiv1EfWyJvmOFBd`; live state now has 36 cards, all in `backlog`.
+- [x] PASS 2026-05-22: Screenshot after spreadsheet import captured `output/playwright/ctv-tbot-sheet-features-2026-05-22.png`.
+- [x] PASS 2026-05-22: `https://nk.2checkin.com/tbot/` still returned `Bibo v3 — 20 Soft 3D Mascot Variants`, confirming the import did not touch NK.
+- [x] PASS 2026-05-22: Header deadline counters deployed on `https://ctv.2checkin.com/tbot`: six-week checkpoint shows 42 days to July 3, 2026 and Oct 15 shows 146 days to October 15, 2026.
+- [x] PASS 2026-05-22: Counter screenshot captured `output/playwright/ctv-tbot-deadline-counters-2026-05-22.png`; source snapshot tracked at `docs/live-artifacts/ctv-tbot/index.html`.
