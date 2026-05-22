@@ -8,6 +8,13 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchPartnerById, fetchAppointments, fetchCustomerBalance, type ApiAppointment, type ApiPartner } from '@/lib/api';
 import { useTimezone } from '@/contexts/TimezoneContext';
 
+export interface ReferralClaim {
+  ownerCtvId: string | null;
+  ownerName: string | null;
+  active: boolean;
+  expiresAt: string | null;
+}
+
 export interface CustomerProfileData {
   id: string;
   name: string;
@@ -36,6 +43,7 @@ export interface CustomerProfileData {
   sourceid?: string | null;
   sourcename?: string | null;
   faceRegisteredAt: string | null;
+  referralClaim?: ReferralClaim | null;
 }
 
 export interface CustomerProfileResult {

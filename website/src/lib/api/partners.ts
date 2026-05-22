@@ -61,6 +61,13 @@ export interface ApiPartner {
   personaladdress: string | null;
   face_subject_id?: string | null;
   face_registered_at?: string | null;
+  // Referral claim status from CTV
+  referralClaim?: {
+    ownerCtvId: string | null;
+    ownerName: string | null;
+    active: boolean;
+    expiresAt: string | null;
+  } | null;
 }
 
 export interface PartnerAggregates {
