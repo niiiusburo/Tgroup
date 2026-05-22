@@ -20,6 +20,7 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 - `ctv.2checkin.com/tbot` board content seeded with 36 Backlog feature cards from the linked 6-week TBot planning spreadsheet; no NK route or clinic data changed. — @agent — 2026-05-22 live board content import.
 - `ctv.2checkin.com/tbot` header now shows live day counters for the July 3, 2026 six-week checkpoint and October 15, 2026 final checkpoint; deployed source snapshot added under `docs/live-artifacts/ctv-tbot/`. — @agent — 2026-05-22 deadline visibility for the shared TBot board.
 - `ctv.2checkin.com/tbot/t2.html` now serves `/Users/thuanle/Downloads/kanban_calendar.html` as a CTV-only static Kanban Calendar page; deployed file checksum matches the source and a source snapshot is tracked under `docs/live-artifacts/ctv-tbot/t2.html`. — @agent — 2026-05-22 additive CTV-only calendar board deploy.
+- `ctv.2checkin.com/tbot` header summary now uses the Kanban Calendar-style task counter from the provided screenshot: task/done counts, current date, 132-days-left Apr 1 → Oct 1 countdown, and progress bar. — @agent — 2026-05-22 CTV TBot header visibility update.
 - `testbright.md` — appended NK3 Cosmetic LOB feedback triage with live screenshot evidence, pending manual feedback IDs, related auto-detected API error clusters, and TestSprite follow-up checks. No runtime code changed. — @agent — 2026-05-22 preserves cosmetic LOB feedback scope for follow-up fixes.
 
 ## [0.32.37] — 2026-05-21

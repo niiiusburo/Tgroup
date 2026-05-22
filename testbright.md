@@ -1976,6 +1976,10 @@ TestSprite execution items:
 - [x] PASS 2026-05-22: `https://nk.2checkin.com/tbot/` still returned `Bibo v3 — 20 Soft 3D Mascot Variants`, confirming the import did not touch NK.
 - [x] PASS 2026-05-22: Header deadline counters deployed on `https://ctv.2checkin.com/tbot`: six-week checkpoint shows 42 days to July 3, 2026 and Oct 15 shows 146 days to October 15, 2026.
 - [x] PASS 2026-05-22: Counter screenshot captured `output/playwright/ctv-tbot-deadline-counters-2026-05-22.png`; source snapshot tracked at `docs/live-artifacts/ctv-tbot/index.html`.
+- [x] PASS 2026-05-22: Replaced the small header countdown pills on `https://ctv.2checkin.com/tbot` with the Kanban Calendar-style summary block from the provided screenshot.
+- [x] PASS 2026-05-22: Live Playwright check confirmed header summary text `39 TASKS · 0 DONE`, `FRI, MAY 22, 2026`, `132 DAYS LEFT`, `APR 1 → OCT 1, 2026`, progress width `27.8689%`, 39 cards, and no console/page errors.
+- [x] PASS 2026-05-22: Screenshot captured `output/playwright/ctv-tbot-calendar-summary-2026-05-22.png`; live source checksum now matches `docs/live-artifacts/ctv-tbot/index.html` at `30faa4dabeaabf1e0b21ee24c1ee34019aabae84955dd5aa8949fe21b72af8e6`.
+- [x] PASS 2026-05-22: Live backup saved before replacement at `/var/backups/ctv.2checkin.com/tbot-summary-20260522T100902Z/index.html.before`.
 
 ---
 
