@@ -94,3 +94,19 @@ export async function fetchCtvs(status?: 'active' | 'suspended'): Promise<{ ctvs
 export async function setCtvActive(id: string, active: boolean): Promise<CtvRecord> {
   return apiFetch<CtvRecord>(`/Ctvs/${id}`, { method: 'PATCH', body: { active } });
 }
+
+export interface CreateBookingInput {
+  clientId?: string;
+  name?: string;
+  phone: string;
+  lob: 'dental' | 'cosmetic';
+  date: string;
+  time?: string;
+  companyId?: string;
+  productId?: string;
+}
+
+/** Create a booking for a referred client (or new client). May fail with B_CLIENT_CLAIMED if client is under another CTV. */
+export async function createBooking(input: CreateBookingInput): Promise<{ clientId: string; appointmentId: string }> {
+  return apiFetch<{ clientId: string; appointmentId: string }>('/ctv/bookings', { method: 'POST', body: input });
+}

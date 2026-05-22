@@ -14,7 +14,7 @@
 import { useEffect, useState } from 'react';
 import { Home, Wallet, Users, User, LogOut, Sparkles, Stethoscope, BellRing, ChevronRight, UserPlus, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { fetchCtvSummary, fetchCtvReferrals, fetchCtvMe, referClient, createCtv, type CtvCommissionSummary, type CtvReferral } from '@/lib/api/ctv';
+import { fetchCtvSummary, fetchCtvReferrals, fetchCtvMe, createCtv, createBooking, type CtvCommissionSummary, type CtvReferral } from '@/lib/api/ctv';
 
 type Tab = 'home' | 'commission' | 'referrals' | 'me';
 type CommissionSub = 'pending' | 'paid';
@@ -39,7 +39,7 @@ export function CtvDashboard() {
   const [showCtvSheet, setShowCtvSheet] = useState(false);
 
   // Client sheet state
-  const [clientForm, setClientForm] = useState({ name: '', phone: '', lob: 'dental' as 'dental' | 'cosmetic' });
+  const [clientForm, setClientForm] = useState({ name: '', phone: '', lob: 'dental' as 'dental' | 'cosmetic', date: '' });
   const [clientLoading, setClientLoading] = useState(false);
   const [clientError, setClientError] = useState<string | null>(null);
   const [clientSuccess, setClientSuccess] = useState(false);
@@ -93,21 +93,28 @@ export function CtvDashboard() {
   async function handleClientSubmit(e: React.FormEvent) {
     e.preventDefault();
     setClientError(null);
-    if (!clientForm.name.trim() || !clientForm.phone.trim()) {
-      setClientError('Name and phone are required');
+    if (!clientForm.name.trim() || !clientForm.phone.trim() || !clientForm.date.trim()) {
+      setClientError('Name, phone, and date are required');
       return;
     }
     setClientLoading(true);
     try {
-      await referClient({ name: clientForm.name, phone: clientForm.phone, lob: clientForm.lob });
+      await createBooking({ name: clientForm.name, phone: clientForm.phone, lob: clientForm.lob, date: clientForm.date });
       setClientSuccess(true);
-      setClientForm({ name: '', phone: '', lob: 'dental' });
+      setClientForm({ name: '', phone: '', lob: 'dental', date: '' });
       setTimeout(() => {
         setShowClientSheet(false);
         setClientSuccess(false);
       }, 1500);
     } catch (err: any) {
-      setClientError(err?.message || 'Failed to refer client');
+      // Handle B_CLIENT_CLAIMED error
+      if (err?.code === 'B_CLIENT_CLAIMED') {
+        const ownerName = err?.body?.owner_name || 'unknown';
+        const expiresAt = err?.body?.expires_at ? new Date(err.body.expires_at).toLocaleDateString('vi-VN', { year: 'numeric', month: '2-digit', day: '2-digit' }) : 'unknown';
+        setClientError(`Khách hàng này đã được đăng ký bởi ${ownerName}. Hết hạn: ${expiresAt}`);
+      } else {
+        setClientError(err?.message || 'Failed to create booking');
+      }
     } finally {
       setClientLoading(false);
     }
@@ -482,6 +489,16 @@ export function CtvDashboard() {
                     onChange={(e) => setClientForm({ ...clientForm, phone: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
                     placeholder="Phone number"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Appointment Date</label>
+                  <input
+                    type="date"
+                    value={clientForm.date}
+                    onChange={(e) => setClientForm({ ...clientForm, date: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
 

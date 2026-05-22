@@ -110,7 +110,17 @@ async function getPartnerById(req, res) {
       return res.status(404).json({ error: 'Partner not found' });
     }
 
-    return res.json(rows[0]);
+    const partner = rows[0];
+
+    // Attach referral claim status if partner has referred_by_ctv_id
+    let referralClaim = null;
+    if (partner && partner.id) {
+      const { getReferralClaimStatus } = require('../../services/referralClaim');
+      const lob = req.lob || 'dental';
+      referralClaim = await getReferralClaimStatus(partner.id, lob, {});
+    }
+
+    return res.json({ ...partner, referralClaim });
   } catch (err) {
     console.error('Error fetching partner:', err);
     return res.status(500).json({
