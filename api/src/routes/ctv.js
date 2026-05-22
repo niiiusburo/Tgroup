@@ -224,10 +224,10 @@ router.post('/', requireAuth, async (req, res) => {
   // Caller must be a CTV (recruiting downline) or an admin.
   let isAdmin = false;
   try {
-    const { resolveEffectivePermissions } = require('../services/permissionService');
-    const perms = await resolveEffectivePermissions(employeeId);
-    const list = Array.isArray(perms) ? perms : (perms && perms.effectivePermissions) || [];
-    isAdmin = list.includes('*') || list.includes('ctv.manage');
+    const { resolveEffectivePermissions, isAdminPermissionState } = require('../services/permissionService');
+    const permState = await resolveEffectivePermissions(employeeId);
+    const list = (permState && permState.effectivePermissions) || [];
+    isAdmin = isAdminPermissionState(permState) || list.includes('*') || list.includes('ctv.manage');
   } catch (e) {
     isAdmin = false;
   }
@@ -332,10 +332,10 @@ router.post('/clients', requireAuth, async (req, res) => {
 
   let isAdmin = false;
   try {
-    const { resolveEffectivePermissions } = require('../services/permissionService');
-    const perms = await resolveEffectivePermissions(employeeId);
-    const list = Array.isArray(perms) ? perms : (perms && perms.effectivePermissions) || [];
-    isAdmin = list.includes('*') || list.includes('ctv.manage');
+    const { resolveEffectivePermissions, isAdminPermissionState } = require('../services/permissionService');
+    const permState = await resolveEffectivePermissions(employeeId);
+    const list = (permState && permState.effectivePermissions) || [];
+    isAdmin = isAdminPermissionState(permState) || list.includes('*') || list.includes('ctv.manage');
   } catch (e) {
     isAdmin = false;
   }

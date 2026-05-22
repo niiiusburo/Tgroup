@@ -14,10 +14,10 @@ const router = express.Router();
 
 async function isAdminCaller(employeeId) {
   try {
-    const { resolveEffectivePermissions } = require('../services/permissionService');
-    const perms = await resolveEffectivePermissions(employeeId);
-    const list = Array.isArray(perms) ? perms : (perms && perms.effectivePermissions) || [];
-    return list.includes('*') || list.includes('ctv.manage');
+    const { resolveEffectivePermissions, isAdminPermissionState } = require('../services/permissionService');
+    const permState = await resolveEffectivePermissions(employeeId);
+    const list = (permState && permState.effectivePermissions) || [];
+    return isAdminPermissionState(permState) || list.includes('*') || list.includes('ctv.manage');
   } catch (e) {
     return false;
   }
