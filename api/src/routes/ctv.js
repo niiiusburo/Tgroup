@@ -208,4 +208,189 @@ router.get('/me', requireAuth, (req, res) => {
   });
 });
 
+/**
+ * POST /api/ctv
+ * Create a new CTV (commission-tracking vendor).
+ * CTV users can create their own CTV profile with self-referral.
+ * Admins can create CTVs and optionally set referred_by_ctv_id.
+ *
+ * Body: { name, phone, email, password, referred_by_ctv_id? }
+ * Auth: requireAuth + (is_ctv=true OR admin permission)
+ */
+router.post('/', requireAuth, async (req, res) => {
+  const { employeeId, is_ctv: isCTV } = req.user || {};
+  if (!employeeId) return res.status(401).json({ error: 'No token' });
+
+  // Caller must be a CTV (recruiting downline) or an admin.
+  let isAdmin = false;
+  try {
+    const { resolveEffectivePermissions } = require('../services/permissionService');
+    const perms = await resolveEffectivePermissions(employeeId);
+    const list = Array.isArray(perms) ? perms : (perms && perms.effectivePermissions) || [];
+    isAdmin = list.includes('*') || list.includes('ctv.manage');
+  } catch (e) {
+    isAdmin = false;
+  }
+
+  if (!isCTV && !isAdmin) {
+    return res.status(403).json({
+      error: { code: 'S_CTV_CREATE_FORBIDDEN', message: 'Only CTVs or admins can create new CTVs' },
+    });
+  }
+
+  const { name, phone, email, password, lob_scope: bodyScope, referred_by_ctv_id: bodyReferredBy } = req.body || {};
+
+  if (!name || !phone || !email || !password) {
+    return res.status(400).json({
+      error: { code: 'VALIDATION', message: 'Missing required fields: name, phone, email, password' },
+    });
+  }
+
+  // Normalize requested LOB scope; dental is always included so the CTV can
+  // authenticate (login resolves against the default/dental partners table).
+  const requested = Array.isArray(bodyScope) && bodyScope.length
+    ? bodyScope.filter((l) => l === 'dental' || l === 'cosmetic')
+    : ['dental'];
+  const lobScope = Array.from(new Set(['dental', ...requested]));
+
+  const dentalDb = getDb('dental');
+  const cosmeticDb = getDb('cosmetic');
+
+  try {
+    // Duplicate phone/email guard across both physical DBs.
+    const phoneCheckSql = `SELECT id FROM dbo.partners WHERE LOWER(phone) = LOWER($1) LIMIT 1`;
+    const [dPhones, cPhones] = await Promise.all([
+      safeQueryRows(dentalDb, phoneCheckSql, [phone]),
+      safeQueryRows(cosmeticDb, phoneCheckSql, [phone]),
+    ]);
+    if (dPhones.length > 0 || cPhones.length > 0) {
+      return res.status(400).json({ error: { code: 'U_DUPLICATE_PHONE', message: 'Phone number already exists' } });
+    }
+
+    const emailCheckSql = `SELECT id FROM dbo.partners WHERE LOWER(email) = LOWER($1) LIMIT 1`;
+    const [dEmails, cEmails] = await Promise.all([
+      safeQueryRows(dentalDb, emailCheckSql, [email]),
+      safeQueryRows(cosmeticDb, emailCheckSql, [email]),
+    ]);
+    if (dEmails.length > 0 || cEmails.length > 0) {
+      return res.status(400).json({ error: { code: 'U_DUPLICATE_EMAIL', message: 'Email already exists' } });
+    }
+
+    const bcrypt = require('bcryptjs');
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // CTV caller becomes the upline; admin may specify (or leave empty).
+    const referredById = isCTV && !bodyReferredBy ? employeeId : (bodyReferredBy || null);
+
+    const { v4: uuidv4 } = require('uuid');
+    const id = uuidv4();
+    const now = new Date().toISOString();
+
+    // employee=true so the CTV can log in (auth requires employee=true).
+    // lob_scope is passed as a JS array → node-postgres binds it as text[].
+    const insertSql = `
+      INSERT INTO dbo.partners (
+        id, name, phone, email, password_hash, is_ctv, lob_scope, referred_by_ctv_id,
+        active, employee, customer, supplier, isagent, isinsurance, iscompany, ishead,
+        isbusinessinvoice, isdeleted, datecreated, lastupdated
+      ) VALUES (
+        $1, $2, $3, $4, $5, true, $6, $7,
+        true, true, false, false, false, false, false, false,
+        false, false, $8, $8
+      ) RETURNING id, name, phone, email, is_ctv, lob_scope, referred_by_ctv_id, active, datecreated
+    `;
+    const params = [id, name, phone, email, passwordHash, lobScope, referredById, now];
+
+    // Always create the auth row in dental (default DB); mirror into cosmetic
+    // only when the CTV is scoped there, so cosmetic earnings can FK to them.
+    const writes = [safeQueryRows(dentalDb, insertSql, params)];
+    if (lobScope.includes('cosmetic')) {
+      writes.push(safeQueryRows(cosmeticDb, insertSql, params));
+    }
+    const results = await Promise.all(writes);
+
+    const created = results[0][0];
+    if (!created) return res.status(500).json({ error: 'Failed to create CTV' });
+    return res.status(201).json(created);
+  } catch (e) {
+    console.error('[ctv POST /] error:', e.message);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * POST /api/ctv/clients
+ * Refer a new client (customer partner) under this CTV.
+ * Auth: requireAuth + is_ctv=true
+ *
+ * Body: { name, phone, email }
+ * Sets referred_by_ctv_id to req.user.employeeId, is_ctv=false, customer=true
+ */
+router.post('/clients', requireAuth, async (req, res) => {
+  const { employeeId, is_ctv: isCTV } = req.user || {};
+  if (!employeeId) return res.status(401).json({ error: 'No token' });
+
+  let isAdmin = false;
+  try {
+    const { resolveEffectivePermissions } = require('../services/permissionService');
+    const perms = await resolveEffectivePermissions(employeeId);
+    const list = Array.isArray(perms) ? perms : (perms && perms.effectivePermissions) || [];
+    isAdmin = list.includes('*') || list.includes('ctv.manage');
+  } catch (e) {
+    isAdmin = false;
+  }
+
+  if (!isCTV && !isAdmin) {
+    return res.status(403).json({
+      error: { code: 'S_CTV_CREATE_FORBIDDEN', message: 'Only CTVs or admins can refer clients' },
+    });
+  }
+
+  const { name, phone, lob: bodyLob, referred_by_ctv_id: bodyReferredBy } = req.body || {};
+
+  if (!name || !phone) {
+    return res.status(400).json({
+      error: { code: 'VALIDATION', message: 'Missing required fields: name, phone' },
+    });
+  }
+
+  // A referred client belongs to one LOB; write only to that physical DB.
+  const lob = bodyLob === 'cosmetic' ? 'cosmetic' : 'dental';
+  const db = getDb(lob);
+  const referredById = isCTV && !bodyReferredBy ? employeeId : (bodyReferredBy || null);
+
+  try {
+    const phoneCheckSql = `SELECT id FROM dbo.partners WHERE LOWER(phone) = LOWER($1) LIMIT 1`;
+    const dup = await safeQueryRows(db, phoneCheckSql, [phone]);
+    if (dup.length > 0) {
+      return res.status(400).json({ error: { code: 'U_DUPLICATE_PHONE', message: 'Phone number already exists' } });
+    }
+
+    const { v4: uuidv4 } = require('uuid');
+    const id = uuidv4();
+    const now = new Date().toISOString();
+
+    // customer=true, employee=false (clients never log in). lob_scope = [lob].
+    const insertSql = `
+      INSERT INTO dbo.partners (
+        id, name, phone, lob_scope, referred_by_ctv_id,
+        is_ctv, customer, active, employee, supplier, isagent, isinsurance, iscompany, ishead,
+        isbusinessinvoice, isdeleted, datecreated, lastupdated
+      ) VALUES (
+        $1, $2, $3, $4, $5,
+        false, true, true, false, false, false, false, false, false,
+        false, false, $6, $6
+      ) RETURNING id, name, phone, lob_scope, referred_by_ctv_id, customer, active, datecreated
+    `;
+    const rows = await safeQueryRows(db, insertSql, [id, name, phone, [lob], referredById, now]);
+
+    const created = rows[0];
+    if (!created) return res.status(500).json({ error: 'Failed to create client' });
+    return res.status(201).json(created);
+  } catch (e) {
+    console.error('[ctv POST /clients] error:', e.message);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

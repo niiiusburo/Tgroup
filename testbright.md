@@ -1928,3 +1928,14 @@ TestSprite execution items:
 - [ ] PENDING: After deploy, logout + log back in, confirm hint reappears.
 - [ ] PENDING: After deploy, open /reports/revenue, confirm cash flow chart dates readable on production data (will have ~30 bars there).
 - [ ] PENDING: Regression on /reports/appointments weekly trend — confirm labels readable when data spans many weeks.
+
+## Feature: CTV signup + MLM commission config (feat/ctv-mlm-commission, 2026-05-22)
+
+- [x] PASS: Migration 049 applies cleanly to tdental_demo + tcosmetic_demo; level config seeded 72.7/14.5/7.3/3.6/1.8, settings default 20% — evidence: psql apply + seed select.
+- [x] PASS: commissionEngine unit tests (9 jest) — CTV chain split 70/30, salestaff single full-pool row, refund reversal — evidence: jest 9/9 green.
+- [x] PASS: Full api jest suite + website depcruise + tsc + vite build all green (no regression) — evidence: background runs exit 0.
+- [ ] PENDING (NK3 live, https://76-13-16-68.sslip.io): log in t@clinic.vn, open /commission → Config tab, change a level %, set enabled sum >100 → Save blocked with B_LEVEL_SUM_EXCEEDS_100; set ≤100 → saves.
+- [ ] PENDING (NK3 live): /commission → CTVs tab, click "+ Add CTV", create one, confirm it appears in the list; suspend then reactivate.
+- [ ] PENDING (NK3 live): log in as a CTV, /ctv header "+ Client" → refer a customer (success); "+ CTV" → recruit (success), confirm new CTV can log in (employee=true).
+- [ ] PENDING (NK3 live): collect a payment on a service with a referral % for a CTV-referred client; confirm earnings rows split across the upline per config.
+- [ ] PENDING (NK3 live): confirm NK + NK2 untouched (no deploy there).

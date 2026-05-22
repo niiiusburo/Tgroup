@@ -2,6 +2,17 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [unreleased] — 2026-05-22 (feat/ctv-mlm-commission)
+### Added
+- **MLM commission config + CTV signup.** Migration `049_add_commission_level_config.sql` (additive, both DBs, guarded schema_migrations insert): `commission_level_config` (per-level enabled + share_percent, seeded L0–L4 = 72.7/14.5/7.3/3.6/1.8), `commission_settings` (singleton `default_referral_percent`), and `earnings.level`. — @agent — 2026-05-22.
+- `commissionEngine.js` rewritten: for `source='ctv'` it walks the `referred_by_ctv_id` upline (≤5 levels) and splits the per-line commission pool by configured level shares; disabled levels / missing upline are not paid (remainder stays with the clinic, no redistribution). `consultation`/`salestaff` keep a single full-pool row at level 0. 9 jest cases (split + salestaff + refund). — @agent — 2026-05-22.
+- New endpoints: `POST /api/ctv` (create CTV — CTV-or-admin only, instant active, `employee=true` so login works, `lob_scope` bound as text[], dental row always + cosmetic mirror if scoped), `POST /api/ctv/clients` (refer a customer into one LOB), `GET/PATCH /api/Ctvs` (admin list/suspend), `GET/PUT /api/CommissionConfig` (admin level split; PUT validates enabled sum ≤ 100 → `B_LEVEL_SUM_EXCEEDS_100`). — @agent — 2026-05-22.
+### Changed
+- `CtvDashboard.tsx` — header gains two pills under the title: **+ Client** (refer customer) and **+ CTV** (recruit), each opening a bottom-sheet wired to `referClient`/`createCtv`. Bottom nav unchanged (4 tabs). — @agent — 2026-05-22.
+- `Commission.tsx` — placeholder replaced with admin **Config** (editable level table + global default %, live ≤100% validation, surfaced save error) and **CTVs** (list + suspend + Add CTV) sub-tabs; new `website/src/lib/api/commission.ts`. — @agent — 2026-05-22.
+### Security
+- Registered `ctv.manage` + `commission.config.manage` in `permission-registry.yaml`. CTV creation is closed (no public signup): self-recruit gated by the `is_ctv` flag, admin by wildcard `*`. — @agent — 2026-05-22.
+
 ## [unreleased] — 2026-05-21 (feat/cosmetic-lob-nk3-phase2)
 ### Added
 - **Phase-2 Task-1 — Admin Permission Seeding:** `api/migrations/048_grant_lob_permissions_to_admin.sql` auto-grants cosmetic.access, dental.access, and lob.crossview to Admin group (UUID 11111111-0000-0000-0000-000000000001). Migration is idempotent (ON CONFLICT DO NOTHING) and applies to both tdental_demo and tcosmetic_demo, enabling multi-scope admins to access /api/dental/* and /api/cosmetic/* routes without manual PermissionBoard steps. Paired Jest test `api/src/__tests__/adminLobPermissions.test.js` (9 assertions) verifies migration file structure, naming, permission keys, idempotency, UUID, and rollback notes. — @agent — Phase-2 critical path Task 1, per spec D5.

@@ -229,6 +229,16 @@ backend_permissions:
     routes:
       - GET /api/*cross-lob-probe (internal for customer profile badge)
     note: Admin-only. Powers the "also a dental client" / "also a cosmetic client" badge on the opposite LOB profile. Performs soft phone match only.
+  - string: ctv.manage
+    routes:
+      - GET /api/Ctvs
+      - PATCH /api/Ctvs/:id
+      - POST /api/ctv (admin-initiated create)
+    note: Admin-only. List/suspend CTVs and create CTVs on their behalf. Satisfied by the admin wildcard ('*') at runtime; CTV self-recruit uses the is_ctv flag, not this key.
+  - string: commission.config.manage
+    routes:
+      - PUT /api/CommissionConfig
+    note: Admin-only. Edit the MLM level split (commission_level_config) + global default referral %. GET is open to any authed user; only writes require this key.
 
 # Frontend page-level permission guards (ProtectedRoute in App.tsx)
 frontend_route_permissions:

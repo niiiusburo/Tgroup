@@ -12,9 +12,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Home, Wallet, Users, User, LogOut, Sparkles, Stethoscope, BellRing, ChevronRight } from 'lucide-react';
+import { Home, Wallet, Users, User, LogOut, Sparkles, Stethoscope, BellRing, ChevronRight, UserPlus, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { fetchCtvSummary, fetchCtvReferrals, fetchCtvMe, type CtvCommissionSummary, type CtvReferral } from '@/lib/api/ctv';
+import { fetchCtvSummary, fetchCtvReferrals, fetchCtvMe, referClient, createCtv, type CtvCommissionSummary, type CtvReferral } from '@/lib/api/ctv';
 
 type Tab = 'home' | 'commission' | 'referrals' | 'me';
 type CommissionSub = 'pending' | 'paid';
@@ -33,6 +33,22 @@ export function CtvDashboard() {
   const [me, setMe] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Signup sheet states
+  const [showClientSheet, setShowClientSheet] = useState(false);
+  const [showCtvSheet, setShowCtvSheet] = useState(false);
+
+  // Client sheet state
+  const [clientForm, setClientForm] = useState({ name: '', phone: '', lob: 'dental' as 'dental' | 'cosmetic' });
+  const [clientLoading, setClientLoading] = useState(false);
+  const [clientError, setClientError] = useState<string | null>(null);
+  const [clientSuccess, setClientSuccess] = useState(false);
+
+  // CTV sheet state
+  const [ctvForm, setCtvForm] = useState({ name: '', phone: '', email: '', password: '', lobs: ['dental'] });
+  const [ctvLoading, setCtvLoading] = useState(false);
+  const [ctvError, setCtvError] = useState<string | null>(null);
+  const [ctvSuccess, setCtvSuccess] = useState(false);
 
   const displayName = me?.name || user?.name || 'CTV';
 
@@ -74,6 +90,56 @@ export function CtvDashboard() {
     return (n || 0).toLocaleString('vi-VN') + ' ₫';
   }
 
+  async function handleClientSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setClientError(null);
+    if (!clientForm.name.trim() || !clientForm.phone.trim()) {
+      setClientError('Name and phone are required');
+      return;
+    }
+    setClientLoading(true);
+    try {
+      await referClient({ name: clientForm.name, phone: clientForm.phone, lob: clientForm.lob });
+      setClientSuccess(true);
+      setClientForm({ name: '', phone: '', lob: 'dental' });
+      setTimeout(() => {
+        setShowClientSheet(false);
+        setClientSuccess(false);
+      }, 1500);
+    } catch (err: any) {
+      setClientError(err?.message || 'Failed to refer client');
+    } finally {
+      setClientLoading(false);
+    }
+  }
+
+  async function handleCtvSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setCtvError(null);
+    if (!ctvForm.name.trim() || !ctvForm.phone.trim() || !ctvForm.email.trim() || !ctvForm.password.trim()) {
+      setCtvError('All fields are required');
+      return;
+    }
+    if (ctvForm.lobs.length === 0) {
+      setCtvError('Select at least one LOB');
+      return;
+    }
+    setCtvLoading(true);
+    try {
+      await createCtv({ name: ctvForm.name, phone: ctvForm.phone, email: ctvForm.email, password: ctvForm.password, lob_scope: ctvForm.lobs });
+      setCtvSuccess(true);
+      setCtvForm({ name: '', phone: '', email: '', password: '', lobs: ['dental'] });
+      setTimeout(() => {
+        setShowCtvSheet(false);
+        setCtvSuccess(false);
+      }, 1500);
+    } catch (err: any) {
+      setCtvError(err?.message || 'Failed to create CTV');
+    } finally {
+      setCtvLoading(false);
+    }
+  }
+
   function Pill({ lob }: { lob: 'dental' | 'cosmetic' | string }) {
     const isDen = lob === 'dental' || lob === 'den';
     return (
@@ -92,20 +158,40 @@ export function CtvDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50/40 via-white to-white text-gray-900 pb-24 font-sans">
-      {/* Top bar — orange gradient brand header */}
+      {/* Top bar — orange gradient brand header with signup pills */}
       <div className="sticky top-0 z-10 bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-lg shadow-orange-500/20">
-        <div className="max-w-md mx-auto px-5 py-4 flex items-center justify-between">
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.18em] text-orange-100/90 font-medium">TG Clinic</div>
-            <div className="text-lg font-semibold tracking-tight">CTV Portal</div>
+        <div className="max-w-md mx-auto px-5 py-4">
+          {/* Title row */}
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.18em] text-orange-100/90 font-medium">TG Clinic</div>
+              <div className="text-lg font-semibold tracking-tight">CTV Portal</div>
+            </div>
+            <button
+              aria-label="Notifications"
+              className="relative w-10 h-10 rounded-full bg-white/15 backdrop-blur flex items-center justify-center hover:bg-white/25 transition"
+            >
+              <BellRing className="w-5 h-5" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-white rounded-full" />
+            </button>
           </div>
-          <button
-            aria-label="Notifications"
-            className="relative w-10 h-10 rounded-full bg-white/15 backdrop-blur flex items-center justify-center hover:bg-white/25 transition"
-          >
-            <BellRing className="w-5 h-5" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-white rounded-full" />
-          </button>
+          {/* Signup pills row */}
+          <div className="flex gap-2.5">
+            <button
+              onClick={() => setShowClientSheet(true)}
+              className="flex-1 py-3.5 px-4 bg-white text-orange-700 font-semibold rounded-2xl shadow-sm hover:bg-white/95 transition flex items-center justify-center gap-1.5"
+            >
+              <UserPlus className="w-4 h-4" />
+              <span>+ Client</span>
+            </button>
+            <button
+              onClick={() => setShowCtvSheet(true)}
+              className="flex-1 py-3.5 px-4 bg-white/20 text-white font-semibold rounded-2xl ring-1 ring-white/30 hover:bg-white/25 transition flex items-center justify-center gap-1.5"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>+ CTV</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -347,6 +433,220 @@ export function CtvDashboard() {
           </div>
         )}
       </div>
+
+      {/* CLIENT REFERRAL SHEET */}
+      {showClientSheet && (
+        <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur" onClick={() => setShowClientSheet(false)}>
+          <div
+            className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl p-6 max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Refer a Client</h2>
+              <button onClick={() => setShowClientSheet(false)} className="p-1 hover:bg-gray-100 rounded-full transition">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            {clientSuccess ? (
+              <div className="text-center py-8">
+                <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 flex items-center justify-center mb-3">
+                  <span className="text-2xl">✓</span>
+                </div>
+                <p className="text-lg font-semibold text-emerald-700">Client referred!</p>
+              </div>
+            ) : (
+              <form onSubmit={handleClientSubmit} className="space-y-4">
+                {clientError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-sm">
+                    {clientError}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Name</label>
+                  <input
+                    type="text"
+                    value={clientForm.name}
+                    onChange={(e) => setClientForm({ ...clientForm, name: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="Client name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
+                  <input
+                    type="tel"
+                    value={clientForm.phone}
+                    onChange={(e) => setClientForm({ ...clientForm, phone: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="Phone number"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Line of Business</label>
+                  <div className="inline-flex bg-gray-100 ring-1 ring-gray-200 rounded-full p-1 w-full">
+                    <button
+                      type="button"
+                      onClick={() => setClientForm({ ...clientForm, lob: 'dental' })}
+                      className={`flex-1 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                        clientForm.lob === 'dental'
+                          ? 'bg-white text-orange-700 shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      Dental
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setClientForm({ ...clientForm, lob: 'cosmetic' })}
+                      className={`flex-1 px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                        clientForm.lob === 'cosmetic'
+                          ? 'bg-white text-rose-700 shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      Cosmetic
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={clientLoading}
+                  className="w-full py-3.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-2xl shadow-lg shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 disabled:opacity-60 disabled:cursor-not-allowed transition active:scale-[0.98]"
+                >
+                  {clientLoading ? 'Submitting…' : 'Refer Client'}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* CTV SIGNUP SHEET */}
+      {showCtvSheet && (
+        <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur" onClick={() => setShowCtvSheet(false)}>
+          <div
+            className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl p-6 max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Recruit a CTV Partner</h2>
+              <button onClick={() => setShowCtvSheet(false)} className="p-1 hover:bg-gray-100 rounded-full transition">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            {ctvSuccess ? (
+              <div className="text-center py-8">
+                <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 flex items-center justify-center mb-3">
+                  <span className="text-2xl">✓</span>
+                </div>
+                <p className="text-lg font-semibold text-emerald-700">CTV created!</p>
+              </div>
+            ) : (
+              <form onSubmit={handleCtvSubmit} className="space-y-4">
+                {ctvError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-sm">
+                    {ctvError}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Name</label>
+                  <input
+                    type="text"
+                    value={ctvForm.name}
+                    onChange={(e) => setCtvForm({ ...ctvForm, name: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="Full name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
+                  <input
+                    type="tel"
+                    value={ctvForm.phone}
+                    onChange={(e) => setCtvForm({ ...ctvForm, phone: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="Phone number"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                  <input
+                    type="email"
+                    value={ctvForm.email}
+                    onChange={(e) => setCtvForm({ ...ctvForm, email: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="Email address"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+                  <input
+                    type="password"
+                    value={ctvForm.password}
+                    onChange={(e) => setCtvForm({ ...ctvForm, password: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="Secure password"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2.5">Lines of Business</label>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={ctvForm.lobs.includes('dental')}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setCtvForm({ ...ctvForm, lobs: [...ctvForm.lobs, 'dental'] });
+                          } else {
+                            setCtvForm({ ...ctvForm, lobs: ctvForm.lobs.filter((l) => l !== 'dental') });
+                          }
+                        }}
+                        className="w-4 h-4 rounded border-gray-300 text-orange-500 cursor-pointer"
+                      />
+                      <span className="text-gray-700">Dental</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={ctvForm.lobs.includes('cosmetic')}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setCtvForm({ ...ctvForm, lobs: [...ctvForm.lobs, 'cosmetic'] });
+                          } else {
+                            setCtvForm({ ...ctvForm, lobs: ctvForm.lobs.filter((l) => l !== 'cosmetic') });
+                          }
+                        }}
+                        className="w-4 h-4 rounded border-gray-300 text-rose-500 cursor-pointer"
+                      />
+                      <span className="text-gray-700">Cosmetic</span>
+                    </label>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={ctvLoading}
+                  className="w-full py-3.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-2xl shadow-lg shadow-orange-500/25 hover:shadow-lg hover:shadow-orange-500/40 disabled:opacity-60 disabled:cursor-not-allowed transition active:scale-[0.98]"
+                >
+                  {ctvLoading ? 'Creating…' : 'Create CTV Account'}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* BOTTOM NAV — orange active state, rounded pills */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-100 shadow-[0_-2px_10px_rgba(249,115,22,0.05)]">

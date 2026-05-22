@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.32.38",
+    "date": "2026-05-22",
+    "commit": "pending",
+    "highlights": "CTV portal can now sign up new clients and recruit CTVs from the header, and admins get a Commission page to configure the MLM level split and manage CTVs.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "CTV Portal header: '+ Client' (refer a customer) and '+ CTV' (recruit a partner) quick actions, each opening a mobile bottom-sheet form. New CTVs are active immediately and can log in.",
+          "Admin Commission page: 'Config' tab to edit the 5-level MLM commission split (per-level on/off + %, validated to never exceed 100%) and the global default referral %, plus a 'CTVs' tab to list, add, and suspend CTVs.",
+          "Commission engine now splits a service's referral commission up the CTV upline chain by the configured level shares; unallocated share stays with the clinic."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "9 commission-engine unit tests (multi-level split, salestaff single-row, refund reversal); full API suite, frontend typecheck, dependency-cruiser, and production build all green."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.37",
     "date": "2026-05-21",
     "commit": "pending",

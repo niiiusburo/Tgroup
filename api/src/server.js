@@ -246,6 +246,8 @@ app.use('/api/StockPickings', stockPickingsRoutes);
 app.use('/api/CrmTasks', crmTasksRoutes);
 app.use('/api/Commissions', commissionsRoutes);
 app.use('/api/Ctv', require('./routes/ctv')); // v2 CTV dashboard (is_ctv gate inside)
+app.use('/api/Ctvs', require('./routes/ctvs')); // admin CTV list/suspend (admin gate inside)
+app.use('/api/CommissionConfig', require('./routes/commissionConfig')); // MLM level config (admin gate on PUT)
 app.use('/api/HrPayslips', hrPayslipsRoutes);
 app.use('/api/Employees', employeesRoutes);
 app.use('/api/Products', productsRoutes);

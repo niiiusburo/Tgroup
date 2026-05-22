@@ -49,9 +49,20 @@ When `COSMETIC_LOB_ENABLED=false` the entire family returns 503.
 |--------|------|------|--------------|----------|
 | GET | `/api/ctv/commission-summary` | CTV (ctv.commission.view.self) | — | Aggregated payload: { pending: {total, dental, cosmetic, count}, paid, recent_activity[], by_service[] } with LOB pills on every row |
 | GET | `/api/ctv/referrals` | CTV (ctv.referrals.view.self) | — | List of referred clients across both DBs with status (earning / no visit), totals earned, LOB pills |
-| (internal) | commission recipient resolution | — | — | Implements D13 priority: referred_by_ctv_id > active consultation card (cosmetic) > salestaffid (dental) |
+| POST | `/api/ctv` | CTV or admin | `{ name, phone, email, password, lob_scope?, referred_by_ctv_id? (admin) }` | 201 created CTV. Closed signup (no public). `employee=true`, instant active; referred_by = caller (CTV) or body (admin). Dups → `U_DUPLICATE_PHONE`/`U_DUPLICATE_EMAIL`; non-CTV/non-admin → 403 `S_CTV_CREATE_FORBIDDEN` |
+| POST | `/api/ctv/clients` | CTV or admin | `{ name, phone, lob }` | 201 referred customer in one LOB DB, `referred_by_ctv_id` = caller |
+| (internal) | commission recipient resolution | — | — | Implements D13 priority: referred_by_ctv_id > active consultation card (cosmetic) > salestaffid (dental). For `ctv` source the pool is split up the upline per `commission_level_config` |
 
 CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin route.
+
+## Admin CTV & Commission config
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/api/Ctvs` | admin (`ctv.manage`/`*`) | `?status=active\|suspended` | `{ ctvs: [{id, name, phone, email, lob_scope, active, referred_by_ctv_id, upline_name}] }` |
+| PATCH | `/api/Ctvs/:id` | admin | `{ active: boolean }` | Updated CTV (suspend/reactivate); mirrors to cosmetic DB if present |
+| GET | `/api/CommissionConfig` | Auth | — | `{ levels: [{level,label,enabled,share_percent}], defaultReferralPercent }` |
+| PUT | `/api/CommissionConfig` | admin (`commission.config.manage`/`*`) | `{ levels[], defaultReferralPercent }` | Upserts config; enabled-sum > 100 → 400 `B_LEVEL_SUM_EXCEEDS_100` |
 
 ## Account (`/api/Account`)
 
