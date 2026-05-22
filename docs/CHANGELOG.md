@@ -16,6 +16,7 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ## [unreleased] — 2026-05-22
 ### Docs
+- `docs/superpowers/specs/2026-05-22-ctv-signup-and-commission-config-design.md` — design spec for CTV signup (CTV-or-admin only, instant active, no public signup/approval queue), header "+ Client" / "+ CTV" actions on the built portal, admin CTVs sub-tab, and fully manual commission level config (enabled ≤ 100%, unallocated stays with clinic). No runtime code changed. — @agent — 2026-05-22 brainstormed design for the CTV/MLM commission layer on the cosmetic-LOB foundation.
 - `ctv.2checkin.com/tbot` static Feature Board deploy documented in `testbright.md`; live route now serves `/Users/thuanle/Downloads/feature_kanban_2.html` from `/var/www/ctv.2checkin.com/tbot/` with browser backup plus shared file sync through `/tbot/state/board.json`, leaving shared `/var/www/tbot` and other vhosts untouched. — @agent — 2026-05-22 CTV-only static deploy proof.
 - `ctv.2checkin.com/tbot` board content seeded with 36 Backlog feature cards from the linked 6-week TBot planning spreadsheet; no NK route or clinic data changed. — @agent — 2026-05-22 live board content import.
 - `ctv.2checkin.com/tbot` header now shows live day counters for the July 3, 2026 six-week checkpoint and October 15, 2026 final checkpoint; deployed source snapshot added under `docs/live-artifacts/ctv-tbot/`. — @agent — 2026-05-22 deadline visibility for the shared TBot board.
