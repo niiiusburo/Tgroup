@@ -38,12 +38,18 @@ function _getDb(lob, injectedGetDb = null) {
  * @param {function} [args.getDb] - injectable for tests
  * @returns {Promise<{recipient_partner_id: string, source: 'ctv'|'consultation'|'salestaff'} | null>}
  */
-async function resolveRecipient({ clientRow, lob, txClient = null, getDb: injectedGetDb = null }) {
+async function resolveRecipient({ clientRow, lob, txClient = null, getDb: injectedGetDb = null, asOf = new Date(), referralClaim = null }) {
   if (!clientRow) return null;
 
-  // 1. CTV referrer (highest priority, works for both LOBs)
+  // 1. CTV referrer (highest priority, works for both LOBs) — only while the
+  // referral claim is ACTIVE as of the payment date. A lapsed claim earns
+  // nothing and does not auto-revive; we fall through to the other sources.
   if (clientRow.referred_by_ctv_id) {
-    return { recipient_partner_id: clientRow.referred_by_ctv_id, source: 'ctv' };
+    const claimSvc = referralClaim || require('./referralClaim');
+    const status = await claimSvc.getReferralClaimStatus(clientRow.id, lob, { asOf, txClient, getDb: injectedGetDb });
+    if (status && status.active && status.ownerCtvId) {
+      return { recipient_partner_id: status.ownerCtvId, source: 'ctv' };
+    }
   }
 
   // 2. Cosmetic active consultation card
@@ -159,13 +165,14 @@ async function _walkCtvChain(startPartnerId, lob, txClient = null, injectedGetDb
  * @param {object} args.clientRow - the customer/partner row for resolution
  * @param {object} [args.txClient] - pg client from BEGIN for atomic write with payment
  */
-async function createEarningsForPayment({ payment, lines = [], lob, clientRow, txClient = null, getDb: injectedGetDb = null }) {
+async function createEarningsForPayment({ payment, lines = [], lob, clientRow, txClient = null, getDb: injectedGetDb = null, referralClaim = null }) {
   if (!payment || !payment.id || !clientRow) return [];
 
   const db = txClient || _getDb(lob, injectedGetDb);
   const useTx = !!txClient;
 
-  const recipient = await resolveRecipient({ clientRow, lob, txClient, getDb: injectedGetDb });
+  const asOf = payment.paymentdate || payment.payment_date || payment.date || new Date();
+  const recipient = await resolveRecipient({ clientRow, lob, txClient, getDb: injectedGetDb, asOf, referralClaim });
   if (!recipient) {
     return []; // no attribution path
   }

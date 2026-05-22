@@ -25,13 +25,33 @@ describe('commissionEngine - D13 recipient resolution & earnings writes', () => 
       referred_by_ctv_id: 'ctv-partner-uuid',
       salestaffid: 'staff-uuid',
     };
-    // Even with active consultation, CTV wins
+    // Even with active consultation, CTV wins (claim active)
     const result = await commissionEngine.resolveRecipient({
       clientRow,
       lob: 'dental',
-      // mock active cons would be ignored
+      referralClaim: { getReferralClaimStatus: async () => ({ active: true, ownerCtvId: 'ctv-partner-uuid' }) },
     });
     expect(result).toEqual({ recipient_partner_id: 'ctv-partner-uuid', source: 'ctv' });
+  });
+
+  test('resolveRecipient: lapsed CTV claim falls through (no credit), then null when no other source', async () => {
+    const clientRow = { id: 'cli-lapsed', referred_by_ctv_id: 'ctv-old', salestaffid: null };
+    const result = await commissionEngine.resolveRecipient({
+      clientRow,
+      lob: 'dental',
+      referralClaim: { getReferralClaimStatus: async () => ({ active: false, ownerCtvId: 'ctv-old' }) },
+    });
+    expect(result).toBeNull();
+  });
+
+  test('resolveRecipient: lapsed CTV claim falls through to salestaff (dental)', async () => {
+    const clientRow = { id: 'cli-lapsed2', referred_by_ctv_id: 'ctv-old', salestaffid: 'sales-x' };
+    const result = await commissionEngine.resolveRecipient({
+      clientRow,
+      lob: 'dental',
+      referralClaim: { getReferralClaimStatus: async () => ({ active: false, ownerCtvId: 'ctv-old' }) },
+    });
+    expect(result).toEqual({ recipient_partner_id: 'sales-x', source: 'salestaff' });
   });
 
   test('resolveRecipient: cosmetic consultation card used when no CTV referrer', async () => {
@@ -70,7 +90,8 @@ describe('commissionEngine - D13 recipient resolution & earnings writes', () => 
       .mockResolvedValueOnce([{ level: 0, share_percent: 100, enabled: true }])  // level config
       .mockResolvedValueOnce([{ referred_by_ctv_id: null }])                     // chain: L0 has no upline
       .mockResolvedValueOnce([{ id: 'e0', amount: 100000, level: 0 }]);          // insert L0
-    await commissionEngine.createEarningsForPayment({ payment, lines: [line], lob: 'dental', clientRow, getDb: mockGetDb });
+    const activeClaim = { getReferralClaimStatus: async () => ({ active: true, ownerCtvId: '00000000-0000-0000-0000-000000000ctv' }) };
+    await commissionEngine.createEarningsForPayment({ payment, lines: [line], lob: 'dental', clientRow, getDb: mockGetDb, referralClaim: activeClaim });
     expect(mockDb.queryRows).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO dbo.earnings'),
       expect.arrayContaining([expect.anything(), '00000000-0000-0000-0000-000000000ctv', '00000000-0000-0000-0000-0000000000p1', expect.anything(), 0, 100000])
@@ -88,7 +109,8 @@ describe('commissionEngine - D13 recipient resolution & earnings writes', () => 
       .mockResolvedValueOnce([{ referred_by_ctv_id: null }])                                                 // L1 → no upline
       .mockResolvedValueOnce([{ id: 'e0' }])
       .mockResolvedValueOnce([{ id: 'e1' }]);
-    await commissionEngine.createEarningsForPayment({ payment, lines: [line], lob: 'dental', clientRow, getDb: mockGetDb });
+    const activeClaimMlm = { getReferralClaimStatus: async () => ({ active: true, ownerCtvId: 'ctv-L0' }) };
+    await commissionEngine.createEarningsForPayment({ payment, lines: [line], lob: 'dental', clientRow, getDb: mockGetDb, referralClaim: activeClaimMlm });
     // L0 gets 70% of 100000, L1 gets 30%
     expect(mockDb.queryRows).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO dbo.earnings'), expect.arrayContaining(['ctv-L0', 'pay-mlm', 70000]));
     expect(mockDb.queryRows).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO dbo.earnings'), expect.arrayContaining(['ctv-L1', 'pay-mlm', 30000]));
