@@ -171,6 +171,15 @@ function ConfigTabContent({ config, onConfigChange, onSaveError, saving, setSavi
   const enabledSum = enabledLevels.reduce((sum, l) => sum + l.share_percent, 0);
   const isValid = enabledSum <= 100;
 
+  // Raw text drafts so the user can type freely (decimals, clearing the field)
+  // without parse-and-clamp on every keystroke fighting them. Key 'default' is
+  // the global percent; 'level-N' is each level's share. Cleared on blur.
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const draftValue = (key: string, modelValue: number) =>
+    drafts[key] !== undefined ? drafts[key] : String(modelValue);
+  const clampPercent = (n: number) => Math.max(0, Math.min(100, Number.isFinite(n) ? n : 0));
+  const commitDraft = (key: string) => setDrafts((d) => { const { [key]: _omit, ...rest } = d; return rest; });
+
   const handleAddLevel = () => {
     const nextLevel = Math.max(...config.levels.map((l) => l.level), -1) + 1;
     onConfigChange({
@@ -225,13 +234,14 @@ function ConfigTabContent({ config, onConfigChange, onSaveError, saving, setSavi
           type="number"
           min="0"
           max="100"
-          value={config.defaultReferralPercent}
-          onChange={(e) =>
-            onConfigChange({
-              ...config,
-              defaultReferralPercent: Math.max(0, Math.min(100, parseFloat(e.target.value) || 0)),
-            })
-          }
+          step="0.1"
+          inputMode="decimal"
+          value={draftValue('default', config.defaultReferralPercent)}
+          onChange={(e) => {
+            setDrafts((d) => ({ ...d, default: e.target.value }));
+            onConfigChange({ ...config, defaultReferralPercent: clampPercent(parseFloat(e.target.value)) });
+          }}
+          onBlur={() => { commitDraft('default'); onConfigChange({ ...config, defaultReferralPercent: clampPercent(config.defaultReferralPercent) }); }}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
         />
       </div>
@@ -285,12 +295,14 @@ function ConfigTabContent({ config, onConfigChange, onSaveError, saving, setSavi
                       type="number"
                       min="0"
                       max="100"
-                      value={level.share_percent}
-                      onChange={(e) =>
-                        handleUpdateLevel(level.level, {
-                          share_percent: Math.max(0, Math.min(100, parseFloat(e.target.value) || 0)),
-                        })
-                      }
+                      step="0.1"
+                      inputMode="decimal"
+                      value={draftValue(`level-${level.level}`, level.share_percent)}
+                      onChange={(e) => {
+                        setDrafts((d) => ({ ...d, [`level-${level.level}`]: e.target.value }));
+                        handleUpdateLevel(level.level, { share_percent: clampPercent(parseFloat(e.target.value)) });
+                      }}
+                      onBlur={() => { commitDraft(`level-${level.level}`); handleUpdateLevel(level.level, { share_percent: clampPercent(level.share_percent) }); }}
                       className="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
                     />
                   </td>

@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.32.39",
+    "date": "2026-05-22",
+    "commit": "pending",
+    "highlights": "Fixed the commission level % inputs so you can type decimals (e.g. 14.5) and clear fields normally, plus fixed CTV portal login on ctv.2checkin.com.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Commission → Config: the Global Default Referral % and per-level Share % fields now accept decimals and let you clear/retype freely; values are clamped to 0–100 when you leave the field.",
+          "CTV portal login on https://ctv.2checkin.com no longer returns an internal error (the domain was missing from the API CORS allowlist)."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.38",
     "date": "2026-05-22",
     "commit": "pending",
