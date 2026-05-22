@@ -16,6 +16,7 @@
 | v1.0.1 | 2026-05-17 | Contract documentation aligned to live payment method enum, report API, and operational export registry. |
 | v1.0.2 | 2026-05-18 | Reconfirmed `@tgroup/contracts` payment method enum and generated contract artifacts are limited to live methods only. |
 | v1.0.3 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
+| v1.0.4 | 2026-05-22 | Employee and company frontend clients accept `lob?: 'dental' | 'cosmetic'`; Cosmetic LOB employee add/edit/profile must use `/api/cosmetic/Companies` and `/api/cosmetic/Employees`. |
 
 ---
 
@@ -182,6 +183,23 @@ PaginatedResponse<{
 
 #### DELETE /api/Partners/:id/hard-delete
 **Effect:** Physical row removal. Requires `customers.hard_delete`.
+
+#### Employee LOB client contract
+
+The employee UI is a partners-backed workflow, but LOB routing is owned by the frontend API client. Frontend callers must pass the active `BusinessUnitContext.currentLOB` into employee and branch calls whenever the surface is LOB-aware.
+
+```ts
+type Lob = 'dental' | 'cosmetic';
+
+fetchCompanies({ offset?: number; limit?: number; lob?: Lob })
+createEmployee(data: CreateEmployeeData, lob?: Lob)
+updateEmployee(id: string, data: Partial<CreateEmployeeData>, lob?: Lob)
+```
+
+Wire behavior:
+- `lob: 'cosmetic'` maps `fetchCompanies` to `GET /api/cosmetic/Companies` and employee create/update to `/api/cosmetic/Employees`.
+- `lob: 'dental'` or omitted `lob` keeps legacy dental routes (`/api/Companies`, `/api/Employees`).
+- `EmployeeForm` and `EmployeeProfile` must use the active LOB so Cosmetic branch dropdowns and profile branch-name lookups never resolve through dental companies.
 
 ---
 

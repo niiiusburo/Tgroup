@@ -4,6 +4,7 @@
 
 ## [unreleased] — 2026-05-22 (feat/ctv-mlm-commission)
 ### Fixed
+- NK3/CTV Cosmetic LOB employee add/edit modal leaked dental branches because EmployeeForm and EmployeeProfile loaded `/api/Companies` without the active LOB. They now load branches with `lob=currentLOB`, and employee create/update sends the same LOB so Cosmetic uses `/api/cosmetic/Companies` and `/api/cosmetic/Employees`. Added form and API-client regression tests. — @agent — 2026-05-22 (0.32.40, preserves Cosmetic LOB v2 D5/D6 data isolation).
 - Commission Config % inputs (global default + per-level share) were unusable: parse-and-clamp on every keystroke dropped the decimal point (typing `14.5` reverted to `14`) and clearing the field snapped to `0`. Now backed by a raw-text draft per input — type freely incl. decimals, parsed into the model on change, clamped to 0–100 on blur. — @agent — 2026-05-22 (0.32.39).
 - NK3 browser login returned 500 "internal error": `https://ctv.2checkin.com` was missing from the API CORS allowlist (`api/src/server.js`). Added it (+ www). curl checks had passed because they send no Origin header. — @agent — 2026-05-22.
 ### Added

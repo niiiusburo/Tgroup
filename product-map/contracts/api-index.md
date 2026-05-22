@@ -106,6 +106,8 @@ PUT handler-level validation: `companyId` (when present) must be a UUID (`400 IN
 | PUT | `/:id` | Perm:`employees.edit` | Employee fields | Updated employee |
 | DELETE | `/:id` | Perm:`employees.edit` | — | Deleted employee |
 
+Cosmetic LOB mirror: Employee UI callers must pass active `lob` into `createEmployee` and `updateEmployee`; when `lob='cosmetic'`, these same contract shapes route through `POST /api/cosmetic/Employees` and `PUT /api/cosmetic/Employees/:id`.
+
 ## Products / Services Catalog (`/api/Products`)
 
 | Method | Path | Auth | Body / Query | Response |
@@ -206,6 +208,8 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
 | GET | `/` | Auth | `?offset, limit, search` | `PaginatedResponse<Company>` |
+
+Cosmetic LOB mirror: LOB-aware employee and location UI surfaces must call `GET /api/cosmetic/Companies?offset=0&limit=50` when active `lob='cosmetic'`; omitted/dental LOB keeps legacy `GET /api/Companies`.
 
 ## Permissions (`/api/Permissions`)
 

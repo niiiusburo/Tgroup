@@ -69,6 +69,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 
 | If you change... | Run these tests... | Why |
 |---|---|---|
+| `website/src/components/employees/EmployeeForm.tsx`, `EmployeeProfile.tsx`, or `website/src/lib/api/employees.ts` LOB handling | `website/src/components/employees/__tests__/EmployeeForm.lob.test.tsx`, `website/src/lib/api/__tests__/employees.lob.test.ts`, live `/employees` Cosmetic LOB add-employee screenshot check | NK3/CTV Cosmetic LOB employee workflows must load branch choices from `/api/cosmetic/Companies` and save via `/api/cosmetic/Employees`, never dental `/api/Companies` locations. |
 | `website/src/components/employees/EmployeeTable.tsx` | `website/src/components/employees/__tests__/EmployeeTable.test.tsx`, `/employees` 1280x720, 1366x768, and 1440x900 screenshot checks | Long role/location labels must not push the edit action offscreen on desktop workstations. |
 | `website/src/components/shared/DataTable.tsx` sticky-column behavior | Component tests for each table using `sticky: 'right'`, plus the affected route screenshot check | Sticky action cells are shared table infrastructure and must not introduce page-level horizontal overflow or hide row actions. |
 

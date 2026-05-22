@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.32.40",
+    "date": "2026-05-22",
+    "commit": "pending",
+    "highlights": "Fixed NK3/CTV Cosmetic LOB employee forms so branch dropdowns and employee saves stay on cosmetic data instead of dental locations.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Employees → Add/Edit Employee now loads branch choices from the active LOB. In Cosmetic mode, the location dropdown uses /api/cosmetic/Companies and shows cosmetic branches such as Thẩm mỹ Hà Nội / Thẩm mỹ Hồ Chí Minh instead of Tấm Dentist dental branches.",
+          "Employee create/update now sends the active LOB through the API client, so Cosmetic employee saves go through /api/cosmetic/Employees."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added Vitest regression coverage for EmployeeForm LOB routing and employees API cosmetic create/update URLs."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.39",
     "date": "2026-05-22",
     "commit": "pending",

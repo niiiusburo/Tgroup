@@ -21,12 +21,12 @@ export interface CreateEmployeeData {
   tierId?: string;
 }
 
-export function createEmployee(data: CreateEmployeeData) {
-  return apiFetch<ApiEmployee>('/Employees', { method: 'POST', body: data });
+export function createEmployee(data: CreateEmployeeData, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiEmployee>('/Employees', { method: 'POST', body: data, lob });
 }
 
-export function updateEmployee(id: string, data: Partial<CreateEmployeeData>) {
-  return apiFetch<ApiEmployee>(`/Employees/${id}`, { method: 'PUT', body: data });
+export function updateEmployee(id: string, data: Partial<CreateEmployeeData>, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiEmployee>(`/Employees/${id}`, { method: 'PUT', body: data, lob });
 }
 
 export function deleteEmployee(id: string) {
@@ -82,4 +82,3 @@ export function fetchEmployees(params?: {
     lob: params?.lob,
   });
 }
-

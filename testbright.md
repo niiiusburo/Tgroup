@@ -10,6 +10,50 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK3 CTV Cosmetic Employee Location LOB Fix 2026-05-22
+
+Feature/edit name: NK3/CTV Cosmetic LOB employee branch isolation fix.
+
+Changed URLs and API routes:
+- Live URL to verify: `https://ctv.2checkin.com/employees`.
+- Cosmetic branch lookup must use `GET /api/cosmetic/Companies?offset=0&limit=50`.
+- Cosmetic employee create/update must use `POST /api/cosmetic/Employees` and `PUT /api/cosmetic/Employees/:id`.
+- Dental employee flows must continue using legacy `GET /api/Companies` and `/api/Employees`.
+
+Affected data flows:
+- `EmployeeForm` loads location dropdown choices from the active LOB instead of the default dental pool.
+- `EmployeeForm` passes the active LOB into create/update employee API calls.
+- `EmployeeProfile` resolves employee branch names from the active LOB so profile display does not map cosmetic employee location IDs through dental branches.
+
+Roles and login state:
+- Admin user with `lob_scope` containing both `dental` and `cosmetic`.
+- Start on CTV/NK3 live domain, switch to Cosmetic LOB, then open Employees.
+
+Happy paths:
+- Cosmetic LOB: click `Thêm nhân viên`; the branch dropdown shows only cosmetic branches such as `Thẩm mỹ Hà Nội` and `Thẩm mỹ Hồ Chí Minh`.
+- Cosmetic LOB: creating a test employee sends the save request to `/api/cosmetic/Employees`.
+- Dental LOB: add/edit employee still shows Tấm Dentist dental branches and saves to legacy `/api/Employees`.
+
+Edge cases:
+- Switching LOBs while on `/employees` must refresh branch choices before opening a new modal.
+- Existing cosmetic employee profile branch names must resolve against cosmetic companies.
+- Unassigned employees should still support an empty primary branch and optional location scope.
+
+Regressions to prevent:
+- Cosmetic employee modal showing dental `Tấm Dentist ...` locations.
+- Cosmetic employee create/update writing to the dental partners table.
+- Employee profile resolving cosmetic branch IDs as raw IDs or dental branch names.
+
+Setup and execution items:
+- [ ] PENDING: Log in at `https://ctv.2checkin.com/login` as an Admin with dental+cosmetic LOB scope.
+- [ ] PENDING: Switch to Cosmetic LOB, open `/employees`, click `Thêm nhân viên`, and confirm dropdown contains cosmetic branches only.
+- [ ] PENDING: Confirm the browser network log includes `GET /api/cosmetic/Companies?offset=0&limit=50` and does not use plain `/api/Companies` for the open modal state.
+- [ ] PENDING: Create or dry-run a safe cosmetic employee save and confirm `POST /api/cosmetic/Employees`.
+- [ ] PENDING: Switch back to Dental LOB and confirm dental branch choices still appear for employee add/edit.
+- [ ] PENDING: Run `npm test -- --run src/components/employees/__tests__/EmployeeForm.lob.test.tsx src/lib/api/__tests__/employees.lob.test.ts`.
+
+---
+
 # TestSprite Plan: Feature Catalog 2026-05-20
 
 Feature/edit name: Feature Catalog — Canonical Export Specifications 2026-05-20
