@@ -3,6 +3,8 @@
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
 ## [unreleased] — 2026-05-22 (feat/ctv-mlm-commission)
+### Added
+- `api/src/services/referralCard.js` — `createReferralStartCard({ clientId, lob })` creates a zero-amount saleorder + saleorderline referencing `commission_settings.referral_start_product_id`; throws `REFERRAL_PRODUCT_NOT_CONFIGURED` if unset. Mirrors `createSaleOrder.js` insert pattern. — @agent — 2026-05-22.
 ### Docs
 - `docs/superpowers/plans/2026-05-22-ctv-referral-claim.md` — 9-task TDD implementation plan for the referral-claim feature (migration 050, getReferralClaimStatus + createReferralStartCard helpers, engine active-window credit gate, POST /api/ctv/bookings eligibility gate, /resolve + profile claim display). No runtime code yet. — @agent — 2026-05-22.
 - `docs/superpowers/specs/2026-05-22-ctv-referral-claim-design.md` — design for CTV referral claims: exclusive ownership via `referred_by_ctv_id`, a "Referral Start" saleorderline card as the claim anchor, a rolling 6-month expiry computed from `max(card date, last paid service)`, a hard eligibility gate that blocks booking a client actively claimed by another CTV (CTVs and admins), and crediting only while the claim is active as of payment date. No new tables; one additive column `commission_settings.referral_start_product_id`. No runtime code yet. — @agent — 2026-05-22.
