@@ -187,6 +187,7 @@ export function fetchSaleOrderLines(params?: {
   lob?: 'dental' | 'cosmetic';
 }) {
   return apiFetch<PaginatedResponse<ApiSaleOrderLine>>('/SaleOrders/lines', {
+    lob: params?.lob,
     params: {
       partner_id: params?.partnerId,
       offset: params?.offset ?? 0,

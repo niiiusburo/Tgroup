@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchExternalCheckups, type ExternalCheckupsResponse } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 export interface UseExternalCheckupsResult {
   data: ExternalCheckupsResponse | null;
@@ -9,6 +10,7 @@ export interface UseExternalCheckupsResult {
 }
 
 export function useExternalCheckups(customerCode: string | null | undefined): UseExternalCheckupsResult {
+  const { currentLOB } = useBusinessUnit();
   const [data, setData] = useState<ExternalCheckupsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +24,7 @@ export function useExternalCheckups(customerCode: string | null | undefined): Us
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetchExternalCheckups(customerCode);
+      const res = await fetchExternalCheckups(customerCode, currentLOB);
       setData(res);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load external checkups');
@@ -30,7 +32,7 @@ export function useExternalCheckups(customerCode: string | null | undefined): Us
     } finally {
       setIsLoading(false);
     }
-  }, [customerCode]);
+  }, [customerCode, currentLOB]);
 
   useEffect(() => {
     load();

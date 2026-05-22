@@ -128,7 +128,7 @@ export function useMonthlyPlans(locationId?: string) {
         down_payment: input.downPayment,
         number_of_installments: input.numberOfInstallments,
         start_date: input.startDate,
-      });
+      }, currentLOB);
       const newPlan = mapApiPlan(apiPlan);
       setPlans((prev) => [newPlan, ...prev]);
       // Refresh summary
@@ -138,18 +138,18 @@ export function useMonthlyPlans(locationId?: string) {
       setError(err instanceof Error ? err.message : 'Failed to create plan');
       throw err;
     }
-  }, [loadPlans]);
+  }, [loadPlans, currentLOB]);
 
   const markInstallmentPaid = useCallback(async (planId: string, installmentId: string) => {
     try {
-      await apiMarkPaid(planId, installmentId);
+      await apiMarkPaid(planId, installmentId, undefined, currentLOB);
       // Refresh the plan to get updated installment statuses
       await loadPlans();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to mark installment as paid');
       throw err;
     }
-  }, [loadPlans]);
+  }, [loadPlans, currentLOB]);
 
   return {
     plans: filteredPlans,

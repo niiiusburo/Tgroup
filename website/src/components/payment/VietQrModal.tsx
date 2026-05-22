@@ -11,6 +11,7 @@ import { buildVietQrUrl, generatePaymentDescription } from '../../lib/vietqr';
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
 import { useBankSettings } from '../../hooks/useBankSettings';
 import { uploadPaymentProof } from '../../lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 interface VietQrModalProps {
   open: boolean;
@@ -30,6 +31,7 @@ export function VietQrModal({
   paymentId
 }: VietQrModalProps) {
   const { t } = useTranslation('payment');
+  const { currentLOB } = useBusinessUnit();
   const { settings, loading } = useBankSettings();
   const [amount, setAmount] = useState<string>(defaultAmount ? String(defaultAmount) : '');
   const [description, setDescription] = useState<string>('');
@@ -84,7 +86,7 @@ export function VietQrModal({
     setUploadSuccess(false);
     setUploadError(null);
     try {
-      await uploadPaymentProof(paymentId, proofImage, description || undefined);
+      await uploadPaymentProof(paymentId, proofImage, description || undefined, currentLOB);
       setUploadSuccess(true);
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Upload failed');

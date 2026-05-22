@@ -70,9 +70,10 @@ export interface ExternalPatientCreateResponse {
   suggestedPatientCode: string;
 }
 
-export function createExternalPatient(customerCode: string): Promise<ExternalPatientCreateResponse> {
+export function createExternalPatient(customerCode: string, lob?: 'dental' | 'cosmetic'): Promise<ExternalPatientCreateResponse> {
   return apiFetch<ExternalPatientCreateResponse>(`/ExternalCheckups/${encodeURIComponent(customerCode)}/patient`, {
     method: 'POST',
+    lob,
   });
 }
 
@@ -133,7 +134,8 @@ export interface CreateExternalCheckupData {
 
 export async function createExternalCheckup(
   customerCode: string,
-  data: CreateExternalCheckupData
+  data: CreateExternalCheckupData,
+  lob?: 'dental' | 'cosmetic'
 ): Promise<{ checkup: ExternalCheckup }> {
   const form = new FormData();
   Object.entries(data).forEach(([key, value]) => {
@@ -145,7 +147,9 @@ export async function createExternalCheckup(
     }
   });
 
-  const res = await fetch(`${API_URL}/ExternalCheckups/${encodeURIComponent(customerCode)}/health-checkups`, {
+  // Mirror apiFetch LOB routing for this raw multipart upload: cosmetic uses /api/cosmetic/* mirror.
+  const lobPrefix = lob === 'cosmetic' ? '/cosmetic' : '';
+  const res = await fetch(`${API_URL}${lobPrefix}/ExternalCheckups/${encodeURIComponent(customerCode)}/health-checkups`, {
     method: 'POST',
     headers: getExternalCheckupAuthHeaders(),
     body: form,

@@ -119,6 +119,25 @@ function translateForTest(key: string, options?: Record<string, unknown> | strin
   return interpolate(TEST_TRANSLATIONS[key] ?? defaultValue ?? key, options);
 }
 
+// Global default mock for BusinessUnitContext so hook/component unit tests that
+// don't wrap in <BusinessUnitProvider> still resolve useBusinessUnit() to a
+// stable dental LOB. Tests that need cosmetic behavior override this per-file.
+vi.mock('@/contexts/BusinessUnitContext', async () => {
+  const actual = await vi.importActual<typeof import('../contexts/BusinessUnitContext')>(
+    '@/contexts/BusinessUnitContext',
+  );
+  return {
+    ...actual,
+    useBusinessUnit: () => ({
+      currentLOB: 'dental' as const,
+      setCurrentLOB: vi.fn(),
+      availableLOBs: ['dental'] as const,
+      isMultiLOBUser: false,
+      isCosmeticEnabled: false,
+    }),
+  };
+});
+
 // Mock react-i18next with the small locale surface needed by component tests.
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({

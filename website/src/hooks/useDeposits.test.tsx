@@ -19,6 +19,16 @@ vi.mock('@/lib/api', () => ({
   deletePayment: vi.fn(),
 }));
 
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({
+    currentLOB: 'dental',
+    setCurrentLOB: vi.fn(),
+    availableLOBs: ['dental'],
+    isMultiLOBUser: false,
+    isCosmeticEnabled: false,
+  }),
+}));
+
 describe('useDeposits mutation refresh', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -62,7 +72,7 @@ describe('useDeposits mutation refresh', () => {
       amount: 500000,
       method: 'cash',
       depositType: 'deposit',
-    }));
+    }), 'dental');
     expect(fetchDeposits).toHaveBeenCalledTimes(2);
     expect(fetchDepositUsage).toHaveBeenCalledTimes(2);
     expect(fetchCustomerBalance).toHaveBeenCalledTimes(2);

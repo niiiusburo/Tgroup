@@ -133,7 +133,7 @@ export function useCustomerServiceActions({
       await refetchProfile?.();
       await refetchServices?.();
     },
-    [currentLOB, loadSaleOrderLines, refetchProfile, refetchServices],
+    [loadSaleOrderLines, refetchProfile, refetchServices, currentLOB],
   );
 
   return { handleCreateService, handleUpdateService, handleDeleteService };

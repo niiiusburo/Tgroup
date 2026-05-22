@@ -29,8 +29,8 @@ export function updateEmployee(id: string, data: Partial<CreateEmployeeData>, lo
   return apiFetch<ApiEmployee>(`/Employees/${id}`, { method: 'PUT', body: data, lob });
 }
 
-export function deleteEmployee(id: string) {
-  return apiFetch<void>(`/Employees/${id}`, { method: 'DELETE' });
+export function deleteEmployee(id: string, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<void>(`/Employees/${id}`, { method: 'DELETE', lob });
 }
 
 export interface ApiEmployee {

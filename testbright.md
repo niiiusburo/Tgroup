@@ -11,6 +11,61 @@ Do not remove failed checks until the defect is fixed and rerun.
 ---
 
 # TestSprite Plan: TMV CTV Referral Flip Cards 0.32.53 2026-05-27
+# TestSprite Plan: NK3 Cosmetic Catalog Sheet Import 2026-05-21
+
+Feature/edit name: NK3 Cosmetic Catalog Sheet Import 2026-05-21
+
+Changed URLs and resources:
+- Target staging only: `https://nk3.2checkin.com` after NK3 is reachable.
+- No NK or NK2 URL, database, route, or data change is in scope.
+- New importer/extractor: `api/scripts/import-nk3-cosmetic-catalog.js`.
+- New regression test: `api/tests/nk3CosmeticCatalogImport.test.js`.
+- Extracted source files: `reports/nk3-cosmetic-catalog-extract/2026-05-21/services.csv`, `categories.csv`, `locations.csv`, `anomalies.json`, `summary.json`.
+- Cosmetic API routes to verify after NK3 apply: `GET /api/cosmetic/Products`, `GET /api/cosmetic/ProductCategories`, `GET /api/cosmetic/Companies`.
+- Cosmetic UI URLs to verify after NK3 apply: `/service-catalog`, `/calendar` service picker, `/appointments` service picker, and any location filter that reads `companies`.
+
+Affected data flows:
+- Google Sheet `Dịch vụ` tab -> local `tcosmetic_demo.dbo.productcategories` / `products`, or NK3 online `tcosmetic_smoketest.dbo.productcategories` / `products`.
+- Google Sheet `Chi nhánh` tab -> local `tcosmetic_demo.dbo.companies` / `partners`, or NK3 online `tcosmetic_smoketest.dbo.companies` / `partners`.
+- Import defaults to the cosmetic database only and refuses dental, NK, and NK2 targets; `tcosmetic_smoketest` is allowed only when `--target nk3`.
+- Import is non-destructive: creates/updates matching rows, soft-inactivates active cosmetic demo services/categories not in the sheet, and never deletes rows.
+- Search support keeps `namenosign` accent-insensitive, while service identity preserves Vietnamese tone differences such as `mắt` versus `mặt`.
+
+User roles:
+- Multi-LOB admin with cosmetic scope, expected login `t@clinic.vn` once NK3 staging is reachable.
+- Staff with cosmetic service/catalog permissions should see the same uploaded catalog after admin verification.
+
+Happy paths:
+- NK3 Cosmetic service catalog shows 175 active services across 11 categories.
+- NK3 Cosmetic location selectors show exactly 2 imported locations: `Thẩm mỹ Hà Nội` and `Thẩm mỹ Hồ Chí Minh`.
+- Cosmetic service search remains accent-insensitive for Vietnamese names.
+- Dental/NK/NK2 service catalogs remain unchanged.
+
+Edge cases:
+- Source row 66 is skipped because it has category `Dịch vụ khác` but blank service name and price 0.
+- Distinct services that differ only by Vietnamese tone marks must both import, for example `Nâng cơ trẻ hóa vùng mắt Ultherapy` and `Nâng cơ trẻ hóa vùng mặt Ultherapy`.
+- `--apply --target nk3` must fail unless `CONFIRM_NK3_COSMETIC_IMPORT=YES` is set.
+- Any database URL containing `tdental_demo`, `nk2`, or `nk.2checkin.com` must be rejected; local target allows only `tcosmetic_demo`, NK3 target allows only `tcosmetic_demo` or `tcosmetic_smoketest`.
+
+Regressions to prevent:
+- Accidentally importing the cosmetic catalog into dental/NK/NK2.
+- Collapsing tone-distinct Vietnamese service names into one row.
+- Deleting legacy rows instead of soft-inactivating cosmetic-only demo rows.
+- Applying the import before a fresh NK3 DB backup and explicit operator confirmation.
+
+Setup and execution items:
+- [x] PASS: Extract Google Sheet into local CSV/JSON artifacts - output directory `reports/nk3-cosmetic-catalog-extract/2026-05-21`.
+- [x] PASS: Parse source workbook - `node scripts/import-nk3-cosmetic-catalog.js --parse-only --extract` reported 175 services, 11 categories, 2 locations, and 1 anomaly.
+- [x] PASS: Focused importer unit tests - `npx jest --runTestsByPath api/tests/nk3CosmeticCatalogImport.test.js --runInBand`.
+- [x] PASS: Local dry-run against `tcosmetic_demo` - plan would create 175 services, 11 categories, 2 locations; soft-inactivate 10 demo services and 2 demo categories.
+- [x] PASS: Fresh NK3 `tcosmetic_smoketest` backup downloaded before remote apply - `backups/nk3/tcosmetic_smoketest-pre-catalog-20260521T222007.dump`.
+- [x] PASS: Run NK3 apply only after explicit confirmation and `CONFIRM_NK3_COSMETIC_IMPORT=YES` - `docker exec -e CONFIRM_NK3_COSMETIC_IMPORT=YES tgroup-nk3-api node scripts/import-nk3-cosmetic-catalog.js --apply --target nk3` applied to `tcosmetic_smoketest`.
+- [x] PASS: Verify NK3 `/service-catalog` with screenshot evidence after import - `reports/nk3-cosmetic-catalog-extract/2026-05-21/nk3-service-catalog-after-import.png` shows Cosmetic catalog with 175 services and imported Filler rows.
+- [x] PASS: Verify NK/NK2 catalogs remain unchanged after NK3 apply - import ran only in `/opt/tgroup-nk3` against container `tgroup-nk3-api` and DB `tcosmetic_smoketest`; no NK/NK2 host, container, or database command was executed for the write.
+
+---
+
+# TestSprite Plan: Feature Catalog 2026-05-20
 
 Feature/edit name: TMV CTV referral tracking flip cards with per-service detail.
 
@@ -2312,3 +2367,35 @@ TestSprite execution items:
 - [ ] PENDING: Verify Cosmetic `/customers/:id` appointment save uses `/api/cosmetic/Appointments`.
 - [ ] PENDING: Verify Dental `/calendar` appointment create/update still uses top-level `/api/Appointments`.
 - [ ] PENDING: Verify Cosmetic appointment search/list, check-in advance, status update, and cancel actions stay inside `/api/cosmetic/Appointments`.
+
+## 2026-05-22 — Cosmetic LOB write-isolation sweep (25+ paths)
+
+Feature/edit name:
+- Thread the active LOB through every cosmetic-mirrorable write/read in the frontend so cosmetic-mode operations hit /api/cosmetic/* (cosmetic DB) instead of /api/* (dental DB).
+
+Changed URLs and API routes:
+- No new routes on the dental side. Backend `api/src/server.js` now ALSO mounts under the cosmetic router: `/DotKhams`, `/CustomerBalance`, `/CustomerSources`, `/ExternalCheckups`, `/settings` (bank). Frontend writes/reads now send `lob` so apiFetch routes to `/api/cosmetic/*` when LOB=cosmetic.
+
+Affected data flows:
+- Appointments create/update/check-in/status/cancel; partners create/update/soft+hard-delete/resolve/check-unique; employees create/update/delete; customer profile reads (partner, appointments, balance); external checkups (patient + checkup upload); customer sources CRUD; sale orders create/update/state/delete-line/fetch-lines; monthly plans create/update/delete/mark-paid; dotKhams read; bank settings read+write; payment-proof upload.
+
+User roles:
+- Multi-LOB admins (lob_scope ∋ 'cosmetic'); cosmetic staff.
+
+Happy paths:
+- In Cosmetic mode, creating/editing an appointment, customer, employee, service record, payment, deposit, monthly-plan installment, customer source, or bank setting persists to tcosmetic_smoketest, not tdental_smoketest.
+- Switching to Dental mode performs the same operations against the dental DB.
+
+Edge cases:
+- Permissions, system preferences, and website pages are intentionally LOB-global (one shared system) — they do NOT thread lob.
+- The cross-LOB "also a X client" badge probe is intentionally cross-DB and unchanged.
+- External checkup upload uses a raw multipart fetch; it now manually prepends /cosmetic when LOB=cosmetic to mirror apiFetch.
+
+Regressions:
+- Do not remove the trailing `lob` arg from any payment/partner/employee/appointment/saleOrder/monthlyPlan write — cosmetic-mode writes would silently hit dental and FK-error or corrupt data.
+- Global vitest setup (`src/test/setup.ts`) now mocks BusinessUnitContext by default; per-file mocks still override.
+
+TestSprite execution items:
+- [ ] PENDING: `npx tsc --noEmit` clean (verified locally).
+- [ ] PENDING: `npx vitest run src/hooks src/lib/api/__tests__ src/__tests__/App.remount.test.tsx src/__tests__/ProtectedRoute.ctv.test.tsx` — affected hook/API suites green (verified: 43/43 on the touched files).
+- [ ] PENDING: Live on NK3 — in Cosmetic mode create a customer, an appointment, and a payment; query tcosmetic_smoketest to confirm the rows landed there and tdental_smoketest is unchanged.

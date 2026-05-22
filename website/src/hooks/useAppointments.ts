@@ -139,7 +139,6 @@ export function useAppointments(selectedLocationId?: string) {
         offset: 0,
         limit: 200,
         companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
-        lob: currentLOB,
       });
       const managed = response.items.map((item) => mapApiToManagedAppointment(item, formatDate));
       setAppointments(managed);
@@ -150,7 +149,7 @@ export function useAppointments(selectedLocationId?: string) {
     } finally {
       setLoading(false);
     }
-  }, [selectedLocationId, formatDate, currentLOB]);
+  }, [selectedLocationId, formatDate]);
 
   // Load appointments on mount
   useEffect(() => {
@@ -178,7 +177,6 @@ export function useAppointments(selectedLocationId?: string) {
           limit: 200,
           search: searchTerm,
           companyId: selectedLocationId && selectedLocationId !== 'all' ? selectedLocationId : undefined,
-          lob: currentLOB,
         });
         const managed = response.items.map((item) => mapApiToManagedAppointment(item, formatDate));
         setAppointments(managed);
@@ -195,7 +193,7 @@ export function useAppointments(selectedLocationId?: string) {
     return () => {
       if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     };
-  }, [searchTerm, refetch, selectedLocationId, formatDate, currentLOB]);
+  }, [searchTerm, refetch]);
 
   const filtered = useMemo(() => {
     let result = appointments;
@@ -251,7 +249,7 @@ export function useAppointments(selectedLocationId?: string) {
       console.error('Failed to create appointment:', err);
       throw err;
     }
-  }, [formatDate, currentLOB]);
+  }, [currentLOB, formatDate]);
 
   const advanceCheckIn = useCallback(async (appointmentId: string) => {
     const appointment = appointments.find((a) => a.id === appointmentId);

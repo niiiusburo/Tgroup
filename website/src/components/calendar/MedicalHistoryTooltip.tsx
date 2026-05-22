@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Stethoscope, Loader2, FileText } from 'lucide-react';
 import { fetchPartnerById, type ApiPartner } from '@/lib/api/partners';
 import { fetchDotKhams, type ApiDotKham } from '@/lib/api/dotKhams';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { cn } from '@/lib/utils';
 
 interface MedicalHistoryTooltipProps {
@@ -26,6 +27,7 @@ export function MedicalHistoryTooltip({
   children
 }: MedicalHistoryTooltipProps) {
   const { t } = useTranslation('calendar');
+  const { currentLOB } = useBusinessUnit();
   const [isVisible, setIsVisible] = useState(false);
   const [partner, setPartner] = useState<ApiPartner | null>(null);
   const [recentDotKhams, setRecentDotKhams] = useState<ApiDotKham[]>([]);
@@ -39,8 +41,8 @@ export function MedicalHistoryTooltip({
     setLoading(true);
     try {
       const [partnerRes, dotKhamRes] = await Promise.all([
-      fetchPartnerById(customerId).catch(() => null),
-      fetchDotKhams({ partnerId: customerId, limit: 3 }).catch(() => null)]
+      fetchPartnerById(customerId, currentLOB).catch(() => null),
+      fetchDotKhams({ partnerId: customerId, limit: 3, lob: currentLOB }).catch(() => null)]
       );
       setPartner(partnerRes);
       setRecentDotKhams(dotKhamRes?.items ?? []);
@@ -48,7 +50,7 @@ export function MedicalHistoryTooltip({
     } finally {
       setLoading(false);
     }
-  }, [customerId, loaded]);
+  }, [customerId, loaded, currentLOB]);
 
   const handleMouseEnter = () => {
     if (hoverTimeoutRef.current) {
