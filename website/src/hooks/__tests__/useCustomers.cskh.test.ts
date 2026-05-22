@@ -112,7 +112,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
           name: 'Test Customer',
           phone: '0903333333',
           cskhid: 'emp2',
-        })
+        }),
+        'dental'
       );
 
       // And: Created customer should have CSKH data
@@ -146,7 +147,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
         expect.objectContaining({
           name: 'Updated Name',
           cskhid: 'emp3',
-        })
+        }),
+        'dental'
       );
     });
 
@@ -176,7 +178,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
         '1',
         expect.objectContaining({
           cskhid: '',
-        })
+        }),
+        'dental'
       );
     });
 
@@ -203,7 +206,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
         '1',
         expect.objectContaining({
           note: '',
-        })
+        }),
+        'dental'
       );
     });
 
@@ -233,7 +237,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
       expect(mockCreatePartner).toHaveBeenCalledWith(
         expect.objectContaining({
           sourceid: 'source-online',
-        })
+        }),
+        'dental'
       );
     });
 
@@ -260,7 +265,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
         '1',
         expect.objectContaining({
           sourceid: 'source-hotline',
-        })
+        }),
+        'dental'
       );
     });
 
@@ -290,7 +296,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
           referraluserid: null,
           cskhid: null,
           salestaffid: null,
-        })
+        }),
+        'dental'
       );
     });
   });

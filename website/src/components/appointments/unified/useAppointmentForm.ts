@@ -18,6 +18,7 @@ import type {
 } from './appointmentForm.types';
 import { formDataToApiPayload } from './appointmentForm.mapper';
 import { createAppointment, updateAppointment } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { DEFAULT_APPOINTMENT_DURATION } from '@/lib/appointmentDuration';
 import { formatInTimezone, getTodayInTimezone } from '@/lib/dateUtils';
 
@@ -82,6 +83,7 @@ export function useAppointmentForm(
   initialData?: Partial<UnifiedAppointmentFormData>,
   onSuccess?: () => void,
 ): UseAppointmentFormResult {
+  const { currentLOB } = useBusinessUnit();
   const [data, setData] = useState<UnifiedAppointmentFormData>(() =>
     mergeWithDefaults(initialData),
   );
@@ -152,9 +154,9 @@ export function useAppointmentForm(
       const payload = formDataToApiPayload(data);
 
       if (mode === 'edit' && data.id) {
-        await updateAppointment(data.id, payload);
+        await updateAppointment(data.id, payload, currentLOB);
       } else {
-        await createAppointment(payload);
+        await createAppointment(payload, currentLOB);
       }
 
       onSuccess?.();
@@ -166,7 +168,7 @@ export function useAppointmentForm(
     } finally {
       setIsSaving(false);
     }
-  }, [data, mode, validate, onSuccess]);
+  }, [data, mode, validate, onSuccess, currentLOB]);
 
   return {
     data,

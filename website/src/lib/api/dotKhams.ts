@@ -23,8 +23,9 @@ export interface ApiDotKham {
   paymentstate: string | null;
 }
 
-export function fetchDotKhams(params?: { partnerId?: string; limit?: number; offset?: number }) {
+export function fetchDotKhams(params?: { partnerId?: string; limit?: number; offset?: number; lob?: 'dental' | 'cosmetic' }) {
   return apiFetch<PaginatedResponse<ApiDotKham>>("/DotKhams", {
+    lob: params?.lob,
     params: {
       partner_id: params?.partnerId,
       limit: params?.limit ?? 100,

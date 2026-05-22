@@ -82,8 +82,8 @@ export function createSaleOrder(data: {
   notes?: string;
   tooth_numbers?: string | null;
   tooth_comment?: string | null;
-}) {
-  return apiFetch<ApiSaleOrder>('/SaleOrders', { method: 'POST', body: data });
+}, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiSaleOrder>('/SaleOrders', { method: 'POST', body: data, lob });
 }
 
 export function updateSaleOrder(id: string, data: {
@@ -106,12 +106,12 @@ export function updateSaleOrder(id: string, data: {
   notes?: string | null;
   tooth_numbers?: string | null;
   tooth_comment?: string | null;
-}) {
-  return apiFetch<ApiSaleOrder>(`/SaleOrders/${id}`, { method: 'PATCH', body: data });
+}, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiSaleOrder>(`/SaleOrders/${id}`, { method: 'PATCH', body: data, lob });
 }
 
-export function updateSaleOrderState(id: string, state: string) {
-  return apiFetch<ApiSaleOrder>(`/SaleOrders/${id}/state`, { method: 'PATCH', body: { state } });
+export function updateSaleOrderState(id: string, state: string, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiSaleOrder>(`/SaleOrders/${id}/state`, { method: 'PATCH', body: { state }, lob });
 }
 
 // ─── Sale Order Lines (service lines) ─────────────────────────────
@@ -184,8 +184,10 @@ export function fetchSaleOrderLines(params?: {
   limit?: number;
   sortField?: string;
   sortOrder?: string;
+  lob?: 'dental' | 'cosmetic';
 }) {
   return apiFetch<PaginatedResponse<ApiSaleOrderLine>>('/SaleOrders/lines', {
+    lob: params?.lob,
     params: {
       partner_id: params?.partnerId,
       offset: params?.offset ?? 0,
@@ -196,9 +198,9 @@ export function fetchSaleOrderLines(params?: {
   });
 }
 
-export function deleteSaleOrderLine(id: string) {
+export function deleteSaleOrderLine(id: string, lob?: 'dental' | 'cosmetic') {
   return apiFetch<{ success: boolean; id: string; orderId?: string | null; deletedOrder?: boolean }>(
     `/SaleOrderLines/${id}`,
-    { method: 'DELETE' }
+    { method: 'DELETE', lob }
   );
 }

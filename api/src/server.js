@@ -414,6 +414,11 @@ if (COSMETIC_FLAG) {
   cosmeticRouter.use('/AccountPayments', accountPaymentsRoutes);
   cosmeticRouter.use('/CrmTasks', crmTasksRoutes);
   cosmeticRouter.use('/MonthlyPlans', monthlyPlansRoutes);
+  cosmeticRouter.use('/DotKhams', dotKhamsRoutes);
+  cosmeticRouter.use('/CustomerBalance', customerBalanceRoutes);
+  cosmeticRouter.use('/CustomerSources', customerSourcesRoutes);
+  cosmeticRouter.use('/ExternalCheckups', externalCheckupsRoutes);
+  cosmeticRouter.use('/settings', bankSettingsRoutes);
   // Add more mirrors (e.g. /Services if revived, feedback, etc.) as needed for full admin reuse
 
   app.use('/api/cosmetic', cosmeticRouter);

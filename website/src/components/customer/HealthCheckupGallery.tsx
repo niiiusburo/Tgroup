@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Calendar, Image as ImageIcon, Loader2, Plus, UserPlus } from 'lucide-react';
 import { createExternalPatient, type ExternalCheckupsResponse } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { AuthenticatedCheckupImage } from './AuthenticatedCheckupImage';
 import { HealthCheckupEmptyState } from './HealthCheckupEmptyState';
 import { HealthCheckupLightbox } from './HealthCheckupLightbox';
@@ -38,6 +39,7 @@ export function HealthCheckupGallery({
   canUploadCheckups = false,
 }: HealthCheckupGalleryProps) {
   const { t } = useTranslation('customers');
+  const { currentLOB } = useBusinessUnit();
   const [lightboxIndex, setLightboxIndex] = useState<number>(-1);
   const [lightboxCheckup, setLightboxCheckup] = useState<number>(-1);
   const [showForm, setShowForm] = useState(false);
@@ -113,7 +115,7 @@ export function HealthCheckupGallery({
     setFormNotice(null);
     setCreatingPatient(true);
     try {
-      await createExternalPatient(customerCode);
+      await createExternalPatient(customerCode, currentLOB);
       setFormNotice(t('createExternalPatientSuccess'));
       onUploaded?.();
     } catch (err) {

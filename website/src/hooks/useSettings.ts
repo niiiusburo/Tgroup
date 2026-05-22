@@ -211,6 +211,7 @@ function mapApiSource(api: ApiCustomerSource): CustomerSource {
 }
 
 export function useCustomerSources() {
+  const { currentLOB } = useBusinessUnit();
   const [sources, setSources] = useState<CustomerSource[]>([...DEFAULT_CUSTOMER_SOURCES]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -223,6 +224,7 @@ export function useCustomerSources() {
     try {
       const response = await fetchCustomerSources({
         type: typeFilter !== 'all' ? typeFilter : undefined,
+        lob: currentLOB,
       });
       if (response.items.length > 0) {
         setSources(response.items.map(mapApiSource));
@@ -233,7 +235,7 @@ export function useCustomerSources() {
     } finally {
       setLoading(false);
     }
-  }, [typeFilter]);
+  }, [typeFilter, currentLOB]);
 
   useEffect(() => {
     loadSources();
@@ -255,7 +257,7 @@ export function useCustomerSources() {
     const source = sources.find(s => s.id === id);
     if (!source) return;
     try {
-      await updateCustomerSource(id, { is_active: !source.isActive });
+      await updateCustomerSource(id, { is_active: !source.isActive }, currentLOB);
       setSources((prev) =>
         prev.map((s) => (s.id === id ? { ...s, isActive: !s.isActive } : s))
       );
@@ -271,7 +273,7 @@ export function useCustomerSources() {
         type: source.type,
         description: source.description,
         is_active: source.isActive,
-      });
+      }, currentLOB);
       setSources((prev) => [...prev, mapApiSource(apiSource)]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add source');
@@ -281,7 +283,7 @@ export function useCustomerSources() {
 
   async function removeSource(id: string) {
     try {
-      await deleteCustomerSource(id);
+      await deleteCustomerSource(id, currentLOB);
       setSources((prev) => prev.filter((s) => s.id !== id));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete source');

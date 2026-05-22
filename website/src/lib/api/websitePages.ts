@@ -84,10 +84,12 @@ export function deleteWebsitePage(id: string) {
 export async function uploadPaymentProof(
   paymentId: string,
   proofImageBase64: string,
-  qrDescription?: string
+  qrDescription?: string,
+  lob?: 'dental' | 'cosmetic'
 ): Promise<{ success: boolean; proofId?: number }> {
   return apiFetch<{ success: boolean; proofId?: number }>(`/Payments/${paymentId}/proof`, {
     method: 'POST',
+    lob,
     body: { proofImageBase64, qrDescription },
   });
 }

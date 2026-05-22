@@ -332,7 +332,7 @@ describe('useCustomerProfile date normalization', () => {
     rerender({ customerId: 't8250' });
 
     await waitFor(() => {
-      expect(fetchPartnerById).toHaveBeenCalledWith('t8250');
+      expect(fetchPartnerById).toHaveBeenCalledWith('t8250', 'dental');
     });
 
     expect(result.current.appointments).toEqual([]);

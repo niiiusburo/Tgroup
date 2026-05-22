@@ -13,6 +13,16 @@ vi.mock('@/lib/api/payments', () => ({
   fetchPayments: vi.fn(),
 }));
 
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({
+    currentLOB: 'dental',
+    setCurrentLOB: vi.fn(),
+    availableLOBs: ['dental'],
+    isMultiLOBUser: false,
+    isCosmeticEnabled: false,
+  }),
+}));
+
 describe('usePayment', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -49,7 +59,7 @@ describe('usePayment', () => {
 
     await waitFor(() => expect(result.current.payments).toHaveLength(1));
 
-    expect(fetchPayments).toHaveBeenCalledWith(undefined, 'payments', undefined);
+    expect(fetchPayments).toHaveBeenCalledWith(undefined, 'payments', undefined, 'dental');
     expect(result.current.payments[0]).toEqual(expect.objectContaining({
       id: 'payment-1',
       recordId: 'saleorder-1',
@@ -92,7 +102,7 @@ describe('usePayment', () => {
     await waitFor(() => expect(result.current.payments).toHaveLength(1));
 
     await waitFor(() => {
-      expect(fetchPayments).toHaveBeenLastCalledWith(undefined, 'payments', 'ma van thanh');
+      expect(fetchPayments).toHaveBeenLastCalledWith(undefined, 'payments', 'ma van thanh', 'dental');
     });
   });
 
@@ -144,7 +154,7 @@ describe('usePayment', () => {
       amount: 500000,
       method: 'cash',
       depositType: 'deposit',
-    }));
+    }), 'dental');
     expect(fetchPayments).toHaveBeenCalledTimes(2);
   });
 });

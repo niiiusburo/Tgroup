@@ -186,11 +186,11 @@ export function useServices(selectedLocationId?: string, partnerId?: string, opt
       sourceid: input.sourceId ?? null,
     };
 
-    const created = await createSaleOrder(apiPayload);
+    const created = await createSaleOrder(apiPayload, currentLOB);
     const newRecord = mapSaleOrderToServiceRecord(created);
     setRecords((prev) => [newRecord, ...prev]);
     return newRecord;
-  }, []);
+  }, [currentLOB]);
 
   /**
    * Update a service record via API
@@ -218,11 +218,11 @@ export function useServices(selectedLocationId?: string, partnerId?: string, opt
       sourceid: input.sourceId ?? null,
     };
 
-    const updated = await updateSaleOrder(input.id, apiPayload);
+    const updated = await updateSaleOrder(input.id, apiPayload, currentLOB);
     const mapped = mapSaleOrderToServiceRecord(updated);
     setRecords((prev) => prev.map((r) => (r.id === input.id ? mapped : r)));
     return mapped;
-  }, []);
+  }, [currentLOB]);
 
   /**
    * Update visit status in a service record (local-only)
@@ -277,13 +277,13 @@ export function useServices(selectedLocationId?: string, partnerId?: string, opt
    */
   const updateServiceStatus = useCallback(async (recordId: string, newStatus: ServiceStatus) => {
     const newState = statusToState(newStatus);
-    const updated = await updateSaleOrderState(recordId, newState);
+    const updated = await updateSaleOrderState(recordId, newState, currentLOB);
     const mapped = mapSaleOrderToServiceRecord(updated);
     setRecords((prev) =>
       prev.map((r) => r.id === recordId ? mapped : r),
     );
     return mapped;
-  }, []);
+  }, [currentLOB]);
 
   /**
    * Get all records for a specific customer

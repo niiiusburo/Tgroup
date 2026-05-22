@@ -25,6 +25,7 @@ import { X, Loader2, UserPlus, User, Phone, Mail, MapPin, CalendarDays, CheckCir
 import { DatePicker } from '@/components/ui/DatePicker';
 import { LocationSelector } from '@/components/shared/LocationSelector';
 import { createEmployee, updateEmployee, fetchCompanies, fetchPermissionGroups, type ApiEmployee, type CreateEmployeeData, type PermissionGroup } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { ALL_ROLES, ROLE_LABELS, ROLE_TO_DB_FLAGS, inferRoleFromFlags, type EmployeeRole } from '@/data/mockEmployees';
 
 const ROLE_TO_JOBTITLE: Record<EmployeeRole, string> = {
@@ -63,6 +64,7 @@ interface EmployeeFormProps {
 
 export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
   const { t } = useTranslation('employees');
+  const { currentLOB } = useBusinessUnit();
   const isEdit = !!employee;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -129,9 +131,9 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
     try {
       let savedEmployee: ApiEmployee;
       if (isEdit && employee) {
-        savedEmployee = await updateEmployee(employee.id, data);
+        savedEmployee = await updateEmployee(employee.id, data, currentLOB);
       } else {
-        savedEmployee = await createEmployee(data);
+        savedEmployee = await createEmployee(data, currentLOB);
       }
       await onSave(savedEmployee, isEdit ? 'edit' : 'create');
       onClose();

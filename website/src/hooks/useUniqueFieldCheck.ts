@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { apiFetch } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 export type UniqueFieldStatus = 'idle' | 'checking' | 'unique' | 'duplicate' | 'error';
 
@@ -39,6 +40,7 @@ interface CacheEntry {
 
 export function useUniqueFieldCheck(args: UseUniqueFieldCheckArgs): UseUniqueFieldCheckResult {
   const { field, value, excludeId, initialValue, debounceMs = 400, enabled = true } = args;
+  const { currentLOB } = useBusinessUnit();
 
   const [status, setStatus] = useState<UniqueFieldStatus>('idle');
   const [message, setMessage] = useState<string | undefined>(undefined);
@@ -100,6 +102,7 @@ export function useUniqueFieldCheck(args: UseUniqueFieldCheckArgs): UseUniqueFie
 
         const data = await apiFetch<{ unique: boolean }>('/Partners/check-unique', {
           params,
+          lob: currentLOB,
         });
 
         if (controller.signal.aborted) return;
@@ -128,7 +131,7 @@ export function useUniqueFieldCheck(args: UseUniqueFieldCheckArgs): UseUniqueFie
         timerRef.current = null;
       }
     };
-  }, [value, excludeId, initialValue, enabled, field, debounceMs, setResult]);
+  }, [value, excludeId, initialValue, enabled, field, debounceMs, setResult, currentLOB]);
 
   // Abort on unmount
   useEffect(() => {

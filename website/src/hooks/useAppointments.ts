@@ -19,6 +19,7 @@ import { calculateEndTime } from '@/lib/calendarUtils';
 import type { AppointmentStatus } from '@/data/mockCalendar';
 import type { AppointmentType } from '@/constants';
 import { useTimezone } from '@/contexts/TimezoneContext';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 export type AppointmentFilter = 'all' | AppointmentStatus;
 export type CheckInFilter = 'all' | CheckInStatus;
@@ -117,6 +118,7 @@ function mapApiToManagedAppointment(
 
 export function useAppointments(selectedLocationId?: string) {
   const { formatDate } = useTimezone();
+  const { currentLOB } = useBusinessUnit();
   const [appointments, setAppointments] = useState<ManagedAppointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -237,7 +239,7 @@ export function useAppointments(selectedLocationId?: string) {
         productid: input.serviceId,
       };
 
-      const created = await apiCreateAppointment(apiPayload);
+      const created = await apiCreateAppointment(apiPayload, currentLOB);
       const managed = mapApiToManagedAppointment(created, formatDate);
       setAppointments((prev) => [...prev, managed]);
       return managed;
@@ -247,7 +249,7 @@ export function useAppointments(selectedLocationId?: string) {
       console.error('Failed to create appointment:', err);
       throw err;
     }
-  }, []);
+  }, [currentLOB, formatDate]);
 
   const advanceCheckIn = useCallback(async (appointmentId: string) => {
     const appointment = appointments.find((a) => a.id === appointmentId);
@@ -274,7 +276,7 @@ export function useAppointments(selectedLocationId?: string) {
 
     try {
       // Persist to API first
-      await apiUpdateAppointment(appointmentId, { state: apiState });
+      await apiUpdateAppointment(appointmentId, { state: apiState }, currentLOB);
 
       // Then update local state
       setAppointments((prev) =>
@@ -295,7 +297,7 @@ export function useAppointments(selectedLocationId?: string) {
       console.error('Failed to advance check-in status:', err);
       throw err;
     }
-  }, [appointments]);
+  }, [appointments, currentLOB]);
 
   const updateStatus = useCallback(async (appointmentId: string, status: AppointmentStatus) => {
     try {
@@ -303,7 +305,7 @@ export function useAppointments(selectedLocationId?: string) {
       if (!appointment) return;
 
       const apiStatus = status === 'completed' ? 'done' : status;
-      await apiUpdateAppointment(appointmentId, { state: apiStatus });
+      await apiUpdateAppointment(appointmentId, { state: apiStatus }, currentLOB);
 
       setAppointments((prev) =>
         prev.map((apt) =>
@@ -316,11 +318,11 @@ export function useAppointments(selectedLocationId?: string) {
       console.error('Failed to update appointment status:', err);
       throw err;
     }
-  }, [appointments]);
+  }, [appointments, currentLOB]);
 
   const cancelAppointment = useCallback(async (appointmentId: string) => {
     try {
-      await apiUpdateAppointment(appointmentId, { state: 'cancelled' });
+      await apiUpdateAppointment(appointmentId, { state: 'cancelled' }, currentLOB);
 
       setAppointments((prev) =>
         prev.map((apt) =>
@@ -335,7 +337,7 @@ export function useAppointments(selectedLocationId?: string) {
       console.error('Failed to cancel appointment:', err);
       throw err;
     }
-  }, []);
+  }, [currentLOB]);
 
   const convertToService = useCallback((appointmentId: string) => {
     const serviceId = `svc-${Date.now()}`;
@@ -372,7 +374,7 @@ export function useAppointments(selectedLocationId?: string) {
         productid: input.serviceId,
       };
 
-      await apiUpdateAppointment(appointmentId, apiPayload);
+      await apiUpdateAppointment(appointmentId, apiPayload, currentLOB);
 
       // Update local state
       setAppointments((prev) =>
@@ -409,7 +411,7 @@ export function useAppointments(selectedLocationId?: string) {
       console.error('Failed to update appointment:', err);
       throw err;
     }
-  }, []);
+  }, [currentLOB]);
 
   const todayAppointments = useMemo(() => {
     const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());

@@ -128,10 +128,11 @@ export type PartnerResolveResult =
   | { status: 'not-found' }
   | { status: 'ambiguous'; candidates: PartnerResolveCandidate[]; matchedBy: 'ref' | 'phone' };
 
-export async function resolvePartnerKey(key: string): Promise<PartnerResolveResult> {
+export async function resolvePartnerKey(key: string, lob?: 'dental' | 'cosmetic'): Promise<PartnerResolveResult> {
   try {
     const data = await apiFetch<PartnerResolveSuccess>(
       `/Partners/resolve?key=${encodeURIComponent(key)}`,
+      { lob },
     );
     return { status: 'found', partner: data.partner, matchedBy: data.matchedBy };
   } catch (err) {
@@ -145,20 +146,20 @@ export async function resolvePartnerKey(key: string): Promise<PartnerResolveResu
   }
 }
 
-export function createPartner(data: Partial<ApiPartner>) {
-  return apiFetch<ApiPartner>('/Partners', { method: 'POST', body: data });
+export function createPartner(data: Partial<ApiPartner>, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiPartner>('/Partners', { method: 'POST', body: data, lob });
 }
 
-export function updatePartner(id: string, data: Partial<ApiPartner>) {
-  return apiFetch<ApiPartner>(`/Partners/${id}`, { method: 'PUT', body: data });
+export function updatePartner(id: string, data: Partial<ApiPartner>, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiPartner>(`/Partners/${id}`, { method: 'PUT', body: data, lob });
 }
 
-export function softDeletePartner(id: string) {
-  return apiFetch<ApiPartner>(`/Partners/${id}/soft-delete`, { method: 'PATCH' });
+export function softDeletePartner(id: string, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiPartner>(`/Partners/${id}/soft-delete`, { method: 'PATCH', lob });
 }
 
-export function hardDeletePartner(id: string) {
-  return apiFetch<{ success: boolean; id: string }>(`/Partners/${id}/hard-delete`, { method: 'DELETE' });
+export function hardDeletePartner(id: string, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<{ success: boolean; id: string }>(`/Partners/${id}/hard-delete`, { method: 'DELETE', lob });
 }
 
 export interface FaceCandidate {
