@@ -1,6 +1,7 @@
 'use strict';
 
 const { query } = require('../../db');
+const { getReferralClaimStatus } = require('../../services/referralClaim');
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -128,6 +129,11 @@ async function resolvePartner(req, res) {
   }
 
   const row = result.rows[0];
+  let referralClaim = null;
+  if (row && row.id) {
+    const lob = req.lob || 'dental';
+    referralClaim = await getReferralClaimStatus(row.id, lob, {});
+  }
   const body = {
     matchedBy: result.matchedBy,
     partner: {
@@ -136,6 +142,7 @@ async function resolvePartner(req, res) {
       name: row.displayname || row.name,
       phone: row.phone,
     },
+    referralClaim,
   };
   cacheSet(cacheKey, { status: 200, body });
   return res.status(200).json(body);

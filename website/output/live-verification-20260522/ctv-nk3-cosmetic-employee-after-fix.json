@@ -1,0 +1,52 @@
+{
+  "baseUrl": "https://ctv.2checkin.com",
+  "screenshotPath": "/Users/thuanle/Documents/TamTMV/Tgrouptest/.worktrees/feat-ctv-mlm-commission/website/output/live-verification-20260522/ctv-nk3-cosmetic-employee-location-dropdown-after-fix.png",
+  "loggedIn": true,
+  "currentLob": "cosmetic",
+  "pageUrl": "https://ctv.2checkin.com/employees",
+  "modalContainsDentalLocations": false,
+  "modalContainsCosmeticLocations": true,
+  "modalTextSample": [
+    "Thêm nhân viên",
+    "",
+    "Tạo nhân viên mới",
+    "",
+    "Họ và tên",
+    "*",
+    "Điện thoại",
+    "Email",
+    "Mật khẩu",
+    "*",
+    "Chi nhánh",
+    "Select location...",
+    "Thẩm mỹ Hà NộiThẩm mỹ Hồ Chí Minh",
+    "Chi nhánh phụ",
+    "Tất cả chi nhánh",
+    "Thẩm mỹ Hà Nội",
+    "Thẩm mỹ Hồ Chí Minh",
+    "Cấp bậc quyền (Tier)",
+    "-- Chọn tier --",
+    "Admin",
+    "Clinic Manager",
+    "Dentist",
+    "Receptionist",
+    "Dental Assistant",
+    "",
+    "Tier quyết định quyền truy cập của nhân viên trong hệ thống",
+    "",
+    "Vị trí / Vai trò"
+  ],
+  "companyRequests": [
+    {
+      "method": "GET",
+      "url": "https://ctv.2checkin.com/api/cosmetic/Companies?offset=0&limit=50"
+    }
+  ],
+  "failedRequests": [
+    {
+      "url": "https://ctv.2checkin.com/assets/Overview-CeHe5G5g.js",
+      "failure": "net::ERR_ABORTED"
+    }
+  ],
+  "consoleErrors": []
+}
