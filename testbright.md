@@ -1976,3 +1976,55 @@ TestSprite execution items:
 - [x] PASS 2026-05-22: `https://nk.2checkin.com/tbot/` still returned `Bibo v3 — 20 Soft 3D Mascot Variants`, confirming the import did not touch NK.
 - [x] PASS 2026-05-22: Header deadline counters deployed on `https://ctv.2checkin.com/tbot`: six-week checkpoint shows 42 days to July 3, 2026 and Oct 15 shows 146 days to October 15, 2026.
 - [x] PASS 2026-05-22: Counter screenshot captured `output/playwright/ctv-tbot-deadline-counters-2026-05-22.png`; source snapshot tracked at `docs/live-artifacts/ctv-tbot/index.html`.
+
+---
+
+# TestSprite Plan: CTV TBot Kanban Calendar t2 Static Page (2026-05-22)
+
+Feature/edit name: Additive CTV TBot Kanban Calendar static page deploy as `t2.html`
+
+Changed URLs and API routes:
+- Added live URL: `https://ctv.2checkin.com/tbot/t2.html`
+- No app API routes changed.
+- Existing `https://ctv.2checkin.com/tbot` Feature Board remains in place.
+- No `nk.2checkin.com/tbot` route was intentionally changed.
+- Screenshot evidence: `output/playwright/ctv-tbot-t2-kanban-calendar-2026-05-22.png`.
+
+Affected data flows:
+- Static HTML page copied from `/Users/thuanle/Downloads/kanban_calendar.html`.
+- The page uses its own browser storage key `kanban-calendar-sheet-import-v1`.
+- No shared JSON file, clinic database table, or backend API was changed for this page.
+
+User roles:
+- Public browser visitor for the static Kanban Calendar page.
+- Internal staff reviewing the imported 6-week plan and task calendar.
+
+Happy paths:
+- Opening `https://ctv.2checkin.com/tbot/t2.html` returns HTTP 200 and renders the Kanban Calendar page.
+- The page title is `Kanban Calendar — Sheet Import`.
+- The page displays the imported task calendar with 106 task cards and local browser persistence.
+
+Edge cases:
+- Refresh should keep edits through the page's local storage.
+- Browser storage failure should fall back to the embedded default state.
+- Loading `t2.html` must not affect the existing `/tbot` Feature Board or `/tbot/state/board.json`.
+
+Regressions:
+- `https://ctv.2checkin.com/tbot` must continue serving the Feature Board.
+- `https://nk.2checkin.com/tbot` must continue serving the existing NK TBot content.
+- Shared legacy folder `/var/www/tbot/` must remain untouched.
+
+Setup data and login state:
+- No login required.
+- VPS host: `76.13.16.68`.
+- CTV-only static target: `/var/www/ctv.2checkin.com/tbot/t2.html`.
+- Source snapshot: `docs/live-artifacts/ctv-tbot/t2.html`.
+- Source checksum: `1cf4e62c216c252d96f7c82d7324e1971ccaa9040c06c8c0fe9a1f216f756a01`.
+
+TestSprite execution items:
+- [x] PASS 2026-05-22: `scp /Users/thuanle/Downloads/kanban_calendar.html root@76.13.16.68:/var/www/ctv.2checkin.com/tbot/t2.html` completed successfully.
+- [x] PASS 2026-05-22: Remote checksum for `/var/www/ctv.2checkin.com/tbot/t2.html` matches the local source checksum `1cf4e62c216c252d96f7c82d7324e1971ccaa9040c06c8c0fe9a1f216f756a01`.
+- [x] PASS 2026-05-22: `curl -I https://ctv.2checkin.com/tbot/t2.html` returned HTTP 200 and `content-length: 98872`.
+- [x] PASS 2026-05-22: Live HTML contains `Kanban Calendar — Sheet Import`, `kanban calendar`, and `kanban-calendar-sheet-import-v1`.
+- [x] PASS 2026-05-22: Playwright browser check confirmed title `Kanban Calendar — Sheet Import`, heading `kanban calendar`, 106 task cards, and no console/page errors.
+- [x] PASS 2026-05-22: Screenshot captured `output/playwright/ctv-tbot-t2-kanban-calendar-2026-05-22.png`.
