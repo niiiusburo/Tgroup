@@ -78,6 +78,7 @@ const ALLOWED_ORIGINS = [
   'https://www.nk2.2checkin.com',
   'https://nk3.2checkin.com',
   'https://www.nk3.2checkin.com',
+  'https://76-13-16-68.sslip.io',
 ];
 app.use(helmet());
 const DEV_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1):(517\d|5715|3\d{3})$/;
