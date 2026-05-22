@@ -4,6 +4,7 @@
 
 ## [unreleased] — 2026-05-22 (feat/ctv-mlm-commission)
 ### Added
+- `POST /api/ctv/bookings` (in `api/src/routes/ctv.js`) — CTV/admin booking with hard eligibility gate: blocks `400 B_CLIENT_CLAIMED` when the client is actively claimed by a different CTV; otherwise creates/re-claims the client, writes a Referral Start card, and creates the appointment (canonical `dbo.appointments` insert). Uses `crypto.randomUUID()` (uuid v13 is ESM and breaks `require` under jest). `REFERRAL_PRODUCT_NOT_CONFIGURED` → 409. 2 jest cases. — @agent — 2026-05-22.
 - `api/src/services/referralCard.js` — `createReferralStartCard({ clientId, lob })` creates a zero-amount saleorder + saleorderline referencing `commission_settings.referral_start_product_id`; throws `REFERRAL_PRODUCT_NOT_CONFIGURED` if unset. Mirrors `createSaleOrder.js` insert pattern. — @agent — 2026-05-22.
 - `api/src/routes/partners/resolveHandler.js` — `/api/Partners/resolve` now includes `referralClaim` in the 200 response (active/lapsed status for the matched partner). — @agent — 2026-05-22.
 ### Docs

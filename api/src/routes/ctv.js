@@ -7,6 +7,8 @@
 const express = require('express');
 const { requireAuth } = require('../middleware/auth');
 const { getDb } = require('../db');
+const { getReferralClaimStatus } = require('../services/referralClaim');
+const { createReferralStartCard } = require('../services/referralCard');
 
 const router = express.Router();
 
@@ -394,3 +396,100 @@ router.post('/clients', requireAuth, async (req, res) => {
 });
 
 module.exports = router;
+
+/**
+ * POST /api/ctv/bookings
+ * CTV books a client: resolve by phone → eligibility gate → create/reclaim client →
+ * Referral Start card → appointment. Atomic within the handler (no explicit tx).
+ */
+router.post('/bookings', requireAuth, async (req, res) => {
+  const { employeeId, is_ctv: isCTV } = req.user || {};
+  if (!employeeId) return res.status(401).json({ error: 'No token' });
+
+  // Admin can also book on behalf of CTVs
+  let isAdmin = false;
+  try {
+    const { resolveEffectivePermissions, isAdminPermissionState } = require('../services/permissionService');
+    const permState = await resolveEffectivePermissions(employeeId);
+    const list = (permState && permState.effectivePermissions) || [];
+    isAdmin = isAdminPermissionState(permState) || list.includes('*') || list.includes('ctv.manage');
+  } catch (e) {
+    isAdmin = false;
+  }
+
+  if (!isCTV && !isAdmin) {
+    return res.status(403).json({
+      error: { code: 'S_CTV_CREATE_FORBIDDEN', message: 'CTV only' },
+    });
+  }
+
+  const { clientId: bodyClientId, name, phone, lob: bodyLob, date, time, companyId, productId } = req.body || {};
+  if (!phone || !date) {
+    return res.status(400).json({ error: { code: 'VALIDATION', message: 'phone and date are required' } });
+  }
+  const lob = bodyLob === 'cosmetic' ? 'cosmetic' : 'dental';
+  const db = getDb(lob);
+
+  try {
+    // 1. Find existing client by id or phone
+    let clientId = bodyClientId || null;
+    if (!clientId) {
+      const found = await safeQueryRows(db, `SELECT id FROM dbo.partners WHERE LOWER(phone) = LOWER($1) LIMIT 1`, [phone]);
+      clientId = found[0]?.id || null;
+    }
+
+    // 2. Eligibility gate
+    if (clientId) {
+      const claim = await getReferralClaimStatus(clientId, lob, {});
+      if (claim.active && claim.ownerCtvId && claim.ownerCtvId !== employeeId) {
+        return res.status(400).json({
+          error: { code: 'B_CLIENT_CLAIMED', message: 'Client already active with another CTV', ownerName: claim.ownerName, expiresAt: claim.expiresAt },
+        });
+      }
+    }
+
+    // 3a. Create client if new
+    if (!clientId) {
+      clientId = require('crypto').randomUUID();
+      const now = new Date().toISOString();
+      await safeQueryRows(db,
+        `INSERT INTO dbo.partners (id, name, phone, lob_scope, referred_by_ctv_id, is_ctv, customer, active, employee, supplier, isagent, isinsurance, iscompany, ishead, isbusinessinvoice, isdeleted, datecreated, lastupdated)
+         VALUES ($1,$2,$3,$4,$5,false,true,true,false,false,false,false,false,false,false,false,$6,$6)`,
+        [clientId, name || 'Khách CTV', phone, [lob], employeeId, now]);
+    } else {
+      // Re-claim (or claim a lapsed/unclaimed client) for this CTV
+      await safeQueryRows(db, `UPDATE dbo.partners SET referred_by_ctv_id = $1, lastupdated = now() WHERE id = $2`, [employeeId, clientId]);
+    }
+
+    // 3b. Referral Start card
+    await createReferralStartCard({ clientId, lob });
+
+    // 3c. Appointment — use canonical insert pattern
+    const apptId = require('crypto').randomUUID();
+    const nameResult = await safeQueryRows(db,
+      "SELECT COALESCE(MAX(CAST(SUBSTRING(name FROM 3) AS INTEGER)), 0) + 1 AS next_seq FROM dbo.appointments WHERE name LIKE 'AP%'"
+    );
+    const nextSeq = nameResult[0]?.next_seq || 1;
+    const apptName = `AP${String(nextSeq).padStart(6, '0')}`;
+
+    await safeQueryRows(db,
+      `INSERT INTO dbo.appointments (
+        id, name, date, time, partnerid, doctorid, companyid, note, timeexpected,
+        color, state, aptstate, isrepeatcustomer, isnotreatment, productid, assistantid, dentalaideid,
+        datecreated, lastupdated
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, false, false, $13, $14, $15,
+        (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'),
+        (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
+      )`,
+      [apptId, apptName, date, time || null, clientId, null, companyId || null, '', 30, '1', 'confirmed', 'confirmed', productId || null, null, null]);
+
+    return res.status(201).json({ clientId, appointmentId: apptId });
+  } catch (e) {
+    if (e.code === 'REFERRAL_PRODUCT_NOT_CONFIGURED') {
+      return res.status(409).json({ error: { code: 'REFERRAL_PRODUCT_NOT_CONFIGURED', message: 'Admin must configure the Referral Start product first' } });
+    }
+    console.error('[ctv POST /bookings] error:', e.message);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
