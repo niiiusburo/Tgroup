@@ -68,9 +68,10 @@ export async function createPayment(data: {
   bankAmount?: number;
   depositType?: 'deposit' | 'refund' | 'usage';
   allocations?: { invoice_id?: string; dotkham_id?: string; allocated_amount: number }[];
-}): Promise<ApiPayment> {
+}, lob?: 'dental' | 'cosmetic'): Promise<ApiPayment> {
   return apiFetch<ApiPayment>('/Payments', {
     method: 'POST',
+    lob,
     body: {
       customer_id: data.customerId,
       service_id: data.serviceId,
@@ -89,9 +90,10 @@ export async function createPayment(data: {
   });
 }
 
-export async function voidPayment(id: string, reason?: string): Promise<{ success: boolean }> {
+export async function voidPayment(id: string, reason?: string, lob?: 'dental' | 'cosmetic'): Promise<{ success: boolean }> {
   return apiFetch<{ success: boolean }>(`/Payments/${id}/void`, {
     method: 'POST',
+    lob,
     body: { reason },
   });
 }
@@ -140,9 +142,10 @@ export async function createRefund(data: {
   method: 'cash' | 'bank_transfer';
   notes?: string;
   paymentDate?: string;
-}): Promise<ApiPayment> {
+}, lob?: 'dental' | 'cosmetic'): Promise<ApiPayment> {
   return apiFetch<ApiPayment>('/Payments/refund', {
     method: 'POST',
+    lob,
     body: {
       customer_id: data.customerId,
       amount: data.amount,
@@ -162,10 +165,12 @@ export async function updatePayment(
     paymentDate: string;
     referenceCode: string;
     status: 'posted' | 'voided';
-  }>
+  }>,
+  lob?: 'dental' | 'cosmetic'
 ): Promise<ApiPayment> {
   return apiFetch<ApiPayment>(`/Payments/${id}`, {
     method: 'PATCH',
+    lob,
     body: {
       amount: data.amount,
       method: data.method,
@@ -177,6 +182,6 @@ export async function updatePayment(
   });
 }
 
-export async function deletePayment(id: string): Promise<{ success: boolean }> {
-  return apiFetch<{ success: boolean }>(`/Payments/${id}`, { method: 'DELETE' });
+export async function deletePayment(id: string, lob?: 'dental' | 'cosmetic'): Promise<{ success: boolean }> {
+  return apiFetch<{ success: boolean }>(`/Payments/${id}`, { method: 'DELETE', lob });
 }

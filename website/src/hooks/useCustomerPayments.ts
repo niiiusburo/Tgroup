@@ -66,22 +66,22 @@ export function useCustomerPayments(customerId: string | null): UseCustomerPayme
       cashAmount: data.cashAmount,
       bankAmount: data.bankAmount,
       allocations: data.allocations,
-    });
+    }, currentLOB);
     setPayments((prev) => [created as PaymentWithAllocations, ...prev]);
     return created;
-  }, []);
+  }, [currentLOB]);
 
   const voidPaymentById = useCallback(async (id: string, reason?: string) => {
-    await voidPayment(id, reason);
+    await voidPayment(id, reason, currentLOB);
     setPayments((prev) =>
       prev.map((p) => (p.id === id ? { ...p, status: 'voided' as const, allocations: [] } : p))
     );
-  }, []);
+  }, [currentLOB]);
 
   const deletePaymentById = useCallback(async (id: string) => {
-    await deletePayment(id);
+    await deletePayment(id, currentLOB);
     setPayments((prev) => prev.filter((p) => p.id !== id));
-  }, []);
+  }, [currentLOB]);
 
   return {
     payments,

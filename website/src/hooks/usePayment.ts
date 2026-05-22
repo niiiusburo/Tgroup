@@ -279,9 +279,9 @@ export function usePayment(selectedLocationId?: string) {
       notes: composedNote || undefined,
       paymentDate: input.date,
       depositType: 'deposit',
-    });
+    }, currentLOB);
     await refreshPayments();
-  }, [refreshPayments]);
+  }, [refreshPayments, currentLOB]);
 
   const getWalletByCustomer = useCallback(
     (customerId: string) => wallets.find((w) => w.customerId === customerId) ?? null,
