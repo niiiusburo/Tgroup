@@ -9,9 +9,20 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 describe('apiFetch LOB-aware routing (Gap B)', () => {
   const originalFetch = global.fetch;
   const originalEnv = { ...import.meta.env };
+  const originalLocalStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
 
   beforeEach(() => {
-    localStorage.clear();
+    vi.resetModules();
+    const store = new Map<string, string>();
+    Object.defineProperty(globalThis, 'localStorage', {
+      configurable: true,
+      value: {
+        clear: () => store.clear(),
+        getItem: (key: string) => store.get(key) ?? null,
+        removeItem: (key: string) => store.delete(key),
+        setItem: (key: string, value: string) => store.set(key, String(value)),
+      },
+    });
     // Mock fetch to capture the URL without making real requests
     global.fetch = vi.fn(async (url: string | Request) => {
       const requestUrl = typeof url === 'string' ? url : url.url;
@@ -25,6 +36,11 @@ describe('apiFetch LOB-aware routing (Gap B)', () => {
   afterEach(() => {
     global.fetch = originalFetch;
     Object.assign(import.meta.env, originalEnv);
+    if (originalLocalStorage) {
+      Object.defineProperty(globalThis, 'localStorage', originalLocalStorage);
+    } else {
+      delete (globalThis as { localStorage?: unknown }).localStorage;
+    }
   });
 
   it('should route to /api/Partners when LOB is dental or flag is disabled', async () => {
@@ -54,7 +70,18 @@ describe('apiFetch LOB-aware routing (Gap B)', () => {
     expect(calledUrl).toContain('/api/cosmetic/Partners');
   });
 
-  it('should NOT rewrite whitelisted routes (/Auth, /me, /version)', async () => {
+  it('should honor explicit cosmetic LOB options used by data hooks', async () => {
+    const { apiFetch: apiFetchV2 } = await import('../core');
+
+    localStorage.setItem('tgclinic_lob', 'dental');
+
+    await apiFetchV2('/Partners', { lob: 'cosmetic' });
+
+    const calledUrl = (global.fetch as any).mock.calls[0][0];
+    expect(calledUrl).toContain('/api/cosmetic/Partners');
+  });
+
+  it('should NOT rewrite whitelisted routes (/Auth, /me, /version, /Places)', async () => {
     (import.meta.env as any).VITE_COSMETIC_LOB_ENABLED = 'true';
     const { apiFetch: apiFetchV2 } = await import('../core');
 
@@ -77,6 +104,12 @@ describe('apiFetch LOB-aware routing (Gap B)', () => {
     const versionUrl = (global.fetch as any).mock.calls[0][0];
     expect(versionUrl).toContain('/api/version');
     expect(versionUrl).not.toContain('/api/cosmetic/version');
+
+    (global.fetch as any).mockClear();
+    await apiFetchV2('/Places/autocomplete', { params: { input: '123 Nguyen Hue' } });
+    const placesUrl = (global.fetch as any).mock.calls[0][0];
+    expect(placesUrl).toContain('/api/Places/autocomplete');
+    expect(placesUrl).not.toContain('/api/cosmetic/Places');
   });
 
   it('should fallback to dental when LOB not in localStorage', async () => {

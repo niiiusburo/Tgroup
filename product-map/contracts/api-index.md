@@ -30,19 +30,21 @@ Note: All existing routes are now implicitly under a selected LOB via BusinessUn
 
 **File:** `website/src/lib/api/core.ts`
 
-**Behavior (v2.0):** When `VITE_COSMETIC_LOB_ENABLED=true` and current LOB (from `localStorage.getItem('tgclinic_lob')`) is `'cosmetic'`, all endpoint paths are automatically rewritten from `/api/X` to `/api/cosmetic/X` before making the HTTP request. This centralizes LOB-aware routing in the API fetch layer without requiring conditional URLs at every call site.
+**Behavior (v2.0):** When `VITE_COSMETIC_LOB_ENABLED=true` and current LOB (from `localStorage.getItem('tgclinic_lob')`) is `'cosmetic'`, all endpoint paths are automatically rewritten from `/api/X` to `/api/cosmetic/X` before making the HTTP request. Data hooks may also pass `apiFetch(..., { lob: 'cosmetic' })` to force the cosmetic mirror for that request. This centralizes LOB-aware routing in the API fetch layer without requiring conditional URLs at every call site.
 
 **Whitelisted Routes (bypass rewriting regardless of LOB):**
 - `/Auth/*` (login, logout, refresh, register)
 - `/me/*` (user profile)
 - `/version/*` (version info)
 - `/ctv/*` (CTV dashboard)
+- `/Places/*` (server-proxied Google Places autocomplete/details; never expose the key in browser env)
 
 **Default Behavior:** If feature flag is false or missing (recommended production default), no rewriting occurs; all routes resolve to `/api/X` (dental LOB). Backward-compatible with existing dental-only deployments.
 
 **Example:**
 - LOB=`'cosmetic'`, flag=`true`, endpoint=`'/Partners'` → rewrites to `/api/cosmetic/Partners`
 - LOB=`'cosmetic'`, flag=`true`, endpoint=`'/Auth/me'` → whitelisted, stays `/api/Auth/me`
+- LOB=`'cosmetic'`, flag=`true`, endpoint=`'/Places/autocomplete'` → whitelisted, stays `/api/Places/autocomplete`
 - LOB=`'dental'` or flag=`false` → no rewriting; all routes unchanged
 
 ## Cosmetic (`/api/cosmetic/*`) — mirrors of all dental routes (gated by requireLobScope('cosmetic') + cosmetic.access)
@@ -99,7 +101,7 @@ PUT handler-level validation: `companyId` (when present) must be a UUID (`400 IN
 | GET | `/resolve` | Perm:`customers.view` | `?key` (UUID, customer ref, or normalized phone) | `{ matchedBy, partner }`, 404 `CUSTOMER_NOT_FOUND`, or 409 `CUSTOMER_LOOKUP_AMBIGUOUS` with candidates |
 | GET | `/:id` | Perm:`customers.view` | — | Partner detail |
 | GET | `/:id/GetKPIs` | Perm:`customers.view` | — | KPI stats |
-| POST | `/` | Perm:`customers.add` | Partner fields | Created partner |
+| POST | `/` | Perm:`customers.add` | Partner fields | Created partner with backend-generated `ref`; dental uses `T######`, cosmetic mirror uses collision-checked `TM######` |
 | PUT | `/:id` | Perm:`customers.edit` | Partner fields | Updated partner |
 | PATCH | `/:id/soft-delete` | Perm:`customers.delete` | — | Soft-deleted partner |
 | DELETE | `/:id/hard-delete` | Perm:`customers.hard_delete` | — | Hard-deleted partner |
@@ -436,6 +438,8 @@ Public telemetry alert behavior: public `POST /api/telemetry/errors` ingestion a
 |--------|------|------|--------------|----------|
 | GET | `/autocomplete` | Auth | `?input, language=vi` | Google Places suggestions |
 | GET | `/details` | Auth | `?place_id, language=vi` | Place details |
+
+Places uses `GOOGLE_PLACES_API_KEY` from the API runtime. Frontend code must call this proxy without `VITE_GOOGLE_PLACES_API_KEY`; cosmetic LOB mode must not rewrite `/Places/*` to `/cosmetic/Places/*`.
 
 ## Session (`/Web/Session`)
 

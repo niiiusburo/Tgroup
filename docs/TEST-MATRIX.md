@@ -41,7 +41,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 
 | If you change... | Run these tests... | Why |
 |---|---|---|
-| `website/src/lib/api/core.ts` (`apiFetch` LOB-aware routing) | `website/src/lib/api/__tests__/apiFetch.lob.test.ts` | Cosmetic LOB v2 Phase-1 Gap B: LOB-aware path rewriting routes `/api/X` to `/api/cosmetic/X` when `VITE_COSMETIC_LOB_ENABLED=true` and `tgclinic_lob='cosmetic'`. Whitelisted routes (`/Auth/*`, `/me/*`, `/version/*`, `/ctv/*`) bypass rewriting. Feature flag and localStorage fallbacks tested with 4 vitest cases. |
+| `website/src/lib/api/core.ts` (`apiFetch` LOB-aware routing) | `website/src/lib/api/__tests__/apiFetch.lob.test.ts` | Cosmetic LOB v2 Phase-1 Gap B: LOB-aware path rewriting routes `/api/X` to `/api/cosmetic/X` when `VITE_COSMETIC_LOB_ENABLED=true` and `tgclinic_lob='cosmetic'`; explicit `{ lob: 'cosmetic' }` options also force the cosmetic mirror for live NK3 data hooks. Whitelisted routes (`/Auth/*`, `/me/*`, `/version/*`, `/ctv/*`, `/Places/*`) bypass rewriting so server-proxied Places calls keep working in cosmetic mode. |
 
 ### Cosmetic LOB Source Imports
 
@@ -67,6 +67,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | If you change... | Run these tests... | Why |
 |---|---|---|
 | `api/src/routes/partners.js` | `api/src/routes/partners/__tests__/*.test.js` | Customer CRUD, search, uniqueness logic. |
+| `api/src/routes/partners/mutationHandlers.js` customer-code generation | `api/src/routes/partners/__tests__/mutationHandlers.test.js` | New dental customers must keep `T######`; new cosmetic customers created through `/api/cosmetic/Partners` must use collision-checked `TM######` refs in the cosmetic DB. |
 | `website/src/components/forms/AddCustomerForm/` | `AddCustomerForm.test.tsx`, `website/e2e/customer-create-save.spec.ts` | New-customer intake is high-frequency workflow. |
 | `website/src/components/customer/CustomerProfile/` | `CustomerProfile.test.tsx`, `website/e2e/customer-profile-crud.spec.ts` | Profile tabs (appointments, services, payments, photos). |
 | `api/src/routes/faceRecognition.js` | `api/tests/faceRecognition.test.js` | Face registration, re-registration, recognition, and provider routing. |

@@ -41,6 +41,7 @@ interface FetchOptions {
   body?: unknown;
   params?: Record<string, string | number | boolean | undefined>;
   signal?: AbortSignal;
+  lob?: 'dental' | 'cosmetic';
 }
 
 // Keys that bypass camelCase → snake_case conversion (backend expects them as-is)
@@ -64,6 +65,8 @@ const LOB_BYPASS_ROUTES = new Set([
   '/version/',
   '/ctv/',
   '/ctv',
+  '/Places/autocomplete',
+  '/Places/details',
 ]);
 
 /**
@@ -80,6 +83,7 @@ function shouldBypassLobRewrite(endpoint: string): boolean {
     '/me/',
     '/version/',
     '/ctv/',
+    '/Places/',
   ];
 
   return patterns.some((pattern) => endpoint.startsWith(pattern));
@@ -90,23 +94,29 @@ function shouldBypassLobRewrite(endpoint: string): boolean {
  * If cosmetic LOB is selected and flag is enabled, rewrite /api/X to /api/cosmetic/X
  * unless the route is whitelisted.
  */
-function rewriteEndpointForLob(endpoint: string): string {
-  // Check if feature flag is enabled
-  const isFlagEnabled = import.meta.env.VITE_COSMETIC_LOB_ENABLED === 'true' ||
-                       import.meta.env.VITE_COSMETIC_LOB_ENABLED === true;
+function rewriteEndpointForLob(endpoint: string, explicitLob?: 'dental' | 'cosmetic'): string {
+  // Explicit per-call LOB is used by NK3 data hooks. It must work even when
+  // the localStorage-driven feature flag path is disabled.
+  const currentLob = explicitLob || localStorage.getItem('tgclinic_lob') || 'dental';
 
-  if (!isFlagEnabled) {
-    return endpoint;
-  }
-
-  // Check if current LOB is cosmetic
-  const currentLob = localStorage.getItem('tgclinic_lob') || 'dental';
   if (currentLob !== 'cosmetic') {
     return endpoint;
   }
 
   // Check if this route should bypass rewriting
   if (shouldBypassLobRewrite(endpoint)) {
+    return endpoint;
+  }
+
+  if (explicitLob === 'cosmetic') {
+    return endpoint.startsWith('/') ? `/cosmetic${endpoint}` : endpoint;
+  }
+
+  // Check if feature flag is enabled
+  const isFlagEnabled = import.meta.env.VITE_COSMETIC_LOB_ENABLED === 'true' ||
+                       import.meta.env.VITE_COSMETIC_LOB_ENABLED === true;
+
+  if (!isFlagEnabled) {
     return endpoint;
   }
 
@@ -120,10 +130,10 @@ function rewriteEndpointForLob(endpoint: string): string {
 }
 
 export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
-  const { method = 'GET', body, params } = options;
+  const { method = 'GET', body, params, lob } = options;
 
   // Apply LOB-aware rewriting
-  const rewrittenEndpoint = rewriteEndpointForLob(endpoint);
+  const rewrittenEndpoint = rewriteEndpointForLob(endpoint, lob);
   let url = `${API_URL}${rewrittenEndpoint}`;
   if (params) {
     const searchParams = new URLSearchParams();

@@ -14,10 +14,13 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
-## [unreleased] — 2026-05-23
+## [0.32.44] — 2026-05-23
 
 ### Added
 - Cosmetic LOB source workbook importer and audit runbook for the exact three tabs `Hồ sơ`, `Phiếu cọc`, and `Phiếu khám`; dry-runs, applies, and re-runs idempotency checks for cosmetic-only partners, branches, staff, products, treatments, payments, and allocations after backup/compare confirmation gates; bumps `website/package.json` to `0.32.38`. — @agent — preserves UC-COS-IMPORT-01 / WF-COS-IMPORT-01 and invariants INV-001, INV-003, INV-004, INV-010, INV-012.
+
+### Fixed
+- NK3 Cosmetic add-customer intake now generates collision-checked `TM######` customer codes for `/api/cosmetic/Partners`, keeps dental `T######` codes, honors explicit `apiFetch` LOB options, bypasses LOB rewriting for server-proxied `/api/Places/*`, and removes the browser-side `VITE_GOOGLE_PLACES_API_KEY` gate; bumps `website/package.json` to `0.32.44`. — @agent — preserves UC-001 customer create, INV-001, and the server-only Google Places key contract.
 
 ---
 

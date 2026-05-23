@@ -2,8 +2,12 @@ jest.mock('../../../db', () => ({
   query: jest.fn(),
 }));
 
+jest.mock('uuid', () => ({
+  v4: jest.fn(() => 'customer-uuid'),
+}));
+
 const { query } = require('../../../db');
-const { updatePartner } = require('../mutationHandlers');
+const { createPartner, updatePartner } = require('../mutationHandlers');
 
 function mockResponse() {
   const res = {
@@ -14,8 +18,69 @@ function mockResponse() {
 }
 
 describe('partner mutation handlers', () => {
+  let randomSpy;
+
   beforeEach(() => {
     query.mockReset();
+  });
+
+  afterEach(() => {
+    if (randomSpy) {
+      randomSpy.mockRestore();
+      randomSpy = null;
+    }
+  });
+
+  it('generates a cosmetic customer code with TM prefix', async () => {
+    randomSpy = jest.spyOn(Math, 'random').mockReturnValue(0);
+    query
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ id: 'customer-1', ref: 'TM100000', name: 'Tham My Customer' }]);
+
+    const req = {
+      originalUrl: '/api/cosmetic/Partners',
+      body: {
+        name: 'Tham My Customer',
+        phone: '0900000000',
+      },
+    };
+    const res = mockResponse();
+
+    await createPartner(req, res);
+
+    const insertCall = query.mock.calls.find(([sql]) => String(sql).includes('INSERT INTO partners'));
+    expect(query.mock.calls[0]).toEqual([
+      'SELECT id FROM partners WHERE ref = $1 LIMIT 1',
+      ['TM100000'],
+    ]);
+    expect(insertCall[1]).toContain('TM100000');
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ id: 'customer-1', ref: 'TM100000', name: 'Tham My Customer' });
+  });
+
+  it('keeps the dental customer code prefix as T', async () => {
+    randomSpy = jest.spyOn(Math, 'random').mockReturnValue(0);
+    query
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ id: 'customer-1', ref: 'T100000', name: 'Dental Customer' }]);
+
+    const req = {
+      originalUrl: '/api/Partners',
+      body: {
+        name: 'Dental Customer',
+        phone: '0911111111',
+      },
+    };
+    const res = mockResponse();
+
+    await createPartner(req, res);
+
+    expect(query.mock.calls[0]).toEqual([
+      'SELECT id FROM partners WHERE ref = $1 LIMIT 1',
+      ['T100000'],
+    ]);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ id: 'customer-1', ref: 'T100000', name: 'Dental Customer' });
   });
 
   it('allows updating a customer phone even when phone values are not globally unique', async () => {
