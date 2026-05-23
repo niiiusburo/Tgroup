@@ -9,6 +9,30 @@ When a use case is created or materially edited, add one compact `Traceability` 
 
 ---
 
+### UC-COS-IMPORT-01: Stage and apply cosmetic source workbook to Cosmetic LOB
+
+- **Actor:** Data admin / implementation agent
+- **Trigger:** Clinic provides the cosmetic source Google Sheet and asks to add it intelligently to Cosmetic LOB.
+- **Preconditions:** Source workbook is downloaded as `.xlsx`; local and target Cosmetic LOB databases are reachable; dry-run summary, anomaly review, local rehearsal, source/target backups, local-vs-VPS compare, and two explicit confirmation gates are complete before live apply.
+- **Main flow:**
+  1. Validate that the workbook contains exactly three tabs: `Hồ sơ`, `Phiếu cọc`, and `Phiếu khám`.
+  2. Normalize phone, branch, payment-method, date, and accent-insensitive name values without treating phone as durable identity.
+  3. Dry-run `Hồ sơ` into cosmetic customer/profile actions in `partners`.
+  4. Dry-run `Phiếu cọc` into cosmetic deposit payments.
+  5. Dry-run `Phiếu khám` into cosmetic products, treatment orders, service lines, payments, and allocations.
+  6. Write summary and anomaly artifacts; preserve unsupported money rows as manual-review anomalies.
+  7. After approval, apply the same source references to the Cosmetic LOB database only and write apply audit artifacts.
+  8. Rerun dry-run against the target database to prove idempotency.
+- **Alternate flows:**
+  - **AF-1 Missing or extra tab:** script exits before planning any rows.
+  - **AF-2 Missing or ambiguous customer match for money row:** row is placed in manual review instead of guessed.
+  - **AF-3 Existing source reference already present:** row is planned as `skip_existing`.
+- **Postconditions:** Cosmetic-only import rows exist for approved source records; rerun dry-run reports zero new creates and repeats only preserved manual-review anomalies.
+- **Invariants touched:** INV-001, INV-003, INV-004, INV-006, INV-010, INV-012.
+- **Traceability:** Related WF: WF-COS-IMPORT-01. Contracts/routes: none, CLI-only import. Data/tables: `tcosmetic_demo.dbo.partners`, `companies`, `products`, `saleorders`, `saleorderlines`, `payments`, `payment_allocations`; live target `tcosmetic_smoketest`. Tests: `api/tests/cosmeticLobImport.test.js`. Product-map domains: `cosmetic`, `cosmetic-clients`, `payments-deposits`, `services-catalog`, `employees-hr`.
+
+---
+
 ## UC-001 — Intake New Patient
 
 - **Actor:** Receptionist / Front Desk

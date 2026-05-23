@@ -14,6 +14,13 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 
+## [unreleased] — 2026-05-23
+
+### Added
+- Cosmetic LOB source workbook importer and audit runbook for the exact three tabs `Hồ sơ`, `Phiếu cọc`, and `Phiếu khám`; dry-runs, applies, and re-runs idempotency checks for cosmetic-only partners, branches, staff, products, treatments, payments, and allocations after backup/compare confirmation gates; bumps `website/package.json` to `0.32.38`. — @agent — preserves UC-COS-IMPORT-01 / WF-COS-IMPORT-01 and invariants INV-001, INV-003, INV-004, INV-010, INV-012.
+
+---
+
 ## [unreleased] — 2026-05-22
 ### Docs
 - `docs/superpowers/specs/2026-05-22-ctv-signup-and-commission-config-design.md` — design spec for CTV signup (CTV-or-admin only, instant active, no public signup/approval queue), header "+ Client" / "+ CTV" actions on the built portal, admin CTVs sub-tab, and fully manual commission level config (enabled ≤ 100%, unallocated stays with clinic). No runtime code changed. — @agent — 2026-05-22 brainstormed design for the CTV/MLM commission layer on the cosmetic-LOB foundation.

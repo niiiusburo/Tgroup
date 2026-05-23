@@ -8,6 +8,53 @@ Every new or materially edited workflow should include one compact traceability 
 
 ---
 
+## WF-COS-IMPORT-01 — Cosmetic Source Workbook Import
+
+**Trigger:** Data admin provides the cosmetic source Google Sheet for staging into Cosmetic LOB.
+**Why it matters:** The workbook carries client, deposit, treatment, staff, branch, and payment data; it must be mapped to the isolated cosmetic database without guessing money identity or touching dental data.
+
+```mermaid
+sequenceDiagram
+    actor A as Data Admin
+    participant Sheet as Google Sheet / XLSX
+    participant CLI as cosmetic-lob-import.js
+    participant DB as tcosmetic_demo (dbo)
+    participant Live as tcosmetic_smoketest (dbo)
+    participant Audit as Audit Artifacts
+
+    A->>Sheet: Export workbook with 3 tabs
+    A->>CLI: Run --dry-run with workbook path
+    CLI->>Sheet: Validate Hồ sơ, Phiếu cọc, Phiếu khám
+    CLI->>CLI: Normalize phone, date, branch, payment method, accent-insensitive names
+    CLI->>DB: Read companies, partners, staff, products, payments, saleorders
+    DB-->>CLI: Current cosmetic snapshot
+    CLI->>CLI: Build create/update/skip/manual-review plan
+    alt Money row has exactly one safe customer candidate
+        CLI->>Audit: Plan deposit/service payment allocation
+    else Missing or ambiguous match
+        CLI->>Audit: Write manual-review anomaly
+    end
+    A->>DB: Save local backup and run apply rehearsal
+    CLI->>DB: Apply approved rows with COSMETIC_SHEET references
+    A->>Live: Save VPS backup and compare local vs VPS state
+    A->>CLI: Confirm first and second import gates
+    CLI->>Live: Apply approved rows to Cosmetic LOB only
+    CLI->>Live: Rerun --dry-run for idempotency
+    CLI-->>A: Print counts and artifact paths
+```
+
+**Data state transitions:**
+- Dry-run writes audit files only under `artifacts/cosmetic-lob-import/`.
+- Apply mode writes only to the configured Cosmetic LOB database.
+- Deposits become `payments` rows with `payment_category='deposit'`; paid treatment rows become `payments` plus `payment_allocations`.
+- Existing `COSMETIC_SHEET:*` references are skipped on rerun.
+- Manual-review anomalies remain outside the database until a human resolves them.
+
+**Invariants:** INV-001, INV-003, INV-004, INV-006, INV-010, INV-012.
+**Traceability:** Related UC: UC-COS-IMPORT-01. Contracts/routes: none, CLI-only import. Data/tables: `tcosmetic_demo.dbo.partners`, `companies`, `products`, `saleorders`, `saleorderlines`, `payments`, `payment_allocations`; live target `tcosmetic_smoketest`. Tests: `api/tests/cosmeticLobImport.test.js`. Product-map domains: `cosmetic`, `cosmetic-clients`, `payments-deposits`, `services-catalog`, `employees-hr`.
+
+---
+
 ## WF-001 — Login with Remember Me
 
 **Trigger:** User submits `/login` form.

@@ -43,6 +43,12 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 |---|---|---|
 | `website/src/lib/api/core.ts` (`apiFetch` LOB-aware routing) | `website/src/lib/api/__tests__/apiFetch.lob.test.ts` | Cosmetic LOB v2 Phase-1 Gap B: LOB-aware path rewriting routes `/api/X` to `/api/cosmetic/X` when `VITE_COSMETIC_LOB_ENABLED=true` and `tgclinic_lob='cosmetic'`. Whitelisted routes (`/Auth/*`, `/me/*`, `/version/*`, `/ctv/*`) bypass rewriting. Feature flag and localStorage fallbacks tested with 4 vitest cases. |
 
+### Cosmetic LOB Source Imports
+
+| If you change... | Run these tests... | Why |
+|---|---|---|
+| `api/scripts/cosmetic-lob-import.js` or the Cosmetic LOB workbook mapping | `npm --prefix api exec -- jest tests/cosmeticLobImport.test.js --runInBand`; then run the script against the latest workbook snapshot in `--dry-run` mode; before `--apply`, run backup/compare gates and confirm a post-apply dry run reports zero new creates | UC-COS-IMPORT-01 / WF-COS-IMPORT-01 require the exact three-tab contract, accent-insensitive matching, cosmetic-only table mapping, idempotent `COSMETIC_SHEET:*` references, and manual review for ambiguous money rows. |
+
 ### Appointments & Calendar
 
 | If you change... | Run these tests... | Why |

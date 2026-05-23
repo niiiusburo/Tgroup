@@ -10,6 +10,69 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: Cosmetic LOB Source Workbook Import 2026-05-23
+
+Feature/edit name: Cosmetic LOB source workbook import staging and apply
+
+Changed URLs and API routes:
+- Source Google Sheet: `https://docs.google.com/spreadsheets/d/1g51Z2XCjgWu_rvxBG3lzaUIHaCu-if4NOsyXwqBpBlA/edit?gid=312794834#gid=312794834`.
+- No frontend URLs changed.
+- No API routes changed.
+- New CLI-only dry-run/apply script: `api/scripts/cosmetic-lob-import.js`.
+
+Affected data flows:
+- `Hồ sơ` tab -> `tcosmetic_demo` / `tcosmetic_smoketest` `dbo.partners` customer/profile rows.
+- `Phiếu cọc` tab -> `tcosmetic_demo` / `tcosmetic_smoketest` `dbo.payments` deposit rows.
+- `Phiếu khám` tab -> `tcosmetic_demo` / `tcosmetic_smoketest` `dbo.products`, `saleorders`, `saleorderlines`, `payments`, and `payment_allocations`.
+- Audit output: `artifacts/cosmetic-lob-import*/*.summary.json` and `*.anomalies.ndjson`.
+
+User roles:
+- Data admin / implementation agent running dry-run staging and approved apply.
+- Finance/admin reviewer resolving preserved manual-review anomalies.
+
+Happy paths:
+- Workbook with exactly 3 tabs (`Hồ sơ`, `Phiếu cọc`, `Phiếu khám`) validates.
+- Branch aliases normalize to `Thẩm mỹ Hà Nội` and `Thẩm mỹ Hồ Chí Minh`.
+- `Chuyển khoản` normalizes to `bank_transfer`.
+- Rows with safe customer candidates produce create/update/skip plan entries and apply idempotently through `COSMETIC_SHEET:*` references.
+- Existing source reference codes are planned as `skip_existing`.
+
+Edge cases:
+- Missing or extra workbook tab must fail before row planning.
+- Money rows with no customer match or multiple customer matches must go to manual review.
+- Phone is never treated as a durable unique identity.
+- Apply mode must be preceded by local rehearsal, local-vs-VPS compare, source/target backups, and the two explicit confirmations required by `AGENTS.md`.
+
+Regressions to prevent:
+- Accidentally importing cosmetic source rows into dental tables.
+- Guessing ambiguous money/customer matches.
+- Creating payments without canonical allocation planning for paid treatment rows.
+- Breaking accent-insensitive matching for Vietnamese source names and branch labels.
+
+Setup data and login state:
+- No browser login required.
+- Local workbook snapshot: `/tmp/tgroup-cosmetic-source.xlsx`.
+- Local DB expected: `tcosmetic_demo` on `127.0.0.1:5433`; live target verified: `tcosmetic_smoketest` on VPS through `tgroup-nk3-api`.
+- Latest dry-run summary: `artifacts/cosmetic-lob-import/cosmetic-lob-import-2026-05-23T09-25-00-066Z-5f9a9df7.summary.json`.
+- Latest anomaly file: `artifacts/cosmetic-lob-import/cosmetic-lob-import-2026-05-23T09-25-00-066Z-5f9a9df7.anomalies.ndjson`.
+- Local before-rehearsal backup: `backups/db-import/tcosmetic_demo-before-cosmetic-sheet-import-20260523-171709.dump`.
+- VPS before-import backup: `backups/db-import/tcosmetic_smoketest-vps-before-cosmetic-sheet-import-20260523-171758.dump`.
+- Live apply summary: `artifacts/cosmetic-lob-import-vps-apply/cosmetic-lob-import-2026-05-23T10-38-41-332Z-aa64081a.summary.json`.
+- Live post-apply dry-run summary: `artifacts/cosmetic-lob-import-vps-post-apply/cosmetic-lob-import-2026-05-23T11-14-37-659Z-915b5266.summary.json`.
+
+Execution checklist:
+- [x] PASS 2026-05-23: Download workbook snapshot from Google Sheets as `/tmp/tgroup-cosmetic-source.xlsx` and confirm it contains exactly the 3 required tabs.
+- [x] PASS 2026-05-23: Run focused importer tests - `npm --prefix api exec -- jest tests/cosmeticLobImport.test.js --runInBand` passed 6 tests.
+- [x] PASS 2026-05-23: Run actual workbook dry-run - summary reported `Hồ sơ=12279`, `Phiếu cọc=1703`, `Phiếu khám=3922`, with 12278 customer creates, 1702 deposit creates, 3922 treatment creates, 3828 payment creates, and 1 anomaly.
+- [x] PASS 2026-05-23: Local apply rehearsal backed up `tcosmetic_demo`, applied the workbook, then reran dry-run with zero new creates and the same 1 manual-review anomaly.
+- [x] PASS 2026-05-23: Live import gate backed up `tcosmetic_smoketest`, compared local-vs-VPS counts, received both explicit confirmations, and applied only to Cosmetic LOB.
+- [x] PASS 2026-05-23: Live post-import DB count check reported 3922 imported sale orders, 5530 imported payments, and 3828 imported allocations in `tcosmetic_smoketest`.
+- [x] PASS 2026-05-23: Live post-apply dry-run reported zero new creates, 1702 deposit skips, 3922 treatment skips, 3828 payment skips, and 1 preserved anomaly.
+- [x] PASS 2026-05-23: Refactored split-module importer reran against live `tcosmetic_smoketest` and again reported zero new creates with summary `artifacts/cosmetic-lob-import-vps-refactor-check/cosmetic-lob-import-2026-05-23T11-21-45-899Z-30002835.summary.json`.
+- [ ] PENDING: Finance/data reviewer resolves `Phiếu cọc` row 1127 phone `0969698444`; it was intentionally not guessed during apply.
+
+---
+
 # TestSprite Plan: Feature Catalog 2026-05-20
 
 Feature/edit name: Feature Catalog — Canonical Export Specifications 2026-05-20

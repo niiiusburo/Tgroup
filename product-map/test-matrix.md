@@ -116,6 +116,7 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 | Test File | Domain | What It Tests |
 |-----------|--------|---------------|
 | `loginRateLimiter.test.js` | Auth | Login rate limiter counts failed attempts only and scopes account lockout by email plus IP |
+| `cosmeticLobImport.test.js` | Cosmetic LOB / Data Imports / Payments | UC-COS-IMPORT-01 / WF-COS-IMPORT-01: exact three-tab workbook validation, phone/branch/payment normalization, dry-run/apply planning into cosmetic partners/deposits/treatments/payments, idempotent source references, and manual-review gating for ambiguous money rows. |
 | `faceRecognition.test.js` | Integrations | Face register/recognize/re-register API in local and CompreFace provider modes |
 | `src/services/__tests__/comprefaceClient.test.js` | Integrations | CompreFace REST client, native multipart uploads, auth header, subject/example calls, and health check |
 | `src/services/__tests__/comprefaceFaceProvider.test.js` | Integrations | CompreFace provider mapping from subjects to customer records, registration status, and `NO_FACE` error normalization |
