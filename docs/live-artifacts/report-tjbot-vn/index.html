@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Feature Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f4f1ea;
+    --ink: #1a1714;
+    --ink-soft: #6b645a;
+    --ink-faint: #a8a094;
+    --line: #ddd6ca;
+    --card: #fffdf8;
+    --card-shadow: rgba(26, 23, 20, 0.06);
+    --backlog: #8a8178;
+    --planned: #c7882f;
+    --progress: #2f6fc7;
+    --done: #3f9b5c;
+    --p-thuan: #2f6fc7;
+    --p-manh: #b8472f;
+    --p-khoa: #3f9b5c;
+    --p-none: #a8a094;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--paper); color: var(--ink);
+    font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.5;
+    min-height: 100vh; -webkit-font-smoothing: antialiased;
+  }
+  body { padding: 32px 26px 60px; background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(0,0,0,0.015) 27px, rgba(0,0,0,0.015) 28px); }
+
+  header { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 2px solid var(--ink); }
+  .title { font-family: 'Fraunces', serif; font-size: 40px; font-weight: 900; letter-spacing: -1.5px; line-height: 0.95; }
+  .subtitle { font-size: 11px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.18em; margin-top: 6px; }
+  .header-right { display: flex; align-items: flex-end; justify-content: flex-end; gap: 14px; flex-wrap: wrap; }
+  .meta {
+    display: grid; justify-items: end; gap: 7px; text-align: right;
+    font-size: 11px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.12em;
+  }
+  .meta .count { color: var(--ink); font-weight: 700; }
+  .deadline-card {
+    width: min(280px, 100%); background: rgba(255, 253, 248, 0.96);
+    border: 1.5px solid #c5d3e6; border-radius: 8px; padding: 10px 11px;
+    box-shadow: 0 10px 22px rgba(26, 23, 20, 0.06);
+  }
+  .deadline-days { color: var(--ink); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; }
+  .deadline-days span {
+    color: #df2b2f; font-family: 'Fraunces', serif; font-size: 30px;
+    font-weight: 900; line-height: 1; letter-spacing: 0;
+  }
+  .deadline-range { margin-top: 2px; color: var(--ink-soft); font-size: 10px; }
+  .deadline-bar {
+    height: 8px; margin-top: 9px; overflow: hidden;
+    background: #e7eef8; border-radius: 999px;
+  }
+  .deadline-bar span {
+    display: block; width: 0%; height: 100%;
+    background: linear-gradient(90deg, #18bf81, #63aef4);
+    border-radius: inherit; transition: width 0.2s ease;
+  }
+  @media (max-width: 760px) {
+    header { align-items: flex-start; flex-direction: column; }
+    .header-right { width: 100%; justify-content: space-between; }
+    .meta { width: 100%; justify-items: start; text-align: left; }
+  }
+
+  .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .tool-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--card); border: 1.5px solid var(--line); color: var(--ink-soft);
+    padding: 6px 12px; border-radius: 4px; font-family: inherit; font-size: 11.5px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .tool-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .tool-btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .tool-btn.primary:hover { opacity: 0.88; }
+  .save-status { font-size: 10.5px; color: var(--ink-faint); margin-left: auto; transition: opacity 0.3s; min-height: 14px; }
+  .save-status.show { color: var(--done); }
+
+  .filterbar { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .filter-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink-faint); margin-right: 2px; }
+  .filter-chip { display: inline-flex; align-items: center; gap: 6px; background: transparent; border: 1.5px solid var(--line); color: var(--ink-soft); padding: 5px 11px; border-radius: 20px; font-family: inherit; font-size: 11.5px; cursor: pointer; transition: all 0.15s; }
+  .filter-chip:hover { border-color: var(--ink-soft); }
+  .filter-chip.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .filter-chip .av { width: 8px; height: 8px; border-radius: 50%; }
+
+  .avatar { width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; color: #fff; flex-shrink: 0; }
+  .av-thuan { background: var(--p-thuan); }
+  .av-manh  { background: var(--p-manh); }
+  .av-khoa  { background: var(--p-khoa); }
+  .av-none  { background: var(--p-none); }
+
+  .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 1000px) { .board { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .board { grid-template-columns: 1fr; } }
+
+  .column { border: 1.5px solid var(--line); border-radius: 4px; min-height: 420px; display: flex; flex-direction: column; transition: border-color 0.15s, background 0.15s; }
+  .column.drag-over { border-color: var(--ink); background: rgba(0,0,0,0.02); }
+  .col-head { padding: 12px 14px; border-bottom: 1.5px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+  .col-label { display: flex; align-items: center; gap: 8px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; font-size: 12px; }
+  .col-tag { width: 10px; height: 10px; border-radius: 2px; }
+  .col-tag.backlog { background: var(--backlog); }
+  .col-tag.planned { background: var(--planned); }
+  .col-tag.progress { background: var(--progress); }
+  .col-tag.done { background: var(--done); }
+  .col-count { font-family: 'Fraunces', serif; font-weight: 900; font-size: 18px; color: var(--ink-faint); }
+
+  .add-row { display: flex; padding: 10px; gap: 6px; border-bottom: 1px dashed var(--line); }
+  .add-input { flex: 1; background: var(--card); border: 1.5px solid var(--line); color: var(--ink); padding: 8px 10px; border-radius: 3px; font-family: inherit; font-size: 12px; outline: none; transition: border-color 0.15s; }
+  .add-input:focus { border-color: var(--ink); }
+  .add-input::placeholder { color: var(--ink-faint); }
+  .add-btn { background: var(--ink); color: var(--paper); border: none; padding: 0 13px; border-radius: 3px; font-family: 'Fraunces', serif; font-weight: 900; font-size: 16px; cursor: pointer; transition: opacity 0.15s, transform 0.1s; }
+  .add-btn:hover { opacity: 0.85; }
+  .add-btn:active { transform: scale(0.94); }
+
+  .cards { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 12px 10px; min-height: 40px; }
+  .empty { color: var(--ink-faint); font-size: 11px; text-align: center; padding: 26px 10px; font-style: italic; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 4px; box-shadow: 2px 2px 0 var(--card-shadow); transition: box-shadow 0.15s, opacity 0.15s; position: relative; perspective: 900px; }
+  .card:hover { box-shadow: 3px 3px 0 var(--card-shadow); }
+  .card.dragging { opacity: 0.4; }
+  .card-inner { transform-style: preserve-3d; }
+  .face { padding: 11px 12px; }
+  .face[hidden] { display: none; }
+
+  .card-title { font-size: 13px; word-break: break-word; padding-right: 16px; cursor: text; }
+  .card-title[contenteditable="true"] { outline: 1.5px solid var(--ink); outline-offset: 2px; border-radius: 2px; }
+  .card.done-card .card-title { text-decoration: line-through; color: var(--ink-soft); }
+
+  .meta-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .assignee { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border: 1px solid var(--line); border-radius: 20px; padding: 2px 9px 2px 3px; font-size: 11px; color: var(--ink-soft); transition: border-color 0.15s; background: var(--card); }
+  .assignee:hover { border-color: var(--ink-soft); }
+  .estimate { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; border: 1px solid var(--line); border-radius: 20px; padding: 3px 9px; font-size: 11px; color: var(--ink-soft); transition: border-color 0.15s; background: var(--card); }
+  .estimate:hover { border-color: var(--ink-soft); }
+  .estimate.empty { color: var(--ink-faint); border-style: dashed; }
+  .est-input { border: none; background: transparent; font-family: inherit; font-size: 11px; width: 70px; outline: none; color: var(--ink); }
+
+  .card-foot { display: flex; gap: 6px; margin-top: 10px; align-items: center; }
+  .move-btn, .details-btn { background: transparent; border: 1px solid var(--line); color: var(--ink-soft); border-radius: 3px; font-family: inherit; font-size: 12px; line-height: 1; padding: 4px 8px; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
+  .move-btn:hover, .details-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .move-btn:disabled { opacity: 0.3; cursor: default; }
+  .details-btn { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; }
+  .details-btn.has-details { border-color: var(--progress); color: var(--progress); }
+
+  .delete-btn { position: absolute; top: 7px; right: 7px; background: transparent; border: none; color: var(--ink-faint); cursor: pointer; font-size: 15px; line-height: 1; padding: 1px 4px; border-radius: 3px; opacity: 0; transition: opacity 0.15s, color 0.15s; z-index: 2; }
+  .card:hover .delete-btn { opacity: 1; }
+  .delete-btn:hover { color: #c0392b; }
+
+  .back-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .back-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-faint); }
+  .back-btn { background: var(--ink); color: var(--paper); border: none; border-radius: 3px; font-family: inherit; font-size: 10.5px; padding: 3px 9px; cursor: pointer; }
+  .details-area { width: 100%; min-height: 90px; resize: vertical; background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 8px; font-family: inherit; font-size: 12px; color: var(--ink); outline: none; }
+  .details-area:focus { border-color: var(--ink); }
+
+  .popover { position: absolute; z-index: 50; background: var(--card); border: 1.5px solid var(--ink); border-radius: 6px; box-shadow: 4px 4px 0 var(--card-shadow); padding: 5px; min-width: 150px; }
+  .pop-item { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+  .pop-item:hover { background: var(--paper); }
+  .pop-item.sel { font-weight: 500; }
+  .pop-item .check { margin-left: auto; color: var(--ink); }
+
+  .footer-tip { margin-top: 26px; text-align: center; font-size: 10.5px; color: var(--ink-faint); font-style: italic; }
+  .hidden-file { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="title">Feature Board</div>
+    <div class="subtitle">backlog &rarr; planned &rarr; in progress &rarr; shipped</div>
+  </div>
+  <div class="header-right">
+    <div class="meta" aria-label="project summary">
+      <div><span class="count" id="totalCount">0</span> tasks &middot; <span class="count" id="shippedCount">0</span> done</div>
+      <div id="todayLabel">—</div>
+      <div class="deadline-card" aria-label="project countdown">
+        <div class="deadline-days"><span id="daysLeft">—</span> days left</div>
+        <div class="deadline-range">Apr 1 &rarr; Oct 1, 2026</div>
+        <div class="deadline-bar"><span id="deadlineProgress"></span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <button class="tool-btn primary" id="exportBtn">&#11015; Export backup</button>
+  <button class="tool-btn" id="importBtn">&#11014; Import backup</button>
+  <input type="file" id="importFile" accept="application/json,.json" class="hidden-file" />
+  <span class="save-status" id="saveStatus"></span>
+</div>
+
+<div class="filterbar" id="filterbar"></div>
+
+<main class="board" id="board"></main>
+
+<div class="footer-tip">click a feature to rename &middot; assign a person &middot; set an estimate &middot; flip for details &middot; drag or use &#9664; &#9654; to move &middot; export regularly to keep a safe copy</div>
+
+<script>
+  if (!window.storage) {
+    window.storage = {
+      async get(key) {
+        const value = localStorage.getItem(key);
+        return value === null ? null : { value };
+      },
+      async set(key, value) {
+        localStorage.setItem(key, value);
+        return { value };
+      }
+    };
+  }
+
+  const COLUMNS = [
+    { key: 'backlog',  label: 'Backlog',     tag: 'backlog'  },
+    { key: 'planned',  label: 'Planned',     tag: 'planned'  },
+    { key: 'progress', label: 'In Progress', tag: 'progress' },
+    { key: 'done',     label: 'Shipped',     tag: 'done'     },
+  ];
+  const COL_KEYS = COLUMNS.map(c => c.key);
+  const PEOPLE = [
+    { key: 'thuan', name: 'Thuan', cls: 'av-thuan' },
+    { key: 'manh',  name: 'Manh',  cls: 'av-manh'  },
+    { key: 'khoa',  name: 'Khoa',  cls: 'av-khoa'  },
+  ];
+  const PROJECT_START = new Date(2026, 3, 1);
+  const PROJECT_END = new Date(2026, 9, 1);
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  function person(key) { return PEOPLE.find(p => p.key === key) || null; }
+  function initial(name) { return name.charAt(0).toUpperCase(); }
+
+  const STORAGE_KEY = 'feature-board-v1';
+  const BACKUP_KEY  = 'feature-board-v1-backup';
+  const REMOTE_STATE_URL = '/state/board.json';
+  const SYNC_INTERVAL_MS = 3000;
+  const CLIENT_ID_KEY = 'feature-board-client-id';
+  const CLIENT_ID = (() => {
+    try {
+      let id = localStorage.getItem(CLIENT_ID_KEY);
+      if (!id) {
+        id = crypto.randomUUID();
+        localStorage.setItem(CLIENT_ID_KEY, id);
+      }
+      return id;
+    } catch (e) {
+      return 'client-' + Math.random().toString(36).slice(2);
+    }
+  })();
+  let state = { features: [] };
+  let activeFilter = 'all';
+  let openPopover = null;
+  let lastRemoteFingerprint = '';
+
+  async function loadState() {
+    const remote = await fetchRemoteState();
+    if (remote) {
+      state = remote;
+      await saveLocalState();
+      flash('Live board loaded');
+      return;
+    }
+
+    // try primary, then fall back to backup if primary is missing/empty
+    let primary = null, backup = null;
+    try { const r = await window.storage.get(STORAGE_KEY); if (r && r.value) primary = JSON.parse(r.value); } catch (e) {}
+    try { const r = await window.storage.get(BACKUP_KEY); if (r && r.value) backup = JSON.parse(r.value); } catch (e) {}
+    if (primary && primary.features && primary.features.length) state = normalizeState(primary);
+    else if (backup && backup.features && backup.features.length) { state = normalizeState(backup); flash('Recovered from backup'); }
+    else if (primary) state = normalizeState(primary);
+    else state = { features: [] };
+  }
+
+  function normalizeState(data) {
+    const features = Array.isArray(data && data.features) ? data.features : [];
+    return {
+      features: features.map(f => ({
+        id: f.id || crypto.randomUUID(),
+        column: COL_KEYS.includes(f.column) ? f.column : 'backlog',
+        title: typeof f.title === 'string' && f.title.trim() ? f.title : 'Untitled',
+        assignee: PEOPLE.some(p => p.key === f.assignee) ? f.assignee : null,
+        estimate: typeof f.estimate === 'string' ? f.estimate : '',
+        details: typeof f.details === 'string' ? f.details : '',
+        createdAt: f.createdAt || Date.now()
+      }))
+    };
+  }
+
+  function stateFingerprint(data) {
+    return JSON.stringify(normalizeState(data).features);
+  }
+
+  function remotePayload() {
+    return JSON.stringify({
+      features: normalizeState(state).features,
+      updatedAt: new Date().toISOString(),
+      updatedBy: CLIENT_ID
+    }, null, 2);
+  }
+
+  async function saveLocalState() {
+    const payload = JSON.stringify(normalizeState(state));
+    await window.storage.set(STORAGE_KEY, payload);
+    await window.storage.set(BACKUP_KEY, payload);
+  }
+
+  async function fetchRemoteState() {
+    try {
+      const res = await fetch(REMOTE_STATE_URL + '?t=' + Date.now(), {
+        cache: 'no-store',
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error('remote load failed ' + res.status);
+      const text = await res.text();
+      if (!text.trim()) return null;
+      const data = normalizeState(JSON.parse(text));
+      lastRemoteFingerprint = stateFingerprint(data);
+      return data;
+    } catch (e) {
+      console.warn('live sync load failed', e);
+      return null;
+    }
+  }
+
+  async function saveRemoteState() {
+    const payload = remotePayload();
+    const res = await fetch(REMOTE_STATE_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: payload
+    });
+    if (!res.ok) throw new Error('remote save failed ' + res.status);
+    lastRemoteFingerprint = stateFingerprint(state);
+  }
+
+  async function saveState() {
+    let ok = true;
+    state = normalizeState(state);
+    try { await saveLocalState(); } catch (e) { ok = false; console.error('local save failed', e); }
+    try { await saveRemoteState(); } catch (e) { ok = false; console.error('live sync save failed', e); }
+    flash(ok ? 'Saved live' : 'Saved locally - live sync error');
+  }
+
+  function hasActiveEditor() {
+    const el = document.activeElement;
+    return !!el && (el.matches('input, textarea') || el.isContentEditable);
+  }
+
+  async function pollRemoteState() {
+    if (hasActiveEditor()) return;
+    const remote = await fetchRemoteState();
+    if (!remote) return;
+    const remoteFp = stateFingerprint(remote);
+    if (remoteFp && remoteFp !== stateFingerprint(state)) {
+      state = remote;
+      await saveLocalState().catch(() => {});
+      render();
+      flash('Live update');
+    }
+  }
+
+  let flashTimer = null;
+  function flash(msg) {
+    const el = document.getElementById('saveStatus');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(() => { el.classList.remove('show'); el.textContent = ''; }, 1600);
+  }
+
+  function matchesFilter(f) {
+    if (activeFilter === 'all') return true;
+    if (activeFilter === 'none') return !f.assignee;
+    return f.assignee === activeFilter;
+  }
+
+  // ---- Export / Import ----
+  function exportData() {
+    const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `feature-board-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    flash('Backup downloaded');
+  }
+
+  function importData(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (!data || !Array.isArray(data.features)) throw new Error('bad format');
+        const incoming = data.features.length;
+        const current = state.features.length;
+        const ok = window.confirm(
+          `Import ${incoming} feature(s) from this file?\n\n` +
+          `This REPLACES the ${current} feature(s) currently on the board.\n` +
+          `(Tip: export a backup first if you're unsure.)`
+        );
+        if (!ok) return;
+        // normalize fields so older backups still work
+        state.features = data.features.map(f => ({
+          id: f.id || crypto.randomUUID(),
+          column: COL_KEYS.includes(f.column) ? f.column : 'backlog',
+          title: f.title || 'Untitled',
+          assignee: PEOPLE.some(p => p.key === f.assignee) ? f.assignee : null,
+          estimate: typeof f.estimate === 'string' ? f.estimate : '',
+          details: typeof f.details === 'string' ? f.details : '',
+          createdAt: f.createdAt || Date.now()
+        }));
+        saveState(); render();
+        flash(`Imported ${incoming}`);
+      } catch (e) {
+        alert('Could not read that file — it does not look like a valid Feature Board backup.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  document.getElementById('exportBtn').addEventListener('click', exportData);
+  document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change', e => {
+    const f = e.target.files[0];
+    if (f) importData(f);
+    e.target.value = '';
+  });
+
+  const filterbar = document.getElementById('filterbar');
+  function renderFilterBar() {
+    const chips = [{ key: 'all', name: 'All', av: null }];
+    PEOPLE.forEach(p => chips.push({ key: p.key, name: p.name, av: p.cls }));
+    chips.push({ key: 'none', name: 'Unassigned', av: 'av-none' });
+    filterbar.innerHTML = '<span class="filter-label">Filter</span>';
+    chips.forEach(c => {
+      const b = document.createElement('button');
+      b.className = 'filter-chip' + (activeFilter === c.key ? ' active' : '');
+      b.innerHTML = (c.av ? `<span class="av ${c.av}"></span>` : '') + c.name;
+      b.addEventListener('click', () => { activeFilter = c.key; render(); });
+      filterbar.appendChild(b);
+    });
+  }
+
+  const board = document.getElementById('board');
+  function render() {
+    closePopover();
+    renderFilterBar();
+    board.innerHTML = '';
+    COLUMNS.forEach(c => {
+      const items = state.features.filter(f => f.column === c.key && matchesFilter(f));
+      const col = document.createElement('section');
+      col.className = 'column';
+      col.dataset.col = c.key;
+      col.innerHTML = `
+        <div class="col-head">
+          <div class="col-label"><span class="col-tag ${c.tag}"></span>${c.label}</div>
+          <div class="col-count">${items.length}</div>
+        </div>
+        <div class="add-row">
+          <input type="text" class="add-input" placeholder="add feature&hellip;" />
+          <button class="add-btn">+</button>
+        </div>
+        <div class="cards"></div>
+      `;
+      const input = col.querySelector('.add-input');
+      const btn = col.querySelector('.add-btn');
+      const add = () => {
+        const title = input.value.trim();
+        if (!title) return;
+        const f = { id: crypto.randomUUID(), column: c.key, title, assignee: null, estimate: '', details: '', createdAt: Date.now() };
+        if (activeFilter !== 'all' && activeFilter !== 'none') f.assignee = activeFilter;
+        state.features.push(f);
+        input.value = '';
+        saveState(); render();
+      };
+      btn.addEventListener('click', add);
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
+
+      const cardsEl = col.querySelector('.cards');
+      if (items.length === 0) cardsEl.innerHTML = `<div class="empty">empty</div>`;
+      else items.forEach(f => cardsEl.appendChild(renderCard(f, c)));
+
+      col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over'); });
+      col.addEventListener('dragleave', e => { if (e.target === col) col.classList.remove('drag-over'); });
+      col.addEventListener('drop', e => {
+        e.preventDefault(); col.classList.remove('drag-over');
+        const id = e.dataTransfer.getData('text/plain');
+        const f = state.features.find(x => x.id === id);
+        if (f && f.column !== c.key) { f.column = c.key; saveState(); render(); }
+      });
+      board.appendChild(col);
+    });
+    updateCounts();
+  }
+
+  function renderCard(feature, col) {
+    const idx = COL_KEYS.indexOf(col.key);
+    const card = document.createElement('div');
+    card.className = 'card' + (col.key === 'done' ? ' done-card' : '');
+    card.dataset.id = feature.id;
+    const p = person(feature.assignee);
+    const assigneeInner = p ? `<span class="avatar ${p.cls}">${initial(p.name)}</span>${p.name}` : `<span class="avatar av-none">?</span>Assign`;
+    const est = feature.estimate ? feature.estimate : '';
+    const estClass = est ? '' : ' empty';
+    const estLabel = est ? est : 'Estimate';
+    const hasDetails = feature.details && feature.details.trim().length > 0;
+
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="face card-front" draggable="true">
+          <button class="delete-btn" title="remove">&times;</button>
+          <div class="card-title">${escapeHtml(feature.title)}</div>
+          <div class="meta-row">
+            <span class="assignee" title="assign person">${assigneeInner}</span>
+            <span class="estimate${estClass}" title="set estimate">&#9201; <span class="est-text">${escapeHtml(estLabel)}</span></span>
+          </div>
+          <div class="card-foot">
+            <button class="move-btn prev" ${idx === 0 ? 'disabled' : ''} title="move left">&#9664;</button>
+            <button class="move-btn next" ${idx === COL_KEYS.length-1 ? 'disabled' : ''} title="move right">&#9654;</button>
+            <button class="details-btn ${hasDetails ? 'has-details' : ''}" title="details">&#9998; Details</button>
+          </div>
+        </div>
+        <div class="face card-back" hidden>
+          <div class="back-head"><span class="back-title">Details</span><button class="back-btn">Done</button></div>
+          <textarea class="details-area" placeholder="add notes, acceptance criteria, links&hellip;">${escapeHtml(feature.details || '')}</textarea>
+        </div>
+      </div>
+    `;
+
+    const front = card.querySelector('.card-front');
+    const back = card.querySelector('.card-back');
+    const inner = card.querySelector('.card-inner');
+
+    const titleEl = card.querySelector('.card-title');
+    titleEl.addEventListener('click', () => {
+      titleEl.contentEditable = 'true'; titleEl.focus();
+      const range = document.createRange(); range.selectNodeContents(titleEl);
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+    });
+    titleEl.addEventListener('blur', () => {
+      titleEl.contentEditable = 'false';
+      const v = titleEl.textContent.trim();
+      if (v && v !== feature.title) { feature.title = v; saveState(); }
+      else if (!v) { titleEl.textContent = feature.title; }
+    });
+    titleEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); titleEl.blur(); }
+      if (e.key === 'Escape') { titleEl.textContent = feature.title; titleEl.blur(); }
+    });
+
+    card.querySelector('.assignee').addEventListener('click', e => { e.stopPropagation(); toggleAssigneePopover(e.currentTarget, feature); });
+
+    const estEl = card.querySelector('.estimate');
+    estEl.addEventListener('click', e => {
+      e.stopPropagation();
+      const cur = feature.estimate || '';
+      estEl.innerHTML = `&#9201; <input class="est-input" type="text" value="${escapeHtml(cur)}" placeholder="e.g. 2 weeks" />`;
+      const inp = estEl.querySelector('.est-input');
+      inp.focus(); inp.select();
+      const commit = () => { feature.estimate = inp.value.trim(); saveState(); render(); };
+      inp.addEventListener('keydown', ev => {
+        if (ev.key === 'Enter') { ev.preventDefault(); commit(); }
+        if (ev.key === 'Escape') { render(); }
+      });
+      inp.addEventListener('blur', commit);
+    });
+
+    card.querySelector('.prev').addEventListener('click', e => { e.stopPropagation(); if (idx > 0) { feature.column = COL_KEYS[idx-1]; saveState(); render(); } });
+    card.querySelector('.next').addEventListener('click', e => { e.stopPropagation(); if (idx < COL_KEYS.length-1) { feature.column = COL_KEYS[idx+1]; saveState(); render(); } });
+    card.querySelector('.delete-btn').addEventListener('click', e => { e.stopPropagation(); state.features = state.features.filter(x => x.id !== feature.id); saveState(); render(); });
+
+    const detailsBtn = card.querySelector('.details-btn');
+    const backBtn = card.querySelector('.back-btn');
+    const area = card.querySelector('.details-area');
+    detailsBtn.addEventListener('click', e => { e.stopPropagation(); flip(true); });
+    backBtn.addEventListener('click', e => { e.stopPropagation(); area.blur(); flip(false); });
+    area.addEventListener('blur', () => { const v = area.value; if (v !== (feature.details || '')) { feature.details = v; saveState(); } });
+
+    function flip(showBack) {
+      inner.style.transition = 'transform 0.16s ease-in';
+      inner.style.transform = 'rotateY(90deg)';
+      setTimeout(() => {
+        front.hidden = showBack; back.hidden = !showBack;
+        inner.style.transition = 'transform 0.16s ease-out';
+        inner.style.transform = 'rotateY(0deg)';
+        if (showBack) area.focus();
+        else detailsBtn.classList.toggle('has-details', !!(feature.details && feature.details.trim()));
+      }, 160);
+    }
+
+    front.addEventListener('dragstart', e => { card.classList.add('dragging'); e.dataTransfer.setData('text/plain', feature.id); e.dataTransfer.effectAllowed = 'move'; });
+    front.addEventListener('dragend', () => card.classList.remove('dragging'));
+    return card;
+  }
+
+  function toggleAssigneePopover(anchor, feature) {
+    if (openPopover && openPopover.dataset.for === feature.id) { closePopover(); return; }
+    closePopover();
+    const pop = document.createElement('div');
+    pop.className = 'popover';
+    pop.dataset.for = feature.id;
+    const opts = [{ key: null, name: 'Unassigned', cls: 'av-none', ch: '?' }]
+      .concat(PEOPLE.map(p => ({ key: p.key, name: p.name, cls: p.cls, ch: initial(p.name) })));
+    opts.forEach(o => {
+      const item = document.createElement('div');
+      const selected = (feature.assignee || null) === o.key;
+      item.className = 'pop-item' + (selected ? ' sel' : '');
+      item.innerHTML = `<span class="avatar ${o.cls}">${o.ch}</span>${o.name}${selected ? '<span class="check">&#10003;</span>' : ''}`;
+      item.addEventListener('click', ev => { ev.stopPropagation(); feature.assignee = o.key; saveState(); render(); });
+      pop.appendChild(item);
+    });
+    document.body.appendChild(pop);
+    const r = anchor.getBoundingClientRect();
+    pop.style.left = (r.left + window.scrollX) + 'px';
+    pop.style.top = (r.bottom + window.scrollY + 4) + 'px';
+    openPopover = pop;
+  }
+  function closePopover() { if (openPopover) { openPopover.remove(); openPopover = null; } }
+  document.addEventListener('click', () => closePopover());
+
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function startOfDay(value) {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+  }
+  function updateProjectSummary() {
+    const now = new Date();
+    const currentDay = startOfDay(now);
+    const totalDays = Math.ceil((PROJECT_END - PROJECT_START) / DAY_MS);
+    const elapsedDays = Math.min(totalDays, Math.max(0, Math.floor((currentDay - PROJECT_START) / DAY_MS)));
+    const daysLeft = Math.max(0, Math.ceil((PROJECT_END - currentDay) / DAY_MS));
+    const progressPct = totalDays ? Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100)) : 100;
+    document.getElementById('todayLabel').textContent = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
+    document.getElementById('daysLeft').textContent = String(daysLeft);
+    document.getElementById('deadlineProgress').style.width = `${progressPct}%`;
+  }
+  function updateCounts() {
+    updateProjectSummary();
+    document.getElementById('totalCount').textContent = state.features.length;
+    document.getElementById('shippedCount').textContent = state.features.filter(f => f.column === 'done').length;
+  }
+
+  (async () => {
+    await loadState();
+    render();
+    setInterval(pollRemoteState, SYNC_INTERVAL_MS);
+    setInterval(updateProjectSummary, 3600000);
+    window.addEventListener('focus', pollRemoteState);
+  })();
+</script>
+
+</body>
+</html>

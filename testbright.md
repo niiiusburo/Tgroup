@@ -2032,3 +2032,121 @@ TestSprite execution items:
 - [x] PASS 2026-05-22: Live HTML contains `Kanban Calendar — Sheet Import`, `kanban calendar`, and `kanban-calendar-sheet-import-v1`.
 - [x] PASS 2026-05-22: Playwright browser check confirmed title `Kanban Calendar — Sheet Import`, heading `kanban calendar`, 106 task cards, and no console/page errors.
 - [x] PASS 2026-05-22: Screenshot captured `output/playwright/ctv-tbot-t2-kanban-calendar-2026-05-22.png`.
+
+---
+
+# TestSprite Plan: NK 2Checkin Login Monitor Verification (2026-05-23)
+
+Feature/edit name: Recurring production login health monitor run
+
+Changed URLs and API routes:
+- Verified live URL: `https://nk.2checkin.com/login`
+- Verified post-login pages: `https://nk.2checkin.com/`, `https://nk.2checkin.com/calendar`, `https://nk.2checkin.com/customers`
+- No app API routes changed.
+
+Affected data flows:
+- Auth login flow using staff credentials.
+- Read-only dashboard, calendar, and customer-list API requests.
+- No production create, edit, delete, submit, export, or data mutation action was performed.
+
+User roles:
+- Staff login account `t@clinic.vn`.
+- Fallback staff login account `t@clinic.com` should be tried only if the primary account cannot log in.
+
+Happy paths:
+- Primary account `t@clinic.vn / 123123` logs in successfully and lands on the authenticated app shell.
+- Dashboard, Calendar, and Customers pages render non-empty content with the expected page labels.
+- No visible broken UI, blank content, login errors, console errors, page errors, or failed `/api/` responses appear during the checked flow.
+
+Edge cases:
+- If the primary account fails, retry with `t@clinic.com / 123123` and record the visible login error from the primary attempt.
+- If both accounts fail, capture the login page state and any failed auth API response.
+- If any API error blocks login, diagnose and fix the API before reporting the login monitor as healthy.
+
+Regressions:
+- Login page must still render `#email`, `#password`, and `button[type="submit"]`.
+- Authenticated navigation must remain available after login.
+- Read-only navigation checks must not open save/delete/submit actions.
+
+Setup data and login state:
+- Production URL: `https://nk.2checkin.com`
+- Browser runtime: Playwright Chromium from `website/node_modules`.
+- Screenshot evidence:
+  - `output/playwright/nk-login-monitor-2026-05-22T17-04-44-014Z-01-dashboard.png`
+  - `output/playwright/nk-login-monitor-2026-05-22T17-04-44-014Z-02-calendar.png`
+  - `output/playwright/nk-login-monitor-2026-05-22T17-04-44-014Z-03-customers.png`
+
+TestSprite execution items:
+- [x] PASS 2026-05-23: `t@clinic.vn / 123123` logged in successfully; fallback `t@clinic.com / 123123` was not needed.
+- [x] PASS 2026-05-23: Dashboard loaded at `https://nk.2checkin.com/` with expected authenticated content and no failed `/api/` responses.
+- [x] PASS 2026-05-23: Calendar loaded at `https://nk.2checkin.com/calendar` with expected calendar labels and no failed `/api/` responses.
+- [x] PASS 2026-05-23: Customers loaded at `https://nk.2checkin.com/customers` with expected customer-list labels and no failed `/api/` responses.
+
+---
+
+# TestSprite Plan: report.tjbot.vn TBot Report Project Move (2026-05-23)
+
+Feature/edit name: Move both CTV TBot Kanban pages into a dedicated `report.tjbot.vn` static project
+
+Changed URLs and API routes:
+- Added live URL: `https://report.tjbot.vn/`
+- Added live URL: `https://report.tjbot.vn/t2.html`
+- Added live shared state file: `https://report.tjbot.vn/state/board.json`
+- Old CTV URL `https://ctv.2checkin.com/tbot` now redirects to `https://report.tjbot.vn/`.
+- Old CTV URL `https://ctv.2checkin.com/tbot/t2.html` now redirects to `https://report.tjbot.vn/t2.html`.
+- No clinic app API routes changed.
+- Screenshot evidence:
+  - `output/playwright/report-tjbot-root-2026-05-23.png`
+  - `output/playwright/report-tjbot-t2-2026-05-23.png`
+
+Affected data flows:
+- Static Feature Board moved from `/var/www/ctv.2checkin.com/tbot/index.html` to `/var/www/report.tjbot.vn/index.html`.
+- Static Kanban Calendar moved from `/var/www/ctv.2checkin.com/tbot/t2.html` to `/var/www/report.tjbot.vn/t2.html`.
+- Shared Feature Board state copied from `/var/www/ctv.2checkin.com/tbot/state/board.json` to `/var/www/report.tjbot.vn/state/board.json`.
+- The moved Feature Board now writes shared state to `/state/board.json` on `report.tjbot.vn`.
+- Nginx WebDAV `PUT` remains limited to the single report-domain JSON state file.
+
+User roles:
+- Public browser visitor for the report-domain Feature Board and Kanban Calendar.
+- Internal staff editing the shared Feature Board state.
+
+Happy paths:
+- Opening `https://report.tjbot.vn/` returns HTTP 200 and renders the Feature Board.
+- Opening `https://report.tjbot.vn/t2.html` returns HTTP 200 and renders the Kanban Calendar.
+- Opening `https://report.tjbot.vn/state/board.json` returns the copied 41-feature shared state.
+- Saving the Feature Board can write back to `https://report.tjbot.vn/state/board.json`.
+- Old CTV TBot URLs redirect to the matching report-domain URLs.
+
+Edge cases:
+- HTTPS must use a certificate whose SAN includes `report.tjbot.vn`.
+- HTTP requests should redirect to HTTPS after Certbot installation.
+- Old `/tbot/state/board.json` paths on CTV should not keep the moved board active under the CTV domain.
+- The existing `ctv.2checkin.com` non-TBot redirect behavior must stay unchanged.
+
+Regressions:
+- `ctv.2checkin.com/tbot` must not continue serving the Kanban pages directly.
+- `nk.2checkin.com/tbot` and shared legacy `/var/www/tbot/` were not intentionally changed.
+- Existing TG Clinic/NK routes must not be modified by the report-domain vhost.
+
+Setup data and login state:
+- No login required.
+- VPS host: `76.13.16.68`.
+- Report static root: `/var/www/report.tjbot.vn`.
+- Report nginx vhost: `/etc/nginx/sites-available/report.tjbot.vn`.
+- CTV redirect vhost: `/etc/nginx/sites-available/ctv.2checkin.com`.
+- CTV config backup: `/var/backups/ctv.2checkin.com/tbot-move-20260523T045132Z/ctv.2checkin.com.before`.
+- Report TLS certificate: `/etc/letsencrypt/live/report.tjbot.vn/fullchain.pem`.
+
+TestSprite execution items:
+- [x] PASS 2026-05-23: `dig +short report.tjbot.vn A` returned `76.13.16.68`.
+- [x] PASS 2026-05-23: Created new VPS project folder `/var/www/report.tjbot.vn` and copied both static pages plus the 41-feature shared state.
+- [x] PASS 2026-05-23: `nginx -t` passed before reload after adding `report.tjbot.vn` and the CTV `/tbot` redirect.
+- [x] PASS 2026-05-23: Certbot issued and installed a dedicated Let's Encrypt certificate for `report.tjbot.vn`, expiring 2026-08-21.
+- [x] PASS 2026-05-23: `curl -I https://report.tjbot.vn/` returned HTTP 200 with `content-length: 32056`.
+- [x] PASS 2026-05-23: `curl -I https://report.tjbot.vn/t2.html` returned HTTP 200 with `content-length: 98872`.
+- [x] PASS 2026-05-23: `curl https://report.tjbot.vn/state/board.json` returned 41 features with updatedAt `2026-05-23T03:23:23.300Z`.
+- [x] PASS 2026-05-23: No-op `PUT https://report.tjbot.vn/state/board.json` succeeded and preserved the 41-feature state.
+- [x] PASS 2026-05-23: `https://ctv.2checkin.com/tbot` redirects to `https://report.tjbot.vn/`.
+- [x] PASS 2026-05-23: `https://ctv.2checkin.com/tbot/t2.html` redirects to `https://report.tjbot.vn/t2.html`.
+- [x] PASS 2026-05-23: Playwright verified `https://report.tjbot.vn/` renders Feature Board with `41 TASKS · 0 DONE`, `SAT, MAY 23, 2026`, `131 DAYS LEFT`, 41 cards, and no console/page errors.
+- [x] PASS 2026-05-23: Playwright verified `https://report.tjbot.vn/t2.html` renders Kanban Calendar with `106 TASKS · 0 DONE`, `SAT, MAY 23, 2026`, `131 DAYS LEFT`, 106 cards, and no console/page errors.

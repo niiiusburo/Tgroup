@@ -1,0 +1,3145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kanban Calendar — Sheet Import</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6fbff;
+    --bg-soft: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f8ff;
+    --border: #c9d8ea;
+    --border-soft: #deebf7;
+    --text: #132033;
+    --text-dim: #53657a;
+    --text-faint: #8291a6;
+    --accent: #00c389;
+    --accent-strong: #047857;
+    --todo: #64748b;
+    --doing: #d97706;
+    --done: #059669;
+    --hard: #e11d48;
+    --medium: #b7791f;
+    --easy: #2563eb;
+    --danger: #dc2626;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    padding: 28px 24px 60px;
+    background:
+      linear-gradient(135deg, #f8fcff 0%, #edf8ff 46%, #f1fff8 100%);
+  }
+
+  header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    align-items: end;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 34px;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+  .title em { color: var(--accent); font-style: italic; }
+  .subtitle {
+    margin-top: 3px;
+    max-width: 880px;
+    color: var(--text-dim);
+    font-size: 11px;
+  }
+
+  .meta {
+    display: grid;
+    justify-items: end;
+    gap: 7px;
+    text-align: right;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .meta .count {
+    color: var(--text);
+    font-weight: 700;
+  }
+  .deadline-card {
+    width: min(280px, 100%);
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 10px;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+  }
+  .deadline-days {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .deadline-days span {
+    color: var(--danger);
+    font-size: 22px;
+    line-height: 1;
+  }
+  .deadline-range {
+    margin-top: 2px;
+    color: var(--text-dim);
+    font-size: 10px;
+  }
+  .deadline-bar {
+    height: 7px;
+    margin-top: 8px;
+    overflow: hidden;
+    background: #e7eef8;
+    border-radius: 999px;
+  }
+  .deadline-bar span {
+    display: block;
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #60a5fa);
+    border-radius: inherit;
+    transition: width 0.2s ease;
+  }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 18px;
+  }
+  .metric, .filter-select, .reset-btn {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-dim);
+    font: inherit;
+    font-size: 11px;
+    min-height: 30px;
+  }
+  .metric {
+    display: inline-flex;
+    gap: 7px;
+    align-items: center;
+    padding: 5px 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .metric strong { color: var(--text); }
+  .similar-hint {
+    min-width: 240px;
+    color: var(--accent-strong);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .filter-select { padding: 5px 9px; color-scheme: light; }
+  .reset-btn {
+    padding: 5px 10px;
+    color: var(--accent-strong);
+    cursor: pointer;
+  }
+  .reset-btn:hover { border-color: var(--accent); }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  @media (max-width: 1050px) {
+    .board { grid-template-columns: 1fr; }
+    header { grid-template-columns: 1fr; }
+    .meta { justify-items: start; text-align: left; }
+  }
+
+  .column {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 14px;
+    min-height: 560px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.15s, background 0.15s;
+    box-shadow: 0 12px 30px rgba(30, 64, 175, 0.08);
+  }
+
+  .column.drag-over {
+    border-color: var(--accent);
+    background: #eefbf5;
+  }
+
+  .col-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .col-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .col-title .year {
+    color: var(--text-faint);
+    font-weight: 400;
+    font-size: 12px;
+    margin-left: 6px;
+  }
+
+  .col-count {
+    font-size: 11px;
+    color: var(--text-dim);
+    background: var(--bg-card);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .add-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .add-input {
+    flex: 1;
+    min-width: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .add-input:focus { border-color: var(--accent); }
+  .add-input::placeholder { color: var(--text-faint); }
+
+  .add-btn {
+    width: 34px;
+    background: var(--accent);
+    color: #06251b;
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .add-btn:hover { opacity: 0.85; }
+  .add-btn:active { transform: scale(0.95); }
+
+  .cards {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-height: 40px;
+  }
+
+  .empty {
+    color: var(--text-faint);
+    font-size: 11px;
+    text-align: center;
+    padding: 30px 10px;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--todo);
+    border-radius: 6px;
+    padding: 10px 12px 11px;
+    cursor: grab;
+    transition: background 0.15s, transform 0.1s, opacity 0.15s;
+    position: relative;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+  }
+  .card:hover { background: var(--bg-card-hover); }
+  .card:active { cursor: grabbing; }
+  .card:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+  .card.dragging { opacity: 0.4; }
+  .card[data-status="doing"] { border-left-color: var(--doing); }
+  .card[data-status="done"] { border-left-color: var(--done); }
+  .card[data-status="done"] .card-title {
+    text-decoration: line-through;
+    color: var(--text-dim);
+  }
+  .card[data-priority="Hard"] { box-shadow: inset 0 0 0 1px rgba(225, 29, 72, 0.16); }
+  .board.has-similarity .card:not(.similar-source):not(.similar-match) {
+    opacity: 0.42;
+    filter: saturate(0.75);
+  }
+  .card.similar-source {
+    border-color: var(--accent);
+    background: #e9fff7;
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 2px rgba(0, 195, 137, 0.28), 0 14px 28px rgba(4, 120, 87, 0.14);
+    z-index: 2;
+  }
+  .card.similar-match {
+    border-color: #22c55e;
+    background: #f0fff9;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.18), 0 10px 22px rgba(4, 120, 87, 0.1);
+  }
+
+  .card-head, .card-tags, .card-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .card-head {
+    padding-right: 20px;
+    margin-bottom: 7px;
+  }
+
+  .lane-tag, .week-tag, .priority-chip, .estimate-chip {
+    border-radius: 999px;
+    padding: 2px 7px;
+    font-size: 10px;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+  .lane-tag { background: #e8f0ff; color: #1d4ed8; }
+  .week-tag { background: #edf2f7; color: var(--text-dim); }
+  .priority-chip[data-priority="Hard"] { background: rgba(225, 29, 72, 0.11); color: var(--hard); }
+  .priority-chip[data-priority="Medium"] { background: rgba(217, 119, 6, 0.13); color: var(--medium); }
+  .priority-chip[data-priority="Easy"] { background: rgba(37, 99, 235, 0.11); color: var(--easy); }
+  .estimate-chip { background: rgba(0, 195, 137, 0.12); color: var(--accent-strong); }
+
+  .card-title {
+    font-size: 12.5px;
+    font-weight: 600;
+    word-break: break-word;
+    padding-right: 18px;
+    cursor: text;
+  }
+  .card-title[contenteditable="true"] {
+    outline: 1px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  .card-detail {
+    margin-top: 6px;
+    color: var(--text-dim);
+    font-size: 11px;
+  }
+  .card-detail b {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .card-context {
+    margin-top: 6px;
+    color: var(--text-faint);
+    font-size: 10.5px;
+  }
+
+  .card-tags { margin-top: 8px; }
+  .card-meta {
+    justify-content: space-between;
+    margin-top: 9px;
+    font-size: 10.5px;
+    color: var(--text-dim);
+  }
+
+  .status-pill {
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .status-pill[data-status="todo"] { background: #eef2f7; color: var(--text-dim); }
+  .status-pill[data-status="doing"] { background: rgba(217, 119, 6, 0.13); color: var(--doing); }
+  .status-pill[data-status="done"] { background: rgba(5, 150, 105, 0.12); color: var(--done); }
+  .status-pill:hover { filter: brightness(1.3); }
+
+  .card-date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .date-input {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 10.5px;
+    cursor: pointer;
+    padding: 0;
+    color-scheme: light;
+  }
+  .date-input:hover { color: var(--text); }
+
+  .delete-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: transparent;
+    border: none;
+    color: var(--text-faint);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 2px 5px;
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.15s, color 0.15s;
+  }
+  .card:hover .delete-btn { opacity: 1; }
+  .delete-btn:hover { color: var(--danger); background: rgba(239, 68, 68, 0.08); }
+
+  .legend {
+    margin-top: 30px;
+    display: flex;
+    gap: 18px;
+    font-size: 10.5px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot.todo { background: var(--todo); }
+  .dot.doing { background: var(--doing); }
+  .dot.done { background: var(--done); }
+  .dot.hard { background: var(--hard); }
+  .dot.medium { background: var(--medium); }
+  .dot.easy { background: var(--easy); }
+  .legend-tip { color: var(--text-dim); font-style: italic; text-transform: none; letter-spacing: 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="title">kanban <em>calendar</em></div>
+    <div class="subtitle">Imported from the Google Sheet workbook: 6-week plan + daily journal. Cards are split by software, hardware, backend/fix, and project work.</div>
+  </div>
+  <div class="meta">
+    <div><span class="count" id="totalCount">0</span> tasks · <span class="count" id="doneCount">0</span> done</div>
+    <div id="todayLabel">—</div>
+    <div class="deadline-card" aria-label="project countdown">
+      <div class="deadline-days"><span id="daysLeft">—</span> days left</div>
+      <div class="deadline-range">Apr 1 → Oct 1, 2026</div>
+      <div class="deadline-bar"><span id="deadlineProgress"></span></div>
+    </div>
+  </div>
+</header>
+
+<section class="toolbar" aria-label="task summary and filters">
+  <span class="metric"><strong id="hardCount">0</strong> hard</span>
+  <span class="metric"><strong id="mediumCount">0</strong> medium</span>
+  <span class="metric"><strong id="easyCount">0</strong> easy</span>
+  <span class="metric"><strong id="hoursCount">0h</strong> est.</span>
+  <span class="metric similar-hint" id="similarHint">hover or click a card to find similar work</span>
+  <select class="filter-select" id="priorityFilter" aria-label="filter by priority">
+    <option value="all">All priorities</option>
+    <option value="Hard">Hard only</option>
+    <option value="Medium">Medium only</option>
+    <option value="Easy">Easy only</option>
+  </select>
+  <select class="filter-select" id="laneFilter" aria-label="filter by lane">
+    <option value="all">All lanes</option>
+  </select>
+  <button class="reset-btn" id="resetImport" type="button">reset import</button>
+</section>
+
+<main class="board" id="board"></main>
+
+<div class="legend">
+  <div class="legend-item"><span class="dot todo"></span>todo</div>
+  <div class="legend-item"><span class="dot doing"></span>doing</div>
+  <div class="legend-item"><span class="dot done"></span>done</div>
+  <div class="legend-item"><span class="dot hard"></span>hard</div>
+  <div class="legend-item"><span class="dot medium"></span>medium</div>
+  <div class="legend-item"><span class="dot easy"></span>easy</div>
+  <div class="legend-tip">click pill to cycle status · click title to edit · drag cards between months</div>
+</div>
+
+<script>
+  const SOURCE_VERSION = "sheet-import-2026-05-22-v1";
+  const SEED_TASKS = [
+  {
+    "id": "Nhat ky hang ngay-2-backend-fix-daily-backend-audit-backend-health-env-build-test-api-qu",
+    "monthKey": "2026-05",
+    "title": "Daily backend: Audit backend health: env, build, test, API, queue/worker nếu có",
+    "status": "todo",
+    "date": "2026-05-21",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Backend/Fix",
+    "week": "W1",
+    "milestone": "Ngày #1",
+    "module": "tbot-mobile, tbot-backend, tbot-ai-services",
+    "output": "",
+    "test": "Backend/API smoke hoặc regression liên quan",
+    "evidence": "",
+    "fallback": "Dùng mock nếu thiếu linh kiện",
+    "criteria": "",
+    "source": "Nhat ky hang ngay",
+    "createdAt": 1779415200105
+  },
+  {
+    "id": "Nhat ky hang ngay-2-ph-n-m-m-daily-plan-r-so-t-repo-hi-n-c-kh-a-ng-demo-app-backend-a",
+    "monthKey": "2026-05",
+    "title": "Daily plan: Rà soát repo hiện có, khóa đường demo app -> backend/AI -> robot/ESP32 -> video/nói/vẫy",
+    "status": "todo",
+    "date": "2026-05-21",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Phần mềm",
+    "week": "W1",
+    "milestone": "Ngày #1",
+    "module": "tbot-mobile, tbot-backend, tbot-ai-services",
+    "output": "",
+    "test": "Repo/module smoke; không đổi phạm vi lõi sau ngày 6",
+    "evidence": "",
+    "fallback": "Dùng mock nếu thiếu linh kiện",
+    "criteria": "",
+    "source": "Nhat ky hang ngay",
+    "createdAt": 1779415200104
+  },
+  {
+    "id": "Ke hoach 6 tuan-2-hardware-ki-m-tra-ble-wifi-provisioning-path",
+    "monthKey": "2026-05",
+    "title": "Kiểm tra BLE/WiFi provisioning path",
+    "status": "todo",
+    "date": "2026-05-22",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Hardware",
+    "week": "W1",
+    "milestone": "Dữ liệu và memory",
+    "module": "ESP32 WiFi/BLE",
+    "output": "Báo cáo kết nối",
+    "test": "Scan/connect thử",
+    "evidence": "Memory path rõ",
+    "fallback": "Local storage fallback",
+    "criteria": "Schema dùng được",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200001
+  },
+  {
+    "id": "Ke hoach 6 tuan-2-backend-fix-t-o-api-contract-l-u-c-session-demo",
+    "monthKey": "2026-05",
+    "title": "Tạo API contract lưu/đọc session demo",
+    "status": "todo",
+    "date": "2026-05-22",
+    "priority": "Easy",
+    "estimate": "1-2h",
+    "lane": "Backend/Fix",
+    "week": "W1",
+    "milestone": "Dữ liệu và memory",
+    "module": "tbot-backend, contracts",
+    "output": "Contract memory API",
+    "test": "",
+    "evidence": "Memory path rõ",
+    "fallback": "Local storage fallback",
+    "criteria": "Schema dùng được",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200002
+  },
+  {
+    "id": "Ke hoach 6 tuan-2-software-nh-ngh-a-child-profile-parentjob-lessonprogress-robotdev",
+    "monthKey": "2026-05",
+    "title": "Định nghĩa child profile, parentJob, lessonProgress, robotDevice, sessionMemory",
+    "status": "todo",
+    "date": "2026-05-22",
+    "priority": "Easy",
+    "estimate": "1-2h",
+    "lane": "Software",
+    "week": "W1",
+    "milestone": "Dữ liệu và memory",
+    "module": "tbot-backend, contracts",
+    "output": "Schema memory v1",
+    "test": "Review schema + payload mẫu",
+    "evidence": "Memory path rõ",
+    "fallback": "Local storage fallback",
+    "criteria": "Schema dùng được",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200000
+  },
+  {
+    "id": "Ke hoach 6 tuan-3-hardware-map-command-t-i-motor-audio-display-wifi-handler",
+    "monthKey": "2026-05",
+    "title": "Map command tới motor/audio/display/wifi handler",
+    "status": "todo",
+    "date": "2026-05-23",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Hardware",
+    "week": "W1",
+    "milestone": "Luồng app",
+    "module": "ESP32 handlers",
+    "output": "Bảng map lệnh HW",
+    "test": "Dry-run command mapping",
+    "evidence": "Flow app/backend/robot rõ",
+    "fallback": "Demo offline mode",
+    "criteria": "Flow không gãy",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200004
+  },
+  {
+    "id": "Ke hoach 6 tuan-3-software-v-flow-ng-nh-p-onboarding-robot-wifi-b-i-h-c-tr-ng-th-i-",
+    "monthKey": "2026-05",
+    "title": "Vẽ flow đăng nhập, onboarding robot, WiFi, bài học, trạng thái robot",
+    "status": "todo",
+    "date": "2026-05-23",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Software",
+    "week": "W1",
+    "milestone": "Luồng app",
+    "module": "tbot-mobile",
+    "output": "Wireframe mobile flow",
+    "test": "Click-through 5 lần",
+    "evidence": "Flow app/backend/robot rõ",
+    "fallback": "Demo offline mode",
+    "criteria": "Flow không gãy",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200003
+  },
+  {
+    "id": "Ke hoach 6 tuan-3-backend-fix-x-c-nh-l-i-backend-tr-v-cho-app-timeout-retry-offline",
+    "monthKey": "2026-05",
+    "title": "Xác định lỗi backend trả về cho app: timeout, retry, offline",
+    "status": "todo",
+    "date": "2026-05-23",
+    "priority": "Easy",
+    "estimate": "1-2h",
+    "lane": "Backend/Fix",
+    "week": "W1",
+    "milestone": "Luồng app",
+    "module": "tbot-mobile",
+    "output": "Error contract",
+    "test": "",
+    "evidence": "Flow app/backend/robot rõ",
+    "fallback": "Demo offline mode",
+    "criteria": "Flow không gãy",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200005
+  },
+  {
+    "id": "Ke hoach 6 tuan-4-backend-fix-th-m-idempotency-requestid-cho-command-demo",
+    "monthKey": "2026-05",
+    "title": "Thêm idempotency/requestId cho command demo",
+    "status": "todo",
+    "date": "2026-05-24",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Backend/Fix",
+    "week": "W1",
+    "milestone": "Hợp đồng SW/HW",
+    "module": "contracts/backend gateway",
+    "output": "Command stability rule",
+    "test": "",
+    "evidence": "Interface thống nhất",
+    "fallback": "Mock command bus",
+    "criteria": "API thống nhất",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200008
+  },
+  {
+    "id": "Ke hoach 6 tuan-4-software-nh-ngh-a-l-nh-robot-wave-speak-playvideo-stop-status-ret",
+    "monthKey": "2026-05",
+    "title": "Định nghĩa lệnh robot: wave, speak, playVideo, stop, status, retry",
+    "status": "todo",
+    "date": "2026-05-24",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Software",
+    "week": "W1",
+    "milestone": "Hợp đồng SW/HW",
+    "module": "contracts/backend gateway",
+    "output": "Robot API contract",
+    "test": "Validate payload + error envelope",
+    "evidence": "Interface thống nhất",
+    "fallback": "Mock command bus",
+    "criteria": "API thống nhất",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200006
+  },
+  {
+    "id": "Ke hoach 6 tuan-4-hardware-ch-t-setup-bench-d-y-ngu-n-g-l-p-reset",
+    "monthKey": "2026-05",
+    "title": "Chốt setup bench: dây, nguồn, gá lắp, reset",
+    "status": "todo",
+    "date": "2026-05-24",
+    "priority": "Easy",
+    "estimate": "1-2h",
+    "lane": "Hardware",
+    "week": "W1",
+    "milestone": "Hợp đồng SW/HW",
+    "module": "robot bench",
+    "output": "Kế hoạch bench",
+    "test": "Review dây/nguồn",
+    "evidence": "Interface thống nhất",
+    "fallback": "Mock command bus",
+    "criteria": "API thống nhất",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200007
+  },
+  {
+    "id": "Ke hoach 6 tuan-5-backend-fix-ch-t-bug-fix-policy-tu-n-6-kh-ng-th-m-feature-ch-fix",
+    "monthKey": "2026-05",
+    "title": "Chốt bug-fix policy: tuần 6 không thêm feature, chỉ fix",
+    "status": "todo",
+    "date": "2026-05-25",
+    "priority": "Easy",
+    "estimate": "1-2h",
+    "lane": "Backend/Fix",
+    "week": "W1",
+    "milestone": "Backlog + bug triage",
+    "module": "docs/stories, TEST_MATRIX",
+    "output": "Bug policy",
+    "test": "",
+    "evidence": "Sẵn sàng build tuần 2",
+    "fallback": "Cắt feature phụ",
+    "criteria": "Ready build",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200011
+  },
+  {
+    "id": "Ke hoach 6 tuan-5-hardware-chu-n-h-a-c-ch-ghi-log-ph-n-c-ng-h-ng-ng-y",
+    "monthKey": "2026-05",
+    "title": "Chuẩn hóa cách ghi log phần cứng hằng ngày",
+    "status": "todo",
+    "date": "2026-05-25",
+    "priority": "Easy",
+    "estimate": "1-2h",
+    "lane": "Hardware",
+    "week": "W1",
+    "milestone": "Backlog + bug triage",
+    "module": "robot bench",
+    "output": "HW log checklist",
+    "test": "Checklist đủ",
+    "evidence": "Sẵn sàng build tuần 2",
+    "fallback": "Cắt feature phụ",
+    "criteria": "Ready build",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200010
+  },
+  {
+    "id": "Ke hoach 6 tuan-5-software-t-o-story-packet-acceptance-criteria-test-matrix",
+    "monthKey": "2026-05",
+    "title": "Tạo story packet, acceptance criteria, test matrix",
+    "status": "todo",
+    "date": "2026-05-25",
+    "priority": "Easy",
+    "estimate": "1-2h",
+    "lane": "Software",
+    "week": "W1",
+    "milestone": "Backlog + bug triage",
+    "module": "docs/stories, TEST_MATRIX",
+    "output": "Backlog demo",
+    "test": "Mỗi story có pass criteria",
+    "evidence": "Sẵn sàng build tuần 2",
+    "fallback": "Cắt feature phụ",
+    "criteria": "Ready build",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200009
+  },
+  {
+    "id": "Ke hoach 6 tuan-6-hardware-set-up-flash-debug-firmware-capture-log",
+    "monthKey": "2026-05",
+    "title": "Set up flash/debug firmware + capture log",
+    "status": "todo",
+    "date": "2026-05-29",
+    "priority": "Hard",
+    "estimate": "6-8h",
+    "lane": "Hardware",
+    "week": "W2",
+    "milestone": "Nền app",
+    "module": "robot/esp32-server",
+    "output": "Firmware deploy path",
+    "test": "Flash 3 lần",
+    "evidence": "App mở + backend có đường chạy",
+    "fallback": "Local-only login",
+    "criteria": "Login demo OK",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200013
+  },
+  {
+    "id": "Ke hoach 6 tuan-6-backend-fix-backend-start-smoke-health-endpoint-n-u-c",
+    "monthKey": "2026-05",
+    "title": "Backend start smoke + health endpoint nếu có",
+    "status": "todo",
+    "date": "2026-05-29",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Backend/Fix",
+    "week": "W2",
+    "milestone": "Nền app",
+    "module": "tbot-mobile",
+    "output": "Backend smoke note",
+    "test": "",
+    "evidence": "App mở + backend có đường chạy",
+    "fallback": "Local-only login",
+    "criteria": "Login demo OK",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200014
+  },
+  {
+    "id": "Ke hoach 6 tuan-6-software-build-ki-m-tra-app-skeleton-login-mock-demo-mode",
+    "monthKey": "2026-05",
+    "title": "Build/kiểm tra app skeleton + login mock + demo mode",
+    "status": "todo",
+    "date": "2026-05-29",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Software",
+    "week": "W2",
+    "milestone": "Nền app",
+    "module": "tbot-mobile",
+    "output": "Login screen",
+    "test": "Mở app 10 lần",
+    "evidence": "App mở + backend có đường chạy",
+    "fallback": "Local-only login",
+    "criteria": "Login demo OK",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200012
+  },
+  {
+    "id": "Ke hoach 6 tuan-7-backend-fix-th-m-structured-logging-cho-request-command",
+    "monthKey": "2026-05",
+    "title": "Thêm structured logging cho request/command",
+    "status": "todo",
+    "date": "2026-05-30",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Backend/Fix",
+    "week": "W2",
+    "milestone": "Backend API skeleton",
+    "module": "tbot-backend",
+    "output": "Backend logs",
+    "test": "",
+    "evidence": "API gọi được hoặc mock rõ",
+    "fallback": "Mock API server",
+    "criteria": "API baseline OK",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200017
+  },
+  {
+    "id": "Ke hoach 6 tuan-7-hardware-test-primitive-motor-v-y-tay",
+    "monthKey": "2026-05",
+    "title": "Test primitive motor vẫy tay",
+    "status": "todo",
+    "date": "2026-05-30",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Hardware",
+    "week": "W2",
+    "milestone": "Backend API skeleton",
+    "module": "motor/servo",
+    "output": "Primitive wave",
+    "test": "Vẫy 10 lần",
+    "evidence": "API gọi được hoặc mock rõ",
+    "fallback": "Mock API server",
+    "criteria": "API baseline OK",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200016
+  },
+  {
+    "id": "Ke hoach 6 tuan-7-software-t-o-ki-m-tra-api-demo-session-lesson-robot-command",
+    "monthKey": "2026-05",
+    "title": "Tạo/kiểm tra API demo: session, lesson, robot command",
+    "status": "todo",
+    "date": "2026-05-30",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Software",
+    "week": "W2",
+    "milestone": "Backend API skeleton",
+    "module": "tbot-backend",
+    "output": "API demo skeleton",
+    "test": "Unit/API smoke",
+    "evidence": "API gọi được hoặc mock rõ",
+    "fallback": "Mock API server",
+    "criteria": "API baseline OK",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200015
+  },
+  {
+    "id": "Ke hoach 6 tuan-8-backend-fix-fix-bug-p0-p1-backend-ph-t-hi-n-ng-y-7-8",
+    "monthKey": "2026-05",
+    "title": "Fix bug P0/P1 backend phát hiện ngày 7-8",
+    "status": "todo",
+    "date": "2026-05-31",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Backend/Fix",
+    "week": "W2",
+    "milestone": "Onboarding",
+    "module": "tbot-mobile",
+    "output": "P0/P1 fixes",
+    "test": "",
+    "evidence": "Onboarding + audio chạy",
+    "fallback": "Nút trigger thủ công",
+    "criteria": "Không dead-end",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200020
+  },
+  {
+    "id": "Ke hoach 6 tuan-8-hardware-test-audio-output-path",
+    "monthKey": "2026-05",
+    "title": "Test audio output path",
+    "status": "todo",
+    "date": "2026-05-31",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Hardware",
+    "week": "W2",
+    "milestone": "Onboarding",
+    "module": "speaker/audio",
+    "output": "Audio OK",
+    "test": "Phát audio 5 lần",
+    "evidence": "Onboarding + audio chạy",
+    "fallback": "Nút trigger thủ công",
+    "criteria": "Không dead-end",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200019
+  },
+  {
+    "id": "Ke hoach 6 tuan-8-software-build-m-n-onboarding-robot-pairing-state-mock",
+    "monthKey": "2026-05",
+    "title": "Build màn onboarding robot + pairing state mock",
+    "status": "todo",
+    "date": "2026-05-31",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Software",
+    "week": "W2",
+    "milestone": "Onboarding",
+    "module": "tbot-mobile",
+    "output": "Onboarding screen",
+    "test": "Flow 5 lần",
+    "evidence": "Onboarding + audio chạy",
+    "fallback": "Nút trigger thủ công",
+    "criteria": "Không dead-end",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200018
+  },
+  {
+    "id": "Ke hoach 6 tuan-9-software-deploy-backend-server-deploy-mobile",
+    "monthKey": "2026-06",
+    "title": "Deploy Backend, server, Deploy mobile",
+    "status": "todo",
+    "date": "2026-06-01",
+    "priority": "Hard",
+    "estimate": "6-8h",
+    "lane": "Software",
+    "week": "W2",
+    "milestone": "Deploy Backend, server, Deploy mobile",
+    "module": "tbot-mobile, backend",
+    "output": "Mobile app",
+    "test": "Flow 5 lần",
+    "evidence": "",
+    "fallback": "",
+    "criteria": "",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200021
+  },
+  {
+    "id": "Ke hoach 6 tuan-10-backend-fix-test-backend-timeout-retry-response",
+    "monthKey": "2026-06",
+    "title": "Test backend timeout/retry response",
+    "status": "todo",
+    "date": "2026-06-02",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Backend/Fix",
+    "week": "W2",
+    "milestone": "WiFi mock",
+    "module": "tbot-mobile",
+    "output": "Retry proof",
+    "test": "",
+    "evidence": "WiFi flow ổn",
+    "fallback": "Mock WiFi fallback",
+    "criteria": "Retry rõ",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200024
+  },
+  {
+    "id": "Ke hoach 6 tuan-10-hardware-test-video-display-playback-path",
+    "monthKey": "2026-06",
+    "title": "Test video/display playback path",
+    "status": "todo",
+    "date": "2026-06-02",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Hardware",
+    "week": "W2",
+    "milestone": "WiFi mock",
+    "module": "display/video",
+    "output": "Video OK",
+    "test": "Phát video 5 lần",
+    "evidence": "WiFi flow ổn",
+    "fallback": "Mock WiFi fallback",
+    "criteria": "Retry rõ",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200023
+  },
+  {
+    "id": "Ke hoach 6 tuan-10-software-build-ui-wifi-ang-t-m-th-nh-c-ng-l-i-retry",
+    "monthKey": "2026-06",
+    "title": "Build UI WiFi: đang tìm, thành công, lỗi, retry",
+    "status": "todo",
+    "date": "2026-06-02",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Software",
+    "week": "W2",
+    "milestone": "WiFi mock",
+    "module": "tbot-mobile",
+    "output": "WiFi flow",
+    "test": "Success/fail/retry 5 lần",
+    "evidence": "WiFi flow ổn",
+    "fallback": "Mock WiFi fallback",
+    "criteria": "Retry rõ",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200022
+  },
+  {
+    "id": "Ke hoach 6 tuan-11-hardware-stability-bench-30-ph-t",
+    "monthKey": "2026-06",
+    "title": "Stability bench 30 phút",
+    "status": "todo",
+    "date": "2026-06-03",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Hardware",
+    "week": "W2",
+    "milestone": "UI bài học",
+    "module": "robot hardware",
+    "output": "HW stability note",
+    "test": "Nguồn/nhiệt/reboot",
+    "evidence": "Bài học hiển thị",
+    "fallback": "Seed lesson data",
+    "criteria": "Lesson OK",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200026
+  },
+  {
+    "id": "Ke hoach 6 tuan-11-backend-fix-backend-lesson-endpoint-tr-data-n-nh",
+    "monthKey": "2026-06",
+    "title": "Backend lesson endpoint trả data ổn định",
+    "status": "todo",
+    "date": "2026-06-03",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Backend/Fix",
+    "week": "W2",
+    "milestone": "UI bài học",
+    "module": "tbot-mobile",
+    "output": "Lesson API proof",
+    "test": "",
+    "evidence": "Bài học hiển thị",
+    "fallback": "Seed lesson data",
+    "criteria": "Lesson OK",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200027
+  },
+  {
+    "id": "Ke hoach 6 tuan-11-software-build-lesson-screen-s-t-c-u-ng-n",
+    "monthKey": "2026-06",
+    "title": "Build lesson screen: số, từ, câu ngắn",
+    "status": "todo",
+    "date": "2026-06-03",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Software",
+    "week": "W2",
+    "milestone": "UI bài học",
+    "module": "tbot-mobile",
+    "output": "Lesson screen",
+    "test": "Đổi bài không crash",
+    "evidence": "Bài học hiển thị",
+    "fallback": "Seed lesson data",
+    "criteria": "Lesson OK",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200025
+  },
+  {
+    "id": "Ke hoach 6 tuan-12-backend-fix-regression-backend-lint-typecheck-test-api-smoke",
+    "monthKey": "2026-06",
+    "title": "Regression backend: lint/typecheck/test/API smoke",
+    "status": "todo",
+    "date": "2026-06-04",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Backend/Fix",
+    "week": "W2",
+    "milestone": "Memory local + API",
+    "module": "mobile/backend",
+    "output": "Backend regression #1",
+    "test": "",
+    "evidence": "Memory không mất",
+    "fallback": "Local-only fallback",
+    "criteria": "Memory OK",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200030
+  },
+  {
+    "id": "Ke hoach 6 tuan-12-hardware-ki-m-tra-cable-power-t-m",
+    "monthKey": "2026-06",
+    "title": "Kiểm tra cable/power tạm",
+    "status": "todo",
+    "date": "2026-06-04",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Hardware",
+    "week": "W2",
+    "milestone": "Memory local + API",
+    "module": "robot bench",
+    "output": "Bench tidy note",
+    "test": "Cable/power check",
+    "evidence": "Memory không mất",
+    "fallback": "Local-only fallback",
+    "criteria": "Memory OK",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200029
+  },
+  {
+    "id": "Ke hoach 6 tuan-12-software-th-m-local-memory-ng-b-backend-n-u-c",
+    "monthKey": "2026-06",
+    "title": "Thêm local memory + đồng bộ backend nếu có",
+    "status": "todo",
+    "date": "2026-06-04",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Software",
+    "week": "W2",
+    "milestone": "Memory local + API",
+    "module": "mobile/backend",
+    "output": "Memory saved",
+    "test": "Restart app 5 lần",
+    "evidence": "Memory không mất",
+    "fallback": "Local-only fallback",
+    "criteria": "Memory OK",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200028
+  },
+  {
+    "id": "Ke hoach 6 tuan-13-backend-fix-backend-command-queue-gateway-kh-ng-treo",
+    "monthKey": "2026-06",
+    "title": "Backend command queue/gateway không treo",
+    "status": "todo",
+    "date": "2026-06-05",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Backend/Fix",
+    "week": "W3",
+    "milestone": "Kết nối robot",
+    "module": "mobile/backend",
+    "output": "Command gateway proof",
+    "test": "",
+    "evidence": "App thấy robot connected",
+    "fallback": "Mock connected mode",
+    "criteria": "Không disconnect",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200033
+  },
+  {
+    "id": "Ke hoach 6 tuan-13-hardware-implement-command-listener-t-i-thi-u",
+    "monthKey": "2026-06",
+    "title": "Implement command listener tối thiểu",
+    "status": "todo",
+    "date": "2026-06-05",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Hardware",
+    "week": "W3",
+    "milestone": "Kết nối robot",
+    "module": "ESP32/server",
+    "output": "Command listener",
+    "test": "Listen 30 phút",
+    "evidence": "App thấy robot connected",
+    "fallback": "Mock connected mode",
+    "criteria": "Không disconnect",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200032
+  },
+  {
+    "id": "Ke hoach 6 tuan-13-software-build-robot-connected-state-command-gateway-mock",
+    "monthKey": "2026-06",
+    "title": "Build robot connected state + command gateway mock",
+    "status": "todo",
+    "date": "2026-06-05",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Software",
+    "week": "W3",
+    "milestone": "Kết nối robot",
+    "module": "mobile/backend",
+    "output": "Connection service",
+    "test": "Connected 30 phút",
+    "evidence": "App thấy robot connected",
+    "fallback": "Mock connected mode",
+    "criteria": "Không disconnect",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200031
+  },
+  {
+    "id": "Ke hoach 6 tuan-14-backend-fix-command-idempotency-timeout-guard",
+    "monthKey": "2026-06",
+    "title": "Command idempotency + timeout guard",
+    "status": "todo",
+    "date": "2026-06-06",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Backend/Fix",
+    "week": "W3",
+    "milestone": "Command gateway",
+    "module": "mobile/backend/ESP32",
+    "output": "Stable command API",
+    "test": "",
+    "evidence": "Gateway chạy",
+    "fallback": "Direct robot trigger",
+    "criteria": "Không duplicate command",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200036
+  },
+  {
+    "id": "Ke hoach 6 tuan-14-hardware-test-reset-recovery-c-b-n",
+    "monthKey": "2026-06",
+    "title": "Test reset/recovery cơ bản",
+    "status": "todo",
+    "date": "2026-06-06",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Hardware",
+    "week": "W3",
+    "milestone": "Command gateway",
+    "module": "robot/ESP32",
+    "output": "Recovery primitive",
+    "test": "Reset 5 lần",
+    "evidence": "Gateway chạy",
+    "fallback": "Direct robot trigger",
+    "criteria": "Không duplicate command",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200035
+  },
+  {
+    "id": "Ke hoach 6 tuan-14-software-n-i-app-backend-robot-command-adapter",
+    "monthKey": "2026-06",
+    "title": "Nối app -> backend -> robot command adapter",
+    "status": "todo",
+    "date": "2026-06-06",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Software",
+    "week": "W3",
+    "milestone": "Command gateway",
+    "module": "mobile/backend/ESP32",
+    "output": "Command adapter",
+    "test": "Send command smoke",
+    "evidence": "Gateway chạy",
+    "fallback": "Direct robot trigger",
+    "criteria": "Không duplicate command",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200034
+  },
+  {
+    "id": "Ke hoach 6 tuan-15-software-g-i-wave-command-t-app-backend",
+    "monthKey": "2026-06",
+    "title": "Gửi wave command từ app/backend",
+    "status": "todo",
+    "date": "2026-06-07",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Software",
+    "week": "W3",
+    "milestone": "Lệnh vẫy tay",
+    "module": "mobile/backend",
+    "output": "Wave trigger",
+    "test": "Gửi 20 lệnh",
+    "evidence": "App bấm -> robot vẫy",
+    "fallback": "Manual trigger",
+    "criteria": "Wave success >=95%",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200037
+  },
+  {
+    "id": "Ke hoach 6 tuan-15-backend-fix-fix-bug-command-p0-p1-th-m-retry-c-gi-i-h-n",
+    "monthKey": "2026-06",
+    "title": "Fix bug command P0/P1, thêm retry có giới hạn",
+    "status": "todo",
+    "date": "2026-06-07",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Backend/Fix",
+    "week": "W3",
+    "milestone": "Lệnh vẫy tay",
+    "module": "mobile/backend",
+    "output": "Wave bug fixes",
+    "test": "",
+    "evidence": "App bấm -> robot vẫy",
+    "fallback": "Manual trigger",
+    "criteria": "Wave success >=95%",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200039
+  },
+  {
+    "id": "Ke hoach 6 tuan-15-hardware-n-i-command-motor-wave",
+    "monthKey": "2026-06",
+    "title": "Nối command -> motor wave",
+    "status": "todo",
+    "date": "2026-06-07",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Hardware",
+    "week": "W3",
+    "milestone": "Lệnh vẫy tay",
+    "module": "motor/servo",
+    "output": "Wave command works",
+    "test": "Vẫy 20 lần",
+    "evidence": "App bấm -> robot vẫy",
+    "fallback": "Manual trigger",
+    "criteria": "Wave success >=95%",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200038
+  },
+  {
+    "id": "Ke hoach 6 tuan-16-software-g-i-speak-command-v-i-text-audio-asset-id",
+    "monthKey": "2026-06",
+    "title": "Gửi speak command với text/audio asset id",
+    "status": "todo",
+    "date": "2026-06-08",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Software",
+    "week": "W3",
+    "milestone": "Lệnh nói",
+    "module": "mobile/backend/AI",
+    "output": "Speak trigger",
+    "test": "Gửi 20 lệnh",
+    "evidence": "App bấm -> robot nói",
+    "fallback": "Voice nạp sẵn",
+    "criteria": "Speak success >=95%",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200040
+  },
+  {
+    "id": "Ke hoach 6 tuan-16-backend-fix-backend-validate-payload-speak-fallback-voice",
+    "monthKey": "2026-06",
+    "title": "Backend validate payload speak + fallback voice",
+    "status": "todo",
+    "date": "2026-06-08",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Backend/Fix",
+    "week": "W3",
+    "milestone": "Lệnh nói",
+    "module": "mobile/backend/AI",
+    "output": "Speak API stable",
+    "test": "",
+    "evidence": "App bấm -> robot nói",
+    "fallback": "Voice nạp sẵn",
+    "criteria": "Speak success >=95%",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200042
+  },
+  {
+    "id": "Ke hoach 6 tuan-16-hardware-n-i-command-audio-playback",
+    "monthKey": "2026-06",
+    "title": "Nối command -> audio playback",
+    "status": "todo",
+    "date": "2026-06-08",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Hardware",
+    "week": "W3",
+    "milestone": "Lệnh nói",
+    "module": "speaker/audio",
+    "output": "Speak command works",
+    "test": "Audio 20 lần",
+    "evidence": "App bấm -> robot nói",
+    "fallback": "Voice nạp sẵn",
+    "criteria": "Speak success >=95%",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200041
+  },
+  {
+    "id": "Ke hoach 6 tuan-17-software-g-i-playvideo-command-v-i-asset-id-url",
+    "monthKey": "2026-06",
+    "title": "Gửi playVideo command với asset id/url",
+    "status": "todo",
+    "date": "2026-06-09",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Software",
+    "week": "W3",
+    "milestone": "Lệnh video",
+    "module": "mobile/backend",
+    "output": "Video trigger",
+    "test": "Gửi 20 lệnh",
+    "evidence": "App bấm -> robot phát video",
+    "fallback": "File video local",
+    "criteria": "Video success >=95%",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200043
+  },
+  {
+    "id": "Ke hoach 6 tuan-17-backend-fix-backend-validate-video-asset-local-fallback",
+    "monthKey": "2026-06",
+    "title": "Backend validate video asset + local fallback",
+    "status": "todo",
+    "date": "2026-06-09",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Backend/Fix",
+    "week": "W3",
+    "milestone": "Lệnh video",
+    "module": "mobile/backend",
+    "output": "Video API stable",
+    "test": "",
+    "evidence": "App bấm -> robot phát video",
+    "fallback": "File video local",
+    "criteria": "Video success >=95%",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200045
+  },
+  {
+    "id": "Ke hoach 6 tuan-17-hardware-n-i-command-display-video",
+    "monthKey": "2026-06",
+    "title": "Nối command -> display/video",
+    "status": "todo",
+    "date": "2026-06-09",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Hardware",
+    "week": "W3",
+    "milestone": "Lệnh video",
+    "module": "display/video",
+    "output": "Video command works",
+    "test": "Video 10 lần",
+    "evidence": "App bấm -> robot phát video",
+    "fallback": "File video local",
+    "criteria": "Video success >=95%",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200044
+  },
+  {
+    "id": "Ke hoach 6 tuan-18-backend-fix-backend-regression-api-command-memory",
+    "monthKey": "2026-06",
+    "title": "Backend regression: API + command + memory",
+    "status": "todo",
+    "date": "2026-06-10",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Backend/Fix",
+    "week": "W3",
+    "milestone": "E2E v1 + regression",
+    "module": "mobile/backend",
+    "output": "Backend regression #2",
+    "test": "",
+    "evidence": "Flow kỹ thuật chạy",
+    "fallback": "Demo mode",
+    "criteria": "Full flow pass 3 lần",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200048
+  },
+  {
+    "id": "Ke hoach 6 tuan-18-hardware-bench-test-wave-speak-video-sequence",
+    "monthKey": "2026-06",
+    "title": "Bench test wave/speak/video sequence",
+    "status": "todo",
+    "date": "2026-06-10",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Hardware",
+    "week": "W3",
+    "milestone": "E2E v1 + regression",
+    "module": "robot bench",
+    "output": "Bench demo",
+    "test": "Sequence 3 lần",
+    "evidence": "Flow kỹ thuật chạy",
+    "fallback": "Demo mode",
+    "criteria": "Full flow pass 3 lần",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200047
+  },
+  {
+    "id": "Ke hoach 6 tuan-18-software-n-i-ng-nh-p-b-i-h-c-command-robot",
+    "monthKey": "2026-06",
+    "title": "Nối đăng nhập -> bài học -> command robot",
+    "status": "todo",
+    "date": "2026-06-10",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Software",
+    "week": "W3",
+    "milestone": "E2E v1 + regression",
+    "module": "mobile/backend",
+    "output": "E2E v1",
+    "test": "Full flow 3 lần",
+    "evidence": "Flow kỹ thuật chạy",
+    "fallback": "Demo mode",
+    "criteria": "Full flow pass 3 lần",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200046
+  },
+  {
+    "id": "Ke hoach 6 tuan-19-project-update-ph-n-m-m-cho-robot",
+    "monthKey": "2026-06",
+    "title": "Update phần mềm cho robot",
+    "status": "todo",
+    "date": "2026-06-12",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Project",
+    "week": "W4",
+    "milestone": "Update phần mềm cho robot",
+    "module": "",
+    "output": "",
+    "test": "",
+    "evidence": "",
+    "fallback": "",
+    "criteria": "",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200049
+  },
+  {
+    "id": "Ke hoach 6 tuan-21-backend-fix-backend-cache-seed-lesson-data-n-nh",
+    "monthKey": "2026-06",
+    "title": "Backend cache/seed lesson data ổn định",
+    "status": "todo",
+    "date": "2026-06-14",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Backend/Fix",
+    "week": "W4",
+    "milestone": "Bài học số",
+    "module": "AI services/mobile/backend",
+    "output": "Lesson cache proof",
+    "test": "",
+    "evidence": "Wave + lesson ổn",
+    "fallback": "Fixed wave",
+    "criteria": "Motion không kẹt",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200052
+  },
+  {
+    "id": "Ke hoach 6 tuan-21-hardware-tune-t-c-bi-n-v-y-tay",
+    "monthKey": "2026-06",
+    "title": "Tune tốc độ/biên độ vẫy tay",
+    "status": "todo",
+    "date": "2026-06-14",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Hardware",
+    "week": "W4",
+    "milestone": "Bài học số",
+    "module": "motor/servo",
+    "output": "Wave mượt",
+    "test": "Safe range test",
+    "evidence": "Wave + lesson ổn",
+    "fallback": "Fixed wave",
+    "criteria": "Motion không kẹt",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200051
+  },
+  {
+    "id": "Ke hoach 6 tuan-21-software-build-b-i-h-c-s-1-5-b-ng-json-rules",
+    "monthKey": "2026-06",
+    "title": "Build bài học số 1-5 bằng JSON/rules",
+    "status": "todo",
+    "date": "2026-06-14",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Software",
+    "week": "W4",
+    "milestone": "Bài học số",
+    "module": "AI services/mobile/backend",
+    "output": "Numbers lesson",
+    "test": "Lesson transition test",
+    "evidence": "Wave + lesson ổn",
+    "fallback": "Fixed wave",
+    "criteria": "Motion không kẹt",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200050
+  },
+  {
+    "id": "Ke hoach 6 tuan-22-backend-fix-fix-bug-content-encoding-locale-backend",
+    "monthKey": "2026-06",
+    "title": "Fix bug content/encoding/locale backend",
+    "status": "todo",
+    "date": "2026-06-15",
+    "priority": "Easy",
+    "estimate": "1-2h",
+    "lane": "Backend/Fix",
+    "week": "W4",
+    "milestone": "Từ và câu",
+    "module": "AI services/content",
+    "output": "Locale fixes",
+    "test": "",
+    "evidence": "Robot nói câu học",
+    "fallback": "Voice ghi sẵn",
+    "criteria": "Giọng rõ",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200055
+  },
+  {
+    "id": "Ke hoach 6 tuan-22-hardware-record-test-c-u-tho-i-robot",
+    "monthKey": "2026-06",
+    "title": "Record/test câu thoại robot",
+    "status": "todo",
+    "date": "2026-06-15",
+    "priority": "Easy",
+    "estimate": "1-2h",
+    "lane": "Hardware",
+    "week": "W4",
+    "milestone": "Từ và câu",
+    "module": "audio",
+    "output": "Voice assets",
+    "test": "Playback 10 lần",
+    "evidence": "Robot nói câu học",
+    "fallback": "Voice ghi sẵn",
+    "criteria": "Giọng rõ",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200054
+  },
+  {
+    "id": "Ke hoach 6 tuan-22-software-th-m-5-t-1-c-u-ng-n",
+    "monthKey": "2026-06",
+    "title": "Thêm 5 từ + 1 câu ngắn",
+    "status": "todo",
+    "date": "2026-06-15",
+    "priority": "Easy",
+    "estimate": "1-2h",
+    "lane": "Software",
+    "week": "W4",
+    "milestone": "Từ và câu",
+    "module": "AI services/content",
+    "output": "Lesson content",
+    "test": "Text/audio match test",
+    "evidence": "Robot nói câu học",
+    "fallback": "Voice ghi sẵn",
+    "criteria": "Giọng rõ",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200053
+  },
+  {
+    "id": "Ke hoach 6 tuan-23-backend-fix-backend-personalization-deterministic-cho-demo",
+    "monthKey": "2026-06",
+    "title": "Backend personalization deterministic cho demo",
+    "status": "todo",
+    "date": "2026-06-16",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Backend/Fix",
+    "week": "W4",
+    "milestone": "Cá nhân hóa",
+    "module": "AI services/backend",
+    "output": "Personalization stable",
+    "test": "",
+    "evidence": "Nội dung theo nghề phụ huynh",
+    "fallback": "Nghề mặc định",
+    "criteria": "Sync <500ms",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200058
+  },
+  {
+    "id": "Ke hoach 6 tuan-23-hardware-test-audio-video-sync",
+    "monthKey": "2026-06",
+    "title": "Test audio/video sync",
+    "status": "todo",
+    "date": "2026-06-16",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Hardware",
+    "week": "W4",
+    "milestone": "Cá nhân hóa",
+    "module": "audio/video",
+    "output": "Sync report",
+    "test": "Sync 5 lần",
+    "evidence": "Nội dung theo nghề phụ huynh",
+    "fallback": "Nghề mặc định",
+    "criteria": "Sync <500ms",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200057
+  },
+  {
+    "id": "Ke hoach 6 tuan-23-software-th-m-v-d-theo-ngh-b-c-s-u-b-p-k-s",
+    "monthKey": "2026-06",
+    "title": "Thêm ví dụ theo nghề: bác sĩ, đầu bếp, kỹ sư",
+    "status": "todo",
+    "date": "2026-06-16",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Software",
+    "week": "W4",
+    "milestone": "Cá nhân hóa",
+    "module": "AI services/backend",
+    "output": "Personalized lesson",
+    "test": "Smoke 3 nghề",
+    "evidence": "Nội dung theo nghề phụ huynh",
+    "fallback": "Nghề mặc định",
+    "criteria": "Sync <500ms",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200056
+  },
+  {
+    "id": "Ke hoach 6 tuan-24-backend-fix-backend-persistence-conflict-handling",
+    "monthKey": "2026-06",
+    "title": "Backend persistence + conflict handling",
+    "status": "todo",
+    "date": "2026-06-17",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Backend/Fix",
+    "week": "W4",
+    "milestone": "Học tiếp bài cũ",
+    "module": "backend/mobile memory",
+    "output": "Memory API stable",
+    "test": "",
+    "evidence": "Robot nhớ bài trước",
+    "fallback": "Seed lastLesson",
+    "criteria": "Continue OK",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200061
+  },
+  {
+    "id": "Ke hoach 6 tuan-24-hardware-test-repeated-commands-reliability",
+    "monthKey": "2026-06",
+    "title": "Test repeated commands reliability",
+    "status": "todo",
+    "date": "2026-06-17",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Hardware",
+    "week": "W4",
+    "milestone": "Học tiếp bài cũ",
+    "module": "ESP32/server",
+    "output": "Reliability note",
+    "test": "Command loop 30 lần",
+    "evidence": "Robot nhớ bài trước",
+    "fallback": "Seed lastLesson",
+    "criteria": "Continue OK",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200060
+  },
+  {
+    "id": "Ke hoach 6 tuan-24-software-th-m-lastlesson-nextlesson-flow",
+    "monthKey": "2026-06",
+    "title": "Thêm lastLesson/nextLesson flow",
+    "status": "todo",
+    "date": "2026-06-17",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Software",
+    "week": "W4",
+    "milestone": "Học tiếp bài cũ",
+    "module": "backend/mobile memory",
+    "output": "Continue logic",
+    "test": "Restart app test",
+    "evidence": "Robot nhớ bài trước",
+    "fallback": "Seed lastLesson",
+    "criteria": "Continue OK",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200059
+  },
+  {
+    "id": "Ke hoach 6 tuan-26-backend-fix-backend-regression-lint-typecheck-test-api-smoke",
+    "monthKey": "2026-06",
+    "title": "Backend regression: lint/typecheck/test/API smoke",
+    "status": "todo",
+    "date": "2026-06-18",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Backend/Fix",
+    "week": "W4",
+    "milestone": "Bug bash tuần 4",
+    "module": "all SW modules",
+    "output": "Backend regression #3",
+    "test": "",
+    "evidence": "Giảm bug trước tuần 5",
+    "fallback": "Disable risky path",
+    "criteria": "P0=0",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200067
+  },
+  {
+    "id": "Ke hoach 6 tuan-25-backend-fix-backend-sequence-orchestration-kh-ng-race",
+    "monthKey": "2026-06",
+    "title": "Backend sequence orchestration không race",
+    "status": "todo",
+    "date": "2026-06-18",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Backend/Fix",
+    "week": "W4",
+    "milestone": "Sequence tự động",
+    "module": "mobile/backend/AI",
+    "output": "Sequence proof",
+    "test": "",
+    "evidence": "1 bài học tự chạy",
+    "fallback": "Sequence render sẵn",
+    "criteria": "Flow pass 5 lần",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200064
+  },
+  {
+    "id": "Ke hoach 6 tuan-26-hardware-fix-l-i-hw-l-m-demo-gi-n-o-n",
+    "monthKey": "2026-06",
+    "title": "Fix lỗi HW làm demo gián đoạn",
+    "status": "todo",
+    "date": "2026-06-18",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Hardware",
+    "week": "W4",
+    "milestone": "Bug bash tuần 4",
+    "module": "all HW modules",
+    "output": "HW fixes",
+    "test": "Robot sequence 5 lần",
+    "evidence": "Giảm bug trước tuần 5",
+    "fallback": "Disable risky path",
+    "criteria": "P0=0",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200066
+  },
+  {
+    "id": "Ke hoach 6 tuan-25-hardware-run-full-robot-sequence",
+    "monthKey": "2026-06",
+    "title": "Run full robot sequence",
+    "status": "todo",
+    "date": "2026-06-18",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Hardware",
+    "week": "W4",
+    "milestone": "Sequence tự động",
+    "module": "robot bench",
+    "output": "Sequence OK",
+    "test": "Sequence 5 lần",
+    "evidence": "1 bài học tự chạy",
+    "fallback": "Sequence render sẵn",
+    "criteria": "Flow pass 5 lần",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200063
+  },
+  {
+    "id": "Ke hoach 6 tuan-25-software-b-i-h-c-trigger-ch-o-v-y-n-i-video",
+    "monthKey": "2026-06",
+    "title": "Bài học trigger chào -> vẫy -> nói -> video",
+    "status": "todo",
+    "date": "2026-06-18",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Software",
+    "week": "W4",
+    "milestone": "Sequence tự động",
+    "module": "mobile/backend/AI",
+    "output": "Auto lesson flow",
+    "test": "Full lesson 5 lần",
+    "evidence": "1 bài học tự chạy",
+    "fallback": "Sequence render sẵn",
+    "criteria": "Flow pass 5 lần",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200062
+  },
+  {
+    "id": "Ke hoach 6 tuan-26-software-t-ng-h-p-fix-bug-p0-p1-sau-integration-tu-n-3-4",
+    "monthKey": "2026-06",
+    "title": "Tổng hợp/fix bug P0/P1 sau integration tuần 3-4",
+    "status": "todo",
+    "date": "2026-06-18",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Software",
+    "week": "W4",
+    "milestone": "Bug bash tuần 4",
+    "module": "all SW modules",
+    "output": "Bug fixes",
+    "test": "Regression full flow 5 lần",
+    "evidence": "Giảm bug trước tuần 5",
+    "fallback": "Disable risky path",
+    "criteria": "P0=0",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200065
+  },
+  {
+    "id": "Ke hoach 6 tuan-27-backend-fix-backend-handles-device-status-offline",
+    "monthKey": "2026-06",
+    "title": "Backend handles device status/offline",
+    "status": "todo",
+    "date": "2026-06-19",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Backend/Fix",
+    "week": "W5",
+    "milestone": "Discovery/provision",
+    "module": "tbot-mobile BLE/WiFi",
+    "output": "Device status stable",
+    "test": "",
+    "evidence": "Chốt real/mock WiFi",
+    "fallback": "Mock WiFi fallback",
+    "criteria": "Không phụ thuộc WiFi thật",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200070
+  },
+  {
+    "id": "Ke hoach 6 tuan-27-hardware-test-wifi-provisioning-th-t-ho-c-fallback",
+    "monthKey": "2026-06",
+    "title": "Test WiFi provisioning thật hoặc fallback",
+    "status": "todo",
+    "date": "2026-06-19",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Hardware",
+    "week": "W5",
+    "milestone": "Discovery/provision",
+    "module": "ESP32 WiFi",
+    "output": "Provisioning result",
+    "test": "Success/fail test",
+    "evidence": "Chốt real/mock WiFi",
+    "fallback": "Mock WiFi fallback",
+    "criteria": "Không phụ thuộc WiFi thật",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200069
+  },
+  {
+    "id": "Ke hoach 6 tuan-27-software-prototype-discovery-th-t-n-u-kh-thi-quy-t-nh-real-mock-w",
+    "monthKey": "2026-06",
+    "title": "Prototype discovery thật nếu khả thi; quyết định real/mock WiFi",
+    "status": "todo",
+    "date": "2026-06-19",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Software",
+    "week": "W5",
+    "milestone": "Discovery/provision",
+    "module": "tbot-mobile BLE/WiFi",
+    "output": "Discovery decision",
+    "test": "Discover 10 lần hoặc ghi fallback",
+    "evidence": "Chốt real/mock WiFi",
+    "fallback": "Mock WiFi fallback",
+    "criteria": "Không phụ thuộc WiFi thật",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200068
+  },
+  {
+    "id": "Ke hoach 6 tuan-28-software-th-m-ui-retry-error-no-robot-no-wifi-command-timeout",
+    "monthKey": "2026-06",
+    "title": "Thêm UI retry/error: no robot, no WiFi, command timeout",
+    "status": "todo",
+    "date": "2026-06-20",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Software",
+    "week": "W5",
+    "milestone": "Xử lý lỗi",
+    "module": "tbot-mobile",
+    "output": "Error states",
+    "test": "Fail/retry 5 lần",
+    "evidence": "Demo không chết khi lỗi",
+    "fallback": "Offline demo mode",
+    "criteria": "Recover được",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200071
+  },
+  {
+    "id": "Ke hoach 6 tuan-28-backend-fix-backend-retry-backoff-clear-error-codes",
+    "monthKey": "2026-06",
+    "title": "Backend retry/backoff + clear error codes",
+    "status": "todo",
+    "date": "2026-06-20",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Backend/Fix",
+    "week": "W5",
+    "milestone": "Xử lý lỗi",
+    "module": "tbot-mobile",
+    "output": "Error handling stable",
+    "test": "",
+    "evidence": "Demo không chết khi lỗi",
+    "fallback": "Offline demo mode",
+    "criteria": "Recover được",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200073
+  },
+  {
+    "id": "Ke hoach 6 tuan-28-hardware-implement-reset-recovery-behavior",
+    "monthKey": "2026-06",
+    "title": "Implement reset/recovery behavior",
+    "status": "todo",
+    "date": "2026-06-20",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Hardware",
+    "week": "W5",
+    "milestone": "Xử lý lỗi",
+    "module": "robot/ESP32",
+    "output": "Recovery behavior",
+    "test": "Reset 5 lần",
+    "evidence": "Demo không chết khi lỗi",
+    "fallback": "Offline demo mode",
+    "criteria": "Recover được",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200072
+  },
+  {
+    "id": "Ke hoach 6 tuan-29-backend-fix-backend-db-storage-fallback-seed-reset-script",
+    "monthKey": "2026-06",
+    "title": "Backend DB/storage fallback + seed reset script",
+    "status": "todo",
+    "date": "2026-06-21",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Backend/Fix",
+    "week": "W5",
+    "milestone": "Session persistence",
+    "module": "backend/mobile",
+    "output": "Persistence stable",
+    "test": "",
+    "evidence": "Restart vẫn demo được",
+    "fallback": "Local default state",
+    "criteria": "State còn sau reboot",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200076
+  },
+  {
+    "id": "Ke hoach 6 tuan-29-hardware-test-power-cycle-behavior",
+    "monthKey": "2026-06",
+    "title": "Test power-cycle behavior",
+    "status": "todo",
+    "date": "2026-06-21",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Hardware",
+    "week": "W5",
+    "milestone": "Session persistence",
+    "module": "robot hardware",
+    "output": "Reboot test",
+    "test": "Power-cycle 5 lần",
+    "evidence": "Restart vẫn demo được",
+    "fallback": "Local default state",
+    "criteria": "State còn sau reboot",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200075
+  },
+  {
+    "id": "Ke hoach 6 tuan-29-software-persist-user-session-lesson-state",
+    "monthKey": "2026-06",
+    "title": "Persist user/session/lesson state",
+    "status": "todo",
+    "date": "2026-06-21",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Software",
+    "week": "W5",
+    "milestone": "Session persistence",
+    "module": "backend/mobile",
+    "output": "Session saved",
+    "test": "Restart 5 lần",
+    "evidence": "Restart vẫn demo được",
+    "fallback": "Local default state",
+    "criteria": "State còn sau reboot",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200074
+  },
+  {
+    "id": "Ke hoach 6 tuan-30-backend-fix-backend-logs-debug-nhanh",
+    "monthKey": "2026-06",
+    "title": "Backend logs đủ để debug nhanh",
+    "status": "todo",
+    "date": "2026-06-22",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Backend/Fix",
+    "week": "W5",
+    "milestone": "Quan sát hệ thống",
+    "module": "mobile/backend",
+    "output": "Debug proof",
+    "test": "",
+    "evidence": "Có log để fix nhanh",
+    "fallback": "Manual notes",
+    "criteria": "Trace đầy đủ",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200079
+  },
+  {
+    "id": "Ke hoach 6 tuan-30-software-th-m-log-m-n-demo-requestid-commandid-error-code",
+    "monthKey": "2026-06",
+    "title": "Thêm log màn demo: requestId, commandId, error code",
+    "status": "todo",
+    "date": "2026-06-22",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Software",
+    "week": "W5",
+    "milestone": "Quan sát hệ thống",
+    "module": "mobile/backend",
+    "output": "Observability demo",
+    "test": "Trace 1 flow đầy đủ",
+    "evidence": "Có log để fix nhanh",
+    "fallback": "Manual notes",
+    "criteria": "Trace đầy đủ",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200077
+  },
+  {
+    "id": "Ke hoach 6 tuan-30-hardware-g-n-nh-n-d-y-ngu-n-chu-n-h-a-reset",
+    "monthKey": "2026-06",
+    "title": "Gắn nhãn dây/nguồn, chuẩn hóa reset",
+    "status": "todo",
+    "date": "2026-06-22",
+    "priority": "Easy",
+    "estimate": "1-2h",
+    "lane": "Hardware",
+    "week": "W5",
+    "milestone": "Quan sát hệ thống",
+    "module": "physical robot",
+    "output": "Demo unit checklist",
+    "test": "Reset path check",
+    "evidence": "Có log để fix nhanh",
+    "fallback": "Manual notes",
+    "criteria": "Trace đầy đủ",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200078
+  },
+  {
+    "id": "Ke hoach 6 tuan-31-backend-fix-backend-bug-list-ri-ng-severity",
+    "monthKey": "2026-06",
+    "title": "Backend bug list riêng + severity",
+    "status": "todo",
+    "date": "2026-06-23",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Backend/Fix",
+    "week": "W5",
+    "milestone": "Rehearsal 1",
+    "module": "all SW modules",
+    "output": "Backend bug triage",
+    "test": "",
+    "evidence": "Lỗi chính được ghi",
+    "fallback": "Demo script fallback",
+    "criteria": "Bug list rõ",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200082
+  },
+  {
+    "id": "Ke hoach 6 tuan-31-hardware-ch-y-full-robot-sequence-ghi-hw-bug-list",
+    "monthKey": "2026-06",
+    "title": "Chạy full robot sequence, ghi HW bug list",
+    "status": "todo",
+    "date": "2026-06-23",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Hardware",
+    "week": "W5",
+    "milestone": "Rehearsal 1",
+    "module": "all HW modules",
+    "output": "HW bug list",
+    "test": "Full robot 5 lần",
+    "evidence": "Lỗi chính được ghi",
+    "fallback": "Demo script fallback",
+    "criteria": "Bug list rõ",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200081
+  },
+  {
+    "id": "Ke hoach 6 tuan-31-software-ch-y-full-flow-ghi-sw-bug-list",
+    "monthKey": "2026-06",
+    "title": "Chạy full flow, ghi SW bug list",
+    "status": "todo",
+    "date": "2026-06-23",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Software",
+    "week": "W5",
+    "milestone": "Rehearsal 1",
+    "module": "all SW modules",
+    "output": "SW bug list",
+    "test": "Full flow 5 lần",
+    "evidence": "Lỗi chính được ghi",
+    "fallback": "Demo script fallback",
+    "criteria": "Bug list rõ",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200080
+  },
+  {
+    "id": "Ke hoach 6 tuan-32-hardware-fix-hardware-blocker-sau-rehearsal",
+    "monthKey": "2026-06",
+    "title": "Fix hardware blocker sau rehearsal",
+    "status": "todo",
+    "date": "2026-06-24",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Hardware",
+    "week": "W5",
+    "milestone": "Fix bug P0/P1",
+    "module": "all HW modules",
+    "output": "HW critical fixes",
+    "test": "Regression 5 lần",
+    "evidence": "Demo pass lần 1",
+    "fallback": "Tắt feature rủi ro",
+    "criteria": "Không còn blocker lớn",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200084
+  },
+  {
+    "id": "Ke hoach 6 tuan-32-software-fix-app-backend-ai-blocker-sau-rehearsal",
+    "monthKey": "2026-06",
+    "title": "Fix app/backend/AI blocker sau rehearsal",
+    "status": "todo",
+    "date": "2026-06-24",
+    "priority": "Hard",
+    "estimate": "4-6h",
+    "lane": "Software",
+    "week": "W5",
+    "milestone": "Fix bug P0/P1",
+    "module": "all SW modules",
+    "output": "Critical fixes",
+    "test": "Regression 5 lần",
+    "evidence": "Demo pass lần 1",
+    "fallback": "Tắt feature rủi ro",
+    "criteria": "Không còn blocker lớn",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200083
+  },
+  {
+    "id": "Ke hoach 6 tuan-32-backend-fix-backend-p0-p1-ph-i-v-0",
+    "monthKey": "2026-06",
+    "title": "Backend P0/P1 phải về 0",
+    "status": "todo",
+    "date": "2026-06-24",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Backend/Fix",
+    "week": "W5",
+    "milestone": "Fix bug P0/P1",
+    "module": "all SW modules",
+    "output": "Backend P0/P1 fixed",
+    "test": "",
+    "evidence": "Demo pass lần 1",
+    "fallback": "Tắt feature rủi ro",
+    "criteria": "Không còn blocker lớn",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200085
+  },
+  {
+    "id": "Ke hoach 6 tuan-33-backend-fix-backend-fallback-kh-ng-c-n-external-provider",
+    "monthKey": "2026-06",
+    "title": "Backend fallback không cần external provider",
+    "status": "todo",
+    "date": "2026-06-26",
+    "priority": "Hard",
+    "estimate": "6-8h",
+    "lane": "Backend/Fix",
+    "week": "W6",
+    "milestone": "Demo fallback",
+    "module": "mobile/backend",
+    "output": "Provider fallback proof",
+    "test": "",
+    "evidence": "Demo ít rủi ro",
+    "fallback": "Offline full demo",
+    "criteria": "Fallback pass",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200088
+  },
+  {
+    "id": "Ke hoach 6 tuan-33-hardware-test-fallback-no-wifi-no-robot-reset-ngu-n",
+    "monthKey": "2026-06",
+    "title": "Test fallback: no WiFi/no robot/reset nguồn",
+    "status": "todo",
+    "date": "2026-06-26",
+    "priority": "Hard",
+    "estimate": "6-8h",
+    "lane": "Hardware",
+    "week": "W6",
+    "milestone": "Demo fallback",
+    "module": "robot bench",
+    "output": "Fallback verified",
+    "test": "Fallback test",
+    "evidence": "Demo ít rủi ro",
+    "fallback": "Offline full demo",
+    "criteria": "Fallback pass",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200087
+  },
+  {
+    "id": "Ke hoach 6 tuan-33-software-th-m-c-ng-t-c-demo-mode-mock-fallback",
+    "monthKey": "2026-06",
+    "title": "Thêm công tắc demo mode/mock fallback",
+    "status": "todo",
+    "date": "2026-06-26",
+    "priority": "Hard",
+    "estimate": "6-8h",
+    "lane": "Software",
+    "week": "W6",
+    "milestone": "Demo fallback",
+    "module": "mobile/backend",
+    "output": "Demo mode",
+    "test": "No WiFi/no robot test",
+    "evidence": "Demo ít rủi ro",
+    "fallback": "Offline full demo",
+    "criteria": "Fallback pass",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200086
+  },
+  {
+    "id": "Ke hoach 6 tuan-34-backend-fix-backend-10-run-stability-kh-ng-5xx-timeout",
+    "monthKey": "2026-06",
+    "title": "Backend 10-run stability: không 5xx/timeout",
+    "status": "todo",
+    "date": "2026-06-27",
+    "priority": "Hard",
+    "estimate": "6-8h",
+    "lane": "Backend/Fix",
+    "week": "W6",
+    "milestone": "Load/stress nhẹ",
+    "module": "mobile/backend",
+    "output": "Backend stability report",
+    "test": "",
+    "evidence": "Demo chịu lặp",
+    "fallback": "Prerecorded path",
+    "criteria": "10 vòng pass",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200091
+  },
+  {
+    "id": "Ke hoach 6 tuan-34-hardware-ch-y-sequence-robot-10-v-ng",
+    "monthKey": "2026-06",
+    "title": "Chạy sequence robot 10 vòng",
+    "status": "todo",
+    "date": "2026-06-27",
+    "priority": "Hard",
+    "estimate": "6-8h",
+    "lane": "Hardware",
+    "week": "W6",
+    "milestone": "Load/stress nhẹ",
+    "module": "robot unit",
+    "output": "Robot stability report",
+    "test": "Sequence 10 lần",
+    "evidence": "Demo chịu lặp",
+    "fallback": "Prerecorded path",
+    "criteria": "10 vòng pass",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200090
+  },
+  {
+    "id": "Ke hoach 6 tuan-34-software-ch-y-full-demo-10-v-ng-o-l-i-app-backend",
+    "monthKey": "2026-06",
+    "title": "Chạy full demo 10 vòng, đo lỗi app/backend",
+    "status": "todo",
+    "date": "2026-06-27",
+    "priority": "Hard",
+    "estimate": "6-8h",
+    "lane": "Software",
+    "week": "W6",
+    "milestone": "Load/stress nhẹ",
+    "module": "mobile/backend",
+    "output": "Stability report",
+    "test": "10 vòng demo",
+    "evidence": "Demo chịu lặp",
+    "fallback": "Prerecorded path",
+    "criteria": "10 vòng pass",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200089
+  },
+  {
+    "id": "Ke hoach 6 tuan-35-backend-fix-fix-bug-p2-n-u-nh-h-ng-demo-ng-bug-c-n-l-i-th-nh-risk",
+    "monthKey": "2026-06",
+    "title": "Fix bug P2 nếu ảnh hưởng demo; đóng bug còn lại thành risk",
+    "status": "todo",
+    "date": "2026-06-28",
+    "priority": "Hard",
+    "estimate": "6-8h",
+    "lane": "Backend/Fix",
+    "week": "W6",
+    "milestone": "Polish cuối",
+    "module": "all SW modules",
+    "output": "Bug closure",
+    "test": "",
+    "evidence": "Demo pass lần 2",
+    "fallback": "Đường prerecorded",
+    "criteria": "Full demo pass 10 lần",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200094
+  },
+  {
+    "id": "Ke hoach 6 tuan-35-hardware-tune-timing-motor-audio-video",
+    "monthKey": "2026-06",
+    "title": "Tune timing motor/audio/video",
+    "status": "todo",
+    "date": "2026-06-28",
+    "priority": "Hard",
+    "estimate": "6-8h",
+    "lane": "Hardware",
+    "week": "W6",
+    "milestone": "Polish cuối",
+    "module": "all HW modules",
+    "output": "Robot mượt",
+    "test": "Sequence 10 lần",
+    "evidence": "Demo pass lần 2",
+    "fallback": "Đường prerecorded",
+    "criteria": "Full demo pass 10 lần",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200093
+  },
+  {
+    "id": "Ke hoach 6 tuan-35-software-tune-timing-label-ui-ng-demo-script",
+    "monthKey": "2026-06",
+    "title": "Tune timing, label UI, đường demo script",
+    "status": "todo",
+    "date": "2026-06-28",
+    "priority": "Hard",
+    "estimate": "6-8h",
+    "lane": "Software",
+    "week": "W6",
+    "milestone": "Polish cuối",
+    "module": "all SW modules",
+    "output": "App mượt",
+    "test": "Full flow 10 lần",
+    "evidence": "Demo pass lần 2",
+    "fallback": "Đường prerecorded",
+    "criteria": "Full demo pass 10 lần",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200092
+  },
+  {
+    "id": "Ke hoach 6 tuan-36-backend-fix-backend-final-lint-typecheck-test-api-smoke-n-u-ch-y-c",
+    "monthKey": "2026-06",
+    "title": "Backend final: lint/typecheck/test/API smoke nếu chạy được",
+    "status": "todo",
+    "date": "2026-06-29",
+    "priority": "Hard",
+    "estimate": "6-8h",
+    "lane": "Backend/Fix",
+    "week": "W6",
+    "milestone": "Final regression",
+    "module": "all SW modules",
+    "output": "Backend final proof",
+    "test": "",
+    "evidence": "Ready quay",
+    "fallback": "Fallback package",
+    "criteria": "Không lỗi đã biết chặn demo",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200097
+  },
+  {
+    "id": "Ke hoach 6 tuan-36-hardware-power-cycle-sequence-cu-i",
+    "monthKey": "2026-06",
+    "title": "Power-cycle + sequence cuối",
+    "status": "todo",
+    "date": "2026-06-29",
+    "priority": "Hard",
+    "estimate": "6-8h",
+    "lane": "Hardware",
+    "week": "W6",
+    "milestone": "Final regression",
+    "module": "all HW modules",
+    "output": "Final HW regression",
+    "test": "Power-cycle 5 lần",
+    "evidence": "Ready quay",
+    "fallback": "Fallback package",
+    "criteria": "Không lỗi đã biết chặn demo",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200096
+  },
+  {
+    "id": "Ke hoach 6 tuan-36-software-ch-y-regression-cu-i-mobile-backend-ai-demo-mode",
+    "monthKey": "2026-06",
+    "title": "Chạy regression cuối: mobile/backend/AI + demo mode",
+    "status": "todo",
+    "date": "2026-06-29",
+    "priority": "Hard",
+    "estimate": "6-8h",
+    "lane": "Software",
+    "week": "W6",
+    "milestone": "Final regression",
+    "module": "all SW modules",
+    "output": "Final regression",
+    "test": "Regression pass hoặc blocker rõ",
+    "evidence": "Ready quay",
+    "fallback": "Fallback package",
+    "criteria": "Không lỗi đã biết chặn demo",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200095
+  },
+  {
+    "id": "Ke hoach 6 tuan-37-backend-fix-theo-d-i-backend-logs-khi-quay-kh-ng-crash-5xx",
+    "monthKey": "2026-06",
+    "title": "Theo dõi backend logs khi quay, không crash/5xx",
+    "status": "todo",
+    "date": "2026-06-30",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Backend/Fix",
+    "week": "W6",
+    "milestone": "Quay demo",
+    "module": "mobile/backend",
+    "output": "Recording backend proof",
+    "test": "",
+    "evidence": "Có video demo",
+    "fallback": "Retake script",
+    "criteria": "Video demo dùng được",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200100
+  },
+  {
+    "id": "Ke hoach 6 tuan-37-hardware-v-n-h-nh-robot-khi-quay",
+    "monthKey": "2026-06",
+    "title": "Vận hành robot khi quay",
+    "status": "todo",
+    "date": "2026-06-30",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Hardware",
+    "week": "W6",
+    "milestone": "Quay demo",
+    "module": "robot unit",
+    "output": "Robot proof",
+    "test": "Robot hoạt động trong video",
+    "evidence": "Có video demo",
+    "fallback": "Retake script",
+    "criteria": "Video demo dùng được",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200099
+  },
+  {
+    "id": "Ke hoach 6 tuan-37-software-quay-demo-product-3-ph-t-screen-capture-app",
+    "monthKey": "2026-06",
+    "title": "Quay demo product 3 phút + screen capture app",
+    "status": "todo",
+    "date": "2026-06-30",
+    "priority": "Medium",
+    "estimate": "2-4h",
+    "lane": "Software",
+    "week": "W6",
+    "milestone": "Quay demo",
+    "module": "mobile/backend",
+    "output": "Video demo",
+    "test": "Replay video check",
+    "evidence": "Có video demo",
+    "fallback": "Retake script",
+    "criteria": "Video demo dùng được",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200098
+  },
+  {
+    "id": "Ke hoach 6 tuan-38-backend-fix-b-o-c-o-backend-stability-bug-c-n-l-i",
+    "monthKey": "2026-07",
+    "title": "Báo cáo backend stability + bug còn lại",
+    "status": "todo",
+    "date": "2026-07-01",
+    "priority": "Hard",
+    "estimate": "6-8h",
+    "lane": "Backend/Fix",
+    "week": "W6",
+    "milestone": "Báo cáo cuối",
+    "module": "docs/report",
+    "output": "Backend final report",
+    "test": "",
+    "evidence": "Ready trình bày",
+    "fallback": "Video demo fallback",
+    "criteria": "Báo cáo hoàn chỉnh",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200103
+  },
+  {
+    "id": "Ke hoach 6 tuan-38-hardware-vi-t-bom-v-n-phi-n-b-n-hw-ti-p-theo",
+    "monthKey": "2026-07",
+    "title": "Viết BOM/vấn đề/phiên bản HW tiếp theo",
+    "status": "todo",
+    "date": "2026-07-01",
+    "priority": "Easy",
+    "estimate": "1-2h",
+    "lane": "Hardware",
+    "week": "W6",
+    "milestone": "Báo cáo cuối",
+    "module": "hardware docs",
+    "output": "Báo cáo HW cuối",
+    "test": "Check BOM/issues",
+    "evidence": "Ready trình bày",
+    "fallback": "Video demo fallback",
+    "criteria": "Báo cáo hoàn chỉnh",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200102
+  },
+  {
+    "id": "Ke hoach 6 tuan-38-software-vi-t-b-o-c-o-k-thu-t-l-m-mock-r-i-ro-b-c-ti-p",
+    "monthKey": "2026-07",
+    "title": "Viết báo cáo kỹ thuật: đã làm/mock/rủi ro/bước tiếp",
+    "status": "todo",
+    "date": "2026-07-01",
+    "priority": "Easy",
+    "estimate": "1-2h",
+    "lane": "Software",
+    "week": "W6",
+    "milestone": "Báo cáo cuối",
+    "module": "docs/report",
+    "output": "Báo cáo SW cuối",
+    "test": "Check link proof",
+    "evidence": "Ready trình bày",
+    "fallback": "Video demo fallback",
+    "criteria": "Báo cáo hoàn chỉnh",
+    "source": "Ke hoach 6 tuan",
+    "createdAt": 1779415200101
+  }
+];
+
+  const calendarStart = new Date(2026, 4, 1);
+  const projectStart = new Date(2026, 3, 1);
+  const projectEnd = new Date(2026, 9, 1);
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const today = new Date();
+  const todayLabel = document.getElementById('todayLabel');
+  todayLabel.textContent = today.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
+
+  function startOfDay(value) {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+  }
+
+  function updateDeadline() {
+    const currentDay = startOfDay(new Date());
+    const totalDays = Math.ceil((projectEnd - projectStart) / DAY_MS);
+    const elapsedDays = Math.min(totalDays, Math.max(0, Math.floor((currentDay - projectStart) / DAY_MS)));
+    const daysLeft = Math.max(0, Math.ceil((projectEnd - currentDay) / DAY_MS));
+    const progressPct = totalDays ? Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100)) : 100;
+    document.getElementById('daysLeft').textContent = String(daysLeft);
+    document.getElementById('deadlineProgress').style.width = `${progressPct}%`;
+  }
+  updateDeadline();
+  setInterval(updateDeadline, 60 * 60 * 1000);
+
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  function buildMonths(count) {
+    const arr = [];
+    const y = calendarStart.getFullYear();
+    const m = calendarStart.getMonth();
+    for (let i = 0; i < count; i++) {
+      const d = new Date(y, m + i, 1);
+      arr.push({
+        key: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,
+        name: monthNames[d.getMonth()],
+        year: d.getFullYear(),
+        month: d.getMonth() + 1,
+        daysInMonth: new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()
+      });
+    }
+    return arr;
+  }
+  const months = buildMonths(3);
+
+  const STORAGE_KEY = 'kanban-calendar-sheet-import-v1';
+  let state = seedState();
+  let filters = { priority: 'all', lane: 'all' };
+  let pinnedSimilarityId = null;
+
+  function seedState() {
+    return {
+      importVersion: SOURCE_VERSION,
+      tasks: structuredClone(SEED_TASKS)
+    };
+  }
+
+  async function readStoredState() {
+    try {
+      if (window.storage?.get) {
+        const r = await window.storage.get(STORAGE_KEY);
+        return r?.value || null;
+      }
+      return localStorage.getItem(STORAGE_KEY);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function writeStoredState(value) {
+    try {
+      if (window.storage?.set) {
+        await window.storage.set(STORAGE_KEY, value);
+      } else {
+        localStorage.setItem(STORAGE_KEY, value);
+      }
+    } catch (e) {
+      console.error('save failed', e);
+    }
+  }
+
+  async function loadState() {
+    const raw = await readStoredState();
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed.importVersion === SOURCE_VERSION && Array.isArray(parsed.tasks)) {
+          state = parsed;
+          return;
+        }
+      } catch (e) {
+        // fall through to fresh seed
+      }
+    }
+    state = seedState();
+    await saveState();
+  }
+
+  async function saveState() {
+    await writeStoredState(JSON.stringify(state));
+  }
+
+  const STATUS_ORDER = ['todo', 'doing', 'done'];
+  const PRIORITY_ORDER = { Hard: 0, Medium: 1, Easy: 2 };
+  const STOP_WORDS = new Set([
+    'the','and','for','with','from','this','that','task','test','output','pass','hoac',
+    'neu','co','the','duoc','khong','cho','sau','truoc','ngay','tuan','them','tao',
+    'kiem','tra','chot','ghi','bao','cao','mot','cac','cai','nay','demo','flow',
+    'backend','software','hardware','phan','mem','cung','robot','app','tbot',
+    'mobile','services','service','server','esp32'
+  ]);
+
+  function nextStatus(s) {
+    const i = STATUS_ORDER.indexOf(s);
+    return STATUS_ORDER[(i + 1) % STATUS_ORDER.length];
+  }
+
+  const board = document.getElementById('board');
+  const priorityFilter = document.getElementById('priorityFilter');
+  const laneFilter = document.getElementById('laneFilter');
+
+  function populateLaneFilter() {
+    const lanes = [...new Set(state.tasks.map(t => t.lane).filter(Boolean))].sort();
+    lanes.forEach(lane => {
+      const option = document.createElement('option');
+      option.value = lane;
+      option.textContent = lane;
+      laneFilter.appendChild(option);
+    });
+  }
+
+  function taskVisible(task) {
+    return (filters.priority === 'all' || task.priority === filters.priority) &&
+      (filters.lane === 'all' || task.lane === filters.lane);
+  }
+
+  function sortedTasks(tasks) {
+    return [...tasks].sort((a, b) => {
+      const dateCmp = (a.date || '').localeCompare(b.date || '');
+      if (dateCmp) return dateCmp;
+      const pCmp = (PRIORITY_ORDER[a.priority] ?? 9) - (PRIORITY_ORDER[b.priority] ?? 9);
+      if (pCmp) return pCmp;
+      return `${a.lane} ${a.title}`.localeCompare(`${b.lane} ${b.title}`);
+    });
+  }
+
+  function normalizeText(value) {
+    return String(value || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd');
+  }
+
+  function taskSearchText(task) {
+    return [
+      task.title,
+      task.milestone,
+      task.module,
+      task.output,
+      task.test,
+      task.criteria,
+      task.fallback,
+      task.lane,
+      task.week
+    ].filter(Boolean).join(' ');
+  }
+
+  function taskTokens(task) {
+    const raw = normalizeText(taskSearchText(task));
+    return new Set(raw
+      .split(/[^a-z0-9]+/)
+      .filter(token => token.length >= 3 && !STOP_WORDS.has(token)));
+  }
+
+  function moduleTokens(value) {
+    return new Set(normalizeText(value)
+      .split(/[\s,/·+>-]+/)
+      .filter(token => token.length >= 3 && !STOP_WORDS.has(token)));
+  }
+
+  function overlapCount(a, b) {
+    let total = 0;
+    a.forEach(value => { if (b.has(value)) total += 1; });
+    return total;
+  }
+
+  function similarityScore(source, candidate) {
+    if (!source || !candidate || source.id === candidate.id) return 0;
+    const sourceTokens = taskTokens(source);
+    const candidateTokens = taskTokens(candidate);
+    const sharedTokens = overlapCount(sourceTokens, candidateTokens);
+    const denominator = Math.max(1, Math.min(sourceTokens.size, candidateTokens.size));
+    const tokenRatio = sharedTokens / denominator;
+
+    const sourceModules = moduleTokens(source.module);
+    const candidateModules = moduleTokens(candidate.module);
+    const sharedModules = overlapCount(sourceModules, candidateModules);
+    const sameMilestone = Boolean(source.milestone && candidate.milestone && normalizeText(source.milestone) === normalizeText(candidate.milestone));
+    const sameWeek = Boolean(source.week && candidate.week && source.week === candidate.week);
+    const sameLane = Boolean(source.lane && candidate.lane && source.lane === candidate.lane);
+    const sameDate = Boolean(source.date && candidate.date && source.date === candidate.date);
+
+    let score = 0;
+    if (sameMilestone) score += 7;
+    if (sharedModules > 0 && (sameWeek || sameMilestone || tokenRatio >= 0.18 || sharedTokens >= 2)) {
+      score += 2 + Math.min(sharedModules, 2);
+    }
+    if (tokenRatio >= 0.5) score += 5;
+    else if (tokenRatio >= 0.3) score += 4;
+    else if (tokenRatio >= 0.18) score += 3;
+    else if (sharedTokens >= 2) score += 2;
+    if (sameWeek) score += 1.5;
+    if (sameLane) score += 1;
+    if (sameDate) score += 1;
+
+    const hasAnchor = sameMilestone || tokenRatio >= 0.22 || sharedTokens >= 2 ||
+      (sharedModules > 0 && (sameWeek || sharedTokens > 0));
+    return hasAnchor ? score : 0;
+  }
+
+  function similarTasksFor(source) {
+    return state.tasks
+      .filter(task => taskVisible(task))
+      .map(task => ({ task, score: similarityScore(source, task) }))
+      .filter(item => item.score >= 5)
+      .sort((a, b) => b.score - a.score || (a.task.date || '').localeCompare(b.task.date || ''))
+      .map(item => item.task.id);
+  }
+
+  function clearSimilarity() {
+    board.classList.remove('has-similarity');
+    document.querySelectorAll('.card.similar-source, .card.similar-match').forEach(card => {
+      card.classList.remove('similar-source', 'similar-match');
+    });
+    document.getElementById('similarHint').textContent = 'hover or click a card to find similar work';
+  }
+
+  function applySimilarity(taskId, pinned = false) {
+    const source = state.tasks.find(task => task.id === taskId);
+    if (!source) {
+      clearSimilarity();
+      return;
+    }
+    clearSimilarity();
+    const matches = similarTasksFor(source);
+    const visibleIds = new Set([...matches, source.id]);
+    document.querySelectorAll('.card').forEach(card => {
+      if (card.dataset.id === source.id) card.classList.add('similar-source');
+      else if (visibleIds.has(card.dataset.id)) card.classList.add('similar-match');
+    });
+    board.classList.add('has-similarity');
+    const label = pinned ? 'Pinned' : 'Similar';
+    document.getElementById('similarHint').textContent = `${label}: ${matches.length} related card${matches.length === 1 ? '' : 's'} highlighted`;
+  }
+
+  function render() {
+    board.innerHTML = '';
+    months.forEach(m => {
+      const monthTasks = sortedTasks(state.tasks.filter(t => t.monthKey === m.key && taskVisible(t)));
+      const col = document.createElement('section');
+      col.className = 'column';
+      col.dataset.monthKey = m.key;
+      col.innerHTML = `
+        <div class="col-head">
+          <div class="col-title">${m.name.toLowerCase()}<span class="year">${m.year}</span></div>
+          <div class="col-count">${monthTasks.length}</div>
+        </div>
+        <div class="add-row">
+          <input type="text" class="add-input" placeholder="add task…" />
+          <button class="add-btn" title="add">+</button>
+        </div>
+        <div class="cards"></div>
+      `;
+
+      const input = col.querySelector('.add-input');
+      const btn = col.querySelector('.add-btn');
+      const addTask = () => {
+        const title = input.value.trim();
+        if (!title) return;
+        state.tasks.push({
+          id: crypto.randomUUID(),
+          monthKey: m.key,
+          title,
+          status: 'todo',
+          date: '',
+          priority: 'Medium',
+          estimate: '2-4h',
+          lane: 'Manual',
+          week: 'Manual',
+          milestone: 'Manual add',
+          module: '',
+          output: '',
+          test: '',
+          evidence: '',
+          fallback: '',
+          criteria: '',
+          source: 'Manual',
+          createdAt: Date.now()
+        });
+        input.value = '';
+        saveState();
+        render();
+      };
+      btn.addEventListener('click', addTask);
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+
+      const cardsEl = col.querySelector('.cards');
+      if (monthTasks.length === 0) {
+        cardsEl.innerHTML = `<div class="empty">no tasks match this filter</div>`;
+      } else {
+        monthTasks.forEach(t => cardsEl.appendChild(renderCard(t, m)));
+      }
+
+      col.addEventListener('dragover', e => {
+        e.preventDefault();
+        col.classList.add('drag-over');
+      });
+      col.addEventListener('dragleave', e => {
+        if (e.target === col) col.classList.remove('drag-over');
+      });
+      col.addEventListener('drop', e => {
+        e.preventDefault();
+        col.classList.remove('drag-over');
+        const id = e.dataTransfer.getData('text/plain');
+        const task = state.tasks.find(t => t.id === id);
+        if (task && task.monthKey !== m.key) {
+          task.monthKey = m.key;
+          task.date = '';
+          saveState();
+          render();
+        }
+      });
+
+      board.appendChild(col);
+    });
+
+    updateCounts();
+    if (pinnedSimilarityId) applySimilarity(pinnedSimilarityId, true);
+  }
+
+  function renderCard(task, month) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.draggable = true;
+    card.dataset.status = task.status;
+    card.dataset.priority = task.priority;
+    card.dataset.id = task.id;
+    card.tabIndex = 0;
+    card.title = 'Hover or click to highlight similar tasks';
+
+    const dateValue = task.date || '';
+    const minDate = `${month.year}-${String(month.month).padStart(2,'0')}-01`;
+    const maxDate = `${month.year}-${String(month.month).padStart(2,'0')}-${String(month.daysInMonth).padStart(2,'0')}`;
+    const detail = [task.milestone, task.module].filter(Boolean).join(' · ');
+    const context = [
+      task.output ? `Output: ${task.output}` : '',
+      task.test ? `Test: ${task.test}` : '',
+      task.criteria ? `Pass: ${task.criteria}` : ''
+    ].filter(Boolean).join(' · ');
+
+    card.innerHTML = `
+      <button class="delete-btn" title="delete">×</button>
+      <div class="card-head">
+        <span class="lane-tag">${escapeHtml(task.lane || 'Task')}</span>
+        <span class="week-tag">${escapeHtml(task.week || '')}</span>
+      </div>
+      <div class="card-title">${escapeHtml(task.title)}</div>
+      ${detail ? `<div class="card-detail"><b>${escapeHtml(task.milestone || '')}</b>${task.module ? ` · ${escapeHtml(task.module)}` : ''}</div>` : ''}
+      ${context ? `<div class="card-context">${escapeHtml(context)}</div>` : ''}
+      <div class="card-tags">
+        <span class="priority-chip" data-priority="${task.priority}">${escapeHtml(task.priority || 'Medium')}</span>
+        <span class="estimate-chip">${escapeHtml(task.estimate || '2-4h')}</span>
+      </div>
+      <div class="card-meta">
+        <span class="status-pill" data-status="${task.status}">${task.status}</span>
+        <span class="card-date">
+          <input type="date" class="date-input" value="${dateValue}" min="${minDate}" max="${maxDate}" title="set day">
+        </span>
+      </div>
+    `;
+
+    const titleEl = card.querySelector('.card-title');
+    titleEl.addEventListener('click', () => {
+      titleEl.contentEditable = 'true';
+      titleEl.focus();
+      const range = document.createRange();
+      range.selectNodeContents(titleEl);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    });
+    titleEl.addEventListener('blur', () => {
+      titleEl.contentEditable = 'false';
+      const newTitle = titleEl.textContent.trim();
+      if (newTitle && newTitle !== task.title) {
+        task.title = newTitle;
+        saveState();
+      } else if (!newTitle) {
+        titleEl.textContent = task.title;
+      }
+    });
+    titleEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); titleEl.blur(); }
+      if (e.key === 'Escape') { titleEl.textContent = task.title; titleEl.blur(); }
+    });
+
+    card.querySelector('.status-pill').addEventListener('click', e => {
+      e.stopPropagation();
+      task.status = nextStatus(task.status);
+      saveState();
+      render();
+    });
+
+    card.querySelector('.date-input').addEventListener('change', e => {
+      task.date = e.target.value;
+      task.monthKey = e.target.value ? e.target.value.slice(0, 7) : task.monthKey;
+      saveState();
+      render();
+    });
+    card.querySelector('.date-input').addEventListener('mousedown', e => e.stopPropagation());
+
+    card.querySelector('.delete-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      state.tasks = state.tasks.filter(t => t.id !== task.id);
+      if (pinnedSimilarityId === task.id) pinnedSimilarityId = null;
+      saveState();
+      render();
+    });
+
+    card.addEventListener('mouseenter', () => {
+      if (!pinnedSimilarityId) applySimilarity(task.id);
+    });
+    card.addEventListener('mouseleave', () => {
+      if (!pinnedSimilarityId) clearSimilarity();
+    });
+    card.addEventListener('focus', () => {
+      if (!pinnedSimilarityId) applySimilarity(task.id);
+    });
+    card.addEventListener('blur', () => {
+      if (!pinnedSimilarityId) clearSimilarity();
+    });
+    card.addEventListener('click', e => {
+      if (e.target.closest('button, input, .status-pill')) return;
+      pinnedSimilarityId = pinnedSimilarityId === task.id ? null : task.id;
+      if (pinnedSimilarityId) applySimilarity(task.id, true);
+      else clearSimilarity();
+    });
+
+    card.addEventListener('dragstart', e => {
+      card.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', task.id);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+
+    return card;
+  }
+
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function estimateHours(value) {
+    const match = String(value || '').match(/(\d+)\s*-\s*(\d+)/);
+    if (match) return (Number(match[1]) + Number(match[2])) / 2;
+    const single = String(value || '').match(/(\d+)/);
+    return single ? Number(single[1]) : 0;
+  }
+
+  function updateCounts() {
+    const visibleTasks = state.tasks.filter(taskVisible);
+    document.getElementById('totalCount').textContent = visibleTasks.length;
+    document.getElementById('doneCount').textContent = visibleTasks.filter(t => t.status === 'done').length;
+    document.getElementById('hardCount').textContent = visibleTasks.filter(t => t.priority === 'Hard').length;
+    document.getElementById('mediumCount').textContent = visibleTasks.filter(t => t.priority === 'Medium').length;
+    document.getElementById('easyCount').textContent = visibleTasks.filter(t => t.priority === 'Easy').length;
+    const hours = visibleTasks.reduce((sum, task) => sum + estimateHours(task.estimate), 0);
+    document.getElementById('hoursCount').textContent = `${Math.round(hours)}h`;
+  }
+
+  priorityFilter.addEventListener('change', e => {
+    filters.priority = e.target.value;
+    render();
+  });
+  laneFilter.addEventListener('change', e => {
+    filters.lane = e.target.value;
+    render();
+  });
+  document.addEventListener('click', e => {
+    if (!pinnedSimilarityId) return;
+    if (e.target.closest('.card, .filter-select, .reset-btn')) return;
+    pinnedSimilarityId = null;
+    clearSimilarity();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && pinnedSimilarityId) {
+      pinnedSimilarityId = null;
+      clearSimilarity();
+    }
+  });
+  document.getElementById('resetImport').addEventListener('click', async () => {
+    state = seedState();
+    filters = { priority: 'all', lane: 'all' };
+    pinnedSimilarityId = null;
+    priorityFilter.value = 'all';
+    laneFilter.value = 'all';
+    await saveState();
+    render();
+  });
+
+  (async () => {
+    await loadState();
+    populateLaneFilter();
+    render();
+  })();
+</script>
+
+</body>
+</html>
