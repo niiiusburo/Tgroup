@@ -3,6 +3,8 @@
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
 ## [unreleased] — 2026-05-22 (feat/ctv-mlm-commission)
+### Changed
+- NK3 canonical domain is now `https://tmv.2checkin.com` (was `https://ctv.2checkin.com`). nginx vhost `tmv.2checkin.com` proxies `/` to the NK3 web container (`:5375`) with a fresh Let's Encrypt cert; the old `ctv.2checkin.com` now 301-redirects `/` to tmv and keeps `/tbot/*` (kanban board) unchanged. API CORS allowlist drops `ctv.2checkin.com` (+ www) and adds `tmv.2checkin.com` (+ www). NK and NK2 untouched. — @agent — 2026-05-23.
 ### Added
 - CTV-panel booking UI (`CtvDashboard.tsx` + `createBooking` in `website/src/lib/api/ctv.ts`): the `+ Client` sheet now takes a date and POSTs `/ctv/bookings`; a `B_CLIENT_CLAIMED` response shows a Vietnamese "already with another CTV until <date>" message. 3 vitest. — @agent — 2026-05-23 (0.32.41).
 - Customer profile "Người giới thiệu (CTV)" block (`ProfileHeader.tsx`): shows the owning CTV + active/expired badge. `GET /api/Partners/:id` (`getPartnerById.js`) now returns `referralClaim`. 4 jest. — @agent — 2026-05-23.
