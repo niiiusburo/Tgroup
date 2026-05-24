@@ -12,6 +12,7 @@ export interface ServiceFormData {
   categid: string;
   uomname: string;
   companyid: string;
+  commission_rate_percent: number;
 }
 
 interface ServiceFormModalProps {
@@ -34,11 +35,18 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit, categories, compan
     categid: '',
     uomname: t('defaultUnit'),
     companyid: '',
+    commission_rate_percent: 0,
   });
   const [saving, setSaving] = useState(false);
 
+  // Raw draft for commission % so decimals + clear work (mirrors Commission.tsx ConfigTab)
+  const [commissionDraft, setCommissionDraft] = useState<string | undefined>(undefined);
+  const clampPercent = (n: number) => Math.max(0, Math.min(100, Number.isFinite(n) ? n : 0));
+
   useEffect(() => {
     if (initialData) {
+      const rawPercent = initialData.commission_rate_percent;
+      const parsedPercent = rawPercent != null ? parseFloat(String(rawPercent)) : 0;
       setForm({
         name: initialData.name,
         defaultcode: initialData.defaultcode ?? '',
@@ -46,9 +54,12 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit, categories, compan
         categid: initialData.categid ?? '',
         uomname: initialData.uomname ?? t('defaultUnit'),
         companyid: initialData.companyid ?? '',
+        commission_rate_percent: parsedPercent,
       });
+      setCommissionDraft(undefined);
     } else {
-      setForm({ name: '', defaultcode: '', listprice: 0, categid: '', uomname: t('defaultUnit'), companyid: '' });
+      setForm({ name: '', defaultcode: '', listprice: 0, categid: '', uomname: t('defaultUnit'), companyid: '', commission_rate_percent: 0 });
+      setCommissionDraft(undefined);
     }
   }, [initialData, isOpen, t]);
 
@@ -65,6 +76,8 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit, categories, compan
       setSaving(false);
     }
   }
+
+  const commissionDisplay = commissionDraft !== undefined ? commissionDraft : String(form.commission_rate_percent);
 
   const modal = (
     <div className="fixed inset-0 z-[100] flex items-end justify-center overflow-hidden bg-black/40 sm:items-center sm:p-4">
@@ -113,6 +126,28 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit, categories, compan
               onChange={(v) => setForm({ ...form, listprice: v ?? 0 })}
               className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tỷ lệ hoa hồng (%)</label>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              inputMode="decimal"
+              value={commissionDisplay}
+              onChange={(e) => {
+                setCommissionDraft(e.target.value);
+                setForm((f) => ({ ...f, commission_rate_percent: clampPercent(parseFloat(e.target.value)) }));
+              }}
+              onBlur={() => {
+                setCommissionDraft(undefined);
+                setForm((f) => ({ ...f, commission_rate_percent: clampPercent(f.commission_rate_percent) }));
+              }}
+              placeholder="0"
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary"
+            />
+            <p className="mt-1 text-xs text-gray-500">Mặc định: 0%</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t('columns.category')}</label>
