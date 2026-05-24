@@ -11,7 +11,7 @@ const {
   listDeposits,
   listPayments,
 } = require("./payments/readHandlers");
-const { createEarningsForPayment } = require("../services/commissionEngine"); // v2 earnings hook (D12/D13) — additive only, never touches legacy commission* tables
+const { createEarningsForPayment, reverseOnRefund } = require("../services/commissionEngine"); // v2 earnings hook (D12/D13) — additive only, never touches legacy commission* tables
 
 // GET /api/Payments - List payments with allocations
 router.get("/", requirePermission('payment.view'), listPayments);
@@ -209,7 +209,7 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
 router.post("/refund", requirePermission('payment.refund'), async (req, res) => {
   try {
     const q = getQuery(req);
-    const { customer_id, amount, method, notes, payment_date } = req.body;
+    const { customer_id, amount, method, notes, payment_date, original_payment_id } = req.body;
 
     if (!customer_id || !amount || amount <= 0 || !method) {
       return res.status(400).json({ error: "customer_id, positive amount, and method are required" });
@@ -233,15 +233,13 @@ router.post("/refund", requirePermission('payment.refund'), async (req, res) => 
 
     const row = result[0];
 
-    // v2 earnings: write negative row for this refund payment (reversal semantics)
+    // v2 earnings: write negative reversal rows for this refund payment
     try {
-      const custRows = await q('SELECT id, referred_by_ctv_id, salestaffid FROM partners WHERE id = $1 LIMIT 1', [customer_id]);
-      if (custRows[0]) {
-        await createEarningsForPayment({
-          payment: row,
-          lines: [],
+      if (original_payment_id) {
+        await reverseOnRefund({
+          originalPaymentId: original_payment_id,
+          refundPayment: row,
           lob: req.lob || 'dental',
-          clientRow: custRows[0],
         });
       }
     } catch (e) {
