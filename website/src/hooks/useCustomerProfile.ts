@@ -37,6 +37,7 @@ export interface CustomerProfileData {
   sourceid?: string | null;
   sourcename?: string | null;
   faceRegisteredAt: string | null;
+  referralClaim?: ApiPartner['referralClaim'];
 }
 
 export interface CustomerProfileResult {
@@ -133,6 +134,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         sourceid: partner.sourceid ?? null,
         sourcename: partner.sourcename ?? null,
         faceRegisteredAt: partner.face_registered_at ?? null,
+        referralClaim: partner.referralClaim ?? null,
       };
 
       // Fetch appointment history for this customer

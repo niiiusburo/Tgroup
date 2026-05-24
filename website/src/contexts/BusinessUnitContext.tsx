@@ -27,15 +27,43 @@ const STORAGE_KEY = 'tgclinic_lob';
 const CHANGE_EVENT = 'tgclinic:lob-change';
 const ADMIN_GROUP_ID = '11111111-0000-0000-0000-000000000001';
 
+function isBusinessUnit(value: unknown): value is BusinessUnit {
+  return value === 'dental' || value === 'cosmetic';
+}
+
+function isCosmeticFlagEnabled(): boolean {
+  const viteFlag = (import.meta as any).env?.VITE_COSMETIC_LOB_ENABLED;
+  const testFlag = (globalThis as any).process?.env?.VITE_COSMETIC_LOB_ENABLED;
+  return viteFlag === 'true' || testFlag === 'true';
+}
+
+function readRequestedInitialLob(): BusinessUnit {
+  if (!isCosmeticFlagEnabled() || typeof window === 'undefined') {
+    return 'dental';
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const queryLob = params.get('lob');
+  if (isBusinessUnit(queryLob)) {
+    return queryLob;
+  }
+
+  const persisted = window.localStorage.getItem(STORAGE_KEY);
+  return isBusinessUnit(persisted) ? persisted : 'dental';
+}
+
 interface Props {
   readonly children: ReactNode;
 }
 
 export function BusinessUnitProvider({ children }: Props) {
   const { user, permissions, isLoading: authLoading } = useAuth();
-  const [currentLOB, setCurrentLOBState] = useState<BusinessUnit>('dental');
-  const [availableLOBs, setAvailableLOBs] = useState<BusinessUnit[]>(['dental']);
-  const [isCosmeticEnabled, setIsCosmeticEnabled] = useState(false);
+  const [currentLOB, setCurrentLOBState] = useState<BusinessUnit>(() => readRequestedInitialLob());
+  const [availableLOBs, setAvailableLOBs] = useState<BusinessUnit[]>(() => {
+    const initialLob = readRequestedInitialLob();
+    return initialLob === 'cosmetic' ? ['dental', 'cosmetic'] : ['dental'];
+  });
+  const [isCosmeticEnabled, setIsCosmeticEnabled] = useState(() => isCosmeticFlagEnabled());
 
   const isAdminBusinessUnitUser = useMemo(() => {
     const groupId = String(permissions?.groupId || '').trim().toLowerCase();
@@ -51,13 +79,13 @@ export function BusinessUnitProvider({ children }: Props) {
   // Derive LOB scope from authenticated user + feature flag (primary path)
   // Also reacts to auth-change custom event for cross-context sync (LocationContext pattern)
   const deriveAndSet = useCallback((userFromAuth?: any, fromEvent?: any) => {
-    const flag = (import.meta as any).env?.VITE_COSMETIC_LOB_ENABLED === 'true';
+    const flag = isCosmeticFlagEnabled();
     setIsCosmeticEnabled(flag);
 
     const sourceUser = fromEvent?.user ?? userFromAuth ?? user;
     const scopes: string[] = (sourceUser as any)?.lob_scope || [];
     const normalized: BusinessUnit[] = scopes
-      .filter((s: string): s is BusinessUnit => s === 'dental' || s === 'cosmetic');
+      .filter((s: string): s is BusinessUnit => isBusinessUnit(s));
 
     const finalAvailable: BusinessUnit[] = flag && normalized.length > 0
       ? (isAdminBusinessUnitUser ? normalized : normalized.slice(0, 1))
@@ -68,9 +96,11 @@ export function BusinessUnitProvider({ children }: Props) {
     // Query param takes precedence over localStorage for the initial derive (allows forcing opposite LOB without polluting persisted state).
     const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
     const queryLob = (searchParams?.get('lob') as BusinessUnit | null) || null;
-    const forcedLob = queryLob && (queryLob === 'dental' || queryLob === 'cosmetic') ? queryLob : null;
+    const forcedLob = isBusinessUnit(queryLob) ? queryLob : null;
 
-    const persisted = localStorage.getItem(STORAGE_KEY) as BusinessUnit | null;
+    const persisted = typeof window !== 'undefined'
+      ? (window.localStorage.getItem(STORAGE_KEY) as BusinessUnit | null)
+      : null;
     let next: BusinessUnit = persisted && finalAvailable.includes(persisted as BusinessUnit)
       ? (persisted as BusinessUnit)
       : (finalAvailable[0] ?? 'dental');
@@ -82,7 +112,9 @@ export function BusinessUnitProvider({ children }: Props) {
     // If auth still loading, keep prior or default; will re-derive on user settle
     if (!authLoading) {
       setCurrentLOBState(next);
-      window.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: { lob: next } }));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: { lob: next } }));
+      }
     }
   }, [user, isAdminBusinessUnitUser, authLoading]);
 
@@ -104,7 +136,7 @@ export function BusinessUnitProvider({ children }: Props) {
 
   const setCurrentLOB = useCallback((lob: BusinessUnit) => {
     if (!availableLOBs.includes(lob)) return;
-    localStorage.setItem(STORAGE_KEY, lob);
+    window.localStorage.setItem(STORAGE_KEY, lob);
     setCurrentLOBState(lob);
     window.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: { lob } }));
   }, [availableLOBs]);

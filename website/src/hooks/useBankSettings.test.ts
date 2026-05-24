@@ -2,6 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useBankSettings } from './useBankSettings';
 
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({ currentLOB: 'cosmetic' }),
+}));
+
 describe('useBankSettings', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -68,7 +72,7 @@ describe('useBankSettings', () => {
 
     const putCall = calls.find((call) => (call[1] as RequestInit)?.method === 'PUT');
     expect(putCall).toBeDefined();
-    expect(putCall![0]).toContain('/api/settings/bank');
+    expect(putCall![0]).toContain('/api/cosmetic/settings/bank');
     expect(putCall![1]).toMatchObject({
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

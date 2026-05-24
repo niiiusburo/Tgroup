@@ -24,17 +24,15 @@ const staffPermissions = {
 };
 
 function setCosmeticFlag(value: 'true' | 'false') {
-  Object.defineProperty((import.meta as any).env, 'VITE_COSMETIC_LOB_ENABLED', {
-    value,
-    configurable: true,
-    writable: true,
-  });
+  vi.stubEnv('VITE_COSMETIC_LOB_ENABLED', value);
 }
 
 function BusinessUnitProbe() {
   const { currentLOB, setCurrentLOB, availableLOBs, isMultiLOBUser, isCosmeticEnabled } = useBusinessUnit();
+  const [firstLOB] = React.useState(currentLOB);
   return (
     <div>
+      <span data-testid="first-lob">{firstLOB}</span>
       <span data-testid="current-lob">{currentLOB}</span>
       <span data-testid="available">{availableLOBs.join(',')}</span>
       <span data-testid="multi">{isMultiLOBUser ? 'multi' : 'single'}</span>
@@ -58,6 +56,7 @@ describe('BusinessUnitContext (TDD)', () => {
 
   afterEach(() => {
     setCosmeticFlag('false');
+    vi.unstubAllEnvs();
   });
 
   it('throws when used outside provider', () => {
@@ -125,6 +124,24 @@ describe('BusinessUnitContext (TDD)', () => {
         <BusinessUnitProbe />
       </BusinessUnitProvider>
     );
+    expect(screen.getByTestId('current-lob').textContent).toBe('cosmetic');
+  });
+
+  it('initializes from persisted cosmetic LOB before child effects can fetch', () => {
+    setCosmeticFlag('true');
+    localStorage.setItem('tgclinic_lob', 'cosmetic');
+    mockUseAuth.mockReturnValue({
+      user: { lob_scope: ['dental', 'cosmetic'] },
+      permissions: adminPermissions,
+    });
+
+    render(
+      <BusinessUnitProvider>
+        <BusinessUnitProbe />
+      </BusinessUnitProvider>
+    );
+
+    expect(screen.getByTestId('first-lob').textContent).toBe('cosmetic');
     expect(screen.getByTestId('current-lob').textContent).toBe('cosmetic');
   });
 

@@ -7,6 +7,7 @@ import {
   type FaceCandidate,
   type FaceStatusResult,
 } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 type RecognitionState =
   | { status: 'idle' }
@@ -29,6 +30,7 @@ type ReregisterState =
   | { status: 'error'; message: string };
 
 export function useFaceRecognition() {
+  const { currentLOB } = useBusinessUnit();
   const [recognizeState, setRecognizeState] = useState<RecognitionState>({ status: 'idle' });
   const [registerState, setRegisterState] = useState<RegisterState>({ status: 'idle' });
   const [reregisterState, setReregisterState] = useState<ReregisterState>({ status: 'idle' });
@@ -37,7 +39,7 @@ export function useFaceRecognition() {
   const recognize = useCallback(async (image: Blob) => {
     setRecognizeState({ status: 'processing' });
     try {
-      const result = await recognizeFace(image);
+      const result = await recognizeFace(image, currentLOB);
       if (result.match) {
         setRecognizeState({ status: 'success', match: result.match });
       } else if (result.candidates && result.candidates.length > 0) {
@@ -51,12 +53,12 @@ export function useFaceRecognition() {
       setRecognizeState({ status: 'error', message });
       throw err;
     }
-  }, []);
+  }, [currentLOB]);
 
   const register = useCallback(async (partnerId: string, image: Blob, source?: string) => {
     setRegisterState({ status: 'processing' });
     try {
-      const result = await registerFace(partnerId, image, source);
+      const result = await registerFace(partnerId, image, source, currentLOB);
       setRegisterState({ status: 'success', sampleCount: result.sampleCount });
       return result;
     } catch (err) {
@@ -64,23 +66,23 @@ export function useFaceRecognition() {
       setRegisterState({ status: 'error', message });
       throw err;
     }
-  }, []);
+  }, [currentLOB]);
 
   const loadFaceStatus = useCallback(async (partnerId: string) => {
     try {
-      const status = await getFaceStatus(partnerId);
+      const status = await getFaceStatus(partnerId, currentLOB);
       setFaceStatus(status);
       return status;
     } catch {
       setFaceStatus(null);
       return null;
     }
-  }, []);
+  }, [currentLOB]);
 
   const reregister = useCallback(async (partnerId: string, images: readonly Blob[], source?: string) => {
     setReregisterState({ status: 'processing' });
     try {
-      const result = await reregisterFace(partnerId, images, source);
+      const result = await reregisterFace(partnerId, images, source, currentLOB);
       setReregisterState({ status: 'success', sampleCount: result.sampleCount });
       return result;
     } catch (err) {
@@ -88,7 +90,7 @@ export function useFaceRecognition() {
       setReregisterState({ status: 'error', message });
       throw err;
     }
-  }, []);
+  }, [currentLOB]);
 
   const reset = useCallback(() => {
     setRecognizeState({ status: 'idle' });

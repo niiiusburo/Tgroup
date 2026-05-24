@@ -16,6 +16,7 @@ import { useCustomerFormActions } from './useCustomerFormActions';
 import { useCustomerPaymentActions } from './useCustomerPaymentActions';
 import { useCustomerProfileData } from './useCustomerProfileData';
 import { useCustomerServiceActions } from './useCustomerServiceActions';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 interface UseCustomerDetailControllerOptions {
   readonly selectedCustomerId: string | null;

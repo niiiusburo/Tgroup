@@ -5,6 +5,7 @@ import type { ApiPartner } from '@/lib/api';
 import { FaceCaptureModal } from '@/components/shared/FaceCaptureModal';
 import { useFaceRecognition } from '@/hooks/useFaceRecognition';
 import { fetchPartners } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { CustomerCameraCandidateReview } from './CustomerCameraCandidateReview';
 import { CustomerCameraIdleControls } from './CustomerCameraIdleControls';
 import { CustomerCameraNoMatchRescue } from './CustomerCameraNoMatchRescue';
@@ -20,6 +21,7 @@ export function CustomerCameraWidget({
   disabled = false
 }: CustomerCameraWidgetProps) {
   const { t } = useTranslation('customers');
+  const { currentLOB } = useBusinessUnit();
   const [mode, setMode] = useState<WidgetMode>('idle');
   const [captureState, setCaptureState] = useState<CaptureState>('preview');
   const [showCaptureModal, setShowCaptureModal] = useState(false);
@@ -133,7 +135,7 @@ export function CustomerCameraWidget({
     searchDebounce.current = setTimeout(async () => {
       setSearchLoading(true);
       try {
-        const res = await fetchPartners({ search: query.trim(), limit: 10, status: 'active' });
+        const res = await fetchPartners({ search: query.trim(), limit: 10, status: 'active', lob: currentLOB });
         setSearchResults(res.items ?? []);
       } catch {
         setSearchResults([]);
@@ -141,7 +143,7 @@ export function CustomerCameraWidget({
         setSearchLoading(false);
       }
     }, 300);
-  }, []);
+  }, [currentLOB]);
 
   const handleRegisterToCustomer = useCallback(async () => {
     const imagesToRegister = capturedImages.length ? capturedImages : capturedImage ? [capturedImage] : [];

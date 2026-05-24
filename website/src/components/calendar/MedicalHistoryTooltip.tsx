@@ -5,6 +5,7 @@ import { fetchPartnerById, type ApiPartner } from '@/lib/api/partners';
 import { fetchDotKhams, type ApiDotKham } from '@/lib/api/dotKhams';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { cn } from '@/lib/utils';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 interface MedicalHistoryTooltipProps {
   readonly customerId: string;

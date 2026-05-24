@@ -34,6 +34,7 @@ export function fetchCustomerSources(params?: {
       type: params?.type,
       is_active: params?.is_active,
     },
+    lob: params?.lob,
   });
 }
 
@@ -58,4 +59,3 @@ export function updateCustomerSource(id: string, data: Partial<{
 export function deleteCustomerSource(id: string, lob?: 'dental' | 'cosmetic') {
   return apiFetch<void>(`/CustomerSources/${id}`, { method: 'DELETE', lob });
 }
-

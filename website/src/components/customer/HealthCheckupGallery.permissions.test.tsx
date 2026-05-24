@@ -10,6 +10,10 @@ vi.mock('@/lib/api', () => ({
   createExternalPatient: vi.fn(),
 }));
 
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({ currentLOB: 'cosmetic' }),
+}));
+
 describe('HealthCheckupGallery permissions', () => {
   it('hides upload actions for view-only Hồ sơ online access', () => {
     render(

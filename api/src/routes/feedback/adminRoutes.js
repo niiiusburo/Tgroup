@@ -18,84 +18,84 @@ const {
 const router = express.Router();
 const VALID_STATUSES = new Set(['pending', 'in_progress', 'resolved', 'ignored']);
 
+function normalizeHost(rawHost) {
+  if (typeof rawHost !== 'string') return '';
+  const trimmed = rawHost.trim();
+  if (!trimmed) return '';
+
+  const withoutScheme = trimmed.replace(/^[a-z][a-z0-9+.-]*:\/\//i, '');
+  const hostOnly = withoutScheme.split('/')[0].split('?')[0].split('#')[0];
+  return hostOnly.replace(/:\d+$/, '').toLowerCase();
+}
+
+function buildThreadFilters({ source, host }) {
+  const clauses = [];
+  const params = [];
+
+  if (source === 'auto' || source === 'manual') {
+    params.push(source);
+    clauses.push(`t.source = $${params.length}`);
+  }
+
+  const normalizedHost = normalizeHost(host);
+  if (normalizedHost) {
+    params.push(normalizedHost);
+    clauses.push(`LOWER(REGEXP_REPLACE(REGEXP_REPLACE(COALESCE(NULLIF(t.page_url, ''), NULLIF(e.metadata->>'url', ''), ''), '^[a-z][a-z0-9+.-]*://', '', 'i'), '[:/].*$', '')) = $${params.length}`);
+  }
+
+  return {
+    whereClause: clauses.length > 0 ? `WHERE ${clauses.join(' AND ')}` : '',
+    params,
+  };
+}
+
 /**
  * GET /api/Feedback/all
- * Admin-only: returns all threads.
+ * Admin-only: returns all threads, optionally filtered by source and host.
  */
 router.get('/all', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { source } = req.query; // 'manual', 'auto', or empty for all
-    let whereClause = '';
-    const params = [];
+    const { source, host } = req.query;
+    const { whereClause, params } = buildThreadFilters({ source, host });
+    const includeErrorFields = source === 'auto';
 
-    if (source === 'auto') {
-      whereClause = 'WHERE t.source = $1';
-      params.push('auto');
-    } else if (source === 'manual') {
-      whereClause = 'WHERE t.source = $1';
-      params.push('manual');
-    }
-
-    let threads;
-    if (source === 'auto') {
-      threads = await query(
-        `SELECT
-          t.id,
-          t.employee_id AS "employeeId",
-          COALESCE(p.name, 'System') AS "employeeName",
-          t.page_url AS "pageUrl",
-          t.page_path AS "pagePath",
-          t.status,
-          t.source,
-          t.error_event_id AS "errorEventId",
-          t.created_at AS "createdAt",
-          t.updated_at AS "updatedAt",
-          (SELECT content FROM feedback_messages WHERE thread_id = t.id ORDER BY created_at ASC LIMIT 1) AS "firstMessage",
-          (SELECT content FROM feedback_messages WHERE thread_id = t.id AND author_id != t.employee_id ORDER BY created_at DESC LIMIT 1) AS "latestReply",
-          e.error_type AS "errorType",
-          e.message AS "errorMessage",
-          e.stack AS "errorStack",
-          e.source_file AS "errorSourceFile",
-          e.source_line AS "errorSourceLine",
-          e.route AS "errorRoute",
-          e.api_endpoint AS "errorApiEndpoint",
-          e.api_method AS "errorApiMethod",
-          e.api_status AS "errorApiStatus",
-          e.occurrence_count AS "errorOccurrenceCount",
-          e.first_seen_at AS "errorFirstSeenAt",
-          e.last_seen_at AS "errorLastSeenAt",
-          e.status AS "errorEventStatus",
-          e.fix_summary AS "errorFixSummary",
-          e.fix_commit AS "errorFixCommit"
-         FROM feedback_threads t
-         LEFT JOIN partners p ON p.id = t.employee_id
-         LEFT JOIN dbo.error_events e ON e.id = t.error_event_id
-         ${whereClause}
-         ORDER BY t.updated_at DESC`,
-        params
-      );
-    } else {
-      threads = await query(
-        `SELECT
-          t.id,
-          t.employee_id AS "employeeId",
-          COALESCE(p.name, 'System') AS "employeeName",
-          t.page_url AS "pageUrl",
-          t.page_path AS "pagePath",
-          t.status,
-          t.source,
-          t.error_event_id AS "errorEventId",
-          t.created_at AS "createdAt",
-          t.updated_at AS "updatedAt",
-          (SELECT content FROM feedback_messages WHERE thread_id = t.id ORDER BY created_at ASC LIMIT 1) AS "firstMessage",
-          (SELECT content FROM feedback_messages WHERE thread_id = t.id AND author_id != t.employee_id ORDER BY created_at DESC LIMIT 1) AS "latestReply"
-         FROM feedback_threads t
-         LEFT JOIN partners p ON p.id = t.employee_id
-         ${whereClause}
-         ORDER BY t.updated_at DESC`,
-        params
-      );
-    }
+    const threads = await query(
+      `SELECT
+        t.id,
+        t.employee_id AS "employeeId",
+        COALESCE(p.name, 'System') AS "employeeName",
+        t.page_url AS "pageUrl",
+        t.page_path AS "pagePath",
+        t.status,
+        t.source,
+        t.error_event_id AS "errorEventId",
+        t.created_at AS "createdAt",
+        t.updated_at AS "updatedAt",
+        (SELECT content FROM feedback_messages WHERE thread_id = t.id ORDER BY created_at ASC LIMIT 1) AS "firstMessage",
+        (SELECT content FROM feedback_messages WHERE thread_id = t.id AND author_id != t.employee_id ORDER BY created_at DESC LIMIT 1) AS "latestReply"
+        ${includeErrorFields ? `,
+        e.error_type AS "errorType",
+        e.message AS "errorMessage",
+        e.stack AS "errorStack",
+        e.source_file AS "errorSourceFile",
+        e.source_line AS "errorSourceLine",
+        e.route AS "errorRoute",
+        e.api_endpoint AS "errorApiEndpoint",
+        e.api_method AS "errorApiMethod",
+        e.api_status AS "errorApiStatus",
+        e.occurrence_count AS "errorOccurrenceCount",
+        e.first_seen_at AS "errorFirstSeenAt",
+        e.last_seen_at AS "errorLastSeenAt",
+        e.status AS "errorEventStatus",
+        e.fix_summary AS "errorFixSummary",
+        e.fix_commit AS "errorFixCommit"` : ''}
+       FROM feedback_threads t
+       LEFT JOIN partners p ON p.id = t.employee_id
+       LEFT JOIN dbo.error_events e ON e.id = t.error_event_id
+       ${whereClause}
+       ORDER BY t.updated_at DESC`,
+      params
+    );
 
     return res.json({ items: threads });
   } catch (err) {

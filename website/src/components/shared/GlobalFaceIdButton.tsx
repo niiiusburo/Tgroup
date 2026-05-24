@@ -6,6 +6,7 @@ import { FaceCaptureModal } from '@/components/shared/FaceCaptureModal';
 import { useFaceRecognition } from '@/hooks/useFaceRecognition';
 import { fetchPartners, registerFace } from '@/lib/api';
 import type { ApiPartner } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 /**
  * Global Face ID quick-search button.
@@ -19,6 +20,7 @@ import type { ApiPartner } from '@/lib/api';
 export function GlobalFaceIdButton() {
   const { t } = useTranslation('customers');
   const navigate = useNavigate();
+  const { currentLOB } = useBusinessUnit();
   const containerRef = useRef<HTMLDivElement>(null);
   const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -91,7 +93,7 @@ export function GlobalFaceIdButton() {
     searchDebounce.current = setTimeout(async () => {
       setSearchLoading(true);
       try {
-        const res = await fetchPartners({ search: query.trim(), limit: 10, status: 'active' });
+        const res = await fetchPartners({ search: query.trim(), limit: 10, status: 'active', lob: currentLOB });
         setSearchResults(res.items ?? []);
       } catch {
         setSearchResults([]);
@@ -99,14 +101,14 @@ export function GlobalFaceIdButton() {
         setSearchLoading(false);
       }
     }, 300);
-  }, []);
+  }, [currentLOB]);
 
   const handleRegisterToCustomer = useCallback(async () => {
     if (!selectedCustomer || !capturedImage) return;
     setRegistering(true);
     setRegisterError(null);
     try {
-      await registerFace(selectedCustomer.id, capturedImage, 'no_match_rescue');
+      await registerFace(selectedCustomer.id, capturedImage, 'no_match_rescue', currentLOB);
       navigate(`/customers/${selectedCustomer.id}`);
       dismiss();
     } catch (err) {
@@ -115,7 +117,7 @@ export function GlobalFaceIdButton() {
     } finally {
       setRegistering(false);
     }
-  }, [selectedCustomer, capturedImage, navigate, dismiss, t]);
+  }, [selectedCustomer, capturedImage, navigate, dismiss, t, currentLOB]);
 
   return (
     <div ref={containerRef} className="relative shrink-0">

@@ -1,8 +1,22 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '@/test/test-utils';
 import { AddCustomerForm } from './AddCustomerForm';
-import { fetchEmployees } from '@/lib/api';
+import { fetchCompanies, fetchEmployees, fetchPartners } from '@/lib/api';
+
+const mockBusinessUnit = vi.hoisted(() => ({
+  currentLOB: 'dental' as 'dental' | 'cosmetic',
+}));
+
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({
+    currentLOB: mockBusinessUnit.currentLOB,
+    setCurrentLOB: vi.fn(),
+    availableLOBs: ['dental', 'cosmetic'],
+    isMultiLOBUser: true,
+    isCosmeticEnabled: true,
+  }),
+}));
 
 vi.mock('@/lib/api', async () => {
   class ApiError extends Error {
@@ -34,6 +48,11 @@ vi.mock('@/hooks/useFaceRecognition', () => ({
 }));
 
 describe('AddCustomerForm', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockBusinessUnit.currentLOB = 'dental';
+  });
+
   it('does not render customer source in the customer profile form', () => {
     renderWithProviders(
       <AddCustomerForm
@@ -103,7 +122,7 @@ describe('AddCustomerForm', () => {
     await waitFor(() => {
       expect(screen.getByDisplayValue('Sale Nhung')).toBeInTheDocument();
     });
-    expect(fetchEmployees).toHaveBeenCalledWith({ limit: 500, active: 'all' });
+    expect(fetchEmployees).toHaveBeenCalledWith({ limit: 500, active: 'all', lob: 'dental' });
   });
 
   it('pre-populates inactive assigned CSKH staff in edit mode', async () => {
@@ -154,7 +173,7 @@ describe('AddCustomerForm', () => {
     await waitFor(() => {
       expect(screen.getByDisplayValue('CSKH Trang')).toBeInTheDocument();
     });
-    expect(fetchEmployees).toHaveBeenCalledWith({ limit: 500, active: 'all' });
+    expect(fetchEmployees).toHaveBeenCalledWith({ limit: 500, active: 'all', lob: 'dental' });
   });
 
   it('hides inactive duplicate sales staff from new selection suggestions', async () => {
@@ -238,5 +257,38 @@ describe('AddCustomerForm', () => {
       expect(screen.getByText('Sale Nhung Active')).toBeInTheDocument();
     });
     expect(screen.queryByText('Sale Nhung Inactive')).not.toBeInTheDocument();
+  });
+
+  it('loads cosmetic companies, employees, and referrer options in cosmetic mode', async () => {
+    mockBusinessUnit.currentLOB = 'cosmetic';
+
+    renderWithProviders(
+      <AddCustomerForm
+        initialData={{
+          name: 'Cosmetic Customer',
+          phone: '0909000002',
+        }}
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(fetchCompanies).toHaveBeenCalledWith({ limit: 50, lob: 'cosmetic' });
+      expect(fetchEmployees).toHaveBeenCalledWith({ limit: 500, active: 'all', lob: 'cosmetic' });
+    });
+
+    const referrerInput = screen.getByPlaceholderText(/tên hoặc số điện thoại/i);
+    if (!referrerInput) throw new Error('Referrer input was not rendered');
+
+    fireEvent.change(referrerInput, { target: { value: 'Cosmetic Referrer' } });
+
+    await waitFor(() => {
+      expect(fetchPartners).toHaveBeenCalledWith({
+        search: 'Cosmetic Referrer',
+        limit: 20,
+        lob: 'cosmetic',
+      });
+    });
   });
 });

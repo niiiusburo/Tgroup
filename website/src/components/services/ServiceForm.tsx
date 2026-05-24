@@ -477,7 +477,16 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
               rows={3} placeholder={t('enterNotes', 'Nhập ghi chú')}
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all text-sm resize-none" />
           </div>
+
         </div>
+
+        {errors.submit && (
+          <div className="px-4 pb-3 sm:px-6">
+            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+              {errors.submit}
+            </div>
+          </div>
+        )}
 
         <FormFooter
           onCancel={onClose}

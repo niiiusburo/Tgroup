@@ -4,9 +4,12 @@ const { requirePermission } = require('../../middleware/auth');
 const { err, validDate, validUUID } = require('./helpers');
 const {
   SERVICE_REVENUE_PAYMENT_CONDITION,
+  UNALLOCATED_SERVICE_PAYMENT_CONDITION,
   ALLOCATION_TOTALS_CTE,
   CAPPED_ALLOCATED_AMOUNT_SQL,
+  DIRECT_SERVICE_PAYMENT_AMOUNT_SQL,
   buildPairedRevenueFilters,
+  buildPaymentRevenueFilter,
   toNumber,
   toInt,
 } = require('./revenueRecognition');
@@ -49,6 +52,13 @@ router.post('/revenue/summary', requirePermission('reports.view'), async (req, r
       orderCompanyCol: 'companyid',
       paymentCompanyCol: 'so.companyid',
     });
+    const directF = buildPaymentRevenueFilter({
+      dateFrom,
+      dateTo,
+      companyId,
+      paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
+      companyCol: 'COALESCE(so.companyid, customer.companyid)',
+    });
     const orders = await query(
       `SELECT state, COUNT(*) as cnt, COALESCE(SUM(amounttotal),0) as total,
               COALESCE(SUM(residual),0) as outstanding
@@ -56,24 +66,56 @@ router.post('/revenue/summary', requirePermission('reports.view'), async (req, r
        GROUP BY state`, f.params);
 
     const paidByState = await query(
-      `WITH ${ALLOCATION_TOTALS_CTE}
-       SELECT so.state, COALESCE(SUM(${CAPPED_ALLOCATED_AMOUNT_SQL}),0) as paid
-       FROM dbo.payment_allocations pa
-       JOIN dbo.payments p ON p.id = pa.payment_id
-       LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
-       JOIN dbo.saleorders so ON so.id = pa.invoice_id AND so.isdeleted=false
-       WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${f.paymentWhere}
-       GROUP BY so.state`, f.params);
+      `WITH ${ALLOCATION_TOTALS_CTE},
+       allocated_service_payments AS (
+         SELECT so.state, p.id, p.method, p.status, ${CAPPED_ALLOCATED_AMOUNT_SQL} AS paid
+         FROM dbo.payment_allocations pa
+         JOIN dbo.payments p ON p.id = pa.payment_id
+         LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
+         JOIN dbo.saleorders so ON so.id = pa.invoice_id AND so.isdeleted=false
+         WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${f.paymentWhere}
+       ),
+       direct_service_payments AS (
+         SELECT COALESCE(so.state, 'direct') AS state, p.id, p.method, p.status, ${DIRECT_SERVICE_PAYMENT_AMOUNT_SQL} AS paid
+         FROM dbo.payments p
+         LEFT JOIN dbo.saleorders so ON so.id = p.service_id AND so.isdeleted=false
+         LEFT JOIN dbo.partners customer ON customer.id = p.customer_id
+         WHERE ${UNALLOCATED_SERVICE_PAYMENT_CONDITION} ${directF.where}
+       ),
+       recognized_service_payments AS (
+         SELECT state, id, method, status, paid FROM allocated_service_payments
+         UNION ALL
+         SELECT state, id, method, status, paid FROM direct_service_payments
+       )
+       SELECT state, COALESCE(SUM(paid),0) as paid
+       FROM recognized_service_payments
+       GROUP BY state`, f.params);
 
     const methods = await query(
-      `WITH ${ALLOCATION_TOTALS_CTE}
-       SELECT p.method, p.status, COUNT(DISTINCT p.id) as cnt, COALESCE(SUM(${CAPPED_ALLOCATED_AMOUNT_SQL}),0) as total
-       FROM dbo.payment_allocations pa
-       JOIN dbo.payments p ON p.id = pa.payment_id
-       LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
-       JOIN dbo.saleorders so ON so.id = pa.invoice_id AND so.isdeleted=false
-       WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${f.paymentWhere}
-       GROUP BY p.method, p.status`, f.params);
+      `WITH ${ALLOCATION_TOTALS_CTE},
+       allocated_service_payments AS (
+         SELECT so.state, p.id, p.method, p.status, ${CAPPED_ALLOCATED_AMOUNT_SQL} AS paid
+         FROM dbo.payment_allocations pa
+         JOIN dbo.payments p ON p.id = pa.payment_id
+         LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
+         JOIN dbo.saleorders so ON so.id = pa.invoice_id AND so.isdeleted=false
+         WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${f.paymentWhere}
+       ),
+       direct_service_payments AS (
+         SELECT COALESCE(so.state, 'direct') AS state, p.id, p.method, p.status, ${DIRECT_SERVICE_PAYMENT_AMOUNT_SQL} AS paid
+         FROM dbo.payments p
+         LEFT JOIN dbo.saleorders so ON so.id = p.service_id AND so.isdeleted=false
+         LEFT JOIN dbo.partners customer ON customer.id = p.customer_id
+         WHERE ${UNALLOCATED_SERVICE_PAYMENT_CONDITION} ${directF.where}
+       ),
+       recognized_service_payments AS (
+         SELECT state, id, method, status, paid FROM allocated_service_payments
+         UNION ALL
+         SELECT state, id, method, status, paid FROM direct_service_payments
+       )
+       SELECT method, status, COUNT(DISTINCT id) as cnt, COALESCE(SUM(paid),0) as total
+       FROM recognized_service_payments
+       GROUP BY method, status`, f.params);
 
     const ordersWithPaid = mergePaidByKey(orders, paidByState, 'state');
     return res.json({ success: true, data: { orders: ordersWithPaid.map(o => ({ ...o, cnt: toInt(o.cnt), total: toNumber(o.total), paid: toNumber(o.paid), outstanding: toNumber(o.outstanding) })), payments: methods.map(m => ({ ...m, cnt: toInt(m.cnt), total: toNumber(m.total) })) } });
@@ -96,6 +138,13 @@ router.post('/revenue/trend', requirePermission('reports.view'), async (req, res
       orderCompanyCol: 'companyid',
       paymentCompanyCol: 'so.companyid',
     });
+    const directF = buildPaymentRevenueFilter({
+      dateFrom,
+      dateTo,
+      companyId,
+      paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
+      companyCol: 'COALESCE(so.companyid, customer.companyid)',
+    });
     const trend = await query(
       `SELECT DATE_TRUNC('month', datecreated) as month,
               COUNT(*) as order_count,
@@ -105,14 +154,31 @@ router.post('/revenue/trend', requirePermission('reports.view'), async (req, res
        GROUP BY month ORDER BY month`, f.params);
 
     const paidTrend = await query(
-      `WITH ${ALLOCATION_TOTALS_CTE}
-       SELECT DATE_TRUNC('month', COALESCE(p.payment_date, p.created_at)) as month,
-              COALESCE(SUM(${CAPPED_ALLOCATED_AMOUNT_SQL}),0) as paid
-       FROM dbo.payment_allocations pa
-       JOIN dbo.payments p ON p.id = pa.payment_id
-       LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
-       JOIN dbo.saleorders so ON so.id = pa.invoice_id AND so.isdeleted=false
-       WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${f.paymentWhere}
+      `WITH ${ALLOCATION_TOTALS_CTE},
+       allocated_service_payments AS (
+         SELECT DATE_TRUNC('month', COALESCE(p.payment_date, p.created_at)) as month,
+                ${CAPPED_ALLOCATED_AMOUNT_SQL} AS paid
+         FROM dbo.payment_allocations pa
+         JOIN dbo.payments p ON p.id = pa.payment_id
+         LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
+         JOIN dbo.saleorders so ON so.id = pa.invoice_id AND so.isdeleted=false
+         WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${f.paymentWhere}
+       ),
+       direct_service_payments AS (
+         SELECT DATE_TRUNC('month', COALESCE(p.payment_date, p.created_at)) as month,
+                ${DIRECT_SERVICE_PAYMENT_AMOUNT_SQL} AS paid
+         FROM dbo.payments p
+         LEFT JOIN dbo.saleorders so ON so.id = p.service_id AND so.isdeleted=false
+         LEFT JOIN dbo.partners customer ON customer.id = p.customer_id
+         WHERE ${UNALLOCATED_SERVICE_PAYMENT_CONDITION} ${directF.where}
+       ),
+       recognized_service_payments AS (
+         SELECT month, paid FROM allocated_service_payments
+         UNION ALL
+         SELECT month, paid FROM direct_service_payments
+       )
+       SELECT month, COALESCE(SUM(paid),0) as paid
+       FROM recognized_service_payments
        GROUP BY month ORDER BY month`, f.params);
 
     const paidMap = new Map(paidTrend.map(row => [String(row.month), toNumber(row.paid)]));
@@ -154,6 +220,13 @@ router.post('/revenue/by-location', requirePermission('reports.view'), async (re
       orderCompanyCol: 'so.companyid',
       paymentCompanyCol: 'so.companyid',
     });
+    const directF = buildPaymentRevenueFilter({
+      dateFrom,
+      dateTo,
+      companyId,
+      paymentDateCol: 'COALESCE(p.payment_date, p.created_at)',
+      companyCol: 'COALESCE(so.companyid, customer.companyid)',
+    });
     const rows = await query(
       `WITH order_totals AS (
          SELECT so.companyid, COUNT(so.id) as order_count,
@@ -164,22 +237,50 @@ router.post('/revenue/by-location', requirePermission('reports.view'), async (re
          GROUP BY so.companyid
        ),
        ${ALLOCATION_TOTALS_CTE},
-       paid_totals AS (
-         SELECT so.companyid, COALESCE(SUM(${CAPPED_ALLOCATED_AMOUNT_SQL}),0) as paid
+       allocated_service_payments AS (
+         SELECT so.companyid, ${CAPPED_ALLOCATED_AMOUNT_SQL} AS paid
          FROM dbo.payment_allocations pa
          JOIN dbo.payments p ON p.id = pa.payment_id
          LEFT JOIN allocation_totals at ON at.payment_id = pa.payment_id
          JOIN dbo.saleorders so ON so.id = pa.invoice_id AND so.isdeleted=false
          WHERE ${SERVICE_REVENUE_PAYMENT_CONDITION} ${f.paymentWhere}
-         GROUP BY so.companyid
+       ),
+       direct_service_payments AS (
+         SELECT COALESCE(so.companyid, customer.companyid) AS companyid, ${DIRECT_SERVICE_PAYMENT_AMOUNT_SQL} AS paid
+         FROM dbo.payments p
+         LEFT JOIN dbo.saleorders so ON so.id = p.service_id AND so.isdeleted=false
+         LEFT JOIN dbo.partners customer ON customer.id = p.customer_id
+         WHERE ${UNALLOCATED_SERVICE_PAYMENT_CONDITION} ${directF.where}
+       ),
+       recognized_service_payments AS (
+         SELECT companyid, paid FROM allocated_service_payments
+         UNION ALL
+         SELECT companyid, paid FROM direct_service_payments
+       ),
+       paid_totals AS (
+         SELECT companyid, COALESCE(SUM(paid),0) as paid
+         FROM recognized_service_payments
+         GROUP BY companyid
+       ),
+       location_keys AS (
+         SELECT id AS companyid FROM dbo.companies
+         UNION
+         SELECT companyid FROM order_totals
+         UNION
+         SELECT companyid FROM paid_totals
        )
-       SELECT c.id, c.name, COALESCE(ot.order_count,0) as order_count,
+       SELECT COALESCE(lk.companyid::text, 'unassigned') as id,
+              COALESCE(c.name, 'Chưa gán chi nhánh') as name,
+              COALESCE(ot.order_count,0) as order_count,
               COALESCE(ot.invoiced,0) as invoiced,
               COALESCE(pt.paid,0) as paid,
               COALESCE(ot.outstanding,0) as outstanding
-       FROM dbo.companies c
-       LEFT JOIN order_totals ot ON ot.companyid=c.id
-       LEFT JOIN paid_totals pt ON pt.companyid=c.id
+       FROM location_keys lk
+       LEFT JOIN dbo.companies c ON c.id=lk.companyid
+       LEFT JOIN order_totals ot ON ot.companyid=lk.companyid
+       LEFT JOIN paid_totals pt ON (
+         pt.companyid=lk.companyid OR (pt.companyid IS NULL AND lk.companyid IS NULL)
+       )
        ORDER BY paid DESC`, f.params);
 
     return res.json({ success: true, data: rows.map(r => ({ ...r, orderCount: toInt(r.order_count), invoiced: toNumber(r.invoiced), paid: toNumber(r.paid), outstanding: toNumber(r.outstanding) })) });

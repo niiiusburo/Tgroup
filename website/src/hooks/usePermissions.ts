@@ -7,6 +7,7 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { fetchPermissionGroups } from '@/lib/api';
 
 export interface Permission {
@@ -33,6 +34,7 @@ interface UsePermissionsState {
 
 export function usePermissions(defaultRoleId = 'admin') {
   const { permissions: authPermissions, isAuthenticated } = useAuth();
+  const { currentLOB } = useBusinessUnit();
   const [currentRoleId, setCurrentRoleId] = useState(defaultRoleId);
   
   // State for API-fetched permission groups
@@ -47,7 +49,7 @@ export function usePermissions(defaultRoleId = 'admin') {
   useEffect(() => {
     async function loadPermissionGroups() {
       try {
-        const groups = await fetchPermissionGroups();
+        const groups = await fetchPermissionGroups(currentLOB);
         
         // Extract all unique permissions from groups
         const allPermissions = new Map<string, Permission>();
@@ -95,7 +97,7 @@ export function usePermissions(defaultRoleId = 'admin') {
     }
 
     loadPermissionGroups();
-  }, []);
+  }, [currentLOB]);
 
   // Use auth permissions if user is authenticated, otherwise use fetched roles
   const currentRole = useMemo(() => {

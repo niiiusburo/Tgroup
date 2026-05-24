@@ -116,4 +116,3 @@ export function markInstallmentPaid(planId: string, installmentId: string, data?
     lob,
   });
 }
-

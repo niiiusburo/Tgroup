@@ -119,6 +119,34 @@
 Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `Docs`.
 
 ---
+## [0.32.46] — 2026-05-24
+### Fixed
+- TMV Cosmetic feedback sweep: appointment create/update, customer create/edit selectors, employee create/edit permission selectors, payment/deposit balance reads, and payment history refreshes now pass the active Cosmetic LOB through the frontend API clients so Cosmetic screens stay on `/api/cosmetic/*`. — @agent — Staff feedback from TMV Cosmetic; preserves Cosmetic LOB v2 two-DB isolation.
+- Feedback admin auto-error hygiene now filters the Auto-detected Errors tab to the current host by default while preserving the all-host cleanup toggle and manual feedback behavior. — @agent — Staff feedback from TMV feedback queue; keeps stale-host errors from obscuring current TMV defects.
+- Added regression coverage for the Cosmetic `/CustomerBalance` API mirror so live payment modals do not regress to a missing balance route. — @agent — Staff feedback from Cosmetic customer payment/deposit workflows.
+- NK3 web image builds now accept `GIT_SHA` and `GIT_BRANCH` build args for `/version.json` when Docker builds without `.git` in context. — @agent — Deploy verification must prove the live bundle matches the pushed commit.
+
+## [0.32.45] — 2026-05-23
+### Fixed
+- TMV/NK3 Cosmetic LOB permissions board now has a request-scoped `/api/cosmetic/Permissions/*` mirror, so `/permissions` under Cosmetic no longer 404s on `/Permissions/employees`. — @agent — Staff feedback from TMV Cosmetic; preserves Cosmetic LOB v2 route isolation and permission-board parity.
+- Cosmetic customer add-service failures now surface a visible form error instead of disappearing into the console; regression coverage keeps service create/update writes on the active Cosmetic LOB. — @agent — Staff feedback from TMV Cosmetic customer profile add-service flow.
+
+## [0.32.43-nk3-cosmetic-lob] — 2026-05-23
+### Fixed
+- TMV/NK3 Cosmetic LOB redo: the Business Unit provider now initializes from `?lob=cosmetic` or persisted `tgclinic_lob=cosmetic` before child data effects can fire, preventing first-render Dental requests while Cosmetic is selected; additional customer, appointment, payment, service, settings, face-ID, monthly-plan, HSO/checkup, customer-source, and DotKham callers now pass the active LOB so Cosmetic screens use `/api/cosmetic/*` consistently. — @agent — User found the prior sweep was being exercised in Dental; preserves Cosmetic LOB v2 two-DB isolation and active-LOB workflow parity.
+- Added missing Cosmetic mirror mounts for customer sources, DotKhams, bank settings, external checkups, face-ID, and exports so the frontend callers above have request-scoped cosmetic API routes instead of falling back to dental/global endpoints. — @agent — Closes the live Cosmetic toggle leak observed on `https://tmv.2checkin.com`.
+
+## [0.32.42-nk3-api-hotfix] — 2026-05-23
+### Fixed
+- TMV/NK3 API hotfix: restored healthy CompreFace-backed `/api/health`, mounted `/api/cosmetic/CustomerBalance`, removed the duplicate unguarded `/api/ctv` mount, required `is_ctv` on CTV self-dashboard reads, and restored service-catalog create/edit by importing `normalizeVietnamese` in `api/src/routes/products.js`. — @agent — NK3/TMV full-parity sweep; preserves Cosmetic LOB v2 two-DB isolation and CTV-only dashboard gating.
+
+### Removed
+- Retired the external `ctv.2checkin.com` hostname for NK3/TMV: removed it from API CORS and disabled the VPS nginx vhost so `tmv.2checkin.com` is the only supported NK3 clinic domain. — @agent — User request to nuke the unused CTV hostname while preserving the in-app `/ctv` route gating.
+
+## [0.32.35-cosmetic-lob] — 2026-05-22
+### Fixed
+- NK3 Cosmetic LOB routing now sends employee branch loads, employee creates, customer creates/updates, appointment creates/updates, customer selectors, payments, deposits, customer profile reads, customer balance, sale-order lines, and revenue report reads through the cosmetic mirror when the active business unit is Cosmetic; the web Docker build now forwards `VITE_COSMETIC_LOB_ENABLED`, and the NK3 `sslip.io` browser origin is allowed by API CORS for live verification. Revenue summary, trend, and by-location cards now include direct posted `payment_category = 'payment'` receipts without allocation rows, including imported cosmetic receipts whose `service_id` is still blank; by-location shows unassigned paid receipts instead of dropping them, customer-balance advance cards count only deposit-category rows, and revenue still excludes deposits, refunds, usage, and voided payments. — @agent — Staff feedback from NK3 `/feedback` and `/reports/revenue`; preserves INV-003/INV-004 payment classification and Cosmetic LOB v2 two-DB isolation.
+
 ## [0.31.19] — 2026-05-19
 ### Fixed
 - Restricted Cosmetic LOB selector to Admin users only: auth responses cap non-admin visible `lob_scope` to one LOB, `BusinessUnitContext` ignores staff localStorage/query attempts to switch, and docs/tests now cite INV-008A. — @agent — User request: dental staff must not see or select Cosmetic LOB.

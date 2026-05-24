@@ -324,4 +324,48 @@ describe('feedback attachment transaction integrity', () => {
     existsSpy.mockRestore();
     unlinkSpy.mockRestore();
   });
+
+  it('filters admin auto feedback by source and current host without losing error fields', async () => {
+    query.mockImplementation(async (sql, params = []) => {
+      if (sql.includes('ip_access_settings')) return [{ mode: 'disabled' }];
+      if (sql.includes('ip_access_entries')) return [];
+      if (sql.includes('FROM feedback_threads t')) {
+        return [{
+          id: THREAD_ID,
+          employeeId: null,
+          employeeName: 'System',
+          source: 'auto',
+          errorMessage: 'current host failure',
+        }];
+      }
+      return [];
+    });
+
+    const res = await request(app).get('/api/Feedback/all?source=auto&host=https://tmv.2checkin.com/feedback');
+
+    expect(res.status).toBe(200);
+    expect(res.body.items).toHaveLength(1);
+    const feedbackQueryCall = query.mock.calls.find(([sql]) => sql.includes('FROM feedback_threads t'));
+    expect(feedbackQueryCall[0]).toContain('t.source = $1');
+    expect(feedbackQueryCall[0]).toContain("e.metadata->>'url'");
+    expect(feedbackQueryCall[0]).toContain('e.message AS "errorMessage"');
+    expect(feedbackQueryCall[1]).toEqual(['auto', 'tmv.2checkin.com']);
+  });
+
+  it('preserves manual source filtering while omitting host when not requested', async () => {
+    query.mockImplementation(async (sql) => {
+      if (sql.includes('ip_access_settings')) return [{ mode: 'disabled' }];
+      if (sql.includes('ip_access_entries')) return [];
+      if (sql.includes('FROM feedback_threads t')) return [];
+      return [];
+    });
+
+    const res = await request(app).get('/api/Feedback/all?source=manual');
+
+    expect(res.status).toBe(200);
+    const feedbackQueryCall = query.mock.calls.find(([sql]) => sql.includes('FROM feedback_threads t'));
+    expect(feedbackQueryCall[0]).toContain('t.source = $1');
+    expect(feedbackQueryCall[0]).not.toContain("e.metadata->>'url'");
+    expect(feedbackQueryCall[1]).toEqual(['manual']);
+  });
 });

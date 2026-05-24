@@ -6,6 +6,7 @@ import {
   type Customer as ApiCustomer,
 } from '@/hooks/useCustomers/customerMapper';
 import type { Customer } from '@/types/customer';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 const CUSTOMER_SEARCH_LIMIT = 20;
 const SEARCH_DEBOUNCE_MS = 300;
@@ -41,6 +42,7 @@ export function useCustomerSelectorOptions(
   selectedId: string | null,
   searchTerm: string,
 ) {
+  const { currentLOB } = useBusinessUnit();
   const [remoteCustomers, setRemoteCustomers] = useState<Customer[]>([]);
   const [selectedRemoteCustomer, setSelectedRemoteCustomer] = useState<Customer | null>(null);
   const [searching, setSearching] = useState(false);
@@ -77,6 +79,7 @@ export function useCustomerSelectorOptions(
         const response = await fetchPartners({
           search: trimmed,
           limit: CUSTOMER_SEARCH_LIMIT,
+          lob: currentLOB,
         });
         if (!cancelled) {
           setRemoteCustomers(response.items.map(mapPartnerToCustomer).map(toSelectorCustomer));
@@ -90,7 +93,7 @@ export function useCustomerSelectorOptions(
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [searchTerm]);
+  }, [searchTerm, currentLOB]);
 
   const shouldUseRemote = searchTerm.trim().length >= MIN_SEARCH_LENGTH;
   const sourceCustomers = shouldUseRemote ? remoteCustomers : baseSelectorCustomers;

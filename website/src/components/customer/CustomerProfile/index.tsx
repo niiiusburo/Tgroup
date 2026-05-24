@@ -151,6 +151,7 @@ export function CustomerProfile(props: OrchestratorProps) {
       setShowServiceModal(false);
     } catch (error) {
       console.error('Failed to create service:', error);
+      throw error;
     }
   };
 

@@ -16,6 +16,12 @@ vi.mock('@/lib/api', () => ({
   getFaceStatus: mocks.getFaceStatus,
 }));
 
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({
+    currentLOB: 'cosmetic',
+  }),
+}));
+
 // Mock FaceCaptureModal to immediately call onCapture with a fake blob
 vi.mock('@/components/shared/FaceCaptureModal', () => ({
   FaceCaptureModal: ({ isOpen, onCapture, onCancel }: {
@@ -309,7 +315,12 @@ describe('CustomerCameraWidget', () => {
       fireEvent.change(searchInput, { target: { value: 'Ali' } });
 
       await waitFor(() => {
-        expect(mocks.fetchPartners).toHaveBeenCalledWith({ search: 'Ali', limit: 10, status: 'active' });
+        expect(mocks.fetchPartners).toHaveBeenCalledWith({
+          search: 'Ali',
+          limit: 10,
+          status: 'active',
+          lob: 'cosmetic',
+        });
       }, { timeout: 1000 });
 
       await waitFor(() => {
@@ -358,7 +369,7 @@ describe('CustomerCameraWidget', () => {
       fireEvent.click(screen.getByText(/Register face to/i));
 
       await waitFor(() => {
-        expect(mocks.registerFace).toHaveBeenCalledWith('p1', expect.any(Blob), 'no_match_rescue');
+        expect(mocks.registerFace).toHaveBeenCalledWith('p1', expect.any(Blob), 'no_match_rescue', 'cosmetic');
       }, { timeout: 3000 });
 
       await waitFor(() => {
