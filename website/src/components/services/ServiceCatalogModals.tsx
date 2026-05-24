@@ -128,7 +128,7 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit, categories, compan
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tỷ lệ hoa hồng (%)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('columns.commissionRate')}</label>
             <input
               type="number"
               min="0"
@@ -147,7 +147,7 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit, categories, compan
               placeholder="0"
               className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary"
             />
-            <p className="mt-1 text-xs text-gray-500">Mặc định: 0%</p>
+            <p className="mt-1 text-xs text-gray-500">{t('default')}: 0%</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t('columns.category')}</label>

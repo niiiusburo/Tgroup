@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { Percent, Users, BarChart3, Loader, AlertCircle, X, Plus, Trash2 } from 'lucide-react';
+import { Percent, Users, Loader, AlertCircle, X, Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { fetchCommissionConfig, saveCommissionConfig, type CommissionConfig, type CommissionLevel } from '@/lib/api/commission';
@@ -17,6 +17,7 @@ type TabType = 'config' | 'ctvs' | 'earnings' | 'payouts';
 
 export function Commission() {
   const { t } = useTranslation('common');
+  const { t: tc } = useTranslation('commission');
   const [activeTab, setActiveTab] = useState<TabType>('config');
 
   return (
@@ -27,35 +28,13 @@ export function Commission() {
         icon={<Percent className="w-6 h-6 text-primary" />}
       />
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[
-          { label: 'Total Commissions (MTD)', value: '₫12,450,000', icon: Percent, color: '#EC4899' },
-          { label: 'Eligible Employees', value: '14', icon: Users, color: '#10B981' },
-          { label: 'Avg. Commission Rate', value: '8.5%', icon: BarChart3, color: '#8B5CF6' },
-        ].map((stat) => (
-          <div key={stat.label} className="bg-white rounded-xl p-5 shadow-card">
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-xs font-medium text-gray-500">{stat.label}</div>
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: `${stat.color}15` }}
-              >
-                <stat.icon className="w-4 h-4" style={{ color: stat.color }} />
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-          </div>
-        ))}
-      </div>
-
       {/* Segmented tab control */}
       <div className="flex gap-2 bg-gray-100 rounded-lg p-1 w-fit">
         {[
-          ['config', 'Config'],
-          ['ctvs', 'CTVs'],
-          ['earnings', 'Earnings'],
-          ['payouts', 'Payouts'],
+          ['config', tc('tabs.config')],
+          ['ctvs', tc('tabs.ctvs')],
+          ['earnings', tc('tabs.earnings')],
+          ['payouts', tc('tabs.payouts')],
         ].map(([key, label]) => (
           <button
             key={key}
@@ -83,6 +62,8 @@ export function Commission() {
 // ─── CONFIG TAB ────────────────────────────────────────────
 
 function ConfigTab() {
+  const { t } = useTranslation('common');
+  const { t: tc } = useTranslation('commission');
   const [config, setConfig] = useState<CommissionConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -114,7 +95,7 @@ function ConfigTab() {
     return (
       <div className="bg-white rounded-xl shadow-card p-12 flex items-center justify-center gap-3 text-gray-600">
         <Loader className="w-5 h-5 animate-spin" />
-        Loading commission config...
+        {t('loading')}
       </div>
     );
   }
@@ -125,13 +106,13 @@ function ConfigTab() {
         <div className="flex gap-3 items-start">
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="font-medium text-red-900">Error</h4>
+            <h4 className="font-medium text-red-900">{t('error')}</h4>
             <p className="text-red-700 text-sm">{error}</p>
             <button
               onClick={handleLoad}
               className="mt-3 px-3 py-1 text-sm bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors"
             >
-              Retry
+              {tc('config.retry')}
             </button>
           </div>
         </div>
@@ -142,7 +123,7 @@ function ConfigTab() {
   if (!config) {
     return (
       <div className="bg-white rounded-xl shadow-card p-12 text-center text-gray-500">
-        No commission config found
+        {tc('config.loadError')}
       </div>
     );
   }
@@ -168,6 +149,7 @@ interface ConfigTabContentProps {
 }
 
 function ConfigTabContent({ config, onConfigChange, onSaveError, saving, setSaving }: ConfigTabContentProps) {
+  const { t: tc } = useTranslation('commission');
   const enabledLevels = config.levels.filter((l) => l.enabled);
   const enabledSum = enabledLevels.reduce((sum, l) => sum + l.share_percent, 0);
   const isValid = enabledSum <= 100;
@@ -230,7 +212,7 @@ function ConfigTabContent({ config, onConfigChange, onSaveError, saving, setSavi
     <div className="bg-white rounded-xl shadow-card p-6 space-y-6">
       {/* Global referral percent */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-900">Global Default Referral %</label>
+        <label className="block text-sm font-medium text-gray-900">{tc('config.globalReferralPercent')}</label>
         <input
           type="number"
           min="0"
@@ -250,13 +232,13 @@ function ConfigTabContent({ config, onConfigChange, onSaveError, saving, setSavi
       {/* Levels table */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-gray-900">Commission Levels</h3>
+          <h3 className="text-sm font-medium text-gray-900">{tc('config.commissionLevels')}</h3>
           <button
             onClick={handleAddLevel}
             className="flex items-center gap-2 px-3 py-1.5 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Add Level
+            {tc('config.addLevel')}
           </button>
         </div>
 
@@ -264,11 +246,11 @@ function ConfigTabContent({ config, onConfigChange, onSaveError, saving, setSavi
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-y border-gray-200">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Level</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Label</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Enabled</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Share %</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Action</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('config.level')}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('config.label')}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('config.enabled')}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('config.sharePercent')}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('config.action')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -324,8 +306,8 @@ function ConfigTabContent({ config, onConfigChange, onSaveError, saving, setSavi
 
       {/* Validation message */}
       <div className="flex items-center gap-2 text-sm">
-        <span className="text-gray-600">Enabled total: {enabledSum}%</span>
-        {!isValid && <span className="text-red-600 font-medium">Enabled levels exceed 100%</span>}
+        <span className="text-gray-600">{tc('config.enabledTotal')}: {enabledSum}%</span>
+        {!isValid && <span className="text-red-600 font-medium">{tc('config.exceeds100')}</span>}
       </div>
 
       {/* Save error */}
@@ -341,7 +323,7 @@ function ConfigTabContent({ config, onConfigChange, onSaveError, saving, setSavi
             : 'bg-primary text-white hover:bg-primary-dark'
         }`}
       >
-        {saving ? 'Saving...' : 'Save'}
+        {saving ? tc('config.saving') : tc('config.save')}
       </button>
     </div>
   );
@@ -350,6 +332,8 @@ function ConfigTabContent({ config, onConfigChange, onSaveError, saving, setSavi
 // ─── CTV TAB ────────────────────────────────────────────
 
 function CtvTab() {
+  const { t } = useTranslation('common');
+  const { t: tc } = useTranslation('commission');
   const [ctvs, setCtvs] = useState<CtvRecord[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -380,7 +364,7 @@ function CtvTab() {
     return (
       <div className="bg-white rounded-xl shadow-card p-12 flex items-center justify-center gap-3 text-gray-600">
         <Loader className="w-5 h-5 animate-spin" />
-        Loading CTVs...
+        {t('loading')}
       </div>
     );
   }
@@ -391,13 +375,13 @@ function CtvTab() {
         <div className="flex gap-3 items-start">
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="font-medium text-red-900">Error</h4>
+            <h4 className="font-medium text-red-900">{t('error')}</h4>
             <p className="text-red-700 text-sm">{error}</p>
             <button
               onClick={handleLoad}
               className="mt-3 px-3 py-1 text-sm bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors"
             >
-              Retry
+              {tc('config.retry')}
             </button>
           </div>
         </div>
@@ -409,12 +393,12 @@ function CtvTab() {
     return (
       <div className="bg-white rounded-xl shadow-card p-12 text-center">
         <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-        <p className="text-gray-600 font-medium mb-4">No CTVs yet</p>
+        <p className="text-gray-600 font-medium mb-4">{tc('ctv.noCtvs')}</p>
         <button
           onClick={() => setShowAddModal(true)}
           className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm font-medium"
         >
-          Add First CTV
+          {tc('ctv.addFirstCtv')}
         </button>
         {showAddModal && <AddCtvModal onClose={() => setShowAddModal(false)} onSuccess={() => { handleLoad(); setShowAddModal(false); }} />}
       </div>
@@ -429,7 +413,7 @@ function CtvTab() {
           className="flex items-center gap-2 px-3 py-1.5 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
         >
           <Plus className="w-4 h-4" />
-          Add CTV
+          {tc('ctv.addCtv')}
         </button>
       </div>
 
@@ -438,13 +422,13 @@ function CtvTab() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-y border-gray-200">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Name</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Phone</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Email</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">LOB</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Upline</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Action</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('ctv.name')}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('ctv.phone')}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('ctv.email')}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('ctv.lob')}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('ctv.upline')}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('ctv.status')}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{tc('ctv.action')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -467,6 +451,7 @@ interface CtvRowProps {
 }
 
 function CtvRow({ ctv, onStatusChange }: CtvRowProps) {
+  const { t: tc } = useTranslation('commission');
   const [toggling, setToggling] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -499,7 +484,7 @@ function CtvRow({ ctv, onStatusChange }: CtvRowProps) {
               : 'bg-gray-100 text-gray-600'
           }`}
         >
-          {ctv.active ? 'Active' : 'Suspended'}
+          {ctv.active ? tc('ctv.active') : tc('ctv.suspended')}
         </span>
       </td>
       <td className="px-4 py-3">
@@ -512,7 +497,7 @@ function CtvRow({ ctv, onStatusChange }: CtvRowProps) {
               : 'bg-green-50 text-green-700 hover:bg-green-100 disabled:bg-gray-100 disabled:text-gray-400'
           }`}
         >
-          {toggling ? '...' : ctv.active ? 'Suspend' : 'Reactivate'}
+          {toggling ? '...' : ctv.active ? tc('ctv.suspend') : tc('ctv.reactivate')}
         </button>
         {error && <p className="text-red-600 text-xs mt-1">{error}</p>}
       </td>
@@ -526,6 +511,8 @@ interface AddCtvModalProps {
 }
 
 function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
+  const { t } = useTranslation('common');
+  const { t: tc } = useTranslation('commission');
   const [input, setInput] = useState<CreateCtvInput>({
     name: '',
     phone: '',
@@ -563,7 +550,7 @@ function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md space-y-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Add New CTV</h3>
+          <h3 className="text-lg font-semibold text-gray-900">{tc('ctv.addCtv')}</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X className="w-5 h-5" />
           </button>
@@ -572,7 +559,7 @@ function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
         {/* Form fields */}
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-1">Name</label>
+            <label className="block text-sm font-medium text-gray-900 mb-1">{tc('ctv.name')}</label>
             <input
               type="text"
               value={input.name}
@@ -583,7 +570,7 @@ function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-1">Phone</label>
+            <label className="block text-sm font-medium text-gray-900 mb-1">{tc('ctv.phone')}</label>
             <input
               type="tel"
               value={input.phone}
@@ -594,7 +581,7 @@ function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-900 mb-1">{tc('ctv.email')}</label>
             <input
               type="email"
               value={input.email}
@@ -605,7 +592,7 @@ function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-1">Password</label>
+            <label className="block text-sm font-medium text-gray-900 mb-1">{t('password', { ns: 'auth' })}</label>
             <input
               type="password"
               value={input.password}
@@ -646,7 +633,7 @@ function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
             onClick={onClose}
             className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            Cancel
+            {t('cancel')}
           </button>
           <button
             onClick={handleSubmit}
@@ -657,7 +644,7 @@ function AddCtvModal({ onClose, onSuccess }: AddCtvModalProps) {
                 : 'bg-primary text-white hover:bg-primary-dark'
             }`}
           >
-            {submitting ? 'Creating...' : 'Create'}
+            {submitting ? t('loading') : t('save')}
           </button>
         </div>
       </div>

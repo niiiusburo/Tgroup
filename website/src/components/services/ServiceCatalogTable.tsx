@@ -56,7 +56,7 @@ export function ServiceCatalogTable({
               {t('columns.price')}
             </th>
             <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-              HH%
+              {t('columns.commissionRateShort')}
             </th>
             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
               {tc('actions')}
