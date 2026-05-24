@@ -3,7 +3,7 @@ const { query: legacyQuery, getQuery } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const { requirePermission } = require('../middleware/auth');
 const { getVietnamNow } = require('../lib/dateUtils');
-const { addAccentInsensitiveSearchCondition } = require('../utils/search');
+const { addAccentInsensitiveSearchCondition, normalizeVietnamese } = require('../utils/search');
 
 const router = express.Router();
 

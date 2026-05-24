@@ -67,6 +67,8 @@
 | PUT | `/:id` | Perm:`services.edit` | Product fields | Updated product |
 | DELETE | `/:id` | Perm:`services.edit` | — | 204 or 409 if linked records exist |
 
+POST/PUT must write the accent-insensitive search column as `namenosign = normalizeVietnamese(name)` in both dental `/api/Products` and cosmetic `/api/cosmetic/Products`.
+
 ## Product Categories (`/api/ProductCategories`)
 
 | Method | Path | Auth | Body / Query | Response |
@@ -133,7 +135,7 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/:id` | Auth | — | Balance breakdown |
+| GET | `/:id` | Auth | — | `{ id, name, deposit_balance, outstanding_balance, total_deposited, total_used, total_refunded }`; cosmetic mirror reads request-scoped cosmetic DB at `/api/cosmetic/CustomerBalance/:id` |
 
 ## Customer Receipts (`/api/CustomerReceipts`)
 
@@ -170,6 +172,8 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 | GET | `/resolve/:employeeId` | Perm:`permissions.view` | — | Effective permissions breakdown |
 
 ## Reports (`/api/Reports`)
+
+Revenue paid totals count posted `payment_allocations` linked to saleorders plus direct posted service receipts with `payments.service_id IS NOT NULL` and no allocation rows. Deposits, refunds, deposit usage, unallocated wallet/customer payments without `service_id`, and voided rows are excluded.
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
@@ -393,10 +397,11 @@ Hosoonline uses a mixed current contract: if `HOSOONLINE_USERNAME` and `HOSOONLI
 ---
 
 ## Cosmetic LOB Mirrors (v2, gated by COSMETIC_LOB_ENABLED + requireLobScope('cosmetic') + cosmetic.access)
-All existing dental route shapes are mirrored at `/api/cosmetic/*` (e.g. /api/cosmetic/Partners, /api/cosmetic/Appointments, /api/cosmetic/Employees, /api/cosmetic/Products, /api/cosmetic/Payments, /api/cosmetic/Reports/* etc.).
+All existing dental route shapes required by TMV/NK3 Cosmetic mode are mirrored at `/api/cosmetic/*` (e.g. `/api/cosmetic/Partners`, `/api/cosmetic/Appointments`, `/api/cosmetic/Employees`, `/api/cosmetic/Products`, `/api/cosmetic/ProductCategories`, `/api/cosmetic/Payments`, `/api/cosmetic/CustomerBalance`, `/api/cosmetic/CustomerReceipts`, `/api/cosmetic/SaleOrderLines`, `/api/cosmetic/SaleOrders`, `/api/cosmetic/MonthlyPlans`, `/api/cosmetic/Companies`, `/api/cosmetic/Reports/*`, `/api/cosmetic/DashboardReports/*`, `/api/cosmetic/CustomerSources`, `/api/cosmetic/Permissions`, `/api/cosmetic/DotKhams`, `/api/cosmetic/settings`, `/api/cosmetic/ExternalCheckups`, `/api/cosmetic/face`, and `/api/cosmetic/Exports`).
 - Auth: same as dental equivalent + lob_scope check (hard) + permission (soft)
 - Response: identical shape, but sourced exclusively from tcosmetic_demo
 - Flag off or missing scope → 503 or 403 S_LOB_FORBIDDEN
+- Frontend `apiFetch(..., { lob: 'cosmetic' })` prefixes requests with `/api/cosmetic`; omitted or `dental` uses legacy `/api/*`.
 
 See cosmetic-clients.yaml, business-unit.yaml for details.
 

@@ -42,14 +42,22 @@ function useObjectUrls(files: File[]) {
 }
 
 type FeedbackSource = 'manual' | 'auto';
+type AutoHostMode = 'current' | 'all';
 
 interface FeedbackAdminContentProps {
   readonly canEdit?: boolean;
 }
 
+function getCurrentFeedbackHost() {
+  if (typeof window === 'undefined') return '';
+  return window.location.host || window.location.hostname || '';
+}
+
 export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentProps) {
   const { t } = useTranslation('settings');
   const [activeTab, setActiveTab] = useState<FeedbackSource>('manual');
+  const [currentHost] = useState(() => getCurrentFeedbackHost());
+  const [autoHostMode, setAutoHostMode] = useState<AutoHostMode>(() => (getCurrentFeedbackHost() ? 'current' : 'all'));
   const [threads, setThreads] = useState<AdminFeedbackThread[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -71,10 +79,10 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
     currentCount: files.length,
   });
 
-  const loadThreads = useCallback(async (source?: FeedbackSource) => {
+  const loadThreads = useCallback(async (source?: FeedbackSource, host?: string) => {
     setLoading(true);
     try {
-      const res = await fetchAllFeedback(source);
+      const res = await fetchAllFeedback({ source, host });
       setThreads(res.items);
     } catch (err) {
       console.error('Failed to load admin feedback:', err);
@@ -117,7 +125,7 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
     try {
       await Promise.all(Array.from(selectedIds).map((id) => deleteFeedbackThread(id)));
       setSelectedIds(new Set());
-      await loadThreads(activeTab);
+      await loadThreads(activeTab, activeTab === 'auto' && autoHostMode === 'current' ? currentHost : undefined);
     } catch (err) {
       console.error('Failed to delete feedback:', err);
       alert(t('feedbackAdmin.deleteError'));
@@ -125,10 +133,6 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
       setDeleting(false);
     }
   }
-
-  useEffect(() => {
-    loadThreads(activeTab);
-  }, [loadThreads, activeTab]);
 
   useEffect(() => {
     if (!modalThreadId) {
@@ -206,7 +210,7 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
       setDetail((prev) => (prev ? { ...prev, messages: [...prev.messages, msg] } : prev));
       setReplyInput('');
       setFiles([]);
-      await loadThreads(activeTab);
+      await loadThreads(activeTab, activeTab === 'auto' && autoHostMode === 'current' ? currentHost : undefined);
     } catch (err: unknown) {
       console.error('Failed to send reply:', err);
       const message = err instanceof Error ? err.message : 'Failed to send. Please try again.';
@@ -224,6 +228,11 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
   }
 
   const isAutoTab = activeTab === 'auto';
+  const activeHostFilter = isAutoTab && autoHostMode === 'current' ? currentHost : undefined;
+
+  useEffect(() => {
+    loadThreads(activeTab, activeHostFilter);
+  }, [loadThreads, activeTab, activeHostFilter]);
 
   const autoColumns: Column<AdminFeedbackThread>[] = [
     {
@@ -462,11 +471,37 @@ export function FeedbackAdminContent({ canEdit = false }: FeedbackAdminContentPr
           </h3>
           <p className="text-sm text-gray-500">
             {isAutoTab
-              ? `${threads.length} error${threads.length !== 1 ? 's' : ''} auto-captured from production. Click View to see stack traces, source locations, and occurrence counts.`
+              ? `${threads.length} error${threads.length !== 1 ? 's' : ''} auto-captured${activeHostFilter ? ` for ${activeHostFilter}` : ' across all hosts'}. Click View to see stack traces, source locations, and occurrence counts.`
               : 'Review and respond to feedback submitted by employees.'}
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {isAutoTab && currentHost && (
+            <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl">
+              <button
+                type="button"
+                onClick={() => { setAutoHostMode('current'); setSelectedIds(new Set()); }}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 ${
+                  autoHostMode === 'current'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Current host
+              </button>
+              <button
+                type="button"
+                onClick={() => { setAutoHostMode('all'); setSelectedIds(new Set()); }}
+                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 ${
+                  autoHostMode === 'all'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                All hosts
+              </button>
+            </div>
+          )}
           {canEdit && selectedIds.size > 0 && (
             <button
               type="button"

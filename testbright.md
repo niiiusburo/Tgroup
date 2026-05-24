@@ -10,6 +10,378 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: TMV Cosmetic Feedback Sweep 2026-05-24
+
+Feature/edit name: TMV Cosmetic Feedback Sweep 2026-05-24
+
+Changed URLs and API routes:
+- `https://tmv.2checkin.com/feedback?lob=cosmetic`
+- `https://tmv.2checkin.com/permissions?lob=cosmetic`
+- `https://tmv.2checkin.com/customers?lob=cosmetic`
+- `https://tmv.2checkin.com/employees?lob=cosmetic`
+- `https://tmv.2checkin.com/calendar?lob=cosmetic`
+- `GET /api/Feedback/all?source=auto&host=tmv.2checkin.com`
+- `GET /api/cosmetic/Permissions/groups`
+- `GET/PUT /api/cosmetic/Permissions/employees`
+- `GET /api/cosmetic/CustomerBalance/:customerId`
+- `GET/POST /api/cosmetic/Payments`
+- `GET/POST/PUT /api/cosmetic/Partners`
+- `GET/POST/PUT /api/cosmetic/Employees`
+- `GET/POST/PUT /api/cosmetic/Appointments`
+
+Affected data flows:
+- Cosmetic appointment create/edit keeps the active LOB from form submission through appointment hooks.
+- Cosmetic customer add/edit, CSKH/sales/branch selectors, employee add/edit, and permission-board calls load and write through Cosmetic mirrors.
+- Cosmetic deposits, payment history, wallet top-ups, payment void/delete, and customer balance reads use Cosmetic mirrors.
+- Feedback Auto-detected Errors defaults to the current host, while User Feedback remains manual/global.
+
+User roles:
+- Admin with both Dental and Cosmetic LOB access.
+- Cosmetic staff with customer, calendar, payment, employee, permission, and feedback access according to their role.
+
+Happy paths:
+- Open Cosmetic permissions and verify no `GET /Permissions/employees` 404 appears.
+- Open Cosmetic employee add/edit and verify branch and permission group dropdowns load.
+- Open Cosmetic customer add/edit and verify branch, CSKH, sales, and referrer selectors load from Cosmetic data.
+- Create or edit a Cosmetic appointment and verify the request uses `/api/cosmetic/Appointments`.
+- Open a Cosmetic customer with deposits and verify `CustomerBalance` returns 200 and the payment modal can see available deposit.
+- Open Feedback Auto-detected Errors and verify the first request includes `source=auto&host=tmv.2checkin.com`; toggle All hosts and verify `host` is omitted.
+
+Edge cases:
+- Dental-only users must still be blocked from Cosmetic mirrors by the LOB gate.
+- Dental mode must continue to use top-level `/api/*` routes.
+- Empty/unknown feedback host should preserve all-host auto-error behavior.
+- Manual feedback must not disappear when the auto host filter is active.
+
+Regressions:
+- Existing Dental appointment, customer, employee, permission, and payment workflows must still pass.
+- Cosmetic `/api/cosmetic/CustomerBalance/:id` must remain mounted after deploy.
+- Feedback detail, reply, status, delete, unread count, and attachment flows remain unchanged.
+
+Setup data and login state:
+- Live TMV: `https://tmv.2checkin.com`.
+- Use an admin with Dental + Cosmetic access.
+- Keep `?lob=cosmetic` or persisted `tgclinic_lob=cosmetic`.
+- Verify against real Cosmetic customers with posted deposits when testing payment modal behavior.
+
+TestSprite execution items:
+- [ ] PENDING: Verify Cosmetic permissions page loads employees/groups without 404 and screenshot the page.
+- [ ] PENDING: Verify Cosmetic employee add/edit loads branch and permission group dropdowns from Cosmetic routes.
+- [ ] PENDING: Verify Cosmetic customer add/edit assignment selectors load from Cosmetic routes.
+- [ ] PENDING: Verify Cosmetic appointment create/edit posts to `/api/cosmetic/Appointments`.
+- [ ] PENDING: Verify Cosmetic payment modal sees non-zero posted deposit through `/api/cosmetic/CustomerBalance/:id`.
+- [ ] PENDING: Verify Feedback Auto-detected Errors current-host and all-host toggles with screenshots.
+
+---
+
+# TestSprite Plan: TMV Feedback Host Hygiene
+
+Feature/edit name: TMV Feedback Host Hygiene
+
+Changed URLs and API routes:
+- `https://tmv.2checkin.com/feedback?lob=cosmetic`
+- `GET /api/Feedback/all?source=auto&host=tmv.2checkin.com`
+- `GET /api/Feedback/all?source=auto`
+- `GET /api/Feedback/all?source=manual`
+
+Affected data flows:
+- Auto-detected feedback reads remain global feedback data, but the admin queue can now narrow auto-errors to the current browser host using `error_events.metadata.url` or `feedback_threads.page_url`.
+- Manual employee feedback remains unfiltered by host and visible from the User Feedback tab.
+- The all-host auto-error view remains available for cleanup of stale hosts such as `ctv.2checkin.com`, `nk2.2checkin.com`, `76-13-16-68.sslip.io`, and raw IP origins.
+
+User roles:
+- Admin or staff with effective settings feedback/admin access that can open the feedback settings page.
+
+Happy paths:
+- Open `https://tmv.2checkin.com/feedback?lob=cosmetic`, switch to Auto-detected Errors, and verify the default request includes `source=auto&host=tmv.2checkin.com`.
+- Toggle All hosts and verify the request keeps `source=auto` but omits `host`.
+- Switch back to User Feedback and verify manual feedback loads with `source=manual` and no host filter.
+
+Edge cases:
+- Hosts submitted with a scheme or path normalize to the hostname before filtering.
+- Empty host keeps the old all-host behavior.
+- Auto rows without `metadata.url` can still match `feedback_threads.page_url` when that stores a full URL.
+
+Regressions:
+- Existing `/api/Feedback/all?source=manual` and `/api/Feedback/all?source=auto` callers still work.
+- Feedback detail, reply, status, delete, unread count, and attachment flows remain unchanged.
+- Feedback is still not routed through `/api/cosmetic/Feedback`.
+
+Setup data and login state:
+- Live TMV: `https://tmv.2checkin.com`.
+- Use a logged-in admin with feedback/settings access.
+- Keep Cosmetic context via `?lob=cosmetic` only for page context; feedback remains global.
+
+TestSprite execution items:
+- [ ] PENDING: Verify Auto-detected Errors defaults to current-host TMV filtering and screenshot the queue count.
+- [ ] PENDING: Verify All hosts mode shows stale-host cleanup scope without losing auto-error fields.
+- [ ] PENDING: Verify User Feedback still lists manual employee feedback without host filtering.
+
+---
+
+# TestSprite Plan: TMV Cosmetic Feedback Fixes
+
+Feature/edit name: TMV Cosmetic Feedback Fixes
+
+Changed URLs and API routes:
+- `https://tmv.2checkin.com/permissions?lob=cosmetic`
+- `https://tmv.2checkin.com/customers/:id?lob=cosmetic`
+- `GET /api/cosmetic/Permissions/employees`
+- `GET/PUT /api/cosmetic/Permissions/employees/:employeeId`
+- `GET /api/cosmetic/Permissions/groups`
+- `GET /api/cosmetic/Permissions/resolve/:employeeId`
+- `POST/PATCH /api/cosmetic/SaleOrders`
+
+Affected data flows:
+- PermissionBoard under Cosmetic reads and writes permission assignments through the request-scoped Cosmetic permissions mirror.
+- Cosmetic customer add-service submits service records through `/api/cosmetic/SaleOrders`.
+- Service save failures stay visible in the modal instead of only logging to the console.
+
+User roles:
+- Admin with both Dental and Cosmetic LOB access plus `permissions.view`, `permissions.edit`, `customers.edit`, and `services.view`.
+- Cosmetic staff/admin creating staff accounts and customer services.
+
+Happy paths:
+- Open Cosmetic `/permissions` and verify employee permission assignments load without a 404.
+- Create or edit a Cosmetic employee and verify the permission group selector can load groups/employees.
+- Open a Cosmetic customer profile, add a service, and verify the request uses `/api/cosmetic/SaleOrders`.
+- If save fails, verify the modal displays the error above the footer and remains open.
+
+Edge cases:
+- Dental-only users calling `/api/cosmetic/Permissions/employees` receive the LOB gate, not Dental data.
+- Missing `permissions.view` still returns a permission failure.
+- A stale/invalid service payload produces a visible submit error instead of a silent no-op.
+
+Regressions:
+- Dental `/permissions` still uses top-level `/api/Permissions/*`.
+- Dental customer service creation still uses top-level `/api/SaleOrders`.
+- Existing Cosmetic customer, source, service, and payment route mirrors remain available.
+
+Setup data and login state:
+- Live TMV: `https://tmv.2checkin.com`.
+- Use an admin account with both Dental and Cosmetic LOB access.
+- Keep `tgclinic_lob=cosmetic` or open with `?lob=cosmetic`.
+
+TestSprite execution items:
+- [x] PASS: Reproduced pre-fix live `GET /api/cosmetic/Permissions/employees` 404 from TMV Cosmetic permissions screenshot - direct API returned 404 while top-level `/api/Permissions/employees` returned 200.
+- [x] PASS: After deploy, verify Cosmetic permissions page has no `API GET /Permissions/employees failed (404)` and screenshot the page - `output/playwright/tmv-cosmetic-feedback-20260523T1657Z/01-permissions-cosmetic-after.png`; final network audit recorded 0 permission 404s.
+- [x] PASS: After deploy, verify `GET /api/cosmetic/Permissions/employees` returns 200 - direct API returned 200 with 103 employee rows.
+- [x] PASS: After deploy, verify Cosmetic customer add-service posts to `/api/cosmetic/SaleOrders`; if save fails, visible submit error is shown - Playwright intercepted `POST https://tmv.2checkin.com/api/cosmetic/SaleOrders` and screenshot `output/playwright/tmv-cosmetic-feedback-20260523T1657Z/02-service-save-error-visible-after.png` shows the footer-level error; final network audit recorded 0 Cosmetic feedback/permissions 404s.
+
+---
+
+# TestSprite Plan: TMV Cosmetic Money Isolation Regression
+
+Feature/edit name: TMV Cosmetic Money Isolation Regression
+
+Changed URLs and API routes:
+- `https://tmv.2checkin.com/customers/fcee66e3-0e1b-4527-825d-1fdd171d12ee?lob=cosmetic`
+- `GET /api/cosmetic/Partners?search=0989460997`
+- `GET /api/cosmetic/CustomerBalance/:id`
+- `GET /api/cosmetic/Payments/deposits?customerId=:id`
+- `POST /api/cosmetic/Payments/:id/void`
+- Control checks against top-level Dental `GET /api/Partners?search=T163752` and `GET /api/CustomerBalance/:id`
+
+Affected data flows:
+- Cosmetic customer profile balance reads must come only from `tcosmetic_smoketest.dbo.payments`.
+- Cosmetic deposit history must filter by the Cosmetic customer UUID, not by shared phone and not by Dental rows.
+- Cross-LOB badge is allowed as a phone-match indicator only; it must not merge Dental money, appointments, services, or profile balances into Cosmetic.
+- False Cosmetic deposit `05923eda-0813-481d-9b15-63236f54c84c` for customer `fcee66e3-0e1b-4527-825d-1fdd171d12ee` was backed up and voided, preserving audit history while removing active balance.
+
+User roles:
+- Admin with both Dental and Cosmetic LOB access and `payment.view` / `payment.void`.
+- Cosmetic staff with customer/payment view permissions should see the corrected 0 đ active deposit balance.
+
+Happy paths:
+- Open the Cosmetic customer profile for `thuan le` phone `0989460997` and verify the header shows `Deposit Balance 0 đ`.
+- Keep the `also a dental client` badge visible when the cross-view phone probe finds Dental matches.
+- Verify `/api/cosmetic/CustomerBalance/fcee66e3-0e1b-4527-825d-1fdd171d12ee` returns `deposit_balance: 0`.
+- Verify `/api/cosmetic/Payments/deposits?customerId=fcee66e3-0e1b-4527-825d-1fdd171d12ee` returns only rows for that Cosmetic customer and no posted active deposits.
+
+Edge cases:
+- A Dental-only customer UUID must return 404 under `/api/cosmetic/CustomerBalance/:id`.
+- A Dental ref such as `T163752` must be absent from `/api/cosmetic/Partners` while still present in top-level Dental `/api/Partners`.
+- Voided Cosmetic deposit rows may remain visible for audit, but must not contribute to active deposit balance.
+- Same phone in both LOBs must not be treated as a shared financial identity.
+
+Regressions:
+- Dental mode must still show the Dental customer rows and balances through top-level `/api/*`.
+- Cosmetic pages must not fire top-level `/api/Partners`, `/api/CustomerBalance`, `/api/Payments`, `/api/Appointments`, `/api/Products`, `/api/Employees`, `/api/Reports`, `/api/settings`, or `/api/face` calls while Cosmetic is selected.
+- Existing Cosmetic customer, appointment, service, employee, report, source, bank, face, HSO, and export mirrors must remain available.
+
+Setup data and login state:
+- Live TMV: `https://tmv.2checkin.com`.
+- Cosmetic customer: `fcee66e3-0e1b-4527-825d-1fdd171d12ee`, name `thuan le`, phone `0989460997`.
+- Voided false deposit: `05923eda-0813-481d-9b15-63236f54c84c`, amount `1,000,000`, now `status='voided'`.
+- Live backup before correction: `/var/backups/tgroup-nk3/tmv-cosmetic-false-deposit-20260523T105515Z/`.
+- Evidence artifacts: `output/playwright/tmv-cosmetic-lob-isolation-20260523T1055Z/`.
+
+TestSprite execution items:
+- [x] PASS: Verify false Cosmetic deposit row was backed up before correction - `/var/backups/tgroup-nk3/tmv-cosmetic-false-deposit-20260523T105515Z/payment-before.tsv` and `customer-before.tsv`.
+- [x] PASS: Verify Cosmetic false deposit was voided through `/api/cosmetic/Payments/:id/void` - API response returned `voidSuccess=true`, `beforeBalance=1000000`, `afterBalance=0`.
+- [x] PASS: Verify Cosmetic customer profile browser screenshot shows `Deposit Balance 0 đ` - `output/playwright/tmv-cosmetic-lob-isolation-20260523T1055Z/01-thuan-le-cosmetic-balance-zero.png`.
+- [x] PASS: Verify live browser network on the profile had no bad top-level Dental data calls - `browser-profile-network.json` recorded 19 API calls, 16 Cosmetic calls, 0 bad top-level calls, 0 errors.
+- [x] PASS: Verify live API LOB isolation checks - `cosmetic-lob-isolation-api.json` recorded 15 checks and 0 failures.
+- [x] PASS: Verify Cosmetic DB integrity checks for payments/appointments/saleorders/dotkhams missing Cosmetic customers and active `thuan le` deposits - `cosmetic-lob-isolation-db.tsv` recorded all zero counts.
+
+---
+
+# TestSprite Plan: TMV Cosmetic LOB Redo
+
+Feature/edit name: TMV Cosmetic LOB Redo
+
+Changed URLs and API routes:
+- `https://tmv.2checkin.com`
+- Cosmetic-mode `/dashboard`
+- Cosmetic-mode `/customers` and `/customers/:id`
+- Cosmetic-mode `/calendar`
+- Cosmetic-mode `/payment`
+- Cosmetic-mode `/services`
+- Cosmetic-mode `/service-catalog`
+- Cosmetic-mode `/employees`
+- Cosmetic-mode `/reports/revenue`
+- `GET/POST/PUT /api/cosmetic/Partners`
+- `GET/POST/PUT /api/cosmetic/Appointments`
+- `GET/POST/PATCH/DELETE /api/cosmetic/Payments`
+- `GET/POST/PUT/PATCH /api/cosmetic/Products`
+- `GET/POST/PATCH /api/cosmetic/Employees`
+- `GET/POST/PUT/DELETE /api/cosmetic/CustomerSources`
+- `GET /api/cosmetic/DotKhams`
+- `GET/PUT /api/cosmetic/settings/bank`
+- `GET/POST /api/cosmetic/ExternalCheckups`
+- `POST /api/cosmetic/face/recognize`, `POST /api/cosmetic/face/register`, `POST /api/cosmetic/face/re-register`, `GET /api/cosmetic/face/status/:id`
+- `GET /api/cosmetic/Exports/*`
+
+Affected data flows:
+- Business Unit selection initializes from `?lob=cosmetic` or persisted `tgclinic_lob=cosmetic` before customer, appointment, employee, service, payment, report, and dashboard data hooks fire.
+- Customer add/edit, assignment searches, uniqueness checks, face-ID rescue searches, profile reads, service actions, monthly plans, DotKham history, HSO/checkups, customer sources, and bank settings pass the active Cosmetic LOB to API clients.
+- Cosmetic mirror routes now include customer sources, DotKhams, bank settings, external checkups, face-ID, and exports so Cosmetic callers do not hit dental/global endpoints.
+
+User roles:
+- Admin with both Dental and Cosmetic LOB access, including `kien@clinic.vn` after the live DB permission repair.
+- Cosmetic staff/admin users with `cosmetic.access` and the relevant workflow permissions.
+
+Happy paths:
+- Open `https://tmv.2checkin.com/?lob=cosmetic` and confirm the first dashboard/customer/calendar/payment/service/employee/report data requests use `/api/cosmetic/*`.
+- Add and edit a Cosmetic customer, including CSKH/sales assignment searches and uniqueness checks.
+- Add and edit a Cosmetic appointment for a Cosmetic customer.
+- Add a Cosmetic payment/deposit and confirm reload/balance routes stay Cosmetic.
+- Add/edit Cosmetic service catalog records and sale-order/service lines.
+- Use Face ID rescue/register flows in Cosmetic mode without calling top-level `/api/face` or top-level `/api/Partners`.
+- Load customer sources, bank settings, DotKham/medical-history tooltip, HSO/checkup gallery/upload, and exports through Cosmetic mirrors.
+
+Edge cases:
+- Persisted `tgclinic_lob=cosmetic` must beat the default Dental value on first render.
+- `?lob=cosmetic` must deep-link into Cosmetic mode without a first-render Dental fetch.
+- Switching back to Dental must keep legacy top-level `/api/*` behavior.
+- Non-admin or single-LOB staff must not get unauthorized Cosmetic switching from localStorage/query attempts.
+- Cosmetic customer searches must remain accent-insensitive.
+
+Regressions:
+- Dental mode must still use top-level `/api/*` and Dental data.
+- CTV routes must remain CTV-only; admin `GET /api/ctv/me` should stay forbidden.
+- Revenue must still exclude deposits/refunds/usage/voids while including direct posted service payments.
+- Payment/customer balance and sale-order-line changes must not double-count allocations.
+
+Setup data and login state:
+- Use live TMV: `https://tmv.2checkin.com`.
+- Use an admin with both LOBs (`t@clinic.vn` verified for full browser/API sweep; `kien@clinic.vn` live DB row now has `{dental,cosmetic}` but still needs the real password for browser login proof).
+- Keep `COSMETIC_LOB_ENABLED=true` and `VITE_COSMETIC_LOB_ENABLED=true`.
+- Preserve screenshot evidence for every browser-visible checked page under `output/playwright/`.
+
+TestSprite execution items:
+- [x] PASS: Verify Cosmetic first-render request audit has zero top-level `/api/Employees`, `/api/Appointments`, `/api/Partners`, `/api/Payments`, `/api/Products`, `/api/face`, or `/api/settings` calls after selecting/persisting Cosmetic - live browser artifact `output/playwright/tmv-cosmetic-after-deploy-20260523T1033Z/cosmetic-browser-after-deploy-results.json` recorded 50 `/api/cosmetic/*` calls and 0 bad top-level data calls.
+- [x] PASS: Verify Cosmetic dashboard screenshot on `https://tmv.2checkin.com/?lob=cosmetic` - `output/playwright/tmv-cosmetic-after-deploy-20260523T1033Z/01-cosmetic-dashboard.png`.
+- [x] PASS: Verify Cosmetic customers add/edit and customer-list screenshot - API mutation artifact created/edited customer `47b6d6d0-ce04-4723-8dcf-688639944c64`; screenshots `02-cosmetic-customers.png` and `09-cosmetic-created-customer.png`.
+- [x] PASS: Verify Cosmetic appointment add/edit and calendar screenshot - API mutation artifact created/edited appointment `ef1fdadf-cff3-4e30-b2a4-905351eb9808`; screenshot `03-cosmetic-calendar.png`.
+- [x] PASS: Verify Cosmetic payment/deposit add/reload and payment screenshot - API mutation artifact created deposit `ebda1ef8-adaf-4e42-bdb3-5c8847de2df0`, reloaded payments/deposits/balance; screenshot `04-cosmetic-payment.png`.
+- [x] PASS: Verify Cosmetic service/service-catalog add/edit and screenshots - API mutation artifact created/edited service `5144f944-a4ab-49b6-a22d-f3cb721eb154`; screenshots `05-cosmetic-services.png` and `06-cosmetic-service-catalog.png`.
+- [x] PASS: Verify Cosmetic employees list/add/edit and employee screenshot - API mutation artifact created/edited employee `e3550ab6-6886-4b0c-9250-20baa753b185`; screenshot `07-cosmetic-employees.png`.
+- [x] PASS: Verify Cosmetic revenue report screenshot and revenue paid/deposit exclusion behavior - `/api/cosmetic/Reports/revenue/summary` returned 200 in artifact `cosmetic-api-after-deploy-results.json`; screenshot `08-cosmetic-reports-revenue.png`.
+- [x] PASS: Verify Cosmetic support mirrors for customer sources, DotKhams, bank settings, HSO/checkups, face-ID, and exports return non-5xx and stay LOB-scoped - artifact `cosmetic-api-after-deploy-results.json` covered `/api/cosmetic/CustomerSources`, `/DotKhams`, `/settings/bank`, `/ExternalCheckups`, `/face/status`, and `/Exports/types` with no failures.
+- [x] PASS: Verify Dental mode still uses Dental/top-level routes after switching back - API artifact confirmed the Cosmetic-created customer is absent from top-level Dental `/api/Partners/:id` with 404, preserving DB separation.
+
+---
+
+# TestSprite Plan: NK3 Cosmetic LOB Feedback Fixes
+
+Feature/edit name: NK3 Cosmetic LOB Feedback Fixes
+
+Changed URLs and API routes:
+- `https://76-13-16-68.sslip.io/reports/revenue`
+- `https://76-13-16-68.sslip.io/feedback` (source of triage only; no feedback code changed)
+- Cosmetic-mode `/employees`
+- Cosmetic-mode `/calendar` and appointment create/edit surfaces
+- Cosmetic-mode `/customers` and `/customers/:id`
+- Cosmetic-mode `/payment` and customer deposit/payment panels
+- `GET/POST/PUT /api/cosmetic/Partners`
+- `GET/POST/PUT /api/cosmetic/Appointments`
+- `GET/POST/PATCH/DELETE /api/cosmetic/Employees`
+- `GET/POST/PATCH/DELETE /api/cosmetic/Payments`
+- `GET /api/cosmetic/Payments/deposits`
+- `GET /api/cosmetic/Payments/deposit-usage`
+- `GET /api/cosmetic/CustomerBalance/:id`
+- `GET /api/cosmetic/SaleOrderLines`
+- `POST /api/cosmetic/Reports/revenue/summary`
+- `POST /api/cosmetic/Reports/revenue/trend`
+- `POST /api/cosmetic/Reports/revenue/by-location`
+- API CORS allowlist for `https://76-13-16-68.sslip.io`
+- `Dockerfile.web` Vite build args for `VITE_COSMETIC_LOB_ENABLED`
+
+Affected data flows:
+- Cosmetic UI create/update/read hooks now pass the active `currentLOB` to API clients so `apiFetch` uses `/api/cosmetic/*` mirror routes.
+- Employee form branch list and employee save use cosmetic `companies` and `partners` rows instead of dental rows.
+- Customer create/update and customer selectors use cosmetic partners and cosmetic companies, preventing dental FK validation against cosmetic company IDs.
+- Customer form company, employee assignment, and referrer selectors pass the active Cosmetic LOB to `fetchCompanies`, `fetchEmployees`, `fetchPartners`, and selected-referrer lookup calls.
+- Appointment create/update uses cosmetic appointments and cosmetic partners, preventing `Partner with given partnerId does not exist` when the selected customer exists only in `tcosmetic_demo`.
+- Cosmetic deposit list, usage history, customer balance, customer profile, and payment mutations use the cosmetic mirror so deposit history and summary cards read the same DB.
+- Revenue summary, trend, and by-location include posted direct `payment_category = 'payment'` receipts with no allocation rows, including imported cosmetic receipts whose `service_id` is blank; by-location shows an unassigned row for paid receipts with no company, while excluding deposits, refunds, deposit usage, and voided payments.
+
+User roles:
+- Admin with both Dental and Cosmetic LOB access.
+- Cosmetic staff/admin users with `cosmetic.access`, relevant customer/appointment/employee/payment/report permissions, and Cosmetic selected in the business-unit selector.
+
+Happy paths:
+- In Cosmetic mode, `/employees` branch dropdown lists cosmetic branches only, and creating/updating an employee posts to `/api/cosmetic/Employees`.
+- In Cosmetic mode, creating/updating an appointment with a cosmetic customer succeeds through `/api/cosmetic/Appointments`.
+- In Cosmetic mode, creating/updating a customer with a cosmetic branch succeeds through `/api/cosmetic/Partners`.
+- In Cosmetic mode, adding a customer deposit shows the row in deposit history and updates summary cards through `/api/cosmetic/CustomerBalance/:id`.
+- On `/reports/revenue` in Cosmetic mode, `Tổng đã thu`, trend, and location cards include posted direct payment-category service receipts even when imported rows have no `service_id` or company assignment yet.
+
+Edge cases:
+- Deposit-category wallet/customer advances without `service_id` must not be counted as revenue and must remain in deposit/cash-flow reporting.
+- Deposits, refunds, deposit usage, and voided payments must remain excluded from revenue paid totals.
+- Switching between Dental and Cosmetic must not leave stale dental customer, employee, sale-order-line, payment, or balance data in cosmetic screens.
+- Cosmetic customer selectors must remain accent-insensitive for Vietnamese names.
+
+Regressions:
+- Dental routes must continue using legacy `/api/*` paths when the active LOB is Dental.
+- Existing payment allocation revenue must still use capped allocation math and not double-count direct receipts that already have payment allocations.
+- Customer profile service/payment tabs should keep loading after the LOB-aware sale-order-line and balance changes.
+- `website/package.json` version is bumped to `0.32.35-cosmetic-lob`.
+
+Setup data and login state:
+- Use NK3: `https://76-13-16-68.sslip.io`.
+- Log in with an admin/staff account that can select Cosmetic LOB.
+- Use a cosmetic branch, cosmetic customer, cosmetic employee, a posted direct `payment_category = 'payment'` receipt with no allocation row, and a deposit-category advance row.
+- Keep `COSMETIC_LOB_ENABLED=true` and verify the cosmetic mirror API is mounted.
+- Verify browser-origin API calls from `https://76-13-16-68.sslip.io` do not fail CORS.
+- Verify the deployed web bundle has `VITE_COSMETIC_LOB_ENABLED=true` so the Business Unit selector can enter Cosmetic mode.
+
+TestSprite execution items:
+- [ ] PENDING: Verify Cosmetic `/employees` lists cosmetic branches and employee create/update does not show dental branches or save to dental.
+- [ ] PENDING: Verify Cosmetic customer add/edit branch, sales staff, CSKH, and referrer selectors request Cosmetic companies/employees/customers and never show Dental-only selector rows.
+- [ ] PENDING: Verify Cosmetic appointment create/update succeeds with a cosmetic-only customer and does not return `Partner with given partnerId does not exist`.
+- [ ] PENDING: Verify Cosmetic customer create/update succeeds with a cosmetic company ID and does not hit the dental companies FK.
+- [ ] PENDING: Verify Cosmetic deposit add/reload shows the deposit row and updates summary cards through `/api/cosmetic/CustomerBalance/:id`.
+- [ ] PENDING: Verify Cosmetic `/reports/revenue` `Tổng đã thu`, trend, and by-location totals include direct posted payment-category receipts with no allocation row, including rows whose `service_id` or company assignment is blank.
+- [ ] PENDING: Verify deposit-category advances, refunds, deposit usage, and voided payments are excluded from revenue.
+- [ ] PENDING: Verify live NK3 browser requests from `https://76-13-16-68.sslip.io` do not trigger CORS failures.
+- [ ] PENDING: Verify live NK3 Docker web build forwards `VITE_COSMETIC_LOB_ENABLED=true` and does not compile the Cosmetic selector as disabled.
+- [ ] PENDING: Verify Dental mode still uses dental data for customers, employees, appointments, payments, customer balance, sale-order lines, and revenue.
+
+---
+
 # TestSprite Plan: NK2 Responsive Population Audit
 
 Feature/edit name: NK2 Responsive Population Audit
@@ -1261,3 +1633,95 @@ TestSprite execution items:
 - [ ] PENDING: Verify file-only staff feedback and file-only staff/admin replies do not crash.
 - [ ] PENDING: Verify missing-thread file replies clean up uploaded files and do not create `feedback_attachments` rows.
 - [ ] PENDING: Verify delete rollback simulation does not remove physical files before DB commit.
+
+## 2026-05-24 — Cosmetic Deposit And Payment LOB Routing
+
+Feature/edit name:
+- Cosmetic deposit wallet and customer payment API routing.
+
+Changed URLs and API routes:
+- Browser-visible surfaces: customer profile payment modal/deposit wallet, `/payment`.
+- Dental API routes remain top-level: `/api/Payments`, `/api/Payments/deposits`, `/api/Payments/deposit-usage`, `/api/CustomerBalance/:id`.
+- Cosmetic API routes must be used when active LOB is Cosmetic: `/api/cosmetic/Payments`, `/api/cosmetic/Payments/deposits`, `/api/cosmetic/Payments/deposit-usage`, `/api/cosmetic/Payments/:id/void`, `/api/cosmetic/Payments/:id`, `/api/cosmetic/Payments/refund`, `/api/cosmetic/CustomerBalance/:id`.
+
+Affected data flows:
+- `BusinessUnitContext.currentLOB` -> deposit hooks/customer payment hooks -> `website/src/lib/api/payments.ts` and `customerBalance.ts` -> `apiFetch` cosmetic prefix -> isolated cosmetic DB payment and balance rows.
+- Cosmetic deposit creation, refund, void, update, delete, deposit usage, and service payment creation must not read or mutate dental payment rows.
+
+User roles:
+- Admin or staff with Cosmetic LOB access and payment permissions.
+- Dental users and Dental active LOB remain on legacy top-level payment routes.
+
+Happy paths:
+- In Cosmetic LOB, opening a customer deposit wallet fetches deposits, deposit usage, and balance from `/api/cosmetic/*`.
+- In Cosmetic LOB, creating a deposit makes the balance visible in the same payment modal/customer wallet refresh.
+- In Cosmetic LOB, creating a service payment with deposit usage posts through `/api/cosmetic/Payments`.
+- Dental LOB still fetches and mutates the legacy `/api/Payments*` and `/api/CustomerBalance/:id` routes.
+
+Edge cases:
+- Cosmetic customer has deposit history but zero dental balance; UI must show the cosmetic balance, not dental 0.
+- Mixed/cash/bank payments with `deposit_used` must stay in the active LOB.
+- Void/delete/update/refund actions must refresh from the same active LOB after mutation.
+- LOB toggle changes must not keep stale dental customer payment/deposit state in Cosmetic.
+
+Regressions:
+- Dental customer payment history, wallet top-up, refund, void, delete, update, and balance display remain unchanged.
+- Payment history fallback from sale orders remains unchanged for Dental and Cosmetic.
+- Existing permission handling for payment add/refund/void/delete remains backend-owned and unchanged.
+
+Setup data and login state:
+- Use a dual-scope admin session with active LOB set to Cosmetic.
+- Use at least one Cosmetic customer with a posted 500,000 VND deposit and one service invoice/dotkham eligible for deposit usage.
+- Repeat with active LOB Dental for a known dental customer to confirm legacy route behavior.
+
+TestSprite execution items:
+- [ ] PENDING: Verify Cosmetic customer wallet opens and calls `/api/cosmetic/Payments/deposits`, `/api/cosmetic/Payments/deposit-usage`, and `/api/cosmetic/CustomerBalance/:id`.
+- [ ] PENDING: Verify Cosmetic deposit creation posts to `/api/cosmetic/Payments` and refreshes the cosmetic balance in the payment modal.
+- [ ] PENDING: Verify Cosmetic service payment creation with deposit usage posts to `/api/cosmetic/Payments`.
+- [ ] PENDING: Verify Cosmetic deposit refund, void, delete, and update actions stay on `/api/cosmetic/Payments*`.
+- [ ] PENDING: Verify Dental payment/deposit flows still use top-level `/api/Payments*` and `/api/CustomerBalance/:id`.
+
+## 2026-05-24 — Cosmetic Appointment Save LOB Routing
+
+Feature/edit name:
+- Cosmetic appointment create/update API routing from calendar and customer-profile appointment forms.
+
+Changed URLs and API routes:
+- Browser-visible: `/calendar`, `/customers/:id` appointment create/edit surfaces.
+- API routes: Cosmetic saves must call `POST /api/cosmetic/Appointments` and `PUT /api/cosmetic/Appointments/:id`; Dental saves must continue calling `POST /api/Appointments` and `PUT /api/Appointments/:id`.
+
+Affected data flows:
+- `BusinessUnitContext.currentLOB` -> `useAppointmentForm` -> `createAppointment` / `updateAppointment`.
+- `BusinessUnitContext.currentLOB` -> `useAppointments` -> list/search/create/update/status/cancel appointment API calls.
+- `apiFetch` receives `lob: 'cosmetic'` so it prefixes `/api/cosmetic/*`; Dental remains legacy top-level.
+
+User roles:
+- Admin or scoped staff using the Cosmetic LOB calendar/customer profile.
+- Dental staff using the existing Dental appointment flows.
+
+Happy paths:
+- With active LOB Cosmetic, calendar appointment create saves through `/api/cosmetic/Appointments`.
+- With active LOB Cosmetic, customer-profile appointment edit saves through `/api/cosmetic/Appointments/:id`.
+- With active LOB Dental, appointment create/edit continues to use legacy `/api/Appointments`.
+
+Edge cases:
+- Switching LOB before saving must use the current active LOB, not stale state.
+- Appointment search/list refreshes must use the selected LOB.
+- Check-in advance, status update, and cancel actions must use the selected LOB.
+
+Regressions:
+- Dental appointment form validation, duration mapping, and appointment update behavior must remain unchanged.
+- Calendar list/search filters by selected location must still work.
+- Cosmetic saves must not write into Dental appointments.
+
+Setup data and login state:
+- Use an authenticated admin with both `dental` and `cosmetic` LOB access.
+- Seed or create one Cosmetic customer, one Cosmetic location, and one Cosmetic service.
+- Use one existing Dental appointment as a regression comparison.
+
+TestSprite execution items:
+- [ ] PENDING: Verify Cosmetic `/calendar` appointment create sends `POST /api/cosmetic/Appointments` and appears after refresh under Cosmetic only.
+- [ ] PENDING: Verify Cosmetic `/calendar` appointment update sends `PUT /api/cosmetic/Appointments/:id`.
+- [ ] PENDING: Verify Cosmetic `/customers/:id` appointment save uses `/api/cosmetic/Appointments`.
+- [ ] PENDING: Verify Dental `/calendar` appointment create/update still uses top-level `/api/Appointments`.
+- [ ] PENDING: Verify Cosmetic appointment search/list, check-in advance, status update, and cancel actions stay inside `/api/cosmetic/Appointments`.

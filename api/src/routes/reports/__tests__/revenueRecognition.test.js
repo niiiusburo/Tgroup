@@ -57,6 +57,32 @@ describe('reports revenue recognition', () => {
     expect(methodsSql).toContain("COALESCE(p.deposit_type, '') NOT IN ('deposit', 'refund', 'usage')");
   });
 
+  it('includes direct posted payment-category service receipts even before service/order linking', async () => {
+    query
+      .mockResolvedValueOnce([{ state: 'collected', cnt: '1', total: '850000', outstanding: '0' }])
+      .mockResolvedValueOnce([{ state: 'direct', paid: '4250000' }])
+      .mockResolvedValueOnce([{ method: 'cash', status: 'posted', cnt: '1', total: '4250000' }]);
+
+    const res = await request(makeApp())
+      .post('/api/Reports/revenue/summary')
+      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.payments).toEqual([
+      { method: 'cash', status: 'posted', cnt: 1, total: 4250000 },
+    ]);
+
+    const revenueSql = query.mock.calls[1][0];
+    const methodsSql = query.mock.calls[2][0];
+    expect(revenueSql).toContain('direct_service_payments AS');
+    expect(methodsSql).toContain('direct_service_payments AS');
+    expect(methodsSql).toContain('NOT EXISTS');
+    expect(methodsSql).toContain('existing_pa.payment_id = p.id');
+    expect(methodsSql).not.toContain('p.service_id IS NOT NULL');
+    expect(methodsSql).toContain("COALESCE(p.payment_category, 'payment') = 'payment'");
+    expect(methodsSql).toContain("COALESCE(p.deposit_type, '') NOT IN ('deposit', 'refund', 'usage')");
+  });
+
   it('uses payment dates for paid revenue in the trend', async () => {
     query
       .mockResolvedValueOnce([{ month: '2026-05-01', order_count: '2', invoiced: '1000', outstanding: '200' }])
@@ -77,6 +103,46 @@ describe('reports revenue recognition', () => {
     expect(paidTrendSql).toContain('pa.allocated_amount * p.amount / at.total_allocated_for_payment');
     expect(paidTrendSql).toContain('COALESCE(p.payment_date, p.created_at)');
     expect(paidTrendSql).not.toContain('SUM(totalpaid)');
+  });
+
+  it('includes direct posted service receipts in revenue by location', async () => {
+    query.mockResolvedValueOnce([
+      {
+        id: 'company-1',
+        name: 'Cosmetic Branch',
+        order_count: '0',
+        invoiced: '0',
+        paid: '500000',
+        outstanding: '0',
+      },
+    ]);
+
+    const res = await request(makeApp())
+      .post('/api/Reports/revenue/by-location')
+      .send({ dateFrom: '2026-05-01', dateTo: '2026-05-31' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual([
+      {
+        id: 'company-1',
+        name: 'Cosmetic Branch',
+        order_count: '0',
+        orderCount: 0,
+        invoiced: 0,
+        paid: 500000,
+        outstanding: 0,
+      },
+    ]);
+
+    const sql = query.mock.calls[0][0];
+    expect(sql).toContain('direct_service_payments AS');
+    expect(sql).toContain('recognized_service_payments AS');
+    expect(sql).toContain('COALESCE(so.companyid, customer.companyid) AS companyid');
+    expect(sql).toContain('existing_pa.payment_id = p.id');
+    expect(sql).not.toContain('p.service_id IS NOT NULL');
+    expect(sql).toContain('location_keys AS');
+    expect(sql).toContain("COALESCE(lk.companyid::text, 'unassigned') as id");
+    expect(sql).not.toContain('WHERE companyid IS NOT NULL');
   });
 
   it('uses posted payment allocations for doctor revenue', async () => {

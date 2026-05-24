@@ -29,8 +29,8 @@ export function usePermissionBoard() {
     setError(null);
     try {
       const [groupsRes, employeesRes, locationsRes] = await Promise.all([
-        fetchPermissionGroups(),
-        fetchEmployeePermissions(),
+        fetchPermissionGroups(currentLOB),
+        fetchEmployeePermissions(currentLOB),
         fetchCompanies({ offset: 0, limit: 50, lob: currentLOB }),
       ]);
       setGroups(groupsRes);
@@ -49,10 +49,10 @@ export function usePermissionBoard() {
     employeeId: string,
     data: { groupId: string; locScope: string; locationIds: string[]; overrides: { grant: string[]; revoke: string[] } }
   ) => {
-    const updated = await updateEmployeePermission(employeeId, data);
+    const updated = await updateEmployeePermission(employeeId, data, currentLOB);
     setEmployees(prev => prev.map(e => e.employeeId === employeeId ? updated : e));
     return updated;
-  }, []);
+  }, [currentLOB]);
 
   const getEffective = useCallback((emp: EmployeePermission): string[] => {
     const group = groups.find(g => g.id === emp.groupId);
@@ -75,10 +75,10 @@ export function usePermissionBoard() {
       color: group.color,
       description: group.description || '',
       permissions: newPerms,
-    });
+    }, currentLOB);
     setGroups(prev => prev.map(g => g.id === groupId ? updated : g));
     return updated;
-  }, [groups]);
+  }, [currentLOB, groups]);
 
   return { groups, employees, locations, loading, error, updateEmployee, toggleGroupPermission, getEffective, refetch: loadAll };
 }

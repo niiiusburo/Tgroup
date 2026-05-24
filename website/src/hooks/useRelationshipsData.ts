@@ -10,6 +10,7 @@ import {
   fetchPermissionGroups,
   updatePermissionGroup,
 } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { ENTITY_NODES, ENTITY_RELATIONS } from '@/constants/entityGraph';
 
 export type RelationshipsTab = 'permissions' | 'entities';
@@ -38,6 +39,7 @@ interface UseRelationshipsDataState {
 }
 
 export function useRelationshipsData() {
+  const { currentLOB } = useBusinessUnit();
   const [activeTab, setActiveTab] = useState<RelationshipsTab>('permissions');
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
@@ -59,7 +61,7 @@ export function useRelationshipsData() {
   useEffect(() => {
     async function loadPermissionGroups() {
       try {
-        const groups = await fetchPermissionGroups();
+        const groups = await fetchPermissionGroups(currentLOB);
         // Map PermissionGroup to Role to match PermissionMatrix expectations
         const roles: readonly Role[] = groups.map((g) => ({
           id: g.id,
@@ -80,7 +82,7 @@ export function useRelationshipsData() {
     }
 
     loadPermissionGroups();
-  }, []);
+  }, [currentLOB]);
 
   // Extract all unique permissions from groups
   const allPermissions = useMemo(() => {
@@ -192,7 +194,7 @@ export function useRelationshipsData() {
         color: role.color,
         description: role.description,
         permissions: newPermissions,
-      });
+      }, currentLOB);
 
       // Update local roles state to reflect saved changes
       setState((prev) => ({
@@ -214,7 +216,7 @@ export function useRelationshipsData() {
         error: err instanceof Error ? err.message : 'Failed to save permissions',
       }));
     }
-  }, [selectedRoleId, editedPermissions, state.roles]);
+  }, [currentLOB, selectedRoleId, editedPermissions, state.roles]);
 
   const resetPermissions = useCallback(() => {
     setEditedPermissions({});

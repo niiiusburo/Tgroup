@@ -42,6 +42,7 @@ endpoints:
   - PATCH  /api/Partners/:id/soft-delete
   - DELETE /api/Partners/:id/hard-delete
   - GET    /api/CustomerBalance/:id
+  - GET    /api/cosmetic/CustomerBalance/:id
   - GET    /api/CustomerReceipts
   - GET    /api/CustomerSources
   - POST   /api/CustomerSources
@@ -69,6 +70,7 @@ ui_invariants:
   - Customer edit forms must resolve saved employee assignment IDs against all employees, including inactive migrated employees; active-only lists are for new selection defaults, not selected-value hydration.
   - Employee assignment suggestions in customer forms must hide inactive employees so TDental duplicate staff records do not appear as selectable options.
   - Customer phone is not a durable unique identity. Phone may overlap another phone or match a customer code (`partners.ref`) and must not block customer create/edit saves.
+  - Cosmetic customer create/update and customer balance reads must use the cosmetic mirror (`/api/cosmetic/Partners`, `/api/cosmetic/CustomerBalance`) so company FKs and deposit summaries resolve against `tcosmetic_demo`, not the dental database.
 jobs:
   - none (archive scripts in api/scripts/archive/ are stale)
 shared_types:
@@ -89,4 +91,6 @@ impact_tests:
   - website/e2e/face-recognition related flows
   - api/src/routes/partners/__tests__/searchFilters.test.js
   - website/src/__tests__/customer-deep-link.test.tsx
+  - api/src/routes/__tests__/customerBalance.lob.test.js
+  - website/src/hooks/__tests__/useCustomers.lob.test.ts
 risk_level: high

@@ -12,10 +12,16 @@
 | v1.0.1 | 2026-05-17 | Contract documentation aligned to live payment method enum, report API, and operational export registry. |
 | v1.0.2 | 2026-05-18 | Reconfirmed `@tgroup/contracts` payment method enum and generated contract artifacts are limited to live methods only. |
 | v1.0.3 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
+| v1.0.4 | 2026-05-22 | Cosmetic LOB mirror routing and NK3 revenue recognition contract clarified for customer/employee/appointment/payment/balance/report flows. |
+| v1.0.5 | 2026-05-23 | TMV/NK3 API hotfix contract clarified: cosmetic CustomerBalance mirror, CTV-only self-dashboard reads, and normalized service catalog writes. |
 
 ---
 
 ## 1. API Contracts
+
+Cosmetic LOB mirror rule: when the frontend passes `lob: 'cosmetic'` to `apiFetch`, the client routes the same endpoint under `/api/cosmetic/*`. Mirrored handlers must run behind `requireLobScope('cosmetic')`, `attachCosmeticDb`, `runWithLob('cosmetic')`, and `cosmetic.access`, then read/write `tcosmetic_demo` through request-scoped `getQuery(req)` or ALS-aware `query()`. Dental remains the default legacy `/api/*` path.
+
+CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referrals`, and `GET /api/ctv/me` are mounted behind `ctv.dashboard.view` and must additionally require `req.user.is_ctv === true`. Authenticated non-CTV staff, including admins, receive `403 S_CTV_ONLY`.
 
 ### 1.1 Auth
 
@@ -117,6 +123,8 @@ PaginatedResponse<{
 **Body:** `AppointmentUpdateSchema` (partial omit `id`)
 **Response 200:** Updated row.
 
+Cosmetic mirror: `POST /api/cosmetic/Appointments` and `PUT /api/cosmetic/Appointments/:id` use the same request/response body and must validate `partnerId` / `companyId` against the cosmetic database.
+
 ---
 
 ### 1.3 Partners (Customers + Employees)
@@ -158,6 +166,8 @@ PaginatedResponse<{
 
 #### DELETE /api/Partners/:id/hard-delete
 **Effect:** Physical row removal. Requires `customers.hard_delete`.
+
+Cosmetic mirror: `GET/POST/PUT/PATCH/DELETE /api/cosmetic/Partners...` use the same contract and must validate `companyId` against cosmetic `dbo.companies`. Customer create/update clients must pass `lob: 'cosmetic'` when Cosmetic is selected.
 
 ---
 
@@ -246,6 +256,29 @@ PaginatedResponse<{
 **Body:** `{ proofImageBase64: string; qrDescription?: string | null }`
 **Behavior:** `proofImageBase64` must be a `data:image/*` URI.
 **Response:** `{ success: true, proofId: string }`
+
+Cosmetic mirror: `GET/POST/PATCH/DELETE /api/cosmetic/Payments...`, `/api/cosmetic/Payments/deposits`, and `/api/cosmetic/Payments/deposit-usage` use the same contract and operate only on cosmetic `dbo.payments` / `dbo.payment_allocations`.
+
+#### GET /api/CustomerBalance/:id
+**Auth:** Authenticated route mounted through the app router.
+**Response 200:**
+```ts
+{
+  id: string;
+  name: string;
+  deposit_balance: number;
+  outstanding_balance: number;
+  total_deposited: number;
+  total_used: number;
+  total_refunded: number;
+}
+```
+**Behavior:** Reads `partners`, `payments`, `saleorders`, and `dotkhams` in the request-scoped LOB database. Cosmetic callers must use `GET /api/cosmetic/CustomerBalance/:id`; otherwise the deposit summary cards can read dental balances for cosmetic customers. Deposit totals are based on `payments.payment_category = 'deposit'`; unallocated service/payment receipts are not treated as customer advances.
+
+#### POST /api/Products and PUT /api/Products/:id
+**Auth:** Requires the service catalog permission enforced by the product route.
+**Body:** Service catalog fields accepted by the active `products.js` route, including required `name`.
+**Behavior:** Dental and cosmetic mirrors (`/api/cosmetic/Products...`) must persist the accent-insensitive search column as `namenosign = normalizeVietnamese(name)` on create and update.
 
 ---
 
@@ -359,6 +392,8 @@ All current `/api/Reports` endpoints use `POST`, require `reports.view`, and ret
 }
 ```
 Date-scoped endpoints accept `{ dateFrom?: 'YYYY-MM-DD'; dateTo?: 'YYYY-MM-DD'; companyId?: string }` unless noted.
+
+Revenue recognition rule: paid revenue counts posted payment allocations linked to saleorders plus direct posted `payments.payment_category = 'payment'` receipts with no `payment_allocations` row, including imported receipts whose `service_id` is still blank. Deposits, refunds, deposit usage, and voided payments are excluded. The by-location report includes a synthetic unassigned row for paid receipts that cannot yet be attributed to a company.
 
 | Endpoint | Body | `data` shape |
 |---|---|---|
@@ -489,10 +524,12 @@ async function apiFetch<T>(
     body?: unknown;
     params?: Record<string, string | number | boolean | undefined>;
     signal?: AbortSignal;
+    lob?: 'dental' | 'cosmetic';
   }
 ): Promise<T>
 ```
 **Invariants:**
+- `lob: 'cosmetic'` prefixes requests with `/cosmetic`; omitted or `dental` uses legacy `/api/*`.
 - CamelCase keys in `params` are converted to snake_case on the wire (except `CAMEL_CASE_PASSTHROUGH` set).
 - 401 responses clear `localStorage` token and dispatch `AUTH_UNAUTHORIZED_EVENT`.
 - Structured errors are thrown as `ApiError` with `status`, `code`, `field`, `message`.

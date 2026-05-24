@@ -73,8 +73,8 @@ export function fetchMonthlyPlans(params?: {
   });
 }
 
-export function fetchMonthlyPlanById(id: string) {
-  return apiFetch<ApiMonthlyPlan>(`/MonthlyPlans/${id}`);
+export function fetchMonthlyPlanById(id: string, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiMonthlyPlan>(`/MonthlyPlans/${id}`, { lob });
 }
 
 export function createMonthlyPlan(data: {
@@ -87,8 +87,8 @@ export function createMonthlyPlan(data: {
   start_date: string;
   notes?: string;
   invoice_ids?: string[];
-}) {
-  return apiFetch<ApiMonthlyPlan>('/MonthlyPlans', { method: 'POST', body: data });
+}, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiMonthlyPlan>('/MonthlyPlans', { method: 'POST', body: data, lob });
 }
 
 export function updateMonthlyPlan(id: string, data: Partial<{
@@ -98,21 +98,21 @@ export function updateMonthlyPlan(id: string, data: Partial<{
   status: string;
   notes: string;
   invoice_ids?: string[];
-}>) {
-  return apiFetch<ApiMonthlyPlan>(`/MonthlyPlans/${id}`, { method: 'PUT', body: data });
+}>, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiMonthlyPlan>(`/MonthlyPlans/${id}`, { method: 'PUT', body: data, lob });
 }
 
-export function deleteMonthlyPlan(id: string) {
-  return apiFetch<void>(`/MonthlyPlans/${id}`, { method: 'DELETE' });
+export function deleteMonthlyPlan(id: string, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<void>(`/MonthlyPlans/${id}`, { method: 'DELETE', lob });
 }
 
 export function markInstallmentPaid(planId: string, installmentId: string, data?: {
   paid_amount?: number;
   paid_date?: string;
-}) {
+}, lob?: 'dental' | 'cosmetic') {
   return apiFetch<ApiInstallment>(`/MonthlyPlans/${planId}/installments/${installmentId}/pay`, {
     method: 'PUT',
     body: data,
+    lob,
   });
 }
-

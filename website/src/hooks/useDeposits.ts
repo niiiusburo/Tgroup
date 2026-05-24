@@ -10,6 +10,7 @@ import {
   deletePayment,
 } from '@/lib/api';
 import type { ApiPayment } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 export interface DepositTransaction {
   id: string;
@@ -86,6 +87,7 @@ export interface DepositFilters {
 }
 
 export function useDeposits() {
+  const { currentLOB } = useBusinessUnit();
   const [depositList, setDepositList] = useState<DepositTransaction[]>([]);
   const [usageHistory, setUsageHistory] = useState<DepositTransaction[]>([]);
   const [balance, setBalance] = useState<DepositBalance>({
@@ -111,13 +113,15 @@ export function useDeposits() {
           dateTo: filters?.dateTo,
           receiptNumber: filters?.receiptNumber,
           type: filters?.type ?? 'all',
+          lob: currentLOB,
         }),
         fetchDepositUsage({
           customerId,
           dateFrom: filters?.dateFrom,
           dateTo: filters?.dateTo,
+          lob: currentLOB,
         }),
-        fetchCustomerBalance(customerId).catch(() => ({
+        fetchCustomerBalance(customerId, currentLOB).catch(() => ({
           id: customerId,
           name: '',
           depositBalance: 0,
@@ -136,7 +140,7 @@ export function useDeposits() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentLOB]);
 
   const reloadCurrentDeposits = useCallback(async () => {
     const lastLoad = lastLoadRef.current;
@@ -163,7 +167,7 @@ export function useDeposits() {
         notes: composedNote,
         paymentDate: date,
         depositType: 'deposit',
-      });
+      }, currentLOB);
       await loadDeposits(customerId);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add deposit');
@@ -171,7 +175,7 @@ export function useDeposits() {
     } finally {
       setLoading(false);
     }
-  }, [loadDeposits]);
+  }, [loadDeposits, currentLOB]);
 
   const addRefund = useCallback(async (
     customerId: string,
@@ -189,7 +193,7 @@ export function useDeposits() {
         method,
         notes: note,
         paymentDate: date,
-      });
+      }, currentLOB);
       await loadDeposits(customerId);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add refund');
@@ -197,12 +201,12 @@ export function useDeposits() {
     } finally {
       setLoading(false);
     }
-  }, [loadDeposits]);
+  }, [loadDeposits, currentLOB]);
 
   const voidDeposit = useCallback(async (id: string, reason?: string) => {
     setLoading(true);
     try {
-      await voidPayment(id, reason);
+      await voidPayment(id, reason, currentLOB);
       await reloadCurrentDeposits();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to void deposit');
@@ -210,12 +214,12 @@ export function useDeposits() {
     } finally {
       setLoading(false);
     }
-  }, [reloadCurrentDeposits]);
+  }, [reloadCurrentDeposits, currentLOB]);
 
   const removeDeposit = useCallback(async (id: string) => {
     setLoading(true);
     try {
-      await deletePayment(id);
+      await deletePayment(id, currentLOB);
       await reloadCurrentDeposits();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete deposit');
@@ -223,7 +227,7 @@ export function useDeposits() {
     } finally {
       setLoading(false);
     }
-  }, [reloadCurrentDeposits]);
+  }, [reloadCurrentDeposits, currentLOB]);
 
   const editDeposit = useCallback(async (
     id: string,
@@ -236,7 +240,7 @@ export function useDeposits() {
         method: data.method,
         notes: data.notes,
         paymentDate: data.paymentDate,
-      });
+      }, currentLOB);
       await reloadCurrentDeposits();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update deposit');
@@ -244,7 +248,7 @@ export function useDeposits() {
     } finally {
       setLoading(false);
     }
-  }, [reloadCurrentDeposits]);
+  }, [reloadCurrentDeposits, currentLOB]);
 
   return {
     depositList,

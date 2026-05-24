@@ -63,8 +63,8 @@ export function usePermissionGroups() {
       setError(null);
       try {
         const [fetchedGroups, fetchedAssignments, fetchedCompanies] = await Promise.all([
-          fetchPermissionGroups(),
-          fetchEmployeePermissions(),
+          fetchPermissionGroups(currentLOB),
+          fetchEmployeePermissions(currentLOB),
           fetchCompanies({ limit: 100, lob: currentLOB }),
         ]);
 
@@ -238,7 +238,7 @@ export function usePermissionGroups() {
           locScope: locationScope,
           locationIds: [],
           overrides: { grant: [], revoke: [] },
-        });
+        }, currentLOB);
 
         setAssignments((prev) => {
           const existing = prev.findIndex((a) => a.employeeId === employeeId);
@@ -254,7 +254,7 @@ export function usePermissionGroups() {
         throw err;
       }
     },
-    [groups],
+    [currentLOB, groups],
   );
 
   const removeAssignment = useCallback((employeeId: string) => {

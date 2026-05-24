@@ -2,10 +2,24 @@ import { afterEach, describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useAppointmentForm } from '../useAppointmentForm';
 
+const mockBusinessUnit = vi.hoisted(() => ({
+  currentLOB: 'dental' as 'dental' | 'cosmetic',
+}));
+
 // Mock API
 vi.mock('@/lib/api', () => ({
   createAppointment: vi.fn(),
   updateAppointment: vi.fn(),
+}));
+
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({
+    currentLOB: mockBusinessUnit.currentLOB,
+    setCurrentLOB: vi.fn(),
+    availableLOBs: ['dental', 'cosmetic'],
+    isMultiLOBUser: true,
+    isCosmeticEnabled: true,
+  }),
 }));
 
 import { createAppointment, updateAppointment } from '@/lib/api';
@@ -19,6 +33,7 @@ describe('useAppointmentForm validation', () => {
   });
 
   beforeEach(() => {
+    mockBusinessUnit.currentLOB = 'dental';
     mockCreateAppointment.mockClear();
     mockUpdateAppointment.mockClear();
   });
@@ -128,7 +143,66 @@ describe('useAppointmentForm validation', () => {
         time: '09:00',
         timeexpected: 45,
       }),
+      'dental',
     );
     expect(result.current.errors.endTime).toBeUndefined();
+  });
+
+  it('submits new cosmetic appointments through the cosmetic mirror route', async () => {
+    mockBusinessUnit.currentLOB = 'cosmetic';
+    mockCreateAppointment.mockResolvedValue({ id: 'new-id' });
+    const { result } = renderHook(() => useAppointmentForm('create'));
+
+    act(() => {
+      result.current.handleChange({
+        customerId: '550e8400-e29b-41d4-a716-446655440000',
+        customerName: 'Cosmetic Customer',
+        locationId: '770e8400-e29b-41d4-a716-446655440002',
+        locationName: 'Cosmetic Branch',
+        date: '2026-05-22',
+        startTime: '10:00',
+        estimatedDuration: 30,
+      });
+    });
+
+    await act(async () => {
+      await result.current.handleSubmit();
+    });
+
+    expect(mockCreateAppointment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        partnerid: '550e8400-e29b-41d4-a716-446655440000',
+        companyid: '770e8400-e29b-41d4-a716-446655440002',
+      }),
+      'cosmetic',
+    );
+  });
+
+  it('updates cosmetic appointments through the cosmetic mirror route', async () => {
+    mockBusinessUnit.currentLOB = 'cosmetic';
+    mockUpdateAppointment.mockResolvedValue({ id: 'appointment-1' });
+    const { result } = renderHook(() => useAppointmentForm('edit', {
+      id: 'appointment-1',
+      customerId: '550e8400-e29b-41d4-a716-446655440000',
+      customerName: 'Cosmetic Customer',
+      locationId: '770e8400-e29b-41d4-a716-446655440002',
+      locationName: 'Cosmetic Branch',
+      date: '2026-05-22',
+      startTime: '10:00',
+      estimatedDuration: 30,
+    }));
+
+    await act(async () => {
+      await result.current.handleSubmit();
+    });
+
+    expect(mockUpdateAppointment).toHaveBeenCalledWith(
+      'appointment-1',
+      expect.objectContaining({
+        partnerid: '550e8400-e29b-41d4-a716-446655440000',
+        companyid: '770e8400-e29b-41d4-a716-446655440002',
+      }),
+      'cosmetic',
+    );
   });
 });

@@ -156,7 +156,7 @@ export function useCustomers(locationId: string = 'all', options: UseCustomersOp
         isbusinessinvoice: input.isbusinessinvoice ?? undefined,
         customer: true,
         status: true,
-      });
+      }, currentLOB);
       const mapped = mapPartnerToCustomer(created);
       setCustomers((prev) => [...prev, mapped]);
       setTotalItems((prev) => prev + 1);
@@ -166,7 +166,7 @@ export function useCustomers(locationId: string = 'all', options: UseCustomersOp
       console.error('Failed to create customer:', err);
       throw err;
     }
-  }, []);
+  }, [currentLOB]);
 
   const updateCustomerFn = useCallback(async (id: string, updates: CustomerFormData) => {
     const hasUpdate = (key: keyof CustomerFormData) =>
@@ -208,7 +208,7 @@ export function useCustomers(locationId: string = 'all', options: UseCustomersOp
       salestaffid: hasUpdate('salestaffid') ? updates.salestaffid : undefined,
     };
 
-    await updatePartner(id, updatePayload);
+    await updatePartner(id, updatePayload, currentLOB);
     setCustomers((prev) =>
       prev.map((c) =>
         c.id === id
@@ -227,7 +227,7 @@ export function useCustomers(locationId: string = 'all', options: UseCustomersOp
           : c,
       ),
     );
-  }, []);
+  }, [currentLOB]);
 
   const deleteCustomer = useCallback((id: string) => {
     setCustomers((prev) => prev.filter((c) => c.id !== id));

@@ -13,6 +13,10 @@ vi.mock('@/lib/api/payments', () => ({
   fetchPayments: vi.fn(),
 }));
 
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({ currentLOB: 'cosmetic' }),
+}));
+
 describe('usePayment', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -49,7 +53,7 @@ describe('usePayment', () => {
 
     await waitFor(() => expect(result.current.payments).toHaveLength(1));
 
-    expect(fetchPayments).toHaveBeenCalledWith(undefined, 'payments', undefined);
+    expect(fetchPayments).toHaveBeenCalledWith(undefined, 'payments', undefined, 'cosmetic');
     expect(result.current.payments[0]).toEqual(expect.objectContaining({
       id: 'payment-1',
       recordId: 'saleorder-1',
@@ -92,7 +96,7 @@ describe('usePayment', () => {
     await waitFor(() => expect(result.current.payments).toHaveLength(1));
 
     await waitFor(() => {
-      expect(fetchPayments).toHaveBeenLastCalledWith(undefined, 'payments', 'ma van thanh');
+      expect(fetchPayments).toHaveBeenLastCalledWith(undefined, 'payments', 'ma van thanh', 'cosmetic');
     });
   });
 
@@ -144,7 +148,7 @@ describe('usePayment', () => {
       amount: 500000,
       method: 'cash',
       depositType: 'deposit',
-    }));
+    }), 'cosmetic');
     expect(fetchPayments).toHaveBeenCalledTimes(2);
   });
 });

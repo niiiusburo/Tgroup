@@ -29,12 +29,17 @@ const packageJson = JSON.parse(
 
 // Try to get git info
 function getGitInfo() {
+  const envCommit = process.env.GIT_SHA?.trim();
+  const envBranch = process.env.GIT_BRANCH?.trim();
   try {
     const commit = execSync('git rev-parse --short HEAD').toString().trim();
     const branch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
     return { commit, branch };
   } catch {
-    return { commit: 'unknown', branch: 'unknown' };
+    return {
+      commit: envCommit ? envCommit.slice(0, 8) : 'unknown',
+      branch: envBranch || 'unknown',
+    };
   }
 }
 

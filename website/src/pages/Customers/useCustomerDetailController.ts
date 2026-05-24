@@ -15,6 +15,7 @@ import { useCustomerFormActions } from './useCustomerFormActions';
 import { useCustomerPaymentActions } from './useCustomerPaymentActions';
 import { useCustomerProfileData } from './useCustomerProfileData';
 import { useCustomerServiceActions } from './useCustomerServiceActions';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 interface UseCustomerDetailControllerOptions {
   readonly selectedCustomerId: string | null;
@@ -37,6 +38,7 @@ export function useCustomerDetailController({
   setShowForm,
   setIsEditMode,
 }: UseCustomerDetailControllerOptions) {
+  const { currentLOB } = useBusinessUnit();
   const {
     profile: hookProfile,
     rawPartner,
@@ -83,7 +85,7 @@ export function useCustomerDetailController({
     }
     setSaleOrderLinesLoading(true);
     try {
-      const res = await fetchSaleOrderLines({ partnerId: selectedCustomerId, limit: 500 });
+      const res = await fetchSaleOrderLines({ partnerId: selectedCustomerId, limit: 500, lob: currentLOB });
       setSaleOrderLines(res.items.map(mapSaleOrderLineToCustomerService));
     } catch (err) {
       console.error('Failed to fetch sale order lines:', err);
@@ -91,7 +93,7 @@ export function useCustomerDetailController({
     } finally {
       setSaleOrderLinesLoading(false);
     }
-  }, [selectedCustomerId]);
+  }, [selectedCustomerId, currentLOB]);
 
   useEffect(() => {
     loadSaleOrderLines();

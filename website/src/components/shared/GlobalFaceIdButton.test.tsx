@@ -24,6 +24,12 @@ vi.mock('@/hooks/useFaceRecognition', () => ({
   }),
 }));
 
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({
+    currentLOB: 'cosmetic',
+  }),
+}));
+
 vi.mock('@/lib/api', () => ({
   fetchPartners: vi.fn(),
   registerFace: vi.fn(),
@@ -100,6 +106,7 @@ describe('GlobalFaceIdButton', () => {
         search: 'T146292',
         limit: 10,
         status: 'active',
+        lob: 'cosmetic',
       });
     });
     fireEvent.click(await screen.findByText('TRẦN THANH DUY- QL'));
@@ -110,6 +117,7 @@ describe('GlobalFaceIdButton', () => {
         'p-1',
         expect.any(Blob),
         'no_match_rescue',
+        'cosmetic',
       );
       expect(navigateMock).toHaveBeenCalledWith('/customers/p-1');
     });

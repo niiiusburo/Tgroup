@@ -12,6 +12,7 @@ interface UseEmployeeAssignmentFieldsArgs {
   readonly employees: ApiEmployee[];
   readonly formData: CustomerFormData;
   readonly set: SetCustomerField;
+  readonly lob: 'dental' | 'cosmetic';
 }
 
 const employeeSearchHaystack = (employee: ApiEmployee) =>
@@ -43,6 +44,7 @@ export function useEmployeeAssignmentFields({
   employees,
   formData,
   set,
+  lob,
 }: UseEmployeeAssignmentFieldsArgs) {
   const [salesQuery, setSalesQuery] = useState('');
   const [salesResults, setSalesResults] = useState<ApiEmployee[]>([]);
@@ -77,13 +79,13 @@ export function useEmployeeAssignmentFields({
     }
     setSalesLoading(true);
     salesTimeoutRef.current = setTimeout(() => {
-      fetchEmployees({ search: trimmed, limit: 100, active: 'true' })
+      fetchEmployees({ search: trimmed, limit: 100, active: 'true', lob })
         .then((res) => setSalesResults(filterActiveOptions(res.items, isSalesStaffOption)))
         .catch(() => setSalesResults([]))
         .finally(() => setSalesLoading(false));
     }, 300);
     return () => { if (salesTimeoutRef.current) clearTimeout(salesTimeoutRef.current); };
-  }, [salesQuery, employees]);
+  }, [salesQuery, employees, lob]);
 
   useEffect(() => {
     if (formData.cskhid) {
@@ -104,13 +106,13 @@ export function useEmployeeAssignmentFields({
     }
     setCskhLoading(true);
     cskhTimeoutRef.current = setTimeout(() => {
-      fetchEmployees({ search: trimmed, limit: 100, active: 'true' })
+      fetchEmployees({ search: trimmed, limit: 100, active: 'true', lob })
         .then((res) => setCskhResults(filterActiveOptions(res.items, isCskhStaffOption)))
         .catch(() => setCskhResults([]))
         .finally(() => setCskhLoading(false));
     }, 300);
     return () => { if (cskhTimeoutRef.current) clearTimeout(cskhTimeoutRef.current); };
-  }, [cskhQuery, employees]);
+  }, [cskhQuery, employees, lob]);
 
   const handleSalesInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSalesQuery(e.target.value);

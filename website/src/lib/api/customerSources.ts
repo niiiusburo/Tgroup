@@ -26,12 +26,14 @@ export interface CustomerSourcesResponse {
 export function fetchCustomerSources(params?: {
   type?: string;
   is_active?: boolean;
+  lob?: 'dental' | 'cosmetic';
 }) {
   return apiFetch<CustomerSourcesResponse>('/CustomerSources', {
     params: {
       type: params?.type,
       is_active: params?.is_active,
     },
+    lob: params?.lob,
   });
 }
 
@@ -40,8 +42,8 @@ export function createCustomerSource(data: {
   type?: string;
   description?: string;
   is_active?: boolean;
-}) {
-  return apiFetch<ApiCustomerSource>('/CustomerSources', { method: 'POST', body: data });
+}, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiCustomerSource>('/CustomerSources', { method: 'POST', body: data, lob });
 }
 
 export function updateCustomerSource(id: string, data: Partial<{
@@ -49,11 +51,10 @@ export function updateCustomerSource(id: string, data: Partial<{
   type: string;
   description: string;
   is_active: boolean;
-}>) {
-  return apiFetch<ApiCustomerSource>(`/CustomerSources/${id}`, { method: 'PUT', body: data });
+}>, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiCustomerSource>(`/CustomerSources/${id}`, { method: 'PUT', body: data, lob });
 }
 
-export function deleteCustomerSource(id: string) {
-  return apiFetch<void>(`/CustomerSources/${id}`, { method: 'DELETE' });
+export function deleteCustomerSource(id: string, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<void>(`/CustomerSources/${id}`, { method: 'DELETE', lob });
 }
-

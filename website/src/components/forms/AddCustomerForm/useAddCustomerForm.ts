@@ -181,11 +181,11 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
   // Load selected referrer name when editing
   useEffect(() => {
     if (formData.referraluserid && !selectedReferrer) {
-      fetchPartnerById(formData.referraluserid)
+      fetchPartnerById(formData.referraluserid, currentLOB)
         .then((partner) => setSelectedReferrer(partner))
         .catch(() => {});
     }
-  }, [formData.referraluserid, selectedReferrer]);
+  }, [formData.referraluserid, selectedReferrer, currentLOB]);
 
   useEffect(() => {
     if (selectedReferrer) {
@@ -211,13 +211,13 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
     }
     setReferrerLoading(true);
     referrerTimeoutRef.current = setTimeout(() => {
-      fetchPartners({ search: trimmed, limit: 20 })
+      fetchPartners({ search: trimmed, limit: 20, lob: currentLOB })
         .then((res) => setReferrerResults(res.items))
         .catch(() => setReferrerResults([]))
         .finally(() => setReferrerLoading(false));
     }, 300);
     return () => { if (referrerTimeoutRef.current) clearTimeout(referrerTimeoutRef.current); };
-  }, [referrerQuery, selectedReferrer]);
+  }, [referrerQuery, selectedReferrer, currentLOB]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -273,7 +273,7 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
     handleSalesInputChange, handleSelectSales, handleClearSales,
     cskhQuery, setCskhQuery, cskhResults, cskhLoading, cskhOpen, setCskhOpen, cskhContainerRef,
     handleCskhInputChange, handleSelectCskh, handleClearCskh,
-  } = useEmployeeAssignmentFields({ employees, formData, set });
+  } = useEmployeeAssignmentFields({ employees, formData, set, lob: currentLOB });
 
   // Live uniqueness checks for phone and email
   const phoneCheck = useUniqueFieldCheck({
@@ -281,12 +281,14 @@ export function useAddCustomerForm(props: AddCustomerFormProps): UseAddCustomerF
     value: formData.phone ?? '',
     excludeId: isEdit ? customerId : undefined,
     initialValue: isEdit ? (initialData?.phone ?? undefined) : undefined,
+    lob: currentLOB,
   });
   const emailCheck = useUniqueFieldCheck({
     field: 'email',
     value: formData.email ?? '',
     excludeId: isEdit ? customerId : undefined,
     initialValue: isEdit ? (initialData?.email ?? undefined) : undefined,
+    lob: currentLOB,
   });
 
   const setError = useCallback(

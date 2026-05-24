@@ -70,10 +70,17 @@ const ALLOWED_ORIGINS = [
   'http://localhost:5175',
   'http://localhost:5715',
   'http://76.13.16.68:5175',
+  'http://76.13.16.68:5275',
+  'http://76.13.16.68:5375',
   'https://nk.2checkin.com',
   'https://www.nk.2checkin.com',
   'https://nk2.2checkin.com',
   'https://www.nk2.2checkin.com',
+  'https://nk3.2checkin.com',
+  'https://www.nk3.2checkin.com',
+  'https://76-13-16-68.sslip.io',
+  'https://tmv.2checkin.com',
+  'https://www.tmv.2checkin.com',
 ];
 app.use(helmet());
 const DEV_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1):(517\d|5715|3\d{3})$/;
@@ -405,10 +412,18 @@ if (COSMETIC_FLAG) {
   cosmeticRouter.use('/Companies', companiesRoutes);
   cosmeticRouter.use('/Reports', reportsRoutes);
   cosmeticRouter.use('/DashboardReports', dashboardReportsRoutes);
+  cosmeticRouter.use('/CustomerBalance', customerBalanceRoutes);
   cosmeticRouter.use('/CustomerReceipts', customerReceiptsRoutes);
+  cosmeticRouter.use('/CustomerSources', customerSourcesRoutes);
+  cosmeticRouter.use('/Permissions', permissionsRoutes);
   cosmeticRouter.use('/AccountPayments', accountPaymentsRoutes);
   cosmeticRouter.use('/CrmTasks', crmTasksRoutes);
+  cosmeticRouter.use('/DotKhams', dotKhamsRoutes);
   cosmeticRouter.use('/MonthlyPlans', monthlyPlansRoutes);
+  cosmeticRouter.use('/settings', bankSettingsRoutes);
+  cosmeticRouter.use('/ExternalCheckups', externalCheckupsRoutes);
+  cosmeticRouter.use('/face', faceRecognitionRoutes);
+  cosmeticRouter.use('/Exports', exportsRoutes);
   // Add more mirrors (e.g. /Services if revived, feedback, etc.) as needed for full admin reuse
 
   app.use('/api/cosmetic', cosmeticRouter);
@@ -424,9 +439,6 @@ if (COSMETIC_FLAG) {
     });
   });
 }
-
-// CTV dashboard routes (gated internally by is_ctv + ctv.* perms; cross-DB aggregation)
-app.use('/api/ctv', ctvRoutes);
 
 app.get('/api/health', async (_req, res) => {
   const checks = { db: false, faceService: false };

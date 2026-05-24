@@ -6,7 +6,12 @@ import * as api from '@/lib/api';
 vi.mock('@/lib/api', () => ({
   recognizeFace: vi.fn(),
   registerFace: vi.fn(),
+  reregisterFace: vi.fn(),
   getFaceStatus: vi.fn(),
+}));
+
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({ currentLOB: 'cosmetic' }),
 }));
 
 describe('useFaceRecognition', () => {
@@ -103,7 +108,7 @@ describe('useFaceRecognition', () => {
     const { result } = renderHook(() => useFaceRecognition());
     await result.current.register('p-1', new Blob(['img']), 'no_match_rescue');
 
-    expect(api.registerFace).toHaveBeenCalledWith('p-1', expect.any(Blob), 'no_match_rescue');
+    expect(api.registerFace).toHaveBeenCalledWith('p-1', expect.any(Blob), 'no_match_rescue', 'cosmetic');
   });
 
   it('calls registerFace without source when source is omitted', async () => {
@@ -118,7 +123,7 @@ describe('useFaceRecognition', () => {
     const { result } = renderHook(() => useFaceRecognition());
     await result.current.register('p-1', new Blob(['img']));
 
-    expect(api.registerFace).toHaveBeenCalledWith('p-1', expect.any(Blob), undefined);
+    expect(api.registerFace).toHaveBeenCalledWith('p-1', expect.any(Blob), undefined, 'cosmetic');
   });
 
   it('transitions registerState to error when API throws', async () => {

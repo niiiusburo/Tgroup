@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Loader2 } from 'lucide-react';
 import { createExternalCheckup } from '@/lib/api';
 import { formatUploadBytes, prepareImageForUpload } from '@/lib/imageUpload';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 interface HealthCheckupUploadFormProps {
   readonly customerCode: string;
@@ -22,6 +23,7 @@ export function HealthCheckupUploadForm({
   saving,
 }: HealthCheckupUploadFormProps) {
   const { t } = useTranslation('customers');
+  const { currentLOB } = useBusinessUnit();
   const [title, setTitle] = useState('');
   const [doctor, setDoctor] = useState('');
   const [date, setDate] = useState(() => {
@@ -92,7 +94,7 @@ export function HealthCheckupUploadForm({
         nextAppointmentDate: nextAppointmentDate || undefined,
         nextDescription: nextDescription || undefined,
         files: files.length > 0 ? files : undefined,
-      });
+      }, currentLOB);
       onSuccess();
     } catch (err) {
       onError(err instanceof Error ? err.message : 'Upload failed');

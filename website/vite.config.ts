@@ -16,12 +16,15 @@ function getVersionInfo() {
     
     let gitCommit = 'unknown'
     let gitBranch = 'unknown'
+    const envCommit = process.env.GIT_SHA?.trim()
+    const envBranch = process.env.GIT_BRANCH?.trim()
     
     try {
-      gitCommit = execSync('git rev-parse --short HEAD', { cwd: __dirname }).toString().trim()
-      gitBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: __dirname }).toString().trim()
+      gitCommit = execSync('git rev-parse --short HEAD', { cwd: __dirname, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+      gitBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: __dirname, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
     } catch {
-      // Git not available, use defaults
+      gitCommit = envCommit ? envCommit.slice(0, 8) : 'unknown'
+      gitBranch = envBranch || 'unknown'
     }
     
     return {

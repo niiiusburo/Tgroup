@@ -7,6 +7,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchPartnerById, fetchAppointments, fetchCustomerBalance, type ApiAppointment, type ApiPartner } from '@/lib/api';
 import { useTimezone } from '@/contexts/TimezoneContext';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 export interface CustomerProfileData {
   id: string;
@@ -36,6 +37,7 @@ export interface CustomerProfileData {
   sourceid?: string | null;
   sourcename?: string | null;
   faceRegisteredAt: string | null;
+  referralClaim?: ApiPartner['referralClaim'];
 }
 
 export interface CustomerProfileResult {
@@ -54,6 +56,7 @@ export interface CustomerProfileResult {
 
 export function useCustomerProfile(customerId: string | null): CustomerProfileResult {
   const { formatDate: formatDateTz } = useTimezone();
+  const { currentLOB } = useBusinessUnit();
   const requestIdRef = useRef(0);
   const [profile, setProfile] = useState<CustomerProfileData | null>(null);
   const [rawPartner, setRawPartner] = useState<ApiPartner | null>(null);
@@ -85,7 +88,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
 
     try {
       // Fetch partner details
-      const partner = await fetchPartnerById(customerId);
+      const partner = await fetchPartnerById(customerId, currentLOB);
       if (!isCurrentRequest()) return;
 
       // Build DOB string from available fields
@@ -131,6 +134,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         sourceid: partner.sourceid ?? null,
         sourcename: partner.sourcename ?? null,
         faceRegisteredAt: partner.face_registered_at ?? null,
+        referralClaim: partner.referralClaim ?? null,
       };
 
       // Fetch appointment history for this customer
@@ -140,6 +144,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
           offset: 0,
           limit: 500,
           partnerId: customerId, // auto-converted to partner_id by apiFetch
+          lob: currentLOB,
         });
         // Normalize dates to YYYY-MM-DD in the selected timezone so display
         // utilities don't mis-render ISO timestamps (e.g. showing 17 Apr when
@@ -168,7 +173,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
 
       // Fetch deposit balance
       try {
-        const balance = await fetchCustomerBalance(customerId);
+        const balance = await fetchCustomerBalance(customerId, currentLOB);
         if (!isCurrentRequest()) return;
         profileData.depositBalance = balance.depositBalance;
         profileData.outstandingBalance = balance.outstandingBalance;
@@ -196,7 +201,7 @@ export function useCustomerProfile(customerId: string | null): CustomerProfileRe
         setIsLoading(false);
       }
     }
-  }, [customerId, formatDateTz]);
+  }, [customerId, formatDateTz, currentLOB]);
 
   useEffect(() => {
     fetchProfile();

@@ -29,12 +29,24 @@ async function safeQueryRows(db, sql, params = []) {
   }
 }
 
+function requireCtvUser(req, res, next) {
+  if (!req.user?.employeeId) {
+    return res.status(401).json({ error: 'No token' });
+  }
+  if (!req.user.is_ctv) {
+    return res.status(403).json({
+      error: { code: 'S_CTV_ONLY', message: 'CTV access required' },
+    });
+  }
+  next();
+}
+
 /**
  * GET /api/ctv/commission-summary
  * Live aggregation across both LOB DBs for this CTV (by recipient_partner_id = employeeId from JWT).
  * Returns shape consumable by CtvDashboard (totals with per-LOB pending, recent with client_name + lob pills, lists).
  */
-router.get('/commission-summary', requireAuth, async (req, res) => {
+router.get('/commission-summary', requireAuth, requireCtvUser, async (req, res) => {
   const { employeeId } = req.user || {};
   if (!employeeId) return res.status(401).json({ error: 'No token' });
 
@@ -128,7 +140,7 @@ router.get('/commission-summary', requireAuth, async (req, res) => {
  * Live list of partners (both DBs) where referred_by_ctv_id matches this CTV.
  * Computes per-referral earnings totals/counts from the earnings table (live attribution proof).
  */
-router.get('/referrals', requireAuth, async (req, res) => {
+router.get('/referrals', requireAuth, requireCtvUser, async (req, res) => {
   const { employeeId } = req.user || {};
   if (!employeeId) return res.status(401).json({ error: 'No token' });
   const ctvId = employeeId;
@@ -197,7 +209,7 @@ router.get('/referrals', requireAuth, async (req, res) => {
 /**
  * GET /api/ctv/me — lightweight profile for Me tab (no extra DB hit)
  */
-router.get('/me', requireAuth, (req, res) => {
+router.get('/me', requireAuth, requireCtvUser, (req, res) => {
   const u = req.user || {};
   res.json({
     id: u.employeeId,

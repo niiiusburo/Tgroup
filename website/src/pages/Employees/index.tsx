@@ -14,6 +14,7 @@ import { EmployeeProfile } from '@/components/employees/EmployeeProfile';
 import { useTranslation } from 'react-i18next';
 import { EmployeeForm } from '@/components/employees/EmployeeForm';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import type { ApiEmployee } from '@/lib/api';
 import type { Employee } from '@/data/mockEmployees';
 
@@ -26,6 +27,7 @@ import type { Employee } from '@/data/mockEmployees';
 export function Employees() {
   const { t } = useTranslation('employees');
   const { hasPermission } = useAuth();
+  const { currentLOB } = useBusinessUnit();
   const canEditEmployees = hasPermission('employees.edit');
   const { selectedLocationId } = useLocationFilter();
   const {
@@ -69,11 +71,11 @@ export function Employees() {
 
   useEffectReact(() => {
     setTiersLoading(true);
-    fetchPermissionGroups()
+    fetchPermissionGroups(currentLOB)
       .then(setTiers)
       .catch(() => {})
       .finally(() => setTiersLoading(false));
-  }, []);
+  }, [currentLOB]);
 
   const openEmployeeEditor = (employee: Employee) => {
     if (!canEditEmployees) return;

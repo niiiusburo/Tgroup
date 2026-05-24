@@ -65,9 +65,21 @@ export async function replyToMyFeedbackThread(
   });
 }
 
-export async function fetchAllFeedback(source?: 'manual' | 'auto'): Promise<{ items: AdminFeedbackThread[] }> {
-  const params = source ? `?source=${source}` : '';
-  return apiFetch(`/Feedback/all${params}`);
+export interface FetchAllFeedbackParams {
+  source?: 'manual' | 'auto';
+  host?: string;
+}
+
+export async function fetchAllFeedback(
+  params?: 'manual' | 'auto' | FetchAllFeedbackParams
+): Promise<{ items: AdminFeedbackThread[] }> {
+  const filters = typeof params === 'string' ? { source: params } : (params ?? {});
+  return apiFetch('/Feedback/all', {
+    params: {
+      source: filters.source,
+      host: filters.host,
+    },
+  });
 }
 
 export async function fetchAdminFeedbackThread(threadId: string): Promise<FeedbackThreadDetail> {

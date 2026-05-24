@@ -61,6 +61,15 @@ export interface ApiPartner {
   personaladdress: string | null;
   face_subject_id?: string | null;
   face_registered_at?: string | null;
+  referralClaim?: ReferralClaim | null;
+}
+
+export interface ReferralClaim {
+  ownerCtvId: string | null;
+  ownerName: string | null;
+  anchorDate?: string | Date | null;
+  expiresAt: string | Date | null;
+  active: boolean;
 }
 
 export interface PartnerAggregates {
@@ -145,20 +154,20 @@ export async function resolvePartnerKey(key: string): Promise<PartnerResolveResu
   }
 }
 
-export function createPartner(data: Partial<ApiPartner>) {
-  return apiFetch<ApiPartner>('/Partners', { method: 'POST', body: data });
+export function createPartner(data: Partial<ApiPartner>, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiPartner>('/Partners', { method: 'POST', body: data, lob });
 }
 
-export function updatePartner(id: string, data: Partial<ApiPartner>) {
-  return apiFetch<ApiPartner>(`/Partners/${id}`, { method: 'PUT', body: data });
+export function updatePartner(id: string, data: Partial<ApiPartner>, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiPartner>(`/Partners/${id}`, { method: 'PUT', body: data, lob });
 }
 
-export function softDeletePartner(id: string) {
-  return apiFetch<ApiPartner>(`/Partners/${id}/soft-delete`, { method: 'PATCH' });
+export function softDeletePartner(id: string, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<ApiPartner>(`/Partners/${id}/soft-delete`, { method: 'PATCH', lob });
 }
 
-export function hardDeletePartner(id: string) {
-  return apiFetch<{ success: boolean; id: string }>(`/Partners/${id}/hard-delete`, { method: 'DELETE' });
+export function hardDeletePartner(id: string, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<{ success: boolean; id: string }>(`/Partners/${id}/hard-delete`, { method: 'DELETE', lob });
 }
 
 export interface FaceCandidate {
@@ -197,16 +206,17 @@ export interface FaceStatusResult {
   lastRegisteredAt: string | null;
 }
 
-export function recognizeFace(image: Blob) {
+export function recognizeFace(image: Blob, lob?: 'dental' | 'cosmetic') {
   const formData = new FormData();
   formData.append('image', image, 'face.jpg');
   return apiFetch<FaceMatchResult>('/face/recognize', {
     method: 'POST',
     body: formData as unknown as Record<string, unknown>,
+    lob,
   });
 }
 
-export function registerFace(partnerId: string, image: Blob, source?: string) {
+export function registerFace(partnerId: string, image: Blob, source?: string, lob?: 'dental' | 'cosmetic') {
   const formData = new FormData();
   formData.append('partnerId', partnerId);
   formData.append('image', image, 'face.jpg');
@@ -214,14 +224,15 @@ export function registerFace(partnerId: string, image: Blob, source?: string) {
   return apiFetch<FaceRegisterResult>('/face/register', {
     method: 'POST',
     body: formData as unknown as Record<string, unknown>,
+    lob,
   });
 }
 
-export function getFaceStatus(partnerId: string) {
-  return apiFetch<FaceStatusResult>(`/face/status/${encodeURIComponent(partnerId)}`);
+export function getFaceStatus(partnerId: string, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<FaceStatusResult>(`/face/status/${encodeURIComponent(partnerId)}`, { lob });
 }
 
-export function reregisterFace(partnerId: string, images: readonly Blob[], source?: string) {
+export function reregisterFace(partnerId: string, images: readonly Blob[], source?: string, lob?: 'dental' | 'cosmetic') {
   const formData = new FormData();
   formData.append('partnerId', partnerId);
   images.forEach((blob, idx) => formData.append('images', blob, `face-${idx}.jpg`));
@@ -229,6 +240,7 @@ export function reregisterFace(partnerId: string, images: readonly Blob[], sourc
   return apiFetch<FaceReRegisterResult>('/face/re-register', {
     method: 'POST',
     body: formData as unknown as Record<string, unknown>,
+    lob,
   });
 }
 

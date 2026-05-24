@@ -30,7 +30,10 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `api/src/middleware/auth.js` | `api/tests/loginRateLimiter.test.js`, `api/tests/readRoutePermissions.test.js`, all E2E auth specs | Single point of failure for all protected routes. |
 | `api/src/routes/auth.js` | Same as above + `website/e2e/auth-setup.spec.ts` | Login payload shape changes break frontend AuthContext. |
 | `api/src/services/permissionService.js` | `api/tests/readRoutePermissions.test.js`, `website/e2e/permissions-*.spec.ts` | Effective permission divergence causes 403s. |
+| `api/src/server.js` CORS / `/api/ctv` mounts | `api/src/__tests__/nk3CorsOrigin.test.js`, `api/src/__tests__/ctvRouteGating.test.js` | TMV/NK3 browser origins must be allowed without reopening an unguarded CTV route mount. |
+| `api/src/routes/ctv.js` self-dashboard reads | `api/src/__tests__/ctvRouteGating.test.js`, live `GET /api/ctv/me` as admin must return 403 `S_CTV_ONLY` | CTV commission/referral/profile reads are cross-DB and must remain CTV-only even when admins have broad permissions. |
 | `website/src/contexts/AuthContext.tsx` | `website/e2e/auth-setup.spec.ts`, `website/e2e/permissions-check.spec.ts` | Auth state hydration affects every protected page. |
+| `website/src/contexts/BusinessUnitContext.tsx` | `website/src/contexts/__tests__/BusinessUnitContext.test.tsx`, live Cosmetic browser request audit | Active LOB must initialize from persisted/query Cosmetic before child effects fetch, or Cosmetic pages can leak first-render Dental/global requests. |
 | `website/src/constants/index.ts` (ROUTE_PERMISSIONS) | All E2E specs that navigate protected routes | Route guard changes may hide/show pages incorrectly. |
 
 ### Appointments & Calendar
@@ -38,6 +41,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | If you change... | Run these tests... | Why |
 |---|---|---|
 | `api/src/routes/appointments.js` | `api/src/routes/appointments/__tests__/readHandlers.test.js`, `website/e2e/team-alpha-appointments.spec.ts` | Calendar data shape changes break all views. |
+| `website/src/components/appointments/unified/useAppointmentForm.ts` | `website/src/components/appointments/unified/__tests__/useAppointmentForm.test.ts` | Locks appointment create/update payload shape and active-LOB routing for `/api/cosmetic/Appointments`. |
 | `website/src/pages/Calendar.tsx` | `website/e2e/team-alpha-appointments.spec.ts`, `website/src/pages/Calendar.click.test.tsx` | Core scheduling surface. |
 | `website/src/components/calendar/*.tsx` | Component unit tests + `website/e2e/team-alpha-appointments.spec.ts` | Drag-to-reschedule, filter chips, status badges. |
 | `website/src/components/calendar/CalendarToolbar.tsx` and `CalendarDateNavigator.tsx` | `website/src/components/calendar/__tests__/CalendarToolbar.test.tsx`, `/calendar` 1024x768, 1280x720, and 1366x768 screenshot checks | Tablet and laptop toolbar wrapping must keep view tabs, date navigation, search, export, filter, and quick-add visible while appointments populate. |
@@ -49,15 +53,26 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | If you change... | Run these tests... | Why |
 |---|---|---|
 | `api/src/routes/partners.js` | `api/src/routes/partners/__tests__/*.test.js` | Customer CRUD, search, uniqueness logic. |
+| Cosmetic mirror mounts in `api/src/server.js` | Cosmetic API smoke for `/CustomerSources`, `/Permissions`, `/DotKhams`, `/settings`, `/ExternalCheckups`, `/face`, `/Exports`; `api/src/__tests__/cosmeticAdminMirrors.test.js` | Frontend Cosmetic callers must have request-scoped mirror routes and must not fall back to dental/global endpoints. |
+| `api/src/routes/customerBalance.js` | `api/src/routes/__tests__/customerBalance.lob.test.js`, `api/src/__tests__/cosmeticCustomerBalanceMount.test.js`, `website/src/hooks/useDeposits.test.tsx` | Locks request-scoped customer balance reads so Cosmetic deposit summary cards use `/api/cosmetic/CustomerBalance/:id` and count deposit-category advances instead of unallocated service collections. |
+| `website/src/hooks/useCustomers.ts` and `website/src/lib/api/partners.ts` | `website/src/hooks/__tests__/useCustomers.lob.test.ts` | Customer create/update must pass active LOB so cosmetic company FKs validate against cosmetic `dbo.companies`. |
 | `website/src/components/forms/AddCustomerForm/` | `AddCustomerForm.test.tsx`, `website/e2e/customer-create-save.spec.ts` | New-customer intake is high-frequency workflow. |
 | `website/src/components/customer/CustomerProfile/` | `CustomerProfile.test.tsx`, `website/e2e/customer-profile-crud.spec.ts` | Profile tabs (appointments, services, payments, photos). |
 | `api/src/routes/faceRecognition.js` | `api/tests/faceRecognition.test.js` | Face registration, re-registration, recognition, and provider routing. |
+
+### Services Catalog
+
+| If you change... | Run these tests... | Why |
+|---|---|---|
+| `api/src/routes/products.js` service create/edit | `api/src/__tests__/productsNormalizeImport.test.js`, live `POST/PUT /api/Products` and `/api/cosmetic/Products` smoke | Product writes populate `namenosign` through `normalizeVietnamese`; missing imports break service creation for both Dental and Cosmetic. |
+| `website/src/pages/ServiceCatalog.tsx` / service catalog hooks | Service catalog component tests, `/service-catalog` screenshots for Dental and Cosmetic | Service catalog is a shared Dental/Cosmetic workflow and must keep category filters, active toggles, and delete guards working. |
 
 ### Employees & HR
 
 | If you change... | Run these tests... | Why |
 |---|---|---|
 | `website/src/components/employees/EmployeeTable.tsx` | `website/src/components/employees/__tests__/EmployeeTable.test.tsx`, `/employees` 1280x720, 1366x768, and 1440x900 screenshot checks | Long role/location labels must not push the edit action offscreen on desktop workstations. |
+| `website/src/components/employees/EmployeeForm.tsx` and `website/src/lib/api/employees.ts` | `website/src/components/employees/EmployeeForm.lob.test.tsx` | Locks cosmetic branch loading and employee create/update routing through `/api/cosmetic/Companies` and `/api/cosmetic/Employees`. |
 | `website/src/components/shared/DataTable.tsx` sticky-column behavior | Component tests for each table using `sticky: 'right'`, plus the affected route screenshot check | Sticky action cells are shared table infrastructure and must not introduce page-level horizontal overflow or hide row actions. |
 
 ### Payments & Deposits
@@ -65,6 +80,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | If you change... | Run these tests... | Why |
 |---|---|---|
 | `api/src/routes/payments.js` | `api/tests/readRoutePermissions.test.js`, `website/e2e/team-charlie-payments.spec.ts`, `website/src/lib/allocatePaymentSources.test.ts` | Money logic is high-risk. |
+| `website/src/hooks/useDeposits.ts`, `website/src/hooks/useCustomerPayments.ts`, `website/src/hooks/usePayment.ts`, and `website/src/lib/api/payments.ts` | `website/src/hooks/useDeposits.test.tsx`, `website/src/hooks/__tests__/useCustomerPayments.lob.test.ts` | Locks cosmetic payment/deposit creates, deposit list, deposit usage, void/delete/update, and balance refresh against cosmetic payment routes. |
 | `api/src/routes/payments/helpers.js` | `website/src/lib/allocatePaymentSources.test.ts`, payment backend tests | Allocation math, receipt generation, residual validation. |
 | `website/src/components/payment/PaymentForm.tsx` | `PaymentForm.submit.test.tsx`, `website/e2e/vietqr-payment.spec.ts` | Payment entry and mixed-method breakdown. |
 | `contracts/payment.ts` | `npm --prefix contracts run build`, `website/src/hooks/useDeposits.test.tsx`, `website/src/components/payment/PaymentHistory.test.tsx`, `website/src/components/payment/CustomerDeposits.test.tsx`, `website/e2e/team-charlie-payments.spec.ts`, `website/e2e/vietqr-payment.spec.ts` | Schema change cascades into payment method labels, deposit history, VietQR-as-bank-transfer entry, reports/export grouping, and shared package consumers. |
@@ -78,6 +94,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `api/src/services/exports/builders/legacyFlatReportsExport*.js` | `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, `website/e2e/export-downloads.spec.ts` | UC-013, WF-005. Locks `revenue-flat` and `deposit-flat` workbook templates, SO-code column mapping, posted service-payment filters, allocation proration SQL, row-limit errors, and deposit top-up filtering. |
 | `api/src/services/exports/builders/reportSalesEmployeesExport.js` | `api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js`, `website/src/pages/reports/__tests__/ReportsSubpages.test.tsx` | UC-019, WF-005. Locks `report-sales-employees` preview/download filters, location scope, employee-type attribution, grouped workbook rows, and `/reports/revenue` export controls. |
 | `api/src/routes/reports/revenue*.js` | `api/src/routes/reports/__tests__/revenueRecognition.test.js`, `api/src/services/reports/__tests__/canonicalRevenue.test.js` | UC-013, WF-013. Locks `CON-Reports-RevenueSummary`, revenue trend, doctor/category/location paid revenue, canonical Excel-matching WHERE/JOIN topology, payment-date bucketing, and allocation capping. |
+| `api/src/routes/reports/revenueRecognition.js` direct receipt rules | `api/src/routes/reports/__tests__/revenueRecognition.test.js` | Locks direct posted `payment_category = 'payment'` receipts with no allocation rows into summary/trend/location paid totals, including imported cosmetic receipts with blank `service_id`; by-location must expose unassigned paid receipts instead of dropping them while excluding deposits, refunds, usage, and voided rows. |
 | `api/src/routes/reports/cashFlow.js` | `api/src/routes/reports/__tests__/cashFlow.test.js` | UC-013, WF-013. Locks `CON-Reports-CashFlowSummary`, service collections vs deposits/refunds/deposit usage/voided rows, route mounting, timezone-safe date buckets, and scoped location rejection. |
 | `api/src/routes/reports/servicesBreakdown.js` | `api/src/routes/reports/__tests__/servicesBreakdown.test.js` | UC-013, WF-013. Locks `CON-Reports-ServicesBreakdown` so service/category/source revenue comes from posted payment allocations instead of listed service prices or raw order totals. |
 | `website/src/hooks/useReportData.ts` | `website/src/hooks/__tests__/useReportData.test.ts` | UC-013, WF-013. Locks report API calls as POST payloads and strips the all-location sentinel from request bodies. |

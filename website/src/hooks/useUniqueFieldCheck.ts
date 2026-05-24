@@ -16,6 +16,7 @@ export interface UseUniqueFieldCheckArgs {
   initialValue?: string;   // edit-mode: skip check when value === initialValue
   debounceMs?: number;     // default 400
   enabled?: boolean;       // default true
+  lob?: 'dental' | 'cosmetic';
 }
 
 export interface UseUniqueFieldCheckResult {
@@ -38,7 +39,7 @@ interface CacheEntry {
 }
 
 export function useUniqueFieldCheck(args: UseUniqueFieldCheckArgs): UseUniqueFieldCheckResult {
-  const { field, value, excludeId, initialValue, debounceMs = 400, enabled = true } = args;
+  const { field, value, excludeId, initialValue, debounceMs = 400, enabled = true, lob } = args;
 
   const [status, setStatus] = useState<UniqueFieldStatus>('idle');
   const [message, setMessage] = useState<string | undefined>(undefined);
@@ -100,6 +101,7 @@ export function useUniqueFieldCheck(args: UseUniqueFieldCheckArgs): UseUniqueFie
 
         const data = await apiFetch<{ unique: boolean }>('/Partners/check-unique', {
           params,
+          lob,
         });
 
         if (controller.signal.aborted) return;
@@ -128,7 +130,7 @@ export function useUniqueFieldCheck(args: UseUniqueFieldCheckArgs): UseUniqueFie
         timerRef.current = null;
       }
     };
-  }, [value, excludeId, initialValue, enabled, field, debounceMs, setResult]);
+  }, [value, excludeId, initialValue, enabled, field, debounceMs, lob, setResult]);
 
   // Abort on unmount
   useEffect(() => {
