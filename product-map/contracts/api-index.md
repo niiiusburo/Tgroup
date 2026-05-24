@@ -61,10 +61,10 @@ CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin ro
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/api/Ctvs` | admin (`ctv.manage`/`*`) | `?status=active\|suspended` | `{ ctvs: [{id, name, phone, email, lob_scope, active, referred_by_ctv_id, upline_name}] }` |
-| PATCH | `/api/Ctvs/:id` | admin | `{ active: boolean }` | Updated CTV (suspend/reactivate); mirrors to cosmetic DB if present |
-| GET | `/api/CommissionConfig` | Auth | — | `{ levels: [{level,label,enabled,share_percent}], defaultReferralPercent }` |
-| PUT | `/api/CommissionConfig` | admin (`commission.config.manage`/`*`) | `{ levels[], defaultReferralPercent }` | Upserts config; enabled-sum > 100 → 400 `B_LEVEL_SUM_EXCEEDS_100` |
+| GET | `/api/Ctvs`, `/api/cosmetic/Ctvs` | admin (`ctv.manage`/`*`) | `?status=active\|suspended` | `{ ctvs: [{id, name, phone, email, lob_scope, active, referred_by_ctv_id, upline_name}] }` |
+| PATCH | `/api/Ctvs/:id`, `/api/cosmetic/Ctvs/:id` | admin | `{ active: boolean }` | Updated CTV (suspend/reactivate); mirrors to cosmetic DB if present |
+| GET | `/api/CommissionConfig`, `/api/cosmetic/CommissionConfig` | Auth | — | `{ levels: [{level,label,enabled,share_percent}], defaultReferralPercent }` |
+| PUT | `/api/CommissionConfig`, `/api/cosmetic/CommissionConfig` | admin (`commission.config.manage`/`*`) | `{ levels[], defaultReferralPercent }` | Upserts config; enabled-sum > 100 → 400 `B_LEVEL_SUM_EXCEEDS_100` |
 
 ## Account (`/api/Account`)
 

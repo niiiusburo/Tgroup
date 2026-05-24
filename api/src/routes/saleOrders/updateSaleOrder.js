@@ -34,7 +34,7 @@ async function updateSaleOrder(req, res) {
     }
 
     const paymentState = amounttotal !== undefined
-      ? await calculateSaleOrderPaymentStateFromAllocations(query, id, amounttotal)
+      ? await calculateSaleOrderPaymentStateFromAllocations(q, id, amounttotal)
       : null;
 
     const fields = [
@@ -58,7 +58,7 @@ async function updateSaleOrder(req, res) {
       );
     }
 
-    const updatedOrder = await updateSaleOrderFields(id, fields);
+    const updatedOrder = await updateSaleOrderFields(q, id, fields);
     if (!updatedOrder && !hasLineUpdate(req.body)) {
       return res.status(400).json({ error: 'No fields to update' });
     }
@@ -66,7 +66,7 @@ async function updateSaleOrder(req, res) {
       return res.status(404).json({ error: 'Sale order not found' });
     }
 
-    await updatePrimarySaleOrderLine(id, {
+    await updatePrimarySaleOrderLine(q, id, {
       productid,
       productname,
       doctorid,
@@ -88,7 +88,7 @@ async function updateSaleOrder(req, res) {
   }
 }
 
-async function updateSaleOrderFields(id, fields) {
+async function updateSaleOrderFields(q, id, fields) {
   const sets = [];
   const values = [];
   let paramIdx = 1;
@@ -123,7 +123,7 @@ function hasLineUpdate(body) {
   );
 }
 
-async function updatePrimarySaleOrderLine(orderId, fields) {
+async function updatePrimarySaleOrderLine(q, orderId, fields) {
   if (!hasLineUpdate(fields)) return;
 
   const existingLine = await q(
@@ -132,13 +132,13 @@ async function updatePrimarySaleOrderLine(orderId, fields) {
   );
 
   if (existingLine && existingLine.length > 0) {
-    await updateExistingLine(existingLine[0].id, fields);
+    await updateExistingLine(q, existingLine[0].id, fields);
   } else if (fields.productid) {
-    await insertPrimaryLine(orderId, fields);
+    await insertPrimaryLine(q, orderId, fields);
   }
 }
 
-async function updateExistingLine(lineId, fields) {
+async function updateExistingLine(q, lineId, fields) {
   const lineSets = [];
   const lineValues = [];
   let lineIdx = 1;
@@ -195,7 +195,7 @@ async function updateExistingLine(lineId, fields) {
   await q(`UPDATE saleorderlines SET ${lineSets.join(', ')} WHERE id = $${lineIdx}`, lineValues);
 }
 
-async function insertPrimaryLine(orderId, fields) {
+async function insertPrimaryLine(q, orderId, fields) {
   const lineId = crypto.randomUUID();
   await q(
     `INSERT INTO saleorderlines (

@@ -11,8 +11,9 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { fetchCommissionConfig, saveCommissionConfig, type CommissionConfig, type CommissionLevel } from '@/lib/api/commission';
 import { fetchCtvs, setCtvActive, createCtv, type CtvRecord, type CreateCtvInput } from '@/lib/api/ctv';
 import { ApiError } from '@/lib/api/core';
+import { EarningsTab, PayoutsTab } from '@/components/commission/EarningsPayoutsTabs';
 
-type TabType = 'config' | 'ctvs';
+type TabType = 'config' | 'ctvs' | 'earnings' | 'payouts';
 
 export function Commission() {
   const { t } = useTranslation('common');
@@ -50,31 +51,31 @@ export function Commission() {
 
       {/* Segmented tab control */}
       <div className="flex gap-2 bg-gray-100 rounded-lg p-1 w-fit">
-        <button
-          onClick={() => setActiveTab('config')}
-          className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
-            activeTab === 'config'
-              ? 'bg-white text-primary shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          Config
-        </button>
-        <button
-          onClick={() => setActiveTab('ctvs')}
-          className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
-            activeTab === 'ctvs'
-              ? 'bg-white text-primary shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          CTVs
-        </button>
+        {[
+          ['config', 'Config'],
+          ['ctvs', 'CTVs'],
+          ['earnings', 'Earnings'],
+          ['payouts', 'Payouts'],
+        ].map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setActiveTab(key as TabType)}
+            className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
+              activeTab === key
+                ? 'bg-white text-primary shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Tab content */}
       {activeTab === 'config' && <ConfigTab />}
       {activeTab === 'ctvs' && <CtvTab />}
+      {activeTab === 'earnings' && <EarningsTab />}
+      {activeTab === 'payouts' && <PayoutsTab />}
     </div>
   );
 }

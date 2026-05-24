@@ -68,6 +68,8 @@ const cosmeticEndpoints = [
   '/api/cosmetic/Partners',
   '/api/cosmetic/Appointments',
   '/api/cosmetic/Payments',
+  '/api/cosmetic/CommissionConfig',
+  '/api/cosmetic/Ctvs',
 ];
 
 describe('Cosmetic LOB mount guards (Phase-1 gap D)', () => {
@@ -151,6 +153,9 @@ describe('Cosmetic LOB mount guards (Phase-1 gap D)', () => {
       expect(serverSrc).toMatch(/requireLobScope\(['"]cosmetic['"]\)/);
       // Cosmetic mount
       expect(serverSrc).toMatch(/app\.use\(['"]\/api\/cosmetic['"]/);
+      // Commission admin routes must be reachable after LOB rewrite.
+      expect(serverSrc).toMatch(/cosmeticRouter\.use\(['"]\/CommissionConfig['"]/);
+      expect(serverSrc).toMatch(/cosmeticRouter\.use\(['"]\/Ctvs['"]/);
     });
   });
 });

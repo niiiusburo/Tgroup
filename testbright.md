@@ -1977,6 +1977,9 @@ TestSprite execution items:
 
 - [x] PASS: Migration 049 applies cleanly to tdental_demo + tcosmetic_demo; level config seeded 72.7/14.5/7.3/3.6/1.8, settings default 20% — evidence: psql apply + seed select.
 - [x] PASS: commissionEngine unit tests (9 jest) — CTV chain split 70/30, salestaff single full-pool row, refund reversal — evidence: jest 9/9 green.
+- [x] PASS: TMV/NK3 live `/commission` error reproduced before fix: Cosmetic LOB requested `GET /api/cosmetic/CommissionConfig` and received 404. Screenshot: `output/playwright/tmv-commission-error-20260523/commission-live.png`.
+- [x] PASS: After live hotfix, TMV/NK3 `/commission` under Cosmetic LOB loads Config without error and `GET /api/cosmetic/CommissionConfig` returns 200. Screenshot: `output/playwright/tmv-commission-error-20260523/commission-live-after.png`.
+- [x] PASS: After live hotfix, TMV/NK3 `/commission` → CTVs tab loads and `GET /api/cosmetic/Ctvs` returns 200, not 404. Screenshot: `output/playwright/tmv-commission-error-20260523/commission-live-ctvs-after.png`.
 - [x] PASS: Full api jest suite + website depcruise + tsc + vite build all green (no regression) — evidence: background runs exit 0.
 - [ ] PENDING (NK3 live, https://76-13-16-68.sslip.io): log in t@clinic.vn, open /commission → Config tab, change a level %, set enabled sum >100 → Save blocked with B_LEVEL_SUM_EXCEEDS_100; set ≤100 → saves.
 - [ ] PENDING (NK3 live): /commission → CTVs tab, click "+ Add CTV", create one, confirm it appears in the list; suspend then reactivate.

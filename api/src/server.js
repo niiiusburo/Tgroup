@@ -41,6 +41,8 @@ const dashboardReportsRoutes = require('./routes/dashboardReports');
 const permissionsRoutes = require('./routes/permissions');
 const authRoutes = require('./routes/auth');
 const paymentsRoutes = require('./routes/payments');
+const earningsRoutes = require('./routes/earnings');
+const payoutsRoutes = require('./routes/payouts');
 const ctvRoutes = require('./routes/ctv');
 // const servicesRoutes removed: dead route queries non-existent table
 const customerBalanceRoutes = require('./routes/customerBalance');
@@ -259,6 +261,8 @@ app.use('/api/DashboardReports', dashboardReportsRoutes);
 app.use('/api/Permissions', permissionsRoutes);
 app.use('/api/Auth', authRoutes);
 app.use('/api/Payments', paymentsRoutes);
+app.use('/api/Earnings', earningsRoutes);
+app.use('/api/Payouts', payoutsRoutes);
 
 // Cosmetic LOB v2: dedicated /api/me/lob-scope (lightweight, re-queries canonical partners row)
 // Returns current user's { lob_scope, is_ctv, available } for frontend BusinessUnitContext + CTV gating.
@@ -411,6 +415,10 @@ if (COSMETIC_FLAG) {
   cosmeticRouter.use('/SaleOrderLines', saleOrderLinesRoutes);
   cosmeticRouter.use('/Appointments', appointmentsRoutes);
   cosmeticRouter.use('/Payments', paymentsRoutes);
+  cosmeticRouter.use('/CommissionConfig', require('./routes/commissionConfig'));
+  cosmeticRouter.use('/Ctvs', require('./routes/ctvs'));
+  cosmeticRouter.use('/Earnings', earningsRoutes);
+  cosmeticRouter.use('/Payouts', payoutsRoutes);
   cosmeticRouter.use('/Companies', companiesRoutes);
   cosmeticRouter.use('/Reports', reportsRoutes);
   cosmeticRouter.use('/DashboardReports', dashboardReportsRoutes);
@@ -472,6 +480,8 @@ app.get('/api/health', async (_req, res) => {
 
 // Serve uploaded feedback attachments
 app.use('/uploads/feedback', express.static(path.join(__dirname, '..', 'uploads', 'feedback')));
+// Serve uploaded payout receipts
+app.use('/uploads/payouts', express.static(path.join(__dirname, '..', 'uploads', 'payouts')));
 
 // Stub image endpoint used by partner avatars
 app.get('/api/web/Image2', (req, res) => {

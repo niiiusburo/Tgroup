@@ -351,17 +351,27 @@ export function CtvDashboard() {
                 <div className="bg-white rounded-3xl p-5 ring-1 ring-gray-100 shadow-sm">
                   <div className="text-[11px] uppercase tracking-[0.15em] font-semibold text-gray-500">Total paid out</div>
                   <div className="text-3xl font-bold tabular-nums text-gray-900 mt-1">{formatVnd(paid)}</div>
-                  <div className="text-sm text-gray-500 mt-1">{summary?.counts?.paid || 0} payout cycles</div>
+                  <div className="text-sm text-gray-500 mt-1">{summary?.payouts?.length || 0} payout cycles</div>
                 </div>
                 <div>
                   <div className="text-[11px] uppercase tracking-[0.15em] font-semibold text-gray-500 mb-2 px-1">Payout cycles</div>
-                  {(summary?.paidList || []).slice(0, 3).map((p: any, i: number) => (
-                    <div key={i} className="bg-white p-4 rounded-2xl ring-1 ring-gray-100 mb-2 flex justify-between items-center">
-                      <div className="text-sm">2026-0{i+2} <span className="text-emerald-600 font-medium ml-1">· Paid</span></div>
-                      <div className="font-semibold tabular-nums">{formatVnd(p.amount)}</div>
+                  {(summary?.payouts || []).map((p) => (
+                    <div key={p.id} className="bg-white p-4 rounded-2xl ring-1 ring-gray-100 mb-2 flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <div>
+                          <div className="text-sm font-medium">{p.cycle_label}</div>
+                          <div className="text-xs text-gray-500">{p.lob === 'dental' ? 'Dental' : 'Cosmetic'} · {p.paid_at ? new Date(p.paid_at).toLocaleDateString('vi-VN') : '—'}</div>
+                        </div>
+                        {p.receipt_url && (
+                          <a href={p.receipt_url} target="_blank" rel="noreferrer">
+                            <img src={p.receipt_url} alt="Receipt" className="h-8 w-8 rounded border border-gray-200 object-cover" />
+                          </a>
+                        )}
+                      </div>
+                      <div className="font-semibold tabular-nums">{formatVnd(p.total_amount)}</div>
                     </div>
                   ))}
-                  {(!summary?.paidList || summary.paidList.length === 0) && (
+                  {(!summary?.payouts || summary.payouts.length === 0) && (
                     <div className="bg-white rounded-2xl p-4 ring-1 ring-gray-100 text-sm text-gray-500">
                       Payout batch history will appear here after admin runs payouts.
                     </div>

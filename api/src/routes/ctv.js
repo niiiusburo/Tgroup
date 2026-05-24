@@ -7,6 +7,7 @@
 const express = require('express');
 const { requireAuth } = require('../middleware/auth');
 const { getDb } = require('../db');
+const { buildCtvNetwork } = require('../services/ctvNetwork');
 const { getReferralClaimStatus } = require('../services/referralClaim');
 const { createReferralStartCard } = require('../services/referralCard');
 
@@ -111,6 +112,22 @@ router.get('/commission-summary', requireAuth, async (req, res) => {
   const pendingList = recent.filter((r) => r.status === 'pending');
   const paidList = recent.filter((r) => r.status !== 'pending' || parseFloat(r.amount) < 0);
 
+  // Fetch payout cycles referenced by this CTV's earnings (for Paid tab grouping)
+  const dPayoutIds = [...new Set(dRows.map((r) => r.payout_id).filter(Boolean))];
+  const cPayoutIds = [...new Set(cRows.map((r) => r.payout_id).filter(Boolean))];
+  const [dPayouts, cPayouts] = await Promise.all([
+    dPayoutIds.length > 0
+      ? safeQueryRows(dentalDb, `SELECT id, cycle_label, paid_at, total_amount, receipt_url FROM dbo.payouts WHERE id = ANY($1)`, [dPayoutIds])
+      : Promise.resolve([]),
+    cPayoutIds.length > 0
+      ? safeQueryRows(cosmeticDb, `SELECT id, cycle_label, paid_at, total_amount, receipt_url FROM dbo.payouts WHERE id = ANY($1)`, [cPayoutIds])
+      : Promise.resolve([]),
+  ]);
+  const payouts = [
+    ...dPayouts.map((p) => ({ ...p, lob: 'dental', total_amount: parseFloat(p.total_amount || 0) })),
+    ...cPayouts.map((p) => ({ ...p, lob: 'cosmetic', total_amount: parseFloat(p.total_amount || 0) })),
+  ].sort((a, b) => new Date(b.paid_at || 0).getTime() - new Date(a.paid_at || 0).getTime());
+
   return res.json({
     totals: {
       pending: Math.round(pendingTotal),
@@ -122,6 +139,7 @@ router.get('/commission-summary', requireAuth, async (req, res) => {
     recent,
     pendingList,
     paidList,
+    payouts,
   });
 });
 
@@ -395,7 +413,46 @@ router.post('/clients', requireAuth, async (req, res) => {
   }
 });
 
-module.exports = router;
+/**
+ * GET /api/ctv/network
+ * Returns the authenticated CTV's direct recruits and recursive downline (max 5 levels)
+ * plus client counts. Privacy: exposes CTV partner profile basics only; no client PII.
+ */
+router.get('/network', requireAuth, async (req, res) => {
+  const { employeeId } = req.user || {};
+  if (!employeeId) return res.status(401).json({ error: 'No token' });
+
+  try {
+    const dentalDb = getDb('dental');
+    const cosmeticDb = getDb('cosmetic');
+    const ctvSql = `
+      SELECT id, name, phone, email, active, referred_by_ctv_id, datecreated
+      FROM dbo.partners
+      WHERE is_ctv = true AND isdeleted = false
+    `;
+    const [dCtvs, cCtvs, dClientCounts, cClientCounts, dEarnRows, cEarnRows] = await Promise.all([
+      safeQueryRows(dentalDb, ctvSql),
+      safeQueryRows(cosmeticDb, ctvSql),
+      safeQueryRows(dentalDb, `SELECT referred_by_ctv_id AS ctv_id, COUNT(*) AS count FROM dbo.partners WHERE customer = true AND referred_by_ctv_id IS NOT NULL GROUP BY referred_by_ctv_id`),
+      safeQueryRows(cosmeticDb, `SELECT referred_by_ctv_id AS ctv_id, COUNT(*) AS count FROM dbo.partners WHERE customer = true AND referred_by_ctv_id IS NOT NULL GROUP BY referred_by_ctv_id`),
+      safeQueryRows(dentalDb, `SELECT recipient_partner_id AS ctv_id, COALESCE(SUM(amount),0) AS amount FROM dbo.earnings GROUP BY recipient_partner_id`),
+      safeQueryRows(cosmeticDb, `SELECT recipient_partner_id AS ctv_id, COALESCE(SUM(amount),0) AS amount FROM dbo.earnings GROUP BY recipient_partner_id`),
+    ]);
+
+    return res.json(buildCtvNetwork({
+      ctvId: employeeId,
+      dentalCtvs: dCtvs,
+      cosmeticCtvs: cCtvs,
+      dentalClientCounts: dClientCounts,
+      cosmeticClientCounts: cClientCounts,
+      dentalEarnings: dEarnRows,
+      cosmeticEarnings: cEarnRows,
+    }));
+  } catch (e) {
+    console.error('[ctv GET /network] error:', e.message);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 /**
  * POST /api/ctv/bookings
@@ -493,3 +550,5 @@ router.post('/bookings', requireAuth, async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+module.exports = router;

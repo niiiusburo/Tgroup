@@ -1,5 +1,33 @@
 [
   {
+    "version": "0.32.46",
+    "date": "2026-05-24",
+    "commit": "pending",
+    "highlights": "Admin can create payout cycles with receipt photo upload; CTV portal Paid tab shows real cycles with thumbnails.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Admin Commission → Payouts: select pending earnings, set a cycle label, attach a receipt photo, and create a payout batch. Past cycles show a thumbnail; missing receipts can be attached later.",
+          "CTV Portal → Comm → Paid: now displays real payout cycles with cycle label, amount, and receipt thumbnail.",
+          "Migration 051_add_payout_receipt.sql adds receipt_url and receipt_uploaded_at to dbo.payouts (both DBs)."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Admin Earnings and Payouts routes now correctly allow admins via isAdminPermissionState (previously required explicit commissions.view.team / commissions.payout.run keys)."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "7 jest cases for payouts route: permission gate (admin + explicit perm), POST happy path with receipt_url, B_EARNINGS_NOT_PAYABLE conflict, PATCH receipt attachment, 404 on missing payout."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.41",
     "date": "2026-05-23",
     "commit": "pending",

@@ -4,6 +4,15 @@
  */
 import { apiFetch } from './core';
 
+export interface CtvPayoutCycle {
+  id: string;
+  lob: 'dental' | 'cosmetic';
+  cycle_label: string;
+  paid_at?: string;
+  total_amount: number;
+  receipt_url?: string | null;
+}
+
 export interface CtvCommissionSummary {
   totals: {
     pending: number;
@@ -23,6 +32,7 @@ export interface CtvCommissionSummary {
   }>;
   pendingList?: any[];
   paidList?: any[];
+  payouts?: CtvPayoutCycle[];
 }
 
 export interface CtvReferral {
@@ -36,12 +46,37 @@ export interface CtvReferral {
   referred_at?: string;
 }
 
+export interface CtvNetworkNode {
+  id: string;
+  name?: string;
+  phone?: string;
+  email?: string;
+  active?: boolean;
+  lobs?: string[];
+  level?: number;
+  referred_by_ctv_id?: string | null;
+  client_count?: number;
+  active_earnings_sum?: number;
+  children?: CtvNetworkNode[];
+}
+
+export interface CtvNetworkResponse {
+  self: CtvNetworkNode;
+  upline: CtvNetworkNode | null;
+  direct: CtvNetworkNode[];
+  downline: CtvNetworkNode[];
+}
+
 export async function fetchCtvSummary(): Promise<CtvCommissionSummary> {
   return apiFetch<CtvCommissionSummary>('/ctv/commission-summary');
 }
 
 export async function fetchCtvReferrals(): Promise<{ referrals: CtvReferral[] }> {
   return apiFetch('/ctv/referrals');
+}
+
+export async function fetchCtvNetwork(): Promise<CtvNetworkResponse> {
+  return apiFetch<CtvNetworkResponse>('/ctv/network');
 }
 
 export async function fetchCtvMe(): Promise<{ id: string; name: string; email?: string; phone?: string; role: string }> {
