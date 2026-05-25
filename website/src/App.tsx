@@ -36,7 +36,7 @@ const Payment = lazy(() => import('@/pages/Payment').then(m => ({ default: m.Pay
 const Feedback = lazy(() => import('@/pages/Feedback').then(m => ({ default: m.Feedback })));
 const Services = lazy(() => import('@/pages/Services').then(m => ({ default: m.Services })));
 const ServiceCatalog = lazy(() => import('@/pages/ServiceCatalog').then(m => ({ default: m.ServiceCatalog })));
-const CtvDashboard = lazy(() => import('@/pages/CtvDashboard').then(m => ({ default: m.CtvDashboard })));
+const CtvDashboard = lazy(() => import('@/pages/CTV/CtvDashboard'));
 
 /**
  * Access Denied page — shown when authenticated but lacking permission
@@ -114,6 +114,16 @@ function ProtectedRoute({ children, path }: ProtectedRouteProps) {
   return <>{children}</>;
 }
 
+function CTVRouteGuard({ children }: { readonly children: React.ReactNode }) {
+  const { isAuthenticated, isLoading, user } = useAuth();
+
+  if (isLoading) return <AuthLoading />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!user?.is_ctv && !user?.isCtv) return <Navigate to="/" replace />;
+
+  return <>{children}</>;
+}
+
 /**
  * LoginRoute — redirects authenticated users away from /login
  */
@@ -163,7 +173,14 @@ function AppRoutes() {
           )}
 
           {/* CTV v2 dashboard — mobile-first, bypasses admin Layout entirely for is_ctv users */}
-          <Route path="/ctv" element={<CtvDashboard />} />
+          <Route
+            path="/ctv"
+            element={
+              <CTVRouteGuard>
+                <CtvDashboard />
+              </CTVRouteGuard>
+            }
+          />
 
           {/* Protected routes wrapped in Layout */}
           <Route

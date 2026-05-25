@@ -10,6 +10,52 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK3 CTV Portal Tracking Refresh 2026-05-25
+
+Feature/edit name: NK3 CTV self portal refresh and Tracking tab.
+
+Changed URLs and routes:
+- Live page to verify after deploy: `https://tmv.2checkin.com/ctv`.
+- Local page during development: `/ctv`.
+- API routes: `GET /api/ctv/commission-summary`, `GET /api/ctv/referrals`, `GET /api/ctv/client-journeys`, `GET /api/ctv/me`, `GET /api/ctv/network`, `POST /api/ctv`, `POST /api/ctv/clients`, `POST /api/ctv/bookings`.
+
+Affected data flows:
+- Authenticated CTV users are hard-routed to `/ctv`; non-CTV users cannot render the CTV portal.
+- `GET /api/ctv/client-journeys` composes self-owned referred clients from both `tdental_smoketest` and `tcosmetic_smoketest` through API code, not cross-DB SQL joins.
+- `POST /api/ctv/bookings` writes only to the selected LOB database, creates/updates the referred client claim, writes the Referral Start card, and creates the appointment.
+- Booking conflict errors keep `B_CLIENT_CLAIMED` with both camelCase and snake_case owner/expiry fields for UI compatibility.
+
+Roles and setup state:
+- CTV user: `ctv-demo@clinic.vn` on NK3 live when available; verify read-only routes first.
+- Admin users should be redirected away from `/ctv` or shown the normal admin app rather than the CTV portal.
+- TestSprite should avoid creating live clients/bookings unless a disposable phone/name and explicit live-write approval are provided.
+
+Happy paths:
+- CTV logs in, lands on `/ctv`, and sees Home, Commission, Tracking, Referrals, and Me bottom tabs.
+- Tracking tab loads client journeys with LOB badges, stage progress, and earned/estimated commission values.
+- Commission and Referrals tabs still load with existing CTV data.
+- `+ Client` booking sheet handles `B_CLIENT_CLAIMED` with a clear already-owned message.
+
+Edge cases:
+- No referred clients: Tracking tab shows a useful empty state without crashing.
+- Referred client appears in both LOBs: UI deduplicates/merges LOB badges and keeps the highest progress stage.
+- CTV has only dental or only cosmetic data: totals and journey cards stay scoped and visible.
+- API rows missing optional visit/service/payment fields: cards render without undefined text.
+
+Regressions to check:
+- ProtectedRoute still honors both `is_ctv` and `isCtv`.
+- CTV users cannot access admin routes such as `/customers`, `/calendar`, or `/commission`.
+- Admin Commission CTV tab and referral-claim booking tests still pass.
+- NK3 live target stays `https://tmv.2checkin.com` and uses `tdental_smoketest` + `tcosmetic_smoketest`; do not touch legacy `nk.2checkin.com` or `tdental_demo`.
+
+Verification state:
+- [x] PASS: `npm --prefix website test -- src/__tests__/ProtectedRoute.ctv.test.tsx src/lib/api/__tests__/ctv.booking.test.ts` passed 2 files / 7 tests.
+- [x] PASS: `npx jest --runInBand src/routes/__tests__/ctvBookings.test.js src/services/__tests__/referralClaim.test.js src/services/__tests__/referralCard.test.js src/services/__tests__/commissionEngine.test.js` passed 4 suites / 29 tests.
+- [x] PASS: `npm --prefix website run build` produced the 0.32.49 production bundle.
+- [x] PASS: `/opt/homebrew/bin/semgrep scan --config p/default --metrics=off --no-git-ignore ...` scanned 19 files with 0 findings.
+- [x] PASS: Local `/ctv` screenshot evidence: `website/output/local-verification/nk3-ctv-portal-0.32.49/01-local-ctv-home-mobile.png`, `02-local-ctv-tracking-mobile.png`, `03-local-ctv-tracking-desktop.png`.
+- [x] PASS: NK3 live `/ctv` read-only verification on `https://tmv.2checkin.com` after deploy: `/api/ctv/commission-summary`, `/api/ctv/referrals`, `/api/ctv/client-journeys`, and `/api/ctv/me` all returned 200 as `ctv-demo@clinic.vn`; screenshot evidence: `output/live-verification/nk3-ctv-portal-0.32.49-20260525/01-live-ctv-home-mobile.png`, `02-live-ctv-tracking-mobile.png`, `03-live-ctv-tracking-desktop.png`.
+
 # TestSprite Plan: NK3 CTV Cosmetic Employee Location LOB Fix 2026-05-22
 
 Feature/edit name: NK3/CTV Cosmetic LOB employee branch isolation fix.

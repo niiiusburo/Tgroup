@@ -1,0 +1,147 @@
+{
+  "header": {
+    "brand": "TG Clinic",
+    "title": "CTV Portal",
+    "trackingTitle": "Client Tracking",
+    "commissionTitle": "My Commission",
+    "referralsTitle": "My Referrals",
+    "networkTitle": "Network",
+    "meTitle": "Account"
+  },
+  "tabs": {
+    "home": "Home",
+    "commission": "Commission",
+    "tracking": "Tracking",
+    "referrals": "Referrals",
+    "network": "Network",
+    "me": "Me"
+  },
+  "actions": {
+    "referClient": "Refer Client",
+    "recruitCtv": "Recruit CTV",
+    "seeAll": "See all",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "reload": "Reload",
+    "logout": "Log out",
+    "search": "Search clients...",
+    "filterAll": "All",
+    "filterInProgress": "In Progress",
+    "filterCompleted": "Completed",
+    "filterPendingPayment": "Pending Payment",
+    "swipeHint": "← Swipe left/right to see columns →"
+  },
+  "home": {
+    "greeting": "Hi, {{name}}",
+    "subtitle": "Your referral commissions across Dental & Cosmetic",
+    "pendingCommission": "Pending Commission",
+    "thisMonth": "This Month",
+    "referrals": "Referrals",
+    "services": "Services",
+    "paidOut": "Paid out",
+    "recentActivity": "Recent activity",
+    "noActivity": "No recent activity yet.<br />Refer clients to start earning.",
+    "dental": "Dental",
+    "cosmetic": "Cosmetic"
+  },
+  "commission": {
+    "myCommission": "My Commission",
+    "pending": "Pending",
+    "paid": "Paid",
+    "totalPending": "Total pending",
+    "totalPaid": "Total paid out",
+    "byService": "By service",
+    "payoutCycles": "Payout cycles",
+    "noPending": "No pending commissions.",
+    "noPayouts": "Payout history will appear here after admin runs payouts.",
+    "servicesAcrossClients": "{{count}} services across {{clients}} clients"
+  },
+  "tracking": {
+    "pageTitle": "Client Tracking",
+    "subtitle": "Track your referred clients from introduction to payment",
+    "stage": {
+      "referred": "Referred",
+      "visited": "Visited",
+      "serviced": "Serviced",
+      "paid": "Paid"
+    },
+    "stageBadge": {
+      "referred": "Just referred",
+      "visited": "Visited",
+      "serviced": "In service",
+      "paid": "✓ Complete"
+    },
+    "via": "via",
+    "appointmentDate": "Appointment",
+    "noAppointment": "No appointment yet · Remind client to book",
+    "nextVisit": "Next visit",
+    "commissionEarned": "Commission",
+    "estimated": "estimated",
+    "received": "received",
+    "serviceAmount": "Service amount",
+    "noClientsYet": "No clients yet",
+    "noClientsHint": "Refer your first client to start earning commission",
+    "noClientsAction": "+ Refer Client"
+  },
+  "referrals": {
+    "myReferrals": "My Referrals",
+    "noReferrals": "No referred clients yet.",
+    "svc": "svc",
+    "status": {
+      "earning": "Earning",
+      "noVisitYet": "No visit yet"
+    }
+  },
+  "network": {
+    "myNetwork": "CTV Network",
+    "downline": "Downline",
+    "direct": "Direct",
+    "level": "Level {{level}}",
+    "clients": "clients",
+    "noNetwork": "No CTVs in your network yet."
+  },
+  "me": {
+    "ctvPartner": "CTV partner",
+    "referralCode": "Referral code",
+    "language": "Language",
+    "notifications": "Notifications",
+    "on": "On",
+    "copyCodeHint": "Share this code to recruit new CTVs"
+  },
+  "forms": {
+    "referClient": {
+      "title": "Refer a Client",
+      "name": "Name",
+      "namePlaceholder": "Client name",
+      "phone": "Phone",
+      "phonePlaceholder": "Phone number",
+      "date": "Appointment date",
+      "lob": "Line of business",
+      "dental": "Dental",
+      "cosmetic": "Cosmetic",
+      "submit": "Refer Client",
+      "submitting": "Submitting...",
+      "success": "Client referred!",
+      "required": "All fields are required",
+      "errorClaimed": "This client is already registered by {{owner}}. Expires: {{expires}}"
+    },
+    "recruitCtv": {
+      "title": "Recruit a CTV",
+      "name": "Name",
+      "phone": "Phone",
+      "email": "Email",
+      "password": "Password",
+      "lobs": "Lines of business",
+      "selectOne": "Select at least one LOB",
+      "submit": "Create CTV Account",
+      "submitting": "Creating...",
+      "success": "CTV created!"
+    }
+  },
+  "errors": {
+    "loadFailed": "Failed to load data",
+    "loadFailedDetail": "Server connection error. Please try again.",
+    "generic": "An error occurred. Please try again later."
+  },
+  "currency": "₫"
+}

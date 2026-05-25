@@ -14,14 +14,18 @@ function getVersionInfo() {
     const packagePath = path.resolve(__dirname, 'package.json')
     const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'))
     
-    let gitCommit = 'unknown'
-    let gitBranch = 'unknown'
-    
-    try {
-      gitCommit = execSync('git rev-parse --short HEAD', { cwd: __dirname }).toString().trim()
-      gitBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: __dirname }).toString().trim()
-    } catch {
-      // Git not available, use defaults
+    let gitCommit = process.env.GIT_SHA || process.env.GIT_COMMIT || 'unknown'
+    let gitBranch = process.env.GIT_BRANCH || 'unknown'
+
+    if (gitCommit !== 'unknown') {
+      gitCommit = gitCommit.slice(0, 7)
+    } else {
+      try {
+        gitCommit = execSync('git rev-parse --short HEAD', { cwd: __dirname }).toString().trim()
+        gitBranch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: __dirname }).toString().trim()
+      } catch {
+        // Git not available and no build env was passed, use defaults.
+      }
     }
     
     return {

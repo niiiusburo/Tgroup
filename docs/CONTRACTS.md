@@ -17,6 +17,7 @@
 | v1.0.2 | 2026-05-18 | Reconfirmed `@tgroup/contracts` payment method enum and generated contract artifacts are limited to live methods only. |
 | v1.0.3 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
 | v1.0.4 | 2026-05-22 | Employee and company frontend clients accept `lob?: 'dental' | 'cosmetic'`; Cosmetic LOB employee add/edit/profile must use `/api/cosmetic/Companies` and `/api/cosmetic/Employees`. |
+| v1.0.5 | 2026-05-25 | CTV self portal adds client-journey tracking and structured booking-claim error compatibility fields. |
 
 ---
 
@@ -59,6 +60,50 @@
 #### GET /api/Auth/me
 **Headers:** `Authorization: Bearer <token>`
 **Response 200:** Same shape as login `user` + `permissions`.
+
+### 1.1A CTV Self Portal
+
+All `/api/ctv/*` routes require `Authorization: Bearer <token>` and are self-scoped to `partners.id` from the authenticated CTV user. CTV aggregation is intentionally composed in API code with `getDb('dental')` and `getDb('cosmetic')`; no cross-database SQL join is allowed.
+
+#### GET /api/ctv/client-journeys
+**Response 200:**
+```ts
+{
+  clients: Array<{
+    id: string;
+    name: string;
+    phone?: string;
+    lobs: Array<'dental' | 'cosmetic'>;
+    referred_at: string;
+    referred_via?: string;
+    stage: 'referred' | 'visited' | 'serviced' | 'paid';
+    stage_progress: 1 | 2 | 3 | 4;
+    visit?: { date: string; time?: string; doctor?: string; location?: string };
+    service?: { name: string; amount: number; date?: string; next_appointment?: string };
+    payment?: { amount: number; date: string; method?: string; commission_earned: number; commission_rate?: string };
+    total_earned: number;
+    estimated_commission?: number;
+  }>;
+}
+```
+
+#### POST /api/ctv/bookings
+**Request:** `clientId?`, `name?`, `phone`, `lob`, `date`, optional `time`, `companyId`, `productId`.
+**Response 201:** `{ clientId: string; appointmentId: string }`.
+**Error 400:** active claims owned by another CTV return:
+```ts
+{
+  error: {
+    code: 'B_CLIENT_CLAIMED';
+    message: string;
+    ownerName?: string;
+    owner_name?: string;
+    expiresAt?: string;
+    expires_at?: string;
+  };
+}
+```
+Both camelCase and snake_case fields are part of the compatibility contract for the refreshed CTV booking sheet.
 
 ---
 

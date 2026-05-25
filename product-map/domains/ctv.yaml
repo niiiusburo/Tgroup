@@ -3,13 +3,14 @@ summary: |
   Dedicated role for external referrers (CTV). Flagged by partners.is_ctv = true (additive column on partners table in dental DB; mirrored in cosmetic DB).
   CTV partners have empty lob_scope; on login hard-redirected to /ctv and 403'd on any admin route (including cosmetic/dental mirrors).
   Permissions: ctv.dashboard.view, ctv.commission.view.self, ctv.referrals.view.self (and lob.crossview for admins viewing CTV data).
-  Single new UI surface: mobile-first 4-tab dashboard (Home, Commission, Referrals, Me) at /ctv with bottom nav.
+  Single UI surface: mobile-first 5-tab dashboard (Home, Commission, Tracking, Referrals, Me) at /ctv with bottom nav.
   /api/ctv/commission-summary aggregates earnings from BOTH physical DBs (tdental_demo.earnings + tcosmetic_demo.earnings) server-side for the authenticated CTV partner only (via recipient_partner_id).
+  /api/ctv/client-journeys composes self-owned referred clients from BOTH physical DBs and returns their referral-to-paid progress for the Tracking tab.
   Shows pending/paid, LOB-tagged activity, referred clients across LOBs, split bars, etc. per visual companion. D13 recipient resolution powers the rows.
   CTV is the only surface that intentionally crosses the two DBs (composition in API, no SQL JOIN).
 owns:
-  - api/src/routes/ctv.js (or ctv/ folder; commission-summary cross-DB aggregator using getDb on both)
-  - website/src/pages/CTV/* (CtvDashboard, CtvHome, CtvCommission, CtvReferrals, CtvMe)
+  - api/src/routes/ctv.js and ctv* helper modules (commission-summary + client-journeys cross-DB aggregators using getDb on both)
+  - website/src/pages/CTV/* (CtvDashboard, CtvHome, CtvCommission, CtvTracking, CtvReferrals, CtvMe)
   - website/src/lib/api/ctv.ts
   - website/src/components/ctv/* (LOB pills, split bars, bottom nav)
   - Login redirect logic in AuthContext / ProtectedRoute / LoginRoute
@@ -20,8 +21,12 @@ reads:
   - tdental_demo.dbo.partners (referred clients on dental side)
   - tcosmetic_demo.dbo.partners (referred clients on cosmetic side via referred_by_ctv_id)
   - Both DBs: payouts for paid status
+  - Both DBs: appointments/payments/service-line fields indirectly through earnings-derived journey status
 writes:
-  - (none at CTV level; earnings written by payment paths + commissionEngine in earnings domain; payouts by admin)
+  - POST /api/ctv (create CTV under caller/admin; writes partners in dental and optionally cosmetic)
+  - POST /api/ctv/clients (refer a client under caller/admin; writes partners in selected LOB DB)
+  - POST /api/ctv/bookings (create or reclaim referred client, create Referral Start card, create appointment in selected LOB DB)
+  - earnings remain written by payment paths + commissionEngine in earnings domain; payouts by admin
 tables:
   - tdental_demo.dbo.partners (+ is_ctv BOOLEAN, lob_scope)
   - tdental_demo.dbo.earnings (owned by earnings domain; filter by recipient_partner_id = current CTV)
@@ -31,12 +36,18 @@ tables:
 endpoints:
   - GET /api/ctv/commission-summary (auth: is_ctv + ctv.commission.view.self; returns aggregates + per-LOB breakdown + recent rows with source)
   - GET /api/ctv/referrals (self referred partners/clients + status + earned)
+  - GET /api/ctv/client-journeys (self referred clients + referral/visit/service/payment stage)
   - GET /api/ctv/me (profile)
+  - POST /api/ctv (self/admin CTV recruit)
+  - POST /api/ctv/clients (self/admin referred client create)
+  - GET /api/ctv/network (self CTV upline/direct/downline graph)
+  - POST /api/ctv/bookings (self/admin referred-client booking; blocks B_CLIENT_CLAIMED)
   - GET /api/ctv/* (gated)
 ui_surfaces:
-  - /ctv (full bypass of admin Layout/sidebar; mobile-first with bottom nav 4 tabs; also usable desktop)
+  - /ctv (full bypass of admin Layout/sidebar; mobile-first with bottom nav 5 tabs; also usable desktop)
     - Home: greeting + pending tile (split dental/cosmetic) + this-month + recent activity feed with [den]/[cos] pills
     - Commission: Pending/Paid segmented; earnings list (client, service, amount, LOB pill)
+    - Tracking: referred clients by stage (referred, visited, serviced, paid) with LOB pills and earned/estimated commission context
     - Referrals: list of referred partners (dual LOB badges possible)
     - Me: profile, logout
   - Hard redirect on login for partners.is_ctv=true (before any admin mount)

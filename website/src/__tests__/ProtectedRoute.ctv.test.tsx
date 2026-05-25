@@ -70,9 +70,8 @@ vi.mock('../contexts/TimezoneContext', () => {
 });
 
 // Stub the CTV dashboard so we can detect when the redirect lands there.
-vi.mock('../pages/CtvDashboard', () => ({
+vi.mock('../pages/CTV/CtvDashboard', () => ({
   default: () => <div data-testid="ctv-dashboard-stub">CTV dashboard rendered</div>,
-  CtvDashboard: () => <div data-testid="ctv-dashboard-stub">CTV dashboard rendered</div>,
 }));
 
 describe('ProtectedRoute — hard redirect for is_ctv users (Phase-1 gap C)', () => {

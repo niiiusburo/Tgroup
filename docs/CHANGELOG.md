@@ -2,6 +2,16 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.49] — 2026-05-25 (codex/nk3-ctv-deploy)
+### Added
+- NK3 CTV self portal refresh: `/ctv` now uses the modular CTV page set under `website/src/pages/CTV/*`, shared CTV components, and the `ctv` i18n namespace. The portal keeps Home, Commission, Referrals, and Me while adding the Tracking tab for client journey status. — @agent — UC-CTV self-service, preserves Cosmetic LOB v2 D14 CTV admin isolation.
+- `GET /api/ctv/client-journeys` returns self-owned referred clients from both dental and cosmetic databases with stage/progress, visit, service, payment, and earned-commission fields. The backend CTV router was split into smaller route modules (`ctv.js`, `ctvActions.js`, `ctvClientJourneys.js`, `ctvHelpers.js`) without changing the NK3 two-DB discipline. — @agent — contract v1.0.5, CTV is the approved cross-DB composition surface.
+### Changed
+- `/ctv` route guarding now explicitly renders only for authenticated CTV users and redirects non-CTV users back to the admin app. `POST /api/ctv/bookings` keeps `B_CLIENT_CLAIMED` compatibility by returning both camelCase and snake_case owner/expiry fields for the refreshed sheet UI. — @agent — D14 role isolation and referral-claim eligibility.
+- `vite.config.ts` now honors `GIT_SHA`/`GIT_BRANCH` build args when generating `dist/version.json`, so NK3 Docker builds can prove the exact deployed commit even though git is not installed inside the build image. — @agent — release verification invariant.
+### Tests
+- Targeted verification: `npm --prefix website test -- src/__tests__/ProtectedRoute.ctv.test.tsx src/lib/api/__tests__/ctv.booking.test.ts`; `npx jest --runInBand src/routes/__tests__/ctvBookings.test.js src/services/__tests__/referralClaim.test.js src/services/__tests__/referralCard.test.js src/services/__tests__/commissionEngine.test.js`; `npx tsc --noEmit` in `website`; `node --check api/src/routes/ctv*.js`; scoped Semgrep scan; local and NK3 live `/ctv` screenshot verification. — @agent — docs/test matrix sync.
+
 ## [0.32.48] — 2026-05-25 (codex/nk3-ctv-deploy)
 ### Added
 - Admin Payouts cycle with receipt photo upload (Gap 1): migration `051_add_payout_receipt.sql` adds `receipt_url` + `receipt_uploaded_at` to `dbo.payouts`. `POST /api/Payouts` accepts optional `receipt_url`; `PATCH /api/Payouts/:id` attaches a receipt after creation; `POST /api/Payouts/upload-receipt` returns a stored image URL (multer + local disk, same pattern as feedback attachments). `EarningsPayoutsTabs.tsx` adds file picker to the payout form, thumbnail preview, and "Attach" button on past cycles. `CtvDashboard.tsx` Paid tab now shows real payout cycles with receipt thumbnails. Permission gates on `earnings.js` and `payouts.js` now accept `isAdminPermissionState` (matching `commissionConfig.js`/`ctvs.js`). 7 jest cases in `payouts.test.js`. — @agent — 2026-05-24 (0.32.46).

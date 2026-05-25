@@ -1,5 +1,5 @@
 /**
- * ctv.ts — API client for CTV dashboard (v2)
+ * ctv.ts — API client for CTV dashboard (v2.1)
  * Calls /api/ctv/* (self-gated)
  */
 import { apiFetch } from './core';
@@ -46,6 +46,39 @@ export interface CtvReferral {
   referred_at?: string;
 }
 
+/** Extended referral with client journey tracking stages */
+export interface CtvClientJourney {
+  id: string;
+  name: string;
+  phone?: string;
+  lobs: string[];
+  referred_at: string;
+  referred_via?: string;
+  stage: 'referred' | 'visited' | 'serviced' | 'paid';
+  stage_progress: number; // 1-4
+  visit?: {
+    date: string;
+    time?: string;
+    doctor?: string;
+    location?: string;
+  };
+  service?: {
+    name: string;
+    amount: number;
+    date?: string;
+    next_appointment?: string;
+  };
+  payment?: {
+    amount: number;
+    date: string;
+    method?: string;
+    commission_earned: number;
+    commission_rate?: string;
+  };
+  total_earned: number;
+  estimated_commission?: number;
+}
+
 export interface CtvNetworkNode {
   id: string;
   name?: string;
@@ -75,11 +108,15 @@ export async function fetchCtvReferrals(): Promise<{ referrals: CtvReferral[] }>
   return apiFetch('/ctv/referrals');
 }
 
+export async function fetchCtvClientJourneys(): Promise<{ clients: CtvClientJourney[] }> {
+  return apiFetch('/ctv/client-journeys');
+}
+
 export async function fetchCtvNetwork(): Promise<CtvNetworkResponse> {
   return apiFetch<CtvNetworkResponse>('/ctv/network');
 }
 
-export async function fetchCtvMe(): Promise<{ id: string; name: string; email?: string; phone?: string; role: string }> {
+export async function fetchCtvMe(): Promise<{ id: string; name: string; email?: string; phone?: string; role: string; referral_code?: string }> {
   return apiFetch('/ctv/me');
 }
 
