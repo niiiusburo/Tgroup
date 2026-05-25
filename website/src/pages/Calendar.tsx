@@ -13,6 +13,7 @@ import { SmartFilterDrawer } from '@/components/calendar/SmartFilterDrawer';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import { useTimezone } from '@/contexts/TimezoneContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import type { CalendarAppointment } from '@/data/mockCalendar';
 import type { AppointmentStatus } from '@/types/appointment';
 import { AppointmentFormShell, calendarAppointmentToFormData } from '@/components/appointments/unified';
@@ -26,6 +27,7 @@ export function Calendar() {
   const { t } = useTranslation('calendar');
   const { selectedLocationId } = useLocationFilter();
   const { formatDate } = useTimezone();
+  const { currentLOB } = useBusinessUnit();
   const {
     viewMode,
     setViewMode,
@@ -102,12 +104,12 @@ export function Calendar() {
       const { updateAppointment } = await import('@/lib/api');
       await updateAppointment(result.appointmentId, {
         date: `${result.newDate}T${result.newTime}:00`
-      });
+      }, currentLOB);
       refresh?.();
     } catch (error) {
       console.error('Failed to reschedule appointment:', error);
     }
-  }, [canEditAppointments, refresh]);
+  }, [canEditAppointments, refresh, currentLOB]);
 
   const { handleDragStart, handleDragOver, handleDrop, handleDragEnd } = useDragReschedule(handleReschedule);
 

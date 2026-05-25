@@ -104,6 +104,10 @@ vi.mock('@/lib/api', () => ({
   ),
 }));
 
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({ currentLOB: 'cosmetic' }),
+}));
+
 function Wrapper({ children }: { children: React.ReactNode }) {
   return <TimezoneProvider>{children}</TimezoneProvider>;
 }
@@ -332,7 +336,7 @@ describe('useCustomerProfile date normalization', () => {
     rerender({ customerId: 't8250' });
 
     await waitFor(() => {
-      expect(fetchPartnerById).toHaveBeenCalledWith('t8250');
+      expect(fetchPartnerById).toHaveBeenCalledWith('t8250', 'cosmetic');
     });
 
     expect(result.current.appointments).toEqual([]);

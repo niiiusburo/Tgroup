@@ -22,6 +22,10 @@ vi.mock('@/lib/api', () => ({
   updatePartner: vi.fn(),
 }));
 
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({ currentLOB: 'cosmetic' }),
+}));
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useCustomers, PERMISSION_VIEW_ALL_CUSTOMERS, MIN_SEARCH_LENGTH } from '../useCustomers';
 import { fetchPartners } from '@/lib/api';

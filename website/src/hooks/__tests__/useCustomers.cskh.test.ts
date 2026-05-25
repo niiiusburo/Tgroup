@@ -24,6 +24,10 @@ vi.mock('@/contexts/AuthContext', () => ({
   }),
 }));
 
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({ currentLOB: 'cosmetic' }),
+}));
+
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useCustomers } from '../useCustomers';
 
@@ -112,7 +116,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
           name: 'Test Customer',
           phone: '0903333333',
           cskhid: 'emp2',
-        })
+        }),
+        'cosmetic',
       );
 
       // And: Created customer should have CSKH data
@@ -146,7 +151,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
         expect.objectContaining({
           name: 'Updated Name',
           cskhid: 'emp3',
-        })
+        }),
+        'cosmetic',
       );
     });
 
@@ -176,7 +182,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
         '1',
         expect.objectContaining({
           cskhid: '',
-        })
+        }),
+        'cosmetic',
       );
     });
 
@@ -203,7 +210,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
         '1',
         expect.objectContaining({
           note: '',
-        })
+        }),
+        'cosmetic',
       );
     });
 
@@ -233,7 +241,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
       expect(mockCreatePartner).toHaveBeenCalledWith(
         expect.objectContaining({
           sourceid: 'source-online',
-        })
+        }),
+        'cosmetic',
       );
     });
 
@@ -260,7 +269,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
         '1',
         expect.objectContaining({
           sourceid: 'source-hotline',
-        })
+        }),
+        'cosmetic',
       );
     });
 
@@ -290,7 +300,8 @@ describe('useCustomers - CSKH Role Assignment', () => {
           referraluserid: null,
           cskhid: null,
           salestaffid: null,
-        })
+        }),
+        'cosmetic',
       );
     });
   });

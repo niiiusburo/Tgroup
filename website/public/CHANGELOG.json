@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.32.50",
+    "date": "2026-05-25",
+    "commit": "pending",
+    "highlights": "NK3 Cosmetic admin feedback hotfix: customers, appointments, deposits, payments, and permission saves now stay on Cosmetic routes.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Customer create/edit/delete, customer-code resolve, customer profile, appointment create/edit/reschedule, service records, and Permission Board saves now pass the active LOB so Cosmetic UI calls /api/cosmetic/* instead of dental.",
+          "Customer advance balance now has a live Cosmetic endpoint at GET /api/cosmetic/CustomerBalance/:id and uses the Cosmetic database query context."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Targeted frontend hook tests passed 5 files / 23 tests; backend cosmetic route guard test passed 15 tests."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.46",
     "date": "2026-05-24",
     "commit": "pending",

@@ -7,6 +7,7 @@ import { useCallback } from 'react';
 import type { CustomerProfileData } from '@/hooks/useCustomerProfile';
 import type { CreateServiceInput } from '@/hooks/useServices';
 import { deleteSaleOrderLine } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 interface ServiceCreateInput {
   catalogItemId: string;
@@ -55,6 +56,7 @@ export function useCustomerServiceActions({
   refetchProfile,
   refetchServices,
 }: UseCustomerServiceActionsOptions) {
+  const { currentLOB } = useBusinessUnit();
   const handleCreateService = useCallback(
     async (data: ServiceCreateInput) => {
       await createServiceRecord({
@@ -126,12 +128,12 @@ export function useCustomerServiceActions({
 
   const handleDeleteService = useCallback(
     async (serviceLineId: string) => {
-      await deleteSaleOrderLine(serviceLineId);
+      await deleteSaleOrderLine(serviceLineId, currentLOB);
       await loadSaleOrderLines();
       await refetchProfile?.();
       await refetchServices?.();
     },
-    [loadSaleOrderLines, refetchProfile, refetchServices],
+    [currentLOB, loadSaleOrderLines, refetchProfile, refetchServices],
   );
 
   return { handleCreateService, handleUpdateService, handleDeleteService };

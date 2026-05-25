@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { query } = require('../db');
+const { getQuery } = require('../db');
 
 /**
  * GET /api/CustomerBalance/:id
@@ -10,9 +10,10 @@ const { query } = require('../db');
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const q = getQuery(req);
 
     // Verify customer exists in dbo.partners
-    const partner = await query('SELECT id, name FROM dbo.partners WHERE id = $1', [id]);
+    const partner = await q('SELECT id, name FROM dbo.partners WHERE id = $1', [id]);
     if (!partner || partner.length === 0) {
       return res.status(404).json({ error: 'Customer not found' });
     }
@@ -20,22 +21,33 @@ router.get('/:id', async (req, res) => {
     // Calculate deposit balance from payments.
     // Bug fix (2026-04-14): exclude payments that have allocations so regular
     // invoice payments are not double-counted as deposits (Tạm ứng).
-    const depositResult = await query(`
+    const depositResult = await q(`
       SELECT
-        COALESCE(SUM(CASE WHEN deposit_type = 'deposit' OR (
-          deposit_type IS NULL AND method IN ('cash', 'bank', 'bank_transfer')
-          AND service_id IS NULL AND (deposit_used IS NULL OR deposit_used = 0) AND amount > 0
-          AND NOT EXISTS (SELECT 1 FROM payment_allocations pa WHERE pa.payment_id = payments.id)
-        ) THEN amount ELSE 0 END), 0) AS total_deposited,
         COALESCE(SUM(
           CASE
-            WHEN method = 'deposit' THEN amount
-            ELSE COALESCE(deposit_used, 0)
+            WHEN p.payment_category = 'deposit'
+              AND COALESCE(p.deposit_type, 'deposit') = 'deposit'
+              AND p.amount > 0
+            THEN p.amount
+            ELSE 0
+          END
+        ), 0) AS total_deposited,
+        COALESCE(SUM(
+          CASE
+            WHEN p.deposit_type = 'usage' OR p.method = 'deposit' THEN ABS(p.amount)
+            ELSE COALESCE(p.deposit_used, 0)
           END
         ), 0) AS total_used,
-        COALESCE(SUM(CASE WHEN deposit_type = 'refund' OR amount < 0 THEN ABS(amount) ELSE 0 END), 0) AS total_refunded
-      FROM payments
-      WHERE customer_id = $1 AND status != 'voided'
+        COALESCE(SUM(
+          CASE
+            WHEN p.payment_category = 'deposit'
+              AND (p.deposit_type = 'refund' OR p.amount < 0)
+            THEN ABS(p.amount)
+            ELSE 0
+          END
+        ), 0) AS total_refunded
+      FROM payments p
+      WHERE p.customer_id = $1 AND p.status != 'voided'
     `, [id]);
 
     const totalDeposited = parseFloat(depositResult[0]?.total_deposited || 0);
@@ -46,7 +58,7 @@ router.get('/:id', async (req, res) => {
     // Calculate outstanding balance from uninvoiced saleorders and dotkhams
     let outstandingBalance = 0;
     try {
-      const residualResult = await query(`
+      const residualResult = await q(`
         SELECT COALESCE(SUM(residual), 0) AS total FROM saleorders WHERE partnerid = $1 AND state != 'cancelled'
         UNION ALL
         SELECT COALESCE(SUM(amountresidual), 0) FROM dotkhams WHERE partnerid = $1 AND state != 'cancelled'

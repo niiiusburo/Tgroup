@@ -28,6 +28,10 @@ vi.mock('@/lib/api', () => ({
   updateSaleOrderState: vi.fn(),
 }));
 
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({ currentLOB: 'cosmetic' }),
+}));
+
 describe('useServices payment state mapping', () => {
   it('trusts explicit zero totalpaid instead of inferring fully paid from stale zero residual', async () => {
     const { result } = renderHook(() => useServices(undefined, 'customer-id'));

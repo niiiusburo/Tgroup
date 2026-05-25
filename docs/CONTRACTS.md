@@ -18,6 +18,7 @@
 | v1.0.3 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
 | v1.0.4 | 2026-05-22 | Employee and company frontend clients accept `lob?: 'dental' | 'cosmetic'`; Cosmetic LOB employee add/edit/profile must use `/api/cosmetic/Companies` and `/api/cosmetic/Employees`. |
 | v1.0.5 | 2026-05-25 | CTV self portal adds client-journey tracking and structured booking-claim error compatibility fields. |
+| v1.0.6 | 2026-05-25 | Customer, appointment, service, permission, and customer-balance frontend clients preserve `lob?: 'dental' | 'cosmetic'`; Cosmetic profile/deposit balance uses `GET /api/cosmetic/CustomerBalance/:id`. |
 
 ---
 

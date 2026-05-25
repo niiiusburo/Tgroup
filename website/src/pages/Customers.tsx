@@ -9,6 +9,7 @@ import {
 import { resolvePartnerKey, type PartnerResolveCandidate } from "@/lib/api/partners";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBusinessUnit } from "@/contexts/BusinessUnitContext";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useLocations } from "@/hooks/useLocations";
 import type { ProfileTab } from "@/components/customer/CustomerProfile";
@@ -34,6 +35,7 @@ export function Customers() {
   const { t } = useTranslation("customers");
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
+  const { currentLOB } = useBusinessUnit();
   const [showForm, setShowForm] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   // Only seed with the URL id when it's already a UUID. Non-UUID keys must wait
@@ -87,7 +89,7 @@ export function Customers() {
 
     let cancelled = false;
     setResolveState({ status: 'resolving', key: id });
-    resolvePartnerKey(id)
+    resolvePartnerKey(id, currentLOB)
       .then((result) => {
         if (cancelled) return;
         if (result.status === 'found') {
@@ -110,7 +112,7 @@ export function Customers() {
     return () => {
       cancelled = true;
     };
-  }, [id, navigate]);
+  }, [id, navigate, currentLOB]);
 
   // Reset profile tab when switching customers or returning to list
   useEffect(() => {
@@ -238,9 +240,9 @@ export function Customers() {
     setDeleteError(null);
     try {
       if (deleteDialog.mode === "hard") {
-        await hardDeletePartner(deleteDialog.customerId);
+        await hardDeletePartner(deleteDialog.customerId, currentLOB);
       } else {
-        await softDeletePartner(deleteDialog.customerId);
+        await softDeletePartner(deleteDialog.customerId, currentLOB);
       }
       setDeleteDialog(null);
       navigate("/customers");

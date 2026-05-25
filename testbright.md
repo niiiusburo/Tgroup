@@ -10,6 +10,52 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK3 Cosmetic Feedback Hotfix 0.32.50 2026-05-25
+
+Feature/edit name: NK3 Cosmetic feedback hotfix for the five reported broken admin flows.
+
+Changed URLs and API routes:
+- Live page to verify after deploy: `https://tmv.2checkin.com/customers?lob=cosmetic`.
+- Live page to verify after deploy: `https://tmv.2checkin.com/calendar?lob=cosmetic`.
+- Live page to verify after deploy: `https://tmv.2checkin.com/permissions?lob=cosmetic`.
+- API routes: `POST/PUT/PATCH/DELETE /api/cosmetic/Partners`, `GET /api/cosmetic/Partners/:id`, `GET /api/cosmetic/Partners/resolve`, `GET/POST/PUT /api/cosmetic/Appointments`, `GET/POST/PUT/DELETE /api/cosmetic/Payments`, `GET /api/cosmetic/CustomerBalance/:id`, `GET/PUT /api/cosmetic/Permissions/*`, `GET/POST/PATCH /api/cosmetic/SaleOrders`, `GET/DELETE /api/cosmetic/SaleOrderLines`.
+
+Affected data flows:
+- Cosmetic customer create/edit/delete and customer-code resolve must stay in `tcosmetic_demo`.
+- Cosmetic appointment list/create/edit/reschedule must stay in `tcosmetic_demo`.
+- Cosmetic customer profile must fetch customer detail, appointment history, sale-order lines, and balance from Cosmetic routes.
+- Cosmetic deposit/payment screens must create payments and then refresh `GET /api/cosmetic/CustomerBalance/:id`.
+- Permission Board under Cosmetic must load groups/employees and save employee permission changes through `/api/cosmetic/Permissions/*`.
+
+Roles and setup state:
+- Admin user with both dental and cosmetic LOB scope, e.g. NK3 admin `t@clinic.vn`.
+- Start on `https://tmv.2checkin.com`, switch header LOB to Cosmetic, and keep Cosmetic selected for all checks.
+- Use disposable live QA names/phones only.
+
+Happy paths:
+- Add a Cosmetic customer and verify the customer remains visible after refresh/search.
+- Add a Cosmetic appointment for that customer and verify it appears on Calendar and customer profile.
+- Add an advance/deposit for that customer and verify the wallet/advance balance increases without a 404.
+- Record a Cosmetic payment and verify it appears in the customer payment list.
+- Change an employee permission group/location scope under Cosmetic and verify save succeeds and reloading keeps the change.
+
+Edge cases:
+- Dental isolation: the new Cosmetic customer ID must not resolve through legacy `/api/Partners/:id`.
+- Customer profile deep links and non-UUID customer-code resolution must use the active Cosmetic LOB.
+- Calendar drag/drop reschedule must call `/api/cosmetic/Appointments/:id` while Cosmetic is active.
+- Service create/update/delete from a Cosmetic customer profile must not hit dental sale-order routes.
+
+Regressions to check:
+- Dental customer, appointment, payment, and permission flows still use legacy `/api/*` routes.
+- CTV `/ctv` portal and admin CTV commission routes from 0.32.49 still load.
+- `version.json` updates to `0.32.50` after deploy.
+
+Verification state:
+- [x] PASS: Pre-fix live API regression on `https://tmv.2checkin.com` showed customer create PASS, appointment create PASS, payment record PASS, permission save PASS, dental isolation PASS, and customer balance FAIL with `Route not found: GET /api/cosmetic/CustomerBalance/:id`; evidence screenshot `output/live-verification/nk3-feedback-regression-20260525T170000Z/nk3-feedback-regression-customers-page.png`.
+- [x] PASS: Local targeted tests passed 5 frontend files / 23 tests for customer/profile/service/permission LOB routing.
+- [x] PASS: Local backend cosmetic guard test passed 15 tests and now asserts `/api/cosmetic/CustomerBalance` remains mounted.
+- [ ] PENDING: After deploy, rerun live NK3 five-bug regression and mark all five flows PASS with screenshot evidence.
+
 # TestSprite Plan: NK3 CTV Portal Tracking Refresh 2026-05-25
 
 Feature/edit name: NK3 CTV self portal refresh and Tracking tab.

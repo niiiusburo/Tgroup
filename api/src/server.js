@@ -422,6 +422,7 @@ if (COSMETIC_FLAG) {
   cosmeticRouter.use('/Companies', companiesRoutes);
   cosmeticRouter.use('/Reports', reportsRoutes);
   cosmeticRouter.use('/DashboardReports', dashboardReportsRoutes);
+  cosmeticRouter.use('/CustomerBalance', customerBalanceRoutes);
   cosmeticRouter.use('/CustomerReceipts', customerReceiptsRoutes);
   cosmeticRouter.use('/AccountPayments', accountPaymentsRoutes);
   cosmeticRouter.use('/CrmTasks', crmTasksRoutes);

@@ -188,6 +188,8 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 |--------|------|------|--------------|----------|
 | GET | `/:id` | Auth | — | Balance breakdown |
 
+Cosmetic LOB mirror: `GET /api/cosmetic/CustomerBalance/:id` returns the same balance breakdown from `tcosmetic_demo` for the active Cosmetic LOB. Customer profile and deposit screens must call this mirror when `currentLOB='cosmetic'`.
+
 ## Customer Receipts (`/api/CustomerReceipts`)
 
 | Method | Path | Auth | Body / Query | Response |

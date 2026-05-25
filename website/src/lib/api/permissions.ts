@@ -2,6 +2,8 @@ import { apiFetch } from './core';
 
 // ─── Permissions ──────────────────────────────────────────────────
 
+type BusinessUnit = 'dental' | 'cosmetic';
+
 export interface PermissionGroup {
   id: string;
   name: string;
@@ -32,12 +34,12 @@ export interface ResolvedPermission {
   locations: { id: string; name: string }[];
 }
 
-export function fetchPermissionGroups() {
-  return apiFetch<PermissionGroup[]>('/Permissions/groups');
+export function fetchPermissionGroups(lob?: BusinessUnit) {
+  return apiFetch<PermissionGroup[]>('/Permissions/groups', { lob });
 }
 
-export function fetchEmployeePermissions() {
-  return apiFetch<EmployeePermission[]>('/Permissions/employees');
+export function fetchEmployeePermissions(lob?: BusinessUnit) {
+  return apiFetch<EmployeePermission[]>('/Permissions/employees', { lob });
 }
 
 export function updateEmployeePermission(employeeId: string, data: {
@@ -45,18 +47,18 @@ export function updateEmployeePermission(employeeId: string, data: {
   locScope: string;
   locationIds: string[];
   overrides: { grant: string[]; revoke: string[] };
-}) {
-  return apiFetch<EmployeePermission>(`/Permissions/employees/${employeeId}`, { method: 'PUT', body: data });
+}, lob?: BusinessUnit) {
+  return apiFetch<EmployeePermission>(`/Permissions/employees/${employeeId}`, { method: 'PUT', body: data, lob });
 }
 
-export function resolveEmployeePermissions(employeeId: string) {
-  return apiFetch<ResolvedPermission>(`/Permissions/resolve/${employeeId}`);
+export function resolveEmployeePermissions(employeeId: string, lob?: BusinessUnit) {
+  return apiFetch<ResolvedPermission>(`/Permissions/resolve/${employeeId}`, { lob });
 }
 
-export function createPermissionGroup(data: { name: string; color: string; description: string; permissions: string[] }) {
-  return apiFetch<PermissionGroup>('/Permissions/groups', { method: 'POST', body: data });
+export function createPermissionGroup(data: { name: string; color: string; description: string; permissions: string[] }, lob?: BusinessUnit) {
+  return apiFetch<PermissionGroup>('/Permissions/groups', { method: 'POST', body: data, lob });
 }
 
-export function updatePermissionGroup(groupId: string, data: { name: string; color: string; description: string; permissions: string[] }) {
-  return apiFetch<PermissionGroup>(`/Permissions/groups/${groupId}`, { method: 'PUT', body: data });
+export function updatePermissionGroup(groupId: string, data: { name: string; color: string; description: string; permissions: string[] }, lob?: BusinessUnit) {
+  return apiFetch<PermissionGroup>(`/Permissions/groups/${groupId}`, { method: 'PUT', body: data, lob });
 }

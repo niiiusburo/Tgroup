@@ -2,6 +2,13 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.50] — 2026-05-25 (codex/nk3-balance-hotfix)
+### Fixed
+- NK3 Cosmetic feedback hotfix: customer create/edit/delete, customer-code resolve, customer profile, appointment create/edit/reschedule, customer service records, and Permission Board save now pass the active LOB into API clients so Cosmetic UI writes route through `/api/cosmetic/*` instead of silently falling back to dental. — @agent — Cosmetic LOB v2 physical isolation invariant.
+- `GET /api/cosmetic/CustomerBalance/:id` is now mounted and `customerBalance.js` uses `getQuery(req)`, so customer profile/deposit screens calculate Cosmetic advance balance from `tcosmetic_demo` instead of returning 404 or using the dental pool. — @agent — closes NK3 feedback bug "Thêm tạm ứng nhưng không nhảy tiền tạm ứng".
+### Tests
+- Targeted verification: `npm test -- src/hooks/__tests__/useCustomers.cskh.test.ts src/hooks/__tests__/useCustomers.permissions.test.ts src/hooks/__tests__/useCustomerProfile.date-normalization.test.tsx src/hooks/useServices.payment-state.test.tsx src/hooks/usePermissionBoard.lob.test.tsx` passed 5 files / 23 tests; `JWT_SECRET=test jest --runTestsByPath src/__tests__/cosmeticLobGuards.test.js --runInBand` passed 15 tests. — @agent — NK3 feedback regression lock.
+
 ## [0.32.49] — 2026-05-25 (codex/nk3-ctv-deploy)
 ### Added
 - NK3 CTV self portal refresh: `/ctv` now uses the modular CTV page set under `website/src/pages/CTV/*`, shared CTV components, and the `ctv` i18n namespace. The portal keeps Home, Commission, Referrals, and Me while adding the Tracking tab for client journey status. — @agent — UC-CTV self-service, preserves Cosmetic LOB v2 D14 CTV admin isolation.
