@@ -122,6 +122,14 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 ## [0.31.19] — 2026-05-19
 ### Fixed
 - Restricted Cosmetic LOB selector to Admin users only: auth responses cap non-admin visible `lob_scope` to one LOB, `BusinessUnitContext` ignores staff localStorage/query attempts to switch, and docs/tests now cite INV-008A. — @agent — User request: dental staff must not see or select Cosmetic LOB.
+## [0.32.47] — 2026-05-25
+
+### Fixed
+- `permissions.js` LOB-aware query routing: migrated all 21 bare `query()` calls to `getQuery(req)` so Cosmetic permissions reads/writes route through the cosmetic database pool instead of the dental default. — @agent — fixes NK3 feedback bug #5 (staff permission save errors under Cosmetic LOB) and aligns with LOB v2 two-DB discipline (D13).
+- Frontend test stability: added global `BusinessUnitContext` mock in `website/src/test/setup.ts` to prevent `useBusinessUnit must be used inside BusinessUnitProvider` errors in hooks/components that now depend on LOB context. — @agent — test infrastructure only, no runtime change.
+
+## [0.32.46] — 2026-05-24
+## [0.32.44] — 2026-05-23
 
 ## [0.32.37] — 2026-05-21
 ### Added
@@ -133,6 +141,16 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 ## [0.32.36] — 2026-05-21
 ### Added
 - Frontend foundation for Cosmetic LOB v2 (Phase 0/1 per PLAN): full `BusinessUnitContext.tsx` (TDD, stable memoized, auth-event synced mirroring LocationContext), `FilterByBusinessUnit` toggle component (placed left of location filter in header, renders for isMultiLOBUser), wired `BusinessUnitProvider` + keyed remount (`key={currentLOB}` around Outlet in Layout) in App/Layout, LOB-aware `apiFetch(..., { lob })` support in core.ts for future /cosmetic/* routes. Toggle is now renderable (visible for admins with lob_scope >=2). — Frontend Foundation Agent — Follows website/agents.md + v2 spec + visual companion.
+### Docs
+- Cement cosmetic LOB v2 authority sync on `fix/feedback-reports`: AGENTS / DECISIONS / COORDINATION_REQUESTS get the LOB discipline + two-DB + partners-as-identity rules; `docs/CONTRACTS.md`, `DATA-MODEL.md`, `MIGRATIONS.md`, `RUNBOOK.md`, `SECURITY.md` get migration-047 / `getDb(lob)` / `getQuery(req)` / `COSMETIC_LOB_ENABLED` / `/api/cosmetic` + `/api/ctv` subsections; `product-map/contracts/{api-index,dependency-rules,permission-registry}` get LOB endpoints, `lob.*` permissions, and dep-cruise rules; `product-map/domains/appointments-calendar.yaml` records `companyId` on appointment update; `product-map/schema-map.md` gets the partners (lob_scope/is_ctv/referred_by_ctv_id) + earnings table diagram; split cosmetic domains added as `product-map/domains/{business-unit,cosmetic,cosmetic-clients,ctv,earnings-commissions}.yaml` plus `product-map/governance-delta-cosmetic-lob-v2.md`. Source-of-truth alignment only — no application code touched, no Excel export builders changed. — @agent — 2026-05-21 pre-build cementing so the cosmetic LOB UI work on this branch shares the same product-map as the nk3-deploy / Codex line.
+- `testbright.md` — appended NK 2Checkin login monitor TestSprite entry (read-only auth health check, 3 non-destructive screens). — @agent — 2026-05-21.
+---
+## [0.32.47] — 2026-05-25
+
+### Fixed
+- `permissions.js` LOB-aware query routing: migrated all 21 bare `query()` calls to `getQuery(req)` so Cosmetic permissions reads/writes route through the cosmetic database pool instead of the dental default. — @agent — fixes NK3 feedback bug #5 (staff permission save errors under Cosmetic LOB) and aligns with LOB v2 two-DB discipline (D13).
+- Frontend test stability: added global `BusinessUnitContext` mock in `website/src/test/setup.ts` to prevent `useBusinessUnit must be used inside BusinessUnitProvider` errors in hooks/components that now depend on LOB context. — @agent — test infrastructure only, no runtime change.
+
 
 ### Docs
 - Added cosmetic line-of-business design specs (v1, v2, visual companion) and SMS messaging system research under `docs/superpowers/specs/`. These design documents are now present on the `feat/cosmetic-line-of-business` worktree (cherry-picked from the parking branch) to guide implementation of the new Cosmetic LOB feature — @agent — Pre-implementation design capture for feat/cosmetic-line-of-business.
@@ -401,6 +419,12 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 - React 18 + Vite 5 frontend rewrite — @human — Modern SPA replacing legacy web app.
 
 ---
+## [0.32.47] — 2026-05-25
+
+### Fixed
+- `permissions.js` LOB-aware query routing: migrated all 21 bare `query()` calls to `getQuery(req)` so Cosmetic permissions reads/writes route through the cosmetic database pool instead of the dental default. — @agent — fixes NK3 feedback bug #5 (staff permission save errors under Cosmetic LOB) and aligns with LOB v2 two-DB discipline (D13).
+- Frontend test stability: added global `BusinessUnitContext` mock in `website/src/test/setup.ts` to prevent `useBusinessUnit must be used inside BusinessUnitProvider` errors in hooks/components that now depend on LOB context. — @agent — test infrastructure only, no runtime change.
+
 
 ## Unreleased
 

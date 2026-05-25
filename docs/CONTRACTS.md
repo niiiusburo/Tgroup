@@ -471,14 +471,66 @@ Face error responses:
 
 ### 1.7 Permissions
 
+All permissions routes are mounted at both `/api/Permissions/*` (Dental) and `/api/cosmetic/Permissions/*` (Cosmetic). The Cosmetic mirror uses `requireLobScope('cosmetic')` + `attachCosmeticDb` so all reads/writes route through the cosmetic database pool. The request/response contracts below are identical for both paths.
+
+#### GET /api/Permissions/groups
+**Response 200:**
+```ts
+{
+  id: string;
+  name: string;
+  color: string;
+  description: string | null;
+  isSystem: boolean;
+  datecreated: string;
+  lastupdated: string;
+  permissions: string[];
+}[]
+```
+
+#### POST /api/Permissions/groups
+**Body:** `{ name: string; color?: string; description?: string; permissions?: string[] }`
+**Response 201:** Group object with `permissions` array.
+
+#### PUT /api/Permissions/groups/:groupId
+**Body:** `{ name?: string; color?: string; description?: string; permissions?: string[] }`
+**Response 200:** Updated group object with `permissions` array.
+
+#### GET /api/Permissions/employees
+**Response 200:**
+```ts
+{
+  employeeId: string;
+  employeeName: string;
+  employeeEmail: string | null;
+  groupId: string | null;
+  groupName: string | null;
+  groupColor: string | null;
+  locScope: 'all' | 'assigned' | string;
+  locations: { id: string; name: string }[];
+  overrides: { grant: string[]; revoke: string[] };
+}[]
+```
+
+#### PUT /api/Permissions/employees/:employeeId
+**Body:** `{ groupId: string; locScope?: string; locationIds?: string[]; overrides?: { grant: string[]; revoke: string[] } }`
+**Response 200:** Updated employee permission object.
+
 #### GET /api/Permissions/resolve/:employeeId
 **Response 200:**
 ```ts
 {
   employeeId: string;
+  employeeName: string;
+  group: {
+    id: string;
+    name: string;
+    color: string;
+    basePermissions: string[];
+  } | null;
+  overrides: { grant: string[]; revoke: string[] };
   effectivePermissions: string[];
-  tierId: string | null;
-  groupName: string | null;
+  locations: { id: string; name: string }[];
 }
 ```
 

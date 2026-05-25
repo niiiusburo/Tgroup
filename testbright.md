@@ -549,6 +549,7 @@ TestSprite execution items:
 - [x] PASS: After deploy, verify Cosmetic permissions page has no `API GET /Permissions/employees failed (404)` and screenshot the page - `output/playwright/tmv-cosmetic-feedback-20260523T1657Z/01-permissions-cosmetic-after.png`; final network audit recorded 0 permission 404s.
 - [x] PASS: After deploy, verify `GET /api/cosmetic/Permissions/employees` returns 200 - direct API returned 200 with 103 employee rows.
 - [x] PASS: After deploy, verify Cosmetic customer add-service posts to `/api/cosmetic/SaleOrders`; if save fails, visible submit error is shown - Playwright intercepted `POST https://tmv.2checkin.com/api/cosmetic/SaleOrders` and screenshot `output/playwright/tmv-cosmetic-feedback-20260523T1657Z/02-service-save-error-visible-after.png` shows the footer-level error; final network audit recorded 0 Cosmetic feedback/permissions 404s.
+- [x] PASS: Local branch `codex/nk3-feedback-fixes` — `permissions.js` migrated from bare `query` to `getQuery(req)`; all 21 DB calls now route through the request-scoped cosmetic pool. Backend `JWT_SECRET=test npx jest --runInBand` passes 662/669 (7 pre-existing failures unrelated to this change). Website `npm run build` passes. `npm run lint` passes (0 errors).
 
 ---
 

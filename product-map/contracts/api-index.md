@@ -219,6 +219,8 @@ Cosmetic LOB mirror: LOB-aware employee and location UI surfaces must call `GET 
 
 ## Permissions (`/api/Permissions`)
 
+All routes below are mirrored at `/api/cosmetic/Permissions/*` with `requireLobScope('cosmetic')` + `attachCosmeticDb`; the cosmetic mirror routes all queries through the cosmetic DB pool via `getQuery(req)`.
+
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
 | GET | `/groups` | Perm:`permissions.view` | — | Permission groups array |
