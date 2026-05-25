@@ -128,3 +128,15 @@ vi.mock('react-i18next', () => ({
   initReactI18next: { type: '3rdParty', init: vi.fn() },
   Trans: ({ children }: { children: React.ReactNode }) => children,
 }));
+
+// Global mock for BusinessUnitContext so tests don't need to wrap every render.
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({
+    currentLOB: 'dental' as 'dental' | 'cosmetic',
+    setCurrentLOB: vi.fn(),
+    availableLOBs: ['dental'],
+    isMultiLOBUser: false,
+    isCosmeticEnabled: false,
+  }),
+  BusinessUnitProvider: ({ children }: { children: React.ReactNode }) => children,
+}));

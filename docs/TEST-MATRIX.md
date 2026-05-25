@@ -29,6 +29,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 |---|---|---|
 | `api/src/middleware/auth.js` | `api/tests/loginRateLimiter.test.js`, `api/tests/readRoutePermissions.test.js`, all E2E auth specs | Single point of failure for all protected routes. |
 | `api/src/routes/auth.js` | Same as above + `website/e2e/auth-setup.spec.ts` | Login payload shape changes break frontend AuthContext. |
+| `api/src/routes/permissions.js` | `api/tests/readRoutePermissions.test.js`, `website/e2e/permissions-*.spec.ts`, live Cosmetic permissions browser audit | LOB-aware query routing via `getQuery(req)` must hit the correct DB pool; bare `query` causes Cosmetic permission reads/writes to leak into the dental database. |
 | `api/src/services/permissionService.js` | `api/tests/readRoutePermissions.test.js`, `website/e2e/permissions-*.spec.ts` | Effective permission divergence causes 403s. |
 | `api/src/server.js` CORS / `/api/ctv` mounts | `api/src/__tests__/nk3CorsOrigin.test.js`, `api/src/__tests__/ctvRouteGating.test.js` | TMV/NK3 browser origins must be allowed without reopening an unguarded CTV route mount. |
 | `api/src/routes/ctv.js` self-dashboard reads | `api/src/__tests__/ctvRouteGating.test.js`, live `GET /api/ctv/me` as admin must return 403 `S_CTV_ONLY` | CTV commission/referral/profile reads are cross-DB and must remain CTV-only even when admins have broad permissions. |

@@ -220,6 +220,8 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 
 ## Permissions (`/api/Permissions`)
 
+All routes below are mirrored at `/api/cosmetic/Permissions/*` with `requireLobScope('cosmetic')` + `attachCosmeticDb`; the cosmetic mirror routes all queries through the cosmetic DB pool via `getQuery(req)`.
+
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
 | GET | `/groups` | Perm:`permissions.view` | — | Permission groups array |

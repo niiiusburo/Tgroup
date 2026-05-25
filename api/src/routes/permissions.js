@@ -1,5 +1,5 @@
 const express = require('express');
-const { query } = require('../db');
+const { getQuery } = require('../db');
 const { requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
@@ -10,7 +10,8 @@ const router = express.Router();
  */
 router.get('/groups', requirePermission('permissions.view'), async (req, res) => {
   try {
-    const rows = await query(`
+    const q = getQuery(req);
+    const rows = await q(`
       SELECT
         pg.id,
         pg.name,
@@ -42,13 +43,14 @@ router.get('/groups', requirePermission('permissions.view'), async (req, res) =>
  */
 router.post('/groups', requirePermission('permissions.edit'), async (req, res) => {
   try {
+    const q = getQuery(req);
     const { name, color = '#94A3B8', description = null, permissions = [] } = req.body;
 
     if (!name) {
       return res.status(400).json({ error: 'name is required' });
     }
 
-    const groupRows = await query(
+    const groupRows = await q(
       `INSERT INTO permission_groups (name, color, description)
        VALUES ($1, $2, $3)
        RETURNING id, name, color, description, is_system AS "isSystem", datecreated, lastupdated`,
@@ -58,13 +60,13 @@ router.post('/groups', requirePermission('permissions.edit'), async (req, res) =
 
     if (permissions.length > 0) {
       const placeholders = permissions.map((_, i) => `($1, $${i + 2})`).join(', ');
-      await query(
+      await q(
         `INSERT INTO group_permissions (group_id, permission) VALUES ${placeholders} ON CONFLICT DO NOTHING`,
         [group.id, ...permissions]
       );
     }
 
-    const result = await query(
+    const result = await q(
       `SELECT
         pg.id, pg.name, pg.color, pg.description, pg.is_system AS "isSystem", pg.datecreated, pg.lastupdated,
         COALESCE(ARRAY_AGG(gp.permission ORDER BY gp.permission) FILTER (WHERE gp.permission IS NOT NULL), '{}'::TEXT[]) AS permissions
@@ -89,6 +91,7 @@ router.post('/groups', requirePermission('permissions.edit'), async (req, res) =
  */
 router.put('/groups/:groupId', requirePermission('permissions.edit'), async (req, res) => {
   try {
+    const q = getQuery(req);
     const { groupId } = req.params;
     const { name, color, description, permissions = [] } = req.body;
 
@@ -103,23 +106,23 @@ router.put('/groups/:groupId', requirePermission('permissions.edit'), async (req
 
     if (updateFields.length > 1) {
       params.push(groupId);
-      await query(
+      await q(
         `UPDATE permission_groups SET ${updateFields.join(', ')} WHERE id = $${paramIdx}`,
         params
       );
     }
 
     // Replace permissions
-    await query(`DELETE FROM group_permissions WHERE group_id = $1`, [groupId]);
+    await q(`DELETE FROM group_permissions WHERE group_id = $1`, [groupId]);
     if (permissions.length > 0) {
       const placeholders = permissions.map((_, i) => `($1, $${i + 2})`).join(', ');
-      await query(
+      await q(
         `INSERT INTO group_permissions (group_id, permission) VALUES ${placeholders} ON CONFLICT DO NOTHING`,
         [groupId, ...permissions]
       );
     }
 
-    const result = await query(
+    const result = await q(
       `SELECT
         pg.id, pg.name, pg.color, pg.description, pg.is_system AS "isSystem", pg.datecreated, pg.lastupdated,
         COALESCE(ARRAY_AGG(gp.permission ORDER BY gp.permission) FILTER (WHERE gp.permission IS NOT NULL), '{}'::TEXT[]) AS permissions
@@ -147,7 +150,8 @@ router.put('/groups/:groupId', requirePermission('permissions.edit'), async (req
  */
 router.get('/employees', requirePermission('permissions.view'), async (req, res) => {
   try {
-    const rows = await query(`
+    const q = getQuery(req);
+    const rows = await q(`
       SELECT
         p.id AS "employeeId",
         p.name AS "employeeName",
@@ -169,7 +173,7 @@ router.get('/employees', requirePermission('permissions.view'), async (req, res)
     let overridesMap = {};
 
     if (employeeIds.length > 0) {
-      const locRows = await query(`
+      const locRows = await q(`
         WITH location_candidates AS (
           SELECT
             p.id AS employee_id,
@@ -210,7 +214,7 @@ router.get('/employees', requirePermission('permissions.view'), async (req, res)
         locationMap[loc.employee_id].push({ id: loc.location_id, name: loc.location_name });
       }
 
-      const overrideRows = await query(`
+      const overrideRows = await q(`
         SELECT employee_id, permission, override_type
         FROM permission_overrides
         WHERE employee_id = ANY($1::uuid[])
@@ -248,6 +252,7 @@ router.get('/employees', requirePermission('permissions.view'), async (req, res)
  */
 router.put('/employees/:employeeId', requirePermission('permissions.edit'), async (req, res) => {
   try {
+    const q = getQuery(req);
     const { employeeId } = req.params;
     const { groupId, locScope = 'assigned', locationIds = [], overrides = { grant: [], revoke: [] } } = req.body;
 
@@ -256,13 +261,13 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
     }
 
     // Update tier on partners record
-    await query(
+    await q(
       `UPDATE partners SET tier_id = $1, lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE id = $2`,
       [groupId, employeeId]
     );
 
     // Upsert employee_permissions for backward compatibility
-    await query(
+    await q(
       `INSERT INTO employee_permissions (employee_id, group_id, loc_scope, lastupdated)
        VALUES ($1, $2, $3, (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'))
        ON CONFLICT (employee_id) DO UPDATE
@@ -273,17 +278,17 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
     );
 
     // Replace location scopes
-    await query(`DELETE FROM employee_location_scope WHERE employee_id = $1`, [employeeId]);
+    await q(`DELETE FROM employee_location_scope WHERE employee_id = $1`, [employeeId]);
     if (locationIds.length > 0) {
       const placeholders = locationIds.map((_, i) => `($1, $${i + 2})`).join(', ');
-      await query(
+      await q(
         `INSERT INTO employee_location_scope (employee_id, company_id) VALUES ${placeholders} ON CONFLICT DO NOTHING`,
         [employeeId, ...locationIds]
       );
     }
 
     // Replace permission overrides
-    await query(`DELETE FROM permission_overrides WHERE employee_id = $1`, [employeeId]);
+    await q(`DELETE FROM permission_overrides WHERE employee_id = $1`, [employeeId]);
     const allOverrides = [
       ...(overrides.grant || []).map(p => ({ permission: p, type: 'grant' })),
       ...(overrides.revoke || []).map(p => ({ permission: p, type: 'revoke' })),
@@ -294,14 +299,14 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
       for (const ov of allOverrides) {
         params.push(ov.permission, ov.type);
       }
-      await query(
+      await q(
         `INSERT INTO permission_overrides (employee_id, permission, override_type) VALUES ${placeholders} ON CONFLICT DO NOTHING`,
         params
       );
     }
 
     // Return updated employee data
-    const epRows = await query(
+    const epRows = await q(
       `SELECT
         ep.employee_id AS "employeeId",
         p.name AS "employeeName",
@@ -321,7 +326,7 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
       return res.status(404).json({ error: 'Employee permission not found' });
     }
 
-    const locRows = await query(
+    const locRows = await q(
       `WITH location_candidates AS (
          SELECT c.id AS location_id, c.name AS location_name, 0 AS sort_order
          FROM partners p
@@ -346,7 +351,7 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
       [employeeId]
     );
 
-    const overrideRows = await query(
+    const overrideRows = await q(
       `SELECT permission, override_type FROM permission_overrides WHERE employee_id = $1`,
       [employeeId]
     );
@@ -380,9 +385,10 @@ router.put('/employees/:employeeId', requirePermission('permissions.edit'), asyn
  */
 router.get('/resolve/:employeeId', requirePermission('permissions.view'), async (req, res) => {
   try {
+    const q = getQuery(req);
     const { employeeId } = req.params;
 
-    const tierRows = await query(
+    const tierRows = await q(
       `SELECT
         p.id AS employee_id,
         p.name AS employee_name,
@@ -406,15 +412,15 @@ router.get('/resolve/:employeeId', requirePermission('permissions.view'), async 
     const ep = tierRows[0];
 
     const [basePermRows, overrideRows, locRows] = await Promise.all([
-      query(
+      q(
         `SELECT permission FROM group_permissions WHERE group_id = $1 ORDER BY permission`,
         [ep.group_id]
       ),
-      query(
+      q(
         `SELECT permission, override_type FROM permission_overrides WHERE employee_id = $1`,
         [employeeId]
       ),
-      query(
+      q(
         `WITH location_candidates AS (
            SELECT c.id, c.name, 0 AS sort_order
            FROM partners p
