@@ -17,7 +17,63 @@
 | GET | `/me` | Auth | — | `{ user, permissions }` |
 | POST | `/change-password` | Auth | `{ oldPassword, newPassword }` | `{ success, message }` |
 
-## Account (`/api/Account`)
+
+## LOB & Business Unit (`/api/me` + context) — Cosmetic LOB v2
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/api/me/lob-scope` | Auth | — | `{ lob_scope: string[], is_ctv: boolean, default_lob }` |
+| (augmented) | `GET /api/Auth/me` | Auth | — | User payload now includes `lob_scope[]` and `is_ctv` (affects login redirect and header toggle visibility) |
+
+Note: All existing routes are now implicitly under a selected LOB via BusinessUnitContext. Cosmetic routes live under `/api/cosmetic/*` prefix and are distinct from dental.
+
+## Frontend LOB-Aware Routing (`apiFetch` with automatic path rewriting)
+
+**File:** `website/src/lib/api/core.ts`
+
+**Behavior (v2.0):** When `VITE_COSMETIC_LOB_ENABLED=true` and current LOB (from `localStorage.getItem('tgclinic_lob')`) is `'cosmetic'`, all endpoint paths are automatically rewritten from `/api/X` to `/api/cosmetic/X` before making the HTTP request. Data hooks may also pass `apiFetch(..., { lob: 'cosmetic' })` to force the cosmetic mirror for that request. This centralizes LOB-aware routing in the API fetch layer without requiring conditional URLs at every call site.
+
+**Whitelisted Routes (bypass rewriting regardless of LOB):**
+- `/Auth/*` (login, logout, refresh, register)
+- `/me/*` (user profile)
+- `/version/*` (version info)
+- `/ctv/*` (CTV dashboard)
+- `/Places/*` (server-proxied Google Places autocomplete/details; never expose the key in browser env)
+
+**Default Behavior:** If feature flag is false or missing (recommended production default), no rewriting occurs; all routes resolve to `/api/X` (dental LOB). Backward-compatible with existing dental-only deployments.
+
+**Example:**
+- LOB=`'cosmetic'`, flag=`true`, endpoint=`'/Partners'` → rewrites to `/api/cosmetic/Partners`
+- LOB=`'cosmetic'`, flag=`true`, endpoint=`'/Auth/me'` → whitelisted, stays `/api/Auth/me`
+- LOB=`'cosmetic'`, flag=`true`, endpoint=`'/Places/autocomplete'` → whitelisted, stays `/api/Places/autocomplete`
+- LOB=`'dental'` or flag=`false` → no rewriting; all routes unchanged
+
+## Cosmetic (`/api/cosmetic/*`) — mirrors of all dental routes (gated by requireLobScope('cosmetic') + cosmetic.access)
+
+All dental endpoints have exact cosmetic mirrors:
+
+- `GET/POST/PUT/PATCH/DELETE /api/cosmetic/Partners` (and /check-unique, /resolve, /:id, KPIs, etc.)
+- `GET/POST/PUT /api/cosmetic/Appointments` (and /:id)
+- `GET/POST/PUT/DELETE /api/cosmetic/Products` + ProductCategories
+- `GET/POST/PATCH/DELETE /api/cosmetic/Payments` + refunds, proofs, monthly plans
+- `GET/POST/PUT/DELETE /api/cosmetic/Employees`
+- `GET /api/cosmetic/Companies`
+- `GET/POST/PATCH /api/cosmetic/SaleOrders` + lines
+- `GET /api/cosmetic/DotKhams` etc.
+- All report/export endpoints under cosmetic prefix when LOB=cosmetic
+- Auth gates: requireLobScope('cosmetic') returns 403 S_LOB_FORBIDDEN when missing; plus permission strings (cosmetic.access etc.)
+
+When `COSMETIC_LOB_ENABLED=false` the entire family returns 503.
+
+## CTV Dashboard & Commission API (`/api/ctv`) — CTV role only (is_ctv + ctv.* permissions)
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/api/ctv/commission-summary` | CTV (ctv.commission.view.self) | — | Aggregated payload: { pending: {total, dental, cosmetic, count}, paid, recent_activity[], by_service[] } with LOB pills on every row |
+| GET | `/api/ctv/referrals` | CTV (ctv.referrals.view.self) | — | List of referred clients across both DBs with status (earning / no visit), totals earned, LOB pills |
+| (internal) | commission recipient resolution | — | — | Implements D13 priority: referred_by_ctv_id > active consultation card (cosmetic) > salestaffid (dental) |
+
+CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin route.## Account (`/api/Account`)
 
 | Method | Path | Auth | Body | Response |
 |--------|------|------|------|----------|
@@ -42,7 +98,7 @@
 | GET | `/resolve` | Perm:`customers.view` | `?key` (UUID, customer ref, or normalized phone) | `{ matchedBy, partner }`, 404 `CUSTOMER_NOT_FOUND`, or 409 `CUSTOMER_LOOKUP_AMBIGUOUS` with candidates |
 | GET | `/:id` | Perm:`customers.view` | — | Partner detail |
 | GET | `/:id/GetKPIs` | Perm:`customers.view` | — | KPI stats |
-| POST | `/` | Perm:`customers.add` | Partner fields | Created partner |
+| POST | `/` | Perm:`customers.add` | Partner fields | Created partner with backend-generated `ref`; dental uses `T######`, cosmetic mirror uses collision-checked `TM######` |
 | PUT | `/:id` | Perm:`customers.edit` | Partner fields | Updated partner |
 | PATCH | `/:id/soft-delete` | Perm:`customers.delete` | — | Soft-deleted partner |
 | DELETE | `/:id/hard-delete` | Perm:`customers.hard_delete` | — | Hard-deleted partner |
@@ -379,6 +435,8 @@ Hosoonline uses a mixed current contract: if `HOSOONLINE_USERNAME` and `HOSOONLI
 |--------|------|------|--------------|----------|
 | GET | `/autocomplete` | Auth | `?input, language=vi` | Google Places suggestions |
 | GET | `/details` | Auth | `?place_id, language=vi` | Place details |
+
+Places uses `GOOGLE_PLACES_API_KEY` from the API runtime. Frontend code must call this proxy without `VITE_GOOGLE_PLACES_API_KEY`; cosmetic LOB mode must not rewrite `/Places/*` to `/cosmetic/Places/*`.
 
 ## Session (`/Web/Session`)
 

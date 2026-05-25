@@ -24,7 +24,30 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ---
 ## [0.32.46] — 2026-05-24
+## [0.32.44] — 2026-05-23
+
+### Added
+- Cosmetic LOB source workbook importer and audit runbook for the exact three tabs `Hồ sơ`, `Phiếu cọc`, and `Phiếu khám`; dry-runs, applies, and re-runs idempotency checks for cosmetic-only partners, branches, staff, products, treatments, payments, and allocations after backup/compare confirmation gates; bumps `website/package.json` to `0.32.38`. — @agent — preserves UC-COS-IMPORT-01 / WF-COS-IMPORT-01 and invariants INV-001, INV-003, INV-004, INV-010, INV-012.
+
 ### Fixed
+- NK3 Cosmetic add-customer intake now generates collision-checked `TM######` customer codes for `/api/cosmetic/Partners`, keeps dental `T######` codes, honors explicit `apiFetch` LOB options, bypasses LOB rewriting for server-proxied `/api/Places/*`, and removes the browser-side `VITE_GOOGLE_PLACES_API_KEY` gate; bumps `website/package.json` to `0.32.44`. — @agent — preserves UC-001 customer create, INV-001, and the server-only Google Places key contract.
+
+---
+
+## [unreleased] — 2026-05-22
+### Docs
+- `docs/superpowers/specs/2026-05-22-ctv-signup-and-commission-config-design.md` — design spec for CTV signup (CTV-or-admin only, instant active, no public signup/approval queue), header "+ Client" / "+ CTV" actions on the built portal, admin CTVs sub-tab, and fully manual commission level config (enabled ≤ 100%, unallocated stays with clinic). No runtime code changed. — @agent — 2026-05-22 brainstormed design for the CTV/MLM commission layer on the cosmetic-LOB foundation.
+- `ctv.2checkin.com/tbot` static Feature Board deploy documented in `testbright.md`; live route now serves `/Users/thuanle/Downloads/feature_kanban_2.html` from `/var/www/ctv.2checkin.com/tbot/` with browser backup plus shared file sync through `/tbot/state/board.json`, leaving shared `/var/www/tbot` and other vhosts untouched. — @agent — 2026-05-22 CTV-only static deploy proof.
+- `ctv.2checkin.com/tbot` board content seeded with 36 Backlog feature cards from the linked 6-week TBot planning spreadsheet; no NK route or clinic data changed. — @agent — 2026-05-22 live board content import.
+- `ctv.2checkin.com/tbot` header now shows live day counters for the July 3, 2026 six-week checkpoint and October 15, 2026 final checkpoint; deployed source snapshot added under `docs/live-artifacts/ctv-tbot/`. — @agent — 2026-05-22 deadline visibility for the shared TBot board.
+- `ctv.2checkin.com/tbot/t2.html` now serves `/Users/thuanle/Downloads/kanban_calendar.html` as a CTV-only static Kanban Calendar page; deployed file checksum matches the source and a source snapshot is tracked under `docs/live-artifacts/ctv-tbot/t2.html`. — @agent — 2026-05-22 additive CTV-only calendar board deploy.
+- `ctv.2checkin.com/tbot` header summary now uses the Kanban Calendar-style task counter from the provided screenshot: task/done counts, current date, 132-days-left Apr 1 → Oct 1 countdown, and progress bar. — @agent — 2026-05-22 CTV TBot header visibility update.
+- `report.tjbot.vn` now has its own static TBot report project on VPS `76.13.16.68`: root `/` serves the moved Feature Board, `/t2.html` serves the moved Kanban Calendar, `/state/board.json` preserves the 41-card shared state, HTTPS is issued for the domain, and old `ctv.2checkin.com/tbot` paths redirect to the new report domain. — @agent — 2026-05-23 TBot reports moved off the CTV domain.
+- `testbright.md` — appended NK3 Cosmetic LOB feedback triage with live screenshot evidence, pending manual feedback IDs, related auto-detected API error clusters, and TestSprite follow-up checks. No runtime code changed. — @agent — 2026-05-22 preserves cosmetic LOB feedback scope for follow-up fixes.
+
+## [0.32.37] — 2026-05-21
+### Added
+- **FeedbackWidget login hint:** small dismissible bubble next to the speech-bubble icon in the header that prompts "Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc." (EN: "Any problem? Tap here to report it — we read every one."). Shows once per fresh login session — `AuthContext.login` clears `sessionStorage['tg_feedback_hint_dismissed']`, the X button on the bubble sets it. New i18n keys: `feedback.loginHintTitle`, `feedback.loginHintBody`, `feedback.loginHintDismiss` (EN + VI). — @agent — 2026-05-21 surfaces the feedback channel to staff on every login.### Fixed
 - TMV Cosmetic feedback sweep: appointment create/update, customer create/edit selectors, employee create/edit permission selectors, payment/deposit balance reads, and payment history refreshes now pass the active Cosmetic LOB through the frontend API clients so Cosmetic screens stay on `/api/cosmetic/*`. — @agent — Staff feedback from TMV Cosmetic; preserves Cosmetic LOB v2 two-DB isolation.
 - Feedback admin auto-error hygiene now filters the Auto-detected Errors tab to the current host by default while preserving the all-host cleanup toggle and manual feedback behavior. — @agent — Staff feedback from TMV feedback queue; keeps stale-host errors from obscuring current TMV defects.
 - Added regression coverage for the Cosmetic `/CustomerBalance` API mirror so live payment modals do not regress to a missing balance route. — @agent — Staff feedback from Cosmetic customer payment/deposit workflows.

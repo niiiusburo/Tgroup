@@ -21,8 +21,8 @@ When a use case is created or materially edited, add one compact `Traceability` 
   2. Clicks "Add Customer" → `AddCustomerForm` modal opens.
   3. Enters required fields: `name`, `phone`, `email`, `companyid` (location).
   4. Optionally captures face (3 angles: straight, left, right) via `FaceCaptureModal`.
-  5. Clicks Save → `POST /api/Partners` with customer data + optional `face_subject_id`.
-  6. Backend validates uniqueness (`/api/Partners/check-unique`), creates partner row.
+  5. Clicks Save → `POST /api/Partners` or `POST /api/cosmetic/Partners` with customer data + optional `face_subject_id`.
+  6. Backend validates uniqueness (`/api/Partners/check-unique`), generates the customer code in the request-scoped LOB (`T######` for dental, `TM######` for cosmetic), collision-checks `partners.ref`, and creates the partner row.
   7. Redirects to customer profile (`/customers/:id`); face registration is async.
 - **Alternate flows:**
   - **AF-1 Phone conflict:** Phone overlaps an existing customer → backend returns 400 warning; frontend allows continuing because phone is not a unique key (INV-001).
@@ -30,8 +30,10 @@ When a use case is created or materially edited, add one compact `Traceability` 
   - **AF-3 Location required but missing:** Form validation blocks submit before API call.
 - **Postconditions:**
   - New partner row exists with `customer=true`.
+  - New dental customer codes use `T######`; new cosmetic customer codes use `TM######`.
   - If face captured, `partners.face_subject_id` and `face_registered_at` are populated.
 - **Invariants touched:** INV-001 (phone non-uniqueness), INV-006 (accent-insensitive search ready), INV-016 (i18n dual-language form labels).
+- **Traceability:** Related WF: unknown. Contracts/routes: `POST /api/Partners`, `POST /api/cosmetic/Partners`, `GET /api/Places/autocomplete`, `GET /api/Places/details`. Data/tables: `dbo.partners.ref` in dental or cosmetic DB. Tests: `api/src/routes/partners/__tests__/mutationHandlers.test.js`, `website/src/lib/api/__tests__/apiFetch.lob.test.ts`. Product-map domains: `customers-partners`, `settings-system`, `cosmetic`.
 
 ---
 

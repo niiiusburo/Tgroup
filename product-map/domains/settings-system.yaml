@@ -108,3 +108,4 @@ notes:
   - "`POST /api/telemetry/errors` is intentionally public and rate-limited before the global `/api` auth middleware; telemetry reads, writes, stats, fix-attempts, and version events are authenticated by the global middleware."
   - "`GET /api/CustomerSources*` and `GET /api/StockPickings*` are authenticated only by the global `/api` auth middleware; their create/update/delete routes require `settings.edit`."
   - "`GET /api/IpAccess/check` is public via the server allowlist; settings and entries reads require `settings.view`, while mode/entry mutations require `settings.edit`."
+  - "`GET /api/Places/autocomplete` and `GET /api/Places/details` are server-proxied Google Places calls; browser code must not require or expose `VITE_GOOGLE_PLACES_API_KEY`, and cosmetic LOB routing must bypass `/Places/*` rewrites."

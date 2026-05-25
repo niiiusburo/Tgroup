@@ -4,7 +4,10 @@
 > 
 > **Rule:** If you change any contract in this file, you MUST update the version, the consumer code, the tests, and append a CHANGELOG entry in the same commit.
 
-## Contract Versioning
+
+**Cosmetic LOB v2 Sync (2026-05-19):** Added/aligned: `Lob` ('dental'|'cosmetic'), `BusinessUnitScope`, `EarningsRow` (append-only with recipient_partner_id on partners, source enum, negative reversals), `Payout`, `CtvCommissionSummary` (cross-DB aggregate), `ConsultationCard`, `getDb(lob)` / `getQuery(req)` factory contracts, `LobScope` middleware types. partners (both DBs) is identity for all LOB/CTV/earnings. See product-map/earnings-commissions.yaml + db/index.js + commissionEngine. Per v2 §269 + migration 047 reality.
+
+**NK3 Cosmetic Intake Hotfix (2026-05-23):** Customer creates through `/api/cosmetic/Partners` must generate `partners.ref` with the `TM######` cosmetic prefix and collision-check against the request-scoped cosmetic database. Google Places autocomplete is proxied by `/api/Places/*` and remains server-key only.## Contract Versioning
 
 | Version | Date | Scope |
 |---|---|---|
@@ -14,7 +17,7 @@
 | v1.0.3 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
 | v1.0.4 | 2026-05-22 | Cosmetic LOB mirror routing and NK3 revenue recognition contract clarified for customer/employee/appointment/payment/balance/report flows. |
 | v1.0.5 | 2026-05-23 | TMV/NK3 API hotfix contract clarified: cosmetic CustomerBalance mirror, CTV-only self-dashboard reads, and normalized service catalog writes. |
-
+| v1.0.6 | 2026-05-23 | NK3 cosmetic customer intake clarified: cosmetic creates use `TM######` refs; Google Places stays server-proxied through `/api/Places/*` and bypasses LOB path rewriting. |
 ---
 
 ## 1. API Contracts
@@ -157,6 +160,7 @@ Cosmetic mirror: `POST /api/cosmetic/Appointments` and `PUT /api/cosmetic/Appoin
   // ... plus Odoo legacy fields
 }
 ```
+**Response 201:** Created partner row. The backend owns `ref` generation; dental creates use `T######`, while cosmetic creates through `/api/cosmetic/Partners` use `TM######` and check for collisions in the request-scoped database before insert.
 
 #### PUT /api/Partners/:id
 **Body:** Partial partner fields. `ref` cannot be changed after creation (enforced by backend).
@@ -534,6 +538,7 @@ async function apiFetch<T>(
 - 401 responses clear `localStorage` token and dispatch `AUTH_UNAUTHORIZED_EVENT`.
 - Structured errors are thrown as `ApiError` with `status`, `code`, `field`, `message`.
 
+- **LOB-Aware Routing (v2.0):** If `VITE_COSMETIC_LOB_ENABLED=true` and `localStorage.getItem('tgclinic_lob')='cosmetic'`, endpoint paths are rewritten from `/api/X` to `/api/cosmetic/X`. Data hooks may also pass `apiFetch(..., { lob: 'cosmetic' })` to force the cosmetic mirror for that request. Whitelisted routes (`/Auth/*`, `/me/*`, `/version/*`, `/ctv/*`, `/Places/*`) bypass rewriting regardless of LOB. Default behavior (flag false or missing) performs no rewriting; dental LOB is unaffected.
 ### 2.2 resolveEffectivePermissions (Backend Auth)
 
 **File:** `api/src/services/permissionService.js`
@@ -607,7 +612,7 @@ async function query(text: string, params?: any[]): Promise<any[]>
 ### 4.3 Google Places
 
 **API Key:** `GOOGLE_PLACES_API_KEY` (server-side only; never exposed to browser)
-**Usage:** `api/src/routes/places.js` proxies autocomplete requests to `https://maps.googleapis.com/maps/api/place/autocomplete/json`.
+**Usage:** `api/src/routes/places.js` proxies autocomplete and details requests to Google Places. Frontend callers use `/api/Places/*`; cosmetic LOB mode must not rewrite these endpoints to `/api/cosmetic/Places/*`.
 
 ---
 

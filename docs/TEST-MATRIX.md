@@ -36,7 +36,18 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | `website/src/contexts/BusinessUnitContext.tsx` | `website/src/contexts/__tests__/BusinessUnitContext.test.tsx`, live Cosmetic browser request audit | Active LOB must initialize from persisted/query Cosmetic before child effects fetch, or Cosmetic pages can leak first-render Dental/global requests. |
 | `website/src/constants/index.ts` (ROUTE_PERMISSIONS) | All E2E specs that navigate protected routes | Route guard changes may hide/show pages incorrectly. |
 
-### Appointments & Calendar
+
+### API & Frontend Bridge
+
+| If you change... | Run these tests... | Why |
+|---|---|---|
+| `website/src/lib/api/core.ts` (`apiFetch` LOB-aware routing) | `website/src/lib/api/__tests__/apiFetch.lob.test.ts` | Cosmetic LOB v2 Phase-1 Gap B: LOB-aware path rewriting routes `/api/X` to `/api/cosmetic/X` when `VITE_COSMETIC_LOB_ENABLED=true` and `tgclinic_lob='cosmetic'`; explicit `{ lob: 'cosmetic' }` options also force the cosmetic mirror for live NK3 data hooks. Whitelisted routes (`/Auth/*`, `/me/*`, `/version/*`, `/ctv/*`, `/Places/*`) bypass rewriting so server-proxied Places calls keep working in cosmetic mode. |
+
+### Cosmetic LOB Source Imports
+
+| If you change... | Run these tests... | Why |
+|---|---|---|
+| `api/scripts/cosmetic-lob-import.js` or the Cosmetic LOB workbook mapping | `npm --prefix api exec -- jest tests/cosmeticLobImport.test.js --runInBand`; then run the script against the latest workbook snapshot in `--dry-run` mode; before `--apply`, run backup/compare gates and confirm a post-apply dry run reports zero new creates | UC-COS-IMPORT-01 / WF-COS-IMPORT-01 require the exact three-tab contract, accent-insensitive matching, cosmetic-only table mapping, idempotent `COSMETIC_SHEET:*` references, and manual review for ambiguous money rows. |### Appointments & Calendar
 
 | If you change... | Run these tests... | Why |
 |---|---|---|
@@ -56,7 +67,7 @@ Current governance note: when changing `contracts/payment.ts`, `website/src/hook
 | Cosmetic mirror mounts in `api/src/server.js` | Cosmetic API smoke for `/CustomerSources`, `/Permissions`, `/DotKhams`, `/settings`, `/ExternalCheckups`, `/face`, `/Exports`; `api/src/__tests__/cosmeticAdminMirrors.test.js` | Frontend Cosmetic callers must have request-scoped mirror routes and must not fall back to dental/global endpoints. |
 | `api/src/routes/customerBalance.js` | `api/src/routes/__tests__/customerBalance.lob.test.js`, `api/src/__tests__/cosmeticCustomerBalanceMount.test.js`, `website/src/hooks/useDeposits.test.tsx` | Locks request-scoped customer balance reads so Cosmetic deposit summary cards use `/api/cosmetic/CustomerBalance/:id` and count deposit-category advances instead of unallocated service collections. |
 | `website/src/hooks/useCustomers.ts` and `website/src/lib/api/partners.ts` | `website/src/hooks/__tests__/useCustomers.lob.test.ts` | Customer create/update must pass active LOB so cosmetic company FKs validate against cosmetic `dbo.companies`. |
-| `website/src/components/forms/AddCustomerForm/` | `AddCustomerForm.test.tsx`, `website/e2e/customer-create-save.spec.ts` | New-customer intake is high-frequency workflow. |
+| `api/src/routes/partners/mutationHandlers.js` customer-code generation | `api/src/routes/partners/__tests__/mutationHandlers.test.js` | New dental customers must keep `T######`; new cosmetic customers created through `/api/cosmetic/Partners` must use collision-checked `TM######` refs in the cosmetic DB. || `website/src/components/forms/AddCustomerForm/` | `AddCustomerForm.test.tsx`, `website/e2e/customer-create-save.spec.ts` | New-customer intake is high-frequency workflow. |
 | `website/src/components/customer/CustomerProfile/` | `CustomerProfile.test.tsx`, `website/e2e/customer-profile-crud.spec.ts` | Profile tabs (appointments, services, payments, photos). |
 | `api/src/routes/faceRecognition.js` | `api/tests/faceRecognition.test.js` | Face registration, re-registration, recognition, and provider routing. |
 

@@ -11,7 +11,54 @@ Do not remove failed checks until the defect is fixed and rerun.
 ---
 
 # TestSprite Plan: TMV Cosmetic Feedback Sweep 2026-05-24
+# TestSprite Plan: NK3 Cosmetic Customer Code and Places Proxy 2026-05-23
 
+Feature/edit name: NK3 Cosmetic add-customer code generation and Google Places proxy fix
+
+Changed URLs and API routes:
+- Live UI to verify: `https://tmv.2checkin.com/customers`.
+- API routes: `POST /api/cosmetic/Partners`, `POST /api/Partners`, `GET /api/Places/autocomplete`, `GET /api/Places/details`.
+
+Affected data flows:
+- Add Customer form -> `apiFetch('/Partners')` (including live NK3 `{ lob: 'cosmetic' }` data-hook calls) -> cosmetic LOB rewrite -> `/api/cosmetic/Partners` -> request-scoped cosmetic DB `dbo.partners`.
+- Backend customer-code generation -> collision check against `partners.ref` -> insert with `TM######` for cosmetic and `T######` for dental.
+- Address autocomplete -> backend Places proxy -> `GOOGLE_PLACES_API_KEY` from NK3 API env; browser must not need `VITE_GOOGLE_PLACES_API_KEY`.
+
+User roles:
+- Cosmetic staff/admin with `customers.add`, `cosmetic.access`, and cosmetic LOB scope.
+- Dental staff/admin with `customers.add` for regression check that dental code still starts with `T`.
+
+Happy paths:
+- In cosmetic mode, opening Add Customer does not show the red `VITE_GOOGLE_PLACES_API_KEY` error.
+- Typing a Vietnamese address of at least 3 characters calls `/api/Places/autocomplete` without rewriting to `/api/cosmetic/Places`.
+- Saving a cosmetic customer creates a `partners.ref` beginning with `TM`.
+- Saving a dental customer still creates a `partners.ref` beginning with `T`.
+
+Edge cases:
+- Existing generated `ref` collision retries instead of inserting a duplicate.
+- Missing server-side `GOOGLE_PLACES_API_KEY` returns a backend config error but does not disable the address input because of missing browser env.
+- Cosmetic LOB routing remains isolated to the cosmetic DB for customer create.
+
+Regressions to prevent:
+- Leaking Google Places API key into browser build env.
+- Rewriting global Places proxy calls into an unmounted `/api/cosmetic/Places` path.
+- Generating cosmetic customer codes with the old `T######` dental prefix.
+- Breaking dental add-customer code generation.
+
+Setup data and login state:
+- Use an authenticated NK3/TMV session with cosmetic LOB selected.
+- VPS env must contain `GOOGLE_PLACES_API_KEY` in `/opt/tgroup-nk3/.env.nk3` copied from the existing NK source without printing the secret.
+- Test customer data should be clearly marked as QA and removed/soft-deleted after verification if created on live.
+
+Execution checklist:
+- [ ] PENDING: Verify Add Customer in cosmetic mode has no browser-side Google key error.
+- [ ] PENDING: Verify Places autocomplete network call uses `/api/Places/autocomplete` and returns suggestions for a Vietnam address.
+- [ ] PENDING: Create or API-create a cosmetic QA customer and confirm returned `ref` starts with `TM`.
+- [ ] PENDING: Run focused backend customer-code tests and frontend LOB routing tests.
+
+---
+
+# TestSprite Plan: Cosmetic LOB Source Workbook Import 2026-05-23
 Feature/edit name: TMV Cosmetic Feedback Sweep 2026-05-24
 
 Changed URLs and API routes:
