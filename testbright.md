@@ -54,7 +54,7 @@ Verification state:
 - [x] PASS: Pre-fix live API regression on `https://tmv.2checkin.com` showed customer create PASS, appointment create PASS, payment record PASS, permission save PASS, dental isolation PASS, and customer balance FAIL with `Route not found: GET /api/cosmetic/CustomerBalance/:id`; evidence screenshot `output/live-verification/nk3-feedback-regression-20260525T170000Z/nk3-feedback-regression-customers-page.png`.
 - [x] PASS: Local targeted tests passed 5 frontend files / 23 tests for customer/profile/service/permission LOB routing.
 - [x] PASS: Local backend cosmetic guard test passed 15 tests and now asserts `/api/cosmetic/CustomerBalance` remains mounted.
-- [ ] PENDING: After deploy, rerun live NK3 five-bug regression and mark all five flows PASS with screenshot evidence.
+- [x] PASS: After deploy, live NK3 `https://tmv.2checkin.com` served `0.32.50` commit `931de63`, and the five-bug regression passed with `Origin: https://tmv.2checkin.com`: customer create, appointment create, deposit balance refresh, payment record, and staff permission save. Evidence: `output/live-verification/nk3-feedback-regression-0.32.50-20260525T172500Z/regression-report.json`, screenshot `output/live-verification/nk3-feedback-regression-0.32.50-20260525T172500Z/nk3-feedback-regression-live.png`, video `output/live-verification/nk3-feedback-regression-0.32.50-20260525T172500Z/nk3-feedback-regression-live-video.webm`.
 
 # TestSprite Plan: NK3 CTV Portal Tracking Refresh 2026-05-25
 
