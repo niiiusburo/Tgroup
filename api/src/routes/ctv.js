@@ -1,0 +1,223 @@
+/**
+ * ctv.js — Real cross-DB CTV commission aggregation for Cosmetic LOB v2 (D13 live)
+ * Uses getDb('dental') + getDb('cosmetic') to query dbo.earnings + partners for the authed is_ctv user's employeeId (recipient_partner_id).
+ * No mocks, no stubs. Data is 100% from DB via engine-written rows (referred_by_ctv_id path).
+ * Mounted at /api/ctv (gated by ctv.dashboard.view perm + requireAuth).
+ */
+const express = require('express');
+const { requireAuth } = require('../middleware/auth');
+const { getDb } = require('../db');
+
+const router = express.Router();
+
+function toRows(result) {
+  if (Array.isArray(result)) return result;
+  if (result && result.rows) return result.rows;
+  return [];
+}
+
+async function safeQueryRows(db, sql, params = []) {
+  try {
+    if (typeof db.queryRows === 'function') {
+      return await db.queryRows(sql, params);
+    }
+    const r = await db.query(sql, params);
+    return toRows(r);
+  } catch (e) {
+    console.error('[ctv] query error:', e.message);
+    return [];
+  }
+}
+
+function requireCtvUser(req, res, next) {
+  if (!req.user?.employeeId) {
+    return res.status(401).json({ error: 'No token' });
+  }
+  if (!req.user.is_ctv) {
+    return res.status(403).json({
+      error: { code: 'S_CTV_ONLY', message: 'CTV access required' },
+    });
+  }
+  next();
+}
+
+/**
+ * GET /api/ctv/commission-summary
+ * Live aggregation across both LOB DBs for this CTV (by recipient_partner_id = employeeId from JWT).
+ * Returns shape consumable by CtvDashboard (totals with per-LOB pending, recent with client_name + lob pills, lists).
+ */
+router.get('/commission-summary', requireAuth, requireCtvUser, async (req, res) => {
+  const { employeeId } = req.user || {};
+  if (!employeeId) return res.status(401).json({ error: 'No token' });
+
+  const ctvId = employeeId;
+
+  const earningsSql = `
+    SELECT e.id, e.client_id, e.recipient_partner_id, e.payment_id, e.service_line_id,
+           e.source, e.amount, e.status, e.payout_id, e.earned_at, e.created_at,
+           COALESCE(p.name, 'Unknown Client') AS client_name
+    FROM dbo.earnings e
+    LEFT JOIN dbo.partners p ON p.id = e.client_id
+    WHERE e.recipient_partner_id = $1
+    ORDER BY COALESCE(e.earned_at, e.created_at) DESC
+    LIMIT 100
+  `;
+
+  const dentalDb = getDb('dental');
+  const cosmeticDb = getDb('cosmetic');
+
+  const [dRows, cRows] = await Promise.all([
+    safeQueryRows(dentalDb, earningsSql, [ctvId]),
+    safeQueryRows(cosmeticDb, earningsSql, [ctvId]),
+  ]);
+
+  const all = [
+    ...dRows.map(r => ({ ...r, lob: 'dental' })),
+    ...cRows.map(r => ({ ...r, lob: 'cosmetic' })),
+  ].sort((a, b) => {
+    const ta = new Date(a.earned_at || a.created_at || 0).getTime();
+    const tb = new Date(b.earned_at || b.created_at || 0).getTime();
+    return tb - ta;
+  });
+
+  let pendingTotal = 0;
+  let paidTotal = 0;
+  let dentalPending = 0;
+  let cosmeticPending = 0;
+  let dentalPaid = 0;
+  let cosmeticPaid = 0;
+  let pendingCount = 0;
+  let paidCount = 0;
+
+  all.forEach((e) => {
+    const amt = parseFloat(e.amount || 0);
+    const isPaid = e.status === 'paid' || !!e.payout_id;
+    if (isPaid) {
+      const absAmt = Math.abs(amt);
+      paidTotal += absAmt;
+      paidCount += 1;
+      if (e.lob === 'dental') dentalPaid += absAmt;
+      else cosmeticPaid += absAmt;
+    } else if (e.status === 'pending') {
+      if (amt > 0) {
+        pendingTotal += amt;
+        pendingCount += 1;
+        if (e.lob === 'dental') dentalPending += amt;
+        else cosmeticPending += amt;
+      }
+    }
+  });
+
+  const recent = all.slice(0, 8).map((e) => ({
+    id: e.id,
+    client_name: e.client_name,
+    amount: parseFloat(e.amount || 0),
+    source: e.source || 'ctv',
+    lob: e.lob,
+    earned_at: e.earned_at || e.created_at,
+    status: e.status,
+  }));
+
+  const pendingList = recent.filter((r) => r.status === 'pending');
+  const paidList = recent.filter((r) => r.status !== 'pending' || parseFloat(r.amount) < 0);
+
+  return res.json({
+    totals: {
+      pending: Math.round(pendingTotal),
+      paid: Math.round(paidTotal),
+      dentalPending: Math.round(dentalPending),
+      cosmeticPending: Math.round(cosmeticPending),
+    },
+    counts: { pending: pendingCount, paid: paidCount },
+    recent,
+    pendingList,
+    paidList,
+  });
+});
+
+/**
+ * GET /api/ctv/referrals
+ * Live list of partners (both DBs) where referred_by_ctv_id matches this CTV.
+ * Computes per-referral earnings totals/counts from the earnings table (live attribution proof).
+ */
+router.get('/referrals', requireAuth, requireCtvUser, async (req, res) => {
+  const { employeeId } = req.user || {};
+  if (!employeeId) return res.status(401).json({ error: 'No token' });
+  const ctvId = employeeId;
+
+  const dentalDb = getDb('dental');
+  const cosmeticDb = getDb('cosmetic');
+
+  const refSql = `
+    SELECT id, name, phone, email, datecreated AS referred_at
+    FROM dbo.partners
+    WHERE referred_by_ctv_id = $1
+      AND (customer = true OR active = true OR employee = false)
+    ORDER BY datecreated DESC NULLS LAST
+    LIMIT 30
+  `;
+
+  const [dRefsRaw, cRefsRaw] = await Promise.all([
+    safeQueryRows(dentalDb, refSql, [ctvId]),
+    safeQueryRows(cosmeticDb, refSql, [ctvId]),
+  ]);
+
+  const buildReferral = async (db, row, lob) => {
+    const earnRows = await safeQueryRows(
+      db,
+      `SELECT COALESCE(SUM(amount), 0) AS total, COUNT(*) AS cnt
+       FROM dbo.earnings
+       WHERE client_id = $1 AND recipient_partner_id = $2`,
+      [row.id, ctvId]
+    );
+    const er = earnRows[0] || { total: 0, cnt: 0 };
+    const total = Math.round(parseFloat(er.total || 0));
+    const cnt = parseInt(er.cnt || 0, 10);
+    return {
+      id: row.id,
+      name: row.name,
+      phone: row.phone || '',
+      lobs: [lob],
+      total_earned: total,
+      earned_count: cnt,
+      status: cnt > 0 ? 'earning' : 'no visit yet',
+      referred_at: row.referred_at,
+    };
+  };
+
+  const dItems = await Promise.all(dRefsRaw.map((r) => buildReferral(dentalDb, r, 'dental')));
+  const cItems = await Promise.all(cRefsRaw.map((r) => buildReferral(cosmeticDb, r, 'cosmetic')));
+
+  // dedupe by id (in case same uuid in both DBs)
+  const byId = new Map();
+  [...dItems, ...cItems].forEach((item) => {
+    if (byId.has(item.id)) {
+      const prev = byId.get(item.id);
+      prev.lobs = Array.from(new Set([...prev.lobs, ...item.lobs]));
+      prev.total_earned += item.total_earned;
+      prev.earned_count += item.earned_count;
+      if (item.status === 'earning') prev.status = 'earning';
+    } else {
+      byId.set(item.id, item);
+    }
+  });
+
+  const referrals = Array.from(byId.values());
+  return res.json({ referrals });
+});
+
+/**
+ * GET /api/ctv/me — lightweight profile for Me tab (no extra DB hit)
+ */
+router.get('/me', requireAuth, requireCtvUser, (req, res) => {
+  const u = req.user || {};
+  res.json({
+    id: u.employeeId,
+    name: u.name || 'CTV',
+    email: u.email || '',
+    phone: '',
+    role: 'CTV',
+  });
+});
+
+module.exports = router;

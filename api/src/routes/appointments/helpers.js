@@ -1,4 +1,4 @@
-const { query } = require('../../db');
+const { query: legacyQuery, getQuery } = require('../../db');
 
 const VALID_STATES = ['draft', 'scheduled', 'confirmed', 'arrived', 'in Examination', 'in-progress', 'done', 'cancelled'];
 
@@ -19,11 +19,12 @@ function isValidISODate(str) {
 
 const FK_TABLES = new Set(['partners', 'companies', 'employees']);
 
-async function foreignKeyExists(table, id) {
+async function foreignKeyExists(table, id, reqOrLob) {
   if (!FK_TABLES.has(table)) {
     throw new Error(`foreignKeyExists: "${table}" not allowlisted`);
   }
-  const result = await query(`SELECT 1 FROM ${table} WHERE id = $1 LIMIT 1`, [id]);
+  const q = getQuery(reqOrLob);
+  const result = await q(`SELECT 1 FROM ${table} WHERE id = $1 LIMIT 1`, [id]);
   return result.length > 0;
 }
 

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { query, pool } = require("../db");
+const { query: legacyQuery, pool, getQuery } = require("../db");
 const { requirePermission } = require("../middleware/auth");
 const { validate } = require("../middleware/validate");
 const { PaymentCreateSchema, PaymentUpdateSchema } = require("@tgroup/contracts");
@@ -11,6 +11,7 @@ const {
   listDeposits,
   listPayments,
 } = require("./payments/readHandlers");
+const { createEarningsForPayment } = require("../services/commissionEngine"); // v2 earnings hook (D12/D13) — additive only, never touches legacy commission* tables
 
 // GET /api/Payments - List payments with allocations
 router.get("/", requirePermission('payment.view'), listPayments);
@@ -22,6 +23,8 @@ router.get("/:id", requirePermission('payment.view'), getPaymentById);
 router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema), async (req, res) => {
   let client;
   try {
+    const q = getQuery(req); // for any direct queries + generate
+    const txPool = req.db || pool;
     let {
       customer_id, service_id, amount, method, notes,
       payment_date, reference_code, status,
@@ -53,7 +56,7 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
       deposit_type = "deposit";
     }
 
-    client = await pool.connect();
+    client = await txPool.connect();
     await client.query("BEGIN");
 
     if (deposit_type === "deposit" && !receipt_number) {
@@ -126,6 +129,25 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
       }
     }
 
+    // === Cosmetic LOB v2 earnings engine hook (Phase 2) ===
+    // Append-only write to dbo.earnings in correct DB via txClient.
+    // D13 resolution inside engine. Safe: errors logged, payment tx not aborted.
+    // Current path: dental only (mirrors will invoke with lob='cosmetic' + getDb).
+    try {
+      const custRows = await rowsFrom(client, 'SELECT id, referred_by_ctv_id, salestaffid FROM partners WHERE id = $1 LIMIT 1', [customer_id]);
+      if (custRows[0]) {
+        await createEarningsForPayment({
+          payment: row,
+          lines: [], // TODO in future: map allocations to saleorderlines for per-line service_line_id + product rate
+          lob: req.lob || 'dental',
+          clientRow: custRows[0],
+          txClient: client,
+        });
+      }
+    } catch (earningsErr) {
+      console.error('[earnings hook] non-fatal error during payment create (tx continues):', earningsErr && earningsErr.message);
+    }
+
     await client.query("COMMIT");
 
     res.status(201).json({
@@ -169,15 +191,16 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
 // POST /api/Payments/refund - Create a refund (negative deposit payment)
 router.post("/refund", requirePermission('payment.refund'), async (req, res) => {
   try {
+    const q = getQuery(req);
     const { customer_id, amount, method, notes, payment_date } = req.body;
 
     if (!customer_id || !amount || amount <= 0 || !method) {
       return res.status(400).json({ error: "customer_id, positive amount, and method are required" });
     }
 
-    const receipt_number = await generateReceiptNumber();
+    const receipt_number = await generateReceiptNumber(undefined, q);
 
-    const result = await query(
+    const result = await q(
       `INSERT INTO payments (
         customer_id, amount, method, notes,
         payment_date, status, deposit_type, receipt_number,
@@ -192,6 +215,22 @@ router.post("/refund", requirePermission('payment.refund'), async (req, res) => 
     );
 
     const row = result[0];
+
+    // v2 earnings: write negative row for this refund payment (reversal semantics)
+    try {
+      const custRows = await q('SELECT id, referred_by_ctv_id, salestaffid FROM partners WHERE id = $1 LIMIT 1', [customer_id]);
+      if (custRows[0]) {
+        await createEarningsForPayment({
+          payment: row,
+          lines: [],
+          lob: req.lob || 'dental',
+          clientRow: custRows[0],
+        });
+      }
+    } catch (e) {
+      console.error('[earnings hook] refund non-fatal:', e && e.message);
+    }
+
     res.status(201).json({
       id: row.id,
       customerId: row.customer_id,
@@ -213,6 +252,7 @@ router.post("/refund", requirePermission('payment.refund'), async (req, res) => 
 // PATCH /api/Payments/:id - Update payment
 router.patch("/:id", requirePermission('payment.add'), validate(PaymentUpdateSchema), async (req, res) => {
   try {
+    const q = getQuery(req);
     const { id } = req.params;
     const updates = req.body;
     const allowedFields = [
@@ -241,7 +281,7 @@ router.patch("/:id", requirePermission('payment.add'), validate(PaymentUpdateSch
 
     values.push(id);
     const sql = `UPDATE payments SET ${fields.join(", ")} WHERE id = $${values.length} RETURNING *`;
-    const result = await query(sql, values);
+    const result = await q(sql, values);
 
     if (result.length === 0) {
       return res.status(404).json({ error: "Payment not found" });
@@ -271,7 +311,9 @@ router.patch("/:id", requirePermission('payment.add'), validate(PaymentUpdateSch
 // DELETE /api/Payments/:id - Delete payment and reverse allocations
 router.delete("/:id", requirePermission('payment.void'), async (req, res) => {
   const { id } = req.params;
-  const client = await pool.connect();
+  const q = getQuery(req);
+  const txPool = req.db || pool;
+  const client = await txPool.connect();
   try {
     await client.query("BEGIN");
 
@@ -317,7 +359,9 @@ router.delete("/:id", requirePermission('payment.void'), async (req, res) => {
 router.post("/:id/void", requirePermission('payment.void'), async (req, res) => {
   const { id } = req.params;
   const { reason } = req.body || {};
-  const client = await pool.connect();
+  const q = getQuery(req);
+  const txPool = req.db || pool;
+  const client = await txPool.connect();
   try {
     await client.query("BEGIN");
 
@@ -364,6 +408,7 @@ router.post("/:id/void", requirePermission('payment.void'), async (req, res) => 
 // POST /api/Payments/:id/proof - Upload payment proof image
 router.post("/:id/proof", requirePermission('payment.add'), async (req, res) => {
   try {
+    const q = getQuery(req);
     const { id } = req.params;
     const { proofImageBase64, qrDescription } = req.body;
 
@@ -371,7 +416,7 @@ router.post("/:id/proof", requirePermission('payment.add'), async (req, res) => 
       return res.status(400).json({ error: "proofImageBase64 must be a non-empty string starting with data:image/" });
     }
 
-    const result = await query(
+    const result = await q(
       "INSERT INTO payment_proofs (payment_id, proof_image, qr_description) VALUES ($1, $2, $3) RETURNING *",
       [id, proofImageBase64, qrDescription || null]
     );

@@ -1,4 +1,4 @@
-const { query } = require('../../db');
+const { query: legacyQuery, getQuery } = require('../../db');
 const { errorResponse, isValidISODate, isValidUUID, VALID_STATES } = require('./helpers');
 const { addAccentInsensitiveSearchCondition } = require('../../utils/search');
 
@@ -9,6 +9,7 @@ const { addAccentInsensitiveSearchCondition } = require('../../utils/search');
  */
 async function listAppointments(req, res) {
   try {
+    const q = getQuery(req);
     const {
       partner_id,
       offset = '0',
@@ -257,7 +258,7 @@ async function listAppointments(req, res) {
       LEFT JOIN customerreceipts cr ON cr.id = a.customerreceiptid
       LEFT JOIN products prod ON prod.id = a.productid`;
 
-    const items = await query(
+    const items = await q(
       `SELECT
       ${calendarModeEnabled ? calendarSelect : fullSelect}
       ${calendarModeEnabled ? calendarJoins : fullJoins}
@@ -270,7 +271,7 @@ async function listAppointments(req, res) {
     let totalItems = offsetNum + items.length;
     let aggregates = null;
     if (includeCountsEnabled) {
-      const countResult = await query(
+      const countResult = await q(
         `SELECT COUNT(*) AS count
         FROM appointments a
         LEFT JOIN partners p ON p.id = a.partnerid
@@ -286,7 +287,7 @@ async function listAppointments(req, res) {
         byState: {},
       };
 
-      const stateCounts = await query(
+      const stateCounts = await q(
         `SELECT a.state, COUNT(*) AS count
         FROM appointments a LEFT JOIN partners p ON p.id = a.partnerid
         LEFT JOIN partners doc ON doc.id = a.doctorid
@@ -323,13 +324,14 @@ async function listAppointments(req, res) {
  */
 async function getAppointmentById(req, res) {
   try {
+    const q = getQuery(req);
     const { id } = req.params;
 
     if (!isValidUUID(id)) {
       return errorResponse(res, 400, 'INVALID_ID', 'id must be a valid UUID');
     }
 
-    const rows = await query(
+    const rows = await q(
       `SELECT
         a.id,
         a.name,

@@ -5,11 +5,21 @@ jest.mock('../src/middleware/auth', () => ({
   requirePermission: jest.fn(() => (_req, _res, next) => next()),
 }));
 
-jest.mock('../src/db', () => ({
-  query: jest.fn(),
-  pool: {
-    connect: jest.fn(),
-  },
+jest.mock('../src/db', () => {
+  const queryMock = jest.fn();
+  const poolMock = { connect: jest.fn() };
+  return {
+    query: queryMock,
+    pool: poolMock,
+    getQuery: jest.fn(() => queryMock),
+    getDb: jest.fn(() => poolMock),
+    runWithLob: jest.fn((_lob, fn) => fn()),
+    getCurrentLob: jest.fn(() => 'dental'),
+  };
+});
+
+jest.mock('../src/services/commissionEngine', () => ({
+  createEarningsForPayment: jest.fn(),
 }));
 
 jest.mock('uuid', () => ({ v4: jest.fn(() => 'mock-uuid') }));

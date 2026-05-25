@@ -8,53 +8,6 @@ Every new or materially edited workflow should include one compact traceability 
 
 ---
 
-## WF-COS-IMPORT-01 — Cosmetic Source Workbook Import
-
-**Trigger:** Data admin provides the cosmetic source Google Sheet for staging into Cosmetic LOB.
-**Why it matters:** The workbook carries client, deposit, treatment, staff, branch, and payment data; it must be mapped to the isolated cosmetic database without guessing money identity or touching dental data.
-
-```mermaid
-sequenceDiagram
-    actor A as Data Admin
-    participant Sheet as Google Sheet / XLSX
-    participant CLI as cosmetic-lob-import.js
-    participant DB as tcosmetic_demo (dbo)
-    participant Live as tcosmetic_smoketest (dbo)
-    participant Audit as Audit Artifacts
-
-    A->>Sheet: Export workbook with 3 tabs
-    A->>CLI: Run --dry-run with workbook path
-    CLI->>Sheet: Validate Hồ sơ, Phiếu cọc, Phiếu khám
-    CLI->>CLI: Normalize phone, date, branch, payment method, accent-insensitive names
-    CLI->>DB: Read companies, partners, staff, products, payments, saleorders
-    DB-->>CLI: Current cosmetic snapshot
-    CLI->>CLI: Build create/update/skip/manual-review plan
-    alt Money row has exactly one safe customer candidate
-        CLI->>Audit: Plan deposit/service payment allocation
-    else Missing or ambiguous match
-        CLI->>Audit: Write manual-review anomaly
-    end
-    A->>DB: Save local backup and run apply rehearsal
-    CLI->>DB: Apply approved rows with COSMETIC_SHEET references
-    A->>Live: Save VPS backup and compare local vs VPS state
-    A->>CLI: Confirm first and second import gates
-    CLI->>Live: Apply approved rows to Cosmetic LOB only
-    CLI->>Live: Rerun --dry-run for idempotency
-    CLI-->>A: Print counts and artifact paths
-```
-
-**Data state transitions:**
-- Dry-run writes audit files only under `artifacts/cosmetic-lob-import/`.
-- Apply mode writes only to the configured Cosmetic LOB database.
-- Deposits become `payments` rows with `payment_category='deposit'`; paid treatment rows become `payments` plus `payment_allocations`.
-- Existing `COSMETIC_SHEET:*` references are skipped on rerun.
-- Manual-review anomalies remain outside the database until a human resolves them.
-
-**Invariants:** INV-001, INV-003, INV-004, INV-006, INV-010, INV-012.
-**Traceability:** Related UC: UC-COS-IMPORT-01. Contracts/routes: none, CLI-only import. Data/tables: `tcosmetic_demo.dbo.partners`, `companies`, `products`, `saleorders`, `saleorderlines`, `payments`, `payment_allocations`; live target `tcosmetic_smoketest`. Tests: `api/tests/cosmeticLobImport.test.js`. Product-map domains: `cosmetic`, `cosmetic-clients`, `payments-deposits`, `services-catalog`, `employees-hr`.
-
----
-
 ## WF-001 — Login with Remember Me
 
 **Trigger:** User submits `/login` form.
@@ -79,6 +32,7 @@ sequenceDiagram
         DB-->>API: groupId, groupName, effectivePermissions[]
         API->>DB: Query employee_location_scope
         DB-->>API: locations[] (id, name)
+        API->>API: Cap visible lob_scope to one LOB unless group is Admin
         API->>API: JWT.sign(payload, JWT_SECRET, expiresIn: rememberMe ? '60d' : '24h')
         API-->>FE: { token, user, permissions, locations }
         FE->>FE: localStorage.setItem('tgclinic_token', token)
@@ -92,10 +46,11 @@ sequenceDiagram
 
 **Data state transitions:**
 - `partners.last_login` → current timestamp.
+- `user.lob_scope` / JWT `lob_scope` → multiple LOBs only for Admin; non-admin staff get one visible scoped LOB.
 - `localStorage.tgclinic_token` → new JWT string.
 - `AuthContext` → populated with user, permissions, locations.
 
-**Invariants:** INV-007, INV-008.
+**Invariants:** INV-007, INV-008, INV-008A.
 **Failure modes:**
 - `tier_id` NULL → empty permissions (INC-20260506-01).
 - `JWT_SECRET` missing → API exits FATAL before listening.
@@ -494,19 +449,8 @@ sequenceDiagram
     actor A as Admin
     participant FE as React (/feedback)
     participant API as Express API
-    participant Lark as Lark T-Group Webhook
     participant FS as Upload Storage
     participant DB as Postgres (dbo)
-
-    Note over FE,API: Initial staff thread creation
-    FE->>API: POST /api/Feedback FormData
-    API->>FS: Store uploaded attachment(s)
-    API->>DB: INSERT feedback_threads / feedback_messages / feedback_attachments
-    DB-->>API: Commit thread
-    opt LARK_FEEDBACK_WEBHOOK_URL configured
-        API-->>Lark: POST custom bot text alert (non-blocking)
-    end
-    API-->>FE: Created thread
 
     A->>FE: Open feedback inbox
     FE->>API: GET /api/Feedback/all?source=...
@@ -532,16 +476,14 @@ sequenceDiagram
 ```
 
 **Data state transitions:**
-- `feedback_threads` / `feedback_messages` rows are inserted for initial staff feedback; optional Lark alert delivery has no database write.
 - `feedback_threads.status` changes for moderation.
 - `feedback_messages` and `feedback_attachments` rows are inserted for admin replies; files are stored under `api/uploads/feedback/`.
 
-**Traceability:** Related UC: UC-020. Contracts/routes: `POST /api/Feedback`, `GET /api/Feedback/all`, `GET /api/Feedback/all/:threadId`, `POST /api/Feedback/all/:threadId/reply`, `PATCH /api/Feedback/all/:threadId/status`, `DELETE /api/Feedback/all/:threadId`. Data/tables: `dbo.feedback_threads`, `dbo.feedback_messages`, `dbo.feedback_attachments`, `api/uploads/feedback/`; optional outbound Lark webhook via `api/src/services/larkNotifier.js`. Invariants: INV-015, INV-016, INV-017. Tests: `api/tests/feedbackAttachments.test.js`, `api/src/services/__tests__/larkNotifier.test.js`, `api/tests/readRoutePermissions.test.js`, `website/e2e/phase2-quick-features.spec.ts` indirect; file storage/deletion and live Lark delivery E2E remain gaps. Product-map domains: `feedback-cms`, `auth`, `integrations`.
+**Traceability:** Related UC: UC-020. Contracts/routes: `GET /api/Feedback/all`, `GET /api/Feedback/all/:threadId`, `POST /api/Feedback/all/:threadId/reply`, `PATCH /api/Feedback/all/:threadId/status`, `DELETE /api/Feedback/all/:threadId`. Data/tables: `dbo.feedback_threads`, `dbo.feedback_messages`, `dbo.feedback_attachments`, `api/uploads/feedback/`. Invariants: INV-015, INV-016, INV-017. Tests: `api/tests/readRoutePermissions.test.js`, `website/e2e/phase2-quick-features.spec.ts` indirect; file storage/deletion E2E remains a gap. Product-map domains: `feedback-cms`, `auth`.
 
 **Failure modes:**
 - Missing scoped feedback permission causes 403 on the specific action.
 - Attachment upload succeeds but DB insert fails → orphan-file cleanup must be checked when changing upload handling.
-- Lark webhook unavailable or invalid → feedback request still succeeds; API logs the alert failure for ops follow-up.
 
 ---
 

@@ -55,4 +55,37 @@ function requirePermission(permission) {
   };
 }
 
-module.exports = { requireAuth, requirePermission };
+/**
+ * requireLobScope(lob) middleware factory (Cosmetic LOB v2, D5/D14/D15)
+ *
+ * Hard gate for LOB-scoped routes (e.g. /api/cosmetic/*).
+ * CTV users (is_ctv=true) typically have empty lob_scope and are redirected at login layer.
+ * Returns S_LOB_FORBIDDEN (per v2 spec) when scope missing.
+ * The lob_scope and is_ctv live on partners (canonical auth source, not a users table).
+ */
+function requireLobScope(lob) {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'No token' });
+    }
+    const scopes = req.user.lob_scope || [];
+    const isCtv = !!req.user.is_ctv;
+
+    // CTV never has LOB scope; explicit 403 prevents any leakage
+    if (isCtv || !scopes.includes(lob)) {
+      return res.status(403).json({
+        error: {
+          code: 'S_LOB_FORBIDDEN',
+          message: `LOB scope '${lob}' required`,
+          required: lob,
+          has: scopes,
+          is_ctv: isCtv,
+        },
+      });
+    }
+
+    next();
+  };
+}
+
+module.exports = { requireAuth, requirePermission, requireLobScope };

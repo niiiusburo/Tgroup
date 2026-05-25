@@ -1,4 +1,4 @@
-const { query } = require("../../db");
+const { query: legacyQuery, getQuery } = require("../../db");
 const { mapAllocations } = require("./helpers");
 const { addAccentInsensitiveSearchCondition, normalizedSql } = require("../../utils/search");
 
@@ -27,9 +27,10 @@ function mapPaymentRow(row, allocations = []) {
   };
 }
 
-async function loadPaymentAllocations(paymentIds) {
+async function loadPaymentAllocations(paymentIds, reqOrLobOrQ) {
   if (paymentIds.length === 0) return [];
-  const allocResult = await query(
+  const q = typeof reqOrLobOrQ === 'function' ? reqOrLobOrQ : getQuery(reqOrLobOrQ);
+  const allocResult = await q(
     `SELECT pa.id, pa.payment_id, pa.invoice_id, pa.dotkham_id, pa.allocated_amount,
             so.name as invoice_name, so.code as invoice_code, so.amounttotal as invoice_total, so.residual as invoice_residual,
             NULL as dotkham_name, NULL as dotkham_total, NULL as dotkham_residual
@@ -136,8 +137,9 @@ function paymentCountWhere({ customerId, serviceId, type, search }) {
   return { where: conditions.join(' AND '), params };
 }
 
-async function loadLegacyRows({ customerId, limit, offset }) {
-  return query(
+async function loadLegacyRows({ customerId, limit, offset }, reqOrLobOrQ) {
+  const q = typeof reqOrLobOrQ === 'function' ? reqOrLobOrQ : getQuery(reqOrLobOrQ);
+  return q(
     `SELECT
        ap.id,
        ap.partnerid AS customer_id,
@@ -170,6 +172,7 @@ async function loadLegacyRows({ customerId, limit, offset }) {
 
 async function listPayments(req, res) {
   try {
+    const q = getQuery(req);
     const { customerId, serviceId, limit = 100, offset = 0, type, search } = req.query;
     const params = [];
     let sql = `
@@ -192,12 +195,12 @@ async function listPayments(req, res) {
     sql += ` ORDER BY p.created_at DESC LIMIT $` + (params.length + 1) + ` OFFSET $` + (params.length + 2);
     params.push(parseInt(limit), parseInt(offset));
 
-    let result = await query(sql, params);
+    let result = await q(sql, params);
     let usedLegacyFallback = false;
 
     if (customerId && result.length === 0 && (!type || type === 'payments')) {
       try {
-        const legacyRows = await loadLegacyRows({ customerId, limit, offset });
+        const legacyRows = await loadLegacyRows({ customerId, limit, offset }, q);
         if (legacyRows.length > 0) {
           result = legacyRows;
           usedLegacyFallback = true;
@@ -208,7 +211,7 @@ async function listPayments(req, res) {
     }
 
     const count = paymentCountWhere({ customerId, serviceId, type, search });
-    let countResult = await query(
+    let countResult = await q(
       `SELECT COUNT(*)
        FROM payments p
        LEFT JOIN partners partner ON partner.id = p.customer_id
@@ -219,7 +222,7 @@ async function listPayments(req, res) {
 
     if (customerId && totalItems === 0 && (!type || type === 'payments')) {
       try {
-        const legacyCount = await query(
+        const legacyCount = await q(
           `SELECT COUNT(*) FROM accountpayments ap WHERE ap.partnerid = $1`,
           [customerId]
         );
@@ -232,7 +235,7 @@ async function listPayments(req, res) {
     let allocations = [];
     if (!usedLegacyFallback) {
       try {
-        allocations = await loadPaymentAllocations(result.map(r => r.id));
+        allocations = await loadPaymentAllocations(result.map(r => r.id), q);
       } catch (allocErr) {
         console.warn("Payment allocations query failed, returning empty allocations:", allocErr.message);
       }
@@ -279,6 +282,7 @@ function appendDepositFilters({ sql, params, customerId, dateFrom, dateTo, recei
 
 async function listDeposits(req, res) {
   try {
+    const q = getQuery(req);
     const {
       customerId,
       dateFrom,
@@ -307,13 +311,13 @@ async function listDeposits(req, res) {
 
     sql = appendDepositFilters({ sql, params, customerId, dateFrom, dateTo, receiptNumber, type });
     const countSql = `SELECT COUNT(*) FROM payments p ${sql.slice(sql.indexOf("FROM payments p") + "FROM payments p".length)}`;
-    const countResult = await query(countSql, [...params]);
+    const countResult = await q(countSql, [...params]);
     const totalItems = parseInt(countResult[0]?.count || 0);
 
     sql += ` ORDER BY p.created_at DESC LIMIT $` + (params.length + 1) + ` OFFSET $` + (params.length + 2);
     params.push(parseInt(limit), parseInt(offset));
 
-    const result = await query(sql, params);
+    const result = await q(sql, params);
     res.json({ items: result.map(row => mapPaymentRow(row)), totalItems });
   } catch (error) {
     console.error("Error fetching deposits:", error);
@@ -323,6 +327,7 @@ async function listDeposits(req, res) {
 
 async function listDepositUsage(req, res) {
   try {
+    const q = getQuery(req);
     const { customerId, dateFrom, dateTo, limit = 100, offset = 0 } = req.query;
     const params = [];
     let sql = `
@@ -355,13 +360,13 @@ async function listDepositUsage(req, res) {
     }
 
     const countSql = `SELECT COUNT(*) FROM payments p ${sql.slice(sql.indexOf("FROM payments p") + "FROM payments p".length)}`;
-    const countResult = await query(countSql, [...params]);
+    const countResult = await q(countSql, [...params]);
     const totalItems = parseInt(countResult[0]?.count || 0);
 
     sql += ` ORDER BY p.created_at DESC LIMIT $` + (params.length + 1) + ` OFFSET $` + (params.length + 2);
     params.push(parseInt(limit), parseInt(offset));
 
-    const result = await query(sql, params);
+    const result = await q(sql, params);
     res.json({ items: result.map(row => mapPaymentRow(row)), totalItems });
   } catch (error) {
     console.error("Error fetching deposit usage:", error);
@@ -371,8 +376,9 @@ async function listDepositUsage(req, res) {
 
 async function getPaymentById(req, res) {
   try {
+    const q = getQuery(req);
     const { id } = req.params;
-    const rows = await query(
+    const rows = await q(
       `SELECT p.id, p.customer_id, p.service_id,
               partner.name AS customer_name,
               partner.phone AS customer_phone,
@@ -390,7 +396,7 @@ async function getPaymentById(req, res) {
 
     let allocations = [];
     try {
-      allocations = await loadPaymentAllocations([id]);
+      allocations = await loadPaymentAllocations([id], q);
     } catch (allocErr) {
       console.warn("Payment allocations query failed, returning empty allocations:", allocErr.message);
     }

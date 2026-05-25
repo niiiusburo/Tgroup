@@ -3,9 +3,17 @@ jest.mock('../src/middleware/auth', () => ({
   requirePermission: () => (_req, _res, next) => next(),
 }));
 
-jest.mock('../src/db', () => ({
-  query: jest.fn(),
-}));
+jest.mock('../src/db', () => {
+  const queryMock = jest.fn();
+  return {
+    query: queryMock,
+    pool: { connect: jest.fn() },
+    getQuery: jest.fn(() => queryMock),
+    getDb: jest.fn(),
+    runWithLob: jest.fn((_lob, fn) => fn()),
+    getCurrentLob: jest.fn(() => 'dental'),
+  };
+});
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid'),

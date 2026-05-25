@@ -1,10 +1,8 @@
 # TGroup Clinic — Runbook
 
+> **Cosmetic LOB v2 addition:** See `docs/superpowers/specs/2026-05-18-cosmetic-line-of-business-governance-delta.md` and runbooks/DEPLOYMENT.md + VERIFICATION.md for flag rollout, tcosmetic_demo provisioning/backup, "local only" verification gates, and rollback. Feature flag COSMETIC_LOB_ENABLED controls visibility until Phase 4. Two-DB (tdental_demo + tcosmetic_demo) backup/restore procedures added in runbooks.
+
 > Deploy steps, rollback procedure, health checks, common incidents, per environment.
-
-**Cosmetic LOB v2 sync (2026-05-19):** Feature flag rollout, tcosmetic_demo backup/restore steps, dual DB connection strings (DATABASE_URL + COSMETIC_DATABASE_URL), getDb pools. See docs/runbooks/DEPLOYMENT.md, INFRASTRUCTURE.md, PORTS.md. partners/earnings in both DBs.
-
-
 
 ## Environments
 

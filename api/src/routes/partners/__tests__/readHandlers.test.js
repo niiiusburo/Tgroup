@@ -1,6 +1,11 @@
-jest.mock('../../../db', () => ({
-  query: jest.fn(),
-}));
+jest.mock('../../../db', () => {
+  const mockQuery = jest.fn();
+  return {
+    query: mockQuery,
+    getQuery: jest.fn((reqOrLob) => mockQuery), // test shim: always delegate to the spied query fn (dental path in tests)
+    getDb: jest.fn(() => ({ queryRows: mockQuery })),
+  };
+});
 
 const { query } = require('../../../db');
 const { checkPartnerUnique } = require('../readHandlers');
@@ -16,6 +21,7 @@ function mockResponse() {
 describe('partner read handlers', () => {
   beforeEach(() => {
     query.mockReset();
+    // getQuery is also mocked at module level to return the same query spy
   });
 
   it('treats phone uniqueness checks as non-blocking', async () => {

@@ -2,10 +2,6 @@
 
 > Schema migration log with up/down/rollback notes. Manual SQL migration system (no ORM runner).
 
-**Cosmetic LOB v2 (docs sync 2026-05-19):** 047 migration adds to partners in both DBs (lob_scope etc.), creates earnings (D13), etc. Full details + rollback in api/migrations/047_*.sql and product-map/governance-delta. partners canonical, earnings table. All authority refreshed.
-
-
-
 ## Migration System Rules
 
 1. Every migration file is idempotent: use `IF NOT EXISTS` for CREATE, `IF EXISTS` for DROP/ALTER.

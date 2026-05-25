@@ -9,30 +9,6 @@ When a use case is created or materially edited, add one compact `Traceability` 
 
 ---
 
-### UC-COS-IMPORT-01: Stage and apply cosmetic source workbook to Cosmetic LOB
-
-- **Actor:** Data admin / implementation agent
-- **Trigger:** Clinic provides the cosmetic source Google Sheet and asks to add it intelligently to Cosmetic LOB.
-- **Preconditions:** Source workbook is downloaded as `.xlsx`; local and target Cosmetic LOB databases are reachable; dry-run summary, anomaly review, local rehearsal, source/target backups, local-vs-VPS compare, and two explicit confirmation gates are complete before live apply.
-- **Main flow:**
-  1. Validate that the workbook contains exactly three tabs: `Hồ sơ`, `Phiếu cọc`, and `Phiếu khám`.
-  2. Normalize phone, branch, payment-method, date, and accent-insensitive name values without treating phone as durable identity.
-  3. Dry-run `Hồ sơ` into cosmetic customer/profile actions in `partners`.
-  4. Dry-run `Phiếu cọc` into cosmetic deposit payments.
-  5. Dry-run `Phiếu khám` into cosmetic products, treatment orders, service lines, payments, and allocations.
-  6. Write summary and anomaly artifacts; preserve unsupported money rows as manual-review anomalies.
-  7. After approval, apply the same source references to the Cosmetic LOB database only and write apply audit artifacts.
-  8. Rerun dry-run against the target database to prove idempotency.
-- **Alternate flows:**
-  - **AF-1 Missing or extra tab:** script exits before planning any rows.
-  - **AF-2 Missing or ambiguous customer match for money row:** row is placed in manual review instead of guessed.
-  - **AF-3 Existing source reference already present:** row is planned as `skip_existing`.
-- **Postconditions:** Cosmetic-only import rows exist for approved source records; rerun dry-run reports zero new creates and repeats only preserved manual-review anomalies.
-- **Invariants touched:** INV-001, INV-003, INV-004, INV-006, INV-010, INV-012.
-- **Traceability:** Related WF: WF-COS-IMPORT-01. Contracts/routes: none, CLI-only import. Data/tables: `tcosmetic_demo.dbo.partners`, `companies`, `products`, `saleorders`, `saleorderlines`, `payments`, `payment_allocations`; live target `tcosmetic_smoketest`. Tests: `api/tests/cosmeticLobImport.test.js`. Product-map domains: `cosmetic`, `cosmetic-clients`, `payments-deposits`, `services-catalog`, `employees-hr`.
-
----
-
 ## UC-001 — Intake New Patient
 
 - **Actor:** Receptionist / Front Desk
@@ -45,8 +21,8 @@ When a use case is created or materially edited, add one compact `Traceability` 
   2. Clicks "Add Customer" → `AddCustomerForm` modal opens.
   3. Enters required fields: `name`, `phone`, `email`, `companyid` (location).
   4. Optionally captures face (3 angles: straight, left, right) via `FaceCaptureModal`.
-  5. Clicks Save → `POST /api/Partners` or `POST /api/cosmetic/Partners` with customer data + optional `face_subject_id`.
-  6. Backend validates uniqueness (`/api/Partners/check-unique`), generates the customer code in the request-scoped LOB (`T######` for dental, `TM######` for cosmetic), collision-checks `partners.ref`, and creates the partner row.
+  5. Clicks Save → `POST /api/Partners` with customer data + optional `face_subject_id`.
+  6. Backend validates uniqueness (`/api/Partners/check-unique`), creates partner row.
   7. Redirects to customer profile (`/customers/:id`); face registration is async.
 - **Alternate flows:**
   - **AF-1 Phone conflict:** Phone overlaps an existing customer → backend returns 400 warning; frontend allows continuing because phone is not a unique key (INV-001).
@@ -54,10 +30,8 @@ When a use case is created or materially edited, add one compact `Traceability` 
   - **AF-3 Location required but missing:** Form validation blocks submit before API call.
 - **Postconditions:**
   - New partner row exists with `customer=true`.
-  - New dental customer codes use `T######`; new cosmetic customer codes use `TM######`.
   - If face captured, `partners.face_subject_id` and `face_registered_at` are populated.
 - **Invariants touched:** INV-001 (phone non-uniqueness), INV-006 (accent-insensitive search ready), INV-016 (i18n dual-language form labels).
-- **Traceability:** Related WF: unknown. Contracts/routes: `POST /api/Partners`, `POST /api/cosmetic/Partners`, `GET /api/Places/autocomplete`, `GET /api/Places/details`. Data/tables: `dbo.partners.ref` in dental or cosmetic DB. Tests: `api/src/routes/partners/__tests__/mutationHandlers.test.js`, `website/src/lib/api/__tests__/apiFetch.lob.test.ts`. Product-map domains: `customers-partners`, `settings-system`, `cosmetic`.
 
 ---
 
@@ -307,16 +281,16 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Main flow:**
   1. Actor enters email, password, checks "Remember Me".
   2. Frontend calls `POST /api/Auth/login`.
-  3. Backend validates credentials, resolves effective permissions and location scope.
+  3. Backend validates credentials, resolves effective permissions, location scope, and visible LOB scope.
   4. Signs JWT (`expiresIn: rememberMe ? '60d' : '24h'`).
-  5. Returns token + user + permissions.
+  5. Returns token + user + permissions; only Admin users may receive multiple visible LOBs for the header selector.
   6. Frontend stores token in `localStorage`; redirects to `/overview`.
 - **Alternate flows:**
   - **AF-1 Invalid credentials:** 401 with generic message (rate limiter tracks failed attempts).
   - **AF-2 Missing password_hash:** 401 (legacy employee not yet activated).
   - **AF-3 Rate limited:** 429 after excessive failures.
 - **Postconditions:** Session active; `AuthContext` populated; polling hooks start.
-- **Invariants touched:** INV-007 (JWT_SECRET required), INV-008 (shared permission resolution), INV-018 (local-first deploy discipline for auth changes).
+- **Invariants touched:** INV-007 (JWT_SECRET required), INV-008 (shared permission resolution), INV-008A (Admin-only LOB selection), INV-018 (local-first deploy discipline for auth changes).
 
 ---
 
@@ -345,9 +319,8 @@ When a use case is created or materially edited, add one compact `Traceability` 
   1. ErrorBoundary catches exception.
   2. Frontend calls `POST /api/telemetry/errors` (no auth required).
   3. Backend inserts `dbo.error_events` row.
-  4. First-seen errors auto-create a `source='auto'` feedback thread and queue a Lark alert when `LARK_FEEDBACK_WEBHOOK_URL` is configured.
-  5. Admin can view, update, summarize, and attach fix attempts to telemetry in Settings/System tooling.
-- **Postconditions:** Error event logged with stack trace and browser info; optional Lark alert points admins back to `/feedback`.
+  4. Admin can view, update, summarize, and attach fix attempts to telemetry in Settings/System tooling.
+- **Postconditions:** Error event logged with stack trace and browser info.
 - **Invariants touched:** INV-018 when telemetry is used to diagnose deploy/runtime incidents.
 - **Traceability:** Related WF: none yet. Contracts/routes: `POST /api/telemetry/errors` public ingestion, `GET /api/telemetry/errors`, `PUT /api/telemetry/errors/:id`, `POST /api/telemetry/errors/:id/fix-attempts`, `GET /api/telemetry/stats`, `POST /api/telemetry/version`. Data/tables: `dbo.error_events`, `dbo.error_fix_attempts`, `dbo.version_events`. Tests: `api/tests/telemetry.test.js`, `api/tests/telemetryAuth.test.js`, `website/src/__tests__/useVersionCheck.test.ts`. Product-map domains: `settings-system`.
 
@@ -411,14 +384,13 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Trigger:** `/feedback` admin thread inbox
 - **Preconditions:** Actor has the scoped feedback permission for the action (`feedback.view`, `feedback.reply`, `feedback.edit`, or `feedback.delete`).
 - **Main flow:**
-  1. Staff creates a feedback thread via the floating feedback widget; backend commits the thread/message and queues an optional Lark alert when configured.
-  2. Admin views list of feedback threads.
-  3. Opens thread; reads messages and attachments.
-  4. Replies or changes status (`pending` → `in_progress` → `resolved` / `ignored`).
-  5. Status update saved via `PATCH /api/Feedback/all/:threadId/status`; admin reply saved via `POST /api/Feedback/all/:threadId/reply`.
-- **Postconditions:** Thread status updated; reporter sees resolution; optional Lark alert exists for initial thread creation only.
+  1. Admin views list of feedback threads.
+  2. Opens thread; reads messages and attachments.
+  3. Replies or changes status (`pending` → `in_progress` → `resolved` / `ignored`).
+  4. Status update saved via `PATCH /api/Feedback/all/:threadId/status`; admin reply saved via `POST /api/Feedback/all/:threadId/reply`.
+- **Postconditions:** Thread status updated; reporter sees resolution.
 - **Invariants touched:** INV-016 (i18n labels).
-- **Traceability:** Related WF: WF-011. Contracts/routes: `POST /api/Feedback`, `GET /api/Feedback/all`, `GET /api/Feedback/all/:threadId`, `POST /api/Feedback/all/:threadId/reply`, `PATCH /api/Feedback/all/:threadId/status`, `DELETE /api/Feedback/all/:threadId`. Data/tables: `dbo.feedback_threads`, `dbo.feedback_messages`, `dbo.feedback_attachments`, `api/uploads/feedback/`; optional outbound Lark webhook via `api/src/services/larkNotifier.js`. Tests: `api/tests/feedbackAttachments.test.js`, `api/src/services/__tests__/larkNotifier.test.js`, `api/tests/readRoutePermissions.test.js`, `website/e2e/phase2-quick-features.spec.ts` indirect; live Lark delivery and attachment storage/deletion E2E remain known gaps. Product-map domains: `feedback-cms`, `auth`, `integrations`.
+- **Traceability:** Related WF: WF-011. Contracts/routes: `GET /api/Feedback/all`, `GET /api/Feedback/all/:threadId`, `POST /api/Feedback/all/:threadId/reply`, `PATCH /api/Feedback/all/:threadId/status`, `DELETE /api/Feedback/all/:threadId`. Data/tables: `dbo.feedback_threads`, `dbo.feedback_messages`, `dbo.feedback_attachments`, `api/uploads/feedback/`. Tests: `api/tests/readRoutePermissions.test.js`, `website/e2e/phase2-quick-features.spec.ts` indirect; attachment storage/deletion E2E remains a known gap. Product-map domains: `feedback-cms`, `auth`.
 
 ---
 

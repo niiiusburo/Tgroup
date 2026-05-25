@@ -1,4 +1,4 @@
-const { query } = require('../../db');
+const { query: legacyQuery, getQuery } = require('../../db');
 const { errorResponse, foreignKeyExists, isValidISODate, isValidUUID, readBodyField, VALID_STATES } = require('./helpers');
 
 const VIETNAM_NOW_SQL = `(NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh')`;
@@ -10,6 +10,7 @@ const VIETNAM_NOW_SQL = `(NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh')`;
  */
 async function createAppointment(req, res) {
   try {
+    const q = getQuery(req);
     // Accept both camelCase and lowercase field names (frontend sends lowercase)
     const b = req.body;
     const date = b.date;
@@ -65,27 +66,27 @@ async function createAppointment(req, res) {
     }
 
     // Check foreign keys exist
-    if (!(await foreignKeyExists('partners', partnerId))) {
+    if (!(await foreignKeyExists('partners', partnerId, req))) {
       return errorResponse(res, 404, 'PARTNER_NOT_FOUND', 'Partner with given partnerId does not exist');
     }
 
-    if (!(await foreignKeyExists('companies', companyId))) {
+    if (!(await foreignKeyExists('companies', companyId, req))) {
       return errorResponse(res, 404, 'COMPANY_NOT_FOUND', 'Company with given companyId does not exist');
     }
 
-    if (doctorId && !(await foreignKeyExists('employees', doctorId))) {
+    if (doctorId && !(await foreignKeyExists('employees', doctorId, req))) {
       return errorResponse(res, 404, 'DOCTOR_NOT_FOUND', 'Doctor with given doctorId does not exist');
     }
 
     // Generate appointment name (AP + sequence)
-    const nameResult = await query(
+    const nameResult = await q(
       "SELECT COALESCE(MAX(CAST(SUBSTRING(name FROM 3) AS INTEGER)), 0) + 1 AS next_seq FROM appointments WHERE name LIKE 'AP%'"
     );
     const nextSeq = nameResult[0]?.next_seq || 1;
     const name = `AP${String(nextSeq).padStart(6, '0')}`;
 
     // Create appointment
-    const result = await query(
+    const result = await q(
       `INSERT INTO appointments (
         id, name, date, time, partnerid, doctorid, companyid, note, timeexpected,
         color, state, aptstate, isrepeatcustomer, isnotreatment, productid, assistantid, dentalaideid,
@@ -99,7 +100,7 @@ async function createAppointment(req, res) {
     const newAppointment = result[0];
 
     // Fetch full details with joins
-    const rows = await query(
+    const rows = await q(
       `SELECT
         a.id,
         a.name,
@@ -150,17 +151,17 @@ async function createAppointment(req, res) {
 
 /**
  * PUT /api/Appointments/:id
- * Body: { date, doctorId, companyId, note, state, timeExpected, color }
+ * Body: { date, doctorId, note, state, timeExpected, color }
  * Returns: updated appointment
  */
 async function updateAppointment(req, res) {
   try {
+    const q = getQuery(req);
     const { id } = req.params;
     // Accept both camelCase and lowercase field names
     const b = req.body;
     const date = b.date;
     const doctorId = readBodyField(b, 'doctorId', 'doctorid');
-    const companyId = readBodyField(b, 'companyId', 'companyid');
     const note = b.note;
     const state = b.state;
     const timeExpected = readBodyField(b, 'timeExpected', 'timeexpected');
@@ -183,12 +184,6 @@ async function updateAppointment(req, res) {
     if (doctorId !== undefined && doctorId !== null) {
       if (!isValidUUID(doctorId)) {
         return errorResponse(res, 400, 'INVALID_DOCTOR_ID', 'doctorId must be a valid UUID');
-      }
-    }
-
-    if (companyId !== undefined) {
-      if (!isValidUUID(companyId)) {
-        return errorResponse(res, 400, 'INVALID_COMPANY_ID', 'companyId must be a valid UUID');
       }
     }
 
@@ -216,25 +211,21 @@ async function updateAppointment(req, res) {
     }
 
     // Check if appointment exists
-    const existing = await query('SELECT id FROM appointments WHERE id = $1', [id]);
+    const existing = await q('SELECT id FROM appointments WHERE id = $1', [id]);
     if (!existing || existing.length === 0) {
       return errorResponse(res, 404, 'NOT_FOUND', 'Appointment not found');
     }
 
     // Check foreign key constraints after validation and existence check
-    if (doctorId !== undefined && doctorId !== null && !(await foreignKeyExists('employees', doctorId))) {
+    if (doctorId !== undefined && doctorId !== null && !(await foreignKeyExists('employees', doctorId, req))) {
       return errorResponse(res, 404, 'DOCTOR_NOT_FOUND', 'Doctor with given doctorId does not exist');
     }
 
-    if (companyId !== undefined && !(await foreignKeyExists('companies', companyId))) {
-      return errorResponse(res, 404, 'COMPANY_NOT_FOUND', 'Company with given companyId does not exist');
-    }
-
-    if (assistantId !== undefined && assistantId !== null && !(await foreignKeyExists('employees', assistantId))) {
+    if (assistantId !== undefined && assistantId !== null && !(await foreignKeyExists('employees', assistantId, req))) {
       return errorResponse(res, 404, 'ASSISTANT_NOT_FOUND', 'Assistant with given assistantId does not exist');
     }
 
-    if (dentalAideId !== undefined && dentalAideId !== null && !(await foreignKeyExists('employees', dentalAideId))) {
+    if (dentalAideId !== undefined && dentalAideId !== null && !(await foreignKeyExists('employees', dentalAideId, req))) {
       return errorResponse(res, 404, 'DENTAL_AIDE_NOT_FOUND', 'Dental aide with given dentalAideId does not exist');
     }
 
@@ -252,11 +243,6 @@ async function updateAppointment(req, res) {
     if (doctorId !== undefined) {
       updates.push(`doctorid = $${paramIdx}`);
       params.push(doctorId || null);
-      paramIdx++;
-    }
-    if (companyId !== undefined) {
-      updates.push(`companyid = $${paramIdx}`);
-      params.push(companyId);
       paramIdx++;
     }
     if (note !== undefined) {
@@ -328,13 +314,13 @@ async function updateAppointment(req, res) {
 
     params.push(id);
 
-    await query(
+    await q(
       `UPDATE appointments SET ${updates.join(', ')} WHERE id = $${paramIdx}`,
       params
     );
 
     // Fetch updated appointment
-    const rows = await query(
+    const rows = await q(
       `SELECT
         a.id,
         a.name,

@@ -2,6 +2,16 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [Cosmetic LOB v2 — Phase 0 Governance] — 2026-05-19 (feat/cosmetic-line-of-business worktree only)
+
+- Product-map domains split/created: business-unit, cosmetic-clients, ctv, earnings-commissions (earnings table per PLAN); cosmetic.yaml corrected.
+- permission-registry + api-index updated with 9 keys + new routes.
+- schema-map, unknowns, change-checklist, system-map updated for two-DB + earnings.
+- New Governance Delta spec created documenting all authority/product-map changes.
+- AGENTS, ARCHITECTURE, BEHAVIOR, DECISIONS (D1–D16), DATA-MODEL, SECURITY, RUNBOOK + runbooks, TEST-MATRIX, etc. updated with LOB notes + cross-refs per v2 spec § Documentation updates and PLAN Phase 0.
+- Reinforced "local only", TDD-first, product-map governance, no cross-DB SQL.
+- No runtime code or migrations yet — pure governance foundation. See 2026-05-18-cosmetic-line-of-business-governance-delta.md and PLAN.md.
+
 ## Format
 
 ```
@@ -13,81 +23,52 @@
 Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `Docs`.
 
 ---
+## [0.32.47] — 2026-05-25
+### Fixed
+- Cherry-picked cosmetic LOB v2 backend infrastructure from nk3-deploy: db/index.js two-DB factory, middleware/lob.js attachCosmeticDb, server.js cosmeticRouter mounting /api/cosmetic/* mirrors (Payments, CustomerBalance, Permissions, Appointments, Partners, etc.). Fixes P0 NK3 staff feedback: deposit top-up not reflecting balance, payment recording failing, permission save errors — all were 404s because frontend rewrote to /api/cosmetic/* but backend had no cosmetic route mounts. — @agent — NK3 staff feedback Tasks 3, 4, 5.
 
-## [0.32.44] — 2026-05-23
+## [0.32.46] — 2026-05-24
+### Fixed
+- TMV Cosmetic feedback sweep: appointment create/update, customer create/edit selectors, employee create/edit permission selectors, payment/deposit balance reads, and payment history refreshes now pass the active Cosmetic LOB through the frontend API clients so Cosmetic screens stay on `/api/cosmetic/*`. — @agent — Staff feedback from TMV Cosmetic; preserves Cosmetic LOB v2 two-DB isolation.
+- Feedback admin auto-error hygiene now filters the Auto-detected Errors tab to the current host by default while preserving the all-host cleanup toggle and manual feedback behavior. — @agent — Staff feedback from TMV feedback queue; keeps stale-host errors from obscuring current TMV defects.
+- Added regression coverage for the Cosmetic `/CustomerBalance` API mirror so live payment modals do not regress to a missing balance route. — @agent — Staff feedback from Cosmetic customer payment/deposit workflows.
+- NK3 web image builds now accept `GIT_SHA` and `GIT_BRANCH` build args for `/version.json` when Docker builds without `.git` in context. — @agent — Deploy verification must prove the live bundle matches the pushed commit.
+
+## [0.32.45] — 2026-05-23
+### Fixed
+- TMV/NK3 Cosmetic LOB permissions board now has a request-scoped `/api/cosmetic/Permissions/*` mirror, so `/permissions` under Cosmetic no longer 404s on `/Permissions/employees`. — @agent — Staff feedback from TMV Cosmetic; preserves Cosmetic LOB v2 route isolation and permission-board parity.
+- Cosmetic customer add-service failures now surface a visible form error instead of disappearing into the console; regression coverage keeps service create/update writes on the active Cosmetic LOB. — @agent — Staff feedback from TMV Cosmetic customer profile add-service flow.
+
+## [0.32.43-nk3-cosmetic-lob] — 2026-05-23
+### Fixed
+- TMV/NK3 Cosmetic LOB redo: the Business Unit provider now initializes from `?lob=cosmetic` or persisted `tgclinic_lob=cosmetic` before child data effects can fire, preventing first-render Dental requests while Cosmetic is selected; additional customer, appointment, payment, service, settings, face-ID, monthly-plan, HSO/checkup, customer-source, and DotKham callers now pass the active LOB so Cosmetic screens use `/api/cosmetic/*` consistently. — @agent — User found the prior sweep was being exercised in Dental; preserves Cosmetic LOB v2 two-DB isolation and active-LOB workflow parity.
+- Added missing Cosmetic mirror mounts for customer sources, DotKhams, bank settings, external checkups, face-ID, and exports so the frontend callers above have request-scoped cosmetic API routes instead of falling back to dental/global endpoints. — @agent — Closes the live Cosmetic toggle leak observed on `https://tmv.2checkin.com`.
+
+## [0.32.42-nk3-api-hotfix] — 2026-05-23
+### Fixed
+- TMV/NK3 API hotfix: restored healthy CompreFace-backed `/api/health`, mounted `/api/cosmetic/CustomerBalance`, removed the duplicate unguarded `/api/ctv` mount, required `is_ctv` on CTV self-dashboard reads, and restored service-catalog create/edit by importing `normalizeVietnamese` in `api/src/routes/products.js`. — @agent — NK3/TMV full-parity sweep; preserves Cosmetic LOB v2 two-DB isolation and CTV-only dashboard gating.
+
+### Removed
+- Retired the external `ctv.2checkin.com` hostname for NK3/TMV: removed it from API CORS and disabled the VPS nginx vhost so `tmv.2checkin.com` is the only supported NK3 clinic domain. — @agent — User request to nuke the unused CTV hostname while preserving the in-app `/ctv` route gating.
+
+## [0.32.35-cosmetic-lob] — 2026-05-22
+### Fixed
+- NK3 Cosmetic LOB routing now sends employee branch loads, employee creates, customer creates/updates, appointment creates/updates, customer selectors, payments, deposits, customer profile reads, customer balance, sale-order lines, and revenue report reads through the cosmetic mirror when the active business unit is Cosmetic; the web Docker build now forwards `VITE_COSMETIC_LOB_ENABLED`, and the NK3 `sslip.io` browser origin is allowed by API CORS for live verification. Revenue summary, trend, and by-location cards now include direct posted `payment_category = 'payment'` receipts without allocation rows, including imported cosmetic receipts whose `service_id` is still blank; by-location shows unassigned paid receipts instead of dropping them, customer-balance advance cards count only deposit-category rows, and revenue still excludes deposits, refunds, usage, and voided payments. — @agent — Staff feedback from NK3 `/feedback` and `/reports/revenue`; preserves INV-003/INV-004 payment classification and Cosmetic LOB v2 two-DB isolation.
+
+## [0.31.19] — 2026-05-19
+### Fixed
+- Restricted Cosmetic LOB selector to Admin users only: auth responses cap non-admin visible `lob_scope` to one LOB, `BusinessUnitContext` ignores staff localStorage/query attempts to switch, and docs/tests now cite INV-008A. — @agent — User request: dental staff must not see or select Cosmetic LOB.
 
 ### Added
-- Cosmetic LOB source workbook importer and audit runbook for the exact three tabs `Hồ sơ`, `Phiếu cọc`, and `Phiếu khám`; dry-runs, applies, and re-runs idempotency checks for cosmetic-only partners, branches, staff, products, treatments, payments, and allocations after backup/compare confirmation gates; bumps `website/package.json` to `0.32.38`. — @agent — preserves UC-COS-IMPORT-01 / WF-COS-IMPORT-01 and invariants INV-001, INV-003, INV-004, INV-010, INV-012.
-
-### Fixed
-- NK3 Cosmetic add-customer intake now generates collision-checked `TM######` customer codes for `/api/cosmetic/Partners`, keeps dental `T######` codes, honors explicit `apiFetch` LOB options, bypasses LOB rewriting for server-proxied `/api/Places/*`, and removes the browser-side `VITE_GOOGLE_PLACES_API_KEY` gate; bumps `website/package.json` to `0.32.44`. — @agent — preserves UC-001 customer create, INV-001, and the server-only Google Places key contract.
-
----
-
-## [unreleased] — 2026-05-22
-### Docs
-- `docs/superpowers/specs/2026-05-22-ctv-signup-and-commission-config-design.md` — design spec for CTV signup (CTV-or-admin only, instant active, no public signup/approval queue), header "+ Client" / "+ CTV" actions on the built portal, admin CTVs sub-tab, and fully manual commission level config (enabled ≤ 100%, unallocated stays with clinic). No runtime code changed. — @agent — 2026-05-22 brainstormed design for the CTV/MLM commission layer on the cosmetic-LOB foundation.
-- `ctv.2checkin.com/tbot` static Feature Board deploy documented in `testbright.md`; live route now serves `/Users/thuanle/Downloads/feature_kanban_2.html` from `/var/www/ctv.2checkin.com/tbot/` with browser backup plus shared file sync through `/tbot/state/board.json`, leaving shared `/var/www/tbot` and other vhosts untouched. — @agent — 2026-05-22 CTV-only static deploy proof.
-- `ctv.2checkin.com/tbot` board content seeded with 36 Backlog feature cards from the linked 6-week TBot planning spreadsheet; no NK route or clinic data changed. — @agent — 2026-05-22 live board content import.
-- `ctv.2checkin.com/tbot` header now shows live day counters for the July 3, 2026 six-week checkpoint and October 15, 2026 final checkpoint; deployed source snapshot added under `docs/live-artifacts/ctv-tbot/`. — @agent — 2026-05-22 deadline visibility for the shared TBot board.
-- `ctv.2checkin.com/tbot/t2.html` now serves `/Users/thuanle/Downloads/kanban_calendar.html` as a CTV-only static Kanban Calendar page; deployed file checksum matches the source and a source snapshot is tracked under `docs/live-artifacts/ctv-tbot/t2.html`. — @agent — 2026-05-22 additive CTV-only calendar board deploy.
-- `ctv.2checkin.com/tbot` header summary now uses the Kanban Calendar-style task counter from the provided screenshot: task/done counts, current date, 132-days-left Apr 1 → Oct 1 countdown, and progress bar. — @agent — 2026-05-22 CTV TBot header visibility update.
-- `report.tjbot.vn` now has its own static TBot report project on VPS `76.13.16.68`: root `/` serves the moved Feature Board, `/t2.html` serves the moved Kanban Calendar, `/state/board.json` preserves the 41-card shared state, HTTPS is issued for the domain, and old `ctv.2checkin.com/tbot` paths redirect to the new report domain. — @agent — 2026-05-23 TBot reports moved off the CTV domain.
-- `testbright.md` — appended NK3 Cosmetic LOB feedback triage with live screenshot evidence, pending manual feedback IDs, related auto-detected API error clusters, and TestSprite follow-up checks. No runtime code changed. — @agent — 2026-05-22 preserves cosmetic LOB feedback scope for follow-up fixes.
-
-## [0.32.37] — 2026-05-21
-### Added
-- **FeedbackWidget login hint:** small dismissible bubble next to the speech-bubble icon in the header that prompts "Có vấn đề? Nhấn vào đây để báo cho chúng tôi — mọi phản hồi đều được đọc." (EN: "Any problem? Tap here to report it — we read every one."). Shows once per fresh login session — `AuthContext.login` clears `sessionStorage['tg_feedback_hint_dismissed']`, the X button on the bubble sets it. New i18n keys: `feedback.loginHintTitle`, `feedback.loginHintBody`, `feedback.loginHintDismiss` (EN + VI). — @agent — 2026-05-21 surfaces the feedback channel to staff on every login.
-
-### Fixed
-- **`Xu hướng dòng tiền` cash flow chart no longer truncates dates.** `BarChart` (`website/src/components/reports/BarChart.tsx`) gains a `labelOrientation: 'auto' | 'horizontal' | 'vertical'` prop. `'auto'` (default) rotates labels -90° when there are >= 8 bars so per-column width is no longer the constraint. `ReportsRevenue.tsx` passes `labelOrientation="vertical"` explicitly to the cash-flow chart since daily dates with month suffix are always long. The same auto-rotation applies to every other `BarChart` consumer (weekly trend, monthly summary) without per-call changes. — @agent — 2026-05-21 fixes the "4..." / "2..." mid-character truncation on /reports/revenue.
-
-## [0.32.36] — 2026-05-21
-### Added
-- **apiFetch LOB-aware routing (Gap B):** `website/src/lib/api/core.ts` now rewrites endpoint paths from `/api/*` to `/api/cosmetic/*` when VITE_COSMETIC_LOB_ENABLED flag is true and current LOB (via localStorage tgclinic_lob) is 'cosmetic'. Whitelisted routes (/Auth/*, /me/*, /version/*, /ctv/*) bypass rewriting regardless of LOB. Added vitest coverage: `website/src/lib/api/__tests__/apiFetch.lob.test.ts` (4 assertions: dental LOB routing, cosmetic LOB routing, whitelist bypass, missing LOB fallback). Feature locked behind optional feature flag (defaults false in .env); zero impact on existing dental-only deployments. — @phase-1-executor — 2026-05-21 closes cosmetic LOB v2 Gap B.
-- Feedback Lark alerts for the `T-Group` custom bot: `POST /api/Feedback` and public `POST /api/telemetry/errors` now queue non-blocking backend-only Lark text alerts after manual or auto-detected feedback threads commit. Added `api/src/services/larkNotifier.js`, `api/src/routes/publicTelemetryErrors.js`, env documentation for `LARK_FEEDBACK_WEBHOOK_URL` / optional `LARK_FEEDBACK_WEBHOOK_SECRET` / `TGROUP_PUBLIC_URL`, Docker env passthrough, Jest coverage, product-map updates, `testbright.md`, and website release metadata for `0.32.36`. — @agent — 2026-05-21 preserves UC-016/UC-020 and WF-011 by alerting without coupling feedback persistence to external delivery.
-
-### Changed
-- Archived agent audit reports under `docs/audits/<date>-<topic>/`: 2026-05-19 cosmetic-LOB v2 finishing-swarm pack (brutal audit #2, cross-LOB badge, docs-sync, overall-status) and the 2026-05-16 NK2 deeplink proof report. Added `docs/audits/README.md` as the index. Added `.gitignore` entries for `output/playwright/`, `reports/feedback-extract/`, `reports/responsive-qa/`, and `reports/calendar-five-digit-proof-2026-04-29/` so future Playwright runs do not dirty the working tree (already-tracked files in those paths remain tracked). — @agent — 2026-05-21 working-tree cleanup before starting the cosmetic LOB UI build.
-
-### Tests
-- `api/src/services/exports/__tests__/featureCatalog.crosscheck.test.js` — 40-assertion Jest cross-check that walks each `product-map/features/exports/*.yaml` and compares its declared column list (key + header, order-sensitive) against the COLUMNS arrays parsed from the corresponding builder source. Additive test only; does not touch any export builder source. — @agent — 2026-05-21 carries the YAML/code contract lock onto `fix/feedback-reports`.
-
-## [0.32.35] — 2026-05-21
-### Fixed
-- `PUT /api/Appointments/:id` companyId persistence now ships on `fix/feedback-reports`: handler accepts `companyId`/`companyid`, validates as UUID, checks FK against `companies`, persists `appointments.companyid`, and the unified appointment form mapper sends `companyid` + `companyname` from the selected location. Added Jest coverage in `api/src/routes/appointments/__tests__/mutationHandlers.test.js` (valid UUID, missing FK 404, malformed UUID 400) and a Vitest case in `appointmentForm.mapper.test.ts` asserting payload passes `AppointmentUpdateSchema`. Version bumped to `0.32.35` + entry in `website/public/CHANGELOG.json`. — @agent — 2026-05-21 carries the 2026-05-19 NK feedback fix onto this branch with explicit tests.
+- Frontend foundation for Cosmetic LOB v2 (Phase 0/1 per PLAN): full `BusinessUnitContext.tsx` (TDD, stable memoized, auth-event synced mirroring LocationContext), `FilterByBusinessUnit` toggle component (placed left of location filter in header, renders for isMultiLOBUser), wired `BusinessUnitProvider` + keyed remount (`key={currentLOB}` around Outlet in Layout) in App/Layout, LOB-aware `apiFetch(..., { lob })` support in core.ts for future /cosmetic/* routes. Toggle is now renderable (visible for admins with lob_scope >=2). — Frontend Foundation Agent — Follows website/agents.md + v2 spec + visual companion.
 
 ### Docs
-- Cement cosmetic LOB v2 authority sync on `fix/feedback-reports`: AGENTS / DECISIONS / COORDINATION_REQUESTS get the LOB discipline + two-DB + partners-as-identity rules; `docs/CONTRACTS.md`, `DATA-MODEL.md`, `MIGRATIONS.md`, `RUNBOOK.md`, `SECURITY.md` get migration-047 / `getDb(lob)` / `getQuery(req)` / `COSMETIC_LOB_ENABLED` / `/api/cosmetic` + `/api/ctv` subsections; `product-map/contracts/{api-index,dependency-rules,permission-registry}` get LOB endpoints, `lob.*` permissions, and dep-cruise rules; `product-map/domains/appointments-calendar.yaml` records `companyId` on appointment update; `product-map/schema-map.md` gets the partners (lob_scope/is_ctv/referred_by_ctv_id) + earnings table diagram; split cosmetic domains added as `product-map/domains/{business-unit,cosmetic,cosmetic-clients,ctv,earnings-commissions}.yaml` plus `product-map/governance-delta-cosmetic-lob-v2.md`. Source-of-truth alignment only — no application code touched, no Excel export builders changed. — @agent — 2026-05-21 pre-build cementing so the cosmetic LOB UI work on this branch shares the same product-map as the nk3-deploy / Codex line.
-- `testbright.md` — appended NK 2Checkin login monitor TestSprite entry (read-only auth health check, 3 non-destructive screens). — @agent — 2026-05-21.
-
----
-
-## [unreleased] — 2026-05-20
-### Added
-- `product-map/features/exports/` — canonical feature catalog for all 8 Excel exports (appointments, customers, payments, services, service-catalog, report-sales-employees, revenue-flat, deposit-flat). Each YAML specifies columns (position, key, header_vi, style, width, source), API routes, UI entry points, permission gates, code references, and acceptance filters. Jest cross-check test (`featureCatalog.crosscheck.test.js`) validates YAML column definitions match builder code COLUMNS arrays (keys and headers, order-sensitive). — @agent — 2026-05-20 Contract-First Monorepo pattern; single source of truth for Excel export column contracts.
-
-### Fixed
-- Commit the 7 working-tree-only export fixes (paymentNote/depositNote columns, SQL aliases, mapper wiring, COALESCE customer source) that had been bypassing git across 5 fix cycles. NK2 deployed code byte-identical to working tree confirms no behavioral change to NK2. NK production will gain the Note columns on next deploy. — @agent — 2026-05-20 root cause of recurring Excel export regression; persists fix to git so fresh checkouts no longer lose Note columns.
-
-### Added
-- `api/src/services/exports/__tests__/legacyFlatReportColumns.lock.test.js` — locked source-of-truth guard for REVENUE_COLUMNS and DEPOSIT_COLUMNS. Asserts column count, key+header snapshot (order-sensitive), uniqueness, and presence of every column key in the row mapper. Future column add/remove must intentionally edit two test arrays + the data file + SQL + mapper; silent drops cannot pass review. — @agent — 2026-05-20 anti-regression structural fix.
-
-### Added (2026-05-20 — Defense in depth)
-- `scripts/require-clean-tree.sh` and `scripts/deploy-build-args.sh` — refuse to build/deploy from a working tree with uncommitted changes (Layer 1 prevention). Set `ALLOW_DIRTY_BUILD=1` to override in emergencies. — @agent — 2026-05-20 5-cycle Excel export regression root cause prevention.
-- `Dockerfile.web` accepts `GIT_SHA` / `GIT_BRANCH` build args; `website/scripts/generate-version.js` prefers these env vars before falling back to `git rev-parse` (which isn't available inside the build container). `/version.json` now reports the real commit deployed instead of `"unknown"`. — @agent — 2026-05-20 Layer 2 deploy parity.
-- `api/src/services/exports/__tests__/allBuilderColumns.lock.test.js` (24 assertions) — locks COLUMNS arrays in appointments / customers / payments / services / serviceCatalog / reportSalesEmployees exports. Same pattern as `legacyFlatReportColumns.lock.test.js` but file-text based since these builders don't `module.exports` their column constants. — @agent — 2026-05-20 Layer 4 extension.
+- Added cosmetic line-of-business design specs (v1, v2, visual companion) and SMS messaging system research under `docs/superpowers/specs/`. These design documents are now present on the `feat/cosmetic-line-of-business` worktree (cherry-picked from the parking branch) to guide implementation of the new Cosmetic LOB feature — @agent — Pre-implementation design capture for feat/cosmetic-line-of-business.
 
 
 ## [unreleased] — 2026-05-19
-### Fixed
-- `revenue-flat` and `deposit-flat` Excel exports now include payment/deposit notes, use sale-order customer source before customer fallback for revenue rows, and split deposit cash vs bank-transfer values from explicit split columns or payment-method fallback — @Worker A — 2026-05-19 live feedback export defects; preserves UC-013/WF-005 report export contracts.
-- Calendar appointment export now serializes the same `appointments.date` clinic-calendar value used by `/calendar` before falling back to legacy `datetimeappointment`, and appointment export search now matches customer phone numbers so phone `922403152` day exports do not use stale appointment dates or unfiltered rows — @Worker B — 2026-05-19 live feedback calendar export date correctness.
-- `PUT /api/Appointments/:id` now accepts `companyId`/`companyid`, validates the company FK, persists `appointments.companyid`, and returns the refreshed clinic/location so appointment edit saves no longer drop changed cơ sở values — @agent — 2026-05-19 live feedback appointment location persistence; preserves Appointments & Calendar edit contract.
-
 ### Docs
 - Added cosmetic line-of-business design specs (v1, v2, visual companion) and SMS messaging system research under `docs/superpowers/specs/`. Parked on `fix/feedback-reports` so they exist on a tracked branch ahead of starting the cosmetic LOB feature work — @agent — Pre-implementation design capture.
-- Documentation & Authority Sync (Governance Delta close-out): Created the 4 missing split product-map domains in main (business-unit.yaml, cosmetic-clients.yaml, ctv.yaml, earnings-commissions.yaml); corrected all 5 + cosmetic.yaml + schema-map.md + governance-delta + permission-registry for final implemented shape (partners as canonical identity/auth table with lob_scope/is_ctv/referred_by_ctv_id in BOTH tdental_demo + tcosmetic_demo per migration 047; earnings table not commissions for D13 transactional attribution; two-DB dual-pool getDb/getQuery topology; D13 recipient_partner_id). Updated AGENTS.md (new LOB discipline subsection + must-read list), governance-delta, and CHANGELOG. All authority files (DATA-MODEL, DECISIONS, CONTRACTS, MIGRATIONS, TEST-MATRIX, SECURITY, RUNBOOK etc.) aligned to reality vs early v2 spec deviations. Swarm progress updated. Produced AGENT_FINISH_DOCS_SYNC.md with before/after. — @Documentation & Authority Sync Agent — v2 spec §262-282 + AGENT_COSMETIC drift closure.
 
 ## [0.32.34] — 2026-05-19
 ### Fixed

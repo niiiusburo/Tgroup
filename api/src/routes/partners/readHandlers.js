@@ -1,4 +1,4 @@
-const { query } = require('../../db');
+const { query: legacyQuery, getQuery } = require('../../db');
 const { applyPartnerListFilters } = require('./listFilters');
 const { applyPartnerSearchFilter } = require('./searchFilters');
 
@@ -9,6 +9,7 @@ const { applyPartnerSearchFilter } = require('./searchFilters');
  */
 async function listPartners(req, res) {
   try {
+    const q = getQuery(req); // supports cosmetic via req.lob/req.db set by attachCosmeticDb; dental unchanged
     const {
       offset = '0',
       limit = '20',
@@ -43,7 +44,7 @@ async function listPartners(req, res) {
 
     const whereClause = conditions.join(' AND ');
 
-    const items = await query(
+    const items = await q(
       `SELECT
         p.id,
         p.ref AS code,
@@ -99,7 +100,7 @@ async function listPartners(req, res) {
     );
 
     // Single query: get total, active, and inactive counts in one pass
-    const countResult = await query(
+    const countResult = await q(
       `SELECT
         COUNT(*)::int AS total,
         COUNT(*) FILTER (WHERE p.active = true)::int AS active,
@@ -137,6 +138,7 @@ async function listPartners(req, res) {
 
 async function checkPartnerUnique(req, res) {
   try {
+    const q = getQuery(req);
     const { field, value, excludeId } = req.query;
 
     if (!field || !['phone', 'email'].includes(field)) {
@@ -160,12 +162,12 @@ async function checkPartnerUnique(req, res) {
     let rows;
     // email — case-insensitive comparison
     if (excludeId) {
-      rows = await query(
+      rows = await q(
         'SELECT id FROM partners WHERE LOWER(email) = LOWER($1) AND id <> $2 LIMIT 1',
         [trimmed, excludeId]
       );
     } else {
-      rows = await query(
+      rows = await q(
         'SELECT id FROM partners WHERE LOWER(email) = LOWER($1) LIMIT 1',
         [trimmed]
       );
@@ -190,9 +192,10 @@ async function checkPartnerUnique(req, res) {
  */
 async function getPartnerKpis(req, res) {
   try {
+    const q = getQuery(req);
     const { id } = req.params;
 
-    const kpiResult = await query(
+    const kpiResult = await q(
       `SELECT
         COALESCE((
           SELECT SUM(sol.pricetotal)

@@ -1,8 +1,8 @@
 # TGroup Clinic — Data Model
 
-> Full schema, ERD, and invariant rules that must always hold. PostgreSQL 16, `search_path=dbo`, manual migration system (no ORM runner).
+> **Cosmetic LOB v2 update (Phase 0):** See two-DB topology in `product-map/schema-map.md`, `docs/superpowers/specs/2026-05-18-cosmetic-line-of-business-governance-delta.md`, and `product-map/domains/earnings-commissions.yaml`. All dental changes additive only. New tables (earnings, payouts, consultations, referral_locks) and columns documented in schema-map. tcosmetic_demo is the isolated cosmetic DB.
 
-**Cosmetic LOB v2 (2026-05-19 sync):** Two physical DBs (tdental_demo + tcosmetic_demo on 5433). partners table is canonical identity (lob_scope TEXT[], is_ctv, referred_by_ctv_id additive on partners in both). earnings (append-only D13 attribution) + payouts + consultations (cosmetic) + referral_locks (dental) per migration 047. See product-map/domains/*-lob yamls + schema-map.md for full two-DB layout. No cross-DB SQL; getDb(lob) in API.
+> Full schema, ERD, and invariant rules that must always hold. PostgreSQL 16, `search_path=dbo`, manual migration system (no ORM runner).
 
 ## Schema Statistics
 
@@ -567,3 +567,31 @@ If `dbo.customer_face_embeddings` exists and the local provider is active, the e
 - **Domain specs:** `product-map/domains/*.yaml`
 - **Migration log:** `docs/MIGRATIONS.md`
 - **Invariant IDs:** `docs/INVARIANTS.md`
+
+## Cosmetic LOB v2 Topology (2026-05, two physical DBs)
+
+**Core invariant (D1):** No cross-DB JOINs or FKs. Composition only at API layer via `getDb(lob)`.
+
+```
+Postgres 127.0.0.1:5433
+├── tdental_demo (existing — additive only)
+│   └── dbo
+│       ├── partners (+ lob_scope TEXT[], is_ctv BOOLEAN, referred_by_ctv_id UUID)
+│       ├── products (+ commission_rate_percent NUMERIC(5,2) DEFAULT 0)
+│       ├── earnings (NEW, append-only; recipient_partner_id FK to partners)
+│       ├── payouts (NEW)
+│       ├── referral_locks (NEW, dental-internal)
+│       └── ... (all prior tables unchanged)
+└── tcosmetic_demo (NEW, bootstrapped empty via schema-only dump of dental)
+    └── dbo
+        ├── partners (cosmetic's own clients + staff; same columns + new LOB cols)
+        ├── products (same + commission_rate_percent)
+        ├── earnings (NEW; same shape, recipient soft-validated)
+        ├── payouts (NEW)
+        ├── consultations (NEW, cosmetic-only, invisible to admin)
+        └── ... (full mirror of dental core tables for route reuse)
+```
+
+**Auth note:** All identity, CTV flags, and LOB scoping use `partners` (no `users` table in the system). See DEC-20260519-COSMETIC-V2-01 and migration 047.
+
+New tables/columns are documented with full reversible SQL in `api/migrations/047_*.sql`.

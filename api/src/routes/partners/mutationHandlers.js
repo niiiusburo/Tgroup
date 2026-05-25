@@ -1,12 +1,4 @@
-const db = require('../../db');
-
-const legacyQuery = db.query;
-const getRequestQuery = (req) => (
-  typeof db.getQuery === 'function' ? db.getQuery(req) : legacyQuery
-);
-
-const CUSTOMER_CODE_DIGITS = 6;
-const CUSTOMER_CODE_MAX_ATTEMPTS = 20;
+const { query: legacyQuery, getQuery } = require('../../db');
 
 const UUID_FIELDS = [
   'companyid','titleid','agentid','countryid','stateid',
@@ -18,39 +10,6 @@ function sanitizeUuids(o) {
   for (const f of UUID_FIELDS) if (o[f] === '' || o[f] === undefined) o[f] = null;
 }
 
-function isCosmeticRequest(req) {
-  const lob = req?.lob || req?.query?.lob || req?.headers?.['x-lob'];
-  if (lob === 'cosmetic') return true;
-
-  const routeText = [
-    req?.baseUrl,
-    req?.originalUrl,
-    req?.path,
-  ].filter(Boolean).join(' ').toLowerCase();
-
-  return routeText.includes('/cosmetic/');
-}
-
-function getCustomerCodePrefix(req) {
-  return isCosmeticRequest(req) ? 'TM' : 'T';
-}
-
-function randomCustomerCode(prefix) {
-  const min = 10 ** (CUSTOMER_CODE_DIGITS - 1);
-  const range = 9 * min;
-  return `${prefix}${Math.floor(min + Math.random() * range)}`;
-}
-
-async function generateCustomerCode(q, prefix) {
-  for (let attempt = 0; attempt < CUSTOMER_CODE_MAX_ATTEMPTS; attempt += 1) {
-    const code = randomCustomerCode(prefix);
-    const existing = await q('SELECT id FROM partners WHERE ref = $1 LIMIT 1', [code]);
-    if (!existing || existing.length === 0) return code;
-  }
-
-  throw new Error(`Unable to generate unique customer code with prefix ${prefix}`);
-}
-
 /**
  * POST /api/Partners
  * Creates a new customer/partner
@@ -58,7 +17,7 @@ async function generateCustomerCode(q, prefix) {
  */
 async function createPartner(req, res) {
   try {
-    const q = getRequestQuery(req);
+    const q = getQuery(req);
     sanitizeUuids(req.body);
     const {
       name,
@@ -128,7 +87,8 @@ async function createPartner(req, res) {
     const { v4: uuidv4 } = require('uuid');
     const id = uuidv4();
 
-    const code = await generateCustomerCode(q, getCustomerCodePrefix(req));
+    // Generate customer code (T + random 6 digits)
+    const code = 'T' + Math.floor(100000 + Math.random() * 900000);
 
     const result = await q(
       `INSERT INTO partners (
@@ -205,7 +165,7 @@ async function createPartner(req, res) {
  */
 async function updatePartner(req, res) {
   try {
-    const q = getRequestQuery(req);
+    const q = getQuery(req);
     const { id } = req.params;
     sanitizeUuids(req.body);
     const {
@@ -301,7 +261,7 @@ async function updatePartner(req, res) {
  */
 async function softDeletePartner(req, res) {
   try {
-    const q = getRequestQuery(req);
+    const q = getQuery(req);
     const { id } = req.params;
 
     const result = await q(
@@ -332,7 +292,7 @@ async function softDeletePartner(req, res) {
  */
 async function hardDeletePartner(req, res) {
   try {
-    const q = getRequestQuery(req);
+    const q = getQuery(req);
     const { id } = req.params;
 
     const existing = await q(
@@ -350,17 +310,17 @@ async function hardDeletePartner(req, res) {
       crmResult, spResult, mpResult,
       epResult, elsResult
     ] = await Promise.all([
-      q('SELECT COUNT(*) AS count FROM appointments WHERE partnerid = $1', [id]),
-      q('SELECT COUNT(*) AS count FROM saleorders WHERE partnerid = $1 AND isdeleted = false', [id]),
-      q('SELECT COUNT(*) AS count FROM dotkhams WHERE partnerid = $1 AND isdeleted = false', [id]),
-      q('SELECT COUNT(*) AS count FROM payments WHERE customer_id = $1', [id]),
-      q('SELECT COUNT(*) AS count FROM accountpayments WHERE partnerid = $1', [id]),
-      q('SELECT COUNT(*) AS count FROM customerreceipts WHERE partnerid = $1', [id]),
-      q('SELECT COUNT(*) AS count FROM crmtasks WHERE partnerid = $1', [id]),
-      q('SELECT COUNT(*) AS count FROM stockpickings WHERE partnerid = $1', [id]),
-      q('SELECT COUNT(*) AS count FROM monthlyplans WHERE customer_id = $1', [id]),
-      q('SELECT COUNT(*) AS count FROM employee_permissions WHERE employee_id = $1', [id]),
-      q('SELECT COUNT(*) AS count FROM employee_location_scope WHERE employee_id = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM appointments WHERE partnerid = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM saleorders WHERE partnerid = $1 AND isdeleted = false', [id]),
+      query('SELECT COUNT(*) AS count FROM dotkhams WHERE partnerid = $1 AND isdeleted = false', [id]),
+      query('SELECT COUNT(*) AS count FROM payments WHERE customer_id = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM accountpayments WHERE partnerid = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM customerreceipts WHERE partnerid = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM crmtasks WHERE partnerid = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM stockpickings WHERE partnerid = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM monthlyplans WHERE customer_id = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM employee_permissions WHERE employee_id = $1', [id]),
+      query('SELECT COUNT(*) AS count FROM employee_location_scope WHERE employee_id = $1', [id]),
     ]);
 
     const appointments = parseInt(aptResult[0]?.count || '0', 10);

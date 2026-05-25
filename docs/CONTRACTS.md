@@ -4,12 +4,6 @@
 > 
 > **Rule:** If you change any contract in this file, you MUST update the version, the consumer code, the tests, and append a CHANGELOG entry in the same commit.
 
-**Cosmetic LOB v2 Sync (2026-05-19):** Added/aligned: `Lob` ('dental'|'cosmetic'), `BusinessUnitScope`, `EarningsRow` (append-only with recipient_partner_id on partners, source enum, negative reversals), `Payout`, `CtvCommissionSummary` (cross-DB aggregate), `ConsultationCard`, `getDb(lob)` / `getQuery(req)` factory contracts, `LobScope` middleware types. partners (both DBs) is identity for all LOB/CTV/earnings. See product-map/earnings-commissions.yaml + db/index.js + commissionEngine. Per v2 §269 + migration 047 reality.
-
-**NK3 Cosmetic Intake Hotfix (2026-05-23):** Customer creates through `/api/cosmetic/Partners` must generate `partners.ref` with the `TM######` cosmetic prefix and collision-check against the request-scoped cosmetic database. Google Places autocomplete is proxied by `/api/Places/*` and remains server-key only.
-
-
-
 ## Contract Versioning
 
 | Version | Date | Scope |
@@ -17,13 +11,17 @@
 | v1.0.0 | 2026-05-13 | Initial contract freeze covering all active API routes, shared types, and integration boundaries. |
 | v1.0.1 | 2026-05-17 | Contract documentation aligned to live payment method enum, report API, and operational export registry. |
 | v1.0.2 | 2026-05-18 | Reconfirmed `@tgroup/contracts` payment method enum and generated contract artifacts are limited to live methods only. |
-| v1.0.4 | 2026-05-21 | Feedback creation now queues optional Lark custom bot alerts after manual or auto-detected feedback threads commit. |
 | v1.0.3 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
-| v1.0.6 | 2026-05-23 | NK3 cosmetic customer intake clarified: cosmetic creates use `TM######` refs; Google Places stays server-proxied through `/api/Places/*` and bypasses LOB path rewriting. |
+| v1.0.4 | 2026-05-22 | Cosmetic LOB mirror routing and NK3 revenue recognition contract clarified for customer/employee/appointment/payment/balance/report flows. |
+| v1.0.5 | 2026-05-23 | TMV/NK3 API hotfix contract clarified: cosmetic CustomerBalance mirror, CTV-only self-dashboard reads, and normalized service catalog writes. |
 
 ---
 
 ## 1. API Contracts
+
+Cosmetic LOB mirror rule: when the frontend passes `lob: 'cosmetic'` to `apiFetch`, the client routes the same endpoint under `/api/cosmetic/*`. Mirrored handlers must run behind `requireLobScope('cosmetic')`, `attachCosmeticDb`, `runWithLob('cosmetic')`, and `cosmetic.access`, then read/write `tcosmetic_demo` through request-scoped `getQuery(req)` or ALS-aware `query()`. Dental remains the default legacy `/api/*` path.
+
+CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referrals`, and `GET /api/ctv/me` are mounted behind `ctv.dashboard.view` and must additionally require `req.user.is_ctv === true`. Authenticated non-CTV staff, including admins, receive `403 S_CTV_ONLY`.
 
 ### 1.1 Auth
 
@@ -44,22 +42,24 @@
     id: string;            // partners.id (UUID)
     name: string;
     email: string;
-    companyId: string;     // primary branch
-    companyName: string;
-    is_ctv?: boolean;      // optional, true if user is a CTV (cosmetic TV) member
-    lob_scope?: string[];  // optional, array of permitted lines of business (e.g., ["dental", "cosmetic"])
-  };
-  permissions: {
-    effectivePermissions: string[];  // e.g., ["customers.view", "appointments.add"]
-    locations: { id: string; name: string }[];
-  };
+	    companyId: string;     // primary branch
+	    companyName: string;
+	    lob_scope: Array<'dental' | 'cosmetic'>; // Admin can receive multiple; non-admin staff receive one visible LOB
+	    is_ctv: boolean;
+	  };
+	  permissions: {
+	    groupId: string | null;
+	    groupName: string | null;
+	    effectivePermissions: string[];  // e.g., ["customers.view", "appointments.add"]
+	    locations: { id: string; name: string }[];
+	  };
 }
 ```
 **Errors:** 400 (missing fields), 401 (invalid credentials), 429 (rate limited).
 
 #### GET /api/Auth/me
 **Headers:** `Authorization: Bearer <token>`
-**Response 200:** Same shape as login response — `user` (with optional `is_ctv` and `lob_scope` fields) + `permissions`.
+**Response 200:** Same shape as login `user` + `permissions`.
 
 ---
 
@@ -121,27 +121,9 @@ PaginatedResponse<{
 
 #### PUT /api/Appointments/:id
 **Body:** `AppointmentUpdateSchema` (partial omit `id`)
-```ts
-{
-  date?: string;
-  time?: string | null;
-  doctorId?: string | null;
-  companyId?: string;
-  note?: string | null;
-  state?: AppointmentStatus | null;
-  timeExpected?: number | null;
-  color?: string | null;
-  productId?: string | null;
-  assistantId?: string | null;
-  dentalAideId?: string | null;
-}
-```
-**Response 200:** Updated row, including refreshed `companyid/companyname` when location changes.
+**Response 200:** Updated row.
 
-**Validation (handler-level, in addition to Zod):**
-- `companyId` (when present) must be a UUID; otherwise `400 INVALID_COMPANY_ID`.
-- `companyId` (when present) must reference an existing `companies` row; otherwise `404 COMPANY_NOT_FOUND`.
-- Persisted column: `appointments.companyid`. Test coverage: `api/src/routes/appointments/__tests__/mutationHandlers.test.js`.
+Cosmetic mirror: `POST /api/cosmetic/Appointments` and `PUT /api/cosmetic/Appointments/:id` use the same request/response body and must validate `partnerId` / `companyId` against the cosmetic database.
 
 ---
 
@@ -175,7 +157,6 @@ PaginatedResponse<{
   // ... plus Odoo legacy fields
 }
 ```
-**Response 201:** Created partner row. The backend owns `ref` generation; dental creates use `T######`, while cosmetic creates through `/api/cosmetic/Partners` use `TM######` and check for collisions in the request-scoped database before insert.
 
 #### PUT /api/Partners/:id
 **Body:** Partial partner fields. `ref` cannot be changed after creation (enforced by backend).
@@ -185,6 +166,8 @@ PaginatedResponse<{
 
 #### DELETE /api/Partners/:id/hard-delete
 **Effect:** Physical row removal. Requires `customers.hard_delete`.
+
+Cosmetic mirror: `GET/POST/PUT/PATCH/DELETE /api/cosmetic/Partners...` use the same contract and must validate `companyId` against cosmetic `dbo.companies`. Customer create/update clients must pass `lob: 'cosmetic'` when Cosmetic is selected.
 
 ---
 
@@ -273,6 +256,29 @@ PaginatedResponse<{
 **Body:** `{ proofImageBase64: string; qrDescription?: string | null }`
 **Behavior:** `proofImageBase64` must be a `data:image/*` URI.
 **Response:** `{ success: true, proofId: string }`
+
+Cosmetic mirror: `GET/POST/PATCH/DELETE /api/cosmetic/Payments...`, `/api/cosmetic/Payments/deposits`, and `/api/cosmetic/Payments/deposit-usage` use the same contract and operate only on cosmetic `dbo.payments` / `dbo.payment_allocations`.
+
+#### GET /api/CustomerBalance/:id
+**Auth:** Authenticated route mounted through the app router.
+**Response 200:**
+```ts
+{
+  id: string;
+  name: string;
+  deposit_balance: number;
+  outstanding_balance: number;
+  total_deposited: number;
+  total_used: number;
+  total_refunded: number;
+}
+```
+**Behavior:** Reads `partners`, `payments`, `saleorders`, and `dotkhams` in the request-scoped LOB database. Cosmetic callers must use `GET /api/cosmetic/CustomerBalance/:id`; otherwise the deposit summary cards can read dental balances for cosmetic customers. Deposit totals are based on `payments.payment_category = 'deposit'`; unallocated service/payment receipts are not treated as customer advances.
+
+#### POST /api/Products and PUT /api/Products/:id
+**Auth:** Requires the service catalog permission enforced by the product route.
+**Body:** Service catalog fields accepted by the active `products.js` route, including required `name`.
+**Behavior:** Dental and cosmetic mirrors (`/api/cosmetic/Products...`) must persist the accent-insensitive search column as `namenosign = normalizeVietnamese(name)` on create and update.
 
 ---
 
@@ -387,6 +393,8 @@ All current `/api/Reports` endpoints use `POST`, require `reports.view`, and ret
 ```
 Date-scoped endpoints accept `{ dateFrom?: 'YYYY-MM-DD'; dateTo?: 'YYYY-MM-DD'; companyId?: string }` unless noted.
 
+Revenue recognition rule: paid revenue counts posted payment allocations linked to saleorders plus direct posted `payments.payment_category = 'payment'` receipts with no `payment_allocations` row, including imported receipts whose `service_id` is still blank. Deposits, refunds, deposit usage, and voided payments are excluded. The by-location report includes a synthetic unassigned row for paid receipts that cannot yet be attributed to a company.
+
 | Endpoint | Body | `data` shape |
 |---|---|---|
 | `/api/Reports/revenue/summary` | Date scope | `{ orders: { state, cnt, total, paid, outstanding }[]; payments: { method, status, cnt, total }[] }` |
@@ -449,7 +457,7 @@ Supported registry types:
 |---|---|---|
 | `service-catalog` | `products.export` | `search`, `companyId`, `categId`, `active` |
 | `customers` | `customers.export` | `search`, `companyId`, `status` |
-| `appointments` | `appointments.export` | `search` (appointment/customer fields including phone), `companyId`, `dateFrom`, `dateTo`, `state`, `doctorId`; workbook date prefers `appointments.date` + `time` before legacy `datetimeappointment` |
+| `appointments` | `appointments.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `state`, `doctorId` |
 | `services` | `services.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `state` |
 | `payments` | `payments.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `status` |
 | `report-sales-employees` | `reports.export` | `companyId`, `employeeType`, `employeeId`, `dateFrom`, `dateTo` |
@@ -464,8 +472,6 @@ Supported registry types:
 **Auth:** Any authenticated employee.
 **Body:** `multipart/form-data` with `content?: string`, `pagePath?: string`, `screenSize?: string`, and repeated `files` image fields.
 **Response 201:** Created feedback thread row.
-
-**Side effect:** If `LARK_FEEDBACK_WEBHOOK_URL` is configured, the API queues a non-blocking Lark custom bot text alert after the transaction commits. The alert contains thread id, reporter id/name when available, page context, screen size, attachment count, a bounded content preview, and a `/feedback` inbox link. A Lark delivery failure is logged and must not fail the request or roll back the committed feedback thread.
 
 #### POST /api/Feedback/my/:threadId/reply
 **Auth:** Thread owner.
@@ -502,8 +508,6 @@ Feedback attachment behavior:
 ```
 **Response 201:** `{ id: string }` (error_event row id)
 
-**Side effect:** The public telemetry ingestion route creates a `source='auto'` feedback thread for first-seen errors. If `LARK_FEEDBACK_WEBHOOK_URL` is configured, that new auto-feedback thread queues the same non-blocking Lark alert with error type, route, API context, and bounded error-message preview.
-
 ---
 
 ## 2. Cross-Module Function Signatures
@@ -520,14 +524,15 @@ async function apiFetch<T>(
     body?: unknown;
     params?: Record<string, string | number | boolean | undefined>;
     signal?: AbortSignal;
+    lob?: 'dental' | 'cosmetic';
   }
 ): Promise<T>
 ```
 **Invariants:**
+- `lob: 'cosmetic'` prefixes requests with `/cosmetic`; omitted or `dental` uses legacy `/api/*`.
 - CamelCase keys in `params` are converted to snake_case on the wire (except `CAMEL_CASE_PASSTHROUGH` set).
 - 401 responses clear `localStorage` token and dispatch `AUTH_UNAUTHORIZED_EVENT`.
 - Structured errors are thrown as `ApiError` with `status`, `code`, `field`, `message`.
-- **LOB-Aware Routing (v2.0):** If `VITE_COSMETIC_LOB_ENABLED=true` and `localStorage.getItem('tgclinic_lob')='cosmetic'`, endpoint paths are rewritten from `/api/X` to `/api/cosmetic/X`. Data hooks may also pass `apiFetch(..., { lob: 'cosmetic' })` to force the cosmetic mirror for that request. Whitelisted routes (`/Auth/*`, `/me/*`, `/version/*`, `/ctv/*`, `/Places/*`) bypass rewriting regardless of LOB. Default behavior (flag false or missing) performs no rewriting; dental LOB is unaffected.
 
 ### 2.2 resolveEffectivePermissions (Backend Auth)
 
@@ -602,7 +607,7 @@ async function query(text: string, params?: any[]): Promise<any[]>
 ### 4.3 Google Places
 
 **API Key:** `GOOGLE_PLACES_API_KEY` (server-side only; never exposed to browser)
-**Usage:** `api/src/routes/places.js` proxies autocomplete and details requests to Google Places. Frontend callers use `/api/Places/*`; cosmetic LOB mode must not rewrite these endpoints to `/api/cosmetic/Places/*`.
+**Usage:** `api/src/routes/places.js` proxies autocomplete requests to `https://maps.googleapis.com/maps/api/place/autocomplete/json`.
 
 ---
 
