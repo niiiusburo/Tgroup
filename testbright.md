@@ -1772,3 +1772,194 @@ TestSprite execution items:
 - [ ] PENDING: Verify Cosmetic `/customers/:id` appointment save uses `/api/cosmetic/Appointments`.
 - [ ] PENDING: Verify Dental `/calendar` appointment create/update still uses top-level `/api/Appointments`.
 - [ ] PENDING: Verify Cosmetic appointment search/list, check-in advance, status update, and cancel actions stay inside `/api/cosmetic/Appointments`.
+- [x] VERIFIED: Feedback page shows one pending item for changing appointment/customer location after appointment creation.
+- [x] VERIFIED: Customer `[T0365] TEST` appointment `AP9568610` changed from `Tấm Dentist Gò Vấp` to `Tấm Dentist Quận 3` through the customer-page edit modal.
+- [x] VERIFIED: `PUT /api/Appointments/d2f961fd-7384-4d18-bf4e-65cb49688d28` returned 200 and API readback showed `Tấm Dentist Quận 3`.
+- [x] VERIFIED: Appointment was restored to `Tấm Dentist Gò Vấp` and final API readback confirmed the original branch.
+- [x] VERIFIED: Feedback thread `769230ed-53ac-4f0f-9816-0b9c5c564f5b` was replied to with the verification summary and three proof screenshots, then marked `Resolved`.
+
+## 2026-05-20 — NK2 Clone Payment Allocation Merge
+
+Feature/edit name:
+- Targeted VPS database repair for one clone-only payment and payment allocation from `tdental_smoketest` into main `tdental_demo`.
+
+Changed URLs and API routes:
+- No code URLs changed.
+- Data surfaces to verify after merge: `/customers/67e36450-fc43-4b7a-bdae-b4350079dc96`, `/payment`, and payment reads through `GET /api/Payments`.
+
+Affected data flows:
+- `tdental_smoketest.dbo.payments` -> `tdental_demo.dbo.payments`.
+- `tdental_smoketest.dbo.payment_allocations` -> `tdental_demo.dbo.payment_allocations`.
+- Customer `T163974` payment history and service allocation display.
+
+User roles:
+- Admin/manager users with customer/payment view permissions.
+
+Happy paths:
+- Customer `T163974` / `[T163974] TRINH - G1` shows bank transfer payment `14,725,000` with reference `06 - ACB - GẮN MCKLTD`.
+- Payment allocation `545e7c79-06cb-4b7f-add3-a3d7d67aa8dc` links payment `9e198971-669d-422f-9120-209a856c1f22` to sale order `17dd5dd8-976c-4d60-8b46-c040b4b99351`.
+
+Edge cases:
+- Main `tdental_demo` sale order `17dd5dd8-976c-4d60-8b46-c040b4b99351` is currently `isdeleted=true`; verification must confirm whether the UI intentionally hides or still reports the inserted payment.
+- Re-running the merge should be idempotent and not duplicate payment or allocation rows.
+
+Regressions:
+- No customer, appointment, service order, service line, or product rows should be added from the clone as part of this targeted repair.
+- Existing main database appointment/service/payment counts should only change by the inserted payment and allocation.
+
+Setup data and login state:
+- Source clone backup: `backups/db-sync/tdental_smoketest-source-before-merge-20260520-154050.dump`.
+- VPS source DB: `tdental_smoketest`.
+- VPS target DB: `tdental_demo`.
+
+TestSprite execution items:
+- [ ] PENDING: Verify target DB contains payment `9e198971-669d-422f-9120-209a856c1f22` exactly once.
+- [ ] PENDING: Verify target DB contains allocation `545e7c79-06cb-4b7f-add3-a3d7d67aa8dc` exactly once and linked to invoice `17dd5dd8-976c-4d60-8b46-c040b4b99351`.
+- [ ] PENDING: Verify customer `T163974` payment surface after merge.
+
+## 2026-05-20 — NK2 Database Target and Customer Creation Audit
+
+Feature/edit name:
+- VPS database target audit for NK2 customer creation claim around phone `0972020908`, followed by cleanup of the unused legacy `tdental-db` container.
+
+Changed URLs and API routes:
+- No code URLs changed.
+- Checked public routes/logs for `https://nk2.2checkin.com/api/Partners` and `https://nk.2checkin.com/api/Partners`.
+- Checked running API database targets for `tgroup-staging-api`, `tgroup-nk3-api`, and `tgroup-api`.
+- Removed the unused legacy Docker container `tdental-db` after creating a local backup.
+
+Affected data flows:
+- NK2 nginx route `/api` -> `tgroup-staging-api` port `3102` -> `tdental_demo`.
+- Smoketest-backed `tgroup-nk3-api` -> `tdental_smoketest`.
+- Legacy `tdental-db` container -> `tdental` database, not referenced by current TGroup API containers; container removed after backup.
+- Customer lookup in `dbo.partners` by normalized phone `0972020908`.
+
+User roles:
+- Staff/admin customer creation and customer search flows.
+
+Happy paths:
+- If staff creates a customer through NK2, nginx should show `POST /api/Partners` with `nk2.2checkin.com` referrer and the target DB should receive a new `dbo.partners` row.
+- If staff only searches/opens an existing customer, nginx should show `GET /api/Partners?search=0972020908` and no new partner row should appear.
+
+Edge cases:
+- The same phone exists on two historical customers: `T6725` and `KH0001`.
+- A separate running `tgroup-nk3-api` points to `tdental_smoketest`, but current nginx has no `nk3` server_name route and NK2 does not proxy to that container.
+- Before removal, legacy `tdental-db` also contained the same two old phone matches, but it was not a hidden NK2 write target.
+
+Regressions:
+- Do not merge or insert any partner/customer row unless a clone-only or alternate-target-only row is found with matching creation evidence.
+- Do not treat production `nk.2checkin.com` `POST /api/Partners` lines as NK2 writes.
+
+Setup data and login state:
+- VPS host: `76.13.16.68`.
+- Primary Postgres container: `tgroup-db`.
+- Legacy Postgres container inspected for exclusion and then removed: `tdental-db`.
+- Backup before removal: `backups/db-sync/tdental-legacy-before-container-delete-20260520-163907.dump`.
+- Preserved rollback volume: `tdental-postgres-data`.
+- Audit phone: `0972020908`.
+
+TestSprite execution items:
+- [x] VERIFIED: `nk2.2checkin.com/api` proxies to `127.0.0.1:3102`, which is `tgroup-staging-api`.
+- [x] VERIFIED: Current `tgroup-staging-api` uses `tdental_demo`; current `tgroup-nk3-api` uses `tdental_smoketest`; `tgroup-api` uses `tdental_demo`.
+- [x] VERIFIED: `tgroup-db` databases are `tdental_demo`, `tdental_smoketest`, `tcosmetic_smoketest`, `tgroup_restore_probe_20260507`, and `postgres`.
+- [x] VERIFIED: `tdental-db` has database `tdental`, but no current TGroup API container has `DATABASE_URL` pointing to it.
+- [x] VERIFIED: `0972020908` resolves to existing old rows `T6725` and `KH0001` in `tdental_demo`, `tdental_smoketest`, and legacy `tdental`.
+- [x] VERIFIED: NK2 nginx logs have zero `POST /api/Partners` on May 20, 2026; the phone appears only in GET search/open requests on NK2.
+- [x] VERIFIED: Local backup created before deletion with SHA-256 `a5aafd000539625ff9f92f960e6a1e3d7eb737ac10065f819fcd7ce69daa57e3`.
+- [x] VERIFIED: `tdental-db` no longer appears in `docker ps -a`; preserved Docker volume `tdental-postgres-data` still exists.
+- [x] VERIFIED: Strict post-delete env scan found no running container pointed at `tdental-db` or `/tdental`.
+
+# TestSprite Plan: Defense-in-Depth Anti-Regression 2026-05-20
+
+Feature/edit name: Defense-in-Depth Anti-Regression 2026-05-20
+
+Changed paths:
+- New: `scripts/require-clean-tree.sh`, `scripts/deploy-build-args.sh`, `api/src/services/exports/__tests__/allBuilderColumns.lock.test.js`
+- Modified: `Dockerfile.web` (ARG GIT_SHA / GIT_BRANCH), `docker-compose.yml` (passes them through), `website/scripts/generate-version.js` (prefers env vars over `git` shell-out).
+
+Affected data flows:
+- Build process now refuses dirty trees; `version.json` reports real commit; 6 more Excel export column lists are locked against silent drops.
+
+Execution items:
+- [ ] PENDING: `bash scripts/require-clean-tree.sh` exits 1 on dirty tree, exits 0 on clean tree.
+- [ ] PENDING: After `GIT_SHA=$(git rev-parse HEAD) docker compose up -d --build web`, `curl <host>/version.json` returns the real short SHA.
+- [ ] PENDING: `npx jest src/services/exports/__tests__/allBuilderColumns.lock.test.js` passes 24/24.
+- [ ] PENDING: Simulated removal of any one column in any of the 6 builders causes 3+ test failures in allBuilderColumns.lock.test.js.
+
+## 2026-05-21 — NK 2Checkin Login Monitor
+
+Feature/edit name:
+- Automation health check for production login and three non-destructive navigation screens.
+
+Changed URLs and API routes:
+- Checked target URL: `https://nk.2checkin.com`.
+- Intended login API route: `POST /api/Auth/login`.
+- No production URLs, routes, or data were changed.
+
+Affected data flows:
+- Browser login form -> frontend auth context -> `/api/Auth/login` -> JWT/localStorage session -> read-only navigation screens.
+
+User roles:
+- Admin monitor credentials: `t@clinic.vn` / fallback `t@clinic.com`.
+
+Happy paths:
+- `t@clinic.vn / 123123` logs in and lands on authenticated navigation.
+- If the first account fails, `t@clinic.com / 123123` is attempted.
+- Three distinct navigation screens load with visible content and no obvious broken UI, blank content, or page-level error messages.
+
+Edge cases:
+- DNS or browser sandbox failure prevents the monitor from reaching the live host.
+- Login API returns 4xx/5xx or visible invalid-credential message.
+- Auth succeeds but one or more read-only screens show blank content, broken layout, or API error banners.
+
+Regressions:
+- Do not create, edit, delete, submit, import, export, or modify production data during this monitor.
+- Do not use destructive navigation items such as add, edit, delete, save, payment, import, export, or logout as validation screens.
+
+Setup data and login state:
+- Production URL: `https://nk.2checkin.com`.
+- Primary credential: `t@clinic.vn / 123123`.
+- Fallback credential: `t@clinic.com / 123123`.
+- Screenshot evidence required when browser access is available.
+
+TestSprite execution items:
+- [ ] PENDING: Re-run from a browser-capable environment because this sandbox reported no DNS configuration and denied desktop browser control.
+- [ ] PENDING: Capture authenticated screenshots for three distinct read-only screens after login.
+- [ ] PENDING: Record visible login error text if both credentials fail.
+
+## 2026-05-21 — Appointment companyId persistence (PUT /api/Appointments/:id)
+
+Feature/edit name:
+- Persist the selected clinic/location (companyid) when editing an appointment.
+
+Changed URLs and API routes:
+- `PUT /api/Appointments/:id` — now reads `companyId` (and `companyid` alias) from the body, UUID-validates, FK-checks against `companies`, and writes `appointments.companyid`.
+
+Affected data flows:
+- Calendar / Appointments edit form (`appointmentForm.mapper.ts`) → API client `lib/api/appointments.ts` → `PUT /api/Appointments/:id` (`mutationHandlers.updateAppointment`) → `dbo.appointments.companyid` → response includes refreshed `companyid` + `companyname`.
+
+User roles:
+- Admin (`appointments.edit` permission).
+
+Happy paths:
+- Open an appointment, change Cơ sở to a different location, click Save. After page reload the appointment still shows the new location.
+- API response from PUT echoes the new `companyid` + `companyname`.
+
+Edge cases:
+- companyId omitted from body → existing companyid is preserved (column not in UPDATE SET).
+- companyId present but malformed → `400 INVALID_COMPANY_ID`.
+- companyId references a nonexistent companies row → `404 COMPANY_NOT_FOUND`.
+- locationId field cleared in the form → mapper sends companyid as the current selection (form keeps locationId required).
+
+Regressions:
+- Do not introduce companyId on POST path that previously worked; the create endpoint already accepted companyId/companyid and is unchanged.
+- Do not break null-clear semantics for `doctorId`, `assistantId`, or `dentalAideId`; they remain explicit `null`-able.
+
+Setup data and login state:
+- Local dev: `http://127.0.0.1:5175`, login `t@clinic.vn / 123123` (Tgrouptest demo DB).
+- A valid `companies.id` UUID for the target clinic.
+
+TestSprite execution items:
+- [ ] PENDING: Edit any appointment on `/calendar`, change Cơ sở, save, reload, verify location persisted.
+- [ ] PENDING: `npx jest api/src/routes/appointments/__tests__/mutationHandlers.test.js` passes (incl. the new companyId valid-UUID / 400 / 404 cases).
+- [ ] PENDING: `npx vitest run website/src/components/appointments/unified/__tests__/appointmentForm.mapper.test.ts` passes (incl. the new locationId→companyid case).
