@@ -101,11 +101,9 @@ export default function CtvDashboard() {
       }, 1500);
     } catch (err: any) {
       if (err?.code === 'B_CLIENT_CLAIMED') {
-        const structuredError = err?.body?.error || err?.body || {};
-        const ownerName = structuredError.owner_name || structuredError.ownerName || 'unknown';
-        const expiresAtValue = structuredError.expires_at || structuredError.expiresAt;
-        const expiresAt = expiresAtValue
-          ? new Date(expiresAtValue).toLocaleDateString('vi-VN', { year: 'numeric', month: '2-digit', day: '2-digit' })
+        const ownerName = err?.body?.owner_name || 'unknown';
+        const expiresAt = err?.body?.expires_at
+          ? new Date(err.body.expires_at).toLocaleDateString('vi-VN', { year: 'numeric', month: '2-digit', day: '2-digit' })
           : 'unknown';
         setClientError(t('forms.referClient.errorClaimed', { owner: ownerName, expires: expiresAt }));
       } else {

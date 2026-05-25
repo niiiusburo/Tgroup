@@ -3,7 +3,6 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/Layout';
 import { LocationProvider } from '@/contexts/LocationContext';
-import { BusinessUnitProvider, useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { TimezoneProvider } from '@/contexts/TimezoneContext';
@@ -100,9 +99,8 @@ function ProtectedRoute({ children, path }: ProtectedRouteProps) {
   if (isLoading) return <AuthLoading />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  // CTV users (is_ctv) are blocked from ALL admin routes — hard gate
-  if (user?.is_ctv || user?.isCtv) {
-    // redirect back to their surface
+  // Redirect is_ctv=true users to /ctv dashboard
+  if (user?.is_ctv === true) {
     return <Navigate to="/ctv" replace />;
   }
 
@@ -114,13 +112,14 @@ function ProtectedRoute({ children, path }: ProtectedRouteProps) {
   return <>{children}</>;
 }
 
-function CTVRouteGuard({ children }: { readonly children: React.ReactNode }) {
+/**
+ * CTVRouteGuard — ensures only CTV users can access /ctv
+ */
+function CTVRouteGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, user } = useAuth();
-
   if (isLoading) return <AuthLoading />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (!user?.is_ctv && !user?.isCtv) return <Navigate to="/" replace />;
-
+  if (!user?.is_ctv) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 
@@ -137,7 +136,7 @@ function LoginRoute() {
 /**
  * Main Application Component
  * @crossref:root-component
- * @crossref:uses[Layout, Routes, Route, LocationProvider, BusinessUnitProvider, AuthProvider]
+ * @crossref:uses[Layout, Routes, Route, LocationProvider, AuthProvider]
  * @crossref:routes[
  *   / -> Overview,
  *   /calendar -> Calendar,
@@ -153,34 +152,18 @@ function LoginRoute() {
  *   /notifications -> Notifications
  * ]
  */
-
-/**
- * AppRoutes — keyed by currentLob to force remount when LOB changes
- * This ensures all state and contexts reset when switching between dental and cosmetic
- *
- * @see BusinessUnitContext for LOB state management
- */
-function AppRoutes() {
-  const { currentLOB } = useBusinessUnit();
-
+function App() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center h-screen text-gray-500">Loading...</div>}>
-      <Routes key={currentLOB}>
+    <AuthProvider>
+      <TimezoneProvider>
+        <LocationProvider>
+        <Suspense fallback={<div className="flex items-center justify-center h-screen text-gray-500">Loading...</div>}>
+        <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginRoute />} />
           {import.meta.env.DEV && (
             <Route path="/test/address" element={<AddressAutocompleteTest />} />
           )}
-
-          {/* CTV v2 dashboard — mobile-first, bypasses admin Layout entirely for is_ctv users */}
-          <Route
-            path="/ctv"
-            element={
-              <CTVRouteGuard>
-                <CtvDashboard />
-              </CTVRouteGuard>
-            }
-          />
 
           {/* Protected routes wrapped in Layout */}
           <Route
@@ -370,20 +353,19 @@ function AppRoutes() {
             {/* @crossref:catch-all-route[redirects to Overview] */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
-        </Routes>
-      </Suspense>
-  );
-}
 
-function App() {
-  return (
-    <AuthProvider>
-      <TimezoneProvider>
-        <LocationProvider>
-          <BusinessUnitProvider>
-            <AppRoutes />
-          </BusinessUnitProvider>
-        </LocationProvider>
+          {/* CTV Portal — bypasses admin Layout */}
+          <Route
+            path="/ctv"
+            element={
+              <CTVRouteGuard>
+                <CtvDashboard />
+              </CTVRouteGuard>
+            }
+          />
+        </Routes>
+        </Suspense>
+      </LocationProvider>
       </TimezoneProvider>
     </AuthProvider>
   );
