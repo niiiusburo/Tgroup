@@ -27,6 +27,15 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 ### Changed
 - Face recognition model upgraded from OpenCV SFace/YuNet (128-dim, LFW ~99.4%) to InsightFace SCRFD + ArcFace buffalo_l (512-dim, LFW 99.80%, IJB-C 97.16% TAR@FAR=1e-4). Detection: SCRFD-10GF replaces YuNet. Recognition: ArcFace R50 on WebFace600K replaces SFace. Embedding dimension 128→512. All existing SFace embeddings deactivated by migration 047 — re-enrollment required. INV-005 updated. Thresholds retuned for ArcFace score distribution (AUTO_MATCH 0.88→0.55, CANDIDATE 0.80→0.40). Anti-spoofing liveness detection stub added (Phase 2 placeholder). — @agent — bank-grade facial recognition upgrade.
 
+## [0.32.50] — 2026-05-26
+### Fixed
+- Added `DELETE /Appointments/:id` route for cosmetic LOB (soft-delete sets state='cancelled'). Was returning 404. — @agent — NK3 appointment deletion.
+- Added `GET /Companies/:id`, `POST /Companies`, and `PUT /Companies/:id` routes for cosmetic LOB with proper LOB-aware `req.db.connect()` for transactions. POST creates a linked partner record (NOT NULL constraint on partnerid). Was returning 404 for all CUD operations. — @agent — NK3 locations CRUD.
+
+## [0.32.49] — 2026-05-26
+### Fixed
+- Employee mutations (create/update) now use `req.db.connect()` for cosmetic LOB transactions instead of bare `pool.connect()`. This fixes employee creation writing to the dental DB instead of cosmetic DB when on the cosmetic LOB. — @agent — NK3 cosmetic employee CRUD.
+
 ## [0.32.48] — 2026-05-25
 ### Fixed
 - Login route now includes `lob_scope` and `is_ctv` in JWT token payload and login response. GET /Auth/me also returns these fields. Fixes cosmetic LOB 403 — `requireLobScope` middleware requires `req.user.lob_scope` which was never populated by login. — @agent — NK3 cosmetic LOB access.

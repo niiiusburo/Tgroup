@@ -370,7 +370,41 @@ async function updateAppointment(req, res) {
   }
 }
 
+/**
+ * DELETE /api/Appointments/:id
+ * Soft-deletes by setting state='cancelled'
+ */
+async function deleteAppointment(req, res) {
+  try {
+    const q = getQuery(req);
+    const { id } = req.params;
+
+    if (!isValidUUID(id)) {
+      return errorResponse(res, 400, 'INVALID_ID', 'id must be a valid UUID');
+    }
+
+    const existing = await q('SELECT id, state FROM appointments WHERE id = $1', [id]);
+    if (!existing || existing.length === 0) {
+      return errorResponse(res, 404, 'NOT_FOUND', 'Appointment not found');
+    }
+
+    await q(
+      `UPDATE appointments SET state = 'cancelled', aptstate = 'cancelled', lastupdated = ${VIETNAM_NOW_SQL} WHERE id = $1`,
+      [id]
+    );
+
+    return res.json({ success: true, id });
+  } catch (err) {
+    console.error('Error deleting appointment:', err);
+    return res.status(500).json({
+      errorCode: 'INTERNAL_ERROR',
+      message: err instanceof Error ? err.message : 'Unknown error',
+    });
+  }
+}
+
 module.exports = {
   createAppointment,
   updateAppointment,
+  deleteAppointment,
 };
