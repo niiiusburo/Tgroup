@@ -23,6 +23,10 @@
 Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `Docs`.
 
 ---
+## [0.32.48] — 2026-05-25
+### Fixed
+- Login route now includes `lob_scope` and `is_ctv` in JWT token payload and login response. GET /Auth/me also returns these fields. Fixes cosmetic LOB 403 — `requireLobScope` middleware requires `req.user.lob_scope` which was never populated by login. — @agent — NK3 cosmetic LOB access.
+
 ## [0.32.47] — 2026-05-25
 ### Fixed
 - Cherry-picked cosmetic LOB v2 backend infrastructure from nk3-deploy: db/index.js two-DB factory, middleware/lob.js attachCosmeticDb, server.js cosmeticRouter mounting /api/cosmetic/* mirrors (Payments, CustomerBalance, Permissions, Appointments, Partners, etc.). Fixes P0 NK3 staff feedback: deposit top-up not reflecting balance, payment recording failing, permission save errors — all were 404s because frontend rewrote to /api/cosmetic/* but backend had no cosmetic route mounts. — @agent — NK3 staff feedback Tasks 3, 4, 5.

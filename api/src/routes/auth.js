@@ -23,7 +23,8 @@ router.post('/login', async (req, res) => {
     }
 
     const rows = await query(
-      `SELECT p.id, p.name, p.email, p.password_hash, p.companyid AS "companyId", c.name AS "companyName"
+      `SELECT p.id, p.name, p.email, p.password_hash, p.companyid AS "companyId", c.name AS "companyName",
+              p.lob_scope AS "lobScope", p.is_ctv AS "isCtv"
        FROM partners p
        LEFT JOIN companies c ON c.id = p.companyid
        WHERE p.email = $1 AND p.employee = true AND p.isdeleted = false AND p.active = true`,
@@ -53,11 +54,16 @@ router.post('/login', async (req, res) => {
 
     const permissions = await resolveEffectivePermissions(employee.id);
 
+    const lobScope = Array.isArray(employee.lobScope) ? employee.lobScope : [];
+    const isCtv = !!employee.isCtv;
+
     const tokenPayload = {
       employeeId: employee.id,
       name: employee.name,
       email: employee.email,
       companyId: employee.companyId,
+      lob_scope: lobScope,
+      is_ctv: isCtv,
     };
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '24h' });
@@ -70,6 +76,8 @@ router.post('/login', async (req, res) => {
         email: employee.email,
         companyId: employee.companyId,
         companyName: employee.companyName,
+        lob_scope: lobScope,
+        is_ctv: isCtv,
       },
       permissions,
     });
@@ -89,7 +97,8 @@ router.get('/me', requireAuth, async (req, res) => {
     const { employeeId } = req.user;
 
     const rows = await query(
-      `SELECT p.id, p.name, p.email, p.companyid AS "companyId", c.name AS "companyName"
+      `SELECT p.id, p.name, p.email, p.companyid AS "companyId", c.name AS "companyName",
+              p.lob_scope AS "lobScope", p.is_ctv AS "isCtv"
        FROM partners p
        LEFT JOIN companies c ON c.id = p.companyid
        WHERE p.id = $1 AND p.employee = true AND p.isdeleted = false`,
@@ -102,6 +111,7 @@ router.get('/me', requireAuth, async (req, res) => {
 
     const employee = rows[0];
     const permissions = await resolveEffectivePermissions(employeeId);
+    const lobScope = Array.isArray(employee.lobScope) ? employee.lobScope : [];
 
     return res.json({
       user: {
@@ -110,6 +120,8 @@ router.get('/me', requireAuth, async (req, res) => {
         email: employee.email,
         companyId: employee.companyId,
         companyName: employee.companyName,
+        lob_scope: lobScope,
+        is_ctv: !!employee.isCtv,
       },
       permissions,
     });
