@@ -90,7 +90,7 @@ Regressions to check:
 Verification state:
 - [x] PASS: Pre-fix live UI reproduction failed on NK3 `0.32.50` while header LOB was Cosmetic; Calendar/Profile appointment submit raised `Partner with given partnerId does not exist` and did not call `/api/cosmetic/Appointments`. Evidence: `output/live-verification/nk3-ui-bugfix-video-20260526T020000Z/nk3-ui-bugfix-error.png`.
 - [x] PASS: Unit regression `npm --prefix website test -- src/components/appointments/unified/__tests__/useAppointmentForm.test.ts` passed 1 file / 7 tests, including Cosmetic create/edit LOB routing.
-- [ ] PENDING: After deploy, live NK3 UI video must show all five feedback flows passing from the website and record the final artifact path.
+- [x] PASS: After deploy, live NK3 UI video on `https://tmv.2checkin.com` showed 7/7 website-driven checks passing on version `0.32.51` (`ebaeb73`): Cosmetic customer create, Calendar appointment create via `POST /api/cosmetic/Appointments`, deposit, service payment, permission save, and Dental isolation. Video: `output/live-verification/nk3-ui-bugfix-video-20260526T020000Z/nk3-ui-bugfix-verification.webm`; report: `output/live-verification/nk3-ui-bugfix-video-20260526T020000Z/nk3-ui-bugfix-report.json`; final screenshot: `output/live-verification/nk3-ui-bugfix-video-20260526T020000Z/nk3-ui-bugfix-final.png`.
 
 # TestSprite Plan: NK3 CTV Portal Tracking Refresh 2026-05-25
 
