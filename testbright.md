@@ -49,7 +49,7 @@ Regressions to check:
 Verification state:
 - [x] PASS: Emergency live login restore rebuilt the NK3 web container with `VITE_API_URL=/api`; browser automation logged in as `ctv@clinic.vn`, ended on `/ctv`, saw `POST https://tmv.2checkin.com/api/Auth/login` return 200, and recorded zero localhost API calls. Evidence: `output/live-verification/nk3-live-login-restored-20260526T074600Z/report.json`, screenshot `output/live-verification/nk3-live-login-restored-20260526T074600Z/nk3-live-login-restored.png`, video `output/live-verification/nk3-live-login-restored-20260526T074600Z/page@4f231c3e989d3bc74a616c2173c23d36.webm`.
 - [x] PASS: Pre-fix live employee-login reproduction created `NK3 EMP LOGIN 20260526060559` through the real UI, confirmed the row existed only in `tcosmetic_smoketest`, and captured `POST /api/Auth/login -> 401 Invalid email or password`.
-- [ ] PENDING: After deploying 0.32.52, rerun real browser video for create Cosmetic employee account -> logout -> login as that employee -> verify `/api/Auth/login` 200 and Cosmetic auth scope.
+- [x] PASS: After deploying 0.32.52, real browser video created Cosmetic employee account `NK3 EMP LOGIN 20260526075607`, logged out, logged in as that employee through the website, and saw `POST /api/Auth/login -> 200`. Evidence: `output/live-verification/nk3-employee-login-fixed-20260526T075600Z/nk3-employee-login-fixed-report.json`, screenshot `output/live-verification/nk3-employee-login-fixed-20260526T075600Z/nk3-employee-login-fixed-final.png`, MP4 `output/live-verification/nk3-employee-login-fixed-20260526T075600Z/nk3-employee-login-fixed.mp4`.
 
 # TestSprite Plan: NK3 Live Cosmetic Employee Create Verification 2026-05-26
 
