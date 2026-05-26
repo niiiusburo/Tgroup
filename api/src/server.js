@@ -424,7 +424,12 @@ if (COSMETIC_FLAG) {
   cosmeticRouter.use('/ExternalCheckups', externalCheckupsRoutes);
   cosmeticRouter.use('/face', faceRecognitionRoutes);
   cosmeticRouter.use('/Exports', exportsRoutes);
-  // Add more mirrors (e.g. /Services if revived, feedback, etc.) as needed for full admin reuse
+  cosmeticRouter.use('/SystemPreferences', systemPreferencesRoutes);
+  cosmeticRouter.use('/Feedback', feedbackRoutes);
+  cosmeticRouter.use('/IpAccess', ipAccessRoutes);
+  cosmeticRouter.use('/WebsitePages', websitePagesRoutes);
+  cosmeticRouter.use('/Places', placesRoutes);
+  cosmeticRouter.use('/telemetry', telemetryRoutes);
 
   app.use('/api/cosmetic', cosmeticRouter);
   console.log('[CosmeticLOB] /api/cosmetic/* mirrors mounted (flag=true, using tcosmetic_demo via req context)');
