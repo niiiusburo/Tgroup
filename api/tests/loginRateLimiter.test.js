@@ -1,4 +1,5 @@
 const request = require('supertest');
+const jwt = require('jsonwebtoken');
 
 const ADMIN_GROUP_ID = '11111111-0000-0000-0000-000000000001';
 
@@ -22,7 +23,12 @@ function isAdminPermissionState(permissionState) {
   return groupId === ADMIN_GROUP_ID || groupName === 'admin' || groupName === 'super admin' || groupName === 'system administrator';
 }
 
-function loadApp({ passwordMatches, permissions = adminPermissions, lobScope = ['dental', 'cosmetic'] }) {
+function loadApp({
+  passwordMatches,
+  permissions = adminPermissions,
+  lobScope = ['dental', 'cosmetic'],
+  authRowsByLob = null,
+}) {
   jest.resetModules();
   process.env.JWT_SECRET = 'test-secret';
 
@@ -53,26 +59,42 @@ function loadApp({ passwordMatches, permissions = adminPermissions, lobScope = [
     v4: jest.fn(() => 'mock-uuid'),
   }));
 
-  jest.doMock('../src/db', () => ({
-    query: jest.fn(async (sql) => {
+  const defaultEmployeeRow = {
+    id: 'employee-id',
+    name: 'Test Employee',
+    email: 't@clinic.vn',
+    password_hash: 'stored-password-hash',
+    companyId: 'company-id',
+    companyName: 'Test Clinic',
+    lobScope,
+    isCtv: false,
+  };
+
+  const queryByLob = jest.fn(async (lob, sql) => {
       if (sql.includes('SELECT p.id, p.name, p.email, p.password_hash')) {
-        return [{
-          id: 'employee-id',
-          name: 'Test Employee',
-          email: 't@clinic.vn',
-          password_hash: 'stored-password-hash',
-          companyId: 'company-id',
-          companyName: 'Test Clinic',
-          lobScope,
-          isCtv: false,
-        }];
+        return authRowsByLob ? (authRowsByLob[lob] || []) : [defaultEmployeeRow];
+      }
+      if (sql.includes('UPDATE partners SET last_login')) {
+        return [];
+      }
+      if (sql.includes('SELECT password_hash FROM partners')) {
+        return [{ password_hash: 'stored-password-hash' }];
       }
       if (sql.includes('lob_scope') || sql.includes('lobScope')) {
         // support /me/lob-scope and me refresh
-        return [{ lobScope, isCtv: false }];
+        const row = authRowsByLob?.[lob]?.[0] || defaultEmployeeRow;
+        return [{ lobScope: row.lobScope, isCtv: row.isCtv }];
       }
       return [];
-    }),
+  });
+
+  const dbQuery = jest.fn((sql, params) => queryByLob('dental', sql, params));
+  const getQuery = jest.fn((lob = 'dental') => (sql, params) => queryByLob(lob, sql, params));
+
+  jest.doMock('../src/db', () => ({
+    query: dbQuery,
+    getQuery,
+    runWithLob: jest.fn((_lob, fn) => fn()),
     pool: {
       connect: jest.fn(),
       end: jest.fn(),
@@ -149,6 +171,44 @@ describe('login rate limiter', () => {
     expect(lobRes.status).toBe(200);
     expect(lobRes.body.lob_scope).toEqual(['dental']);
     expect(lobRes.body.available).toEqual(['dental']);
+  });
+
+  it('authenticates a cosmetic-only employee from the cosmetic auth source', async () => {
+    const app = loadApp({
+      passwordMatches: true,
+      permissions: {
+        groupId: 'cosmetic-staff',
+        groupName: 'Cosmetic Staff',
+        effectivePermissions: ['cosmetic.access'],
+        locations: [],
+      },
+      authRowsByLob: {
+        dental: [],
+        cosmetic: [{
+          id: 'cosmetic-employee-id',
+          name: 'Cosmetic Employee',
+          email: 'cosmetic@clinic.vn',
+          password_hash: 'stored-password-hash',
+          companyId: 'cosmetic-company-id',
+          companyName: 'Cosmetic Branch',
+          lobScope: null,
+          isCtv: false,
+        }],
+      },
+    });
+
+    const res = await request(app)
+      .post('/api/Auth/login')
+      .send({ email: 'cosmetic@clinic.vn', password: '123123' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.lob_scope).toEqual(['cosmetic']);
+    expect(res.body.user.auth_lob).toBe('cosmetic');
+    expect(res.body.user.lob_context).toBe('cosmetic');
+
+    const decoded = jwt.verify(res.body.token, 'test-secret');
+    expect(decoded.auth_lob).toBe('cosmetic');
+    expect(decoded.lob_scope).toEqual(['cosmetic']);
   });
 
   it('limits repeated failures for one email without blocking another email on the same IP', async () => {

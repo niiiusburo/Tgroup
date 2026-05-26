@@ -13,16 +13,16 @@
 
 | Method | Path | Auth | Body | Response |
 |--------|------|------|------|----------|
-| POST | `/login` | Public | `{ email, password }` | `{ token, user, permissions }` |
-| GET | `/me` | Auth | — | `{ user, permissions }` |
-| POST | `/change-password` | Auth | `{ oldPassword, newPassword }` | `{ success, message }` |
+| POST | `/login` | Public | `{ email, password }` | `{ token, user: { lob_scope, auth_lob, lob_context, is_ctv, ... }, permissions }`; searches employee auth rows in dental + cosmetic and binds token to the password-matching source LOB |
+| GET | `/me` | Auth | — | `{ user: { lob_scope, auth_lob, lob_context, is_ctv, ... }, permissions }`; reads the token source LOB |
+| POST | `/change-password` | Auth | `{ oldPassword, newPassword }` | `{ success, message }`; reads/writes the token source LOB |
 
 ## LOB & Business Unit (`/api/me` + context) — Cosmetic LOB v2
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/api/me/lob-scope` | Auth | — | `{ lob_scope: string[], is_ctv: boolean, default_lob }` |
-| (augmented) | `GET /api/Auth/me` | Auth | — | User payload now includes `lob_scope[]` and `is_ctv` (affects login redirect and header toggle visibility) |
+| GET | `/api/me/lob-scope` | Auth | — | `{ lob_scope: string[], is_ctv: boolean, available: string[] }`; reads the token source LOB |
+| (augmented) | `GET /api/Auth/me` | Auth | — | User payload now includes `lob_scope[]`, `auth_lob`, `lob_context`, and `is_ctv` (affects login redirect and header toggle visibility) |
 
 Note: All existing routes are now implicitly under a selected LOB via BusinessUnitContext. Cosmetic routes live under `/api/cosmetic/*` prefix and are distinct from dental.
 
@@ -110,7 +110,7 @@ Cosmetic LOB mirror: Appointment UI submitters must pass active `lob` into `crea
 | PUT | `/:id` | Perm:`employees.edit` | Employee fields | Updated employee |
 | DELETE | `/:id` | Perm:`employees.edit` | — | Deleted employee |
 
-Cosmetic LOB mirror: Employee UI callers must pass active `lob` into `createEmployee` and `updateEmployee`; when `lob='cosmetic'`, these same contract shapes route through `POST /api/cosmetic/Employees` and `PUT /api/cosmetic/Employees/:id`.
+Cosmetic LOB mirror: Employee UI callers must pass active `lob` into `createEmployee` and `updateEmployee`; when `lob='cosmetic'`, these same contract shapes route through `POST /api/cosmetic/Employees` and `PUT /api/cosmetic/Employees/:id`. Creates stamp `partners.lob_scope` to the source LOB so password-backed employee accounts authenticate from the owning physical DB.
 
 ## Products / Services Catalog (`/api/Products`)
 

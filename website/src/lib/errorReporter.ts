@@ -7,7 +7,7 @@
  * where they're deduplicated and made available to the auto-fixer agent.
  */
 
-const TELEMETRY_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3002/api').replace(/\/?api\/?$/, '') + '/api/telemetry';
+const TELEMETRY_URL = (import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3002/api')).replace(/\/?api\/?$/, '') + '/api/telemetry';
 
 interface ErrorReport {
   error_type: 'React' | 'API' | 'Network' | 'Global' | 'UnhandledRejection' | 'Console';

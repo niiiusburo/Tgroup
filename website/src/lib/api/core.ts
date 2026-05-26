@@ -3,7 +3,7 @@
  * @crossref:used-in[lib/api/* domain modules]
  */
 
-export const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3000/api';
+export const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://127.0.0.1:3000/api');
 export const AUTH_UNAUTHORIZED_EVENT = 'tgclinic:auth-unauthorized';
 const TOKEN_KEY = 'tgclinic_token';
 

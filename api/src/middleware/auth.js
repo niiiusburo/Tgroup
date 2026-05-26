@@ -2,6 +2,14 @@
 
 const jwt = require('jsonwebtoken');
 const { resolveEffectivePermissions } = require('../services/permissionService');
+const { runWithLob } = require('../db');
+
+function authLobFromToken(user) {
+  if (user?.auth_lob === 'cosmetic' || user?.auth_lob === 'dental') return user.auth_lob;
+  if (user?.lob_context === 'cosmetic' || user?.lob_context === 'dental') return user.lob_context;
+  const scopes = Array.isArray(user?.lob_scope) ? user.lob_scope.filter((lob) => lob === 'dental' || lob === 'cosmetic') : [];
+  return scopes.length === 1 ? scopes[0] : 'dental';
+}
 
 /**
  * requireAuth middleware
@@ -37,7 +45,8 @@ function requirePermission(permission) {
     }
     try {
       const { employeeId } = req.user;
-      const { effectivePermissions } = await resolveEffectivePermissions(employeeId);
+      const authLob = authLobFromToken(req.user);
+      const { effectivePermissions } = await runWithLob(authLob, () => resolveEffectivePermissions(employeeId));
 
       if (effectivePermissions.length === 0) {
         return res.status(403).json({ error: 'No permission assignment found' });

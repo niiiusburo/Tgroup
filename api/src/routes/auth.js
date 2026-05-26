@@ -3,22 +3,61 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { query } = require('../db');
+const { getQuery, runWithLob } = require('../db');
 const { requireAuth } = require('../middleware/auth');
 const { resolveEffectivePermissions, isAdminPermissionState } = require('../services/permissionService');
 
 const router = express.Router();
 
-function normalizeLobScope(scope) {
-  return Array.isArray(scope)
-    ? scope.filter((lob) => lob === 'dental' || lob === 'cosmetic')
-    : [];
+const VALID_LOBS = ['dental', 'cosmetic'];
+
+function isValidLob(lob) {
+  return lob === 'dental' || lob === 'cosmetic';
 }
 
-function visibleLobScopeForUser(rawScope, permissions) {
-  const normalized = normalizeLobScope(rawScope);
+function normalizeLobScope(scope, fallbackLob) {
+  const normalized = Array.isArray(scope)
+    ? scope.filter(isValidLob)
+    : [];
+  if (normalized.length > 0) return normalized;
+  return isValidLob(fallbackLob) ? [fallbackLob] : [];
+}
+
+function visibleLobScopeForUser(rawScope, permissions, fallbackLob) {
+  const normalized = normalizeLobScope(rawScope, fallbackLob);
   if (isAdminPermissionState(permissions)) return normalized;
   return normalized.slice(0, 1);
+}
+
+function authLobFromToken(user) {
+  if (isValidLob(user?.auth_lob)) return user.auth_lob;
+  if (isValidLob(user?.lob_context)) return user.lob_context;
+  const scope = normalizeLobScope(user?.lob_scope);
+  return scope.length === 1 ? scope[0] : 'dental';
+}
+
+const EMPLOYEE_LOGIN_SQL = `
+  SELECT p.id, p.name, p.email, p.password_hash, p.companyid AS "companyId", c.name AS "companyName",
+         p.lob_scope AS "lobScope", p.is_ctv AS "isCtv"
+  FROM partners p
+  LEFT JOIN companies c ON c.id = p.companyid
+  WHERE p.email = $1 AND p.employee = true AND p.isdeleted = false AND p.active = true
+`;
+
+async function findEmployeeLoginRows(email) {
+  const candidates = [];
+  for (const lob of VALID_LOBS) {
+    const q = getQuery(lob);
+    const rows = await q(EMPLOYEE_LOGIN_SQL, [email]);
+    for (const row of rows || []) {
+      candidates.push({ ...row, authLob: lob });
+    }
+  }
+  return candidates;
+}
+
+function resolvePermissionsForLob(employeeId, lob) {
+  return runWithLob(lob, () => resolveEffectivePermissions(employeeId));
 }
 
 /**
@@ -34,39 +73,39 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'email and password are required' });
     }
 
-    const rows = await query(
-      `SELECT p.id, p.name, p.email, p.password_hash, p.companyid AS "companyId", c.name AS "companyName",
-              p.lob_scope AS "lobScope", p.is_ctv AS "isCtv"
-       FROM partners p
-       LEFT JOIN companies c ON c.id = p.companyid
-       WHERE p.email = $1 AND p.employee = true AND p.isdeleted = false AND p.active = true`,
-      [email]
-    );
+    const rows = await findEmployeeLoginRows(email);
 
     if (!rows || rows.length === 0) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const employee = rows[0];
+    let employee = null;
 
-    if (!employee.password_hash) {
+    for (const candidate of rows) {
+      if (!candidate.password_hash) continue;
+      const passwordMatch = await bcrypt.compare(password, candidate.password_hash);
+      if (passwordMatch) {
+        employee = candidate;
+        break;
+      }
+    }
+
+    if (!employee) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const passwordMatch = await bcrypt.compare(password, employee.password_hash);
-    if (!passwordMatch) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
+    const authLob = employee.authLob;
+    const q = getQuery(authLob);
 
     // Update last_login
-    await query(
+    await q(
       `UPDATE partners SET last_login = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE id = $1`,
       [employee.id]
     );
 
-    const permissions = await resolveEffectivePermissions(employee.id);
+    const permissions = await resolvePermissionsForLob(employee.id, authLob);
 
-    const lobScope = visibleLobScopeForUser(employee.lobScope, permissions);
+    const lobScope = visibleLobScopeForUser(employee.lobScope, permissions, authLob);
     const isCtv = !!employee.isCtv;
 
     const tokenPayload = {
@@ -75,6 +114,8 @@ router.post('/login', async (req, res) => {
       email: employee.email,
       companyId: employee.companyId,
       lob_scope: lobScope,
+      auth_lob: authLob,
+      lob_context: authLob,
       is_ctv: isCtv,
     };
 
@@ -93,6 +134,8 @@ router.post('/login', async (req, res) => {
         companyId: employee.companyId,
         companyName: employee.companyName,
         lob_scope: lobScope,
+        auth_lob: authLob,
+        lob_context: authLob,
         is_ctv: isCtv,
       },
       permissions,
@@ -112,8 +155,10 @@ router.post('/login', async (req, res) => {
 router.get('/me', requireAuth, async (req, res) => {
   try {
     const { employeeId } = req.user;
+    const authLob = authLobFromToken(req.user);
+    const q = getQuery(authLob);
 
-    const rows = await query(
+    const rows = await q(
       `SELECT p.id, p.name, p.email, p.companyid AS "companyId", c.name AS "companyName",
               p.lob_scope AS "lobScope", p.is_ctv AS "isCtv"
        FROM partners p
@@ -127,9 +172,9 @@ router.get('/me', requireAuth, async (req, res) => {
     }
 
     const employee = rows[0];
-    const permissions = await resolveEffectivePermissions(employeeId);
+    const permissions = await resolvePermissionsForLob(employeeId, authLob);
 
-    const lobScope = visibleLobScopeForUser(employee.lobScope, permissions);
+    const lobScope = visibleLobScopeForUser(employee.lobScope, permissions, authLob);
     const isCtv = !!employee.isCtv;
 
     return res.json({
@@ -140,6 +185,8 @@ router.get('/me', requireAuth, async (req, res) => {
         companyId: employee.companyId,
         companyName: employee.companyName,
         lob_scope: lobScope,
+        auth_lob: authLob,
+        lob_context: authLob,
         is_ctv: isCtv,
       },
       permissions,
@@ -159,6 +206,8 @@ router.post('/change-password', requireAuth, async (req, res) => {
   try {
     const { employeeId } = req.user;
     const { oldPassword, newPassword } = req.body;
+    const authLob = authLobFromToken(req.user);
+    const q = getQuery(authLob);
 
     if (!oldPassword || !newPassword) {
       return res.status(400).json({ error: 'oldPassword and newPassword are required' });
@@ -168,7 +217,7 @@ router.post('/change-password', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'newPassword must be at least 6 characters' });
     }
 
-    const rows = await query(
+    const rows = await q(
       `SELECT password_hash FROM partners WHERE id = $1 AND employee = true AND isdeleted = false`,
       [employeeId]
     );
@@ -183,7 +232,7 @@ router.post('/change-password', requireAuth, async (req, res) => {
     }
 
     const newHash = await bcrypt.hash(newPassword, 10);
-    await query(
+    await q(
       `UPDATE partners SET password_hash = $1 WHERE id = $2`,
       [newHash, employeeId]
     );

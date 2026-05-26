@@ -2,6 +2,13 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.52] — 2026-05-26 (codex/nk3-balance-hotfix)
+### Fixed
+- NK3 employee-account login now searches the employee's source LOB database during `/api/Auth/login`, stamps `auth_lob` / `lob_context` into the JWT and user payload, and resolves `/api/Auth/me`, `/api/me/lob-scope`, password changes, and permission checks under that source LOB. Cosmetic employee creation now writes `partners.lob_scope = ARRAY['cosmetic']`, so newly created Cosmetic staff accounts can authenticate without falling back to Dental. — @agent — preserves INV-008A/INV-008B and closes the live report "tạo được nhân viên rồi, nhưng tạo tài khoản cho nhân viên đăng nhập thì không được".
+- Production web API fallback now defaults to same-origin `/api` instead of localhost when `VITE_API_URL` is missing, preventing a bad NK3 web image from showing Chrome local-network prompts and `Failed to fetch` on login. — @agent — live restore evidence: `output/live-verification/nk3-live-login-restored-20260526T074600Z/`.
+### Tests
+- Targeted verification: `NODE_PATH=.../api/node_modules npx jest --runTestsByPath tests/loginRateLimiter.test.js --runInBand` passed 5 tests, including a Cosmetic-only employee auth-source regression; `npm --prefix website test -- --run src/lib/api/__tests__/apiFetch.lob.test.ts src/lib/api/__tests__/employees.lob.test.ts` passed 2 files / 7 tests. — @agent — auth/source-LOB regression lock.
+
 ## [0.32.51] — 2026-05-26 (codex/nk3-balance-hotfix)
 ### Fixed
 - NK3 Cosmetic appointment form submit now passes `BusinessUnitContext.currentLOB` into `createAppointment` and `updateAppointment`, so Calendar and customer-profile appointment writes use `/api/cosmetic/Appointments` while Cosmetic is active instead of falling back to dental and failing with `Partner with given partnerId does not exist`. — @agent — preserves INV-008B and Cosmetic LOB v2 physical isolation.

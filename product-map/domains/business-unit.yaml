@@ -2,6 +2,7 @@ name: Business Unit / LOB Context (Cosmetic v2)
 summary: |
   The BusinessUnitContext (mirrors LocationContext) manages the active LOB ("dental" | "cosmetic") for admin users only.
   Stored in partners.lob_scope TEXT[] (additive column on both DBs, backfilled on dental; partners is canonical auth/identity).
+  Auth tokens carry auth_lob/lob_context so /api/Auth/me, /api/me/lob-scope, password changes, and permission checks read from the physical DB that owns the employee row.
   CTV partners have empty/null lob_scope + is_ctv=true; never see toggle or admin UI (hard redirect to /ctv).
   Non-admin staff are pinned to one visible scoped LOB even if stale database state contains multiple lob_scope values.
   Feature flag COSMETIC_LOB_ENABLED gates the entire surface (default false → 503 on cosmetic routes, toggle hidden).
@@ -29,7 +30,7 @@ tables:
   - tcosmetic_demo.dbo.partners (same additive columns for 1:1 handler compatibility)
 endpoints:
   - GET /api/me/lob-scope (returns { lob_scope, is_ctv, available_lobs })
-  - POST /api/Auth/login (response now includes lob_scope + is_ctv in user payload; CTV redirect)
+  - POST /api/Auth/login (searches employee accounts across dental/cosmetic; response includes lob_scope + auth_lob/lob_context + is_ctv in user payload; CTV redirect)
   - GET /api/Auth/me (augmented)
 ui_surfaces:
   - Header: LOB toggle dropdown (Dental / Cosmetic) — visible only if partner.lob_scope.length >= 2 AND flag enabled; immediately left of location filter
@@ -58,6 +59,7 @@ risk_level: high
 notes:
   - "Physical DB isolation invariant: BusinessUnitContext only selects which pool + route prefix; never mixes data. getQuery(req) in handlers provides the right pool transparently."
   - "Per PLAN + migration 047: partners is the identity table for LOB scope (deviation from early v2 spec's 'users' and 'clients' concepts; documented in DECISIONS.md and MIGRATIONS.md)."
+  - "Cosmetic-created employees are login principals in tcosmetic_demo. Auth must preserve auth_lob and must not resolve Cosmetic staff through the default dental pool."
   - "cosmetic.yaml is the parent LOB domain; this is the cross-cutting context mechanism."
   - "Update AGENTS.md, ARCHITECTURE.md, product-map when adding new LOB-aware surfaces."
   - "Two-DB topology on same Postgres server (port 5433 for both tdental_demo / tcosmetic_demo in local; dual pools in docker too)."

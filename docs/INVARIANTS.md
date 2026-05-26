@@ -77,6 +77,12 @@
 **Enforced by:** `website/src/lib/api/core.ts`, LOB-aware hooks/forms, and targeted tests such as `website/src/components/appointments/unified/__tests__/useAppointmentForm.test.ts`.
 **Cite when:** Editing shared create/update hooks, form submit handlers, or API clients used by both Dental and Cosmetic.
 
+### INV-008C — Employee Auth Must Preserve Source LOB
+**Rule:** Employee login, token refresh surfaces, password changes, and permission checks must read from the physical LOB database that owns the employee row. Cosmetic-created staff must not be authenticated or permission-resolved through the Dental pool.
+**Rationale:** Cosmetic employee creation writes `partners` rows and password hashes into `tcosmetic_demo`; defaulting `/api/Auth/*` or `requirePermission()` to Dental makes valid Cosmetic employee accounts fail login or lose permissions.
+**Enforced by:** `api/src/routes/auth.js`, `api/src/middleware/auth.js`, `/api/me/lob-scope`, `api/src/routes/employees/mutations.js`, and `api/tests/loginRateLimiter.test.js`.
+**Cite when:** Editing employee creation, auth JWT claims, `/api/Auth/me`, `/api/me/lob-scope`, password changes, or permission middleware.
+
 ### INV-009 — Location Scope Frontend-Only Filter
 **Rule:** Backend list routes generally do NOT enforce location scope. The frontend `LocationContext` is responsible for filtering by `companyid`.
 **Rationale:** Backend location scoping was historically inconsistent; frontend filtering is the current operational contract.

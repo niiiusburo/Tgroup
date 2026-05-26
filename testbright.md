@@ -10,6 +10,71 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK3 Cosmetic Employee Login Account 0.32.52 2026-05-26
+
+Feature/edit name: NK3 live Cosmetic employee account login and production API origin restore.
+
+Changed URLs and API routes:
+- Live page to verify after deploy: `https://tmv.2checkin.com/login`.
+- Live page to verify after deploy: `https://tmv.2checkin.com/employees?lob=cosmetic`.
+- API routes: `POST /api/Auth/login`, `GET /api/Auth/me`, `GET /api/me/lob-scope`, `POST /api/Auth/change-password`, `POST /api/cosmetic/Employees`, and permission middleware for `/api/cosmetic/*`.
+- Web API fallback: production `VITE_API_URL` fallback must be same-origin `/api`, never `localhost` or `127.0.0.1`.
+
+Affected data flows:
+- Admin creates a Cosmetic employee with password through the Employees form.
+- Employee row, password hash, `lob_scope=['cosmetic']`, and optional tier remain in `tcosmetic_demo`.
+- Login searches the employee account across LOB auth sources and stamps `auth_lob='cosmetic'` into the token/user payload.
+- `/api/Auth/me`, `/api/me/lob-scope`, password change, and `requirePermission()` resolve permissions under the token source LOB.
+
+Roles and setup state:
+- Admin user with both dental and cosmetic LOB scope.
+- Disposable Cosmetic employee account with known temporary password.
+- Start from a fresh browser context or hard reload to avoid old cached web bundles.
+
+Happy paths:
+- Login as existing CTV/admin accounts should call `https://tmv.2checkin.com/api/Auth/login` and must not call localhost.
+- Create a Cosmetic employee account, clear session, and log in as that employee through the real login form.
+- After login, `/api/Auth/me` and `/api/me/lob-scope` must return `lob_scope` containing `cosmetic` and `auth_lob`/`lob_context` set to `cosmetic`.
+
+Edge cases:
+- A Cosmetic employee row with null/empty `lob_scope` from the pre-fix period should still fall back to the source auth LOB for login visibility.
+- Wrong password still returns 401 and counts toward the existing rate limiter.
+- Dental employees continue to authenticate against Dental and do not gain Cosmetic scope.
+
+Regressions to check:
+- `ctv@clinic.vn` login still redirects to `/ctv`.
+- Live JS bundle must not contain `http://localhost:3002/api` or `http://127.0.0.1:3000/api`.
+- Cosmetic employee creation still writes only Cosmetic and does not leak to Dental.
+
+Verification state:
+- [x] PASS: Emergency live login restore rebuilt the NK3 web container with `VITE_API_URL=/api`; browser automation logged in as `ctv@clinic.vn`, ended on `/ctv`, saw `POST https://tmv.2checkin.com/api/Auth/login` return 200, and recorded zero localhost API calls. Evidence: `output/live-verification/nk3-live-login-restored-20260526T074600Z/report.json`, screenshot `output/live-verification/nk3-live-login-restored-20260526T074600Z/nk3-live-login-restored.png`, video `output/live-verification/nk3-live-login-restored-20260526T074600Z/page@4f231c3e989d3bc74a616c2173c23d36.webm`.
+- [x] PASS: Pre-fix live employee-login reproduction created `NK3 EMP LOGIN 20260526060559` through the real UI, confirmed the row existed only in `tcosmetic_smoketest`, and captured `POST /api/Auth/login -> 401 Invalid email or password`.
+- [ ] PENDING: After deploying 0.32.52, rerun real browser video for create Cosmetic employee account -> logout -> login as that employee -> verify `/api/Auth/login` 200 and Cosmetic auth scope.
+
+# TestSprite Plan: NK3 Live Cosmetic Employee Create Verification 2026-05-26
+
+Feature/edit name: NK3 live UI employee create verification for reported Cosmetic staff creation issue.
+
+Changed URLs and API routes:
+- Live page verified: `https://tmv.2checkin.com/employees?lob=cosmetic`.
+- Isolation page verified: `https://tmv.2checkin.com/employees?lob=dental`.
+- API route observed from the browser UI: `POST /api/cosmetic/Employees`.
+
+Affected data flows:
+- Admin opens the Employees page with the header LOB set to Cosmetic.
+- Employee create form submits through `createEmployee(data, currentLOB)` and writes the Cosmetic DB route.
+- Cosmetic employee search should show the created staff record; Dental employee search should not show it.
+
+Roles and setup state:
+- Admin user with both dental and cosmetic LOB scope.
+- Live NK3 version `0.32.51` commit `52286e9`.
+
+Verification state:
+- [x] PASS: Live UI screen recording created `NK3 EMP VIDEO 20260526053809` through the Employees form with `POST /api/cosmetic/Employees` returning 201.
+- [x] PASS: Created employee appeared in Cosmetic employee search with 1 visible match.
+- [x] PASS: Switching to Dental and searching the same employee returned 0 visible matches.
+- [x] PASS: MP4 handoff artifact generated at `output/live-verification/nk3-employee-create-video-20260526T053500Z/nk3-employee-create-verification.mp4`; report at `output/live-verification/nk3-employee-create-video-20260526T053500Z/nk3-employee-create-report.json`; final screenshot at `output/live-verification/nk3-employee-create-video-20260526T053500Z/nk3-employee-create-final.png`.
+
 # TestSprite Plan: NK3 Cosmetic Feedback Hotfix 0.32.50 2026-05-25
 
 Feature/edit name: NK3 Cosmetic feedback hotfix for the five reported broken admin flows.

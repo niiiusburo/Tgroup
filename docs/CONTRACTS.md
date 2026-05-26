@@ -47,6 +47,8 @@
 	    companyId: string;     // primary branch
 	    companyName: string;
 	    lob_scope: Array<'dental' | 'cosmetic'>; // Admin can receive multiple; non-admin staff receive one visible LOB
+	    auth_lob: 'dental' | 'cosmetic'; // physical DB where this employee authenticated
+	    lob_context: 'dental' | 'cosmetic'; // compatibility alias for auth_lob
 	    is_ctv: boolean;
 	  };
 	  permissions: {
@@ -58,6 +60,7 @@
 }
 ```
 **Errors:** 400 (missing fields), 401 (invalid credentials), 429 (rate limited).
+**LOB auth rule:** `/api/Auth/login` searches active employee accounts in both physical LOB databases. The first password-matching row becomes the token's `auth_lob`; subsequent `/api/Auth/me`, `/api/me/lob-scope`, permission resolution, and password changes must read/write that source LOB.
 
 #### GET /api/Auth/me
 **Headers:** `Authorization: Bearer <token>`

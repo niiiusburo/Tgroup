@@ -42,6 +42,8 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
 
     const id = require('crypto').randomUUID();
     const now = getVietnamNow();
+    const requestLob = req.lob === 'cosmetic' ? 'cosmetic' : 'dental';
+    const lobScope = [requestLob];
 
     // Hash password if provided
     let passwordHash = null;
@@ -59,9 +61,9 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
         employee, customer, supplier, isagent, isinsurance,
         active, isdoctor, isassistant, isreceptionist, startworkdate,
         iscompany, ishead, isdeleted, isbusinessinvoice,
-        password_hash, jobtitle, wage, allowance, hrjobid, tier_id,
+        password_hash, jobtitle, wage, allowance, hrjobid, tier_id, lob_scope,
         datecreated, lastupdated
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)
       RETURNING *`,
       [
         id,
@@ -89,6 +91,7 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
         allowance,
         hrjobid,
         tierId,
+        lobScope,
         now,    // datecreated
         now,    // lastupdated
       ]

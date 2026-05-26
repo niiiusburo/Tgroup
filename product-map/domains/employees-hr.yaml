@@ -2,7 +2,8 @@ name: Employees & HR
 summary: |
   Employee management uses the dbo.partners table (employee=true) plus a
   dbo.employees view. Features include employee CRUD, tier assignment,
-  schedule blocks, linked employees, payslips, and commissions.
+  schedule blocks, linked employees, payslips, commissions, and optional
+  login-account creation through partners.password_hash.
 owns:
   - api/src/routes/employees.js
   - api/src/routes/hrPayslips.js
@@ -66,10 +67,12 @@ affected_by:
   - Changes to dbo.hrjobs (dropdown data)
   - Employee and permission-board searches must remain accent-insensitive for Vietnamese staff, role, and location names.
   - Cosmetic LOB employee add/edit/profile surfaces must pass the active LOB into Companies and Employees API calls so branch choices and saves stay in the cosmetic database.
+  - Employee creation must stamp partners.lob_scope to the source LOB so login-account auth can resolve the row from the owning physical database.
 impact_tests:
   - website/e2e/check_employees_page.spec.ts
   - website/e2e/employee-save.spec.ts
   - website/src/components/employees/__tests__/EmployeeForm.lob.test.tsx
   - website/src/lib/api/__tests__/employees.lob.test.ts
+  - api/tests/loginRateLimiter.test.js
   - website/e2e/vps-tier-verification.spec.ts
 risk_level: high

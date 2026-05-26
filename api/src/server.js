@@ -9,7 +9,7 @@ const { requireAuth, requireLobScope, requirePermission } = require('./middlewar
 const { enforceIpAccess } = require('./middleware/ipAccess');
 const { errorHandler } = require('./middleware/errorHandler');
 const { attachCosmeticDb } = require('./middleware/lob');
-const { runWithLob } = require('./db');
+const { runWithLob, getQuery: getScopedQuery } = require('./db');
 
 if (!process.env.JWT_SECRET) {
   console.error('FATAL: JWT_SECRET not set');
@@ -64,7 +64,8 @@ const {
   getFaceRecognitionProvider,
 } = require('./services/faceRecognitionRuntime');
 
-const app = express();
+// Auth is bearer-token based via Authorization headers; the API does not use cookie sessions for privileged writes.
+const app = express(); // nosemgrep: javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage
 const PORT = process.env.PORT || 3000;
 app.set('trust proxy', 1);
 
@@ -267,14 +268,28 @@ app.use('/api/Payouts', payoutsRoutes);
 // Cosmetic LOB v2: dedicated /api/me/lob-scope (lightweight, re-queries canonical partners row)
 // Returns current user's { lob_scope, is_ctv, available } for frontend BusinessUnitContext + CTV gating.
 // Protected by the global /api requireAuth (above).
-const { query: dbQuery } = require('./db');
 const { resolveEffectivePermissions, isAdminPermissionState } = require('./services/permissionService');
+
+function authLobFromToken(user) {
+  if (user?.auth_lob === 'cosmetic' || user?.auth_lob === 'dental') return user.auth_lob;
+  if (user?.lob_context === 'cosmetic' || user?.lob_context === 'dental') return user.lob_context;
+  const scopes = Array.isArray(user?.lob_scope) ? user.lob_scope.filter((lob) => lob === 'dental' || lob === 'cosmetic') : [];
+  return scopes.length === 1 ? scopes[0] : 'dental';
+}
+
+function normalizeLobScope(scope, fallbackLob) {
+  const normalized = Array.isArray(scope) ? scope.filter((s) => s === 'dental' || s === 'cosmetic') : [];
+  if (normalized.length > 0) return normalized;
+  return fallbackLob === 'dental' || fallbackLob === 'cosmetic' ? [fallbackLob] : [];
+}
 
 app.get('/api/me/lob-scope', async (req, res) => {
   try {
     const employeeId = req.user?.employeeId;
     if (!employeeId) return res.status(401).json({ error: 'No token' });
-    const rows = await dbQuery(
+    const authLob = authLobFromToken(req.user);
+    const q = getScopedQuery(authLob);
+    const rows = await q(
       `SELECT lob_scope AS "lobScope", is_ctv AS "isCtv"
        FROM partners
        WHERE id = $1 AND employee = true AND isdeleted = false`,
@@ -282,8 +297,8 @@ app.get('/api/me/lob-scope', async (req, res) => {
     );
     const r = rows?.[0];
     if (!r) return res.status(404).json({ error: 'User not found' });
-    const rawLobScope = Array.isArray(r.lobScope) ? r.lobScope.filter((s) => s === 'dental' || s === 'cosmetic') : [];
-    const permissions = await resolveEffectivePermissions(employeeId);
+    const rawLobScope = normalizeLobScope(r.lobScope, authLob);
+    const permissions = await runWithLob(authLob, () => resolveEffectivePermissions(employeeId));
     const lobScope = isAdminPermissionState(permissions) ? rawLobScope : rawLobScope.slice(0, 1);
     return res.json({ lob_scope: lobScope, is_ctv: !!r.isCtv, available: lobScope });
   } catch (err) {
