@@ -23,6 +23,10 @@
 Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `Docs`.
 
 ---
+## [0.33.0] — 2026-05-26
+### Changed
+- Face recognition model upgraded from OpenCV SFace/YuNet (128-dim, LFW ~99.4%) to InsightFace SCRFD + ArcFace buffalo_l (512-dim, LFW 99.80%, IJB-C 97.16% TAR@FAR=1e-4). Detection: SCRFD-10GF replaces YuNet. Recognition: ArcFace R50 on WebFace600K replaces SFace. Embedding dimension 128→512. All existing SFace embeddings deactivated by migration 047 — re-enrollment required. INV-005 updated. Thresholds retuned for ArcFace score distribution (AUTO_MATCH 0.88→0.55, CANDIDATE 0.80→0.40). Anti-spoofing liveness detection stub added (Phase 2 placeholder). — @agent — bank-grade facial recognition upgrade.
+
 ## [0.32.48] — 2026-05-25
 ### Fixed
 - Login route now includes `lob_scope` and `is_ctv` in JWT token payload and login response. GET /Auth/me also returns these fields. Fixes cosmetic LOB 403 — `requireLobScope` middleware requires `req.user.lob_scope` which was never populated by login. — @agent — NK3 cosmetic LOB access.

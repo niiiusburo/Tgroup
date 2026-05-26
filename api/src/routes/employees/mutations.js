@@ -12,7 +12,7 @@ const router = express.Router();
  * Body: { name, phone?, email?, companyid?, active? }
  */
 router.post('/', requirePermission('employees.edit'), async (req, res) => {
-  const client = await pool.connect();
+  const client = await (req.db ? req.db.connect() : pool.connect());
   try {
     const {
       name,
@@ -124,7 +124,7 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
  * Updates an existing employee (updates partners table)
  */
 router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
-  const client = await pool.connect();
+  const client = await (req.db ? req.db.connect() : pool.connect());
   try {
     const { id } = req.params;
     const {
