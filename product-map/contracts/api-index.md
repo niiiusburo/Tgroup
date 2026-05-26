@@ -84,6 +84,8 @@ CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin ro
 
 PUT handler-level validation: `companyId` (when present) must be a UUID (`400 INVALID_COMPANY_ID`) and reference an existing `companies` row (`404 COMPANY_NOT_FOUND`); persisted to `appointments.companyid`. Covered by `api/src/routes/appointments/__tests__/mutationHandlers.test.js`.
 
+Cosmetic LOB mirror: Appointment UI submitters must pass active `lob` into `createAppointment` and `updateAppointment`; when `lob='cosmetic'`, Calendar and customer-profile appointment forms route through `POST/PUT /api/cosmetic/Appointments` with the same payload shape and write only the Cosmetic database.
+
 ## Partners / Customers (`/api/Partners`)
 
 | Method | Path | Auth | Body / Query | Response |

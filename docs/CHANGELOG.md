@@ -2,6 +2,12 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.51] — 2026-05-26 (codex/nk3-balance-hotfix)
+### Fixed
+- NK3 Cosmetic appointment form submit now passes `BusinessUnitContext.currentLOB` into `createAppointment` and `updateAppointment`, so Calendar and customer-profile appointment writes use `/api/cosmetic/Appointments` while Cosmetic is active instead of falling back to dental and failing with `Partner with given partnerId does not exist`. — @agent — preserves INV-008B and Cosmetic LOB v2 physical isolation.
+### Tests
+- Targeted verification: `npm --prefix website test -- src/components/appointments/unified/__tests__/useAppointmentForm.test.ts` passed 1 file / 7 tests, including Cosmetic create/edit LOB routing assertions. — @agent — NK3 live UI reproduction lock.
+
 ## [0.32.50] — 2026-05-25 (codex/nk3-balance-hotfix)
 ### Fixed
 - NK3 Cosmetic feedback hotfix: customer create/edit/delete, customer-code resolve, customer profile, appointment create/edit/reschedule, customer service records, and Permission Board save now pass the active LOB into API clients so Cosmetic UI writes route through `/api/cosmetic/*` instead of silently falling back to dental. — @agent — Cosmetic LOB v2 physical isolation invariant.

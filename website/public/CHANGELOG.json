@@ -1,5 +1,25 @@
 [
   {
+    "version": "0.32.51",
+    "date": "2026-05-26",
+    "commit": "pending",
+    "highlights": "NK3 Cosmetic appointment form submits now keep the active Cosmetic LOB, so Calendar/profile appointment writes call /api/cosmetic/Appointments.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "The shared appointment form now passes BusinessUnitContext.currentLOB into appointment create/update calls. In Cosmetic mode, the form no longer falls back to dental /api/Appointments or fails with Partner with given partnerId does not exist."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "useAppointmentForm unit regression passed 1 file / 7 tests, including Cosmetic create and edit route assertions; live NK3 UI video verification is required after deploy."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.50",
     "date": "2026-05-25",
     "commit": "pending",

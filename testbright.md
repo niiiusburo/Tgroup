@@ -56,6 +56,42 @@ Verification state:
 - [x] PASS: Local backend cosmetic guard test passed 15 tests and now asserts `/api/cosmetic/CustomerBalance` remains mounted.
 - [x] PASS: After deploy, live NK3 `https://tmv.2checkin.com` served `0.32.50` commit `931de63`, and the five-bug regression passed with `Origin: https://tmv.2checkin.com`: customer create, appointment create, deposit balance refresh, payment record, and staff permission save. Evidence: `output/live-verification/nk3-feedback-regression-0.32.50-20260525T172500Z/regression-report.json`, screenshot `output/live-verification/nk3-feedback-regression-0.32.50-20260525T172500Z/nk3-feedback-regression-live.png`, video `output/live-verification/nk3-feedback-regression-0.32.50-20260525T172500Z/nk3-feedback-regression-live-video.webm`.
 
+# TestSprite Plan: NK3 Cosmetic Appointment UI LOB Routing 0.32.51 2026-05-26
+
+Feature/edit name: NK3 live UI appointment submit must keep the active Cosmetic LOB.
+
+Changed URLs and API routes:
+- Live page to verify after deploy: `https://tmv.2checkin.com/calendar?lob=cosmetic`.
+- Live page to verify after deploy: `https://tmv.2checkin.com/customers/:id?lob=cosmetic`.
+- API routes: `POST /api/cosmetic/Appointments`, `PUT /api/cosmetic/Appointments/:id`, and dental regressions for `POST/PUT /api/Appointments`.
+
+Affected data flows:
+- Shared `useAppointmentForm` create/update submits now pass `BusinessUnitContext.currentLOB` into the appointment API client.
+- Cosmetic Calendar and customer-profile appointment forms write `tcosmetic_demo.dbo.appointments`.
+- Dental Calendar and profile appointment forms keep legacy `/api/Appointments` behavior.
+
+Roles and setup state:
+- Admin user with both dental and cosmetic LOB scope.
+- Start on `https://tmv.2checkin.com`, switch header LOB to Cosmetic, and create only disposable live QA customer/appointment records.
+
+Happy paths:
+- Create a Cosmetic customer through the UI.
+- Create a Cosmetic appointment through the Calendar UI for that customer and verify the UI network call is `POST /api/cosmetic/Appointments`.
+- Create or edit a Cosmetic appointment from customer profile and verify the UI network call stays under `/api/cosmetic/Appointments`.
+
+Edge cases:
+- Appointment forms embedded in multiple surfaces must share the same LOB routing behavior.
+- Cosmetic customer UUIDs must not be submitted to legacy dental `/api/Appointments`.
+
+Regressions to check:
+- Dental appointment create/edit still uses `/api/Appointments`.
+- The previous NK3 hotfix flows still work: customer create, deposit balance refresh, service payment, and permission save.
+
+Verification state:
+- [x] PASS: Pre-fix live UI reproduction failed on NK3 `0.32.50` while header LOB was Cosmetic; Calendar/Profile appointment submit raised `Partner with given partnerId does not exist` and did not call `/api/cosmetic/Appointments`. Evidence: `output/live-verification/nk3-ui-bugfix-video-20260526T020000Z/nk3-ui-bugfix-error.png`.
+- [x] PASS: Unit regression `npm --prefix website test -- src/components/appointments/unified/__tests__/useAppointmentForm.test.ts` passed 1 file / 7 tests, including Cosmetic create/edit LOB routing.
+- [ ] PENDING: After deploy, live NK3 UI video must show all five feedback flows passing from the website and record the final artifact path.
+
 # TestSprite Plan: NK3 CTV Portal Tracking Refresh 2026-05-25
 
 Feature/edit name: NK3 CTV self portal refresh and Tracking tab.

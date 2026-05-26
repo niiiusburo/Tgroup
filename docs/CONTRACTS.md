@@ -19,6 +19,7 @@
 | v1.0.4 | 2026-05-22 | Employee and company frontend clients accept `lob?: 'dental' | 'cosmetic'`; Cosmetic LOB employee add/edit/profile must use `/api/cosmetic/Companies` and `/api/cosmetic/Employees`. |
 | v1.0.5 | 2026-05-25 | CTV self portal adds client-journey tracking and structured booking-claim error compatibility fields. |
 | v1.0.6 | 2026-05-25 | Customer, appointment, service, permission, and customer-balance frontend clients preserve `lob?: 'dental' | 'cosmetic'`; Cosmetic profile/deposit balance uses `GET /api/cosmetic/CustomerBalance/:id`. |
+| v1.0.7 | 2026-05-26 | Appointment form submitters must pass active `BusinessUnitContext.currentLOB` into appointment create/update API clients; Cosmetic Calendar/profile appointment writes must hit `/api/cosmetic/Appointments`. |
 
 ---
 
@@ -145,6 +146,8 @@ PaginatedResponse<{
 ```
 
 #### POST /api/Appointments
+Frontend LOB routing: Any LOB-aware appointment form must pass the active `BusinessUnitContext.currentLOB` to `createAppointment(data, lob)` and `updateAppointment(id, data, lob)`. When `lob='cosmetic'`, identical payload shapes route through `/api/cosmetic/Appointments` and write `tcosmetic_demo.dbo.appointments`; omitted/dental LOB keeps legacy `/api/Appointments`.
+
 **Body:** `AppointmentCreateSchema` (from `@tgroup/contracts`)
 ```ts
 {

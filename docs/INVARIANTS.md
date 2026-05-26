@@ -71,6 +71,12 @@
 **Enforced by:** `api/src/routes/auth.js`, `/api/me/lob-scope`, `api/src/services/permissionService.js:isAdminPermissionState`, and `website/src/contexts/BusinessUnitContext.tsx`.
 **Cite when:** Editing LOB selector, auth payloads, `lob_scope`, or admin/staff permission-group behavior.
 
+### INV-008B — Active LOB Must Route All LOB-Aware Writes
+**Rule:** Any frontend write surface reused by Dental and Cosmetic must pass the active `BusinessUnitContext.currentLOB` to its API client. Cosmetic mode must call `/api/cosmetic/*` mirrors and must never silently fall back to legacy `/api/*` writes.
+**Rationale:** Falling back to dental writes can fail with missing Cosmetic UUIDs or leak records across physical databases.
+**Enforced by:** `website/src/lib/api/core.ts`, LOB-aware hooks/forms, and targeted tests such as `website/src/components/appointments/unified/__tests__/useAppointmentForm.test.ts`.
+**Cite when:** Editing shared create/update hooks, form submit handlers, or API clients used by both Dental and Cosmetic.
+
 ### INV-009 — Location Scope Frontend-Only Filter
 **Rule:** Backend list routes generally do NOT enforce location scope. The frontend `LocationContext` is responsible for filtering by `companyid`.
 **Rationale:** Backend location scoping was historically inconsistent; frontend filtering is the current operational contract.

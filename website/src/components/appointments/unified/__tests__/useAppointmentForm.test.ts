@@ -2,10 +2,24 @@ import { afterEach, describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useAppointmentForm } from '../useAppointmentForm';
 
+const businessUnitMock = vi.hoisted(() => ({
+  currentLOB: 'dental' as 'dental' | 'cosmetic',
+}));
+
 // Mock API
 vi.mock('@/lib/api', () => ({
   createAppointment: vi.fn(),
   updateAppointment: vi.fn(),
+}));
+
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({
+    currentLOB: businessUnitMock.currentLOB,
+    setCurrentLOB: vi.fn(),
+    availableLOBs: ['dental', 'cosmetic'],
+    isMultiLOBUser: true,
+    isCosmeticEnabled: true,
+  }),
 }));
 
 import { createAppointment, updateAppointment } from '@/lib/api';
@@ -19,6 +33,7 @@ describe('useAppointmentForm validation', () => {
   });
 
   beforeEach(() => {
+    businessUnitMock.currentLOB = 'dental';
     mockCreateAppointment.mockClear();
     mockUpdateAppointment.mockClear();
   });
@@ -99,7 +114,70 @@ describe('useAppointmentForm validation', () => {
     });
 
     expect(mockCreateAppointment).toHaveBeenCalledTimes(1);
+    expect(mockCreateAppointment).toHaveBeenCalledWith(expect.any(Object), 'dental');
     expect(onSuccess).toHaveBeenCalled();
+  });
+
+  it('should pass the active cosmetic LOB when creating an appointment', async () => {
+    businessUnitMock.currentLOB = 'cosmetic';
+    mockCreateAppointment.mockResolvedValue({ id: 'new-id' });
+    const { result } = renderHook(() => useAppointmentForm('create'));
+
+    act(() => {
+      result.current.handleChange({
+        customerId: '550e8400-e29b-41d4-a716-446655440000',
+        customerName: 'Cosmetic Test',
+        locationId: '770e8400-e29b-41d4-a716-446655440002',
+        locationName: 'Cosmetic Clinic',
+        date: '2026-04-21',
+        startTime: '09:00',
+        estimatedDuration: 30,
+      });
+    });
+
+    await act(async () => {
+      await result.current.handleSubmit();
+    });
+
+    expect(mockCreateAppointment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        partnerid: '550e8400-e29b-41d4-a716-446655440000',
+        companyid: '770e8400-e29b-41d4-a716-446655440002',
+        time: '09:00',
+      }),
+      'cosmetic',
+    );
+  });
+
+  it('should pass the active cosmetic LOB when editing an appointment', async () => {
+    businessUnitMock.currentLOB = 'cosmetic';
+    mockUpdateAppointment.mockResolvedValue({ id: 'appointment-id' });
+    const { result } = renderHook(() =>
+      useAppointmentForm('edit', {
+        id: 'appointment-id',
+        customerId: '550e8400-e29b-41d4-a716-446655440000',
+        customerName: 'Cosmetic Test',
+        locationId: '770e8400-e29b-41d4-a716-446655440002',
+        locationName: 'Cosmetic Clinic',
+        date: '2026-04-21',
+        startTime: '09:00',
+        estimatedDuration: 45,
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleSubmit();
+    });
+
+    expect(mockUpdateAppointment).toHaveBeenCalledWith(
+      'appointment-id',
+      expect.objectContaining({
+        partnerid: '550e8400-e29b-41d4-a716-446655440000',
+        companyid: '770e8400-e29b-41d4-a716-446655440002',
+        time: '09:00',
+      }),
+      'cosmetic',
+    );
   });
 
   it('should submit from database duration without requiring an end time', async () => {
@@ -128,6 +206,7 @@ describe('useAppointmentForm validation', () => {
         time: '09:00',
         timeexpected: 45,
       }),
+      'dental',
     );
     expect(result.current.errors.endTime).toBeUndefined();
   });
