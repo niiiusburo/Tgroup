@@ -6,10 +6,29 @@ const { getVietnamNow } = require('../../lib/dateUtils');
 
 const router = express.Router();
 
+// Well-known permission group IDs (seeded by migration 008/030)
+const TIER_EDITOR = '11111111-0000-0000-0000-000000000003';
+const TIER_RECEPTIONIST = '11111111-0000-0000-0000-000000000004';
+const TIER_ASSISTANT = '11111111-0000-0000-0000-000000000005';
+
 /**
- * POST /api/Employees
+ * Derive a default tier_id from role flags when the caller does not supply one.
+ * Mirrors the mapping used in migration 031_assign_default_tiers.sql.
+ */
+function inferDefaultTier({ isdoctor, isassistant, isreceptionist }) {
+  if (isdoctor) return TIER_EDITOR;
+  if (isreceptionist) return TIER_RECEPTIONIST;
+  if (isassistant) return TIER_ASSISTANT;
+  return TIER_ASSISTANT; // safe fallback: lowest-privilege tier
+}
+
+/**
+ * POST /api/Employees (dental) or /api/cosmetic/Employees (cosmetic)
  * Creates a new employee (inserts into partners table with employee=true)
- * Body: { name, phone?, email?, companyid?, active? }
+ * Body: { name, phone?, email?, companyid?, active?, password? }
+ *
+ * lob_scope is inferred from req.lob (set by attachCosmeticDb middleware for cosmetic routes)
+ * or defaults to ['dental'] for dental routes.
  */
 router.post('/', requirePermission('employees.edit'), async (req, res) => {
   const client = await (req.db ? req.db.connect() : pool.connect());
@@ -40,6 +59,14 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
     const id = require('crypto').randomUUID();
     const now = getVietnamNow();
 
+    // Determine lob_scope from route context (req.lob set by attachCosmeticDb middleware)
+    const lobScope = req.lob === 'cosmetic' ? ['cosmetic'] : ['dental'];
+
+    // Assign a default permission tier when the caller does not supply one.
+    // Without this, newly created employees have tier_id = NULL and receive 403
+    // on every guarded route because resolveEffectivePermissions() returns [].
+    const effectiveTierId = tierId || inferDefaultTier({ isdoctor, isassistant, isreceptionist });
+
     // Hash password if provided
     let passwordHash = null;
     if (password) {
@@ -49,7 +76,7 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
 
     await client.query('BEGIN');
 
-    // Insert into partners table with employee=true
+    // Insert into partners table with employee=true and lob_scope
     const result = await client.query(
       `INSERT INTO partners (
         id, name, phone, email, companyid,
@@ -57,8 +84,9 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
         active, isdoctor, isassistant, isreceptionist, startworkdate,
         iscompany, ishead, isdeleted, isbusinessinvoice,
         password_hash, jobtitle, wage, allowance, hrjobid, tier_id,
+        lob_scope,
         datecreated, lastupdated
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)
       RETURNING *`,
       [
         id,
@@ -85,11 +113,27 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
         wage,
         allowance,
         hrjobid,
-        tierId,
+        effectiveTierId,
+        lobScope,
         now,    // datecreated
         now,    // lastupdated
       ]
     );
+
+    // Mirror tier assignment to employee_permissions for backward compatibility.
+    // Auth resolution reads partners.tier_id (primary), but legacy code paths
+    // and the permissions API still consult this table.
+    if (effectiveTierId) {
+      await client.query(
+        `INSERT INTO employee_permissions (employee_id, group_id, loc_scope, lastupdated)
+         VALUES ($1, $2, 'all', $3)
+         ON CONFLICT (employee_id) DO UPDATE
+           SET group_id = EXCLUDED.group_id,
+               loc_scope = EXCLUDED.loc_scope,
+               lastupdated = EXCLUDED.lastupdated`,
+        [id, effectiveTierId, now]
+      );
+    }
 
     // Insert scope records (skip primary companyid to avoid duplicate)
     const scopes = Array.isArray(locationScopeIds) ? locationScopeIds : [];
@@ -120,8 +164,10 @@ router.post('/', requirePermission('employees.edit'), async (req, res) => {
 });
 
 /**
- * PUT /api/Employees/:id
+ * PUT /api/Employees/:id (dental) or /api/cosmetic/Employees/:id (cosmetic)
  * Updates an existing employee (updates partners table)
+ *
+ * lob_scope is inferred from req.lob if not explicitly provided in the body.
  */
 router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
   const client = await (req.db ? req.db.connect() : pool.connect());
@@ -144,7 +190,11 @@ router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
       wage,
       allowance,
       hrjobid,
+      lob_scope,
     } = req.body;
+
+    // Determine lob_scope: use explicit value from body, or infer from route context
+    const effectiveLobScope = lob_scope || (req.lob === 'cosmetic' ? ['cosmetic'] : ['dental']);
 
     // Build dynamic update query for partners table
     const updates = [];
@@ -180,6 +230,11 @@ router.put('/:id', requirePermission('employees.edit'), async (req, res) => {
         paramIdx++;
       }
     }
+
+    // Always set lob_scope on update (inferred from route or explicit)
+    updates.push(`lob_scope = $${paramIdx}`);
+    values.push(effectiveLobScope);
+    paramIdx++;
 
     // Hash password if provided
     if (password) {
