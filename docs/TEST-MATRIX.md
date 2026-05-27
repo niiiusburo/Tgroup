@@ -64,6 +64,7 @@
 |---|---|---|
 | `api/src/routes/exports.js` | `website/e2e/export-downloads.spec.ts`, backend export builder tests | Download routes and workbook generation. |
 | `api/src/services/exports/builders/*.js` | `website/e2e/export-downloads.spec.ts`, builder unit tests | Excel shape, headers, formulas, numeric cells. |
+| `api/src/services/exports/builders/legacyFlatReportsExport*.js` | `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`, CI `backend-export-contracts`, `website/e2e/export-downloads.spec.ts` | Locks `revenue-flat` and `deposit-flat` registry entries, workbook templates, payment/deposit notes, source precedence, split fallback, row-limit errors, and report selector regressions. |
 | `api/src/routes/reports.js` | `api/src/routes/reports/__tests__/cashFlow.test.js` | Aggregation accuracy. |
 | `nginx.conf` or `nginx.docker.conf` | `website/e2e/export-downloads.spec.ts` (large dataset) | Timeout behavior for long-running exports. |
 

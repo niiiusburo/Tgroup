@@ -124,6 +124,7 @@
 | `telemetryAuth.test.js` | Settings/Telemetry | Public-only error ingestion and auth-required telemetry management routes |
 | `readRoutePermissions.test.js` | Auth/Permissions | Backend route permission declarations, including scoped feedback admin actions |
 | `src/routes/reports/__tests__/cashFlow.test.js` | Reports/Payments | Cash-flow aggregation rules for service collections, deposits, refunds, deposit usage, and voided rows |
+| `src/services/exports/__tests__/legacyFlatReportsExport.test.js` | Reports/Exports | `revenue-flat` and `deposit-flat` registry, workbook templates, payment/deposit notes, split fallback, row-limit errors, and CI backend export-contract gate |
 
 ## Coverage Gaps
 

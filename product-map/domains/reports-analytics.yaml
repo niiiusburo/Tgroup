@@ -55,6 +55,12 @@ endpoints:
   - GET  /api/Exports/types
   - POST /api/Exports/:type/preview
   - POST /api/Exports/:type/download
+  - POST /api/Exports/report-sales-employees/preview
+  - POST /api/Exports/report-sales-employees/download
+  - POST /api/Exports/revenue-flat/preview
+  - POST /api/Exports/revenue-flat/download
+  - POST /api/Exports/deposit-flat/preview
+  - POST /api/Exports/deposit-flat/download
 ui_surfaces:
   - /reports
   - /reports/dashboard
@@ -87,6 +93,7 @@ impact_tests:
   - website/src/pages/reports/__tests__/ReportsDashboard.test.tsx
   - website/src/pages/reports/__tests__/ReportsSubpages.test.tsx
   - api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js
+  - api/src/services/exports/__tests__/legacyFlatReportsExport.test.js
   - api/src/routes/reports/__tests__/cashFlow.test.js
   - api/src/routes/reports/__tests__/revenueRecognition.test.js
   - api/src/routes/reports/__tests__/servicesBreakdown.test.js
@@ -100,4 +107,5 @@ notes:
   - Revenue reporting must derive paid revenue from posted `payment_allocations` linked to saleorders, excluding deposits, refunds, deposit usage, and voided payments. Unpaid `saleorders.amounttotal` remains invoiced/outstanding context, not paid revenue.
   - Revenue and cash-flow report endpoints enforce employee location scope from primary branch plus `employee_location_scope`; remaining non-revenue report routes should be reviewed before exposing them to scoped managers.
   - Employee revenue Excel export uses `/api/Exports/report-sales-employees` with `reports.export`, date/location scope, employee type, and optional employee filters; workbook rows are grouped by employee and derive revenue from posted `payment_allocations`.
+  - Legacy flat report exports use `/api/Exports/revenue-flat` and `/api/Exports/deposit-flat` with `payments.export`; preview/download behavior must stay aligned with the Revenue and Cash Flow report cards.
   - Overview Zone 1 and Zone 3 searches must be accent-insensitive so unaccented input matches Vietnamese names and labels with diacritics.

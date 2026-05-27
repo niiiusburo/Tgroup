@@ -195,7 +195,40 @@ PaginatedResponse<{
 
 ---
 
-### 1.5 External Checkups (Hosoonline)
+### 1.5 Operational Exports
+
+#### GET /api/Exports/types
+**Response 200:**
+```ts
+Array<{
+  key: 'service-catalog' | 'customers' | 'appointments' | 'services' | 'payments' | 'report-sales-employees' | 'revenue-flat' | 'deposit-flat';
+  label: string;
+  permission: 'products.export' | 'customers.export' | 'appointments.export' | 'services.export' | 'payments.export' | 'reports.export';
+}>
+```
+
+#### POST /api/Exports/:type/preview
+**Body:** `{ filters?: Record<string, string | number | boolean | null | undefined> }`
+**Response 200:** `{ type, label, rowCount, filename, filters, summary, exceedsMax }`.
+
+#### POST /api/Exports/:type/download
+**Body:** Same `{ filters }` wrapper as preview.
+**Response 200:** XLSX stream with `Content-Disposition` filename.
+**Errors:** 400 unknown type or row-limit exceeded, 403 missing registry permission, 500 internal error.
+
+Supported flat report types:
+
+| Type | Permission | Filters |
+|---|---|---|
+| `revenue-flat` | `payments.export` | `search`, `companyId`, `dateFrom`, `dateTo` |
+| `deposit-flat` | `payments.export` | `search`, `companyId`, `dateFrom`, `dateTo` |
+| `report-sales-employees` | `reports.export` | `companyId`, `employeeType`, `employeeId`, `dateFrom`, `dateTo` |
+
+`revenue-flat` restores the legacy "Báo cáo doanh thu" workbook. `deposit-flat` restores the legacy "Báo cáo cọc tiền" workbook.
+
+---
+
+### 1.6 External Checkups (Hosoonline)
 
 #### GET /api/ExternalCheckups/:customerCode/health-checkups
 **Headers:** `Authorization: Bearer <token>`

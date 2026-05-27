@@ -23,6 +23,11 @@
 Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `Docs`.
 
 ---
+## [0.31.20] — 2026-05-20
+### Fixed
+- Restored the Revenue page flat Excel report selector and `/api/Exports/revenue-flat` plus `/api/Exports/deposit-flat` registrations on the Cosmetic LOB staging lane while preserving the current LOB-aware employee export filters — @agent — NK2 regression: "Báo cáo doanh thu" Excel download disappeared when staging was rebuilt from the Cosmetic LOB branch.
+- Added a CI backend export-contract job that runs `legacyFlatReportsExport.test.js` so future PRs fail if `revenue-flat` or `deposit-flat` are removed from the export registry — @agent — Prevent repeat NK2 regression where the revenue Excel download disappeared.
+
 ## [0.31.19] — 2026-05-19
 ### Fixed
 - Restricted Cosmetic LOB selector to Admin users only: auth responses cap non-admin visible `lob_scope` to one LOB, `BusinessUnitContext` ignores staff localStorage/query attempts to switch, and docs/tests now cite INV-008A. — @agent — User request: dental staff must not see or select Cosmetic LOB.

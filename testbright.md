@@ -564,6 +564,49 @@ Setup data and login state:
 
 ---
 
+# TestSprite Plan: NK2 Revenue Flat Excel Restore
+
+Feature/edit name: NK2 Revenue Flat Excel Restore
+
+Changed URLs and API routes:
+- `/reports/revenue`
+- `POST /api/Exports/revenue-flat/preview`
+- `POST /api/Exports/revenue-flat/download`
+- `POST /api/Exports/deposit-flat/preview`
+- `POST /api/Exports/deposit-flat/download`
+
+Affected data flows:
+- Revenue page report-type selector chooses revenue, deposit, or employee Excel exports.
+- Legacy flat revenue/deposit export builders read payments, sale orders, partners, companies, and customer sources.
+- Cosmetic LOB branch keeps employee export LOB filtering while restoring dental revenue/deposit flat exports.
+
+User roles:
+- Admin/reporting staff with `payments.export`.
+- Admin/reporting staff with `reports.export` for employee revenue export.
+
+Happy paths:
+- On NK2 `/reports/revenue`, choose `Báo cáo doanh thu`, preview, then download Excel successfully.
+- Direct `POST /api/Exports/revenue-flat/download` returns a valid XLSX workbook.
+- Direct `POST /api/Exports/deposit-flat/download` returns a valid XLSX workbook.
+- Employee revenue export still works with existing LOB-aware employee filtering.
+
+Edge cases:
+- Date range with no rows should show preview/empty-state behavior rather than unknown export errors.
+- `companyId=all` and a specific branch should both sanitize correctly.
+- Stale NK2 bundles must not hide the restored selector.
+
+Regressions:
+- Existing reports charts and cash-flow CSV exports still render.
+- Cosmetic LOB selector and LOB-aware employee fetching remain intact.
+- Production NK is not touched by the NK2 staging repair.
+- CI must keep running `api/src/services/exports/__tests__/legacyFlatReportsExport.test.js`; removing `revenue-flat` or `deposit-flat` from the export registry should fail the backend export-contract job.
+
+Setup data and login state:
+- Verify on `https://nk2.2checkin.com` with admin account `t@clinic.vn`.
+- Use a non-destructive date range such as `2026-04-16` to `2026-05-16`.
+
+---
+
 # TestSprite Plan: Cosmetic LOB Selector Admin-Only Guard
 
 Feature/edit name: Cosmetic LOB Selector Admin-Only Guard

@@ -7,6 +7,7 @@ const appointmentsExport = require('./builders/appointmentsExport');
 const servicesExport = require('./builders/servicesExport');
 const paymentsExport = require('./builders/paymentsExport');
 const reportSalesEmployeesExport = require('./builders/reportSalesEmployeesExport');
+const legacyFlatReportsExport = require('./builders/legacyFlatReportsExport');
 
 /**
  * Export Registry
@@ -88,6 +89,31 @@ const REGISTRY = {
       companyId: { type: 'string', default: 'all' },
       employeeType: { type: 'string', default: 'doctor' },
       employeeId: { type: 'string', default: '' },
+      dateFrom: { type: 'string', default: '' },
+      dateTo: { type: 'string', default: '' },
+    },
+  },
+  // Staff-facing legacy report downloads. CI locks these keys so NK2 cannot lose the Excel menu again.
+  'revenue-flat': {
+    label: 'Báo cáo doanh thu',
+    permission: 'payments.export',
+    filename: () => buildFilename('BaoCaoDoanhThu'),
+    builder: legacyFlatReportsExport.revenue,
+    filterSchema: {
+      search: { type: 'string', default: '' },
+      companyId: { type: 'string', default: 'all' },
+      dateFrom: { type: 'string', default: '' },
+      dateTo: { type: 'string', default: '' },
+    },
+  },
+  'deposit-flat': {
+    label: 'Báo cáo cọc tiền',
+    permission: 'payments.export',
+    filename: () => buildFilename('BaoCaoCocTien'),
+    builder: legacyFlatReportsExport.deposit,
+    filterSchema: {
+      search: { type: 'string', default: '' },
+      companyId: { type: 'string', default: 'all' },
       dateFrom: { type: 'string', default: '' },
       dateTo: { type: 'string', default: '' },
     },

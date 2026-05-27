@@ -171,6 +171,15 @@
       "sales": "Nhân viên sale"
     }
   },
+  "revenueExport": {
+    "title": "Xuất Excel báo cáo",
+    "reportType": "Loại báo cáo",
+    "kinds": {
+      "revenue": "Báo cáo doanh thu",
+      "deposit": "Báo cáo cọc tiền",
+      "employee": "Doanh thu theo nhân viên"
+    }
+  },
   "revenueRules": {
     "servicePayments": {
       "label": "Thanh toán dịch vụ"
