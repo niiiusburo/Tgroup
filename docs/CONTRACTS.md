@@ -4,10 +4,6 @@
 > 
 > **Rule:** If you change any contract in this file, you MUST update the version, the consumer code, the tests, and append a CHANGELOG entry in the same commit.
 
-**Cosmetic LOB v2 Sync (2026-05-19):** Added/aligned: `Lob` ('dental'|'cosmetic'), `BusinessUnitScope`, `EarningsRow` (append-only with recipient_partner_id on partners, source enum, negative reversals), `Payout`, `CtvCommissionSummary` (cross-DB aggregate), `ConsultationCard`, `getDb(lob)` / `getQuery(req)` factory contracts, `LobScope` middleware types. partners (both DBs) is identity for all LOB/CTV/earnings. See product-map/earnings-commissions.yaml + db/index.js + commissionEngine. Per v2 §269 + migration 047 reality.
-
-
-
 ## Contract Versioning
 
 | Version | Date | Scope |
@@ -21,10 +17,19 @@
 | v1.0.6 | 2026-05-25 | Customer, appointment, service, permission, and customer-balance frontend clients preserve `lob?: 'dental' | 'cosmetic'`; Cosmetic profile/deposit balance uses `GET /api/cosmetic/CustomerBalance/:id`. |
 | v1.0.7 | 2026-05-26 | Appointment form submitters must pass active `BusinessUnitContext.currentLOB` into appointment create/update API clients; Cosmetic Calendar/profile appointment writes must hit `/api/cosmetic/Appointments`. |
 | v1.0.8 | 2026-05-27 | `GET /api/ctv/referrals` includes per-referral `services[]` and `service_count` so CTV cards can reveal all services under a referred client. |
+| v1.0.4 | 2026-05-22 | Cosmetic LOB mirror routing and NK3 revenue recognition contract clarified for customer/employee/appointment/payment/balance/report flows. |
+| v1.0.5 | 2026-05-23 | TMV/NK3 API hotfix contract clarified: cosmetic CustomerBalance mirror, CTV-only self-dashboard reads, and normalized service catalog writes. |
+| v1.1.1 | 2026-05-27 | CTV referral dashboard contract now exposes service-level earnings rows under each referred client and in commission recents. |
 
 ---
 
 ## 1. API Contracts
+
+Cosmetic LOB mirror rule: when the frontend passes `lob: 'cosmetic'` to `apiFetch`, the client routes the same endpoint under `/api/cosmetic/*`. Mirrored handlers must run behind `requireLobScope('cosmetic')`, `attachCosmeticDb`, `runWithLob('cosmetic')`, and `cosmetic.access`, then read/write `tcosmetic_demo` through request-scoped `getQuery(req)` or ALS-aware `query()`. Dental remains the default legacy `/api/*` path.
+
+CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referrals`, and `GET /api/ctv/me` are mounted behind `ctv.dashboard.view` and must additionally require `req.user.is_ctv === true`. Authenticated non-CTV staff, including admins, receive `403 S_CTV_ONLY`.
+
+CTV referral service-line rule: `GET /api/ctv/referrals` returns each referred client with `service_count` and `services[]`. Each service row contains `{ id, serviceLineId, paymentId, serviceName, amount, status, source, lob, earnedAt }` and is scoped to `earnings.client_id = referral.id` plus `earnings.recipient_partner_id = current CTV`. `GET /api/ctv/commission-summary` recents and lists also include `client_id`, `service_line_id`, `service_name`, and `payment_id` for read-only CTV display.
 
 ### 1.1 Auth
 
@@ -203,27 +208,9 @@ Frontend LOB routing: Any LOB-aware appointment form must pass the active `Busin
 
 #### PUT /api/Appointments/:id
 **Body:** `AppointmentUpdateSchema` (partial omit `id`)
-```ts
-{
-  date?: string;
-  time?: string | null;
-  doctorId?: string | null;
-  companyId?: string;
-  note?: string | null;
-  state?: AppointmentStatus | null;
-  timeExpected?: number | null;
-  color?: string | null;
-  productId?: string | null;
-  assistantId?: string | null;
-  dentalAideId?: string | null;
-}
-```
-**Response 200:** Updated row, including refreshed `companyid/companyname` when location changes.
+**Response 200:** Updated row.
 
-**Validation (handler-level, in addition to Zod):**
-- `companyId` (when present) must be a UUID; otherwise `400 INVALID_COMPANY_ID`.
-- `companyId` (when present) must reference an existing `companies` row; otherwise `404 COMPANY_NOT_FOUND`.
-- Persisted column: `appointments.companyid`. Test coverage: `api/src/routes/appointments/__tests__/mutationHandlers.test.js`.
+Cosmetic mirror: `POST /api/cosmetic/Appointments` and `PUT /api/cosmetic/Appointments/:id` use the same request/response body and must validate `partnerId` / `companyId` against the cosmetic database.
 
 ---
 
@@ -283,6 +270,7 @@ Wire behavior:
 - `lob: 'cosmetic'` maps `fetchCompanies` to `GET /api/cosmetic/Companies` and employee create/update to `/api/cosmetic/Employees`.
 - `lob: 'dental'` or omitted `lob` keeps legacy dental routes (`/api/Companies`, `/api/Employees`).
 - `EmployeeForm` and `EmployeeProfile` must use the active LOB so Cosmetic branch dropdowns and profile branch-name lookups never resolve through dental companies.
+Cosmetic mirror: `GET/POST/PUT/PATCH/DELETE /api/cosmetic/Partners...` use the same contract and must validate `companyId` against cosmetic `dbo.companies`. Customer create/update clients must pass `lob: 'cosmetic'` when Cosmetic is selected.
 
 ---
 
@@ -371,6 +359,29 @@ Wire behavior:
 **Body:** `{ proofImageBase64: string; qrDescription?: string | null }`
 **Behavior:** `proofImageBase64` must be a `data:image/*` URI.
 **Response:** `{ success: true, proofId: string }`
+
+Cosmetic mirror: `GET/POST/PATCH/DELETE /api/cosmetic/Payments...`, `/api/cosmetic/Payments/deposits`, and `/api/cosmetic/Payments/deposit-usage` use the same contract and operate only on cosmetic `dbo.payments` / `dbo.payment_allocations`.
+
+#### GET /api/CustomerBalance/:id
+**Auth:** Authenticated route mounted through the app router.
+**Response 200:**
+```ts
+{
+  id: string;
+  name: string;
+  deposit_balance: number;
+  outstanding_balance: number;
+  total_deposited: number;
+  total_used: number;
+  total_refunded: number;
+}
+```
+**Behavior:** Reads `partners`, `payments`, `saleorders`, and `dotkhams` in the request-scoped LOB database. Cosmetic callers must use `GET /api/cosmetic/CustomerBalance/:id`; otherwise the deposit summary cards can read dental balances for cosmetic customers. Deposit totals are based on `payments.payment_category = 'deposit'`; unallocated service/payment receipts are not treated as customer advances.
+
+#### POST /api/Products and PUT /api/Products/:id
+**Auth:** Requires the service catalog permission enforced by the product route.
+**Body:** Service catalog fields accepted by the active `products.js` route, including required `name`.
+**Behavior:** Dental and cosmetic mirrors (`/api/cosmetic/Products...`) must persist the accent-insensitive search column as `namenosign = normalizeVietnamese(name)` on create and update.
 
 ---
 
@@ -485,6 +496,8 @@ All current `/api/Reports` endpoints use `POST`, require `reports.view`, and ret
 ```
 Date-scoped endpoints accept `{ dateFrom?: 'YYYY-MM-DD'; dateTo?: 'YYYY-MM-DD'; companyId?: string }` unless noted.
 
+Revenue recognition rule: paid revenue counts posted payment allocations linked to saleorders plus direct posted `payments.payment_category = 'payment'` receipts with no `payment_allocations` row, including imported receipts whose `service_id` is still blank. Deposits, refunds, deposit usage, and voided payments are excluded. The by-location report includes a synthetic unassigned row for paid receipts that cannot yet be attributed to a company.
+
 | Endpoint | Body | `data` shape |
 |---|---|---|
 | `/api/Reports/revenue/summary` | Date scope | `{ orders: { state, cnt, total, paid, outstanding }[]; payments: { method, status, cnt, total }[] }` |
@@ -547,7 +560,7 @@ Supported registry types:
 |---|---|---|
 | `service-catalog` | `products.export` | `search`, `companyId`, `categId`, `active` |
 | `customers` | `customers.export` | `search`, `companyId`, `status` |
-| `appointments` | `appointments.export` | `search` (appointment/customer fields including phone), `companyId`, `dateFrom`, `dateTo`, `state`, `doctorId`; workbook date prefers `appointments.date` + `time` before legacy `datetimeappointment` |
+| `appointments` | `appointments.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `state`, `doctorId` |
 | `services` | `services.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `state` |
 | `payments` | `payments.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `status` |
 | `report-sales-employees` | `reports.export` | `companyId`, `employeeType`, `employeeId`, `dateFrom`, `dateTo` |
@@ -614,10 +627,12 @@ async function apiFetch<T>(
     body?: unknown;
     params?: Record<string, string | number | boolean | undefined>;
     signal?: AbortSignal;
+    lob?: 'dental' | 'cosmetic';
   }
 ): Promise<T>
 ```
 **Invariants:**
+- `lob: 'cosmetic'` prefixes requests with `/cosmetic`; omitted or `dental` uses legacy `/api/*`.
 - CamelCase keys in `params` are converted to snake_case on the wire (except `CAMEL_CASE_PASSTHROUGH` set).
 - 401 responses clear `localStorage` token and dispatch `AUTH_UNAUTHORIZED_EVENT`.
 - Structured errors are thrown as `ApiError` with `status`, `code`, `field`, `message`.

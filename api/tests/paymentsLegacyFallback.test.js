@@ -1,21 +1,23 @@
 jest.mock('../src/middleware/auth', () => ({
   requireAuth: (_req, _res, next) => next(),
   requirePermission: () => (_req, _res, next) => next(),
-  requireLobScope: () => (_req, _res, next) => next(),
 }));
 
-jest.mock('../src/db', () => ({
-  query: jest.fn(),
-  pool: {
-    connect: jest.fn(),
-  },
-  getQuery: jest.fn(() => jest.fn(async () => [])),
-  getDb: jest.fn(() => ({
-    query: jest.fn(async () => ({ rows: [] })),
-    queryRows: jest.fn(async () => []),
-  })),
-  runWithLob: jest.fn((lob, fn) => (fn ? fn() : undefined)),
-  getCurrentLob: jest.fn(() => 'dental'),
+jest.mock('../src/db', () => {
+  const queryMock = jest.fn();
+  const poolMock = { connect: jest.fn() };
+  return {
+    query: queryMock,
+    pool: poolMock,
+    getQuery: jest.fn(() => queryMock),
+    getDb: jest.fn(() => poolMock),
+    runWithLob: jest.fn((_lob, fn) => fn()),
+    getCurrentLob: jest.fn(() => 'dental'),
+  };
+});
+
+jest.mock('../src/services/commissionEngine', () => ({
+  createEarningsForPayment: jest.fn(),
 }));
 
 jest.mock('uuid', () => ({ v4: jest.fn(() => 'mock-uuid') }));

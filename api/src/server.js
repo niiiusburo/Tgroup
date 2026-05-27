@@ -223,6 +223,12 @@ const PUBLIC_PATHS = new Set([
   '/api/IpAccess/check',
   '/api/ipaccess/check',
   '/api/health',
+  // Public CTV signup surface — visitor sees terms, looks up referrer, submits signup.
+  // is_ctv partner is created directly; no admin approval gate.
+  '/api/ctv/signup',
+  '/api/ctv/signup/ocr',
+  '/api/ctv/check-referrer-phone',
+  '/api/signup-terms/active',
 ]);
 
 app.use('/api', (req, res, next) => {
@@ -253,6 +259,10 @@ app.use('/api/Commissions', commissionsRoutes);
 app.use('/api/Ctv', require('./routes/ctv')); // v2 CTV dashboard (is_ctv gate inside)
 app.use('/api/Ctvs', require('./routes/ctvs')); // admin CTV list/suspend (admin gate inside)
 app.use('/api/CommissionConfig', require('./routes/commissionConfig')); // MLM level config (admin gate on PUT)
+app.use('/api/admin/commission-tiers', require('./routes/admin/commissionTiers')); // per-LOB tier admin
+app.use('/api/signup-terms', require('./routes/signupTerms')); // versioned CTV signup terms (active row)
+// Public CTV signup routes mounted BEFORE the gated /api/ctv mount (see PUBLIC_PATHS for bypass)
+app.use('/api/ctv', require('./routes/ctvSignup'));
 app.use('/api/HrPayslips', hrPayslipsRoutes);
 app.use('/api/Employees', employeesRoutes);
 app.use('/api/Products', productsRoutes);
@@ -443,7 +453,18 @@ if (COSMETIC_FLAG) {
   cosmeticRouter.use('/CrmTasks', crmTasksRoutes);
   cosmeticRouter.use('/MonthlyPlans', monthlyPlansRoutes);
   cosmeticRouter.use('/Permissions', permissionsRoutes);
-  // Add more mirrors (e.g. /Services if revived, feedback, etc.) as needed for full admin reuse
+  cosmeticRouter.use('/CustomerSources', customerSourcesRoutes);
+  cosmeticRouter.use('/DotKhams', dotKhamsRoutes);
+  cosmeticRouter.use('/settings', bankSettingsRoutes);
+  cosmeticRouter.use('/ExternalCheckups', externalCheckupsRoutes);
+  cosmeticRouter.use('/face', faceRecognitionRoutes);
+  cosmeticRouter.use('/Exports', exportsRoutes);
+  cosmeticRouter.use('/SystemPreferences', systemPreferencesRoutes);
+  cosmeticRouter.use('/Feedback', feedbackRoutes);
+  cosmeticRouter.use('/IpAccess', ipAccessRoutes);
+  cosmeticRouter.use('/WebsitePages', websitePagesRoutes);
+  cosmeticRouter.use('/Places', placesRoutes);
+  cosmeticRouter.use('/telemetry', telemetryRoutes);
 
   app.use('/api/cosmetic', cosmeticRouter);
   console.log('[CosmeticLOB] /api/cosmetic/* mirrors mounted (flag=true, using tcosmetic_demo via req context)');

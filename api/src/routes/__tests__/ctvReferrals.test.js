@@ -42,7 +42,7 @@ describe('CTV referrals route', () => {
         return [
           {
             id: 'client-1',
-            name: 'Seed Client - TMV CTV',
+            name: 'Seed Client - NK3 CTV',
             phone: '0900000000',
             email: 'seed@example.test',
             referred_at: '2026-05-24T08:00:00.000Z',
@@ -107,7 +107,7 @@ describe('CTV referrals route', () => {
     expect(res.body.referrals).toHaveLength(1);
     expect(res.body.referrals[0]).toMatchObject({
       id: 'client-1',
-      name: 'Seed Client - TMV CTV',
+      name: 'Seed Client - NK3 CTV',
       total_earned: 172000,
       earned_count: 3,
       service_count: 3,

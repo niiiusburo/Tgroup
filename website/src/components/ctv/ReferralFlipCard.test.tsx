@@ -1,14 +1,12 @@
-import '@/i18n';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ReferralFlipCard } from './ReferralFlipCard';
 import type { CtvReferral } from '@/lib/api/ctv';
-import i18n from '@/i18n';
 
 const referral: CtvReferral = {
   id: 'client-1',
-  name: 'Seed Client - TMV CTV',
+  name: 'Seed Client - NK3 CTV',
   phone: '0900000000',
   lobs: ['cosmetic'],
   total_earned: 172000,
@@ -60,14 +58,13 @@ describe('ReferralFlipCard', () => {
 
   it('flips from referral journey to all service rows for the client', async () => {
     localStorage.setItem('tg-lang', 'vi');
-    await i18n.changeLanguage('vi');
     const user = userEvent.setup();
     render(<ReferralFlipCard referral={referral} />);
 
-    const flipButton = await screen.findByRole('button', { name: /Seed Client - TMV CTV/i });
+    const flipButton = screen.getByRole('button', { name: /Seed Client - NK3 CTV/i });
     expect(flipButton).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByText('3/4')).toBeVisible();
-    expect(screen.getAllByText(/3 services/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/3 dịch vụ/i).length).toBeGreaterThan(0);
 
     await user.click(flipButton);
 
@@ -77,7 +74,7 @@ describe('ReferralFlipCard', () => {
     expect(screen.getByText('Tẩy trắng răng')).toBeVisible();
     expect(screen.getAllByText('172.000 ₫').length).toBeGreaterThan(0);
 
-    await user.click(flipButton);
+    await user.click(screen.getByRole('button', { name: /Quay lại/i }));
 
     expect(flipButton).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByText('3/4')).toBeVisible();
@@ -85,11 +82,10 @@ describe('ReferralFlipCard', () => {
 
   it('renders referral portal copy in English when the app language is English', async () => {
     localStorage.setItem('tg-lang', 'en');
-    await i18n.changeLanguage('en');
     const user = userEvent.setup();
     render(<ReferralFlipCard referral={referral} />);
 
-    const flipButton = await screen.findByRole('button', { name: /show services for Seed Client - TMV CTV/i });
+    const flipButton = screen.getByRole('button', { name: /show services for Seed Client - NK3 CTV/i });
     expect(screen.getAllByText('Cosmetic').length).toBeGreaterThan(0);
     expect(screen.getAllByText(/3 services/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText('Expected').length).toBeGreaterThan(0);
@@ -98,6 +94,6 @@ describe('ReferralFlipCard', () => {
 
     expect(screen.getByText('Services under this referral')).toBeVisible();
     expect(screen.getByText('Dental')).toBeVisible();
-    expect(flipButton).toHaveAccessibleName(/show referral journey for Seed Client - TMV CTV/i);
+    expect(screen.getByRole('button', { name: /Back/i })).toBeVisible();
   });
 });

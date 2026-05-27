@@ -112,6 +112,7 @@ export const ROUTES = {
   PERMISSIONS: '/permissions',
   PAYMENT: '/payment',
   FEEDBACK: '/feedback',
+  COMMISSION_TIERS: '/admin/commission-tiers',
 } as const
 
 /**
@@ -143,6 +144,7 @@ export const ROUTE_PERMISSIONS: Record<string, string> = {
   [ROUTES.PERMISSIONS]: 'permissions.view',
   [ROUTES.PAYMENT]: 'payment.view',
   [ROUTES.FEEDBACK]: 'permissions.view',
+  [ROUTES.COMMISSION_TIERS]: 'settings.view',
 } as const
 
 /**

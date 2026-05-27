@@ -53,6 +53,10 @@ jest.mock('../src/routes/feedback/attachments', () => ({
   removeUploadedFiles: jest.fn(),
 }));
 
+jest.mock('../src/services/larkNotifier', () => ({
+  notifyFeedbackThreadCreated: jest.fn(async () => ({ ok: true, skipped: true })),
+}));
+
 jest.mock('uuid', () => ({ v4: jest.fn(() => 'mock-uuid') }));
 
 const request = require('supertest');
@@ -60,6 +64,7 @@ const fs = require('fs');
 const app = require('../src/server');
 const { query, pool } = require('../src/db');
 const attachments = require('../src/routes/feedback/attachments');
+const { notifyFeedbackThreadCreated } = require('../src/services/larkNotifier');
 
 const THREAD_ID = 'thread-1';
 const MESSAGE_ID = 'message-1';
@@ -151,6 +156,7 @@ describe('feedback attachment transaction integrity', () => {
     consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
     mockIpAccess();
     attachments.insertAttachments.mockResolvedValue(undefined);
+    notifyFeedbackThreadCreated.mockResolvedValue({ ok: true, skipped: true });
     attachments.enrichMessageWithAttachments.mockImplementation(async (_client, message) => ({
       ...message,
       attachments: [{ url: '/uploads/feedback/mock-proof.jpg' }],
@@ -180,6 +186,14 @@ describe('feedback attachment transaction integrity', () => {
     ]));
     expect(calls.find(([sql]) => sql.includes('INSERT INTO feedback_messages'))[1][2]).toBe('');
     expect(attachments.insertAttachments).toHaveBeenCalledWith(client, MESSAGE_ID, expect.any(Array));
+    expect(notifyFeedbackThreadCreated).toHaveBeenCalledWith(expect.objectContaining({
+      source: 'manual',
+      threadId: THREAD_ID,
+      employeeId: 'employee-1',
+      pagePath: '/reports/revenue',
+      content: '',
+      attachmentCount: 1,
+    }));
     expect(client.release).toHaveBeenCalledTimes(1);
   });
 

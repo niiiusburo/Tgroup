@@ -12,9 +12,10 @@
     "home": "Home",
     "commission": "Commission",
     "tracking": "Tracking",
-    "referrals": "Referrals",
+    "referrals": "Refer Client",
     "network": "Network",
-    "me": "Me"
+    "me": "Me",
+    "recruiting": "Recruit CTV"
   },
   "actions": {
     "referClient": "Refer Client",
@@ -117,7 +118,8 @@
     "noServices": "No services yet",
     "servicesUnderReferral": "Services under this referral",
     "emptyBack": "No paid services have been attributed to this referral yet.",
-    "tapToReturn": "Tap to return to the referral journey"
+    "tapToReturn": "Tap to return to the referral journey",
+    "back": "Back"
   },
   "network": {
     "myNetwork": "CTV Network",
@@ -170,5 +172,81 @@
     "loadFailedDetail": "Server connection error. Please try again.",
     "generic": "An error occurred. Please try again later."
   },
-  "currency": "₫"
+  "currency": "₫",
+  "brand": "TG CLINIC",
+  "portal": "CTV Portal",
+  "profileFallback": "CTV",
+  "hello": "Hi, {{name}}",
+  "notifications": "Notifications",
+  "title": "Customer Tracking",
+  "subtitle": "Track each referred customer from referral to payment",
+  "searchLabel": "Search customers",
+  "searchPlaceholder": "Search customers...",
+  "filters": {
+    "all": "All",
+    "active": "In progress",
+    "completed": "Completed",
+    "waitingPayment": "Waiting payment"
+  },
+  "summary": {
+    "clients": "Clients",
+    "pending": "Expected",
+    "paid": "Received"
+  },
+  "loading": "Loading referrals...",
+  "errorTitle": "CTV data could not load",
+  "errorBody": "Please try again in a few minutes.",
+  "retry": "Retry",
+  "emptyTitle": "No referred clients yet",
+  "emptyBody": "Clients will appear here once they are attached to your CTV code.",
+  "noSearchTitle": "No clients found",
+  "noSearchBody": "Try a different search or filter.",
+  "signup": {
+    "title": "CTV Registration",
+    "subtitle": "Join our community and start earning commissions",
+    "phone": "Phone Number",
+    "name": "Full Name",
+    "email": "Email",
+    "dob": "Date of Birth",
+    "address": "Address",
+    "idNumber": "ID Number",
+    "referrerPhone": "Referrer's Phone",
+    "checkReferrer": "Check",
+    "referrerFound": "Referrer: {{name}} ({{phone}})",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "signatureLabel": "Digital Signature",
+    "clearSignature": "Clear signature",
+    "termsLabel": "Terms & Conditions",
+    "viewTerms": "View terms",
+    "acceptTerms": "I agree to the Terms & Conditions",
+    "closeTerms": "Close",
+    "idCardLabel": "Upload ID Card (Optional)",
+    "ocrLoading": "Scanning card...",
+    "ocrImageTooLarge": "Image must be under 2MB",
+    "submit": "Submit Registration",
+    "submitting": "Submitting...",
+    "termsRequired": "You must accept the Terms & Conditions",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "signatureRequired": "Signature is required",
+    "termsLoadError": "Could not load terms. Please refresh."
+  },
+  "referral": {
+    "title": "Refer a Client",
+    "clientName": "Client Name",
+    "clientPhone": "Client Phone",
+    "clientEmail": "Client Email",
+    "serviceInterest": "Service Interest",
+    "servicePlaceholder": "e.g. Teeth whitening",
+    "lob": "Line of Business",
+    "notes": "Notes",
+    "submit": "Submit Referral",
+    "submitting": "Submitting...",
+    "namePhoneRequired": "Client name and phone are required",
+    "referredByOther": "This client is already referred by another CTV",
+    "activeExists": "An active referral for this client already exists",
+    "alreadyReferred": "This client has already been referred",
+    "successMessage": "Referral submitted successfully!"
+  }
 }

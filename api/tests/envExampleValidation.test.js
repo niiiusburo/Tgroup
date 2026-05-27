@@ -66,4 +66,10 @@ describe('.env.example', () => {
   it('contains HOSOONLINE_PASSWORD for authentication', () => {
     expect(content).toContain('HOSOONLINE_PASSWORD');
   });
+
+  it('contains Lark feedback alert variables', () => {
+    expect(content).toContain('LARK_FEEDBACK_WEBHOOK_URL');
+    expect(content).toContain('LARK_FEEDBACK_WEBHOOK_SECRET');
+    expect(content).toContain('TGROUP_PUBLIC_URL');
+  });
 });

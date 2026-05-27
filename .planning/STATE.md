@@ -1,77 +1,73 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: milestone
+milestone: v1.2
+milestone_name: CTVlegacy Port
 current_plan: Not started
 status: planning
-stopped_at: Completed 03-04-PLAN.md
-last_updated: "2026-04-11T04:50:49.291Z"
-last_activity: 2026-04-11
+stopped_at: Roadmap created for v1.2 — 5 phases, 15 plans
+last_updated: "2026-05-27T00:00:00.000Z"
+last_activity: 2026-05-27
 progress:
-  total_phases: 4
-  completed_phases: 3
-  total_plans: 12
-  completed_plans: 11
-  percent: 92
+  total_phases: 9
+  completed_phases: 4
+  total_plans: 26
+  completed_plans: 20
+  percent: 77
 ---
 
-# Project State — TG Clinic v1.1 Bugfixes & Features
+# Project State — TG Clinic v1.2 CTVlegacy Port
 
-**Status:** Ready to plan
-**Last Activity:** 2026-04-11
+## Current Position
+
+Phase: 5 (Schema Foundation) — ready to plan
+Plan: —
+Status: Roadmap complete; awaiting plan execution for Phase 5
+Last activity: 2026-05-27 — v1.2 Roadmap created (Phases 5–9)
 
 ## Phase Tracker
 
-| Phase | Status | Plans | Verified |
-|-------|--------|-------|----------|
-| 1: Bug Fixes Wave 1 | Completed | 1 | Yes |
-| 2: Quick Features & Validations | Completed | — | — |
-| 3: Architecture Shifts | Completed | — | — |
-| 4: Polish & Walk-in Redesign | Not started | — | — |
+| Phase | Milestone | Status | Plans | Verified |
+|-------|-----------|--------|-------|----------|
+| 1. Bug Fixes Wave 1 | v1.1 | Complete | 3/3 | ✓ |
+| 2. Quick Features & Validations | v1.1 | Complete | 8/8 | ✓ |
+| 3. Architecture Shifts | v1.1 | Complete | 4/4 | ✓ |
+| 4. Polish & Walk-in Redesign | v1.1 | Not started | — | — |
+| 5. Schema Foundation | v1.2 | Not started | 0/2 | — |
+| 6. Commission Tier Admin | v1.2 | Not started | 0/3 | — |
+| 7. Public CTV Signup + Auth + OCR | v1.2 | Not started | 0/4 | — |
+| 8. Refer-A-Client Flow | v1.2 | Not started | 0/3 | — |
+| 9. E2E Verification & Polish | v1.2 | Not started | 0/2 | — |
 
-## Reports
+## Accumulated Context (v1.2 locked)
 
-- `v1-1-audit-report.md` — Codebase audit (4 exist, 1 partial, 10 missing)
-- `v1-1-contradictions-report.md` — Top 5 architectural conflicts and resolutions
-- `v1-1-playwright-report.md` — Playwright verification (save-button bugs confirmed by test failures)
+### Decisions
 
-## Phase Tracker (Detailed)
+- Per-LOB commission tiers (dental ≠ cosmetic) — explicit in schema with (lob, level) PK
+- No admin approval queue — CTVs self-sign-up directly; admins review on partners list page
+- Gemini Vision OCR env-gated by GEMINI_API_KEY — control hidden when unset, endpoint 503s
+- Dual-format password support (legacy SHA256 + bcrypt) — lazy rehash on login, no hard cutoff date
+- Refer-A-Client hardened by 6-month eligibility gate on completed/paid services in chosen LOB only
+- Five migrations (048–052) applied to BOTH tdental_demo and tcosmetic_demo for schema mirroring
 
-**Phase 03: Architecture Shifts**
+### Pitfalls & Mitigations
 
-- **Current Plan:** Not started
-- **Plan Status:** Completed
+Top 3 critical pitfalls identified in research:
 
-| Plan | Status |
-|------|--------|
-| 03-01 | Completed |
-| 03-02 | Completed |
-| 03-03 | Completed |
-| 03-04 | Completed |
+1. **Two-DB Partner Approval Atomicity** (Pitfall 1) — Dual-LOB partner creation can leave one DB incomplete. Mitigation: idempotent retry; approve transaction fails both or succeeds both.
+2. **Commission Tiers Drift** (Pitfall 2) — Tier rate updates must stay in sync across LOBs. Mitigation: single API endpoint validates both DBs update or fails both.
+3. **Gemini OCR Cost Runaway** (Pitfall 3) — Public OCR endpoint vulnerable to bot abuse. Mitigation: rate limit 5 OCR calls per IP per day, image size validation, env-gated by GEMINI_API_KEY.
 
-## Performance Metrics
+Full pitfalls list: `.planning/research/PITFALLS.md` (10 pitfalls, phase-specific mitigations listed).
 
-| Phase | Plan | Duration | Tasks | Files |
-|-------|------|----------|-------|-------|
-| 03-architecture-shifts | 03-01 | 18min | 2 | 2 |
-| Phase 03-architecture-shifts P03 | 23min | 3 tasks | 7 files |
-| Phase 03-architecture-shifts P03-02 | 35min | 3 tasks | 7 files |
-| Phase 03-architecture-shifts P03-04 | 571 | 4 tasks | 7 files |
+### Pending Blockers
 
-## Decisions
+None — research complete, phase dependencies clear, no unresolved questions in architecture.
 
-- Use pool.connect() with explicit BEGIN/COMMIT/ROLLBACK for transactional scope updates
-- Exclude primary companyid from junction inserts to maintain a single source of truth
-- [Phase 03-architecture-shifts]: Hard delete is gated behind customer:hard_delete permission and runs FK-safe counts on appointments, saleorders, dotkhams
-- [Phase 03-architecture-shifts]: Soft delete is exposed in both list view (trash icon) and profile view (dropdown) for users with customer:delete
-- [Phase 03-architecture-shifts]: Linked record counts shown in hard-delete dialog come from hookProfile (appointmentcount, ordercount, dotkhamcount)
-- [Phase 03-architecture-shifts]: 409 Conflict from hard delete maps to user-facing message 'Không thể xóa: còn dữ liệu liên quan.'
-- [Phase 03-architecture-shifts]: Use useColumns hook to close over locationNameMap since DataTable Column render only receives row
-- [Phase 03-architecture-shifts]: Filter out primary companyid from scope chips to avoid duplicate selection
-- [Phase 03-architecture-shifts]: Dotkhams is a VIEW in the demo schema; FK constraint to dotkhams(id) cannot be added, so column was added without REFERENCES
-- [Phase 03-architecture-shifts]: Allocation state was refactored to target-agnostic keys to support both invoices and dotkhams
+## Session Continuity
 
-## Session
+Last session: 2026-05-27 — Roadmap creation
+Stopped at: ROADMAP.md written; REQUIREMENTS.md updated; STATE.md initialized
+Resume: Ready to invoke `/gsd-plan-phase 5` for Schema Foundation
 
-- **Last session:** 2026-04-11T04:41:03.361Z
-- **Stopped at:** Completed 03-04-PLAN.md
+</content>
+</invoke>

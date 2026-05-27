@@ -10,6 +10,7 @@ owns:
   - website/src/pages/Customers.tsx (when LOB=cosmetic, sources from cosmetic DB via getQuery)
   - All customer-related hooks when currentLOB=cosmetic
   - api/src/routes/partners/* (read/write handlers support getQuery(req) for LOB routing)
+  - api/scripts/cosmetic-lob-import.js (maps `Hồ sơ` rows to cosmetic partner/customer actions through dry-run/apply gates)
 reads:
   - tcosmetic_demo.dbo.partners (client rows under cosmetic LOB; lob_scope filter implicit via pool)
   - tcosmetic_demo.dbo.earnings (for client KPI/earned attribution)
@@ -46,6 +47,7 @@ impact_tests:
   - No data leak: cosmetic client list never returns dental rows
   - Cross-view badge: only visible with lob.crossview; probe does not mutate data
   - Referral by CTV: client row with referred_by_ctv_id correctly attributes earnings on payment
+  - Cosmetic source workbook import never treats phone as durable identity; ambiguous phone matches must become manual-review anomalies
 risk_level: medium
 notes:
   - "D2: No shared identity table. Independent clients per LOB, separate DB rows."
@@ -53,3 +55,4 @@ notes:
   - "Cross-LOB badge is soft phone match only; never a FK or merge operation."
   - "All cosmetic partners queries must go through getQuery(req) or getDb('cosmetic') — never bare pool."
   - "cosmetic.staff and companies seeded empty per D16; admins create via UI under cosmetic LOB."
+  - "The workbook `Hồ sơ` tab is an intake source for cosmetic partner/customer records. Apply mode creates or matches through reviewed importer logic and must never assume phone uniqueness as durable identity."

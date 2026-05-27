@@ -4,10 +4,6 @@
 
 > Deploy steps, rollback procedure, health checks, common incidents, per environment.
 
-**Cosmetic LOB v2 sync (2026-05-19):** Feature flag rollout, tcosmetic_demo backup/restore steps, dual DB connection strings (DATABASE_URL + COSMETIC_DATABASE_URL), getDb pools. See docs/runbooks/DEPLOYMENT.md, INFRASTRUCTURE.md, PORTS.md. partners/earnings in both DBs.
-
-
-
 ## Environments
 
 | Environment | URL | Containers | Notes |

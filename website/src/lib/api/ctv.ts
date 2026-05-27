@@ -1,7 +1,3 @@
-/**
- * ctv.ts — API client for CTV dashboard (v2.1)
- * Calls /api/ctv/* (self-gated)
- */
 import { apiFetch } from './core';
 
 export type CtvLob = 'dental' | 'cosmetic';
@@ -19,192 +15,93 @@ export interface CtvReferralService {
   readonly earnedAt: string | null;
 }
 
-export interface CtvPayoutCycle {
-  id: string;
-  lob: CtvLob;
-  cycle_label: string;
-  paid_at?: string;
-  total_amount: number;
-  receipt_url?: string | null;
-}
-
-export interface CtvCommissionSummary {
-  totals: {
-    pending: number;
-    paid: number;
-    dentalPending: number;
-    cosmeticPending: number;
-  };
-  counts: { pending: number; paid: number };
-  recent: Array<{
-    id: string;
-    client_id?: string;
-    client_name: string;
-    service_line_id?: string | null;
-    service_name?: string;
-    payment_id?: string | null;
-    amount: number;
-    source: string;
-    lob: CtvLob;
-    earned_at: string | null;
-    status: CtvServiceStatus;
-  }>;
-  pendingList?: any[];
-  paidList?: any[];
-  payouts?: CtvPayoutCycle[];
-}
-
 export interface CtvReferral {
-  id: string;
-  name: string;
-  phone?: string;
-  lobs: CtvLob[];
-  total_earned: number;
-  earned_count: number;
-  service_count?: number;
-  status: 'earning' | 'no visit yet' | string;
-  referred_at?: string | null;
-  services?: CtvReferralService[];
+  readonly id: string;
+  readonly name: string;
+  readonly phone: string;
+  readonly lobs: CtvLob[];
+  readonly total_earned: number;
+  readonly earned_count: number;
+  readonly service_count: number;
+  readonly status: 'earning' | 'no visit yet' | string;
+  readonly referred_at: string | null;
+  readonly services: CtvReferralService[];
 }
 
 export interface CtvReferralResponse {
-  referrals: CtvReferral[];
+  readonly referrals: CtvReferral[];
 }
 
-/** Extended referral with client journey tracking stages */
-export interface CtvClientJourney {
-  id: string;
-  name: string;
-  phone?: string;
-  lobs: CtvLob[];
-  referred_at: string;
-  referred_via?: string;
-  stage: 'referred' | 'visited' | 'serviced' | 'paid';
-  stage_progress: number; // 1-4
-  visit?: {
-    date: string;
-    time?: string;
-    doctor?: string;
-    location?: string;
+export interface CtvCommissionRow {
+  readonly id: string;
+  readonly client_id?: string;
+  readonly client_name: string;
+  readonly service_line_id?: string | null;
+  readonly service_name?: string;
+  readonly payment_id?: string | null;
+  readonly amount: number;
+  readonly source: string;
+  readonly lob: CtvLob;
+  readonly earned_at: string | null;
+  readonly status: CtvServiceStatus;
+}
+
+export interface CtvCommissionSummary {
+  readonly totals: {
+    readonly pending: number;
+    readonly paid: number;
+    readonly dentalPending: number;
+    readonly cosmeticPending: number;
   };
-  service?: {
-    name: string;
-    amount: number;
-    date?: string;
-    next_appointment?: string;
+  readonly counts: {
+    readonly pending: number;
+    readonly paid: number;
   };
-  payment?: {
-    amount: number;
-    date: string;
-    method?: string;
-    commission_earned: number;
-    commission_rate?: string;
-  };
-  total_earned: number;
-  estimated_commission?: number;
-  services?: CtvReferralService[];
+  readonly recent: CtvCommissionRow[];
+  readonly pendingList: CtvCommissionRow[];
+  readonly paidList: CtvCommissionRow[];
+  readonly tierLabels?: Record<number, string>;
 }
 
-export interface CtvNetworkNode {
-  id: string;
-  name?: string;
-  phone?: string;
-  email?: string;
-  active?: boolean;
-  lobs?: CtvLob[];
-  level?: number;
-  referred_by_ctv_id?: string | null;
-  client_count?: number;
-  active_earnings_sum?: number;
-  children?: CtvNetworkNode[];
+export interface CtvProfile {
+  readonly id: string;
+  readonly name: string;
+  readonly email: string;
+  readonly phone: string;
+  readonly role: string;
 }
 
-export interface CtvNetworkResponse {
-  self: CtvNetworkNode;
-  upline: CtvNetworkNode | null;
-  direct: CtvNetworkNode[];
-  downline: CtvNetworkNode[];
+export function fetchCtvReferrals() {
+  return apiFetch<CtvReferralResponse>('/ctv/referrals');
 }
 
-export async function fetchCtvSummary(): Promise<CtvCommissionSummary> {
+export function fetchCtvCommissionSummary() {
   return apiFetch<CtvCommissionSummary>('/ctv/commission-summary');
 }
 
-export async function fetchCtvReferrals(): Promise<CtvReferralResponse> {
-  return apiFetch('/ctv/referrals');
+export interface CreateReferralPayload {
+  readonly clientName: string;
+  readonly clientPhone: string;
+  readonly clientEmail?: string;
+  readonly serviceInterest?: string;
+  readonly notes?: string;
+  readonly lob?: CtvLob;
 }
 
-export async function fetchCtvClientJourneys(): Promise<{ clients: CtvClientJourney[] }> {
-  return apiFetch('/ctv/client-journeys');
+export interface CreateReferralResponse {
+  readonly success: boolean;
+  readonly partnerId: string;
+  readonly orderId: string;
+  readonly message: string;
 }
 
-export async function fetchCtvNetwork(): Promise<CtvNetworkResponse> {
-  return apiFetch<CtvNetworkResponse>('/ctv/network');
+export function fetchCtvProfile() {
+  return apiFetch<CtvProfile>('/ctv/me');
 }
 
-export async function fetchCtvMe(): Promise<{ id: string; name: string; email?: string; phone?: string; role: string; referral_code?: string }> {
-  return apiFetch('/ctv/me');
-}
-
-export interface CreateCtvInput {
-  name: string;
-  phone: string;
-  email: string;
-  password: string;
-  lob_scope?: string[];
-  referred_by_ctv_id?: string;
-}
-
-export interface CtvRecord {
-  id: string;
-  name: string;
-  phone?: string;
-  email?: string;
-  lob_scope?: string[];
-  active?: boolean;
-  is_ctv?: boolean;
-  referred_by_ctv_id?: string | null;
-  upline_name?: string | null;
-}
-
-export interface ReferClientInput {
-  name: string;
-  phone: string;
-  lob: 'dental' | 'cosmetic';
-}
-
-/** Create a CTV (caller must be a CTV or admin). New CTV is active immediately. */
-export async function createCtv(input: CreateCtvInput): Promise<CtvRecord> {
-  return apiFetch<CtvRecord>('/ctv', { method: 'POST', body: input });
-}
-
-/** Refer a new client (customer) under the calling CTV. */
-export async function referClient(input: ReferClientInput): Promise<CtvRecord> {
-  return apiFetch<CtvRecord>('/ctv/clients', { method: 'POST', body: input });
-}
-
-/** Admin: list CTVs, optionally filtered by status. */
-export async function fetchCtvs(status?: 'active' | 'suspended'): Promise<{ ctvs: CtvRecord[] }> {
-  return apiFetch('/Ctvs', { params: status ? { status } : undefined });
-}
-
-/** Admin: suspend or reactivate a CTV. */
-export async function setCtvActive(id: string, active: boolean): Promise<CtvRecord> {
-  return apiFetch<CtvRecord>(`/Ctvs/${id}`, { method: 'PATCH', body: { active } });
-}
-
-export interface CreateBookingInput {
-  clientId?: string;
-  name?: string;
-  phone: string;
-  lob: 'dental' | 'cosmetic';
-  date: string;
-  time?: string;
-  companyId?: string;
-  productId?: string;
-}
-
-/** Create a booking for a referred client (or new client). May fail with B_CLIENT_CLAIMED if client is under another CTV. */
-export async function createBooking(input: CreateBookingInput): Promise<{ clientId: string; appointmentId: string }> {
-  return apiFetch<{ clientId: string; appointmentId: string }>('/ctv/bookings', { method: 'POST', body: input });
+export function createCtvReferral(payload: CreateReferralPayload) {
+  return apiFetch<CreateReferralResponse>('/ctv/referrals', {
+    method: 'POST',
+    body: payload,
+  });
 }

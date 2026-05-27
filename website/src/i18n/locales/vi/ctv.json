@@ -12,9 +12,10 @@
     "home": "Tổng quan",
     "commission": "Hoa hồng",
     "tracking": "Theo dõi",
-    "referrals": "Giới thiệu",
+    "referrals": "Giới thiệu khách",
     "network": "Mạng lưới",
-    "me": "Tôi"
+    "me": "Tôi",
+    "recruiting": "Tuyển CTV"
   },
   "actions": {
     "referClient": "Giới thiệu khách",
@@ -117,7 +118,8 @@
     "noServices": "Chưa có dịch vụ",
     "servicesUnderReferral": "Dịch vụ thuộc lượt giới thiệu này",
     "emptyBack": "Chưa có dịch vụ đã thanh toán nào được ghi nhận cho lượt giới thiệu này.",
-    "tapToReturn": "Chạm để quay lại hành trình giới thiệu"
+    "tapToReturn": "Chạm để quay lại hành trình giới thiệu",
+    "back": "Quay lại"
   },
   "network": {
     "myNetwork": "Mạng lưới CTV",
@@ -170,5 +172,81 @@
     "loadFailedDetail": "Lỗi kết nối máy chủ. Vui lòng thử lại.",
     "generic": "Đã xảy ra lỗi. Vui lòng thử lại sau."
   },
-  "currency": "₫"
+  "currency": "₫",
+  "brand": "TG CLINIC",
+  "portal": "Cổng CTV",
+  "profileFallback": "CTV",
+  "hello": "Xin chào, {{name}}",
+  "notifications": "Thông báo",
+  "title": "Theo dõi khách hàng",
+  "subtitle": "Theo dõi hành trình khách hàng từ giới thiệu đến thanh toán",
+  "searchLabel": "Tìm khách hàng",
+  "searchPlaceholder": "Tìm khách hàng...",
+  "filters": {
+    "all": "Tất cả",
+    "active": "Đang tiến hành",
+    "completed": "Đã hoàn tất",
+    "waitingPayment": "Chờ thanh toán"
+  },
+  "summary": {
+    "clients": "Khách",
+    "pending": "Dự kiến",
+    "paid": "Đã nhận"
+  },
+  "loading": "Đang tải danh sách giới thiệu...",
+  "errorTitle": "Không tải được dữ liệu CTV",
+  "errorBody": "Vui lòng thử lại sau ít phút.",
+  "retry": "Tải lại",
+  "emptyTitle": "Chưa có khách giới thiệu",
+  "emptyBody": "Danh sách sẽ hiển thị ngay khi khách được gắn với mã CTV của bạn.",
+  "noSearchTitle": "Không tìm thấy khách",
+  "noSearchBody": "Thử đổi từ khóa hoặc bộ lọc.",
+  "signup": {
+    "title": "Đăng ký CTV",
+    "subtitle": "Tham gia cộng đồng và bắt đầu nhận hoa hồng",
+    "phone": "Số điện thoại",
+    "name": "Họ và tên",
+    "email": "Email",
+    "dob": "Ngày sinh",
+    "address": "Địa chỉ",
+    "idNumber": "Số CMND/CCCD",
+    "referrerPhone": "SĐT ngườii giới thiệu",
+    "checkReferrer": "Kiểm tra",
+    "referrerFound": "Ngườii giới thiệu: {{name}} ({{phone}})",
+    "password": "Mật khẩu",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "signatureLabel": "Chữ ký số",
+    "clearSignature": "Xóa chữ ký",
+    "termsLabel": "Điều khoản & Điều kiện",
+    "viewTerms": "Xem điều khoản",
+    "acceptTerms": "Tôi đồng ý với Điều khoản & Điều kiện",
+    "closeTerms": "Đóng",
+    "idCardLabel": "Tải lên CMND/CCCD (Tùy chọn)",
+    "ocrLoading": "Đang quét thẻ...",
+    "ocrImageTooLarge": "Hình ảnh phải dưới 2MB",
+    "submit": "Gửi đăng ký",
+    "submitting": "Đang gửi...",
+    "termsRequired": "Bạn phải đồng ý với Điều khoản & Điều kiện",
+    "passwordMismatch": "Mật khẩu không khớp",
+    "passwordTooShort": "Mật khẩu phải có ít nhất 6 ký tự",
+    "signatureRequired": "Vui lòng ký tên",
+    "termsLoadError": "Không tải được điều khoản. Vui lòng tải lại trang."
+  },
+  "referral": {
+    "title": "Giới thiệu khách hàng",
+    "clientName": "Tên khách hàng",
+    "clientPhone": "Số điện thoại",
+    "clientEmail": "Email",
+    "serviceInterest": "Dịch vụ quan tâm",
+    "servicePlaceholder": "VD: Tẩy trắng răng",
+    "lob": "Lĩnh vực",
+    "notes": "Ghi chú",
+    "submit": "Gửi giới thiệu",
+    "submitting": "Đang gửi...",
+    "namePhoneRequired": "Vui lòng nhập tên và số điện thoại",
+    "referredByOther": "Khách hàng này đã được giới thiệu bởi CTV khác",
+    "activeExists": "Đã có lượt giới thiệu đang hoạt động cho khách hàng này",
+    "alreadyReferred": "Khách hàng này đã được giới thiệu",
+    "successMessage": "Giới thiệu thành công!"
+  }
 }

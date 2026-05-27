@@ -4,8 +4,20 @@ jest.mock('../src/middleware/auth', () => ({
   requireLobScope: () => (_req, _res, next) => next(),
 }));
 
-jest.mock('../src/db', () => ({
-  query: jest.fn(),
+jest.mock('../src/db', () => {
+  const queryMock = jest.fn();
+  return {
+    query: queryMock,
+    pool: { connect: jest.fn() },
+    getQuery: jest.fn(() => queryMock),
+    getDb: jest.fn(),
+    runWithLob: jest.fn((_lob, fn) => fn()),
+    getCurrentLob: jest.fn(() => 'dental'),
+  };
+});
+
+jest.mock('../src/services/larkNotifier', () => ({
+  notifyFeedbackThreadCreated: jest.fn(async () => ({ ok: true, skipped: true })),
 }));
 
 jest.mock('uuid', () => ({
@@ -15,10 +27,12 @@ jest.mock('uuid', () => ({
 const request = require('supertest');
 const app = require('../src/server');
 const { query } = require('../src/db');
+const { notifyFeedbackThreadCreated } = require('../src/services/larkNotifier');
 
 describe('telemetry route auth boundary', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    notifyFeedbackThreadCreated.mockResolvedValue({ ok: true, skipped: true });
     query.mockImplementation(async (sql) => {
       if (sql.includes('ip_access_settings')) return [{ mode: 'disabled' }];
       if (sql.includes('ip_access_entries')) return [];
@@ -37,6 +51,13 @@ describe('telemetry route auth boundary', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
+    expect(notifyFeedbackThreadCreated).toHaveBeenCalledWith(expect.objectContaining({
+      source: 'auto',
+      threadId: 'feedback-thread-id',
+      errorEventId: 'error-event-id',
+      errorType: 'Global',
+      errorMessage: 'render failed',
+    }));
   });
 
   it('requires auth for telemetry management reads', async () => {

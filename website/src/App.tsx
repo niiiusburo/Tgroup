@@ -36,7 +36,10 @@ const Payment = lazy(() => import('@/pages/Payment').then(m => ({ default: m.Pay
 const Feedback = lazy(() => import('@/pages/Feedback').then(m => ({ default: m.Feedback })));
 const Services = lazy(() => import('@/pages/Services').then(m => ({ default: m.Services })));
 const ServiceCatalog = lazy(() => import('@/pages/ServiceCatalog').then(m => ({ default: m.ServiceCatalog })));
-const CtvDashboard = lazy(() => import('@/pages/CTV/CtvDashboard'));
+const CtvDashboard = lazy(() => import('@/pages/CTV').then(m => ({ default: m.CtvDashboard })));
+const CommissionTiers = lazy(() => import('@/pages/Admin/CommissionTiers').then(m => ({ default: m.default })));
+const CtvSignup = lazy(() => import('@/pages/CtvSignup').then(m => ({ default: m.default })));
+const CtvThankYou = lazy(() => import('@/pages/CtvSignup/ThankYou').then(m => ({ default: m.default })));
 
 /**
  * Access Denied page — shown when authenticated but lacking permission
@@ -100,9 +103,7 @@ function ProtectedRoute({ children, path }: ProtectedRouteProps) {
   if (isLoading) return <AuthLoading />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  // CTV users (is_ctv) are blocked from ALL admin routes — hard gate
   if (user?.is_ctv || user?.isCtv) {
-    // redirect back to their surface
     return <Navigate to="/ctv" replace />;
   }
 
@@ -125,12 +126,26 @@ function CTVRouteGuard({ children }: { readonly children: React.ReactNode }) {
 }
 
 /**
+ * CtvRoute — keeps CTV users on the standalone mobile CTV portal.
+ */
+function CtvRoute({ children }: { readonly children: React.ReactNode }) {
+  const { isAuthenticated, isLoading, user, hasPermission } = useAuth();
+
+  if (isLoading) return <AuthLoading />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user?.is_ctv !== true) return <AccessDenied />;
+  if (!hasPermission('ctv.dashboard.view')) return <AccessDenied />;
+
+  return <>{children}</>;
+}
+
+/**
  * LoginRoute — redirects authenticated users away from /login
  */
 function LoginRoute() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   if (isLoading) return <AuthLoading />;
-  if (isAuthenticated) return <Navigate to="/" replace />;
+  if (isAuthenticated) return <Navigate to={user?.is_ctv === true ? '/ctv' : '/'} replace />;
   return <Login />;
 }
 
@@ -171,6 +186,17 @@ function AppRoutes() {
           {import.meta.env.DEV && (
             <Route path="/test/address" element={<AddressAutocompleteTest />} />
           )}
+          {/* Public CTV signup (no auth required) */}
+          <Route path="/ctv/signup" element={<CtvSignup />} />
+          <Route path="/ctv/thank-you" element={<CtvThankYou />} />
+          <Route
+            path="/ctv"
+            element={
+              <CtvRoute>
+                <CtvDashboard />
+              </CtvRoute>
+            }
+          />
 
           {/* CTV v2 dashboard — mobile-first, bypasses admin Layout entirely for is_ctv users */}
           <Route
@@ -363,6 +389,16 @@ function AppRoutes() {
               element={
                 <ProtectedRoute path={ROUTES.FEEDBACK}>
                   <Feedback />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* @crossref:route[path="/admin/commission-tiers", component=CommissionTiers] */}
+            <Route
+              path={ROUTES.COMMISSION_TIERS}
+              element={
+                <ProtectedRoute path={ROUTES.COMMISSION_TIERS}>
+                  <CommissionTiers />
                 </ProtectedRoute>
               }
             />

@@ -55,6 +55,24 @@ testsprite_tests/tmp/
 
 # Playwright MCP session snapshots
 .playwright-mcp/
+.playwright-cli/
+
+# Scratch / ad-hoc artifacts (never commit)
+website/output/
+semgrep-results.json
+semgrep-results.sarif
+testbright.md
+ete-verify-script.js
+ete-screenshot-script.cjs
+ete-verify-script.cjs
+website/ete-*.cjs
+nieng-rang-audit.js
+output/live-hotfixes/
+output/live-verification/
+output/local-verification/
+output/nk-login-monitor-*/
+*.yml
+!product-map/**/*.yml
 
 # Code graph build output
 graphify-out/

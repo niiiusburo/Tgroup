@@ -17,6 +17,7 @@ owns:
   - website/src/lib/api/lob.ts (me/lob-scope)
   - website/src/hooks/useBusinessUnit.ts
   - website/src/hooks/useCTVSummary.ts
+  - api/scripts/cosmetic-lob-import.js (audited dry-run/apply importer for the 3-tab source workbook)
 reads:
   - api/src/db.js (dual-pool: dental pool + cosmetic pool)
   - tdental_demo.partners (lob_scope, is_ctv — canonical auth/identity source per 047; NO users table for LOB)
@@ -28,6 +29,7 @@ reads:
   - tcosmetic_demo.staff (mirrors dental employee flags; via partners table too)
   - tcosmetic_demo.companies
   - tcosmetic_demo.payments / saleorders / saleorderlines (with consultation_id)
+  - Google Sheets/XLSX source workbook tabs `Hồ sơ`, `Phiếu cọc`, `Phiếu khám` (import source only; not a runtime source of truth)
 writes:
   - tdental_demo.partners (lob_scope / is_ctv / referred_by_ctv_id additive columns)
   - tdental_demo.partners (referred_by_ctv_id)
@@ -116,6 +118,7 @@ impact_tests:
   - Migration rollback dry-run on dental additive changes
   - Real-browser smoke: admin with both scopes sees toggle, can switch, sees empty cosmetic state, switches back with dental data intact
   - CTV login lands on /ctv and sees cross-DB pending/paid data
+  - Cosmetic source workbook import rejects missing/extra tabs, plans/applies `Hồ sơ`/`Phiếu cọc`/`Phiếu khám` into existing cosmetic tables only, preserves unmatched money rows as manual-review anomalies, and reruns dry-run idempotency checks after apply
 risk_level: high
 notes:
   - "Physical DB isolation is the core invariant of v2. No cross-DB JOINs are ever allowed; all composition happens in the API layer (ctv aggregator, crossview badge probe)."
@@ -125,3 +128,4 @@ notes:
   - "The 9 new permission keys (cosmetic.access, dental.access, ctv.dashboard.view, ctv.commission.view.self, ctv.referrals.view.self, commissions.view.team, commissions.payout.run, commissions.export, lob.crossview) must be seeded and appear in permission-registry.yaml."
   - "Feature flag COSMETIC_LOB_ENABLED gates the entire surface until step 8 of the rollout. Pre-flip, cosmetic routes return 503."
   - "Verification gates (detailed in parent spec) must all pass before flag flip on nk2 and again on nk prod."
+  - "The 2026-05-23 cosmetic source workbook has exactly three tabs: Hồ sơ, Phiếu cọc, Phiếu khám. The approved importer is api/scripts/cosmetic-lob-import.js and is gated by dry-run artifacts, backup/compare checks, two confirmations, manual-review anomaly preservation, and post-apply idempotency verification."

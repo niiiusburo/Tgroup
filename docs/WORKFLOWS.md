@@ -627,6 +627,7 @@ sequenceDiagram
 **Data state transitions:** None. CTV portal is read-only; earnings remain append-only attribution rows.
 
 **Traceability:** Related UC: UC-022. Contracts/routes: `GET /api/ctv/referrals`, `GET /api/ctv/commission-summary`, `GET /api/ctv/me`. Data/tables: `dbo.partners`, `dbo.earnings`, `dbo.saleorderlines`, `dbo.products` in dental and cosmetic DBs. Invariants: INV-006, INV-016, INV-017, INV-020. Tests: `api/src/routes/__tests__/ctvReferrals.test.js`, `website/src/components/ctv/ReferralFlipCard.test.tsx`, `website/src/pages/CTV/tabs/CtvTrackingTab.test.tsx`. Product-map domains: `ctv`, `earnings-commissions`, `business-unit`.
+**Traceability:** Related UC: UC-022. Contracts/routes: `GET /api/ctv/referrals`, `GET /api/ctv/commission-summary`, `GET /api/ctv/me`. Data/tables: `dbo.partners`, `dbo.earnings`, `dbo.saleorderlines`, `dbo.products` in dental and cosmetic DBs. Invariants: INV-006, INV-016, INV-017, INV-020. Tests: `api/src/routes/__tests__/ctvReferrals.test.js`, `website/src/components/ctv/ReferralFlipCard.test.tsx`, `website/src/pages/CTV/index.test.tsx`. Product-map domains: `ctv`, `earnings-commissions`, `business-unit`.
 
 **Failure modes:**
 - A missing `recipient_partner_id` filter can leak another CTV's service rows.

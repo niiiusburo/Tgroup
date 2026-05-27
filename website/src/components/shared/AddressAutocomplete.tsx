@@ -85,17 +85,6 @@ export function AddressAutocomplete({
   // Debounce timer ref
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Get API key
-  const apiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
-
-  // Check API key on mount
-  useEffect(() => {
-    if (!apiKey) {
-      setError('Google Places API key not configured. Please set VITE_GOOGLE_PLACES_API_KEY');
-      console.error('[AddressAutocomplete] VITE_GOOGLE_PLACES_API_KEY not set');
-    }
-  }, [apiKey]);
-
   // Sync external value
   useEffect(() => {
     if (value !== inputValue) {
@@ -106,7 +95,6 @@ export function AddressAutocomplete({
 
   // Fetch suggestions from backend proxy (which calls Google Places API)
   const fetchSuggestions = useCallback(async (input: string) => {
-    if (!apiKey) return;
     if (input.length < 3) {
       setSuggestions([]);
       return;
@@ -131,12 +119,12 @@ export function AddressAutocomplete({
       }
     } catch (err) {
       console.error('[AddressAutocomplete] Fetch error:', err);
-      setError('Failed to fetch suggestions. Please try again.');
+      setError('Không tải được gợi ý địa chỉ. Vui lòng thử lại.');
       setSuggestions([]);
     } finally {
       setIsLoading(false);
     }
-  }, [apiKey]);
+  }, []);
 
   // Handle input change with debounce
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -336,11 +324,6 @@ export function AddressAutocomplete({
         </div>
         <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-xs text-red-600 font-medium">⚠️ {error}</p>
-          {error.includes('API key') &&
-          <p className="text-xs text-red-500 mt-1">
-
-          </p>
-          }
         </div>
       </div>);
 
@@ -358,14 +341,14 @@ export function AddressAutocomplete({
           onChange={handleInputChange}
           onFocus={() => inputValue.length >= 3 && setShowSuggestions(true)}
           placeholder={placeholder}
-          disabled={disabled || !apiKey}
+          disabled={disabled}
           title={inputValue || placeholder} // Show full address on hover
           className={`
             w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-xl 
             text-sm text-gray-900 placeholder:text-gray-400
             focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary 
             transition-all
-            ${disabled || !apiKey ? 'opacity-60 cursor-not-allowed bg-gray-50' : ''}
+            ${disabled ? 'opacity-60 cursor-not-allowed bg-gray-50' : ''}
           `} />
         
 

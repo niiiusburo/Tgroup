@@ -1,11 +1,11 @@
 'use strict';
 
 const express = require('express');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { getQuery, runWithLob } = require('../db');
 const { requireAuth } = require('../middleware/auth');
 const { resolveEffectivePermissions, isAdminPermissionState } = require('../services/permissionService');
+const { verify: verifyPassword, hash: hashPassword, isLegacy } = require('../services/passwordService');
 
 const router = express.Router();
 
@@ -60,11 +60,6 @@ function resolvePermissionsForLob(employeeId, lob) {
   return runWithLob(lob, () => resolveEffectivePermissions(employeeId));
 }
 
-/**
- * POST /api/Auth/login
- * Body: { email, password }
- * Returns JWT token + user info + permissions
- */
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -83,7 +78,7 @@ router.post('/login', async (req, res) => {
 
     for (const candidate of rows) {
       if (!candidate.password_hash) continue;
-      const passwordMatch = await bcrypt.compare(password, candidate.password_hash);
+      const passwordMatch = await verifyPassword(password, candidate.password_hash);
       if (passwordMatch) {
         employee = candidate;
         break;
@@ -97,14 +92,24 @@ router.post('/login', async (req, res) => {
     const authLob = employee.authLob;
     const q = getQuery(authLob);
 
-    // Update last_login
+    if (isLegacy(employee.password_hash)) {
+      try {
+        const newHash = await hashPassword(password);
+        await q(
+          `UPDATE partners SET password_hash = $1 WHERE id = $2`,
+          [newHash, employee.id]
+        );
+      } catch (rehashErr) {
+        console.error('Lazy rehash failed:', rehashErr.message);
+      }
+    }
+
     await q(
       `UPDATE partners SET last_login = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh') WHERE id = $1`,
       [employee.id]
     );
 
     const permissions = await resolvePermissionsForLob(employee.id, authLob);
-
     const lobScope = visibleLobScopeForUser(employee.lobScope, permissions, authLob);
     const isCtv = !!employee.isCtv;
 
@@ -120,9 +125,6 @@ router.post('/login', async (req, res) => {
     };
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '24h' });
-
-    // CTV redirect decision lives on backend (per task): non-CTV admins/staff use normal flow;
-    // CTV users should be sent to /ctv dashboard and never reach admin UI.
     const redirectTo = isCtv ? '/ctv' : null;
 
     return res.json({
@@ -139,7 +141,7 @@ router.post('/login', async (req, res) => {
         is_ctv: isCtv,
       },
       permissions,
-      redirectTo, // backend-driven CTV redirect hook
+      redirectTo,
     });
   } catch (err) {
     console.error('Login error:', err);
@@ -147,11 +149,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-/**
- * GET /api/Auth/me
- * Authorization: Bearer <token>
- * Returns current user info + permissions
- */
 router.get('/me', requireAuth, async (req, res) => {
   try {
     const { employeeId } = req.user;
@@ -173,7 +170,6 @@ router.get('/me', requireAuth, async (req, res) => {
 
     const employee = rows[0];
     const permissions = await resolvePermissionsForLob(employeeId, authLob);
-
     const lobScope = visibleLobScopeForUser(employee.lobScope, permissions, authLob);
     const isCtv = !!employee.isCtv;
 
@@ -197,11 +193,6 @@ router.get('/me', requireAuth, async (req, res) => {
   }
 });
 
-/**
- * POST /api/Auth/change-password
- * Body: { oldPassword, newPassword }
- * Allows an authenticated employee to change their own password.
- */
 router.post('/change-password', requireAuth, async (req, res) => {
   try {
     const { employeeId } = req.user;
@@ -226,12 +217,12 @@ router.post('/change-password', requireAuth, async (req, res) => {
       return res.status(401).json({ error: 'User not found or no password set' });
     }
 
-    const passwordMatch = await bcrypt.compare(oldPassword, rows[0].password_hash);
+    const passwordMatch = await verifyPassword(oldPassword, rows[0].password_hash);
     if (!passwordMatch) {
       return res.status(401).json({ error: 'Incorrect current password' });
     }
 
-    const newHash = await bcrypt.hash(newPassword, 10);
+    const newHash = await hashPassword(newPassword);
     await q(
       `UPDATE partners SET password_hash = $1 WHERE id = $2`,
       [newHash, employeeId]

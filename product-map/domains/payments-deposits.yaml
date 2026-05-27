@@ -20,6 +20,7 @@ owns:
   - website/src/hooks/useDeposits.ts
   - website/src/hooks/useMonthlyPlans.ts
   - website/src/hooks/useBankSettings.ts
+  - api/scripts/cosmetic-lob-import.js (dry-run/apply importer for `Phiếu cọc` and paid `Phiếu khám` rows)
 reads:
   - api/src/db.js
 writes:
@@ -93,6 +94,7 @@ impact_tests:
   - website/e2e/vps-payment-history.spec.ts
   - website/src/components/payment/__tests__/PaymentForm.submit.test.tsx
   - website/src/lib/allocatePaymentSources.test.ts
+  - api/tests/cosmeticLobImport.test.js
 risk_level: high
 notes:
   - "`payments` is the canonical money row; `payment_allocations` is the canonical link from payments to saleorders or dotkhams."
@@ -104,3 +106,8 @@ notes:
     `payment.void`. `payment.edit` alone must not grant refund, delete, void,
     PATCH, or proof-upload access unless the code changes.
   - Payment allocation flows can update `dotkhams.amountresidual`, so DotKhams route/schema drift belongs in payment verification even though `/api/DotKhams` itself is read-only.
+  - >-
+    Cosmetic workbook money rows import only after dry-run, backup, compare,
+    and confirmation gates: `Phiếu cọc` maps to deposit payments, and paid
+    `Phiếu khám` rows map to service payments plus `payment_allocations`.
+    Missing or ambiguous customer matches must remain manual-review anomalies.

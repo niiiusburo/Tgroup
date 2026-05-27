@@ -4,6 +4,7 @@ const express = require('express');
 const { query, pool } = require('../../db');
 const { requireAuth } = require('../../middleware/auth');
 const { getVietnamNow } = require('../../lib/dateUtils');
+const { notifyFeedbackThreadCreated } = require('../../services/larkNotifier');
 const { isAdmin } = require('./admin');
 const {
   upload,
@@ -14,6 +15,12 @@ const {
 } = require('./attachments');
 
 const router = express.Router();
+
+function queueFeedbackCreatedAlert(payload) {
+  notifyFeedbackThreadCreated(payload).catch((err) => {
+    console.error('[Lark] Feedback alert queue failed:', err.message);
+  });
+}
 
 /**
  * GET /api/Feedback/unread-count
@@ -110,6 +117,19 @@ router.post('/', requireAuth, upload.array('files', 5), async (req, res) => {
 
     await client.query('COMMIT');
     transactionStarted = false;
+
+    queueFeedbackCreatedAlert({
+      source: 'manual',
+      threadId: thread.id,
+      employeeId,
+      pageUrl,
+      pagePath,
+      screenSize,
+      content: bodyContent,
+      attachmentCount: req.files ? req.files.length : 0,
+      createdAt: now,
+      appBaseUrl: req.headers.origin || pageUrl,
+    });
 
     return res.status(201).json(thread);
   } catch (err) {

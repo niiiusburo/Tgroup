@@ -80,9 +80,7 @@ CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin ro
 | GET | `/` | Auth | `?partner_id, offset, limit, search, sortField, sortOrder, date_from/dateFrom, date_to/dateTo, state, company_id/companyId, doctor_id/doctorId` | `PaginatedResponse<Appointment> + aggregates` |
 | GET | `/:id` | Auth | — | Appointment detail |
 | POST | `/` | Perm:`appointments.add` | `{ date, time, partnerId/partnerid, doctorId/doctorid, companyId/companyid, note, timeExpected/timeexpected, color, state, productId/productid }` | Created appointment |
-| PUT | `/:id` | Perm:`appointments.edit` | `{ date, doctorId/doctorid, companyId/companyid, note, state, timeExpected/timeexpected, color, time, productId/productid, assistantId/assistantid, dentalAideId/dentalaideid }` | Updated appointment, including refreshed `companyid/companyname` when clinic/location changes |
-
-PUT handler-level validation: `companyId` (when present) must be a UUID (`400 INVALID_COMPANY_ID`) and reference an existing `companies` row (`404 COMPANY_NOT_FOUND`); persisted to `appointments.companyid`. Covered by `api/src/routes/appointments/__tests__/mutationHandlers.test.js`.
+| PUT | `/:id` | Perm:`appointments.edit` | `{ date, doctorId/doctorid, note, state, timeExpected/timeexpected, color, time, productId/productid }` | Updated appointment |
 
 Cosmetic LOB mirror: Appointment UI submitters must pass active `lob` into `createAppointment` and `updateAppointment`; when `lob='cosmetic'`, Calendar and customer-profile appointment forms route through `POST/PUT /api/cosmetic/Appointments` with the same payload shape and write only the Cosmetic database.
 
@@ -121,6 +119,8 @@ Cosmetic LOB mirror: Employee UI callers must pass active `lob` into `createEmpl
 | POST | `/` | Perm:`services.edit` | `{ name, defaultcode, type, listprice, categid, uomname, companyid, canorderlab }` | Created product |
 | PUT | `/:id` | Perm:`services.edit` | Product fields | Updated product |
 | DELETE | `/:id` | Perm:`services.edit` | — | 204 or 409 if linked records exist |
+
+POST/PUT must write the accent-insensitive search column as `namenosign = normalizeVietnamese(name)` in both dental `/api/Products` and cosmetic `/api/cosmetic/Products`.
 
 ## Product Categories (`/api/ProductCategories`)
 
@@ -188,7 +188,7 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/:id` | Auth | — | Balance breakdown |
+| GET | `/:id` | Auth | — | `{ id, name, deposit_balance, outstanding_balance, total_deposited, total_used, total_refunded }`; cosmetic mirror reads request-scoped cosmetic DB at `/api/cosmetic/CustomerBalance/:id` |
 
 Cosmetic LOB mirror: `GET /api/cosmetic/CustomerBalance/:id` returns the same balance breakdown from `tcosmetic_demo` for the active Cosmetic LOB. Customer profile and deposit screens must call this mirror when `currentLOB='cosmetic'`.
 
@@ -230,6 +230,8 @@ Cosmetic LOB mirror: LOB-aware employee and location UI surfaces must call `GET 
 
 ## Reports (`/api/Reports`)
 
+Revenue paid totals count posted `payment_allocations` linked to saleorders plus direct posted service receipts with `payments.service_id IS NOT NULL` and no allocation rows. Deposits, refunds, deposit usage, unallocated wallet/customer payments without `service_id`, and voided rows are excluded.
+
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
 | POST | `/dashboard` | Perm:`reports.view` | `{ dateFrom?, dateTo?, companyId? }` | Dashboard KPIs |
@@ -257,7 +259,7 @@ Cosmetic LOB mirror: LOB-aware employee and location UI surfaces must call `GET 
 | POST | `/:type/preview` | Auth + registry permission | `{ filters }`; `type` is `service-catalog`, `customers`, `appointments`, `services`, `payments`, `report-sales-employees`, `revenue-flat`, or `deposit-flat` | `{ type, label, rowCount, filename, filters, summary, exceedsMax }` + best-effort `exports_audit` row |
 | POST | `/:type/download` | Auth + registry permission | `{ filters }`; same type keys as preview | XLSX workbook stream + best-effort `exports_audit` row after response |
 
-Export permissions are defined by `api/src/services/exports/exportRegistry.js`: `customers.export`, `appointments.export`, `services.export`, `payments.export`, `products.export`, and `reports.export`. `appointments` accepts `search`, `companyId`, `dateFrom`, `dateTo`, `state`, and `doctorId`; its search includes customer phone and its workbook date must prefer `appointments.date`/`time` before falling back to legacy `datetimeappointment`. `report-sales-employees` accepts `companyId`, `employeeType` (`doctor`, `assistant`, `consultant`, `sales`), optional `employeeId`, `dateFrom`, and `dateTo`; `revenue-flat` and `deposit-flat` use `payments.export` with `search`, `companyId`, `dateFrom`, and `dateTo`. `revenue-flat` includes payment note and resolves customer source from sale order first, then customer fallback; `deposit-flat` includes deposit note and splits cash vs bank-transfer amounts from explicit split columns or payment method fallback.
+Export permissions are defined by `api/src/services/exports/exportRegistry.js`: `customers.export`, `appointments.export`, `services.export`, `payments.export`, `products.export`, and `reports.export`. `report-sales-employees` accepts `companyId`, `employeeType` (`doctor`, `assistant`, `consultant`, `sales`), optional `employeeId`, `dateFrom`, and `dateTo`; `revenue-flat` and `deposit-flat` use `payments.export` with `search`, `companyId`, `dateFrom`, and `dateTo`.
 
 ## Dashboard Reports (`/api/DashboardReports`)
 
@@ -456,6 +458,11 @@ All existing dental route shapes are mirrored at `/api/cosmetic/*` (e.g. /api/co
 - Auth: same as dental equivalent + lob_scope check (hard) + permission (soft)
 - Response: identical shape, but sourced exclusively from tcosmetic_demo
 - Flag off or missing scope → 503 or 403 S_LOB_FORBIDDEN
+All existing dental route shapes required by TMV/NK3 Cosmetic mode are mirrored at `/api/cosmetic/*` (e.g. `/api/cosmetic/Partners`, `/api/cosmetic/Appointments`, `/api/cosmetic/Employees`, `/api/cosmetic/Products`, `/api/cosmetic/ProductCategories`, `/api/cosmetic/Payments`, `/api/cosmetic/CustomerBalance`, `/api/cosmetic/CustomerReceipts`, `/api/cosmetic/SaleOrderLines`, `/api/cosmetic/SaleOrders`, `/api/cosmetic/MonthlyPlans`, `/api/cosmetic/Companies`, `/api/cosmetic/Reports/*`, `/api/cosmetic/DashboardReports/*`, `/api/cosmetic/CustomerSources`, `/api/cosmetic/Permissions`, `/api/cosmetic/DotKhams`, `/api/cosmetic/settings`, `/api/cosmetic/ExternalCheckups`, `/api/cosmetic/face`, and `/api/cosmetic/Exports`).
+- Auth: same as dental equivalent + lob_scope check (hard) + permission (soft)
+- Response: identical shape, but sourced exclusively from tcosmetic_demo
+- Flag off or missing scope → 503 or 403 S_LOB_FORBIDDEN
+- Frontend `apiFetch(..., { lob: 'cosmetic' })` prefixes requests with `/api/cosmetic`; omitted or `dental` uses legacy `/api/*`.
 
 See cosmetic-clients.yaml, business-unit.yaml for details.
 

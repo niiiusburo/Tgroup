@@ -6,9 +6,11 @@ summary: |
 owns:
   - api/src/routes/faceRecognition.js
   - api/src/routes/externalCheckups.js
+  - api/src/routes/publicTelemetryErrors.js
   - api/src/services/faceEngineClient.js
   - api/src/services/comprefaceClient.js (legacy fallback)
   - api/src/services/faceMatchEngine.js
+  - api/src/services/larkNotifier.js
   - website/src/components/customer/CustomerCameraWidget.tsx
   - website/src/components/shared/FaceCaptureModal.tsx
   - website/src/components/modules/PatientCheckIn.tsx
@@ -24,6 +26,9 @@ reads:
   - process.env.HOSOONLINE_API_KEY
   - process.env.HOSOONLINE_USERNAME
   - process.env.HOSOONLINE_PASSWORD
+  - process.env.LARK_FEEDBACK_WEBHOOK_URL
+  - process.env.LARK_FEEDBACK_WEBHOOK_SECRET
+  - process.env.TGROUP_PUBLIC_URL
 writes:
   - dbo.partners (face_subject_id, face_registered_at)
   - dbo.customer_face_embeddings
@@ -40,6 +45,7 @@ endpoints:
   - GET  /api/ExternalCheckups/:customerCode
   - POST /api/ExternalCheckups/:customerCode/patient
   - POST /api/ExternalCheckups/:customerCode/health-checkups
+  - POST https://open.larksuite.com/open-apis/bot/v2/hook/* (outbound only, optional)
 ui_surfaces:
   - PatientCheckIn
   - CustomerCameraWidget
@@ -64,6 +70,7 @@ impact_tests:
   - website/src/components/customer/AuthenticatedCheckupImage.test.tsx
 risk_level: medium
 notes:
+  - Lark feedback alerts are optional and env-gated. The API process posts a text alert to the configured T-Group custom bot webhook only after a manual feedback thread or auto-detected telemetry feedback thread has committed locally.
   - `FACE_RECOGNITION_PROVIDER=local` uses the Python FastAPI face-service with OpenCV YuNet (detection) and SFace (128-dim embedding extraction).
   - `FACE_RECOGNITION_PROVIDER=compreface` uses CompreFace recognition subjects keyed by `partners.id`; TGClinic still updates `partners.face_subject_id` and `face_registered_at`.
   - Compreface services are defined in docker-compose.yml but are not required for core app startup.
