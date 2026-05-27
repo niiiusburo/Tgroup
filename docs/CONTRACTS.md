@@ -20,6 +20,7 @@
 | v1.0.5 | 2026-05-25 | CTV self portal adds client-journey tracking and structured booking-claim error compatibility fields. |
 | v1.0.6 | 2026-05-25 | Customer, appointment, service, permission, and customer-balance frontend clients preserve `lob?: 'dental' | 'cosmetic'`; Cosmetic profile/deposit balance uses `GET /api/cosmetic/CustomerBalance/:id`. |
 | v1.0.7 | 2026-05-26 | Appointment form submitters must pass active `BusinessUnitContext.currentLOB` into appointment create/update API clients; Cosmetic Calendar/profile appointment writes must hit `/api/cosmetic/Appointments`. |
+| v1.0.8 | 2026-05-27 | `GET /api/ctv/referrals` includes per-referral `services[]` and `service_count` so CTV cards can reveal all services under a referred client. |
 
 ---
 
@@ -91,6 +92,36 @@ All `/api/ctv/*` routes require `Authorization: Bearer <token>` and are self-sco
   }>;
 }
 ```
+
+#### GET /api/ctv/referrals
+**Response 200:**
+```ts
+{
+  referrals: Array<{
+    id: string;
+    name: string;
+    phone: string;
+    lobs: Array<'dental' | 'cosmetic'>;
+    total_earned: number;
+    earned_count: number;
+    service_count: number;
+    status: 'earning' | 'no visit yet' | string;
+    referred_at: string | null;
+    services: Array<{
+      id: string;
+      serviceLineId: string | null;
+      paymentId: string | null;
+      serviceName: string;
+      amount: number;
+      status: 'pending' | 'paid' | 'reversed' | string;
+      source: string;
+      lob: 'dental' | 'cosmetic';
+      earnedAt: string | null;
+    }>;
+  }>;
+}
+```
+The `services[]` list is self-scoped to the authenticated CTV's `partners.id` and is built from `dbo.earnings` joined to `dbo.saleorderlines` / `dbo.products` in each physical LOB DB.
 
 #### POST /api/ctv/bookings
 **Request:** `clientId?`, `name?`, `phone`, `lob`, `date`, optional `time`, `companyId`, `productId`.

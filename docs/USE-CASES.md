@@ -410,3 +410,21 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Postconditions:** Staff can inspect long migrated clinical notes without breaking dense profile layout.
 - **Invariants touched:** INV-015 (expandable overflow), INV-016 (i18n), INV-017 (dense list scroll).
 - **Traceability:** Related WF: WF-014. Contracts/routes: `GET /api/Partners/:id`, `GET /api/DotKhams`. Data/tables: `dbo.partners.medicalhistory`, `dbo.dotkhams`, `dbo.dotkhamsteps`. Tests: `website/src/components/customer/CustomerProfile.test.tsx`, `website/src/hooks/__tests__/useCustomerProfile.date-normalization.test.tsx`, no dedicated DotKham tooltip regression yet. Product-map domains: `customers-partners`, `services-catalog`, `payments-deposits` when DotKham allocations are shown.
+
+---
+
+## UC-022 — Review CTV Referral Services
+
+- **Actor:** CTV user
+- **Trigger:** `/ctv` referral tracking screen
+- **Preconditions:** Actor is authenticated with `is_ctv=true`; referred clients are linked through `partners.referred_by_ctv_id`; earnings rows exist when services are attributed.
+- **Main flow:**
+  1. Actor opens `/ctv`.
+  2. Frontend loads `GET /api/ctv/referrals`, `GET /api/ctv/commission-summary`, and `GET /api/ctv/me`.
+  3. Actor searches or filters referred clients.
+  4. Actor clicks a referral card.
+  5. Card flips from journey progress to every service row under that referral, including service name, amount, status, LOB, and earned date.
+  6. Actor clicks the card again to return to the referral journey.
+- **Postconditions:** CTV can audit multi-service referral earnings without accessing admin screens or cross-CTV data.
+- **Invariants touched:** INV-006 (accent-insensitive search), INV-016 (i18n), INV-017 (dense list internal scroll), INV-020 (version bump).
+- **Traceability:** Related WF: WF-015. Contracts/routes: `GET /api/ctv/referrals`, `GET /api/ctv/commission-summary`, `GET /api/ctv/me`. Data/tables: `dbo.partners`, `dbo.earnings`, `dbo.saleorderlines`, `dbo.products` across dental and cosmetic DBs. Tests: `api/src/routes/__tests__/ctvReferrals.test.js`, `website/src/components/ctv/ReferralFlipCard.test.tsx`, `website/src/pages/CTV/tabs/CtvTrackingTab.test.tsx`. Product-map domains: `ctv`, `earnings-commissions`, `business-unit`.

@@ -3,26 +3,60 @@ import { useTranslation } from 'react-i18next';
 import { ClientTrackingCard } from '@/components/ctv/ClientTrackingCard';
 import { EmptyState } from '@/components/ctv/EmptyState';
 import { LoadingSkeleton } from '@/components/ctv/LoadingSkeleton';
-import type { CtvClientJourney } from '@/lib/api/ctv';
+import { ReferralFlipCard } from '@/components/ctv/ReferralFlipCard';
+import { normalizeText } from '@/lib/utils';
+import type { CtvClientJourney, CtvReferral } from '@/lib/api/ctv';
 
 interface Props {
   clients: CtvClientJourney[];
+  referrals?: CtvReferral[];
   loading: boolean;
   onReferClient: () => void;
 }
 
 type FilterType = 'all' | 'in_progress' | 'completed' | 'pending_payment';
 
-export function CtvTrackingTab({ clients, loading, onReferClient }: Props) {
+function hasPaidServices(referral: CtvReferral): boolean {
+  const services = referral.services ?? [];
+  return services.length > 0 && services.every((service) => service.status === 'paid');
+}
+
+function hasPendingServices(referral: CtvReferral): boolean {
+  return (referral.services ?? []).some((service) => service.status === 'pending');
+}
+
+function referralMatchesSearch(referral: CtvReferral, search: string): boolean {
+  const query = normalizeText(search.trim());
+  if (!query) return true;
+
+  const services = (referral.services ?? []).map((service) => service.serviceName).join(' ');
+  return normalizeText(`${referral.name} ${referral.phone || ''} ${services}`).includes(query);
+}
+
+export function CtvTrackingTab({ clients, referrals = [], loading, onReferClient }: Props) {
   const { t } = useTranslation('ctv');
   const [filter, setFilter] = useState<FilterType>('all');
   const [search, setSearch] = useState('');
 
-  const filtered = useMemo(() => {
+  const filteredReferrals = useMemo(() => {
+    let result = referrals.filter((referral) => referralMatchesSearch(referral, search));
+
+    if (filter === 'in_progress') {
+      result = result.filter((referral) => !hasPaidServices(referral));
+    } else if (filter === 'completed') {
+      result = result.filter(hasPaidServices);
+    } else if (filter === 'pending_payment') {
+      result = result.filter(hasPendingServices);
+    }
+
+    return result;
+  }, [filter, referrals, search]);
+
+  const filteredClients = useMemo(() => {
     let result = [...clients];
     if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter((c) => c.name.toLowerCase().includes(q));
+      const q = normalizeText(search.trim());
+      result = result.filter((c) => normalizeText(c.name).includes(q));
     }
     if (filter === 'in_progress') {
       result = result.filter((c) => c.stage === 'visited' || c.stage === 'serviced');
@@ -33,6 +67,9 @@ export function CtvTrackingTab({ clients, loading, onReferClient }: Props) {
     }
     return result;
   }, [clients, filter, search]);
+
+  const useReferralCards = referrals.length > 0;
+  const hasRows = useReferralCards ? filteredReferrals.length > 0 : filteredClients.length > 0;
 
   const filters: { key: FilterType; label: string }[] = [
     { key: 'all', label: t('actions.filterAll') },
@@ -80,11 +117,17 @@ export function CtvTrackingTab({ clients, loading, onReferClient }: Props) {
       {/* Content */}
       {loading ? (
         <LoadingSkeleton />
-      ) : filtered.length === 0 ? (
+      ) : !hasRows ? (
         <EmptyState onAction={onReferClient} />
+      ) : useReferralCards ? (
+        <div className="space-y-3">
+          {filteredReferrals.map((referral) => (
+            <ReferralFlipCard key={referral.id} referral={referral} />
+          ))}
+        </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map((client) => (
+          {filteredClients.map((client) => (
             <ClientTrackingCard key={client.id} client={client} />
           ))}
         </div>

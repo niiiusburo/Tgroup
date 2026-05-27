@@ -10,6 +10,47 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: TMV CTV Referral Flip Cards 0.32.53 2026-05-27
+
+Feature/edit name: TMV CTV referral tracking flip cards with per-service detail.
+
+Changed URLs and API routes:
+- Live page to verify after deploy: `https://tmv.2checkin.com/ctv`.
+- API routes: `GET /api/ctv/referrals`, `GET /api/ctv/commission-summary`.
+- Frontend surfaces: CTV Tracking tab and CTV Referrals tab in the mobile CTV portal.
+
+Affected data flows:
+- CTV opens `/ctv`; frontend loads self-owned referrals from both dental and cosmetic DBs.
+- Backend reads `dbo.partners.referred_by_ctv_id` and `dbo.earnings.recipient_partner_id`, then joins service-line/product names from `dbo.saleorderlines` / `dbo.products`.
+- Each referral card keeps the front journey/status summary and flips on click/tap to reveal all attributed service rows.
+
+Roles and setup state:
+- CTV user on TMV with at least one referred client that has multiple earnings/service rows.
+- Browser should start from a fresh session or hard refresh after deploy to avoid old CTV bundle cache.
+
+Happy paths:
+- CTV login redirects to `/ctv`; Tracking tab shows referral cards.
+- Clicking/tapping a referral card flips it and shows every service name, amount, status, LOB, and earned date under that client.
+- Clicking/tapping the card again returns to the journey side.
+- Search must match Vietnamese names/services accent-insensitively, e.g. `thuan` matches `Thuần`.
+
+Edge cases:
+- Referral with no earnings shows the no-service empty state and remains clickable.
+- Referral with dental and cosmetic rows keeps both LOB pills and merges services without losing totals.
+- Long service names truncate without overlapping amounts or timeline labels.
+
+Regressions to check:
+- CTV Home, Commission, Referrals, and Me tabs still load.
+- `GET /api/ctv/client-journeys` and booking/recruit sheets still work.
+- Admin routes remain blocked for CTV users; non-CTV users cannot open `/ctv`.
+- No calls should hit `nk.2checkin.com` or `nk2.2checkin.com` during TMV verification.
+
+Verification state:
+- [x] PASS: Local API test confirms `GET /api/ctv/referrals` returns `services[]` and `service_count` - `npx jest --runInBand src/routes/__tests__/ctvReferrals.test.js ...` passed 5 suites / 30 tests.
+- [x] PASS: Local CTV component tests confirm card flip and accent-insensitive search - `npm --prefix website test -- src/__tests__/ProtectedRoute.ctv.test.tsx src/lib/api/__tests__/ctv.booking.test.ts src/components/ctv/ReferralFlipCard.test.tsx src/pages/CTV/tabs/CtvTrackingTab.test.tsx` passed 4 files / 10 tests.
+- [x] PASS: Build passes with CTV i18n keys in English and Vietnamese - JSON parse check passed and `npm --prefix website run build` completed for 0.32.53.
+- [ ] PENDING: Live TMV screenshot shows `/ctv` route on version `0.32.53` after deploy.
+
 # TestSprite Plan: NK3 Cosmetic Employee Login Account 0.32.52 2026-05-26
 
 Feature/edit name: NK3 live Cosmetic employee account login and production API origin restore.

@@ -92,6 +92,33 @@
       "noVisitYet": "Chưa đến khám"
     }
   },
+  "lobs": {
+    "dental": "Nha khoa",
+    "cosmetic": "Thẩm mỹ"
+  },
+  "serviceStatus": {
+    "pending": "Chờ chi trả",
+    "paid": "Đã chi trả",
+    "reversed": "Đã hoàn"
+  },
+  "expected": "Dự kiến",
+  "paidOut": "Đã chi trả",
+  "received": "Đã nhận",
+  "steps": {
+    "referred": "Giới thiệu",
+    "visited": "Đã đến",
+    "serviced": "Làm dịch vụ",
+    "paid": "Thanh toán"
+  },
+  "card": {
+    "showFrontFor": "Xem hành trình giới thiệu của {{name}}",
+    "showServicesFor": "Xem dịch vụ của {{name}}",
+    "serviceCount": "{{count}} dịch vụ",
+    "noServices": "Chưa có dịch vụ",
+    "servicesUnderReferral": "Dịch vụ thuộc lượt giới thiệu này",
+    "emptyBack": "Chưa có dịch vụ đã thanh toán nào được ghi nhận cho lượt giới thiệu này.",
+    "tapToReturn": "Chạm để quay lại hành trình giới thiệu"
+  },
   "network": {
     "myNetwork": "Mạng lưới CTV",
     "downline": "Tuyến dưới",

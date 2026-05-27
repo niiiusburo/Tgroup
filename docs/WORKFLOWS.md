@@ -597,3 +597,38 @@ sequenceDiagram
 **Failure modes:**
 - Long Vietnamese text clips or overlaps if `ExpandableText`/runtime overflow detection is bypassed.
 - DotKham rows may be read-only or sync-owned; avoid implying unsupported edits.
+
+---
+
+## WF-015 — CTV Referral Flip Card Service Review
+
+**Trigger:** CTV opens the mobile CTV portal and inspects a referred client's services.
+
+```mermaid
+sequenceDiagram
+    actor C as CTV
+    participant FE as React (/ctv)
+    participant API as Express /api/ctv
+    participant Dental as tdental_demo
+    participant Cosmetic as tcosmetic_demo
+
+    C->>FE: Open /ctv
+    FE->>API: GET /api/ctv/referrals
+    API->>Dental: SELECT referred partners + earnings/services for current CTV
+    API->>Cosmetic: SELECT referred partners + earnings/services for current CTV
+    Dental-->>API: Dental referral rows
+    Cosmetic-->>API: Cosmetic referral rows
+    API-->>FE: Referrals with service_count and services[]
+    FE-->>C: Referral journey cards
+    C->>FE: Click referral card
+    FE-->>C: Flip card shows all service rows under that referral
+```
+
+**Data state transitions:** None. CTV portal is read-only; earnings remain append-only attribution rows.
+
+**Traceability:** Related UC: UC-022. Contracts/routes: `GET /api/ctv/referrals`, `GET /api/ctv/commission-summary`, `GET /api/ctv/me`. Data/tables: `dbo.partners`, `dbo.earnings`, `dbo.saleorderlines`, `dbo.products` in dental and cosmetic DBs. Invariants: INV-006, INV-016, INV-017, INV-020. Tests: `api/src/routes/__tests__/ctvReferrals.test.js`, `website/src/components/ctv/ReferralFlipCard.test.tsx`, `website/src/pages/CTV/tabs/CtvTrackingTab.test.tsx`. Product-map domains: `ctv`, `earnings-commissions`, `business-unit`.
+
+**Failure modes:**
+- A missing `recipient_partner_id` filter can leak another CTV's service rows.
+- A missing `service_line_id` join fallback must still show a readable generic service label.
+- Long service lists must scroll inside the flipped card without pushing search/filter controls off the page.

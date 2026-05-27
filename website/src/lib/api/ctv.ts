@@ -4,9 +4,24 @@
  */
 import { apiFetch } from './core';
 
+export type CtvLob = 'dental' | 'cosmetic';
+export type CtvServiceStatus = 'pending' | 'paid' | 'reversed' | string;
+
+export interface CtvReferralService {
+  readonly id: string;
+  readonly serviceLineId: string | null;
+  readonly paymentId: string | null;
+  readonly serviceName: string;
+  readonly amount: number;
+  readonly status: CtvServiceStatus;
+  readonly source: string;
+  readonly lob: CtvLob;
+  readonly earnedAt: string | null;
+}
+
 export interface CtvPayoutCycle {
   id: string;
-  lob: 'dental' | 'cosmetic';
+  lob: CtvLob;
   cycle_label: string;
   paid_at?: string;
   total_amount: number;
@@ -23,12 +38,16 @@ export interface CtvCommissionSummary {
   counts: { pending: number; paid: number };
   recent: Array<{
     id: string;
+    client_id?: string;
     client_name: string;
+    service_line_id?: string | null;
+    service_name?: string;
+    payment_id?: string | null;
     amount: number;
     source: string;
-    lob: 'dental' | 'cosmetic';
-    earned_at: string;
-    status: string;
+    lob: CtvLob;
+    earned_at: string | null;
+    status: CtvServiceStatus;
   }>;
   pendingList?: any[];
   paidList?: any[];
@@ -39,11 +58,17 @@ export interface CtvReferral {
   id: string;
   name: string;
   phone?: string;
-  lobs: string[];
+  lobs: CtvLob[];
   total_earned: number;
   earned_count: number;
-  status: 'earning' | 'no visit yet';
-  referred_at?: string;
+  service_count?: number;
+  status: 'earning' | 'no visit yet' | string;
+  referred_at?: string | null;
+  services?: CtvReferralService[];
+}
+
+export interface CtvReferralResponse {
+  referrals: CtvReferral[];
 }
 
 /** Extended referral with client journey tracking stages */
@@ -51,7 +76,7 @@ export interface CtvClientJourney {
   id: string;
   name: string;
   phone?: string;
-  lobs: string[];
+  lobs: CtvLob[];
   referred_at: string;
   referred_via?: string;
   stage: 'referred' | 'visited' | 'serviced' | 'paid';
@@ -77,6 +102,7 @@ export interface CtvClientJourney {
   };
   total_earned: number;
   estimated_commission?: number;
+  services?: CtvReferralService[];
 }
 
 export interface CtvNetworkNode {
@@ -85,7 +111,7 @@ export interface CtvNetworkNode {
   phone?: string;
   email?: string;
   active?: boolean;
-  lobs?: string[];
+  lobs?: CtvLob[];
   level?: number;
   referred_by_ctv_id?: string | null;
   client_count?: number;
@@ -104,7 +130,7 @@ export async function fetchCtvSummary(): Promise<CtvCommissionSummary> {
   return apiFetch<CtvCommissionSummary>('/ctv/commission-summary');
 }
 
-export async function fetchCtvReferrals(): Promise<{ referrals: CtvReferral[] }> {
+export async function fetchCtvReferrals(): Promise<CtvReferralResponse> {
   return apiFetch('/ctv/referrals');
 }
 

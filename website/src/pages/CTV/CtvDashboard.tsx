@@ -204,6 +204,7 @@ export default function CtvDashboard() {
             {activeTab === 'tracking' && (
               <CtvTrackingTab
                 clients={clients}
+                referrals={referrals}
                 loading={loading}
                 onReferClient={() => setShowClientSheet(true)}
               />

@@ -2,6 +2,12 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.53] — 2026-05-27 (codex/tmv-ctv-flip-cards)
+### Added
+- TMV CTV referral tracking cards now flip on click/tap to show every attributed service under the referred client, including service name, amount, status, LOB, and earned date. `GET /api/ctv/referrals` now includes `services[]` and `service_count` derived from `dbo.earnings` joined to service-line/product display names across both LOB databases. — @agent — UC-022, INV-006, INV-016, INV-017.
+### Tests
+- Targeted verification required for this release: `api/src/routes/__tests__/ctvReferrals.test.js`, `website/src/components/ctv/ReferralFlipCard.test.tsx`, `website/src/pages/CTV/tabs/CtvTrackingTab.test.tsx`, CTV i18n coverage, website build, scoped Semgrep, and live `https://tmv.2checkin.com/ctv` screenshot after deploy. — @agent — TMV-only deployment path.
+
 ## [0.32.52] — 2026-05-26 (codex/nk3-balance-hotfix)
 ### Fixed
 - NK3 employee-account login now searches the employee's source LOB database during `/api/Auth/login`, stamps `auth_lob` / `lob_context` into the JWT and user payload, and resolves `/api/Auth/me`, `/api/me/lob-scope`, password changes, and permission checks under that source LOB. Cosmetic employee creation now writes `partners.lob_scope = ARRAY['cosmetic']`, so newly created Cosmetic staff accounts can authenticate without falling back to Dental. — @agent — preserves INV-008A/INV-008B and closes the live report "tạo được nhân viên rồi, nhưng tạo tài khoản cho nhân viên đăng nhập thì không được".
