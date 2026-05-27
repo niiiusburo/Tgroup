@@ -15,7 +15,8 @@
     "referrals": "Track Clients",
     "network": "Network",
     "me": "Me",
-    "recruiting": "Invite CTVs"
+    "recruiting": "Invite CTVs",
+    "hierarchy": "Network"
   },
   "actions": {
     "referClient": "Refer Client",

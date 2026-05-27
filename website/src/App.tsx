@@ -36,7 +36,7 @@ const Payment = lazy(() => import('@/pages/Payment').then(m => ({ default: m.Pay
 const Feedback = lazy(() => import('@/pages/Feedback').then(m => ({ default: m.Feedback })));
 const Services = lazy(() => import('@/pages/Services').then(m => ({ default: m.Services })));
 const ServiceCatalog = lazy(() => import('@/pages/ServiceCatalog').then(m => ({ default: m.ServiceCatalog })));
-const CtvDashboard = lazy(() => import('@/pages/CTV').then(m => ({ default: m.CtvDashboard })));
+const CtvDashboard = lazy(() => import('@/pages/CTV/CtvDashboard'));
 const CommissionTiers = lazy(() => import('@/pages/Admin/CommissionTiers').then(m => ({ default: m.default })));
 const CtvSignup = lazy(() => import('@/pages/CtvSignup').then(m => ({ default: m.default })));
 const CtvThankYou = lazy(() => import('@/pages/CtvSignup/ThankYou').then(m => ({ default: m.default })));

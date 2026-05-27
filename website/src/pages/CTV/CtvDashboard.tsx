@@ -1,28 +1,31 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Home, Wallet, ListChecks, Users, User, Sparkles,
+  Home, Wallet, ListChecks, Users, User, Sparkles, Network,
   BellRing, UserPlus, X,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   fetchCtvSummary, fetchCtvReferrals, fetchCtvMe,
-  fetchCtvClientJourneys, createCtv, createBooking,
+  fetchCtvClientJourneys, createCtv, createBooking, fetchCtvHierarchy,
   type CtvCommissionSummary, type CtvReferral, type CtvClientJourney,
+  type CtvHierarchyResponse,
 } from '@/lib/api/ctv';
 import { CtvHomeTab } from './tabs/CtvHomeTab';
 import { CtvCommissionTab } from './tabs/CtvCommissionTab';
 import { CtvTrackingTab } from './tabs/CtvTrackingTab';
 import { CtvReferralsTab } from './tabs/CtvReferralsTab';
 import { CtvMeTab } from './tabs/CtvMeTab';
+import { CtvHierarchyPanel } from '@/components/ctv/CtvHierarchyPanel';
 
-type TabKey = 'home' | 'commission' | 'tracking' | 'referrals' | 'me';
+type TabKey = 'home' | 'commission' | 'tracking' | 'referrals' | 'hierarchy' | 'me';
 
 const TABS: { key: TabKey; labelKey: string; Icon: React.ComponentType<{ className?: string }> }[] = [
   { key: 'home', labelKey: 'tabs.home', Icon: Home },
   { key: 'commission', labelKey: 'tabs.commission', Icon: Wallet },
   { key: 'tracking', labelKey: 'tabs.tracking', Icon: ListChecks },
   { key: 'referrals', labelKey: 'tabs.referrals', Icon: Users },
+  { key: 'hierarchy', labelKey: 'tabs.hierarchy', Icon: Network },
   { key: 'me', labelKey: 'tabs.me', Icon: User },
 ];
 
@@ -35,6 +38,9 @@ export default function CtvDashboard() {
   const [referrals, setReferrals] = useState<CtvReferral[]>([]);
   const [clients, setClients] = useState<CtvClientJourney[]>([]);
   const [me, setMe] = useState<{ id: string; name: string; email?: string; phone?: string; referral_code?: string } | null>(null);
+  const [hierarchy, setHierarchy] = useState<CtvHierarchyResponse | null>(null);
+  const [hierarchyLoading, setHierarchyLoading] = useState(false);
+  const [hierarchyError, setHierarchyError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -81,6 +87,17 @@ export default function CtvDashboard() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Lazy-load hierarchy data when the tab is first activated
+  useEffect(() => {
+    if (activeTab !== 'hierarchy' || hierarchy || hierarchyLoading) return;
+    setHierarchyLoading(true);
+    setHierarchyError(null);
+    fetchCtvHierarchy()
+      .then((data) => setHierarchy(data))
+      .catch((e) => setHierarchyError(e instanceof Error ? e.message : 'Hierarchy fetch failed'))
+      .finally(() => setHierarchyLoading(false));
+  }, [activeTab, hierarchy, hierarchyLoading]);
 
   async function handleClientSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -210,6 +227,25 @@ export default function CtvDashboard() {
               />
             )}
             {activeTab === 'referrals' && <CtvReferralsTab referrals={referrals} />}
+            {activeTab === 'hierarchy' && (
+              <CtvHierarchyPanel
+                hierarchy={hierarchy}
+                isLoading={hierarchyLoading}
+                error={hierarchyError}
+                onRetry={async () => {
+                  setHierarchyError(null);
+                  setHierarchyLoading(true);
+                  try {
+                    const data = await fetchCtvHierarchy();
+                    setHierarchy(data);
+                  } catch (e) {
+                    setHierarchyError(e instanceof Error ? e.message : 'Hierarchy fetch failed');
+                  } finally {
+                    setHierarchyLoading(false);
+                  }
+                }}
+              />
+            )}
             {activeTab === 'me' && <CtvMeTab me={me} />}
           </>
         )}
