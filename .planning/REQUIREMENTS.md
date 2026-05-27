@@ -85,40 +85,40 @@
 
 ## Traceability
 
-| REQ-ID | Phase |
-|--------|-------|
-| PAY-01 | 1 |
-| PAY-02 | 1 |
-| PAY-03 | 1 |
-| PAY-04 | 1 |
-| FACE-01 | 2 |
-| FACE-02 | 2 |
-| FACE-03 | 4 |
-| FACE-04 | 3 |
-| DATA-01 | 3 |
-| DATA-02 | 1 |
-| DATA-03 | 3 |
-| DATA-04 | 1 |
-| REQ-06 | 3 |
-| REQ-12 | 3 |
-| REQ-15 | 3 |
-| CTV-SCHEMA-01 | (to be assigned by roadmapper) |
-| CTV-SCHEMA-02 | (to be assigned by roadmapper) |
-| CTV-SCHEMA-03 | (to be assigned by roadmapper) |
-| CTV-SCHEMA-04 | (to be assigned by roadmapper) |
-| CTV-SIGNUP-01 | (to be assigned by roadmapper) |
-| CTV-SIGNUP-02 | (to be assigned by roadmapper) |
-| CTV-SIGNUP-03 | (to be assigned by roadmapper) |
-| CTV-SIGNUP-04 | (to be assigned by roadmapper) |
-| CTV-SIGNUP-05 | (to be assigned by roadmapper) |
-| CTV-SIGNUP-06 | (to be assigned by roadmapper) |
-| CTV-AUTH-01 | (to be assigned by roadmapper) |
-| CTV-AUTH-02 | (to be assigned by roadmapper) |
-| CTV-REFER-01 | (to be assigned by roadmapper) |
-| CTV-REFER-02 | (to be assigned by roadmapper) |
-| CTV-REFER-03 | (to be assigned by roadmapper) |
-| CTV-REFER-04 | (to be assigned by roadmapper) |
-| CTV-REFER-05 | (to be assigned by roadmapper) |
-| CTV-TIERS-01 | (to be assigned by roadmapper) |
-| CTV-TIERS-02 | (to be assigned by roadmapper) |
-| CTV-TIERS-03 | (to be assigned by roadmapper) |
+| REQ-ID | Phase | Status |
+|--------|-------|--------|
+| PAY-01 | 1 | Pending |
+| PAY-02 | 1 | Pending |
+| PAY-03 | 1 | Pending |
+| PAY-04 | 1 | Pending |
+| FACE-01 | 2 | Pending |
+| FACE-02 | 2 | Pending |
+| FACE-03 | 4 | Pending |
+| FACE-04 | 3 | Pending |
+| DATA-01 | 3 | Pending |
+| DATA-02 | 1 | Pending |
+| DATA-03 | 3 | Pending |
+| DATA-04 | 1 | Pending |
+| REQ-06 | 3 | Pending |
+| REQ-12 | 3 | Pending |
+| REQ-15 | 3 | Pending |
+| CTV-SCHEMA-01 | 5 | Pending |
+| CTV-SCHEMA-02 | 5 | Pending |
+| CTV-SCHEMA-03 | 5 | Pending |
+| CTV-SCHEMA-04 | 5 | Pending |
+| CTV-SIGNUP-01 | 7 | Pending |
+| CTV-SIGNUP-02 | 7 | Pending |
+| CTV-SIGNUP-03 | 7 | Pending |
+| CTV-SIGNUP-04 | 7 | Pending |
+| CTV-SIGNUP-05 | 7 | Pending |
+| CTV-SIGNUP-06 | 7 | Pending |
+| CTV-AUTH-01 | 7 | Pending |
+| CTV-AUTH-02 | 7 | Pending |
+| CTV-REFER-01 | 8 | Pending |
+| CTV-REFER-02 | 8 | Pending |
+| CTV-REFER-03 | 8 | Pending |
+| CTV-REFER-04 | 8 | Pending |
+| CTV-REFER-05 | 8 | Pending |
+| CTV-TIERS-01 | 6 | Pending |
+| CTV-TIERS-02 | 6 | Pending |
+| CTV-TIERS-03 | 6 | Pending |

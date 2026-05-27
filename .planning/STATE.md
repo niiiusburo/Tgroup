@@ -4,58 +4,70 @@ milestone: v1.2
 milestone_name: CTVlegacy Port
 current_plan: Not started
 status: planning
-stopped_at: Milestone v1.2 started — defining requirements
+stopped_at: Roadmap created for v1.2 — 5 phases, 15 plans
 last_updated: "2026-05-27T00:00:00.000Z"
 last_activity: 2026-05-27
 progress:
-  total_phases: 0
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_phases: 9
+  completed_phases: 4
+  total_plans: 26
+  completed_plans: 20
+  percent: 77
 ---
 
 # Project State — TG Clinic v1.2 CTVlegacy Port
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 5 (Schema Foundation) — ready to plan
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-27 — Milestone v1.2 started
+Status: Roadmap complete; awaiting plan execution for Phase 5
+Last activity: 2026-05-27 — v1.2 Roadmap created (Phases 5–9)
 
 ## Phase Tracker
 
-| Phase | Status | Plans | Verified |
-|-------|--------|-------|----------|
-| (to be defined by roadmapper) | — | — | — |
+| Phase | Milestone | Status | Plans | Verified |
+|-------|-----------|--------|-------|----------|
+| 1. Bug Fixes Wave 1 | v1.1 | Complete | 3/3 | ✓ |
+| 2. Quick Features & Validations | v1.1 | Complete | 8/8 | ✓ |
+| 3. Architecture Shifts | v1.1 | Complete | 4/4 | ✓ |
+| 4. Polish & Walk-in Redesign | v1.1 | Not started | — | — |
+| 5. Schema Foundation | v1.2 | Not started | 0/2 | — |
+| 6. Commission Tier Admin | v1.2 | Not started | 0/3 | — |
+| 7. Public CTV Signup + Auth + OCR | v1.2 | Not started | 0/4 | — |
+| 8. Refer-A-Client Flow | v1.2 | Not started | 0/3 | — |
+| 9. E2E Verification & Polish | v1.2 | Not started | 0/2 | — |
 
-## Accumulated Context (carried from v1.1)
+## Accumulated Context (v1.2 locked)
 
-- Existing CTV scaffolding on branch `fix/feedback-reports`:
-  - `api/src/services/commissionEngine.js` — engine in place, needs CSKH branch
-  - `api/src/routes/ctv.js` — 4 endpoints live (commission-summary, referrals, hierarchy, me)
-  - `website/src/pages/CTV/index.tsx` + `components/ctv/*` — dashboard wired
-  - `website/src/i18n/locales/{en,vi}/ctv.json` — 92 keys each
-  - `product-map/domains/ctv.yaml` — authoritative domain spec
-- Cosmetic LOB infrastructure live: `attachCosmeticDb`, `getDb('cosmetic')`, `runWithLob()`, `COSMETIC_LOB_ENABLED`
-- CTV redirect on login (`is_ctv=true` → `/ctv`) wired in `AuthContext.tsx`
-- Last applied migration: `047_face_model_upgrade_arcface.sql` — next available is `048`
-- v1.1 Phase 4 (Polish & Walk-in Redesign) still pending; runs in parallel when prioritized
+### Decisions
 
-## Reports
+- Per-LOB commission tiers (dental ≠ cosmetic) — explicit in schema with (lob, level) PK
+- No admin approval queue — CTVs self-sign-up directly; admins review on partners list page
+- Gemini Vision OCR env-gated by GEMINI_API_KEY — control hidden when unset, endpoint 503s
+- Dual-format password support (legacy SHA256 + bcrypt) — lazy rehash on login, no hard cutoff date
+- Refer-A-Client hardened by 6-month eligibility gate on completed/paid services in chosen LOB only
+- Five migrations (048–052) applied to BOTH tdental_demo and tcosmetic_demo for schema mirroring
 
-- (none yet for v1.2)
+### Pitfalls & Mitigations
 
-## Decisions (v1.2 locked answers)
+Top 3 critical pitfalls identified in research:
 
-- Per-LOB commission tiers (dental ≠ cosmetic)
-- Gemini Vision OCR included at signup, gated by `GEMINI_API_KEY` env var
-- Marketing scrollytelling landing page **dropped entirely**
-- Do NOT re-port existing commissionEngine or CTV portal
-- Five migrations 048–052, applied to both dental and cosmetic DBs
+1. **Two-DB Partner Approval Atomicity** (Pitfall 1) — Dual-LOB partner creation can leave one DB incomplete. Mitigation: idempotent retry; approve transaction fails both or succeeds both.
+2. **Commission Tiers Drift** (Pitfall 2) — Tier rate updates must stay in sync across LOBs. Mitigation: single API endpoint validates both DBs update or fails both.
+3. **Gemini OCR Cost Runaway** (Pitfall 3) — Public OCR endpoint vulnerable to bot abuse. Mitigation: rate limit 5 OCR calls per IP per day, image size validation, env-gated by GEMINI_API_KEY.
 
-## Session
+Full pitfalls list: `.planning/research/PITFALLS.md` (10 pitfalls, phase-specific mitigations listed).
 
-- **Last session:** 2026-05-27 — Milestone v1.2 kickoff
-- **Stopped at:** Defining requirements
+### Pending Blockers
+
+None — research complete, phase dependencies clear, no unresolved questions in architecture.
+
+## Session Continuity
+
+Last session: 2026-05-27 — Roadmap creation
+Stopped at: ROADMAP.md written; REQUIREMENTS.md updated; STATE.md initialized
+Resume: Ready to invoke `/gsd-plan-phase 5` for Schema Foundation
+
+</content>
+</invoke>
