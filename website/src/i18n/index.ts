@@ -23,6 +23,7 @@ import enServiceCatalog from './locales/en/serviceCatalog.json';
 import enPermissions from './locales/en/permissions.json';
 import enExports from './locales/en/exports.json';
 import enCtv from './locales/en/ctv.json';
+import enAdmin from './locales/en/admin.json';
 
 import viCommon from './locales/vi/common.json';
 import viNav from './locales/vi/nav.json';
@@ -46,6 +47,7 @@ import viServiceCatalog from './locales/vi/serviceCatalog.json';
 import viPermissions from './locales/vi/permissions.json';
 import viExports from './locales/vi/exports.json';
 import viCtv from './locales/vi/ctv.json';
+import viAdmin from './locales/vi/admin.json';
 
 const STORAGE_KEY = 'tg-lang';
 const DEFAULT_LANG = 'vi';
@@ -85,6 +87,7 @@ i18n.use(initReactI18next).init({
       permissions: enPermissions,
       exports: enExports,
       ctv: enCtv,
+      admin: enAdmin,
     },
     vi: {
       common: viCommon,
@@ -109,6 +112,7 @@ i18n.use(initReactI18next).init({
       permissions: viPermissions,
       exports: viExports,
       ctv: viCtv,
+      admin: viAdmin,
     },
   },
   lng: savedLang && SUPPORTED_LANGS.includes(savedLang) ? savedLang : DEFAULT_LANG,
@@ -118,7 +122,7 @@ i18n.use(initReactI18next).init({
     'common', 'nav', 'overview', 'calendar', 'customers',
     'appointments', 'services', 'payment', 'employees',
     'locations', 'reports', 'settings', 'auth', 'website', 'permissions',
-    'commission', 'feedback', 'notifications', 'relationships', 'serviceCatalog', 'exports', 'ctv',
+    'commission', 'feedback', 'notifications', 'relationships', 'serviceCatalog', 'exports', 'ctv', 'admin',
   ],
   defaultNS: 'common',
   interpolation: { escapeValue: false },

@@ -1,0 +1,21 @@
+{
+  "lobs": {
+    "dental": "Nha khoa",
+    "cosmetic": "Thẩm mỹ"
+  },
+  "tiers": {
+    "title": "Cấp hoa hồng",
+    "level": "Cấp",
+    "label": "Nhãn",
+    "rate": "Tỷ lệ",
+    "active": "Hoạt động",
+    "yes": "Có",
+    "no": "Không",
+    "save": "Lưu",
+    "saving": "Đang lưu...",
+    "lobHint": "Đang chỉnh sửa cấp {{lob}} — LOB khác không thay đổi"
+  },
+  "common": {
+    "loading": "Đang tải..."
+  }
+}

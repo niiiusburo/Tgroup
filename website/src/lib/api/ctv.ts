@@ -60,6 +60,7 @@ export interface CtvCommissionSummary {
   readonly recent: CtvCommissionRow[];
   readonly pendingList: CtvCommissionRow[];
   readonly paidList: CtvCommissionRow[];
+  readonly tierLabels?: Record<number, string>;
 }
 
 export interface CtvProfile {

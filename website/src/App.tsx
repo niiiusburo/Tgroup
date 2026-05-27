@@ -36,6 +36,7 @@ const Feedback = lazy(() => import('@/pages/Feedback').then(m => ({ default: m.F
 const Services = lazy(() => import('@/pages/Services').then(m => ({ default: m.Services })));
 const ServiceCatalog = lazy(() => import('@/pages/ServiceCatalog').then(m => ({ default: m.ServiceCatalog })));
 const CtvDashboard = lazy(() => import('@/pages/CTV').then(m => ({ default: m.CtvDashboard })));
+const CommissionTiers = lazy(() => import('@/pages/Admin/CommissionTiers').then(m => ({ default: m.default })));
 
 /**
  * Access Denied page — shown when authenticated but lacking permission
@@ -357,6 +358,16 @@ function App() {
               element={
                 <ProtectedRoute path={ROUTES.FEEDBACK}>
                   <Feedback />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* @crossref:route[path="/admin/commission-tiers", component=CommissionTiers] */}
+            <Route
+              path={ROUTES.COMMISSION_TIERS}
+              element={
+                <ProtectedRoute path={ROUTES.COMMISSION_TIERS}>
+                  <CommissionTiers />
                 </ProtectedRoute>
               }
             />

@@ -1,0 +1,21 @@
+{
+  "lobs": {
+    "dental": "Dental",
+    "cosmetic": "Cosmetic"
+  },
+  "tiers": {
+    "title": "Commission Tiers",
+    "level": "Level",
+    "label": "Label",
+    "rate": "Rate",
+    "active": "Active",
+    "yes": "Yes",
+    "no": "No",
+    "save": "Save",
+    "saving": "Saving...",
+    "lobHint": "Editing {{lob}} tiers — other LOB untouched"
+  },
+  "common": {
+    "loading": "Loading..."
+  }
+}

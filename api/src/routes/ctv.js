@@ -115,10 +115,23 @@ router.get('/commission-summary', requireAuth, requireCtvUser, async (req, res) 
   const dentalDb = getDb('dental');
   const cosmeticDb = getDb('cosmetic');
 
-  const [dRows, cRows] = await Promise.all([
+  // Fetch tier labels from both DBs for L0–L4
+  const tierSql = `
+    SELECT level, label FROM dbo.commission_tiers
+    WHERE lob = $1 AND level BETWEEN 0 AND 4
+    ORDER BY level ASC
+  `;
+
+  const [dRows, cRows, dTiers, cTiers] = await Promise.all([
     safeQueryRows(dentalDb, earningsSql, [ctvId]),
     safeQueryRows(cosmeticDb, earningsSql, [ctvId]),
+    safeQueryRows(dentalDb, tierSql, ['dental']),
+    safeQueryRows(cosmeticDb, tierSql, ['cosmetic']),
   ]);
+
+  const tierLabels = {};
+  dTiers.forEach((t) => { tierLabels[t.level] = t.label; });
+  cTiers.forEach((t) => { tierLabels[t.level] = t.label; });
 
   const all = [
     ...dRows.map(r => ({ ...r, lob: 'dental' })),
@@ -185,6 +198,7 @@ router.get('/commission-summary', requireAuth, requireCtvUser, async (req, res) 
     recent,
     pendingList,
     paidList,
+    tierLabels,
   });
 });
 
