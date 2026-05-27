@@ -10,6 +10,137 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: CTV Hierarchy Tab (2026-05-27)
+
+Feature/edit name: CTV Hierarchy Tab
+
+Changed URLs and API routes:
+- `/ctv` CTV self portal, `Giới thiệu CTV` / `Invite CTVs` tab.
+- `GET /api/ctv/hierarchy`
+
+Affected data flows:
+- CTV hierarchy loads from dental and cosmetic `dbo.partners` using `partners.referred_by_ctv_id`.
+- The hierarchy route filters upline and downline nodes to `is_ctv=true`, keeping CTV invitation relationships separate from referred service clients.
+- Existing client tracking remains on `GET /api/ctv/referrals`, `GET /api/ctv/commission-summary`, and `GET /api/ctv/me`.
+
+User roles:
+- CTV user with `is_ctv=true`.
+- Non-CTV admin/staff must not access CTV-only hierarchy data.
+
+Happy paths:
+- CTV opens `/ctv`, clicks `Giới thiệu CTV`, and sees `Hệ thống giới thiệu CTV`.
+- The tab shows current CTV, upline, direct downline count, total downline count, and downline CTV rows.
+- English mode shows `Invite CTVs`, `CTV Referral Hierarchy`, `Upline`, and `Downline`.
+
+Edge cases:
+- No upline shows the top-of-branch empty state.
+- No downline shows the empty downline state.
+- Duplicate partner IDs across Dental/Cosmetic merge into one node with multiple LOB tags.
+- Client search and filters must disappear on the hierarchy tab because they belong only to referred-client tracking.
+
+Regressions:
+- `/ctv` client tracking search/filter/flip-card behavior remains unchanged.
+- `Hoa hồng` and `Theo dõi` continue to represent referred service clients, not CTV hierarchy.
+- Admin routes and Cosmetic `/api/cosmetic/*` routing are unchanged.
+
+Setup data and login state:
+- Use a CTV account with one linked upline CTV and at least one downline CTV.
+- Include a referred service client for the same CTV and verify that client does not appear in the hierarchy tab.
+- Keep screenshot evidence of the hierarchy tab.
+
+TestSprite execution items:
+- [ ] PENDING: `/ctv` Vietnamese mode hierarchy tab shows `Hệ thống giới thiệu CTV`, `Tuyến trên`, and `Tuyến dưới`.
+- [ ] PENDING: `GET /api/ctv/hierarchy` returns CTV-only upline/downline nodes and excludes referred clients.
+- [ ] PENDING: Empty upline/downline states render without overlap on mobile.
+- [ ] PENDING: Returning to `Theo dõi` restores search/filter and referral cards.
+
+---
+
+# TestSprite Plan: CTV Client Tracking vs CTV Invitation Terminology Fix (2026-05-27)
+
+Feature/edit name: CTV Client Tracking vs CTV Invitation Terminology Fix
+
+Changed URLs and API routes:
+- `/ctv` CTV self portal dashboard, client tracking tab, CTV invitation tab, summary cards, search, and empty/no-result states.
+- No API routes changed.
+
+Affected data flows:
+- CTV referred-client tracking still comes from `GET /api/ctv/referrals` and represents client/customer records attached to the current CTV for service and commission tracking.
+- CTV account/team growth remains separated under the `Invite CTVs` / `Giới thiệu CTV` tab and must represent upline/downline CTV recruitment, not service clients.
+- Search remains accent-insensitive via `normalizeText()` across referred client names, phones, and service names.
+
+User roles:
+- CTV user with `is_ctv=true`.
+- Non-CTV admin/staff must not access CTV-only portal data.
+
+Happy paths:
+- `/ctv` shows `Theo dõi` / `Track Clients` for the referred-client service tracking lane.
+- `/ctv` shows `Giới thiệu CTV` / `Invite CTVs` separately for CTV recruitment, upline, and downline growth.
+- Summary count label says `Khách giới thiệu` / `Referred clients`, not generic CTV count.
+- Search label and placeholder refer to referred clients while card contents still show actual client names.
+
+Edge cases:
+- Empty state says there are no referred clients yet.
+- No-result state says no referred clients were found.
+- Vietnamese and English modes keep the same distinction.
+
+Regressions:
+- Existing `/ctv` referral API shape and card flip behavior are unchanged.
+- Admin/customer pages may still use `Clients` / `Khách hàng` where they are true business client records.
+- Bare `Giới thiệu` must not label the referred-client tracking tab; CTV invitation is the only CTV growth lane.
+
+Setup data and login state:
+- Use a CTV account with at least one referred client, and run one pass in Vietnamese and one pass in English.
+- Keep screenshot evidence of the `/ctv` header/tab/search/summary area showing the corrected labels.
+
+TestSprite execution items:
+- [ ] PENDING: `/ctv` Vietnamese mode shows `Theo dõi`, `Giới thiệu CTV`, `Theo dõi khách giới thiệu`, and `Khách giới thiệu`.
+- [ ] PENDING: `/ctv` English mode shows `Track Clients`, `Invite CTVs`, `Referred Client Tracking`, and referred-client search copy.
+- [ ] PENDING: Referred-client search still filters by client name/phone/service without accent sensitivity.
+- [ ] PENDING: Empty and no-result states use referred-client language, while CTV invitation remains separate.
+
+---
+
+# TestSprite Plan: CTV Portal i18n Hardcoded Copy Fix (2026-05-27)
+
+Feature/edit name: CTV Portal i18n Hardcoded Copy Fix
+
+Changed URLs and API routes:
+- `/ctv` CTV self portal dashboard, header shell, search/filter controls, and referral/service card surface.
+- No API routes changed.
+
+Affected data flows:
+- CTV dashboard and referral/service cards now render portal copy from the `ctv` i18n namespace.
+- Header labels, notification aria-label, search/filter labels, summaries, empty/error states, LOB labels, service status labels, card action labels, service count text, and short dates respond to the active language.
+- CTV dashboard data loading no longer retriggers from translation function identity changes.
+
+User roles:
+- CTV user with `is_ctv=true` and `ctv.dashboard.view`.
+
+Happy paths:
+- In Vietnamese mode, `/ctv` shows Vietnamese portal title, search label, filters, summaries, step labels, status labels, LOB labels, service count, and back action.
+- In English mode, `/ctv` shows the same dashboard and card surfaces in English with English date formatting.
+
+Edge cases:
+- Empty referred clients still show translated empty-service copy.
+- Paid, pending, and reversed services all use translated status labels.
+
+Regressions:
+- Card flip interaction still exposes the service list and returns to the referral journey.
+- Dashboard initial load happens once per mount and does not loop while i18n initializes.
+- Dynamic service/customer names remain raw business data and are not translated.
+
+Setup data and login state:
+- Use a CTV account with at least one referral containing both Cosmetic and Dental service rows.
+
+TestSprite execution items:
+- [ ] PENDING: `/ctv` dashboard and referral card render Vietnamese portal copy in Vietnamese mode.
+- [ ] PENDING: `/ctv` dashboard and referral card render English portal copy in English mode.
+- [ ] PENDING: `/ctv` initial load settles without repeated loading flashes or max-update-depth warnings.
+- [ ] PENDING: Flip card still opens service rows and returns correctly in both languages.
+
+---
+
 # TestSprite Plan: CTV Referral Flip Card Service Ledger (2026-05-27)
 
 Feature/edit name: CTV Referral Flip Card Service Ledger

@@ -3,25 +3,28 @@ import { useTranslation } from 'react-i18next';
 import {
   AlertCircle,
   Bell,
+  ListChecks,
+  Network,
   RefreshCw,
   Search,
-  Sparkles,
-  UserPlus,
-  Users,
 } from 'lucide-react';
+import { CtvHierarchyPanel } from '@/components/ctv/CtvHierarchyPanel';
 import { ReferralFlipCard } from '@/components/ctv/ReferralFlipCard';
 import { formatVND } from '@/lib/formatting';
 import { cn, normalizeText } from '@/lib/utils';
 import {
   fetchCtvCommissionSummary,
+  fetchCtvHierarchy,
   fetchCtvProfile,
   fetchCtvReferrals,
   type CtvCommissionSummary,
+  type CtvHierarchyResponse,
   type CtvProfile,
   type CtvReferral,
 } from '@/lib/api';
 
 type FilterKey = 'all' | 'active' | 'completed' | 'waitingPayment';
+type ActiveTab = 'clients' | 'hierarchy';
 
 function isCompleted(referral: CtvReferral): boolean {
   const services = referral.services ?? [];
@@ -114,11 +117,15 @@ export function CtvDashboard() {
   const isMountedRef = useRef(true);
   const [referrals, setReferrals] = useState<CtvReferral[]>([]);
   const [summary, setSummary] = useState<CtvCommissionSummary | null>(null);
+  const [hierarchy, setHierarchy] = useState<CtvHierarchyResponse | null>(null);
   const [profile, setProfile] = useState<CtvProfile | null>(null);
+  const [activeTab, setActiveTab] = useState<ActiveTab>('clients');
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<FilterKey>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [isHierarchyLoading, setIsHierarchyLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hierarchyError, setHierarchyError] = useState<string | null>(null);
 
   const loadDashboard = useCallback(async () => {
     setIsLoading(true);
@@ -144,6 +151,25 @@ export function CtvDashboard() {
     setIsLoading(false);
   }, []);
 
+  const loadHierarchy = useCallback(async () => {
+    setIsHierarchyLoading(true);
+    setHierarchyError(null);
+
+    try {
+      const result = await fetchCtvHierarchy();
+      if (!isMountedRef.current) return;
+      setHierarchy(result);
+    } catch (err) {
+      if (!isMountedRef.current) return;
+      setHierarchy(null);
+      setHierarchyError(err instanceof Error ? err.message : 'CTV hierarchy request failed');
+    } finally {
+      if (isMountedRef.current) {
+        setIsHierarchyLoading(false);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     isMountedRef.current = true;
     void loadDashboard();
@@ -151,6 +177,12 @@ export function CtvDashboard() {
       isMountedRef.current = false;
     };
   }, [loadDashboard]);
+
+  useEffect(() => {
+    if (activeTab === 'hierarchy' && !hierarchy && !isHierarchyLoading) {
+      void loadHierarchy();
+    }
+  }, [activeTab, hierarchy, isHierarchyLoading, loadHierarchy]);
 
   const filteredReferrals = useMemo(
     () => referrals.filter((referral) => matchesFilter(referral, filter) && matchesSearch(referral, searchTerm)),
@@ -171,6 +203,8 @@ export function CtvDashboard() {
   const paidTotal = summary?.totals.paid ?? getFallbackPaid(referrals);
   const profileName = profile?.name || t('profileFallback');
   const hasSearchOrFilter = searchTerm.trim().length > 0 || filter !== 'all';
+  const activeTitle = activeTab === 'clients' ? t('title') : t('hierarchy.title');
+  const activeSubtitle = activeTab === 'clients' ? t('subtitle') : t('hierarchy.subtitle');
 
   const filters: { key: FilterKey; label: string }[] = [
     { key: 'all', label: t('filters.all') },
@@ -201,24 +235,37 @@ export function CtvDashboard() {
           <div className="mt-4 grid grid-cols-2 gap-2">
             <button
               type="button"
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-white text-sm font-bold text-orange-600 shadow-sm"
+              onClick={() => setActiveTab('clients')}
+              aria-pressed={activeTab === 'clients'}
+              className={cn(
+                'inline-flex h-12 items-center justify-center gap-2 rounded-2xl text-sm font-bold transition-colors',
+                activeTab === 'clients'
+                  ? 'bg-white text-orange-600 shadow-sm'
+                  : 'bg-white/15 text-white ring-1 ring-white/25'
+              )}
             >
-              <UserPlus className="h-4 w-4" />
+              <ListChecks className="h-4 w-4" />
               {t('tabs.referrals')}
             </button>
             <button
               type="button"
-              disabled
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-white/15 text-sm font-bold text-white ring-1 ring-white/25"
+              onClick={() => setActiveTab('hierarchy')}
+              aria-pressed={activeTab === 'hierarchy'}
+              className={cn(
+                'inline-flex h-12 items-center justify-center gap-2 rounded-2xl text-sm font-bold transition-colors',
+                activeTab === 'hierarchy'
+                  ? 'bg-white text-orange-600 shadow-sm'
+                  : 'bg-white/15 text-white ring-1 ring-white/25'
+              )}
             >
-              <Sparkles className="h-4 w-4" />
+              <Network className="h-4 w-4" />
               {t('tabs.recruiting')}
             </button>
           </div>
 
           <div className="mt-4 grid grid-cols-3 gap-2 text-xs font-semibold">
             <div className="rounded-xl bg-white/12 px-3 py-2">
-              <p className="text-orange-100">{t('summary.clients')}</p>
+              <p className="text-orange-100">{t('summary.referredClients')}</p>
               <p className="mt-1 text-base text-white">{referrals.length}</p>
             </div>
             <div className="rounded-xl bg-white/12 px-3 py-2">
@@ -234,49 +281,60 @@ export function CtvDashboard() {
 
         <section className="px-5 py-5">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">{t('title')}</h2>
-            <p className="mt-1 text-sm leading-6 text-gray-500">{t('subtitle')}</p>
+            <h2 className="text-xl font-bold text-gray-900">{activeTitle}</h2>
+            <p className="mt-1 text-sm leading-6 text-gray-500">{activeSubtitle}</p>
           </div>
 
-          <label className="mt-4 flex h-12 items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 text-sm shadow-sm shadow-gray-200/40">
-            <Search className="h-4 w-4 shrink-0 text-gray-400" />
-            <span className="sr-only">{t('searchLabel')}</span>
-            <input
-              type="search"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder={t('searchPlaceholder')}
-              aria-label={t('searchLabel')}
-              className="min-w-0 flex-1 bg-transparent text-gray-900 outline-none placeholder:text-gray-400"
-            />
-          </label>
+          {activeTab === 'clients' ? (
+            <>
+              <label className="mt-4 flex h-12 items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 text-sm shadow-sm shadow-gray-200/40">
+                <Search className="h-4 w-4 shrink-0 text-gray-400" />
+                <span className="sr-only">{t('searchLabel')}</span>
+                <input
+                  type="search"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder={t('searchPlaceholder')}
+                  aria-label={t('searchLabel')}
+                  className="min-w-0 flex-1 bg-transparent text-gray-900 outline-none placeholder:text-gray-400"
+                />
+              </label>
 
-          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-            {filters.map((item) => {
-              const selected = filter === item.key;
-              return (
-                <button
-                  key={item.key}
-                  type="button"
-                  onClick={() => setFilter(item.key)}
-                  className={cn(
-                    'h-8 shrink-0 rounded-full border px-3 text-xs font-bold transition-colors',
-                    selected
-                      ? 'border-orange-500 bg-orange-500 text-white'
-                      : 'border-gray-200 bg-white text-gray-600 hover:border-orange-200 hover:text-orange-600'
-                  )}
-                >
-                  {item.label}
-                  <span className={cn('ml-1 font-semibold', selected ? 'text-orange-100' : 'text-gray-400')}>
-                    {filterCounts[item.key]}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                {filters.map((item) => {
+                  const selected = filter === item.key;
+                  return (
+                    <button
+                      key={item.key}
+                      type="button"
+                      onClick={() => setFilter(item.key)}
+                      className={cn(
+                        'h-8 shrink-0 rounded-full border px-3 text-xs font-bold transition-colors',
+                        selected
+                          ? 'border-orange-500 bg-orange-500 text-white'
+                          : 'border-gray-200 bg-white text-gray-600 hover:border-orange-200 hover:text-orange-600'
+                      )}
+                    >
+                      {item.label}
+                      <span className={cn('ml-1 font-semibold', selected ? 'text-orange-100' : 'text-gray-400')}>
+                        {filterCounts[item.key]}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          ) : null}
 
           <div className="mt-4">
-            {isLoading ? (
+            {activeTab === 'hierarchy' ? (
+              <CtvHierarchyPanel
+                hierarchy={hierarchy}
+                isLoading={isHierarchyLoading}
+                error={hierarchyError}
+                onRetry={() => void loadHierarchy()}
+              />
+            ) : isLoading ? (
               <>
                 <p className="sr-only">{t('loading')}</p>
                 <LoadingList />
@@ -311,7 +369,7 @@ export function CtvDashboard() {
               />
             ) : (
               <EmptyState
-                icon={<Users className="h-5 w-5" />}
+                icon={<ListChecks className="h-5 w-5" />}
                 title={t('emptyTitle')}
                 body={t('emptyBody')}
               />

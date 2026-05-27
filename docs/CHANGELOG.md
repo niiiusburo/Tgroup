@@ -23,6 +23,14 @@
 Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `Docs`.
 
 ---
+## [0.32.55] — 2026-05-27
+### Added
+- Added CTV hierarchy endpoint `GET /api/ctv/hierarchy` and enabled the `/ctv` `Giới thiệu CTV` / `Invite CTVs` tab to show current CTV, upline, downline, and hierarchy totals from CTV-to-CTV `partners.referred_by_ctv_id` links only. — @agent — UC-023 / WF-016; preserves the CTV/client separation in Contracts v1.1.2.
+
+## [0.32.54] — 2026-05-27
+### Fixed
+- CTV `/ctv` portal now separates referred-client service tracking (`Track Clients` / `Theo dõi`) from CTV recruitment and upline/downline growth (`Invite CTVs` / `Giới thiệu CTV`). — @agent — UC-022 / WF-015 CTV self-portal terminology.
+
 ## [0.32.53] — 2026-05-27
 ### Added
 - Built the `/ctv` mobile referral-tracking portal with searchable/filterable referral cards that flip to show every service row under the referred client. — @agent — UC-022 / WF-015; preserves INV-006, INV-016, INV-017, and INV-020.

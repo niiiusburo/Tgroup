@@ -5,13 +5,13 @@
   "hello": "Hi, {{name}}",
   "notifications": "Notifications",
   "tabs": {
-    "referrals": "Refer Client",
-    "recruiting": "Recruit CTV"
+    "referrals": "Track Clients",
+    "recruiting": "Invite CTVs"
   },
-  "title": "Customer Tracking",
-  "subtitle": "Track each referred customer from referral to payment",
-  "searchLabel": "Search customers",
-  "searchPlaceholder": "Search customers...",
+  "title": "Referred Client Tracking",
+  "subtitle": "Track referred clients from booking to payment",
+  "searchLabel": "Search referred clients",
+  "searchPlaceholder": "Search referred clients...",
   "filters": {
     "all": "All",
     "active": "In progress",
@@ -19,17 +19,39 @@
     "waitingPayment": "Waiting payment"
   },
   "summary": {
-    "clients": "Clients",
+    "referredClients": "Referred clients",
     "pending": "Expected",
     "paid": "Received"
   },
-  "loading": "Loading referrals...",
+  "hierarchy": {
+    "title": "CTV Referral Hierarchy",
+    "subtitle": "See the CTVs above and below you in the referral tree",
+    "statsDirect": "Direct CTVs",
+    "statsTotal": "Total downline",
+    "statsUpline": "Upline",
+    "currentTitle": "You",
+    "uplineTitle": "Upline",
+    "downlineTitle": "Downline",
+    "directUpline": "Direct upline",
+    "noUpline": "No upline assigned",
+    "noUplineBody": "You are currently at the top of your CTV branch.",
+    "noDownlineTitle": "No CTV downline yet",
+    "noDownlineBody": "CTVs you invite will appear here after their account is linked to you.",
+    "level": "Level {{level}}",
+    "directCount": "{{count}} direct",
+    "joined": "Joined {{date}}",
+    "loading": "Loading CTV hierarchy...",
+    "errorTitle": "CTV hierarchy could not load",
+    "errorBody": "Please try again in a few minutes.",
+    "retry": "Retry hierarchy"
+  },
+  "loading": "Loading referred clients...",
   "errorTitle": "CTV data could not load",
   "errorBody": "Please try again in a few minutes.",
   "retry": "Retry",
   "emptyTitle": "No referred clients yet",
-  "emptyBody": "Clients will appear here once they are attached to your CTV code.",
-  "noSearchTitle": "No clients found",
+  "emptyBody": "Referred clients will appear here once they are attached to your CTV code.",
+  "noSearchTitle": "No referred clients found",
   "noSearchBody": "Try a different search or filter.",
   "lobs": {
     "dental": "Dental",
@@ -44,19 +66,19 @@
   "paidOut": "Paid out",
   "received": "Received",
   "steps": {
-    "referred": "Referred",
+    "referred": "Recorded",
     "visited": "Visited",
     "serviced": "Serviced",
     "paid": "Paid"
   },
   "card": {
-    "showFrontFor": "Show referral journey for {{name}}",
+    "showFrontFor": "Show client tracking journey for {{name}}",
     "showServicesFor": "Show services for {{name}}",
     "serviceCount": "{{count}} services",
     "noServices": "No services yet",
-    "servicesUnderReferral": "Services under this referral",
-    "emptyBack": "No paid services have been attributed to this referral yet.",
-    "tapToReturn": "Tap to return to the referral journey",
+    "servicesUnderReferral": "Services under this referred client",
+    "emptyBack": "No paid services have been attributed to this referred client yet.",
+    "tapToReturn": "Tap to return to the client tracking journey",
     "back": "Back"
   }
 }

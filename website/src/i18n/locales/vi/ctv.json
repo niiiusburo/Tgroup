@@ -5,13 +5,13 @@
   "hello": "Xin chào, {{name}}",
   "notifications": "Thông báo",
   "tabs": {
-    "referrals": "Giới thiệu khách",
-    "recruiting": "Tuyển CTV"
+    "referrals": "Theo dõi",
+    "recruiting": "Giới thiệu CTV"
   },
-  "title": "Theo dõi khách hàng",
-  "subtitle": "Theo dõi hành trình khách hàng từ giới thiệu đến thanh toán",
-  "searchLabel": "Tìm khách hàng",
-  "searchPlaceholder": "Tìm khách hàng...",
+  "title": "Theo dõi khách giới thiệu",
+  "subtitle": "Theo dõi khách được giới thiệu từ đặt lịch đến thanh toán",
+  "searchLabel": "Tìm khách giới thiệu",
+  "searchPlaceholder": "Tìm khách được giới thiệu...",
   "filters": {
     "all": "Tất cả",
     "active": "Đang tiến hành",
@@ -19,17 +19,39 @@
     "waitingPayment": "Chờ thanh toán"
   },
   "summary": {
-    "clients": "Khách",
+    "referredClients": "Khách giới thiệu",
     "pending": "Dự kiến",
     "paid": "Đã nhận"
   },
-  "loading": "Đang tải danh sách giới thiệu...",
+  "hierarchy": {
+    "title": "Hệ thống giới thiệu CTV",
+    "subtitle": "Xem tuyến trên và tuyến dưới trong cây CTV của bạn",
+    "statsDirect": "CTV trực tiếp",
+    "statsTotal": "Tổng tuyến dưới",
+    "statsUpline": "Tuyến trên",
+    "currentTitle": "Bạn",
+    "uplineTitle": "Tuyến trên",
+    "downlineTitle": "Tuyến dưới",
+    "directUpline": "Tuyến trên trực tiếp",
+    "noUpline": "Chưa có tuyến trên",
+    "noUplineBody": "Bạn đang ở đầu nhánh CTV này.",
+    "noDownlineTitle": "Chưa có CTV tuyến dưới",
+    "noDownlineBody": "CTV bạn giới thiệu sẽ hiển thị khi tài khoản được gắn với bạn.",
+    "level": "Tầng {{level}}",
+    "directCount": "{{count}} trực tiếp",
+    "joined": "Tham gia {{date}}",
+    "loading": "Đang tải hệ thống CTV...",
+    "errorTitle": "Không tải được hệ thống CTV",
+    "errorBody": "Vui lòng thử lại sau ít phút.",
+    "retry": "Tải lại hệ thống"
+  },
+  "loading": "Đang tải khách giới thiệu...",
   "errorTitle": "Không tải được dữ liệu CTV",
   "errorBody": "Vui lòng thử lại sau ít phút.",
   "retry": "Tải lại",
   "emptyTitle": "Chưa có khách giới thiệu",
-  "emptyBody": "Danh sách sẽ hiển thị ngay khi khách được gắn với mã CTV của bạn.",
-  "noSearchTitle": "Không tìm thấy khách",
+  "emptyBody": "Khách được giới thiệu sẽ hiển thị ngay khi được gắn với mã CTV của bạn.",
+  "noSearchTitle": "Không tìm thấy khách giới thiệu",
   "noSearchBody": "Thử đổi từ khóa hoặc bộ lọc.",
   "lobs": {
     "dental": "Nha khoa",
@@ -44,19 +66,19 @@
   "paidOut": "Đã chi trả",
   "received": "Đã nhận",
   "steps": {
-    "referred": "Giới thiệu",
+    "referred": "Ghi nhận",
     "visited": "Đã đến",
     "serviced": "Làm dịch vụ",
     "paid": "Thanh toán"
   },
   "card": {
-    "showFrontFor": "Xem hành trình giới thiệu của {{name}}",
+    "showFrontFor": "Xem hành trình theo dõi của {{name}}",
     "showServicesFor": "Xem dịch vụ của {{name}}",
     "serviceCount": "{{count}} dịch vụ",
     "noServices": "Chưa có dịch vụ",
-    "servicesUnderReferral": "Dịch vụ thuộc lượt giới thiệu này",
-    "emptyBack": "Chưa có dịch vụ đã thanh toán nào được ghi nhận cho lượt giới thiệu này.",
-    "tapToReturn": "Chạm để quay lại hành trình giới thiệu",
+    "servicesUnderReferral": "Dịch vụ của khách giới thiệu này",
+    "emptyBack": "Chưa có dịch vụ đã thanh toán nào được ghi nhận cho khách giới thiệu này.",
+    "tapToReturn": "Chạm để quay lại hành trình theo dõi",
     "back": "Quay lại"
   }
 }

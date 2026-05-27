@@ -32,6 +32,29 @@ export interface CtvReferralResponse {
   readonly referrals: CtvReferral[];
 }
 
+export interface CtvHierarchyNode {
+  readonly id: string;
+  readonly name: string;
+  readonly email: string;
+  readonly phone: string;
+  readonly joinedAt: string | null;
+  readonly referredByCtvId: string | null;
+  readonly level: number;
+  readonly directDownlineCount: number;
+  readonly lobs: CtvLob[];
+}
+
+export interface CtvHierarchyResponse {
+  readonly current: CtvHierarchyNode;
+  readonly upline: CtvHierarchyNode[];
+  readonly downline: CtvHierarchyNode[];
+  readonly totals: {
+    readonly uplineCount: number;
+    readonly downlineCount: number;
+    readonly directDownlineCount: number;
+  };
+}
+
 export interface CtvCommissionRow {
   readonly id: string;
   readonly client_id?: string;
@@ -72,6 +95,10 @@ export interface CtvProfile {
 
 export function fetchCtvReferrals() {
   return apiFetch<CtvReferralResponse>('/ctv/referrals');
+}
+
+export function fetchCtvHierarchy() {
+  return apiFetch<CtvHierarchyResponse>('/ctv/hierarchy');
 }
 
 export function fetchCtvCommissionSummary() {
