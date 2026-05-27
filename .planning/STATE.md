@@ -1,77 +1,61 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: milestone
+milestone: v1.2
+milestone_name: CTVlegacy Port
 current_plan: Not started
 status: planning
-stopped_at: Completed 03-04-PLAN.md
-last_updated: "2026-04-11T04:50:49.291Z"
-last_activity: 2026-04-11
+stopped_at: Milestone v1.2 started — defining requirements
+last_updated: "2026-05-27T00:00:00.000Z"
+last_activity: 2026-05-27
 progress:
-  total_phases: 4
-  completed_phases: 3
-  total_plans: 12
-  completed_plans: 11
-  percent: 92
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
-# Project State — TG Clinic v1.1 Bugfixes & Features
+# Project State — TG Clinic v1.2 CTVlegacy Port
 
-**Status:** Ready to plan
-**Last Activity:** 2026-04-11
+## Current Position
+
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-27 — Milestone v1.2 started
 
 ## Phase Tracker
 
 | Phase | Status | Plans | Verified |
 |-------|--------|-------|----------|
-| 1: Bug Fixes Wave 1 | Completed | 1 | Yes |
-| 2: Quick Features & Validations | Completed | — | — |
-| 3: Architecture Shifts | Completed | — | — |
-| 4: Polish & Walk-in Redesign | Not started | — | — |
+| (to be defined by roadmapper) | — | — | — |
+
+## Accumulated Context (carried from v1.1)
+
+- Existing CTV scaffolding on branch `fix/feedback-reports`:
+  - `api/src/services/commissionEngine.js` — engine in place, needs CSKH branch
+  - `api/src/routes/ctv.js` — 4 endpoints live (commission-summary, referrals, hierarchy, me)
+  - `website/src/pages/CTV/index.tsx` + `components/ctv/*` — dashboard wired
+  - `website/src/i18n/locales/{en,vi}/ctv.json` — 92 keys each
+  - `product-map/domains/ctv.yaml` — authoritative domain spec
+- Cosmetic LOB infrastructure live: `attachCosmeticDb`, `getDb('cosmetic')`, `runWithLob()`, `COSMETIC_LOB_ENABLED`
+- CTV redirect on login (`is_ctv=true` → `/ctv`) wired in `AuthContext.tsx`
+- Last applied migration: `047_face_model_upgrade_arcface.sql` — next available is `048`
+- v1.1 Phase 4 (Polish & Walk-in Redesign) still pending; runs in parallel when prioritized
 
 ## Reports
 
-- `v1-1-audit-report.md` — Codebase audit (4 exist, 1 partial, 10 missing)
-- `v1-1-contradictions-report.md` — Top 5 architectural conflicts and resolutions
-- `v1-1-playwright-report.md` — Playwright verification (save-button bugs confirmed by test failures)
+- (none yet for v1.2)
 
-## Phase Tracker (Detailed)
+## Decisions (v1.2 locked answers)
 
-**Phase 03: Architecture Shifts**
-
-- **Current Plan:** Not started
-- **Plan Status:** Completed
-
-| Plan | Status |
-|------|--------|
-| 03-01 | Completed |
-| 03-02 | Completed |
-| 03-03 | Completed |
-| 03-04 | Completed |
-
-## Performance Metrics
-
-| Phase | Plan | Duration | Tasks | Files |
-|-------|------|----------|-------|-------|
-| 03-architecture-shifts | 03-01 | 18min | 2 | 2 |
-| Phase 03-architecture-shifts P03 | 23min | 3 tasks | 7 files |
-| Phase 03-architecture-shifts P03-02 | 35min | 3 tasks | 7 files |
-| Phase 03-architecture-shifts P03-04 | 571 | 4 tasks | 7 files |
-
-## Decisions
-
-- Use pool.connect() with explicit BEGIN/COMMIT/ROLLBACK for transactional scope updates
-- Exclude primary companyid from junction inserts to maintain a single source of truth
-- [Phase 03-architecture-shifts]: Hard delete is gated behind customer:hard_delete permission and runs FK-safe counts on appointments, saleorders, dotkhams
-- [Phase 03-architecture-shifts]: Soft delete is exposed in both list view (trash icon) and profile view (dropdown) for users with customer:delete
-- [Phase 03-architecture-shifts]: Linked record counts shown in hard-delete dialog come from hookProfile (appointmentcount, ordercount, dotkhamcount)
-- [Phase 03-architecture-shifts]: 409 Conflict from hard delete maps to user-facing message 'Không thể xóa: còn dữ liệu liên quan.'
-- [Phase 03-architecture-shifts]: Use useColumns hook to close over locationNameMap since DataTable Column render only receives row
-- [Phase 03-architecture-shifts]: Filter out primary companyid from scope chips to avoid duplicate selection
-- [Phase 03-architecture-shifts]: Dotkhams is a VIEW in the demo schema; FK constraint to dotkhams(id) cannot be added, so column was added without REFERENCES
-- [Phase 03-architecture-shifts]: Allocation state was refactored to target-agnostic keys to support both invoices and dotkhams
+- Per-LOB commission tiers (dental ≠ cosmetic)
+- Gemini Vision OCR included at signup, gated by `GEMINI_API_KEY` env var
+- Marketing scrollytelling landing page **dropped entirely**
+- Do NOT re-port existing commissionEngine or CTV portal
+- Five migrations 048–052, applied to both dental and cosmetic DBs
 
 ## Session
 
-- **Last session:** 2026-04-11T04:41:03.361Z
-- **Stopped at:** Completed 03-04-PLAN.md
+- **Last session:** 2026-05-27 — Milestone v1.2 kickoff
+- **Stopped at:** Defining requirements
