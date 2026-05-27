@@ -1,0 +1,62 @@
+{
+  "brand": "TG CLINIC",
+  "portal": "Cổng CTV",
+  "profileFallback": "CTV",
+  "hello": "Xin chào, {{name}}",
+  "notifications": "Thông báo",
+  "tabs": {
+    "referrals": "Giới thiệu khách",
+    "recruiting": "Tuyển CTV"
+  },
+  "title": "Theo dõi khách hàng",
+  "subtitle": "Theo dõi hành trình khách hàng từ giới thiệu đến thanh toán",
+  "searchLabel": "Tìm khách hàng",
+  "searchPlaceholder": "Tìm khách hàng...",
+  "filters": {
+    "all": "Tất cả",
+    "active": "Đang tiến hành",
+    "completed": "Đã hoàn tất",
+    "waitingPayment": "Chờ thanh toán"
+  },
+  "summary": {
+    "clients": "Khách",
+    "pending": "Dự kiến",
+    "paid": "Đã nhận"
+  },
+  "loading": "Đang tải danh sách giới thiệu...",
+  "errorTitle": "Không tải được dữ liệu CTV",
+  "errorBody": "Vui lòng thử lại sau ít phút.",
+  "retry": "Tải lại",
+  "emptyTitle": "Chưa có khách giới thiệu",
+  "emptyBody": "Danh sách sẽ hiển thị ngay khi khách được gắn với mã CTV của bạn.",
+  "noSearchTitle": "Không tìm thấy khách",
+  "noSearchBody": "Thử đổi từ khóa hoặc bộ lọc.",
+  "lobs": {
+    "dental": "Nha khoa",
+    "cosmetic": "Thẩm mỹ"
+  },
+  "serviceStatus": {
+    "pending": "Chờ chi trả",
+    "paid": "Đã chi trả",
+    "reversed": "Đã hoàn"
+  },
+  "expected": "Dự kiến",
+  "paidOut": "Đã chi trả",
+  "received": "Đã nhận",
+  "steps": {
+    "referred": "Giới thiệu",
+    "visited": "Đã đến",
+    "serviced": "Làm dịch vụ",
+    "paid": "Thanh toán"
+  },
+  "card": {
+    "showFrontFor": "Xem hành trình giới thiệu của {{name}}",
+    "showServicesFor": "Xem dịch vụ của {{name}}",
+    "serviceCount": "{{count}} dịch vụ",
+    "noServices": "Chưa có dịch vụ",
+    "servicesUnderReferral": "Dịch vụ thuộc lượt giới thiệu này",
+    "emptyBack": "Chưa có dịch vụ đã thanh toán nào được ghi nhận cho lượt giới thiệu này.",
+    "tapToReturn": "Chạm để quay lại hành trình giới thiệu",
+    "back": "Quay lại"
+  }
+}

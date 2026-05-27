@@ -41,6 +41,52 @@ function requireCtvUser(req, res, next) {
   next();
 }
 
+function parseMoney(value) {
+  const amount = parseFloat(value || 0);
+  if (Number.isNaN(amount)) return 0;
+  return Math.round(amount);
+}
+
+function mapServiceRow(row, lob) {
+  return {
+    id: row.id,
+    serviceLineId: row.service_line_id || null,
+    paymentId: row.payment_id || null,
+    serviceName: row.service_name || 'Dịch vụ',
+    amount: parseMoney(row.amount),
+    status: row.status || 'pending',
+    source: row.source || 'ctv',
+    lob,
+    earnedAt: row.earned_at || row.created_at || null,
+  };
+}
+
+async function getReferralServices(db, clientId, ctvId, lob) {
+  const rows = await safeQueryRows(
+    db,
+    `SELECT
+       e.id,
+       e.service_line_id,
+       e.payment_id,
+       e.amount,
+       e.status,
+       e.source,
+       e.earned_at,
+       e.created_at,
+       COALESCE(NULLIF(sol.productname, ''), pr.name, NULLIF(sol.name, ''), 'Dịch vụ') AS service_name
+     FROM dbo.earnings e
+     LEFT JOIN dbo.saleorderlines sol ON sol.id = e.service_line_id
+     LEFT JOIN dbo.products pr ON pr.id = sol.productid
+     WHERE e.client_id = $1
+       AND e.recipient_partner_id = $2
+     ORDER BY COALESCE(e.earned_at, e.created_at) DESC
+     LIMIT 50`,
+    [clientId, ctvId]
+  );
+
+  return rows.map((row) => mapServiceRow(row, lob));
+}
+
 /**
  * GET /api/ctv/commission-summary
  * Live aggregation across both LOB DBs for this CTV (by recipient_partner_id = employeeId from JWT).
@@ -55,9 +101,12 @@ router.get('/commission-summary', requireAuth, requireCtvUser, async (req, res) 
   const earningsSql = `
     SELECT e.id, e.client_id, e.recipient_partner_id, e.payment_id, e.service_line_id,
            e.source, e.amount, e.status, e.payout_id, e.earned_at, e.created_at,
-           COALESCE(p.name, 'Unknown Client') AS client_name
+           COALESCE(p.name, 'Unknown Client') AS client_name,
+           COALESCE(NULLIF(sol.productname, ''), pr.name, NULLIF(sol.name, ''), 'Dịch vụ') AS service_name
     FROM dbo.earnings e
     LEFT JOIN dbo.partners p ON p.id = e.client_id
+    LEFT JOIN dbo.saleorderlines sol ON sol.id = e.service_line_id
+    LEFT JOIN dbo.products pr ON pr.id = sol.productid
     WHERE e.recipient_partner_id = $1
     ORDER BY COALESCE(e.earned_at, e.created_at) DESC
     LIMIT 100
@@ -110,8 +159,12 @@ router.get('/commission-summary', requireAuth, requireCtvUser, async (req, res) 
 
   const recent = all.slice(0, 8).map((e) => ({
     id: e.id,
+    client_id: e.client_id,
     client_name: e.client_name,
     amount: parseFloat(e.amount || 0),
+    service_line_id: e.service_line_id || null,
+    service_name: e.service_name || 'Dịch vụ',
+    payment_id: e.payment_id || null,
     source: e.source || 'ctv',
     lob: e.lob,
     earned_at: e.earned_at || e.created_at,
@@ -173,6 +226,7 @@ router.get('/referrals', requireAuth, requireCtvUser, async (req, res) => {
     const er = earnRows[0] || { total: 0, cnt: 0 };
     const total = Math.round(parseFloat(er.total || 0));
     const cnt = parseInt(er.cnt || 0, 10);
+    const services = await getReferralServices(db, row.id, ctvId, lob);
     return {
       id: row.id,
       name: row.name,
@@ -180,6 +234,8 @@ router.get('/referrals', requireAuth, requireCtvUser, async (req, res) => {
       lobs: [lob],
       total_earned: total,
       earned_count: cnt,
+      service_count: services.length,
+      services,
       status: cnt > 0 ? 'earning' : 'no visit yet',
       referred_at: row.referred_at,
     };
@@ -196,6 +252,8 @@ router.get('/referrals', requireAuth, requireCtvUser, async (req, res) => {
       prev.lobs = Array.from(new Set([...prev.lobs, ...item.lobs]));
       prev.total_earned += item.total_earned;
       prev.earned_count += item.earned_count;
+      prev.services = [...prev.services, ...item.services];
+      prev.service_count = prev.services.length;
       if (item.status === 'earning') prev.status = 'earning';
     } else {
       byId.set(item.id, item);

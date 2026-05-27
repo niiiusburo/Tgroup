@@ -10,6 +10,54 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: CTV Referral Flip Card Service Ledger (2026-05-27)
+
+Feature/edit name: CTV Referral Flip Card Service Ledger
+
+Changed URLs and API routes:
+- `/ctv` CTV self portal referral tracking page.
+- `GET /api/ctv/referrals`
+- `GET /api/ctv/commission-summary`
+- `GET /api/ctv/me`
+
+Affected data flows:
+- CTV portal loads current CTV profile, commission summary, and referred clients from the CTV-only API.
+- Referral cards now flip to show all `earnings` service rows tied to the referred client and current CTV.
+- Frontend search uses accent-insensitive `normalizeText()` across customer names, phones, and service names.
+
+User roles:
+- CTV user with `is_ctv=true`.
+- Non-CTV admin/staff must not access `/api/ctv/*`; admin routes must remain blocked for CTV users.
+
+Happy paths:
+- Login as a CTV user and land on `/ctv`.
+- Search by customer name without Vietnamese accents and keep the correct referral visible.
+- Click a referral card and confirm every service row appears with service name, amount, status, LOB pill, and earned date.
+- Click back or the card again and confirm the journey progress front returns.
+
+Edge cases:
+- Referred client with no services shows the no-service journey state and an empty service back.
+- Referred client with multiple services keeps the service list scrollable inside the flipped card.
+- Mixed Dental/Cosmetic rows show both LOB labels without merging amounts incorrectly.
+- Pending, paid, and reversed service statuses stay readable in Vietnamese and English.
+
+Regressions:
+- CTV `/ctv` route bypasses the admin layout, while non-CTV users receive access denied.
+- `/ctv` API requests bypass Cosmetic LOB rewriting and remain CTV self-scoped.
+- Existing admin pages and Cosmetic `/api/cosmetic/*` routes are unchanged.
+
+Setup data and login state:
+- Use a local or staging CTV account with at least one referred client and multiple `earnings` rows in dental and/or cosmetic DBs.
+- Keep screenshot evidence for `/ctv` front state and flipped service-list state.
+
+TestSprite execution items:
+- [ ] PENDING: `/ctv` loads for a CTV account and redirects/denies non-CTV users.
+- [ ] PENDING: Accent-insensitive search finds Vietnamese customer names and service names.
+- [ ] PENDING: Clicking a referral card flips to all service rows and returns to the journey front.
+- [ ] PENDING: Multi-service and empty-service referrals render without overflow or text overlap on mobile.
+
+---
+
 # TestSprite Plan: TMV Cosmetic Feedback Sweep 2026-05-24
 
 Feature/edit name: TMV Cosmetic Feedback Sweep 2026-05-24

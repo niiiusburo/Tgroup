@@ -23,6 +23,16 @@
 Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `Docs`.
 
 ---
+## [0.32.53] — 2026-05-27
+### Added
+- Built the `/ctv` mobile referral-tracking portal with searchable/filterable referral cards that flip to show every service row under the referred client. — @agent — UC-022 / WF-015; preserves INV-006, INV-016, INV-017, and INV-020.
+
+### Changed
+- `GET /api/ctv/referrals` now returns `service_count` and `services[]`; `GET /api/ctv/commission-summary` recents now include service-line fields for read-only CTV service review. — @agent — CTV contract v1.1.1 and D13 earnings attribution.
+
+### Fixed
+- CTV portal dashboard and referral/service card copy now uses a dedicated `ctv` i18n namespace for English and Vietnamese labels, service statuses, LOB pills, ARIA labels, empty/error states, and language-aware short dates. — @agent — BEHAVIOR.md §9 localization and CTV self-portal parity.
+
 ## [0.33.0] — 2026-05-26
 ### Changed
 - Face recognition model upgraded from OpenCV SFace/YuNet (128-dim, LFW ~99.4%) to InsightFace SCRFD + ArcFace buffalo_l (512-dim, LFW 99.80%, IJB-C 97.16% TAR@FAR=1e-4). Detection: SCRFD-10GF replaces YuNet. Recognition: ArcFace R50 on WebFace600K replaces SFace. Embedding dimension 128→512. All existing SFace embeddings deactivated by migration 047 — re-enrollment required. INV-005 updated. Thresholds retuned for ArcFace score distribution (AUTO_MATCH 0.88→0.55, CANDIDATE 0.80→0.40). Anti-spoofing liveness detection stub added (Phase 2 placeholder). — @agent — bank-grade facial recognition upgrade.

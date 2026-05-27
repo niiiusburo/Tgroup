@@ -1,0 +1,62 @@
+{
+  "brand": "TG CLINIC",
+  "portal": "CTV Portal",
+  "profileFallback": "CTV",
+  "hello": "Hi, {{name}}",
+  "notifications": "Notifications",
+  "tabs": {
+    "referrals": "Refer Client",
+    "recruiting": "Recruit CTV"
+  },
+  "title": "Customer Tracking",
+  "subtitle": "Track each referred customer from referral to payment",
+  "searchLabel": "Search customers",
+  "searchPlaceholder": "Search customers...",
+  "filters": {
+    "all": "All",
+    "active": "In progress",
+    "completed": "Completed",
+    "waitingPayment": "Waiting payment"
+  },
+  "summary": {
+    "clients": "Clients",
+    "pending": "Expected",
+    "paid": "Received"
+  },
+  "loading": "Loading referrals...",
+  "errorTitle": "CTV data could not load",
+  "errorBody": "Please try again in a few minutes.",
+  "retry": "Retry",
+  "emptyTitle": "No referred clients yet",
+  "emptyBody": "Clients will appear here once they are attached to your CTV code.",
+  "noSearchTitle": "No clients found",
+  "noSearchBody": "Try a different search or filter.",
+  "lobs": {
+    "dental": "Dental",
+    "cosmetic": "Cosmetic"
+  },
+  "serviceStatus": {
+    "pending": "Pending",
+    "paid": "Paid",
+    "reversed": "Reversed"
+  },
+  "expected": "Expected",
+  "paidOut": "Paid out",
+  "received": "Received",
+  "steps": {
+    "referred": "Referred",
+    "visited": "Visited",
+    "serviced": "Serviced",
+    "paid": "Paid"
+  },
+  "card": {
+    "showFrontFor": "Show referral journey for {{name}}",
+    "showServicesFor": "Show services for {{name}}",
+    "serviceCount": "{{count}} services",
+    "noServices": "No services yet",
+    "servicesUnderReferral": "Services under this referral",
+    "emptyBack": "No paid services have been attributed to this referral yet.",
+    "tapToReturn": "Tap to return to the referral journey",
+    "back": "Back"
+  }
+}

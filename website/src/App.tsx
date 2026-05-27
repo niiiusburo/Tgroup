@@ -35,6 +35,7 @@ const Payment = lazy(() => import('@/pages/Payment').then(m => ({ default: m.Pay
 const Feedback = lazy(() => import('@/pages/Feedback').then(m => ({ default: m.Feedback })));
 const Services = lazy(() => import('@/pages/Services').then(m => ({ default: m.Services })));
 const ServiceCatalog = lazy(() => import('@/pages/ServiceCatalog').then(m => ({ default: m.ServiceCatalog })));
+const CtvDashboard = lazy(() => import('@/pages/CTV').then(m => ({ default: m.CtvDashboard })));
 
 /**
  * Access Denied page — shown when authenticated but lacking permission
@@ -112,12 +113,26 @@ function ProtectedRoute({ children, path }: ProtectedRouteProps) {
 }
 
 /**
+ * CtvRoute — keeps CTV users on the standalone mobile CTV portal.
+ */
+function CtvRoute({ children }: { readonly children: React.ReactNode }) {
+  const { isAuthenticated, isLoading, user, hasPermission } = useAuth();
+
+  if (isLoading) return <AuthLoading />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user?.is_ctv !== true) return <AccessDenied />;
+  if (!hasPermission('ctv.dashboard.view')) return <AccessDenied />;
+
+  return <>{children}</>;
+}
+
+/**
  * LoginRoute — redirects authenticated users away from /login
  */
 function LoginRoute() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   if (isLoading) return <AuthLoading />;
-  if (isAuthenticated) return <Navigate to="/" replace />;
+  if (isAuthenticated) return <Navigate to={user?.is_ctv === true ? '/ctv' : '/'} replace />;
   return <Login />;
 }
 
@@ -152,6 +167,14 @@ function App() {
           {import.meta.env.DEV && (
             <Route path="/test/address" element={<AddressAutocompleteTest />} />
           )}
+          <Route
+            path="/ctv"
+            element={
+              <CtvRoute>
+                <CtvDashboard />
+              </CtvRoute>
+            }
+          />
 
           {/* Protected routes wrapped in Layout */}
           <Route
