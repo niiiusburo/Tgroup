@@ -17,7 +17,7 @@
 ## Two-Database Topology — Cosmetic Line of Business (v2)
 
 > Implemented per migration 047 (2026-05-19) + final handler + db factory code.
-> Physical isolation: two separate Postgres databases (tdental_demo + tcosmetic_demo) on the same server (127.0.0.1:5433 both local and docker). Dual pools via api/src/db/index.js (getDentalPool / getCosmeticPool, getDb(lob), getQuery(req) for transparent handler reuse).
+> Physical isolation: two separate Postgres databases (tdental_demo + tcosmetic_demo) on the same server (127.0.0.1:5433 both local and docker). NK3 online currently uses the same cosmetic schema under the deployment database name `tcosmetic_smoketest`. Dual pools via api/src/db/index.js (getDentalPool / getCosmeticPool, getDb(lob), getQuery(req) for transparent handler reuse).
 > Dental DB receives only additive changes (new nullable columns + new tables per 047). No existing rows, queries, or constraints altered.
 > Cosmetic DB provisioned with same schema (partners as identity for 1:1 mirror reuse of all dental handlers); seeded empty for staff/companies.
 > partners table is the canonical identity/auth source in BOTH DBs (lob_scope, is_ctv, referred_by_ctv_id added to partners; NO users table for LOB scope per explicit migration comment).
@@ -113,7 +113,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 |-----------|-------|
 | **Primary Key** | `id` (uuid) |
 | **Key Relationships** | Referenced by `partners.companyid`, `appointments.companyid`, `payments.companyid`, `products.companyid`, `saleorders.company_id`, `monthlyplans.companyid`, `dotkhams.companyid`, `feedback_attachments` (indirect), `employee_location_scope.company_id` |
-| **W** | `api/src/routes/employees.js` (indirect via partner updates), `api/src/routes/stockPickings.js` |
+| **W** | `api/src/routes/employees.js` (indirect via partner updates), `api/src/routes/stockPickings.js`, `api/scripts/import-nk3-cosmetic-catalog.js` (`tcosmetic_demo` locations only) |
 | **R** | Nearly every route file; employee revenue export builder |
 | **E** | `GET /api/Companies` |
 | **UI** | LocationSelector, FilterByLocation, LocationDashboard, LocationCard, all page lists filtered by location |
@@ -126,7 +126,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | **Primary Key** | `id` (uuid) |
 | **Key Relationships** | FK `companyid` → companies; conceptually parent of `appointments.partnerid`, `appointments.doctorid`, `payments.partnerid`, `saleorders.partner_id`, `dotkhams.partnerid`, `dotkhams.doctorid`, `monthlyplans.partnerid`, `employee_permissions.employee_id`, `permission_overrides.employee_id`, `employee_location_scope.employee_id` |
 | **Discriminator Columns** | `customer` (bool), `employee` (bool), `isdoctor` (bool), `isassistant` (bool), `isreceptionist` (bool) |
-| **W** | `api/src/routes/partners.js`, `api/src/routes/employees.js`, `api/src/routes/auth.js` (password_hash, last_login), `api/src/routes/faceRecognition.js` (face_subject_id), `api/src/routes/permissions.js` (tier_id) |
+| **W** | `api/src/routes/partners.js`, `api/src/routes/employees.js`, `api/src/routes/auth.js` (password_hash, last_login), `api/src/routes/faceRecognition.js` (face_subject_id), `api/src/routes/permissions.js` (tier_id), `api/scripts/import-nk3-cosmetic-catalog.js` (`tcosmetic_demo` company partner rows only) |
 | **R** | `partners.js`, `appointments.js`, `payments.js`, `reports.js`, `employees.js`, `auth.js`, `faceRecognition.js`, `dashboardReports.js`, `commissions.js`, employee revenue export builder |
 | **E** | `GET/POST/PUT/PATCH/DELETE /api/Partners/*`, `GET/POST/PUT/DELETE /api/Employees/*`, `POST /api/Auth/login`, `GET /api/Auth/me`, `POST /api/Auth/change-password`, `POST /api/face/*` |
 | **UI** | Customers page, Employees page, Login, Appointment forms, Payment forms, Service records, Reports, Face capture |
@@ -162,8 +162,8 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 |-----------|-------|
 | **Primary Key** | `id` (uuid) |
 | **Foreign Keys** | `categid` → productcategories, `companyid` → companies |
-| **Semantic Note** | Legacy Odoo table name; holds dental services (type = 'service'). |
-| **W** | `api/src/routes/products.js` |
+| **Semantic Note** | Legacy Odoo table name; holds dental services (type = 'service'); in `tcosmetic_demo`, NK3 catalog import writes cosmetic services from the approved sheet only. |
+| **W** | `api/src/routes/products.js`, `api/scripts/import-nk3-cosmetic-catalog.js` (`tcosmetic_demo` NK3 cosmetic services only) |
 | **R** | `products.js`, `appointments.js`, `reports.js`, `saleOrderLines.js`, `dotKhams.js` |
 | **E** | `GET/POST/PUT/DELETE /api/Products` |
 | **UI** | ServiceCatalog, ServiceForm, ServiceCatalogSelector, AppointmentForm service picker, Reports services breakdown |
@@ -175,7 +175,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 |-----------|-------|
 | **Primary Key** | `id` (uuid) |
 | **Self-Ref FK** | `parentid` → productcategories |
-| **W** | `api/src/routes/productCategories.js` |
+| **W** | `api/src/routes/productCategories.js`, `api/scripts/import-nk3-cosmetic-catalog.js` (`tcosmetic_demo` NK3 cosmetic categories only) |
 | **R** | `products.js` (JOIN for categname), `reports.js` |
 | **E** | `GET/POST/PUT/DELETE /api/ProductCategories` |
 | **UI** | ServiceCatalog category filters (duplicate migrated display names are grouped by API), ServiceForm category dropdown |

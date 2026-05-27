@@ -1,0 +1,176 @@
+source_row,category,service_name,price
+3,Filler,1cc Filler Hàn,6000000
+4,Filler,COMBO Môi 2cc Hàn,12500000
+5,Filler,COMBO Cằm 2cc Hàn,12500000
+6,Filler,COMBO Rãnh Cười 2cc Hàn,12500000
+7,Filler,COMBO Tai Tài Lộc 3cc Hàn,20000000
+8,Filler,COMBO Thái Dương 3cc Hàn,20000000
+9,Filler,COMBO Đầy Trán 5cc Hàn,31000000
+10,Filler,COMBO má cấp độ I (5cc) Hàn,31000000
+11,Filler,COMBO má cấp độ II (7cc) Hàn,43000000
+12,Filler,50cc Mông Hàn,25000000
+13,Filler,200cc Mông Hàn,65000000
+14,Filler,COMBo 3cc Hàn,15000000
+15,Filler,Combo 5cc Hàn,22500000
+16,Filler,1cc Filler Hàn Xuất,9000000
+17,Filler,COMBO Môi 2cc Filler Hàn Xuất,20000000
+18,Filler,COMBO Cằm 2cc Filler Hàn Xuất,20000000
+19,Filler,COMBO Rãnh Cười 2cc Filler Hàn Xuất,20000000
+20,Filler,COMBO Tai Tài Lộc 3cc Filler Hàn Xuất,31000000
+21,Filler,COMBO Thái Dương 3cc Filler Hàn Xuất,31000000
+22,Filler,COMBO má cấp độ I (3cc) Filler Hàn Xuất,31000000
+23,Filler,COMBO Đầy Trán 5cc Filler Hàn Xuất,46000000
+24,Filler,COMBO má cấp độ II (5cc) Filler Hàn Xuất,46000000
+25,Filler,COMBO má cấp độ III (7cc) Filler Hàn Xuất,61000000
+26,Filler,1cc Filler Juverderm,14000000
+27,Nâng ngực,Nâng ngực Nano Ergonomix,200000000
+28,Nâng ngực,Nâng ngực Nano Chip,190000000
+29,Nâng ngực,Nâng ngực Nano không Chip,165000000
+30,Nâng ngực,Nâng ngực Mentor Perfect,190000000
+31,Nâng ngực,Treo Sa Trễ,125000000
+32,Nâng ngực,Thu Nhỏ Quầng Ti,50000000
+33,Tiêm thon gọn,Thon gọn hàm Botox Hàn 50 unit,4500000
+34,Tiêm thon gọn,Thon gọn hàm Botox Hàn 100 unit,8000000
+35,Tiêm thon gọn,Thon gọn hàm Botox Hàn trọn gói 2 năm,23000000
+36,Tiêm thon gọn,Thon gọn hàm Botox Mỹ,14000000
+37,Tiêm thon gọn,Thon gọn cầu vai,18000000
+38,Vline perfect,Thon gọn hàm Vline Perfect 50 shot,9000000
+39,Vline perfect,Thon gọn hàm Vline Perfect 100 shot,14000000
+40,Vline perfect,Thon gọn hàm Vline Perfect 150 shot,16000000
+41,Vline perfect,COMBO Vline Perfect 2 năm,31000000
+42,Dịch vụ khác,Cắt 2 môi,15000000
+43,Dịch vụ khác,Cắt 1 môi,10500000
+44,Dịch vụ khác,Làm đầy hốc mắt (bảo hành dặm miễn phí 3 tháng),15000000
+45,Dịch vụ khác,Xóa nếp nhăn trán Botox Hàn,10500000
+46,Dịch vụ khác,Xóa nếp nhăn mắt Botox Hàn,5000000
+47,Dịch vụ khác,Xóa nếp nhăn ấn đường Botox Hàn,10500000
+48,Dịch vụ khác,Xóa nếp nhăn trán Botox Mỹ,13500000
+49,Dịch vụ khác,Xóa nếp nhăn mắt Botox Mỹ,13500000
+50,Dịch vụ khác,Xóa nếp nhăn ấn đường Botox Mỹ,13500000
+51,Dịch vụ khác,Hút mở xoài vai,41000000
+52,Dịch vụ khác,Hút mỡ họng cằm,41000000
+53,Dịch vụ khác,Hút mỡ đùi,75000000
+54,Dịch vụ khác,Hút mỡ Bụng+Eo,75000000
+55,Dịch vụ khác,Hút mỡ bắp tay,41000000
+56,Dịch vụ khác,Hút mỡ bắp chân,41000000
+57,Dịch vụ khác,Thu nhỏ đầu ti,16500000
+58,Dịch vụ khác,Thu ngắn đầu ti,16500000
+59,Dịch vụ khác,Thu nhỏ quầng vú,25000000
+60,Dịch vụ khác,Trị hôi nách bằng Botox Hàn,15000000
+61,Dịch vụ khác,Trị hôi nách bằng Botox Mỹ,25000000
+62,Dịch vụ khác,Hút tuyến mồ hôi trị hôi nách,37000000
+63,Dịch vụ khác,Độn cằm sụn Mỹ,41000000
+64,Dịch vụ khác,Độn cằm sụn Hàn,62000000
+65,Dịch vụ khác,Độn cằm sụn Sugiform,81000000
+67,Dịch vụ khác,Thuốc Sẹo,625000
+68,Dịch vụ khác,Dao NNC,2500000
+69,Dịch vụ khác,Tinh Chất( TC),1250000
+70,Dịch vụ khác,Treo cơ mi,6250000
+71,Dịch vụ khác,Hạ trợn,6250000
+72,Dịch vụ khác,Phẫu thuật hút tuyến mồ hôi nách,37000000
+73,Dịch vụ khác,Tiêm botox nách của Hàn,15000000
+74,Dịch vụ khác,Midface Lift mí dưới,31250000
+75,Dịch vụ khác,Treo + sửa góc ngoài bị ngửa,18750000
+76,Dịch vụ khác,Cấy mỡ trung bì mũi,25000000
+77,Dịch vụ khác,Tháo sụn + Cấy mỡ trung bì mũi,31250000
+78,Dịch vụ khác,Cấy mỡ trung bì môi,12500000
+79,Dịch vụ khác,Têm botox nách của Mỹ,25000000
+80,Dịch vụ khác,Giảm đau,2500000
+81,Dịch vụ khác,Tiền mê,6250000
+82,Dịch vụ khác,Gây mê,18750000
+83,Dịch vụ khác,Nạo mũi silicon cằm,12500000
+84,Dịch vụ khác,Nạo mũi silicon mũi,12500000
+85,Dịch vụ khác,Order Bác sĩ,2500000
+86,Thẩm mỹ mũi,Nâng mũi Mini Line,25000000
+87,Thẩm mỹ mũi,Nâng mũi Softline 4D,34000000
+88,Thẩm mỹ mũi,Nâng mũi Shanghai,55000000
+89,Thẩm mỹ mũi,Sụn sinh học Surgiform,21000000
+90,Thẩm mỹ mũi,Bọc sụn đầu mũi,10000000
+91,Thẩm mỹ mũi,"Nâng mũi Tái Cấu Trúc Reform (đã gồm bọc đầu mũi , thu gọn dầu mũi , dựng trụ)",56000000
+92,Thẩm mỹ mũi,Nâng mũi TCT Reform sụn Tự Thân,135000000
+93,Thẩm mỹ mũi,Thu nhỏ đầu mũi,31000000
+94,Thẩm mỹ mũi,Mài gồ mũi,10000000
+95,Thẩm mỹ mũi,Cắt cánh mũi,8000000
+96,Thẩm mỹ mũi,Thu nền mũi,8000000
+97,Thẩm mỹ mũi,Mũi sửa lại lần 2,10000000
+98,Thẩm mỹ mũi,Tháo sụn mũi,7500000
+99,Thẩm mỹ mắt,Cắt mí Line Mini,12500000
+100,Thẩm mỹ mắt,Cắt mí Line Mini (khách hàng >=39 tuổi),15625000
+101,Thẩm mỹ mắt,Cắt mí Shanghai,15625000
+102,Thẩm mỹ mắt,Nhấn mí Baby Eyes,10625000
+103,Thẩm mỹ mắt,Bấm mí,12500000
+104,Thẩm mỹ mắt,Mở góc mắt trong,13750000
+105,Thẩm mỹ mắt,Mở góc mắt ngoài,13750000
+106,Thẩm mỹ mắt,Hạ mắt xếch,13750000
+107,Thẩm mỹ mắt,Bóc mỡ mắt (khách làm lẻ dịch vụ),9375000
+108,Thẩm mỹ mắt,Nâng nửa đuôi cung mày,15625000
+109,Thẩm mỹ mắt,Nâng full cung chân mày,18750000
+110,Thẩm mỹ mắt,Cấy mỡ ly tâm mí mắt trên,23125000
+111,Thẩm mỹ mắt,Cấy mỡ ly tâm mí mắt dưới,23125000
+112,Thẩm mỹ mắt,Căng da mắt,35000000
+113,Thẩm mỹ mắt,Cắt mí lại lần 2,1250000
+114,Thẩm mỹ mắt,Sửa mí hỏng,10000000
+115,Thẩm mỹ cô bé,Tạo Hình môi bé độ 1,10000000
+116,Thẩm mỹ cô bé,Tạo Hình môi bé độ 2,12500000
+117,Thẩm mỹ cô bé,Tạo Hình môi bé độ 3,16250000
+118,Thẩm mỹ cô bé,Chuyển vạt làm hồng,15000000
+119,Thẩm mỹ cô bé,Tạo hình môi lớn độ 1,16250000
+120,Thẩm mỹ cô bé,Tạo hình môi lớn độ 2,18750000
+121,Thẩm mỹ cô bé,Tiêm filler làm đầy môi lớn,15000000
+122,Thẩm mỹ cô bé,Cấy mỡ môi lớn tự thân,44000000
+123,Thẩm mỹ cô bé,Căng chỉ trẻ hóa môi lớn,27500000
+124,Thẩm mỹ cô bé,Tiêm/Cấy PRP trẻ hóa môi lớn,10000000
+125,Thẩm mỹ cô bé,Thu hẹp âm đạo độ 1,22500000
+126,Thẩm mỹ cô bé,Thu hẹp âm đạo độ 2,25000000
+127,Thẩm mỹ cô bé,Thu hẹp âm đạo độ 3,27500000
+128,Thẩm mỹ cô bé,Bóc bỏ xơ sẹo/niêm mạc,11500000
+129,Thẩm mỹ cô bé,Siết cơ vòng âm đạo tăng đàn hồi Nano cấp 1,18750000
+130,Thẩm mỹ cô bé,Siết cơ vòng âm đạo tăng đàn hồi Nano cấp 2,27500000
+131,Thẩm mỹ cô bé,Siết cơ vòng âm đạo tăng đàn hồi Nano cấp 3,37500000
+132,Thẩm mỹ cô bé,Cấy chỉ âm đạo Collagen,27500000
+133,Thẩm mỹ cô bé,Tăng kích thích điểm G/Nâng G,22500000
+134,Thẩm mỹ cô bé,Chỉnh mũ âm vật độ 1,8000000
+135,Thẩm mỹ cô bé,Chỉnh mũ âm vật độ 2,15000000
+136,Thẩm mỹ cô bé,Nâng sa trễ tầng sinh môn,15000000
+137,Thẩm mỹ cô bé,Sửa sẹo tầng sinh môn,11250000
+138,Thẩm mỹ cô bé,Loại bỏ niêm mạc gốc màng trinh,8000000
+139,Thẩm mỹ cô bé,Nâng sa trễ âm đạo/tử cung,8000000
+140,Thẩm mỹ cô bé,Tái tạo/ vá màng trinh,68000000
+141,Thẩm mỹ cô bé,Bóc u tuyến Batholin,28000000
+142,Thẩm mỹ cô bé,Bóc nang bã đậu âm đạo,8000000
+143,Thẩm mỹ cô bé,Thẩm mỹ sẹo mổ đẻ,15000000
+144,Thẩm mỹ cô bé,Combo Tạo hình Môi bé+ Thu hẹp âm đạo,22500000
+145,Căng da,Căng da Medi Lift toàn mặt ( gây mê ) tại BV,110000000
+146,Căng da,Căng da Medi Lift vùng cổ ( tiền mê ) tại BV,53000000
+147,Căng da,Căng da Medi Lift vùng trán ( gây tê),40000000
+148,Căng da,Căng da Medi Lift vùng đuôi mắt / thái dương ( gây tê),40000000
+149,Căng da,Căng da Medi Lift vùng hàm ( gây tê),40000000
+150,Căng da,Căng da Medi Lift vùng má ( gây tê),40000000
+151,Nâng cơ táo,Nâng cơ táo Cấp độ 1,40000000
+152,Nâng cơ táo,Nâng cơ táo Cấp độ 2,55000000
+153,Nâng cơ táo,Nâng cơ táo Cấp độ 3,75000000
+154,Nâng cơ táo,Nâng cơ táo Cấp độ 4,100000000
+155,Công nghệ cao,Trẻ hóa PRH Cấp độ 1,31250000
+156,Công nghệ cao,Trẻ hóa PRH Cấp độ 2,62500000
+157,Công nghệ cao,Trẻ hóa PRH Cấp độ 3,93750000
+158,Công nghệ cao,Trẻ hóa PRH Cấp độ 4,125000000
+159,Công nghệ cao,Nâng cơ trẻ hóa Hifu cấp độ 1,13000000
+160,Công nghệ cao,Nâng cơ trẻ hóa Hifu cấp độ 2,20000000
+161,Công nghệ cao,Nâng cơ trẻ hóa Hifu cấp độ 3,28000000
+162,Công nghệ cao,Nâng cơ trẻ hóa Hifu cấp độ 4,40000000
+163,Công nghệ cao,Nâng cơ trẻ hóa vùng mắt Ultherapy,20000000
+164,Công nghệ cao,Nâng cơ trẻ hóa vùng mặt Ultherapy,30000000
+165,Công nghệ cao,Nâng cơ trẻ hóa vùng mặt+cổ Ultherapy,40000000
+166,Công nghệ cao,Nâng cơ trẻ hóa vùng bụng/đùi Ultherapy,55000000
+167,Công nghệ cao,Nâng cơ trẻ hóa vùng mắt Thermage,50000000
+168,Công nghệ cao,Nâng cơ trẻ hóa vùng mặt Thermage,75000000
+169,Công nghệ cao,Nâng cơ trẻ hóa vùng mặt+cổ Thermage,90000000
+170,Công nghệ cao,Nâng cơ trẻ hóa vùng bụng/đùi Thermage,100000000
+171,Công nghệ cao,Slim Plus Giảm Mỡ Hạ Gò Má,15500000
+172,Công nghệ cao,Slim Plus Giảm Mỡ Má,16750000
+173,Công nghệ cao,Slim Plus Giảm Mỡ Bắp Tay,19500000
+174,Công nghệ cao,Slim Plus Giảm Mỡ Bắp Chân,19500000
+175,Công nghệ cao,Slim Plus Giảm Mỡ Đùi,28000000
+176,Công nghệ cao,Slim Plus Giảm Mỡ Bụng,35000000
+177,Công nghệ cao,Slim Plus Giảm Mỡ Eo,35000000
+178,Công nghệ cao,Slim Plus Giảm Mỡ Nọng Cằm,14000000

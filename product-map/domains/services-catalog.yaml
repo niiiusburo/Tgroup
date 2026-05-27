@@ -12,6 +12,7 @@ owns:
   - api/src/routes/saleOrders.js
   - api/src/routes/saleOrderLines.js
   - api/src/routes/dotKhams.js (read-only treatment-round context)
+  - api/scripts/import-nk3-cosmetic-catalog.js (NK3 cosmetic sheet extract/import; tcosmetic_demo only)
   - website/src/pages/ServiceCatalog.tsx
   - website/src/pages/Services/index.tsx
   - website/src/components/services/
@@ -24,6 +25,10 @@ reads:
 writes:
   - dbo.products (insert/update/delete)
   - dbo.productcategories (insert/update/delete)
+  - tcosmetic_demo.dbo.products / tcosmetic_smoketest.dbo.products (NK3 sheet import create/update/soft-inactivate services only)
+  - tcosmetic_demo.dbo.productcategories / tcosmetic_smoketest.dbo.productcategories (NK3 sheet import create/update/soft-inactivate unused categories only)
+  - tcosmetic_demo.dbo.companies / tcosmetic_smoketest.dbo.companies (NK3 sheet import create/update cosmetic locations)
+  - tcosmetic_demo.dbo.partners / tcosmetic_smoketest.dbo.partners (company partner rows for imported cosmetic locations only)
   - dbo.saleorders (create + state patch)
   - dbo.saleorderlines (CRUD via saleOrderLines route)
   - dbo.saleorder_state_logs (audit logging)
@@ -65,7 +70,7 @@ ui_surfaces:
   - ServiceForm
   - ServiceHistoryList
 jobs:
-  - none
+  - api/scripts/import-nk3-cosmetic-catalog.js (operator-run NK3 cosmetic catalog import; requires dry-run, backup, and explicit confirmation before --apply --target nk3)
 shared_types:
   - website/src/types/service.ts
   - website/src/lib/api/products.ts
@@ -80,6 +85,7 @@ affected_by:
 impact_tests:
   - website/src/__tests__/ServiceCatalog.test.tsx
   - website/src/components/services/serviceFormToothQuantity.test.ts
+  - api/tests/nk3CosmeticCatalogImport.test.js
   - website/e2e/export-downloads.spec.ts (services/service-catalog export menus)
   - website/e2e/team-bravo-records.spec.ts
 risk_level: high
@@ -90,5 +96,7 @@ notes:
   - Current frontend guards: /service-catalog uses `services.view`, while /services patient treatment records still use `customers.edit` even though backend sale-order read routes use `services.view`.
   - /api/ProductCategories groups duplicate migrated category UUIDs by display name for the catalog sidebar; /api/Products category filtering expands the selected display group to all matching category UUIDs.
   - Service catalog and patient treatment searches must remain accent-insensitive for Vietnamese service, category, doctor, and customer names.
+  - NK3 cosmetic sheet import is scoped to the cosmetic DB only (`tcosmetic_demo` locally, `tcosmetic_smoketest` for the online NK3 container), refuses dental/NK/NK2 targets, writes no deletes, and preserves Vietnamese tone-distinct service identities even though `namenosign` remains accent-insensitive for search.
+  - Current NK3 source extraction is 175 valid services, 11 categories, 2 locations, and one skipped source anomaly at row 66 (`Dịch vụ khác` with blank service name and price 0).
   - Customer profile service edits patch the parent sale order but must also persist rendered line fields such as `saleorderlines.productuomqty`, `tooth_numbers`, and `tooth_comment` because the `Phiếu khám` table is sourced from `/api/SaleOrders/lines`.
   - Tooth picker saves should sync quantity to selected tooth count only while quantity is still following the picker/default count; manual quantity overrides must be preserved.

@@ -10,6 +10,7 @@ owns:
   - api/src/routes/cosmetic/*.js (mirrors of dental routes, gated by requireLobScope('cosmetic'))
   - api/src/routes/ctv.js (commission-summary cross-DB aggregator)
   - api/src/middleware/lobScope.js (requireLobScope)
+  - api/scripts/import-nk3-cosmetic-catalog.js (NK3 cosmetic catalog sheet extract/import; tcosmetic_demo only)
   - website/src/contexts/BusinessUnitContext.tsx
   - website/src/components/header/LOBSelector.tsx (or equivalent in Layout header)
   - website/src/pages/CTV/index.tsx (mobile-first 4-tab surface)
@@ -39,6 +40,8 @@ writes:
   - tcosmetic_demo.earnings
   - tcosmetic_demo.payouts
   - tcosmetic_demo.consultations (auto-created on cosmetic booking with consulting_staff_id)
+  - tcosmetic_demo.products / productcategories (NK3 catalog sheet import)
+  - tcosmetic_demo.companies / partners (NK3 location import and company partner rows)
 tables:
   # DENTAL DB (tdental_demo, dbo schema) — additive only
   - tdental_demo.dbo.partners (as canonical auth/identity source) (+ lob_scope TEXT[] NULL, + is_ctv BOOLEAN NULL DEFAULT FALSE)
@@ -88,7 +91,8 @@ ui_invariants:
   - All searches and lists under cosmetic LOB must be accent-insensitive (Vietnamese names).
   - Cross-LOB "also a X client" badge is admin-only (lob.crossview) and performs soft phone match only — no FK or merge.
 jobs:
-  - none (commission payout run is admin-triggered via commissions.payout.run)
+  - api/scripts/import-nk3-cosmetic-catalog.js (operator-run NK3 service/location sheet import; requires dry-run, backup, explicit confirmation, and CONFIRM_NK3_COSMETIC_IMPORT=YES before remote apply)
+  - none for scheduled jobs (commission payout run is admin-triggered via commissions.payout.run)
 shared_types:
   - website/src/types/lob.ts (Lob, BusinessUnitScope, LOBToggleState)
   - website/src/lib/api/ctv.ts (CtvCommissionSummary, CtvReferral, CommissionRow with lob tag)
@@ -116,6 +120,7 @@ impact_tests:
   - Migration rollback dry-run on dental additive changes
   - Real-browser smoke: admin with both scopes sees toggle, can switch, sees empty cosmetic state, switches back with dental data intact
   - CTV login lands on /ctv and sees cross-DB pending/paid data
+  - NK3 catalog import: api/tests/nk3CosmeticCatalogImport.test.js, parse-only extraction, local dry-run, scoped Semgrep, and NK3 service-catalog screenshot after staging is reachable
 risk_level: high
 notes:
   - "Physical DB isolation is the core invariant of v2. No cross-DB JOINs are ever allowed; all composition happens in the API layer (ctv aggregator, crossview badge probe)."
@@ -125,3 +130,6 @@ notes:
   - "The 9 new permission keys (cosmetic.access, dental.access, ctv.dashboard.view, ctv.commission.view.self, ctv.referrals.view.self, commissions.view.team, commissions.payout.run, commissions.export, lob.crossview) must be seeded and appear in permission-registry.yaml."
   - "Feature flag COSMETIC_LOB_ENABLED gates the entire surface until step 8 of the rollout. Pre-flip, cosmetic routes return 503."
   - "Verification gates (detailed in parent spec) must all pass before flag flip on nk2 and again on nk prod."
+  - "NK3 online currently uses `tcosmetic_smoketest` for the same cosmetic schema, while local development defaults to `tcosmetic_demo`."
+  - "NK3 catalog source is the Google Sheet with 175 valid services, 11 categories, and 2 cosmetic locations; row 66 is intentionally skipped because it has a blank service name and price 0."
+  - "NK3 catalog import must not target NK/NK2/dental and must preserve Vietnamese tone-distinct service names such as mắt versus mặt."

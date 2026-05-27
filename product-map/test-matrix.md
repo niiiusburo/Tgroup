@@ -130,6 +130,7 @@ Feature coverage should cite the UC/WF IDs from `docs/USE-CASES.md` and `docs/WO
 | `telemetry.test.js` | Settings/Telemetry | Telemetry error ingestion, deduplication, management updates, fix attempts, and stats |
 | `telemetryAuth.test.js` | Settings/Telemetry | Public-only error ingestion and auth-required telemetry management routes |
 | `readRoutePermissions.test.js` | Auth/Permissions | Backend route permission declarations, including scoped feedback admin actions |
+| `nk3CosmeticCatalogImport.test.js` | Services/Cosmetic LOB | NK3 Google Sheet extraction/import helpers: workbook parsing, 175-service identity handling, CSV output, non-destructive delta planning, and NK/NK2/dental target refusal |
 | `src/routes/reports/__tests__/cashFlow.test.js` | Reports/Payments | UC-013/WF-013: `CON-Reports-CashFlowSummary`; cash-flow aggregation rules for service collections, deposits, refunds, deposit usage, voided rows, timezone-safe date buckets, route mounting, and scoped location rejection |
 | `src/routes/reports/__tests__/revenueRecognition.test.js` | Reports/Payments | UC-013/WF-013: `CON-Reports-RevenueSummary` plus trend/doctor/category revenue; posted service payment allocations, deposit exclusion, allocation proration, and payment-date recognition |
 | `src/routes/reports/__tests__/servicesBreakdown.test.js` | Reports/Services | UC-013/WF-013: `CON-Reports-ServicesBreakdown`; category/source revenue from posted payment allocations instead of listed service prices or raw order totals |
