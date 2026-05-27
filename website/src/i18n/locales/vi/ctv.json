@@ -89,5 +89,22 @@
     "passwordTooShort": "Mật khẩu phải có ít nhất 6 ký tự",
     "signatureRequired": "Vui lòng ký tên",
     "termsLoadError": "Không tải được điều khoản. Vui lòng tải lại trang."
+  },
+  "referral": {
+    "title": "Giới thiệu khách hàng",
+    "clientName": "Tên khách hàng",
+    "clientPhone": "Số điện thoại",
+    "clientEmail": "Email",
+    "serviceInterest": "Dịch vụ quan tâm",
+    "servicePlaceholder": "VD: Tẩy trắng răng",
+    "lob": "Lĩnh vực",
+    "notes": "Ghi chú",
+    "submit": "Gửi giới thiệu",
+    "submitting": "Đang gửi...",
+    "namePhoneRequired": "Vui lòng nhập tên và số điện thoại",
+    "referredByOther": "Khách hàng này đã được giới thiệu bởi CTV khác",
+    "activeExists": "Đã có lượt giới thiệu đang hoạt động cho khách hàng này",
+    "alreadyReferred": "Khách hàng này đã được giới thiệu",
+    "successMessage": "Giới thiệu thành công!"
   }
 }

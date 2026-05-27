@@ -79,6 +79,29 @@ export function fetchCtvCommissionSummary() {
   return apiFetch<CtvCommissionSummary>('/ctv/commission-summary');
 }
 
+export interface CreateReferralPayload {
+  readonly clientName: string;
+  readonly clientPhone: string;
+  readonly clientEmail?: string;
+  readonly serviceInterest?: string;
+  readonly notes?: string;
+  readonly lob?: CtvLob;
+}
+
+export interface CreateReferralResponse {
+  readonly success: boolean;
+  readonly partnerId: string;
+  readonly orderId: string;
+  readonly message: string;
+}
+
 export function fetchCtvProfile() {
   return apiFetch<CtvProfile>('/ctv/me');
+}
+
+export function createCtvReferral(payload: CreateReferralPayload) {
+  return apiFetch<CreateReferralResponse>('/ctv/referrals', {
+    method: 'POST',
+    body: payload,
+  });
 }

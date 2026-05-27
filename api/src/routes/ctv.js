@@ -7,6 +7,8 @@
 const express = require('express');
 const { requireAuth } = require('../middleware/auth');
 const { getDb } = require('../db');
+const { checkEligibility } = require('../services/referralEligibilityService');
+const { normalizePhone } = require('../services/phoneNormalize');
 
 const router = express.Router();
 
@@ -290,6 +292,117 @@ router.get('/me', requireAuth, requireCtvUser, (req, res) => {
     phone: '',
     role: 'CTV',
   });
+});
+
+/**
+ * POST /api/ctv/referrals
+ * Create a new client referral for this CTV.
+ * Body: { clientName, clientPhone, clientEmail?, serviceInterest?, notes?, lob? }
+ * lob defaults to 'dental'.
+ */
+router.post('/referrals', requireAuth, requireCtvUser, async (req, res) => {
+  try {
+    const { employeeId } = req.user || {};
+    if (!employeeId) return res.status(401).json({ error: 'No token' });
+
+    const {
+      clientName,
+      clientPhone,
+      clientEmail,
+      serviceInterest,
+      notes,
+      lob = 'dental',
+    } = req.body || {};
+
+    if (!clientName || !clientPhone) {
+      return res.status(400).json({
+        error: { code: 'BAD_REQUEST', message: 'clientName and clientPhone are required' },
+      });
+    }
+
+    const targetDb = lob === 'cosmetic' ? getDb('cosmetic') : getDb('dental');
+    if (!targetDb) {
+      return res.status(500).json({
+        error: { code: 'DB_ERROR', message: `Database for lob=${lob} not available` },
+      });
+    }
+
+    // Eligibility gate
+    const eligibility = await checkEligibility(targetDb, employeeId, clientPhone);
+    if (!eligibility.eligible) {
+      const messages = {
+        INVALID_PHONE: 'Invalid phone number',
+        REFERRED_BY_OTHER: 'This client is already referred by another CTV',
+        ACTIVE_REFERRAL_EXISTS: 'An active referral for this client already exists',
+      };
+      return res.status(409).json({
+        error: {
+          code: eligibility.reason,
+          message: messages[eligibility.reason] || 'Not eligible for referral',
+        },
+      });
+    }
+
+    const normalizedPhone = normalizePhone(clientPhone);
+    let partnerId = eligibility.existingPartnerId || null;
+
+    // Create partner if not exists
+    if (!partnerId) {
+      const { v4: uuidv4 } = require('uuid');
+      partnerId = uuidv4();
+
+      const refCode = 'T' + Math.floor(100000 + Math.random() * 900000);
+
+      await targetDb.query(
+        `INSERT INTO dbo.partners (
+          id, name, phone, email, customer, active, employee,
+          supplier, isagent, isinsurance, iscompany, ishead,
+          isbusinessinvoice, isdeleted, isdoctor, isassistant, isreceptionist,
+          referred_by_ctv_id, ref, datecreated, lastupdated
+        ) VALUES (
+          $1, $2, $3, $4, true, true, false,
+          false, false, false, false, false,
+          false, false, false, false, false,
+          $5, $6, (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh'),
+          (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
+        )`,
+        [partnerId, clientName, normalizedPhone, clientEmail || null, employeeId, refCode]
+      );
+    }
+
+    // Create draft saleorder as referral record
+    const { v4: uuidv4 } = require('uuid');
+    const orderId = uuidv4();
+    const orderName = serviceInterest
+      ? `CTV Referral — ${clientName} (${serviceInterest})`
+      : `CTV Referral — ${clientName}`;
+
+    await targetDb.query(
+      `INSERT INTO dbo.saleorders (
+        id, name, partnerid, state, origin,
+        amounttotal, residual, totalpaid,
+        quantity, unit, isdeleted, notes, datecreated
+      ) VALUES (
+        $1, $2, $3, 'draft', 'ctv_referral',
+        0, 0, 0,
+        1, 'lần', false, $4,
+        (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
+      )`,
+      [orderId, orderName, partnerId, notes || null]
+    );
+
+    return res.status(201).json({
+      success: true,
+      partnerId,
+      orderId,
+      message: 'Referral created successfully',
+    });
+  } catch (err) {
+    console.error('[ctv/referrals] error:', err);
+    return res.status(500).json({
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to create referral' },
+    });
+  }
 });
 
 module.exports = router;

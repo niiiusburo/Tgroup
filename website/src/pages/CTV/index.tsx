@@ -10,6 +10,7 @@ import {
   Users,
 } from 'lucide-react';
 import { ReferralFlipCard } from '@/components/ctv/ReferralFlipCard';
+import { ReferClientModal } from '@/components/ctv/ReferClientModal';
 import { formatVND } from '@/lib/formatting';
 import { cn, normalizeText } from '@/lib/utils';
 import {
@@ -119,6 +120,7 @@ export function CtvDashboard() {
   const [filter, setFilter] = useState<FilterKey>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showReferModal, setShowReferModal] = useState(false);
 
   const loadDashboard = useCallback(async () => {
     setIsLoading(true);
@@ -201,6 +203,7 @@ export function CtvDashboard() {
           <div className="mt-4 grid grid-cols-2 gap-2">
             <button
               type="button"
+              onClick={() => setShowReferModal(true)}
               className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-white text-sm font-bold text-orange-600 shadow-sm"
             >
               <UserPlus className="h-4 w-4" />
@@ -319,6 +322,13 @@ export function CtvDashboard() {
           </div>
         </section>
       </div>
+
+      {showReferModal && (
+        <ReferClientModal
+          onClose={() => setShowReferModal(false)}
+          onSuccess={() => void loadDashboard()}
+        />
+      )}
     </main>
   );
 }

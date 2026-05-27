@@ -89,5 +89,22 @@
     "passwordTooShort": "Password must be at least 6 characters",
     "signatureRequired": "Signature is required",
     "termsLoadError": "Could not load terms. Please refresh."
+  },
+  "referral": {
+    "title": "Refer a Client",
+    "clientName": "Client Name",
+    "clientPhone": "Client Phone",
+    "clientEmail": "Client Email",
+    "serviceInterest": "Service Interest",
+    "servicePlaceholder": "e.g. Teeth whitening",
+    "lob": "Line of Business",
+    "notes": "Notes",
+    "submit": "Submit Referral",
+    "submitting": "Submitting...",
+    "namePhoneRequired": "Client name and phone are required",
+    "referredByOther": "This client is already referred by another CTV",
+    "activeExists": "An active referral for this client already exists",
+    "alreadyReferred": "This client has already been referred",
+    "successMessage": "Referral submitted successfully!"
   }
 }
