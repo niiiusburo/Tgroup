@@ -21,7 +21,6 @@ import { createAppointment, updateAppointment } from '@/lib/api';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { DEFAULT_APPOINTMENT_DURATION } from '@/lib/appointmentDuration';
 import { formatInTimezone, getTodayInTimezone } from '@/lib/dateUtils';
-import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 const DEFAULT_COLOR = '1';
 const DEFAULT_TIMEZONE = 'Asia/Ho_Chi_Minh';

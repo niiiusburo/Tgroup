@@ -12,7 +12,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useBusinessUnit } from "@/contexts/BusinessUnitContext";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useLocations } from "@/hooks/useLocations";
-import { useBusinessUnit } from "@/contexts/BusinessUnitContext";
 import type { ProfileTab } from "@/components/customer/CustomerProfile";
 import { LoadingState } from "@/components/shared/LoadingState";
 import { CustomerKeyPicker } from "@/components/customer/CustomerKeyPicker";

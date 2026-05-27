@@ -11,7 +11,7 @@ interface CtvHierarchyPanelProps {
   readonly onRetry: () => void;
 }
 
-function formatJoinedDate(value: string | null, language: string) {
+function formatJoinedDate(value: string | null | undefined, language: string) {
   if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;

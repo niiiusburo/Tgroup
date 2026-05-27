@@ -13,7 +13,7 @@ function getDateLocale(language: string): string {
   return language.startsWith('en') ? 'en-US' : 'vi-VN';
 }
 
-function formatShortDate(value: string | null, locale: string): string {
+function formatShortDate(value: string | null | undefined, locale: string): string {
   if (!value) return '-';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '-';

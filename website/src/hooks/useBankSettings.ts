@@ -8,7 +8,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '@/lib/api/core';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import type { BankSettings, UseBankSettingsResult } from '@/types/bankSettings';
-import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 export { type BankSettings, type UseBankSettingsResult } from '@/types/bankSettings';
 

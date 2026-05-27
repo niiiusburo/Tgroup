@@ -34,7 +34,6 @@ export function fetchCustomerSources(params?: {
       type: params?.type,
       is_active: params?.is_active,
     },
-    lob: params?.lob,
   });
 }
 

@@ -195,7 +195,6 @@ export function fetchSaleOrderLines(params?: {
       sortField: params?.sortField ?? 'date',
       sortOrder: params?.sortOrder ?? 'desc',
     },
-    lob: params?.lob,
   });
 }
 

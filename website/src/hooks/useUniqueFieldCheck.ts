@@ -17,6 +17,7 @@ export interface UseUniqueFieldCheckArgs {
   initialValue?: string;   // edit-mode: skip check when value === initialValue
   debounceMs?: number;     // default 400
   enabled?: boolean;       // default true
+  lob?: 'dental' | 'cosmetic';  // explicit LOB override (else from BusinessUnit context)
 }
 
 export interface UseUniqueFieldCheckResult {

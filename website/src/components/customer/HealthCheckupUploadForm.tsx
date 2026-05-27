@@ -4,7 +4,6 @@ import { Loader2 } from 'lucide-react';
 import { createExternalCheckup } from '@/lib/api';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { formatUploadBytes, prepareImageForUpload } from '@/lib/imageUpload';
-import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
 interface HealthCheckupUploadFormProps {
   readonly customerCode: string;

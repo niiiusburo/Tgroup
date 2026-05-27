@@ -205,16 +205,17 @@ export interface FaceStatusResult {
   lastRegisteredAt: string | null;
 }
 
-export function recognizeFace(image: Blob) {
+export function recognizeFace(image: Blob, lob?: 'dental' | 'cosmetic') {
   const formData = new FormData();
   formData.append('image', image, 'face.jpg');
   return apiFetch<FaceMatchResult>('/face/recognize', {
     method: 'POST',
     body: formData as unknown as Record<string, unknown>,
+    lob,
   });
 }
 
-export function registerFace(partnerId: string, image: Blob, source?: string) {
+export function registerFace(partnerId: string, image: Blob, source?: string, lob?: 'dental' | 'cosmetic') {
   const formData = new FormData();
   formData.append('partnerId', partnerId);
   formData.append('image', image, 'face.jpg');
@@ -222,14 +223,15 @@ export function registerFace(partnerId: string, image: Blob, source?: string) {
   return apiFetch<FaceRegisterResult>('/face/register', {
     method: 'POST',
     body: formData as unknown as Record<string, unknown>,
+    lob,
   });
 }
 
-export function getFaceStatus(partnerId: string) {
-  return apiFetch<FaceStatusResult>(`/face/status/${encodeURIComponent(partnerId)}`);
+export function getFaceStatus(partnerId: string, lob?: 'dental' | 'cosmetic') {
+  return apiFetch<FaceStatusResult>(`/face/status/${encodeURIComponent(partnerId)}`, { lob });
 }
 
-export function reregisterFace(partnerId: string, images: readonly Blob[], source?: string) {
+export function reregisterFace(partnerId: string, images: readonly Blob[], source?: string, lob?: 'dental' | 'cosmetic') {
   const formData = new FormData();
   formData.append('partnerId', partnerId);
   images.forEach((blob, idx) => formData.append('images', blob, `face-${idx}.jpg`));
@@ -237,6 +239,7 @@ export function reregisterFace(partnerId: string, images: readonly Blob[], sourc
   return apiFetch<FaceReRegisterResult>('/face/re-register', {
     method: 'POST',
     body: formData as unknown as Record<string, unknown>,
+    lob,
   });
 }
 
