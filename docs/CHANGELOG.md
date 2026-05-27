@@ -182,6 +182,13 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 
 ### Docs
 - Added cosmetic line-of-business design specs (v1, v2, visual companion) and SMS messaging system research under `docs/superpowers/specs/`. These design documents are now present on the `feat/cosmetic-line-of-business` worktree (cherry-picked from the parking branch) to guide implementation of the new Cosmetic LOB feature — @agent — Pre-implementation design capture for feat/cosmetic-line-of-business.
+## [0.32.55] — 2026-05-27
+### Added
+- Added CTV hierarchy endpoint `GET /api/ctv/hierarchy` and enabled the `/ctv` `Giới thiệu CTV` / `Invite CTVs` tab to show current CTV, upline, downline, and hierarchy totals from CTV-to-CTV `partners.referred_by_ctv_id` links only. — @agent — UC-023 / WF-016; preserves the CTV/client separation in Contracts v1.1.2.
+
+## [0.32.54] — 2026-05-27
+### Fixed
+- CTV `/ctv` portal now separates referred-client service tracking (`Track Clients` / `Theo dõi`) from CTV recruitment and upline/downline growth (`Invite CTVs` / `Giới thiệu CTV`). — @agent — UC-022 / WF-015 CTV self-portal terminology.
 
 ## [0.32.53] — 2026-05-27
 ### Added

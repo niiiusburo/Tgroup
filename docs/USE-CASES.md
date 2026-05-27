@@ -432,3 +432,21 @@ When a use case is created or materially edited, add one compact `Traceability` 
 - **Postconditions:** CTV can audit multi-service referral earnings without accessing admin screens or cross-CTV data.
 - **Invariants touched:** INV-006 (accent-insensitive search), INV-016 (i18n), INV-017 (dense list internal scroll), INV-020 (version bump).
 - **Traceability:** Related WF: WF-015. Contracts/routes: `GET /api/ctv/referrals`, `GET /api/ctv/commission-summary`, `GET /api/ctv/me`. Data/tables: `dbo.partners`, `dbo.earnings`, `dbo.saleorderlines`, `dbo.products` across dental and cosmetic DBs. Tests: `api/src/routes/__tests__/ctvReferrals.test.js`, `website/src/components/ctv/ReferralFlipCard.test.tsx`, `website/src/pages/CTV/index.test.tsx`. Product-map domains: `ctv`, `earnings-commissions`, `business-unit`.
+
+---
+
+## UC-023 — Review CTV Referral Hierarchy
+
+- **Actor:** CTV user
+- **Trigger:** CTV clicks `Giới thiệu CTV` / `Invite CTVs` on `/ctv`.
+- **Preconditions:** Actor is authenticated with `is_ctv=true`; CTV-to-CTV links use `partners.referred_by_ctv_id`; hierarchy nodes are CTV partners with `is_ctv=true`.
+- **Main flow:**
+  1. Actor opens `/ctv`.
+  2. Actor clicks `Giới thiệu CTV` / `Invite CTVs`.
+  3. Frontend loads `GET /api/ctv/hierarchy`.
+  4. API reads the current CTV, upline, and downline from dental and cosmetic `dbo.partners`.
+  5. API filters every hierarchy node to CTV records only and returns merged `current`, `upline`, `downline`, and `totals`.
+  6. Frontend shows current CTV, direct/total downline counts, upline, and downline CTV rows.
+- **Postconditions:** CTV can review their CTV invitation tree without mixing referred service clients into the hierarchy.
+- **Invariants touched:** INV-016 (i18n), INV-017 (dense list internal scroll), INV-020 (version bump).
+- **Traceability:** Related WF: WF-016. Contracts/routes: `GET /api/ctv/hierarchy`. Data/tables: `dbo.partners` across dental and cosmetic DBs. Tests: `api/src/routes/__tests__/ctvReferrals.test.js`, `website/src/pages/CTV/index.test.tsx`, `/ctv` screenshot verification. Product-map domains: `ctv`, `business-unit`.

@@ -9,6 +9,7 @@ summary: |
   /api/ctv/referrals returns self-owned referrals with service_count and services[] so a card can flip to every service attributed under that referral.
   Shows pending/paid, LOB-tagged activity, referred clients across LOBs, split bars, etc. per visual companion. D13 recipient resolution powers the rows.
   Single new UI surface: mobile-first CTV portal at /ctv; referral cards flip to show every service/earning row tied to the referred client.
+  Single new UI surface: mobile-first CTV portal at /ctv; referral cards flip to show every service/earning row tied to the referred client, and the CTV invitation tab shows CTV-only upline/downline hierarchy.
   /api/ctv/commission-summary aggregates earnings from BOTH physical DBs (tdental_demo.earnings + tcosmetic_demo.earnings) server-side for the authenticated CTV partner only (via recipient_partner_id).
   Shows pending/paid, LOB-tagged activity, referred clients across LOBs, service-line drill-downs, split bars, etc. per visual companion. D13 recipient resolution powers the rows.
   CTV is the only surface that intentionally crosses the two DBs (composition in API, no SQL JOIN).
@@ -20,10 +21,12 @@ owns:
   - Login redirect logic in AuthContext / ProtectedRoute / LoginRoute
 reads:
   - tdental_demo.dbo.partners (is_ctv flag for role gating; referred_by_ctv_id for referred clients)
+  - tdental_demo.dbo.partners (referred_by_ctv_id + is_ctv=true for CTV-to-CTV hierarchy)
   - tdental_demo.dbo.earnings (CTV's rows via recipient_partner_id; D13 source)
   - tcosmetic_demo.dbo.earnings (same for cosmetic LOB referrals)
   - tdental_demo.dbo.partners (referred clients on dental side)
   - tcosmetic_demo.dbo.partners (referred clients on cosmetic side via referred_by_ctv_id)
+  - tcosmetic_demo.dbo.partners (referred_by_ctv_id + is_ctv=true for cosmetic CTV hierarchy mirror)
   - Both DBs: payouts for paid status
   - Both DBs: appointments/payments/service-line fields indirectly through earnings-derived journey status
 writes:
@@ -42,6 +45,7 @@ endpoints:
   - GET /api/ctv/referrals (self referred partners/clients + status + earned + services[] under each referral)
   - GET /api/ctv/client-journeys (self referred clients + referral/visit/service/payment stage)
   - GET /api/ctv/commission-summary (auth: is_ctv + ctv.commission.view.self; returns aggregates + per-LOB breakdown + recent rows with source and service-line fields)
+  - GET /api/ctv/hierarchy (auth: is_ctv; returns current CTV plus CTV-only upline/downline nodes using partners.referred_by_ctv_id and COALESCE(is_ctv,false)=true)
   - GET /api/ctv/referrals (self referred partners/clients + status + earned + services[] rows for flip card)
   - GET /api/ctv/me (profile)
   - POST /api/ctv (self/admin CTV recruit)
@@ -58,6 +62,7 @@ ui_surfaces:
     - Me: profile, logout
   - /ctv (full bypass of admin Layout/sidebar; mobile-first; also usable desktop)
     - Referral tracking: search/filter referred clients; card front shows journey progress; card back shows all services under that referral with amount, status, LOB pill, and earned date.
+    - Giới thiệu CTV / Invite CTVs: CTV referral hierarchy view showing current CTV, upline, direct downline count, and downline CTVs only.
   - Hard redirect on login for partners.is_ctv=true (before any admin mount)
   - 403 guards on all / (admin) routes for CTV
 shared_types:
@@ -77,6 +82,7 @@ impact_tests:
   - Referred clients show correct LOB tags, status, and flip-card service rows
   - Referred clients show correct LOB tags and status
   - Referral flip card returns all earned services for the client and keeps search accent-insensitive
+  - CTV hierarchy route and tab show upline/downline CTVs only and never mix service clients into the invitation tree
 risk_level: high (only cross-DB surface)
 notes:
   - "D13 live demo: seed a CTV partner + referred patient + collected payment in dental and/or cosmetic; verify earnings row + CTV dashboard shows it."

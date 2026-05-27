@@ -63,6 +63,43 @@ function mapServiceRow(row, lob) {
   };
 }
 
+function mapHierarchyNode(row, lob) {
+  return {
+    id: row.id,
+    name: row.name || 'CTV',
+    email: row.email || '',
+    phone: row.phone || '',
+    joinedAt: row.joined_at || row.datecreated || null,
+    referredByCtvId: row.referred_by_ctv_id || null,
+    level: parseInt(row.level || 0, 10),
+    directDownlineCount: parseInt(row.direct_downline_count || 0, 10),
+    lobs: [lob],
+  };
+}
+
+function mergeHierarchyNodes(items) {
+  const byId = new Map();
+
+  items.forEach((item) => {
+    if (!item?.id) return;
+    if (!byId.has(item.id)) {
+      byId.set(item.id, { ...item, lobs: [...item.lobs] });
+      return;
+    }
+
+    const existing = byId.get(item.id);
+    existing.lobs = Array.from(new Set([...existing.lobs, ...item.lobs]));
+    existing.level = Math.min(existing.level || item.level, item.level || existing.level);
+    existing.directDownlineCount = Math.max(existing.directDownlineCount || 0, item.directDownlineCount || 0);
+    if (!existing.joinedAt && item.joinedAt) existing.joinedAt = item.joinedAt;
+  });
+
+  return Array.from(byId.values()).sort((a, b) => {
+    if ((a.level || 0) !== (b.level || 0)) return (a.level || 0) - (b.level || 0);
+    return new Date(b.joinedAt || 0).getTime() - new Date(a.joinedAt || 0).getTime();
+  });
+}
+
 async function getReferralServices(db, clientId, ctvId, lob) {
   const rows = await safeQueryRows(
     db,
@@ -88,6 +125,138 @@ async function getReferralServices(db, clientId, ctvId, lob) {
 
   return rows.map((row) => mapServiceRow(row, lob));
 }
+
+/**
+ * GET /api/ctv/hierarchy
+ * Read-only CTV-to-CTV referral hierarchy. Referred service clients stay on /referrals;
+ * this route filters for is_ctv=true rows so the invitation tree cannot mix with clients.
+ */
+router.get('/hierarchy', requireAuth, requireCtvUser, async (req, res) => {
+  const { employeeId } = req.user || {};
+  if (!employeeId) return res.status(401).json({ error: 'No token' });
+  const ctvId = employeeId;
+
+  const currentSql = `
+    SELECT id, name, phone, email, datecreated AS joined_at, referred_by_ctv_id, 0 AS level
+    FROM dbo.partners
+    WHERE id = $1
+      AND COALESCE(is_ctv, false) = true
+    LIMIT 1
+  `;
+
+  const uplineSql = `
+    WITH RECURSIVE upline AS (
+      SELECT p.id, p.name, p.phone, p.email, p.datecreated AS joined_at, p.referred_by_ctv_id, 1 AS level
+      FROM dbo.partners current_ctv
+      JOIN dbo.partners p ON p.id = current_ctv.referred_by_ctv_id
+      WHERE current_ctv.id = $1
+        AND COALESCE(p.is_ctv, false) = true
+      UNION ALL
+      SELECT p.id, p.name, p.phone, p.email, p.datecreated AS joined_at, p.referred_by_ctv_id, upline.level + 1 AS level
+      FROM dbo.partners p
+      JOIN upline ON p.id = upline.referred_by_ctv_id
+      WHERE COALESCE(p.is_ctv, false) = true
+        AND upline.level < 5
+    )
+    SELECT
+      id,
+      name,
+      phone,
+      email,
+      joined_at,
+      referred_by_ctv_id,
+      level,
+      (
+        SELECT COUNT(*)::int
+        FROM dbo.partners child
+        WHERE child.referred_by_ctv_id = upline.id
+          AND COALESCE(child.is_ctv, false) = true
+      ) AS direct_downline_count
+    FROM upline
+    ORDER BY level ASC, joined_at DESC NULLS LAST
+    LIMIT 20
+  `;
+
+  const downlineSql = `
+    WITH RECURSIVE downline AS (
+      SELECT p.id, p.name, p.phone, p.email, p.datecreated AS joined_at, p.referred_by_ctv_id, 1 AS level
+      FROM dbo.partners p
+      WHERE p.referred_by_ctv_id = $1
+        AND COALESCE(p.is_ctv, false) = true
+      UNION ALL
+      SELECT p.id, p.name, p.phone, p.email, p.datecreated AS joined_at, p.referred_by_ctv_id, downline.level + 1 AS level
+      FROM dbo.partners p
+      JOIN downline ON p.referred_by_ctv_id = downline.id
+      WHERE COALESCE(p.is_ctv, false) = true
+        AND downline.level < 5
+    )
+    SELECT
+      downline.id,
+      downline.name,
+      downline.phone,
+      downline.email,
+      downline.joined_at,
+      downline.referred_by_ctv_id,
+      downline.level,
+      (
+        SELECT COUNT(*)::int
+        FROM dbo.partners child
+        WHERE child.referred_by_ctv_id = downline.id
+          AND COALESCE(child.is_ctv, false) = true
+      ) AS direct_downline_count
+    FROM downline
+    ORDER BY downline.level ASC, downline.joined_at DESC NULLS LAST
+    LIMIT 100
+  `;
+
+  const dentalDb = getDb('dental');
+  const cosmeticDb = getDb('cosmetic');
+
+  const [dCurrent, cCurrent, dUpline, cUpline, dDownline, cDownline] = await Promise.all([
+    safeQueryRows(dentalDb, currentSql, [ctvId]),
+    safeQueryRows(cosmeticDb, currentSql, [ctvId]),
+    safeQueryRows(dentalDb, uplineSql, [ctvId]),
+    safeQueryRows(cosmeticDb, uplineSql, [ctvId]),
+    safeQueryRows(dentalDb, downlineSql, [ctvId]),
+    safeQueryRows(cosmeticDb, downlineSql, [ctvId]),
+  ]);
+
+  const current =
+    mergeHierarchyNodes([
+      ...dCurrent.map((row) => mapHierarchyNode(row, 'dental')),
+      ...cCurrent.map((row) => mapHierarchyNode(row, 'cosmetic')),
+    ])[0] || {
+      id: ctvId,
+      name: req.user.name || 'CTV',
+      email: req.user.email || '',
+      phone: '',
+      joinedAt: null,
+      referredByCtvId: null,
+      level: 0,
+      directDownlineCount: 0,
+      lobs: [],
+    };
+
+  const upline = mergeHierarchyNodes([
+    ...dUpline.map((row) => mapHierarchyNode(row, 'dental')),
+    ...cUpline.map((row) => mapHierarchyNode(row, 'cosmetic')),
+  ]);
+  const downline = mergeHierarchyNodes([
+    ...dDownline.map((row) => mapHierarchyNode(row, 'dental')),
+    ...cDownline.map((row) => mapHierarchyNode(row, 'cosmetic')),
+  ]);
+
+  return res.json({
+    current,
+    upline,
+    downline,
+    totals: {
+      uplineCount: upline.length,
+      downlineCount: downline.length,
+      directDownlineCount: downline.filter((node) => node.level === 1).length,
+    },
+  });
+});
 
 /**
  * GET /api/ctv/commission-summary

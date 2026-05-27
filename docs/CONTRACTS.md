@@ -22,6 +22,7 @@
 | v1.1.1 | 2026-05-27 | CTV referral dashboard contract now exposes service-level earnings rows under each referred client and in commission recents. |
 | v1.0.2 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
 | v1.0.3 | 2026-05-20 | Appointment update accepts clinic/location changes, appointment export date/search semantics are clarified, and legacy flat report export columns cover notes/source/payment split feedback. |
+| v1.1.2 | 2026-05-27 | CTV hierarchy contract exposes `GET /api/ctv/hierarchy` for CTV-only upline/downline review under the `Giới thiệu CTV` tab. |
 
 ---
 
@@ -29,9 +30,11 @@
 
 Cosmetic LOB mirror rule: when the frontend passes `lob: 'cosmetic'` to `apiFetch`, the client routes the same endpoint under `/api/cosmetic/*`. Mirrored handlers must run behind `requireLobScope('cosmetic')`, `attachCosmeticDb`, `runWithLob('cosmetic')`, and `cosmetic.access`, then read/write `tcosmetic_demo` through request-scoped `getQuery(req)` or ALS-aware `query()`. Dental remains the default legacy `/api/*` path.
 
-CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referrals`, and `GET /api/ctv/me` are mounted behind `ctv.dashboard.view` and must additionally require `req.user.is_ctv === true`. Authenticated non-CTV staff, including admins, receive `403 S_CTV_ONLY`.
+CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referrals`, `GET /api/ctv/hierarchy`, and `GET /api/ctv/me` are mounted behind `ctv.dashboard.view` and must additionally require `req.user.is_ctv === true`. Authenticated non-CTV staff, including admins, receive `403 S_CTV_ONLY`.
 
 CTV referral service-line rule: `GET /api/ctv/referrals` returns each referred client with `service_count` and `services[]`. Each service row contains `{ id, serviceLineId, paymentId, serviceName, amount, status, source, lob, earnedAt }` and is scoped to `earnings.client_id = referral.id` plus `earnings.recipient_partner_id = current CTV`. `GET /api/ctv/commission-summary` recents and lists also include `client_id`, `service_line_id`, `service_name`, and `payment_id` for read-only CTV display.
+
+CTV hierarchy rule: `GET /api/ctv/hierarchy` returns `{ current, upline, downline, totals }` for the authenticated CTV. Each hierarchy node contains `{ id, name, email, phone, joinedAt, referredByCtvId, level, directDownlineCount, lobs }`. The route reads `dbo.partners.referred_by_ctv_id` across dental and cosmetic DBs, filters every hierarchy edge to `COALESCE(is_ctv,false)=true`, and must not include referred service clients from `GET /api/ctv/referrals`.
 
 ### 1.1 Auth
 

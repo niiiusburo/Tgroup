@@ -92,7 +92,7 @@ describe('ReferralFlipCard', () => {
 
     await user.click(flipButton);
 
-    expect(screen.getByText('Services under this referral')).toBeVisible();
+    expect(screen.getByText('Services under this referred client')).toBeVisible();
     expect(screen.getByText('Dental')).toBeVisible();
     expect(screen.getByRole('button', { name: /Back/i })).toBeVisible();
   });

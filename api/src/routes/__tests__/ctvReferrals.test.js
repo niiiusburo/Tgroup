@@ -38,7 +38,52 @@ describe('CTV referrals route', () => {
     jest.clearAllMocks();
 
     mockDentalQueryRows.mockImplementation(async (sql) => {
-      if (sql.includes('FROM dbo.partners') && sql.includes('referred_by_ctv_id')) {
+      if (sql.includes('WITH RECURSIVE upline')) {
+        return [
+          {
+            id: 'ctv-parent',
+            name: 'Leader CTV',
+            phone: '0909999999',
+            email: 'leader@clinic.vn',
+            joined_at: '2026-05-01T00:00:00.000Z',
+            referred_by_ctv_id: null,
+            level: 1,
+            direct_downline_count: 2,
+          },
+        ];
+      }
+
+      if (sql.includes('WITH RECURSIVE downline')) {
+        return [
+          {
+            id: 'ctv-child',
+            name: 'Junior CTV',
+            phone: '0902222222',
+            email: 'junior@clinic.vn',
+            joined_at: '2026-05-25T00:00:00.000Z',
+            referred_by_ctv_id: 'ctv-1',
+            level: 1,
+            direct_downline_count: 0,
+          },
+        ];
+      }
+
+      if (sql.includes('WHERE id = $1') && sql.includes('COALESCE(is_ctv, false) = true')) {
+        return [
+          {
+            id: 'ctv-1',
+            name: 'CTV Demo',
+            phone: '',
+            email: 'ctv-demo@clinic.vn',
+            joined_at: '2026-05-20T00:00:00.000Z',
+            referred_by_ctv_id: 'ctv-parent',
+            level: 0,
+            direct_downline_count: 1,
+          },
+        ];
+      }
+
+      if (sql.includes('FROM dbo.partners') && sql.includes('customer = true')) {
         return [
           {
             id: 'client-1',
@@ -93,7 +138,12 @@ describe('CTV referrals route', () => {
     });
 
     mockCosmeticQueryRows.mockImplementation(async (sql) => {
-      if (sql.includes('FROM dbo.partners') && sql.includes('referred_by_ctv_id')) {
+      if (
+        sql.includes('WITH RECURSIVE upline') ||
+        sql.includes('WITH RECURSIVE downline') ||
+        (sql.includes('WHERE id = $1') && sql.includes('COALESCE(is_ctv, false) = true')) ||
+        (sql.includes('FROM dbo.partners') && sql.includes('customer = true'))
+      ) {
         return [];
       }
       throw new Error(`Unexpected cosmetic query: ${sql}`);
@@ -132,5 +182,42 @@ describe('CTV referrals route', () => {
         status: 'paid',
       }),
     ]);
+  });
+
+  it('returns the CTV-only upline and downline hierarchy separately from referred clients', async () => {
+    const res = await request(makeApp()).get('/api/ctv/hierarchy');
+
+    expect(res.status).toBe(200);
+    expect(res.body.current).toMatchObject({
+      id: 'ctv-1',
+      name: 'CTV Demo',
+      referredByCtvId: 'ctv-parent',
+      level: 0,
+      lobs: ['dental'],
+    });
+    expect(res.body.upline).toEqual([
+      expect.objectContaining({
+        id: 'ctv-parent',
+        name: 'Leader CTV',
+        level: 1,
+        directDownlineCount: 2,
+        lobs: ['dental'],
+      }),
+    ]);
+    expect(res.body.downline).toEqual([
+      expect.objectContaining({
+        id: 'ctv-child',
+        name: 'Junior CTV',
+        referredByCtvId: 'ctv-1',
+        level: 1,
+        directDownlineCount: 0,
+        lobs: ['dental'],
+      }),
+    ]);
+    expect(res.body.totals).toEqual({
+      uplineCount: 1,
+      downlineCount: 1,
+      directDownlineCount: 1,
+    });
   });
 });

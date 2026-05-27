@@ -633,3 +633,36 @@ sequenceDiagram
 - A missing `recipient_partner_id` filter can leak another CTV's service rows.
 - A missing `service_line_id` join fallback must still show a readable generic service label.
 - Long service lists must scroll inside the flipped card without pushing search/filter controls off the page.
+
+---
+
+## WF-016 — CTV Hierarchy Review
+
+**Trigger:** CTV opens the CTV invitation tab to inspect upline/downline relationships.
+
+```mermaid
+sequenceDiagram
+    actor C as CTV
+    participant FE as React (/ctv)
+    participant API as Express /api/ctv
+    participant Dental as tdental_demo
+    participant Cosmetic as tcosmetic_demo
+
+    C->>FE: Click Giới thiệu CTV
+    FE->>API: GET /api/ctv/hierarchy
+    API->>Dental: SELECT current CTV, recursive upline, recursive downline where is_ctv=true
+    API->>Cosmetic: SELECT current CTV, recursive upline, recursive downline where is_ctv=true
+    Dental-->>API: Dental CTV hierarchy rows
+    Cosmetic-->>API: Cosmetic CTV hierarchy rows
+    API-->>FE: current, upline[], downline[], totals
+    FE-->>C: CTV-only hierarchy panel
+```
+
+**Data state transitions:** None. The hierarchy view is read-only and uses existing `partners.referred_by_ctv_id` links.
+
+**Traceability:** Related UC: UC-023. Contracts/routes: `GET /api/ctv/hierarchy`. Data/tables: `dbo.partners` in dental and cosmetic DBs. Invariants: INV-016, INV-017, INV-020. Tests: `api/src/routes/__tests__/ctvReferrals.test.js`, `website/src/pages/CTV/index.test.tsx`, `/ctv` screenshot verification. Product-map domains: `ctv`, `business-unit`.
+
+**Failure modes:**
+- If the route omits `is_ctv=true`, referred service clients can appear in the CTV invitation tree.
+- If duplicate partner IDs exist across DBs, nodes must merge LOB tags instead of rendering duplicate people.
+- The hierarchy tab must not show client-search filters; those belong only to referred-client tracking.
