@@ -37,6 +37,8 @@ const Services = lazy(() => import('@/pages/Services').then(m => ({ default: m.S
 const ServiceCatalog = lazy(() => import('@/pages/ServiceCatalog').then(m => ({ default: m.ServiceCatalog })));
 const CtvDashboard = lazy(() => import('@/pages/CTV').then(m => ({ default: m.CtvDashboard })));
 const CommissionTiers = lazy(() => import('@/pages/Admin/CommissionTiers').then(m => ({ default: m.default })));
+const CtvSignup = lazy(() => import('@/pages/CtvSignup').then(m => ({ default: m.default })));
+const CtvThankYou = lazy(() => import('@/pages/CtvSignup/ThankYou').then(m => ({ default: m.default })));
 
 /**
  * Access Denied page — shown when authenticated but lacking permission
@@ -168,6 +170,9 @@ function App() {
           {import.meta.env.DEV && (
             <Route path="/test/address" element={<AddressAutocompleteTest />} />
           )}
+          {/* Public CTV signup (no auth required) */}
+          <Route path="/ctv/signup" element={<CtvSignup />} />
+          <Route path="/ctv/thank-you" element={<CtvThankYou />} />
           <Route
             path="/ctv"
             element={
