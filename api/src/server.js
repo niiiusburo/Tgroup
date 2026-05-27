@@ -249,6 +249,9 @@ app.use('/api/CrmTasks', crmTasksRoutes);
 app.use('/api/Commissions', commissionsRoutes);
 app.use('/api/Ctv', require('./routes/ctv')); // v2 CTV dashboard (is_ctv gate inside)
 app.use('/api/admin/commission-tiers', require('./routes/admin/commissionTiers'));
+app.use('/api/signup-terms', require('./routes/signupTerms'));
+// Public CTV signup routes mounted BEFORE the gated /api/ctv mount
+app.use('/api/ctv', require('./routes/ctvSignup'));
 app.use('/api/HrPayslips', hrPayslipsRoutes);
 app.use('/api/Employees', employeesRoutes);
 app.use('/api/Products', productsRoutes);

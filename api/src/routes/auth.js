@@ -1,11 +1,11 @@
 'use strict';
 
 const express = require('express');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { query } = require('../db');
 const { requireAuth } = require('../middleware/auth');
 const { resolveEffectivePermissions } = require('../services/permissionService');
+const { verify: verifyPassword, hash: hashPassword, isLegacy } = require('../services/passwordService');
 
 const router = express.Router();
 
@@ -41,9 +41,23 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const passwordMatch = await bcrypt.compare(password, employee.password_hash);
+    const passwordMatch = await verifyPassword(password, employee.password_hash);
     if (!passwordMatch) {
       return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    // Lazy rehash: if legacy format, upgrade to bcrypt
+    if (isLegacy(employee.password_hash)) {
+      try {
+        const newHash = await hashPassword(password);
+        await query(
+          `UPDATE partners SET password_hash = $1 WHERE id = $2`,
+          [newHash, employee.id]
+        );
+      } catch (rehashErr) {
+        console.error('Lazy rehash failed:', rehashErr.message);
+        // Non-fatal: login succeeds even if rehash fails
+      }
     }
 
     // Update last_login
@@ -158,12 +172,12 @@ router.post('/change-password', requireAuth, async (req, res) => {
       return res.status(401).json({ error: 'User not found or no password set' });
     }
 
-    const passwordMatch = await bcrypt.compare(oldPassword, rows[0].password_hash);
+    const passwordMatch = await verifyPassword(oldPassword, rows[0].password_hash);
     if (!passwordMatch) {
       return res.status(401).json({ error: 'Incorrect current password' });
     }
 
-    const newHash = await bcrypt.hash(newPassword, 10);
+    const newHash = await hashPassword(newPassword);
     await query(
       `UPDATE partners SET password_hash = $1 WHERE id = $2`,
       [newHash, employeeId]

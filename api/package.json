@@ -13,6 +13,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@google/generative-ai": "^0.12.0",
     "@tgroup/contracts": "file:../contracts",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
