@@ -15,6 +15,11 @@ ARG GIT_SHA=unknown
 ARG GIT_BRANCH=unknown
 ENV GIT_SHA=${GIT_SHA}
 ENV GIT_BRANCH=${GIT_BRANCH}
+# Bulletproof: materialize build args into .env.production.local so Vite
+# always inlines them at `vite build --mode production`, regardless of whether
+# the shell ENV propagates through npm script subprocesses inside Docker.
+RUN printf 'VITE_API_URL=%s\nVITE_COSMETIC_LOB_ENABLED=%s\n' "${VITE_API_URL}" "${VITE_COSMETIC_LOB_ENABLED}" > .env.production.local \
+  && cat .env.production.local
 RUN npm run build
 
 FROM nginx:alpine
