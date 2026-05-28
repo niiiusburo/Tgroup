@@ -118,7 +118,7 @@ describe('ProtectedRoute — hard redirect for is_ctv users (Phase-1 gap C)', ()
 
   it('App.tsx source still contains the is_ctv gate (regression lock)', () => {
     const appSource = readFileSync(resolve(__dirname, '..', 'App.tsx'), 'utf8');
-    expect(appSource).toMatch(/user\?\.is_ctv\s*\|\|\s*user\?\.isCtv/);
+    expect(appSource).toMatch(/user\?\.is_ctv\s*===\s*true\s*\|\|\s*user\?\.isCtv\s*===\s*true/);
     expect(appSource).toMatch(/<Navigate to="\/ctv" replace \/>/);
   });
 });

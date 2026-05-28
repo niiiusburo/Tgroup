@@ -46,7 +46,7 @@ router.get('/commission-summary', requireAuth, async (req, res) => {
   const earningsSql = `
     SELECT e.id, e.client_id, e.recipient_partner_id, e.payment_id, e.service_line_id,
            e.source, e.amount, e.status, e.payout_id, e.earned_at, e.created_at,
-           COALESCE(p.name, 'Unknown Client') AS client_name
+           p.name AS client_name
     FROM dbo.earnings e
     LEFT JOIN dbo.partners p ON p.id = e.client_id
     WHERE e.recipient_partner_id = $1
@@ -101,7 +101,7 @@ router.get('/commission-summary', requireAuth, async (req, res) => {
 
   const recent = all.slice(0, 8).map((e) => ({
     id: e.id,
-    client_name: e.client_name,
+    client_name: e.client_name || null,
     amount: parseFloat(e.amount || 0),
     source: e.source || 'ctv',
     lob: e.lob,
@@ -285,7 +285,7 @@ router.get('/client-journeys', requireAuth, async (req, res) => {
         date: firstEarn?.earned_at || firstEarn?.created_at || row.referred_at,
       } : undefined,
       service: hasService && lastEarn ? {
-        name: lastEarn.source || 'Service',
+        name: lastEarn.source || null,
         amount: Math.abs(parseFloat(lastEarn.amount || 0)),
         date: lastEarn.earned_at || lastEarn.created_at,
       } : undefined,

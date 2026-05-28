@@ -1,10 +1,12 @@
 import { Stethoscope, Sparkles } from 'lucide-react';
+import { useCtvLocale } from '@/lib/i18n/ctv';
 
 interface PillProps {
   lob: 'dental' | 'cosmetic' | string;
 }
 
 export function Pill({ lob }: PillProps) {
+  const ctv = useCtvLocale();
   const isDen = lob === 'dental' || lob === 'den';
   return (
     <span
@@ -15,7 +17,7 @@ export function Pill({ lob }: PillProps) {
       }`}
     >
       {isDen ? <Stethoscope className="w-2.5 h-2.5" /> : <Sparkles className="w-2.5 h-2.5" />}
-      {isDen ? 'Dental' : 'Cosmetic'}
+      {ctv.getLobLabel(isDen ? 'dental' : 'cosmetic')}
     </span>
   );
 }

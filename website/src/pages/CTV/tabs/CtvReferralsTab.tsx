@@ -1,17 +1,15 @@
 import { useTranslation } from 'react-i18next';
 import { Pill } from '@/components/ctv/Pill';
 import type { CtvReferral } from '@/lib/api/ctv';
+import { useCtvLocale } from '@/lib/i18n/ctv';
 
 interface Props {
   referrals: CtvReferral[];
 }
 
-function formatVnd(n: number) {
-  return (n || 0).toLocaleString('vi-VN') + ' ₫';
-}
-
 export function CtvReferralsTab({ referrals }: Props) {
   const { t } = useTranslation('ctv');
+  const ctv = useCtvLocale();
 
   return (
     <>
@@ -28,7 +26,7 @@ export function CtvReferralsTab({ referrals }: Props) {
               {ref.lobs.map((l, li) => (
                 <Pill key={li} lob={l} />
               ))}
-              <span className="font-semibold ml-auto sm:ml-0">{ref.name}</span>
+              <span className="font-semibold ml-auto sm:ml-0">{ref.name || ctv.unknownClient()}</span>
             </div>
             {ref.phone && <div className="text-sm text-gray-500">{ref.phone}</div>}
             <div className="mt-2 flex justify-between items-center text-sm">
@@ -42,7 +40,7 @@ export function CtvReferralsTab({ referrals }: Props) {
                 {ref.status === 'earning' ? t('referrals.status.earning') : t('referrals.status.noVisitYet')}
               </span>
               <span className="text-gray-600">
-                {ref.earned_count} {t('referrals.svc')} · <span className="font-semibold text-gray-900 tabular-nums">{formatVnd(ref.total_earned)}</span>
+                {ref.earned_count} {t('referrals.svc')} · <span className="font-semibold text-gray-900 tabular-nums">{ctv.formatCurrency(ref.total_earned)}</span>
               </span>
             </div>
           </div>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LogOut, Copy, Check } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { LANG_LABELS, type SupportedLang } from '@/i18n';
 
 interface Props {
   me: { id: string; name: string; email?: string; phone?: string; referral_code?: string } | null;
@@ -9,13 +10,14 @@ interface Props {
 
 export function CtvMeTab({ me }: Props) {
   const { logout, user } = useAuth();
-  const { t } = useTranslation('ctv');
+  const { t, i18n } = useTranslation('ctv');
   const [copied, setCopied] = useState(false);
 
   const displayName = me?.name || user?.name || 'CTV';
   const email = me?.email || user?.email || '—';
   const phone = me?.phone;
   const referralCode = me?.referral_code || 'CTV-' + (me?.id?.slice(0, 6).toUpperCase() || '000000');
+  const languageLabel = LANG_LABELS[(i18n.language.startsWith('en') ? 'en' : 'vi') as SupportedLang];
 
   async function handleCopy() {
     try {
@@ -63,7 +65,7 @@ export function CtvMeTab({ me }: Props) {
       <div className="bg-white rounded-3xl ring-1 ring-gray-100 mt-4 divide-y divide-gray-50 text-sm">
         <div className="flex justify-between items-center px-5 py-3.5">
           <span className="text-gray-600">{t('me.language')}</span>
-          <span className="font-medium text-gray-900">VI</span>
+          <span className="font-medium text-gray-900">{languageLabel}</span>
         </div>
         <div className="flex justify-between items-center px-5 py-3.5">
           <span className="text-gray-600">{t('me.notifications')}</span>

@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.32.50",
+    "date": "2026-05-28",
+    "commit": "pending",
+    "highlights": "NK3 CTV portal now has an in-app EN/VI language toggle and shared locale formatting for CTV dates, money, LOB labels, and unknown-client/service fallbacks.",
+    "sections": [
+      {
+        "title": "Changed",
+        "items": [
+          "CTV Portal /ctv: header now includes the language switcher, and the modular CTV tabs/cards use shared CTV locale helpers for display formatting.",
+          "Tracking search is accent-insensitive for Vietnamese referred-client and service names.",
+          "CTV API display fallbacks now return null for missing names so the frontend can render localized fallback labels."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added focused Vitest coverage for the CTV language toggle and accent-insensitive Tracking search."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.46",
     "date": "2026-05-24",
     "commit": "pending",

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pill } from '@/components/ctv/Pill';
 import type { CtvCommissionSummary } from '@/lib/api/ctv';
+import { useCtvLocale } from '@/lib/i18n/ctv';
 
 type CommissionSub = 'pending' | 'paid';
 
@@ -9,12 +10,9 @@ interface Props {
   summary: CtvCommissionSummary | null;
 }
 
-function formatVnd(n: number) {
-  return (n || 0).toLocaleString('vi-VN') + ' ₫';
-}
-
 export function CtvCommissionTab({ summary }: Props) {
   const { t } = useTranslation('ctv');
+  const ctv = useCtvLocale();
   const [commissionSub, setCommissionSub] = useState<CommissionSub>('pending');
 
   const pending = summary?.totals?.pending || 0;
@@ -52,7 +50,7 @@ export function CtvCommissionTab({ summary }: Props) {
         <div className="space-y-3">
           <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-3xl p-5 shadow-lg shadow-orange-500/25">
             <div className="text-[11px] uppercase tracking-[0.15em] font-semibold text-orange-100/90">{t('commission.totalPending')}</div>
-            <div className="text-3xl font-bold tabular-nums mt-1">{formatVnd(pending)}</div>
+            <div className="text-3xl font-bold tabular-nums mt-1">{ctv.formatCurrency(pending)}</div>
             <div className="text-sm text-orange-100/90 mt-1">
               {t('commission.servicesAcrossClients', { count: summary?.counts?.pending || 0, clients: summary?.pendingList?.length || 0 })}
             </div>
@@ -63,9 +61,9 @@ export function CtvCommissionTab({ summary }: Props) {
               <div key={idx} className="bg-white rounded-2xl p-4 mb-2 ring-1 ring-gray-100 flex justify-between items-center text-sm">
                 <div className="flex items-center gap-2 min-w-0">
                   <Pill lob={row.lob} />
-                  <span className="font-medium truncate">{row.client_name}</span>
+                  <span className="font-medium truncate">{row.client_name || ctv.unknownClient()}</span>
                 </div>
-                <div className="font-semibold tabular-nums shrink-0">{formatVnd(row.amount)}</div>
+                <div className="font-semibold tabular-nums shrink-0">{ctv.formatCurrency(row.amount)}</div>
               </div>
             ))}
             {(!summary?.pendingList || summary.pendingList.length === 0) && (
@@ -77,7 +75,7 @@ export function CtvCommissionTab({ summary }: Props) {
         <div className="space-y-3">
           <div className="bg-white rounded-3xl p-5 ring-1 ring-gray-100 shadow-sm">
             <div className="text-[11px] uppercase tracking-[0.15em] font-semibold text-gray-500">{t('commission.totalPaid')}</div>
-            <div className="text-3xl font-bold tabular-nums text-gray-900 mt-1">{formatVnd(paid)}</div>
+            <div className="text-3xl font-bold tabular-nums text-gray-900 mt-1">{ctv.formatCurrency(paid)}</div>
             <div className="text-sm text-gray-500 mt-1">{summary?.payouts?.length || 0} {t('commission.payoutCycles')}</div>
           </div>
           <div>
@@ -87,7 +85,7 @@ export function CtvCommissionTab({ summary }: Props) {
                 <div className="flex items-center gap-3">
                   <div>
                     <div className="text-sm font-medium">{p.cycle_label}</div>
-                    <div className="text-xs text-gray-500">{p.lob === 'dental' ? 'Dental' : 'Cosmetic'} · {p.paid_at ? new Date(p.paid_at).toLocaleDateString('vi-VN') : '—'}</div>
+                    <div className="text-xs text-gray-500">{ctv.getLobLabel(p.lob)} · {ctv.formatShortDate(p.paid_at)}</div>
                   </div>
                   {p.receipt_url && (
                     <a href={p.receipt_url} target="_blank" rel="noreferrer">
@@ -95,7 +93,7 @@ export function CtvCommissionTab({ summary }: Props) {
                     </a>
                   )}
                 </div>
-                <div className="font-semibold tabular-nums">{formatVnd(p.total_amount)}</div>
+                <div className="font-semibold tabular-nums">{ctv.formatCurrency(p.total_amount)}</div>
               </div>
             ))}
             {(!summary?.payouts || summary.payouts.length === 0) && (

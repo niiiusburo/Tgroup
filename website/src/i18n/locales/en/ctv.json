@@ -6,7 +6,8 @@
     "commissionTitle": "My Commission",
     "referralsTitle": "My Referrals",
     "networkTitle": "Network",
-    "meTitle": "Account"
+    "meTitle": "Account",
+    "notifications": "Notifications"
   },
   "tabs": {
     "home": "Home",
@@ -43,6 +44,15 @@
     "noActivity": "No recent activity yet.<br />Refer clients to start earning.",
     "dental": "Dental",
     "cosmetic": "Cosmetic"
+  },
+  "lobs": {
+    "dental": "Dental",
+    "cosmetic": "Cosmetic"
+  },
+  "serviceStatus": {
+    "pending": "Pending",
+    "paid": "Paid",
+    "reversed": "Reversed"
   },
   "commission": {
     "myCommission": "My Commission",
@@ -143,5 +153,8 @@
     "loadFailedDetail": "Server connection error. Please try again.",
     "generic": "An error occurred. Please try again later."
   },
+  "unknownClient": "Client",
+  "unknownService": "Service",
+  "unknownValue": "Unknown",
   "currency": "₫"
 }

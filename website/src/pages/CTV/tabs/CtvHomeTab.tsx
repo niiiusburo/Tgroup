@@ -2,18 +2,16 @@ import { useTranslation } from 'react-i18next';
 
 import { Pill } from '@/components/ctv/Pill';
 import type { CtvCommissionSummary } from '@/lib/api/ctv';
+import { useCtvLocale } from '@/lib/i18n/ctv';
 
 interface Props {
   summary: CtvCommissionSummary | null;
   displayName: string;
 }
 
-function formatVnd(n: number) {
-  return (n || 0).toLocaleString('vi-VN') + ' ₫';
-}
-
 export function CtvHomeTab({ summary, displayName }: Props) {
   const { t } = useTranslation('ctv');
+  const ctv = useCtvLocale();
 
   const pending = summary?.totals?.pending || 0;
   const paid = summary?.totals?.paid || 0;
@@ -36,7 +34,7 @@ export function CtvHomeTab({ summary, displayName }: Props) {
           {t('home.pendingCommission')}
         </div>
         <div className="text-[2.5rem] leading-none font-bold tabular-nums tracking-tight text-gray-900 mb-4">
-          {formatVnd(pending)}
+          {ctv.formatCurrency(pending)}
         </div>
 
         {/* Split bar */}
@@ -49,12 +47,12 @@ export function CtvHomeTab({ summary, displayName }: Props) {
           <div className="flex items-center gap-2">
             <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: '#F97316' }} />
             <span className="text-gray-600">{t('home.dental')}</span>
-            <span className="font-semibold tabular-nums">{formatVnd(dentalP)}</span>
+            <span className="font-semibold tabular-nums">{ctv.formatCurrency(dentalP)}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: '#FB7185' }} />
             <span className="text-gray-600">{t('home.cosmetic')}</span>
-            <span className="font-semibold tabular-nums">{formatVnd(cosP)}</span>
+            <span className="font-semibold tabular-nums">{ctv.formatCurrency(cosP)}</span>
           </div>
         </div>
       </div>
@@ -72,7 +70,7 @@ export function CtvHomeTab({ summary, displayName }: Props) {
             <div className="text-xs text-gray-500 mt-1">{t('home.services')}</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-orange-600 tabular-nums">{formatVnd(paid).replace(/\s+₫$/, '')}</div>
+            <div className="text-2xl font-bold text-orange-600 tabular-nums">{ctv.formatCurrency(paid).replace(/\s+₫$/, '')}</div>
             <div className="text-xs text-gray-500 mt-1">{t('home.paidOut')} ({t('currency')})</div>
           </div>
         </div>
@@ -88,10 +86,10 @@ export function CtvHomeTab({ summary, displayName }: Props) {
             <div key={i} className="flex justify-between items-center py-2 border-b last:border-0 border-gray-50">
               <div className="flex items-center gap-2 min-w-0">
                 <Pill lob={act.lob} />
-                <span className="font-medium truncate">{act.client_name}</span>
+                <span className="font-medium truncate">{act.client_name || ctv.unknownClient()}</span>
               </div>
               <div className={`font-semibold tabular-nums shrink-0 ${parseFloat(String(act.amount)) < 0 ? 'text-red-500' : 'text-emerald-600'}`}>
-                {parseFloat(String(act.amount)) < 0 ? '' : '+'}{formatVnd(Math.abs(act.amount))}
+                {parseFloat(String(act.amount)) < 0 ? '' : '+'}{ctv.formatCurrency(Math.abs(act.amount))}
               </div>
             </div>
           ))}

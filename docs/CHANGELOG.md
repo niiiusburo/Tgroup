@@ -2,6 +2,14 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.50] — 2026-05-28 (codex/nk3-ctv-deploy)
+### Changed
+- NK3 CTV portal is now bilingual inside the modular `/ctv` dashboard: added the shared `useCtvLocale()` helper, placed the EN/VI `LanguageToggle` in the CTV header, localized CTV currency/date/LOB/fallback display helpers, and made Tracking search accent-insensitive across referred-client and service text. — @agent — BEHAVIOR.md §9 localization, Contracts v1.0.6, CTV self-service parity.
+- CTV API display fallbacks now return nullable names instead of hardcoded English service/client text so frontend i18n owns user-facing unknown-client/service labels. — @agent — CTV contract v1.0.6; preserves D14 CTV isolation and two-DB composition.
+- `/ctv` route guards now preserve legacy `isCtv` auth payload compatibility while keeping CTV users out of admin routes and non-CTV users out of the CTV portal. — @agent — INV-008B CTV role isolation.
+### Tests
+- Added focused Vitest coverage for the CTV header language toggle and accent-insensitive Tracking search. — @agent — docs/TEST-MATRIX.md CTV locale regression row.
+
 ## [0.32.49] — 2026-05-25 (codex/nk3-ctv-deploy)
 ### Added
 - NK3 CTV self portal refresh: `/ctv` now uses the modular CTV page set under `website/src/pages/CTV/*`, shared CTV components, and the `ctv` i18n namespace. The portal keeps Home, Commission, Referrals, and Me while adding the Tracking tab for client journey status. — @agent — UC-CTV self-service, preserves Cosmetic LOB v2 D14 CTV admin isolation.

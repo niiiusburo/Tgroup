@@ -4,6 +4,7 @@ import { ClientTrackingCard } from '@/components/ctv/ClientTrackingCard';
 import { EmptyState } from '@/components/ctv/EmptyState';
 import { LoadingSkeleton } from '@/components/ctv/LoadingSkeleton';
 import type { CtvClientJourney } from '@/lib/api/ctv';
+import { normalizeText } from '@/lib/utils';
 
 interface Props {
   clients: CtvClientJourney[];
@@ -21,8 +22,10 @@ export function CtvTrackingTab({ clients, loading, onReferClient }: Props) {
   const filtered = useMemo(() => {
     let result = [...clients];
     if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter((c) => c.name.toLowerCase().includes(q));
+      const q = normalizeText(search);
+      result = result.filter((c) =>
+        normalizeText(`${c.name || ''} ${c.phone || ''} ${c.service?.name || ''}`).includes(q)
+      );
     }
     if (filter === 'in_progress') {
       result = result.filter((c) => c.stage === 'visited' || c.stage === 'serviced');

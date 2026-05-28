@@ -23,7 +23,7 @@ export interface CtvCommissionSummary {
   counts: { pending: number; paid: number };
   recent: Array<{
     id: string;
-    client_name: string;
+    client_name: string | null;
     amount: number;
     source: string;
     lob: 'dental' | 'cosmetic';
@@ -37,7 +37,7 @@ export interface CtvCommissionSummary {
 
 export interface CtvReferral {
   id: string;
-  name: string;
+  name: string | null;
   phone?: string;
   lobs: string[];
   total_earned: number;
@@ -49,7 +49,7 @@ export interface CtvReferral {
 /** Extended referral with client journey tracking stages */
 export interface CtvClientJourney {
   id: string;
-  name: string;
+  name: string | null;
   phone?: string;
   lobs: string[];
   referred_at: string;
@@ -63,7 +63,7 @@ export interface CtvClientJourney {
     location?: string;
   };
   service?: {
-    name: string;
+    name: string | null;
     amount: number;
     date?: string;
     next_appointment?: string;

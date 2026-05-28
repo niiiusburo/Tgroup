@@ -456,7 +456,7 @@ All existing dental route shapes are mirrored at `/api/cosmetic/*` (e.g. /api/co
 See cosmetic-clients.yaml, business-unit.yaml for details.
 
 ## CTV Dashboard (v2)
-- GET /api/ctv/commission-summary — CTV only (is_ctv + ctv.commission.view.self); aggregates earnings from both DBs; returns { totals: { pending, paid, dental, cosmetic }, rows: [...] with lob tags }
+- GET /api/ctv/commission-summary — CTV only (is_ctv + ctv.commission.view.self); aggregates earnings from both DBs; returns { totals: { pending, paid, dental, cosmetic }, rows: [...] with lob tags }. Display names may be null; frontend owns localized unknown-client fallbacks.
 - GET /api/ctv/referrals — self referred clients across LOBs + earning status
 - GET /api/ctv/me — profile
 - All CTV routes return 403 for non-is_ctv; admin routes 403 for CTV

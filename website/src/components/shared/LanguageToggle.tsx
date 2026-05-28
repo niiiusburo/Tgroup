@@ -3,13 +3,26 @@ import { useTranslation } from 'react-i18next';
 import { Globe, Check } from 'lucide-react';
 import { SUPPORTED_LANGS, LANG_LABELS, STORAGE_KEY, type SupportedLang } from '@/i18n';
 
-export function LanguageToggle({ compact = false }: {compact?: boolean;}) {
+interface LanguageToggleProps {
+  compact?: boolean;
+  menuPlacement?: 'above' | 'below';
+}
+
+export function LanguageToggle({ compact = false, menuPlacement = 'above' }: LanguageToggleProps) {
   const { t } = useTranslation('common');
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   const currentLang = i18n.language as SupportedLang;
+  const menuClass =
+    menuPlacement === 'below'
+      ? 'absolute top-full mt-2 right-0 bg-white rounded-xl shadow-2xl border border-gray-200 py-1 z-[200] min-w-[160px]'
+      : 'absolute bottom-full mb-2 left-0 bg-white rounded-xl shadow-2xl border border-gray-200 py-1 z-[200] min-w-[160px]';
+  const wideMenuClass =
+    menuPlacement === 'below'
+      ? 'absolute top-full mt-2 right-0 bg-white rounded-xl shadow-2xl border border-gray-200 py-1 z-[200] min-w-[160px]'
+      : 'absolute bottom-full mb-2 left-0 right-0 bg-white rounded-xl shadow-2xl border border-gray-200 py-1 z-[200] min-w-[160px]';
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -40,7 +53,7 @@ export function LanguageToggle({ compact = false }: {compact?: boolean;}) {
         </button>
 
         {open &&
-        <div data-testid="lang-dropdown" className="absolute bottom-full mb-2 left-0 bg-white rounded-xl shadow-2xl border border-gray-200 py-1 z-[200] min-w-[160px]">
+        <div data-testid="lang-dropdown" className={menuClass}>
             {SUPPORTED_LANGS.map((lang) =>
           <button
             key={lang}
@@ -76,7 +89,7 @@ export function LanguageToggle({ compact = false }: {compact?: boolean;}) {
       </button>
 
       {open &&
-      <div data-testid="lang-dropdown" className="absolute bottom-full mb-2 left-0 right-0 bg-white rounded-xl shadow-2xl border border-gray-200 py-1 z-[200] min-w-[160px]">
+      <div data-testid="lang-dropdown" className={wideMenuClass}>
           {SUPPORTED_LANGS.map((lang) =>
         <button
           key={lang}

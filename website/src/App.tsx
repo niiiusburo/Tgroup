@@ -95,12 +95,13 @@ interface ProtectedRouteProps {
 
 function ProtectedRoute({ children, path }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, hasPermission, user } = useAuth();
+  const isCtv = user?.is_ctv === true || user?.isCtv === true;
 
   if (isLoading) return <AuthLoading />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  // Redirect is_ctv=true users to /ctv dashboard
-  if (user?.is_ctv === true) {
+  // Redirect CTV users to /ctv dashboard before admin routes render.
+  if (isCtv) {
     return <Navigate to="/ctv" replace />;
   }
 
@@ -117,9 +118,10 @@ function ProtectedRoute({ children, path }: ProtectedRouteProps) {
  */
 function CTVRouteGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, user } = useAuth();
+  const isCtv = user?.is_ctv === true || user?.isCtv === true;
   if (isLoading) return <AuthLoading />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (!user?.is_ctv) return <Navigate to="/" replace />;
+  if (!isCtv) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 

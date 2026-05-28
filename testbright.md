@@ -10,6 +10,53 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK3 CTV Portal Bilingual Toggle 2026-05-28
+
+Feature/edit name: NK3 CTV portal bilingual toggle and shared locale helpers.
+
+Changed URLs and API routes:
+- Local page during development: `/ctv`.
+- Live page to verify after deploy: `https://tmv.2checkin.com/ctv`.
+- API routes affected by nullable display fallbacks: `GET /api/ctv/commission-summary`, `GET /api/ctv/client-journeys`.
+- Frontend code paths: `website/src/pages/CTV/*`, `website/src/components/ctv/*`, `website/src/lib/i18n/ctv.ts`, `website/src/i18n/locales/{en,vi}/ctv.json`.
+
+Affected data flows:
+- CTV portal copy, CTV date formatting, VND display, LOB badges, unknown-client/service fallbacks, and the Me language label now follow the active `tg-lang` language.
+- CTV header language toggle writes `tg-lang` and must not re-fetch dashboard data just because language changed.
+- Tracking search uses accent-insensitive normalization across referred client name, phone, and service name.
+- Missing backend display names are sent as `null`; frontend renders localized fallback labels.
+
+User roles:
+- CTV user with `is_ctv=true`.
+- Non-CTV/admin users should still be blocked or redirected away from the CTV self portal.
+
+Happy paths:
+- CTV opens `/ctv`, uses the header language button, switches to English, and sees CTV portal labels/formatting in English.
+- CTV switches back to Vietnamese and sees Vietnamese labels without losing current tab data.
+- Tracking search finds `Thuần Lê` when staff type `thuan`, and finds `Tẩy trắng răng` when staff type `tay trang`.
+
+Edge cases:
+- Missing `client_name`, referred-client name, service name, doctor, or date fields render localized fallback text instead of `undefined`, `Unknown Client`, or hardcoded English.
+- Language dropdown opens downward in the sticky CTV header and remains visible on mobile.
+- Empty CTV data still renders localized empty states.
+
+Regressions:
+- Existing `/ctv` Home, Commission, Tracking, Referrals, and Me tabs still render.
+- CTV route guards still honor both `is_ctv=true` and legacy `isCtv=true`, redirect CTV users away from admin routes, and block non-CTV users from `/ctv`.
+- `POST /api/ctv/bookings` and `B_CLIENT_CLAIMED` conflict handling remain unchanged.
+- Admin sidebar language toggle keeps its existing placement.
+
+Setup data and login state:
+- Use a CTV account with at least one Vietnamese referred client/service for search proof.
+- Keep screenshot evidence for `/ctv` in English and Vietnamese after deploy.
+
+TestSprite execution items:
+- [ ] PENDING: `/ctv` header language toggle switches from Vietnamese to English and persists `tg-lang=en`.
+- [ ] PENDING: `/ctv` header language toggle switches back to Vietnamese and keeps portal data visible.
+- [ ] PENDING: Tracking search matches Vietnamese names and service labels without accents.
+- [ ] PENDING: Missing client/service display names render localized fallback labels.
+- [ ] PENDING: Mobile header dropdown opens downward and does not clip off the top of the viewport.
+
 # TestSprite Plan: NK3 CTV Portal Tracking Refresh 2026-05-25
 
 Feature/edit name: NK3 CTV self portal refresh and Tracking tab.

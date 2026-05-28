@@ -6,7 +6,8 @@
     "commissionTitle": "Hoa hồng của tôi",
     "referralsTitle": "Danh sách giới thiệu",
     "networkTitle": "Mạng lưới",
-    "meTitle": "Tài khoản"
+    "meTitle": "Tài khoản",
+    "notifications": "Thông báo"
   },
   "tabs": {
     "home": "Tổng quan",
@@ -43,6 +44,15 @@
     "noActivity": "Chưa có hoạt động.<br />Giới thiệu khách để bắt đầu kiếm hoa hồng.",
     "dental": "Dental",
     "cosmetic": "Cosmetic"
+  },
+  "lobs": {
+    "dental": "Dental",
+    "cosmetic": "Cosmetic"
+  },
+  "serviceStatus": {
+    "pending": "Chờ xử lý",
+    "paid": "Đã thanh toán",
+    "reversed": "Đã hoàn"
   },
   "commission": {
     "myCommission": "Hoa hồng của tôi",
@@ -143,5 +153,8 @@
     "loadFailedDetail": "Lỗi kết nối máy chủ. Vui lòng thử lại.",
     "generic": "Đã xảy ra lỗi. Vui lòng thử lại sau."
   },
+  "unknownClient": "Khách hàng",
+  "unknownService": "Dịch vụ",
+  "unknownValue": "Không rõ",
   "currency": "₫"
 }

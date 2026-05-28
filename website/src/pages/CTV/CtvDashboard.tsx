@@ -5,11 +5,13 @@ import {
   BellRing, UserPlus, X,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { LanguageToggle } from '@/components/shared/LanguageToggle';
 import {
   fetchCtvSummary, fetchCtvReferrals, fetchCtvMe,
   fetchCtvClientJourneys, createCtv, createBooking,
   type CtvCommissionSummary, type CtvReferral, type CtvClientJourney,
 } from '@/lib/api/ctv';
+import { useCtvLocale } from '@/lib/i18n/ctv';
 import { CtvHomeTab } from './tabs/CtvHomeTab';
 import { CtvCommissionTab } from './tabs/CtvCommissionTab';
 import { CtvTrackingTab } from './tabs/CtvTrackingTab';
@@ -29,6 +31,7 @@ const TABS: { key: TabKey; labelKey: string; Icon: React.ComponentType<{ classNa
 export default function CtvDashboard() {
   const { user } = useAuth();
   const { t } = useTranslation('ctv');
+  const ctvLocale = useCtvLocale();
   const [activeTab, setActiveTab] = useState<TabKey>('home');
 
   const [summary, setSummary] = useState<CtvCommissionSummary | null>(null);
@@ -55,6 +58,7 @@ export default function CtvDashboard() {
   const [ctvSuccess, setCtvSuccess] = useState(false);
 
   const displayName = me?.name || user?.name || 'CTV';
+  const displayError = error === 'errors.loadFailed' ? t('errors.loadFailed') : error;
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -72,11 +76,11 @@ export default function CtvDashboard() {
       setMe(m);
     } catch (e: any) {
       console.error('[CtvDashboard] load failed:', e);
-      setError(e?.message || t('errors.loadFailed'));
+      setError(e?.message || 'errors.loadFailed');
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -103,8 +107,8 @@ export default function CtvDashboard() {
       if (err?.code === 'B_CLIENT_CLAIMED') {
         const ownerName = err?.body?.owner_name || 'unknown';
         const expiresAt = err?.body?.expires_at
-          ? new Date(err.body.expires_at).toLocaleDateString('vi-VN', { year: 'numeric', month: '2-digit', day: '2-digit' })
-          : 'unknown';
+          ? ctvLocale.formatDate(err.body.expires_at)
+          : ctvLocale.unknownValue();
         setClientError(t('forms.referClient.errorClaimed', { owner: ownerName, expires: expiresAt }));
       } else {
         setClientError(err?.message || t('errors.generic'));
@@ -152,13 +156,16 @@ export default function CtvDashboard() {
               <div className="text-[11px] uppercase tracking-[0.18em] text-orange-100/90 font-medium">{t('header.brand')}</div>
               <div className="text-lg font-semibold tracking-tight">{t('header.title')}</div>
             </div>
-            <button
-              aria-label="Notifications"
-              className="relative w-10 h-10 rounded-full bg-white/15 backdrop-blur flex items-center justify-center hover:bg-white/25 transition"
-            >
-              <BellRing className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-white rounded-full" />
-            </button>
+            <div className="flex items-center gap-2">
+              <LanguageToggle compact menuPlacement="below" />
+              <button
+                aria-label={t('header.notifications')}
+                className="relative w-10 h-10 rounded-full bg-white/15 backdrop-blur flex items-center justify-center hover:bg-white/25 transition"
+              >
+                <BellRing className="w-5 h-5" />
+                <span className="absolute top-2 right-2 w-2 h-2 bg-white rounded-full" />
+              </button>
+            </div>
           </div>
           <div className="flex gap-2.5">
             <button
@@ -188,14 +195,14 @@ export default function CtvDashboard() {
           </div>
         )}
 
-        {error && !loading && (
+        {displayError && !loading && (
           <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-2xl mb-4 text-sm">
-            ⚠️ {error}
+            ⚠️ {displayError}
             <button onClick={() => loadData()} className="ml-3 underline font-medium">{t('actions.reload')}</button>
           </div>
         )}
 
-        {!loading && !error && (
+        {!loading && !displayError && (
           <>
             {activeTab === 'home' && <CtvHomeTab summary={summary} displayName={displayName} />}
             {activeTab === 'commission' && <CtvCommissionTab summary={summary} />}
