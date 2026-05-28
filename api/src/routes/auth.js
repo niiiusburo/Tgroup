@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { query } = require('../db');
 const { requireAuth } = require('../middleware/auth');
-const { resolveEffectivePermissions } = require('../services/permissionService');
+const { resolveEffectivePermissions, isAdminPermissionState } = require('../services/permissionService');
 
 const router = express.Router();
 
@@ -53,13 +53,21 @@ router.post('/login', async (req, res) => {
 
     const permissions = await resolveEffectivePermissions(employee.id);
 
+    // Admins implicitly get both LOB scopes so they can access /api/cosmetic/* mirrors
+    // without requiring manual lob_scope DB updates for pre-migration admin accounts.
+    const isAdmin = isAdminPermissionState(permissions);
+    const adminLobScope = ['dental', 'cosmetic'];
+    const effectiveLobScope = (Array.isArray(employee.lob_scope) && employee.lob_scope.length > 0)
+      ? employee.lob_scope
+      : (isAdmin ? adminLobScope : employee.lob_scope);
+
     const tokenPayload = {
       employeeId: employee.id,
       name: employee.name,
       email: employee.email,
       companyId: employee.companyId,
       isCtv: employee.is_ctv === true,
-      lobScope: employee.lob_scope,
+      lobScope: effectiveLobScope,
     };
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '24h' });
@@ -73,7 +81,7 @@ router.post('/login', async (req, res) => {
         companyId: employee.companyId,
         companyName: employee.companyName,
         is_ctv: employee.is_ctv === true,
-        lob_scope: employee.lob_scope,
+        lob_scope: effectiveLobScope,
       },
       permissions,
     });
@@ -107,6 +115,13 @@ router.get('/me', requireAuth, async (req, res) => {
     const employee = rows[0];
     const permissions = await resolveEffectivePermissions(employeeId);
 
+    // Admins implicitly get both LOB scopes (same logic as /login)
+    const isAdmin = isAdminPermissionState(permissions);
+    const adminLobScope = ['dental', 'cosmetic'];
+    const effectiveLobScope = (Array.isArray(employee.lob_scope) && employee.lob_scope.length > 0)
+      ? employee.lob_scope
+      : (isAdmin ? adminLobScope : employee.lob_scope);
+
     return res.json({
       user: {
         id: employee.id,
@@ -115,7 +130,7 @@ router.get('/me', requireAuth, async (req, res) => {
         companyId: employee.companyId,
         companyName: employee.companyName,
         is_ctv: employee.is_ctv === true,
-        lob_scope: employee.lob_scope,
+        lob_scope: effectiveLobScope,
       },
       permissions,
     });

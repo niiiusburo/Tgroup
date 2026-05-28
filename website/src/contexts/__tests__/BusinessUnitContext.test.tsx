@@ -156,6 +156,22 @@ describe('BusinessUnitContext (TDD)', () => {
     expect(screen.getByTestId('current-lob').textContent).toBe('dental');
   });
 
+  it('grants admin both LOBs even when lob_scope is null/empty', () => {
+    setCosmeticFlag('true');
+    mockUseAuth.mockReturnValue({
+      user: { lob_scope: null },
+      permissions: adminPermissions,
+    });
+    render(
+      <BusinessUnitProvider>
+        <BusinessUnitProbe />
+      </BusinessUnitProvider>
+    );
+    expect(screen.getByTestId('available').textContent).toBe('dental,cosmetic');
+    expect(screen.getByTestId('multi').textContent).toBe('multi');
+    expect(screen.getByTestId('enabled').textContent).toBe('yes');
+  });
+
   it('setCurrentLOB updates state, persists, and only allows available', async () => {
     setCosmeticFlag('true');
     mockUseAuth.mockReturnValue({

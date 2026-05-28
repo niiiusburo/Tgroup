@@ -2,6 +2,12 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.57] — 2026-05-28 (nk3-deploy)
+### Fixed
+- Admin users now see the Line of Business (LOB) toggle even when their `partners.lob_scope` DB column is null or empty. Backend `/api/Auth/login` and `/api/Auth/me` auto-grant `['dental', 'cosmetic']` to admins; frontend `BusinessUnitContext` defaults admins to both LOBs when the cosmetic flag is enabled. — @agent — Cosmetic LOB v2 admin parity; closes nk3-deploy LOB visibility gap for pre-migration admin accounts.
+### Tests
+- Added `BusinessUnitContext` Vitest coverage asserting admin with null `lob_scope` gets `dental,cosmetic` available LOBs and `multi` toggle state when `VITE_COSMETIC_LOB_ENABLED=true`. — @agent — docs/TEST-MATRIX.md LOB regression row.
+
 ## [0.32.51] — 2026-05-28 (codex/nk3-ctv-deploy)
 ### Fixed
 - NK3 CTV portal bottom navigation now has one `Theo dõi` destination: removed the redundant Referrals tab from the dashboard shell and stopped fetching unused referrals data on page load. — @agent — CTV self-service tab clarity, product-map CTV 4-tab dashboard.

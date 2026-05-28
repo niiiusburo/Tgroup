@@ -27,7 +27,6 @@ function getVersionInfo() {
         // Git not available and no build env was passed, use defaults.
       }
     }
-    }
     
     return {
       version: packageJson.version,

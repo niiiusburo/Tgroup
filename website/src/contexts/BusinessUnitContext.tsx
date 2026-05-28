@@ -87,9 +87,13 @@ export function BusinessUnitProvider({ children }: Props) {
     const normalized: BusinessUnit[] = scopes
       .filter((s: string): s is BusinessUnit => isBusinessUnit(s));
 
-    const finalAvailable: BusinessUnit[] = flag && normalized.length > 0
-      ? (isAdminBusinessUnitUser ? normalized : normalized.slice(0, 1))
-      : ['dental'];
+    // Admins implicitly get both LOBs when the cosmetic flag is enabled,
+    // so pre-migration admin accounts (with null lob_scope) still see the toggle.
+    const finalAvailable: BusinessUnit[] = flag && isAdminBusinessUnitUser
+      ? (normalized.length > 0 ? normalized : ['dental', 'cosmetic'])
+      : (flag && normalized.length > 0
+          ? normalized.slice(0, 1)
+          : ['dental']);
     setAvailableLOBs(finalAvailable);
 
     // Support ?lob=cosmetic (or dental) query param for cross-LOB badge deep links (new tab from probe match).
