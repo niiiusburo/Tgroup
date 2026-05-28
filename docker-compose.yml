@@ -50,6 +50,9 @@ services:
       FACE_MAX_CANDIDATES: ${FACE_MAX_CANDIDATES:-3}
       FACE_MIN_QUALITY: ${FACE_MIN_QUALITY:-0.55}
       FACE_DETECTION_THRESHOLD: ${FACE_DETECTION_THRESHOLD:-0.6}
+      # Cosmetic LOB v2 feature flag — default false so NK/NK2 are unaffected.
+      # NK3 (tmv.2checkin.com) MUST set COSMETIC_LOB_ENABLED=true to enable /api/cosmetic/* routes.
+      COSMETIC_LOB_ENABLED: ${COSMETIC_LOB_ENABLED:-false}
     volumes:
       - ./uploads:/app/uploads
     ports:
@@ -128,6 +131,9 @@ services:
         # which exports these automatically after running require-clean-tree.sh.
         GIT_SHA: ${GIT_SHA:-unknown}
         GIT_BRANCH: ${GIT_BRANCH:-unknown}
+        # Cosmetic LOB v2 frontend feature flag — default false so NK/NK2 are unaffected.
+        # NK3 (tmv.2checkin.com) MUST set VITE_COSMETIC_LOB_ENABLED=true to show the LOB toggle.
+        VITE_COSMETIC_LOB_ENABLED: ${VITE_COSMETIC_LOB_ENABLED:-false}
     container_name: tgroup-web
     restart: unless-stopped
     depends_on:

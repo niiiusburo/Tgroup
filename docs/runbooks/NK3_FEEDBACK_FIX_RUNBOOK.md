@@ -49,6 +49,23 @@ cd .worktrees/nk3-feedback-fixes
 bash scripts/prompt-authority-check.sh
 ```
 
+### NK3 Deploy Prerequisites
+
+Before any NK3 deploy, the VPS shell MUST export the Cosmetic LOB v2 feature flags:
+
+```bash
+export COSMETIC_LOB_ENABLED=true
+export VITE_COSMETIC_LOB_ENABLED=true
+```
+
+Then build with:
+
+```bash
+docker compose up -d --build web api
+```
+
+Without these flags the frontend hides the LOB toggle and the backend returns 503 on `/api/cosmetic/*`. NK and NK2 must NOT set these flags.
+
 ## Required First Pass
 
 - [ ] Confirm the exact LOB and domain with the reporter. Default to `tmv.2checkin.com` Cosmetic if no clarification is available.

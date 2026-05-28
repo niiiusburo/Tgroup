@@ -16,6 +16,17 @@ All changes are fixed and verified locally before VPS deployment. Do not edit VP
 - API: Node/Express container.
 - Database: PostgreSQL using `dbo` schema.
 
+### NK3 (tmv.2checkin.com) Deploy Notes
+
+NK3 is the Cosmetic LOB v2 target. Before building NK3, the VPS shell MUST export:
+
+```bash
+export COSMETIC_LOB_ENABLED=true
+export VITE_COSMETIC_LOB_ENABLED=true
+```
+
+These flags enable `/api/cosmetic/*` routes and the LOB toggle in the admin UI. The `docker-compose.yml` defaults both to `false`, so NK and NK2 deployments are unaffected when these exports are omitted.
+
 ## Deployment Checklist
 
 1. Confirm local git status and intended commit.
