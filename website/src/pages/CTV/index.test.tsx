@@ -162,4 +162,13 @@ describe('CtvDashboard', () => {
     expect(screen.getByText('Junior CTV')).toBeVisible();
     expect(screen.queryByRole('searchbox', { name: /tìm khách giới thiệu/i })).not.toBeInTheDocument();
   });
+
+  it('renders the LanguageToggle button in the header', async () => {
+    localStorage.setItem('tg-lang', 'en');
+    render(<CtvDashboard />);
+
+    await waitFor(() => expect(screen.getByText('Referred Client Tracking')).toBeVisible());
+
+    expect(screen.getByRole('button', { name: /switch language/i })).toBeVisible();
+  });
 });

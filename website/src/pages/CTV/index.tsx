@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { CtvHierarchyPanel } from '@/components/ctv/CtvHierarchyPanel';
 import { ReferralFlipCard } from '@/components/ctv/ReferralFlipCard';
+import { LanguageToggle } from '@/components/shared/LanguageToggle';
 import { formatVND } from '@/lib/formatting';
 import { cn, normalizeText } from '@/lib/utils';
 import {
@@ -223,13 +224,16 @@ export function CtvDashboard() {
               <h1 className="mt-1 text-lg font-bold">{t('portal')}</h1>
               <p className="mt-1 text-xs font-semibold text-orange-100">{t('hello', { name: profileName })}</p>
             </div>
-            <button
-              type="button"
-              className="grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/20"
-              aria-label={t('notifications')}
-            >
-              <Bell className="h-5 w-5" />
-            </button>
+            <div className="flex items-start gap-2">
+              <LanguageToggle compact />
+              <button
+                type="button"
+                className="grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/20"
+                aria-label={t('notifications')}
+              >
+                <Bell className="h-5 w-5" />
+              </button>
+            </div>
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-2">

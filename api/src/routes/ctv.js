@@ -52,7 +52,7 @@ function mapServiceRow(row, lob) {
     id: row.id,
     serviceLineId: row.service_line_id || null,
     paymentId: row.payment_id || null,
-    serviceName: row.service_name || 'Dịch vụ',
+    serviceName: row.service_name || null,
     amount: parseMoney(row.amount),
     status: row.status || 'pending',
     source: row.source || 'ctv',
@@ -64,7 +64,7 @@ function mapServiceRow(row, lob) {
 function mapHierarchyNode(row, lob) {
   return {
     id: row.id,
-    name: row.name || 'CTV',
+    name: row.name || null,
     email: row.email || '',
     phone: row.phone || '',
     joinedAt: row.joined_at || row.datecreated || null,
@@ -110,7 +110,7 @@ async function getReferralServices(db, clientId, ctvId, lob) {
        e.source,
        e.earned_at,
        e.created_at,
-       COALESCE(NULLIF(sol.productname, ''), pr.name, NULLIF(sol.name, ''), 'Dịch vụ') AS service_name
+       COALESCE(NULLIF(sol.productname, ''), pr.name, NULLIF(sol.name, '')) AS service_name
      FROM dbo.earnings e
      LEFT JOIN dbo.saleorderlines sol ON sol.id = e.service_line_id
      LEFT JOIN dbo.products pr ON pr.id = sol.productid
@@ -270,8 +270,8 @@ router.get('/commission-summary', requireAuth, requireCtvUser, async (req, res) 
   const earningsSql = `
     SELECT e.id, e.client_id, e.recipient_partner_id, e.payment_id, e.service_line_id,
            e.source, e.amount, e.status, e.payout_id, e.earned_at, e.created_at,
-           COALESCE(p.name, 'Unknown Client') AS client_name,
-           COALESCE(NULLIF(sol.productname, ''), pr.name, NULLIF(sol.name, ''), 'Dịch vụ') AS service_name
+           p.name AS client_name,
+           COALESCE(NULLIF(sol.productname, ''), pr.name, NULLIF(sol.name, '')) AS service_name
     FROM dbo.earnings e
     LEFT JOIN dbo.partners p ON p.id = e.client_id
     LEFT JOIN dbo.saleorderlines sol ON sol.id = e.service_line_id
@@ -329,10 +329,10 @@ router.get('/commission-summary', requireAuth, requireCtvUser, async (req, res) 
   const recent = all.slice(0, 8).map((e) => ({
     id: e.id,
     client_id: e.client_id,
-    client_name: e.client_name,
+    client_name: e.client_name || null,
     amount: parseFloat(e.amount || 0),
     service_line_id: e.service_line_id || null,
-    service_name: e.service_name || 'Dịch vụ',
+    service_name: e.service_name || null,
     payment_id: e.payment_id || null,
     source: e.source || 'ctv',
     lob: e.lob,
@@ -440,7 +440,7 @@ router.get('/me', requireAuth, requireCtvUser, (req, res) => {
   const u = req.user || {};
   res.json({
     id: u.employeeId,
-    name: u.name || 'CTV',
+    name: u.name || 'CTV', // structural fallback (role code)
     email: u.email || '',
     phone: '',
     role: 'CTV',

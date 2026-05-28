@@ -3,33 +3,17 @@ import { useTranslation } from 'react-i18next';
 import { CalendarDays, Check, ReceiptText, RotateCcw, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatVND } from '@/lib/formatting';
+import { useCtvLocale } from '@/lib/i18n/ctv';
 import type { CtvLob, CtvReferral, CtvReferralService } from '@/lib/api/ctv';
 
 interface ReferralFlipCardProps {
   readonly referral: CtvReferral;
 }
 
-function getDateLocale(language: string): string {
-  return language.startsWith('en') ? 'en-US' : 'vi-VN';
-}
-
-function formatShortDate(value: string | null, locale: string): string {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
-
 function getLobClass(lob: CtvLob): string {
   return lob === 'cosmetic'
     ? 'bg-rose-50 text-rose-600 ring-rose-500/20'
     : 'bg-orange-50 text-orange-700 ring-orange-500/20';
-}
-
-function getServiceStatusKey(status: string): string {
-  if (status === 'paid') return 'serviceStatus.paid';
-  if (status === 'reversed') return 'serviceStatus.reversed';
-  return 'serviceStatus.pending';
 }
 
 function getProgress(referral: CtvReferral): { current: number; paid: boolean } {
@@ -44,19 +28,19 @@ function getProgress(referral: CtvReferral): { current: number; paid: boolean } 
 }
 
 function ServiceRow({ service }: { readonly service: CtvReferralService }) {
-  const { t, i18n } = useTranslation('ctv');
-  const dateLocale = getDateLocale(i18n.language);
+  const { t } = useTranslation('ctv');
+  const ctv = useCtvLocale();
 
   return (
     <li className="grid grid-cols-[1fr_auto] gap-3 rounded-xl border border-gray-100 bg-white p-3">
       <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-gray-900">{service.serviceName}</p>
+        <p className="truncate text-sm font-semibold text-gray-900">{service.serviceName || ctv.unknownService()}</p>
         <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] font-medium text-gray-500">
           <span className={cn('rounded-full px-2 py-0.5 ring-1 ring-inset', getLobClass(service.lob))}>
-            {t(`lobs.${service.lob}`)}
+            {ctv.getLobLabel(service.lob)}
           </span>
-          <span>{t(getServiceStatusKey(service.status))}</span>
-          <span>{formatShortDate(service.earnedAt, dateLocale)}</span>
+          <span>{ctv.getServiceStatusLabel(service.status)}</span>
+          <span>{ctv.formatShortDate(service.earnedAt)}</span>
         </div>
       </div>
       <div className="text-right">
@@ -68,13 +52,13 @@ function ServiceRow({ service }: { readonly service: CtvReferralService }) {
 }
 
 export function ReferralFlipCard({ referral }: ReferralFlipCardProps) {
-  const { t, i18n } = useTranslation('ctv');
+  const { t } = useTranslation('ctv');
+  const ctv = useCtvLocale();
   const [isFlipped, setIsFlipped] = useState(false);
   const services = referral.services ?? [];
   const serviceCount = Math.max(referral.service_count ?? 0, services.length);
   const progress = useMemo(() => getProgress(referral), [referral]);
   const hasServices = serviceCount > 0;
-  const dateLocale = getDateLocale(i18n.language);
 
   const steps = [
     t('steps.referred'),
@@ -123,10 +107,10 @@ export function ReferralFlipCard({ referral }: ReferralFlipCardProps) {
                         key={lob}
                         className={cn('rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 ring-inset', getLobClass(lob))}
                       >
-                        {t(`lobs.${lob}`)}
+                        {ctv.getLobLabel(lob)}
                       </span>
                     ))}
-                    <span className="text-[11px] font-medium text-gray-400">{formatShortDate(referral.referred_at, dateLocale)}</span>
+                    <span className="text-[11px] font-medium text-gray-400">{ctv.formatShortDate(referral.referred_at)}</span>
                   </div>
                 </div>
                 <div className="text-right">

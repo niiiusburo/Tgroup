@@ -7,7 +7,7 @@ export interface CtvReferralService {
   readonly id: string;
   readonly serviceLineId: string | null;
   readonly paymentId: string | null;
-  readonly serviceName: string;
+  readonly serviceName: string | null;
   readonly amount: number;
   readonly status: CtvServiceStatus;
   readonly source: string;
@@ -17,7 +17,7 @@ export interface CtvReferralService {
 
 export interface CtvReferral {
   readonly id: string;
-  readonly name: string;
+  readonly name: string | null;
   readonly phone: string;
   readonly lobs: CtvLob[];
   readonly total_earned: number;
@@ -58,9 +58,9 @@ export interface CtvHierarchyResponse {
 export interface CtvCommissionRow {
   readonly id: string;
   readonly client_id?: string;
-  readonly client_name: string;
+  readonly client_name: string | null;
   readonly service_line_id?: string | null;
-  readonly service_name?: string;
+  readonly service_name?: string | null;
   readonly payment_id?: string | null;
   readonly amount: number;
   readonly source: string;

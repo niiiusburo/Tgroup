@@ -4,6 +4,7 @@
   "profileFallback": "CTV",
   "hello": "Xin chào, {{name}}",
   "notifications": "Thông báo",
+  "language": "Ngôn ngữ",
   "tabs": {
     "referrals": "Theo dõi",
     "recruiting": "Giới thiệu CTV"
@@ -65,6 +66,8 @@
   "expected": "Dự kiến",
   "paidOut": "Đã chi trả",
   "received": "Đã nhận",
+  "unknownClient": "Khách hàng",
+  "unknownService": "Dịch vụ",
   "steps": {
     "referred": "Ghi nhận",
     "visited": "Đã đến",

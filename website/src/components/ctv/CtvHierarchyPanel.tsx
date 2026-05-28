@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowUp, Mail, Network, Phone, RefreshCw, UserRound, UsersRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useCtvLocale } from '@/lib/i18n/ctv';
 import type { CtvHierarchyNode, CtvHierarchyResponse } from '@/lib/api/ctv';
 import { cn } from '@/lib/utils';
 
@@ -11,18 +12,6 @@ interface CtvHierarchyPanelProps {
   readonly onRetry: () => void;
 }
 
-function formatJoinedDate(value: string | null, language: string) {
-  if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-
-  return new Intl.DateTimeFormat(language === 'en' ? 'en-US' : 'vi-VN', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(date);
-}
-
 function NodeRow({
   node,
   variant,
@@ -30,8 +19,9 @@ function NodeRow({
   readonly node: CtvHierarchyNode;
   readonly variant: 'current' | 'upline' | 'downline';
 }) {
-  const { t, i18n } = useTranslation('ctv');
-  const joinedDate = formatJoinedDate(node.joinedAt, i18n.language);
+  const { t } = useTranslation('ctv');
+  const ctv = useCtvLocale();
+  const joinedDate = ctv.formatJoinedDate(node.joinedAt);
   const isCurrent = variant === 'current';
   const accentClass =
     variant === 'upline' ? 'bg-sky-50 text-sky-600' : variant === 'downline' ? 'bg-emerald-50 text-emerald-600' : 'bg-orange-50 text-orange-600';
@@ -49,7 +39,7 @@ function NodeRow({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="min-w-0 truncate text-sm font-bold text-gray-900">{node.name}</h3>
+            <h3 className="min-w-0 truncate text-sm font-bold text-gray-900">{node.name || ctv.unknownClient()}</h3>
             <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-bold text-gray-600">
               {isCurrent ? t('hierarchy.currentTitle') : t('hierarchy.level', { level: node.level })}
             </span>
@@ -58,7 +48,7 @@ function NodeRow({
           <div className="mt-2 flex flex-wrap gap-1.5">
             {node.lobs.map((lob) => (
               <span key={lob} className="rounded-full bg-orange-50 px-2 py-0.5 text-[11px] font-bold text-orange-600">
-                {t(`lobs.${lob}`)}
+                {ctv.getLobLabel(lob)}
               </span>
             ))}
             {!isCurrent && (

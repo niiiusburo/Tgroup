@@ -4,6 +4,7 @@
   "profileFallback": "CTV",
   "hello": "Hi, {{name}}",
   "notifications": "Notifications",
+  "language": "Language",
   "tabs": {
     "referrals": "Track Clients",
     "recruiting": "Invite CTVs"
@@ -65,6 +66,8 @@
   "expected": "Expected",
   "paidOut": "Paid out",
   "received": "Received",
+  "unknownClient": "Client",
+  "unknownService": "Service",
   "steps": {
     "referred": "Recorded",
     "visited": "Visited",
