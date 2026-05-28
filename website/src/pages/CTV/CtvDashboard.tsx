@@ -1,30 +1,28 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Home, Wallet, ListChecks, Users, User, Sparkles,
+  Home, Wallet, ListChecks, User, Sparkles,
   BellRing, UserPlus, X,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { LanguageToggle } from '@/components/shared/LanguageToggle';
 import {
-  fetchCtvSummary, fetchCtvReferrals, fetchCtvMe,
+  fetchCtvSummary, fetchCtvMe,
   fetchCtvClientJourneys, createCtv, createBooking,
-  type CtvCommissionSummary, type CtvReferral, type CtvClientJourney,
+  type CtvCommissionSummary, type CtvClientJourney,
 } from '@/lib/api/ctv';
 import { useCtvLocale } from '@/lib/i18n/ctv';
 import { CtvHomeTab } from './tabs/CtvHomeTab';
 import { CtvCommissionTab } from './tabs/CtvCommissionTab';
 import { CtvTrackingTab } from './tabs/CtvTrackingTab';
-import { CtvReferralsTab } from './tabs/CtvReferralsTab';
 import { CtvMeTab } from './tabs/CtvMeTab';
 
-type TabKey = 'home' | 'commission' | 'tracking' | 'referrals' | 'me';
+type TabKey = 'home' | 'commission' | 'tracking' | 'me';
 
 const TABS: { key: TabKey; labelKey: string; Icon: React.ComponentType<{ className?: string }> }[] = [
   { key: 'home', labelKey: 'tabs.home', Icon: Home },
   { key: 'commission', labelKey: 'tabs.commission', Icon: Wallet },
   { key: 'tracking', labelKey: 'tabs.tracking', Icon: ListChecks },
-  { key: 'referrals', labelKey: 'tabs.referrals', Icon: Users },
   { key: 'me', labelKey: 'tabs.me', Icon: User },
 ];
 
@@ -35,7 +33,6 @@ export default function CtvDashboard() {
   const [activeTab, setActiveTab] = useState<TabKey>('home');
 
   const [summary, setSummary] = useState<CtvCommissionSummary | null>(null);
-  const [referrals, setReferrals] = useState<CtvReferral[]>([]);
   const [clients, setClients] = useState<CtvClientJourney[]>([]);
   const [me, setMe] = useState<{ id: string; name: string; email?: string; phone?: string; referral_code?: string } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,14 +61,12 @@ export default function CtvDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const [s, r, c, m] = await Promise.all([
+      const [s, c, m] = await Promise.all([
         fetchCtvSummary(),
-        fetchCtvReferrals(),
         fetchCtvClientJourneys().catch(() => ({ clients: [] })),
         fetchCtvMe(),
       ]);
       setSummary(s);
-      setReferrals((r && (r as any).referrals) || []);
       setClients(c.clients || []);
       setMe(m);
     } catch (e: any) {
@@ -213,7 +208,6 @@ export default function CtvDashboard() {
                 onReferClient={() => setShowClientSheet(true)}
               />
             )}
-            {activeTab === 'referrals' && <CtvReferralsTab referrals={referrals} />}
             {activeTab === 'me' && <CtvMeTab me={me} />}
           </>
         )}

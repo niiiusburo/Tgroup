@@ -10,6 +10,38 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: NK3 CTV Portal Bottom Nav Dedup 2026-05-28
+
+Feature/edit name: NK3 CTV portal bottom navigation deduplication.
+
+Changed URLs and API routes:
+- Local page during development: `/ctv`.
+- Live page to verify after deploy: `https://tmv.2checkin.com/ctv`.
+- Frontend code path: `website/src/pages/CTV/CtvDashboard.tsx`.
+- API routes unchanged; `GET /api/ctv/referrals` remains available but is no longer fetched by the bottom-nav dashboard shell.
+
+Affected data flows:
+- CTV dashboard load now fetches summary, client journeys, and profile data for the visible tabs only.
+- Tracking remains the single bottom-nav destination for referred-client status.
+
+User roles:
+- CTV user with `is_ctv=true`.
+
+Happy paths:
+- CTV opens `/ctv` and sees exactly four bottom tabs: Home/Tổng quan, Commission/Hoa hồng, Tracking/Theo dõi, and Me/Tôi.
+- Only one bottom-tab label is `Theo dõi`.
+
+Regressions:
+- The Tracking tab still opens referred-client journey cards.
+- Header language toggle and CTV route guards remain unchanged.
+
+TestSprite execution items:
+- [ ] PENDING: `/ctv` bottom nav shows only one `Theo dõi` label on mobile.
+- [ ] PENDING: `/ctv` bottom nav no longer shows a separate Referrals/Giới thiệu tab.
+- [ ] PENDING: Tracking tab still displays referred-client journey status.
+
+---
+
 # TestSprite Plan: NK3 CTV Portal Bilingual Toggle 2026-05-28
 
 Feature/edit name: NK3 CTV portal bilingual toggle and shared locale helpers.
@@ -41,7 +73,7 @@ Edge cases:
 - Empty CTV data still renders localized empty states.
 
 Regressions:
-- Existing `/ctv` Home, Commission, Tracking, Referrals, and Me tabs still render.
+- Existing `/ctv` Home, Commission, Tracking, and Me tabs still render; the redundant Referrals bottom tab is intentionally removed.
 - CTV route guards still honor both `is_ctv=true` and legacy `isCtv=true`, redirect CTV users away from admin routes, and block non-CTV users from `/ctv`.
 - `POST /api/ctv/bookings` and `B_CLIENT_CLAIMED` conflict handling remain unchanged.
 - Admin sidebar language toggle keeps its existing placement.
@@ -78,9 +110,9 @@ Roles and setup state:
 - TestSprite should avoid creating live clients/bookings unless a disposable phone/name and explicit live-write approval are provided.
 
 Happy paths:
-- CTV logs in, lands on `/ctv`, and sees Home, Commission, Tracking, Referrals, and Me bottom tabs.
+- CTV logs in, lands on `/ctv`, and sees Home, Commission, Tracking, and Me bottom tabs.
 - Tracking tab loads client journeys with LOB badges, stage progress, and earned/estimated commission values.
-- Commission and Referrals tabs still load with existing CTV data.
+- Commission and Tracking tabs still load with existing CTV data.
 - `+ Client` booking sheet handles `B_CLIENT_CLAIMED` with a clear already-owned message.
 
 Edge cases:

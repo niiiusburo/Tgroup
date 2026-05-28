@@ -2,6 +2,12 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.51] — 2026-05-28 (codex/nk3-ctv-deploy)
+### Fixed
+- NK3 CTV portal bottom navigation now has one `Theo dõi` destination: removed the redundant Referrals tab from the dashboard shell and stopped fetching unused referrals data on page load. — @agent — CTV self-service tab clarity, product-map CTV 4-tab dashboard.
+### Tests
+- Added a CTV dashboard regression assertion that the bottom nav has exactly one Tracking/`Theo dõi` label and no Referrals/Giới thiệu tab. — @agent — TestSprite bottom-nav dedup check.
+
 ## [0.32.50] — 2026-05-28 (codex/nk3-ctv-deploy)
 ### Changed
 - NK3 CTV portal is now bilingual inside the modular `/ctv` dashboard: added the shared `useCtvLocale()` helper, placed the EN/VI `LanguageToggle` in the CTV header, localized CTV currency/date/LOB/fallback display helpers, and made Tracking search accent-insensitive across referred-client and service text. — @agent — BEHAVIOR.md §9 localization, Contracts v1.0.6, CTV self-service parity.

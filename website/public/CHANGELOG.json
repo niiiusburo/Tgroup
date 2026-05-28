@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.32.51",
+    "date": "2026-05-28",
+    "commit": "pending",
+    "highlights": "NK3 CTV portal bottom navigation now has one Tracking/Theo dõi tab instead of duplicate tracking/referrals destinations.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "CTV Portal /ctv: removed the redundant Referrals bottom-tab entry from the dashboard shell.",
+          "Dashboard load now fetches only the visible bottom-tab data: commission summary, client journeys, and CTV profile."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added a focused CTV dashboard regression assertion that the bottom nav has exactly one Tracking/Theo dõi label and no Referrals/Giới thiệu tab."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.50",
     "date": "2026-05-28",
     "commit": "pending",

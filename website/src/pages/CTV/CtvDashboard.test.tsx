@@ -5,7 +5,6 @@ import CtvDashboard from './CtvDashboard';
 import {
   fetchCtvClientJourneys,
   fetchCtvMe,
-  fetchCtvReferrals,
   fetchCtvSummary,
 } from '@/lib/api/ctv';
 
@@ -24,7 +23,6 @@ vi.mock('@/lib/api/ctv', () => ({
     paidList: [],
     payouts: [],
   })),
-  fetchCtvReferrals: vi.fn(async () => ({ referrals: [] })),
   fetchCtvClientJourneys: vi.fn(async () => ({ clients: [] })),
   fetchCtvMe: vi.fn(async () => ({
     id: 'ctv-1',
@@ -48,6 +46,11 @@ describe('CtvDashboard bilingual shell', () => {
 
     await waitFor(() => expect(fetchCtvSummary).toHaveBeenCalledTimes(1));
 
+    const bottomNavLabels = Array.from(screen.getByRole('navigation').querySelectorAll('button'))
+      .map((node) => node.textContent?.trim());
+    expect(bottomNavLabels).toEqual(['tabs.home', 'tabs.commission', 'tabs.tracking', 'tabs.me']);
+    expect(bottomNavLabels).not.toContain('tabs.referrals');
+
     await user.click(screen.getByRole('button', { name: /switch language/i }));
     expect(screen.getByTestId('lang-dropdown')).toBeInTheDocument();
 
@@ -55,7 +58,6 @@ describe('CtvDashboard bilingual shell', () => {
 
     expect(localStorage.getItem('tg-lang')).toBe('en');
     expect(fetchCtvSummary).toHaveBeenCalledTimes(1);
-    expect(fetchCtvReferrals).toHaveBeenCalledTimes(1);
     expect(fetchCtvClientJourneys).toHaveBeenCalledTimes(1);
     expect(fetchCtvMe).toHaveBeenCalledTimes(1);
   });
