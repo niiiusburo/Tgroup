@@ -18,9 +18,20 @@ ENV GIT_BRANCH=${GIT_BRANCH}
 # Bulletproof: materialize build args into .env.production.local so Vite
 # always inlines them at `vite build --mode production`, regardless of whether
 # the shell ENV propagates through npm script subprocesses inside Docker.
+# Guard 1: confirm the flag was written to the env file (deterministic input check).
 RUN printf 'VITE_API_URL=%s\nVITE_COSMETIC_LOB_ENABLED=%s\n' "${VITE_API_URL}" "${VITE_COSMETIC_LOB_ENABLED}" > .env.production.local \
-  && cat .env.production.local
+  && cat .env.production.local \
+  && grep -qx "VITE_COSMETIC_LOB_ENABLED=${VITE_COSMETIC_LOB_ENABLED}" .env.production.local \
+     || (echo "FATAL: VITE_COSMETIC_LOB_ENABLED not materialized into .env.production.local" && exit 1)
 RUN npm run build
+# Guard 2: fail loudly if cosmetic LOB was requested but the flag did NOT bake into
+# the bundle. This is exactly the regression that silently hid the dental/cosmetic
+# toggle on NK3 (see commit d37b35e4). A broken toggle must never ship silently again.
+RUN if [ "${VITE_COSMETIC_LOB_ENABLED}" = "true" ]; then \
+      grep -rqs '"true"==="true"' dist/assets/ \
+        || (echo "FATAL: VITE_COSMETIC_LOB_ENABLED=true but the flag did NOT bake into the bundle — the dental/cosmetic LOB toggle would be hidden. Build env did not reach vite build." && exit 1); \
+      echo "✓ LOB flag verified baked into bundle"; \
+    fi
 
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
