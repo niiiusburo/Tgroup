@@ -4,7 +4,7 @@ summary: |
   One shared login with role-based LOB scoping via partners.lob_scope TEXT[] and is_ctv flag (partners is the canonical auth/identity source; NO separate users table for LOB scope per migration 047).
   Admin users with multiple scopes see a header LOB dropdown (BusinessUnitContext); staff see only their LOB; CTV-flagged users are redirected to the dedicated mobile-first /ctv dashboard and never enter admin UI.
   Existing dental admin UI (overview, customers, calendar, appointments, employees, services, payment, reports, settings) is reused 1:1 for cosmetic when LOB=cosmetic; all /api/cosmetic/* routes mirror dental routes against the cosmetic DB.
-  The single new UI surface is the CTV (Cộng tác viên / referrer) commission dashboard at /ctv with four bottom-nav tabs (Home, Commission, Referrals, Me) that aggregates commission rows across both physical databases.
+  The single CTV (Cộng tác viên / referrer) UI surface is the bilingual /ctv commission dashboard with five bottom-nav tabs (Home, Commission, Track Clients, Network, Me) that aggregates commission rows across both physical databases.
   Commission attribution engine (D13 recipient resolution using partners + earnings) and consultation cards (cosmetic-only, invisible to admin UI) are backend-only in v1. All dental schema changes are strictly additive (new nullable columns + new tables per migration 047). Two-DB topology (tdental_demo + tcosmetic_demo); getDb(lob)/getQuery(req) for routing. Feature-flagged behind COSMETIC_LOB_ENABLED.
 owns:
   - api/src/routes/cosmetic/*.js (mirrors of dental routes, gated by requireLobScope('cosmetic'))
@@ -12,7 +12,7 @@ owns:
   - api/src/middleware/lobScope.js (requireLobScope)
   - website/src/contexts/BusinessUnitContext.tsx
   - website/src/components/header/LOBSelector.tsx (or equivalent in Layout header)
-  - website/src/pages/CTV/index.tsx (mobile-first 4-tab surface)
+  - website/src/pages/CTV/CtvDashboard.tsx and website/src/pages/CTV/tabs/* (mobile-first five-tab surface)
   - website/src/lib/api/ctv.ts
   - website/src/lib/api/lob.ts (me/lob-scope)
   - website/src/hooks/useBusinessUnit.ts

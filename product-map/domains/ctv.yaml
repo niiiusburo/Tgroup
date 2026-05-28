@@ -3,13 +3,13 @@ summary: |
   Dedicated role for external referrers (CTV). Flagged by partners.is_ctv = true (additive column on partners table in dental DB; mirrored in cosmetic DB).
   CTV partners have empty lob_scope; on login hard-redirected to /ctv and 403'd on any admin route (including cosmetic/dental mirrors).
   Permissions: ctv.dashboard.view, ctv.commission.view.self, ctv.referrals.view.self (and lob.crossview for admins viewing CTV data).
-  Single new UI surface: mobile-first CTV portal at /ctv; referral cards flip to show every service/earning row tied to the referred client, and the CTV invitation tab shows CTV-only upline/downline hierarchy.
+  Single UI surface: mobile-first bilingual CTV portal at /ctv with one canonical bottom-menu dashboard; referral cards flip to show every service/earning row tied to the referred client, and the CTV network tab shows CTV-only upline/downline hierarchy.
   /api/ctv/commission-summary aggregates earnings from BOTH physical DBs (tdental_demo.earnings + tcosmetic_demo.earnings) server-side for the authenticated CTV partner only (via recipient_partner_id).
   Shows pending/paid, LOB-tagged activity, referred clients across LOBs, service-line drill-downs, split bars, etc. per visual companion. D13 recipient resolution powers the rows.
   CTV is the only surface that intentionally crosses the two DBs (composition in API, no SQL JOIN).
 owns:
   - api/src/routes/ctv.js (or ctv/ folder; commission-summary cross-DB aggregator using getDb on both)
-  - website/src/pages/CTV/* (CtvDashboard, CtvHome, CtvCommission, CtvReferrals, CtvMe)
+  - website/src/pages/CTV/CtvDashboard.tsx + website/src/pages/CTV/tabs/* (bottom-menu dashboard: Home, Commission, Tracking, Network, Me)
   - website/src/lib/api/ctv.ts
   - website/src/components/ctv/* (LOB pills, split bars, bottom nav)
   - Login redirect logic in AuthContext / ProtectedRoute / LoginRoute
@@ -38,8 +38,9 @@ endpoints:
   - GET /api/ctv/* (gated)
 ui_surfaces:
   - /ctv (full bypass of admin Layout/sidebar; mobile-first; also usable desktop)
+    - Bottom menu: Tổng quan/Home, Hoa hồng/Commission, Theo dõi/Track Clients, Mạng lưới/Network, Tôi/Me.
     - Referral tracking: search/filter referred clients; card front shows journey progress; card back shows all services under that referral with amount, status, LOB pill, and earned date.
-    - Giới thiệu CTV / Invite CTVs: CTV referral hierarchy view showing current CTV, upline, direct downline count, and downline CTVs only.
+    - Mạng lưới / Network: CTV referral hierarchy view showing current CTV, upline, direct downline count, and downline CTVs only.
   - Hard redirect on login for partners.is_ctv=true (before any admin mount)
   - 403 guards on all / (admin) routes for CTV
 shared_types:
@@ -58,7 +59,7 @@ impact_tests:
   - commission-summary returns live aggregated numbers from both DB earnings tables for the CTV's recipient_partner_id
   - Referred clients show correct LOB tags and status
   - Referral flip card returns all earned services for the client and keeps search accent-insensitive
-  - CTV hierarchy route and tab show upline/downline CTVs only and never mix service clients into the invitation tree
+  - CTV hierarchy route and Network tab show upline/downline CTVs only and never mix service clients into the invitation tree
 risk_level: high (only cross-DB surface)
 notes:
   - "D13 live demo: seed a CTV partner + referred patient + collected payment in dental and/or cosmetic; verify earnings row + CTV dashboard shows it."

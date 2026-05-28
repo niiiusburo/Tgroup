@@ -612,13 +612,15 @@ sequenceDiagram
     participant Dental as tdental_demo
     participant Cosmetic as tcosmetic_demo
 
-    C->>FE: Open /ctv
+    C->>FE: Open /ctv bottom-menu dashboard
     FE->>API: GET /api/ctv/referrals
     API->>Dental: SELECT referred partners + earnings/services for current CTV
     API->>Cosmetic: SELECT referred partners + earnings/services for current CTV
     Dental-->>API: Dental referral rows
     Cosmetic-->>API: Cosmetic referral rows
     API-->>FE: Referrals with service_count and services[]
+    FE-->>C: Home dashboard and Track Clients bottom tab
+    C->>FE: Tap Theo dõi / Track Clients
     FE-->>C: Referral journey cards
     C->>FE: Click referral card
     FE-->>C: Flip card shows all service rows under that referral
@@ -626,7 +628,7 @@ sequenceDiagram
 
 **Data state transitions:** None. CTV portal is read-only; earnings remain append-only attribution rows.
 
-**Traceability:** Related UC: UC-022. Contracts/routes: `GET /api/ctv/referrals`, `GET /api/ctv/commission-summary`, `GET /api/ctv/me`. Data/tables: `dbo.partners`, `dbo.earnings`, `dbo.saleorderlines`, `dbo.products` in dental and cosmetic DBs. Invariants: INV-006, INV-016, INV-017, INV-020. Tests: `api/src/routes/__tests__/ctvReferrals.test.js`, `website/src/components/ctv/ReferralFlipCard.test.tsx`, `website/src/pages/CTV/index.test.tsx`. Product-map domains: `ctv`, `earnings-commissions`, `business-unit`.
+**Traceability:** Related UC: UC-022. Contracts/routes: `GET /api/ctv/referrals`, `GET /api/ctv/commission-summary`, `GET /api/ctv/me`. Data/tables: `dbo.partners`, `dbo.earnings`, `dbo.saleorderlines`, `dbo.products` in dental and cosmetic DBs. Invariants: INV-006, INV-016, INV-017, INV-020. Tests: `api/src/routes/__tests__/ctvReferrals.test.js`, `website/src/components/ctv/ReferralFlipCard.test.tsx`, `website/src/pages/CTV/CtvDashboard.test.tsx`. Product-map domains: `ctv`, `earnings-commissions`, `business-unit`.
 
 **Failure modes:**
 - A missing `recipient_partner_id` filter can leak another CTV's service rows.
@@ -637,7 +639,7 @@ sequenceDiagram
 
 ## WF-016 — CTV Hierarchy Review
 
-**Trigger:** CTV opens the CTV invitation tab to inspect upline/downline relationships.
+**Trigger:** CTV opens the Network bottom tab or the Invite CTVs header action to inspect upline/downline relationships.
 
 ```mermaid
 sequenceDiagram
@@ -647,7 +649,7 @@ sequenceDiagram
     participant Dental as tdental_demo
     participant Cosmetic as tcosmetic_demo
 
-    C->>FE: Click Giới thiệu CTV
+    C->>FE: Open Mạng lưới / Network
     FE->>API: GET /api/ctv/hierarchy
     API->>Dental: SELECT current CTV, recursive upline, recursive downline where is_ctv=true
     API->>Cosmetic: SELECT current CTV, recursive upline, recursive downline where is_ctv=true
@@ -659,7 +661,7 @@ sequenceDiagram
 
 **Data state transitions:** None. The hierarchy view is read-only and uses existing `partners.referred_by_ctv_id` links.
 
-**Traceability:** Related UC: UC-023. Contracts/routes: `GET /api/ctv/hierarchy`. Data/tables: `dbo.partners` in dental and cosmetic DBs. Invariants: INV-016, INV-017, INV-020. Tests: `api/src/routes/__tests__/ctvReferrals.test.js`, `website/src/pages/CTV/index.test.tsx`, `/ctv` screenshot verification. Product-map domains: `ctv`, `business-unit`.
+**Traceability:** Related UC: UC-023. Contracts/routes: `GET /api/ctv/hierarchy`. Data/tables: `dbo.partners` in dental and cosmetic DBs. Invariants: INV-016, INV-017, INV-020. Tests: `api/src/routes/__tests__/ctvReferrals.test.js`, `website/src/pages/CTV/CtvDashboard.test.tsx`, `/ctv` screenshot verification. Product-map domains: `ctv`, `business-unit`.
 
 **Failure modes:**
 - If the route omits `is_ctv=true`, referred service clients can appear in the CTV invitation tree.

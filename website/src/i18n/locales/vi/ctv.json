@@ -5,9 +5,54 @@
   "hello": "Xin chào, {{name}}",
   "notifications": "Thông báo",
   "language": "Ngôn ngữ",
+  "header": {
+    "brand": "TG CLINIC",
+    "title": "Cổng CTV",
+    "commissionTitle": "Hoa hồng",
+    "networkTitle": "Mạng lưới",
+    "meTitle": "Tài khoản"
+  },
   "tabs": {
+    "home": "Tổng quan",
+    "commission": "Hoa hồng",
     "referrals": "Theo dõi",
-    "recruiting": "Giới thiệu CTV"
+    "recruiting": "Giới thiệu CTV",
+    "network": "Mạng lưới",
+    "me": "Tôi"
+  },
+  "actions": {
+    "trackClients": "Khách giới thiệu",
+    "inviteCtv": "Giới thiệu CTV",
+    "copy": "Sao chép mã giới thiệu",
+    "copied": "Đã sao chép",
+    "logout": "Đăng xuất"
+  },
+  "home": {
+    "greeting": "Xin chào, {{name}} 👋",
+    "subtitle": "Hoa hồng giới thiệu của bạn qua Dental & Cosmetic",
+    "pendingCommission": "Hoa hồng chờ nhận",
+    "thisMonth": "Tháng này",
+    "services": "Dịch vụ",
+    "paidOut": "Đã nhận",
+    "recentActivity": "Hoạt động gần đây",
+    "noActivityPlain": "Chưa có hoạt động gần đây."
+  },
+  "commission": {
+    "myCommission": "Hoa hồng của tôi",
+    "pending": "Chờ nhận",
+    "paid": "Đã nhận",
+    "totalPending": "Tổng chờ nhận",
+    "totalPaid": "Tổng đã nhận",
+    "noPending": "Chưa có hoa hồng chờ nhận.",
+    "noPayouts": "Chưa có khoản đã chi trả."
+  },
+  "me": {
+    "ctvPartner": "Đối tác CTV",
+    "referralCode": "Mã giới thiệu",
+    "language": "Ngôn ngữ",
+    "notifications": "Thông báo",
+    "on": "Bật",
+    "copyCodeHint": "Dùng mã này khi gắn khách hoặc CTV."
   },
   "title": "Theo dõi khách giới thiệu",
   "subtitle": "Theo dõi khách được giới thiệu từ đặt lịch đến thanh toán",

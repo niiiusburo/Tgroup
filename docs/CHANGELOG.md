@@ -23,6 +23,10 @@
 Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `Docs`.
 
 ---
+## [0.32.58] — 2026-05-28
+### Fixed
+- CTV `/ctv` now has one canonical bilingual bottom-menu dashboard: the route imports `website/src/pages/CTV/CtvDashboard.tsx`, the old `index.tsx` implementation was removed, and the header no longer duplicates the exact Vietnamese `Theo dõi` bottom-menu label. — @agent — UC-022 / UC-023 CTV self-portal parity and INV-020 version traceability.
+
 ## [0.32.57] — 2026-05-28
 ### Fixed
 - CTV `/ctv` mobile language toggle now opens its compact dropdown below the orange header instead of above it, so the English/Vietnamese options stay inside the viewport and can be selected by touch. — @agent — BEHAVIOR.md §9 localization and UC-022 CTV self-portal language parity.

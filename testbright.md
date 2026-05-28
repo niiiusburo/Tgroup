@@ -10,6 +10,50 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: CTV Canonical Bottom Menu Consolidation (2026-05-28)
+
+Feature/edit name: CTV canonical bilingual bottom-menu dashboard consolidation.
+
+Changed URLs and API routes:
+- `/ctv` CTV self portal now routes to `website/src/pages/CTV/CtvDashboard.tsx`.
+- No API routes changed; the dashboard still reads `GET /api/ctv/referrals`, `GET /api/ctv/commission-summary`, `GET /api/ctv/hierarchy`, and `GET /api/ctv/me`.
+
+Affected data flows:
+- No backend writes or schema changes.
+- CTV dashboard remains read-only and self-scoped to the authenticated CTV.
+- Language state still uses the shared i18n storage key and `ctv` namespace.
+
+User roles:
+- CTV user with `is_ctv=true` and `ctv.dashboard.view`.
+- Non-CTV admin/staff should remain denied by the existing `/ctv` route guard.
+
+Happy paths:
+- `/ctv` opens a five-item bottom menu: `Tổng quan`, `Hoa hồng`, `Theo dõi`, `Mạng lưới`, `Tôi`.
+- English mode shows `Home`, `Commission`, `Track Clients`, `Network`, `Me`.
+- Header quick action for referred clients does not duplicate the exact Vietnamese `Theo dõi` label.
+- Tracking tab still filters/searches clients and opens referral flip-card service rows.
+- Network tab still loads CTV-only upline/downline hierarchy.
+
+Edge cases:
+- Empty commission, empty activity, empty referred-client, and empty hierarchy states remain readable on mobile.
+- Language dropdown opens below the orange header.
+- Bottom menu labels do not wrap outside their buttons on small mobile width.
+
+Regressions:
+- CTV cannot enter admin layout/sidebar.
+- `/api/ctv/*` remains CTV-only and self-scoped.
+- Referral search remains accent-insensitive.
+- Existing `ReferralFlipCard` service ledger behavior is unchanged.
+
+Setup data and login state:
+- Use a CTV account with at least one referred client and one hierarchy relationship on `https://tmv.2checkin.com/ctv`.
+- Capture live screenshot with browser URL bar after deploy.
+
+TestSprite execution items:
+- [x] PASS: Unit coverage checks bottom menu shell, single exact `Theo dõi` label, tracking search/flip card, hierarchy tab, and language dropdown placement - `npm --prefix website test -- src/pages/CTV/CtvDashboard.test.tsx src/components/ctv/ReferralFlipCard.test.tsx`.
+- [ ] PENDING: Live `/ctv` Vietnamese screenshot shows the bottom menu and no duplicate exact `Theo dõi` header button.
+- [ ] PENDING: Live `/ctv` English screenshot shows `Home`, `Commission`, `Track Clients`, `Network`, `Me`.
+
 # TestSprite Plan: CTV Language Toggle Dropdown Mobile Fix (2026-05-28)
 
 Feature/edit name: CTV language toggle dropdown mobile placement.
@@ -43,7 +87,7 @@ Setup data and login state:
 - Keep mobile screenshot evidence for both Vietnamese and English states after deploy.
 
 TestSprite execution items:
-- [x] PASS: Unit coverage checks the CTV language dropdown uses `top-full` placement - `npm --prefix website test -- src/pages/CTV/index.test.tsx src/components/ctv/ReferralFlipCard.test.tsx`.
+- [x] PASS: Unit coverage checks the CTV language dropdown uses `top-full` placement - `npm --prefix website test -- src/pages/CTV/CtvDashboard.test.tsx src/components/ctv/ReferralFlipCard.test.tsx`.
 - [ ] PENDING: Live mobile `/ctv` screenshot shows Vietnamese portal with accessible language toggle.
 - [ ] PENDING: Live mobile `/ctv` screenshot after selecting English shows `CTV Portal`, `Track Clients`, and `Invite CTVs`.
 

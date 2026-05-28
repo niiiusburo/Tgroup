@@ -5,9 +5,54 @@
   "hello": "Hi, {{name}}",
   "notifications": "Notifications",
   "language": "Language",
+  "header": {
+    "brand": "TG CLINIC",
+    "title": "CTV Portal",
+    "commissionTitle": "Commission",
+    "networkTitle": "Network",
+    "meTitle": "Account"
+  },
   "tabs": {
+    "home": "Home",
+    "commission": "Commission",
     "referrals": "Track Clients",
-    "recruiting": "Invite CTVs"
+    "recruiting": "Invite CTVs",
+    "network": "Network",
+    "me": "Me"
+  },
+  "actions": {
+    "trackClients": "Referred clients",
+    "inviteCtv": "Invite CTVs",
+    "copy": "Copy referral code",
+    "copied": "Copied",
+    "logout": "Log out"
+  },
+  "home": {
+    "greeting": "Hi, {{name}} 👋",
+    "subtitle": "Your referral commission across Dental & Cosmetic",
+    "pendingCommission": "Pending commission",
+    "thisMonth": "This month",
+    "services": "Services",
+    "paidOut": "Paid out",
+    "recentActivity": "Recent activity",
+    "noActivityPlain": "No recent activity yet."
+  },
+  "commission": {
+    "myCommission": "My commission",
+    "pending": "Pending",
+    "paid": "Paid",
+    "totalPending": "Total pending",
+    "totalPaid": "Total paid",
+    "noPending": "No pending commission yet.",
+    "noPayouts": "No paid payouts yet."
+  },
+  "me": {
+    "ctvPartner": "CTV Partner",
+    "referralCode": "Referral code",
+    "language": "Language",
+    "notifications": "Notifications",
+    "on": "On",
+    "copyCodeHint": "Use this code when linking clients or CTVs."
   },
   "title": "Referred Client Tracking",
   "subtitle": "Track referred clients from booking to payment",
