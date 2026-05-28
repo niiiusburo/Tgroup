@@ -38,13 +38,14 @@ export function FilterByLocation({
       <button
         onClick={() => setIsOpen((prev) => !prev)}
         className="
-          flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200
+          flex items-center gap-2 px-2 sm:px-4 py-2 rounded-lg border border-gray-200
           bg-white hover:bg-gray-50 transition-colors duration-150
           text-sm font-medium text-gray-700
         "
+        aria-label={selectedLocation?.name ?? 'All Locations'}
       >
         <MapPin className="w-4 h-4 text-gray-400" />
-        <span>{selectedLocation?.name ?? 'All Locations'}</span>
+        <span className="hidden sm:inline">{selectedLocation?.name ?? 'All Locations'}</span>
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 

@@ -2,6 +2,10 @@
 
 > Schema migration log with up/down/rollback notes. Manual SQL migration system (no ORM runner).
 
+**Cosmetic LOB v2 (docs sync 2026-05-21):** Phase-1 complete (047 base schema, partners/earnings/products). Phase-2 Task-1 (migration 048: admin permissions + test). Phase-2 Task-2 (seed-cosmetic-lob-transactional.js + test). Full details in api/migrations/04[78]_*.sql, api/scripts/seed-cosmetic-lob-transactional.js, and product-map/governance-delta. CTV attribution (D13), append-only earnings, refund reversals verified by Jest (24 tests, 100% pass).
+
+
+
 ## Migration System Rules
 
 1. Every migration file is idempotent: use `IF NOT EXISTS` for CREATE, `IF EXISTS` for DROP/ALTER.
@@ -72,8 +76,10 @@ Current inventory from disk:
 | 045 | `045_add_feedback_permissions.sql` | Seeds feedback permissions | Permission seed inserts | Delete seeded feedback permissions | 2026-04 |
 | 045 | `045_grant_external_checkups_create_to_clinic_roles.sql` | Grants external checkup create permission to clinic roles | Permission seed insert | Delete granted permission rows | 2026-04 |
 | 046 | `046_split_payment_and_hoso_permissions.sql` | Splits payment and treatment-record permission strings | Permission seed inserts | Delete seeded split permissions after replacement mapping | 2026-05 |
+| 047 | `047_cosmetic_lob_v2_base.sql` | Cosmetic LOB v2 base schema + partner fields + earnings table (D13 CTV support) | Creates `earnings` table; adds columns to `partners`, `products` | Drop `earnings` table, restore partner/product schema | 2026-05 |
+| 048 | `048_grant_lob_permissions_to_admin.sql` | Grant cosmetic.access, dental.access, lob.crossview to Admin group (Phase-2) | Permission seed insert | Delete granted permission rows | 2026-05 |
 
-**Total canonical migrations:** 53 files in `api/migrations/`.
+**Total canonical migrations:** 54 files in `api/migrations/`.
 
 ## Supplemental Migration Files
 

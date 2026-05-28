@@ -1,48 +1,55 @@
-name: Cosmetic Clients (v2)
+name: Cosmetic Clients / Partners (v2)
 summary: |
-  Independent client identity in the cosmetic LOB (tcosmetic_demo.dbo.clients table).
-  No shared identity with dental partners — same human in both LOBs = two unrelated rows (loose phone match for admin cross-view badge only, gated by lob.crossview).
-  Mirrors dental partners shape for core fields but lives in separate DB; supports referred_by_ctv_id (soft-ref to dental users) and consulting_staff_id (for attribution).
-  All cosmetic client CRUD flows through /api/cosmetic/Partners (mirror of dental) against cosmetic DB only.
-  Seeded empty; populated via existing Employees/Services UI under cosmetic LOB or via booking flows.
+  Client identity for cosmetic LOB lives in tcosmetic_demo.dbo.partners table (for 1:1 route/handler reuse with dental; mirror of partners SMI).
+  No shared rows with dental partners — same human enrolling in both LOBs gets independent partner rows in separate DBs (loose phone match only for admin cross-view "also a dental client" badge, permission-gated by lob.crossview).
+  Supports referred_by_ctv_id (soft-ref, validated in API; points to a partner in dental or local) and consulting_staff_id for D13 attribution via consultations.
+  All cosmetic client CRUD flows through /api/cosmetic/Partners (exact mirror of dental Partners routes) against the cosmetic DB pool only via attachCosmeticDb + getQuery.
+  Seeded empty per D16; populated via existing Employees/Services UI under cosmetic LOB or via booking flows. "Clients" terminology is business-level; impl table is partners in cosmetic DB too.
 owns:
-  - api/src/routes/cosmetic/partners.js (or mirror wrapper)
-  - website/src/pages/Customers.tsx (when LOB=cosmetic, sources from cosmetic DB)
+  - api/src/routes/cosmetic/partners.js (or shared partnersRoutes mounted under cosmetic with LOB scope)
+  - website/src/pages/Customers.tsx (when LOB=cosmetic, sources from cosmetic DB via getQuery)
   - All customer-related hooks when currentLOB=cosmetic
+  - api/src/routes/partners/* (read/write handlers support getQuery(req) for LOB routing)
 reads:
-  - tcosmetic_demo.dbo.clients
-  - tcosmetic_demo.dbo.earnings (for client KPI/earned)
-  - tdental_demo.dbo.users (for cross-view probe + referred_by_ctv_id resolution)
+  - tcosmetic_demo.dbo.partners (client rows under cosmetic LOB; lob_scope filter implicit via pool)
+  - tcosmetic_demo.dbo.earnings (for client KPI/earned attribution)
+  - tcosmetic_demo.dbo.consultations (for D13 resolution)
+  - tdental_demo.dbo.partners (for cross-view probe + referred_by_ctv_id resolution, admin only)
 writes:
-  - tcosmetic_demo.dbo.clients
-  - tcosmetic_demo.dbo.consultations (auto on booking)
+  - tcosmetic_demo.dbo.partners (via cosmetic-mounted Partners routes)
+  - tcosmetic_demo.dbo.consultations (auto-created on cosmetic appointment booking with consulting_staff_id)
 tables:
-  - tcosmetic_demo.dbo.clients (PK uuid; referred_by_ctv_id UUID NULL soft-ref dental users; consulting_staff_id UUID NULL refs cosmetic.staff; + standard fields mirrored from partners)
-  - tcosmetic_demo.dbo.consultations (invisible attribution cards; status open/superseded/etc; 6mo TTL)
+  - tcosmetic_demo.dbo.partners (PK uuid; referred_by_ctv_id UUID NULL (soft); consulting_staff_id UUID NULL refs cosmetic partners staff; + lob_scope/is_ctv/referred_by_ctv_id additive per 047; standard fields mirrored from dental partners SMI)
+  - tcosmetic_demo.dbo.consultations (invisible attribution cards; status open/attached/converted/superseded/expired; 6mo TTL)
+  - tcosmetic_demo.dbo.earnings (earnings rows for this LOB's clients)
 endpoints:
-  - GET/POST/PUT/PATCH/DELETE /api/cosmetic/Partners (and /:id, /check-unique, /GetKPIs etc.) — exact mirror, LOB-gated
-  - Internal: consultation card lifecycle on cosmetic appointment create
+  - GET/POST/PUT/PATCH/DELETE /api/cosmetic/Partners (and /:id, /check-unique, /GetKPIs etc.) — exact mirror, LOB-gated by requireLobScope('cosmetic')
+  - Internal: consultation card lifecycle on cosmetic appointment create (earnings domain)
 ui_surfaces:
-  - /customers (under cosmetic LOB) — empty state until seeded
-  - /customers/:id with optional "Also a dental client" badge (if lob.crossview + phone match in other DB)
+  - /customers (under cosmetic LOB) — empty state until seeded via UI
+  - /customers/:id with optional "Also a dental client" badge (if lob.crossview + phone match in tdental_demo.partners)
   - Cross-LOB badge opens other LOB profile in new tab (admin only)
 jobs:
   - none (attribution engine in earnings domain)
 shared_types:
-  - contracts/partner.ts (extended or cosmetic variant)
+  - contracts/partner.ts (extended for LOB; used by both dental and cosmetic mirrors)
 dependencies:
-  - Business Unit Context (all client surfaces LOB-aware)
-  - Earnings / Commissions (referred_by_ctv_id + consultation resolution for attribution)
-  - Employees HR (cosmetic staff for consulting_staff_id)
+  - Business Unit Context (all client surfaces LOB-aware via getDb / getQuery)
+  - Earnings / Commissions (referred_by_ctv_id + consultation resolution for D13 attribution)
+  - Employees HR (cosmetic staff for consulting_staff_id on partners)
 affected_by:
-  - Changes to dental partners schema (no impact, separate table)
-  - Consultation card auto-create logic
+  - Changes to dental partners schema (additive only, no impact on cosmetic)
+  - Consultation card auto-create logic + commissionEngine
 impact_tests:
+  - Cosmetic customers list empty after fresh cosmetic seed; CRUD works only under cosmetic LOB
+  - Cross-LOB badge only for multi-scope admins
   - No data leak: cosmetic client list never returns dental rows
   - Cross-view badge: only visible with lob.crossview; probe does not mutate data
   - Referral by CTV: client row with referred_by_ctv_id correctly attributes earnings on payment
 risk_level: medium
 notes:
-  - "D2: No shared identity table. Independent clients per LOB."
+  - "D2: No shared identity table. Independent clients per LOB, separate DB rows."
+  - "Reality per migration 047 + handler migration: cosmetic DB reuses partners table (not a separate clients table) to enable zero-dupe handler code via getQuery(req). Early v2 spec brainstorm used 'clients' name; final impl standardized on partners in both DBs. cosmetic-clients.yaml kept for business-domain separation in product-map."
   - "Cross-LOB badge is soft phone match only; never a FK or merge operation."
+  - "All cosmetic partners queries must go through getQuery(req) or getDb('cosmetic') — never bare pool."
   - "cosmetic.staff and companies seeded empty per D16; admins create via UI under cosmetic LOB."

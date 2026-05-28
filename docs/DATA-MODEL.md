@@ -4,6 +4,8 @@
 
 > Full schema, ERD, and invariant rules that must always hold. PostgreSQL 16, `search_path=dbo`, manual migration system (no ORM runner).
 
+**Cosmetic LOB v2 (2026-05-19 sync):** Two physical DBs (tdental_demo + tcosmetic_demo on 5433). partners table is canonical identity (lob_scope TEXT[], is_ctv, referred_by_ctv_id additive on partners in both). earnings (append-only D13 attribution) + payouts + consultations (cosmetic) + referral_locks (dental) per migration 047. See product-map/domains/*-lob yamls + schema-map.md for full two-DB layout. No cross-DB SQL; getDb(lob) in API.
+
 ## Schema Statistics
 
 - **Tables / Views:** Baseline schema plus migration-added objects; verify the target database for an exact live count before sync/deploy decisions.

@@ -31,6 +31,7 @@ If behavior is accepted as product truth, promote it here or to a domain runbook
 - 403 means the user is authenticated but not allowed; show a permission-specific denial rather than a generic failure.
 - **Cosmetic LOB v2:** New `S_LOB_FORBIDDEN` error envelope for LOB scope violations (dental user hits /cosmetic/* or CTV hits admin). See governance-delta.md and BEHAVIOR updates in v2 spec. CTV users see hard redirect to /ctv instead of admin 403s.
 - **Cosmetic LOB selector:** Only Admin permission-group users can select between Dental and Cosmetic. Non-admin staff are pinned to one LOB from their scoped auth payload and must not see the header LOB dropdown, even if a stale database row contains multiple LOB values.
+- **CTV referral claim:** `POST /api/ctv/bookings` returns `400 B_CLIENT_CLAIMED` (`{ error: { code, message, ownerName, expiresAt } }`) when the target client is actively claimed (within the 6-month window) by a different CTV — booking blocked, no appointment created. `409 REFERRAL_PRODUCT_NOT_CONFIGURED` when `commission_settings.referral_start_product_id` is unset. A claim is active for 6 months from `max(Referral Start card date, last paid-service date)`; commission credits the owning CTV only while active as of the payment date (lapsed = no credit, no auto-revive).
 
 ## 4. Forms
 

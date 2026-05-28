@@ -13,6 +13,11 @@ import {
 } from '@/lib/api';
 import type { FeedbackThread, FeedbackMessage, FeedbackStatus } from '@/types/feedback';
 
+// Per-session flag: cleared on login (AuthContext.login), set when the user
+// dismisses the inline hint. Keeps the prompt visible once per fresh session
+// without nagging across page navigations.
+const FEEDBACK_HINT_DISMISSED_KEY = 'tg_feedback_hint_dismissed';
+
 const STATUS_STYLES: Record<FeedbackStatus, string> = {
   pending: 'bg-amber-50 text-amber-700 ring-amber-600/20',
   in_progress: 'bg-blue-50 text-blue-700 ring-blue-600/20',
@@ -118,8 +123,22 @@ export function FeedbackWidget() {
   const [fileError, setFileError] = useState<string | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showLoginHint, setShowLoginHint] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Show the "Any problem? Tap here" hint once per fresh session.
+  // AuthContext.login removes the dismissal key on each successful login.
+  useEffect(() => {
+    if (!user) return;
+    if (sessionStorage.getItem(FEEDBACK_HINT_DISMISSED_KEY)) return;
+    setShowLoginHint(true);
+  }, [user]);
+
+  const dismissLoginHint = useCallback(() => {
+    sessionStorage.setItem(FEEDBACK_HINT_DISMISSED_KEY, '1');
+    setShowLoginHint(false);
+  }, []);
 
   // Poll the unread count every 45s so the badge stays roughly fresh without
   // hammering the API. Also refresh on widget open and immediately when the
@@ -291,7 +310,10 @@ export function FeedbackWidget() {
     <div className="relative" ref={panelRef}>
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          if (showLoginHint) dismissLoginHint();
+          setOpen((v) => !v);
+        }}
         className="relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors duration-150"
         aria-label={unreadCount > 0 ? `Phản hồi (${unreadCount} mới)` : 'Phản hồi'}
       >
@@ -305,6 +327,37 @@ export function FeedbackWidget() {
           </span>
         )}
       </button>
+
+      {showLoginHint && !open && (
+        <div
+          role="status"
+          className="absolute right-0 top-full mt-2 z-40 w-64 rounded-xl bg-white shadow-lg ring-1 ring-gray-200 px-3.5 py-3 animate-in fade-in slide-in-from-top-1 duration-200"
+        >
+          {/* Arrow pointing up to the icon */}
+          <span
+            aria-hidden="true"
+            className="absolute -top-1.5 right-4 w-3 h-3 bg-white ring-1 ring-gray-200 rotate-45"
+          />
+          <div className="relative flex items-start gap-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900 leading-tight">
+                {tFeedback('loginHintTitle')}
+              </p>
+              <p className="mt-1 text-xs text-gray-600 leading-snug">
+                {tFeedback('loginHintBody')}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={dismissLoginHint}
+              aria-label={tFeedback('loginHintDismiss')}
+              className="-mr-1 -mt-1 p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {open && (
         <div className="absolute right-0 top-full mt-2 z-50 w-96 max-h-[80vh] flex flex-col bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden">

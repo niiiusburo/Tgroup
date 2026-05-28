@@ -71,6 +71,12 @@
 **Enforced by:** `api/src/routes/auth.js`, `/api/me/lob-scope`, `api/src/services/permissionService.js:isAdminPermissionState`, and `website/src/contexts/BusinessUnitContext.tsx`.
 **Cite when:** Editing LOB selector, auth payloads, `lob_scope`, or admin/staff permission-group behavior.
 
+### INV-008B — CTV Role Isolation
+**Rule:** Authenticated users flagged as CTV by either `is_ctv === true` or legacy `isCtv === true` must be routed to `/ctv` before the admin app renders. Non-CTV users must not render the CTV portal.
+**Rationale:** CTV self-service is separate from clinic admin operations, and older auth payloads may still carry the camelCase flag.
+**Enforced by:** `website/src/App.tsx` route guards and `website/src/__tests__/ProtectedRoute.ctv.test.tsx`.
+**Cite when:** Editing CTV auth payloads, `/ctv` route guards, login redirects, or admin route protection.
+
 ### INV-009 — Location Scope Frontend-Only Filter
 **Rule:** Backend list routes generally do NOT enforce location scope. The frontend `LocationContext` is responsible for filtering by `companyid`.
 **Rationale:** Backend location scoping was historically inconsistent; frontend filtering is the current operational contract.

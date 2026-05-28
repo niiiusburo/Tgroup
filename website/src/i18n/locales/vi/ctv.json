@@ -1,0 +1,160 @@
+{
+  "header": {
+    "brand": "TG Clinic",
+    "title": "CTV Portal",
+    "trackingTitle": "Theo dõi khách hàng",
+    "commissionTitle": "Hoa hồng của tôi",
+    "referralsTitle": "Danh sách giới thiệu",
+    "networkTitle": "Mạng lưới",
+    "meTitle": "Tài khoản",
+    "notifications": "Thông báo"
+  },
+  "tabs": {
+    "home": "Tổng quan",
+    "commission": "Hoa hồng",
+    "tracking": "Theo dõi",
+    "referrals": "Giới thiệu",
+    "network": "Mạng lưới",
+    "me": "Tôi"
+  },
+  "actions": {
+    "referClient": "Giới thiệu khách",
+    "recruitCtv": "Tuyển CTV",
+    "seeAll": "Xem tất cả",
+    "copy": "Sao chép",
+    "copied": "Đã sao chép!",
+    "reload": "Tải lại",
+    "logout": "Đăng xuất",
+    "search": "Tìm khách hàng...",
+    "filterAll": "Tất cả",
+    "filterInProgress": "Đang tiến hành",
+    "filterCompleted": "Đã hoàn tất",
+    "filterPendingPayment": "Chờ thanh toán",
+    "swipeHint": "← Vuốt sang trái/phải để xem các cột →"
+  },
+  "home": {
+    "greeting": "Xin chào, {{name}}",
+    "subtitle": "Hoa hồng giới thiệu của bạn qua Dental & Cosmetic",
+    "pendingCommission": "Hoa hồng chờ nhận",
+    "thisMonth": "Tháng này",
+    "referrals": "Giới thiệu",
+    "services": "Dịch vụ",
+    "paidOut": "Đã nhận",
+    "recentActivity": "Hoạt động gần đây",
+    "noActivity": "Chưa có hoạt động.<br />Giới thiệu khách để bắt đầu kiếm hoa hồng.",
+    "dental": "Dental",
+    "cosmetic": "Cosmetic"
+  },
+  "lobs": {
+    "dental": "Dental",
+    "cosmetic": "Cosmetic"
+  },
+  "serviceStatus": {
+    "pending": "Chờ xử lý",
+    "paid": "Đã thanh toán",
+    "reversed": "Đã hoàn"
+  },
+  "commission": {
+    "myCommission": "Hoa hồng của tôi",
+    "pending": "Chờ nhận",
+    "paid": "Đã nhận",
+    "totalPending": "Tổng chờ nhận",
+    "totalPaid": "Tổng đã nhận",
+    "byService": "Theo dịch vụ",
+    "payoutCycles": "Đợt thanh toán",
+    "noPending": "Không có hoa hồng chờ nhận.",
+    "noPayouts": "Lịch sử thanh toán sẽ hiện ở đây sau khi admin chạy thanh toán.",
+    "servicesAcrossClients": "{{count}} dịch vụ qua {{clients}} khách"
+  },
+  "tracking": {
+    "pageTitle": "Theo dõi khách hàng",
+    "subtitle": "Theo dõi hành trình khách hàng từ giới thiệu đến thanh toán",
+    "stage": {
+      "referred": "Đã giới thiệu",
+      "visited": "Đã đến khám",
+      "serviced": "Đã làm dịch vụ",
+      "paid": "Đã thanh toán"
+    },
+    "stageBadge": {
+      "referred": "Mới giới thiệu",
+      "visited": "Đã đến khám",
+      "serviced": "Đang làm DV",
+      "paid": "✓ Hoàn tất"
+    },
+    "via": "qua",
+    "appointmentDate": "Lịch hẹn",
+    "noAppointment": "Chưa đặt lịch · Nhắc khách đặt hẹn",
+    "nextVisit": "Lịch tái khám",
+    "commissionEarned": "Hoa hồng",
+    "estimated": "dự kiến",
+    "received": "đã nhận",
+    "serviceAmount": "Giá dịch vụ",
+    "noClientsYet": "Chưa có khách hàng",
+    "noClientsHint": "Giới thiệu khách hàng đầu tiên để bắt đầu kiếm hoa hồng",
+    "noClientsAction": "+ Giới thiệu khách"
+  },
+  "referrals": {
+    "myReferrals": "Giới thiệu của tôi",
+    "noReferrals": "Chưa giới thiệu khách nào.",
+    "svc": "DV",
+    "status": {
+      "earning": "Đang sinh lời",
+      "noVisitYet": "Chưa đến khám"
+    }
+  },
+  "network": {
+    "myNetwork": "Mạng lưới CTV",
+    "downline": "Tuyến dưới",
+    "direct": "Trực tiếp",
+    "level": "Cấp {{level}}",
+    "clients": "khách",
+    "noNetwork": "Chưa có CTV nào trong mạng lưới."
+  },
+  "me": {
+    "ctvPartner": "CTV partner",
+    "referralCode": "Mã giới thiệu",
+    "language": "Ngôn ngữ",
+    "notifications": "Thông báo",
+    "on": "Bật",
+    "copyCodeHint": "Chia sẻ mã này để giới thiệu CTV mới"
+  },
+  "forms": {
+    "referClient": {
+      "title": "Giới thiệu khách",
+      "name": "Họ tên",
+      "namePlaceholder": "Tên khách hàng",
+      "phone": "Số điện thoại",
+      "phonePlaceholder": "Số điện thoại",
+      "date": "Ngày hẹn",
+      "lob": "Lĩnh vực",
+      "dental": "Dental",
+      "cosmetic": "Cosmetic",
+      "submit": "Giới thiệu khách",
+      "submitting": "Đang gửi...",
+      "success": "Giới thiệu thành công!",
+      "required": "Vui lòng nhập đầy đủ thông tin",
+      "errorClaimed": "Khách hàng này đã được đăng ký bởi {{owner}}. Hết hạn: {{expires}}"
+    },
+    "recruitCtv": {
+      "title": "Tuyển CTV",
+      "name": "Họ tên",
+      "phone": "Số điện thoại",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "lobs": "Lĩnh vực hoạt động",
+      "selectOne": "Chọn ít nhất một lĩnh vực",
+      "submit": "Tạo tài khoản CTV",
+      "submitting": "Đang tạo...",
+      "success": "Tạo CTV thành công!"
+    }
+  },
+  "errors": {
+    "loadFailed": "Không thể tải dữ liệu",
+    "loadFailedDetail": "Lỗi kết nối máy chủ. Vui lòng thử lại.",
+    "generic": "Đã xảy ra lỗi. Vui lòng thử lại sau."
+  },
+  "unknownClient": "Khách hàng",
+  "unknownService": "Dịch vụ",
+  "unknownValue": "Không rõ",
+  "currency": "₫"
+}

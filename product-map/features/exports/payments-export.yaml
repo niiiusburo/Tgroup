@@ -1,0 +1,132 @@
+feature_id: payments-export
+display_name_vi: Báo cáo Thanh toán
+display_name_en: Payments Report Excel Export
+status: live
+
+ui_entry_points:
+  - page: /payments
+    component: website/src/pages/payments/PaymentsPage.tsx
+    user_action: "Click 'Xuất dữ liệu' button in payments toolbar"
+
+api_routes:
+  - method: POST
+    path: /api/Exports/payments/preview
+    handler: api/src/routes/exports.js#/:type/preview
+  - method: POST
+    path: /api/Exports/payments/download
+    handler: api/src/routes/exports.js#/:type/download
+
+permission_required: payments.export
+
+code_refs:
+  registry_entry: api/src/services/exports/exportRegistry.js#payments
+  column_definition: api/src/services/exports/builders/paymentsExport.js#COLUMNS
+  sql_query: api/src/services/exports/builders/paymentsExport.js#getRows
+  row_mapper: api/src/services/exports/builders/paymentsExport.js#build
+  unit_tests: api/src/services/exports/__tests__/paymentsExport.test.js
+
+columns:
+  - position: 1
+    key: referenceCode
+    header_vi: Mã phiếu thu
+    style: text
+    width: 16
+    source: payments.reference_code
+  - position: 2
+    key: paymentDate
+    header_vi: Ngày thanh toán
+    style: date
+    width: 14
+    source: payments.payment_date OR created_at
+  - position: 3
+    key: customerCode
+    header_vi: Mã KH
+    style: text
+    width: 12
+    source: partners.ref
+  - position: 4
+    key: customerName
+    header_vi: Khách hàng
+    style: text
+    width: 24
+    source: partners.displayname
+  - position: 5
+    key: customerPhone
+    header_vi: SĐT
+    style: text
+    width: 14
+    source: partners.phone
+  - position: 6
+    key: amount
+    header_vi: Số tiền
+    style: vnd
+    width: 14
+    source: payments.amount
+  - position: 7
+    key: cashAmount
+    header_vi: Tiền mặt
+    style: vnd
+    width: 14
+    source: payments.cash_amount
+  - position: 8
+    key: bankAmount
+    header_vi: Chuyển khoản
+    style: vnd
+    width: 14
+    source: payments.bank_amount
+  - position: 9
+    key: depositUsed
+    header_vi: Đặt cọc
+    style: vnd
+    width: 14
+    source: payments.deposit_used
+  - position: 10
+    key: method
+    header_vi: Phương thức
+    style: text
+    width: 12
+    source: payments.method
+  - position: 11
+    key: status
+    header_vi: Trạng thái
+    style: text
+    width: 12
+    source: payments.status (mapped via STATUS_LABELS)
+  - position: 12
+    key: saleOrderName
+    header_vi: Số phiếu điều trị
+    style: text
+    width: 28
+    source: saleorder.name
+  - position: 13
+    key: notes
+    header_vi: Nội dung
+    style: text
+    width: 28
+    source: payments.notes
+  - position: 14
+    key: companyName
+    header_vi: Chi nhánh
+    style: text
+    width: 20
+    source: companies.name
+
+filters_accepted:
+  - name: dateFrom
+    type: string
+    format: YYYY-MM-DD
+  - name: dateTo
+    type: string
+    format: YYYY-MM-DD
+  - name: companyId
+    type: uuid or 'all'
+  - name: search
+    type: string
+
+verified_against_live: "2026-05-20 — verified from paymentsExport.js COLUMNS array"
+
+notes: |
+  Payment records are filtered by status = 'posted' (approved payments only).
+  Amount field is split into three method-specific columns (cash, bank, deposit).
+  Status field is mapped via STATUS_LABELS lookup table. Payment method is
+  stored directly from payments.method field.

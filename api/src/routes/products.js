@@ -131,6 +131,7 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
         p.uomname,
         p.companyid,
         c.name AS companyname,
+        p.commission_rate_percent,
         p.canorderlab,
         p.active,
         p.datecreated,
@@ -196,6 +197,7 @@ router.get('/:id', requirePermission('services.view'), async (req, res) => {
         p.uomname,
         p.companyid,
         c.name AS companyname,
+        p.commission_rate_percent,
         p.canorderlab,
         p.active,
         p.datecreated,
@@ -227,7 +229,7 @@ router.get('/:id', requirePermission('services.view'), async (req, res) => {
 router.post('/', requirePermission('services.edit'), async (req, res) => {
   try {
     const q = getQuery(req);
-    const { name, defaultcode, type, listprice, categid, uomname, companyid, canorderlab } = req.body;
+    const { name, defaultcode, type, listprice, categid, uomname, companyid, canorderlab, commission_rate_percent } = req.body;
     if (!name || !name.trim()) {
       return res.status(400).json({ error: 'Name is required' });
     }
@@ -238,9 +240,9 @@ router.post('/', requirePermission('services.edit'), async (req, res) => {
     const trimmedName = name.trim();
     const nameNoSign = normalizeVietnamese(trimmedName);
     await q(
-      `INSERT INTO dbo.products (id, name, namenosign, defaultcode, type, type2, listprice, categid, uomname, companyid, canorderlab, active, datecreated, lastupdated)
-       VALUES ($1, $2, $3, $4, $5, $5, $6, $7, $8, $9, $10, true, $11, $11)`,
-      [id, trimmedName, nameNoSign, defaultcode || null, type || 'service', listprice || 0, categid || null, uomname || 'Lần', companyid || null, canorderlab || false, now]
+      `INSERT INTO dbo.products (id, name, namenosign, defaultcode, type, type2, listprice, categid, uomname, companyid, canorderlab, commission_rate_percent, active, datecreated, lastupdated)
+       VALUES ($1, $2, $3, $4, $5, $5, $6, $7, $8, $9, $10, $11, true, $12, $12)`,
+      [id, trimmedName, nameNoSign, defaultcode || null, type || 'service', listprice || 0, categid || null, uomname || 'Lần', companyid || null, canorderlab || false, commission_rate_percent != null ? commission_rate_percent : 0, now]
     );
 
     const rows = await q(
@@ -267,7 +269,7 @@ router.put('/:id', requirePermission('services.edit'), async (req, res) => {
   try {
     const { id } = req.params;
     const q = getQuery(req);
-    const { name, defaultcode, listprice, categid, uomname, companyid, canorderlab, active } = req.body;
+    const { name, defaultcode, listprice, categid, uomname, companyid, canorderlab, active, commission_rate_percent } = req.body;
 
     const updates = [];
     const params = [];
@@ -288,6 +290,7 @@ router.put('/:id', requirePermission('services.edit'), async (req, res) => {
     if (uomname !== undefined) { updates.push(`uomname = $${idx}`); params.push(uomname); idx++; }
     if (companyid !== undefined) { updates.push(`companyid = $${idx}`); params.push(companyid); idx++; }
     if (canorderlab !== undefined) { updates.push(`canorderlab = $${idx}`); params.push(canorderlab); idx++; }
+    if (commission_rate_percent !== undefined) { updates.push(`commission_rate_percent = $${idx}`); params.push(commission_rate_percent); idx++; }
     if (active !== undefined) { updates.push(`active = $${idx}`); params.push(active); idx++; }
 
     if (updates.length === 0) {

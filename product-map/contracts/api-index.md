@@ -17,6 +17,55 @@
 | GET | `/me` | Auth | — | `{ user, permissions }` |
 | POST | `/change-password` | Auth | `{ oldPassword, newPassword }` | `{ success, message }` |
 
+## LOB & Business Unit (`/api/me` + context) — Cosmetic LOB v2
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/api/me/lob-scope` | Auth | — | `{ lob_scope: string[], is_ctv: boolean, default_lob }` |
+| (augmented) | `GET /api/Auth/me` | Auth | — | User payload now includes `lob_scope[]` and `is_ctv` (affects login redirect and header toggle visibility) |
+
+Note: All existing routes are now implicitly under a selected LOB via BusinessUnitContext. Cosmetic routes live under `/api/cosmetic/*` prefix and are distinct from dental.
+
+## Cosmetic (`/api/cosmetic/*`) — mirrors of all dental routes (gated by requireLobScope('cosmetic') + cosmetic.access)
+
+All dental endpoints have exact cosmetic mirrors:
+
+- `GET/POST/PUT/PATCH/DELETE /api/cosmetic/Partners` (and /check-unique, /resolve, /:id, KPIs, etc.)
+- `GET/POST/PUT /api/cosmetic/Appointments` (and /:id)
+- `GET/POST/PUT/DELETE /api/cosmetic/Products` + ProductCategories
+- `GET/POST/PATCH/DELETE /api/cosmetic/Payments` + refunds, proofs, monthly plans
+- `GET/POST/PUT/DELETE /api/cosmetic/Employees`
+- `GET /api/cosmetic/Companies`
+- `GET/POST/PATCH /api/cosmetic/SaleOrders` + lines
+- `GET /api/cosmetic/DotKhams` etc.
+- All report/export endpoints under cosmetic prefix when LOB=cosmetic
+- Auth gates: requireLobScope('cosmetic') returns 403 S_LOB_FORBIDDEN when missing; plus permission strings (cosmetic.access etc.)
+
+When `COSMETIC_LOB_ENABLED=false` the entire family returns 503.
+
+## CTV Dashboard & Commission API (`/api/ctv`) — CTV role only (is_ctv + ctv.* permissions)
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/api/ctv/commission-summary` | CTV (ctv.commission.view.self) | — | Aggregated payload: { pending: {total, dental, cosmetic, count}, paid, recent_activity[], by_service[] } with LOB pills on every row |
+| GET | `/api/ctv/referrals` | CTV (ctv.referrals.view.self) | — | List of referred clients across both DBs with status (earning / no visit), totals earned, LOB pills |
+| POST | `/api/ctv` | CTV or admin | `{ name, phone, email, password, lob_scope?, referred_by_ctv_id? (admin) }` | 201 created CTV. Closed signup (no public). `employee=true`, instant active; referred_by = caller (CTV) or body (admin). Dups → `U_DUPLICATE_PHONE`/`U_DUPLICATE_EMAIL`; non-CTV/non-admin → 403 `S_CTV_CREATE_FORBIDDEN` |
+| POST | `/api/ctv/clients` | CTV or admin | `{ name, phone, lob }` | 201 referred customer in one LOB DB, `referred_by_ctv_id` = caller |
+| POST | `/api/ctv/bookings` | CTV or admin | `{ clientId?, name?, phone, lob, date, time?, companyId?, productId? }` | 201 `{ clientId, appointmentId }`. Eligibility gate: `400 B_CLIENT_CLAIMED {ownerName, expiresAt}` if actively claimed by another CTV; creates/re-claims client + Referral Start card + appointment. `409 REFERRAL_PRODUCT_NOT_CONFIGURED` if referral product unset |
+| (augmented) | `GET /api/Partners/resolve` & `GET /api/Partners/:id` | Auth | — | responses now include `referralClaim: { ownerCtvId, ownerName, active, expiresAt } | null` |
+| (internal) | commission recipient resolution | — | — | Implements D13 priority: referred_by_ctv_id > active consultation card (cosmetic) > salestaffid (dental). For `ctv` source the pool is split up the upline per `commission_level_config` |
+
+CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin route.
+
+## Admin CTV & Commission config
+
+| Method | Path | Auth | Body / Query | Response |
+|--------|------|------|--------------|----------|
+| GET | `/api/Ctvs`, `/api/cosmetic/Ctvs` | admin (`ctv.manage`/`*`) | `?status=active\|suspended` | `{ ctvs: [{id, name, phone, email, lob_scope, active, referred_by_ctv_id, upline_name}] }` |
+| PATCH | `/api/Ctvs/:id`, `/api/cosmetic/Ctvs/:id` | admin | `{ active: boolean }` | Updated CTV (suspend/reactivate); mirrors to cosmetic DB if present |
+| GET | `/api/CommissionConfig`, `/api/cosmetic/CommissionConfig` | Auth | — | `{ levels: [{level,label,enabled,share_percent}], defaultReferralPercent }` |
+| PUT | `/api/CommissionConfig`, `/api/cosmetic/CommissionConfig` | admin (`commission.config.manage`/`*`) | `{ levels[], defaultReferralPercent }` | Upserts config; enabled-sum > 100 → 400 `B_LEVEL_SUM_EXCEEDS_100` |
+
 ## Account (`/api/Account`)
 
 | Method | Path | Auth | Body | Response |
@@ -31,7 +80,9 @@
 | GET | `/` | Auth | `?partner_id, offset, limit, search, sortField, sortOrder, date_from/dateFrom, date_to/dateTo, state, company_id/companyId, doctor_id/doctorId` | `PaginatedResponse<Appointment> + aggregates` |
 | GET | `/:id` | Auth | — | Appointment detail |
 | POST | `/` | Perm:`appointments.add` | `{ date, time, partnerId/partnerid, doctorId/doctorid, companyId/companyid, note, timeExpected/timeexpected, color, state, productId/productid }` | Created appointment |
-| PUT | `/:id` | Perm:`appointments.edit` | `{ date, doctorId/doctorid, note, state, timeExpected/timeexpected, color, time, productId/productid }` | Updated appointment |
+| PUT | `/:id` | Perm:`appointments.edit` | `{ date, doctorId/doctorid, companyId/companyid, note, state, timeExpected/timeexpected, color, time, productId/productid, assistantId/assistantid, dentalAideId/dentalaideid }` | Updated appointment, including refreshed `companyid/companyname` when clinic/location changes |
+
+PUT handler-level validation: `companyId` (when present) must be a UUID (`400 INVALID_COMPANY_ID`) and reference an existing `companies` row (`404 COMPANY_NOT_FOUND`); persisted to `appointments.companyid`. Covered by `api/src/routes/appointments/__tests__/mutationHandlers.test.js`.
 
 ## Partners / Customers (`/api/Partners`)
 
@@ -56,6 +107,8 @@
 | POST | `/` | Perm:`employees.edit` | Employee fields | Created employee |
 | PUT | `/:id` | Perm:`employees.edit` | Employee fields | Updated employee |
 | DELETE | `/:id` | Perm:`employees.edit` | — | Deleted employee |
+
+Cosmetic LOB mirror: Employee UI callers must pass active `lob` into `createEmployee` and `updateEmployee`; when `lob='cosmetic'`, these same contract shapes route through `POST /api/cosmetic/Employees` and `PUT /api/cosmetic/Employees/:id`.
 
 ## Products / Services Catalog (`/api/Products`)
 
@@ -160,6 +213,8 @@ Live `method` values are `cash`, `bank_transfer`, `deposit`, and `mixed`. VietQR
 |--------|------|------|--------------|----------|
 | GET | `/` | Auth | `?offset, limit, search` | `PaginatedResponse<Company>` |
 
+Cosmetic LOB mirror: LOB-aware employee and location UI surfaces must call `GET /api/cosmetic/Companies?offset=0&limit=50` when active `lob='cosmetic'`; omitted/dental LOB keeps legacy `GET /api/Companies`.
+
 ## Permissions (`/api/Permissions`)
 
 | Method | Path | Auth | Body / Query | Response |
@@ -202,7 +257,7 @@ Revenue paid totals count posted `payment_allocations` linked to saleorders plus
 | POST | `/:type/preview` | Auth + registry permission | `{ filters }`; `type` is `service-catalog`, `customers`, `appointments`, `services`, `payments`, `report-sales-employees`, `revenue-flat`, or `deposit-flat` | `{ type, label, rowCount, filename, filters, summary, exceedsMax }` + best-effort `exports_audit` row |
 | POST | `/:type/download` | Auth + registry permission | `{ filters }`; same type keys as preview | XLSX workbook stream + best-effort `exports_audit` row after response |
 
-Export permissions are defined by `api/src/services/exports/exportRegistry.js`: `customers.export`, `appointments.export`, `services.export`, `payments.export`, `products.export`, and `reports.export`. `report-sales-employees` accepts `companyId`, `employeeType` (`doctor`, `assistant`, `consultant`, `sales`), optional `employeeId`, `dateFrom`, and `dateTo`; `revenue-flat` and `deposit-flat` use `payments.export` with `search`, `companyId`, `dateFrom`, and `dateTo`.
+Export permissions are defined by `api/src/services/exports/exportRegistry.js`: `customers.export`, `appointments.export`, `services.export`, `payments.export`, `products.export`, and `reports.export`. `appointments` accepts `search`, `companyId`, `dateFrom`, `dateTo`, `state`, and `doctorId`; its search includes customer phone and its workbook date must prefer `appointments.date`/`time` before falling back to legacy `datetimeappointment`. `report-sales-employees` accepts `companyId`, `employeeType` (`doctor`, `assistant`, `consultant`, `sales`), optional `employeeId`, `dateFrom`, and `dateTo`; `revenue-flat` and `deposit-flat` use `payments.export` with `search`, `companyId`, `dateFrom`, and `dateTo`. `revenue-flat` includes payment note and resolves customer source from sale order first, then customer fallback; `deposit-flat` includes deposit note and splits cash vs bank-transfer amounts from explicit split columns or payment method fallback.
 
 ## Dashboard Reports (`/api/DashboardReports`)
 
@@ -406,7 +461,7 @@ All existing dental route shapes required by TMV/NK3 Cosmetic mode are mirrored 
 See cosmetic-clients.yaml, business-unit.yaml for details.
 
 ## CTV Dashboard (v2)
-- GET /api/ctv/commission-summary — CTV only (is_ctv + ctv.commission.view.self); aggregates earnings from both DBs; returns { totals: { pending, paid, dental, cosmetic }, rows: [...] with lob tags }
+- GET /api/ctv/commission-summary — CTV only (is_ctv + ctv.commission.view.self); aggregates earnings from both DBs; returns { totals: { pending, paid, dental, cosmetic }, rows: [...] with lob tags }. Display names may be null; frontend owns localized unknown-client fallbacks.
 - GET /api/ctv/referrals — self referred clients across LOBs + earning status
 - GET /api/ctv/me — profile
 - All CTV routes return 403 for non-is_ctv; admin routes 403 for CTV

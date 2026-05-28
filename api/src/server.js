@@ -5,11 +5,9 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const { requireAuth, requireLobScope, requirePermission } = require('./middleware/auth');
+const { requireAuth } = require('./middleware/auth');
 const { enforceIpAccess } = require('./middleware/ipAccess');
 const { errorHandler } = require('./middleware/errorHandler');
-const { attachCosmeticDb } = require('./middleware/lob');
-const { runWithLob } = require('./db');
 
 if (!process.env.JWT_SECRET) {
   console.error('FATAL: JWT_SECRET not set');
@@ -41,7 +39,6 @@ const dashboardReportsRoutes = require('./routes/dashboardReports');
 const permissionsRoutes = require('./routes/permissions');
 const authRoutes = require('./routes/auth');
 const paymentsRoutes = require('./routes/payments');
-const ctvRoutes = require('./routes/ctv');
 // const servicesRoutes removed: dead route queries non-existent table
 const customerBalanceRoutes = require('./routes/customerBalance');
 const monthlyPlansRoutes = require('./routes/monthlyPlans');
@@ -55,12 +52,15 @@ const faceRecognitionRoutes = require('./routes/faceRecognition');
 const feedbackRoutes = require('./routes/feedback');
 const reportsRoutes = require('./routes/reports');
 const telemetryRoutes = require('./routes/telemetry');
+const publicTelemetryErrorRoutes = require('./routes/publicTelemetryErrors');
 const ipAccessRoutes = require('./routes/ipAccess');
 const exportsRoutes = require('./routes/exports');
+const ctvRoutes = require('./routes/ctv');
 const {
   healthCheck: faceRecognitionHealth,
   getFaceRecognitionProvider,
 } = require('./services/faceRecognitionRuntime');
+const { query } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -114,15 +114,8 @@ const loginAccountFailureLimiter = rateLimit({
 
 const loginLimiters = [loginIpFailureLimiter, loginAccountFailureLimiter];
 app.use('/api/Auth/login', loginLimiters);
-// Express routes are case-insensitive by default, so this also covers /api/auth/login.
 // app.use('/api/Account/Login', loginLimiters);  // LEGACY
 // app.use('/api/account/login', loginLimiters);  // LEGACY
-
-const telemetryErrorLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: process.env.NODE_ENV === 'development' ? 300 : 60,
-  message: { error: 'Too many error reports, please try again later.' },
-});
 
 // Request logger
 app.use((req, _res, next) => {
@@ -135,82 +128,7 @@ app.use('/api', enforceIpAccess);
 
 // AutoDebugger: public error collection endpoint (before auth)
 // Frontend reports errors here; management endpoints stay behind auth
-const crypto = require('crypto');
-const { query } = require('./db');
-app.post('/api/telemetry/errors', telemetryErrorLimiter, async (req, res) => {
-  try {
-    const { error_type = 'Unknown', message = 'No message', stack = '', component_stack = '',
-            route = '', source_file = '', source_line = null,
-            api_endpoint = '', api_method = '', api_status = null, api_body = null,
-            user_agent = '', user_id = null, location_id = null, metadata = {} } = req.body;
-
-    // Fingerprint: error_type + normalized message + top stack frame
-    const normMsg = (message || '').replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, '<UUID>').replace(/\d{4}-\d{2}-\d{2}/g, '<DATE>').replace(/\d+/g, '<N>').slice(0, 200);
-    const topFrame = (stack || '').split('\n').slice(1).find(l => !l.includes('node_modules') && !l.includes('chunk-'))?.trim()?.slice(0, 200) || '';
-    const fingerprint = crypto.createHash('sha256').update(`${error_type}|${normMsg}|${topFrame}`).digest('hex').slice(0, 64);
-
-    const existing = await query('SELECT id, status FROM dbo.error_events WHERE fingerprint = $1', [fingerprint]);
-    if (existing.length > 0) {
-      const row = existing[0];
-      const isResolved = ['fixed', 'deployed', 'won_t_fix'].includes(row.status);
-      await query(
-        `UPDATE dbo.error_events SET last_seen_at = NOW(), occurrence_count = occurrence_count + 1,
-         ${isResolved ? "status = 'new'," : ''}
-         stack = COALESCE(NULLIF($1, ''), stack),
-         component_stack = COALESCE(NULLIF($2, ''), component_stack),
-         route = COALESCE(NULLIF($3, ''), route),
-         source_file = COALESCE(NULLIF($4, ''), source_file),
-         source_line = COALESCE($5, source_line)
-         WHERE fingerprint = $6`,
-        [stack || '', component_stack || '', route || '', source_file || '', source_line, fingerprint]
-      );
-      return res.json({ ok: true, fingerprint, is_duplicate: true });
-    }
-
-    const result = await query(
-      `INSERT INTO dbo.error_events (fingerprint, error_type, message, stack, component_stack, route, source_file, source_line, api_endpoint, api_method, api_status, api_body, user_agent, ip_address, user_id, location_id, metadata)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING id`,
-      [fingerprint, error_type, message, stack || '', component_stack || '', route || '',
-       source_file || '', source_line, api_endpoint || '', api_method || '', api_status,
-       api_body ? JSON.stringify(api_body) : null,
-       user_agent || '', req.ip || '', user_id || null, location_id || null, JSON.stringify(metadata || {})]
-    );
-    console.log(`[Telemetry] New error: ${error_type} - ${message.slice(0, 80)} (${fingerprint.slice(0, 12)})`);
-
-    // Auto-create feedback thread so it appears on the Feedback page
-    const errorEventId = result[0].id;
-    try {
-      const fbResult = await query(
-        `INSERT INTO feedback_threads (source, error_event_id, page_path, status, created_at, updated_at)
-         VALUES ('auto', $1, $2, 'pending', NOW(), NOW()) RETURNING id`,
-        [errorEventId, route || '/']
-      );
-      const fbThreadId = fbResult[0].id;
-      // First message: error details
-      const fbContent = [
-        `🚨 **Auto-detected ${error_type} Error**`,
-        `**Message:** ${message}`,
-        stack ? `**Stack:** \`\`\`\n${stack.slice(0, 500)}\n\`\`\`` : '',
-        source_file ? `**Source:** ${source_file}${source_line ? `:${source_line}` : ''}` : '',
-        api_endpoint ? `**API:** ${api_method || 'GET'} ${api_endpoint}` : '',
-        `**Occurrences:** 1`,
-      ].filter(Boolean).join('\n');
-      await query(
-        `INSERT INTO feedback_messages (thread_id, content, created_at)
-         VALUES ($1, $2, NOW())`,
-        [fbThreadId, fbContent]
-      );
-    } catch (fbErr) {
-      // Don't fail error collection if feedback creation fails
-      console.error('[Telemetry] Feedback thread creation failed:', fbErr.message);
-    }
-
-    return res.json({ ok: true, id: errorEventId, fingerprint, is_duplicate: false });
-  } catch (err) {
-    console.error('[Telemetry] Error insert failed:', err.message);
-    return res.json({ ok: true }); // Fire-and-forget: never block the client
-  }
-});
+app.use('/api/telemetry/errors', publicTelemetryErrorRoutes);
 
 const PUBLIC_PATHS = new Set([
   '/api/Auth/login',
@@ -247,7 +165,6 @@ app.use('/api/AccountJournals', journalsRoutes);
 app.use('/api/StockPickings', stockPickingsRoutes);
 app.use('/api/CrmTasks', crmTasksRoutes);
 app.use('/api/Commissions', commissionsRoutes);
-app.use('/api/Ctv', require('./routes/ctv')); // v2 CTV dashboard (is_ctv gate inside)
 app.use('/api/HrPayslips', hrPayslipsRoutes);
 app.use('/api/Employees', employeesRoutes);
 app.use('/api/Products', productsRoutes);
@@ -257,103 +174,6 @@ app.use('/api/DashboardReports', dashboardReportsRoutes);
 app.use('/api/Permissions', permissionsRoutes);
 app.use('/api/Auth', authRoutes);
 app.use('/api/Payments', paymentsRoutes);
-
-// Cosmetic LOB v2: dedicated /api/me/lob-scope (lightweight, re-queries canonical partners row)
-// Returns current user's { lob_scope, is_ctv, available } for frontend BusinessUnitContext + CTV gating.
-// Protected by the global /api requireAuth (above).
-const { query: dbQuery } = require('./db');
-const { resolveEffectivePermissions, isAdminPermissionState } = require('./services/permissionService');
-
-app.get('/api/me/lob-scope', async (req, res) => {
-  try {
-    const employeeId = req.user?.employeeId;
-    if (!employeeId) return res.status(401).json({ error: 'No token' });
-    const rows = await dbQuery(
-      `SELECT lob_scope AS "lobScope", is_ctv AS "isCtv"
-       FROM partners
-       WHERE id = $1 AND employee = true AND isdeleted = false`,
-      [employeeId]
-    );
-    const r = rows?.[0];
-    if (!r) return res.status(404).json({ error: 'User not found' });
-    const rawLobScope = Array.isArray(r.lobScope) ? r.lobScope.filter((s) => s === 'dental' || s === 'cosmetic') : [];
-    const permissions = await resolveEffectivePermissions(employeeId);
-    const lobScope = isAdminPermissionState(permissions) ? rawLobScope : rawLobScope.slice(0, 1);
-    return res.json({ lob_scope: lobScope, is_ctv: !!r.isCtv, available: lobScope });
-  } catch (err) {
-    console.error('/me/lob-scope error:', err);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Cross-LOB badge probe (D6 / ui_surfaces in cosmetic.yaml + permission-registry.yaml)
-// GET /api/cross-lob-probe?phone=...&lob=dental|cosmetic
-// Soft phone match (normalized last 9 digits) against the *other* LOB's partners table.
-// Gated by lob.crossview permission only (no LOB-scope gate — cross by design).
-// Returns {matched, otherLob, otherId?, otherName?, matchedPhone?} or 403 if no perm.
-app.get('/api/cross-lob-probe', requirePermission('lob.crossview'), async (req, res) => {
-  const { phone, lob } = req.query || {};
-  if (!phone || !lob || (lob !== 'dental' && lob !== 'cosmetic')) {
-    return res.status(400).json({ error: { code: 'BAD_REQUEST', message: 'phone and lob=dental|cosmetic required' } });
-  }
-
-  const currentLob = lob;
-  const otherLob = currentLob === 'dental' ? 'cosmetic' : 'dental';
-
-  // Soft phone key: last 9 significant digits (handles 090/8490/84 variants common in VN data)
-  function getPhoneKey(p) {
-    if (!p) return '';
-    const digits = String(p).replace(/\D/g, '');
-    let k = digits.replace(/^84/, '').replace(/^0/, '');
-    return k.slice(-9);
-  }
-
-  const key = getPhoneKey(phone);
-  if (!key) {
-    return res.json({ matched: false, otherLob });
-  }
-
-  try {
-    const { getDb } = require('./db');
-    const otherPool = getDb(otherLob);
-    const rows = await otherPool.query(
-      `SELECT id, name, phone FROM partners WHERE customer = true AND phone IS NOT NULL AND phone <> '' LIMIT 300`,
-      []
-    );
-
-    for (const r of (rows.rows || rows)) {
-      if (getPhoneKey(r.phone) === key) {
-        return res.json({
-          matched: true,
-          otherLob,
-          otherId: r.id,
-          otherName: r.name,
-          matchedPhone: r.phone,
-        });
-      }
-    }
-    return res.json({ matched: false, otherLob });
-  } catch (err) {
-    console.error('cross-lob-probe error:', err);
-    return res.status(500).json({ error: { code: 'PROBE_FAILED' } });
-  }
-});
-
-// Cosmetic LOB v2: CTV dashboard mount (gated by flag + permission).
-// /api/cosmetic/* mirrors are owned solely by the unified cosmeticRouter below
-// ("Cosmetic LOB v2: /api/cosmetic/* mirrors (Phase 1)"). Individual
-// /api/cosmetic/X mounts were removed here: they shadowed the unified router
-// and the two blocks could silently drift apart.
-// CTV has NO requireLobScope/attachCosmeticDb on purpose: ctvRoutes aggregates
-// across BOTH dental and cosmetic DBs, so it must not be pinned to one LOB pool.
-const COSMETIC_ENABLED = process.env.COSMETIC_LOB_ENABLED === 'true';
-if (COSMETIC_ENABLED) {
-  app.use('/api/ctv', requirePermission('ctv.dashboard.view'), ctvRoutes);
-  console.log('[cosmetic] CTV dashboard mounted (COSMETIC_LOB_ENABLED=true)');
-} else {
-  app.use('/api/ctv', (req, res) => res.status(503).json({ error: { code: 'S_COSMETIC_DISABLED', message: 'Cosmetic LOB disabled (set COSMETIC_LOB_ENABLED=true for verification)' } }));
-}
-
 // DEAD ROUTE: services.js queries non-existent public.services table
 // app.use('/api/Services', servicesRoutes);
 app.use('/api/CustomerBalance', customerBalanceRoutes);
@@ -439,6 +259,7 @@ if (COSMETIC_FLAG) {
     });
   });
 }
+app.use('/api/ctv', ctvRoutes);
 
 app.get('/api/health', async (_req, res) => {
   const checks = { db: false, faceService: false };

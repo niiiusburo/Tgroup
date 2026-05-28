@@ -4,6 +4,10 @@
 > 
 > **Rule:** If you change any contract in this file, you MUST update the version, the consumer code, the tests, and append a CHANGELOG entry in the same commit.
 
+**Cosmetic LOB v2 Sync (2026-05-19):** Added/aligned: `Lob` ('dental'|'cosmetic'), `BusinessUnitScope`, `EarningsRow` (append-only with recipient_partner_id on partners, source enum, negative reversals), `Payout`, `CtvCommissionSummary` (cross-DB aggregate), `ConsultationCard`, `getDb(lob)` / `getQuery(req)` factory contracts, `LobScope` middleware types. partners (both DBs) is identity for all LOB/CTV/earnings. See product-map/earnings-commissions.yaml + db/index.js + commissionEngine. Per v2 §269 + migration 047 reality.
+
+
+
 ## Contract Versioning
 
 | Version | Date | Scope |
@@ -12,8 +16,10 @@
 | v1.0.1 | 2026-05-17 | Contract documentation aligned to live payment method enum, report API, and operational export registry. |
 | v1.0.2 | 2026-05-18 | Reconfirmed `@tgroup/contracts` payment method enum and generated contract artifacts are limited to live methods only. |
 | v1.0.3 | 2026-05-19 | Feedback attachment persistence contract clarified: file-only messages are valid, DB/file writes are transactional, and destructive file cleanup happens only after DB commit. |
-| v1.0.4 | 2026-05-22 | Cosmetic LOB mirror routing and NK3 revenue recognition contract clarified for customer/employee/appointment/payment/balance/report flows. |
+| v1.0.4 | 2026-05-22 | Cosmetic LOB mirror routing and NK3 revenue recognition contract clarified for customer/employee/appointment/payment/balance/report flows. Employee and company frontend clients accept `lob?: 'dental' | 'cosmetic'`. |
 | v1.0.5 | 2026-05-23 | TMV/NK3 API hotfix contract clarified: cosmetic CustomerBalance mirror, CTV-only self-dashboard reads, and normalized service catalog writes. |
+| v1.0.6 | 2026-05-25 | CTV self portal adds client-journey tracking and structured booking-claim error compatibility fields. |
+| v1.0.7 | 2026-05-28 | CTV portal payloads allow nullable display names so frontend i18n owns localized unknown-client/service fallbacks. |
 
 ---
 
@@ -40,7 +46,7 @@ CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referr
   token: string;           // JWT signed with JWT_SECRET
   user: {
     id: string;            // partners.id (UUID)
-    name: string;
+    name: string | null;
     email: string;
 	    companyId: string;     // primary branch
 	    companyName: string;
@@ -60,6 +66,50 @@ CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referr
 #### GET /api/Auth/me
 **Headers:** `Authorization: Bearer <token>`
 **Response 200:** Same shape as login `user` + `permissions`.
+
+### 1.1A CTV Self Portal
+
+All `/api/ctv/*` routes require `Authorization: Bearer <token>` and are self-scoped to `partners.id` from the authenticated CTV user. CTV aggregation is intentionally composed in API code with `getDb('dental')` and `getDb('cosmetic')`; no cross-database SQL join is allowed.
+
+#### GET /api/ctv/client-journeys
+**Response 200:**
+```ts
+{
+  clients: Array<{
+    id: string;
+    name: string;
+    phone?: string;
+    lobs: Array<'dental' | 'cosmetic'>;
+    referred_at: string;
+    referred_via?: string;
+    stage: 'referred' | 'visited' | 'serviced' | 'paid';
+    stage_progress: 1 | 2 | 3 | 4;
+    visit?: { date: string; time?: string; doctor?: string; location?: string };
+    service?: { name: string | null; amount: number; date?: string; next_appointment?: string };
+    payment?: { amount: number; date: string; method?: string; commission_earned: number; commission_rate?: string };
+    total_earned: number;
+    estimated_commission?: number;
+  }>;
+}
+```
+
+#### POST /api/ctv/bookings
+**Request:** `clientId?`, `name?`, `phone`, `lob`, `date`, optional `time`, `companyId`, `productId`.
+**Response 201:** `{ clientId: string; appointmentId: string }`.
+**Error 400:** active claims owned by another CTV return:
+```ts
+{
+  error: {
+    code: 'B_CLIENT_CLAIMED';
+    message: string;
+    ownerName?: string;
+    owner_name?: string;
+    expiresAt?: string;
+    expires_at?: string;
+  };
+}
+```
+Both camelCase and snake_case fields are part of the compatibility contract for the refreshed CTV booking sheet.
 
 ---
 
@@ -121,7 +171,27 @@ PaginatedResponse<{
 
 #### PUT /api/Appointments/:id
 **Body:** `AppointmentUpdateSchema` (partial omit `id`)
-**Response 200:** Updated row.
+```ts
+{
+  date?: string;
+  time?: string | null;
+  doctorId?: string | null;
+  companyId?: string;
+  note?: string | null;
+  state?: AppointmentStatus | null;
+  timeExpected?: number | null;
+  color?: string | null;
+  productId?: string | null;
+  assistantId?: string | null;
+  dentalAideId?: string | null;
+}
+```
+**Response 200:** Updated row, including refreshed `companyid/companyname` when location changes.
+
+**Validation (handler-level, in addition to Zod):**
+- `companyId` (when present) must be a UUID; otherwise `400 INVALID_COMPANY_ID`.
+- `companyId` (when present) must reference an existing `companies` row; otherwise `404 COMPANY_NOT_FOUND`.
+- Persisted column: `appointments.companyid`. Test coverage: `api/src/routes/appointments/__tests__/mutationHandlers.test.js`.
 
 Cosmetic mirror: `POST /api/cosmetic/Appointments` and `PUT /api/cosmetic/Appointments/:id` use the same request/response body and must validate `partnerId` / `companyId` against the cosmetic database.
 
@@ -168,6 +238,23 @@ Cosmetic mirror: `POST /api/cosmetic/Appointments` and `PUT /api/cosmetic/Appoin
 **Effect:** Physical row removal. Requires `customers.hard_delete`.
 
 Cosmetic mirror: `GET/POST/PUT/PATCH/DELETE /api/cosmetic/Partners...` use the same contract and must validate `companyId` against cosmetic `dbo.companies`. Customer create/update clients must pass `lob: 'cosmetic'` when Cosmetic is selected.
+
+#### Employee LOB client contract
+
+The employee UI is a partners-backed workflow, but LOB routing is owned by the frontend API client. Frontend callers must pass the active `BusinessUnitContext.currentLOB` into employee and branch calls whenever the surface is LOB-aware.
+
+```ts
+type Lob = 'dental' | 'cosmetic';
+
+fetchCompanies({ offset?: number; limit?: number; lob?: Lob })
+createEmployee(data: CreateEmployeeData, lob?: Lob)
+updateEmployee(id: string, data: Partial<CreateEmployeeData>, lob?: Lob)
+```
+
+Wire behavior:
+- `lob: 'cosmetic'` maps `fetchCompanies` to `GET /api/cosmetic/Companies` and employee create/update to `/api/cosmetic/Employees`.
+- `lob: 'dental'` or omitted `lob` keeps legacy dental routes (`/api/Companies`, `/api/Employees`).
+- `EmployeeForm` and `EmployeeProfile` must use the active LOB so Cosmetic branch dropdowns and profile branch-name lookups never resolve through dental companies.
 
 ---
 
@@ -457,7 +544,7 @@ Supported registry types:
 |---|---|---|
 | `service-catalog` | `products.export` | `search`, `companyId`, `categId`, `active` |
 | `customers` | `customers.export` | `search`, `companyId`, `status` |
-| `appointments` | `appointments.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `state`, `doctorId` |
+| `appointments` | `appointments.export` | `search` (appointment/customer fields including phone), `companyId`, `dateFrom`, `dateTo`, `state`, `doctorId`; workbook date prefers `appointments.date` + `time` before legacy `datetimeappointment` |
 | `services` | `services.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `state` |
 | `payments` | `payments.export` | `search`, `companyId`, `dateFrom`, `dateTo`, `status` |
 | `report-sales-employees` | `reports.export` | `companyId`, `employeeType`, `employeeId`, `dateFrom`, `dateTo` |

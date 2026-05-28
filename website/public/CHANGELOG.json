@@ -1,5 +1,223 @@
 [
   {
+    "version": "0.32.51",
+    "date": "2026-05-28",
+    "commit": "pending",
+    "highlights": "NK3 CTV portal bottom navigation now has one Tracking/Theo dõi tab instead of duplicate tracking/referrals destinations.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "CTV Portal /ctv: removed the redundant Referrals bottom-tab entry from the dashboard shell.",
+          "Dashboard load now fetches only the visible bottom-tab data: commission summary, client journeys, and CTV profile."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added a focused CTV dashboard regression assertion that the bottom nav has exactly one Tracking/Theo dõi label and no Referrals/Giới thiệu tab."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.50",
+    "date": "2026-05-28",
+    "commit": "pending",
+    "highlights": "NK3 CTV portal now has an in-app EN/VI language toggle and shared locale formatting for CTV dates, money, LOB labels, and unknown-client/service fallbacks.",
+    "sections": [
+      {
+        "title": "Changed",
+        "items": [
+          "CTV Portal /ctv: header now includes the language switcher, and the modular CTV tabs/cards use shared CTV locale helpers for display formatting.",
+          "Tracking search is accent-insensitive for Vietnamese referred-client and service names.",
+          "CTV API display fallbacks now return null for missing names so the frontend can render localized fallback labels."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added focused Vitest coverage for the CTV language toggle and accent-insensitive Tracking search."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.46",
+    "date": "2026-05-24",
+    "commit": "pending",
+    "highlights": "Admin can create payout cycles with receipt photo upload; CTV portal Paid tab shows real cycles with thumbnails.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Admin Commission → Payouts: select pending earnings, set a cycle label, attach a receipt photo, and create a payout batch. Past cycles show a thumbnail; missing receipts can be attached later.",
+          "CTV Portal → Comm → Paid: now displays real payout cycles with cycle label, amount, and receipt thumbnail.",
+          "Migration 051_add_payout_receipt.sql adds receipt_url and receipt_uploaded_at to dbo.payouts (both DBs)."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Admin Earnings and Payouts routes now correctly allow admins via isAdminPermissionState (previously required explicit commissions.view.team / commissions.payout.run keys)."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "7 jest cases for payouts route: permission gate (admin + explicit perm), POST happy path with receipt_url, B_EARNINGS_NOT_PAYABLE conflict, PATCH receipt attachment, 404 on missing payout."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.41",
+    "date": "2026-05-23",
+    "commit": "pending",
+    "highlights": "CTVs can book a referred client straight from the portal — the client is linked to them, gets a Referral Start card, and the booking is blocked if the client already belongs to another CTV. The customer profile now shows who referred them.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "CTV Portal '+ Client': now creates a booking and claims the client for that CTV (6-month exclusive window). If the client is already active with another CTV, the booking is blocked with a clear message.",
+          "Customer profile shows 'Người giới thiệu (CTV)' with active/expired status.",
+          "Commission is credited to the referring CTV only while their claim is active as of the payment date."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.40",
+    "date": "2026-05-22",
+    "commit": "pending",
+    "highlights": "Fixed NK3/CTV Cosmetic LOB employee forms so branch dropdowns and employee saves stay on cosmetic data instead of dental locations.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Employees → Add/Edit Employee now loads branch choices from the active LOB. In Cosmetic mode, the location dropdown uses /api/cosmetic/Companies and shows cosmetic branches such as Thẩm mỹ Hà Nội / Thẩm mỹ Hồ Chí Minh instead of Tấm Dentist dental branches.",
+          "Employee create/update now sends the active LOB through the API client, so Cosmetic employee saves go through /api/cosmetic/Employees."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added Vitest regression coverage for EmployeeForm LOB routing and employees API cosmetic create/update URLs."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.39",
+    "date": "2026-05-22",
+    "commit": "pending",
+    "highlights": "Fixed the commission level % inputs so you can type decimals (e.g. 14.5) and clear fields normally, plus fixed CTV portal login on ctv.2checkin.com.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Commission → Config: the Global Default Referral % and per-level Share % fields now accept decimals and let you clear/retype freely; values are clamped to 0–100 when you leave the field.",
+          "CTV portal login on https://ctv.2checkin.com no longer returns an internal error (the domain was missing from the API CORS allowlist)."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.38",
+    "date": "2026-05-22",
+    "commit": "pending",
+    "highlights": "CTV portal can now sign up new clients and recruit CTVs from the header, and admins get a Commission page to configure the MLM level split and manage CTVs.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "CTV Portal header: '+ Client' (refer a customer) and '+ CTV' (recruit a partner) quick actions, each opening a mobile bottom-sheet form. New CTVs are active immediately and can log in.",
+          "Admin Commission page: 'Config' tab to edit the 5-level MLM commission split (per-level on/off + %, validated to never exceed 100%) and the global default referral %, plus a 'CTVs' tab to list, add, and suspend CTVs.",
+          "Commission engine now splits a service's referral commission up the CTV upline chain by the configured level shares; unallocated share stays with the clinic."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "9 commission-engine unit tests (multi-level split, salestaff single-row, refund reversal); full API suite, frontend typecheck, dependency-cruiser, and production build all green."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.37",
+    "date": "2026-05-21",
+    "commit": "pending",
+    "highlights": "Friendly feedback hint shows on every login, and the Xu hướng dòng tiền chart now shows dates vertically so they're readable.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "FeedbackWidget shows a small 'Có vấn đề? Nhấn vào đây để báo cho chúng tôi' (\"Any problem? Tap here to report it\") bubble next to the speech-bubble icon on every fresh login. Dismiss with the × button — hint reappears after each logout/login cycle (session-scoped).",
+          "Vietnamese and English copy provided via i18n (feedback.json: loginHintTitle / loginHintBody / loginHintDismiss)."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Xu hướng dòng tiền (cash flow trend) chart on /reports/revenue no longer truncates dates to '4...' '2...' — labels render vertically with the full date readable.",
+          "BarChart component now auto-rotates labels to vertical when there are >= 8 bars, fixing the same truncation pattern across weekly trends, monthly summaries, and any other dense chart automatically.",
+          "BarChart accepts a new `labelOrientation` prop ('auto' | 'horizontal' | 'vertical') for explicit control where the auto-detection isn't sufficient."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Verified locally via Playwright: VI hint copy renders with full text, dismiss X button visible, cash flow chart labels confirmed to use CSS rotate(-90deg) via computed style and visual screenshot."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.36",
+    "date": "2026-05-21",
+    "highlights": "New feedback and auto-detected website errors can now alert the Lark T-Group chat through a backend-only custom bot webhook.",
+    "sections": [
+      {
+        "title": "Feedback Alerts",
+        "items": [
+          "POST /api/Feedback queues a non-blocking Lark alert after the feedback thread and first message commit.",
+          "POST /api/telemetry/errors queues the same alert when a first-seen frontend error creates an auto-detected feedback thread.",
+          "Alerts include thread/page context, a bounded preview, attachment count, and the /feedback inbox link; attachment bytes and webhook secrets stay out of the browser."
+        ]
+      },
+      {
+        "title": "Configuration",
+        "items": [
+          "Added LARK_FEEDBACK_WEBHOOK_URL, optional LARK_FEEDBACK_WEBHOOK_SECRET, and TGROUP_PUBLIC_URL env documentation.",
+          "The notifier accepts only HTTPS Lark/Feishu custom bot webhook hosts and keeps feedback submission successful if Lark is unavailable."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.35",
+    "date": "2026-05-21",
+    "commit": "fb9f3884",
+    "highlights": "Appointment edits now persist the chosen clinic location (companyid) end-to-end.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "PUT /api/Appointments/:id now reads companyId (and companyid alias) from the request body, validates it as a UUID, checks the foreign key against companies, and writes it to appointments.companyid so the edited cơ sở value survives the save.",
+          "Frontend appointmentForm.mapper now sends locationId as companyid (plus companyname) inside the update payload."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added mutationHandlers.test.js coverage for the companyId path: valid UUID writes, missing-FK 404, malformed UUID 400.",
+          "Added appointmentForm.mapper.test.ts case asserting locationId becomes companyid and the payload passes AppointmentUpdateSchema."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.34",
     "date": "2026-05-19",
     "highlights": "Feedback proof images now stay linked to their uploaded files, including file-only replies and admin resolution screenshots.",

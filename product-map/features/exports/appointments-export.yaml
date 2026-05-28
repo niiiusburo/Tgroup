@@ -1,0 +1,136 @@
+feature_id: appointments-export
+display_name_vi: Báo cáo Lịch hẹn
+display_name_en: Appointments Schedule Excel Export
+status: live
+
+ui_entry_points:
+  - page: /appointments/calendar
+    component: website/src/pages/appointments/AppointmentsCalendar.tsx
+    user_action: "Click 'Export' button on calendar toolbar"
+
+api_routes:
+  - method: POST
+    path: /api/Exports/appointments/preview
+    handler: api/src/routes/exports.js#/:type/preview
+  - method: POST
+    path: /api/Exports/appointments/download
+    handler: api/src/routes/exports.js#/:type/download
+
+permission_required: appointments.export
+
+code_refs:
+  registry_entry: api/src/services/exports/exportRegistry.js#appointments
+  column_definition: api/src/services/exports/builders/appointmentsExport.js#COLUMNS
+  sql_query: api/src/services/exports/builders/appointmentsExport.js#getRows
+  row_mapper: api/src/services/exports/builders/appointmentsExport.js#build
+  unit_tests: api/src/services/exports/__tests__/appointmentsExport.test.js
+
+columns:
+  - position: 1
+    key: id
+    header_vi: Mã lịch hẹn
+    style: text
+    width: 16
+    source: appointments.name OR id
+  - position: 2
+    key: datetime
+    header_vi: Ngày giờ hẹn
+    style: datetime
+    width: 18
+    source: appointments.date / appointments.time combined
+  - position: 3
+    key: customerCode
+    header_vi: Mã KH
+    style: text
+    width: 12
+    source: partners.ref
+  - position: 4
+    key: customerName
+    header_vi: Khách hàng
+    style: text
+    width: 24
+    source: partners.displayname OR name
+  - position: 5
+    key: customerPhone
+    header_vi: SĐT
+    style: text
+    width: 14
+    source: partners.phone
+  - position: 6
+    key: serviceName
+    header_vi: Dịch vụ
+    style: text
+    width: 24
+    source: products.name
+  - position: 7
+    key: doctorName
+    header_vi: Bác sĩ
+    style: text
+    width: 18
+    source: employees.name (doctor)
+  - position: 8
+    key: assistantName
+    header_vi: Phụ tá
+    style: text
+    width: 18
+    source: employees.name (assistant)
+  - position: 9
+    key: dentalAideName
+    header_vi: Trợ lý BS
+    style: text
+    width: 18
+    source: employees.name (dental aid)
+  - position: 10
+    key: companyName
+    header_vi: Chi nhánh
+    style: text
+    width: 20
+    source: companies.name
+  - position: 11
+    key: type
+    header_vi: Loại hẹn
+    style: text
+    width: 14
+    source: appointments.isrepeatcustomer (derived to 'Khám mới' or 'Tái khám')
+  - position: 12
+    key: status
+    header_vi: Trạng thái
+    style: text
+    width: 14
+    source: appointments.state (mapped via STATUS_LABELS)
+  - position: 13
+    key: content
+    header_vi: Nội dung
+    style: text
+    width: 28
+    source: appointments.reason
+  - position: 14
+    key: notes
+    header_vi: Ghi chú
+    style: text
+    width: 28
+    source: appointments.note
+
+filters_accepted:
+  - name: dateFrom
+    type: string
+    format: YYYY-MM-DD
+  - name: dateTo
+    type: string
+    format: YYYY-MM-DD
+  - name: companyId
+    type: uuid or 'all'
+  - name: search
+    type: string
+  - name: state
+    type: string
+  - name: doctorId
+    type: uuid
+
+verified_against_live: "2026-05-20 — verified from appointmentsExport.js COLUMNS array"
+
+notes: |
+  This export combines date and time fields into a single datetime column
+  following Vietnam local time (non-UTC). The status field is mapped via
+  STATUS_LABELS lookup table (e.g. 'scheduled' → 'Đã lên lịch'). The 'type'
+  field is derived from isrepeatcustomer boolean.

@@ -1,0 +1,123 @@
+feature_id: customers-export
+display_name_vi: Báo cáo Khách hàng
+display_name_en: Customers List Excel Export
+status: live
+
+ui_entry_points:
+  - page: /customers
+    component: website/src/pages/customers/CustomersPage.tsx
+    user_action: "Click 'Xuất dữ liệu' button in customers toolbar"
+
+api_routes:
+  - method: POST
+    path: /api/Exports/customers/preview
+    handler: api/src/routes/exports.js#/:type/preview
+  - method: POST
+    path: /api/Exports/customers/download
+    handler: api/src/routes/exports.js#/:type/download
+
+permission_required: customers.export
+
+code_refs:
+  registry_entry: api/src/services/exports/exportRegistry.js#customers
+  column_definition: api/src/services/exports/builders/customersExport.js#COLUMNS
+  sql_query: api/src/services/exports/builders/customersExport.js#getRows
+  row_mapper: api/src/services/exports/builders/customersExport.js#build
+  unit_tests: api/src/services/exports/__tests__/customersExport.test.js
+
+columns:
+  - position: 1
+    key: code
+    header_vi: Mã KH
+    style: text
+    width: 14
+    source: partners.ref
+  - position: 2
+    key: displayname
+    header_vi: Tên khách hàng
+    style: text
+    width: 28
+    source: partners.displayname
+  - position: 3
+    key: phone
+    header_vi: SĐT
+    style: text
+    width: 14
+    source: partners.phone
+  - position: 4
+    key: gender
+    header_vi: Giới tính
+    style: text
+    width: 10
+    source: partners.gender (formatted to Nam/Nữ)
+  - position: 5
+    key: birthday
+    header_vi: Ngày sinh
+    style: date
+    width: 14
+    source: partners.birthyear/birthmonth/birthday combined
+  - position: 6
+    key: sourcename
+    header_vi: Nguồn
+    style: text
+    width: 18
+    source: customersources.name
+  - position: 7
+    key: salestaffname
+    header_vi: Sale
+    style: text
+    width: 18
+    source: partners.name (via salestaffid)
+  - position: 8
+    key: cskhname
+    header_vi: CSKH
+    style: text
+    width: 18
+    source: partners.name (via cskhid)
+  - position: 9
+    key: companyname
+    header_vi: Chi nhánh
+    style: text
+    width: 22
+    source: companies.name
+  - position: 10
+    key: address
+    header_vi: Địa chỉ
+    style: text
+    width: 36
+    source: partners.street/cityname/districtname/wardname concatenated
+  - position: 11
+    key: comment
+    header_vi: Ghi chú
+    style: text
+    width: 32
+    source: partners.comment
+  - position: 12
+    key: datecreated
+    header_vi: Ngày tạo
+    style: datetime
+    width: 14
+    source: partners.datecreated
+  - position: 13
+    key: status
+    header_vi: Trạng thái
+    style: text
+    width: 12
+    source: partners.active (mapped to active/inactive)
+
+filters_accepted:
+  - name: search
+    type: string
+  - name: status
+    type: string (active | inactive | all)
+  - name: companyId
+    type: uuid or 'all'
+
+verified_against_live: "2026-05-20 — verified from customersExport.js COLUMNS array"
+
+notes: |
+  Customer filter includes only those with customer = true AND isdeleted = false.
+  Birthday field combines three separate columns (birthyear, birthmonth, birthday)
+  into a single date. Address is constructed from street/cityname/districtname/wardname.
+  Gender is normalized to 'Nam' or 'Nữ' for display. Status filter can be 'active',
+  'inactive', or omitted for all.

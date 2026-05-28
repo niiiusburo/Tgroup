@@ -434,27 +434,25 @@ export function Layout() {
           </div>
 
           <div className="flex min-w-0 items-center justify-end gap-2 md:gap-3 lg:gap-4">
-            {/* LOB Toggle (BusinessUnit) — Admin-only, immediately left of location filter per spec. */}
+            {/* LOB Toggle (BusinessUnit) — Admin-only, immediately left of location filter per spec.
+                Visible on every breakpoint so iPhone admins can switch LOB. */}
             {isMultiLOBUser && (
-              <div className="hidden sm:block">
-                <FilterByBusinessUnit
-                  current={currentLOB}
-                  available={availableLOBs}
-                  onChange={setCurrentLOB}
-                />
-              </div>
+              <FilterByBusinessUnit
+                current={currentLOB}
+                available={availableLOBs}
+                onChange={setCurrentLOB}
+              />
             )}
 
-            {/* Location Filter — hidden when user is locked to a single location */}
-            {!isSingleLocation &&
-            <div className="hidden sm:block">
-                <FilterByLocation
+            {/* Location Filter — hidden when user is locked to a single location.
+                Visible on every breakpoint so iPhone users can switch location. */}
+            {!isSingleLocation && (
+              <FilterByLocation
                 locations={locationsForFilter}
                 selectedId={selectedLocationId}
-                onChange={setSelectedLocationId} />
-
-              </div>
-            }
+                onChange={setSelectedLocationId}
+              />
+            )}
 
             {/* Quick Face ID — opens FaceCaptureModal, navigates to matched customer */}
             <GlobalFaceIdButton />

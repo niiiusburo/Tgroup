@@ -25,6 +25,7 @@ import { X, Loader2, UserPlus, User, Phone, Mail, MapPin, CalendarDays, CheckCir
 import { DatePicker } from '@/components/ui/DatePicker';
 import { LocationSelector } from '@/components/shared/LocationSelector';
 import { createEmployee, updateEmployee, fetchCompanies, fetchPermissionGroups, type ApiEmployee, type CreateEmployeeData, type PermissionGroup } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { ALL_ROLES, ROLE_LABELS, ROLE_TO_DB_FLAGS, inferRoleFromFlags, type EmployeeRole } from '@/data/mockEmployees';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
@@ -90,11 +91,11 @@ export function EmployeeForm({ employee, onClose, onSave }: EmployeeFormProps) {
   const [selectedTierId, setSelectedTierId] = useState<string>(employee?.tierId ?? '');
 
   useEffect(() => {
-    fetchCompanies({ lob: currentLOB }).then((res) => setLocations(res.items.map((l) => ({
+    fetchCompanies({ limit: 50, lob: currentLOB }).then((res) => setLocations(res.items.map((l) => ({
       id: l.id, name: l.name, address: '', phone: l.phone || '',
       status: (l.active ? 'active' : 'inactive') as 'active' | 'inactive', doctorCount: 0, patientCount: 0, appointmentCount: 0
     })))).catch((err) => console.error('Failed to fetch locations:', err));
-    fetchPermissionGroups(currentLOB).then((groups) => setTiers(groups)).catch((err) => console.error('Failed to fetch tiers:', err));
+    fetchPermissionGroups().then((groups) => setTiers(groups)).catch((err) => console.error('Failed to fetch tiers:', err));
   }, [currentLOB]);
 
   const handleSubmit = async (e: React.FormEvent) => {

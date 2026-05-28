@@ -1,0 +1,129 @@
+feature_id: report-sales-employees-export
+display_name_vi: Báo cáo doanh số nhân viên
+display_name_en: Employee Sales Report Excel Export
+status: live
+
+ui_entry_points:
+  - page: /reports/sales-employees
+    component: website/src/pages/reports/ReportsSalesEmployees.tsx
+    user_action: "Click 'Xuất dữ liệu' button in sales report toolbar"
+
+api_routes:
+  - method: POST
+    path: /api/Exports/report-sales-employees/preview
+    handler: api/src/routes/exports.js#/:type/preview
+  - method: POST
+    path: /api/Exports/report-sales-employees/download
+    handler: api/src/routes/exports.js#/:type/download
+
+permission_required: reports.export
+
+code_refs:
+  registry_entry: api/src/services/exports/exportRegistry.js#report-sales-employees
+  column_definition: api/src/services/exports/builders/reportSalesEmployeesExport.js#DATA_COLUMNS
+  sql_query: api/src/services/exports/builders/reportSalesEmployeesExport.js#getRows
+  row_mapper: api/src/services/exports/builders/reportSalesEmployeesExport.js#build
+  unit_tests: api/src/services/exports/__tests__/reportSalesEmployeesExport.test.js
+
+columns:
+  - position: 1
+    key: employee
+    header_vi: Nhân viên
+    style: text
+    width: 20
+    source: hremployee.name
+  - position: 2
+    key: employeeTotal
+    header_vi: Doanh thu
+    style: vnd
+    width: 14
+    source: SUM(payments.amount) grouped by employee
+  - position: 3
+    key: paymentDate
+    header_vi: Ngày thanh toán
+    style: date
+    width: 14
+    source: payments.payment_date OR created_at
+  - position: 4
+    key: paymentReference
+    header_vi: Mã phiếu thu
+    style: text
+    width: 16
+    source: payments.reference_code
+  - position: 5
+    key: saleOrderCode
+    header_vi: Mã phiếu khám
+    style: text
+    width: 16
+    source: saleorder.name
+  - position: 6
+    key: saleOrderName
+    header_vi: Số phiếu điều trị
+    style: text
+    width: 28
+    source: saleorderline.name
+  - position: 7
+    key: customerName
+    header_vi: Khách hàng
+    style: text
+    width: 24
+    source: partners.displayname
+  - position: 8
+    key: customerPhone
+    header_vi: Số điện thoại
+    style: text
+    width: 14
+    source: partners.phone
+  - position: 9
+    key: roleLabel
+    header_vi: Vai trò
+    style: text
+    width: 14
+    source: hremployee.job_title (mapped to role label)
+  - position: 10
+    key: productName
+    header_vi: Dịch vụ/Thuốc
+    style: text
+    width: 20
+    source: productproduct.name
+  - position: 11
+    key: paymentAmount
+    header_vi: Thanh toán
+    style: vnd
+    width: 14
+    source: payments.amount
+  - position: 12
+    key: companyName
+    header_vi: Chi nhánh
+    style: text
+    width: 20
+    source: companies.name
+  - position: 13
+    key: paymentMethod
+    header_vi: Phương thức
+    style: text
+    width: 14
+    source: payments.method
+
+filters_accepted:
+  - name: dateFrom
+    type: string
+    format: YYYY-MM-DD
+  - name: dateTo
+    type: string
+    format: YYYY-MM-DD
+  - name: companyId
+    type: uuid or 'all'
+  - name: employeeId
+    type: uuid
+  - name: search
+    type: string
+
+verified_against_live: "2026-05-20 — verified from reportSalesEmployeesExport.js DATA_COLUMNS array"
+
+notes: |
+  This report aggregates payment data by employee sales role. The employeeTotal
+  column is a rollup showing the sum of all payments for that employee across
+  the filtered period. Role label is derived from hremployee.job_title and mapped
+  to a readable label. Payment records are filtered by status = 'posted' only.
+  This report is commonly used for commission tracking and performance evaluation.

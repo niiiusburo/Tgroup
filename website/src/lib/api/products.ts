@@ -21,6 +21,7 @@ export interface ApiProduct {
   companyid: string | null;
   companyname: string | null;
   canorderlab: boolean;
+  commission_rate_percent: string | number | null;
   active: boolean;
   datecreated: string | null;
   lastupdated: string | null;
@@ -56,6 +57,7 @@ export function createProduct(data: {
   uomname?: string;
   companyid?: string;
   canorderlab?: boolean;
+  commission_rate_percent?: number;
 }, lob?: 'dental' | 'cosmetic') {
   return apiFetch<ApiProduct>('/Products', { method: 'POST', body: data, lob });
 }
@@ -68,6 +70,7 @@ export function updateProduct(id: string, data: Partial<{
   uomname: string;
   companyid: string;
   canorderlab: boolean;
+  commission_rate_percent: number;
   active: boolean;
 }>, lob?: 'dental' | 'cosmetic') {
   return apiFetch<ApiProduct>(`/Products/${id}`, { method: 'PUT', body: data, lob });

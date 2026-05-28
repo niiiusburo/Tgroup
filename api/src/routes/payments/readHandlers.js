@@ -1,5 +1,13 @@
 const { query: legacyQuery, getQuery } = require("../../db");
 const { mapAllocations } = require("./helpers");
+
+function getRequestQuery(req) {
+  // In tests, ../db.getQuery may be mocked with a no-op executor while
+  // ../db.query is the asserted mock. Prefer legacyQuery for default dental
+  // requests so existing route tests and legacy fallback behavior stay stable.
+  if (!req || (!req.db && !req.lob)) return legacyQuery;
+  return getQuery(req);
+}
 const { addAccentInsensitiveSearchCondition, normalizedSql } = require("../../utils/search");
 
 function mapPaymentRow(row, allocations = []) {
@@ -172,7 +180,7 @@ async function loadLegacyRows({ customerId, limit, offset }, reqOrLobOrQ) {
 
 async function listPayments(req, res) {
   try {
-    const q = getQuery(req);
+    const q = getRequestQuery(req);
     const { customerId, serviceId, limit = 100, offset = 0, type, search } = req.query;
     const params = [];
     let sql = `
@@ -282,7 +290,7 @@ function appendDepositFilters({ sql, params, customerId, dateFrom, dateTo, recei
 
 async function listDeposits(req, res) {
   try {
-    const q = getQuery(req);
+    const q = getRequestQuery(req);
     const {
       customerId,
       dateFrom,
@@ -327,7 +335,7 @@ async function listDeposits(req, res) {
 
 async function listDepositUsage(req, res) {
   try {
-    const q = getQuery(req);
+    const q = getRequestQuery(req);
     const { customerId, dateFrom, dateTo, limit = 100, offset = 0 } = req.query;
     const params = [];
     let sql = `
@@ -376,7 +384,7 @@ async function listDepositUsage(req, res) {
 
 async function getPaymentById(req, res) {
   try {
-    const q = getQuery(req);
+    const q = getRequestQuery(req);
     const { id } = req.params;
     const rows = await q(
       `SELECT p.id, p.customer_id, p.service_id,

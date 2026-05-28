@@ -18,7 +18,9 @@
     "description": "Mô tả",
     "serviceCode": "Mã dịch vụ",
     "uom": "Đơn vị tính",
-    "listPrice": "Giá niêm yết"
+    "listPrice": "Giá niêm yết",
+    "commissionRate": "Tỷ lệ hoa hồng (%)",
+    "commissionRateShort": "HH%"
   },
   "categories": {
     "all": "Tất cả danh mục",

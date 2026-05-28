@@ -5,21 +5,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { query } = require('../db');
 const { requireAuth } = require('../middleware/auth');
-const { resolveEffectivePermissions, isAdminPermissionState } = require('../services/permissionService');
+const { resolveEffectivePermissions } = require('../services/permissionService');
 
 const router = express.Router();
-
-function normalizeLobScope(scope) {
-  return Array.isArray(scope)
-    ? scope.filter((lob) => lob === 'dental' || lob === 'cosmetic')
-    : [];
-}
-
-function visibleLobScopeForUser(rawScope, permissions) {
-  const normalized = normalizeLobScope(rawScope);
-  if (isAdminPermissionState(permissions)) return normalized;
-  return normalized.slice(0, 1);
-}
 
 /**
  * POST /api/Auth/login
@@ -35,8 +23,7 @@ router.post('/login', async (req, res) => {
     }
 
     const rows = await query(
-      `SELECT p.id, p.name, p.email, p.password_hash, p.companyid AS "companyId", c.name AS "companyName",
-              p.lob_scope AS "lobScope", p.is_ctv AS "isCtv"
+      `SELECT p.id, p.name, p.email, p.password_hash, p.companyid AS "companyId", p.is_ctv, p.lob_scope, c.name AS "companyName"
        FROM partners p
        LEFT JOIN companies c ON c.id = p.companyid
        WHERE p.email = $1 AND p.employee = true AND p.isdeleted = false AND p.active = true`,
@@ -66,23 +53,16 @@ router.post('/login', async (req, res) => {
 
     const permissions = await resolveEffectivePermissions(employee.id);
 
-    const lobScope = visibleLobScopeForUser(employee.lobScope, permissions);
-    const isCtv = !!employee.isCtv;
-
     const tokenPayload = {
       employeeId: employee.id,
       name: employee.name,
       email: employee.email,
       companyId: employee.companyId,
-      lob_scope: lobScope,
-      is_ctv: isCtv,
+      isCtv: employee.is_ctv === true,
+      lobScope: employee.lob_scope,
     };
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '24h' });
-
-    // CTV redirect decision lives on backend (per task): non-CTV admins/staff use normal flow;
-    // CTV users should be sent to /ctv dashboard and never reach admin UI.
-    const redirectTo = isCtv ? '/ctv' : null;
 
     return res.json({
       token,
@@ -92,11 +72,10 @@ router.post('/login', async (req, res) => {
         email: employee.email,
         companyId: employee.companyId,
         companyName: employee.companyName,
-        lob_scope: lobScope,
-        is_ctv: isCtv,
+        is_ctv: employee.is_ctv === true,
+        lob_scope: employee.lob_scope,
       },
       permissions,
-      redirectTo, // backend-driven CTV redirect hook
     });
   } catch (err) {
     console.error('Login error:', err);
@@ -114,8 +93,7 @@ router.get('/me', requireAuth, async (req, res) => {
     const { employeeId } = req.user;
 
     const rows = await query(
-      `SELECT p.id, p.name, p.email, p.companyid AS "companyId", c.name AS "companyName",
-              p.lob_scope AS "lobScope", p.is_ctv AS "isCtv"
+      `SELECT p.id, p.name, p.email, p.companyid AS "companyId", p.is_ctv, p.lob_scope, c.name AS "companyName"
        FROM partners p
        LEFT JOIN companies c ON c.id = p.companyid
        WHERE p.id = $1 AND p.employee = true AND p.isdeleted = false`,
@@ -129,9 +107,6 @@ router.get('/me', requireAuth, async (req, res) => {
     const employee = rows[0];
     const permissions = await resolveEffectivePermissions(employeeId);
 
-    const lobScope = visibleLobScopeForUser(employee.lobScope, permissions);
-    const isCtv = !!employee.isCtv;
-
     return res.json({
       user: {
         id: employee.id,
@@ -139,8 +114,8 @@ router.get('/me', requireAuth, async (req, res) => {
         email: employee.email,
         companyId: employee.companyId,
         companyName: employee.companyName,
-        lob_scope: lobScope,
-        is_ctv: isCtv,
+        is_ctv: employee.is_ctv === true,
+        lob_scope: employee.lob_scope,
       },
       permissions,
     });

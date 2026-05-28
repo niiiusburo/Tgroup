@@ -55,6 +55,9 @@ export function ServiceCatalogTable({
             <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
               {t('columns.price')}
             </th>
+            <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+              {t('columns.commissionRateShort')}
+            </th>
             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
               {tc('actions')}
             </th>
@@ -63,14 +66,14 @@ export function ServiceCatalogTable({
         <tbody className="divide-y divide-gray-100">
           {loading ? (
             <tr>
-              <td colSpan={6} className="py-16 text-center">
+              <td colSpan={7} className="py-16 text-center">
                 <Loader2 className="w-8 h-8 mx-auto mb-2 text-gray-300 animate-spin" />
                 <p className="text-sm text-gray-500">{tc('loading')}</p>
               </td>
             </tr>
           ) : products.length === 0 ? (
             <tr>
-              <td colSpan={6} className="py-16 text-center">
+              <td colSpan={7} className="py-16 text-center">
                 <p className="text-sm text-gray-500">{t('noServicesFound')}</p>
               </td>
             </tr>
@@ -101,6 +104,9 @@ export function ServiceCatalogTable({
                 </td>
                 <td className="px-4 py-3 text-sm text-right font-medium text-gray-900 whitespace-nowrap">
                   {product.listprice && parseFloat(product.listprice) > 1 ? formatVND(parseFloat(product.listprice)) : '-'}
+                </td>
+                <td className="px-4 py-3 text-sm text-right text-gray-600 whitespace-nowrap">
+                  {product.commission_rate_percent ? `${parseFloat(String(product.commission_rate_percent))}%` : '-'}
                 </td>
                 <td className="px-4 py-3">
                   {canEditServices && (

@@ -166,7 +166,7 @@ export async function updatePayment(
     referenceCode: string;
     status: 'posted' | 'voided';
   }>,
-  lob?: 'dental' | 'cosmetic',
+  lob?: 'dental' | 'cosmetic'
 ): Promise<ApiPayment> {
   return apiFetch<ApiPayment>(`/Payments/${id}`, {
     method: 'PATCH',

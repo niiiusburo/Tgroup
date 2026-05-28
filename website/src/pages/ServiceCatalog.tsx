@@ -151,6 +151,7 @@ export function ServiceCatalog() {
       categid: data.categid || undefined,
       uomname: data.uomname || undefined,
       companyid: data.companyid || undefined,
+      commission_rate_percent: data.commission_rate_percent || undefined,
     }, currentLOB);
     await loadProducts();
     // Refresh categories to update counts (LOB-aware)
@@ -166,6 +167,7 @@ export function ServiceCatalog() {
       categid: data.categid || undefined,
       uomname: data.uomname || undefined,
       companyid: data.companyid || undefined,
+      commission_rate_percent: data.commission_rate_percent || undefined,
     }, currentLOB);
     setEditingProduct(null);
     await loadProducts();

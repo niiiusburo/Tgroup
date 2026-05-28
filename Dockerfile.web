@@ -6,8 +6,11 @@ RUN npm install --legacy-peer-deps
 COPY website/ .
 ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
-ARG VITE_COSMETIC_LOB_ENABLED
+ARG VITE_COSMETIC_LOB_ENABLED=false
 ENV VITE_COSMETIC_LOB_ENABLED=${VITE_COSMETIC_LOB_ENABLED}
+# Pass real git SHA into the bundle so /version.json reports the actual
+# commit deployed. Without this, version.json says "unknown" and there is
+# no way to verify whether a container was built from a clean git tree.
 ARG GIT_SHA=unknown
 ARG GIT_BRANCH=unknown
 ENV GIT_SHA=${GIT_SHA}

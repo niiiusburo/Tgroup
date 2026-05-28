@@ -2,9 +2,9 @@
 # Canonical mapping of all permission strings to backend routes, frontend routes, and UI components.
 
 meta:
-  total_backend_strings: 42
-  total_frontend_route_guards: 17
-  total_nav_guards: 14
+  total_backend_strings: 43
+  total_frontend_route_guards: 15
+  total_nav_guards: 13
   wildcard: "*"
   wildcard_meaning: "Grants all permissions (used in auth middleware and hasPermission)"
 
@@ -191,35 +191,54 @@ backend_permissions:
     routes:
       - GET /api/WebsitePages
       - GET /api/WebsitePages/:id
-  # Cosmetic LOB v2 — 9 new keys (registered Phase 0; see cosmetic.yaml + v2 design)
+  # Cosmetic LOB v2 (per 2026-05-18-cosmetic-line-of-business-design-v2.md)
   - string: cosmetic.access
     routes:
-      - "All /api/cosmetic/* (mirrors of dental routes; gated by requireLobScope('cosmetic') + this perm)"
+      - GET,POST,PUT,PATCH,DELETE /api/cosmetic/*
+    note: Hard LOB gate is also enforced by requireLobScope('cosmetic') middleware; this permission is the soft within-scope gate for cosmetic staff and admins.
   - string: dental.access
     routes:
-      - "Legacy dental routes (implicit for dental-scoped users; admins + dental staff)"
+      - All existing /api/dental/* and legacy routes when LOB=dental
+    note: Backfilled for all existing users; admins + dental staff receive it.
   - string: ctv.dashboard.view
     routes:
       - GET /api/ctv/*
+    note: CTV-flagged users only. Combined with is_ctv flag on users; CTV users never receive admin LOB scopes.
   - string: ctv.commission.view.self
     routes:
       - GET /api/ctv/commission-summary
+    note: Self-only view of own pending/paid commissions aggregated across both DBs.
   - string: ctv.referrals.view.self
     routes:
       - GET /api/ctv/referrals
+    note: Self-only list of referred clients (with LOB pills and earnings).
   - string: commissions.view.team
     routes:
-      - "Future /api/reports/commissions/* or earnings team views (admin/manager)"
+      - GET /api/commissions/team
+      - Reports commission rollups
+    note: For admins and managers to view team (not just self) commissions.
   - string: commissions.payout.run
     routes:
-      - POST /api/payouts
-      - "Payout batch runner endpoints"
+      - POST /api/commissions/payout
+    note: Admin-only action to close a payout cycle and mark commissions paid.
   - string: commissions.export
     routes:
-      - "POST /api/Exports/commissions/* or earnings exports"
+      - POST /api/Exports/commissions/*
+    note: Export of commission ledgers (admin + manager).
   - string: lob.crossview
     routes:
-      - "Internal cross-LOB client probe endpoints (admin-only badge; e.g. /Partners/:id/cross-lob)"
+      - GET /api/*cross-lob-probe (internal for customer profile badge)
+    note: Admin-only. Powers the "also a dental client" / "also a cosmetic client" badge on the opposite LOB profile. Performs soft phone match only.
+  - string: ctv.manage
+    routes:
+      - GET /api/Ctvs
+      - PATCH /api/Ctvs/:id
+      - POST /api/ctv (admin-initiated create)
+    note: Admin-only. List/suspend CTVs and create CTVs on their behalf. Satisfied by the admin wildcard ('*') at runtime; CTV self-recruit uses the is_ctv flag, not this key.
+  - string: commission.config.manage
+    routes:
+      - PUT /api/CommissionConfig
+    note: Admin-only. Edit the MLM level split (commission_level_config) + global default referral %. GET is open to any authed user; only writes require this key.
 
 # Frontend page-level permission guards (ProtectedRoute in App.tsx)
 frontend_route_permissions:
@@ -277,6 +296,20 @@ frontend_route_permissions:
   - string: ctv.dashboard.view
     paths:
       - /ctv
+
+  # Cosmetic LOB v2 frontend guards (header toggle + CTV surface)
+  - string: dental.access
+    paths:
+      - / (when BusinessUnitContext = dental)
+  - string: cosmetic.access
+    paths:
+      - / (when BusinessUnitContext = cosmetic)
+  - string: ctv.dashboard.view
+    paths:
+      - /ctv
+  - string: lob.crossview
+    paths:
+      - /customers/:id (cross-LOB badge visibility)
 
 # Additional frontend permissions not in ROUTE_PERMISSIONS but checked inline
 frontend_inline_permissions:
@@ -381,3 +414,10 @@ risks:
     severity: high
   - desc: "Wildcard * bypasses all checks but is not documented for admins"
     severity: low
+
+# Cosmetic LOB v2 reality note (post 047 sync)
+# - Table for transactional attribution: dbo.earnings (both DBs); legacy rules tables remain named commissions/*
+# - Permission strings keep "commissions.*" and "ctv.*" for UI/UX continuity (see earnings-commissions.yaml)
+# - New keys registered: cosmetic.access, dental.access, ctv.*, lob.crossview, commissions.*
+# - All cosmetic/* routes also enforce requireLobScope + requirePermission('cosmetic.access')
+# - partners table (not users) carries is_ctv / lob_scope for all permission + LOB decisions

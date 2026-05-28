@@ -9,6 +9,13 @@ import { fetchPartnerById, fetchAppointments, fetchCustomerBalance, type ApiAppo
 import { useTimezone } from '@/contexts/TimezoneContext';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 
+export interface ReferralClaim {
+  ownerCtvId: string | null;
+  ownerName: string | null;
+  active: boolean;
+  expiresAt: string | null;
+}
+
 export interface CustomerProfileData {
   id: string;
   name: string;
@@ -37,7 +44,7 @@ export interface CustomerProfileData {
   sourceid?: string | null;
   sourcename?: string | null;
   faceRegisteredAt: string | null;
-  referralClaim?: ApiPartner['referralClaim'];
+  referralClaim?: ReferralClaim | null;
 }
 
 export interface CustomerProfileResult {

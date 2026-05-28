@@ -25,13 +25,33 @@ describe('commissionEngine - D13 recipient resolution & earnings writes', () => 
       referred_by_ctv_id: 'ctv-partner-uuid',
       salestaffid: 'staff-uuid',
     };
-    // Even with active consultation, CTV wins
+    // Even with active consultation, CTV wins (claim active)
     const result = await commissionEngine.resolveRecipient({
       clientRow,
       lob: 'dental',
-      // mock active cons would be ignored
+      referralClaim: { getReferralClaimStatus: async () => ({ active: true, ownerCtvId: 'ctv-partner-uuid' }) },
     });
     expect(result).toEqual({ recipient_partner_id: 'ctv-partner-uuid', source: 'ctv' });
+  });
+
+  test('resolveRecipient: lapsed CTV claim falls through (no credit), then null when no other source', async () => {
+    const clientRow = { id: 'cli-lapsed', referred_by_ctv_id: 'ctv-old', salestaffid: null };
+    const result = await commissionEngine.resolveRecipient({
+      clientRow,
+      lob: 'dental',
+      referralClaim: { getReferralClaimStatus: async () => ({ active: false, ownerCtvId: 'ctv-old' }) },
+    });
+    expect(result).toBeNull();
+  });
+
+  test('resolveRecipient: lapsed CTV claim falls through to salestaff (dental)', async () => {
+    const clientRow = { id: 'cli-lapsed2', referred_by_ctv_id: 'ctv-old', salestaffid: 'sales-x' };
+    const result = await commissionEngine.resolveRecipient({
+      clientRow,
+      lob: 'dental',
+      referralClaim: { getReferralClaimStatus: async () => ({ active: false, ownerCtvId: 'ctv-old' }) },
+    });
+    expect(result).toEqual({ recipient_partner_id: 'sales-x', source: 'salestaff' });
   });
 
   test('resolveRecipient: cosmetic consultation card used when no CTV referrer', async () => {
@@ -61,22 +81,52 @@ describe('commissionEngine - D13 recipient resolution & earnings writes', () => 
     expect(result).toBeNull();
   });
 
-  test('createEarningsForPayment: writes append-only row with correct source/amount (dental)', async () => {
+  test('createEarningsForPayment: single-level CTV (L0=100%) writes full pool to direct referrer', async () => {
     const payment = { id: '00000000-0000-0000-0000-0000000000p1', amount: 1000000, customer_id: '00000000-0000-0000-0000-0000000000c1' };
     const clientRow = { id: '00000000-0000-0000-0000-0000000000c1', referred_by_ctv_id: '00000000-0000-0000-0000-000000000ctv' };
     const line = { id: '00000000-0000-0000-0000-0000000000ln', product_id: '00000000-0000-0000-0000-0000000000pr' };
-    mockDb.queryRows.mockResolvedValueOnce([{ commission_rate_percent: 10 }]);
-    await commissionEngine.createEarningsForPayment({
-      payment,
-      lines: [line],
-      lob: 'dental',
-      clientRow,
-      getDb: mockGetDb,
-    });
+    mockDb.queryRows
+      .mockResolvedValueOnce([{ commission_rate_percent: 10 }])                  // product rate → pool 100000
+      .mockResolvedValueOnce([{ level: 0, share_percent: 100, enabled: true }])  // level config
+      .mockResolvedValueOnce([{ referred_by_ctv_id: null }])                     // chain: L0 has no upline
+      .mockResolvedValueOnce([{ id: 'e0', amount: 100000, level: 0 }]);          // insert L0
+    const activeClaim = { getReferralClaimStatus: async () => ({ active: true, ownerCtvId: '00000000-0000-0000-0000-000000000ctv' }) };
+    await commissionEngine.createEarningsForPayment({ payment, lines: [line], lob: 'dental', clientRow, getDb: mockGetDb, referralClaim: activeClaim });
     expect(mockDb.queryRows).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO dbo.earnings'),
-      expect.arrayContaining([expect.anything(), '00000000-0000-0000-0000-000000000ctv', '00000000-0000-0000-0000-0000000000p1', expect.anything(), 100000])
+      expect.arrayContaining([expect.anything(), '00000000-0000-0000-0000-000000000ctv', '00000000-0000-0000-0000-0000000000p1', expect.anything(), 0, 100000])
     );
+  });
+
+  test('createEarningsForPayment: MLM split across upline chain by configured shares', async () => {
+    const payment = { id: 'pay-mlm', amount: 1000000 };
+    const clientRow = { id: 'cli-mlm', referred_by_ctv_id: 'ctv-L0' };
+    const line = { id: 'line-mlm', product_id: 'prod-mlm' };
+    mockDb.queryRows
+      .mockResolvedValueOnce([{ commission_rate_percent: 10 }])                                              // pool = 100000
+      .mockResolvedValueOnce([{ level: 0, share_percent: 70, enabled: true }, { level: 1, share_percent: 30, enabled: true }])
+      .mockResolvedValueOnce([{ referred_by_ctv_id: 'ctv-L1' }])                                             // L0 → upline ctv-L1
+      .mockResolvedValueOnce([{ referred_by_ctv_id: null }])                                                 // L1 → no upline
+      .mockResolvedValueOnce([{ id: 'e0' }])
+      .mockResolvedValueOnce([{ id: 'e1' }]);
+    const activeClaimMlm = { getReferralClaimStatus: async () => ({ active: true, ownerCtvId: 'ctv-L0' }) };
+    await commissionEngine.createEarningsForPayment({ payment, lines: [line], lob: 'dental', clientRow, getDb: mockGetDb, referralClaim: activeClaimMlm });
+    // L0 gets 70% of 100000, L1 gets 30%
+    expect(mockDb.queryRows).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO dbo.earnings'), expect.arrayContaining(['ctv-L0', 'pay-mlm', 70000]));
+    expect(mockDb.queryRows).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO dbo.earnings'), expect.arrayContaining(['ctv-L1', 'pay-mlm', 30000]));
+  });
+
+  test('createEarningsForPayment: salestaff source writes a single full-pool row at level 0 (no split)', async () => {
+    const payment = { id: 'pay-ss', amount: 1000000 };
+    const clientRow = { id: 'cli-ss', referred_by_ctv_id: null, salestaffid: 'staff-1' };
+    const line = { id: 'line-ss', product_id: 'prod-ss' };
+    mockDb.queryRows
+      .mockResolvedValueOnce([{ commission_rate_percent: 10 }])                  // pool 100000
+      .mockResolvedValueOnce([{ level: 0, share_percent: 70, enabled: true }])   // level config (ignored for salestaff)
+      .mockResolvedValueOnce([{ id: 'e' }]);
+    await commissionEngine.createEarningsForPayment({ payment, lines: [line], lob: 'dental', clientRow, getDb: mockGetDb });
+    // full pool to salestaff, not 70%
+    expect(mockDb.queryRows).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO dbo.earnings'), expect.arrayContaining(['staff-1', 'pay-ss', 100000]));
   });
 
   test('reverseOnRefund: creates negative reversal row; original earnings status untouched', async () => {

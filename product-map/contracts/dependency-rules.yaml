@@ -167,6 +167,30 @@ rules:
       - hook dependency arrays (stale closure risk)
       - mock setups in tests
 
+  - name: lob-scope-or-two-db-change
+    trigger: "Any change involving lob_scope, is_ctv, BusinessUnitContext, /api/cosmetic/*, /api/ctv/*, commission recipient resolution (D13), cross-DB aggregation, or dual-database topology"
+    must_update:
+      - product-map/domains/cosmetic.yaml
+      - product-map/schema-map.md (two-DB section + new tables/columns)
+      - product-map/contracts/permission-registry.yaml (the 9+ new keys + LOB gates)
+      - product-map/contracts/api-index.md (cosmetic and ctv route families)
+      - product-map/contracts/dependency-rules.yaml
+      - AGENTS.md, ARCHITECTURE.md, DECISIONS.md, DESIGN.md, BEHAVIOR.md (LOB toggle, S_LOB_FORBIDDEN, CTV redirect)
+      - docs/CONTRACTS.md, docs/DATA-MODEL.md, docs/MIGRATIONS.md, docs/SECURITY.md, docs/RUNBOOK.md, docs/runbooks/DEPLOYMENT.md, docs/TEST-MATRIX.md
+      - api/src/middleware/auth.js + lobScope middleware
+      - All dual-pool db access and ctv aggregator code
+      - Frontend BusinessUnitContext + header toggle + login redirect
+      - E2E tests for LOB isolation, CTV aggregation, toggle remount, and dental regression
+    should_review:
+      - Every requirePermission and requireLobScope call site
+      - Cross-LOB badge phone-match probe (privacy + lob.crossview)
+      - Commission engine (earnings on payment, reversal rows, payout cycles)
+      - .claude/memory.md and testbright.md for two-DB mental model
+    verify:
+      - Full pre-existing Playwright + Jest suite remains green
+      - Explicit LOB isolation + CTV gating + rollback dry-run tests pass
+      - Real-browser verification on nk2 before flag flip (per v2 spec gates)
+
 blast_radius_map:
   - file: api/src/db.js
     radius: all_api_routes

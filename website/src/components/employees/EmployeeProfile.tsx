@@ -7,6 +7,7 @@ import {
   type Employee } from
 '@/data/mockEmployees';
 import { fetchCompanies, type ApiCompany } from '@/lib/api';
+import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { useTranslation } from 'react-i18next';
 
 /**
@@ -32,12 +33,13 @@ export function EmployeeProfile({
   onEdit
 }: EmployeeProfileProps) {
   const { t } = useTranslation(['employees', 'common']);
+  const { currentLOB } = useBusinessUnit();
   const [locations, setLocations] = useState<ApiCompany[]>([]);
   const [loadingLocations, setLoadingLocations] = useState(true);
 
   // Load locations for name lookup
   useEffect(() => {
-    fetchCompanies().
+    fetchCompanies({ limit: 50, lob: currentLOB }).
     then((res) => {
       setLocations(res.items);
       setLoadingLocations(false);
@@ -45,7 +47,7 @@ export function EmployeeProfile({
     catch(() => {
       setLoadingLocations(false);
     });
-  }, []);
+  }, [currentLOB]);
 
   const getLocationName = (locationId: string): string => {
     if (!locationId) return 'No Location';

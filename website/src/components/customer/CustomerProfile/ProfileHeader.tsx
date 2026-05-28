@@ -115,6 +115,31 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
             </button>
           )}
 
+          {/* Referral Claim Badge: shows "Referred by CTV" with claim status */}
+          {profile.referralClaim?.ownerCtvId && (
+            <div className="mt-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1"
+                data-testid="referral-claim-badge"
+                title={profile.referralClaim.ownerName || 'CTV Referral'}
+              >
+                <span className="text-gray-700">Người giới thiệu (CTV): <strong>{profile.referralClaim.ownerName}</strong></span>
+              </span>
+              {profile.referralClaim.active && profile.referralClaim.expiresAt ? (
+                <span className="ml-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200"
+                  data-testid="referral-active-badge"
+                >
+                  còn hiệu lực đến {new Date(profile.referralClaim.expiresAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                </span>
+              ) : (
+                <span className="ml-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 ring-1 ring-gray-200"
+                  data-testid="referral-expired-badge"
+                >
+                  đã hết hạn
+                </span>
+              )}
+            </div>
+          )}
+
           {/* Medical History — distinctive amber card */}
           {(() => {
             const MEDICAL_CONDITIONS = [

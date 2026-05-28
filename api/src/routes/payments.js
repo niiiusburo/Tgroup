@@ -11,7 +11,7 @@ const {
   listDeposits,
   listPayments,
 } = require("./payments/readHandlers");
-const { createEarningsForPayment } = require("../services/commissionEngine"); // v2 earnings hook (D12/D13) — additive only, never touches legacy commission* tables
+const { createEarningsForPayment, reverseOnRefund } = require("../services/commissionEngine"); // v2 earnings hook (D12/D13) — additive only, never touches legacy commission* tables
 
 // GET /api/Payments - List payments with allocations
 router.get("/", requirePermission('payment.view'), listPayments);
@@ -132,13 +132,30 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
     // === Cosmetic LOB v2 earnings engine hook (Phase 2) ===
     // Append-only write to dbo.earnings in correct DB via txClient.
     // D13 resolution inside engine. Safe: errors logged, payment tx not aborted.
-    // Current path: dental only (mirrors will invoke with lob='cosmetic' + getDb).
     try {
       const custRows = await rowsFrom(client, 'SELECT id, referred_by_ctv_id, salestaffid FROM partners WHERE id = $1 LIMIT 1', [customer_id]);
       if (custRows[0]) {
+        // Map payment allocations to saleorderlines so the engine can apply
+        // per-product commission_rate_percent (Gap-3 wiring fix).
+        let engineLines = [];
+        if (createdAllocations.length > 0) {
+          const invoiceIds = createdAllocations.map((a) => a.invoice_id).filter(Boolean);
+          if (invoiceIds.length > 0) {
+            const solRows = await rowsFrom(
+              client,
+              `SELECT id, productid, pricetotal FROM dbo.saleorderlines WHERE orderid = ANY($1) AND isdeleted = false`,
+              [invoiceIds],
+            );
+            engineLines = solRows.map((sol) => ({
+              id: sol.id,
+              product_id: sol.productid,
+              amount: parseFloat(sol.pricetotal || 0),
+            }));
+          }
+        }
         await createEarningsForPayment({
           payment: row,
-          lines: [], // TODO in future: map allocations to saleorderlines for per-line service_line_id + product rate
+          lines: engineLines,
           lob: req.lob || 'dental',
           clientRow: custRows[0],
           txClient: client,
@@ -192,7 +209,7 @@ router.post("/", requirePermission('payment.add'), validate(PaymentCreateSchema)
 router.post("/refund", requirePermission('payment.refund'), async (req, res) => {
   try {
     const q = getQuery(req);
-    const { customer_id, amount, method, notes, payment_date } = req.body;
+    const { customer_id, amount, method, notes, payment_date, original_payment_id } = req.body;
 
     if (!customer_id || !amount || amount <= 0 || !method) {
       return res.status(400).json({ error: "customer_id, positive amount, and method are required" });
@@ -216,15 +233,13 @@ router.post("/refund", requirePermission('payment.refund'), async (req, res) => 
 
     const row = result[0];
 
-    // v2 earnings: write negative row for this refund payment (reversal semantics)
+    // v2 earnings: write negative reversal rows for this refund payment
     try {
-      const custRows = await q('SELECT id, referred_by_ctv_id, salestaffid FROM partners WHERE id = $1 LIMIT 1', [customer_id]);
-      if (custRows[0]) {
-        await createEarningsForPayment({
-          payment: row,
-          lines: [],
+      if (original_payment_id) {
+        await reverseOnRefund({
+          originalPaymentId: original_payment_id,
+          refundPayment: row,
           lob: req.lob || 'dental',
-          clientRow: custRows[0],
         });
       }
     } catch (e) {

@@ -14,6 +14,97 @@
 
 ---
 
+## Two-Database Topology — Cosmetic Line of Business (v2)
+
+> Implemented per migration 047 (2026-05-19) + final handler + db factory code.
+> Physical isolation: two separate Postgres databases (tdental_demo + tcosmetic_demo) on the same server (127.0.0.1:5433 both local and docker). Dual pools via api/src/db/index.js (getDentalPool / getCosmeticPool, getDb(lob), getQuery(req) for transparent handler reuse).
+> Dental DB receives only additive changes (new nullable columns + new tables per 047). No existing rows, queries, or constraints altered.
+> Cosmetic DB provisioned with same schema (partners as identity for 1:1 mirror reuse of all dental handlers); seeded empty for staff/companies.
+> partners table is the canonical identity/auth source in BOTH DBs (lob_scope, is_ctv, referred_by_ctv_id added to partners; NO users table for LOB scope per explicit migration comment).
+> earnings table (not commissions) chosen to avoid legacy name collision.
+> No cross-DB JOINs at SQL; CTV aggregation + cross-view only in API layer (getDb calls).
+> D13 recipient resolution implemented in commissionEngine against partners + earnings.
+
+**Database layout (final implemented)**
+
+```
+postgres (127.0.0.1:5433)
+├── tdental_demo (EXISTING — dental LOB, production data, additive only)
+│   └── dbo
+│       ├── ... (all pre-v2 tables unchanged in shape)
+│       ├── partners (canonical auth/identity SMI for customers + staff + CTV)
+│       │   + lob_scope TEXT[] NULL
+│       │   + is_ctv BOOLEAN NULL DEFAULT FALSE   (backfilled to ARRAY['dental']; CTV may have empty)
+│       │   + referred_by_ctv_id UUID NULL
+│       ├── products
+│       │   + commission_rate_percent NUMERIC(5,2) NULL DEFAULT 0
+│       ├── earnings (NEW — append-only transactional attribution per D12/D13; recipient_partner_id → partners)
+│       ├── payouts (NEW)
+│       └── referral_locks (NEW — dental-internal 6-month locks)
+│
+└── tcosmetic_demo (NEW — cosmetic LOB, seeded empty)
+    └── dbo
+        ├── partners (identity for clients/staff; reused for mirror /api/cosmetic/Partners etc. via getQuery)
+        │   + lob_scope / is_ctv / referred_by_ctv_id (additive per 047 for consistency)
+        │   + consulting_staff_id support via relations
+        ├── staff (employee flags via partners; seeded EMPTY per D16)
+        ├── companies (cosmetic locations; seeded EMPTY)
+        ├── employee_location_scope
+        ├── appointments
+        ├── products / services
+        │   + commission_rate_percent NUMERIC(5,2) NULL DEFAULT 0
+        ├── saleorders / saleorderlines
+        │   + consultation_id FK on saleorderlines
+        ├── payments / payment_allocations / monthlyplans / planinstallments
+        ├── consultations (NEW — invisible backend attribution unit only; 6mo TTL)
+        │   status: open | attached | converted | superseded | expired
+        │   auto-managed on appt book
+        ├── earnings (NEW — identical to dental; recipient_partner_id → partners)
+        └── payouts (NEW)
+```
+
+### Key new / altered tables (detailed shapes — final per 047)
+
+#### tdental_demo.dbo.earnings
+- PK: id UUID
+- FKs: client_id → partners(id), recipient_partner_id → partners(id), payment_id → payments(id), service_line_id → saleorderlines(id), payout_id → payouts(id)
+- Columns: source TEXT CHECK ('ctv'|'consultation'|'salestaff'), amount NUMERIC(14,2) (negative on reversal), status ('pending'|'paid'|'reversed'), earned_at, created_at
+- Notes: Append-only. D13 resolution in commissionEngine. Real FKs on dental. Refunds = negative reversal rows.
+
+#### tdental_demo.dbo.payouts
+- Same shape in both DBs: id, cycle_label, paid_at, total_amount, notes, created_by_partner_id, created_at
+
+#### tdental_demo.dbo.referral_locks
+- Dental-internal only. 6-month TTL engine (not exposed in v1 UI).
+
+#### tdental_demo.dbo.partners (additive columns — canonical identity)
+- lob_scope TEXT[] — hard gate for LOB access (replaces early 'users' concept)
+- is_ctv BOOLEAN — CTV partners bypass admin UI entirely, land on /ctv
+- referred_by_ctv_id — first-class CTV attribution
+
+#### tdental_demo.dbo.products (additive)
+- commission_rate_percent — per-product rate; 0% default means no behavior change for dental today
+
+#### tcosmetic_demo.dbo.partners
+- Reused for client/identity rows (enables exact mirror of all /Partners, /Employees etc. handlers via getQuery(req) + attachCosmeticDb).
+- Same additive columns as dental (lob_scope etc.) + relations for consulting_staff.
+- Phone match for optional admin "also a dental client" badge (lob.crossview) only.
+
+#### tcosmetic_demo.dbo.consultations
+- Backend-only commission attribution surface. Auto-created when cosmetic appointment booked with consulting_staff_id.
+- Superseded by subsequent card; never rendered in admin UI. 6mo TTL.
+
+#### tcosmetic_demo.dbo.earnings
+- Identical columns/shape to dental earnings.
+- recipient_partner_id is a soft reference (no cross-DB FK); API + engine validate on write via getDb.
+
+#### tcosmetic_demo.dbo.staff / companies / employee_location_scope
+- Mirror dental employee + location scoping tables. Cosmetic staff table intentionally empty at bootstrap (D16); populated by admins via reused Employees UI.
+
+All other cosmetic tables (appointments, payments, saleorders, etc.) are structural mirrors of their dental counterparts and are accessed exclusively via the /api/cosmetic/* route family.
+
+---
+
 ## Core Entities
 
 ### dbo.companies (Locations / Branches)
