@@ -26,7 +26,7 @@ Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `D
 ## [0.32.57] — 2026-05-28
 ### Fixed
 - CTV `/ctv` mobile language toggle now opens its compact dropdown below the orange header instead of above it, so the English/Vietnamese options stay inside the viewport and can be selected by touch. — @agent — BEHAVIOR.md §9 localization and UC-022 CTV self-portal language parity.
-- NK3/TMV Docker web builds now materialize `VITE_API_URL` and `VITE_COSMETIC_LOB_ENABLED` into `.env.production.local` before `vite build`, preserving the Cosmetic/Dental LOB toggle while deploying the CTV bilingual portal. — @agent — INV-008A/INV-008B deploy parity for Cosmetic LOB.
+- NK3/TMV Docker web builds now declare and materialize `VITE_API_URL` and `VITE_COSMETIC_LOB_ENABLED` into `.env.production.local` before `vite build`, preserving the Cosmetic/Dental LOB toggle while deploying the CTV bilingual portal. — @agent — INV-008A/INV-008B deploy parity for Cosmetic LOB.
 
 ## [0.32.55] — 2026-05-27
 ### Added
