@@ -10,6 +10,43 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: CTV Language Toggle Dropdown Mobile Fix (2026-05-28)
+
+Feature/edit name: CTV language toggle dropdown mobile placement.
+
+Changed URLs and API routes:
+- `/ctv` CTV self portal header language toggle.
+- No API routes changed.
+
+Affected data flows:
+- No backend data flow changed.
+- CTV portal language state still uses the shared i18n storage key and swaps the same `ctv` namespace strings.
+
+User roles:
+- CTV user with `is_ctv=true`.
+
+Happy paths:
+- On mobile `/ctv`, tapping the globe opens the language dropdown below the header, inside the viewport.
+- Selecting English changes the portal to `CTV Portal`, `Track Clients`, and `Invite CTVs`.
+- Selecting Vietnamese changes the portal to `Cổng CTV`, `Theo dõi`, and `Giới thiệu CTV`.
+
+Edge cases:
+- The admin sidebar compact toggle still opens upward from the bottom sidebar.
+- The CTV header compact toggle must not open upward off-screen.
+
+Regressions:
+- CTV referral search/filter/flip-card behavior remains unchanged.
+- CTV hierarchy tab remains available and translated.
+
+Setup data and login state:
+- Use a CTV account with `ctv.dashboard.view` on `https://tmv.2checkin.com/ctv`.
+- Keep mobile screenshot evidence for both Vietnamese and English states after deploy.
+
+TestSprite execution items:
+- [x] PASS: Unit coverage checks the CTV language dropdown uses `top-full` placement - `npm --prefix website test -- src/pages/CTV/index.test.tsx src/components/ctv/ReferralFlipCard.test.tsx`.
+- [ ] PENDING: Live mobile `/ctv` screenshot shows Vietnamese portal with accessible language toggle.
+- [ ] PENDING: Live mobile `/ctv` screenshot after selecting English shows `CTV Portal`, `Track Clients`, and `Invite CTVs`.
+
 # TestSprite Plan: CTV Hierarchy Tab (2026-05-27)
 
 Feature/edit name: CTV Hierarchy Tab

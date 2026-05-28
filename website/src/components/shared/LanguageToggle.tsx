@@ -3,7 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Globe, Check } from 'lucide-react';
 import { SUPPORTED_LANGS, LANG_LABELS, STORAGE_KEY, type SupportedLang } from '@/i18n';
 
-export function LanguageToggle({ compact = false }: {compact?: boolean;}) {
+export function LanguageToggle({
+  compact = false,
+  dropdownPlacement = 'above',
+}: {
+  compact?: boolean;
+  dropdownPlacement?: 'above' | 'below';
+}) {
   const { t } = useTranslation('common');
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -40,7 +46,10 @@ export function LanguageToggle({ compact = false }: {compact?: boolean;}) {
         </button>
 
         {open &&
-        <div data-testid="lang-dropdown" className="absolute bottom-full mb-2 left-0 bg-white rounded-xl shadow-2xl border border-gray-200 py-1 z-[200] min-w-[160px]">
+        <div
+          data-testid="lang-dropdown"
+          className={`absolute ${dropdownPlacement === 'below' ? 'top-full mt-2 right-0' : 'bottom-full mb-2 left-0'} bg-white rounded-xl shadow-2xl border border-gray-200 py-1 z-[200] min-w-[160px]`}
+        >
             {SUPPORTED_LANGS.map((lang) =>
           <button
             key={lang}

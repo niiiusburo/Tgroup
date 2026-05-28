@@ -163,12 +163,19 @@ describe('CtvDashboard', () => {
     expect(screen.queryByRole('searchbox', { name: /tìm khách giới thiệu/i })).not.toBeInTheDocument();
   });
 
-  it('renders the LanguageToggle button in the header', async () => {
+  it('opens the LanguageToggle dropdown below the CTV header', async () => {
     localStorage.setItem('tg-lang', 'en');
+    const user = userEvent.setup();
     render(<CtvDashboard />);
 
     await waitFor(() => expect(screen.getByText('Referred Client Tracking')).toBeVisible());
 
-    expect(screen.getByRole('button', { name: /switch language/i })).toBeVisible();
+    await user.click(screen.getByRole('button', { name: /switch language/i }));
+
+    const dropdown = screen.getByTestId('lang-dropdown');
+    expect(dropdown).toBeVisible();
+    expect(dropdown).toHaveClass('top-full');
+    expect(dropdown).not.toHaveClass('bottom-full');
+    expect(screen.getByRole('button', { name: /tiếng việt/i })).toBeVisible();
   });
 });

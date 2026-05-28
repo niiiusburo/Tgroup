@@ -225,7 +225,7 @@ export function CtvDashboard() {
               <p className="mt-1 text-xs font-semibold text-orange-100">{t('hello', { name: profileName })}</p>
             </div>
             <div className="flex items-start gap-2">
-              <LanguageToggle compact />
+              <LanguageToggle compact dropdownPlacement="below" />
               <button
                 type="button"
                 className="grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/20"

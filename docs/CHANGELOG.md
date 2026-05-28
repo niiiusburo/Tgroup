@@ -23,6 +23,10 @@
 Categories: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `Docs`.
 
 ---
+## [0.32.57] — 2026-05-28
+### Fixed
+- CTV `/ctv` mobile language toggle now opens its compact dropdown below the orange header instead of above it, so the English/Vietnamese options stay inside the viewport and can be selected by touch. — @agent — BEHAVIOR.md §9 localization and UC-022 CTV self-portal language parity.
+
 ## [0.32.55] — 2026-05-27
 ### Added
 - Added CTV hierarchy endpoint `GET /api/ctv/hierarchy` and enabled the `/ctv` `Giới thiệu CTV` / `Invite CTVs` tab to show current CTV, upline, downline, and hierarchy totals from CTV-to-CTV `partners.referred_by_ctv_id` links only. — @agent — UC-023 / WF-016; preserves the CTV/client separation in Contracts v1.1.2.

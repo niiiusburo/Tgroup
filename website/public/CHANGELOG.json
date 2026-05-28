@@ -1,5 +1,27 @@
 [
   {
+    "version": "0.32.57",
+    "date": "2026-05-28",
+    "commit": "pending",
+    "highlights": "CTV portal language switcher now opens inside the mobile viewport so Vietnamese and English can be selected on tmv.2checkin.com/ctv.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "The compact language toggle used by the CTV portal header now opens below the header instead of off-screen above it.",
+          "Admin sidebar compact language toggle keeps its upward dropdown placement."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added CTV dashboard coverage for the below-header language dropdown placement.",
+          "Live verification requires mobile screenshots for Vietnamese and English CTV states after deploy."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.37",
     "date": "2026-05-21",
     "commit": "pending",
