@@ -13,6 +13,10 @@ ARG GIT_SHA=unknown
 ARG GIT_BRANCH=unknown
 ENV GIT_SHA=${GIT_SHA}
 ENV GIT_BRANCH=${GIT_BRANCH}
+# Materialize build args into Vite's production env file so Docker builds
+# inline the same values even when npm script subprocess env propagation differs.
+RUN printf 'VITE_API_URL=%s\nVITE_COSMETIC_LOB_ENABLED=%s\n' "${VITE_API_URL}" "${VITE_COSMETIC_LOB_ENABLED}" > .env.production.local \
+  && cat .env.production.local
 RUN npm run build
 
 FROM nginx:alpine
