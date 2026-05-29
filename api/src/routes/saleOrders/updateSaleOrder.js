@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const { query: legacyQuery, getQuery } = require('../../db');
 const { calculateSaleOrderPaymentStateFromAllocations } = require('../../lib/saleOrderTotals');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
-const { setCustomerReferrer } = require('../../services/customerReferrer');
+const { setCustomerReferrer, clearCustomerReferrer } = require('../../services/customerReferrer');
 
 async function updateSaleOrder(req, res) {
   try {
@@ -60,12 +60,14 @@ async function updateSaleOrder(req, res) {
       );
     }
 
-    // A bare CTV assignment counts as a valid update (the customer's referrer changes
-    // even when no sale-order column does), so it must not trip "No fields to update".
-    const hasCtvUpdate = ctv_id !== undefined && ctv_id !== null && ctv_id !== '';
+    // A CTV change (assign OR explicit clear) counts as a valid update — the customer's
+    // referrer changes even when no sale-order column does — so it must not trip
+    // "No fields to update". Presence of the ctv_id key signals intent (the edit form always
+    // sends it; null/'' means the user picked "None").
+    const ctvProvided = Object.prototype.hasOwnProperty.call(req.body, 'ctv_id');
 
     const updatedOrder = await updateSaleOrderFields(q, id, fields);
-    if (!updatedOrder && !hasLineUpdate(req.body) && !hasCtvUpdate) {
+    if (!updatedOrder && !hasLineUpdate(req.body) && !ctvProvided) {
       return res.status(400).json({ error: 'No fields to update' });
     }
     if (updatedOrder === null) {
@@ -84,16 +86,20 @@ async function updateSaleOrder(req, res) {
       paymentState,
     });
 
-    // Assign the chosen CTV as the customer's commission referrer (assign-only no-op
-    // when ctv_id is absent/empty). Resolve the customer from the order if the body
-    // didn't carry partnerid.
-    if (ctv_id) {
+    // Apply the CTV change when the edit sent ctv_id: a UUID assigns the referrer (validated),
+    // null/'' explicitly clears it (the edit form pre-fills the current CTV, so "None" is
+    // deliberate). Resolve the customer from the order if the body didn't carry partnerid.
+    if (ctvProvided) {
       let customerId = partnerid;
       if (!customerId) {
         const ownerRows = await q('SELECT partnerid FROM saleorders WHERE id = $1', [id]);
         customerId = ownerRows[0]?.partnerid || null;
       }
-      await setCustomerReferrer(q, customerId, ctv_id);
+      if (ctv_id) {
+        await setCustomerReferrer(q, customerId, ctv_id);
+      } else {
+        await clearCustomerReferrer(q, customerId);
+      }
     }
 
     const rows = await fetchSaleOrderById(id, q);

@@ -8,9 +8,11 @@
  * dashboard surface to set that field — services/appointments now expose a CTV selector that
  * routes through here.
  *
- * SAFETY: this is "assign only". A null / empty / non-UUID `ctvId` is a NO-OP — it never
- * clears an existing referrer. That prevents an untouched (or not-prefilled) selector from
- * silently wiping a customer's commission attribution on every save.
+ * `setCustomerReferrer` is "assign only": a null / empty / non-UUID `ctvId` is a NO-OP — it
+ * never clears an existing referrer. CREATE paths use it so a not-prefilled selector can't
+ * silently wipe attribution. UPDATE paths additionally call `clearCustomerReferrer` when the
+ * user explicitly picks "None" (the edit forms pre-fill the current CTV, so an empty selector
+ * on edit is a deliberate clear).
  *
  * `referred_by_ctv_id` is a soft reference (no FK in migration 047), matching the existing
  * /api/ctv/bookings reclaim path which UPDATEs it directly.
@@ -62,4 +64,26 @@ async function setCustomerReferrer(q, customerId, ctvId) {
   return Array.isArray(updated) && updated.length > 0;
 }
 
-module.exports = { setCustomerReferrer, isUuid };
+/**
+ * Clear a customer's commission referrer (set referred_by_ctv_id = NULL).
+ * Used by UPDATE paths when the user explicitly selects "None". Only call this when the form
+ * reflected the current CTV (i.e. it was pre-filled), so an empty selector is a deliberate clear.
+ *
+ * @param {(sql: string, params?: any[]) => Promise<any[]>} q - request-scoped LOB-bound query fn
+ * @param {string} customerId - partners.id of the customer
+ * @returns {Promise<boolean>} true if a row was updated
+ */
+async function clearCustomerReferrer(q, customerId) {
+  if (!isUuid(customerId)) return false;
+  const updated = await q(
+    `UPDATE partners
+        SET referred_by_ctv_id = NULL,
+            lastupdated = (NOW() AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Ho_Chi_Minh')
+      WHERE id = $1 AND isdeleted = false
+      RETURNING id`,
+    [customerId],
+  );
+  return Array.isArray(updated) && updated.length > 0;
+}
+
+module.exports = { setCustomerReferrer, clearCustomerReferrer, isUuid };

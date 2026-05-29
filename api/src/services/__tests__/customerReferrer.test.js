@@ -1,6 +1,6 @@
 'use strict';
 
-const { setCustomerReferrer, isUuid } = require('../customerReferrer');
+const { setCustomerReferrer, clearCustomerReferrer, isUuid } = require('../customerReferrer');
 
 const CUSTOMER_ID = '11111111-1111-4111-8111-111111111111';
 const CTV_ID = '22222222-2222-4222-8222-222222222222';
@@ -106,5 +106,30 @@ describe('setCustomerReferrer (assign-only, never clears)', () => {
     expect(await setCustomerReferrer(q, null, CTV_ID)).toBe(false);
     expect(await setCustomerReferrer(q, 'nope', CTV_ID)).toBe(false);
     expect(q.calls).toHaveLength(0);
+  });
+});
+
+describe('clearCustomerReferrer (explicit clear, used by UPDATE paths)', () => {
+  test('sets referred_by_ctv_id = NULL for a valid customer', async () => {
+    const q = makeQuery();
+    const result = await clearCustomerReferrer(q, CUSTOMER_ID);
+    expect(result).toBe(true);
+    expect(q.calls).toHaveLength(1);
+    expect(q.calls[0].sql).toMatch(/UPDATE partners/i);
+    expect(q.calls[0].sql).toMatch(/referred_by_ctv_id\s*=\s*NULL/i);
+    expect(q.calls[0].params).toEqual([CUSTOMER_ID]);
+  });
+
+  test('is a NO-OP when customerId is invalid', async () => {
+    const q = makeQuery();
+    expect(await clearCustomerReferrer(q, 'nope')).toBe(false);
+    expect(await clearCustomerReferrer(q, null)).toBe(false);
+    expect(q.calls).toHaveLength(0);
+  });
+
+  test('returns false when the customer row does not exist', async () => {
+    const q = makeQuery({ customerExists: false });
+    expect(await clearCustomerReferrer(q, CUSTOMER_ID)).toBe(false);
+    expect(q.calls).toHaveLength(1);
   });
 });

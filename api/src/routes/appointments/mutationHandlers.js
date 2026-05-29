@@ -1,6 +1,6 @@
 const { query: legacyQuery, getQuery } = require('../../db');
 const { errorResponse, foreignKeyExists, isValidISODate, isValidUUID, readBodyField, VALID_STATES } = require('./helpers');
-const { setCustomerReferrer } = require('../../services/customerReferrer');
+const { setCustomerReferrer, clearCustomerReferrer } = require('../../services/customerReferrer');
 
 const VIETNAM_NOW_SQL = `(NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh')`;
 
@@ -343,12 +343,18 @@ async function updateAppointment(req, res) {
       params
     );
 
-    // Assign the chosen CTV as the customer's commission referrer (assign-only no-op
-    // when ctv_id is absent/empty). The appointment's customer never changes on update,
-    // so resolve it from the row.
-    if (ctvId) {
+    // Apply the CTV change when the edit sent ctv_id (readBodyField returns undefined only
+    // when the key is absent). A UUID assigns the referrer (validated); null/'' explicitly
+    // clears it — the edit form pre-fills the current CTV, so "None" is deliberate. The
+    // appointment's customer never changes on update, so resolve it from the row.
+    if (ctvId !== undefined) {
       const ownerRows = await q('SELECT partnerid FROM appointments WHERE id = $1', [id]);
-      await setCustomerReferrer(q, ownerRows[0]?.partnerid || null, ctvId);
+      const customerId = ownerRows[0]?.partnerid || null;
+      if (ctvId) {
+        await setCustomerReferrer(q, customerId, ctvId);
+      } else {
+        await clearCustomerReferrer(q, customerId);
+      }
     }
 
     // Fetch updated appointment
