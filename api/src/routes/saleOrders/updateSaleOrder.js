@@ -60,8 +60,12 @@ async function updateSaleOrder(req, res) {
       );
     }
 
+    // A bare CTV assignment counts as a valid update (the customer's referrer changes
+    // even when no sale-order column does), so it must not trip "No fields to update".
+    const hasCtvUpdate = ctv_id !== undefined && ctv_id !== null && ctv_id !== '';
+
     const updatedOrder = await updateSaleOrderFields(q, id, fields);
-    if (!updatedOrder && !hasLineUpdate(req.body)) {
+    if (!updatedOrder && !hasLineUpdate(req.body) && !hasCtvUpdate) {
       return res.status(400).json({ error: 'No fields to update' });
     }
     if (updatedOrder === null) {
@@ -93,6 +97,9 @@ async function updateSaleOrder(req, res) {
     }
 
     const rows = await fetchSaleOrderById(id, q);
+    if (!rows || !rows[0]) {
+      return res.status(404).json({ error: 'Sale order not found' });
+    }
     return res.json(rows[0]);
   } catch (err) {
     console.error('Error updating sale order:', err);
