@@ -24,21 +24,24 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTimezone } from '@/contexts/TimezoneContext';
-import { ClipboardPlus, Edit2, User, Stethoscope, MapPin, CalendarDays, FileText, DollarSign, Hash } from 'lucide-react';
+import { ClipboardPlus, Edit2, User, Stethoscope, MapPin, CalendarDays, FileText, DollarSign, Hash, Handshake } from 'lucide-react';
 
 import { FormShell, FormHeader, FormFooter } from '@/components/modules/FormShell';
 import { FormGrid } from '@/components/modules/FormShell/FormGrid';
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
 import { ServiceCatalogSelector } from '@/components/shared/ServiceCatalogSelector';
 import { ToothPickerModal } from './ToothPickerModal';
+import { ServiceSourceSelector } from './ServiceSourceSelector';
 import { CustomerSelector } from '@/components/shared/CustomerSelector';
 import { DoctorSelector } from '@/components/shared/DoctorSelector';
+import { CtvSelector } from '@/components/shared/CtvSelector';
 import { LocationSelector } from '@/components/shared/LocationSelector';
 import { DatePicker } from '@/components/ui/DatePicker';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
 import { useProducts } from '@/hooks/useProducts';
+import { useCtvs } from '@/hooks/useCtvs';
 import { useCustomerSources } from '@/hooks/useSettings';
 import { useCustomerSelectorOptions } from '@/components/shared/useCustomerSelectorOptions';
 import { type ServiceCatalogItem } from '@/data/mockServices';
@@ -97,11 +100,13 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
   const [toothNumbers, setToothNumbers] = useState<readonly string[]>(initialData?.toothNumbers ?? []);
   const [toothComment, setToothComment] = useState(initialData?.toothComment ?? '');
   const [sourceId, setSourceId] = useState<string | null>(initialData?.sourceId ?? null);
+  const [ctvId, setCtvId] = useState<string | null>(initialData?.ctvId ?? null);
   const [customerSearchTerm, setCustomerSearchTerm] = useState('');
   const [showToothPicker, setShowToothPicker] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const { allSources } = useCustomerSources();
+  const { ctvs, loading: ctvsLoading } = useCtvs();
 
   useEffect(() => {
     if (initialData) {
@@ -122,6 +127,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
       setToothNumbers(initialData.toothNumbers ?? []);
       setToothComment(initialData.toothComment ?? '');
       setSourceId(initialData.sourceId ?? null);
+      setCtvId(initialData.ctvId ?? null);
     }
   }, [initialData?.id, readonlyCustomerId]);
 
@@ -256,7 +262,8 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
         notes: notes.trim(), quantity: quantity || 1, unit: unit.trim(),
         toothNumbers,
         toothComment: toothComment.trim(),
-        sourceId
+        sourceId,
+        ctvId
       });
     } catch (error) {
       setErrors((prev) => ({ ...prev, submit: error instanceof Error ? error.message : t('formErrors.saveFailed', 'Lưu thất bại') }));
@@ -286,32 +293,7 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
             </div>
           )}
 
-          {/* Nguồn khách hàng */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-              <FileText className="w-3.5 h-3.5" />
-              Nguồn khách hàng
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {allSources.map((s) => {
-                const isSelected = sourceId === s.id;
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => setSourceId(isSelected ? null : s.id)}
-                    className={`
-                      px-3 py-1.5 rounded-full text-sm font-medium transition-all border
-                      ${isSelected ?
-                        'bg-orange-500 text-white border-orange-500 shadow-sm' :
-                        'bg-white text-gray-700 border-gray-200 hover:border-orange-300 hover:text-orange-600'}
-                    `}
-                  >
-                    {s.name}
-                  </button>);
-              })}
-            </div>
-          </div>
+          <ServiceSourceSelector sources={allSources} value={sourceId} onChange={setSourceId} />
 
           {/* Dịch vụ */}
           <div>
@@ -373,6 +355,15 @@ export function ServiceForm({ customerId: readonlyCustomerId, onSubmit, onClose,
               <DoctorSelector employees={employees} selectedId={dentalAideId} onChange={handleDentalAideChange} filterRoles={['doctor-assistant']} placeholder={t('form.selectDoctor', { ns: 'appointments' })} allowClear />
             </div>
           </FormGrid>
+
+          {/* Cộng tác viên (CTV) — commission referrer */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
+              <Handshake className="w-3.5 h-3.5" />
+              {t('form.ctv', 'Cộng tác viên (CTV)')}
+            </label>
+            <CtvSelector ctvs={ctvs} selectedId={ctvId} onChange={setCtvId} loading={ctvsLoading} placeholder={t('form.selectCtv', 'Chọn cộng tác viên...')} />
+          </div>
 
           {/* Chi nhánh + Ngày bắt đầu */}
           <FormGrid cols={2}>

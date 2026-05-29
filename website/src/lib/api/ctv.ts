@@ -160,6 +160,28 @@ export async function referClient(input: ReferClientInput): Promise<CtvRecord> {
   return apiFetch<CtvRecord>('/ctv/clients', { method: 'POST', body: input });
 }
 
+/** Lightweight CTV option for the service/appointment CTV selector. */
+export interface CtvOption {
+  id: string;
+  name: string;
+  phone?: string | null;
+  lob_scope?: string[] | null;
+}
+
+/**
+ * List active CTVs for the CTV selector (service/appointment forms).
+ * Available to any authenticated staff (not admin-gated). LOB-filtered so the
+ * cosmetic LOB only offers cosmetic-scoped CTVs.
+ */
+export async function fetchCtvOptions(
+  lob?: 'dental' | 'cosmetic'
+): Promise<{ ctvs: CtvOption[] }> {
+  return apiFetch('/Ctvs/options', {
+    lob: lob === 'cosmetic' ? 'cosmetic' : undefined,
+    params: lob ? { lob } : undefined,
+  });
+}
+
 /** Admin: list CTVs, optionally filtered by status. */
 export async function fetchCtvs(
   status?: 'active' | 'suspended',

@@ -39,6 +39,8 @@
     "service": "Service",
     "assistant": "Assistant",
     "dentalAide": "Dental Aide",
+    "ctv": "Collaborator (CTV)",
+    "selectCtv": "Select collaborator...",
     "notes": "Notes",
     "status": "Status",
     "color": "Color",

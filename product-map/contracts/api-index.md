@@ -13,7 +13,7 @@
 
 | Method | Path | Auth | Body | Response |
 |--------|------|------|------|----------|
-| POST | `/login` | Public | `{ email, password }` | `{ token, user, permissions }` |
+| POST | `/login` | Public | `{ email, password }` where `email` is an email address or imported legacy CTV phone/ref code | `{ token, user, permissions }` |
 | GET | `/me` | Auth | — | `{ user, permissions }` |
 | POST | `/change-password` | Auth | `{ oldPassword, newPassword }` | `{ success, message }` |
 
@@ -41,6 +41,8 @@ All dental endpoints have exact cosmetic mirrors:
 - All report/export endpoints under cosmetic prefix when LOB=cosmetic
 - Auth gates: requireLobScope('cosmetic') returns 403 S_LOB_FORBIDDEN when missing; plus permission strings (cosmetic.access etc.)
 
+**CTV commission referrer on service/appointment writes:** `POST/PATCH /api/SaleOrders` and `POST/PUT /api/Appointments` (and cosmetic mirrors) accept an optional `ctv_id` (UUID). When present it assigns that CTV as the customer's `partners.referred_by_ctv_id` (D13 priority #1 for earnings attribution) via `services/customerReferrer.setCustomerReferrer`. **Assign-only**: a null/empty/invalid `ctv_id` is a no-op and never clears an existing referrer. The CTV must exist as an `is_ctv=true`, active, non-deleted partner in the request's LOB DB (validated server-side; cross-LOB / unknown ids are rejected to avoid later earnings FK failures). Reads (`GET /api/SaleOrders`, `/SaleOrders/lines`, `/SaleOrders/:id`, `GET/POST/PUT /api/Appointments`) return the customer's current `ctv_id` for selector pre-fill.
+
 When `COSMETIC_LOB_ENABLED=false` the entire family returns 503.
 
 ## CTV Dashboard & Commission API (`/api/ctv`) — CTV role only (is_ctv + ctv.* permissions)
@@ -61,7 +63,8 @@ CTV users are hard-redirected to `/ctv` on login and receive 403 on any admin ro
 
 | Method | Path | Auth | Body / Query | Response |
 |--------|------|------|--------------|----------|
-| GET | `/api/Ctvs`, `/api/cosmetic/Ctvs` | admin (`ctv.manage`/`*`) | `?status=active\|suspended` | `{ ctvs: [{id, name, phone, email, lob_scope, active, referred_by_ctv_id, upline_name}] }` |
+| GET | `/api/Ctvs`, `/api/cosmetic/Ctvs` | admin (`ctv.manage`/`*`) | `?status=active\|suspended` | `{ ctvs: [{id, name, phone, email, lob_scope, active, referred_by_ctv_id, upline_name, source, legacy_code, created_via}] }`; cosmetic mount filters to Cosmetic-scoped CTVs and exposes `source='legacy_ctv'` for legacy imports |
+| GET | `/api/Ctvs/options`, `/api/cosmetic/Ctvs/options` | Auth (any staff) | `?lob=dental\|cosmetic` | `{ ctvs: [{id, name, phone, lob_scope}] }` — active CTVs for the CTV selector in the Service/Appointment forms; LOB-filtered (cosmetic mount returns only Cosmetic-scoped CTVs) |
 | PATCH | `/api/Ctvs/:id`, `/api/cosmetic/Ctvs/:id` | admin | `{ active: boolean }` | Updated CTV (suspend/reactivate); mirrors to cosmetic DB if present |
 | GET | `/api/CommissionConfig`, `/api/cosmetic/CommissionConfig` | Auth | — | `{ levels: [{level,label,enabled,share_percent}], defaultReferralPercent }` |
 | PUT | `/api/CommissionConfig`, `/api/cosmetic/CommissionConfig` | admin (`commission.config.manage`/`*`) | `{ levels[], defaultReferralPercent }` | Upserts config; enabled-sum > 100 → 400 `B_LEVEL_SUM_EXCEEDS_100` |

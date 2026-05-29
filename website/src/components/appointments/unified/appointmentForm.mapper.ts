@@ -38,6 +38,7 @@ export function formDataToApiPayload(
     color: data.color ?? '1',
     state: data.status ?? 'scheduled',
     productid: data.serviceId,
+    ctv_id: data.ctvId ?? null,
   };
 }
 
@@ -68,6 +69,7 @@ export function apiAppointmentToFormData(
     assistantName: api.assistantname ?? undefined,
     dentalAideId: api.dentalaideid ?? undefined,
     dentalAideName: api.dentalaidename ?? undefined,
+    ctvId: api.ctv_id ?? undefined,
     locationId: api.companyid ?? '',
     locationName: api.companyname ?? '',
     appointmentType: 'consultation', // Default — caller should override if known
@@ -102,6 +104,7 @@ export function overviewAppointmentToFormData(
     assistantName: overview.assistantName ?? undefined,
     dentalAideId: overview.dentalAideId ?? undefined,
     dentalAideName: overview.dentalAideName ?? undefined,
+    ctvId: overview.ctvId ?? undefined,
     locationId: overview.locationId,
     locationName: overview.locationName,
     appointmentType: 'consultation',
@@ -136,6 +139,7 @@ export function calendarAppointmentToFormData(
     assistantName: cal.assistantName ?? undefined,
     dentalAideId: cal.dentalAideId ?? undefined,
     dentalAideName: cal.dentalAideName ?? undefined,
+    ctvId: cal.ctvId ?? undefined,
     locationId: cal.locationId,
     locationName: cal.locationName,
     appointmentType: cal.appointmentType,

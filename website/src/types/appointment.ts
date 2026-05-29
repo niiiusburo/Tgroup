@@ -35,6 +35,8 @@ export interface CalendarAppointment {
   readonly assistantName?: string | null;
   readonly dentalAideId?: string | null;
   readonly dentalAideName?: string | null;
+  // CTV (Cộng tác viên) commission referrer of the customer
+  readonly ctvId?: string | null;
   // Service / product mapping
   readonly productId?: string | null;
 }

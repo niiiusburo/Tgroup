@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const { query: legacyQuery, getQuery } = require('../../db');
 const { calculateSaleOrderPaymentStateFromAllocations } = require('../../lib/saleOrderTotals');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
+const { setCustomerReferrer } = require('../../services/customerReferrer');
 
 async function updateSaleOrder(req, res) {
   try {
@@ -24,6 +25,7 @@ async function updateSaleOrder(req, res) {
       tooth_numbers,
       tooth_comment,
       sourceid,
+      ctv_id,
     } = req.body;
 
     if (amounttotal != null && parseFloat(amounttotal) < 0) {
@@ -77,6 +79,18 @@ async function updateSaleOrder(req, res) {
       tooth_comment,
       paymentState,
     });
+
+    // Assign the chosen CTV as the customer's commission referrer (assign-only no-op
+    // when ctv_id is absent/empty). Resolve the customer from the order if the body
+    // didn't carry partnerid.
+    if (ctv_id) {
+      let customerId = partnerid;
+      if (!customerId) {
+        const ownerRows = await q('SELECT partnerid FROM saleorders WHERE id = $1', [id]);
+        customerId = ownerRows[0]?.partnerid || null;
+      }
+      await setCustomerReferrer(q, customerId, ctv_id);
+    }
 
     const rows = await fetchSaleOrderById(id, q);
     return res.json(rows[0]);

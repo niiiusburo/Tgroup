@@ -36,6 +36,8 @@ export interface UnifiedAppointmentFormData {
   readonly assistantName?: string | null;
   readonly dentalAideId?: string | null;
   readonly dentalAideName?: string | null;
+  /** CTV (Cộng tác viên) commission referrer. Assigning sets the customer's referred_by_ctv_id. */
+  readonly ctvId?: string | null;
   readonly locationId: string;
   readonly locationName: string;
   readonly appointmentType: AppointmentType;

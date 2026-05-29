@@ -13,6 +13,7 @@ export declare const AppointmentBaseSchema: z.ZodObject<{
     productid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     assistantid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     dentalaideid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    ctv_id: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }, "strip", z.ZodTypeAny, {
     date: string;
     id?: string | undefined;
@@ -27,6 +28,7 @@ export declare const AppointmentBaseSchema: z.ZodObject<{
     productid?: string | null | undefined;
     assistantid?: string | null | undefined;
     dentalaideid?: string | null | undefined;
+    ctv_id?: string | null | undefined;
 }, {
     date: string;
     id?: string | undefined;
@@ -41,6 +43,7 @@ export declare const AppointmentBaseSchema: z.ZodObject<{
     productid?: string | null | undefined;
     assistantid?: string | null | undefined;
     dentalaideid?: string | null | undefined;
+    ctv_id?: string | null | undefined;
 }>;
 export declare const AppointmentCreateSchema: z.ZodObject<Omit<{
     id: z.ZodOptional<z.ZodString>;
@@ -56,6 +59,7 @@ export declare const AppointmentCreateSchema: z.ZodObject<Omit<{
     productid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     assistantid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     dentalaideid: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    ctv_id: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }, "id">, "strip", z.ZodTypeAny, {
     date: string;
     time?: string | null | undefined;
@@ -69,6 +73,7 @@ export declare const AppointmentCreateSchema: z.ZodObject<Omit<{
     productid?: string | null | undefined;
     assistantid?: string | null | undefined;
     dentalaideid?: string | null | undefined;
+    ctv_id?: string | null | undefined;
 }, {
     date: string;
     time?: string | null | undefined;
@@ -82,6 +87,7 @@ export declare const AppointmentCreateSchema: z.ZodObject<Omit<{
     productid?: string | null | undefined;
     assistantid?: string | null | undefined;
     dentalaideid?: string | null | undefined;
+    ctv_id?: string | null | undefined;
 }>;
 export declare const AppointmentUpdateSchema: z.ZodObject<Omit<{
     id: z.ZodOptional<z.ZodOptional<z.ZodString>>;
@@ -97,6 +103,7 @@ export declare const AppointmentUpdateSchema: z.ZodObject<Omit<{
     productid: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     assistantid: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
     dentalaideid: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
+    ctv_id: z.ZodOptional<z.ZodNullable<z.ZodOptional<z.ZodString>>>;
 }, "id">, "strip", z.ZodTypeAny, {
     date?: string | undefined;
     time?: string | null | undefined;
@@ -110,6 +117,7 @@ export declare const AppointmentUpdateSchema: z.ZodObject<Omit<{
     productid?: string | null | undefined;
     assistantid?: string | null | undefined;
     dentalaideid?: string | null | undefined;
+    ctv_id?: string | null | undefined;
 }, {
     date?: string | undefined;
     time?: string | null | undefined;
@@ -123,6 +131,7 @@ export declare const AppointmentUpdateSchema: z.ZodObject<Omit<{
     productid?: string | null | undefined;
     assistantid?: string | null | undefined;
     dentalaideid?: string | null | undefined;
+    ctv_id?: string | null | undefined;
 }>;
 export type Appointment = z.infer<typeof AppointmentBaseSchema>;
 export type AppointmentCreate = z.infer<typeof AppointmentCreateSchema>;

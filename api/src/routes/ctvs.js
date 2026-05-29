@@ -71,6 +71,45 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 /**
+ * GET /api/Ctvs/options?lob=dental|cosmetic
+ * Lightweight active-CTV list (id, name, phone) for populating the CTV selector in the
+ * service/appointment forms. Available to any authenticated staff member (not admin-gated)
+ * since assigning a CTV requires only customers.edit / appointments.add. CTV auth rows live
+ * in the dental (default) DB; results are filtered by lob_scope so the cosmetic LOB only
+ * offers cosmetic-scoped CTVs (which are mirrored into the cosmetic DB for earnings FK).
+ */
+router.get('/options', requireAuth, async (req, res) => {
+  const { employeeId } = req.user || {};
+  if (!employeeId) return res.status(401).json({ error: 'No token' });
+
+  const requestedLob = req.lob === 'cosmetic'
+    ? 'cosmetic'
+    : (req.query.lob === 'dental' || req.query.lob === 'cosmetic' ? req.query.lob : null);
+
+  const db = getDb('dental');
+  const where = ['p.is_ctv = true', 'p.isdeleted = false', 'p.active = true'];
+  const params = [];
+  if (requestedLob) {
+    params.push(requestedLob);
+    where.push(`COALESCE(p.lob_scope, ARRAY[]::text[]) @> ARRAY[$${params.length}]::text[]`);
+  }
+
+  try {
+    const sql = `
+      SELECT p.id, p.name, p.phone, p.lob_scope
+      FROM dbo.partners p
+      WHERE ${where.join(' AND ')}
+      ORDER BY p.name ASC NULLS LAST
+    `;
+    const rows = await db.queryRows(sql, params);
+    return res.json({ ctvs: rows });
+  } catch (e) {
+    console.error('[Ctvs GET /options] error:', e.message);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
  * PATCH /api/Ctvs/:id  Body: { active: boolean }
  * Admin-only suspend/reactivate. Mirrors the change into cosmetic DB if the row exists there.
  */

@@ -1,5 +1,34 @@
 [
   {
+    "version": "0.32.63",
+    "date": "2026-05-29",
+    "commit": "pending",
+    "highlights": "Assign a CTV (Cộng tác viên) directly from the Service and Appointment forms — the chosen collaborator becomes the customer's commission referrer.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Service form (Services page + customer profile) and Appointment form now have a 'Cộng tác viên (CTV)' selector after the doctor / assistant / doctor-aide row.",
+          "Picking a CTV sets the customer's referred_by_ctv_id, so the chosen collaborator earns commission on that customer's payments (D13 attribution). Per-customer; the current CTV pre-fills when editing.",
+          "New GET /api/Ctvs/options endpoint (LOB-filtered) powers the selector for any staff who can edit services/appointments."
+        ]
+      },
+      {
+        "title": "Hardening",
+        "items": [
+          "Assign-only: leaving the CTV selector empty never clears an existing referrer.",
+          "Server validates the CTV exists as an active CTV in the current LOB before assigning — cross-LOB/unknown ids are rejected to prevent commission misattribution and earnings FK failures (found by an adversarial multi-agent review)."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "New unit tests for the customerReferrer helper (assign-only + validation) and CTV mapping in the appointment form mapper; backend suite green (60 tests)."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.61",
     "date": "2026-05-29",
     "commit": "pending",

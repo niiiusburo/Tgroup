@@ -15,6 +15,10 @@ export const AppointmentBaseSchema = z.object({
   productid: z.string().uuid().optional().nullable(),
   assistantid: z.string().uuid().optional().nullable(),
   dentalaideid: z.string().uuid().optional().nullable(),
+  // CTV (Cộng tác viên) commission referrer. When present, the appointment
+  // handler assigns this CTV as the customer's referred_by_ctv_id so the
+  // commission engine attributes future paid-service earnings to them.
+  ctv_id: z.string().uuid().optional().nullable(),
 });
 
 export const AppointmentCreateSchema = AppointmentBaseSchema.omit({ id: true });

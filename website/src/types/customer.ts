@@ -139,6 +139,8 @@ export interface CustomerService {
   readonly paidAmount?: number;
   readonly residual?: number;
   readonly sourceId?: string | null;
+  /** CTV (Cộng tác viên) commission referrer assigned to this customer. */
+  readonly ctvId?: string | null;
   readonly locationId?: string | null;
   /** Branch/clinic name where the service was performed. */
   readonly locationName?: string;

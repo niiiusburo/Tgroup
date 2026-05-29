@@ -118,6 +118,7 @@ export function CustomerProfileModals({
             assistantId: editingService.assistantId,
             dentalAideId: editingService.dentalAideId,
             sourceId: editingService.sourceId,
+            ctvId: editingService.ctvId,
             locationId: editingService.locationId || profile.companyId,
             startDate: editingService.date,
             notes: editingService.notes || '',

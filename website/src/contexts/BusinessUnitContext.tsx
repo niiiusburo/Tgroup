@@ -173,3 +173,12 @@ export function useBusinessUnit(): BusinessUnitContextValue {
   }
   return ctx;
 }
+
+/**
+ * Non-throwing accessor. Returns null when no BusinessUnitProvider is mounted
+ * (e.g. components rendered in isolation by unit tests). Production code always
+ * runs under the provider; use this only where a sensible default is acceptable.
+ */
+export function useBusinessUnitOptional(): BusinessUnitContextValue | null {
+  return useContext(BusinessUnitContext);
+}

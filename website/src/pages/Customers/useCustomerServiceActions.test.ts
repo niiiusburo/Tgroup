@@ -6,6 +6,12 @@ vi.mock('@/lib/api', () => ({
   deleteSaleOrderLine: vi.fn().mockResolvedValue({ success: true }),
 }));
 
+// The hook reads the active LOB via useBusinessUnit; stub it so the hook can be
+// rendered without a BusinessUnitProvider in this unit test.
+vi.mock('@/contexts/BusinessUnitContext', () => ({
+  useBusinessUnit: () => ({ currentLOB: 'dental' }),
+}));
+
 describe('useCustomerServiceActions', () => {
   it('refreshes visible service history after deleting a service line', async () => {
     const createServiceRecord = vi.fn().mockResolvedValue(undefined);

@@ -32,6 +32,8 @@ export interface ApiSaleOrder {
   tooth_comment: string | null;
   sourceid: string | null;
   sourcename: string | null;
+  /** Customer's CTV (Cộng tác viên) commission referrer (partners.referred_by_ctv_id). */
+  ctv_id: string | null;
   lastupdated: string | null;
   isdeleted?: boolean;
   /** Sale order reference code (e.g. SO-2024-001). */
@@ -82,6 +84,8 @@ export function createSaleOrder(data: {
   notes?: string;
   tooth_numbers?: string | null;
   tooth_comment?: string | null;
+  sourceid?: string | null;
+  ctv_id?: string | null;
 }, lob?: 'dental' | 'cosmetic') {
   return apiFetch<ApiSaleOrder>('/SaleOrders', { method: 'POST', body: data, lob });
 }
@@ -106,6 +110,8 @@ export function updateSaleOrder(id: string, data: {
   notes?: string | null;
   tooth_numbers?: string | null;
   tooth_comment?: string | null;
+  sourceid?: string | null;
+  ctv_id?: string | null;
 }, lob?: 'dental' | 'cosmetic') {
   return apiFetch<ApiSaleOrder>(`/SaleOrders/${id}`, { method: 'PATCH', body: data, lob });
 }
@@ -159,6 +165,8 @@ export interface ApiSaleOrderLine {
   companyId?: string | null;
   sourceid?: string | null;
   sourceId?: string | null;
+  ctv_id?: string | null;
+  ctvId?: string | null;
   unit?: string | null;
   orderid?: string | null;
   orderId?: string | null;

@@ -1,5 +1,6 @@
 const { query: legacyQuery, getQuery } = require('../../db');
 const { errorResponse, foreignKeyExists, isValidISODate, isValidUUID, readBodyField, VALID_STATES } = require('./helpers');
+const { setCustomerReferrer } = require('../../services/customerReferrer');
 
 const VIETNAM_NOW_SQL = `(NOW() AT TIME ZONE 'Asia/Ho_Chi_Minh')`;
 
@@ -25,6 +26,7 @@ async function createAppointment(req, res) {
     const productId = b.productId || b.productid || null;
     const assistantId = b.assistantId || b.assistantid || null;
     const dentalAideId = b.dentalAideId || b.dentalaideid || null;
+    const ctvId = b.ctv_id || b.ctvId || null;
 
     // Validate required fields
     const missingFields = [];
@@ -99,6 +101,10 @@ async function createAppointment(req, res) {
 
     const newAppointment = result[0];
 
+    // Assign the chosen CTV as the customer's commission referrer (assign-only no-op
+    // when ctv_id is absent/empty — never clears an existing referrer).
+    await setCustomerReferrer(q, partnerId, ctvId);
+
     // Fetch full details with joins
     const rows = await q(
       `SELECT
@@ -116,6 +122,7 @@ async function createAppointment(req, res) {
         p.displayname AS partnerdisplayname,
         p.phone AS partnerphone,
         p.ref AS partnercode,
+        p.referred_by_ctv_id AS ctv_id,
         a.companyid,
         c.name AS companyname,
         a.doctorid,
@@ -171,6 +178,7 @@ async function updateAppointment(req, res) {
     const productId = readBodyField(b, 'productId', 'productid');
     const assistantId = readBodyField(b, 'assistantId', 'assistantid');
     const dentalAideId = readBodyField(b, 'dentalAideId', 'dentalaideid');
+    const ctvId = readBodyField(b, 'ctv_id', 'ctvId');
 
     // Validate ID
     if (!isValidUUID(id)) {
@@ -335,6 +343,14 @@ async function updateAppointment(req, res) {
       params
     );
 
+    // Assign the chosen CTV as the customer's commission referrer (assign-only no-op
+    // when ctv_id is absent/empty). The appointment's customer never changes on update,
+    // so resolve it from the row.
+    if (ctvId) {
+      const ownerRows = await q('SELECT partnerid FROM appointments WHERE id = $1', [id]);
+      await setCustomerReferrer(q, ownerRows[0]?.partnerid || null, ctvId);
+    }
+
     // Fetch updated appointment
     const rows = await q(
       `SELECT
@@ -348,6 +364,7 @@ async function updateAppointment(req, res) {
         p.name AS partnername,
         p.displayname AS partnerdisplayname,
         p.ref AS partnercode,
+        p.referred_by_ctv_id AS ctv_id,
         a.companyid,
         c.name AS companyname,
         a.doctorid,

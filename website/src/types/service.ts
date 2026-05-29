@@ -68,4 +68,6 @@ export interface ServiceRecord {
   readonly orderCode?: string;
   readonly sourceId?: string | null;
   readonly sourceName?: string;
+  /** CTV (Cộng tác viên) commission referrer assigned to this service's customer. */
+  readonly ctvId?: string | null;
 }

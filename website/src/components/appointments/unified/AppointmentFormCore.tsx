@@ -20,6 +20,7 @@ import { useCustomers } from '@/hooks/useCustomers';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useLocations } from '@/hooks/useLocations';
 import { useProducts } from '@/hooks/useProducts';
+import { useCtvs } from '@/hooks/useCtvs';
 import { useLocationFilter } from '@/contexts/LocationContext';
 import type { AppointmentType } from '@/constants';
 import type { Customer, CustomerFormData } from '@/types/customer';
@@ -49,6 +50,7 @@ export function AppointmentFormCore({
   const employees = employeesProp ?? fetchedEmployees;
   const { selectedLocationId } = useLocationFilter();
   const { products: serviceCatalog, isLoading: productsLoading } = useProducts({ limit: 500 });
+  const { ctvs, loading: ctvsLoading } = useCtvs();
   const staffLoading = employeesProp ? false : employeesLoading;
   const [customerSearchTerm, setCustomerSearchTerm] = useState('');
   const { customers: customerOptions, searching: customersSearching } = useCustomerSelectorOptions(
@@ -232,7 +234,7 @@ export function AppointmentFormCore({
         />
       </div>
 
-      <AppointmentStaffFields employees={employees} data={data} onChange={onChange} loading={staffLoading} />
+      <AppointmentStaffFields employees={employees} data={data} onChange={onChange} loading={staffLoading} ctvs={ctvs} ctvsLoading={ctvsLoading} />
 
       <AppointmentServiceFields
         catalog={serviceCatalogItems}

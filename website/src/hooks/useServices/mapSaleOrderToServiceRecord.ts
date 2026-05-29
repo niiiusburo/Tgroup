@@ -72,5 +72,6 @@ export function mapSaleOrderToServiceRecord(order: ApiSaleOrder): ServiceRecord 
     orderCode: extractOrderCode(order),
     sourceId: order.sourceid ?? null,
     sourceName: order.sourcename || undefined,
+    ctvId: order.ctv_id ?? null,
   };
 }

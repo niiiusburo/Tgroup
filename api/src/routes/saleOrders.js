@@ -109,6 +109,7 @@ router.get('/', requirePermission('services.view'), async (req, res) => {
         so.notes,
         COALESCE(so.sourceid, p.sourceid) AS sourceid,
         cs.name AS sourcename,
+        p.referred_by_ctv_id AS ctv_id,
         (SELECT sol.productid FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productid,
         (SELECT sol.productname FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS productname,
         (SELECT sol.tooth_numbers FROM saleorderlines sol WHERE sol.orderid = so.id AND sol.isdeleted = false LIMIT 1) AS tooth_numbers,
@@ -226,6 +227,7 @@ router.get('/lines', requirePermission('services.view'), async (req, res) => {
         so.dentalaideid,
         so.companyid,
         so.sourceid,
+        cust.referred_by_ctv_id AS ctv_id,
         COALESCE(NULLIF(NULLIF(so.unit, ''), 'services.form.unitPlaceholder'), pr.uomname) as unit,
         so.id as orderid,
         so.name as ordername,
@@ -247,6 +249,7 @@ router.get('/lines', requirePermission('services.view'), async (req, res) => {
       LEFT JOIN employees asst ON asst.id = COALESCE(sol.assistantid, so.assistantid)
       LEFT JOIN employees da ON da.id = so.dentalaideid
       LEFT JOIN companies c ON c.id = so.companyid
+      LEFT JOIN partners cust ON cust.id = so.partnerid
       LEFT JOIN (
         SELECT orderid, COUNT(*) as order_line_count
         FROM saleorderlines

@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const { query: legacyQuery, getQuery } = require('../../db');
 const { getVietnamToday, getVietnamYear } = require('../../lib/dateUtils');
 const { fetchSaleOrderById } = require('./fetchSaleOrderById');
+const { setCustomerReferrer } = require('../../services/customerReferrer');
 
 async function createSaleOrder(req, res) {
   try {
@@ -23,6 +24,7 @@ async function createSaleOrder(req, res) {
       tooth_numbers,
       tooth_comment,
       sourceid,
+      ctv_id,
     } = req.body;
 
     if (!partnerid) {
@@ -94,6 +96,10 @@ async function createSaleOrder(req, res) {
         ],
       );
     }
+
+    // Assign the chosen CTV as the customer's commission referrer (assign-only no-op
+    // when ctv_id is absent/empty — never clears an existing referrer).
+    await setCustomerReferrer(q, partnerid, ctv_id);
 
     const rows = await fetchSaleOrderById(id, q);
     return res.status(201).json(rows[0]);

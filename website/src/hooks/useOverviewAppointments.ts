@@ -44,6 +44,8 @@ export interface OverviewAppointment {
   readonly assistantName: string | null;
   readonly dentalAideId: string | null;
   readonly dentalAideName: string | null;
+  // CTV (Cộng tác viên) commission referrer of the customer
+  readonly ctvId: string | null;
 }
 
 // ─── Zone 3 filter tabs ──────────────────────────────────────────
@@ -140,6 +142,7 @@ function mapApiToOverview(
     assistantName: apt.assistantname ?? null,
     dentalAideId: apt.dentalaideid ?? null,
     dentalAideName: apt.dentalaidename ?? null,
+    ctvId: apt.ctv_id ?? null,
   };
 }
 

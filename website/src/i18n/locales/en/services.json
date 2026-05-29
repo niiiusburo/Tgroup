@@ -91,6 +91,8 @@
     "doctor": "Doctor",
     "assistant": "Assistant",
     "dentalAide": "Dental Aide",
+    "ctv": "Collaborator (CTV)",
+    "selectCtv": "Select collaborator...",
     "startDate": "Start Date",
     "endDate": "End Date",
     "quantity": "Quantity",

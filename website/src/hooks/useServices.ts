@@ -18,6 +18,7 @@ import {
 } from '@/lib/api';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import { mapSaleOrderToServiceRecord } from './useServices/mapSaleOrderToServiceRecord';
+import { nullableUuid } from '@/lib/uuid';
 
 export type ServiceFilter = 'all' | ServiceStatus;
 export type CategoryFilter = 'all' | AppointmentType;
@@ -48,6 +49,8 @@ export interface CreateServiceInput {
   readonly toothNumbers: readonly string[];
   readonly toothComment?: string;
   readonly sourceId?: string | null;
+  /** CTV (Cộng tác viên) commission referrer. Assigning sets the customer's referred_by_ctv_id. */
+  readonly ctvId?: string | null;
 }
 
 interface UseServicesOptions {
@@ -183,7 +186,8 @@ export function useServices(selectedLocationId?: string, partnerId?: string, opt
       notes: input.notes,
       tooth_numbers: input.toothNumbers?.join(',') || null,
       tooth_comment: input.toothComment || null,
-      sourceid: input.sourceId ?? null,
+      sourceid: nullableUuid(input.sourceId),
+      ctv_id: nullableUuid(input.ctvId),
     };
 
     const created = await createSaleOrder(apiPayload, currentLOB);
@@ -215,7 +219,8 @@ export function useServices(selectedLocationId?: string, partnerId?: string, opt
       notes: input.notes,
       tooth_numbers: input.toothNumbers?.join(',') || null,
       tooth_comment: input.toothComment || null,
-      sourceid: input.sourceId ?? null,
+      sourceid: nullableUuid(input.sourceId),
+      ctv_id: nullableUuid(input.ctvId),
     };
 
     const updated = await updateSaleOrder(input.id, apiPayload, currentLOB);

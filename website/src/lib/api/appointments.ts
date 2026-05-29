@@ -37,6 +37,8 @@ export interface ApiAppointment {
   assistantname: string | null;
   dentalaideid: string | null;
   dentalaidename: string | null;
+  /** CTV (Cộng tác viên) commission referrer of the customer (partners.referred_by_ctv_id). */
+  ctv_id?: string | null;
 }
 
 export function fetchAppointments(params?: {

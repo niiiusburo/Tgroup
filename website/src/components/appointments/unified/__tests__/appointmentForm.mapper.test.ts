@@ -157,4 +157,33 @@ describe('apiAppointmentToFormData', () => {
     expect(formData.estimatedDuration).toBe(45);
     expect(formData).not.toHaveProperty('endTime');
   });
+
+  it('maps a selected CTV to ctv_id in the API payload', () => {
+    const ctvId = '880e8400-e29b-41d4-a716-446655440099';
+    const payload = formDataToApiPayload({ ...makeValidFormData(), ctvId });
+    expect(payload.ctv_id).toBe(ctvId);
+    // payload must still satisfy the create contract with the new field present
+    expect(AppointmentCreateSchema.safeParse(payload).success).toBe(true);
+  });
+
+  it('sends ctv_id null when no CTV is selected (assign-only, server no-ops)', () => {
+    const payload = formDataToApiPayload(makeValidFormData());
+    expect(payload.ctv_id).toBeNull();
+    expect(AppointmentCreateSchema.safeParse(payload).success).toBe(true);
+  });
+
+  it('preloads ctvId from the appointment record (referred_by_ctv_id)', () => {
+    const ctvId = '880e8400-e29b-41d4-a716-446655440099';
+    const api = {
+      id: 'test-id',
+      date: '2026-04-21',
+      time: '14:30',
+      partnerid: 'p1',
+      companyid: 'c1',
+      state: 'scheduled',
+      ctv_id: ctvId,
+    } as any;
+    const formData = apiAppointmentToFormData(api);
+    expect(formData.ctvId).toBe(ctvId);
+  });
 });

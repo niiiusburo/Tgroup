@@ -17,6 +17,10 @@ exports.AppointmentBaseSchema = zod_1.z.object({
     productid: zod_1.z.string().uuid().optional().nullable(),
     assistantid: zod_1.z.string().uuid().optional().nullable(),
     dentalaideid: zod_1.z.string().uuid().optional().nullable(),
+    // CTV (Cộng tác viên) commission referrer. When present, the appointment
+    // handler assigns this CTV as the customer's referred_by_ctv_id so the
+    // commission engine attributes future paid-service earnings to them.
+    ctv_id: zod_1.z.string().uuid().optional().nullable(),
 });
 exports.AppointmentCreateSchema = exports.AppointmentBaseSchema.omit({ id: true });
 exports.AppointmentUpdateSchema = exports.AppointmentBaseSchema.partial().omit({ id: true });

@@ -143,6 +143,7 @@ export function mapApiAppointmentToCalendar(apt: ApiAppointment): CalendarAppoin
     assistantName: apt.assistantname ?? null,
     dentalAideId: apt.dentalaideid ?? null,
     dentalAideName: apt.dentalaidename ?? null,
+    ctvId: apt.ctv_id ?? null,
     productId: apt.productid ?? null,
   };
 }

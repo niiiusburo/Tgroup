@@ -31,6 +31,7 @@ interface ServiceCreateInput {
   toothNumbers: readonly string[];
   toothComment?: string;
   sourceId?: string | null;
+  ctvId?: string | null;
 }
 
 interface ServiceUpdateInput extends ServiceCreateInput {
@@ -85,6 +86,7 @@ export function useCustomerServiceActions({
         toothNumbers: data.toothNumbers,
         toothComment: data.toothComment ?? undefined,
         sourceId: data.sourceId ?? null,
+        ctvId: data.ctvId ?? null,
       });
       // Refresh the service list so the new record appears immediately
       await loadSaleOrderLines();
@@ -120,6 +122,7 @@ export function useCustomerServiceActions({
         toothNumbers: data.toothNumbers,
         toothComment: data.toothComment ?? undefined,
         sourceId: data.sourceId ?? null,
+        ctvId: data.ctvId ?? null,
       };
       await updateServiceRecord(payload);
       await loadSaleOrderLines();
