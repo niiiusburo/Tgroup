@@ -62,6 +62,14 @@ Each entry:
 - **Prevention:** Rate limiting must differentiate between per-account attacks and per-network traffic.
 - **Related:** `api/tests/loginRateLimiter.test.js`.
 
+## FM-20260529-01: TMV Cosmetic Employee Hits Login Rate Limit
+
+- **Symptom:** A valid Cosmetic employee on `https://tmv.2checkin.com/login` receives invalid-login responses until the normal 429 rate limit appears.
+- **Root Cause:** The employee exists only in the Cosmetic database, but `/api/Auth/login` looked up identity only through the Dental database connection.
+- **Fix:** Preserve dental-first auth, then fall back to Cosmetic identity lookup when `COSMETIC_LOB_ENABLED=true`; `/api/Auth/me` refreshes from the auth-source LOB stored in the JWT.
+- **Prevention:** Keep cosmetic-only employee login covered in `api/tests/loginRateLimiter.test.js` and check live DB placement before treating 429 as the root cause.
+- **Related:** `api/src/routes/auth.js`, `product-map/domains/auth.yaml`, `INV-008D`.
+
 ## FM-20260415-01: Export Downloads Timeout at 60s
 
 - **Symptom:** Large revenue/payment exports fail mid-download with nginx 504 Gateway Timeout.

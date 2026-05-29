@@ -26,7 +26,7 @@ Staff → /login form → POST /api/Auth/login
 {
   employeeId: string;    // partners.id
   name: string;
-  email: string;
+  email: string; // staff/admin email, or imported legacy CTV phone/ref code
   companyId: string;     // primary branch
   lob_scope: Array<'dental' | 'cosmetic'>; // Admin may receive multiple; staff receive one
   is_ctv: boolean;
@@ -37,6 +37,8 @@ Staff → /login form → POST /api/Auth/login
 ```
 
 **Storage:** `localStorage` key `tgclinic_token`. Not httpOnly cookie (see ADR-0004).
+
+**CSRF posture:** Authenticated API requests must include an explicit `Authorization: Bearer <token>` header. The app does not use cookie-backed API sessions, and CORS is allowlist-based; CSRF middleware is therefore not part of the current auth boundary. If API auth moves to cookies, CSRF protection must be added before release.
 
 **Secret:** `JWT_SECRET` env var. Must be identical across all environments sharing token validation (prod and staging may differ, but swapping tokens between them fails validation).
 
@@ -106,11 +108,11 @@ Effective permissions = (Group ∪ Grants) − Revokes, then filtered by locatio
 
 | Endpoint | Limit | Scope |
 |---|---|---|
-| `POST /api/Auth/login` | 5 failures / 15 min per email+IP | Brute-force protection |
-| `POST /api/Auth/login` | 20 failures / 15 min per IP | Network-wide cap |
+| `POST /api/Auth/login` | 10 failures / 15 min per login identifier+IP | Brute-force protection |
+| `POST /api/Auth/login` | 75 failures / 15 min per IP | Network-wide cap |
 | `POST /api/telemetry/errors` | 100 req / min per IP | Public ingestion abuse prevention |
 
-**Implementation:** `express-rate-limit` in `api/src/server.js` for login; custom counter in `api/src/routes/auth.js` for email-scoped lockout.
+**Implementation:** two `express-rate-limit` limiters in `api/src/server.js`; successful logins are skipped so the lockout budget counts failed attempts.
 
 ## Input Validation
 

@@ -16,15 +16,30 @@ const staffPermissions = {
   locations: [],
 };
 
+const cosmeticStaffPermissions = {
+  groupId: 'cosmetic-staff-group',
+  groupName: 'Dentist',
+  effectivePermissions: ['cosmetic.access'],
+  locations: [],
+};
+
 function isAdminPermissionState(permissionState) {
   const groupId = String(permissionState?.groupId || '').trim().toLowerCase();
   const groupName = String(permissionState?.groupName || '').trim().toLowerCase();
   return groupId === ADMIN_GROUP_ID || groupName === 'admin' || groupName === 'super admin' || groupName === 'system administrator';
 }
 
-function loadApp({ passwordMatches, permissions = adminPermissions, lobScope = ['dental', 'cosmetic'] }) {
+function loadApp({
+  passwordMatches,
+  permissions = adminPermissions,
+  lobScope = ['dental', 'cosmetic'],
+  loginLob = 'dental',
+  cosmeticEnabled = false,
+  isCtv = false,
+}) {
   jest.resetModules();
   process.env.JWT_SECRET = 'test-secret';
+  process.env.COSMETIC_LOB_ENABLED = cosmeticEnabled ? 'true' : 'false';
 
   jest.doMock('../src/middleware/ipAccess', () => ({
     enforceIpAccess: (_req, _res, next) => next(),
@@ -53,26 +68,39 @@ function loadApp({ passwordMatches, permissions = adminPermissions, lobScope = [
     v4: jest.fn(() => 'mock-uuid'),
   }));
 
+  const employeeRow = {
+    id: 'employee-id',
+    name: 'Test Employee',
+    email: 't@clinic.vn',
+    password_hash: 'stored-password-hash',
+    companyId: 'company-id',
+    companyName: 'Test Clinic',
+    lob_scope: lobScope,
+    lobScope,
+    is_ctv: isCtv,
+    isCtv,
+  };
+
+  const makeQuery = (lob) => jest.fn(async (sql) => {
+    if (sql.includes('SELECT p.id, p.name, p.email, p.password_hash')) {
+      return loginLob === lob ? [employeeRow] : [];
+    }
+    if (sql.includes('SELECT p.id, p.name, p.email, p.companyid')) {
+      return loginLob === lob ? [employeeRow] : [];
+    }
+    if (sql.includes('lob_scope') || sql.includes('lobScope')) {
+      return [{ lob_scope: lobScope, lobScope, is_ctv: isCtv, isCtv }];
+    }
+    return [];
+  });
+
+  const dentalQuery = makeQuery('dental');
+  const cosmeticQuery = makeQuery('cosmetic');
+
   jest.doMock('../src/db', () => ({
-    query: jest.fn(async (sql) => {
-      if (sql.includes('SELECT p.id, p.name, p.email, p.password_hash')) {
-        return [{
-          id: 'employee-id',
-          name: 'Test Employee',
-          email: 't@clinic.vn',
-          password_hash: 'stored-password-hash',
-          companyId: 'company-id',
-          companyName: 'Test Clinic',
-          lobScope,
-          isCtv: false,
-        }];
-      }
-      if (sql.includes('lob_scope') || sql.includes('lobScope')) {
-        // support /me/lob-scope and me refresh
-        return [{ lobScope, isCtv: false }];
-      }
-      return [];
-    }),
+    query: dentalQuery,
+    getQuery: jest.fn((lob) => (lob === 'cosmetic' ? cosmeticQuery : dentalQuery)),
+    runWithLob: jest.fn((_lob, fn) => fn()),
     pool: {
       connect: jest.fn(),
       end: jest.fn(),
@@ -86,6 +114,7 @@ describe('login rate limiter', () => {
   afterEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
+    delete process.env.COSMETIC_LOB_ENABLED;
   });
 
   it('does not count successful logins against the failed-login limit', async () => {
@@ -105,7 +134,7 @@ describe('login rate limiter', () => {
     }
   });
 
-  it('returns lob_scope and is_ctv on /api/me and /api/me/lob-scope (v2 auth support)', async () => {
+  it('returns lob_scope and is_ctv on /api/Auth/me (v2 auth support)', async () => {
     const app = loadApp({ passwordMatches: true });
 
     // first login to get token (mocked)
@@ -122,19 +151,14 @@ describe('login rate limiter', () => {
     expect(meRes.status).toBe(200);
     expect(meRes.body.user.lob_scope).toEqual(['dental', 'cosmetic']);
     expect(meRes.body.user.is_ctv).toBe(false);
-
-    // dedicated /api/me/lob-scope endpoint
-    const lobRes = await request(app)
-      .get('/api/me/lob-scope')
-      .set('Authorization', `Bearer ${token}`);
-    expect(lobRes.status).toBe(200);
-    expect(lobRes.body.lob_scope).toEqual(['dental', 'cosmetic']);
-    expect(lobRes.body.is_ctv).toBe(false);
-    expect(lobRes.body.available).toContain('cosmetic');
   });
 
   it('does not expose multi-LOB selection scope to non-admin staff', async () => {
-    const app = loadApp({ passwordMatches: true, permissions: staffPermissions });
+    const app = loadApp({
+      passwordMatches: true,
+      permissions: staffPermissions,
+      lobScope: ['dental'],
+    });
 
     const loginRes = await request(app)
       .post('/api/Auth/login')
@@ -142,13 +166,36 @@ describe('login rate limiter', () => {
     expect(loginRes.status).toBe(200);
     expect(loginRes.body.user.lob_scope).toEqual(['dental']);
 
-    const token = loginRes.body.token;
-    const lobRes = await request(app)
-      .get('/api/me/lob-scope')
-      .set('Authorization', `Bearer ${token}`);
-    expect(lobRes.status).toBe(200);
-    expect(lobRes.body.lob_scope).toEqual(['dental']);
-    expect(lobRes.body.available).toEqual(['dental']);
+    const meRes = await request(app)
+      .get('/api/Auth/me')
+      .set('Authorization', `Bearer ${loginRes.body.token}`);
+    expect(meRes.status).toBe(200);
+    expect(meRes.body.user.lob_scope).toEqual(['dental']);
+  });
+
+  it('falls back to the cosmetic auth database for cosmetic-only TMV employees', async () => {
+    const app = loadApp({
+      passwordMatches: true,
+      permissions: cosmeticStaffPermissions,
+      lobScope: ['cosmetic'],
+      loginLob: 'cosmetic',
+      cosmeticEnabled: true,
+    });
+
+    const loginRes = await request(app)
+      .post('/api/Auth/login')
+      .send({ email: '0362950725@gmail.com', password: '123123' });
+
+    expect(loginRes.status).toBe(200);
+    expect(loginRes.body.user.lob_scope).toEqual(['cosmetic']);
+    expect(loginRes.body.user.is_ctv).toBe(false);
+
+    const meRes = await request(app)
+      .get('/api/Auth/me')
+      .set('Authorization', `Bearer ${loginRes.body.token}`);
+
+    expect(meRes.status).toBe(200);
+    expect(meRes.body.user.lob_scope).toEqual(['cosmetic']);
   });
 
   it('limits repeated failures for one email without blocking another email on the same IP', async () => {

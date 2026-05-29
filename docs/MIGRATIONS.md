@@ -78,8 +78,9 @@ Current inventory from disk:
 | 046 | `046_split_payment_and_hoso_permissions.sql` | Splits payment and treatment-record permission strings | Permission seed inserts | Delete seeded split permissions after replacement mapping | 2026-05 |
 | 047 | `047_cosmetic_lob_v2_base.sql` | Cosmetic LOB v2 base schema + partner fields + earnings table (D13 CTV support) | Creates `earnings` table; adds columns to `partners`, `products` | Drop `earnings` table, restore partner/product schema | 2026-05 |
 | 048 | `048_grant_lob_permissions_to_admin.sql` | Grant cosmetic.access, dental.access, lob.crossview to Admin group (Phase-2) | Permission seed insert | Delete granted permission rows | 2026-05 |
+| 049 | `049_widen_partners_created_via_for_legacy_ctv.sql` | Widen `partners.created_via` and allow full legacy CTV import markers | `ALTER COLUMN created_via TYPE VARCHAR(64)` + refresh `partners_created_via_check` | Narrow only after confirming no value exceeds 16 chars and no legacy marker remains | 2026-05 |
 
-**Total canonical migrations:** 54 files in `api/migrations/`.
+**Total canonical migrations:** 55 files in `api/migrations/`.
 
 ## Supplemental Migration Files
 

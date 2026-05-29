@@ -81,6 +81,7 @@ postgres (127.0.0.1:5433)
 - lob_scope TEXT[] — hard gate for LOB access (replaces early 'users' concept)
 - is_ctv BOOLEAN — CTV partners bypass admin UI entirely, land on /ctv
 - referred_by_ctv_id — first-class CTV attribution
+- created_via / ref / signature_image — import/source metadata; legacy CTV imports use `created_via LIKE 'legacy_ctv_import%'` and `ref = ma_ctv` so admin CTV pages can show source badges without changing identity keys.
 
 #### tdental_demo.dbo.products (additive)
 - commission_rate_percent — per-product rate; 0% default means no behavior change for dental today
@@ -191,7 +192,7 @@ All other cosmetic tables (appointments, payments, saleorders, etc.) are structu
 | **R** | `saleOrders.js`, `saleOrderLines.js`, `payments.js` (allocations), `reports.js`, `partners.js` (KPIs), `appointments.js`, employee revenue export builder |
 | **E** | `GET/POST/PATCH /api/SaleOrders` |
 | **UI** | Services patient records, Payment allocations, CustomerProfile service history, Reports |
-| **Risk** | **High** — state transitions (`draft` → `confirmed` → `done` → `cancelled`) are logged in `saleorder_state_logs` and drive payment residual calculations. |
+| **Risk** | **High** — state transitions (`draft` → `confirmed` → `done` → `cancelled`) are logged in `saleorder_state_logs` and drive payment residual calculations. `sourceid` is UUID-typed and must come from the active LOB's `customersources`; fallback UI ids are not valid writes. |
 
 ### dbo.saleorderlines
 

@@ -49,6 +49,12 @@
 **Enforced by:** Frontend `normalizeText()` helper; backend SQL using accent-stripped comparisons.
 **Cite when:** Adding any new search field, filter, or picker.
 
+### INV-015 — Sale Order Source IDs Are Persisted Active-LOB UUIDs
+**Rule:** `saleorders.sourceid` may only be written as `null` or a persisted UUID from the currently active LOB's `dbo.customersources` rows. Display-only fallback IDs such as `src-1` must never be submitted as write values.
+**Rationale:** Cosmetic and Dental source rows are isolated by database. Stale Dental or fallback source IDs can block Cosmetic service creation or misattribute source reporting.
+**Enforced by:** `useCustomerSources()` active-LOB reload behavior, `ServiceSourceSelector`, and `nullableUuid()` normalization in `useServices`.
+**Cite when:** Editing service creation/editing, customer-source settings, `SaleOrders` API clients, or source reporting.
+
 ---
 
 ## Auth & Permission Invariants
@@ -76,6 +82,18 @@
 **Rationale:** CTV self-service is separate from clinic admin operations, and older auth payloads may still carry the camelCase flag.
 **Enforced by:** `website/src/App.tsx` route guards and `website/src/__tests__/ProtectedRoute.ctv.test.tsx`.
 **Cite when:** Editing CTV auth payloads, `/ctv` route guards, login redirects, or admin route protection.
+
+### INV-008C — Legacy CTV Password Fallback Is Import-Marker Gated
+**Rule:** Legacy phone/ref-code login and salted SHA-256 password verification may only run for partner rows where `is_ctv === true` and `created_via` starts with `legacy_ctv_import`. A successful legacy-password login must immediately replace the stored hash with bcrypt. Staff, admin, customer, and non-imported CTV accounts remain email-login/bcrypt-only.
+**Rationale:** Imported CTVs need continuity from the legacy portal, but widening legacy hash support to normal accounts would weaken the authentication boundary.
+**Enforced by:** `api/src/services/loginIdentifier.js`, `api/src/services/legacyCtvPassword.js`, and the `/api/Auth/login` lookup/password verification flow.
+**Cite when:** Editing auth login, CTV imports, password hash storage, or partner migration scripts.
+
+### INV-008D — Cosmetic Staff Auth Source
+**Rule:** When `COSMETIC_LOB_ENABLED=true`, `/api/Auth/login` must preserve dental-first authentication and then fall back to the cosmetic identity database only when no dental login row matches. Tokens must carry the selected auth-source LOB, and `/api/Auth/me` must resolve the user and permissions from that same LOB.
+**Rationale:** TMV can create active cosmetic-only employees in `tcosmetic_*`; treating login as dental-only makes valid credentials look invalid until the rate limiter blocks the user.
+**Enforced by:** `api/src/routes/auth.js` and `api/tests/loginRateLimiter.test.js`.
+**Cite when:** Editing login lookup, `/api/Auth/me`, LOB auth payloads, or cosmetic employee creation.
 
 ### INV-009 — Location Scope Frontend-Only Filter
 **Rule:** Backend list routes generally do NOT enforce location scope. The frontend `LocationContext` is responsible for filtering by `companyid`.
@@ -187,5 +205,6 @@
 
 | Date | ID | Action | Commit / PR |
 |---|---|---|---|
+| 2026-05-28 | INV-008C | Added import-marker-gated legacy CTV password and phone/ref-code login fallback invariant | pending |
 | 2026-05-13 | INV-001..INV-020 | Initial invariant set created | feat/complete-documentation-stack |
 | 2026-05-13 | INC-20260506-01, INC-20260506-02 | Incident-derived invariants added | feat/complete-documentation-stack |

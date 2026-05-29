@@ -10,6 +10,53 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: TMV Cosmetic Employee Login Rate-Limit Fix
+
+Feature/edit name: TMV Cosmetic Employee Login Rate-Limit Fix
+
+Changed URLs and API routes:
+- `https://tmv.2checkin.com/login`
+- `POST /api/Auth/login`
+- `GET /api/Auth/me`
+
+Affected data flows:
+- Login remains Dental-first for existing NK/NK2 staff and admins.
+- When `COSMETIC_LOB_ENABLED=true`, login falls back to the Cosmetic identity database if no Dental row matches the identifier.
+- The JWT records the auth-source LOB so `/api/Auth/me` refreshes the employee row and permissions from the same database.
+- Successful logins still do not consume the failed-login rate-limit budget; repeated invalid credentials still return 429 after the configured threshold.
+
+User roles:
+- Cosmetic-only TMV employee with `lob_scope=['cosmetic']` and `cosmetic.access`.
+- Existing Dental/admin user with Dental-first login.
+
+Happy paths:
+- `PhuongNTN` (`0362950725@gmail.com`) can log into TMV when the row exists only in `tcosmetic_smoketest`.
+- Refreshing the app after login calls `/api/Auth/me` and preserves Cosmetic scope.
+- Existing Dental/admin login still authenticates against Dental without querying Cosmetic first.
+
+Edge cases:
+- Duplicate or invalid Dental login rows still fail generically rather than falling through to another identity.
+- Cosmetic DB fallback only runs when `COSMETIC_LOB_ENABLED=true`.
+- Wrong passwords still count toward the per-identifier+IP failed-login limiter.
+
+Regressions:
+- Dental/NK login behavior remains unchanged.
+- CTV redirect behavior remains `/ctv` for `is_ctv=true`.
+- `/api/cosmetic/*` remains gated by `requireLobScope('cosmetic')` plus `cosmetic.access`.
+
+Setup data and login state:
+- Live TMV target: `https://tmv.2checkin.com`.
+- A cosmetic-only employee row exists in `tcosmetic_smoketest.dbo.partners` for `0362950725@gmail.com`; no matching row exists in `tdental_smoketest`.
+- Use a known correct password for that employee; do not brute-force production credentials during verification.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `0362950725@gmail.com` logs into `https://tmv.2checkin.com/login` and lands in Cosmetic scope.
+- [ ] PENDING: Refresh after login and verify `/api/Auth/me` keeps `lob_scope=['cosmetic']`.
+- [ ] PENDING: Verify an existing Dental/admin login still works on TMV and NK.
+- [ ] PENDING: Verify repeated wrong passwords still return 429 after the failed-login threshold.
+
+---
+
 # TestSprite Plan: TMV Cosmetic Legacy CTV Source
 
 Feature/edit name: TMV Cosmetic Legacy CTV Source

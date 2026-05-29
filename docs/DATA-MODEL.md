@@ -143,7 +143,7 @@ erDiagram
 | `personaladdress` | text | e-invoice field |
 
 **Indexes:**
-- `partners_email_idx` (for login lookup)
+- `partners_email_idx` (for staff/admin login lookup; imported legacy CTV phone/ref-code login remains gated by `is_ctv` + `created_via LIKE 'legacy_ctv_import%'`)
 - `partners_companyid_idx`
 - `partners_customer_idx` (partial where customer=true)
 - `partners_employee_idx` (partial where employee=true)
@@ -578,7 +578,7 @@ If `dbo.customer_face_embeddings` exists and the local provider is active, the e
 Postgres 127.0.0.1:5433
 ├── tdental_demo (existing — additive only)
 │   └── dbo
-│       ├── partners (+ lob_scope TEXT[], is_ctv BOOLEAN, referred_by_ctv_id UUID)
+│       ├── partners (+ lob_scope TEXT[], is_ctv BOOLEAN, referred_by_ctv_id UUID, created_via VARCHAR(64)/ref/signature_image source metadata)
 │       ├── products (+ commission_rate_percent NUMERIC(5,2) DEFAULT 0)
 │       ├── earnings (NEW, append-only; recipient_partner_id FK to partners)
 │       ├── payouts (NEW)

@@ -30,8 +30,8 @@ export interface LoginResponse {
   redirectTo?: string;
 }
 
-export function login(email: string, password: string) {
-  return apiFetch<LoginResponse>('/Auth/login', { method: 'POST', body: { email, password } });
+export function login(identifier: string, password: string) {
+  return apiFetch<LoginResponse>('/Auth/login', { method: 'POST', body: { email: identifier, password } });
 }
 
 export function fetchMe() {
@@ -44,4 +44,3 @@ export function changePassword(oldPassword: string, newPassword: string) {
     body: { oldPassword, newPassword },
   });
 }
-

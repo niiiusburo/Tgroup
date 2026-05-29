@@ -13,8 +13,8 @@
 
 | Method | Path | Auth | Body | Response |
 |--------|------|------|------|----------|
-| POST | `/login` | Public | `{ email, password }` where `email` is an email address or imported legacy CTV phone/ref code | `{ token, user, permissions }` |
-| GET | `/me` | Auth | — | `{ user, permissions }` |
+| POST | `/login` | Public | `{ email, password }` where `email` is an email address or imported legacy CTV phone/ref code | `{ token, user, permissions, redirectTo }`; when `COSMETIC_LOB_ENABLED=true`, Dental identity lookup runs first and Cosmetic lookup runs only if Dental has no matching row |
+| GET | `/me` | Auth | — | `{ user, permissions }`; resolves the employee from the JWT auth-source LOB when present |
 | POST | `/change-password` | Auth | `{ oldPassword, newPassword }` | `{ success, message }` |
 
 ## LOB & Business Unit (`/api/me` + context) — Cosmetic LOB v2

@@ -20,6 +20,8 @@
 | v1.0.5 | 2026-05-23 | TMV/NK3 API hotfix contract clarified: cosmetic CustomerBalance mirror, CTV-only self-dashboard reads, and normalized service catalog writes. |
 | v1.0.6 | 2026-05-25 | CTV self portal adds client-journey tracking and structured booking-claim error compatibility fields. |
 | v1.0.7 | 2026-05-28 | CTV portal payloads allow nullable display names so frontend i18n owns localized unknown-client/service fallbacks. |
+| v1.0.8 | 2026-05-28 | SaleOrders client contract now explicitly carries `sourceid?: UUID | null` and the frontend must only submit persisted active-LOB customer-source UUIDs. |
+| v1.0.9 | 2026-05-28 | `POST /api/Auth/login` accepts an email address for staff/admins or a legacy CTV phone/ref code for rows marked `legacy_ctv_import*`. |
 
 ---
 
@@ -27,16 +29,20 @@
 
 Cosmetic LOB mirror rule: when the frontend passes `lob: 'cosmetic'` to `apiFetch`, the client routes the same endpoint under `/api/cosmetic/*`. Mirrored handlers must run behind `requireLobScope('cosmetic')`, `attachCosmeticDb`, `runWithLob('cosmetic')`, and `cosmetic.access`, then read/write `tcosmetic_demo` through request-scoped `getQuery(req)` or ALS-aware `query()`. Dental remains the default legacy `/api/*` path.
 
-CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referrals`, and `GET /api/ctv/me` are mounted behind `ctv.dashboard.view` and must additionally require `req.user.is_ctv === true`. Authenticated non-CTV staff, including admins, receive `403 S_CTV_ONLY`.
+CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referrals`, and `GET /api/ctv/me` are mounted behind `ctv.dashboard.view` and must additionally require `req.user.is_ctv === true` or legacy JWT `req.user.isCtv === true`. Authenticated non-CTV staff, including admins, receive `403 S_CTV_ONLY`.
+
+Admin CTV list rule: `GET /api/Ctvs` and `GET /api/cosmetic/Ctvs` return CTV identity rows with `source`, `legacy_code`, and `created_via`. Cosmetic mode filters to CTV rows whose `lob_scope` includes `cosmetic`; `source='legacy_ctv'` is derived from `created_via LIKE 'legacy_ctv_import%'`.
 
 ### 1.1 Auth
 
 #### POST /api/Auth/login
+When `COSMETIC_LOB_ENABLED=true`, login resolves identity from Dental first, then from Cosmetic only if no active Dental employee/CTV row matches the supplied identifier. The JWT records the auth-source LOB so `/api/Auth/me` can refresh the user and permissions from the same database.
+
 **Request:**
 ```ts
 {
-  email: string;           // employee email
-  password: string;        // plaintext, bcrypt compared server-side
+  email: string;           // staff/admin email, or imported legacy CTV phone/ref code
+  password: string;        // plaintext; bcrypt compared first, gated legacy CTV hash fallback second
   rememberMe?: boolean;    // default false → token expires 24h; true → 60d
 }
 ```
@@ -59,6 +65,7 @@ CTV self-dashboard rule: `GET /api/ctv/commission-summary`, `GET /api/ctv/referr
 	    effectivePermissions: string[];  // e.g., ["customers.view", "appointments.add"]
 	    locations: { id: string; name: string }[];
 	  };
+	  redirectTo: '/ctv' | null;
 }
 ```
 **Errors:** 400 (missing fields), 401 (invalid credentials), 429 (rate limited).
@@ -255,6 +262,36 @@ Wire behavior:
 - `lob: 'cosmetic'` maps `fetchCompanies` to `GET /api/cosmetic/Companies` and employee create/update to `/api/cosmetic/Employees`.
 - `lob: 'dental'` or omitted `lob` keeps legacy dental routes (`/api/Companies`, `/api/Employees`).
 - `EmployeeForm` and `EmployeeProfile` must use the active LOB so Cosmetic branch dropdowns and profile branch-name lookups never resolve through dental companies.
+
+---
+
+### 1.3A Sale Orders / Patient Service Records
+
+`POST /api/SaleOrders` and `PATCH /api/SaleOrders/:id` create and edit patient service records. When called with `lob: 'cosmetic'`, the frontend routes these same contracts to `/api/cosmetic/SaleOrders` and the handler writes to `tcosmetic_demo`.
+
+Frontend client payload:
+```ts
+{
+  partnerid?: string;
+  companyid?: string;
+  productid?: string;
+  productname?: string;
+  doctorid?: string | null;
+  assistantid?: string | null;
+  dentalaideid?: string | null;
+  quantity?: number | null;
+  unit?: string | null;
+  amounttotal?: number;
+  datestart?: string | null;
+  dateend?: string | null;
+  notes?: string | null;
+  tooth_numbers?: string | null;
+  tooth_comment?: string | null;
+  sourceid?: string | null; // UUID from current LOB customer sources only
+}
+```
+
+`sourceid` is optional. The service UI must not send display-only fallback IDs such as `src-1`; invalid or stale source IDs are normalized to `null` before the client writes a sale order.
 
 ---
 

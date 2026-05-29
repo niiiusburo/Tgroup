@@ -2,6 +2,12 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.64] — 2026-05-29 (nk3-deploy)
+### Fixed
+- `POST /api/Auth/login` now preserves Dental-first auth but falls back to the Cosmetic identity database when `COSMETIC_LOB_ENABLED=true` and no Dental login row exists; `/api/Auth/me` refreshes the user and permissions from the JWT auth-source LOB. This fixes valid TMV Cosmetic-only employees receiving repeated 401s until the normal login rate limiter returns 429. — @agent — INV-008D Cosmetic Staff Auth Source.
+### Tests
+- Added focused backend coverage for cosmetic-only TMV employee login and `/api/Auth/me` refresh in `api/tests/loginRateLimiter.test.js`. — @agent — docs/TEST-MATRIX.md Auth route row.
+
 ## [0.32.61] — 2026-05-29 (nk3-deploy)
 ### Added
 - `PUT /api/Ctvs/:id` (admin-only) lets admins edit a CTV's `name`, `phone`, `email`, and reset the login password. A non-empty password is bcrypt-hashed into `password_hash` (login tries bcrypt first, so this works for legacy CTV rows too). Duplicate phone/email guards exclude the CTV's own id and run across both physical DBs; changes mirror best-effort into the cosmetic DB. — @agent — gives admins full control of CTV accounts from `/commission` without widening other auth paths.

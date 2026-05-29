@@ -15,6 +15,7 @@ owns:
   - website/src/lib/i18n/ctv.ts
   - website/src/components/ctv/* (LOB pills, split bars, bottom nav)
   - Login redirect logic in AuthContext / ProtectedRoute / LoginRoute
+  - api/src/services/loginIdentifier.js (legacy CTV phone/ref-code login lookup gated by created_via marker)
 reads:
   - tdental_demo.dbo.partners (is_ctv flag for role gating; referred_by_ctv_id for referred clients)
   - tdental_demo.dbo.earnings (CTV's rows via recipient_partner_id; D13 source)
@@ -27,6 +28,8 @@ writes:
   - POST /api/ctv (create CTV under caller/admin; writes partners in dental and optionally cosmetic)
   - POST /api/ctv/clients (refer a client under caller/admin; writes partners in selected LOB DB)
   - POST /api/ctv/bookings (create or reclaim referred client, create Referral Start card, create appointment in selected LOB DB)
+  - PATCH /api/Ctvs/:id or /api/cosmetic/Ctvs/:id (admin suspend/reactivate; mirrors active flag to cosmetic row if present)
+  - api/scripts/import-legacy-ctvs.js after explicit DB confirmation (mirrors safe legacy CTV identities into dental + cosmetic partners with identical UUIDs; skips ambiguous matches)
   - earnings remain written by payment paths + commissionEngine in earnings domain; payouts by admin
 tables:
   - tdental_demo.dbo.partners (+ is_ctv BOOLEAN, lob_scope)
@@ -43,6 +46,7 @@ endpoints:
   - POST /api/ctv/clients (self/admin referred client create)
   - GET /api/ctv/network (self CTV upline/direct/downline graph)
   - POST /api/ctv/bookings (self/admin referred-client booking; blocks B_CLIENT_CLAIMED)
+  - GET /api/Ctvs and GET /api/cosmetic/Ctvs (admin CTV list; cosmetic mount filters Cosmetic-scoped rows and returns source/legacy_code/created_via)
   - GET /api/ctv/* (gated)
 ui_surfaces:
   - /ctv (full bypass of admin Layout/sidebar; mobile-first with bottom nav 4 tabs; also usable desktop; EN/VI switcher in the CTV header)
@@ -52,6 +56,7 @@ ui_surfaces:
     - Me: profile, current language label, logout
   - Hard redirect on login for partners.is_ctv=true (before any admin mount)
   - 403 guards on all / (admin) routes for CTV
+  - /commission > CTV tab (admin only; LOB-aware list with source badges so legacy imports are visibly distinguishable)
 shared_types:
   - website/src/lib/api/ctv.ts : CtvCommissionSummary, CtvReferral, CommissionRow (with lob tag)
   - api/src/routes/ctv.js payload contracts
@@ -61,10 +66,12 @@ dependencies:
   - BusinessUnitContext (not used by CTV; they have no scope)
 affected_by:
   - commissionEngine changes (D13 order or earnings shape)
-  - Auth me/login augmentation
+  - Auth me/login augmentation, including legacy CTV phone/ref-code lookup boundaries
   - Any partners column rename
 impact_tests:
   - CTV login lands on /ctv, 403 on admin
+  - Admin /commission CTV tab shows legacy source badges for rows with `created_via LIKE 'legacy_ctv_import%'`
+  - Legacy CTV import dry-run reports planned/skipped counts and writes an audit before any confirmed DB write
   - commission-summary returns live aggregated numbers from both DB earnings tables for the CTV's recipient_partner_id
   - Referred clients show correct LOB tags and status
 risk_level: high (only cross-DB surface)

@@ -9,27 +9,29 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 
-const EMAIL_STORAGE_KEY = 'tgclinic_saved_email';
+const LOGIN_STORAGE_KEY = 'tgclinic_saved_login';
+const LEGACY_EMAIL_STORAGE_KEY = 'tgclinic_saved_email';
 
-function getSavedEmail(): string {
+function getSavedLogin(): string {
   try {
-    return localStorage.getItem(EMAIL_STORAGE_KEY) || '';
+    return localStorage.getItem(LOGIN_STORAGE_KEY) || localStorage.getItem(LEGACY_EMAIL_STORAGE_KEY) || '';
   } catch {
     return '';
   }
 }
 
-function saveEmail(email: string): void {
+function saveLogin(identifier: string): void {
   try {
-    localStorage.setItem(EMAIL_STORAGE_KEY, email);
+    localStorage.setItem(LOGIN_STORAGE_KEY, identifier);
   } catch {
     // Ignore storage errors
   }
 }
 
-function clearSavedEmail(): void {
+function clearSavedLogin(): void {
   try {
-    localStorage.removeItem(EMAIL_STORAGE_KEY);
+    localStorage.removeItem(LOGIN_STORAGE_KEY);
+    localStorage.removeItem(LEGACY_EMAIL_STORAGE_KEY);
   } catch {
     // Ignore storage errors
   }
@@ -41,7 +43,7 @@ export function Login() {
   const navigate = useNavigate();
   const mountedRef = useRef(true);
 
-  const [email, setEmail] = useState(() => getSavedEmail());
+  const [identifier, setIdentifier] = useState(() => getSavedLogin());
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -59,12 +61,12 @@ export function Login() {
     setIsLoading(true);
 
     try {
-      await login(email, password);
+      await login(identifier, password);
 
       if (!mountedRef.current) return;
 
-      // Only save email (not password) for prefill convenience
-      saveEmail(email);
+      // Only save login identifier (not password) for prefill convenience.
+      saveLogin(identifier);
 
       navigate('/', { replace: true });
     } catch (err: unknown) {
@@ -74,7 +76,7 @@ export function Login() {
       } else {
         setError(t('errors.invalidCredentials'));
       }
-      clearSavedEmail();
+      clearSavedLogin();
     } finally {
       if (mountedRef.current) {
         setIsLoading(false);
@@ -116,17 +118,18 @@ export function Login() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                {t('email')}
+              <label htmlFor="login-identifier" className="text-sm font-medium text-gray-700">
+                {t('loginIdentifier')}
               </label>
               <input
-                id="email"
-                type="email"
-                autoComplete="email"
+                id="login-identifier"
+                type="text"
+                inputMode="email"
+                autoComplete="username"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@tgclinic.vn"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder={t('loginIdentifierPlaceholder')}
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:border-primary transition-colors"
               />
             </div>
