@@ -139,6 +139,9 @@ export interface CtvRecord {
   is_ctv?: boolean;
   referred_by_ctv_id?: string | null;
   upline_name?: string | null;
+  legacy_code?: string | null;
+  created_via?: string | null;
+  source?: string | null;
 }
 
 export interface ReferClientInput {
@@ -158,13 +161,48 @@ export async function referClient(input: ReferClientInput): Promise<CtvRecord> {
 }
 
 /** Admin: list CTVs, optionally filtered by status. */
-export async function fetchCtvs(status?: 'active' | 'suspended'): Promise<{ ctvs: CtvRecord[] }> {
-  return apiFetch('/Ctvs', { params: status ? { status } : undefined });
+export async function fetchCtvs(
+  status?: 'active' | 'suspended',
+  lob?: 'dental' | 'cosmetic'
+): Promise<{ ctvs: CtvRecord[] }> {
+  return apiFetch('/Ctvs', {
+    lob: lob === 'cosmetic' ? 'cosmetic' : undefined,
+    params: status ? { status } : undefined,
+  });
+}
+
+export interface UpdateCtvInput {
+  name?: string;
+  phone?: string;
+  email?: string;
+  /** When provided and non-empty, resets the CTV's login password. */
+  password?: string;
+}
+
+/** Admin: edit a CTV's profile fields (name, phone, email, password). */
+export async function updateCtv(
+  id: string,
+  input: UpdateCtvInput,
+  lob?: 'dental' | 'cosmetic'
+): Promise<CtvRecord> {
+  return apiFetch<CtvRecord>(`/Ctvs/${id}`, {
+    method: 'PUT',
+    lob: lob === 'cosmetic' ? 'cosmetic' : undefined,
+    body: input,
+  });
 }
 
 /** Admin: suspend or reactivate a CTV. */
-export async function setCtvActive(id: string, active: boolean): Promise<CtvRecord> {
-  return apiFetch<CtvRecord>(`/Ctvs/${id}`, { method: 'PATCH', body: { active } });
+export async function setCtvActive(
+  id: string,
+  active: boolean,
+  lob?: 'dental' | 'cosmetic'
+): Promise<CtvRecord> {
+  return apiFetch<CtvRecord>(`/Ctvs/${id}`, {
+    method: 'PATCH',
+    lob: lob === 'cosmetic' ? 'cosmetic' : undefined,
+    body: { active },
+  });
 }
 
 export interface CreateBookingInput {

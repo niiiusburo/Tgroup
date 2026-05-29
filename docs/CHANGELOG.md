@@ -2,6 +2,43 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.61] — 2026-05-29 (nk3-deploy)
+### Added
+- `PUT /api/Ctvs/:id` (admin-only) lets admins edit a CTV's `name`, `phone`, `email`, and reset the login password. A non-empty password is bcrypt-hashed into `password_hash` (login tries bcrypt first, so this works for legacy CTV rows too). Duplicate phone/email guards exclude the CTV's own id and run across both physical DBs; changes mirror best-effort into the cosmetic DB. — @agent — gives admins full control of CTV accounts from `/commission` without widening other auth paths.
+- `/commission` > CTV tab now renders an Edit (Sửa) action per row opening a pre-filled modal (name/phone/email + optional new password) wired to `updateCtv`. — @agent — INV CTV admin management; preserves two-DB routing and LOB scoping.
+### Security
+- `PUT /api/Ctvs/:id` now rejects an empty/whitespace `email` (`U_INVALID_EMAIL`). A non-legacy CTV's only login identifier is its email, so blanking it would have locked them out permanently. Surfaced by an adversarial multi-agent review of the diff. — @agent — INV-008C login-identifier integrity.
+### Fixed
+- CTV edit modal no longer sends empty `phone`/`email`: it submits only the fields the admin filled (plus name, always). Previously a CTV with no phone/email on record (e.g. legacy imports) could not be edited at all because the empty value tripped the API's identifier guard. Save now requires only a non-empty name. — @agent — surfaced by review (FE-1); verified a phone-less CTV is now editable.
+### Tests
+- Added focused Jest coverage for `PUT /api/Ctvs/:id` (field updates, password hashing, duplicate phone/email, invalid/empty/whitespace validation, empty-email lockout guard, name-only & password-only partial updates, legacy-CTV password reset preserving `created_via`, best-effort cosmetic-mirror failure, admin gate). Added a Vitest for `EditCtvModal` asserting empty phone/email are omitted from the payload and Save stays enabled for a phone-less CTV. — @agent — docs/TEST-MATRIX.md CTV admin edit row.
+
+## [0.32.60] — 2026-05-28 (nk3-deploy)
+### Fixed
+- `POST /api/Auth/login` and the login form now accept email for staff/admins or phone/ref-code for imported legacy CTV rows only, preserving the `legacy_ctv_import*` gate before legacy password fallback can run. — @agent — INV-008C legacy CTV continuity without widening staff authentication.
+### Tests
+- Added focused Jest coverage for the imported legacy CTV login identifier lookup boundary. — @agent — docs/TEST-MATRIX.md legacy CTV auth row.
+
+## [0.32.59] — 2026-05-28 (nk3-deploy)
+### Changed
+- `/commission` > CTV management is now LOB-aware and shows a visible source badge for legacy CTV imports via `source`, `legacy_code`, and `created_via` from `/api/Ctvs` and `/api/cosmetic/Ctvs`. — @agent — Cosmetic LOB CTV import visibility; preserves D14 CTV isolation and two-DB admin routing.
+- Added a dry-run-first legacy CTV import runner that plans deterministic Dental + Cosmetic partner mirrors, skips ambiguous matches, maps safe CTV uplines, and preserves existing non-legacy passwords unless explicitly overridden. — @agent — INV-001 partner identity uniqueness and INV-008C legacy password fallback boundary.
+- Preserved NK3 Docker web build argument materialization so `VITE_COSMETIC_LOB_ENABLED=true` is written into the container build environment during deploy. — @agent — INV-020 deploy version/build verification.
+### Fixed
+- Restored local server mounts for `/api/CommissionConfig`, `/api/Ctvs`, `/api/Earnings`, and their Cosmetic CTV/config mirrors; `/api/ctv` is again mounted behind `ctv.dashboard.view`. Also normalized JWT `isCtv`/`lobScope` casing in CTV and LOB gates. — @agent — docs/TEST-MATRIX.md CTV route gating and Cosmetic LOB guard rows.
+- Imported legacy CTV password hashes can now be verified only for `legacy_ctv_import*` CTV rows and are migrated to bcrypt after successful login. — @agent — Legacy CTV source migration without broadening password fallback to normal staff.
+- Added migration 049 to widen `partners.created_via` to `VARCHAR(64)` and allow `legacy_ctv_import*` in `partners_created_via_check` so the full legacy import marker can be stored in both Dental and Cosmetic databases. — @agent — INV-008C requires an unambiguous import marker for legacy password fallback.
+### Tests
+- Added focused Jest coverage for legacy CTV salted-SHA256 password verification and import-marker gating. — @agent — docs/TEST-MATRIX.md legacy CTV auth row.
+- Verified the import runner dry run against the refreshed live legacy snapshot: 198 active source rows, 170 planned, 28 skipped for manual review, and no DB writes. — @agent — testbright.md legacy CTV import setup.
+
+## [0.32.58] — 2026-05-28 (nk3-deploy)
+### Fixed
+- Cosmetic customer service creation no longer fails when staff select a customer source: the service modal now hides non-persisted fallback source chips, active-LOB source loading clears stale Dental/fallback rows on successful empty Cosmetic responses, and `SaleOrders` create/update payloads normalize non-UUID `sourceid` values to `null`. — @agent — preserves INV-015 and Cosmetic LOB two-DB source isolation.
+- Restored the app-level `BusinessUnitProvider` and keyed route remount for the protected admin route tree so `/customers/:id?lob=cosmetic` can hydrate Cosmetic context before Layout/customer hooks run. — @agent — preserves the LOB toggle behavior locked in docs/TEST-MATRIX.md.
+### Tests
+- Added focused Vitest coverage for Cosmetic service source payload normalization, empty Cosmetic customer-source loading, and the existing App LOB remount regression. — @agent — docs/TEST-MATRIX.md Services Catalog and App LOB regression rows.
+
 ## [0.32.57] — 2026-05-28 (nk3-deploy)
 ### Fixed
 - Admin users now see the Line of Business (LOB) toggle even when their `partners.lob_scope` DB column is null or empty. Backend `/api/Auth/login` and `/api/Auth/me` auto-grant `['dental', 'cosmetic']` to admins; frontend `BusinessUnitContext` defaults admins to both LOBs when the cosmetic flag is enabled. — @agent — Cosmetic LOB v2 admin parity; closes nk3-deploy LOB visibility gap for pre-migration admin accounts.

@@ -1,5 +1,35 @@
 [
   {
+    "version": "0.32.61",
+    "date": "2026-05-29",
+    "commit": "pending",
+    "highlights": "Admins now have full control over CTV accounts from /commission — edit name, phone, email, and reset the login password.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Commission > CTV tab: each CTV row now has an Edit (Sửa) button opening a modal to edit name, phone, email, and reset the password.",
+          "New admin-only PUT /api/Ctvs/:id endpoint updates CTV profile fields, bcrypt-hashes a new password, guards against duplicate phone/email, and mirrors changes into the cosmetic DB."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Admins can now edit CTVs that have no phone/email on record (e.g. legacy imports) — the edit form only submits the fields you fill in, so a blank phone/email no longer blocks the save.",
+          "Hardened: the API rejects blanking a CTV's email (which would have permanently locked a non-legacy CTV out of login). Found by an adversarial multi-agent review of the change."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added Jest coverage for PUT /api/Ctvs/:id: field updates, password hashing, duplicate guards, empty/whitespace validation, empty-email lockout guard, partial (name-only / password-only) updates, legacy-CTV password reset, and best-effort cosmetic mirroring.",
+          "Added a Vitest for the edit modal (empty phone/email omitted from payload; Save enabled for a phone-less CTV).",
+          "Verified end-to-end: edit CTV via UI persists to DB; reset password logs in while the old password is rejected; empty email is rejected (400)."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.51",
     "date": "2026-05-28",
     "commit": "pending",

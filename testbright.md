@@ -10,6 +10,114 @@ Do not remove failed checks until the defect is fixed and rerun.
 
 ---
 
+# TestSprite Plan: TMV Cosmetic Legacy CTV Source
+
+Feature/edit name: TMV Cosmetic Legacy CTV Source
+
+Changed URLs and API routes:
+- `https://tmv.2checkin.com/commission` > `CTV` tab in Dental and Cosmetic LOB mode
+- `GET /api/Ctvs`
+- `GET /api/cosmetic/Ctvs`
+- `PATCH /api/Ctvs/:id`
+- `PATCH /api/cosmetic/Ctvs/:id`
+- `POST /api/Auth/login`
+
+Affected data flows:
+- Admin CTV list now exposes `source`, `legacy_code`, and `created_via` so imported legacy CTVs can be visually identified.
+- Cosmetic LOB mode calls `/api/cosmetic/Ctvs` and filters the list to CTV rows with Cosmetic scope.
+- Legacy CTV password hashes are accepted only for rows marked `created_via LIKE 'legacy_ctv_import%'`; successful login migrates the hash to bcrypt. The safe import runner preserves existing non-legacy passwords by default and only writes legacy hashes for new/imported rows or already-legacy rows.
+- Legacy CTV phone/ref-code login is accepted only for rows marked `created_via LIKE 'legacy_ctv_import%'`; staff/admin users still log in by email.
+- `/api/ctv` self-dashboard gating accepts both `is_ctv` and legacy JWT `isCtv` casing.
+- `api/scripts/import-legacy-ctvs.js --dry-run` plans the import from legacy CTV snapshots and writes an audit file before any database write.
+
+User roles:
+- Admin with Dental + Cosmetic LOB access and CTV management permission or wildcard admin permissions.
+- Imported CTV users with `is_ctv=true`, `employee=true`, active status, and legacy source marker.
+
+Happy paths:
+- Admin opens `/commission`, switches to the CTV tab in Cosmetic mode, and sees Cosmetic-scoped CTV rows with a Legacy CTV source badge after import.
+- Admin toggles an imported CTV active/suspended status and the change mirrors to Cosmetic if the mirror row exists.
+- Imported legacy CTV row that received a legacy hash logs in with the old phone/ref-code plus old legacy password, lands on `/ctv`, and their password hash migrates to bcrypt.
+
+Edge cases:
+- Non-legacy CTV rows show TMV source, not Legacy CTV.
+- Cosmetic CTV tab should not show Dental-only CTV rows.
+- A non-CTV admin calling `/api/ctv/me` still receives `403 S_CTV_ONLY`.
+- Legacy password fallback must not work for rows without `created_via LIKE 'legacy_ctv_import%'`.
+- Phone/ref-code login must not work for staff/admin or non-imported CTV rows.
+
+Regressions:
+- `/api/cosmetic/*` still returns `S_LOB_FORBIDDEN` for users without Cosmetic scope.
+- Existing CTV self portal commission, tracking, and profile tabs remain CTV-only.
+- Commission config and CTV admin routes remain reachable under the Cosmetic mirror.
+
+Setup data and login state:
+- Live TMV: `https://tmv.2checkin.com`.
+- Use an admin account with both Dental and Cosmetic access.
+- Legacy import should set `created_via='legacy_ctv_import_20260528'`, `ref=<legacy ma_ctv>`, `lob_scope=['dental','cosmetic']`, `is_ctv=true`, and matching Dental/Cosmetic partner IDs.
+- Manual recovery row for previously skipped legacy CTV `0989460997`: Dental/Cosmetic partner id `0a5f8672-5f22-80f8-1029-777f104416ef`, `created_via='legacy_ctv_import_20260528_manual'`, phone ending `0997`, legacy password hash copied from the source DB.
+- Dry-run audit artifact: `artifacts/ctv-import/20260528-live-refresh-20260528-193252/legacy-ctv-import-plan.json`.
+- DB write/import still requires the second explicit confirmation before execution.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `/commission` CTV tab in Cosmetic mode loads from `/api/cosmetic/Ctvs` and screenshot the Legacy CTV source badge.
+- [ ] PENDING: Verify Dental mode still loads `/api/Ctvs`.
+- [ ] PENDING: Verify imported legacy CTV row with a written legacy hash can login with old phone/ref-code plus old password and confirm DB password hash is bcrypt after login.
+- [x] PASS: Verify manual recovery row for `0989460997` resolves as exactly one imported legacy CTV login candidate - live Dental query returned one active employee CTV with `created_via LIKE 'legacy_ctv_import%'` and the deployed login lookup returned `legacyFallbackAllowed=true`.
+- [ ] PENDING: Verify non-imported CTV/staff phone login fails unless the email identifier is used.
+- [ ] PENDING: Verify non-legacy CTV rows show TMV source.
+
+---
+
+# TestSprite Plan: TMV Cosmetic Service Source Save Fix
+
+Feature/edit name: TMV Cosmetic Service Source Save Fix
+
+Changed URLs and API routes:
+- `https://tmv.2checkin.com/customers/:id?lob=cosmetic`
+- `GET /api/cosmetic/CustomerSources`
+- `POST /api/cosmetic/SaleOrders`
+- `PATCH /api/cosmetic/SaleOrders/:id`
+
+Affected data flows:
+- The protected admin route tree is wrapped in `BusinessUnitProvider` and keyed by `currentLOB`, so Cosmetic customer routes hydrate the Cosmetic context before Layout and customer hooks fetch data.
+- Cosmetic service modal source chips now come only from valid UUID customer-source rows in the active Cosmetic LOB.
+- Successful empty Cosmetic customer-source responses clear stale Dental/fallback source chips instead of leaving `src-*` options in the modal.
+- Service create/update normalizes non-UUID `sourceid` values to `null` before writing `SaleOrders`.
+
+User roles:
+- Admin with Dental + Cosmetic LOB access and `customers.edit`/`services.view`.
+- Cosmetic staff allowed to create patient service records.
+
+Happy paths:
+- Open a Cosmetic customer profile, create a service with a valid Cosmetic source selected, and verify save posts to `/api/cosmetic/SaleOrders`.
+- Open a Cosmetic customer profile when `/api/cosmetic/CustomerSources` returns no rows and verify the service can still save with no source chips.
+- Edit an existing service and verify valid source UUIDs persist through `PATCH /api/cosmetic/SaleOrders/:id`.
+
+Edge cases:
+- Fallback source IDs such as `src-1` must not be visible or submitted.
+- Stale Dental source rows must disappear after switching to Cosmetic if the Cosmetic source list is empty.
+- Dental mode must continue to save services through top-level `/api/SaleOrders`.
+
+Regressions:
+- `/customers/:id?lob=cosmetic` must not crash with `useBusinessUnit must be used inside BusinessUnitProvider`.
+- Existing tooth quantity/comment, doctor/assistant/TLBS, branch, and payment residual behavior remains unchanged.
+- Service form stays under the FormShell modal and keeps save errors visible.
+- Settings customer-source management still shows API fallback data only when the source API request fails.
+
+Setup data and login state:
+- Live TMV: `https://tmv.2checkin.com`.
+- Use an admin account with both Dental and Cosmetic access.
+- Keep `tgclinic_lob=cosmetic` or open with `?lob=cosmetic`.
+
+TestSprite execution items:
+- [ ] PENDING: Verify `/customers/:id?lob=cosmetic` renders the customer profile without a BusinessUnitProvider runtime crash.
+- [ ] PENDING: Verify Cosmetic service create with a valid source saves and screenshot the modal/service history after save.
+- [ ] PENDING: Verify empty Cosmetic customer-source state does not show `src-*` fallback chips and service save still succeeds.
+- [ ] PENDING: Verify Dental service create still offers Dental customer sources and posts to `/api/SaleOrders`.
+
+---
+
 # TestSprite Plan: TMV Cosmetic Feedback Sweep 2026-05-24
 
 Feature/edit name: TMV Cosmetic Feedback Sweep 2026-05-24
@@ -1725,3 +1833,40 @@ TestSprite execution items:
 - [ ] PENDING: Verify Cosmetic `/customers/:id` appointment save uses `/api/cosmetic/Appointments`.
 - [ ] PENDING: Verify Dental `/calendar` appointment create/update still uses top-level `/api/Appointments`.
 - [ ] PENDING: Verify Cosmetic appointment search/list, check-in advance, status update, and cancel actions stay inside `/api/cosmetic/Appointments`.
+
+---
+
+# TestSprite Plan: Admin CTV Full Edit
+
+Feature/edit name: Admin CTV Full Edit (name / phone / email / password)
+
+Changed URLs and API routes:
+- `https://tmv.2checkin.com/commission` > `CTV` tab — new Edit (Sửa) button per row + Edit modal
+- `PUT /api/Ctvs/:id` (admin-only) — new endpoint
+
+Behavior to verify:
+- Admin opens Commission > CTV tab, clicks Edit (Sửa) on a CTV row; modal opens pre-filled with name, phone, email; password field is blank with a "leave blank to keep current" hint.
+- Saving with edited name/phone/email persists via `PUT /api/Ctvs/:id`; the table reflects the new values after reload and the DB row is updated.
+- Entering a new password resets the CTV login: the new credentials authenticate (HTTP 200) and the old password is rejected (HTTP 401).
+- Leaving the password blank keeps the existing password unchanged.
+
+Edge cases:
+- Setting a phone/email already used by another partner returns `U_DUPLICATE_PHONE` / `U_DUPLICATE_EMAIL` (400); re-saving the CTV's own current phone/email is allowed (no false duplicate).
+- Invalid email format → `U_INVALID_EMAIL`; password shorter than 6 chars → `U_WEAK_PASSWORD`; empty body → `VALIDATION` (all 400).
+- Editing a cosmetic-scoped CTV mirrors the change into the cosmetic DB; a dental-only CTV does not error on the missing cosmetic row.
+
+Regressions:
+- CTV list, source badge, and suspend/reactivate behavior remain unchanged.
+- Non-admin callers receive 403 `S_FORBIDDEN` from `PUT /api/Ctvs/:id`.
+
+Setup data and login state:
+- Authenticated admin `t@clinic.vn` / `123123`.
+- At least one CTV row present in the demo DB.
+
+TestSprite execution items:
+- [ ] PENDING: Verify Edit (Sửa) modal opens pre-filled with the CTV's name/phone/email and a blank password field.
+- [ ] PENDING: Verify editing name/phone/email saves via `PUT /api/Ctvs/:id` and the table + DB reflect the new values.
+- [ ] PENDING: Verify a new password resets login (new creds → 200, old creds → 401).
+- [ ] PENDING: Verify duplicate phone/email returns 400 while re-saving the CTV's own current values succeeds.
+- [ ] PENDING: Verify invalid email, weak password, and empty body each return the documented 400 error codes.
+- [ ] PENDING: Verify a non-admin caller gets 403 `S_FORBIDDEN`.
