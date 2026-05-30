@@ -42,7 +42,9 @@ function hasAllLocationReportAccess(permissionState = {}) {
 }
 
 async function resolveReportCompanyScope(req, res, companyId) {
-  const permissionState = await resolveEffectivePermissions(req.user?.employeeId);
+  // Resolve from the caller's home DB (authLob) so an admin keeps all-location report
+  // access on /api/cosmetic/* (the cosmetic mirror DB is not seeded with the admin group).
+  const permissionState = await resolveEffectivePermissions(req.user?.employeeId, req.user?.authLob || 'dental');
 
   if (hasAllLocationReportAccess(permissionState)) {
     return { companyIds: companyId ? [companyId] : null };

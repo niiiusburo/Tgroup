@@ -78,8 +78,10 @@ describe('P0.1 — Permission Resolution Deduplication', () => {
       );
       expect(authCode).toContain("require('../services/permissionService')");
       expect(authCode).toContain('resolveEffectivePermissions');
-      // Should NOT have the old resolvePermissions function
-      expect(authCode).not.toContain('async function resolvePermissions');
+      // Should NOT have the old deduplicated `resolvePermissions(` function.
+      // Note: the LOB-aware login helper `resolvePermissionsForLob(` is a distinct,
+      // legitimate function — match the trailing `(` so it isn't a false positive.
+      expect(authCode).not.toContain('async function resolvePermissions(');
     });
   });
 });

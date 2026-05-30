@@ -86,7 +86,7 @@ async function resolveCompanyScope(user, companyId) {
   const requestedCompanyId = normalizeId(companyId);
   assertUuid(requestedCompanyId, 'Chi nhánh');
 
-  const permissionState = await resolveEffectivePermissions(user?.employeeId);
+  const permissionState = await resolveEffectivePermissions(user?.employeeId, user?.authLob);
   if (hasAllLocationAccess(permissionState)) {
     return {
       companyIds: requestedCompanyId ? [requestedCompanyId] : null,

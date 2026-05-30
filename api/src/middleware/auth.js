@@ -37,7 +37,10 @@ function requirePermission(permission) {
     }
     try {
       const { employeeId } = req.user;
-      const { effectivePermissions } = await resolveEffectivePermissions(employeeId);
+      // Resolve against the caller's HOME db (authLob), not the request's data-LOB.
+      // On /api/cosmetic/* the ALS context is cosmetic; resolving perms there would
+      // under-permission a real admin (see permissionService.resolveEffectivePermissions).
+      const { effectivePermissions } = await resolveEffectivePermissions(employeeId, req.user.authLob || 'dental');
 
       if (effectivePermissions.length === 0) {
         return res.status(403).json({ error: 'No permission assignment found' });
@@ -68,8 +71,8 @@ function requireLobScope(lob) {
     if (!req.user) {
       return res.status(401).json({ error: 'No token' });
     }
-    const scopes = req.user.lob_scope || [];
-    const isCtv = !!req.user.is_ctv;
+    const scopes = req.user.lob_scope || req.user.lobScope || [];
+    const isCtv = req.user.is_ctv === true || req.user.isCtv === true;
 
     // CTV never has LOB scope; explicit 403 prevents any leakage
     if (isCtv || !scopes.includes(lob)) {

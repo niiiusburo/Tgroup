@@ -21,6 +21,7 @@ function loadApp({ row }) {
 
   jest.doMock('../src/services/permissionService', () => ({
     resolveEffectivePermissions: jest.fn(async () => ['dashboard.view']),
+    isAdminPermissionState: jest.fn(() => false),
   }));
 
   jest.doMock('bcryptjs', () => ({
@@ -28,8 +29,8 @@ function loadApp({ row }) {
     hash: jest.fn(async () => 'new-hash'),
   }));
 
-  jest.doMock('../src/db', () => ({
-    query: jest.fn(async (sql) => {
+  jest.doMock('../src/db', () => {
+    const query = jest.fn(async (sql) => {
       if (sql.includes('SELECT p.id, p.name, p.email, p.password_hash')) {
         return [row];
       }
@@ -37,9 +38,17 @@ function loadApp({ row }) {
         return [];
       }
       return [];
-    }),
-    pool: { connect: jest.fn(), end: jest.fn() },
-  }));
+    });
+    return {
+      query,
+      // LOB-aware login path: auth.js resolves the login partner via getQuery(lob)
+      // and wraps permission resolution in runWithLob. Both must be present or the
+      // login handler throws "getQuery is not a function" (→ 500).
+      getQuery: jest.fn(() => query),
+      runWithLob: jest.fn((_lob, fn) => fn()),
+      pool: { connect: jest.fn(), end: jest.fn() },
+    };
+  });
 
   return require('../src/server');
 }

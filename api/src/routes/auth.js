@@ -18,7 +18,9 @@ function isCosmeticAuthEnabled() {
 function getEmployeeLobScope(employee) {
   if (Array.isArray(employee?.lob_scope)) return employee.lob_scope;
   if (Array.isArray(employee?.lobScope)) return employee.lobScope;
-  return employee?.lob_scope || employee?.lobScope;
+  // Always return an array — a null lob_scope (e.g. CTV accounts) must serialize as []
+  // so requireLobScope and the frontend can safely call .includes() on it.
+  return [];
 }
 
 function isEmployeeCtv(employee) {

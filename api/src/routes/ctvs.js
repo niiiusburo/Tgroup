@@ -9,13 +9,17 @@
 const express = require('express');
 const { requireAuth } = require('../middleware/auth');
 const { getDb } = require('../db');
+const { getCtvHierarchy } = require('../services/ctvNetwork');
 
 const router = express.Router();
 
-async function isAdminCaller(employeeId) {
+async function isAdminCaller(employeeId, authLob) {
   try {
     const { resolveEffectivePermissions, isAdminPermissionState } = require('../services/permissionService');
-    const permState = await resolveEffectivePermissions(employeeId);
+    // Admin identity is canonical in the caller's home DB (authLob), not the cosmetic
+    // mirror DB. The CTV roster itself is read from the dental/auth DB (getDb('dental')
+    // below), so the authorization check must resolve from the same canonical source.
+    const permState = await resolveEffectivePermissions(employeeId, authLob);
     const list = (permState && permState.effectivePermissions) || [];
     return isAdminPermissionState(permState) || list.includes('*') || list.includes('ctv.manage');
   } catch (e) {
@@ -30,7 +34,7 @@ async function isAdminCaller(employeeId) {
 router.get('/', requireAuth, async (req, res) => {
   const { employeeId } = req.user || {};
   if (!employeeId) return res.status(401).json({ error: 'No token' });
-  if (!(await isAdminCaller(employeeId))) {
+  if (!(await isAdminCaller(employeeId, req.user?.authLob || 'dental'))) {
     return res.status(403).json({ error: { code: 'S_FORBIDDEN', message: 'Admin only' } });
   }
 
@@ -110,13 +114,38 @@ router.get('/options', requireAuth, async (req, res) => {
 });
 
 /**
+ * GET /api/Ctvs/:id/hierarchy
+ * Admin-only. Returns the upline chain + flat downline for an ARBITRARY CTV
+ * (CtvHierarchyResponse: { current, upline[], downline[], totals }).
+ * Reuses the same builder as the CTV self-portal's /api/ctv/hierarchy; the
+ * hierarchy spans both LOB DBs, so the result is LOB-independent.
+ */
+router.get('/:id/hierarchy', requireAuth, async (req, res) => {
+  const { employeeId } = req.user || {};
+  if (!employeeId) return res.status(401).json({ error: 'No token' });
+  if (!(await isAdminCaller(employeeId, req.user?.authLob || 'dental'))) {
+    return res.status(403).json({ error: { code: 'S_FORBIDDEN', message: 'Admin only' } });
+  }
+  const { id } = req.params;
+  if (!id) return res.status(400).json({ error: { code: 'U_INVALID_INPUT', message: 'CTV id is required' } });
+
+  try {
+    const hierarchy = await getCtvHierarchy(id);
+    return res.json(hierarchy);
+  } catch (e) {
+    console.error('[Ctvs GET /:id/hierarchy] error:', e.message);
+    return res.status(500).json({ error: { code: 'E_SYSTEM', message: 'Failed to load hierarchy' } });
+  }
+});
+
+/**
  * PATCH /api/Ctvs/:id  Body: { active: boolean }
  * Admin-only suspend/reactivate. Mirrors the change into cosmetic DB if the row exists there.
  */
 router.patch('/:id', requireAuth, async (req, res) => {
   const { employeeId } = req.user || {};
   if (!employeeId) return res.status(401).json({ error: 'No token' });
-  if (!(await isAdminCaller(employeeId))) {
+  if (!(await isAdminCaller(employeeId, req.user?.authLob || 'dental'))) {
     return res.status(403).json({ error: { code: 'S_FORBIDDEN', message: 'Admin only' } });
   }
 
@@ -156,7 +185,7 @@ router.patch('/:id', requireAuth, async (req, res) => {
 router.put('/:id', requireAuth, async (req, res) => {
   const { employeeId } = req.user || {};
   if (!employeeId) return res.status(401).json({ error: 'No token' });
-  if (!(await isAdminCaller(employeeId))) {
+  if (!(await isAdminCaller(employeeId, req.user?.authLob || 'dental'))) {
     return res.status(403).json({ error: { code: 'S_FORBIDDEN', message: 'Admin only' } });
   }
 
@@ -205,9 +234,14 @@ router.put('/:id', requireAuth, async (req, res) => {
       return res.status(404).json({ error: { code: 'S_NOT_FOUND', message: 'CTV not found' } });
     }
 
-    // Duplicate guards exclude this CTV's own id (mirrored rows share the id).
+    // Duplicate guards: only collide with OTHER CTV LOGIN ACCOUNTS (is_ctv = true), excluding
+    // this CTV's own id (mirrored rows share the id). Phone/email are CTV login identifiers, but
+    // they are NOT unique across all partners: migration 044 deliberately allows customers to
+    // share a phone, and a CTV commonly shares their phone/email with their own client rows
+    // (is_ctv = false). Guarding against every partner row wrongly blocked editing a CTV whose
+    // phone also appears on a customer (the reported bug). Scope the check to is_ctv = true.
     if (phone) {
-      const dupSql = `SELECT id FROM dbo.partners WHERE LOWER(phone) = LOWER($1) AND id <> $2 LIMIT 1`;
+      const dupSql = `SELECT id FROM dbo.partners WHERE LOWER(phone) = LOWER($1) AND id <> $2 AND is_ctv = true AND COALESCE(isdeleted, false) = false LIMIT 1`;
       const [dDup, cDup] = await Promise.all([
         dentalDb.queryRows(dupSql, [phone, id]),
         cosmeticDb.queryRows(dupSql, [phone, id]).catch(() => []),
@@ -217,7 +251,7 @@ router.put('/:id', requireAuth, async (req, res) => {
       }
     }
     if (email) {
-      const dupSql = `SELECT id FROM dbo.partners WHERE LOWER(email) = LOWER($1) AND id <> $2 LIMIT 1`;
+      const dupSql = `SELECT id FROM dbo.partners WHERE LOWER(email) = LOWER($1) AND id <> $2 AND is_ctv = true AND COALESCE(isdeleted, false) = false LIMIT 1`;
       const [dDup, cDup] = await Promise.all([
         dentalDb.queryRows(dupSql, [email, id]),
         cosmeticDb.queryRows(dupSql, [email, id]).catch(() => []),

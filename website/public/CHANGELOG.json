@@ -1,5 +1,282 @@
 [
   {
+    "version": "0.32.77",
+    "date": "2026-05-30",
+    "commit": "pending",
+    "highlights": "Cosmetic LOB fix: admins can again open the CTV tab and the Revenue (Doanh thu) report — both were wrongly returning 'Admin only' / permission-denied on the cosmetic line of business.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "CTV management tab and Revenue/Doanh thu reports now load on the Cosmetic LOB. They were returning 403 (\"Admin only\" / \"Permission denied: reports.view\") because permission checks on /api/cosmetic/* routes were resolved against the cosmetic database instead of the admin's home database.",
+          "Permission/identity resolution is now anchored to the caller's home line-of-business (authLob), so an admin keeps full access across both Dental and Cosmetic. Also fixes all-location report scope and CSV export visibility on Cosmetic."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "permissionService: added regression tests proving permission resolution targets the caller's home DB (authLob) and never the request's data-LOB. Affected API suites green; no new failures introduced."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.76",
+    "date": "2026-05-29",
+    "commit": "pending",
+    "highlights": "Multi-level CTV override is now REAL: a downline's commission cascades a configured share up the upline chain, so the projected 'potential from downline' becomes actual pending commission.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "The commission engine now writes multi-level override earnings: when a CTV earns a direct commission, each upline in their chain earns share_percent[level] of it (L1 4%, L2 2% per commission_level_config). Additive — direct earners keep their full commission; uplines get an extra row.",
+          "Backfilled existing earnings so the override shows immediately: e.g. Trần Trung Kiên's pending commission is now ₫41,230 (matching the Network tab projection), where it was 0đ before."
+        ]
+      },
+      {
+        "title": "Changed",
+        "items": [
+          "The Network-tab 'potential' projection now bases on DIRECT (level-0) downline earnings only, so the new override rows don't double-count into the projection. Projection == the override actually received."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "commissionEngine tests extended: override cascades to enabled upline levels (additive, idempotent); non-CTV sources (salestaff/consultation) do NOT cascade. All commission + hierarchy suites green."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.75",
+    "date": "2026-05-29",
+    "commit": "pending",
+    "highlights": "CTV Network: the 'Potential from downline' card now flips on tap to reveal exactly where the earnings come from — each contributing member with the amount paid to them and your projected cut.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "The 'Tiềm năng từ tuyến dưới' (potential) card is now a flip card: tap it to flip and see the source — a list of the downline members generating commission, each showing the total paid to THEM and your projected cut from them (biggest contributor first). Tap again to flip back.",
+          "Replaces the inline per-level chips with the richer flipped detail; the searchable collapsible downline list below is unchanged."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.74",
+    "date": "2026-05-29",
+    "commit": "pending",
+    "highlights": "CTV Network tab: see where your downline potential comes from — per-level breakdown, collapsible member cards with earnings detail, and a search bar.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Mạng lưới (Network) tab: the 'Potential from downline' card now shows a per-level breakdown (e.g. 'Tầng 2 · ₫41,230') so you can see which levels drive the number.",
+          "Downline members are now collapsible cards: collapsed shows name + level + your projected cut; expand to see that member's own earnings, the rate applied, your cut, LOB, contact, and direct-downline count.",
+          "A search bar on the downline list filters by name or phone (diacritic-insensitive, so 'kien' matches 'Kiên')."
+        ]
+      },
+      {
+        "title": "API",
+        "items": [
+          "GET /api/ctv/hierarchy downline nodes now include `earned` (the member's own earnings) and `overrideContribution` (their share of your projected override) so the portal can show the source breakdown."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "ctvNetwork.hierarchy.test.js extended (8 cases) — added a per-node earned/overrideContribution assertion that also checks the per-node contributions sum to totals.potentialOverride."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.73",
+    "date": "2026-05-29",
+    "commit": "pending",
+    "highlights": "CTV portal fix: Track Clients now shows only the real customers you referred (not your downline CTVs), and the Network tab shows a projected override number from your downline.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Theo dõi (Track Clients) was wrongly listing your downline CTVs as if they were your referred clients — a leak from the shared referred_by_ctv_id column. It now shows ONLY the real end-customers you personally referred (downline CTVs are excluded). Same fix applied to /ctv/referrals and /ctv/client-journeys."
+        ]
+      },
+      {
+        "title": "New Features",
+        "items": [
+          "Mạng lưới (Network) tab now shows a single 'Potential from downline' card: your projected override (₫) rolled up across your whole downline, plus the effective % — computed from the commission level config (L1 14.5% / L2 7.3% / L3 3.6% / L4 1.8%). Clearly labeled 'Projected / Tạm tính' since multi-level override is not paid out yet. No per-person breakdown, just the number."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added api/src/services/__tests__/ctvNetwork.hierarchy.test.js (7 cases) covering the downline rollup math: per-level shares, multi-depth, disabled levels, config fallback, and empty/unknown CTV edge cases."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.72",
+    "date": "2026-05-29",
+    "commit": "pending",
+    "highlights": "CTV portal Track Clients: each client card now has a shareable link to open that customer's record directly.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Each referred-client card on the CTV portal's Track Clients tab now has an 'Open customer' link (opens /customers/<id> in a new tab) and a 'Copy link' button — so a CTV can hand the link to anyone who needs to check that client, and whoever has access opens the record directly."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.71",
+    "date": "2026-05-29",
+    "commit": "pending",
+    "highlights": "Commission → CTV tab: search any CTV by name/phone/email/code, and click a name to expand their upline + downline hierarchy.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Search box on the CTV tab — filter the list instantly by name, phone, email, code, or upline. Diacritic-insensitive, so 'kien' matches 'Kiên'.",
+          "Click a CTV's name to expand their card and see their upline chain and full downline (with direct/total/upline counts), reusing the portal's hierarchy view."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "New admin endpoint GET /api/Ctvs/:id/hierarchy verified against a seeded multi-level chain; search + expand verified live in the browser; typecheck clean, no test regressions."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.70",
+    "date": "2026-05-29",
+    "commit": "pending",
+    "highlights": "CTV payouts are live: the Commission → Payouts (Chi trả) tab now loads, lets you pay selected pending earnings as a cycle, and attach a receipt photo.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Payouts tab (Chi trả) now works end-to-end — pick a LOB (Dental/Cosmetic), tick pending earnings, label the cycle, and pay. Paid earnings move out of the pending list and the cycle appears under 'Recent payout cycles'.",
+          "Attach a receipt photo when paying (or later via the 'Đính kèm' button); the thumbnail shows on the cycle and opens full size."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Fixed 'API GET /Payouts failed (404)' — the Payouts backend (GET/POST/PATCH /api/Payouts + receipt upload) was never implemented or mounted; it now is."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "7 backend unit tests for the payout permission gate, create-cycle transaction, already-paid guard, and receipt attach; verified live in the browser on the Cosmetic LOB (4 earnings -> 1,035,000d cycle)."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.69",
+    "date": "2026-05-29",
+    "commit": "pending",
+    "highlights": "CTV portal: 'Giới thiệu khách' and 'Tuyển CTV' work again, and the refer form now live-checks the phone against the chosen Dental/Cosmetic database as you type.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "Refer-a-client form checks the phone number against the chosen service line (Dental or Cosmetic) in real time and tells you if the client is new, already exists, is yours, or is held by another CTV.",
+          "Restored the recruit-CTV form."
+        ]
+      },
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "The portal's 'Giới thiệu khách' and 'Tuyển CTV' buttons opened nothing in the new portal — they now open their forms again."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.68",
+    "date": "2026-05-29",
+    "commit": "pending",
+    "highlights": "New CTV portal deployed to NK3: the flip-card client tracking and the referral-hierarchy (Mạng lưới) tab. Added the /ctv/hierarchy endpoint that the new hierarchy page needs.",
+    "sections": [
+      {
+        "title": "New Features",
+        "items": [
+          "CTV portal now uses the flip-card tracking view and adds a referral-hierarchy (network) tab showing the CTV's upline and downline.",
+          "Backend: new /ctv/hierarchy endpoint returns the network shaped for the hierarchy page (the page previously had no matching endpoint)."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.67",
+    "date": "2026-05-29",
+    "commit": "pending",
+    "highlights": "CTV commission is now a flat % of the actual service paid directly to the referrer (24% default, 7% for braces) — no more 'pool' split. Verified on NK3: a 29,450,000đ braces client now earns the CTV 2,061,500đ.",
+    "sections": [
+      {
+        "title": "Changed",
+        "items": [
+          "Referral commission is now a direct percentage of the actual service amount paid to the referring CTV — default 24%, braces/orthodontics 7%. The previous two-layer 'pool then split across levels' calculation was removed (it left every CTV at 0 because product rates were unset and the 20% default was never applied)."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Verified on NK3: ĐẶNG THỊ TUYẾT MAI's braces service (29,450,000đ) now pays the CTV 2,061,500đ (7%), visible in Hoa hồng and the client journey."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.66",
+    "date": "2026-05-29",
+    "commit": "pending",
+    "highlights": "CTV portal journey now reflects the client's real activity (came / serviced / paid) instead of commission-payout status — a client who already paid shows 'Đã thanh toán' even with no commission recorded. Deployed + verified on NK3.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "The CTV portal's 4-step client journey (Đã giới thiệu → Đã đến khám → Đã làm dịch vụ → Đã thanh toán) was computed purely from the commission ledger, so a referred client who already came and paid — but had no commission row yet — was frozen at step 1 (1/4). The journey now advances from the client's real activity: completed appointment, sale-order line, and payment received. Commission amounts still come from the ledger.",
+          "Fixed a broken internal commission-replay module that crashed on load (missing exports)."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Verified on the NK3 sandbox: a real paid client with no recorded commission now correctly returns 4/4 'Đã thanh toán' from the CTV portal endpoint."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.32.65",
+    "date": "2026-05-29",
+    "commit": "pending",
+    "highlights": "CTV portal now reflects clients who already paid before being linked: assigning a CTV retroactively backfills commission earnings over the customer's past payments, so the client journey advances past 'referred'.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Assigning a CTV (Cộng tác viên) to a customer who has ALREADY come and paid now retroactively attributes commission for those past payments. Previously earnings were only ever written at payment time, so a customer linked after paying stayed frozen at the '1/4 Đã giới thiệu' (referred) stage in the CTV portal with no commission.",
+          "The backfill re-runs the commission engine over the customer's positive payments (reconstructing order lines from invoice allocations so per-product commission rates apply) and is idempotent — a payment already attributed to the CTV is skipped, so no double-payout."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added engine tests for backfillEarningsForClient (attribution, idempotency, no-referrer / missing-arg no-ops) and wiring tests proving CTV assignment triggers a non-fatal backfill on the request LOB."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.63",
     "date": "2026-05-29",
     "commit": "pending",

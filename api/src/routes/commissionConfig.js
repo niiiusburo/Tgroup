@@ -16,9 +16,11 @@ const { resolveEffectivePermissions, isAdminPermissionState } = require('../serv
 
 const router = express.Router();
 
-async function isAdminCaller(employeeId) {
+async function isAdminCaller(employeeId, authLob) {
   try {
-    const permState = await resolveEffectivePermissions(employeeId);
+    // Resolve admin status from the caller's home DB (authLob), not the cosmetic
+    // mirror DB — otherwise a real admin is denied on /api/cosmetic/CommissionConfig.
+    const permState = await resolveEffectivePermissions(employeeId, authLob);
     const list = (permState && permState.effectivePermissions) || [];
     return isAdminPermissionState(permState) || list.includes('*') || list.includes('commission.config.manage');
   } catch (e) {
@@ -52,7 +54,7 @@ router.get('/', requireAuth, async (req, res) => {
 router.put('/', requireAuth, async (req, res) => {
   const { employeeId } = req.user || {};
   if (!employeeId) return res.status(401).json({ error: 'No token' });
-  if (!(await isAdminCaller(employeeId))) {
+  if (!(await isAdminCaller(employeeId, req.user?.authLob || 'dental'))) {
     return res.status(403).json({ error: { code: 'S_FORBIDDEN', message: 'Admin only' } });
   }
 

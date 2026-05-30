@@ -3,9 +3,10 @@
 // Mock the db module
 jest.mock('../../db', () => ({
   query: jest.fn(),
+  getQuery: jest.fn(),
 }));
 
-const { query } = require('../../db');
+const { query, getQuery } = require('../../db');
 const {
   resolveEffectivePermissions,
   hasPermission,
@@ -16,6 +17,7 @@ const {
 
 beforeEach(() => {
   query.mockReset();
+  getQuery.mockReset();
 });
 
 describe('permissionService', () => {
@@ -123,6 +125,48 @@ describe('permissionService', () => {
 
       await resolveEffectivePermissions('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
       expect(query).toHaveBeenCalledTimes(4); // 1 partner + 3 parallel
+    });
+
+    // Regression: on /api/cosmetic/* the ALS context is 'cosmetic', so the bare dynamic
+    // query() resolved perms against the (under-seeded) cosmetic DB and wrongly denied a
+    // real admin — 403 "Admin only" on CTV management, 403 "reports.view" on revenue reports.
+    // resolveEffectivePermissions must resolve against the caller's HOME db (authLob).
+    describe('authLob routing (cosmetic LOB admin 403 fix)', () => {
+      it('resolves against the authLob DB (not the ALS-following query) when authLob is given', async () => {
+        const homeQ = jest.fn()
+          .mockResolvedValueOnce([{ tier_id: 'group-1', group_name: 'Admin' }]) // partner
+          .mockResolvedValueOnce([{ permission: 'reports.view' }])              // base perms
+          .mockResolvedValueOnce([])                                            // overrides
+          .mockResolvedValueOnce([]);                                           // locations
+        getQuery.mockReturnValueOnce(homeQ);
+
+        const result = await resolveEffectivePermissions('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 'dental');
+
+        expect(getQuery).toHaveBeenCalledWith('dental');
+        expect(homeQ).toHaveBeenCalled();        // used the explicit home-DB executor
+        expect(query).not.toHaveBeenCalled();    // did NOT use the ALS-following query()
+        expect(result.groupName).toBe('Admin');
+        expect(result.effectivePermissions).toContain('reports.view');
+      });
+
+      it('routes to the cosmetic pool for cosmetic-home callers', async () => {
+        const homeQ = jest.fn()
+          .mockResolvedValueOnce([{ tier_id: 'group-2', group_name: 'Cosmetic Staff' }])
+          .mockResolvedValueOnce([{ permission: 'cosmetic.access' }])
+          .mockResolvedValueOnce([])
+          .mockResolvedValueOnce([]);
+        getQuery.mockReturnValueOnce(homeQ);
+
+        await resolveEffectivePermissions('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee', 'cosmetic');
+        expect(getQuery).toHaveBeenCalledWith('cosmetic');
+      });
+
+      it('falls back to the legacy dynamic query() when authLob is omitted', async () => {
+        query.mockResolvedValueOnce([{ tier_id: null, group_name: null }]);
+        await resolveEffectivePermissions('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee');
+        expect(query).toHaveBeenCalled();
+        expect(getQuery).not.toHaveBeenCalled();
+      });
     });
   });
 

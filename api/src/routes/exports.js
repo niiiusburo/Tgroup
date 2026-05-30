@@ -19,7 +19,7 @@ function requireExportPermission(req, res, next) {
     return res.status(400).json({ error: err.message });
   }
 
-  resolveEffectivePermissions(req.user.employeeId)
+  resolveEffectivePermissions(req.user.employeeId, req.user.authLob || 'dental')
     .then(({ effectivePermissions }) => {
       if (!effectivePermissions.includes('*') && !effectivePermissions.includes(permission)) {
         return res.status(403).json({ error: `Permission denied: ${permission}` });
@@ -115,7 +115,7 @@ router.post('/:type/download', requireAuth, requireExportPermission, async (req,
 router.get('/types', requireAuth, async (req, res) => {
   try {
     const { listExportTypes } = require('../services/exports/exportRegistry');
-    const { effectivePermissions } = await resolveEffectivePermissions(req.user.employeeId);
+    const { effectivePermissions } = await resolveEffectivePermissions(req.user.employeeId, req.user.authLob || 'dental');
 
     const allTypes = listExportTypes();
     const visibleTypes = allTypes.filter((t) =>

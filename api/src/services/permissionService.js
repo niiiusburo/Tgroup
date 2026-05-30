@@ -1,6 +1,6 @@
 'use strict';
 
-const { query } = require('../db');
+const { query, getQuery } = require('../db');
 
 const ADMIN_GROUP_ID = '11111111-0000-0000-0000-000000000001';
 
@@ -42,7 +42,17 @@ function isAdminPermissionState(permissionState) {
  *
  * Both now import from here. Update ONE file, both paths stay in sync.
  *
+ * Identity & permissions are CANONICAL in the caller's HOME database (authLob),
+ * NOT the request's data-LOB. On /api/cosmetic/* mirror routes the AsyncLocalStorage
+ * context is 'cosmetic', so the bare dynamic query() would resolve permissions against
+ * the cosmetic DB — which is not seeded with the full permission model — and would
+ * wrongly under-permission a real admin (observed: 403 "Admin only" on CTV management,
+ * 403 "Permission denied: reports.view" on revenue reports). Pass the caller's authLob
+ * (from the JWT) so resolution always targets their home DB regardless of request context.
+ *
  * @param {string} employeeId - UUID of the employee
+ * @param {('dental'|'cosmetic')} [authLob] - caller's home LOB (req.user.authLob). When
+ *   omitted, falls back to the legacy ALS-following query() for backward compatibility.
  * @returns {Promise<{
  *   groupId: string|null,
  *   groupName: string|null,
@@ -50,14 +60,18 @@ function isAdminPermissionState(permissionState) {
  *   locations: Array<{id:string, name:string}>
  * }>}
  */
-async function resolveEffectivePermissions(employeeId) {
+async function resolveEffectivePermissions(employeeId, authLob) {
+  // Resolve against the caller's home DB explicitly when known; otherwise keep the
+  // legacy dynamic query() so existing callers/tests are unaffected.
+  const q = (authLob === 'dental' || authLob === 'cosmetic') ? getQuery(authLob) : query;
+
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (!uuidRegex.test(employeeId)) {
     return { groupId: null, groupName: null, effectivePermissions: [], locations: [] };
   }
 
   // Read tier_id from partners (primary source, matches middleware/auth.js lookup)
-  const partnerRows = await query(
+  const partnerRows = await q(
     `SELECT p.tier_id, pg.name AS group_name
      FROM dbo.partners p
      LEFT JOIN dbo.permission_groups pg ON pg.id = p.tier_id
@@ -76,7 +90,7 @@ async function resolveEffectivePermissions(employeeId) {
   // This allows ctv-demo@clinic.vn (and future CTVs) to hit /api/ctv/* without needing group assignment.
   // Soft-gated by is_ctv flag in JWT + route logic; additive, does not affect admin groups.
   if (!groupId) {
-    const ctvCheck = await query(`SELECT is_ctv FROM dbo.partners WHERE id = $1 LIMIT 1`, [employeeId]);
+    const ctvCheck = await q(`SELECT is_ctv FROM dbo.partners WHERE id = $1 LIMIT 1`, [employeeId]);
     if (ctvCheck && ctvCheck[0] && ctvCheck[0].is_ctv) {
       return {
         groupId: null,
@@ -90,15 +104,15 @@ async function resolveEffectivePermissions(employeeId) {
 
   // Resolve base permissions, overrides, and location scope in parallel
   const [basePermRows, overrideRows, locationRows] = await Promise.all([
-    query(
+    q(
       `SELECT permission FROM dbo.group_permissions WHERE group_id = $1`,
       [groupId]
     ),
-    query(
+    q(
       `SELECT permission, override_type FROM dbo.permission_overrides WHERE employee_id = $1`,
       [employeeId]
     ),
-    query(
+    q(
       `WITH location_candidates AS (
          SELECT c.id, c.name, 0 AS sort_order
          FROM dbo.partners p
@@ -145,8 +159,8 @@ async function resolveEffectivePermissions(employeeId) {
  * @param {string} permission - e.g., 'customers.view'
  * @returns {Promise<boolean>}
  */
-async function hasPermission(employeeId, permission) {
-  const { effectivePermissions } = await resolveEffectivePermissions(employeeId);
+async function hasPermission(employeeId, permission, authLob) {
+  const { effectivePermissions } = await resolveEffectivePermissions(employeeId, authLob);
   if (effectivePermissions.length === 0) return false;
   if (effectivePermissions.includes('*')) return true;
   return effectivePermissions.includes(permission);
