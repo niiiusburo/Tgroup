@@ -6,7 +6,8 @@ const router = express.Router();
 
 /**
  * GET /api/settings/bank
- * Returns the configured bank account or 404 if none
+ * Returns the configured bank account (HTTP 200 with empty-string fields if not configured)
+ * Allows the unconfigured cosmetic LOB to gracefully handle missing bank settings
  */
 router.get('/bank', requirePermission('settings.view'), async (_req, res) => {
   try {
@@ -15,7 +16,13 @@ router.get('/bank', requirePermission('settings.view'), async (_req, res) => {
     );
 
     if (!result || result.length === 0) {
-      return res.status(404).json({ message: 'Bank settings not found' });
+      // Return HTTP 200 with empty strings (not null) so the unconfigured cosmetic
+      // LOB doesn't break — keeps the BankSettings type non-null for FE consumers.
+      return res.json({
+        bankBin: '',
+        bankNumber: '',
+        bankAccountName: '',
+      });
     }
 
     const row = result[0];

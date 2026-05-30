@@ -5,7 +5,8 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const { requireAuth } = require('./middleware/auth');
+const { requireAuth, requirePermission, requireLobScope } = require('./middleware/auth');
+const { attachCosmeticDb } = require('./middleware/lob');
 const { enforceIpAccess } = require('./middleware/ipAccess');
 const { errorHandler } = require('./middleware/errorHandler');
 
@@ -28,8 +29,9 @@ const cashbooksRoutes = require('./routes/cashbooks');
 const receiptsRoutes = require('./routes/receipts');
 const journalsRoutes = require('./routes/journals');
 const stockPickingsRoutes = require('./routes/stockPickings');
-const crmTasksRoutes = require('./routes/crmTasks');
+// const crmTasksRoutes = require('./routes/crmTasks'); // DEAD ROUTE: crmTasks.js queries non-existent dbo.crmtasks (HTTP 500)
 const commissionsRoutes = require('./routes/commissions');
+const commissionConfigRoutes = require('./routes/commissionConfig');
 const hrPayslipsRoutes = require('./routes/hrPayslips');
 const employeesRoutes = require('./routes/employees');
 const productsRoutes = require('./routes/products');
@@ -56,12 +58,17 @@ const publicTelemetryErrorRoutes = require('./routes/publicTelemetryErrors');
 const ipAccessRoutes = require('./routes/ipAccess');
 const exportsRoutes = require('./routes/exports');
 const ctvRoutes = require('./routes/ctv');
+const ctvsRoutes = require('./routes/ctvs');
+const earningsRoutes = require('./routes/earnings');
+const payoutsRoutes = require('./routes/payouts');
 const {
   healthCheck: faceRecognitionHealth,
   getFaceRecognitionProvider,
 } = require('./services/faceRecognitionRuntime');
-const { query } = require('./db');
+const { query, runWithLob } = require('./db');
 
+// TGClinic uses explicit Authorization: Bearer JWTs, not cookie-backed auth; see docs/SECURITY.md.
+// nosemgrep: javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.set('trust proxy', 1);
@@ -163,8 +170,12 @@ app.use('/api/CashBooks', cashbooksRoutes);
 app.use('/api/Receipts', receiptsRoutes);
 app.use('/api/AccountJournals', journalsRoutes);
 app.use('/api/StockPickings', stockPickingsRoutes);
-app.use('/api/CrmTasks', crmTasksRoutes);
+// app.use('/api/CrmTasks', crmTasksRoutes); // DEAD ROUTE: crmTasks.js queries non-existent dbo.crmtasks (HTTP 500). Matches the dead Services route.
 app.use('/api/Commissions', commissionsRoutes);
+app.use('/api/CommissionConfig', commissionConfigRoutes);
+app.use('/api/Ctvs', ctvsRoutes);
+app.use('/api/Earnings', earningsRoutes);
+app.use('/api/Payouts', payoutsRoutes);
 app.use('/api/HrPayslips', hrPayslipsRoutes);
 app.use('/api/Employees', employeesRoutes);
 app.use('/api/Products', productsRoutes);
@@ -235,9 +246,11 @@ if (COSMETIC_FLAG) {
   cosmeticRouter.use('/CustomerBalance', customerBalanceRoutes);
   cosmeticRouter.use('/CustomerReceipts', customerReceiptsRoutes);
   cosmeticRouter.use('/CustomerSources', customerSourcesRoutes);
+  cosmeticRouter.use('/CommissionConfig', commissionConfigRoutes);
+  cosmeticRouter.use('/Ctvs', ctvsRoutes);
   cosmeticRouter.use('/Permissions', permissionsRoutes);
   cosmeticRouter.use('/AccountPayments', accountPaymentsRoutes);
-  cosmeticRouter.use('/CrmTasks', crmTasksRoutes);
+  // cosmeticRouter.use('/CrmTasks', crmTasksRoutes); // DEAD ROUTE: crmTasks.js queries non-existent dbo.crmtasks (HTTP 500)
   cosmeticRouter.use('/DotKhams', dotKhamsRoutes);
   cosmeticRouter.use('/MonthlyPlans', monthlyPlansRoutes);
   cosmeticRouter.use('/settings', bankSettingsRoutes);
@@ -259,7 +272,7 @@ if (COSMETIC_FLAG) {
     });
   });
 }
-app.use('/api/ctv', ctvRoutes);
+app.use('/api/ctv', requirePermission('ctv.dashboard.view'), ctvRoutes);
 
 app.get('/api/health', async (_req, res) => {
   const checks = { db: false, faceService: false };
@@ -296,6 +309,9 @@ app.get('/api/health', async (_req, res) => {
 
 // Serve uploaded feedback attachments
 app.use('/uploads/feedback', express.static(path.join(__dirname, '..', 'uploads', 'feedback')));
+
+// Serve uploaded payout receipt photos
+app.use('/uploads/payouts', express.static(path.join(__dirname, '..', 'uploads', 'payouts')));
 
 // Stub image endpoint used by partner avatars
 app.get('/api/web/Image2', (req, res) => {

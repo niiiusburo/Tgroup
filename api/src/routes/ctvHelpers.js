@@ -23,10 +23,10 @@ function isCtvUser(user) {
   return user?.is_ctv === true || user?.isCtv === true;
 }
 
-async function isAdminCaller(employeeId, permission = 'ctv.manage') {
+async function isAdminCaller(employeeId, permission = 'ctv.manage', authLob = 'dental') {
   try {
     const { resolveEffectivePermissions, isAdminPermissionState } = require('../services/permissionService');
-    const permState = await resolveEffectivePermissions(employeeId);
+    const permState = await resolveEffectivePermissions(employeeId, authLob);
     const list = (permState && permState.effectivePermissions) || [];
     return isAdminPermissionState(permState) || list.includes('*') || list.includes(permission);
   } catch (err) {

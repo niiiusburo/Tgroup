@@ -7,9 +7,10 @@
 const express = require('express');
 const { requireAuth } = require('../middleware/auth');
 const { getDb } = require('../db');
-const { buildCtvNetwork } = require('../services/ctvNetwork');
+const { buildCtvNetwork, getCtvHierarchy } = require('../services/ctvNetwork');
 const { getReferralClaimStatus } = require('../services/referralClaim');
 const { createReferralStartCard } = require('../services/referralCard');
+const { isCtvUser } = require('./ctvHelpers');
 
 const router = express.Router();
 
@@ -36,7 +37,7 @@ function requireCtvUser(req, res, next) {
   if (!req.user?.employeeId) {
     return res.status(401).json({ error: 'No token' });
   }
-  if (!req.user.is_ctv) {
+  if (!isCtvUser(req.user)) {
     return res.status(403).json({
       error: { code: 'S_CTV_ONLY', message: 'CTV access required' },
     });
@@ -172,58 +173,160 @@ router.get('/referrals', requireAuth, requireCtvUser, async (req, res) => {
     SELECT id, name, phone, email, datecreated AS referred_at
     FROM dbo.partners
     WHERE referred_by_ctv_id = $1
+      AND COALESCE(is_ctv, false) = false
       AND (customer = true OR active = true OR employee = false)
     ORDER BY datecreated DESC NULLS LAST
     LIMIT 30
   `;
 
-  const [dRefsRaw, cRefsRaw] = await Promise.all([
-    safeQueryRows(dentalDb, refSql, [ctvId]),
-    safeQueryRows(cosmeticDb, refSql, [ctvId]),
-  ]);
+  try {
+    const [dRefsRaw, cRefsRaw] = await Promise.all([
+      safeQueryRows(dentalDb, refSql, [ctvId]),
+      safeQueryRows(cosmeticDb, refSql, [ctvId]),
+    ]);
 
-  const buildReferral = async (db, row, lob) => {
-    const earnRows = await safeQueryRows(
-      db,
-      `SELECT COALESCE(SUM(amount), 0) AS total, COUNT(*) AS cnt
-       FROM dbo.earnings
-       WHERE client_id = $1 AND recipient_partner_id = $2`,
-      [row.id, ctvId]
-    );
-    const er = earnRows[0] || { total: 0, cnt: 0 };
-    const total = Math.round(parseFloat(er.total || 0));
-    const cnt = parseInt(er.cnt || 0, 10);
-    return {
-      id: row.id,
-      name: row.name,
-      phone: row.phone || '',
-      lobs: [lob],
-      total_earned: total,
-      earned_count: cnt,
-      status: cnt > 0 ? 'earning' : 'no visit yet',
-      referred_at: row.referred_at,
+    // Build all referrals for one LOB DB. Journey stages reflect the CLIENT's REAL activity
+    // (visited/serviced/paid) from the operational tables — NOT commission-payout status — so a
+    // client who already came & paid advances past "referred" even when no earning row exists yet
+    // (retroactive CTV assignment, or a paid order whose product carries no commission rate).
+    // Commission ($) stays a separate concern: total_earned/earned_count come from the earnings
+    // ledger. Signals are BATCHED (partnerid = ANY) — no per-client N+1 — and each query goes
+    // through safeQueryRows so a missing table/column in either LOB DB degrades to "referred"
+    // rather than 500ing the whole portal.
+    const buildReferralsForLob = async (db, rows, lob) => {
+      if (!rows || rows.length === 0) return [];
+      const ids = rows.map((r) => r.id);
+
+      const [earnAgg, payAgg, svcRows, visitAgg] = await Promise.all([
+        safeQueryRows(
+          db,
+          `SELECT client_id AS id, COALESCE(SUM(amount), 0) AS total, COUNT(*) AS cnt
+             FROM dbo.earnings WHERE client_id = ANY($1) AND recipient_partner_id = $2
+            GROUP BY client_id`,
+          [ids, ctvId]
+        ),
+        safeQueryRows(
+          db,
+          `SELECT customer_id AS id, COALESCE(SUM(amount), 0) AS total, COUNT(*) AS cnt, MAX(payment_date) AS last_at
+             FROM payments WHERE customer_id = ANY($1) AND amount > 0
+            GROUP BY customer_id`,
+          [ids]
+        ),
+        safeQueryRows(
+          db,
+          `SELECT so.partnerid AS id, sol.id AS line_id, sol.productname AS name,
+                  sol.pricetotal AS amount, sol.date AS dt, sol.amountresidual AS residual
+             FROM dbo.saleorderlines sol
+             JOIN dbo.saleorders so ON so.id = sol.orderid
+            WHERE so.partnerid = ANY($1) AND sol.isdeleted = false
+            ORDER BY sol.date DESC NULLS LAST`,
+          [ids]
+        ),
+        safeQueryRows(
+          db,
+          `SELECT partnerid AS id, COUNT(*) AS cnt, MAX(date) AS last_at
+             FROM appointments WHERE partnerid = ANY($1) AND state IN ('completed','done','arrived')
+            GROUP BY partnerid`,
+          [ids]
+        ),
+      ]);
+
+      const earnMap = new Map(earnAgg.map((r) => [r.id, r]));
+      const payMap = new Map(payAgg.map((r) => [r.id, r]));
+      const visitMap = new Map(visitAgg.map((r) => [r.id, r]));
+      const svcMap = new Map();
+      for (const s of svcRows) {
+        if (!svcMap.has(s.id)) svcMap.set(s.id, []);
+        svcMap.get(s.id).push(s);
+      }
+
+      return rows.map((row) => {
+        const e = earnMap.get(row.id) || { total: 0, cnt: 0 };
+        const p = payMap.get(row.id);
+        const v = visitMap.get(row.id);
+        const svc = svcMap.get(row.id) || [];
+
+        const hasPaid = !!p && parseInt(p.cnt, 10) > 0;
+        const hasService = svc.length > 0;
+        const hasVisited = !!v && parseInt(v.cnt, 10) > 0;
+
+        // Highest reached stage wins (paid > serviced > visited > referred). A paid client
+        // shows 4/4 even if no completed appointment / service line was recorded.
+        let stage = 'referred';
+        let stageProgress = 1;
+        if (hasPaid) { stage = 'paid'; stageProgress = 4; }
+        else if (hasService) { stage = 'serviced'; stageProgress = 3; }
+        else if (hasVisited) { stage = 'visited'; stageProgress = 2; }
+
+        const services = svc.map((s) => ({
+          id: s.line_id,
+          serviceLineId: s.line_id,
+          paymentId: null,
+          serviceName: s.name || null,
+          amount: Math.abs(parseFloat(s.amount || 0)),
+          status: s.residual != null && parseFloat(s.residual) <= 0 ? 'paid' : 'pending',
+          source: 'saleorder',
+          lob,
+          earnedAt: s.dt || null,
+        }));
+
+        const total = Math.round(parseFloat(e.total || 0));
+        const cnt = parseInt(e.cnt || 0, 10);
+        return {
+          id: row.id,
+          name: row.name,
+          phone: row.phone || '',
+          lobs: [lob],
+          total_earned: total,
+          earned_count: cnt,
+          status: cnt > 0 ? 'earning' : hasPaid ? 'paid' : 'no visit yet',
+          referred_at: row.referred_at,
+          stage,
+          stage_progress: stageProgress,
+          service_count: services.length,
+          services,
+          last_payment_at: p ? p.last_at : null,
+          last_visit_at: v ? v.last_at : null,
+        };
+      });
     };
-  };
 
-  const dItems = await Promise.all(dRefsRaw.map((r) => buildReferral(dentalDb, r, 'dental')));
-  const cItems = await Promise.all(cRefsRaw.map((r) => buildReferral(cosmeticDb, r, 'cosmetic')));
+    const [dItems, cItems] = await Promise.all([
+      buildReferralsForLob(dentalDb, dRefsRaw, 'dental'),
+      buildReferralsForLob(cosmeticDb, cRefsRaw, 'cosmetic'),
+    ]);
 
-  // dedupe by id (in case same uuid in both DBs)
-  const byId = new Map();
-  [...dItems, ...cItems].forEach((item) => {
-    if (byId.has(item.id)) {
-      const prev = byId.get(item.id);
-      prev.lobs = Array.from(new Set([...prev.lobs, ...item.lobs]));
-      prev.total_earned += item.total_earned;
-      prev.earned_count += item.earned_count;
-      if (item.status === 'earning') prev.status = 'earning';
-    } else {
-      byId.set(item.id, item);
-    }
-  });
+    // dedupe by id (same uuid can appear in both DBs): union lobs/services, sum commission,
+    // keep the highest stage and the most recent payment date.
+    const byId = new Map();
+    [...dItems, ...cItems].forEach((item) => {
+      if (byId.has(item.id)) {
+        const prev = byId.get(item.id);
+        prev.lobs = Array.from(new Set([...prev.lobs, ...item.lobs]));
+        prev.total_earned += item.total_earned;
+        prev.earned_count += item.earned_count;
+        prev.services = [...prev.services, ...item.services];
+        prev.service_count = prev.services.length;
+        if (item.stage_progress > prev.stage_progress) {
+          prev.stage = item.stage;
+          prev.stage_progress = item.stage_progress;
+        }
+        if (item.status === 'earning') prev.status = 'earning';
+        else if (item.status === 'paid' && prev.status !== 'earning') prev.status = 'paid';
+        if (item.last_payment_at && (!prev.last_payment_at || new Date(item.last_payment_at) > new Date(prev.last_payment_at))) {
+          prev.last_payment_at = item.last_payment_at;
+        }
+      } else {
+        byId.set(item.id, { ...item });
+      }
+    });
 
-  const referrals = Array.from(byId.values());
-  return res.json({ referrals });
+    const referrals = Array.from(byId.values());
+    return res.json({ referrals });
+  } catch (err) {
+    console.error('[ctv GET /referrals] error:', err && err.message);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 /**
@@ -243,6 +346,7 @@ router.get('/client-journeys', requireAuth, async (req, res) => {
     SELECT id, name, phone, email, datecreated AS referred_at
     FROM dbo.partners
     WHERE referred_by_ctv_id = $1
+      AND COALESCE(is_ctv, false) = false
       AND (customer = true OR active = true OR employee = false)
     ORDER BY datecreated DESC NULLS LAST
     LIMIT 50
@@ -314,6 +418,47 @@ router.get('/client-journeys', requireAuth, async (req, res) => {
   const dItems = await Promise.all(dRefsRaw.map((r) => buildJourney(dentalDb, r, 'dental')));
   const cItems = await Promise.all(cRefsRaw.map((r) => buildJourney(cosmeticDb, r, 'cosmetic')));
 
+  // Activity-based journey override: stages above reflect commission EARNINGS, so a client who
+  // already came & paid but has no earning row yet (retroactive CTV assignment, or a paid order
+  // whose product carries no commission rate) is wrongly frozen at "referred" (1/4). Re-derive
+  // the stage from the client's REAL operational activity (completed appointment / sale-order
+  // line / payment) and take the higher of the two, so the CTV sees their client actually
+  // progressing. Commission ($) display stays driven by earnings (total_earned / payment object).
+  // Batched per LOB (no N+1); each query is guarded by safeQueryRows so a missing table/column
+  // degrades to no-override rather than 500ing the portal.
+  const activityProgressById = new Map();
+  const computeActivity = async (db, rawRows) => {
+    if (!rawRows || rawRows.length === 0) return;
+    const ids = rawRows.map((r) => r.id);
+    const [payAgg, svcAgg, visitAgg] = await Promise.all([
+      safeQueryRows(db, `SELECT customer_id AS id FROM payments WHERE customer_id = ANY($1) AND amount > 0 GROUP BY customer_id`, [ids]),
+      safeQueryRows(db, `SELECT so.partnerid AS id FROM dbo.saleorderlines sol JOIN dbo.saleorders so ON so.id = sol.orderid WHERE so.partnerid = ANY($1) AND sol.isdeleted = false GROUP BY so.partnerid`, [ids]),
+      safeQueryRows(db, `SELECT partnerid AS id FROM appointments WHERE partnerid = ANY($1) AND state IN ('completed','done','arrived') GROUP BY partnerid`, [ids]),
+    ]);
+    const paid = new Set(payAgg.map((r) => r.id));
+    const serviced = new Set(svcAgg.map((r) => r.id));
+    const visited = new Set(visitAgg.map((r) => r.id));
+    for (const id of ids) {
+      let p = 1;
+      if (paid.has(id)) p = 4;
+      else if (serviced.has(id)) p = 3;
+      else if (visited.has(id)) p = 2;
+      activityProgressById.set(id, Math.max(p, activityProgressById.get(id) || 1));
+    }
+  };
+  await Promise.all([computeActivity(dentalDb, dRefsRaw), computeActivity(cosmeticDb, cRefsRaw)]);
+
+  const STAGE_BY_PROGRESS = { 1: 'referred', 2: 'visited', 3: 'serviced', 4: 'paid' };
+  const applyActivity = (item) => {
+    const ap = activityProgressById.get(item.id) || 1;
+    if (ap > item.stage_progress) {
+      item.stage_progress = ap;
+      item.stage = STAGE_BY_PROGRESS[ap];
+    }
+  };
+  dItems.forEach(applyActivity);
+  cItems.forEach(applyActivity);
+
   // dedupe by id
   const byId = new Map();
   [...dItems, ...cItems].forEach((item) => {
@@ -362,14 +507,15 @@ router.get('/me', requireAuth, requireCtvUser, (req, res) => {
  * Auth: requireAuth + (is_ctv=true OR admin permission)
  */
 router.post('/', requireAuth, async (req, res) => {
-  const { employeeId, is_ctv: isCTV } = req.user || {};
+  const { employeeId } = req.user || {};
+  const isCTV = isCtvUser(req.user);
   if (!employeeId) return res.status(401).json({ error: 'No token' });
 
   // Caller must be a CTV (recruiting downline) or an admin.
   let isAdmin = false;
   try {
     const { resolveEffectivePermissions, isAdminPermissionState } = require('../services/permissionService');
-    const permState = await resolveEffectivePermissions(employeeId);
+    const permState = await resolveEffectivePermissions(employeeId, req.user?.authLob || 'dental');
     const list = (permState && permState.effectivePermissions) || [];
     isAdmin = isAdminPermissionState(permState) || list.includes('*') || list.includes('ctv.manage');
   } catch (e) {
@@ -471,13 +617,14 @@ router.post('/', requireAuth, async (req, res) => {
  * Sets referred_by_ctv_id to req.user.employeeId, is_ctv=false, customer=true
  */
 router.post('/clients', requireAuth, async (req, res) => {
-  const { employeeId, is_ctv: isCTV } = req.user || {};
+  const { employeeId } = req.user || {};
+  const isCTV = isCtvUser(req.user);
   if (!employeeId) return res.status(401).json({ error: 'No token' });
 
   let isAdmin = false;
   try {
     const { resolveEffectivePermissions, isAdminPermissionState } = require('../services/permissionService');
-    const permState = await resolveEffectivePermissions(employeeId);
+    const permState = await resolveEffectivePermissions(employeeId, req.user?.authLob || 'dental');
     const list = (permState && permState.effectivePermissions) || [];
     isAdmin = isAdminPermissionState(permState) || list.includes('*') || list.includes('ctv.manage');
   } catch (e) {
@@ -579,19 +726,84 @@ router.get('/network', requireAuth, async (req, res) => {
 });
 
 /**
+ * GET /api/ctv/hierarchy
+ * Shaped for the NEW portal's Network tab (CtvHierarchyPanel → CtvHierarchyResponse):
+ * { current, upline[], downline[] (flat), totals }. Delegates to getCtvHierarchy so the
+ * cross-DB source fetch AND the downline-earnings / projected-override rollup
+ * (commission_level_config-driven) live in ONE place shared with the admin hierarchy view.
+ */
+router.get('/hierarchy', requireAuth, async (req, res) => {
+  const { employeeId } = req.user || {};
+  if (!employeeId) return res.status(401).json({ error: 'No token' });
+
+  try {
+    const result = await getCtvHierarchy(employeeId);
+    return res.json(result);
+  } catch (e) {
+    console.error('[ctv GET /hierarchy] error:', e.message);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * GET /api/ctv/client-lookup?phone=...&lob=dental|cosmetic
+ * Live phone cross-check for the CTV refer/booking form: looks the phone up in the CHOSEN LOB's
+ * database (dental vs cosmetic) and reports whether the customer already exists there and whether
+ * they're already actively claimed by another CTV. Read-only; the authoritative gate still runs on
+ * POST /bookings.
+ */
+router.get('/client-lookup', requireAuth, async (req, res) => {
+  const { employeeId } = req.user || {};
+  if (!employeeId) return res.status(401).json({ error: 'No token' });
+
+  const phone = (req.query.phone || '').toString().trim();
+  const lob = req.query.lob === 'cosmetic' ? 'cosmetic' : 'dental';
+  if (!phone) return res.status(400).json({ error: { code: 'VALIDATION', message: 'phone is required' } });
+
+  try {
+    const db = getDb(lob);
+    const rows = await safeQueryRows(
+      db,
+      `SELECT id, name FROM dbo.partners WHERE LOWER(phone) = LOWER($1) AND COALESCE(isdeleted, false) = false LIMIT 1`,
+      [phone]
+    );
+    if (!rows[0]) return res.json({ exists: false, lob });
+
+    const clientId = rows[0].id;
+    const claim = await getReferralClaimStatus(clientId, lob, {});
+    const claimedByOther = !!(claim.active && claim.ownerCtvId && claim.ownerCtvId !== employeeId);
+    const claimedByMe = !!(claim.active && claim.ownerCtvId === employeeId);
+    return res.json({
+      exists: true,
+      lob,
+      clientId,
+      name: rows[0].name || null,
+      claimed: claimedByOther,
+      claimedByMe,
+      ownerName: claimedByOther ? claim.ownerName || null : null,
+      expiresAt: claimedByOther ? claim.expiresAt || null : null,
+    });
+  } catch (e) {
+    console.error('[ctv GET /client-lookup] error:', e.message);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
  * POST /api/ctv/bookings
  * CTV books a client: resolve by phone → eligibility gate → create/reclaim client →
  * Referral Start card → appointment. Atomic within the handler (no explicit tx).
  */
 router.post('/bookings', requireAuth, async (req, res) => {
-  const { employeeId, is_ctv: isCTV } = req.user || {};
+  const { employeeId } = req.user || {};
+  const isCTV = isCtvUser(req.user);
   if (!employeeId) return res.status(401).json({ error: 'No token' });
 
   // Admin can also book on behalf of CTVs
   let isAdmin = false;
   try {
     const { resolveEffectivePermissions, isAdminPermissionState } = require('../services/permissionService');
-    const permState = await resolveEffectivePermissions(employeeId);
+    const permState = await resolveEffectivePermissions(employeeId, req.user?.authLob || 'dental');
     const list = (permState && permState.effectivePermissions) || [];
     isAdmin = isAdminPermissionState(permState) || list.includes('*') || list.includes('ctv.manage');
   } catch (e) {

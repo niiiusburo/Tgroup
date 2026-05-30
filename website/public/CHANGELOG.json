@@ -1,5 +1,34 @@
 [
   {
+    "version": "0.32.78",
+    "date": "2026-05-30",
+    "commit": "pending",
+    "highlights": "Cosmetic LOB hardening: commission config, earnings & payouts now respect the active line of business; dead CrmTasks route removed; cleaner authorization across CTV/earnings/payouts.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "Commission config (Quản lý tab) is now line-of-business aware: on Cosmetic it shows and saves the Cosmetic commission rates instead of always reading/overwriting the Dental config.",
+          "Thu nhập (Earnings) and Chi trả (Payouts) tabs now default to the active line of business and reload when you switch it, instead of defaulting to 'all'/Dental.",
+          "Bank settings on an unconfigured Cosmetic LOB no longer error (return empty values gracefully instead of 404).",
+          "Removed the dead CrmTasks endpoints that returned HTTP 500 (missing table) on both lines of business."
+        ]
+      },
+      {
+        "title": "Changed",
+        "items": [
+          "Authorization for CTV, earnings and payouts endpoints now resolves against the caller's home line of business (authLob), consistent with the earlier cosmetic-login fix; invalid ?lob values on payouts are rejected with a clear 400."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added backend tests (authLob threading, payouts ?lob validation, bank-settings graceful response) and frontend tests (commission-config LOB routing, earnings/payouts LOB defaults). Full API suite 888/888 green; frontend typecheck clean."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.77",
     "date": "2026-05-30",
     "commit": "pending",

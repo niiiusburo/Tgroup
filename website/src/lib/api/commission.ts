@@ -16,12 +16,12 @@ export interface CommissionConfig {
   defaultReferralPercent: number;
 }
 
-export async function fetchCommissionConfig(): Promise<CommissionConfig> {
-  return apiFetch<CommissionConfig>('/CommissionConfig');
+export async function fetchCommissionConfig(lob?: 'dental' | 'cosmetic'): Promise<CommissionConfig> {
+  return apiFetch<CommissionConfig>('/CommissionConfig', { lob });
 }
 
-export async function saveCommissionConfig(cfg: CommissionConfig): Promise<CommissionConfig> {
-  return apiFetch<CommissionConfig>('/CommissionConfig', { method: 'PUT', body: cfg });
+export async function saveCommissionConfig(cfg: CommissionConfig, lob?: 'dental' | 'cosmetic'): Promise<CommissionConfig> {
+  return apiFetch<CommissionConfig>('/CommissionConfig', { method: 'PUT', body: cfg, lob });
 }
 
 export interface EarningsRow {

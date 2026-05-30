@@ -30,9 +30,9 @@ function parseLimitOffset(query) {
   return { limit, offset };
 }
 
-async function adminOrPerm(employeeId, perm) {
+async function adminOrPerm(employeeId, perm, authLob = 'dental') {
   try {
-    const state = await resolveEffectivePermissions(employeeId);
+    const state = await resolveEffectivePermissions(employeeId, authLob);
     const list = (state && state.effectivePermissions) || [];
     return isAdminPermissionState(state) || list.includes('*') || list.includes(perm);
   } catch (e) {
@@ -107,7 +107,7 @@ async function listForLob(lob, filters) {
 router.get('/', requireAuth, async (req, res) => {
   const { employeeId } = req.user || {};
   if (!employeeId) return res.status(401).json({ error: 'No token' });
-  if (!(await adminOrPerm(employeeId, 'commissions.view.team'))) {
+  if (!(await adminOrPerm(employeeId, 'commissions.view.team', req.user?.authLob || 'dental'))) {
     return res.status(403).json({ error: { code: 'S_FORBIDDEN', message: 'Admin only' } });
   }
 

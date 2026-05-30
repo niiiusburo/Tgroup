@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fetchEarnings, fetchPayouts, createPayout, uploadPayoutReceipt, updatePayoutReceipt, type EarningsRow, type PayoutRow } from '@/lib/api/commission';
-import { ApiError } from '@/lib/api/core';
+import { ApiError, getUploadUrl } from '@/lib/api/core';
+import { useBusinessUnitOptional } from '@/contexts/BusinessUnitContext';
 
 function formatVnd(value: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(value || 0);
@@ -10,17 +11,21 @@ function formatVnd(value: number) {
 function EarningsTab() {
   const { t } = useTranslation('commission');
   const { t: tc } = useTranslation('common');
+  const businessUnit = useBusinessUnitOptional();
   const [rows, setRows] = useState<EarningsRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState('pending');
-  const [lob, setLob] = useState<'all' | 'dental' | 'cosmetic'>('all');
+  const [lob, setLob] = useState<'all' | 'dental' | 'cosmetic'>(
+    businessUnit?.currentLOB === 'cosmetic' ? 'cosmetic' : 'dental'
+  );
 
-  const handleLoad = async () => {
+  const handleLoad = async (currentLob?: 'all' | 'dental' | 'cosmetic') => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchEarnings({ status: status || undefined, lob, limit: 100 });
+      const lobToUse = currentLob ?? lob;
+      const data = await fetchEarnings({ status: status || undefined, lob: lobToUse, limit: 100 });
       setRows(data.items || []);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to load earnings');
@@ -28,8 +33,14 @@ function EarningsTab() {
       setLoading(false);
     }
   };
-  const [hasLoaded, setHasLoaded] = useState(false);
-  if (!hasLoaded) { setHasLoaded(true); handleLoad(); }
+
+  // Load on mount and reload whenever the active business unit (LOB) changes.
+  useEffect(() => {
+    const next = businessUnit?.currentLOB === 'cosmetic' ? 'cosmetic' : 'dental';
+    setLob(next);
+    handleLoad(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [businessUnit?.currentLOB]);
 
   return (
     <div className="bg-white rounded-xl shadow-card p-6 space-y-4">
@@ -51,7 +62,7 @@ function EarningsTab() {
             </select>
           </label>
         </div>
-        <button onClick={handleLoad} className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-dark">{t('earnings.refresh')}</button>
+        <button onClick={() => handleLoad()} className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-dark">{t('earnings.refresh')}</button>
       </div>
       {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">{error}</div>}
       {loading ? <div className="p-8 text-center text-gray-500">{t('earnings.loading')}</div> : (
@@ -76,10 +87,13 @@ function EarningsTab() {
 function PayoutsTab() {
   const { t } = useTranslation('commission');
   const { t: tc } = useTranslation('common');
+  const businessUnit = useBusinessUnitOptional();
   const [payouts, setPayouts] = useState<PayoutRow[]>([]);
   const [pending, setPending] = useState<EarningsRow[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
-  const [lob, setLob] = useState<'dental' | 'cosmetic'>('cosmetic');
+  const [lob, setLob] = useState<'dental' | 'cosmetic'>(
+    businessUnit?.currentLOB === 'cosmetic' ? 'cosmetic' : 'dental'
+  );
   const [cycleLabel, setCycleLabel] = useState('');
   const [notes, setNotes] = useState('');
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
@@ -89,12 +103,13 @@ function PayoutsTab() {
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleLoad = async () => {
+  const handleLoad = async (currentLob?: 'dental' | 'cosmetic') => {
     setLoading(true); setError(null);
     try {
+      const lobToUse = currentLob ?? lob;
       const [payoutData, earningsData] = await Promise.all([
-        fetchPayouts({ lob, limit: 50 }),
-        fetchEarnings({ lob, status: 'pending', limit: 200 }),
+        fetchPayouts({ lob: lobToUse, limit: 50 }),
+        fetchEarnings({ lob: lobToUse, status: 'pending', limit: 200 }),
       ]);
       setPayouts(payoutData.items || []);
       setPending(earningsData.items || []);
@@ -103,8 +118,14 @@ function PayoutsTab() {
       setError(err instanceof ApiError ? err.message : 'Failed to load payouts');
     } finally { setLoading(false); }
   };
-  const [hasLoaded, setHasLoaded] = useState(false);
-  if (!hasLoaded) { setHasLoaded(true); handleLoad(); }
+
+  // Load on mount and reload whenever the active business unit (LOB) changes.
+  useEffect(() => {
+    const next = businessUnit?.currentLOB === 'cosmetic' ? 'cosmetic' : 'dental';
+    setLob(next);
+    handleLoad(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [businessUnit?.currentLOB]);
 
   const totalSelected = pending.filter((e) => selected.includes(e.id)).reduce((sum, e) => sum + e.amount, 0);
 
@@ -167,7 +188,7 @@ function PayoutsTab() {
               <option value="cosmetic">Cosmetic</option><option value="dental">Dental</option>
             </select>
           </label>
-          <button onClick={handleLoad} className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200">{t('payouts.reload')}</button>
+          <button onClick={() => handleLoad()} className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200">{t('payouts.reload')}</button>
         </div>
         {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">{error}</div>}
         <div className="grid md:grid-cols-[1fr_auto] gap-3 items-end">
@@ -217,8 +238,8 @@ function PayoutsTab() {
                 <td className="px-6 py-3 text-right font-semibold">{formatVnd(p.total_amount)}</td>
                 <td className="px-6 py-3">
                   {p.receipt_url ? (
-                    <a href={p.receipt_url} target="_blank" rel="noreferrer" className="inline-block">
-                      <img src={p.receipt_url} alt="Receipt" className="h-10 w-10 rounded border border-gray-200 object-cover hover:ring-2 hover:ring-primary/30" />
+                    <a href={getUploadUrl(p.receipt_url)} target="_blank" rel="noreferrer" className="inline-block">
+                      <img src={getUploadUrl(p.receipt_url)} alt="Receipt" className="h-10 w-10 rounded border border-gray-200 object-cover hover:ring-2 hover:ring-primary/30" />
                     </a>
                   ) : (
                     <label className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 cursor-pointer">
