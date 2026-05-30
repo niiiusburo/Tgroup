@@ -1,5 +1,32 @@
 [
   {
+    "version": "0.32.79",
+    "date": "2026-05-30",
+    "commit": "pending",
+    "highlights": "Cosmetic clinic (NK3/tmv) now opens on the Cosmetic line of business by default — Báo cáo (reports) and Phân quyền nhân sự (staff permissions) show cosmetic data instead of dental, without having to flip the LOB switcher first.",
+    "sections": [
+      {
+        "title": "Bug Fixes",
+        "items": [
+          "On the cosmetic deployment, admins are no longer dropped onto the Dental line of business by default. Báo cáo and Phân quyền nhân sự previously showed the dental clinic's data/permission groups until you manually switched to Cosmetic; they now open on Cosmetic.",
+          "Your explicit choice still wins: if you switch the line-of-business toggle it is remembered, and ?lob= deep links still override."
+        ]
+      },
+      {
+        "title": "Changed",
+        "items": [
+          "Added a build-time default line-of-business (VITE_DEFAULT_LOB), baked to 'cosmetic' on the NK3/tmv cosmetic site and left as 'dental' on the dental sites (NK/NK2) — so each deployment opens on its own line of business by default."
+        ]
+      },
+      {
+        "title": "Testing",
+        "items": [
+          "Added 4 BusinessUnitContext unit tests covering the deployment default (cosmetic default applied, persisted choice wins, query param wins, value ignored when out of scope, dental sites unaffected). BusinessUnitContext suite 14/14 green; frontend typecheck clean."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.32.78",
     "date": "2026-05-30",
     "commit": "pending",

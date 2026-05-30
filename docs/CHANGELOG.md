@@ -2,6 +2,12 @@
 
 > Append-only. What changed, when, by whom (human or agent), why. Semver.
 
+## [0.32.79] — 2026-05-30 (nk3-deploy)
+### Fixed
+- **Cosmetic deployment (NK3/tmv) defaulted admins to the Dental LOB.** Root cause: `website/src/contexts/BusinessUnitContext.tsx` resolved the default `currentLOB` to `finalAvailable[0]` which, for admins (who get implicit `['dental','cosmetic']` scope), is always `'dental'`. On the cosmetic site a fresh admin login therefore landed on **dental** — **Báo cáo** showed the dental clinic's revenue (₫7.87B vs cosmetic ₫1.93B) and **Phân quyền nhân sự** showed dental permission groups — until the user manually flipped the LOB switcher. (Non-admin cosmetic-only staff already defaulted to cosmetic; backend authz was already correct — verified admins 200 / non-admins 403 on both `/api/cosmetic/Reports/*` and `/api/cosmetic/Permissions/*`.) Fix: added a baked **`VITE_DEFAULT_LOB`** deployment default. `BusinessUnitContext` now resolves the default LOB as **query `?lob=` > persisted localStorage > `VITE_DEFAULT_LOB` (if within available LOBs) > `finalAvailable[0]`**. `Dockerfile.web` bakes it into `.env.production.local`; NK3 compose sets `VITE_DEFAULT_LOB: "cosmetic"`, NK/NK2 leave it unset (→ dental, no regression). — @agent
+### Tested
+- `BusinessUnitContext.test.tsx`: +4 tests — cosmetic default applied for admins when `VITE_DEFAULT_LOB=cosmetic`; persisted choice wins; value ignored when not in available LOBs (flag off); dental deployment (flag unset) keeps admins on dental. Suite **14/14** green, `tsc --noEmit` clean, eslint clean on edited files (3 pre-existing fast-refresh/unused-import warnings only). Adversarial no-regression review confirmed all 6 cases (dental-site default, cosmetic-site default, persisted-wins, query-wins, out-of-scope-ignored, non-admin-unaffected). Live browser-verified on `https://tmv.2checkin.com` (see below). — @agent
+
 ## [0.32.78] — 2026-05-30 (nk3-deploy)
 ### Fixed
 - **Commission config (Quản lý tab) is now LOB-aware.** `website/src/lib/api/commission.ts`: `fetchCommissionConfig(lob?)`/`saveCommissionConfig(cfg, lob?)` now pass the `lob` option (→ `/api/cosmetic/CommissionConfig` prefix); `Commission.tsx` wires `currentLOB` from `useBusinessUnit()` and reloads on LOB change. Previously the tab always hit `/api/CommissionConfig` (dental) — on Cosmetic it showed dental rates (24/4/2) and **saving overwrote the dental config**; now it correctly reads/writes the cosmetic config (33.33/14.5/7.3). Backend route was already correct. — @agent

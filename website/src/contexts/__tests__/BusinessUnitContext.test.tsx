@@ -216,4 +216,65 @@ describe('BusinessUnitContext (TDD)', () => {
     dispatchSpy.mockClear();
     // Trigger set would dispatch too (tested via integration)
   });
+
+  it('uses VITE_DEFAULT_LOB as the default LOB for admins when set and no persisted value', () => {
+    setCosmeticFlag('true');
+    vi.stubEnv('VITE_DEFAULT_LOB', 'cosmetic');
+    mockUseAuth.mockReturnValue({
+      user: { lob_scope: ['dental', 'cosmetic'] },
+      permissions: adminPermissions,
+    });
+    render(
+      <BusinessUnitProvider>
+        <BusinessUnitProbe />
+      </BusinessUnitProvider>
+    );
+    expect(screen.getByTestId('first-lob').textContent).toBe('cosmetic');
+    expect(screen.getByTestId('current-lob').textContent).toBe('cosmetic');
+  });
+
+  it('persisted localStorage choice wins over VITE_DEFAULT_LOB', () => {
+    setCosmeticFlag('true');
+    vi.stubEnv('VITE_DEFAULT_LOB', 'cosmetic');
+    localStorage.setItem('tgclinic_lob', 'dental');
+    mockUseAuth.mockReturnValue({
+      user: { lob_scope: ['dental', 'cosmetic'] },
+      permissions: adminPermissions,
+    });
+    render(
+      <BusinessUnitProvider>
+        <BusinessUnitProbe />
+      </BusinessUnitProvider>
+    );
+    expect(screen.getByTestId('current-lob').textContent).toBe('dental');
+  });
+
+  it('ignores VITE_DEFAULT_LOB when it is not within the user available LOBs', () => {
+    setCosmeticFlag('false');
+    vi.stubEnv('VITE_DEFAULT_LOB', 'cosmetic');
+    mockUseAuth.mockReturnValue({
+      user: { lob_scope: ['dental'] },
+      permissions: adminPermissions,
+    });
+    render(
+      <BusinessUnitProvider>
+        <BusinessUnitProbe />
+      </BusinessUnitProvider>
+    );
+    expect(screen.getByTestId('current-lob').textContent).toBe('dental');
+  });
+
+  it('dental deployment (no VITE_DEFAULT_LOB) keeps admins on dental by default', () => {
+    setCosmeticFlag('true');
+    mockUseAuth.mockReturnValue({
+      user: { lob_scope: ['dental', 'cosmetic'] },
+      permissions: adminPermissions,
+    });
+    render(
+      <BusinessUnitProvider>
+        <BusinessUnitProbe />
+      </BusinessUnitProvider>
+    );
+    expect(screen.getByTestId('current-lob').textContent).toBe('dental');
+  });
 });

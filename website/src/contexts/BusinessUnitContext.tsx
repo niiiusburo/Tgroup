@@ -37,6 +37,21 @@ function isCosmeticFlagEnabled(): boolean {
   return viteFlag === 'true' || testFlag === 'true';
 }
 
+/**
+ * Deployment-level default LOB, baked at build via VITE_DEFAULT_LOB.
+ * Lets a cosmetic-primary deployment (NK3 / tmv) land users on cosmetic by
+ * default instead of always dental, WITHOUT affecting dental deployments
+ * (NK/NK2) where the flag is unset. Only honoured when there is no explicit
+ * persisted choice or ?lob= override, and only when the value is within the
+ * user's available LOBs.
+ */
+function readDeploymentDefaultLob(): BusinessUnit | null {
+  const viteFlag = (import.meta as any).env?.VITE_DEFAULT_LOB;
+  const testFlag = (globalThis as any).process?.env?.VITE_DEFAULT_LOB;
+  const value = viteFlag ?? testFlag;
+  return isBusinessUnit(value) ? value : null;
+}
+
 function readRequestedInitialLob(): BusinessUnit {
   if (!isCosmeticFlagEnabled() || typeof window === 'undefined') {
     return 'dental';
@@ -49,7 +64,13 @@ function readRequestedInitialLob(): BusinessUnit {
   }
 
   const persisted = window.localStorage.getItem(STORAGE_KEY);
-  return isBusinessUnit(persisted) ? persisted : 'dental';
+  if (isBusinessUnit(persisted)) {
+    return persisted;
+  }
+
+  // Deployment default (e.g. cosmetic on the NK3/tmv cosmetic site) before
+  // the hardcoded dental fallback.
+  return readDeploymentDefaultLob() ?? 'dental';
 }
 
 interface Props {
@@ -105,9 +126,12 @@ export function BusinessUnitProvider({ children }: Props) {
     const persisted = typeof window !== 'undefined'
       ? (window.localStorage.getItem(STORAGE_KEY) as BusinessUnit | null)
       : null;
+    const deploymentDefault = readDeploymentDefaultLob();
     let next: BusinessUnit = persisted && finalAvailable.includes(persisted as BusinessUnit)
       ? (persisted as BusinessUnit)
-      : (finalAvailable[0] ?? 'dental');
+      : (deploymentDefault && finalAvailable.includes(deploymentDefault)
+          ? deploymentDefault
+          : (finalAvailable[0] ?? 'dental'));
 
     if (forcedLob && finalAvailable.includes(forcedLob)) {
       next = forcedLob;

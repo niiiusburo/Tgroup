@@ -8,6 +8,8 @@ ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
 ARG VITE_COSMETIC_LOB_ENABLED=false
 ENV VITE_COSMETIC_LOB_ENABLED=${VITE_COSMETIC_LOB_ENABLED}
+ARG VITE_DEFAULT_LOB=dental
+ENV VITE_DEFAULT_LOB=${VITE_DEFAULT_LOB}
 # Pass real git SHA into the bundle so /version.json reports the actual
 # commit deployed. Without this, version.json says "unknown" and there is
 # no way to verify whether a container was built from a clean git tree.
@@ -15,6 +17,8 @@ ARG GIT_SHA=unknown
 ARG GIT_BRANCH=unknown
 ENV GIT_SHA=${GIT_SHA}
 ENV GIT_BRANCH=${GIT_BRANCH}
+RUN printf 'VITE_API_URL=%s\nVITE_COSMETIC_LOB_ENABLED=%s\nVITE_DEFAULT_LOB=%s\n' "${VITE_API_URL}" "${VITE_COSMETIC_LOB_ENABLED}" "${VITE_DEFAULT_LOB}" > .env.production.local \
+  && cat .env.production.local
 RUN npm run build
 
 FROM nginx:alpine
