@@ -6,9 +6,18 @@
     "prepare": "husky",
     "verify:prompt": "bash scripts/prompt-authority-check.sh",
     "verify:docs": "bash scripts/verify-docs.sh",
-    "verify:governance": "bash scripts/prompt-authority-check.sh && bash scripts/verify-docs.sh && git diff --check HEAD"
+    "verify:governance": "bash scripts/prompt-authority-check.sh && bash scripts/verify-docs.sh && git diff --check HEAD",
+    "pack": "npm run pack:api && npm run pack:web && npm run pack:contracts && npm run pack:docs",
+    "pack:api": "repomix api -o .repomix-packs/repomix-api.xml --quiet",
+    "pack:web": "npm run pack:web:components && npm run pack:web:pages && npm run pack:web:core",
+    "pack:web:components": "repomix website/src/components -o .repomix-packs/repomix-web-components.xml --quiet",
+    "pack:web:pages": "repomix website/src/pages -o .repomix-packs/repomix-web-pages.xml --quiet",
+    "pack:web:core": "repomix website/src --ignore \"**/components/**,**/pages/**\" -o .repomix-packs/repomix-web-core.xml --quiet",
+    "pack:contracts": "repomix contracts -o .repomix-packs/repomix-contracts.xml --quiet",
+    "pack:docs": "repomix docs product-map -o .repomix-packs/repomix-docs.xml --quiet"
   },
   "devDependencies": {
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "repomix": "^1.14.1"
   }
 }
