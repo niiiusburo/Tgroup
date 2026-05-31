@@ -34,9 +34,14 @@ function isUuid(value) {
  *   same physical DB the service/appointment is written to.
  * @param {string} customerId - partners.id of the customer
  * @param {string|null|undefined} ctvId - selected CTV partner id
+ * @param {object} [opts]
+ * @param {'dental'|'cosmetic'} [opts.lob] - when provided, retroactively backfill CTV earnings
+ *   over the customer's already-collected payments so the CTV portal journey reflects past
+ *   visits/services/payments (and pays the commission). Omit to skip backfill (CREATE paths on
+ *   brand-new customers have no prior payments, but passing it is a harmless no-op).
  * @returns {Promise<boolean>} true if a row was updated, false if it was a no-op
  */
-async function setCustomerReferrer(q, customerId, ctvId) {
+async function setCustomerReferrer(q, customerId, ctvId, opts = {}) {
   if (!isUuid(customerId) || !isUuid(ctvId)) return false;
   const normalized = ctvId.trim();
 
@@ -61,7 +66,28 @@ async function setCustomerReferrer(q, customerId, ctvId) {
       RETURNING id`,
     [normalized, customerId],
   );
-  return Array.isArray(updated) && updated.length > 0;
+  const didAssign = Array.isArray(updated) && updated.length > 0;
+
+  // Retroactive earnings backfill: a customer who already came & paid BEFORE being linked to
+  // this CTV produced no CTV earning at payment time, so their portal journey is frozen at
+  // "referred" (1/4). Re-run the commission engine over their past payments now that the link
+  // exists, so the CTV sees the real paid journey + commission. Non-fatal: a backfill failure
+  // must never block the assignment. `q` is already bound to the request's LOB DB, so the
+  // adapter ignores the lob arg and reuses it.
+  if (didAssign && opts && opts.lob) {
+    try {
+      const { backfillEarningsForClient } = require('./commissionEngine');
+      await backfillEarningsForClient({
+        clientId: customerId,
+        lob: opts.lob,
+        getDb: () => ({ queryRows: q }),
+      });
+    } catch (err) {
+      console.error('[customerReferrer] CTV earnings backfill failed (non-fatal):', err && err.message);
+    }
+  }
+
+  return didAssign;
 }
 
 /**

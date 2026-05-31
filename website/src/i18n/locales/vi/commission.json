@@ -58,7 +58,12 @@
     "namePlaceholder": "Nhập tên",
     "phonePlaceholder": "Nhập số điện thoại",
     "emailPlaceholder": "Nhập email",
-    "passwordPlaceholder": "Nhập mật khẩu"
+    "passwordPlaceholder": "Nhập mật khẩu",
+    "searchPlaceholder": "Tìm theo tên, SĐT, email hoặc mã…",
+    "matchCount": "{{count}} kết quả",
+    "noMatch": "Không có CTV phù hợp.",
+    "viewHierarchy": "Nhấn để xem tuyến trên & tuyến dưới",
+    "hierarchyError": "Không tải được hệ thống"
   },
   "earnings": {
     "status": "Trạng thái",
@@ -89,5 +94,10 @@
     "noCycles": "Chưa có chu kỳ chi trả nào.",
     "attach": "Đính kèm",
     "earningsCount": "{{count}} thu nhập"
-  }
+  },
+  "cancel": "Hủy",
+  "loading": "Đang tải...",
+  "save": "Lưu",
+  "error": "Lỗi",
+  "clear": "Xóa"
 }

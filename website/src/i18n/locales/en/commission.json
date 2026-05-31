@@ -58,7 +58,12 @@
     "namePlaceholder": "Enter name",
     "phonePlaceholder": "Enter phone",
     "emailPlaceholder": "Enter email",
-    "passwordPlaceholder": "Enter password"
+    "passwordPlaceholder": "Enter password",
+    "searchPlaceholder": "Search by name, phone, email, or code…",
+    "matchCount": "{{count}} matching",
+    "noMatch": "No CTV matches your search.",
+    "viewHierarchy": "Click to view upline & downline",
+    "hierarchyError": "Could not load hierarchy"
   },
   "earnings": {
     "status": "Status",
@@ -89,5 +94,10 @@
     "noCycles": "No payout cycles yet.",
     "attach": "Attach",
     "earningsCount": "{{count}} earnings"
-  }
+  },
+  "cancel": "Cancel",
+  "loading": "Loading...",
+  "save": "Save",
+  "error": "Error",
+  "clear": "Clear"
 }

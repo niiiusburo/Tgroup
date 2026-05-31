@@ -1,11 +1,16 @@
 const express = require('express');
-const { requireAdminScope } = require('../middleware/auth');
+// NOTE: this router is intentionally NOT mounted in server.js — it is a manual/admin
+// commission-replay tool kept for debugging. It previously imported `requireAdminScope`
+// (never exported by middleware/auth) and `triggerCommissionEngine` (never exported by the
+// service), so requiring this file threw at load. Both are now fixed: the gate uses the real
+// `requirePermission('ctv.manage')` factory and the service exports `triggerCommissionEngine`.
+const { requirePermission } = require('../middleware/auth');
 const { triggerCommissionEngine } = require('../services/commissionEngine');
 
 const router = express.Router();
 
 /**
- * POST /api/commissionEngine/trigger
+ * POST /trigger  (only reachable if this router is mounted, e.g. app.use('/api/CommissionEngine', ...))
  * Manual trigger for commission calculation (for testing, debugging, or event replay).
  * Body: {
  *   serviceLineId: string,
@@ -14,7 +19,7 @@ const router = express.Router();
  *   lob: 'dental' | 'cosmetic'
  * }
  */
-router.post('/commissionEngine/trigger', requireAdminScope, async (req, res) => {
+router.post('/trigger', requirePermission('ctv.manage'), async (req, res) => {
   try {
     const { serviceLineId, clientId, partnerId, lob } = req.body;
 

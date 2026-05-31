@@ -1,123 +1,85 @@
+/**
+ * triggerCommissionEngine — manual/admin replay wrapper.
+ *
+ * Rewritten (was a stale Knex-style mock calling a function the service never exported, which
+ * always failed). The wrapper now delegates to backfillEarningsForClient; this exercises the
+ * full attribution chain through a SQL-routing mock DB (no real Postgres).
+ *
+ * Run: cd api && npx jest test/commissionEngine.test.js
+ */
+
 const { triggerCommissionEngine } = require('../src/services/commissionEngine');
-const { getDb } = require('../src/db');
 
-// Mock getDb to return in-memory DBs for testing
-jest.mock('../src/db', () => ({
-  getDb: jest.fn(),
-}));
+const CLIENT = '00000000-0000-0000-0000-0000000000c1';
+const CTV = '00000000-0000-0000-0000-000000000ctv';
+const PAYMENT = '00000000-0000-0000-0000-0000000000p1';
+const INVOICE = '00000000-0000-0000-0000-0000000000iv';
+const LINE = '00000000-0000-0000-0000-0000000000ln';
+const PRODUCT = '00000000-0000-0000-0000-0000000000pr';
 
-describe('commissionEngine', () => {
-  let mockCosmeticDb;
-  let mockDentalDb;
+// Route queries by SQL fragment so the test does not depend on a brittle call-order chain.
+function makeSmartDb(overrides = {}) {
+  const inserts = [];
+  const db = {
+    queryRows: jest.fn(async (sql, params) => {
+      // backfill: load client row (projection includes salestaffid)
+      if (/FROM dbo\.partners WHERE id/.test(sql) && /salestaffid/.test(sql)) {
+        return overrides.clientRow === null ? [] : [overrides.clientRow || { id: CLIENT, referred_by_ctv_id: CTV, salestaffid: null }];
+      }
+      // backfill: positive payments
+      if (/FROM payments WHERE customer_id/.test(sql) && /amount > 0/.test(sql)) return overrides.payments || [];
+      // backfill: idempotency check
+      if (/FROM dbo\.earnings WHERE payment_id/.test(sql) && /source = 'ctv'/.test(sql)) return overrides.existingCtv || [];
+      // backfill: allocations -> lines
+      if (/FROM payment_allocations/.test(sql)) return [{ invoice_id: INVOICE }];
+      if (/FROM dbo\.saleorderlines WHERE orderid/.test(sql)) return [{ id: LINE, productid: PRODUCT, pricetotal: 1000000 }];
+      // referralClaim.getReferralClaimStatus
+      if (/partners p\s+LEFT JOIN/i.test(sql) || (/referred_by_ctv_id/.test(sql) && /owner_name/i.test(sql))) {
+        return [{ referred_by_ctv_id: CTV, owner_name: 'CTV Owner' }];
+      }
+      if (/referral_start_product_id FROM dbo\.commission_settings/.test(sql)) return [{ referral_start_product_id: null }];
+      if (/MAX\(payment_date\)/.test(sql)) return [{ d: '2026-05-18' }];
+      // engine: product rate, level config, chain walk, insert
+      if (/commission_rate_percent FROM products/.test(sql)) return [{ commission_rate_percent: overrides.rate ?? 10 }];
+      if (/FROM dbo\.commission_level_config/.test(sql)) return [{ level: 0, share_percent: 100, enabled: true }];
+      if (/referred_by_ctv_id FROM dbo\.partners WHERE id/.test(sql)) return [{ referred_by_ctv_id: null }];
+      if (/INSERT INTO dbo\.earnings/.test(sql)) { inserts.push(params); return [{ id: 'e' + inserts.length }]; }
+      return [];
+    }),
+    query: jest.fn(async () => ({ rows: [] })),
+  };
+  return { db, inserts };
+}
 
-  beforeEach(() => {
-    mockCosmeticDb = {
-      select: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      insert: jest.fn(),
-      transaction: jest.fn(),
-    };
-
-    mockDentalDb = {
-      select: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      insert: jest.fn(),
-    };
-
-    getDb.mockImplementation((lob) => {
-      if (lob === 'cosmetic') return mockCosmeticDb;
-      if (lob === 'dental') return mockDentalDb;
-      throw new Error(`Unknown LOB: ${lob}`);
+describe('triggerCommissionEngine (manual replay wrapper)', () => {
+  it('attributes a paid client to its CTV and reports counts', async () => {
+    const { db, inserts } = makeSmartDb({
+      payments: [{ id: PAYMENT, amount: 1000000, payment_date: '2026-05-18' }],
     });
-
-    // Mock transaction
-    mockCosmeticDb.transaction.mockImplementation(async (fn) => {
-      await fn(mockCosmeticDb);
-      return { insertedCount: 2 };
-    });
+    const result = await triggerCommissionEngine('sl_unused', CLIENT, 'partner_unused', 'cosmetic', () => db);
+    expect(result.errors).toEqual([]);
+    expect(result.paymentsScanned).toBe(1);
+    expect(result.paymentsProcessed).toBe(1);
+    expect(result.earningsCreated).toBe(1);
+    expect(inserts[0]).toEqual(expect.arrayContaining([CLIENT, CTV, PAYMENT, 100000]));
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  it('returns zero counts (no error) when the client has no CTV referrer', async () => {
+    const { db } = makeSmartDb({ clientRow: { id: CLIENT, referred_by_ctv_id: null, salestaffid: null } });
+    const result = await triggerCommissionEngine('sl', CLIENT, 'p', 'dental', () => db);
+    expect(result).toEqual({ paymentsScanned: 0, paymentsProcessed: 0, earningsCreated: 0, errors: [] });
   });
 
-  it('should calculate and insert earnings for a direct CTV referral', async () => {
-    // Mock service line and product
-    mockCosmeticDb.select.mockReturnValueOnce({
-      where: jest.fn().mockReturnValueOnce({
-        limit: jest.fn().mockReturnValueOnce([
-          { id: 'sl_123', price: '1000000', quantity: '1' },
-        ]),
-      }),
-    });
-
-    mockCosmeticDb.select.mockReturnValueOnce({
-      where: jest.fn().mockReturnValueOnce({
-        limit: jest.fn().mockReturnValueOnce([
-          { commission_rate_percent: 10.0 },
-        ]),
-      }),
-    });
-
-    // Mock commission_level_config
-    mockCosmeticDb.select.mockReturnValueOnce({
-      where: jest.fn().mockReturnValueOnce({
-        orderBy: jest.fn().mockReturnValueOnce([
-          { level: 0, percentage: 24.0 },
-          { level: 1, percentage: 4.0 },
-        ]),
-      }),
-    });
-
-    // Mock partners chain
-    mockCosmeticDb.select.mockReturnValueOnce({
-      where: jest.fn().mockReturnValueOnce({
-        limit: jest.fn().mockReturnValueOnce([
-          { id: 'ctv_abc', referred_by_ctv_id: null, lob_scope: ['cosmetic'] },
-        ]),
-      }),
-    });
-
-    const result = await triggerCommissionEngine(
-      'sl_123',
-      'client_xyz',
-      'ctv_abc',
-      'cosmetic'
-    );
-
-    expect(result.insertedCount).toBe(1);
-    expect(mockCosmeticDb.insert).toHaveBeenCalledTimes(1);
-    expect(mockDentalDb.insert).toHaveBeenCalledTimes(1);
+  it('errors on a missing/invalid lob', async () => {
+    const result = await triggerCommissionEngine('sl', CLIENT, 'p', null);
+    expect(result.earningsCreated).toBe(0);
+    expect(result.errors[0]).toMatch(/lob/i);
   });
 
-  it('should return 0 if no commission rate is configured', async () => {
-    // Mock service line
-    mockCosmeticDb.select.mockReturnValueOnce({
-      where: jest.fn().mockReturnValueOnce({
-        limit: jest.fn().mockReturnValueOnce([
-          { id: 'sl_123', price: '1000000', quantity: '1' },
-        ]),
-      }),
-    });
-
-    // Mock product with no commission_rate_percent
-    mockCosmeticDb.select.mockReturnValueOnce({
-      where: jest.fn().mockReturnValueOnce({
-        limit: jest.fn().mockReturnValueOnce([
-          { commission_rate_percent: null },
-        ]),
-      }),
-    });
-
-    const result = await triggerCommissionEngine(
-      'sl_123',
-      'client_xyz',
-      'ctv_abc',
-      'cosmetic'
-    );
-
-    expect(result.insertedCount).toBe(0);
+  it('never throws — a DB failure is captured into errors[]', async () => {
+    const db = { queryRows: jest.fn(async () => { throw new Error('db down'); }) };
+    const result = await triggerCommissionEngine('sl', CLIENT, 'p', 'dental', () => db);
+    expect(result.errors[0]).toMatch(/db down/);
+    expect(result.earningsCreated).toBe(0);
   });
 });

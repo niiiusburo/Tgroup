@@ -1,20 +1,38 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Loader, Pencil, Plus, Users, X } from 'lucide-react';
+import { AlertCircle, ChevronDown, ChevronRight, Loader, Pencil, Plus, Search, Users, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useBusinessUnit } from '@/contexts/BusinessUnitContext';
 import {
   createCtv,
+  fetchCtvHierarchyForCtv,
   fetchCtvs,
   setCtvActive,
   updateCtv,
   type CreateCtvInput,
+  type CtvHierarchyResponse,
   type CtvRecord,
   type UpdateCtvInput,
 } from '@/lib/api/ctv';
 import { ApiError } from '@/lib/api/core';
+import { CtvHierarchyPanel } from '@/components/ctv/CtvHierarchyPanel';
+
+const TABLE_COL_COUNT = 8;
+
+// Combining diacritical marks (U+0300–U+036F). Built from an ASCII string so the
+// source contains no invisible combining characters.
+const COMBINING_MARKS = new RegExp('[\\u0300-\\u036f]', 'g');
 
 function isLegacyCtv(ctv: CtvRecord) {
   return ctv.source === 'legacy_ctv' || ctv.created_via?.startsWith('legacy_ctv_import');
+}
+
+/** Lowercase + strip Vietnamese diacritics so "kien" matches "Kiên" and "dang" matches "Đặng". */
+function normalizeText(value: string | null | undefined): string {
+  return (value || '')
+    .normalize('NFD')
+    .replace(COMBINING_MARKS, '')
+    .replace(/[đĐ]/g, 'd')
+    .toLowerCase();
 }
 
 function SourceBadge({ ctv }: { ctv: CtvRecord }) {
@@ -51,11 +69,40 @@ function CtvRow({ ctv, onStatusChange, onEdit }: CtvRowProps) {
   const [error, setError] = useState<string | null>(null);
   const { currentLOB } = useBusinessUnit();
 
+  // Lazy, cached hierarchy expansion (downline + upline) for this CTV.
+  const [expanded, setExpanded] = useState(false);
+  const [hierarchy, setHierarchy] = useState<CtvHierarchyResponse | null>(null);
+  const [hierLoading, setHierLoading] = useState(false);
+  const [hierError, setHierError] = useState<string | null>(null);
+
+  const loadHierarchy = async () => {
+    setHierLoading(true);
+    setHierError(null);
+    try {
+      const data = await fetchCtvHierarchyForCtv(ctv.id, currentLOB);
+      setHierarchy(data);
+    } catch (err) {
+      setHierError(err instanceof ApiError ? err.message : tc('ctv.hierarchyError'));
+    } finally {
+      setHierLoading(false);
+    }
+  };
+
+  const toggleExpanded = () => {
+    const next = !expanded;
+    setExpanded(next);
+    if (next && !hierarchy && !hierLoading) {
+      loadHierarchy();
+    }
+  };
+
   const handleToggleStatus = async () => {
     setToggling(true);
     setError(null);
     try {
       await setCtvActive(ctv.id, !ctv.active, currentLOB);
+      // Drop the cached hierarchy so a re-expand reflects the change (e.g. renamed/suspended nodes).
+      setHierarchy(null);
       onStatusChange();
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Failed to update CTV status';
@@ -66,50 +113,79 @@ function CtvRow({ ctv, onStatusChange, onEdit }: CtvRowProps) {
   };
 
   return (
-    <tr className="hover:bg-gray-50">
-      <td className="px-4 py-3 text-gray-900 font-medium">{ctv.name}</td>
-      <td className="px-4 py-3 text-gray-700">{ctv.phone || '-'}</td>
-      <td className="px-4 py-3 text-gray-700">{ctv.email || '-'}</td>
-      <td className="px-4 py-3 text-gray-700">{ctv.lob_scope?.join(', ') || '-'}</td>
-      <td className="px-4 py-3 text-gray-700">{ctv.upline_name || '-'}</td>
-      <td className="px-4 py-3">
-        <SourceBadge ctv={ctv} />
-      </td>
-      <td className="px-4 py-3">
-        <span
-          className={`px-2 py-1 text-xs rounded-full font-medium ${
-            ctv.active
-              ? 'bg-green-100 text-green-700'
-              : 'bg-gray-100 text-gray-600'
-          }`}
-        >
-          {ctv.active ? tc('ctv.active') : tc('ctv.suspended')}
-        </span>
-      </td>
-      <td className="px-4 py-3">
-        <div className="flex items-center gap-2">
+    <>
+      <tr className="hover:bg-gray-50">
+        <td className="px-4 py-3">
           <button
-            onClick={() => onEdit(ctv)}
-            className="flex items-center gap-1 px-3 py-1 text-sm rounded transition-colors bg-blue-50 text-blue-700 hover:bg-blue-100"
+            type="button"
+            onClick={toggleExpanded}
+            title={tc('ctv.viewHierarchy')}
+            aria-expanded={expanded}
+            className="flex items-center gap-1.5 text-left font-medium text-gray-900 hover:text-primary transition-colors"
           >
-            <Pencil className="w-3.5 h-3.5" />
-            {tc('ctv.edit')}
+            {expanded ? (
+              <ChevronDown className="w-4 h-4 shrink-0 text-gray-400" />
+            ) : (
+              <ChevronRight className="w-4 h-4 shrink-0 text-gray-400" />
+            )}
+            <span>{ctv.name}</span>
           </button>
-          <button
-            onClick={handleToggleStatus}
-            disabled={toggling}
-            className={`px-3 py-1 text-sm rounded transition-colors ${
+        </td>
+        <td className="px-4 py-3 text-gray-700">{ctv.phone || '-'}</td>
+        <td className="px-4 py-3 text-gray-700">{ctv.email || '-'}</td>
+        <td className="px-4 py-3 text-gray-700">{ctv.lob_scope?.join(', ') || '-'}</td>
+        <td className="px-4 py-3 text-gray-700">{ctv.upline_name || '-'}</td>
+        <td className="px-4 py-3">
+          <SourceBadge ctv={ctv} />
+        </td>
+        <td className="px-4 py-3">
+          <span
+            className={`px-2 py-1 text-xs rounded-full font-medium ${
               ctv.active
-                ? 'bg-red-50 text-red-700 hover:bg-red-100 disabled:bg-gray-100 disabled:text-gray-400'
-                : 'bg-green-50 text-green-700 hover:bg-green-100 disabled:bg-gray-100 disabled:text-gray-400'
+                ? 'bg-green-100 text-green-700'
+                : 'bg-gray-100 text-gray-600'
             }`}
           >
-            {toggling ? '...' : ctv.active ? tc('ctv.suspend') : tc('ctv.reactivate')}
-          </button>
-        </div>
-        {error && <p className="text-red-600 text-xs mt-1">{error}</p>}
-      </td>
-    </tr>
+            {ctv.active ? tc('ctv.active') : tc('ctv.suspended')}
+          </span>
+        </td>
+        <td className="px-4 py-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onEdit(ctv)}
+              className="flex items-center gap-1 px-3 py-1 text-sm rounded transition-colors bg-blue-50 text-blue-700 hover:bg-blue-100"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              {tc('ctv.edit')}
+            </button>
+            <button
+              onClick={handleToggleStatus}
+              disabled={toggling}
+              className={`px-3 py-1 text-sm rounded transition-colors ${
+                ctv.active
+                  ? 'bg-red-50 text-red-700 hover:bg-red-100 disabled:bg-gray-100 disabled:text-gray-400'
+                  : 'bg-green-50 text-green-700 hover:bg-green-100 disabled:bg-gray-100 disabled:text-gray-400'
+              }`}
+            >
+              {toggling ? '...' : ctv.active ? tc('ctv.suspend') : tc('ctv.reactivate')}
+            </button>
+          </div>
+          {error && <p className="text-red-600 text-xs mt-1">{error}</p>}
+        </td>
+      </tr>
+      {expanded && (
+        <tr className="bg-gray-50/70">
+          <td colSpan={TABLE_COL_COUNT} className="px-4 py-4">
+            <CtvHierarchyPanel
+              hierarchy={hierarchy}
+              isLoading={hierLoading}
+              error={hierError}
+              onRetry={loadHierarchy}
+            />
+          </td>
+        </tr>
+      )}
+    </>
   );
 }
 
@@ -392,8 +468,22 @@ export function CtvManagementTab() {
   const [error, setError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCtv, setEditingCtv] = useState<CtvRecord | null>(null);
+  const [search, setSearch] = useState('');
 
   const legacyCount = useMemo(() => (ctvs || []).filter(isLegacyCtv).length, [ctvs]);
+
+  const filtered = useMemo(() => {
+    const list = ctvs || [];
+    const query = normalizeText(search).trim();
+    if (!query) return list;
+    const terms = query.split(/\s+/).filter(Boolean);
+    return list.filter((ctv) => {
+      const haystack = normalizeText(
+        [ctv.name, ctv.phone, ctv.email, ctv.upline_name, ctv.legacy_code].filter(Boolean).join(' ')
+      );
+      return terms.every((term) => haystack.includes(term));
+    });
+  }, [ctvs, search]);
 
   const handleLoad = async () => {
     setLoading(true);
@@ -463,14 +553,38 @@ export function CtvManagementTab() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="text-sm text-gray-600">
           {tc('ctv.totalCount', { count: ctvs.length })} · {tc('ctv.legacyCount', { count: legacyCount })}
+          {search.trim() && <> · {tc('ctv.matchCount', { count: filtered.length })}</>}
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          {tc('ctv.addCtv')}
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={tc('ctv.searchPlaceholder')}
+              aria-label={tc('ctv.searchPlaceholder')}
+              className="w-64 max-w-full pl-9 pr-8 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                aria-label={t('clear')}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            {tc('ctv.addCtv')}
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-card overflow-hidden">
@@ -489,9 +603,16 @@ export function CtvManagementTab() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {ctvs.map((ctv) => (
+              {filtered.map((ctv) => (
                 <CtvRow key={ctv.id} ctv={ctv} onStatusChange={() => handleLoad()} onEdit={setEditingCtv} />
               ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={TABLE_COL_COUNT} className="px-4 py-8 text-center text-gray-500">
+                    {tc('ctv.noMatch')}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
